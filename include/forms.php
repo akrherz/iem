@@ -138,6 +138,18 @@ function minuteSelect($selected, $name, $skip=1){
   return $s;
 }
 
+function minuteSelect2($selected, $name, $jsextra=''){
+  $s = "<select name='".$name."' {$jsextra}>\n";
+  for ($i=0; $i<60;$i++) {
+    $s .= "<option value='".$i."' ";
+    if ($i == intval($selected)) $s .= "SELECTED";
+    $s .= ">". $i ."</option>";
+  }
+  $s .= "</select>\n";
+  return $s;
+}
+
+
 function hour24Select($selected, $name){
   $s = "<select name='".$name."'>\n";
   for ($i=0; $i<24;$i++) {
@@ -150,8 +162,8 @@ function hour24Select($selected, $name){
   return $s;
 } 
 
-function hourSelect($selected, $name){
-  $s = "<select name='".$name."'>\n";
+function hourSelect($selected, $name, $jsextra){
+  $s = "<select name=\"{$name}\" {$jsextra}>\n";
   for ($i=0; $i<24;$i++) {
     $ts = mktime($i,0,0,1,1,0);
     $s .= "<option value='".$i."' ";
@@ -198,11 +210,11 @@ function yearSelect($start, $selected){
   return $s;
 }
 
-function yearSelect2($start, $selected, $fname){
+function yearSelect2($start, $selected, $fname, $jsextra=''){
   $start = intval($start);
   $now = time();
   $tyear = strftime("%Y", $now);
-  $s = "<select name='$fname'>\n";
+  $s = "<select name='$fname' {$jsextra}>\n";
   for ($i=$start; $i<=$tyear;$i++) {
     $s .= "<option value='".$i ."' ";
     if ($i == intval($selected)) $s .= "SELECTED";
@@ -214,8 +226,8 @@ function yearSelect2($start, $selected, $fname){
 
 
 
-function monthSelect2($selected, $name){
-  $s = "<select name='$name'>\n";
+function monthSelect2($selected, $name, $jsextra=''){
+  $s = "<select name='$name' {$jsextra}>\n";
   for ($i=1; $i<=12;$i++) {
     $ts = mktime(0,0,0,$i,1,0);
     $s .= "<option value='".$i ."' ";
@@ -238,8 +250,9 @@ function daySelect($selected){
   $s .= "</select>\n";
   return $s;
 } // End of daySelect
-function daySelect2($selected, $name){
-  $s = "<select name='$name'>\n";
+
+function daySelect2($selected, $name, $jsextra=''){
+  $s = "<select name='$name' {$jsextra}>\n";
   for ($k=1;$k<32;$k++){
     $s .= "<option value=\"".$k."\" ";
     if ($k == (int)$selected){
