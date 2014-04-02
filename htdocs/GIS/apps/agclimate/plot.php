@@ -122,7 +122,7 @@ EOF;
   SELECT station, 
   c2f(tair_c_max) as c11, '' as c11_f,
   c2f(tair_c_min) as c12, '' as c12_f,
-  c2f(t06_c_avg) as c30, '' as c30_f,
+  c2f(tsoil_c_avg) as c30, '' as c30_f,
   ws_mps_s_wvt * 2.236 as c40, '' as c40_f,
   ws_mps_max * 2.236 as c509, '' as c509_f,
   ws_mps_max * 2.236 as c529, '' as c529_f,
