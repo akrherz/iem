@@ -57,6 +57,17 @@ reset($cameras);
 
 $t->thispage = "webcam-still";
 $t->title = "Web Cameras";
+$t->jsextra = <<<EOF
+<script language="JavaScript1.2" type="text/javascript">
+//<!--
+function switchToArchiveMode()
+{
+  $('#isarchived').prop('checked', true);
+}
+
+-->
+</script>
+EOF;
 
 if (! $isarchive)
 	$t->refresh = "<meta http-equiv=\"refresh\" content=\"${camera_refresh};\">";
@@ -65,11 +76,12 @@ $selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff");
 $selback[$network] = "#ffcc99";
 
 $isarchived = ($isarchive) ? " CHECKED=CHECKED": "" ;
-$ys = yearSelect(2003, $year, "year");
-$month_select = monthSelect($month, "month");
-$ds = daySelect($day, "day");
-$hs = hourSelect($hour, "hour");
-$ms = minuteSelect($minute, "minute");
+$jsextra = 'onChange="javascript: switchToArchiveMode();"';
+$ys = yearSelect2(2003, $year, "year", $jsextra);
+$month_select = monthSelect2($month, "month", $jsextra);
+$ds = daySelect2($day, "day", $jsextra);
+$hs = hourSelect($hour, "hour", $jsextra);
+$ms = minuteSelect2($minute, "minute", $jsextra);
 $dd = date("YmdHi", $radts);
 
 
@@ -110,7 +122,7 @@ $t->content = <<<EOF
 <thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
 <tbody>
 <tr>
-<td><input type="checkbox" value="yes" name="archive" {$isarchived}>Archived Images</td>
+<td><input type="checkbox" value="yes" id="isarchived" name="archive" {$isarchived}>Archived Images</td>
 <td>{$ys}</td>
 <td>{$month_select}</td>
 <td>{$ds}</td>
