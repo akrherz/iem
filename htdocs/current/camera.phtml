@@ -66,7 +66,7 @@ $selback[$network] = "#ffcc99";
 
 $isarchived = ($isarchive) ? " CHECKED=CHECKED": "" ;
 $ys = yearSelect(2003, $year, "year");
-$ms = monthSelect($month, "month");
+$month_select = monthSelect($month, "month");
 $ds = daySelect($day, "day");
 $hs = hourSelect($hour, "hour");
 $ms = minuteSelect($minute, "minute");
@@ -112,7 +112,7 @@ $t->content = <<<EOF
 <tr>
 <td><input type="checkbox" value="yes" name="archive" {$isarchived}>Archived Images</td>
 <td>{$ys}</td>
-<td>{$ms}</td>
+<td>{$month_select}</td>
 <td>{$ds}</td>
 <td>{$hs}</td>
 <td>{$ms}</td>
