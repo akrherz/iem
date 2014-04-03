@@ -19,7 +19,7 @@ if ($dir != ""){
  $puri='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
 }
 if (! file_exists($filename)){
-	$puri = sprintf('%s/images/nophoto.png', $rooturl);
+	$puri = '/images/nophoto.png';
 }
 
 $t->thispage = "iem-sites";
@@ -34,10 +34,10 @@ function printtd($instr,$selected,$station){
   	$filename='/mesonet/share/pics/'.$station.'/'.$station.'_'.$instr.'.jpg';
   	if (file_exists($filename)){ 
   		if ($instr == $selected){
-       	$s .= '<TD align="center" style="background: #ee0;">'.$instr.'</TD>';
+       	$s .= '<td align="center" style="background: #ee0;">'.$instr.'</td>';
        	$s .= "\n";
     	} else {
-      	$s .= '<TD align="center"><a href="pics.php?network='.$network.'&station='.$station.'&dir='.$instr.'">'.$instr.'</a></TD>';
+      	$s .= '<td align="center"><a href="pics.php?network='.$network.'&station='.$station.'&dir='.$instr.'">'.$instr.'</a></td>';
       	$s .= "\n";
     	}
 	} else {
