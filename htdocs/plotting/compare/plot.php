@@ -8,9 +8,9 @@ if (isset($argv))
 
 
 include("../../../config/settings.inc.php");
-include("$rootpath/include/station.php");
+include("../../../include/station.php");
 
-include("$rootpath/include/iemaccess.php");
+include("../../../include/iemaccess.php");
 $iem = new IEMAccess();
 
 /* Get vars */
@@ -47,9 +47,9 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
   //$cnt[$s] += 1;
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required

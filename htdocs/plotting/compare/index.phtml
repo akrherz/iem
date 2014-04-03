@@ -1,41 +1,58 @@
 <?php
  include("../../../config/settings.inc.php");
+ include_once "../../../include/myview.php";
+ $t = new MyView();
+ 
 
-
- $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
+ $network = isset($_REQUEST['network']) ? $_REQUEST['network'] : "IA_ASOS";
  $station1 = isset($_GET['station']) ? strtoupper($_GET['station']) : "";
  $station2 = isset($_GET['station1']) ? strtoupper($_GET['station1']) : "";
 
  $var = isset($_GET['var']) ? $_GET['var'] : "tmpf";
- include("$rootpath/include/station.php");
+ include("../../../include/station.php");
  $st = new StationData(Array($station1, $station2));
  $cities = $st->table;
 
 
- $uri = "$rooturl/plotting/compare/index.phtml?";
+ $uri = "/plotting/compare/index.phtml?";
  $ar = Array();
  if (strlen($station1) > 0)
  {
    $ar["station1"] = $station1;
- } if (strlen($station2) > 0)
- {
-   $ar["station1"] = $station2;
+ } else {
+ 	$cities[""]["name"] = "";
+ 	$cities[""]["network"] = "";
  }
+ 
  if (strlen($station2) > 0)
  {
-   $uri = "$rooturl/plotting/compare/index.phtml?station1=$station2";
+   $ar["station1"] = $station2;
+   $uri = "/plotting/compare/index.phtml?station1=$station2";
+ }else{
+ 	$cities[""]["name"] = "";
+ 	$cities[""]["network"] = "";
  }
 
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/forms.php");
-$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
-$BODYEXTRA = "onload=\"init()\"";
-$THISPAGE = "iem-qc";
-$TITLE = "IEM | Site Comparisons";
-include("$rootpath/include/header.php"); 
-?>
+include("../../../include/imagemaps.php");
+include("../../../include/forms.php");
+$t->headextra = <<<EOF
+<script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
+<script src="/js/olselect.php?network=${network}"></script>
+EOF;
+$t->bodyextra = "onload=\"init()\"";
+$t->thispage = "iem-qc";
+$t->title = "Site Comparisons";
+
+$ar = Array("tmpf" => "Temperature",
+"dwpf" => "Dew Point",
+"sknt" => "Wind Speed (knots)",
+"drct" => "Wind Direction",
+"alti" => "Pressure Altimeter",
+"phour" => "Hourly Precipitation");
+$vselect = make_select("var", $var, $ar);
+
+$content = <<<EOF
 <style type="text/css">
         #map {
             width: 450px;
@@ -57,41 +74,36 @@ choices.
 
 <tr>
   <th>Station 1:</th>
-  <td><input type="text" size="10" name="station" value="<?php echo $station1; ?>"></td>
-  <td><?php echo @$cities[$station1]['name']; ?></td>
-  <td><?php echo @$cities[$station1]['network']; ?></td>
-  <td><a href="index.phtml?station1=<?php echo $station2; ?>&network=<?php echo @$cities[$station1]['network']; ?>">Select from Map</a></td>
+  <td><input type="text" size="10" name="station" value="{$station1}"></td>
+  <td>{$cities[$station1]['name']}</td>
+  <td>{$cities[$station1]['network']}</td>
+  <td><a href="index.phtml?station1={$station2}&network={$cities[$station1]['network']}">Select from Map</a></td>
 </tr>
 <tr>
   <th>Station 2:</th>
-  <td><input type="text" size="10" name="station1" value="<?php echo $station2; ?>"></td>
-  <td><?php echo @$cities[$station2]['name']; ?></td>
-  <td><?php echo @$cities[$station2]['network']; ?></td>
-  <td><a href="index.phtml?station1=<?php echo $station1; ?>&network=<?php echo @$cities[$station2]['network']; ?>">Select from Map</a></td>
+  <td><input type="text" size="10" name="station1" value="{$station2}"></td>
+  <td>{$cities[$station2]['name']}</td>
+  <td>{$cities[$station2]['network']}</td>
+  <td><a href="index.phtml?station1={$station1}&network={$cities[$station2]['network']}">Select from Map</a></td>
 </tr>
 
-<tr><th>Variable:</th><td colspan="3"><SELECT name="var">
-<option value="tmpf" <?php if ($var == "tmpf") echo "SELECTED"; ?>>Temperature
-<option value="dwpf" <?php if ($var == "dwpf") echo "SELECTED"; ?>>Dewpoint
-<option value="sknt" <?php if ($var == "sknt") echo "SELECTED"; ?>>Wind Speed (knots)
-<option value="drct" <?php if ($var == "drct") echo "SELECTED"; ?>>Wind Direction
-<option value="alti" <?php if ($var == "alti") echo "SELECTED"; ?>>Altimeter
-<option value="phour" <?php if ($var == "phour") echo "SELECTED"; ?>>Precip
-</SELECT>
+<tr><th>Variable:</th><td colspan="3">
+{$vselect}
 </td></tr>
 
 <tr><td colspan="4"><INPUT TYPE="SUBMIT" VALUE="Build Comparison"> <a href="index.phtml">Reset App</a></td></tr>
 </table>
 </form>
-
-<?php 
+EOF;
+$nselect = selectNetwork($network);
+$sselect = networkSelect($network, $station1);
 if (strlen($station1) == 0 || strlen($station2) == 0)
 {
-?>
-<form name="netselect">
-<input type="hidden" name="station1" value="<?php echo $station1; ?>">
+$content .= <<<EOF
+	<form name="netselect">
+<input type="hidden" name="station1" value="{$station1}">
 <table><tr><th>Select Network</th>
-<td><?php echo selectNetwork($network); ?></td>
+<td>{$nselect}</td>
 <td><input type="submit" value="Switch to Network"></td>
 </tr></table>
 </form>
@@ -99,22 +111,24 @@ if (strlen($station1) == 0 || strlen($station2) == 0)
 <p>
 
 <form name="olselect">
-<input type="hidden" value="<?php echo $network; ?>" name="network">
-<input type="hidden" name="station1" value="<?php echo $station1; ?>">
+<input type="hidden" value="{$network}" name="network">
+<input type="hidden" name="station1" value="{$station1}">
 <table><tr><th>Select Station</th>
-<td><?php echo networkSelect($network, ""); ?></td>
+<td>{$sselect}</td>
 <td><input type="submit" value="Select Station"></tr></table>
 <div id="map"></div>
 <div id="sname" unselectable="on">No site selected</div>
 </form>
 
-
-<?php
+EOF;
 } else
 {
-  echo "<img src='plot.php?var=$var&station1=$station1&station2=$station2'>\n";
-  echo "<br /><b>Loading Comparison, please be patient...</b>";
+$content .= <<<EOF
+<img src="plot.php?var={$var}&station1={$station1}&station2={$station2}" />
+<br /><b>Loading Comparison, please be patient...</b>
+EOF;
 }
-?>
 
-<?php include("$rootpath/include/footer.php"); ?>
+$t->content = $content;
+$t->render('single.phtml');
+?>
