@@ -86,7 +86,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   $wfo = $row["wfo"];
   $reps[] = "\"REPLACEME$i\"";
   $subs[] = $row["geojson"];
-  $vtecurl = sprintf("%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d", $rooturl, 
+  $vtecurl = sprintf("%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d", ROOTURL, 
       substr($row["issue"],0,4),
       $wfo, $row["phenomena"], $row["significance"], $row["eventid"] );
 
