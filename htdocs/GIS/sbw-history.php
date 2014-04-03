@@ -1,10 +1,10 @@
 <?php
 /* Generate an ultra fancy plot of a storm based warning history! */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
 
-$mapFile = $rootpath."/data/gis/base4326.map";
+$mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");
 
 /* Figure out what our VTEC is! */

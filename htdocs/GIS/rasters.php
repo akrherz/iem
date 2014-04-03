@@ -4,13 +4,24 @@
  * within its archives
  */
 include("../../config/settings.inc.php");
-require_once(ROOTPATH ."/include/database.inc.php");
+require_once "../../include/database.inc.php";
+include_once "../../include/myview.php";
+$t = new MyView();
 $mesosite = iemdb("mesosite");
 
-$TITLE = "IEM GIS RASTER Documentation";
-require_once(ROOTPATH ."/include/header.php");
-?>
+$t->title = "GIS RASTER Documentation";
 
+$table = "";
+$rs = pg_query($mesosite, "SELECT * from raster_metadata
+  ORDER by name ASC");
+
+for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$table .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>\n", $row["name"],
+			$row["description"], $row["units"]);
+
+}
+
+$t->content = <<<EOF
 <h3>IEM GIS RASTER Documentation</h3>
 
 <p>The IEM produces a number of RASTER images meant for GIS use. These RASTERs
@@ -22,21 +33,9 @@ actual value.
 <p><table cellspacing="0" cellpadding="3" border="1">
 <thead><tr><th>Code</th><th>Description</th><th>Units</th></tr></thead>
 <tbody>
-<?php
-$rs = pg_query($mesosite, "SELECT * from raster_metadata
-  ORDER by name ASC");
-
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>\n", $row["name"],
-  		$row["description"], $row["units"]);
-
-}
-
-?>
+{$table}
 </tbody>
 </table>
-
-
-<?php 
-require_once(ROOTPATH ."/include/footer.php");
+EOF;
+$t->render('single.phtml');
 ?>
