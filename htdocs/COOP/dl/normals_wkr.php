@@ -3,8 +3,8 @@
  /** normals_wkr.php
   *  - Download daily climate values
   */
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");     
+include("../../../include/database.inc.php");
+include("../../../include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
