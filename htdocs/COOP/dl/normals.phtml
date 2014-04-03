@@ -1,11 +1,18 @@
 <?php 
 include("../../../config/settings.inc.php");
- $TITLE = "IEM | NWS COOP | Daily Normals";
-$THISPAGE = "climatology-today";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/imagemaps.php"); 
-include("$rootpath/include/forms.php"); 
-?><div class="text">
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "NWS COOP Daily Normals";
+$t->thispage = "climatology-today";
+include("../../../include/imagemaps.php"); 
+include("../../../include/forms.php"); 
+
+$year = date("Y");
+$nselect = networkSelect("IACLIMATE", "");
+$mselect = monthSelect("month");
+$dselect = daySelect("day");
+
+$t->content = <<<EOF
 
 <p>With this interface, you can download daily climate normals for NWS COOP
 sites.  Please fill out the form below:</p>
@@ -20,8 +27,8 @@ official data is the 30 year record from NCDC.</i>)
 
 <strong>Select Data Source</strong><br />
  <select name="source">
-    <option value="climate">IEM Climatology 1893-<?php echo date("Y"); ?></option>
-    <option value="climate51">IEM Climatology 1951-<?php echo date("Y"); ?></option>
+    <option value="climate">IEM Climatology 1893-{$year}</option>
+    <option value="climate51">IEM Climatology 1951-{$year}</option>
  	<option value="climate71" SELECTED>IEM Climatology 1971-2000</option>
  	<option value="ncdc_climate71">NCDC Climatology 1971-2000 *Official*</option>
  	<option value="ncdc_climate81">NCDC Climatology 1981-2010 *Official*</option>
@@ -33,13 +40,12 @@ official data is the 30 year record from NCDC.</i>)
 <input type="radio" name="mode" value="station" checked="CHECKED">Single Station, All Days</input>
 <input type="radio" name="mode" value="day">All Stations, One Day</input>
 
-<p><b>2a. Select Station:</b><br>
-<?php echo networkSelect("IACLIMATE", ""); ?>
+<p><b>2a. Select Station:</b><br>{$nselect}
 
 <p><b>2b. Select Month & Date:</b><br>
 
-Select Month:<?php echo monthSelect("month"); ?>
-<br>Select Day:<?php echo daySelect("day"); ?>
+Select Month: {$mselect}
+<br>Select Day: {$dselect}
 
 
 <h3 class="subtitle">3. Download Options:</h3>
@@ -53,6 +59,7 @@ Select Month:<?php echo monthSelect("month"); ?>
 
 </form><p>
 
-<p><img src="<?php echo $rooturl; ?>/images/gisready.png"> Data includes Lat/Lon information.
-</div>
-<?php include("$rootpath/include/footer.php"); ?>
+<p><img src="/images/gisready.png"> Data includes Lat/Lon information.
+EOF;
+$t->render('single.phtml');
+?>
