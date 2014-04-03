@@ -133,7 +133,7 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
 	$tdiff = $now - $parts["ts"];
-	$moreinfo = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl, $key, $parts["network"]);
+	$moreinfo = sprintf("/sites/site.php?station=%s&network=%s", $key, $parts["network"]);
 	$table .= "<td>". $parts["sname"] . " (<a href=\"$moreinfo\">". $key ."</a>,". $parts["network"] .")</td>";
 	$table .= "<td ";
 	if ($tdiff > 10000){
