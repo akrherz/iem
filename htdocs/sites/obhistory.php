@@ -70,7 +70,7 @@ if ($metadata["archive_begin"]){
 		$date = strtotime($metadata['archive_begin']);
 	}
 } else {
-	$startyear = 1933;
+	$startyear = 2010;
 }
 
 $iemarchive = mktime(0,0,0,date("m"), date("d"), date("Y")) - 86400;
