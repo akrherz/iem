@@ -27,7 +27,7 @@
  {
     if ($cameras[$id]["network"] != $network) continue;
 
-	$cameras[$id]["url"] = sprintf("$rooturl/data/camera/stills/%s.jpg?%s", $id, time() );
+	$cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time() );
     if ( @filemtime("/home/ldm/data/camera/stills/${id}.jpg") < (time() - 1200))
     {      
       $cameras[$id]["active"] = false;
