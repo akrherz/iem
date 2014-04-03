@@ -24,7 +24,7 @@ def compute_bounds(lons, lats):
     x1, y1 = np.unravel_index(dist.argmin(), dist.shape)
     dist = ((lats - ref.MW_NORTH)**2 + (lons - ref.MW_EAST)**2)**0.5
     x2, y2 = np.unravel_index(dist.argmin(), dist.shape)
-    return x1, x2, y1, y2
+    return x1, x2 + 30, y1, y2
 
 def run( utc , routes):
     ''' Generate the plot for the given UTC time '''
