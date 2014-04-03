@@ -28,7 +28,7 @@ $cities = $nt->table;
 echo "<select  onChange=\"location=this.form.station.options[this.form.station.selectedIndex].value\" name=\"station\">\n";
 
 while( list($key, $val) = each($cities) ){
-  echo "<option value=\"$rooturl/content/kelo_fe.php?min=".$min."&station=". $key ."\"";
+  echo "<option value=\"/content/kelo_fe.php?min=".$min."&station=". $key ."\"";
   if ($station == $key){
         echo " SELECTED ";
   }

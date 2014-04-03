@@ -28,7 +28,7 @@ echo "<select  onChange=\"location=this.form.station.options[this.form.station.s
 
 
 while( list($key, $val) = each($Scities) ){
-  echo "<option value=\"$rooturl/content/kimt_fe.php?min=".$min."&station=". $key ."\"";
+  echo "<option value=\"/content/kimt_fe.php?min=".$min."&station=". $key ."\"";
   if ($station == $key){
         echo " SELECTED ";
   }
