@@ -2,6 +2,7 @@
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 127.0.0.1        iem.local
+127.0.0.1        mesonet.agron.iastate.edu
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.4      iemfe         iemfe.local
@@ -17,7 +18,7 @@
 192.168.0.23     iem23         iem23.local
 192.168.0.30     iem30         iem30.local iembot iem-geoserver iem-arcgis
 192.168.0.40     iem40         iem40.local
-192.168.0.50     iem50         iem50.local iem-mapserver 
+192.168.0.50     iem50         iem50.local 
 192.168.0.60     iem60         iem60.local
 192.168.0.70     iem70         iem70.local
 192.168.0.99     iem99
@@ -41,3 +42,4 @@
 192.168.$net$.9      iem-memcached
 192.168.$net$.4      iem-memcached1
 192.168.$net$.21     iem-memcached2
+192.168.$net$.50     iem-mapserver
