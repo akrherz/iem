@@ -39,6 +39,6 @@
 192.168.0.254    iem-gateway   iem-gateway.local
 
 192.168.$net$.9      iem-memcached
-192.168.$net$.4      iem-memcached1
+192.168.$net$.241      iem-memcached1
 192.168.$net$.21     iem-memcached2
 192.168.$net$.50     iem-mapserver
