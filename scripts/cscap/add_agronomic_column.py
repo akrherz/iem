@@ -13,14 +13,13 @@ config.read('mytokens.cfg')
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
-query = gdata.docs.client.DocsQuery(show_collections='true', title='Agronomic Data')
+query = gdata.docs.client.DocsQuery(show_collections='true', title='NAEW Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
 
 newcols = [
-           ['AGR35', '[35] Soybean grain biomass total carbon at R8', 'kg ha-1'],
-           ['AGR36', '[36] Soybean grain biomass total nitrogen at R8', 'kg ha-1'],
-           ['AGR37', '[37] Cover crop (rye) and weedy biomass in late fall', 'kg ha-1'],
-           ['AGR38', '[38] Weedy biomass (only) in late fall', 'kg ha-1']
+    ['AGR44', '[44] Red clover or mixed cover crop biomass in spring of spreadsheet year', 'kg ha-1'],
+    ['AGR45', '[45] Red clover or mixed cover crop total nitrogen in spring of spreadsheet year', 'kg ha-1'],
+    ['AGR46', '[46] Red clover or mixed cover crop total carbon in spring of spreadsheet year', 'kg ha-1'],
            ]
 
 for entry in feed:
@@ -33,11 +32,11 @@ for entry in feed:
         feed3 = spr_client.get_list_feed(spreadkey, worksheet)
         row = feed3.entry[0]
         data = row.to_dict()
-        if data.get('agr6') is None and data.get('agr7') is None:
+        if data.get('agr41') is None and data.get('agr42') is None:
             print ' ... not found!'
             continue
 
-        plusone = int(entry2.col_count.text) + 4
+        plusone = int(entry2.col_count.text) + 3
         entry2.col_count.text = str(plusone)
         spr_client.update(entry2)
         
