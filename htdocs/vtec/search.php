@@ -3,9 +3,9 @@ include("../../config/settings.inc.php");
 
 $HEADEXTRA = '
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js?v=3"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
 <script type="text/javascript" src="search.js?v=6"></script>

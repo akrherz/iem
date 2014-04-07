@@ -32,10 +32,10 @@ $significance = $tokens[5];
 $eventid = intval( $tokens[6] );
 
 $headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
-<link rel="stylesheet" type="text/css" href="../ext/ux/form/Spinner.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<link rel="stylesheet" type="text/css" href="/ext/ux/form/Spinner.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <script src="OpenLayers.js"></script>
 EOF;

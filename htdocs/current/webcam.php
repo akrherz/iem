@@ -7,10 +7,10 @@ include("../../config/settings.inc.php");
 define("IEM_APPID", 9);
  include("../../include/iemprop.php");
  $camera_refresh = get_iemprop("webcam.interval");
-$HEADEXTRA = "
-  <link rel='stylesheet' type='text/css' href='http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css'/>
-  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js'></script>
-  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.4.0/ext-all.js'></script>
+$HEADEXTRA = <<<EOF
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script>
 Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
@@ -39,7 +39,8 @@ cfg.jsonSource = '/json/webcams.php';
     padding: 4px;
 }
 
-</style>";
+</style>
+EOF;
 $NOCONTENT = 1;
 $TITLE = "IEM Webcams";
 $THISPAGE = "webcam-still";

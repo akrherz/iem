@@ -28,11 +28,11 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   }
   $data[$row["id"]][intval($row["month"])-1] = $row["precip"];
 }
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext
--all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
-<script type="text/javascript" src="../../ext/ux/TableGrid.js"></script>
+$HEADEXTRA = '
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+<script type="text/javascript" src="/ext/ux/TableGrid.js"></script>
 <script>
 Ext.onReady(function(){
     var btn = Ext.get("create-grid");

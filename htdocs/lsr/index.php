@@ -1,9 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
 
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
+$HEADEXTRA = <<<EOF
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <link rel="stylesheet" type="text/css" href="superboxselect.css" />
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <script src="http://www.openlayers.org/api/2.12/OpenLayers.js"></script>
@@ -18,7 +19,7 @@ Ext.namespace("cfg");
 cfg.header = "iem-header";
 </script>
 <script type="text/javascript" src="static.js?v=14"></script>
-';
+EOF;
 $TITLE = "IEM Local Storm Report App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-lsr";
