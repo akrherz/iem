@@ -1,4 +1,4 @@
-from mpl_toolkits.basemap import Basemap, cm
+from mpl_toolkits.basemap import Basemap
 import matplotlib
 import matplotlib.pyplot as plt
 from osgeo import ogr
@@ -7,6 +7,7 @@ from numpy import asarray
 from matplotlib.colors import rgb2hex
 import matplotlib.colors as mpcolors
 from matplotlib.patches import Polygon
+import matplotlib.cm as cm
 from matplotlib.collections import PatchCollection
 import pylab
 import math
@@ -20,11 +21,13 @@ POSTGIS = iemdb.connect('postgis', bypass=True)
 pcursor = POSTGIS.cursor()
 
 from iem import plot
-cmap = maue()
+#cmap = maue()
+cmap = cm.get_cmap("jet")
 cmap.set_under("#ffffff")
 cmap.set_over("#000000")
 #bins = np.arange(0,131,10)
-bins = [1,2,3,4,5,6,7,8,9,10,15,20,30,50,100,125]
+#bins = [1,2,3,4,5,6,7,8,9,10,15,20,30,50,100,125]
+bins = [1,2,5,10,15,20,25,30,45,60,75,90,120,150,180,240]
 norm = mpcolors.BoundaryNorm(bins, cmap.N)
 #bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
 
@@ -68,11 +71,15 @@ data = source.ExecuteSQL("""
  ---ON (n.ugc = foo.ugc) WHERE n.polygon_class = 'Z' 
  ---ORDER by data DESC NULLS LAST
  
- select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n 
- LEFT JOIN (select ugc, count(*) as data from warnings 
-                  where phenomena in ('BZ') and significance = 'W' 
-                  and gtype = 'C' and issue > '2005-11-12' GROUP by ugc) as foo 
- ON (n.ugc = foo.ugc) WHERE n.polygon_class = 'Z'
+ select n.ugc, foo.data, ST_Simplify(n.geom,0.01), n.name from nws_ugc n 
+ LEFT JOIN (
+ SELECT ugc, count(*) / 28.0 as data from 
+ (select distinct ugc, generate_series(issue, expire, '1 minute'::interval) 
+ from warnings where phenomena = 'TO' and significance = 'W' 
+ and ugc is not null and (expire - issue) < '90 minutes'::interval) as foo2
+ GROUP by ugc
+ ) as foo 
+ ON (n.ugc = foo.ugc) WHERE n.polygon_class = 'C'
  ORDER by data ASC NULLS FIRST
  
 """)
@@ -97,7 +104,8 @@ while 1:
     else:
         c = cmap( norm([cnt,]) )[0]
     geom = loads(feature.GetGeometryRef().ExportToWkb())
-    print ugc, cnt, c
+    if ugc[:2] == 'OK':
+        print "%s,%s,%.2f" % (ugc, feature.GetField('name'), cnt)
     for polygon in geom:
         if polygon.exterior is None:
             continue
@@ -141,7 +149,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 ec='None')
 
 
-ax.text(0.17, 1.09, '12 Nov 2005 - 19 Feb 2014 Number of NWS Issued Blizzard Warnings', transform=ax.transAxes,
+ax.text(0.17, 1.09, '1986-2013 Yearly Average Minutes in Tornado Warning', transform=ax.transAxes,
      size=16,
     horizontalalignment='left', verticalalignment='center')
 
