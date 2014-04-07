@@ -325,11 +325,9 @@ $t->content = <<<EOF
 
 <form method="GET" action="{$uri}" name="controls">
 
-<table cellpadding=2 cellspacing=0>
- <tr><td valign="top">
+<div class="row">
+<div class="col-md-3 col-sm-3">
 
-
-<div class="iembox" style="width: 200px;">
 <p><strong>Composite Product:</strong><br />
 {$prodselect}
 
@@ -362,16 +360,17 @@ $t->content = <<<EOF
 <p><strong>Related Links:</strong><br /> 
 <a href="/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>
 <br /><a href="/cow/">Warning Verification</a>
-</div>
 </form>
-</td><td>
+
+</div><div class="col-md-9 col-sm-9">
+
 {$watches}
 
 {$rtmessage}
 
 {$control}
 
-</td></tr></table>
+</div></div>
 
 <p><b>GIS NEXRAD layers</b>
 <br />The NEXRAD layer used in these images are available in a georeferenced 
