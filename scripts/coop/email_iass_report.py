@@ -312,7 +312,7 @@ def email_report(report, subject):
 
     # Send the email via our own SMTP server.
     s = smtplib.SMTP('localhost')
-    s.sendmail(msg['From'], msg['To'], msg.as_string())
+    s.sendmail(msg['From'], [msg['To'], msg['Cc']], msg.as_string())
     s.quit()
     
 
