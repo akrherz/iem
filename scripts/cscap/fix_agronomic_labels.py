@@ -7,8 +7,8 @@ import ConfigParser
 
 import util
 
-VARID = 'agr40' # lowercase
-NEWVAL = '[40] Weedy biomass (only) collected in spring (at termination) of spreadsheet year'
+VARID = 'agr43' # lowercase
+NEWVAL = '[43] Red clover or mixed cover crop total carbon in late fall of previous year'
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
@@ -18,7 +18,7 @@ spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
 query = gdata.docs.client.DocsQuery(show_collections='true', 
-                                    title='Agronomic Data')
+                                    title='NAEW Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
 
 for entry in feed:
