@@ -32,7 +32,7 @@ if [ $DD -eq "01" ]
 	python email_iass_report.py monthly
 fi
 DOY=$(date +%u)
-if [ "$DOY" -eq "0" ]
+if [ "$DOY" -eq "1" ]
 	then
 		python email_iass_report.py weekly	
 fi
