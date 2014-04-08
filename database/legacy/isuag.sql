@@ -90,7 +90,9 @@ CREATE TABLE sm_hourly (
   p06outofrange real,
   p12outofrange real,
   p24outofrange real,
-  p50outofrange real
+  p50outofrange real,
+  tairnans_tot real,
+  rhnans_tot real
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
