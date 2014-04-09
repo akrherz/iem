@@ -57,6 +57,15 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 
 EOF;
 $t->east = <<<EOF
+
+<div class="well">
+<strong>Did you see an image posted to social media with the IEM logo on it?</strong><br />
+	Daryl posts some interesting graphics to his 
+	<a href="https://twitter.com/akrherz">Twitter @akrherz</a> page.  Generally,
+	these are one-off images that are not available for dynamic generation on
+	this website.
+</div>
+
 <h4>Valid Time Extent Code (VTEC) Apps</h4>
 <ul>
  <li><a href="vtec_obs.php">ASOS/AWOS Obs during WFO WWA</a>
