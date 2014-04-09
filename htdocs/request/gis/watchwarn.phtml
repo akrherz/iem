@@ -64,9 +64,9 @@ $mi2select = minuteSelect(0, "minute2");
 
 $table = "";
 for($year=1986;$year<=date("Y");$year++){
-	$allurl = sprintf("<a href=\"%s/pickup/wwa/%s_all.zip\">Zip</a>", $rooturl, $year);
+	$allurl = sprintf("<a href=\"/pickup/wwa/%s_all.zip\">Zip</a>",  $year);
 	$allfp = "/mesonet/share/pickup/wwa/${year}_all.zip";
-	$tsmfurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf.zip\">Zip</a>", $rooturl, $year);
+	$tsmfurl = sprintf("<a href=\"/pickup/wwa/%s_tsmf.zip\">Zip</a>",  $year);
 	$tsmffp = "/mesonet/share/pickup/wwa/${year}_tsmf.zip";
 	$sbwurl = "N/A";
 	$sbwfp = "/dev/zero";
@@ -88,7 +88,7 @@ archive status and dbf schema below. The IEM's archive is certainly not complete
 If you are looking for a real-time source of warning shapefiles, 
 you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
-<div class="warning"> Due to transient server load or other issues, this application sometimes fails to 
+<div class="alert alert-warning"> Due to transient server load or other issues, this application sometimes fails to 
 generate output.  You may wish to try shorting the duration of your 
 request or email <a href="/info/contacts.php">us</a> for help.
 </div>
