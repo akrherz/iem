@@ -3,21 +3,39 @@ include("../../../config/settings.inc.php");
 define("IEM_APPID", 14);
  $station = isset($_GET['station']) ? $_GET['station']: "";
  $network = isset($_REQUEST["network"]) ? $_REQUEST['network'] : "IA_ASOS";
- $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
- $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
- $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
- $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
- $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
+ $year = isset($_GET['year']) ? intval($_GET['year']) : date("Y");
+ $smonth = isset($_GET['smonth']) ? intval($_GET['smonth']) : 5;
+ $emonth = isset($_GET['emonth']) ? intval($_GET['emonth']) : 10;
+ $sday = isset($_GET['sday']) ? intval($_GET['sday']) : 1;
+ $eday = isset($_GET['eday']) ? intval($_GET['eday']) : 1;
  
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/imagemaps.php");
-$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+include("../../../include/database.inc.php");
+include("../../../include/imagemaps.php");
+include_once "../../../include/myview.php";
+include_once("../../../include/forms.php");
+$t = new MyView();
+$t->headextra = <<<EOF
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
 <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
-$BODYEXTRA = "onload=\"init()\"";
-$THISPAGE = "climatology-season";
-$TITLE = "IEM | Accumulated Values versus Climatology";
-include("$rootpath/include/header.php"); ?>
+<script src='/js/olselect.php?network=${network}'></script>
+EOF;
+$t->bodyextra = "onload=\"init()\"";
+$t->thispage = "climatology-season";
+$t->title = "Accumulated Values versus Climatology";
+
+$mesosite = iemdb("mesosite");
+$rs = pg_query($mesosite, "SELECT id, name from networks where
+	id ~* '^IA' or id ~* '^MN' or id ~* '^WI' or id ~* '^ND' or id ~* '^SD' or id ~* '^NE'
+	 or id ~* '^KS' or id ~* '^MO' or id ~* '^IL' or id ~* '^IN' or id ~* '^OH' or id ~* '^KY'
+	or id in ('KCCI','KELO','KIMT')");
+$nselect = "<select name=\"network\">";
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$nselect .= sprintf("<option value=\"%s\"%s>%s</option>", $row["id"],
+			($row["id"] == $network) ? ' selected="selected"': '', $row["name"]);
+}
+$nselect .= "</select>";
+
+$content = <<<EOF
 <style type="text/css">
         #map {
             width: 450px;
@@ -33,62 +51,53 @@ versus climatology.  This application should be used with extreme caution
 since it uses non quality controlled observations.  There is also missing data which
 can cause errors in the accumulated values.</p>
 
-<div class="text">
+
 <P>Pick network to select station from:
 <form name='netselect' method='GET'>
-<?php 
-$mesosite = iemdb("mesosite");
-$rs = pg_query($mesosite, "SELECT id, name from networks where 
-	id ~* '^IA' or id ~* '^MN' or id ~* '^WI' or id ~* '^ND' or id ~* '^SD' or id ~* '^NE'
-	 or id ~* '^KS' or id ~* '^MO' or id ~* '^IL' or id ~* '^IN' or id ~* '^OH' or id ~* '^KY'
-	or id in ('KCCI','KELO','KIMT')");
-echo "<select name=\"network\">";
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-	echo sprintf("<option value=\"%s\"%s>%s</option>", $row["id"], 
-	($row["id"] == $network) ? ' selected="selected"': '', $row["name"]);
-}
-echo "</select>";
-?>
+{$nselect}
 <input type="submit" value="Select Network" />
 </form>
-
-
-<?php if (strlen($station) > 0 ) { ?>
-<?php include_once("$rootpath/include/forms.php"); ?>
+EOF;
+$sselect = networkSelect($network, $station);
+if (strlen($station) > 0 ) { 
+	
+	$yselect = yearSelect(2004,$year,"year");
+	$smselect =  monthSelect($smonth,"smonth");
+	$sdselect = daySelect2($sday,"sday");
+	$emselect =  monthSelect($emonth,"emonth");
+	$edselect = daySelect2($eday,"eday");
+	$content .= <<<EOF
 <form name="ds" action="fe.phtml" method="GET">
 <table cellspacing=2 border=1 cellpadding=2>
 <thead>
 <tr><th>Site ID:</th><th>Year:</th><th>Start Date:</th><th>End Date:</th></tr>
 </thead>
 <tbody>
-<tr><td><?php echo networkSelect($network, $station); ?></td>
-  <td><?php echo yearSelect(2004,$year,"year"); ?></td>
-  <td><?php echo monthSelect($smonth,"smonth"); ?>
-      <?php echo daySelect2($sday,"sday"); ?></td>
-  <td><?php echo monthSelect($emonth,"emonth"); ?>
-      <?php echo daySelect2($eday,"eday"); ?></td>
+<tr><td>{$sselect}</td>
+  <td>{$yselect}</td>
+  <td>{$smselect} {$sdselect}</td>
+  <td>{$emselect} {$edselect}</td>
 </tr>
 </tbody>
 </table>
 <input type="submit" value="Make Plot">
 </form>
 
-<p><img src="gdd_plot.php?<?php echo "network=$network&station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
-<p><img src="rainfall_plot.php?<?php echo "network=$network&station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
-
-<?php } else { ?>
-
+<p><img src="gdd_plot.php?network={$network}&station={$station}&year={$year}&smonth={$smonth}&sday={$sday}&emonth={$emonth}&eday={$eday}" ALT="Time Series">
+<p><img src="rainfall_plot.php?network={$network}&station={$station}&year={$year}&smonth={$smonth}&sday={$sday}&emonth={$emonth}&eday={$eday}" ALT="Time Series">
+EOF;
+} else { 
+	$content .= <<<EOF
 <form name="olselect">
-<input type="hidden" value="<?php echo $network; ?>" name="network">
+<input type="hidden" value="{$network}" name="network">
 <table><tr><th>Select Station</th>
-<td><?php echo networkSelect($network, $station); ?></td>
+<td>{$sselect}</td>
 <td><input type="submit" value="Make Plot"></tr></table>
 <div id="map"></div>
 <div id="sname" unselectable="on">No site selected</div>
 </form>
-
-
-<?php } ?>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+}
+$t->content = $content;
+$t->render('single.phtml');
+?>

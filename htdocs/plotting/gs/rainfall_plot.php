@@ -21,8 +21,8 @@ $e2date = date("2000-m-d", $ets);
 
 $today = time();
 
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/station.php");
+include("../../../include/database.inc.php");
+include("../../../include/station.php");
 $st = new StationData($station, $network);
 $st->load_station( $st->table[$station]['climate_site'] );
 $cities = $st->table;
@@ -88,11 +88,11 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 pg_close($coopdb);
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_plotline.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
