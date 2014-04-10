@@ -5,7 +5,7 @@ require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 header("Content-type: application/json");
 $connect = iemdb("postgis");
-pg_exec($connect, "SET TIME ZONE 'GMT'");
+pg_exec($connect, "SET TIME ZONE 'UTC'");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
 if ($year < 1986 || $year > intval(gmdate("Y"))){
@@ -26,24 +26,33 @@ $sql = <<<EOF
  significance = '$significance' and phenomena = '$phenomena' 
  and eventid is not null GROUP by eventid ORDER by eventid ASC
 EOF;
-if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "FF" || $phenomena == "MA") && $significance == "W" && $year > 2003){
+if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "FF" || 
+	 $phenomena == "MA") && $significance == "W" && $year > 2003){
 
 $sql = <<<EOF
  WITH countybased as (
- select string_agg( u.name || ' ['||u.state||']', ', ') as locations, eventid,
- min(issue) as issued, max(expire) as expired from warnings_$year w JOIN ugcs u
- ON (u.gid = w.gid) WHERE w.wfo = '$wfo' and
- significance = '$significance' and phenomena = '$phenomena' 
- and eventid is not null GROUP by eventid ),
+ 	select string_agg( u.name || ' ['||u.state||']', ', ') as locations, eventid,
+	min(issue) as issued, max(expire) as expired,
+	min(product_issue) as product_issued,
+	max(init_expire) as init_expired from warnings_$year w JOIN ugcs u
+ 	ON (u.gid = w.gid) WHERE w.wfo = '$wfo' and
+ 	significance = '$significance' and phenomena = '$phenomena' 
+ 	and eventid is not null GROUP by eventid ),
  
  stormbased as (
  	SELECT round((ST_area(ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area,
  	eventid from sbw_$year w WHERE w.wfo = '$wfo' and
  	significance = '$significance' and phenomena = '$phenomena' 
- 	and eventid is not null)
+ 	and eventid is not null and status = 'NEW')
  			
- SELECT s.area, c.locations, c.eventid, issued, expired from 
+ SELECT s.area, c.locations, c.eventid, 
+ to_char(issued, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
+ to_char(expired, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
+ to_char(product_issued, 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
+ to_char(init_expired, 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired
+ from 
  stormbased s JOIN countybased c on (c.eventid = s.eventid)
+ ORDER by c.eventid ASC
 EOF;
 }
 
@@ -58,8 +67,10 @@ for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
   $z["significance"] = $significance;
   $z["wfo"] = $wfo;
   $z["year"] = $year;
-  $z["issued"] = substr($z["issued"],0,16);
-  $z["expired"] = substr($z["expired"],0,16);
+  $z["issued"] = $z["iso_issued"];
+  $z["expired"] = $z["iso_expired"];
+  $z["product_issued"] = $z["iso_product_issued"];
+  $z["init_expired"] = $z["iso_init_expired"];
   $ar["products"][] = $z;
 }
 

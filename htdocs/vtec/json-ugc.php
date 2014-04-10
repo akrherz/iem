@@ -14,7 +14,11 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 
-$sql = "SELECT w.ugc, issue, expire, status, name 
+$sql = "SELECT w.ugc, status, name,
+	to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
+ 	to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
+ 	to_char(product_issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
+ 	to_char(init_expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired 
         from warnings_$year w JOIN ugcs u on (u.gid = w.gid) 
         WHERE w.wfo = '$wfo' and 
         w.phenomena = '$phenomena' and w.eventid = $eventid and 
@@ -27,8 +31,10 @@ $ar = Array("ugcs" => Array() );
 for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
 {
   $z["id"] = $i +1;
-  $z["issue"] = substr($z["issue"],0,16);
-  $z["expire"] = substr($z["expire"],0,16);
+  $z["issued"] = $z["iso_issued"];
+  $z["expired"] = $z["iso_expired"];
+  $z["product_issued"] = $z["iso_product_issued"];
+  $z["init_expired"] = $z["iso_init_expired"];
   $ar["ugcs"][] = $z;
 }
 

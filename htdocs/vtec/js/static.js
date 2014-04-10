@@ -97,8 +97,10 @@ var expander2 = new Ext.grid.RowExpander({
            {name: 'significance'},
            {name: 'phenomena'},
            {name: 'eventid', type: 'int'},
-           {name: 'issued'},
-           {name: 'expired'}
+           {name: 'issued', type: 'date'},
+           {name: 'expired', type: 'date'},
+           {name: 'product_issued', type: 'date'},
+           {name: 'init_expired', type: 'date'}
           ])
         });
 
@@ -118,8 +120,10 @@ var expander2 = new Ext.grid.RowExpander({
            {name: 'ugc'},
            {name: 'name'},
            {name: 'status'},
-           {name: 'issue'},
-           {name: 'expire'}
+           {name: 'issued', type: 'date'},
+           {name: 'expired', type: 'date'},
+           {name: 'product_issued', type: 'date'},
+           {name: 'init_expired', type: 'date'}
           ])
         });
 
@@ -595,10 +599,20 @@ geoPanel = new Ext.grid.GridPanel({
         loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
             {header: "UGC", width: 50, sortable: true, dataIndex: 'ugc'},
-            {header: "Name", width: 200, sortable: true, dataIndex: 'name'},
+            {header: "Name", width: 100, sortable: true, dataIndex: 'name'},
             {header: "Status", width: 50, sortable: true, dataIndex: 'status'},
-            {header: "Issue (UTC)", sortable: true, dataIndex: 'issue'},
-            {header: "Expire (UTC)", sortable: true, dataIndex: 'expire'}
+            {header: "Product Issued", width: 140, sortable: true, 
+                dataIndex: 'product_issued', format: 'M d, Y g:i A T',
+                xtype: 'datecolumn'},
+            {header: "VTEC Issued", width: 140, sortable: true, 
+             dataIndex: 'issued', format: 'M d, Y g:i A T',
+             xtype: 'datecolumn'},
+             {header: "Initial Expire", width: 140, sortable: true, 
+                 dataIndex: 'init_expired', format: 'M d, Y g:i A T',
+                 xtype: 'datecolumn'},
+            {header: "VTEC Expired", width: 140, sortable: true, 
+             dataIndex: 'expired', format: 'M d, Y g:i A T',
+             xtype: 'datecolumn'}
         ]),
         stripeRows: true,
         autoScroll:true,
@@ -639,10 +653,18 @@ eventsPanel = new Ext.grid.GridPanel({
     loadMask : {msg:'Loading Data...'},
     cm       : new Ext.grid.ColumnModel([
         {header: "Event", width: 40, sortable: true, dataIndex: 'eventid'},
-        {header: "Issued (UTC)", width: 140, sortable: true, 
-         dataIndex: 'issued'},
-        {header: "Expired (UTC)", width: 140, sortable: true, 
-         dataIndex: 'expired'},
+        {header: "Product Issued", width: 140, sortable: true, 
+            dataIndex: 'product_issued', format: 'M d, Y g:i A T',
+            xtype: 'datecolumn'},
+        {header: "VTEC Issued", width: 140, sortable: true, 
+         dataIndex: 'issued', format: 'M d, Y g:i A T',
+         xtype: 'datecolumn'},
+         {header: "Initial Expire", width: 140, sortable: true, 
+             dataIndex: 'init_expired', format: 'M d, Y g:i A T',
+             xtype: 'datecolumn'},
+        {header: "VTEC Expired", width: 140, sortable: true, 
+         dataIndex: 'expired', format: 'M d, Y g:i A T',
+         xtype: 'datecolumn'},
         {header: "Area km**2", width: 70, sortable: true, 
          dataIndex: 'area'},
         {header: "Locations", id:"locations", width: 250, sortable: true, 
