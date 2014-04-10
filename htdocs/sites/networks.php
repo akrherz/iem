@@ -5,13 +5,25 @@ include("../../include/database.inc.php");
 include_once("../../include/myview.php");
 include_once("../../include/forms.php");
 $pgconn = iemdb("mesosite");
-$rs = pg_prepare($pgconn, "NTSELECT", "SELECT *, 
-            ST_x(geom) as longitude, ST_y(geom) as latitude from stations 
-            WHERE online = 'y' and 
-			network = $1 ORDER by name");
-include("../../include/imagemaps.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
+
+if (isset($_GET["special"]) && $_GET["special"] == 'allasos'){
+	$sql = "SELECT *,
+            ST_x(geom) as longitude, ST_y(geom) as latitude from stations
+            WHERE online = 'y' and
+			(network ~* 'ASOS' or network = 'AWOS') and
+			'IA_ASOS' = $1 ORDER by name";
+	$network = "IA_ASOS";
+} else {
+	$sql = "SELECT *,
+            ST_x(geom) as longitude, ST_y(geom) as latitude from stations
+            WHERE online = 'y' and
+			network = $1 ORDER by name";
+}
+$rs = pg_prepare($pgconn, "NTSELECT", $sql);
+include("../../include/imagemaps.php");
+
 $format = isset($_GET['format']) ? $_GET['format'] : 'html';
 $nohtml = isset($_GET['nohtml']);
 
@@ -154,11 +166,16 @@ if (! $nohtml || $format == 'shapefile') {
 	$fselect = make_select("format", $format, $ar);
 	$nselect = selectNetwork($network);
 	$t->content = <<<EOF
-<h3 class="heading">Network Location Tables</h3>
+<h3>Network Location Tables</h3>
 
 <div class="well pull-right">
 <a href="new-rss.php"><img src="/images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
 added stations.
+
+<br /><strong>Special Table Requests</strong>
+<ul>
+ <li><a href="networks.php?special=allasos&format=gempak&nohtml">Global METAR in GEMPAK Format</a></li>
+</ul>
 </div>
 
 
