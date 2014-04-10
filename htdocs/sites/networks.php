@@ -181,7 +181,7 @@ added stations.
 
 <p>With this form, you can generate a station table for any
 of the networks listed below.  If there is a particular format for a station
-table that you need, please let use know.</p>
+table that you need, please <a href="/info/contacts.php">let us know</a>.</p>
 
 <form method="GET" action="networks.php" name="networkSelect">
 {$sextra}
