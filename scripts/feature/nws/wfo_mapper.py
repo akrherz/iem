@@ -16,15 +16,12 @@ clabels =['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec
 POSTGIS = psycopg2.connect(database='postgis', host='mesonet.agron.iastate.edu', user='nobody')
 pcursor = POSTGIS.cursor()
 pcursor.execute("""
- SELECT wfo, week from    
- (SELECT wfo, week, rank() OVER (PARTITION by wfo ORDER by count DESC) from
-   (SELECT wfo, week, count(*) from 
-   (SELECT distinct wfo, extract(year from issue) as yr, extract(week from issue) as week, eventid 
-   from warnings where phenomena = 'TO' and significance = 'W' 
-   and issue < '2014-01-01') as foo
-   GROUP by wfo, week) as foo2
-   ) as foo3
- WHERE rank = 1
+SELECT wfo, avg(min) from 
+    (SELECT wfo, extract(year from issue) as yr, min(extract(doy from issue))
+    from warnings where phenomena = 'TO' and significance = 'W' 
+    and issue < '2014-01-01' GROUP 
+    by wfo, yr) as foo
+    GROUP by wfo
 """)
 
 data = {}
@@ -32,17 +29,17 @@ labels = {}
 for row in pcursor:
     if row[1] is None:
         continue
-    ts = datetime.datetime(2000,1,1) + datetime.timedelta(days=((row[1]-1)*7))
+    ts = datetime.datetime(2000,1,1) + datetime.timedelta(days=((row[1]-1)*1))
     labels[ row[0] ] = "%s %s%s" % (ts.strftime("%-d"), ts.strftime("%b")[0],
                            ts.strftime("%b")[2])
     if row[0] == 'JSJ':
         labels['SJU'] = labels['JSJ']
-    data[ row[0] ] = (row[1]-1) * 7
+    data[ row[0] ] = row[1]
     
 p = MapPlot(sector='nws',
-                 title="Approx Week with most Tornado Warnings by NWS Forecast Office",
-                 subtitle='based on data from 1986-2013, date starting week shown')
+                 title="Avg Date of First Tornado Warning by NWS Forecast Office",
+                 subtitle='based on data from 1986-2013')
 p.fill_cwas(data, bins=bins, labels=labels, lblformat='%s', clevlabels=clabels)
-p.postprocess(filename='test.png')
-#import iemplot
-#iemplot.makefeature('test')
+p.postprocess(filename='test.ps')
+import iemplot
+iemplot.makefeature('test')

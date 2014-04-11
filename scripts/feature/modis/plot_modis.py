@@ -41,7 +41,7 @@ x,y = m.map(a[:,0], a[:,1])
 m.ax.plot(x,y, color='red', lw=2.5, zorder=2)
 
 """
-(fig, ax) = plt.subplots(2,1, figsize=(4,4))
+(fig, ax) = plt.subplots(2,1)
 
 m = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
             llcrnrlon=-99,urcrnrlon=-89,resolution='i',
@@ -55,11 +55,11 @@ x2,y2=m(-88.1321, 45.2504)
 
 img=mpimg.imread('/tmp/065.jpg')
 ax[0].imshow(img, extent=(x,x2,y, y2) )
-ax[0].set_title("6 March 2014 :: Aqua MODIS True Color", fontsize=10)
+ax[0].set_title("6 March 2014 :: Aqua MODIS True Color")
 
 img=mpimg.imread('/tmp/072.jpg')
 ax[1].imshow(img, extent=(x,x2,y, y2) )
-ax[1].set_title("13 March 2013 :: Aqua MODIS True Color", fontsize=10)
+ax[1].set_title("13 March 2014 :: Aqua MODIS True Color")
 
 m.drawstates(linewidth=2.5)
 m2.drawstates(linewidth=2.5)
