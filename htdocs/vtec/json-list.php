@@ -21,7 +21,12 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 $sql = <<<EOF
  select round(sum(ST_area(ST_transform(u.geom,2163)) / 1000000.0)::numeric,0) as area, 
  string_agg( u.name || ' ['||u.state||']', ', ') as locations, eventid,
- min(issue) as issued, max(expire) as expired from warnings_$year w JOIN ugcs u
+ to_char(min(issue), 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
+ to_char(max(expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
+ to_char(min(product_issue), 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
+ to_char(max(init_expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired
+ 
+ from warnings_$year w JOIN ugcs u
  ON (u.gid = w.gid) WHERE w.wfo = '$wfo' and
  significance = '$significance' and phenomena = '$phenomena' 
  and eventid is not null GROUP by eventid ORDER by eventid ASC
