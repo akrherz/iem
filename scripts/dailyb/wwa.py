@@ -89,7 +89,7 @@ def run(sts=None, ets=None):
         select phenomena, count(*) as count 
         from sbw_%s w, states s
         WHERE ST_contains(s.the_geom, w.geom) and s.state_name = 'Iowa' 
-        and issue >= '%s' and issue < '%s' 
+        and issue >= '%s' and issue < '%s' and status = 'NEW'
         and phenomena IN ('TO','SV','FF') GROUP by phenomena""" % (sts.year,
                                                                    sts, ets)) 
     for row in cursor:
@@ -102,7 +102,7 @@ def run(sts=None, ets=None):
         d['FF%s' % (wfo,)] = 0
     cursor.execute("""
   SELECT phenomena, wfo, count(*) as count from sbw_%s WHERE 
-  issue >= '%s' and issue < '%s' 
+  issue >= '%s' and issue < '%s' and status = 'NEW' 
   and phenomena IN ('TO','SV','FF') and
   wfo in ('DMX','FSD','ARX','DVN','OAX') GROUP by wfo, phenomena""" % (sts.year,
                                                                     sts, ets))
