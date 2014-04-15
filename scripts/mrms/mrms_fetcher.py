@@ -60,5 +60,5 @@ if __name__ == '__main__':
     fetch( utcnow, False )
     for delay in [2,4,10,60,120,1440,2880]:
         fetch( utcnow - datetime.timedelta(minutes=delay), False )
-    for delay in [60*24*3, 60*24*4]:
+    for delay in [60*24*3, 60*24*5]:
         fetch( utcnow - datetime.timedelta(minutes=delay), True )
