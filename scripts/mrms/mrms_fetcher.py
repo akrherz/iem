@@ -11,7 +11,23 @@ import pytz
 import sys
 import os
 
-def fetch(ts):
+def get_uri(varname, ts, tile, iarchive):
+    ''' Slightly different logic to fetch archived files '''
+    baseuri = 'http://129.15.110.182/'
+    if iarchive:
+        baseuri += 'archive/%s/' % (ts.strftime("%Y/%m"))
+    baseuri += 'tile%s/' % (tile,)
+    if varname == 'lcref':
+        baseuri += 'lcref/LCREF'
+    elif varname == 'rainrate':
+        baseuri = 'q3rad/rainrate/PRECIPRATE'
+    elif varname == '24hrad':
+        baseuri = 'q3rad/24h_acc/24HRAD'
+    elif varname == '1hrad':
+        baseuri = 'q3rad/1h_acc/1HRAD'
+    return '%s%s' % (baseuri, ts.strftime('.%Y%m%d.%H%M00.gz'))
+
+def fetch(ts, iarchive=False):
     ''' Do the fetching for a given timestamp '''
     basedir = ts.strftime("/mnt/mtarchive/data/%Y/%m/%d/mrms")
     for tile in range(1,5):
@@ -21,15 +37,7 @@ def fetch(ts):
             mydir = "%s/tile%s/%s" % (basedir, tile, varname)
             if not os.path.isdir(mydir):
                 os.makedirs(mydir)
-            if varname == 'lcref':
-                baseuri = 'http://129.15.110.182/tile'+str(tile)+'/lcref/LCREF'
-            elif varname == 'rainrate':
-                baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/rainrate/PRECIPRATE'
-            elif varname == '24hrad':
-                baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/24h_acc/24HRAD'
-            elif varname == '1hrad':
-                baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/1h_acc/1HRAD'
-            uri = "%s%s" % (baseuri, ts.strftime('.%Y%m%d.%H%M00.gz'))
+            uri = get_uri(varname, ts, tile, iarchive)
             fn = "%s/%s%s" % (mydir, varname, ts.strftime('.%Y%m%d.%H%M00.gz'))
             if not os.path.isfile(fn):
                 try:
@@ -46,9 +54,11 @@ def fetch(ts):
 if __name__ == '__main__':
     ''' This is our routine '''
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    if utcnow.minute % 2 == 0:
-        sys.exit(0)
+    #if utcnow.minute % 2 == 0:
+    #    sys.exit(0)
     utcnow -= datetime.timedelta(minutes=1)
-    fetch( utcnow )
+    fetch( utcnow, False )
     for delay in [2,4,10,60,120,1440,2880]:
-        fetch( utcnow - datetime.timedelta(minutes=delay) )
+        fetch( utcnow - datetime.timedelta(minutes=delay), False )
+    for delay in [60*24*3, 60*24*4]:
+        fetch( utcnow - datetime.timedelta(minutes=delay), True )
