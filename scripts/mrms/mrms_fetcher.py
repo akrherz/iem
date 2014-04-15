@@ -20,11 +20,11 @@ def get_uri(varname, ts, tile, iarchive):
     if varname == 'lcref':
         baseuri += 'lcref/LCREF'
     elif varname == 'rainrate':
-        baseuri = 'q3rad/rainrate/PRECIPRATE'
+        baseuri += 'q3rad/rainrate/PRECIPRATE'
     elif varname == '24hrad':
-        baseuri = 'q3rad/24h_acc/24HRAD'
+        baseuri += 'q3rad/24h_acc/24HRAD'
     elif varname == '1hrad':
-        baseuri = 'q3rad/1h_acc/1HRAD'
+        baseuri += 'q3rad/1h_acc/1HRAD'
     return '%s%s' % (baseuri, ts.strftime('.%Y%m%d.%H%M00.gz'))
 
 def fetch(ts, iarchive=False):
