@@ -83,8 +83,8 @@ import tempfile
 
 # Third party
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature
-#import pyiem.meteorology as met
+from pyiem.datatypes import temperature, humidity
+import pyiem.meteorology as met
 import psycopg2
 ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
 icursor = ISUAG.cursor()
@@ -166,9 +166,11 @@ def hourly_process(nwsli, maxts):
         #print nwsli, valid
         ob = Observation(nwsli, 'ISUSM', 
                          valid.astimezone(pytz.timezone("America/Chicago")))
-        ob.data['tmpf'] = temperature(
-                    float(tokens[headers.index('tair_c_avg')]), 'C').value('F')
-        ob.data['relh'] = tokens[headers.index('rh')]
+        tmpc = temperature(float(tokens[headers.index('tair_c_avg')]), 'C')
+        ob.data['tmpf'] = tmpc.value('F')
+        relh = humidity(float(tokens[headers.index('rh')]), '%')
+        ob.data['relh'] = relh.value('%')
+        ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
         ob.data['srad'] = tokens[headers.index('slrkw_avg')]
         ob.data['phour'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
