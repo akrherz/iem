@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 
 /** We need these vars to make this work */
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
@@ -55,11 +55,11 @@ if ($mode != 'rt') {
 	pg_close($dbconn);
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_bar.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_led.php");
 
 if (pg_num_rows($rs) == 0){
 	
@@ -68,7 +68,7 @@ if (pg_num_rows($rs) == 0){
     die();
 }
 
-include ("$rootpath/include/network.php");
+include ("../../../include/network.php");
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
