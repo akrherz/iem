@@ -24,7 +24,8 @@ local surrounding area.
 EOF;
 
 $rosedata_uri = "/cgi-bin/windrose.py?nsector=36&station=$station&network=$network"
-		."&day1=1&day2=1&month2=1&minute1=0&minute2=0&units=mph&justdata=true";
+		."&year1=1970&day1=1&day2=1&month2=1&minute1=0&minute2=0&units=mph&"
+		."justdata=true&hour1=0&hour2=0&year2=". (intval(date("Y"))+1);
 
 
 if (file_exists("/mesonet/share/windrose/climate/yearly/${station}_yearly.png"))
