@@ -79,22 +79,17 @@ if (strlen($network) > 0){
 		));
 
 		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-			$shp = ms_newShapeObj(MS_SHAPE_POINT);
 			$pt = ms_newPointobj();
 			$pt->setXY( $row["longitude"], $row["latitude"], 0);
-			$line = ms_newLineObj();
-			$line->add( $pt );
-			$shp->add($line);
-			$shpFile->addShape($shp);
-			dbase_add_record($dbfFile, array(
-			$row["id"],
-			$row["name"],
-			$row["network"],
-			substr($row["archive_begin"],0,16),
-			));
-		}
+			$shpFile->addPoint($pt);
 
-		$shpFile->free();
+			dbase_add_record($dbfFile, array(
+				$row["id"],
+				$row["name"],
+				$row["network"],
+				substr($row["archive_begin"],0,16)));
+		}
+		unset($shpFile);
 		dbase_close($dbfFile);
 		chdir("/var/webtmp/");
 		copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
