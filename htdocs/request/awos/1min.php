@@ -1,19 +1,37 @@
 <?php 
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 65);
-$THISPAGE = "networks-awos";
-$TITLE = "IEM | AWOS 1 Minute Data Download";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/iemprop.php");
-$awos_archive_end = strtotime( get_iemprop("awos.1min.end") );
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/forms.php");
-$bogus = 0;
-?>
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->thispage = "networks-awos";
+$t->title = "AWOS One Minute Data Download";
 
-<div class="text">
-<b>Nav:</b> <a href="/AWOS/">AWOS</a> <b> &gt; </b>
-  Download Data
+include("../../../include/iemprop.php");
+$awos_archive_end = strtotime( get_iemprop("awos.1min.end") );
+include("../../../include/imagemaps.php");
+include("../../../include/forms.php");
+$bogus = 0;
+
+$ys1 = yearSelect2(1995, date("Y"), "year1");
+$ms1 = monthSelect($bogus, "month1");
+$ds1 = daySelect2($bogus, "day1");
+$mi1 = minuteSelect($bogus, "minute1"); 
+$hs1 = hour24Select($bogus, "hour1");
+
+$ys2 = yearSelect2(1995, date("Y"), "year2");
+$ms2 = monthSelect($bogus, "month2");
+$ds2 = daySelect2($bogus, "day2");
+$mi2 = minuteSelect($bogus, "minute2");
+$hs2 = hour24Select($bogus, "hour2");
+
+$aend = date('d M Y', $awos_archive_end);
+
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/AWOS/">AWOS Network</a></li>
+ <li class="active">Download One Minute Data</li>
+</ol>
 
 <p>The Iowa Department of Transportation (DOT) manages the 
 network of AWOS sensors in the state of Iowa.  While 20 minute interval data
@@ -24,24 +42,20 @@ and make the observations available here for download.  Please don't make
 giant data requests through this interface, instead feel 
 free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
-<p>Population of this archive was discontinued by the DOT on 1 April 2011. Data
+<div class="alert alert-warning">Population of this archive was discontinued by the DOT on 1 April 2011. Data
 for dates after that date can be found 
-<a href="<?php echo $rooturl; ?>/request/download.phtml?network=AWOS">here</a>, but it is only
+<a class="link link-warning" href="/request/download.phtml?network=AWOS">here</a>, but it is only
 at a 5-10 minute interval.
 
 <ul>
  <li><b>Archive Begins:</b> 1 Jan 1995 (for some sites, not all)</li>
- <li><b>Last Date in Archive:</b> <?php echo date('d M Y', $awos_archive_end); ?></li>
+ <li><b>Last Date in Archive:</b> {$aend} </li>
 </ul>
+</div>
+<form method="GET" action="1min_dl.php" name="dl">
 
-
-<p>
-
-
-<form method="GET" action="1min_dl.php">
-
-<table>
-<tr><td width="50%">
+<div class="row">
+<div class="col-md-6 col-sm-6">
 
 <p><h3 class="subtitle">1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network. Clinton and Fort Dodge 
@@ -64,39 +78,10 @@ in this archive up until that point.</i><br>
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(1995, date("Y"), "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect($bogus, "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2($bogus, "day1"); ?>
-    </td>
-    <td>
-     <?php echo hour24Select($bogus, "hour1"); ?>
-    </td>
-    <td>
-     <?php echo minuteSelect($bogus, "minute1"); ?>
-    </td>
-  </tr>
-
+    <td>{$ys1}</td><td>{$ms1}</td><td>{$ds1}</td><td>{$hs1}</td><td>{$mi1}</td></tr>
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(1995, date("Y"), "year2"); ?>
-    <td>
-     <?php echo monthSelect($bogus, "month2"); ?>
-    <td>
-     <?php echo daySelect2($bogus, "day2"); ?>
-    </td>
-    <td>
-     <?php echo hour24Select($bogus, "hour2"); ?>
-    </td>
-    <td>
-     <?php echo minuteSelect($bogus, "minute2"); ?>
-    </td>
-  </tr>
+    <td>{$ys2}</td><td>{$ms2}</td><td>{$ds2}</td><td>{$hs2}</td><td>{$mi2}</td></tr>
 </table>
 
 <p><h3 class="subtitle">3. Select Variables:</h3><br>
@@ -118,7 +103,9 @@ in this archive up until that point.</i><br>
   <option value="ca3">Cloud Deck 3 Coverage
 </select>
 
-</td><td valign="TOP">
+</div>
+<div class="col-md-6 col-sm-6">
+    		
 
 <p><h3 class="subtitle">4. Data Sampling?</h3><br>
 <i>Data is potentially available every minute, but you don't have to download
@@ -156,12 +143,12 @@ How shall the output values be seperated?
  </select>
 </div>
 
-</td></tr></table>
+</div>
 
-<p><h3 class="subtitle">Submit Form:</h3><br>
+<p><h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
