@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 
 /** We need these vars to make this work */
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
@@ -58,11 +58,11 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 pg_close($dbconn);
 pg_close($iemdb);
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_bar.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_led.php");
 
 if (pg_num_rows($rs) == 0){
 	
@@ -71,7 +71,7 @@ if (pg_num_rows($rs) == 0){
     die();
 }
 
-include ("$rootpath/include/network.php");
+include ("../../../include/network.php");
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
@@ -87,7 +87,7 @@ $graph->img->SetMargin(40,55,105,105);
 $graph->yaxis->SetTitle("Average Speed [mph]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
-$graph->xaxis->SetTitle("Time Period:");
+$graph->xaxis->SetTitle("Time Period: ". date('Y-m-d h:i A', $times[0][0]) ." thru ". date('Y-m-d h:i A', max($times[0])) );
 $graph->xaxis->SetTitleMargin(67);
 $graph->xaxis->title->SetFont(FF_VERA,FS_BOLD,12);
 $graph->xaxis->title->SetColor("brown");
