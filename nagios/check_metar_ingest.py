@@ -1,11 +1,11 @@
 """
- Check how much HADSA data we have
+ Check how much HADS data we have
 """
 import os
 import sys
 import stat
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+IEM = psycopg2.connect(database='iem', host=sys.argv[1], user='nobody')
 icursor = IEM.cursor()
 
 def check():
