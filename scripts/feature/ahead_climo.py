@@ -7,14 +7,14 @@ icursor = IEM.cursor()
 
 climate = {}
 ccursor.execute("""
-  SELECT valid, high from climate51 where station = 'IA0200'
+  SELECT valid, high from climate51 where station = 'IA2203'
 """)
 for row in ccursor:
     climate[row[0].strftime("%m%d")] = row[1]
 
 icursor.execute("""
   SELECT day, max_tmpf from summary_2014 s JOIN stations t on (t.iemid = s.iemid)
-  where t.id = 'AMW' and day <= 'TODAY' ORDER by day ASC
+  where t.id = 'DSM' and day <= 'TODAY' ORDER by day ASC
 """)
 doy = []
 ahead = []
@@ -90,12 +90,12 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 ax.set_yticks(xticks)
 ax.set_yticklabels(xticklabels)
-ax.set_xlim(0,103)
-ax.set_ylim(0,160)
+ax.set_xlim(0,110)
+ax.set_ylim(0,210)
 ax.grid(True)
 ax.set_ylabel("Feels like Date")
 ax.set_xlabel("2014 Daily High Temperature")
-ax.set_title("2014 Ames Daily High Feels like Climatology on...")
+ax.set_title("2014 Des Moines Daily High Feels like Climatology on...")
 fig.savefig("test.ps")
 import iemplot
 iemplot.makefeature('test')
