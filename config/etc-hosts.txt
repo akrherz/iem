@@ -11,7 +11,7 @@
 192.168.0.9      iemvm1        
 192.168.0.10     iem10         iem10.local
 192.168.0.11     iem11         iem11.local iem-syslog
-192.168.0.12     postgresread
+192.168.0.12     iem12         postgresread
 192.168.0.19     iem19         iem19.local iemdb iemdb2
 192.168.0.21     iem21         iem21.local openfire-bosh
 192.168.0.22     iem22         iem22.local
