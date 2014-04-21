@@ -6,48 +6,34 @@ import psycopg2
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = COOP.cursor()
 
-cursor.execute("""SELECT day, precip from alldata_ia where station = 'IA2203'""")
+cursor.execute("""SELECT day, high from alldata_ia where station = 'IA2203'""")
 data = {}
 for row in cursor:
     data[ row[0] ] = row[1]
 
-hits = [0]*7
-allhits = [0]*7
-events = 0
-total = 0
+highs = []
 
 for yr in range(1880,2014):
-    total += 1
     e = easter(yr)
-    if data[e] >= 0.01:
-        events += 1
-    for week in range(1,8):
-        ts = e + datetime.timedelta(days=(week*7))
-        print yr, e, ts, week 
-        if data[e] >= 0.01 and data[ts] >= 0.01:
-            hits[week-1] += 1
-        if data[ts] >= 0.01:
-            allhits[week-1] += 1
-            
-hits = np.array(hits)
-allhits = np.array(allhits)
+    highs.append( data[e] )
+highs.append( 84 )
+highs = np.array(highs)
 
 import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
-ax.bar(np.arange(1,8)-0.4, hits / float(events) * 100., width=0.4,
-       fc='purple',
-       label="Rained on Easter")
-ax.bar(np.arange(1,8), allhits / float(total) * 100., width=0.4, 
-       fc='lightgreen',
-       label="Overall Frequency")
+bars = ax.bar(np.arange(1880,2015), highs, fc='b', ec='b')
+for i, bar in enumerate(bars):
+    if highs[i] >= highs[-1]:
+        ax.text( 1880+i, highs[i] + 1, "%s\n%s" % (highs[i], 1880+i), ha='center', va='bottom')
+        bars[i].set_facecolor('r')
+        bars[i].set_edgecolor('r')
 ax.grid(True)
-ax.set_title("1880-2013 Des Moines Seven Sundays after Easter")
-ax.set_xlim(0.5, 7.5)
-ax.set_xlabel("Sequential Sunday following Easter")
-ax.set_ylabel("Percent Years with Measurable Rainfall [%]")
-ax.legend(fontsize=10)
+ax.set_ylim(0,95)
+ax.set_xlim(1879,2015)
+ax.set_title("1880-2014 Des Moines Easter High Temperature")
+ax.set_ylabel("High Temperature $^\circ$F")
 
 fig.savefig('test.ps')
 import iemplot
