@@ -323,7 +323,7 @@ if __name__ == '__main__':
      This script is run each Monday or the first of the month 
      from RUN_2AM script
     '''
-    today = datetime.datetime.today()
+    today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=1)
     rtype = sys.argv[1]
     # We are testing things
