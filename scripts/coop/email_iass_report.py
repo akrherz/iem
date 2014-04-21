@@ -340,7 +340,7 @@ if __name__ == '__main__':
         if rtype == 'weekly':
             sts = datetime.date(int(sys.argv[2]), int(sys.argv[3]), 
                                 int(sys.argv[4]))
-            ets = sts + datetime.timedelta(days=7)
+            ets = sts + datetime.timedelta(days=6)
             report = cStringIO.StringIO()
             weekly_header(report, sts, ets)
             compute_weekly(report, sts, ets)    
