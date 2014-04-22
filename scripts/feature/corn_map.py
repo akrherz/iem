@@ -2,20 +2,20 @@ import datetime
 import numpy
 
 data = {}
-d2013 = {}
+d2014 = {}
 
-for linenum, line in enumerate(open('/home/akrherz/Downloads/404AC2DB-F408-33CF-8CC6-F8F5C6306187.csv')):
+for linenum, line in enumerate(open('crop_progress.csv')):
     if linenum == 0:
         continue
-    tokens = line.split(",")
+    tokens = line.replace('"','').split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 10 and day.day in range(20,28):
+    if day.month == 4 and day.day in range(17,24):
         state = tokens[5]
         val = float(tokens[-1])
         if not data.has_key(state):
             data[state] = []
-        if day.year == 2013:
-            d2013[state] = val
+        if day.year == 2014:
+            d2014[state] = val
         else:
             data[state].append( val )
 
@@ -24,8 +24,8 @@ print data['IOWA']
 
 for state in data.keys():
     ar = numpy.array(data[state])
-    print "%s %.1f %.0f" % ( state, numpy.average(ar), d2013[state])
-    results[ state ] = {'d2013': d2013[state], 'avg': numpy.average(ar)}
+    print "%s %.1f %.0f" % ( state, numpy.average(ar), d2014[state])
+    results[ state ] = {'d2014': d2014[state], 'avg': numpy.average(ar)}
     
 from mpl_toolkits.basemap import Basemap
 from osgeo import ogr
@@ -56,7 +56,7 @@ ST_x(ST_Centroid(the_geom)) as x, ST_Y(ST_Centroid(the_geom)) as y from states""
 
 from iem import plot
 maue = plot.maue(15)
-bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
+bins = [0,1,2,3,4,5,7,10,15,20,25,30,35]
 
 def get_color(val, minvalue, maxvalue):
     if val < bins[0]:
@@ -74,7 +74,7 @@ while 1:
     if not results.has_key(name.upper()):
         continue
     geom = loads(feature.GetGeometryRef().ExportToWkb())
-    c = get_color(results[name.upper()]['d2013'],0,100)
+    c = get_color(results[name.upper()]['d2014'],0,100)
     for polygon in geom:
         a = asarray(polygon.exterior)
         x,y = m(a[:,0], a[:,1])
@@ -83,8 +83,8 @@ while 1:
         patches.append(p)
 
     x,y = m(feature.GetField('x'), feature.GetField('y'))
-    diff = results[name.upper()]['d2013'] - results[name.upper()]['avg']
-    txt = ax.text(x,y, '%.0f%%\n%.0f' % (results[name.upper()]['d2013'],
+    diff = results[name.upper()]['d2014'] - results[name.upper()]['avg']
+    txt = ax.text(x,y, '%.0f%%\n%.0f' % (results[name.upper()]['d2014'],
                                        diff), 
                   verticalalignment='center', horizontalalignment='center', 
                   size=20, zorder=5)
@@ -106,11 +106,11 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=maue(range(len(bins))),
                 ec='None')
 
-ax.text(0.17, 1.05, "20 Oct 2013 USDA Percentage of Corn Harvested\nPercentage Points Departure from 1980-2012 Average for 20-27 Oct", transform=ax.transAxes,
+ax.text(0.17, 1.05, "20 Apr 2014 USDA Percentage of Corn Planted\nPercentage Points Departure from 1980-2013 Average for 17-24 Apr", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
-import Image
+from PIL import Image
 logo = Image.open('../../htdocs/images/logo_small.png')
 ax3 = plt.axes([0.05,0.9,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117), yticks=[], xticks=[])
 ax3.imshow(logo)
