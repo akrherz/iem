@@ -37,9 +37,13 @@ EOF;
   $mesosite = iemdb('mesosite');
   pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
   $rs = pg_execute($mesosite, "FINDTZ", Array($network));
-  $row = pg_fetch_assoc($rs,0);
-  $tzname = $row["tzname"];
-
+  if (pg_num_rows($rs) < 1){
+  	$tzname = "America/Chicago";
+  } else {
+  	$row = pg_fetch_assoc($rs,0);
+  	$tzname = $row["tzname"];
+  }
+  
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
   "alti" => "Altimeter [mb]", "peak" => "Today's Wind Gust [knots]",
@@ -55,6 +59,10 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "pday" => "Today Rainfall [inch]", );
 
 function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
+	reset($multiArray);
+	if (sizeof($multiArray) == 0){
+		return array();
+	}
   while (list($firstIndex, ) = each($multiArray))
        $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
   if ($sorder == "asc")
@@ -94,7 +102,6 @@ while ( list($key, $iemob) = each($asos) ){
          $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_sknt_ts"],0,16) );
       }
     }
-
 } // End of while
 
 if($format == 'csv'){
