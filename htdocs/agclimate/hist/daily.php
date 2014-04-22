@@ -72,15 +72,34 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 </TR>
 </TABLE>
 
-<h4 class="subtitle">Options:</h4>
-<input type="checkbox" name="todisk" value="yes">Download directly to disk
-<br>How should the values be separated?: 
+<h4>Options:</h4>
+
+<strong>Select from available variables</strong><br />
+<input type="checkbox" name="vars" value="high">High Temperature [F]
+<br /><input type="checkbox" name="vars" value="low">Low Temperature [F]
+<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [MJ]
+<br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
+<br /><input type="checkbox" name="vars" value="sped">Average Wind Speed [mph]
+<br /><input type="checkbox" name="vars" value="gust">Wind Gust [mph]
+<br /><input type="checkbox" name="vars" value="et">Potential Evapotranspiration[inch]
+<br /><input type="checkbox" name="vars" value="soil04t">4 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil12t">12 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil24t">24 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil50t">50 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
+<br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
+<br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
+ 		
+<p><strong>View on web browser or</strong> &nbsp; 
+ <br /><input type="checkbox" name="todisk" value="yes">Download directly to disk
+
+<p><strong>How should the values be separated?:</strong> &nbsp; 
 <select name="delim">
   <option value="comma">by commas
   <option value="tab">by tabs
 </select>
 
-<p><b><h4 class="subtitle">Submit your request:</h4></b>
+<p><h4>Submit your request:</h4>
 	<input type="submit" value="Get Data">
 	<input type="reset">
 

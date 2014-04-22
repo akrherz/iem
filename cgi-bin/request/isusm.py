@@ -6,6 +6,8 @@ import cgi
 import datetime
 import psycopg2
 import sys
+import pandas as pd
+import cStringIO
 from pyiem.datatypes import temperature
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 cursor = ISUAG.cursor()
@@ -41,16 +43,26 @@ def get_delimiter( form ):
     return '\t'
 
 
-def fetch_daily( form ):
+def fetch_daily( form, cols ):
     ''' Return a fetching of daily data '''
     sts, ets = get_dates( form )
     stations = get_stations( form )
     delim = get_delimiter( form )
-    
-    res = delim.join( ["station","valid","high", "low", "solar", "precip",
+    if delim == 'tab':
+        delim = '\t'
+    elif delim == 'comma':
+        delim = ','
+    elif delim == 'space':
+        delim = ' '
+
+    if len(cols) == 0:    
+        cols = ["station","valid","high", "low", "solar", "precip",
                        "sped", "gust", "et", "soil04t", "soil12t", "soil24t", 
                        "soil50t",
-                       "soil12vwc", "soil24vwc", "soil50vwc",] ) + "\n"
+                       "soil12vwc", "soil24vwc", "soil50vwc"]
+    else:
+        cols.insert(0, 'valid')
+        cols.insert(0, 'station')
     
     sql = """SELECT station, valid, tair_c_max, tair_c_min, slrmj_tot,
     rain_mm_tot, dailyet, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
@@ -62,6 +74,8 @@ def fetch_daily( form ):
            str(tuple(stations)))
     cursor.execute(sql)
     
+    values = []
+    
     for row in cursor:
         valid = row[1]
         station = row[0]
@@ -69,33 +83,50 @@ def fetch_daily( form ):
         low = temperature(row[3], 'C').value('F') if row[3] is not None else -99
         precip = row[5] / 24.5 if row[5] > 0 else 0
         et = row[6] / 24.5 if row[6] > 0 else 0
-        tsoil04t = temperature(row[7], 'C').value('F') if row[7] is not None else -99
-        tsoil12t = temperature(row[8], 'C').value('F') if row[8] is not None else -99
-        tsoil24t = temperature(row[9], 'C').value('F') if row[9] is not None else -99
-        tsoil50t = temperature(row[10], 'C').value('F') if row[10] is not None else -99
-        tsoil12vwc = row[11] if row[11] is not None else -99
-        tsoil24vwc = row[12] if row[12] is not None else -99
-        tsoil50vwc = row[13] if row[13] is not None else -99
+        soil04t = temperature(row[7], 'C').value('F') if row[7] is not None else -99
+        soil12t = temperature(row[8], 'C').value('F') if row[8] is not None else -99
+        soil24t = temperature(row[9], 'C').value('F') if row[9] is not None else -99
+        soil50t = temperature(row[10], 'C').value('F') if row[10] is not None else -99
+        soil12vwc = row[11] if row[11] is not None else -99
+        soil24vwc = row[12] if row[12] is not None else -99
+        soil50vwc = row[13] if row[13] is not None else -99
         speed = row[14] * 2.23 if row[14] is not None else -99
         gust = row[15] * 2.23 if row[15] is not None else -99
         
-        values = [station, valid.strftime("%Y-%m-%d"), high, low, row[4],
-                  precip, speed, gust, et, tsoil04t, tsoil12t, tsoil24t, tsoil50t,
-                  tsoil12vwc, tsoil24vwc, tsoil50vwc]
-        res += delim.join(map(str,values)) + "\n"
+        values.append( dict(station=station, valid=valid.strftime("%Y-%m-%d"), 
+                high=high, low=low, solar=row[4],
+                precip=precip, sped=speed, gust=gust, et=et, 
+                soil04t=soil04t, soil12t=soil12t, soil24t=soil24t, 
+                soil50t=soil50t,
+                soil12vwc=soil12vwc, soil24vwc=soil24vwc, soil50vwc=soil50vwc))
+
+    df = pd.DataFrame(values)
+    buf = cStringIO.StringIO()
+    df.to_csv(buf, index=False, cols=cols, sep=delim, float_format='%7.2f')
+    buf.seek(0)
+    return buf.read()
     
-    return res
     
-    
-def fetch_hourly( form ):
+def fetch_hourly( form , cols):
     ''' Return a fetching of hourly data '''
     sts, ets = get_dates( form )
     stations = get_stations( form )
     delim = get_delimiter( form )
-    res = delim.join( ["station","valid","tmpf", "relh", "solar", "precip",
+    if delim == 'tab':
+        delim = '\t'
+    elif delim == 'comma':
+        delim = ','
+    elif delim == 'space':
+        delim = ' '
+            
+    if len(cols) == 0:
+        cols = ["station","valid","tmpf", "relh", "solar", "precip",
                        "speed", "drct", "et", "soil04t", "soil12t", "soil24t", 
                        "soil50t",
-                       "soil12vwc", "soil24vwc", "soil50vwc"] ) + "\n"
+                       "soil12vwc", "soil24vwc", "soil50vwc"]
+    else:
+        cols.insert(0, 'valid')
+        cols.insert(0, 'station')
     
     cursor.execute("""SELECT station, valid, tair_c_avg, rh, slrkw_avg,
     rain_mm_tot, ws_mps_s_wvt, winddir_d1_wvt, etalfalfa, tsoil_c_avg,
@@ -105,6 +136,8 @@ def fetch_hourly( form ):
     ORDER by valid ASC
     """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), 
            str(tuple(stations))))
+    
+    values = []
     
     for row in cursor:
         valid = row[1]
@@ -116,31 +149,35 @@ def fetch_hourly( form ):
         speed = row[6] * 2.23 if row[6] is not None else -99
         drct = row[7] if row[7] is not None else -99
         et = row[8] / 24.5 if row[8] is not None else -99
-        tsoil04t = temperature(row[9], 'C').value('F') if row[9] is not None else -99
-        tsoil12t = temperature(row[10], 'C').value('F') if row[10] is not None else -99
-        tsoil24t = temperature(row[11], 'C').value('F') if row[11] is not None else -99
-        tsoil50t = temperature(row[12], 'C').value('F') if row[12] is not None else -99
-        tsoil12vwc = row[13] if row[13] is not None else -99
-        tsoil24vwc = row[14] if row[14] is not None else -99
-        tsoil50vwc = row[15] if row[15] is not None else -99
+        soil04t = temperature(row[9], 'C').value('F') if row[9] is not None else -99
+        soil12t = temperature(row[10], 'C').value('F') if row[10] is not None else -99
+        soil24t = temperature(row[11], 'C').value('F') if row[11] is not None else -99
+        soil50t = temperature(row[12], 'C').value('F') if row[12] is not None else -99
+        soil12vwc = row[13] if row[13] is not None else -99
+        soil24vwc = row[14] if row[14] is not None else -99
+        soil50vwc = row[15] if row[15] is not None else -99
         
-        values = [station, valid.strftime("%Y-%m-%d %H:%M"), 
-                  tmpf, relh, solar, precip, speed, drct, et,  tsoil04t, 
-                  tsoil12t, tsoil24t, tsoil50t,
-                  tsoil12vwc, tsoil24vwc, tsoil50vwc]
-        res += delim.join(map(str,values)) + "\n"
-    
-    return res
+        values.append( dict(station=station, valid=valid.strftime("%Y-%m-%d %H:%M"), 
+                  tmpf=tmpf, relh=relh, solar=solar, precip=precip, 
+                  speed=speed, drct=drct, et=et,  soil04t=soil04t, 
+                  soil12t=soil12t, soil24t=soil24t, soil50t=soil50t,
+                  soil12vwc=soil12vwc, soil24vwc=soil24vwc, soil50vwc=soil50vwc))
+    df = pd.DataFrame(values)
+    buf = cStringIO.StringIO()
+    df.to_csv(buf, index=False, cols=cols, sep=delim, float_format='%7.2f')
+    buf.seek(0)
+    return buf.read()
 
 
 if __name__ == '__main__':
     ''' make stuff happen '''
     form = cgi.FieldStorage()
     mode = form.getfirst('mode', 'hourly')
+    cols = form.getlist('vars')
     if mode == 'hourly':
-        res = fetch_hourly(form)
+        res = fetch_hourly(form, cols)
     else:
-        res = fetch_daily(form)
+        res = fetch_daily(form, cols)
 
     todisk = form.getfirst('todisk', 'no')
     if todisk == 'yes':

@@ -72,7 +72,25 @@ wish to change this to <a href="daily.php">daily data</a>.
 </TABLE>
 
 <h4>Options:</h4>
-<input type="checkbox" name="todisk" value="yes">Download directly to disk
+ 		
+<strong>Select from available variables</strong><br />
+<input type="checkbox" name="vars" value="tmpf">Air Temperature [F]
+<br /><input type="checkbox" name="vars" value="relh">Relative Humidity [%]
+<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [W/m^2]
+<br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
+<br /><input type="checkbox" name="vars" value="speed">Average Wind Speed [mph]
+<br /><input type="checkbox" name="vars" value="drct">Wind Direction [deg]
+<br /><input type="checkbox" name="vars" value="et">Potential Evapotranspiration[inch]
+<br /><input type="checkbox" name="vars" value="soil04t">4 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil12t">12 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil24t">24 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil50t">50 inch Soil Temperature [F]
+<br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
+<br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
+<br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
+ 		
+ 		
+<p><input type="checkbox" name="todisk" value="yes">Download directly to disk
 <br>Delimination: <select name="delim">
   <option value="comma">Comma Delimited
   <option value="tab">Tab Delimited
