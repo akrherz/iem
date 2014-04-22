@@ -18,7 +18,7 @@ icursor.execute("""SELECT station, valid from offline
 for row in icursor:
     offline[ row[0] ] = row[1]
 
-thres = datetime.datetime.now() - datetime.timedelta(hours=1)
+thres = datetime.datetime.now() - datetime.timedelta(hours=2)
 
 obs = access.get_network("ISUSM", IEM)
 actions = 0
