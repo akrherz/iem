@@ -3,17 +3,18 @@
 # 15 after scan produced at 45 after
 # 45 after scan produced at 15 after
 
-import mx.DateTime, sys
+import datetime
+import sys
 
-#ftp://gp16.ssd.nesdis.noaa.gov/pub/GIS/GOESwest/GoesWest1V3501745.tif
 
-now = mx.DateTime.gmt()
+now = datetime.datetime.utcnow()
 
-cycle = int(sys.argv[1])
+cycle = sys.argv[1]
 
-if (cycle == 15):
-  now += mx.DateTime.RelativeDateTime(minute=15)
+if cycle == "15":
+    now = now.replace(minute=15)
 else:
-  now += mx.DateTime.RelativeDateTime(minute=45,hours=-1)
+    now -= datetime.timedelta(hours=1)
+    now = now.replace(minute=45)
 
 print now.strftime( sys.argv[2] )

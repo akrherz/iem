@@ -22,8 +22,6 @@ mkdir nesdis.$ftm
 cd nesdis.$ftm
 
 BASE="http://satepsanone.nesdis.noaa.gov/pub/GIS"
-SCP="scp -o ConnectTimeout=5"
-SSH="ssh -o ConnectTimeout=5 -f"
 
 function getter(){
 	for i in {1..10}
