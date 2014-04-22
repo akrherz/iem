@@ -9,9 +9,9 @@ import sys
 
 gmt = datetime.datetime.utcnow()
 
-cycle = int(sys.argv[1])
+cycle = sys.argv[1]
 
-if cycle == 15:
+if cycle == "15":
     gmt = gmt.replace(minute=0)
 else:
     gmt -= datetime.timedelta(hours=1)

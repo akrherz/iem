@@ -10,7 +10,7 @@ import shutil
 import os
 
 FINAL = "/mesonet/share/pickup/wwa/"
-URL = "http://iem21.local/cgi-bin/request/gis/watchwarn.py"
+URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
 
 
 def get_files(year):
