@@ -33,6 +33,12 @@ def get_dates( form ):
     sts = datetime.datetime( int(year1), int(month1), int(day1))
     ets = datetime.datetime( int(year2), int(month2), int(day2))
     
+    if sts > ets:
+        sts2 = ets
+        ets = sts
+        sts = sts2
+    if sts == ets:
+        ets = sts + datetime.timedelta(days=1)
     return sts, ets
 
 def get_delimiter( form ):
