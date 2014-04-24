@@ -198,7 +198,9 @@ function init(){
 			   var tokens2 = tokens[1].split("/");
 			   varname = tokens2[0];
 			   $('#varpicker').val(varname);
-			   currentdt = (new Date(Date.parse(tokens2[1])));
+			   if (tokens2.length == 2){
+				   currentdt = (new Date(Date.parse(tokens2[1])));
+			   }
 			   gj.redraw();
 		   }
 	   } catch(err) {
