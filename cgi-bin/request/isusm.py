@@ -100,6 +100,9 @@ def fetch_daily( form, cols ):
                 soil50t=soil50t,
                 soil12vwc=soil12vwc, soil24vwc=soil24vwc, soil50vwc=soil50vwc))
 
+    if len(values) == 0:
+        return 'Sorry, no data found for this query.'
+
     df = pd.DataFrame(values)
     buf = cStringIO.StringIO()
     df.to_csv(buf, index=False, cols=cols, sep=delim, float_format='%7.2f')
@@ -162,6 +165,11 @@ def fetch_hourly( form , cols):
                   speed=speed, drct=drct, et=et,  soil04t=soil04t, 
                   soil12t=soil12t, soil24t=soil24t, soil50t=soil50t,
                   soil12vwc=soil12vwc, soil24vwc=soil24vwc, soil50vwc=soil50vwc))
+
+    if len(values) == 0:
+        return 'Sorry, no data found for this query.'
+
+    
     df = pd.DataFrame(values)
     buf = cStringIO.StringIO()
     df.to_csv(buf, index=False, cols=cols, sep=delim, float_format='%7.2f')
