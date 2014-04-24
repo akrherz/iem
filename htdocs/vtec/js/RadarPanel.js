@@ -206,9 +206,27 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
                         new OpenLayers.Control.PanZoom(),
                         new OpenLayers.Control.ArgParser()],
 			layers : new GeoExt.data.LayerStore({
-						layers : [new OpenLayers.Layer.Google(
-								"Google Streets", // the default
+						layers : [
+						        new OpenLayers.Layer.Google("Google Streets", 
 								{
+									numZoomLevels : 20,
+									sphericalMercator : true,
+									maxZoomLevel : 15,
+									maxExtent : new OpenLayers.Bounds(
+											-20037508.34, -20037508.34,
+											20037508.34, 20037508.34)
+								}),new OpenLayers.Layer.Google("Google Hybrid", 
+								{
+									type: google.maps.MapTypeId.HYBRID,
+									numZoomLevels : 20,
+									sphericalMercator : true,
+									maxZoomLevel : 15,
+									maxExtent : new OpenLayers.Bounds(
+											-20037508.34, -20037508.34,
+											20037508.34, 20037508.34)
+								}),new OpenLayers.Layer.Google("Google Satellite", 
+								{
+									type: google.maps.MapTypeId.SATELLITE,
 									numZoomLevels : 20,
 									sphericalMercator : true,
 									maxZoomLevel : 15,
