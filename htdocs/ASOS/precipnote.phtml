@@ -1,12 +1,11 @@
 <?php 
  include("../../config/settings.inc.php");
- $THISPAGE = 'networks-asos'; 
- $TITLE = "IEM :: Note about ASOS Precipitation Data";
- include("../../include/header.php"); 
-?>
+ include_once "../../include/myview.php";
+ $t = new MyView();
+ $t->thispage = 'networks-asos'; 
+ $t->title = "Note about ASOS Precipitation Data";
 
-<div style="width: 800px;">
-
+ $t->content = <<<EOF
 <h3>Notes about ASOS Precipitation Reports</h3>
 
 <p>The Automated Surface Observation System <a href="/ASOS/">ASOS</a> is the
@@ -87,7 +86,6 @@ typical adjustment is practically zero.
 over time when summed. Please let us know of any corrections or clarifications
 you would like to see made.
 
-</div>
-
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+ ?>
