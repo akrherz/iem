@@ -33,7 +33,11 @@ def run( ts ):
             #print 'HRRR file %s missing' % (fn,)
             continue
         grbs = pygrib.open(fn)
-        grb = grbs.select(parameterNumber=192)
+        try:
+            grb = grbs.select(parameterNumber=192)
+        except ValueError:
+            print 'coop/hrrr_solarrad.py %s had no param=192' % (fn,)
+            continue
         if len(grb) == 0:
             print 'Could not find SWDOWN in HRR %s' % (fn,)
             continue
@@ -53,7 +57,8 @@ def run( ts ):
             total += g.values
     
     if total is None:
-        print '%s found no HRRR data!' % (ts, )
+        print 'coop/hrrr_solarrad.py found no HRRR data for %s' % (
+                                                    ts.strftime("%d %b %Y"), )
         return
     
     # Total is the sum of the hourly values
