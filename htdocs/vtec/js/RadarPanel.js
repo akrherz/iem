@@ -85,7 +85,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 											autoDestroy : true,
 											autoLoad : false,
 											proxy : new Ext.data.HttpProxy({
-														url : '../json/radar',
+														url : '/json/radar',
 														method : 'GET'
 													}),
 											root : 'radars',
@@ -123,7 +123,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 											autoDestroy : true,
 											autoLoad : false,
 											proxy : new Ext.data.HttpProxy({
-														url : '../json/radar',
+														url : '/json/radar',
 														method : 'GET'
 													}),
 											root : 'products',
@@ -192,6 +192,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 						})]
 			},
 			map : {
+				allOverlays : false,
 				projection : new OpenLayers.Projection("EPSG:900913"),
 				units : "m",
 				numZoomLevels : 18,
@@ -199,56 +200,54 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 				controls : [new OpenLayers.Control.Navigation(),
 						new OpenLayers.Control.PanZoom(),
 						new OpenLayers.Control.ArgParser()],
+
 				maxExtent : new OpenLayers.Bounds(-20037508, -20037508,
 						20037508, 20037508.34)
 			},
 			controls : [new OpenLayers.Control.Navigation(),
                         new OpenLayers.Control.PanZoom(),
                         new OpenLayers.Control.ArgParser()],
-			layers : new GeoExt.data.LayerStore({
-						layers : [
-						        new OpenLayers.Layer.Google("Google Streets", 
-								{
-									numZoomLevels : 20,
-									sphericalMercator : true,
-									maxZoomLevel : 15,
-									maxExtent : new OpenLayers.Bounds(
-											-20037508.34, -20037508.34,
-											20037508.34, 20037508.34)
-								}),new OpenLayers.Layer.Google("Google Hybrid", 
-								{
-									type: google.maps.MapTypeId.HYBRID,
-									numZoomLevels : 20,
-									sphericalMercator : true,
-									maxZoomLevel : 15,
-									maxExtent : new OpenLayers.Bounds(
-											-20037508.34, -20037508.34,
-											20037508.34, 20037508.34)
-								}),new OpenLayers.Layer.Google("Google Satellite", 
-								{
-									type: google.maps.MapTypeId.SATELLITE,
-									numZoomLevels : 20,
-									sphericalMercator : true,
-									maxZoomLevel : 15,
-									maxExtent : new OpenLayers.Bounds(
-											-20037508.34, -20037508.34,
-											20037508.34, 20037508.34)
-								}),new OpenLayers.Layer.TMS('RADAR',
-						'http://mesonet1.agron.iastate.edu/cache/tile.py/', {
-									layername : 'cwsu-900913',
-									service : '1.0.0',
-									type : 'png',
-									visibility : false,
-									opacity : 1,
-									getURL : App.get_my_url,
-									radarProduct : 'N0Q',
-									radar : 'DMX',
-									radarTime : null,
-									isBaseLayer : false
-								}), App.SBWFeatureStore.layer,
-								App.LSRFeatureStore.layer,
-								App.SBWIntersectionFeatureStore.layer]
-					}),
+            layers :  [
+               new OpenLayers.Layer.Google(
+            		   "Google Physical",
+            		   {type: google.maps.MapTypeId.TERRAIN,
+            			visibility: false,
+            			isBaseLayer: true}
+               ),new OpenLayers.Layer.Google(
+            		   "Google Streets", // the default
+            		   {numZoomLevels: 20,
+            			   visibility: false,
+                			isBaseLayer: true}
+               ),
+               new OpenLayers.Layer.Google(
+            		   "Google Hybrid",
+            		   {type: google.maps.MapTypeId.HYBRID, 
+            			numZoomLevels: 20,
+            			visibility: false,
+            			isBaseLayer: true}
+               ),
+               new OpenLayers.Layer.Google(
+            		   "Google Satellite",
+            		   {type: google.maps.MapTypeId.SATELLITE, 
+            			numZoomLevels: 22,
+            			visibility: false,
+            			isBaseLayer: true}
+               ),new OpenLayers.Layer.TMS('RADAR',
+            		   'http://mesonet1.agron.iastate.edu/cache/tile.py/', {
+            	   layername : 'cwsu-900913',
+            	   service : '1.0.0',
+            	   type : 'png',
+            	   visibility : true,
+            	   isBaseLayer: false,
+            	   opacity : 1,
+            	   getURL : App.get_my_url,
+            	   radarProduct : 'N0Q',
+            	   radar : 'DMX',
+            	   radarTime : null
+               }), 
+               App.SBWFeatureStore.layer,
+               App.LSRFeatureStore.layer,
+               App.SBWIntersectionFeatureStore.layer],
 			extent : new OpenLayers.Bounds(-14427682, 1423562, -7197350,
 					8673462)
 		};
@@ -257,9 +256,9 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 		App.RadarPanel.superclass.initComponent.call(this);
 		this.doLayout();
 		this.hookUpListeners();
-		this.layerSwitcher = new OpenLayers.Control.LayerSwitcher();
-		this.map.addControl( this.layerSwitcher );
-		this.layerSwitcher.maximizeControl();
+		ls = new OpenLayers.Control.LayerSwitcher();
+		this.map.addControl( ls );
+		ls.maximizeControl();
 
 	},
 	setVTEC : function(vtecObj) {
@@ -385,7 +384,6 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 				}, this);
 		this.getToolbar("radar").store.on("load", function(store, records,
 						options) {
-					// console.log("RADAR Loaded...");
 					if (store.getCount() == 0) {
 						Ext.MessageBox.show({
 							title : 'No Data Found',
@@ -505,7 +503,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 					params : {
 						operation : 'products',
 						radar : this.getToolbar("radar").getValue(),
-						start : this.vtec.issue.format('Y-m-d\\TH:i\\Z')
+						start : this.vtec.radarstart.format('Y-m-d\\TH:i\\Z')
 					}
 				});
 	},
@@ -516,8 +514,8 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 						operation : 'list',
 						product : this.getToolbar("product").getValue(),
 						radar : this.getToolbar("radar").getValue(),
-						start : this.vtec.issue.format('Y-m-d\\TH:i\\Z'),
-						end : this.vtec.expire.format('Y-m-d\\TH:i\\Z')
+						start : this.vtec.radarstart.format('Y-m-d\\TH:i\\Z'),
+						end : this.vtec.radarend.format('Y-m-d\\TH:i\\Z')
 					}
 				});
 	},
@@ -530,7 +528,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 	setCenterPoint : function(pt) {
 		this.getToolbar("radar").store.load({
 					params : {
-						start : this.vtec.issue.format('Y-m-d\\TH:i\\Z'),
+						start : this.vtec.radarstart.format('Y-m-d\\TH:i\\Z'),
 						operation : 'available',
 						lat : pt.lat,
 						lon : pt.lon
@@ -546,7 +544,8 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 		}
 	},
 	getRadarLayer : function() {
-		return this.layers.getAt(1).data.layer;
+		// TODO: This is a hack bug!
+		return this.layers.getAt(4).data.layer;
 	},
 	afterRender : function() {
 		//console.log("afterRender called");

@@ -44,12 +44,12 @@ if (isset($_REQUEST["devel"])){
     $headextra .= '<script type="text/javascript" src="js/wfos.js"></script>
 <script type="text/javascript" src="js/RowExpander.js"></script>
 <script type="text/javascript" src="js/Printer-all.js"></script>
-<script type="text/javascript" src="../ext/ux/menu/EditableItem.js"></script>
-<script type="text/javascript" src="../ext/ux/grid/GridFilters.js"></script>
-<script type="text/javascript" src="../ext/ux/grid/filter/Filter.js"></script>
-<script type="text/javascript" src="../ext/ux/form/Spinner.js"></script>
-<script type="text/javascript" src="../ext/ux/form/SpinnerStrategy.js"></script>
-<script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
+<script type="text/javascript" src="/ext/ux/menu/EditableItem.js"></script>
+<script type="text/javascript" src="/ext/ux/grid/GridFilters.js"></script>
+<script type="text/javascript" src="/ext/ux/grid/filter/Filter.js"></script>
+<script type="text/javascript" src="/ext/ux/form/Spinner.js"></script>
+<script type="text/javascript" src="/ext/ux/form/SpinnerStrategy.js"></script>
+<script type="text/javascript" src="/ext/ux/grid/filter/StringFilter.js"></script>
 <script type="text/javascript" src="js/overrides.js"></script>
 <script type="text/javascript" src="js/RadarPanel.js"></script>
 <script type="text/javascript" src="js/LSRFeatureStore.js"></script>
@@ -73,10 +73,6 @@ EOF;
 $t->headextra = $headextra;
 $t->title = "Valid Time Extent Code (VTEC) App";
 $t->content = <<<EOF
-<style>
-#menuwrapper, #p7menubar ul a {height: 1%;}
-a:active {width: auto;}
-</style>
 <div id="help">
  <h2>IEM VTEC Product Browser 3.0</h2>
 
