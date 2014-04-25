@@ -1,7 +1,12 @@
 #!/bin/sh
 
+cd isuag
+python fancy_4inch.py 1
+python fancy_4inch.py 2
+python fancy_4inch.py 3
+
 # Make sure we run this first as we need the data before producing other things
-cd climodat
+cd ../climodat
 python daily_estimator.py IA
 python daily_estimator.py KY
 python daily_estimator.py IL
