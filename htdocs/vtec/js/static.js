@@ -327,6 +327,8 @@ metastore.on('load', function(mystore, records, options){
 	      x1			: q.data.x1,
 	      y0			: q.data.y0,
 	      y1			: q.data.y1,
+	      radarstart	: q.data.radarstart,
+	      radarend		: q.data.radarend,
 	      issue			: q.data.issue,
 	      expire		: q.data.expire
   	});
