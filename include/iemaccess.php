@@ -90,7 +90,7 @@ class IEMAccess {
     s.name as sname from
     current c2, summary_%s c, stations s WHERE
     s.state = $1 and (s.network ~* 'RWIS' or s.network ~* 'ASOS' or
-  			s.network in ('KCCI','KELO','KIMT')) 
+  			s.network in ('KCCI','KELO','KIMT') or network = 'AWOS') 
     and c.day = 'TODAY'
     and c2.valid > 'TODAY' and c2.iemid = c.iemid and c.iemid = s.iemid",
   			$this->tzname, $this->tzname, $this->tzname, date("Y")));
