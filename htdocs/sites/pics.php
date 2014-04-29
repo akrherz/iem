@@ -28,8 +28,7 @@ $t->title = "Site Photos";
 $t->sites_current = "pics"; 
 
 
-function printtd($instr,$selected,$station){
-  	global $network;
+function printtd($network, $instr,$selected,$station){
   	$s = "";
   	$filename='/mesonet/share/pics/'.$station.'/'.$station.'_'.$instr.'.jpg';
   	if (file_exists($filename)){ 
@@ -48,11 +47,11 @@ function printtd($instr,$selected,$station){
 }
 
 $table = sprintf("<tr>%s%s%s</tr><tr>%s%s%s</tr><tr>%s%s%s</tr>",
- 		printtd("NW",$dir,$station), printtd("N",$dir,$station), 
-		printtd("NE",$dir,$station), printtd("W",$dir,$station),
- 	"<td><img src=\"{$puri}\" alt=\"{$station} {$dir}\" /></td>",
-    	printtd("E",$dir,$station), printtd("SW",$dir,$station),
-  		printtd("S",$dir,$station), printtd("SE",$dir,$station));
+ 		printtd($network,"NW",$dir,$station), printtd($network,"N",$dir,$station), 
+		printtd($network,"NE",$dir,$station), printtd($network,"W",$dir,$station),
+ 	"<td><img src=\"{$puri}\" alt=\"{$station} {$dir}\" class=\"img img-responsive\" /></td>",
+    	printtd($network,"E",$dir,$station), printtd($network,"SW",$dir,$station),
+  		printtd($network,"S",$dir,$station), printtd($network,"SE",$dir,$station));
 
 $more = "";
 $filename='/mesonet/share/pics/'.$station.'/'.$station.'_span.jpg';
