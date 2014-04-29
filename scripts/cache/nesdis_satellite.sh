@@ -103,19 +103,19 @@ then
 	gdaladdo -q wv_900913.tif 2 4 6 18
 fi
 
-/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/west1V_ bogus tif' GoesWest1V${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west1V_0.tif bogus tif' GoesWest1V${tm}.tif
 /home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west1V_0.tfw bogus tfw' GoesWest1V${tm}.tfw >& /dev/null
-/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/east1V_ bogus tif' GoesEast1V${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east1V_0.tif bogus tif' GoesEast1V${tm}.tif
 /home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east1V_0.tfw bogus tfw' GoesEast1V${tm}.tfw >& /dev/null
 
-/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/west04I4_ bogus tif' GoesWest04I4${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west04I4_0.tif bogus tif' GoesWest04I4${tm}.tif
 /home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west04I4_0.tfw bogus tfw' GoesWest04I4${tm}.tfw >& /dev/null
-/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/east04I4_ bogus tif' GoesEast04I4${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east04I4_0.tif bogus tif' GoesEast04I4${tm}.tif
 /home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east04I4_0.tfw bogus tfw' GoesEast04I4${tm}.tfw >& /dev/null
  
-/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/west04I3_ bogus tif' GoesWest04I3${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west04I3_0.tif bogus tif' GoesWest04I3${tm}.tif
 /home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west04I3_0.tfw bogus tfw' GoesWest04I3${tm}.tfw >& /dev/null
-/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/east04I3_ bogus tif' GoesEast04I3${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east04I3_0.tif bogus tif' GoesEast04I3${tm}.tif
 /home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east04I3_0.tfw bogus tfw' GoesEast04I3${tm}.tfw >& /dev/null
 
 
