@@ -80,7 +80,7 @@ END
 LAYER
   NAME "q2_n1p"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p24h.png"
+  DATA "/home/ldm/data/gis/images/4326/mrms/p1h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -99,7 +99,7 @@ END
 LAYER
   NAME "q2_n1p_900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/mrms/p24h.tif"
+  DATA "/home/ldm/data/gis/images/900913/mrms/p1h.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
