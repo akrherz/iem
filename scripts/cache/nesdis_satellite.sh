@@ -121,17 +121,17 @@ fi
 
 if [ -e vis_900913.tif ]
   	then
-		/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/900913/goes/vis_ bogus tif' vis_900913.tif
+		/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/900913/goes/vis_0.tif bogus tif' vis_900913.tif
     fi
   	
 if [ -e ir_900913.tif ]
   	then
-		/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/900913/goes/ir_ bogus tif' ir_900913.tif
+		/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/900913/goes/ir_0.tif bogus tif' ir_900913.tif
     fi
   	
 if [ -e wv_900913.tif ]
   	then
-		/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/900913/goes/wv_ bogus tif' wv_900913.tif
+		/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/900913/goes/wv_0.tif bogus tif' wv_900913.tif
     fi 
 
 # Cleanup!
