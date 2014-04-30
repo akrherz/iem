@@ -51,6 +51,8 @@ def makeplot(ts, routes='ac'):
                     title = 'SMOS Satellite: Soil Moisture (0-5cm)',
                     subtitle="Satelite passes around %s UTC" % (
                                                 ts.strftime("%d %B %Y %H"),))
+        if sector == 'iowa':
+            m.drawcounties()
         cmap = cm.get_cmap('jet_r')
         cmap.set_under('#EEEEEE')
         cmap.set_over("k")
@@ -67,6 +69,8 @@ def makeplot(ts, routes='ac'):
                     title = 'SMOS Satellite: Land Cover Optical Depth (microwave L-band)',
                     subtitle="Satelite passes around %s UTC" % (
                                                 ts.strftime("%d %B %Y %H"),))
+        if sector == 'iowa':
+            m.drawcounties()
         cmap = cm.get_cmap('jet')
         cmap.set_under('#EEEEEE')
         cmap.set_over("k")
