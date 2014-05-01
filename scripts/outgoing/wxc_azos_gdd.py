@@ -10,8 +10,9 @@ import shutil
 import sys
 import psycopg2
 import subprocess
+from pyiem.datatypes import temperature
 import network
-nt = network.Table("ISUAG")
+nt = network.Table("ISUSM")
 
 ACCESS = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 acursor = ACCESS.cursor()
@@ -43,13 +44,13 @@ def load_soilt(data):
     valid = datetime.date.today() - datetime.timedelta(days=1)
     if datetime.datetime.now().hour < 7:
         valid -= datetime.timedelta(days=1)
-    icursor.execute("""SELECT station, c30 from daily WHERE 
-         valid = %s""", (valid,) )
+    icursor.execute("""SELECT station, tsoil_c_avg from sm_daily WHERE 
+         valid = %s and tsoil_c_avg is not null""", (valid,) )
     for row in icursor:
         stid = row[0]
         if not nt.sts.has_key(stid):
             continue
-        soil_obs.append( row[1] )
+        soil_obs.append( temperature(row[1], 'C').value('F') )
         lats.append( nt.sts[stid]['lat'] )
         lons.append( nt.sts[stid]['lon'] )
     if len(lons) < 4:
