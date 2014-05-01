@@ -10,9 +10,9 @@ if now.month < 5 or now.month > 10:
 
 import network
 nt = network.Table('IACLIMATE')
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
 import psycopg2.extras
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
@@ -28,11 +28,13 @@ gdd50 = []
 sdd86 = []
 ccursor.execute( sql )
 for row in ccursor:
-  id = row['station']
-  lats.append( nt.sts[id]['lat'] )
-  lons.append( nt.sts[id]['lon'] )
-  gdd50.append( row['gdd'] )
-  sdd86.append( row['sdd'] )
+    sid = row['station']
+    if not nt.sts.has_key(sid):
+        continue
+    lats.append( nt.sts[sid]['lat'] )
+    lons.append( nt.sts[sid]['lon'] )
+    gdd50.append( row['gdd'] )
+    sdd86.append( row['sdd'] )
 
 
 cfg = {
