@@ -10,7 +10,7 @@ class cow {
 function cow($dbconn){
     /* Constructor */
     $this->dbconn = $dbconn;
-    pg_query($dbconn, "SET TIME ZONE 'GMT'");
+    pg_query($dbconn, "SET TIME ZONE 'UTC'");
 
     $this->wfo = Array();        /* Array of WFOs to potentially limit */
     $this->warnings = Array();   /* Array of warnings */
@@ -299,7 +299,7 @@ function loadWarnings(){
 	$sql = sprintf("
 	WITH stormbased as (
       SELECT 
-		wfo, phenomena, eventid, hailtag, windtag, issue, expire,
+		wfo, phenomena, eventid, hailtag, windtag, 
 		ST_AsText(geom) as tgeom, significance,
 		ST_area(ST_transform(geom,2163)) / 1000000.0 as parea,
 		ST_perimeter(ST_transform(geom,2163)) as perimeter,
@@ -315,16 +315,19 @@ function loadWarnings(){
 		string_agg(u.ugc, ',') as ar_ugc,
 		string_agg(u.name ||' '||u.state, '|') as ar_ugcname,
 		sum(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as carea,
+		min(issue) as missue,
+		max(expire) as mexpire,
 		extract(year from issue at time zone 'UTC') as year
-			from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE           
-            w.gid is not null and %s and
-			issue >= '%s' and issue < '%s' and expire < '%s' 
-			and %s %s
-			GROUP by w.wfo, phenomena, eventid, significance, year
+		from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE           
+        w.gid is not null and %s and
+		issue >= '%s' and issue < '%s' and expire < '%s' 
+		and %s %s
+		GROUP by w.wfo, phenomena, eventid, significance, year
     )
 	SELECT  
-		s.year, s.wfo, s.phenomena, s.eventid, s.tgeom, s.issue, s.expire,
-			s.significance, s.hailtag, s.windtag, s.issue, c.carea, c.ar_ugc,
+		s.year, s.wfo, s.phenomena, s.eventid, s.tgeom, c.missue as issue, 
+			c.mexpire as expire,
+			s.significance, s.hailtag, s.windtag, c.carea, c.ar_ugc,
 			s.lat0, s.lon0, s.perimeter, s.parea, c.ar_ugcname
 			from stormbased s JOIN countybased c on 
 			(c.eventid = s.eventid and c.wfo = s.wfo and c.year = s.year
@@ -337,8 +340,9 @@ function loadWarnings(){
 	date("Y/m/d H:i", $this->ets),  date("Y/m/d H:i", $this->ets),
     $this->sqlTypeBuilder(), $this->sqlTagLimiter() );
 	
+	//die("<pre>$sql</pre>");
 	$rs = $this->callDB($sql);
-    
+	
     for ($i=0;$row = @pg_fetch_assoc($rs,$i);$i++){
         $key = sprintf("%s-%s-%s-%s", $row["year"], $row["wfo"], 
                        $row["phenomena"], $row["eventid"]);
