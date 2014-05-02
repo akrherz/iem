@@ -1,9 +1,7 @@
 #!/bin/sh
 
 cd isuag
-python fancy_4inch.py 1
-python fancy_4inch.py 2
-python fancy_4inch.py 3
+sh run_plots.sh
 
 # Make sure we run this first as we need the data before producing other things
 cd ../climodat
