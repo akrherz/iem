@@ -132,10 +132,12 @@ EOF;
 
    $content .= "<tr ";
    if ($oddrow) $content .= "bgcolor=\"#EEEEEE\"";
-   $content .= "><th><input type=\"checkbox\" name=\"st[]\"
-   value=\"".$site."\"></th><td> $site </td>
-    <td>". $value["sname"] ."</td>
-    <td>". $value["county"] ."</td>";
+   $content .= <<<EOF
+><th><input type="checkbox" name="st[]"
+   value="{$site}"></th><td><a href="/sites/site.php?station={$site}&network={$network}">$site</a></td>
+    <td>{$value["sname"]}</td>
+    <td>{$value["county"]}</td>
+EOF;
    $content .= "<td ";
    if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
      $content .= 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
