@@ -1,15 +1,14 @@
 dstr=`date --date '1 day ago' +'%Y-%m-%d'`
-WEBHOST="iem21.local"
-#export PATH=$PATH:/mesonet/local/bin
+WEBHOST="iem.local"
 
-python process.py /mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
-cat report.txt | mail -s "ISU AgClimate Data Report" -c meyers2@iastate.edu akrherz@iastate.edu
-rm -f report.txt
+#python process.py /mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
+#cat report.txt | mail -s "ISU AgClimate Data Report" -c meyers2@iastate.edu akrherz@iastate.edu
+#rm -f report.txt
 
-python fix_precip.py
-python fix_precip.py `date --date '2 day ago' +'%Y %m %d'`
-python fix_precip.py `date --date '3 day ago' +'%Y %m %d'`
-python compute_soil_hilo.py
+#python fix_precip.py
+#python fix_precip.py `date --date '2 day ago' +'%Y %m %d'`
+#python fix_precip.py `date --date '3 day ago' +'%Y %m %d'`
+#python compute_soil_hilo.py
 
 fp="air-temp-out"
 wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&pvar=c11\&var2=c12\&date=${dstr} -O air-temp-out.png
