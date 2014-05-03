@@ -55,17 +55,18 @@ for row in  data[1:]:
         'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')""" % (sid, name,
         state, state, lon, lat, cnty, name)
     try:
+        mcursor = MESOSITE.cursor()
         mcursor.execute(sql)
+        mcursor.close()
+        MESOSITE.commit()
     except:
         mcursor.close()
         MESOSITE.commit()
-        mcursor = MESOSITE.cursor()
         sql = """UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)',
             name = '%s', plot_name = '%s'
            WHERE id = '%s' and network = '%sCOCORAHS'""" % (lon, lat,
            name, name, sid, state)
         mcursor.execute( sql )
-    MESOSITE.commit()
+        mcursor.close()
+        MESOSITE.commit()
 
-mcursor.close()
-MESOSITE.commit()
