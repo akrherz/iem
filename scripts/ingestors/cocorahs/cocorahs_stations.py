@@ -44,10 +44,11 @@ for row in  data[1:]:
     lat = float(cols[ header["Latitude"] ].strip())
     lon = float(cols[ header["Longitude"] ].strip())
 
-    if lat < 10 or lon > -60:
+    if lat < 10 or lon > -60 or name == '':
         continue
 
-    print "ADD COCORAHS %s %s %s %.3f %.3f" %  (sid, name, cnty, lat, lon)
+    print "ADD COCORAHS SID:%s Name:%s County:%s %.3f %.3f" %  (
+                                                sid, name, cnty, lat, lon)
   
     sql = """INSERT into stations(id, synop, name, state, country, network, 
         online, geom, county, plot_name , metasite) 
