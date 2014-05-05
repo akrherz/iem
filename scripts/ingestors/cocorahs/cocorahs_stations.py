@@ -14,7 +14,7 @@ state = sys.argv[1]
 req = urllib2.Request( ("http://data.cocorahs.org/cocorahs/export/"
                         +"exportstations.aspx?State=%s&Format=CSV"
                         +"&country=usa") % (state,) )
-data = urllib2.urlopen(req).readlines()
+data = urllib2.urlopen(req, timeout=30).readlines()
 
 # Find current stations
 stations = []
