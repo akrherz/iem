@@ -11,7 +11,7 @@ $t->headextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js?v=3"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="search.js?v=6"></script>
+<script type="text/javascript" src="search.js?v=7"></script>
 		  <style>
   #map {
     width: 100%;
@@ -48,24 +48,29 @@ grid will update and provide a listing of storm based warnings found.
 <h3><a name="byugc">2.</a> Search for NWS Watch/Warning/Advisories Products by County/Zone</h3>
 <br />
 <p>The NWS issues watch, warnings, and advisories (WWA) for counties/parishes.  For 
-some products (like winter warnings), they issue for forecast zones.  In many parts of the country, these zones are exactly the 
-same as the counties/parishes.  When you get into regions with topography, then zones will start to 
-differ to the local counties.</p>
-<br />
-<p>This application allows you to search the IEM's archive of NWS WWA products.  Our archive is not complete, but
-there are no known holes since 12 November 2005.  This archive is of those products that contain VTEC codes, which
-are nearly all WWAs that the NWS issues for. </p>
+some products (like winter warnings), they issue for forecast zones.  
+ In many parts of the country, these zones are exactly the 
+ same as the counties/parishes.  When you get into regions with topography, 
+ then zones will start to differ to the local counties.</p>
+
+<p>This application allows you to search the IEM's archive of NWS WWA products.  
+ Our archive is not complete, but there are no known holes since 12 November 2005. 
+ This archive is of those products that contain VTEC codes, which are nearly all 
+ WWAs that the NWS issues for. There are Severe Thunderstorm, Tornado, and 
+ Flash Flood Warnings included in this archive for dates prior to 2005.  These  
+ were retroactively assigned VTEC event identifiers by the IEM based on some
+ hopefully intelligent logic.</p>
 <br />
 <div class="alert alert-warning">Please note: NWS forecast offices have 
 changed over the years, this application may incorrectly label old warnings as coming from
 an office that did not exist at the time.</div>
 <br />
-<div id="myform"></div>
-<br />
-<p>The table will automatically populate below once you make your selections above. Click on the linked Event ID
-to get more information on the warning.</p>
-<br />
-<div id="mytable"></div>
+
+<div class="row">
+		<div class="col-md-4"><div id="myform"></div></div>
+		<div class="col-md-8"><div id="mytable"></div></div>
+</div>
+		
 EOF;
 $t->render('single.phtml');
 ?>
