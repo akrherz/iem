@@ -124,26 +124,26 @@ Ext.onReady(function() {
 				data : iemdata.vtec_sig_dict
 			});
 	var eventStore = new Ext.data.Store({
-				autoLoad : false,
-				proxy : new Ext.data.HttpProxy({
-							url : 'events.php'
-						}),
-				baseParams : {
-					'ugc' : 'IAC001'
-				},
-				reader : new Ext.data.JsonReader({
-							root : 'events',
-							id : 'id'
-						}, [{
-									name : 'id',
-									mapping : 'id'
-								}, {
-									name : 'eventid',
-									type : 'float'
-								}, {name: 'wfo'},
-								{
-									name : 'phenomena'
-								}, {
+		autoLoad : false,
+		proxy : new Ext.data.HttpProxy({
+			url : '/json/vtec_events_byugc.php'
+		}),
+		baseParams : {
+			'ugc' : 'IAC001'
+		},
+		reader : new Ext.data.JsonReader({
+			root : 'events',
+			id : 'id'
+		}, [{
+			name : 'id',
+			mapping : 'id'
+		}, {
+			name : 'eventid',
+			type : 'float'
+		}, {name: 'wfo'},
+		{
+			name : 'phenomena'
+		}, {
 			name : 'pstring',
 			convert : function(val, record){
 				rec = pDict.getById(record.phenomena);
@@ -164,17 +164,15 @@ Ext.onReady(function() {
 				}
 			}
 		},{
-									name : 'significance'
-								}, {
-									name : 'expire',
-									type : 'date',
-									dateFormat : 'Y-m-d H:i'
-								}, {
-									name : 'issue',
-									type : 'date',
-									dateFormat : 'Y-m-d H:i'
-								}])
-			});
+			name : 'significance'
+		}, {
+			name : 'expire',
+			type : 'date'
+		}, {
+			name : 'issue',
+			type : 'date'
+		}])
+	});
 
 	var ugcStore = new Ext.data.Store({
 				autoLoad : false,
@@ -271,6 +269,7 @@ Ext.onReady(function() {
 		fieldLabel : 'Start Date',
 		id : 'sdate',
 		format : 'd M Y',
+		width: 150,
 		minValue : new Date('1/1/1986'),
 		maxValue : new Date(),
 		value : new Date('1/1/1986')
@@ -279,6 +278,7 @@ Ext.onReady(function() {
 		fieldLabel : 'End Date',
 		id : 'edate',
 		format : 'd M Y',
+		width: 150,
 		minValue : new Date('1/1/1986'),
 		maxValue : new Date(),
 		value : new Date()

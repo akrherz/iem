@@ -19,6 +19,23 @@
 
   $services = array();
   $services[] = Array(
+  		"title" => "Search for Warnings by UGC Code and Date Interval",
+  		"url" => "/json/vtec_events_byugc.php?ugc={ugc}&edate={edate}&sdate={sdate}",
+  		"desc" => "Provides a json response of archived warnings valid for the
+  		given UGC code and date interval (UTC time, end date exclusive). The date
+  		of product issuance is used for the date filtering.",
+  		"vars" => Array(
+  				"ugc" => "Five character UGC identifier used by the NWS",
+  				"sdate" => "YYYY-mm-dd Start Date (UTC)",
+  		  		"edate" => "YYYY-mm-dd End Date (UTC)",
+  		),
+  		"example" => Array(
+  				"{ugc}" => "IAC001",
+  				"{sdate}" => "1990-06-01",
+  				"{edate}" => "1990-07-01",
+  		)
+  );
+  $services[] = Array(
   		"title" => "Storm Prediction Center Watches",
   		"url" => "/json/spcwatch.py?ts={timestamp}",
   		"desc" => "Provides a geojson format of SPC watches valid at given time
