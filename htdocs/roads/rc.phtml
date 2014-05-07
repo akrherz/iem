@@ -1,13 +1,15 @@
 <?php
  include("../../config/settings.inc.php");
  define("IEM_APPID", 54);
-include("$rootpath/include/database.inc.php");
-$conn = iemdb("postgis");
+ include "../../include/myview.php";
+ $t = new MyView();
+
+ include("../../include/database.inc.php");
+ $conn = iemdb("postgis");
 
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "segid";
- $THISPAGE = "roads-sort"; 
- $REFRESH = '<meta http-equiv="refresh" content="600">';
-include("$rootpath/include/header.php"); 
+ $t->thispage = "roads-sort"; 
+ $t->refresh = '<meta http-equiv="refresh" content="600">';
 
 
 $sql = "SELECT * from roads_current r, roads_base b, roads_conditions c WHERE
@@ -19,12 +21,12 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
 {
   $seg = intval($row["segid"]);
   $obs[$seg] = $row;
-  $t = preg_split('/ to /', $row["minor"]);
+  $t2 = preg_split('/ to /', $row["minor"]);
   if (sizeof($t) == 2){
-  	$obs[$seg]["minor0"] = $t[0];
-  	$obs[$seg]["minor1"] = $t[1];
+  	$obs[$seg]["minor0"] = $t2[0];
+  	$obs[$seg]["minor1"] = $t2[1];
   } else {
-  	$obs[$seg]["minor0"] = $t[0];
+  	$obs[$seg]["minor0"] = $t2[0];
   	$obs[$seg]["minor1"] = '';
   }
   
@@ -43,63 +45,64 @@ $vals = Array("number" => "Route #", "type" => "Road Classification",
   "label" => "Road Condition", "cond_code" => "Road Condition",
   "segid" => "Travel Path");
 
-?>
+ $uri = "rc.phtml?sortcol="; 
+
+ function aSortBySecondIndex($multiArray, $secondIndex) {
+ 	while (list($firstIndex, ) = each($multiArray))
+ 		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+ 	asort($indexMap);
+ 	while (list($firstIndex, ) = each($indexMap))
+ 	if (is_numeric($firstIndex))
+ 		$sortedArray[] = $multiArray[$firstIndex];
+ 	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+ 	return $sortedArray;
+ }
+ 
+ $finalA = Array();
+ $finalA = aSortBySecondIndex($obs, $sortcol);
+ $now = time();
+ $i = 0;
+ $table = "";
+ while (list ($key, $val) = each ($finalA))  {
+ 	$i++;
+ 	$parts = $finalA[$key];
+ 
+ 	$table .= "<tr";
+ 	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
+ 	$table .= "></td>";
+ 
+ 	$table .= "<td>". $types[$parts["type"]] ."</td>";
+ 	$table .= "<td>". $parts["number"] ."</td>";
+ 	$table .= "<td>". $parts["minor0"] ."</td>";
+ 	$table .= "<td>". $parts["minor1"] ."</td>";
+ 	$table .= "<td>". $parts["raw"] ."</td>";
+ }
+  
+
+$t->content = <<<EOF
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
   <li class="active">Sortable Conditions</li>
 </ol>
 
-<h3 class="subtitle"><center>Iowa Road Conditions valid <?php echo $valid; ?></center></h3><p>
+<h3>Iowa Road Conditions valid {$valid}</h3>
 
-<?php
-echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
-a column to sort it or sort by <a href=\"rc.phtml?sortcol=segid\">travel path</a><br>\n";
-?>
+<br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
+ a column to sort it or sort by <a href=\"rc.phtml?sortcol=segid\">travel path</a><br>
 
 
 <table class="table table-striped">
 <thead>
 <tr>
-  <?php $uri = "rc.phtml?sortcol="; ?>
-  <th><a href="<?php echo $uri; ?>type">Road Class</a></th>
-  <th><a href="<?php echo $uri; ?>number">Route #</a></th>
-  <th><a href="<?php echo $uri; ?>minor0">Start Point</a></th>
-  <th><a href="<?php echo $uri; ?>minor1">End Point</a></th>
-  <th><a href="<?php echo $uri; ?>cond_code">Condition</a></th>
+  <th><a href="{$uri}type">Road Class</a></th>
+  <th><a href="{$uri}number">Route #</a></th>
+  <th><a href="{$uri}minor0">Start Point</a></th>
+  <th><a href="{$uri}minor1">End Point</a></th>
+  <th><a href="{$uri}cond_code">Condition</a></th>
 </tr></thead>
 <tbody>
-<?php
-function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-        asort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
-}
-
-  $finalA = Array();
-  $finalA = aSortBySecondIndex($obs, $sortcol);
-  $now = time();
-  $i = 0;
-  while (list ($key, $val) = each ($finalA))  {
-    $i++;
-    $parts = $finalA[$key];
-
-    echo "<tr";
-    if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
-    echo "></td>";
-
-    echo "<td>". $types[$parts["type"]] ."</td>";
-    echo "<td>". $parts["number"] ."</td>";
-    echo "<td>". $parts["minor0"] ."</td>";
-    echo "<td>". $parts["minor1"] ."</td>";
-    echo "<td>". $parts["raw"] ."</td>";
-   }
-?>
+{$table}
 </table>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

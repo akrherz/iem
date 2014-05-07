@@ -1,7 +1,10 @@
-<?php include("../../config/settings.inc.php"); ?>
-<?php $THISPAGE = "roads-gis"; 
-include("$rootpath/include/header.php"); ?>
+<?php 
+ include("../../config/settings.inc.php"); 
+ include "../../include/myview.php";
+ $t = new MyView();
+ $t->thispage = "roads-gis"; 
 
+ $t->content = <<<EOF
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
   <li class="active">GIS Products</li>
@@ -43,9 +46,6 @@ application to one of these services.
 
 <p><strong>Web Map Service:</strong>
 <br /> <code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
-
-
-
-<?php include("$rootpath/include/footer.php"); ?>
-</body>
-</html>
+EOF;
+$t->render('single.phtml');
+ ?>
