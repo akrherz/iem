@@ -1,7 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 154);
+include("../../include/myview.php");
+$t = new MyView();
 
-$HEADEXTRA = '
+$t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
@@ -11,33 +14,38 @@ $HEADEXTRA = '
 <script type="text/javascript" src="search.js?v=6"></script>
 		  <style>
   #map {
-    width: 500px;
+    width: 100%;
     height: 400px;
     float: left;
   }
 		#warntable { float: right; }
 		</style>
-		';
-$THISPAGE ="severe-vtec";
-$TITLE = "IEM | NWS Warning Search by Point or County/Zone";
-include("$rootpath/include/header.php");
-?>
+EOF;
+$t->thispage ="severe-search";
+$t->title = "NWS Warning Search by Point or County/Zone";
 
+$t->content = <<<EOF
 <p>This application allows you to search for National Weather Service Watch,
 Warning, and Advisories.  There are currently two options:
-
-<h3>1. Search for Storm Based Warnings by Point</h3>
+<ul>
+	<li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
+	<li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone</a></li>
+</ul>
+		
+<h3><a name="bypoint">1.</a> Search for Storm Based Warnings by Point</h3>
 
 <br />The official warned area for some products the NWS issues is a polygon.
 This section allows you to specify a point on the map below by dragging the 
 marker to where you are interested in.  Once you stop dragging the marker, the
 grid will update and provide a listing of storm based warnings found.  
 <br clear="all" />
-<div id="map"></div>
-<div id="warntable"></div>
+<div class="row">
+		<div class="col-md-6"><div id="map"></div></div>
+		<div class="col-md-6"><div id="warntable"></div></div>
+</div>
 
 <br clear="all" />
-<h3>2. Search for NWS Watch/Warning/Advisories Products by County/Zone</h3>
+<h3><a name="byugc">2.</a> Search for NWS Watch/Warning/Advisories Products by County/Zone</h3>
 <br />
 <p>The NWS issues watch, warnings, and advisories (WWA) for counties/parishes.  For 
 some products (like winter warnings), they issue for forecast zones.  In many parts of the country, these zones are exactly the 
@@ -48,9 +56,9 @@ differ to the local counties.</p>
 there are no known holes since 12 November 2005.  This archive is of those products that contain VTEC codes, which
 are nearly all WWAs that the NWS issues for. </p>
 <br />
-<p><strong>Please note:</strong> NWS forecast offices have 
+<div class="alert alert-warning">Please note: NWS forecast offices have 
 changed over the years, this application may incorrectly label old warnings as coming from
-an office that did not exist at the time.</p>
+an office that did not exist at the time.</div>
 <br />
 <div id="myform"></div>
 <br />
@@ -58,5 +66,6 @@ an office that did not exist at the time.</p>
 to get more information on the warning.</p>
 <br />
 <div id="mytable"></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
