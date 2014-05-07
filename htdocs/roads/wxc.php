@@ -1,7 +1,7 @@
 <?php
 /* Generate WXC stationfile with the road conditons */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $conn = iemdb("postgis");
 
 
