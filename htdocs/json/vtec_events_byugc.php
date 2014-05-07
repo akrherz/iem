@@ -4,7 +4,7 @@
  */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 $dbconn = iemdb('postgis');
 pg_query($dbconn, "SET TIME ZONE 'UTC'");
 $rs = pg_prepare($dbconn, "SELECT", "SELECT 
