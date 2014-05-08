@@ -1,7 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
- putenv("TZ=GMT");
- date_default_timezone_set('GMT');
+include("../../include/myview.php");
+$t = new MyView();
+
+putenv("TZ=UTC");
+ date_default_timezone_set('UTC');
  $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array();
  $ltype = isset($_GET["ltype"]) ? $_GET["ltype"] : Array();
  $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
@@ -32,49 +35,103 @@ include("../../config/settings.inc.php");
    $ltype = array_diff( $ltype, array("FF") );
  }
 
- $TITLE = "IEM Cow";
- $THISPAGE = "severe-cow";
+ $t->title = "Cow (Storm Based Warning Verification)";
+ $t->thispage = "severe-cow";
  include("../../include/database.inc.php");
- include("../../include/header.php");
  include("../../include/network.php");
  $nt = new NetworkTable("WFO");
  include("../../include/forms.php");
-?>
+
+ $y1 = yearSelect2(2005,$syear,"syear");
+ $m1 = monthSelect($smonth, "smonth");
+ $d1 = daySelect2($sday, "sday");
+ $h1 = gmtHourSelect($shour, "shour");
+
+ $y2 = yearSelect2(2005,$eyear,"eyear");
+ $m2 = monthSelect($emonth, "emonth");
+ $d2 = daySelect2($eday, "eday");
+ $h2 = gmtHourSelect($ehour, "ehour");
+ 
+ $wselect = "<select name=\"wfo\">";
+ while( list($key, $value) = each($nt->table) ){
+ 	$wselect .= "<option value=\"$key\" ";
+ 	if ($wfo == $key) $wselect .= "SELECTED";
+ 	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+}
+ $wselect .= "</select>";
+
+ $ar = Array("TO"=> "Tornado",
+ 	"SV" => "Svr T'storm",
+ 	"MA" => "Marine",
+ 	"FF" => "Flash Flood (2008+)");
+ $tselect = "";
+ while (list($k,$v)=each($ar)){
+ 	$tselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
+ 			id=\"%s\" value=\"%s\"%s>%s</input>", $k, $k, 
+ 		(in_array($k, $wtype) ? " CHECKED": ""), $v);
+ }
+ 
+ $ar = Array("T" => "Tornado",
+ "D" => "Wind Damage",
+ "H" => "Hail",
+ "G" => "Wind Gust",
+ "MA" => "Marine",
+ "FF" => "Flash Flood (2008+)");
+ $ltselect = "";
+ while (list($k,$v)=each($ar)){
+ 	if ($k == "MA2") $ltselect .= "<br />";
+ 	$ltselect .= sprintf("<input name=\"ltype[]\" type=\"checkbox\"
+ 			id=\"%s%s\" value=\"%s\"%s>%s</input>", $k, 
+ 			(strlen($k) == 2)? "2": "", $k,
+ 			(in_array($k, $ltype) ? " CHECKED": ""), $v);
+ }
+   
+ 
+ $ar = Array("0.75" => "0.75",
+ 	"1.00" => "1.00",
+ "1.75" => "1.75",
+ "2.00" => "2.00",
+ "7.00" => "7.00");
+ 
+ $hselect = make_select("hail", $hail, $ar);
+ 
+ $ar = Array("5" => "5", "15" => "15", "30" => "30");
+ $lbselect = make_select("lsrbuffer", $lsrbuffer, $ar);
+ 
+ $ar = Array(58 => "58 mph", 70 => "70 mph", 75 => "75 mph", 150 => "150 mph");
+ $wiselect = make_select("wind", $wind, $ar);
+
+ $tagselect = "<input name=\"windhailtag\" type=\"checkbox\" value=\"Y\" ";
+ $tagselect .= (($useWindHailTag == 'Y') ? " CHECKED": "");
+ $tagselect .= <<<EOF
+>When possible, verify SVR warnings against issuance WIND...HAIL tag
+<br /><input name="limitwarns" type="checkbox" value="Y" 
+EOF;
+	$tagselect .= (($limitwarns == 'Y')? " CHECKED": "");
+	$tagselect .= ">When possible, limit considered warnings to your hail/wind threshold";
+  
+ 
+$content = <<<EOF
 <a href="/cow/">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow" rel="nofollow">
-<table>
-<tr>
- <th>Start:</th>
- <td>
- <?php echo yearSelect2(2005,$syear,"syear"); 
- echo monthSelect($smonth, "smonth"); 
- echo daySelect2($sday, "sday"); 
- echo gmtHourSelect($shour, "shour"); ?>
- </td>
- <th>End:</th>
- <td>
- <?php 
- echo yearSelect2(2005,$eyear,"eyear"); 
- echo monthSelect($emonth, "emonth"); 
- echo daySelect2($eday, "eday"); 
- echo gmtHourSelect($ehour, "ehour"); 
- ?></td>
-</tr>
+
+<div class="row">
+	<div class="col-sm-6">
+
+<table class="table table-condensed">
+<tr><th>Start:</th><td>{$y1} {$m1} {$d1} {$h1}</td></tr>
+<tr><th>End:</th><td>{$y2} {$m2} {$d2} {$h2}</td></tr>
+<tr><th>WFO:</th><td colspan="3">{$wselect}</td></tr>
+<tr><th>Hail Size:</th><td>{$hselect}</td></tr>
+<tr><th>LSR Buffer:</th><td>{$lbselect} km</td></tr>
+<tr><th>Wind:</th><td>{$wiselect}</td></tr>
 </table>
-<table>
-<tr><th>WFO:</th>
-<td colspan="3">
-<select name="wfo">
-<?php
-while( list($key, $value) = each($nt->table) ){
-  echo "<option value=\"$key\" ";
-  if ($wfo == $key) echo "SELECTED";
-  echo ">[".$key."] ". $nt->table[$key]["name"] ."\n";
-}
-?>
-</select>
-</td>
-<th>Warning Type:</th>
+	
+	</div>
+	<div class="col-sm-6">
+
+<table class="table table-condensed">
+<tr><th>Warning Type:</th>
 <td>
 <script type="text/javascript">
 function wtypeSelect()
@@ -86,29 +143,10 @@ function wtypeSelect()
 	return false;
 }
 </script>
-<button onclick="return wtypeSelect()">Select All</button>
-<input name="wtype[]" type="checkbox" id="TO" value="TO" <?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado
-<input name="wtype[]" type="checkbox" id="SV" value="SV" <?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Svr T'storm
-<input name="wtype[]" type="checkbox" id="MA" value="MA" <?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine
-<input name="wtype[]" type="checkbox" id="FF" value="FF" <?php if (in_array("FF", $wtype)) echo "CHECKED"; ?>>Flash Flood (2008+)
+<button onclick="return wtypeSelect()">Select All</button> {$tselect}
 </td></tr>
-<tr>
-<th>Hail Size:</th>
-<td><select name="hail">
-  <option value="0.75" <?php if ($hail == 0.75) echo "SELECTED"; ?>>0.75
-  <option value="1.00" <?php if ($hail == 1.00) echo "SELECTED"; ?>>1.00
-  <option value="1.75" <?php if ($hail == 1.75) echo "SELECTED"; ?>>1.75
-  <option value="2.00" <?php if ($hail == 2.00) echo "SELECTED"; ?>>2.00
-  <option value="7.00" <?php if ($hail == 7.00) echo "SELECTED"; ?>>7.00
-</select></td>
-<th>LSR Buffer:</th>
-<td><select name="lsrbuffer">
- <option value="5" <?php if ($lsrbuffer == 5) echo "SELECTED"; ?>>5
- <option value="15" <?php if ($lsrbuffer == 15) echo "SELECTED"; ?>>15
- <option value="30" <?php if ($lsrbuffer == 30) echo "SELECTED"; ?>>30
-</select> km</td>
-<th>LSR Type:</th>
-<td>
+
+<tr><th>LSR Type:</th><td>
 <script type="text/javascript">
 function ltypeSelect()
 {
@@ -121,35 +159,22 @@ function ltypeSelect()
 	return false;
 }
 </script>
-<button onclick="return ltypeSelect()">Select All</button>
-<input name="ltype[]" type="checkbox" id="T" value="T" <?php if (in_array("T", $ltype)) echo "CHECKED"; ?>>Tornado
-<input name="ltype[]" type="checkbox" id="D" value="D" <?php if (in_array("D", $ltype)) echo "CHECKED"; ?>>Wind Damage
-<input name="ltype[]" type="checkbox" id="H" value="H" <?php if (in_array("H", $ltype)) echo "CHECKED"; ?>>Hail
-<input name="ltype[]" type="checkbox" id="G" value="G" <?php if (in_array("G", $ltype)) echo "CHECKED"; ?>>Wind Gust
-<br /><input name="ltype[]" type="checkbox" id="MA2" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
-<input name="ltype[]" type="checkbox" id="FF2" value="FF" <?php if (in_array("FF", $ltype)) echo "CHECKED"; ?>>Flash Flood (2008+)
+<button onclick="return ltypeSelect()">Select All</button> {$ltselect}
 </td></tr>
-<tr>
- <th>Wind:</th>
- <td><select name="wind">
-  <option value="58" <?php if ($wind == 58) echo "SELECTED"; ?>>58 mph
-  <option value="70" <?php if ($wind == 75) echo "SELECTED"; ?>>70 mph
-  <option value="75" <?php if ($wind == 75) echo "SELECTED"; ?>>75 mph
-  <option value="150" <?php if ($wind == 150) echo "SELECTED"; ?>>150 mph
-</select></td>
- <td colspan="4">
- <span style='color: #ff0000; weight: bold;'>New!</span> </span>
- <input name="windhailtag" type="checkbox" value="Y" <?php if ($useWindHailTag == 'Y') echo "CHECKED"; ?>>When possible, verify SVR warnings against issuance WIND...HAIL tag
- <br /><input name="limitwarns" type="checkbox" value="Y" <?php if ($limitwarns == 'Y') echo "CHECKED"; ?>>When possible, limit considered warnings to your hail/wind threshold
- 
- </td>
-</tr>
-</table>
-<input type="submit" value="Go Cow Go"></form>
 
-<?php if (isset($_GET["hail"])){ include("worker.php"); }
+ <tr><td colspan="2">{$tagselect}</td></tr>
+		
+</table>
+	
+	</div>
+</div>
+
+<input type="submit" value="Go Cow Go">
+</form>
+EOF;
+if (isset($_GET["hail"])){ include("worker.php"); }
       else {
-?>
+$content .= <<<EOF
 
 <h3 class="heading">IEM Cow (NWS Storm Based Warning Verification)</h3>
 
@@ -206,7 +231,8 @@ Reports are buffered out in a circular fashion and combined to create a
 coverage of impacted areas.  The area of the buffered LSRs is then compared
 with the area of the storm based warning to yield a percentage.</li>
 </ul>
-
-
-
-<?php } include("../../include/footer.php"); ?>
+EOF;
+} 
+$t->content = $content;
+$t->render('single.phtml');
+?>
