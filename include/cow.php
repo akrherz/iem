@@ -3,7 +3,7 @@
  *  Functionized routines for IEM Cow
  *  This way we can call from other applications, like dailyb :)
  */
-putenv("TZ=GMT");
+putenv("TZ=UTC");
 
 class cow {
 
@@ -229,6 +229,7 @@ function computeAreaVerify(){
     if (sizeof($this->warnings) == 0){ return 0; }
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)){
+    	if ($v["buffered"] === null) continue;
         $polysz += $v["parea"];
         $lsrsz += $v["buffered"];
     }
@@ -312,6 +313,7 @@ function loadWarnings(){
     ), countybased as (
       SELECT  
 		w.wfo, phenomena, eventid, significance, 
+		max(w.status) as statuses,
 		string_agg(u.ugc, ',') as ar_ugc,
 		string_agg(u.name ||' '||u.state, '|') as ar_ugcname,
 		sum(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as carea,
@@ -326,7 +328,7 @@ function loadWarnings(){
     )
 	SELECT  
 		s.year, s.wfo, s.phenomena, s.eventid, s.tgeom, c.missue as issue, 
-			c.mexpire as expire,
+			c.mexpire as expire, c.statuses,
 			s.significance, s.hailtag, s.windtag, c.carea, c.ar_ugc,
 			s.lat0, s.lon0, s.perimeter, s.parea, c.ar_ugcname
 			from stormbased s JOIN countybased c on 
@@ -350,8 +352,8 @@ function loadWarnings(){
         $this->warnings[$key] = Array();
         $this->warnings[$key]["lead0"] = -1;
         $this->warnings[$key]["buffered"] = 0;
-        $this->warnings[$key]["verify"] = 0;
-        $this->warnings[$key]["status"] = 'UNK';
+        $this->warnings[$key]["verify"] = FALSE;
+        $this->warnings[$key]["status"] = $row["statuses"];
         $this->warnings[$key]['lsrs'] = Array();
         
         $this->warnings[$key]["hailtag"] = $row["hailtag"];
@@ -407,28 +409,36 @@ function loadLSRs() {
 } /* End of loadLSRs() */
 
 function areaVerify() {
+	/*
+	 * Compute the areal verification for each warning
+	 */
     reset($this->warnings);
-    while (list($k,$v) = each($this->warnings)) {
-        if (sizeof($v["lsrs"]) == 0){ continue; }
+    while (list($wkey,$warn) = each($this->warnings)) {
+        if (sizeof($warn["lsrs"]) == 0){ 
+        	continue; 
+        }
+        
         $bufferedArray = Array();
-        while (list($k2,$v2) = each($v["lsrs"])){
+        reset($warn["lsrs"]);
+        while (list($lkey,$lsr) = each($warn["lsrs"])){
             $bufferedArray[] = sprintf("ST_SetSRID(ST_GeomFromText('%s'),2163)", 
-              $this->lsrs[$v2]["buffered"]);
+              $this->lsrs[$lsr]["buffered"]);
         }
+        
         $sql = sprintf("SELECT ST_Area(
-         ST_Intersection( ST_Union(ARRAY[%s]), 
+         			ST_Intersection( ST_Union(ARRAY[%s]), 
                           ST_Transform(ST_GeomFromEWKT('SRID=4326;%s'),2163) ) 
-         ) / 1000000.0 as area",
-         implode(",", $bufferedArray), $v["geom"] );
+         			) / 1000000.0 as area",
+         			implode(",", $bufferedArray), $warn["geom"] );
         $rs = $this->callDB($sql);
-        if ($rs){
-            $row = pg_fetch_array($rs,0);
+        if ($rs === FALSE){ // PostGIS likely threw an error!
+        	$row = Array("area" => null);
         } else {
-            $row = Array("area" => 0);
+            $row = pg_fetch_array($rs,0);
         }
-        $this->warnings[$k]["buffered"] = $row["area"];
+        $this->warnings[$wkey]["buffered"] = $row["area"];
     }
-}
+} // end areaVerify()
 
 function getVerifyHailSize($warn){
 	if ($this->useWindHailTag && $warn['hailtag'] != null && $warn['hailtag'] >= $this->hailsize){
@@ -444,6 +454,9 @@ function getVerifyWind($warn){
 }
 
 function sbwVerify() {
+	/*
+	 * Compute if a warning verifies or not!
+	 */
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)) {
     	/*
@@ -462,14 +475,14 @@ function sbwVerify() {
          (type = 'H' and magnitude >= %s) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
          or type = 'F' or type = 'x')
-         and valid >= '%s' and valid <= '%s' 
+         and valid >= '%s+00' and valid <= '%s+00' 
          ORDER by valid ASC", 
          $v["year"], $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
          $v["wfo"], $this->getVerifyHailSize($v), $this->getVerifyWind($v),
          date("Y/m/d H:i", strtotime($v["issue"])),
          date("Y/m/d H:i", $v["expire"]) );
         $rs = $this->callDB($sql);
-        for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+        for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
             $key = sprintf("%s-%s-%s-%s-%s", 
                    $row["wfo"], $row["valid"], $row["type"],
                    $row["magnitude"], $row["city"]);
@@ -504,9 +517,9 @@ function sbwVerify() {
             }
             if (($verify || $this->lsrs[$key]["tdq"]) &&
                  ! $this->lsrs[$key]["warned"] ){
+            	$this->lsrs[$key]["warned"] = True;
             	$this->warnings[$k]["lsrs"][] = $key;
-                $this->lsrs[$key]["warned"] = True;
-                $this->lsrs[$key]["leadtime"] = ($this->lsrs[$key]["ts"] - 
+            	$this->lsrs[$key]["leadtime"] = ($this->lsrs[$key]["ts"] - 
                        $v["sts"]) / 60;
                 if ($this->warnings[$k]["lead0"] < 0){
                $this->warnings[$k]["lead0"] = $this->lsrs[$key]["leadtime"];
