@@ -1,17 +1,22 @@
 <?php
 include("../../../../config/settings.inc.php");
-include_once "$rootpath/include/iemmap.php";
-include("$rootpath/include/database.inc.php");
+include_once "../../../../include/iemmap.php";
+include("../../../../include/database.inc.php");
 $dbconn = iemdb("isuag");
-$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "c90";
+$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "rain_mm_tot";
+
+$title = Array("rain_mm_tot" => "Rainfall (inches)", 
+		"dailyet" => "Potential Evapotrans. (in)");
+if (!array_key_exists($dvar, $title)) die();
+
 $rs = pg_prepare($dbconn, "SELECT", "select station, sum($dvar) as s,
-		min(valid), max(valid) from daily 
+		min(valid), max(valid) from sm_daily 
    WHERE extract(month from valid) = $1 and
          extract(year from valid) = $2 GROUP by station");
 
 
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("ISUAG");
+include("../../../../include/network.php");
+$nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
@@ -27,7 +32,7 @@ $myStations = $ISUAGcities;
 $height = 480;
 $width = 640;
 
-$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
+$map = ms_newMapObj("../../../../data/gis/base26915.map");
 $map->setProjection("init=epsg:26915");
 $map->setsize($width,$height);
 $map->setextent(175000, 4440000, 775000, 4890000);
@@ -62,7 +67,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
   $key = $row["station"];
   if ($key == "A133259" or $key == "A130219") continue;
 
-  $val = $row["s"];
+  $val = round($row["s"] / 25.4,2);
   $sdate = strtotime( $row["min"] );
   $edate = strtotime( $row["max"] );
   
@@ -85,10 +90,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
     $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   }
 }
-if ($i == 0)
-   plotNoData($map, $img);
 
-$title = Array("c90" => "Rainfall (inches)", "c70" => "Potential Evapotrans. (in)");
 
 iemmap_title($map, $img, $title[$dvar] ." [ ". date("d M", $sdate) ." thru ". date("d M Y", $edate) ." ]");
 $map->drawLabelCache($img);
