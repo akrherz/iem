@@ -108,12 +108,12 @@ wget -q http://${WEBHOST}/GIS/apps/agclimate/chill.php\?direct=yes -O ${fp}.png
 rm -f ${fp}.png
 
 fp="mon-prec-out"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=c90\&direct=yes -O ${fp}.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=rain_mm_tot\&direct=yes -O ${fp}.png
 /home/ldm/bin/pqinsert -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 
 fp="mon-et-out"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=c70\&direct=yes -O ${fp}.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=dailyet\&direct=yes -O ${fp}.png
 /home/ldm/bin/pqinsert -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 
