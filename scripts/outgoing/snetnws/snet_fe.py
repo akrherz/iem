@@ -238,9 +238,9 @@ def will_email(_network, obs, thres):
     """
     Preemptive checking to make sure we don't email!
     """
-    cnt_threshold = 25
+    cnt_threshold = 35
     if (_network == 'KIMT'):
-        cnt_threshold = 10
+        cnt_threshold = 20
     # First, look into the offline database to see how many active tickets
     icursor = IEM.cursor()
     icursor.execute("""SELECT count(*) as c from offline WHERE 
