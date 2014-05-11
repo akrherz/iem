@@ -74,7 +74,7 @@ $counties->set("status", 1);
 
 $c0 = $map->getlayerbyname("sbw");
 $c0->set("status", MS_ON );
-$db_ts = strftime("%Y-%m-%d %H:%M+00", $ts );
+$db_ts = gmstrftime("%Y-%m-%d %H:%M+00", $ts );
 $year = date("Y", $ts);
 $c0->set("data", "geom from " 
 	." (select significance, phenomena, geom, random() as oid from sbw_$year "
