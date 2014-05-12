@@ -1,7 +1,8 @@
 <?php
 include("../../config/settings.inc.php");
-
-$HEADEXTRA = <<<EOF
+include_once "../../include/myview.php";
+$t = new MyView();
+$t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
@@ -17,14 +18,13 @@ $HEADEXTRA = <<<EOF
 <script>
 Ext.namespace("cfg");
 cfg.header = "iem-header";
+cfg.footer = "iem-footer";
 </script>
-<script type="text/javascript" src="static.js?v=14"></script>
+<script type="text/javascript" src="static.js?v=15"></script>
 EOF;
-$TITLE = "IEM Local Storm Report App";
-$NOCONTENT = 1;
-$THISPAGE ="severe-lsr";
-include("$rootpath/include/header.php");
-?>
+$t->title = "Local Storm Report App";
+$t->thispage ="severe-lsr";
+$t->content = <<<EOF
 <script>
 Ext.onReady(function(){
   var tokens = window.location.href.split('#');
@@ -93,7 +93,7 @@ generate links to it.  Currently, there are two calling modes:</p>
   past.  For example, <i>/lsr/#LWX/-86400</i> would produce LSRs from
   LWX for the past day (86400 seconds).</p>
 <br />
-
-
 </div>
-</body></html>
+EOF;
+$t->render('single.phtml');
+?>
