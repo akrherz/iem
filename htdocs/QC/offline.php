@@ -25,7 +25,7 @@ include ("../../include/network.php");
 $nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {
-	global $iem, $rootpath, $nt;
+	global $iem, $nt;
 	$nt->load_network($network);
 	$cities = $nt->table;
 	$s = "";
