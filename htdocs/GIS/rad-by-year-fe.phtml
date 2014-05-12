@@ -2,7 +2,7 @@
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
 define("IEM_APPID", 53);
-include("$rootpath/include/forms.php");
+include("../../include/forms.php");
 
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time());
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time());
@@ -50,7 +50,19 @@ $t = new MyView();
 $t->thispage = "gis-nexrad";
 $t->title = "IEM NEXRAD by Year";
 $er = implode(",", $extents);
-$content = <<<EOF
+
+$ar = Array("0.5" => "100 km",
+	"2.5" => "500 km",
+	"5" => "1000 km",
+	"20" => "4000 km");
+$szselect = make_select("sz", $sz, $ar);
+
+$monselect = monthSelect($month, "month");
+$dayselect = daySelect($day, "day");
+$hrselect =  hourSelect($hour, "hour");
+$minselect = minuteSelect($minute, "minute", 5);
+
+$t->content = <<<EOF
 
 <h3>IEM NEXRAD Composite by Year</h3>
 
@@ -65,36 +77,17 @@ $content = <<<EOF
 <td rowspan="5">
   <input type="image" src="{$ourl}" name="map">
 <br /><strong>Select Rough Box Size</strong>
-EOF;
-$content .= '<select name="sz">';
-$content .= '<option value="0.5" '; 
-if ($sz == 0.5){ $content .= "SELECTED"; } 
-$content .= ">100 km</option>\n";
-
-$content .= '<option value="2.5" ';
-if ($sz == 2.5){ $content .= "SELECTED"; }
-$content .= ">500 km</option>\n";
-
-$content .= '<option value="5" ';
-if ($sz == 5){ $content .= "SELECTED"; }
-$content .= ">1000 km</option>\n";
-
-$content .= '<option value="20" ';
-if ($sz == 20){ $content .= "SELECTED"; }
-$content .= ">4000 km</option>\n";
-
-$content .= "</select>
+{$szselect}
 </td>
-<td>Month:</td><td>". monthSelect($month, "month") ."</td></tr>
-<tr><td>Day:</td><td>". daySelect($day, "day") ."</td></tr>
-<tr><td>Hour:</td><td>". hourSelect($hour, "hour") ."</td></tr>
-<tr><td>Minute:</td><td>". minuteSelect($minute, "minute", 5) ."</td></tr>
+<td>Month:</td><td>{$monselect}</td></tr>
+<tr><td>Day:</td><td>{$dayselect}</td></tr>
+<tr><td>Hour:</td><td>{$hrselect}</td></tr>
+<tr><td>Minute:</td><td>{$minselect}</td></tr>
 <tr><td colspan='2'><input type='submit' value='Generate Image'></td></tr>
 </table>
 </form>
 <p><i>The image below may take a few moments to appear...</i><br />
-<img src='$image_url' class='img-responsive'>";
-
-$t->content = $content;
+<img src='$image_url' class='img-responsive'>
+EOF;
 $t->render('single.phtml');
 ?>
