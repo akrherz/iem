@@ -5,7 +5,7 @@ include("../../include/myview.php");
 $t = new MyView();
 
 $t->title = "NLAE Flux Sites Variables";
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 
 $pg_conn = iemdb("other");
 $sql = "SELECT * from flux_vars ORDER by name ASC";
