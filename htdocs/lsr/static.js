@@ -883,6 +883,10 @@ new Ext.Viewport({
         collapsed   : true,
         contentEl   : cfg.header
     },{
+        region:'south',
+        height: 10,
+        contentEl: cfg.footer
+    },{
         xtype       : 'panel',
         region      : 'west',
         width       : 600,
