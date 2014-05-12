@@ -17,9 +17,9 @@ function new_window(url) {
 </script>
 EOF;
  $t->thispage = "current-sort";
-include("$rootpath/include/mlib.php"); 
-  include("$rootpath/include/iemaccess.php");
-  include("$rootpath/include/iemaccessob.php");
+include("../../include/mlib.php"); 
+  include("../../include/iemaccess.php");
+  include("../../include/iemaccessob.php");
 
 $iem = new IEMAccess();
 $rwis = $iem->getNetwork("OT");
