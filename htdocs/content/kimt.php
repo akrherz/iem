@@ -9,12 +9,12 @@ function dwp($tmpf, $relh){
 
 }
 include("../../config/settings.inc.php");
-include("$rootpath/include/network.php");
+include("../../include/network.php");
 $nt = new NetworkTable('KIMT');
 
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+include("../../include/mlib.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
 $station = isset($_GET["station"]) ? substr($_GET["station"],0,5) : 'SFMM5';
 $iemdb = new IEMAccess();
 $myOb = $iemdb->getSingleSite($station);
