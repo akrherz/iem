@@ -4,10 +4,10 @@
   include("../../config/settings.inc.php");
   $station = isset($_GET['station']) ? substr($_GET["station"],0,5): "SSAS2";
   $min = isset($_GET["min"]) ? intval($_GET["min"]) : 1;
-  include("$rootpath/include/network.php");
+  include("../../include/network.php");
 $nt = new NetworkTable("KELO");
 $cities = $nt->table;
-  include("$rootpath/include/imagemaps.php");
+  include("../../include/imagemaps.php");
  if (strlen($min) == 0){
    $secs = 600;
    $min = 1;

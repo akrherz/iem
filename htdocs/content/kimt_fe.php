@@ -4,13 +4,13 @@
   include("../../config/settings.inc.php");
   $station = isset($_GET['station']) ? substr($_GET["station"],0,5) : 'SMYI4';
   $min = isset($_GET["min"]) ? intval($_GET["min"]) : 1;
-  include("$rootpath/include/network.php");
+  include("../../include/network.php");
   $nt = new NetworkTable("KIMT");
   $Scities = $nt->table;
   if (!array_key_exists($station, $Scities)){
   	$station = "SMYI4";
   }
-  include("$rootpath/include/imagemaps.php");
+  include("../../include/imagemaps.php");
  $secs = intval($min) * 60;
 ?>
   <title>IEM | KIMT SchoolNet | <?php echo $Scities[$station]["name"]; ?></title>
