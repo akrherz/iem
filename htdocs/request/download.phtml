@@ -1,6 +1,8 @@
 <?php 
 include("../../config/settings.inc.php");
 define("IEM_APPID", 8);
+include("../../include/myview.php");
+$t = new MyView();
 $year = date("Y");
 $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
 $station = "";
@@ -8,23 +10,40 @@ $station = "";
 include("../../include/database.inc.php");
 include("../../include/imagemaps.php");
 include("../../include/forms.php");
-$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+$t->headextra = <<<EOF
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
 <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}'></script>";
-$TITLE = "IEM | Download Data";
-$THISPAGE = "networks-asos";
-$BODYEXTRA = "onload=\"init()\"";
-include("$rootpath/include/header.php");
-?>
+<script src='/js/olselect.php?network=${network}'></script>
+EOF;
+$t->title = "Download ASOS/AWOS/METAR Data";
+$t->thispage = "networks-asos";
+$t->bodyextra = "onload=\"init()\"";
+
+$nselect = networkSelect($network, $station); 
+$netselect = selectAzosNetwork($network);
+
+$y1select = yearSelect2(1941, date("Y"), "year1"); 
+$y2select = yearSelect2(1941, date("Y"), "year2"); 
+
+$m1select = monthSelect2(date("m"), "month1"); 
+$m2select = monthSelect2(date("m"), "month2"); 
+
+$d1select = daySelect2(date("d"), "day1"); 
+$d2select = daySelect2(date("d"), "day2");
+
+$t->content = <<<EOF
 <style type="text/css">
         #map {
-            width: 450px;
+            width: 100%;
             height: 450px;
             border: 2px solid black;
         }
 </style>
 
-<h3>ASOS/AWOS data download</h3>
+<ol class="breadcrumb">
+ <li><a href="/ASOS">ASOS Network</a></li>
+ <li class="active">ASOS-AWOS-METAR Data Download</li>
+</ol>
 
 <p>The IEM maintains an ever growing archive of automated airport weather
 observations from around the world!  These observations are typically called 
@@ -37,21 +56,19 @@ and <a href="awos/1min.php">AWOS</a> (1995-2011) sites.  This archive
 simply provides the as-is collection of historical observations, very little 
 quality control is done.
 
-<div class="warning">Please be patient with this page as it will take a number
+<div class="alert alert-warning">Please be patient with this page as it will take a number
 of seconds to process your request and provide the result.</div>
 
 <form name="netselect">
-<table><tr><th>Select Network</th>
-<td><?php echo selectAzosNetwork($network); ?></td>
-<td><input type="submit" value="Switch to Network"></td>
-</tr></table>
+<p><strong>Select Network</strong> {$netselect} 
+<input type="submit" value="Switch to Network">
+</p>
 </form>
 
+<div class="row">
+<div class="col-sm-7">
 
-<TABLE>
-<TR>
-<TD valign="top">
-<h3 class="subtitle">1) Select Station/Network by clicking on location: </h3>
+<h3>1) Select Station/Network by clicking on location: </h3>
 
 <form method="GET" action="/cgi-bin/request/getData.py" name="olselect">
 <div id="map"></div>
@@ -83,9 +100,10 @@ by site. Values in inches
 <br /><strong>skyl4:</strong> Sky Level 4 Altitude in feet
 <br /><strong>metar:</strong> unprocessed reported observation in METAR format
 
-</td>
-<td>
-<P>Selected Station: <?php echo networkSelect($network, $station); ?>
+</div>
+<div class="col-sm-5">
+
+<P>Selected Station: {$nselect}
 
 <br><br>
 <h3 class="subtitle">2) Select From Available Data:</h3>
@@ -125,18 +143,18 @@ for all observations, the IEM continues to backfill this information.
 <TR><TH>Start:</TH><TH>Stop:</TH></TR>
 
 <tr>
- <td><?php echo yearSelect2(1941, date("Y"), "year1"); ?></td>
- <td><?php echo yearSelect2(1941, date("Y"), "year2"); ?></td>
+ <td>{$y1select}</td>
+ <td>{$y2select}</td>
 </tr>
 
 <tr>
- <td><?php echo monthSelect2(date("m"), "month1"); ?></td>
- <td><?php echo monthSelect2(date("m"), "month2"); ?></td>
+ <td>{$m1select}</td>
+ <td>{$m2select}</td>
 </TR>
 
 <tr>
- <td><?php echo daySelect2(date("d"), "day1"); ?></td>
- <td><?php echo daySelect2(date("d"), "day2"); ?></td>
+ <td>{$d1select}</td>
+ <td>{$d2select}</td>
 </tr>
 
 </TABLE>
@@ -166,10 +184,11 @@ for all observations, the IEM continues to backfill this information.
 
   <input type="submit" value="Get Data">
   <input type="reset">
-</TD></TR></TABLE>
+
+ 		</div>
+ 		</div>
+ 		
 </form>
-
-
-
-<?php include("../../include/footer.php"); ?>
-
+EOF;
+$t->render('single.phtml');
+?>

@@ -1,9 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
-	$TITLE = "IEM | LDM Request HOWTO";
-include("$rootpath/include/header.php"); 
-?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "LDM Request HOWTO";
 
+$t->content = <<<EOF
 <h3 class="heading">Real-time IEM data feeds with LDM HOWTO</h3>
 
 <div class="text">
@@ -115,5 +116,6 @@ OK
 Daryl Herzmann 
 <br> (akrherz@iastate.edu)
 <br> Rev: 26 Dec 2002 </div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

@@ -1,9 +1,9 @@
 <?php
  $station = isset($_GET['station']) ? substr($_GET['station'],0,5): 'SJEI4';
  include("../../config/settings.inc.php");
- include("$rootpath/include/iemaccess.php");
- include("$rootpath/include/mlib.php");
- include("$rootpath/include/iemaccessob.php");
+ include("../../include/iemaccess.php");
+ include("../../include/mlib.php");
+ include("../../include/iemaccessob.php");
  $iem = new IEMAccess();
  $ob = $iem->getSingleSite($station);
  header('Content-type: text/plain');
