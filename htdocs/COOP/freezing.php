@@ -1,20 +1,103 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Freezing Dates";
-$THISPAGE = "climatology-year";
-include("$rootpath/include/header.php");
-include("$rootpath/include/database.inc.php"); 
-include("$rootpath/include/network.php"); 
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Freezing Dates";
+$t->thispage = "climatology-year";
+
+include("../../include/database.inc.php"); 
+include("../../include/network.php"); 
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
 
-?>
+function aSortBySecondIndex($multiArray, $secondIndex) {
+	while (list($firstIndex, ) = each($multiArray))
+		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+	asort($indexMap);
+	while (list($firstIndex, ) = each($indexMap))
+	if (is_numeric($firstIndex))
+		$sortedArray[] = $multiArray[$firstIndex];
+	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+	return $sortedArray;
+}
 
-<h3 class="heading">Freezing Dates</h3>
+$connection = iemdb("coop");
 
-<div class="text">
+$query = "select station, valid, min_low, min_low_yr from climate
+     WHERE valid > '2000-08-01' and min_low <= 32
+     and station NOT IN ('IA4381', 'IA7842')
+     and substr(station,0,3) = 'IA' ORDER by valid";
+$rs = pg_exec($connection, $query);
+
+$query = "select station, valid, low from climate
+     WHERE valid > '2000-08-01' and low <= 40
+     and station NOT IN ('IA4381', 'IA7842')
+     and substr(station,0,3) = 'IA' ORDER by valid";
+$rs2 = pg_exec($connection, $query);
+
+
+$data = Array();
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+$st = $row["station"];
+		if (! isset($data[$st])){
+		$data[$st] = Array("min_low" => 100, "station" => $st);
+		$data[$st]["low"] = $row["min_low"];
+				$data[$st]["lowyr"] = $row["min_low_yr"] ."-". substr($row["valid"], 5, 6);
+		}
+		if (! isset($data[$st]["low28"]) ){
+				if (intval($row["min_low"]) < 29 ){
+				$data[$st]["low28"] = $row["min_low"];
+				$data[$st]["low28yr"] = $row["min_low_yr"] ."-". substr($row["valid"], 5, 6);
+		}
+		}
+
+		}
+
+		for( $i=0; $row = @pg_fetch_array($rs2,$i); $i++)
+		{
+		$st = $row["station"];
+		if (! isset($data[$st]["avelow40day"])){
+		if ( intval($row["low"]) < 41 ){
+		$data[$st]["avelow40day"] = substr($row["valid"], 5, 6);
+		}
+		}
+		if (! isset($data[$st]["avelow32day"])){
+		if ( intval($row["low"]) < 33 ){
+			$data[$st]["avelow32day"] = substr($row["valid"], 5, 6);
+			}
+			}
+			if (! isset($data[$st]["avelow28day"])){
+			if ( intval($row["low"]) < 28 ){
+				$data[$st]["avelow28day"] = substr($row["valid"], 5, 6);
+     }
+				}
+
+				}
+
+				$finalA = Array();
+				$finalA = aSortBySecondIndex($data, $sortcol);
+
+$table = "";
+foreach($finalA as $key => $value ){
+	if (! array_key_exists($key, $cities)) continue;
+	$table .= "<tr><td>". $cities[strtoupper($key)]["name"] ."</td>
+    <td>". $data[$key]["low"] ."</td>
+    <td>". $data[$key]["lowyr"] ."</td>
+    <td>". $data[$key]["low28"] ."</td>
+    <td>". $data[$key]["low28yr"] ."</td>
+    <td>". $data[$key]["avelow40day"] ."</td>
+    <td>". $data[$key]["avelow32day"] ."</td>
+    <td>". $data[$key]["avelow28day"] ."</td>
+    </tr>\n";
+}
+
+
+$t->content = <<<EOF
+<h3>Freezing Dates</h3>
+
 <p>Using the NWS COOP data archive, significant dates relating to fall are
 extracted and presented on this page.  The specific dates are the first 
 occurance of that temperature and may have occured again in subsequent 
@@ -24,79 +107,9 @@ years.
 temperature.  The "Average Lows" column shows when certain climatological
 thresholds are surpassed in the fall.
 </p>
-<?php
-function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-        asort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
-}
- 
 
- $connection = iemdb("coop");
-
- $query = "select station, valid, min_low, min_low_yr from climate 
-     WHERE valid > '2000-08-01' and min_low <= 32 
-     and station NOT IN ('IA4381', 'IA7842') 
-     and substr(station,0,3) = 'IA' ORDER by valid";
- $rs = pg_exec($connection, $query);
-
- $query = "select station, valid, low from climate 
-     WHERE valid > '2000-08-01' and low <= 40 
-     and station NOT IN ('IA4381', 'IA7842')
-     and substr(station,0,3) = 'IA' ORDER by valid";
- $rs2 = pg_exec($connection, $query);
-
-
- $data = Array();
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
- {
-   $st = $row["station"];
-   if (! isset($data[$st])){
-     $data[$st] = Array("min_low" => 100, "station" => $st);
-     $data[$st]["low"] = $row["min_low"];
-     $data[$st]["lowyr"] = $row["min_low_yr"] ."-". substr($row["valid"], 5, 6);
-   }
-   if (! isset($data[$st]["low28"]) ){
-     if (intval($row["min_low"]) < 29 ){
-       $data[$st]["low28"] = $row["min_low"];
-       $data[$st]["low28yr"] = $row["min_low_yr"] ."-". substr($row["valid"], 5, 6);
-     }
-   }
- 
- }
-
- for( $i=0; $row = @pg_fetch_array($rs2,$i); $i++)
- {
-   $st = $row["station"];
-   if (! isset($data[$st]["avelow40day"])){
-     if ( intval($row["low"]) < 41 ){
-       $data[$st]["avelow40day"] = substr($row["valid"], 5, 6);
-     }
-   }
-   if (! isset($data[$st]["avelow32day"])){
-     if ( intval($row["low"]) < 33 ){
-       $data[$st]["avelow32day"] = substr($row["valid"], 5, 6);
-     }
-   }
-   if (! isset($data[$st]["avelow28day"])){
-     if ( intval($row["low"]) < 28 ){
-       $data[$st]["avelow28day"] = substr($row["valid"], 5, 6);
-     }
-   }
-
- }
-
- $finalA = Array();
- $finalA = aSortBySecondIndex($data, $sortcol);
-
- //-------------------------------------------------
-
- echo "<table border=1 cellpadding=2>
+<table class="table table-condensed table-striped">
+<thead>
   <tr>
     <th rowspan='3'><a href='freezing.php?sortcol=station'>COOP Site:</a></th>
     <th colspan='4'>Record Lows:</th>
@@ -113,21 +126,12 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     <td><a href='freezing.php?sortcol=lowyr'>Date:</a></td>
     <td>Temp:</td>
     <td><a href='freezing.php?sortcol=low28yr'>Date:</a></td>
-  </tr>";
-
- foreach($finalA as $key => $value ){
-   echo "<tr><td>". $cities[strtoupper($key)]["name"] ."</td>
-    <td>". $data[$key]["low"] ."</td>
-    <td>". $data[$key]["lowyr"] ."</td>
-    <td>". $data[$key]["low28"] ."</td>
-    <td>". $data[$key]["low28yr"] ."</td>
-    <td>". $data[$key]["avelow40day"] ."</td>
-    <td>". $data[$key]["avelow32day"] ."</td>
-    <td>". $data[$key]["avelow28day"] ."</td>
-    </tr>\n";
- }
-
- echo "</table>\n";
- pg_close($connection);
-?></div>
-<?php include("$rootpath/include/footer.php"); ?>
+  </tr>
+</thead>
+<tbody>
+  {$table}
+</tbody>
+</table>
+EOF;
+$t->render('single.phtml');
+?>
