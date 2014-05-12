@@ -1,6 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
- include("$rootpath/include/database.inc.php");
+ include("../../include/database.inc.php");
  /* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
@@ -52,7 +52,7 @@ if ($method == "geocode")
 }
 else if ($method == "id")
 {
-	include("$rootpath/include/station.php");
+	include("../../include/station.php");
 	$id = strtoupper($_GET["nwsli"]);
     $st = new StationData($id);
     $cities = $st->table;
