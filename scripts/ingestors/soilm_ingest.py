@@ -244,6 +244,8 @@ def daily_process(nwsli, maxts):
         ob.data['min_tmpf'] = temperature(
                     float(tokens[headers.index('tair_c_min')]), 'C').value('F')
         ob.data['pday'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
+        ob.data['et_inch'] = float(tokens[headers.index('dailyet')]) / 24.5
+        ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
         ob.save(accesstxn)
         #    print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
