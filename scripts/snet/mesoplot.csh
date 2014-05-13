@@ -1,21 +1,5 @@
 #!/bin/csh
 # Script to plot station model of schoolnet obs
-# Daryl Herzmann 11 Feb 2002
-# 12 Feb 2002:	Added solar Rad
-# 19 Feb 2002:	Added precip
-# 05 Mar 2002:	Added Altimeter
-# 09 Apr 2002:	Move DSM up a bit to get AMW, BNW
-# 10 Apr 2002:	Also plot Monthly precip totals
-# 18 Apr 2002:	Also plot wind gusts
-# 19 Apr 2002:	We need to be further North to get Mallard
-# 07 May 2002:	Also do statistics for the current page
-#		Clean up mesonet plot
-# 20 Jul 2002:	Change the name of the Surface Altimeter Plot
-#  3 Oct 2002:	Dave doesn't want the use of the work 'Reporting'
-# 21 Nov 2002:	Parkin would like a plot in inches too
-# 17 Feb 2003:	Use GIF driver
-# 19 Aug 2003	Don't use GIF driver
-########################################################
 
 source /mesonet/nawips/Gemenviron
 setenv DISPLAY localhost:1
@@ -175,14 +159,7 @@ if (-e ${GFFILE}) then
   /home/ldm/bin/pqinsert -p "plot c 000000000000 snet/${GUSTFILE} ${GUSTFILE} gif" ${GUSTFILE} >& /dev/null
   /home/ldm/bin/pqinsert -p "plot c 000000000000 snet/snet_altm.gif snet_altm.gif gif" snet_altm.gif >& /dev/null
   /home/ldm/bin/pqinsert -p "plot c 000000000000 snet/snet_alti.gif snet_alti.gif gif" snet_alti.gif >& /dev/null
-  #mv ${GFFILE} ~/current/snet/
-  #mv ${RADFILE} ~/current/snet/
-  #mv ${DSMFILE} ~/current/snet/
-  #mv ${PRECFILE} ~/current/snet/
-  #mv ${MONPREC} ~/current/snet/
-  #mv ${GUSTFILE} ~/current/snet/
-  #mv snet_altm.gif ~/current/snet/
-  #mv snet_alti.gif ~/current/snet/
+rm -f ${GFFILE} ${RADFILE} ${DSMFILE} ${PRECFILE} ${MONPREC} ${GUSTFILE} snet_altm.gif snet_alti.gif
 endif
 
 #####
