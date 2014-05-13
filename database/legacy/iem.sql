@@ -235,7 +235,9 @@ CREATE TABLE summary (
     max_drct real,
     max_srad smallint,
     coop_tmpf real,
-    coop_valid timestamp with time zone
+    coop_valid timestamp with time zone,
+    et_inch real,
+    srad_mj real
 );
 
 CREATE TABLE summary_2011() inherits (summary);
