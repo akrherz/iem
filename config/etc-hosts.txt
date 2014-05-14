@@ -35,11 +35,12 @@
 # IPs that float depending on workload!
 192.168.0.200    iem-idd0      iem-idd0.local
 192.168.0.201    iemdb3
+# iem50, backup iem30
 192.168.1.202    iem-mapserver 
 192.168.0.231    iemvm4
 192.168.0.254    iem-gateway   iem-gateway.local
 
-# iemvm1
+# iemvm1, backup iem21
 192.168.1.190    iem-memcached
 # metvm4
 192.168.1.191    iem-memcached1
