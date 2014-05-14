@@ -19,11 +19,11 @@ elnino = numpy.array(elnino)
 
 ccursor.execute("""
  WITH climo as (
- SELECT month, avg((high+low)/2.) from alldata_ia where station = 'IA0200'
+ SELECT month, avg((high+low)/2.) from alldata_ia where station = 'IA0000'
  and day < '2014-05-01' GROUP by month),
  
  obs as (
- SELECT year, month, avg((high+low)/2.) from alldata_ia where station = 'IA0200'
+ SELECT year, month, avg((high+low)/2.) from alldata_ia where station = 'IA0000'
  and day < '2014-05-01' and year > 1899 GROUP by year, month)
 
  SELECT obs.year, obs.month, obs.avg - climo.avg from obs JOIN climo on
@@ -39,13 +39,15 @@ for row in ccursor:
     #print row
     valid.append( datetime.datetime(row[0], row[1], 1) )
     diff.append( row[2] )
-    if row[2] < 0:
+    if row[2] < -2:
         running += 1
     else:
         if running > maxrunning:
             print '----->', running, row[0], row[1]
             maxrunning = running
         running = 0
+if running > maxrunning:
+    print '----->', running, row[0], row[1]
 
 import matplotlib.pyplot as plt
 fig = plt.figure()
