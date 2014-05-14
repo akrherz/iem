@@ -22,11 +22,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 
 (fig, ax) = plt.subplots(1, 1)
-bars = ax.bar(years -0.5, data, fc='darkblue', ec='darkblue')
+bars = ax.bar(years -0.5, data, fc='brown', ec='brown')
 for i, bar in enumerate(bars):
     if data[i] < avgdata:
-        bar.set_facecolor('brown')
-        bar.set_edgecolor('brown')
+        bar.set_facecolor('darkblue')
+        bar.set_edgecolor('darkblue')
     if data[i] >= 900:
         txt = ax.text(years[i], data[i]+(0.075 if years[i] != 1881 else -0.45), "%s" % (years[i],), 
                       color='k', fontsize=14,
