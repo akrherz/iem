@@ -107,8 +107,7 @@ EOF;
  while (list($site, $value) = each($final) ){
    $content .= "<tr ";
    if ($oddrow) $content .= "bgcolor=\"#EEEEEE\"";
-   $url = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl,
-         $site, $network);
+   $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
    $content .= "><td><a href=\"$url\">$site</a></td>
     <td>". $value["name"] ."</font></td>";
    $content .= "<td ";
