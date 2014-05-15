@@ -9,12 +9,29 @@ $t->content = <<<EOF
 
 <h3>Documentation on IEM generated NEXRAD composites</h3>
 
-<div style="float: right;">
+<div class="row">
+<div class="col-sm-6">
+
+<img src="example_raster.png" class="img img-responsive" />
+<br />Example composite from 1 March 2007.
+
+</div>
+<div class="col-sm-6">
+
 <table cellpadding="3" cellspacing="0" border="1">
 <thead>
-<tr><th colspan="4">Precipitation</th><th colspan="2">Reflectivity</th></tr>
+<tr>
+ <th colspan="4">Precipitation</th>
+ <th colspan="2">N0R (4bit) Reflectivity</th>
+ <th>N0Q (8bit) Reflectivity</th>
+</tr>
 </thead>
-<tr><td>Ramp</td><td colspan="3">Index values [inch]</td><td>Ramp</td><td>Index values [dBZ]</td></tr>
+<tr>
+ <td>Ramp</td>
+ <td colspan="3">Index values [inch]</td>
+ <td>Ramp</td><td>Index values [dBZ]</td>
+ <td>Index values [dBZ]</td>
+ </tr>
 <tr>
 <td><img src="precip_ramp.png" width="10" style="float: left;" /></td>
 <td valign="top">
@@ -86,15 +103,17 @@ $t->content = <<<EOF
 <br />70
 <br />75
 </td>
+<td>
+-32 dBZ
+<br />through
+<br />90 dBZ
+<br />0.5 dBZ increment
+</td>
 </tr></table>
-</div>
 
-<div style="float: left; padding: 5px; border: 2px solid #000; margin: 5px;">
-<img src="example_raster.png">
-<br />Example composite from 1 March 2007.
-</div>
+</div></div>
 
-<div class="table" style="float: left;">
+
 <strong>Quick Information:</strong>
 <table>
 <tr><th>Product:</th><td>GIS-ready NEXRAD composite</td></tr>
@@ -115,10 +134,6 @@ and <a href="/archive/data/{$d}/GIS/uscomp/">Archive for today</a></td></tr>
 
 </ul>
 
-</div>
-
-
-<br clear="all"\>
 <p>Since 2003, the IEM has been generating and archiving nationwide composites 
 of NEXRAD base reflectivity every 5 minutes.  These composites are generated 
 by combining the 130+ individual RADARs that comprise the NEXRAD network. This
@@ -219,7 +234,10 @@ http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?
 
 <h3>Example WMS-T Application</h3>
 
-<p>Here is an example interface utilizing the WMS-T NEXRAD service. The interface code is a part of the <a href="http://www.openlayers.org/">OpenLayers toolkit</a>. The default time display shows Hurricane Katrina making landfall.
+<p>Here is an <a href="wmst.html">example interface</a> utilizing the WMS-T NEXRAD service. 
+		The interface code is a part of the 
+		<a href="http://www.openlayers.org/">OpenLayers toolkit</a>. 
+		The default time display shows Hurricane Katrina making landfall.
 <br />
 <iframe src="wmst.html" style="width: 550px; height: 450px;"></iframe>
 
