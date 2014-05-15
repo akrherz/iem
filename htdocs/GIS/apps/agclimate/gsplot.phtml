@@ -1,9 +1,9 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 51);
-include("$rootpath/include/forms.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../../../include/forms.php");
+include("../../../../include/database.inc.php");
+include("../../../../include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
 $ISUAGcities["A130219"]["lon"] += 0.2;
@@ -227,13 +227,12 @@ foreach($vals as $key => $value){
   		round($value, $round[$var]) );
 }
 
-
-?>
-
-<?php 
-$THISPAGE = "networks-agclimate";
-	$TITLE = "IEM | ISUAG Growing Season Data";
-	$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+include "../../../../include/myview.php";
+$t = new MyView();
+$t->thispage = "networks-agclimate";
+$t->title = "ISUAG Growing Season Data";
+$t->headextra = <<<EOF
+<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
         link = 
@@ -241,21 +240,67 @@ function new_window(url) {
 window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
 } 
 //END Script-->
-</script>';
-        include("$rootpath/include/header.php"); 
-?>
+</script>
+EOF;
 
-<h3 class="heading">Growing Season Maps</h3><p>
+$ar = Array("gdd50" => "Growing Degree Days (base=50,cap=86)",
+    "gdd32" => "Growing Degree Days (base=32,cap=86)",
+    "et" => "Potential Evapotranspiration",
+    "sgdd50" => "Soil Growing Degree Days (base=50)",
+    "sgdd52" => "Soil Growing Degree Days (base=52)",
+    "srad" => "Solar Radiation (langleys)",
+    "sdd86" => "Stress Degree Days (base=86)",
+);
 
-<div style="width: 640px;">
+$vselect = make_select("var", $var, $ar);
+
+$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+		"gdd32" => "Growing Degree Days (base=32)",
+		"et" => "Potential Evapotranspiration",
+		"prec" => "Precipitation",
+		"srad" => "Solar Radiation (langleys)",
+		"sgdd50" => "Soil Growing Degree Days (base=50)",
+		"sgdd52" => "Soil Growing Degree Days (base=52)",
+		"sdd86" => "Stress Degree Days (base=86)"
+);
+
+
+$rnd = Array("gdd50" => 0,
+		"gdd32" => 0,
+		"et" => 2, "c11" => 2,
+		"prec" => 2,
+		"srad" => 0,
+		"sgdd50" => 0,
+		"sgdd52" => 0,
+		"sdd86" => 0);
+
+$h3 = "";
+if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
+{
+	$h3 = "Departure from climatology is shown below the accumulated value.";
+}
+$yselect = yearSelect(1986, $year, "year");
+$smselect = monthSelect2($smonth, 'smonth');
+$sdselect = daySelect2($sday, 'sday');
+$emselect = monthSelect2($emonth, 'emonth');
+$edselect = daySelect2($eday, 'eday');
+
+$ar = Array("640x480" => "640x480",
+		"720x496" => "720x496",
+		"1024x768" => "1024x768");
+$iselect = make_select("imgsz", $imgsz, $ar);
+
+$t->content = <<<EOF
+<h3>Growing Season Maps</h3><p>
+
 This application will plot an accumulated variable for a time period of your 
 selection.  Data is based on the automated sensors from the ISU AG Climate
-network.  A <a href="<?php echo $rooturl; ?>/GIS/apps/coop/gsplot.phtml">similiar application</a> exists based on the COOP network data, which
+network.  A <a href="/GIS/apps/coop/gsplot.phtml">similiar application</a> 
+exists based on the COOP network data, which
 is of higher quality for temperature and precipitation.
-</div>
 
 <form method="GET" action="gsplot.phtml">
-<table cellspacing="0" cellpadding="2" border="1"> 
+<table class="table"> 
 <thead>
 <tr>
    <th>Plot Parameter</th>
@@ -267,91 +312,52 @@ is of higher quality for temperature and precipitation.
   </tr>
 </thead>
  <tr>
-  <td rowspan=2><select name="var">
-     <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50,cap=86)</option>
-     <option value="gdd32" <?php if($var == "gdd32") echo "SELECTED"; ?>>Growing Degree Days (base=32,cap=86)</option>
-     <option value="et" <?php if($var == "et") echo "SELECTED"; ?>>Potential Evapotranspiration</option>
-     <option value="sgdd50" <?php if($var == "sgdd50") echo "SELECTED"; ?>>Soil Growing Degree Days (base=50)</option>
-     <option value="sgdd52" <?php if($var == "sgdd52") echo "SELECTED"; ?>>Soil Growing Degree Days (base=52)</option>
-     <option value="srad" <?php if($var == "srad") echo "SELECTED"; ?>>Solar Radiation (langleys)</option>
-     <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
-    </select></td>
-  <td rowspan=2><?php echo yearSelect(1986, $year, "year"); ?></td>
-  <td><?php echo monthSelect2($smonth, 'smonth'); ?></td>
-  <td><?php echo daySelect2($sday, 'sday'); ?></td>
+  <td rowspan=2>{$vselect}</td>
+  <td rowspan=2>{$yselect}</td>
+  <td>{$smselect}</td>
+  <td>{$sdselect}</td>
 <td rowspan=2>
-<select name="imgsz">
-     <option value="640x480" <?php if($imgsz == "640x480") echo "SELECTED"; ?>>640x480</option>
-     <option value="720x496" <?php if($imgsz == "720x496") echo "SELECTED"; ?>>720x496</option>
-     <option value="1024x768" <?php if($imgsz == "1024x768") echo "SELECTED"; ?>>1024x768</option>
-</select> 
+{$iselect}
 </td>
   <td rowspan=2><input type="submit" value="Make Plot"></td>
   </tr>
  <tr>
-  <td><?php echo monthSelect2($emonth, 'emonth'); ?></td>
-  <td><?php echo daySelect2($eday, 'eday'); ?></td>
+  <td>{$emselect}</td>
+  <td>{$edselect}</td>
   </tr>
 </table>
  
 
-<?php
+<div class="row">
+<div class="col-sm-3">
 
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
-  "gdd32" => "Growing Degree Days (base=32)",
-  "et" => "Potential Evapotranspiration",
-  "prec" => "Precipitation",
-  "srad" => "Solar Radiation (langleys)",
-  "sgdd50" => "Soil Growing Degree Days (base=50)",
-  "sgdd52" => "Soil Growing Degree Days (base=52)",
-  "sdd86" => "Stress Degree Days (base=86)"
-);
-
-
-$rnd = Array("gdd50" => 0,
-  "gdd32" => 0,
-  "et" => 2, "c11" => 2,
-  "prec" => 2,
-  "srad" => 0,
-  "sgdd50" => 0,
-  "sgdd52" => 0,
-  "sdd86" => 0);
-
-
-?>
-<table>
-<tr><td valign="top">
-<h3 class="heading">Dynamic Historical Data:</h3>
+<h3>Dynamic Historical Data:</h3>
 <a href="dayplot.phtml">Daily Data Plots</a>
 <br /><b>Growing Season Plots</b>
 
-<p>Open this plot in a <a href="javascript:new_window('<?php echo $imgurl; ?>');">new window</a> for comparison with other plots. Once the
+<p>Open this plot in a <a href="javascript:new_window('{$imgurl}');">new window</a> 
+for comparison with other plots. Once the
 image is loaded up in another window, you can modify this plots 
 parameters.
 
 <p><b>*Note:</b> Precipitation recorded from this network is not reliable.
- You should use precipitation obs from the <a href="<?php echo $rooturl; ?>/COOP/">COOP</a> network.
-</td>
-  <td>
-<?php
-  if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
-{
-  echo "Departure from climatology is shown below the accumulated value.";
-}
-?>
-  <img src="<?php echo $imgurl; ?>" border=1>
-</td></tr>
-</table>
+ You should use precipitation obs from the <a href="/COOP/">COOP</a> network.
 
+ </div><div class="col-sm-9">
+ 
+{$h3}
+  <img src="{$imgurl}" class="img img-responsive">
+
+  </div></div>
+  
 <p>
-<center><img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
-<pre><?php echo $tr; ?></pre>
+<center><img src="/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
+<pre>{$tr}</pre>
 
 <p>You should be able to 'copy & paste' this raw data listing into a simple
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
-
-<?php 
-  include("$rootpath/include/footer.php");
+EOF;
+$t->render('single.phtml');
 ?>
