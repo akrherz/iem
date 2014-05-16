@@ -25,10 +25,10 @@ $netselect = selectAzosNetwork($network);
 $y1select = yearSelect2(1941, date("Y"), "year1"); 
 $y2select = yearSelect2(1941, date("Y"), "year2"); 
 
-$m1select = monthSelect2(date("m"), "month1"); 
+$m1select = monthSelect2(1, "month1"); 
 $m2select = monthSelect2(date("m"), "month2"); 
 
-$d1select = daySelect2(date("d"), "day1"); 
+$d1select = daySelect2(1, "day1"); 
 $d2select = daySelect2(date("d"), "day2");
 
 $t->content = <<<EOF
@@ -50,7 +50,7 @@ observations from around the world!  These observations are typically called
 'ASOS' or sometimes 'AWOS' sensors.  A more generic term may be METAR data, 
 which is a term that describes the format the data is transmitted as. If you 
 don't get data for a request, please feel free to 
-<a href="../info/contacts.php">contact us</a> for help. The IEM also has a one
+<a href="/info/contacts.php">contact us</a> for help. The IEM also has a one
 minute interval dataset for Iowa <a href="asos/1min.phtml">ASOS</a> (2000-) 
 and <a href="awos/1min.php">AWOS</a> (1995-2011) sites.  This archive
 simply provides the as-is collection of historical observations, very little 
@@ -68,7 +68,7 @@ of seconds to process your request and provide the result.</div>
 <div class="row">
 <div class="col-sm-7">
 
-<h3>1) Select Station/Network by clicking on location: </h3>
+<h4>1) Select Station/Network by clicking on location: </h4>
 
 <form method="GET" action="/cgi-bin/request/getData.py" name="olselect">
 <div id="map"></div>
@@ -103,10 +103,12 @@ by site. Values in inches
 </div>
 <div class="col-sm-5">
 
-<P>Selected Station: {$nselect}
+<p>Selected Station: {$nselect}
 
-<br><br>
-<h3 class="subtitle">2) Select From Available Data:</h3>
+<h4>2) Select From Available Data:</h4>
+<p><strong>Note:</strong> Cloud information and raw METAR data is not available 
+for all observations, the IEM continues to backfill this information.</p>
+
 <SELECT name="data" size="5" MULTIPLE>
 	<option value="all" SELECTED>All Available
 	<option value="tmpf">Air Temperature [F]
@@ -132,55 +134,47 @@ by site. Values in inches
 	<option value="skyl3">Cloud Height Level 3 [ft]
 	<option value="metar">Raw METAR</option>
 </SELECT>
-<br />
-<strong>Note:</strong> Cloud information and raw METAR data is not available 
-for all observations, the IEM continues to backfill this information.
 
 
 <br><br>
-<h3 class="subtitle">3) Specific Date Range (If needed):</h3>
-<TABLE>
-<TR><TH>Start:</TH><TH>Stop:</TH></TR>
+<h4>3) Specific Date Range (If needed):</h4>
+<p><strong>Note:</strong> Data is available from this archive up until the current
+UTC date.  <a href="https://github.com/akrherz/iem/blob/master/scripts/dbutil/asos2archive.py">A process runs</a> at midnight Iowa time to populate the previous UTC's
+day worth of data.</p>
 
-<tr>
- <td>{$y1select}</td>
- <td>{$y2select}</td>
-</tr>
-
-<tr>
- <td>{$m1select}</td>
- <td>{$m2select}</td>
-</TR>
-
-<tr>
- <td>{$d1select}</td>
- <td>{$d2select}</td>
-</tr>
-
-</TABLE>
-
-<br><br>
-<h3 class="subtitle">4) Format of time output:</h3>
+<table class="table table-condensed">
+<tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select}</td></tr>
+<tr><th>End Date:</th><td>{$y2select} {$m2select} {$d2select}</td></tr>
+</table>
+		
+<h4>4) Format of time output:</h4>
 <SELECT name="tz">
 	<option value="GMT">GMT (UTC) timestamps
 	<option value="local">Central Standard/Daylight Time
 </SELECT>
 
-<br><br>
-<h3 class="subtitle">5) Data Format:</h3>
-<SELECT name="format">
+<h4>5) Download Options:</h4>
+		
+<p><strong>Data Format:</strong> 
+<select name="format">
 	<option value="tdf">Tab Delimited
 	<option value="comma">Comma Delimited
-</SELECT>
+</select></p>
 
-<p><h3>6) Include Lat/Lons?:</h3>
+<p><strong>Include Latitude + Longitude?</strong>
 <select name="latlon">
   <option value="no">No
   <option value="yes">Yes
-</select>
+</select></p>
 
-<br><br>
-<h3 class="subtitle">7) Finally, get Data:</h3>
+<p>
+<select name="direct">
+  <option value="no">View result data in web browser</option>
+  <option value="yes">Save result data to file on computer</option>
+</select></p>
+		
+		
+<h4>6) Finally, get Data:</h4>
 
   <input type="submit" value="Get Data">
   <input type="reset">
