@@ -18,14 +18,27 @@ acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+def get_station(form):
+    ''' Figure out the requested station '''
+    if not form.has_key("station"):
+        sys.stdout.write("Content-type: text/plain \n\n")
+        sys.stdout.write("ERROR: station must be specified!")
+        sys.exit(0)
+    return (string.strip( form["station"][0] )).upper()
+
 def main():
     """ Go main Go """
-    sys.stdout.write("Content-type: text/plain \n\n")
     form = cgi.FormContent()
-    if not form.has_key("station"):
-        print "ERROR: CGI variable station Not defined."
-        sys.exit(0)
-    station = (string.strip( form["station"][0] )).upper()
+    # Save direct to disk or view in browser
+    direct = True if form.get('direct', 'no')[0] == 'yes' else False
+    station = get_station(form)
+    if direct:
+        sys.stdout.write('Content-type: application/octet-stream\n')
+        sys.stdout.write('Content-Disposition: attachment; filename=%s.txt\n\n' % (
+                            station))
+    else:
+        sys.stdout.write("Content-type: text/plain \n\n")
+
     gisextra = []
     if form.has_key("latlon") and form["latlon"][0] == "yes":
         mcursor.execute("""SELECT ST_x(geom) as lon, ST_y(geom) as lat 
