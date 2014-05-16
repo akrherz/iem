@@ -1,23 +1,33 @@
 """
  Dump ASOS observations into the long term archive...
 
- Database paritioning is now based on the UTC day, so we need to make sure
- we are not inserting where we should not be
+ Database partitioning is now based on the UTC day, so we need to make sure
+ we are not inserting where we should not be...
+ 
+ This script copies from the iem->current_log database table to the asos
+ database.  This data is a result of the pyWWA/metar_parser.py process
+ 
+ We run in two modes, once every hour to copy over the Iowa data and once
+ at midnight to copy the previous UTC's days worth of METAR data over
+ 
 """
 import datetime
 import sys
-import iemdb
-import iemtz
+import psycopg2
+import pytz
 import psycopg2.extras
-ASOS = iemdb.connect('asos')
-IEM = iemdb.connect('iem')
+
+ASOS = psycopg2.connect(database='asos', host='iemdb')
+IEM = psycopg2.connect(database='iem', host='iemdb')
 acursor = ASOS.cursor()
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-utc = datetime.datetime.utcnow()
-utc = utc.replace(tzinfo=iemtz.UTC())
+''' Set ourselves back one hour as when we run at 10 after as we don't
+    want to miss data when we run at 00:10 UTC '''
+utc = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
+utc = utc.replace(tzinfo=pytz.timezone("UTC"), minute=59, second=0, microsecond=0)
     
-sts = utc.replace(hour=0,minute=0,second=0,microsecond=0)
+sts = utc.replace(hour=0)
 
 # Option 1 is to run for 'today' and for Iowa data    
 if len(sys.argv) > 1:
@@ -25,19 +35,19 @@ if len(sys.argv) > 1:
     networks = "(network = 'IA_ASOS' or network = 'AWOS')"
 # Option 2 is to run for 'yesterday' and for the entire archive
 else:
-    ets = sts 
-    sts = sts - datetime.timedelta(days=1)
+    sts = sts.replace(minute=0) - datetime.timedelta(days=1)
+    ets = sts.replace(hour=23,minute=59)
     networks = "(network ~* 'ASOS' or network ~* 'AWOS')"
 
 # Delete any obs from yesterday
-sql = "DELETE from t%s WHERE valid >= '%s' and valid < '%s'" % (sts.year, 
+sql = "DELETE from t%s WHERE valid >= '%s' and valid <= '%s'" % (sts.year, 
                                                                 sts, ets )
 acursor.execute(sql)
 
 # Get obs from Access
 sql = """SELECT c.*, t.network, t.id from 
     current_log c JOIN stations t on (t.iemid = c.iemid) WHERE 
-    valid >= %s and valid < %s and """+networks+"""
+    valid >= %s and valid <= %s and """+networks+"""
     """ 
 args = (sts, ets)
 icursor.execute(sql, args)
@@ -75,7 +85,7 @@ for row in icursor:
     acursor.execute(sql, args)
 
 if icursor.rowcount == 0:
-    print 'Nothing done for asos2archive.py?'
+    print '%s - %s Nothing done for asos2archive.py?'  % (sts, ets)
 
 icursor.close()
 IEM.commit()
