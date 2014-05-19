@@ -1,65 +1,47 @@
 <?php
  include("../../../../config/settings.inc.php");
- include_once "$rootpath/include/iemmap.php";
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/network.php");
-include("$rootpath/include/nexlib2.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
- $pgconn = iemdb("access");
+ include("../../../../include/myview.php");
+ $t = new MyView();
+ 
+include_once "../../../../include/iemmap.php";
+include("../../../../include/mlib.php");
+include("../../../../include/forms.php");
+include("../../../../include/network.php");
+include("../../../../include/nexlib2.php");
+include("../../../../include/iemaccess.php");
+include("../../../../include/iemaccessob.php");
+
+$pgconn = iemdb("access");
  $rad = isset($_GET['rad']) ? $_GET['rad'] : 'DMX';
  $tv = isset($_GET['rad']) ? strtoupper(substr($_GET['tv'],0,4)) : 'KCCI';
  $station = isset($_GET['station']) ? $_GET['station'] : '';
  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'p15m';
 
 $rs = pg_prepare($pgconn, "SELECT", "SELECT * from events WHERE network = $1
-and valid > (now() - '15 minutes'::interval)");
+	and valid > (now() - '15 minutes'::interval)");
 
-$REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
-$TITLE = "IEM | SchoolNet | Where's it raining?";
-$THISPAGE = "networks-schoolnet";
-include("$rootpath/include/header.php");
-?>
+$t->refresh = "<meta http-equiv=\"refresh\" content=\"60\">";
+$t->title = "SchoolNet - Where's it raining?";
+$t->thispage = "networks-schoolnet";
 
-<h3 class="heading">SchoolNet 'Where is it raining?'</h3>
+$ar = Array("KCCI" => "KCCI-TV Des Moines",
+	"KELO" => "KELO-TV Sioux Falls",
+	"KIMT" => "KIMT-TV Mason City");
+$tvselect = make_select("tv", $tv, $ar);
 
-<form method="GET" action="raining.php" name="former">
-<table>
-<tr>
- <td>Select Network:</td>
- <td>Select NEXRAD source:</td>
- <td></td></tr>
-
-<tr>
-<td>
-<select name="tv">
- <option value="KCCI" <?php if ($tv == 'KCCI') echo 'SELECTED'; ?>>KCCI-TV Des Moines
- <option value="KELO" <?php if ($tv == 'KELO') echo 'SELECTED'; ?>>KELO-TV Sioux Falls
- <option value="KIMT" <?php if ($tv == 'KIMT') echo 'SELECTED'; ?>>KIMT-TV Mason City
-</select>
-</td>
-<td>
-<select name="rad">
-  <option value="ABR" <?php if ($rad == 'ABR') echo 'SELECTED'; ?>>[ARX] Aberdeen, SD
-  <option value="ARX" <?php if ($rad == 'ARX') echo 'SELECTED'; ?>>[ARX] LaCrosse, WI
-  <option value="DMX" <?php if ($rad == 'DMX') echo 'SELECTED'; ?>>[DMX] Des Moines, IA
-  <option value="DMXA" <?php if ($rad == 'DMXA') echo 'SELECTED'; ?>>[DMX] Des Moines, IA (North)
-  <option value="DMXB" <?php if ($rad == 'DMXB') echo 'SELECTED'; ?>>[DMX] Des Moines, IA (Central)
-  <option value="DMXC" <?php if ($rad == 'DMXC') echo 'SELECTED'; ?>>[DMX] Des Moines, IA (South)
-  <option value="DVN" <?php if ($rad == 'DVN') echo 'SELECTED'; ?>>[DVN] Davenport, IA
-  <option value="EAX" <?php if ($rad == 'EAX') echo 'SELECTED'; ?>>[EAX] Pleasant Hill, MO
-  <option value="FSD" <?php if ($rad == 'FSD') echo 'SELECTED'; ?>>[FSD] Sioux Falls, SD
-  <option value="MPX" <?php if ($rad == 'MPX') echo 'SELECTED'; ?>>[MPX] Minneapolis, MN
-  <option value="OAX" <?php if ($rad == 'OAX') echo 'SELECTED'; ?>>[OAX] Omaha, NE
-  <option value="UDX" <?php if ($rad == 'UDX') echo 'SELECTED'; ?>>[UDX] Rapid City, SD
-</select>
-</td>
-<td>
-<input type="submit" value="Switch NEXRAD">
-</td></tr></table>
-</form>
-
-<?php
+$ar = Array("ABR" => "[ABR] Aberdeen, SD",
+  "ARX" => "[ARX] LaCrosse, WI",
+  "DMX" => "[DMX] Des Moines, IA",
+  "DMXA" => "[DMX] Des Moines, IA (North)",
+  "DMXB" => "[DMX] Des Moines, IA (Central)",
+  "DMXC" => "[DMX] Des Moines, IA (South)",
+  "DVN" => "[DVN] Davenport, IA",
+  "EAX" => "[EAX] Pleasant Hill, MO",
+  "FSD" => "[FSD] Sioux Falls, SD",
+  "MPX" => "[MPX] Minneapolis, MN",
+  "OAX" => "[OAX] Omaha, NE",
+  "UDX" => "[UDX] Rapid City, SD");
+$radselect = make_select("rad", $rad, $ar);
 
 $nt = new NetworkTable($tv);
 $stbl = $nt->table;
@@ -68,43 +50,41 @@ $iemdb = new IEMAccess();
 $iemdata = $iemdb->getNetwork($tv);
 $data = Array();
 while (list($key, $iemob) = each($iemdata) ){
-  $data[$key] = $iemob->db;
-  $data[$key]["p15m"] = 0;
+	$data[$key] = $iemob->db;
+	$data[$key]["p15m"] = 0;
 }
 
 $rs = pg_execute($pgconn, "SELECT", Array($tv));
 for($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
-  $data[ $row["station"] ]["p15m"] = $row["magnitude"];
+	$data[ $row["station"] ]["p15m"] = $row["magnitude"];
 }
 
 function mktitle($map, $imgObj, $titlet) {
-  $layer = $map->getLayerByName("credits");
+	$layer = $map->getLayerByName("credits");
 
-  // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY(0, 470);
+	// point feature with text for location
+	$point = ms_newpointobj();
+	$point->setXY(0, 470);
 
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet);
+	$point->draw($map, $layer, $imgObj, 0,
+			$titlet);
 }
 
 
 
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map = ms_newMapObj("../../../../data/gis/base4326.map");
 $map->setsize(640,480);
 
 $pad = 1;
 $lpad = 0.4;
-
 $map->setProjection( $projs[substr($rad,0,3)] );
 $map->setextent($extents[$rad][0],$extents[$rad][1],$extents[$rad][2],$extents[$rad][3] );
 if (strlen($station) > 0)
 {
-  $a = $stbl[$station];
-  $map->setextent($a["lon"] - 0.5, $a["lat"] - 0.5, $a["lon"] + 0.5, $a["lat"] + 0.5);
+	$a = $stbl[$station];
+	$map->setextent($a["lon"] - 0.5, $a["lat"] - 0.5, $a["lon"] + 0.5, $a["lat"] + 0.5);
 }
-
 
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
@@ -141,30 +121,28 @@ $precip = Array();
 
 $now = time();
 foreach($stbl as $key => $value){
-   //if ($key == "S03I4" || $key == "SDNI4" || $key == "SRUM5" || $key == "GETS2") continue;
 	if (! array_key_exists($key, $data)){ continue; }
 	
-   $pt = ms_newPointObj();
-   $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
-   /** Data is old */
-   if ($now - $data[$key]["ts"] > 1800){
-       $pt->draw($map, $site, $img, 0, "" );
-   } else {
-     if (floatval($data[$key]["tmpf"]) < 32.1) {
-       $pt->draw($map, $site, $img, 2, "" );
-     } else {
-       $pt->draw($map, $site, $img, 1, "" );
-     }
-   }
+	$pt = ms_newPointObj();
+	$pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
+	/** Data is old */
+	if ($now - $data[$key]["ts"] > 1800){
+		$pt->draw($map, $site, $img, 0, "" );
+	} else {
+		if (floatval($data[$key]["tmpf"]) < 32.1) {
+			$pt->draw($map, $site, $img, 2, "" );
+		} else {
+			$pt->draw($map, $site, $img, 1, "" );
+		}
+	}
 
-
-   if (strlen($station) > 0)
-   {
-     $pt = ms_newPointObj();
-     $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
-     $pt->draw($map, $dot, $img, 1, $data[$key]["sname"] );
-     
-   }
+	if (strlen($station) > 0)
+	{
+		$pt = ms_newPointObj();
+		$pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
+		$pt->draw($map, $dot, $img, 1, $data[$key]["sname"] );
+		 
+	}
 }
 
 
@@ -172,17 +150,17 @@ $obcount = 0;
 $now = time();
 reset($data);
 foreach($data as $key => $value){
-   if ($data[$key]['p15m'] > 0) {
-     $obcount += 1;
-     $pt = ms_newPointObj();
-     $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
-     $pt->draw($map, $dot, $img, 0, $key ." (". $data[$key]['p15m'] .")" );
-     
-   }
+	if ($data[$key]['p15m'] > 0) {
+		$obcount += 1;
+		$pt = ms_newPointObj();
+		$pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
+		$pt->draw($map, $dot, $img, 0, $key ." (". $data[$key]['p15m'] .")" );
+		 
+	}
 }
 
 
-  $ts = strftime("%d %b %I:%M %p");
+$ts = strftime("%d %b %I:%M %p");
 
 $map->drawLabelCache($img);
 
@@ -197,48 +175,72 @@ iemmap_title($map, $img, "SNET 15min rain ending: ". $ts , "NEXRAD valid: $r");
 
 $url = $img->saveWebImage();
 
-echo"<table><tr><td valign=\"TOP\">";
-
-echo "<p><h3 class=\"subtitle\">Rainfall totals today.</h3><br>";
-
 $u = sprintf("<a href=\"raining.php?rad=%s&tv=%s&sortcol=", $rad, $tv);
 
-echo $u ."\">Zoom out</a>\n";
-echo "<table border=1>
- <tr><th>${u}station\">SID</a></th><th>${u}sname\">Site</a></th><th>${u}p15m\">15min</a></th><th>${u}phour\">1hour</a></th><th>${u}pday\">Day</a></th></tr>";
-
-
 function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-             $indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];
-        arsort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
+	while (list($firstIndex, ) = each($multiArray))
+		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];
+	arsort($indexMap);
+	while (list($firstIndex, ) = each($indexMap))
+	if (is_numeric($firstIndex))
+		$sortedArray[] = $multiArray[$firstIndex];
+	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+	return $sortedArray;
 }
 
 $finalA = Array();
 $finalA = aSortBySecondIndex($data, $sortcol);
 
 $now = time();
+$table = "";
 foreach($finalA as $key => $value){
-  $pDay = round($data[$key]["pday"], 2);
-  if ( ($now - $data[$key]["ts"] < 1000) ){
-    echo "<tr><th><a href=\"raining.php?sortcol=$sortcol&tv=$tv&rad=$rad&station=$key\">". $key ."</a></th><td>". $stbl[$key]["name"] ."</td>
+	$pDay = round($data[$key]["pday"], 2);
+	if ( ($now - $data[$key]["ts"] < 1000) ){
+		$table .= "<tr><th><a href=\"raining.php?sortcol=$sortcol&tv=$tv&rad=$rad&station=$key\">". $key ."</a></th><td>". $stbl[$key]["name"] ."</td>
      <td>". $data[$key]["p15m"] ."</td><td>". $data[$key]["phour"] ."</td><td>". $data[$key]["pday"] ."</td></tr>\n";
-  }
-}
-echo "</table>\n";
+	}
+	}
 
-echo "</td><td valign=\"top\">\n";
+$t->content = <<<EOF
+<h3>SchoolNet 'Where is it raining?'</h3>
 
-echo "<p><b>". $obcount ."</b> sites currently reporting precip.\n";
-echo "<br>Map of <a href=\"$rooturl/sites/locate.php?network=KCCI\" target=\"_new\">KCCI sites</a> or <a href=\"$rooturl/sites/locate.php?network=KELO\" target=\"_new\">KELO sites</a> or <a href=\"$rooturl/sites/locate.php?network=KIMT\" target=\"_new\">KIMT sites</a> .\n";
+<form method="GET" action="raining.php" name="former">
+<table>
+<tr>
+ <td>Select Network:</td>
+ <td>Select NEXRAD source:</td>
+ <td></td></tr>
 
-echo "<p><img src=\"$url\" border=1>";
-?>
+<tr>
+<td>{$tvselect}
+</td>
+<td>{$radselect}
+</td>
+<td>
+<input type="submit" value="Switch NEXRAD">
+</td></tr></table>
+</form>
+
+<table><tr><td valign="TOP">
+<p><h3>Rainfall totals today.</h3><br>
+
+$u">Zoom out</a>
+<table border=1>
+ <tr><th>${u}station">SID</a></th><th>${u}sname">Site</a></th>
+ <th>${u}p15m">15min</a></th><th>${u}phour">1hour</a></th><th>${u}pday">Day</a></th>
+ </tr>
+
+
+{$table}
+</table>
+
+</td><td valign="top">
+
+<p><b>{$obcount}</b> sites currently reporting precip.
+<br>Map of <a href="/sites/locate.php?network=KCCI" target="_new">KCCI sites</a> 
+or <a href="/sites/locate.php?network=KELO" target="_new">KELO sites</a> or 
+<a href="/sites/locate.php?network=KIMT" target="_new">KIMT sites</a>
+<p><img src="$url" border=1>
 
 <p>SchoolNet sites use a non-heated tipping bucket to measure rainfall,
 which means no rainfall is recorded when the temperature is below freezing.</p>
@@ -255,13 +257,8 @@ which means no rainfall is recorded when the temperature is below freezing.</p>
 schoolNet sites are actually reporting rainfall.  If a dot is black, the site has received 
 <b>measurable</b> (> 0.01) rainfall in the previous 15 minutes.<br>
 This page will automatically reload every 3 minutes.</p>
-
-<?php
-echo "</td></tr></table>\n";
-
-?></div>
-
-<?php
-include ("$rootpath/include/footer.php");
-
+</td></tr></table>
+</div>
+EOF;
+$t->render('single.phtml');
 ?>
