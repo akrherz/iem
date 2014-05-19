@@ -27,6 +27,7 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
 
    $sql = sprintf("UPDATE stations SET synop = 9999, country = '%s', plot_name = '%s', 
    name = '%s', state = '%s', elevation = '%s', online = '%s', metasite = '%s',
+   		tzname = null,
    geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, 
    $state, $elevation, $online, $metasite, $longitude, $latitude,  $station, $network);
    pg_exec($pg_conn, $sql);
