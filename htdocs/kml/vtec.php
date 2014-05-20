@@ -29,8 +29,7 @@ if (pg_num_rows($result) <= 0) {
            round(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as psize
            from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
            WHERE w.wfo = $1 and phenomena = $2 and 
-           eventid = $3 and significance = $4
-           and gtype = 'C'");
+           eventid = $3 and significance = $4 ");
 
     $result = pg_execute($connect, "SELECT2", 
                Array($wfo, $phenomena, $eventid, $significance) );
