@@ -4,7 +4,7 @@ import datetime
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-station = 'IA0200'
+station = 'IA0000'
 # Get climatology
 ccursor.execute("""
  SELECT sday, avg(precip) from alldata_ia where station = %s
@@ -49,7 +49,7 @@ import matplotlib.dates as mdates
 (fig, ax) = plt.subplots(1,1)
 
 #ax.plot(numpy.arange(0, len(running)), running)
-ax.set_title("Ames Precipitation Departure over Trailing Windows\n1 Apr 2012 - 23 Mar 2014")
+ax.set_title("Iowa Precipitation Departure over Trailing Windows\n1 Jan 2013 - 8 May 2014")
 #ax[0].set_ylabel("Departure [inch]")
 #ax[0].plot(dates, running30, color='b', label='30 day')
 #ax[0].plot(dates, running90, color='r', label='90 day')
@@ -63,7 +63,7 @@ ax.set_ylabel("Departure [inch]")
 ax.plot(dates, running30, color='b', label='30 day')
 ax.plot(dates, running90, color='r', label='90 day')
 ax.plot(dates, running365, color='k', label='365 day')
-ax.set_xlim( datetime.date(2013,1,1), datetime.date(2014,3,23))
+ax.set_xlim( datetime.date(2013,1,1), datetime.date(2014,5,8))
 ax.set_ylim(-10,8)
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
 ax.grid(True)
