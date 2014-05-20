@@ -20,11 +20,11 @@ import sys
 
 def compute_bounds(lons, lats):
     ''' figure out a minimum box to extract data from, save CPU '''
-    dist = ((lats - ref.MW_SOUTH)**2 + (lons - ref.MW_WEST)**2)**0.5
-    x1, y1 = np.unravel_index(dist.argmin(), dist.shape)
-    dist = ((lats - ref.MW_NORTH)**2 + (lons - ref.MW_EAST)**2)**0.5
-    x2, y2 = np.unravel_index(dist.argmin(), dist.shape)
-    return x1, x2 + 30, y1, y2
+    dist = ((lats - ref.MW_NORTH)**2 + (lons - ref.MW_WEST)**2)**0.5
+    x2, y1 = np.unravel_index(dist.argmin(), dist.shape)
+    dist = ((lats - ref.MW_SOUTH)**2 + (lons - ref.MW_EAST)**2)**0.5
+    x1, y2 = np.unravel_index(dist.argmin(), dist.shape)
+    return x1 - 20, x2 + 20, y1 - 20, y2 + 20
 
 def run( utc , routes):
     ''' Generate the plot for the given UTC time '''
@@ -92,7 +92,7 @@ def run( utc , routes):
                                                             pqstr,),
                     shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     
-    os.remove("/tmp/hrrr_ref.gif")
+    #os.remove("/tmp/hrrr_ref.gif")
     os.remove("/tmp/hrrr.ref.tmp.grib2")
 
 
