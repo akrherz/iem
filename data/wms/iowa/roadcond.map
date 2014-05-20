@@ -92,7 +92,6 @@ LAYER
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100"
     "wms_extent" "-97 40 -89 44"
   END
-  #FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
    "init=epsg:4326"
   END
@@ -289,7 +288,6 @@ LAYER
     "wms_extent" "-97 40 -89 44"
   END
   TRANSPARENCY ALPHA
-  #FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
    "init=epsg:4326"
   END
