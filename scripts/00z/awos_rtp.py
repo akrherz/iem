@@ -1,15 +1,20 @@
 """
 Generate a First Guess RTP that the bureau can use for their product
 """
-
+#stdlib
 import datetime
-import pytz
 import subprocess
-from pyiem.tracker import loadqc
-qdict = loadqc()
-import network
-nt = network.Table("AWOS")
+
+#extras
+import pytz
 import psycopg2
+
+#pyiem
+from pyiem.tracker import loadqc
+from pyiem import network
+
+nt = network.Table("AWOS")
+qdict = loadqc()
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
