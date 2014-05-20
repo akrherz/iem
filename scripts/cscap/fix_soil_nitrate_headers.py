@@ -2,10 +2,8 @@
  Scrape out the Soil Nitrate data from Google Drive
 '''
 import util
-import sys
 import gdata.docs.client
 import ConfigParser
-import psycopg2
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
@@ -19,31 +17,53 @@ query = gdata.docs.client.DocsQuery(show_collections='false',
                                     title='Soil Nitrate Data')
 feed = docs_client.GetAllResources(query=query)
 
-varconv = {'SOIL23 Spring Soil Ammonium (Optional)': 'SOIL22 Spring Soil Ammonium (Optional)',
-}
+cols = []
+
+seasons = {'SOIL15': "Spring",
+           'SOIL22': 'Spring',
+           'SOIL16': 'Summer',
+           'SOIL23': 'Fall',
+           'SOIL25': 'Fall'}
+
+what = {'SOIL15': "Nitrate",
+           'SOIL22': 'Ammonium',
+           'SOIL16': 'Nitrate',
+           'SOIL23': 'Nitrate',
+           'SOIL25': 'Ammonium'}
+
+def translate(year, oldval):
+    ''' Convert something old into something new '''
+    if oldval not in cols:
+        cols.append( oldval )
+    tokens = oldval.split()
+    if tokens[0] in ['SOIL99', 'SOIL98', 'SOIL97', 'SOIL96']:
+        return oldval
+    cy = year
+    if tokens[0] in ['SOIL23', 'SOIL25']:
+        cy = int(year) - 1
+    
+    return "%s Calendar Year %s %s Soil %s" % (tokens[0], cy, 
+                                            seasons[ tokens[0] ],
+                                            what[ tokens[0]])
+    
 
 for entry in feed:
     if entry.get_resource_type() != 'spreadsheet':
         continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
-    cols = []
-    for key in spreadsheet.worksheets:
-        worksheet = spreadsheet.worksheets[key]
+    for year in spreadsheet.worksheets:
+        worksheet = spreadsheet.worksheets[year]
         worksheet.get_cell_feed()
-        for col in range(1, worksheet.cols+1):
-            cell_feed = spr_client.get_cells(spreadsheet.id, 
-                                             worksheet.id)
-            for entry in cell_feed.entry:
-                row = entry.cell.row
-                if row != "1":
-                    continue
-                cv = entry.cell.input_value.strip()
-                if cv not in cols:
-                    cols.append(cv)
-                if varconv.has_key(cv):
-                    print 'Fixing %s [%s] %s' % (spreadsheet.title, key, cv)
-                    entry.cell.input_value = "%s" % (
-                                    varconv[entry.cell.input_value.strip()],)
-                    spr_client.update(entry)
-    print spreadsheet.title, cols
+        for entry in worksheet.cell_feed.entry:
+            if entry.cell.row != "1":
+                continue
+            val = entry.cell.input_value.strip()
+            if val in ['plotid', 'depth']:
+                continue
+            newval = translate(year, val)
+            if newval != val:
+                print '[%s] %s -> %s' % (year, val, newval)
+                entry.cell.input_value = newval
+                spr_client.update(entry)
+print cols
