@@ -36,6 +36,14 @@ fd = ogr.FieldDefn('UPDATED',ogr.OFTString)
 fd.SetWidth(12)
 out_layer.CreateField(fd)
 
+fd = ogr.FieldDefn('INIT_ISS',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('INIT_EXP',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
 fd = ogr.FieldDefn('TYPE',ogr.OFTString)
 fd.SetWidth(2)
 out_layer.CreateField(fd)
@@ -68,7 +76,9 @@ sql = """
  phenomena,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
- to_char(polygon_begin at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated
+ to_char(polygon_begin at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated,
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
+ to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
  from sbw_%s WHERE polygon_begin <= '%s' and expire > '%s' 
 
 UNION
@@ -77,7 +87,9 @@ UNION
  phenomena,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
- to_char(updated at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated 
+ to_char(updated at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated,
+ to_char(product_issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
+ to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
  from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
  expire > '%s' and w.gid is not null
 
@@ -102,6 +114,8 @@ while True:
 	featDef.SetField('ISSUED', feat.GetField("utcissue"))
 	featDef.SetField('EXPIRED', feat.GetField("utcexpire"))
 	featDef.SetField('UPDATED', feat.GetField("utcupdated"))
+	featDef.SetField('INIT_ISS', feat.GetField("utc_prodissue"))
+	featDef.SetField('INIT_EXP', feat.GetField("utc_init_expire"))
 	featDef.SetField('SIG', feat.GetField("significance"))
 	featDef.SetField('WFO', feat.GetField("wfo"))
 	featDef.SetField('STATUS', feat.GetField("status"))
