@@ -8,40 +8,42 @@ include("../../../include/vtec.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+if ($year < 2002) die("invalid year specified!");
+
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
-           from sbw_$year 
-           WHERE wfo = $1 and phenomena = $2 and 
-           eventid = $3 and significance = $4
-           and status = 'NEW'");
+$rs = pg_prepare($connect, "SELECT", "SELECT eventid, phenomena, 
+		significance, ST_AsText(geom) as g
+        from sbw_$year 
+        WHERE wfo = $1 and phenomena = $2 and 
+        eventid = $3 and significance = $4
+        and status = 'NEW'");
 
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT2", "SELECT *, ST_astext(u.geom) as g, 
-           round(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as psize,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
-           WHERE w.wfo = $1 and phenomena = $2 and 
-           eventid = $3 and significance = $4
-           and gtype = 'C'");
+    $rs = pg_prepare($connect, "SELECT2", "SELECT eventid, phenomena,
+    	significance, ST_astext(u.geom) as g 
+        from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+        WHERE w.wfo = $1 and phenomena = $2 and 
+        eventid = $3 and significance = $4 ");
 
     $result = pg_execute($connect, "SELECT2", 
                Array($wfo, $phenomena, $eventid, $significance) );
 }
 $fp = sprintf("%s-%s-%s-%s.txt", $wfo, $phenomena, $significance, $eventid);
- header("Content-type: application/octet-stream");
- header("Content-Disposition: attachment; filename=$fp");
+
+header("Content-type: application/octet-stream");
+header("Content-Disposition: attachment; filename=$fp");
+
 echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
 echo "Title: VTEC $wfo ${phenomena}.${significance} $eventid\n";            
                      
-for($i=0;$row=@pg_fetch_array($result,$i);$i++){
+for($i=0;$row=@pg_fetch_assoc($result,$i);$i++){
 	$geom = $row["g"];
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);
