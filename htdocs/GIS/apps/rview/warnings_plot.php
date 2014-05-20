@@ -165,7 +165,7 @@ if ($warngeo == "both" or $warngeo == "county")
     $c0->set("data", "geom from (select eventid, w.wfo, significance, phenomena, "
   		." u.geom, random() as oid from warnings_$year w JOIN ugcs u "
   		." ON (u.gid = w.gid) WHERE expire > '$db_ts' and issue <= '$db_ts' "
-  		." and gtype = 'C' ORDER by phenomena ASC) as foo "
+  		." ORDER by phenomena ASC) as foo "
   		." using unique oid using SRID=4326");
 }
 if ($warngeo == "both")
