@@ -71,9 +71,19 @@ fd.SetWidth(3)
 out_layer.CreateField(fd)
 fd = ogr.FieldDefn('ISSUED',ogr.OFTString)
 fd.SetWidth(12)
+
 out_layer.CreateField(fd)
 fd = ogr.FieldDefn('EXPIRED',ogr.OFTString)
 fd.SetWidth(12)
+
+out_layer.CreateField(fd)
+fd = ogr.FieldDefn('INIT_ISS',ogr.OFTString)
+fd.SetWidth(12)
+
+out_layer.CreateField(fd)
+fd = ogr.FieldDefn('INIT_EXP',ogr.OFTString)
+fd.SetWidth(12)
+
 out_layer.CreateField(fd)
 fd = ogr.FieldDefn('PHENOM',ogr.OFTString)
 fd.SetWidth(2)
@@ -117,7 +127,7 @@ if form.has_key('simple') and form['simple'][0] == 'yes':
     geomcol = "simple_geom"
 
 cols = """%s, gtype, significance, wfo, status, eventid, ugc, phenomena,
- area2d, utc_expire, utc_issue""" % (geomcol,)
+ area2d, utc_expire, utc_issue, utc_prodissue, utc_init_expire""" % (geomcol,)
 
 sql = """
 WITH stormbased as (
@@ -126,7 +136,9 @@ WITH stormbased as (
  phenomena, geom as simple_geom,  
  ST_area( ST_transform(w.geom,2163) ) / 1000000.0 as area2d,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
- to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
+ to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
  from %s w WHERE status = 'NEW' and issue >= '%s' and issue < '%s' %s %s
 ),
 countybased as (
@@ -134,7 +146,9 @@ countybased as (
  w.wfo, status, eventid, u.ugc, phenomena,
  ST_area( ST_transform(u.geom,2163) ) / 1000000.0 as area2d,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
- to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
+ to_char(product_issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
+ to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
  from %s w JOIN ugcs u on (u.gid = w.gid) WHERE
  issue >= '%s' and issue < '%s' %s %s
  )
@@ -156,6 +170,8 @@ while True:
     featDef.SetGeometry(feat.GetGeometryRef())
     featDef.SetField('ISSUED', feat.GetField("utc_issue"))
     featDef.SetField('EXPIRED', feat.GetField("utc_expire"))
+    featDef.SetField('INIT_ISS', feat.GetField("utc_prodissue"))
+    featDef.SetField('INIT_EXP', feat.GetField("utc_init_expire"))
     featDef.SetField('PHENOM', feat.GetField("phenomena"))
     featDef.SetField('GTYPE', feat.GetField("gtype"))
     featDef.SetField('SIG', feat.GetField("significance"))
@@ -185,17 +201,12 @@ z.write(fp+".dbf")
 z.write(fp+".prj")
 z.close()
 
-print "Content-type: application/octet-stream"
-print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-print
+sys.stdout.write("Content-type: application/octet-stream\n")
+sys.stdout.write("Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,))
 
-print file(fp+".zip", 'r').read(),
+sys.stdout.write( file(fp+".zip", 'r').read() )
 
-os.remove(fp+".zip")
-os.remove(fp+".shp")
-os.remove(fp+".shx")
-os.remove(fp+".dbf")
-os.remove(fp+".prj")
-
+for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
+    os.remove("%s.%s" % (fp, suffix))
 
 # END
