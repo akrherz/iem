@@ -60,6 +60,10 @@ for entry in feed:
             for col in data.keys():
                 if col[:3] != 'agr':
                     continue
+                #if (col in cropmates.get(crop, []) and data[col] == "."):
+                #    print 'Setting to DNC', data['plotid'], crop, col, data[col]
+                #    entry.set_value(col, 'did not collect')
+                #    dirty = True                    
                 if (col not in cropmates.get(crop, []) and 
                     (data[col] is None or 
                     data[col].lower() in ['.', 'did not collect'])):
