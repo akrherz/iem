@@ -1,0 +1,17 @@
+JSani - JavaScript Animator
+http://www.ssec.wisc.edu/~billb/jsani/
+
+Copyright 2010, Bill Bellon
+Licensed under the GPL Version 3 licenses.
+http://www.ssec.wisc.edu/~billb/jsani/license
+
+Includes jQuery.js 
+http://jquery.com/
+Copyright 2010, John Resig
+Dual licensed under the MIT or GPL Version 2 licenses.
+http://jquery.org/license
+
+Includes Sizzle.js
+http://sizzlejs.com/
+Copyright 2010, The Dojo Foundation
+Released under the MIT, BSD, and GPL Licenses.
