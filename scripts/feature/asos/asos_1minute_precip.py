@@ -15,19 +15,19 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'MOB'
- and valid BETWEEN '2014-04-29 00:00' and '2014-04-29 23:59' 
+  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'AMW'
+ and valid BETWEEN '2014-05-20 00:00' and '2014-05-20 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
 for row in acursor:
-        offset = row[0].hour * 60 + row[0].minute
-        if row[0].day == 36:
-            offset += 1440
-        if row[7] > 0:
-            print offset, row[0], row[7]
-            tot += row[7]
-        sprec[offset] = float(row[7] or 0) 
+    offset = row[0].hour * 60 + row[0].minute
+    if row[0].day == 36:
+        offset += 1440
+    if row[7] > 0:
+        print offset, row[0], row[7]
+        tot += row[7]
+    sprec[offset] = float(row[7] or 0) 
         
 print tot
 
@@ -35,7 +35,7 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2014,4,29)
+basets = datetime.datetime(2014,5,20)
 basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
 for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
@@ -50,16 +50,16 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2014,4,29, 0, 0)
+sts = datetime.datetime(2014,5,20, 19, 0)
 sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-ets = sts + datetime.timedelta(minutes=1441)
-interval = datetime.timedelta(minutes=120)
+ets = sts + datetime.timedelta(minutes=81)
+interval = datetime.timedelta(minutes=15)
 now = sts
 xticks = []
 xlabels = []
 xlabels2 = []
 while now <= ets:
-    fmt = "%-I %p"
+    fmt = "%-I:%M %p"
     #if now == sts or now.hour == 0:
     #    fmt = "%-I %p\n%-d %B"
     
@@ -85,9 +85,10 @@ ax.bar(svalid, sprec * 60, width=1./1440., fc='b', ec='b', label="Hourly Rate ov
 ax.plot(svalid, acc, color='k', label="Accumulation",lw=2, zorder=2)
 ax.plot(svalid, rate15, color='g', label="Hourly Rate over 15min", linewidth=2)
 ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=2)
-ax.text(xticks[3], 8.45, "Minute Accums [inch]", va='bottom')
-for i in range(124,135):
-    ax.text( xticks[3], 8.25 + (124-i)*0.69, "%s %.2f" % (
+x0 = 1170
+ax.text(sts + datetime.timedelta(minutes=5), 10.85, "Minute Accums [inch]", va='bottom')
+for i in range(x0,x0+11):
+    ax.text( sts + datetime.timedelta(minutes=5), 10.65 + (x0-i)*0.69, "%s %.2f" % (
                                 svalid[i].strftime("%-I:%M %p"), sprec[i],),
              va='top')
 ax.set_xticks(xticks)
@@ -95,15 +96,15 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
 ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
-ax.legend(loc=(0.3,0.75), prop=prop, ncol=1)
+ax.legend(loc=1, prop=prop, ncol=1)
 ax.set_ylim(0,12)
-ax.set_xlabel("29 April 2014 (CDT)")
-ax.set_title("29 April 2014 Mobile (KMOB) One Minute Rainfall\n11.24 inches total")
+ax.set_xlabel("20 May 2014 (CDT)")
+ax.set_title("20 May 2014 Ames (KAMW) One Minute Rainfall\n3.03 inches total")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
 
 
-fig.savefig('test.png')
-#import iemplot
-#iemplot.makefeature('test')
+fig.savefig('test.ps')
+import iemplot
+iemplot.makefeature('test')
