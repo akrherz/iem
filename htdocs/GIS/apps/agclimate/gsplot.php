@@ -1,8 +1,8 @@
 <?php
 include("../../../../config/settings.inc.php");
-include_once "$rootpath/include/iemmap.php";
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include_once "../../../../include/iemmap.php";
+include("../../../../include/database.inc.php");
+include("../../../../include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
 $ISUAGcities["A130219"]["lon"] += 0.2;
@@ -59,7 +59,7 @@ $width = $width;
 
 $proj = "init=epsg:26915";
 
-$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
+$map = ms_newMapObj("../../../../data/gis/base26915.map");
 $map->setsize($width,$height);
 $map->setProjection($proj);
 
