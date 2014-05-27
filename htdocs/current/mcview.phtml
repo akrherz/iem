@@ -238,37 +238,20 @@ EOF;
 } else if ($java == 'script'){
 	$i = 0;
 	reset($images);
-	$mi = "";
-	while ( list($key,$val) = each($images) ){
-		$mi .= "modImages[$i] = \"". $images[$i] ."\";\n";
-		$i++;
-	}
-	$sz = sizeof($images);
+	$myimages = implode("::", $images);
 	$control = <<<EOF
-	<script LANGUAGE="JavaScript1.2" type="text/javascript">
-	//<!--
-	modImages = new Array();
-	{$mi}
-	first_image = 1;
-	last_image = {$sz};
-	current_image = first_image;
-	-->
-	</script>
-	<script language="JavaScript" src="/js/animation.js"></script>
-	<img NAME="animation" SRC="{$images[0]}" ALT="Image" border="2" />
-	                                                                                
-	  <form METHOD="POST" NAME="control_form">
-	<a HREF="JavaScript: func()" onClick="change_mode(1);reverse()"><img BORDER=0 SRC="/images/rev_button.gif" ALT="REV"></a>
-	<a HREF="JavaScript: func()" onClick="stop()"><img BORDER=0 SRC="/images/stp_button.gif" ALT="STOP"></a>
-	<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 SRC="/images/fwd_button.gif" ALT="FWD"></a>
-	  <font SIZE=-1 COLOR="#3300CC">Frame No:</font>
-	  <input TYPE="text" NAME="frame_nr" VALUE=9 SIZE="2" onFocus="this.select()" onChange="go2image(this.value)"></input>
-	  </form>
-	<script LANGUAGE="JavaScript1.2" type="text/javascript">
-	//<!--
-	launch();
-	-->
-	</script>
+<form name="jsani" id="jsani" action="#" style="width: {$lwidth}px; height: {$lheight}px;">
+    <input type="hidden" name="filenames" value="{$myimages}">
+    <input type="hidden" name="controls"
+           value="previous, stopplay, next, looprock, slowfast">
+    <input type="hidden" name="maxdwell" value="1400">
+    <input type="hidden" name="mindwell" value="100">
+    <input type="hidden" name="initdwell" value="300">
+    <input type="hidden" name="nsteps" value="8">
+    <input type="hidden" name="last_frame_pause" value="3">
+    <input type="hidden" name="first_frame_pause" value="2">
+    <input type="hidden" name="frame_pause" value="2:4,3:5">
+</form>
 EOF;
 } else {
  	reset($images);
@@ -288,18 +271,24 @@ foreach ($radtimes as $value ){
 
 /* We finally start output */
 
-$t->headextra = "<script LANGUAGE=\"JavaScript1.2\" type=\"text/javascript\">
+$headextra = <<<EOF
+<script LANGUAGE=\"JavaScript1.2\" type=\"text/javascript\">
 //<!--
-
 function switchToArchiveMode()
 {
   document.controls.mode.selectedIndex = 1;
 }
-
 -->
-</script>";
+</script>
+EOF;
+if ($java == 'script'){
+	$headextra .= <<<EOF
+<script language="javascript" type="text/javascript" src="/js/jsani/jsani.loader.js"></script>
+EOF;
+}
 if ($autopilot == "yes"){
- $t->headextra .= "<style>
+ 	$headextra .= <<<EOF
+<style>
 body{
   background: #fff;
 }
@@ -309,8 +298,10 @@ body{
 .iembox{
  display: none;
 }
-</style>";
+</style>
+EOF;
 }
+  $t->headextra = $headextra;
   if ($mode == "realtime") {
 	$t->refresh = "<meta http-equiv=\"refresh\" content=\"300;\">";
   }
