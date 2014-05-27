@@ -12,7 +12,7 @@
 192.168.0.10     iem10         iem10.local
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12         postgresread
-192.168.0.19     iem19         iem19.local iemdb iemdb2
+192.168.0.19     iem19         iem19.local
 192.168.0.21     iem21         iem21.local openfire-bosh
 192.168.0.22     iem22         iem22.local
 192.168.0.23     iem23         iem23.local
@@ -32,18 +32,19 @@
 192.168.0.107    iemvs107      iemvs107.local
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
-
-# IPs that float depending on workload!
 192.168.0.200    iem-idd0      iem-idd0.local
-192.168.0.201    iemdb3
-# iem50, backup iem30
-192.168.1.202    iem-mapserver 
 192.168.0.231    iemvm4
 192.168.0.254    iem-gateway   iem-gateway.local
 
+# IPs that float depending on workload!
 # iemvm1, backup iem21
 192.168.1.190    iem-memcached
 # metvm4
 192.168.1.191    iem-memcached1
 # metvm3
 192.168.1.192    iem-memcached2
+192.168.0.201    iemdb3
+# iem50, backup iem30
+192.168.1.202    iem-mapserver 
+# iem19, backup iem12
+192.168.1.203    iemdb iemdb2
