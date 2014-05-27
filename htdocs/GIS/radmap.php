@@ -578,6 +578,12 @@ $roadsint->set("connection", $_DATABASES["postgis"]);
 $roadsint->set("status", in_array("roads-inter", $layers) );
 $roadsint->draw($img);
 
+if (in_array("usdm", $layers)){
+	$usdm = $map->getlayerbyname("usdm");
+	$usdm->set("status", MS_ON );
+	$usdm->draw($img);
+}
+
 if (in_array("surface", $layers)){
 	$surface = $map->getlayerbyname("surface");
 	$surface->set("status", MS_ON );
