@@ -8,15 +8,15 @@ function reverseLayer(lyr) {
     var w = document.getElementById(lyr);
     if (w.style.display == "none") { 
        w.style.display = "block"; 
-      var w = document.getElementById("datawindow");
-      w.style.top = "120px";
-      w.style.left = "5px";
+      var w2 = document.getElementById("datawindow");
+      w2.style.top = "120px";
+      w2.style.left = "5px";
     }
     else { 
       w.style.display = "none"; 
-      var w = document.getElementById("datawindow");
-      w.style.top = "5px";
-      w.style.left = "5px";
+      var w2 = document.getElementById("datawindow");
+      w2.style.top = "5px";
+      w2.style.left = "5px";
     }
 
 
@@ -39,7 +39,6 @@ function handsOff( ) {
 }
 function showControl(layerName){
   var oldval = document.getElementById(layerName).style.display;
-  setLayerDisplay("applet-hack", 'none');
   setLayerDisplay("layers-control", 'none');
   setLayerDisplay("locations-control", 'none');
   setLayerDisplay("time-control", 'none');

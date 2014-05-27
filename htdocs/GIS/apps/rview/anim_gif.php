@@ -3,17 +3,23 @@
 
 $fts = isset($_GET["fts"]) ? intval($_GET["fts"]): exit();
 
+$memcache = new Memcache;
+$memcache->connect('iem-memcached', 11211);
+$urls = $memcache->get("/GIS/apps/rview/warnings.phtml?fts=${fts}");
+if (!$urls){
+	die("fts not found, ERROR");
+}
 chdir("/var/webtmp");
-
-$lines = file($fts .".dat");
-
-$cmdstr = "gifsicle --loopcount=0 --delay=100 -o ${fts}_anim.gif ";
-foreach ($lines as $line_num => $line) 
-{
-  $tokens = split("/", $line);
-  $cmdstr .= trim($tokens[sizeof($tokens)-1]) .".gif ";
-  $convert = "convert ". trim($tokens[sizeof($tokens)-1]) ." ". trim($tokens[sizeof($tokens)-1]) .".gif";
-  `$convert`;
+$cmdstr = "gifsicle --colors 256 --loopcount=0 --delay=100 -o ${fts}_anim.gif ";
+while (list($k,$v)=each($urls)) {
+	$res = file_get_contents("http://iem.local{$v}");
+	$fn = "{$fts}_{$k}.png";
+	$gfn = "{$fts}_{$k}.gif";
+	$f = fopen($fn, 'wb');
+	fwrite($f, $res);
+	fclose($f);
+	`convert $fn $gfn`;
+	$cmdstr .= " {$gfn} ";
 }
 
 `$cmdstr`;
