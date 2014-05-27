@@ -31,7 +31,8 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
 
 $layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "uscounties", "nexrad", "watches");
 $cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
-$loop = isset($_GET["loop"]) ? $_GET["loop"] : 0;
+$loop = isset($_GET["loop"]) ? intval($_GET["loop"]) : 0;
+if ($loop == 2) $loop = 1;
 $tz = isset($_GET["tz"]) ? $_GET["tz"] : "CDT";
 $tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, 
 		"CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, 
@@ -124,13 +125,16 @@ else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 
-$t->title = "IEM | RADAR & NWS Warnings";
-$headextra = "<script type=\"text/javascript\" src=\"warnings.js\"></script>
-<link rel=\"stylesheet\" type=\"text/css\" href=\"warnings.css\" />
-<script language=\"JavaScript1.2\" type=\"text/javascript\">
-";
+$t->title = "RADAR &amp; NWS Warnings";
+$headextra = <<<EOF
+<script type="text/javascript" src="warnings.js?v=2"></script>
+<link rel="stylesheet" type="text/css" href="warnings.css" />
+<script language="javascript" type="text/javascript" src="/js/jsani/jsani.loader.js"></script>
+<script language="JavaScript1.2" type="text/javascript">
+EOF;
 if (! $isarchive)
   $headextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
+
 $headextra .= "</script>";
 $t->headextra = $headextra;
 
@@ -234,8 +238,7 @@ $lrselect = make_select("lsrlook", $lsrlook, $ar);
 
 $ar = Array(
 	"0" => "1 image only",
-		"1" => "Java Script Loop",
-		"2" => "Java Applet Loop",
+	"1" => "Java Script Loop"
 );
 $loselect = make_select("loop", $loop, $ar);
 
@@ -287,14 +290,15 @@ $content .= <<<EOF
 {$lselect}
 <input type="hidden" name="layers[]" value="blank">
 
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="locations-control" style="width: 450px; background: #F2FE5A; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <strong>NWS Office:</strong><br />
 {$wselect}
 
 <br />Selecting a different office will move the display to that office.
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('locations-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;">
+<input type="submit" onClick="javascript: setLayerDisplay('locations-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="time-control" style="width: 450px; background: #FF5EC4; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <p><strong>Select Time Zone</strong><br />
@@ -309,7 +313,7 @@ $content .= <<<EOF
 <tr><th>Time:</th><td>{$hselect}:{$miselect}</td></tr>
 </table>
 
-<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="options-control" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <strong>Warning geography:</strong>
@@ -347,59 +351,37 @@ geography associated with them.  You can pick which or both to display:
 <br />Time window around plot valid time to plot LSRs.
 <br />{$lrselect}
 {$lwselect}
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
 EOF;
 
 $heightadd = 0;
 $maptitle = "IEM NEXRAD Composite Base Reflectivity";
-if (intval($loop) ==  1){
-
-  $urls = Array();
-  $fts = time();
-  $f = fopen("/var/webtmp/". $fts .".dat", 'w');
-
-  for ($i=0;$i<$frames;$i++){
-   $imgi = $frames - 1 - $i;
-   include("warnings_plot.php");
-   $urls[$i] = $url;
-   fwrite($f, "$rooturl/$url\n");
-  }
-  fclose($f);
-  $content .= "<div id=\"applet-hack\"></div><a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
-  include ("loop.php");
-  printHTML($urls);
-} else if (intval($loop) == 2){
-  $heightadd = 100;
-  $urls = Array();
-  $fts = time();
-  $f = fopen("/var/webtmp/". $fts .".dat", 'w');
-
-  for ($i=0;$i<$frames;$i++){
-   $imgi = $frames - 1 - $i;
-   include("warnings_plot.php");
-   $urls[$i] = $url;
-   fwrite($f, "$rooturl/$url\n");
-  }
-  fclose($f);
-  $content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
-
-$height2 = $height + 100;
-$content .= <<<EOF
-<div id="applet-hack"><applet codebase="/current/class/" code="AniS.class" width="{$width}" height="{$height2}" alt="You must enable Java in your browser to view the radar loop" style="float: left;">
-        <param name="bottom_controls" value="startstop, looprock, step, speed, toggle, zoom">
-        <param name="rate" value="80">
-	<PARAM name="no_enh" value="true">
-    <param name="pause_percent" value="800">
-        <param name="file_of_filenames" value="/tmp/{$fts}.dat">
-</applet></div>
-EOF;
+if (intval($loop) == 1 || intval($loop) == 2){
+	// Alternative 1, we want javascript looper!
+  	$urls = Array();  	
+  	for ($i=0;$i<$frames;$i++){
+   		$imgi = $frames - 1 - $i;
+   		include("warnings_plot.php");
+   		$urls[] = $url;
+  	}
+  	// Save this animation to memcache for future potential use
+  	$memcache = new Memcache;
+  	$memcache->connect('iem-memcached', 11211);
+  	$fts = time();
+  	$memcache->set("/GIS/apps/rview/warnings.phtml?fts=${fts}", $urls, false, 86400);
+  	
+  	$content .= "</form>";
+  	$content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+  	include ("loop.php");
+  	$content .= printHTML($urls, $width, $height);
+  
 } else {
   $imgi = 0;
   include("warnings_plot.php");
 
-  $content .= "<div id=\"applet-hack\"></div><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
-
+  $content .= "<input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
+  $content .= "</form>";
 }
 $content .= <<<EOF
 <!-- Warnings Key! -->
@@ -407,7 +389,7 @@ $content .= <<<EOF
 </div>
 EOF;
 
-$content .= "<input type=\"hidden\" name=\"extents\" value=\"". $map->extent->minx .",". $map->extent->miny .",". $map->extent->maxx .",". $map->extent->maxy ."\">\n";
+$content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
 
 $connection = iemdb("postgis");
 
@@ -532,7 +514,7 @@ if ($k == 0 && $filter){
 if ($k == 0){
   $content .= $msg;
 }
-$content .= "</form>";
+
 $content .= "<div style=\"clear: both;\">";
 if (! $isarchive) { 
   $content .= "<img src=\"/images/gisready.png\">Download <a href=\"/data/gis/shape/unproj/us/current_ww.zip\">GIS shapefile of current warnings</a> and/or <a href=\"/data/gis/images/4326/USCOMP/n0r_0.gtif.Z\">GeoTiff of NEXRAD base reflectivity</a>.";
