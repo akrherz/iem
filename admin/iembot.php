@@ -27,7 +27,7 @@ $sub = isset($_REQUEST["sub"]) ? $_REQUEST["sub"]: Array();
 $name = isset($_REQUEST["name"]) ? $_REQUEST["name"]: "";
 
 function reloadbot(){
-	$alertMsg = file_get_contents("http://localhost/iembot-json/reload");
+	$alertMsg = file_get_contents("http://iembot:8003/iembot-json/reload");
 }
 
 
