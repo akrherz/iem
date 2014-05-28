@@ -14,7 +14,7 @@ while (list($key, $val) = each($nt->table)){
 $wselect .= "</select>";
  
  $t->content = <<<EOF
-<h3 class="heading">iembot</h3>
+<h3>iembot</h3>
 
 <p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
 text products to Jabber chat rooms hosted on the conference.weather.im multi-user
@@ -22,7 +22,7 @@ chat service.
 <i>iembot</i> was written to aid the dissemination and use of NWS issued 
 warnings by their chat partners.
 
-<h3 class="subtitle">Where to access <i>iembot</i> messages?</h3>
+<h3>Where to access <i>iembot</i> messages?</h3>
 
 <ul>
  <li><a href="public.phtml">Public Chatrooms</a> (requires Jabber client and public Jabber account)</li>
@@ -34,17 +34,17 @@ warnings by their chat partners.
 <script>
 function urlChanger(){
  var myid =  document.myForm.wfo.value.toLowerCase();
- document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"http://mesonet.agron.iastate.edu/iembot-rss/wfo/k"+ myid +".xml\">http://mesonet.agron.iastate.edu/iembot-rss/wfo/k"+ myid +".xml</a>";
+ document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"http://weather.im/iembot-rss/wfo/k"+ myid +".xml\">http://mesonet.agron.iastate.edu/iembot-rss/wfo/k"+ myid +".xml</a>";
 }
 </script>
 <form name="myForm">
 <p><img src="/images/rss.gif"> Experimental RSS feed of <i>iembot</i> messages per NWS Forecast Office:
 <br /><b>WFO:</b>{$wselect}
 
-<br /><div id="wfolink" style="float: left;"><b>URL: </b><a href="http://mesonet.agron.iastate.edu/iembot-rss/wfo/kabq.xml">http://mesonet.agron.iastate.edu/iembot-rss/wfo/kabq.xml</a></div>
+<br /><div id="wfolink" style="float: left;"><b>URL: </b><a href="http://weather.im/iembot-rss/wfo/kabq.xml">http://weather.im/iembot-rss/wfo/kabq.xml</a></div>
 
 <br />
-<p>All iembot messages are here: <a href="http://mesonet.agron.iastate.edu/iembot-rss/wfo/botstalk.xml">http://mesonet.agron.iastate.edu/iembot-rss/wfo/botstalk.xml</a>
+<p>All iembot messages are here: <a href="http://weather.im/iembot-rss/wfo/botstalk.xml">http:/weather.im/iembot-rss/wfo/botstalk.xml</a>
 </form>
 
 <h3 class="subtitle">How does <i>iembot</i> work?</h3>
