@@ -4,15 +4,9 @@
  */
 $url = "/GIS/radmap.php?";
 
-if ($isarchive){
-  	/* Set us ahead to GMT and then back into the archive */
-  	$ts = $basets + $tzoff - ($imgi * 60 * $interval );
-} else {
-  $ts = filemtime("/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
-  $radfile = "/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".tif";
-}
+/* Set us ahead to GMT and then back into the archive */
+$ts = $basets + $tzoff - ($imgi * 60 * $interval );
 $url .= sprintf("ts=%s&width=%s&height=%s&", date("YmdHi", $ts), $width, $height);
-
 
 if (isset($x0)) {
 	$url .= sprintf("bbox=%.3f,%.3f,%.3f,%.3f&", $x0, $y0, $x1, $y1);
