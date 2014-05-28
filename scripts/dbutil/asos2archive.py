@@ -22,12 +22,13 @@ IEM = psycopg2.connect(database='iem', host='iemdb')
 acursor = ASOS.cursor()
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-''' Set ourselves back one hour as when we run at 10 after as we don't
-    want to miss data when we run at 00:10 UTC '''
+# Set ourselves back one hour as when we run at 10 after as we don't
+# want to miss data when we run at 00:10 UTC 
 utc = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
-utc = utc.replace(tzinfo=pytz.timezone("UTC"), minute=59, second=0, microsecond=0)
+utc = utc.replace(tzinfo=pytz.timezone("UTC"), minute=59, second=0, 
+                  microsecond=0)
     
-sts = utc.replace(hour=0)
+sts = utc.replace(hour=0, minute=0)
 
 # Option 1 is to run for 'today' and for Iowa data    
 if len(sys.argv) > 1:
@@ -36,7 +37,7 @@ if len(sys.argv) > 1:
 # Option 2 is to run for 'yesterday' and for the entire archive
 else:
     sts = sts.replace(minute=0) - datetime.timedelta(days=1)
-    ets = sts.replace(hour=23,minute=59)
+    ets = sts.replace(hour=23, minute=59)
     networks = "(network ~* 'ASOS' or network ~* 'AWOS')"
 
 # Delete any obs from yesterday
@@ -52,10 +53,10 @@ sql = """SELECT c.*, t.network, t.id from
 args = (sts, ets)
 icursor.execute(sql, args)
 for row in icursor:
-    sql = """INSERT into t"""+ str(sts.year) +""" (station, valid, tmpf, dwpf, drct, sknt,  alti, 
-    p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
-    p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
-    mslp, presentwx) 
+    sql = """INSERT into t"""+ str(sts.year) +""" (station, valid, tmpf, 
+    dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4, 
+    skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr, 
+    min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, presentwx) 
     values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
     %s,%s,%s,%s,%s,%s,%s,%s,%s)""" 
 
