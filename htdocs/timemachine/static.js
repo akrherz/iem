@@ -3,6 +3,8 @@
  */
 Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
 
+var ys;
+
 Ext.onReady( function(){
 
 var currentURI = "";
@@ -43,11 +45,11 @@ var task = {
   interval: 300000
 };
 
-var ys = new Ext.Slider({
+ys = new Ext.Slider({
     id       : 'YearSlider',
     width    : 214,
     minValue : 1893,
-    maxValue : Ext.Date.format(appTime, "Y"),
+    maxValue : parseInt( Ext.Date.format(appTime, "Y") ),
     listeners: {
           'drag': function(){ updateDT(); }
     }
@@ -170,7 +172,7 @@ var combo = Ext.create('Ext.form.field.ComboBox', {
 
         ms.increment = records[0].data.interval;
         //console.log("Setting MS Increment to "+ ms.increment );
-        ys.minValue = Ext.Date.format(records[0].data.sts, "Y");
+        ys.minValue = parseInt( Ext.Date.format(records[0].data.sts, "Y") );
         ys.setValue( ys.getValue()-1 );
         ys.setValue( ys.getValue()+1 );
         updateDT();
