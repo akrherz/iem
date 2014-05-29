@@ -8,7 +8,7 @@ $t->thispage="archive-tm";
 $t->headextra = '
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/4.2.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/4.2.1/ext-all.js"></script>
-<script type="text/javascript" src="static.js?v=16"></script>
+<script type="text/javascript" src="static.js?v=17"></script>
 ';
 
 $t->content = <<<EOF
