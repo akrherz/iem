@@ -3,9 +3,6 @@ include("../../../../config/settings.inc.php");
 include_once "../../../../include/iemmap.php";
 include("../../../../include/database.inc.php");
 include("../../../../include/network.php");
-$nt = new NetworkTable("ISUAG");
-$ISUAGcities = $nt->table;
-$ISUAGcities["A130219"]["lon"] += 0.2;
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -17,6 +14,16 @@ $imgsz = isset($_GET["imgsz"]) ? $_GET["imgsz"] : "640x480";
 $ar = explode("x", $imgsz);
 $width = $ar[0];
 $height = $ar[1];
+
+if ($year > 2013) {
+	$nt = new NetworkTable("ISUSM");
+	$ISUAGcities = $nt->table;
+} else {
+	$nt = new NetworkTable("ISUAG");
+	$ISUAGcities = $nt->table;
+	$ISUAGcities["A130219"]["lon"] += 0.2;
+}
+
 
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
@@ -186,11 +193,18 @@ if ($var == 'sdd86') {
 }  
 /* ------------------------------------------------------- */
 else if ($var == 'sgdd50' || $var == 'sgdd52') {
-  $q = "SELECT station, date(valid) as dvalid, 
-     max(c300) as high, min(c300) as low
-     from hourly WHERE valid >= '". $sstr ."'
-     and valid < '". $estr ."' GROUP by station, dvalid";
-
+	if ($year > 2013){
+		$q = "SELECT station, date(valid) as dvalid, 
+				c2f(max(tsoil_c_avg)) as high,
+				c2f(min(tsoil_c_avg)) as low from sm_hourly WHERE
+				valid >= '". $sstr ."'
+     			and valid < '". $estr ."' GROUP by station, dvalid";	
+	} else {
+  		$q = "SELECT station, date(valid) as dvalid, 
+     		max(c300) as high, min(c300) as low
+     		from hourly WHERE valid >= '". $sstr ."'
+     		and valid < '". $estr ."' GROUP by station, dvalid";
+	}
   $gdds = Array();
   $rs =  pg_exec($c, $q);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
@@ -301,8 +315,8 @@ foreach($vals as $key => $value){
 }
 
 $map->drawLabelCache($img);
-iemmap_title($map, $img, $year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ",
-	($i==0) ? 'No Data Found!': null);
+iemmap_title($map, $img, $year." ". $varDef[$var] , 
+	"(". $sstr_txt ." - ". $estr_txt .")");
 
 header("Content-type: image/png");
 $img->saveImage('');
