@@ -6,14 +6,22 @@
                   ViewID
                      GMT Timestamp....
 """
-
-import os, mx.DateTime, glob, re
-from PIL import Image, ImageDraw, ImageFont
-font = ImageFont.truetype('veramono.ttf', 10)
+# stdlib
+import os
+import datetime
+import glob
+import re
 import subprocess
+
+# third party
+from PIL import Image, ImageDraw, ImageFont
 import psycopg2
-import mesonet
 import psycopg2.extras
+import pytz
+
+import mesonet
+
+font = ImageFont.truetype('veramono.ttf', 10)
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -22,41 +30,45 @@ mcursor.execute("""SELECT propvalue from properties
 row = mcursor.fetchone()
 FTP_PASS = row['propvalue']
 
-gmt = mx.DateTime.gmt()
+utc = datetime.datetime.utcnow()
 
 # we work from here
 os.chdir("/mesonet/data/dotcams")
 
 # Every three hours, clean up after ourselves :)
-if gmt.hour % 3 == 0 and gmt.minute < 5:
-    os.system("/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images")
+if utc.hour % 3 == 0 and utc.minute < 5:
+    subprocess.call("/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images",
+                    shell=True)
 
 # Make dictionary of webcams we are interested in
 cameras = {}
 mcursor.execute("SELECT * from webcams WHERE network = 'IDOT'")
 for row in mcursor:
-  cameras[ row['id'] ] = row
+    cameras[ row['id'] ] = row
 
 
-p = subprocess.Popen("wget --timeout=20 -m --ftp-user=rwis --ftp-password=%s \
-           ftp://165.206.203.34/rwis_images/*%s-??.jpg" % (FTP_PASS,
-           gmt.strftime("%d-%H")), shell=True, stdout=subprocess.PIPE,
+p = subprocess.Popen(("wget --timeout=20 -m --ftp-user=rwis --ftp-password=%s "
+           +"ftp://165.206.203.34/rwis_images/*%s-??.jpg") % (FTP_PASS,
+           utc.strftime("%d-%H")), shell=True, stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
 stdout, stderr = p.communicate()
 lines = stderr.split("\n")
 for line in lines:
     # Look for RETR (.*)
-    tokens = re.findall("RETR Vid-000512([0-9]{3})-([0-9][0-9])-([0-9][0-9])-([0-9]{4})-([0-9][0-9])-([0-9][0-9])-([0-9][0-9])-([0-9][0-9]).jpg", line)
+    tokens = re.findall(("RETR Vid-000512([0-9]{3})-([0-9][0-9])-([0-9][0-9])"
+                +"-([0-9]{4})-([0-9][0-9])-([0-9][0-9])-([0-9][0-9])-"
+                +"([0-9][0-9]).jpg"), line)
     if len(tokens) == 0:
         continue
 
     t = tokens[0]
     cid = "IDOT-%s-%s" % (t[0], t[2])
-    gmt = mx.DateTime.DateTime( int(t[3]), int(t[4]), int(t[5]),
+    gmt = datetime.datetime( int(t[3]), int(t[4]), int(t[5]),
                              int(t[6]), int(t[7]) )
-    now = gmt.localtime()
+    gmt = gmt.replace(tzinfo=pytz.timezone("UTC"))
+    now = gmt.astimezone(pytz.timezone("America/Chicago"))
     if not cameras.has_key(cid):
-        print "Unknown CameraID: %s" % (cid,)
+        print "ingest_dot_webcams.py unknown CameraID: %s" % (cid,)
         cameras[ cid ] = {'pan0': 0, 'name': 'unknown'}
 
     # Hard coded...
@@ -65,28 +77,31 @@ for line in lines:
     drctTxt = mesonet.drct2dirTxt( drct )
 
     # Create 320x240 variant
-    fp = "165.206.203.34/rwis_images/Vid-000512%s.jpg" % ("-".join(t),)
+    fn = "165.206.203.34/rwis_images/Vid-000512%s.jpg" % ("-".join(t),)
     try:
-        i0 = Image.open( fp )
+        i0 = Image.open( fn )
         i320 = i0.resize((320, 240), Image.ANTIALIAS)
     except:
-        os.unlink( fp )
+        if os.path.isfile(fn):
+            os.unlink( fn )
         continue
 
     draw = ImageDraw.Draw(i0)
-    str = "(%s) %s %s" % (drctTxt, d['name'], now.strftime("%-2I:%M:%S %p - %d %b %Y") )
-    (w, h) = font.getsize(str)
+    s = "(%s) %s %s" % (drctTxt, d['name'], 
+                        now.strftime("%-2I:%M:%S %p - %d %b %Y") )
+    (w, h) = font.getsize(s)
     draw.rectangle( [5,475-h,5+w,475], fill="#000000" )
-    draw.text((5,475-h), str, font=font)
+    draw.text((5,475-h), s, font=font)
   
     # Save 640x480
     i0.save("%s-640x480.jpg" % (cid,) )
   
     draw = ImageDraw.Draw(i320)
-    str = "(%s) %s %s" % (drctTxt, d['name'], now.strftime("%-2I:%M:%S %p - %d %b %Y") )
-    (w, h) = font.getsize(str)
+    s = "(%s) %s %s" % (drctTxt, d['name'], 
+                        now.strftime("%-2I:%M:%S %p - %d %b %Y") )
+    (w, h) = font.getsize(s)
     draw.rectangle( [5,235-h,5+w,235], fill="#000000" )
-    draw.text((5,235-h), str, font=font)
+    draw.text((5,235-h), s, font=font)
   
     # Save 640x480
     i320.save("%s-320x240.jpg" % (cid,) )
@@ -106,16 +121,16 @@ for line in lines:
     
     # Insert into webcam log please
     sql = """INSERT into camera_log (cam, valid, drct) VALUES 
-             ('%s', '%s', %s)""" % (cid, now.strftime("%Y-%m-%d %H:%M"),
-             drct)
-    mcursor.execute( sql )
+             (%s, %s, %s)""" 
+    args =  (cid, now, drct)
+    mcursor.execute( sql, args )
     
     sql = "DELETE from camera_current WHERE cam = '%s'" % (cid,)
     mcursor.execute(sql)
     
-    sql = """INSERT into camera_current(cam, valid, drct) values ('%s','%s',%s)
-    """ % (cid, now.strftime('%Y-%m-%d %H:%M'), drct)
-    mcursor.execute(sql)
+    sql = """INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)""" 
+    args = (cid, now, drct)
+    mcursor.execute(sql, args)
   
 mcursor.close()
 MESOSITE.commit()

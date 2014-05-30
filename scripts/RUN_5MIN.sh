@@ -25,6 +25,5 @@ cd ../ingestors/rwis
 ./download.csh &
 python ingest_rw.py &
 
-# This could take some time, so background it
 cd ../dotcams
-python process.py &
+python ingest_dot_webcams.py 
