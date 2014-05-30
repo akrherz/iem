@@ -1,17 +1,26 @@
 """
 Generates the nice 4inch soil temperature plot by county
 """
-from pyiem.plot import MapPlot
-from pyiem.datatypes import temperature
-import numpy as np
+#stdlib
 import datetime
 import os
 import sys
+
+#thirdparty
+import numpy as np
 from scipy.interpolate import NearestNDInterpolator
-import network
+import psycopg2
 import matplotlib.cm as cm
 import psycopg2.extras
-nt = network.Table(["ISUAG", "ISUSM"])
+
+#pyiem
+from pyiem.plot import MapPlot
+from pyiem.datatypes import temperature
+from pyiem.tracker import loadqc
+from pyiem.network import Table
+
+nt = Table("ISUSM")
+qdict = loadqc()
 
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -25,21 +34,15 @@ ts = datetime.datetime.now() - datetime.timedelta(days=day_ago)
 soil_obs = []
 lats = []
 lons = []
-icursor.execute("""SELECT station, c30 from daily WHERE 
-     valid = '%s' and c30 > 0 and station not in ('A135849','A131909')""" % (
-     ts.strftime("%Y-%m-%d"), ) )
-for row in icursor:
-    stid = row['station']
-    soil_obs.append( row['c30'] )
-    lats.append( nt.sts[stid]['lat'] )
-    lons.append( nt.sts[stid]['lon'] )
-
 icursor.execute("""
   SELECT station, tsoil_c_avg from sm_daily 
   where valid = '%s' and tsoil_c_avg > -40 
 """ % (ts.strftime("%Y-%m-%d"), ))
 for row in icursor:
     stid = row['station']
+    if qdict.get(stid, {}).get('soil4', False):
+        print '%s was QCd out' % (stid,)
+        continue
     soil_obs.append( temperature(row['tsoil_c_avg'], 'C').value('F') )
     lats.append( nt.sts[stid]['lat'] )
     lons.append( nt.sts[stid]['lon'] )
