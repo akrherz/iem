@@ -16,7 +16,7 @@ def run(sts, ets):
         if not os.path.isfile(fn):
             print 'check_n0q.py %s is missing' % (fn.split("/")[-1],)
         else:
-            if os.stat(fn)[6] < 600000:
+            if os.stat(fn)[6] < 500000:
                 print 'check_n0q.py %s too small, size: %s' % (
                                                             fn.split("/")[-1], 
                                                             os.stat(fn)[6])
