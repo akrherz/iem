@@ -41,7 +41,7 @@ icursor.execute("""
 for row in icursor:
     stid = row['station']
     if qdict.get(stid, {}).get('soil4', False):
-        print '%s was QCd out' % (stid,)
+        #print '%s was QCd out' % (stid,)
         continue
     soil_obs.append( temperature(row['tsoil_c_avg'], 'C').value('F') )
     lats.append( nt.sts[stid]['lat'] )
