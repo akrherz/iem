@@ -32,7 +32,8 @@ ssh root@iem30 "mv -f $BASE/access_log-weather.im $BASE/access_log-weather.im.ie
 # Step 2, bring all these log files back to roost
 for MACH in $MACHINES
 do
-	scp -q root@${MACH}:${BASE}/*${MACH} .
+	# limit file transfer to 750Mbit/s
+	scp -l 750000 -q root@${MACH}:${BASE}/*${MACH} .
 	ssh root@$MACH "rm -f $BASE/access_log.$MACH"
 done
 
