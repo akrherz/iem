@@ -8,6 +8,7 @@ include("../../include/iemaccessob.php");
 include("../../include/myview.php");
 $t = new MyView();
 $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
+$refresh = isset($_REQUEST["refresh"]) ? strtolower($_REQUEST["refresh"]): 'yes';
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
 $expiry = 60*60*24*100; // 100 days
 
@@ -40,7 +41,9 @@ if ($str != ""){
 setcookie("stations", implode(",", $_SESSION['stations']), time() + $expiry, "/my/");
  
 $t->title = "My IEM Current Conditions";
-$t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol&metar=$metar\">";
+if ($refresh == 'yes'){
+	$t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol&metar=$metar\">";
+}
 $t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -83,6 +86,11 @@ $ar = Array(
 		"yes" => "Yes"
 );
 $mselect = make_select("metar", $metar, $ar);
+$ar = Array(
+		"no" => "No",
+		"yes" => "Yes"
+);
+$refresh_select = make_select("refresh", $refresh, $ar);
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
 	while (list($firstIndex, ) = each($multiArray))
@@ -109,7 +117,7 @@ $iem = new IEMAccess();
 $mydata = Array();
 $doSF = 0;
 foreach ($_SESSION['stations'] as $key => $value){
-	if (strlen($value) == 7){
+	if (strpos($value, '_SF') == 5){
 		$doSF = 1;
 	} else {
 		$iemob = $iem->getSingleSite($value);
@@ -146,7 +154,7 @@ if (sizeof($mydata) == 0){
 	$t->render('sortables.phtml');
 	die();
 }
-$uri = "current.phtml?metar=$metar&sortcol=";
+$uri = "current.phtml?refresh=$refresh&metar=$metar&sortcol=";
 
 $finalA = Array();
 if ($sortcol == "sname"){
@@ -203,27 +211,29 @@ while (list ($key, $val) = each ($finalA))  {
 }
 
 $content = <<<EOF
-<form method="GET" action="current.phtml">
+<form name="opts" method="GET" action="current.phtml">
 <input type="hidden" name="sortcol" value="{$sortcol}">
-
-<div class="text"><p>
-<table class="back" border=1 cellspacing=0 cellpadding=1>
+<input type="hidden" name="refresh" value="{$refresh}">
+<p>
+<table class="table table-condensed">
 <tr>
   <th>View Options:</th>
-  <td>Include METARS (ASOS): {$mselect}
-</td>
-<td><input type="submit" value="Go!"></form></td>
+  <td>Include METARS (ASOS): {$mselect}</td>
+  <th>Automatically Refresh?</th>
+  <td>{$refresh_select}</td>
+  <td><input type="submit" value="Update Settings"></td>
 </tr></table><p>
+</form>
 
 
-<h3 class="subtitle"><center>Current Conditions</center></h3><p>
+<h3></h3>
 
 <br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; 
 Click on a column to sort it.<br>
 
 <form method="GET" action="current.phtml">
 
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
 
@@ -278,22 +288,22 @@ EOF;
 if ($doSF == 1){
  $mydata = Array();
  foreach ($_SESSION['stations'] as $key => $value){
-   if (strlen($value) == 7){
-     $value = substr($value, 0, 4);
+   if (strpos($value, '_SF') == 5){
+     $value = substr($value, 0, 5);
      $iemob = $iem->getSingleSite($value);
      $mydata[$value] = $iemob->db;
-     $mydata[$value]["ts"] = $iemob->ts;
+     $mydata[$value]["ts"] = $iemob->db["ts"];
 
-     $t = Array($mydata[$value]['tsf0'], $mydata[$value]['tsf1'], 
+     $t2 = Array($mydata[$value]['tsf0'], $mydata[$value]['tsf1'], 
       $mydata[$value]['tsf2'], $mydata[$value]['tsf3']);
-     arsort($t);
-     while (min($t) == -99.99){  
-      $ba = array_pop($t); 
-      if (sizeof($t) == 0) break;
+     arsort($t2);
+     while (min($t2) == -99.99){  
+      $ba = array_pop($t2); 
+      if (sizeof($t2) == 0) break;
       }
-     if (sizeof($t) > 0){
-      while ((max($t) - min($t)) > 20){ $ba = array_pop($t); }
-      $mydata[$value]['pave_avg'] = array_sum($t) / sizeof($t);
+     if (sizeof($t2) > 0){
+      while ((max($t2) - min($t2)) > 20){ $ba = array_pop($t2); }
+      $mydata[$value]['pave_avg'] = array_sum($t2) / sizeof($t2);
      } else {
       $mydata[$value]['pave_avg'] = -99.99;
      }
@@ -358,13 +368,15 @@ $finalA = aSortBySecondIndex($mydata, $sortcol);
 
 
 $content .= <<<EOF
-<h3 align="center">RWIS Pavement Conditions</h3>
-<form method="GET" action="/my/current.phtml">
-<table border=1 style="font-size: 10pt;" cellspacing=0 cellpadding=2 width="100%">
+<h3>RWIS Pavement Conditions</h3>
+<form method="GET" action="current.phtml" name="opts2">
+<input type="hidden" name="sortcol" value="{$sortcol}">
+<input type="hidden" name="refresh" value="{$refresh}">
+<table class="table table-striped table-condensed table-bordered">
 <tr>
   <td rowspan="2">DEL:</td>
-  <th rowspan="2"><a href="current.phtml?sortcol=sname">Station:</a></th>
-  <th rowspan="2"><a href="current.phtml?sortcol=ts">Ob Time</a></th>
+  <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
+  <th rowspan="2"><a href="{$uri}ts">Ob Time</a></th>
   <th colspan="2" bgcolor="#acdcda">Air:</th>
   <th bgcolor="#acdcda">Sensor 1</th>
   <th bgcolor="#acdcda">Sensor 2</th>
@@ -374,14 +386,14 @@ $content .= <<<EOF
   <td></td>
 <tr>
   
-  <th><a href="current.phtml?sortcol=tmpf">Temp</a></th>
-  <th><a href="current.phtml?sortcol=dwpf">Dew P</a></th>
-  <th><a href="current.phtml?sortcol=tsf0">Temp</a></th>
-  <th><a href="current.phtml?sortcol=tsf1">Temp</a></th>
-  <th><a href="current.phtml?sortcol=tsf2">Temp</a></th>
-  <th><a href="current.phtml?sortcol=tsf3">Temp</a></th>
-  <th><a href="current.phtml?sortcol=rwis_subf">Sub T</a></th>
-  <th><a href="current.phtml?sortcol=pave_avg">Ave Surface Temp</a> [<b>2</b>]
+  <th><a href="{$uri}tmpf">Temp</a></th>
+  <th><a href="{$uri}dwpf">Dew P</a></th>
+  <th><a href="{$uri}tsf0">Temp</a></th>
+  <th><a href="{$uri}tsf1">Temp</a></th>
+  <th><a href="{$uri}tsf2">Temp</a></th>
+  <th><a href="{$uri}tsf3">Temp</a></th>
+  <th><a href="{$uri}rwis_subf">Sub T</a></th>
+  <th><a href="{$uri}pave_avg">Ave Surface Temp</a> [<b>2</b>]
 </th>
 {$table}
 </table>
@@ -399,7 +411,6 @@ does work sometimes!
 <br><b>2. </b> The average surface temperature is calculated by the IEM using some
 logic to account for sites without 4 sensors or broken sensors.
 
-<br><br></div>
 EOF;
 $t->content = $content;
 $t->render('sortables.phtml');
