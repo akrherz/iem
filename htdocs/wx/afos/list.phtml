@@ -8,9 +8,10 @@ include("../../../include/forms.php");
 include("../../../include/database.inc.php");
 include("../../../include/imagemaps.php");
 $afos = iemdb("afos");
-$TITLE = "NWS Text Product by Issuing Center by Date";
-$THISPAGE ="archive-afos";
-include("../../../include/header.php");
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "NWS Text Product by Issuing Center by Date";
+$t->thispage ="archive-afos";
 
 $wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"] : null;
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
@@ -34,11 +35,75 @@ if (isset($_REQUEST['drange'])){
 	$d2display = "block";
 }
 
-
-pg_query($afos, "SET TIME ZONE 'GMT'");
+$table = "";
+pg_query($afos, "SET TIME ZONE 'UTC'");
 $rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from products
       WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
-?>
+
+$rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
+		date("Y-m-d H:i", $ts2)."+00"));
+if ($view == "prod"){
+	$prods = Array();
+	for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+		$ts = strtotime($row["entered"]);
+		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+		@$prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
+    	<td>%s</td><td>%s</td></tr>",
+				$url, $row["pil"], gmdate("Y-m-d", $ts), gmdate("H:i", $ts));
+	}
+	$keys = array_keys($prods);
+	asort($keys);
+	$table .= "<table class=\"table table-condensed table-striped\"><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
+	while(list($i,$k) = each($keys)){
+		$table .= sprintf("%s", $prods[$k]);
+	}
+	$table .= "</table>";
+} else if ($view == "grid"){
+	$columns = Array();
+	for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+		$ts = strtotime($row["entered"]);
+		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+		@$columns[$row["pil"]] .= sprintf("<br /><a href=\"%s\">%s</a> (%s)",
+				$url, $row["pil"], gmdate("H:i", $ts));
+	}
+	$table .= "<table class=\"table table-condensed table-bordered\"><tr>";
+	$keys = array_keys($columns);
+	asort($keys);
+	while(list($i,$k) = each($keys)){
+		$table .= sprintf("<td valign=\"top\">%s</td>\n", $columns[$k]);
+	}
+	$table .= "</tr></table>";
+} else {
+	$l = "";
+	for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+		$ts = strtotime($row["entered"]);
+		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+		if (gmdate("H", $ts) != $l){
+			$table .= sprintf("<hr /><strong>%s UTC</strong>", gmdate('d M Y : H', $ts));
+		}
+		$l = gmdate("H", $ts);
+		$table .= sprintf("<br /><a href=\"%s\">%s</a> (%s)", $url, $row["pil"],
+				gmdate("H:i", $ts));
+	}
+}
+
+$drangecheck = (isset($_REQUEST["drange"]))? "checked='checked'" : "";
+$netselect = networkSelect(Array("WFO","RFC","NWS","NCEP", "CWSU"), 
+ 		$source, Array(), "source");
+$yselect = yearSelect(2009, $year);
+$mselect = monthSelect($month);
+$dselect = daySelect($day);
+$y2select = yearSelect2(2009, $year2, "year2");
+$m2select = monthSelect($month2, "month2");
+$d2select = daySelect2($day2, "day2");
+
+$ar = Array("time" => "Chronological",
+	"grid" => "PIL Grid",
+	"prod" => "Product List");
+$vselect = make_select("view", $view, $ar);
+
+
+$t->content = <<<EOF
 <h3>NWS Text Products by Issuing Center by Date</h3>
 <p>This application prints out a listing of IEM archived text products
 by issuing NWS Issuing Center and by date.  After about
@@ -56,88 +121,34 @@ function showHide(v){
 }
 </script>
 <form name="selector" method="GET">
-<table>
+<table class="table table-condensed">
 <thead>
 <tr><th>Select Issuing Center:</th>
     <th>Start UTC Date:</th>
     <th>End UTC Date:<br />
     <input id="drange" type="checkbox" name="drange" value="yes" 
-    onClick="showHide(this.value)"
-    <?php if (isset($_REQUEST["drange"])){ echo "checked='checked'"; }?>
-    />Search over date range</th>
+    onClick="showHide(this.value)" {$drangecheck}/>Search over date range</th>
     <th>View Option</th>
     <th></th></tr>
 </thead>
 
 <tbody>
 <tr>
- <td><?php echo networkSelect(Array("WFO","RFC","NWS","NCEP", "CWSU"), 
- 		$source, Array(), "source"); ?></td>
- <td><?php echo yearSelect(2009, $year); ?>
- <?php echo monthSelect($month); ?>
- <?php echo daySelect($day); ?></td>
+ <td>{$netselect}</td>
+ <td>{$yselect} {$mselect} {$dselect}</td>
  
- <td><div id="d2" style="display: <?php echo $d2display; ?>;"><?php echo yearSelect2(2009, $year2, "year2"); ?>
- <?php echo monthSelect($month2, "month2"); ?>
- <?php echo daySelect2($day2, "day2"); ?></div></td>
+ <td><div id="d2" style="display: {$d2display}">
+ {$y2select} {$m2select} {$d2select}</div></td>
  
- <td><select name="view">
-  <option value="time" <?php if ($view == "time"){ echo "SELECTED";} ?>>Chronologically</option>
-  <option value="grid" <?php if ($view == "grid"){ echo "SELECTED";} ?>>PIL Grid</option>
-  <option value="prod" <?php if ($view == "prod"){ echo "SELECTED";} ?>>Product List</option>
-    </select>
- </td>
+ <td>{$vselect}</td>
  <td><input type="submit" value="Giveme Giveme!"></td>
 </table>
 </form>
-<?php
 
-$rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
-      date("Y-m-d H:i", $ts2)."+00"));
-if ($view == "prod"){
-  $prods = Array();
-  for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-    $ts = strtotime($row["entered"]);
-    $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-    @$prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
-    	<td>%s</td><td>%s</td></tr>", 
-       $url, $row["pil"], gmdate("Y-m-d", $ts), gmdate("H:i", $ts));
-  }
-  $keys = array_keys($prods);
-  asort($keys);
-  echo "<table><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
-  while(list($i,$k) = each($keys)){
-    echo sprintf("%s", $prods[$k]);
-  }
-  echo "</table>";
-} else if ($view == "grid"){
-  $columns = Array();
-  for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-    $ts = strtotime($row["entered"]);
-    $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-    @$columns[$row["pil"]] .= sprintf("<br /><a href=\"%s\">%s</a> (%s)", 
-       $url, $row["pil"], gmdate("H:i", $ts));
-  }
-  echo "<table><tr>";
-  $keys = array_keys($columns);
-  asort($keys);
-  while(list($i,$k) = each($keys)){
-    echo sprintf("<td valign=\"top\">%s</td>\n", $columns[$k]);
-  }
-  echo "</tr></table>";
-} else {
-  $l = "";
-  for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-    $ts = strtotime($row["entered"]);
-    $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-    if (gmdate("H", $ts) != $l){
-     	echo sprintf("<hr /><strong>%s UTC</strong>", gmdate('d M Y : H', $ts));
-    }
-    $l = gmdate("H", $ts);
-   	echo sprintf("<br /><a href=\"%s\">%s</a> (%s)", $url, $row["pil"],
-       gmdate("H:i", $ts));
- }
-}
+{$table}
+
+EOF;
+
+$t->render('single.phtml');
+
 ?>
-
-<?php include("../../../include/footer.php"); ?>
