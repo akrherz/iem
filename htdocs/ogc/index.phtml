@@ -8,7 +8,7 @@ $t->thispage = "gis-ogc";
 $t->content = <<<EOF
 
 
-<h3 class="heading">OGC Web Services</h3>
+<h3>OGC Web Services</h3>
 
 <p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC) is a standards organization leading the development of geospatial and location based services.  The OGC has adopted a number of specifications, some of which are used by the IEM.  This page lists these services.</p>
 
@@ -95,7 +95,8 @@ var n0q = new OpenLayers.Layer.TMS(
 
 <p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  
 Here are other TileCache services provided by the IEM.  These are all TMS for spherical mercator.<br />
-<table cellpadding="2" cellspacing="0" border="1">
+
+<table class="table table-striped table-condensed">
 <thead><tr><th>Service Name</th><th>Description</th></tr></thead>
 <tr><td>ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
 <a href="../GIS/ridge.phtml">more info</a></td></tr>
@@ -136,6 +137,7 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
   <td>Q2 48 Hour Precipitation</td></tr> 
 <tr><td>q2-p72h-900913</td>
   <td>Q2 72 Hour Precipitation</td></tr> 
+<tr><td>q2-hsr-900913</td><td>MRMS Hybrid-Scan Reflectivity Composite.</td></tr>
 </table>
 
 <h4>Web Map Service (WMS)</h4>
