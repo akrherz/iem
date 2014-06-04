@@ -32,18 +32,18 @@ for entry in feed:
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]
-    print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
+    #print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
         worksheet.get_cell_value(1, 2) != 'depth'):
         print 'FATAL site: %s soil nitrate has corrupt headers' % (siteid,)
         continue
-    for row in range(3,worksheet.rows+1):
+    for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
         depth = worksheet.get_cell_value(row, 2)
         if plotid is None or depth is None:
             continue
         for col in range(3, worksheet.cols+1):
-            varname = worksheet.get_cell_value(1,col).strip().split()[0]
+            varname = worksheet.get_cell_value(1, col).strip().split()[0]
             if varname[:4] != 'SOIL':
                 print 'Invalid varname: %s site: %s year: %s' % (
                                     worksheet.get_cell_value(1,col).strip(),
@@ -58,11 +58,12 @@ for entry in feed:
                     values (%s, %s, %s, %s, %s, %s, %s)
                     """, (siteid, plotid, varname, YEAR, depth, val, subsample))
             except Exception, exp:
-                print 'HARVEST_SOIL_NITRATE TRACEBACK'
+                print 'site: %s year: %s HARVEST_SOIL_NITRATE TRACEBACK' % (
+                                                    siteid, YEAR)
                 print exp
                 print '%s %s %s %s %s' % (siteid, plotid, varname, depth, val)
                 sys.exit()
-    print "...done"
+    #print "...done"
 pcursor.close()
 pgconn.commit()
 pgconn.close()
