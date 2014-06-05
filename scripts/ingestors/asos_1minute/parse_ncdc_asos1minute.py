@@ -218,8 +218,8 @@ def runner(station, monthts):
     # Our final amount of data
     data = {}
     if os.path.isfile("64050K%s%s%02i" % (station,monthts.year, monthts.month)):
-        fp5 = '64050K%s%s%02i.dat' % (station, monthts.year, monthts.month)
-        fp6 = '64060K%s%s%02i.dat' % (station, monthts.year, monthts.month)        
+        fp5 = '64050K%s%s%02i' % (station, monthts.year, monthts.month)
+        fp6 = '64060K%s%s%02i' % (station, monthts.year, monthts.month)        
     else:
         fp5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
                 station, monthts.year, monthts.month)
