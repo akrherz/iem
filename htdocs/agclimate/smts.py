@@ -5,7 +5,7 @@ sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import datetime
 import numpy
 import mesonet
-import iemtz
+import pytz
 #import cgitb
 #cgitb.enable()
 
@@ -103,15 +103,18 @@ days = (ets - sts).days
 if days >= 3:
     interval = max(int(days/7), 1)
     ax[0].xaxis.set_major_locator(
-                               mdates.DayLocator(interval=interval, tz=iemtz.Central)
+                               mdates.DayLocator(interval=interval, 
+                                        tz=pytz.timezone("America/Chicago"))
                                )
-    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y', tz=iemtz.Central))
+    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y', 
+                                        tz=pytz.timezone("America/Chicago")))
 else:
     ax[0].xaxis.set_major_locator(
-                               mdates.AutoDateLocator(maxticks=10, tz=iemtz.Central)
+                               mdates.AutoDateLocator(maxticks=10, 
+                                        tz=pytz.timezone("America/Chicago"))
                                )
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b',
-                                                      tz=iemtz.Central))
+                                        tz=pytz.timezone("America/Chicago")))
 
 ax[0].set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],
                                             ))
@@ -122,6 +125,10 @@ ax[1].plot(valid, mesonet.c2f( d50t), linewidth=2, color='black', label='50in')
 ax[1].grid(True)
 ax[1].set_ylabel(r"Temperature $^\circ$F")
 
+ax2 = ax[2].twinx()
+ax2.plot(valid, slrkw, color='g', zorder=1)
+ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
+
 ax[2].plot(valid, mesonet.c2f( tair ), linewidth=2, color='blue', zorder=2, 
            label='Air')
 ax[2].plot(valid, mesonet.c2f( tsoil ), linewidth=2, color='red', zorder=2, 
@@ -130,10 +137,10 @@ ax[2].grid(True)
 ax[2].legend(loc=(.1, 1.01), ncol=2)
 ax[2].set_ylabel(r"Temperature $^\circ$F")
 
-ax2 = ax[2].twinx()
-ax2.plot(valid, slrkw, color='g')
-ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
-
+# 
+ax[2].set_zorder(ax2.get_zorder()+1) 
+ax[2].patch.set_visible(False)
+                      
 # Wow, strange bugs if I did not put this last
 ax[0].set_xlim( min(valid), max(valid))
 print "Content-Type: image/png\n"
