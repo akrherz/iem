@@ -75,7 +75,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   {
      /* Lets go looking for warnings for this particular LSR, fast please */
      $sql = sprintf("SELECT distinct phenomena, significance, eventid 
-        from warnings_%s
+        from sbw_%s
         WHERE wfo = '%s' and issue <= '%s' 
         and issue > '%s'::timestamp - '7 days'::interval and expire > '%s'
         and ST_GeometryFromText('SRID=4326;POINT(%s %s)') && geom
