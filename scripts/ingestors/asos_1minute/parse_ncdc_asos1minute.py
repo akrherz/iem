@@ -217,19 +217,23 @@ def runner(station, monthts):
 
     # Our final amount of data
     data = {}
-    fp5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
-            station, monthts.year, monthts.month)
-    fp6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
-            station, monthts.year, monthts.month)
-    if not os.path.isfile( fp5 ):
-        try:
-            download(station, monthts)
-        except Exception, exp:
-            print 'download() error', exp
-        if not os.path.isfile( fp5 ) or not os.path.isfile( fp6 ):
-            print "NCDC did not have %s station for %s" % (station,
-                                                monthts.strftime("%b %Y"))
-            return
+    if os.path.isfile("64050K%s%s%02i" % (station,monthts.year, monthts.month)):
+        fp5 = '64050K%s%s%02i.dat' % (station, monthts.year, monthts.month)
+        fp6 = '64060K%s%s%02i.dat' % (station, monthts.year, monthts.month)        
+    else:
+        fp5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
+                station, monthts.year, monthts.month)
+        fp6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
+                station, monthts.year, monthts.month)
+        if not os.path.isfile( fp5 ):
+            try:
+                download(station, monthts)
+            except Exception, exp:
+                print 'download() error', exp
+            if not os.path.isfile( fp5 ) or not os.path.isfile( fp6 ):
+                print "NCDC did not have %s station for %s" % (station,
+                                                    monthts.strftime("%b %Y"))
+                return
     # We have two files to worry about
     page1 = open(fp5, 'r')
     
