@@ -83,7 +83,7 @@ sql = """
 
 UNION
 
- SELECT u.simple_geom as geom, gtype, significance, w.wfo, status, eventid, u.ugc,
+ SELECT u.simple_geom as geom, 'C' as gtype, significance, w.wfo, status, eventid, u.ugc,
  phenomena,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
