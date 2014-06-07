@@ -68,8 +68,9 @@ for row in pcursor:
 
 #print "Largest Dimension %s m" % (maxDimension,)
 
-sql = """SELECT phenomena, sum( ST_area2d(ST_transform(geom,2163)) ) as size 
-   from warnings_%s WHERE gtype = 'C' and issue >= '%s' and issue < '%s' and 
+sql = """SELECT phenomena, sum( ST_area2d(ST_transform(u.geom,2163)) ) as size 
+   from warnings_%s w JOIN ugcs u on (u.gid = w.gid) 
+   WHERE issue >= '%s' and issue < '%s' and 
    significance = 'W' and phenomena IN ('TO','SV') GROUP by phenomena""" % (
                                 sts.year, sts, ets )
 
@@ -162,7 +163,7 @@ for row in pcursor:
     # Compute CAR! 
     sql = """select sum( ST_area2d(ST_transform(u.geom,2163))) as csize
         from warnings_%s w 
-        JOIN ugcs u on (u.gid = w.gid) WHERE gtype = 'C' and 
+        JOIN ugcs u on (u.gid = w.gid) WHERE  
         phenomena = '%s' and significance = '%s' and eventid = %s 
         and w.wfo = '%s'
         """ % (row['issue'].year, row['phenomena'], 
