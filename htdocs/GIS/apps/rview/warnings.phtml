@@ -379,7 +379,7 @@ if (intval($loop) == 1 || intval($loop) == 2){
 } else {
   $imgi = 0;
   include("warnings_plot.php");
-
+  $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";  
   $content .= "<input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
   $content .= "</form>";
 }

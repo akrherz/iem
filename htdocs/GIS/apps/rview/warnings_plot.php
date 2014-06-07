@@ -56,13 +56,8 @@ if ( in_array("nexrad", $layers) ){
 
 if ($warngeo == "both" or $warngeo == "county")
 {
-	$url .= "layers[]=cbw&";	
+	$url .= "layers[]=county_warnings&";	
 }
-if ($warngeo == "both")
-{
-	$url .= "layers[]=cbw&";	
-}
-	
 if ($warngeo == "sbw")
 {
 	$url .= "layers[]=sbw&";	
