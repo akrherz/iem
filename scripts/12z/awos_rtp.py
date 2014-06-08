@@ -6,8 +6,11 @@
 import datetime
 import pytz
 import subprocess
-import network
+from pyiem.tracker import loadqc
+from pyiem import network
+
 nt = network.Table("AWOS")
+qdict = loadqc()
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
@@ -46,6 +49,8 @@ sql = """SELECT id,
 args = (yesterday6z, today6z) 
 icursor.execute(sql, args)
 for row in icursor:
+	if qdict.get(row[0], {}).get('tmpf'):
+		continue
 	highs[ row[0] ] = row[1]
 
 # 12z to 12z precip
@@ -60,6 +65,8 @@ sql = """select id, sum(precip) from
 args = (yesterday12z, now12z)
 icursor.execute(sql, args)
 for row in icursor:
+	if qdict.get(row[0], {}).get('precip'):
+		continue
 	pcpn[ row[0] ] = "%5.2f" % (row[1],)
 
 ''' 0z to 12z low temperature '''
@@ -73,6 +80,8 @@ sql = """SELECT id,
 args = (today0z, now12z)
 icursor.execute(sql, args)
 for row in icursor:
+	if qdict.get(row[0], {}).get('tmpf'):
+		continue
 	lows[ row[0] ] = row[1]
 
 ids = nt.sts.keys()
