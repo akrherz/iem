@@ -5,3 +5,7 @@
   PythonOption TileCacheConfig /mesonet/www/apps/iemwebsite/htdocs/cache/tilecache.cfg
 
   Options +ExecCGI
+
+# http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
+ExpiresActive On
+ExpiresDefault "access plus 5 minutes"
