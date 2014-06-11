@@ -238,7 +238,7 @@ def will_email(_network, obs, thres):
     """
     Preemptive checking to make sure we don't email!
     """
-    cnt_threshold = 35
+    cnt_threshold = 45
     if (_network == 'KIMT'):
         cnt_threshold = 20
     # First, look into the offline database to see how many active tickets
