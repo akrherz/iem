@@ -73,7 +73,7 @@ def get_warnings(sts, ets, wfo, wtypes):
         sum(ST_Area(ST_Transform(u.geom,2163))/1000000.0) as countyarea
         from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
         issue BETWEEN '%s+00' and '%s+00' and
-        w.wfo = '%s' and phenomena in %s and significance = 'W' and gtype = 'C'
+        w.wfo = '%s' and phenomena in %s and significance = 'W'
         GROUP by phenomena, eventid
     )
     
