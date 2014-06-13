@@ -1406,14 +1406,22 @@ LAYER
   NAME "flowpaths"
   CONNECTION "user=nobody dbname=idep host=iemdb"
   CONNECTIONTYPE POSTGIS
-  DATA "geom from flowpaths using srid=26915 using unique fid"
+  DATA "geom from (select fid, geom, fpath from flowpaths WHERE fpath > 0) as foo using srid=26915 using unique fid"
   PROJECTION
     "init=epsg:26915"
   END # PROJECTION
   STATUS ON
   TYPE LINE
   UNITS METERS
+  LABELITEM fpath
   CLASS
+    LABEL
+      MAXSCALEDENOM 240000
+      COLOR 0 0 0
+      OUTLINECOLOR 255 255 255
+      SIZE MEDIUM
+      TYPE BITMAP
+    END
     STYLE
       SYMBOL 0
       SIZE 1.5
