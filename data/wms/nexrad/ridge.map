@@ -19,7 +19,7 @@ WEB
   MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/webtmp/w0.log"
+  #LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS RIDGE Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?"
