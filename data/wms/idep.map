@@ -17,7 +17,7 @@ WEB
   MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/webtmp/w0.log"
+  #LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS IDEP Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/idep.cgi?"
@@ -1401,6 +1401,27 @@ LAYER
     END # STYLE
   END # CLASS
 END # LAYER
+
+LAYER
+  NAME "flowpaths"
+  CONNECTION "user=nobody dbname=idep host=iemdb"
+  CONNECTIONTYPE POSTGIS
+  DATA "geom from flowpaths using srid=26915 using unique fid"
+  PROJECTION
+    "init=epsg:26915"
+  END # PROJECTION
+  STATUS ON
+  TYPE LINE
+  UNITS METERS
+  CLASS
+    STYLE
+      SYMBOL 0
+      SIZE 1.5
+      COLOR 255 0 0
+    END # STYLE
+  END # CLASS
+END # LAYER
+
 
 LAYER
   NAME "iahuc12"
