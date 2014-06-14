@@ -297,4 +297,22 @@ LAYER
   END
 END
 
+#------------------------------------------------------
+#
+LAYER
+  NAME "iaglu-900913"
+  STATUS ON
+  DATA "/mesonet/data/gis/static/images/3857/iowa/glu0813.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  OFFSITE 0 0 0
+  METADATA
+    "wms_title" "Iowa Generalized Landuse 0813"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wms_extent" "-110 30 -86 45"
+  END
+END
+
 END
