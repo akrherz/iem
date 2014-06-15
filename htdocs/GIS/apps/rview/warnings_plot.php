@@ -58,7 +58,7 @@ if ($warngeo == "both" or $warngeo == "county")
 {
 	$url .= "layers[]=county_warnings&";	
 }
-if ($warngeo == "sbw")
+if ($warngeo == "both" or $warngeo == "sbw")
 {
 	$url .= "layers[]=sbw&";	
 }
