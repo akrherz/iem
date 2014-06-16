@@ -10,10 +10,11 @@ header("Content-type: text/plain");
 
  
  $rs = pg_query($dbconn, "select phenomena, eventid, 
- 		ST_asText(ST_Multi(ST_buffer(ST_collect( geom ),0))) as g from warnings 
+ 		ST_asText(ST_Multi(ST_buffer(ST_collect( u.geom ),0))) as g 
+ 		from warnings w JOIN ugcs u on (u.gid = w.gid) 
  		WHERE significance = 'A' and phenomena IN ('TO','SV') and 
  		issue <= now() and expire > now() 
- 		and substr(ugc,3,1) = 'C' GROUP by phenomena, eventid 
+ 		and substr(w.ugc,3,1) = 'C' GROUP by phenomena, eventid 
  		ORDER by phenomena ASC");
 
 echo "Refresh: 10\n";
