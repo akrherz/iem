@@ -39,7 +39,7 @@ LAYER
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=wepp host=iemdb"
     CONNECTIONTYPE POSTGIS
-    DATA "the_geom from (select d.oid as oid, (rainfall / 25.4) as da, 
+    DATA "the_geom from (select random() as oid, (rainfall / 25.4) as da, 
      h.the_geom from daily_rainfall_%year% d left join hrap_polygons h 
      using (hrap_i) WHERE d.valid = '%date%') as foo 
      using unique oid using srid=26915"
@@ -171,7 +171,7 @@ LAYER
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=wepp host=iemdb"
     CONNECTIONTYPE POSTGIS
-    DATA "the_geom from (select d.oid as oid, 
+    DATA "the_geom from (select random() as oid, 
    (vsm) as da, h.the_geom from 
    waterbalance_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
@@ -304,7 +304,7 @@ LAYER
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=wepp host=iemdb"
     CONNECTIONTYPE POSTGIS
-    DATA "the_geom from (select d.oid as oid, 
+    DATA "the_geom from (select random() as oid, 
    (s10cm) as da, h.the_geom from 
    waterbalance_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
@@ -437,7 +437,7 @@ LAYER
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=wepp host=iemdb"
     CONNECTIONTYPE POSTGIS
-    DATA "the_geom from (select d.oid as oid, 
+    DATA "the_geom from (select random() as oid, 
    (avg_runoff / 25.4) as da, h.the_geom from 
    results_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
@@ -570,7 +570,7 @@ LAYER
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=wepp host=iemdb"
     CONNECTIONTYPE POSTGIS
-    DATA "the_geom from (select d.oid as oid, 
+    DATA "the_geom from (select random() as oid, 
    (avg_loss * 4.463) as da, h.the_geom from 
    results_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
