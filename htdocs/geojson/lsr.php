@@ -18,7 +18,7 @@ function toTime($s){
                intval(substr($s,0,4)) );
 }
 
-$rs = pg_query("SET TIME ZONE 'GMT'");
+$rs = pg_query("SET TIME ZONE 'UTC'");
 
 if (isset($_REQUEST["phenomena"])){
   $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -107,7 +107,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   
   $z = Array("type"=>"Feature", "id"=>$i, 
              "properties"=>Array(
-                "magnitude" => $magnitude,
+                "magnitude" => ($magnitude == null)? "": $magnitude,
                 "wfo"       => $row["wfo"],
                 "valid"     => substr($row["valid"],0,16),
                 "type"      => $row["type"],
