@@ -77,7 +77,7 @@ for row in icursor:
 
 o.close()
 
-pqstr = "data c 000000000000 wxc/%s.txt bogus text" % (ldmname,)
+pqstr = "data c 000000000000 wxc/%s bogus text" % (ldmname,)
 cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, fn)
 subprocess.call(cmd, shell=True)
 os.remove( fn )
