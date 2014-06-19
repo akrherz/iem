@@ -4,7 +4,8 @@ import numpy as np
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = COOP.cursor()
 
-cursor.execute("""SELECT year, sum(gddxx(50,86,high,low)) from alldata_ia where station = 'IA0200' and sday > '0414' and sday < '0514' GROUP by year ORDER by year
+cursor.execute("""SELECT year, sum(precip) from alldata_ia 
+where station = 'IA0000' and month = 6 and sday < '0619' GROUP by year ORDER by year
  ASC""")
 
 years = []
@@ -24,21 +25,21 @@ import matplotlib.patheffects as PathEffects
 (fig, ax) = plt.subplots(1, 1)
 bars = ax.bar(years -0.5, data, fc='brown', ec='brown')
 for i, bar in enumerate(bars):
-    if data[i] < avgdata:
+    if data[i] > avgdata:
         bar.set_facecolor('darkblue')
         bar.set_edgecolor('darkblue')
-    if data[i] >= 900:
+    if data[i] >= 5:
         txt = ax.text(years[i], data[i]+(0.075 if years[i] != 1881 else -0.45), "%s" % (years[i],), 
                       color='k', fontsize=14,
                       ha=('left' if years[i] < 1901 else 'right'), va='bottom')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                  foreground="yellow")])
 
-ax.set_title("Ames 1970-2014 15 April - 13 May Growing Degree Days\n(base 50, ceiling 86)")
-ax.set_ylabel("Growing Degree Days")
+ax.set_title("Iowa 1-18 June Areal Averaged Precipitation")
+ax.set_ylabel("Precipitation [inch]")
 #ax.set_xlabel("* 2013 thru 14 Nov")
 #ax.set_ylim(0, 12.5)
-ax.set_xlim(1969.5,2014.5)
+ax.set_xlim(1892.5,2014.5)
 ax.grid(True)
 ax.axhline( avgdata, lw=2.5, c='white')
 ax.axhline( avgdata, lw=1, c='k')
