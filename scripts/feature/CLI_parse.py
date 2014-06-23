@@ -10,7 +10,7 @@ acursor2 = AFOS.cursor()
 
 
 acursor.execute("""SELECT distinct pil from products_2014_0106 where
- substr(pil,1,3) = 'CLI' and entered > '2014-03-20' """)
+ substr(pil,1,3) = 'CLI' and entered > '2014-06-23' """)
 
 lats = []
 lons = []
@@ -26,30 +26,32 @@ for row in acursor:
         continue
     acursor2.execute("""
     SELECT data from products_2014_0106 WHERE pil = %s 
-    and entered > '2014-03-20' ORDER by entered DESC
+    and entered > '2014-06-23' ORDER by entered DESC
     LIMIT 1
     """, (row[0],))
     row2 = acursor2.fetchone()
     hasSnowfall = False
     for line in row2[0].split("\n"):
-        if line.find("SNOWFALL (IN)") > -1:
+        if line.find("PRECIPITATION (IN)") > -1:
             hasSnowfall = True
         if line.strip() == "":
             hasSnowfall = False
-        if hasSnowfall and line.find("SINCE JUL 1") > 0:
+        if hasSnowfall and line.find("SINCE JUN 1") > 0:
             tokens = line.split()
-            if tokens[3] not in ['MM','T'] and float(tokens[3]) > 0:
-                print row[0], tokens
+            if len(tokens) < 6:
+                break
+            if tokens[5] not in ['MM','T'] and float(tokens[5]) > -77:
+                print row[0], tokens[5], tokens
                 lats.append( nt.sts[row[0][-3:]]['lat'])
                 lons.append( nt.sts[row[0][-3:]]['lon'])
-                vals.append( float(tokens[3]) )
+                vals.append( float(tokens[5]) )
             break
         
 from pyiem.plot import MapPlot
 
 m = MapPlot(sector='midwest',
-       title='NWS Total Snowfall (inches) thru 20 March 2014',
-       subtitle= '1 July 2013 - 20 March 2014')
+       title='NWS June Precipitation Departure (inches) thru 22 June 2014',
+       subtitle= '1-22 June 2014 based on NWS issued CLI Reports')
 m.plot_values(lons, lats, vals, fmt='%.1f')
 m.postprocess(filename='test.ps')
 import iemplot
