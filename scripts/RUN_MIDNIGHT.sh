@@ -33,6 +33,9 @@ python merge_mrms_q3.py
 cd ../dbutil 
 python hads_delete_dups.py
 
+cd ../mrms
+python create_daily_symlink.py $(date --date '1 day ago' +'%Y %m %d')
+
 if [ $DD -eq "28" ]
 then
 	cd ../coop
