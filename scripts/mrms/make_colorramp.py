@@ -1,5 +1,5 @@
 # Generate a color ramp image, please
-import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import numpy
 import nmq
 
