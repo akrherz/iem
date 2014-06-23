@@ -28,7 +28,8 @@ class Request (object):
         #try:
         if layername.find('idep') == 0:
             (blah, ltype, date) = layername.split("::", 3)
-            uri = 'date=%s&year=%s' % (date, date[:4])
+            uri = 'date=%s&year=%s&month=%s&day=%s' % (date, date[:4], 
+                                                       date[5:7], date[8:10])
             layer = self.service.layers['idep']
             layer.name = layername
             layer.layers = ltype
