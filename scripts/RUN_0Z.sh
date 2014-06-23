@@ -1,4 +1,8 @@
 # Jobs run at 00 UTC
+
+# Wait a bit, so that more obs can come in
+sleep 300
+
 cd 00z
 python awos_rtp.py
 

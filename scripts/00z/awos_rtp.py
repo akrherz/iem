@@ -58,7 +58,7 @@ for row in icursor:
 	highs[ row[0] ] = row[1]
 
 
-# 12z to 12z precip
+# 00 UTC to 00 UTC Preciptation
 pcpn = {}
 icursor.execute("""select id as station, sum(precip) from 
 		(select t.id, extract(hour from valid) as hour, 
