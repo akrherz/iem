@@ -15,8 +15,8 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'LWD'
- and valid BETWEEN '2014-06-03 00:00' and '2014-06-03 23:59' 
+  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'ACT'
+ and valid BETWEEN '2014-06-22 00:00' and '2014-06-22 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
@@ -35,7 +35,7 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2014,6,3)
+basets = datetime.datetime(2014,6,22)
 basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
 for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
@@ -50,16 +50,16 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2014,6,3, 17, 0)
+sts = datetime.datetime(2014,6,22, 17, 30)
 sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-ets = sts + datetime.timedelta(minutes=421)
-interval = datetime.timedelta(minutes=60)
+ets = sts + datetime.timedelta(minutes=91)
+interval = datetime.timedelta(minutes=15)
 now = sts
 xticks = []
 xlabels = []
 xlabels2 = []
 while now <= ets:
-    fmt = "%-I %p"
+    fmt = "%-I:%M %p"
     #if now == sts or now.hour == 0:
     #    fmt = "%-I %p\n%-d %B"
     
@@ -85,7 +85,7 @@ ax.bar(svalid, sprec * 60, width=1./1440., fc='b', ec='b', label="Hourly Rate ov
 ax.plot(svalid, acc, color='k', label="Accumulation",lw=2, zorder=2)
 ax.plot(svalid, rate15, color='g', label="Hourly Rate over 15min", linewidth=2)
 ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=2)
-x0 = 1168
+x0 = 1095
 ax.text(sts + datetime.timedelta(minutes=5), 10.85, "Minute Accums [inch]", va='bottom')
 for i in range(x0,x0+11):
     ax.text( sts + datetime.timedelta(minutes=5), 10.65 + (x0-i)*0.69, "%s %.2f" % (
@@ -98,13 +98,13 @@ ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=1, prop=prop, ncol=1)
 ax.set_ylim(0,12)
-ax.set_xlabel("3 June 2014 (CDT)")
-ax.set_title("3 June 2014 Lamoni (KLWD) One Minute Rainfall\n5.27 inches total")
+ax.set_xlabel("22 June 2014 (CDT)")
+ax.set_title("22 June 2014 Waco (KACT) One Minute Rainfall\n4.28 inches total")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
+#import iemplot
+#iemplot.makefeature('test')
