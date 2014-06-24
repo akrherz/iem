@@ -11,7 +11,7 @@ mcursor2 = MESOSITE.cursor()
 mcursor.execute("""
 	SELECT id, geom, state from stations 
 	WHERE climate_site IS NULL and country = 'US' and 
-	state not in ('PR','DC','GU','PU','P3')
+	state not in ('PR','DC','GU','PU','P3', 'P4')
 """)
 
 for row in mcursor:
