@@ -18,7 +18,7 @@ data = [
         ['ALO', 6.37, 12.47, 'Waterloo'],
         ['DSM', 3.61, 15.79, 'Des Moines'],
         ['BRL', 8.52, 11.34, 'Burlington'],
-        ['CID', 5.25, 12.02, 'Cedar Rapids'],
+        ['CID', 8.93, 12.02, 'Cedar Rapids'],
         ['EST', 9.09, 13.49, 'Esterville'],
         ['MIW', 5.27, 14.61, 'Marshalltown']
 ]
