@@ -19,6 +19,19 @@
 
   $services = array();
   $services[] = Array(
+  		"title" => "Current Storm Based Warnings",
+  		"url" => "/geojson/sbw.geojson?",
+  		"desc" => "Provides a geojson format of current National Weather Service
+  		storm based warnings.  There is a 15 second caching done by the server
+  		to ease load.  The generation_time attribute is set on the output 
+  		to diagnose when the file is valid.",
+  		"vars" => Array(
+  		),
+  		"example" => Array(
+  		)
+  );
+  
+  $services[] = Array(
   		"title" => "Search for Warnings by UGC Code and Date Interval",
   		"url" => "/json/vtec_events_byugc.php?ugc={ugc}&edate={edate}&sdate={sdate}",
   		"desc" => "Provides a json response of archived warnings valid for the
