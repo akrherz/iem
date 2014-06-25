@@ -1,2 +1,5 @@
 AddHandler cgi-script .py
 Options +ExecCGI
+
+RewriteEngine On
+RewriteRule ^sbw.geojson(.*) sbw.py$1 [QSA]

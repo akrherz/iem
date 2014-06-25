@@ -28,6 +28,7 @@ $t = new MyView();
 var map;
 var n0q;
 var jsonlayer;
+var sbwlayer;
 var selectControl;
 cameraID = "{$id}";
 ts = null;
@@ -77,6 +78,7 @@ function refreshRADAR(){
 function refreshJSON(){
 	if (! jsonlayer.firstLoad){
 	    jsonlayer.refresh(true);
+	    sbwlayer.refresh(true);
 	}
 }
 function setCamera(cid){
@@ -107,6 +109,30 @@ function init()
 	                                         20037508, 20037508.34)
 	  });
 
+	  var sbwStyleMap = new OpenLayers.StyleMap({
+       'default': {
+           strokeColor: 'black',
+           strokeWidth: 3,
+           fillOpacity  : 0,
+           strokeOpacity: 1
+       },
+       'select': {
+           strokeWidth: 5
+       }
+});
+	  var sbwLookup = {
+ "TO": {strokeColor: 'red'},
+ "MA": {strokeColor: 'purple'},
+ "FF": {strokeColor: 'green'},
+ "EW": {strokeColor: 'green'},
+ "FA": {strokeColor: 'green'},
+ "FL": {strokeColor: 'green'},
+ "FF": {strokeColor: 'green'},
+ "SV": {strokeColor: 'yellow'}
+}
+	sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
+
+	  
 	   var styleMap = new OpenLayers.StyleMap({
 	       'default': {
 	    	   externalGraphic: "/images/yellow_arrow.png",
@@ -123,7 +149,17 @@ function init()
 	                 'Google Streets',
 	                  {'sphericalMercator': true}
 	             );
-	 	   
+
+	   sbwlayer = new OpenLayers.Layer.Vector("Storm Based Warnings", {
+           protocol: new OpenLayers.Protocol.HTTP({
+               url: "/geojson/sbw.geojson",
+               format: new OpenLayers.Format.GeoJSON()
+   			}),
+   			projection: new OpenLayers.Projection('EPSG:4326'),
+   			styleMap: sbwStyleMap,
+			firstLoad : true,
+   			strategies: [new OpenLayers.Strategy.Fixed()]
+   		});
 	   
 	   jsonlayer = new OpenLayers.Layer.Vector(" Network", {
            protocol: new OpenLayers.Protocol.HTTP({
@@ -168,7 +204,7 @@ function init()
 		        getURL          : get_my_url,
 		        isBaseLayer     : false}
 		);
-	    map.addLayers([googleLayer, jsonlayer, n0q]);
+	    map.addLayers([googleLayer, sbwlayer, jsonlayer, n0q]);
 
 
 
