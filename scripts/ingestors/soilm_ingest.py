@@ -167,10 +167,11 @@ def hourly_process(nwsli, maxts):
         ob = Observation(nwsli, 'ISUSM', 
                          valid.astimezone(pytz.timezone("America/Chicago")))
         tmpc = temperature(float(tokens[headers.index('tair_c_avg')]), 'C')
-        ob.data['tmpf'] = tmpc.value('F')
-        relh = humidity(float(tokens[headers.index('rh')]), '%')
-        ob.data['relh'] = relh.value('%')
-        ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
+        if tmpc.value('F') > -50 and tmpc.value('F') < 140:
+            ob.data['tmpf'] = tmpc.value('F')
+            relh = humidity(float(tokens[headers.index('rh')]), '%')
+            ob.data['relh'] = relh.value('%')
+            ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
         ob.data['srad'] = tokens[headers.index('slrkw_avg')]
         ob.data['phour'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
