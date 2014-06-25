@@ -39,6 +39,7 @@ function relh($tmpc, $dwpc){
 
 //______________________________________________________________
 // /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prheat.f
+// http://www.hpc.ncep.noaa.gov/html/heatindex_equation.shtml
 function heat_idx($tmpf, $relh){
   if ($tmpf > 140)  return " ";
   if ($relh == 0) return " ";
@@ -56,21 +57,15 @@ function heat_idx($tmpf, $relh){
   $r2 = pow($relh, 2);
   $r3 = pow($relh, 3);
 
-  $PR_HEAT =  17.423 +  0.185212 * $tmpf
-     +  5.37941 * $relh
-     -  0.100254 * $tmpf * $relh
-     +  0.00941695 * $t2 
-     +  0.00728898 * $r2
-     +  0.000345372 * $t2 * $relh
-     -  0.000814971 * $tmpf * $r2
-     +  0.0000102102 * $t2 * $r2
-     -  0.000038646 * $t3
-     +  0.0000291583 * $r3
-     +  0.00000142721 * $t3 * $relh
-     +  0.000000197483 * $tmpf * $r3 
-     -  0.0000000218429 * $t3 * $r2
-     +  0.000000000843296  * $t2 * $r3
-     -  0.0000000000481975  * $t3 * $r3;
+  $PR_HEAT =  -42.379 
+  	+ 2.04901523* $tmpf 
+  	+ 10.14333127*$relh 
+  	- .22475541*$tmpf*$relh 
+  	- .00683783*$tmpf*$tmpf 
+  	- .05481717*$relh*$relh 
+  	+ .00122874*$tmpf*$tmpf*$relh 
+  	+ .00085282*$tmpf*$relh*$relh 
+  	- .00000199*$tmpf*$tmpf*$relh*$relh;
  
 return round($PR_HEAT,0);
 } // End of heat_idx
