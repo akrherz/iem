@@ -4,35 +4,23 @@ from scipy import stats
 import iemdb
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
-POSTGIS = iemdb.connect('postgis', bypass=True)
-pcursor = POSTGIS.cursor()
 
 
 ccursor.execute("""
- select year, sum(precip) from alldata_ia where station = 'IA0000'
- and month in (4,5) and sday < '0509'
- and day >= '1986-01-01' GROUP by year ORDER by year ASC 
+ select year, sum(case when station = 'IA2203' then sum else 0 end), 
+ avg(case when station != 'IA2203' then sum else null end) as a 
+ from (select station, year, sum(precip) from alldata_ia 
+ where month = 6 and 
+ station in ('IA2203', 'IA1319', 'IA2724', 'IA2364', 'IA1063') and year > 1950
+ GROUP by station, year) as foo GROUP by year ORDER by year ASC
 """)
 x = []
+y = []
 for row in ccursor:
     x.append( float(row[1]) )
+    y.append( float(row[2]) )
 
-pcursor.execute("""
- SELECT yr, count(*) from
- (SELECT distinct wfo, eventid, phenomena, extract(year from issue) as yr
- FROM warnings where gtype = 'C' and substr(ugc,1,3) = 'IAC' and 
- significance = 'W' and phenomena in ('SV') and 
-(extract(month from issue) = 4 or (extract(month from issue) = 5 and 
- extract(day from issue) < 9))) as foo
- GROUP by yr ORDER by yr ASC
-""")
-y = []
-for row in pcursor:
-    y.append( float(row[1]) )
-
-print x, len(x)
-print y, len(y)
-
+x[-1] = 3.61
 
 from matplotlib import pyplot as plt
 
@@ -43,14 +31,15 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 def g(y):
-  if y == 2002:
-    return 'right'
-  return 'center'
+    if y in [1993,]:
+        return 'left'
+    return 'center'
 
 ax.scatter(x, y)
-for xi, yi, ti in zip(x, y, range(1986,2014)):
-  if yi < 25 or yi > 100 or ti == 2013:
-    ax.text(xi, yi + 2, "%s" % (ti,), ha=g(ti), va='bottom')
+ax.plot([0,14], [0,14])
+for xi, yi, ti in zip(x, y, range(1951,2015)):
+  if yi > 9 or xi > 9 or ti == 2014:
+    ax.text(xi, yi + 0.1, "%s" % (ti,), ha=g(ti), va='bottom')
 #ax.scatter(x[-1],y[-1], facecolor='r', label='2012')
 #ax.plot([x[-1],x[-1]], [10,35], color='r')
 #ax.text( x[-1], 13, '2012', color='r')
@@ -65,10 +54,11 @@ for xi, yi, ti in zip(x, y, range(1986,2014)):
 #ax.plot( [0,31], [intercept, intercept + 31 * h_slope], color='r',
 #         label=r"Fit = $\frac{%.2f ^{\circ}\mathrm{F}}{day}, R^2 = %.2f$" % (
 #                                h_slope, h_r_value ** 2))
-ax.set_title("1986-2013 1 April - 7 May :: Precipitation + Severe Weather")
-ax.set_xlabel("Iowa Statewide Precipitation [inch]")
-ax.set_ylabel("Severe Thunderstorm Warnings")
-ax.set_ylim(bottom=0)
+ax.set_title("1951-2014 June Precipitation\nBurlington, Cedar Rapids, Dubuque, Estherville Avg vs Des Moines ")
+ax.set_xlabel("Des Moines Precipitation [inch], *2014 thru 24 June")
+ax.set_ylabel("Four City (non-DSM) Precip Average [inch]")
+ax.set_ylim(0,14)
+ax.set_xlim(0,14)
 #ax.set_xlim(60,90)
 #ax.set_ylim(10,35)
 #ax.set_yticks( range(0,30,6))
@@ -76,5 +66,5 @@ ax.set_ylim(bottom=0)
 #ax.legend(loc='best')
 ax.grid(True)
 import iemplot
-fig.savefig('test.svg')
+fig.savefig('test.ps')
 iemplot.makefeature('test')
