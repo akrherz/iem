@@ -212,7 +212,7 @@ year          day           radn          maxt          mint          rain
 	
 	pg_prepare($connection, "TBD4", "SELECT extract(doy from day) as doy, high,".
 			" low, precip, month, year, extract(day from day) as lday, station, year,".
-			" coalesce(merra_srad, narr_srad, hrrr_srad) as srad".
+			" coalesce(narr_srad, merra_srad, hrrr_srad) as srad".
 			" from $table ".
 			" WHERE station IN ". $stationString ." and ".
 			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
@@ -279,7 +279,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 	if ($selectAll) die("Sorry, only one station request at a time for daycent option");
 	pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high,".
 	" low, precip, month, year, extract(day from day) as lday, station, year,".
-	" coalesce(merra_srad, narr_srad, hrrr_srad) as srad".
+	" coalesce(narr_srad, merra_srad, hrrr_srad) as srad".
 	" from $table WHERE station IN ". $stationString ." and ".
 	" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
 	$rs = pg_execute($connection, 'TBD', Array());
