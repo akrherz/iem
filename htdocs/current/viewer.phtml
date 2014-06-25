@@ -243,16 +243,19 @@ function switchRADAR(){
 // -->
 </script>
 
-<table>
-<tr><td valign="top">
+<p>This application auto-magically updates both the webcam image and map
+elements.
 
-<div style="float: left; z-index: 2; border: 10px #000 solid;">
-<img name="camera" src="/data/camera/640x480/{$id}.jpg" />
+<div class="row">
+<div class="col-md-6">
+
+<img name="camera" src="/data/camera/640x480/{$id}.jpg" class="img img-responsive" />
+
 </div>
+<div class="col-md-6">
 
-</td><td valign="top">
 
-<div style="width: 640px; height: 400px;" id="map"></div>
+<div style="width: 100%; height: 400px;" id="map"></div>
 <br /><form name="radar">
 <input type="radio" name="nexrad" value="nexrad-n0q-900913"
              onclick="switchRADAR()" checked="checked">US Composite</input>
@@ -273,7 +276,9 @@ function switchRADAR(){
 <input type="radio" name="nexrad" value="ridge::FSD-N0U-0"
              onclick="switchRADAR()">Sioux Falls Velocity</input>
 </form>
-</td></tr></table>
+
+</div>
+</div>
 
 <br clear="all" />
 
