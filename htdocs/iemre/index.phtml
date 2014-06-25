@@ -8,8 +8,14 @@
  $t->content = <<<EOF
 <h3>IEM Reanalysis (IEMRE)</h3><p>
 
-<img src="iemre_anim.gif" align="left" style="margin: 5px;"/>
+<div class="row">
+ 		<div class="col-xs-2">
+ 		
+<img src="iemre_anim.gif" class="img img-responsive" />
 
+ 		</div>
+ 		<div class="col-xs-10">
+ 		
 <p>IEM Reanalysis is an effort to provide a regular 
 dataset of Iowa Environmental Data without many of the problems associated
 with single site observations.  The IEM will continue to provide single
@@ -36,12 +42,17 @@ and does not include many of the datasets the IEM uniquely collects. We may
 also produce an analysis on sub-hourly timescales.</li>
 </ul>
 
+ 		</div>
+ 		</div>
+ 		
 <br clear="all" />
 <h3>Data Availability</h3>
 
-<table cellpadding="3" cellspacing="0" border="1">
+<table class="table">
+ 		<thead>
 <tr><th>Hourly Interval</th><th>Daily Interval</th></tr>
-<tr>
+</thead>
+ 		<tr>
 <td>
 <ul>
  <li>2 Meter Air Temperature</li>
@@ -69,6 +80,9 @@ MultiDay Request
 Form: http://mesonet.agron.iastate.edu/iemre/multiday/{YYYY-MM-DD::date1}/{YYYY-MM-DD::date2}/{LAT}/{LON}/json
 Example: http://mesonet.agron.iastate.edu/iemre/multiday/2010-05-01/2010-09-30/42.54/-96.40/json
 </pre>
+ 		
+ <p>IEMRE data is stored on the server as netCDF files.  You can directly 
+ 	download these files from <a href="/onsite/iemre/">here</a>.
 
 EOF;
 $t->render('single.phtml');
