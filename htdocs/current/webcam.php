@@ -5,12 +5,13 @@
  */
 include("../../config/settings.inc.php");
 define("IEM_APPID", 9);
+require_once "../../include/myview.php";
+$t = new MyView();
  include("../../include/iemprop.php");
  $camera_refresh = get_iemprop("webcam.interval");
-$HEADEXTRA = <<<EOF
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+$t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.0/build/ext-all.js"></script>
 <script>
 Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
@@ -20,9 +21,6 @@ cfg.jsonSource = '/json/webcams.php';
 </script>
   <script type='text/javascript' src='webcam-static.js?v=6'></script>
 <style>
-#iem-footer {
-	display: none;
-	}
 .webimage {
   height: 240px;
   width : 320px;
@@ -41,11 +39,9 @@ cfg.jsonSource = '/json/webcams.php';
 
 </style>
 EOF;
-$NOCONTENT = 1;
-$TITLE = "IEM Webcams";
-$THISPAGE = "webcam-still";
-include("../../include/header.php");
-?>
+$t->title = "Webcams";
+$t->thispage = "webcam-still";
+$t->content = <<<EOF
 <div id="main">
 </div>
 <div id="help" class="x-hidden">
@@ -70,4 +66,6 @@ and the application will automatically update to show you the images. The IEM ha
 </ul>
 
 </div>
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
