@@ -11,17 +11,18 @@ cursor = IEM.cursor()
 
 def get_data(network, sts, ets, stations=[]):
     ''' Go fetch data please '''
-    s = "station,day,max_temp_f,min_temp_f,max_dewpoint_f,min_dewpoint_f\n"
+    s = ("station,day,max_temp_f,min_temp_f,max_dewpoint_f,"
+         +"min_dewpoint_f,precip_in\n")
     if len(stations) == 1:
         stations.append( 'ZZZZZ' )
-    cursor.execute("""SELECT id, day, max_tmpf, min_tmpf, max_dwpf, min_dwpf 
-        from summary s JOIN stations t on (t.iemid = s.iemid) WHERE
+    cursor.execute("""SELECT id, day, max_tmpf, min_tmpf, max_dwpf, min_dwpf, 
+        pday from summary s JOIN stations t on (t.iemid = s.iemid) WHERE
         s.day >= %s and s.day < %s and t.network = %s and t.id in %s
         ORDER by day ASC""",
         (sts, ets, network, tuple(stations)))
     for row in cursor:
-        s += "%s,%s,%s,%s,%s,%s\n" % (row[0], row[1], row[2], row[3], row[4],
-                                      row[5]) 
+        s += "%s,%s,%s,%s,%s,%s,%s\n" % (row[0], row[1], row[2], row[3], row[4],
+                                      row[5], row[6]) 
     
     return s
 
