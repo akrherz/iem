@@ -38,7 +38,7 @@ COPY alldata_tmp from STDIN with null as 'Null';
 hits = 0
 misses = 0
 for line in lines:
-    tokens = re.split(",", line)
+    tokens = re.split(",", line.replace('"', ""))
     if len(tokens) < 15 or len(tokens[2]) != 4:
         misses += 1
         continue
