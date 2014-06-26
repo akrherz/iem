@@ -380,24 +380,27 @@ function loadWarnings(){
 } /* End of loadWarnings() */
 
 function loadLSRs() {
+	/*
+	 * Load LSRs from the database using a distinct on what eventually will 
+	 * become the primary key for the memory storage
+	 */
     $sql = sprintf("SELECT distinct *, ST_x(geom) as lon0, ST_y(geom) as lat0, 
-        ST_astext(geom) as tgeom,
-        ST_astext(ST_buffer( ST_transform(geom,2163), %s000)) as buffered
-        from lsrs w WHERE %s and 
-        valid >= '%s' and valid < '%s' and %s and
-        ((type = 'M' and magnitude >= 34) or 
-         (type = 'H' and magnitude >= %s) or type = 'W' or
-         type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
-         or type = 'F' or type = 'x')
-        ORDER by valid ASC", $this->lsrbuffer, 
-        $this->sqlWFOBuilder(), 
-        date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
-        $this->sqlLSRTypeBuilder(), $this->hailsize, $this->wind);
+        	ST_astext(geom) as tgeom,
+        	ST_astext(ST_buffer( ST_transform(geom,2163), %s000)) as buffered
+        	from lsrs w WHERE %s and 
+        	valid >= '%s' and valid < '%s' and %s and
+        	((type = 'M' and magnitude >= 34) or 
+         	(type = 'H' and magnitude >= %s) or type = 'W' or
+         	type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
+         	or type = 'F' or type = 'x') ORDER by valid ASC", 
+    		$this->lsrbuffer, $this->sqlWFOBuilder(), 
+        	date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
+        	$this->sqlLSRTypeBuilder(), $this->hailsize, $this->wind);
     $rs = $this->callDB($sql);
-    for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
+    for ($i=0;$row = @pg_fetch_assoc($rs,$i);$i++)
     {
         $key = sprintf("%s-%s-%s-%s-%s", $row["wfo"], $row["valid"], 
-        	$row["type"], $row["magnitude"], $row["city"]);
+        				$row["type"], $row["magnitude"], $row["city"]);
         $this->lsrs[$key] = $row;
         $this->lsrs[$key]['geom'] = $row["tgeom"];
         $this->lsrs[$key]["ts"] = strtotime($row["valid"]);
