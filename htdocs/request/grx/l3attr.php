@@ -31,7 +31,7 @@ Font: 1, 11, 1, \"Courier New\"
 ";
 
 
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 {
   $d = intval( $row["drct"] ) - 180;
   if ($d < 0){ $d = 360 - $d; }
@@ -39,7 +39,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $ts = strtotime($row["valid"]);
   $q = sprintf("K%s [%s] %s Z\\n", $row["nexrad"], $row["storm_id"], gmdate("H:i", $ts) );
   $q .= sprintf("Drct: %s Speed: %s kts\\n", $row["drct"], $row["sknt"]);
-  $icon = 1;
+  $icon = 9; // Default icon of white box
   if ($row["tvs"] != "NONE" || $row["meso"] != "NONE"){
     $q .= sprintf("TVS: %s MESO: %s\\n", $row["tvs"], $row["meso"]);
   }
