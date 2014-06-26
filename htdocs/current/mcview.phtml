@@ -257,7 +257,7 @@ EOF;
  	reset($images);
  	$control = "";
  	while ( list($key,$val) = each($images) ){
-   		$control .= "<p><img src=\"". $val ."\">\n";
+   		$control .= "<p><img src=\"". $val ."\" class=\"img img-responsive\">\n";
  	}
 }
 
@@ -317,7 +317,16 @@ $t->content = <<<EOF
 
 
 <div class="row">
-<div class="col-md-3 col-sm-3">
+<div class="col-xs-9">
+
+{$watches}
+
+{$rtmessage}
+
+{$control}
+
+</div>
+<div class="col-xs-3">
 
 <form method="GET" action="{$uri}" name="controls">
 
@@ -354,14 +363,6 @@ $t->content = <<<EOF
 <a href="/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>
 <br /><a href="/cow/">Warning Verification</a>
 </form>
-
-</div><div class="col-md-9 col-sm-9">
-
-{$watches}
-
-{$rtmessage}
-
-{$control}
 
 </div></div>
 
