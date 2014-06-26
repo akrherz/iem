@@ -269,6 +269,8 @@ CREATE TABLE climate51(
   hdd65 real 
 );
 CREATE UNIQUE INDEX climate51_idx on climate51(station,valid);
+CREATE INDEX climate51_station_idx on climate51(station);
+CREATE INDEX climate51_valid_idx on climate51(valid);
 GRANT SELECT on climate51 to nobody,apache;
 
 CREATE TABLE climate71(
