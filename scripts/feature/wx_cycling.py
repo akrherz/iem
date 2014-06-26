@@ -1,5 +1,5 @@
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 import datetime
@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
-sts = datetime.datetime(2013,12,2)
-ets = datetime.datetime(2014,3,4)
+sts = datetime.datetime(2014,1,20)
+ets = datetime.datetime(2014,6,24)
 interval = datetime.timedelta(days=7)
 
 lbls = []
@@ -83,7 +83,7 @@ for l,t,p,a in zip(lbls, tsigma, psigma,aligns):
 ax.set_xlim(-3.5,3.5)
 ax.set_ylabel("Precipitation Departure $\sigma$")
 ax.set_xlabel("Temperature Departure $\sigma$")
-ax.set_title("2 Dec 2013 - 3 Mar 2014 Iowa\n 14 Day Trailing Departures plotted every 7 days")
+ax.set_title("20 Jan 2014 - 24 Jun 2014 Iowa\n 14 Day Trailing Departures plotted every 7 days")
 ax.grid(True)
 
 fig.savefig('test.ps')
