@@ -15,12 +15,12 @@ Ext.override(Ext.form.ComboBox, {
 Ext.override(Date, {
     toUTC : function() {
                         // Convert the date to the UTC date
-        return this.add(Date.MINUTE, this.getTimezoneOffset());
+        return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
     },
 
     fromUTC : function() {
                         // Convert the date from the UTC date
-        return this.add(Date.MINUTE, -this.getTimezoneOffset());
+        return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
     }
 });
 
@@ -42,9 +42,15 @@ var disableStore = new Ext.data.Store({
 
 imagestore = new Ext.data.JsonStore({
     isLoaded    : false,
-    url         : cfg.jsonSource,
-    root        : 'images',
-    idProperty  : 'cid',
+    proxy: {
+        type: 'ajax',
+        url: cfg.jsonSource,
+        reader: {
+            type: 'json',
+            idProperty : 'cid',
+            rootProperty: 'images'
+        }
+    },
     fields      : dataFields
 });
 imagestore.on('load', function(store, records){
@@ -109,26 +115,47 @@ var helpWin = new Ext.Window({
     width      : 400
 });
 
-new Ext.Viewport({
-  renderTo  : 'main',
-  layout    : 'border',
-  layoutConfig : {
-	  activeOnTop: false
+Ext.create('Ext.Panel', {
+  renderTo : 'main',
+  height: 600,
+  layout   : {
+	  type: 'border',
+	  align: 'stretch'
   },
-  items     : [new Ext.BoxComponent({
-      region      :'north',
-      height      : cfg.headerHeight,
-      contentEl   : cfg.header
-    }),{
+  items     : [{
+      xtype       : 'form',
+      id          : 'cameralist',
+      region : 'west',
+      collapsible : true,
+      autoScroll  : true,
+      title       : "Select Webcams",
+      tbar        : [{
+          xtype   : 'button',
+          text    : 'Turn All Off',
+          handler : function(){
+              Ext.getCmp("camselector").items.each(function(i){
+                   i.setValue(false);
+              });
+          }
+      },{
+          xtype   : 'button',
+          text    : 'Turn All On',
+          handler : function(){
+              Ext.getCmp("camselector").items.each(function(i){
+                   i.setValue(true);
+              });
+          }
+      }]
+ },{
+	  region : 'center',
       xtype       : 'panel',
-       region: 'center',
        autoScroll : true,
        items: [{
            xtype       : 'dataview',
           store        : imagestore,
           itemSelector : 'div.thumb-wrap',
           autoHeight   : true,
-          overClass    : 'x-view-over',
+          overItemCls  : 'x-view-over',
           emptyText    : "No Images Loaded or Selected for Display",
           tpl          : tpl
        }],
@@ -182,11 +209,11 @@ new Ext.Viewport({
             listeners: {
                 'select': function(sb){
                    imagestore.isLoaded = false;
-                   ts = Ext.getCmp("datepicker").getValue().format('m/d/Y') 
-                     +" "+ Ext.getCmp("timepicker").getValue();
+                   ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y') 
+                     +" "+ Ext.getCmp("timepicker").getRawValue();
                    var dt = new Date(ts);
                    if (Ext.getCmp("timemode").realtime){ ts = 0; }
-                   else{ ts = dt.toUTC().format('YmdHi'); }
+                   else{ ts = Ext.Date.format(dt.toUTC(), 'YmdHi'); }
                    imagestore.reload({
                      add    : false,
                      params : {'ts': ts,
@@ -231,15 +258,15 @@ new Ext.Viewport({
           listeners : {
               select : function(field, value){
                   imagestore.isLoaded = false;
-                  ts = Ext.getCmp("datepicker").getValue().format('m/d/Y') 
-                     +" "+ Ext.getCmp("timepicker").getValue();
+                  ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y') 
+                     +" "+ Ext.getCmp("timepicker").getRawValue();
                   var dt = new Date(ts);
                   imagestore.reload({
                       add    : false,
-                      params : {'ts': dt.toUTC().format('YmdHi'),
+                      params : {'ts': Ext.Date.format(dt.toUTC(), 'YmdHi'),
                         'network': Ext.getCmp("networkSelect").getValue() }
                   });
-                  window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.toUTC().format('YmdHi');
+                  window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ Ext.Date.format(dt.toUTC(), 'YmdHi');
               }
           }
        },{
@@ -254,45 +281,21 @@ new Ext.Viewport({
           listeners : {
               select : function(field, value){
                   imagestore.isLoaded = false;
-                  ts = Ext.getCmp("datepicker").getValue().format('m/d/Y') 
-                     +" "+ Ext.getCmp("timepicker").getValue();
+                  ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(),
+                		  'm/d/Y') 
+                     +" "+ Ext.getCmp("timepicker").getRawValue();
                   var dt = new Date(ts);
                   imagestore.reload({
                       add    : false,
-                      params : {'ts': dt.toUTC().format('YmdHi'),
+                      params : {'ts': Ext.Date.format(dt.toUTC(), 'YmdHi'),
                           'network': Ext.getCmp("networkSelect").getValue() }
                   });
-                   window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.toUTC().format('YmdHi');
+                   window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ Ext.Date.format(dt.toUTC(), 'YmdHi');
               }
           }
        }
        ]
-    },{
-        xtype       : 'form',
-        id          : 'cameralist',
-        region      : 'west',
-        width       : 160,
-        collapsible : true,
-        autoScroll  : true,
-        title       : "Select Webcams",
-        tbar        : [{
-            xtype   : 'button',
-            text    : 'Turn All Off',
-            handler : function(){
-                Ext.getCmp("camselector").items.each(function(i){
-                     i.setValue(false);
-                });
-            }
-        },{
-            xtype   : 'button',
-            text    : 'Turn All On',
-            handler : function(){
-                Ext.getCmp("camselector").items.each(function(i){
-                     i.setValue(true);
-                });
-            }
-        }]
-   }]
+    }]
 });
 
 
@@ -308,7 +311,7 @@ var task = {
   },
   interval: cfg.refreshint
 };
-Ext.TaskMgr.start(task);
+Ext.TaskManager.start(task);
 
 
 
@@ -319,7 +322,7 @@ app.appSetTime = function(s){
     var network = tokens2[0];
     Ext.getCmp("networkSelect").setValue( network );
     var tstamp = tokens2[1];
-    var dt = Date.parseDate(tstamp, 'YmdHi');
+    var dt = Ext.Date.parseDate(tstamp, 'YmdHi');
     Ext.getCmp("datepicker").setValue( dt.fromUTC() );
     Ext.getCmp("timepicker").setValue( dt.fromUTC() );
     Ext.getCmp("datepicker").enable();
@@ -329,10 +332,10 @@ app.appSetTime = function(s){
     imagestore.isLoaded = false;
     imagestore.reload({
         add    : false,
-        params : {'ts': dt.format('YmdHi'),
+        params : {'ts': Ext.Date.format(dt, 'YmdHi'),
          'network': Ext.getCmp("networkSelect").getValue() }
     });
-    window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.format('YmdHi');
+    window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ Ext.Date.format(dt, 'YmdHi');
 } else if (s.length == 6){ 
    var tokens2 = s.split("-");
    Ext.getCmp("networkSelect").setValue( tokens2[0]);
