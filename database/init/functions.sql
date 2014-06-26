@@ -20,3 +20,8 @@ CREATE OR REPLACE FUNCTION wcht(real, real) RETURNS double precision
 		END 
 	$_$;
 COMMENT on FUNCTION wcht(real, real) IS 'Wind Chill wcht(tmpf, sknt)';
+
+CREATE OR REPLACE FUNCTION hdd65(real, real) RETURNS numeric
+ 	LANGUAGE sql
+ 	AS $_$select (case when (65 - (( $1 + $2 )/2.)) > 0 then (65. - ( $1 + $2 )/2.) else 0 end)::numeric$_$;
+ 	

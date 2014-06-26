@@ -370,7 +370,8 @@ create table sbw(
   tornadodamagetag varchar(64),
   tml_valid timestamp with time zone,
   tml_direction smallint,
-  tml_sknt smallint
+  tml_sknt smallint,
+  updated timestamptz
 ) WITH OIDS;
 select addgeometrycolumn('','sbw','geom',4326,'MULTIPOLYGON',2);
 select addGeometryColumn('sbw', 'tml_geom', 4326, 'POINT', 2);
