@@ -25,7 +25,7 @@
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $t = new MyView();
 $t->thispage = "climatology-climodat";
-$t->title = "IEM Climodat";
+$t->title = "Climodat Reports";
 
 if ($station == "" || ! is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
   	$t->jsextra = <<<EOF
@@ -144,8 +144,8 @@ $content .= <<<EOF
   <input type="submit" value="Download Text Version">
 </form></td>
 <td><form name="excel" action="as-excel.php">
-  <input type="hidden" name="station\" value="$station"> 
-  <input type="hidden" name="report\" value="$report">
+  <input type="hidden" name="station" value="$station"> 
+  <input type="hidden" name="report" value="$report">
   <input type="submit" value="Download Excel Version"></form></td>
 </tr></table>
 <pre>
