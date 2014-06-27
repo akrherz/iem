@@ -2,11 +2,11 @@
 include("../../../../config/settings.inc.php");
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
-include_once "$rootpath/include/iemmap.php";
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
-include("$rootpath/include/network.php");
+include_once "../../../../include/iemmap.php";
+include("../../../../include/mlib.php");
+include("../../../../include/iemaccess.php");
+include("../../../../include/iemaccessob.php");
+include("../../../../include/network.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
 $nt = new NetworkTable($network);
@@ -82,9 +82,8 @@ $rnd = Array("tmpf" => 0,
 $height = 480;
 $width = 640;
 
-$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
-$map->set("width", $width);
-$map->set("height", $height);
+$map = ms_newMapObj("../../../../data/gis/base26915.map");
+$map->setSize($width, $height);
 
 $map->setprojection($proj);
 if (isset($_GET["zoom"]))
