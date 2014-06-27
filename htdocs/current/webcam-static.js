@@ -5,6 +5,7 @@
  */
 Ext.namespace('app');
 var imagestore;
+var disableStore;
 
 Ext.onReady(function(){
 
@@ -25,20 +26,22 @@ Ext.override(Date, {
     }
 });
 
+// Set up a model to use in our Store
+Ext.define('Image', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'cid', type: 'string'},
+        {name: 'show', type: 'boolean', defaultValue: true},
+        {name: 'name',  type: 'string'},
+        {name: 'county',  type: 'string'},
+        {name: 'network',  type: 'string'},
+        {name: 'url',  type: 'string'}
+    ]
+});
 
-
-var dataFields = [
- 'cid',
- 'name',
- 'county',
- 'state',
- 'network',
- 'url'
-];
-
-var disableStore = new Ext.data.Store({
+disableStore = new Ext.data.Store({
     idProperty  : 'cid',
-    fields      : dataFields
+    model       : 'Image'
 });
 
 imagestore = new Ext.data.JsonStore({
@@ -47,66 +50,79 @@ imagestore = new Ext.data.JsonStore({
         type: 'ajax',
         url: cfg.jsonSource,
         reader: {
-            type: 'json',
-            idProperty : 'cid',
-            rootProperty: 'images'
+            type         : 'json',
+            idProperty   : 'cid',
+            rootProperty : 'images'
         }
     },
-    fields      : dataFields
+    model : 'Image'
 });
+/*
+ * When the image store loads, we need to check our listing of disabled
+ * webcams so that we don't show it again
+ */
 imagestore.on('load', function(store, records){
-  data = Array();
-  Ext.each(records, function(record){
-    data.push({
-      boxLabel : (record.get("cid").substr(5,3) * 1)+" "+record.get("name"), 
-      name     : record.get("cid"), 
-      checked  : true,
-      listeners  : {
-        check: function(cb, checked, oldValue){
-          id = cb.getName();
-          if (! imagestore.isLoaded ){ return; }
+	data = Array();
+	Ext.each(records, function(record){
+		var checked = (disableStore.find('cid', record.get("cid")) == -1);
+		data.push({
+			boxLabel : (record.get("cid").substr(5,3) * 1)+" "+record.get("name"), 
+			name     : record.get("cid"), 
+			checked  : checked,
+			listeners  : {
+				change: function(cb, checked, oldValue){
+					id = cb.getName();
+					//console.log("cid: "+ id +" checked: "+ checked);
+					if (! imagestore.isLoaded ){ return; }
 
-          rec = imagestore.getById( id );
-          if (checked && !rec){
-            rec = disableStore.getById( id );
-            imagestore.add( rec );
-            imagestore.sort(Ext.getCmp("sortSelect").getValue(), "ASC");
-            disableStore.remove( rec );
-          } else {
-            rec = imagestore.getById( id );
-            imagestore.remove( rec );
-            disableStore.add( rec );
-          }
-        }
-      }
-    });
-  });
-  if (Ext.getCmp("camselector")){
-      Ext.getCmp("camselector").destroy();
-  }
-  if (records.length > 0){
-     Ext.getCmp("cameralist").add({
-        xtype      : 'checkboxgroup',
-        columns    : 1,
-        id         : 'camselector',
-        hideLabel  : true,
-        items      : data
-     });
-     Ext.getCmp("cameralist").doLayout();
-  } else {
-     Ext.Msg.alert('Status', 'Sorry, no images found for this time. Try selecting a time divisible by 5.');
-  }
-  imagestore.isLoaded = true;
+					rec = imagestore.getAt(imagestore.find("cid", id ));
+					rec.set('show', checked, {silent: true});
+					if (checked){
+						rec = disableStore.getAt(disableStore.find('cid', id ));
+						disableStore.remove( rec );
+						imagestore.sort(Ext.getCmp("sortSelect").getValue(), "ASC");
+					} else {
+						disableStore.add( rec );
+						imagestore.sort(Ext.getCmp("sortSelect").getValue(), "ASC");
+					}
+				}
+			}
+		});
+	});
+	if (Ext.getCmp("camselector")){
+		Ext.getCmp("camselector").destroy();
+	}
+	if (records.length > 0){
+		Ext.getCmp("cameralist").add({
+			xtype      : 'checkboxgroup',
+			columns    : 1,
+			id         : 'camselector',
+			hideLabel  : true,
+			items      : data
+		});
+		Ext.getCmp("cameralist").doLayout();
+	} else {
+		Ext.Msg.alert('Status', 'Sorry, no images found for this time. '
+				+'Try selecting a time divisible by 5.');
+	}
+	imagestore.isLoaded = true;
 });
 
 
 var tpl = new Ext.XTemplate(
     '<tpl for=".">',
-        '<div class="thumb-wrap" id="{cid}">',
-        '<div class="thumb"><img class="webimage" src="{url}?{[ (new Date()).getTime() ]}" title="{name}"></div>',
-        '<span>[{cid}] {name}, {state} ({county} County)</span></div>',
+    	'<tpl if="this.shouldShow(cid)">',
+        	'<div class="thumb-wrap" id="{cid}">',
+        	'<div class="thumb"><img class="webimage" src="{url}" title="{name}"></div>',
+        	'<span>[{cid}] {name}, {state} ({county} County)</span></div>',
+        '</tpl>',
     '</tpl>',
-    '<div class="x-clear"></div>'
+    '<div class="x-clear"></div>',
+    {
+    	shouldShow: function(cid){
+    		return (disableStore.find('cid', cid) == -1);
+    	}
+    }
 );
 
 var helpWin = new Ext.Window({
@@ -118,7 +134,7 @@ var helpWin = new Ext.Window({
 
 Ext.create('Ext.Panel', {
   renderTo : 'main',
-  height: 600,
+  height: Ext.getBody().getViewSize().height - 120,
   layout   : {
 	  type: 'border',
 	  align: 'stretch'
@@ -132,7 +148,7 @@ Ext.create('Ext.Panel', {
       title       : "Select Webcams",
       tbar        : [{
           xtype   : 'button',
-          text    : 'Turn All Off',
+          text    : 'All Off',
           handler : function(){
               Ext.getCmp("camselector").items.each(function(i){
                    i.setValue(false);
@@ -140,7 +156,7 @@ Ext.create('Ext.Panel', {
           }
       },{
           xtype   : 'button',
-          text    : 'Turn All On',
+          text    : 'All On',
           handler : function(){
               Ext.getCmp("camselector").items.each(function(i){
                    i.setValue(true);
@@ -302,16 +318,18 @@ Ext.create('Ext.Panel', {
 
 
 var task = {
-  run: function(){
-    if (imagestore.data.length > 0 && Ext.getCmp("timemode") &&
-        Ext.getCmp("timemode").realtime){
-      //imagestore.fireEvent('datachanged');
-      imagestore.reload({
-       add: false, params : {'network': Ext.getCmp("networkSelect").getValue()}
-   		});
-    }
-  },
-  interval: cfg.refreshint
+		run: function(){
+			if (imagestore.data.length > 0 && Ext.getCmp("timemode") &&
+					Ext.getCmp("timemode").realtime){
+				imagestore.reload({
+					add    : false, 
+					params : {
+						'network': Ext.getCmp("networkSelect").getValue()
+					}
+				});
+			}
+		},
+		interval: cfg.refreshint
 };
 Ext.TaskManager.start(task);
 

@@ -45,9 +45,9 @@ $result = pg_execute($connect, "CAMSEL", $ar);
 
 $ar = Array("images" => Array() );
 if ($ts > 0){
-  $url = "http://mesonet.agron.iastate.edu/current/camrad.php?network=${network}&ts=". $_REQUEST["ts"];
+  $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network=${network}&ts=". $_REQUEST["ts"];
 } else {
-  $url = "http://mesonet.agron.iastate.edu/current/camrad.php?network=${network}";
+  $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network=${network}&". time();
 }
 if (pg_num_rows($result) > 0){
   $ar["images"][] = Array("cid" => "${network}-000",
@@ -65,7 +65,7 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 	}
 	$used[$row["cam"]] = True;
 	$gts = strtotime($row["valid"]);
-    $url = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/camera/%s/%s_%s.jpg", 
+    $url = sprintf("https://mesonet.agron.iastate.edu/archive/data/%s/camera/%s/%s_%s.jpg", 
     		gmdate("Y/m/d", $gts), $row["cam"], $row["cam"], gmdate("YmdHi", $gts) );
   	$z = Array("cid" => $row["id"],
         "name" => $row["name"], 
