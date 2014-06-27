@@ -12,7 +12,7 @@ $ts = isset($_REQUEST["ts"]) ? strtotime($_REQUEST["ts"]) : 0;
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,4): "KCCI";
 
 $connect = iemdb("mesosite");
-pg_exec($connect, "SET TIME ZONE 'GMT'");
+pg_exec($connect, "SET TIME ZONE 'UTC'");
 
 if ($ts > 0){
 	if ($network != "IDOT"){
