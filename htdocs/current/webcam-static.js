@@ -3,6 +3,7 @@
  * 
  * Feel free to use this for whatever! 
  */
+Ext.namespace('app');
 var imagestore;
 
 Ext.onReady(function(){
@@ -192,7 +193,7 @@ Ext.create('Ext.Panel', {
            xtype         : 'combo',
            id            : 'networkSelect',
            triggerAction : 'all',
-           width         : 100,
+           width         : 140,
            editable      : false,
            mode          : 'local',
            displayField  : 'desc',
@@ -254,6 +255,7 @@ Ext.create('Ext.Panel', {
           emptyText : 'Select Date',
           minValue  : '07/23/2003',
           value     : new Date(),
+          width     : 100,
           disabled  : true,
           listeners : {
               select : function(field, value){
@@ -313,48 +315,45 @@ var task = {
 };
 Ext.TaskManager.start(task);
 
-
-
-Ext.namespace('app');
 app.appSetTime = function(s){
- if (s.length == 17){ 
-    var tokens2 = s.split("-");
-    var network = tokens2[0];
-    Ext.getCmp("networkSelect").setValue( network );
-    var tstamp = tokens2[1];
-    var dt = Ext.Date.parseDate(tstamp, 'YmdHi');
-    Ext.getCmp("datepicker").setValue( dt.fromUTC() );
-    Ext.getCmp("timepicker").setValue( dt.fromUTC() );
-    Ext.getCmp("datepicker").enable();
-    Ext.getCmp("timepicker").enable();
-    Ext.getCmp("timemode").setText("Archived Mode");
-    Ext.getCmp("timemode").realtime = false;
-    imagestore.isLoaded = false;
-    imagestore.reload({
-        add    : false,
-        params : {'ts': Ext.Date.format(dt, 'YmdHi'),
-         'network': Ext.getCmp("networkSelect").getValue() }
-    });
-    window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ Ext.Date.format(dt, 'YmdHi');
-} else if (s.length == 6){ 
-   var tokens2 = s.split("-");
-   Ext.getCmp("networkSelect").setValue( tokens2[0]);
-   imagestore.load({
-       add: false, params : {'network': tokens2[0]}
-   });
-} else {
-   imagestore.load();
-   Ext.getCmp("networkSelect").setValue("KCCI");
-}
+	if (s.length == 17){ 
+		var tokens2 = s.split("-");
+		var network = tokens2[0];
+		Ext.getCmp("networkSelect").setValue( network );
+		var tstamp = tokens2[1];
+		var dt = Ext.Date.parseDate(tstamp, 'YmdHi');
+		Ext.getCmp("datepicker").setValue( dt.fromUTC() );
+		Ext.getCmp("timepicker").setValue( dt.fromUTC() );
+		Ext.getCmp("datepicker").enable();
+		Ext.getCmp("timepicker").enable();
+		Ext.getCmp("timemode").setText("Archived Mode");
+		Ext.getCmp("timemode").realtime = false;
+		imagestore.isLoaded = false;
+		imagestore.reload({
+			add    : false,
+			params : {'ts': Ext.Date.format(dt, 'YmdHi'),
+				'network': Ext.getCmp("networkSelect").getValue() }
+		});
+		window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ Ext.Date.format(dt, 'YmdHi');
+	} else if (s.length == 6){ 
+		var tokens2 = s.split("-");
+		Ext.getCmp("networkSelect").setValue( tokens2[0]);
+		imagestore.load({
+			add: false, params : {'network': tokens2[0]}
+		});
+	} else {
+		imagestore.load();
+		Ext.getCmp("networkSelect").setValue("KCCI");
+	}
 };
 
-
+// Anchor bookmark support
 var tokens = window.location.href.split('#');
 if (tokens.length == 2){
-  app.appSetTime(tokens[1]);
+	app.appSetTime(tokens[1]);
 } else {
-   imagestore.load();
-   Ext.getCmp("networkSelect").setValue("KCCI");
+	imagestore.load();
+	Ext.getCmp("networkSelect").setValue("KCCI");
 }
 
 });

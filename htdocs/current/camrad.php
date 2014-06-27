@@ -1,7 +1,7 @@
 <?php
 /* 
-   Generate a radar image with camera locs for some time 
-*/
+ * Generate a RADAR image with webcams overlain for some *UTC* timestamp!
+ */
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/cameras.inc.php");
@@ -12,10 +12,11 @@ $network = isset($_GET["network"])
            ? substr($_GET["network"],0,4) : die("No \$network Set");
 $ts = 0;
 if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
-if (isset($_GET["ts"]))
+
+if (isset($_GET["ts"]) && $_GET["ts"] != "0")
 {
   $q = strptime($_GET["ts"],'%Y%m%d%H%M');
-  $ts = mktime( $q["tm_hour"], $q["tm_min"], 0,
+  $ts = gmmktime( $q["tm_hour"], $q["tm_min"], 0,
                 1 + $q["tm_mon"], $q["tm_mday"], 1900 + $q["tm_year"]);
 }
 /* Now, we need to figure out if we are in realtime or archive mode */
