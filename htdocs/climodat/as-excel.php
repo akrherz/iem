@@ -9,7 +9,7 @@ $station = isset($_GET["station"])? substr($_GET["station"],0,6) : "IA0200";
 // Creating a workbook
 $workbook = new Spreadsheet_Excel_Writer();
 // sending HTTP headers
-$workbook->send('test.xls');
+$workbook->send(sprintf('%s_%s.xls', $station, $report));
 // Creating a worksheet
 $worksheet =& $workbook->addWorksheet('My first worksheet');
 
