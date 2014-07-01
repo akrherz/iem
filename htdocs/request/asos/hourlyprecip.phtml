@@ -46,6 +46,11 @@ in <strong>Central Daylight/Standard Time</strong> and for the hour the precipit
 fell.  So a value for 5 PM would roughly represent the period between 
 4:53 and 5:53 PM.
 
+<p><div class="alert alert-warning">Data prior to 2010 only contains the
+non-zero values, whereas all hours are accounted for after 2010.  This may
+be fixed in upcoming work on the database.  For now, assume zeros for any 
+data prior to 2010 for missing hours.</div>
+
 <p>Select network to download from:<br />
 <form name="network" action="hourlyprecip.phtml">
 {$nselect}		
