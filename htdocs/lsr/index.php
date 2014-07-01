@@ -8,7 +8,7 @@ $t->headextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <link rel="stylesheet" type="text/css" href="superboxselect.css" />
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-<script src="http://www.openlayers.org/api/2.12/OpenLayers.js"></script>
+<script src="/vtec/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
 <script type="text/javascript" src="Printer-all.js"></script>
