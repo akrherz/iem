@@ -1,0 +1,100 @@
+<?php 
+include("../../../config/settings.inc.php");
+define("IEM_APPID", 155);
+include("../../../include/myview.php");
+include_once "../../../include/database.inc.php";
+include("../../../include/imagemaps.php");
+include("../../../include/forms.php");
+
+$mesosite = iemdb('mesosite');
+
+$t = new MyView();
+$t->title = "Download Hourly Precipitation Data";
+
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IA_ASOS";
+
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks WHERE
+		id = 'ASOS' or id ~* 'ASOS' ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sel = '';
+	if ($network == $row["id"]){
+		$sel = " selected='SELECTED'";
+	}
+	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
+	  $row["id"], $sel, $row["name"]);
+}
+$nselect .= "</select>";
+
+$sselect = networkMultiSelect($network, "");
+
+$y1 = yearSelect2(1941, date("Y"), "year1");
+$m1 = monthSelect("", "month1");
+$d1 = daySelect2("", "day1");
+$y2 = yearSelect2(1941, date("Y"), "year2");
+$m2 = monthSelect("", "month2");
+$d2 = daySelect2("", "day2");
+
+$t->content = <<<EOF
+<h3>IEM Computed Hourly Precipitation Totals</h3>
+		
+<p>The IEM attempts to take the METAR reports of precipitation and then 
+provide just the hourly precipitation totals.  These totals are not for the
+true hour (00 to 59 after), but for the hour between the standard METAR
+reporting time, typically :53 or :54 after.  The timestamps displayed are 
+in <strong>Central Daylight/Standard Time</strong> and for the hour the precipitation 
+fell.  So a value for 5 PM would roughly represent the period between 
+4:53 and 5:53 PM.
+
+<p>Select network to download from:<br />
+<form name="network" action="hourlyprecip.phtml">
+{$nselect}		
+<input type="submit" value="Switch Network">
+		</form>
+
+<form name="dl" action="/cgi-bin/request/hourlyprecip.py">
+<input type="hidden" value="{$network}" name="network" />
+
+<div class="row">
+<div class="col-sm-6">
+
+<h4>Select station(s):</h4>
+{$sselect}
+
+<h4>Select period:</h4>
+<table class="table table-striped">
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
+		</tr>
+
+  <tr>
+    <th>End:</th>
+    <td>{$y2}</td><td>{$m2}</td><td>{$d2}</td>
+  </tr>
+</table>
+
+    		</div>
+    		<div class="col-sm-6">
+
+<dl class="dl-horizontal">
+ <dt>station</dt><dd>Common identifier for the station.</dd>
+ <dt>network</dt><dd>Network identifier for the station.</dd>
+ <dt>valid</dt><dd>Hour on which the precip fell.</dd>
+ <dt>precip_in</dt><dd>Hourly Precipitation [inch].</dd>
+    		</dl>
+    		 		
+		
+</div></div>
+    		<input type="submit" value="Request Data">
+</form>
+
+EOF;
+$t->render('single.phtml');
+
+?>
