@@ -10,7 +10,7 @@ $t->title = "ASOS/AWOS Network";
 
 
 $t->north = <<< EOF
-<h3 class="heading">ASOS Network</h3><p>
+<h3>ASOS Network</h3><p>
 
 <div class="well pull-right">
 <b><u>ASOS</u></b>
@@ -34,7 +34,7 @@ EOF;
 
 $t->west = <<< EOF
 
-<P><h3 class="subtitle">Current ASOS Data:</h3>
+<P><h3>Current ASOS Data:</h3>
 <UL>
  <li><a href="current.phtml">Sortable Current Conditions</a></li>
  <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
@@ -45,7 +45,7 @@ $t->west = <<< EOF
 </UL>
 
 
-<P><h3 class="subtitle">1 Minute Archive:</h3>
+<P><h3>1 Minute Archive:</h3>
 The National Climatic Data Center collects a 1 minute interval archive
 from the ASOS network.  This archive is available <a href="ftp://ftp.ncdc.noaa.gov/pub/data/asos-onemin/">here</a>, but in a terrible
 format!  The IEM has done its best to process this data and will make it 
@@ -56,7 +56,7 @@ available here for Iowa sites.
 </ul>
 <br />Data is available for Des Moines, Waterloo, Dubuque, and Sioux City back to 2000.  The rest of the sites since March 2005.
 
-<p><h3 class="subtitle">Quality Control:</h3>
+<p><h3>Quality Control:</h3>
 <ul>
  <li><a href="/QC/madis/network.phtml?network=IA_ASOS">MADIS Raw QC Values</a></li>
  <li><a href="precipnote.phtml">Note about ASOS Precipitation Timing</a></li>
@@ -64,10 +64,11 @@ available here for Iowa sites.
 
 EOF;
 $t->east = <<< EOF
-<p><h3 class="subtitle">Historical Data:</h3>
+<p><h3>Historical Data:</h3>
 <ul>
  <li><a href="/request/download.phtml">Download</a> raw observations from the archive</li>
  <li><a href="/cgi-bin/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
+ <li><a href="/request/asos/hourlyprecip.phtml">Download</a> computed hourly precipitation totals</li>
  <li><a href="/request/daily.phtml">Download</a> computed daily summaries</li>
  <li><a href="/climodat/">IEM Climodat</a> has monthly/yearly summaries of 
 		precipitation and temperature.</li>
