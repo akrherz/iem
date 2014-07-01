@@ -244,7 +244,16 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
             	   radarProduct : 'N0Q',
             	   radar : 'DMX',
             	   radarTime : null
-               }), 
+               }),  new OpenLayers.Layer.WMS("Counties", "http://mesonet.agron.iastate.edu/c/c.py/",
+            		    {layers      : 'c-900913',
+            	     format      : 'image/png',
+            	     transparent : 'true'},{
+            	     opacity     : 1.0,
+            	     singleTile  : false,
+            	     isBaseLayer : false,
+            	     visibility  : false,
+            	     buffer      : 0
+            	}),
                App.SBWFeatureStore.layer,
                App.LSRFeatureStore.layer,
                App.SBWIntersectionFeatureStore.layer],
