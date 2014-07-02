@@ -20,7 +20,7 @@ import datetime
 import urllib2
 import subprocess
 import numpy
-import Image
+from PIL import Image
 from PIL import PngImagePlugin
 import nmq
 import tempfile
@@ -36,7 +36,7 @@ def get_file( now ):
         uri = "%s/%s.out" % (BASEURL, fn)
         try:
             req = urllib2.Request(uri)
-            data = urllib2.urlopen(req).read()
+            data = urllib2.urlopen(req, timeout=30).read()
         except:
             #print "Download %s failed" % (uri,)
             pass
