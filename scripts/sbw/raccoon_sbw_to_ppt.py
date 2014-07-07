@@ -11,6 +11,7 @@ import sys
 import shutil
 import datetime
 import psycopg2
+import subprocess
 import random
 import psycopg2.extras
 from odf.opendocument import OpenDocumentPresentation
@@ -262,11 +263,12 @@ def do_job(job):
     doc.save(outputfile)
     del doc
     cmd = "unoconv -f ppt %s" % (outputfile,)
-    os.system( cmd )
-    print "%s.ppt" % (basefn,)
-    if os.path.isfile("%s.ppt" % (basefn,)):
-        print 'Here!'
-        shutil.copyfile("%s.ppt" % (basefn,), "/mesonet/share/pickup/raccoon/%s.ppt" % (basefn,))
+    subprocess.call( cmd, shell=True )
+    pptfn = "%s.ppt" % (basefn,)
+    print "Generated %s with %s slides" % (pptfn, i)
+    if os.path.isfile(pptfn):
+        print '...copied to webfolder'
+        shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
 
 
 if __name__ == "__main__":
