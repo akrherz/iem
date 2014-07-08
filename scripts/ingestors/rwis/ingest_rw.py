@@ -49,8 +49,12 @@ def process( nwsli , lastts ):
     except Exception, exp:
         #print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
         return
-
-    df = pandas.DataFrame.from_csv(data)
+    try:
+        df = pandas.DataFrame.from_csv(data)
+    except Exception, exp:
+        print "ingest_rw.py pandas fail for sid: %s\ndata: %s\nreason: %s" % (
+                                        nwsli, data, exp)
+        return
     #Index([u'utc', u'mac', u'serial', u'tia', u'til', u'tih', u'tdl', 
     #u'tdh', u'ria', u'ril', u'rih', u'rdl', u'rdh', u'bia', u'bil', 
     #u'bih', u'bdl', u'bdh', u'wia', u'dia', u'wih', u'dih', u'wdh', 
