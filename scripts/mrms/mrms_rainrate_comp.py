@@ -6,7 +6,7 @@ import pytz
 import numpy as np
 import os
 import tempfile
-import Image
+from PIL import Image
 import subprocess
 import json
 import sys
@@ -40,7 +40,11 @@ def do( now , realtime=False):
                 print "MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
         count += 1
-        tilemeta, val = util.reader(fn)
+        try:
+            tilemeta, val = util.reader(fn)
+        except:
+            print 'mrms_rainrate_comp read failed: %s' % (fn,)
+            continue
         # Convert into units of 0.1 mm accumulation
         val = val / 60.0 * 2.0 * 10.0
         val = np.where(val < 0., 255., val)
