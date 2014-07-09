@@ -105,24 +105,24 @@ $content .= <<<EOF
 
 <h4>Shapefile DBF schema:</h4>
 <pre>
-Field 0: Type=C/String, Title=`VALID', Timestamp in UTC
-Field 1: Type=C/String, Title=`STORM_ID', 2 character Storm ID
-Field 2: Type=C/String, Title=`NEXRAD', 3 character NEXRAD ID
-Field 3: Type=N/Integer, Title=`AZIMUTH', Azimuth of storm in degrees from North
-Field 4: Type=N/Integer, Title=`RANGE', Range of storm in miles from RDA
-Field 5: Type=C/String, Title=`TVS', Tornado Vortex Signature
-Field 6: Type=C/String, Title=`MESO', Mesocyclone detection
-Field 7: Type=N/Integer, Title=`POSH', Probability of Hail
-Field 8: Type=N/Integer, Title=`POH', Probability of Hail
-Field 9: Type=N/Double, Title=`MAX_SIZE', Maximum Hail Size inch
-Field 10: Type=N/Integer, Title=`VIL', Volume Integrated Liquid kg/m3
-Field 11: Type=N/Integer, Title=`MAX_DBZ', max dbZ
-Field 12: Type=N/Double, Title=`MAX_DBZ_H', Height of Max dbZ in thousands of feet
-Field 13: Type=N/Double, Title=`TOP', Storm Top in thousands of feet
-Field 14: Type=N/Integer, Title=`DRCT', Motion Direction degrees from North
-Field 15: Type=N/Integer, Title=`SKNT', Speed in knots
-Field 16: Type=N/Double, Title=`LAT', Latitude
-Field 17: Type=N/Double, Title=`LON', Longitude 
+Field 0: Type=C/String, Title='VALID', Timestamp in UTC
+Field 1: Type=C/String, Title='STORM_ID', 2 character Storm ID
+Field 2: Type=C/String, Title='NEXRAD', 3 character NEXRAD ID
+Field 3: Type=N/Integer, Title='AZIMUTH', Azimuth of storm in degrees from North
+Field 4: Type=N/Integer, Title='RANGE', Range of storm in miles from RDA
+Field 5: Type=C/String, Title='TVS', Tornado Vortex Signature
+Field 6: Type=C/String, Title='MESO', Mesocyclone strength (1=weak,25=strongest)
+Field 7: Type=N/Integer, Title='POSH', Probability of Hail
+Field 8: Type=N/Integer, Title='POH', Probability of Hail
+Field 9: Type=N/Double, Title='MAX_SIZE', Maximum Hail Size inch
+Field 10: Type=N/Integer, Title='VIL', Volume Integrated Liquid kg/m3
+Field 11: Type=N/Integer, Title='MAX_DBZ', max dbZ
+Field 12: Type=N/Double, Title='MAX_DBZ_H', Height of Max dbZ in thousands of feet
+Field 13: Type=N/Double, Title='TOP', Storm Top in thousands of feet
+Field 14: Type=N/Integer, Title='DRCT', Motion Direction degrees from North
+Field 15: Type=N/Integer, Title='SKNT', Speed in knots
+Field 16: Type=N/Double, Title='LAT', Latitude
+Field 17: Type=N/Double, Title='LON', Longitude 
 </pre>
 
 <h4>Archive notes:</h4>
