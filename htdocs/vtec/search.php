@@ -11,7 +11,7 @@ $t->headextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js?v=3"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="search.js?v=7"></script>
+<script type="text/javascript" src="search.js?v=8"></script>
 		  <style>
   #map {
     width: 100%;

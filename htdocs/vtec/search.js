@@ -271,7 +271,7 @@ Ext.onReady(function() {
 		format : 'd M Y',
 		width: 150,
 		minValue : new Date('1/1/1986'),
-		maxValue : new Date(),
+		maxValue : (new Date()).add(Date.DAY, 1),
 		value : new Date('1/1/1986')
 	});
 	var edate = new Ext.form.DateField({
@@ -280,8 +280,8 @@ Ext.onReady(function() {
 		format : 'd M Y',
 		width: 150,
 		minValue : new Date('1/1/1986'),
-		maxValue : new Date(),
-		value : new Date()
+		maxValue : (new Date()).add(Date.DAY, 1),
+		value : (new Date()).add(Date.DAY, 1)
 	});
 	
 	
