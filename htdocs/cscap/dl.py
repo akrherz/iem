@@ -90,7 +90,8 @@ def get_agdata():
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
     'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') 
     and varname in ('SOIL13', 'SOIL23', 'SOIL14', 'SOIL27', 'SOIL28', 'SOIL1',
-    'SOIL15')
+    'SOIL15', 
+    'SOIL11', 'SOIL32', 'SOIL31', 'SOIL2', 'SOIL26')
     GROUP by site, plotid, depth, varname, year
     """)
     sndata = {}
@@ -101,11 +102,16 @@ def get_agdata():
 
     res = ("uniqueid,plotid,year,rep,tillage,rotation,nitrogen,agr1,agr2,agr7,"
           +"agr15,agr16,agr17,agr19,agr39,agr40,"
+          +"soil11_0-10,soil11_10-20,soil11_20-40,soil11_40-60,"
           +"soil13_0-10,soil13_10-20,soil13_20-40,soil13_40-60,"
           +"soil14_0-10,soil14_10-20,soil14_20-40,soil14_40-60,"
+          +"soil26_0-10,soil26_10-20,soil26_20-40,soil26_40-60,"
           +"soil27_0-10,soil27_10-20,soil27_20-40,soil27_40-60,"
           +"soil28_0-10,soil28_10-20,soil28_20-40,soil28_40-60,"
+          +"soil32_0-10,soil32_10-20,soil32_20-40,soil32_40-60,"
+          +"soil31_0-10,soil31_10-20,soil31_20-40,soil31_40-60,"
           +"soil1_0-10,soil1_10-20,soil1_20-40,soil1_40-60,"
+          +"soil2_0-10,soil2_10-20,soil2_20-40,soil2_40-60,"
           +"soil23_0-30,soil23_30-60,soil23_60-90,soil23_90-120,"
           +"soil15_0-30,soil15_30-60,soil15_60-90,\n")
     for key in data.keys():
@@ -113,6 +119,7 @@ def get_agdata():
         lkp = "%s|%s|%s|%s" % (tokens[0], tokens[1], tokens[2], 'SOIL')
         res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
                +"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+               +"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
                +"%s,%s,%s,\n") % (
                 tokens[0], tokens[1],
                 tokens[2], tokens[3], tokens[4], tokens[5], tokens[6],
@@ -121,6 +128,10 @@ def get_agdata():
                 data[key].get('AGR16', ''), data[key].get('AGR17', ''),
                 data[key].get('AGR19', ''),data[key].get('AGR39', ''),
                 data[key].get('AGR40', ''),
+                sndata.get(lkp+"11|0 - 10", 'M'),
+                sndata.get(lkp+"11|10 - 20", 'M'),
+                sndata.get(lkp+"11|20 - 40", 'M'),
+                sndata.get(lkp+"11|40 - 60", 'M'),
                 sndata.get(lkp+"13|0 - 10", 'M'),
                 sndata.get(lkp+"13|10 - 20", 'M'),
                 sndata.get(lkp+"13|20 - 40", 'M'),
@@ -129,6 +140,10 @@ def get_agdata():
                 sndata.get(lkp+"14|10 - 20", 'M'),
                 sndata.get(lkp+"14|20 - 40", 'M'),
                 sndata.get(lkp+"14|40 - 60", 'M'),
+                sndata.get(lkp+"26|0 - 10", 'M'),
+                sndata.get(lkp+"26|10 - 20", 'M'),
+                sndata.get(lkp+"26|20 - 40", 'M'),
+                sndata.get(lkp+"26|40 - 60", 'M'),
                 sndata.get(lkp+"27|0 - 10", 'M'),
                 sndata.get(lkp+"27|10 - 20", 'M'),
                 sndata.get(lkp+"27|20 - 40", 'M'),
@@ -137,10 +152,22 @@ def get_agdata():
                 sndata.get(lkp+"28|10 - 20", 'M'),
                 sndata.get(lkp+"28|20 - 40", 'M'),
                 sndata.get(lkp+"28|40 - 60", 'M'),
+                sndata.get(lkp+"32|0 - 10", 'M'),
+                sndata.get(lkp+"32|10 - 20", 'M'),
+                sndata.get(lkp+"32|20 - 40", 'M'),
+                sndata.get(lkp+"32|40 - 60", 'M'),
+                sndata.get(lkp+"31|0 - 10", 'M'),
+                sndata.get(lkp+"31|10 - 20", 'M'),
+                sndata.get(lkp+"31|20 - 40", 'M'),
+                sndata.get(lkp+"31|40 - 60", 'M'),
                 sndata.get(lkp+"1|0 - 10", 'M'),
                 sndata.get(lkp+"1|10 - 20", 'M'),
                 sndata.get(lkp+"1|20 - 40", 'M'),
                 sndata.get(lkp+"1|40 - 60", 'M'),
+                sndata.get(lkp+"2|0 - 10", 'M'),
+                sndata.get(lkp+"2|10 - 20", 'M'),
+                sndata.get(lkp+"2|20 - 40", 'M'),
+                sndata.get(lkp+"2|40 - 60", 'M'),
                 sndata.get(lkp+"23|0 - 30", 'M'),
                 sndata.get(lkp+"23|30 - 60", 'M'),
                 sndata.get(lkp+"23|60 - 90", 'M'),
