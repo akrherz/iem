@@ -6,11 +6,9 @@ $t = new MyView();
 
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
-<script type="text/javascript" src="wfos.js?v=3"></script>
-<script type="text/javascript" src="Exporter-all.js"></script>
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.0/build/ext-all.js"></script>
+<script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
 <script type="text/javascript" src="search.js?v=8"></script>
 		  <style>
   #map {
@@ -40,8 +38,8 @@ marker to where you are interested in.  Once you stop dragging the marker, the
 grid will update and provide a listing of storm based warnings found.  
 <br clear="all" />
 <div class="row">
-		<div class="col-md-6"><div id="map"></div></div>
-		<div class="col-md-6"><div id="warntable"></div></div>
+		<div class="col-md-4"><div id="map"></div></div>
+		<div class="col-md-8"><div id="warntable" style="width: 100%"></div></div>
 </div>
 
 <br clear="all" />
@@ -67,8 +65,8 @@ an office that did not exist at the time.</div>
 <br />
 
 <div class="row">
-		<div class="col-md-4"><div id="myform"></div></div>
-		<div class="col-md-8"><div id="mytable"></div></div>
+		<div class="col-md-4"><div id="myform" style="width:100%"></div></div>
+		<div class="col-md-8"><div id="mytable" style="width:100%"></div></div>
 </div>
 		
 EOF;
