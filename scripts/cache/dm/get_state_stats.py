@@ -9,13 +9,13 @@ d1 = []
 d2 = []
 d3 = []
 d4 = []
-sts = mx.DateTime.DateTime(2013,1,1)
-ets = mx.DateTime.DateTime(2013,7,25)
+sts = mx.DateTime.DateTime(2014,7,8)
+ets = mx.DateTime.DateTime(2014,7,11)
 interval = mx.DateTime.RelativeDateTime(days=7)
 now = sts
 while now < ets:
-    """
-    url = now.strftime("http://torka.unl.edu/DroughtMonitor/Export/?mode=table&aoi=state&date=%Y%m%d")
+    #"""
+    url = now.strftime("http://usdmdataservices.unl.edu/?mode=table&aoi=state&date=%Y%m%d")
     cmd = "wget -q -O /mesonet/data/dm/text/%s.dat '%s'" % (now.strftime("%Y%m%d"), url)
     os.system( cmd )
     now += interval
@@ -32,7 +32,7 @@ while now < ets:
             d4.append( float(tokens[7]) )
             break
     now += interval
-    #"""
+    """
 xticks = []
 xticklabels = []
 for yr in range(1,13):
