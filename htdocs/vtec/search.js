@@ -1,76 +1,95 @@
-Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
-var warnStore;
-var warntable;
+Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
 
-function post_to_url(path, params, method) {
-     method = method || "post";
-     var form = document.createElement("form");
-     form.setAttribute("method", method);
-     form.setAttribute("action", path);
-     for(var i=0; i<params.length; i++) {
-         var hiddenField = document.createElement("input");
-         hiddenField.setAttribute("type", "hidden");
-         hiddenField.setAttribute("name", params[i].name);
-         hiddenField.setAttribute("value", params[i].value);
-         form.appendChild(hiddenField);
-     }
-     document.body.appendChild(form);
-     form.submit();
-}
+var warnStore;
+var eventStore;
+var warntable;
+var pDict;
+var sDict;
+var vtec_sig_dict = [
+['W','Warning'],
+['Y','Advisory'],
+['A','Watch'],
+['S','Statement'],
+['F','Forecast'],
+['O','Outlook'],
+['N','Synopsis']
+];
+
+var vtec_phenomena_dict = [
+['SV','Severe Thunderstorm'],
+['TO','Tornado'],
+['MA','Marine'],
+['AF','Volcanic Ashfall'],
+['AS','Air Stagnation'],
+['AV','Avalanche'],
+['BS','Blowing Snow'],
+['BZ','Blizzard'],
+['CF','Coastal Flood'],
+['DU','Blowing Dust'],
+['DS','Dust Storm'],
+['EC','Extreme Cold'],
+['EH','Excessive Heat'],
+['EW','Extreme Wind'],
+['FA','Areal Flood'],
+['FF','Flash Flood'],
+['FL','Flood'],
+['FR','Frost'],
+['FZ','Freeze'],
+['FG','Dense Fog'],
+['FW','Red Flag'],
+['GL','Gale'],
+['HF','Hurricane Force Wind'],
+['HI','Inland Hurricane Wind'],
+['HS','Heavy Snow'],
+['HP','Heavy Sleet'],
+['HT','Heat'],
+['HU','Hurricane'],
+['HW','High Wind'],
+['HY','Hydrologic'],
+['HZ','Hard Freeze'],
+['IS','Ice Storm'],
+['IP','Sleet'],
+['LB','Lake Effect Snow and Blowing Snow'],
+['LE','Lake Effect Snow'],
+['LO','Low Water'],
+['LS','Lakeshore Flood'],
+['LW','Lake Wind'],
+['RB','Small Craft for Rough Bar'],
+['RH','Radiological Hazard'],
+['SB','Snow and Blowing Snow'],
+['SC','Small Craft'],
+['SE','Hazardous Seas'],
+['SI','Small Craft for Winds'],
+['SM','Dense Smoke'],
+['SN','Snow'],
+['SR','Storm'],
+['SU','High Surf'],
+['TI','Inland Tropical Storm Wind'],
+['TR','Tropical Storm'],
+['TS','Tsunami'],
+['TY','Typhoon'],
+['UP','Ice Accretion'],
+['VO','Volcano'],
+['WC','Wind Chill'],
+['WI','Wind'],
+['WS','Winter Storm'],
+['WW','Winter Weather'],
+['ZF','Freezing Fog'],
+['ZR','Freezing Rain']
+];
 
 Ext.override(Date, {
-			toUTC : function() {
-				// Convert the date to the UTC date
-				return this.add(Date.MINUTE, this.getTimezoneOffset());
-			},
+    toUTC : function() {
+                        // Convert the date to the UTC date
+        return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
+    },
 
-			fromUTC : function() {
-				// Convert the date from the UTC date
-				return this.add(Date.MINUTE, -this.getTimezoneOffset());
-			}
-		});
+    fromUTC : function() {
+                        // Convert the date from the UTC date
+        return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
+    }
+});
 
-Ext.override(Ext.form.ComboBox, {
-			doQuery : function(q, forceAll) {
-				if (q === undefined || q === null) {
-					q = '';
-				}
-				var qe = {
-					query : q,
-					forceAll : forceAll,
-					combo : this,
-					cancel : false
-				};
-				if (this.fireEvent('beforequery', qe) === false || qe.cancel) {
-					return false;
-				}
-				q = qe.query;
-				forceAll = qe.forceAll;
-				if (forceAll === true || (q.length >= this.minChars)) {
-					if (this.lastQuery !== q) {
-						this.lastQuery = q;
-						if (this.mode == 'local') {
-							this.selectedIndex = -1;
-							if (forceAll) {
-								this.store.clearFilter();
-							} else {
-								this.store.filter(this.displayField, q, true);
-							}
-							this.onLoad();
-						} else {
-							this.store.baseParams[this.queryParam] = q;
-							this.store.load({
-										params : this.getParams(q)
-									});
-							this.expand();
-						}
-					} else {
-						this.selectedIndex = -1;
-						this.onLoad();
-					}
-				}
-			}
-		});
 
 states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
 		["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
@@ -110,153 +129,176 @@ states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
 		["SL", "St. Lawrence River"]
 		];
 
+Ext.define('SBW', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'id', type: 'string'},
+        {name: 'eventid',  type: 'float'},
+        {name: 'wfo', type: 'string'},
+        {name: 'phenomena', type: 'string'},
+        {name: 'pstring', type: 'string', 
+        	convert: function(val, record){
+                idx = pDict.find('abbr', record.data.phenomena);
+                if (idx > -1) {
+                	rec = pDict.getAt(idx);
+                        return rec.data.name;
+                } else {
+                        return record.data.phenomena;
+                }
+        	}},
+        {name: 'sig_string', type: 'string',
+        	convert: function(val, record){
+                idx = sDict.find('abbr', record.data.significance);
+                if (idx > -1) {
+                	rec = sDict.getAt(idx);
+                	return rec.data.name;
+                } else {
+                        return record.data.significance;
+                }
+        	}},
+        {name: 'significance', type: 'string'},
+        {name: 'expire', type: 'date'},
+        {name: 'issue', type: 'date'},
+    ]
+});
+
+function alinkUGC(){
+	window.location.href = Ext.String.format("#byugc/{0}/{1}/{2}/{3}", 
+			Ext.getCmp('stateselector').getValue(), 
+			Ext.getCmp('ugcselector').getValue(),
+			Ext.Date.format(Ext.getCmp('sdate').getValue(),'Ymd'),
+			Ext.Date.format(Ext.getCmp('edate').getValue(),'Ymd')
+			);
+}
+
 Ext.onReady(function() {
 
-	Ext.namespace("iemdata");
-	var pDict = new Ext.data.SimpleStore({
+	pDict = new Ext.data.SimpleStore({
 				idIndex : 0,
 				fields : ['abbr', 'name'],
-				data : iemdata.vtec_phenomena_dict
+				data : vtec_phenomena_dict
 			});
-	var sDict = new Ext.data.SimpleStore({
+	sDict = new Ext.data.SimpleStore({
 				idIndex : 0,
 				fields : ['abbr', 'name'],
-				data : iemdata.vtec_sig_dict
+				data : vtec_sig_dict
 			});
-	var eventStore = new Ext.data.Store({
+
+	eventStore = new Ext.data.Store({
 		autoLoad : false,
-		proxy : new Ext.data.HttpProxy({
-			url : '/json/vtec_events_byugc.php'
-		}),
-		baseParams : {
-			'ugc' : 'IAC001'
-		},
-		reader : new Ext.data.JsonReader({
-			root : 'events',
-			id : 'id'
-		}, [{
-			name : 'id',
-			mapping : 'id'
-		}, {
-			name : 'eventid',
-			type : 'float'
-		}, {name: 'wfo'},
-		{
-			name : 'phenomena'
-		}, {
-			name : 'pstring',
-			convert : function(val, record){
-				rec = pDict.getById(record.phenomena);
-				if (rec) {
-					return rec.data.name;
-				} else {
-					return record.phenomena;
-				}
-			}
-		},{
-			name : 'sig_string',
-			convert : function(val, record){
-				rec = sDict.getById(record.significance);
-				if (rec) {
-					return rec.data.name;
-				} else {
-					return record.phenomena;
-				}
-			}
-		},{
-			name : 'significance'
-		}, {
-			name : 'expire',
-			type : 'date'
-		}, {
-			name : 'issue',
-			type : 'date'
-		}])
+		model : 'SBW',
+		proxy : {
+			type : 'ajax',
+			url : '/json/vtec_events_byugc.php',
+	        reader: {
+	            type: 'json',
+	            rootProperty: 'events'
+	        }
+		}
 	});
 
+	Ext.define('UGC', {
+	    extend: 'Ext.data.Model',
+	    fields: [
+	        {name: 'ugc', type: 'string'},
+	        {name: 'name',  type: 'string'},
+	        {name: 'nicename', type:'string', convert: function(val, record){
+				var e = record.data.ugc.substr(2,1) == "Z" ? " (Zone) " : "";
+				var s = Ext.String.format("[{0}] {1} {2}", record.data.ugc, 
+						record.data.name, e);
+
+				return s;
+	        }}
+	    ]
+	});
+
+	
 	var ugcStore = new Ext.data.Store({
-				autoLoad : false,
-				proxy : new Ext.data.HttpProxy({
-							url : '../json/state_ugc.php'
-						}),
-				baseParams : {
-					'state' : 'IA'
-				},
-				reader : new Ext.data.JsonReader({
-							root : 'ugcs',
-							id : 'ugc'
-						}, [{
-									name : 'ugc',
-									mapping : 'ugc'
-							}, {name : 'name',
-								mapping : 'name'
-							},
-								{
-								name : 'nicename',
-								convert : function(val, record){
-									
-									var e = record.ugc.substr(2,1) == "Z" ? " (Zone) " : "";
-									var s = String.format("[{0}] {1} {2}", record.ugc, 
-										record.name, e);
-							
-									return s;
-								}
-								}])
-			});
+		autoLoad : false,
+		model : 'UGC',
+		proxy : {
+			type: 'ajax',
+			url : '/json/state_ugc.php',
+	        reader: {
+	            type: 'json',
+	            rootProperty: 'ugcs'
+	        }
+		}
+	});
 
 	var ugcCB = new Ext.form.ComboBox({
-				store : ugcStore,
-				displayField : 'nicename',
-				valueField : 'ugc',
-				width : 300,
-				mode : 'local',
-				triggerAction : 'all',
-				fieldLabel : 'County/Zone',
-				emptyText : 'Then Select County/Zone...',
-				typeAhead : false,
-//				itemSelector : 'div.search-item',
-				hideTrigger : false,
-				listeners : {
-					select : function(cb, record, idx) {
-						eventStore.load({
-									add : false,
-									params : {
-										ugc : record.data.ugc,
-										sdate : Ext.getCmp('sdate').getValue().format('Y/m/d'),
-										edate : Ext.getCmp('edate').getValue().format('Y/m/d')
-									}
-								});
-						gp.ugc = record.data.ugc;
-						gp.setTitle("VTEC Events for: " + record.data.nicename);
-						return false;
+		id : 'ugcselector',
+		store : ugcStore,
+		displayField : 'nicename',
+		valueField : 'ugc',
+		queryMode : 'local',
+		matchFieldWidth : false,
+		triggerAction : 'all',
+		fieldLabel : 'County/Zone',
+		emptyText : 'Select State First',
+		typeAhead : false,
+//		itemSelector : 'div.search-item',
+		hideTrigger : false,
+		listeners : {
+			select : function(cb, records, idx) {
+				eventStore.load({
+					add : false,
+					params : {
+						ugc : records[0].data.ugc,
+						sdate : Ext.Date.format(
+								Ext.getCmp('sdate').getValue(),
+						'Y/m/d'),
+						edate : Ext.Date.format(
+								Ext.getCmp('edate').getValue(),
+						'Y/m/d')
 					}
-				}
-			});
+				});
+				gp.ugc = records[0].data.ugc;
+				gp.setTitle("VTEC Events for: " + records[0].data.nicename);
+				alinkUGC();
+				return false;
+			}
+		}
+	});
 
+	Ext.define('States', {
+	    extend: 'Ext.data.Model',
+	    fields: [
+	        {name: 'abbr', type: 'string'},
+	        {name: 'name',  type: 'string'}
+	    ]
+	});
+	
 	var stateCB = new Ext.form.ComboBox({
 		hiddenName : 'state',
 		store : new Ext.data.SimpleStore({
-					fields : ['abbr', 'name'],
+					model : 'States',
 					data : states
 				}),
 		valueField : 'abbr',
-		width : 180,
-		fieldLabel : 'Step 1: Select State',
-		displayField : 'name',
+		fieldLabel : 'Select State',
 		typeAhead : true,
-		tpl : '<tpl for="."><div class="x-combo-list-item">[{abbr}] {name}</div></tpl>',
-		mode : 'local',
+	    tpl: Ext.create('Ext.XTemplate',
+	        '<tpl for=".">',
+	            '<div class="x-boundlist-item">{abbr} - {name}</div>',
+	        '</tpl>'
+	    ),
+	    displayTpl: Ext.create('Ext.XTemplate',
+	        '<tpl for=".">',
+	            '{abbr} - {name}',
+	        '</tpl>'
+	    ),
+	    queryMode : 'local',
 		triggerAction : 'all',
 		emptyText : 'Select/or type here...',
 		selectOnFocus : true,
-		lazyRender : true,
 		id : 'stateselector',
 		listeners : {
-			select : function(cb, record, idx) {
+			select : function(cb, records, idx) {
 				ugcStore.load({
 							add : false,
 							params : {
-								state : record.data.abbr
+								state : records[0].data.abbr
 							}
 						});
 				return false;
@@ -266,82 +308,73 @@ Ext.onReady(function() {
 
 	/* Date Selectors */
 	var sdate = new Ext.form.DateField({
-		fieldLabel : 'Start Date',
+		fieldLabel : 'Start UTC Date',
 		id : 'sdate',
 		format : 'd M Y',
-		width: 150,
 		minValue : new Date('1/1/1986'),
-		maxValue : (new Date()).add(Date.DAY, 1),
+		maxValue : Ext.Date.add(new Date(), Date.DAY, 1),
 		value : new Date('1/1/1986')
 	});
 	var edate = new Ext.form.DateField({
-		fieldLabel : 'End Date',
+		fieldLabel : 'End UTC Date',
 		id : 'edate',
 		format : 'd M Y',
-		width: 150,
 		minValue : new Date('1/1/1986'),
-		maxValue : (new Date()).add(Date.DAY, 1),
-		value : (new Date()).add(Date.DAY, 1)
+		maxValue : Ext.Date.add(new Date(), Date.DAY, 1),
+		value : Ext.Date.add(new Date(), Date.DAY, 1)
 	});
 	
 	
-	var form = new Ext.form.FormPanel({
-				applyTo : 'myform',
-				labelAlign : 'top',
-				width : 320,
-				style : 'padding-left: 5px;',
-				title : 'Select County/Zone to search for...',
-				items : [stateCB, ugcCB, sdate, edate],
-				buttons : [{
-					text : 'Load Grid with Settings Above',
-					handler : function(){
-						eventStore.load({
-							add : false,
-							params : {
-								ugc : ugcCB.getValue(),
-								sdate : Ext.getCmp('sdate').getValue().format('Y/m/d'),
-								edate : Ext.getCmp('edate').getValue().format('Y/m/d')
-							}
-						});
+	var form = new Ext.form.Panel({
+		renderTo : 'myform',
+		layout : 'anchor',
+		title : 'Select County/Zone to search for...',
+		items : [stateCB, ugcCB, sdate, edate],
+		buttons : [{
+			id : 'eventbutton',
+			text : 'Load Grid with Settings Above',
+			handler : function(){
+				eventStore.load({
+					add : false,
+					params : {
+						ugc : ugcCB.getValue(),
+						sdate : Ext.Date.format(
+								Ext.getCmp('sdate').getValue(),
+						'Y/m/d'),
+						edate : Ext.Date.format(
+								Ext.getCmp('edate').getValue(),
+						'Y/m/d')
 					}
-				}]
-			});
-	var gp = new Ext.grid.GridPanel({
+				});
+				alinkUGC();
+			}
+		}]
+	});
+	var gp = Ext.create('My.grid.ExcelGridPanel', {
 			ugc : '',
 				height : 500,
-				width : 650,
 				title : 'Events Listing',
 				loadMask : {
 					msg : 'Loading Data...'
 				},
 				store : eventStore,
 				tbar : [{
-	                                        id : 'grid-excel-button',
-	                                        icon : '../lsr/icons/excel.png',
-	                                        text : 'Export to Excel...',
-	                                        handler : function() {
-	                                                var xd = gp.getExcelXml(true);
-	                                                if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isIE9 || Ext.isSafari
-	                                                                || Ext.isSafari2 || Ext.isSafari3) {
-	                                                        var dataURL = 'exportexcel.php';
-	                                                        params = [{
-	                                                                                name : 'ex',
-	                                                                                value : xd
-	                                                                        }];
-	                                                        post_to_url(dataURL, params, 'post');
-	                                                } else {
-	                                                        document.location = 'data:application/vnd.ms-excel;base64,'+ Base64.encode(xd);
-	                                                }
-	                                        }
-                                }],
+					id : 'grid-excel-button',
+					icon : '/lsr/icons/excel.png',
+					text : 'Export to Excel...',
+					handler : function(b, e) {
+						b.up('grid').downloadExcelXml();
+					}
+				}],
 				columns : [{
 							'header' : 'Event ID',
 							dataIndex : 'eventid',
 							width : 50,
 							renderer : function(value, metaData, record){
-								var url = String.format("/vtec/#{0}-O-NEW-K{1}-{2}-{3}-{4}", record.data.issue.format('Y'),
+								var url = Ext.String.format("/vtec/#{0}-O-NEW-K{1}-{2}-{3}-{4}", 
+										Ext.Date.format(record.data.issue, 'Y'),
 									record.data.wfo, record.data.phenomena, record.data.significance,
-									String.leftPad(record.data.eventid,4,'0'));
+									Ext.String.leftPad(record.data.eventid,4,'0'));
 								return "<a href='"+url+"' target='_blank'>"+ value +"</a>";
 							}
 						}, {
@@ -367,7 +400,8 @@ Ext.onReady(function() {
 							dataIndex : 'issue',
 							width : 150,
 							renderer : function(value) {
-								return value.fromUTC().format('M d, Y g:i A');
+								return Ext.Date.format(value.fromUTC(),
+										'M d, Y g:i A');
 							}
 						}, {
 							'header' : 'Expired',
@@ -375,167 +409,172 @@ Ext.onReady(function() {
 							dataIndex : 'expire',
 							width : 150,
 							renderer : function(value) {
-								return value.fromUTC().format('M d, Y g:i A');
+								return Ext.Date.format(value.fromUTC(),
+										'M d, Y g:i A');
 							}
 						}]
 			});
 	gp.render('mytable');
 	gp.doLayout();
-
-warnStore = new Ext.data.Store({
-				autoLoad : false,
-				proxy : new Ext.data.HttpProxy({
-							url : '/json/sbw_by_point.py'
-						}),
-				reader : new Ext.data.JsonReader({
-							root : 'sbws',
-							id : 'id'
-						}, [{
-									name : 'id',
-									mapping : 'id'
-								}, {
-									name : 'eventid',
-									type : 'float'
-								}, {name: 'wfo'},
-								{
-									name : 'phenomena'
-								}, {
-			name : 'pstring',
-			convert : function(val, record){
-				rec = pDict.getById(record.phenomena);
-				if (rec) {
-					return rec.data.name;
-				} else {
-					return record.phenomena;
-				}
-			}
-		},{
-			name : 'sig_string',
-			convert : function(val, record){
-				rec = sDict.getById(record.significance);
-				if (rec) {
-					return rec.data.name;
-				} else {
-					return record.phenomena;
-				}
-			}
-		},{
-									name : 'significance'
-								}, {
-									name : 'expire',
-									type : 'date',
-									dateFormat : 'Y-m-d\\TH:i\\Z'
-								}, {
-									name : 'issue',
-									type : 'date',
-									dateFormat : 'Y-m-d\\TH:i\\Z'
-								}])
-			});
+	
+	warnStore = new Ext.data.Store({
+		autoLoad : false,
+		model : 'SBW',
+		proxy : {
+			type: 'ajax',
+			url : '/json/sbw_by_point.py',
+	        reader: {
+	            type: 'json',
+	            rootProperty: 'sbws'
+	        }
+		}
+	});
 
 	
-warntable = new Ext.grid.GridPanel({
-				height : 500,
-				width : 650,
-				title : 'Drag marker on map to load data...',
-				loadMask : {
-					msg : 'Loading Data...'
-				},
-				store : warnStore,
-				tbar : [{
-        id : 'grid-excel-button',
-        icon : '../lsr/icons/excel.png',
-        text : 'Export to Excel...',
-        handler : function() {
-                var xd = warntable.getExcelXml(true);
-                if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isIE9 || Ext.isSafari
-                                || Ext.isSafari2 || Ext.isSafari3) {
-                        var dataURL = 'exportexcel.php';
-                        params = [{
-                                                name : 'ex',
-                                                value : xd
-                                        }];
-                        post_to_url(dataURL, params, 'post');
-                } else {
-                        document.location = 'data:application/vnd.ms-excel;base64,'+ Base64.encode(xd);
-                }
-        }
-                                }],
-				columns : [{
-							'header' : 'Event ID',
-							dataIndex : 'eventid',
-							width : 50,
-							renderer : function(value, metaData, record){
-								var url = String.format("/vtec/#{0}-O-NEW-K{1}-{2}-{3}-{4}", record.data.issue.format('Y'),
-									record.data.wfo, record.data.phenomena, record.data.significance,
-									String.leftPad(record.data.eventid,4,'0'));
-								return "<a href='"+url+"' target='_blank'>"+ value +"</a>";
-							}
-						}, {
-							'header' : 'Phenomena',
-							sortable : true,
-							dataIndex : 'pstring',
-							width : 150
-						}, {
-							'header' : 'Significance',
-							sortable : true,
-							dataIndex : 'sig_string'
-						}, {
-	header : 'VTEC Phenomena',
-	hidden : true,
-	dataIndex : 'phenomena'
-},{
-	header : 'VTEC Significance',
-	hidden : true,
-	dataIndex : 'significance'
-},{
-							'header' : 'Issued',
-							sortable : true,
-							dataIndex : 'issue',
-							width : 150,
-							renderer : function(value) {
-								return value.fromUTC().format('M d, Y g:i A');
-							}
-						}, {
-							'header' : 'Expired',
-							sortable : true,
-							dataIndex : 'expire',
-							width : 150,
-							renderer : function(value) {
-								return value.fromUTC().format('M d, Y g:i A');
-							}
-						}]
-			});
+	warntable = Ext.create('My.grid.ExcelGridPanel', {
+		height : 500,
+		title : 'Drag marker on map to load data...',
+		loadMask : {
+			msg : 'Loading Data...'
+		},
+		store : warnStore,
+		tbar : [{
+			id : 'grid-excel-button22',
+			icon : '/lsr/icons/excel.png',
+			text : 'Export to Excel...',
+			handler : function(b, e) {
+				b.up('grid').downloadExcelXml();
+			}
+		}],
+		columns : [{
+			'header' : 'Event ID',
+			dataIndex : 'eventid',
+			width : 50,
+			renderer : function(value, metaData, record){
+				var url = Ext.String.format("/vtec/#{0}-O-NEW-K{1}-{2}-{3}-{4}", 
+						Ext.Date.format(record.data.issue, 'Y'),
+						record.data.wfo, record.data.phenomena, record.data.significance,
+						Ext.String.leftPad(record.data.eventid,4,'0'));
+				return "<a href='"+url+"' target='_blank'>"+ value +"</a>";
+			}
+		}, {
+			'header' : 'Phenomena',
+			sortable : true,
+			dataIndex : 'pstring',
+			width : 150
+		}, {
+			'header' : 'Significance',
+			sortable : true,
+			dataIndex : 'sig_string'
+		}, {
+			header : 'VTEC Phenomena',
+			hidden : true,
+			dataIndex : 'phenomena'
+		},{
+			header : 'VTEC Significance',
+			hidden : true,
+			dataIndex : 'significance'
+		},{
+			'header' : 'Issued',
+			sortable : true,
+			dataIndex : 'issue',
+			width : 150,
+			renderer : function(value) {
+				return Ext.Date.format(value.fromUTC(),
+						'M d, Y g:i A');
+			}
+		}, {
+			'header' : 'Expired',
+			sortable : true,
+			dataIndex : 'expire',
+			width : 150,
+			renderer : function(value) {
+				return Ext.Date.format(value.fromUTC(),
+						'M d, Y g:i A');
+			}
+		}]
+	});
 	warntable.render('warntable');
 	warntable.doLayout();
+
+	// Do the anchor tag linking, please
+	var tokens = window.location.href.split("#");
+	if (tokens.length == 2){
+		var tokens2 = tokens[1].split("/");
+		if (tokens2.length == 5){
+			if (tokens2[0] == 'byugc'){
+				sdate = tokens2[3].substr(0,4) +"/"+
+						tokens2[3].substr(4,2) +"/"+
+						tokens2[3].substr(6,2) ;
+				Ext.getCmp("sdate").setValue(new Date(sdate));
+				edate = tokens2[4].substr(0,4) +"/"+
+						tokens2[4].substr(4,2) +"/"+
+						tokens2[4].substr(6,2) ;
+				Ext.getCmp("edate").setValue(new Date(edate));
+				Ext.getCmp("stateselector").setValue(tokens2[1]);
+				Ext.getCmp("ugcselector").setValue(tokens2[2]);
+				eventStore.load({
+					add : false,
+					params : {
+						ugc : tokens2[2],
+						sdate : Ext.Date.format(
+								Ext.getCmp('sdate').getValue(),
+						'Y/m/d'),
+						edate : Ext.Date.format(
+								Ext.getCmp('edate').getValue(),
+						'Y/m/d')
+					}
+				});
+				gp.setTitle("Event Listing for UGC: "+ tokens2[2]);
+			}
+		}
+
+	}
 
 });
 
 function updateMarkerPosition(latLng) {
+	// callback on when the map marker is moved
 	warnStore.load({add: false, params: {
 		lon: latLng.lng(),
 		lat: latLng.lat()
 	}});
-	warntable.setTitle( String.format("SBW Events for Lat: {0} Lon: {1}", 
+	warntable.setTitle( Ext.String.format("SBW Events for Lat: {0} Lon: {1}", 
 		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
-	//console.log(latLng.lat() +'-'+ latLng.lng());
+	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
+			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
 }
 function initialize() {
 	var latLng = new google.maps.LatLng(41.53, -93.653);
 	var map = new google.maps.Map(document.getElementById('map'), {
-	    zoom: 5,
-	    center: latLng,
-	    mapTypeId: google.maps.MapTypeId.ROADMAP
+		zoom: 5,
+		center: latLng,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
 	});
-	  var marker = new google.maps.Marker({
-	    position: latLng,
-	    title: 'Point A',
-	    map: map,
-	    draggable: true
+	var marker = new google.maps.Marker({
+		position: latLng,
+		title: 'Point A',
+		map: map,
+		draggable: true
 	});
-	  
-	  google.maps.event.addListener(marker, 'dragend', function() {
-	    updateMarkerPosition(marker.getPosition());
-	  });
+
+	google.maps.event.addListener(marker, 'dragend', function() {
+		updateMarkerPosition(marker.getPosition());
+	});
+
+	// Do the anchor tag linking, please
+	var tokens = window.location.href.split("#");
+	if (tokens.length == 2){
+		var tokens2 = tokens[1].split("/");
+		if (tokens2.length == 3){
+			if (tokens2[0] == 'bypoint'){
+				latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
+				marker.setPosition(latlng);
+				updateMarkerPosition(latlng);
+			}
+		}
+	}
+
 }
 
 // Onload handler to fire off the app.
