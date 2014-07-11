@@ -4,9 +4,11 @@ import numpy as np
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = COOP.cursor()
 
-cursor.execute("""SELECT year, sum(precip) from alldata_ia 
-where station = 'IA0000' and month = 6 and sday < '0619' GROUP by year ORDER by year
- ASC""")
+cursor.execute("""
+ select year, avg(high) from alldata_ia 
+ where station = 'IA2203' and sday >= '0714' and sday < '0719' 
+ GROUP by year ORDER by year ASC
+ """)
 
 years = []
 data = []
@@ -14,7 +16,10 @@ data = []
 for row in cursor:
     years.append( row[0]  )
     data.append( float(row[1]) )
-    
+
+years.append(2014)
+data.append( np.average([76,68,74,78,78]))
+
 years = np.array(years)
 data = np.array(data)
 avgdata = np.average(data)
@@ -25,21 +30,24 @@ import matplotlib.patheffects as PathEffects
 (fig, ax) = plt.subplots(1, 1)
 bars = ax.bar(years -0.5, data, fc='brown', ec='brown')
 for i, bar in enumerate(bars):
-    if data[i] > avgdata:
+    if data[i] < avgdata:
         bar.set_facecolor('darkblue')
         bar.set_edgecolor('darkblue')
-    if data[i] >= 5:
+    if data[i] < 79 or data[i] > 95:
         txt = ax.text(years[i], data[i]+(0.075 if years[i] != 1881 else -0.45), "%s" % (years[i],), 
                       color='k', fontsize=14,
-                      ha=('left' if years[i] < 1901 else 'right'), va='bottom')
+                      ha=('left' if years[i] < 1910 else 'right'), va='bottom')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                  foreground="yellow")])
 
-ax.set_title("Iowa 1-18 June Areal Averaged Precipitation")
-ax.set_ylabel("Precipitation [inch]")
-#ax.set_xlabel("* 2013 thru 14 Nov")
-#ax.set_ylim(0, 12.5)
-ax.set_xlim(1892.5,2014.5)
+bars[-1].set_facecolor('yellow')
+bars[-1].set_edgecolor('yellow')
+        
+ax.set_title("1879-2013 Des Moines Average High Temp (14-19 July)")
+ax.set_ylabel("Average Daily High $^\circ$F")
+ax.set_xlabel("* 2014 forecasted values of 76,68,74,78,78")
+ax.set_ylim(70, 105.5)
+ax.set_xlim(1878.5,2014.5)
 ax.grid(True)
 ax.axhline( avgdata, lw=2.5, c='white')
 ax.axhline( avgdata, lw=1, c='k')
