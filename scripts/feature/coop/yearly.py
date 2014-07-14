@@ -5,9 +5,8 @@ COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = COOP.cursor()
 
 cursor.execute("""
- select year, avg(high) from alldata_ia 
- where station = 'IA2203' and sday >= '0714' and sday < '0719' 
- GROUP by year ORDER by year ASC
+ select year, sum(case when high > 89 then 1 else 0 end) from alldata_ia
+ where station = 'IA0200' and sday < '0714' GROUP by year oRDER by year ASC
  """)
 
 years = []
@@ -17,8 +16,6 @@ for row in cursor:
     years.append( row[0]  )
     data.append( float(row[1]) )
 
-years.append(2014)
-data.append( np.average([76,68,74,78,78]))
 
 years = np.array(years)
 data = np.array(data)
@@ -33,21 +30,21 @@ for i, bar in enumerate(bars):
     if data[i] < avgdata:
         bar.set_facecolor('darkblue')
         bar.set_edgecolor('darkblue')
-    if data[i] < 79 or data[i] > 95:
+    if data[i] > 20:
         txt = ax.text(years[i], data[i]+(0.075 if years[i] != 1881 else -0.45), "%s" % (years[i],), 
                       color='k', fontsize=14,
-                      ha=('left' if years[i] < 1910 else 'right'), va='bottom')
+                      ha=('left' if years[i] > 1800 else 'right'), va='bottom')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                 foreground="yellow")])
+                                                 foreground="white")])
 
 bars[-1].set_facecolor('yellow')
 bars[-1].set_edgecolor('yellow')
         
-ax.set_title("1879-2013 Des Moines Average High Temp (14-19 July)")
-ax.set_ylabel("Average Daily High $^\circ$F")
-ax.set_xlabel("* 2014 forecasted values of 76,68,74,78,78")
-ax.set_ylim(70, 105.5)
-ax.set_xlim(1878.5,2014.5)
+ax.set_title("1893-2014 Ames Days At or Above 90 $^\circ$F (1 Jan - 13 Jul)")
+ax.set_ylabel("Days")
+#ax.set_xlabel("* 2014 forecasted values of 76,68,74,78,78")
+#ax.set_ylim(70, 105.5)
+ax.set_xlim(1892.5,2014.5)
 ax.grid(True)
 ax.axhline( avgdata, lw=2.5, c='white')
 ax.axhline( avgdata, lw=1, c='k')
