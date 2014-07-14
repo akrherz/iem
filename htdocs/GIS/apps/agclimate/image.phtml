@@ -3,7 +3,7 @@
 </head>
 <body>
 <?php
-  $f = html_entities($_GET["f"]);
+  $f = htmlentities($_GET["f"]);
   echo "<img src=\"". $f ."\">\n";
 ?>
 </body>
