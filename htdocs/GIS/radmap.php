@@ -377,7 +377,7 @@ $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
 $wbc->set("connection", $_DATABASES["postgis"]);
 $sql = sprintf("g from (select phenomena, eventid, "
-		."ST_buffer(ST_collect( u.geom ),0) as g from warnings w JOIN ugcs u "
+		."ST_buffer(ST_collect( u.simple_geom ),0) as g from warnings w JOIN ugcs u "
 		." on (u.gid = w.gid) WHERE substr(u.ugc,3,1) = 'C' and "
 		." significance = 'A' and phenomena IN ('TO','SV') and "
 		." issue <= '%s:00+00' and expire > '%s:00+00' "
@@ -582,6 +582,12 @@ if (in_array("usdm", $layers)){
 	$usdm = $map->getlayerbyname("usdm");
 	$usdm->set("status", MS_ON );
 	$usdm->draw($img);
+}
+
+if (in_array("cities", $layers)){
+	$l = $map->getlayerbyname("cities");
+	$l->set("status", MS_ON );
+	$l->draw($img);
 }
 
 if (in_array("surface", $layers)){
