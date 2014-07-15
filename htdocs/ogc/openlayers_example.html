@@ -2,10 +2,12 @@
 <head>
   <title>IEM TMS + OpenLayers Example</title>
   <script src="http://openlayers.org/api/2.12/OpenLayers.js"></script> 
-  <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script> 
+  <script src="https://maps.google.com/maps/api/js?v=3.2&sensor=false"></script> 
     
 <script type="text/javascript">
 var map;
+var n0q;
+
 /*
  * You need to wrap your DOM manipulators into a function that is called after
  * the DOM is rendered!  Notice the onload="" attribute to the body tag below
@@ -31,8 +33,21 @@ function init(){
         "Google Streets",
         {sphericalMercator: true}
     );
+    
+    function get_my_url_static (bounds) {
+        var res = this.map.getResolution();
+        var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+        var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+        var z = this.map.getZoom();
 
+        var path = z + "/" + x + "/" + y + "." + this.type;
+        var url = this.url;
+        if (url instanceof Array) {
+            url = this.selectUrl(path, url);
+        }
+        return url + this.service +"/"+ this.layername +"/"+ path;
 
+}
     function get_my_url (bounds) {
             var res = this.map.getResolution();
             var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
@@ -47,15 +62,15 @@ function init(){
             return url + this.service +"/"+ this.layername +"/"+ path;
 
     }
-    var n0q = new OpenLayers.Layer.TMS(
-                'NEXRAD Base Reflectivity',
-                'http://mesonet.agron.iastate.edu/cache/tile.py/',
+    n0q = new OpenLayers.Layer.TMS(
+                'NEXRAD Base Reflect',
+                'http://mesonet.agron.iastate.edu/c/tile.py/',
                 // Find more layer names here: http://mesonet.agron.iastate.edu/ogc/
-                {layername      : 'nexrad-n0q-900913',
+                {layername      : 'ridge::USCOMP-N0Q-0',
                 service         : '1.0.0',
                 type            : 'png',
-                visibility      : true,
-                getURL          : get_my_url,
+                visibility      : false,
+                getURL          : get_my_url_static,
                 isBaseLayer     : false}
     );
     var irsat = new OpenLayers.Layer.TMS(
@@ -106,7 +121,7 @@ function init(){
             service         : '1.0.0',
             type            : 'png',
             visibility      : false,
-            getURL          : get_my_url,
+            getURL          : get_my_url_static,
             isBaseLayer     : false}
     );
     
@@ -124,6 +139,38 @@ function init(){
     ls.maximizeControl();
     map.addControl(new OpenLayers.Control.MousePosition());
     if (!map.getCenter()){ map.zoomToMaxExtent(); }
+    
+    function refresher(){
+    	//console.log("call refresher()");
+    	OpenLayers.Request.GET({
+  		  url: '/json/tms.json',
+  		  success: processData
+  		});
+  		 
+  		function processData( data ) {
+  		  var json = new OpenLayers.Format.JSON().read( data.responseText );
+
+  		  for (var i=0; i < json.services.length; i++){
+  			  var s = json.services[i];
+  			  if (s.id == 'ridge_uscomp_n0q'){
+  				  valid = new Date(s.utc_valid);
+  				  n0q.setName("NEXRAD N0Q @"
+  				  	+ ("0"+valid.getHours()).slice(-2)
+  				  	+ ("0"+valid.getMinutes()).slice(-2)
+  				  	+ " UTC");
+  				  n0q.layername = s.layername;
+  				  n0q.setVisibility(true);
+  			  }
+  		  }
+  		  n0q.redraw();
+
+  		}
+    }
+    refresher();
+    window.setInterval(function(){
+		refresher();
+    }, 5*60000);
+    
 }
 </script>
 </head>
