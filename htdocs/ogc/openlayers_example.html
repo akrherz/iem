@@ -155,8 +155,8 @@ function init(){
   			  if (s.id == 'ridge_uscomp_n0q'){
   				  valid = new Date(s.utc_valid);
   				  n0q.setName("NEXRAD N0Q @"
-  				  	+ ("0"+valid.getHours()).slice(-2)
-  				  	+ ("0"+valid.getMinutes()).slice(-2)
+  				  	+ ("0"+valid.getUTCHours()).slice(-2)
+  				  	+ ("0"+valid.getUTCMinutes()).slice(-2)
   				  	+ " UTC");
   				  n0q.layername = s.layername;
   				  n0q.setVisibility(true);
