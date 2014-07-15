@@ -34,6 +34,7 @@ import sys
 import os
 import datetime
 import pytz
+import pdb
 import urllib2
 import zipfile
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
@@ -112,7 +113,22 @@ while feat is not None:
         feat = lyr.GetNextFeature()
         continue
     area = Area(geo)
-    wkt = geo.ExportToWkt()
+    
+    newgeo = ogr.Geometry(ogr.wkbMultiPolygon)
+    thismaxa = 0
+    thismaxi = 0
+    for i in range(geo.GetGeometryCount()):
+        _g = geo.GetGeometryRef(i)
+        if Area(_g) > thismaxa: 
+            thismaxa = Area(_g)
+            thismaxi = i
+    newgeo.AddGeometry( geo.GetGeometryRef(thismaxi) )
+    for i in range(geo.GetGeometryCount()):
+        if i == thismaxi:
+            continue
+        newgeo.AddGeometry( geo.GetGeometryRef(i) )
+    
+    wkt = newgeo.ExportToWkt()
 
     if ugcs.has_key(ugc):
         if area < ugcs[ugc]:
