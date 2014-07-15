@@ -18,6 +18,19 @@
 
 
   $services = array();
+  
+  $services[] = Array(
+  		"title" => "IEM Tile Map Service Metadata",
+  		"url" => "/json/tms.json?",
+  		"desc" => "Provides metadata about the currently available Tile Map
+  		Services provided by the IEM.  This is useful to determine how to 
+  		call back to the Tile Map Services.",
+  		"vars" => Array(
+  		),
+  		"example" => Array(
+  		)
+  );
+  
   $services[] = Array(
   		"title" => "Current Storm Based Warnings",
   		"url" => "/geojson/sbw.geojson?",
