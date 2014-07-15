@@ -3,12 +3,12 @@
 import  mx.DateTime
 import shapelib
 import dbflib
-import iemdb
+import psycopg2
 import psycopg2.extras
 import subprocess
 import os
 
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 now = mx.DateTime.now()
@@ -23,7 +23,7 @@ icursor.execute("""SELECT s.id, c.pday,
   c.max_tmpf, 
 	case when c.min_tmpf < 99 THEN c.min_tmpf ELSE -99 END as min_tmpf, 
 	ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.name, 
-	c2.valid at time zone 'UTC' as vvv
+	c2.valid at time zone 'UTC' as vvv, s.elevation
 	from summary_%s c, current c2, stations s WHERE 
 	c.iemid = c2.iemid and s.iemid = c.iemid and 
     s.network ~* 'COOP' and min_tmpf > -99 and c2.valid > 'TODAY' 
@@ -47,6 +47,7 @@ for row in icursor:
     cob[ thisStation ]["LAT"] = row['lat']
     cob[ thisStation ]["LON"] = row['lon']
     cob[ thisStation ]["NAME"] = row['name']
+    cob[ thisStation ]['ELEV_M'] = row['elevation']
     cob[ thisStation ]["PMOI"] = 0.
     cob[ thisStation ]["SMOI"] = 0.
     cob[thisStation]['HHMM'] = row['vvv'].strftime('%H%M')
@@ -60,21 +61,22 @@ icursor.execute("""SELECT t.id, sum(pday) as tprec,
 								now.year, now.year) )
 
 for row in icursor:
-	thisStation = row["id"]
-	thisPrec = row["tprec"]
-	thisSnow = row["tsnow"]
-	if (not cob.has_key(thisStation)):
-		continue
-	cob[ thisStation ]["PMOI"] = round(float(thisPrec),2)
-	cob[ thisStation ]["SMOI"] = round(float(thisSnow),2)
+    thisStation = row["id"]
+    thisPrec = row["tprec"]
+    thisSnow = row["tsnow"]
+    if not cob.has_key(thisStation):
+        continue
+    cob[ thisStation ]["PMOI"] = round(float(thisPrec),2)
+    cob[ thisStation ]["SMOI"] = round(float(thisSnow),2)
 
 csv = open('coop.csv', 'w')
 csv.write('nwsli,site_name,longitude,latitude,date,time,high_f,low_f,prec_in,')
-csv.write('snow_in,snow_depth_in,prec_mon_in,snow_mon_in\n')
+csv.write('snow_in,snow_depth_in,prec_mon_in,snow_mon_in,elevation_m\n')
 
 dbf = dbflib.create("coop_"+ts)
 dbf.add_field("SID", dbflib.FTString, 5, 0)
 dbf.add_field("SITE_NAME", dbflib.FTString, 40, 0)
+dbf.add_field("ELEV_M", dbflib.FTDouble, 10, 2)
 dbf.add_field("YYYYMMDD", dbflib.FTString, 8, 0)
 dbf.add_field("HHMM", dbflib.FTString, 4, 0)
 dbf.add_field("HI_T_F", dbflib.FTInteger, 10, 0)
@@ -92,34 +94,41 @@ o.write(' PARM = TMPX;TMPN;P24I;PMOI;SMOI;SNOW;SNOD\n\n')
 o.write('    STN     YYMMDD/HHMM    TMPX    TMPN      P24I      PMOI      SMOI      SNOW      SNOD\n')
 
 j = 0
-for id in cob.keys():
+for sid in cob.keys():
 
     obj = shapelib.SHPObject(shapelib.SHPT_POINT, j, 
-		[[(cob[id]["LON"], cob[id]["LAT"])]] )
+		[[(cob[sid]["LON"], cob[sid]["LAT"])]] )
     shp.write_object(-1, obj)
-	#print id, cob[id]
+    #print id, cob[sid]
     o.write("%7s%16s%8.0f%8.0f%10.2f%10.2f%10.2f%10.2f%10.2f\n" % (
-		id, dateStr, cob[id]["TMPX"], cob[id]["TMPN"], 
-		cob[id]["P24I"], cob[id]["PMOI"], cob[id]["SMOI"], cob[id]["SNOW"], 
-		cob[id]["SNOD"]) )
-    if (cob[id]["TMPX"] < 0): cob[id]["TMPX"] = -99.
-    if (cob[id]["TMPN"] < 0): cob[id]["TMPN"] = -99.
-    if (cob[id]["P24I"] < 0): cob[id]["P24I"] = -99.
-    if (cob[id]["SNOW"] < 0): cob[id]["SNOW"] = -99.
-    if (cob[id]["SNOD"] < 0): cob[id]["SNOD"] = -99.
-    if (cob[id]["PMOI"] < 0): cob[id]["PMOI"] = -99.
-    if (cob[id]["SMOI"] < 0): cob[id]["SMOI"] = -99.
-	#print cob[id], id
-    dbf.write_record(j, (id, cob[id]["NAME"], ts,"1200",
-		cob[id]["TMPX"], cob[id]["TMPN"], cob[id]["P24I"], 
-		cob[id]["SNOW"], cob[id]["SNOD"], cob[id]["PMOI"], 
-		cob[id]["SMOI"]) )
+		sid, dateStr, cob[sid]["TMPX"], cob[sid]["TMPN"], 
+		cob[sid]["P24I"], cob[sid]["PMOI"], cob[sid]["SMOI"], cob[sid]["SNOW"], 
+		cob[sid]["SNOD"]) )
+    if cob[sid]["TMPX"] < 0:
+        cob[sid]["TMPX"] = -99.
+    if cob[sid]["TMPN"] < 0:
+        cob[sid]["TMPN"] = -99.
+    if cob[sid]["P24I"] < 0:
+        cob[sid]["P24I"] = -99.
+    if cob[sid]["SNOW"] < 0:
+        cob[sid]["SNOW"] = -99.
+    if cob[sid]["SNOD"] < 0:
+        cob[sid]["SNOD"] = -99.
+    if cob[sid]["PMOI"] < 0:
+        cob[sid]["PMOI"] = -99.
+    if cob[sid]["SMOI"] < 0:
+        cob[sid]["SMOI"] = -99.
+    #print cob[sid], id
+    dbf.write_record(j, (sid, cob[sid]["NAME"], cob[sid]['ELEV_M'], ts,"1200",
+		cob[sid]["TMPX"], cob[sid]["TMPN"], cob[sid]["P24I"], 
+		cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"], 
+		cob[sid]["SMOI"]) )
 
-    csv.write("%s,%s,%.4f,%.4f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (id, 
-            cob[id]["NAME"].replace(","," "), cob[id]['LON'], cob[id]["LAT"],
-            ts, cob[id]['HHMM'], cob[id]["TMPX"], cob[id]["TMPN"], cob[id]["P24I"],
-            cob[id]["SNOW"], cob[id]["SNOD"], cob[id]["PMOI"], 
-            cob[id]["SMOI"]))
+    csv.write("%s,%s,%.4f,%.4f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.1f\n" % (sid, 
+            cob[sid]["NAME"].replace(","," "), cob[sid]['LON'], cob[sid]["LAT"],
+            ts, cob[sid]['HHMM'], cob[sid]["TMPX"], cob[sid]["TMPN"], cob[sid]["P24I"],
+            cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"], 
+            cob[sid]["SMOI"], cob[sid]['ELEV_M']))
     
     del(obj)
     j += 1
