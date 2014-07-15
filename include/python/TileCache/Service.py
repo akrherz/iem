@@ -27,7 +27,7 @@ class Request (object):
     def getLayer(self, layername):    
         #try:
         if layername.find('idep') == 0:
-            (blah, ltype, date) = layername.split("::", 3)
+            (_, ltype, date) = layername.split("::", 3)
             uri = 'date=%s&year=%s&month=%s&day=%s' % (date, date[:4], 
                                                        date[5:7], date[8:10])
             layer = self.service.layers['idep']
@@ -38,7 +38,7 @@ class Request (object):
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
                 mylayername = 'ridge-t'
-                if sector in ['USCOMP',]:
+                if sector in ['USCOMP', 'HICOMP', 'AKCOMP']:
                     mylayername = 'ridge-composite-t'
                     sector = sector.lower()
                     prod = prod.lower()
