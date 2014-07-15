@@ -6,7 +6,7 @@ cd ../ingestors/ifc
 python ingest_ifc_precip.py &
 
 cd ../../dl
-python radar_composite.py 
+python radar_composite.py &
 
 cd ../outgoing
 python dump_precip.py
