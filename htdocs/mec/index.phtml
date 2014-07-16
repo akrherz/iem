@@ -1,0 +1,15 @@
+<?php 
+include_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+
+$t = new MyView();
+$t->title = "Confidential MEC Stuff";
+
+$t->content = <<<EOF
+
+<img src="i/0.png" />
+
+EOF;
+
+$t->render('single.phtml');
+?>
