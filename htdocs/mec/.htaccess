@@ -6,5 +6,8 @@ AuthType Basic
 order deny,allow
 require user mec
 
+AddHandler cgi-script .py
+Options +ExecCGI
+
 RewriteEngine On
 RewriteRule ^i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
