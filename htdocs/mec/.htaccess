@@ -1,0 +1,10 @@
+AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
+AuthGroupFile /dev/null
+AuthName Administrative
+AuthType Basic
+
+order deny,allow
+require user mec
+
+RewriteEngine On
+RewriteRule ^i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
