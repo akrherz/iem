@@ -4,8 +4,21 @@ require_once "../../include/myview.php";
 
 $t = new MyView();
 $t->title = "Confidential MEC Stuff";
-
+$t->headextra = <<<EOF
+<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script src="/js/OpenLayers.js"></script>
+<script src="map.js"></script>
+EOF;
+$t->bodyextra = " onload=\"init();\"";
 $t->content = <<<EOF
+
+<span style="color: #0000ff;">Expansion 1</span>
+<span style="color: #00ff00;">Expansion 2</span>
+<span style="color: #ff0000;">Expansion 3</span>		
+<span style="color: #00ffff;">Expansion 4</span>
+		
+
+<div id="map" style="width:100%; height:500px;"></div>
 
 <img src="i/0.png" />
 
