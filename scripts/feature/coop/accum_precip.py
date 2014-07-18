@@ -1,7 +1,7 @@
 import psycopg2
 import numpy as np
 
-data = np.zeros( (2014-1893, 366), 'f')
+data = np.zeros( (2015-1893, 366), 'f')
 
 IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = IEM.cursor()
@@ -20,15 +20,15 @@ bestc = 0
 bestcyr = None
 bestd = 11111110
 bestdyr = None
-for yr in range(1893,2013):
-    d = np.average((data[2013-1893,:248] - data[yr-1893,:248])**2)
+for yr in range(1893,2014):
+    d = np.average((data[2014-1893,:248] - data[yr-1893,:248])**2)
     if d < bestd:
         bestd = d
         bestdyr = yr
         print 'd', yr, d
 
     
-    c = np.corrcoef(data[2013-1893,:248], data[yr-1893,:248])[0,1]
+    c = np.corrcoef(data[2014-1893,:248], data[yr-1893,:248])[0,1]
     if c > bestc:
         bestc = c
         bestcyr = yr
@@ -43,17 +43,17 @@ import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
-ax.plot(range(1,248), data[-1,:247], label='2013', color='r', lw=2, zorder=2)
-ax.plot(range(1,367), data[1988-1893,:], label='1988', color='brown', lw=2, zorder=2)
+ax.plot(range(1,188), data[-1,:187], label='2014', color='r', lw=2, zorder=2)
 ax.plot(range(1,367), data[1993-1893,:], label='1993', color='b', lw=2, zorder=2)
-ax.plot(range(1,367), data[2012-1893,:], label='2012', color='g', lw=2, zorder=2)
+ax.plot(range(1,367), data[2008-1893,:], label='2008', color='g', lw=2, zorder=2)
+ax.plot(range(1,367), data[2010-1893,:], label='2010', color='brown', lw=2, zorder=2)
 ax.plot(range(1,367), avg, label='Average', color='k', lw=1, zorder=2)
 ax.fill_between(range(1,367), mn, mx, color='tan', label='max', zorder=1)
 ax.legend(loc=2)
 ax.set_ylim(0, 50)
 ax.set_title("IEM Estimated Iowa Areal Averaged Precip")
 ax.set_ylabel("Accumulated Precipitation [inch]")
-ax.set_xlabel("1893 - 5 September 2013")
+ax.set_xlabel("1893 - 7 July 2014")
 ax.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )
 ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
 ax.set_xlim(1,367)
