@@ -23,20 +23,14 @@ import mx.DateTime
 import nwnOB
 import secret
 
-import iemdb
 import psycopg2.extras
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 logging.basicConfig(filename='/mesonet/data/logs/nwn.log',filemode='a')
 logger=logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
-
-# Write a PID File
-o = open("ingest.pid",'w')
-o.write("%s" % ( os.getpid(),) )
-o.close()
 
 # Load up locs
 locs = {}
@@ -168,7 +162,6 @@ def process(dataStr):
 
 def archiveWriter():
     for sid in db.keys():
-        #logger.write("WRITE ID: %s\n"% (id,) )
         # No obs during this period
         if (db[sid].valid == None):
             continue
@@ -196,43 +189,43 @@ def averageWinds():
     for sid in db.keys():
         db[sid].avgWinds()
 
-def sendWindAlert(id, alertSPED, alertDrctTxt, myThreshold):
-    if id in [904, 75, 907, 918, 9, 913,924,610,619, 60]:
+def sendWindAlert(sid, alertSPED, alertDrctTxt, myThreshold):
+    if sid in [904, 75, 907, 918, 9, 913,924,610,619, 60]:
         return
-    if (not locs.has_key(id)):
-        logger.info("\nCan't Alert ID: %s\n" % (id,) )
+    if (not locs.has_key(sid)):
+        logger.info("\nCan't Alert ID: %s\n" % (sid,) )
         return
     # Unreliable....
-    if locs[id]['tv'] == 'KIMT':
+    if locs[sid]['tv'] == 'KIMT':
         return
     form = {}
     form["threshold"] = myThreshold
-    form["sname"] = locs[id]["name"]
-    form["lat"] = locs[id]["lat"]
-    form["lon"] = locs[id]["lon"]
-    form["nwsli"] = locs[id]["nwsli"]
-    form["county"] = locs[id]["county"]
-    form["obts"] = db[id].valid.strftime("%Y-%m-%d %I:%M %p")
-    form["shortts"] = db[id].valid.strftime("%I:%M %p")
-    form["shefdate"] = db[id].valid.strftime("%m%d")
-    form["sheftime"] = db[id].valid.strftime("%H%M")
+    form["sname"] = locs[sid]["name"]
+    form["lat"] = locs[sid]["lat"]
+    form["lon"] = locs[sid]["lon"]
+    form["nwsli"] = locs[sid]["nwsli"]
+    form["county"] = locs[sid]["county"]
+    form["obts"] = db[sid].valid.strftime("%Y-%m-%d %I:%M %p")
+    form["shortts"] = db[sid].valid.strftime("%I:%M %p")
+    form["shefdate"] = db[sid].valid.strftime("%m%d")
+    form["sheftime"] = db[sid].valid.strftime("%H%M")
     try:
-        form["gustts"] = db[id].maxSPED_ts.strftime("%I:%M %p")
+        form["gustts"] = db[sid].maxSPED_ts.strftime("%I:%M %p")
     except:
         form["gustts"] = "Unknown"
-    form["tmpf"] = db[id].tmpf
+    form["tmpf"] = db[sid].tmpf
     form["dwpf"] = "None"
-    form["pDay"] = db[id].pDay
-    form["gust"] = db[id].maxSPED
-    form["drct"] = db[id].maxDrctTxt
+    form["pDay"] = db[sid].pDay
+    form["gust"] = db[sid].maxSPED
+    form["drct"] = db[sid].maxDrctTxt
     form["alertSPED"] = alertSPED
     form["alertDrctTxt"] = alertDrctTxt
     form["lastts"] = "Undefined"
-    if (db[id].lvalid != None):
-        form["lastts"] = db[id].lvalid.strftime("%d %b %Y %I:%M %p")
+    if (db[sid].lvalid != None):
+        form["lastts"] = db[sid].lvalid.strftime("%d %b %Y %I:%M %p")
     form["warning"] = ""
-    if ( db[id].sinceLastObInMinutes() > 10):
-        form["warning"] = "\n: WARNING: First ob since %s [ %s minutes ]. Perhaps Offline?" % (form["lastts"], db[id].sinceLastObInMinutes(), )
+    if ( db[sid].sinceLastObInMinutes() > 10):
+        form["warning"] = "\n: WARNING: First ob since %s [ %s minutes ]. Perhaps Offline?" % (form["lastts"], db[sid].sinceLastObInMinutes(), )
 
     # Need three blank lines for the SHEF header to be printed if needed
     report = """
@@ -250,18 +243,18 @@ def sendWindAlert(id, alertSPED, alertDrctTxt, myThreshold):
 : All Wind Obs since last ob at: %(lastts)s
 """ 
 
-    for i in range(len(db[id].aSPED)):
-        report += ":    %s MPH from the %s\n" % (db[id].aSPED[i], db[id].aDrctTxt[i])
+    for i in range(len(db[sid].aSPED)):
+        report += ":    %s MPH from the %s\n" % (db[sid].aSPED[i], db[sid].aDrctTxt[i])
 
-    for route in locs[id]["routes"]:
+    for route in locs[sid]["routes"]:
         form["route"] = route
-        fireLDM(report % form, route, id)
+        fireLDM(report % form, route, sid)
         if (len(route) == 3):
             if (route == "DSM"):
                 form['route'] = "DMX"
 
 
-def fireLDM(report, route, id):
+def fireLDM(report, route, sid):
     logger.info("Route! %s" % (route,))
     fname = "LOC%sSVRWX.dat" % (route,)
     fp = open("/tmp/"+fname, 'w')
@@ -270,62 +263,63 @@ def fireLDM(report, route, id):
     logger.info( report )
     try:
         #if (route != "KELO" and route != "KCCI"):
-        os.system("/home/ldm/bin/pqinsert -p '%s' /tmp/%s" %(fname.replace('DMX','DSM'),fname) )
+        os.system("/home/ldm/bin/pqinsert -p '%s' /tmp/%s" %(
+                                        fname.replace('DMX','DSM'),fname) )
     except:
         logger.exception("Trouble inserting Alert!")
 
     # Save a copy of this alert!
     shutil.copy("/tmp/"+fname, "/mesonet/data/alerts/%s_%s_%s" \
-                % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"), id, fname) )
+                % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"), sid, fname) )
 
 #==================================================
 def windGustAlert():
-    for id in db.keys():
+    for sid in db.keys():
         myThreshold = _WIND_THRESHOLD
-        if (id == 84 or id == 40 or id == 9 or id == 78 or id == 49):
+        if sid in [84, 40, 9, 78, 49]:
             myThreshold += 7
-        if (id == 49 or id == 618 or id == 1):
+        if sid in [49, 618, 1]:
             myThreshold += 40
         # If no obs during this period, no alerts
         # If no obs during this period, no alerts
-        if (db[id].valid == None): continue
+        if (db[sid].valid == None): continue
 
         # If the max gust is greater than the threshold, we consider
-        if (db[id].maxSPED != None and db[id].maxSPED >= myThreshold):
+        if (db[sid].maxSPED != None and db[sid].maxSPED >= myThreshold):
             # We also need this maxGust to be greater than previously warned
-            if (db[id].windGustAlert != None and \
-            db[id].maxSPED > db[id].windGustAlert):
+            if (db[sid].windGustAlert != None and \
+            db[sid].maxSPED > db[sid].windGustAlert):
                 # Set the value for the last alert generated!
-                db[id].windGustAlert = db[id].maxSPED
-                sendWindAlert(id, db[id].maxSPED, db[id].maxDrctTxt, myThreshold)
+                db[sid].windGustAlert = db[sid].maxSPED
+                sendWindAlert(id, db[sid].maxSPED, db[sid].maxDrctTxt, myThreshold)
                 continue
             # If the windGustAlert is None, then we should alert too
-            if (db[id].windGustAlert == None):
+            if (db[sid].windGustAlert == None):
                 # Set the value for the last alert generated!
-                db[id].windGustAlert = db[id].maxSPED
-                sendWindAlert(id, db[id].maxSPED, db[id].maxDrctTxt, myThreshold)
+                db[sid].windGustAlert = db[sid].maxSPED
+                sendWindAlert(id, db[sid].maxSPED, db[sid].maxDrctTxt, myThreshold)
                 continue
 
         # We will always alert in this situation
-        if (len(db[id].aSPED) > 0) and (max(db[id].aSPED) >= myThreshold):
+        if (len(db[sid].aSPED) > 0) and (max(db[sid].aSPED) >= myThreshold):
             # We need to find the max wind speed direction
-            for pos in range(len(db[id].aSPED)):
-                if (max(db[id].aSPED) == db[id].aSPED[pos]):
-                    alertDrctTxt = db[id].aDrctTxt[pos]
-                    db[id].maxDrctTxt = alertDrctTxt
-                    db[id].maxSPED_ts = db[id].valid
-            sendWindAlert(id, max(db[id].aSPED), alertDrctTxt, myThreshold)
+            for pos in range(len(db[sid].aSPED)):
+                if (max(db[sid].aSPED) == db[sid].aSPED[pos]):
+                    alertDrctTxt = db[sid].aDrctTxt[pos]
+                    db[sid].maxDrctTxt = alertDrctTxt
+                    db[sid].maxSPED_ts = db[sid].valid
+            sendWindAlert(id, max(db[sid].aSPED), alertDrctTxt, myThreshold)
 
 
 
 def clearObs():
-    for id in db.keys():
-        if (db[id].valid != None): # We got obs!
-            db[id].lvalid = db[id].valid
-            db[id].valid = None
-            db[id].aSPED = []
-            db[id].aDrctTxt = []
-            db[id].aDrct = []
+    for sid in db.keys():
+        if (db[sid].valid != None): # We got obs!
+            db[sid].lvalid = db[sid].valid
+            db[sid].valid = None
+            db[sid].aSPED = []
+            db[sid].aDrctTxt = []
+            db[sid].aDrct = []
 
 def main():
     tn = makeConnect()
@@ -333,7 +327,7 @@ def main():
     dryRun = 0
     dataStr = ""
 
-    while (counter > 0):
+    while counter > 0:
         #s = mx.DateTime.now()
         if (counter % 15 == 0):
             saveDB()
@@ -384,16 +378,16 @@ def logData(goodLines):
 
 MAXEMAILS = 10
 
-if (__name__ == "__main__"):
+if __name__ == "__main__":
     loadDB()
-    running = 1
-    while(running):
+    running = True
+    while running:
         try:
             logger.info("GO MAIN GO!")
             main()
         except KeyboardInterrupt:
             saveDB()
-            running = 0
+            running = False
         except:
             logger.exception("Uh oh!")
 
