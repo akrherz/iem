@@ -1,4 +1,42 @@
 #
+# AWIPS Cities
+#
+LAYER
+  NAME 'cities'
+  METADATA
+      "wms_title"       "city"
+  END
+  PROJECTION
+    "init=epsg:4326"
+  END
+  STATUS ON
+  TYPE POINT
+  DATA "/mesonet/data/gis/static/shape/4326/nws/cities.shp"
+  LABELITEM 'name'
+  LABELCACHE TRUE
+  CLASS
+    LABEL
+          COLOR 255 255 153
+          OUTLINECOLOR 0 0 0
+          FONT "liberation-bold"
+          TYPE truetype
+          SIZE 11
+          OFFSET 0 2
+          BUFFER 40
+          ANGLE AUTO
+          POSITION UC
+          PARTIALS FALSE
+          PRIORITY 10
+          STYLE
+            SYMBOL 'circle'
+            COLOR 0 0 0
+            SIZE 4
+         END
+      END
+   END
+END
+
+#
 # Generic stuff useful to all IEM base*.map
 #
 # USDM!
