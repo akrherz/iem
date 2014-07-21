@@ -3,9 +3,8 @@
 import iemplot
 import datetime
 
-import iemdb
 import psycopg2.extras
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """
