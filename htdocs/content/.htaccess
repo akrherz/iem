@@ -1,2 +1,2 @@
 RewriteEngine On
-RewriteRule ^pil_([A-Z0-9]{6}).png$ pil.php?pil=$1
+RewriteRule ^pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
