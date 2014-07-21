@@ -11,3 +11,5 @@
 /twistd.pid
 /gemglb.nts
 /last.nts
+/db.p
+/ingest.pid
