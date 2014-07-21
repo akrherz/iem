@@ -19,8 +19,19 @@ zip -q coop_${Date}.zip coop_${Date}.txt coop_${Date}.prj coop_${Date}.shp coop_
 /home/ldm/bin/pqinsert -p "zip ac $ftime gis/shape/4326/iem/coopobs.zip GIS/coop_${Date}.zip zip" coop_${Date}.zip
 rm -f coop_${Date}.* 
 
+if (! -e /mesonet/data/coop/coop.gem) then
+	echo 'coop.gem is missing, copying template...'
+	cp templates/coop.gem /mesonet/data/coop/coop.gem
+	endif
+
+if (! -e /mesonet/data/coop/coop.grd) then
+	echo 'coop.grd is missing, copying template...'
+	cp templates/coop.grd /mesonet/data/coop/
+	endif
+
+
 sfdelt << EOF > /tmp/PREC_sfdelt.out
-	SFFILE	= coop.gem
+	SFFILE	= /mesonet/data/coop/coop.gem
 	DATTIM	= ALL
 	SFPARM	= ALL
 	AREA	= DSET
@@ -31,8 +42,8 @@ sfdelt << EOF > /tmp/PREC_sfdelt.out
 EOF
 
 sfedit << EOF > /tmp/PREC_sfedit.out
-	SFFILE	= coop.gem
-	SFEFIL	= coop_obs.fil
+	SFFILE	= /mesonet/data/coop/coop.gem
+	SFEFIL	= /mesonet/data/coop/coop_obs.fil
 	list
 	run
 
@@ -40,7 +51,7 @@ sfedit << EOF > /tmp/PREC_sfedit.out
 EOF
 
 gddelt << EOF > /tmp/PREC_gddelt.out
-        GDFILE	= coop.grd
+        GDFILE	= /mesonet/data/coop/coop.grd
         GDATTIM = ALL
         GDNUM   = ALL
         GFUNC   = ALL
@@ -52,8 +63,8 @@ gddelt << EOF > /tmp/PREC_gddelt.out
 EOF
 
 oabsfc << EOF > /tmp/PREC_oabsfc.out
-        SFFILE   = coop.gem
-        GDFILE   = coop.grd
+        SFFILE   = /mesonet/data/coop/coop.gem
+        GDFILE   = /mesonet/data/coop/coop.grd
         SFPARM   = P24I
         DATTIM   = ${date}/1200
         DTAAREA  =
@@ -72,7 +83,7 @@ gpend
 rm coopPrec.gif* >& /dev/null
 
 $GEMEXE/gdplot << EOF > /tmp/PREC_gdplot1.out
-        GDFILE  = coop.grd
+        GDFILE  = /mesonet/data/coop/coop.grd
         GDATTIM = ${date}/1200
         PANEL	= 0
         MAP	= 25/1/1
@@ -122,7 +133,7 @@ $GEMEXE/sfmap << EOF > /tmp/PREC_sfmap.out
         SFPARM   =  MARK;STID;P24I*100>-1
         COLORS   =  25;25;4
         DATTIM   =  ${date}/1200
-        SFFILE   =  coop.gem
+        SFFILE   =  /mesonet/data/coop/coop.gem
         MAP      =  25//2 + 25
         LATLON   =  0
         TITLE    =  32/-1/~ COOP PRECIP REPORTS [.01 inch]
@@ -172,7 +183,7 @@ $GEMEXE/sfmap << EOF > /tmp/PREC_sfmap2.out
         SFPARM   =  MARK;STID;PMOI*100>-1
         COLORS   =  25;25;4
         DATTIM   =  ${date}/1200
-        SFFILE   =  coop.gem
+        SFFILE   =  /mesonet/data/coop/coop.gem
         MAP      =  25//2 + 25
         LATLON   =  0
         TITLE    =  32/-1/~ COOP PRECIP ACCUM THIS MONTH [.01 inch]
@@ -199,29 +210,31 @@ EOF
 
 gpend
 
+set PQI="/home/ldm/bin/pqinsert"
+
 if (-e coopPrecPlot.gif ) then
-/home/ldm/bin/pqinsert -p "plot ac $ftime coopPrecPlot.gif coopPrecPlot.gif gif" coopPrecPlot.gif >& /dev/null
-/home/ldm/bin/pqinsert -p "plot ac $ftime coopSnowPlot.gif coopSnowPlot.gif gif" coopSnowPlot.gif >& /dev/null
-/home/ldm/bin/pqinsert -p "plot ac $ftime coopSnowDepth.gif coopSnowDepth.gif gif" coopSnowDepth.gif >& /dev/null
-/home/ldm/bin/pqinsert -p "plot ac $ftime coopHighLow.gif coopHighLow.gif gif" coopHighLow.gif >& /dev/null
+$PQI -p "plot ac $ftime coopPrecPlot.gif coopPrecPlot.gif gif" coopPrecPlot.gif >& /dev/null
+$PQI -p "plot ac $ftime coopSnowPlot.gif coopSnowPlot.gif gif" coopSnowPlot.gif >& /dev/null
+$PQI -p "plot ac $ftime coopSnowDepth.gif coopSnowDepth.gif gif" coopSnowDepth.gif >& /dev/null
+$PQI -p "plot ac $ftime coopHighLow.gif coopHighLow.gif gif" coopHighLow.gif >& /dev/null
 else
 	echo "COOP Precip Plot did not get made" | mail -s "[MESONET] COOP Problem" akrherz@iastate.edu
 endif
 
 if (-e coopPrec.gif ) then
-/home/ldm/bin/pqinsert -p "plot c $ftime coopPrec.gif coopPrec.gif gif" coopPrec.gif >& /dev/null
-	#mv coopPrec.gif ~/current
+$PQI -p "plot c $ftime coopPrec.gif coopPrec.gif gif" coopPrec.gif >& /dev/null
 endif 
 
 if (-e coopMonthPlot.gif ) then
-/home/ldm/bin/pqinsert -p "plot c $ftime coopMonthPlot.gif coopMonthPlot.gif gif" coopMonthPlot.gif >& /dev/null
-/home/ldm/bin/pqinsert -p "plot c $ftime coopMonthSPlot.gif coopMonthSPlot.gif gif" coopMonthSPlot.gif >& /dev/null
-	#mv coopMonthPlot.gif ~/current
-	#mv coopMonthSPlot.gif ~/current
+$PQI -p "plot c $ftime coopMonthPlot.gif coopMonthPlot.gif gif" coopMonthPlot.gif >& /dev/null
+$PQI -p "plot c $ftime coopMonthSPlot.gif coopMonthSPlot.gif gif" coopMonthSPlot.gif >& /dev/null
 endif
 
 python monthPrecip.py
 python yearPrecip.py
 
 python dayPrecip.py
-/home/ldm/bin/pqinsert -p "plot ac $ftime text/IEMNWSDPR.txt coopobs.txt txt" IEMNWSDPR.txt >& /dev/null
+$PQI -p "plot ac $ftime text/IEMNWSDPR.txt coopobs.txt txt" IEMNWSDPR.txt >& /dev/null
+
+rm -f IEMNWSDPR.txt coopPrecPlot.gif coopSnowPlot.gif coopSnowDepth.gif 
+rm -f coopHighLow.gif coopPrec.gif coopMonthPlot.gif coopMonthSPlot.gif

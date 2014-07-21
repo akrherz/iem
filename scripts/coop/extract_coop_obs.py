@@ -89,7 +89,7 @@ dbf.add_field("SMONTH", dbflib.FTDouble, 10, 2)
 
 shp = shapelib.create("coop_"+ts, shapelib.SHPT_POINT)
 
-o = open('coop_obs.fil', 'w')
+o = open('/mesonet/data/coop/coop_obs.fil', 'w')
 o.write(' PARM = TMPX;TMPN;P24I;PMOI;SMOI;SNOW;SNOD\n\n')
 o.write('    STN     YYMMDD/HHMM    TMPX    TMPN      P24I      PMOI      SMOI      SNOW      SNOD\n')
 
