@@ -15,9 +15,19 @@ set yymmdd="$yy$mm$dd"
 set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
 set gtime="`date -u --date '1 hour ago' +'%y%m%d/%H00'`"
 
+if (! -e /mesonet/data/iemplot/grid_25_25.grd) then
+	echo "Missing grid_25_25.grd, copying template over..."
+	cp templates/grid_25_25.grd /mesonet/data/iemplot/
+endif
+
+if (! -e /mesonet/data/iemplot/surface.gem) then
+	echo "Missing surface.gem, copying template over..."
+	cp templates/surface.gem /mesonet/data/iemplot/
+endif
+
 
 gddelt << EOF > /tmp/oa_gddelt.out
- GDFILE = grid_25_25.grd
+GDFILE = /mesonet/data/iemplot/grid_25_25.grd
  GDATTIM = ALL
  GLEVEL = ALL
  GVCORD = ALL
@@ -38,7 +48,7 @@ endif
 
 gdbiint << EOF > /tmp/oa_gdbiint.out
  GDFILE   = $gdfile
- GDOUTF   = grid_oa.grd
+GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
  GFUNC    = MMSL
  GLEVEL   = 0
  GVCORD   = NONE
@@ -51,8 +61,8 @@ exit
 EOF
 
 gddiag << EOF > /tmp/oa_gddiag.out
- GDFILE = grid_oa.grd
- GDOUTF = grid_oa.grd
+ GDFILE = /mesonet/data/iemplot/grid_oa.grd
+ GDOUTF = /mesonet/data/iemplot/grid_oa.grd
  GFUNC  = MMSL
  GDATTIM = F001
  GLEVEL  = 0
@@ -66,7 +76,7 @@ exit
 EOF
 
 sfdelt << EOF > /tmp/oa_sfdelt.out
- SFFILE = surface.gem
+ SFFILE = /mesonet/data/iemplot/surface.gem
  DATTIM = ALL
  AREA   = DSET
  list
@@ -91,8 +101,8 @@ EOF
 python dump_altm.py
 
 sfedit << EOF > /tmp/oa_sfedit.out
- SFEFIL   = altm.txt
- SFFILE   = surface.gem
+SFEFIL   = /mesonet/data/iemplot/altm.txt
+ SFFILE   = /mesonet/data/iemplot/surface.gem
  list
  run
 
@@ -108,8 +118,8 @@ EOF
 # GUESS    = grid_oa.grd*${gtime}F001
 # GUESFUN = ALTM
 oabsfc << EOF > /tmp/oa_oabsfc.out
- SFFILE = surface.gem
- GDFILE   = grid_25_25.grd
+ SFFILE = /mesonet/data/iemplot/surface.gem
+ GDFILE   = /mesonet/data/iemplot/grid_25_25.grd
  SFPARM   = ALTM
  DATTIM   = /${hh}
  DTAAREA  = ia
