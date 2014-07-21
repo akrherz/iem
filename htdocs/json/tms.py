@@ -23,6 +23,14 @@ def run():
             'utc_valid': j['meta']['valid']
             })
     
+    j = json.load( open('/home/ldm/data/gis/images/4326/USCOMP/n0r_0.json'))
+    vt = datetime.datetime.strptime(j['meta']['valid'], ISO)
+    res['services'].append({
+            'id' : 'ridge_uscomp_n0r',
+            'layername': 'ridge::USCOMP-N0R-%s' % vt.strftime("%Y%m%d%H%M"),
+            'utc_valid': j['meta']['valid']
+            })
+    
     return json.dumps(res)
 
 if __name__ == '__main__':
