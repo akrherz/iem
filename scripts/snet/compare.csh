@@ -143,9 +143,9 @@ if (-e ${GFFILE}) then
   /home/ldm/bin/pqinsert -p "plot c 000000000000 snet/${GFFILE2} ${GFFILE2} gif" ${GFFILE2} >& /dev/null
   /home/ldm/bin/pqinsert -p "plot c 000000000000 snet/${GFFILE3} ${GFFILE3} gif" ${GFFILE3} >& /dev/null
   /home/ldm/bin/pqinsert -p "plot c 000000000000 snet/${GFFILE4} ${GFFILE4} gif" ${GFFILE4} >& /dev/null
-  #mv ${GFFILE} ~/current/snet/
-  #mv ${GFFILE2} ~/current/snet/
-  #mv ${GFFILE3} ~/current/snet/
-  #mv ${GFFILE4} ~/current/snet/
+rm -f ${GFFILE}
+rm -f ${GFFILE2} 
+rm -f ${GFFILE3} 
+rm -f ${GFFILE4} 
 endif
 
