@@ -47,4 +47,5 @@ gpend
 
 if (-e 1hprecip.gif) then
   /home/ldm/bin/pqinsert -p "plot c 000000000000 1hprecip.gif bogus gif" 1hprecip.gif >& /dev/null
+	rm -f 1hprecip.gif
 endif
