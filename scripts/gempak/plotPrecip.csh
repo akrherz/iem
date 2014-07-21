@@ -79,4 +79,5 @@ if (-e ${gif}.gif) then
   else 
     /home/ldm/bin/pqinsert -p "plot c $ftime ${gif}.gif ${gif}_${ts}.gif gif" ${gif}.gif
   endif
+rm -f ${gif}.gif
 endif
