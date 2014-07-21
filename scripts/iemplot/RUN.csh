@@ -6,6 +6,6 @@ set mm=`date --date '1 minute' +%m`
 set dd=`date --date '1 minute' +%d`
 set hh=`date --date '1 minute' +%H`
 
-./oa.csh $yy $mm $dd $hh
-./IAMESONET_plot.csh $yy $mm $dd $hh
-./pres_plot.csh $yy $mm $dd $hh
+csh oa.csh $yy $mm $dd $hh
+csh IAMESONET_plot.csh $yy $mm $dd $hh
+csh pres_plot.csh $yy $mm $dd $hh

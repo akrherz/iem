@@ -14,7 +14,7 @@ cursor.execute("""
  and t.state in ('IA','MO','IL','WI','IN','OH','KY','MI','SD','ND','NE','KS')
  """)
 
-o = open('altm.txt', 'w')
+o = open('/mesonet/data/iemplot/altm.txt', 'w')
 o.write(""" PARM = ALTM                                                                     
 
     STN    YYMMDD/HHMM      ALTM

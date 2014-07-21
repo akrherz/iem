@@ -56,7 +56,7 @@ gdcntr << EOF > /tmp/pres_plot_gdcntr.out
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(ALTM)
-	GDFILE   = grid_oa.grd
+	GDFILE   = /mesonet/data/iemplot/grid_oa.grd
 	CINT     = 1
 	LINE     = 4
 	MAP      = 0
@@ -90,8 +90,5 @@ gpend
 
 
 if (-e mesonet_altm.gif) then
-#  ~/bin/logo.csh /mesonet/scripts/iemplot/mesonet_altm.gif
   /home/ldm/bin/pqinsert -p "plot ac ${timestamp} mesonet_altm.gif mesonet_altm_${hh}00.gif gif" mesonet_altm.gif >& /dev/null
-  #cp mesonet_altm.gif ~/archive/mesonet_altm_${hh}00.gif
-  #mv mesonet_altm.gif ~/current
 endif

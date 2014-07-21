@@ -67,7 +67,7 @@ gdcntr << EOF > /tmp/IAMESONETplot_gdcntr.out
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(MMSL)
-	GDFILE   = grid_25_25.grd
+	GDFILE   = /mesonet/data/iemplot/grid_25_25.grd
 	CINT     = 1
 	LINE     = 4
 	MAP      = 0
@@ -99,5 +99,7 @@ EOF
 
 gpend
 
-/home/ldm/bin/pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" mesonet.gif
-
+if (-e mesonet.gif) then
+	/home/ldm/bin/pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" mesonet.gif
+	rm -f mesonet.gif
+endif
