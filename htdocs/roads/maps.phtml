@@ -1,6 +1,8 @@
 <?php
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
+include_once "../../include/myview.php";
+$t = new MyView();
 
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
@@ -11,11 +13,11 @@ $valid = substr($row["valid"],0,16);
 $ts = strtotime($valid);
 $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 
-$THISPAGE = "roads-maps";
-$HEADEXTRA = "
+$t->thispage = "roads-maps";
+$t->headextra = <<<EOF
 <script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src=\"http://openlayers.org/api/2.12/OpenLayers.js\"></script>
-<script type=\"text/javascript\">
+<script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
+<script type="text/javascript">
 /* 'Globals' */
 var map, selectedFeature, selectControl;
 
@@ -24,7 +26,7 @@ function cb_roadOver(feature){
   popup = new OpenLayers.Popup('chicken', 
               feature.geometry.getBounds().getCenterLonLat(),
               new OpenLayers.Size(200,60),
-              \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"(\"+ feature.attributes.cond_code +\")</div>\",
+              "<div style='font-size:.8em'>Road Name: " + feature.attributes.major +"<br />Segment: "+ feature.attributes.minor   +"<br />Condition: "+ feature.attributes.label + "("+ feature.attributes.cond_code +")</div>",
               true);
   feature.popup = popup;
   map.addPopup(popup);
@@ -97,7 +99,7 @@ function init(){
      		{
      		strategies: [new OpenLayers.Strategy.BBOX()],
      		protocol: new OpenLayers.Protocol.WFS({
-                    url: '".$rootcgi."/wfs/iowa/roadcond-900913.cgi',
+                    url: '/cgi-bin/wfs/iowa/roadcond-900913.cgi',
                     featureType: 'roadcond-wfs-900913'
                 }),
        		extractAttributes: true,
@@ -125,13 +127,13 @@ function init(){
 
    // Pavement Temperatures, again, some help
    var pavetemps = new OpenLayers.Layer.WMS( 'Pavement Temperatures',
-    '". $rootcgi ."/wms/us/roadtemps.cgi?', 
+    '/cgi-bin/wms/us/roadtemps.cgi?', 
     {layers: 'roadtemps', format: 'image/png', transparent: 'true'});
    pavetemps.setVisibility(false);
 
    // Air Temperatures, needs some help
    var airtemps = new OpenLayers.Layer.WMS( 'Air 2m Temperatures',
-    '". $rootcgi ."/wms/us/obs.cgi?', 
+    '/cgi-bin/wms/us/obs.cgi?', 
     {layers: 'airtemps', format: 'image/png', transparent: 'true'});
    airtemps.setVisibility(false);
 
@@ -142,17 +144,17 @@ function get_my_url (bounds) {
     var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
     var z = this.map.getZoom();
 
-    var path = z + '/' + x + \"/\" + y + \".\" + this.type +\"?\"+ parseInt(Math.random()*9999);
+    var path = z + '/' + x + "/" + y + "." + this.type +"?"+ parseInt(Math.random()*9999);
     var url = this.url;
     if (url instanceof Array) {
         url = this.selectUrl(path, url);
     }
-    return url + this.service +\"/\"+ this.layername +\"/\"+ path;
+    return url + this.service +"/"+ this.layername +"/"+ path;
 
 }
 var nexrad = new OpenLayers.Layer.TMS(
         'NEXRAD Base Reflectivity',
-        'http://mesonet.agron.iastate.edu/cache/tile.py/',
+        '/cache/tile.py/',
         {layername      : 'nexrad-n0q-900913',
         service         : '1.0.0',
         type            : 'png',
@@ -192,11 +194,10 @@ function myrefresh(layer){
 }
 
 </script>
-";
-$TITLE = "IEM Interactive Road Conditions";
-$BODYEXTRA = "onload=\"init()\"";
-include("../../include/header.php");
-?>
+EOF;
+$t->title = "Interactive Road Conditions";
+$t->bodyextra = "onload=\"init()\"";
+$t->content = <<<EOF
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
   <li class="active">Interactive Mapping</li>
@@ -212,5 +213,6 @@ include("../../include/header.php");
 <div id="map"></div>
 <img src="http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?LAYER=roadcond-noninterstate&FORMAT=image%2Fpng&TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&STYLES=&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&BBOX=-92.8125,36.5625,-90,39.375&WIDTH=256&HEIGHT=256" style="position: absolute; left: 10px; top: 310px; z-index: 777;">
 <img src="http://mesonet.agron.iastate.edu/cgi-bin/wms/us/roadtemps.cgi?LAYER=roadtemps&FORMAT=image%2Fpng&TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&STYLES=&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&BBOX=-92.8125,36.5625,-90,39.375&WIDTH=256&HEIGHT=256" style="position: absolute; left: 55px; top: 180px; z-index: 777;">
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
