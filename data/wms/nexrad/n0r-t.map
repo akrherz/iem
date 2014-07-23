@@ -12,6 +12,7 @@ UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
 #SYMBOLSET "/mesonet/www/html/GIS/data/symbols/wind.sym"
 IMAGECOLOR -1 -1 -1
+CONFIG "ON_MISSING_DATA" "IGNORE"
 
 
 #
