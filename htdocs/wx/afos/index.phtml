@@ -2,18 +2,20 @@
 /* AJAX AFOS Retreiver */
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 59);
+include_once "../../../include/myview.php";
+$t = new MyView();
 
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+$t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="Printer-all.js"></script>
-<script type="text/javascript" src="static.js?v=5"></script>';
-$TITLE = "IEM :: NWS Text Product Finder";
-$NOCONTENT = 1;
-$THISPAGE ="current-afos";
-include("../../../include/header.php");
-?>
+<script type="text/javascript" src="static.js?v=5"></script>
+EOF;
+$t->title = "NWS Text Product Finder";
+$t->thispage ="current-afos";
+$t->content = <<<EOF
 <div id="help">
 <h3>IEM NWS Text Product Finder</h3>
 
@@ -83,5 +85,6 @@ All products should be used for educational purposes only.</p>
 </p>
 
 </div>
-
-<?php include("../../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
