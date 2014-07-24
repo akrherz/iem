@@ -6,7 +6,7 @@ cursor = COOP.cursor()
 
 cursor.execute("""
  select year, sum(case when high > 89 then 1 else 0 end) from alldata_ia
- where station = 'IA0200' and sday < '0714' GROUP by year oRDER by year ASC
+ where station = 'IA8706' and sday < '0724' GROUP by year oRDER by year ASC
  """)
 
 years = []
@@ -16,6 +16,7 @@ for row in cursor:
     years.append( row[0]  )
     data.append( float(row[1]) )
 
+data[-1] = 1
 
 years = np.array(years)
 data = np.array(data)
@@ -40,7 +41,7 @@ for i, bar in enumerate(bars):
 bars[-1].set_facecolor('yellow')
 bars[-1].set_edgecolor('yellow')
         
-ax.set_title("1893-2014 Ames Days At or Above 90 $^\circ$F (1 Jan - 13 Jul)")
+ax.set_title("1893-2014 Waterloo Days At or Above 90 $^\circ$F (1 Jan - 23 Jul)")
 ax.set_ylabel("Days")
 #ax.set_xlabel("* 2014 forecasted values of 76,68,74,78,78")
 #ax.set_ylim(70, 105.5)
