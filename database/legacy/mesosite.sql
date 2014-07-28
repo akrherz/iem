@@ -1,3 +1,32 @@
+
+
+CREATE TABLE iembot_fb_access_tokens (
+    fbpid bigint,
+    access_token text
+);
+CREATE TABLE iembot_fb_subscriptions (
+    fbpid bigint,
+    channel character varying
+);
+
+---
+--- Table to track iembot's use of social media
+---
+CREATE TABLE iembot_social_log(
+  valid timestamp with time zone default now(),
+  medium varchar(24),
+  source varchar(256),
+  resource_uri varchar(256),
+  message text,
+  message_link varchar(256),
+  response text,
+  response_code int
+);
+CREATE index iembot_social_log_valid_idx on iembot_social_log(valid);
+ALTER TABLE iembot_social_log OWNER to nwschatwrite;
+GRANT SELECT on iembot_social_log to nwschatread;
+
+
 ---
 --- networks we process!
 ---
