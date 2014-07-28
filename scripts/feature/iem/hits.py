@@ -17,7 +17,7 @@ ax.semilogy(x, y, lw=3)
 xticks = []
 xticklabels = []
 ts0 = mx.DateTime.DateTime(2001,1,1)
-ts1 = mx.DateTime.DateTime(2014,1,2)
+ts1 = mx.DateTime.DateTime(2015,1,2)
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = ts0
 while now < ts1:
