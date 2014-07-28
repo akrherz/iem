@@ -40,13 +40,13 @@ for row in acursor:
             hasSnowfall = False
         if hasSnowfall and line.find("SINCE JUL 1") > 0:
             tokens = line.split()
-            if tokens[3] not in ['MM','T'] and float(tokens[3]) > 0:
+            if tokens[3] not in ['MM','T'] and float(tokens[3]) >= 0:
                 #print row[0], tokens
                 lats.append( nt.sts[row[0][-3:]]['lat'])
                 lons.append( nt.sts[row[0][-3:]]['lon'])
                 vals.append( float(tokens[3]) )
             break
-        
+
 from pyiem.plot import MapPlot
 
 yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
