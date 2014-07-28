@@ -63,7 +63,9 @@ GRANT SELECT on raster_lookup to nobody,apache;
 ---
 CREATE TABLE iembot_channels(
   id varchar not null UNIQUE,
-  name varchar);
+  name varchar,
+  channel_key character varying DEFAULT substr(md5((random())::text), 0, 12)
+);
 GRANT all on iembot_channels to nobody,apache;
 
 ---
