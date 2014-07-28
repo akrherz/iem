@@ -100,10 +100,10 @@ GRANT all on racoon_jobs to apache,nobody;
 ---
 --- Oauth tokens
 ---
-CREATE TABLE oauth_tokens(
-  username text,
-  token text,
-  secret text
+CREATE TABLE iembot_twitter_oauth(
+  screen_name text,
+  access_token text,
+  access_token_secret text
 );
 
 ---
