@@ -3,10 +3,10 @@
 
 """
 import sys
-import psycopg2
 import psycopg2.extras
 import ConfigParser
 import cgi
+import pandas.io.sql as pdsql
 
 config = ConfigParser.ConfigParser()
 config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
@@ -179,13 +179,71 @@ def get_agdata():
     
     return res
     
+def get_dl(form):
+    """ Process the form provided to us from the Internal website """
+    pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb',
+                              user='nobody')
+
+    years = form.getlist('years')
+    if len(years) == 1:
+        years.append('9')
+    if "all" in years or len(years) == 0:
+        yrlist = "('2011', '2012', '2013', '2014', '2015')"
+    else:
+        yrlist = str(tuple(years))
+    
+    sql = """
+    WITH ad as
+    (SELECT site, plotid, ''::text as depth, varname, year, value, ''::text as subsample 
+     from agronomic_data WHERE year in %s),
+    sd as
+    (SELECT site, plotid, depth, varname, year, value, subsample 
+     from soil_data WHERE year in %s),
+    sn as
+    (SELECT site, plotid, depth, varname, year, value, ''::text as subsample 
+     from soil_nitrate_data WHERE year in %s),
+    tot as 
+    (SELECT * from ad UNION select * from sd UNION select * from sn)
+    
+    SELECT site || '|' || plotid || '|' || depth || '|' || subsample || '|' || year as lbl,
+    varname, value from tot 
+    
+    """  % (yrlist, yrlist, yrlist)
+    df = pdsql.read_sql(sql, pgconn)
+    df2 = df.pivot('lbl', 'varname', 'value')
+    allcols = df2.columns.values.tolist()
+    df2['site'] = [item.split('|')[0] for item in df2.index]
+    df2['plotid'] = [item.split('|')[1] for item in df2.index]
+    df2['depth'] = [item.split('|')[2] for item in df2.index]
+    df2['subsample'] = [item.split('|')[3] for item in df2.index]
+    df2['year'] = [item.split('|')[4] for item in df2.index]
+    
+    # start output
+    cols = ['year', 'site', 'plotid', 'depth', 'subsample'] 
+    dvars = form.getlist("data")
+    if 'all' in dvars:
+        cols = cols + allcols
+    else:
+        cols = cols + dvars
+    
+    df2cols = df2.columns.values.tolist()
+    for col in cols:
+        if col not in df2cols:
+            cols.remove(col)
+    
+    sys.stdout.write("Content-type: text/plain\n\n")
+    return df2.to_csv(columns=cols, index=False)
+    
 if __name__ == '__main__':
     ''' See how we are called '''
     form = cgi.FieldStorage()
-    sys.stdout.write("Content-type: text/plain\n\n")
     check_auth(form)
     report = form.getfirst('report', 'ag1')
     if report == 'ag1':
+        sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write( get_agdata() )
+    if report == 'dl': # coming from internal website
+        sys.stdout.write( get_dl(form) )
     else:
+        sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write( get_nitratedata() )
