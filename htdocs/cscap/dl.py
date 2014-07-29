@@ -275,17 +275,16 @@ def get_dl(form):
             cols.remove(col)
     
     fmt = form.getfirst('format', 'csv')
-    if fmt == 'csv':
-        sys.stdout.write("Content-type: text/plain\n\n")
-        return df2.to_csv(columns=cols, index=False)
     if fmt == 'excel':
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
         sys.stdout.write("Content-Disposition: attachment;Filename=cscap.xls\n\n")
         df2.to_excel('/tmp/cscap.xls', columns=cols, index=False)
         return open('/tmp/cscap.xls', 'rb').read()
-    if fmt == 'tab':
+    elif fmt == 'tab':
         sys.stdout.write("Content-type: text/plain\n\n")
         return df2.to_csv(columns=cols, sep='\t', index=False)
+    sys.stdout.write("Content-type: text/plain\n\n")
+    return df2.to_csv(columns=cols, index=False)
     
     
 if __name__ == '__main__':
@@ -297,7 +296,7 @@ if __name__ == '__main__':
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write( get_agdata() )
     if report == 'dl': # coming from internal website
-        sys.stdout.write( get_dl(form) )
+        sys.stdout.write( get_dl(form) )    
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write( get_nitratedata() )
