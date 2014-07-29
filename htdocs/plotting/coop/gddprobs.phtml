@@ -1,9 +1,12 @@
 <?php
  include("../../../config/settings.inc.php");
  define("IEM_APPID", 147);
-include("../../../include/database.inc.php");
-include("../../../include/imagemaps.php");
-include_once("../../../include/forms.php");
+ include_once "../../../include/myview.php";
+ $t = new MyView();
+
+ include("../../../include/database.inc.php");
+ include("../../../include/imagemaps.php");
+ include_once("../../../include/forms.php");
 
  $station = isset($_GET["station"]) ? $_GET["station"]: "IA0200";
  $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
@@ -11,14 +14,16 @@ include_once("../../../include/forms.php");
 
  $dcgi = "gddbase=$gddbase";
  
-$THISPAGE = "networks-coop";
-$TITLE = "IEM :: Growing Degree Day Scenarios / Probabilities";
-$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+$t->thispage = "networks-coop";
+$t->title = "Growing Degree Day Scenarios / Probabilities";
+$t->headextra = <<<EOF
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
 <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}&c=". time() ."'></script>";
-$BODYEXTRA = "onload=\"init()\"";
-include("../../../include/header.php"); ?>
-
+<script src='/js/olselect.php?network=${network}&c=". time() ."'></script>
+EOF;
+$t->bodyextra = "onload=\"init()\"";
+$nselect = networkSelect($network, $station);
+$t->content = <<<EOF
 <style type="text/css">
         #map {
             width: 450px;
@@ -39,9 +44,9 @@ year's data to provide frequencies.  The right hand plot is meant to provide
 current frequencies / probabilities of what could potentially happen this year.
 
 <p>One interpretation of the plot is given a corn emergence date of 1 May, the
-frequency that <?php echo $gddbase; ?> GDDs units are accumulated by 1 October 
+frequency that {$gddbase} GDDs units are accumulated by 1 October 
 and <strong>without a freeze event</strong> are XX %.  Meaning XX % of years
-on record got to <?php echo $gddbase; ?> by 1 October prior to a freeze.
+on record got to {$gddbase} by 1 October prior to a freeze.
 
 <p>Data is available from the following states: 
 <a href="gddprobs.phtml?network=ILCLIMATE">Illinois</a> ,
@@ -60,16 +65,16 @@ on record got to <?php echo $gddbase; ?> by 1 October prior to a freeze.
 <div class="text">
 
 <form name="olselect" action="gddprobs.phtml" method="GET">
-<input type="hidden" name="network" value="<?php echo $network; ?>" />
+<input type="hidden" name="network" value="{$network}" />
 <table style="padding: 3px; border: 0px; margin: 0px;">
 <thead>
 <tr><th>Climate Site:</th><td>GDD Accumulation</td></tr>
 </thead>
 <tbody>
 <tr>
-  <td rowspan="2"><?php echo networkSelect($network, $station); ?>
-	<br /><a href="gddprobs.phtml?<?php echo $dcgi; ?>">Select via map.</a></td>
-  <td><input type="text" size="10" name="gddbase" value="<?php echo $gddbase; ?>" /></td>
+  <td rowspan="2">{$nselect}
+	<br /><a href="gddprobs.phtml?{$dcgi}">Select via map.</a></td>
+  <td><input type="text" size="10" name="gddbase" value="{$gddbase}" /></td>
 </tr>
 </tbody>
 </table>
@@ -77,10 +82,11 @@ on record got to <?php echo $gddbase; ?> by 1 October prior to a freeze.
 </form>
 
 <?php ob_flush(); ?>
-<p><img src="/cgi-bin/climate/gdd_probs.py?<?php echo "$dcgi&station=$station"; ?>" ALT="GDD Probs">
+<p><img src="/cgi-bin/climate/gdd_probs.py?{$dcgi}&station={$station} ALT="GDD Probs">
 
 <p>The image will appear above and may take a few seconds to generate.
 
 </div>
-
-<?php include("../../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
