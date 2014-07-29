@@ -1,0 +1,72 @@
+<?php 
+include("../../../config/settings.inc.php");
+include("../../../include/cameras.inc.php");
+
+$camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
+reset($cameras);
+while( list($key, $dict) = each($cameras) )
+{
+	if ($dict["removed"] || ($dict["network"] != "KCRG" && $key != 'KCCI-017')){ continue; }
+	$camselect .= "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
+}
+$camselect .= "</select>";
+
+echo <<<EOF
+<html>
+<head>
+<script type="text/javascript" src="flowplayer-3.2.13.min.js"></script>
+</head>
+<body>
+
+<div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
+<div id="player"  style="display:block;width:640px;height:490px;"></div>
+<form name="theform">
+<br /><strong>Select Camera:</strong>
+{$camselect}
+<strong>Select Lapse:</strong>
+<select id="mylapse" name="mylapse" onchange="myloader()">
+ <option value="sunrise">Sunrise 
+ <option value="morning">Morning (8 AM - 11 AM) 
+ <option value="afternoon">Afternoon (1 PM - 4 PM)
+ <option value="eve">Sunset 
+ <option value="day">Full day
+</select>
+</div>
+</form>
+
+
+<script>
+flowplayer("player", "flowplayer-3.2.18.swf", {
+   clip:{
+    baseUrl:"/onsite/lapses/auto/",
+    url:"uni_sunrise.flv"}
+   });
+
+function myloader()
+{
+  ts = new Date();
+  var mycam = document.theform.mycam.value;
+  var mylapse = document.theform.mylapse.value;
+	window.location.href = "#"+mycam+"_"+mylapse;
+  var url =  mycam +"_"+ mylapse +".flv?"+ ts.getTime();
+  \$f().play(url);
+}
+
+var tokens = window.location.href.split('#');
+if (tokens.length == 2){
+  tokens2 = tokens[1].split('_');
+  if (tokens2.length == 2){
+	mycam = tokens2[0];
+	document.getElementById('mycam').value = mycam;
+	mylapse = tokens2[1];
+	document.getElementById('mylapse').value = mylapse;
+	myloader();
+  }
+} 
+
+
+</script>
+</body>
+</html>
+EOF;
+?>
