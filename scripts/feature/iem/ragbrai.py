@@ -53,11 +53,14 @@ DATES = [
 [mx.DateTime.DateTime(2008,7,20), mx.DateTime.DateTime(2008,7,26)],
 [mx.DateTime.DateTime(2009,7,19), mx.DateTime.DateTime(2009,7,25)],
 [mx.DateTime.DateTime(2010,7,25), mx.DateTime.DateTime(2010,7,31)],
-[mx.DateTime.DateTime(2011,7,24), mx.DateTime.DateTime(2011,7,30)]
+[mx.DateTime.DateTime(2011,7,24), mx.DateTime.DateTime(2011,7,30)],
+[mx.DateTime.DateTime(2012,7,22), mx.DateTime.DateTime(2012,7,28)],
+[mx.DateTime.DateTime(2013,7,21), mx.DateTime.DateTime(2013,7,27)],
+[mx.DateTime.DateTime(2014,7,20), mx.DateTime.DateTime(2014,7,26)]
 ]
 
-hindex = numpy.zeros((2012-1973))
-uwnd = numpy.zeros((2012-1973))
+hindex = numpy.zeros((2015-1973))
+uwnd = numpy.zeros((2015-1973))
 
 #output = open('ragbrai.dat', 'w')
 for sdate,edate in DATES:
@@ -90,16 +93,16 @@ for sdate,edate in DATES:
 import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(211)
-ax.set_xlim(1972.5,2011.5)
-ax.set_title("1973-2011 RAGBRAI Weather (Des Moines Airport Data)")
-ax.bar(numpy.arange(1973,2012)-0.4, hindex, color='r')
+ax.set_xlim(1972.5,2014.5)
+ax.set_title("1973-2014 RAGBRAI Weather (Des Moines Airport Data)")
+ax.bar(numpy.arange(1973,2015)-0.4, hindex, color='r')
 ax.set_ylim(60,100)
 ax.set_ylabel("Average Heat Index $^{\circ}\mathrm{F}$")
 ax.grid(True)
 
 ax2 = fig.add_subplot(212)
-ax2.set_xlim(1972.5,2011.5)
-bars = ax2.bar(numpy.arange(1973,2012)-0.4, uwnd, fc='r')
+ax2.set_xlim(1972.5,2014.5)
+bars = ax2.bar(numpy.arange(1973,2015)-0.4, uwnd, fc='r')
 for bar in bars:
     if bar.get_xy()[1] == 0:
         bar.set_facecolor('g')
