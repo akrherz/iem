@@ -6,6 +6,7 @@ import sys
 import psycopg2.extras
 import ConfigParser
 import cgi
+import pandas as pd
 import pandas.io.sql as pdsql
 
 config = ConfigParser.ConfigParser()
@@ -192,6 +193,23 @@ def get_dl(form):
     else:
         yrlist = str(tuple(years))
     
+    treatlimiter = "1=1"
+    treatments = form.getlist('treatments')
+    if len(treatments) > 0 and 'all' not in treatments:
+        if len(treatments) == 1:
+            treatments.append('ZZ')
+        s = str(tuple(treatments))
+        treatlimiter = """(tillage in %s or rotation in %s or
+        nitrogen in %s or landscape in %s)""" % (s,s,s,s)
+        
+    sitelimiter = "1=1"
+    sites = form.getlist('sites')
+    if len(sites) > 0 and 'all' not in sites:
+        if len(sites) == 1:
+            sites.append('ZZ')
+        s = str(tuple(sites))
+        treatlimiter = """t.site in %s""" % (s,)
+    
     sql = """
     WITH ad as
     (SELECT site, plotid, ''::text as depth, varname, year, value, ''::text as subsample 
@@ -205,11 +223,30 @@ def get_dl(form):
     tot as 
     (SELECT * from ad UNION select * from sd UNION select * from sn)
     
-    SELECT site || '|' || plotid || '|' || depth || '|' || subsample || '|' || year as lbl,
-    varname, value from tot 
+    SELECT site || '|' || p.plotid 
+    || '|' || coalesce(depth,'') 
+    || '|' || coalesce(subsample, '') 
+    || '|' || year 
+    || '|' || coalesce(rep, '') 
+    || '|' || coalesce(rotation, '') 
+    || '|' || coalesce(tillage, '') 
+    || '|' || coalesce(drainage, '')
+    || '|' || coalesce(landscape, '') as lbl,
+    varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
+    t.plotid = p.plotid) WHERE 1=1 and %s and %s
     
-    """  % (yrlist, yrlist, yrlist)
+    """  % (yrlist, yrlist, yrlist, treatlimiter, sitelimiter)
     df = pdsql.read_sql(sql, pgconn)
+    
+    dnc = form.getfirst('dnc', 'DNC')
+    missing = form.getfirst('missing', '.')
+    def cleaner(val):
+        if val is None or val.strip() == '':
+            return missing
+        if val is not None and val.strip().lower() == 'did not collect':
+            return dnc
+        return val
+    df['value'] = df['value'].apply(cleaner) 
     df2 = df.pivot('lbl', 'varname', 'value')
     allcols = df2.columns.values.tolist()
     df2['site'] = [item.split('|')[0] for item in df2.index]
@@ -217,9 +254,15 @@ def get_dl(form):
     df2['depth'] = [item.split('|')[2] for item in df2.index]
     df2['subsample'] = [item.split('|')[3] for item in df2.index]
     df2['year'] = [item.split('|')[4] for item in df2.index]
+    df2['rep'] = [item.split('|')[5] for item in df2.index]
+    df2['rotation'] = [item.split('|')[6] for item in df2.index]
+    df2['tillage'] = [item.split('|')[7] for item in df2.index]
+    df2['drainage'] = [item.split('|')[8] for item in df2.index]
+    df2['landscape'] = [item.split('|')[9] for item in df2.index]
     
     # start output
-    cols = ['year', 'site', 'plotid', 'depth', 'subsample'] 
+    cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
+            'tillage', 'drainage', 'landscape'] 
     dvars = form.getlist("data")
     if 'all' in dvars:
         cols = cols + allcols
@@ -231,8 +274,19 @@ def get_dl(form):
         if col not in df2cols:
             cols.remove(col)
     
-    sys.stdout.write("Content-type: text/plain\n\n")
-    return df2.to_csv(columns=cols, index=False)
+    fmt = form.getfirst('format', 'csv')
+    if fmt == 'csv':
+        sys.stdout.write("Content-type: text/plain\n\n")
+        return df2.to_csv(columns=cols, index=False)
+    if fmt == 'excel':
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write("Content-Disposition: attachment;Filename=cscap.xls\n\n")
+        df2.to_excel('/tmp/cscap.xls', columns=cols, index=False)
+        return open('/tmp/cscap.xls', 'rb').read()
+    if fmt == 'tab':
+        sys.stdout.write("Content-type: text/plain\n\n")
+        return df2.to_csv(columns=cols, sep='\t', index=False)
+    
     
 if __name__ == '__main__':
     ''' See how we are called '''
