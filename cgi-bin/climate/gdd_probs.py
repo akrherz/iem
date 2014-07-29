@@ -101,7 +101,7 @@ def run(station, gddbase):
     
     
 def postprocess():
-    import Image
+    from PIL import Image
     import cStringIO
     ram = cStringIO.StringIO()
     plt.savefig(ram, format='png')
@@ -127,7 +127,7 @@ def main():
     if not res:
         run(station, gddbase)
         res = postprocess()
-        mc.set(mckey, res)
+        mc.set(mckey, res, 86400)
     sys.stdout.write( res )
 
 if __name__ == '__main__':
