@@ -65,6 +65,7 @@ while 1:
     count = 0
     for entry in feed.entry:
         #edited = entry.get_elements('edited')
+        #print entry
         count += 1
         changestamp = max(int(entry.changestamp.value) +1, changestamp)
         #print '    this changestamp: %s  max: %s' % (entry.changestamp.value,
@@ -89,7 +90,7 @@ while 1:
             continue
         updated = updated.astimezone(pytz.timezone("America/Chicago"))
         author = "N/A"
-        if entry.last_modified_by:
+        if entry.last_modified_by and entry.last_modified_by.email is not None:
             author = entry.last_modified_by.email.text
         tablerows.append( "<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>\n" % (
             updated.strftime("%-d %b %-I:%M %P"), author, rtype, uri, 
