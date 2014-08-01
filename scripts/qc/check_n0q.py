@@ -3,6 +3,7 @@ Check the availability of NEXRAD Composites
 """
 import datetime
 import os
+import sys
 import pytz
 
 def run(sts, ets):
@@ -23,9 +24,14 @@ def run(sts, ets):
         now += interval
 
 if __name__ == '__main__':
-    utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.timezone("UTC"))
-    sts = utc - datetime.timedelta(hours=24)
-    sts = sts.replace(hour=0,minute=0,second=0,microsecond=0)
+    if len(sys.argv) == 4:
+        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                                int(sys.argv[3]))
+        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    else:
+        utc = datetime.datetime.utcnow()
+        utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+        sts = utc - datetime.timedelta(hours=24)
+        sts = sts.replace(hour=0,minute=0,second=0,microsecond=0)
     ets = sts + datetime.timedelta(hours=24)
     run(sts, ets)
