@@ -1,13 +1,18 @@
 # Generate a map of this month's observed precip
 
-import sys, os
-import iemplot
+import sys
+import os
+from pyiem.plot import MapPlot
 
-import mx.DateTime
-now = mx.DateTime.now()
+import datetime
+now = datetime.datetime.now()
 
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import pyiem.tracker
+
+qdict = pyiem.tracker.loadqc()
+
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 # Compute normal from the climate database
@@ -25,26 +30,19 @@ precip = []
 labels = []
 icursor.execute(sql)
 for row in icursor:
-  id = row[0]
-  labels.append( id )
-  lats.append( row[3] )
-  lons.append( row[2] )
-  precip.append( row[1] )
+    sid = row[0]
+    labels.append( sid )
+    lats.append( row[3] )
+    lons.append( row[2] )
+    if not qdict.get(sid, {}).get('precip', False):
+        precip.append("%.2f" % (row[1],) )
+    else:
+        precip.append("M")
 
-
-#---------- Plot the points
-
-cfg = {
- 'wkColorMap': 'gsltod',
- '_format': '%.2f',
- '_labels': labels,
- '_title'       : "This Month's Precipitation [inch]",
- '_valid'       : now.strftime("%b %Y"),
-}
-
-
-tmpfp = iemplot.simple_valplot(lons, lats, precip, cfg)
-
+m = MapPlot(title="This Month's Precipitation [inch]",
+            subtitle=now.strftime("%b %Y"), axisbg='white')
+m.plot_values(lons, lats, precip, labels=labels)
 pqstr = "plot c 000000000000 summary/month_prec.png bogus png"
-iemplot.postprocess(tmpfp, pqstr)
-#iemplot.makefeature(tmpfp)
+m.postprocess(pqstr=pqstr)
+#import iemplot
+#iemplot.makefeature('test')
