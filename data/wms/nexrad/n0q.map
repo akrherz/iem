@@ -1136,6 +1136,7 @@ LAYER
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #----------------------
 LAYER
   NAME "nexrad-n0q-m15m-conus"
