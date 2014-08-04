@@ -1,0 +1,92 @@
+<?php 
+
+include_once "../../../config/settings.inc.php";
+include_once "../../../include/myview.php";
+include_once "../../../include/forms.php";
+include_once "../../../include/imagemaps.php";
+$formhtml = "";
+$image = "";
+$t = new MyView();
+$t->thispage = "networks-coop";
+$t->title = "NWS COOP Data Plotter";
+
+$q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
+
+// Available Plots
+$data = file_get_contents("http://iem.local/COOP/auto/meta/0.json");
+$jobj = json_decode($data);
+$ar = Array();
+while (list($k,$v) = each($jobj->plots)){
+	if (intval($k) == $q){
+		$t->title = $v;
+	}
+	$ar[$k] = $v;
+}
+$pselect = make_select("q", $q, $ar);
+
+
+if (isset($_GET["q"])){
+	$q = intval($_GET["q"]);
+	$data = file_get_contents("http://iem.local/COOP/auto/meta/$q.json");
+	$jobj = json_decode($data);
+	$imguri = "/COOP/auto/plot/$q/";
+	$pltvars = Array();
+	$form = "";
+	while (list($k,$v) = each($jobj->arguments)){
+		if ($v->type == "station"){
+			$station = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
+			$form .= "<tr><td>". $v->label ."</td><td>". networkSelect("IACLIMATE", $station) ."</td></tr>";
+			$pltvars[] = sprintf("%s:%s", $v->name, $station);
+		}
+		if ($v->type == "text"){
+			$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
+			$form .= "<tr><td>". $v->label ."</td>
+			<td><input value=\"$value\" type=\"text\" name=\"". $v->name ."\"></td></tr>" ;
+			$pltvars[] = sprintf("%s:%s", $v->name, $value);
+		}
+	}
+	$imguri .= implode($pltvars, "_");
+	$imguri .= ".png";
+	$image = <<<EOF
+	<p>A graph will appear below this text with your specifications from above:<br >
+	<img src="$imguri" class="img img-responsive" />
+EOF;
+	$formhtml = <<<EOF
+	<h4>Chart Options</h4>
+	<form method="GET" name="s">
+	<input type="hidden" name="q" value="{$q}">
+	<table class="table table-striped">
+		<thead><tr><th>Description</th><th>Value</th></tr></thead>
+	$form
+	</table>		
+	<input type="submit" value="Make Plot with Options" />
+</form>
+EOF;
+}
+
+
+$t->content = <<<EOF
+<h3>COOP Data Plotter</h3>
+
+<p><strong>Select from available plots:</strong>
+<br /><form method="GET" name="t">
+{$pselect}
+<br /><input type="submit" value="Select Plot Type" />
+</form>
+
+<hr />
+
+
+ $formhtml
+
+
+<hr />
+
+$image
+
+EOF;
+
+$t->render('single.phtml');
+
+
+?>
