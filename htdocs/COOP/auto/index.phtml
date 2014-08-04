@@ -11,6 +11,7 @@ $t->thispage = "networks-coop";
 $t->title = "NWS COOP Data Plotter";
 
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
+$network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
 
 // Available Plots
 $data = file_get_contents("http://iem.local/COOP/auto/meta/0.json");
@@ -24,6 +25,21 @@ while (list($k,$v) = each($jobj->plots)){
 }
 $pselect = make_select("q", $q, $ar);
 
+$networks = Array("ILCLIMATE" => "Illinois",
+		"INCLIMATE" => "Indiana",
+		"IACLIMATE" => "Iowa",
+		"KSCLIMATE" => "Kansas",
+		"KYCLIMATE" => "Kentucky",
+		"MICLIMATE" => "Michigan",
+		"MNCLIMATE" => "Minnesota",
+		"MOCLIMATE" => "Missouri",
+		"NECLIMATE" => "Nebraska",
+		"NDCLIMATE" => "North Dakota",
+		"OHCLIMATE" => "Ohio",
+		"SDCLIMATE" => "South Dakota",
+		"WICLIMATE" => "Wisconsin"
+);
+
 
 if (isset($_GET["q"])){
 	$q = intval($_GET["q"]);
@@ -35,7 +51,8 @@ if (isset($_GET["q"])){
 	while (list($k,$v) = each($jobj->arguments)){
 		if ($v->type == "station"){
 			$station = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
-			$form .= "<tr><td>". $v->label ."</td><td>". networkSelect("IACLIMATE", $station) ."</td></tr>";
+			$netselect = make_select("network", $network, $networks, "onNetworkChange");
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $station) ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", $v->name, $station);
 		}
 		if ($v->type == "text"){
@@ -52,8 +69,13 @@ if (isset($_GET["q"])){
 	<img src="$imguri" class="img img-responsive" />
 EOF;
 	$formhtml = <<<EOF
+<script>
+function onNetworkChange(newnetwork){
+	$('form#myForm').submit();
+}
+</script>
 	<h4>Chart Options</h4>
-	<form method="GET" name="s">
+	<form method="GET" name="s" id="myForm">
 	<input type="hidden" name="q" value="{$q}">
 	<table class="table table-striped">
 		<thead><tr><th>Description</th><th>Value</th></tr></thead>
