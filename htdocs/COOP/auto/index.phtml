@@ -4,6 +4,7 @@ include_once "../../../config/settings.inc.php";
 include_once "../../../include/myview.php";
 include_once "../../../include/forms.php";
 include_once "../../../include/imagemaps.php";
+include_once "../../../include/forms.php";
 $formhtml = "";
 $image = "";
 $t = new MyView();
@@ -49,17 +50,23 @@ if (isset($_GET["q"])){
 	$pltvars = Array();
 	$form = "";
 	while (list($k,$v) = each($jobj->arguments)){
+		$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
+		$pltvars[] = sprintf("%s:%s", $v->name, $value);
 		if ($v->type == "station"){
-			$station = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
 			$netselect = make_select("network", $network, $networks, "onNetworkChange");
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $station) ."</td></tr>";
-			$pltvars[] = sprintf("%s:%s", $v->name, $station);
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
 		}
 		if ($v->type == "text"){
-			$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
 			$form .= "<tr><td>". $v->label ."</td>
 			<td><input value=\"$value\" type=\"text\" name=\"". $v->name ."\"></td></tr>" ;
-			$pltvars[] = sprintf("%s:%s", $v->name, $value);
+		}
+		if ($v->type == "month"){
+			$form .= "<tr><td>". $v->label ."</td>
+			<td>". monthSelect2( $value, $v->name) ."</td></tr>" ;
+		}
+		if ($v->type == "year"){
+			$form .= "<tr><td>". $v->label ."</td>
+			<td>". yearSelect2(1893, $value, $v->name) ."</td></tr>" ;
 		}
 	}
 	$imguri .= implode($pltvars, "_");
