@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+import cgi
+import sys
+import imp
+import json
+
+
+if __name__ == '__main__':
+    form = cgi.FieldStorage()
+    p = int(form.getfirst('p', 0))
+
+    if p == 0:
+        import scripts
+        data = scripts.data
+    else:    
+        name = 'scripts/p%s' % (p,)
+        fp, pathname, description = imp.find_module(name)
+        a = imp.load_module(name, fp, pathname, description)
+        data = a.get_description()
+    sys.stdout.write("Content-type: application/json\n\n")
+    sys.stdout.write( json.dumps(data) )
