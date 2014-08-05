@@ -91,7 +91,7 @@ def plotter( fdict ):
     ax.set_ylabel("Precipitation Departure ($\sigma$)")
     ax.grid(True)
     ax.legend(fontsize=10)
-    ax.set_title("%s %s [%s] Temp + Precip Departure\nbased on IEM estimated areal averaged data (1893-2014)" % (
+    ax.set_title("%s %s [%s] Temp + Precip Departure" % (
                 calendar.month_name[month], nt.sts[station]['name'], station))
     
     return fig
