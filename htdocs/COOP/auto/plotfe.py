@@ -5,6 +5,7 @@ import cStringIO
 import sys
 import imp
 import memcache
+import matplotlib.pyplot as plt
 
 def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting 
@@ -23,6 +24,7 @@ if __name__ == '__main__':
     q = form.getfirst('q', "")
     fdict = parser( q )
     p = int(form.getfirst('p', 0))
+    dpi = int(fdict.get('dpi', 100))
 
     mckey = "/COOP/auto/plot/%s/%s.png" % (p, q)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
@@ -34,7 +36,7 @@ if __name__ == '__main__':
         a = imp.load_module(name, fp, pathname, description)
         fig = a.plotter(fdict)
         ram = cStringIO.StringIO()
-        fig.savefig(ram, format='png')
+        plt.savefig(ram, format='png', dpi=dpi)
         ram.seek(0)
         res = ram.read()
         mc.set(mckey, res, 86400)

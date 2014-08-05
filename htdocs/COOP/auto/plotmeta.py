@@ -18,5 +18,8 @@ if __name__ == '__main__':
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
         data = a.get_description()
+    
+        # Defaults
+        data['arguments'].append( dict(type='text', name='dpi', default='100', label='Image Resolution (DPI)') )
     sys.stdout.write("Content-type: application/json\n\n")
     sys.stdout.write( json.dumps(data) )
