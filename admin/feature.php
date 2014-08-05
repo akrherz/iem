@@ -22,7 +22,7 @@ if ($me){
   ));
 }
 
-
+$appurl = isset($_REQUEST["appurl"]) ? $_REQUEST["appurl"] : null;
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
 $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
 $caption = isset($_REQUEST["caption"]) ? $_REQUEST["caption"] : null;
@@ -32,8 +32,8 @@ $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ?
 
 $mesosite = iemdb("mesosite", TRUE, TRUE);
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature 
-  (title, story, caption, voting, tags, fbid) VALUES 
-  ($1   , $2   , $3   , $4     , $5  , $6)");
+  (title, story, caption, voting, tags, fbid, appurl) VALUES 
+  ($1   , $2   , $3   , $4     , $5  , $6, $7)");
 
 
 
@@ -69,7 +69,7 @@ if ($story != null && $title != null &&
     isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
-             $voting, $tags, $story_fbid) );
+             $voting, $tags, $story_fbid, $appurl) );
 }
 
 include("$rootpath/include/header.php");
@@ -93,6 +93,9 @@ if ($me){
 
 <p>Tags:
 <br /><input type="text" name="tags" size="80" /></p>
+
+<p>AppURL:
+<br /><input type="text" name="appurl" size="80" /></p>
 
 <p>Publish Facebook?
 <br /><input type="checkbox" name="facebook" value="yes" />Yes</p>
