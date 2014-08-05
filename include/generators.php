@@ -65,41 +65,68 @@ function gen_feature($t){
 	$imghref = sprintf("/onsite/features/%s_s.png", $row["imageref"]);
 	$bigimghref = sprintf("/onsite/features/%s.png", $row["imageref"]);
 	
-	$s .= <<<EOF
-	<div class="panel panel-default top-buffer">
-	  <div class="panel-heading">
-	  <b>IEM Daily Feature</b> &nbsp; <a href="/feature_rss.php"><img src="/images/rss.gif" /></a>
-	  <div class="btn-group pull-right">
-	<a class="btn btn-default" href="{$fburl}">Facebook</a>
-	<a class="btn btn-default" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
-	<a class="btn btn-default" href="/onsite/features/past.php">Past Features</a>
-	<a class="btn btn-default" href="/onsite/features/tags/">Tags</a>
-		</div>
-		<div class="clearfix"></div>
-	  </div>
-	  <div class="panel-body">
+	$linktext = "";
+	if ($row["appurl"] != ""){
+		$linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+	}
 	
-	  <h4 style="display: inline;">{$row["title"]}</h4>
- 
-	<div>
-EOF;
-	$s .= "<small>Posted: ". $row["webdate"] ."</small>";
-	$s .= "<a href=\"$bigimghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" /></a>";
+	$tagtext = "";
 	if (sizeof($tags) > 0){
-		$s .= "<br /><small>Tags: &nbsp; ";
+		$tagtext .= "<br /><small>Tags: &nbsp; ";
 		while (list($k,$v) = each($tags))
 		{
-			$s .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
+			$tagtext .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
 		}
-		$s .= "</small>";
+		$tagtext .= "</small>";
 	}
-	$s .= "<br />". $row["story"] ;
+	
+	$s .= <<<EOF
+<div class="panel panel-default top-buffer">
+	<div class="panel-heading">
+	
+<div class='row'>
+    <div class='col-xs-12 col-sm-4'><b>IEM Daily Feature</b>
+    	<a href="/feature_rss.php"><img src="/images/rss.gif" /></a></div>
+    <div class='col-xs-12 col-sm-8'>
+        <div class='btn-group'>
+            <a class="btn btn-default col-xs-3" href="{$fburl}">Facebook</a>
+			<a class="btn btn-default col-xs-3" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
+			<a class="btn btn-default col-xs-4" href="/onsite/features/past.php">Past Features</a>
+			<a class="btn btn-default col-xs-2" href="/onsite/features/tags/">Tags</a>
+         </div>
+    </div>
+</div>
+	
+		<div class="clearfix"></div>
+	</div>
+	<div class="panel-body">
+
+	
+		<div class="thumbnail col-xs-12 col-sm-7 pull-right">
+			<a href="$bigimghref"><img src="$bigimghref" alt="Feature" class="img img-responsive" /></a>
+			<div class="caption"><span>{$row["caption"]}</span>{$linktext}</div>
+		</div>
+		
+		<h4 style="display: inline;">{$row["title"]}</h4>
+		
+			<br /><small>Posted: {$row["webdate"]}</small>
+			{$tagtext}
+			<br />{$row["story"]}
+	
+			
+
+
+		<div class="clearfix"></div>
+			
+
+EOF;
 	
 	/* Rate Feature and Past ones too! */
 	if ($row["voting"] == "f"){
-	
+		$fbtext = "";
+		$vtext = "";
 	} else {
-		$s .= "<div style='clear:both;'>";
+		$vtext = "<div style='clear:both;'>";
 		if ($voted){
 			$goodurl = "#";
 			$badurl = "#";
@@ -112,11 +139,13 @@ EOF;
 			$msg = "Rate Feature";
 		}
 	
-		$s .= "<strong>$msg</strong> 
-		<a class=\"btn btn-success\" href=\"$goodurl\">Good ($good votes)</a>
-		<a class=\"btn btn-danger\" href=\"$badurl\">Bad ($bad votes)</a>
-		<a class=\"btn btn-warning\" href=\"$abstainurl\">Abstain ($abstain votes)</a>
-		</div>";
+		$vtext .= <<<EOF
+		<strong>$msg</strong> 
+		<a class="btn btn-success" href="$goodurl">Good ($good votes)</a>
+		<a class="btn btn-danger" href="$badurl">Bad ($bad votes)</a>
+		<a class="btn btn-warning" href="$abstainurl">Abstain ($abstain votes)</a>
+		</div>
+EOF;
 		
 		$t->jsextra = <<<EOF
 		<div id="fb-root"></div>
@@ -141,31 +170,39 @@ window.fbAsyncInit = function() {
 </script>
 EOF;
 		$huri = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ;
-		$s .= <<<EOF
+		$fbtext = <<<EOF
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
-</div>
 EOF;
 	}
+	$s .= <<<EOF
+		$vtext
+		$fbtext
+			
+		<br /><strong>Previous Years' Features</strong>
+			
+EOF;
 	/* Now, lets look for older features! */
-	$s .= "<br /><strong>Previous Years' Features</strong>";
 	$sql = "select *, extract(year from valid) as yr from feature 
 			WHERE extract(month from valid) = extract(month from now()) 
 			and extract(day from valid) = extract(day from now()) and 
 			extract(year from valid) != extract(year from now()) ORDER by yr DESC";
 	$result = pg_exec($connection, $sql);
-	for($i=0;$row=@pg_fetch_array($result,$i);$i++)
+	
+	for($i=0;$row=@pg_fetch_assoc($result,$i);$i++)
 	{
 		// Start a new row
 		if ($i % 2 == 0){ $s .= "\n<div class=\"row\">"; }
-		$s .= "\n<div class=\"col-md-6\">". $row["yr"] .": <a href=\"onsite/features/cat.php?day=". substr($row["valid"], 0, 10) ."\">". $row["title"] ."</a></div>";
+		$s .= "\n<div class=\"col-xs-6\">". $row["yr"] .": <a href=\"onsite/features/cat.php?day=". substr($row["valid"], 0, 10) ."\">". $row["title"] ."</a></div>";
 		// End the row
 		if ($i % 2 != 0){ $s .= "\n</div>\n"; }
 	}
 	
-	if ($i % 2 != 0){ $s .= "\n<div class=\"col-md-6\">&nbsp;</div>\n</div>"; }
+	if ($i > 0 && $i % 2 != 0){ 
+		$s .= "\n<div class=\"col-xs-6\">&nbsp;</div>\n</div>"; 
+	}
 		
 	$s .= "</div><!--  end of panel body -->";
-	$s .= "</div>";
+	$s .= "</div><!-- end of panel -->";
 	
 	return $s;
 }
