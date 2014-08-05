@@ -5,6 +5,11 @@ Some IEM cluster details (so I can keep it straight!)
 -[ ] one
 -[x] two
 
+# Point php.ini at memcache for sessions
+[Session]
+session.save_handler = memcache
+session.save_path = "tcp://192.168.1.190:11211"
+
 
 #Shared Filesystems
 
