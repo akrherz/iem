@@ -59,6 +59,11 @@ for ($i = 0; $i < $num; $i++){
 	$fmt = "gif";
 	if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 	$d = date("Y-m-d", $valid);
+    $linktext = "";
+    if ($row["appurl"] != ""){
+        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+    }
+	
 	$table .= <<<EOF
 <tr class="even">
 <td colspan="2" style="text-align: center;">{$row["calhead"]}</td></tr>
@@ -71,6 +76,7 @@ for ($i = 0; $i < $num; $i++){
 <br>{$row["story"]}
 <br>Voting: Good - {$row["good"]} Bad - {$row["bad"]}
 <br />{$p}
+{$linktext}
 </div></td></tr>
 EOF;
 }
