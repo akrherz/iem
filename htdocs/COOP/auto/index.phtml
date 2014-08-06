@@ -26,6 +26,22 @@ while (list($k,$v) = each($jobj->plots)){
 }
 $pselect = make_select("q", $q, $ar);
 
+$states = Array(
+		'IA' => 'Iowa',
+          'IL'=> 'Illinois',
+          'KS'=> 'Kansas',
+		  'KY'=> 'Kentucky',
+		  'MI'=> 'Michigan',
+          'MN'=> 'Minnesota',
+        'MO'=> 'Missouri',
+          'NE'=> 'Nebraska',
+          'ND'=> 'North Dakota',
+          'OH'=> 'Ohio',
+          'SD'=> 'South Dakota',
+          'WI'=> 'Wisconsin',
+        
+);
+
 $networks = Array("ILCLIMATE" => "Illinois",
 		"INCLIMATE" => "Indiana",
 		"IACLIMATE" => "Iowa",
@@ -55,6 +71,10 @@ if (isset($_GET["q"])){
 		if ($v->type == "station"){
 			$netselect = make_select("network", $network, $networks, "onNetworkChange");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
+		}
+		if ($v->type == "clstate"){
+			$netselect = make_select($v->name, $value, $states);
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
 		}
 		if ($v->type == "text"){
 			$form .= "<tr><td>". $v->label ."</td>
