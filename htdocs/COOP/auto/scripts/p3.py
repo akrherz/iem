@@ -8,14 +8,26 @@ import matplotlib.patheffects as PathEffects
 import datetime
 import calendar
 
+PDICT ={'max_high': 'Maximum High', 
+                      'avg-high': 'Average High',
+                      'min-high': 'Minimum High',
+                      'max-low': 'Maximum Low', 
+                      'avg-low': 'Average Low',
+                      'min-low': 'Minimum Low',
+                      'max-precip': 'Maximum Daily Precip',
+                      'sum-precip': 'Total Precipitation'}
+
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000', label='Select Station'),
-        dict(type='month', name='month', default='7', label='Month'),     
+        dict(type='month', name='month', default='7', label='Month'),
+        dict(type='select', name='type', default='max-high', label='Which metric to plot?',
+             options=PDICT), 
     ]
     return d
+
 
 def plotter( fdict ):
     """ Go """
@@ -24,12 +36,21 @@ def plotter( fdict ):
 
     station = fdict.get('station', 'IA0000')
     month = int(fdict.get('month', 7))
+    ptype = fdict.get('type', 'max_high')
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     ccursor.execute("""
-    SELECT year, max(high) as t
+    SELECT year, 
+    max(high) as "max-high", 
+    min(high) as "min-high",
+    avg(high) as "avg-high",
+    max(low) as "max-low", 
+    min(low) as "min-low",
+    avg(low) as "avg-low",
+    max(precip) as "max-precip",
+    sum(precip) as "sum-precip"
   from """+table+"""
   where station = %s and month = %s
   GROUP by year ORDER by year ASC
@@ -39,7 +60,7 @@ def plotter( fdict ):
     data = []
     for row in ccursor:
         years.append( int(row['year']) )
-        data.append( float(row['t']) )
+        data.append( float(row[ptype]) )
     
     data = np.array( data )
     years = np.array( years )
@@ -57,13 +78,15 @@ def plotter( fdict ):
     txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                  foreground="k")])
     ax.set_xlim(years[0] - 1, years[-1] + 1)
-    ax.set_ylim( min(data) - 5 , max(data) + 5)
+    if ptype.find('precip') == -1:
+        ax.set_ylim( min(data) - 5 , max(data) + 5)
     
     ax.set_xlabel("Year")
-    ax.set_ylabel("Maximum Daily High Temp $^\circ$F")
+    ax.set_ylabel(PDICT[ptype])
     ax.grid(True)
     ax.legend(fontsize=10)
-    ax.set_title("%s %s [%s] Maximum Daily High Temp" % (
-                calendar.month_name[month], nt.sts[station]['name'], station))
+    ax.set_title("%s %s [%s] %s" % (
+                calendar.month_name[month], nt.sts[station]['name'], station,
+                PDICT[ptype]))
     
     return fig
