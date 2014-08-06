@@ -5,6 +5,7 @@ import cStringIO
 import sys
 import imp
 import memcache
+import datetime
 import matplotlib.pyplot as plt
 
 def parser(cgistr):
@@ -35,6 +36,10 @@ if __name__ == '__main__':
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
         fig = a.plotter(fdict)
+        # Place timestamp on the image
+        fig.text(0.01, 0.01, 'Plot Generated: %s' % (
+                datetime.datetime.now().strftime("%-d %b %Y %-I:%M %p"),), 
+                 va='bottom', ha='left', fontsize=10)
         ram = cStringIO.StringIO()
         plt.savefig(ram, format='png', dpi=dpi)
         ram.seek(0)
