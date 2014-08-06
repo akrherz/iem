@@ -84,7 +84,6 @@ def plotter( fdict ):
     ax.set_xlabel("Year")
     ax.set_ylabel(PDICT[ptype])
     ax.grid(True)
-    ax.legend(fontsize=10)
     ax.set_title("%s %s [%s] %s" % (
                 calendar.month_name[month], nt.sts[station]['name'], station,
                 PDICT[ptype]))
