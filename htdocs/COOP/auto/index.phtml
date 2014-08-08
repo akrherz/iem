@@ -96,7 +96,7 @@ if (isset($_GET["q"])){
 	$imguri .= implode($pltvars, "_");
 	$imguri .= ".png";
 	$image = <<<EOF
-	<p>A graph will appear below this text with your specifications from above:<br >
+	<p><span class="glyphicon glyphicon-arrow-down"></span> A graph will appear below this text with your specifications from above:<br >
 	<img src="$imguri" class="img img-responsive" />
 EOF;
 	$formhtml = <<<EOF
@@ -105,7 +105,7 @@ function onNetworkChange(newnetwork){
 	$('form#myForm').submit();
 }
 </script>
-	<h4>Chart Options</h4>
+	<h4><span class="glyphicon glyphicon-arrow-right"></span> Second, select specific chart options::</h4>
 	<form method="GET" name="s" id="myForm">
 	<input type="hidden" name="q" value="{$q}">
 	<table class="table table-striped">
@@ -121,10 +121,16 @@ EOF;
 $t->content = <<<EOF
 <h3>COOP Data Plotter</h3>
 
-<p><strong>Select from available plots:</strong>
+<p>This application dynamically generates many types of graphs.  These graphs
+are derived from NWS Cooperative Observer data that is processed and sometimes
+estimated by the IEM.  The raw data can be downloaded <a href="/request/coop/fe.phtml">here</a>.</p>
+
 <br /><form method="GET" name="t">
+<div class="form-group">
+<h4><span class="glyphicon glyphicon-arrow-right"></span> First, select a chart type::</h4>
 {$pselect}
-<br /><input type="submit" value="Select Plot Type" />
+<input type="submit" value="Select Plot Type" />
+</div>
 </form>
 
 <hr />
@@ -136,6 +142,11 @@ $t->content = <<<EOF
 <hr />
 
 $image
+
+<div class="alert alert-info"><span class="glyphicon glyphicon-info-sign"></span>
+		If you notice plotting issues with the image above, please 
+		do <a class="alert-link" href="/info/contacts.php">let us know</a> by providing the 
+		URL address currently shown by your web browser.</div>
 
 EOF;
 

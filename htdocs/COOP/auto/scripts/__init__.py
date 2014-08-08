@@ -4,5 +4,6 @@ data = {'plots': {
     "2": "Month Precipitation v Month Growing Degree Day Departures",
     "3": "Monthly Temperature / Precipitation Statistics by Year",
     "4": "State Areal Coverage of Precip Intensity over X Days",
+    "5": "Minimum Daily Temperature Range",
     }
 }
