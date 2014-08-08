@@ -49,6 +49,11 @@ $day = $row["d"];
 $thumb = sprintf("/onsite/features/%s_s.%s", $row["imageref"], $fmt);
 $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $fmt);
 
+$linktext = "";
+if ($row["appurl"] != ""){
+	$linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+}
+
 $t->title = "$day Feature - ". $row["title"]; 
 $t->thispage = "iem-feature";
 
@@ -74,6 +79,7 @@ $content = <<<EOF
 <a href="{$big}"><img src="{$thumb}" class="img-responsive"></a>
 <br /><a href="{$big}">View larger image</a>
 <br />{$row["caption"]}
+{$linktext}
 </div>
 <div class='col-md-6 well'>{$row["story"]}
 EOF;
