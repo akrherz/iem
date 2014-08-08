@@ -15,22 +15,54 @@ $t->content = <<<EOF
 <img src="example_raster.png" class="img img-responsive" />
 <br />Example composite from 1 March 2007.
 
+<h4>Quick Information:</h4>
+<table class="table table-striped table-condensed">
+<thead><tr><td></td><th>N0R</th><th>N0Q</th></tr></thead>
+<tbody>
+<tr>
+ <th>Product:</th>
+ <td>4 bit Base Reflectivity 5dbz</td>
+ <td>8 bit Base Reflectivity 0.5dbz</td>
+ </tr>
+ 
+<tr>
+ <th>Format:</th>
+ <td colspan="2">PNG image (GeoTiff available)</td></tr>
+
+<tr>
+ <th>Size:</th>
+ <td>6000x2600 pixels</td>
+ <td>12000x5200 pixels<br />12200x5400 after 8 Aug 2014</td>
+ </tr>
+ 
+<tr>
+ <th>Time:</th>
+ <td>Every 5 minutes since 1 Jan 1995</td>
+ <td>Every 5 minutes since 25 Oct 2010</td>
+ </tr>
+
+<tr><th>Download:</th>
+<td colspan="2"><a href="/data/gis/images/4326/USCOMP/">Current</a> 
+and <a href="/archive/data/{$d}/GIS/uscomp/">Archive for today</a></td></tr>
+</tbody>
+</table>
+
 </div>
 <div class="col-sm-6">
 
-<table cellpadding="3" cellspacing="0" border="1">
+<table class="table table-bordered table-condensed">
 <thead>
 <tr>
  <th colspan="4">Precipitation</th>
  <th colspan="2">N0R (4bit) Reflectivity</th>
- <th>N0Q (8bit) Reflectivity</th>
+ <th colspan="2">N0Q (8bit) Reflectivity</th>
 </tr>
 </thead>
 <tr>
  <td>Ramp</td>
  <td colspan="3">Index values [inch]</td>
  <td>Ramp</td><td>Index values [dBZ]</td>
- <td>Index values [dBZ]</td>
+ <td>Ramp</td><td>Index values [dBZ]</td>
  </tr>
 <tr>
 <td><img src="precip_ramp.png" width="10" style="float: left;" /></td>
@@ -80,7 +112,8 @@ $t->content = <<<EOF
 </td>
 <td><img src="reflect_ramp.png" width="20" style="float: left;" /></td>
 <td>
--30
+NODATA
+<br />-30
 <br />-25
 <br />-20
 <br />-15
@@ -103,8 +136,10 @@ $t->content = <<<EOF
 <br />70
 <br />75
 </td>
+<td><img src="n0q_ramp.png" width="20" style="float: left;" /></td>
 <td>
--32 dBZ
+NODATA
+<br />-32 dBZ
 <br />through
 <br />90 dBZ
 <br />0.5 dBZ increment
@@ -114,15 +149,7 @@ $t->content = <<<EOF
 </div></div>
 
 
-<strong>Quick Information:</strong>
-<table>
-<tr><th>Product:</th><td>GIS-ready NEXRAD composite</td></tr>
-<tr><th>Format:</th><td>PNG image (GeoTiff available)</td></tr>
-<tr><th>Size:</th><td>6000x2600 pixels</td></tr>
-<tr><th>Time:</th><td>Every 5 minutes since 1 Jan 1995</td></tr>
-<tr><th>Download:</th><td><a href="/data/gis/images/4326/USCOMP/">Current</a> 
-and <a href="/archive/data/{$d}/GIS/uscomp/">Archive for today</a></td></tr>
-</table>
+
 
 <p><strong>IEM Applications using this product</strong>
 <ul>
@@ -163,6 +190,9 @@ the summer months (Apr-Sep).</li>
 	<li><strong>16 July 2014:</strong> Modified the clutter removal routine
 	to use the higher resolution EET level III product.  Previously NET was
 	used.</li>
+	<li><strong>8 Aug 2014:</strong> The spatial domain of the N0Q composite
+	was expanded 1 degree east and south.  The reason is that the clipping was
+	occurring on the eastern and southern borders of the domain.</li>
 </ul>
 
 <h3>Product Generation:</h3>
