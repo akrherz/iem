@@ -167,7 +167,7 @@ $map->drawLabelCache($img);
 $radTimes = Array();
 $rad2 = $rad;
 if ($rad == "DMXA" || $rad == "DMXB" ||$rad == "DMXC" ) { $rad2 = "DMX"; }
-$radTS = filemtime("/home/ldm/data/gis/images/4326/$rad2/n0r_0.tif");
+$radTS = filemtime("/home/ldm/data/gis/images/4326/ridge/$rad2/N0R_0.png");
 $r = date("m/d h:i a", $radTS);
 
 $map->drawLabelCache($img);
