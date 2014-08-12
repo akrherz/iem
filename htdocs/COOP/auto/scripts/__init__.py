@@ -7,5 +7,6 @@ data = {'plots': {
     "5": "Minimum Daily Temperature Range",
     "6": "Monthly Temperature/Precipitation Distributions",
     "7": "Growing Degree Day Periods for One Year by Planting Date",
+    "8": "Monthly Precipitation Reliability",
     }
 }
