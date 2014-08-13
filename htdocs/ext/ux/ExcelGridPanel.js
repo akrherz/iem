@@ -258,8 +258,6 @@ Ext.define('My.grid.ExcelGridPanel', {
     	var cellType = [];
         var cellTypeClass = [];
         var cm = this.columns;
-        theTitle = theTitle.replace(":", " ");
-        
         var totalWidthInPixels = 0;
         var colXml = '';
         var headerXml = '';
