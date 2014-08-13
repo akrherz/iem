@@ -525,7 +525,7 @@ Ext.onReady(function() {
 						'Y/m/d')
 					}
 				});
-				gp.setTitle("Event Listing for UGC: "+ tokens2[2]);
+				gp.setTitle("Event Listing for UGC "+ tokens2[2]);
 			}
 		}
 
