@@ -40,6 +40,8 @@ class Request (object):
                 mylayername = 'ridge-t'
                 if sector in ['USCOMP', 'HICOMP', 'AKCOMP']:
                     mylayername = 'ridge-composite-t'
+                    if prod == 'N0R':
+                        mylayername = 'ridge-composite-t-n0r'
                     sector = sector.lower()
                     prod = prod.lower()
                 year = tstring[:4]
