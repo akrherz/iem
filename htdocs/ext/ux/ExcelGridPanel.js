@@ -255,10 +255,11 @@ Ext.define('My.grid.ExcelGridPanel', {
  
     createWorksheet: function(includeHidden, theTitle) {
         // Calculate cell data types and extra class names which affect formatting
-        var cellType = [];
+    	var cellType = [];
         var cellTypeClass = [];
         var cm = this.columns;
- 
+        theTitle = theTitle.replace(":", " ");
+        
         var totalWidthInPixels = 0;
         var colXml = '';
         var headerXml = '';
