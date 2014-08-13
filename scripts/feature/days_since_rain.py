@@ -10,9 +10,9 @@ import pg
 wepp = pg.connect('wepp', 'iemdb', user='nobody')
 
 sql = """
-SELECT x(transform(centroid(the_geom),4326)) as lon, 
-       y(transform(centroid(the_geom),4326)) as lat, maxday from
- (SELECT hrap_i, max(valid) as maxday from daily_rainfall_2013 
+SELECT ST_x(ST_transform(ST_centroid(the_geom),4326)) as lon, 
+       ST_y(ST_transform(ST_centroid(the_geom),4326)) as lat, maxday from
+ (SELECT hrap_i, max(valid) as maxday from daily_rainfall_2014 
   WHERE rainfall / 25.4 > 0.50 GROUP by hrap_i) as dr, hrap_polygons h
  WHERE h.hrap_i = dr.hrap_i
 """
@@ -35,7 +35,7 @@ m = MapPlot(sector='iowa', title='Days since last 0.5+ inch calendar day rainfal
 cmap = cm.get_cmap('jet')
 cmap.set_under('white')
 cmap.set_over('black')
-m.contourf(lons, lats, vals, np.arange(0,71,5), cmap=cmap,
+m.contourf(lons, lats, vals, np.arange(0,51,5), cmap=cmap,
        units='days')
 m.drawcounties()
 m.postprocess(filename='test.ps')
