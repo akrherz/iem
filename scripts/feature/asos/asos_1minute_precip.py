@@ -15,8 +15,8 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'BWI'
- and valid BETWEEN '2014-08-12 00:00' and '2014-08-12 23:59' 
+  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'PWM'
+ and valid BETWEEN '2014-08-13 00:00' and '2014-08-13 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
@@ -36,7 +36,7 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2014,8,12)
+basets = datetime.datetime(2014,8,13)
 basets = basets.replace(tzinfo=pytz.timezone("America/New_York"))
 
 for i in range(3000):
@@ -52,7 +52,7 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2014,8,12, 9, 0)
+sts = datetime.datetime(2014,8,13, 16, 0)
 sts = sts.replace(tzinfo=pytz.timezone("America/New_York"))
 ets = sts + datetime.timedelta(minutes=8*60+1)
 interval = datetime.timedelta(minutes=60)
@@ -70,6 +70,7 @@ while now <= ets:
     xlabels.append( now.strftime(fmt))
     xlabels2.append( now.strftime(fmt))
     now += interval
+xlabels[-1] = 'Mid'
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager 
@@ -89,7 +90,7 @@ ax.plot(svalid, rate15, color='yellow', label="Hourly Rate over 15min", linewidt
 ax.plot(svalid, rate15, color='k', linewidth=1, zorder=4)
 ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=3.5,zorder=3)
 ax.plot(svalid, rate60, color='k', lw=1, zorder=4)
-x0 = 790
+x0 = 1283
 ax.text(sts + datetime.timedelta(seconds=330), 5.9, "Minute Accums [inch]", va='bottom')
 for i in range(x0,x0+12):
     ax.text( sts + datetime.timedelta(seconds=330), 5.85 + (x0-i)*0.29, "%s %.2f" % (
@@ -102,8 +103,8 @@ ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=2, prop=prop, ncol=1)
 ax.set_ylim(0,8)
-ax.set_xlabel("12 August 2014 (EDT)")
-ax.set_title("12 August 2014 Baltimore, MD (KBWI) One Minute Rainfall\n6.30 inches plotted on this chart")
+ax.set_xlabel("13 August 2014 (EDT)")
+ax.set_title("13 August 2014 Portland, ME (KPWM) One Minute Rainfall\n6.39 inches plotted on this chart")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
