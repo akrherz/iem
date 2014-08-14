@@ -4,7 +4,7 @@ import numpy
 import pytz
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
-#acursor.execute("SET TIME ZONE 'EDT6EST'")
+acursor.execute("SET TIME ZONE 'EDT5EST'")
 stemps = []
 sdrct = []
 ssknt = []
@@ -15,8 +15,8 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'CID'
- and valid BETWEEN '2014-06-30 00:00' and '2014-06-30 23:59' 
+  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'ISP'
+ and valid BETWEEN '2014-08-13 00:00' and '2014-08-13 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
@@ -25,7 +25,7 @@ for row in acursor:
     if row[0].day == 36:
         offset += 1440
     if row[7] > 0:
-        print offset, row[0], row[7]
+        #print offset, row[0], row[7]
         tot += row[7]
     sprec[offset] = float(row[7] or 0) 
         
@@ -35,8 +35,9 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2014,6,30)
-basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
+basets = datetime.datetime(2014,8,13)
+basets = basets.replace(tzinfo=pytz.timezone("America/New_York"))
+
 for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
     rate15[i] = numpy.sum(sprec[i-14:i+1]) * 4
@@ -50,16 +51,16 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2014,6,30, 14, 40)
-sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-ets = sts + datetime.timedelta(minutes=31)
-interval = datetime.timedelta(minutes=5)
+sts = datetime.datetime(2014,8,13, 0, 0)
+sts = sts.replace(tzinfo=pytz.timezone("America/New_York"))
+ets = sts + datetime.timedelta(minutes=661)
+interval = datetime.timedelta(minutes=60)
 now = sts
 xticks = []
 xlabels = []
 xlabels2 = []
 while now <= ets:
-    fmt = "%-I:%M %p"
+    fmt = "%-I %p"
     #if now == sts or now.hour == 0:
     #    fmt = "%-I %p\n%-d %B"
     
@@ -83,12 +84,14 @@ print numpy.max(rate60)
 ax.bar(svalid, sprec * 60, width=1./1440., fc='b', ec='b', label="Hourly Rate over 1min",
        zorder=1)
 ax.plot(svalid, acc, color='k', label="Accumulation",lw=2, zorder=2)
-ax.plot(svalid, rate15, color='g', label="Hourly Rate over 15min", linewidth=2)
-ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=2)
-x0 = 885
-ax.text(sts + datetime.timedelta(seconds=30), 5.65, "Minute Accums [inch]", va='bottom')
-for i in range(x0,x0+11):
-    ax.text( sts + datetime.timedelta(seconds=30), 5.65 + (x0-i)*0.29, "%s %.2f" % (
+ax.plot(svalid, rate15, color='yellow', label="Hourly Rate over 15min", linewidth=3.5, zorder=3)
+ax.plot(svalid, rate15, color='k', linewidth=1, zorder=4)
+ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=3.5,zorder=3)
+ax.plot(svalid, rate60, color='k', lw=1, zorder=4)
+x0 = 339
+ax.text(sts + datetime.timedelta(seconds=330), 10.0, "Minute Accums [inch]", va='bottom')
+for i in range(x0,x0+16):
+    ax.text( sts + datetime.timedelta(seconds=330), 10.0 + (x0-i)*0.49, "%s %.2f" % (
                                 svalid[i].strftime("%-I:%M %p"), sprec[i],),
              va='top')
 ax.set_xticks(xticks)
@@ -96,10 +99,10 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
 ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
-ax.legend(loc=1, prop=prop, ncol=1)
-ax.set_ylim(0,6)
-ax.set_xlabel("30 June 2014 (CDT)")
-ax.set_title("30 June 2014 Cedar Rapids (KCID) One Minute Rainfall\n1.81 inches total")
+ax.legend(loc=2, prop=prop, ncol=1)
+ax.set_ylim(0,14)
+ax.set_xlabel("13 August 2014 (EDT)")
+ax.set_title("13 August 2014 Islip, NY (KISP) One Minute Rainfall\n13.25 inches plotted on this chart")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
