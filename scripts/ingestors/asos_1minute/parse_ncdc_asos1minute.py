@@ -11,7 +11,8 @@ import re
 import os
 import subprocess
 import sys
-import mx.DateTime
+import datetime
+import pytz
 import urllib2
 
 BASEDIR="/mesonet/ARCHIVE/raw/asos/"
@@ -20,17 +21,15 @@ P1_RE = re.compile(r"""
 (?P<wban>[0-9]{5})
 (?P<faaid>[0-9A-Z]{4})\s
 (?P<id3>[0-9A-Z]{3})
-(?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
-(?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
-(?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-\[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s*\]?\s*
-\[?(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\]?\s+
+(?P<tstamp>[0-9]{16})\s+
+((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s*\s*
+(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\s+
 ((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[A-Za-z\?\$ ])\s+
 ...............\s+
-\[?\s*((?P<drct>\d+)|(?P<drct_miss>M))\s+
+((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
-((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s*\]?\s+
-\[?((?P<gust_sknt>\d+)R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
+((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s+
+((?P<gust_sknt>\d+)R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s+
 (....)\s
 (...)
 """, re.VERBOSE)
@@ -59,27 +58,21 @@ p1_examples = [
 "14942KOMA OMA2013121611251725  [15.300] D                              161    2  189    3   14R60+              ",
 ]
 
-p1_answers = [
- {'year': 2010, 'month': 1, 'day': 1 }
-]
-
 P2_RE = re.compile(r"""
 (?P<wban>[0-9]{5})
 (?P<faaid>[0-9A-Z]{4})\s
 (?P<id3>[0-9A-Z]{3})
-(?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
-(?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
-(?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-\[?\s?(?P<ptype>[a-zA-Z0-9\?\-\+\.]{1,2})\s?\]?\s?\s?
-\[?((?P<unk>\d+)V?|\s+(?P<unk_miss>[M ]))\s+\]?\s?
-\[?\s*((?P<precip>\d+\.\d*)|(?P<precip_miss>[M ]))\s*\]?
+(?P<tstamp>[0-9]{16})\s+
+\s?(?P<ptype>[a-zA-Z0-9\?\-\+\.]{1,2})\s?\s?\s?
+((?P<unk>\d+)V?|\s+(?P<unk_miss>[M ]))\s+\s?
+\s*((?P<precip>\d+\.\d*)|(?P<precip_miss>[M ]))\s*
 ............\s+
-\[?((?P<unk2>\d*)|(?P<unk2_miss>M))\]?\s+
-\[?((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\]?\s*
-\[?((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\]?\s*
-\[?((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\]?\s*
-\[?\s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>[M ]))\]?\s*
-\[?\s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>[M ]))\]?\s+
+((?P<unk2>\d*)|(?P<unk2_miss>M))\s+
+((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\s*
+((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\s*
+((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\s*
+\s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>[M ]))\s*
+\s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>[M ]))\s+
 """, re.VERBOSE)
 
 
@@ -113,22 +106,26 @@ p2_examples = [
 "14942KOMA OMA2013120308361436 [ M ][  M   ]                  [  M  ] [  M   ][  M   ][  M   ][ M ][ M ]         ",
 ]
 
+def tstamp2dt( s ):
+    """ Convert a string to a datetime """
+    ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    local_hr = int(s[8:10])
+    utc_hr = int(s[12:14])
+    if utc_hr < local_hr: # Next day assumption valid in United States
+        ts += datetime.timedelta(hours=24)
+    return ts.replace(hour=utc_hr, minute=int(s[14:16]))
+    
 def p2_parser( ln ):
     """
     Handle the parsing of a line found in the 6506 report, return QC dict
     """
-    m = P2_RE.match( ln )
+    m = P2_RE.match( ln.replace("]", "").replace("[", "") )
     if m is None:
         print "P2_FAIL:|%s|" % (ln,)
         return None
-    d = m.groupdict()
-
-    ret = {}
-    # localtime, CST
-    ret['ts'] = mx.DateTime.DateTime( int(d['year']), int(d['month']), 
-                int(d['day']), int(d['hr']), int(d['mi']) )
-    for k in d.keys():
-        ret[k] = d[k]
+    res = m.groupdict()
+    res['ts'] = tstamp2dt(res['tstamp'])
     """
     for v in ['tmpf', 'dwpf']:
         if d['%s_miss' % (v,)]:
@@ -142,24 +139,18 @@ def p2_parser( ln ):
         else:
             ret[v] = float( d[v] )
     """
-    return ret
+    return res
 
 def p1_parser( ln ):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
-    m = P1_RE.match( ln )
+    m = P1_RE.match( ln.replace("]", "").replace("[", "") )
     if m is None:
         print "P1_FAIL:|%s|" % (ln,)
         return None
-    d = m.groupdict()
-
-    ret = {}
-    # localtime, CST
-    ret['ts'] = mx.DateTime.DateTime( int(d['year']), int(d['month']), 
-                int(d['day']), int(d['hr']), int(d['mi']) )
-    for k in d.keys():
-        ret[k] = d[k]
+    res = m.groupdict()
+    res['ts'] = tstamp2dt(res['tstamp'])
     """
     if d['vis1_coef_miss']:
         ret['vis1_coef'] = "Null"
@@ -181,7 +172,7 @@ def p1_parser( ln ):
         else:
             ret[v] = int( d[v] )
     """
-    return ret
+    return res
 
 
 def test():
@@ -218,36 +209,32 @@ def runner(station, monthts):
     # Our final amount of data
     data = {}
     if os.path.isfile("64050K%s%s%02i" % (station,monthts.year, monthts.month)):
-        fp5 = '64050K%s%s%02i' % (station, monthts.year, monthts.month)
-        fp6 = '64060K%s%s%02i' % (station, monthts.year, monthts.month)        
+        fn5 = '64050K%s%s%02i' % (station, monthts.year, monthts.month)
+        fn6 = '64060K%s%s%02i' % (station, monthts.year, monthts.month)        
     else:
-        fp5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
+        fn5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
                 station, monthts.year, monthts.month)
-        fp6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
+        fn6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
                 station, monthts.year, monthts.month)
-        if not os.path.isfile( fp5 ):
+        if not os.path.isfile( fn5 ):
             try:
                 download(station, monthts)
             except Exception, exp:
                 print 'download() error', exp
-            if not os.path.isfile( fp5 ) or not os.path.isfile( fp6 ):
+            if not os.path.isfile( fn5 ) or not os.path.isfile( fn6 ):
                 print "NCDC did not have %s station for %s" % (station,
                                                     monthts.strftime("%b %Y"))
                 return
     # We have two files to worry about
-    page1 = open(fp5, 'r')
-    
-    cnt = 60*24*31
-    for ln in page1:
+    print "Processing 64050: %s" % (fn5,)
+    for ln in open(fn5):
         d = p1_parser( ln )
         if d is None:
             continue
         data[ d['ts'] ] = d
-        cnt -= 1
-    page1.close()
 
-    page2 = open(fp6, 'r')
-    for ln in page2:
+    print "Processing 64060: %s" % (fn6,)
+    for ln in open(fn6):
         d = p2_parser( ln )
         if d is None:
             continue
@@ -255,14 +242,27 @@ def runner(station, monthts):
             data[ d['ts'] ] = {}
         for k in d.keys():
             data[ d['ts'] ][ k ] = d[k]
-    page2.close()
+
+    if len(data) == 0:
+        print 'No data found for station: %s' % (station,)
+        return
+
+    mints = None
+    maxts = None
+    for ts in data.keys():
+        if mints is None or maxts is None:
+            mints = ts
+            maxts = ts
+        if mints > ts:
+            mints = ts
+        if maxts < ts:
+            maxts = ts
     
-    tmpfp = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
-    out = open( tmpfp , 'w')
+    tmpfn = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
+    out = open( tmpfn , 'w')
     out.write("""DELETE from t%s_1minute WHERE station = '%s' and 
-               valid BETWEEN '%s 00:00-0600' and '%s 00:00-0600';\n""" % (
-         monthts.year, station, monthts.strftime("%Y-%m-%d"),
-(monthts + mx.DateTime.RelativeDateTime(months=1)).strftime("%Y-%m-%d") ))
+               valid >= '%s' and valid <= '%s';\n""" % (
+         monthts.year, station, mints, maxts ))
     out.write("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (
          monthts.year,))
 
@@ -270,8 +270,7 @@ def runner(station, monthts):
     for ts in data.keys():
         ln = ""
         data[ts]['station'] = station
-        data[ts]['valid'] = ts.strftime("%Y-%m-%d %H:%M:00-0600")
-        for col in ('station', 'valid', 'vis1_coeff', 'vis1_nd', 
+        for col in ('station', 'ts', 'vis1_coeff', 'vis1_nd', 
             'vis2_coeff', 'vis2_nd', 'drct', 'sknt','gust_drct', 
             'gust_sknt', 'ptype', 'precip', 'pres1', 'pres2', 'pres3', 
             'tmpf','dwpf'):
@@ -280,18 +279,26 @@ def runner(station, monthts):
     out.write("\.\n")
     out.close()
 
-    subprocess.call("psql -f %s -h iemdb asos" % (tmpfp,), shell=True)
-    os.unlink( tmpfp )
-    print "%s Station: %s processed %s entries" % (mx.DateTime.now(),
-           station, len(data.keys()))
-    del data
+    proc = subprocess.Popen("psql -f %s -h iemdb asos" % (tmpfn,), shell=True,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout = proc.stdout.read()
+    stderr = proc.stderr.read()
+    
+    print ("%s %s processed %s entries [%s to %s UTC]\n"
+           +"STDOUT: %s\nSTDERR: %s") % (
+            datetime.datetime.now().strftime("%H:%M %p"),
+           station, len(data.keys()), mints.strftime("%y%m%d %H:%M"), 
+           maxts.strftime("%y%m%d %H:%M"), stdout.replace("\n", " "), 
+           stderr.replace("\n", " "))
+
+    os.unlink( tmpfn )
     
 if len(sys.argv) == 3:
     for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
                     'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
                     'ALO', 'DSM']:
         runner(station, 
-               mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
+               datetime.datetime(int(sys.argv[1]),int(sys.argv[2]),1))
 elif len(sys.argv) == 4:
         if int(sys.argv[3]) != 0:
             months = [int(sys.argv[3]),]
@@ -299,7 +306,7 @@ elif len(sys.argv) == 4:
             months = range(1,13)
         for month in months:
             runner(sys.argv[1], 
-               mx.DateTime.DateTime(int(sys.argv[2]),month,1))
+               datetime.datetime(int(sys.argv[2]),month,1))
 else:
     test()
 """
