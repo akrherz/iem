@@ -15,8 +15,8 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'ISP'
- and valid BETWEEN '2014-08-13 00:00' and '2014-08-13 23:59' 
+  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'BWI'
+ and valid BETWEEN '2014-08-12 00:00' and '2014-08-12 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
@@ -25,7 +25,8 @@ for row in acursor:
     if row[0].day == 36:
         offset += 1440
     if row[7] > 0:
-        #print offset, row[0], row[7]
+        if row[7] > 0.1:
+            print offset, row[0], row[7]
         tot += row[7]
     sprec[offset] = float(row[7] or 0) 
         
@@ -35,7 +36,7 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2014,8,13)
+basets = datetime.datetime(2014,8,12)
 basets = basets.replace(tzinfo=pytz.timezone("America/New_York"))
 
 for i in range(3000):
@@ -51,9 +52,9 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2014,8,13, 0, 0)
+sts = datetime.datetime(2014,8,12, 9, 0)
 sts = sts.replace(tzinfo=pytz.timezone("America/New_York"))
-ets = sts + datetime.timedelta(minutes=661)
+ets = sts + datetime.timedelta(minutes=8*60+1)
 interval = datetime.timedelta(minutes=60)
 now = sts
 xticks = []
@@ -69,7 +70,7 @@ while now <= ets:
     xlabels.append( now.strftime(fmt))
     xlabels2.append( now.strftime(fmt))
     now += interval
-print xticks
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager 
 prop = matplotlib.font_manager.FontProperties(size=12) 
@@ -88,10 +89,10 @@ ax.plot(svalid, rate15, color='yellow', label="Hourly Rate over 15min", linewidt
 ax.plot(svalid, rate15, color='k', linewidth=1, zorder=4)
 ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=3.5,zorder=3)
 ax.plot(svalid, rate60, color='k', lw=1, zorder=4)
-x0 = 339
-ax.text(sts + datetime.timedelta(seconds=330), 10.0, "Minute Accums [inch]", va='bottom')
-for i in range(x0,x0+16):
-    ax.text( sts + datetime.timedelta(seconds=330), 10.0 + (x0-i)*0.49, "%s %.2f" % (
+x0 = 790
+ax.text(sts + datetime.timedelta(seconds=330), 5.9, "Minute Accums [inch]", va='bottom')
+for i in range(x0,x0+12):
+    ax.text( sts + datetime.timedelta(seconds=330), 5.85 + (x0-i)*0.29, "%s %.2f" % (
                                 svalid[i].strftime("%-I:%M %p"), sprec[i],),
              va='top')
 ax.set_xticks(xticks)
@@ -100,14 +101,14 @@ ax.set_xticklabels(xlabels2)
 ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=2, prop=prop, ncol=1)
-ax.set_ylim(0,14)
-ax.set_xlabel("13 August 2014 (EDT)")
-ax.set_title("13 August 2014 Islip, NY (KISP) One Minute Rainfall\n13.25 inches plotted on this chart")
+ax.set_ylim(0,8)
+ax.set_xlabel("12 August 2014 (EDT)")
+ax.set_title("12 August 2014 Baltimore, MD (KBWI) One Minute Rainfall\n6.30 inches plotted on this chart")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
+#import iemplot
+#iemplot.makefeature('test')
