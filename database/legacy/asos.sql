@@ -1,4 +1,27 @@
 ---
+--- One Minute ASOS data
+---
+CREATE TABLE alldata_1minute(
+  station char(3),
+  valid timestamptz,
+  vis1_coeff real,
+  vis1_nd char(1),
+  vis2_coeff real,
+  vis2_nd char(1),
+  drct smallint,
+  sknt smallint,
+  gust_drct smallint,
+  gust_sknt smallint,
+  ptype char(2),
+  precip real,
+  pres1 real,
+  pres2 real,
+  pres3 real,
+  tmpf smallint,
+  dwpf smallint
+);
+
+---
 --- Quasi synced from mesosite database
 ---
 CREATE TABLE stations(
