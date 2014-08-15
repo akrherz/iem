@@ -9,5 +9,6 @@ data = {'plots': {
     "7": "Growing Degree Day Periods for One Year by Planting Date",
     "8": "Monthly Precipitation Reliability",
     "9": "Growing Degree Day Climatology and Daily Values for one Year",
+    "10": "Last Spring and First Fall Date below given threshold",
     }
 }
