@@ -8,5 +8,6 @@ data = {'plots': {
     "6": "Monthly Temperature/Precipitation Distributions",
     "7": "Growing Degree Day Periods for One Year by Planting Date",
     "8": "Monthly Precipitation Reliability",
+    "9": "Growing Degree Day Climatology and Daily Values for one Year",
     }
 }
