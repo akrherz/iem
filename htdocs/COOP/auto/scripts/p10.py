@@ -10,7 +10,7 @@ def get_description():
     d = dict()
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200', label='Select Station:'),
-        dict(type='text', name='year', default='2014', label='Enter Year:'),
+        dict(type='text', name='threshold', default='32', label='Enter Threshold Temperature:'),
     ]
     return d
 
