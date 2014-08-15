@@ -1,14 +1,11 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
 import psycopg2.extras
 import numpy as np
-from scipy import stats
 from pyiem import network
 import matplotlib.patheffects as PathEffects
-import datetime
 import calendar
 
-PDICT ={'max_high': 'Maximum High', 
+PDICT ={'max-high': 'Maximum High', 
                       'avg-high': 'Average High',
                       'min-high': 'Minimum High',
                       'max-low': 'Maximum Low', 
