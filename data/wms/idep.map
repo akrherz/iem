@@ -1129,6 +1129,7 @@ LAYER
 LAYER
   VALIDATION
     date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    scenario "^[0-9]+$"
   END
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=idep host=iemdb"
@@ -1136,7 +1137,7 @@ LAYER
     DATA "geom from (select d.huc_12 as oid, 
    (avg_runoff / 25.4) as da, h.geom from 
    results_by_huc12 d left join ia_huc12 h using (huc_12) 
-   WHERE d.valid = '%date%' ) as foo 
+   WHERE d.valid = '%date%' and scenario = %scenario% ) as foo 
    using unique oid using srid=26915"
     NAME "runoff2"
     PROJECTION
@@ -1265,6 +1266,7 @@ LAYER
   LAYER
     VALIDATION
     	date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    	scenario "^[0-9]+$"
   	END
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=idep host=iemdb"
@@ -1272,7 +1274,7 @@ LAYER
     DATA "geom from (select d.huc_12 as oid, 
    (avg_loss * 4.463) as da, h.geom from 
    results_by_huc12 d left join ia_huc12 h using (huc_12) 
-   WHERE d.valid = '%date%' ) as foo 
+   WHERE d.valid = '%date%' and scenario = %scenario%) as foo 
    using unique oid using srid=26915"
     NAME "loss2"
     PROJECTION

@@ -27,9 +27,12 @@ class Request (object):
     def getLayer(self, layername):    
         #try:
         if layername.find('idep') == 0:
-            (_, ltype, date) = layername.split("::", 3)
-            uri = 'date=%s&year=%s&month=%s&day=%s' % (date, date[:4], 
-                                                       date[5:7], date[8:10])
+            (lbl, ltype, date) = layername.split("::", 3)
+            scenario = lbl[4:]
+            uri = 'date=%s&year=%s&month=%s&day=%s&scenario=%s' % (date, 
+                                                        date[:4], 
+                                                       date[5:7], date[8:10],
+                                                       scenario)
             layer = self.service.layers['idep']
             layer.name = layername
             layer.layers = ltype
