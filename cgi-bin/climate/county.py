@@ -2,6 +2,8 @@
 """
 Generate cloropleths of Iowa County level data
 """
+import matplotlib
+matplotlib.use('agg')
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import os

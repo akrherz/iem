@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """ Soil Moisture Timeseries """
+import matplotlib
+matplotlib.use('agg')
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import datetime

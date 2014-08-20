@@ -2,11 +2,10 @@
 """ ASI Data Timeseries """
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import os
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import iemtz

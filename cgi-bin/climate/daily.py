@@ -4,6 +4,8 @@ import cgi
 import memcache
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import psycopg2
