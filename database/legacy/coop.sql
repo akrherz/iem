@@ -1,4 +1,19 @@
 ---
+--- Storage of Hayhoe downscaled data
+---
+CREATE TABLE hayhoe_daily(
+  model varchar(32),
+  scenario varchar(8),
+  station varchar(5),
+  day date,
+  high real,
+  low real,
+  precip real
+);
+GRANT SELECT on hayhoe_daily to nobody,apache;
+CREATE INDEX hayhoe_daily_station_idx on hayhoe_daily(station);
+
+---
 --- Quickstats table
 ---
 CREATE TABLE quickstats(
