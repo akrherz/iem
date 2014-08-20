@@ -6,6 +6,8 @@ import sys
 import imp
 import memcache
 import datetime
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 def parser(cgistr):

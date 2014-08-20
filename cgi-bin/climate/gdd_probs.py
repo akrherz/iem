@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-
+import matplotlib
+matplotlib.use('agg')
 import cgi
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
