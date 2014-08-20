@@ -13,8 +13,8 @@
  include("../../../include/forms.php");
 
  $yselect = yearSelect2(2013, date("Y"), "year1");
- $mselect = monthSelect(date("m"), "month1");
- $dselect= daySelect2(date("d"), "day1");
+ $mselect = monthSelect(1, "month1");
+ $dselect= daySelect2(1, "day1");
  $yselect2 = yearSelect2(2013, date("Y"), "year2");
  $mselect2 = monthSelect(date("m"), "month2");
  $dselect2= daySelect2(date("d"), "day2");
@@ -24,9 +24,20 @@ while( list($key,$val) = each($nt->table)){
 	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s County, %s)",
 			$key, $val["name"], $val["county"], $key);
 }
- 
+
+$soilopts = "";
+$levels = Array(4,12,24,50);
+while( list($key, $val) = each($levels)){
+	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dtn\">Daily Low %s inch Soil Temperature [F]</input>\n"
+		,$val, $val);
+	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dt\">Daily Average %s inch Soil Temperature [F]</input>\n"
+		,$val, $val);
+	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dtx\">Daily High %s inch Soil Temperature [F]</input>\n"
+			,$val, $val);
+}
+
 $t->content = <<<EOF
-<h3 class="heading">Daily Data Request Form:</h3>
+<h3>Daily Data Request Form:</h3>
 
 <div class="alert alert-info">
 This download page is for the recently installed (2013) ISU Soil Moisture sites.  
@@ -82,10 +93,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <br /><input type="checkbox" name="vars" value="sped">Average Wind Speed [mph]
 <br /><input type="checkbox" name="vars" value="gust">Wind Gust [mph]
 <br /><input type="checkbox" name="vars" value="et">Potential Evapotranspiration[inch]
-<br /><input type="checkbox" name="vars" value="soil04t">4 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil12t">12 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil24t">24 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil50t">50 inch Soil Temperature [F]
+{$soilopts}
 <br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
@@ -121,10 +129,18 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <dt>speed</dt><dd>Average Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
  <dt>gust</dt><dd>Peak Wind Gust [mph], 10 minute average, 10 ft above ground</dd>		
  <dt>et</dt><dd>Evapotranspiration [inch]</dd>
- <dt>soil04t</dt><dd>Average 4 inch Depth Soil Temperature [F]</dd>
- <dt>soil12t</dt><dd>Average 12 inch Depth Soil Temperature [F]</dd>
- <dt>soil24t</dt><dd>Average 24 inch Depth Soil Temperature [F]</dd>
- <dt>soil50t</dt><dd>Average 50 inch Depth Soil Temperature [F]</dd>
+ <dt>soil04tn</dt><dd>Daily Low 4 inch Depth Soil Temperature [F]</dd>
+ <dt>soil04t</dt><dd>Daily Average 4 inch Depth Soil Temperature [F]</dd>
+ <dt>soil04tx</dt><dd>Daily High 4 inch Depth Soil Temperature [F]</dd>
+ <dt>soil12tn</dt><dd>Daily Low 12 inch Depth Soil Temperature [F]</dd>
+ <dt>soil12t</dt><dd>Daily Average 12 inch Depth Soil Temperature [F]</dd>
+ <dt>soil12tx</dt><dd>Daily High 12 inch Depth Soil Temperature [F]</dd>
+ <dt>soil24tn</dt><dd>Daily Low 24 inch Depth Soil Temperature [F]</dd>
+ <dt>soil24t</dt><dd>Daily Average 24 inch Depth Soil Temperature [F]</dd>
+ <dt>soil24tx</dt><dd>Daily High 24 inch Depth Soil Temperature [F]</dd>
+ <dt>soil50tn</dt><dd>Daily Low 50 inch Depth Soil Temperature [F]</dd>
+ <dt>soil50t</dt><dd>Daily Average 50 inch Depth Soil Temperature [F]</dd>
+ <dt>soil50tx</dt><dd>Daily High 50 inch Depth Soil Temperature [F]</dd>
  <dt>soil12vwc</dt><dd>Average 12 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil24vwc</dt><dd>Average 24 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil50vwc</dt><dd>Average 50 inch Depth Soil Volumetric Water Content [%]</dd>
