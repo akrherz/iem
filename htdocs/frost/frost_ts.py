@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import sys
 import os
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
 import matplotlib
 matplotlib.use( 'Agg' )
 from matplotlib import pyplot as plt
