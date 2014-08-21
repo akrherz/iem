@@ -81,7 +81,7 @@ def do(valid):
     cmap = plt.cm.get_cmap('jet')
     cmap.set_under('tan')
     cmap.set_over('black')
-    clevs = np.arange(0,1501,100)
+    clevs = np.arange(0,1651,150)
     norm = mpcolors.BoundaryNorm(clevs, cmap.N)
     ax.quiver(lons, lats, u, v, zorder=1)
     ax.scatter(lons, lats, c=vals, norm=norm, edgecolor='none',
