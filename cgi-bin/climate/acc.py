@@ -5,24 +5,18 @@
   2. Accumulated Precip
   3. Accumulated SDD
 """
-import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import os
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
 import cgi
+import sys
 
-import numpy
 import mx.DateTime
 import matplotlib
 matplotlib.use( 'Agg' )
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
 
-import network
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+from pyiem import network
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 def get_data(station, startdt, enddt):
@@ -96,50 +90,54 @@ def process_cgi(form):
     (dates, gdd50, d_gdd50, c_gdd50, precip, d_precip, c_precip, 
      sdd86, d_sdd86, c_sdd86) = get_data(station, startdt, enddt)
     
-    (fig, ax) = plt.subplots(3,1, figsize=(9,12))
+    fig = plt.figure( figsize=(9,12) )
+    ax1 = fig.add_axes([0.1, 0.7, 0.8, 0.2] )
+    ax2 = fig.add_axes([0.1, 0.6, 0.8, 0.1], sharex=ax1, axisbg='#EEEEEE' )
+    ax3 = fig.add_axes([0.1, 0.35, 0.8, 0.2], sharex=ax1 )
+    ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1 )
     
-    ax[0].set_title("Accumulated GDD(base=50), Precip, & SDD(base=86)\n%s %s" % (
+    ax1.set_title("Accumulated GDD(base=50), Precip, & SDD(base=86)\n%s %s" % (
                                                         station, nt.sts[station]['name']),
                     fontsize=18)
     yearlabel = startdt.year
     if startdt.year != enddt.year:
         yearlabel = "%s-%s" % (startdt.year, enddt.year)
     
-    ax[0].plot(dates, gdd50, color='r', label='%s' % (yearlabel,), lw=2)
-    ax[0].plot(dates, c_gdd50, color='k', label='Climatology', lw=2)
-    ax[0].set_ylabel("GDD Base 50 $^{\circ}\mathrm{F}$", fontsize=16)
+    ax1.plot(dates, gdd50, color='r', label='%s' % (yearlabel,), lw=2)
+    ax1.plot(dates, c_gdd50, color='k', label='Climatology', lw=2)
+    ax1.set_ylabel("GDD Base 50 $^{\circ}\mathrm{F}$", fontsize=16)
     
-    ax2 = ax[0].twinx()
+    ax1.text(0.5, 0.9, "%s - %s" % (startdt.strftime("%b %-d"), 
+                                    enddt.strftime("%b %-d")), transform=ax1.transAxes,
+             ha='center')
+    
     ax2.plot(dates, d_gdd50, color='r', linewidth=2, linestyle='--')
     #spread = max( max(d_gdd50), abs(min(d_gdd50))) * 1.1
     #ax2.set_ylim(0-spread, spread)
-    ax2.set_ylabel("Actual minus Climatology (dashed)")
+    ax2.text(0.02, 0.1, " Accumulated Departure ", transform=ax2.transAxes, 
+             bbox=dict(facecolor='white', ec='#EEEEEE'))
+    ax2.yaxis.tick_right()
     
-    ax[1].plot(dates, precip, color='r', lw=2)
-    ax[1].plot(dates, c_precip, color='k', lw=2)
-    ax[1].set_ylabel("Precipitation [inch]", fontsize=16)
+    ax3.plot(dates, precip, color='r', lw=2)
+    ax3.plot(dates, c_precip, color='k', lw=2)
+    ax3.set_ylabel("Precipitation [inch]", fontsize=16)
     
-    ax[2].plot(dates, sdd86, color='r', lw=2)
-    ax[2].plot(dates, c_sdd86, color='k', lw=2)
-    ax[2].set_ylabel("SDD Base 86 $^{\circ}\mathrm{F}$", fontsize=16)
+    ax4.plot(dates, sdd86, color='r', lw=2)
+    ax4.plot(dates, c_sdd86, color='k', lw=2)
+    ax4.set_ylabel("SDD Base 86 $^{\circ}\mathrm{F}$", fontsize=16)
 
-    ax[0].grid(True)
-    ax[1].grid(True)
-    ax[2].grid(True)
+    ax1.grid(True)
+    ax2.grid(True)
+    ax3.grid(True)
+    ax4.grid(True)
     
     if (dates[-1] - dates[0]).days < 32:
-        ax[0].xaxis.set_major_locator(mdates.DayLocator(interval=7))
-        ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=7))
-        ax[2].xaxis.set_major_locator(mdates.DayLocator(interval=7))
+        ax1.xaxis.set_major_locator(mdates.DayLocator(interval=7))
         
     else:
-        ax[0].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        ax[1].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        ax[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
 
-    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
-    ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
-    ax[2].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))    
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     if form.getvalue('year2'):
         startdt2 = mx.DateTime.DateTime(int(form.getvalue('year2')),
                                     int(form.getvalue('smonth', 5)),
@@ -158,9 +156,9 @@ def process_cgi(form):
             yearlabel = "%s-%s" % (startdt2.year, enddt2.year)
         sz = len(dates)
         if len(gdd50) >= sz:
-            ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='b', lw=2)
-            ax[1].plot(dates, precip[:sz], color='b', lw=2)
-            ax[2].plot(dates, sdd86[:sz], color='b', lw=2)
+            ax1.plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='b', lw=2)
+            ax3.plot(dates, precip[:sz], color='b', lw=2)
+            ax4.plot(dates, sdd86[:sz], color='b', lw=2)
             ax2.plot(dates, d_gdd50[:sz], color='b', linewidth=2, linestyle='--')
     
     
@@ -182,9 +180,9 @@ def process_cgi(form):
             yearlabel = "%s-%s" % (startdt3.year, enddt3.year)
         sz = len(dates)
         if len(gdd50) >= sz:
-            ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='g', lw=2)
-            ax[1].plot(dates, precip[:sz], color='g', lw=2)
-            ax[2].plot(dates, sdd86[:sz], color='g', lw=2)
+            ax1.plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='g', lw=2)
+            ax3.plot(dates, precip[:sz], color='g', lw=2)
+            ax4.plot(dates, sdd86[:sz], color='g', lw=2)
             ax2.plot(dates, d_gdd50[:sz], color='g', linewidth=2, linestyle='--')
 
     if form.getvalue('year4'):
@@ -205,12 +203,16 @@ def process_cgi(form):
             yearlabel = "%s-%s" % (startdt4.year, enddt4.year)
         sz = len(dates)
         if len(gdd50) >= sz:
-            ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='tan', lw=2)
-            ax[1].plot(dates, precip[:sz], color='tan', lw=2)
-            ax[2].plot(dates, sdd86[:sz], color='tan', lw=2)
+            ax1.plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='tan', lw=2)
+            ax3.plot(dates, precip[:sz], color='tan', lw=2)
+            ax4.plot(dates, sdd86[:sz], color='tan', lw=2)
             ax2.plot(dates, d_gdd50[:sz], color='tan', linewidth=2, linestyle='--')
     
-    ax[0].legend(loc=2, prop={'size': 14})
+    ax1.legend(loc=2, prop={'size': 14})
+
+    for label in ax1.get_xticklabels():
+        label.set_visible(False)
+
 
     fmt = form.getvalue('format', 'png')
     if fmt in ['eps',]:
@@ -220,6 +222,7 @@ def process_cgi(form):
     fig.savefig( sys.stdout, format=fmt )
 
 if __name__ == '__main__':
+    # Go Main Go
     form = cgi.FieldStorage()
     if form.has_key("station"):
         process_cgi(form)
