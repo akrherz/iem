@@ -45,7 +45,7 @@ def make_colorbar(clevs, norm, cmap):
 
 def do(valid):
     """ Generate plot for a given timestamp """
-    PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
+    PGCONN = psycopg2.connect(database='mec', host='localhost', port='5555',
                               user='mesonet')
     cursor = PGCONN.cursor()
 
@@ -72,6 +72,7 @@ def do(valid):
         u.append( a.value('MPS') )
         v.append( b.value('MPS') )
         pitch.append(row[6])
+    pitch = np.array(pitch)
     vals = np.array(vals)
     avgv = np.average(vals)
     #vals2 = vals - avgv
@@ -92,33 +93,48 @@ def do(valid):
     
     ax.text(0.05, 0.05, "Turbine Avg: %.1f kW" % (avgv,),
             transform=ax.transAxes)
+    ax.text(0.05, 0.01, "Wind $\mu$= %.1f $\sigma$= %.1f $ms^{-1}$" % (
+                                                            np.average(ws),
+                                                            np.std(ws)),
+            transform=ax.transAxes)
     ax.set_xlabel("Longitude $^\circ$E")
     ax.set_ylabel("Latitude $^\circ$N")
     
     # Next plot
-    ax2 = fig.add_axes([0.7, 0.73, 0.28, 0.25])
+    ax2 = fig.add_axes([0.7, 0.80, 0.28, 0.18])
     ax2.scatter(ws, vals)
-    ax2.text(0.5, -0.2, "Wind Speed $ms^{-1}$", transform=ax2.transAxes,
+    ax2.text(0.5, -0.25, "Wind Speed $ms^{-1}$", transform=ax2.transAxes,
              ha='center')
     #ax2.set_ylabel("Power kW")
     ax2.grid(True)
 
     # Next plot
-    ax3 = fig.add_axes([0.7, 0.41, 0.28, 0.25], sharey=ax2)
+    ax3 = fig.add_axes([0.7, 0.57, 0.28, 0.18], sharey=ax2)
     ax3.scatter(yaw, vals)
-    ax3.text(0.5, -0.2, "Yaw $^\circ$N", transform=ax3.transAxes, ha='center')
+    ax3.text(0.5, -0.25, "Yaw $^\circ$N", transform=ax3.transAxes, ha='center')
     #ax3.set_ylabel("Power kW")
     ax3.set_xlim(0,360)
     ax3.set_xticks(np.arange(0,361,45))
     ax3.grid(True)
     
     # Next plot
-    ax4 = fig.add_axes([0.7, 0.08, 0.28, 0.25], sharey=ax2)
+    ax4 = fig.add_axes([0.7, 0.32, 0.28, 0.18], sharey=ax2)
     ax4.scatter(pitch, vals)
-    ax4.text(0.5, -0.2, "Pitch $^\circ$", transform=ax4.transAxes, ha='center')
+    ax4.text(0.5, -0.25, "Pitch $^\circ$", transform=ax4.transAxes, ha='center')
     ax4.grid(True)
     ax4.set_ylim(bottom=-10)
-    ax4.set_xlim(-5,12)
+    
+    # Next plot
+    ax5 = fig.add_axes([0.7, 0.07, 0.28, 0.18], sharex=ax4)
+    ax5.scatter(pitch, ws)
+    ax5.text(0.5, -0.25, "Pitch $^\circ$", transform=ax5.transAxes, ha='center')
+    ax5.grid(True)
+    ax5.set_ylim(bottom=-10)
+    maxpitch = max(np.where(pitch > 20, 0, pitch))
+    ax5.set_xlim(np.ma.minimum(pitch)-0.5, maxpitch+0.5)
+    ax5.set_ylim(bottom=0)
+    ax5.text(-0.1, 0.5, "Wind Speed $ms^{-1}$", transform=ax5.transAxes,
+             ha='center', va='center', rotation=90)
     
     plt.savefig( sys.stdout )
 
