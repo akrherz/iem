@@ -45,7 +45,7 @@ def make_colorbar(clevs, norm, cmap):
 
 def do(valid):
     """ Generate plot for a given timestamp """
-    PGCONN = psycopg2.connect(database='mec', host='localhost', port='5555',
+    PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
                               user='mesonet')
     cursor = PGCONN.cursor()
 
