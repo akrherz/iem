@@ -67,7 +67,9 @@ if (isset($_GET["q"])){
 				}
 			}
 			$netselect = make_select("network", $network, $networks, "onNetworkChange");
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". 
+				networkSelect($network, $value, Array(), "zstation") ."</td></tr>";
+			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
 		if ($v->type == "station"){
 			if (sizeof($networks) == 0){
@@ -88,6 +90,7 @@ if (isset($_GET["q"])){
 			}
 			$netselect = make_select("network", $network, $networks, "onNetworkChange");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
+			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
 		if ($v->type == "clstate"){
 			$netselect = make_select($v->name, $value, $states);
@@ -110,20 +113,26 @@ if (isset($_GET["q"])){
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
 		}
 	}
-	$imguri .= implode($pltvars, "_");
+	$imguri .= implode($pltvars, "__");
 	$imguri .= ".png";
-	$image = <<<EOF
+	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
+		$image = "";
+	} else{
+		$image = <<<EOF
 	<p><span class="glyphicon glyphicon-arrow-down"></span> A graph will appear below this text with your specifications from above:<br >
 	<img src="$imguri" class="img img-responsive" />
 EOF;
+	}
 	$formhtml = <<<EOF
 <script>
 function onNetworkChange(newnetwork){
+    $("#_wait").val("yes");
 	$('form#myForm').submit();
 }
 </script>
 	<h4><span class="glyphicon glyphicon-arrow-right"></span> Second, select specific chart options::</h4>
 	<form method="GET" name="s" id="myForm">
+	<input type="hidden" name="_wait" value="no" id="_wait">
 	<input type="hidden" name="q" value="{$q}">
 	<table class="table table-striped">
 		<thead><tr><th>Description</th><th>Value</th></tr></thead>
@@ -136,11 +145,10 @@ EOF;
 
 
 $t->content = <<<EOF
-<h3>COOP Data Plotter</h3>
+<h3>Automated Data Plotter</h3>
 
 <p>This application dynamically generates many types of graphs.  These graphs
-are derived from NWS Cooperative Observer data that is processed and sometimes
-estimated by the IEM.  The raw data can be downloaded <a href="/request/coop/fe.phtml">here</a>.</p>
+are derived from raw observations collected by the IEM.</p>
 
 <br /><form method="GET" name="t">
 <div class="form-group">

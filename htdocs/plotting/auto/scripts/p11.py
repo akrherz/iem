@@ -34,7 +34,7 @@ def plotter( fdict ):
 
     cursor.execute("""
      select day, 
-     (case when max_dwpf > -90 and max_dwpf < 100 
+     (case when max_dwpf > -90 and max_dwpf < 120 
              then max_dwpf else null end) as "max-dwpf"
      from """+table+""" where iemid = (select iemid from stations where 
      id = %s and network = %s) ORDER by day ASC 
@@ -50,8 +50,11 @@ def plotter( fdict ):
     vals = np.array(vals)
         
     (fig, ax) = plt.subplots(1,1)
-    ax.bar(days, vals, ec='tan', fc='tan', zorder=1)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
+    if len(vals) > 0:
+        ax.bar(days, vals, ec='tan', fc='tan', zorder=1)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
+    else:
+        ax.text(0.5, 0.5, "No Data Found!")
     ax.grid(True)
     ax.set_title("%s [%s] Daily Maximum Dew Point" % (nt.sts[station]['name'],
                                                       station))
