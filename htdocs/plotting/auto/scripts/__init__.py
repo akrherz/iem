@@ -10,5 +10,6 @@ data = {'plots': {
     "8": "Monthly Precipitation Reliability",
     "9": "Growing Degree Day Climatology and Daily Values for one Year",
     "10": "Last Spring and First Fall Date below given threshold",
+    "11": "ASOS/AWOS Daily Maximum Dew Point for a Year",
     }
 }

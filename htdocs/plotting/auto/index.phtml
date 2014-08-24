@@ -5,17 +5,19 @@ include_once "../../../include/myview.php";
 include_once "../../../include/forms.php";
 include_once "../../../include/imagemaps.php";
 include_once "../../../include/forms.php";
+include_once "../../../include/database.inc.php";
+$mesosite = iemdb("mesosite");
 $formhtml = "";
 $image = "";
 $t = new MyView();
 $t->thispage = "networks-coop";
-$t->title = "NWS COOP Data Plotter";
+$t->title = "Automated Data Plotter";
 
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
 
 // Available Plots
-$data = file_get_contents("http://iem.local/COOP/auto/meta/0.json");
+$data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
 $jobj = json_decode($data);
 $ar = Array();
 while (list($k,$v) = each($jobj->plots)){
@@ -42,33 +44,48 @@ $states = Array(
         
 );
 
-$networks = Array("ILCLIMATE" => "Illinois",
-		"INCLIMATE" => "Indiana",
-		"IACLIMATE" => "Iowa",
-		"KSCLIMATE" => "Kansas",
-		"KYCLIMATE" => "Kentucky",
-		"MICLIMATE" => "Michigan",
-		"MNCLIMATE" => "Minnesota",
-		"MOCLIMATE" => "Missouri",
-		"NECLIMATE" => "Nebraska",
-		"NDCLIMATE" => "North Dakota",
-		"OHCLIMATE" => "Ohio",
-		"SDCLIMATE" => "South Dakota",
-		"WICLIMATE" => "Wisconsin"
-);
 
+$networks = Array();
 
 if (isset($_GET["q"])){
 	$q = intval($_GET["q"]);
-	$data = file_get_contents("http://iem.local/COOP/auto/meta/$q.json");
+	$data = file_get_contents("http://iem.local/plotting/auto/meta/$q.json");
 	$jobj = json_decode($data);
-	$imguri = "/COOP/auto/plot/$q/";
+	$imguri = "/plotting/auto/plot/$q/";
 	$pltvars = Array();
 	$form = "";
 	while (list($k,$v) = each($jobj->arguments)){
 		$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
 		$pltvars[] = sprintf("%s:%s", $v->name, $value);
+		if ($v->type == "zstation"){
+			$network = isset($_GET["network"]) ? $_GET["network"]: "IA_ASOS";
+			if (sizeof($networks) == 0){
+				$rs = pg_query($mesosite, "SELECT id, name from networks 
+						where id ~* 'ASOS' or id = 'AWOS' ORDER by name ASC");
+				for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+					$networks[$row["id"]] = $row["name"];
+				}
+			}
+			$netselect = make_select("network", $network, $networks, "onNetworkChange");
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
+		}
 		if ($v->type == "station"){
+			if (sizeof($networks) == 0){
+				$networks = Array("ILCLIMATE" => "Illinois",
+						"INCLIMATE" => "Indiana",
+						"IACLIMATE" => "Iowa",
+						"KSCLIMATE" => "Kansas",
+						"KYCLIMATE" => "Kentucky",
+						"MICLIMATE" => "Michigan",
+						"MNCLIMATE" => "Minnesota",
+						"MOCLIMATE" => "Missouri",
+						"NECLIMATE" => "Nebraska",
+						"NDCLIMATE" => "North Dakota",
+						"OHCLIMATE" => "Ohio",
+						"SDCLIMATE" => "South Dakota",
+						"WICLIMATE" => "Wisconsin"
+				);
+			}
 			$netselect = make_select("network", $network, $networks, "onNetworkChange");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
 		}
