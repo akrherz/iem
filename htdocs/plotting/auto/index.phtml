@@ -19,14 +19,16 @@ $network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
 // Available Plots
 $data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
 $jobj = json_decode($data);
-$ar = Array();
+$pselect = "<select name=\"q\">";
 while (list($k,$v) = each($jobj->plots)){
-	if (intval($k) == $q){
-		$t->title = $v;
+	$pselect .= sprintf("<optgroup label=\"%s\">", $v->label);
+	while (list($k2,$v2) = each($v->options)){
+		$pselect .= sprintf("<option value=\"%s\"%s>%s</option>", $v2->id,
+			($v2->id == $q) ? ' selected="selected"': '', $v2->label);
 	}
-	$ar[$k] = $v;
+	$pselect .= "</optgroup>";
 }
-$pselect = make_select("q", $q, $ar);
+$pselect .= "</select>";
 
 $states = Array(
 		'IA' => 'Iowa',
