@@ -42,7 +42,10 @@ for entry in feed:
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
         worksheet.get_cell_value(1, 2) != 'depth' or
         worksheet.get_cell_value(1, 3) != 'subsample'):
-        print 'FATAL site: %s bd & water retention has corrupt headers' % (siteid,)
+        print 'FATAL site: %s bd & water retention has corrupt headers %s %s %s' % (
+            siteid, worksheet.get_cell_value(1, 1), 
+            worksheet.get_cell_value(1, 2), 
+            worksheet.get_cell_value(1, 3))
         continue
     for row in range(4,worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
