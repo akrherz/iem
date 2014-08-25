@@ -51,12 +51,14 @@ def plotter( fdict ):
         
     (fig, ax) = plt.subplots(1,1)
     if len(vals) > 0:
-        ax.bar(days, vals, ec='tan', fc='tan', zorder=1)
+        ax.bar(days, vals, ec='g', fc='g', zorder=1)
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     else:
         ax.text(0.5, 0.5, "No Data Found!")
     ax.grid(True)
-    ax.set_title("%s [%s] Daily Maximum Dew Point" % (nt.sts[station]['name'],
-                                                      station))
+    ax.set_ylabel("Dew Point Temperature $^\circ$F")
+    ax.set_title("%s [%s] %s Daily Maximum Dew Point\nPeriod: %s to %s" % (
+                nt.sts[station]['name'], station, year,
+                min(days).strftime("%-d %b"), max(days).strftime("%-d %b")))
 
     return fig
