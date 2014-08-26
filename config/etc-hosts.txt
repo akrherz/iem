@@ -14,7 +14,7 @@
 192.168.0.12     iem12         postgresread
 192.168.0.21     iem21         iem21.local openfire-bosh
 192.168.0.22     iem22         iem22.local
-192.168.0.30     iem30         iem30.local iembot iem-geoserver iem-arcgis
+192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
 192.168.0.40     iem40         iem40.local
 192.168.0.49     metvm0
 192.168.0.50     iem50         iem50.local 
@@ -32,6 +32,8 @@
 192.168.0.109    iemvs109      iemvs109.local
 192.168.0.200    iem-idd0      iem-idd0.local
 192.168.0.231    iemvm4
+192.168.0.233    iemvm3
+192.168.0.235    iemvm5
 192.168.0.249    metvm2
 192.168.0.254    iem-gateway   iem-gateway.local
 
@@ -42,7 +44,8 @@
 192.168.1.191    iem-memcached1
 # metvm3
 192.168.1.192    iem-memcached2
-192.168.0.201    iemdb3
+# iem30, backup iem21
+192.168.1.193    iembot
 # iem50, backup iem30
 192.168.1.202    iem-mapserver 
 # iem19, backup iem12
