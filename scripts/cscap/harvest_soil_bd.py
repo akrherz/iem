@@ -56,9 +56,9 @@ for entry in feed:
         for col in range(4, worksheet.cols+1):
             varname = worksheet.get_cell_value(1,col).strip().split()[0]
             if varname[:4] != 'SOIL':
-                print 'Invalid varname: %s site: %s year: %s' % (
-                                    worksheet.get_cell_value(1,col).strip(),
-                                    siteid, YEAR)
+                #print 'Invalid varname: %s site: %s year: %s' % (
+                #                    worksheet.get_cell_value(1,col).strip(),
+                #                    siteid, YEAR)
                 continue
             val = worksheet.get_cell_value(row, col)
             try:
