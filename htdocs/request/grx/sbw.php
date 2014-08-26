@@ -13,7 +13,7 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]) : 1;
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : 8;
 $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : 10;
 $minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : 0;
-$ts = mktime($hour, $minute, 0, $month, $day, $year);
+$ts = gmmktime($hour, $minute, 0, $month, $day, $year);
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
@@ -23,14 +23,14 @@ $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g,
            and status = 'NEW'");
 
 $result = pg_execute($connect, "SELECT", 
-                     Array($wfo, date("Y-m-d H:i", $ts)) );
+                     Array($wfo, gmdate("Y-m-d H:i", $ts)) );
 
-$fp = sprintf("%s-%s.txt", $wfo, date("YmdHi", $ts));
+$fp = sprintf("%s-%s.txt", $wfo, gmdate("YmdHi", $ts));
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=$fp");
 echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
-echo sprintf("Title: $wfo SBW @ %s UTC\n", date("d M Y H:i", $ts));            
+echo sprintf("Title: $wfo SBW @ %s UTC\n", gmdate("d M Y H:i", $ts));            
                      
 for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 	$geom = $row["g"];
@@ -42,8 +42,8 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 	$issue = strtotime($row["issue"]);
 	$expire = strtotime($row["expire"]);
 	$lbl = $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." ". 
-		$row["eventid"] ."\\nIssue: ". date("Hi", $issue) ."Z Expire: ".
-		date("Hi", $expire) ."Z";
+		$row["eventid"] ."\\nIssue: ". gmdate("Hi", $issue) ."Z Expire: ".
+		gmdate("Hi", $expire) ."Z";
 	echo "\n;";
 	
 	if ($row["phenomena"] == "SV"){
