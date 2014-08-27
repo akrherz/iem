@@ -29,6 +29,12 @@ Warning, and Advisories.  There are currently two options:
 	<li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
 	<li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone</a></li>
 </ul>
+
+<div class="alert alert-info"><strong>Attention Firefox Users</strong>For some
+		reason when you attempt to download the data as Excel, Firefox will
+		corrupt the filename by adding a .xlsx to suffix.  A workaround is to
+		"Save As" the download and then double click the file to open it.
+		</div>
 		
 <h3><a name="bypoint">1.</a> Search for Storm Based Warnings by Point</h3>
 
