@@ -82,7 +82,7 @@ Ext.define('My.grid.ExcelGridPanel', {
  
             var el = Ext.DomHelper.append(gridEl, {
                 tag: "a",
-                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xls',
+                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xml',
                 href: location
             });
  
@@ -129,6 +129,7 @@ Ext.define('My.grid.ExcelGridPanel', {
  
         return ''.concat(
             '<?xml version="1.0"?>',
+            '<?mso-application progid="Excel.Sheet"?>',
             '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">',
             '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Title>' + theTitle + '</Title></DocumentProperties>',
             '<OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office"><AllowPNG/></OfficeDocumentSettings>',
