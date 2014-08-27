@@ -1,6 +1,11 @@
 # Run at 12Z, but needs some manual crontab changing help
 
-cd cscap
+# DVN wants this to run at 12:10 UTC, so we start the cron script a bit late
+cd 12z
+python awos_rtp.py
+python asos_low.py
+
+cd ../cscap
 python harvest_agronomic.py 2011
 python harvest_agronomic.py 2012
 python harvest_agronomic.py 2013
@@ -13,9 +18,6 @@ python set_dashboard_links.py 2012
 python set_dashboard_links.py 2013
 python set_dashboard_links.py 2014
 
-cd ../12z
-python awos_rtp.py
-python asos_low.py
 
 # Rerun yesterday and today
 cd ../dbutil

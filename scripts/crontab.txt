@@ -17,7 +17,7 @@ S=/mesonet/www/apps/iemwebsite/scripts
 # Run at 1:59 to avoid issue with 2AM on DST switch
 59 1 * * * cd $S; sh RUN_2AM.sh
 0 11 * * * cd $S; sh RUN_11AM.sh
-0 7 * * * cd $S; sh RUN_12Z.sh
+10 7 * * * cd $S; sh RUN_12Z.sh
 
 10 * * * * cd $S; sh RUN_10_AFTER.sh 
 20 * * * * cd $S; sh RUN_20_AFTER.sh 
