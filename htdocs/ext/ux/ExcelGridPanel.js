@@ -70,7 +70,7 @@ Ext.define('My.grid.ExcelGridPanel', {
  
         var vExportContent = this.getExcelXml(includeHidden, title);
  
-        var location = 'data:application/vnd.ms-excel;base64,' + Base64.encode(vExportContent);
+        var location = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + Base64.encode(vExportContent);
  
         /* 
           dynamically create and anchor tag to force download with suggested filename 
@@ -82,7 +82,7 @@ Ext.define('My.grid.ExcelGridPanel', {
  
             var el = Ext.DomHelper.append(gridEl, {
                 tag: "a",
-                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xls',
+                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xlsx',
                 href: location
             });
  
