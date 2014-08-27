@@ -9,7 +9,7 @@ $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=9"></script>
+<script type="text/javascript" src="search.js?v=10"></script>
 		  <style>
   #map {
     width: 100%;
