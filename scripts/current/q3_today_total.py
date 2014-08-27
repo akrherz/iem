@@ -30,7 +30,7 @@ def doday(ts, realtime):
             fn = util.get_fn('1hrad', gmt, tile)
             if os.path.isfile(fn):
                 lastts = now
-                tilemeta, val = util.reader(fn)
+                _, val = util.reader(fn)
                 ysz, xsz = np.shape(val)
                 if tile == 1:
                     x0 = 0
@@ -51,7 +51,7 @@ def doday(ts, realtime):
         routes = 'a'
     pqstr = "plot %s %s00 iowa_q2_1d.png iowa_q2_1d.png png" % (routes,
             ts.strftime("%Y%m%d%H"), )
-    m = MapPlot(title="%s NMQ Q3 Today's Precipitation" % (
+    m = MapPlot(title="%s MRMS Q3 Today's Precipitation" % (
                                                     ts.strftime("%-d %b %Y"),),
                 subtitle=subtitle)
         
