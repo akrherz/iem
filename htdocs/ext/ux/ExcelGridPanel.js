@@ -328,7 +328,7 @@ Ext.define('My.grid.ExcelGridPanel', {
             '<Worksheet ss:Name="myworksheet">',
  
             '<Names>',
-            '<NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'myworksheet!R1:R2">',
+            '<NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'myworksheet\'!R1:R2">',
             '</NamedRange></Names>',
  
             '<Table ss:ExpandedColumnCount="' + (visibleColumnCount + 2),
