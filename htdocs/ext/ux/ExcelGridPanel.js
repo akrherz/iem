@@ -79,11 +79,9 @@ Ext.define('My.grid.ExcelGridPanel', {
  
         if (Ext.isChrome || Ext.isGecko) { // local download
             var gridEl = this.getEl();
-            var extension = 'xml';
-            if (Ext.isGecko) extension = 'xlsx';
             var el = Ext.DomHelper.append(gridEl, {
                 tag: "a",
-                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.'+extension,
+                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xml',
                 href: location
             });
  
