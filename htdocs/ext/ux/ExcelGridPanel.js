@@ -82,7 +82,7 @@ Ext.define('My.grid.ExcelGridPanel', {
  
             var el = Ext.DomHelper.append(gridEl, {
                 tag: "a",
-                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xlsx',
+                download: title + "-" + Ext.Date.format(new Date(), 'Y-m-d Hi') + '.xls',
                 href: location
             });
  
@@ -122,8 +122,7 @@ Ext.define('My.grid.ExcelGridPanel', {
     */
     getExcelXml: function(includeHidden, title) {
  
-        //var theTitle = title || this.title;
-        var theTitle = 'myworksheet';
+        var theTitle = title || this.title;
  
         var worksheet = this.createWorksheet(includeHidden, theTitle);
         var totalWidth = this.columns.length;
@@ -326,10 +325,10 @@ Ext.define('My.grid.ExcelGridPanel', {
  
         // create header for worksheet
         var t = ''.concat(
-            '<Worksheet ss:Name="' + theTitle + '">',
+            '<Worksheet ss:Name="myworksheet">',
  
             '<Names>',
-            '<NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'' + theTitle + '\'!R1:R2">',
+            '<NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'myworksheet!R1:R2">',
             '</NamedRange></Names>',
  
             '<Table ss:ExpandedColumnCount="' + (visibleColumnCount + 2),
