@@ -122,7 +122,8 @@ Ext.define('My.grid.ExcelGridPanel', {
     */
     getExcelXml: function(includeHidden, title) {
  
-        var theTitle = title || this.title;
+        //var theTitle = title || this.title;
+        var theTitle = 'myworksheet';
  
         var worksheet = this.createWorksheet(includeHidden, theTitle);
         var totalWidth = this.columns.length;
