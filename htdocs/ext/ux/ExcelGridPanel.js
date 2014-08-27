@@ -77,7 +77,7 @@ Ext.define('My.grid.ExcelGridPanel', {
           note: download attribute is Google Chrome specific
         */
  
-        if (Ext.isChrome || Ext.isGecko) { // local download
+        if (Ext.isChrome) { // local download
             var gridEl = this.getEl();
  
             var el = Ext.DomHelper.append(gridEl, {
