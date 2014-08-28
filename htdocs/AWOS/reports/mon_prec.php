@@ -7,7 +7,7 @@ include("../../../include/forms.php");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 
-$yselect = yearSelect2(2002, $year, "year");
+$yselect = yearSelect2(2004, $year, "year");
 
 define("IEM_APPID", 38);
 $t = new MyView();
