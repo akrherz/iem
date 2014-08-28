@@ -1,33 +1,37 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
-$t = new MyView();
-define("IEM_APPID", 23);
-$t->title = "Past Features";
-$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
-$month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
 include("../../../include/database.inc.php");
 include("../../../include/feature.php");
+
+$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
+$month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
+
+define("IEM_APPID", 23);
+$t = new MyView();
+$t->title = "Past Features";
 $t->thispage = "iem-feature";
 
 $ts = mktime(0,0,0,$month,1,$year);
 $prev = $ts - 15*86400;
 $plink = sprintf("past.php?year=%s&month=%s", date("Y", $prev), date("m", $prev));
 $next = $ts + 35*86400;
-$nlink = sprintf("past.php?year=%s&month=%s", date("Y", $next), date("m", $next));
+$nmonth = date("m", $next);
+$nyear = date("Y", $next);
+$nlink = sprintf("past.php?year=%s&month=%s", $nyear, $nmonth);
 
 $mstr = date("M Y", $ts);
 $table = "";
 $c = iemdb("mesosite");
-$q = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
-to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
-to_char(valid, 'Dy Mon DD, YYYY') as calhead,
-to_char(valid, 'D') as dow from feature
-WHERE extract(year from valid) = $year
-and extract(month from valid) = $month
-ORDER by valid ASC";
-$rs = pg_exec($c, $q);
-pg_close($c);
+$sql = <<<EOF
+	SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
+	to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
+	to_char(valid, 'Dy Mon DD, YYYY') as calhead,
+	to_char(valid, 'D') as dow from feature
+	WHERE valid BETWEEN '{$year}-{$month}-01' and '{$nyear}-{$nmonth}-01'
+	ORDER by valid ASC
+EOF;
+$rs = pg_exec($c, $sql);
 
 $num = pg_numrows($rs);
 
@@ -49,9 +53,6 @@ $linkbar = <<<EOF
 </div>
 EOF;
 
-$table .= <<<EOF
-<table><tr>
-EOF;
 for ($i = 0; $i < $num; $i++){
 	$row = @pg_fetch_assoc($rs,$i);
 	$valid = strtotime( substr($row["valid"],0,16) );
@@ -65,22 +66,29 @@ for ($i = 0; $i < $num; $i++){
     }
 	
 	$table .= <<<EOF
-<tr class="even">
-<td colspan="2" style="text-align: center;">{$row["calhead"]}</td></tr>
-<tr><td valign="top">
-<a href="/onsite/features/{$row["imageref"]}.{$fmt}">
-<img src="/onsite/features/{$row["imageref"]}_s.{$fmt}" BORDER=0 ALT="Feature"></a>
-<br />{$row["caption"]}</td>
-<td><b><a href='cat.php?day={$d}'>{$row["title"]}</a></b>
+<div class="row">
+  <div class="col-xs-12 well well-sm">{$row["calhead"]}</large></div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+	<a href="/onsite/features/{$row["imageref"]}.{$fmt}">
+<img src="/onsite/features/{$row["imageref"]}_s.{$fmt}" alt="Feature" class="img img-responsive" /></a>
+<br />{$row["caption"]}
+	</div>
+	<div class="col-md-6">
+
+<b><a href='cat.php?day={$d}'>{$row["title"]}</a></b>
 <br><font size='-1' style='color:black'>{$row["webdate"]}</font>
 <br>{$row["story"]}
 <br>Voting: Good - {$row["good"]} Bad - {$row["bad"]}
 <br />{$p}
 {$linktext}
-</div></td></tr>
+	</div>
+</div>
+
 EOF;
 }
-$table .= "</tr></table>\n";
 
 if ($num == 0){
     $table .= "<p>No entries found for this month\n";
