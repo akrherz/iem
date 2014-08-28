@@ -7,7 +7,7 @@ import pytz
 import numpy as np
 import os
 import tempfile
-import Image
+from PIL import Image
 import subprocess
 import json
 import sys
@@ -42,7 +42,8 @@ def do(now, hr ):
     for tile in range(1,5):
         fn = util.get_fn('%shrad' % (hr,), now, tile)
         if not os.path.isfile(fn):
-            print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
+            print "MRMS %sHRAD MISS Tile: %s Time: %s UTC" % (hr, tile, 
+                                            now.strftime("%Y-%m-%d %H:%M"))
             continue
         tilemeta, val = util.reader(fn)
         ''' There is currently a bug with how MRMS computes missing data :( '''
