@@ -87,18 +87,18 @@ def doit(gts, hr):
     # Now we need to generate the world file
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p%sh.wld GIS/q2/p%sh_%s.wld wld' %s.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/p%sh.wld GIS/mrms/p%sh_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p%sh.png GIS/q2/p%sh_%s.png png' %s.png" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/p%sh.png GIS/mrms/p%sh_%s.png png' %s.png" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Create 900913 image
     cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
     subprocess.call( cmd , shell=True)
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p%sh.tif GIS/q2/p%sh_%s.tif tif' %s.tif" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/mrms/p%sh.tif GIS/mrms/p%sh_%s.tif tif' %s.tif" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     
@@ -106,7 +106,7 @@ def doit(gts, hr):
     j.write( json.dumps(dict(meta=metadata)))
     j.close()
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/4326/q2/p%sh.json GIS/q2/p%sh_%s.json json' %s.json" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/4326/mrms/p%sh.json GIS/mrms/p%sh_%s.json json' %s.json" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     for suffix in ['tif', 'json', 'png', 'wld']:

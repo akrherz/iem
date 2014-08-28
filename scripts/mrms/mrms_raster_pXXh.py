@@ -109,7 +109,6 @@ if __name__ == '__main__':
                                     int(sys.argv[3]),
                                     int(sys.argv[4]), 0).replace(
                                                 tzinfo=pytz.timezone("UTC"))
-        do( utcnow , 24)
         do( utcnow , 1)
     else:
         print 'Usage: python mrms_pXXh_comp.py YYYY MM DD HR'
