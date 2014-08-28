@@ -1,12 +1,20 @@
 <?php
 include("../../../config/settings.inc.php");
-define("IEM_APPID", 38);
 include("../../../include/myview.php");
-$t = new MyView();
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 include("../../../include/database.inc.php");
-$pgconn = iemdb("access");
 include("../../../include/network.php");
+include("../../../include/forms.php");
+
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+
+$yselect = yearSelect2(2002, $year, "year");
+
+define("IEM_APPID", 38);
+$t = new MyView();
+$t->thispage = "networks-awos";
+$t->title = "Iowa AWOS Monthly Precipitation";
+
+$pgconn = iemdb("access");
 $nt = new NetworkTable("AWOS");
 $cities = $nt->table;
 
@@ -21,7 +29,7 @@ WHERE
  and pday >= 0
 GROUP by id, month");
 $data = Array();
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 {
   if (!array_key_exists($row['id'], $data))
   { 
@@ -32,7 +40,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 }
 $t->headextra = '
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/TableGrid.js"></script>
 <script>
@@ -53,8 +61,6 @@ Ext.onReady(function(){
 });
 </script>
 ';
-$t->thispage = "networks-awos";
-$t->title = "Iowa AWOS Monthly Precipitation";
 
 reset($data);
 function friendly($val){
@@ -81,12 +87,21 @@ while (list($key,$val) = each($data)){
 
 $d = date("d M Y h a");
 $t->content = <<<EOF
-<h3>{$year} Iowa AWOS Precipitation Report</h3>
+<ol class="breadcrumb">
+	<li><a href="/AWOS/">AWOS Mainpage</a></li>
+	<li>{$year} Iowa AWOS Precipitation Report</li>
+</ol>
 
 <p>This table was generated at {$d} and is based
-on AWOS minute by minute data.  No attempt was made to estimate missing data.</p>
+on available AWOS data.  
+<strong>No attempt was made to estimate missing data.</strong></p>
 
-<button id="create-grid" type="button">Interactive Grid</button>
+<form name="change">
+<p>{$yselect}
+<input type="submit" value="Change Year" />
+</form>
+
+<p><button id="create-grid" type="button">Interactive Grid</button>
 
 <TABLE border="1" cellpadding="2" cellspacing="0" width="100%" id="datagrid">
 <thead>
