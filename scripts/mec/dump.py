@@ -11,19 +11,20 @@ o = open('turbines.csv', 'w')
 o.write("TID,LON,LAT\n")
 
 p = open('turbine_data.csv', 'w')
-p.write("TID,VALID_UTC,POWER,YAW,WINDSPEED\n")
+p.write("TID,VALID_UTC,POWER,YAW,WINDSPEED,PITCH\n")
 
 for row in cursor:
     o.write("%s,%.6f,%.6f\n" % (row[0], row[2], row[3]))
     
     cursor2.execute("""SELECT valid at time zone 'UTC', power, yaw, 
-    windspeed from turbine_data_%s where power is not null and 
-    yaw is not null and windspeed is not null""" % (row[1],))
+    windspeed, pitch from sampled_data_%s WHERE
+    valid between '2009-04-01' and '2009-05-01' 
+    ORDER by valid ASC """ % (row[1],))
     
     for row2 in cursor2:
-        p.write("%s,%s,%s,%s,%s\n" % (row[0], 
+        p.write("%s,%s,%s,%s,%s,%s\n" % (row[0], 
                     row2[0].strftime("%Y-%m-%d %H:%M:%S"), row2[1],
-                    row2[2], row2[3]))
+                    row2[2], row2[3], row2[4]))
     print row[0], cursor2.rowcount
     
 p.close()

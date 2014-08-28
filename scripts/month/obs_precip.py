@@ -1,7 +1,5 @@
 # Generate a map of this month's observed precip
 
-import sys
-import os
 from pyiem.plot import MapPlot
 
 import datetime

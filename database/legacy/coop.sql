@@ -4,7 +4,7 @@
 CREATE TABLE hayhoe_daily(
   model varchar(32),
   scenario varchar(8),
-  station varchar(5),
+  station varchar(6),
   day date,
   high real,
   low real,
