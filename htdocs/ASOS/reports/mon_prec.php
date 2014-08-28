@@ -1,4 +1,4 @@
-<<?php
+<?php
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
 include("../../../include/database.inc.php");
