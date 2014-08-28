@@ -9,7 +9,7 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 
 $yselect = yearSelect2(2004, $year, "year");
 
-define("IEM_APPID", 38);
+define("IEM_APPID", 29);
 $t = new MyView();
 $t->thispage = "networks-asos";
 $t->title = "Iowa ASOS Monthly Precipitation";
