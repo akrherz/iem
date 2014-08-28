@@ -1,8 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | High Temperature Forecasting";
-include("$rootpath/include/header.php"); ?>
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "High Temperature Forecasting";
 
+$t->content = <<<EOF
 <h3>High Temperature Forecasting Methods</h3>
 
 <p><img src="figs/year.png">
@@ -20,6 +22,6 @@ include("$rootpath/include/header.php"); ?>
 <img src="figs/dec.png">
 
 <p>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
