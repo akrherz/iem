@@ -16,7 +16,6 @@
 192.168.0.22     iem22         iem22.local
 192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
 192.168.0.40     iem40         iem40.local
-192.168.0.49     metvm0
 192.168.0.50     iem50         iem50.local 
 192.168.0.60     iem60         iem60.local
 192.168.0.70     iem70         iem70.local
