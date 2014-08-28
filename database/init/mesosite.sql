@@ -1,3 +1,24 @@
+--- ==== TABLES TO investigate deleting
+--- counties
+--- cwas
+--- states
+--- tz_world  (scripts/dbutil/set_timezone.py)
+
+
+---
+--- Store metadata used to drive the /timemachine/
+---
+CREATE TABLE archive_products(
+	id SERIAL,
+	name varchar,
+	template varchar,
+	sts timestamptz,
+	interval int,
+	groupname varchar,
+	time_offset int,
+	avail_lag int);
+GRANT SELECT on archive_products to nobody,apache;
+
 CREATE TABLE iembot_room_syndications (
 	roomname character varying(64),    
 	endpoint character varying(64),    
@@ -319,7 +340,10 @@ CREATE table feature(
   abstain smallint default 0,
   voting boolean default true,
   tags varchar(1024),
-  fbid bigint);
+  fbid bigint,
+  abstain smallint,
+  appurl varchar(1024)
+);
 alter table feature SET WITH oids;
 CREATE unique index feature_title_check_idx on feature(title);
 CREATE index feature_valid_idx on feature(valid);
