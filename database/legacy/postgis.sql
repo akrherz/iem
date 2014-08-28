@@ -468,7 +468,7 @@ CREATE TABLE sigmets_current(
 	expire timestamp with time zone,
 	raw text
 );
-SELECT AddGeometryColumn('sigmets_current', 'geom', 4326, 'MULTIPOLYGON', 2);
+SELECT AddGeometryColumn('sigmets_current', 'geom', 4326, 'POLYGON', 2);
 GRANT SELECT on sigmets_current to nobody,apache;
 
 CREATE TABLE sigmets_archive(
@@ -478,7 +478,7 @@ CREATE TABLE sigmets_archive(
 	expire timestamp with time zone,
 	raw text
 );
-SELECT AddGeometryColumn('sigmets_archive', 'geom', 4326, 'MULTIPOLYGON', 2);
+SELECT AddGeometryColumn('sigmets_archive', 'geom', 4326, 'POLYGON', 2);
 GRANT SELECT on sigmets_archive to nobody,apache;
 
 

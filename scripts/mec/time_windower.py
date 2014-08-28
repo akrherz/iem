@@ -1,1 +1,0 @@
-""" Take the raw turbine data and make window'd data out of it """

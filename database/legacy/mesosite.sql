@@ -1,3 +1,7 @@
+CREATE TABLE iembot_room_syndications (
+	roomname character varying(64),    
+	endpoint character varying(64),    
+	convtype character(1));
 
 
 CREATE TABLE iembot_fb_access_tokens (
