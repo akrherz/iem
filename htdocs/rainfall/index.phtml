@@ -1,16 +1,20 @@
 <?php
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
-$t = new MyView();
-$t->title = "Rainfall";
-$t->thispage = "gis-rainfall";
 include("../../include/forms.php");
+
+$t = new MyView();
+$t->title = "GIS-Ready Rainfall Data";
+$t->thispage = "gis-rainfall";
 
 $mselect = monthSelect( date("m", time() - 86400) );
 $dselect = daySelect( date("d", time() - 86400) );
 $yselect = yearSelect(1997, date("Y", time() - 86400), "year");
 $ys = yearSelect2(1997, date("Y"), "syear");
 $ye = yearSelect2(1997, date("Y"), "eyear");
+
+$archivedir = '/archive/data/'. date("Y") .'/'. date('m') .'/'. date('d') .'/GIS/mrms';
+
 $t->content = <<<EOF
 <h3>IEM Rainfall</h3>
 
@@ -19,8 +23,13 @@ the state of Iowa.  These estimates are provided freely via the Internet with
 no warranty or claim of accuracy.  Currently, there are a number of ways you
 can view/download this dataset.</p>
 
+<p><ul>
+ <li><a href="#about">About Precipitation Estimates</a></li>
+ <li><a href="#mrms">Multi-RADAR Multi-Sensor Products</a></li>
+</ul>
+
 <h3>Request Data by Point</h3>
-<div class="iem-form">
+
 <form method="GET" action="bypoint.phtml" name="bypoint">
 <b>Instructions:</b> With this form you can request daily estimates of rainfall
 for a particular year and for a particular point.  This point can be specified 
@@ -35,7 +44,8 @@ in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may
 	<option value="online">Online
 	<option value="download">Download to disk
 </select>
-<table>
+
+<table class="table table-bordered">
 <thead>
 <tr>
 	<th colspan="6">Choose a method to select data point:</th>
@@ -50,19 +60,21 @@ in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may
 <tr>
 <td><b>Latitude:</b></td> <td><input type="text" name="lat" size="6"></td>
 <td><b>Street Address:</b></td> <td> <input type="text" name="street"></td>
-<td><b>Enter ID:</b></td> <td> <input type="text" name="nwsli" size="6"></td>
+<td rowspan="2"><b>Enter ID:</b></td> 
+<td rowspan="2"><input type="text" name="nwsli" size="6"></td>
 </tr>
 <tr>
 <td><b>Longitude:</b></td> <td> <input type="text" name="lon" size="6"></td>
 <td><b>City in Iowa:</b></td> <td> <input type="text" name="city"></td>
-<td></td></td> <td></tr>
+</tr>
 </tbody>
 </table>
 <input type="submit" value="Show Data">
 </form>
-</div>
+
 
 <h3>GIS Shapefiles</h3>
+
 <form method="GET" action="dshape.php" name="shapefile">
 <div class="iem-form">
 <b>Instructions:</b>  Please select the date you would like to download a zip 
@@ -118,11 +130,14 @@ tested.  If you run into any problems, please let us know!
 
 </div>
 
-<h3>About Rainfall Estimates</h3>
+<h3><a name="about" href="#about"><i class="glyphicon glyphicon-bookmark"></i></a> About Precipitation Estimates</h3>
+
 
 These rainfall estimates are directly based on
-the <a href="http://www.emc.ncep.noaa.gov/mmb/ylin/pcpanl/stage4/">Stage 4</a> precipitation analysis produced by the <a href="http://www.ncep.noaa.gov">National Center for 
-Environmental Prediction</a>.  The IEM processes this data source in the following ways:
+the <a href="http://www.emc.ncep.noaa.gov/mmb/ylin/pcpanl/stage4/">Stage 4</a> 
+precipitation analysis produced by the 
+<a href="http://www.ncep.noaa.gov">National Center for Environmental Prediction</a>.  
+The IEM processes this data source in the following ways:
 <ul>
 	<li>Extract data valid for Iowa from the national analyses.</li>
 	<li>Convert the data from Grib format to a relational database.</li>
@@ -134,7 +149,47 @@ Environmental Prediction</a>.  The IEM processes this data source in the followi
 These estimates are later revised as more information is made available to 
 better refine the estimates.  If you downloaded data for yesterday at the time,
 you may wish to redownload that dataset again later, since the estimates may 
-be refined then.  Sounds confusing.  Please <a href="/info/contacts.php">contact us</a> if you have questions.</p>
+be refined then.  Sounds confusing.  Please 
+<a href="/info/contacts.php">contact us</a> if you have questions.</p>
+
+
+<h3><a name="mrms" href="#mrms"><i class="glyphicon glyphicon-bookmark"></i></a> MRMS Q3 Estimates</h3>
+
+<p>NOAA has begun working on an advanced replacement of the system that produces
+rainfall estimates.  This project is called 
+<a href="http://mrms.ou.edu/">Multi-RADAR Multi-Sensor System</a>.  The IEM 
+processes some of the data found in this feed and produces products from it.
+			
+<h4>GIS RASTER PNG Images of Accumulation Estimates</h4>
+			
+<p>The technique used provides 8-bit PNG images whereby a function can be used
+to convert the 8-bit value into a rainfall.  This equation is different for
+the various products produced by the IEM in order to accomodate the data ranges
+necessary to capture.  These images can be found in a 
+<a href="/data/gis/images/4326/mrms/">current directory</a>
+and <a href="{$archivedir}">date based archive</a>. The units for the data is
+millimeters.</p>
+
+<p><strong>1,24,48,72 Hour Precipitation</strong>
+<br ><table class="table">
+<thead>
+<tr><th>8-bit value/index</th><th>Precip [mm]</th><th>Approx Precip [in]</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>1-100 (0.25mm)</td><td>0.25 to 25</td><td>~0.01 to 1 inch</td></tr>
+<tr><td>101-180 (1.25mm)</td><td>26.25 to 125</td><td>~1.05 to 5 inch</td></tr>
+<tr><td>181-254 (5mm)</td><td>130 to 500</td><td>~5 to 20 inch</td></tr>
+<tr><td>255</td><td>Missing</td><td>Missing</td></tr>
+</tbody>
+</table>
+
+		<p class="bg-info">Please note that there is a current bug with how the
+		one hour precipitation is generated by the MRMS project.  The bug prevents
+		the proper delination between zero and missing precipitation.  The IEM
+		has long whined to the MRMS project about fixing this bug.</p>
+		
+
 EOF;
 $t->render('single.phtml');
 ?>
