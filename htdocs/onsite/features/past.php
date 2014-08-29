@@ -67,7 +67,7 @@ for ($i = 0; $i < $num; $i++){
 	
 	$table .= <<<EOF
 <div class="row">
-  <div class="col-xs-12 well well-sm">{$row["calhead"]}</large></div>
+  <div class="col-md-12 well well-sm">{$row["calhead"]}</large></div>
 </div>
 
 <div class="row">

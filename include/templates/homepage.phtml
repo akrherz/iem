@@ -11,7 +11,7 @@ $connection = iemdb("mesosite", TRUE, TRUE);
     <div class="container">
       <div class="row">
 
-        <div class="col-xs-8">
+        <div class="col-sm-8">
        
  <p>The Iowa Environmental Mesonet (IEM) collects environmental data from 
  cooperating members with observing networks. The data are stored and made 
@@ -24,8 +24,8 @@ $connection = iemdb("mesosite", TRUE, TRUE);
 </div>
 	
 		<?php echo $this->feature; ?>		
-        </div><!--/col-md-8-->
-        <div class="col-xs-4">
+        </div><!--/col-sm-8-->
+        <div class="col-sm-4">
 
 <?php 
 
@@ -115,7 +115,7 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
 
 <!-- Three columns highlighting stuff -->
 <div class="row">
-    <div class="col-xs-4">
+    <div class="col-sm-4">
         <h3>RADAR Products</h3>
         <a href="/timemachine/#2.0"><img src="/data/mwcomp.png" class="img-responsive" /></a>
         <p>The IEM processes National Weather Service NEXRAD information
@@ -124,7 +124,7 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
         every five minutes dating back to 1995!</p>
         <p><a class="btn" href="/current/radar.phtml">View more products &raquo;</a></p>
     </div>
-    <div class="col-xs-4">
+    <div class="col-sm-4">
         <h3>Precipitation</h3>
         <a href="/timemachine/#45.0"><img src="/data/iowa_q2_1d.png" class="img-responsive" /></a>
         <p>Besides point observations of precipitation, the IEM also processes
@@ -132,7 +132,7 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
         is archived and made available in GIS ready formats.</p>
         <p><a class="btn" href="/rainfall/">Download Precipitation for GIS &raquo;</a></p>
     </div>
-    <div class="col-xs-4">
+    <div class="col-sm-4">
         <h3>Current Data</h3>
         <a href="/timemachine/#1.0"><img src="/data/mesonet.gif" class="img-responsive" /></a>
         <p>The IEM combines data from participating networks into products
@@ -142,20 +142,20 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
 </div><!--/row-->
 
 <div class="row clearfix well">
-<div class="col-xs-2"><h4>Partners:</h4></div>
-<div class='col-xs-4'>
+<div class="col-sm-2"><h4>Partners:</h4></div>
+<div class='col-sm-4'>
 <a href="http://www.agron.iastate.edu/"><img
 src="/images/agronomy.png" alt="ISU Agronomy" class="img-responsive"></a>
 </div>
-<div class='col-xs-2'>
+<div class='col-sm-2'>
 <a href="http://www.iihr.uiowa.edu"><img src="images/iihrlogo.jpg"
   alt="IIHR - University of Iowa" class="img-responsive" /></a>
 </div>
-<div class='col-xs-3'>
+<div class='col-sm-3'>
  <a href="http://www.dot.state.ia.us"><img src="images/doticon.gif"
  alt="DOT" class="img-responsive" /></a>
 </div>
-<div class='col-xs-1'>
+<div class='col-sm-1'>
   <a href="http://www.crh.noaa.gov/dmx/"><img src="images/nws.gif"
   alt="NWS" class="img-responsive" /></a>
 </div>

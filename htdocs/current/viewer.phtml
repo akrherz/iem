@@ -14,7 +14,7 @@ $t = new MyView();
  $cnt = 0;
  while (list($cid, $v) = each($cameras) ) {
  	if ($v["active"] && $v["network"] != "IDOT"){
- 		$camselect .= "<div class=\"col-xs-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
+ 		$camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
  		if ($cid == $id) { $camselect .= "checked=\"checked\""; }
  		$camselect .= " onClick=\"setCameraFromForm();\">". $v["name"] ."</label></div>\n";
  		$cnt += 1;
@@ -255,39 +255,39 @@ function switchRADAR(){
 <br />
 <form name="radar">
 <div class="row">
-<div class="col-xs-6">
+<div class="col-md-6">
 <input type="radio" name="nexrad" value="nexrad-n0q-900913"
              onclick="switchRADAR()" checked="checked">US Composite</input>
 </div>
-<div class="col-xs-6">
+<div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::DVN-N0Q-0"
              onclick="switchRADAR()">Davenport Reflectivity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::DVN-N0U-0"
              onclick="switchRADAR()">Davenport Velocity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::DMX-N0Q-0"
              onclick="switchRADAR()">Des Moines Reflectivity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::DMX-N0U-0"
              onclick="switchRADAR()">Des Moines Velocity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::ARX-N0Q-0"
              onclick="switchRADAR()">LaCrosse Reflectivity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::ARX-N0U-0"
              onclick="switchRADAR()">LaCrosse Velocity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::FSD-N0Q-0"
              onclick="switchRADAR()">Sioux Falls Reflectivity</input>
 </div>
-             <div class="col-xs-6">
+             <div class="col-md-6">
 <input type="radio" name="nexrad" value="ridge::FSD-N0U-0"
              onclick="switchRADAR()">Sioux Falls Velocity</input>
 </div>
