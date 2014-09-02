@@ -173,8 +173,11 @@ if __name__ == '__main__':
         sys.stdout.write("""<th><abbr title="%s">%s</abbr></th>""" % (
                                                 varlookup[dv], dv))
     sys.stdout.write("</tr></thead>")
-    for sid in sites:
-        sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
+    for i, sid in enumerate(sites):
+        lbl = "SITE_%s" % (i,)
+        if i == 0:
+            lbl = sid
+        sys.stdout.write("""<tr><th>%s</th>""" % (lbl,))
         for datavar in dvars:
             row = data[sid].get(datavar, None)
             sys.stdout.write('<td>%s</td>' % (make_progress(row)))
