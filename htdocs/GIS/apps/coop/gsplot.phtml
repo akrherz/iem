@@ -5,7 +5,13 @@ include("../../../../include/database.inc.php");
 $coopdb = iemdb("coop");
 include("../../../../include/forms.php");
 include("../../../../include/network.php");
+/** Need to use external date lib
+ * http://php.weblogs.com/adodb_date_time_library
+ */
+include("../../../../include/adodb-time.inc.php");
+include_once "../../../../include/myview.php";
 
+$t = new MyView();
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400);
@@ -18,10 +24,7 @@ $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-/** Need to use external date lib 
-  * http://php.weblogs.com/adodb_date_time_library
-  */
-include("../../../../include/adodb-time.inc.php");
+
 
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
@@ -33,76 +36,12 @@ $imgurl = sprintf("gsplot.php?network=%s&smonth=%s&sday=%s&var=%s&emonth=%s&eday
   $network, $smonth, $sday, $var, $emonth, $eday, $year);
 
 
-$TITLE = "IEM | NWS COOP Growing Season Data";
-$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
-        link = 
-        window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
-} 
-//END Script-->
-</script>';
-$THISPAGE="current-gs";
-include("../../../../include/header.php"); ?>
+$t->title = "NWS COOP Growing Season Data";
+$t->thispage = "current-gs";
 
-<div class="text">
-
-<h3>Custom Date Duration Charts</h3>
-
-<p>With this application, you can total a parameter of your
-choice over a duration of your choice.  The resulting data is presented 
-graphically as well as textually for use in a GIS. The end date is inclusive to
-the data presented. The raw daily data used for this application can be downloaded
-from <a href="/request/coop/fe.phtml">here</a>.
-
-<form method="GET" action="gsplot.phtml" name="theform">
-<table>
- <tr>
-   <th>Available State:</th>
-   <th>Select Parameter:</th>
-   <th>Year</th>
-   <th>Month</th>
-   <th>Day</th>
-   <td></td>
-  </tr>
- <tr>
- <td rowspan="2">
- <select name="network">
- <?php 
- $mesosite = iemdb("mesosite");
- $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'CLIMATE'
-    and id not in ('MSCLIMATE') ORDER by name ASC");
- for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-    echo sprintf("<option value='%s' %s>%s</option>\n", $row["id"],
-    		($row["id"] == $network)? "selected='selected'": "", $row["name"]);
- }
- pg_close($mesosite);
- ?>
- </select>
- </td>
-  <td rowspan="2"><select name="var">
-     <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50)</option>
-     <option value="prec" <?php if($var == "prec") echo "SELECTED"; ?>>Precipitation</option>
-     <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
-     <option value="mintemp" <?php if($var == "mintemp") echo "SELECTED"; ?>>Minimum Temperature</option>
-	 <option value="maxtemp" <?php if($var == "maxtemp") echo "SELECTED"; ?>>Maximum Temperature</option>
-    </select></td>
-  <td rowspan=2><?php echo yearselect(1893, $year); ?></td>
-  <td><?php echo monthSelect2($smonth, 'smonth'); ?></td>
-  <td><?php echo daySelect2($sday, 'sday'); ?></td>
-  <td rowspan=2><input type="submit" value="Make Plot"></td>
-  </tr>
- <tr>
-  <td><?php echo monthSelect2($emonth, 'emonth'); ?></td>
-  <td><?php echo daySelect2($eday, 'eday'); ?></td>
-  </tr>
-</table>
-</form>
-
-<?php
-
-$tr = sprintf("# IEM Estimated COOP Accumulations (%s - %s)\n", adodb_date("Y-m-d", $sts),
-	adodb_date("Y-m-d", $ets) );
+$tr = sprintf("# IEM Estimated COOP Accumulations (start: %s to inclusive date: %s)\n", 
+		adodb_date("Y-m-d", $sts),
+		adodb_date("Y-m-d", $ets) );
 $tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml
 # Download Date: ". strftime("%d %b %Y") ."
 # CLIM_ values are based on climatology 1951-today
@@ -113,54 +52,120 @@ $state = substr($network,0,2);
 
 /* Query the obs */
 $rs = pg_prepare($coopdb, "SELECT", "SELECT foo.station, s_rainfall,
-    s_gdd50, s_sdd86, c_rainfall, c_gdd50, s_sdd86, s_mintemp,
-      s_maxtemp from (
-      SELECT station, 
-	  sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
-	  sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
-	  max(high) as s_maxtemp from alldata_${state} 
-	  WHERE day >= $1 and day < $2 GROUP by station) as foo,
-	 (SELECT station, 
-      sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
-      sum(sdd86) as c_sdd86 from climate51 
-      WHERE valid >= $3 and valid < $4 GROUP by station) as foo2
-	WHERE foo2.station = foo.station ORDER by foo.station ASC");
+		s_gdd50, s_sdd86, c_rainfall, c_gdd50, s_sdd86, s_mintemp,
+		s_maxtemp from (
+		SELECT station,
+		sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
+		sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
+		max(high) as s_maxtemp from alldata_${state}
+WHERE day >= $1 and day < $2 GROUP by station) as foo,
+(SELECT station,
+sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
+sum(sdd86) as c_sdd86 from climate51
+WHERE valid >= $3 and valid <= $4 GROUP by station) as foo2
+WHERE foo2.station = foo.station ORDER by foo.station ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
-	adodb_date("Y-m-d", $ets), "2000-". adodb_date('m-d', $sts), 
-	"2000-". adodb_date('m-d', $ets)));
+		adodb_date("Y-m-d", $ets), "2000-". adodb_date('m-d', $sts),
+		"2000-". adodb_date('m-d', $ets)));
 
 
-$tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID', 
+		$tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID',
  'StationName', 'Latitude', 'Longitude', 'GDD50', 'SDD86', 'PRECIP',
  'CLIM_GDD50', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP');
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
-  $ukey = $row["station"];
-  if (! isset($cities[$ukey]) ) continue;
-  $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey, 
+$ukey = $row["station"];
+	if (! isset($cities[$ukey]) ) continue;
+	$tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey,
   $cities[$ukey]['name'],
-  $cities[$ukey]['lat'], $cities[$ukey]['lon'], 
-  $row["s_gdd50"], $row["s_sdd86"], $row["s_rainfall"],
+  $cities[$ukey]['lat'], $cities[$ukey]['lon'],
+  		$row["s_gdd50"], $row["s_sdd86"], $row["s_rainfall"],
   $row["c_gdd50"], $row["c_rainfall"], $row["s_maxtemp"],
   $row["s_mintemp"] );
 }
-?>
+
+$netselect = "<select name=\"network\">";
+$mesosite = iemdb("mesosite");
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'CLIMATE'
+    and id not in ('MSCLIMATE') ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$netselect .= sprintf("<option value='%s' %s>%s</option>\n", $row["id"],
+			($row["id"] == $network)? "selected='selected'": "", $row["name"]);
+}
+$netselect .= "</select>";
+
+$ar = Array(
+	"gdd50" => "Growing Degree Days (base=50)",
+	"prec" => "Precipitation",
+	"sdd86" => 	"Stress Degree Days (base=86)",
+	"mintemp" => "Minimum Temperature",
+	"maxtemp" => "Maximum Temperature",
+);
+$vselect = make_select("var", $var, $ar );
+$yselect = yearselect(1893, $year);
+$m1select = monthSelect2($smonth, 'smonth');
+$d1select = daySelect2($sday, 'sday');
+$m2select = monthSelect2($emonth, 'emonth');
+$d2select = daySelect2($eday, 'eday');
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/COOP/">NWS Cooperative Network</a></li>
+ <li class="active">Custom Date Duration Charts</li>
+</ol>
+
+<p>With this application, you can total a parameter of your
+choice over a duration of your choice.  The resulting data is presented 
+graphically as well as textually for use in a GIS. 
+<strong>The end date is inclusive to the data presented.</strong> 
+The raw daily data used for this application can be downloaded
+from <a href="/request/coop/fe.phtml">here</a>.
+
+<form method="GET" action="gsplot.phtml" name="theform">
+<table class="table table-condensed">
+<thead>
+ <tr>
+   <th>Available State:</th>
+   <th>Select Parameter:</th>
+   <th>Year</th>
+   <th>Month</th>
+   <th>Day</th>
+   <th></th>
+  </tr>
+  </thead>
+  <tbody>
+ <tr>
+ <td rowspan="2">
+ {$netselect}
+ </td>
+  <td rowspan="2">{$vselect}</td>
+  <td>{$yselect}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td>
+  <td rowspan=2><input type="submit" value="Make Plot"></td>
+  </tr>
+ <tr>
+  <td>to inclusive date:</td>
+  <td>{$m2select}</td>
+  <td>{$d2select}</td>
+  </tr>
+  </tbody>
+</table>
+</form>
 
 <p>*Note: Only a sub-sample of stations are plotted on the map due to 
 space restrictions.
 <br />
-  <img src="<?php echo $imgurl; ?>" border=1 />
+  <img src="{$imgurl}" class="img img-responsive" />
   </p>
 
-<p>
-<img src="/images/gisready.png"><h3 class="heading"> Data Listing</h3>
-<pre><?php echo $tr; ?></pre>
+<h3> Data Listing</h3>
+<pre>{$tr}</pre>
 
 <p>You should be able to 'copy &amp; paste' this raw data listing into a simple
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
-(#) if your GIS has trouble importing the data.</div>
-
-<?php 
-  include("../../../../include/footer.php");
+(#) if your GIS has trouble importing the data.
+EOF;
+$t->render('single.phtml');
 ?>

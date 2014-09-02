@@ -40,14 +40,7 @@ function mktitlelocal($map, $imgObj, $titlet) {
      // point feature with text for location
   $point = ms_newpointobj();
   $point->setXY( 0, 10);
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet ."                                                                                ");
-
-     // point feature with text for location
-//  $point = ms_newpointobj();
-//  $point->setXY( 0, 460);
-//  $point->draw($map, $layer, $imgObj, 1,
-//    "  Iowa Environmental Mesonet | NWS COOP ");
+  $point->draw($map, $layer, $imgObj, 0, $titlet );
 }
 
 function plotNoData($map, $img){
@@ -133,7 +126,7 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT station,
 	sum(precip) as s_prec, sum(gdd50(high,low)) as s_gdd50,
 	sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
 	max(high) as s_maxtemp from alldata 
-	WHERE day >= $1 and day < $2 GROUP by station 
+	WHERE day >= $1 and day <= $2 GROUP by station 
 	ORDER by station ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets)));
@@ -164,7 +157,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 if ($i == 0)
    plotNoData($map, $img);
 
-   $title = sprintf("%s (%s - %s)", $varDef[$var], adodb_date("Y-m-d", $sts),
+   $title = sprintf("%s (%s through %s)", $varDef[$var], adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets));
    
 mktitlelocal($map, $img, $title);
