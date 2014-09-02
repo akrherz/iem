@@ -26,10 +26,11 @@ import sys
 import re
 import mx.DateTime
 import psycopg2
-PORTFOLIO = psycopg2.connect("dbname=portfolio host=iemdb user=nobody")
+# Use SSH proxy 
+PORTFOLIO = psycopg2.connect("dbname=portfolio host=localhost port=5555 user=nobody")
 pcursor = PORTFOLIO.cursor()
 
-CALINFO = re.compile(".*Calibrated? T/DP: AWOS:?\s*([0-9\-\.]+)/([0-9\-\.]+) Std\.? ([0-9\-\.]+)/([0-9\-\.]+)")
+CALINFO = re.compile(".*Calibrated? T/DP: AWOS:?\s*([0-9\-\.]+)/([0-9\-\.]+) Std:\.? ([0-9\-\.]+)/([0-9\-\.]+)")
 
 data = sys.stdin.read()
 
@@ -52,12 +53,14 @@ for line in data.split("\n"):
     tempadj = float(parts[0][2]) - float(parts[0][0])
     args = (faa, date.strftime("%Y-%m-%d"), 'tmpf', tempadj,
             parts[0][2], tokens[3].replace('"', ''))
-    pcursor.execute(sql, args)
+    if len(sys.argv) > 1:
+        pcursor.execute(sql, args)
     
     dewpadj = float(parts[0][3]) - float(parts[0][1])
     args = (faa, date.strftime("%Y-%m-%d"), 'dwpf', float(parts[0][3]) - float(parts[0][1]),
             parts[0][3], tokens[3].replace('"', ''))
-    pcursor.execute(sql, args)
+    if len(sys.argv) > 1:
+        pcursor.execute(sql, args)
     
     print '--> %s [%s] TMPF: %s (%s) DWPF: %s (%s)' % (faa, tokens[1],
                                                    parts[0][2], tempadj,
