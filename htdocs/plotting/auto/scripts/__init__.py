@@ -18,5 +18,6 @@ data = {'plots': [
         {'id': "10", 'label': "Last Spring and First Fall Date below given threshold"},
         {'id': "12", 'label': "Days per year and latest date above given threshold"},
         {'id': "13", 'label': "End Date of Summer (warmest 91 day period) per Year"},
+        {'id': "14", 'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
 ]}
