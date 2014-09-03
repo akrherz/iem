@@ -110,7 +110,7 @@ def plotter( fdict ):
     ax.grid(True)
     ax.set_ylabel("Days")
     ax.text(0.5, -0.05, ("Precipitation Bins [inch], split into equal 20%%"
-                        +" by rain volume (%.2f")  % (normal/5.0,), 
+                        +" by rain volume (%.2fin)")  % (normal/5.0,), 
                         transform=ax.transAxes,
             va='top', ha='center')
     ax.set_title("%s [%s] [%s-%s]\nDaily Precipitation Contributions" % (
