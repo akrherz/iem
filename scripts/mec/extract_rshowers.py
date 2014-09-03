@@ -38,7 +38,7 @@ for line in dates.split("\n"):
     for row in cursor:
         ts = row[0].astimezone(pytz.timezone("UTC"))
         output.write("%s,%s,%s,%s,%s\n"  % ( 
-           row[0].strftime("%Y-%m-%d %H:%M:%S"), 
+           ts.strftime("%Y-%m-%d %H:%M:%S"), 
            c(row[1]), c(row[2]), c(row[3]), row[4] ))
 
     output.close()
