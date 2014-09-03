@@ -58,7 +58,7 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT foo.station, s_rainfall,
 		sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
 		sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
 		max(high) as s_maxtemp from alldata_${state}
-WHERE day >= $1 and day < $2 GROUP by station) as foo,
+WHERE day >= $1 and day <= $2 GROUP by station) as foo,
 (SELECT station,
 sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
 sum(sdd86) as c_sdd86 from climate51
