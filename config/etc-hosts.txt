@@ -30,6 +30,7 @@
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
 192.168.0.200    iem-idd0      iem-idd0.local
+192.168.0.231    iemvm1
 192.168.0.233    iemvm3
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
