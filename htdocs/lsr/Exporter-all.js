@@ -73,7 +73,8 @@ Ext.override(Ext.grid.GridPanel, {
     getExcelXml: function(includeHidden) {
         var worksheet = this.createWorksheet(includeHidden);
         var totalWidth = this.getColumnModel().getTotalWidth(includeHidden);
-        return '<xml version="1.0" encoding="utf-8">' +
+        return '<?xml version="1.0" encoding="utf-8"?>' +
+        	'<?mso-application progid="Excel.Sheet"?>' +
             '<ss:Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:o="urn:schemas-microsoft-com:office:office">' +
             '<o:DocumentProperties><o:Title>' + this.title + '</o:Title></o:DocumentProperties>' +
             '<ss:ExcelWorkbook>' +
@@ -158,7 +159,7 @@ Ext.override(Ext.grid.GridPanel, {
                         cellTypeClass.push("");
                         continue;
                 }
-                switch(fld.type) {
+                switch(fld.type.type) {
                     case "int":
                         cellType.push("Number");
                         cellTypeClass.push("int");
@@ -199,12 +200,6 @@ Ext.override(Ext.grid.GridPanel, {
                 ' ss:ExpandedColumnCount="' + visibleColumnCount +
                 '" ss:ExpandedRowCount="' + (this.store.getCount() + 2) + '">' +
                 colXml +
-                '<ss:Row ss:Height="38">' +
-                    '<ss:Cell ss:StyleID="title" ss:MergeAcross="' + (visibleColumnCount - 1) + '">' +
-                      '<ss:Data xmlns:html="http://www.w3.org/TR/REC-html40" ss:Type="String">' +
-                        '<html:B>Local Storm Reports (timestamps are UTC)</html:B></ss:Data><ss:NamedCell ss:Name="Print_Titles" />' +
-                    '</ss:Cell>' +
-                '</ss:Row>' +
                 '<ss:Row ss:AutoFitHeight="1">' +
                 headerXml +
                 '</ss:Row>';
@@ -219,12 +214,12 @@ Ext.override(Ext.grid.GridPanel, {
                 if (includeHidden || !cm.isHidden(j)) {
                     var v = r[cm.getDataIndex(j)];
                     t += '<ss:Cell ss:StyleID="' + cellClass + cellTypeClass[k] + '"><ss:Data ss:Type="' + cellType[j] + '">';
-                        if (cm.getDataIndex(j) == ""){ }
-                        else if (cellType[k] == 'DateTime') {
+                    if (cm.getDataIndex(j) == ""){ }
+                    else if (cellType[k] == 'DateTime') {
                             t += v.format('Y-m-d\\TH:i:s');
-                        } else {
+                    } else {
                             t += v;
-                        }
+                    }
                     t +='</ss:Data></ss:Cell>';
                     k++;
                 }

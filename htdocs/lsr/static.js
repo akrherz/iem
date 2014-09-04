@@ -422,16 +422,12 @@ sbwGridPanel = new Ext.grid.GridPanel({
         text    : 'Export to Excel...',
         handler : function(){
            var xd = sbwGridPanel.getExcelXml(true);
-           if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari || Ext.isSafari2 || Ext.isSafari3) {
-                 var dataURL = 'exportexcel.php';
-                 params =[{
-                      name: 'ex',
-                      value: xd
-                 }];
-                 post_to_url(dataURL, params, 'post');
-            } else {
-                 document.location = 'data:application/vnd.ms-excel;base64,' + Base64.encode(xd);
-            }
+         var dataURL = 'exportexcel.php';
+         params =[{
+              name: 'ex',
+              value: xd
+         }];
+         post_to_url(dataURL, params, 'post');
         }
       },{
             xtype     : 'button',
@@ -485,7 +481,9 @@ sbwGridPanel = new Ext.grid.GridPanel({
       fields    : [
          {name: 'wfo'},
          {name: 'issue', type: 'date', dateFormat: 'Y-m-d H:i'},
+         {name: 'lissue', type: 'date', mapping: 'issue', convert: localdate},
          {name: 'expire', type: 'date', dateFormat: 'Y-m-d H:i'},
+         {name: 'lexpire', type: 'date', mapping: 'expire', convert: localdate},
          {name: 'phenomena'},
          {name: 'significance'},
          {name: 'eventid', type:'int'},
@@ -530,16 +528,32 @@ sbwGridPanel = new Ext.grid.GridPanel({
         }, {
             header    : "Issued",
             sortable  : true,
+            dataIndex : "lissue",
+            renderer  : function(value){
+                return value.format('Y-m-d g:i A');
+            }
+        }, {
+            header    : "Issued UTC",
+            sortable  : true,
+            hidden : true,
             dataIndex : "issue",
             renderer  : function(value){
-                return value.fromUTC().format('Y-m-d g:i A');
+                return value.format('Y-m-d g:i');
             }
         }, {
             header    : "Expired",
             sortable  : true,
+            dataIndex : "lexpire",
+            renderer  : function(value){
+                return value.format('Y-m-d g:i A');
+            }
+        }, {
+            header    : "Expired UTC",
+            sortable  : true,
+            hidden : true,
             dataIndex : "expire",
             renderer  : function(value){
-                return value.fromUTC().format('Y-m-d g:i A');
+                return value.format('Y-m-d g:i');
         }
    }],
    sm: new GeoExt.grid.FeatureSelectionModel() 
@@ -561,6 +575,10 @@ function post_to_url(path, params, method) {
      form.submit();
 }
 
+function localdate(v, record){
+	return (new Date(v)).fromUTC();
+}
+
 lsrGridPanel = new Ext.grid.GridPanel({
    autoScroll : true,
    id         : 'lsrGridPanel',
@@ -580,16 +598,12 @@ lsrGridPanel = new Ext.grid.GridPanel({
      text    : 'Export to Excel...',
      handler : function(){
         var xd = lsrGridPanel.getExcelXml(true);
-        if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari || Ext.isSafari2 || Ext.isSafari3) {
               var dataURL = 'exportexcel.php';
               params =[{
                    name: 'ex',
                    value: xd
               }];
               post_to_url(dataURL, params, 'post');
-         } else {
-              document.location = 'data:application/vnd.ms-excel;base64,' + Base64.encode(xd);
-         }
      }
    },{
             xtype     : 'button',
@@ -643,6 +657,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
       fields    : [
          {name: 'wfo', type: 'string'},
          {name: 'valid', type: 'date', dateFormat: 'Y-m-d H:i'},
+         {name: 'lvalid', type: 'date', mapping: 'valid', convert: localdate},
          {name: 'county'},
          {name: 'city'},
          {name: 'st', type: 'string'},
@@ -675,11 +690,19 @@ lsrGridPanel = new Ext.grid.GridPanel({
         }, {
             header    : "Report Time",
             sortable  : true,
-            dataIndex : "valid",
-            renderer  : function(value){
-                return value.fromUTC().format('Y-m-d g:i A');
+            dataIndex : "lvalid",
+            renderer  : function(value, metadata, record){
+                return value.format('Y-m-d g:i A');
             }
         }, {
+            header    : "Report Time UTC",
+            sortable  : true,
+            hidden : true,
+            dataIndex : "valid",
+            renderer  : function(value){
+                return value.format('Y-m-d g:i');
+            }
+        },{
             header: "County",
             sortable  : true,
             dataIndex: "county"
