@@ -80,6 +80,36 @@ def do_apsim( ctx ):
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
     
+    thisyear = datetime.datetime.now().year
+    extra = {}
+    if ctx['scenario'] == 'yes':
+        sts = datetime.datetime(int(ctx['scenario_year']), 1, 1)
+        ets = datetime.datetime(int(ctx['scenario_year']), 12, 31)
+        cursor.execute("""
+            SELECT day, high, low, precip,
+            coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+            from """+table+""" WHERE station = %s 
+            and day >= %s and day <= %s
+            """, (ctx['stations'][0], sts, ets))
+        for row in cursor:
+            ts = row[0].replace(year=thisyear)
+            extra[ ts ] = row
+        febtest = datetime.date(thisyear, 3, 1 ) - datetime.timedelta(days=1)
+        if not extra.has_key(febtest):
+            feb28 = datetime.date(thisyear, 2, 28)
+            extra[febtest] = extra[feb28]
+    
+    ssw("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
+    ssw("! Created: %s UTC\n" % (
+                datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
+    ssw("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
+    ssw("! Station: %s %s\n" % (station, nt.sts[station]['name']))
+    ssw("! Data Period: %s - %s\n" % (ctx['sts'].strftime("%d %b %Y"), 
+                                      ctx['ets'].strftime("%d %b %Y")))
+    if ctx['scenario'] == 'yes':
+        ssw("! !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
+                            ctx['ets'], ctx['scenario_year']))
+    
     ssw("[weather.met.weather]\n")
     ssw("latitude = %.1f (DECIMAL DEGREES)\n" % ( nt.sts[ station ]["lat"]) )
     
@@ -103,28 +133,9 @@ def do_apsim( ctx ):
         (temperature(row['h'], 'F').value('C') - 
         temperature(row['l'], 'F').value('C')), ))
     
-    ssw("""year          day           radn          maxt          mint          rain
-()            ()            (MJ/m^2)      (oC)          (oC)          (mm)\n""")
+    ssw("""year        day       radn       maxt       mint      rain
+  ()         ()   (MJ/m^2)       (oC)       (oC)       (mm)\n""")
 
-    thisyear = datetime.datetime.now().year
-    extra = {}
-    if ctx['scenario'] == 'yes':
-        sts = datetime.datetime(int(ctx['scenario_year']), 1, 1)
-        ets = datetime.datetime(int(ctx['scenario_year']), 12, 31)
-        cursor.execute("""
-            SELECT day, high, low, precip,
-            coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-            from """+table+""" WHERE station = %s 
-            and day >= %s and day <= %s
-            """, (ctx['stations'][0], sts, ets))
-        for row in cursor:
-            ts = row[0].replace(year=thisyear)
-            extra[ ts ] = row
-        febtest = datetime.date(thisyear, 3, 1 ) - datetime.timedelta(days=1)
-        if not extra.has_key(febtest):
-            feb28 = datetime.date(thisyear, 2, 28)
-            extra[febtest] = extra[feb28]
-    
     cursor.execute("""
         SELECT day, high, low, precip, 
         coalesce(narr_srad, merra_srad, hrrr_srad) as srad
@@ -134,7 +145,7 @@ def do_apsim( ctx ):
         """, (station, ctx['sts'], ctx['ets']) )
     for row in cursor:
         srad = -99 if row['srad'] is None else row['srad']
-        ssw(" %s         %.0f        %.4f         %.4f      %.4f     %.2f\n" % (
+        ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % (
             row["day"].year, int(row["day"].strftime("%j")), srad, 
             temperature(row["high"], 'F').value('C'), 
             temperature(row["low"], 'F').value('C'), 
