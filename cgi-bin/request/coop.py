@@ -1,7 +1,11 @@
 #!/usr/bin/env python
-#
-# Download interface for the data stored in coop database (alldata)
-#
+"""
+ Download interface for the data stored in coop database (alldata)
+
+ This is called from /request/coop/fe.phtml
+
+"""
+
 import psycopg2.extras
 import cgi
 import sys
@@ -10,18 +14,16 @@ import zipfile
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 import StringIO
-import copy
-import cgitb
-cgitb.enable()
 
-def set_scenario_period( ctx ):
+def get_scenario_period( ctx ):
     """ Compute the inclusive start and end dates to fetch scenario data for 
     Arguments:
         ctx dictionary context this app was called with
     """
-    ctx['scenario_sts'] = datetime.date(ctx['scenario_year'], ctx['sts'].month,
+    sts = datetime.date(ctx['scenario_year'], ctx['sts'].month,
                                         ctx['sts'].day)
-    ctx['scenario_ets'] = datetime.date(ctx['scenario_year'], 12, 31)
+    ets = datetime.date(ctx['scenario_year'], 12, 31)
+    return sts, ets
 
 def ssw( txt ):
     """ shortcut """
@@ -157,7 +159,8 @@ def do_apsim( ctx ):
         now = row['day']
         while now <= dec31:
             row = extra[now]
-            ssw(" %s         %.0f        %.4f         %.4f      %.4f     %.2f\n" % ( 
+            srad = -99 if row['srad'] is None else row['srad']
+            ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % ( 
                 now.year, int(now.strftime("%j")), srad, 
                 temperature(row["high"], 'F').value('C'), 
                 temperature(row["low"], 'F').value('C'), 
@@ -214,14 +217,14 @@ def do_century( ctx ):
     for row in cursor:
         if not data.has_key(row['year']):
             data[ row['year'] ] = {}
-            for mo in range(1,13):
+            for mo in range(1, 13):
                 data[ row['year'] ][mo] = {'prec': -99, 'tmin': -99,
                                            'tmax': -99}
         
         data[ row['year'] ][ row['month'] ] = {
              'prec' :  row['prec'] * 24.5,
              'tmin' : temperature(float(row['tmin']), 'F').value('C'),
-             'tmax' : temperature(float(row['tmax']), 'F').value('C'),                                               
+             'tmax' : temperature(float(row['tmax']), 'F').value('C'),
             }
 
     ssw("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
@@ -298,9 +301,8 @@ def do_daycent( ctx ):
     ssw("Daily Weather Data File (use extra weather drivers = 0):\n\n")
     for row in cursor:
         ssw("%s %s %s %s %.2f %.2f %.2f\n" % (row["day"].day, 
-                                                  row["day"].month, 
-                row["day"].year, int(row["day"].strftime("%j")), f2c(row["high"]), 
-                f2c(row["low"]), row["precip"] * 25.4) )
+            row["day"].month, row["day"].year, int(row["day"].strftime("%j")),
+            f2c(row["high"]), f2c(row["low"]), row["precip"] * 25.4) )
     if len(extra) > 0:
         dec31 = datetime.date(thisyear, 12, 31)
         now = row['day']
@@ -325,15 +327,6 @@ def do_simple( ctx ):
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    scenario_year= 2030    
-    asts = datetime.date(2030, 1, 1)
-    if ctx['scenario'] == 'yes':
-        # Tricky!
-        scenario_year = ctx['scenario_year']
-        today = datetime.date.today()
-        asts = datetime.date(scenario_year, today.month, today.day)
-        pass
-    
     table = get_tablename(ctx['stations'])
     
     network = "%sCLIMATE" % (ctx['stations'][0][:2],)
@@ -346,7 +339,7 @@ def do_simple( ctx ):
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         merra_srad, merra_srad_cs, hrrr_srad, 
-        to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date, 
+to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date, 
         'YYYY/mm/dd') as day,
         extract(doy from day) as julianday,
         gddxx(50, 86, high, low) as gdd_50_86,
@@ -356,7 +349,7 @@ def do_simple( ctx ):
         round((precip * 25.4)::numeric,1) as precipmm 
         from """+table+""" WHERE 
         station IN """+ str(tuple(ctx['stations'])) +""" and 
-        day >= %s and year = %s
+        day >= %s and day <= %s
     ), obs as (    
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         merra_srad, merra_srad_cs, hrrr_srad, 
@@ -375,7 +368,7 @@ def do_simple( ctx ):
     )
     
     SELECT * from total ORDER by day ASC
-    """, (asts, scenario_year, ctx['sts'], ctx['ets']) )
+    """, (ctx['scenario_sts'], ctx['scenario_ets'], ctx['sts'], ctx['ets']) )
 
     cols = ['station', 'station_name', 'day', 'julianday']
     if ctx['inclatlon'] == 'yes':
@@ -383,6 +376,17 @@ def do_simple( ctx ):
         cols.insert(3, 'lon')
 
     cols = cols + ctx['myvars']
+
+    ssw("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
+    ssw("# Created: %s UTC\n" % (
+                datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
+    ssw("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
+    ssw("# Data Period: %s - %s\n" % (ctx['sts'].strftime("%d %b %Y"), 
+                                      ctx['ets'].strftime("%d %b %Y")))
+    if ctx['scenario'] == 'yes':
+        ssw("# !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
+                            ctx['ets'], ctx['scenario_year']))
+
 
     p = {'comma': ',', 'tab': '\t', 'space': ' '}
     d = p[ ctx['delim'] ]
@@ -398,7 +402,7 @@ def do_simple( ctx ):
         res = []
         for n in cols:
             res.append( str(dc[n]) )
-        ssw( d.join(res) +"\r\n")
+        ssw( (d.join(res)).replace("None", "M") +"\r\n")
 
 def do_salus( ctx ):
     """ Generate SALUS
@@ -414,14 +418,13 @@ def do_salus( ctx ):
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    scenario_year= 2030    
+    scenario_year = 2030    
     asts = datetime.date(2030, 1, 1)
     if ctx['scenario'] == 'yes':
         # Tricky!
         scenario_year = ctx['scenario_year']
         today = datetime.date.today()
         asts = datetime.date(scenario_year, today.month, today.day)
-        pass
     
     table = get_tablename(ctx['stations'])
     station = ctx['stations'][0]
@@ -429,7 +432,7 @@ def do_salus( ctx ):
     cursor.execute("""
     WITH scenario as (
         SELECT 
-        ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
+    ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
         high, low, precip, station,
         coalesce(narr_srad, merra_srad, hrrr_srad) as srad 
         from """+table+""" WHERE station = %s and 
@@ -446,7 +449,8 @@ def do_salus( ctx ):
     
     SELECT * from total ORDER by day ASC
     """, (station, asts, scenario_year, station, ctx['sts'], ctx['ets']) )
-    ssw("StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum\n")
+    ssw(("StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, "
+         +"Wind, Par, dbnum\n"))
     for i, row in enumerate(cursor):
         srad = -99 if row['srad'] is None else row['srad']
         ssw("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n" % ( 
@@ -471,20 +475,19 @@ def do_dndc( ctx ):
     if len(ctx['stations']) == 1:
         ctx['stations'].append('X')
         
-    scenario_year= 2030    
+    scenario_year = 2030    
     asts = datetime.date(2030, 1, 1)
     if ctx['scenario'] == 'yes':
         # Tricky!
         scenario_year = ctx['scenario_year']
         today = datetime.date.today()
         asts = datetime.date(scenario_year, today.month, today.day)
-        pass
         
     thisyear = datetime.datetime.now().year
     cursor.execute("""
         WITH scenario as (
             SELECT 
-            ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
+    ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
             high, low, precip, station from """+table+"""
             WHERE station IN """+ str(tuple(ctx['stations'])) +""" and 
             day >= %s and year = %s),
@@ -505,10 +508,11 @@ def do_dndc( ctx ):
         fn = "%s/%s_%s.txt" % (sname, sname, row['day'].year)
         if not zipfiles.has_key(fn):
             zipfiles[fn] = ""
-        zipfiles[fn] += "%s %.2f %.2f %.2f\n" % ( int(row["day"].strftime("%j")), 
-                temperature(row["high"], 'F').value('C'), 
-                temperature(row["low"], 'F').value('C'), 
-                row["precip"] * 2.54 )
+        zipfiles[fn] += "%s %.2f %.2f %.2f\n" % ( 
+                        int(row["day"].strftime("%j")), 
+                        temperature(row["high"], 'F').value('C'), 
+                        temperature(row["low"], 'F').value('C'), 
+                        row["precip"] * 2.54 )
 
     sio = StringIO.StringIO()
     z = zipfile.ZipFile(sio, 'a')
@@ -520,8 +524,8 @@ def do_dndc( ctx ):
     sio.seek(0)
     ssw( sio.read() )
 
-if __name__ == '__main__':
-    # See how we are called
+def main():
+    """ go main go """
     form = cgi.FieldStorage()
     ctx = {}
     ctx['stations'] = get_cgi_stations(form)
@@ -535,7 +539,7 @@ if __name__ == '__main__':
         ctx['scenario_year'] = int(form.getfirst('scenario_year', 2099))
     else:
         ctx['scenario_year'] = 2099
-    set_scenario_period( ctx )
+    ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period( ctx )
     
     if "dndc" not in ctx['myvars']:
         if ctx['what'] == 'dl':
@@ -559,3 +563,6 @@ if __name__ == '__main__':
         do_salus( ctx )
     else:
         do_simple( ctx )
+
+if __name__ == '__main__':
+    main()

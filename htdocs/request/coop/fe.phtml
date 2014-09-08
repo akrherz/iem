@@ -1,16 +1,18 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
-$t = new MyView();
-
-define("IEM_APPID", 3);
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 include("../../../include/iemprop.php");
-$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
+include("../../../include/network.php");
+include("../../../include/forms.php");
+
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
+
+$t = new MyView();
 $t->title = "COOP Quality Controlled and Estimated Data Download";
 $t->thispage = "networks-coop";
-include("../../../include/network.php"); 
-include("../../../include/forms.php"); 
+
+define("IEM_APPID", 3);
+$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
@@ -22,6 +24,7 @@ while (list($key,$val) = each($cities)){
 			substr($cities[$key]["archive_begin"],0,10) ."</option>\n";
 }
 $y1 = yearSelect2(1893, 1893, "year1");
+$sy_select = yearSelect2(1893, 2013, "scenario_year");
 $m1 = monthSelect2(1, "month1");
 $d1 = daySelect2(1, "day1");
 $y2 = yearSelect2(1893, 1893, "year2");
@@ -104,12 +107,18 @@ side effect is that data changes as new information becomes available.
  use.  Unfortunately, long term observations that are on local calendar 
  days does not exist!</div>
 
-<form method="GET" action="dl.php" name="dlform">
+ <div class="alert alert-danger"><i class="glyphicon glyphicon-paperclip"></i>
+ On 8 September 2014, a very large code 
+ modification was made to this application.  Please 
+ <a href="/info/contacts.php" class="link link-alert">let us know</a> of any
+ suspicious output that the download generates!</div>
+ 
+<form method="GET" action="/cgi-bin/request/coop.py" name="dlform">
 <input type="hidden" name="network" value="{$network}" />
 
-<div class="row"><div class="col-md-6 col-sm-6">
+<div class="row"><div class="col-sm-6">
 
-<p><h3 class="subtitle">1. Select Station:</h3>
+<p><h4>1. Select Station:</h4>
 <i>Select One or More or All stations in the network.</i><br />
 <select name="station[]" size="5" MULTIPLE>
 <option value="_ALL">--Select ALL--</option>
@@ -117,7 +126,7 @@ side effect is that data changes as new information becomes available.
 </select>
 
 
-<p><h3 class="subtitle">2. Select Start/End Time:</h3>
+<p><h4>2. Select Start/End Time:</h4>
 <i>Please note the start year in the station selector. Some sites start
 in 1951 others are earlier. If you only want data for one day, set the
 start and end times to the same value.</i>
@@ -142,15 +151,16 @@ start and end times to the same value.</i>
    </tr>
 </table>
 
-<p><h3 class="subtitle">3. Select Variables / Model Input Format:</h3>
+<p><h4>3. Select Variables / Model Input Format:</h4>
 <i>Select either one or more data variables or a predefined format that 
 should work within the specified Model input format.  Please <a href="/info/contact.php">contact us</a>
 to have your format added to the list!</i>
 <select size=5 name="vars[]" MULTIPLE>
+  <option value="apsim">Model: APSIM MET File</option> 
+  <option value="century">Model: Century (Monthly Format)</option> 
   <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
   <option value="dndc">Model: DNDC</option> 
-  <option value="century">Model: Century</option> 
-  <option value="apsim">Model: APSIM MET File</option> 
+  <option value="salus">Model: SALUS</option> 
   <option value="gdd_50_86">Computed: Growing Degree Days (base=50,max=86) [F]</option>
   <option value="gdd_40_86">Computed: Growing Degree Days (base=40,max=86) [F]</option>
   <option value="high">Variable: High Temperature [F]</option>
@@ -166,15 +176,15 @@ to have your format added to the list!</i>
   <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
 </select>
 
-</div><div class="col-md-6 col-sm-6">
+</div><div class="col-sm-6">
 
-<p><h3 class="subtitle">4. How to view?</h3>
+<p><h4>4. How to view?</h4>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
 </select>
 
-<p><h3 class="subtitle">5. Data Delimitation:</h3>
+<p><h4>5. Data Delimitation:</h4>
 How shall the output values be seperated?
 <br><select name="delim">
     <option value="comma">Comma
@@ -182,16 +192,25 @@ How shall the output values be seperated?
     <option value="tab">Tab
    </select>
 
-<p>
-<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="/images/gisready.png">
+
+<p><h4>6. Include Latitude and Longitude in output?</h4>
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
  </select>
 
 
-<p><h3 class="subtitle">7. Submit Form:</h3>
-<br /><i>Please be patient and only submit this form once.  It may take 10-20
+<p><h4>7. Repeat previous year's data for the future?</h4>
+<i>This download only provides data up until today, some users may wish to 
+include future data that simply repeats the past. So the data for the
+rest of this year will simply replay a previous year.  If data for Feb 29 is
+needed and not available from past year, Feb 28 data is simply repeated.</i> 
+<br />
+<input type="checkbox" name="scenario" value="yes"> Yes, include this year:
+{$sy_select}
+    		
+<p><h4>8. Submit Form:</h4>
+<i>Please be patient and only submit this form once.  It may take 10-20
 seconds to get a response.</i><br />
 <input type="submit" value="Process Data Request">
 <input type="reset">

@@ -1,6 +1,7 @@
 <?php
 /*
  * Download COOP observations from the QC'd table
+ * DEPRECIATE this at some point...
  */
 include("../../../config/settings.inc.php");
 include("../../../include/database.inc.php");
