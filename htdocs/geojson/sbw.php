@@ -2,7 +2,7 @@
 /* 
  * Generate GeoJSON SBW information for a period of choice
  */
-header("Content-type: application/json");
+header("Content-type: application/vnd.geo+json");
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
@@ -22,7 +22,7 @@ function toTime($s){
 
 
 
-$rs = pg_query("SET TIME ZONE 'GMT'");
+$rs = pg_query($postgis, "SET TIME ZONE 'UTC'");
 
 if (isset($_REQUEST["phenomena"])){
   $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -33,6 +33,8 @@ if (isset($_REQUEST["phenomena"])){
   	
   $rs = pg_prepare($postgis, "SELECT", "SELECT  
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
+  		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+  		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
   		ST_asGeoJson(geom) as geojson
       FROM sbw_$year w WHERE
       status = 'NEW' and significance = $1 and wfo = $2
@@ -42,6 +44,8 @@ if (isset($_REQUEST["phenomena"])){
   if (pg_num_rows($rs) < 1){
   	$rs = pg_prepare($postgis, "SELECT222", "SELECT 
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
+  		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+  		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
   			ST_asGeoJson(u.geom) as geojson
   			FROM warnings_$year w JOIN ugcs u on (u.gid = w.gid) WHERE
   			significance = $1 and w.wfo = $2
@@ -60,7 +64,9 @@ if (isset($_REQUEST["phenomena"])){
 	
 	$rs = pg_prepare($postgis, "SELECT", "SELECT 
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
-      ST_asGeoJson(geom) as geojson
+  		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+  		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
+			ST_asGeoJson(geom) as geojson
       FROM sbw w WHERE
       issue < $2 and
       expire > $1 and expire < $3 $str_wfo_list
@@ -96,8 +102,8 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
                 "significance" => $row["significance"],
                 "wfo"       => $row["wfo"],
                 "eventid"   => $row["eventid"],
-                "issue"     => substr($row["issue"],0,16),
-                "expire"     => substr($row["expire"],0,16),
+                "issue"     => $row["iso_issue"],
+                "expire"     => $row["iso_expire"],
                 "link"         => sprintf("<a href='%s'>%s %s %s</a> &nbsp; ",
          $vtecurl, $vtec_phenomena[$row["phenomena"]],
          $vtec_significance[$row["significance"]], $row["eventid"]),

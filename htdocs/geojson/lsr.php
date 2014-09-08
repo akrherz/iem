@@ -2,7 +2,7 @@
 /* 
  * Generate GeoJSON LSR information for a period of choice
  */
-header("Content-type: application/json");
+header("Content-type: application/vnd.geo+json");
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
@@ -18,7 +18,7 @@ function toTime($s){
                intval(substr($s,0,4)) );
 }
 
-$rs = pg_query("SET TIME ZONE 'UTC'");
+$rs = pg_query($postgis, "SET TIME ZONE 'UTC'");
 
 if (isset($_REQUEST["phenomena"])){
   $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -30,6 +30,7 @@ if (isset($_REQUEST["phenomena"])){
 
 /* Now we fetch warning and perhaps polygon */
   $rs = pg_prepare($postgis, "SELECT", "SELECT l.*, 
+  		to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
   			ST_x(l.geom) as lon, ST_y(l.geom) as lat
            from sbw_$year w, lsrs_$year l
            WHERE w.wfo = $1 and w.phenomena = $2 and 
@@ -49,6 +50,7 @@ if (isset($_REQUEST["phenomena"])){
 	if ($wfoList == ""){  $str_wfo_list = ""; }
 	
 	$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
+			to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
       ST_x(geom) as lon, ST_y(geom) as lat 
       FROM lsrs WHERE
       valid BETWEEN $1 and $2 $str_wfo_list
@@ -109,7 +111,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
              "properties"=>Array(
                 "magnitude" => ($magnitude == null)? "": $magnitude,
                 "wfo"       => $row["wfo"],
-                "valid"     => substr($row["valid"],0,16),
+                "valid"     => $row["iso_valid"],
                 "type"      => $row["type"],
                 "county"    => $row["county"],
                 "typetext"  => $row["typetext"],
