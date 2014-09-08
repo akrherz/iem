@@ -480,10 +480,10 @@ sbwGridPanel = new Ext.grid.GridPanel({
       layer     : sbwLayer,
       fields    : [
          {name: 'wfo'},
-         {name: 'issue', type: 'date', dateFormat: 'Y-m-d H:i'},
-         {name: 'lissue', type: 'date', mapping: 'issue', convert: localdate},
-         {name: 'expire', type: 'date', dateFormat: 'Y-m-d H:i'},
-         {name: 'lexpire', type: 'date', mapping: 'expire', convert: localdate},
+         {name: 'issue', type: 'date'},
+         {name: 'utc_issue', type: 'date', mapping: 'issue', convert: utcdate},
+         {name: 'expire', type: 'date'},
+         {name: 'utc_expire', type: 'date', mapping: 'expire', convert: utcdate},
          {name: 'phenomena'},
          {name: 'significance'},
          {name: 'eventid', type:'int'},
@@ -491,7 +491,7 @@ sbwGridPanel = new Ext.grid.GridPanel({
       ],
       proxy: new GeoExt.data.ProtocolProxy({
             protocol : new OpenLayers.Protocol.HTTP({
-              url      : "../geojson/sbw.php",
+              url      : "/geojson/sbw.php",
               format   : new OpenLayers.Format.GeoJSON({
                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
                    internalProjection: new OpenLayers.Projection("EPSG:900913")
@@ -528,7 +528,7 @@ sbwGridPanel = new Ext.grid.GridPanel({
         }, {
             header    : "Issued",
             sortable  : true,
-            dataIndex : "lissue",
+            dataIndex : "issue",
             renderer  : function(value){
                 return value.format('Y-m-d g:i A');
             }
@@ -536,14 +536,14 @@ sbwGridPanel = new Ext.grid.GridPanel({
             header    : "Issued UTC",
             sortable  : true,
             hidden : true,
-            dataIndex : "issue",
+            dataIndex : "utc_issue",
             renderer  : function(value){
                 return value.format('Y-m-d g:i');
             }
         }, {
             header    : "Expired",
             sortable  : true,
-            dataIndex : "lexpire",
+            dataIndex : "expire",
             renderer  : function(value){
                 return value.format('Y-m-d g:i A');
             }
@@ -551,7 +551,7 @@ sbwGridPanel = new Ext.grid.GridPanel({
             header    : "Expired UTC",
             sortable  : true,
             hidden : true,
-            dataIndex : "expire",
+            dataIndex : "utc_expire",
             renderer  : function(value){
                 return value.format('Y-m-d g:i');
         }
@@ -575,8 +575,8 @@ function post_to_url(path, params, method) {
      form.submit();
 }
 
-function localdate(v, record){
-	return (new Date(v)).fromUTC();
+function utcdate(v, record){
+	return (new Date(v)).toUTC();
 }
 
 lsrGridPanel = new Ext.grid.GridPanel({
@@ -656,8 +656,8 @@ lsrGridPanel = new Ext.grid.GridPanel({
       layer     : lsrLayer,
       fields    : [
          {name: 'wfo', type: 'string'},
-         {name: 'valid', type: 'date', dateFormat: 'Y-m-d H:i'},
-         {name: 'lvalid', type: 'date', mapping: 'valid', convert: localdate},
+         {name: 'valid', type: 'date', mapping: 'valid'},
+         {name: 'utc_valid', type: 'date', mapping: 'valid', convert: utcdate},
          {name: 'county'},
          {name: 'city'},
          {name: 'st', type: 'string'},
@@ -672,7 +672,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
       ],
       proxy: new GeoExt.data.ProtocolProxy({
             protocol : new OpenLayers.Protocol.HTTP({
-              url      : "../geojson/lsr.php?inc_ap=yes",
+              url      : "/geojson/lsr.php?inc_ap=yes",
               format   : new OpenLayers.Format.GeoJSON({
                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
                    internalProjection: new OpenLayers.Projection("EPSG:900913")
@@ -690,7 +690,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
         }, {
             header    : "Report Time",
             sortable  : true,
-            dataIndex : "lvalid",
+            dataIndex : "valid",
             renderer  : function(value, metadata, record){
                 return value.format('Y-m-d g:i A');
             }
@@ -698,7 +698,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
             header    : "Report Time UTC",
             sortable  : true,
             hidden : true,
-            dataIndex : "valid",
+            dataIndex : "utc_valid",
             renderer  : function(value){
                 return value.format('Y-m-d g:i');
             }

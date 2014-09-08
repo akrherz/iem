@@ -76,10 +76,8 @@ App.SBWFeatureStore = new GeoExt.data.FeatureStore({
 					featureselected : function(e){
 						feature = e.feature;
 						record = App.SBWFeatureStore.getByFeature(feature);
-					      html = "Issue: "+ record.data.issue.fromUTC()
-							.format('Y-m-d g:i A T')
-				          +"<br />Expire: "+ record.data.expire.fromUTC()
-							.format('Y-m-d g:i A T') ;
+					      html = "Issue: "+ record.data.issue.format('Y-m-d g:i A T')
+				          +"<br />Expire: "+ record.data.expire.format('Y-m-d g:i A T') ;
                         popup = new GeoExt.Popup({
                                                 map : this.map,
                                                 location : e.feature,
@@ -107,15 +105,15 @@ App.SBWFeatureStore = new GeoExt.data.FeatureStore({
 		    		  20037508.34,20037508.34)
 		      }),
 		fields : [{name: 'wfo'},
-		          {name: 'issue', type: 'date', dateFormat: 'Y-m-d H:i'},
-		          {name: 'expire', type: 'date', dateFormat: 'Y-m-d H:i'},
+		          {name: 'issue', type: 'date'},
+		          {name: 'expire', type: 'date'},
 		          {name: 'phenomena'},
 		          {name: 'significance'},
 		          {name: 'eventid', type:'int'},
 		          {name: 'link'}],
 		proxy : new GeoExt.data.ProtocolProxy({
 			protocol : new OpenLayers.Protocol.HTTP({
-				url : "../geojson/sbw.php?",
+				url : "/geojson/sbw.php?",
 				format : new OpenLayers.Format.GeoJSON({
 					externalProjection : new OpenLayers.Projection("EPSG:4326"),
 					internalProjection : new OpenLayers.Projection("EPSG:900913")

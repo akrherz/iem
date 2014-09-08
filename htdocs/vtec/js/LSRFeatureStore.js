@@ -62,8 +62,7 @@ App.LSRFeatureStore = new GeoExt.data.FeatureStore({
 						featureselected : function(e){
 							feature = e.feature;
 							record = App.LSRFeatureStore.getByFeature(feature);
-						      html = "Time: "+ record.data.valid.fromUTC()
-								.format('Y-m-d g:i A T')
+						      html = "Time: "+ record.data.valid.format('Y-m-d g:i A T')
 					           +"<br />Event: "+ feature.data.magnitude +" "+ feature.data.typetext
 					           +"<br />Source: "+ feature.data.source
 					           +"<br />Remark: "+ feature.data.remark ;
@@ -98,8 +97,7 @@ App.LSRFeatureStore = new GeoExt.data.FeatureStore({
 					type : 'string'
 				}, {
 					name : 'valid',
-					type : 'date',
-					dateFormat : 'Y-m-d H:i'
+					type : 'date'
 				}, {
 					name : 'county'
 				}, {
@@ -130,7 +128,7 @@ App.LSRFeatureStore = new GeoExt.data.FeatureStore({
 				}],
 		proxy : new GeoExt.data.ProtocolProxy({
 			protocol : new OpenLayers.Protocol.HTTP({
-				url : "../geojson/lsr.php?inc_ap=yes",
+				url : "/geojson/lsr.php?inc_ap=yes",
 				format : new OpenLayers.Format.GeoJSON({
 					externalProjection : new OpenLayers.Projection("EPSG:4326"),
 					internalProjection : new OpenLayers.Projection("EPSG:900913")
