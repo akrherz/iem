@@ -1,16 +1,18 @@
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from windrose.windrose import WindroseAxes
 from matplotlib.patches import Rectangle
 
-import iemdb
-ASOS = iemdb.connect('asos', bypass=True)
+import psycopg2
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
 sped = []
 drct = []
 acursor.execute("""
  SELECT drct, sknt from alldata where station = 'DSM' and 
- presentwx ~* 'SN' and sknt > 0 and drct >= 0 and drct < 360 
+ presentwx ~* 'TS' and sknt > 0 and drct >= 0 and drct <= 360 
 """)
 for row in acursor:
     sped.append( row[1] * 1.15)
@@ -33,9 +35,9 @@ l = fig.legend( handles, ('2-5','5-7','7-10','10-15','15-20','20+') , loc=3,
  mode=None, columnspacing=0.9, handletextpad=0.45)
 plt.setp(l.get_texts(), fontsize=10)
 
-plt.gcf().text(0.5,0.91, "1960-2012 Des Moines Airport Wind Rose\nWhen observation includes falling snow", 
+plt.gcf().text(0.5,0.91, "1933-2014 Des Moines Airport Wind Rose\nWhen observation includes thunder (TS)", 
                fontsize=16, ha='center')
-plt.gcf().text(0.01,0.1, "Generated: 4 March 2013" ,
+plt.gcf().text(0.01,0.1, "Generated: 8 September 2014" ,
                    verticalalignment="bottom")
 
 plt.savefig('test.ps')
