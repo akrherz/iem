@@ -3,6 +3,57 @@
  * functions that generate stuff
  */
 include_once dirname(__FILE__) ."/database.inc.php";
+
+function get_website_stats(){
+	$memcache = new Memcache;
+	$memcache->connect('iem-memcached', 11211);
+	$val = $memcache->get("iemperf.json");
+	if (! $val){
+		// Fetch from nagios
+		$val = file_get_contents("http://nagios.local/cgi-bin/get_iemstats.py");
+		$memcache->set("iemperf.json", $val, false, 90);
+	}
+	$jobj = json_decode($val);
+	
+	$bandwidth = $jobj->stats->bandwidth / 1000000.0;
+	$bcolor = "success";
+	if ($bandwidth > 20) $bcolor = "warning";
+	if ($bandwidth > 50) $bcolor = "danger";
+	
+	$label = sprintf("%.1f MB/s", $bandwidth);
+	$bpercent = intval( $bandwidth / 124.0  * 100.0 );
+
+	$req = $jobj->stats->apache_req_per_sec;
+	$rcolor = "success";
+	if ($req > 5000) $rcolor = "warning";
+	if ($req > 7500) $rcolor = "danger";
+	
+	$rlabel = sprintf("%.0f", $req);
+	$rpercent = intval( $req / 15000.0 * 100.0);
+	
+	$s = <<<EOF
+<div class="panel panel-default">
+<div class="panel-heading">Current Website Performance:</div>
+  <div class="panel-body">
+
+  <span>Bandwidth: {$label}</span>
+<div class="progress">
+    <div class="progress-bar progress-bar-{$bcolor}" role="progressbar" aria-valuenow="{$bpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$bpercent}%;">
+    </div>
+</div>
+
+  <span>Requests/Second: {$rlabel}</span>
+<div class="progress">
+    <div class="progress-bar progress-bar-{$rcolor}" role="progressbar" aria-valuenow="{$rpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$rpercent}%;">
+    </div>
+</div>
+    		
+  </div>
+</div>
+EOF;
+	return $s;
+}
+
 function gen_feature($t){
 	$s = '';
 	
