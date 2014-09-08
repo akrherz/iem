@@ -20,7 +20,7 @@ Ext.namespace("cfg");
 cfg.header = "iem-header";
 cfg.footer = "iem-footer";
 </script>
-<script type="text/javascript" src="static.js?v=17"></script>
+<script type="text/javascript" src="static.js?v=18"></script>
 EOF;
 $t->title = "Local Storm Report App";
 $t->thispage ="severe-lsr";
