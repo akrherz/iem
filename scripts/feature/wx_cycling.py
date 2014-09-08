@@ -1,14 +1,14 @@
 import psycopg2
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-
+import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
-sts = datetime.datetime(2014,1,20)
-ets = datetime.datetime(2014,6,24)
+sts = datetime.datetime(2014,5,26)
+ets = datetime.datetime(2014,9,9)
 interval = datetime.timedelta(days=7)
 
 lbls = []
@@ -71,8 +71,11 @@ while now > ets:
         
     
     now += interval
-
-ax.plot(tsigma, psigma, zorder=2)
+tsigma = np.array(tsigma, 'f')
+psigma = np.array(psigma, 'f')
+ax.quiver(tsigma[:-1], psigma[:-1], tsigma[1:]-tsigma[:-1], 
+          psigma[1:]-psigma[:-1], scale_units='xy', angles='xy', scale=1,
+          zorder=1, color='tan')
 for l,t,p,a in zip(lbls, tsigma, psigma,aligns):
     # Manual move label some for readiability
     if l == '7/15':
@@ -83,7 +86,7 @@ for l,t,p,a in zip(lbls, tsigma, psigma,aligns):
 ax.set_xlim(-3.5,3.5)
 ax.set_ylabel("Precipitation Departure $\sigma$")
 ax.set_xlabel("Temperature Departure $\sigma$")
-ax.set_title("20 Jan 2014 - 24 Jun 2014 Iowa\n 14 Day Trailing Departures plotted every 7 days")
+ax.set_title("26 May 2014 - 8 Sep 2014 Iowa\n 14 Day Trailing Departures plotted every 7 days")
 ax.grid(True)
 
 fig.savefig('test.ps')
