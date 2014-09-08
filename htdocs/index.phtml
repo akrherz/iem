@@ -10,6 +10,7 @@ include_once '../include/iemprop.php';
 
 $t = new MyView();
 $t->feature = gen_feature($t);
+$t->iemperf = get_website_stats();
 $t->lsr_snow = get_iemprop("homepage.lsrmap.on");
 $t->render('homepage.phtml');
 ?>

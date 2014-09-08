@@ -84,7 +84,6 @@ if ($rancam == ""){ $rancam = "KCWI-001";}
 </div>
 
 
-
 <div class="panel panel-default">
   <div class="panel-heading">News Items &nbsp; <a href="/rss.php"><img src="/images/rss.gif" /></a></div>
   <div class="panel-body">
@@ -108,6 +107,8 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
 
   </div>
 </div>
+
+<?php echo $this->iemperf; ?>
 
 
         </div><!--/span-->
