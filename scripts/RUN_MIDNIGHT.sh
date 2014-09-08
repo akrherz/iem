@@ -35,6 +35,7 @@ python hads_delete_dups.py
 
 cd ../mrms
 python create_daily_symlink.py $(date --date '1 day ago' +'%Y %m %d')
+python mrms_monthly_plot.py
 
 if [ $DD -eq "28" ]
 then
