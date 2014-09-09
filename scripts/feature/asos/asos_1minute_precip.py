@@ -4,7 +4,7 @@ import numpy
 import pytz
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
-acursor.execute("SET TIME ZONE 'EDT5EST'")
+acursor.execute("SET TIME ZONE 'MDT8MST'")
 stemps = []
 sdrct = []
 ssknt = []
@@ -15,8 +15,8 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'CAE'
- and valid BETWEEN '2014-08-09 00:00' and '2014-08-09 23:59' 
+  sknt, pres1, gust_sknt, precip from t2014_1minute WHERE station = 'PHX'
+ and valid BETWEEN '2014-09-08 00:00' and '2014-09-08 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
@@ -36,8 +36,8 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2014,8,9)
-basets = basets.replace(tzinfo=pytz.timezone("America/New_York"))
+basets = datetime.datetime(2014,9,8)
+basets = basets.replace(tzinfo=pytz.timezone("America/Phoenix"))
 
 for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
@@ -52,16 +52,16 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2014,8,9,7, 0)
-sts = sts.replace(tzinfo=pytz.timezone("America/New_York"))
-ets = sts + datetime.timedelta(minutes=3*60+1)
-interval = datetime.timedelta(minutes=30)
+sts = datetime.datetime(2014,9,8,1, 0)
+sts = sts.replace(tzinfo=pytz.timezone("America/Phoenix"))
+ets = sts + datetime.timedelta(minutes=8*60+1)
+interval = datetime.timedelta(minutes=60)
 now = sts
 xticks = []
 xlabels = []
 xlabels2 = []
 while now <= ets:
-    fmt = "%-I:%M %p"
+    fmt = "%-I %p"
     #if now == sts or now.hour == 0:
     #    fmt = "%-I %p\n%-d %B"
     
@@ -90,9 +90,9 @@ ax.plot(svalid, rate15, color='yellow', label="Hourly Rate over 15min", linewidt
 ax.plot(svalid, rate15, color='k', linewidth=1, zorder=4)
 ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=3.5,zorder=3)
 ax.plot(svalid, rate60, color='k', lw=1, zorder=4)
-x0 = 526
+x0 = 157
 ax.text(sts + datetime.timedelta(seconds=330), 4.45, "Minute Accums [inch]", va='bottom')
-for i in range(x0,x0+9):
+for i in range(x0,x0+15):
     ax.text( sts + datetime.timedelta(seconds=330), 4.4 + (x0-i)*0.29, "%s %.2f" % (
                                 svalid[i].strftime("%-I:%M %p"), sprec[i],),
              va='top')
@@ -103,8 +103,8 @@ ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=2, prop=prop, ncol=1)
 ax.set_ylim(0,6)
-ax.set_xlabel("9 August 2014 (EDT)")
-ax.set_title("9 August 2014 Columbia, SC (KCAE) One Minute Rainfall")
+ax.set_xlabel("8 September 2014 (Phoenix Local Time)")
+ax.set_title("8 September 2014 Phoenix, AZ (KPHX) One Minute Rainfall")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
