@@ -44,7 +44,7 @@ def plotter( fdict ):
 
         
     fig = plt.figure(figsize=(6, 7), facecolor='w', edgecolor='w')
-    rect = [0.1, 0.1, 0.8, 0.8]
+    rect = [0.1, 0.09, 0.8, 0.8]
     ax = WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
     ax.bar(drct, sped, normed=True, bins=[0,2,5,7,10,15,20], opening=0.8, 
@@ -59,10 +59,10 @@ def plotter( fdict ):
      mode=None, columnspacing=0.9, handletextpad=0.45)
     plt.setp(l.get_texts(), fontsize=10)
     
-    plt.gcf().text(0.5,0.91, ("%s-%s %s %s Wind Rose\nWhen METAR observation "
+    plt.gcf().text(0.5,0.99, ("%s-%s %s Wind Rose\n%s\nWhen METAR observation "
                               +"includes thunderstorm (TS)") % (minvalid.year,
                             maxvalid.year, station, nt.sts[station]['name']), 
-                   fontsize=16, ha='center')
+                   fontsize=16, ha='center', va='top')
     plt.gcf().text(0.01, 0.1, "Generated: 8 September 2014" ,
                        verticalalignment="bottom")
     plt.gcf().text(0.95, 0.1, "n=%s" % (len(drct),) ,
