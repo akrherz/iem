@@ -60,7 +60,7 @@ def plotter( fdict ):
     plt.setp(l.get_texts(), fontsize=10)
     
     plt.gcf().text(0.5,0.91, ("%s-%s %s %s Wind Rose\nWhen METAR observation "
-                              +"includes thunder (TS)") % (minvalid.year,
+                              +"includes thunderstorm (TS)") % (minvalid.year,
                             maxvalid.year, station, nt.sts[station]['name']), 
                    fontsize=16, ha='center')
     plt.gcf().text(0.01, 0.1, "Generated: 8 September 2014" ,
