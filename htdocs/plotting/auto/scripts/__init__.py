@@ -21,4 +21,7 @@ data = {'plots': [
         {'id': "13", 'label': "End Date of Summer (warmest 91 day period) per Year"},
         {'id': "14", 'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
+    {'label': 'METAR ASOS Special Plots', 'options': [
+        {'id': "16", 'label': "Wind Rose when TS (thunder) is reported"},
+    ]},
 ]}
