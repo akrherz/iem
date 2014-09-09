@@ -41,8 +41,14 @@ if ($prod == 1 or $prod == 2) {
 EOF;
 
 }
-$uri = sprintf("%s?month=%s&year=%s&network=%s&station=%s", $products[$prod], 
+if ($prod == 1){
+	$uri = sprintf("/plotting/auto/plot/17/month:%s"
+			."__year:%s__station:%s__network:%s__dpi:100.png", $month, $year,
+ 			$station, $network);
+} else {
+	$uri = sprintf("%s?month=%s&year=%s&network=%s&station=%s", $products[$prod], 
 		$month, $year, $network, $station);
+}
 $t->content = <<<EOF
 <div style="float: left;">
 {$form}
