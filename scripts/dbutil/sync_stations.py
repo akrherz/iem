@@ -50,7 +50,7 @@ def sync(dbname):
        sigstage_bankfull = %(sigstage_bankfull)s, sigstage_flood = %(sigstage_flood)s,
        sigstage_moderate = %(sigstage_moderate)s, sigstage_major = %(sigstage_major)s,
        sigstage_record = %(sigstage_record)s, ugc_county = %(ugc_county)s,
-       ugc_zone = %(ugc_zone)s, id = %(id)s
+       ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s
        WHERE iemid = %(iemid)s""",
        row)
     print 'DB: %-7s Mod %4s rows TS: %s IEMID: %s' % (dbname, 

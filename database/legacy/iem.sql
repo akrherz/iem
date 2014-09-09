@@ -66,7 +66,8 @@ CREATE TABLE stations(
 	tzname varchar(32),
 	modified timestamp with time zone,
 	iemid int PRIMARY KEY,
-	metasite boolean
+	metasite boolean,
+	ncdc81 varchar(11)
 	);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to nobody,apache;
