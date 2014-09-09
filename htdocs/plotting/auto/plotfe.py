@@ -30,7 +30,7 @@ if __name__ == '__main__':
     p = int(form.getfirst('p', 0))
     dpi = int(fdict.get('dpi', 100))
 
-    mckey = "/COOP/auto/plot/%s/%s.png" % (p, q)
+    mckey = "/plotting/auto/plot/%s/%s.png" % (p, q)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     sys.stdout.write("Content-type: image/png\n\n")
