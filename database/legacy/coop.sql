@@ -224,7 +224,8 @@ CREATE TABLE stations(
 	archive_end timestamp with time zone,
 	tzname varchar(32),
 	modified timestamp with time zone,
-	iemid int PRIMARY KEY
+	iemid int PRIMARY KEY,
+	ncdc81 varchar(11)
 	);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to nobody,apache,apiuser;

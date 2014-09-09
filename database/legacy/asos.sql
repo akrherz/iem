@@ -55,7 +55,8 @@ CREATE TABLE stations(
 	sigstage_major real,
 	sigstage_record real,
 	ugc_county char(6),
-	ugc_zone char(6)
+	ugc_zone char(6),
+	ncdc81 varchar(11)
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 create index stations_iemid_idx on stations(iemid);
