@@ -3,6 +3,7 @@
 import cgi
 import cStringIO
 import sys
+import os
 import imp
 import memcache
 import datetime
@@ -33,10 +34,12 @@ if __name__ == '__main__':
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     sys.stdout.write("Content-type: image/png\n\n")
-    if not res:
+    hostname = os.environ.get("SERVER_NAME", "")
+    if not res or hostname == "iem.local":
         name = 'scripts/p%s' % (p,)
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
+        meta = a.get_description()
         fig = a.plotter(fdict)
         # Place timestamp on the image
         fig.text(0.01, 0.01, 'Plot Generated: %s' % (
@@ -46,5 +49,6 @@ if __name__ == '__main__':
         plt.savefig(ram, format='png', dpi=dpi)
         ram.seek(0)
         res = ram.read()
-        mc.set(mckey, res, 86400)
+        sys.stderr.write("Setting cache: %s" % (mckey,) )
+        mc.set(mckey, res, meta.get('cache', 43200))
     sys.stdout.write( res )
