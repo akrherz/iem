@@ -33,10 +33,11 @@ import psycopg2
 import sys
 import os
 import datetime
-import pytz
 import pdb
+import pytz
 import urllib2
 import zipfile
+
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 cursor = POSTGIS.cursor()
 
@@ -122,11 +123,21 @@ while feat is not None:
         if Area(_g) > thismaxa: 
             thismaxa = Area(_g)
             thismaxi = i
-    newgeo.AddGeometry( geo.GetGeometryRef(thismaxi) )
+    maxgeo = geo.GetGeometryRef(thismaxi)
+    if maxgeo.GetGeometryName() == 'LINEARRING':
+        m2 = ogr.Geometry(ogr.wkbPolygon)
+        m2.AddGeometry(maxgeo)
+        maxgeo = m2
+    newgeo.AddGeometry( maxgeo )
     for i in range(geo.GetGeometryCount()):
         if i == thismaxi:
             continue
-        newgeo.AddGeometry( geo.GetGeometryRef(i) )
+        _g = geo.GetGeometryRef(i)
+        if _g.GetGeometryName() == "LINEARRING":
+            _n = ogr.Geometry(ogr.wkbPolygon)
+            _n.AddGeometry(_g)
+            _g = _n
+        newgeo.AddGeometry( _g )
     
     wkt = newgeo.ExportToWkt()
 
@@ -136,6 +147,13 @@ while feat is not None:
             feat = lyr.GetNextFeature()
             continue
     ugcs[ugc] = area
+
+    if wkt.find("EMPTY") > 0:
+        print ugc
+        for i in range(geo.GetGeometryCount()):
+            _g = geo.GetGeometryRef(i)
+            print i, _g.GetGeometryName(), Area(_g)
+        sys.exit()
 
     # OK, lets see if this UGC is new
     cursor.execute("""SELECT ugc from ugcs where ugc = %s
@@ -155,7 +173,7 @@ while feat is not None:
         UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null""", 
             (TS, ugc))
     
-    # Finally, insert the new geometry    
+    # Finally, insert the new geometry   
     cursor.execute("""
     INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom)
     VALUES (%s, %s, %s, %s, %s,
