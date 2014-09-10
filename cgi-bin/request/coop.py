@@ -96,6 +96,7 @@ def do_apsim( ctx ):
         for row in cursor:
             ts = row[0].replace(year=thisyear)
             extra[ ts ] = row
+            extra[ ts ]['doy'] = int(ts.strftime("%j"))
         febtest = datetime.date(thisyear, 3, 1 ) - datetime.timedelta(days=1)
         if not extra.has_key(febtest):
             feb28 = datetime.date(thisyear, 2, 28)
@@ -106,8 +107,8 @@ def do_apsim( ctx ):
                 datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
     ssw("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
     ssw("! Station: %s %s\n" % (station, nt.sts[station]['name']))
-    ssw("! Data Period: %s - %s\n" % (ctx['sts'].strftime("%d %b %Y"), 
-                                      ctx['ets'].strftime("%d %b %Y")))
+    ssw("! Data Period: %s - %s\n" % (ctx['sts'], 
+                                      ctx['ets']))
     if ctx['scenario'] == 'yes':
         ssw("! !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
                             ctx['ets'], ctx['scenario_year']))
@@ -140,6 +141,7 @@ def do_apsim( ctx ):
 
     cursor.execute("""
         SELECT day, high, low, precip, 
+        extract(doy from day) as doy,
         coalesce(narr_srad, merra_srad, hrrr_srad) as srad
         from """+table+""" 
         WHERE station = %s and 
@@ -148,7 +150,7 @@ def do_apsim( ctx ):
     for row in cursor:
         srad = -99 if row['srad'] is None else row['srad']
         ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % (
-            row["day"].year, int(row["day"].strftime("%j")), srad, 
+            row["day"].year, int(row["doy"]), srad, 
             temperature(row["high"], 'F').value('C'), 
             temperature(row["low"], 'F').value('C'), 
             row["precip"] * 25.4 ))
@@ -161,7 +163,7 @@ def do_apsim( ctx ):
             row = extra[now]
             srad = -99 if row['srad'] is None else row['srad']
             ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % ( 
-                now.year, int(now.strftime("%j")), srad, 
+                now.year, int(row['doy']), srad, 
                 temperature(row["high"], 'F').value('C'), 
                 temperature(row["low"], 'F').value('C'), 
                 row["precip"] * 25.4 ) )
@@ -232,8 +234,7 @@ def do_century( ctx ):
                 datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
     ssw("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
     ssw("# Station: %s %s\n" % (station, nt.sts[station]['name']))
-    ssw("# Data Period: %s - %s\n" % (sts.strftime("%d %b %Y"), 
-                                      ets.strftime("%d %b %Y")))
+    ssw("# Data Period: %s - %s\n" % (sts, ets))
     if ctx['scenario'] == 'yes':
         ssw("# !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
                             ctx['ets'], ctx['scenario_year']))
@@ -294,14 +295,15 @@ def do_daycent( ctx ):
             extra[febtest] = extra[feb28]
     
     cursor.execute("""
-        SELECT day, high, low, precip
+        SELECT day, high, low, precip,
+        extract(doy from day) as doy
         from """+table+""" WHERE station = %s 
         and day >= %s and day <= %s ORDER by day ASC
         """, (ctx['stations'][0], ctx['sts'], ctx['ets']) )
     ssw("Daily Weather Data File (use extra weather drivers = 0):\n\n")
     for row in cursor:
         ssw("%s %s %s %s %.2f %.2f %.2f\n" % (row["day"].day, 
-            row["day"].month, row["day"].year, int(row["day"].strftime("%j")),
+            row["day"].month, row["day"].year, int(row["doy"]),
             f2c(row["high"]), f2c(row["low"]), row["precip"] * 25.4) )
     if len(extra) > 0:
         dec31 = datetime.date(thisyear, 12, 31)
@@ -381,8 +383,7 @@ to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date,
     ssw("# Created: %s UTC\n" % (
                 datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
     ssw("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
-    ssw("# Data Period: %s - %s\n" % (ctx['sts'].strftime("%d %b %Y"), 
-                                      ctx['ets'].strftime("%d %b %Y")))
+    ssw("# Data Period: %s - %s\n" % (ctx['sts'], ctx['ets']))
     if ctx['scenario'] == 'yes':
         ssw("# !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
                             ctx['ets'], ctx['scenario_year']))
@@ -444,7 +445,8 @@ def do_salus( ctx ):
         from """+table+""" WHERE station = %s and 
         day >= %s and day <= %s ORDER by day ASC
     ), total as (
-        SELECT * from obs UNION SELECT * from scenario
+        SELECT *, extract(doy from day) as doy from obs 
+        UNION SELECT * from scenario
     )
     
     SELECT * from total ORDER by day ASC
@@ -455,7 +457,7 @@ def do_salus( ctx ):
         srad = -99 if row['srad'] is None else row['srad']
         ssw("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n" % ( 
                 station[:4], row["day"].year,
-                int(row["day"].strftime("%j")), srad,  
+                int(row["doy"]), srad,  
                 temperature(row["high"], 'F').value('C'), 
                 temperature(row["low"], 'F').value('C'), 
                 row["precip"] * 25.4, i + 2))
@@ -496,7 +498,8 @@ def do_dndc( ctx ):
             WHERE station IN """+ str(tuple(ctx['stations'])) +""" and 
             day >= %s and day <= %s),
         total as (
-            SELECT * from obs UNION SELECT * from scenario
+            SELECT *, extract(doy from day) as doy from obs UNION 
+            SELECT *, extract(doy from day) as doy from scenario
         )
         
         SELECT * from total ORDER by day ASC 
@@ -509,7 +512,7 @@ def do_dndc( ctx ):
         if not zipfiles.has_key(fn):
             zipfiles[fn] = ""
         zipfiles[fn] += "%s %.2f %.2f %.2f\n" % ( 
-                        int(row["day"].strftime("%j")), 
+                        int(row["doy"]), 
                         temperature(row["high"], 'F').value('C'), 
                         temperature(row["low"], 'F').value('C'), 
                         row["precip"] * 2.54 )
