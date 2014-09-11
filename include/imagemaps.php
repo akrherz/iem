@@ -39,7 +39,7 @@ function selectNetwork($network)
  * @param extra is an array of extra values for this box
  */
 function networkMultiSelect($network, $selected, $extra=Array(),
-		$label="station[]")
+		$label="station")
 {
     global $rootpath;
     $s = "";

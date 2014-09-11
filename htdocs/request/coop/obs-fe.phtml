@@ -53,7 +53,7 @@ $west .= <<<EOF
 
 <p><h3>1. Select Station(s):</h3><br>
 EOF;
-$west .= networkMultiSelect($network, ""); 
+$west .= networkMultiSelect($network, "", Array(), "station[]"); 
 
 $y1 = yearSelect2(2010, date("Y"), "year1");
 $m1 = monthSelect("", "month1");

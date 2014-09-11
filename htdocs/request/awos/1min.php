@@ -26,6 +26,7 @@ $hs2 = hour24Select($bogus, "hour2");
 
 $aend = date('d M Y', $awos_archive_end);
 
+$sselect = networkMultiSelect("AWOS", '', Array(), 'station[]');
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -61,9 +62,7 @@ at a 5-10 minute interval.
 <i>Select One or More or All stations in the network. Clinton and Fort Dodge 
 where converted to ASOS in September of 2000.  Data for these sites exists 
 in this archive up until that point.</i><br>
-<div class="story">
-  <?php echo networkMultiSelect("AWOS", ''); ?>
-</div>
+{$sselect}
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
 <strong>Time Zone:</strong><input type="radio" value="UTC" name="tz" checked="checked"> UTC  

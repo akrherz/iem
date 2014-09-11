@@ -35,7 +35,7 @@ for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++)
 			substr($row["sts"],0,10), substr($row["ets"],0,10) );
 }
 
-$sselect = networkMultiSelect("NSTLFLUX", Array());
+$sselect = networkMultiSelect("NSTLFLUX", '', Array(), 'station[]');
 
 $t->content = <<<EOF
 
