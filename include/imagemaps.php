@@ -46,7 +46,7 @@ function networkMultiSelect($network, $selected, $extra=Array(),
     include_once("$rootpath/include/network.php");
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    $s .= "<select id=\"olstation\" name=\"${label}\" size=\"5\" MULTIPLE >\n";
+    $s .= "<select name=\"${label}\" size=\"5\" MULTIPLE >\n";
     
     reset($extra);
     while (list($idx,$sid) = each($extra))
