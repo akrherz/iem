@@ -2,28 +2,30 @@
 include("../../config/settings.inc.php");
 define("IEM_APPID", 8);
 include("../../include/myview.php");
-$t = new MyView();
-$year = date("Y");
-$network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
-$station = "";
-
 include("../../include/database.inc.php");
 include("../../include/imagemaps.php");
 include("../../include/forms.php");
+
+$t = new MyView();
+
+$network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
+$station = "";
+
+
 $t->headextra = <<<EOF
 <script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
 <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}'></script>
+<script src='/js/olselect.php?network=${network}&multi'></script>
 EOF;
 $t->title = "Download ASOS/AWOS/METAR Data";
 $t->thispage = "networks-asos";
 $t->bodyextra = "onload=\"init()\"";
 
-$nselect = networkSelect($network, $station); 
+$nselect = networkMultiSelect($network, $station, Array(), "station"); 
 $netselect = selectAzosNetwork($network);
 
-$y1select = yearSelect2(1941, date("Y"), "year1"); 
-$y2select = yearSelect2(1941, date("Y"), "year2"); 
+$y1select = yearSelect2(1928, date("Y"), "year1"); 
+$y2select = yearSelect2(1928, date("Y"), "year2"); 
 
 $m1select = monthSelect2(1, "month1"); 
 $m2select = monthSelect2(date("m"), "month2"); 
@@ -31,6 +33,16 @@ $m2select = monthSelect2(date("m"), "month2");
 $d1select = daySelect2(1, "day1"); 
 $d2select = daySelect2(date("d"), "day2");
 
+$ar = Array(
+	"Etc/UTC" => "Coordinated Universal Time (UTC)",
+	"America/New_York" => "America/New_York (EST/EDT)",
+    "America/Chicago" => "America/Chicago (CST/CDT)",
+    "America/Denver" => "America/Denver (MST/MDT)",
+    "America/Los_Angeles" => "America/Los_Angeles (WST/WDT)",
+);
+
+$tzselect = make_select("tz", "Etc/UTC", $ar);
+		
 $t->content = <<<EOF
 <style type="text/css">
         #map {
@@ -54,7 +66,12 @@ don't get data for a request, please feel free to
 minute interval dataset for Iowa <a href="asos/1min.phtml">ASOS</a> (2000-) 
 and <a href="awos/1min.php">AWOS</a> (1995-2011) sites.  This archive
 simply provides the as-is collection of historical observations, very little 
-quality control is done.
+quality control is done. "M" is used to denote missing data.</p>
+
+<p>Here is a 
+<a href="https://github.com/akrherz/iem/blob/master/scripts/asos/iem_scraper_example.py">python script example</a> 
+<i class="glyphicon glyphicon-download"></i> that automates the download
+of data from this interface.
 
 <div class="alert alert-warning">Please be patient with this page as it will take a number
 of seconds to process your request and provide the result.</div>
@@ -70,40 +87,66 @@ of seconds to process your request and provide the result.</div>
 
 <h4>1) Select Station/Network by clicking on location: </h4>
 
-<form method="GET" action="/cgi-bin/request/getData.py" name="olselect">
+<form method="GET" action="/cgi-bin/request/asos.py" name="olselect">
 <div id="map"></div>
 <div id="sname">No site selected</div>
 
 <p><strong>Download Variable Description</strong>
 
-<br /><strong>station:</strong> three or four character site identifier
-<br /><strong>valid:</strong> timestamp of the observation
-<br /><strong>tmpf:</strong> Air Temperature in Fahrenheit, typically @ 2 meters
-<br /><strong>dwpf:</strong> Dew Point Temperature in Fahrenheit, typically @ 2 meters
-<br /><strong>relh:</strong> Relative Humidity in %
-<br /><strong>drct:</strong> Wind Direction in degrees from north
-<br /><strong>sknt:</strong> Wind Speed in knots	
-<br /><strong>p01i:</strong> One hour precipitation for the period from the observation time
+<dl class="dl-horizontal">
+<dt>station:</dt>
+<dd>three or four character site identifier</dd>
+<dt>valid:</dt>
+<dd>timestamp of the observation</dd>
+<dt>tmpf:</dt>
+<dd>Air Temperature in Fahrenheit, typically @ 2 meters</dd>
+<dt>dwpf:</dt>
+<dd>Dew Point Temperature in Fahrenheit, typically @ 2 meters</dd>
+<dt>relh:</dt>
+<dd>Relative Humidity in %</dd>
+<dt>drct:</dt>
+<dd>Wind Direction in degrees from north</dd>
+<dt>sknt:</dt>
+<dd>Wind Speed in knots	</dd>
+<dt>p01i:</dt>
+<dd>One hour precipitation for the period from the observation time
 to the time of the previous hourly precipitation reset.  This varies slightly
-by site. Values in inches
-<br /><strong>alti:</strong> Pressure altimeter in inches
-<br /><strong>mslp:</strong> Sea Level Pressure in millibar
-<br /><strong>vsby:</strong> Visibility in miles
-<br /><strong>gust:</strong> Wind Gust in knots
-<br /><strong>skyc1:</strong> Sky Level 1 Coverage
-<br /><strong>skyc2:</strong> Sky Level 2 Coverage
-<br /><strong>skyc3:</strong> Sky Level 3 Coverage
-<br /><strong>skyc4:</strong> Sky Level 4 Coverage
-<br /><strong>skyl1:</strong> Sky Level 1 Altitude in feet
-<br /><strong>skyl2:</strong> Sky Level 2 Altitude in feet
-<br /><strong>skyl3:</strong> Sky Level 3 Altitude in feet
-<br /><strong>skyl4:</strong> Sky Level 4 Altitude in feet
-<br /><strong>metar:</strong> unprocessed reported observation in METAR format
+by site. Values in inches</dd>
+<dt>alti:</dt>
+<dd>Pressure altimeter in inches</dd>
+<dt>mslp:</dt>
+<dd>Sea Level Pressure in millibar</dd>
+<dt>vsby:</dt>
+<dd>Visibility in miles</dd>
+<dt>gust:</dt>
+<dd>Wind Gust in knots</dd>
+<dt>skyc1:</dt>
+<dd>Sky Level 1 Coverage</dd>
+<dt>skyc2:</dt>
+<dd>Sky Level 2 Coverage</dd>
+<dt>skyc3:</dt>
+<dd>Sky Level 3 Coverage</dd>
+<dt>skyc4:</dt>
+<dd>Sky Level 4 Coverage</dd>
+<dt>skyl1:</dt>
+<dd>Sky Level 1 Altitude in feet</dd>
+<dt>skyl2:</dt>
+<dd>Sky Level 2 Altitude in feet</dd>
+<dt>skyl3:</dt>
+<dd>Sky Level 3 Altitude in feet</dd>
+<dt>skyl4:</dt>
+<dd>Sky Level 4 Altitude in feet</dd>
+<dt>metar:</dt>
+<dd>unprocessed reported observation in METAR format</dd>
+</dl>
 
 </div>
 <div class="col-sm-5">
 
-<p>Selected Station: {$nselect}
+<h4>1) Selected Station(s):</h4>
+<p>You can download from one or more stations. 
+<a href="javascript: selectAllStations();">select all</a></p>
+ {$nselect}
 
 <h4>2) Select From Available Data:</h4>
 <p><strong>Note:</strong> Cloud information and raw METAR data is not available 
@@ -147,11 +190,10 @@ day worth of data.</p>
 <tr><th>End Date:</th><td>{$y2select} {$m2select} {$d2select}</td></tr>
 </table>
 		
-<h4>4) Format of time output:</h4>
-<SELECT name="tz">
-	<option value="GMT">GMT (UTC) timestamps
-	<option value="local">Central Standard/Daylight Time
-</SELECT>
+<h4>4) Timezone of Observation Times:</h4>
+<p><i>The following options are available for how the observation time is 
+	presented.</i></p>
+{$tzselect}
 
 <h4>5) Download Options:</h4>
 		

@@ -1,20 +1,27 @@
 <?php
 include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
+$multi = isset($_GET["multi"]);
 header("Content-type: application/javascript");
 $uri = sprintf("%s/geojson/network.php?network=%s&c=%s", BASEURL, $network,
 	time() );
-?>
+
+echo <<<EOF
 var map, selectedFeature, selectControl;
 
+function selectAllStations(){
+  $("#olstation").find('option').attr('selected','selected');
+}
+
 function cb_siteOver(feature){
+  station = feature.attributes.sid;
   selectedFeature = feature;
-  document.olselect.station.value = feature.attributes.sid;
+  $("#olstation").find("option[value="+station+"]").prop("selected", "selected");
   document.getElementById("sname").innerHTML = feature.attributes.sname;
   popup = new OpenLayers.Popup('chicken', 
               feature.geometry.getBounds().getCenterLonLat(),
               new OpenLayers.Size(200,20),
-          "<div style='font-size:1em'>" + feature.attributes.sname +"</div>",
+          "<div style='font-size:1em'>" + station +" "+feature.attributes.sname +"</div>",
               true);
   feature.popup = popup;
   map.addPopup(popup);
@@ -60,9 +67,9 @@ function init(){
        }
    });
 
-  var geojson = new OpenLayers.Layer.Vector("<?php echo $network; ?> Network", {
+  var geojson = new OpenLayers.Layer.Vector("{$network} Network", {
 		protocol: new OpenLayers.Protocol.HTTP({
-                    url: "<?php echo $uri; ?>",
+                    url: "{$uri}",
                     format: new OpenLayers.Format.GeoJSON()
     	}),
     	projection: new OpenLayers.Projection('EPSG:4326'),
@@ -95,3 +102,5 @@ function init(){
    map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
    map.addControl( new OpenLayers.Control.MousePosition() );
 }
+EOF;
+?>

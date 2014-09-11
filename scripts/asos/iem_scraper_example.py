@@ -9,8 +9,8 @@ import urllib2
 startts = datetime.datetime(2012,8,1)
 endts = datetime.datetime(2012,9,1)
 
-SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/getData.py?"
-SERVICE += "data=all&tz=GMT&format=comma&latlon=yes&"
+SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
+SERVICE += "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
 
 SERVICE += startts.strftime('year1=%Y&month1=%m&day1=%d&')
 SERVICE += endts.strftime('year2=%Y&month2=%m&day2=%d&')

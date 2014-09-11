@@ -39,14 +39,14 @@ function selectNetwork($network)
  * @param extra is an array of extra values for this box
  */
 function networkMultiSelect($network, $selected, $extra=Array(),
-		$label="station")
+		$label="station[]")
 {
     global $rootpath;
     $s = "";
     include_once("$rootpath/include/network.php");
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    $s .= "<select name=\"${label}[]\" size=\"5\" MULTIPLE >\n";
+    $s .= "<select id=\"olstation\" name=\"${label}\" size=\"5\" MULTIPLE >\n";
     
     reset($extra);
     while (list($idx,$sid) = each($extra))
