@@ -5,7 +5,6 @@ Download interface for ASOS/AWOS data from the asos database
 
 import cgi
 import re
-import string
 import sys
 import datetime
 import pytz
@@ -122,7 +121,6 @@ def main():
         for row in mcursor:
             gtxt[row[0]] = "%.4f%s%.4f%s" % (row['lon'], rD, row['lat'], rD)
 
-    sys.stderr.write( str(tuple(dbstations)) )
     acursor.execute("""SELECT * from alldata 
       WHERE valid >= %s and valid < %s and station in %s
       ORDER by valid ASC""", (sts, ets, tuple(dbstations)))
