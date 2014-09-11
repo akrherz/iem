@@ -147,7 +147,7 @@ YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   A
         for mo in range(1, 13):
             ts = mx.DateTime.DateTime(yr, mo, 1)
             if (ts >= constants._ARCHIVEENDTS):
-                out.write("%6s" % ("M",))
+                out3.write("%6s" % ("M",))
                 continue
             v = (float(db[ts]["avg_high"]) + float(db[ts]["avg_low"])) / 2.0
             if (ts < constants._ARCHIVEENDTS):
