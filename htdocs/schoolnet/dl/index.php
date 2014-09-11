@@ -6,7 +6,8 @@ $t->title = "School Network Data Download";
 include("../../../include/forms.php");
 include("../../../include/imagemaps.php");
 
-$nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '');
+$nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '', Array(),
+	'station[]');
 
 $y1 = yearSelect2(2002, date("Y"), "year1");
 $m1 = monthSelect(date("m"), "month1");

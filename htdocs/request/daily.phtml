@@ -24,7 +24,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 }
 $nselect .= "</select>";
 
-$sselect = networkMultiSelect($network, "");
+$sselect = networkMultiSelect($network, "", Array(), 'station');
 
 $y1 = yearSelect2(2010, date("Y"), "year1");
 $m1 = monthSelect("", "month1");

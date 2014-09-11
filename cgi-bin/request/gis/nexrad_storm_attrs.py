@@ -47,8 +47,8 @@ massive.  So lets set arbitrary values of
 """
 radarLimiter = ""
 aRADAR = [1,2,3,4]
-if form.has_key('radar[]'):
-    aRADAR = form['radar[]']
+if form.has_key('radar'):
+    aRADAR = form['radar']
     aRADAR.append('XXX') # Hack to make next section work
     if 'ALL' not in aRADAR:
         radarLimiter = " and nexrad in %s " % ( str( tuple(aRADAR) ), )

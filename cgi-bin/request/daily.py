@@ -38,6 +38,6 @@ if __name__ == '__main__':
                          int(form.getfirst('day2')) )
     
     print 'Content-type: text/plain\n'
-    stations = form.getlist('station[]')
+    stations = form.getlist('station')
     network = form.getfirst('network')[:12]
     print get_data(network, sts, ets, stations=stations)

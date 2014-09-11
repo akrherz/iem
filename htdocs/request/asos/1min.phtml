@@ -16,7 +16,7 @@ $bogus = 0;
 $archive_end = date('d M Y', $asos_archive_end);
 
 $sselect = networkMultiSelect("IA_ASOS", "", Array("FSD"=>"Sioux Falls, SD",
-  		"MLI" => "Moline, IL", "OMA"=>"Omaha, NE") );
+  		"MLI" => "Moline, IL", "OMA"=>"Omaha, NE") , 'station[]');
 
 $y1select = yearSelect2(2000, date("Y"), "year1");
 $m1select = monthSelect($bogus, "month1"); 
