@@ -144,9 +144,9 @@ def main():
             sys.stdout.write( gtxt.get(row['station'], "M%sM%s" % (rD, rD)) )
         for data1 in outCols:
             if data1 == 'relh':
-                tmpf = temperature(row['tmpf'], 'F')
-                dwpf = temperature(row['dwpf'], 'F')
-                if tmpf is not None and dwpf is not None:
+                if row['tmpf'] is not None and row['dwpf'] is not None:
+                    tmpf = temperature(row['tmpf'], 'F')
+                    dwpf = temperature(row['dwpf'], 'F')
                     val = meteorology.relh( tmpf, dwpf )
                     sys.stdout.write("%.2f%s" % (val.value("%"), rD))
                 else:
