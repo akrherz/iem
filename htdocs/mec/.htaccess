@@ -11,4 +11,4 @@ Options +ExecCGI
 
 RewriteEngine On
 RewriteRule ^i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
-RewriteRule ^map_power_([0-9]*).png$ map_power.py?ts=$1
+RewriteRule ^map_power_([0-9]*)_(yaw2?).png$ map_power.py?ts=$1&yawsource=$2
