@@ -8,6 +8,7 @@ $month = isset($_GET["month"]) ? $_GET["month"] : 6;
 $year = isset($_GET["year"]) ? $_GET["year"] : 2010;
 $hour = isset($_GET["hour"]) ? $_GET["hour"] : 20;
 $minute = isset($_GET["minute"]) ? $_GET["minute"] : 0;
+$yawsource = isset($_GET["yawsource"]) ? $_GET["yawsource"] : "yaw2";
 
 $yselect = yearSelect2(2008, $year, "year");
 $mselect = monthSelect($month, "month");
@@ -16,7 +17,10 @@ $hrselect = hourSelect($hour, "hour");
 $miselect = minuteSelect($minute, "minute");
 
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
-$img = sprintf("map_power_%s.png", date('YmdHi', $ts));
+$img = sprintf("map_power_%s_%s.png", date('YmdHi', $ts), $yawsource);
+
+$ar = Array("yaw" => "Original", "yaw2" => "daryl corrected 12 Sep");
+$yawselect = make_select("yawsource", $yawsource, $ar);
 
 $t = new MyView();
 $t->title = "Confidential MEC Stuff";
@@ -30,11 +34,12 @@ $t->content = <<<EOF
 
 <table class="table table-condensed" style="width: auto">
 <thead><tr>
-<th>Date:</th><th>Time:</th></tr>
+<th>Date:</th><th>Time:</th><th>Yaw Source:</th></tr>
 </thead>
 <tbody>
 <tr><td>$yselect $mselect $dselect</td>
-<td>$hrselect $miselect</td></tr>
+<td>$hrselect $miselect</td><td>{$yawselect}</td>
+</tr>
 </tbody>
 </table>
 

@@ -14,6 +14,7 @@ from pyiem.datatypes import speed, direction
 import numpy as np
 import psycopg2
 import cgi
+import os
 import sys
 
 
@@ -43,16 +44,23 @@ def make_colorbar(clevs, norm, cmap):
     ax.yaxis.set_ticklabels([])
 
 
-def do(valid):
+def do(valid, yawsource):
     """ Generate plot for a given timestamp """
-    PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
+    if yawsource not in ['yaw', 'yaw2']:
+        return
+    yawdict = {'yaw': 'Orginal', 'yaw2': 'daryl corrected'}
+    if os.environ.get("SERVER_NAME", "") == 'iem.local':
+        PGCONN = psycopg2.connect(database='mec', host='localhost', 
+                                  port='5555', user='mesonet')        
+    else:
+        PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
                               user='mesonet')
     cursor = PGCONN.cursor()
 
-    cursor.execute("""select turbineid, power, ST_x(geom), ST_y(geom), yaw,
-    windspeed, pitch
+    cursor.execute("""select turbineid, power, ST_x(geom), ST_y(geom), 
+    """+yawsource+""", windspeed, pitch
      from sampled_data s JOIN turbines t on (t.id = s.turbineid) 
-     WHERE valid = %s and power is not null and yaw is not null
+     WHERE valid = %s and power is not null and """+yawsource+""" is not null
      and windspeed is not null and pitch is not null""", (valid,))
     lons = []
     lats = []
@@ -87,8 +95,9 @@ def do(valid):
     ax.quiver(lons, lats, u, v, zorder=1)
     ax.scatter(lons, lats, c=vals, norm=norm, edgecolor='none',
                cmap=cmap, s=100, zorder=2)
-    ax.set_title("Pomeroy Farm Turbine Power [kW] (1min sampled dataset)\nValid: %s" % (
-                                                        valid.strftime("%d %b %Y %I:%M %p")))
+    ax.set_title("Pomeroy Farm Turbine Power [kW] (1min sampled dataset)\nValid: %s, yaw source: %s" % (
+                                                        valid.strftime("%d %b %Y %I:%M %p"),
+                                                        yawdict.get(yawsource, yawsource)))
     make_colorbar(clevs, norm, cmap)
     
     ax.text(0.05, 0.05, "Turbine Avg: %.1f kW" % (avgv,),
@@ -144,5 +153,6 @@ if __name__ == '__main__':
     form = cgi.FieldStorage()
     ts = form.getfirst('ts', '200006302000')
     ts = datetime.datetime.strptime(ts, '%Y%m%d%H%M')
+    yawsource = form.getfirst('yawsource', 'yaw')
     sys.stdout.write("Content-type: image/png\n\n")
-    do(ts)
+    do(ts, yawsource)
