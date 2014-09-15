@@ -1,4 +1,75 @@
 Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
+var tabs;
+
+// http://druckit.wordpress.com/2014/02/15/ext-js-4-printing-the-contents-of-an-ext-panel/
+Ext.define('MyApp.view.override.Panel', {
+    override: 'Ext.panel.Panel',
+ 
+    print: function(pnl) {
+ 
+        if (!pnl) {
+            pnl = this;
+        }
+ 
+        // instantiate hidden iframe
+ 
+        var iFrameId = "printerFrame";
+        var printFrame = Ext.get(iFrameId);
+ 
+        if (printFrame == null) {
+            printFrame = Ext.getBody().appendChild({
+                id: iFrameId,
+                tag: 'iframe',
+                cls: 'x-hidden',
+                style: {
+                    display: "none"
+                }
+            });
+        }
+ 
+        var cw = printFrame.dom.contentWindow;
+ 
+        // instantiate application stylesheets in the hidden iframe
+ 
+        var stylesheets = "";
+        for (var i = 0; i < document.styleSheets.length; i++) {
+            stylesheets += Ext.String.format('<link rel="stylesheet" href="{0}" />', document.styleSheets[i].href);
+        }
+ 
+        // various style overrides
+        stylesheets += ''.concat(
+          "<style>", 
+            ".x-panel-body {overflow: visible !important;}",
+            // experimental - page break after embedded panels
+            // .x-panel {page-break-after: always; margin-top: 10px}",
+          "</style>"
+         );
+ 
+        // get the contents of the panel and remove hardcoded overflow properties
+        var markup = pnl.getEl().dom.innerHTML;
+        while (markup.indexOf('overflow: auto;') >= 0) {
+            markup = markup.replace('overflow: auto;', '');
+        }
+ 
+        var str = Ext.String.format('<html><head>{0}</head><body>{1}</body></html>',stylesheets,markup);
+ 
+        // output to the iframe
+        cw.document.open();
+        cw.document.write(str);
+        cw.document.close();
+ 
+        // remove style attrib that has hardcoded height property
+        cw.document.getElementsByTagName('DIV')[0].removeAttribute('style');
+ 
+        // print the iframe
+        cw.print();
+ 
+        // destroy the iframe
+        Ext.fly(iFrameId).destroy();
+ 
+    }
+});
+
 Ext.onReady(function(){
 
 	// Add the additional 'advanced' VTypes
@@ -31,24 +102,6 @@ Ext.onReady(function(){
 	    }
 	});	
 	
-/**
- * Prints the contents of an Ext.Panel
- */
-Ext.ux.Printer.PanelRenderer = Ext.extend(Ext.ux.Printer.BaseRenderer, {
-
- /**
-  * Generates the HTML fragment that will be rendered inside the <html> 
-  * element of the printing window
-  */
- generateBody: function(panel) {
-   return String.format("<div class='x-panel-print'>{0}</div>", panel.body.dom.innerHTML);
- }
-});
-
-Ext.ux.Printer.registerRenderer("panel", Ext.ux.Printer.PanelRenderer);
-Ext.ux.Printer.BaseRenderer.prototype.stylesheetPath = 'print.css';
-
-
 var cp = new Ext.state.CookieProvider({
        expires: new Date(new Date().getTime()+(1000*60*60*24*300))
 });
@@ -56,36 +109,26 @@ Ext.state.Manager.setProvider(cp);
 
 
 
-var tp = new Ext.tree.TreePanel({
-             loader: new Ext.tree.TreeLoader({dataUrl:'products.txt'}),
-             containerScroll:true,
-             autoScroll:true,
-             title:'Popular Products',
-             root:  new Ext.tree.AsyncTreeNode({
-                text: 'Browse',
-                draggable:false, // disable root node dragging
-                id:'source'
-             })
-});
+
 
 var refreshAction = new Ext.Action({
-  text: 'Refresh',
-  handler: function() {
-    var id = tabs.getActiveTab().getId();
-    var tokens= id.split("-");
-    var uri;
-    if (tokens.length == 2){
-    	uri = 'pil='+ tokens[0] +'&cnt='+ tokens[1];
-    }
-    if (tokens.length == 3){
-    	uri = 'pil='+ tokens[0] +'&cnt='+ tokens[1] +'&center='+ tokens[2];
-    }
-    tabs.getActiveTab().getUpdater().update({
-          url       : 'retreive.php', 
-         params     : uri,
-         discardUrl : false
-}); 
-  }
+	text: 'Refresh',
+	handler: function() {
+		var id = tabs.getActiveTab().getId();
+		var tokens= id.split("-");
+		var uri;
+		if (tokens.length == 2){
+			uri = 'retreive.php?pil='+ tokens[0] +'&cnt='+ tokens[1];
+		}
+		if (tokens.length == 3){
+			uri = 'retreive.php?pil='+ tokens[0] +'&cnt='+ tokens[1] +'&center='+ tokens[2];
+		}
+		tabs.getActiveTab().getLoader().load({
+			url       : uri, 
+			autoLoad : true,
+			loadMask : true
+		}); 
+	}
 });
 var saveConfig = function() {
     // Update Cookie?!
@@ -102,13 +145,14 @@ var addTab = function(id, center, cnt, sdate, edate) {
 		sdate = new Date('12/31/2008');
 	} 
 	if (!edate){
-		edate = (new Date().add(Date.DAY, 1));
+		edate = Ext.Date.add(new Date(), Date.DAY, 1);
 	}
     var tid = id+"-"+cnt;
     tid = tid.toUpperCase();
-    var a = tabs.find("id", tid);
-    if (a.length > 0){ tabs.setActiveTab(tid); return; }
-    var uri = 'pil='+id+'&cnt='+cnt+'&sdate='+sdate.format('Y-m-d')+'&edate='+ edate.format('Y-m-d');
+    var a = Ext.getCmp(tid);
+    if (a !== undefined){ tabs.setActiveTab(tid); return; }
+    var uri = 'retreive.php?pil='+id+'&cnt='+cnt+'&sdate='+Ext.Date.format(sdate, 'Y-m-d')
+    		+'&edate='+ Ext.Date.format(edate, 'Y-m-d');
     var title = id;
     if (center != null){
     	uri = uri +"&center="+center;
@@ -120,55 +164,122 @@ var addTab = function(id, center, cnt, sdate, edate) {
         title      : title,
         closable   : true,
         autoScroll : true,
-        autoLoad   : {url: 'retreive.php', 
-                   params: uri,
-                   discardUrl:false},
+        listeners : {
+        	destroy: function(){
+        		saveConfig();
+        	}
+        },
+        loader  : {
+        	url        : uri, 
+            autoLoad   : true,
+            loadMask : true
+        },
         tbar: [refreshAction,
         {
             text    : 'Print Text',
             icon    : '/images/print.png',
             cls     : 'x-btn-text-icon',
             handler : function(){
-                Ext.ux.Printer.print(Ext.getCmp("tabPanel").getActiveTab());
+                Ext.getCmp("tabPanel").getActiveTab().print();
             }
           }]
-     }).show().addListener('destroy', function() {
-        saveConfig();
-     });
+     }).show(); // have this tab become the active tab
     saveConfig();
 };
 
-tp.addListener('click', function(node, e){
-  if(node.isLeaf()){
-     e.stopEvent();
-     addTab(node.id, null, 1, null, null);
-  }
+var tp = new Ext.tree.TreePanel({
+	containerScroll:true,
+	autoScroll:true,
+	title:'Popular Products',
+	listeners : {
+		itemclick : function(node, record, item, idx, e){
+				addTab(record.data.id, null, 1, null, null);
+		}
+	},
+	root:  {
+		text: 'Browse',
+		draggable:false, // disable root node dragging
+		id:'source',
+		children:[{id:'SWOMCD', text: 'SPC Mesoscale Discussion', leaf: true},
+		          {id:'SWODY1', text: 'SPC Day1 Outlook', leaf: true},
+		          {id:'SWODY2', text: 'SPC Day2 Outlook', leaf: true},
+		          {id:'PMDHMD', text: 'Model Diagnostic Discussion', leaf: true},
+		          {
+		           text: 'GFSX MOS',
+		           children: [{
+		                     id:'MEXDSM',
+		                     text: 'Des Moines',
+		                     leaf: true
+		                 },{
+		                     id:'MEXDVN',
+		                     text: 'Davenport',
+		                     leaf: true
+		                 }]
+		           },
+		          {
+		           text: 'NAM MOS',
+		           children: [{
+		                     id:'METDSM',
+		                     text: 'Des Moines',
+		                     leaf: true
+		                 },{
+		                     id:'METDVN',
+		                     text: 'Davenport',
+		                     leaf: true
+		                 }]
+		           },
+		          {
+		           text: 'GFS MOS',
+		           children: [{
+		                     id:'MAVDSM',
+		                     text: 'Des Moines',
+		                     leaf: true
+		                 },{
+		                     id:'MAVDVN',
+		                     text: 'Davenport',
+		                     leaf: true
+		                 }]
+		           }
+		         ]
+	}
 });
 
- var tabs =  new Ext.TabPanel({
-                   id: 'tabPanel',
-                    region:'center',
-                    height:.75,
-                    plain:true,
-                    enableTabScroll:true,
-                    defaults:{bodyStyle:'padding:5px'},
-                    items:[
-     new Ext.Panel({contentEl:'help', title: 'Help',autoScroll:true})
-                    ],
-                    activeTab:0
 
-                });
+	tabs = new Ext.TabPanel({
+		id : 'tabPanel',
+		region : 'center',
+		height : .75,
+		plain : true,
+		enableTabScroll : true,
+		defaults : {
+			bodyStyle : 'padding:5px'
+		},
+		items : [{
+			contentEl : 'help',
+			title : 'Help',
+			autoScroll : true
+		}],
+		activeTab : 0
+
+	});
 
  var myform = new Ext.FormPanel({
              frame:true,
              defaultType:'textfield',
              title:'Enter Product ID Manually',
              labelWidth:50,
+             border: false,
+             bodyPadding: 10,
+             autoScroll: true,
+             fieldDefaults: {
+                 labelAlign: 'top',
+                 labelWidth: 100,
+                 labelStyle: 'font-weight:bold'
+             },
              items:[{
                    fieldLabel:'PIL:',
                    name:'pil',
                    allowBlank:false,
-                   width: 150,
                    emptyText:'(Example) AFDDMX'
                 },{
                     fieldLabel : 'Center:',
@@ -186,7 +297,7 @@ tp.addListener('click', function(node, e){
                    value:1
                 }), {
                 	xtype : 'datefield',
-                	maxDate : (new Date().add(Date.DAY, 1)),
+                	maxDate : Ext.Date.add(new Date(), Ext.Date.DAY, 1),
                 	minDate : new Date('12/31/2008'),
                 	name : 'sdate',
                 	id : 'sdate',
@@ -197,10 +308,10 @@ tp.addListener('click', function(node, e){
                 	fieldLabel : 'Start Date'
                 }, {
                 	xtype : 'datefield',
-                	maxDate : (new Date().add(Date.DAY, 1)),
+                	maxDate : Ext.Date.add(new Date(), Ext.Date.DAY, 1),
                 	minDate : new Date('12/31/2008'),
                 	name : 'edate',
-                	value : (new Date().add(Date.DAY, 1)),
+                	value : Ext.Date.add(new Date(), Ext.Date.DAY, 1),
                 	width: 120,
                 	vtype : 'daterange',
                 	id : 'edate',
@@ -227,6 +338,7 @@ tp.addListener('click', function(node, e){
 
  var myform2 = new Ext.FormPanel({
      frame: true,
+     border: false,
      title: 'Select by WFO & Product',
      buttons: [{
          text:'Add',
@@ -284,36 +396,29 @@ tp.addListener('click', function(node, e){
 });
 
 
- var viewport = new Ext.Viewport({
-            layout:'border',
-            items:[
-                new Ext.BoxComponent({ // raw
-                    region:'north',
-                    el: 'iem-header',
-                    height:70
-                }),
-                new Ext.BoxComponent({ // raw
-                    region:'south',
-                    el: 'iem-footer',
-                    height:50
-                }),
-                new Ext.Panel({ // raw
-                    region:'west',
-                    layout:'accordion',
-     layoutConfig: {
-        // layout-specific configs go here
-        titleCollapse: false,
-        animate: true,
-        activeOnTop: false,
-        fill:true
-    },
-                    width:210,
-                    height:500,
-                    items:[myform,myform2,tp]
-                }),
-                tabs
-             ]
-        });
+ Ext.create('Ext.Panel', {
+	  renderTo : 'main',
+	  height: Ext.getBody().getViewSize().height - 120,
+	  layout   : {
+	          type: 'border',
+	          align: 'stretch'
+	  },
+	 items:[{ 
+		 region:'west',
+		 layout:'accordion',
+		 layoutConfig: {
+			 // layout-specific configs go here
+			 titleCollapse: false,
+			 animate: true,
+			 activeOnTop: false,
+			 fill:true
+		 },
+		 width:210,
+		 items:[myform, myform2, tp]
+	 },
+	 tabs
+	 ]
+ });
 
 var a = cp.get("afospils", "");
 var ar = a.split(",");

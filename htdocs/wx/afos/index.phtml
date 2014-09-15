@@ -6,16 +6,15 @@ include_once "../../../include/myview.php";
 $t = new MyView();
 
 $t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.1/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.1/build/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="Printer-all.js"></script>
 <script type="text/javascript" src="static.js?v=5"></script>
 EOF;
 $t->title = "NWS Text Product Finder";
 $t->thispage ="current-afos";
 $t->content = <<<EOF
+<div id="main"></div>
 <div id="help">
 <h3>IEM NWS Text Product Finder</h3>
 
