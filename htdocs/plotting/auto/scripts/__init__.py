@@ -1,3 +1,10 @@
+"""
+Examples of widget types
+
+dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
+     min="1893/01/01"), # Comes back to python as yyyy-mm-dd
+
+"""
 # Association of plots
 data = {'plots': [
     {'label': 'Daily', 'options': [
