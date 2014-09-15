@@ -48,6 +48,6 @@ ax.set_ylabel("Days")
 ax.legend(ncol=3)
 ax.set_ylim(0,40)
 ax.set_xlabel("High Temperature Ranges")
-fig.savefig('test.svg')
+fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')
