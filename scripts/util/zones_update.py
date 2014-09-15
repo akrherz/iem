@@ -115,23 +115,21 @@ while feat is not None:
         continue
     area = Area(geo)
     
-    newgeo = ogr.Geometry(ogr.wkbMultiPolygon)
+    # This is tricky. We want to have our multipolygon have its biggest polygon
+    # first in the multipolygon.  This will allow some plotting simplification
+    # later as we will only consider the first polygon
     thismaxa = 0
-    thismaxi = 0
+    idx = []
     for i in range(geo.GetGeometryCount()):
         _g = geo.GetGeometryRef(i)
         if Area(_g) > thismaxa: 
             thismaxa = Area(_g)
-            thismaxi = i
-    maxgeo = geo.GetGeometryRef(thismaxi)
-    if maxgeo.GetGeometryName() == 'LINEARRING':
-        m2 = ogr.Geometry(ogr.wkbPolygon)
-        m2.AddGeometry(maxgeo)
-        maxgeo = m2
-    newgeo.AddGeometry( maxgeo )
-    for i in range(geo.GetGeometryCount()):
-        if i == thismaxi:
-            continue
+            idx.insert(0, i)
+        else:
+            idx.append(i)
+
+    newgeo = ogr.Geometry(ogr.wkbMultiPolygon)
+    for i in idx:
         _g = geo.GetGeometryRef(i)
         if _g.GetGeometryName() == "LINEARRING":
             _n = ogr.Geometry(ogr.wkbPolygon)
@@ -143,13 +141,15 @@ while feat is not None:
 
     if ugcs.has_key(ugc):
         if area < ugcs[ugc]:
-            print 'Skipping %s [area: %s], since we had a previously bigger one' % (ugc, area)
+            print ('Skipping %s [area: %.5f], since we had a previously '
+                   +'bigger one') % (ugc, area)
             feat = lyr.GetNextFeature()
             continue
     ugcs[ugc] = area
 
     if wkt.find("EMPTY") > 0:
-        print ugc
+        print 'UGC: %s resulted in empty multipolygon, listing polygons' % (
+                                                                        ugc,)
         for i in range(geo.GetGeometryCount()):
             _g = geo.GetGeometryRef(i)
             print i, _g.GetGeometryName(), Area(_g)
