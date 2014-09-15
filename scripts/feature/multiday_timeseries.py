@@ -12,12 +12,10 @@ clows = []
 ccursor.execute("""SELECT 
 case when extract(month from valid) = 1 then valid + '1 year'::interval else valid end as dvalid,
  high, low from ncdc_climate71 where station = 'IA0200'
- and extract(month from valid) in (12,1,2,3,4,5) ORDER by dvalid ASC""")
+ ORDER by dvalid ASC""")
 for row in ccursor:
     ts = row[0]
-    ts = ts.replace(year=2013)
-    if ts.month in (1,2,3,4,5):
-        ts = ts.replace(year=2014)
+    ts = ts.replace(year=2014)
     #if row[0].month == 3 and row[0].day == 1:
     #    cdates.append( ts - mx.DateTime.RelativeDateTime(days=1) )
     #    chighs.append( chighs[-1] )
@@ -36,7 +34,7 @@ tmpf = []
 for yr in [2013,2014]:
     acursor.execute("""
  SELECT valid, tmpf from t%s WHERE station = 'DSM'
- and valid > '2013-12-01' ORDER by valid ASC
+ and valid > '2014-05-01' ORDER by valid ASC
 """ % (yr))
     for row in acursor:
         valid.append( row[0] )
@@ -61,8 +59,8 @@ prop = matplotlib.font_manager.FontProperties(size=12)
 
 fig = plt.figure()
 
-sts = datetime.datetime(2013,12,1)
-ets = datetime.datetime(2014,5,15)
+sts = datetime.datetime(2014,7,1)
+ets = datetime.datetime(2014,9,16)
 now = sts
 xticks = []
 xticklabels = []
@@ -86,11 +84,11 @@ ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 ax.set_xlim(sts, ets)
-ax.set_ylim(-20,95)
+ax.set_ylim(38,105)
 ax.legend(loc=2)
 ax.axhline(32, linestyle='-.')
 ax.grid(True)
-ax.set_title("Ames (KAMW) Air Temperature\n1 Dec 2013 - 14 May 2014")
+ax.set_title("Ames (KAMW) Air Temperature\n1 Jul 2014 - 15 Sep 2014")
 fig.savefig('test.ps')
 
 import iemplot
