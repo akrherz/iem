@@ -12,6 +12,10 @@ $image = "";
 $t = new MyView();
 $t->thispage = "networks-coop";
 $t->title = "Automated Data Plotter";
+$t->headextra = <<<EOF
+ <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+EOF;
+
 
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
@@ -31,22 +35,21 @@ while (list($k,$v) = each($jobj->plots)){
 $pselect .= "</select>";
 
 $states = Array(
-		'IA' => 'Iowa',
-          'IL'=> 'Illinois',
-          'KS'=> 'Kansas',
-		  'KY'=> 'Kentucky',
-		  'MI'=> 'Michigan',
-          'MN'=> 'Minnesota',
-        'MO'=> 'Missouri',
-          'NE'=> 'Nebraska',
-          'ND'=> 'North Dakota',
-          'OH'=> 'Ohio',
-          'SD'=> 'South Dakota',
-          'WI'=> 'Wisconsin',
-        
+	'IA' => 'Iowa',
+    'IL' => 'Illinois',
+    'KS' => 'Kansas',
+	'KY' => 'Kentucky',
+	'MI' => 'Michigan',
+    'MN' => 'Minnesota',
+    'MO' => 'Missouri',
+    'NE' => 'Nebraska',
+    'ND' => 'North Dakota',
+    'OH' => 'Ohio',
+    'SD' => 'South Dakota',
+    'WI' => 'Wisconsin',
 );
 
-
+$jsextra = "";
 $networks = Array();
 
 if (isset($_GET["q"])){
@@ -73,7 +76,7 @@ if (isset($_GET["q"])){
 				networkSelect($network, $value, Array(), "zstation") ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
-		if ($v->type == "station"){
+		elseif ($v->type == "station"){
 			if (sizeof($networks) == 0){
 				$networks = Array("ILCLIMATE" => "Illinois",
 						"INCLIMATE" => "Indiana",
@@ -94,28 +97,41 @@ if (isset($_GET["q"])){
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
-		if ($v->type == "clstate"){
+		elseif ($v->type == "clstate"){
 			$netselect = make_select($v->name, $value, $states);
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
 		}
-		if ($v->type == "text"){
+		elseif ($v->type == "text"){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td><input value=\"$value\" type=\"text\" name=\"". $v->name ."\"></td></tr>" ;
 		}
-		if ($v->type == "month"){
+		elseif ($v->type == "month"){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td>". monthSelect2( $value, $v->name) ."</td></tr>" ;
 		}
-		if ($v->type == "year"){
+		elseif ($v->type == "year"){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td>". yearSelect2(1893, $value, $v->name) ."</td></tr>" ;
 		}
-		if ($v->type == "select"){
+		elseif ($v->type == "select"){
 			$netselect = make_select($v->name, $value, $v->options);
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
 		}
+		elseif ($v->type == "date"){
+			$dpname = "datepicker_". $v->name;
+			$jsextra .= <<<EOF
+$( "#{$dpname}" ).datepicker({
+		dateFormat : "yy/mm/dd",
+		minDate    : new Date("{$v->min}")});
+$("#{$dpname}").datepicker('setDate', new Date("{$value}"));
+	
+EOF;
+			$form .= "<tr><td>". $v->label ."</td>"
+					."<td><input type=\"text\" name=\"". $v->name 
+					."\" id=\"{$dpname}\" /> (YYYY/mm/dd)</td></tr>";
+		}
 	}
-	$imguri .= implode($pltvars, "__");
+	$imguri .= str_replace('/', '-', implode($pltvars, "__"));
 	$imguri .= ".png";
 	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
 		$image = "";
@@ -176,7 +192,14 @@ $image
 		URL address currently shown by your web browser.</div>
 
 EOF;
-
+$t->jsextra = <<<EOF
+<script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script>
+$(document).ready(function(){
+{$jsextra}
+});
+</script>
+EOF;
 $t->render('single.phtml');
 
 
