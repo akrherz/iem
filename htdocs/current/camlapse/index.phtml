@@ -4,9 +4,12 @@ include("../../../include/myview.php");
 $t = new MyView();
 include("../../../include/cameras.inc.php");
 $t->title = "Webcam Lapse Player";
-$t->headextra = '
-<script type="text/javascript" src="flowplayer-3.2.13.min.js"></script>
-';
+$t->headextra = <<<EOF
+<link href="skin/minimalist.css" rel="stylesheet">
+EOF;
+$jsextra = <<<EOF
+<script type="text/javascript" src="flowplayer-dev.js"></script>
+EOF;
 $t->thispage = "webcam-lapse";
 
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
@@ -41,39 +44,53 @@ note the timestamp on the lapses, some of them may be old.</p>
 </select>
 </div>
 </form>
+EOF;
+$jsextra .= <<<EOF
+<script type="text/javascript">
+flowplayer.conf = {
+	engine: 'flash',
+	swf: 'flowplayer-dev.swf'
+};
+
+$(function () {
+	$("#player").flowplayer({
+		playlist : [
+			[{flash: '/onsite/lapses/auto/algona_sunrise.flv'}]
+		]
+	});
+
+	var tokens = window.location.href.split('#');
+	if (tokens.length == 2){
+  		tokens2 = tokens[1].split('_');
+  		if (tokens2.length == 2){
+			mycam = tokens2[0];
+			document.getElementById('mycam').value = mycam;
+			mylapse = tokens2[1];
+			document.getElementById('mylapse').value = mylapse;
+			window.setTimeout(myloader, 1000);
+  		}
+	} 
+});
 
 
-<script>
-flowplayer("player", "flowplayer-3.2.18.swf", {
-   clip:{
-    baseUrl:"/onsite/lapses/auto/",
-    url:"algona_sunrise.flv"}
-   });
-
+		
 function myloader()
 {
-  ts = new Date();
-  var mycam = document.theform.mycam.value;
-  var mylapse = document.theform.mylapse.value;
+  	ts = new Date();
+  	var mycam = document.theform.mycam.value;
+  	var mylapse = document.theform.mylapse.value;
 	window.location.href = "#"+mycam+"_"+mylapse;
-  var url =  mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-  \$f().play(url);
+  	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
+
+	api = flowplayer();
+	api.load([{flash:url}]);
 }
 
-var tokens = window.location.href.split('#');
-if (tokens.length == 2){
-  tokens2 = tokens[1].split('_');
-  if (tokens2.length == 2){
-	mycam = tokens2[0];
-	document.getElementById('mycam').value = mycam;
-	mylapse = tokens2[1];
-	document.getElementById('mylapse').value = mylapse;
-	myloader();
-  }
-} 
+
 
 
 </script>
 EOF;
+$t->jsextra = $jsextra;
 $t->render('single.phtml');
 ?>
