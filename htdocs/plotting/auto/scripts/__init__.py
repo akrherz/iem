@@ -31,5 +31,6 @@ data = {'plots': [
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
         {'id': "16", 'label': "Wind Rose when TS (thunder) is reported"},
+        {'id': "18", 'label': "Long term temperature time series"},
     ]},
 ]}
