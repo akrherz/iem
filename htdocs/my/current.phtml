@@ -1,16 +1,21 @@
 <?php
 include("../../config/settings.inc.php");
+// This page uses cookies to store the favorited stations
 session_start();
+
 include("../../include/mlib.php");
 include("../../include/forms.php");
 include("../../include/iemaccess.php");
 include("../../include/iemaccessob.php");
 include("../../include/myview.php");
-$t = new MyView();
+
 $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
 $refresh = isset($_REQUEST["refresh"]) ? strtolower($_REQUEST["refresh"]): 'yes';
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
 $expiry = 60*60*24*100; // 100 days
+
+
+$t = new MyView();
 
 $_SESSION['stations'] = Array();
 if (isset($_COOKIE['stations'])){
@@ -241,8 +246,8 @@ Click on a column to sort it.<br>
   <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
   <th rowspan="2"><a href="{$uri}ts">Valid</a></th>
   <th colspan=6></td>
-  <th colspan="3" bgcolor="#EEEEEE">Wind Knots</th>
-  <th colspan="2" bgcolor="#e6e6fa">Precipitation</th>
+  <th colspan="3" bgcolor="#EEEEEE">Wind (knots)</th>
+  <th colspan="2" bgcolor="#e6e6fa">Precipitation (inch)</th>
 </tr>
 <tr>
   <th><a href="{$uri}tmpf">Temp</a> (<a href="{$uri}max_tmpf">Hi</a>/<a href="{$uri}min_tmpf">Lo</a>)</th>
@@ -406,10 +411,12 @@ $content .= <<<EOF
 <br><br>
 
 <b>Notes:</b><br>
-<b>1.</b> The plotting functionality does not work in all situations.  It 
-does work sometimes!
-<br><b>2. </b> The average surface temperature is calculated by the IEM using some
-logic to account for sites without 4 sensors or broken sensors.
+		<ol>
+<li>The plotting functionality does not work in all situations.  It 
+does work sometimes!</li>
+<li>The average surface temperature is calculated by the IEM using some
+logic to account for sites without 4 sensors or broken sensors.</li>
+		</ol>
 
 EOF;
 $t->content = $content;
