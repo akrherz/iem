@@ -3,7 +3,6 @@
 """
 
 import sys
-import os
 import psycopg2
 from pyiem.plot import MapPlot
 import datetime
@@ -13,11 +12,10 @@ import pytz
 MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 mcursor = MOS.cursor()
-mcursor2 = MOS.cursor()
 icursor = IEM.cursor()
 
 def doit(now, model):
-    # Figure out the model runtime we care about
+    """ Figure out the model runtime we care about """
     mcursor.execute("""
     SELECT max(runtime) from alldata where station = 'KDSM'
     and ftime = %s and model = %s
@@ -62,12 +60,6 @@ WHERE
         diff = forecast[row[0]] - row[2]
         if diff > 20 or diff < -20:
             continue
-            mcursor2.execute("""
-            INSERT into large_difference(model, valid, station, ob, mos)
-            VALUES (%s, %s, %s, %s, %s)
-            """, (model, now.strftime("%Y-%m-%d %H:00"), row[0], row[2],
-                    forecast[row[0]]))
-            continue
         lats.append( row[4] )
         lons.append( row[3] )
         vals.append( diff )
@@ -80,12 +72,12 @@ WHERE
                                 runtime.strftime("%d %b %Y %-I %p"), 
                                 localnow.strftime("%d %b %Y %-I %p"))
             )
-    m.contourf(lons, lats, vals, range(-10,10), units='F')
+    m.contourf(lons, lats, vals, range(-10, 10), units='F')
 
     pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
-    m.postprocess(pqstr=pqstr)
+    m.postprocess(pqstr=pqstr, view=False)
     del(m)
 
     m = MapPlot(sector='conus',
@@ -94,23 +86,25 @@ WHERE
                                 runtime.strftime("%d %b %Y %-I %p"), 
                                 localnow.strftime("%d %b %Y %-I %p"))
             )
-    m.contourf(lons, lats, vals, range(-10,10), units='F')
+    m.contourf(lons, lats, vals, range(-10, 10), units='F')
     
-    pqstr = "plot ac %s00 conus_%s_mos_T_bias.png conus_%s_mos_T_bias_%s.png png" % (
+    pqstr = ("plot ac %s00 conus_%s_mos_T_bias.png "
+             +"conus_%s_mos_T_bias_%s.png png") % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
-    m.postprocess(pqstr=pqstr)
+    m.postprocess(pqstr=pqstr, view=False)
     
-if __name__ == "__main__":
-    ''' Go go gadget arm '''
+def main():
+    """ Go main go"""
     ts = datetime.datetime.utcnow()
     model = sys.argv[1]
     if len(sys.argv) == 6:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4]))
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+                               int(sys.argv[3]), int(sys.argv[4]))
         model = sys.argv[5]
-    ts = ts.replace(minute=0,second=0,microsecond=0)
+    ts = ts.replace(minute=0, second=0, microsecond=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     doit(ts, model )
-    mcursor2.close()
-    MOS.commit()
+
+if __name__ == "__main__":
+    main()
