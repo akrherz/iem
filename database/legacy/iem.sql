@@ -244,6 +244,18 @@ CREATE TABLE summary (
 CREATE TABLE summary_2011() inherits (summary);
 
 ---
+--- Hourly precip
+---
+CREATE TABLE hourly(
+  station varchar(20),
+  network varchar(10),
+  valid timestamptz,
+  phour real,
+  iemid int references stations(iemid)
+);
+GRANT SELECT on hourly to apache,nobody;
+
+---
 ---
 create table hourly_2014( 
   CONSTRAINT __hourly_2014_check 
