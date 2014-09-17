@@ -58,7 +58,7 @@ def plotter( fdict ):
         
     x = ar[0][0]
     y = ar[0][1]
-    ax.text(0.65, 0.15, "Largest Frequency: %.1f days\nHigh:%.0f-%.0f Low:%.0f-%.0f" % (
+    ax.text(0.65, 0.15, "Largest Frequency: %.1f days\nHigh: %.0f-%.0f Low: %.0f-%.0f" % (
                             H[x,y], yedges[y], yedges[y+1],
                                          xedges[x], xedges[x+1]), ha='center', 
             va='center', transform=ax.transAxes,
