@@ -11,14 +11,17 @@ def do(col):
 	# Query out all sites with a null climate_site
 	mcursor.execute("""
 		SELECT id, geom, state from stations 
-		WHERE """+col+""" IS NULL and country = 'US' and 
-		state not in ('PR','DC','GU','PU','P3', 'P4')
+		WHERE """+col+""" IS NULL and country = 'US'
 	""")
 	
 	for row in mcursor:
 		thisID = row[0]
 		thisGEOM = row[1]
 		st = row[2]
+		# Don't attempt to assign a climate_site to sites outside of mainland
+		if (col == 'climate_site' and 
+			st in ['PR', 'DC', 'GU', 'PU', 'P3', 'P4', 'P5']):
+			continue
 		# Find the closest site
 		if col == 'climate_site':
 			sql = """select id from stations WHERE network = '%sCLIMATE'
@@ -31,7 +34,7 @@ def do(col):
 		mcursor2.execute(sql)
 		row2 = mcursor2.fetchone()
 		if row2 is None:
-			print 'Could not find %s Site for: %s' % (col, thisID)
+			print 'Could not find %s site for: %s' % (col, thisID)
 		else:
 			sql = """UPDATE stations SET %s = '%s' WHERE
 	             id = '%s'""" % (col, row2[0], thisID)
