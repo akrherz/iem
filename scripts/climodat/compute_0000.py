@@ -21,7 +21,8 @@ def do_day(valid):
     alldata a JOIN stations t on (t.id = a.station) 
     where t.network ~* 'CLIMATE' and day = %s and substr(station,2,1) != 'C'
     and substr(station,2,4) != '0000' and high is not null and
-    precip is not null
+    precip is not null and low is not null and snow is not null and
+    snowd is not null
     """, (valid,))
     lats = []
     lons = []
@@ -97,10 +98,10 @@ def do_climdiv_day(stabbr, valid, highgrid, lowgrid, precipgrid, snowgrid,
         ccursor.execute("""INSERT into alldata_"""+stabbr+"""
         (station, day, high, low, precip, snow, snowd, estimated, year, month, 
         sday)
-        VALUES (%s, %s, %.0f, %.0f, %.2f, %.1f, %.1f, true, %s, %s, %s)""", (
+        VALUES ('%s', '%s', %.0f, %.0f, %.2f, %.1f, %.1f, true, '%s', '%s', '%s')""" % (
         stid, valid, high, low, precip, 
         snow, snowd, valid.year, valid.month, 
-        "%02d%02d" % (valid.month, valid.day)) )
+        "%02i%02i" % (valid.month, valid.day)) )
 
     sw_nc.close()
 
@@ -128,14 +129,13 @@ def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid, snowgrid,
 
     # Now we insert into the proper database!
     ccursor.execute("""DELETE from alldata_"""+stabbr+""" 
-    WHERE station = %s and day = %s""", (stabbr +"0000",))
-    
+    WHERE station = %s and day = %s""", (stabbr +"0000", valid))
     ccursor.execute("""INSERT into alldata_"""+stabbr+""" 
     (station, day, high, low, precip, snow, snowd, estimated, year, month, 
     sday)
-    VALUES (%s, %s, %.0f, %.0f, %.2f, %.1f, %.1f, true, %s, %s, %s)""", (
+    VALUES ('%s', '%s', %.0f, %.0f, %.2f, %.1f, %.1f, true, '%s', '%s', '%s')""" % (
     stabbr +"0000", valid, high, low, precip, 
-    snow, snowd, valid.year, valid.month, "%02d%02d" % (valid.month,
+    snow, snowd, valid.year, valid.month, "%02i%02i" % (valid.month,
                                                         valid.day)))
     
 if __name__ == '__main__':
