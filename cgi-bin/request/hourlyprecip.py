@@ -4,7 +4,7 @@
 '''
 import cgi
 import datetime
-
+import sys
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 cursor = IEM.cursor()
@@ -25,17 +25,25 @@ def get_data(network, sts, ets, stations=[]):
     return s
 
 
-if __name__ == '__main__':
-    ''' run rabbit run '''
+def main():
+    """ run rabbit run """
+    sys.stdout.write('Content-type: text/plain\n\n')
     form = cgi.FieldStorage()
-    sts = datetime.date( int(form.getfirst('year1')), 
+    try:
+        sts = datetime.date( int(form.getfirst('year1')), 
                          int(form.getfirst('month1')),
                          int(form.getfirst('day1')) )
-    ets = datetime.date( int(form.getfirst('year2')), 
+        ets = datetime.date( int(form.getfirst('year2')), 
                          int(form.getfirst('month2')),
                          int(form.getfirst('day2')) )
-    
-    print 'Content-type: text/plain\n'
+    except:
+        sys.stdout.write(("ERROR: Invalid date provided, please check "
+                          +"selected dates."))
+        return
     stations = form.getlist('station')
     network = form.getfirst('network')[:12]
-    print get_data(network, sts, ets, stations=stations)
+    sys.stdout.write( get_data(network, sts, ets, stations=stations) )
+    
+if __name__ == '__main__':
+    # Go Main Go
+    main()
