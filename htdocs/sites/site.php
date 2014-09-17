@@ -1,9 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
+include("../../include/myview.php");
+
 include("setup.php");
 
-include("../../include/myview.php");
 $t = new MyView();
 $t->thispage="iem-sites";
 $t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
@@ -12,13 +13,13 @@ $t->sites_current = "base";
 
 $lat = sprintf("%.5f", $cities[$station]["lat"]);
 $lon = sprintf("%.5f", $cities[$station]["lon"]);
+
 $t->content = <<<EOF
-<div style="float: left;">
 
+<div class="row">
+<div class="col-md-4">
 
-<table><tr><td valign="top">
-
-<table cellpadding='1' border='1' cellspacing='0'>
+<table class="table table-condensed table-striped">
 <tr><th>Station Identifier:</th><td>{$station}</td></tr>
 <tr><th>Station Name:</th><td>{$cities[$station]["name"]}</td></tr>
 <tr><th>Network:</th><td>{$network}</td></tr>
@@ -30,12 +31,14 @@ $t->content = <<<EOF
 <tr><th>Time Zone:</th><td>{$cities[$station]["tzname"]}</td></tr>
 </table>
 
-</td><td>
-  <div id="mymap" style="height: 640px; width: 640px;"></div>
-</td>
-</tr></table>
+</div>
+<div class="col-md-8">
+
+  <div id="mymap" style="height: 640px; width: 100%;"></div>
 
 </div>
+</div>
+
 <script type="text/javascript">
 var map;
 function load(){
