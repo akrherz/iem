@@ -8,10 +8,11 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 # Association of plots
 data = {'plots': [
     {'label': 'Daily', 'options': [
-        {'id': "4", 'label': "State Areal Coverage of Precip Intensity over X Days"},
-        {'id': "5", 'label': "Minimum Daily Temperature Range"},
-        {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "11", 'label': "ASOS/AWOS Daily Maximum Dew Point for a Year"},
+        {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
+        {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
+        {'id': "5", 'label': "Minimum Daily Temperature Range"},
+        {'id': "4", 'label': "State Areal Coverage of Precip Intensity over X Days"},
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "1", 'label': "July-August Days Above Temp v. May-June Precip"},
