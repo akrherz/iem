@@ -19,10 +19,10 @@ def do_day(valid):
     ccursor.execute("""
     SELECT ST_x(geom), ST_y(geom), high, low, precip, snow, snowd from
     alldata a JOIN stations t on (t.id = a.station) 
-    where t.network ~* 'CLIMATE' and day = '%s' and substr(station,2,1) != 'C'
+    where t.network ~* 'CLIMATE' and day = %s and substr(station,2,1) != 'C'
     and substr(station,2,4) != '0000' and high is not null and
     precip is not null
-    """ % (valid.strftime("%Y-%m-%d"),))
+    """, (valid,))
     lats = []
     lons = []
     highs= []
@@ -85,20 +85,22 @@ def do_climdiv_day(stabbr, valid, highgrid, lowgrid, precipgrid, snowgrid,
         snow = np.average(snowgrid[sw > 0])    
         snowd = np.average(snowdgrid[sw > 0])
         
-        print '%s %s High: %5.1f Low: %5.1f Precip: %4.2f' % (stid, 
-                                                    valid.strftime("%Y-%m-%d"),
+        print '%s %s-%s-%s High: %5.1f Low: %5.1f Precip: %4.2f' % (stid, 
+                                                    valid.year, valid.month,
+                                                    valid.day,
                                                     high, low, precip)
 
         # Now we insert into the proper database!
-        ccursor.execute("""DELETE from alldata_%s WHERE station = '%s' 
-        and day = '%s'""" % ( stabbr, stid, valid.strftime("%Y-%m-%d"),))
+        ccursor.execute("""DELETE from alldata_"""+stabbr+""" 
+        WHERE station = %s and day = %s""", (stid, valid))
         
-        ccursor.execute("""INSERT into alldata_%s 
+        ccursor.execute("""INSERT into alldata_"""+stabbr+"""
         (station, day, high, low, precip, snow, snowd, estimated, year, month, 
         sday)
-        VALUES ('%s', '%s', %.0f, %.0f, %.2f, %.1f, %.1f, true, %s, %s, '%s')""" % (
-        stabbr, stid, valid.strftime("%Y-%m-%d"), high, low, precip, 
-        snow, snowd, valid.year, valid.month, valid.strftime("%m%d")))
+        VALUES (%s, %s, %.0f, %.0f, %.2f, %.1f, %.1f, true, %s, %s, %s)""", (
+        stid, valid, high, low, precip, 
+        snow, snowd, valid.year, valid.month, 
+        "%02d%02d" % (valid.month, valid.day)) )
 
     sw_nc.close()
 
@@ -119,20 +121,22 @@ def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid, snowgrid,
     snow = np.average(snowgrid[sw > 0])    
     snowd = np.average(snowdgrid[sw > 0])
 
-    print '%s %s NEW High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, 
-                                                    valid.strftime("%Y-%m-%d"),
+    print '%s %s-%s-%s NEW High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, 
+                                                    valid.year, valid.month,
+                                                    valid.day,
                                                 high, low, precip)
 
     # Now we insert into the proper database!
-    ccursor.execute("""DELETE from alldata_%s WHERE station = '%s0000' 
-    and day = '%s'""" % ( stabbr, stabbr, valid.strftime("%Y-%m-%d"),))
+    ccursor.execute("""DELETE from alldata_"""+stabbr+""" 
+    WHERE station = %s and day = %s""", (stabbr +"0000",))
     
-    ccursor.execute("""INSERT into alldata_%s 
+    ccursor.execute("""INSERT into alldata_"""+stabbr+""" 
     (station, day, high, low, precip, snow, snowd, estimated, year, month, 
     sday)
-    VALUES ('%s0000', '%s', %.0f, %.0f, %.2f, %.1f, %.1f, true, %s, %s, '%s')""" % (
-    stabbr, stabbr, valid.strftime("%Y-%m-%d"), high, low, precip, 
-    snow, snowd, valid.year, valid.month, valid.strftime("%m%d")))
+    VALUES (%s, %s, %.0f, %.0f, %.2f, %.1f, %.1f, true, %s, %s, %s)""", (
+    stabbr +"0000", valid, high, low, precip, 
+    snow, snowd, valid.year, valid.month, "%02d%02d" % (valid.month,
+                                                        valid.day)))
     
 if __name__ == '__main__':
     if len(sys.argv) == 4:
