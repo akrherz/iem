@@ -53,13 +53,13 @@ m2 = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
 x,y= m(-99.4023, 38.7753)
 x2,y2=m(-88.1321, 45.2504)
 
-img=mpimg.imread('/tmp/065.jpg')
+img=mpimg.imread('/tmp/ames2012.jpg')
 ax[0].imshow(img, extent=(x,x2,y, y2) )
-ax[0].set_title("6 March 2014 :: Aqua MODIS True Color")
+ax[0].set_title("15 September 2012 :: Aqua MODIS True Color")
 
-img=mpimg.imread('/tmp/072.jpg')
+img=mpimg.imread('/tmp/ames2014.jpg')
 ax[1].imshow(img, extent=(x,x2,y, y2) )
-ax[1].set_title("13 March 2014 :: Aqua MODIS True Color")
+ax[1].set_title("16 September 2014 :: Aqua MODIS True Color")
 
 m.drawstates(linewidth=2.5)
 m2.drawstates(linewidth=2.5)
