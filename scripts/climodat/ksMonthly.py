@@ -59,7 +59,7 @@ def process(id, csv,yr):
     sql = """SELECT round(avg(high)::numeric,1) as avg_high,
     round(avg(low)::numeric,1) as avg_low, 
     round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' """ % (
-                            constants.climatetable(id.lower()), id,)
+                            constants.climatetable(id), id,)
     rs = constants.mydb.query(sql).dictresult()
     aHigh = rs[0]["avg_high"]
     aLow = rs[0]["avg_low"]
