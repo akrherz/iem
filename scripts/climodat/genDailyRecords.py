@@ -22,7 +22,17 @@ def write(mydb, out, station):
         for mo in range(1,13):
             try:
                 ts = mx.DateTime.DateTime(2000, mo, day)
+                if not r.has_key(ts):
+                    print ("Records missing for table: %s station: %s "
+                           +"date: %s") % (constants.climatetable(station),
+                                           station, ts.strftime("%b %d"))
+                    out.write(" *** ***")
+                    continue
             except:
+                out.write(" *** ***")
+                continue
+            if (r[ts]['max_high'] is None or
+                r[ts]['min_low'] is None):
                 out.write(" *** ***")
                 continue
             out.write("%4i%4i" % (r[ts]["max_high"], r[ts]["min_low"]) )

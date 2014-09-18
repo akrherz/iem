@@ -23,5 +23,8 @@ DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  
             except:
                 out.write(" *** ***")
                 continue
+            if not r.has_key(ts) or r[ts]['high'] is None:
+                out.write(" *** ***")
+                continue
             out.write("%4i%4i" % (r[ts]["high"], r[ts]["low"]) )
         out.write("\n")

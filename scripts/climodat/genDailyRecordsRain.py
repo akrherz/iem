@@ -21,6 +21,9 @@ def write(mydb, out, station):
             except:
                 out.write("  ****")
                 continue
+            if not r.has_key(ts) or r[ts]['max_precip'] is None:
+                out.write("  ****")
+                continue
             out.write("%6.2f" % (r[ts]["max_precip"]) )
         out.write("\n")
   
