@@ -2,18 +2,23 @@
  Crude data estimator!
 """
 import sys
-import iemdb
-import numpy
+import numpy as np
 import network
 import psycopg2.extras
+import netCDF4
+import datetime
+from pyiem import iemre
+from pyiem.datatypes import temperature
 
 # Database Connection
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 
 state = sys.argv[1]
 nt = network.Table("%sCLIMATE" % (state.upper(),))
+
+vnameconv = {'high': 'high_tmpk', 'low': 'low_tmpk', 'precip': 'p01d'}
 
 # We'll care about our nearest 11 stations, arbitrary
 friends = {}
@@ -32,14 +37,15 @@ for station in nt.sts.keys():
     for row in ccursor:
         friends[station].append( row[0] )
         weights[station].append( 1.0 / row[1] )
-    weights[station] = numpy.array( weights[station] )
+    weights[station] = np.array( weights[station] )
 
 def do_var(varname):
     """
     Run our estimator for a given variable
     """
+    currentnc = None
     sql = """select day, station from alldata_%s WHERE %s IS NULL 
-        and day >= '1893-01-01'""" % (state.lower(), varname)
+        and day >= '1893-01-01' ORDER by day ASC""" % (state.lower(), varname)
     ccursor.execute( sql )
     for row in ccursor:
         day = row[0]
@@ -59,12 +65,25 @@ def do_var(varname):
             value.append( row2[1] )
 
         if len(weight) < 3:
-            print 'Not Enough Data Found station: %s day: %s var: %s' % (
-                                    station, day, varname)
-            continue
-    
-        mass = sum(weight)
-        interp = numpy.sum(numpy.array(weight) * numpy.array(value) / mass)
+            # Nearest neighbors failed, so lets look at our grided analysis
+            # and sample from it
+            if currentnc is None or currentnc.title.find(str(day.year)) == -1:
+                currentnc = netCDF4.Dataset(("/mesonet/data/iemre/"
+                            +"%s_mw_daily.nc") % (day.year,))
+            tidx = iemre.daily_offset(datetime.datetime(day.year, day.month,
+                                                        day.day))
+            iidx, jidx = iemre.find_ij(nt.sts[station]['lon'], 
+                                       nt.sts[station]['lat'])
+            iemreval = currentnc.variables[vnameconv[varname]][tidx, jidx, 
+                                                               iidx]
+            if varname in ('high', 'low'):
+                interp = temperature(iemreval, 'K').value('F')
+            else:
+                interp = iemreval / 24.5
+            print '--> Neighbor failure, %s %s %s' % (station, day, varname)
+        else:
+            mass = sum(weight)
+            interp = np.sum(np.array(weight) * np.array(value) / mass)
 
         dataformat = '%.2f'
         if varname in ['high', 'low']:
@@ -74,6 +93,7 @@ def do_var(varname):
         sql = """UPDATE alldata_%s SET estimated = true, %s = %s WHERE 
             station = '%s' and day = '%s'""" % (state.lower(), varname, 
                                     dataformat % (interp,), station, day)
+        sql = sql.replace(' nan ', ' null ')
         ccursor2.execute( sql )
 
 def main():
