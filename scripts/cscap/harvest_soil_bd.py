@@ -38,7 +38,7 @@ for entry in feed:
     #if siteid == 'DPAC':
     #    print 'ERROR: Skipping DPAC Soil Texture sheet as it has subsamples'
     #    continue
-    print 'Processing %s Soil BD & Water Retention Year %s' % (siteid, YEAR),
+    #print 'Processing %s Soil BD & Water Retention Year %s' % (siteid, YEAR),
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
         worksheet.get_cell_value(1, 2) != 'depth' or
         worksheet.get_cell_value(1, 3) != 'subsample'):
