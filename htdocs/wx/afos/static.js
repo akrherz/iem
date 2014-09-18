@@ -145,7 +145,7 @@ var addTab = function(id, center, cnt, sdate, edate) {
 		sdate = new Date('12/31/2008');
 	} 
 	if (!edate){
-		edate = Ext.Date.add(new Date(), Date.DAY, 1);
+		edate = Ext.Date.add(new Date(), Ext.Date.DAY, 1);
 	}
     var tid = id+"-"+cnt;
     tid = tid.toUpperCase();
