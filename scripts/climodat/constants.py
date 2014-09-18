@@ -1,6 +1,10 @@
 
 import pg
 import mx.DateTime
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
+         'OHCLIMATE','MICLIMATE','KYCLIMATE','WICLIMATE','MNCLIMATE',
+         'SDCLIMATE','NDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE'))
 
 _THISYEAR = mx.DateTime.now().year
 _ENDYEAR = mx.DateTime.now().year +1
@@ -11,8 +15,8 @@ _ENDTS = mx.DateTime.DateTime(_ENDYEAR,1,1)
 #_YEARS = 58
 #_YRCNT = [0,58,58,58,57,57,57,57,57,57,57,57,57]
 mydb = pg.connect('coop', 'iemdb',user='nobody')
-import iemdb
-mesosite = iemdb.connect('mesosite', bypass=True)
+import psycopg2
+mesosite = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = mesosite.cursor()
 mcursor.execute("""SELECT propvalue from properties 
     where propname = 'iaclimate.end'""")
@@ -20,18 +24,11 @@ row = mcursor.fetchone()
 _QCENDTS = mx.DateTime.strptime(row[0], '%Y-%m-%d')
 mcursor.close()
 
-longterm = ['IA1635','IA4063','IA3509','IA3473','IA4389','IA5769','IA1319',
-'IA7147','IA2171','IA1533','IA5952','IA2110','IA6243','IA5131','IA3290',
-'IA8266','IA7979','IA0133','IA1833','IA7161','IA8806',
-'IA4735','IA6327','IA8706','IA4894','IA0200','IA2864','IA0364',
-'IA7842','IA2789','IA8688','IA5198','IA2203','IA2364',
-'IA0000', 'IA4101']
-
 def get_table(sid):
     """
     Return the table which has the data for this siteID
     """
-    return "alldata_%s" % (sid.lower()[:2],)
+    return "alldata_%s" % (sid[:2],)
 
 def yrcnt(sid):
     """ Compute the number of years each month will have in the records """
@@ -56,8 +53,9 @@ def climatetable(sid):
 def startts(sid):
     return mx.DateTime.DateTime(startyear(sid),1,1)
 
-def startyear(sid):
-    if sid in longterm:
+def startyear( sid ):
+    """ Return the start year for this station ID """
+    if nt.sts['sid']['archive_begin'].year <= 1893:
         return 1893
     return 1951
 

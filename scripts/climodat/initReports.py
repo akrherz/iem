@@ -9,11 +9,11 @@ mydb = pg.connect("coop", 'iemdb')
 
 #mydb.query("DELETE from r_monthly")
 
-s = mx.DateTime.DateTime(2012, 1, 1)
-e = mx.DateTime.DateTime(2013, 1, 1)
+s = mx.DateTime.DateTime(2013, 1, 1)
+e = mx.DateTime.DateTime(2015, 1, 1)
 interval = mx.DateTime.RelativeDateTime(months=+1)
 
-for id in nt.sts.keys():
+for id in ['IA0200',]:
 #for n in range(0,1):
   #for st in ['ND','SD','NE','KS','MO','IL','IN', 'OH','MI','WI','MN','KY','IA']:
   #for st in ['KY',]:
