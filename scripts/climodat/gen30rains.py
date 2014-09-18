@@ -9,7 +9,8 @@ def write(mydb, out, station):
 """)
 
     rs = mydb.query("""SELECT precip, day from %s WHERE station = '%s' 
-   and day >= '%s-01-01' ORDER by precip DESC LIMIT 30""" % (
+   and day >= '%s-01-01' and precip is not null
+   ORDER by precip DESC LIMIT 30""" % (
         constants.get_table(station), station, 
         constants.startyear(station) ) ).dictresult()
 
