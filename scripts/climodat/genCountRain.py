@@ -13,7 +13,8 @@ def write(mydb, out, station):
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN   
 """)
 
-    rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" % (
+    rs = mydb.query("""SELECT * from r_monthly WHERE station = '%s'
+    and rain_days is not null""" % (
                             station,) ).dictresult()
 
     db = {}
@@ -26,9 +27,9 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
         tot = 0
         out.write("%s   " % (yr,) )
         for mo in range(1, 13):
-            cnt = db["%s-%02i-01" % (yr, mo)]
+            cnt = db.get("%s-%02i-01" % (yr, mo), None)
             ts = mx.DateTime.DateTime(yr,mo,1)
-            if (ts >= constants._ARCHIVEENDTS):
+            if ts >= constants._ARCHIVEENDTS or cnt is None:
                 out.write("%3s " % ("M",) )
                 continue
       
@@ -38,7 +39,8 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 
     rs = mydb.query("""select extract(month from monthdate) as month, 
     stddev(rain_days), avg(rain_days) from r_monthly 
-    WHERE station = '%s' GROUP by month ORDER by month ASC""" % (
+    WHERE station = '%s' and rain_days is not null
+    GROUP by month ORDER by month ASC""" % (
                                 station,) ).dictresult()
 
     db = {}

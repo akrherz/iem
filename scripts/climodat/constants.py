@@ -55,7 +55,7 @@ def startts(sid):
 
 def startyear( sid ):
     """ Return the start year for this station ID """
-    if nt.sts['sid']['archive_begin'].year <= 1893:
+    if nt.sts[sid]['archive_begin'].year <= 1893:
         return 1893
     return 1951
 

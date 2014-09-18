@@ -52,6 +52,9 @@ def write(mydb, out, station):
             except:
                 out.write("  **  **")
                 continue
+            if not r.has_key(ts) or r[ts]['max_range'] is None:
+                out.write("  **  **")
+                continue
             out.write("%4i%4i" % (r[ts]["max_range"], r[ts]["min_range"]) )
         out.write("\n")
 

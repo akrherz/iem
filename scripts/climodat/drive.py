@@ -26,6 +26,7 @@ import genTempThresholds
 import genRecordPeriods
 import gen_precip_cats
 import constants
+import sys
 
 
 #stdlib
@@ -39,7 +40,12 @@ def caller(func, *args):
     #print "%s %s took %s" % (func.__name__, args[-1], (end-start))
     return ret
 
-for dbid in constants.nt.sts.keys():
+runstations = constants.nt.sts.keys()
+if len(sys.argv) == 2:
+    runstations = [sys.argv[1],]
+    update_all = True
+
+for dbid in runstations:
     #print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
     sql = """SELECT d.*, c.climoweek from %s d, climoweek c 
     WHERE station = '%s' and day >= '%s-01-01' and d.sday = c.sday 
