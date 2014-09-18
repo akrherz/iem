@@ -49,6 +49,7 @@ for dbid in runstations:
     #print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
     sql = """SELECT d.*, c.climoweek from %s d, climoweek c 
     WHERE station = '%s' and day >= '%s-01-01' and d.sday = c.sday 
+    and precip is not null
     ORDER by day ASC""" % (constants.get_table(dbid),
                 dbid, constants.startyear(dbid) ) 
 
