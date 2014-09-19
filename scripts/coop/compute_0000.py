@@ -22,7 +22,7 @@ def do_day(valid):
     where t.network ~* 'CLIMATE' and day = %s and substr(station,2,1) != 'C'
     and substr(station,2,4) != '0000' and high is not null and
     precip is not null and low is not null
-    """, (valid,))
+    """, (valid.date(),))
     lats = []
     lons = []
     highs= []
