@@ -22,8 +22,10 @@ python daily_estimator.py MO
 cd ../iemre
 python daily_analysis.py
 
-cd ../climodat
+cd ../coop
 python compute_0000.py
+
+cd ../climodat
 sh run.sh &
 
 cd ../coop
