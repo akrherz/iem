@@ -1,10 +1,12 @@
-'''
+"""
 We need to download the data files from MRMS project
 
- http://129.15.110.182/tile4/q3rad/rainrate/PRECIPRATE.20130801.095000.gz
- http://129.15.110.182/tile4/q3rad/lcref/LCREF.20130801.095000.gz
- http://129.15.110.182:/tile1/q3rad/6h_24h_acc/24HRAD.20130801.130000.gz
-'''
+ Changes to 140.172.25.182 on 19 Sept 2014
+
+ http://140.172.25.182/tile4/q3rad/rainrate/PRECIPRATE.20130801.095000.gz
+ http://140.172.25.182/tile4/q3rad/lcref/LCREF.20130801.095000.gz
+ http://140.172.25.182:/tile1/q3rad/6h_24h_acc/24HRAD.20130801.130000.gz
+"""
 import urllib2
 import datetime
 import pytz
@@ -13,7 +15,7 @@ import os
 
 def get_uri(varname, ts, tile, iarchive):
     ''' Slightly different logic to fetch archived files '''
-    baseuri = 'http://129.15.110.182/'
+    baseuri = 'http://140.172.25.182/'
     if iarchive:
         baseuri += 'archive/%s/' % (ts.strftime("%Y/%m"))
     baseuri += 'tile%s/' % (tile,)
