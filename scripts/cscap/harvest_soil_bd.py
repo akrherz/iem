@@ -73,7 +73,7 @@ for entry in feed:
                 print '%s %s %s %s %s %s' % (siteid, plotid, varname, depth, 
                                              val, subsample)
                 sys.exit()
-    print "...done"
+    #print "...done"
 pcursor.close()
 pgconn.commit()
 pgconn.close()
