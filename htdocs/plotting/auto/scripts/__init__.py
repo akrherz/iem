@@ -22,6 +22,7 @@ data = {'plots': [
         {'id': "8", 'label': "Monthly Precipitation Reliability"},
         {'id': "9", 'label': "Growing Degree Day Climatology and Daily Values for one Year"},
         {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
+        {'id': "20", 'label': "Hours of Precipitation by Month"},
         #{'id': "17", 'label': "Daily Temperatures + Climatology for Year + Month"},
     ]},
     {'label': 'Yearly', 'options': [
