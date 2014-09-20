@@ -12,7 +12,7 @@ import json
 import sys
 import util
 
-def do( now , realtime=False):
+def do( now , realtime, delta):
     ''' Generate for this timestep! '''
     szx = 7000
     szy = 3500
@@ -36,7 +36,7 @@ def do( now , realtime=False):
     for tile in range(1,5):
         fn = util.get_fn('rainrate', now, tile)
         if not os.path.isfile(fn):
-            if not realtime:
+            if delta > 1440:
                 print "Missing MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
         count += 1
@@ -116,14 +116,14 @@ def main():
         if utcnow.minute % 2 != 1:
             return
         utcnow = utcnow - datetime.timedelta(minutes=5)
-        do( utcnow , True)
+        do( utcnow , True, 0)
         # Also check old dates
         for delta in [30, 90, 1440, 2880]:
             ts = utcnow - datetime.timedelta(minutes=delta)
             fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
                               +"GIS/mrms/a2m_%Y%m%d%H%M.png"))
             if not os.path.isfile(fn):
-                do( ts, False)
+                do( ts, False, delta)
     
 if __name__ == '__main__':
     main()
