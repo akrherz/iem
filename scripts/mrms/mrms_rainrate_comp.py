@@ -37,7 +37,7 @@ def do( now , realtime=False):
         fn = util.get_fn('rainrate', now, tile)
         if not os.path.isfile(fn):
             if not realtime:
-                print "MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
+                print "Missing MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
         count += 1
         try:
@@ -63,41 +63,44 @@ def do( now , realtime=False):
 
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
+    routes = "c" if realtime else "" 
     prefix = 'a2m'
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (
-                    now.strftime("%Y%m%d%H%M"), prefix, prefix, 
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a%s %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (
+                    routes, now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png" % (
-                    now.strftime("%Y%m%d%H%M"), prefix, prefix, 
-                    now.strftime("%Y%m%d%H%M"), tmpfn )
-    subprocess.call(pqstr, shell=True)
-    # Create 900913 image
-    cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
-    subprocess.call(cmd, shell=True)
-    # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif" % (
-                    now.strftime("%Y%m%d%H%M"), prefix, prefix, 
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a%s %s gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png" % (
+                    routes, now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     
-    j = open("%s.json" % (tmpfn,), 'w')
-    j.write( json.dumps(dict(meta=metadata)))
-    j.close()
-    # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/4326/mrms/%s.json GIS/mrms/%s_%s.json json' %s.json" % (
-                    now.strftime("%Y%m%d%H%M"),prefix, prefix, now.strftime("%Y%m%d%H%M"), tmpfn )
-    subprocess.call(pqstr, shell=True)
+    if realtime:
+        # Create 900913 image
+        cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
+        subprocess.call(cmd, shell=True)
+        # Insert into LDM
+        pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif" % (
+                        now.strftime("%Y%m%d%H%M"), prefix, prefix, 
+                        now.strftime("%Y%m%d%H%M"), tmpfn )
+        subprocess.call(pqstr, shell=True)
+        
+        j = open("%s.json" % (tmpfn,), 'w')
+        j.write( json.dumps(dict(meta=metadata)))
+        j.close()
+        # Insert into LDM
+        pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/4326/mrms/%s.json GIS/mrms/%s_%s.json json' %s.json" % (
+                        now.strftime("%Y%m%d%H%M"),prefix, prefix, now.strftime("%Y%m%d%H%M"), tmpfn )
+        subprocess.call(pqstr, shell=True)
     for suffix in ['tif', 'json', 'png', 'wld']:
-        os.unlink('%s.%s' % (tmpfn, suffix))
+        if os.path.isfile("%s.%s" % (tmpfn, suffix)):
+            os.unlink('%s.%s' % (tmpfn, suffix))
 
     os.close(tmpfp)
     os.unlink(tmpfn)
 
-
-if __name__ == '__main__':
-    ''' Lets do something '''
+def main():
+    """ Go Main Go """
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
     if len(sys.argv) == 6:
         utcnow = datetime.datetime( int(sys.argv[1]),
@@ -108,8 +111,19 @@ if __name__ == '__main__':
                                                 tzinfo=pytz.timezone("UTC"))
         do( utcnow )
     else:
-        ''' If our time is an odd time, run 3 minutes ago '''
+        #If our time is an odd time, run 5 minutes ago 
         utcnow = utcnow.replace(second=0,microsecond=0)
-        if utcnow.minute % 2 == 1:
-            do( utcnow - datetime.timedelta(minutes=5), True)
+        if utcnow.minute % 2 != 1:
+            return
+        utcnow = utcnow - datetime.timedelta(minutes=5)
+        do( utcnow , True)
+        # Also check old dates
+        for delta in [30, 90, 1440, 2880]:
+            ts = utcnow - datetime.timedelta(minutes=delta)
+            fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
+                              +"GIS/mrms/a2m_%Y%m%d%H%M.png"))
+            if not os.path.isfile(fn):
+                do( ts, False)
     
+if __name__ == '__main__':
+    main()
