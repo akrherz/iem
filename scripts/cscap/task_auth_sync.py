@@ -1,41 +1,31 @@
 """
-A script that syncs my google site authentication to a shared folder on google docs
+Sync authorized users on Google Sites to Google Drive
+
 """
-from gdata import gauth
-import gdata.sites.client
 import gdata.docs.client
 import gdata.docs.data
 import gdata.acl.data
 import gdata.data
 import ConfigParser
+import util
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
-token = gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
-                                client_secret=config.get('appauth', 'app_secret'),
-                                user_agent='daryl.testing',
-                                scope=config.get('googleauth', 'scopes'),
-                                refresh_token=config.get('googleauth', 'refresh_token'))
 
-spr_client = gdata.sites.client.SitesClient( config.get('cscap', 'sitename') )
-token.authorize(spr_client)
+docs_client = util.get_docs_client( config )
+spr_client = util.get_sites_client( config )
 
 site_users = []
 for acl in spr_client.get_acl_feed().entry:
-    print "IN: ||%s||" % (acl.scope.value,)
+    #print "IN: ||%s||" % (acl.scope.value,)
     userid =  acl.scope.value 
     if userid not in site_users:
         site_users.append( acl.scope.value )
-    #if userid == 'smzuber@illinois.edu':
-    #    print acl
-    
-docs_client = gdata.docs.client.DocsClient()
-token.authorize(docs_client)
-query = gdata.docs.client.DocsQuery(show_collections='true', title='CSCAP Internal Documents')
+
+query = gdata.docs.client.DocsQuery(show_collections='true', 
+                                    title='CSCAP Internal Documents')
 feed = docs_client.GetAllResources(query=query)
-#collection = feed[0]
-#cscap = docs_client.GetResource( feed[0] )
 cscap = feed[0]
 acl_feed = docs_client.GetResourceAcl( cscap )
 for acl in acl_feed.entry:
@@ -55,6 +45,7 @@ for loser in site_users:
                     )
                 )
             
-print cscap.GetAclLink().href
 if len(acls) > 0:
-    print docs_client.BatchProcessAclEntries(cscap, acls)
+    feed = docs_client.BatchProcessAclEntries(cscap, acls)
+    for entry in feed.entry:
+        print entry.role.value, entry.title.text
