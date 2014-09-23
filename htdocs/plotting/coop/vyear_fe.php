@@ -1,17 +1,22 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | COOP Data vs Year";
-include("$rootpath/include/header.php"); 
+include_once "../../../include/myview.php";
+include("../../../include/forms.php");
+include("../../../include/imagemaps.php");
+
+$t = new MyView();
+$t->title = "COOP Data vs Year";
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
-include("../../../include/forms.php");     
-include("../../../include/imagemaps.php");
 
 $imgurl = sprintf("/cgi-bin/climate/daily.py?plot=compare&station1=%s&year=%s",
 		$station, $year);
-?>
 
+$nselect = networkSelect("IACLIMATE", $station);
+$yselect = yearSelect(1893, $year);
+
+$t->content = <<<EOF
 
 <p>With this form, you can interactively plot one year vs 
 climatology for a station.</p>
@@ -28,10 +33,10 @@ climatology for a station.</p>
 
 <tr>
 <td>
-<?php echo networkSelect("IACLIMATE", $station); ?>
+{$nselect}
 </td>
 <td>
-<?php echo yearSelect(1893, $year); ?>
+{$yselect}
 </td>
 <td>
 <input type="SUBMIT" value="Make Plot">
@@ -41,7 +46,8 @@ climatology for a station.</p>
 
 </tr></table>
 
-<?php
-    echo "<img src=\"$imgurl\">\n";
+<img src="{$imgurl}">
+
+EOF;
+$t->render('single.phtml');
 ?>
-<?php include("../../../include/footer.php"); ?>
