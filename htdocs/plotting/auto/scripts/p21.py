@@ -70,6 +70,7 @@ def plotter( fdict ):
                                             date2.strftime("%-d %B"))
                 )
     cmap = cm.get_cmap("RdBu_r")
-    m.contourf(lons, lats, vals, np.arange(0-extent,extent+1, 2), cmap=cmap)
+    m.contourf(lons, lats, vals, np.arange(0-extent,extent+1, 2), cmap=cmap,
+               units='F')
 
     return m.fig
