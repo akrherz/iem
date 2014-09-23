@@ -66,7 +66,6 @@ def plotter( fdict ):
     (fig, ax) = plt.subplots(1,1)
 
     total = decrease + nochange + increase
-    sys.stderr.write(str(total))
 
     ax.bar( np.arange(1,13)-0.4, decrease / total * 100.0, fc='b', label='Decrease')
     ax.bar( np.arange(1,13)-0.4, nochange / total * 100.0, bottom=(decrease/total * 100.0), fc='g', label="No Change")
