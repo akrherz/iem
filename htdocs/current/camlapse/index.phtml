@@ -55,7 +55,8 @@ flowplayer.conf = {
 $(function () {
 	$("#player").flowplayer({
 		playlist : [
-			[{flash: '/onsite/lapses/auto/algona_sunrise.flv'}]
+			[{flash: '/onsite/lapses/auto/ames_morning.flv',
+			mp4: '/onsite/lapses/auto/ames_morning.mp4'}]
 		]
 	});
 
@@ -81,9 +82,9 @@ function myloader()
   	var mylapse = document.theform.mylapse.value;
 	window.location.href = "#"+mycam+"_"+mylapse;
   	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-
+  	url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
 	api = flowplayer();
-	api.load([{flash:url}]);
+	api.load([{flash:url, mp4:url2}]);
 }
 
 
