@@ -9,6 +9,7 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 data = {'plots': [
     {'label': 'Daily', 'options': [
         {'id': "11", 'label': "ASOS/AWOS Daily Maximum Dew Point for a Year"},
+        {'id': "21", 'label': "Change in NCDC 81 Daily Climatology over X Days"},
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
         {'id': "5", 'label': "Minimum Daily Temperature Range"},
