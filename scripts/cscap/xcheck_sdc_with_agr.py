@@ -1,11 +1,8 @@
 """
+ Use the Site Data Collected and then see what columns exist within the
+ Agronomic Data Sheets.
 """
-import gdata.spreadsheets.client
-import gdata.spreadsheets.data
-import gdata.docs.data
 import gdata.docs.client
-import gdata.gauth
-import re
 import ConfigParser
 import sys
 import util
@@ -22,8 +19,8 @@ docs_client = util.get_docs_client(config)
 sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
 sdc, sdc_names = util.build_sdc(sdc_feed)
 
-query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='SWROC.G Agronomic Data')
+query = gdata.docs.client.DocsQuery(show_collections='false',
+                                    title='Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
 feed.reverse()
 for entry in feed:
@@ -31,7 +28,7 @@ for entry in feed:
         continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     sitekey = spreadsheet.title.split()[0].lower()
-    print '------------> %s [%s] [%s]' % ( YEAR, sitekey, spreadsheet.title)
+    print '------------> %s [%s] [%s]' % (YEAR, sitekey, spreadsheet.title)
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_list_feed()
     if len(worksheet.list_feed.entry) == 0:
@@ -48,11 +45,12 @@ for entry in feed:
                 print 'EXTRA %s' % (key.upper(),)
                 error = True
         else:
-            shouldhave.remove( key.upper() )
+            shouldhave.remove(key.upper())
     for sh in shouldhave:
         if sh.find("AGR") == 0:
             print 'SHOULDHAVE %s' % (sh,)
             error = True
-            #worksheet.add_column(sh, sdc_names[sh]['name'], sdc_names[sh]['units'])
+            #worksheet.add_column(sh, sdc_names[sh]['name'],
+            #                         sdc_names[sh]['units'])
     #if error:
     #    sys.exit()
