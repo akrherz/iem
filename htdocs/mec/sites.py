@@ -8,7 +8,7 @@ dbconn = psycopg2.connect(database='mec', host='iemdb', user='nobody')
 cursor = dbconn.cursor()
 
 if __name__ == '__main__':
-    sys.stdout.write("Content-type: application/json\n\n")
+    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
                     "properties": {"code": 4326,

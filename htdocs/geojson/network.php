@@ -1,5 +1,6 @@
 <?php
 /* Generate a KML file of a network locations, yummy */
+header("Content-type: application/vnd.geo+json");
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");

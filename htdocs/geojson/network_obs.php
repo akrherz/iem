@@ -1,5 +1,6 @@
 <?php
 /* Generate a JSON file of network observations */
+header("Content-type: application/vnd.geo+json");
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
@@ -59,7 +60,6 @@ while (list($sid,$data) = each($mydata))
 }
 
 if ($callback != null){
-	header("Content-type: application/json-p");
 	echo sprintf("%s(%s);", $callback, Zend_Json::encode($ar));
 } else{
 	echo Zend_Json::encode($ar);
