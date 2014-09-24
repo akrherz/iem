@@ -1213,7 +1213,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         sys.stdout.write("# First value in table is CALM\n")
         sys.stdout.write("       ,")
         for j in range(len(var_bins)-1):
-            sys.stdout.write(" %4.1f-%4.1f," % (var_bins[j], var_bins[j+1]))
+            sys.stdout.write(" %4.1f-%4.1f," % (var_bins[j], var_bins[j+1]-0.1))
         sys.stdout.write("\n")
         dir_edges2 = numpy.concatenate((numpy.array(dir_edges), 
                             [dir_edges[-1] + (dir_edges[-1] - dir_edges[-2]),]))
