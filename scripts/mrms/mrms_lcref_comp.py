@@ -1,12 +1,12 @@
-'''
-Generate a composite of the MRMS RainRate
-'''
+"""
+ Generate a composite of the MRMS Lowest Composite Reflectvity
+"""
 import datetime
 import pytz
 import numpy as np
 import os
 import tempfile
-import Image
+from PIL import Image
 import subprocess
 import json
 import sys
@@ -30,7 +30,7 @@ def make_colorramp():
 
 
 def do( now , realtime=False):
-    ''' Generate for this timestep! '''
+    """ Generate for this timestep! """
     szx = 7000
     szy = 3500
     # Create the image data
@@ -39,15 +39,13 @@ def do( now , realtime=False):
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'product': 'lcref',
                 'units': '0.5 dBZ' }
-    ''' 
-      Loop over tiles
-    Data from tile is SW corner and row , so y, x
-
-    File represents 2 minute accumulation in 0.1 mm, so 25.4 mm
-    
-    So file has units of 
-
-    '''
+    #
+    #  Loop over tiles
+    #Data from tile is SW corner and row , so y, x
+    #
+    #File represents 2 minute accumulation in 0.1 mm, so 25.4 mm
+    #
+    #So file has units of 
     found = 0
     for tile in range(1,5):
         fn = util.get_fn('lcref', now, tile)
@@ -61,13 +59,13 @@ def do( now , realtime=False):
             print 'MRMS LCREF: %s Read Error: %s' % (fn, exp)
             continue
         found += 1
-        ''' There is currently a bug with how MRMS computes missing data :( '''
+        # There is currently a bug with how MRMS computes missing data :(
         val = np.where(val >= -32, (val + 32) * 2.0, val)
         val = np.where(val < 0., 255., val)
         ysz, xsz = np.shape(val)
 
-        x0 = (tilemeta['ll_lon'] - util.WEST) * 100.0
-        y0 = round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0)
+        x0 = int( (tilemeta['ll_lon'] - util.WEST) * 100.0 )
+        y0 = int( round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0) )
         imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
 
     if found < 4:
@@ -114,8 +112,8 @@ def do( now , realtime=False):
     os.unlink(tmpfn)
 
 
-if __name__ == '__main__':
-    ''' Lets do something '''
+def main():
+    """ Go Main Go """
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
     if len(sys.argv) == 6:
         utcnow = datetime.datetime( int(sys.argv[1]),
@@ -126,8 +124,12 @@ if __name__ == '__main__':
                                                 tzinfo=pytz.timezone("UTC"))
         do( utcnow )
     else:
-        ''' If our time is an odd time, run 3 minutes ago '''
+        # If our time is an odd time, run 3 minutes ago
         utcnow = utcnow.replace(second=0,microsecond=0)
         if utcnow.minute % 2 == 1:
             do( utcnow - datetime.timedelta(minutes=5), True)
+
+if __name__ == '__main__':
+    # Lets do something 
+    main()
     
