@@ -1,4 +1,12 @@
 ---
+--- Storage of climoweek
+CREATE TABLE climoweek(
+  sday char(4) UNIQUE,
+  climoweek smallint
+);
+GRANT SELECT on climoweek to nobody,apache;
+
+---
 --- Storage of Hayhoe downscaled data
 ---
 CREATE TABLE hayhoe_daily(
@@ -404,7 +412,7 @@ CREATE FUNCTION gdd48(real, real) RETURNS numeric
 
 DROP table r_precipevents;
 CREATE table r_precipevents(
-  stationid char(6),
+  station char(6),
   climoweek smallint,
   maxval real,
   meanval real,
@@ -413,15 +421,16 @@ CREATE table r_precipevents(
   cat3e smallint,
   cat4e smallint,
   cat5e smallint,
-  missing smallint 
+  missing smallint,
+  maxyr smallint
 );
-grant select on r_precipevents to nobody;
+grant all on r_precipevents to nobody;
 create unique index r_precipevents_idx 
- on r_precipevents(stationid, climoweek);
+ on r_precipevents(station, climoweek);
 
 DROP table r_monthly;
 CREATE table r_monthly(
-  stationid char(6),
+  station char(6),
   monthdate date,
   gdd40 smallint,
   gdd48 smallint,
@@ -437,6 +446,6 @@ CREATE table r_monthly(
   hdd60 real,
   cdd60 real
 );
-grant select on r_rmonthly to nobody;
+grant all on r_monthly to nobody;
 create unique index r_monthly_idx
- on r_monthly(stationid, monthdate);
+ on r_monthly(station, monthdate);
