@@ -1,9 +1,9 @@
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 ccursor.execute("""
-SELECT day, precip from alldata_ia where stationid = 'ia0200' ORDER by day ASC
+SELECT day, precip from alldata_ia where station = 'IA0200' ORDER by day ASC
 """)
 
 import numpy

@@ -20,11 +20,11 @@ elnino = numpy.array(elnino)
 ccursor.execute("""
  WITH climo as (
  SELECT month, avg((high+low)/2.) from alldata_ia where station = 'IA0000'
- and day < '2014-05-01' GROUP by month),
+ and day < '2014-10-01' GROUP by month),
  
  obs as (
  SELECT year, month, avg((high+low)/2.) from alldata_ia where station = 'IA0000'
- and day < '2014-05-01' and year > 1899 GROUP by year, month)
+ and day < '2014-10-01' and year > 1899 GROUP by year, month)
 
  SELECT obs.year, obs.month, obs.avg - climo.avg from obs JOIN climo on
  (climo.month = obs.month) 
@@ -82,7 +82,7 @@ ax.set_ylabel("Avg Temperature Departure [F] (bars)")
 ax.grid(True)
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
-ax.set_xlim(datetime.datetime(2007,1,1), datetime.datetime(2014,5,1))
+ax.set_xlim(datetime.datetime(2007,1,1), datetime.datetime(2014,10,1))
 #ax.set_ylim(-8,8)
 """
 import scipy.stats
