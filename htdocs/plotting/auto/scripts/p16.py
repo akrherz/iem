@@ -7,13 +7,45 @@ import sys
 sys.path.insert(0, "/mesonet/www/apps/iemwebsite/scripts/lib")
 from windrose.windrose import WindroseAxes
 from matplotlib.patches import Rectangle
+import datetime
 
+PDICT ={'ts': 'Thunderstorm (TS) Reported',
+        'tmpf_above': 'Temperature At or Above Threshold (F)',
+        'tmpf_below': 'Temperature Below Threshold (F)',
+        'dwpf_above': 'Dew Point At or Above Threshold (F)',
+        'dwpf_below': 'Dew Point Below Threshold (F)',
+        }
+MDICT = {'all': 'No Month/Time Limit',
+         'spring': 'Spring (MAM)',
+         'fall': 'Fall (SON)',
+         'winter': 'Winter (DJF)',
+         'summer': 'Summer (JJA)',
+         'jan': 'January',
+         'feb': 'February',
+         'mar': 'March',
+         'apr': 'April',
+         'may': 'May',
+         'jun': 'June',
+         'jul': 'July',
+         'aug': 'August',
+         'sep': 'September',
+         'oct': 'October',
+         'nov': 'November',
+         'dec': 'December'
+         }
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['arguments'] = [
-        dict(type='zstation', name='zstation', default='AMW', label='Select Station:'),
+        dict(type='zstation', name='zstation', default='AMW', 
+             label='Select Station:'),
+        dict(type='select', name='opt', default='ts',
+             label='Which metric to plot?', options=PDICT),
+        dict(type='select', name='month', default='all',
+             label='Month Limiter', options=MDICT),
+        dict(type='text', name='threshold', default='80',
+             label='Threshold (when appropriate):')
     ]
     return d
 
@@ -24,13 +56,46 @@ def plotter( fdict ):
 
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
+    threshold = int(fdict.get('threshold', 80))
+    opt = fdict.get('opt', 'ts')
+    month = fdict.get('month', 'all')
     nt = NetworkTable(network)
-    
+
+    if month == 'all':
+        months = range(1,13)    
+    elif month == 'fall':
+        months = [9,10,11]
+    elif month == 'winter':
+        months = [12,1,2]
+    elif month == 'spring':
+        months = [3,4,5]
+    elif month == 'summer':
+        months = [6,7,8]
+    else:
+        ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month, 999]
+
+    limiter = "presentwx ~* 'TS'"
+    title = "Thunderstorm (TS) contained in METAR"
+    if opt == 'tmpf_above':
+        limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
+        title = "Air Temp at or above %s$^\circ$F" % (threshold,)
+    elif opt == 'tmpf_below':
+        limiter = "round(tmpf::numeric,0) < %s" % (threshold,)
+        title = "Air Temp below %s$^\circ$F" % (threshold,)
+    elif opt == 'dwpf_below':
+        limiter = "round(dwpf::numeric,0) < %s" % (threshold,)
+        title = "Dew Point below %s$^\circ$F" % (threshold,)
+    elif opt == 'dwpf_above':
+        limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
+        title = "Dew Point at or above %s$^\circ$F" % (threshold,)
 
     cursor.execute("""
      SELECT valid, drct, sknt from alldata where station = %s and 
-     presentwx ~* 'TS' and sknt > 0 and drct >= 0 and drct <= 360
-    """, (station,))
+     """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
+     and extract(month from valid) in %s
+    """, (station, tuple(months)))
     sped = []
     drct = [] 
     for i, row in enumerate(cursor):
@@ -59,9 +124,11 @@ def plotter( fdict ):
      mode=None, columnspacing=0.9, handletextpad=0.45)
     plt.setp(l.get_texts(), fontsize=10)
     
-    plt.gcf().text(0.5,0.99, ("%s-%s %s Wind Rose\n%s\nWhen METAR observation "
-                              +"includes thunderstorm (TS)") % (minvalid.year,
-                            maxvalid.year, station, nt.sts[station]['name']), 
+    plt.gcf().text(0.5,0.99, ("%s-%s %s Wind Rose, month=%s\n%s\nWhen  "
+                              +"%s") % (minvalid.year,
+                            maxvalid.year, station, month.upper(),
+                            nt.sts[station]['name'],
+                            title ), 
                    fontsize=16, ha='center', va='top')
     plt.gcf().text(0.01, 0.1, "Generated: 8 September 2014" ,
                        verticalalignment="bottom")
