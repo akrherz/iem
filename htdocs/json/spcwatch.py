@@ -39,7 +39,7 @@ def do( ts ):
     return json.dumps(res)
 
 if __name__ == '__main__':
-    sys.stdout.write("Content-type: application/json\n\n")
+    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
     
     form = cgi.FieldStorage()
     ts = form.getfirst('ts', None)

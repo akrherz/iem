@@ -129,7 +129,7 @@ def get_data( ts ):
 
 if __name__ == '__main__':
     ''' see how we are called '''
-    sys.stdout.write("Content-type: application/json\n\n")
+    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
     field = cgi.FieldStorage()
     dt = field.getfirst('dt')
     ts = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.000Z')
