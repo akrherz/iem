@@ -37,11 +37,7 @@ python cocorahs_stations.py IL
 python cocorahs_data_ingest.py IL
 python cocorahs_data_ingest.py IA
 
-# This is intensive...
-cd ../../week
-python plot_stage4.py
-
-cd ../plots
+cd ../../plots
 ./RUN_PLOTS
 cd black
 ./surfaceContours.csh
