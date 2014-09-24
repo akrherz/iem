@@ -139,7 +139,7 @@ function gen_feature($t){
     <div class='col-xs-12 col-sm-4'><b>IEM Daily Feature</b>
     	<a href="/feature_rss.php"><img src="/images/rss.gif" /></a></div>
     <div class='col-xs-12 col-sm-8'>
-        <div class='btn-group'>
+        <div class='btn-group row'>
             <a class="btn btn-default col-xs-3" href="{$fburl}">Facebook</a>
 			<a class="btn btn-default col-xs-3" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
 			<a class="btn btn-default col-xs-4" href="/onsite/features/past.php">Past Features</a>
