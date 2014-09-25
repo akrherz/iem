@@ -14,7 +14,7 @@
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
-BASEURL = "http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV"
+BASEURL = "http://rainproc.its.uiowa.edu/Products/IFC7ADV"
 
 import datetime
 import urllib2
