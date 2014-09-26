@@ -37,6 +37,7 @@ import psycopg2
 import sys
 import re
 from pyiem.datatypes import temperature
+from pyiem.network import Table as NetworkTable
 
 COOP = psycopg2.connect(database='coop', host='iemdb')
 cursor = COOP.cursor()
@@ -224,8 +225,22 @@ def process( station ):
                              d, station )
             cursor.execute(sql)
 
+def main():
+    """ go main go """
+    station = sys.argv[1]
+    if len(station) == 2:
+        # we have a state!
+        nt = NetworkTable("%sCLIMATE" % (station,))
+        for sid in nt.sts.keys():
+            if sid[2:] == '0000' or sid[2] == 'C':
+                continue
+            process( sid )
+    else:
+        process( sys.argv[1] )
+
+
 if __name__ == '__main__':
-    process( sys.argv[1] )
+    main()
     cursor.close()
     COOP.commit()
     COOP.close()
