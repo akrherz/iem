@@ -10,11 +10,10 @@ We need to download the data files from MRMS project
 import urllib2
 import datetime
 import pytz
-import sys
 import os
 
 def get_uri(varname, ts, tile, iarchive):
-    ''' Slightly different logic to fetch archived files '''
+    """ Slightly different logic to fetch archived files """
     baseuri = 'http://140.172.25.182/'
     if iarchive:
         baseuri += 'archive/%s/' % (ts.strftime("%Y/%m"))
@@ -30,9 +29,9 @@ def get_uri(varname, ts, tile, iarchive):
     return '%s%s' % (baseuri, ts.strftime('.%Y%m%d.%H%M00.gz'))
 
 def fetch(ts, iarchive=False):
-    ''' Do the fetching for a given timestamp '''
+    """ Do the fetching for a given timestamp """
     basedir = ts.strftime("/mnt/mtarchive/data/%Y/%m/%d/mrms")
-    for tile in range(1,5):
+    for tile in range(1, 5):
         for varname in ['lcref', 'rainrate', '24hrad', '1hrad']:
             if varname in ['24hrad', '1hrad'] and ts.minute != 0:
                 continue
@@ -43,24 +42,29 @@ def fetch(ts, iarchive=False):
             fn = "%s/%s%s" % (mydir, varname, ts.strftime('.%Y%m%d.%H%M00.gz'))
             if not os.path.isfile(fn):
                 try:
+                    data = urllib2.urlopen(uri, timeout=10).read()
+                    if data is None or len(data) == 0:
+                        continue
                     fp = open(fn, 'wb')
-                    fp.write( urllib2.urlopen(uri, timeout=10).read() )
+                    fp.write(data)
                     fp.close()
                 except Exception, exp:
                     if str(exp) != 'HTTP Error 404: Not Found':
                         print exp, uri
                     if os.path.isfile(fn):
                         os.unlink(fn)
-                    
-    
-if __name__ == '__main__':
-    ''' This is our routine '''
+
+def main():
+    """ This is our routine """
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
     #if utcnow.minute % 2 == 0:
     #    sys.exit(0)
     utcnow -= datetime.timedelta(minutes=1)
-    fetch( utcnow, False )
-    for delay in [2,4,10,60,120,1440,2880]:
-        fetch( utcnow - datetime.timedelta(minutes=delay), False )
+    fetch(utcnow, False)
+    for delay in [2, 4, 10, 60, 120, 1440, 2880]:
+        fetch(utcnow - datetime.timedelta(minutes=delay), False)
     for delay in [60*24*3, 60*24*5]:
-        fetch( utcnow - datetime.timedelta(minutes=delay), True )
+        fetch(utcnow - datetime.timedelta(minutes=delay), True)
+
+if __name__ == '__main__':
+    main()
