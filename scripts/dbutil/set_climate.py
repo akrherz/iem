@@ -11,7 +11,7 @@ def do(col):
 	# Query out all sites with a null climate_site
 	mcursor.execute("""
 		SELECT id, geom, state from stations 
-		WHERE """+col+""" IS NULL and country = 'US'
+		WHERE """+col+""" IS NULL and country = 'US' and state is not null
 	""")
 	
 	for row in mcursor:
