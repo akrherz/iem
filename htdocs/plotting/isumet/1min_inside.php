@@ -102,7 +102,7 @@ $lineplot->SetWeight(3.0);
 // Create the linear plot
 $lineplot2=new LinePlot($dwpf, $valid);
 $lineplot2->SetLegend("Dew Point");
-$lineplot2->SetColor("green");
+$lineplot2->SetColor("blue");
 $lineplot2->SetWeight(3.0);
 
 // Create the linear plot
