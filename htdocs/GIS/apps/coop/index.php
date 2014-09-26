@@ -1,10 +1,19 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 52);
-include_once "$rootpath/include/database.inc.php";
-include_once "$rootpath/include/iemmap.php";
+include_once "../../../../include/myview.php";
+$t = new MyView();
+$t->thispage = "networks-coop";
+$t->title = "NWS COOP Plotting";
+
+include_once "../../../../include/database.inc.php";
+include_once "../../../../include/iemmap.php";
+include("../../../../include/network.php");
+include("../../../../include/mlib.php");
+include("../../../../include/forms.php");
+include("../rview/lib.php");
+
 $coopdb = iemdb("coop");
-include("$rootpath/include/network.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
@@ -12,17 +21,12 @@ $plot = isset($_GET["plot"]) ? $_GET["plot"]: "high";
 $area = isset($_GET["area"]) ? $_GET["area"]: "all";
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
-$THISPAGE = "networks-coop";
-$TITLE = "IEM | NWS COOP Plotting";
-include("$rootpath/include/header.php");
 
-include("$rootpath/include/mlib.php");
-include("../rview/lib.php");
 
 $height = 350;
 $width = 350;
 
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map = ms_newMapObj("../../../../data/gis/base4326.map");
 $map->setProjection("init=epsg:26915");
 
 $lx =  200000;
@@ -153,36 +157,53 @@ $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();
 
-echo "<h3 class=\"heading\">COOP Climate Data</h3><p>
- <div class=\"text\">Using the COOP data archive, daily averages and extremes
+$ar = Array("all" => "Iowa",
+    "ne" => "NE Iowa",
+    "se" => "SE Iowa",
+    "sw" => "SW Iowa",
+    "nw" => "NW Iowa");
+$aselect = make_select("area", $area, $ar);
+
+$ar = Array("high" => "Average High Temperature",
+    "low"		 => "Average Low Temperature",
+    "precip" 	 => "Average Precip",
+   	"max_high" 	 => "Record High Temperature",
+  	"min_low" 	 => "Record Low Temperature",
+    "max_precip" => "Record Precip",
+    "min_high" 	 => "Record Minimum High Temp",
+    "max_low" 	 => "Record Maximum Low Temp");
+$pselect = make_select("plot", $plot, $ar);
+
+$mselect = monthSelect("month", $month);
+$dselect = daySelect("day", $day);
+
+$t->content = <<<EOF
+<h3>COOP Climate Data</h3>
+
+ Using the COOP data archive, daily averages and extremes
   were calculated.  These numbers are <b>not</b> official, but we believe them
   to be accurate.  Please make your form selections on the left hand side and
   then click the 'Generate Plot' button.
-";
 
-echo "<table border=0>
- <tr>
-  <td valign=\"top\"><img src=\"$url\" border=\"1\">"; ?>
+  <div class="row">
+  <div class="col-md-7">
+
+<img src="{$url}" class="img img-responsive" />
    <br><i>You can right-click on the image to save it.</i>
   <br><li>Only one year with the record value is shown, there may have been 
     more.</li>
- </td>
-  <td>
-    <form method="GET" action="index.php">
+
+   </div><div class="col-md-5">
+    
+    <form name="f" method="GET" action="index.php">
 
 <table width="100%">
 <tr>
-  <td colspan=2 class="subtitle"><b>Display Area:</b>
+  <td colspan=2><b>Display Area:</b>
   </td></tr>
 
 <tr><td colspan=2>
-  <select name="area">
-    <option value="all" <?php if ($area == "all") echo "SELECTED"; ?> >Iowa
-    <option value="ne" <?php if ($area == "ne") echo "SELECTED"; ?> >NE Iowa
-    <option value="se" <?php if ($area == "se") echo "SELECTED"; ?> >SE Iowa
-    <option value="sw" <?php if ($area == "sw") echo "SELECTED"; ?> >SW Iowa
-    <option value="nw" <?php if ($area == "nw") echo "SELECTED"; ?> >NW Iowa
-   </select>
+  {$aselect}
    <br><i>If you select a sub-region, the year of a record event will appear 
    as well.</i><br><br>
 
@@ -193,24 +214,7 @@ echo "<table border=0>
   </td></tr>
 
 <tr><td colspan=2>
-  <select name="plot">
-    <option value="high" 
-      <?php if ($plot == "high") echo "SELECTED"; ?> >Average High Temperature
-    <option value="low" 
-      <?php if ($plot == "low") echo "SELECTED"; ?> >Average Low Temperature
-    <option value="precip" 
-      <?php if ($plot == "precip") echo "SELECTED"; ?> >Average Precip
-   <option value="max_high" 
-    <?php if ($plot == "max_high") echo "SELECTED"; ?> >Record High Temperature
-   <option value="min_low" 
-     <?php if ($plot == "min_low") echo "SELECTED"; ?> >Record Low Temperature
-    <option value="max_precip" 
-      <?php if ($plot == "max_precip") echo "SELECTED"; ?> >Record Precip
-    <option value="min_high" 
-      <?php if ($plot == "min_high") echo "SELECTED"; ?> >Record Minimum High Temp
-    <option value="max_low" 
-      <?php if ($plot == "max_low") echo "SELECTED"; ?> >Record Maximum Low Temp
-  </select><br><br>
+  {$pselect}<br><br>
 
 </td></tr>
 
@@ -222,35 +226,12 @@ echo "<table border=0>
   <td>
 
  <b>Month:</b>
-  <br><select name="month">
-    <option value="01" <?php if ($month == "01") echo "SELECTED"; ?> >January
-    <option value="02" <?php if ($month == "02") echo "SELECTED"; ?> >February
-    <option value="03" <?php if ($month == "03") echo "SELECTED"; ?> >March
-    <option value="04" <?php if ($month == "04") echo "SELECTED"; ?> >April
-    <option value="05" <?php if ($month == "05") echo "SELECTED"; ?> >May
-    <option value="06" <?php if ($month == "06") echo "SELECTED"; ?> >June
-    <option value="07" <?php if ($month == "07") echo "SELECTED"; ?> >July
-    <option value="08" <?php if ($month == "08") echo "SELECTED"; ?> >August
-    <option value="09" <?php if ($month == "09") echo "SELECTED"; ?> >September
-    <option value="10" <?php if ($month == "10") echo "SELECTED"; ?> >October
-    <option value="11" <?php if ($month == "11") echo "SELECTED"; ?> >November
-    <option value="12" <?php if ($month == "12") echo "SELECTED"; ?> >December
-  </select>
+  <br>{$mselect}
 
 </td><td>
 
  <b>Day:</b>
-  <br><select name="day">
-  <?php
-  for ($k=1;$k<32;$k++){
-   echo "<option value=\"".$k."\" ";
-   if ($k == (int)$day){
-     echo "SELECTED";
-   }
-   echo ">".$k."\n";
-  }
-  ?>
-  </select>
+  <br>{$dselect}
 
 <tr>
   <td colspan=2 align="center">
@@ -264,8 +245,8 @@ echo "<table border=0>
 
 <tr>
   <td colspan=2>
-    <a href="request.php?month=<?php echo $month; ?>&day=<?php echo $day;
-    ?>"><img src="<?php echo $rooturl; ?>/images/gisready.png" border=0> shp, dbf, shx</a><br><br>
+    <a href="request.php?month={$month}&day={$day}">
+    <img src="/images/gisready.png" border="0"> shp, dbf, shx</a><br><br>
   </td></tr>
 
 
@@ -282,11 +263,8 @@ echo "<table border=0>
 
 </table>
 
-<?php
-  echo "</td></tr>
-</table></div>";
-?>
+</div></div>
 
-<?php
-include ("$rootpath/include/footer.php");
+EOF;
+$t->render('single.phtml');
 ?>
