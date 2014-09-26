@@ -1,29 +1,35 @@
 <?php
-
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/database.inc.php");
-include("lib.php");
-$db = iemdb("postgis");
-pg_exec($db, "SET TIME ZONE 'GMT'");
-$rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, ST_xmin(geom) as x0, 
-      ST_xmax(geom) as x1, ST_ymin(geom) as y0, ST_ymax(geom) as y1,
-      ST_askml(geom) as kml from watches 
-      where extract(year from issued) = $1 and num = $2");
-putenv("TZ=GMT");
-
-$THISPAGE = "severe-watch";
-include("$rootpath/include/header.php");
-$ERROR = "";
+putenv("TZ=UTC");
+include("../../../../include/myview.php");
 
 /* Needed GET variables */
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
 $num = isset($_GET["num"]) ? intval($_GET["num"]) : 1;
 
+$t = new MyView();
+$t->title = "SPC $year Convective Watch $num";
+
+include("../../../../include/forms.php");
+include("../../../../include/database.inc.php");
+include("lib.php");
+$db = iemdb("postgis");
+pg_exec($db, "SET TIME ZONE 'UTC'");
+
+$rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, ST_xmin(geom) as x0, 
+      ST_xmax(geom) as x1, ST_ymin(geom) as y0, ST_ymax(geom) as y1,
+      ST_askml(geom) as kml, 
+		ST_asGeoJSON(geom) as geojson from watches 
+      where extract(year from issued) = $1 and num = $2");
+
+$t->thispage = "severe-watch";
+$ERROR = "";
+
+
 $rs = pg_execute($db, "CHECK4WATCH", Array($year, $num));
 if (pg_numrows($rs) == 0) {
-  echo "<h3>Sorry, watch number $num for year $year was not found</h3>";
-  include("$rootpath/include/footer.php");
+  $t->content = "<h3>Sorry, watch number $num for year $year was not found</h3>";
+  $t->render('single.phtml');
   die();
 }
 
@@ -43,75 +49,108 @@ if ($expires < time() && $year > 2002)
  $lurl = sprintf("%s/GIS/radmap.php?layers[]=lsrs&ts=%s&ts2=%s&height=480&width=640&layers[]=watches&sector=conus&bbox=%s,%s,%s,%s", $rooturl, gmdate('YmdHi', $ts), gmdate('YmdHi', $expires), $row["x0"] -$margin, $row["y0"]-$margin, $row["x1"]+$margin, $row["y1"]+$margin);
 }
 
-$ourl = sprintf("%s/GIS/radmap.php?layers[]=nexrad&ts=%s&height=240&width=320&layers[]=watches&sector=conus", $rooturl, gmdate('YmdHi', $ts));
+$ourl = sprintf("%s/GIS/radmap.php?layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&sector=conus", $rooturl, gmdate('YmdHi', $ts));
 
-/*____________ web interface _________*/
+$prevlink = "";
+if ($num > 1){
+	$prevlink = "<a href=\"watch.phtml?year=$year&num=". ($num -1) ."\">Previous Watch</a>";
+}
+$nextlink = "<a href=\"watch.phtml?year=$year&num=". ($num +1) ."\">Next Watch</a>";
 
-?>
+$yselect = yearSelect(1997,$year);
 
-<h3 class="heading">Storm Prediction Center Convective Watch Archive</h3>
+$issue = substr($row["issued"],0,16);
+$expire = substr($row["expired"],0,16);
 
-<p>This application presents a browsable archive of <a href="http://www.spc.noaa.gov">SPC</a> issued tornado and severe thunderstorm watches. Each sequential
+$spclink = sprintf("http://www.spc.noaa.gov/products/watch/%s/ww%04d.html",
+	$year, $num);
+
+$woulink = "";
+/* Include a link to download WOU outlines... */
+if (date("Y", $ts) > 2005){
+	$woulink .= "<tr><th>WOU Outline Shapefiles</th><td>";
+	$begints = $ts + ((60 - intval(date("i", $ts))) * 60);
+	$endts = $expires - (intval(date("i", $expires)) * 60);
+	while ($begints <= $endts){
+		$woulink .= sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ",
+				gmdate("Y", $begints), gmdate("m", $begints), gmdate("d", $begints),
+				gmdate("H", $begints) , $num, gmdate("H", $begints));
+		$begints += 3600;
+	}
+}
+
+$ltext = "";
+if (isset($lurl)){ 
+	$ltext .= "<h3>Local Storm Reports:</h3><img src=\"$lurl\">"; 
+}
+$kml = htmlentities($row["kml"]);
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+<li><a href="/current/severe.phtml">Severe Wx Products</a></li>
+<li class="active">Storm Prediction Center Convective Watch Archive</li>
+</ol>
+
+<p>This application presents a browsable archive 
+of <a href="http://www.spc.noaa.gov">SPC</a> issued tornado and 
+severe thunderstorm watches. Each sequential
 watch is assigned a numeric ID, which uniquely identifies a watch for each year.
 Up until 2006, the polygon was the valid area of the watch.  Since then, the 
 valid area is issued by county and marine zone.
 </p>
 
 <form method="GET" action="watch.phtml">
-<table style="width: 750px;">
-<tr><td>
+
+<div class="row">
+ <div class="col-md-7">
 <strong>All active watches at issuance:</strong>
-<img src="<?php echo $ourl; ?>">
-</td>
-<td valign="top">
+<img src="{$ourl}" class="img img-responsive">
+
+</div><div class="col-md-5">
+
 <p>
-<?php
-if ($num > 1){
-  echo "<a href=\"watch.phtml?year=$year&num=". ($num -1) ."\">Previous Watch</a>";
-}
-echo " &nbsp; -- &nbsp; ";
-echo "<a href=\"watch.phtml?year=$year&num=". ($num +1) ."\">Next Watch</a>";
-?> 
+{$prevlink} &nbsp; -- &nbsp; {$nextlink}
+
 <table cellpadding="2" cellspacing="0" border="1">
-<tr><th>Type:</th><td><?php echo $row["type"]; ?></td></tr>
-<tr><th>Watch #:</th><td><?php echo yearSelect(1997,$year); ?><input name="num" type="text" size="5" value="<?php echo $row["num"]; ?>"> <input type="submit" value="GO!"></td></tr>
-<tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
-<tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
-<?php
-/* Include a link to download WOU outlines... */
-if (date("Y", $ts) > 2005){
-  echo "<tr><th>WOU Outline Shapefiles</th><td>";
-  $begints = $ts + ((60 - intval(date("i", $ts))) * 60);
-  $endts = $expires - (intval(date("i", $expires)) * 60);
-  while ($begints <= $endts){
-    echo sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ", 
-		gmdate("Y", $begints), gmdate("m", $begints), gmdate("d", $begints), 
-		gmdate("H", $begints) , $num, gmdate("H", $begints));
-    $begints += 3600;
-  }
-  echo "</td>";
-}
-?>
+<tr><th>Type:</th><td>{$row["type"]}</td></tr>
+<tr><th>Watch #:</th><td>{$yselect}
+<input name="num" type="text" size="5" value="{$row["num"]}"> 
+<input type="submit" value="GO!"></td></tr>
+
+<tr><th>Issue:</th><td>{$issue} UTC</td></tr>
+<tr><th>Expired/Cancelled:</th><td>{$expire} UTC</td></tr>
+{$woulink}
 </table>
-<strong>Archive Status:</strong>
+
+<br />
+<a href="{$spclink}" class="btn btn-info">View This Watch on SPC Website</a>
+<br />
+
+<p><strong>Archive Status:</strong>
 <ul>
   <li>Watch archive should be complete back to 1997.</li>
   <li>RADAR composite is mostly complete back to 1997.</li>
   <li>Local Storm Reports are available after 2002.</li>
 </ul>
-</td></tr></table>
+
+</div></div>
+
 </form>
 
 <h3>Initial Watch Box and Watch By County Outline</h3>
-<br /><?php echo $ERROR;?>
-<img src="<?php echo $url; ?>">
+<br />{$ERROR}
+<img src="{$url}">
 
-<?php if (isset($lurl)){ echo "<h3>Local Storm Reports:</h3><img src=\"$lurl\">"; } ?>
+{$ltext}
 
-<p><strong>Watch Polygon Geometry:</strong><br />
-<pre>
- <?php echo $row["kml"]; ?>
-</pre>
-</p>
+<p><strong>Watch Polygon (KML):</strong><br />
+<pre>{$kml}</pre>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<p><strong>Watch Polygon (GeoJSON):</strong><br />
+<pre>{$row["geojson"]}</pre>
+		
+
+EOF;
+$t->render('single.phtml');
+
+?>
