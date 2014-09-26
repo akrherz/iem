@@ -184,33 +184,38 @@ def process( station ):
             cursor.execute("""INSERT into %s(station, day, sday,
             year, month) VALUES ('%s', '%s', '%s', %s, %s)""" % (
                                             table, station, d, 
-                                             d.strftime("%m%d"), d.year, 
+                            "%02i%02i" % (d.month, d.day), d.year, 
                                              d.month))
             row = [None, None, None, None, None]
         s = ""
         if (data[d].get('TMAX') is not None and 
             (row[0] is None or row[0] != data[d]['TMAX'])):
-            print 'Update %s High Old: %s New: %s' % (d, row[0], data[d]['TMAX'])
+            print 'Update %s High   %5s -> %5s' % (d, row[0], 
+                                                      data[d]['TMAX'])
             s += "high = %.0f," % (data[d]['TMAX'],)
             
         if (data[d].get('TMIN') is not None and 
             (row[1] is None or row[1] != data[d]['TMIN'])):
-            print 'Update %s Low Old: %s New: %s' % (d, row[1], data[d]['TMIN'])
+            print 'Update %s Low    %5s -> %5s' % (d, row[1], 
+                                                     data[d]['TMIN'])
             s += "low = %.0f," % (data[d]['TMIN'],)
 
         if (data[d].get('PRCP') is not None and 
             (row[2] is None or row[2] != data[d]['PRCP'])):
-            print 'Update %s Precip Old: %s New: %s' % (d, row[2], data[d]['PRCP'])
+            print 'Update %s Precip %5s -> %5s' % (d, row[2], 
+                                                        data[d]['PRCP'])
             s += "precip = %.2f," % (data[d]['PRCP'],)
 
         if (data[d].get('SNOW') is not None and 
             (row[3] is None or row[3] != data[d]['SNOW'])):
-            print 'Update %s Snow Old: %s New: %s' % (d, row[3], data[d]['SNOW'])
+            print 'Update %s Snow   %5s -> %5s' % (d, row[3], 
+                                                      data[d]['SNOW'])
             s += "snow = %.1f," % (data[d]['SNOW'],)
 
         if (data[d].get('SNWD') is not None and 
             (row[4] is None or row[4] != data[d]['SNWD'])):
-            print 'Update %s Snowd Old: %s New: %s' % (d, row[4], data[d]['SNWD'])
+            print 'Update %s Snowd  %5s -> %5s' % (d, row[4], 
+                                                       data[d]['SNWD'])
             s += "snowd = %.1f," % (data[d]['SNWD'],)
 
         if s != "":
