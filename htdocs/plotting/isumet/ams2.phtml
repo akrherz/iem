@@ -14,28 +14,29 @@ $myTime = mktime(0,0,0,$month, $day, $year);
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0010.dat";
 
-include("../../../include/forms.php");   $station = "isumet";
+include("../../../include/forms.php");   
+$station = "isumet";
 
-$content = <<< EOF
+$ys = yearSelect2(2011, $year, "year");
+$ms = monthSelect2($month, "month");
+$ds = daySelect2($day, "day");
+$ymd = sprintf("year=%s&month=%s&day=%s", $year, $month, $day);
+
+$t->content = <<< EOF
+<ol class="breadcrumb">
+ <li><a href="/other/">Miscellaneous Stations</a></li>
+ <li class="active">ISU AMS Station</li>	
+</ol>
 
 <p>You can plot 1 minute data for this location.  Note that 
 the archive <br> begins 8 Sep 2011.</p>
 
-<table>
-<tr class="even"><td>
-
 
   <form method="GET" action="ams2.phtml">
-EOF;
-$content .= yearSelect2(2011, $year, "year"); 
-$content .= monthSelect2($month, "month"); 
-$content .= daySelect2($day, "day"); 
+{$ys} {$ms} {$ds}
 
-$ymd = sprintf("year=%s&month=%s&day=%s", $year, $month, $day);
-$content .= <<<EOF
   <input type="submit" value="Make Plot"></form>
 
-</td></tr><tr><td>
 <a href="{$dataurl}">View raw data file</a><br />
 <BR>
 <img src="1min.php?station=ot0010&${ymd}" ALT="Time Series">
@@ -51,10 +52,9 @@ $content .= <<<EOF
 <img src="1min_P.php?station=ot0010&${ymd}" ALT="Time Series">
 <br />
 <img src="1min.php?station=ot0010&${ymd}&rh" ALT="Time Series">
-</td></tr></table>
 </div>
 EOF;
 
-$t->content = $content;
+
 $t->render("single.phtml");
 ?>

@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/mlib.php");
+include("../../../include/mlib.php");
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -64,10 +64,10 @@ if ($station == null){
 	
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -84,7 +84,7 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 
-$graph->yaxis->SetColor("blue");
+//$graph->yaxis->SetColor("blue");
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
@@ -102,11 +102,13 @@ $graph->xaxis->SetPos("min");
 $lineplot=new LinePlot($orelh, $valid);
 $lineplot->SetColor("blue");
 $lineplot->SetLegend("Outside");
+$lineplot->SetWeight(3.0);
 $graph->Add($lineplot);
 
 $lineplot2=new LinePlot($irelh, $valid);
 $lineplot2->SetColor("red");
 $lineplot2->SetLegend("Inside");
+$lineplot2->SetWeight(3.0);
 $graph->Add($lineplot2);
 
 

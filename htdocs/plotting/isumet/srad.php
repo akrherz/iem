@@ -62,10 +62,10 @@ if ($station == null){
 	
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -104,11 +104,12 @@ $graph->xaxis->SetPos("min");
 $lineplot=new LinePlot($srad, $valid);
 $lineplot->SetLegend("Solar Radiation");
 $lineplot->SetColor("blue");
+$lineplot->SetWeight(3.0);
 
 $lineplot2=new LinePlot($uvindex, $valid);
 $lineplot2->SetLegend("UV Index");
 $lineplot2->SetColor("red");
-
+$lineplot2->SetWeight(3.0);
 
 $graph->Add($lineplot);
 $graph->AddY2($lineplot2);

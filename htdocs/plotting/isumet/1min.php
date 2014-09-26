@@ -112,13 +112,14 @@ $lineplot->SetWeight(3.0);
 // Create the linear plot
 $lineplot2=new LinePlot($dwpf, $valid);
 $lineplot2->SetLegend("Dew Point");
-$lineplot2->SetColor("green");
+$lineplot2->SetColor("blue");
 $lineplot2->SetWeight(3.0);
 
 // Create the linear plot
 $lineplot3=new LinePlot($relh, $valid);
 $lineplot3->SetLegend("Rel Humid");
 $lineplot3->SetColor("black");
+$lineplot3->SetWeight(3.0);
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
@@ -133,7 +134,7 @@ $graph->Add($lineplot);
 if (isset($_REQUEST["rh"])){
 	$graph->AddY2($lineplot3);
 } else {
-	//$graph->Add($lineplot2);
+	$graph->Add($lineplot2);
 }
 	
 $graph->Stroke();
