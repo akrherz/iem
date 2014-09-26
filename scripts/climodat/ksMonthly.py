@@ -24,29 +24,27 @@ def metadata(id,csv):
 def process(id, csv,yr):
     for i in range(1,13):
     # Compute Climate
-        sql = """SELECT round(avg(high)::numeric,1) as avg_high,
-      round(avg(low)::numeric,1) as avg_low, 
-      round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' and 
-      extract(month from valid) = %s""" % (constants.climatetable(id), id, i)
+        sql = """
+        WITH yearly as (
+            SELECT year, avg(high) as ah, avg(low) as al, 
+            sum(precip) as sp from %s WHERE station = '%s' and month = %s
+            GROUP by year)
+
+        SELECT avg(ah) as avg_high, avg(al) as avg_low,
+        avg(sp) as rain, sum(sp) as sum_rain from yearly
+        """ % ("alldata_"+id[:2], id, i)
         rs = constants.mydb.query(sql).dictresult()
         aHigh = rs[0]["avg_high"]
         aLow = rs[0]["avg_low"]
-        aRain = rs[0]["rain"]
-
-    # Fetch Obs
-        sql = """SELECT round(avg_high::numeric,1) as avg_high, 
-      round(avg_low::numeric,1) as avg_low, 
-      round(rain::numeric,2) as rain from r_monthly WHERE station = '%s' 
-      and monthdate = '%s-%02i-01'""" % (id, yr, i)
-        rs = constants.mydb.query(sql).dictresult()
+        aRain = rs[0]["sum_rain"]
         oHigh = rs[0]["avg_high"]
         oLow = rs[0]["avg_low"]
         oRain = rs[0]["rain"]
 
         csv.write("%s,%s,%s,%s,%s,%s," % (oLow,aLow,oHigh,aHigh,oRain,aRain) )
 
-  # Need to do yearly stuff
-  # First, get our obs
+    # Need to do yearly stuff
+    # First, get our obs
     sql = """SELECT round(avg(high)::numeric,1) as avg_high,
       round(avg(low)::numeric,1) as avg_low, 
       round(sum(precip)::numeric,2) as rain from %s WHERE 
@@ -55,7 +53,7 @@ def process(id, csv,yr):
     oHigh = rs[0]["avg_high"]
     oLow = rs[0]["avg_low"]
     oRain = rs[0]["rain"]
-  # Then climate
+    # Then climate
     sql = """SELECT round(avg(high)::numeric,1) as avg_high,
     round(avg(low)::numeric,1) as avg_low, 
     round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' """ % (

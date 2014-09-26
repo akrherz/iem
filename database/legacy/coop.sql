@@ -1,4 +1,19 @@
 ---
+--- Cooling Degree Days
+--- (high, low, base)
+ CREATE OR REPLACE FUNCTION cdd(real, real, real) RETURNS numeric
+ 	LANGUAGE sql
+ 	AS $_$select (case when (( $1 + $2 )/2.) > $3 then (( $1 + $2 )/2. - $3) else 0 end)::numeric$_$;
+
+---
+--- Heating Degree Days
+--- (high, low, base)
+ CREATE OR REPLACE FUNCTION hdd(real, real, real) RETURNS numeric
+ 	LANGUAGE sql
+ 	AS $_$select (case when ($3 - (( $1 + $2 )/2.)) > 0 then ($3 - ( $1 + $2 )/2.) else 0 end)::numeric$_$;
+
+
+---
 --- Storage of climoweek
 CREATE TABLE climoweek(
   sday char(4) UNIQUE,
@@ -427,25 +442,3 @@ CREATE table r_precipevents(
 grant all on r_precipevents to nobody;
 create unique index r_precipevents_idx 
  on r_precipevents(station, climoweek);
-
-DROP table r_monthly;
-CREATE table r_monthly(
-  station char(6),
-  monthdate date,
-  gdd40 smallint,
-  gdd48 smallint,
-  gdd50 smallint,
-  gdd52 smallint,
-  avg_high smallint,
-  avg_low smallint,
-  rain real,
-  hdd real,
-  cdd real,
-  rain_days smallint,
-  snow_days smallint,
-  hdd60 real,
-  cdd60 real
-);
-grant all on r_monthly to nobody;
-create unique index r_monthly_idx
- on r_monthly(station, monthdate);

@@ -4,6 +4,10 @@
 import pg
 mydb = pg.connect('coop', 'iemdb', user='nobody')
 
+import psycopg2.extras
+pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 import genPrecipEvents
 import gen30rains
 import genGDD
@@ -46,14 +50,33 @@ if len(sys.argv) == 2:
     update_all = True
 
 for dbid in runstations:
+    table = constants.get_table(dbid)
     #print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
     sql = """SELECT d.*, c.climoweek from %s d, climoweek c 
     WHERE station = '%s' and day >= '%s-01-01' and d.sday = c.sday 
     and precip is not null
-    ORDER by day ASC""" % (constants.get_table(dbid),
+    ORDER by day ASC""" % (table,
                 dbid, constants.startyear(dbid) ) 
-
     rs = caller(mydb.query, sql).dictresult()
+
+    # Compute monthly
+    cursor.execute("""
+    SELECT year, month, sum(precip) as sum_precip,
+    avg(high) as avg_high,
+    avg(low) as avg_low,
+    sum(cdd(high,low,60)) as cdd60,
+    sum(cdd(high,low,65)) as cdd65,
+    sum(hdd(high,low,60)) as hdd60,
+    sum(hdd(high,low,65)) as hdd65,
+    sum(case when precip >= 0.01 then 1 else 0 end) as rain_days,
+    sum(case when snow >= 0.1 then 1 else 0 end) as snow_days,
+    sum(gddxx(40,86,high,low)) as gdd40,
+    sum(gddxx(48,86,high,low)) as gdd48,
+    sum(gddxx(50,86,high,low)) as gdd50,
+    sum(gddxx(52,86,high,low)) as gdd52
+     from """+table+""" WHERE station = %s GROUP by year, month
+    """, (dbid, ))
+    monthly_rows = cursor.fetchall()
 
     caller(genPrecipEvents.go, mydb, rs, dbid)
     out = constants.make_output( constants.nt, dbid, "01")
@@ -64,9 +87,8 @@ for dbid in runstations:
     caller(gen30rains.write, mydb, out, dbid)
     out.close()
     
-    caller(genGDD.go, mydb, rs, dbid, update_all)
     out = constants.make_output( constants.nt, dbid, "03")
-    caller(genGDD.write, mydb, out, dbid)
+    caller(genGDD.write, monthly_rows, out, dbid)
     out.close()
 
     out = constants.make_output(constants.nt, dbid, "04")
@@ -110,25 +132,22 @@ for dbid in runstations:
     caller(genSpringFall.write, mydb, out, rs, dbid, 24)
     out.close()
     
-    caller(genMonthly.go, mydb, dbid, update_all)
     out = constants.make_output( constants.nt, dbid, "14")
     out2 = constants.make_output( constants.nt, dbid, "15")
     out3 = constants.make_output( constants.nt, dbid, "16")
     out4 = constants.make_output( constants.nt, dbid, "17")
-    caller(genMonthly.write,mydb, out, out2, out3, out4, dbid)
+    caller(genMonthly.write, monthly_rows, out, out2, out3, out4, dbid)
     out.close()
     out2.close()
     out3.close()
     out4.close()
     
-    caller(genHDD.go, mydb, rs, dbid, update_all)
     out = constants.make_output( constants.nt, dbid, "18")
-    caller(genHDD.write, mydb, out, dbid)
+    caller(genHDD.write, monthly_rows, out, dbid)
     out.close()
     
-    caller(genCDD.go, mydb, rs, dbid, update_all)
     out = constants.make_output( constants.nt, dbid, "19")
-    caller(genCDD.write, mydb, out, dbid)
+    caller(genCDD.write, monthly_rows, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "20")
@@ -136,11 +155,11 @@ for dbid in runstations:
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "21")
-    caller(genCountRain.write, mydb, out, dbid)
+    caller(genCountRain.write, monthly_rows, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "25")
-    caller(genCountSnow.write, mydb, out, dbid)
+    caller(genCountSnow.write, monthly_rows, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "22")

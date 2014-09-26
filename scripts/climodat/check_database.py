@@ -36,18 +36,6 @@ def fix_year(station, year):
 for station in nt.sts.keys():
     sts = mx.DateTime.DateTime( constants.startyear(station), 1, 1)
     ets = constants._ENDTS
-    now = sts
-    interval = mx.DateTime.RelativeDateTime(months=1)
-    while now < ets:
-        ccursor.execute("""SELECT * from r_monthly WHERE 
-        station = '%s' and monthdate = '%s' """ % (station, 
-                                                   now.strftime("%Y-%m-%d")))
-        row = ccursor.fetchone()
-        if row[0] == 0:
-            print 'Adding station: %s month: %s' % (station, now)
-            ccursor.execute("""INSERT into r_monthly(station, monthdate)
-            values ('%s','%s')""" % (station, now.strftime("%Y-%m-%d")))
-        now += interval
     
     # Check for obs total
     now = sts
