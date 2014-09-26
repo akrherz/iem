@@ -16,49 +16,20 @@ def ccdd(high, low, base):
 
     return cdd  
 
-def go(mydb, rs, station, updateAll=False):
-    if updateAll:
-        s = constants.startts(station)
-    else:
-        s = constants._ENDTS - mx.DateTime.RelativeDateTime(years=1)
-    e = constants._ENDTS
-    interval = mx.DateTime.RelativeDateTime(months=+1)
 
-    now = s
-    db = {}
-    db60 = {}
-    while (now < e):
-        db[now] = 0
-        db60[now] = 0
-        now += interval
-
-    for i in range(len(rs)):
-        ts = mx.DateTime.strptime( rs[i]["day"] , "%Y-%m-%d")
-        if ts < s:
-            continue
-        mo = ts + mx.DateTime.RelativeDateTime(day=1)
-        db[mo] += ccdd(rs[i]["high"], rs[i]["low"], 65.0)
-        db60[mo] += ccdd(rs[i]["high"], rs[i]["low"], 60.0)
-
-    for mo in db.keys():
-        mydb.query("""UPDATE r_monthly SET cdd = %s, cdd60 = %s WHERE 
-          station = '%s' and monthdate = '%s' """ % (db[mo], db60[mo],
-                                    station, mo.strftime("%Y-%m-%d") ) )
-
-def write(mydb, out, station):
+def write(monthly_rows, out, station):
+    """ write out this report """
     YRCNT = constants.yrcnt(station)
     out.write("""# THESE ARE THE MONTHLY COOLING DEGREE DAYS (base=65) %s-%s FOR STATION  %s
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC
 """ % (constants.startyear(station), constants._ENDYEAR, station) )
 
-    rs = mydb.query("""SELECT * from r_monthly WHERE station = '%s'""" % (
-                                        station,) ).dictresult()
     db = {}
     db60 = {}
-    for i in range(len(rs)):
-        mo = mx.DateTime.strptime( rs[i]["monthdate"], "%Y-%m-%d")
-        db[mo] = rs[i]["cdd"]
-        db60[mo] = rs[i]["cdd60"]
+    for row in monthly_rows:
+        mo = mx.DateTime.DateTime(row['year'], row['month'], 1)
+        db[mo] = row["cdd65"]
+        db60[mo] = row["cdd60"]
 
     moTot = {}
     moTot60 = {}

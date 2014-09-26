@@ -4,60 +4,18 @@ Heating Degree Days
 import constants
 import mx.DateTime
 
-def chdd(high, low, base):
-    hdd = 0
-    try:
-        a = float(int(high) + int(low)) / 2.00
-    except:
-        return 0
-    if a < base:
-        hdd = base - a
-
-    return hdd  
-
-def go(mydb, rs, stationID, updateAll=False):
-    if updateAll:
-        s = constants.startts(stationID)
-    else:
-        s = constants._ENDTS - mx.DateTime.RelativeDateTime(years=1)
-    e = constants._ENDTS
-    interval = mx.DateTime.RelativeDateTime(months=+1)
-
-    now = s
-    db = {}
-    db60 = {}
-    while (now < e):
-        db[now] = 0
-        db60[now] = 0
-        now += interval
-
-    for i in range(len(rs)):
-        ts = mx.DateTime.strptime( rs[i]["day"] , "%Y-%m-%d")
-        if ts < s:
-            continue
-        mo = ts + mx.DateTime.RelativeDateTime(day=1)
-        db[mo] += chdd(rs[i]["high"], rs[i]["low"], 65.0)
-        db60[mo] += chdd(rs[i]["high"], rs[i]["low"], 60.0)
-
-    for mo in db.keys():
-        mydb.query("""UPDATE r_monthly SET hdd = %s, hdd60 = %s WHERE 
-          station = '%s' and monthdate = '%s' """ % (db[mo], db60[mo],
-                                    stationID, mo.strftime("%Y-%m-%d") ) )
-
-def write(mydb, out, station):
+def write(monthly_rows, out, station):
     YRCNT = constants.yrcnt(station)
     out.write("""# THESE ARE THE MONTHLY HEATING DEGREE DAYS (base=65) %s-%s FOR STATION  %s
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC
 """ % (constants.startyear(station), constants._ENDYEAR, station) )
 
-    rs = mydb.query("""SELECT * from r_monthly WHERE station = '%s'""" % (
-                                        station,) ).dictresult()
     db = {}
     db60 = {}
-    for i in range(len(rs)):
-        mo = mx.DateTime.strptime( rs[i]["monthdate"], "%Y-%m-%d")
-        db[mo] = rs[i]["hdd"]
-        db60[mo] = rs[i]["hdd60"]
+    for row in monthly_rows:
+        mo = mx.DateTime.DateTime(row['year'], row['month'], 1)
+        db[mo] = row["hdd65"]
+        db60[mo] = row["hdd60"]
 
     moTot = {}
     moTot60 = {}
