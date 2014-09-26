@@ -104,7 +104,11 @@ def get_file(station):
     localfn = "/tmp/USC00%s.dly" % (ncdc,)
     if not os.path.isfile(localfn):
         print 'Downloading from NCDC station: %s' % (ncdc, )
-        data = urllib2.urlopen(uri)
+        try:
+            data = urllib2.urlopen(uri)
+        except urllib2.HTTPError, exp:
+            print exp
+            return None
         o = open(localfn, 'w')
         o.write(data.read())
         o.close()
@@ -147,6 +151,8 @@ def process( station ):
 
     '''
     fp = get_file( station )
+    if fp is None:
+        return
     data = {}
     for line in fp:
         m = DATARE.match(line)
