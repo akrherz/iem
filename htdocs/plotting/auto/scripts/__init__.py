@@ -13,6 +13,7 @@ data = {'plots': [
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
         {'id': "5", 'label': "Minimum Daily Temperature Range"},
+        {'id': "22", 'label': "Percentage of Years within Temperature Range from Averages"},
         {'id': "4", 'label': "State Areal Coverage of Precip Intensity over X Days"},
     ]},
     {'label': 'Monthly', 'options': [
