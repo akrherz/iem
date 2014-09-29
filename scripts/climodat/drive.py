@@ -78,9 +78,8 @@ for dbid in runstations:
     """, (dbid, ))
     monthly_rows = cursor.fetchall()
 
-    caller(genPrecipEvents.go, mydb, rs, dbid)
     out = constants.make_output( constants.nt, dbid, "01")
-    caller(genPrecipEvents.write, mydb, out, dbid)
+    caller(genPrecipEvents.write, cursor, out, dbid)
     out.close()
 
     out = constants.make_output( constants.nt, dbid, "02")
