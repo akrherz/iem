@@ -18,7 +18,8 @@ def contiguous_regions(condition):
     second column is the end index."""
 
     # Find the indicies of changes in "condition"
-    d = np.diff(condition)
+    #d = np.diff(condition)
+    d = np.subtract(condition[1:], condition[:-1], dtype=np.float)
     idx, = d.nonzero() 
 
     # We need to start things after the change in "condition". Therefore, 
@@ -55,58 +56,64 @@ def write(mydb, out, rs, station):
         highs[i] = rs[i]['high']
         lows[i] = rs[i]['low']
 
-    for thres in range(-20,100,2):
-        
+    for thres in range(-20,101,2):
         condition = lows < thres
         max_bl = 0
         max_bl_ts = mx.DateTime.now()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_bl:
                 max_bl = int(stop - start)
-                max_bl_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
-    
+                max_bl_ts = mx.DateTime.DateTime(constants.startyear(station),
+                            1, 1) + mx.DateTime.RelativeDateTime(
+                                                            days=int(stop))
         condition = lows >= thres
         max_al = 0
         max_al_ts = mx.DateTime.now()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_al:
                 max_al = int(stop - start)
-                max_al_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
-
+                max_al_ts = mx.DateTime.DateTime(constants.startyear(station),
+                            1, 1) + mx.DateTime.RelativeDateTime(
+                                                            days=int(stop))
         condition = highs < thres
         max_bh = 0
         max_bh_ts = mx.DateTime.now()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_bh:
                 max_bh = int(stop - start)
-                max_bh_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
-    
+                max_bh_ts = mx.DateTime.DateTime(constants.startyear(station),
+                            1, 1) + mx.DateTime.RelativeDateTime(
+                                                            days=int(stop))
         condition = highs >= thres
         max_ah = 0
         max_ah_ts = mx.DateTime.now()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_ah:
                 max_ah = int(stop - start)
-                max_ah_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
+                max_ah_ts = mx.DateTime.DateTime(constants.startyear(station),
+                            1, 1) + mx.DateTime.RelativeDateTime(
+                                                            days=int(stop))
 
-
-        out.write("%3i %5s %10s %10s %5s %10s %10s  %5s %10s %10s %5s %10s %10s\n" % (
+        out.write(("%3i %5s %10s %10s %5s %10s %10s  "
+                      +"%5s %10s %10s %5s %10s %10s\n") % (
     thres, 
-    wrap(max_bl), 
-    wrap(max_bl, (max_bl_ts - mx.DateTime.RelativeDateTime(days=max_bl)).strftime("%m/%d/%Y")), 
+    wrap(max_bl),
+    wrap(max_bl, (max_bl_ts -
+            mx.DateTime.RelativeDateTime(days=max_bl)).strftime("%m/%d/%Y")), 
     wrap(max_bl, max_bl_ts.strftime("%m/%d/%Y") ),
 
-    wrap(max_al), 
-    wrap(max_al, (max_al_ts - mx.DateTime.RelativeDateTime(days=max_al)).strftime("%m/%d/%Y")), 
+    wrap(max_al),
+    wrap(max_al, (max_al_ts -
+            mx.DateTime.RelativeDateTime(days=max_al)).strftime("%m/%d/%Y")), 
     wrap(max_al, max_al_ts.strftime("%m/%d/%Y") ),
 
-    wrap(max_bh), 
-    wrap(max_bh, (max_bh_ts - mx.DateTime.RelativeDateTime(days=max_bh)).strftime("%m/%d/%Y")), 
+    wrap(max_bh),
+    wrap(max_bh, (max_bh_ts -
+            mx.DateTime.RelativeDateTime(days=max_bh)).strftime("%m/%d/%Y")), 
     wrap(max_bh, max_bh_ts.strftime("%m/%d/%Y") ),
 
-    wrap(max_ah), 
-    wrap(max_ah, (max_ah_ts - mx.DateTime.RelativeDateTime(days=max_ah)).strftime("%m/%d/%Y")), 
+    wrap(max_ah),
+    wrap(max_ah, (max_ah_ts -
+            mx.DateTime.RelativeDateTime(days=max_ah)).strftime("%m/%d/%Y")), 
     wrap(max_ah, max_ah_ts.strftime("%m/%d/%Y") )
   ) )
-
-    

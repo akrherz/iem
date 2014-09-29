@@ -5,84 +5,38 @@
 import constants 
 import cweek
 
-def go(mydb, rs, stationID):
-  db = {}
-  for i in range(1,54): # Store climateweek values
-    db[i] = {}
-    db[i]["maxval"] = 0
-    db[i]["maxyr"] = 0
-    db[i]["total"] = 0
-    db[i]["events"] = 0
-    db[i]["cat1"] = 0
-    db[i]["cat2"] = 0
-    db[i]["cat3"] = 0
-    db[i]["cat4"] = 0
-    db[i]["cat5"] = 0
-    db[i]["totprec"] = [0]* (constants._ENDYEAR - constants.startyear(stationID))
-
-
-  for i in range(len(rs)):
-    climoweek = int(rs[i]["climoweek"])
-    precip = float(rs[i]["precip"])
-    yr = int(rs[i]['year'])
-     # First we do the CATS
-    if (precip >= 0.01 and precip <= 0.25):
-      db[climoweek]["cat1"] += 1
-    elif (precip >= 0.26 and precip <= 0.50):
-      db[climoweek]["cat2"] += 1
-    elif (precip >= 0.51 and precip <= 1.00):
-      db[climoweek]["cat3"] += 1
-    elif (precip >= 1.01 and precip <= 2.00):
-      db[climoweek]["cat4"] += 1
-    elif (precip >= 2.01):
-      db[climoweek]["cat5"] += 1
-     # Work the Max
-    if (precip > 0):
-      db[climoweek]["totprec"][yr - constants.startyear(stationID)] += precip
-     # Add in for the total
-    db[climoweek]["total"] += precip
-
-  annEvents = 0
-  maxVal = 0
-  totRain = 0
-  cat1 = 0
-  cat2 = 0
-  cat3 = 0
-  cat4 = 0
-  cat5 = 0
-  for i in range(1,54):
-    totEvents = db[i]["cat1"] + db[i]["cat2"] + db[i]["cat3"] + \
-                db[i]["cat4"] + db[i]["cat5"]
-    meanRain = db[i]["total"] / totEvents
-    annEvents += totEvents
-    maxVal = max( db[i]['totprec'] )
-    maxyr = db[i]['totprec'].index(maxVal) + constants.startyear(stationID)
-    cat1 += db[i]["cat1"]
-    cat2 += db[i]["cat2"]
-    cat3 += db[i]["cat3"]
-    cat4 += db[i]["cat4"]
-    cat5 += db[i]["cat5"]
-    totRain += db[i]["total"]
-
-    mydb.query("""DELETE from r_precipevents WHERE station = '%s' and 
-     climoweek = %s""" % (stationID, i) )
-
-    mydb.query("""INSERT into r_precipevents(station, climoweek, maxval, maxyr, 
-     meanval, cat1e, cat2e, cat3e, cat4e, cat5e) values ('%s', %s, %s, %s, 
-     %4.2f, %s, %s, %s, %s, %s)""" % (stationID, i, maxVal, maxyr, meanRain,
-     db[i]["cat1"], db[i]["cat2"], db[i]["cat3"], db[i]["cat4"], db[i]["cat5"]))
-
-
-def write(mydb, out, station):
+def write(cursor, out, station):
+    """ Do our business """
+    table = constants.get_table(station)
+    cursor.execute("""
+    with events as (
+        SELECT c.climoweek, a.precip, a.year from """+table+""" a
+        JOIN climoweek c on (c.sday = a.sday) WHERE a.station = %s
+        and precip >= 0.01),
+    ranks as (
+        SELECT climoweek, year,
+        rank() OVER (PARTITION by climoweek ORDER by precip DESC)
+        from events), 
+    stats as (
+    SELECT climoweek, max(precip), avg(precip), 
+    sum(case when precip >= 0.01 and precip < 0.26 then 1 else 0 end) as cat1, 
+    sum(case when precip >= 0.26 and precip < 0.51 then 1 else 0 end) as cat2, 
+    sum(case when precip >= 0.51 and precip < 1.01 then 1 else 0 end) as cat3, 
+    sum(case when precip >= 1.01 and precip < 2.01 then 1 else 0 end) as cat4, 
+    sum(case when precip >= 2.01 then 1 else 0 end) as cat5, 
+    count(*) from events GROUP by climoweek)
+    SELECT e.climoweek, e.max, r.year, e.avg, e.cat1, e.cat2, e.cat3, e.cat4,
+    e.cat5 from 
+    stats e JOIN ranks r on (r.climoweek = e.climoweek) WHERE r.rank = 1
+    ORDER by e.climoweek ASC
+    """, (station,))
+    
     out.write("""\
 # Based on climoweek periods, this report summarizes liquid precipitation.
 #                                     Number of precip events - (% of total)
  CL                MAX         MEAN   0.01-    0.26-    0.51-    1.01-            TOTAL
  WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS
 """)
-
-    rs = mydb.query("SELECT * from r_precipevents WHERE station = '%s'" % (
-                station,) ).dictresult()
 
     annEvents = 0
     cat1t = 0
@@ -92,29 +46,35 @@ def write(mydb, out, station):
     cat5t = 0
     maxRain = 0
     totRain = 0
-    for i in range(len(rs)):
-        cw = int(rs[i]["climoweek"])
-        cat1 = rs[i]["cat1e"]
-        cat2 = rs[i]["cat2e"]
-        cat3 = rs[i]["cat3e"]
-        cat4 = rs[i]["cat4e"]
-        cat5 = rs[i]["cat5e"]
+    lastcw = 0
+    for row in cursor:
+        cw = int(row["climoweek"])
+        # Skip ties
+        if cw == lastcw:
+            continue
+        lastcw = cw
+        cat1 = row["cat1"]
+        cat2 = row["cat2"]
+        cat3 = row["cat3"]
+        cat4 = row["cat4"]
+        cat5 = row["cat5"]
         cat1t += cat1
         cat2t += cat2
         cat3t += cat3
         cat4t += cat4
         cat5t += cat5
-        maxval = rs[i]["maxval"]
+        maxval = row["max"]
         if maxval > maxRain:
             maxRain = maxval
-        meanval = rs[i]["meanval"]
+        meanval = row["avg"]
         totEvents = cat1 + cat2 + cat3 + cat4 + cat5
         annEvents += totEvents
         totRain += ( totEvents * meanval)
     
-        out.write("%3s %-13s %5.2f %i   %4.2f %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i)   %4i\n" % (
+        out.write(("%3s %-13s %5.2f %i   %4.2f %4i(%2i) %4i(%2i) "
+                   +"%4i(%2i) %4i(%2i) %4i(%2i)   %4i\n") % (
                 cw, cweek.cweek[cw], 
-          maxval, rs[i]['maxyr'], meanval, 
+          maxval, row['year'], meanval, 
           cat1, round((float(cat1) / float(totEvents)) * 100.0), 
           cat2, round((float(cat2) / float(totEvents)) * 100.0), 
           cat3, round((float(cat3) / float(totEvents)) * 100.0), 
@@ -122,7 +82,7 @@ def write(mydb, out, station):
           cat5, round((float(cat5) / float(totEvents)) * 100.0), totEvents) )
 
 
-    out.write("%-17s %5.2f        %4.2f %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i)   %4i\n" % (
+    out.write("%-17s %5.2f        %4.2f %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i)  %5i\n" % (
             "ANNUAL TOTALS", maxRain, totRain / annEvents, 
             cat1t, (float(cat1t) / float(annEvents)) * 100, 
             cat2t, (float(cat2t) / float(annEvents)) * 100, 
