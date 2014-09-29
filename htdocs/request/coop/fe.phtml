@@ -23,11 +23,11 @@ while (list($key,$val) = each($cities)){
 	$sselect .= "<option value=\"$key\">[$key] ". $cities[$key]['name'] ." -- ".
 			substr($cities[$key]["archive_begin"],0,10) ."</option>\n";
 }
-$y1 = yearSelect2(1893, 1893, "year1");
+$y1 = yearSelect2(1870, 1893, "year1");
 $sy_select = yearSelect2(1893, 2013, "scenario_year");
 $m1 = monthSelect2(1, "month1");
 $d1 = daySelect2(1, "day1");
-$y2 = yearSelect2(1893, 1893, "year2");
+$y2 = yearSelect2(1870, date("Y"), "year2");
 $m2 = monthSelect2(1, "month2");
 $d2 = daySelect2(1, "day2");
 
