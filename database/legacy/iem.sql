@@ -1,4 +1,39 @@
 ---
+--- Storage of information we parse from CLI products
+---
+CREATE TABLE cli_data(
+  station char(4),
+  product varchar(64),
+  valid date,
+  high int,
+  high_normal int,
+  high_record int,
+  high_record_years int[],
+  low int,
+  low_normal int,
+  low_record int,
+  low_record_years int[],
+  precip float,
+  precip_month float,
+  precip_jan1 float,
+  precip_jan1_normal float,
+  precip_jul1 float,
+  precip_dec1 float,
+  precip_dec1_normal float,
+  precip_normal float,
+  precip_record float,
+  precip_record_years int[],
+  precip_month_normal real,
+  snow float,
+  snow_month float,
+  snow_jun1 float,
+  snow_jul1 float,
+  snow_dec1 float
+);
+CREATE UNIQUE index cli_data_idx on cli_data(station,valid);
+GRANT SELECT on cli_data to nobody,apache;
+
+---
 --- Offline metadata
 ---
 CREATE TABLE offline(
