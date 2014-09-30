@@ -7,62 +7,118 @@ include_once "../../include/forms.php";
 
 $station = isset($_GET["station"]) ? $_GET["station"]: 'KDSM';
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]): null;
+$day = isset($_GET["day"]) ? intval($_GET["day"]): null;
+$opt = isset($_GET["opt"]) ? $_GET["opt"]: "bystation";
 
-$ys = yearSelect(2010, $year, "year");
+$ys = yearSelect(2009, $year, "year");
+$ms = monthSelect($month, "month");
+$ds = daySelect($day, "day");
 
 $pgconn = iemdb("iem");
-$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
-		array_to_string(high_record_years, ' ') as hry,
-		array_to_string(low_record_years, ' ') as lry,
-		array_to_string(precip_record_years, ' ') as pry,
-		array_to_string(snow_record_years, ' ') as sry
-		from cli_data where
-		station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
-$rs = pg_execute($pgconn, "SELECT", Array($station, "{$year}-01-01",
-	"{$year}-12-31"));
+$byday = false;
+if ($opt === "bystation"){
+	$title = sprintf("Station: %s for Year: %s", $station, $year);
+	$col1label = "Date";
+	$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
+			array_to_string(high_record_years, ' ') as hry,
+			array_to_string(low_record_years, ' ') as lry,
+			array_to_string(precip_record_years, ' ') as pry,
+			array_to_string(snow_record_years, ' ') as sry
+			from cli_data where
+			station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
+	$rs = pg_execute($pgconn, "SELECT", Array($station, "{$year}-01-01",
+		"{$year}-12-31"));
+} else {
+	$col1label = "Station";
+	$byday = true;
+	$day = mktime(0,0,0, $month, $day, $year);
+	$title = sprintf("All Stations for Date: %s", date("d F Y", $day));
+	$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
+			array_to_string(high_record_years, ' ') as hry,
+			array_to_string(low_record_years, ' ') as lry,
+			array_to_string(precip_record_years, ' ') as pry,
+			array_to_string(snow_record_years, ' ') as sry
+			from cli_data where
+			valid = $1 ORDER by station ASC");
+	$rs = pg_execute($pgconn, "SELECT", Array(date("Y-m-d", $day)));
+}
+
 $table = <<<EOF
-<form method="GET" name="dl">
-	<p><strong>Select Station:</strong> <input type="text" name="station"
-		value="{$station}" size="10" />
-	<br /><strong>Year:</strong> {$ys}
-	<br /><input type="submit" value="Generate Table" />
-</form>
-<table class="table table-condensed table-striped table-bordered">
+<style>
+.empty{
+	width: 0px !important;
+	border: 0px !important;
+	padding: 2px !important;
+	background: tan !important;
+}	
+</style>
+<h3>{$title}</h3>
+<table class="table table-condensed table-striped table-bordered table-hover">
 <thead>
-<tr>
-	<th rowspan="2">Date</th>
+<tr class="small">
+	<th rowspan="2">{$col1label}</th>
 	<th colspan="6">Maximum Temperature &deg;F</th>
+	<th class="empty"></th>
 	<th colspan="6">Minimum Temperature &deg;F</th>
+	<th class="empty"></th>
 	<th colspan="6">Precip (inches)</th>
+	<th class="empty"></th>
 	<th colspan="4">Snow (inches)</th>
 </tr>
-<tr>
-	<th>Value</th><th>Time</th><th>Record</th><th>Years</th><th>Normal</th>
-	<th>Depart</th>
-	<th>Value</th><th>Time</th><th>Record</th><th>Years</th><th>Normal</th>
-	<th>Depart</th>
-	<th>Value</th><th>Record</th><th>Years</th>
-	<th>Normal</th><th>Mon to Date</th><th>Mon Normal</th>
-	<th>Value</th><th>Record</th><th>Years</th><th>Mon to Date</th>
+<tr class="small">
+	<th>Ob</th><th>Time</th><th>Rec</th><th>Years</th><th>Avg</th>
+	<th>&Delta;</th><th class="empty"></th>
+	
+	<th>Ob</th><th>Time</th><th>Rec</th><th>Years</th><th>Avg</th>
+	<th>&Delta;</th><th class="empty"></th>
+	
+	<th>Ob</th><th>Rec</th><th>Years</th>
+	<th>Avg</th><th>Mon to Date</th><th>Mon Avg</th><th class="empty"></th>
+			
+	<th>Ob</th><th>Rec</th><th>Years</th><th>Mon to Date</th>
 </tr>
 </thead>
 EOF;
 function departcolor($actual, $normal){
-	if ($actual > $normal) return "#FD96B1";
-	if ($actual < $normal) return "#A5EAFF";
+	$diff = $actual - $normal;
+	if ($diff == null || $diff == 0) return "#fff";
+	if ($diff >= 10) return "#FF1493";
+	if ($diff > 0) return "#D8BFD8";
+	if ($diff > -10) return "#87CEEB";
+	if ($diff <= -10) return "#00BFFF";
 	return "#fff";
 }
+function trace($val){
+	if ($val == 0.0001) return 'T';
+	return $val;
+}
 for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
-	$table .= sprintf("<tr><td>%s</td>
-			<td>%s</td><td>%s</td><td>%s</td>
+	$uri = sprintf("/p.php?pid=%s", $row["product"]);
+	$ts = strtotime($row["valid"]);
+	if ($byday){
+		$link = sprintf("clitable.php?station=%s&year=%s", $row["station"],
+				date("Y", $ts));
+		$col1 = sprintf("<a href=\"%s\">%s</a>", $link, $row["station"]);
+	}else {
+		$link = sprintf("clitable.php?opt=bydate&year=%s&month=%s&day=%s", date("Y", $ts),
+				date("m", $ts), date("d", $ts));
+		$col1 = sprintf("<a href=\"%s\">%s</a>", $link, date("Md,y", $ts));
+	}
+	$table .= sprintf("<tr><td nowrap><a href=\"%s\"><i class=\"glyphicon glyphicon-list-alt\" alt=\"View Text\"></i></a>
+			%s</td>
+			<td>%s</td><td nowrap>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
-			<td>%s</td><td>%s</td><td>%s</td>
+			<th class=\"empty\"></th>
+			<td>%s</td><td nowrap>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
+			<th class=\"empty\"></th>
 			<td>%s</td><td>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td>%s</td>
+			<th class=\"empty\"></th>
 			<td>%s</td><td>%s</td><td>%s</td>
 			<td>%s</td>
-			</tr>", $row["valid"],
+			</tr>", $uri, $col1, 
 			$row["high"], $row["high_time"], $row["high_record"],
 			$row["hry"], $row["high_normal"],
 			departcolor($row["high"], $row["high_normal"]),
@@ -73,11 +129,12 @@ for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 			departcolor($row["low"], $row["low_normal"]),
 			$row["low"] - $row["low_normal"],
 			
-			$row["precip"], $row["precip_record"], $row["pry"],
-			$row["precip_normal"], $row["precip_month"], $row["precip_month_normal"],
+			trace($row["precip"]), trace($row["precip_record"]), $row["pry"],
+			trace($row["precip_normal"]), trace($row["precip_month"]), 
+			trace($row["precip_month_normal"]),
 			
-			$row["snow"], $row["snow_record"], $row["sry"],
-			$row["snow_month"]
+			trace($row["snow"]), trace($row["snow_record"]), $row["sry"],
+			trace($row["snow_month"])
 				
 		);
 }
@@ -92,7 +149,42 @@ $t->content = <<<EOF
 	<li class="active">Tabular CLI Report Data</li>		
 </ol>
 
+<div class="row">
+	<div class="col-md-4">This application lists out parsed data from 
+	National Weather Service issued daily climate reports.  These reports
+	contain 24 hour totals for a period between midnight <b>local standard time</b>.
+	This means that during daylight saving time, this period is from 1 AM to 
+	1 AM local daylight time!
+	</div>
+	<div class="col-md-4 well">
+	<h4>Option 1: One Station for One Year</h4>
+<form method="GET" name="one">
+<input type="hidden" name="opt" value="bystation" />
+<p><strong>Select Station:</strong>
+	<br /><input type="text" name="station" value="{$station}" size="10" />
+	<br /><strong>Year:</strong>
+	<br />{$ys}
+	<br /><input type="submit" value="Generate Table" />
+</form>
+
+	</div>
+	<div class="col-md-4 well">
+
+<h4>Option 2: One Day for Stations</h4>
+<form method="GET" name="two">
+<input type="hidden" name="opt" value="bydate" />
+	{$ys} {$ms} {$ds}
+	<br /><input type="submit" value="Generate Table" />
+</form>
+	
+	
+	</div>
+</div>
+			
+
+<div class="table-responsive">
 	{$table}
+</div>
 
 EOF;
 
