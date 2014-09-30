@@ -9,10 +9,12 @@ CREATE TABLE cli_data(
   high_normal int,
   high_record int,
   high_record_years int[],
+  high_time varchar(7),
   low int,
   low_normal int,
   low_record int,
   low_record_years int[],
+  low_time varchar(7),
   precip float,
   precip_month float,
   precip_jan1 float,
@@ -28,7 +30,9 @@ CREATE TABLE cli_data(
   snow_month float,
   snow_jun1 float,
   snow_jul1 float,
-  snow_dec1 float
+  snow_dec1 float,
+  snow_record_years int[],
+  snow_record float
 );
 CREATE UNIQUE index cli_data_idx on cli_data(station,valid);
 GRANT SELECT on cli_data to nobody,apache;
