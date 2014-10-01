@@ -22,6 +22,7 @@ data = {'plots': [
         {'id': "3", 'label': "Monthly Temperature / Precipitation Statistics by Year"},
         {'id': "6", 'label': "Monthly Temperature/Precipitation Distributions"},
         {'id': "8", 'label': "Monthly Precipitation Reliability"},
+        {'id': "23", 'label': "Monthly Station Departures + El Nino 3.4 Index"},
         {'id': "9", 'label': "Growing Degree Day Climatology and Daily Values for one Year"},
         {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
         {'id': "20", 'label': "Hours of Precipitation by Month"},
