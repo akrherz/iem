@@ -41,7 +41,7 @@ def plotter( fdict ):
 
     sts = datetime.datetime(syear, 1, 1)
     ets = datetime.datetime(syear+years,1,1)
-    archiveend = datetime.date.today()
+    archiveend = datetime.date.today() + datetime.timedelta(days=1)
     archiveend = archiveend.replace(day=1)
 
     elnino = []
