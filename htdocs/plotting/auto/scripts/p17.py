@@ -5,8 +5,6 @@ import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
 import psycopg2.extras
 import numpy as np
-import calendar
-import sys
 import datetime
 from pyiem.network import Table as NetworkTable
 import warnings
@@ -17,7 +15,8 @@ def get_description():
     d = dict()
     d['cache'] = 300
     d['arguments'] = [
-        dict(type='zstation', name='station', default='AMW', label='Select Station:'),
+        dict(type='zstation', name='station', default='AMW', 
+             label='Select Station:'),
     ]
     return d
 
@@ -103,8 +102,11 @@ def plotter( fdict ):
                 ha='center', va='bottom', color='k')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2, 
                                                      foreground="w")])
-    ax.set_ylim(min(min(cllows), min(lows))-5,
+    if ccursor.rowcount > 0:
+        ax.set_ylim(min(min(cllows), min(lows))-5,
                 max(max(clhighs), max(highs))+5)
+    else:
+        ax.set_ylim(min(lows)-5, max(highs)+5)
     ax.set_xlim(0.5, days + 0.5)
     ax.set_xticks( np.arange(1, days+1))
     ax.set_xticklabels( np.arange(1,days+1), fontsize=8)
