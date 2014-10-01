@@ -26,10 +26,10 @@ def get_description():
 
 def plotter( fdict ):
     """ Go """
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='coop', host='iemdb2', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', 
+    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb2', 
                                 user='nobody')
     mcursor = MESOSITE.cursor()
 
@@ -73,7 +73,7 @@ def plotter( fdict ):
     valid = []
     for row in cursor:
         valid.append( datetime.datetime(row[0], row[1], 1) )
-        diff.append( row[2] )
+        diff.append( float(row[2]) )
     
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title(("[%s] %s\nMonthly Departure of Average Temperature + "
@@ -103,6 +103,7 @@ def plotter( fdict ):
     
     ax2.plot(elninovalid, elnino, zorder=2, color='k', lw=2.0)
     ax2.set_ylabel("El Nino 3.4 Index (line)")
+    ax2.set_ylim(-3,3)
     
     ax.set_ylabel("Avg Temperature Departure [F] (bars)")
     #ax.set_xlabel("* Thru 28 May 2013")
@@ -110,5 +111,7 @@ def plotter( fdict ):
     ax.set_xticks( xticks )
     ax.set_xticklabels( xticklabels )
     ax.set_xlim(sts, ets)
+    maxv = np.max(np.absolute(diff)) + 2
+    ax.set_ylim(0-maxv, maxv)
 
     return fig
