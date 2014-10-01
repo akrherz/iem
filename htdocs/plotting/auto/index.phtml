@@ -111,7 +111,7 @@ if (isset($_GET["q"])){
 		}
 		elseif ($v->type == "year"){
 			$form .= "<tr><td>". $v->label ."</td>
-			<td>". yearSelect2(1893, $value, $v->name) ."</td></tr>" ;
+			<td>". yearSelect2(isset($v->min) ? $v->min: 1893, $value, $v->name) ."</td></tr>" ;
 		}
 		elseif ($v->type == "select"){
 			$netselect = make_select($v->name, $value, $v->options);
