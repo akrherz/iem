@@ -3,88 +3,97 @@
 """
 import constants
 import sys
-import mx.DateTime
-import network
-nt = network.Table("IACLIMATE")
+import datetime
+import numpy as np
 
-
-def setupCSV(yr):
+def setup_csv(yr):
+    """ Setup the output file """
     out = open("/mesonet/share/climodat/ks/%s_monthly.csv" % (yr,), 'w')
     out.write("stationID,stationName,Latitude,Longitude,")
     for i in range(1,13):
         for v in ["MINT","MAXT","PREC"]:
             out.write("%02i_%s,C%02i_%s," % (i,v,i,v) )
-    out.write("%i_MINT,CYR_MINT,%i_MAXT,CYR_MAXT,%i_PREC,CYR_PREC,\n" % (yr,yr,yr) )
+    out.write("%i_MINT,CYR_MINT,%i_MAXT,CYR_MAXT,%i_PREC,CYR_PREC,\n" % (yr,
+                                                                yr, yr))
     return out
 
-def metadata(id,csv):
-    csv.write("%s,%s,%s,%s," % (id, nt.sts[id]["name"], nt.sts[id]["lat"], 
-                                nt.sts[id]["lon"] ) )
+def metadata(sid,csv):
+    """ write metadata to csv file """
+    csv.write("%s,%s,%s,%s," % (sid, constants.nt.sts[sid]["name"], 
+                                constants.nt.sts[sid]["lat"], 
+                                constants.nt.sts[sid]["lon"]))
 
-def process(id, csv,yr):
+def process(sid, csv, yr):
+    """ Actually process a station for a csv file and year """
+    ah = []
+    al = []
+    ap = []
+    oh = []
+    ol = []
+    op = []
     for i in range(1,13):
-    # Compute Climate
         sql = """
         WITH yearly as (
             SELECT year, avg(high) as ah, avg(low) as al, 
             sum(precip) as sp from %s WHERE station = '%s' and month = %s
             GROUP by year)
 
-        SELECT avg(ah) as avg_high, avg(al) as avg_low,
-        avg(sp) as rain, sum(sp) as sum_rain from yearly
-        """ % ("alldata_"+id[:2], id, i)
+        SELECT 
+        avg(ah) as avg_high,
+        avg(al) as avg_low,
+        avg(sp) as avg_rain,
+        max(case when year = %s then ah else null end) as ob_high,
+        max(case when year = %s then al else null end) as ob_low,
+        max(case when year = %s then sp else null end) as ob_rain
+        from yearly
+        """ % (constants.get_table(sid), sid, i, yr, yr, yr)
         rs = constants.mydb.query(sql).dictresult()
-        aHigh = rs[0]["avg_high"]
-        aLow = rs[0]["avg_low"]
-        aRain = rs[0]["sum_rain"]
-        oHigh = rs[0]["avg_high"]
-        oLow = rs[0]["avg_low"]
-        oRain = rs[0]["rain"]
+        avgHigh = rs[0]["avg_high"]
+        avgLow = rs[0]["avg_low"]
+        avgRain = rs[0]["avg_rain"]
+        ah.append( avgHigh )
+        al.append( avgLow )
+        ap.append( avgRain )
+        
+        obHigh = rs[0]["ob_high"]
+        obLow = rs[0]["ob_low"]
+        obRain = rs[0]["ob_rain"]
+        if obHigh is not None:
+            oh.append( obHigh )
+            ol.append( obLow )
+            op.append( obRain )
 
-        csv.write("%s,%s,%s,%s,%s,%s," % (oLow,aLow,oHigh,aHigh,oRain,aRain) )
+        csv.write("%s,%s,%s,%s,%s,%s," % (obLow or 'M', avgLow, 
+                                          obHigh or 'M', avgHigh, 
+                                          obRain or 'M', avgRain))
 
-    # Need to do yearly stuff
-    # First, get our obs
-    sql = """SELECT round(avg(high)::numeric,1) as avg_high,
-      round(avg(low)::numeric,1) as avg_low, 
-      round(sum(precip)::numeric,2) as rain from %s WHERE 
-      station = '%s' and year = %s """ % (constants.get_table(id), id, yr)
-    rs = constants.mydb.query(sql).dictresult()
-    oHigh = rs[0]["avg_high"]
-    oLow = rs[0]["avg_low"]
-    oRain = rs[0]["rain"]
-    # Then climate
-    sql = """SELECT round(avg(high)::numeric,1) as avg_high,
-    round(avg(low)::numeric,1) as avg_low, 
-    round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' """ % (
-                            constants.climatetable(id), id,)
-    rs = constants.mydb.query(sql).dictresult()
-    aHigh = rs[0]["avg_high"]
-    aLow = rs[0]["avg_low"]
-    aRain = rs[0]["rain"]
-    csv.write("%s,%s,%s,%s,%s,%s," % (oLow,aLow,oHigh,aHigh,oRain,aRain) )
+    low = np.average(ol)
+    high = np.average(oh)
+    rain = np.sum(op)
+    avg_low = np.average(al)
+    avg_high = np.average(ah)
+    avg_rain = np.sum(ap)
+    csv.write("%s,%s,%s,%s,%s,%s," % (low, avg_low, high, avg_high, rain,
+                                      avg_rain) )
 
     csv.write("\n")
     csv.flush()
 
 def main(yr):
-    csv = setupCSV(yr)
-    for id in nt.sts.keys():
-    #if (id == 'IA7844' or id == 'IA4381'):
-    #  continue
-    #if (not longterm.__contains__(id.lower())):
-    #  continue
+    """ main ! """
+    csv = setup_csv(yr)
+    for sid in constants.nt.sts.keys():
         #print "%s processing [%s] %s" % (yr, id, nt.sts[id]["name"])
-        metadata(id, csv)
-        process(id, csv, yr)
+        metadata(sid, csv)
+        process(sid, csv, yr)
 
 if __name__ == "__main__":
-  # For what year are we running!
+    # For what year are we running!
     if len(sys.argv) == 2:
         yr = int(sys.argv[1])
     else:
-        yr = mx.DateTime.now().year
+        yr = datetime.datetime.now().year
     main(yr)
     main(yr-1)
-  #for yr in range(1893,1951):
-  #  main(yr)
+    #for yr in range(1893,1951):
+    #  main(yr)
