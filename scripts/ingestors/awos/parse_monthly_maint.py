@@ -30,7 +30,7 @@ import psycopg2
 PORTFOLIO = psycopg2.connect("dbname=portfolio host=localhost port=5555 user=nobody")
 pcursor = PORTFOLIO.cursor()
 
-CALINFO = re.compile(".*Calibrated? T/DP: AWOS:?\s*([0-9\-\.]+)/([0-9\-\.]+) Std:\.? ([0-9\-\.]+)/([0-9\-\.]+)")
+CALINFO = re.compile(".*Calibrated? T/DP: AWOS:?\s*([0-9\-\.]+)/([0-9\-\.]+) Std:?\.? ([0-9\-\.]+)/([0-9\-\.]+)")
 
 data = sys.stdin.read()
 
@@ -45,7 +45,7 @@ for line in data.split("\n"):
     
     parts = re.findall(CALINFO, tokens[3])
     if len(parts) == 0:
-        print bcolors.OKGREEN + tokens[3] + bcolors.ENDC
+        print bcolors.FAIL + tokens[3] + bcolors.ENDC
         continue
     
     sql = """INSERT into iem_calibration(station, portfolio, valid, parameter,
