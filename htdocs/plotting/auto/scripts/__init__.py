@@ -21,6 +21,7 @@ data = {'plots': [
         {'id': "2", 'label': "Month Precipitation v Month Growing Degree Day Departures"},
         {'id': "3", 'label': "Monthly Temperature / Precipitation Statistics by Year"},
         {'id': "6", 'label': "Monthly Temperature/Precipitation Distributions"},
+        {'id': "24", 'label': "Monthly Precipitation Climate District Ranks"},
         {'id': "8", 'label': "Monthly Precipitation Reliability"},
         {'id': "23", 'label': "Monthly Station Departures + El Nino 3.4 Index"},
         {'id': "9", 'label': "Growing Degree Day Climatology and Daily Values for one Year"},
