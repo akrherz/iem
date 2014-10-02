@@ -142,7 +142,7 @@ var saveConfig = function() {
 
 var addTab = function(id, center, cnt, sdate, edate) {
 	if (!sdate){
-		sdate = new Date('12/31/2008');
+		sdate = new Date('11/26/2000');
 	} 
 	if (!edate){
 		edate = Ext.Date.add(new Date(), Ext.Date.DAY, 1);
@@ -298,10 +298,10 @@ var tp = new Ext.tree.TreePanel({
                 }), {
                 	xtype : 'datefield',
                 	maxDate : Ext.Date.add(new Date(), Ext.Date.DAY, 1),
-                	minDate : new Date('12/31/2008'),
+                	minDate : new Date('11/25/2000'),
                 	name : 'sdate',
                 	id : 'sdate',
-                	value : new Date('01/01/2009'),
+                	value : new Date('11/26/2000'),
                 	vtype : 'daterange',
                 	width: 120,
                 	endDateField : 'edate',
@@ -309,7 +309,7 @@ var tp = new Ext.tree.TreePanel({
                 }, {
                 	xtype : 'datefield',
                 	maxDate : Ext.Date.add(new Date(), Ext.Date.DAY, 1),
-                	minDate : new Date('12/31/2008'),
+                	minDate : new Date('11/25/2000'),
                 	name : 'edate',
                 	value : Ext.Date.add(new Date(), Ext.Date.DAY, 1),
                 	width: 120,
