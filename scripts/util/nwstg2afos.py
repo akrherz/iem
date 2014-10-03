@@ -8,6 +8,7 @@ import tarfile
 import subprocess
 import pytz
 import re
+import os
 
 BAD_CHARS = "[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 
@@ -25,6 +26,9 @@ def do(ts):
     cursor = PGCONN.cursor()
 
     fn = ts.strftime("/mnt/mesonet2/data/nwstg/NWSTG_%Y%m%d.tar.Z")
+    if not os.path.isfile(fn):
+        print("MISSING FILE: %s" % (fn,))
+        return
     subprocess.call("uncompress %s" % (fn,), shell=True)
     tar = tarfile.open(fn[:-2], 'r')
     for member in tar.getmembers():
