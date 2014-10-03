@@ -325,6 +325,17 @@ def get_tablename(stations):
         return "alldata_%s" % (states[0],)
     return "alldata"
 
+def get_stationtable(stations):
+    """ Figure out our station table! """
+    states = []
+    networks = []
+    for sid in stations:
+        if sid[:2] not in states:
+            states.append(sid[:2])
+            networks.append("%sCLIMATE" % (sid[:2],))
+    return NetworkTable(networks)
+    
+
 def f2c(val):
     """ Convert temperature in F to C """
     return temperature(val, 'F').value('C')
@@ -337,8 +348,7 @@ def do_simple( ctx ):
     
     table = get_tablename(ctx['stations'])
     
-    network = "%sCLIMATE" % (ctx['stations'][0][:2],)
-    nt = NetworkTable(network)
+    nt = get_stationtable(ctx['stations'])
     thisyear = datetime.datetime.now().year
     if len(ctx['stations']) == 1:
         ctx['stations'].append('X')
@@ -478,7 +488,7 @@ def do_dndc( ctx ):
     
     table = get_tablename(ctx['stations'])
     
-    nt = NetworkTable(ctx['stations'][0][:2]+"CLIMATE")
+    nt = get_stationtable(ctx['stations'])
     
     if len(ctx['stations']) == 1:
         ctx['stations'].append('X')
