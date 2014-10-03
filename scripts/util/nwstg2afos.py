@@ -56,10 +56,15 @@ def do(ts):
             except:
                 print 'Invalid timestamp', f2.name
                 continue
+            
+            if valid.year != ts.year:
+                print 'Invalid timestamp, year mismatch'
+                continue
+            
             valid = valid.replace(tzinfo=pytz.timezone("UTC"))
                 
-            table = "products_%s_%s" % (ts.year, 
-                                        "0712" if ts.month > 6 else "0106")
+            table = "products_%s_%s" % (valid.year, 
+                                        "0712" if valid.month > 6 else "0106")
             
             print f2.name, ttaaii, valid.strftime("%Y%m%d%H%M"), source, awipsid, table
             cursor.execute("""INSERT into """+table+"""
