@@ -4,20 +4,22 @@ Gonna try to make something that can plot most anything under the moon for the C
 data, watch me fail
 
 -  seasonal temperatures, ex: summer daily max. temperature
--  seasonal percipitation, ex: summer annual precip.
+-  seasonal precipitation, ex: summer annual precip.
 
 """
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import os
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
 
 import cgi
 import matplotlib
-matplotlib.use( 'Agg' )
-matplotlib.rcParams['font.sans-serif'] = 'Arial'
-matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.use('agg')
+#matplotlib.rcParams['font.sans-serif'] = 'Arial'
+#matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['ps.usedistiller'] = 'ghostscript'
+matplotlib.rc('font', family='sans-serif') 
+matplotlib.rc('font', serif='Arial') 
+matplotlib.rc('text', usetex='false') 
+#matplotlib.rcParams.update({'font.size': 22})
 from matplotlib import pyplot as plt
 import iemdb
 import numpy
