@@ -3,7 +3,10 @@ include("../../config/settings.inc.php");
 include_once "../../include/myview.php";
 include_once "../../include/database.inc.php";
 include_once "../../include/forms.php";
+include_once "../../include/imagemaps.php";
+include_once "../../include/network.php";
 
+$nt = new NetworkTable("NWSCLI");
 
 $station = isset($_GET["station"]) ? $_GET["station"]: 'KDSM';
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
@@ -99,7 +102,8 @@ for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 	if ($byday){
 		$link = sprintf("clitable.php?station=%s&year=%s", $row["station"],
 				date("Y", $ts));
-		$col1 = sprintf("<a href=\"%s\">%s</a>", $link, $row["station"]);
+		$col1 = sprintf("<a href=\"%s\" class=\"small\">%s %s</a>", $link, $row["station"],
+				$nt->table[$row["station"]]['name']);
 	}else {
 		$link = sprintf("clitable.php?opt=bydate&year=%s&month=%s&day=%s", date("Y", $ts),
 				date("m", $ts), date("d", $ts));
@@ -140,6 +144,8 @@ for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 }
 $table .= "</table>";
 
+$sselect = networkSelect("NWSCLI", $station);
+
 $t = new MyView();
 $t->title = "Tabular CLI Report Data";
 
@@ -150,25 +156,25 @@ $t->content = <<<EOF
 </ol>
 
 <div class="row">
-	<div class="col-md-4">This application lists out parsed data from 
+	<div class="col-md-3">This application lists out parsed data from 
 	National Weather Service issued daily climate reports.  These reports
 	contain 24 hour totals for a period between midnight <b>local standard time</b>.
 	This means that during daylight saving time, this period is from 1 AM to 
 	1 AM local daylight time!
 	</div>
-	<div class="col-md-4 well">
+	<div class="col-md-6 well">
 	<h4>Option 1: One Station for One Year</h4>
 <form method="GET" name="one">
 <input type="hidden" name="opt" value="bystation" />
 <p><strong>Select Station:</strong>
-	<br /><input type="text" name="station" value="{$station}" size="10" />
+	<br />{$sselect}
 	<br /><strong>Year:</strong>
 	<br />{$ys}
 	<br /><input type="submit" value="Generate Table" />
 </form>
 
 	</div>
-	<div class="col-md-4 well">
+	<div class="col-md-3 well">
 
 <h4>Option 2: One Day for Stations</h4>
 <form method="GET" name="two">
