@@ -545,7 +545,7 @@ def main():
     ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period( ctx )
     
     if "dndc" not in ctx['myvars']:
-        if ctx['what'] == 'dl':
+        if ctx['what'] == 'download':
             ssw("Content-type: application/octet-stream\n")
             ssw(("Content-Disposition: attachment; "
                               +"filename=changeme.txt\n\n"))        
