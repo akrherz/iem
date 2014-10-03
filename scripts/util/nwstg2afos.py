@@ -38,12 +38,16 @@ def do(ts):
             awipsid = find_awipsid(content)
             if (awipsid is not None and 
                 (awipsid.startswith("RR") or awipsid.startswith("MTR")
-                 or awipsid in ["TSTNCF",])):
+                 or awipsid in ["TSTNCF", "WTSNCF"])):
                 print 'Skip', f2.name, awipsid
                 continue
             parts = f2.name.strip().split("_")
             ttaaii = parts[1]
             source = parts[2]
+            if source[0] not in ['K', 'P']:
+                continue
+            if source in ['KWBC', 'KWAL']:
+                continue
             if parts[4] == '2400':
                 parts[4] = '2359'
             try:
