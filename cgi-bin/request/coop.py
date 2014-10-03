@@ -317,7 +317,13 @@ def do_daycent( ctx ):
 
 def get_tablename(stations):
     """ Figure out the table that has the data for these stations """
-    return "alldata_%s" % (stations[0][:2],)
+    states = []
+    for sid in stations:
+        if sid[:2] not in states:
+            states.append( sid[:2])
+    if len(states) == 1:
+        return "alldata_%s" % (states[0],)
+    return "alldata"
 
 def f2c(val):
     """ Convert temperature in F to C """
