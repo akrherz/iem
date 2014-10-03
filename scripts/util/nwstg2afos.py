@@ -16,7 +16,7 @@ PGCONN = psycopg2.connect(database='afos', host='iemdb')
 
 def find_awipsid(data):
     """ Attempt to guess the AWIPSID """
-    tokens = re.findall("[0-9]{6}\s+([A-Z][A-Z][A-Z][A-Z0-9]{1,3})", data)
+    tokens = re.findall("[0-9]{6}\s+([A-Z][A-Z][A-Z0-9][A-Z0-9]{1,3})", data)
     if len(tokens) == 0:
         return None
     return tokens[0]
@@ -40,14 +40,20 @@ def do(ts):
                 continue
             content = (re.sub(BAD_CHARS, "", f2.read())).replace("\r\r", "")
             awipsid = find_awipsid(content)
+            parts = f2.name.strip().split("_")
+            ttaaii = parts[1]
+            source = parts[2]
+            # Filter content back to the start of the ttaaii
+            pos = content.find(ttaaii)
+            if pos == -1:
+                print 'Skipping as can not find ttaaii in product'
+                continue
+            content = content[pos:]
             if (awipsid is not None and 
                 (awipsid.startswith("RR") or awipsid.startswith("MTR")
                  or awipsid in ["TSTNCF", "WTSNCF"])):
                 print 'Skip', f2.name, awipsid
                 continue
-            parts = f2.name.strip().split("_")
-            ttaaii = parts[1]
-            source = parts[2]
             if source[0] not in ['K', 'P']:
                 continue
             if source in ['KWBC', 'KWAL']:
