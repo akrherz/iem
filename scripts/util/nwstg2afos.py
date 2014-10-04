@@ -58,6 +58,9 @@ def do(ts):
                 continue
             if source in ['KWBC', 'KWAL']:
                 continue
+            if len(parts) < 5:
+                print 'Invalid filename', f2.name
+                continue
             if parts[4] == '2400':
                 parts[4] = '2359'
             try:
