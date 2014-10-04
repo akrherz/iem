@@ -22,7 +22,7 @@ cd ../delta
 cd ../ingestors
 python beloit.py
 python flux_ingest.py
-python stuart_smith.py &
+#python stuart_smith.py &
 
 cd ../outgoing
 php wxc_cocorahs.php
