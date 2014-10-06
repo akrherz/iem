@@ -1,8 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | RadMapserver Docs";
-include("$rootpath/include/header.php"); ?>
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "RadMapserver Docs";
 
+$t->content = <<<EOF
 <h3 class="heading">NEXRAD Composite + Mapserver Documentation</h3>
 
 <div class="text">
@@ -61,5 +63,6 @@ href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/radmapserver/radmapserver.map
 <li><b>25 Jul 2003:</b> Initial release for review.</li>
 
 </td></tr></table></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
