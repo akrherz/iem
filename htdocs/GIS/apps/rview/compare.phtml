@@ -1,7 +1,11 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 68);
-/** POC of doing some interesting things with county level maps */
+include_once "../../../../include/myview.php";
+include("lib.php");
+include("../../../../include/network.php");
+
+$t = new MyView();
 
 $county = isset($_GET['county']) ? $_GET["county"]: "";
 $cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"]: "";
@@ -29,11 +33,8 @@ if ($ul_x != ""){
 
 <?php
 
-$TITLE = "IEM | GIS RADAR Comparison";
-$THISPAGE = "current-radar";
-include("$rootpath/include/header.php");
-include("lib.php");
-include("../../../../include/network.php");
+$t->title = "RADAR Comparison";
+$t->thispage = "current-radar";
 $nt = new NetworkTable("NEXRAD");
 
 $latlon = ms_newprojectionobj("init=epsg:4326");
@@ -67,31 +68,33 @@ $site = "OAX"; $oax_url = drawCountyNEXRAD($site, $extents);
 $site = "MPX"; $mpx_url = drawCountyNEXRAD($site, $extents);
 $site = "EAX"; $eax_url = drawCountyNEXRAD($site, $extents);
 $kcci_url = drawKCCI($extents);
-?>
 
-<a href="/current/radar.phtml">Current RADAR Products</a> <b> > </b> RADAR comparison
+$ftime = filemtime('/home/ldm/data/gis/images/4326/ridge/DMX/N0Q_0.png');
+$radTS = date("m/d h:i a", $ftime);
+$s = drawStateNEXRAD($extents);
 
-<h3 class="heading">RADAR Base Reflectivity Comparison:</h3><p>
-<div class="text">
+$t->content = <<<EOF
+<ol class="breadcrumb">
+<li><a href="/current/radar.phtml">Current RADAR Products</a></li>
+<li class="active">RADAR comparison</li>
+</ol>
+
+<h3>RADAR Base Reflectivity Comparison:</h3><p>
 <table>
 <tr>
  <td><b>DMX - Des Moines:</b>
-   <br><i>Distance:</i> <?php echo $distances['DMX']; ?> km
-   <br><img src="<?php echo $dmx_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['DMX']} km
+   <br><img src="{$dmx_url}"></td>
  <td><b>KCCI-TV - Des Moines:</b>
-   <br><i>Distance:</i> <?php echo $distances['KCCI']; ?> km
-   <br><img src="<?php echo $kcci_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['KCCI']} km
+   <br><img src="{$kcci_url}"></td>
  <td rowspan=4 valign="TOP">
   <b>Directions:</b> Click on the State NEXRAD view to change your comparison 
   area (shown in white)<br>
-  <?php 
-  drawStateNEXRAD($extents); 
+  {$s}
  
-  $ftime = filemtime('/home/ldm/data/gis/images/4326/ridge/DMX/N0Q_0.png'); 
-  $radTS = date("m/d h:i a", $ftime);
-  echo "<a href=\"compare.phtml\">Reset app</a> <i>(view state)</i>";
-  echo "<br>RADAR composite valid: $radTS ";
-  ?>
+	<a href="compare.phtml">Reset app</a> <i>(view state)</i>
+  	<br>RADAR composite valid: $radTS 
 <p><b>Notes:</b>
 <li>This app is purely for educational purposes.</li>
 <li>Distances are measured from the RADAR site to the midpoint of the area 
@@ -102,29 +105,30 @@ $kcci_url = drawKCCI($extents);
 </tr>
 <tr>
  <td><b>ARX - LaCrosse:</b>
-   <br><i>Distance:</i> <?php echo $distances['ARX']; ?> km
-   <br><img src="<?php echo $arx_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['ARX']} km
+   <br><img src="{$arx_url}"></td>
  <td><b>MPX - Minneapolis:</b>
-   <br><i>Distance:</i> <?php echo $distances['MPX']; ?> km
-   <br><img src="<?php echo $mpx_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['MPX']} km
+   <br><img src="{$mpx_url}"></td>
 </tr>
 <tr>
  <td><b>FSD - Sioux Falls:</b>
-   <br><i>Distance:</i> <?php echo $distances['FSD']; ?> km
-   <br><img src="<?php echo $fsd_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['FSD']} km
+   <br><img src="{$fsd_url}"></td>
  <td><b>OAX - Omaha:</b>
-   <br><i>Distance:</i> <?php echo $distances['OAX']; ?> km
-   <br><img src="<?php echo $oax_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['OAX']} km
+   <br><img src="{$oax_url}"></td>
 </tr>
 <tr>
  <td><b>DVN - Davenport:</b>
-   <br><i>Distance:</i> <?php echo $distances['DVN']; ?> km
-   <br><img src="<?php echo $dvn_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['DVN']} km
+   <br><img src="{$dvn_url}"></td>
  <td><b>EAX - Pleasant Hill:</b>
-   <br><i>Distance:</i> <?php echo $distances['EAX']; ?> km
-   <br><img src="<?php echo $eax_url; ?>"></td>
+   <br><i>Distance:</i> {$distances['EAX']} km
+   <br><img src="{$eax_url}"></td>
 </tr>
 
-</table></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+</table>
+EOF;
+$t->render('single.phtml');
+?>
