@@ -3,8 +3,10 @@ MM6=$(date -u --date '6 hours ago' +'%m')
 DD6=$(date -u --date '6 hours ago' +'%d')
 HH6=$(date -u --date '6 hours ago' +'%H')
 
+cd hrrr
+python plot_ref.py &
 
-cd sbw
+cd ../sbw
 python polygonMosaic.py S
 sleep 2
 python polygonMosaic.py T
