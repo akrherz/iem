@@ -315,9 +315,12 @@ def modPythonHandler (apacheReq, service):
         apacheReq.content_type = "text/plain"
         apacheReq.status = apache.HTTP_INTERNAL_SERVER_ERROR
         apacheReq.send_http_header()
-        apacheReq.write("An error occurred: %s\n%s\n" % (
-            str(E), 
-            "".join(traceback.format_tb(sys.exc_traceback))))
+        try:
+            apacheReq.write("An error occurred: %s\n%s\n" % (
+                str(E), 
+                "".join(traceback.format_tb(sys.exc_traceback))))
+        except:
+            pass
     return apache.OK
 
 def wsgiHandler (environ, start_response, service):
