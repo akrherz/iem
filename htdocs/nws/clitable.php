@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 156);
 include_once "../../include/myview.php";
 include_once "../../include/database.inc.php";
 include_once "../../include/forms.php";
