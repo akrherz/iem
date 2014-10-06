@@ -1,8 +1,8 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/network.php");
+include("../../../include/database.inc.php");
+include("../../../include/mlib.php");
+include("../../../include/network.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
@@ -31,8 +31,8 @@ $ahigh[] = array_sum($highs) / floatval( sizeof($highs) );
 $alow = Array();
 $alow[] = array_sum($lows) / floatval( sizeof($lows) );
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
 
 
 // Create the graph. These two calls are always required

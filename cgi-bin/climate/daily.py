@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 import psycopg2
 import numpy
 import cStringIO
-import Image
+from PIL import Image
 import network
 import datetime
 

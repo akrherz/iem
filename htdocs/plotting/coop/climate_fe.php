@@ -1,29 +1,38 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | COOP Climate Plots";
+include("../../../include/imagemaps.php");     
+include_once "../../../include/forms.php";
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "COOP Climate Plots";
+
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "IA0000";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : null;
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
-$THISPAGE="networks-coop";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/imagemaps.php");     
+
+$t->thispage = "networks-coop";
 
 $imgurl = sprintf("/cgi-bin/climate/daily.py?p=daily&station1=%s", $station1);
 if ($mode == 'c'){
 	$imgurl .= sprintf("&station2=%s", $station2);
 }
 
-?>
+$ar = Array("o" => "One Station", "c" => "Compare Two");
+$modeselect = make_select("mode", $mode, $ar);
 
+$s1 = networkSelect("IACLIMATE", $station1, Array(), "station1");
+$s2 = networkSelect("IACLIMATE", $station2, Array(), "station2");
+
+$t->content = <<<EOF
 <h3>Daily Climatology</h3>
 
 <p>This application dynamically generates plots of the daily average high
 and low temperature for climate locations tracked by the IEM.  You can optionally
 plot two stations at once for a visual comparison.</p>
 
-<div style="padding: 3px;">
+
      <b>Make Plot Selections:</b>
-  <div style="background: white; padding: 3px;">
+
 
 <form method="GET" action="climate_fe.php">
 
@@ -36,24 +45,10 @@ plot two stations at once for a visual comparison.</p>
 </tr>
 
 <tr>
+<td>{$s1}</td>
+<td>{$s2}</td>
 <td>
-<?php echo networkSelect("IACLIMATE", $station1, Array(), "station1"); ?>
-</td>
-<td>
-<?php echo networkSelect("IACLIMATE", $station2, Array(), "station2"); ?>
-</td>
-<td>
-  <select name="mode">
-<?php
-   echo "<option value=\"o\" ";
-   if ($mode == "o") echo " SELECTED ";
-   echo ">One Station\n";
-   echo "<option value=\"c\" ";
-   if ($mode == "c") echo " SELECTED ";
-   echo ">Compare Two\n";
-
-?>
-  </select>
+{$modeselect}
 </td>
 
 <td>
@@ -64,10 +59,9 @@ plot two stations at once for a visual comparison.</p>
 
 </tr></table>
 
-</div></div>
 
-<?php
-echo "<img src=\"$imgurl\">\n";
+
+<img src="$imgurl">
+EOF;
+$t->render('single.phtml');
 ?>
-
-<?php include("$rootpath/include/footer.php"); ?>

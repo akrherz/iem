@@ -1,6 +1,8 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/imagemaps.php");     
+include_once "../../../include/myview.php";
+$t = new MyView();
+include("../../../include/imagemaps.php");     
 
 $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
 $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
@@ -8,16 +10,19 @@ $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 5;
 $eday = isset($_GET['eday']) ? $_GET['eday'] : 31;
 $station = isset($_GET["station"]) ? $_GET['station']: 'IA0200';
 $uri = sprintf("precip_cdf.php?station=%s&smonth=%s&sday=%s&emonth=%s&eday=%s", $station, $smonth, $sday, $emonth, $eday);
-?>
 
-<?php
- $TITLE = "IEM | Precip Accumulation Probabilities";
-include("$rootpath/include/header.php"); 
- include("$rootpath/include/forms.php"); ?>
+$t->title = "Precip Accumulation Probabilities";
+ include("../../../include/forms.php");
 
+ $nselect = networkSelect("IACLIMATE", $station);
+ $ms = monthSelect2($smonth, "smonth");
+ $ds = daySelect2($sday, "sday");
+ $ms2 = monthSelect2($emonth, "emonth");
+ $ds2 = daySelect2($eday, "eday");
+ 
+ $t->content = <<<EOF
 <p><h3 class="heading">Precip Accumulation Probabilities</h3><p>
 
-<div class="text">
 <h3 class="subtitle">Information</h3><p>
 This application charts out precip accumulation probabilities between 
 two dates of the year and a site of your choice.  The chart may take a 
@@ -28,25 +33,24 @@ few seconds to load, so please be patient.
 <tr>
  <th>Station</th><td></td><th>Month</th><th>Day</th><td></td></tr>
 <tr>
-<td rowspan="2"><?php echo networkSelect("IACLIMATE", $station); ?>
-</td>
+<td rowspan="2">{$nselect}</td>
 <td>Start Date:</td>
-<th><?php echo monthSelect2($smonth, "smonth"); ?></th>
-<th><?php echo daySelect2($sday, "sday"); ?></th>
+<td>{$ms}</td>
+<td>{$ds}</td>
 <td rowspan="2"><input type="submit" value="Gen Chart"></tr>
 </tr>
 
 <tr>
 <td>End Date:</td>
-<th><?php echo monthSelect2($emonth, "emonth"); ?></th>
-<th><?php echo daySelect2($eday, "eday"); ?></th>
+<td>{$ms2}</td>
+<td>{$ds2}</td>
 </tr>
 
 </table>
 
 <p>
-<img src="<?php echo $uri; ?>">
+<img src="{$uri}">
 
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+ ?>

@@ -5,14 +5,14 @@
 include("../../../config/settings.inc.php");
 
 
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../../include/database.inc.php");
+include("../../../include/network.php");
 $nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS","SD_ASOS"));
 $cities = $nt->table;
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph_led.php");
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "DSM";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");

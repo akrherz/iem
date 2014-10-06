@@ -1,8 +1,8 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 $connection = iemdb("isuag");
-include("$rootpath/include/network.php");
+include("../../../include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
 
@@ -44,9 +44,9 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph//jpgraph_line.php");
-include ("$rootpath/include/jpgraph//jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph//jpgraph_line.php");
+include ("../../../include/jpgraph//jpgraph_bar.php");
 
 
 // Create the graph. These two calls are always required

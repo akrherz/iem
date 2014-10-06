@@ -1,7 +1,8 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | ISU AMS Station on Agronomy";
-include("../../../include/header.php"); 
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "ISU AMS Station on Agronomy";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -11,10 +12,14 @@ $myTime = mktime(0,0,0,$month, $day, $year);
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0002.dat";
 
-?>
-<?php include("../../../include/forms.php"); ?>
+ include("../../../include/forms.php"); 
+ 
+ $ys = yearSelect2(2003, $year, "year");
+ $ms = monthSelect($month, "month");
+ $ds = daySelect($day, "day");
+ 
+$t->content = <<<EOF
 
-<div class="text">
 <a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; ISU AMS Station
 
 <p>You can plot 1 minute data for this location.  Note that 
@@ -25,58 +30,19 @@ the archive <br> begins 15 Jan 2003.</p>
 
 
   <form method="GET" action="1station_1min.phtml">
-  <?php
-
-    if (strlen($month) == 0 ){
-	$month = date("m");
-    }
-    if (strlen($day) == 0 ){
-        $day = date("d");
-    }
-    if (strlen($year) == 0 ){
-        $year = date("Y");
-    }
-
-  ?>
-  <?php echo yearSelect2(2003, $year, "year"); ?>
-
-  <select name="month">
-    <option value="01" <?php if ($month == "01") echo "SELECTED"; ?> >January
-    <option value="02" <?php if ($month == "02") echo "SELECTED"; ?> >February
-    <option value="03" <?php if ($month == "03") echo "SELECTED"; ?> >March
-    <option value="04" <?php if ($month == "04") echo "SELECTED"; ?> >April
-    <option value="05" <?php if ($month == "05") echo "SELECTED"; ?> >May
-    <option value="06" <?php if ($month == "06") echo "SELECTED"; ?> >June
-    <option value="07" <?php if ($month == "07") echo "SELECTED"; ?> >July
-    <option value="08" <?php if ($month == "08") echo "SELECTED"; ?> >August
-    <option value="09" <?php if ($month == "09") echo "SELECTED"; ?> >September
-    <option value="10" <?php if ($month == "10") echo "SELECTED"; ?> >October
-    <option value="11" <?php if ($month == "11") echo "SELECTED"; ?> >November
-    <option value="12" <?php if ($month == "12") echo "SELECTED"; ?> >December
-  </select>
-
-  <select name="day">
-<?php
-  for ($k=1;$k<32;$k++){
-   echo "<option value=\"".$k."\" ";
-   if ($k == (int)$day){
-     echo "SELECTED";
-   }
-   echo ">".$k."\n";
-  }
-?>
-  </select>
+{$ys} {$ms} {$ds}
 
   <input type="submit" value="Make Plot"></form>
 
 </td></tr><tr><td>
-<a href="<?php echo $dataurl; ?>">View raw data file</a><br />
+<a href="{$dataurl}">View raw data file</a><br />
 <BR>
-<img src="1min.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="1min.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
 <BR>
-<img src="1min_V.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="1min_V.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
 <BR>
-<img src="1min_P.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="1min_P.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
 </td></tr></table>
-</div>
-<?php include("../../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

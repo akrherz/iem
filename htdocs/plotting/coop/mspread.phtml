@@ -1,17 +1,11 @@
 <?php
 include("../../../config/settings.inc.php");
+include_once "../../../include/myview.php";
+$t = new MyView();
 
-$month = isset($_GET['month']) ? $_GET['month'] : date("m");
-$day = isset($_GET['day']) ? $_GET['day'] : date("d");
-$ts = strtotime("2003-$month-$day");
-$pts = strftime("2003-%m-%d", $ts);
-?>
-
-<?php
- $page = "plotting";
- $TITLE = "IEM | Monthly Temperature Spreads";
-include("$rootpath/include/header.php"); 
- include("$rootpath/include/forms.php"); ?>
+ $t->title = "Monthly Temperature Spreads";
+ $t->thispage="networks-coop";
+ $t->content = <<<EOF
 
 <p><h3 class="heading">Monthly Temperature Spreads</h3><p>
 
@@ -30,5 +24,6 @@ include("$rootpath/include/header.php");
 <p><img src="images/spread_oct.png">
 <p><img src="images/spread_nov.png">
 <p><img src="images/spread_dec.png">
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+ $t->render('single.phtml');
+ ?>
