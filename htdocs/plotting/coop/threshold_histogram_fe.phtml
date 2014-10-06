@@ -1,21 +1,55 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | Low Temperature Threshold Histograms";
+include_once "../../../include/forms.php";
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "Low Temperature Threshold Histograms";
+
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/network.php");     
+
+include("../../../include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
-?>
 
-<B>Navigation:</B>
-<a href="http://mesonet.agron.iastate.edu/">IEM</a> &nbsp;>&nbsp;
-<a href="/COOP/">NWS COOP</a> &nbsp;>&nbsp;
-<B>COOP Low Temperature Thresholds</B>
+$s1 = "";
+for(reset($cities); $key = key($cities); next($cities))
+{
+	$s1 .= "<option value=\"" . $cities[$key]["id"] ."\"";
+	if ($cities[$key]["id"] == $station1) $s1 .= " SELECTED ";
 
-<BR>
+	$s1 .= ">" . $cities[$key]["name"] . "\n";
+}
+$s2 = "";
+for(reset($cities); $key = key($cities); next($cities))
+{
+	$s2 .= "<option value=\"" . $cities[$key]["id"] ."\"";
+	if ($cities[$key]["id"] == $station2) $s2 .= " SELECTED ";
+
+	$s2 .= ">" . $cities[$key]["name"] . "\n";
+}
+$ar = Array("o" => "One Station", "c" => "Compare Two");
+$modeselect = make_select("mode", $mode, $ar);
+
+if ($station1 != "" && $station2 != "")
+{
+	if ($mode == "c"){
+		$imgurl = "<img src=\"threshold_histogram.php?station1=".$station1."&station2=".$station2."\">\n";
+
+	}else {
+		$imgurl = "<img src=\"threshold_histogram.php?station1=". $station1 ."\">\n";
+	}
+} else {
+	$imgurl = "<p>Select your site above...</p>";
+}
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+<li><a href="http://mesonet.agron.iastate.edu/">IEM</a></li>
+<li><a href="/COOP/">NWS COOP</a></li>
+<li class="active">COOP Low Temperature Thresholds</li>
+</ol>
 
 
 <form method="GET">
@@ -31,42 +65,16 @@ $cities = $nt->table;
 <tr>
 <td>
 <SELECT name="station1">
-<?php
-	for(reset($cities); $key = key($cities); next($cities))
-	{
-		print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $station1) print(" SELECTED ");
-
-		print(">" . $cities[$key]["name"] . "\n");
-	}
-?>
+{$s1}
 </SELECT>
 </td>
 <td>
 <SELECT name="station2">
-<?php
-        for(reset($cities); $key = key($cities); next($cities))
-        {
-                print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $station2) print(" SELECTED ");
-
-                print(">" . $cities[$key]["name"] . "\n");
-        }
-?>
+{$s2}
 </SELECT>
 </td>
 <td>
-  <select name="mode">
-<?php
-   echo "<option value=\"o\" ";
-   if ($mode == "o") echo " SELECTED ";
-   echo ">One Station\n";
-   echo "<option value=\"c\" ";
-   if ($mode == "c") echo " SELECTED ";
-   echo ">Compare Two\n";
-
-?>
-  </select>
+{$modeselect}
 </td>
 
 <td>
@@ -85,18 +93,7 @@ your sites.
 </div>
 <br />
 
-<?php
-if ($station1 != "" && $station2 != "")
-{
-  if ($mode == "c"){
-    echo "<img src=\"threshold_histogram.php?station1=".$station1."&station2=".$station2."\">\n";
-
-  }else {
-    echo "<img src=\"threshold_histogram.php?station1=". $station1 ."\">\n";
-  }
-} else {
-  echo "<p>Select your site above...</p>";
-}
+{$imgurl}
+EOF;
+$t->render('single.phtml');
 ?>
-
-<?php include("$rootpath/include/footer.php"); ?>

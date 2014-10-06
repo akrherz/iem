@@ -1,8 +1,11 @@
 <?php
 /* Web based feature publisher */
 include("../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/facebook.php");
+include_once "../include/myview.php";
+$t = new MyView();
+
+include("../include/database.inc.php");
+include("../include/facebook.php");
 
 $facebook = new Facebook(Array(
   'appId' => '148705700931',
@@ -72,13 +75,16 @@ if ($story != null && $title != null &&
              $voting, $tags, $story_fbid, $appurl) );
 }
 
-include("$rootpath/include/header.php");
+$app = "";
 if ($me){ 
-	echo "Hello, ". $me["name"] ."!<a href=\"$logouturl\">Logout</a>";
+	$app .= "Hello, ". $me["name"] ."!<a href=\"$logouturl\">Logout</a>";
 } else {
-	echo "<a href=\"$loginurl\">Login</a>";
+	$app .= "<a href=\"$loginurl\">Login</a>";
 }
-?>
+$t->content = <<<EOF
+
+{$app}
+
 <h3>IEM Feature Publisher</h3>
 <form method="POST">
 
@@ -108,5 +114,6 @@ if ($me){
 
 <p><input type="submit" value="Go!" /></p>
 </form>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

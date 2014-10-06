@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 
 function standard_deviation($std) 
      {
@@ -77,10 +77,10 @@ for ($r=$lowVal; $r <= $hiVal; $r=$r+0.01)
 }
 pg_close($coop);
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_bar.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include("$rootpath/include/network.php");     
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include("../../../include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 

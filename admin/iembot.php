@@ -1,7 +1,10 @@
 <?php
 include("../config/settings.inc.php");
 include("Zend/XmlRpc/Client.php");
-include("$rootpath/include/database.inc.php");
+include("../include/database.inc.php");
+include_once "../include/myview.php";
+$t = new MyView();
+
 //$dbconn = iemdb("mesosite");
 $dbconn = pg_connect("dbname=mesosite host=iemdb");
 
@@ -52,7 +55,7 @@ if ($action == "addchannel" && $channel != ""){
 
 
 /* BEGIN WEB OUTPUT PLEASE */
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" 
+$t->headextra = '<link rel="stylesheet" type="text/css" 
 	href="https://nwschat.weather.gov/ext-3.4.0/resources/css/ext-all.css"/>
 <script type="text/javascript" src="https://nwschat.weather.gov/ext-3.4.0/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://nwschat.weather.gov/ext-3.4.0/ext-all.js"></script>
@@ -82,18 +85,12 @@ App.roomname = "'. $room .'";
 }
 </style>
 ';
-include("../include/header.php");
-?>
-<h3>IEMBot Chatroom Configuration Page</h3>
-<?php
-if (isset($alertMsg)){ 
-  echo "<div class=\"alert alert-warning\">$alertMsg</div>";
-}
 
+$c = "";
 if ($room != "" && $action != "delete"){
-  echo "<div style=\"border: 3px solid #000; background: #eee; padding:20px;\">";
+	$c .= "<div style=\"border: 3px solid #000; background: #eee; padding:20px;\">";
 
-  echo "<p><strong>Please click the 'Update Room Settings' once done</strong><br />
+	$c .= "<p><strong>Please click the 'Update Room Settings' once done</strong><br />
     <table width=\"800\"><tr><td width=\"400\">
     <div class=\"x-box-tl\"><div class=\"x-box-tr\"><div class=\"x-box-tc\"></div></div></div>
     <div class=\"x-box-ml\"><div class=\"x-box-mr\"><div class=\"x-box-mc\">
@@ -103,13 +100,13 @@ if ($room != "" && $action != "delete"){
 	    <div style=\"padding-top:4px;\">
             Click in list to remove.
         </div>
-	
+
        <div id=\"channel_del\" /></div>
-        
+
         <div style=\"padding-top:4px;\">
             Enter some text to search for channels.
         </div>
-		<input type=\"text\" size=\"20\" name=\"channelsearch\" 
+		<input type=\"text\" size=\"20\" name=\"channelsearch\"
 		id=\"channelsearch\" />
 
     </div></div></div>
@@ -118,26 +115,41 @@ if ($room != "" && $action != "delete"){
     </td><td width=\"400\">
 
     </td></tr></table>
- 
+
         <script src=\"iembot.js\" type=\"text/javascript\">
         </script>";
-  
-  
 
-  echo "<h4><img src=\"../images/configure.png\"/> Edit room settings for: ${room}</h4>";
 
-  echo sprintf("<a href=\"iembot.php?action=delete&room=%s\">Click to remove iembot from %s room</a>", $room, $room);
 
-  echo "<form name=\"modify\" method=\"POST\">";
-  echo "<input type=\"hidden\" name=\"action\" value=\"modify\">";
-  echo "<input type=\"hidden\" name=\"room\" value=\"${room}\">";
+	$c .= "<h4><img src=\"../images/configure.png\"/> Edit room settings for: ${room}</h4>";
 
-  echo "<p><input type=\"submit\" value=\"Update Room Settings\">";
-  echo "</form>";
-  echo "</div>";
-  reloadbot();
+	$c .= sprintf("<a href=\"iembot.php?action=delete&room=%s\">Click to remove iembot from %s room</a>", $room, $room);
+
+	$c .= "<form name=\"modify\" method=\"POST\">";
+			$c .= "<input type=\"hidden\" name=\"action\" value=\"modify\">";
+			$c .= "<input type=\"hidden\" name=\"room\" value=\"${room}\">";
+
+			$c .= "<p><input type=\"submit\" value=\"Update Room Settings\">";
+			$c .= "</form>";
+			$c .= "</div>";
+			reloadbot();
 }
-?>
+
+$table = "";
+$rs = pg_execute($dbconn, "SELECTROOMS", Array());
+for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	if ($i % 8 == 0) $table .= "</tr><tr>";
+	$table .= sprintf("<td><a href=\"iembot.php?action=edit&room=%s\">%s</a></td>",
+			$row["roomname"], $row["roomname"] );
+}
+
+
+$t->content = <<<EOF
+<h3>IEMBot Chatroom Configuration Page</h3>
+
+<div class=\"alert alert-warning\">$alertMsg</div>
+
+{$c}
 
 <h4>Option 1: Enter room name for iembot to join</h4>
 <div style="padding-left: 20px;">
@@ -163,18 +175,10 @@ if ($room != "" && $action != "delete"){
 <h4>Option 3: Edit a room's settings</h4>
 <div style="padding-left: 20px;">
 <table>
-<?php
-$rs = pg_execute($dbconn, "SELECTROOMS", Array());
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-  if ($i % 8 == 0) echo "</tr><tr>";
-  echo sprintf("<td><a href=\"iembot.php?action=edit&room=%s\">%s</a></td>",
-               $row["roomname"], $row["roomname"] );
-}
-?>
+{$table}
 </tr></table>
 
 </div>
-
-
-
-<?php include("../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

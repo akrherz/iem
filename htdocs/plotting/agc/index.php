@@ -1,10 +1,12 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | ISU Ag Plotting";
-$THISPAGE="networks-agclimate";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/forms.php"); 
-include("$rootpath/include/imagemaps.php"); 
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "ISU Ag Plotting";
+$t->thispage="networks-agclimate";
+
+include("../../../include/forms.php"); 
+include("../../../include/imagemaps.php"); 
 $plot = isset($_GET["plot"]) ? $_GET["plot"] : "solarRad";
 $station = isset($_GET["station"]) ? $_GET["station"] : "A130209";
 
@@ -28,27 +30,34 @@ $desc = Array(
    rainy season.  So use this plot with care."
   );
 
-?>
+$imgurl = sprintf("%s.php?station=%s", $plot, $station);
+$nselect = isuagSelect( $station);
 
-Back to <a href="/agclimate/">ISU Ag Climate</a> Homepage.<p>
+$ar = Array(
+		"solarRad" => "Yesterday Solar Radiation &amp; Air Temps",
+  "l30temps" => "High/low temps for last 30 days",
+  "l60rad" => "4 inch soil temps and radiation for last 60 days",
+  "l60p-et" => "60 days of Precip minus PET");
+$pselect = make_select("plot", $plot, $ar);
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/agclimate/">ISU Ag Climate</a></li>
+ </ol>
 
 <form name="selector" method="GET">
 <p><strong>Select Plot:</strong>
-<select name="plot">
-  <option value="solarRad" <?php if ($plot == "solarRad") echo "SELECTED"; ?>>Yesterday Solar Radiation & Air Temps</option>
-  <option value="l30temps" <?php if ($plot == "l30temps") echo "SELECTED"; ?>>High/low temps for last 30 days</option>
-  <option value="l60rad" <?php if ($plot == "l60rad") echo "SELECTED"; ?>>4 inch soil temps and radiation for last 60 days</option>
-  <option value="l60p-et" <?php if ($plot == "l60p-et") echo "SELECTED"; ?>>60 days of Precip minus PET</option>
-</select>
+{$pselect}
 
 <strong>Select Site:</strong>
-<?php echo isuagSelect( $station); ?>
+{$nselect}
 
 <input type="submit" value="Make Plot"></form>
 
-<p><img src="<?php echo sprintf("%s.php?station=%s", $plot, $station); ?>">
+<p><img src="{$imgurl}">
 
 <p><strong>Plot Description:</strong>
-<br /><?php echo $desc[$plot]; ?>
-
-<?php include("$rootpath/include/footer.php"); ?>
+<br />{$desc[$plot]}
+EOF;
+$t->render('single.phtml');
+?>

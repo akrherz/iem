@@ -144,23 +144,24 @@ function isuagSelect($selected)
 }
 
 function rwisMultiSelect($selected, $size){
-global $rootpath;
+	global $rootpath;
     include_once("$rootpath/include/network.php");
     $nt = new NetworkTable("IA_RWIS");
     $cities = $nt->table;
-  echo "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
-  echo "<option value=\"_ALL\">Select All</option>\n";
+  $s = "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
+  $s .= "<option value=\"_ALL\">Select All</option>\n";
   reset($cities);
   while( list($key, $val) = each($cities) ) {
     if ($val["network"] != "IA_RWIS") continue; 
-    echo "<option value=\"". $key ."\"";
+    $s .= "<option value=\"". $key ."\"";
     if ($selected == $key){
-        echo " SELECTED ";
+        $s .= " SELECTED ";
     }
-    echo " >". $val["name"] ." (". $key .")\n";
+    $s .= " >". $val["name"] ." (". $key .")\n";
   }
 
-  echo "</select>\n";
+  $s .= "</select>\n";
+  return $s;
 }
 
 ?>

@@ -1,14 +1,24 @@
 <?php 
 include("../../../config/settings.inc.php");
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/forms.php");
+include_once "../../../include/myview.php";
+$t = new MyView();
+include("../../../include/imagemaps.php");
+include("../../../include/forms.php");
 
-$TITLE = "IEM | RWIS Soil Probe Data Download";
-$THISPAGE = "networks-rwis";
-include("$rootpath/include/header.php"); 
-?>
-<div class="text">
+$t->title = "RWIS Soil Probe Data Download";
+$t->thispage = "networks-rwis";
 
+$ys = yearSelect2(2008, date("Y"), "year1");
+$ms = monthSelect("", "month1");
+$ds = daySelect2("", "day1");
+$hs = gmtHourSelect("", "hour1");
+
+$ys2 = yearSelect2(2008, date("Y"), "year2");
+$ms2 = monthSelect("", "month2");
+$ds2 = daySelect2("", "day2");
+$hs2 = gmtHourSelect("", "hour2");
+
+$t->content = <<<EOF
 <p>This page provides access to the Iowa RWIS Soil Probe sensor data. The
 data columns are 15 temperature values at these depths (1,3,6,9,12,18,24,
 30,36,42,48,54,60,66,72 inches).  They are labelled s0temp thru s14temp.
@@ -44,37 +54,21 @@ Values are in Fahrenheit.
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(2008, date("Y"), "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day1"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour1"); ?>
-	<input type="hidden" name="minute1" value="0">
-    </td>
+    <td>{$ys}</td>
+    <td>{$ms}</td>
+    <td>{$ds}</td>
+    <td>{$hs}
+	<input type="hidden" name="minute1" value="0"></td>
   </tr>
 
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(2008, date("Y"), "year2"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day2"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour2"); ?>
-	<input type="hidden" name="minute2" value="0">
-    </td>
-  </tr>
+    <td>{$ys2}</td>
+    <td>{$ms2}</td>
+    <td>{$ds2}</td>
+    <td>{$hs2}
+	<input type="hidden" name="minute2" value="0"></td>
+    </tr>
 </table>
 
 </td><td valign="TOP">
@@ -105,7 +99,8 @@ How shall the output values be seperated?
 <p><h3 class="subtitle">Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
-</form></div>
+</form>
+EOF;
+$t->render('single.phtml');
 
-
-<?php include("$rootpath/include/footer.php"); ?>
+?>

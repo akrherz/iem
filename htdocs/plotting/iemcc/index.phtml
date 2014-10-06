@@ -1,8 +1,11 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM Central Command | Time Series";
-$THISPAGE = "networks-other";
-include("$rootpath/include/header.php"); 
+include_once "../../../include/myview.php";
+include("../../../include/mlib.php");
+include("../../../include/forms.php");
+$t = new MyView();
+$t->title = "Central Command Time Series";
+$t->thispage = "networks-other";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -15,28 +18,241 @@ $dirRef = strftime("%Y/%m/%d", $myTime);
 $dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0007
 .dat";
 
+$myTime = strtotime($year."-".$month."-".$day);
 
-?>
-<?php include("$rootpath/include/forms.php"); ?>
 
-<a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; IEM Central Command
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$titleDate = strftime("%b %d, %Y", $myTime);
+$jday = strftime("%j", $myTime);
+
+$fp = '/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat';
+if (! is_file($fp)){
+	die("No data for date!");
+}
+$fcontents = file('/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat');
+
+/* Create data arrays */
+$tmpf = array();
+$dwpf = array();
+$smph = array();
+$drct = array();
+$pmsl = array();
+$rain = array();
+$times = array();
+
+$pcpn = 0;
+while (list ($line_num, $line) = each ($fcontents)) {
+	$tokens = preg_split ("/,/", $line);
+	if (sizeof($tokens) != 11) continue;
+
+	if ($jday != $tokens[2]) continue;
+
+	$hhmm = str_pad($tokens[3],4,"0",STR_PAD_LEFT);
+	$hh = substr($hhmm,0,2);
+	$mm = substr($hhmm,2,2);
+	$timestamp = mktime($hh,$mm,0,$month,$day,$year);
+
+	$times[] = $timestamp;
+	$tmpf[] =  $tokens[5];
+	$dwpf[] = dwpf($tokens[5], $tokens[6] );
+	//$sknt[] = $tokens[7] * 1.94;
+	$smph[] = $tokens[7] * 2.24;
+	$drct[] = $tokens[8];
+	$pmsl[] = $tokens[9];
+	$pcpn += ($tokens[10] / 25.4);
+	$rain[] = $pcpn;
+
+} // End of while
+
+/* Make special ones for wind direction */
+$drct5 = array();
+$times5 = array();
+for($i=0;$i<sizeof($drct);$i+=5)
+{
+	$times5[] = $times[$i];
+	$drct5[] = $drct[$i];
+}
+
+
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
+
+/* ------------------------- */
+// Create the graph. These two calls are always required
+$graph = new Graph(600,300);
+$graph->SetScale("datlin");
+
+$graph->img->SetMargin(58,55,45,60);
+
+$graph->xaxis->SetLabelAngle(90);
+
+$graph->title->Set("Outside Air Temperature & Dew Point");
+$graph->subtitle->Set($titleDate );
+
+$graph->legend->SetLayout(LEGEND_HOR);
+$graph->legend->Pos(0.01,0.075);
+
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
+$graph->yaxis->SetTitle("Temperature [F]");
+
+
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->SetTitle("Valid Local Time");
+$graph->xaxis->SetTitleMargin(30);
+$graph->yaxis->SetTitleMargin(40);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->SetPos("min");
+
+// Create the linear plot
+$lineplot=new LinePlot($tmpf, $times);
+$lineplot->SetLegend("Temperature");
+$lineplot->SetColor("red");
+
+// Create the linear plot
+$lineplot2=new LinePlot($dwpf, $times);
+$lineplot2->SetLegend("Dew Point");
+$lineplot2->SetColor("blue");
+
+$graph->Add($lineplot2);
+$graph->Add($lineplot);
+
+$fp3 = sprintf("jpg-%s-%s.png", time(), rand() );
+$graph->Stroke("/var/webtmp/$fp3");
+
+/* ----------- Wind Speed and Direction-------------- */
+// Create the graph. These two calls are always required
+$graph = new Graph(600,300);
+$graph->SetScale("datlin",0, 360);
+$graph->SetY2Scale("lin");
+
+$graph->img->SetMargin(55,55,40,60);
+//$graph->xaxis->SetFont(FONT1,FS_BOLD);
+//$graph->xaxis->SetTickLabels($xlabel);
+//$graph->xaxis->SetTextLabelInterval(60);
+$graph->xaxis->SetTextTickInterval(60);
+$graph->xaxis->SetLabelAngle(90);
+$graph->title->Set("Wind Speed & Direction");
+$graph->subtitle->Set($titleDate );
+
+$graph->legend->SetLayout(LEGEND_HOR);
+$graph->legend->Pos(0.01,0.04);
+
+$graph->yaxis->scale->ticks->Set(90,15);
+
+$graph->yaxis->SetColor("blue");
+$graph->y2axis->SetColor("red");
+
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
+
+$graph->yaxis->SetTitle("Wind Direction");
+$graph->y2axis->SetTitle("Wind Speed [MPH]");
+
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->SetTitle("Valid Local Time");
+$graph->xaxis->SetTitleMargin(30);
+$graph->yaxis->SetTitleMargin(30);
+$graph->y2axis->SetTitleMargin(35);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->SetPos("min");
+
+// Create the linear plot
+$lineplot=new LinePlot($smph, $times);
+$lineplot->SetLegend("Wind Speed [mph]");
+$lineplot->SetColor("red");
+
+// Create the linear plot
+$sp1=new ScatterPlot($drct5, $times5);
+$sp1->mark->SetType(MARK_FILLEDCIRCLE);
+$sp1->mark->SetFillColor("blue");
+$sp1->mark->SetWidth(3);
+
+$graph->AddY2($lineplot);
+$graph->Add($sp1);
+
+
+$fp1 = sprintf("jpg-%s-%s.png", time(), rand() );
+$graph->Stroke("/var/webtmp/$fp1");
+
+/* ----------- Pressure and precip -------------- */
+// Create the graph. These two calls are always required
+$graph = new Graph(600,300);
+$graph->SetScale("datlin");
+$graph->SetY2Scale("lin");
+
+$graph->img->SetMargin(58,55,55,60);
+$graph->xaxis->SetTextTickInterval(60);
+
+$graph->xaxis->SetLabelAngle(90);
+//$graph->yaxis->scale->ticks->Set(0.1,0.05);
+$graph->y2scale->SetGrace(10);
+$graph->title->Set("Pressure & Daily Precipitation");
+$graph->subtitle->Set($titleDate );
+
+$graph->legend->SetLayout(LEGEND_HOR);
+$graph->legend->Pos(0.01,0.075);
+
+//[DMF]$graph->y2axis->scale->ticks->Set(100,25);
+
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
+$graph->yaxis->SetTitle("Pressure [millibars]");
+$graph->y2axis->SetTitle("Accumulated Precipitation [inches]");
+
+
+//[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
+
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->SetTitle("Valid Local Time");
+$graph->xaxis->SetTitleMargin(30);
+//$graph->yaxis->SetTitleMargin(48);
+$graph->yaxis->SetTitleMargin(45);
+$graph->y2axis->SetTitleMargin(40);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->SetPos("min");
+
+// Create the linear plot
+$lineplot=new LinePlot($rain, $times);
+$lineplot->SetLegend("Precipitation");
+$lineplot->SetColor("blue");
+
+$lineplot2=new LinePlot($pmsl, $times);
+$lineplot2->SetLegend("Pressure");
+$lineplot2->SetColor("black");
+
+$graph->Add($lineplot2);
+$graph->AddY2($lineplot);
+
+$fp2 = sprintf("jpg-%s-%s.png", time(), rand() );
+$graph->Stroke("/var/webtmp/$fp2");
+
+$ys = yearSelect2(2003, $year, "year");
+$ms = monthSelect($month);
+$ds = daySelect($day);
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+<li><a href="/other/">Other Networks</a></li>
+<li class="active">IEM Central Command</li>
+</ol>
 
 <p>This station is located on top of the ISU Agronomy Building at Ames, Iowa.
 Sensors were provided by the National Soil Tilth Lab and report information
 every minute. Note that the archive begins 17 Aug 2006.</p>
 
 <form method="GET">
-<?php 
-  echo yearSelect2(2003, $year, "year"); 
-  echo monthSelect($month);
-  echo daySelect($day);
-?>
+{$ys} {$ms} {$ds}
   <input type="submit" value="Make Plot">
 </form>
 
-<br /><a href="<?php echo $dataurl; ?>">View raw data file</a><br />
+<br /><a href="{$dataurl}">View raw data file</a><br />
 <p>
-<?php include("graphs-inc.php"); ?>
 
 
-<?php include("$rootpath/include/footer.php"); ?>
+<img src="/tmp/{$fp3}">
+<img src="/tmp/{$fp1}">
+<img src="/tmp/{$fp2}">
+
+EOF;
+$t->render('single.phtml');
+?>
