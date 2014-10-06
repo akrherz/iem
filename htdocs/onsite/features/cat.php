@@ -3,10 +3,11 @@ include("../../../config/settings.inc.php");
 define("IEM_APPID", 55);
 define("FBEXTRA", True); 
 include("../../../include/myview.php");
-$t = new MyView();
-
 include("../../../include/database.inc.php");
 include("../../../include/feature.php");
+
+$t = new MyView();
+
 $day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : null;
 $offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
 if ($day == null){
@@ -46,6 +47,7 @@ if ($row["fbid"] == null){
 }
 
 $day = $row["d"];
+$prettyday = date("l, d F Y", $valid);
 $thumb = sprintf("/onsite/features/%s_s.%s", $row["imageref"], $fmt);
 $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $fmt);
 
@@ -58,25 +60,34 @@ $t->title = "$day Feature - ". $row["title"];
 $t->thispage = "iem-feature";
 
 $content = <<<EOF
+
+<div class="row well">
+	<div class="col-md-4">
+
 <button type="button" class="btn btn-default btn-lg">
   <span class="glyphicon glyphicon-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1">Previous Feature by Date</a> 
 </button>
-<strong>IEM Daily Feature for {$day}</strong>
+	</div>
+	<div class="col-md-4">
+<strong>IEM Daily Feature<br />{$prettyday}</strong>
+	</div>
+	<div class="col-md-4">
 <button type="button" class="btn btn-default btn-lg">
   <a href="cat.php?day={$day}&offset=1">Next Feature by Date</a> 
   <span class="glyphicon glyphicon-arrow-right"></span> 
 </button>
+	</div>
+</div>
 
 <!-- Begin Feature Display -->
 
-<table cellpadding="2" cellspacing="0" border="1">
-<tr><td>Title:</td><td><strong>{$row["title"]}</strong></td></tr>
-<tr><td>Posted:</td><td>{$row["webdate"]}</td></tr>
-</table>
+<h3>{$row["title"]}</h3>
+<p><i>Posted:</i> {$row["webdate"]} </p>
+
 
 <div class="row">
 <div class="col-md-6">
-<a href="{$big}"><img src="{$thumb}" class="img-responsive"></a>
+<a href="{$big}"><img src="{$thumb}" class="img img-responsive"></a>
 <br /><a href="{$big}">View larger image</a>
 <br />{$row["caption"]}
 {$linktext}
