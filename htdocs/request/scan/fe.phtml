@@ -1,18 +1,27 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | SCAN Data Download";
-include("$rootpath/include/header.php"); 
-?>
-<div class="text">
-<b>Nav:</b> <a href="/scan/">SCAN</a> <b> > </b>
-  Download Data
+include_once "../../../include/forms.php";
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "SCAN Data Download";
 
-<?php include("$rootpath/include/imagemaps.php"); ?>
-<?php include("$rootpath/include/forms.php"); ?>
+$ys = yearSelect(2000, date("Y"), "year");
+$ms = monthSelect("", "month1");
+$ds = daySelect2("", "day1");
+$hs = gmtHourSelect("", "hour1");
+$ms2 = monthSelect("", "month2");
+$ds2= daySelect2("", "day2");
+$hs2 = gmtHourSelect("", "hour2");
+
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+	<li><a href="/scan/">SCAN</a></li>
+  	<li class="active">Download Data</li>
+ </ol>
 
 <p>Filling out this form will provide you with whatever archive data the
 IEM has from the SCAN network.  The archive has some holes in it....
-
 
 <form method="GET" action="dl.php">
 
@@ -39,17 +48,10 @@ IEM has from the SCAN network.  The archive has some holes in it....
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">
-     <?php echo yearSelect(2000, date("Y"), "year"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day1"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour1"); ?>
+    <td rowspan="2">{$ys}</td>
+    <td>{$ms}</td>
+    <td>{$ds}</td>
+    <td>${hs}
 	<input type="hidden" name="minute1" value="0">
     </td>
   </tr>
@@ -57,13 +59,13 @@ IEM has from the SCAN network.  The archive has some holes in it....
   <tr>
     <th>End:</th>
     <td>
-     <?php echo monthSelect("", "month2"); ?>
+     {$ms2}
     </td>
     <td>
-     <?php echo daySelect2("", "day2"); ?>
+     {$ds2}
     </td>
     <td>
-     <?php echo gmtHourSelect("", "hour2"); ?>
+     {$hs2}
 	<input type="hidden" name="minute2" value="0">
     </td>
   </tr>
@@ -111,7 +113,8 @@ How shall the output values be seperated?
 <p><h3 class="subtitle">Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
-</form></div>
+</form>
+EOF;
+$t->render('single.phtml');
 
-
-<?php include("$rootpath/include/footer.php"); ?>
+?>
