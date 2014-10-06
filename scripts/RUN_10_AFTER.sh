@@ -65,9 +65,6 @@ python q3_Xhour.py 3
 python q3_Xhour.py 1
 python q3_today_total.py 
 
-cd ../hrrr
-python plot_ref.py
-
 cd ../ua
 if [ $HH -eq "02" ]
 then

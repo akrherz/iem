@@ -1,11 +1,8 @@
-'''
+"""
 Generate an animated GIF of HRRR forecasted 1km reflectivity
 
-Run at ~ :15 after, from RUN_10_AFTER.sh
-
-at 20:20 UTC, the 18z run is in.
-
-'''
+Run at :40 after
+"""
 
 import pygrib
 from pyiem.plot import MapPlot
@@ -15,7 +12,6 @@ import datetime
 import pytz
 import subprocess
 import os
-import urllib2
 import sys
 
 def compute_bounds(lons, lats):
@@ -29,16 +25,10 @@ def compute_bounds(lons, lats):
 def run( utc , routes):
     ''' Generate the plot for the given UTC time '''
 
-    uri = utc.strftime(("http://hrrr.agron.iastate.edu/data/"
-                        +"hrrr_reflectivity/hrrr.ref.%Y%m%d%H00.grib2"))
+    subprocess.call("python dl_hrrrref.py %s" % (utc.strftime("%Y %m %d %H"),),
+                   shell=True)
 
-    fn = "/tmp/hrrr.ref.tmp.grib2"
-    try:
-        fp = open(fn, 'wb')
-        fp.write( urllib2.urlopen(uri).read() )
-        fp.close()
-    except urllib2.HTTPError:
-        return
+    fn = "/tmp/ncep_hrrr_%s.grib2" % (utc.strftime("%Y%m%d%H"),)
 
     grbs = pygrib.open(fn)
 
@@ -65,8 +55,8 @@ def run( utc , routes):
             
         ref = g['values'][x1:x2,y1:y2]
         
-        m = MapPlot(sector='midwest',
-                title='%s UTC HRRR 1 km AGL Reflectivity' % (
+        m = MapPlot(sector='midwest', axisbg='tan',
+                title='%s UTC NCEP HRRR 1 km AGL Reflectivity' % (
                                             utc.strftime("%-d %b %Y %H"),),
                 subtitle='valid: %s' % (now.strftime("%-d %b %Y %I:%M %p %Z"),))
 
@@ -93,11 +83,9 @@ def run( utc , routes):
                     shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     
     #os.remove("/tmp/hrrr_ref.gif")
-    os.remove("/tmp/hrrr.ref.tmp.grib2")
+    os.remove(fn)
 
-
-if __name__ == '__main__':
-    ''' go go gadget '''
+def main():
     utcnow = datetime.datetime.utcnow()
     if len(sys.argv) == 5:
         utcnow = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]),
@@ -105,9 +93,13 @@ if __name__ == '__main__':
         routes = 'a'
     else:
         # Two hours ago
-        utcnow = utcnow - datetime.timedelta(hours=2)
+        utcnow = utcnow - datetime.timedelta(hours=1)
         routes = 'ac'
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"),minute=0,second=0,
                             microsecond=0)
         
     run( utcnow , routes)
+
+if __name__ == '__main__':
+    # go go gadget
+    main()
