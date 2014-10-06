@@ -4,14 +4,15 @@
   */
  include("../../../config/settings.inc.php");
  include("../../../include/myview.php");
+ include("../../../include/network.php");
+ include("../../../include/forms.php");
+ 
  $t = new MyView();
  $t->title = "ISU Soil Moisture Daily Data Request";
  $t->thispage = "networks-agclimate";
  
- include("../../../include/network.php");
  $nt = new NetworkTable("ISUSM");
- include("../../../include/forms.php");
-
+ 
  $yselect = yearSelect2(2013, date("Y"), "year1");
  $mselect = monthSelect(1, "month1");
  $dselect= daySelect2(1, "day1");
@@ -88,6 +89,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <strong>Select from available variables</strong><br />
 <input type="checkbox" name="vars" value="high">High Temperature [F]
 <br /><input type="checkbox" name="vars" value="low">Low Temperature [F]
+<br /><input type="checkbox" name="vars" value="gdd50">Growing Degree Days (base 50) [F]
 <br /><input type="checkbox" name="vars" value="solar">Solar Radiation [MJ]
 <br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
 <br /><input type="checkbox" name="vars" value="sped">Average Wind Speed [mph]
@@ -124,6 +126,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 
  <dt>high</dt><dd>High Temperature [F]</dd>
  <dt>low</dt><dd>Low Temperature [F]</dd>
+ <dt>gdd50</dt><dd>Growing Degree Days [F]</dd>
  <dt>solar</dt><dd>Solar Radiation [MJ/m^2]</dd>
  <dt>precip</dt><dd>Precipitation [inch]</dd>
  <dt>speed</dt><dd>Average Wind Speed [mph], 10 minute average, 10 ft above ground</dd>

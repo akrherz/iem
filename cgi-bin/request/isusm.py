@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-''' 
+"""
  Download interface for ISU-SM data
-'''
+"""
 import cgi
 import datetime
 import psycopg2
@@ -63,7 +63,7 @@ def fetch_daily( form, cols ):
         delim = ' '
 
     if len(cols) == 0:    
-        cols = ["station","valid","high", "low", "solar", "precip",
+        cols = ["station","valid","high", "low", "gdd50", "solar", "precip",
                        "sped", "gust", "et", "soil04t", "soil12t", "soil24t", 
                        "soil50t",
                        "soil12vwc", "soil24vwc", "soil50vwc"]
@@ -93,7 +93,8 @@ def fetch_daily( form, cols ):
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
     s.soil50tn, s.soil50tx, tair_c_max, tair_c_min, slrmj_tot,
     rain_mm_tot, dailyet, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
-    vwc_12_avg, vwc_24_avg, vwc_50_avg, ws_mps_s_wvt, ws_mps_max
+    vwc_12_avg, vwc_24_avg, vwc_50_avg, ws_mps_s_wvt, ws_mps_max,
+    round(gddxx(50, 86, c2f( tair_c_max ), c2f( tair_c_min ))::numeric,1) as gdd50
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
     """ % (
@@ -135,7 +136,7 @@ def fetch_daily( form, cols ):
         gust = row['ws_mps_max'] * 2.23 if row['ws_mps_max'] is not None else -99
         
         values.append( dict(station=station, valid=valid.strftime("%Y-%m-%d"), 
-                high=high, low=low, solar=row[4],
+                high=high, low=low, solar=row['slrmj_tot'], gdd50=row['gdd50'],
                 precip=precip, sped=speed, gust=gust, et=et, 
                 soil04t=soil04t, soil12t=soil12t, soil24t=soil24t, 
                 soil50t=soil50t,
