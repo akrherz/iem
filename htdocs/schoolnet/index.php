@@ -39,7 +39,7 @@ if ($network == 'KCCI'){
 
 <p><h3 class="subtitle">QC Info</h3>
 <ul>
- <li><a href="/QC/offline.php">Stations Offline</a> [<a href="/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
+ <li><a href="/QC/offline.php">Stations Offline</a></li>
  <li><a href="/QC/madis/network.phtml?network=KCCI">MADIS QC Values</a></li>
   <li>MADIS QC Messages:
   <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qchour.txt">Last Hour</a>
@@ -90,7 +90,7 @@ else if ($network == 'KELO'){
 
 <p><h3 class="subtitle">QC Info</h3>
 <ul>
- <li><a href="/QC/offline.php">Stations Offline</a> [<a href="/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
+ <li><a href="/QC/offline.php">Stations Offline</a></li>
  <li><a href="/QC/madis/network.phtml?network=KELO">MADIS QC Values</a></li>
   <li>MADIS QC Messages:
   <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qchour.txt">Last Hour</a>
