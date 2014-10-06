@@ -109,17 +109,17 @@ function drawStateNEXRAD($hlext) {
   
  $url = $img->saveWebImage();
 
- echo "<form name=\"img\" method=\"GET\" action=\"compare.phtml\">";
+ $s = "<form name=\"img\" method=\"GET\" action=\"compare.phtml\">";
 
- echo "<input type=\"hidden\" name=\"ul_x\" value=\"". $map->extent->minx ."\">
+ $s .= "<input type=\"hidden\" name=\"ul_x\" value=\"". $map->extent->minx ."\">
 <input type=\"hidden\" name=\"ul_y\" value=\"". $map->extent->maxy ."\">
 <input type=\"hidden\" name=\"lr_x\" value=\"". $map->extent->maxx ."\">
 <input type=\"hidden\" name=\"lr_y\" value=\"". $map->extent->miny ."\">
 <input type=\"hidden\" name=\"map_height\" value=\"". $height ."\">
 <input type=\"hidden\" name=\"map_width\" value=\"". $width ."\">";
- echo "<input border=1 name=\"map\" type=\"image\" src=\"$url\"></form>";
+ $s .= "<input border=1 name=\"map\" type=\"image\" src=\"$url\"></form>";
 
- return $url;
+ return $s;
 
 
 }
