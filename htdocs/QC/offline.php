@@ -59,8 +59,7 @@ $t->content = <<< EOF
 
 <P>Unfortunately, automated observing sites occasionally go offline due
 to a wide range of factors.  Here is a listing of sites currently offline.
-You can also view a Graphical
-display of sites that are offline.</p>
+</p>
 
 
 <table class="table table-striped">
@@ -71,26 +70,26 @@ display of sites that are offline.</p>
  <th align="left">Flagged Offline At</th></tr>
 </thead>
 <tr><td colspan="3" style="background: #CCCCCC;"><b>KCCI School Network</b>
-  [<a href="/GIS/apps/stations/offline.php?network=KCCI">Graphical View</a>]  (30 minute tolerance)</td></tr>
+  (30 minute tolerance)</td></tr>
 {$kcci}
 
 <tr><td colspan=3 style="background: #CCCCCC;"><b>KELO School Network</b>
-  [<a href="/GIS/apps/stations/offline.php?network=KELO">Graphical View</a>]  (3 hour tolerance)</td></tr>
+  (3 hour tolerance)</td></tr>
 {$kelo}
 
 <tr><td colspan=3 style="background: #CCCCCC;"><b>KIMT School Network</b>
-  [<a href="/GIS/apps/stations/offline.php?network=KIMT">Graphical View</a>]  (30 minute tolerance)</td></tr>
+  (30 minute tolerance)</td></tr>
 {$kimt}
 
 <tr>
  <td colspan=3 style="background: #CCCCCC;"><b>RWIS Network</b>
-  [<a href="/GIS/apps/stations/offline.php?network=IA_RWIS">Graphical View</a>]  (1 hour tolerance)</td>
+  (1 hour tolerance)</td>
 </tr>
 {$rwis}
 
 <tr>
  <td colspan=3 style="background: #CCCCCC;"><b>AWOS Network</b>
-  [<a href="/GIS/apps/stations/offline.php?network=AWOS">Graphical View</a>] (90 minute tolerance)</td>
+  (90 minute tolerance)</td>
 </tr>
 {$awos}
 
