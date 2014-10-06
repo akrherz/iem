@@ -1,13 +1,29 @@
 <?php include_once("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include_once "../../../include/myview.php";
+include("../../../include/database.inc.php");
 $pg = iemdb("squaw");
-$TITLE = "Squaw Creek Flood Modeling";
-include("$rootpath/include/header.php");
-include("$rootpath/include/squaw/forms.inc.php"); 
-?>
+$t = new MyView();
+$t->title = "Squaw Creek Flood Modeling";
+include("../../../include/squaw/forms.inc.php"); 
 
-<div id="content">
+$ms = monthSelect( date("m") , "month");
+$ds =  daySelect( date("d") );
+$ys = yearSelect(1990, date("Y") );
+$hs = localHourSelect( date("I"), "hour" );
+$hs2 = localHourSelect(3, "rhour1");
+$hs3 = localHourSelect(4, "rhour2");
 
+$sql = "SELECT * from scenarios";
+$rs = pg_query($pg, $sql);
+$scenarios = "";
+while($row = pg_fetch_array($rs))
+{
+	$name = $row["name"];
+	$id = $row["id"];
+	$scenarios .= "<br /><input type=\"checkbox\" name=\"scenarios[]\" value=\"$id\">$name";
+}
+
+$t->content = <<<EOF
 <h3>Run the Model!</h3>
 
 <div class="help">This form allows you to set up the model with the necessary
@@ -29,10 +45,10 @@ the <i>Run Model</i> button at the bottom of the page.</div>
 </thead>
 <tbody>
 <tr>
-	<td><?php echo monthSelect( date("m") , "month"); ?></td>
-	<td><?php echo daySelect( date("d") ); ?></td>
-	<td><?php echo yearSelect(1990, date("Y") ); ?></td>
-	<td><?php echo localHourSelect( date("I"), "hour" ); ?></td></tr>
+	<td>{$ms}</td>
+	<td>{$ds}</td>
+	<td>{$ys}</td>
+	<td>{$hs}</td></tr>
 </tbody>
 </table>
 
@@ -49,10 +65,10 @@ Creek.  These two points must be after the <i>Model Initialization Time</i> chos
 
 <tbody>
 <tr>
-	<td>1.</td><td><?php echo localHourSelect(3, "rhour1"); ?></td>
+	<td>1.</td><td>{$hs2}</td>
 		<td><input type="text" name="rflow1" size="6"></td></tr>
 <tr>
-	<td>2.</td><td><?php echo localHourSelect(4, "rhour2"); ?></td>
+	<td>2.</td><td>{$hs3}</td>
 		<td><input type="text" name="rflow2" size="6"></td></tr>
 </tbody>
 </table>
@@ -60,22 +76,13 @@ Creek.  These two points must be after the <i>Model Initialization Time</i> chos
 <p><b>3.  Select optional scenarios to run with:</b></p>
 
 <p>You can select from these scenarios to run with as well.</p>
-<?php
-$sql = "SELECT * from scenarios";
-$rs = pg_query($pg, $sql);
-while($row = pg_fetch_array($rs))
-{
-  $name = $row["name"];
-  $id = $row["id"];
-  echo "<br /><input type=\"checkbox\" name=\"scenarios[]\" value=\"$id\">$name";
-}
-?>
+{$scenarios}
 
 <p><b>4. Run The Model:</b></p>
 
 <input type="submit" value="Run Model"><input type="reset" value="Reset Form">
 </form>
 
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
