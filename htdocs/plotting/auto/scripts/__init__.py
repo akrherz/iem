@@ -14,6 +14,7 @@ data = {'plots': [
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
         {'id': "5", 'label': "Minimum Daily Temperature Range"},
         {'id': "22", 'label': "Percentage of Years within Temperature Range from Averages"},
+        {'id': "25", 'label': "Spread of Daily High and Low Temperatures"},
         {'id': "4", 'label': "State Areal Coverage of Precip Intensity over X Days"},
     ]},
     {'label': 'Monthly', 'options': [
