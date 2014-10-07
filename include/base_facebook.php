@@ -989,6 +989,10 @@ abstract class BaseFacebook
       curl_setopt($ch, CURLOPT_CAINFO,
                   dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fb_ca_chain_bundle.crt');
       $result = curl_exec($ch);
+      $errno = curl_errno($ch);
+      if ($errno == 60 || $errno == 77) {
+        die("double error");
+      }
     }
 
     // With dual stacked DNS responses, it's possible for a server to
