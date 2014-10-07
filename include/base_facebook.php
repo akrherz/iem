@@ -975,7 +975,7 @@ abstract class BaseFacebook
     } else {
       $opts[CURLOPT_HTTPHEADER] = array('Expect:');
     }
-    $opts[CURLOPT_CAINFO] = dirname(__FILE__).'/fb_ca_chain_bundle.crt';
+    $opts[CURLOPT_SSL_VERIFYPEER] = false;
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
 
