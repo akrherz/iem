@@ -109,6 +109,10 @@ if (isset($_GET["q"])){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td>". monthSelect2( $value, $v->name) ."</td></tr>" ;
 		}
+		elseif ($v->type == "day"){
+			$form .= "<tr><td>". $v->label ."</td>
+			<td>". daySelect( $value, $v->name) ."</td></tr>" ;
+		}
 		elseif ($v->type == "year"){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td>". yearSelect2(isset($v->min) ? $v->min: 1893, $value, $v->name) ."</td></tr>" ;
