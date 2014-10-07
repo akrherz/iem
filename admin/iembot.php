@@ -29,8 +29,10 @@ $action = isset($_REQUEST["action"]) ? $_REQUEST["action"]: "";
 $sub = isset($_REQUEST["sub"]) ? $_REQUEST["sub"]: Array();
 $name = isset($_REQUEST["name"]) ? $_REQUEST["name"]: "";
 
+$alertMsg = "";
+
 function reloadbot(){
-	$alertMsg = file_get_contents("http://iembot/iembot-json/reload");
+	return file_get_contents("http://iembot/iembot-json/reload");
 }
 
 
@@ -126,13 +128,13 @@ if ($room != "" && $action != "delete"){
 	$c .= sprintf("<a href=\"iembot.php?action=delete&room=%s\">Click to remove iembot from %s room</a>", $room, $room);
 
 	$c .= "<form name=\"modify\" method=\"POST\">";
-			$c .= "<input type=\"hidden\" name=\"action\" value=\"modify\">";
-			$c .= "<input type=\"hidden\" name=\"room\" value=\"${room}\">";
+	$c .= "<input type=\"hidden\" name=\"action\" value=\"modify\">";
+	$c .= "<input type=\"hidden\" name=\"room\" value=\"${room}\">";
 
-			$c .= "<p><input type=\"submit\" value=\"Update Room Settings\">";
-			$c .= "</form>";
-			$c .= "</div>";
-			reloadbot();
+	$c .= "<p><input type=\"submit\" value=\"Update Room Settings\">";
+	$c .= "</form>";
+	$c .= "</div>";
+	$alertMsg = reloadbot();
 }
 
 $table = "";
@@ -147,7 +149,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 $t->content = <<<EOF
 <h3>IEMBot Chatroom Configuration Page</h3>
 
-<div class=\"alert alert-warning\">$alertMsg</div>
+<div class="alert alert-warning">$alertMsg</div>
 
 {$c}
 
@@ -173,12 +175,13 @@ $t->content = <<<EOF
 
 
 <h4>Option 3: Edit a room's settings</h4>
-<div style="padding-left: 20px;">
-<table>
-{$table}
-</tr></table>
 
-</div>
+<table class="table table-condensed table-striped table-bordered">
+{$table}
+</tr>
+</table>
+
+
 EOF;
 $t->render('single.phtml');
 ?>
