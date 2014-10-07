@@ -975,14 +975,16 @@ abstract class BaseFacebook
     } else {
       $opts[CURLOPT_HTTPHEADER] = array('Expect:');
     }
-    $opts[CURLOPT_SSL_VERIFYPEER] = false;
+    
     curl_setopt_array($ch, $opts);
+    curl_setopt($ch, CURLOPT_CAINFO,
+                  dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fb_ca_chain_bundle.crt');
     $result = curl_exec($ch);
 
     $errno = curl_errno($ch);
     // CURLE_SSL_CACERT || CURLE_SSL_CACERT_BADFILE
     if ($errno == 60 || $errno == 77) {
-      self::errorLog('Invalid or no certificate authority found, '.
+      self::errorLog('Daryl Invalid or no certificate authority found, '.
                      'using bundled information');
       curl_setopt($ch, CURLOPT_CAINFO,
                   dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fb_ca_chain_bundle.crt');
