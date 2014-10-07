@@ -9,6 +9,7 @@ import subprocess
 import pytz
 import re
 import os
+from pyiem.nws.product import TextProduct
 
 BAD_CHARS = "[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 
@@ -39,50 +40,50 @@ def do(ts):
             if not f2.name.startswith("TEXT_"):
                 continue
             content = (re.sub(BAD_CHARS, "", f2.read())).replace("\r\r", "")
-            awipsid = find_awipsid(content)
             parts = f2.name.strip().split("_")
             ttaaii = parts[1]
             source = parts[2]
+            if source[0] not in ['K', 'P']:
+                continue
+            if source in ['KWBC', 'KWAL']:
+                continue
+            delimiter = "%s %s" % (ttaaii, source)
             # Filter content back to the start of the ttaaii
-            pos = content.find(ttaaii)
+            pos = content.find(delimiter)
             if pos == -1:
-                print 'Skipping as can not find ttaaii in product'
+                print 'Skipping can not find %s in product %s' % (delimiter,
+                                                                  f2.name)
                 continue
             content = content[pos:]
+            awipsid = find_awipsid(content)
             if (awipsid is not None and 
                 (awipsid.startswith("RR") or awipsid.startswith("MTR")
                  or awipsid in ["TSTNCF", "WTSNCF"])):
                 print 'Skip', f2.name, awipsid
                 continue
-            if source[0] not in ['K', 'P']:
-                continue
-            if source in ['KWBC', 'KWAL']:
-                continue
-            if len(parts) < 5:
-                print 'Invalid filename', f2.name
-                continue
-            if parts[4] == '2400':
-                parts[4] = '2359'
-            try:
-                valid = datetime.datetime.strptime(parts[3]+"_"+parts[4], 
-                                               '%Y%m%d_%H%M')
-            except:
-                print 'Invalid timestamp', f2.name
-                continue
+            # Now we are getting closer, lets split by the delimter as we 
+            # may have multiple products in one file!
+            for bulletin in content.split(delimiter):
+                if len(bulletin) == 0:
+                    continue
+                bulletin = "000\n%s%s" % (delimiter, bulletin)
+                try:
+                    prod = TextProduct(bulletin, utcnow=ts)
+                except:
+                    print 'Parsing Failure', f2.name
+                    continue
             
-            if valid.year != ts.year:
-                print 'Invalid timestamp, year mismatch'
-                continue
+                if prod.valid.year != ts.year:
+                    print 'Invalid timestamp, year mismatch'
+                    continue
             
-            valid = valid.replace(tzinfo=pytz.timezone("UTC"))
-                
-            table = "products_%s_%s" % (valid.year, 
-                                        "0712" if valid.month > 6 else "0106")
+                table = "products_%s_%s" % (prod.valid.year, 
+                                        "0712" if prod.valid.month > 6 else "0106")
             
-            print f2.name, ttaaii, valid.strftime("%Y%m%d%H%M"), source, awipsid, table
-            cursor.execute("""INSERT into """+table+"""
+                print 'SAVE', f2.name, prod.valid.strftime("%Y%m%d%H%M"), awipsid, prod.afos, table
+                cursor.execute("""INSERT into """+table+"""
             (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)""",
-            (content, awipsid, valid, source, ttaaii))
+            (bulletin, prod.afos, prod.valid, source, ttaaii))
             
     cursor.close()
     PGCONN.commit()
@@ -96,7 +97,7 @@ def main():
                              int(sys.argv[6]))
     now = sts
     while now <= ets:
-        do(now)
+        do(now.replace(tzinfo=pytz.timezone("UTC")))
         now += datetime.timedelta(days=1)
 
 
