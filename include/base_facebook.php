@@ -975,23 +975,18 @@ abstract class BaseFacebook
     } else {
       $opts[CURLOPT_HTTPHEADER] = array('Expect:');
     }
-    
+
     curl_setopt_array($ch, $opts);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $result = curl_exec($ch);
 
     $errno = curl_errno($ch);
     // CURLE_SSL_CACERT || CURLE_SSL_CACERT_BADFILE
     if ($errno == 60 || $errno == 77) {
-      self::errorLog('Daryl Invalid or no certificate authority found, '.
+      self::errorLog('Invalid or no certificate authority found, '.
                      'using bundled information');
       curl_setopt($ch, CURLOPT_CAINFO,
                   dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fb_ca_chain_bundle.crt');
       $result = curl_exec($ch);
-      $errno = curl_errno($ch);
-      if ($errno == 60 || $errno == 77) {
-        die("double error");
-      }
     }
 
     // With dual stacked DNS responses, it's possible for a server to
