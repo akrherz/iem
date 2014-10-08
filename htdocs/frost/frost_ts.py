@@ -2,7 +2,7 @@
 import sys
 import os
 import matplotlib
-matplotlib.use( 'Agg' )
+matplotlib.use('agg')
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 import cgi
