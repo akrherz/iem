@@ -99,8 +99,9 @@ map.on('click', function(evt) {
      });
     
   } else {
-    $(element).popover('destroy');
+    $(element).popover('hide');
   }
+
 });
 
 };
