@@ -10,7 +10,7 @@ import sys
 
 import mx.DateTime
 import matplotlib
-matplotlib.use( 'Agg' )
+matplotlib.use('agg')
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 

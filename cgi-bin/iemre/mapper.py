@@ -13,7 +13,7 @@ import netCDF4
 import numpy
 import numpy.ma
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('agg')
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
