@@ -27,7 +27,8 @@ for row in cursor:
     
     cursor2.execute("""SELECT valid, power, yaw, 
     windspeed, pitch from sampled_data_%s WHERE
-    valid between '2008-08-26 21:00' and '2008-08-27 09:00'
+    valid between '2008-08-26 10:00' and '2008-08-26 19:00'
+    and extract(minute from valid)::numeric %% 10 = 0
     ORDER by valid ASC """ % (row[1],))
     
     for row2 in cursor2:
