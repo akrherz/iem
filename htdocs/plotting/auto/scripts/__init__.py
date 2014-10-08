@@ -12,6 +12,7 @@ data = {'plots': [
         {'id': "21", 'label': "Change in NCDC 81 Daily Climatology over X Days"},
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
+        {'id': "26", 'label': "Minimum Daily Low Temperature after 1 July"},
         {'id': "5", 'label': "Minimum Daily Temperature Range"},
         {'id': "22", 'label': "Percentage of Years within Temperature Range from Averages"},
         {'id': "25", 'label': "Spread of Daily High and Low Temperatures"},
