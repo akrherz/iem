@@ -6,3 +6,4 @@ Options +ExecCGI
 
 RewriteEngine On 
 RewriteRule ^sql/database/([a-z]+)$ sql.py?database=$1 [QSA]
+RewriteRule ^nwstext/([0-9A-Z\-]{31}).txt$ nwstext.py?p=$1 [QSA]
