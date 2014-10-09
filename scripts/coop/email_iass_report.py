@@ -116,20 +116,20 @@ def compute_weekly(fp, sts, ets):
         max(max_tmpf) as hi,
         min(min_tmpf)  as lo,
         avg((max_tmpf+min_tmpf)/2.) as avg,
-        sum(pday) as total_p
+        sum(case when pday >= 0.01 then pday else 0 end) as total_p
         FROM summary s JOIN stations t on (t.iemid = s.iemid) 
         WHERE day >= %s and day <= %s 
-        and t.network = 'IA_COOP' and pday >= 0 and max_tmpf > -90 
+        and t.network = 'IA_COOP' and max_tmpf > -90 
         and min_tmpf < 90
         GROUP by station, climate_site
     ), april_obs as (
         SELECT id as station,  climate_site,
-        sum(pday) as p, 
+        sum(case when pday >= 0.01 then pday else 0 end) as p, 
         sum(gddxx(50,86,max_tmpf,min_tmpf)) as gdd
         from summary s JOIN stations t on (t.iemid = s.iemid)
         WHERE t.network = 'IA_COOP' and 
         day >= %s and day <= %s
-        and pday >= 0 GROUP by station, climate_site
+        GROUP by station, climate_site
     ), climo as (
         SELECT station,
         avg((high+low)/2.) as avg,
