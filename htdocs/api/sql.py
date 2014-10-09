@@ -57,7 +57,7 @@ def main():
     return res
 
 if __name__ == '__main__':
-    sys.stdout.write("Content-type: text/plain\r\n")
+    sys.stdout.write("Content-type: text/plain\n\n")
     if os.environ['REQUEST_METHOD'] == 'GET':
         try:
             res = main()
