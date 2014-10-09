@@ -8,39 +8,61 @@ function updateMap(){
 	vectorLayer.setStyle( vectorLayer.getStyle() );
 }
 
-function init(){
-
-	$( "#datepicker" ).datepicker();
+function updateDate(){
+	var fullDate = $.datepicker.formatDate("yy-mm-dd", 
+										$("#datepicker").datepicker('getDate'));
+	map.removeLayer(vectorLayer);
+	vectorLayer = makeVectorLayer(fullDate);
+	map.addLayer(vectorLayer);
 	
-vectorLayer = new ol.layer.Vector({
-	source: new ol.source.GeoJSON({
-	  	projection: ol.proj.get('EPSG:4326'),
-	    url: '/geojson/cli.py'
-  	}),
-  	style: function(feature, resolution){
-  		style = [new ol.style.Style({
-  	        fill: new ol.style.Fill({
-  	          color: 'rgba(255, 255, 255, 0.6)'
-  	        }),
-  	        stroke: new ol.style.Stroke({
-  	          color: '#319FD3',
-  	          width: 1
-  	        }),
-  	        text: new ol.style.Text({
-  	          font: '12px Calibri,sans-serif',
-  	          text: feature.get(renderattr),
-  	          fill: new ol.style.Fill({
-  	            color: '#000'
-  	          }),
-  	          stroke: new ol.style.Stroke({
-  	            color: '#fff',
-  	            width: 3
-  	          })
-  	        })
-  	      })];
-  		return style;
-  	}
-});
+}
+
+function makeVectorLayer(dt){
+	return new ol.layer.Vector({
+		source: new ol.source.GeoJSON({
+		  	projection: ol.proj.get('EPSG:4326'),
+		    url: '/geojson/cli.py?dt='+dt
+	  	}),
+	  	style: function(feature, resolution){
+	  		style = [new ol.style.Style({
+	  	        fill: new ol.style.Fill({
+	  	          color: 'rgba(255, 255, 255, 0.6)'
+	  	        }),
+	  	        stroke: new ol.style.Stroke({
+	  	          color: '#319FD3',
+	  	          width: 1
+	  	        }),
+	  	        text: new ol.style.Text({
+	  	          font: '12px Calibri,sans-serif',
+	  	          text: feature.get(renderattr),
+	  	          fill: new ol.style.Fill({
+	  	            color: '#000'
+	  	          }),
+	  	          stroke: new ol.style.Stroke({
+	  	            color: '#fff',
+	  	            width: 3
+	  	          })
+	  	        })
+	  	      })];
+	  		return style;
+	  	}
+	});
+}
+
+$(document).ready(function(){
+
+
+	$( "#datepicker" ).datepicker({
+		dateFormat:"DD, d MM, yy",
+		minDate: new Date(2009, 1, 1),
+		maxDate: new Date()
+	});
+	$("#datepicker").datepicker('setDate', new Date());
+    $("#datepicker").change(function(){
+        updateDate();
+     });
+
+vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()));
 
 map = new ol.Map({
         target: 'map',
@@ -90,10 +112,13 @@ map.on('click', function(evt) {
     var content = "<p><strong>"+ feature.get('name') 
     	+"<br />High: "+ feature.get('high') +" Norm:"+ feature.get("high_normal") +" Rec:"+ feature.get("high_record")
     	+"<br />Low: "+ feature.get('low') +" Norm:"+ feature.get("low_normal") +" Rec:"+ feature.get("low_record")
+    	+"<br />Precip: "+ feature.get('precip') +" Rec:"+ feature.get("precip_record")
+    	+"<br />Snow: "+ feature.get('snow') +" Rec:"+ feature.get("snow_record")
     	+"</p>";
     $('#popover-content').html(content);
     $(element).popover('show');
     
+    $('#clireport').html("<h3>Loading text, one moment please...</h3>");
     $.get(feature.get('link'), function(data) {
         $('#clireport').html("<pre>"+ data +"</pre>");
      });
@@ -104,4 +129,4 @@ map.on('click', function(evt) {
 
 });
 
-};
+});
