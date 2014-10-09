@@ -28,7 +28,6 @@ $t->jsextra = <<<EOF
 <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 <script src='climap.js?v=3'></script>
 EOF;
-$t->bodyextra = "onload=\"init()\"";
 
 $t->content = <<<EOF
 
@@ -48,10 +47,25 @@ $t->content = <<<EOF
 	<option value="low">Low Temperature</option>
 	<option value="low_record">Record Low Temperature</option>
 	<option value="low_normal">Normal Low Temperature</option>
+	<option value="precip">Precipitation</option>
+	<option value="precip_month">Precipitation this month</option>
+	<option value="precip_jan1">Precipitation since January 1</option>
+	<option value="precip_jan1_normal">Precipitation since January 1 normal</option>
+    <option value="precip_jul1">Precipitation since July 1</option>
+	<option value="precip_dec1">Precipitation since December 1</option>
+	<option value="precip_dec1_normal">Precipitation since December 1 Normal</option>
+	<option value="precip_record">Precipitation Record</option>
+    <option value="precip_month_normal">Precipitation this month normal</option>
+	<option value="snow">Snowfall</option>
+	<option value="snow_month">Snowfall this month</option>
+	<option value="snow_jun1">Snowfall since June 1</option>
+	<option value="snow_jul1">Snowfall since July 1</option>
+	<option value="snow_dec1">Snowfall since December 1</option>
+	<option value="snow_record">Snowfall Record</option>
 </select>	
 		
 <strong>For Date:</strong>
-		<input type="text" id="datepicker">
+		<input type="text" id="datepicker" width="80">
 		
 </form>
 		

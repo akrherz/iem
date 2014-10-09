@@ -27,7 +27,11 @@ def get_data( ts ):
     cursor.execute("""
     select station, name, product, st_x(geom), st_y(geom), 
     high, high_normal, high_record, high_record_years,
-    low, low_normal, low_record, low_record_years
+    low, low_normal, low_record, low_record_years,
+    precip, precip_month, precip_jan1, precip_jan1_normal,
+    precip_jul1, precip_dec1, precip_dec1_normal, precip_record,
+    precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
+    snow_dec1, snow_record
     from cli_data c JOIN stations s on (c.station = s.id) 
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """, (ts.date(),))
@@ -44,6 +48,20 @@ def get_data( ts ):
                 "low_record":  str(sanitize(row["low_record"])),
                 "low_record_years":  row["low_record_years"],
                 "low_normal":  str(sanitize(row["low_normal"])),
+                "precip":  str(sanitize(row["precip"])),
+                "precip_month":  str(sanitize(row["precip_month"])),
+                "precip_jan1":  str(sanitize(row["precip_jan1"])),
+                "precip_jan1_normal":  str(sanitize(row["precip_jan1_normal"])),
+                "precip_jul1":  str(sanitize(row["precip_jul1"])),
+                "precip_dec1":  str(sanitize(row["precip_dec1"])),
+                "precip_dec1_normal":  str(sanitize(row["precip_dec1_normal"])),
+                "precip_record":  str(sanitize(row["precip_record"])),
+                "snow":  str(sanitize(row["snow"])),
+                "snow_month":  str(sanitize(row["snow_month"])),
+                "snow_jun1":  str(sanitize(row["snow_jun1"])),
+                "snow_jul1":  str(sanitize(row["snow_jul1"])),
+                "snow_dec1":  str(sanitize(row["snow_dec1"])),
+                "snow_record":  str(sanitize(row["snow_record"])),                
             },
             "geometry": {"type": "Point",
                         "coordinates": [row['st_x'], row['st_y']]
