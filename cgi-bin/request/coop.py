@@ -88,7 +88,7 @@ def do_apsim( ctx ):
         sts = datetime.datetime(int(ctx['scenario_year']), 1, 1)
         ets = datetime.datetime(int(ctx['scenario_year']), 12, 31)
         cursor.execute("""
-            SELECT day, high, low, precip,
+            SELECT day, high, low, precip, 1 as doy,
             coalesce(narr_srad, merra_srad, hrrr_srad) as srad
             from """+table+""" WHERE station = %s 
             and day >= %s and day <= %s
