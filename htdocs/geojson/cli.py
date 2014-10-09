@@ -14,6 +14,8 @@ def sanitize(val):
     """ convert to Ms"""
     if val is None:
         return "M"
+    if val == 0.0001:
+        return "T"
     return val
 
 def get_data( ts ):
