@@ -33,8 +33,17 @@ def get_database():
     """ Get database """
     return psycopg2.connect(database="coop", host="iemdb", user="nobody")
 
+def sane_date(year, month, day):
+    """ Attempt to account for usage of days outside of the bounds for 
+    a given month """
+    # Calculate the last date of the given month
+    nextmonth = datetime.date(year, month, 1) + datetime.timedelta(days=35)
+    lastday = nextmonth.replace(day=1) - datetime.timedelta(days=1)
+    return datetime.date(year, month, min(day, lastday.day))
+
 def get_cgi_dates(form):
-    """ Figure out which dates are requested """
+    """ Figure out which dates are requested via the form, we shall attempt
+    to account for invalid dates provided! """
     y1 = int(form.getfirst('year1'))
     m1 = int(form.getfirst('month1'))
     d1 = int(form.getfirst('day1'))
@@ -42,12 +51,12 @@ def get_cgi_dates(form):
     m2 = int(form.getfirst('month2'))
     d2 = int(form.getfirst('day2'))
 
-    ets = datetime.date(y2, m2, d2)
+    ets = sane_date(y2, m2, d2)
     archive_end = datetime.date.today() - datetime.timedelta(days=1)
     if ets > archive_end:
         ets = archive_end
         
-    return [datetime.date(y1, m1, d1), ets]
+    return [sane_date(y1, m1, d1), ets]
 
 def get_cgi_stations(form):
     """ Figure out which stations the user wants, return a list of them """
@@ -585,3 +594,13 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
+import unittest
+class tests(unittest.TestCase):
+    
+    def test_sane_date(self):
+        """ Test our sane_date() method"""
+        self.assertEquals(sane_date(2000,9,31), datetime.date(2000,9,30))
+        self.assertEquals(sane_date(2000,2,31), datetime.date(2000,2,29))
+        self.assertEquals(sane_date(2000,1,15), datetime.date(2000,1,15))
+        
