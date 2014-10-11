@@ -51,7 +51,7 @@ if len(sys.argv) == 2:
 
 for dbid in runstations:
     table = constants.get_table(dbid)
-    #print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
+    #print "processing [%s] %s" % (dbid, constants.nt.sts[dbid]["name"])
     sql = """SELECT d.*, c.climoweek from %s d, climoweek c 
     WHERE station = '%s' and day >= '%s-01-01' and d.sday = c.sday 
     and precip is not null
