@@ -14,6 +14,8 @@ P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
                    +" +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"))
 
+SWITCH_DATE = datetime.datetime(2014,10,10,20)
+SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.timezone("UTC"))
 
 COOP = psycopg2.connect(database='coop', host='iemdb')
 cursor = COOP.cursor()
@@ -34,9 +36,12 @@ def run( ts ):
             continue
         grbs = pygrib.open(fn)
         try:
-            grb = grbs.select(parameterNumber=192)
+            if utc >= SWITCH_DATE:
+                grb = grbs.select(name='Downward short-wave radiation flux')
+            else:
+                grb = grbs.select(parameterNumber=192)
         except ValueError:
-            print 'coop/hrrr_solarrad.py %s had no param=192' % (fn,)
+            print 'coop/hrrr_solarrad.py %s had no solar rad' % (fn,)
             continue
         if len(grb) == 0:
             print 'Could not find SWDOWN in HRR %s' % (fn,)
