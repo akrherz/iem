@@ -53,9 +53,9 @@ def fetch(valid):
 def main():
     """ Go Main Go"""
     ts = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]))
+                               int(sys.argv[3]), int(sys.argv[4]))
     fetch(ts)
 
 
