@@ -32,9 +32,10 @@ data = {'plots': [
         #{'id': "17", 'label': "Daily Temperatures + Climatology for Year + Month"},
     ]},
     {'label': 'Yearly', 'options': [
-        {'id': "10", 'label': "Last Spring and First Fall Date above/below given threshold"},
         {'id': "12", 'label': "Days per year and latest date above given threshold"},
         {'id': "13", 'label': "End Date of Summer (warmest 91 day period) per Year"},
+        {'id': "27", 'label': "First Fall Freeze then Killing Frost"},
+        {'id': "10", 'label': "Last Spring and First Fall Date above/below given threshold"},
         {'id': "14", 'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
