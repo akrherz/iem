@@ -20,6 +20,9 @@ $t->west = <<<EOF
  <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
  <br />Simple app to plot out current/historical DCP (river gauges) data for a site
  of your choice.</li>
+	<li>Daily Climate Summary (AFOS: CLI Product) 
+		<a href="climap.php">Interactive Map</a> or 
+		<a href="clitable.php">Text Table</a></li>
  <li><a href="/COOP/current.phtml">Sortable Current COOP Reports</a>
 		<br />View today's COOP reports by WFO or by state.  Includes derived
 		frozen to liquid ratio and SWE reports.</li>

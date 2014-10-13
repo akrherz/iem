@@ -20,31 +20,52 @@ function updateDate(){
 function makeVectorLayer(dt){
 	return new ol.layer.Vector({
 		source: new ol.source.GeoJSON({
-		  	projection: ol.proj.get('EPSG:4326'),
+		  	projection: ol.proj.get('EPSG:3857'),
 		    url: '/geojson/cli.py?dt='+dt
 	  	}),
 	  	style: function(feature, resolution){
-	  		style = [new ol.style.Style({
-	  	        fill: new ol.style.Fill({
-	  	          color: 'rgba(255, 255, 255, 0.6)'
-	  	        }),
-	  	        stroke: new ol.style.Stroke({
-	  	          color: '#319FD3',
-	  	          width: 1
-	  	        }),
-	  	        text: new ol.style.Text({
-	  	          font: '12px Calibri,sans-serif',
-	  	          text: feature.get(renderattr),
-	  	          fill: new ol.style.Fill({
-	  	            color: '#000'
-	  	          }),
-	  	          stroke: new ol.style.Stroke({
-	  	            color: '#fff',
-	  	            width: 3
-	  	          })
-	  	        })
-	  	      })];
-	  		return style;
+	  		if (feature.get(renderattr) != "M"){
+		  		style = [new ol.style.Style({
+		  	        fill: new ol.style.Fill({
+		  	          color: 'rgba(255, 255, 255, 0.6)'
+		  	        }),
+		  	        stroke: new ol.style.Stroke({
+		  	          color: '#319FD3',
+		  	          width: 1
+		  	        }),
+		  	        text: new ol.style.Text({
+		  	          font: '14px Calibri,sans-serif',
+		  	          text: feature.get(renderattr),
+		  	          fill: new ol.style.Fill({
+		  	            color: '#fff',
+		  	            width: 3
+		  	          })
+		  	        })
+		  	      })];
+	  		} else {
+	  			style = [
+	  			       new ol.style.Style({
+	  			         image: new ol.style.Circle({
+	  			           fill: new ol.style.Fill({
+		  			           color: 'rgba(255,255,255,0.4)'
+		  			       }),
+	  			           stroke: new ol.style.Stroke({
+		  			           color: '#3399CC',
+			  			         width: 1.25
+			  			       }),
+	  			           radius: 5
+	  			         }),
+	  			         fill: new ol.style.Fill({
+	  			           color: 'rgba(255,255,255,0.4)'
+	  			       }),
+	  			         stroke: new ol.style.Stroke({
+	  			           color: '#3399CC',
+	  			         width: 1.25
+	  			       })
+	  			       })
+	  			     ];
+	  		}
+		  	return style;
 	  	}
 	});
 }
@@ -66,21 +87,25 @@ vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()));
 
 map = new ol.Map({
         target: 'map',
-        layers: [
-                 new ol.layer.Tile({
+        layers: [new ol.layer.Tile({
                      title: "Global Imagery",
                      source: new ol.source.TileWMS({
                        url: 'http://maps.opengeo.org/geowebcache/service/wms',
                        params: {LAYERS: 'bluemarble', VERSION: '1.1.1'}
                      })
                  }),
-          vectorLayer
+                 new ol.layer.Tile({
+                	title: 'State Boundaries',
+                	source: new ol.source.XYZ({
+                		url : '/c/c.py/1.0.0/s-900913/{z}/{x}/{y}.png'
+                	})
+                 }),
+                 vectorLayer
         ],
         view: new ol.View({
-            projection: 'EPSG:4326',
-            center: [-95, 42],
-            zoom: 3,
-            maxResolution: 0.703125
+            projection: 'EPSG:3857',
+            center: [-10575351, 5160979],
+            zoom: 3
           })
       });
 

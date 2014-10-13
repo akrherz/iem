@@ -26,7 +26,7 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="http://openlayers.org/en/v3.0.0/build/ol-debug.js" type="text/javascript"></script>
 <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-<script src='climap.js?v=3'></script>
+<script src='climap.js?v=4'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -65,7 +65,7 @@ $t->content = <<<EOF
 </select>	
 		
 <strong>For Date:</strong>
-		<input type="text" id="datepicker" width="80">
+		<input type="text" id="datepicker" size="30">
 		
 </form>
 		
