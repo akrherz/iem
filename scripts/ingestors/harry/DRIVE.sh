@@ -8,6 +8,8 @@ fi
 
 # Process
 python step1_texttosql.py $1 $2
+# Fill missing data
+python fill_month.py $1 $2
 # Inject into database
 psql -f /tmp/harry.sql -h iemdb coop
 # Need to produce estimates of temperatures were there are none
