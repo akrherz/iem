@@ -3,7 +3,7 @@ import sys
 import os
 import matplotlib
 matplotlib.use('agg')
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import cgi
 import netCDF4
@@ -19,7 +19,7 @@ def get_latest_time():
     utc = utc.replace(hour=12,minute=0,second=0,microsecond=0)
     limit = 24
     while not os.path.isfile(
-                utc.strftime("/mesonet/share/frost/%Y%m%d%H%M_iaoutput.nc")):
+                utc.strftime("/mesonet/share/frost/bridget/%Y%m%d%H%M_iaoutput.nc")):
         utc -= datetime.timedelta(hours=12)
         limit -= 1
         if limit < 0:
@@ -66,7 +66,7 @@ def process(lon, lat):
     (fig, ax) = plt.subplots(1,1)
     modelts = get_latest_time()
     nc = netCDF4.Dataset(
-            modelts.strftime("/mesonet/share/frost/%Y%m%d%H%M_iaoutput.nc"),'r')
+            modelts.strftime("/mesonet/share/frost/bridget/%Y%m%d%H%M_iaoutput.nc"),'r')
     times = get_times(nc)
     i, j = get_ij(lon, lat, nc)
     
