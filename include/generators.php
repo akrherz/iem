@@ -28,7 +28,7 @@ function get_website_stats(){
 	if ($req > 5000) $rcolor = "warning";
 	if ($req > 7500) $rcolor = "danger";
 	
-	$rlabel = sprintf("%.0f", $req);
+	$rlabel = number_format($req);
 	$rpercent = intval( $req / 15000.0 * 100.0);
 	
 	$s = <<<EOF
