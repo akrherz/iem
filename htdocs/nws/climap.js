@@ -3,9 +3,16 @@ var vectorLayer;
 var map;
 var element;
 
+function updateURL(){
+	var t = $.datepicker.formatDate("yymmdd", 
+			$("#datepicker").datepicker('getDate'));
+	window.location.href = "#"+t+"/"+renderattr;
+}
+
 function updateMap(){
 	renderattr = $('#renderattr').val();
 	vectorLayer.setStyle( vectorLayer.getStyle() );
+	updateURL();
 }
 
 function updateDate(){
@@ -14,7 +21,7 @@ function updateDate(){
 	map.removeLayer(vectorLayer);
 	vectorLayer = makeVectorLayer(fullDate);
 	map.addLayer(vectorLayer);
-	
+	updateURL();
 }
 
 function makeVectorLayer(dt){
@@ -79,79 +86,93 @@ $(document).ready(function(){
 		maxDate: new Date()
 	});
 	$("#datepicker").datepicker('setDate', new Date());
-    $("#datepicker").change(function(){
-        updateDate();
-     });
-
-vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()));
-
-map = new ol.Map({
-        target: 'map',
-        layers: [new ol.layer.Tile({
-                     title: "Global Imagery",
-                     source: new ol.source.TileWMS({
-                       url: 'http://maps.opengeo.org/geowebcache/service/wms',
-                       params: {LAYERS: 'bluemarble', VERSION: '1.1.1'}
-                     })
-                 }),
-                 new ol.layer.Tile({
-                	title: 'State Boundaries',
-                	source: new ol.source.XYZ({
-                		url : '/c/c.py/1.0.0/s-900913/{z}/{x}/{y}.png'
-                	})
-                 }),
-                 vectorLayer
-        ],
-        view: new ol.View({
-            projection: 'EPSG:3857',
-            center: [-10575351, 5160979],
-            zoom: 3
-          })
-      });
-
-element = document.getElementById('popup');
-
-var popup = new ol.Overlay({
-	  element: element,
-	  positioning: 'bottom-center',
-	  stopEvent: false
+	$("#datepicker").change(function(){
+		updateDate();
 	});
-map.addOverlay(popup);
-	
-$(element).popover({
-    'placement': 'top',
-    'html': true,
-    content: function() { return $('#popover-content').html(); }
-  });
 
-// display popup on click
-map.on('click', function(evt) {
-  var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
-        return feature;
-      });
-  if (feature) {
-    var geometry = feature.getGeometry();
-    var coord = geometry.getCoordinates();
-    popup.setPosition(coord);
-    var content = "<p><strong>"+ feature.get('name') 
-    	+"<br />High: "+ feature.get('high') +" Norm:"+ feature.get("high_normal") +" Rec:"+ feature.get("high_record")
-    	+"<br />Low: "+ feature.get('low') +" Norm:"+ feature.get("low_normal") +" Rec:"+ feature.get("low_record")
-    	+"<br />Precip: "+ feature.get('precip') +" Rec:"+ feature.get("precip_record")
-    	+"<br />Snow: "+ feature.get('snow') +" Rec:"+ feature.get("snow_record")
-    	+"</p>";
-    $('#popover-content').html(content);
-    $(element).popover('show');
-    
-    $('#clireport').html("<h3>Loading text, one moment please...</h3>");
-    $.get(feature.get('link'), function(data) {
-        $('#clireport').html("<pre>"+ data +"</pre>");
-     });
-    
-  } else {
-    $(element).popover('hide');
-  }
+	vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()));
 
-});
+	map = new ol.Map({
+		target: 'map',
+		layers: [new ol.layer.Tile({
+			title: "Global Imagery",
+			source: new ol.source.TileWMS({
+				url: 'http://maps.opengeo.org/geowebcache/service/wms',
+				params: {LAYERS: 'bluemarble', VERSION: '1.1.1'}
+			})
+		}),
+		new ol.layer.Tile({
+			title: 'State Boundaries',
+			source: new ol.source.XYZ({
+				url : '/c/c.py/1.0.0/s-900913/{z}/{x}/{y}.png'
+			})
+		}),
+		vectorLayer
+		],
+		view: new ol.View({
+			projection: 'EPSG:3857',
+			center: [-10575351, 5160979],
+			zoom: 3
+		})
+	});
 
+	element = document.getElementById('popup');
+
+	var popup = new ol.Overlay({
+		element: element,
+		positioning: 'bottom-center',
+		stopEvent: false
+	});
+	map.addOverlay(popup);
+
+	$(element).popover({
+		'placement': 'top',
+		'html': true,
+		content: function() { return $('#popover-content').html(); }
+	});
+
+	// display popup on click
+	map.on('click', function(evt) {
+		var feature = map.forEachFeatureAtPixel(evt.pixel,
+				function(feature, layer) {
+			return feature;
+		});
+		if (feature) {
+			var geometry = feature.getGeometry();
+			var coord = geometry.getCoordinates();
+			popup.setPosition(coord);
+			var content = "<p><strong>"+ feature.get('name') 
+			+"<br />High: "+ feature.get('high') +" Norm:"+ feature.get("high_normal") +" Rec:"+ feature.get("high_record")
+			+"<br />Low: "+ feature.get('low') +" Norm:"+ feature.get("low_normal") +" Rec:"+ feature.get("low_record")
+			+"<br />Precip: "+ feature.get('precip') +" Rec:"+ feature.get("precip_record")
+			+"<br />Snow: "+ feature.get('snow') +" Rec:"+ feature.get("snow_record")
+			+"</p>";
+			$('#popover-content').html(content);
+			$(element).popover('show');
+
+			$('#clireport').html("<h3>Loading text, one moment please...</h3>");
+			$.get(feature.get('link'), function(data) {
+				$('#clireport').html("<pre>"+ data +"</pre>");
+			});
+
+		} else {
+			$(element).popover('hide');
+		}
+
+	});
+
+	// Figure out if we have anything specified from the window.location
+	var tokens = window.location.href.split("#");
+	if (tokens.length == 2){
+		// #YYYYmmdd/variable
+		tokens = tokens[1].split("/");
+		if (tokens.length == 2){
+			var tpart = tokens[0];
+			renderattr = tokens[1];
+			$('select[id=renderattr] option[value='+renderattr+']').attr("selected", "selected");
+			dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
+			$("#datepicker").datepicker("setDate", new Date(dstr));
+			updateDate();
+		}
+	}
 });
