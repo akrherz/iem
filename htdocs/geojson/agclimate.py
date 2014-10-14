@@ -2,12 +2,11 @@
 ''' Produce geojson of ISUSM data '''
 import cgi
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import network
-import psycopg2
 import psycopg2.extras
 import datetime
 from pyiem.datatypes import temperature
+from pyiem.network import Table as NetworkTable
+from pyiem.tracker import loadqc
 import pytz
 import json
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
@@ -79,8 +78,9 @@ def safe_m(val):
     return round(val * 100.,0)
 
 def get_data( ts ):
-    ''' Get the data for this timestamp '''
-    nt = network.Table("ISUSM")
+    """ Get the data for this timestamp """
+    qcdict = loadqc()
+    nt = NetworkTable("ISUSM")
     data = {"type": "FeatureCollection", 
             "crs": {"type": "EPSG", 
                     "properties": {"code": 4326,
@@ -100,18 +100,19 @@ def get_data( ts ):
     for i, row in enumerate(cursor):
         lon = nt.sts[row['station']]['lon']
         lat = nt.sts[row['station']]['lat']
+        q = qcdict.get(row['station'], {})
         data['features'].append({"type": "Feature", "id": i,
             "properties": {
                 "rh":  "%.0f%%" % (row["rh"],),
-                "hrprecip" : safe_p(row['rain_mm_tot']),
+                "hrprecip" : safe_p(row['rain_mm_tot']) if not q.get('precip', False) else 'M',
                 "et": safe_p(row['etalfalfa']),
                 "bat": safe(row['battv_min'], 2),
                 "radmj": safe(row['slrmj_tot'], 2),
                 "tmpf": safe_t(row['tair_c_avg']),
                 "high": safe_t(daily.get(row['station'], {}).get('max_tmpf', None), 'F'),
                 "low": safe_t(daily.get(row['station'], {}).get('min_tmpf', None), 'F'),
-                "pday": safe(daily.get(row['station'], {}).get('pday', None), 2),
-                "soil04t": safe_t(row['tsoil_c_avg']),
+                "pday": safe(daily.get(row['station'], {}).get('pday', None), 2) if not q.get('precip', False) else 'M',
+    "soil04t": safe_t(row['tsoil_c_avg']) if not q.get('soil4', False) else 'M',
                 "soil12t": safe_t(row['t12_c_avg']),
                 "soil24t": safe_t(row['t24_c_avg']),
                 "soil50t": safe_t(row['t50_c_avg']),
