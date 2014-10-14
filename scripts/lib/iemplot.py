@@ -1245,8 +1245,15 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     if len(hours) == 24 and len(months) == 12:
         tlimit = "All Year"
     if len(hours) < 24:
-        for h in hours: 
-            tlimit += "%s," % (datetime.datetime(2000,1,1,h).strftime("%I %P"),)
+        if len(hours) > 4:
+            tlimit += "%s-%s" % (
+                    datetime.datetime(2000,1,1,hours[0]).strftime("%-I %p"),
+                    datetime.datetime(2000,1,1,hours[-1]).strftime("%-I %p")                                 
+                                 )
+        else:
+            for h in hours: 
+                tlimit += "%s," % (
+                            datetime.datetime(2000,1,1,h).strftime("%-I %p"),)
     if len(months) < 12:
         for h in months: 
             tlimit += "%s," % (datetime.datetime(2000,h,1).strftime("%b"),)
@@ -1271,7 +1278,7 @@ Obs Count: %s Calm: %.1f%% Avg Speed: %.1f %s""" % (station, sname,
     if fp is not None:
         plt.savefig(fp)
     else:
-        print "Content-Type: image/png\n"
+        sys.stdout.write("Content-Type: image/png\n\n")
         plt.savefig( sys.stdout, format='png' )
    
     del sped, drct, im

@@ -5,9 +5,6 @@ Generate a PNG windrose based on the CGI parameters
 
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import os
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
 import cgitb
@@ -33,6 +30,12 @@ else:
 
 if "hour1" in form and "hourlimit" in form:
     hours = numpy.array( (int(form["hour1"].value),) )
+elif "hour1" in form and "hour2" in form and "hourrangelimit" in form:
+    if sts.hour > ets.hour: #over midnight
+        hours = numpy.arange(sts.hour, 24)
+        hours = numpy.append( hours, numpy.arange(0, ets.hour) )
+    else:
+        hours = numpy.arange(sts.hour, ets.hour)
 else:
     hours = numpy.arange(0,24)
 

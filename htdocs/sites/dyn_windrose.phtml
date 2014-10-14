@@ -25,6 +25,9 @@ if (isset($_GET["hour1"])){
 	if (isset($_GET["monthlimit"])){
 	  $rose_uri .= "&monthlimit=1";
 	}
+	if (isset($_GET["hourrangelimit"])){
+		$rose_uri .= "&hourrangelimit=1";
+	}
 	$rosedata_uri = "{$rose_uri}&justdata=true";
 }
 
@@ -40,16 +43,20 @@ $content = <<<EOF
 This application attempts to generate a wind rose for a time period of 
 your choice.  Please be patient when submitting this form, as it may take 
 up to a few minutes to generate the plot due to the large amount of data
-that this application processes.
-
-<p>You can limit the dataset to only include observations from a particular 
-hour.
+that this application processes. You can limit the dataset from which the
+windrose is derived in three ways:
+<ol>
+ <li>By only including observations from a specific hour</li>
+ <li>By only including observations from a specific month</li>
+ <li>By only including observations between a start and end hour</li>
+</ol>
 
 <form method="GET" name="windrose">
 <input type="hidden" name="station" value="{$station}">
 <input type="hidden" name="network" value="{$network}">
 <h4>Select Start/End Time:</h4><br>
-<i>(Times are in Central Standard/Daylight Time, sorry)</i>
+<i>(Times are in US Central Standard/Daylight Time, sorry)</i>
+
 <table>
   <tr>
     <td></td>
@@ -59,10 +66,13 @@ hour.
 EOF;
 $content .= '<input type="checkbox" name="hourlimit" value="1" ';
 if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" "; 
-$content .= '>Limit to Hour of Start Time
+$content .= '>1. Limit to Hour of Start Time
 <br /><input type="checkbox" name="monthlimit" value="1" ';
 if (isset($_GET["monthlimit"])) $content .= "checked=\"checked\" "; 
-$content .= '>Limit to Month of Start Time
+$content .= '>2. Limit to Month of Start Time
+<br /><input type="checkbox" name="hourrangelimit" value="1" ';
+if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" "; 
+$content .= '>3. Limit to Range of hours given by start and end time
 <br />Display Units: <select name="units">
  <option value="kts" ';
 if ($units == "kts"){ $content .= "SELECTED='SELECTED'"; } 
