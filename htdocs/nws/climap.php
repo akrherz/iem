@@ -3,7 +3,7 @@
  * Produce a map of CLI parsed data for a single day
  */
 include("../../config/settings.inc.php");
-define("IEM_APPID", -99);
+define("IEM_APPID", 76);
 include "../../include/myview.php";
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
@@ -26,7 +26,7 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="http://openlayers.org/en/v3.0.0/build/ol-debug.js" type="text/javascript"></script>
 <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-<script src='climap.js?v=4'></script>
+<script src='climap.js?v=5'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -36,6 +36,11 @@ $t->content = <<<EOF
   <p>This is the popover content</p>
 </div>
 
+<div class="breadcrumb">
+		<li><a href="/nws/">NWS Mainpage</a></li>
+		<li class="active">Map of NWS Daily CLI Reports</li>
+		</div>
+		
 <div class="row">
 <div class="col-md-12">
 		
