@@ -20,7 +20,7 @@ def write(monthly_rows, out, station):
 
     db = {}
     for row in monthly_rows:
-        ts = mx.DateTime.DateTime( row['year'], row['month'], 1)
+        ts = mx.DateTime.DateTime( int(row['year']), int(row['month']), 1)
         db[ts] = {40: float(row["gdd40"]), 
                   48: float(row["gdd48"]), 
                   50: float(row["gdd50"]), 
