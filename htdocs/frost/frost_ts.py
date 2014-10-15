@@ -12,14 +12,14 @@ import pytz
 import numpy as np
 from pyiem.datatypes import temperature
 
-def get_latest_time():
+def get_latest_time(model):
     ''' Figure out the latest model runtime '''
     utc = datetime.datetime.utcnow()
     utc = utc.replace(tzinfo=pytz.timezone("UTC"))
     utc = utc.replace(hour=12,minute=0,second=0,microsecond=0)
     limit = 24
     while not os.path.isfile(
-                utc.strftime("/mesonet/share/frost/bridget/%Y%m%d%H%M_iaoutput.nc")):
+                utc.strftime("/mesonet/share/frost/"+model+"/%Y%m%d%H%M_iaoutput.nc")):
         utc -= datetime.timedelta(hours=12)
         limit -= 1
         if limit < 0:
@@ -61,12 +61,17 @@ def get_ifrost_color(val):
     except:
         return 'none'
 
-def process(lon, lat):
+def process(model, lon, lat):
     ''' Generate a plot for this given combination '''
     (fig, ax) = plt.subplots(1,1)
-    modelts = get_latest_time()
+    modelts = get_latest_time(model)
+    if modelts is None:
+        ax.text(0.5, 0.5, "No Data Found to Plot!", ha='center')
+        sys.stdout.write("Content-Type: image/png\n\n")
+        fig.savefig( sys.stdout, format="png")
+        return
     nc = netCDF4.Dataset(
-            modelts.strftime("/mesonet/share/frost/bridget/%Y%m%d%H%M_iaoutput.nc"),'r')
+            modelts.strftime("/mesonet/share/frost/"+model+"/%Y%m%d%H%M_iaoutput.nc"),'r')
     times = get_times(nc)
     i, j = get_ij(lon, lat, nc)
     
@@ -77,9 +82,9 @@ def process(lon, lat):
     ax.plot(times, temperature(nc.variables['dwpk'][:,i,j], 'K').value("F"),
             color='g', label='Dew Point')
     #ax.set_ylim(-30,150)
-    ax.set_title(("ISUMM5 BridgeT Timeseries\n"
-                 +"i: %s j:%s lon: %.2f lat: %.2f Model Run: %s") % (i, j,
-                    nc.variables['lon'][i,j], nc.variables['lat'][i,j],
+    ax.set_title(("ISUMM5 %s Timeseries\n"
+                 +"i: %s j:%s lon: %.2f lat: %.2f Model Run: %s") % (model,
+                    i, j, nc.variables['lon'][i,j], nc.variables['lat'][i,j],
                     modelts.astimezone(pytz.timezone("America/Chicago")).strftime(
                             "%-d %b %Y %-I:%M %p")))
     
@@ -107,9 +112,13 @@ def process(lon, lat):
     sys.stdout.write("Content-Type: image/png\n\n")
     fig.savefig( sys.stdout, format="png")
 
-    
-
-if __name__ == '__main__':
+def main():
+    """ Go Main Go """
     form = cgi.FieldStorage()
     if form.has_key('lon') and form.has_key('lat'):
-        process(float(form.getfirst('lon')), float(form.getfirst('lat')))
+        process(form.getfirst('model'), float(form.getfirst('lon')), 
+                float(form.getfirst('lat')))    
+
+if __name__ == '__main__':
+    # main
+    main()
