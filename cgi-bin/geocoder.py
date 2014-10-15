@@ -16,6 +16,8 @@ def main():
         address = form["address"].value 
     elif form.has_key("street") and form.has_key("city"):
         address = "%s, %s" % (form["street"].value, form["city"].value)
+    else:
+        sys.stdout.write("APIFAIL")
 
     address = urllib.urlencode({'address': address})
     uri = ('http://maps.googleapis.com/maps/api/geocode/json'
