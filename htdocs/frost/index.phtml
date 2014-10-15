@@ -8,7 +8,7 @@ $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <style>
   #map {
-    width: 500px;
+    width: 100%;
     height: 400px;
     float: left;
   }
@@ -16,10 +16,19 @@ $t->headextra = <<<EOF
 <script type="text/javascript">
 var myv = "bdeckt";
 var myt = '00';
+var mymodel = 'bridget';
 var myi = '001';
+var marker;
+function updatePlot(){
+	$('#frost_ts').attr('src', "frost_ts_"+ mymodel +"_"+
+		marker.getPosition().lng() +"_"+ marker.getPosition().lat() +".png")
+}
+function switchmodel(){
+	mymodel = $("#whichmodel").val();
+	updatePlot();		
+}
 function updateMarkerPosition(latLng) {
-        //console.log(latLng.lat() +'-'+ latLng.lng());
-		$('#frost_ts').attr('src', "frost_ts_"+ latLng.lng() +"_"+ latLng.lat() +".png")
+	updatePlot();		
 }
 function initialize() {
         var latLng = new google.maps.LatLng(41.53, -93.653);
@@ -28,12 +37,12 @@ function initialize() {
             center: latLng,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         });
-          var marker = new google.maps.Marker({
+	marker = new google.maps.Marker({
             position: latLng,
             title: 'Point A',
             map: map,
             draggable: true
-        });
+	});
 
           google.maps.event.addListener(marker, 'dragend', function() {
             updateMarkerPosition(marker.getPosition());
@@ -41,7 +50,7 @@ function initialize() {
 }
 
 function showimg(){
-	$('#modimg').attr('src', '/data/model/frost/'+myt+'/'+myv+'_'+myt+'_f'+myi+'.png');
+	$('#modimg').attr('src', '/data/model/frost/'+mymodel+'/'+myt+'/'+myv+'_'+myt+'_f'+myi+'.png');
 }
 function show(i){
 	myi = i;
@@ -102,25 +111,32 @@ EOF;
 
 $t->content = <<<EOF
 
+<h2>ISU + Iowa DOT Road Pavement Forecasting</h2>
+
+<div class="alert alert-warning">This page contains unofficial and experimental
+forecasts intended for research purposes.</div>
+
 <div class="row">
- <div class="col-md-6"><div id="map"></div></div>
- <div class="col-md-6"><img id="frost_ts" src="frost_ts_-93.5_42.1.png" class="img img-responsive"></div>
+ <div class="col-md-6">
+ 	<form name="s">
+ 	<strong>Select Pavement Model:</strong>
+ 	<select name="model" id="whichmodel" onChange="switchmodel();">
+ 	  <option value="bridget">BridgeT</option>
+ 	  <option value="metro">METRo</option>
+ 	 </select>
+ 	</form>
+ 	<div id="map"></div>
+ </div>
+ <div class="col-md-6"><img id="frost_ts" src="frost_ts_bridget_-93.5_42.1.png" class="img img-responsive"></div>
 </div>
 
-<table><tr><td valign="top">
-<img align="left" src="images/Station_bridge.jpg"></td><td>
 
-<h3 class="heading">Frost Forecasting</h3>
-
-<p>This page is the homepage of our frost modeling and prediction effort. 
-Products presented here are for educational use only.
-
-<h2 class="subtitle">IEM Useful Links:</h2><ul>
+<h4>IEM Useful Links:</h4>
+<ul>
 <li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a></li>
 <li><a href="/data/mesonet.gif">Mesonet plot</a></li>
 <li><a href="/data/rwis_sf.gif">RWIS pavement temps plot</a></li>
-<li><a href="/RWIS/current.phtml">RWIS sortable
-currents</a></li></ul>
+<li><a href="/RWIS/current.phtml">RWIS sortable currents</a></li></ul>
 </td></tr></table>
 
 <br clear="all">
@@ -144,25 +160,6 @@ currents</a></li></ul>
 
 {$table}
 
-
-<!--
-<h3>Time series:</h3>
-<li><a href="/plotting/24h/1station.php?station=AMW">Recent Ames ASOS</a></li>
-<li><a href="/plotting/scan/radn5temps.php">SCAN site recent soil temps w/ rad</a></li>
-
-<h3>Frost Forecasts:</h3>
-&nbsp; &nbsp; <b>ISU Frost Model</b>
-<BR><a href="/plotting/frost/accum.php?model=MM5">with ISU MM5 input data</a>
-<BR><a href="/plotting/frost/accum.php?model=SSI">with SSI input data</a>
-
-<h3>Forecast Comparison:</h3>
-<a href="/plotting/frost/f201.php?varnum=4">MM5 Skin Temp vs SSI Pavement</a>
-<br><a href="/plotting/frost/f201.php?varnum=5">MM5 2m Air Temp vs SSI Air Temp</a>
-<br><a href="/plotting/frost/f201.php?varnum=6">MM5 2m Dew Point vs SSI Dew Point</a>
-<br><a href="/plotting/frost/f201.php?varnum=7">MM5 2m Wind Speed vs SSI Wind Speed</a>
-
-<BR><BR>
--->
 EOF;
 $t->render('single.phtml');
 ?>
