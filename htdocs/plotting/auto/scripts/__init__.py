@@ -17,6 +17,7 @@ data = {'plots': [
         {'id': "22", 'label': "Percentage of Years within Temperature Range from Averages"},
         {'id': "25", 'label': "Spread of Daily High and Low Temperatures"},
         {'id': "4", 'label': "State Areal Coverage of Precip Intensity over X Days"},
+        {'id': "28", 'label': "Trailing Number of Days Precipitation Total Rank"},
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "1", 'label': "July-August Days Above Temp v. May-June Precip"},
