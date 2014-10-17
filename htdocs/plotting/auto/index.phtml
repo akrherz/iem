@@ -109,6 +109,10 @@ if (isset($_GET["q"])){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td>". monthSelect2( $value, $v->name) ."</td></tr>" ;
 		}
+		elseif ($v->type == "zhour"){
+			$form .= "<tr><td>". $v->label ."</td>
+			<td>". gmtHourSelect( $value, $v->name) ."</td></tr>" ;
+		}
 		elseif ($v->type == "day"){
 			$form .= "<tr><td>". $v->label ."</td>
 			<td>". daySelect( $value, $v->name) ."</td></tr>" ;
