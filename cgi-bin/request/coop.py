@@ -302,12 +302,21 @@ def do_daycent( ctx ):
         if not extra.has_key(febtest):
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
-    
-    cursor.execute("""
-        SELECT day, high, low, precip,
-        extract(doy from day) as doy
-        from """+table+""" WHERE station = %s 
-        and day >= %s and day <= %s ORDER by day ASC
+    if ctx.get('hayhoe_model') is not None:
+        cursor.execute("""
+            SELECT day, high, low, precip,
+            extract(doy from day) as doy
+            from hayhoe_daily WHERE station = %s 
+            and day >= %s and scenario = %s and model = %s
+            ORDER by day ASC
+        """, (ctx['stations'][0], ctx['sts'],
+              ctx['hayhoe_scenario'], ctx['hayhoe_model']) )        
+    else:
+        cursor.execute("""
+            SELECT day, high, low, precip,
+            extract(doy from day) as doy
+            from """+table+""" WHERE station = %s 
+            and day >= %s and day <= %s ORDER by day ASC
         """, (ctx['stations'][0], ctx['sts'], ctx['ets']) )
     ssw("Daily Weather Data File (use extra weather drivers = 0):\n\n")
     for row in cursor:
@@ -563,6 +572,8 @@ def main():
     ctx['delim'] = form.getfirst('delim', 'comma')
     ctx['inclatlon'] = form.getfirst('gis', 'no')
     ctx['scenario'] = form.getfirst('scenario', 'no')
+    ctx['hayhoe_scenario'] = form.getfirst('hayhoe_scenario')
+    ctx['hayhoe_model'] = form.getfirst('hayhoe_model')
     if ctx['scenario'] == 'yes':
         ctx['scenario_year'] = int(form.getfirst('scenario_year', 2099))
     else:
