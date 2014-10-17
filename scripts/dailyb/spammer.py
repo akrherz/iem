@@ -35,9 +35,9 @@ def feature():
  +----------------------------------------------
 %(link)s
  | Title : %(title)s
- | Date  : %(nicedate)s
- | Votes : Good: %(good)s   Bad: %(bad)s
- +----------------------------------------------
+ | Date  : %(nicedate)s  
+ | Votes : Good: %(good)s   Bad: %(bad)s   Abstain: %(abstain)s
+ +---------------------------------------------------------------
 
 %(story)s
 
@@ -45,7 +45,7 @@ def feature():
     htmlfmt = """
 <p><a href="%(link)s">%(title)s</a>
 <br /><strong>Date:</strong> %(nicedate)s
-<br /><strong>Votes:</strong> Good: %(good)s &nbsp;  Bad: %(bad)s
+<br /><strong>Votes:</strong> Good: %(good)s &nbsp;  Bad: %(bad)s  Abstain: %(abstain)s
 
 <p>%(story)s
 
@@ -145,10 +145,10 @@ msg.attach(part1)
 msg.attach(part2)
 
 try:
-  s = smtplib.SMTP('mailhub.iastate.edu')
+    s = smtplib.SMTP('mailhub.iastate.edu')
 except:
-  time.sleep(57)
-  s = smtplib.SMTP('mailhub.iastate.edu')
+    time.sleep(57)
+    s = smtplib.SMTP('mailhub.iastate.edu')
 s.sendmail(msg['From'], [msg['To']], msg.as_string())
 s.quit()
 
