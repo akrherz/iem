@@ -63,7 +63,6 @@ def plotter( fdict ):
     ax.set_xticks(range(0,13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.grid(True)
-    ax.legend()
     ax.set_ylim(0,100)
     ax.set_yticks([0,25,50,75,100])
     ax.set_ylabel("Frequency [%]")
