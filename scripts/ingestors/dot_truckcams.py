@@ -1,8 +1,8 @@
-'''
+"""
   Iowa DOT Truck dash camera imagery.  Save this to the IEM archives
   
   /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
-'''
+"""
 import urllib2
 import json
 import psycopg2
@@ -62,7 +62,12 @@ def workflow():
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
         #print label, utc, feat['attributes']['PHOTO_URL']
-        image = urllib2.urlopen(feat['attributes']['PHOTO_URL'], timeout=15).read()
+        try:
+            image = urllib2.urlopen(feat['attributes']['PHOTO_URL'], timeout=15).read()
+        except urllib2.HTTPError, exp:
+            print('dot_truckcams.py dl fail |%s| %s' % (exp, 
+                                            feat['attributes']['PHOTO_URL']))
+            continue
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(image)
         tmp.close()
