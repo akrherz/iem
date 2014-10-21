@@ -9,9 +9,9 @@ for linenum, line in enumerate(open('crop_progress.csv')):
         continue
     tokens = line.replace('"','').split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 4 and day.day in range(17,24):
+    if day.month == 10 and day.day in range(16,23):
         state = tokens[5]
-        val = float(tokens[-1])
+        val = float(tokens[20])
         if not data.has_key(state):
             data[state] = []
         if day.year == 2014:
@@ -51,20 +51,15 @@ m.fillcontinents(color='tan',zorder=0)
 
 source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody")
 #data = source.ExecuteSQL("select geom from warnings_2011 where gtype = 'P' LIMIT 1")
-data = source.ExecuteSQL("""select the_geom, state_name,
+data = source.ExecuteSQL("""select ST_Simplify(the_geom, 0.01), state_name,
 ST_x(ST_Centroid(the_geom)) as x, ST_Y(ST_Centroid(the_geom)) as y from states""")
 
-from iem import plot
-maue = plot.maue(15)
-bins = [0,1,2,3,4,5,7,10,15,20,25,30,35]
+from pyiem.plot import maue
+import matplotlib.colors as mpcolors
+cmap = plt.get_cmap('cubehelix_r')
+bins = range(0,101,10)
+norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
-def get_color(val, minvalue, maxvalue):
-    if val < bins[0]:
-        return "None"
-    for i in range(1,len(bins)):
-        if val < bins[i]:
-            return maue(i-1)
-    return maue(14)
 patches = []
 while 1:
     feature = data.GetNextFeature()
@@ -74,7 +69,7 @@ while 1:
     if not results.has_key(name.upper()):
         continue
     geom = loads(feature.GetGeometryRef().ExportToWkb())
-    c = get_color(results[name.upper()]['d2014'],0,100)
+    c = cmap(norm([results[name.upper()]['d2014'],]))[0]
     for polygon in geom:
         a = asarray(polygon.exterior)
         x,y = m(a[:,0], a[:,1])
@@ -97,24 +92,24 @@ axaa = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
                       yticks=[], xticks=[])
 colors = []
 for i in range(len(bins)):
-    colors.append( rgb2hex(maue(i)) )
+    colors.append( rgb2hex(cmap(i)) )
     txt = axaa.text(0.5, i, "%s" % (bins[i],), ha='center', va='center',
                           color='w')
     txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                      foreground="k")])
 axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
-                color=maue(range(len(bins))),
+                color=cmap(norm(bins)),
                 ec='None')
 
-ax.text(0.17, 1.05, "20 Apr 2014 USDA Percentage of Corn Planted\nPercentage Points Departure from 1980-2013 Average for 17-24 Apr", transform=ax.transAxes,
+ax.text(0.17, 1.05, "19 Oct 2014 USDA Percentage of Corn Harvested\nPercentage Points Departure from 1980-2013 Average for 16-23 Oct", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
 from PIL import Image
-logo = Image.open('../../htdocs/images/logo_small.png')
+logo = Image.open('../../../htdocs/images/logo_small.png')
 ax3 = plt.axes([0.05,0.9,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117), yticks=[], xticks=[])
 ax3.imshow(logo)
 
-fig.savefig('test.png')
+fig.savefig('test.png', dpi=45)
 #import iemplot
 #iemplot.makefeature('test')
