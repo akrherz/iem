@@ -289,7 +289,7 @@ var tp = new Ext.tree.TreePanel({
                     emptyText  : '(Optional)'
                 }, new Ext.form.NumberField({
                    allowBlank:false,
-                   maxValue:99,
+                   maxValue:9999,
                    minValue:0,
                    name:'sz',
                    width: 100,
