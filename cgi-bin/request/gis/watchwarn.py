@@ -57,8 +57,19 @@ if form.has_key('wfos[]'):
     if 'ALL' not in aWFO:
         wfoLimiter = " and w.wfo in %s " % ( str( tuple(aWFO) ), )
 
-os.chdir("/tmp/")
 fp = "wwa_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
+timeopt = int(form.get('timeopt', [1])[0])
+if timeopt == 2:
+    year3 = int(form['year3'][0])
+    month3 = int(form['month3'][0])
+    day3 = int(form['day3'][0])
+    hour3 = int(form['hour3'][0])
+    minute3 = int(form['minute3'][0])
+    sTS = datetime.datetime(year3, month3, day3, hour3, minute3)
+    sTS = sTS.replace(tzinfo=pytz.timezone("UTC"))
+    fp = "wwa_%s" % (sTS.strftime("%Y%m%d%H%M"), )
+
+os.chdir("/tmp/")
 for suffix in ['shp', 'shx', 'dbf']:
     if os.path.isfile("%s.%s" % (fp, suffix)):
         os.remove("%s.%s" % (fp, suffix))
@@ -129,6 +140,11 @@ if form.has_key('simple') and form['simple'][0] == 'yes':
 cols = """%s, gtype, significance, wfo, status, eventid, ugc, phenomena,
  area2d, utc_expire, utc_issue, utc_prodissue, utc_init_expire""" % (geomcol,)
 
+timelimit = "issue >= '%s' and issue < '%s'" % (sTS, eTS)
+if timeopt == 2:
+    timelimit = "issue <= '%s' and issue > '%s' and expire > '%s'" % (sTS, 
+            sTS + datetime.timedelta(days=-30), sTS)
+
 sql = """
 WITH stormbased as (
  SELECT geom, 'P'::text as gtype, significance, wfo, status, eventid, 
@@ -139,7 +155,7 @@ WITH stormbased as (
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
  to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
- from %s w WHERE status = 'NEW' and issue >= '%s' and issue < '%s' %s %s
+ from %s w WHERE status = 'NEW' and %s %s %s
 ),
 countybased as (
  SELECT u.simple_geom as simple_geom, u.geom as geom, 'C'::text as gtype, significance, 
@@ -150,11 +166,11 @@ countybased as (
  to_char(product_issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
  to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
  from %s w JOIN ugcs u on (u.gid = w.gid) WHERE
- issue >= '%s' and issue < '%s' %s %s
+ %s %s %s
  )
  SELECT %s from stormbased UNION SELECT %s from countybased %s
-""" % ( table2, sTS, eTS, wfoLimiter, limiter,
-        table1, sTS, eTS, wfoLimiter, limiter,
+""" % ( table2, timelimit, wfoLimiter, limiter,
+        table1, timelimit, wfoLimiter, limiter,
        cols, cols, sbwlimiter)
 #print 'Content-type: text/plain\n'
 #print sql
