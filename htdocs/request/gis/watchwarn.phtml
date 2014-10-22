@@ -4,9 +4,14 @@
  */
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 18);
+include("../../../include/forms.php");
 include("../../../include/myview.php");
-$t = new MyView();
 include("../../../include/network.php");
+
+$t = new MyView();
+$t->title = "NWS Watch Warning Archive Download";
+$t->thispage = "gis-";
+
 $nt = new NetworkTable("WFO");
 
 function get_file_size($filename, $size_in = 'MB') {
@@ -33,9 +38,6 @@ function get_file_size($filename, $size_in = 'MB') {
 	return $size . ' ' . $size_in;
 }
 
-$t->title = "NWS Watch Warning Archive Download";
-include("../../../include/forms.php");
-$t->thispage = "gis-";
 
 $wselect = "<select name=\"wfos[]\" MULTIPLE size=\"5\">";
 $wselect .= "<option value=\"ALL\" SELECTED>All Available</option>";
@@ -48,11 +50,19 @@ $m1select = monthSelect2(0,"month1");
 $d1select = daySelect2(0, "day1");
 $h1select = gmtHourSelect(0, "hour1");
 $mi1select = minuteSelect(0, "minute1");
+
 $y2select = yearSelect2(1986, date("Y"), "year2");
 $m2select = monthSelect2(0,"month2");
 $d2select = daySelect2(0, "day2");
 $h2select = gmtHourSelect(0, "hour2");
 $mi2select = minuteSelect(0, "minute2");
+
+$y3select = yearSelect2(1986, date("Y"), "year3");
+$m3select = monthSelect2(0,"month3");
+$d3select = daySelect2(0, "day3");
+$h3select = gmtHourSelect(0, "hour3");
+$mi3select = minuteSelect(0, "minute3");
+
 
 $table = "";
 for($year=1986;$year<=date("Y");$year++){
@@ -73,7 +83,7 @@ for($year=1986;$year<=date("Y");$year++){
 }
 
 $content = <<<EOF
-<h3 class="heading">Archived NWS Watch/Warnings</h3>
+<h3>Archived NWS Watch/Warnings</h3>
 
 <p>This page allows you to generate a custom GIS shapefile or Google Earth KML of NWS issued watches
 and warnings for a time period of your choice.  Please be sure to read the
@@ -96,15 +106,22 @@ request or email <a href="/info/contacts.php">us</a> for help.
 {$wselect}
 
 <h4>Select time interval</h4>
-<i>(Times are in UTC.  Watches/Warnings <b>issued</b> between these times
-will be included in the output GIS file...)</i>
-<table>
+<i>(Times are in UTC.</i>
+
+<table class="table table-condensed table-bordered table-striped">
   <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
   </tr>
 
+<tr>
+	<th colspan="6">
+	<input type="radio" name="timeopt" value="1" checked="checked" /> 
+	Option 1: WWA events with start time between the specified start
+	and end dates.</th>
+</tr>
+  
   <tr>
     <th>Start:</th>
     <td>{$y1select}</td><td>{$m1select}</td><td>{$d1select}</td>
@@ -113,6 +130,17 @@ will be included in the output GIS file...)</i>
     <th>End:</th>
     <td>{$y2select}</td><td>{$m2select}</td><td>{$d2select}</td>
     <td>{$h2select}</td><td>{$mi2select}</td></tr>
+<tr>
+	<th colspan="6">
+	<input type="radio" name="timeopt" value="2" /> 
+	Option 2: WWA events valid at this exact time (UTC)</th>
+</tr>
+	<tr>
+    <th>Valid:</th>
+    <td>{$y3select}</td><td>{$m3select}</td><td>{$d3select}</td>
+    <td>{$h3select}</td><td>{$mi3select}</td></tr>
+    
+    
     </table>
 
 <br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
