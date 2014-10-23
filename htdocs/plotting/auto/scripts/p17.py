@@ -57,7 +57,9 @@ def plotter( fdict ):
     day >= %s and day < %s
     """, (station, network, sts, ets))
 
+    has_data = False
     for row in cursor:
+        has_data = True
         highs[ int(row[0].day) - 1 ] = row[1]
         lows[ int(row[0].day) - 1 ] = row[2]
 
@@ -89,9 +91,13 @@ def plotter( fdict ):
             color='pink')
     ax.plot(np.arange(1,days+1), cllows , zorder=3, marker='o',
             color='skyblue')
-    ax.bar(np.arange(1,days+1)-0.3, highs, fc='r', ec='k', width=0.3, 
+    if has_data:
+        ax.bar(np.arange(1,days+1)-0.3, highs, fc='r', ec='k', width=0.3, 
            linewidth=0.6)
-    ax.bar(np.arange(1,days+1), lows, fc='b', ec='k', width=0.3, linewidth=0.6)
+        ax.bar(np.arange(1,days+1), lows, fc='b', ec='k', width=0.3, linewidth=0.6)
+    else:
+        ax.text(0.5, 0.5, "No Data Found", transform=ax.transAxes)
+        ax.set_ylim(0,1)
     
     for i in range(days):
         txt = ax.text(i+1-0.15, highs[i]+0.5, "%.0f" % (highs[i],), fontsize=10,
@@ -106,16 +112,22 @@ def plotter( fdict ):
         ax.set_ylim(min(min(cllows), min(lows))-5,
                 max(max(clhighs), max(highs))+5)
     else:
-        ax.set_ylim(min(lows)-5, max(highs)+5)
+        if has_data:
+            ax.set_ylim(min(lows)-5, max(highs)+5)
     ax.set_xlim(0.5, days + 0.5)
     ax.set_xticks( np.arange(1, days+1))
     ax.set_xticklabels( np.arange(1,days+1), fontsize=8)
     ax.set_xlabel( sts.strftime("%B %Y") )
     ax.set_ylabel("Temperature $^\circ$F")
+    
+    if nt.sts[station]['ncdc81'] is None:
+        subtitle = "Daily climatology unavailable for site"
+    else:
+        subtitle = "NCDC 1981-2010 Climate Site: %s" % (nt.sts[station]['ncdc81'],)
 
-    ax.text(0,1.01, "[%s] %s :: Hi/Lo Temps for %s\nNCDC 1981-2010 Climate Site: %s" % (
+    ax.text(0,1.01, "[%s] %s :: Hi/Lo Temps for %s\n%s" % (
                     station, nt.sts[station]['name'], sts.strftime("%b %Y"),
-                    nt.sts[station]['ncdc81'],), transform=ax.transAxes,
+                    subtitle), transform=ax.transAxes,
             ha='left', va='bottom')
     
     ax.yaxis.grid( linestyle='-' )
