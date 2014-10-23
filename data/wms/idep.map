@@ -740,9 +740,6 @@ LAYER
     UNITS METERS
     CLASS
       EXPRESSION ([da] == 0)
-      STYLE
-        COLOR 180 180 180
-      END # STYLE
     END # CLASS
     CLASS
       EXPRESSION ([da] < 0.1)
@@ -876,9 +873,6 @@ LAYER
     UNITS METERS
     CLASS
       EXPRESSION ([da] == 0)
-      STYLE
-        COLOR 180 180 180
-      END # STYLE
     END # CLASS
     CLASS
       EXPRESSION ([da] < 10)
@@ -1012,9 +1006,6 @@ LAYER
     UNITS METERS
     CLASS
       EXPRESSION ([da] == 0)
-      STYLE
-        COLOR 180 180 180
-      END # STYLE
     END # CLASS
     CLASS
       EXPRESSION ([da] < 10)
@@ -1149,9 +1140,6 @@ LAYER
     UNITS METERS
     CLASS
       EXPRESSION ([da] == 0)
-      STYLE
-        COLOR 180 180 180
-      END # STYLE
     END # CLASS
     CLASS
       EXPRESSION ([da] < 0.05)
@@ -1286,9 +1274,6 @@ LAYER
     UNITS METERS
     CLASS
       EXPRESSION ([da] == 0)
-      STYLE
-        COLOR 180 180 180
-      END # STYLE
     END # CLASS
     CLASS
       EXPRESSION ([da] < 0.05)
