@@ -20,6 +20,7 @@ if ($sortvar == 'station'){ $sortvar = 'id'; }
 $ts = mktime(0,0,0, $month, $day, $year);
 $dateStr = strftime("%Y-%m-%d", $ts);
 $nicedate = strftime("%d %B %Y", $ts);
+$nicemonthdate = strftime("%B %Y", $ts);
 $htmlout = "";
 
 function snowprint($val){
@@ -151,8 +152,9 @@ if (substr($network,2) == "CLIMATE"){
 $rs = pg_exec($c, $sql);
 
 if ($mode == "monthly") {
- $db = Array();
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
+	$t->title = sprintf("%s Data Calendar for %s", $station, $nicemonthdate);
+	$db = Array();
+ for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
   $qc = $row["max_tmpf_qc"];
   if ($row["max_tmpf"] == -99) $row["max_tmpf"] = "M";
   if ($row["min_tmpf"] == 99) $row["min_tmpf"] = "M";
@@ -200,10 +202,21 @@ if ($mode == "monthly") {
  		$network, $station, $month, $year);
 
 } else {
+	$t->title = sprintf("%s Network Summary for %s", $network, $nicedate);
 	// We want a table of obs for one day!
  	$uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&station=$station&network=$network&sortvar=";
  	$htmlout = <<<EOF
+ 	
+<p>This table lists out IEM computed daily summary values for this network.
+These values are derived from available observations and specialized summary
+products that some of the observation sites produce.  The time zone reported
+for the peak winds are hopefully the local valid time 
+(<strong>{$metadata["tzname"]}</strong>) at the site. There
+is a <a href="/request/daily.phtml?network={$network}">download interface</a> for most of this
+summary information.</p>
+ 	
 <table class="table table-striped table-bordered">
+<thead>
 <tr>
 <th><a href="{$uri}id">ID:</a></th>
 <th><a href="{$uri}station">Location:</a></th>
@@ -215,6 +228,7 @@ if ($mode == "monthly") {
 <th><a href="{$uri}snow">Snowfall:</a></th>
 <th><a href="{$uri}snowd">Snow Depth:</a></th>
 </tr>
+</thead>
 EOF;
  	for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
   		$qc = $row["max_tmpf_qc"];
@@ -244,7 +258,7 @@ EOF;
 	  	if ($row["pday"] < 0)
 	    	$htmlout .= "<td>M</td>";
 	  	else
-	    	$htmlout .= "<td>". $row["pday"] ."</td>";
+	    	$htmlout .= "<td>". snowprint($row["pday"]) ."</td>";
 	
 	  	if (strlen($row["max_gust"]) > 0 && $row["lmax_gust_ts"] != "") {
 	    	$gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
@@ -263,49 +277,41 @@ EOF;
  	$htmlout .= "</table>\n";
 }
 
-/* Begin Page Output */
-  $t->title = "Weather Data Calendar";
   $t->thispage = "iem-sites";
   $t->sites_current="calendar"; 
+
   $content = <<<EOF
-<h2>Data Calendar for {$st->table[$station]["name"]}</h2>
 <div class="hidden-print">
 <form method="GET" name="changer" class="form-inline" role="form">
 <input type="hidden" name="station" value="{$station}">
 <input type="hidden" name="network" value="{$network}">
 EOF;
+$ys = yearSelect(2002, $year, "year");
+$ms = monthSelect($month, "month");
+$ds = daySelect($day);
 if ($mode == "monthly"){
-  $content .= "The calendar chart below shows the daily reported climate variables.  
+  $content .= <<<EOF
+  	<h2>Data Calendar for {$st->table[$station]["name"]}</h2>
+  		The calendar chart below shows the daily reported climate variables.  
   You can click on a date to display the values for all sites for that day. 
-  Time stamps are displayed in the <strong>". $metadata["tzname"] ."</strong> 
-  timezone. Wind speeds are in mph and temperatures in Fahrenheit.";
-  $content .= "<p>Year: &nbsp; ". yearSelect(2002, $year, "year");
-  $content .= " &nbsp; Month: &nbsp; ". monthSelect($month, "month");
-  $content .= " &nbsp; <input type='submit' value='Change'></form>";
-	$content .= "</div>";
+  Time stamps are displayed in the <strong>{$metadata["tzname"]}</strong> 
+  timezone. Wind speeds are in mph and temperatures in Fahrenheit.
+	<p>Year: &nbsp; {$ys}
+	<p>Month: &nsbp; {$ms}
+	<p>&nbsp; <input type='submit' value='Change'></form>
+</div>
+EOF;
 } else {
-  $content .= "The chart below lists out the reported summary values for a particular date.";
-  $content .= "<p>Switch date shown:<br /><input type=\"hidden\" value=\"daily\" name=\"mode\">";
-  $content .= yearSelect(2002, $year, "year");
-  $content .= monthSelect($month, "month");
-  $content .= daySelect($day);
-  $content .= "<input type=\"submit\" value=\"Switch Date\"></form>";
-	$content .= "</div>";
-  $content .= "<p>Date show in table: $nicedate";
+  $content .= <<<EOF
+  <h2>{$nicedate} Summary for {$network}</h2> 
+  <p>Switch date shown:<br /><input type="hidden" value="daily" name="mode">
+  {$ys} {$ms} {$ds}
+  <input type="submit" value="Switch Date"></form>
+  </div>
+EOF;
 }
 
 $content .= $htmlout;
-$content .= <<<EOF
-<br clear="all"/>
-<p><b>Notes:</b>
-<ul>
-<li>This data is <b>NOT</b> considered official and is intended for educational use only.</li>
-<li>Due to some complexities with the wind gusts, peak gusts before 12:15 AM 
-are not included.</li>
-<li>Values that are <strike>crossed out</strike> failed a crude quality control routine.</li>
-<li>Peak wind gusts are unavailable prior to 11 July 2002.</li>
-</ul>
-EOF;
 $t->content = $content;
 $t->render('sites.phtml');
 
