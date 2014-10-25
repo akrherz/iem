@@ -153,6 +153,11 @@ $fselect = make_select("format", $format, $ar);
 $uri = "current.phtml?sorder=$sorder&metar=$metar&network=$network&sortcol=";
 $uri2 = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
 
+$year = date("Y");
+$month = date("m");
+$day = date("d");
+$tkeys = array_keys($nt->table);
+$station = $tkeys[0];
 $table = <<<EOF
 <table border=1 cellspacing=0 cellpadding=1>
 <tr>
@@ -169,7 +174,9 @@ Select Network: {$nselect}</td>
 is based on that timezone. <br />Table sorted by: <b>({$vals[$sortcol]})</b>  
 &nbsp; &nbsp; Click on
 a column to sort it. Click on site ID for more information. You can download data from 
-this network <a href='../request/download.phtml?network=${network}'>here</a>.<br />
+this network <a href='/request/download.phtml?network=${network}'>here</a>
+and you can view <a href="/sites/hist.phtml?station=${station}&network=${network}&mode=daily&year=$year&month=$month&day=$day">daily summaries</a>
+on this network.
 
 <form method="GET" action="/my/current.phtml">
 
