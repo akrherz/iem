@@ -14,7 +14,7 @@ def consume(fp, ts):
     tablets = ts + datetime.timedelta(hours=6)
     table = "data_%s" % (tablets.strftime("%Y_%m"),)
     for line in open(fp):
-        tokens = line.split()
+        tokens = line.replace("\x00", "").strip().split()
         if len(tokens) != 3:
             continue
         (sid,sm,od) = tokens
