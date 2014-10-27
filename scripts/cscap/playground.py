@@ -9,16 +9,17 @@ config.read('mytokens.cfg')
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
-ss = util.Spreadsheet(docs_client, spr_client, config.get('cscap', 'dashboard'))
-ss.worksheets["2011"].get_cell_feed()
-
-print ss.worksheets["2011"].get_cell_entry(1,1)
-
-sys.exit()
 query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='API Exercise')
+                                    title='NWREC Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
-
+for entry in feed:
+    feed2 = docs_client.get_revisions(entry)
+    for entry2 in feed2.entry:
+        print entry2
+        print entry2.etag, entry.id.text, entry2.id.text
+        feed3 = spr_client.get_list_feed('0AqZGw0coobCxdGtEakU5bm9sWEQ4cE94cmR2UzMybFE', '1', 
+                                         etag=entry2.etag[2:])
+        print len(str(feed3))
 """
 <ns0:id>https://docs.google.com/feeds/id/spreadsheet%3A0AqZGw0coobCxdDA2RUFKa0FCZzBrbWtRYVA5TVRrYUE</ns0:id>
 <ns1:resourceId>spreadsheet:0AqZGw0coobCxdDA2RUFKa0FCZzBrbWtRYVA5TVRrYUE</ns1:resourceId>
@@ -93,7 +94,7 @@ feed = docs_client.GetAllResources(query=query)
  <ns2:edited xmlns:ns2="http://www.w3.org/2007/app">2013-02-25T22:00:01.825Z</ns2:edited>
  </ns0:entry>
 
-"""
+
 
 for entry in feed:
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
@@ -106,3 +107,4 @@ for entry in feed:
         #ws = spreadsheet.worksheets[title]
         #print "%s %s rows: %s cols: %s" % (spreadsheet.title, title, ws.rows,
         #                                   ws.cols) 
+"""
