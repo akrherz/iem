@@ -54,7 +54,7 @@ python mrms_raster_p1h.py $YYYY $MM $DD $HH
 python mrms_raster_pXXh.py $YYYY $MM $DD $HH
 
 cd ../smos
-python ingest.py
+python ingest_smos.py
 
 cd ../qc
 python check_awos_online.py
