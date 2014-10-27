@@ -28,8 +28,8 @@ MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor()
+HADS = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+hcursor = HADS.cursor()
 
 DATA = """IA0112,ALBI4,A
 IA0133,ALGI4,B
@@ -209,27 +209,39 @@ def get_site(year, month, iemre, nwsli):
     ets = ets.replace(day=1)
     while sts < ets:
         data.append({'coop': {'high': '', 'low': '', 'atob': '', 
-                              'prec': '', 'sf': '', 'sog': ''},
+                              'prec': '', 'sf': '', 'sog': '',
+                              'v': ''},
                      'iemre': {'high': '', 'low': '', 'atob': '', 
                               'prec': '', 'sf': '', 'sog': ''}})
         sts += datetime.timedelta(days=1)
 
-    # Go fetch COOP obs
-    icursor.execute("""
-    select extract(day from day), s.max_tmpf, s.min_tmpf, s.snow, s.snowd, 
-    s.coop_tmpf, s.pday from summary_%s s JOIN stations t on (t.iemid = s.iemid) 
-    WHERE t.id = '%s' and extract(month from day) = %s and t.network = 'IA_COOP'
-    """ % (year, nwsli, month))
-    for row in icursor:
-        idx = int(row[0])
-        data[idx]['coop']['high'] = good_value(row[1], -99)
-        data[idx]['coop']['low'] = good_value(row[2], 99)
-        data[idx]['coop']['atob'] = row[5]
-        data[idx]['coop']['sf'] = good_value(row[3], -99)
-        data[idx]['coop']['sog'] = good_value(row[4], -99)
-        data[idx]['coop']['prec'] = good_value(row[6], -99)
+    table = "raw%s_%02i" % (year, month)
+    hcursor.execute("""
+    SELECT valid, key, value from """+table+""" WHERE station = %s
+    and value != -9999 and substr(key,3,1) not in ('H','Q') ORDER by valid ASC
+    """, (nwsli,))
+    for row in hcursor:
+        if row[0].month != month:
+            continue
+        idx = int(row[0].day)
+        key = row[1]
+        if key in ['TAIRZXZ', 'TAIRZX']:
+            data[idx]['coop']['high'] = row[2]
+        elif key in ['TAIRZNZ', 'TAIRZN']:
+            data[idx]['coop']['low'] = row[2]
+        elif key in ['TAIRZZ']:
+            data[idx]['coop']['atob'] = row[2]
+        elif key in ['SFDRZZ']:
+            data[idx]['coop']['sf'] = row[2]
+        elif key in ['SDIRZZ']:
+            data[idx]['coop']['sog'] = row[2]
+        elif key in ['PPDRZZ']:
+            data[idx]['coop']['prec'] = row[2]
+        elif key[:2] in ['PP', 'SF'] and key[2] == 'V':
+            data[idx]['coop']['v'] += "%s/%s " % (key, row[2])
+        elif key[:2] in ['PP', 'SD', 'SF', 'TA']:
+            print 'Unaccounted for %s %s %s' % (nwsli, row[0], key)
 
-    # Go Fetch IEMRE
     ccursor.execute("""
     select extract(day from day), high, low, snow, snowd, precip from 
     alldata_ia where station = %s and year = %s and month = %s
@@ -297,6 +309,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
         row.write(14, data[idx]['coop']['sf'])
         row.write(15, data[idx]['iemre']['sog'])
         row.write(16, data[idx]['coop']['sog'])
+        row.write(17, data[idx]['coop']['v'])
         sts += datetime.timedelta(days=1)
 
 def runner(year, month):
@@ -322,7 +335,8 @@ def runner(year, month):
     book.save(fn)
     return fn
 
-if __name__ == '__main__':
+def main():
+    """ Go Main Go """
     if len(sys.argv) == 1:
         lastmonth = datetime.datetime.now() - datetime.timedelta(days=15)
         fn = runner( lastmonth.year, lastmonth.month)
@@ -348,3 +362,7 @@ if __name__ == '__main__':
         os.unlink(fn)
     else:
         fn = runner(int(sys.argv[1]), int(sys.argv[2]))
+
+
+if __name__ == '__main__':
+    main()
