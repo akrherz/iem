@@ -10,6 +10,7 @@ data = {'plots': [
     {'label': 'Daily', 'options': [
         {'id': "11", 'label': "ASOS/AWOS Daily Maximum Dew Point for a Year"},
         {'id': "21", 'label': "Change in NCDC 81 Daily Climatology over X Days"},
+        {'id': "31", 'label': "Extreme Jumps or Dips in High Temperature over X days"},
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
         {'id': "26", 'label': "Minimum Daily Low Temperature after 1 July"},
