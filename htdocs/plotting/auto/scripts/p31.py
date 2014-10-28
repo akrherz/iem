@@ -67,7 +67,7 @@ def plotter( fdict ):
     ax.grid(True)
     ax.set_ylabel("Temperature Change $^\circ$F")
     ax.set_title("%s %s\nMax Change in High Temp by Week of Year" % (station, 
-                                        nt.sts[station]['name'], days))
+                                        nt.sts[station]['name']))
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0,366)
