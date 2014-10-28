@@ -21,8 +21,7 @@ cd /mesonet/tmp
 mkdir nesdis.$ftm
 cd nesdis.$ftm
 
-#BASE="http://satepsanone.nesdis.noaa.gov/pub/GIS"
-BASE="ftp://ftpprd.ncep.noaa.gov/pub/data1/nesdis/GOES-E-W-imagery-tiff/"
+BASE="http://satepsanone.nesdis.noaa.gov/pub/GIS"
 
 function getter(){
 	for i in {1..10}
