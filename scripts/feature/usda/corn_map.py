@@ -9,7 +9,7 @@ for linenum, line in enumerate(open('crop_progress.csv')):
         continue
     tokens = line.replace('"','').split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 10 and day.day in range(16,23):
+    if day.month == 10 and day.day in range(23,30):
         state = tokens[5]
         val = float(tokens[20])
         if not data.has_key(state):
@@ -58,6 +58,7 @@ from pyiem.plot import maue
 import matplotlib.colors as mpcolors
 cmap = plt.get_cmap('cubehelix_r')
 bins = range(0,101,10)
+
 norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
 patches = []
@@ -101,7 +102,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=cmap(norm(bins)),
                 ec='None')
 
-ax.text(0.17, 1.05, "19 Oct 2014 USDA Percentage of Corn Harvested\nPercentage Points Departure from 1980-2013 Average for 16-23 Oct", transform=ax.transAxes,
+ax.text(0.17, 1.05, "26 Oct 2014 USDA Percentage of Corn Harvested\nPercentage Points Departure from 1980-2013 Average for 23-30 Oct", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
@@ -110,6 +111,6 @@ logo = Image.open('../../../htdocs/images/logo_small.png')
 ax3 = plt.axes([0.05,0.9,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117), yticks=[], xticks=[])
 ax3.imshow(logo)
 
-fig.savefig('test.png', dpi=45)
+fig.savefig('test.png')
 #import iemplot
 #iemplot.makefeature('test')
