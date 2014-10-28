@@ -99,7 +99,6 @@ ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2, label='2
 ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2, label='50 inch')
 ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
 ax[0].legend(loc=(0, -0.15), ncol=3)
-ax[0].set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
 
 days = (ets - sts).days  
 if days >= 3:
