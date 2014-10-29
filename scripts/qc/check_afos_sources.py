@@ -42,7 +42,7 @@ def look4(ts):
 def main():
     """ Go Main Go """
     ts = datetime.datetime.today() - datetime.timedelta(days=1)
-    ts.replace(hour=0,minute=0,second=0,microsecond=0)
+    ts = ts.replace(hour=0,minute=0,second=0,microsecond=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     
     look4(ts)
