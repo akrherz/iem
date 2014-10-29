@@ -88,7 +88,7 @@ if ($view == "prod"){
 }
 
 $drangecheck = (isset($_REQUEST["drange"]))? "checked='checked'" : "";
-$netselect = networkSelect(Array("WFO","RFC","NWS","NCEP", "CWSU"), 
+$netselect = networkSelect(Array("WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"), 
  		$source, Array(), "source");
 $yselect = yearSelect(2001, $year);
 $mselect = monthSelect($month);
