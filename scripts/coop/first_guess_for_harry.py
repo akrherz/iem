@@ -225,7 +225,10 @@ def get_site(year, month, iemre, nwsli):
             continue
         idx = int(row[0].day)
         key = row[1]
-        if key in ['TAIRZXZ', 'TAIRZX']:
+        if key in ['TAIRGZ']:
+            # This is automated station
+            continue
+        elif key in ['TAIRZXZ', 'TAIRZX']:
             data[idx]['coop']['high'] = row[2]
         elif key in ['TAIRZNZ', 'TAIRZN']:
             data[idx]['coop']['low'] = row[2]
