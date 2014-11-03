@@ -76,7 +76,7 @@ def process(model, lon, lat):
     i, j = get_ij(lon, lat, nc)
     
     ax.plot(times, temperature(nc.variables['bdeckt'][:,i,j],'K').value('F'),
-            color='k', label='Bridge Deck Temp')
+            color='k', label='Bridge Deck Temp' if model == 'bridget' else 'Pavement')
     ax.plot(times, temperature(nc.variables['tmpk'][:,i,j], 'K').value("F"),
             color='r', label='Air Temp')
     ax.plot(times, temperature(nc.variables['dwpk'][:,i,j], 'K').value("F"),
