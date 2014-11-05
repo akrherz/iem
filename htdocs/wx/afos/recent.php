@@ -14,16 +14,15 @@ $rs = pg_execute($conn, "_LSELECT", Array($pil));
 
 $content = "";
 if (pg_numrows($rs) < 1){
-	$content .= "ERROR: Sorry, could not find product.";
+	$content .= "ERROR: No products found in past 48 hours.";
 }
 for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 {
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
-	if (preg_match('/xml/', $row["data"]) > 0){
-        $content .= $d;
-	} else {
-		$content .= htmlentities($d);
-	}
+	$d = preg_replace("/\001/", "", $d);
+
+    $content .= $d;
+
 }
 
 header("Content-type: text/plain");
