@@ -24,7 +24,7 @@ def sample(source, ts):
         uri = 'http://mesonet.agron.iastate.edu/p.php?pid=%s-%s-%s-%s' %(
             (row[1].astimezone(pytz.timezone("UTC")).strftime("%Y%m%d%H%M"),
              source, row[2], row[0]))
-        print('    %s' % (uri,))
+        print(' %s' % (uri,))
 
 def look4(ts):
     """ Let us investigate """
