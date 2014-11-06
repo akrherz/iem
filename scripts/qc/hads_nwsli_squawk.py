@@ -67,7 +67,7 @@ acursor2 = ASOS.cursor()
 print '----- Unknown IDs from METAR sites -----'
 acursor.execute("""
  select id, count(*), max(valid) from unknown 
- GROUP by id ORDER by count DESC LIMIT 5
+ GROUP by id ORDER by count DESC
 """)
 for row in acursor:
     print 'ASOS %7s %5s %s' % (row[0], row[1], row[2])
