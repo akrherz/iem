@@ -64,7 +64,7 @@ def workflow():
         #print label, utc, feat['attributes']['PHOTO_URL']
         try:
             image = urllib2.urlopen(feat['attributes']['PHOTO_URL'], timeout=15).read()
-        except urllib2.HTTPError, exp:
+        except urllib2.URLError, exp:
             print('dot_truckcams.py dl fail |%s| %s' % (exp, 
                                             feat['attributes']['PHOTO_URL']))
             continue
