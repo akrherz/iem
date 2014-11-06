@@ -11,12 +11,20 @@ import subprocess
 pils = "LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS|FLW|SPS|SEL|SWO|FFW"
 
 def sanitize(data):
-    """ Make sure we have the right control characters """
-    if data.find("\001") == -1:
-        data = "\001"+data
-    if data.find("\003") == -1:
-        data = data+"\003"
-    return data
+    """ Regularize this product
+    1) \001 is the first character, on a line by itself
+    2) \003 is the last character, on a line by itself, with no trailing data
+    3) those two characters appear nowhere else in the file.
+    """
+    # Get 'clean' lines
+    lines = [s.strip().replace("\001","").replace("\003","") 
+             for s in data.split("\n")]
+    # Make sure the first line is now blank!
+    if lines[0] != '':
+        lines.insert(0, '')
+    if lines[-1] != '':
+        lines.append('')
+    return "\001"+ ("\r\r\n".join(lines)) + "\003"
 
 def do(date):
     """ Process a given UTC date """
