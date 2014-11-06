@@ -50,7 +50,7 @@ for yr in range(1988,2015):
 ax.plot(cdays, climo, color='k', label='Average')
 
 ax.set_title("ISU AgClimate Ames Site 4 inch Soil Temperature\nYearly Timeseries [1988-2014]")
-ax.set_xlabel("* 2014 thru 5 May")
+ax.set_xlabel("* 2014 thru 5 November")
 ax.grid(True)
 ax.set_ylabel('Daily Avg Temp $^{\circ}\mathrm{F}$')
 ax.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )
