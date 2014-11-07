@@ -24,14 +24,19 @@ lookup = {9100104: "SSP #6",
           9100131: "SSP #1",
           9100156: "SSP #7"}
 
-def gage_run(sts, ets):
+def gage_run(sts, ets, stations):
     """ run() """
+    if len(stations) == 0:
+        stations = lookup.keys()
+    if len(stations) == 1:
+        stations.append(0)
     
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
     cursor.execute("""select site_serial, valid, ch1_data_p, ch2_data_p,
     ch1_data_t, ch2_data_t, ch1_data_c from ss_logger_data
-    WHERE valid between %s and %s ORDER by valid ASC""", (sts, ets))
+    WHERE valid between %s and %s and
+    site_serial in %s ORDER by valid ASC""", (sts, ets, tuple(stations)))
     
     res = ("Date,Time,Site ID,Well,Levelogger Reading (ft),Barologger Reading,"
            +"Temp (C),Barologger Air Temp (C),Conductivity (micro-S)\n")
@@ -70,6 +75,7 @@ if __name__ == '__main__':
     month2 = int(form.getfirst("month2"))
     day1 = int(form.getfirst("day1"))
     day2 = int(form.getfirst("day2"))
+    stations = form.getlist('station')
 
     sts = datetime.datetime(year1, month1, day1)
     ets = datetime.datetime(year2, month2, day2)
@@ -77,5 +83,5 @@ if __name__ == '__main__':
     if opt == 'bubbler':
         print bubbler_run(sts, ets)
     elif opt == 'gage':
-        print gage_run(sts, ets)
+        print gage_run(sts, ets, stations)
     

@@ -36,7 +36,7 @@ $table .= sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td
 	drct2txt($rlri4->db['drct']) );
 
 $t->content = <<<EOF
-<h3 class="heading">Other Data Networks</h3>
+<h3>Other Data Networks</h3>
 
 <p>The IEM collects data from a number of stand alone sensors.  This page
 contains links to data from these sites.
@@ -46,6 +46,9 @@ contains links to data from these sites.
 <p>These are four ground water monitoring wells and a stream gage located at
 the Stuart Smith Park in Ames.  These data are used by the Geology 100 class, but
 are freely available to others.
+
+<div class="row">
+<div class="col-md-6 well">
 
 <h4>Download Stream Gage Data ("Bubbler")</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="bubbler">
@@ -66,11 +69,21 @@ are freely available to others.
 <input type="submit" value="Request Data" />
 </form>
 
-<h4>Download Ground Monitoring Well Data</h4>
+</div><div class="col-md-6 well">
+
+<h4><i class="glyphicon glyphicon-download"></i> Download Ground Monitoring Well Data</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="gage">
 <input type="hidden" name="opt" value="gage" />
-<table>
- <th>Start Date:</th> 
+<table class="table table-bordered">
+  <td rowspan="2"><strong>Select Station(s):</strong><br />
+  <select multiple size="4" name="station">
+   <option value="9100131">SSP #1</option>
+   <option value="9100104">SSP #6</option>
+   <option value="9100156">SSP #7</option>
+   <option value="9100135">SSP #8</option>
+  </select>
+  </td>
+  <th>Start Date:</th> 
   <td>{$y1select}</td>
   <td>{$m1select}</td>
   <td>{$d1select}</td></tr>
@@ -84,6 +97,8 @@ are freely available to others.
 </table>
 <input type="submit" value="Request Data" />
 </form>
+
+</div></div>
 
 <h3><a href="http://www.ctre.iastate.edu">CTRE</a> Provided Iowa DOT Bridge Sensors</h3>
 
