@@ -18,13 +18,15 @@ import psycopg2
 import cgi
 import sys
 import datetime
+import pandas as pd
+import os
 
 lookup = {9100104: "SSP #6",
           9100135: "SSP #8",
           9100131: "SSP #1",
           9100156: "SSP #7"}
 
-def gage_run(sts, ets, stations):
+def gage_run(sts, ets, stations, excel):
     """ run() """
     if len(stations) == 0:
         stations = lookup.keys()
@@ -33,21 +35,25 @@ def gage_run(sts, ets, stations):
     
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
-    cursor.execute("""select site_serial, valid, ch1_data_p, ch2_data_p,
-    ch1_data_t, ch2_data_t, ch1_data_c from ss_logger_data
-    WHERE valid between %s and %s and
-    site_serial in %s ORDER by valid ASC""", (sts, ets, tuple(stations)))
-    
-    res = ("Date,Time,Site ID,Well,Levelogger Reading (ft),Barologger Reading,"
-           +"Temp (C),Barologger Air Temp (C),Conductivity (micro-S)\n")
-    for row in cursor:
-        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (row[1].strftime("%Y-%m-%d"),
-                                              row[1].strftime("%H:%M"), 
-                                              row[0], lookup.get(row[0], "N/A"),
-                                         row[2], row[3], row[4],
-                                         row[5], row[6])
+    sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
+    site_serial, ch1_data_p, ch2_data_p,
+    ch1_data_t, ch2_data_t, ch1_data_c
+    from ss_logger_data WHERE valid between '%s' and '%s' and
+    site_serial in %s ORDER by valid ASC""" % (sts, ets, str(tuple(stations)))
+    df = pd.read_sql(sql, dbconn)
+    headers = ['date', 'time', 'site_serial', 'Levelogger Reading (ft)',
+               'Barologger Reading', 'Water Temp (C)', 
+               'Barologger Air Temp (C)', 'Conductivity (micro-S)']
 
-    return res.replace("None", "M")
+    if excel == 'yes':
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write("Content-Disposition: attachment;Filename=stuartsmith.xls\n\n")
+        df.to_excel('/tmp/ss.xls', header=headers, index=False)
+        sys.stdout.write(open('/tmp/ss.xls', 'rb').read())
+        os.unlink('/tmp/ss.xls')
+    else:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write(df.to_csv(None, header=headers, index=False))
 
 def bubbler_run(sts, ets):
     """ run() """
@@ -64,8 +70,8 @@ def bubbler_run(sts, ets):
 
     return res.replace("None", "M")
 
-if __name__ == '__main__':
-    sys.stdout.write("Content-type: text/plain\n\n")
+def main():
+    """ Go Main Go """
     form = cgi.FieldStorage()
     opt = form.getfirst('opt', 'bubbler')
 
@@ -81,7 +87,11 @@ if __name__ == '__main__':
     ets = datetime.datetime(year2, month2, day2)
     
     if opt == 'bubbler':
+        sys.stdout.write("Content-type: text/plain\n\n")
         print bubbler_run(sts, ets)
     elif opt == 'gage':
-        print gage_run(sts, ets, stations)
+        gage_run(sts, ets, stations, form.getfirst('excel', 'n'))
     
+
+if __name__ == '__main__':
+    main()
