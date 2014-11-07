@@ -118,8 +118,8 @@ this data back to 2001.  The IEM's archives can be found:
 
 <h3>Misc</h3>
 <ul>
-<li><a href="/browser/">Archived Data Browser</a>
-  <br />Browse the archive of products via this frames based interface.</li> 
+<li><a href="/timemachine/">Archived IEM Product Browser</a>
+  <br />This "time machine" interface allows for quick browsing of IEM Products.</li> 
 
 <li><a href="http://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
  <br />Excellent archive of the NWS DIFAX products.</li>
