@@ -61,6 +61,7 @@ def run(nexrad):
     ax[1].set_xlabel("Generated %s by Iowa Environmental Mesonet" % (today.strftime("%d %b %Y"),))
     
     fig.savefig('%s_histogram.png' % (nexrad,))
+    plt.close()
 
 if __name__ == '__main__':
     ''' See how we are called '''
