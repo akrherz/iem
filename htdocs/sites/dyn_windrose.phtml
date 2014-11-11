@@ -33,6 +33,10 @@ if (isset($_GET["hour1"])){
 
 include_once "../../include/myview.php";
 $t = new MyView();
+$firstyear = 1995;
+if ($meta["archive_begin"]){
+	$firstyear = date("Y", $meta["archive_begin"]);
+}
 
 $t->thispage ="iem-sites";
 $t->title = "Custom Wind Roses";
@@ -99,7 +103,7 @@ $content .= '
   <tr>
     <th>Start:</th>
     <td>
-     '. yearSelect2(1995, $year1, "year1") .'
+     '. yearSelect2($firstyear, $year1, "year1") .'
     </td>
     <td>
      '. monthSelect($month1, "month1") .'
@@ -117,7 +121,7 @@ $content .= '
 
   <tr>
     <th>End:</th>
-    <td>'. yearSelect2(1995, $year2, "year2") .'</td>
+    <td>'. yearSelect2($firstyear, $year2, "year2") .'</td>
     <td>
      '. monthSelect($month2, "month2") .'
     </td>
