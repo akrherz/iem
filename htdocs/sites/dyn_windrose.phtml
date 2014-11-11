@@ -34,8 +34,8 @@ if (isset($_GET["hour1"])){
 include_once "../../include/myview.php";
 $t = new MyView();
 $firstyear = 1995;
-if ($meta["archive_begin"]){
-	$firstyear = date("Y", $meta["archive_begin"]);
+if ($metadata["archive_begin"]){
+	$firstyear = date("Y", strtotime($metadata["archive_begin"]));
 }
 
 $t->thispage ="iem-sites";
