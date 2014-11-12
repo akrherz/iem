@@ -94,10 +94,11 @@ def main():
     if "all" in dataVars:
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
                      +"vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
-                     +"skyl2, skyl3, skyl4, metar")
+                     +"skyl2, skyl3, skyl4, presentwx, metar")
         outCols = ['tmpf','dwpf','relh', 'drct','sknt','p01i','alti',
                    'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3', 
-                   'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4', 'metar']
+                   'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4', 
+                   'presentwx', 'metar']
     else:
         dataVars = tuple(dataVars)
         outCols = dataVars
@@ -176,6 +177,11 @@ def main():
                 if row['dwpf'] is not None:
                     val = temperature( row['dwpf'], 'F').value('C')
                     sys.stdout.write("%.2f%s" % (val, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
+            elif data1 == 'presentwx':
+                if row['presentwx'] is not None:
+                    sys.stdout.write("%s%s" % (row['presentwx'].replace(",", " "), rD))
                 else:
                     sys.stdout.write("M%s" % (rD,))
             elif data1 in ["metar","skyc1","skyc2","skyc3","skyc4"]:
