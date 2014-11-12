@@ -26,10 +26,10 @@ for line in dates.split("\n"):
     ets = ets.replace(tzinfo=pytz.timezone("UTC"))
     output = open('extract/%s-%s.txt' % (sts.strftime("%Y%m%d%H%M"),
                                          ets.strftime("%Y%m%d%H%M")), 'w')
-    output.write("utcvalid,avg_power,avg_windspeed,stddev_windspeed,count\n")
+    output.write("utcvalid,avg_power,avg_windspeed,stddev_windspeed,count,avg_yaw\n")
     cursor.execute("""
       select valid, avg(power), avg(windspeed), stddev(windspeed),
-      count(*) from sampled_data 
+      count(*), avg(yaw2) from sampled_data 
       WHERE valid >= %s and valid < %s 
       and extract(minute from valid)::int %% 10 = 0 and power is not null
       and windspeed is not null GROUP by valid ORDER by valid ASC
@@ -37,8 +37,8 @@ for line in dates.split("\n"):
     print sts, ets, cursor.rowcount
     for row in cursor:
         ts = row[0].astimezone(pytz.timezone("UTC"))
-        output.write("%s,%s,%s,%s,%s\n"  % ( 
+        output.write("%s,%s,%s,%s,%s,%s\n"  % ( 
            ts.strftime("%Y-%m-%d %H:%M:%S"), 
-           c(row[1]), c(row[2]), c(row[3]), row[4] ))
+           c(row[1]), c(row[2]), c(row[3]), row[4], c(row[5]) ))
 
     output.close()
