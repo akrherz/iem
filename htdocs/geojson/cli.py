@@ -27,7 +27,9 @@ def get_data( ts ):
             "features": []}
     # Fetch the daily values
     cursor.execute("""
-    select station, name, product, st_x(geom), st_y(geom), 
+    select station, name, product, 
+    round(st_x(geom)::numeric, 4)::float as st_x, 
+    round(st_y(geom)::numeric, 4)::float as st_y, 
     high, high_normal, high_record, high_record_years,
     low, low_normal, low_record, low_record_years,
     precip, precip_month, precip_jan1, precip_jan1_normal,
