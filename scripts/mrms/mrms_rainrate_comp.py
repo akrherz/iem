@@ -1,5 +1,5 @@
 '''
-Generate a composite of the MRMS RainRate
+Generate a composite of the MRMS PrecipRate
 '''
 import datetime
 import pytz
@@ -11,9 +11,11 @@ import subprocess
 import json
 import sys
 import util
+import pygrib
+import gzip
 
-def do( now , realtime, delta):
-    ''' Generate for this timestep! '''
+def do(now , realtime, delta):
+    """ Generate for this timestep! """
     szx = 7000
     szy = 3500
     # Create the image data
@@ -23,37 +25,30 @@ def do( now , realtime, delta):
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'product': 'a2m',
                 'units': '0.1 mm' }
-    ''' 
-      Loop over tiles
-    Data from tile is SW corner and row , so y, x
 
-    File represents 2 minute accumulation in 0.1 mm, so 25.4 mm
-    
-    So file has units of 
-
-    '''
-    count = 0
-    for tile in range(1,5):
-        fn = util.get_fn('rainrate', now, tile)
-        if not os.path.isfile(fn):
-            if delta > 1440:
-                print "Missing MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
-            continue
-        count += 1
-        try:
-            tilemeta, val = util.reader(fn)
-        except:
-            print 'mrms_rainrate_comp read failed: %s' % (fn,)
-            continue
-        # Convert into units of 0.1 mm accumulation
-        val = val / 60.0 * 2.0 * 10.0
-        val = np.where(val < 0., 255., val)
-        ysz, xsz = np.shape(val)
-        x0 = int((tilemeta['ul_lon'] - util.WEST) * 100.0)
-        y0 = int(round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0))
-        imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
-    if count < 4:
+    gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/PrecipRate/"
+                           +"PrecipRate_00.00_%Y%m%d-%H%M00.grib2.gz"))
+    if not os.path.isfile(gribfn):
+        print("mrms_rainrate_comp.py MISSING %s" % (gribfn,))
         return
+
+    # http://www.nssl.noaa.gov/projects/mrms/operational/tables.php
+    # Says units are mm/hr
+    fp = gzip.GzipFile(gribfn, 'rb')
+    (tmpfp, tmpfn) = tempfile.mkstemp()
+    tmpfp = open(tmpfn, 'wb')
+    tmpfp.write(fp.read())
+    tmpfp.close()
+    grbs = pygrib.open(tmpfn)
+    grb = grbs[1]
+    os.unlink(tmpfn)
+    
+    val = grb['values']
+    # Convert into units of 0.1 mm accumulation
+    val = val / 60.0 * 2.0 * 10.0
+    val = np.where(val < 0., 255., val)
+    imgdata[:,:] = np.flipud(val.astype('int'))
+
     (tmpfp, tmpfn) = tempfile.mkstemp()
     
     # Create Image
@@ -109,7 +104,7 @@ def main():
                                     int(sys.argv[4]),
                                     int(sys.argv[5]) ).replace(
                                                 tzinfo=pytz.timezone("UTC"))
-        do( utcnow )
+        do(utcnow, False, 0)
     else:
         #If our time is an odd time, run 5 minutes ago 
         utcnow = utcnow.replace(second=0,microsecond=0)
@@ -123,7 +118,7 @@ def main():
             fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
                               +"GIS/mrms/a2m_%Y%m%d%H%M.png"))
             if not os.path.isfile(fn):
-                do( ts, False, delta)
+                do(ts, False, delta)
     
 if __name__ == '__main__':
     main()
