@@ -18,7 +18,7 @@ def sanitize(val):
         return "T"
     return val
 
-def get_data( ts ):
+def get_data(ts, fmt):
     """ Get the data for this timestamp """
     data = {"type": "FeatureCollection", 
             "crs": {"type": "EPSG", 
@@ -42,6 +42,7 @@ def get_data( ts ):
     for i, row in enumerate(cursor):
         data['features'].append({"type": "Feature", "id": i,
             "properties": {
+                "station": row["station"],
                 "link": "/api/nwstext/%s.txt" % (row['product'],),
                 "name": row["name"],
                 "high":  str(sanitize(row["high"])),
@@ -71,24 +72,46 @@ def get_data( ts ):
                         "coordinates": [row['st_x'], row['st_y']]
             }
         })
-    return json.dumps(data)
+    if fmt == 'geojson':
+        return json.dumps(data)
+    else:
+        cols = ("station,name,high,high_record,high_record_years,high_normal,"
+               +"low,low_record,low_record_years,low_normal,precip,"
+               +"precip_month,precip_jan1,precip_jan1_normal,precip_jul1,"
+               +"precip_dec1,precip_dec1_normal,precip_record,snow,"
+               +"snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record")
+        res = cols+"\n"
+        for feat in data['features']:
+            for col in cols.split(","):
+                if type(feat['properties'][col]) == type([]):
+                    res += "%s," % (" ".join([str(s) for s in feat['properties'][col]]),)
+                else:
+                    res += "%s," % (feat['properties'][col],)
+            res += "\n"
+        return res
 
 def main():
     ''' see how we are called '''
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
     field = cgi.FieldStorage()
     dt = field.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, '%Y-%m-%d')
     cb = field.getfirst('callback', None)
+    fmt = field.getfirst('fmt', 'geojson')
 
-    mckey = "/geojson/cli/%s?callback=%s" % (ts.strftime("%Y%m%d"), cb)
+    if fmt == 'geojson':
+        sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    else:
+        sys.stdout.write("Content-type: text/plain\n\n")
+
+    mckey = "/geojson/cli/%s?callback=%s&fmt=%s" % (ts.strftime("%Y%m%d"), 
+                                                    cb, fmt)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = get_data(ts)
+        res = get_data(ts, fmt)
         mc.set(mckey, res, 300)
     if cb is None:
-        sys.stdout.write( res )
+        sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
 
