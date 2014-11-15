@@ -21,16 +21,18 @@
   
   $services[] = Array(
   		"title" => "Daily NWS Climate (CLI Product) Summaries",
-  		"url" => "/geojson/cli.py?dt={dt}",
+  		"url" => "/geojson/cli.py?dt={dt}&fmt={fmt}",
   		"desc" => "Provides a GeoJSON response summarizing all of the atomic
   		processed data from the NWS issued CLI reports.  These reports contain
   		daily temperature, precipitation, and snow data from the primary 
   		climate sites.",
   		"vars" => Array(
   				"dt" => "YYYY-mm-dd Date you want data for (optional)",
+  				"fmt" => "Return format (optional) geojson (default) or csv",
   		),
   		"example" => Array(
   				"{dt}" => "2014-10-09",
+  				"{fmt}" => "geojson",
   		)
   );
   
