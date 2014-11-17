@@ -24,8 +24,10 @@ def main():
             now = sts
             while now < ets:
                 print "Adding %s %s" % (sid, now.strftime("%d %b %Y"))
-                cursor.execute("""INSERT into alldata_ia(station, day)
-                VALUES (%s, %s)""", (sid, now))
+                cursor.execute("""INSERT into alldata_ia(station, day, year,
+                month, sday)
+                VALUES (%s, %s, %s, %s, %s)""", (sid, now, now.year,
+                                            now.month, now.strftime("%m%d")))
                 now += datetime.timedelta(days=1)
             
 
