@@ -10,7 +10,9 @@ from PIL import Image
 import subprocess
 import json
 import sys
+import pygrib
 import util
+import gzip
 
 def make_colorramp():
     """
@@ -39,37 +41,34 @@ def do( now , realtime=False):
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'product': 'lcref',
                 'units': '0.5 dBZ' }
-    #
-    #  Loop over tiles
-    #Data from tile is SW corner and row , so y, x
-    #
-    #File represents 2 minute accumulation in 0.1 mm, so 25.4 mm
-    #
-    #So file has units of 
-    found = 0
-    for tile in range(1,5):
-        fn = util.get_fn('lcref', now, tile)
-        if not os.path.isfile(fn):
-            if not realtime:
-                print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
-            continue
-        try:
-            tilemeta, val = util.reader(fn)
-        except Exception, exp:
-            print 'MRMS LCREF: %s Read Error: %s' % (fn, exp)
-            continue
-        found += 1
-        # There is currently a bug with how MRMS computes missing data :(
-        val = np.where(val >= -32, (val + 32) * 2.0, val)
-        val = np.where(val < 0., 255., val)
-        ysz, xsz = np.shape(val)
 
-        x0 = int( (tilemeta['ll_lon'] - util.WEST) * 100.0 )
-        y0 = int( round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0) )
-        imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
-
-    if found < 4:
+    gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/SeamlessHSR/"
+                           +"SeamlessHSR_00.00_%Y%m%d-%H%M00.grib2.gz"))
+    if not os.path.isfile(gribfn):
+        print("mrms_lcref_comp.py MISSING %s" % (gribfn,))
         return
+
+    fp = gzip.GzipFile(gribfn, 'rb')
+    (tmpfp, tmpfn) = tempfile.mkstemp()
+    tmpfp = open(tmpfn, 'wb')
+    tmpfp.write(fp.read())
+    tmpfp.close()
+    grbs = pygrib.open(tmpfn)
+    grb = grbs[1]
+    os.unlink(tmpfn)
+    
+    val = grb['values']
+
+    # -999 is no coverage, go to 0
+    # -99 is missing , go to 255
+
+    val = np.where(val >= -32, (val + 32) * 2.0, val)
+    #val = np.where(val < -990., 0., val)
+    #val = np.where(val < -90., 255., val)
+    # This is an upstream BUG
+    val = np.where(val < 0., 0., val)
+    imgdata[:,:] = np.flipud(val.astype('int'))
+
     (tmpfp, tmpfn) = tempfile.mkstemp()
     
     # Create Image
