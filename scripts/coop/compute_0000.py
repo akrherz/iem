@@ -21,7 +21,7 @@ def do_day(valid):
     alldata a JOIN stations t on (t.id = a.station) 
     where t.network ~* 'CLIMATE' and day = %s and substr(station,2,1) != 'C'
     and substr(station,2,4) != '0000' and high is not null and
-    precip is not null and low is not null
+    precip is not null and low is not null and snow is not null
     """, (valid.date(),))
     lats = []
     lons = []
