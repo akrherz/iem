@@ -18,9 +18,12 @@ def sample(source, ts):
     cursor2.execute("""
     SELECT pil, entered, wmo from products where
     entered >= %s and entered < %s and source = %s
-    LIMIT 5
     """, (ts, ts+datetime.timedelta(hours=24), source))
+    pils = []
     for row in cursor2:
+        if row[0] in pils:
+            continue
+        pils.append(row[0])
         uri = 'http://mesonet.agron.iastate.edu/p.php?pid=%s-%s-%s-%s' %(
             (row[1].astimezone(pytz.timezone("UTC")).strftime("%Y%m%d%H%M"),
              source, row[2], row[0]))
