@@ -239,7 +239,9 @@ $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", MS_ON);
 $lakes->draw($img);
 
-
+$places = $map->getlayerbyname("places2010");
+$places->set("status", in_array("places", $layers) );
+$places->draw($img);
 
 if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
 	isset($_REQUEST["goes_product"])){
@@ -304,9 +306,7 @@ if (in_array("ridge", $layers) && isset($_REQUEST["ridge_radar"]) &&
     			strftime("%-2I:%M %p %Z" ,  $res[1]));
 		}
 }
-$places = $map->getlayerbyname("places2010");
-$places->set("status", in_array("places", $layers) );
-$places->draw($img);
+
 
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
