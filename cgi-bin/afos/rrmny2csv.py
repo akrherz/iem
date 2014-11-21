@@ -30,10 +30,16 @@ def do(cursor, wfo):
         val = tokens[5].split('"')[0]
         tokens2 = " ".join(tokens[5:]).split()
         #sys.stdout.write(line+"\n")
-        meat += "%9s,%s,%s,%s,%s,%s\n" % (sid, dv, val,
+        lbl = line.split('"')[1]
+        src = ""
+        if lbl.find("  ") > 0:
+            t = lbl.split("  ")
+            src = t[2]
+            lbl = t[1]
+        meat += "%9s,%s,%s,%s,%s,%s,%s\n" % (sid, dv, val,
                                 tokens2[0].split("=")[1], 
                                 tokens2[1].split("=")[1],
-                                " ".join(tokens2[2:]).split('"')[0]
+                                lbl, src
                                 )
 
     return meta, meat
@@ -51,7 +57,7 @@ def run():
         m2 += meat
 
     sys.stdout.write(m1)
-    sys.stdout.write("id,timestamp,value,lat,lon,name\n")
+    sys.stdout.write("id,timestamp,value,lat,lon,name,source\n")
     sys.stdout.write(m2)
 
 if __name__ == '__main__':
