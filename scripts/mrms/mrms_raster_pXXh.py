@@ -19,14 +19,13 @@ import tempfile
 import subprocess
 import util
 import json
+import pygrib
+import gzip
 
 def doit(gts, hr):
     """
     Actually generate a PNG file from the 8 NMQ tiles
     """
-    szx = 7000
-    szy = 3500
-
     sts = gts - datetime.timedelta(hours=hr)
     times = [gts]
     if hr > 24:
@@ -36,48 +35,56 @@ def doit(gts, hr):
     metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': gts.strftime("%Y-%m-%dT%H:%M:%SZ") }
     # Create the image data
-    imgdata = np.zeros( (szy, szx), 'u1')
-    timestep = np.zeros( (szy, szx), 'f')
+    #imgdata = np.zeros( (szy, szx), 'u1')
+    #timestep = np.zeros( (szy, szx), 'f')
+    total = None
     for now in times:    
-        for tile in range(1,5):
-            fn = util.get_fn('24hrad', now, tile)
-            if not os.path.isfile(fn):
-                print 'MRMS 24h RASTER missing %s' % (fn,)
-                continue
-        
-            tilemeta, val = util.reader(fn)
-            ysz, xsz = np.shape(val)
-            if tile == 1:
-                x0 = 0; y0 = 1750
-            elif tile == 2:
-                x0 = 3500; y0 = 1750
-            elif tile == 3:
-                x0 = 0; y0 = 0
-            elif tile == 4:
-                x0 = 3500; y0 = 0
-            #val = np.flipud(val)
-            timestep[y0:(y0+ysz),x0:(x0+xsz)] += val
-            """
-             255 levels...  wanna do 0 to 20 inches
-             index 255 is missing, index 0 is 0
-             0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  0
-             1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
-             5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
-            """
-    
-    timestep = np.flipud(timestep)
-    imgdata = np.where(timestep >= 500, 254, imgdata)
-    imgdata = np.where(np.logical_and(timestep >= 125, timestep < 500), 
-                       180 + ((timestep - 125.) / 5.0), imgdata)
-    imgdata = np.where(np.logical_and(timestep >= 25, timestep < 125), 
-                       100 + ((timestep - 25.) / 1.25), imgdata)
-    imgdata = np.where(np.logical_and(timestep >= 0, timestep < 25), 
-                        timestep / 0.25, imgdata)
-    imgdata = np.where( timestep < 0, 255, imgdata)
+        gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
+                +"RadarOnly_QPE_24H/"
+                +"RadarOnly_QPE_24H_00.00_%Y%m%d-%H%M00.grib2.gz"))
+        if not os.path.isfile(gribfn):
+            print("mrms_raster_pXXh.py MISSING %s" % (gribfn,))
+            return
+        fp = gzip.GzipFile(gribfn, 'rb')
+        (tmpfp, tmpfn) = tempfile.mkstemp()
+        tmpfp = open(tmpfn, 'wb')
+        tmpfp.write(fp.read())
+        tmpfp.close()
+        grbs = pygrib.open(tmpfn)
+        grb = grbs[1]
+        os.unlink(tmpfn)
+
+        # careful here, how we deal with the two missing values!
+        if total is None:
+            total = grb['values']
+        else:
+            maxgrid = np.maximum(grb['values'], total)
+            total = np.where(np.logical_and(grb['values'] >= 0,
+                                           total >= 0),
+                             grb['values'] + total, maxgrid)
+
+    """
+     255 levels...  wanna do 0 to 20 inches
+     index 255 is missing, index 0 is 0
+     0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  0
+     1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
+     5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
+    """
+    #total = np.flipud(total)
+    # Off scale gets index 254
+    imgdata = np.where(total >= 500, 254, 0)
+    imgdata = np.where(np.logical_and(total >= 125, total < 500), 
+                       180 + ((total - 125.) / 5.0), imgdata)
+    imgdata = np.where(np.logical_and(total >= 25, total < 125), 
+                       100 + ((total - 25.) / 1.25), imgdata)
+    imgdata = np.where(np.logical_and(total >= 0, total < 25), 
+                        total / 0.25, imgdata)
+    # -3 is no coverage -> 255
+    # -1 is misisng, so zero
+    # Index 255 is missing
+    imgdata = np.where( total < 0, 0, imgdata)
+    imgdata = np.where( total < -1, 255, imgdata)
  
-    # Stress our color ramp
-    for i in range(26):
-        imgdata[i,0] = i
     (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
     png = Image.fromarray( imgdata.astype('u1') )
@@ -123,5 +130,3 @@ if __name__ == "__main__":
         gts = gts.replace(minute=0,second=0,microsecond=0)
     for hr in [24,48,72]:
         doit( gts , hr)
-        
-    
