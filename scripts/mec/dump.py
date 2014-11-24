@@ -12,23 +12,23 @@ o = open('turbines.csv', 'w')
 o.write("TID,LON,LAT\n")
 
 p = open('turbine_data.csv', 'w')
-p.write("TID,VALID_UTC,VALID_LOCAL,POWER,YAW,WINDSPEED,PITCH\n")
+p.write("TID,VALID_UTC,VALID_LOCAL,POWER,YAW,YAW2,WINDSPEED,PITCH\n")
 
 for row in cursor:
     o.write("%s,%.6f,%.6f\n" % (row[0], row[2], row[3]))
     
-    cursor2.execute("""SELECT valid at time zone 'UTC', power, yaw, 
+    cursor2.execute("""SELECT valid at time zone 'UTC', power, yaw, yaw2,
     windspeed, pitch from sampled_data_%s WHERE
-    valid between '2008-03-01' and '2008-09-01' 
+    valid between '2009-12-01' and '2010-01-01' 
     ORDER by valid ASC """ % (row[1],))
     
     for row2 in cursor2:
         ts = row2[0]
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-        p.write("%s,%s,%s,%s,%s,%s,%s\n" % (row[0], 
+        p.write("%s,%s,%s,%s,%s,%s,%s,%s\n" % (row[0], 
                     ts.strftime("%Y-%m-%d %H:%M:%S"), 
 (ts.astimezone(pytz.timezone("America/Chicago"))).strftime("%Y-%m-%d %H:%M:%S"),                     
-                    row2[1], row2[2], row2[3], row2[4]))
+                    row2[1], row2[2], row2[3], row2[4], row2[5]))
     print row[0], cursor2.rowcount
     
 p.close()
