@@ -59,4 +59,28 @@ INCLUDE "/home/ldm/data/gis/images/4326/goes/GOES_WEST_IR.msinc"
   #OFFSITE 0 0 0
 END
 
+#------------------------------------------------------
+#
+LAYER
+  NAME "west_ir_4km_gray"
+  STATUS ON
+  MINSCALE 0
+  MAXSCALE 465000000
+  DATA "/home/ldm/data/gis/images/awips211/GOES_WEST_IR_gray.png"
+  TYPE RASTER
+  PROJECTION
+    "proj=lcc"
+   "lat_0=25"
+    "lat_1=25"
+    "lat_2=25"
+   "lon_0=-95"
+   "a=6371200.0"
+   "b=6371200.0"
+  END
+INCLUDE "/home/ldm/data/gis/images/4326/goes/GOES_WEST_IR.msinc"
+      PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #OFFSITE 0 0 0
+END
+
+
 END
