@@ -18,6 +18,23 @@
 
 
   $services = array();
+
+  $services[] = Array(
+  		"title" => "NWS Text Products by AWIPS ID and Time Period",
+  		"url" => "/json/nwstext_search.py?sts={sts}&ets={ets}&awipsid={awipsid}",
+  		"desc" => "Search of NWS Issued Text Products by a time period (in 
+  		UTC) and an AWIPS ID (sometime called AFOS PIL).",
+  		"vars" => Array(
+  				"sts" => "YYYY-mm-ddTHH:MMZ Inclusive start period (UTC)",
+  				"ets" => "YYYY-mm-ddTHH:MMZ end time period (UTC)",
+  				"awipsid" => "6 character or less AWIPS ID / AFOS PIL.",
+  		),
+  		"example" => Array(
+  				"{sts}" => "2014-11-24T00:00Z",
+  				"{ets}" => "2014-11-25T00:00Z",
+  				"{awipsid}" => "AFDDMX",
+  		)
+  );
   
   $services[] = Array(
   		"title" => "Daily NWS Climate (CLI Product) Summaries",
