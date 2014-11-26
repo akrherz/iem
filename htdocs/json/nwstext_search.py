@@ -49,8 +49,12 @@ def main():
         sts = sts.replace(tzinfo=pytz.timezone("UTC"))
         ets = datetime.datetime.strptime(ets, '%Y-%m-%dT%H:%MZ')
         ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+        now = datetime.datetime.utcnow()
+        now = now.replace(tzinfo=pytz.timezone("UTC"))
+        cacheexpire = 0 if ets < now else 120
+            
         res = run(sts, ets, awipsid)
-        mc.set(mckey, res)
+        mc.set(mckey, res, cacheexpire)
 
     if cb is None:
         sys.stdout.write( res )
