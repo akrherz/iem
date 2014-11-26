@@ -9,6 +9,9 @@ import sys
 sys.path.insert(0, '../mrms')
 import util
 import pytz
+import pygrib
+import gzip
+import tempfile
 
 from pyiem.plot import MapPlot
 
@@ -21,24 +24,37 @@ def doday(ts, realtime):
     ets = now + datetime.timedelta(hours=24)
     interval = datetime.timedelta(hours=1)
 
-    precip = np.zeros( (3500,7000) )
+    total = None
     lastts = None
     while now < ets:
         gmt = now.astimezone(pytz.timezone("UTC"))
-        # Only need tile 1 and 2 to sufficiently do Iowa
-        for tile in range(1,3):
-            fn = util.get_fn('1hrad', gmt, tile)
-            if os.path.isfile(fn):
-                lastts = now
-                _, val = util.reader(fn)
-                ysz, xsz = np.shape(val)
-                if tile == 1:
-                    x0 = 0
-                    y0 = 1750
-                if tile == 2:
-                    x0 = 3500
-                    y0 = 1750
-                precip[y0:(y0+ysz),x0:(x0+xsz)] += val
+        gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
+                +"RadarOnly_QPE_01H/"
+                +"RadarOnly_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"))
+        if not os.path.isfile(gribfn):
+            print("q3_today_total.py MISSING %s" % (gribfn,))
+            now += interval
+            continue
+        fp = gzip.GzipFile(gribfn, 'rb')
+        (tmpfp, tmpfn) = tempfile.mkstemp()
+        tmpfp = open(tmpfn, 'wb')
+        tmpfp.write(fp.read())
+        tmpfp.close()
+        grbs = pygrib.open(tmpfn)
+        grb = grbs[1]
+        os.unlink(tmpfn)
+        # careful here, how we deal with the two missing values!
+        if total is None:
+            total = grb['values']
+        else:
+            maxgrid = np.maximum(grb['values'], total)
+            total = np.where(np.logical_and(grb['values'] >= 0,
+                                           total >= 0),
+                             grb['values'] + total, maxgrid)
+
+
+        lastts = now
+
         now += interval
     if lastts is None:
         print 'No MRMS Q3 Data found for date: %s' % (now.strftime("%d %B %Y"),)
@@ -51,7 +67,7 @@ def doday(ts, realtime):
         routes = 'a'
     pqstr = "plot %s %s00 iowa_q2_1d.png iowa_q2_1d.png png" % (routes,
             ts.strftime("%Y%m%d%H"), )
-    m = MapPlot(title="%s MRMS Q3 Today's Precipitation" % (
+    m = MapPlot(title="%s NCEP MRMS Q3 Today's Precipitation" % (
                                                     ts.strftime("%-d %b %Y"),),
                 subtitle=subtitle)
         
@@ -62,7 +78,7 @@ def doday(ts, realtime):
     clevs[0] = 0.01
 
     x,y = np.meshgrid(util.XAXIS, util.YAXIS)
-    m.pcolormesh(x, y, precip / 24.5, clevs, units='inch')
+    m.pcolormesh(x, y, total / 24.5, clevs, units='inch')
 
     #map.drawstates(zorder=2)
     m.drawcounties()
