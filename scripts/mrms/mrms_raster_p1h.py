@@ -12,6 +12,8 @@ import subprocess
 import json
 import sys
 import util
+import gzip
+import pygrib
 
 def do(now, hr ):
     ''' Generate for this timestep! 
@@ -23,49 +25,47 @@ def do(now, hr ):
     '''
     szx = 7000
     szy = 3500
-    # Create the image data
-    imgdata = np.zeros( (szy, szx), 'u1')
     sts = now - datetime.timedelta(hours=hr)
     metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'product': 'lcref',
                 'units': 'mm' }
-    ''' 
-      Loop over tiles
-    Data from tile is SW corner and row , so y, x
-
-    File represents 2 minute accumulation in 0.1 mm, so 25.4 mm
-    
-    So file has units of 
-
-    '''
-    for tile in range(1,5):
-        fn = util.get_fn('%shrad' % (hr,), now, tile)
-        if not os.path.isfile(fn):
-            print "MRMS %sHRAD MISS Tile: %s Time: %s UTC" % (hr, tile, 
-                                            now.strftime("%Y-%m-%d %H:%M"))
-            continue
-        tilemeta, val = util.reader(fn)
-        ''' There is currently a bug with how MRMS computes missing data :( '''
-        image = np.zeros( np.shape(val), 'i')
-        image = np.where(val >= 500, 254, image)
-        image = np.where(np.logical_and(val >= 125, val < 500), 180 + ((val - 125.) / 5.0), image)
-        image = np.where(np.logical_and(val >= 25, val < 125), 100 + ((val - 25.) / 1.25), image)
-        image = np.where(np.logical_and(val >= 0, val < 25), 0 + ((val - 0.) / 0.25), image)
-        image = np.where( val < 0, 255, image)
-        #print tile, np.min(image), np.max(image)
-        ysz, xsz = np.shape(val)
-        x0 = int((tilemeta['ul_lon'] - util.WEST) * 100.0)
-        y0 = int(round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0))
-        imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
-
+    gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
+            +"RadarOnly_QPE_01H/"
+            +"RadarOnly_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"))
+    if not os.path.isfile(gribfn):
+        print("mrms_raster_p1h.py MISSING %s" % (gribfn,))
+        return
+    fp = gzip.GzipFile(gribfn, 'rb')
     (tmpfp, tmpfn) = tempfile.mkstemp()
-    
+    tmpfp = open(tmpfn, 'wb')
+    tmpfp.write(fp.read())
+    tmpfp.close()
+    grbs = pygrib.open(tmpfn)
+    grb = grbs[1]
+    os.unlink(tmpfn)
+    total = grb['values']
+
+        # Off scale gets index 254
+    imgdata = np.where(total >= 500, 254, 0)
+    imgdata = np.where(np.logical_and(total >= 125, total < 500), 
+                       180 + ((total - 125.) / 5.0), imgdata)
+    imgdata = np.where(np.logical_and(total >= 25, total < 125), 
+                       100 + ((total - 25.) / 1.25), imgdata)
+    imgdata = np.where(np.logical_and(total >= 0, total < 25), 
+                        total / 0.25, imgdata)
+    # -3 is no coverage -> 255
+    # -1 is misisng, so zero
+    # Index 255 is missing
+    imgdata = np.where( total < 0, 0, imgdata)
+    imgdata = np.where( total < -1, 255, imgdata)
+ 
+    (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
-    png = Image.fromarray( np.flipud( imgdata ) )
+    png = Image.fromarray( imgdata.astype('u1') )
     png.putpalette( util.make_colorramp() )
     png.save('%s.png' % (tmpfn,))
-
+    #os.system('xv %s.png' % (tmpfn,))
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     prefix = 'p%sh' % (hr,)
