@@ -23,11 +23,15 @@ def doday(ts, realtime):
     now = ts.replace(hour=1, minute=0)
     ets = now + datetime.timedelta(hours=24)
     interval = datetime.timedelta(hours=1)
+    currenttime = datetime.datetime.utcnow()
+    currenttime = currenttime.replace(tzinfo=pytz.timezone("UTC"))
 
     total = None
     lastts = None
     while now < ets:
         gmt = now.astimezone(pytz.timezone("UTC"))
+        if gmt > currenttime:
+            break
         gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
                 +"RadarOnly_QPE_01H/"
                 +"RadarOnly_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"))
