@@ -8,6 +8,9 @@ import os
 import sys
 import pyiem.mrms as mrms
 import pytz
+import gzip
+import pygrib
+import tempfile
 
 from iem.plot import MapPlot
 
@@ -20,24 +23,36 @@ def doit(ts, hours):
     ts = ts.replace(minute=0, second=0, microsecond=0)
     now  = ts - datetime.timedelta(hours=hours-1)
     interval = datetime.timedelta(hours=1)
+    ets = datetime.datetime.utcnow()
+    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    total = None
+    while now < ets:
+        gmt = now.astimezone(pytz.timezone("UTC"))
+        gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
+                +"RadarOnly_QPE_01H/"
+                +"RadarOnly_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"))
+        if not os.path.isfile(gribfn):
+            print("q3_Xhour.py MISSING %s" % (gribfn,))
+            now += interval
+            continue
+        fp = gzip.GzipFile(gribfn, 'rb')
+        (tmpfp, tmpfn) = tempfile.mkstemp()
+        tmpfp = open(tmpfn, 'wb')
+        tmpfp.write(fp.read())
+        tmpfp.close()
+        grbs = pygrib.open(tmpfn)
+        grb = grbs[1]
+        os.unlink(tmpfn)
+        # careful here, how we deal with the two missing values!
+        if total is None:
+            total = grb['values']
+        else:
+            maxgrid = np.maximum(grb['values'], total)
+            total = np.where(np.logical_and(grb['values'] >= 0,
+                                           total >= 0),
+                             grb['values'] + total, maxgrid)
 
-    precip = np.zeros( (3500,7000) )
-    while now <= ts:
-        # Only need tile 1 and 2 to sufficiently do Iowa
-        for tile in range(1,3):
-            fn = mrms.get_fn('1hrad', now, tile)
-            if os.path.isfile(fn):
-                tilemeta, val = mrms.reader(fn)
-                ysz, xsz = np.shape(val)
-                if tile == 1:
-                    x0 = 0
-                    y0 = 1750
-                if tile == 2:
-                    x0 = 3500
-                    y0 = 1750
-                precip[y0:(y0+ysz),x0:(x0+xsz)] += val
-            else:
-                print 'Missing 1HRAD MRMS for q3_today_total', fn
+
         now += interval
 
     # Scale factor is 10
@@ -50,7 +65,7 @@ def doit(ts, hours):
 
     lts = ts.astimezone(pytz.timezone("America/Chicago"))
     subtitle = 'Total up to %s' % (lts.strftime("%d %B %Y %I:%M %p %Z"),)
-    m = MapPlot(title="NMQ Q3 %s Hour Precipitation [inch]" % (hours,),
+    m = MapPlot(title="NCEP NMQ Q3 %s Hour Precipitation [inch]" % (hours,),
                 subtitle=subtitle, pqstr=pqstr)
         
     clevs = np.arange(0,0.2,0.05)
@@ -59,7 +74,7 @@ def doit(ts, hours):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    m.contourf(mrms.XAXIS, mrms.YAXIS, precip / 24.5, clevs)
+    m.contourf(mrms.XAXIS, mrms.YAXIS, total / 24.5, clevs)
 
     #map.drawstates(zorder=2)
     m.drawcounties()
