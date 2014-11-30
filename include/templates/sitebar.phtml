@@ -31,7 +31,7 @@ while (list($key,$val) = each($o))
 		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
 		continue;
 	}
-  	$uri = sprintf("%sstation=%s&network=%s", $val["uri"], $station, $network);
+  	$uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
   	echo "<div style=\"";
   	if ($this->sites_current == $key) echo "background: #eaf;";
   	echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
@@ -46,7 +46,7 @@ if (preg_match('/ASOS|AWOS/', $network) > 0){
 	
 }
 ?>
-<br clear="all" />
+<br />
 <form method="GET" name="automatic">
 <?php 
 if (isset($savevars)){
