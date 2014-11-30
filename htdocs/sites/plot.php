@@ -30,7 +30,7 @@ if ($prod == 1 or $prod == 2) {
 	$ms = monthSelect($month);
 	$ys = yearSelect(2004, $year);
   $form = <<<EOF
-<form method="GET" name=\"modify\">
+<form method="GET" name="modify">
  <input type="hidden" name="station" value="{$station}">
  <input type="hidden" name="network" value="{$network}">
  <input type="hidden" name="prod" value="{$prod}">
