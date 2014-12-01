@@ -10,6 +10,9 @@ import os
 import netCDF4
 import numpy as np
 from pyiem import iemre
+import pygrib
+import gzip
+import tempfile
 #from pyiem.plot import MapPlot
 
 def run(ts):
@@ -21,27 +24,28 @@ def run(ts):
 
     # We want this mrms variable to replicate the netcdf file, so the
     # origin is the southwestern corner
-    mrms = np.zeros((3500, 7000), 'f')
     ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone(pytz.timezone("UTC"))
 
-    for tile in range(1, 5):
-        fn = util.get_fn('24hrad', gmtts, tile)
-        if not os.path.isfile(fn):
-            print "24h Tile: %s Time: %s UTC %s" % (tile, 
-                                        gmtts.strftime("%Y-%m-%d %H:%M"), fn)
-            continue
-        # val is valid at SW corner
-        tilemeta, val = util.reader(fn)
-        ysz, xsz = np.shape(val)
-        # ul_lon is the left edge of the first grid cell. Figure out file offset
-        x0 = int(round((tilemeta['ul_lon'] - util.WEST) * 100.0, 0))
-        #print 'Tile %s has left edge of %s util.WEST is %s, so xoffset %s xsz %s' % (
-        #                tile, tilemeta['ul_lon'], util.WEST, x0, xsz)
-        y0 = int(round((tilemeta['ll_lat'] - util.SOUTH) * 100.0, 0))
-        #print 'Tile %s has south edge of %s util.SOUTH is %s, so yoffset %s, ysz %s' % (
-        #                tile, tilemeta['ll_lat'], util.SOUTH, y0, ysz)
-        mrms[y0:(y0+ysz),x0:(x0+xsz)] = val
+    gribfn = gmtts.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
+            +"RadarOnly_QPE_24H/"
+            +"RadarOnly_QPE_24H_00.00_%Y%m%d-%H%M00.grib2.gz"))
+    if not os.path.isfile(gribfn):
+        print("merge_mrms_q3.py MISSING %s" % (gribfn,))
+        return
+
+    fp = gzip.GzipFile(gribfn, 'rb')
+    (tmpfp, tmpfn) = tempfile.mkstemp()
+    tmpfp = open(tmpfn, 'wb')
+    tmpfp.write(fp.read())
+    tmpfp.close()
+    grbs = pygrib.open(tmpfn)
+    grb = grbs[1]
+    os.unlink(tmpfn)
+
+    mrms = grb['values']
+    # Anything less than zero, we set to zero
+    mrms = np.where(mrms < 0, 0, mrms)
 
     # Figure out what we wish to subsample
     y0 = int((iemre.SOUTH - util.SOUTH) * 100.0)
@@ -66,16 +70,16 @@ def main():
     """ go main go """
     if len(sys.argv) == 4:
         # 12 noon to prevent ugliness with timezones
-        ts = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]),
-                                int(sys.argv[3]), 12, 0 )
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                                int(sys.argv[3]), 12, 0)
     else:
         ts = datetime.datetime.now() - datetime.timedelta(hours=24)
         ts = ts.replace(hour=12)
-    
+
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)
-        
+
 if __name__ == '__main__':
     main()
