@@ -45,11 +45,19 @@ if ($prod == 1 or $prod == 2) {
  <input type="hidden" name="network" value="{$network}">
  <input type="hidden" name="prod" value="{$prod}">
  <h3>Select month and year:</h3>
- <a href="{$llink}" class="btn btn-default"><i class="glyphicon glyphicon-arrow-left"></i> {$ltext}</a>
- {$ms} {$ys}
+ <div class="row">
+ <div class="col-sm-3">
+ <a href="{$llink}" class="btn btn-default">{$ltext} <i class="glyphicon glyphicon-arrow-left"></i></a>
+	</div>
+	<div class="col-sm-6">
+  {$ms} {$ys}
  <input type="submit" value="Generate Plot">
+ </div>
+ <div class="col-sm-3">
  <a href="{$nlink}" class="btn btn-default"><i class="glyphicon glyphicon-arrow-right"></i> {$ntext}</a>
- </form>
+</div>
+</div>
+</form>
 EOF;
 
 }
@@ -66,7 +74,7 @@ $t->content = <<<EOF
 {$form}
 
  <div class="row"><div class="col-md-12">
- <img src="{$uri}">
+ <img src="{$uri}" alt="Monthly Plot" class="img img-responsive">
  </div></div>
 EOF;
 $t->render('sites.phtml');
