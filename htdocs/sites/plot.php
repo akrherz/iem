@@ -11,8 +11,8 @@ include("setup.php");
  $t->headextra = '<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>';
  
  $prod = isset($_GET["prod"]) ? $_GET["prod"]: 0;
- $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
- $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
  $current = "7dayhilo"; 
  if ($prod == 1) $current = "monthhilo";
  if ($prod == 2) $current = "monthrain";
@@ -27,16 +27,28 @@ include("setup.php");
 
  $form = "";
 if ($prod == 1 or $prod == 2) { 
+	$timestamp = mktime(0,0,0, $month, 1, $year);
+	$lmonth = $timestamp - 5*86400;
+	$nmonth = $timestamp + 35*86400;
+	$llink = sprintf("plot.php?prod=%s&amp;station=%s&amp;network=%s&amp;month=%s&amp;year=%s",
+			$prod, $station, $network, date("m", $lmonth), date("Y", $lmonth));
+	$nlink = sprintf("plot.php?prod=%s&amp;station=%s&amp;network=%s&amp;month=%s&amp;year=%s",
+			$prod, $station, $network, date("m", $nmonth), date("Y", $nmonth));
+	$ltext = date("M Y", $lmonth);
+	$ntext = date("M Y", $nmonth);
+	
 	$ms = monthSelect($month);
 	$ys = yearSelect(2004, $year);
   $form = <<<EOF
-<form method="GET" name="modify">
+<form method="GET" name="changemonth">
  <input type="hidden" name="station" value="{$station}">
  <input type="hidden" name="network" value="{$network}">
  <input type="hidden" name="prod" value="{$prod}">
  <h3>Select month and year:</h3>
+ <a href="{$llink}" class="btn btn-default"><i class="glyphicon glyphicon-arrow-left"></i> {$ltext}</a>
  {$ms} {$ys}
  <input type="submit" value="Generate Plot">
+ <a href="{$nlink}" class="btn btn-default"><i class="glyphicon glyphicon-arrow-right"></i> {$ntext}</a>
  </form>
 EOF;
 
@@ -50,14 +62,12 @@ if ($prod == 1){
 		$month, $year, $network, $station);
 }
 $t->content = <<<EOF
-<div style="float: left;">
+
 {$form}
-</div>
 
  <div class="row"><div class="col-md-12">
  <img src="{$uri}">
  </div></div>
-</div>
 EOF;
 $t->render('sites.phtml');
 ?>
