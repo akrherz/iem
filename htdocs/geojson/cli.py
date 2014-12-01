@@ -5,6 +5,8 @@ import sys
 import psycopg2.extras
 import datetime
 import json
+from json import encoder
+encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 import memcache
 
 PGCONN = psycopg2.connect(database='iem', host='iemdb', user='nobody')
