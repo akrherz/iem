@@ -14,11 +14,11 @@ $t->thispage = "iem-feature";
 
 $ts = mktime(0,0,0,$month,1,$year);
 $prev = $ts - 15*86400;
-$plink = sprintf("past.php?year=%s&month=%s", date("Y", $prev), date("m", $prev));
+$plink = sprintf("past.php?year=%s&amp;month=%s", date("Y", $prev), date("m", $prev));
 $next = $ts + 35*86400;
 $nmonth = date("m", $next);
 $nyear = date("Y", $next);
-$nlink = sprintf("past.php?year=%s&month=%s", $nyear, $nmonth);
+$nlink = sprintf("past.php?year=%s&amp;month=%s", $nyear, $nmonth);
 
 $mstr = date("M Y", $ts);
 $table = "";
@@ -38,17 +38,11 @@ $num = pg_numrows($rs);
 $linkbar = <<<EOF
 <div class="row well">
 	<div class="col-md-4 col-sm-4">
-<button type="button" class="btn btn-default btn-lg">
-  <span class="glyphicon glyphicon-arrow-left"></span> 
-<a href="{$plink}">Previous Month</a> 
-</button>
+<a href="{$plink}" class="btn btn-default btn-lg"><i class="glyphicon glyphicon-arrow-left"></i> Previous Month</a> 
 	</div>
 	<div class="col-md-4 col-sm-4"><h4>Features for {$mstr}</h4></div>
 	<div class="col-md-4 col-sm-4">
-<button type="button" class="btn btn-default btn-lg">
-  <a href="{$nlink}">Next Month</a> 
-  <span class="glyphicon glyphicon-arrow-right"></span> 
-</button>
+  <a href="{$nlink}" class="btn btn-default btn-lg">Next Month  <i class="glyphicon glyphicon-arrow-right"></i></a> 
 	</div>
 </div>
 EOF;
