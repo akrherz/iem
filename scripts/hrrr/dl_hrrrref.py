@@ -14,7 +14,18 @@ def run(valid):
         uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
             +"nonoperational/com/hrrr/prod/hrrr.%Y%m%d/hrrr.t%Hz.wrfsubhf"+shr
             +".grib2.idx"))
-        data = urllib2.urlopen(uri)
+        attempt = 0
+        data = None
+        while data is None and attempt < 10:
+            try:
+                data = urllib2.urlopen(uri, timeout=30)
+            except Exception,exp:
+                print("dl_hrrrref FAIL %s %s %s" % (valid, hr, exp))
+            attempt += 1
+        if data is None:
+            print("ABORT")
+            sys.exit()
+            
 
         offsets = []
         neednext = False
