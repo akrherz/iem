@@ -230,6 +230,7 @@ $cities = $nt->table;
 $mydata = $iem->getNetwork( Array("OH_RWIS","IN_RWIS", "KY_RWIS") );
 
 $rwis = fopen('/tmp/wxc_oh_in_kydot.txt', 'w');
+$rwiscsv = fopen('/tmp/csv_oh_in_kydot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
   22
    6 Station
@@ -255,7 +256,9 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
    5 Today High Temp F
    5 Today Low Temp F
 ");
- 
+fwrite($rwiscsv, "station,cityname,state,lat,lon,day,hour,airtemp,airdewp,"
+		."drct,drcttxt,sped,subsurfacetemp,p1temp,p2temp,p3temp,p4temp,"
+		."pavetemp,wcht,hidx,today_high,today_low\n");
 
 $now = time();
 while ( list($key, $val) = each($mydata) ) {
@@ -321,7 +324,7 @@ while ( list($key, $val) = each($mydata) ) {
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
   $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s %5s %5s %5s %5s\n", $key, 
-    strtoupper($cities[$key]['name']), $val->db['state'], round($cities[$key]['lat'],2), 
+    strtoupper(preg_replace("/\s+/", "|", $cities[$key]['name'])), $val->db['state'], round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
      $val->db['tmpf'], $val->db['dwpf'],
@@ -333,15 +336,25 @@ while ( list($key, $val) = each($mydata) ) {
   		$val->db["wcht"], $val->db["heat"], 
   	fancy($val->db["max_tmpf"],-50,120,5), fancy($val->db["min_tmpf"],-50,120,5)
   		); 
-  fwrite($rwis, $s);
-
+  fwrite($rwis, str_replace("|", " ", $s));
+  fwrite($rwiscsv, str_replace("|", " ", 
+  			implode(",", preg_split("/\s+/", trim($s)))) ."\n");
+  
 } // End of while
 
 fclose($rwis);
+fclose($rwiscsv);
 
 $pqstr = "data c 000000000000 wxc/wxc_oh_in_kydot.txt bogus txt";
 $cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_oh_in_kydot.txt", $pqstr);
 system($cmd);
+
+$pqstr = "data c 000000000000 csv/oh_in_kydot.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/csv_oh_in_kydot.txt", $pqstr);
+system($cmd);
+
+
 unlink("/tmp/wxc_oh_in_kydot.txt");
+unlink("/tmp/csv_oh_in_kydot.txt");
 
 ?>
