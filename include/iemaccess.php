@@ -54,7 +54,7 @@ class IEMAccess {
     s.name as sname from 
     current c2, summary_%s c, stations s  
     WHERE $nstring and c.iemid = s.iemid and c2.iemid = c.iemid and
-    c.day = date(now() at time zone '%s')",
+    c.day = date(now() at time zone '%s') ORDER by random() ASC",
      date("Y"), 
     $this->tzname);
     $rs = pg_exec($this->dbconn, $sql);
