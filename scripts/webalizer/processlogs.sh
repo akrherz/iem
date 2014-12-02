@@ -66,11 +66,11 @@ wc -l weatherim_access.log
 
 # Step 4, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T access.log
-/usr/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
-/usr/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
-/usr/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
-/usr/bin/webalizer -c ${CONFBASE}/idep.conf idep_access.log
-/usr/bin/webalizer -c ${CONFBASE}/weatherim.conf weatherim_access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/idep.conf idep_access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf weatherim_access.log
 
 grep " /agclimate" access.log > agclimate.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log
