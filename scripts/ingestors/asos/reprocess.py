@@ -275,10 +275,21 @@ def doit(opener, station, now):
 
             
 def process_metar(mstr, now):
-    try:
-        mtr = Metar.Metar(mstr, now.month, now.year)
-    except:
-        return None
+    """ Do the METAR Processing """
+    mtr = None
+    while mtr is None:
+        try:
+            mtr = Metar.Metar(mstr, now.month, now.year)
+        except Metar.ParserError, exp:
+            msg = str(exp)
+            if msg.startswith("Unparsed groups in body:"):
+                badpart = msg.strip().split()[4]
+                mstr = mstr.replace(badpart, "")
+            else:
+                return None
+        except Exception,exp:
+            print("Double Fail: %s %s" % (mstr, exp))
+            return None
     if mtr is None or mtr.time is None:
         return None
     
