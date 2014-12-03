@@ -176,8 +176,8 @@ def do_row(row):
         else:
             newvalue = '=hyperlink("%s", "Entry")' % (uri,)
         if newvalue != entry.cell.input_value:
-            print '--> New Value: %s [%s] OLD: %s NEW: %s' % (siteid, varname,
-                                            entry.cell.input_value, newvalue)
+            print '--> %s New Value: %s [%s] OLD: %s NEW: %s' % (
+                YEAR, siteid, varname, entry.cell.input_value, newvalue)
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
