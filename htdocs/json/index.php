@@ -164,6 +164,27 @@ can be found on <a href='/sites/locate.php'>this page.</a>",
   );
   
   $services[] = Array(
+  		"title" => "GOES East/West Available Scans",
+  		"url" => "/json/goes.py?operation=list&amp;start={start}&amp;end={end}&amp;bird={bird}&amp;product={product}",
+  		"desc" => "This service returns a listing of available GOES scan
+  		times for a period of time.",
+  		"vars" => Array(
+  				"operation" => "Currently always 'list'",
+  				"start" => "ISO-8601 UTC Timestamp",
+  				"end" => "ISO-8601 UTC Timestamp",
+  				"bird" => "GOES EAST or GOES WEST",
+  				"product" => "GOES Channel IR, VIS, or WV",
+  		),
+  		"example" => Array(
+  				"{start}" => "2014-12-02T00:00:00Z",
+  				"{end}" => "2014-12-04T00:00:00Z",
+  				"{operation}" => "list",
+  				"{bird}" => "EAST",
+  				"{product}" => "VIS",
+  		)
+  );
+  
+  $services[] = Array(
   		"title" => "RIDGE Single Site Available NEXRADs",
   		"url" => "/json/radar?operation=available&amp;lat={lat}&amp;lon={lon}&amp;start={start}",
   		"desc" => "This service returns an estimate of which NEXRAD RADARs have
