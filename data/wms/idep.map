@@ -1574,7 +1574,7 @@ LAYER
   NAME "flowpaths"
   CONNECTION "user=nobody dbname=idep host=iemdb"
   CONNECTIONTYPE POSTGIS
-  DATA "geom from (select fid, geom, fpath from flowpaths WHERE fpath > 0) as foo using srid=26915 using unique fid"
+  DATA "geom from (select fid, geom, fpath from flowpaths WHERE fpath > 0 and scenario = 0) as foo using srid=26915 using unique fid"
   PROJECTION
     "init=epsg:26915"
   END # PROJECTION
