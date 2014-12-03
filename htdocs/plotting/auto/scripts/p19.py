@@ -49,7 +49,7 @@ def plotter( fdict ):
         
     (fig, ax) = plt.subplots(1,1)
     res = ax.pcolormesh(xedges, yedges, H.transpose())
-    fig.colorbar( res, label="Days pear Year")
+    fig.colorbar( res, label="Days per Year")
     ax.grid(True)
     ax.set_title("%s [%s]\nDaily High vs Low Temperature Histogram" % (
                 nt.sts[station]['name'], station))
