@@ -14,6 +14,7 @@ data = {'plots': [
         {'id': "31", 'label': "Extreme Jumps or Dips in High Temperature over X days"},
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
+        {'id': "35", 'label': "Histogram of X Hour Temperature Changes"},
         {'id': "34", 'label': "Maximum Stretch of Days with High Below Threshold"},
         {'id': "26", 'label': "Minimum Daily Low Temperature after 1 July"},
         {'id': "5", 'label': "Minimum Daily Temperature Range"},
