@@ -98,7 +98,8 @@ EOF;
   {
     $content .= "<br /><br /><b>Voting:</b>
     		<br />Good = ". $row["good"] 
-    	." <br />Bad = ". $row["bad"] ;
+    	." <br />Bad = ". $row["bad"] 
+    	." <br />Abstain = ". $row["abstain"] ;
     if ($row["abstain"] > 0) $content .= " <br />Abstain = ". $row["abstain"] ;
   }
   $content .= "<br />". printTags(explode(",", $row["tags"]));
