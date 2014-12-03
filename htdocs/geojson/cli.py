@@ -29,7 +29,7 @@ def get_data(ts, fmt):
             "features": []}
     # Fetch the daily values
     cursor.execute("""
-    select station, name, product, 
+    select station, name, product, state, wfo,
     round(st_x(geom)::numeric, 4)::float as st_x, 
     round(st_y(geom)::numeric, 4)::float as st_y, 
     high, high_normal, high_record, high_record_years,
@@ -45,6 +45,8 @@ def get_data(ts, fmt):
         data['features'].append({"type": "Feature", "id": i,
             "properties": {
                 "station": row["station"],
+                "state" : row["state"],
+                "wfo": row["wfo"],
                 "link": "/api/nwstext/%s.txt" % (row['product'],),
                 "name": row["name"],
                 "high":  str(sanitize(row["high"])),
@@ -77,7 +79,7 @@ def get_data(ts, fmt):
     if fmt == 'geojson':
         return json.dumps(data)
     else:
-        cols = ("station,name,high,high_record,high_record_years,high_normal,"
+        cols = ("station,name,state,wfo,high,high_record,high_record_years,high_normal,"
                +"low,low_record,low_record_years,low_normal,precip,"
                +"precip_month,precip_jan1,precip_jan1_normal,precip_jul1,"
                +"precip_dec1,precip_dec1_normal,precip_record,snow,"
