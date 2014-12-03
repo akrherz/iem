@@ -26,7 +26,7 @@ class Request (object):
         self.service = service
     def getLayer(self, layername):    
         #try:
-        if layername.find('idep') == 0:
+        if layername.startswith('idep'):
             (lbl, ltype, date) = layername.split("::", 3)
             scenario = lbl[4:]
             uri = 'date=%s&year=%s&month=%s&day=%s&scenario=%s' % (date, 
@@ -37,6 +37,23 @@ class Request (object):
             layer.name = layername
             layer.layers = ltype
             layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
+        elif layername.startswith('goes'):
+            (bird,channel, tstring) = (layername.split("::")[1]).split('-')
+            if len(tstring) == 12:
+                mylayername = 'goes-t'
+                year = tstring[:4]
+                month = tstring[4:6]
+                day = tstring[6:8]
+                ts = tstring[8:12]
+                uri = "year=%s&month=%s&day=%s&time=%s&" % (year, 
+                                            month, day,  ts)
+            else:
+                mylayername = 'goes'
+                uri = ''
+            layer = self.service.layers[mylayername]
+            layer.name = layername
+            layer.url = "%sbird=%s&channel=%s&%s" % (
+                layer.metadata['baseurl'], bird, channel, uri)                                                                     
         elif layername.find("::") > 0:
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
