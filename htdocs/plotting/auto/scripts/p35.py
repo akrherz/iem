@@ -37,14 +37,14 @@ def plotter( fdict ):
     two as (SELECT valid + '%s hours'::interval as v, tmpf from alldata
     where station = %s and tmpf is not null and tmpf > -50)
     
-    SELECT extract(week from one.valid), two.tmpf - one.tmpf from one JOIN two
-    on (one.valid = two.v)
+    SELECT extract(week from one.valid), two.tmpf - one.tmpf 
+    from one JOIN two on (one.valid = two.v)
     """, (station, hours, station))
     weeks = []
     deltas = []
     for row in cursor:
         weeks.append( row[0] )
-        deltas.append( row[1] )
+        deltas.append( float(row[1]) )
 
     sts = datetime.datetime(2012,1,1)
     xticks = []
@@ -53,7 +53,7 @@ def plotter( fdict ):
         xticks.append(int(ts.strftime("%j")))
 
 
-    bins = np.arange(-79, 80, 2)
+    bins = np.arange(-79.5, 80.5, 1)
         
     H, xedges, yedges = np.histogram2d(weeks, deltas, [range(0,54), bins])
     years = float( 
