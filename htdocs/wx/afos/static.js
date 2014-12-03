@@ -125,6 +125,7 @@ var refreshAction = new Ext.Action({
 		}
 		tabs.getActiveTab().getLoader().load({
 			url       : uri, 
+			timeout	: 120,
 			autoLoad : true,
 			loadMask : true
 		}); 
@@ -159,7 +160,7 @@ var addTab = function(id, center, cnt, sdate, edate) {
     	title = title +"-"+ center;
     	tid = tid +"-"+ center;
     }
-    tabs.add({
+    var newtab = tabs.add({
         id         : tid,
         title      : title,
         closable   : true,
@@ -171,8 +172,9 @@ var addTab = function(id, center, cnt, sdate, edate) {
         },
         loader  : {
         	url        : uri, 
-            autoLoad   : true,
-            loadMask : true
+            autoLoad   : false,
+            timeout : 120,
+            loadMask : {msg: 'Searching Database, Standby...'}
         },
         tbar: [refreshAction,
         {
@@ -183,7 +185,9 @@ var addTab = function(id, center, cnt, sdate, edate) {
                 Ext.getCmp("tabPanel").getActiveTab().print();
             }
           }]
-     }).show(); // have this tab become the active tab
+     });
+    newtab.show();
+    newtab.getLoader().load();
     saveConfig();
 };
 
