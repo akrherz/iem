@@ -42,7 +42,8 @@ def find_scans(root, bird, product, start_gts, end_gts):
             for f in files:
                 ts = datetime.datetime.strptime(f[:-4].split("_")[3],
                                                 "%Y%m%d%H%M")
-                root['scans'].append(ts.strftime("%Y-%m-%dT%H:%M:00Z"))
+                if ts >= start_gts and ts <= end_gts:
+                    root['scans'].append(ts.strftime("%Y-%m-%dT%H:%M:00Z"))
         now += datetime.timedelta(hours=24)
 
 def list_files(form):
@@ -51,8 +52,15 @@ def list_files(form):
     """
     bird = form.getvalue('bird', 'EAST').upper()
     product = form.getvalue('product', 'VIS').upper()
-    start_gts = parse_time( form.getvalue('start', '2012-01-27T00:00Z') )
-    end_gts = parse_time( form.getvalue('end', '2012-01-27T01:00Z') )
+    
+    #default to a four hour period
+    utc0 = datetime.datetime.utcnow()
+    utc1 = utc0 - datetime.timedelta(hours=4)
+    
+    start_gts = parse_time( form.getvalue('start', 
+                            utc1.strftime("%Y-%m-%dT%H:%MZ")) )
+    end_gts = parse_time( form.getvalue('end', 
+                            utc0.strftime("%Y-%m-%dT%H:%MZ")) )
     root = {'scans': []}
     find_scans(root, bird, product, start_gts, end_gts)
         
@@ -60,7 +68,7 @@ def list_files(form):
 
 def main():
     """
-    
+    Do something fun and educational
     """
     form = cgi.FieldStorage()
     operation = form.getvalue('operation', None)
