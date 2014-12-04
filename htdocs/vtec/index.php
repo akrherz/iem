@@ -58,7 +58,7 @@ if (isset($_REQUEST["devel"])){
 <script type="text/javascript" src="js/Ext.ux.SliderTip.js"></script>
 <script type="text/javascript" src="js/static.js"></script>';
 } else {
-	$headextra .= '<script src="app.js?v=6"></script>';
+	$headextra .= '<script src="app.js?v=7"></script>';
 }
 
 $headextra .= <<<EOF

@@ -108,9 +108,9 @@ Ext.ux.Printer.BaseRenderer = Ext.extend(Object, {
     
     win.document.write(this.generateHTML(component));
     win.document.close();
-    
+    // Found needed these reversed 4 Dec 2014!
+    win.close();    
     win.print();
-    win.close();
   },
   
   /**
