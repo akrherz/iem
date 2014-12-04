@@ -63,14 +63,40 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		$newe = date("YmdHi", $basets);
 		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
+		$dstamp = date("Y-m-d H:i", $basets);
+		$listlink = sprintf("list.phtml?source=%s&amp;day=%s&amp;month=%s&amp;year=%s", 
+				$row["source"], date("d", $basets), date("m", $basets), 
+				date("Y", $basets));
+		$date2 =  date("d M Y", $basets);
+		$content .= <<<EOF
+<div class="row">
+<div class="col-sm-12">
+<p>Displaying AFOS PIL: <strong>$pil</strong> 
+Received: <strong>{$dstamp} UTC</strong>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-2">
+<a rel="nofollow" class="btn btn-primary" 
+	href="p.php?dir=prev&pil=$pil&e=$newe"><i class="glyphicon glyphicon-arrow-left"></i> 
+	Previous in Time</a>
+</div>
+<div class="col-sm-4">
+	<a rel="nofollow" class="btn btn-primary" 
+	href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
+</div>
+<div class="col-sm-2">
+	<a rel="nofollow" class="btn btn-primary" 
+	href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="glyphicon glyphicon-arrow-right"></i></a>
+</div>
+<div class="col-sm-4">
+	<a rel="nofollow" class="btn btn-primary" 
+	href="p.php?pil=$pil">Latest Product</a>
+</div>
+</div><!-- ./row -->
+EOF;
 		
-		$content .= "<p>Displaying AFOS PIL: <strong>$pil</strong> Received: <strong>". date("Y-m-d H:i", $basets) ." UTC</strong>";
-		$content .= "<br /><a rel=\"nofollow\" class=\"btn btn-primary\" href=\"p.php?dir=prev&pil=$pil&e=$newe\"><i class='glyphicon glyphicon-arrow-left'></i> Previous in Time</a>";
-		$content .= sprintf(" <a rel=\"nofollow\" class=\"btn btn-primary\" href=\"list.phtml?source=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
-		$row["source"], date("d", $basets), date("m", $basets), 
-		date("Y", $basets), $row["source"], date("d M Y", $basets) );
-		$content .= " <a rel=\"nofollow\" class=\"btn btn-primary\" href=\"p.php?dir=next&pil=$pil&e=$newe\">Next in Time <i class='glyphicon glyphicon-arrow-right'></i></a></div>";
-		$content .= "<br clear=\"both\" />";
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
