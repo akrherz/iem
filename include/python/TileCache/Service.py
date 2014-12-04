@@ -378,7 +378,9 @@ def wsgiHandler (environ, start_response, service):
         start_response("404 Tile Not Found", [('Content-Type','text/plain')])
         return ["An error occurred: %s" % (str(E))]
     except Exception, E:
-        start_response("500 Internal Server Error", [('Content-Type','text/plain')])
+        start_response("500 Internal Server Error", 
+                       [('Content-Type','text/plain')])
+        sys.stderr.write("TCError %s %s" % (str(E), path_info))
         return ["An error occurred: %s\n%s\n" % (
             str(E), 
             "".join(traceback.format_tb(sys.exc_traceback)))]
