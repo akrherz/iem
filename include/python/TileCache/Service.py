@@ -373,7 +373,7 @@ def wsgiHandler(environ, start_response, service):
         fmt, image = service.dispatchRequest(fields, 
                                              path_info, req_method, host)
         headers = [('Content-Type', fmt)]
-        if format.startswith("image/"):
+        if fmt.startswith("image/"):
             if service.cache.sendfile:
                 headers.append(('X-SendFile', image))
             if service.cache.expire:
