@@ -403,14 +403,8 @@ def wsgiHandler(environ, start_response, service):
         msg = "An error occurred: %s\n%s\n" % (str(E), 
             "".join(traceback.format_tb(sys.exc_traceback)))
 
-    # The client may have closed the connection by now, so lets try to 
-    # be careful about not logging too much fun
-    try:
-        start_response(status, [('Content-Type','text/plain')])
-        return [msg]
-    except:
-        return []
-
+    start_response(status, [('Content-Type','text/plain')])
+    return [msg]
 
 def cgiHandler (service):
     try:
