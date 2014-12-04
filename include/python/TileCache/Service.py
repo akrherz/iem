@@ -37,7 +37,7 @@ class Request (object):
             layer.name = layername
             layer.layers = ltype
             layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
-        elif layername.startswith('goes'):
+        elif layername.startswith('goes::'):
             (bird,channel, tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
                 mylayername = 'goes-t'
