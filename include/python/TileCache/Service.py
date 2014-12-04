@@ -7,9 +7,13 @@ class TileCacheException(Exception): pass
 class TileCacheLayerNotFoundException(Exception):
     pass
 
+class TileCacheFutureException(Exception):
+    pass
+
 import sys, cgi, time, os, traceback, email, ConfigParser
 import Cache, Caches
 import Layer, Layers
+import datetime
 
 # Windows doesn't always do the 'working directory' check correctly.
 if sys.platform == 'win32':
@@ -60,6 +64,9 @@ class Request (object):
         elif layername.find("::") > 0:
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
+                utcnow = datetime.datetime.utcnow().strftime("%Y%m%d%H%M")
+                if tstring > utcnow:
+                    raise TileCacheFutureException("Specified time in the future!")
                 mylayername = 'ridge-t'
                 if sector in ['USCOMP', 'HICOMP', 'AKCOMP']:
                     mylayername = 'ridge-composite-t'
@@ -383,6 +390,9 @@ def wsgiHandler (environ, start_response, service):
         start_response("404 Tile Not Found", [('Content-Type','text/plain')])
         return ["An error occurred: %s" % (str(E))]
     except TileCacheLayerNotFoundException, E:
+        start_response("500 Internal Server Error", [('Content-Type','text/plain')])
+        return ["%s" % (str(E))]
+    except TileCacheFutureException, E:
         start_response("500 Internal Server Error", [('Content-Type','text/plain')])
         return ["%s" % (str(E))]
     except Exception, E:
