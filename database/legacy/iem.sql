@@ -35,7 +35,8 @@ CREATE TABLE cli_data(
   snow_record float,
   snow_jun1_normal float,
   snow_jul1_normal float,
-  snow_dec1_normal float
+  snow_dec1_normal float,
+  snow_month_normal float
 );
 CREATE UNIQUE index cli_data_idx on cli_data(station,valid);
 GRANT SELECT on cli_data to nobody,apache;
