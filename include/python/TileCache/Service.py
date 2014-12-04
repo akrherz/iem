@@ -4,6 +4,9 @@
 
 class TileCacheException(Exception): pass
 
+class TileCacheLayerNotFoundException(Exception):
+    pass
+
 import sys, cgi, time, os, traceback, email, ConfigParser
 import Cache, Caches
 import Layer, Layers
@@ -78,7 +81,9 @@ class Request (object):
             layer.url = "%ssector=%s&prod=%s&%s" % (layer.metadata['baseurl'],
                 sector, prod, uri)
         else:
-            layer = self.service.layers[layername]
+            layer = self.service.layers.get(layername, None)
+            if layer is None:
+                raise TileCacheLayerNotFoundException("Layer %s not found" % (layername,))
         return layer
         #except:
         #    raise TileCacheException("The requested layer (%s) does not exist. Available layers are: \n * %s" % (layername, "\n * ".join(self.service.layers.keys()))) 
@@ -377,6 +382,9 @@ def wsgiHandler (environ, start_response, service):
     except TileCacheException, E:
         start_response("404 Tile Not Found", [('Content-Type','text/plain')])
         return ["An error occurred: %s" % (str(E))]
+    except TileCacheLayerNotFoundException, E:
+        start_response("500 Internal Server Error", [('Content-Type','text/plain')])
+        return ["%s" % (str(E))]
     except Exception, E:
         start_response("500 Internal Server Error", 
                        [('Content-Type','text/plain')])
