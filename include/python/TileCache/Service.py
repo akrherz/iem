@@ -388,7 +388,8 @@ def wsgiHandler (environ, start_response, service):
     except Exception, E:
         start_response("500 Internal Server Error", 
                        [('Content-Type','text/plain')])
-        sys.stderr.write("TCError %s\n" % (str(E), ))
+        sys.stderr.write("Path: %s TCError: %s Referrer: %s\n" % (path_info,
+                        str(E).replace("\n", " "), environ.get("HTTP_REFERER")))
         return ["An error occurred: %s\n%s\n" % (
             str(E), 
             "".join(traceback.format_tb(sys.exc_traceback)))]
