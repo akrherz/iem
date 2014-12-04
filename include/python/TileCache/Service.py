@@ -64,7 +64,8 @@ class Request (object):
         elif layername.find("::") > 0:
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
-                utcnow = datetime.datetime.utcnow().strftime("%Y%m%d%H%M")
+                utcnow = (datetime.datetime.utcnow() +
+                          datetime.timedelta(minutes=5)).strftime("%Y%m%d%H%M")
                 if tstring > utcnow:
                     raise TileCacheFutureException("Specified time in the future!")
                 mylayername = 'ridge-t'
