@@ -354,55 +354,63 @@ def modPythonHandler (apacheReq, service):
             pass
     return apache.OK
 
-def wsgiHandler (environ, start_response, service):
+def wsgiHandler(environ, start_response, service):
+    """ This is the WSGI handler """
     from paste.request import parse_formvars
+    host = ""
+    path_info = environ.get("PATH_INFO", "")
+
+    if "HTTP_X_FORWARDED_HOST" in environ:
+        host      = "http://" + environ["HTTP_X_FORWARDED_HOST"]
+    elif "HTTP_HOST" in environ:
+        host      = "http://" + environ["HTTP_HOST"]
+
+    host += environ["SCRIPT_NAME"]
+    req_method = environ["REQUEST_METHOD"]
     try:
-        path_info = host = ""
-
-
-        if "PATH_INFO" in environ: 
-            path_info = environ["PATH_INFO"]
-
-        if "HTTP_X_FORWARDED_HOST" in environ:
-            host      = "http://" + environ["HTTP_X_FORWARDED_HOST"]
-        elif "HTTP_HOST" in environ:
-            host      = "http://" + environ["HTTP_HOST"]
-
-        host += environ["SCRIPT_NAME"]
-        req_method = environ["REQUEST_METHOD"]
         fields = parse_formvars(environ)
 
-        format, image = service.dispatchRequest( fields, path_info, req_method, host )
-        headers = [('Content-Type',format)]
+        fmt, image = service.dispatchRequest(fields, 
+                                             path_info, req_method, host)
+        headers = [('Content-Type', fmt)]
         if format.startswith("image/"):
             if service.cache.sendfile:
                 headers.append(('X-SendFile', image))
             if service.cache.expire:
-                headers.append(('Expires', email.Utils.formatdate(time.time() + service.cache.expire, False, True)))
+                headers.append(('Expires', 
+                email.Utils.formatdate(time.time() + service.cache.expire, 
+                                       False, True)))
 
         start_response("200 OK", headers)
-        if service.cache.sendfile and format.startswith("image/"):
+        if service.cache.sendfile and fmt.startswith("image/"):
             return []
         else:
             return [image]
 
     except TileCacheException, E:
-        start_response("404 Tile Not Found", [('Content-Type','text/plain')])
-        return ["An error occurred: %s" % (str(E))]
+        status = '404 Tile Not Found'
+        msg = "An error occurred: %s" % (str(E),)
     except TileCacheLayerNotFoundException, E:
-        start_response("500 Internal Server Error", [('Content-Type','text/plain')])
-        return ["%s" % (str(E))]
+        status = "500 Internal Server Error"
+        msg = "%s" % (str(E),)
     except TileCacheFutureException, E:
-        start_response("500 Internal Server Error", [('Content-Type','text/plain')])
-        return ["%s" % (str(E))]
+        status = "500 Internal Server Error"
+        msg = "%s" % (str(E),)
     except Exception, E:
-        start_response("500 Internal Server Error", 
-                       [('Content-Type','text/plain')])
+        status = "500 Internal Server Error"
         sys.stderr.write("Path: %s TCError: %s Referrer: %s\n" % (path_info,
                         str(E).replace("\n", " "), environ.get("HTTP_REFERER")))
-        return ["An error occurred: %s\n%s\n" % (
-            str(E), 
-            "".join(traceback.format_tb(sys.exc_traceback)))]
+        msg = "An error occurred: %s\n%s\n" % (str(E), 
+            "".join(traceback.format_tb(sys.exc_traceback)))
+
+    # The client may have closed the connection by now, so lets try to 
+    # be careful about not logging too much fun
+    try:
+        start_response(status, [('Content-Type','text/plain')])
+        return [msg]
+    except:
+        return []
+
 
 def cgiHandler (service):
     try:
