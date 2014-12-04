@@ -329,8 +329,8 @@ def modPythonHandler (apacheReq, service):
         apacheReq.send_http_header()
         apacheReq.write("An error occurred: %s\n" % (str(E)))
     except Exception, E:
-        sys.stderr.write("TCError: %s %s\n" % (str(E), apacheReq.uri))
-        sys.stderr.flush()
+        apache.log_error("TCError: %s %s" % (str(E), apacheReq.uri), 
+                        apache.APLOG_ERR)
         apacheReq.content_type = "text/plain"
         apacheReq.status = apache.HTTP_INTERNAL_SERVER_ERROR
         apacheReq.send_http_header()
