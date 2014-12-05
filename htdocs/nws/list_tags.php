@@ -42,7 +42,44 @@
 EOF;
  $rs = pg_prepare($pgconn, "MYSELECT", $sql);
  
- $t->title = "List Tags used in NWS Warnings";
+ $t->title = "NWS $wfo issued SVR+TOR Warning Tags for $year";
+ $t->headextra = '
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+<script type="text/javascript" src="/ext/ux/TableGrid.js"></script>
+<script>
+Ext.onReady(function(){
+    var btn = Ext.get("create-grid1");
+    btn.on("click", function(){
+        btn.dom.disabled = true;
+ 
+        // create the grid
+        var grid = new Ext.ux.grid.TableGrid("svr", {
+            stripeRows: true // stripe alternate rows
+        });
+        grid.render();
+    }, false, {
+        single: true
+    }); // run once
+
+ 	var btn2 = Ext.get("create-grid2");
+    btn2.on("click", function(){
+        btn2.dom.disabled = true;
+ 
+        // create the grid
+        var grid = new Ext.ux.grid.TableGrid("tor", {
+            stripeRows: true // stripe alternate rows
+        });
+        grid.render();
+    }, false, {
+        single: true
+    }); // run once
+ 		
+});
+</script>
+';
+ 
 
 function do_col1($row){
 	$ts = strtotime($row["utc_issue"]);
@@ -58,9 +95,9 @@ function do_col1($row){
 }
 function do_col2($row){
 	if ($row["status"] == 'NEW'){
-		return date("d M Y Hi", strtotime($row["utc_issue"]));
+		return date("Y/m/d Hi", strtotime($row["utc_issue"]));
 	}
-	return date("d M Y Hi", strtotime($row["utc_polygon_begin"]));
+	return date("Y/m/d Hi", strtotime($row["utc_polygon_begin"]));
 }
 function do_col3($row){
 	if ($row["status"] == 'NEW'){
@@ -69,22 +106,22 @@ function do_col3($row){
 		return date("Hi", strtotime($row["utc_polygon_end"]));
 }
 function do_row($row){
-	return sprintf("<tr><th>%s</th><td nowrap>%s</td><td>%s</td><td>%s</td>"
- 			."<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", do_col1($row), do_col2($row),
+	return sprintf("<tr><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
+ 			."<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>", do_col1($row), do_col2($row),
  			do_col3($row),
  			$row["locations"], $row["windtag"], $row["hailtag"],
  			$row["tornadotag"], $row["tornadodamagetag"], $row["tml_sknt"]);
 }
  
  $svrtable = <<<EOF
- <table class="table table-condensed table-striped table-bordered">
+ <table id='svr' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Tornado Damage Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOF;
- $tortable = $svrtable;
+ $tortable = str_replace('svr', 'tor', $svrtable);
 
  $rs = pg_execute($pgconn, "MYSELECT", array($wfo, 'SV'));
  for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
@@ -131,11 +168,11 @@ $wselect = networkSelect("WFO", $wfo, array(), "wfo");
  </form>
  
  <h3>Tornado Warnings</h3>
- 		
- 		{$tortable}
+ <button id="create-grid2" class="btn btn-info" type="button">Make Table Sortable</button>
+ {$tortable}
  
  <h3>Severe Thunderstorm Warnings</h3>
-
+<button id="create-grid1" class="btn btn-info" type="button">Make Table Sortable</button>
  		{$svrtable}
  
  
