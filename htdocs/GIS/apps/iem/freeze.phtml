@@ -11,6 +11,10 @@ include("../../../../include/forms.php");
 $state = isset($_GET['state']) ? $_GET['state'] : '' ;
 $radar = isset($_GET['radar']) ? $_GET['radar'] : 1;
 $refresh = isset($_GET['refresh']) ? $_GET['refresh'] : 0;
+$imgsize = isset($_GET["imgsize"]) ? $_GET["imgsize"] : "640x480";
+$tokens = explode("x", $imgsize);
+$imgwidth = intval($tokens[0]);
+$imgheight = intval($tokens[1]);
 $uri = "freeze.phtml";
 
 if ($state == "MN_N")
@@ -53,8 +57,6 @@ else if ($state == "NW")
  else 
    $oextents = isset($_GET['extents']) ? $_GET['extents'] : "-105,36,-86,50";
  $zoom     = isset($_GET['zoom']) ? $_GET['zoom'] : 0;
- $imgwidth = 640;
- $imgheight = 480;
  if ( isset($_GET['img_x']) ){
    include("../../../../include/click2geo.inc.php");
    $extents = click2geo($oextents, $_GET['img_x'], $_GET['img_y'],
@@ -63,8 +65,9 @@ else if ($state == "NW")
    $extents = $oextents;
  }
 
-$imgurl = "/GIS/radmap.php?layers[]=airtemps&layers[]=uscounties&";
-$imgurl .= sprintf("layers[]=surface&bbox=%s&", $extents);
+$imgurl = "/GIS/radmap.php?layers[]=airtemps&amp;layers[]=uscounties&amp;";
+$imgurl .= sprintf("width=%s&amp;height=%s&amp;layers[]=surface&amp;bbox=%s&amp;", 
+			$imgwidth, $imgheight, $extents);
 if ($radar){
 	$imgurl .= "layers[]=nexrad&";
 }
@@ -99,15 +102,19 @@ EOF;
  "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota", 
  "NW" => "Pacific Northwest", "SD" => "South Dakota", "WI" => "Wisconsin");
  while (list($key,$val)=each($ar)){
- 	$sselect .= sprintf("<option value=\"%s?state=%s\"%s>%s</option>\n",
- 			$uri, $key, ($state == $key) ? " SELECTED": "", $val); 
+ 	$sselect .= sprintf("<option value=\"%s?width=%s&amp;height=%s&amp;state=%s\"%s>%s</option>\n",
+ 			$uri, $imgwidth, $imgheight, $key, 
+ 			($state == $key) ? " SELECTED": "", $val); 
  }
  $sselect .= "</select>";
  
+ $ar = Array("640x480" => "640x480",
+ 		"800x600" => "800x600",
+ 		"1280x1024" => "1280x1024");
+ $imgsizeselect = make_select("imgsize", $imgsize, $ar);
  
  
 $t->content = <<<EOF
-<h3 class="heading">IEM Freeze</h3><p>
 
 <form method="GET" action="{$uri}" name="myform">
 
@@ -115,7 +122,17 @@ $t->content = <<<EOF
 <input type="hidden" name="state" value="{$state}">
 <input type="hidden" name="zoom" value="1">
 
-<b>Map Controls:</b>
+<div class="row">
+<div class="col-md-5"><u>Temperature Key:</u><br />
+<img src="freeze_legend.png" class="img img-responsive">
+</div>
+<div class="col-md-7"><h3>IEM Freeze</h3></div>
+</div>
+
+
+<div class="row">
+
+<div class="col-md-2"><b>Map Controls:</b><br />
 <img src="../imagenav/button_zoomin_off.png" name="zoominButton" alt="Zoom In"
   onClick="javascript: resetButtons(); document.zoominButton.src = '../imagenav/button_zoomin_on.png'; document.myform.zoom.value = -2;">
 <img src="../imagenav/button_pan_on.png" name="panButton" alt="Pan"
@@ -123,32 +140,29 @@ $t->content = <<<EOF
 <img src="../imagenav/button_zoomout_off.png" name="zoomoutButton" alt="Zoom Out"
   onClick="javascript: resetButtons(); document.zoomoutButton.src = '../imagenav/button_zoomout_on.png'; document.myform.zoom.value = 2;">
 <a href="{$uri}">Reset</a>
-
-&nbsp; &nbsp; <b>Radar Layer? </b> {$rselect}
-
-
-&nbsp; &nbsp; <b>Map Refresh? </b> {$reselect}
-
-<input type="submit" value="View">
-
-<div class="row">
-<div class="col-md-8 col-sm-8">
-
-<input class="img img-responsive" type="image" name="img" src="{$imgurl}">
-</form>
 </div>
-<div class="col-md-4 col-sm-4 well">
 
-<p><u>Preset Views:</u><br />
+<div class="col-md-2"><b>Radar Layer?</b> {$rselect}</div>
+<div class="col-md-2"><b>Map Refresh?</b> {$reselect}</div>
+<div class="col-md-2"><b>Map Size?</b> {$imgsizeselect}</div>
+
+<div class="col-md-2"><b>Preset Views:</b><br />
 <form name="ba">
 {$sselect}
-</form>
-<p><u>Temperature Key:</u><br />
+</form></div>
 
-<img src="freeze_legend.png">
+<div class="col-sm-1"><input type="submit" value="View"></div>
 
 </div>
-		</div><!-- ./row -->
+
+
+<div class="row">
+<div class="col-sm-12">
+
+<input class="img img-responsive" type="image" name="img" src="{$imgurl}">
+</div>
+</div>
+</form>
 
 <br>
 
@@ -167,7 +181,8 @@ of precipitation:<br>
 <li><b>Current Composite RADAR</b> also is overlain on each plot.</li>
 </ul>
 
-<p>This <a href="http://mesonet.agron.iastate.edu/cool/images/freeze_031215.png">historical plot</a> shows how IEM Freeze looks when the winter weather gets interesting.</p>
+<p>This <a href="/cool/images/freeze_031215.png">historical plot</a> 
+	shows how IEM Freeze looks when the winter weather gets interesting.</p>
 
 		<p>Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a> how you would like this 
 application to behave.

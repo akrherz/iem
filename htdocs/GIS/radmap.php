@@ -598,6 +598,13 @@ if (in_array("surface", $layers)){
 if (in_array("airtemps", $layers)){
 	$airtemps = $map->getlayerbyname("airtemps");
 	$airtemps->set("status", MS_ON );
+	if ($width > 800){
+		for ($i=0;$i<$airtemps->numclasses;$i++){
+			$cl = $airtemps->getClass($i);
+			$cllabel = $cl->getLabel(0);
+			$cllabel->set("size", 20);
+		}
+	}
 	$airtemps->draw($img);
 }
 
