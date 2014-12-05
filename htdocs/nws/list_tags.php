@@ -100,7 +100,7 @@ $tortable .= "</tbody></table>";
 
 
 $yselect = yearSelect2(2002, $year, 'year');
-$wselect = networkSelect("WFO", $wfo);
+$wselect = networkSelect("WFO", $wfo, array(), "wfo");
  
  $t->content = <<<EOF
  <ol class="breadcrumb">
