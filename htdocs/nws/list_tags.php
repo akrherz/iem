@@ -151,7 +151,7 @@ $wselect = networkSelect("WFO", $wfo, array(), "wfo");
  <strong>IMPORTANT: Not all offices include these tags in their warnings!</strong>
  For convience, this application lists out warnings back to 2002 eventhough
  these tags did not start until recent years. You should be able to copy/paste
- these tables into Microsoft Excel.</p>
+ these tables into Microsoft Excel prior to making the table sortable!</p>
  
  <form method="GET" name="one">
  <div class="row well">

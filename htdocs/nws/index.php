@@ -95,6 +95,9 @@ $t->east = <<<EOF
   and RADAR site of your choice.</li>
  <li><a href="/request/gis/watchwarn.phtml">GIS Shapefiles</a>
   <br />of archived Storm Based Warning polygons.</li>
+ <li><a href="/nws/list_tags.php">List SVR+TOR Warning Tags</a>
+  <br />This application will list tags used in Severe Thunderstorm and
+		Tornado warnings by NWS Office by Year.</li>
 </ul>
 
 <h4>Text Product Archives</h4>
