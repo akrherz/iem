@@ -73,7 +73,7 @@ def doday(ts, realtime):
             ts.strftime("%Y%m%d%H"), )
     m = MapPlot(title="%s NCEP MRMS Q3 Today's Precipitation" % (
                                                     ts.strftime("%-d %b %Y"),),
-                subtitle=subtitle)
+                subtitle=subtitle, sector='iowa')
         
     clevs = np.arange(0,0.2,0.05)
     clevs = np.append(clevs, np.arange(0.2, 1.0, 0.1))
@@ -82,7 +82,7 @@ def doday(ts, realtime):
     clevs[0] = 0.01
 
     x,y = np.meshgrid(util.XAXIS, util.YAXIS)
-    m.pcolormesh(x, y, total / 24.5, clevs, units='inch')
+    m.pcolormesh(x, y, np.flipud(total) / 24.5, clevs, units='inch')
 
     #map.drawstates(zorder=2)
     m.drawcounties()
