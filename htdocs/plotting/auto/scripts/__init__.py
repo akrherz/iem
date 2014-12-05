@@ -34,6 +34,7 @@ data = {'plots': [
         {'id': "8", 'label': "Monthly Precipitation Reliability"},
         {'id': "23", 'label': "Monthly Station Departures + El Nino 3.4 Index"},
         {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
+        {'id': "36", 'label': "Month warmer than other Month for Year"},
         {'id': "20", 'label': "Hours of Precipitation by Month"},
         #{'id': "17", 'label': "Daily Temperatures + Climatology for Year + Month"},
     ]},
