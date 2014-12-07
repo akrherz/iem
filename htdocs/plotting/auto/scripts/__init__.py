@@ -48,7 +48,8 @@ data = {'plots': [
         {'id': "14", 'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
-        {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
         {'id': "18", 'label': "Long term temperature time series"},
+        {'id': "37", 'label': "MOS Forecasted Temperature Ranges + Observations"},
+        {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
 ]}
