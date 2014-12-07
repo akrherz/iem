@@ -37,7 +37,6 @@ if (! isset($_GET["tag"])){
   
   
   $t->content = <<<EOF
-  <div style="padding: 15px;">
 <h3>IEM Daily Feature Tags</h3>
 
 <p>Some of the IEM Daily Features are tagged based on the content and topic.
@@ -47,7 +46,7 @@ if (! isset($_GET["tag"])){
 <table class="table table-striped table-condensed">
 {$table}
 </table>
-</div>
+
 EOF;
   $t->render('single.phtml');
   die();
@@ -78,23 +77,29 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 	if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 	$thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
 	$big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["imageref"], $fmt);
-	$content .= "<br clear=\"all\" /><hr />";
-	$content .= "<table>";
-	$content .= "<tr><td>";
-	$content .= "<img src=\"$thumb\" style=\"margin: 5px;\">";
-	$content .= "<br /><a href=\"$big\">View larger image</a>";
+	$content .= <<<EOF
+<hr />
+<div class="row">
+<div class="col-md-5">	
+  <a href="$big"><img src="$big" class="img img-responsive"></a>
+EOF;
+	if ($row["appurl"] != ""){
+		$content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+	}
 	$content .= "<br />". $row["caption"] ;
-	$content .= "</td><td>";
+	$content .= "</div><div class=\"col-md-7\">";
 	$content .= "<h3><a href=\"../cat.php?day=". $row["permalink"] ."\">". $row["title"] ."</a></h3>\n";
 	$content .= "<font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
-	$content .= "<br><div class='story'>". $row["story"] ;
+	$content .= "<br>". $row["story"] ;
 	if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0))
 	{
-		$content .= "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
+		$content .= "<br /><br /><b>Voting:</b><br />Good: ". $row["good"] ." <br />Bad: ". $row["bad"] ;
+	}
+	if (intval($row["abstain"]) > 0){
+		$content .= "<br />Abstain: ". $row["abstain"];
 	}
 	$content .= "<br />". printTags( explode(",", $row["tags"]) );
-	$content .= "</div>";
-	$content .= "</td></tr></table>";
+	$content .= "</div></div>";
 
 } // End of feature for loop
 
@@ -105,8 +110,8 @@ if (pg_num_rows($rs) == 0)
 
 
 $t->content = <<<EOF
-<h3>Past IEM Features tagged: <?php echo $tag; ?></h3>
-<p><a href="index.php">List all tags</a></p>
+<h3>Past IEM Features tagged: {$tag}</h3>
+<p><a href="index.php" class="btn btn-default"><i class="glyphicon glyphicon-th-list"></i> List all tags</a></p>
 
 {$content}
 
