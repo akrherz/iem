@@ -53,7 +53,7 @@ are freely available to others.
 <h4>Download Stream Gage Data ("Bubbler")</h4>
 <form method="GET" action="/cgi-bin/request/ss.py" name="bubbler">
 <input type="hidden" name="opt" value="bubbler" />
-<table>
+<table class="table table-bordered">
  <th>Start Date:</th> 
   <td>{$y1select}</td>
   <td>{$m1select}</td>
@@ -66,7 +66,8 @@ are freely available to others.
   <td>{$d2select}</td></tr>
 
 </table>
-<input type="submit" value="Request Data" />
+<input type="checkbox" name="excel" value="yes" />Download as Excel File
+<br /><input type="submit" value="Request Data" />
 </form>
 
 </div><div class="col-md-6 well">

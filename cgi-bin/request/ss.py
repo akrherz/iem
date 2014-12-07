@@ -34,7 +34,6 @@ def gage_run(sts, ets, stations, excel):
         stations.append(0)
     
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
-    cursor = dbconn.cursor()
     sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
     site_serial, ch1_data_p, ch2_data_p,
     ch1_data_t, ch2_data_t, ch1_data_c
@@ -55,21 +54,26 @@ def gage_run(sts, ets, stations, excel):
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write(df.to_csv(None, header=headers, index=False))
 
-def bubbler_run(sts, ets):
+def bubbler_run(sts, ets, excel):
     """ run() """
     
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
-    cursor = dbconn.cursor()
-    cursor.execute("""select valid, field, value, units from ss_bubbler
-    WHERE valid between %s and %s ORDER by valid ASC""", (sts, ets))
+    sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time, 
+    field, value, units from ss_bubbler
+    WHERE valid between '%s' and '%s' ORDER by valid ASC""" % (sts, ets)
+    df = pd.read_sql(sql, dbconn)
+    headers = ['date', 'time', 'field', 'value', 'units']
+
+    if excel == 'yes':
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write("Content-Disposition: attachment;Filename=bubbler.xls\n\n")
+        df.to_excel('/tmp/ss.xls', header=headers, index=False)
+        sys.stdout.write(open('/tmp/ss.xls', 'rb').read())
+        os.unlink('/tmp/ss.xls')
+    else:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write(df.to_csv(None, header=headers, index=False))
     
-    res = "valid,field,value,units\n"
-    for row in cursor:
-        res += "%s,%s,%s,%s\n" % (row[0].strftime("%Y-%m-%d %H:%M"),
-                                         row[1], row[2], row[3])
-
-    return res.replace("None", "M")
-
 def main():
     """ Go Main Go """
     form = cgi.FieldStorage()
@@ -87,8 +91,7 @@ def main():
     ets = datetime.datetime(year2, month2, day2)
     
     if opt == 'bubbler':
-        sys.stdout.write("Content-type: text/plain\n\n")
-        print bubbler_run(sts, ets)
+        bubbler_run(sts, ets, form.getfirst('excel', 'n'))
     elif opt == 'gage':
         gage_run(sts, ets, stations, form.getfirst('excel', 'n'))
     
