@@ -148,14 +148,25 @@ def do_apsim( ctx ):
     ssw("""year        day       radn       maxt       mint      rain
   ()         ()   (MJ/m^2)       (oC)       (oC)       (mm)\n""")
 
-    cursor.execute("""
-        SELECT day, high, low, precip, 
-        extract(doy from day) as doy,
-        coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-        from """+table+""" 
-        WHERE station = %s and 
-        day >= %s and day <= %s ORDER by day ASC
-        """, (station, ctx['sts'], ctx['ets']) )
+    if ctx.get('hayhoe_model') is not None:
+        cursor.execute("""
+            SELECT day, high, low, precip,
+            extract(doy from day) as doy,
+            0 as srad
+            from hayhoe_daily WHERE station = %s 
+            and day >= %s and scenario = %s and model = %s
+            ORDER by day ASC
+        """, (ctx['stations'][0], ctx['sts'],
+              ctx['hayhoe_scenario'], ctx['hayhoe_model']) )   
+    else:    
+        cursor.execute("""
+            SELECT day, high, low, precip, 
+            extract(doy from day) as doy,
+            coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+            from """+table+""" 
+            WHERE station = %s and 
+            day >= %s and day <= %s ORDER by day ASC
+            """, (station, ctx['sts'], ctx['ets']) )
     for row in cursor:
         srad = -99 if row['srad'] is None else row['srad']
         ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % (
