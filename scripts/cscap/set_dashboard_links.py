@@ -64,6 +64,15 @@ lookuprefs = {
               'agr38': 'Agronomic Data',
               'agr39': 'Agronomic Data',
               'agr40': 'Agronomic Data',
+              'agr41': 'Agronomic Data',
+              'agr42': 'Agronomic Data',
+              'agr43': 'Agronomic Data',
+              'agr44': 'Agronomic Data',
+              'agr45': 'Agronomic Data',
+              'agr46': 'Agronomic Data',
+              'agr47': 'Agronomic Data',
+              'agr48': 'Agronomic Data',
+              'agr49': 'Agronomic Data',
               'soil1': 'Soil Bulk Density and Water Retention Data',
               'soil2': 'Soil Bulk Density and Water Retention Data',
               'soil29': 'Soil Bulk Density and Water Retention Data',
@@ -181,5 +190,5 @@ def do_row(row):
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
-for i in range(6,77):
+for i in range(6,86):
     do_row(i)
