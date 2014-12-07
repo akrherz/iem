@@ -37,7 +37,8 @@ def get_data(ts, fmt):
     precip, precip_month, precip_jan1, precip_jan1_normal,
     precip_jul1, precip_dec1, precip_dec1_normal, precip_record,
     precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
-    snow_dec1, snow_record
+    snow_dec1, snow_record, snow_jul1_normal,
+    snow_dec1_normal, snow_month_normal
     from cli_data c JOIN stations s on (c.station = s.id) 
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """, (ts.date(),))
@@ -70,7 +71,10 @@ def get_data(ts, fmt):
                 "snow_jun1":  str(sanitize(row["snow_jun1"])),
                 "snow_jul1":  str(sanitize(row["snow_jul1"])),
                 "snow_dec1":  str(sanitize(row["snow_dec1"])),
-                "snow_record":  str(sanitize(row["snow_record"])),                
+                "snow_record":  str(sanitize(row["snow_record"])),
+                "snow_jul1_normal":  str(sanitize(row["snow_jul1_normal"])),                
+                "snow_dec1_normal":  str(sanitize(row["snow_dec1_normal"])),                
+                "snow_month_normal":  str(sanitize(row["snow_month_normal"])),                
             },
             "geometry": {"type": "Point",
                         "coordinates": [row['st_x'], row['st_y']]
@@ -83,7 +87,9 @@ def get_data(ts, fmt):
                +"low,low_record,low_record_years,low_normal,precip,"
                +"precip_month,precip_jan1,precip_jan1_normal,precip_jul1,"
                +"precip_dec1,precip_dec1_normal,precip_record,snow,"
-               +"snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record")
+               +"snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
+               +"snow_jul1_normal,snow_dec1_normal,"
+               +"snow_month_normal")
         res = cols+"\n"
         for feat in data['features']:
             for col in cols.split(","):
