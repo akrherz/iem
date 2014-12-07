@@ -10,7 +10,7 @@ $t->content = <<<EOF
 
 <h3>Archived Model Output Statistics (MOS)</h3>
 
-<p class="story">The National Weather Service operates a number of operational
+<p>The National Weather Service operates a number of operational
 weather prediction models.  These models produce a gridded forecast that is
 then processed thru a series of equations (Model Output Statistics) to 
 produce a site specific forecast. You can find out more about
@@ -19,12 +19,14 @@ NWS's website.  The IEM maintains an interactive MOS archive to support
 local research and makes it available for others to use as well.</p>
 
 <p><strong>Archive Status:</strong> 
-<table cellpadding='3' cellspacing='0' border='1'>
-<tr><th>Model</th><th>Start</th><th>End</th></tr>
+<table class="table table-condensed table-striped">
+<thead><tr><th>Model</th><th>Start</th><th>End</th></tr></thead>
+<tbody>
 <tr><th>AVN</th><td>1 June 2000</td><td>16 Dec 2003</td></tr>
 <tr><th>ETA</th><td>24 Feb 2002</td><td>9 Dec 2008</td></tr>
 <tr><th>GFS</th><td>16 Dec 2003</td><td>--Realtime--</td></tr>
 <tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
+</tbody>
 </table>
 <br />The MOS products are processed in realtime and immediately available from
 the applications listed below.
@@ -46,6 +48,9 @@ csv.php?station=KAMW&runtime=2009-01-10%2012:00&model=GFS  (explicit)
  <li><a href="fe.phtml">Download the raw data!</a>
   <br />This application returns the raw MOS data for a location and time
   period of your choice.</li>
+ <li><a href="/plotting/auto/?q=37">Monthly Plots of Station Temperature Forecasts</a>
+  <br />This application creates a graph of daily MOS forecasts and actual
+		temperatures for a month and station of your choice.</li>
 </ul>
 
 <p><strong>Note:</strong> MOS variables are stored as their raw encodings 
