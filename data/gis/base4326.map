@@ -249,25 +249,6 @@ LAYER
 END
 
 LAYER
-  CONNECTIONTYPE postgis
-  NAME nc1018
-  # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=nc1018 host=iemdb"
-  # Get the lines from the 'geom' column of the 'roads' table
-  DATA "the_geom from (select d.fips, 
-    round(((1.8 * d.high::real) + 32.0)::numeric, 0) as high, 
-    the_geom from weather d, counties c
-    WHERE d.valid = '1978-05-19' and d.fips = c.fips) as foo 
-    using unique fips using srid=4326"
-  STATUS OFF
-  TYPE POLYGON
-  LABELCACHE OFF
-  PROJECTION
-   "init=epsg:4326"
-  END
-END
-
-LAYER
   NAME goes_east04I4
   STATUS OFF
   TYPE RASTER
