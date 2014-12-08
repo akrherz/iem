@@ -1,17 +1,4 @@
----
---- Cooling Degree Days
---- (high, low, base)
- CREATE OR REPLACE FUNCTION cdd(real, real, real) RETURNS numeric
- 	LANGUAGE sql
- 	AS $_$select (case when (( $1 + $2 )/2.) > $3 then (( $1 + $2 )/2. - $3) else 0 end)::numeric$_$;
-
----
---- Heating Degree Days
---- (high, low, base)
- CREATE OR REPLACE FUNCTION hdd(real, real, real) RETURNS numeric
- 	LANGUAGE sql
- 	AS $_$select (case when ($3 - (( $1 + $2 )/2.)) > 0 then ($3 - ( $1 + $2 )/2.) else 0 end)::numeric$_$;
-
+CREATE EXTENSION postgis;
 
 ---
 --- Storage of climoweek
@@ -79,6 +66,27 @@ WEEK_ENDING varchar(10),
 LOAD_TIME varchar(19),
 VALUE varchar(24)
 );
+
+---
+--- Temp table
+---
+CREATE TABLE alldata_tmp(
+  station char(6),
+  day date,
+  high int,
+  low int,
+  precip real,
+  snow real,
+  sday char(4),
+  year int,
+  month smallint,
+  snowd real,
+  estimated boolean,
+  narr_srad real,
+  merra_srad real,
+  merra_srad_cs real,
+  hrrr_srad real
+  );
 
 ---
 --- Datastorage tables
@@ -404,41 +412,371 @@ CREATE TABLE climate81(
 CREATE UNIQUE INDEX climate81_idx on climate81(station,valid);
 GRANT SELECT on climate81 to nobody,apache;
 
-
-CREATE FUNCTION sdd86(real, real) RETURNS numeric
-    LANGUAGE sql
-    AS $_$select ( (CASE WHEN $1 > 86 THEN $1 - 86 ELSE 0 END) )::numeric$_$;
-    
-CREATE FUNCTION gdd48(real, real) RETURNS numeric
-    LANGUAGE sql
-    AS $_$select (( (CASE WHEN $1 > 48 THEN (case when $1 > 86 THEN 86 ELSE $1 END ) - 48 ELSE 0 END) + (CASE WHEN $2 > 48 THEN $2 - 48 ELSE 0 END) ) / 2.0)::numeric$_$;
-
---
--- base, max, high, low
- CREATE FUNCTION gddxx(real, real, real, real) RETURNS numeric
-    LANGUAGE sql
-    AS $_$select (( (CASE WHEN $3 > $1 THEN (case when $3 > $2 THEN $2 ELSE $3 END ) - $1 ELSE 0 END) + 
-    (CASE WHEN $4 > $1 THEN $4 - $1 ELSE 0 END) ) / 2.0)::numeric$_$;
- 
- CREATE OR REPLACE FUNCTION hdd65(real, real) RETURNS numeric
- 	LANGUAGE sql
- 	AS $_$select (case when (65 - (( $1 + $2 )/2.)) > 0 then (65. - ( $1 + $2 )/2.) else 0 end)::numeric$_$;
- 	
-
-DROP table r_precipevents;
-CREATE table r_precipevents(
-  station char(6),
-  climoweek smallint,
-  maxval real,
-  meanval real,
-  cat1e smallint,
-  cat2e smallint,
-  cat3e smallint,
-  cat4e smallint,
-  cat5e smallint,
-  missing smallint,
-  maxyr smallint
-);
-grant all on r_precipevents to nobody;
-create unique index r_precipevents_idx 
- on r_precipevents(station, climoweek);
+COPY climoweek (sday, climoweek) FROM stdin;
+0101	44
+0102	44
+0103	45
+0104	45
+0105	45
+0106	45
+0107	45
+0108	45
+0109	45
+0110	46
+0111	46
+0112	46
+0113	46
+0114	46
+0115	46
+0116	46
+0117	47
+0118	47
+0119	47
+0120	47
+0121	47
+0122	47
+0123	47
+0124	48
+0125	48
+0126	48
+0127	48
+0128	48
+0129	48
+0130	48
+0131	49
+0201	49
+0202	49
+0203	49
+0204	49
+0205	49
+0206	49
+0207	50
+0208	50
+0209	50
+0210	50
+0211	50
+0212	50
+0213	50
+0214	51
+0215	51
+0216	51
+0217	51
+0218	51
+0219	51
+0220	51
+0221	52
+0222	52
+0223	52
+0224	52
+0225	52
+0226	52
+0227	52
+0228	53
+0229	53
+0301	1
+0302	1
+0303	1
+0304	1
+0305	1
+0306	1
+0307	1
+0308	2
+0309	2
+0310	2
+0311	2
+0312	2
+0313	2
+0314	2
+0315	3
+0316	3
+0317	3
+0318	3
+0319	3
+0320	3
+0321	3
+0322	4
+0323	4
+0324	4
+0325	4
+0326	4
+0327	4
+0328	4
+0329	5
+0330	5
+0331	5
+0401	5
+0402	5
+0403	5
+0404	5
+0405	6
+0406	6
+0407	6
+0408	6
+0409	6
+0410	6
+0411	6
+0412	7
+0413	7
+0414	7
+0415	7
+0416	7
+0417	7
+0418	7
+0419	8
+0420	8
+0421	8
+0422	8
+0423	8
+0424	8
+0425	8
+0426	9
+0427	9
+0428	9
+0429	9
+0430	9
+0501	9
+0502	9
+0503	10
+0504	10
+0505	10
+0506	10
+0507	10
+0508	10
+0509	10
+0510	11
+0511	11
+0512	11
+0513	11
+0514	11
+0515	11
+0516	11
+0517	12
+0518	12
+0519	12
+0520	12
+0521	12
+0522	12
+0523	12
+0524	13
+0525	13
+0526	13
+0527	13
+0528	13
+0529	13
+0530	13
+0531	14
+0601	14
+0602	14
+0603	14
+0604	14
+0605	14
+0606	14
+0607	15
+0608	15
+0609	15
+0610	15
+0611	15
+0612	15
+0613	15
+0614	16
+0615	16
+0616	16
+0617	16
+0618	16
+0619	16
+0620	16
+0621	17
+0622	17
+0623	17
+0624	17
+0625	17
+0626	17
+0627	17
+0628	18
+0629	18
+0630	18
+0701	18
+0702	18
+0703	18
+0704	18
+0705	19
+0706	19
+0707	19
+0708	19
+0709	19
+0710	19
+0711	19
+0712	20
+0713	20
+0714	20
+0715	20
+0716	20
+0717	20
+0718	20
+0719	21
+0720	21
+0721	21
+0722	21
+0723	21
+0724	21
+0725	21
+0726	22
+0727	22
+0728	22
+0729	22
+0730	22
+0731	22
+0801	22
+0802	23
+0803	23
+0804	23
+0805	23
+0806	23
+0807	23
+0808	23
+0809	24
+0810	24
+0811	24
+0812	24
+0813	24
+0814	24
+0815	24
+0816	25
+0817	25
+0818	25
+0819	25
+0820	25
+0821	25
+0822	25
+0823	26
+0824	26
+0825	26
+0826	26
+0827	26
+0828	26
+0829	26
+0830	27
+0831	27
+0901	27
+0902	27
+0903	27
+0904	27
+0905	27
+0906	28
+0907	28
+0908	28
+0909	28
+0910	28
+0911	28
+0912	28
+0913	29
+0914	29
+0915	29
+0916	29
+0917	29
+0918	29
+0919	29
+0920	30
+0921	30
+0922	30
+0923	30
+0924	30
+0925	30
+0926	30
+0927	31
+0928	31
+0929	31
+0930	31
+1001	31
+1002	31
+1003	31
+1004	32
+1005	32
+1006	32
+1007	32
+1008	32
+1009	32
+1010	32
+1011	33
+1012	33
+1013	33
+1014	33
+1015	33
+1016	33
+1017	33
+1018	34
+1019	34
+1020	34
+1021	34
+1022	34
+1023	34
+1024	34
+1025	35
+1026	35
+1027	35
+1028	35
+1029	35
+1030	35
+1031	35
+1101	36
+1102	36
+1103	36
+1104	36
+1105	36
+1106	36
+1107	36
+1108	37
+1109	37
+1110	37
+1111	37
+1112	37
+1113	37
+1114	37
+1115	38
+1116	38
+1117	38
+1118	38
+1119	38
+1120	38
+1121	38
+1122	39
+1123	39
+1124	39
+1125	39
+1126	39
+1127	39
+1128	39
+1129	40
+1130	40
+1201	40
+1202	40
+1203	40
+1204	40
+1205	40
+1206	41
+1207	41
+1208	41
+1209	41
+1210	41
+1211	41
+1212	41
+1213	42
+1214	42
+1215	42
+1216	42
+1217	42
+1218	42
+1219	42
+1220	43
+1221	43
+1222	43
+1223	43
+1224	43
+1225	43
+1226	43
+1227	44
+1228	44
+1229	44
+1230	44
+1231	44
+\.

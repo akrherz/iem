@@ -1,3 +1,51 @@
+
+CREATE FUNCTION getl(text, date) RETURNS integer
+    LANGUAGE sql
+    AS $_$SELECT  low from alldata WHERE station = $1 and day = $2$_$;
+
+CREATE FUNCTION gett(text, date) RETURNS integer
+    LANGUAGE sql
+    AS $_$SELECT high from alldata WHERE station = $1 and day = $2$_$;
+
+
+CREATE FUNCTION sdd86(real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select ( (CASE WHEN $1 > 86 THEN $1 - 86 ELSE 0 END) )::numeric$_$;
+    
+CREATE FUNCTION gdd48(real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select (( (CASE WHEN $1 > 48 THEN (case when $1 > 86 THEN 86 ELSE $1 END ) - 48 ELSE 0 END) + (CASE WHEN $2 > 48 THEN $2 - 48 ELSE 0 END) ) / 2.0)::numeric$_$;
+
+CREATE FUNCTION gdd50(real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select (( (CASE WHEN $1 > 50 THEN (case when $1 > 86 THEN 86 ELSE $1 END ) - 50 ELSE 0 END) + (CASE WHEN $2 > 50 THEN $2 - 50 ELSE 0 END) ) / 2.0)::numeric$_$;
+
+CREATE FUNCTION gdd52(real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$
+  select ((
+   (CASE WHEN $1 > 52 THEN
+     (case when $1 > 86 THEN 86 ELSE $1 END ) - 52
+    ELSE 0 END)
+  + (CASE WHEN $2 > 52 and $2 < 99 THEN $2 - 52 ELSE 0 END) ) / 2.0)::numeric
+$_$;
+
+--
+-- base, max, high, low
+ CREATE FUNCTION gddxx(real, real, real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select (( (CASE WHEN $3 > $1 THEN (case when $3 > $2 THEN $2 ELSE $3 END ) - $1 ELSE 0 END) + 
+    (CASE WHEN $4 > $1 THEN $4 - $1 ELSE 0 END) ) / 2.0)::numeric$_$;
+ 
+
+
+---
+--- Cooling Degree Days
+--- (high, low, base)
+ CREATE OR REPLACE FUNCTION cdd(real, real, real) RETURNS numeric
+ 	LANGUAGE sql
+ 	AS $_$select (case when (( $1 + $2 )/2.) > $3 then (( $1 + $2 )/2. - $3) else 0 end)::numeric$_$;
+
 ---
 --- Convert Fahrenheit to Celsuis
 ---
