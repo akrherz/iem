@@ -28,7 +28,16 @@ EOF;
  $rs = pg_exec($conn, "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature ORDER by valid DESC LIMIT 20");
  pg_close($conn);
  for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++) {
-  $cbody = "<img src=\"http://mesonet.agron.iastate.edu/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" style=\"float: left; padding: 5px;\"/>". $row["story"];
+	$appurl = "";
+ 	if ($row["appurl"] != ""){
+		$appurl = "<p><a href=\"https://mesonet.agron.iastate.edu".$row["appurl"]."\">Generate This Chart on IEM Website</a></p>";
+	}
+ 	$cbody = <<<EOF
+<img src="https://mesonet.agron.iastate.edu/onsite/features/{$row["imageref"]}.png" 
+ alt="Feature" style="float: left; padding: 5px;" />
+ <p>{$row["story"]}</p>
+ {$appurl}
+EOF;
   $t = htmlentities($row["title"]);
   $v = substr($row["valid"],0,10);
   echo <<<EOF
