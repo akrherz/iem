@@ -24,17 +24,23 @@ def go(valid, period):
     size = np.shape(img)
     #print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
     data = np.ones( size, np.uint16) * 65535
-    #print '1', np.max(data), np.min(data), data[0,0]
-    data = np.where( np.logical_and(img >= 125, img < 255), 
-                     (180 + (img-125) / 5.0) * 10, 
+
+    """
+    000 -> 099  0.25mm  000.00 to 024.75
+    100 -> 179  1.25mm  025.00 to 123.75
+    180 -> 254  5.00mm  125.00 to 495.00
+    254                 500.00+
+    255  MISSING/BAD DATA
+    """
+    data = np.where( np.logical_and(img >= 180, img < 255), 
+                     (125. + (img-180) * 5.0) * 10, 
+                     data)
+    data = np.where( np.logical_and(img >= 100, img < 180), 
+                     (25. + (img-125) * 1.25) * 10, 
                      data)
     #print '2', np.max(data), np.min(data), data[0,0]
-    data = np.where( np.logical_and(img >= 25, img < 125),
-                     (100 + (img-25) / 1.25) * 10,
-                     data)
-    #print '3', np.max(data), np.min(data), data[0,0]
-    data = np.where( img < 25,
-                     (img / 0.25) * 10,
+    data = np.where( np.logical_and(img >= 0, img < 100),
+                     (img * 0.25) * 10,
                      data)
     #print '4', np.max(data), np.min(data), data[0,0]
 
