@@ -1,5 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 78);
 include_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Network Data Download";

@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 """
-# Generate web output for precip data
-# Daryl Herzmann 08 May 2002
-#  1 Jan 2002	Fixups found at the new year!
-#  1 Feb 2003	Make sure this can connect from db1
-# 10 Jan 2004	Fixes!
-# 25 Aug 2004	ASOS DB moved
+IEM_APPID = 79
 """
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
