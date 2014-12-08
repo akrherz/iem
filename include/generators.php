@@ -4,6 +4,23 @@
  */
 include_once dirname(__FILE__) ."/database.inc.php";
 
+function get_iemapps_tags($tagname){
+	// Get a html list for this tagname
+	$pgconn = iemdb("mesosite", TRUE, TRUE);
+	$rs = pg_prepare($pgconn, "TAGSELECT", 
+			"SELECT name, description, url from iemapps WHERE "
+			."appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
+			."ORDER by name ASC");
+	$rs = pg_execute($pgconn, "TAGSELECT", Array($tagname));
+	$s = "<ul>";
+	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		$s .= sprintf("<li><a href=\"%s\">%s</a><br />%s</li>\n", $row["url"],
+				$row["name"], $row["description"]);	
+	}
+	$s .= "</ul>";
+	return $s;
+}
+
 function get_website_stats(){
 	$memcache = new Memcache;
 	$memcache->connect('iem-memcached', 11211);

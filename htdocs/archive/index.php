@@ -1,10 +1,14 @@
 <?php 
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
+include("../../include/generators.php");
+
 define("IEM_APPID", 19);
 $t = new MyView();
 $t->thispage = "archive-main";
 $t->title = "Archived Data Resources";
+
+$dllist = get_iemapps_tags("download");
 
 $t->content = <<<EOF
 <h3>Archived Data & Plots</h3>
@@ -173,21 +177,7 @@ surface plots and other plots.</li>
 </ul>
 
 <h3>Data download forms</h3>
-<ul>
-<li><a href="/request/awos/1min.php">1 minute AWOS data</a>
- <br>Download/Plot/View 1 minute AWOS data since 1 Jan 1995.</li>
-
-<li><a href="/schoolnet/dl/">1 minute schoolNet data</a><br>Download/View 1 minute schoolNet data since 12 Feb 2002.</li>
-
-<li><a href="/cgi-bin/precip/catAZOS.py">Hourly ASOS/AWOS Precip Reports</a>
- <br>Hourly precipitation HTML grids from the archive.  A useful tool to 
-quickly find precipitation totals.</li>
-
-<li><a href="/request/download.phtml">Hourly ASOS/AWOS/RWIS Observations</a>
-<br />Quickly query the IEM databases for historical RWIS/ASOS/AWOS observations.
-This dataset contains the raw observations.</li>
-
-</ul>
+{$dllist}
 </div></div>
 
 <p style="clear: both;">Are we forgetting something?  Please let us know of other
