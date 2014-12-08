@@ -36,7 +36,7 @@ def go(valid, period):
                      (125. + (img-180) * 5.0) * 10, 
                      data)
     data = np.where( np.logical_and(img >= 100, img < 180), 
-                     (25. + (img-125) * 1.25) * 10, 
+                     (25. + (img-100) * 1.25) * 10, 
                      data)
     #print '2', np.max(data), np.min(data), data[0,0]
     data = np.where( np.logical_and(img >= 0, img < 100),
