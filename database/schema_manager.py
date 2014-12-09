@@ -59,10 +59,11 @@ def run_db(dbname):
     dbconn.close()
     
     
-    
-    
-if __name__ == '__main__':
-    ''' See how we are called '''
+def main():
+    """ Go Main Go """
     os.chdir('upgrade')
     for dbname in os.listdir('.'):
-        run_db(dbname)
+        run_db(dbname)    
+if __name__ == '__main__':
+    # main
+    main()
