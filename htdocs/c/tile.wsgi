@@ -1,13 +1,6 @@
 import os
 import sys
 
-def myexcepthook(exctype, value, traceback):
-    if exctype == IOError:
-        pass
-    else:
-        sys.__excepthook__(exctype, value, traceback)
-sys.excepthook = myexcepthook
-
 tilecachepath, wsgi_file = os.path.split(__file__)
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/include/python/')
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/include/python/TileCache/')
