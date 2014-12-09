@@ -19,6 +19,7 @@ data = {'plots': [
         {'id': "26", 'label': "Minimum Daily Low Temperature after 1 July"},
         {'id': "5", 'label': "Minimum Daily Temperature Range"},
         {'id': "22", 'label': "Percentage of Years within Temperature Range from Averages"},
+        {'id': "38", 'label': "Solar Radiation Estimates from NARR"},
         {'id': "25", 'label': "Spread of Daily High and Low Temperatures"},
         {'id': "4", 'label': "State Areal Coverage of Precip Intensity over X Days"},
         {'id': "28", 'label': "Trailing Number of Days Precipitation Total Rank"},
