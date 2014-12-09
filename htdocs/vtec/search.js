@@ -1,5 +1,9 @@
 Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
 
+function utcdate(v, record){
+	return (Ext.Date.parseDate(v, 'c')).toUTC();
+}
+
 var warnStore;
 var eventStore;
 var warntable;
@@ -157,8 +161,10 @@ Ext.define('SBW', {
                 }
         	}},
         {name: 'significance', type: 'string'},
-        {name: 'expire', type: 'date'},
-        {name: 'issue', type: 'date'},
+        {name: 'issue', type: 'date', dateFormat: 'c'},
+        {name: 'utc_issue', type: 'date', mapping: 'issue', convert: utcdate},
+        {name: 'expire', type: 'date', dateFormat: 'c'},
+        {name: 'utc_expire', type: 'date', mapping: 'expire', convert: utcdate}
     ]
 });
 
@@ -400,7 +406,7 @@ Ext.onReady(function() {
 							dataIndex : 'issue',
 							width : 150,
 							renderer : function(value) {
-								return Ext.Date.format(value.fromUTC(),
+								return Ext.Date.format(value,
 										'M d, Y g:i A');
 							}
 						}, {
@@ -409,7 +415,7 @@ Ext.onReady(function() {
 							dataIndex : 'expire',
 							width : 150,
 							renderer : function(value) {
-								return Ext.Date.format(value.fromUTC(),
+								return Ext.Date.format(value,
 										'M d, Y g:i A');
 							}
 						}]
@@ -480,7 +486,7 @@ Ext.onReady(function() {
 			dataIndex : 'issue',
 			width : 150,
 			renderer : function(value) {
-				return Ext.Date.format(value.fromUTC(),
+				return Ext.Date.format(value,
 						'M d, Y g:i A');
 			}
 		}, {
@@ -489,7 +495,7 @@ Ext.onReady(function() {
 			dataIndex : 'expire',
 			width : 150,
 			renderer : function(value) {
-				return Ext.Date.format(value.fromUTC(),
+				return Ext.Date.format(value,
 						'M d, Y g:i A');
 			}
 		}]
