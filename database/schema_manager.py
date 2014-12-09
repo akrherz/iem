@@ -37,8 +37,8 @@ def run_db(dbname):
     """)
     row = cursor.fetchone()
     baseversion = row[0]
-    print 'Database: %s has revision: %s (%s)' % (dbname, baseversion, 
-                                                  row[1].strftime("%Y-%m-%d %H:%M"))
+    print('Database: %-12s has revision: %3s (%s)' % (dbname, baseversion, 
+                                            row[1].strftime("%Y-%m-%d %H:%M")))
     
     while True:
         baseversion += 1

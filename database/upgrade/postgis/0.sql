@@ -1,0 +1,42 @@
+
+
+create table lsrs_2015( 
+  CONSTRAINT __lsrs_2015_check 
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz 
+        and valid < '2016-01-01 00:00+00')) 
+  INHERITS (lsrs);
+CREATE INDEX lsrs_2015_valid_idx on lsrs_2015(valid);
+CREATE INDEX lsrs_2015_wfo_idx on lsrs_2015(wfo);
+GRANT SELECT on lsrs_2015 to nobody,apache;
+
+CREATE TABLE nexrad_attributes_2015() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2015 to nobody,apache;
+CREATE INDEX nexrad_attributes_2015_nexrad_idx 
+	on nexrad_attributes_2015(nexrad);
+CREATE INDEX nexrad_attributes_2015_valid_idx 
+	on nexrad_attributes_2015(valid);
+alter table nexrad_attributes_2015 add constraint 
+	__nexrad_attributes_2015__constraint CHECK 
+	(valid >= '2015-01-01 00:00+00' and valid < '2016-01-01 00:00+00');
+
+CREATE TABLE raob_profile_2015() inherits (raob_profile);
+GRANT SELECT on raob_profile_2015 to nobody,apache;
+CREATE INDEX raob_profile_2015_fid_idx 
+	on raob_profile_2015(fid);
+
+CREATE TABLE warnings_2015() inherits (warnings);
+CREATE INDEX warnings_2015_combo_idx on 
+	warnings_2015(wfo, phenomena, eventid, significance);
+CREATE INDEX warnings_2015_expire_idx on warnings_2015(expire);
+CREATE INDEX warnings_2015_gtype_idx on warnings_2015(gtype);
+CREATE INDEX warnings_2015_issue_idx on warnings_2015(issue);
+CREATE INDEX warnings_2015_ugc_idx on warnings_2015(ugc);
+CREATE INDEX warnings_2015_wfo_idx on warnings_2015(wfo);
+grant select on warnings_2015 to nobody,apache;
+
+CREATE table sbw_2015() inherits (sbw);
+create index sbw_2015_idx on sbw_2015(wfo,eventid,significance,phenomena);
+create index sbw_2015_expire_idx on sbw_2015(expire);
+create index sbw_2015_issue_idx on sbw_2015(issue);
+create index sbw_2015_wfo_idx on sbw_2015(wfo);
+grant select on sbw_2015 to apache,nobody;
