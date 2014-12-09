@@ -1,13 +1,4 @@
---- Clever hack to map data around!
-create or replace view alldata as 
-	select station, valid, ws_mps_s_wvt * 1.94 as sknt, 
-	winddir_d1_wvt as drct, rain_mm_tot / 24.5 as phour from sm_hourly;
-grant select on alldata to nobody,apache;
 
---- Convert celsuis to fahrenheit
-CREATE FUNCTION c2f(real) RETURNS numeric
-	LANGUAGE sql
-	AS $_$ select ($1 * 1.8 + 32.0)::numeric $_$; 
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -48,7 +39,8 @@ CREATE TABLE sm_daily (
   t107_1_avg real,
   t107_2_avg real,
   t107_3_avg real,
-  battv_min real
+  encrh_avg real,
+  nancounttot real
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
 GRANT SELECT on sm_daily to nobody;
@@ -94,7 +86,12 @@ CREATE TABLE sm_hourly (
   tairnans_tot real,
   rhnans_tot real,
   ws_mph_max real,
-  ws_mph_tmx timestamptz
+  ws_mph_tmx timestamptz,
+  encrh_avg real,
+  outofrange06 real,
+  outofrange12 real,
+  outofrange24 real,
+  outofrange50 real
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
@@ -171,3 +168,9 @@ CREATE TABLE hourly (
 );
 CREATE UNIQUE INDEX hourly_idx ON hourly USING btree (station, valid);
 grant select on hourly to nobody,apache;
+
+--- Clever hack to map data around!
+create or replace view alldata as 
+	select station, valid, ws_mps_s_wvt * 1.94 as sknt, 
+	winddir_d1_wvt as drct, rain_mm_tot / 24.5 as phour from sm_hourly;
+grant select on alldata to nobody,apache;

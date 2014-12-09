@@ -1,11 +1,11 @@
-
-CREATE FUNCTION getl(text, date) RETURNS integer
-    LANGUAGE sql
-    AS $_$SELECT  low from alldata WHERE station = $1 and day = $2$_$;
-
-CREATE FUNCTION gett(text, date) RETURNS integer
-    LANGUAGE sql
-    AS $_$SELECT high from alldata WHERE station = $1 and day = $2$_$;
+--- TODO: These are db specific and need to be moved
+--- CREATE FUNCTION getl(text, date) RETURNS integer
+---    LANGUAGE sql
+---    AS $_$SELECT  low from alldata WHERE station = $1 and day = $2$_$;
+---
+--- CREATE FUNCTION gett(text, date) RETURNS integer
+---    LANGUAGE sql
+---    AS $_$SELECT high from alldata WHERE station = $1 and day = $2$_$;
 
 
 CREATE FUNCTION sdd86(real, real) RETURNS numeric
@@ -45,6 +45,11 @@ $_$;
  CREATE OR REPLACE FUNCTION cdd(real, real, real) RETURNS numeric
  	LANGUAGE sql
  	AS $_$select (case when (( $1 + $2 )/2.) > $3 then (( $1 + $2 )/2. - $3) else 0 end)::numeric$_$;
+
+--- Convert celsuis to fahrenheit
+CREATE FUNCTION c2f(real) RETURNS numeric
+	LANGUAGE sql
+	AS $_$ select ($1 * 1.8 + 32.0)::numeric $_$; 
 
 ---
 --- Convert Fahrenheit to Celsuis
