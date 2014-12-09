@@ -1,3 +1,5 @@
+CREATE EXTENSION postgis;
+
 --- ==== TABLES TO investigate deleting
 --- counties
 --- cwas
@@ -341,7 +343,6 @@ CREATE table feature(
   voting boolean default true,
   tags varchar(1024),
   fbid bigint,
-  abstain smallint,
   appurl varchar(1024)
 );
 alter table feature SET WITH oids;
