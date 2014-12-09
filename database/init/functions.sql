@@ -7,6 +7,18 @@
 ---    LANGUAGE sql
 ---    AS $_$SELECT high from alldata WHERE station = $1 and day = $2$_$;
 
+CREATE AGGREGATE sumtxt(text) (
+    SFUNC = textcat,
+    STYPE = text,
+    INITCOND = ''
+);
+
+CREATE AGGREGATE array_accum (anyelement)
+(
+    sfunc = array_append,
+    stype = anyarray,
+    initcond = '{}'
+);
 
 CREATE FUNCTION sdd86(real, real) RETURNS numeric
     LANGUAGE sql
