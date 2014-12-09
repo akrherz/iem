@@ -143,54 +143,58 @@ def main():
             (row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD )
         if gisextra:
             sys.stdout.write( gtxt.get(row['station'], "M%sM%s" % (rD, rD)) )
+        r = []
         for data1 in outCols:
             if data1 == 'relh':
                 if row['tmpf'] is not None and row['dwpf'] is not None:
                     tmpf = temperature(row['tmpf'], 'F')
                     dwpf = temperature(row['dwpf'], 'F')
                     val = meteorology.relh( tmpf, dwpf )
-                    sys.stdout.write("%.2f%s" % (val.value("%"), rD))
+                    r.append("%.2f" % (val.value("%"),))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 == 'sped':
                 if row['sknt'] >= 0:
-                    sys.stdout.write("%.1f%s" % (row['sknt'] * 1.14, rD))
+                    r.append("%.1f" % (row['sknt'] * 1.14, ))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 == 'gust_mph':
                 if row['gust'] >= 0:
-                    sys.stdout.write("%.1f%s" % (row['gust'] * 1.14, rD))
+                    r.append("%.1f%s" % (row['gust'] * 1.14, ))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 == 'p01m':
                 if row['p01i'] >= 0:
-                    sys.stdout.write("%.2f%s" % (row['p01i'] * 25.4, rD))
+                    r.append("%.2f" % (row['p01i'] * 25.4, ))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 == 'tmpc':
                 if row['tmpf'] is not None:
                     val = temperature( row['tmpf'] , 'F').value('C')
-                    sys.stdout.write("%.2f%s" % (val, rD))
+                    r.append("%.2f" % (val, ))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 == 'dwpc':
                 if row['dwpf'] is not None:
                     val = temperature( row['dwpf'], 'F').value('C')
-                    sys.stdout.write("%.2f%s" % (val, rD))
+                    r.append("%.2f" % (val, ))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 == 'presentwx':
                 if row['presentwx'] is not None:
-                    sys.stdout.write("%s%s" % (row['presentwx'].replace(",", " "), rD))
+                    r.append("%s" % (row['presentwx'].replace(",", " "), ))
                 else:
-                    sys.stdout.write("M%s" % (rD,))
+                    r.append("M")
             elif data1 in ["metar","skyc1","skyc2","skyc3","skyc4"]:
-                sys.stdout.write("%s%s" % (row[data1], rD))
+                if row[data1] is None:
+                    r.append("M")
+                else:
+                    r.append("%s" % (row[data1], ))
             elif row[ data1 ] is None or row[ data1 ] <= -99.0 or row[ data1 ] == "M":
-                sys.stdout.write("M%s" % (rD,))
+                r.append("M")
             else:  
-                sys.stdout.write("%2.2f%s" % (row[ data1 ], rD))
-        sys.stdout.write("\n")
+                r.append("%2.2f" % (row[ data1 ],))
+        sys.stdout.write("%s\n" % (rD.join(r),))
         
 if __name__ == '__main__':
     main()
