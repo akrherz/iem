@@ -411,8 +411,8 @@ if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO','MA') ";
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
   w.eventid as eventid, w.significance as significance, 
-  w.issue as issue, u.state as sname, ST_xmax(w.geom) as lon0, 
-  ST_ymax(w.geom) as lat0, w.wfo as wfo
+  w.issue as issue, u.state as sname, ST_xmax(u.geom) as lon0, 
+  ST_ymax(u.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
    and w.ugc = u.ugc $cuextra ORDER by $sortcol $sortdir";
