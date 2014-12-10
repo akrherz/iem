@@ -160,7 +160,7 @@ def main():
                     r.append("M")
             elif data1 == 'gust_mph':
                 if row['gust'] >= 0:
-                    r.append("%.1f%s" % (row['gust'] * 1.14, ))
+                    r.append("%.1f" % (row['gust'] * 1.14, ))
                 else:
                     r.append("M")
             elif data1 == 'p01m':
