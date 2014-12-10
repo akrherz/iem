@@ -5,7 +5,6 @@ CREATE EXTENSION postgis;
 ---   + climate_div
 ---   + counties
 ---   + cwa
----   + cwsu
 ---   + iacounties
 ---   + iowatorn
 ---   + placepoly
@@ -13,6 +12,10 @@ CREATE EXTENSION postgis;
 ---   + tz
 ---   + uscounties
 ---   + warnings_import
+
+---
+--- cwsu table, manually got this at some point :/
+---  pg_dump -t cwsu -h localhost -p 5555 postgis | psql postgis
 
 ---
 --- Quasi synced from mesosite database
