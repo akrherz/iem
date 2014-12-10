@@ -37,6 +37,7 @@ data = {'plots': [
         {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
         {'id': "36", 'label': "Month warmer than other Month for Year"},
         {'id': "20", 'label': "Hours of Precipitation by Month"},
+        {'id': "39", 'label': "Scenarios for this month besting some previous month"},
         #{'id': "17", 'label': "Daily Temperatures + Climatology for Year + Month"},
     ]},
     {'label': 'Yearly', 'options': [
