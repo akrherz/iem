@@ -329,7 +329,7 @@ LAYER
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
   DATA "geom from warnings"
-# DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'C' and 
+# DATA "geom from (select type, geom, oid from warnings WHERE  
 #	expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
@@ -338,7 +338,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  FILTER "expire > CURRENT_TIMESTAMP"
   PROJECTION
    "init=epsg:4326"
   END
@@ -404,7 +404,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
+  FILTER "issue > 'YESTERDAY'::timestamp"
   PROJECTION
    "init=epsg:4326"
   END
@@ -421,7 +421,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from warnings"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -429,7 +429,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
+  FILTER "expire > CURRENT_TIMESTAMP and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END
@@ -523,7 +523,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from warnings"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -531,7 +531,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'P'"
+  FILTER "issue > 'YESTERDAY'::timestamp and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END

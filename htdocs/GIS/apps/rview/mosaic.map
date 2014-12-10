@@ -404,8 +404,8 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
-# DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'C' and 
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
+# DATA "geom from (select type, geom, oid from warnings WHERE  
 #	expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
@@ -414,7 +414,7 @@ LAYER
      "wms_srs" "EPSG:4326"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-#  FILTER "significane != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'C'"
+#  FILTER "significane != 'A' and expire > CURRENT_TIMESTAMP"
   PROJECTION
    "init=epsg:4326"
   END
@@ -481,7 +481,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  #FILTER "significance != 'A' and issue > 'YESTERDAY'::timestamp and gtype = 'C'"
+  #FILTER "significance != 'A' and issue > 'YESTERDAY'::timestamp"
   PROJECTION
    "init=epsg:4326"
   END
@@ -507,7 +507,6 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  #FILTER "significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
    "init=epsg:4326"
   END
@@ -526,7 +525,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from warnings"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -534,7 +533,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "significance != 'A' and issue > 'YESTERDAY'::timestamp and gtype = 'P'"
+  FILTER "significance != 'A' and issue > 'YESTERDAY'::timestamp and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END
