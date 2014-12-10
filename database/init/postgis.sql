@@ -1301,8 +1301,7 @@ CREATE TABLE lsrs (
     typetext character varying(40)
 ) WITH OIDS;
 select addgeometrycolumn('','lsrs','geom',4326,'POINT',2);
-
-grant select on lsrs to apache;
+grant select on lsrs to apache,nobody;
 
 create table lsrs_1986( 
   CONSTRAINT __lsrs_1986_check 
@@ -1626,7 +1625,7 @@ CREATE TABLE nws_ugc (
 select addgeometrycolumn('','nws_ugc','geom',4326,'MULTIPOLYGON',2);
 select addgeometrycolumn('','nws_ugc','centroid',4326,'POINT',2);
 select addgeometrycolumn('','nws_ugc','simple_geom',4326,'MULTIPOLYGON',2);
-grant select on nws_ugc to apache;
+grant select on nws_ugc to apache,nobody;
 
 ---
 --- SIGMET Convective Outlook
@@ -2072,8 +2071,7 @@ CREATE TABLE watches (
     num smallint
 );
 select addgeometrycolumn('','watches','geom',4326,'MULTIPOLYGON',2);
-
-grant select on watches to apache;
+grant select on watches to apache,nobody;
 
 CREATE UNIQUE INDEX watches_idx ON watches USING btree (issued, num);
 
@@ -2086,5 +2084,4 @@ CREATE TABLE watches_current (
     num smallint
 );
 select addgeometrycolumn('','watches_current','geom',4326,'MULTIPOLYGON',2);
-
-grant select on watches to apache;
+grant select on watches to apache,nobody;
