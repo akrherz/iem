@@ -117,7 +117,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
-  DATA "geom from warnings"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -126,7 +126,7 @@ LAYER
      "wms_extent" "-116 25 -66 50"
   END
   TEMPLATE q_template.html
-  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  FILTER "expire > CURRENT_TIMESTAMP and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END
@@ -144,7 +144,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
   CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
-  DATA "geom from warnings"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -153,7 +153,7 @@ LAYER
      "wms_extent" "-116 25 -66 50"
   END
   TEMPLATE q_template.html
-  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
+  FILTER "issue > 'YESTERDAY'::timestamp and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END

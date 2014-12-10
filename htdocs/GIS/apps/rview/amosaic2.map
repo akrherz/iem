@@ -278,7 +278,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  FILTER "expire > CURRENT_TIMESTAMP"
   PROJECTION
    "init=epsg:4326"
   END
@@ -312,7 +312,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
+  FILTER "issue > 'YESTERDAY'::timestamp"
   PROJECTION
    "init=epsg:4326"
   END
