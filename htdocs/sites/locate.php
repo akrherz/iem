@@ -22,7 +22,7 @@ $t->title = "Site Locator";
 $t->thispage = "iem-sites";
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
+<script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
 <script src="/js/olselect.php?network=${network}"></script>
 EOF;
 $t->bodyextra = "onload=\"init()\"";
