@@ -52,6 +52,10 @@ function init(){
                 'Google Streets',
                  {'sphericalMercator': true}
             );
+  var gsat = new OpenLayers.Layer.Google(
+        "Google Satellite",
+        {type: google.maps.MapTypeId.SATELLITE, numZoomLevels: 22}
+  );
    var styleMap = new OpenLayers.StyleMap({
        'default': {
            fillColor: 'yellow',
@@ -76,7 +80,7 @@ function init(){
     	styleMap: styleMap,
     	strategies: [new OpenLayers.Strategy.Fixed()]
 	});
-  map.addLayers([googleLayer,geojson]);
+  map.addLayers([googleLayer, gsat, geojson]);
    
   // Provide hover capabilities over road_condition layer
   selectControl = new OpenLayers.Control.SelectFeature(geojson, {
