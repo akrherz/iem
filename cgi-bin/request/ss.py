@@ -58,11 +58,23 @@ def bubbler_run(sts, ets, excel):
     """ run() """
     
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
-    sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time, 
-    field, value, units from ss_bubbler
-    WHERE valid between '%s' and '%s' ORDER by valid ASC""" % (sts, ets)
+    sql = """
+    WITH one as (SELECT valid, value from ss_bubbler WHERE
+    valid between '%s' and '%s' and field = 'Batt Voltage'),
+    two as (SELECT valid, value from ss_bubbler WHERE
+    valid between '%s' and '%s' and field = 'STAGE'),
+    three as (SELECT valid, value from ss_bubbler WHERE
+    valid between '%s' and '%s' and field = 'Water Temp')
+    
+    SELECT date(coalesce(one.valid, two.valid, three.valid)) as date, 
+    to_char(coalesce(one.valid, two.valid, three.valid), 'HH24:MI:SS') as time,
+    one.value, two.value, three.value 
+    from one FULL OUTER JOIN two on (one.valid = two.valid)
+             FULL OUTER JOIN three on (coalesce(two.valid,one.valid) = three.valid)
+    ORDER by date ASC, time ASC
+    """ % (sts, ets, sts, ets, sts, ets)
     df = pd.read_sql(sql, dbconn)
-    headers = ['date', 'time', 'field', 'value', 'units']
+    headers = ['date', 'time', 'batt voltage', 'stage', 'water temp']
 
     if excel == 'yes':
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
