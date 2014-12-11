@@ -29,7 +29,7 @@ for line in open('/mnt/rootdocs/Bubbler.csv'):
         #print exp
         #print repr(line)
         continue
-    if maxts and ts < maxts:
+    if maxts and ts <= maxts:
         continue
     if len(tokens) == 3:
         tokens.append( None )
