@@ -16,7 +16,7 @@ function selectAllStations(){
 function cb_siteOver(feature){
   station = feature.attributes.sid;
   selectedFeature = feature;
-  $('select[name="station"]').find("option[value="+station+"]").prop("selected", "selected");
+  $('select[name="station"]').find("option[value=\""+station+"\"]").prop("selected", "selected");
   document.getElementById("sname").innerHTML = feature.attributes.sname;
   popup = new OpenLayers.Popup('chicken', 
               feature.geometry.getBounds().getCenterLonLat(),
