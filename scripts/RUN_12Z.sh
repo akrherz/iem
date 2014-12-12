@@ -5,7 +5,10 @@ cd 12z
 python awos_rtp.py
 python asos_low.py
 
-cd ../cscap
+cd ../ingestors/other
+python feel_ingest.py
+
+cd ../../cscap
 python harvest_agronomic.py 2012
 python harvest_agronomic.py 2013
 python harvest_agronomic.py 2014
