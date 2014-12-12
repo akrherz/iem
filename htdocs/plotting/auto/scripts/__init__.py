@@ -25,6 +25,7 @@ data = {'plots': [
         {'id': "28", 'label': "Trailing Number of Days Precipitation Total Rank"},
     ]},
     {'label': 'Monthly', 'options': [
+        {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
         {'id': "29", 'label': "Frequency of Hourly Temperature within Range by Month"},
         {'id': "1", 'label': "July-August Days Above Temp v. May-June Precip"},
         {'id': "9", 'label': "Growing Degree Day Climatology and Daily Values for one Year"},
@@ -34,8 +35,8 @@ data = {'plots': [
         {'id': "24", 'label': "Monthly Precipitation Climate District Ranks"},
         {'id': "8", 'label': "Monthly Precipitation Reliability"},
         {'id': "23", 'label': "Monthly Station Departures + El Nino 3.4 Index"},
-        {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
         {'id': "36", 'label': "Month warmer than other Month for Year"},
+        {'id': "41", 'label': "Quantile / Quantile Plot of Daily Temperatures for Two Months"},
         {'id': "20", 'label': "Hours of Precipitation by Month"},
         {'id': "39", 'label': "Scenarios for this month besting some previous month"},
         #{'id': "17", 'label': "Daily Temperatures + Climatology for Year + Month"},
