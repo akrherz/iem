@@ -2,12 +2,15 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 1
+Release: 2
 License: distributable
 
 Requires: pyIEM
 Requires: mod_wsgi
 Requires: python-paste
+Requires: openpyxl
+Requires: jdcal
+Requires: python-lxml > 3.4.0
 
 %description
 A virtual package which makes sure that various requirements are installed
