@@ -18,19 +18,18 @@ def get_data(sid, valid):
     
     before = {}
     after = {}
-    before_delta = datetime.timedelta(hours=-2)
-    after_delta = datetime.timedelta(hours=2)
+    before_delta = -7200
+    after_delta = 7200
     for row in cursor:
         utc = row['utctime'].replace(tzinfo=pytz.timezone("UTC"))
+        diff = (utc - valid).days * 86400 + (utc - valid).seconds
         # After
         if utc > valid:
-            diff = utc - valid
             if diff < after_delta:
                 after_delta = diff
                 after = row.copy()
         # Before
         else:
-            diff = valid - utc
             if diff > before_delta:
                 before_delta = diff
                 before = row.copy()
