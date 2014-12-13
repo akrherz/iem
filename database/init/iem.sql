@@ -1,35 +1,47 @@
 CREATE EXTENSION postgis;
 
 
-
----
---- Quasi synced from mesosite database
----
 CREATE TABLE stations(
-	id varchar(20),
-	synop int,
-	name varchar(64),
-	state char(2),
-	country char(2),
-	elevation real,
-	network varchar(20),
-	online boolean,
-	params varchar(300),
-	county varchar(50),
-	plot_name varchar(64),
-	climate_site varchar(6),
-	remote_id int,
-	wfo char(3),
-	archive_begin timestamp with time zone,
-	archive_end timestamp with time zone,
-	tzname varchar(32),
-	modified timestamp with time zone,
-	iemid int PRIMARY KEY,
-	metasite boolean,
-	ncdc81 varchar(11)
-	);
+        id varchar(20),
+        synop int,
+        name varchar(64),
+        state char(2),
+        country char(2),
+        elevation real,
+        network varchar(20),
+        online boolean,
+        params varchar(300),
+        county varchar(50),
+        plot_name varchar(64),
+        climate_site varchar(6),
+        remote_id int,
+        nwn_id int,
+        spri smallint,
+        wfo varchar(3),
+        archive_begin timestamptz,
+        archive_end timestamp with time zone,
+        modified timestamp with time zone,
+        tzname varchar(32),
+        iemid SERIAL UNIQUE,
+        metasite boolean,
+        sigstage_low real,
+        sigstage_action real,
+        sigstage_bankfull real,
+        sigstage_flood real,
+        sigstage_moderate real,
+        sigstage_major real,
+        sigstage_record real,
+        ugc_county char(6),
+        ugc_zone char(6),
+        ncdc varchar(11)
+);
+CREATE UNIQUE index stations_idx on stations(id, network);
+create index stations_iemid_idx on stations(iemid);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
-GRANT SELECT on stations to nobody,apache;
+GRANT SELECT on stations to apache,nobody;
+grant all on stations_iemid_seq to nobody,apache;
+
+
 
 ---
 --- Some skycoverage metadata
