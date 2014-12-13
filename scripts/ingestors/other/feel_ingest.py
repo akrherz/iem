@@ -10,7 +10,7 @@ BASE = "/mnt/home/mesonet/ot/ot0005/incoming/Pierson"
 
 def get_starttimes():
     """ Figure out when we have data """
-    CURSOR.execute("""SELECT max(valid) from feel_data_hourly""")
+    CURSOR.execute("""SELECT max(valid at time zone 'UTC-06') from feel_data_hourly""")
     row = CURSOR.fetchone()
     hstart = row[0]
 
@@ -57,8 +57,8 @@ def ingest():
             LWS1_Avg, LWS2_Avg, LWS3_Avg, LWS1_Ohms, LWS2_Ohms,
             LWS3_Ohms, LWS1_Ohms_Hst, LWS2_Ohms_Hst, LWS3_Ohms_Hst) VALUES 
             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s)""", (ts, row['BattVolt_Avg'], 
-            row['PanTemp_Avg'], row['AirTemp_Avg'],
+            %s, %s, %s, %s, %s, %s, %s, %s)""", (ts.strftime("%Y-%m-%d %H:%M-06"), 
+            row['BattVolt_Avg'], row['PanTemp_Avg'], row['AirTemp_Avg'],
             row['RH_Avg'], row['sat_vp_Avg'], row['act_vp_Avg'], 
             row['WindDir_Avg'], row['Windspeed_Avg'],
             row['SolarRad_mV_Avg'], row['SolarRad_W_Avg'], 
