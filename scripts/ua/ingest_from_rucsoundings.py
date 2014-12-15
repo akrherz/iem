@@ -122,6 +122,10 @@ class RAOB:
         row = txn.fetchone()
         fid = row[0]
         txn.execute("""DELETE from raob_profile where fid = %s""", (fid,))
+        if txn.rowcount > 0:
+            print("RAOB del %s rows for sid: %s valid: %s" % (txn.rowcount,
+                                        self.station, 
+                                        self.valid.strftime("%Y-%m-%d %H")))
         table = "raob_profile_%s" % (self.valid.year,)
         for d in self.profile:
             txn.execute("""INSERT into """ + table +"""
@@ -222,8 +226,10 @@ def main():
         try:
             data = urllib2.urlopen(uri, timeout=30).read()
         except Exception, exp:
-            print 'RAOB dl failed %s %s %s' % (sid, valid, exp)
-            return
+            print 'RAOB dl failed %s %s %s' % (sid,
+                                               valid.strftime("%Y-%m-%d %H"),
+                                               exp)
+            continue
         try:
             for rob in parse( data, sid ):
                 nt.sts[sid]['count'] = len(rob.profile)
