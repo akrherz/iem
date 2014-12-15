@@ -220,7 +220,7 @@ def main():
                 
         cursor = DBCONN.cursor()
         try:
-            data = urllib2.urlopen(uri).read()
+            data = urllib2.urlopen(uri, timeout=30).read()
         except Exception, exp:
             print 'RAOB dl failed %s %s %s' % (sid, valid, exp)
             return
