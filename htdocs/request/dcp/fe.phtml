@@ -1,12 +1,20 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
+
+$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
+
 $t = new MyView();
+$t->headextra = <<<EOF
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src='/assets/openlayers/2.13.1/OpenLayers.js'></script>
+<script src='/js/olselect.php?network=${network}&multi'></script>
+EOF;
+$t->bodyextra = "onload=\"init()\"";
 define("IEM_APPID", 44);
 include_once "../../../include/database.inc.php";
 $mesosite = iemdb('mesosite');
  
-$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
 $t->title = "DCP/HADS Data Download";
 $t->thispage = "networks-dcp";
  include("../../../include/imagemaps.php");
@@ -24,7 +32,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	  $row["id"], $sel, $row["name"]);
 }
 $nselect .= "</select>";
-$sselect = networkMultiSelect($network, "", Array(), 'station[]'); 
+$sselect = networkMultiSelect($network, "", Array(), 'station'); 
 $ys = yearSelect(2002, date("Y"), "year");
 $ms1 = monthSelect("", "month1");
 $ds1 = daySelect2("", "day1");
@@ -34,6 +42,13 @@ $ds2 = daySelect2("", "day2");
 $hs2 = gmtHourSelect("", "hour2");
 
 $t->content = <<<EOF
+<style type="text/css">
+        #map {
+            width: 100%;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
 <ol class="breadcrumb">
  <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
  <li class="active">Data Download</li>
@@ -50,14 +65,24 @@ dataset is huge and the download may take a number of seconds to process.</p>
 </form>
 
 
-<form method="GET" action="dl.php" name='dl'>
+<form method="GET" action="/cgi-bin/request/hads.py" name='dl'>
 <input type='hidden' name='network' value="{$network}" />
 
 <div class="row">
-<div class="col-md-6 col-sm-6">
+<div class="col-sm-6">
 
 <p><h3>1. Select Station(s):</h3><br>
+
+<p>Select one or more stations from the listing, or click on the map icon
+ to select the site.</p>
+
 {$sselect}
+<br />
+
+<div id="map"></div>
+<div id="sname">No site selected</div>
+
+</div><div class="col-sm-6">
 
 <p><h3>2. Select Start/End Time:</h3><br>
 <div class="alert alert-info">
@@ -90,7 +115,6 @@ Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.
   </tr>
 </table>
 
-</div><div class="col-md-6 col-sm-6">
 
 <p><h3>3. How to view?</h3><br>
 <select name="what">
@@ -98,14 +122,27 @@ Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.
   <option value="view">View on-line
 </select>
 
-<p><h3>4. Data Delimitation:</h3><br>
-How shall the output values be seperated?
-<br><select name="delim">
+<h3>4. Data Delimitation:</h3>
+<p>How shall the output values be seperated?
+<br /><select name="delim">
     <option value="comma">Comma
     <option value="space">Space
     <option value="tab">Tab
-   </select>
+   </select></p>
 
+<h3>5. <i>Optional:</i> Search for Threshold Exceedance</h3>
+<p>For stations that report a stage value ("HG" SHEF variable group), you
+ can optionally search for when the value exceeds this threshold.  The 
+ print out will include:
+ <ul>
+    <li>Timestamp when threshold was exceeded.</li>
+    <li>First timestamp when the value was at its peak.</li>
+    <li>Timestamp when the value crossed below the threshold.</li>
+ </ul>
+ <br /><strong>You can only do this search for one station at a time!</strong>
+ <br />Thresold: <input type="text" size="6" name="threshold" /></p>
+  
+    		
 </div></div>
 
 <p><h3>Submit Form:</h3><br>
