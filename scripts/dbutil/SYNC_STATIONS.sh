@@ -1,5 +1,6 @@
 #!/bin/sh
 # Need to sync all our station metadata, when we add new sites!
+set -x
 
 python set_elevation.py
 python set_county.py

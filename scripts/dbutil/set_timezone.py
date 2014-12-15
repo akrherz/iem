@@ -24,25 +24,25 @@ for row in mcursor:
       """ % (lon, lat))
     row2 = mcursor2.fetchone()
     if row2 is None or row2[0] == 'uninhabited':
-        print '--> MISSING ID: %s NETWORK: %s LAT: %.2f LON: %.2f' % (sid, 
-                                                            network, lat, lon)
-    
+        print('MISSING TZ ID: %s NETWORK: %s LAT: %.2f LON: %.2f' % (sid,
+                                                                     network,
+                                                                     lat, lon))
         mcursor2.execute("""
         SELECT ST_Distance(geom, 'SRID=4326;POINT(%s %s)') as d, 
         id, tzname from stations WHERE network = '%s' 
         and tzname is not null ORDER by d ASC LIMIT 1""" % (lon, lat, network))
         row3 = mcursor2.fetchone()
         if row3 is not None:
-            print 'FORCING DCP to its neighbor: %s Tzname: %s Distance: %.5f' % (
-          row3[1], row3[2], row3[0])
-            mcursor2.execute("""UPDATE stations SET tzname = '%s' 
+            print('FORCING tz to its neighbor: %s Tzname: %s Dist: %.5f' % (
+                row3[1], row3[2], row3[0]))
+            mcursor2.execute("""UPDATE stations SET tzname = '%s'
             WHERE id = '%s' and network = '%s'""" % (row3[2], sid, network))
         else:
             print 'BAD, CAN NOT FORCE EVEN!'
     else:
-        print 'ID: %s NETWORK: %s TIMEZONE: %s' % (sid, network, row2[0])
-        mcursor2.execute("""UPDATE stations SET tzname = '%s' 
-        WHERE id = '%s' and network = '%s'""" % (row2[0], sid, network))
+        print('ID: %s NETWORK: %s TIMEZONE: %s' % (sid, network, row2[0]))
+        mcursor2.execute("""UPDATE stations SET tzname = '%s'
+            WHERE id = '%s' and network = '%s'""" % (row2[0], sid, network))
 
 mcursor2.close()
 MESOSITE.commit()
