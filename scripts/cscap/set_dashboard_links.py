@@ -190,5 +190,5 @@ def do_row(row):
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
-for i in range(6,86):
+for i in range(5,86):
     do_row(i)
