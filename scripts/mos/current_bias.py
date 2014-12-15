@@ -5,6 +5,7 @@
 import sys
 import psycopg2
 from pyiem.plot import MapPlot
+import matplotlib.cm as cm
 import datetime
 import pytz
 
@@ -17,94 +18,97 @@ icursor = IEM.cursor()
 def doit(now, model):
     """ Figure out the model runtime we care about """
     mcursor.execute("""
-    SELECT max(runtime) from alldata where station = 'KDSM'
+    SELECT max(runtime at time zone 'UTC') from alldata where station = 'KDSM'
     and ftime = %s and model = %s
     """, (now, model))
     row = mcursor.fetchone()
     runtime = row[0]
     if runtime is None:
         sys.exit()
-    #print "Model Runtime used: %s" % (runtime,)
+    runtime = runtime.replace(tzinfo=pytz.timezone("UTC"))
 
-    # Load up the mos forecast for our given 
+    # Load up the mos forecast for our given
     mcursor.execute("""
       SELECT station, tmp FROM alldata
     WHERE model = %s and runtime = %s and ftime = %s and tmp < 999
-    """, (model, runtime, now ))
+    """, (model, runtime, now))
     forecast = {}
     for row in mcursor:
         if row[0][0] == 'K':
-            forecast[ row[0][1:] ] = row[1]
+            forecast[row[0][1:]] = row[1]
 
     # Load up the currents!
     icursor.execute("""
-SELECT 
-  s.id, s.network, tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
-FROM 
-  current c, stations s
-WHERE
-  c.iemid = s.iemid and
-  (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
-  valid + '60 minutes'::interval > now() and
-  tmpf > -50
+    SELECT 
+      s.id, s.network, tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
+    FROM 
+      current c, stations s
+    WHERE
+      c.iemid = s.iemid and
+      (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
+      valid + '60 minutes'::interval > now() and
+      tmpf > -50
     """)
 
     lats = []
     lons = []
     vals = []
-    valmask = []
+    #valmask = []
     for row in icursor:
-        if not forecast.has_key( row[0] ):
+        if not forecast.has_key(row[0]):
             continue
 
         diff = forecast[row[0]] - row[2]
         if diff > 20 or diff < -20:
             continue
-        lats.append( row[4] )
-        lons.append( row[3] )
-        vals.append( diff )
-        valmask.append(  (row[1] in ['AWOS','IA_AWOS']) )
+        lats.append(row[4])
+        lons.append(row[3])
+        vals.append(diff)
+        #valmask.append((row[1] in ['AWOS', 'IA_AWOS']))
+
+    cmap = cm.get_cmap("RdYlBu_r")
+    cmap.set_under('black')
+    cmap.set_over('black')
 
     localnow = now.astimezone(pytz.timezone("America/Chicago"))
     m = MapPlot(sector='midwest',
             title="%s MOS Temperature Bias " % (model,),
             subtitle='Model Run: %s Forecast Time: %s' % (
-                                runtime.strftime("%d %b %Y %-I %p"), 
-                                localnow.strftime("%d %b %Y %-I %p"))
-            )
-    m.contourf(lons, lats, vals, range(-10, 10), units='F')
+                                runtime.strftime("%d %b %Y %H %Z"),
+                                localnow.strftime("%d %b %Y %-I %p %Z")))
+    m.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
 
     pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
     m.postprocess(pqstr=pqstr, view=False)
-    del(m)
+    m.close()
 
     m = MapPlot(sector='conus',
             title="%s MOS Temperature Bias " % (model,),
             subtitle='Model Run: %s Forecast Time: %s' % (
-                                runtime.strftime("%d %b %Y %-I %p"), 
-                                localnow.strftime("%d %b %Y %-I %p"))
+                                runtime.strftime("%d %b %Y %H %Z"),
+                                localnow.strftime("%d %b %Y %-I %p %Z"))
             )
-    m.contourf(lons, lats, vals, range(-10, 10), units='F')
-    
+    m.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
+
     pqstr = ("plot ac %s00 conus_%s_mos_T_bias.png "
              +"conus_%s_mos_T_bias_%s.png png") % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
     m.postprocess(pqstr=pqstr, view=False)
-    
+
 def main():
     """ Go main go"""
     ts = datetime.datetime.utcnow()
     model = sys.argv[1]
     if len(sys.argv) == 6:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                int(sys.argv[3]), int(sys.argv[4]))
         model = sys.argv[5]
     ts = ts.replace(minute=0, second=0, microsecond=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-    doit(ts, model )
+    doit(ts, model)
 
 if __name__ == "__main__":
     main()
