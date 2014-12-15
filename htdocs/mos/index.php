@@ -60,20 +60,15 @@ multiplied by 10 for its true value.
 <h3>Current Plots</h3>
 <div class="row">
 	<div class="col-md-6">
-<a href="../timemachine/#52.0"><img src="/data/conus_nam_mos_T_bias.png" 
- class="img-responsive" border="1"/></a>
+<a href="/timemachine/#52.0"><img src="/data/conus_nam_mos_T_bias.png" 
+ class="img img-responsive" border="1"/></a>
  </div>
 	<div class="col-md-6">
 		
-<a href="../timemachine/#51.0"><img src="/data/conus_gfs_mos_T_bias.png" 
- class="img-responsive" border="1"/></a>
+<a href="/timemachine/#51.0"><img src="/data/conus_gfs_mos_T_bias.png" 
+ class="img img-responsive" border="1"/></a>
  </div>
 </div>
-		
-<p>We will probably back fill the archive based on how much interest this
-application generates, so please <a href="../info/contacts.php">let us</a>
-know if you find this page useful. 
-
 EOF;
 $t->render('single.phtml');
 ?>
