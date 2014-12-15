@@ -12,6 +12,7 @@ def supplement_ugcs():
     
     done = []
     for yr in range(2014,1986,-1):
+        print "___________ Processing Year: %s ____________" % (yr,)
         CURSOR.execute("""SELECT geom, ugc, wfo from warnings_"""+str(yr)+"""
         WHERE gid is null and not ST_IsEmpty(geom) and length(ugc) = 6
         """)
@@ -36,16 +37,16 @@ def supplement_ugcs():
 
 def fix_non6_ugcs():
     
-    for yr in range(2007, 2008):
+    for yr in range(2008, 2012):
         print "___________ Processing Year: %s ____________" % (yr,)
         CURSOR.execute("""SELECT wfo, eventid, phenomena, significance, report,
         ST_astext(geom), ugc, oid
         from warnings_"""+str(yr)+""" WHERE gid is null and
-        not ST_IsEmpty(geom) and length(ugc) = 3 and report is not null""")
+        not ST_IsEmpty(geom) and length(ugc) = 6""")
         for row in CURSOR:
             # Okay, we have some work to do here...
             print "NULL GID! %s.%s.%s.%s.%s %s" % (yr, row[0], row[1], row[2],
-                                               row[3], row[4])
+                                               row[3], row[6])
             try:
                 prod = vtecparser(row[4])
             except Exception as exp:
