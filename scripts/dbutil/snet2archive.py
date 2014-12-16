@@ -1,50 +1,48 @@
 """
  Send the current_log history of SNET observations to its long term home
 
- The database partitioning is based on monthly tables based on UTC Time, so 
+ The database partitioning is based on monthly tables based on UTC Time, so
  this runs at 0z and takes the previous GMT day...
 
 """
-
 import datetime
 import os
-import iemdb
-import iemtz
+import pytz
 import psycopg2.extras
 import subprocess
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-SNET = iemdb.connect('snet')
+SNET = psycopg2.connect(database='snet', host='iemdb')
 scursor = SNET.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 utc = datetime.datetime.utcnow()
-utc = utc.replace(tzinfo=iemtz.UTC())
+utc = utc.replace(tzinfo=pytz.timezone("UTC"))
 # We want 0z today
-ets = utc.replace(hour=0,minute=0,second=0,microsecond=0)
+ets = utc.replace(hour=0, minute=0, second=0, microsecond=0)
 # 0z yesterday
 sts = ets - datetime.timedelta(days=1)
 
 # Collect obs from iemaccess
-sql = """SELECT c.*, t.id from current_log c JOIN stations t 
-    ON (t.iemid = c.iemid) WHERE valid >= %s and valid < %s and 
+sql = """SELECT c.*, t.id from current_log c JOIN stations t
+    ON (t.iemid = c.iemid) WHERE valid >= %s and valid < %s and
     t.network IN ('KELO','KCCI','KIMT')"""
 args = (sts, ets)
 icursor.execute(sql, args)
 
 # Dump them into snet archive...
 """
- station | character varying(5)     | 
- valid   | timestamp with time zone | 
- tmpf    | smallint                 | 
- dwpf    | smallint                 | 
- drct    | smallint                 | 
- sknt    | real                     | 
- pday    | real                     | 
- pmonth  | real                     | 
- srad    | real                     | 
- relh    | real                     | 
- alti    | real                     | 
- gust    | smallint                 | 
+ station | character varying(5)     |
+ valid   | timestamp with time zone |
+ tmpf    | smallint                 |
+ dwpf    | smallint                 |
+ drct    | smallint                 |
+ sknt    | real                     |
+ pday    | real                     |
+ pmonth  | real                     |
+ srad    | real                     |
+ relh    | real                     |
+ alti    | real                     |
+ gust    | smallint                 |
 """
 
 def formatter(val, precision):
@@ -55,7 +53,7 @@ def formatter(val, precision):
 
 out = open('/tmp/snet_dbinsert.sql', 'w')
 out.write("DELETE from t%s WHERE valid >= '%s' and valid < '%s';\n" % (
-                    sts.strftime("%Y_%m"), sts, ets ))
+    sts.strftime("%Y_%m"), sts, ets ))
 out.write("COPY t%s FROM stdin WITH NULL 'None';\n" % (sts.strftime("%Y_%m"),) )
 i = 0
 for row in icursor:
