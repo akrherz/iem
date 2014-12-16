@@ -55,6 +55,10 @@ def doit(ts, hours):
 
         now += interval
 
+    if total is None:
+        print("q3_Xhour.py no data ts: %s hours: %s" % (ts, hours))
+        return
+
     # Scale factor is 10
     routes = "c"
     if ts.minute == 0:
