@@ -43,15 +43,24 @@ def get_ij(lon, lat, nc):
             (nc.variables['lat'][:] - lat)**2)**.5
     return np.unravel_index(np.argmin(dist), dist.shape)
 
-def get_icond_color(val):
-    if val is None or val == -1:
+def get_icond_color(model, val):
+    """ Get the color for this Model and icond 
+    
+    METRO: 1-8 dry, wet, ice/snow, mix, dew, melting snow, black ice, icing rain
+    BRIDGET: 0-5 dry, frosty, icy/snowy, melting, freezing, wet
+    """
+    if val is None or val < 0:
         return 'none'
-    colors = ['white', 'tan', 'orange', 'blue', 'purple', 'green']
-    try:
-        return colors[val]
-    except:
+    if model == 'metro':
+        colors = ['white', 'white', 'green', 'orange', 'orange', 'brown',
+                  'blue', 'orange', 'purple']
+    else:
+        colors = ['white', 'tan', 'orange', 'blue', 'purple', 'green']
+    if val > (len(colors) -1 ):
         return 'none'
+    return colors[val]
 
+    
 def get_ifrost_color(val):
     if val is None or val == -1:
         return 'none'
@@ -62,7 +71,7 @@ def get_ifrost_color(val):
         return 'none'
 
 def process(model, lon, lat):
-    ''' Generate a plot for this given combination '''
+    """ Generate a plot for this given combination """
     (fig, ax) = plt.subplots(1,1)
     modelts = get_latest_time(model)
     if modelts is None:
@@ -97,7 +106,6 @@ def process(model, lon, lat):
     ax.axhline(32, linestyle='-.')
     ax.grid(True)
     ax.set_ylabel("Temperature $^\circ$F")
-    ax.legend(loc='best')
 
     (ymin, ymax) = ax.get_ylim()
 
@@ -106,8 +114,14 @@ def process(model, lon, lat):
                 fc=get_ifrost_color(ifrost), ec='none')
     for i2, icond in enumerate(nc.variables['icond'][:-1,i,j]):
         ax.barh(ymax-2, 1.0/24.0/4.0, left=times[i2], 
-                fc=get_icond_color(icond), ec='none')
-        
+                fc=get_icond_color(model, icond), ec='none')
+
+    # Shrink current axis's height by 10% on the bottom
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                 box.width, box.height * 0.9])
+    ax.legend(loc='upper center',
+              bbox_to_anchor=(0.5, -0.08),fancybox=True, shadow=True, ncol=3)
     
     sys.stdout.write("Content-Type: image/png\n\n")
     fig.savefig( sys.stdout, format="png")
