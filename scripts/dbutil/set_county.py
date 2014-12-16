@@ -2,22 +2,21 @@
   Need to set station metadata for county name for a given site...
 """
 
-import re
-import iemdb
-MESOSITE = iemdb.connect('mesosite')
-POSTGIS = iemdb.connect('postgis')
+import psycopg2
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 pcursor = POSTGIS.cursor()
 
-mcursor.execute("""
-  select s.id, c.name, s.iemid from stations s, counties c, states t WHERE 
-  ST_Contains(c.the_geom, s.geom) and s.geom && c.the_geom 
-  and s.county IS NULL and s.state = t.state_abbr and
-  t.state_fips = c.state_fips and s.country = 'US'
+pcursor.execute("""
+  select s.id, c.name, s.iemid from stations s, ugcs c WHERE 
+  ST_Contains(c.geom, s.geom) and s.geom && c.geom 
+  and s.county IS NULL and s.state = substr(c.ugc,1,2) 
+  and s.country = 'US' and c.end_ts is null and substr(c.ugc,3,1) = 'C'
 """)
 
-for row in mcursor:
+for row in pcursor:
     sid = row[0]
     cnty = row[1]
     iemid = row[2]
@@ -26,10 +25,11 @@ for row in mcursor:
                      (cnty, iemid) )
 
 pcursor.execute("""
-  select s.id, c.ugc, s.iemid from stations s, nws_ugc c WHERE 
+  select s.id, c.ugc, s.iemid from stations s, ugcs c WHERE 
   ST_Contains(c.geom, s.geom) and s.geom && c.geom 
-  and s.ugc_county IS NULL and s.state = substr(c.state,1,2) 
-  and s.country = 'US' and c.polygon_class = 'C' LIMIT 1000
+  and s.ugc_county IS NULL and s.state = substr(c.ugc,1,2) 
+  and s.country = 'US' and substr(c.ugc,3,1) = 'C' 
+  and c.end_ts is null LIMIT 1000
 """)
 
 for row in pcursor:
@@ -43,10 +43,10 @@ for row in pcursor:
                      (cnty, iemid) )
 
 pcursor.execute("""
-  select s.id, c.ugc, s.iemid from stations s, nws_ugc c WHERE 
+  select s.id, c.ugc, s.iemid from stations s, ugcs c WHERE 
   ST_Contains(c.geom, s.geom) and s.geom && c.geom 
-  and s.ugc_zone IS NULL and s.state = substr(c.state,1,2) 
-  and s.country = 'US' and c.polygon_class = 'Z' LIMIT 1000
+  and s.ugc_zone IS NULL and s.state = substr(c.ugc,1,2) 
+  and s.country = 'US' and substr(c.ugc,3,1) = 'Z' LIMIT 1000
 """)
 
 for row in pcursor:
