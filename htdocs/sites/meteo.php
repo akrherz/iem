@@ -9,7 +9,7 @@ $t->thispage = "iem-sites";
 $t->title = "Site Meteorograms";
 $t->sites_current="meteo"; 
 
-$uri = sprintf("/plotting/auto/plot/43/station:%s__network:%s.png",  $station,
+$uri = sprintf("/plotting/auto/plot/43/station:%s::network:%s.png",  $station,
 		$network);
 $t->content = <<<EOF
 

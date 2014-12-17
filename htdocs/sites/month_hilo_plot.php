@@ -7,6 +7,6 @@
  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
  $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 
- header("Location: /plotting/auto/plot/17/month:{$month}__year:{$year}__station:{$station}__network:{$network}.png");
+ header("Location: /plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}.png");
  
 ?>
