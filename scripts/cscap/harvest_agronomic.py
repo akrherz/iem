@@ -54,7 +54,8 @@ for entry in feed:
             except Exception, exp:
                 print 'HARVEST_AGRONOMIC TRACEBACK'
                 print exp
-                print '%s %s %s %s' % (siteid, plotid, varname, val)
+                print '%s %s %s %s %s' % (YEAR, siteid, plotid, repr(varname), 
+                                          repr(val))
                 sys.exit()
 
 pcursor.close()
