@@ -9,9 +9,13 @@ $t->thispage = "iem-sites";
 $t->title = "Site Meteorograms";
 $t->sites_current="meteo"; 
 
-$uri = sprintf("meteo_temps.php?network=%s&station=%s",   $network, $station);
+$uri = sprintf("/plotting/auto/plot/43/station:%s__network:%s.png",  $station,
+		$network);
 $t->content = <<<EOF
- <br /><img src="{$uri}">
+
+<p>This page creates a simple plot of recent observations from this site.</p>
+
+ <br /><img src="{$uri}" class="img img-responsive">
 EOF;
 $t->render('sites.phtml');
 ?>
