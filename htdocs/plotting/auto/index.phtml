@@ -141,7 +141,7 @@ EOF;
 					."\" id=\"{$dpname}\" /> (YYYY/mm/dd)</td></tr>";
 		}
 	}
-	$imguri .= str_replace('/', '-', implode($pltvars, "__"));
+	$imguri .= str_replace('/', '-', implode($pltvars, "::"));
 	$imguri .= ".png";
 	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
 		$image = "";

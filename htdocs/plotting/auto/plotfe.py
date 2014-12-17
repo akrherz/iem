@@ -15,7 +15,7 @@ def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting 
     routine """
     d = dict()
-    for token in cgistr.split("__"):
+    for token in cgistr.split("::"):
         token2 = token.split(":")
         if len(token2) != 2:
             continue
