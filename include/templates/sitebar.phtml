@@ -2,10 +2,39 @@
 global $metadata;
 global $station;
 global $network;
+include_once(dirname(__FILE__)."/../imagemaps.php");
 ?>
-<div class="hidden-print">
-<strong><?php echo $metadata["name"]; ?> Links:</strong>
-<p>
+<div class="hidden-print well">
+<form method="GET" name="automatic">
+<?php 
+if (isset($savevars)){
+	while (list($k,$v)=each($savevars)){
+		echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
+		$v, $k);
+	}
+}
+if (isset($_REQUEST["prod"])){
+	echo "<input type='hidden' name='prod' value='". $_REQUEST["prod"] ."'>\n";
+}
+if (isset($_REQUEST["month"])){
+	echo "<input type='hidden' name='month' value='". $_REQUEST["month"] ."'>\n";
+}
+if (isset($_REQUEST["year"])){
+	echo "<input type='hidden' name='year' value='". $_REQUEST["year"] ."'>\n";
+}
+if (isset($_REQUEST["day"])){
+	echo "<input type='hidden' name='day' value='". $_REQUEST["day"] ."'>\n";
+}
+?>
+<input type="hidden" name="network" value="<?php echo $network; ?>">
+<ol class="breadcrumb">
+<li><a href="/sites/locate.php">Station Data &amp; Metadata</a></li>
+<li><a href="/sites/locate.php?network=<?php echo $network; ?>"><?php echo $network; ?></a></li>
+<li class="active"><?php echo networkSelectAuto($network, $station); ?> or <a href="locate.php?network=<?php echo $network; ?>">select from map</a></li>
+</ol>
+</form>
+
+<ul class="nav nav-tabs">
 <?php
 $o = Array(
   "base" => Array("name" => "Information", "uri" => "site.php?"),
@@ -32,48 +61,21 @@ while (list($key,$val) = each($o))
 		continue;
 	}
   	$uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
-  	echo "<div style=\"";
-  	if ($this->sites_current == $key) echo "background: #eaf;";
-  	echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
+  	echo "<li role=\"presentation\"";
+  	if ($this->sites_current == $key) echo " class=\"active\"";
+  	echo sprintf("><a href=\"%s\">%s</a></li>", $uri, $val["name"]);
 }
 
 if (preg_match('/ASOS|AWOS/', $network) > 0){
 	$uri = sprintf("/request/download.phtml?network=%s", $network);
-	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
+	echo sprintf("<li role=\"presentation\"><a href=\"%s\">Download</a></li>", 
+			$uri);
 }elseif (preg_match('/DCP/', $network) > 0){
 	$uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
-	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
+	echo sprintf("<li role=\"presentation\"><a href=\"%s\">Download</a></li>", 
+			$uri);
 	
 }
 ?>
-<br />
-<form method="GET" name="automatic">
-<?php 
-if (isset($savevars)){
-	while (list($k,$v)=each($savevars)){
-		echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
-		$v, $k);
-	}
-}
-if (isset($_REQUEST["prod"])){
-	echo "<input type='hidden' name='prod' value='". $_REQUEST["prod"] ."'>\n";
-}
-if (isset($_REQUEST["month"])){
-	echo "<input type='hidden' name='month' value='". $_REQUEST["month"] ."'>\n";
-}
-if (isset($_REQUEST["year"])){
-	echo "<input type='hidden' name='year' value='". $_REQUEST["year"] ."'>\n";
-}
-if (isset($_REQUEST["day"])){
-	echo "<input type='hidden' name='day' value='". $_REQUEST["day"] ."'>\n";
-}
-?>
-<input type="hidden" name="network" value="<?php echo $network; ?>">
-<p>Other Sites in network:
-<?php 
-include_once(dirname(__FILE__)."/../imagemaps.php");
-echo networkSelectAuto($network, $station); 
-?>
- or <a href="locate.php?network=<?php echo $network; ?>">select from map</a>
-</form>
+</ul>
 </div>
