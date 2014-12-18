@@ -141,7 +141,7 @@ $(document).ready(function(){
 			var geometry = feature.getGeometry();
 			var coord = geometry.getCoordinates();
 			popup.setPosition(coord);
-			var content = "<p><strong>"+ feature.get('name') 
+			var content = "<p><strong>"+ feature.get('name') +"</strong>"
 			+"<br />High: "+ feature.get('high') +" Norm:"+ feature.get("high_normal") +" Rec:"+ feature.get("high_record")
 			+"<br />Low: "+ feature.get('low') +" Norm:"+ feature.get("low_normal") +" Rec:"+ feature.get("low_record")
 			+"<br />Precip: "+ feature.get('precip') +" Rec:"+ feature.get("precip_record")
