@@ -4,9 +4,9 @@ Download Interface for HADS data
 """
 import sys
 import cgi
-from pyiem.network import Table as NetworkTable
 import datetime
 import pytz
+import os
 import pandas as pd
 from pandas.io.sql import read_sql
 import psycopg2
@@ -46,41 +46,38 @@ def threshold_search(table, threshold, delimiter):
     above = False
     maxrunning = -99
     maxvalid = None
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write("# Threshold: %s Search Column: %s\n"% (
-                            threshold, mycol))
-    sys.stdout.write("STATION,UTC_VALID,EVENT,VALUE\n")
     found = False
+    res = []
     for (station, valid), row in table.iterrows():
         val = row[mycol]
         if val > threshold and not above:
             found = True
-            sys.stdout.write("%s%s%s%s%s%s%s\n" % (station, delimiter,
-                                               valid, delimiter, 'START',
-                                               delimiter,val))
+            res.append(dict(station=station, utc_valid=valid, event='START',
+                            value=val))
             above = True
         if val > threshold and above:
             if val > maxrunning:
                 maxrunning = val
                 maxvalid = valid
         if val < threshold and above:
-            sys.stdout.write("%s%s%s%s%s%s%s\n" % (station, delimiter,
-                                               maxvalid, delimiter, 'MAX',
-                                               delimiter, maxrunning))
-            sys.stdout.write("%s%s%s%s%s%s%s\n" % (station, delimiter,
-                                               valid, delimiter, 'END',
-                                               delimiter,val))
+            res.append(dict(station=station, utc_valid=maxvalid, event='MAX',
+                            value=maxrunning))
+            res.append(dict(station=station, utc_valid=valid, event='END',
+                            value=val))
             above = False
             maxrunning = -99
             maxvalid = None
         
     if found is False:
-        sys.stdout.write("# OOPS, did not find any exceedance!")
+        error("# OOPS, did not find any exceedance!")
+
+    return pd.DataFrame(res)
 
 def error(msg):
     """ send back an error """
     sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write(msg)
+    sys.exit(0)
 
 def main():
     """ Go do something """
@@ -107,17 +104,30 @@ def main():
         if 'XXXXXXX' not in stations:
             error('Can not do threshold search for more than one station')
             return
-        threshold_search(table, threshold, delimiter)
-        return
+        table = threshold_search(table, threshold, delimiter)
     
-    if what != 'dl':
-        sys.stdout.write("Content-type: text/plain\n\n")
-    else:
+    if what == 'txt':
         sys.stdout.write('Content-type: application/octet-stream\n')
         sys.stdout.write(('Content-Disposition: attachment; '
                           +'filename=hads.txt\n\n'))
+        table.to_csv(sys.stdout, sep=delimiter)
+    elif what == 'html':
+        sys.stdout.write("Content-type: text/html\n\n")
+        table.to_html(sys.stdout)
+    elif what == 'excel':
+        writer = pd.ExcelWriter('/tmp/ss.xlsx')
+        table.to_excel(writer,'Data', index=True)
+        writer.save()
+    
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write("Content-Disposition: attachment;Filename=hads.xlsx\n\n")
+        sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+        os.unlink('/tmp/ss.xlsx')
 
-    table.to_csv(sys.stdout, sep=delimiter)
+    else:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        table.to_csv(sys.stdout, sep=delimiter)
+
 
 if __name__ == '__main__':
     main()
