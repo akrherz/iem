@@ -94,7 +94,8 @@ def main():
     table = "raw%s" % (sts.year,)
     sql = """SELECT station, valid at time zone 'UTC' as utc_valid, 
     key, value from """+table+""" 
-    WHERE station in %s and valid BETWEEN '%s' and '%s'""" % (tuple(stations),
+    WHERE station in %s and valid BETWEEN '%s' and '%s'
+    and value > -999""" % (tuple(stations),
                                                               sts, ets)
     df = read_sql(sql, PGCONN)
     
