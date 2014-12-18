@@ -23,7 +23,8 @@ while (list($sid,$data) = each($nt->table))
                 "sid"=> $data["id"],
               ),
              "geometry"=>Array("type"=>"Point",
-                         "coordinates"=>Array($data["lon"],$data["lat"])));
+                         "coordinates"=>Array(floatval($data["lon"]),
+                         					  floatval($data["lat"]))));
   $ar["features"][] = $z;
 }
 
