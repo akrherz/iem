@@ -5,12 +5,7 @@ include("../../../include/myview.php");
 $network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
 
 $t = new MyView();
-$t->headextra = <<<EOF
-<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src='/assets/openlayers/2.13.1/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}&multi'></script>
-EOF;
-$t->bodyextra = "onload=\"init()\"";
+$t->iemss = True;
 define("IEM_APPID", 44);
 include_once "../../../include/database.inc.php";
 $mesosite = iemdb('mesosite');
@@ -32,7 +27,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	  $row["id"], $sel, $row["name"]);
 }
 $nselect .= "</select>";
-$sselect = networkMultiSelect($network, "", Array(), 'station'); 
+
 $ys = yearSelect(2002, date("Y"), "year");
 $ms1 = monthSelect("", "month1");
 $ds1 = daySelect2("", "day1");
@@ -42,13 +37,6 @@ $ds2 = daySelect2("", "day2");
 $hs2 = gmtHourSelect("", "hour2");
 
 $t->content = <<<EOF
-<style type="text/css">
-        #map {
-            width: 100%;
-            height: 450px;
-            border: 2px solid black;
-        }
-</style>
 <ol class="breadcrumb">
  <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
  <li class="active">Data Download</li>
@@ -69,20 +57,12 @@ dataset is huge and the download may take a number of seconds to process.</p>
 <input type='hidden' name='network' value="{$network}" />
 
 <div class="row">
-<div class="col-sm-6">
+<div class="col-sm-7">
 
-<p><h3>1. Select Station(s):</h3><br>
+<div id="iemss" data-network="{$network}"></div>
 
-<p>Select one or more stations from the listing, or click on the map icon
- to select the site.</p>
-
-{$sselect}
-<br />
-
-<div id="map"></div>
-<div id="sname">No site selected</div>
-
-</div><div class="col-sm-6">
+</div>
+<div class="col-sm-5">
 
 <p><h3>2. Select Start/End Time:</h3><br>
 <div class="alert alert-info">

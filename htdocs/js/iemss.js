@@ -104,20 +104,13 @@ $().ready(function() {
 			style = [new ol.style.Style({
 				image: new ol.style.Circle({
 					fill: new ol.style.Fill({
-						color: 'rgba(255,255,255,0.4)'
+						color: 'rgba(255,0,0,1)'
 					}),
 					stroke: new ol.style.Stroke({
 						color: '#3399CC',
 						width: 1.25
 					}),
 					radius: 5
-				}),
-				fill: new ol.style.Fill({
-					color: 'rgba(255,255,255,0.4)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: '#3399CC',
-					width: 1.25
 				})
 
 			})];
@@ -128,12 +121,8 @@ $().ready(function() {
 	map = new ol.Map({
 		target: 'map',
 		layers: [new ol.layer.Tile({
-			title: "Global Imagery",
-			source: new ol.source.TileWMS({
-				url: 'http://maps.opengeo.org/geowebcache/service/wms',
-				params: {LAYERS: 'bluemarble', VERSION: '1.1.1'}
-			})
-		}),
+		      source: new ol.source.OSM()
+	    }),
 		geojson
 		],
 		view: new ol.View({
