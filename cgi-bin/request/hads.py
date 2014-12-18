@@ -90,7 +90,7 @@ def main():
     what = form.getfirst('what', 'dl')
     threshold = float(form.getfirst('threshold', -99))
     sts, ets = get_time(form)
-    stations = form.getlist('station')
+    stations = form.getlist('stations')
     if len(stations) == 1:
         stations.append('XXXXXXX')
     

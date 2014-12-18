@@ -1,21 +1,19 @@
 <?php 
-if (isset($this)){
-	$title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
-	$refresh = array_key_exists('refresh', $this->vars)? $this->refresh : '';
-	$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
-	$bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
-	$twimage = array_key_exists('twitter_image', $this->vars) ? 
-				$this->twitter_image : 'http://mesonet.agron.iastate.edu/images/logo_small.png';
-	$twdescription = array_key_exists('twitter_description', $this->vars) ? 
-				$this->twitter_description : 'Iowa Environmental Mesonet of Iowa State University';
-} else{
-	$title = isset($TITLE) ? $TITLE: 'Iowa Environmental Mesonet';
-	$refresh = isset($REFRESH)? $REFRESH: '';
-	$headextra = isset($HEADEXTRA) ? $HEADEXTRA: '';
-	$bodyextra = isset($BODYEXTRA) ? ' '. $BODYEXTRA: '';
-	$twimage = "http://mesonet.agron.iastate.edu/images/logo_small.png";
-	$twdescription = "Iowa Environmental Mesonet of Iowa State University";
+$title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
+$refresh = array_key_exists('refresh', $this->vars)? $this->refresh : '';
+$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
+if (array_key_exists('iemss', $this->vars)){
+  $headextra .= <<<EOF
+<link rel="stylesheet" href="/assets/openlayers/3.0.0/css/ol.css" type="text/css">
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src='/assets/openlayers/3.0.0/build/ol.js'></script>
+EOF;
 }
+$bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
+$twimage = array_key_exists('twitter_image', $this->vars) ? 
+				$this->twitter_image : 'http://mesonet.agron.iastate.edu/images/logo_small.png';
+$twdescription = array_key_exists('twitter_description', $this->vars) ? 
+				$this->twitter_description : 'Iowa Environmental Mesonet of Iowa State University';
 ?>
 <!DOCTYPE html>
 <html lang="en">
