@@ -100,7 +100,11 @@ if (isset($_GET["q"])){
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
 		elseif ($v->type == "networkselect"){
-			$netselect = networkSelect($v->network, $value, Array(), "station");
+			$extra = Array();
+			if (isset($v->all)){
+				$extra["_ALL"] = Array('name'=>' -- All Sites --');
+			}
+			$netselect = networkSelect($v->network, $value, $extra, "station");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect  ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}

@@ -84,8 +84,13 @@ function networkSelect($network, $selected, $extra=Array(),
    }
    while (list($idx,$sid) = each($extra))
    {
-        $nt->load_station($sid);
-        $tbl = $nt->table[$sid];
+        if (is_array($sid)){
+          $tbl = $sid;
+          $sid = $idx;
+        } else{
+          $nt->load_station($sid);
+          $tbl = $nt->table[$sid];
+        }
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
