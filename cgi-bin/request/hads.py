@@ -37,9 +37,10 @@ def threshold_search(table, threshold, delimiter):
     cols4 = [c[:5] for c in cols]
     searchfor = ['HGIRG', 'HGIRP', 'HGIRZ', 'HGIRR']
     mycol = None
-    for i, s in enumerate(searchfor):
+    for s in searchfor:
         if s in cols4:
-            mycol = cols[i]
+            idx = cols4.index(s)
+            mycol = cols[idx]
             break
     if mycol is None:
         error("Could not find HG column for this site!")
