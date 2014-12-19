@@ -6,8 +6,16 @@ var htmlInterface = ['<div class="panel panel-default">',
 '<div class="row">',
 	'<div class="col-sm-6">',
 
+'<div class="btn-group">',
+'<button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">',
+  'Sort Available Stations: <span class="caret"></span>',
+'</button>',
+'<ul class="dropdown-menu" role="menu">',
+	'<li id="iemss-sortbyid"><a href="#">Sort by Identifier</a></li>',
+	'<li id="iemss-sortbyname"><a href="#">Sort by Name</a></li>',
+'</ul>',
+'</div>',
 
-'<label for="stations_in">Available Stations:</label>',
 '<select multiple id="stations_in" class="form-control">',
 '</select>',
 '<div class="form-inline">',
@@ -70,7 +78,16 @@ jQuery.fn.filterByText = function(textbox, selectSingleMatch) {
 	});
 };
 
-
+function sortListing(option){
+	$("#stations_in").append($("#stations_in option").remove().sort(function(a, b) {
+		var at = $(a).text(), bt = $(b).text();
+		if (option == 'name'){
+			at = at.slice(at.indexOf(' ')+1);
+			bt = bt.slice(bt.indexOf(' ')+1);
+		}
+		return (at > bt)?1:((at < bt)?-1:0);
+	}));
+}
 
 $().ready(function() {  
 	
@@ -94,6 +111,14 @@ $().ready(function() {
 		});		
 		return false;
 	});  
+	
+	$('#iemss-sortbyid').click(function(){
+		sortListing("id");
+	});
+	$('#iemss-sortbyname').click(function(){
+		sortListing("name");
+	});
+	
 	geojsonSource = new ol.source.GeoJSON({
 		projection : ol.proj.get('EPSG:3857'),
 		url : '/geojson/network.php?network='+network
@@ -140,10 +165,7 @@ $().ready(function() {
 					text : "["+ feat.get('sid') +"] "+ feat.get('sname') 
 				}));
 			});
-			$("#stations_in").append($("#stations_in option").remove().sort(function(a, b) {
-				var at = $(a).text(), bt = $(b).text();
-				return (at > bt)?1:((at < bt)?-1:0);
-			}));
+			sortListing("id");
 			$('#stations_in').filterByText($('#stationfilter'), true);
 			map.getView().fitExtent(geojsonSource.getExtent(), map.getSize());
 		}
