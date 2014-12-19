@@ -14,7 +14,7 @@ def get_description():
     d['description'] = """Count of SVR+TOR Warnings by Year."""
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
-             default='DMX', label='Select WFO:')
+             default='DMX', label='Select WFO:', all=True)
     ]
     return d
 
@@ -27,22 +27,38 @@ def plotter( fdict ):
     station = fdict.get('station', 'DMX')
 
     nt = NetworkTable('WFO')
+    nt.sts['_ALL'] = {'name': 'All Offices'}
     
-    cursor.execute("""
-        with counts as (
-            select extract(year from issue) as yr, 
-            extract(doy from issue) as doy, count(*) from sbw
-            where status = 'NEW' and phenomena in ('SV', 'TO') 
-            and significance = 'W' and wfo = %s and issue > '2002-01-01'
-            GROUP by yr, doy)  
-            
-        SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC) 
-        from counts ORDER by yr ASC, doy ASC
-
-      """, (station,))
+    if station == '_ALL':
+        cursor.execute("""
+            with counts as (
+                select extract(year from issue) as yr, 
+                extract(doy from issue) as doy, count(*) from sbw
+                where status = 'NEW' and phenomena in ('SV', 'TO') 
+                and significance = 'W' and issue > '2003-01-01'
+                GROUP by yr, doy)  
+                
+            SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC) 
+            from counts ORDER by yr ASC, doy ASC
+    
+          """)
+        
+    else:
+        cursor.execute("""
+            with counts as (
+                select extract(year from issue) as yr, 
+                extract(doy from issue) as doy, count(*) from sbw
+                where status = 'NEW' and phenomena in ('SV', 'TO') 
+                and significance = 'W' and wfo = %s and issue > '2003-01-01'
+                GROUP by yr, doy)  
+                
+            SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC) 
+            from counts ORDER by yr ASC, doy ASC
+    
+          """, (station,))
 
     data = {}
-    for yr in range(2002, datetime.datetime.now().year + 1):
+    for yr in range(2003, datetime.datetime.now().year + 1):
         data[yr] = {'doy': [], 'counts': []}
     for row in cursor:
         data[row[0]]['doy'].append(row[1])
@@ -50,7 +66,7 @@ def plotter( fdict ):
         
     (fig, ax) = plt.subplots(1, 1)
     ann = []
-    for yr in range(2002, datetime.datetime.now().year + 1):
+    for yr in range(2003, datetime.datetime.now().year + 1):
         if len(data[yr]['doy']) < 2:
             continue
         l = ax.plot(data[yr]['doy'], data[yr]['counts'], lw=2, label=str(yr))
@@ -78,7 +94,7 @@ def plotter( fdict ):
         
             s = np.s_[x0:x1+1, y0:y1+1]
             if np.any(mask[s]):
-                a.set_position([a._x+27, a._y])
+                a.set_position([a._x-27, a._y])
             else:
                 mask[s] = True
                 removals.append(a)
