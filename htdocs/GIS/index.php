@@ -22,6 +22,9 @@ serving them out with Mapserver.</li>
  <li><a href="/present/">IEM Presentation Archive</a>
 <br />The IEM has given a number of GIS related talks.  You can browse an
 archive of presentations.</li>
+ <li><a href="rasters.php">IEM RASTERs Lookup Tables</a>
+<br />Metadata on how you can convert IEM produced RASTERs into actual
+		values!</li>
 </ul>
 
 
