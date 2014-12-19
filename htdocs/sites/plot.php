@@ -63,8 +63,8 @@ EOF;
 }
 if ($prod == 1){
 	$uri = sprintf("/plotting/auto/plot/17/month:%s"
-			."__year:%s::station:%s::network:%s::dpi:100.png", $month, $year,
- 			$station, $network);
+		."::year:%s::station:%s::network:%s::dpi:100.png", $month, 
+		$year, $station, $network);
 } else {
 	$uri = sprintf("%s?month=%s&year=%s&network=%s&station=%s", $products[$prod], 
 		$month, $year, $network, $station);
