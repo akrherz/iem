@@ -95,8 +95,13 @@ if (isset($_GET["q"])){
 						"WICLIMATE" => "Wisconsin"
 				);
 			}
-			$netselect = make_select("network", $network, $networks, "onNetworkChange");
+			$netselect = networkSelect($network, $value, Array(), "zstation");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
+			$pltvars[] = sprintf("%s:%s", "network", $network);
+		}
+		elseif ($v->type == "networkselect"){
+			$netselect = networkSelect($v->network, $value, Array(), "station");
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect  ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
 		elseif ($v->type == "clstate"){
