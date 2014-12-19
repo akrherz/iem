@@ -31,20 +31,15 @@ def get_time(form):
     ets = ets.replace(tzinfo=pytz.timezone("UTC"))
     return sts, ets
 
-def threshold_search(table, threshold, delimiter):
+def threshold_search(table, threshold, thresholdvar, delimiter):
     """ Do the threshold searching magic """
     cols = list(table.columns.values)
-    cols4 = [c[:5] for c in cols]
-    searchfor = ['HGIRG', 'HGIRP', 'HGIRZ', 'HGIRR']
-    mycol = None
-    for s in searchfor:
-        if s in cols4:
-            idx = cols4.index(s)
-            mycol = cols[idx]
-            break
-    if mycol is None:
-        error("Could not find HG column for this site!")
+    searchfor = "HGI%s" % (thresholdvar.upper(),)
+    cols5 = [s[:5] for s in cols]
+    if not searchfor in cols5:
+        error("Could not find %s variable for this site!" % (searchfor,))
         return
+    mycol = cols[cols5.index(searchfor)]
     above = False
     maxrunning = -99
     maxvalid = None
@@ -55,7 +50,7 @@ def threshold_search(table, threshold, delimiter):
         if val > threshold and not above:
             found = True
             res.append(dict(station=station, utc_valid=valid, event='START',
-                            value=val))
+                            value=val, varname=mycol))
             above = True
         if val > threshold and above:
             if val > maxrunning:
@@ -63,9 +58,9 @@ def threshold_search(table, threshold, delimiter):
                 maxvalid = valid
         if val < threshold and above:
             res.append(dict(station=station, utc_valid=maxvalid, event='MAX',
-                            value=maxrunning))
+                            value=maxrunning, varname=mycol))
             res.append(dict(station=station, utc_valid=valid, event='END',
-                            value=val))
+                            value=val, varname=mycol))
             above = False
             maxrunning = -99
             maxvalid = None
@@ -88,6 +83,7 @@ def main():
     delimiter = DELIMITERS.get(form.getfirst('delim', 'comma'))
     what = form.getfirst('what', 'dl')
     threshold = float(form.getfirst('threshold', -99))
+    thresholdvar = form.getfirst('threshold-var', 'RG')
     sts, ets = get_time(form)
     stations = form.getlist('stations')
     if len(stations) == 1:
@@ -107,7 +103,7 @@ def main():
         if 'XXXXXXX' not in stations:
             error('Can not do threshold search for more than one station')
             return
-        table = threshold_search(table, threshold, delimiter)
+        table = threshold_search(table, threshold, thresholdvar, delimiter)
     
     if what == 'txt':
         sys.stdout.write('Content-type: application/octet-stream\n')
