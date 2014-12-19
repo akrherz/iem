@@ -34,11 +34,12 @@ def get_time(form):
 def threshold_search(table, threshold, delimiter):
     """ Do the threshold searching magic """
     cols = list(table.columns.values)
-    searchfor = ['HGIRGZ', 'HGIRPZ', 'HGIRZZ']
+    cols4 = [c[:5] for c in cols]
+    searchfor = ['HGIRG', 'HGIRP', 'HGIRZ', 'HGIRR']
     mycol = None
-    for s in searchfor:
-        if s in cols:
-            mycol = s
+    for i, s in enumerate(searchfor):
+        if s in cols4:
+            mycol = cols[i]
             break
     if mycol is None:
         error("Could not find HG column for this site!")
