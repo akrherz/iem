@@ -80,10 +80,10 @@ def plotter( fdict ):
     
     mask = np.zeros(fig.canvas.get_width_height(), bool)
     fig.canvas.draw()
-    offsets = range(0,27*5, 27)
 
-    while len(ann) > 0 and len(offsets) > 0:
-        _ = offsets.pop()
+    attempts = 10
+    while len(ann) > 0 and attempts > 0:
+        attempts -= 1
         removals = []
         for a in ann:
             bbox = a.get_window_extent()
