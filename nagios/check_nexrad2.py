@@ -23,10 +23,10 @@ if __name__ == '__main__':
     badcount = check()
     msg = '%s/%s outage %s' % (len(badcount), len(SAMPLES),
                                         ','.join(badcount))
-    if len(badcount) < 2:
+    if len(badcount) < 3:
         print 'OK - %s' % (msg,)
         sys.exit(0)
-    elif len(badcount) < 3:
+    elif len(badcount) < 4:
         print 'WARNING - %s' % (msg,)
         sys.exit(1)
     else:
