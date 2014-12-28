@@ -59,7 +59,7 @@ if ($rid > 0){
 	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 		$table2 .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>"
 				."<td>%s</td><td>%s</td><td>%s</td></tr>\n", $row["coloridx"], 
-				$row["value"],
+				($row["value"] == null) ? 'Missing': $row["value"],
 				$row["r"], $row["g"], $row["b"], 
 				rgb2html($row["r"], $row["g"], $row["b"]));
 	
@@ -92,7 +92,7 @@ table below.</p>
 
 <div class="alert alert-info">Would it help you to have the information below
 in a different format?  Please <a class="alert-link" 
-href="/info/contacts.php"><i class="glyphicon glyphicon-earphone"></i> contact us</a> 
+href="/info/contacts.php">contact us <i class="glyphicon glyphicon-comment"></i></a> 
 if so!</div>
 
 <table class="table table-condensed table-striped">
