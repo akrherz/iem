@@ -33,16 +33,29 @@ for entry in feed:
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]
     #print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
-    if (worksheet.get_cell_value(1, 1) != 'plotid' or
-        worksheet.get_cell_value(1, 2) != 'depth'):
+    if worksheet.get_cell_value(1, 1) != 'plotid':
         print 'FATAL site: %s soil nitrate has corrupt headers' % (siteid,)
         continue
+    startcol = 3
+    if worksheet.get_cell_value(1,2) == 'depth':
+        depthcol = 2
+    elif worksheet.get_cell_value(1,3) == 'depth':
+        depthcol = 3
+        startcol = 4
+    if worksheet.get_cell_value(1,2) == 'location':
+        locationcol = 2
+    else:
+        locationcol = None
+
     for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
-        depth = worksheet.get_cell_value(row, 2)
+        depth = worksheet.get_cell_value(row, depthcol)
         if plotid is None or depth is None:
             continue
-        for col in range(3, worksheet.cols+1):
+        subsample = "1"
+        if locationcol is not None:
+            subsample = worksheet.get_cell_value(row, locationcol)
+        for col in range(startcol, worksheet.cols+1):
             varname = worksheet.get_cell_value(1, col).strip().split()[0]
             if varname[:4] != 'SOIL':
                 print 'Invalid varname: %s site: %s year: %s' % (
@@ -50,7 +63,6 @@ for entry in feed:
                                     siteid, YEAR)
                 continue
             val = worksheet.get_cell_value(row, col)
-            subsample = "1"
             try:
                 pcursor.execute("""
                     INSERT into soil_data(site, plotid, varname, year, 
