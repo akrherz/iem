@@ -1,10 +1,11 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 83);
  include("../../include/myview.php");
  $t = new MyView();
  $t->current_network = 'RWIS';
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
+ $network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
  $t->title = "RWIS Sortable Currents";
  $t->refresh = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol&network=$network\">";
  $t->headextra = <<<EOF
@@ -18,10 +19,10 @@ function new_window(url) {
 EOF;
  $t->thispage= "current-sort";
 include("../../include/mlib.php"); 
-  include("../../include/iemaccess.php");
-  include("../../include/iemaccessob.php");
-  include_once "../../include/database.inc.php";
-  $mesosite = iemdb('mesosite');
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
+include_once "../../include/database.inc.php";
+$mesosite = iemdb('mesosite');
   
 $iem = new IEMAccess();
 $rwis = $iem->getNetwork($network);
@@ -131,10 +132,7 @@ while (list ($key, $val) = each ($finalA))  {
 
 	$i++;
 
-	$table .= "<tr";
-	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
-
-	$table .= ">";
+	$table .= "<tr>";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
 	$table .= "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["sname"] . "</a></td><td ";
@@ -174,32 +172,30 @@ while (list ($key, $val) = each ($finalA))  {
 
 while (list ($key, $val) = each ($skippedStations) ) {
 	$parts = $finalA[$key];
-	$i++;
 
-	$table .= "<tr";
-	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
-
-	$table .= ">";
+	$table .= "<tr>";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
 	$table .= "<td>". $parts["sname"] . "</td><td ";
 	$table .= 'bgcolor="red"';
-	$format = "%b-%d-%y";
+	$format = "%b-%d-%Y";
 	$table .= ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
 $c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=".$network."&var=";
 
 $content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/RWIS/">RWIS Network</a></li>
+ <li class="active">Sortable Currents (sorted by: <b>{$vals[$sortcol]}</b>)</li>
+</ol>
 <form method="GET" action="current.phtml">
 {$nselect}
 <input type="submit" value="Show State">
 </form>
 
-Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on a column to sort it.<br>
-
 <form method="GET" action="/my/current.phtml">
-<table style="width: 100%; font-size: 10pt;" border="0" cellpadding="1" cellspacing="0">
+<table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
