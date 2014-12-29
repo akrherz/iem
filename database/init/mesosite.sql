@@ -136,7 +136,9 @@ GRANT all on iembot_room_subscriptions to nobody,apache;
 --- IEMBot room subscriptions
 ---
 CREATE TABLE iembot_rooms (
-    roomname varchar(64)
+    roomname varchar(64),
+    fbpage varchar,
+    twitter varchar
 );
 GRANT all on iembot_rooms to nobody,apache;
 
