@@ -7,13 +7,17 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
-import calendar
-import matplotlib.patheffects as PathEffects
 from pyiem.network import Table as NetworkTable
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['description'] = """This plot compares the month to date average 
+    temperature of this month against any previous month of your choice.
+    The plot then contains this month's to date average temperature along 
+    with the scenarios of the remaining days for this month from each of
+    the past years.  These scenarios provide a good approximation of what is
+    possible for the remainder of the month."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200', 
              label='Select Station:'),
@@ -74,14 +78,21 @@ def plotter( fdict ):
     (fig, ax) = plt.subplots(1,1)
     
     beats = 0
-    for yr in range(np.shape(data)[0]):
-        ax.plot(np.arange(1,days+1), avgs[yr, :], color='tan', zorder=1)
+    for yr in range(np.shape(data)[0]-1):
         if avgs[yr,-1] > prevavg[-1]:
             beats += 1
-    ax.plot(np.arange(1,len(prevavg)+1), prevavg, lw=2, color='k', zorder=2,
-            label="%s" % (oldmonth.strftime("%b %Y")))
+        ax.plot(np.arange(1,days+1), avgs[yr, :], zorder=1, color='tan')
     
-    ax.set_title("[%s] %s scenarios for %s\n1-%s [%s] + %s-%s [%s-%s] beats %s %s/%s (%.1f%%)" % (
+    # this looks like a bug, but is legit
+    ax.plot(np.arange(1,thismonth.day), avgs[-2, :thismonth.day-1], zorder=2, lw=2, color='brown',
+            label="%s, %.2f$^\circ$F" % (thismonth.strftime("%b %Y"), 
+                                avgs[-2, thismonth.day-1]))
+    ax.plot(np.arange(1,len(prevavg)+1), prevavg, lw=2, color='k', zorder=3,
+            label="%s, %.2f$^\circ$F" % (oldmonth.strftime("%b %Y"),
+                                prevavg[-1]))
+    
+    ax.set_title(("[%s] %s scenarios for %s\n"
+                  +"1-%s [%s] + %s-%s [%s-%s] beats %s %s/%s (%.1f%%)") % (
                         station,
                         nt.sts[station]['name'], thismonth.strftime("%b %Y"),
                         thismonth.day, thismonth.year,
@@ -92,6 +103,6 @@ def plotter( fdict ):
     ax.set_ylabel("Month to Date Average Temp $^\circ$F")
     ax.set_xlabel("Day of Month")
     ax.grid(True)
-    ax.legend(loc='best')
+    ax.legend(loc='best', fontsize=10)
 
     return fig
