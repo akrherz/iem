@@ -47,6 +47,7 @@ data = {'plots': [
         {'id': "13", 'label': "End Date of Summer (warmest 91 day period) per Year"},
         {'id': "27", 'label': "First Fall Freeze then Killing Frost"},
         {'id': "33", 'label': "Maximum Low Temperature Drop"},
+        {'id': "46", 'label': "Minimum Wind Chill Temperature"},
         {'id': "30", 'label': "Monthly Temperature Range"},
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "10", 'label': "Last Spring and First Fall Date above/below given threshold"},
