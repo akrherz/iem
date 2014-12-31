@@ -46,7 +46,8 @@ pcursor.execute("""
   select s.id, c.ugc, s.iemid from stations s, ugcs c WHERE 
   ST_Contains(c.geom, s.geom) and s.geom && c.geom 
   and s.ugc_zone IS NULL and s.state = substr(c.ugc,1,2) 
-  and s.country = 'US' and substr(c.ugc,3,1) = 'Z' LIMIT 1000
+  and s.country = 'US' and substr(c.ugc,3,1) = 'Z' and
+  c.end_ts is null LIMIT 1000
 """)
 
 for row in pcursor:
