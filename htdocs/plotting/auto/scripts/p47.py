@@ -76,5 +76,5 @@ def plotter( fdict ):
             va='center', ha='right', color='white', bbox=dict(color='black'))
     ax.set_ylabel("Snowfall Total [inch]")
     ax.set_xlabel("Precipitation Total (liquid + melted) [inch]")
-    ax.legend(loc=2, numpoints=1)
+    ax.legend(loc=2, scatterpoints=1)
     return fig
