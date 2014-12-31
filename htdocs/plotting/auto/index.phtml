@@ -95,7 +95,7 @@ if (isset($_GET["q"])){
 						"WICLIMATE" => "Wisconsin"
 				);
 			}
-			$netselect = networkSelect($network, $value, Array(), "zstation");
+			$netselect = make_select("network", $network, $networks, "onNetworkChange");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
