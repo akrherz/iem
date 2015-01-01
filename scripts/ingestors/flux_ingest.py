@@ -154,8 +154,9 @@ for fn in fp.keys():
 cnt = 0
 for station in data.keys():
     for ts in data[station].keys():
+        gts = ts.gmtime()
         try:
-            other.insert("flux%s" % (ts.year,) , data[station][ts])
+            other.insert("flux%s" % (gts.year,) , data[station][ts])
             cnt += 1
         except:
             print station, ts, data[station][ts].keys()
