@@ -42,7 +42,14 @@ def run(valid):
                               
         for pr in offsets:
             req.headers['Range'] = 'bytes=%s-%s' % (pr[0], pr[1])
-            f = urllib2.urlopen(req)
+            f = None
+            attempt = 0
+            while f is None and attempt < 10:
+                try:
+                    f = urllib2.urlopen(req)
+                except Exception, exp:
+                    print("dl_hrrrref FAIL %s %s %s" % (valid, hr, exp))
+                attempt += 1
             output.write( f.read() )
 
     output.close()
