@@ -4,42 +4,83 @@
   * $Id: $:
   */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 
 $station = isset($_REQUEST["station"]) ? substr($_REQUEST["station"],0,10) : "";
 $sname = isset($_REQUEST["sname"]) ? $_REQUEST["sname"] : "";
 $state = isset($_REQUEST["state"]) ? $_REQUEST["state"] : "";
 $country = isset($_REQUEST["country"]) ? $_REQUEST["country"] : "";
 $elevation = isset($_REQUEST["elevation"]) ? $_REQUEST["elevation"] : "";
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "";
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "";
 $online = isset($_REQUEST["online"]) ? $_REQUEST["online"] : "";
 $metasite = isset($_REQUEST["metasite"]) ? $_REQUEST["metasite"] : "";
 $latitude = isset($_REQUEST["latitude"]) ? $_REQUEST["latitude"] : "";
 $longitude = isset($_REQUEST["longitude"]) ? $_REQUEST["longitude"] : "";
 
-$pg_conn = iemdb("mesosite", TRUE, TRUE);
+$pgconn = iemdb("mesosite", TRUE, TRUE);
+
+$msg = "";
+
+function DMStoDD($val){
+	// Convert a degrees minutes seconds value into decimal degrees
+	preg_match_all('!\d+\.*\d*!', $val ,$match);
+	list($d,$m,$s) = $match[0];
+	$num = floatval($d) + ((floatval($s) / 60.) + floatval($m)) / 60.;
+	if (substr($val,0,1) == 'S' || substr($val,0,1) == 'W'){
+		$num = 0 - $num;
+	}
+	return $num;
+}
 
 /* Input station Details */
 if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
 {
-   $sql = sprintf("INSERT into stations (id, network) values ('%s','%s')", $station, $network);
-   pg_exec($pg_conn, $sql);
+	if (strpos($latitude, "'") !== FALSE){
+		$latitude = DMStoDD($latitude);
+		$longitude = DMStoDD($longitude);
+	}
+	
+	$msg = "<h4>Adding station $station to network: $network </h4>";
+	// See if this station exists
+	$msg .= "<h3>Current Entries with ID: $station</h3>";
+	$msg .= "<table><tr><th>IEMID</th><th>Network</th><th>Name</th></tr>";
+	$rs = pg_exec($pgconn, 
+			sprintf("SELECT iemid, network, name from stations WHERE id = '%s'",
+					$station));
+	$found = False;
+	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		if ($row["network"] == $network) $found = True;
+		$msg .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",
+				$row["iemid"], $row["network"], $row["name"]);
+	}
+	$msg .= "</table>";
+	
+	if (!$found){
+		$msg .= "<h3>Creating new database entry for this station...</h3>";
+   		$sql = sprintf("INSERT into stations (id, network) values ('%s','%s')", 
+   				$station, $network);
+   		pg_exec($pgconn, $sql);
+	}
 
-   $sql = sprintf("UPDATE stations SET synop = 9999, country = '%s', plot_name = '%s', 
-   name = '%s', state = '%s', elevation = '%s', online = '%s', metasite = '%s',
-   		tzname = null,
-   geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, 
-   $state, $elevation, $online, $metasite, $longitude, $latitude,  $station, $network);
-   pg_exec($pg_conn, $sql);
-   
-   echo "<h2>Updated Station Table for $station $network !</h2>";
+	$msg .= "<h3>Setting initial values for this site in database</h3>";
+   	$sql = sprintf("UPDATE stations SET synop = null, country = '%s', 
+   		plot_name = '%s', name = '%s', state = '%s', elevation = '%s', 
+   		online = '%s', metasite = '%s', tzname = null, ncdc81 = null,
+   		climate_site = null, county = null, ugc_county = null, ugc_zone = null,
+   		geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", 
+   		$country, $sname, $sname, $state, $elevation, $online, $metasite, 
+   		$longitude, $latitude,  $station, $network);
+   $rs = pg_exec($pgconn, $sql);
+   if (pg_numrows($rs) != 1){
+   		$msg .= "<h3>DATABASE FAILURE!";
+   }
 }
 
 /* Search for station */
 $sql = sprintf("SELECT *, ST_y(geom) as y, ST_x(geom) as x from stations 
 		WHERE id = '%s' and network = '%s'", 
 		$station, $network);
-$rs = pg_exec($pg_conn, $sql);
+$rs = pg_exec($pgconn, $sql);
 if (pg_numrows($rs) == 1){
   	$row = pg_fetch_assoc($rs,0);
   	$elevation = $row['elevation'];
@@ -53,7 +94,11 @@ if (pg_numrows($rs) == 1){
 }
 
 ?>
-
+<html>
+<head>
+<title>Add Station to IEM Mesosite</title>
+</head>
+<body>
 <h3>Add/Edit a Site to the mesosite database</h3>
 
 <p><a href="/admin/">Back to admin</a>
@@ -82,3 +127,4 @@ and network:<input type="text" name="network"><input type="submit" value="go">
 <input type="submit" />
 
 </form>
+</body></html>
