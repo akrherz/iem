@@ -107,6 +107,11 @@ if (pg_numrows($rs) == 1){
 <p>Find SiteID:<input type="text" name="station">
 and network:<input type="text" name="network"><input type="submit" value="go">
 </form>
+<?php 
+if ($msg != ""){
+	echo $msg;
+}
+?>
 
 <form method="POST" name="editor">
 
