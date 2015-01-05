@@ -1,0 +1,7 @@
+AddHandler cgi-script .py
+Options +ExecCGI
+
+RewriteEngine On
+RewriteRule iadot_trucks.txt iadot_trucks.py
+# Legacy link was removed 5 Jan 2015
+RewriteRule idot_trucks.php iadot_trucks.py
