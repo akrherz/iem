@@ -74,7 +74,7 @@ if ($radar){
 $imgurl .= "&title=IEM%20Freeze&";
 
  if ($refresh > 0){
-  $t->headextra = "<meta http-equiv=\"refresh\" content=\"". $refresh ."; URL=". $uri ."?refresh=". $refresh ."&extents=". $extents ."&state=". $state ."\">\n";
+  $t->headextra = "<meta http-equiv=\"refresh\" content=\"". $refresh ."; URL=". $uri ."?imgsize=$imgsize&refresh=". $refresh ."&extents=". $extents ."&state=". $state ."\">\n";
  }
  $t->title = "IEM Freeze";
  $t->jsextra = <<<EOF
