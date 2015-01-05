@@ -71,7 +71,7 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
    		$country, $sname, $sname, $state, $elevation, $online, $metasite, 
    		$longitude, $latitude,  $station, $network);
    $rs = pg_exec($pgconn, $sql);
-   if (pg_numrows($rs) != 1){
+   if (pg_affected_rows($rs) != 1){
    		$msg .= "<h3>DATABASE FAILURE!";
    }
 }
@@ -107,11 +107,6 @@ if (pg_numrows($rs) == 1){
 <p>Find SiteID:<input type="text" name="station">
 and network:<input type="text" name="network"><input type="submit" value="go">
 </form>
-<?php 
-if ($msg != ""){
-	echo $msg;
-}
-?>
 
 <form method="POST" name="editor">
 
@@ -132,4 +127,10 @@ if ($msg != ""){
 <input type="submit" />
 
 </form>
+
+<hr />
+
+<?php echo $msg; ?>
+
+
 </body></html>
