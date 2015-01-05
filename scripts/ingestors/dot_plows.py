@@ -28,7 +28,7 @@ def workflow():
         current[ row[0] ] = row[1]
     
     valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),microsecond=0)
+    valid = valid.replace(tzinfo=pytz.timezone("UTC"),microsecond=0)
     
     try:
         data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
