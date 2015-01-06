@@ -264,6 +264,7 @@ def doit(opener, station, now):
                     if abs(diff) > 25:
                         oldval = ob.mslp
                         ob.mslp = "%.1f" % (pres.value("MB"),)
+                        ob.alti = float(tokens[headers['Sea Level PressureIn']])
                         print 'SETTING PRESSURE %s old: %s new: %s' % (
                                 ob.valid.strftime("%Y/%m/%d %H%M"),
                                 oldval, ob.mslp)
