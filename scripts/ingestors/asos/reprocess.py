@@ -17,6 +17,7 @@ import sys
 import os
 import subprocess
 import pytz
+from pyiem.datatypes import pressure
 from optparse import OptionParser
 from metar import Metar
 import psycopg2
@@ -252,7 +253,23 @@ def doit(opener, station, now):
             ob = process_metar(mstr, now)
             if ob is None:
                 continue
-
+            
+            # Account for SLP505 actually being 1050.5 and not 950.5 :(
+            if headers.has_key('Sea Level PressureIn'):
+                try:
+                    pres = pressure(
+                            float(tokens[headers['Sea Level PressureIn']]),
+                            "IN")
+                    diff = pres.value("MB") - ob.mslp
+                    if abs(diff) > 25:
+                        oldval = ob.mslp
+                        ob.mslp = "%.1f" % (pres.value("MB"),)
+                        print 'SETTING PRESSURE %s old: %s new: %s' % (
+                                ob.valid.strftime("%Y/%m/%d %H%M"),
+                                oldval, ob.mslp)
+                except:
+                    pass
+                
             sql = """INSERT into t"""+ `ob.valid.year` +""" (station, valid, 
             tmpf, dwpf, vsby, drct, sknt, gust, p01i, alti, skyc1, skyc2, 
             skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar, mslp, presentwx,
