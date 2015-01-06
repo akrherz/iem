@@ -19,7 +19,8 @@ import subprocess
 import pytz
 from pyiem.datatypes import pressure
 from optparse import OptionParser
-from metar import Metar
+from metar.metar import Metar
+from metar.metar import ParserError as MetarParserError
 import psycopg2
 ASOS = psycopg2.connect(database='asos', host='iemdb')
 acursor = ASOS.cursor()
@@ -298,13 +299,14 @@ def process_metar(mstr, now):
     mtr = None
     while mtr is None:
         try:
-            mtr = Metar.Metar(mstr, now.month, now.year)
-        except Metar.ParserError, exp:
+            mtr = Metar(mstr, now.month, now.year, allexceptions=True)
+        except MetarParserError, exp:
             msg = str(exp)
-            if msg.startswith("Unparsed groups in body:"):
-                badpart = msg.strip().split()[4]
-                mstr = mstr.replace(badpart, "")
+            if msg.startswith("Unparsed groups:"):
+                badpart = msg.strip().split()[2]
+                mstr = mstr.replace(badpart.replace("'", ''), "")
             else:
+                print("MetarParserError:"+msg)
                 return None
         except Exception,exp:
             print("Double Fail: %s %s" % (mstr, exp))
