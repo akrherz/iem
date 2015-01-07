@@ -3,8 +3,8 @@
 include_once "../../../config/settings.inc.php";
 include_once "../../../include/myview.php";
 include_once "../../../include/forms.php";
+include_once "../../../include/vtec.php";
 include_once "../../../include/imagemaps.php";
-include_once "../../../include/forms.php";
 include_once "../../../include/database.inc.php";
 $mesosite = iemdb("mesosite");
 $formhtml = "";
@@ -19,6 +19,7 @@ EOF;
 
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
+$state = isset($_GET["state"]) ? $_GET["state"]: "IA";
 
 // Available Plots
 $data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
@@ -78,6 +79,11 @@ if (isset($_GET["q"])){
 				networkSelect($network, $value, Array(), "zstation") ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
+		elseif ($v->type == "ugc"){
+			$stateselect = stateSelect($state, "onNetworkChange");
+			$form .= "<tr><td>". $v->label ."</td><td>". $stateselect ." ". ugcStateSelect($state, $value) ."</td></tr>";
+			$pltvars[] = sprintf("%s:%s", "state", $state);
+		}
 		elseif ($v->type == "station"){
 			if (sizeof($networks) == 0){
 				$networks = Array("ILCLIMATE" => "Illinois",
@@ -107,6 +113,14 @@ if (isset($_GET["q"])){
 			$netselect = networkSelect($v->network, $value, $extra, "station");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect  ."</td></tr>";
 			$pltvars[] = sprintf("%s:%s", "network", $network);
+		}
+		elseif ($v->type == "phenomena"){
+			$netselect = vtecPhenoSelect($value);
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+		}
+		elseif ($v->type == "significance"){
+			$netselect = vtecSigSelect($value);
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
 		}
 		elseif ($v->type == "clstate"){
 			$netselect = make_select($v->name, $value, $states);

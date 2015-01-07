@@ -1,5 +1,25 @@
 <?php
 
+function ugcStateSelect($state, $selected)
+{
+    global $rootpath;
+    $state = substr(strtoupper($state),0,2);
+    include_once("$rootpath/include/database.inc.php");
+    $dbconn = iemdb('postgis');
+    $rs = pg_exec($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
+          ." and substr(ugc,1,2) = '$state' ORDER by name ASC");
+    $s = "<select name=\"ugc\">\n";
+    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+    {
+       $z = (substr($row["ugc"],2,1) == "Z") ? "Zone": "County";
+       $s .= "<option value=\"". $row["ugc"] ."\" ";
+       if ($row["ugc"] == $selected){ $s .= "SELECTED"; }
+       $s .= ">[".$row["ugc"]."] ". $row["name"] ." ($z)</option>\n";
+    }
+    return $s;
+}
+
+
 function selectAzosNetwork($network)
 {   
     global $rootpath;
