@@ -68,5 +68,6 @@ data = {'plots': [
     {'label': 'Sustainable Corn Project Plots', 'options': [
         {'id': "49", 'label': "Two Day Precipitation Total Frequencies"},
         {'id': "50", 'label': "Frequency of Measurable Daily Precipitation"},
+        {'id': "51", 'label': "Frequency of No Daily Precipitation over 7 Days"},
     ]},
 ]}
