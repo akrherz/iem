@@ -61,4 +61,8 @@ data = {'plots': [
         {'id': "37", 'label': "MOS Forecasted Temperature Ranges + Observations"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
+    {'label': 'NWS Warning Plots', 'options': [
+        {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
+        {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
+    ]},
 ]}
