@@ -24,7 +24,8 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['cache'] = 86400
-    d['description'] = """ """
+    d['description'] = """Number of days per year that the two day precipitation
+    total is over some threshold."""
     d['arguments'] = [
         dict(type='networkselect', name='station', network='CSCAP',
              default='ISUAG', label='Select CSCAP Site:'),

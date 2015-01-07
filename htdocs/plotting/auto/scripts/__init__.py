@@ -65,4 +65,8 @@ data = {'plots': [
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
     ]},
+    {'label': 'Sustainable Corn Project Plots', 'options': [
+        {'id': "49", 'label': "Two Day Precipitation Total Frequencies"},
+        {'id': "50", 'label': "Frequency of Measurable Daily Precipitation"},
+    ]},
 ]}

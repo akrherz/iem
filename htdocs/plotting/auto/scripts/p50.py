@@ -24,7 +24,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['cache'] = 86400
-    d['description'] = """ """
+    d['description'] = """Days per year with measurable precipitation. """
     d['arguments'] = [
         dict(type='networkselect', name='station', network='CSCAP',
              default='ISUAG', label='Select CSCAP Site:'),
@@ -62,7 +62,7 @@ def plotter( fdict ):
     ax.bar(years, precip, ec='b', fc='b')
     ax.grid(True)
     ax.set_ylabel("Days Per Year")
-    ax.set_title("%s %s\n%s %s :: Days per Year with Measureable Precip" % (
+    ax.set_title("%s %s\n%s %s :: Days per Year with Measurable Precip" % (
             station, nt.sts[station]['name'], model,
                                    scenario))
     return fig
