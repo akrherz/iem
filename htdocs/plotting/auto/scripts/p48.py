@@ -89,7 +89,7 @@ def plotter( fdict ):
     ax.set_xticklabels(["Mid", "", "", "3 AM", "", "", "6 AM", "", "", '9 AM',
                         "", "", "Noon", "", "", "3 PM", "", "", "6 PM",
                         "", "", "9 PM", "", "", "Mid"])
-    ax.set_xlabel("%s (Daylight or Standard)" % (tzname,))
+    ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
     ax.set_ylabel("Frequency [%%] out of %s Events" % (cnt,))
     ax.set_title("[%s] %s :: %s %s (%s.%s)\n%s Events - %s to %s" % (
                                     ugc, name, vtec._phenDict[phenomena],
