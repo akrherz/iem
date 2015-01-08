@@ -12,6 +12,7 @@
  include("../../include/forms.php");
  include("../../include/myview.php");
  include("../../include/iemaccess.php");
+ include_once "../../include/imagemaps.php";
  include("../../include/network.php");
  $t = new MyView();
  $t->title = "NWS COOP Observations by Date by Site";
@@ -37,24 +38,27 @@
 <form name="switchnwsli" action="cat.phtml" method="GET">
 EOF;
 
+ // SCENARIO 1: Print out data for year for station
 if (strlen($station) > 0) {
-  $link = "cat.phtml?year=$year&station=$station&network=$network&sortvar=";
-  if ($sortvar == "") $sortvar = "day";
- $content .= <<<EOF
+  	$link = "cat.phtml?year=$year&station=$station&network=$network&sortvar=";
+  	if ($sortvar == "") $sortvar = "day";
+ 	$stationselect = networkSelect($network, $station);
+ 	$content .= <<<EOF
  <h3>COOP obs listed by station</h3>
  (<i>Click on a date to get all obs for a particular date.</i>)
  
- <p>Enter NWSLI:<input type="text" size="6" maxlength="5" name="station" value="{$station}">
+ <p>{$stationselect}
  Select Year: 
 EOF;
-  $content .= yearSelect(2004, $year, "year"); 
+  	$content .= yearSelect(2004, $year, "year"); 
 } 
- 
+
+// SCENARIO 2: Print out all stations for network and date
 if (strlen($date) > 0) { 
-  $year = substr($date,0,4);
-  $link = "cat.phtml?date=$date&network=$network&sortvar=";
-  if ($sortvar == "") $sortvar = "station";
-$content .= <<<EOF
+  	$year = substr($date,0,4);
+  	$link = "cat.phtml?date=$date&network=$network&sortvar=";
+  	if ($sortvar == "") $sortvar = "station";
+	$content .= <<<EOF
 <h3>COOP obs listed by date</h3>
 (<i>Click on the NWSLI to view all obs from one station.</i>)
  
