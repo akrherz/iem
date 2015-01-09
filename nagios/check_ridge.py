@@ -5,7 +5,7 @@ import os
 import sys
 import stat
 import datetime
-SAMPLES = ['DVN', 'FWD', 'AFC', 'DTX', 'HTX', 'LOT', 'TLX']
+SAMPLES = ['DVN', 'GRK', 'ABC', 'DTX', 'HTX', 'LOT', 'TLX']
 
 def check():
     now = datetime.datetime.now()
