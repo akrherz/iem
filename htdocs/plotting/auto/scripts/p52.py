@@ -13,8 +13,10 @@ from pyiem.nws import vtec
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
-    d['cache'] = 86400
-    d['description'] = """Count of SVR+TOR Warnings by Year."""
+    d['cache'] = 600
+    d['description'] = """Gaant chat of watch, warning, and advisories issued
+    by an NWS Forecast OFffice for a start date and number of days of your
+    choice."""
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
