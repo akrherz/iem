@@ -62,6 +62,7 @@ data = {'plots': [
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
     {'label': 'NWS Warning Plots', 'options': [
+        {'id': "52", 'label': "Gaant Chart of WFO Issued Watch/Warning/Advisories"},
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
     ]},
