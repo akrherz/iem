@@ -260,14 +260,22 @@ def runner(station, monthts):
     
     tmpfn = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
     out = open( tmpfn , 'w')
-    out.write("""DELETE from t%s_1minute WHERE station = '%s' and 
-               valid >= '%s' and valid <= '%s';\n""" % (
-         monthts.year, station, mints, maxts ))
+    out.write("""DELETE from alldata_1minute WHERE station = '%s' and 
+               valid >= '%s' and valid <= '%s';\n""" % (station, mints, maxts))
     out.write("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (
          monthts.year,))
 
     # Loop over the data we got please
-    for ts in data.keys():
+    keys = data.keys()
+    keys.sort()
+    flipped = False
+    for ts in keys:
+        if ts.year != monthts.year and not flipped:
+            print "  Flipped years from %s to %s" % (monthts.year, ts.year)
+            out.write("\.\n")
+            out.write("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (
+                        ts.year,))
+            flipped = True
         ln = ""
         data[ts]['station'] = station
         for col in ('station', 'ts', 'vis1_coeff', 'vis1_nd', 
