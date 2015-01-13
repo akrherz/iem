@@ -101,14 +101,22 @@ CACHE = {}
 QUERY_CACHE = {}
 
 def docs_query(title):
+    """ Make sure we fetch the exact title from Google """
     if QUERY_CACHE.has_key(title):
         #print 'QUERY_CACHE HIT'
         return QUERY_CACHE[ title ]
     
-    query = gdata.docs.client.DocsQuery(show_collections='true', 
+    query = gdata.docs.client.DocsQuery(show_collections='false', 
                                 title=title)
     # We need to go search for the spreadsheet
     resources = docs_client.GetAllResources(query=query)
+    if len(resources) > 1:
+        delpos = None
+        for i, res in enumerate(resources):
+            if res.title.text.split()[0] != title.split()[0]:
+                delpos = i
+        if delpos is not None:
+            del(resources[delpos])
     QUERY_CACHE[title] = resources
     if len(resources) == 0:
         print 'Could not find spreadsheet |%s|' % (title,)
@@ -135,11 +143,6 @@ def do_row(row):
         querytitle = '%s %s' % (siteid, spreadtitle)
         resources = docs_query(querytitle)   
         if len(resources) == 0:
-            continue
-        if len(resources) == 2:
-            print 'Duplicate spread title: |%s %s|' % (siteid, spreadtitle,)
-            for res in resources:
-                print siteid, res.title.text, res.get_html_link().href
             continue
     
         skey = resources[0].get_id().split("/")[-1][14:]

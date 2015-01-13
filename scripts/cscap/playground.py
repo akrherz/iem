@@ -10,9 +10,11 @@ spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
 query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='NWREC Agronomic Data')
+                                    title='ISUAG Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
 for entry in feed:
+    print entry.title.text
+"""
     feed2 = docs_client.get_revisions(entry)
     for entry2 in feed2.entry:
         print entry2
@@ -20,7 +22,7 @@ for entry in feed:
         feed3 = spr_client.get_list_feed('0AqZGw0coobCxdGtEakU5bm9sWEQ4cE94cmR2UzMybFE', '1', 
                                          etag=entry2.etag[2:])
         print len(str(feed3))
-"""
+
 <ns0:id>https://docs.google.com/feeds/id/spreadsheet%3A0AqZGw0coobCxdDA2RUFKa0FCZzBrbWtRYVA5TVRrYUE</ns0:id>
 <ns1:resourceId>spreadsheet:0AqZGw0coobCxdDA2RUFKa0FCZzBrbWtRYVA5TVRrYUE</ns1:resourceId>
 <ns0:title>DPAC Kladivko Agronomic Data</ns0:title>

@@ -29,9 +29,13 @@ for entry in feed:
         continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
-    worksheet = spreadsheet.worksheets[YEAR]
+    worksheet = spreadsheet.worksheets.get(YEAR)
+    if worksheet is None:
+        print 'Missing Year: %s from %s' % (YEAR, spreadsheet.title)
+        continue
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]
+    newvals = 0
     for col in range(1, worksheet.cols+1):
         val = worksheet.get_cell_value(1, col)
         if val is None:
@@ -49,14 +53,19 @@ for entry in feed:
             try:
                 pcursor.execute("""
                     INSERT into agronomic_data(site, plotid, varname, year, value)
-                    values (%s, %s, %s, %s, %s)
+                    values (%s, %s, %s, %s, %s) RETURNING value
                     """, (siteid, plotid, varname, YEAR, val))
+                if pcursor.rowcount == 1:
+                    newvals += 1
             except Exception, exp:
                 print 'HARVEST_AGRONOMIC TRACEBACK'
                 print exp
                 print '%s %s %s %s %s' % (YEAR, siteid, plotid, repr(varname), 
                                           repr(val))
                 sys.exit()
+    if newvals > 0:
+        print 'harvest_agronomic year: %s site: %s had %s new values' % (YEAR,
+                                            siteid, newvals)
 
 pcursor.close()
 pgconn.commit()
