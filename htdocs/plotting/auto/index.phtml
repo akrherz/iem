@@ -65,8 +65,9 @@ if (isset($_GET["q"])){
 	while (list($k,$v) = each($jobj->arguments)){
 		$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
 		$pltvars[] = sprintf("%s:%s", $v->name, $value);
+		// BEGIN generation of interfaces based on types
 		if ($v->type == "zstation"){
-			$network = isset($_GET["network"]) ? $_GET["network"]: "IA_ASOS";
+			// Build out listing of networks, if we have not already
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks 
 						where id ~* 'ASOS' or id = 'AWOS' ORDER by name ASC");
@@ -74,10 +75,20 @@ if (isset($_GET["q"])){
 					$networks[$row["id"]] = $row["name"];
 				}
 			}
-			$netselect = make_select("network", $network, $networks, "onNetworkChange");
+			// Assume if we have zstation, then we don't have multiple stations
+			if ($v->name == "zstation1"){
+				$networkcgi = "network1";
+			}else if ($v->name == "zstation2"){
+				$networkcgi = "network2";
+			}else {
+				$networkcgi = "network";
+			}
+			$defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
+			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
+			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". 
-				networkSelect($network, $value, Array(), "zstation") ."</td></tr>";
-			$pltvars[] = sprintf("%s:%s", "network", $network);
+				networkSelect($network, $value, Array(), $v->name) ."</td></tr>";
+			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
 		}
 		elseif ($v->type == "ugc"){
 			$stateselect = stateSelect($state, "onNetworkChange");
