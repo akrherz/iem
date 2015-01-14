@@ -16,12 +16,11 @@ $valid = substr($row["valid"],0,16);
 $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
+$map->selectOutputFormat("jpeg");
 if ($v2){
-	$map->selectOutputFormat("png");
 	$map->setSize(1920,1080);
 	$map->setextent(250808, 4511368, 986494, 4925191);
 } else{
-	$map->selectOutputFormat("jpeg");
 	$map->setSize(1280, 720);
 	$map->setextent(287307, 4522933, 989445, 4908033);
 }
@@ -128,11 +127,6 @@ $point = ms_newpointobj();
 $point->setXY(500, 10);
 $point->draw($map, $layer, $img, 0, $valid  );
 
-if ($v2){
-	header("Content-type: image/png");
-	$img->saveImage('');
-} else{
-	header("Content-type: image/jpeg");
-	$img->saveImage('');
-}
+header("Content-type: image/jpeg");
+$img->saveImage('');
 ?>
