@@ -29,7 +29,10 @@ for entry in feed:
         continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
-    worksheet = spreadsheet.worksheets[YEAR]
+    worksheet = spreadsheet.worksheets.get(YEAR)
+    if worksheet is None:
+        print("Missing Year: %s from %s" % (YEAR, spreadsheet.title))
+        continue
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]
     #print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
