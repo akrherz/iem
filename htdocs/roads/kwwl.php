@@ -3,6 +3,7 @@ include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 $con = iemdb("postgis");
 
+$v2 = isset($_GET["v2"]);
 
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);
@@ -15,16 +16,19 @@ $valid = substr($row["valid"],0,16);
 $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
-$map->selectOutputFormat("jpeg");
-
-
-$map->set("width", 1280);
-$map->set("height",720);
-$map->setextent(287307, 4522933, 989445, 4908033);
+if ($v2){
+	$map->selectOutputFormat("png");
+	$map->setSize(1920,1080);
+	$map->setextent(250808, 4511368, 986494, 4925191);
+} else{
+	$map->selectOutputFormat("jpeg");
+	$map->setSize(1280, 720);
+	$map->setextent(287307, 4522933, 989445, 4908033);
+}
 
 $img = $map->prepareImage();
 
-$background = $map->getlayerbyname("kwwlback");
+$background = $map->getlayerbyname($v2 ? "kwwl2015": "kwwlback" );
 $background->set("status", MS_ON);
 $background->draw($img);
 
@@ -124,6 +128,11 @@ $point = ms_newpointobj();
 $point->setXY(500, 10);
 $point->draw($map, $layer, $img, 0, $valid  );
 
-header("Content-type: image/jpeg");
-$img->saveImage('');
+if ($v2){
+	header("Content-type: image/png");
+	$img->saveImage('');
+} else{
+	header("Content-type: image/jpeg");
+	$img->saveImage('');
+}
 ?>
