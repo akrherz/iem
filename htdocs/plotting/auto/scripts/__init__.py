@@ -47,6 +47,7 @@ data = {'plots': [
         {'id': "12", 'label': "Days per year and latest date above given threshold"},
         {'id': "13", 'label': "End Date of Summer (warmest 91 day period) per Year"},
         {'id': "27", 'label': "First Fall Freeze then Killing Frost"},
+        {'id': "53", 'label': "Hourly Frequency of Temperature within Certain Ranges"},
         {'id': "33", 'label': "Maximum Low Temperature Drop"},
         {'id': "46", 'label': "Minimum Wind Chill Temperature"},
         {'id': "30", 'label': "Monthly Temperature Range"},
