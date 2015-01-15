@@ -50,6 +50,8 @@ def run(valid):
                 except Exception, exp:
                     print("dl_hrrrref FAIL %s %s %s" % (valid, hr, exp))
                 attempt += 1
+            if f is None:
+                continue
             output.write( f.read() )
 
     output.close()
