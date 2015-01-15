@@ -36,7 +36,7 @@ def fetch(valid):
                             +"%H/hrrr.t%Hz.3kmf00.grib2"))
     outdir = os.path.dirname(outfn)
     if not os.path.isdir(outdir):
-        os.makedirs(outdir)
+        os.makedirs(outdir, mode=0775) # make sure LDM can then write to dir
     output = open(outfn, 'ab')
 
     req = urllib2.Request(uri[:-4])
