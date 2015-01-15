@@ -1,0 +1,117 @@
+import psycopg2.extras
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import datetime
+import calendar
+import sys
+from scipy import stats
+import matplotlib.patheffects as PathEffects
+from pyiem.network import Table as NetworkTable
+
+def get_description():
+    """ Return a dict describing how to call this plotter """
+    d = dict()
+    d['arguments'] = [
+        dict(type='station', name='station', default='IA2203', 
+             label='Select Station:'),
+        dict(type='month', name='month', default='12', 
+             label='Select Month:')
+    ]
+    return d
+
+def plotter( fdict ):
+    """ Go """
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    station = fdict.get('station', 'IA2203')
+    month = int(fdict.get('month', 12))
+    
+    table = "alldata_%s" % (station[:2],)
+    nt = NetworkTable("%sCLIMATE" % (station[:2],))
+    
+    # beat month
+    cursor.execute("""
+    with obs as (
+     SELECT sday, avg(high) as avgh, avg(low) as avgl, 
+     avg((high+low)/2.) as avgt from """+table+"""
+     WHERE station = %s and month = %s GROUP by sday
+    ), c81 as (
+     SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
+     from ncdc_climate81 where station = %s 
+    ), c71 as (
+     SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
+     from ncdc_climate71 where station = %s 
+    )
+    
+    SELECT o.sday, o.avgh, c81.high, c71.high,
+    o.avgl, c81.low, c71.low,
+    o.avgt, c81.avgt, c71.avgt from
+    obs o, c81, c71 where o.sday = c81.sday and o.sday = c71.sday
+    ORDER by o.sday ASC
+    """, (station, month, nt.sts[station]['ncdc81'], 
+          station))
+
+    o_avgh = []
+    o_avgl = []
+    o_avgt = []
+    c81_avgh = []
+    c81_avgl = []
+    c81_avgt = []
+    c71_avgh = []
+    c71_avgl = []
+    c71_avgt = []
+    days = []
+    for row in cursor:
+        days.append(int(row[0][2:]))
+        o_avgh.append(float(row[1]))
+        o_avgl.append(float(row[4]))
+        o_avgt.append(float(row[7]))
+
+        c81_avgh.append(row[2])
+        c81_avgl.append(row[5])
+        c81_avgt.append(row[8])
+    
+        c71_avgh.append(row[3])
+        c71_avgl.append(row[6])
+        c71_avgt.append(row[9])
+    
+    days = np.array(days)
+    
+    (fig, ax) = plt.subplots(3,1, sharex=True)
+    
+    ax[0].set_title("%s %s Daily Climate Comparison\nObservation Period: %s-%s for %s" % (
+        station, 
+        nt.sts[station]['name'],
+        nt.sts[station]['archive_begin'].year, datetime.datetime.now().year,
+        calendar.month_name[month]), fontsize=12)
+    
+    ax[0].bar(days-0.4, o_avgh, width=0.8, fc='tan')
+    ax[0].plot(days, c81_avgh, lw=2, zorder=2, color='g')
+    ax[0].plot(days, c71_avgh, lw=2, zorder=2, color='r')
+    ax[0].grid(True)
+    ax[0].set_ylabel("High Temp $^\circ$F")
+    ax[0].set_ylim(bottom=min([min(o_avgh), min(c71_avgh),min(c81_avgh)])-2)
+    
+    ax[1].bar(days-0.4, o_avgl, width=0.8, fc='tan')
+    ax[1].plot(days, c81_avgl, lw=2, zorder=2, color='g')
+    ax[1].plot(days, c71_avgl, lw=2, zorder=2, color='r')
+    ax[1].grid(True)
+    ax[1].set_ylabel("Low Temp $^\circ$F")
+    ax[1].set_ylim(bottom=min([min(o_avgl), min(c71_avgl),min(c81_avgl)])-2)
+    
+    ax[2].bar(days-0.4, o_avgt, width=0.8, fc='tan', label='IEM Observered Avg')
+    ax[2].plot(days, c81_avgt, lw=2, zorder=2, color='g', label='NCDC 1981-2010')
+    ax[2].plot(days, c71_avgt, lw=2, zorder=2, color='r', label='NCDC 1971-2000')
+    ax[2].grid(True)
+    ax[2].legend(loc='lower center', bbox_to_anchor=(0.5, 0.95),
+          fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=10)
+
+    ax[2].set_ylabel("Average Temp $^\circ$F")
+    ax[2].set_ylim(bottom=min([min(o_avgt), min(c71_avgt),min(c81_avgt)])-2)
+    ax[2].set_xlabel("Day of %s" % (calendar.month_name[month],))
+    ax[2].set_xlim(0.5,len(days)+0.5)
+
+    return fig
