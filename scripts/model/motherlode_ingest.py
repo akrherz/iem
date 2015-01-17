@@ -4,8 +4,8 @@
 
 """
 import sys
-import network
-table = network.Table( ['AWOS', 'IA_ASOS'] )
+from pyiem.network import Table as NetworkTable
+table = NetworkTable( ['AWOS', 'IA_ASOS'] )
 import psycopg2
 MOS = psycopg2.connect(database='mos', host='iemdb')
 mcursor = MOS.cursor()
@@ -30,7 +30,7 @@ VLOOKUP = {
            'RAP': 'Convective_inhibition_surface'},
  'pwater': {'NAM': 'Precipitable_water_entire_atmosphere',
             'GFS': 'Precipitable_water_entire_atmosphere',
-            'RAP': 'Precipitable_water_entire_atmosphere'},
+            'RAP': 'Precipitable_water_entire_atmosphere_single_layer'},
  'precipcon': {'RAP': 
                'Convective_precipitation_surface_Mixed_intervals_Accumulation',
             'NAM': 'Convective_precipitation_surface_3_Hour_Accumulation',
