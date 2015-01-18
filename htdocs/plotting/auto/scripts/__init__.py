@@ -68,6 +68,7 @@ data = {'plots': [
         {'id': "52", 'label': "Gaant Chart of WFO Issued Watch/Warning/Advisories"},
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
+        {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
     ]},
     {'label': 'Sustainable Corn Project Plots', 'options': [
         {'id': "49", 'label': "Two Day Precipitation Total Frequencies"},
