@@ -28,7 +28,7 @@ VLOOKUP = {
  'sbcin': {'NAM': 'Convective_inhibition_surface',
            'GFS': 'Convective_inhibition_surface',
            'RAP': 'Convective_inhibition_surface'},
- 'pwater': {'NAM': 'Precipitable_water_entire_atmosphere',
+ 'pwater': {'NAM': 'Precipitable_water_entire_atmosphere_single_layer',
             'GFS': 'Precipitable_water_entire_atmosphere_single_layer',
             'RAP': 'Precipitable_water_entire_atmosphere_single_layer'},
  'precipcon': {'RAP': 
