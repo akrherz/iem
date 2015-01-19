@@ -40,7 +40,7 @@
 192.168.0.254    iem-gateway   iem-gateway.local
 
 # IPs that float depending on workload!
-# iemvm1, backup iem21
+# metvm5, backup iem21
 192.168.1.190    iem-memcached
 # metvm4
 192.168.1.191    iem-memcached1
