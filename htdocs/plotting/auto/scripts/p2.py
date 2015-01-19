@@ -19,6 +19,12 @@ def get_description():
         dict(type='year', name='year', default=today.year, 
              label='Year to Highlight'),        
     ]
+    d['description'] = """This plot compares the growing degree day vs precipitation
+    departure for a given month and station.  The departure is expressed in 
+    units of standard deviation.  So a value of one would represent an one
+    standard deviation departure from long term mean.  The mean and standard
+    deviation is computed against the current / period of record climatology.
+    """
     return d
 
 def plotter( fdict ):
@@ -33,12 +39,13 @@ def plotter( fdict ):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     ccursor.execute("""
- SELECT stddev(sp) as p, avg(sp) as pavg, 
+     SELECT stddev(sp) as p, avg(sp) as pavg, 
         stddev(tp) as t, avg(tp) as tavg  from 
- (SELECT year, sum(precip) as sp, sum(gdd50(high::numeric,low::numeric)) as tp
-  from """+table+"""
-  where station = %s and month = %s
-  GROUP by year) as foo
+ (    SELECT year, sum(precip) as sp, 
+         sum(gdd50(high::numeric,low::numeric)) as tp
+      from """+table+"""
+      where station = %s and month = %s
+      GROUP by year) as foo
     """, (station, month))
     row = ccursor.fetchone()
     pstd = float(row['p'])
@@ -68,14 +75,15 @@ def plotter( fdict ):
     psigma = np.array( psigma )
 
     
-    h_slope, intercept, r_value, p_value, std_err = stats.linregress(tsigma, psigma)
+    h_slope, intercept, r_value, _, _ = stats.linregress(tsigma, psigma)
 
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
     (fig, ax) = plt.subplots(1,1)
     
     ax.scatter(tsigma, psigma)
-    ax.plot([-4,4], [y1,y2], label="Slope=%.2f\nR$^2$=%.2f" % (h_slope,r_value ** 2))
+    ax.plot([-4,4], [y1,y2], label="Slope=%.2f\nR$^2$=%.2f" % (h_slope,
+                                                               r_value ** 2))
     xmax = max(abs(tsigma)) + 0.5
     ymax = max(abs(psigma)) + 0.5
     ax.set_xlim(0 - xmax, xmax)
@@ -93,7 +101,8 @@ def plotter( fdict ):
     ax.set_ylabel("Precipitation Departure ($\sigma$)")
     ax.grid(True)
     ax.legend(fontsize=10)
-    ax.set_title("%s %s [%s] Temp + Precip Departure" % (
+    ax.set_title(("%s %s [%s]\n"
+                +"Growing Degree Day (base=50) + Precipitation Departure") % (
                 calendar.month_name[month], nt.sts[station]['name'], station))
     
     return fig
