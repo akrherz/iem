@@ -57,7 +57,7 @@ def plotter( fdict ):
     avg(low) as "avg-low",
     max(precip) as "max-precip",
     sum(precip) as "sum-precip",
-    sum(case when high >= %s then 1 else 0 end) as "days-highs-above",
+    sum(case when high >= %s then 1 else 0 end) as "days-high-above",
     sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when low < %s then 1 else 0 end) as "days-lows-below"
   from """+table+"""
