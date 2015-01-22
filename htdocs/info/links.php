@@ -18,6 +18,7 @@ $t->content = <<<EOF
  <li><a href="http://www.kymesonet.org">Kentucky Mesonet</a></li>
  <li><a href="http://www.met.utah.edu/jhorel/html/mesonet/">Meso West</a></li>
  <li><a href="http://agebb.missouri.edu/weather/">Missouri</a></li>
+ <li><a href="http://nysmesonet.org/">New York Mesonet</a></li>
  <li><a href="http://www.mesonet.ou.edu">Oklahoma Mesonet</a></li>
  <li><a href="http://chiliweb.southalabama.edu/">South Alabama Mesonet</a></li>
  <li><a href="http://mesonet.tamu.edu/">Texas Mesonet</a></li>
