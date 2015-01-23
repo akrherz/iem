@@ -1,15 +1,17 @@
+"""Hit up ESRIs elevation REST service to compute a station elevation
 
+"""
 import urllib2
 import time
-import iemdb
+import psycopg2
 import json
-MESOSITE = iemdb.connect('mesosite')
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 
 mcursor.execute("""
- SELECT network, ST_x(geom) as lon, ST_y(geom) as lat, elevation, id from stations 
- WHERE (elevation < -990 or elevation is null)""")
+    SELECT network, ST_x(geom) as lon, ST_y(geom) as lat, elevation, id 
+    from stations WHERE (elevation < -990 or elevation is null)""")
 
 for row in mcursor:
     elev = row[3]
@@ -17,16 +19,10 @@ for row in mcursor:
     lon = row[1]
     sid = row[4]
     network = row[0]
-    #r = urllib2.urlopen('http://weather.gladstonefamily.net/cgi-bin/wx-get-elevation.pl?lat=%s&lng=%s' % (lat,lon)).read()
     r = urllib2.urlopen('http://sampleserver4.arcgisonline.com/'+
             'ArcGIS/rest/services/Elevation/ESRI_Elevation_World/'+
             'MapServer/exts/ElevationsSOE/ElevationLayers/1/'+
             'GetElevationAtLonLat?lon=%s&lat=%s&f=pjson' % (lon,lat)).read()
-    #tokens =  re.findall(' ele="([0-9\.\-]*)" ', r)
-    #if len(tokens) == 0:
-    #  print 'ERROR WITH %s La: %s Lo: %s Res: %s' % (id, lat, lon, r)
-    #  continue
-    #newelev = float(tokens[0])
     j = json.loads(r)
     newelev = j.get('elevation', -999)
     
