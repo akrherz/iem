@@ -1,10 +1,11 @@
-"""
- Look into the ASOS database and figure out the start time of various 
- sites for a given network.
+"""Update metadata database with archive start for METAR sites.
+
+Looks at the asos database and finds the first observation from a site.
+
 """
 
-import iemdb
-import network
+import psycopg2
+from pyiem.network import Table as NetworkTable
 import sys
 import datetime
 import pytz
@@ -12,14 +13,14 @@ import pytz
 basets = datetime.datetime.now()
 basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
 
-asos = iemdb.connect('asos', bypass=True)
+asos = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = asos.cursor()
-mesosite = iemdb.connect('mesosite')
+mesosite = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = mesosite.cursor()
 
 net = sys.argv[1]
 
-table = network.Table( net )
+table = NetworkTable(net)
 keys = table.sts.keys()
 if len(keys) > 1:
     ids = `tuple(keys)`

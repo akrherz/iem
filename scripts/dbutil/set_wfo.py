@@ -1,9 +1,8 @@
-"""
- Assign a WFO to sites in the metadata tables that have no WFO set
+"""Assign a WFO to sites in the metadata tables that have no WFO set
 """
 
-import iemdb
-MESOSITE = iemdb.connect('mesosite')
+import psycopg2
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 
