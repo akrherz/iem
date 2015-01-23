@@ -5,6 +5,7 @@ import psycopg2
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import numpy as np
 import warnings
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -38,11 +39,13 @@ def compute_correction(unitnumber, turbineid):
     
     # Go find interesting cases!
     acursor.execute("""
-      SELECT valid, drct from t2010 where station = 'SLB'
+      SELECT valid, drct from alldata where station = 'SLB'
       and extract(hour from valid) between 8 and 16 and sknt > 15
+      and valid between '2008-01-01' and '2011-01-01'
       """)
     asos = []
     turbine = []
+    valid = []
     for row in acursor:
         cursor2.execute("""SELECT yaw from sampled_data_"""+unitnumber+""" 
         where valid = %s and yaw is not null""", 
@@ -52,10 +55,11 @@ def compute_correction(unitnumber, turbineid):
         row2 = cursor2.fetchone()
         asos.append( float(row[1]) )
         turbine.append( float(row2[0]) )
+        valid.append(row[0])
         
     turbine = np.array(turbine)
         
-    (fig, ax) = plt.subplots(3,1, figsize=(7,10))
+    (fig, ax) = plt.subplots(4,1, figsize=(7,10))
     (counts, xedges, yedges, img) = ax[0].hist2d(asos, turbine, bins=36, cmin=5)
     ax[0].set_ylabel("Turbine %s" % (turbineid,))
 
@@ -102,9 +106,21 @@ def compute_correction(unitnumber, turbineid):
     ax[2].set_title("AWOS vs Turbine %s Corrected" % (turbineid,))
     ax[2].grid(True)
     
+    t = np.array(turbine)
+    a = np.array(asos)
+    diff = t - a
+    diff = np.where(diff > 180, a - t, diff)
+    diff = np.where(diff < -180, diff + 360., diff)
+    
+    
+    ax[3].grid(True)
+    ax[3].scatter(valid, diff)
+    ax[3].set_ylabel("Turbine-ASOS [deg]")
+    ax[3].xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
+    
     fig.tight_layout()
     
-    fig.savefig('yaw_correction_%s.png' % (turbineid,))
+    fig.savefig('yaw_correction_plots/yaw_correction_%s.png' % (turbineid,))
     plt.close()
     return bias
 
@@ -112,13 +128,13 @@ def update_database(unitnumber, turbineid, correction):
     """ Apply this correction """
     cursor2 = PGCONN.cursor()
     cursor2.execute("""UPDATE sampled_data_"""+unitnumber+""" 
-        SET yaw2 = yaw + %s""", 
+        SET yaw3 = yaw + %s""", 
                        (correction,))
     cursor2.execute("""UPDATE sampled_data_"""+unitnumber+"""
-        SET yaw2 = yaw2 - 360. WHERE yaw2 > 360""")
+        SET yaw3 = yaw3 - 360. WHERE yaw3 > 360""")
 
     cursor2.execute("""UPDATE sampled_data_"""+unitnumber+"""
-        SET yaw2 = yaw2 + 360. WHERE yaw2 < 0""")
+        SET yaw3 = yaw3 + 360. WHERE yaw3 < 0""")
     
     cursor2.close()
     PGCONN.commit()
