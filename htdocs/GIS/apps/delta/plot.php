@@ -3,7 +3,7 @@ include("../../../../config/settings.inc.php");
 include_once "$rootpath/include/iemmap.php";
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
-$i = isset($_GET["i"]) ? $_GET["i"] : "1h";
+$i = "1h";
 
 $now = time();
 $plotts = $now;
@@ -25,10 +25,7 @@ $counties->set("status", MS_ON);
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 
-if ($i == "1h")
-	$temps = $map->getlayerbyname("delta-surface");
-else
-	$temps = $map->getlayerbyname("delta-surface15m");
+$temps = $map->getlayerbyname("delta-surface");
 $temps->set("status", MS_ON);
 
 $n0r = $map->getlayerbyname("nexrad_n0q");

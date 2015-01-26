@@ -59,7 +59,7 @@ def computeOthers(d):
         if ob['feel'] == 'M':
             ob['feel'] = None
 
-        ob["altiTend"] = altiTxt(ob["alti_15m"])
+        ob["altiTend"] = 'S'
         ob["drctTxt"] = mesonet.drct2dirTxt(ob["drct"])
         if ob["max_drct"] is None:
             ob["max_drct"] = 0
@@ -74,13 +74,6 @@ def computeOthers(d):
             ob["gtim2"] = ob["max_gust_ts"].strftime("%-I:%M %p")
         r[sid] = ob
     return r
-
-def get_trend15(obs, network):
-    icursor.execute("""SELECT s.id, t.* from trend_15m t JOIN stations s 
-    on (s.iemid = t.iemid) WHERE network = '%s'""" % (
-                                                network,) )
-    for row in icursor:
-        obs[ row["id"] ].data["alti_15m"] = row["alti_15m"]
 
 def get_precip_totals(obs, network):
     now = mx.DateTime.now()
@@ -105,9 +98,6 @@ def main():
     kelo = access.get_network("KELO", IEM)
     kimt = access.get_network("KIMT", IEM)
     
-    get_trend15(kcci, 'KCCI')
-    get_trend15(kelo, 'KELO')
-    get_trend15(kimt, 'KIMT')
     get_precip_totals(kcci, 'KCCI')
     get_precip_totals(kelo, 'KELO')
     get_precip_totals(kimt, 'KIMT')
