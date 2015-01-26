@@ -42,6 +42,7 @@ data = {'plots': [
         {'id': "20", 'label': "Hours of Precipitation by Month"},
         {'id': "47", 'label': "Snowfall vs Precipitation Total for a Month"},
         {'id': "39", 'label': "Scenarios for this month besting some previous month"},
+        {'id': "57", 'label': "Warmest Months for Average Temperature"},
         #{'id': "17", 'label': "Daily Temperatures + Climatology for Year + Month"},
     ]},
     {'label': 'Yearly', 'options': [
