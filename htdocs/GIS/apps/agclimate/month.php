@@ -92,15 +92,15 @@ for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
 }
 
 
-iemmap_title($map, $img, $title[$dvar] ." [ ". date("d M", $sdate) ." thru ". date("d M Y", $edate) ." ]");
+iemmap_title($map, $img, $title[$dvar] ." [ ". date("d M", $sts) ." thru ". date("d M Y", $ets) ." ]");
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage();
 
 if (strlen($direct) > 0) { 
   header("Content-type: image/png");
-  $img->saveImage('');
+  $img->saveImage();
 } else {
+	$url = $img->saveWebImage();
 ?>
 <img src="<?php echo $url; ?>" border=1>
 
