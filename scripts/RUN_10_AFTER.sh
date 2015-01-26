@@ -16,9 +16,6 @@ python wind_power.py &
 cd ../plots
 ./RUN_PLOTS
 
-cd ../delta
-./RUN.csh
-
 cd ../ingestors
 python beloit.py
 python flux_ingest.py
