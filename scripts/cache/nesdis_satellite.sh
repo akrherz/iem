@@ -27,7 +27,7 @@ function getter(){
 	for i in {1..10}
 		do
 			wget --connect-timeout=60 -O $1 -q $2 && return
-			echo "FAIL $2"
+			#echo "FAIL $2"
 			sleep 60
 			done	
 }
@@ -52,7 +52,7 @@ getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4${tm2}.tfw
 # Merge Visible, please
 szw=$(stat -c %s GoesWest1V${tm}.tif)
 sze=$(stat -c %s GoesEast1V${tm}.tif)
-if [ -e GoesWest1V${tm}.tif -a $szw -gt 1000 -a $sze -gt 1000 ]
+if [ -e GoesEast1V${tm}.tif -a $szw -gt 1000 -a $sze -gt 1000 ]
 then
 	# Create composite TIF, 4km
 	gdal_merge.py -q -o vis.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest1V${tm}.tif GoesEast1V${tm}.tif
