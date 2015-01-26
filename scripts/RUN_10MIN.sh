@@ -15,9 +15,6 @@ python dot_truckcams.py &
 cd ../summary
 python updateRain.py
 
-cd ../delta
-python gen_15min.py
-
 cd ../outgoing
 php wxc_rwis.php
 php wxc_awos.php

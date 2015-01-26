@@ -14,7 +14,7 @@ if len(sys.argv) != 3:
     print 'Usage: python remove_realtime.py NETWORK SID'
     sys.exit()
 
-for table in ['current', 'trend_1h', 'trend_15m']:
+for table in ['current', 'trend_1h']:
     icursor.execute("""
      DELETE from %s where 
      iemid = (select iemid from stations where id = '%s' and network = '%s')
