@@ -26,6 +26,7 @@ $day = isset($_GET["day"])? intval($_GET["day"]) : date("d");
 $year2 = isset($_GET["year2"])? intval($_GET["year2"]) : date("Y");
 $month2 = isset($_GET["month2"])? intval($_GET["month2"]) : date("m");
 $day2 = isset($_GET["day2"])? intval($_GET["day2"]) : date("d");
+$order = isset($_GET["order"]) ? $_GET["order"]: "asc";
 $ts = mktime(0,0,0, $month, $day, $year);
 $ts2 = $ts + 86400;
 $d2display = "none";
@@ -35,10 +36,15 @@ if (isset($_REQUEST['drange'])){
 	$d2display = "block";
 }
 
+$ar = Array("asc" => "Time Ascending",
+		"desc" => "Time Descending");
+if (!array_key_exists($order,$ar)){ $order = 'asc'; }
+$oselect = make_select("order", $order, $ar);
+
 $table = "";
 pg_query($afos, "SET TIME ZONE 'UTC'");
 $rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from products
-      WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
+      WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered $order");
 
 $rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
 		date("Y-m-d H:i", $ts2)."+00"));
@@ -141,7 +147,7 @@ function showHide(v){
  <td><div id="d2" style="display: {$d2display}">
  {$y2select} {$m2select} {$d2select}</div></td>
  
- <td>{$vselect}</td>
+ <td>{$vselect} {$oselect}</td>
  <td><input type="submit" value="Giveme Giveme!"></td>
 </table>
 </form>
