@@ -1,8 +1,8 @@
 """
 Update the pday column
 """
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor()
 icursor2 = IEM.cursor()
 import mx.DateTime
