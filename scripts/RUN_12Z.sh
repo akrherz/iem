@@ -5,6 +5,9 @@ cd 12z
 python awos_rtp.py
 python asos_low.py
 
+cd ../dailyb
+python spammer.py
+
 cd ../ingestors/other
 python feel_ingest.py
 

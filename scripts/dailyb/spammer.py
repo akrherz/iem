@@ -1,5 +1,5 @@
 """
- Generate the dailyb spam
+ Generate the dailyb spam, run from RUN_12Z.sh
 """
 import subprocess
 import smtplib
