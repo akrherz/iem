@@ -1,10 +1,10 @@
-import iemdb
+import psycopg2
 import pytz
 from pyiem.nws import vtec
 import datetime
 import matplotlib.dates as mdates
 
-MOS = iemdb.connect('mos', bypass=True)
+MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
 mcursor = MOS.cursor()
 mcursor.execute("""SELECT ftime, tmp from t2013 where station = 'KCID'
   and model = 'GFS' and runtime = '2013-01-29 18:00' ORDER by ftime ASC""")
@@ -15,7 +15,7 @@ for row in mcursor:
     mtmpf.append( row[1] )
 
 
-IEM = iemdb.connect('asos', bypass=True)
+IEM = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 icursor.execute("""SELECT valid, tmpf from t2013 WHERE station = 'CID'
   and valid > '2013-01-25' ORDER by valid ASC""")
@@ -25,7 +25,7 @@ for row in icursor:
     valid.append( row[0] )
     tmpf.append( row[1] )
 
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 
 pcursor.execute("""SELECT issue, expire, phenomena, significance, eventid

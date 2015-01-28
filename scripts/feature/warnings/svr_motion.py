@@ -1,8 +1,8 @@
-import iemdb
+import psycopg2
 import re
 import numpy
 import numpy.ma
-postgis = iemdb.connect('postgis', bypass=True)
+postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = postgis.cursor()
 
 jday = []
