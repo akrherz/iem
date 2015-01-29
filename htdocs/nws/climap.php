@@ -17,7 +17,7 @@ $t->headextra = <<<EOF
 .map {
 	height: 400px;
 	width: 100%;
-	background-color: #000;
+	background-color: #D2B48C;
 }
 .popover {
 		width: 300px;
