@@ -104,7 +104,7 @@ $(document).ready(function(){
 		new ol.layer.Tile({
 			title: 'State Boundaries',
 			source: new ol.source.XYZ({
-				url : '/c/c.py/1.0.0/s-900913/{z}/{x}/{y}.png'
+				url : '/c/tile.py/1.0.0/s-900913/{z}/{x}/{y}.png'
 			})
 		}),
 		vectorLayer
@@ -116,6 +116,9 @@ $(document).ready(function(){
 		})
 	});
 
+    var layerSwitcher = new ol.control.LayerSwitcher();
+    map.addControl(layerSwitcher);
+	
 	element = document.getElementById('popup');
 
 	var popup = new ol.Overlay({

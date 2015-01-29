@@ -10,13 +10,14 @@ $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
 
 $t->headextra = <<<EOF
-<link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.css"/ >
+<link rel="stylesheet" href="/assets/openlayers/3.1.1/css/ol.css" type="text/css">
+<link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
+<link type="text/css" href="/assets/openlayers/3.1.1/css/ol3-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
 	height: 400px;
 	width: 100%;
+	background-color: #000;
 }
 .popover {
 		width: 300px;
@@ -24,9 +25,10 @@ $t->headextra = <<<EOF
 </style>
 EOF;
 $t->jsextra = <<<EOF
-<script src="http://openlayers.org/en/v3.0.0/build/ol-debug.js" type="text/javascript"></script>
-<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-<script src='climap.js?v=5'></script>
+<script src="/assets/openlayers/3.1.1/build/ol.js" type="text/javascript"></script>
+<script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
+<script src='/assets/openlayers/3.1.1/build/ol3-layerswitcher.js'></script>
+<script src='climap.js?v=6'></script>
 EOF;
 
 $t->content = <<<EOF
