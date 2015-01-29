@@ -81,7 +81,7 @@ def get_job_list():
         sql = """SELECT id from stations where network = %s and
         archive_begin < %s ORDER by id ASC"""
         acursor.execute(sql, (options.network, 
-                              days[0] + datetime.timedelta(days=720)) )
+                              days[0] + datetime.timedelta(days=900)) )
         for row in acursor:
             stations.append( row[0] )
     else:
