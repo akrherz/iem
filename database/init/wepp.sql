@@ -45,6 +45,7 @@ CREATE TABLE nri(
  model_twp varchar,
  psu_id int,
  sample int,
+ county_id int,
  town_id int,
  range_id int,
  len real,
@@ -58,6 +59,7 @@ CREATE TABLE nri(
 CREATE UNIQUE INDEX nri_id_idx on nri(id);
 CREATE INDEX nri_man_id on nri(man_id);
 CREATE INDEX nri_model_twp_idx on nri(model_twp);
+GRANT SELECT on nri to apache,nobody;
 
 CREATE TABLE layers(
  soil_id int,
