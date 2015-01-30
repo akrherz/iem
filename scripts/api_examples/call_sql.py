@@ -1,3 +1,6 @@
+"""Example script showing IEM SQL API
+
+"""
 import urllib2
 import urllib
 import json

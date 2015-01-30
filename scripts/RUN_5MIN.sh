@@ -1,4 +1,4 @@
-# Run every 5 minutes
+# Run every 5 minutes...
 cd cache 
 sh download_wwa.sh &
 

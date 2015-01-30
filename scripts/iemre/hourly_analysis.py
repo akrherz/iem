@@ -8,7 +8,6 @@ import numpy
 import datetime
 import Ngl
 from pyiem import iemre
-import iemdb
 from pyiem import meteorology
 import pyiem.datatypes as dt
 import network
@@ -114,7 +113,7 @@ def grid_hour(nc, ts):
 
     # If we are near realtime, look in IEMAccess instead of ASOS database
     if utcnow < ts:
-        dbconn = iemdb.connect('iem', bypass=True)
+        dbconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "current_log"
         pcolumn = "(phour * 25.4)"
@@ -133,7 +132,7 @@ def grid_hour(nc, ts):
          pcolumn, pcolumn, pcolumn, table, ids, 
          ts0, ts1 )
     else:
-        dbconn = iemdb.connect('asos', bypass=True)
+        dbconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "t%s" % (ts.year,)
         pcolumn = "p01i"
@@ -174,14 +173,8 @@ def grid_hour(nc, ts):
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d %H:%M"), 
             pcursor.rowcount)
 
-def main(ts):
-    # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'a')
-    grid_hour(nc , ts)
-
-    nc.close()
-
-if __name__ == "__main__":
+def main():
+    """Go Main"""
     if len(sys.argv) == 5:
         ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]), int(sys.argv[4]) )
@@ -189,4 +182,11 @@ if __name__ == "__main__":
         ts = datetime.datetime.utcnow()
         ts = ts.replace(second=0,minute=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-    main(ts)
+    # Load up our netcdf file!
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'a')
+    grid_hour(nc , ts)
+
+    nc.close()
+
+if __name__ == "__main__":
+    main()

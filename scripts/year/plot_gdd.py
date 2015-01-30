@@ -7,21 +7,21 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 
-import network
-st = network.Table('IACLIMATE')
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+from pyiem.network import Table as NetworkTable
+st = NetworkTable('IACLIMATE')
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 
 gfunc = "gdd50"
 gbase = 50
 if len(sys.argv) == 2 and sys.argv[1] == "gdd52":
-  gfunc = "gdd52"
-  gbase = 52
+    gfunc = "gdd52"
+    gbase = 52
 if len(sys.argv) == 2 and sys.argv[1] == "gdd48":
-  gfunc = "gdd48"
-  gbase = 48
+    gfunc = "gdd48"
+    gbase = 48
 
 # Compute normal from the climate database
 ccursor.execute("""SELECT station,

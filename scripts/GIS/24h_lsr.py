@@ -7,13 +7,11 @@ import dbflib
 import mx.DateTime
 import zipfile
 import os
-import sys
 import shutil
-import wellknowntext
-import iemdb
+from pyiem import wellknowntext
 import subprocess
 import psycopg2.extras
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 pcursor.execute("SET TIME ZONE 'GMT'")
 

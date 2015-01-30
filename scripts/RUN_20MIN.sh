@@ -3,9 +3,6 @@
 cd gempak
 csh grid_radar.csh
 
-# Wait two minutes please
-sleep 120
-
 cd ../ingestors/madis
 python to_iemaccess.py
 

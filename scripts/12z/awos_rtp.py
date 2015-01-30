@@ -5,6 +5,7 @@
 
 import datetime
 import pytz
+import os
 import subprocess
 from pyiem.tracker import loadqc
 from pyiem import network
@@ -26,7 +27,8 @@ yesterday12z = now12z - datetime.timedelta(days=1)
 
 fmt = "%-6s:%-19s: %3s / %3s / %5s / %4s / %2s\n"
 
-out = open("/tmp/awos_rtp.shef", 'w')
+SHEF_FN = "/tmp/awos_rtp.shef"
+out = open(SHEF_FN, 'w')
 out.write("""
 
 
@@ -104,5 +106,7 @@ for s in ids:
 out.write(".END\n")
 out.close()
 
-cmd = "/home/ldm/bin/pqinsert -p 'plot ac %s0000 awos_rtp.shef awos_rtp.shef shef' /tmp/awos_rtp.shef" % (now12z.strftime("%Y%m%d"), )
+cmd = ("/home/ldm/bin/pqinsert -p 'plot ac %s0000 awos_rtp.shef "
+	+"awos_rtp.shef shef' %s") % (now12z.strftime("%Y%m%d"), SHEF_FN)
 subprocess.call(cmd, shell=True)
+os.unlink(SHEF_FN)

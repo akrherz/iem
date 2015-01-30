@@ -1,16 +1,15 @@
 # Generate a plot of normal GDD Accumulation since 1 May of this year
 
-import sys, os
+import sys
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now()
 if now.month < 5 or now.month > 10:
-  sys.exit(0)
+    sys.exit(0)
 
-import network
-nt = network.Table('IACLIMATE')
-import psycopg2
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable('IACLIMATE')
 import psycopg2.extras
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)

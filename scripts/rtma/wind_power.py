@@ -46,7 +46,8 @@ def run(ts, routes):
     
     m.postprocess(pqstr=pqstr)
 
-if __name__ == '__main__':
+def main():
+    """Main()"""
     if len(sys.argv) == 5:
         now = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]), 
                                  int(sys.argv[3]), int(sys.argv[4]))
@@ -57,3 +58,6 @@ if __name__ == '__main__':
     now = now.replace(tzinfo=pytz.timezone("UTC"))
     
     run(now, routes)
+
+if __name__ == '__main__':
+    main()

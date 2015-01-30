@@ -6,13 +6,11 @@ import dbflib
 import mx.DateTime
 import zipfile
 import os
-import sys
 import shutil
-import wellknowntext
-import iemdb
+from pyiem import wellknowntext
 import subprocess
 import psycopg2.extras
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 """
@@ -73,64 +71,64 @@ pcursor.execute( sql )
 
 cnt = 0
 for row in pcursor:
-    #print rs[i]
-    s = row["tgeom"]
-    if s == None or s == "":
-        continue
-    f = wellknowntext.convert_well_known_text(s)
+	#print rs[i]
+	s = row["tgeom"]
+	if s == None or s == "":
+		continue
+	f = wellknowntext.convert_well_known_text(s)
+	
+	d = {}
+	d["VALID"] = row['utcvalid'].strftime("%Y%m%d%H%M")
+	d["NEXRAD"] = row['nexrad']
+	d["STORM_ID"] = row['storm_id']
+	d["AZIMUTH"] = float(row['azimuth'])
+	d["RANGE"] = float(row['range'])
+	d["TVS"] = row['tvs']
+	d["MESO"] = row['meso']
+	d["POSH"] = float(row['posh'])
+	d["POH"] = float(row['poh'])
+	d["MAX_SIZE"] = float(row['max_size'])
+	d["VIL"] = float(row['vil'])
+	d["MAX_DBZ"] = float(row['max_dbz'])
+	d["MAX_DBZ_H"] = float(row['max_dbz_height'])
+	d["TOP"] = float(row['top'])
+	d["DRCT"] = float(row['drct'])
+	d["SKNT"] = float(row['sknt'])
+	d["LAT"] = float(row['lat'])
+	d["LON"] = float(row['lon'])
+	#print d
+	obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f,]] )
+	shp.write_object(-1, obj)
+	dbf.write_record(cnt, d)
+	del(obj)
+	cnt += 1
 
-    d = {}
-    d["VALID"] = row['utcvalid'].strftime("%Y%m%d%H%M")
-    d["NEXRAD"] = row['nexrad']
-    d["STORM_ID"] = row['storm_id']
-    d["AZIMUTH"] = float(row['azimuth'])
-    d["RANGE"] = float(row['range'])
-    d["TVS"] = row['tvs']
-    d["MESO"] = row['meso']
-    d["POSH"] = float(row['posh'])
-    d["POH"] = float(row['poh'])
-    d["MAX_SIZE"] = float(row['max_size'])
-    d["VIL"] = float(row['vil'])
-    d["MAX_DBZ"] = float(row['max_dbz'])
-    d["MAX_DBZ_H"] = float(row['max_dbz_height'])
-    d["TOP"] = float(row['top'])
-    d["DRCT"] = float(row['drct'])
-    d["SKNT"] = float(row['sknt'])
-    d["LAT"] = float(row['lat'])
-    d["LON"] = float(row['lon'])
-    #print d
-    obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f,]] )
-    shp.write_object(-1, obj)
-    dbf.write_record(cnt, d)
-    del(obj)
-    cnt += 1
-
-if (cnt == 0):
-    if now.minute == 1:
-        print 'No NEXRAD attributes found, this may be bad!'
-    obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[(0.1, 0.1),]] )
-    d = {}
-    d["VALID"] = "200000000000"
-    d["NEXRAD"] = "XXX"
-    d["STORM_ID"] = "XX"
-    d["AZIMUTH"] = 0
-    d["RANGE"] = 0
-    d["TVS"] = "NONE"
-    d["MESO"] = "NONE"
-    d["POSH"] = 0
-    d["POH"] = 0
-    d["MAX_SIZE"] = 0
-    d["VIL"] = 0
-    d["MAX_DBZ"] = 0
-    d["MAX_DBZ_H"] = 0
-    d["TOP"] = 0
-    d["DRCT"] = 0
-    d["SKNT"] = 0
-    d["LAT"] = 0
-    d["LON"] = 0
-
-    shp.write_object(-1, obj)
-    dbf.write_record(0, d)
+if cnt == 0:
+	if now.minute == 1:
+		print 'No NEXRAD attributes found, this may be bad!'
+	obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[(0.1, 0.1),]] )
+	d = {}
+	d["VALID"] = "200000000000"
+	d["NEXRAD"] = "XXX"
+	d["STORM_ID"] = "XX"
+	d["AZIMUTH"] = 0
+	d["RANGE"] = 0
+	d["TVS"] = "NONE"
+	d["MESO"] = "NONE"
+	d["POSH"] = 0
+	d["POH"] = 0
+	d["MAX_SIZE"] = 0
+	d["VIL"] = 0
+	d["MAX_DBZ"] = 0
+	d["MAX_DBZ_H"] = 0
+	d["TOP"] = 0
+	d["DRCT"] = 0
+	d["SKNT"] = 0
+	d["LAT"] = 0
+	d["LON"] = 0
+	
+	shp.write_object(-1, obj)
+	dbf.write_record(0, d)
 
 del(shp)
 del(dbf)
@@ -189,7 +187,9 @@ zinfo = z.getinfo('current_nexattr.txt')
 zinfo.external_attr = 0664 << 16
 z.close()
 
-cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_nexattr.zip bogus zip\" current_nexattr.zip" % (now.strftime("%Y%m%d%H%M"),)
+cmd = ("/home/ldm/bin/pqinsert -p \"zip c %s "
+	+"gis/shape/4326/us/current_nexattr.zip bogus zip\" "
+	+"current_nexattr.zip") % (now.strftime("%Y%m%d%H%M"),)
 subprocess.call(cmd, shell=True)
 
 for suffix in ['zip', 'shp', 'dbf', 'shx', 'prj']:

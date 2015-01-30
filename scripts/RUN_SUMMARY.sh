@@ -11,7 +11,6 @@ python plot_hilo.py 1
 cd ../climate
 python today_hilo.py
 python today_rec_hilo.py
-python today_rec_minhi.py
 
 cd ../week
 python avg_high.py

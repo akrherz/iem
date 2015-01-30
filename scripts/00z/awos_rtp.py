@@ -1,5 +1,4 @@
-"""
-Generate a First Guess RTP that the bureau can use for their product
+"""Generate a First Guess RTP that the bureau can use for their product
 """
 #stdlib
 import datetime
