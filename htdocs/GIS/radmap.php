@@ -447,23 +447,23 @@ if (isset($_REQUEST["vtec"]))
   
 }
 
-
-
 /* Storm based warning history, plotted as a white outline, I think */
-$ptext = "'ZZ' as phenomena";
-$sbwh = $map->getlayerbyname("sbw");
-$sbwh->set("status", in_array("sbwh", $layers) );
-$sbwh->set("connection", $_DATABASES["postgis"]);
-//$sbwh->set("maxscale", 10000000);
-$sql = sprintf("geom from (select %s, geom, oid from sbw_%s w "
-    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' and "
-    ."polygon_end > '%s:00+00' "
-    ."%s) as foo using unique oid using SRID=4326", 
-    $ptext, gmstrftime("%Y",$ts),
-    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
-    $vtec_limiter );
-$sbwh->set("data", $sql);
-$sbwh->draw($img);
+if (in_array("sbwh", $layers) && intval(gmstrftime("%Y",$ts)) > 2001){
+	$ptext = "'ZZ' as phenomena";
+	$sbwh = $map->getlayerbyname("sbw");
+	$sbwh->set("status", MS_ON);
+	$sbwh->set("connection", $_DATABASES["postgis"]);
+	//$sbwh->set("maxscale", 10000000);
+	$sql = sprintf("geom from (select %s, geom, oid from sbw_%s w "
+	    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' and "
+	    ."polygon_end > '%s:00+00' "
+	    ."%s) as foo using unique oid using SRID=4326", 
+	    $ptext, gmstrftime("%Y",$ts),
+	    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
+	    $vtec_limiter );
+	$sbwh->set("data", $sql);
+	$sbwh->draw($img);
+}
 
 
 
@@ -628,10 +628,10 @@ if (isset($_GET["title"])){
 } else if (in_array("n0q", $layers)){
   $title = "NEXRAD Base Reflectivity";
 } else if (in_array("n0q_tc", $layers)){
-  $title = "IEM NEXRAD Daily Max Composite Reflectivity";
+  $title = "IEM NEXRAD Daily N0Q Max Composite Reflectivity";
   $d = gmdate("d M Y", $ts) ." UTC";
 } else if (in_array("nexrad_tc", $layers)){
-  $title = "IEM NEXRAD Daily Max Composite Reflectivity";
+  $title = "IEM NEXRAD Daily N0R Max Composite Reflectivity";
   $d = gmdate("d M Y", $ts) ." UTC";
 } else {
   $title = "IEM Plot";
