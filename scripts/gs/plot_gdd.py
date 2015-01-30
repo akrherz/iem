@@ -1,18 +1,15 @@
 """
  Generate a plot of GDD 
 """
-
-import sys
-import os
-import iemplot
+from pyiem.plot import MapPlot
 import datetime
-
+import numpy as np
 import psycopg2
 COOP = psycopg2.connect("dbname=coop host=iemdb user=nobody")
 ccursor = COOP.cursor()
 
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 
 def run(base, ceil, now, fn):
     """ Generate the plot """
@@ -32,28 +29,26 @@ def run(base, ceil, now, fn):
             continue
         lats.append( nt.sts[row[0]]['lat'] )
         lons.append( nt.sts[row[0]]['lon'] )
-        gdd50.append( row[1] )
+        gdd50.append(float(row[1]))
 
-    cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_showvalues'        : True,
- '_format'            : '%.0f',
- '_title'             : "Iowa 1 May - %s GDD Accumulation" % (
+    
+    m = MapPlot(title="Iowa 1 May - %s GDD Accumulation" % (
                         now.strftime("%-d %B %Y"), ),
- 'lbTitleString'      : "base %s" % (base,),
-}
-    # Generates tmp.ps
-    tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
-
+                subtitle="base %s" % (base,))
+    a = np.arange(int(min(gdd50)-20), int(max(gdd50)+20), 50)
+    m.contourf(lons, lats, gdd50, a)
+    
     pqstr = "plot c 000000000000 summary/%s.png bogus png" % (fn,)
-    iemplot.postprocess(tmpfp, pqstr)
+    m.postprocess(view=True, pqstr=pqstr)
 
-if __name__ == '__main__':
+def main():
+    """Main()"""
     today = datetime.datetime.now()
     if today.month < 5:
         today = today.replace(year=(today.year-1), month=11, day=1)
     run(50,86, today, 'gdd_may1')
     run(60,86, today, 'gdd_may1_6086')
     run(65,86, today, 'gdd_may1_6586')
+    
+if __name__ == '__main__':
+    main()

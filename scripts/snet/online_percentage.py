@@ -1,4 +1,4 @@
-# Figure out the online percentage of schoolnet sites
+""" Figure out the online percentage of schoolnet sites"""
 
 import mx.DateTime
 from pyIEM import iemdb 

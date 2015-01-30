@@ -6,12 +6,12 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 
 # Compute normal from the climate database
 sql = """SELECT station,

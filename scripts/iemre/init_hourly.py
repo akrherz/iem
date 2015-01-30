@@ -60,38 +60,44 @@ def init_year(ts):
     tm[:] = numpy.arange(0, int(days) * 24)
 
     # Tracked variables
-    skyc = nc.createVariable('skyc', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
+    skyc = nc.createVariable('skyc', numpy.float, ('time', 'lat', 'lon'),
+                             fill_value=1.e20)
     skyc.long_name = "ASOS Sky Coverage"
     skyc.stanard_name = "ASOS Sky Coverage"
     skyc.units = "%"
     skyc.valid_range = [0,100]
     skyc.coordinates = "lon lat"
 
-    tmpk = nc.createVariable('tmpk', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
+    tmpk = nc.createVariable('tmpk', numpy.float, ('time', 'lat', 'lon'),
+                             fill_value=1.e20)
     tmpk.units = "K"
     tmpk.long_name = "2m Air Temperature"
     tmpk.standard_name = "2m Air Temperature"
     tmpk.coordinates = "lon lat"
 
-    dwpk = nc.createVariable('dwpf', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
+    dwpk = nc.createVariable('dwpf', numpy.float, ('time', 'lat', 'lon'),
+                             fill_value=1.e20)
     dwpk.units = "K"
     dwpk.long_name = "2m Air Dew Point Temperature"
     dwpk.standard_name = "2m Air Dew Point Temperature"
     dwpk.coordinates = "lon lat"
 
-    uwnd = nc.createVariable('uwnd', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
+    uwnd = nc.createVariable('uwnd', numpy.float, ('time', 'lat', 'lon'),
+                             fill_value=1.e20)
     uwnd.units = "meters per second"
     uwnd.long_name = "U component of the wind"
     uwnd.standard_name = "U component of the wind"
     uwnd.coordinates = "lon lat"
 
-    vwnd = nc.createVariable('vwnd', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
+    vwnd = nc.createVariable('vwnd', numpy.float, ('time', 'lat', 'lon'),
+                             fill_value=1.e20)
     vwnd.units = "meters per second"
     vwnd.long_name = "V component of the wind"
     vwnd.standard_name = "V component of the wind"
     vwnd.coordinates = "lon lat"
 
-    p01m = nc.createVariable('p01m', numpy.float, ('time','lat','lon'), fill_value=1.e20)
+    p01m = nc.createVariable('p01m', numpy.float, ('time','lat','lon'),
+                             fill_value=1.e20)
     p01m.units = 'mm'
     p01m.long_name = 'Precipitation'
     p01m.standard_name = 'Precipitation'

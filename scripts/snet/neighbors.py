@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Print out PHP listing of neighbors...
 # Daryl Herzmann 23 Apr 2003
 

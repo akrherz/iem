@@ -78,4 +78,5 @@ def init_year(ts):
 
     nc.close()
 
-init_year(datetime.datetime(int(sys.argv[1]),1,1))
+if __name__ == '__main__':
+    init_year(datetime.datetime(int(sys.argv[1]),1,1))

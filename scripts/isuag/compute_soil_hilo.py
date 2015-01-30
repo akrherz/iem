@@ -1,8 +1,8 @@
 """
 Compute Soil High and Low Temperatures for any missing values!
 """
-import iemdb
-ISUAG = iemdb.connect('isuag', bypass=True)
+import psycopg2
+ISUAG = psycopg2.connect('isuag', bypass=True)
 icursor = ISUAG.cursor()
 
 

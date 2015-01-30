@@ -9,6 +9,7 @@ python awos_rtp.py
 cd ../ingestors
 python elnino.py
 
+# nexrad N0R and N0Q composites
 cd ../summary
 python max_reflect.py
 

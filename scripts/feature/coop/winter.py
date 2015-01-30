@@ -25,10 +25,11 @@ for row in cursor:
     starts[row[0]] = row[1]
     ends[row[0]] = row[2]
 
+days = []
 daf = []
 p = []
 sd = []
-for year in range(2010,2015):
+for year in range(1970,2015):
     d0 = datetime.date(year,1,1) + datetime.timedelta(days=ends[year])
     d1 = datetime.date(year+1,1,1) + datetime.timedelta(days=starts[year+1])
     # Days above freezing
@@ -36,6 +37,13 @@ for year in range(2010,2015):
      and station = 'IA0200' and day between %s and %s""",
      (d0, d1))
     daf.append(cursor.fetchone()[0])
+
+    # Days 
+    cursor.execute("""SELECT count(*) from alldata_ia where
+     station = 'IA0200' and day between %s and %s""",
+     (d0, d1))
+    days.append(cursor.fetchone()[0])
+
 
     # Sum precip
     cursor.execute("""SELECT sum(precip) from alldata_ia where 
@@ -49,6 +57,7 @@ for year in range(2010,2015):
      (d0, d1))
     sd.append(cursor.fetchone()[0])
 
+print 'DAYS', np.average(days)
 print 'DAF', np.average(daf)
 print 'P', np.average(p)
 print 'SC', np.average(sd)

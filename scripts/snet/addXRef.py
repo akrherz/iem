@@ -1,4 +1,3 @@
-#!/mesonet/python-2.4/bin/python
 # Need something to add in locs and counties not previously there...
 
 from pyIEM import iemdb

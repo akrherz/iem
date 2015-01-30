@@ -16,3 +16,5 @@ cd ../iemre
 python stage4_hourlyre.py
 python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
 python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
+
+#END

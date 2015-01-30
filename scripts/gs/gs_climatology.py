@@ -3,7 +3,6 @@
 """
 
 from pyiem.plot import MapPlot
-import datetime
 import numpy as np
 import psycopg2
 COOP = psycopg2.connect("dbname=coop host=iemdb user=nobody")
