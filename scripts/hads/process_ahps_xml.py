@@ -7,7 +7,7 @@ import psycopg2
 import sys
 mesosite = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = mesosite.cursor()
-import network
+from pyiem.network import Table as NetworkTable
 
 def process_site( nwsli, network ):
     
@@ -22,6 +22,9 @@ def process_site( nwsli, network ):
     elementStream.DocumentEndEvent = lambda: results.append(roots[0])
     try:
         xml = urllib2.urlopen(url).read()
+        if xml.strip() == 'No results found for this gage.':
+            print 'No results for %s' % (nwsli,)
+            return
     except:
         print "DOWNLOAD ERROR"
         print url
@@ -69,7 +72,7 @@ def process_site( nwsli, network ):
 print '%5s %5s %5s %5s %5s %5s %5s %5s' % ("NWSLI", "LOW", "ACTN", "BANK", 
                                            "FLOOD", "MOD", "MAJOR", "REC")
 net = sys.argv[1]
-nt = network.Table(net)
+nt = NetworkTable(net)
 for sid in nt.sts.keys():
     process_site(sid, net)
 mcursor.close()
