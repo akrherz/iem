@@ -45,48 +45,53 @@ var task = {
   interval: 300000
 };
 
-ys = new Ext.Slider({
-    id       : 'YearSlider',
-    width    : 214,
-    minValue : 1893,
-    maxValue : parseInt( Ext.Date.format(appTime, "Y") ),
+ys = Ext.create('Ext.slider.Single', {
+    width: '100%',
+    minValue: 1893,
+    renderTo : 'year_select',
+    maxValue: parseInt( Ext.Date.format(appTime, "Y") ),
+    labelAlign: 'top',
+    fieldLabel: 'Year',
     listeners: {
-          'drag': function(){ updateDT(); }
+    	'drag': function(){ updateDT(); }
     }
 });
 
-var ds = new Ext.Slider({
-    id       : 'DaySlider',
-    width    : 732,
-    minValue : 0,
-    maxValue : 365,
-    colspan  : 7,
+var ds = Ext.create('Ext.slider.Single', {
+    width: '100%',
+    renderTo : 'day_select',
+    minValue: 0,
+    maxValue: 365,
+    labelAlign: 'top',
+    fieldLabel: 'Day of Year',
     listeners: {
-          'drag': function(){ updateDT(); }
+    	'drag': function(){ updateDT(); }
     }
 });
 
-var ms = new Ext.Slider({
-    id       : 'MinuteSlider',
-    width    : 120,
-    minValue : 0,
-    maxValue : 59,
-    increment: 1,
+var ms = Ext.create('Ext.slider.Single', {
+    minValue: 0,
+    maxValue: 59,
+    width: '100%',
+    renderTo : 'minute_select',
+    labelAlign: 'top',
+    fieldLabel: 'Minute',
     listeners: {
-          'drag': function(){ updateDT(); }
+    	'drag': function(){ updateDT(); }
     }
 });
 
-var hs = new Ext.Slider({
-    id       : 'HourSlider',
-    width    : 120,
-    minValue : 0,
-    maxValue : 23,
-    increment: 1,
+var hs = Ext.create('Ext.slider.Single', {
+    minValue: 0,
+    renderTo : 'hour_select',
+    width: '100%',
+    maxValue: 23,
+    labelAlign: 'top',
+    fieldLabel: 'Hour',
     listeners: {
-        'drag': function(){ updateDT(); }
+    	'drag': function(){ updateDT(); }
     }
- });
+});
 
 Ext.define('Product', {
     extend: 'Ext.data.Model',
@@ -110,15 +115,15 @@ var store = new Ext.data.JsonStore({
         url: '/json/products.php',
         reader: {
             type: 'json',
-            root: 'products',
+            rootProperty: 'products',
             idProperty: 'id'
         }
     }
     });
 
 var displayDT = new Ext.Toolbar.TextItem({
-    text      : 'Application Loading.....',
-    width     : 180,
+    html      : 'Loading...',
+    renderTo: 'displaydt',
     isInitial : true, 
     style     : {'font-weight': 'bold'}
 });
@@ -127,8 +132,13 @@ var combo = Ext.create('Ext.form.field.ComboBox', {
     id            : 'cb',
     triggerAction : 'all',
     queryMode     : 'local',
+    renderTo : 'product_select',
     editable      : false,
     matchFieldWidth : false,
+    fieldLabel: 'Available Products',
+    labelAlign: 'top',
+    flex: 2,
+    margin: '0 10 0 0',
     listConfig : {
     	minWidth : 300,
     	getInnerTpl : function(){
@@ -147,21 +157,21 @@ var combo = Ext.create('Ext.form.field.ComboBox', {
     valueField    : 'id',
     displayField  : 'name',
     listeners     : {
-      select      : function(cb, records, idx){
-        appDT = records[0].data.interval ;
+      select      : function(cb, record, idx){
+        appDT = record.data.interval;
 
         /* If we don't have sub hourly data, disable the minute selector */
-        if (records[0].data.interval >= 60){ 
+        if (appDT >= 60){ 
           //console.log("Disabling MS"); 
           ms.disable(); 
         } else { ms.enable(); }
 
         /* If we don't have sub daily data, disable the hour selector */
-        if (records[0].data.interval >= (60*24)){  hs.disable(); }
+        if (appDT >= (60*24)){  hs.disable(); }
         else { hs.enable(); }
 
         /* If we don't have hourly data */
-        if (records[0].data.interval > 60){  
+        if (appDT > 60){  
            Ext.getCmp('plushour').disable();
            Ext.getCmp('minushour').disable();
         }
@@ -170,9 +180,9 @@ var combo = Ext.create('Ext.form.field.ComboBox', {
            Ext.getCmp('minushour').enable();
         }
 
-        ms.increment = records[0].data.interval;
+        ms.increment = appDT;
         //console.log("Setting MS Increment to "+ ms.increment );
-        ys.minValue = parseInt( Ext.Date.format(records[0].data.sts, "Y") );
+        ys.minValue = parseInt( Ext.Date.format(record.data.sts, "Y") );
         ys.setValue( ys.getValue()-1 );
         ys.setValue( ys.getValue()+1 );
         updateDT();
@@ -203,7 +213,7 @@ store.on('load', function(){
   /* Make sure that our form gets reset based on settings for record */
   setTime();
   combo.setValue( idx );
-  combo.fireEvent('select', combo, [store.getById(idx)], idx);
+  combo.fireEvent('select', combo, store.getById(idx), idx);
   Ext.util.TaskManager.start(task);
 });
 
@@ -308,8 +318,14 @@ function updateDT(){
     setTime();
   }
 
-  displayDT.setText( Ext.Date.format(appTime, 'D M d Y g:i A T') );
-
+  if (appDT < 1440){
+	  displayDT.setText(Ext.Date.format(appTime, 'D M d Y') +"<br />"
+			  + Ext.Date.format(appTime, 'g:i A T') );
+  } else{
+	  displayDT.setText(Ext.Date.format(appTime.toUTC(), 'D M d Y') );
+	  
+  }
+	  
   tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}').replace(/%y/g, '{5}');
 
   uri = Ext.String.format(tpl, Ext.Date.format(gdt, "Y"), 
@@ -323,113 +339,100 @@ function updateDT(){
   window.location.href = Ext.String.format("#{0}.{1}", combo.getValue(), Ext.Date.format(gdt, 'YmdHi')); 
 }
 
-
-
-
-Ext.create('Ext.form.Panel', {
-    renderTo: 'theform',
-    layout  : {
-    	type: 'table',
-    	columns: 8
-    },
-    defaults : {
-        bodyStyle: 'border:0px;padding-left:0px;'
-    },
-    fbar: {
-    	pack : 'left',
-    	items : [
-      Ext.create('Ext.Button', {
-        id       : 'appMode',
-        realtime : true,
-        text     : 'RealTime',
-        handler  : function(btn){
-          if (btn.realtime){
-            btn.realtime = false;
-            btn.setText("Archive");
-          } else {
-            btn.realtime = true;
-            btn.setText("RealTime");
-            appTime = new Date();
-            setTime();
-            updateDT();
-          }
-        }
-      }),
-      Ext.create('Ext.Button', {
-        text: '<< Year',
-        handler: function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.YEAR, -1);
-            setTime();
-            updateDT();
-        }
-      }),
-      Ext.create('Ext.Button', {
-        text: '<< Day',
-        handler: function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.DAY, -1);
-            setTime();
-            updateDT();
-        }
-      }),
-      Ext.create('Ext.Button', {
-        id      : 'minushour',
-        text    : '<< Hour',
-        handler : function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.HOUR, -1);
-            setTime();
-            updateDT();
-        }
-      }),
-      Ext.create('Ext.Button', {
-        text    : '<< Prev',
-        handler : function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, - appDT );
-            setTime();
-            updateDT();
-        }
-      }),
-      displayDT,
-      Ext.create('Ext.Button', {
-        text    : 'Next >>',
-        handler : function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, appDT );
-            setTime();
-            updateDT();
-        }
-      }),
-      Ext.create('Ext.Button', {
-        id      : 'plushour',
-        text: 'Hour >>',
-        handler: function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.HOUR, 1);
-            setTime();
-            updateDT();
-        }
-      }),
-      Ext.create('Ext.Button', {
-        text: 'Day >>',
-        handler: function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.DAY, 1);
-            setTime();
-            updateDT();
-        }
-      }),
-      Ext.create('Ext.Button', {
-        text: 'Year >>',
-        handler: function(){
-            appTime = Ext.Date.add(appTime, Ext.Date.YEAR, 1);
-            setTime();
-            updateDT();
-        }
-      }),
-      '->']
-    },
-    items: [
-      {html: 'Product: '}, combo, {html: 'Year: '}, ys,
-      {html: 'Hour: '}, hs,       {html: 'Minute: '}, ms,
-      {html: 'Day of Year: '}, ds
-    ]
+Ext.create('Ext.Button', {
+	 id       : 'appMode',
+	 realtime : true,
+	 renderTo: 'realtime',
+	 text     : 'RealTime',
+	 handler  : function(btn){
+		 if (btn.realtime){
+			 btn.realtime = false;
+			 btn.setText("Archive");
+		 } else {
+			 btn.realtime = true;
+			 btn.setText("RealTime");
+			 appTime = new Date();
+			 setTime();
+			 updateDT();
+		 }
+	 }
 });
+
+Ext.create('Ext.Button', {
+	renderTo: 'pyear',
+	text: '<< Year',
+	 handler: function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.YEAR, -1);
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 text: '<< Day',
+	 renderTo: 'pday',
+	 handler: function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.DAY, -1);
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 id      : 'minushour',
+	 text    : '<< Hour',
+	 renderTo: 'phour',
+	 handler : function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.HOUR, -1);
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 text    : '<< Prev',
+	 renderTo: 'prev',
+	 handler : function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, - appDT );
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 text    : 'Next >>',
+	 renderTo: 'next',
+	 handler : function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, appDT );
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 id      : 'plushour',
+	 text: 'Hour >>',
+	 renderTo: 'nhour',
+	 handler: function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.HOUR, 1);
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 text: 'Day >>',
+	 renderTo: 'nday',
+	 handler: function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.DAY, 1);
+		 setTime();
+		 updateDT();
+	 }
+});
+Ext.create('Ext.Button', {
+	 text: 'Year >>',
+	 renderTo: 'nyear',
+	 handler: function(){
+		 appTime = Ext.Date.add(appTime, Ext.Date.YEAR, 1);
+		 setTime();
+		 updateDT();
+	 }
+});
+
 
 
 });
