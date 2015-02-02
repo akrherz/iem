@@ -146,9 +146,11 @@ def varconv(val, element):
 
 def create_netcdf(station, metadata):
     """Create a GHCN netCDF file for other local usage"""
-    fn = "USC00%s%s.nc" % (STCONV[station[:2]], station[2:])
+    ncdcid = "%s%s" % (STCONV[station[:2]], station[2:])
+    fn = "USC00%s.nc" % (ncdcid,)
     nc = netCDF4.Dataset(fn, 'w')
     nc.US_state = metadata['state']
+    nc.ncdc_identifier = ncdcid
     nc.station_name = metadata['name']
     reclen = int((2016-1850) * 365.25) + 1
     
@@ -176,30 +178,60 @@ def create_netcdf(station, metadata):
                              fill_value=-9999)
     snow.standard_name = 'snowfall_flux'
     snow.units = 'kg m-2 s-1'
+    _ = nc.createVariable('prsn_mflag', np.character, ('time',))
+    _.long_name = 'snowfall_flux mflag'
+    _ = nc.createVariable('prsn_qflag', np.character, ('time',))
+    _.long_name = 'snowfall_flux qflag'
+    _ = nc.createVariable('prsn_sflag', np.character, ('time',))
+    _.long_name = 'snowfall_flux sflag'
     
     # snow depth
     snowd = nc.createVariable('snowdepth', np.float, ('time',),
                              fill_value=-9999)
     snowd.long_name = 'Snowfall Depth'
     snowd.units = 'mm'
+    _ = nc.createVariable('snowdepth_mflag', np.character, ('time',))
+    _.long_name = 'Snowfall Depth mflag'
+    _ = nc.createVariable('snowdepth_qflag', np.character, ('time',))
+    _.long_name = 'Snowfall Depth qflag'
+    _ = nc.createVariable('snowdepth_sflag', np.character, ('time',))
+    _.long_name = 'Snowfall Depth sflag'
     
     # tmax
     tmax = nc.createVariable('tmax', np.float, ('time',),
                              fill_value=-9999)
     tmax.long_name = 'Temperature Max'
     tmax.units = 'K'
+    _ = nc.createVariable('tmax_mflag', np.character, ('time',))
+    _.long_name = 'Temperature Max mflag'
+    _ = nc.createVariable('tmax_qflag', np.character, ('time',))
+    _.long_name = 'Temperature Max qflag'
+    _ = nc.createVariable('tmax_sflag', np.character, ('time',))
+    _.long_name = 'Temperature Max sflag'
 
     # tmin
     tmin = nc.createVariable('tmin', np.float, ('time',),
                              fill_value=-9999)
     tmin.long_name = 'Temperature Min'
     tmin.units = 'K'
+    _ = nc.createVariable('tmin_mflag', np.character, ('time',))
+    _.long_name = 'Temperature Min mflag'
+    _ = nc.createVariable('tmin_qflag', np.character, ('time',))
+    _.long_name = 'Temperature Min qflag'
+    _ = nc.createVariable('tmin_sflag', np.character, ('time',))
+    _.long_name = 'Temperature Min sflag'
 
     # precip
     precip = nc.createVariable('pr', np.float, ('time',),
                              fill_value=-9999)
     precip.standard_name = 'precipitation_flux'
     precip.units = 'kg m-2 s-1'
+    _ = nc.createVariable('pr_mflag', np.character, ('time',))
+    _.long_name = 'precipitation_flux mflag'
+    _ = nc.createVariable('pr_qflag', np.character, ('time',))
+    _.long_name = 'precipitation_flux qflag'
+    _ = nc.createVariable('pr_sflag', np.character, ('time',))
+    _.long_name = 'precipitation_flux sflag'
     
     return nc
 
@@ -231,8 +263,11 @@ def process(station, metadata):
                 continue
             if not data.has_key(day):
                 data[day] = {}
-            if d['flag%s' % (i,)][1] != " ":
-                continue
+            #if d['flag%s' % (i,)] != "   ":
+            #    print d['flag%s' % (i,)]
+            data[day][d['element']+"mflag"] = d['flag%s' % (i,)][0]
+            data[day][d['element']+"qflag"] = d['flag%s' % (i,)][1]
+            data[day][d['element']+"sflag"] = d['flag%s' % (i,)][2]
             v = varconv(d['value%s' % (i,)], d['element'])
             if v is not None:
                 data[day][d['element']] = v
@@ -250,22 +285,38 @@ def process(station, metadata):
     for d in keys:
         row = obs.get(d)
         offset = (d - BASE).days - 1
+        nc.variables['pr_mflag'][offset] = data[d].get('PRCPmflag', ' ')
+        nc.variables['pr_qflag'][offset] = data[d].get('PRCPqflag', ' ')
+        nc.variables['pr_sflag'][offset] = data[d].get('PRCPsflag', ' ')
         if data[d].get('PRCP') is not None:
             nc.variables['pr'][offset] = distance(data[d].get('PRCP'), 
                                                   'IN').value("MM") / 86400.
+        nc.variables['prsn_mflag'][offset] = data[d].get('SNOWmflag', ' ')
+        nc.variables['prsn_qflag'][offset] = data[d].get('SNOWqflag', ' ')
+        nc.variables['prsn_sflag'][offset] = data[d].get('SNOWsflag', ' ')
         if data[d].get('SNOW') is not None:
             nc.variables['prsn'][offset] = distance(data[d].get('SNOW'), 
                                                   'IN').value("MM") / 86400.
+        nc.variables['snowdepth_mflag'][offset] = data[d].get('SNWDmflag', ' ')
+        nc.variables['snowdepth_qflag'][offset] = data[d].get('SNWDqflag', ' ')
+        nc.variables['snowdepth_sflag'][offset] = data[d].get('SNWDsflag', ' ')
         if data[d].get('SNWD') is not None:
             nc.variables['snowdepth'][offset] = distance(data[d].get('SNWD'), 
                                                   'IN').value("MM")
+        nc.variables['tmax_mflag'][offset] = data[d].get('TMAXmflag', ' ')
+        nc.variables['tmax_qflag'][offset] = data[d].get('TMAXqflag', ' ')
+        nc.variables['tmax_sflag'][offset] = data[d].get('TMAXsflag', ' ')
         if data[d].get('TMAX') is not None:
             nc.variables['tmax'][offset] = temperature(data[d].get('TMAX'),
                                                    'F').value('K')
+        nc.variables['tmin_mflag'][offset] = data[d].get('TMINmflag', ' ')
+        nc.variables['tmin_qflag'][offset] = data[d].get('TMINqflag', ' ')
+        nc.variables['tmin_sflag'][offset] = data[d].get('TMINsflag', ' ')
         if data[d].get('TMIN') is not None:
             nc.variables['tmin'][offset] = temperature(data[d].get('TMIN'),
                                                    'F').value('K')
-        
+        # abort out for now
+        continue
         if row is None:
             print 'No data for %s %s' % (station, d)
             cursor.execute("""INSERT into %s(station, day, sday,
