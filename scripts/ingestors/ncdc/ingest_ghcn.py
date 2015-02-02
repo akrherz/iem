@@ -33,15 +33,18 @@ SFLAG31    269-269   Character
 import urllib2
 import os
 import datetime
+import numpy as np
 import psycopg2
 import sys
 import re
-from pyiem.datatypes import temperature
+import netCDF4
+from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
 
 COOP = psycopg2.connect(database='coop', host='iemdb')
 cursor = COOP.cursor()
 
+BASE = datetime.date(1850,1,1)
 TODAY = datetime.date.today()
 
 STCONV = {'WA': '45', 'DE': '07', 'DC': '18', 'WI': '47', 'WV': '46', 
@@ -141,7 +144,66 @@ def varconv(val, element):
         return v
     return None
 
-def process( station ):
+def create_netcdf(station, metadata):
+    """Create a GHCN netCDF file for other local usage"""
+    fn = "USC00%s%s.nc" % (STCONV[station[:2]], station[2:])
+    nc = netCDF4.Dataset(fn, 'w')
+    nc.US_state = metadata['state']
+    nc.station_name = metadata['name']
+    reclen = int((2016-1850) * 365.25) + 1
+    
+    _ = nc.createDimension('time', reclen)
+    _ = nc.createDimension('stations', 1)
+    
+    lat = nc.createVariable('lat', np.float, ('stations',))
+    lat.standard_name = 'latitude'
+    lat.units = 'degree_north'
+    lat[0] = metadata['lat']
+
+    lon = nc.createVariable('lon', np.float, ('stations',))
+    lon.standard_name = 'longitude'
+    lon.units = 'degree_east'
+    lon[0] = metadata['lon']
+    
+    # Time
+    tm = nc.createVariable('time', np.float, ('time',))
+    tm.units = "days since 1850-01-01 00:00:00"
+    tm.calendar = "gregorian"
+    tm[:] = np.arange(reclen)
+    
+    # snowfall
+    snow = nc.createVariable('prsn', np.float, ('time',),
+                             fill_value=-9999)
+    snow.standard_name = 'snowfall_flux'
+    snow.units = 'kg m-2 s-1'
+    
+    # snow depth
+    snowd = nc.createVariable('snowdepth', np.float, ('time',),
+                             fill_value=-9999)
+    snowd.long_name = 'Snowfall Depth'
+    snowd.units = 'mm'
+    
+    # tmax
+    tmax = nc.createVariable('tmax', np.float, ('time',),
+                             fill_value=-9999)
+    tmax.long_name = 'Temperature Max'
+    tmax.units = 'K'
+
+    # tmin
+    tmin = nc.createVariable('tmin', np.float, ('time',),
+                             fill_value=-9999)
+    tmin.long_name = 'Temperature Min'
+    tmin.units = 'K'
+
+    # precip
+    precip = nc.createVariable('pr', np.float, ('time',),
+                             fill_value=-9999)
+    precip.standard_name = 'precipitation_flux'
+    precip.units = 'kg m-2 s-1'
+    
+    return nc
+
+def process(station, metadata):
     ''' Lets process something, stat 
     
     ['TMAX', 'TMIN', 'TOBS', 'PRCP', 'SNOW', 'SNWD', 'EVAP', 'MNPN', 'MXPN',
@@ -150,9 +212,10 @@ def process( station ):
      'SX52', 'SX53', 'WT01', 'SN31', 'SN32', 'SN33', 'SX31', 'SX32', 'SX33']
 
     '''
-    fp = get_file( station )
+    fp = get_file(station)
     if fp is None:
         return
+    nc = create_netcdf(station, metadata)
     data = {}
     for line in fp:
         m = DATARE.match(line)
@@ -186,6 +249,23 @@ def process( station ):
        
     for d in keys:
         row = obs.get(d)
+        offset = (d - BASE).days - 1
+        if data[d].get('PRCP') is not None:
+            nc.variables['pr'][offset] = distance(data[d].get('PRCP'), 
+                                                  'IN').value("MM") / 86400.
+        if data[d].get('SNOW') is not None:
+            nc.variables['prsn'][offset] = distance(data[d].get('SNOW'), 
+                                                  'IN').value("MM") / 86400.
+        if data[d].get('SNWD') is not None:
+            nc.variables['snowdepth'][offset] = distance(data[d].get('SNWD'), 
+                                                  'IN').value("MM")
+        if data[d].get('TMAX') is not None:
+            nc.variables['tmax'][offset] = temperature(data[d].get('TMAX'),
+                                                   'F').value('K')
+        if data[d].get('TMIN') is not None:
+            nc.variables['tmin'][offset] = temperature(data[d].get('TMIN'),
+                                                   'F').value('K')
+        
         if row is None:
             print 'No data for %s %s' % (station, d)
             cursor.execute("""INSERT into %s(station, day, sday,
@@ -231,6 +311,8 @@ def process( station ):
                              d, station )
             cursor.execute(sql)
 
+    nc.close()
+
 def main():
     """ go main go """
     station = sys.argv[1]
@@ -240,9 +322,11 @@ def main():
         for sid in nt.sts.keys():
             if sid[2:] == '0000' or sid[2] == 'C':
                 continue
-            process( sid )
+            process(sid, nt.sts[sid])
     else:
-        process( sys.argv[1] )
+        station = sys.argv[1]
+        nt = NetworkTable("%sCLIMATE" % (station[:2],))
+        process(sys.argv[1], nt.sts[station])
 
 
 if __name__ == '__main__':
