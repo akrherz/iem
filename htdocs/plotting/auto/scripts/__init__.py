@@ -38,6 +38,7 @@ data = {'plots': [
         {'id': "8", 'label': "Monthly Precipitation Reliability"},
         {'id': "23", 'label': "Monthly Station Departures + El Nino 3.4 Index"},
         {'id': "36", 'label': "Month warmer than other Month for Year"},
+        {'id': "58", 'label': "One Day's Precipitation Greater than X percentage of Monthly Total"},
         {'id': "41", 'label': "Quantile / Quantile Plot of Daily Temperatures for Two Months"},
         {'id': "20", 'label': "Hours of Precipitation by Month"},
         {'id': "47", 'label': "Snowfall vs Precipitation Total for a Month"},
