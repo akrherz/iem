@@ -12,10 +12,6 @@ cd ../climate
 python today_hilo.py
 python today_rec_hilo.py
 
-cd ../week
-python avg_high.py
-python avg_low.py
-
 cd ../month
 python obs_precip.py
 python obs_precip_coop.py
