@@ -137,7 +137,7 @@ def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid, snowgrid,
     snow, snowd, valid.year, valid.month, "%02i%02i" % (valid.month,
                                                         valid.day)))
     
-if __name__ == '__main__':
+def main():
     if len(sys.argv) == 4:
         do_day( datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
     elif len(sys.argv) == 3:
@@ -151,5 +151,7 @@ if __name__ == '__main__':
     else:
         do_day( datetime.datetime.now() - datetime.timedelta(days=1))
     
+if __name__ == '__main__':
+    main()
     ccursor.close()
     COOP.commit()

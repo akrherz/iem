@@ -5,8 +5,8 @@ import sys
 from pyiem.plot import MapPlot
 import datetime
 import psycopg2
-import network
-st = network.Table(["IA_COOP",'MO_COOP','KS_COOP','NE_COOP','SD_COOP',
+from pyiem.network import Table as NetworkTable
+st = NetworkTable(["IA_COOP",'MO_COOP','KS_COOP','NE_COOP','SD_COOP',
      'ND_ASOS', 'MN_COOP', 'WI_COOP', 'IL_COOP','IN_COOP','OH_COOP','MI_COOP'])
 
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
@@ -54,7 +54,7 @@ def doit(now):
 
     m.contourf(lons, lats, vals, clevs, units='inch')
 
-    pqstr = "plot ac %s0000 iowa_coop_12z_precip.png iowa_coop_12z_precip.png png" % (ts.strftime("%Y%m%d"),)
+    pqstr = "plot ac %s0000 iowa_coop_12z_precip.png iowa_coop_12z_precip.png png" % (now.strftime("%Y%m%d"),)
     m.postprocess(pqstr=pqstr)
     m.close()
 
@@ -64,14 +64,17 @@ def doit(now):
 
     m.contourf(lons, lats, vals, clevs, units='inch')
 
-    pqstr = "plot ac %s0000 midwest_coop_12z_precip.png midwest_coop_12z_precip.png png" % (ts.strftime("%Y%m%d"),)
+    pqstr = "plot ac %s0000 midwest_coop_12z_precip.png midwest_coop_12z_precip.png png" % (now.strftime("%Y%m%d"),)
     m.postprocess(pqstr=pqstr)
     m.close()
 
-
-if __name__ == '__main__':
+def main():
+    """Go Main Go"""
     ts = datetime.datetime.now()
     if len(sys.argv) == 4:
         ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
                                int(sys.argv[3]) )
     doit( ts )
+
+if __name__ == '__main__':
+    main()

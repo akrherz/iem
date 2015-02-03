@@ -1,8 +1,8 @@
 """
 Yearly precip something
 """
-import network
-nt = network.Table("IA_COOP")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IA_COOP")
 import datetime
 import psycopg2
 import subprocess

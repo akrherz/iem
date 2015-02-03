@@ -3,7 +3,7 @@
 """
 import sys
 import numpy as np
-import network
+from pyiem.network import Table as NetworkTable
 import psycopg2.extras
 import netCDF4
 import datetime
@@ -16,7 +16,7 @@ ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 
 state = sys.argv[1]
-nt = network.Table("%sCLIMATE" % (state.upper(),))
+nt = NetworkTable("%sCLIMATE" % (state.upper(),))
 
 vnameconv = {'high': 'high_tmpk', 'low': 'low_tmpk', 'precip': 'p01d'}
 

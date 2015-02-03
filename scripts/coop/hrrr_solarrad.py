@@ -90,9 +90,7 @@ def run( ts ):
         day = %s and station = %s
         """, (rad_mj, ts.strftime("%Y-%m-%d"), row[0]))
     
-
-if __name__ == '__main__':
-    ''' run main() run '''
+def main():
     if len(sys.argv) == 4:
         sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
                                 int(sys.argv[3]), 12, 0)
@@ -120,6 +118,10 @@ if __name__ == '__main__':
         ts = ts - datetime.timedelta(days=1)
         ts = ts.replace(hour=0,minute=0,second=0,microsecond=0)
         run( ts )
+
+if __name__ == '__main__':
+    ''' run main() run '''
+    main()
     cursor.close()
     cursor2.close()
     COOP.commit()

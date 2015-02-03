@@ -1,0 +1,290 @@
+"""Plot of Precip reports"""
+from pyiem.plot import MapPlot
+import psycopg2
+import datetime
+
+def pretty(val, precision=2):
+    """Make a value into a prettier string
+    
+    Args:
+      val (float): value to convert to a string
+      precision (int): number of places
+    """
+    if val == 0:
+        return "0"
+    if val == 0.001:
+        return "T"
+    return ('%.'+str(precision)+'f') % (val,)
+
+def plot_hilo(valid):
+    """ Go Main Go
+    
+    Args:
+      valid (datetime): The timestamp we are interested in!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    
+    cursor.execute("""SELECT max_tmpf, min_tmpf, id, st_x(geom), st_y(geom)
+    from summary s JOIN stations t on 
+    (t.iemid = s.iemid) WHERE s.day = %s
+    and t.network in ('IA_COOP', 'NE_COOP', 'MO_COOP', 'IL_COOP', 'WI_COOP',
+    'MN_COOP')
+    and max_tmpf is not null and max_tmpf >= -30 and
+    min_tmpf is not null and min_tmpf < 99 and
+    extract(hour from coop_valid) between 5 and 10""", (valid.date(),))
+    labels = []
+    highs = []
+    lows = []
+    lats = []
+    lons = []
+    for row in cursor:
+        labels.append(row[2])
+        highs.append(pretty(row[0], precision=0))
+        lows.append(pretty(row[1], precision=0))
+        lats.append(row[4])
+        lons.append(row[3])
+    
+    m = MapPlot(title='%s NWS COOP 24 Hour High/Low Temperature [$^\circ$F]' % (
+                                            valid.strftime("%-d %b %Y"),),
+                subtitle='Reports valid between 6 and 9 AM',
+                axisbg='white', figsize=(10.24,7.68))
+    m.plot_station(lons, lats, [highs, lows, labels], [1,7,5],
+                   colors=['red', 'blue', 'tan'], textsize=[12,12,8])
+    m.drawcounties()
+    
+    pqstr = "plot ac %s0000 coopSnowDepth.gif coopSnowDepth.gif gif" % (
+                                                    valid.strftime("%Y%m%d"),)
+    
+    m.postprocess(pqstr=pqstr)
+    m.close()
+    
+    pgconn.close()
+
+def plot_snowdepth(valid):
+    """ Go Main Go
+    
+    Args:
+      valid (datetime): The timestamp we are interested in!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    
+    cursor.execute("""SELECT snowd, id, st_x(geom), st_y(geom)
+    from summary s JOIN stations t on 
+    (t.iemid = s.iemid) WHERE s.day = %s
+    and t.network in ('IA_COOP', 'NE_COOP', 'MO_COOP', 'IL_COOP', 'WI_COOP',
+    'MN_COOP')
+    and snowd is not null and snowd >= 0 and
+    extract(hour from coop_valid) between 5 and 10""", (valid.date(),))
+    labels = []
+    vals = []
+    lats = []
+    lons = []
+    for row in cursor:
+        labels.append(row[1])
+        vals.append(pretty(row[0], precision=0))
+        lats.append(row[3])
+        lons.append(row[2])
+    
+    m = MapPlot(title='%s NWS COOP Snowfall Depth Reports [inch]' % (
+                                            valid.strftime("%-d %b %Y"),),
+                subtitle='Reports valid between 6 and 9 AM',
+                axisbg='white', figsize=(10.24,7.68))
+    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                  labelcolor='tan')
+    m.drawcounties()
+    
+    pqstr = "plot ac %s0000 coopSnowDepth.gif coopSnowDepth.gif gif" % (
+                                                    valid.strftime("%Y%m%d"),)
+    
+    m.postprocess(pqstr=pqstr)
+    m.close()
+    
+    pgconn.close()
+
+def plot_snow(valid):
+    """ Go Main Go
+    
+    Args:
+      valid (datetime): The timestamp we are interested in!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    
+    cursor.execute("""SELECT snow, id, st_x(geom), st_y(geom)
+    from summary s JOIN stations t on 
+    (t.iemid = s.iemid) WHERE s.day = %s
+    and t.network in ('IA_COOP', 'NE_COOP', 'MO_COOP', 'IL_COOP', 'WI_COOP',
+    'MN_COOP')
+    and snow is not null and snow >= 0 and
+    extract(hour from coop_valid) between 5 and 10""", (valid.date(),))
+    labels = []
+    vals = []
+    lats = []
+    lons = []
+    for row in cursor:
+        labels.append(row[1])
+        vals.append(pretty(row[0]))
+        lats.append(row[3])
+        lons.append(row[2])
+    
+    m = MapPlot(title='%s NWS COOP 24 Hour Snowfall Reports [inch]' % (
+                                            valid.strftime("%-d %b %Y"),),
+                subtitle='Reports valid between 6 and 9 AM',
+                axisbg='white', figsize=(10.24,7.68))
+    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                  labelcolor='tan')
+    m.drawcounties()
+    
+    pqstr = "plot ac %s0000 coopSnowPlot.gif coopSnowPlot.gif gif" % (
+                                                    valid.strftime("%Y%m%d"),)
+    
+    m.postprocess(pqstr=pqstr)
+    m.close()
+    
+    pgconn.close()
+
+def plot_snow_month(valid):
+    """ Go Main Go
+    
+    Args:
+      valid (datetime): The timestamp we are interested in!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    
+    d1 = valid.replace(day=1)
+    d2 = d1 + datetime.timedelta(days=35)
+    d2 = d2.replace(day=1)
+    
+    cursor.execute("""SELECT sum(snow), id, st_x(geom), st_y(geom)
+    from summary s JOIN stations t on 
+    (t.iemid = s.iemid) WHERE s.day >= %s and s.day < %s
+    and t.network in ('IA_COOP', 'NE_COOP', 'MO_COOP', 'IL_COOP', 'WI_COOP',
+    'MN_COOP')
+    and snow is not null and snow >= 0 and
+    extract(hour from coop_valid) between 5 and 10
+    GROUP by id, st_x, st_y""", (d1.date(), d2.date()))
+    labels = []
+    vals = []
+    lats = []
+    lons = []
+    for row in cursor:
+        labels.append(row[1])
+        vals.append(pretty(row[0],0))
+        lats.append(row[3])
+        lons.append(row[2])
+    
+    m = MapPlot(title='%s NWS COOP Month Snowfall Totals [inch]' % (
+                                            valid.strftime("%-d %b %Y"),),
+                subtitle='Reports valid between 6 and 9 AM',
+                axisbg='white', figsize=(10.24,7.68))
+    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                  labelcolor='tan')
+    m.drawcounties()
+    
+    pqstr = "plot ac %s0000 coopMonthSPlot.gif coopMonthSPlot.gif gif" % (
+                                                    valid.strftime("%Y%m%d"),)
+    
+    m.postprocess(view=True,pqstr=pqstr)
+    m.close()
+    
+    pgconn.close()
+
+def plot_precip_month(valid):
+    """ Go Main Go
+    
+    Args:
+      valid (datetime): The timestamp we are interested in!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    
+    d1 = valid.replace(day=1)
+    d2 = d1 + datetime.timedelta(days=35)
+    d2 = d2.replace(day=1)
+    
+    cursor.execute("""SELECT sum(pday), id, st_x(geom), st_y(geom)
+    from summary s JOIN stations t on 
+    (t.iemid = s.iemid) WHERE s.day >= %s and s.day < %s
+    and t.network in ('IA_COOP', 'NE_COOP', 'MO_COOP', 'IL_COOP', 'WI_COOP',
+    'MN_COOP')
+    and pday is not null and pday >= 0 and
+    extract(hour from coop_valid) between 5 and 10
+    GROUP by id, st_x, st_y""", (d1.date(), d2.date()))
+    labels = []
+    vals = []
+    lats = []
+    lons = []
+    for row in cursor:
+        labels.append(row[1])
+        vals.append(pretty(row[0]))
+        lats.append(row[3])
+        lons.append(row[2])
+    
+    m = MapPlot(title='%s NWS COOP Month Precipitation Totals [inch]' % (
+                                            valid.strftime("%-d %b %Y"),),
+                subtitle='Reports valid between 6 and 9 AM',
+                axisbg='white', figsize=(10.24,7.68))
+    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                  labelcolor='tan')
+    m.drawcounties()
+    
+    pqstr = "plot ac %s0000 coopMonthPlot.gif coopMonthPlot.gif gif" % (
+                                                    valid.strftime("%Y%m%d"),)
+    
+    m.postprocess(pqstr=pqstr)
+    m.close()
+    
+    pgconn.close()
+
+def plot_precip(valid):
+    """ Go Main Go
+    
+    Args:
+      valid (datetime): The timestamp we are interested in!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    
+    cursor.execute("""SELECT pday, id, st_x(geom), st_y(geom)
+    from summary s JOIN stations t on 
+    (t.iemid = s.iemid) WHERE s.day = %s
+    and t.network in ('IA_COOP', 'NE_COOP', 'MO_COOP', 'IL_COOP', 'WI_COOP',
+    'MN_COOP')
+    and pday is not null and pday >= 0 and
+    extract(hour from coop_valid) between 5 and 10""", (valid.date(),))
+    labels = []
+    vals = []
+    lats = []
+    lons = []
+    for row in cursor:
+        labels.append(row[1])
+        vals.append(pretty(row[0]))
+        lats.append(row[3])
+        lons.append(row[2])
+    
+    m = MapPlot(title='%s NWS COOP 24 Hour Precipitation Reports [inch]' % (
+                                            valid.strftime("%-d %b %Y"),),
+                subtitle='Reports valid between 6 and 9 AM',
+                axisbg='white', figsize=(10.24,7.68))
+    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                  labelcolor='tan')
+    m.drawcounties()
+    
+    pqstr = "plot ac %s0000 coopPrecPlot.gif coopPrecPlot.gif gif" % (
+                                                    valid.strftime("%Y%m%d"),)
+    
+    m.postprocess(pqstr=pqstr)
+    m.close()
+    
+    pgconn.close()
+
+if __name__ == '__main__':
+    plot_precip(datetime.datetime.now())
+    plot_snow(datetime.datetime.now())
+    plot_snowdepth(datetime.datetime.now())
+    plot_hilo(datetime.datetime.now())
+    plot_precip_month(datetime.datetime.now())
+    plot_snow_month(datetime.datetime.now())

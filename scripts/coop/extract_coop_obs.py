@@ -1,6 +1,6 @@
 """ Dump out obs from the database for use by other apps """
 
-import  mx.DateTime
+import mx.DateTime
 import shapelib
 import dbflib
 import psycopg2
@@ -89,10 +89,6 @@ dbf.add_field("SMONTH", dbflib.FTDouble, 10, 2)
 
 shp = shapelib.create("coop_"+ts, shapelib.SHPT_POINT)
 
-o = open('/mesonet/data/coop/coop_obs.fil', 'w')
-o.write(' PARM = TMPX;TMPN;P24I;PMOI;SMOI;SNOW;SNOD\n\n')
-o.write('    STN     YYMMDD/HHMM    TMPX    TMPN      P24I      PMOI      SMOI      SNOW      SNOD\n')
-
 j = 0
 for sid in cob.keys():
 
@@ -100,10 +96,6 @@ for sid in cob.keys():
 		[[(cob[sid]["LON"], cob[sid]["LAT"])]] )
     shp.write_object(-1, obj)
     #print id, cob[sid]
-    o.write("%7s%16s%8.0f%8.0f%10.2f%10.2f%10.2f%10.2f%10.2f\n" % (
-		sid, dateStr, cob[sid]["TMPX"], cob[sid]["TMPN"], 
-		cob[sid]["P24I"], cob[sid]["PMOI"], cob[sid]["SMOI"], cob[sid]["SNOW"], 
-		cob[sid]["SNOD"]) )
     if cob[sid]["TMPX"] < 0:
         cob[sid]["TMPX"] = -99.
     if cob[sid]["TMPN"] < 0:
@@ -132,7 +124,6 @@ for sid in cob.keys():
     
     del(obj)
     j += 1
-o.close()
 
 icursor.close()
 IEM.commit()

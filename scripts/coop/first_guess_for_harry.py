@@ -339,7 +339,7 @@ def runner(year, month):
     return fn
 
 def main():
-    """ Go Main Go """
+    """Go Main Go """
     if len(sys.argv) == 1:
         lastmonth = datetime.datetime.now() - datetime.timedelta(days=15)
         fn = runner( lastmonth.year, lastmonth.month)
@@ -347,6 +347,7 @@ def main():
         msg = MIMEMultipart()
         msg['Subject'] = 'IEM COOP Report for %s' % (lastmonth.strftime("%b %Y"),)
         msg['From'] = 'akrherz@iastate.edu'
+        #msg['To'] = 'akrherz@localhost'
         msg['To'] = 'Harry.Hillaker@iowaagriculture.gov'
         msg.preamble = 'COOP Report'
 

@@ -1,12 +1,10 @@
 """
 Daily precip something
 """
-import network
-nt = network.Table("IA_COOP")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IA_COOP")
 import datetime
 import psycopg2
-import subprocess
-import os
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')

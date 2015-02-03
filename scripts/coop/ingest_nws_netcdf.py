@@ -1,6 +1,4 @@
-'''
- Ingest the NWS provided netcdf file of COOP data
-'''
+"""Ingest the NWS provided netcdf file of COOP data"""
 import netCDF4
 import psycopg2
 import numpy
