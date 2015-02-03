@@ -39,7 +39,7 @@ def run(base, ceil, now, fn):
     m.contourf(lons, lats, gdd50, a)
     
     pqstr = "plot c 000000000000 summary/%s.png bogus png" % (fn,)
-    m.postprocess(view=True, pqstr=pqstr)
+    m.postprocess(pqstr=pqstr)
 
 def main():
     """Main()"""
