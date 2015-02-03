@@ -194,7 +194,23 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 <li>RIDGE Single NEXRAD Imagery 
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?sector=XXX&amp;prod=XXX&amp;</code>
   <br />You also need to provide two CGI variables for the NEXRAD identifier
-  and level III product you want. For example, sector=DMX&amp;prod=N0Q 
+  and level III product you want. For example, sector=DMX&amp;prod=N0Q
+  <br />
+  <br /><i>Layer:</i> <strong>single</strong> Most recent image for the given 
+		RADAR identifier and Level III product.  A simple JSON metadata file
+		exists for each RADAR and Level III product combination, for example 
+		<a href="/data/gis/images/4326/ridge/DMX/N0Q_0.json">DMX N0Q</a>.
+  <br />
+  <br /><i>Layer:</i> <strong>single-archive</strong> This allows request of
+		a specific volume scan time from IEM's archive of imagery.  You need
+		to specify the prod and sector like with the "single" layer, but also
+		need to include a year, month, day and time.  All of these values are 
+		in UTC.  Here's an <a href="http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
+		that gets NEXRAD RTX N0Q product for 27 Jan 2015 at 23:03 UTC.  You 
+		must know the volume scan times prior to making the request.  There
+		are <a href="/json/">JSON</a> services that can help you out. 
+		Unfortunately, this service <strong>does not support WMS-T</strong> 
+		due to complications with how I serve this information out, sorry.
  </li>
  
  <hr />
