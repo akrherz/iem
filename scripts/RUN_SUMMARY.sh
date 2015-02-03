@@ -29,7 +29,7 @@ python plot_gdd.py
 
 cd ../season
 python plot_4month_stage4.py
-python CLI_parse.py
+python plot_cli_jul1_snow.py
 
 cd ../year
 python precip.py
