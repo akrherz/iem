@@ -1,6 +1,6 @@
 # Plot the COOP Precipitation Reports, don't use lame-o x100
 
-import iemplot
+from pyiem.plot import MapPlot
 import datetime
 
 import psycopg2.extras
@@ -36,19 +36,10 @@ for row in icursor:
     labels.append( row['id'] )
     valmask.append( True )
 
-
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- '_showvalues'        : True,
- '_format'            : '%s',
- '_title'             : "Iowa COOP 24 Hour Precipitation",
- '_valid'             : "ending approximately %s 7 AM" % (
-                            datetime.datetime.now().strftime("%-d %b %Y"), ),
-# '_labels'            : labels
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-
+m = MapPlot(title="Iowa COOP 24 Hour Precipitation", axisbg='white',
+            subtitle="ending approximately %s 7 AM" % (
+                            datetime.datetime.now().strftime("%-d %b %Y"), ))
+m.plot_values(lons, lats, vals)
 pqstr = "plot ac %s iowa_coop_precip.png iowa_coop_precip.png png" % (
         datetime.datetime.now().strftime("%Y%m%d%H%M"), )
-iemplot.postprocess(tmpfp, pqstr)
+m.postprocess(pqstr=pqstr)

@@ -11,12 +11,11 @@
 """
 import netCDF4
 import datetime
-import pyproj
 import numpy
-import iemdb
+import psycopg2
 import sys
 import os
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor()
 ccursor2 = COOP.cursor()
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 import mx.DateTime
-from pyIEM import iemdb
-i = iemdb.iemdb()
-coopdb = i['coop']
+import psycopg2
+i = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
 sts = mx.DateTime.DateTime(2013,5,27)
 ets = mx.DateTime.DateTime(2013,7,8)

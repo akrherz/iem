@@ -4,9 +4,9 @@
 import mx.DateTime
 import psycopg2
 import psycopg2.extras
-import network
+from pyiem.network import Table as NetworkTable
 import sys
-nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
+nt = NetworkTable(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
   "NECLIMATE", "KSCLIMATE", "MOCLIMATE", "ILCLIMATE", "WICLIMATE",
   "MICLIMATE", "INCLIMATE", "OHCLIMATE", "KYCLIMATE"))
 COOP = psycopg2.connect(database='coop', host='iemdb')

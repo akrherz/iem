@@ -15,8 +15,9 @@ now = mx.DateTime.now()
 sts = now + mx.DateTime.RelativeDateTime(days=-7,hour=0)
 
 acursor.execute("""
-  SELECT data, source from products where pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD',
-  'RR3OAX','RR1FSD') and entered > '%s' ORDER by entered ASC
+  SELECT data, source from products where 
+  pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD','RR3OAX','RR1FSD') 
+  and entered > '%s' ORDER by entered ASC
 """ % (sts.strftime("%Y-%m-%d %H:%M"), ))
 
 WFOS = ['KDMX', 'KARX', 'KDVN', 'KFSD', 'KOAX']

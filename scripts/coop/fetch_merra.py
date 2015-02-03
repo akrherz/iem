@@ -26,7 +26,6 @@ def do_month(sts):
     interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
-
         uri = now.strftime(("http://goldsmr2.sci.gsfc.nasa.gov/daac-bin/OTF/"
             +"HTTP_services.cgi?FILENAME=%%2Fdata%%2Fs4pa%%2FMERRA%%2"
             +"FMAT1NXRAD.5.2.0%%2F%Y%%2F%m%%2FMERRA"+trans(now)+".prod.assim."

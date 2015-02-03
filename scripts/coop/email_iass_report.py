@@ -5,7 +5,7 @@
 import sys
 import psycopg2
 import psycopg2.extras
-import network
+from pyiem.network import Table as NetworkTable
 import cStringIO
 import datetime
 import smtplib
@@ -13,7 +13,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
-nt = network.Table("IA_COOP")
+nt = NetworkTable("IA_COOP")
 
 districts = [
 'North West',

@@ -26,7 +26,7 @@ acursor.execute("""SELECT year, month,
  sum(case when low is null then 0 else 1 end), 
  sum(case when precip is null then 0 else 1 end) 
  from alldata_"""+stid[:2]+""" WHERE
- station = %s GROUP by year, month""", (stid,))
+ station = %s and year > 1892 GROUP by year, month""", (stid,))
 
 idx = 2
 vname = 'Counts'
