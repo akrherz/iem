@@ -1,6 +1,6 @@
-import iemdb
+import psycopg2
 import mx.DateTime
-ASOS = iemdb.connect('asos')
+ASOS = psycopg2.connect(database='asos', host='iemdb')
 acursor = ASOS.cursor()
 
 obs = {}

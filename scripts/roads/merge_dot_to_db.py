@@ -1,4 +1,4 @@
-''' 
+""" 
 Take the raw shapefile kindly provided by the DOT and merge it to my
 antiquated schema
 
@@ -22,7 +22,7 @@ antiquated schema
  simple_geom | geometry               | ST_Simplify
 
 
-'''
+"""
 import psycopg2
 conn = psycopg2.connect(database='postgis')
 conn2 = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
