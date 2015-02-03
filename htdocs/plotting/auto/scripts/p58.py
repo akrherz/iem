@@ -56,6 +56,7 @@ def plotter( fdict ):
     ax.grid(True)
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(0,100)
+    ax.set_ylabel("Percentage of Years")
     ax.set_yticks([0,10,25,50,75,90, 100])
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xticks( np.arange(1,13))
