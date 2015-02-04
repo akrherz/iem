@@ -1,5 +1,4 @@
-"""
-Dump what I have stored in the AFOS database to flat files
+"""Dump what I have stored in the AFOS database to flat files
 """
 import psycopg2
 pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')

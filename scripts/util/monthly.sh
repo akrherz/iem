@@ -1,6 +1,5 @@
 #  This process copies data around to longer term locations on a monthly basis
 #
-
 export MM="${2}"
 export YY="${1}"
 export YYYY="20${YY}"
