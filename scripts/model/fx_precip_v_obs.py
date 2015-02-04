@@ -1,7 +1,7 @@
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
-MOS = iemdb.connect('mos', bypass=True)
+MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
 mcursor = MOS.cursor()
 
 import numpy
