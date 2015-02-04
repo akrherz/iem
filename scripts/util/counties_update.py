@@ -10,7 +10,6 @@ import urllib2
 import zipfile
 import datetime
 import pytz
-import psycopg2
 import psycopg2.extras
 mydb = psycopg2.connect(database='postgis', host='iemdb')
 cursor = mydb.cursor(cursor_factory=psycopg2.extras.DictCursor)

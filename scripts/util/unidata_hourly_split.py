@@ -1,8 +1,6 @@
-"""
-Split up the Hourly files from Unidata
+"""Split up the Hourly files from Unidata
 """
 import mx.DateTime
-import os
 
 sts = mx.DateTime.DateTime(2012,6,19, 19)
 ets = mx.DateTime.DateTime(2012,6,20, 1)

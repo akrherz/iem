@@ -8,8 +8,6 @@ from osgeo import _ogr
 import psycopg2
 import sys
 import os
-import datetime
-import pytz
 import urllib2
 import zipfile
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')

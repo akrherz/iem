@@ -1,6 +1,6 @@
 
 import mx.DateTime, os
-from support import TextProduct
+from pyiem.nws.product import TextProduct
 
 sts = mx.DateTime.DateTime(2011,7,19)
 ets = mx.DateTime.DateTime(2011,8,3)
@@ -24,7 +24,7 @@ while(now < ets):
       #if (prod.find("EOKI4 ") < 0 and prod.find("DLDI4 ") < 0):
       #  continue
       try:
-        p = TextProduct.TextProduct(prod)
+        p = TextProduct(prod)
       except:
         continue
       #if (p.afos is not None and p.afos[:3] in ['MET', 'MAV']):

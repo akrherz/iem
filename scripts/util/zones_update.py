@@ -33,7 +33,6 @@ import psycopg2
 import sys
 import os
 import datetime
-import pdb
 import pytz
 import urllib2
 import zipfile

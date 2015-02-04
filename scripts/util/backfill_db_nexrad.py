@@ -1,3 +1,5 @@
+"""Create WMS-T database entries as necessary
+"""
 import psycopg2
 import datetime
 import sys

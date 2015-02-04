@@ -1,5 +1,4 @@
-"""
- Ingest the NWSTG text files into the AFOS IEM database
+"""Ingest the NWSTG text files into the AFOS IEM database
 """
 import psycopg2
 import datetime
