@@ -102,11 +102,12 @@ def get_file(station):
     ''' Download the file from NCDC, if necessary! '''
     # Convert IEM station into what NCDC uses, sigh
     ncdc = "%s%s" % (STCONV[station[:2]], station[2:])
-    uri = "http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00%s.dly" % (
+    #IPv6, use 205.167.25.102 rather than www1.ncdc.noaa.gov
+    uri = "http://205.167.25.102/pub/data/ghcn/daily/all/USC00%s.dly" % (
                                                                         ncdc)
-    localfn = "/tmp/USC00%s.dly" % (ncdc,)
+    localfn = "/mesonet/tmp/USC00%s.dly" % (ncdc,)
     if not os.path.isfile(localfn):
-        print 'Downloading from NCDC station: %s' % (ncdc, )
+        print 'Downloading from NCDC station: %s...' % (ncdc, ),
         try:
             data = urllib2.urlopen(uri)
         except urllib2.HTTPError, exp:
@@ -115,6 +116,7 @@ def get_file(station):
         o = open(localfn, 'w')
         o.write(data.read())
         o.close()
+        print 'done.'
     else:
         print '%s is cached...' % (localfn,)
     return open(localfn, 'r')
@@ -146,9 +148,15 @@ def varconv(val, element):
 
 def create_netcdf(station, metadata):
     """Create a GHCN netCDF file for other local usage"""
+    mydir = station[:2]
+    if not os.path.isdir(mydir):
+        os.makedirs(mydir)
     ncdcid = "%s%s" % (STCONV[station[:2]], station[2:])
-    fn = "USC00%s.nc" % (ncdcid,)
+    fn = "%s/USC00%s.nc" % (mydir, ncdcid)
+    if os.path.isfile(fn):
+        return None
     nc = netCDF4.Dataset(fn, 'w')
+    nc.set_fill_on()
     nc.US_state = metadata['state']
     nc.ncdc_identifier = ncdcid
     nc.station_name = metadata['name']
@@ -174,63 +182,63 @@ def create_netcdf(station, metadata):
     tm[:] = np.arange(reclen)
     
     # snowfall
-    snow = nc.createVariable('prsn', np.float, ('time',),
+    snow = nc.createVariable('prsn', 'f4', ('time',),
                              fill_value=-9999)
     snow.standard_name = 'snowfall_flux'
     snow.units = 'kg m-2 s-1'
-    _ = nc.createVariable('prsn_mflag', np.character, ('time',))
+    _ = nc.createVariable('prsn_mflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'snowfall_flux mflag'
-    _ = nc.createVariable('prsn_qflag', np.character, ('time',))
+    _ = nc.createVariable('prsn_qflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'snowfall_flux qflag'
-    _ = nc.createVariable('prsn_sflag', np.character, ('time',))
+    _ = nc.createVariable('prsn_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'snowfall_flux sflag'
     
     # snow depth
-    snowd = nc.createVariable('snowdepth', np.float, ('time',),
+    snowd = nc.createVariable('snowdepth', 'f4', ('time',),
                              fill_value=-9999)
     snowd.long_name = 'Snowfall Depth'
     snowd.units = 'mm'
-    _ = nc.createVariable('snowdepth_mflag', np.character, ('time',))
+    _ = nc.createVariable('snowdepth_mflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Snowfall Depth mflag'
-    _ = nc.createVariable('snowdepth_qflag', np.character, ('time',))
+    _ = nc.createVariable('snowdepth_qflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Snowfall Depth qflag'
-    _ = nc.createVariable('snowdepth_sflag', np.character, ('time',))
+    _ = nc.createVariable('snowdepth_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Snowfall Depth sflag'
     
     # tmax
-    tmax = nc.createVariable('tmax', np.float, ('time',),
+    tmax = nc.createVariable('tmax', 'f4', ('time',),
                              fill_value=-9999)
     tmax.long_name = 'Temperature Max'
     tmax.units = 'K'
-    _ = nc.createVariable('tmax_mflag', np.character, ('time',))
+    _ = nc.createVariable('tmax_mflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Temperature Max mflag'
-    _ = nc.createVariable('tmax_qflag', np.character, ('time',))
+    _ = nc.createVariable('tmax_qflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Temperature Max qflag'
-    _ = nc.createVariable('tmax_sflag', np.character, ('time',))
+    _ = nc.createVariable('tmax_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Temperature Max sflag'
 
     # tmin
-    tmin = nc.createVariable('tmin', np.float, ('time',),
+    tmin = nc.createVariable('tmin', 'f4', ('time',),
                              fill_value=-9999)
     tmin.long_name = 'Temperature Min'
     tmin.units = 'K'
-    _ = nc.createVariable('tmin_mflag', np.character, ('time',))
+    _ = nc.createVariable('tmin_mflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Temperature Min mflag'
-    _ = nc.createVariable('tmin_qflag', np.character, ('time',))
+    _ = nc.createVariable('tmin_qflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Temperature Min qflag'
-    _ = nc.createVariable('tmin_sflag', np.character, ('time',))
+    _ = nc.createVariable('tmin_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'Temperature Min sflag'
 
     # precip
-    precip = nc.createVariable('pr', np.float, ('time',),
+    precip = nc.createVariable('pr', 'f4', ('time',),
                              fill_value=-9999)
     precip.standard_name = 'precipitation_flux'
     precip.units = 'kg m-2 s-1'
-    _ = nc.createVariable('pr_mflag', np.character, ('time',))
+    _ = nc.createVariable('pr_mflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'precipitation_flux mflag'
-    _ = nc.createVariable('pr_qflag', np.character, ('time',))
+    _ = nc.createVariable('pr_qflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'precipitation_flux qflag'
-    _ = nc.createVariable('pr_sflag', np.character, ('time',))
+    _ = nc.createVariable('pr_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'precipitation_flux sflag'
     
     return nc
@@ -248,7 +256,10 @@ def process(station, metadata):
     if fp is None:
         return
     nc = create_netcdf(station, metadata)
+    if nc is None:
+        return
     data = {}
+    reclength = len(nc.dimensions['time'])
     for line in fp:
         m = DATARE.match(line)
         d = m.groupdict()
@@ -272,48 +283,73 @@ def process(station, metadata):
             if v is not None:
                 data[day][d['element']] = v
             
-    table = "alldata_%s" % (station[:2],)
+    #table = "alldata_%s" % (station[:2],)
     keys = data.keys()
-    keys.sort()
+    #keys.sort()
     
-    obs = {}
-    cursor.execute("""SELECT day, high, low, precip, snow, snowd from
-            """+table+""" where station = %s""", (station,))
-    for row in cursor:
-        obs[row[0]] = row[1:]
-       
+    #obs = {}
+    #cursor.execute("""SELECT day, high, low, precip, snow, snowd from
+    #        """+table+""" where station = %s""", (station,))
+    #for row in cursor:
+    #    obs[row[0]] = row[1:]
+    #print 'loadvars'
+    pr_mflag = nc.variables['pr_mflag'][:]
+    pr_sflag = nc.variables['pr_sflag'][:]
+    pr_qflag = nc.variables['pr_qflag'][:]
+    pr = nc.variables['pr'][:]
+
+    prsn_mflag = nc.variables['prsn_mflag'][:]
+    prsn_qflag = nc.variables['prsn_qflag'][:]
+    prsn_sflag = nc.variables['prsn_sflag'][:]
+    prsn = nc.variables['prsn'][:]
+
+    snowdepth_mflag = nc.variables['snowdepth_mflag'][:]
+    snowdepth_qflag = nc.variables['snowdepth_qflag'][:]
+    snowdepth_sflag = nc.variables['snowdepth_sflag'][:]
+    snowdepth = nc.variables['snowdepth'][:]
+
+    tmax_mflag= nc.variables['tmax_mflag'][:]
+    tmax_qflag= nc.variables['tmax_qflag'][:]
+    tmax_sflag= nc.variables['tmax_sflag'][:]
+    tmax= nc.variables['tmax'][:]
+
+    tmin_mflag= nc.variables['tmin_mflag'][:]
+    tmin_qflag= nc.variables['tmin_qflag'][:]
+    tmin_sflag= nc.variables['tmin_sflag'][:]
+    tmin= nc.variables['tmin'][:]
+    #print 'loaded'
     for d in keys:
-        row = obs.get(d)
+        #row = obs.get(d)
         offset = (d - BASE).days - 1
-        nc.variables['pr_mflag'][offset] = data[d].get('PRCPmflag', ' ')
-        nc.variables['pr_qflag'][offset] = data[d].get('PRCPqflag', ' ')
-        nc.variables['pr_sflag'][offset] = data[d].get('PRCPsflag', ' ')
+        pr_mflag[offset] = ord(data[d].get('PRCPmflag', ' '))
+        pr_qflag[offset] = ord(data[d].get('PRCPqflag', ' '))
+        pr_sflag[offset] = ord(data[d].get('PRCPsflag', ' '))
         if data[d].get('PRCP') is not None:
-            nc.variables['pr'][offset] = distance(data[d].get('PRCP'), 
+            pr[offset] = distance(data[d].get('PRCP'), 
                                                   'IN').value("MM") / 86400.
-        nc.variables['prsn_mflag'][offset] = data[d].get('SNOWmflag', ' ')
-        nc.variables['prsn_qflag'][offset] = data[d].get('SNOWqflag', ' ')
-        nc.variables['prsn_sflag'][offset] = data[d].get('SNOWsflag', ' ')
+        prsn_mflag[offset] = ord(data[d].get('SNOWmflag', ' '))
+        prsn_qflag[offset] = ord(data[d].get('SNOWqflag', ' '))
+        prsn_sflag[offset] = ord(data[d].get('SNOWsflag', ' '))
         if data[d].get('SNOW') is not None:
-            nc.variables['prsn'][offset] = distance(data[d].get('SNOW'), 
+            prsn[offset] = distance(data[d].get('SNOW'), 
                                                   'IN').value("MM") / 86400.
-        nc.variables['snowdepth_mflag'][offset] = data[d].get('SNWDmflag', ' ')
-        nc.variables['snowdepth_qflag'][offset] = data[d].get('SNWDqflag', ' ')
-        nc.variables['snowdepth_sflag'][offset] = data[d].get('SNWDsflag', ' ')
+        snowdepth_mflag[offset] = ord(data[d].get('SNWDmflag', ' '))
+        snowdepth_qflag[offset] = ord(data[d].get('SNWDqflag', ' '))
+        snowdepth_sflag[offset] = ord(data[d].get('SNWDsflag', ' '))
         if data[d].get('SNWD') is not None:
-            nc.variables['snowdepth'][offset] = distance(data[d].get('SNWD'), 
+            snowdepth[offset] = distance(data[d].get('SNWD'), 
                                                   'IN').value("MM")
-        nc.variables['tmax_mflag'][offset] = data[d].get('TMAXmflag', ' ')
-        nc.variables['tmax_qflag'][offset] = data[d].get('TMAXqflag', ' ')
-        nc.variables['tmax_sflag'][offset] = data[d].get('TMAXsflag', ' ')
+        tmax_mflag[offset] = ord(data[d].get('TMAXmflag', ' '))
+        tmax_qflag[offset] = ord(data[d].get('TMAXqflag', ' '))
+        tmax_sflag[offset] = ord(data[d].get('TMAXsflag', ' '))
         if data[d].get('TMAX') is not None:
-            nc.variables['tmax'][offset] = temperature(data[d].get('TMAX'),
+            tmax[offset] = temperature(data[d].get('TMAX'),
                                                    'F').value('K')
-        nc.variables['tmin_mflag'][offset] = data[d].get('TMINmflag', ' ')
-        nc.variables['tmin_qflag'][offset] = data[d].get('TMINqflag', ' ')
-        nc.variables['tmin_sflag'][offset] = data[d].get('TMINsflag', ' ')
+        tmin_mflag[offset] = ord(data[d].get('TMINmflag', ' '))
+        tmin_qflag[offset] = ord(data[d].get('TMINqflag', ' '))
+        tmin_sflag[offset] = ord(data[d].get('TMINsflag', ' '))
         if data[d].get('TMIN') is not None:
-            nc.variables['tmin'][offset] = temperature(data[d].get('TMIN'),
+            tmin[offset] = temperature(data[d].get('TMIN'),
                                                    'F').value('K')
         # abort out for now
         continue
@@ -362,7 +398,42 @@ def process(station, metadata):
                              d, station )
             cursor.execute(sql)
 
+    
+    #print 'Write pr netcdf'
+    nc.variables['pr'][:] = pr
+    #print 'Write pr_mflag netcdf'
+    nc.variables['pr_mflag'][:] = pr_mflag
+    #print 'Write pr_qflag netcdf'
+    nc.variables['pr_qflag'][:] = pr_qflag
+    #print 'Write pr_sflag netcdf'
+    nc.variables['pr_sflag'][:] = pr_sflag
+    
+    #print 'Write prsn netcdf'
+    nc.variables['prsn'][:] = prsn
+    nc.variables['prsn_mflag'][:] = prsn_mflag
+    nc.variables['prsn_qflag'][:] = prsn_qflag
+    nc.variables['prsn_sflag'][:] = prsn_sflag
+
+    #print 'Write snowdepth netcdf'
+    nc.variables['snowdepth'][:] = snowdepth
+    nc.variables['snowdepth_mflag'][:] = snowdepth_mflag
+    nc.variables['snowdepth_qflag'][:] = snowdepth_qflag
+    nc.variables['snowdepth_sflag'][:] = snowdepth_sflag
+
+    #print 'Write tmax netcdf'
+    nc.variables['tmax'][:] = tmax
+    nc.variables['tmax_mflag'][:] = tmax_mflag
+    nc.variables['tmax_qflag'][:] = tmax_qflag
+    nc.variables['tmax_sflag'][:] = tmax_sflag
+
+    #print 'Write tmin netcdf'
+    nc.variables['tmin'][:] = tmin
+    nc.variables['tmin_mflag'][:] = tmin_mflag
+    nc.variables['tmin_qflag'][:] = tmin_qflag
+    nc.variables['tmin_sflag'][:] = tmin_sflag
+    #print 'Done writing'
     nc.close()
+    #print 'done'
 
 def main():
     """ go main go """
@@ -374,6 +445,13 @@ def main():
             if sid[2:] == '0000' or sid[2] == 'C':
                 continue
             process(sid, nt.sts[sid])
+    elif station == 'ALL':
+        for state in STCONV.keys():
+            nt = NetworkTable("%sCLIMATE" % (state,))
+            for sid in nt.sts.keys():
+                if sid[2:] == '0000' or sid[2] == 'C':
+                    continue
+                process(sid, nt.sts[sid])
     else:
         station = sys.argv[1]
         nt = NetworkTable("%sCLIMATE" % (station[:2],))
