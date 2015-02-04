@@ -46,9 +46,10 @@ def make_colorbar(clevs, norm, cmap):
 
 def do(valid, yawsource):
     """ Generate plot for a given timestamp """
-    if yawsource not in ['yaw', 'yaw2']:
+    if yawsource not in ['yaw', 'yaw2', 'yaw3']:
         return
-    yawdict = {'yaw': 'Orginal', 'yaw2': 'daryl corrected'}
+    yawdict = {'yaw': 'Orginal', 'yaw2': 'daryl corrected',
+               'yaw3': 'daryl v2'}
     if os.environ.get("SERVER_NAME", "") == 'iem.local':
         PGCONN = psycopg2.connect(database='mec', host='localhost', 
                                   port='5555', user='mesonet')        
@@ -95,12 +96,15 @@ def do(valid, yawsource):
     ax.quiver(lons, lats, u, v, zorder=1)
     ax.scatter(lons, lats, c=vals, norm=norm, edgecolor='none',
                cmap=cmap, s=100, zorder=2)
-    ax.set_title("Pomeroy Farm Turbine Power [kW] (1min sampled dataset)\nValid: %s, yaw source: %s" % (
+    ax.get_yaxis().get_major_formatter().set_useOffset(False)
+    ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    ax.set_title("'I050' Farm Turbine Power [kW] (1min sampled dataset)\nValid: %s, yaw source: %s" % (
                                                         valid.strftime("%d %b %Y %I:%M %p"),
                                                         yawdict.get(yawsource, yawsource)))
     make_colorbar(clevs, norm, cmap)
     
-    ax.text(0.05, 0.05, "Turbine Avg: %.1f kW" % (avgv,),
+    ax.text(0.05, 0.05, "Turbine Power: $\mu$= %.1f $\sigma$= %.1f kW" % (
+                                                        avgv, np.std(vals)),
             transform=ax.transAxes)
     ax.text(0.05, 0.01, "Wind $\mu$= %.1f $\sigma$= %.1f $ms^{-1}$" % (
                                                             np.average(ws),
@@ -108,40 +112,45 @@ def do(valid, yawsource):
             transform=ax.transAxes)
     ax.set_xlabel("Longitude $^\circ$E")
     ax.set_ylabel("Latitude $^\circ$N")
+    ax.set_xlim(-94.832, -94.673)
+    ax.set_ylim(42.545, 42.671)
     
     # Next plot
     ax2 = fig.add_axes([0.7, 0.80, 0.28, 0.18])
-    ax2.scatter(ws, vals)
+    ax2.scatter(ws, vals, edgecolor='k', c='k')
     ax2.text(0.5, -0.25, "Wind Speed $ms^{-1}$", transform=ax2.transAxes,
              ha='center')
+    ax2.set_xlim(0,20)
     #ax2.set_ylabel("Power kW")
     ax2.grid(True)
 
     # Next plot
     ax3 = fig.add_axes([0.7, 0.57, 0.28, 0.18], sharey=ax2)
-    ax3.scatter(yaw, vals)
-    ax3.text(0.5, -0.25, "Yaw $^\circ$N", transform=ax3.transAxes, ha='center')
+    ax3.scatter(yaw, vals, edgecolor='k', c='k')
+    ax3.text(0.5, -0.25, "Yaw", transform=ax3.transAxes, ha='center')
     #ax3.set_ylabel("Power kW")
     ax3.set_xlim(0,360)
     ax3.set_xticks(np.arange(0,361,45))
+    ax3.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'])
     ax3.grid(True)
     
     # Next plot
     ax4 = fig.add_axes([0.7, 0.32, 0.28, 0.18], sharey=ax2)
-    ax4.scatter(pitch, vals)
+    ax4.scatter(pitch, vals, edgecolor='k', c='k')
     ax4.text(0.5, -0.25, "Pitch $^\circ$", transform=ax4.transAxes, ha='center')
+    ax4.set_ylim(-10,1600)
     ax4.grid(True)
-    ax4.set_ylim(bottom=-10)
     
     # Next plot
     ax5 = fig.add_axes([0.7, 0.07, 0.28, 0.18], sharex=ax4)
-    ax5.scatter(pitch, ws)
+    ax5.scatter(pitch, ws, edgecolor='k', c='k')
     ax5.text(0.5, -0.25, "Pitch $^\circ$", transform=ax5.transAxes, ha='center')
     ax5.grid(True)
     ax5.set_ylim(bottom=-10)
-    maxpitch = max(np.where(pitch > 20, 0, pitch))
-    ax5.set_xlim(np.ma.minimum(pitch)-0.5, maxpitch+0.5)
-    ax5.set_ylim(bottom=0)
+    #maxpitch = max(np.where(pitch > 20, 0, pitch))
+    #ax5.set_xlim(np.ma.minimum(pitch)-0.5, maxpitch+0.5)
+    ax5.set_xlim(-3, 20.1)
+    ax5.set_ylim(0,20)
     ax5.text(-0.1, 0.5, "Wind Speed $ms^{-1}$", transform=ax5.transAxes,
              ha='center', va='center', rotation=90)
     
