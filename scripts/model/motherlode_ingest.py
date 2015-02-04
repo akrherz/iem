@@ -128,8 +128,8 @@ def check_and_run(model, ts):
                                                       mcursor.rowcount)
         run_model(model, ts)
 
-if __name__ == '__main__':
-    ''' Go Go gadget '''
+def main():
+    """Do Something"""
     gts = datetime.datetime.utcnow()
     if len(sys.argv) == 5:
         gts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
@@ -146,6 +146,10 @@ if __name__ == '__main__':
     ts = gts - datetime.timedelta(hours=2)
     run_model("RAP", ts)
     check_and_run('RAP', ts - datetime.timedelta(days=7))
+
+if __name__ == '__main__':
+    #Go Go gadget
+    main()
     mcursor.close()
     MOS.commit()
     MOS.close()
