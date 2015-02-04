@@ -129,7 +129,8 @@ def run(sts=None, ets=None):
 
     return txt, html
 
-if __name__ == '__main__':
+def main():
+    """Lets actually do something """
     sts = datetime.datetime(2005,11,12,12)
     sts = sts.replace(tzinfo=pytz.timezone("UTC"))
     sts = sts.astimezone(pytz.timezone("America/Chicago"))
@@ -137,5 +138,7 @@ if __name__ == '__main__':
     ets = sts + datetime.timedelta(hours=24)
     txt, html = run(sts, ets)
     print txt
-    txt, html = run()
-    print txt
+    print html
+
+if __name__ == '__main__':
+    main()
