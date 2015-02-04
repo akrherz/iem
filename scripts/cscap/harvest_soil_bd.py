@@ -1,6 +1,4 @@
-'''
- Scrape out the Soil Bulk Density and Texture data from Google Drive
-'''
+"""Scrape out the Soil Bulk Density and Texture data from Google Drive"""
 import util
 import sys
 import gdata.docs.client
@@ -47,6 +45,15 @@ for entry in feed:
             worksheet.get_cell_value(1, 2), 
             worksheet.get_cell_value(1, 3))
         continue
+    
+    #Load up current data, incase we need to do some deleting
+    current = {}
+    pcursor.execute("""SELECT plotid, varname, depth, subsample
+    from soil_data WHERE site = %s and year = %s""", (siteid, YEAR))
+    for row in pcursor:
+        key = "%s|%s|%s|%s" % row
+        current[key] = True
+    found_vars = []
     for row in range(4,worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
         depth = worksheet.get_cell_value(row, 2)
@@ -60,6 +67,8 @@ for entry in feed:
                 #                    worksheet.get_cell_value(1,col).strip(),
                 #                    siteid, YEAR)
                 continue
+            if not varname in found_vars:
+                found_vars.append(varname)
             val = worksheet.get_cell_value(row, col)
             try:
                 pcursor.execute("""
@@ -73,6 +82,19 @@ for entry in feed:
                 print '%s %s %s %s %s %s' % (siteid, plotid, varname, depth, 
                                              val, subsample)
                 sys.exit()
+            key = "%s|%s|%s|%s" % (plotid, varname, depth, subsample)
+            if current.has_key(key):
+                del(current[key])
+    for key in current:
+        (plotid, varname, depth, subsample) = key.split("|")
+        if varname in found_vars:
+            print 'harvest_soil_bd REMOVE %s %s %s %s %s' % (siteid, plotid, 
+                                                    varname, depth, subsample)
+            pcursor.execute("""DELETE from soil_data where site = %s and 
+            plotid = %s and varname = %s and year = %s and depth = %s and
+            subsample = %s""", (siteid, plotid, varname, YEAR, depth,
+                                subsample))
+
     #print "...done"
 pcursor.close()
 pgconn.commit()
