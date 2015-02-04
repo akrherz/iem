@@ -4,14 +4,60 @@
 import subprocess
 import smtplib
 import os
-import iemdb
-import mx.DateTime
+import datetime
 import time
 import psycopg2.extras
+import json
+import urllib2
+import pytz
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 import wwa
+
+def get_github_commits():
+    """ Get the recent day's worth of github code commits
+    
+    Returns:
+      txt (str): text variant result
+      html (str): html variant result
+    """
+    utcnow = datetime.datetime.utcnow()
+    yesterday = utcnow - datetime.timedelta(hours=24)
+    yesterday = yesterday.replace(hour=12,minute=0,second=0)
+    iso = yesterday.strftime("%Y-%m-%dT%H:%M:%SZ")
+    uri = "https://api.github.com/repos/akrherz/iem/commits?since=%s" % (iso,)
+
+    txt = "> IEM Code Development on Github\n\n"
+    html = "<h3>IEM Code Development on Github</h3><ul>\n"
+
+    try:
+        jdata = json.loads(urllib2.urlopen(uri).read())
+    except:
+        txt += "    An Error Occurred downloading changelog!\n"
+        html += "<li>An Error Occurred</li></ul>"
+        return txt, html
+
+    res = {}
+    for commit in jdata:
+        timestring = commit['commit']['author']['date']
+        utcvalid = datetime.datetime.strptime(timestring, '%Y-%m-%dT%H:%M:%SZ')
+        valid = (utcvalid.replace(tzinfo=pytz.timezone("UTC"))).astimezone(
+                                            pytz.timezone("America/Chicago"))
+        res[valid] = commit
+    
+    keys = res.keys()
+    keys.sort()
+    for valid in keys:
+        commit = res[valid]
+        msg = commit['commit']['message']
+        txt += "    %s %s\n" % (valid.strftime("%-m/%-d %-2I:%M %p"),
+                              msg.split("\n")[0])
+        html += "<li><a href=\"%s\">%s</a> %s</li>\n" % (commit['html_url'],
+                                            valid.strftime("%-m/%-d %I:%M %p"), 
+                            msg.replace("\n\n","<br />"))
+    
+    return txt+"\n", html+"</ul>"
 
 def cowreport():
     """ Generate something from the Cow, moooo! """
@@ -24,9 +70,10 @@ def cowreport():
 
 def feature():
     """ Print the feature for yesterday """
-    mesosite = iemdb.connect('mesosite', bypass=True)
+    mesosite = psycopg2.connect(database='mesosite', host='iemdb',
+                                user='nobody')
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    lastts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1)
+    lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     # Query
     mcursor.execute("""
       SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate 
@@ -66,10 +113,11 @@ def feature():
 
 def news():
     """ Print the news that is fit to print """
-    mesosite = iemdb.connect('mesosite', bypass=True)
+    mesosite = psycopg2.connect(database='mesosite', host='iemdb',
+                                user='nobody')
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     # Last dailyb delivery
-    lastts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=11, days=-1)
+    lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     mcursor.execute("""
       SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate 
       from news WHERE entered > '%s' 
@@ -109,56 +157,62 @@ def news():
 
     return txt, html
 
-msg = MIMEMultipart('alternative')
-msg['Subject'] = 'IEM Daily Bulletin'
-msg['From'] = 'daryl herzmann <akrherz@iastate.edu>'
-if os.environ['USER'] == 'akrherz':
-    msg['To'] = 'akrherz@iastate.edu'
-else:
-    msg['To'] = 'dailyb@mesonet.agron.iastate.edu'
+def main():
+    """ Go Main! """
+    msg = MIMEMultipart('alternative')
+    now = datetime.datetime.now() 
+    msg['Subject'] = 'IEM Daily Bulletin for %s' % (now.strftime("%b %-d %Y"),)
+    msg['From'] = 'daryl herzmann <akrherz@iastate.edu>'
+    if os.environ['USER'] == 'akrherz':
+        msg['To'] = 'akrherz@iastate.edu'
+    else:
+        msg['To'] = 'dailyb@mesonet.agron.iastate.edu'
+    
+    text = """Iowa Environmental Mesonet Daily Bulletin for %s\n\n""" % (
+                                                now.strftime("%d %B %Y"), )
+    html = """
+    <h3>Iowa Environmental Mesonet Daily Bulletin for %s</h3>
+    """ % (now.strftime("%d %B %Y"), )
+    
+    t,h = news()
+    text += t
+    html += h
+    t, h = get_github_commits()
+    text += t
+    html += h    
+    t,h = feature()
+    text += t
+    html += h
+    t,h = wwa.run()
+    text += t
+    html += h
+    t,h = cowreport()
+    text += t
+    html += h
+    
+    part1 = MIMEText(text, 'plain')
+    part2 = MIMEText(html, 'html')
+    msg.attach(part1)
+    msg.attach(part2)
+    
+    try:
+        s = smtplib.SMTP('mailhub.iastate.edu')
+    except:
+        time.sleep(57)
+        s = smtplib.SMTP('mailhub.iastate.edu')
+    s.sendmail(msg['From'], [msg['To']], msg.as_string())
+    s.quit()
+    
+    # Send forth LDM
+    o = open("tmp.txt", 'w')
+    o.write( text )
+    o.close()
+    subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt""", shell=True)
+    o = open("tmp.txt", 'w')
+    o.write( html )
+    o.close()
+    subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt""", shell=True)
+    os.unlink("tmp.txt")
 
-now = mx.DateTime.now() 
-text = """
-Iowa Environmental Mesonet Daily Bulletin for %s
-
-""" % (now.strftime("%d %B %Y"), )
-html = """
-<h3>Iowa Environmental Mesonet Daily Bulletin for %s</h3>
-""" % (now.strftime("%d %B %Y"), )
-
-t,h = news()
-text += t
-html += h
-t,h = feature()
-text += t
-html += h
-t,h = wwa.run()
-text += t
-html += h
-t,h = cowreport()
-text += t
-html += h
-
-part1 = MIMEText(text, 'plain')
-part2 = MIMEText(html, 'html')
-msg.attach(part1)
-msg.attach(part2)
-
-try:
-    s = smtplib.SMTP('mailhub.iastate.edu')
-except:
-    time.sleep(57)
-    s = smtplib.SMTP('mailhub.iastate.edu')
-s.sendmail(msg['From'], [msg['To']], msg.as_string())
-s.quit()
-
-# Send forth LDM
-o = open("tmp.txt", 'w')
-o.write( text )
-o.close()
-subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt""", shell=True)
-o = open("tmp.txt", 'w')
-o.write( html )
-o.close()
-subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt""", shell=True)
-os.unlink("tmp.txt")
+if __name__ == '__main__':
+    main()

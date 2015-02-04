@@ -1,4 +1,9 @@
 <?php
+/*
+ * Print a report of IEM Cow statistics
+ * This is called from the python spammer script as it uses the output to
+ * send in an email
+ */
 date_default_timezone_set('America/Chicago');
 
 /* Generate some cow statistics! */
