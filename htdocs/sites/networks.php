@@ -8,7 +8,11 @@ $pgconn = iemdb("mesosite");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 
-if (isset($_GET["special"]) && $_GET["special"] == 'allasos'){
+if ($network == '_ALL_'){
+	$sql = "SELECT *,
+            ST_x(geom) as longitude, ST_y(geom) as latitude from stations
+            WHERE online = 'y' and '_ALL_' = $1 ORDER by name";
+} else if (isset($_GET["special"]) && $_GET["special"] == 'allasos'){
 	$sql = "SELECT *,
             ST_x(geom) as longitude, ST_y(geom) as latitude from stations
             WHERE online = 'y' and
@@ -34,15 +38,16 @@ if (strlen($network) > 0){
 		$table .= "<p><table class=\"table table-striped\">\n";
 		$table .= "<caption><b>". $network ." Network</b></caption>\n";
 		$table .= "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
-			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th></tr></thead>\n";
+			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th><th>IEM Network</th></tr></thead>\n";
 		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
 			$table .= "<tr>\n
-			  <td><a href=\"site.php?station=". $row["id"] ."&network=". $row["network"] ."\">". $row["id"] ."</a></td>\n
-			  <td>". $row["name"] ."</td>\n
-			  <td>". round($row["latitude"],5) . "</td>\n
-			  <td>". round($row["longitude"],5) . "</td>\n
-			  <td>". $row["elevation"]. "</td>\n
-			  <td>". $row["archive_begin"]. "</td>\n
+			  <td><a href=\"site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\">". $row["id"] ."</a></td>
+			  <td>". $row["name"] ."</td>
+			  <td>". round($row["latitude"],5) . "</td>
+			  <td>". round($row["longitude"],5) . "</td>
+			  <td>". $row["elevation"]. "</td>
+			  <td>". $row["archive_begin"]. "</td>
+			  <td><a href=\"locate.php?network=". $row["network"] ."\">". $row["network"]. "</a></td>
 			  </tr>";
 		}
 		$table .= "</table>\n";
@@ -50,14 +55,15 @@ if (strlen($network) > 0){
 	} else if ($format == "csv") {
 		if (! $nohtml) $table .= "<p><b>". $network ." Network</b></p>\n";
 		if (! $nohtml) $table .= "<pre>\n";
-		$table .= "stid,station_name,lat,lon,elev,begints\n";
+		$table .= "stid,station_name,lat,lon,elev,begints,iem_network\n";
 		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
 			$table .= $row["id"] .","
 					. $row["name"] .","
 					. round($row["latitude"],5). ","
 					. round($row["longitude"],5). ","
 					. $row["elevation"]. ","
-					. $row["archive_begin"]. "\n";
+					. $row["archive_begin"]. ","
+					. $row["network"]. "\n";
 		}
 		if (! $nohtml)  $table .= "</pre>\n";
 	}
@@ -74,7 +80,7 @@ if (strlen($network) > 0){
 		$dbfFile = dbase_create( $shpFname.".dbf", array(
 				array("ID", "C", 6),
 				array("NAME", "C", 50),
-				array("NETWORK","C",10),
+				array("NETWORK","C",20),
 				array("BEGINTS","C",16),
 		));
 
@@ -159,7 +165,7 @@ if (! $nohtml || $format == 'shapefile') {
 		"madis" => "MADIS Station Table"
 	);
 	$fselect = make_select("format", $format, $ar);
-	$nselect = selectNetwork($network);
+	$nselect = selectNetwork($network, Array("_ALL_"=>"All Networks"));
 	$t->content = <<<EOF
 <h3>Network Location Tables</h3>
 

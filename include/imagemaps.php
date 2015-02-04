@@ -37,18 +37,25 @@ function selectAzosNetwork($network)
     return $s;
 } 
 
-function selectNetwork($network)
+function selectNetwork($selected, $extra=Array())
 {
     global $rootpath;
-    $network = strtoupper($network);
+    $selected = strtoupper($selected);
     include_once("$rootpath/include/database.inc.php");
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
     $s = "<select name=\"network\">\n";
+    reset($extra);
+    while (list($idx,$sid) = each($extra))
+    {
+    	$s .= "<option value=\"$idx\" ";
+    	if ($selected == $idx) { $s .= "SELECTED"; }
+    	$s .= ">$sid</option>\n";
+    }
     for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
     {
        $s .= "<option value=\"". $row["id"] ."\" ";
-       if ($row["id"] == $network){ $s .= "SELECTED"; }
+       if ($row["id"] == $selected){ $s .= "SELECTED"; }
        $s .= ">". $row["name"] ."</option>\n";
     }     
     return $s;
