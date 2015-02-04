@@ -1,5 +1,4 @@
-''' 
- Initially import the smos points into the database
+"""Initially import the smos points into the database
      202104
   202103  202617
      202616
@@ -11,7 +10,8 @@
 offset 75 as per experimentation
 x grid wrapping experimentation too, sigh
 
-'''
+This file was provided by Jason Patton
+"""
 import psycopg2
 SMOS = psycopg2.connect(database='smos', host='iemdb')
 scursor = SMOS.cursor()

@@ -1,4 +1,4 @@
-# Ingest SMOS data, please!
+"""Ingest SMOS data, please!"""
 
 import glob
 import os

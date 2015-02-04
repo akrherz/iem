@@ -1,4 +1,4 @@
-# Create a plot of SMOS data for either 0 or 12z
+"""Create a plot of SMOS data for either 0 or 12z"""
 from pyiem.plot import MapPlot
 import psycopg2
 import sys
@@ -81,7 +81,8 @@ def makeplot(ts, routes='ac'):
         m.postprocess(pqstr=pqstr)
         m.close()
 
-if __name__ == '__main__':
+def main():
+    """Go Main Go"""
     # At midnight, we have 12z previous day
     # At noon, we have 0z of that day
     # Run for hour
@@ -99,3 +100,6 @@ if __name__ == '__main__':
     else:
         makeplot( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0),
                   'a')
+
+if __name__ == '__main__':
+    main()
