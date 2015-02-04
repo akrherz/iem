@@ -57,6 +57,10 @@ def get_github_commits():
                                             valid.strftime("%-m/%-d %I:%M %p"), 
                             msg.replace("\n\n","<br />"))
     
+    if len(keys) == 0:
+        txt += "    No code commits found in previous 24 Hours\n"
+        html += "<li>No code commits found in previous 24 Hours</li>"
+    
     return txt+"\n", html+"</ul>"
 
 def cowreport():
