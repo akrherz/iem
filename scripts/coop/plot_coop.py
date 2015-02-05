@@ -53,7 +53,7 @@ def plot_hilo(valid):
                    colors=['red', 'blue', 'tan'], textsize=[12,12,8])
     m.drawcounties()
     
-    pqstr = "plot ac %s0000 coopSnowDepth.gif coopSnowDepth.gif gif" % (
+    pqstr = "plot ac %s0000 coopHighLow.gif coopHighLow.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
     
     m.postprocess(pqstr=pqstr)
