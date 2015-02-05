@@ -110,7 +110,7 @@ def get_file(station):
         print 'Downloading from NCDC station: %s...' % (ncdc, ),
         try:
             data = urllib2.urlopen(uri)
-        except urllib2.HTTPError, exp:
+        except Exception, exp:
             print exp
             return None
         o = open(localfn, 'w')
