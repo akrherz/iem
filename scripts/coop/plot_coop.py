@@ -187,7 +187,7 @@ def plot_snow_month(valid):
     pqstr = "plot ac %s0000 coopMonthSPlot.gif coopMonthSPlot.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
     
-    m.postprocess(view=True,pqstr=pqstr)
+    m.postprocess(pqstr=pqstr)
     m.close()
     
     pgconn.close()
