@@ -36,7 +36,8 @@ def main():
         reloadres += reload_data()
 
     cursor.execute("""
-        SELECT uniqueid, valid, cropyear, operation from operations
+        SELECT uniqueid, valid, cropyear, operation, biomassdate1, biomassdate2
+        from operations
         WHERE operation in ('harvest_corn', 'harvest_soy', 'plant_rye',
         'plant_rye-corn-res', 'plant_rye-soy-res', 'sample_soilnitrate',
         'sample_covercrop', 'termination_rye_corn', 'termination_rye_soy',
@@ -49,6 +50,8 @@ def main():
         valid = row[1]
         cropyear = str(row[2])
         operation = row[3]
+        biomassdate1 = row[4]
+        biomassdate2 = row[5]
         if not data.has_key(site):
             data[site] = {}
             for cy in ['2011', '2012', '2013', '2014','2015']:
@@ -72,6 +75,12 @@ def main():
         if operation == 'plant_rye':
             for op2 in ['plant_rye-soy-res', 'plant_rye-corn-res']:
                 data[site][cropyear][op2] = valid
+        elif operation.startswith('termination_rye'):
+            if operation.endswith('soy') and biomassdate1 is not None:
+                data[site][cropyear]['spring_sample_covercrop_soy'] = biomassdate1
+            elif biomassdate1 is not None:
+                data[site][cropyear]['spring_sample_covercrop_corn'] = biomassdate1
+            data[site][cropyear][operation] = valid
         elif operation == 'fertilizer_synthetic':
             if data[site][cropyear][operation+"1"] == '':
                 data[site][cropyear][operation+"1"] = valid
