@@ -240,8 +240,8 @@ def create_netcdf(station, metadata):
     _.long_name = 'precipitation_flux qflag'
     _ = nc.createVariable('pr_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'precipitation_flux sflag'
-    
-    return nc
+    nc.close()
+    return netCDF4.Dataset(fn,'a')
 
 def process(station, metadata):
     ''' Lets process something, stat 
