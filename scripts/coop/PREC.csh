@@ -1,4 +1,6 @@
 #!/bin/csh
+set Date=`date +'%Y%m%d'`
+set ftime="`date +'%Y%m%d'`0000"
 
 python plot_coop.py
 python extract_coop_obs.py
