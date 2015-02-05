@@ -9,7 +9,7 @@ import sys
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
-pgconn = psycopg2.connect(database='sustainablecorn',
+pgconn = psycopg2.connect(database='sustainablecorn', user='mesonet',
                           host=config.get('database', 'host'))
 pcursor = pgconn.cursor()
 
