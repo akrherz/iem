@@ -162,15 +162,14 @@ def create_netcdf(station, metadata):
     nc.station_name = metadata['name']
     reclen = int((2016-1850) * 365.25) + 1
     
-    _a = nc.createDimension('time', reclen)
-    _b = nc.createDimension('stations', 1)
+    nc.createDimension('time', reclen)
     
-    lat = nc.createVariable('lat', np.float, ('stations',))
+    lat = nc.createVariable('lat', np.float)
     lat.standard_name = 'latitude'
     lat.units = 'degree_north'
     lat[0] = metadata['lat']
 
-    lon = nc.createVariable('lon', np.float, ('stations',))
+    lon = nc.createVariable('lon', np.float)
     lon.standard_name = 'longitude'
     lon.units = 'degree_east'
     lon[0] = metadata['lon']
@@ -240,8 +239,8 @@ def create_netcdf(station, metadata):
     _.long_name = 'precipitation_flux qflag'
     _ = nc.createVariable('pr_sflag', np.uint8, ('time',), fill_value=0)
     _.long_name = 'precipitation_flux sflag'
-    nc.close()
-    return netCDF4.Dataset(fn,'a')
+
+    return nc
 
 def process(station, metadata):
     ''' Lets process something, stat 
