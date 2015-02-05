@@ -18,3 +18,4 @@ python monthPrecip.py
 python yearPrecip.py
 python dayPrecip.py
 /home/ldm/bin/pqinsert -p "plot ac $ftime text/IEMNWSDPR.txt coopobs.txt txt" IEMNWSDPR.txt >& /dev/null
+rm IEMNWSDPR.txt
