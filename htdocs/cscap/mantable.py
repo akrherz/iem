@@ -22,14 +22,16 @@ def reload_data():
     p = subprocess.Popen("python harvest_management.py", shell=True,
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
-    return "<div class=\"alert alert-info\"><pre>%s %s</pre></div>" % (
-                                        p.stdout.read(), p.stderr.read())
+    return """<div class="alert alert-info">
+    Here is the result of sync process<br />
+    <pre>%s %s</pre>
+    </div>""" % (p.stdout.read(), p.stderr.read())
 
 def main():
     sys.stdout.write('Content-type: text/html\n\n')
 
     form = cgi.FieldStorage()
-    reloadres = "<a href=\"mantable.py?reload=yes\" class=\"btn btn-default\">Request Sync of Google Data</a>"
+    reloadres = ""
     if form.getfirst('reload') is not None:
         reloadres += reload_data()
 
@@ -37,7 +39,8 @@ def main():
         SELECT uniqueid, valid, cropyear, operation from operations
         WHERE operation in ('harvest_corn', 'harvest_soy', 'plant_rye',
         'plant_rye-corn-res', 'plant_rye-soy-res', 'sample_soilnitrate',
-        'sample_covercrop', 'termination_rye_corn', 'termination_rye_soy')
+        'sample_covercrop', 'termination_rye_corn', 'termination_rye_soy',
+        'plant_corn', 'plant_soy', 'fertilizer_synthetic')
         ORDER by valid ASC
     """)
     data = {}
@@ -52,12 +55,15 @@ def main():
                 data[site][cy] = {'harvest_soy': '','harvest_corn': '',
                                     'plant_rye': '', 'plant_rye-corn-res': '',
                                     'plant_rye-soy-res': '',
+                                    'plant_corn': '', 'plant_soy': '',
                                     'fall_sample_soilnitrate_corn': '',
                                     'fall_sample_soilnitrate_soy': '',
                                     'spring_sample_soilnitrate_corn': '',
                                     'spring_sample_soilnitrate_soy': '',
                                     'termination_rye_corn': '',
                                     'termination_rye_soy': '',
+                                    'fertilizer_synthetic1': '',
+                                    'fertilizer_synthetic2': '',
                                     'spring_sample_covercrop_corn': '',
                                     'spring_sample_covercrop_soy': '',
                                     'fall_sample_covercrop_corn': '',
@@ -66,10 +72,18 @@ def main():
         if operation == 'plant_rye':
             for op2 in ['plant_rye-soy-res', 'plant_rye-corn-res']:
                 data[site][cropyear][op2] = valid
+        elif operation == 'fertilizer_synthetic':
+            if data[site][cropyear][operation+"1"] == '':
+                data[site][cropyear][operation+"1"] = valid
+            else:
+                data[site][cropyear][operation+"2"] = valid
+            
         elif operation in ['sample_soilnitrate', 'sample_covercrop']:
             # We only want 'fall' events
             season = 'fall_'
-            if valid.month < 8:
+            if valid.month in [6,7,8]:
+                continue
+            elif valid.month < 6:
                 season = 'spring_'
             if data[site][cropyear][season+operation+'_soy'] != '':
                 data[site][cropyear][season+operation+'_corn'] = valid
@@ -112,12 +126,12 @@ def main():
     for site in COVER_SITES: #data.keys():
         table3 += "<tr><td>%s</td>" % (site,)
         for yr in ['2012', '2013', '2014', '2015']:
-            for op in ['spring_sample_soilnitrate_corn',
-                       'spring_sample_soilnitrate_soy']:
-                table3 += "<td>%s</td>" % (
-                        data[site].get(yr, {}).get(op, ''),)
             for op in ['spring_sample_covercrop_corn',
                        'spring_sample_covercrop_soy']:
+                table3 += "<td>%s</td>" % (
+                        data[site].get(yr, {}).get(op, ''),)
+            for op in ['spring_sample_soilnitrate_corn',
+                       'spring_sample_soilnitrate_soy']:
                 table3 += "<td>%s</td>" % (
                         data[site].get(yr, {}).get(op, ''),)
             for op in ['termination_rye_corn', 'termination_rye_soy']:
@@ -125,6 +139,28 @@ def main():
                         data[site].get(yr, {}).get(op, ''),)
         table3 += "</tr>"
 
+    #---------------------------------------------------------------
+    table4 = ""
+    for site in COVER_SITES: #data.keys():
+        table4 += "<tr><td>%s</td>" % (site,)
+        for yr in ['2011', '2012', '2013', '2014', '2015']:
+            for op in ['plant_corn',
+                       'plant_soy']:
+                table4 += "<td>%s</td>" % (
+                        data[site].get(yr, {}).get(op, ''),)
+        table4 += "</tr>"
+
+    #---------------------------------------------------------------
+    table5 = ""
+    for site in COVER_SITES: #data.keys():
+        table5 += "<tr><td>%s</td>" % (site,)
+        for yr in ['2011', '2012', '2013', '2014', '2015']:
+            for op in ['fertilizer_synthetic1',
+                       'fertilizer_synthetic2']:
+                table5 += "<td>%s</td>" % (
+                        data[site].get(yr, {}).get(op, ''),)
+        table5 += "</tr>"
+    
     sys.stdout.write("""<!DOCTYPE html>
 <html lang='en'>
 <head>
@@ -133,6 +169,11 @@ def main():
 </head>    
 <body>
 
+<p>The data presented on this page is current as of the last sync of 
+Google Data to the ISU Database Server.  You can <br />
+<a href="mantable.py?reload=yes"
+ class="btn btn-info"><i class="glyphicon glyphicon-cloud-download"></i> Request Sync of Google Data</a> 
+ <br />and a script will run to sync the database.
 %s
 
 <h3>Sub Table 1</h3>
@@ -200,16 +241,16 @@ def main():
   <th colspan="2">Fall Cover Crop Sample</th>
  </tr>
  <tr>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
-  <th>Corn</th><th>Soybean</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
+  <th>after C</th><th>after S</th>
  </tr>
 </thead>
 %s
@@ -258,9 +299,55 @@ def main():
 %s
 </table>
 
+<h3>Cash Crop Planting</h3>
+
+<table class="table table-striped table-bordered">
+<thead>
+ <tr>
+  <th rowspan="3">Site</th>
+  <th colspan="2">2011</th>
+  <th colspan="2">2012</th>
+  <th colspan="2">2013</th>
+  <th colspan="2">2014</th>
+  <th colspan="2">2015</th>
+ </tr>
+ <tr>
+  <th>Corn</th><th>Soybean</th>
+  <th>Corn</th><th>Soybean</th>
+  <th>Corn</th><th>Soybean</th>
+  <th>Corn</th><th>Soybean</th>
+  <th>Corn</th><th>Soybean</th>
+ </tr>
+</thead>
+%s
+</table>
+
+<h3>Fertilizer N Application</h3>
+
+<table class="table table-striped table-bordered">
+<thead>
+ <tr>
+  <th rowspan="3">Site</th>
+  <th colspan="2">2011</th>
+  <th colspan="2">2012</th>
+  <th colspan="2">2013</th>
+  <th colspan="2">2014</th>
+  <th colspan="2">2015</th>
+ </tr>
+ <tr>
+  <th>Starter</th><th>Side Dress</th>
+  <th>Starter</th><th>Side Dress</th>
+  <th>Starter</th><th>Side Dress</th>
+  <th>Starter</th><th>Side Dress</th>
+  <th>Starter</th><th>Side Dress</th>
+ </tr>
+</thead>
+%s
+</table>
+
 </body>
 </html>
-    """ % (reloadres, table, table2, table3))
+    """ % (reloadres, table, table2, table3, table4, table5))
     
 if __name__ == '__main__':
     main()
