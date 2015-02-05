@@ -162,8 +162,8 @@ def create_netcdf(station, metadata):
     nc.station_name = metadata['name']
     reclen = int((2016-1850) * 365.25) + 1
     
-    nc.createDimension('time', reclen)
-    nc.createDimension('stations', 1)
+    _a = nc.createDimension('time', reclen)
+    _b = nc.createDimension('stations', 1)
     
     lat = nc.createVariable('lat', np.float, ('stations',))
     lat.standard_name = 'latitude'
