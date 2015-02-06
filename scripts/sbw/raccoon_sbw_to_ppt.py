@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Generate a Powerpoint file for an event.  This script looks for queued jobs 
-within the database and runs them sequentially each minute
-
-"""
+"""Generate a Powerpoint file for an event.  This script looks for queued jobs 
+within the database and runs them sequentially each minute"""
 __REV__ = "11Feb2013"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
 import shutil
 import datetime
-import psycopg2
 import subprocess
 import random
 import psycopg2.extras
@@ -18,7 +14,7 @@ from odf.opendocument import OpenDocumentPresentation
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.text import P
-from odf.draw  import Page, Frame, TextBox, Image
+from odf.draw import Page, Frame, TextBox, Image
 
 SUPER_RES = datetime.datetime(2010, 3, 1)
 

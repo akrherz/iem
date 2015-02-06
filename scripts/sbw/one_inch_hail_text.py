@@ -1,9 +1,8 @@
 # Look into 1 inch hail verification
 
 import re
-from pyIEM import iemdb
-i = iemdb.iemdb()
-postgis = i['postgis']
+import pg
+postgis = pg.connect('postgis', 'iemdb')
 
 # Query for warnings
 rs = postgis.query("SELECT report, wfo, issue, expire, astext(geom) as txt from \
