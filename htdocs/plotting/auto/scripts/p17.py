@@ -77,8 +77,12 @@ def plotter( fdict ):
     clhighs = [None]*days
     cllows = [None]*days
     for row in ccursor:
-        clhighs[ int(row[0].day) - 1 ] = row[1]
-        cllows[ int(row[0].day) - 1 ] = row[2]
+        idx = int(row[0].day) - 1
+        # February leap day
+        if idx >= days:
+            continue
+        clhighs[idx] = row[1]
+        cllows[idx] = row[2]
     
     (fig, ax) = plt.subplots(1,1)
 
