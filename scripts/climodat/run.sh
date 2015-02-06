@@ -1,6 +1,5 @@
-#!/bin/sh
+# Generate the reports, run from RUN_2AM.sh
 
-# Generate the reports
 python drive.py
 python ksYearly.py 
 python ksMonthly.py

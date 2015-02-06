@@ -108,27 +108,27 @@ for dbid in runstations:
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "08")
-    caller(genCountLows32.write, mydb, out, dbid)
+    caller(genCountLows32.write, cursor, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "09")
-    caller(genSpringFall.write, mydb, out, rs, dbid, 32)
+    caller(genSpringFall.write, out, rs, dbid, 32)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "10")
-    caller(genSpringFall.write, mydb, out, rs, dbid, 30)
+    caller(genSpringFall.write, out, rs, dbid, 30)
     out.close()
     
     out =  constants.make_output( constants.nt, dbid, "11")
-    caller(genSpringFall.write, mydb, out, rs, dbid, 28)
+    caller(genSpringFall.write, out, rs, dbid, 28)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "12")
-    caller(genSpringFall.write, mydb, out, rs, dbid, 26)
+    caller(genSpringFall.write, out, rs, dbid, 26)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "13")
-    caller(genSpringFall.write, mydb, out, rs, dbid, 24)
+    caller(genSpringFall.write, out, rs, dbid, 24)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "14")
@@ -150,7 +150,7 @@ for dbid in runstations:
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "20")
-    caller(genHeatStress.write, mydb, out, dbid)
+    caller(genHeatStress.write, cursor, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "21")
@@ -166,15 +166,15 @@ for dbid in runstations:
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "23")
-    caller(genSpringProbabilities.write, mydb, out, dbid)
+    caller(genSpringProbabilities.write, cursor, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "24")
-    caller(genCycles.write, mydb, out, rs, dbid)
+    caller(genCycles.write, out, rs, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "26")
-    caller(genTempThresholds.write, mydb, out, dbid)
+    caller(genTempThresholds.write, cursor, out, dbid)
     out.close()
     
     out = constants.make_output( constants.nt, dbid, "27")
