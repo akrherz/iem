@@ -1,9 +1,8 @@
 # Look for wind information in warnings
 
 import re
-from pyIEM import iemdb
-i = iemdb.iemdb()
-postgis = i['postgis']
+import pg
+postgis = pg.connect('postgis', 'iemdb')
 
 # Query for warnings
 rs = postgis.query("""SELECT issue, windtag, report, wfo, eventid, 

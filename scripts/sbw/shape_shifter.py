@@ -1,14 +1,12 @@
-import iemdb
 import math
 import re
 import psycopg2.extras
 import matplotlib.pyplot as plt
 import numpy
 import mx.DateTime
-import iemplot
 import pyproj
 P2163 = pyproj.Proj(init='epsg:2163')
-postgis = iemdb.connect('postgis', bypass=True)
+postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = postgis.cursor(cursor_factory=psycopg2.extras.DictCursor)
 pcursor2 = postgis.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

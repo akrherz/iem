@@ -3,7 +3,6 @@
 """
 
 import psycopg2.extras
-import psycopg2
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 pcursor2 = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -19,31 +18,31 @@ from PIL import Image, ImageDraw, ImageFont
 # Preparation
 sortOpt = sys.argv[1]
 ts = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-sts = ts.replace(tzinfo=pytz.timezone("UTC"),hour=0, minute=0, second=0,
-                microsecond=0)
+sts = ts.replace(tzinfo=pytz.timezone("UTC"), hour=0, minute=0, second=0,
+                 microsecond=0)
 if len(sys.argv) == 5:
-    sts = sts.replace(year=int(sys.argv[1]), month=int(sys.argv[2]), 
-                    day=int(sys.argv[3]) )
+    sts = sts.replace(year=int(sys.argv[1]), month=int(sys.argv[2]),
+                      day=int(sys.argv[3]))
     sortOpt = sys.argv[4]
 
 ets = sts + datetime.timedelta(hours=24)
 
-opts = {'W': {'fnadd': '-wfo', 'sortby': 'wfo ASC, phenomena ASC, eventid ASC'},
+opts = {'W': {'fnadd': '-wfo',
+              'sortby': 'wfo ASC, phenomena ASC, eventid ASC'},
         'S': {'fnadd': '', 'sortby': 'size DESC'},
-        'T': {'fnadd': '-time', 'sortby': 'issue ASC'} }
-
+        'T': {'fnadd': '-time', 'sortby': 'issue ASC'}}
 
 # Defaults
 thumbpx = 100
 cols = 10
 
 # Find largest polygon either in height or width
-sql = """SELECT *, ST_area2d(ST_transform(geom,2163)) as size, 
-  (ST_xmax(ST_transform(geom,2163)) - ST_xmin(ST_transform(geom,2163))) as width, 
-  (ST_ymax(ST_transform(geom,2163)) - ST_ymin(ST_transform(geom,2163))) as height 
+sql = """SELECT *, ST_area2d(ST_transform(geom,2163)) as size,
+  (ST_xmax(ST_transform(geom,2163)) - ST_xmin(ST_transform(geom,2163))) as width,
+  (ST_ymax(ST_transform(geom,2163)) - ST_ymin(ST_transform(geom,2163))) as height
   from sbw_%s WHERE status = 'NEW' and issue >= '%s' and issue < '%s' and 
-  phenomena IN ('TO','SV') """ % (sts.year, sts, ets )
-pcursor.execute( sql )
+  phenomena IN ('TO','SV') """ % (sts.year, sts, ets)
+pcursor.execute(sql)
 
 maxDimension = 0
 mybuffer = 10000
@@ -55,8 +54,10 @@ svrSize = 0
 for row in pcursor:
     w = float(row['width'])
     h = float(row['height'])
-    if (w > maxDimension): maxDimension = w
-    if (h > maxDimension): maxDimension = h
+    if w > maxDimension:
+        maxDimension = w
+    if h > maxDimension:
+        maxDimension = h
 
     if row['phenomena'] == "SV":
         svrCount += 1
@@ -66,42 +67,43 @@ for row in pcursor:
         torSize += float(row['size'])
     i += 1
 
-#print "Largest Dimension %s m" % (maxDimension,)
+sql = """
+    SELECT phenomena, sum( ST_area2d(ST_transform(u.geom,2163)) ) as size
+    from warnings_%s w JOIN ugcs u on (u.gid = w.gid) 
+    WHERE issue >= '%s' and issue < '%s' and 
+    significance = 'W' and phenomena IN ('TO','SV') GROUP by phenomena
+""" % (sts.year, sts, ets)
 
-sql = """SELECT phenomena, sum( ST_area2d(ST_transform(u.geom,2163)) ) as size 
-   from warnings_%s w JOIN ugcs u on (u.gid = w.gid) 
-   WHERE issue >= '%s' and issue < '%s' and 
-   significance = 'W' and phenomena IN ('TO','SV') GROUP by phenomena""" % (
-                                sts.year, sts, ets )
-
-pcursor.execute( sql )
+pcursor.execute(sql)
 for row in pcursor:
     if row['phenomena'] == "TO":
-        totalTorCar = 100.0* (1.0 - (torSize / float(row['size'])))
+        totalTorCar = 100.0 * (1.0 - (torSize / float(row['size'])))
     if row['phenomena'] == "SV":
-        totalSvrCar = 100.0* (1.0 - (svrSize / float(row['size'])))
+        totalSvrCar = 100.0 * (1.0 - (svrSize / float(row['size'])))
 
 # Make mosaic image
 header = 35
-mosaic = Image.new('RGB', (thumbpx*cols, ((int(i/cols)+1)*thumbpx )+header ))
+mosaic = Image.new('RGB', (thumbpx*cols, ((int(i/cols)+1)*thumbpx) + header))
 font = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 12)
 font10 = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 10)
 font2 = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 18)
 draw = ImageDraw.Draw(mosaic)
 
 imagemap = open('imap.txt', 'w')
-imagemap.write("<!-- %s %s -->\n" % (
-        datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), sortOpt) )
+utcnow = datetime.datetime.utcnow()
+imagemap.write("<!-- %s %s -->\n" % (utcnow.strftime("%Y-%m-%d %H:%M:%S"),
+                                     sortOpt))
 imagemap.write("<MAP NAME='mymap'>\n")
 
 # Find my polygons
-sql = """SELECT *, ST_area2d(ST_transform(geom,2163)) as size, 
-  (ST_xmax(ST_transform(geom,2163)) + ST_xmin(ST_transform(geom,2163))) /2.0 as xc, 
-  (ST_ymax(ST_transform(geom,2163)) + ST_ymin(ST_transform(geom,2163))) /2.0 as yc 
-  from sbw_%s WHERE status = 'NEW' and issue >= '%s' and issue < '%s' and 
-  phenomena IN ('TO','SV') and eventid is not null ORDER by %s""" % (
-            sts.year, sts, ets, opts[sortOpt]['sortby'] )
-pcursor.execute( sql )
+sql = """
+    SELECT *, ST_area2d(ST_transform(geom,2163)) as size, 
+    (ST_xmax(ST_transform(geom,2163)) + ST_xmin(ST_transform(geom,2163))) /2.0 as xc,
+    (ST_ymax(ST_transform(geom,2163)) + ST_ymin(ST_transform(geom,2163))) /2.0 as yc
+    from sbw_%s WHERE status = 'NEW' and issue >= '%s' and issue < '%s' and
+    phenomena IN ('TO','SV') and eventid is not null ORDER by %s
+""" % (sts.year, sts, ets, opts[sortOpt]['sortby'])
+pcursor.execute(sql)
 
 # Write metadata to image
 tmp = Image.open("logo_small.png")
@@ -212,11 +214,11 @@ imagemap.close()
 
 cmd = "/home/ldm/bin/pqinsert -p 'plot a %s0000 blah sbwsum%s.png png' test.png" % (
                     ts.strftime("%Y%m%d"), opts[sortOpt]['fnadd'])
-subprocess.call( cmd, shell=True )
+subprocess.call(cmd, shell=True)
 
 cmd = "/home/ldm/bin/pqinsert -p 'plot a %s0000 blah sbwsum-imap%s.txt txt' imap.txt" % (
                     ts.strftime("%Y%m%d"), opts[sortOpt]['fnadd'])
-subprocess.call( cmd, shell=True )
+subprocess.call(cmd, shell=True)
 
 os.remove("test.png")
 os.remove("imap.txt")

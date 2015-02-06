@@ -37,6 +37,4 @@ while( list($k, $lsr) = each($cow->lsrs)){
 			$lsr["lat0"], $lsr["lon0"], $ratio));  	
 }
 fclose($output);
-
-
 ?>
