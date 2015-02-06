@@ -28,6 +28,5 @@ m.pcolormesh(x, y, data, clevs)
 m.map.drawcounties(zorder=10, linewidth=1.)
 
 
-m.postprocess(filename='test.ps')
-import iemplot
-iemplot.makefeature('test')
+m.postprocess(filename='test.png')
+

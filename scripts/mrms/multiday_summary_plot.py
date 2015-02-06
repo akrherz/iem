@@ -25,6 +25,4 @@ x,y = np.meshgrid(lons, lats)
 m.pcolormesh(x, y, p01d, [0.01,0.1,0.25,0.5,0.75,1,2,3,4,5,6], cmap=cm.get_cmap('RdYlBu'),
              label='inches')
 m.drawcounties()
-m.postprocess(filename='test.ps')
-import iemplot
-iemplot.makefeature('test')
+m.postprocess(filename='test.png')
