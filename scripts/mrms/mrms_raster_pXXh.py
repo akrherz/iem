@@ -110,7 +110,7 @@ def doit(gts, hr):
     # Now we need to generate the world file
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/p%sh.wld GIS/mrms/p%sh_%s.wld wld' %s.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/mrms/p%sh.wld GIS/mrms/p%sh_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM

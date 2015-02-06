@@ -60,7 +60,7 @@ def do(now , realtime, delta):
     # Inject WLD file
     routes = "c" if realtime else "" 
     prefix = 'a2m'
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a%s %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -i -p 'plot a%s %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (
                     routes, now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)

@@ -109,17 +109,17 @@ def random_zeros():
     return "%s" % ("0" * random.randint(0, 20),)
 
 
-def write_worldfile( filename ):
-    """
-    Write a world file to given filename
-    @param filename to write the data to
+def write_worldfile(filename):
+    """Write a worldfile
+
+    Args:
+      filename (str): filename to write to
     """
     output = open(filename, 'w')
-    output.write("""0.010%s
-0.00%s
-0.00%s
--0.010%s
+    output.write("""0.01
+0.00
+0.00
+-0.01
 %s
-%s""" % (random_zeros(), random_zeros(), random_zeros(), random_zeros(),
-            WEST, NORTH))
+%s""" % (WEST, NORTH))
     output.close()

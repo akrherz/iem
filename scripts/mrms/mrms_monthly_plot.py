@@ -5,8 +5,8 @@ from pyiem.plot import MapPlot
 from pyiem import iemre
 import datetime
 import numpy as np
-import matplotlib.cm as cm
 import sys
+
 
 def do_month(year, month, routes):
     """ Generate a MRMS plot for the month!"""
@@ -30,7 +30,6 @@ def do_month(year, month, routes):
     p01d = np.sum(nc.variables['p01d'][idx0:idx1,:,:],0) / 24.5
     nc.close()
 
-
     m = MapPlot(sector='iowa', title='MRMS %s - %s Total Precipitation' % (
             sts.strftime("%-d %b"), 
             (ets - datetime.timedelta(days=1)).strftime("%-d %b %Y")),
@@ -45,6 +44,7 @@ def do_month(year, month, routes):
                 routes, sts.strftime("%Y%m%d%H"), currentfn, archivefn)
     m.postprocess(pqstr=pqstr)
 
+
 def main():
     #
     if len(sys.argv) == 3:
@@ -53,6 +53,6 @@ def main():
         today = datetime.date.today()
         yesterday = today - datetime.timedelta(days=1)
         do_month(yesterday.year, yesterday.month, 'cm')
-    
+
 if __name__ == '__main__':
     main()
