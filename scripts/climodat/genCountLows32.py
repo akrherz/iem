@@ -1,29 +1,26 @@
-# Count mininum lows
+""" This is report 08 """
 
 import constants
 
-def write(mydb, out, station):
+
+def write(cursor, out, station):
     out.write("""# OF DAYS EACH YEAR WHERE MIN >=32 F\n""")
 
-    rs = mydb.query("""SELECT year, count(low) from %s WHERE 
-    station = '%s' and low >= 32 and day >= '%s-01-01' 
-    and year < %s GROUP by year""" % (constants.get_table(station), 
-                                      station, 
-                                      constants.startyear(station), 
-                                      constants._THISYEAR) ).dictresult()
+    cursor.execute("""
+        SELECT year, count(low) from %s WHERE
+        station = '%s' and low >= 32 and day >= '%s-01-01'
+        and year < %s GROUP by year
+    """ % (constants.get_table(station), station,
+           constants.startyear(station), constants._THISYEAR))
     tot = 0
     d = {}
-    for yr in range(constants.startyear(station), constants._THISYEAR):
-        d[yr] = 0
-    for i in range(len(rs)):
-        tot += int(rs[i]["count"])
-        d[ int(rs[i]["year"]) ] = int(rs[i]["count"])
+    for row in cursor:
+        tot += row["count"]
+        d[row["year"]] = row["count"]
 
-    mean = tot / len(rs)
+    mean = tot / float(cursor.rowcount)
 
-    for yr in range(constants.startyear(station), constants._THISYEAR):
-        out.write("%s %3i\n" % (yr, d[yr]))
+    for year in range(constants.startyear(station), constants._THISYEAR):
+        out.write("%s %3i\n" % (year, d.get(year, 0)))
 
-
-    out.write("MEAN %3i\n" % (mean,) )
-  
+    out.write("MEAN %3i\n" % (mean,))

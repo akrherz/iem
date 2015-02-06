@@ -2,13 +2,12 @@
  Create a contour plot of monthly precip from the climodat data (iemre)
 """
 import sys
-import iemdb
 import psycopg2.extras
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-import network
-nt = network.Table("IACLIMATE")
-import iemplot
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
+from pyiem.plot import MapPlot
 import mx.DateTime
 
 def do_month(ts, routes='m'):
@@ -34,25 +33,26 @@ def do_month(ts, routes='m'):
         lons.append( nt.sts[row['station']]['lon'] )
         vals.append( row['total'] )
         
-    cfg = {
-     'wkColorMap': 'WhiteBlueGreenYellowRed',
-     '_valid'    : '%s - %s' % (now.strftime("%d %B %Y"), lastday.strftime("%d %B %Y")),
-     '_title'    : "%s Total Precipitation [inch]" % (now.strftime("%B %Y"),),
-     'lbTitleString': 'inch',
-     '_showvalues': True,
-     '_format' : '%.2f',
-     }
+    m = MapPlot(title='%s - %s' % (ts.strftime("%d %B %Y"),
+                                   lastday.strftime("%d %B %Y")),
+                subtitle="%s Total Precipitation [inch]" % (
+                                    ts.strftime("%B %Y"),))
+    m.contourf(lons, lats, vals, [0,0.1,0.25,0.5,0.75,1,2,3,4,5,6,7])
+    m.plot_values(lons, lats, vals, fmt='%.2f')
 
-    tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
     pqstr = "plot %s %s summary/iemre_iowa_total_precip.png %s/summary/iemre_iowa_total_precip.png png" % (
                                     routes, ts.strftime("%Y%m%d%H%M"), 
                                                               ts.strftime("%Y/%m"),)
-    iemplot.postprocess(tmpfp, pqstr)
+    m.postprocess(pqstr=pqstr)
     
-if __name__ == '__main__':
+def main():
+    """Do Something"""
     if len(sys.argv) == 3:
         now = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]))
         do_month( now , 'm')
     else:
         now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1) + mx.DateTime.RelativeDateTime(day=1)
         do_month(now, 'cm')
+    
+if __name__ == '__main__':
+    main()

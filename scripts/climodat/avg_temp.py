@@ -3,18 +3,17 @@
 """
 
 import sys
-import iemplot
+from pyiem.plot import MapPlot
 
 import datetime
 now = datetime.datetime.now()
 
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 nt.sts["IA0200"]["lon"] = -93.4
 nt.sts["IA5992"]["lat"] = 41.65
-import iemdb
 import psycopg2.extras
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 def runYear(year):
@@ -40,21 +39,15 @@ def runYear(year):
         maxday   = row['max']
 
     #---------- Plot the points
-
-    cfg = {
-     'wkColorMap': 'gsltod',
-     '_format'   : '%.1f',
-     '_labels'   : labels,
-     '_valid'    : '1 January - %s' % (maxday.strftime("%d %B"),),
-     '_title'    : "Average Daily High Temperature [F] (%s)" % (year,),
-     }
-
-    tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+    m = MapPlot(title="Average Daily High Temperature [F] (%s)" % (year,),
+                subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                axisbg='white')
+    m.plot_values(lons,lats, vals, labels=labels, labeltextsize=8,
+                  labelcolor='tan')
     pqstr = "plot m %s bogus %s/summary/avg_high.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
-    iemplot.postprocess(tmpfp, pqstr)
-    iemplot.simple_valplot(lons, lats, vals, cfg)
-
+    m.postprocess(pqstr=pqstr)
+    m.close()
 
     # Plot Average Lows
     lats = []
@@ -72,20 +65,15 @@ def runYear(year):
         vals.append( row['avg_low'] )
 
     #---------- Plot the points
-
-    cfg = {
-     'wkColorMap': 'gsltod',
-     '_format'   : '%.1f',
-     '_labels'   : labels,
-     '_valid'    : '1 January - %s' % (maxday.strftime("%d %B"),),
-     '_title'    : "Average Daily Low Temperature [F] (%s)" % (year,),
-     }
-
-    tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+    m = MapPlot(title="Average Daily Low Temperature [F] (%s)" % (year,),
+                subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                axisbg='white')
+    m.plot_values(lons,lats, vals, labels=labels, labeltextsize=8,
+                  labelcolor='tan')
     pqstr = "plot m %s bogus %s/summary/avg_low.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
-    iemplot.postprocess(tmpfp, pqstr)
-    iemplot.simple_valplot(lons, lats, vals, cfg)
+    m.postprocess(pqstr=pqstr)
+    m.close()
 
     # Plot Average Highs
     lats = []
@@ -103,20 +91,15 @@ def runYear(year):
         vals.append( row['avg_tmp'] )
 
     #---------- Plot the points
-
-    cfg = {
-     'wkColorMap': 'gsltod',
-     '_format'   : '%.1f',
-     '_labels'   : labels,
-     '_valid'    : '1 January - %s' % (now.strftime("%d %B"),),
-     '_title'    : "Average Daily Temperature (mean high+low) [F] (%s)" % (year,),
-  }
-
-    tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+    m = MapPlot(title="Average Daily Temperature [F] (%s)" % (year,),
+                subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                axisbg='white')
+    m.plot_values(lons,lats, vals, labels=labels, labeltextsize=8,
+                  labelcolor='tan')
     pqstr = "plot m %s bogus %s/summary/avg_temp.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
-    iemplot.postprocess(tmpfp, pqstr)
-    iemplot.simple_valplot(lons, lats, vals, cfg)
+    m.postprocess(pqstr=pqstr)
+    m.close()
 
 
 if __name__ == '__main__':

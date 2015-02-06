@@ -1,13 +1,12 @@
-# Compute number of cyles per season 
-
+""" Compute number of cyles per season"""
 import constants
 import mx.DateTime
 
-def write(mydb, out, rs, station):
+
+def write(out, rs, station):
     s = constants.startts(station)
     e = constants._ENDTS
     YEARS = e.year - s.year + 1
-
 
     out.write("""# SEASONAL TEMPERATURE CYCLES PER YEAR
 # 1 CYCLE IS A TEMPERATURE VARIATION FROM A VALUE BELOW A THRESHOLD 
@@ -19,36 +18,34 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 
     data = {}
     for yr in range(constants.startyear(station), constants._ENDYEAR):
-        data[yr] = {'26s':0, '26f': 0, 
-                '24s':0, '24f': 0,
-                '20s':0, '20f': 0,
-                '14s':0, '14f': 0}
- 
-    prs = [[26,38], [24,40], [20,44], [14,50]]
-  
+        data[yr] = {'26s': 0, '26f': 0, '24s': 0, '24f': 0,
+                    '20s': 0, '20f': 0, '14s': 0, '14f': 0}
+
+    prs = [[26, 38], [24, 40], [20, 44], [14, 50]]
+
     cycPos = {'26s': -1, '24s': -1, '20s': -1, '14s': -1}
- 
+
     for i in range(len(rs)):
         ts = mx.DateTime.strptime(rs[i]["day"], "%Y-%m-%d")
         high = int(rs[i]['high'])
         low = int(rs[i]['low'])
 
         for pr in prs:
-            l,u = pr
-            key = '%ss'%(l,)
-            ckey = '%ss'%(l,)
-            if (ts.month >= 7):
-                ckey = '%sf'%(l,)
-      
+            l, u = pr
+            key = '%ss' % (l, )
+            ckey = '%ss' % (l, )
+            if ts.month >= 7:
+                ckey = '%sf' % (l, )
+
             # cycles lower
-            if (cycPos[key] == 1 and low < l):
-                #print 'Cycled lower', low, ts
+            if cycPos[key] == 1 and low < l:
+                # print 'Cycled lower', low, ts
                 cycPos[key] = -1
                 data[ts.year][ckey] += 0.5
 
             # cycled higher
-            if (cycPos[key] == -1 and high > u):
-                #print 'Cycled higher', high, ts
+            if cycPos[key] == -1 and high > u:
+                # print 'Cycled higher', high, ts
                 cycPos[key] = 1
                 data[ts.year][ckey] += 0.5
 
@@ -69,8 +66,12 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
         f20 += data[yr]['20f']
         s14 += data[yr]['14s']
         f14 += data[yr]['14f']
-        out.write("%s   %-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i\n" % (yr,data[yr]['26s'],
-        data[yr]['26f'],data[yr]['24s'],data[yr]['24f'],
-        data[yr]['20s'],data[yr]['20f'],data[yr]['14s'],data[yr]['14f'] ))
+        out.write(("%s   %-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i\n"
+                   "") % (yr, data[yr]['26s'],
+                          data[yr]['26f'], data[yr]['24s'], data[yr]['24f'],
+                          data[yr]['20s'], data[yr]['20f'], data[yr]['14s'],
+                          data[yr]['14f']))
 
-    out.write("AVG    %-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f\n" % (s26/YEARS, f26/YEARS, s24/YEARS, f24/YEARS, s20/YEARS, f20/YEARS, s14/YEARS, f14/YEARS) )
+    out.write(("AVG    %-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f\n"
+               "") % (s26/YEARS, f26/YEARS, s24/YEARS, f24/YEARS, s20/YEARS,
+                      f20/YEARS, s14/YEARS, f14/YEARS))
