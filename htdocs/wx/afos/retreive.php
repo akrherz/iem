@@ -59,9 +59,8 @@ if (pg_numrows($rs) == 0){
 }
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
-{
-	$data = preg_replace("/\x1E/", '', $row['data']);
-  	echo "<pre>". preg_replace("/\r\r\n/", "\n", $data) ."</pre><hr />";
+{ 
+  echo "<pre>". preg_replace("/\r\r\n/", "\n", $row["data"]) ."</pre><hr />";
 }
 
 ?>
