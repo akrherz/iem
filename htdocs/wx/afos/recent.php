@@ -20,7 +20,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 {
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
 	$d = preg_replace("/\001/", "", $d);
-
+	$d = preg_replace("/\x1e/", "", $d);
     $content .= $d;
 
 }
