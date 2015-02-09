@@ -1,51 +1,43 @@
-import iemdb
-import iemplot
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
-snowdlats = []
-snowdlons = []
-snowdvals = []
+
 icursor.execute("""
-    SELECT ST_x(geom), ST_y(geom), snowd from summary_2014 s JOIN stations t 
-    ON (t.iemid = s.iemid) WHERE
-    network in ('IA_COOP') and 
-    snowd >= 0 and day = '2014-03-10'
+with one as (select iemid, snowd from summary_2015 
+ where snowd >= 0 and day = '2015-02-07'), 
+two as (select iemid, max_tmpf from summary_2015 
+ where max_tmpf > 0 and day = '2015-02-08' 
+ and extract(hour from coop_valid) between 4 and 10), 
+data as (SELECT o.iemid, o.snowd, t.max_tmpf from one o JOIN two t 
+ ON (t.iemid = o.iemid)) 
+
+ SELECT t.id, d.snowd, d.max_tmpf from data d JOIN stations t 
+ on (t.iemid = d.iemid) WHERE t.network in ('IA_COOP', 'MN_COOP',
+ 'SD_COOP', 'NE_COOP', 'KS_COOP', 'MO_COOP', 'IL_COOP',
+ 'MI_COOP', 'WI_COOP') ORDER by max_tmpf DESC
 """)
+snowd = []; high = []
+ia_snowd = []; ia_high = []
 for row in icursor:
-    snowdlats.append( row[1] )
-    snowdlons.append( row[0] )
-    snowdvals.append( row[2] )
-    
-highslats = []
-highslons = []
-highsvals = []
-icursor.execute("""
-    SELECT ST_x(geom), ST_y(geom), max_tmpf, id from summary_2014 s JOIN stations t
-    on (t.iemid = s.iemid) WHERE
-    network in ('IA_ASOS','AWOS') 
-    and max_tmpf > 0 and day = '2014-03-10' ORDER by max_tmpf ASC
-""")
-for row in icursor:
-    print row
-    highslats.append( row[1] )
-    highslons.append( row[0] )
-    highsvals.append( row[2] )
-    
-# Grid please
-snowd, res = iemplot.grid_iowa(snowdlons, snowdlats, snowdvals)
-highs, res = iemplot.grid_iowa(highslons, highslats, highsvals)
+  if row[0][-2:] == 'I4':
+    ia_snowd.append(row[1])
+    ia_high.append(row[2])
+  else:
+    snowd.append(row[1])
+    high.append(row[2])
+
 
 import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-#ax.imshow( highs )
-ax.scatter( snowd[2:-2,2:-2].flatten(), highs[2:-2,2:-2].flatten() )
+ax.scatter(snowd, high, marker='o', color='b', label='Surrounding\nStates')
+ax.scatter(ia_snowd, ia_high, marker='s', color='r', zorder=2, label='Iowa')
 ax.set_xlim(-0.3,30)
+ax.legend()
 ax.set_xlabel('Morning Snow Depth [inch]')
 ax.set_ylabel('Afternoon High Temperature [F]')
-ax.set_title("10 Mar 2014: High Temperature  vs. Snow Depth\nPoint Comparison of Gridded Analysis over Iowa")
+ax.set_title("7 February 2015: High Temperature  vs. Snow Depth\nNWS COOP Reports over upper Midwest")
 ax.grid(True)
 
-fig.savefig('test.ps')
-iemplot.makefeature('test')
+fig.savefig('test.png')
