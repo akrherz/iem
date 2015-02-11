@@ -68,7 +68,7 @@ class RWISOb(object):
     self.error      = 0
     self.subT = -99
     self.sfdata = [0]*5
-    for i in range(4):
+    for i in range(5):
       self.sfdata[i] = {"dry": -99, "tmpc": -99, "tmpf": -99}
 
   def get(self, key):
