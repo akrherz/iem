@@ -67,7 +67,7 @@ class RWISOb(object):
     self.sname      = None
     self.error      = 0
     self.subT = -99
-    self.sfdata = [0]*4
+    self.sfdata = [0]*5
     for i in range(4):
       self.sfdata[i] = {"dry": -99, "tmpc": -99, "tmpf": -99}
 
@@ -76,6 +76,8 @@ class RWISOb(object):
 
   def add_sfdata(self, dict):
     sensorid = int(dict["Senid"])
+    if sensorid > 4:
+        return
     self.stationNum = int( dict["Rpuid"] )
     lkp = "%02i" % (self.stationNum,)
     if not RWISconvert.has_key(lkp):
