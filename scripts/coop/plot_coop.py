@@ -33,24 +33,16 @@ def plot_hilo(valid):
     and max_tmpf is not null and max_tmpf >= -30 and
     min_tmpf is not null and min_tmpf < 99 and
     extract(hour from coop_valid) between 5 and 10""", (valid.date(),))
-    labels = []
-    highs = []
-    lows = []
-    lats = []
-    lons = []
+    data = []
     for row in cursor:
-        labels.append(row[2])
-        highs.append(pretty(row[0], precision=0))
-        lows.append(pretty(row[1], precision=0))
-        lats.append(row[4])
-        lons.append(row[3])
-    
+        data.append(dict(lat=row[4], lon=row[3], tmpf=row[0],
+                         dwpf=row[1], id=row[2]))
+
     m = MapPlot(title='%s NWS COOP 24 Hour High/Low Temperature [$^\circ$F]' % (
                                             valid.strftime("%-d %b %Y"),),
                 subtitle='Reports valid between 6 and 9 AM',
                 axisbg='white', figsize=(10.24,7.68))
-    m.plot_station(lons, lats, [highs, lows, labels], [1,7,5],
-                   colors=['red', 'blue', 'tan'], textsize=[12,12,8])
+    m.plot_station(data)
     m.drawcounties()
     
     pqstr = "plot ac %s0000 coopHighLow.gif coopHighLow.gif gif" % (
