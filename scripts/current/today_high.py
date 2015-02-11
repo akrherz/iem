@@ -12,11 +12,11 @@ IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 sql = """
-  select s.id, 
-  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
+  select s.id,
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat,
   max_tmpf as high, s.network
   from summary c, stations s
-  WHERE c.iemid = s.iemid and day = 'TODAY' and max_tmpf > -40 
+  WHERE c.iemid = s.iemid and day = 'TODAY' and max_tmpf > -40
   and s.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
   'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS') ORDER by high ASC
 """
@@ -31,18 +31,18 @@ dsm = None
 for row in icursor:
     if row[0] == 'DSM':
         dsm = row[3]
-    lats.append( row[2] )
-    lons.append( row[1] )
-    vals.append( row[3] )
-    labels.append( row[0] )
-    valmask.append( row[4] in ['AWOS', 'IA_ASOS'] )
+    lats.append(row[2])
+    lons.append(row[1])
+    vals.append(row[3])
+    labels.append(row[0])
+    valmask.append(row[4] in ['AWOS', 'IA_ASOS'])
 
 if len(lats) < 4:
     sys.exit()
 
 m = MapPlot(sector='iowa',
-            title='%s Iowa ASOS/AWOS High Temperature' % (
-                                                now.strftime("%-d %b %Y"),),
+            title=("%s Iowa ASOS/AWOS High Temperature"
+                   "") % (now.strftime("%-d %b %Y"),),
             subtitle='map valid: %s' % (now.strftime("%d %b %Y %-I:%M %p"), ))
 
 if dsm is None:
@@ -50,7 +50,7 @@ if dsm is None:
 
 bottom = int(dsm) - 15
 top = int(dsm) + 15
-bins = np.linspace( bottom, top, 11)
+bins = np.linspace(bottom, top, 11)
 cmap = cm.get_cmap('jet')
 m.contourf(lons, lats, vals, bins, units='F', cmap=cmap)
 m.plot_values(lons, lats, vals, '%.0f', valmask=valmask, labels=labels)

@@ -9,6 +9,7 @@ from pyiem.plot import MapPlot
 import os, sys
 import matplotlib.cm as cm
 
+
 def do(ts, hours):
     """
     Create a plot of precipitation stage4 estimates for some day
@@ -63,8 +64,9 @@ def do(ts, hours):
             m.drawcounties()
         m.postprocess(pqstr=pqstr)
         m.close()
-    
-if __name__ == "__main__":
+
+
+def main():
     if len(sys.argv) == 4:
         ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
                                int(sys.argv[3]), int(sys.argv[4]))
@@ -74,3 +76,6 @@ if __name__ == "__main__":
         hr = int(sys.argv[1])
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     do(ts, hr)
+
+if __name__ == "__main__":
+    main()

@@ -10,10 +10,11 @@ import sys
 import pytz
 import numpy as np
 
+
 def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
-    
+
     We should total files from 1 AM to midnight local time
     """
     sts = ts.replace(hour=1)
@@ -38,9 +39,9 @@ def doday(ts, realtime):
                 total += grbs[1]["values"]
             grbs.close()
         now += interval
-    
+
     if lts is None and ts.hour > 1:
-        print 'Missing StageIV data!'
+        print 'stage4_today_total.py found no data!'
     if lts is None:
         return
     lts = lts - datetime.timedelta(minutes=1)
@@ -72,12 +73,12 @@ def doday(ts, realtime):
         m.close()
     
     
-if __name__ == "__main__":
+def main():
     ''' Go Main Go 
-    
+
     So the past hour's stage IV is available by about 50 after, so we should 
     run for a day that is 90 minutes in the past by default
-    
+
     '''
     if len(sys.argv) == 4:
         date = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
@@ -92,3 +93,6 @@ if __name__ == "__main__":
     date = date.replace(tzinfo=pytz.timezone("UTC"))
     date = date.astimezone(pytz.timezone("America/Chicago"))
     doday(date, realtime)
+
+if __name__ == "__main__":
+    main()

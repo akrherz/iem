@@ -1,4 +1,4 @@
-# Runs at Midnight
+# Runs at Midnight CST/CDT
 DD=$(date -u +'%d')
 MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
@@ -38,6 +38,7 @@ cd ../mrms
 python create_daily_symlink.py $(date --date '1 day ago' +'%Y %m %d')
 python mrms_monthly_plot.py
 
+# Assume we have MERRA data by the 28th each month
 if [ $DD -eq "28" ]
 then
 	cd ../coop
