@@ -13,16 +13,19 @@ import tempfile
 import os
 
 URI = ("https://geonexusr.iowadot.gov/arcgis/rest/services/Operations/"
-       +"Truck_Images/MapServer/3/query?outFields=*&outSR=4326&"
-       +"f=json&where=PHOTO_UID%3E0&returnGeometry=true&returnIdsOnly=false")
+       "Truck_Images/MapServer/3/query?outFields=*&outSR=4326&"
+       "f=json&where=PHOTO_UID%3E0&returnGeometry=true&returnIdsOnly=false")
+
 
 def get_label(attrs):
     ''' Figure out the site label given the attributes, this will change later'''
     return attrs['PHOTO_URL'].split("/")[-1].split("_")[0]
 
+
 def get_current_fn(label):
     ''' Return how this is stored for current data '''
     return 'camera/idot_trucks/%s.jpg' % (label,)
+
 
 def get_archive_fn(label, utc):
     ''' Return how this is stored for current data '''

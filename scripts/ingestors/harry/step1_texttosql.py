@@ -55,23 +55,39 @@ for line in lines:
     pr = string.strip(tokens[12])
     sf = string.strip(tokens[14])
     sd = string.strip(tokens[16])
-    if (pr == "T"): pr = 0.0001
-    if (sf == "T"): sf = 0.0001
-    if (sd == "T"): sd = 0.0001
-    if (sf == "M"): sf = ""
-    if (sd == "M"): sd = ""
-    if (hi == "M"): hi = ""
-    if (lo == "M"): lo = ""
-    if (pr == "M"): pr = ""
-    if (pr == "C"): pr = ""
-    if (sf == "C"): sf = ""
-    if (sd == "C"): sd = ""
+    if (pr == "T"):
+        pr = 0.0001
+    if (sf == "T"):
+        sf = 0.0001
+    if (sd == "T"):
+        sd = 0.0001
+    if (sf == "M"):
+        sf = ""
+    if (sd == "M"):
+        sd = ""
+    if (hi == "M"):
+        hi = ""
+    if (lo == "M"):
+        lo = ""
+    if (pr == "M"):
+        pr = ""
+    if (pr == "C"):
+        pr = ""
+    if (sf == "C"):
+        sf = ""
+    if (sd == "C"):
+        sd = ""
 
-    if (sf == ""): sf = 0
-    if (sd == ""): sd = 0
-    if (pr == ""): pr = 0
-    if (hi == ""): hi = "Null"
-    if (lo == ""): lo = "Null"
+    if (sf == ""):
+        sf = 0
+    if (sd == ""):
+        sd = 0
+    if (pr == ""):
+        pr = 0
+    if (hi == ""):
+        hi = "Null"
+    if (lo == ""):
+        lo = "Null"
 
     ts = datetime.datetime(yr, mo, dy)
     day = ts.strftime("%Y-%m-%d")

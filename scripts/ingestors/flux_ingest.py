@@ -107,6 +107,7 @@ convert = {
 'Terrest_LW_TCor_Avg': 'terrest_lw_tcor',
            }
 
+
 def c(v):
     if (v == "NAN" or v == "-INF" or v == "INF"):
         return None

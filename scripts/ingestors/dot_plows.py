@@ -8,12 +8,12 @@ import pytz
 import datetime
 
 URI = ("https://geonexusr.iowadot.gov/ArcGIS/rest/services/Operations/"
-       +"Realtime_Trucks/MapServer/1/query?text=&geometry=&"
-       +"geometryType=esriGeometryPoint&inSR="
-       +"&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds="
-       +"&where=label+is+not+null&time=&returnCountOnly=false&"
-       +"returnIdsOnly=false&returnGeometry=true&maxAllowableOffset="
-       +"&outSR=&outFields=*&f=json")
+       "Realtime_Trucks/MapServer/1/query?text=&geometry=&"
+       "geometryType=esriGeometryPoint&inSR="
+       "&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds="
+       "&where=label+is+not+null&time=&returnCountOnly=false&"
+       "returnIdsOnly=false&returnGeometry=true&maxAllowableOffset="
+       "&outSR=&outFields=*&f=json")
 
 
 def workflow():
@@ -21,15 +21,15 @@ def workflow():
 
     postgis = psycopg2.connect(database='postgis', host='iemdb')
     cursor = postgis.cursor()
-    
+
     current = {}
     cursor.execute("""SELECT label, valid from idot_snowplow_current""")
     for row in cursor:
-        current[ row[0] ] = row[1]
-    
+        current[row[0]] = row[1]
+
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("UTC"),microsecond=0)
-    
+
     try:
         data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
     except Exception, exp:

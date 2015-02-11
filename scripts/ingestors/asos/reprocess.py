@@ -25,6 +25,7 @@ import psycopg2
 ASOS = psycopg2.connect(database='asos', host='iemdb')
 acursor = ASOS.cursor()
 
+
 class OB(object):
     ''' hacky representation of the database schema '''
     station = None
@@ -45,16 +46,17 @@ class OB(object):
     skyl3 = None
     metar = None
     skyl4 = None
-    p03i = None 
+    p03i = None
     p06i = None
     p24i = None
-    max_tmpf_6hr = None 
-    min_tmpf_6hr = None 
-    max_tmpf_24hr = None 
+    max_tmpf_6hr = None
+    min_tmpf_6hr = None
+    max_tmpf_24hr = None
     min_tmpf_24hr = None
     mslp = None
-    p01i = None 
+    p01i = None
     presentwx = None
+
 
 def get_job_list():
     """ Figure out the days and stations we need to get """
@@ -90,6 +92,7 @@ def get_job_list():
 
     return stations, days
 
+
 def workflow():
     """ Do some work """
     stations, days = get_job_list()
@@ -111,7 +114,8 @@ def workflow():
             if not usedcache:
                 time.sleep(0.5)
         print "%s processed %s entries" % (station, total)
-            
+
+
 def process_rawtext(yyyymm):
     """ Process the raw SAO files the IEM has """
     # skip 0z for now
@@ -184,7 +188,8 @@ def process_rawtext(yyyymm):
                     out.write("FullMetar,\n")
             if out is not None and not out.closed:
                 out.write("%s,\n" % (stdata[station][tm],))
-        
+
+
 def stup(station):
     if station[0] == 'K':
         return station[1:]

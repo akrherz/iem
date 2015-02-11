@@ -4,7 +4,7 @@ import os
 os.environ['TZ'] = 'CST6CDT'
 
 o = open('runner.pid', 'w')
-o.write("%s" % ( os.getpid(), ))
+o.write("%s" % (os.getpid(), ))
 o.close()
 
 import time
