@@ -1,3 +1,4 @@
+#Run at 40 minutes after the hour, there are some expensive scripts here
 YYYY6=$(date -u --date '6 hours ago' +'%Y')
 MM6=$(date -u --date '6 hours ago' +'%m')
 DD6=$(date -u --date '6 hours ago' +'%d')

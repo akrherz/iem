@@ -15,6 +15,7 @@ import tempfile
 
 from pyiem.plot import MapPlot
 
+
 def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
@@ -86,10 +87,10 @@ def doday(ts, realtime):
 
     #map.drawstates(zorder=2)
     m.drawcounties()
-    m.postprocess(pqstr=pqstr)    
-    
-if __name__ == "__main__":
-    ''' This is how we roll '''
+    m.postprocess(pqstr=pqstr, view=False)
+
+
+def main():
     if len(sys.argv) == 4:
         date = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
                                  int(sys.argv[3]), 12, 0)
@@ -103,3 +104,7 @@ if __name__ == "__main__":
     date = date.replace(tzinfo=pytz.timezone("UTC"))
     date = date.astimezone(pytz.timezone("America/Chicago"))
     doday(date, realtime)
+
+
+if __name__ == "__main__":
+    main()

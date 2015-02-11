@@ -12,6 +12,7 @@ import matplotlib.cm as cm
 gmtnow = datetime.datetime.utcnow()
 gmtnow = gmtnow.replace(tzinfo=pytz.timezone("UTC"))
 
+
 def doit(ts):
     """
     Generate hourly plot of stage4 data
@@ -48,18 +49,23 @@ def doit(ts):
                                 sector, ts.strftime("%H"))
         if sector == 'iowa':
             m.drawcounties()
-        m.postprocess(pqstr=pqstr)
+        m.postprocess(view=False, pqstr=pqstr)
         m.close()
 
-if __name__ == '__main__':
-    ''' Go main go '''
+
+def main():
+    """Go main Go"""
     if len(sys.argv) == 5:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]) )
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                               int(sys.argv[3]), int(sys.argv[4]))
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-        doit( ts )
+        doit(ts)
     else:
         ts = datetime.datetime.utcnow()
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-        doit( ts )
-        doit( (ts - datetime.timedelta(hours=24)) )
-        doit( (ts - datetime.timedelta(hours=48)) )
+        doit(ts)
+        doit(ts - datetime.timedelta(hours=24))
+        doit(ts - datetime.timedelta(hours=48))
+
+if __name__ == '__main__':
+    main()

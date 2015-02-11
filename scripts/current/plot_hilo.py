@@ -1,60 +1,41 @@
 # Plot the High + Low Temperatures
 
-import sys, os
-import iemplot
+import sys
+from pyiem.plot import MapPlot
 
-import mx.DateTime
-now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=int(sys.argv[1]))
+import datetime
+now = datetime.datetime.now() - datetime.timedelta(days=int(sys.argv[1]))
 
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
-SELECT 
+SELECT
   s.id as station, max_tmpf, min_tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
-FROM 
+FROM
   summary_%s c, stations s
 WHERE
-  c.iemid = s.iemid and 
+  c.iemid = s.iemid and
   s.network IN ('AWOS', 'IA_ASOS') and
   day = '%s'
-  and max_tmpf > -50 
+  and max_tmpf > -50
 """ % (now.year, now.strftime("%Y-%m-%d"))
 
-lats = []
-lons = []
-highs = []
-lows = []
-labels = []
+data = []
 icursor.execute(sql)
 for row in icursor:
-  lats.append( row[4] )
-  lons.append( row[3] )
-  highs.append( row[1] )
-  lows.append( row[2] )
-  labels.append( row[0] )
+    data.append(dict(lat=row[4], lon=row[3], tmpf=row[1], dwpf=row[2],
+                id=row[0]))
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_title'             : "Iowa High & Low Air Temperature",
- '_valid'             : now.strftime("%d %b %Y"),
- '_labels'            : labels,
- '_format'            : '%.0f',
- 'lbTitleString'      : "[F]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
-}
-# Generates tmp.ps
-tmpfp = iemplot.hilo_valplot(lons, lats, highs, lows, cfg)
-
+m = MapPlot(title="Iowa High & Low Air Temperature", axisbg='white',
+            subtitle=now.strftime("%d %b %Y"))
+m.plot_station(data)
+m.drawcounties()
 if sys.argv[1] == "0":
-  pqstr = "plot c 000000000000 summary/asos_hilo.png bogus png"
+    pqstr = "plot c 000000000000 summary/asos_hilo.png bogus png"
 else:
-  pqstr = "plot a %s0000 bogus hilow.gif png" % (now.strftime("%Y%m%d"), )
-
-iemplot.postprocess(tmpfp, pqstr)
+    pqstr = "plot a %s0000 bogus hilow.gif png" % (now.strftime("%Y%m%d"), )
+m.postprocess(view=False, pqstr=pqstr)
+m.close()

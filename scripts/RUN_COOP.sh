@@ -1,9 +1,7 @@
 # COOP related scripts that are run at :10 after between 6-10 AM
-cd current
-python coop_precip.py
-python coop_snow.py
+# set -x
 
-cd ../outgoing
+cd outgoing
 python wxc_azos_gdd.py
 php wxc_coop.php
 
