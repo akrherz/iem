@@ -1,17 +1,12 @@
+"""Iowa RWIS station plot!
 """
- Iowa RWIS station plot!
-"""
-
-import sys
-import os
-import iemplot
-import synop
-
-import mx.DateTime
-now = mx.DateTime.now()
+import datetime
+now = datetime.datetime.now()
+from pyiem.plot import MapPlot
 import psycopg2.extras
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+from pyiem.datatypes import direction, speed
+import pyiem.meteorology as meteorology
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
@@ -23,34 +18,19 @@ FROM
 WHERE
   s.network IN ('IA_RWIS') and c.iemid = s.iemid and 
   valid + '20 minutes'::interval > now() and
-  tmpf > -50 and s.id not in ('RLMI4', 'ROCI4', 'RMYI4', 'RAII4')
+  tmpf > -50 and dwpf > -50
 """
 
-lats = []
-lons = []
-vals = []
+data = []
 icursor.execute(sql)
 for row in icursor:
-    lats.append( row['lat'] )
-    lons.append( row['lon'] )
-    imdat = synop.ob2synop( row )
-    vals.append( imdat )
-  #vals.append("11206227031102021040300004963056046601517084081470")
+    data.append(row)
 
-
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_title'             : "Iowa DOT RWIS Mesoplot",
- '_valid'             : now.strftime("%d %b %Y %-I:%M %p"),
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- '_stationplot' : True,
- '_removeskyc'  : True,
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-
+m = MapPlot(axisbg='white',
+            title='Iowa DOT RWIS Mesoplot',
+            subtitle='plot valid %s' % (now.strftime("%-d %b %Y %H:%M %P"), ))
+m.plot_station(data)
+m.drawcounties(color='#EEEEEE')
 pqstr = "plot c 000000000000 iowa_rwis.png bogus png"
-iemplot.postprocess(tmpfp, pqstr)
+m.postprocess(pqstr=pqstr)
+m.close()
