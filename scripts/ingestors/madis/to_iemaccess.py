@@ -1,21 +1,18 @@
-"""
-Suck in MADIS data into the iemdb
-"""
+"""Suck in MADIS data into the iemdb"""
 import netCDF4
-import mx.DateTime
+import datetime
 import os
 import sys
-import access
-import psycopg2
-import mesonet
+from pyiem.observation import Observation
+from pyiem.datatypes import temperature
 import subprocess
 import psycopg2.extras
 IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 fp = None
-for i in range(0,4):
-    ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
+for i in range(0, 4):
+    ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
     testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
     if os.path.isfile(testfp):
         fp = testfp
@@ -32,56 +29,56 @@ except:
     time.sleep(20)
     nc = netCDF4.Dataset(fp)
 
+
 def sanityCheck(val, lower, upper, rt):
     if val > lower and val < upper:
         return val
     return rt
 
-stations   = nc.variables["stationId"]
-providers  = nc.variables["dataProvider"]
-tmpk        = nc.variables["temperature"]
-tmpk_dd     = nc.variables["temperatureDD"]
-obTime      = nc.variables["observationTime"]
-pressure    = nc.variables["stationPressure"]
-altimeter   = nc.variables["altimeter"]
-slp         = nc.variables["seaLevelPressure"]
-dwpk        = nc.variables["dewpoint"]
-drct        = nc.variables["windDir"]
-smps        = nc.variables["windSpeed"]
-gmps        = nc.variables["windGust"]
-gmps_drct   = nc.variables["windDirMax"]
-pcpn        = nc.variables["precipAccum"]
-rtk1        = nc.variables["roadTemperature1"]
-rtk2        = nc.variables["roadTemperature2"]
-rtk3        = nc.variables["roadTemperature3"]
-rtk4        = nc.variables["roadTemperature4"]
-subk1       = nc.variables["roadSubsurfaceTemp1"]
+stations = nc.variables["stationId"][:]
+providers = nc.variables["dataProvider"][:]
+tmpk = nc.variables["temperature"][:]
+tmpk_dd = nc.variables["temperatureDD"][:]
+obTime = nc.variables["observationTime"][:]
+pressure = nc.variables["stationPressure"][:]
+altimeter = nc.variables["altimeter"][:]
+slp = nc.variables["seaLevelPressure"][:]
+dwpk = nc.variables["dewpoint"][:]
+drct = nc.variables["windDir"][:]
+smps = nc.variables["windSpeed"][:]
+gmps = nc.variables["windGust"][:]
+gmps_drct = nc.variables["windDirMax"][:]
+pcpn = nc.variables["precipAccum"][:]
+rtk1 = nc.variables["roadTemperature1"][:]
+rtk2 = nc.variables["roadTemperature2"][:]
+rtk3 = nc.variables["roadTemperature3"][:]
+rtk4 = nc.variables["roadTemperature4"][:]
+subk1 = nc.variables["roadSubsurfaceTemp1"][:]
 
 db = {}
 
-MY_PROVIDERS = [
- "AKDOT", 
- "CODOT", 
- "DEDOT",
- "FLDOT",
- "GADOT", 
- "INDOT", 
- "KSDOT", 
- "KYTC-RWIS", 
- "KYMN",
- "MEDOT", 
- "MDDOT", 
- "MNDOT", 
- "NEDOR", 
- "NHDOT", 
- "NDDOT",
- "NVDOT",
- "OHDOT", 
- "WIDOT",
- "WVDOT", 
- "WYDOT",  
- "VADOT", 
- "VTDOT",  
+MY_PROVIDERS = ["AKDOT",
+"CODOT",
+"DEDOT",
+"FLDOT",
+"GADOT",
+"INDOT",
+"KSDOT",
+"KYTC-RWIS",
+"KYMN",
+"MEDOT",
+"MDDOT",
+"MNDOT",
+"NEDOR",
+"NHDOT",
+"NDDOT",
+"NVDOT",
+"OHDOT",
+"WIDOT",
+"WVDOT",
+"WYDOT",
+"VADOT",
+"VTDOT",
 ]
 
 
@@ -92,13 +89,13 @@ def provider2network(p):
     return '%s_RWIS' % (p[:2],)
 
 for recnum in range(len(providers)):
-    thisProvider =  providers[recnum].tostring().replace('\x00','')
-    thisStation  =  stations[recnum].tostring().replace('\x00','')
-    if not thisProvider in MY_PROVIDERS:
+    thisProvider = providers[recnum].tostring().replace('\x00', '')
+    thisStation = stations[recnum].tostring().replace('\x00', '')
+    if thisProvider not in MY_PROVIDERS:
         continue
     db[thisStation] = {}
     ticks = obTime[recnum]
-    ts = mx.DateTime.gmtime(ticks)
+    ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
     db[thisStation]['ts'] = ts
     db[thisStation]['network'] = provider2network(thisProvider)
     db[thisStation]['pres'] = sanityCheck(pressure[recnum], 0, 1000000, -99)
@@ -112,42 +109,42 @@ for recnum in range(len(providers)):
     db[thisStation]['rtk2'] = sanityCheck(rtk2[recnum], 0, 500, -99)
     db[thisStation]['rtk3'] = sanityCheck(rtk3[recnum], 0, 500, -99)
     db[thisStation]['rtk4'] = sanityCheck(rtk4[recnum], 0, 500, -99)
-    db[thisStation]['subk'] = sanityCheck(subk1[recnum],0,500,-99)
-    db[thisStation]['pday'] = sanityCheck(pcpn[recnum],-1,5000,-99)
+    db[thisStation]['subk'] = sanityCheck(subk1[recnum], 0, 500, -99)
+    db[thisStation]['pday'] = sanityCheck(pcpn[recnum], -1, 5000, -99)
 
 for sid in db.keys():
-    iem = access.Ob(sid, db[sid]['network'], icursor)
-    iem.setObTimeGMT( db[sid]['ts'] )
-    if not iem.load_and_compare():
-        print 'Missing fp: %s network: %s station: %s' % (fp, 
-           db[sid]['network'], sid)
+    iem = Observation(sid, db[sid]['network'], db[sid]['ts'])
+    if not iem.load(icursor):
+        print 'Missing fp: %s network: %s station: %s' % (fp,
+                                                          db[sid]['network'],
+                                                          sid)
         subprocess.call("python sync_stations.py %s" % (fp,), shell=True)
         os.chdir("../../dbutil")
         subprocess.call("sh SYNC_STATIONS.sh", shell=True)
         os.chdir("../ingestors/madis")
-    iem.data['tmpf'] = mesonet.k2f( db[sid]['tmpk'] )
-    iem.data['dwpf'] = mesonet.k2f( db[sid]['dwpk'] )
-    if (db[sid]['drct'] >= 0):
+    iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
+    iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
+    if db[sid]['drct'] >= 0:
         iem.data['drct'] = db[sid]['drct']
-    if (db[sid]['smps'] >= 0):
+    if db[sid]['smps'] >= 0:
         iem.data['sknt'] = db[sid]['smps'] * (1/0.5148)
-    if (db[sid]['gmps'] >= 0):
+    if db[sid]['gmps'] >= 0:
         iem.data['gust'] = db[sid]['gmps'] * (1/0.5148)
-    if (db[sid]['pres'] > 0):
-        iem.data['pres'] = (float(db[sid]['pres']) / 100.00 ) * 0.02952
-    if (db[sid]['rtk1'] > 0):
-        iem.data['tsf0'] = mesonet.k2f( db[sid]['rtk1'] )
-    if (db[sid]['rtk2'] > 0):
-        iem.data['tsf1'] = mesonet.k2f( db[sid]['rtk2'] )
-    if (db[sid]['rtk3'] > 0):
-        iem.data['tsf2'] = mesonet.k2f( db[sid]['rtk3'] )
-    if (db[sid]['rtk4'] > 0):
-        iem.data['tsf3'] = mesonet.k2f( db[sid]['rtk4'] )
-    if (db[sid]['subk'] > 0):
-        iem.data['rwis_subf'] = mesonet.k2f( db[sid]['subk'] )
-    if (db[sid]['pday'] >= 0):
+    if db[sid]['pres'] > 0:
+        iem.data['pres'] = (float(db[sid]['pres']) / 100.00) * 0.02952
+    if db[sid]['rtk1'] > 0:
+        iem.data['tsf0'] = temperature(db[sid]['rtk1'], 'K').value('F')
+    if db[sid]['rtk2'] > 0:
+        iem.data['tsf1'] = temperature(db[sid]['rtk2'], 'K').value('F')
+    if db[sid]['rtk3'] > 0:
+        iem.data['tsf2'] = temperature(db[sid]['rtk3'], 'K').value('F')
+    if db[sid]['rtk4'] > 0:
+        iem.data['tsf3'] = temperature(db[sid]['rtk4'], 'K').value('F')
+    if db[sid]['subk'] > 0:
+        iem.data['rwis_subf'] = temperature(db[sid]['subk'], 'K').value('F')
+    if db[sid]['pday'] >= 0:
         iem.data['pday'] = float(db[sid]['pday']) * (1.00/25.4)
-    iem.updateDatabase()
+    iem.save(icursor)
     del(iem)
 nc.close()
 icursor.close()

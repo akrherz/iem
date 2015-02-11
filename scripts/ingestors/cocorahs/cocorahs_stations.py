@@ -11,31 +11,32 @@ mcursor = MESOSITE.cursor()
 
 state = sys.argv[1]
 
-req = urllib2.Request( ("http://data.cocorahs.org/cocorahs/export/"
-                        +"exportstations.aspx?State=%s&Format=CSV"
-                        +"&country=usa") % (state,) )
+req = urllib2.Request(("http://data.cocorahs.org/cocorahs/export/"
+                       "exportstations.aspx?State=%s&Format=CSV"
+                       "&country=usa") % (state,))
 data = urllib2.urlopen(req, timeout=30).readlines()
 
 # Find current stations
 stations = []
-sql = """SELECT id from stations WHERE network = '%sCOCORAHS' and ST_y(geom) > 0
-  and name is not null and name != '' """ % (state,)
-mcursor.execute( sql )
+sql = """
+    SELECT id from stations WHERE network = '%sCOCORAHS' and ST_y(geom) > 0
+    and name is not null and name != '' """ % (state,)
+mcursor.execute(sql)
 for row in mcursor:
-    stations.append( row[0] )
+    stations.append(row[0])
 
 # Process Header
 header = {}
 h = data[0].split(",")
-for i in range(len( h )):
-    header[ h[i] ] = i
+for i in range(len(h)):
+    header[h[i]] = i
 
-if not header.has_key('StationNumber'):
+if 'StationNumber' not in header:
     sys.exit(0)
 
-for row in  data[1:]:
+for row in data[1:]:
     cols = row.split(", ")
-    sid = cols[ header["StationNumber"] ]
+    sid = cols[header["StationNumber"]]
     if sid in stations:
         continue
 

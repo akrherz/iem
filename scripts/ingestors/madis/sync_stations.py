@@ -1,7 +1,6 @@
 """
 Extract station data from file and update any new stations we find, please
 """
-
 import netCDF4
 import psycopg2
 import sys

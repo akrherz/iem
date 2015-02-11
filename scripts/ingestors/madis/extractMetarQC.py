@@ -31,6 +31,7 @@ tmpkQCD = nc.variables["temperatureQCD"]
 dwpkQCD = nc.variables["dewpointQCD"]
 altiQCD = nc.variables["altimeterQCD"]
 
+
 def figure(val, qcval):
     if qcval > 1000:
         return 'Null'
@@ -38,23 +39,25 @@ def figure(val, qcval):
     qcval = temperature(val + qcval, 'K').value("F")
     return qcval - tmpf
 
+
 def figureAlti(val, qcval):
     if (qcval > 100000.):
         return 'Null'
     return qcval / 100.0
-  
+
+
 def check(val):
     if val > 200000.:
         return 'Null'
     return val
 
-found =0
+found = 0
 for j in range(ids.shape[0]):
     sid = ids[j]
-    id = re.sub('\x00', '', sid.tostring())
-    if len(id) < 4:
+    sid = re.sub('\x00', '', sid.tostring())
+    if len(sid) < 4:
         continue
-    if id[0] == "K":
+    if sid[0] == "K":
         ts = datetime.datetime(1971, 1, 1) + datetime.timedelta(
                                 seconds = nc.variables["timeObs"][j])
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
@@ -70,21 +73,23 @@ for j in range(ids.shape[0]):
         if (not np.ma.is_masked( nc_dwpk[j] ) and 
             not np.ma.is_masked( dwpkQCD[j,0] ) and 
             not np.ma.is_masked( dwpkQCD[j,6])):
-            dwpf = check(temperature( nc_dwpk[j], 'K' ).value('F'))
+            dwpf = check(temperature(nc_dwpk[j], 'K' ).value('F'))
             dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j,0])
             dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[j,6])
         if not np.ma.is_masked( nc_alti[j] ):
-            alti =  check(nc_alti[j] / 100.0  * 0.0295298 )
-            alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298 )
-            alti_qc_sc = figureAlti(alti, altiQCD[j,6] * 0.0295298 )
-        sql = """UPDATE %s SET tmpf = %s, tmpf_qc_av = %s, 
-     tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s, 
-     dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s, 
-     alti_qc_sc = %s, valid = '%s' WHERE 
-     station = '%s' """ % (table, tmpf, 
-     tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av, 
-     dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc, 
-     ts.strftime("%Y-%m-%d %H:%M+00"), id[1:])
+            alti = check(nc_alti[j] / 100.0 * 0.0295298)
+            alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298)
+            alti_qc_sc = figureAlti(alti, altiQCD[j,6] * 0.0295298)
+        sql = """
+            UPDATE %s SET tmpf = %s, tmpf_qc_av = %s,
+            tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
+            dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
+            alti_qc_sc = %s, valid = '%s' WHERE
+            station = '%s'
+            """ % (table, tmpf,
+                   tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av,
+                   dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc,
+                   ts.strftime("%Y-%m-%d %H:%M+00"), sid[1:])
         sql = sql.replace("--", "Null").replace("nan", "Null")
         try:
             icursor.execute(sql)

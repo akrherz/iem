@@ -65,7 +65,7 @@ for sid in [9100104, 9100135, 9100131, 9100156]:
         mcursor.execute("""
             INSERT into ss_logger_data values (%s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", tokens)
-        
+
 mcursor.close()
 MESOSITE.commit()
 MESOSITE.close()

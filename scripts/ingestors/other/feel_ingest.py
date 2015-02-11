@@ -5,8 +5,8 @@ import pandas as pd
 import datetime
 import psycopg2
 
-
 BASE = "/mnt/home/mesonet/ot/ot0005/incoming/Pierson"
+
 
 def get_starttimes():
     """ Figure out when we have data """
@@ -20,9 +20,10 @@ def get_starttimes():
 
     return dstart, hstart
 
+
 def ingest():
     """ Lets do something """
-    
+
     dstart, hstart = get_starttimes()
     if dstart is None:
         dstart = datetime.date(1980,1,1)

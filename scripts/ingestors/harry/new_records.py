@@ -1,13 +1,12 @@
 import sys
-import pg
 import mx.DateTime
-import iemdb
+import psycopg2
 import psycopg2.extras
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 
-sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 1)
+sts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), 1)
 ets = sts + mx.DateTime.RelativeDateTime(months=1)
 
 cnt = {'climate': {'max_high': 0, 'min_high': 0, 'max_low': 0, 
@@ -16,13 +15,14 @@ cnt = {'climate': {'max_high': 0, 'min_high': 0, 'max_low': 0,
                      'min_low': 0, 'max_precip': 0}
       }
 
+
 def update(tbl, col, val, yr, station, valid):
     sql = """UPDATE %s SET %s = %s, %s_yr = %s WHERE station = '%s' and 
        valid = '%s'""" % (tbl, col, val, col, yr, station, valid)
     ccursor2.execute(sql)
     cnt[tbl][col] += 1
 
-for tbl in ['climate51','climate']:
+for tbl in ['climate51', 'climate']:
     # Load up records
     sql = "SELECT * from %s" % (tbl,)
     ccursor.execute( sql )

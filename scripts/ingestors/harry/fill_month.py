@@ -6,6 +6,7 @@ from pyiem.network import Table as NetworkTable
 PGCONN = psycopg2.connect(database='coop', host='iemdb')
 cursor = PGCONN.cursor()
 
+
 def main():
     """ Go Main Go """
     year = int(sys.argv[1])
@@ -17,7 +18,7 @@ def main():
     for sid in nt.sts.keys():
         if sid[2] == 'C' or sid == 'IA0000':
             continue
-        cursor.execute("""SELECT count(*) from alldata_ia where 
+        cursor.execute("""SELECT count(*) from alldata_ia where
         station = %s and month = %s and year = %s""", (sid, month, year))
         row = cursor.fetchone()
         if row[0] == 0:
@@ -27,9 +28,10 @@ def main():
                 cursor.execute("""INSERT into alldata_ia(station, day, year,
                 month, sday)
                 VALUES (%s, %s, %s, %s, %s)""", (sid, now, now.year,
-                                            now.month, now.strftime("%m%d")))
+                                                 now.month,
+                                                 now.strftime("%m%d")))
                 now += datetime.timedelta(days=1)
-            
+
 
 if __name__ == '__main__':
     main()

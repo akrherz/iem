@@ -2,7 +2,7 @@
  Process the GHCN data
  http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00130200.dly
  http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt
- 
+
  ID            1-11   Character
 YEAR         12-15   Integer
 MONTH        16-17   Integer

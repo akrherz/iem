@@ -1,12 +1,10 @@
 """
  Attempt to process the 1 minute archives available from NCDC
- 
- NCDC provides monthly tar files for nearly up to the current day here:
- 
- http://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
- 
-"""
 
+ NCDC provides monthly tar files for nearly up to the current day here:
+
+ http://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
+"""
 import re
 import os
 import subprocess
@@ -15,7 +13,7 @@ import datetime
 import pytz
 import urllib2
 
-BASEDIR="/mesonet/ARCHIVE/raw/asos/"
+BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
 
 P1_RE = re.compile(r"""
 (?P<wban>[0-9]{5})
@@ -106,6 +104,7 @@ p2_examples = [
 "14942KOMA OMA2013120308361436 [ M ][  M   ]                  [  M  ] [  M   ][  M   ][  M   ][ M ][ M ]         ",
 ]
 
+
 def tstamp2dt( s ):
     """ Convert a string to a datetime """
     ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
@@ -115,7 +114,8 @@ def tstamp2dt( s ):
     if utc_hr < local_hr: # Next day assumption valid in United States
         ts += datetime.timedelta(hours=24)
     return ts.replace(hour=utc_hr, minute=int(s[14:16]))
-    
+
+
 def p2_parser( ln ):
     """
     Handle the parsing of a line found in the 6506 report, return QC dict
@@ -140,6 +140,7 @@ def p2_parser( ln ):
             ret[v] = float( d[v] )
     """
     return res
+
 
 def p1_parser( ln ):
     """
@@ -182,6 +183,7 @@ def test():
     for ex in p2_examples:
         p2_parser( ex )
 
+
 def download(station, monthts):
     """
     Download a month file from NCDC
@@ -200,6 +202,7 @@ def download(station, monthts):
                                     station, monthts.strftime("%Y%m")),'w')
         o.write(data)
         o.close()
+
 
 def runner(station, monthts):
     """
@@ -257,7 +260,7 @@ def runner(station, monthts):
             mints = ts
         if maxts < ts:
             maxts = ts
-    
+
     tmpfn = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
     out = open( tmpfn , 'w')
     out.write("""DELETE from alldata_1minute WHERE station = '%s' and 
@@ -291,7 +294,7 @@ def runner(station, monthts):
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = proc.stdout.read()
     stderr = proc.stderr.read()
-    
+
     print ("%s %s processed %s entries [%s to %s UTC]\n"
            +"STDOUT: %s\nSTDERR: %s") % (
             datetime.datetime.now().strftime("%H:%M %p"),
@@ -300,7 +303,7 @@ def runner(station, monthts):
            stderr.replace("\n", " "))
 
     os.unlink( tmpfn )
-    
+
 if len(sys.argv) == 3:
     for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
                     'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',

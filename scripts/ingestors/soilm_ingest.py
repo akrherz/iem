@@ -129,6 +129,7 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
                           hourly='CedarRapids/CedarRapids_HrlySI.dat'),
             }
 
+
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
     #print '-------------- HOURLY PROCESS ---------------'

@@ -6,10 +6,10 @@ import urllib
 import urllib2
 import datetime
 import pytz
-import mesonet
+from pyiem.datatypes import temperature
 from pyiem.observation import Observation
-import network
-nt = network.Table("SCAN")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("SCAN")
 import psycopg2
 SCAN = psycopg2.connect(database='scan', host='iemdb')
 scursor = SCAN.cursor()
@@ -129,13 +129,18 @@ def savedata( data , maxts ):
             iem.data[ mapping[key]['iemvar'] ] = float(data[key].strip())
 
     iem.data['valid'] = ts
-    iem.data['tmpf'] = mesonet.c2f(float(iem.data.get('tmpc')))
-    iem.data['dwpf'] = mesonet.c2f(float(iem.data.get('dwpc')))
-    iem.data['c1tmpf'] = mesonet.c2f(float(iem.data.get('c1tmpc')))
-    iem.data['c2tmpf'] = mesonet.c2f(float(iem.data.get('c2tmpc')))
-    iem.data['c3tmpf'] = mesonet.c2f(float(iem.data.get('c3tmpc')))
-    iem.data['c4tmpf'] = mesonet.c2f(float(iem.data.get('c4tmpc')))
-    iem.data['c5tmpf'] = mesonet.c2f(float(iem.data.get('c5tmpc')))     
+    iem.data['tmpf'] = temperature(float(iem.data.get('tmpc')), 'C').value('F')
+    iem.data['dwpf'] = temperature(float(iem.data.get('dwpc')), 'C').value('F')
+    iem.data['c1tmpf'] = temperature(float(iem.data.get('c1tmpc')),
+                                     'C').value('F')
+    iem.data['c2tmpf'] = temperature(float(iem.data.get('c2tmpc')),
+                                     'C').value('F')
+    iem.data['c3tmpf'] = temperature(float(iem.data.get('c3tmpc')),
+                                     'C').value('F')
+    iem.data['c4tmpf'] = temperature(float(iem.data.get('c4tmpc')),
+                                     'C').value('F')
+    iem.data['c5tmpf'] = temperature(float(iem.data.get('c5tmpc')),
+                                     'C').value('F')     
     iem.data['c1smv'] = float(iem.data.get('c1smv'))
     iem.data['c2smv'] = float(iem.data.get('c2smv'))
     iem.data['c3smv'] = float(iem.data.get('c3smv'))
@@ -162,6 +167,7 @@ def savedata( data , maxts ):
         """ % iem.data
     scursor.execute(sql.replace("None", "null"))
 
+
 def load_times():
     """
     Load the latest ob times from the database
@@ -170,8 +176,9 @@ def load_times():
         WHERE t.iemid = c.iemid and t.network = 'SCAN'""")
     d = {}
     for row in icursor:
-        d[ row[0] ] = row[1]
+        d[row[0]] = row[1]
     return d
+
 
 def main():
     maxts = load_times()
