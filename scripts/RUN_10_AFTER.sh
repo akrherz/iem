@@ -17,7 +17,6 @@ cd ../plots
 ./RUN_PLOTS
 
 cd ../ingestors
-python beloit.py
 python flux_ingest.py
 python stuart_smith.py &
 
