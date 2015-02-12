@@ -14,7 +14,8 @@ icursor2 = IEM.cursor()
 # table!
 icursor.execute("""
  select s.iemid, id, network from stations s LEFT JOIN current c
- ON c.iemid = s.iemid where c.iemid is null
+ ON c.iemid = s.iemid where c.iemid is null and s.online and
+ not s.metasite
 """)
 
 utcnow = datetime.datetime.utcnow()
