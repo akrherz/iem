@@ -32,7 +32,7 @@ except:
 
 def sanityCheck(val, lower, upper, rt):
     if val > lower and val < upper:
-        return val
+        return float(val)
     return rt
 
 stations = nc.variables["stationId"][:]
