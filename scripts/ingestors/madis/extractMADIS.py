@@ -39,6 +39,8 @@ altiQCD = nc.variables["altimeterQCD"][:]
 def figure(val, qcval):
     if qcval > 1000:
         return None
+    if np.ma.is_masked(val) or np.ma.is_masked(qcval):
+        return None
     return temperature(val + qcval,
                        'K').value('F') - temperature(val, 'K').value('F')
 
