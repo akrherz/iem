@@ -6,6 +6,7 @@ import sys
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature
 import subprocess
+import pytz
 import psycopg2.extras
 IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -96,7 +97,7 @@ for recnum in range(len(providers)):
     db[thisStation] = {}
     ticks = obTime[recnum]
     ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-    db[thisStation]['ts'] = ts
+    db[thisStation]['ts'] = ts.replace(tzinfo=pytz.timezone('UTC'))
     db[thisStation]['network'] = provider2network(thisProvider)
     db[thisStation]['pres'] = sanityCheck(pressure[recnum], 0, 1000000, -99)
     db[thisStation]['tmpk'] = sanityCheck(tmpk[recnum], 0, 500, -99)
