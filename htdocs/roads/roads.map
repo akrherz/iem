@@ -199,15 +199,16 @@ END
 
 LAYER
  NAME kcciback
- DATA "images/26915/kcciback.tif"
+ DATA "images/4326/kcci.tif"
  PROJECTION
-  "init=epsg:26915"
+  "init=epsg:4326"
  END
  METADATA
   "show_in_legend" "0"
  END
  TYPE RASTER
  STATUS OFF
+ PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
