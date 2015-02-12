@@ -11,24 +11,24 @@ import psycopg2.extras
 IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-fp = None
+fn = None
 for i in range(0, 4):
     ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
-    testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
-    if os.path.isfile(testfp):
-        fp = testfp
+    testfn = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
+    if os.path.isfile(testfn):
+        fn = testfn
         break
 
-if fp is None:
+if fn is None:
     sys.exit()
 
 try:
-    nc = netCDF4.Dataset(fp)
+    nc = netCDF4.Dataset(fn)
 except:
     # File may be in progress of being read, wait a little bit
     import time
     time.sleep(20)
-    nc = netCDF4.Dataset(fp)
+    nc = netCDF4.Dataset(fn)
 
 
 def sanityCheck(val, lower, upper, rt):
@@ -145,7 +145,14 @@ for sid in db.keys():
         iem.data['rwis_subf'] = temperature(db[sid]['subk'], 'K').value('F')
     if db[sid]['pday'] >= 0:
         iem.data['pday'] = float(db[sid]['pday']) * (1.00/25.4)
-    iem.save(icursor)
+    if not iem.save(icursor):
+        print(("MADIS Extract: %s found new station: %s network: %s"
+              "") % (fn.split("/")[-1], sid, db[sid]['network']))
+        subprocess.call("python sync_stations.py %s" % (fn,), shell=True)
+        os.chdir("../../dbutil")
+        subprocess.call("sh SYNC_STATIONS.sh", shell=True)
+        os.chdir("../ingestors/madis")
+        print("...done with sync.")
     del(iem)
 nc.close()
 icursor.close()
