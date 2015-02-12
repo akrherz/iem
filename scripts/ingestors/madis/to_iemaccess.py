@@ -115,14 +115,14 @@ for recnum in range(len(providers)):
 
 for sid in db.keys():
     iem = Observation(sid, db[sid]['network'], db[sid]['ts'])
-    if not iem.load(icursor):
-        print 'Missing fp: %s network: %s station: %s' % (fp,
-                                                          db[sid]['network'],
-                                                          sid)
-        subprocess.call("python sync_stations.py %s" % (fp,), shell=True)
-        os.chdir("../../dbutil")
-        subprocess.call("sh SYNC_STATIONS.sh", shell=True)
-        os.chdir("../ingestors/madis")
+    # if not iem.load(icursor):
+    #    print 'Missing fp: %s network: %s station: %s' % (fp,
+    #                                                      db[sid]['network'],
+    #                                                      sid)
+    #    subprocess.call("python sync_stations.py %s" % (fp,), shell=True)
+    #    os.chdir("../../dbutil")
+    #    subprocess.call("sh SYNC_STATIONS.sh", shell=True)
+    #    os.chdir("../ingestors/madis")
     iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
     iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
     if db[sid]['drct'] >= 0:
