@@ -1,6 +1,4 @@
-'''
- Ingest the RWIS rainwise data
-'''
+'''Ingest the RWIS rainwise data'''
 import pandas
 import urllib2
 import psycopg2
@@ -26,6 +24,7 @@ assoc = {
          'RASI4': '0090C2E90538',
          }
 
+
 def get_last_obs():
     ''' Get the last obs we have for each of the sites '''
     sids = assoc.keys()
@@ -38,6 +37,7 @@ def get_last_obs():
         data[row[0]] = row[1]
     return data
 
+
 def process( nwsli , lastts ):
     ''' Process this NWSLI please '''
     myuri = "%s&sdate=%s&edate=%s&mac=%s" % (URI, today.strftime("%Y-%m-%d"),
@@ -47,7 +47,7 @@ def process( nwsli , lastts ):
     try:
         data = urllib2.urlopen(myuri, timeout=15)
     except Exception, exp:
-        #print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
+        # print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
         return
     try:
         df = pandas.DataFrame.from_csv(data)
