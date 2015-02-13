@@ -7,7 +7,7 @@ set GTS="`date -u +'%Y%m%d%H%M'`"
 python process_idot_awos.py
 
 # Actually ingest the data
-python process_rwis.py
+python process_rwis.py $GTS
 
 # Do mini and portable stuff
 cd /mesonet/data/incoming/rwis
