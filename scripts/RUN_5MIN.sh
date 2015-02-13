@@ -21,7 +21,7 @@ cd ../current
 python lsr_snow_mapper.py &
 
 cd ../ingestors/rwis
-./download.csh &
+csh download.csh &
 python ingest_rw.py &
 
 cd ../dotcams

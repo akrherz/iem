@@ -1,6 +1,4 @@
-'''
-Get RWIS FTP password from the database settings
-'''
+'''Get RWIS FTP password from the database settings'''
 import psycopg2
 DBCONN = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 cursor = DBCONN.cursor()
