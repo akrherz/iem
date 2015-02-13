@@ -3,6 +3,7 @@ import pandas as pd
 import datetime
 import pytz
 import os
+import sys
 import numpy as np
 import smtplib
 import psycopg2
@@ -15,6 +16,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 import pyiem.util as util
 
+GTS = sys.argv[1]
 NT = NetworkTable('IA_RWIS')
 IEM = psycopg2.connect(database='iem', host='iemdb')
 PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
@@ -285,7 +287,6 @@ def update_iemaccess(obs):
 def fetch_files():
     """Download the files we need"""
     props = util.get_properties()
-    utc = datetime.datetime.utcnow().strftime("%Y%m%d%H%M")
     # get atmosfn
     atmosfn = "%s/rwis.txt" % (INCOMING, )
     data = urllib2.urlopen(("ftp://rwis:%s@165.206.203.34/ExpApAirData.txt"
@@ -295,7 +296,7 @@ def fetch_files():
     fp.write(data)
     fp.close()
     # Insert into LDM
-    pqstr = "plot ac %s rwis.txt raw/rwis/%sat.txt txt" % (utc, utc)
+    pqstr = "plot ac %s rwis.txt raw/rwis/%sat.txt txt" % (GTS, GTS)
     subprocess.call(("/home/ldm/bin/pqinsert -i -p '%s' %s "
                      "") % (pqstr, atmosfn), shell=True)
 
@@ -308,7 +309,7 @@ def fetch_files():
     fp.write(data)
     fp.close()
     # Insert into LDM
-    pqstr = "plot ac %s rwis.txt raw/rwis/%ssf.txt txt" % (utc, utc)
+    pqstr = "plot ac %s rwis.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
     subprocess.call(("/home/ldm/bin/pqinsert -i -p '%s' %s "
                      "") % (pqstr, sfcfn), shell=True)
 
