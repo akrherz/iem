@@ -1,6 +1,6 @@
 """
   Check to make sure the station metadata is reasonable!
-
+called from RUN_MIDNIGHT.sh
 """
 import psycopg2
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')

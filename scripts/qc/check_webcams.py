@@ -3,59 +3,53 @@ Check to see if there are webcams offline, generate emails and such
 """
 
 import os
-import mx.DateTime
+import datetime
+import pytz
 import stat
-import tracker
-track = tracker.Engine()
+from pyiem.network import Table as NetworkTable
+from pyiem.tracker import TrackerEngine
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor()
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
-mcursor = MESOSITE.cursor()
-now = mx.DateTime.now()
-
-# Determine sites offline
-offline = {}
-icursor.execute("""SELECT station, valid from offline 
-    WHERE network IN ('KCCI','KELO','KCRG', 'KCWI')""")
-for row in icursor:
-    offline[ row[0] ] = row[1]
+PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
 # Now lets check files
 mydir = "/home/ldm/data/camera/stills"
 files = os.listdir(mydir)
 
-mcursor.execute("""
-    SELECT id, network, name from webcams where 
-    network in ('KELO','KCCI','KCRG', 'KCWI')
-    and online ORDER by id ASC
-""")
+threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
+threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
 
-emails = 0
-for row in mcursor:
-    fn = "%s/%s.jpg" % (mydir, row[0])
-    if not os.path.isfile(fn):
-        print 'Missing webcam file: %s' % (fn,)
-        continue
 
-    mtime = os.stat(fn)[stat.ST_MTIME]
-    ts = mx.DateTime.DateTimeFromTicks(mtime)
-    age = float(now) - mtime
-    network = row[1]
-    portfolio = "%ssnet" % (network.lower(),)
+def do(netname, pname):
+    """Do something please"""
+    mcursor = MESOSITE.cursor()
+    mcursor.execute("""
+        SELECT id, network, name from webcams where
+        network = %s
+        and online ORDER by id ASC
+    """, (netname, ))
+    NT = NetworkTable(None)
+    obs = {}
+    for row in mcursor:
+        NT.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2])
+        fn = "%s/%s.jpg" % (mydir, row[0])
+        if not os.path.isfile(fn):
+            print 'Missing webcam file: %s' % (fn,)
+            continue
+        ticks = os.stat(fn)[stat.ST_MTIME]
+        valid = (datetime.datetime(1970, 1, 1) +
+                 datetime.timedelta(seconds=ticks))
+        valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+        print valid
+        obs[row[0]] = dict(valid=valid)
 
-    if age > 3600 and not offline.has_key(row[0]):
-        emails += 1
-        track.doAlert(row[0], {'ts': ts, 'sname': row[2] +' Webcam'}, 
-                      network, portfolio, False)
-    elif age < 3600 and offline.has_key(row[0]):
-        emails += 1
-        track.checkStation(row[0], {'ts': ts, 'sname': row[2] +' Webcam'}, 
-                           network, portfolio, False)
-        
-if emails < 5:
-    track.send()
-else:
-    print 'Skipping check_webcams email due to too many emails'
-    
-# done
+    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), maxoffline=10)
+    tracker.process_network(obs, pname, NT, threshold)
+    tracker.send_emails()
+    IEM.commit()
+    PORTFOLIO.commit()
+
+
+for network in ['KCCI', 'KCRG', 'KELO', 'KCWI']:
+    do(network, "%ssnet" % (network.lower(), ))

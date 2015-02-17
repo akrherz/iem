@@ -8,7 +8,6 @@ sh processlogs.sh &
 
 cd ../qc
 python adjust_snet_precip.py
-python check_hilo.py
 
 cd ../dbutil
 sh save_snet_raw.sh

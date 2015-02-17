@@ -12,17 +12,17 @@ acursor = ACCESS.cursor()
 
 print '----- Unknown NWSLIs from DCPish sites -----'
 hcursor.execute("""
- select nwsli, count(*) as tot, max(product), 
- count(distinct substr(product,1,8)), 
+ select nwsli, count(*) as tot, max(product),
+ count(distinct substr(product,1,8)),
  count(distinct product),
- sum(case when substr(nwsli,4,2) = 'I4' then 1 else 0 end) as priority 
- from unknown 
+ sum(case when substr(nwsli,4,2) = 'I4' then 1 else 0 end) as priority
+ from unknown
  where nwsli ~ '^[A-Z]{4}[0-9]$'
  GROUP by nwsli ORDER by priority DESC, tot DESC LIMIT 7
 """)
 for row in hcursor:
-    print '%7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], row[3], 
-      row[4], row[2])
+    print '%7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], row[3],
+                                                    row[4], row[2])
     # Get vars reported for this site
     acursor.execute("""SELECT valid, physical_code || duration || source ||
     extremum || probability as p, value from current_shef WHERE station = %s
@@ -35,18 +35,19 @@ for row in hcursor:
 
 print '----- Unknown NWSLIs from COOPish sites -----'
 hcursor.execute("""
- select nwsli, count(*) as tot, max(product), 
- count(distinct substr(product,1,8)), 
+ select nwsli, count(*) as tot, max(product),
+ count(distinct substr(product,1,8)),
  count(distinct product),
  sum(case when substr(nwsli,4,2) = 'I4' then 1 else 0 end) as priority
- from unknown 
+ from unknown
  WHERE network ~* 'COOP'
- and nwsli ~ '^[A-Z]{4}[0-9]$' GROUP by nwsli 
+ and nwsli ~ '^[A-Z]{4}[0-9]$' GROUP by nwsli
  ORDER by priority DESC, tot DESC LIMIT 5
 """)
 for row in hcursor:
-    print 'COOP %7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], 
-     row[3], row[4], row[2])
+    print 'COOP %7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1],
+                                                         row[3], row[4],
+                                                         row[2])
     # Get vars reported for this site
     acursor.execute("""SELECT valid, physical_code || duration || source ||
     extremum || probability as p, value from current_shef WHERE station = %s
@@ -57,7 +58,7 @@ for row in hcursor:
     DELETE from unknown where nwsli = %s
     """, (row[0],))
 
-   
+
 HADS.commit()
 
 ASOS = psycopg2.connect(database='asos', host='iemdb')
@@ -66,7 +67,7 @@ acursor2 = ASOS.cursor()
 
 print '----- Unknown IDs from METAR sites -----'
 acursor.execute("""
- select id, count(*), max(valid) from unknown 
+ select id, count(*), max(valid) from unknown
  GROUP by id ORDER by count DESC
 """)
 for row in acursor:
@@ -76,4 +77,3 @@ for row in acursor:
     """, (row[0],))
 
 ASOS.commit()
-
