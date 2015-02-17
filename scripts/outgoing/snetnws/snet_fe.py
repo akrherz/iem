@@ -1,27 +1,21 @@
 """
  Script to take current SHEF obs and generate a METAR summary
 """
-from twisted.python import log
-log.startLogging( open('/mesonet/data/logs/snet_fe.log', 'a') )
-
-import mx.DateTime
-SCRIPT_TIME = mx.DateTime.now()
+import datetime
+import pytz
+SCRIPT_TIME = datetime.datetime.utcnow()
+SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
+SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
 import subprocess
 import tempfile
 import os
-import sys
-import access
-import network
-import tracker
-import mesonet
-iemtracker = tracker.Engine()
-nt = network.Table(("KCCI", "KELO", "KIMT"))
+from pyiem.datatypes import temperature
+from pyiem.network import Table as NetworkTable
+from pyiem.tracker import TrackerEngine
+NT = NetworkTable(("KCCI", "KELO", "KIMT"))
 import psycopg2
-import iemdb
-IEM = iemdb.connect("iem", bypass=True)
-
-
-
+IEM = psycopg2.connect(database="iem", host='iemdb')
+PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()
@@ -33,13 +27,13 @@ locdsmfn = "%s_LOCDSM.dat" % (tmpfname,)
 fsdrr5fn = "%s_FSD.dat" % (tmpfname,)
 kimtrr5fn = "%s_kimt.dat" % (tmpfname,)
 
-SAOFILE = open(saofn,'w')
-CSVFILE = open(csvfn,'w')
-KELOCSVFILE = open(kelocsvfn,'w')
-DMXRR5 = open(rr5fn,'w')
-LOCDSMRR5 = open(locdsmfn,'w')
-FSDRR5 = open(fsdrr5fn,'w')
-BADRR5 = open(kimtrr5fn,'w')
+SAOFILE = open(saofn, 'w')
+CSVFILE = open(csvfn, 'w')
+KELOCSVFILE = open(kelocsvfn, 'w')
+DMXRR5 = open(rr5fn, 'w')
+LOCDSMRR5 = open(locdsmfn, 'w')
+FSDRR5 = open(fsdrr5fn, 'w')
+BADRR5 = open(kimtrr5fn, 'w')
 
 ###
 # Two dicts to hold information about precip accumulations
@@ -47,46 +41,97 @@ yrCntr = {}
 moCntr = {}
 
 
-#_______________________________________________________________
-# writeHeader()
-#   - function to simply write the header on the SAO file
-#
+def f2c(thisf):
+    return 5.00/9.00 * (thisf - 32.00)
+
+
+def metar_tmpf(tmpf):
+    """
+    Convert a temperature in F to something metar wants
+    """
+    if tmpf is None:
+        return 'MM'
+    tmpc = f2c(tmpf)
+    if tmpc < 0:
+        return 'M%02.0f' % (0 - tmpc,)
+    return '%02.0f' % (tmpc,)
+
+
+def metar_tmpf_tgroup(tmpf):
+    """
+    Convert a temperature in F to something metar wants
+    """
+    if tmpf is None:
+        return '////'
+    tmpc = f2c(tmpf)
+    if tmpc < 0:
+        return '1%03.0f' % (0 - (tmpc*10.0),)
+    return '0%03.0f' % ((tmpc*10.0),)
+
+
+def metar(ob):
+    """
+    Return a METAR representation of this observation :)
+    """
+    # First up, is the ID, which needs to be 3 or 4 char :(
+    mid = ob.get('id')
+    if len(mid) > 4:
+        mid = 'Q%s' % (mid[1:4])
+    # Metar Time
+    mtrts = ob['valid'].astimezone(pytz.timezone("UTC")).strftime("%d%H%MZ")
+    # Wind Direction
+    mdir = ob.get('drct', 0)
+    if mdir == 360:
+        mdir = 0
+    mwind = "%03i%02iKT" % (mdir, ob.get('sknt', 0))
+    # Temperature
+    mtmp = "%s/%s" % (metar_tmpf(ob.get('tmpf')),
+                      metar_tmpf(ob.get('dwpf')))
+    # Altimeter
+    malti = "A%04i" % (ob.get('pres', 0) * 100.0,)
+    # Remarks
+    tgroup = "T%s%s" % (metar_tmpf_tgroup(ob.get('tmpf')),
+                        metar_tmpf_tgroup(ob.get('dwpf')))
+    # Phour
+    phour = "P%04i" % (ob.get('p01i', 0), )
+    # Pday
+    pday = "7%04i" % (ob.get('pday', 0), )
+    return "%s %s %s %s RMK %s %s %s %s=\015\015\012" % (mid, mtrts, mwind,
+                                                         mtmp, malti, tgroup,
+                                                         phour, pday)
+
+
 def writeHeader():
-    now = SCRIPT_TIME.gmtime()
+    now = SCRIPT_TIME.astimezone(pytz.timezone("UTC"))
     sDate = now.strftime("%d%H%M")
 
     SAOFILE.write("\001\015\015\012001\n")
     SAOFILE.write("SAUS43 KDMX "+sDate+"\015\015\012")
     SAOFILE.write("METAR\015\015\012")
-    #DMXRR5.write("\001\015\015\012001\n")
-    #DMXRR5.write("SRUS53 KDMX "+sDate+"\015\015\012")
-    #DMXRR5.write("RR5DMX\015\015\012")
 
-    now = SCRIPT_TIME + mx.DateTime.RelativeDateTime(minutes=+4)
+    now = SCRIPT_TIME + datetime.timedelta(minutes=4)
     sDate = now.strftime("%m%d")
     hour = now.strftime("%H%M")
 
-    DMXRR5.write("\n\n\n.B DMX "+sDate+" C DH"+str(hour)+"/TA/PPH/PPT/PPQ/PCIRP\n")
+    DMXRR5.write("\n\n\n.B DMX "+sDate+" C DH"+hour+"/TA/PPH/PPT/PPQ/PCIRP\n")
     DMXRR5.write(":Location ID   TempF / 1h prec / 3h prec / ...\n")
     DMXRR5.write(":                6h prec / pcirp\n")
     DMXRR5.write(":Iowa Environmental Mesonet - KCCI SchoolNet8\n")
 
-    LOCDSMRR5.write("\n\n\n.B DMX "+sDate+" C DH"+str(hour)+"/TA/PCIRP\n")
+    LOCDSMRR5.write("\n\n\n.B DMX "+sDate+" C DH"+hour+"/TA/PCIRP\n")
     LOCDSMRR5.write(":Location ID   TempF / pcirp ...\n")
     LOCDSMRR5.write(":Iowa Environmental Mesonet - KCCI SchoolNet8\n")
 
-    #FSDRR5.write("\n\n\n.B FSD "+sDate+" C DH"+str(hour)+"/TA/PPH/PPT/PPQ/PPD/PCIRP\n")
-    FSDRR5.write("\n\n\n.B FSD "+sDate+" C DH"+str(hour)+"/TA/PPH/PPT/PPQ/PCIRP\n")
+    FSDRR5.write("\n\n\n.B FSD "+sDate+" C DH"+hour+"/TA/PPH/PPT/PPQ/PCIRP\n")
     FSDRR5.write(":Location ID   TempF / 1h prec / 3h prec / ...\n")
-    #FSDRR5.write(":                6h prec / 1d prec / pcirp\n")
     FSDRR5.write(":                6h prec / pcirp\n")
     FSDRR5.write(":Iowa Environmental Mesonet - KELO WeatherNet\n")
 
- 
+
 def loadCounters():
     """ Open the precip_counter.txt """
     # Default to zero
-    for sid in nt.sts.keys():
+    for sid in NT.sts.keys():
         moCntr[sid] = 0.0
         yrCntr[sid] = 0.0
     if not os.path.isfile("precip_counter.txt"):
@@ -98,10 +143,11 @@ def loadCounters():
         sid = tokens[0]
         moCntr[sid] = float(tokens[1])
         yrCntr[sid] = float(tokens[2])
-    
+
+
 def writeCounters():
     """ write out the precip counters for the next run! """
-    o = open("precip_counter","w")
+    o = open("precip_counter", "w")
     for key in moCntr.keys():
         MOelem = moCntr[key]
         if (MOelem < 0):
@@ -109,13 +155,15 @@ def writeCounters():
         YRelem = yrCntr[key]
         if (YRelem < 0):
             YRelem = 0
-        o.write("%s %.2f %.2f\n" % (key, MOelem, YRelem) )
+        o.write("%s %.2f %.2f\n" % (key, MOelem, YRelem))
     o.close()
 
+
 def fetch_pmonth(obs, nwsli):
-    if obs.has_key(nwsli):
-        return obs[nwsli].data.get('pmonth',-1)
+    if nwsli in obs:
+        return obs[nwsli].get('pmonth', -1)
     return -1
+
 
 def precip_diff(current, past):
     if current < 0 or past < 0:
@@ -124,8 +172,9 @@ def precip_diff(current, past):
         return current - past
     if past > current:
         return current
-    log.msg("Precip diff logic fault! Current: %s Past: %s" % (current,past))
+    print("Precip diff logic fault! Current: %s Past: %s" % (current, past))
     return None
+
 
 def pretty_tmpf(ob):
     val = ob.get('tmpf', None)
@@ -135,6 +184,7 @@ def pretty_tmpf(ob):
         return 'M'
     return "%.0f" % (val,)
 
+
 def pretty_precip(val):
     if val is None:
         return 'M'
@@ -142,14 +192,48 @@ def pretty_precip(val):
         return 'M'
     return "%.2f" % (val,)
 
+
 def getm_c(ob, idx):
     val = ob.get(idx, None)
     if val is None:
         return 'M'
-    valc = mesonet.f2c( val )
+    valc = temperature(val, 'F').value('C')
     if valc is None:
         return 'M'
     return '%.0f' % (valc,)
+
+
+def get_network(_network):
+    """get data"""
+    obs = {}
+    cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor.execute("""
+    SELECT c.*, s.*, t.id, t.name as sname
+    from current c, summary s, stations t WHERE
+    t.iemid = s.iemid and s.iemid = c.iemid and t.network = '%s' and
+    s.day = 'TODAY' ORDER by random()
+    """ % (_network, ))
+    for row in cursor:
+        obs[row['id']] = row
+    cursor.close()
+    return obs
+
+
+def get_network_recent(_network, valid):
+    obs = {}
+    cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor.execute("""
+    SELECT c.*, t.id from current_log c JOIN stations t ON (t.iemid = c.iemid)
+    WHERE t.network = %s and
+    c.valid BETWEEN %s and %s::timestamptz + '%s minutes'::interval
+    ORDER by valid ASC
+    """, (_network, valid.strftime("%Y-%m-%d %H:%M"),
+          valid.strftime("%Y-%m-%d %H:%M"), 10))
+    for row in cursor:
+        obs[row['id']] = row
+    cursor.close()
+    return obs
+
 
 def doNetwork(_network, shef_fp, thres, qdict):
     """
@@ -159,39 +243,34 @@ def doNetwork(_network, shef_fp, thres, qdict):
     @param thres time threshold we care about for alerting
     @param qdict dictionary of sites we don't care about
     """
-    now = mx.DateTime.now()
+    now = datetime.datetime.now()
     # Get Obs
-    obs = access.get_network(_network, IEM)
-    tophour_obs = access.get_network_recent(_network, IEM, now + mx.DateTime.RelativeDateTime(minute=0))
-    hr3_obs = access.get_network_recent(_network, IEM, now + mx.DateTime.RelativeDateTime(hours=-3))
-    hr6_obs = access.get_network_recent(_network, IEM, now + mx.DateTime.RelativeDateTime(hours=-6))
+    obs = get_network(_network)
+    tophour_obs = get_network_recent(_network, now.replace(minute=0))
+    hr3_obs = get_network_recent(_network, now + datetime.timedelta(hours=-3))
+    hr6_obs = get_network_recent(_network, now + datetime.timedelta(hours=-6))
 
-    # Check to see if we will be alerting for offline stuff
-    dontmail = will_email(_network, obs, thres)
-    if len(sys.argv) > 1:
-        log.msg("Running in safe mode due to sys.argv")
-        dontmail = True
+    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 25)
+    tracker.process_network(obs, '%ssnet' % (_network.lower(), ), NT, thres)
 
     keys = obs.keys()
     keys.sort()
     for nwsli in keys:
-        ob = obs[nwsli].data
-        if ob['ts'] < thres:  
-            iemtracker.doAlert(nwsli, ob, _network, '%ssnet' % (_network.lower(),) , dontmail)
+        ob = obs[nwsli]
+        if ob['valid'] < thres:
             continue
-        iemtracker.checkStation(nwsli, ob, _network, '%ssnet' % (_network.lower(),), dontmail)
-        
+
         current_pmonth = fetch_pmonth(obs, nwsli)
         tophour_pmonth = fetch_pmonth(tophour_obs, nwsli)
         hr3_pmonth = fetch_pmonth(hr3_obs, nwsli)
         hr6_pmonth = fetch_pmonth(hr6_obs, nwsli)
-        
-        if not moCntr.has_key(nwsli):
+
+        if nwsli not in moCntr:
             moCntr[nwsli] = 0.
             yrCntr[nwsli] = 0.
-                    
+
         # reset
-        if moCntr[nwsli] > current_pmonth: 
+        if moCntr[nwsli] > current_pmonth:
             yrCntr[nwsli] += current_pmonth
         moCntr[nwsli] = current_pmonth
 
@@ -203,7 +282,7 @@ def doNetwork(_network, shef_fp, thres, qdict):
         p06i = precip_diff(current_pmonth, hr6_pmonth)
         pday = ob['pday']
 
-        if qdict.get(nwsli, {}).get('precip', False) or network == 'KIMT':
+        if qdict.get(nwsli, {}).get('precip', False) or _network == 'KIMT':
             phour = None
             p03i = None
             p06i = None
@@ -211,11 +290,11 @@ def doNetwork(_network, shef_fp, thres, qdict):
             pday = None
 
         # Finally ready to write SHEF!
-        shef_fp.write("%s %s / %4s / %4s / %4s / %5s : %s\n" % (nwsli,
-                                pretty_tmpf(ob), pretty_precip(phour),
-                                pretty_precip(p03i), pretty_precip(p06i),
-                                pretty_precip(pcounter), 
-                                ob.get('sname', 'Unknown')))
+        shef_fp.write(("%s %s / %4s / %4s / %4s / %5s : %s\n"
+                       "") % (nwsli, pretty_tmpf(ob), pretty_precip(phour),
+                              pretty_precip(p03i), pretty_precip(p06i),
+                              pretty_precip(pcounter),
+                              ob.get('sname', 'Unknown')))
         if _network == 'KCCI':
                 LOCDSMRR5.write("%s      %3s / %5s\n" % (nwsli,
                                 pretty_tmpf(ob), pretty_precip(pcounter)))
@@ -223,45 +302,16 @@ def doNetwork(_network, shef_fp, thres, qdict):
         for fp in [CSVFILE, KELOCSVFILE]:
             if _network != 'KELO' and fp == KELOCSVFILE:
                 continue
-            fp.write("%s,%s,%s,%s,%i,%s,%s,%s,%s\n" % (nwsli,
-                ob['ts'].gmtime().strftime("%Y/%m/%d %H:%M:%S"), getm_c(ob, 'tmpf'),
-                getm_c(ob, 'dwpf'), ob['sknt'], ob['drct'], phour or 'M', pday or 'M', ob['pres']))
+            utc = ob['valid'].astimezone(pytz.timezone("UTC"))
+            fp.write(("%s,%s,%s,%s,%i,%s,%s,%s,%s\n"
+                      "") % (nwsli, utc.strftime("%Y/%m/%d %H:%M:%S"),
+                             getm_c(ob, 'tmpf'), getm_c(ob, 'dwpf'),
+                             ob['sknt'], ob['drct'], phour or 'M',
+                             pday or 'M', ob['pres']))
 
         if _network != 'KIMT':
-            SAOFILE.write( obs[nwsli].metar() )
+            SAOFILE.write(metar(obs[nwsli]))
 
-
-
-
-
-def will_email(_network, obs, thres):
-    """
-    Preemptive checking to make sure we don't email!
-    """
-    cnt_threshold = 45
-    if (_network == 'KIMT'):
-        cnt_threshold = 20
-    # First, look into the offline database to see how many active tickets
-    icursor = IEM.cursor()
-    icursor.execute("""SELECT count(*) as c from offline WHERE 
-      network = %s and length(station) = 5""", (_network,) )
-    row = icursor.fetchone()
-    cnt_offline = row[0]
-
-    log.msg("Portfolio says cnt_offline: %s %s" % (_network, cnt_offline))
-    if cnt_offline > cnt_threshold:
-        return True
-
-    # Check obs
-    cnt_offline = 0
-    for nwsli in obs.keys():
-        if obs[nwsli].data['ts'] < thres:
-            cnt_offline += 1
-    log.msg("IEMAccess says cnt_offline: %s %s" % (_network, cnt_offline))
-    if cnt_offline > cnt_threshold:
-        return True
-
-    return False
 
 def closeFiles():
     SAOFILE.write("\015\015\012\003")
@@ -275,18 +325,19 @@ def closeFiles():
     CSVFILE.close()
     KELOCSVFILE.close()
 
+
 def post_process():
     """
     Last actions after we are done generating all these files :)
     """
-    
-    saoname = "IA.snet%s.sao" % (SCRIPT_TIME.gmtime().strftime("%d%H%M"),)
+    now = SCRIPT_TIME.astimezone(pytz.timezone("UTC"))
+    saoname = "IA.snet%s.sao" % (now.strftime("%d%H%M"),)
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (saoname, saofn)
-    subprocess.call( cmd, shell=True )
+    subprocess.call(cmd, shell=True)
     os.unlink(saofn)
 
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('snet.csv', csvfn)
-    subprocess.call( cmd, shell=True )
+    subprocess.call(cmd, shell=True)
     os.unlink(csvfn)
 
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('kelo.csv', kelocsvfn)
@@ -294,56 +345,66 @@ def post_process():
                          stdout=subprocess.PIPE)
     p.stdout.read()
     os.unlink(kelocsvfn)
-    
-    if SCRIPT_TIME.minute in [15,35]:
-        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('LOCDSMRR5DMX.dat', locdsmfn)
-        subprocess.call( cmd, shell=True )
-    if SCRIPT_TIME.minute in [55,]:
-        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUADSMRR5DMX.dat', rr5fn)
-        subprocess.call( cmd, shell=True )
-        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUAFSDRR5FSD.dat', fsdrr5fn)
-        subprocess.call( cmd, shell=True )
+
+    if SCRIPT_TIME.minute in [15, 35]:
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('LOCDSMRR5DMX.dat',
+                                                     locdsmfn)
+        subprocess.call(cmd, shell=True)
+    if SCRIPT_TIME.minute == 55:
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUADSMRR5DMX.dat',
+                                                     rr5fn)
+        subprocess.call(cmd, shell=True)
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUAFSDRR5FSD.dat',
+                                                     fsdrr5fn)
+        subprocess.call(cmd, shell=True)
+    # print locdsmfn
+    # print rr5fn
+    # print fsdrr5fn
+    # print kimtrr5fn
     os.unlink(locdsmfn)
     os.unlink(rr5fn)
     os.unlink(fsdrr5fn)
     os.unlink(kimtrr5fn)
+
 
 def loadQC():
     """
     See which sites have flags against them
     """
     qdict = {}
-    portfolio = psycopg2.connect('dbname=portfolio host=iemdb user=mesonet')
-    pcursor = portfolio.cursor()
-    
+    pcursor = PORTFOLIO.cursor()
+
     pcursor.execute("""
-    select s_mid, sensor, status from tt_base WHERE sensor is not null 
+    select s_mid, sensor, status from tt_base WHERE sensor is not null
     and status != 'CLOSED' and portfolio in ('kccisnet','kelosnet','kimtsnet')
     """)
     for row in pcursor:
-        if not qdict.has_key(row[0]):
+        if row[0] not in qdict:
             qdict[row[0]] = {}
         if row[1].find("precip") > -1:
             qdict[row[0]]['precip'] = True
-    
+
     pcursor.close()
-    portfolio.close()
     return qdict
 
-if __name__ == '__main__':
+
+def main():
+    """Go"""
     qdict = loadQC()
     loadCounters()
     writeHeader()
-    now = mx.DateTime.now()
-    doNetwork('KCCI', DMXRR5, now - mx.DateTime.RelativeDateTime(minutes=60),
+    now = datetime.datetime.utcnow()
+    now = now.replace(tzinfo=pytz.timezone("UTC"))
+    doNetwork('KCCI', DMXRR5, now - datetime.timedelta(minutes=60),
               qdict)
-    doNetwork('KIMT', BADRR5, now - mx.DateTime.RelativeDateTime(minutes=60),
+    doNetwork('KIMT', BADRR5, now - datetime.timedelta(minutes=60),
               qdict)
-    doNetwork('KELO', FSDRR5, now - mx.DateTime.RelativeDateTime(minutes=300),
+    doNetwork('KELO', FSDRR5, now - datetime.timedelta(minutes=300),
               qdict)
 
     writeCounters()
     closeFiles()
     post_process()
-    iemtracker.send()
-    log.msg("FINISH...")
+
+if __name__ == '__main__':
+    main()

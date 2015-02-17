@@ -7,18 +7,19 @@ from twisted.internet import reactor
 from twisted.application import service, internet
 from twisted.enterprise import adbapi
 from twisted.internet.task import LoopingCall
-import traceback
+from twisted.python import log
 import secret
 import re
 import mx.DateTime
-import nwnformat
-import access
-import network
-NT = network.Table(("KCCI", "KIMT", "KELO"))
+import pyiem.nwnformat as nwnformat
+from pyiem.observation import Observation
+from pyiem.network import Table as NetworkTable
+NT = NetworkTable(("KCCI", "KIMT", "KELO"))
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost,
                                cp_reconnect=True)
 DB = {}
+
 
 class NWNClientFactory(hubclient.HubClientProtocolBaseFactory):
     """
@@ -33,16 +34,17 @@ class NWNClientFactory(hubclient.HubClientProtocolBaseFactory):
         implemented callback
         """
         reactor.callLater(0, ingest_data, data)
-                   
 
-def find_nwsli( sid ):
+
+def find_nwsli(sid):
     """
     Figure out the NWSLI given the sid
     """
-    for station in NT.sts.keys():
-        if int(NT.sts[station]['nwn_id']) == sid:
+    for station in NT.sts:
+        if NT.sts[station]['nwn_id'] == sid:
             return station
     return None
+
 
 def ingest_data(data):
     """
@@ -52,38 +54,44 @@ def ingest_data(data):
         return
 
     tokens = re.split("\s+", data)
-    if len(tokens) != 14: 
+    if len(tokens) != 14:
         return
 
     siteID = tokens[1]
-    if not DB.has_key(siteID):
+    if siteID not in DB:
         DB[siteID] = nwnformat.nwnformat()
         DB[siteID].sid = int(siteID)
-        DB[siteID].nwsli = find_nwsli( int(siteID) )
-        DB[siteID].network = NT.sts.get(DB[siteID].nwsli, 
+        DB[siteID].nwsli = find_nwsli(int(siteID))
+        DB[siteID].network = NT.sts.get(DB[siteID].nwsli,
                                         {'network': None})['network']
         DB[siteID].updated = False
 
-    DB[siteID].parseLineRT(tokens)  
+    DB[siteID].parseLineRT(tokens)
     DB[siteID].updated = True
 
-def saveData():
+
+def saver():
+    """Looping call"""
+    df = DBPOOL.runInteraction(saveData)
+    df.addErrback(log.err)
+
+
+def saveData(txn):
     """
     Save data to the IEM database
     """
     timer_start = mx.DateTime.now()
     updates = 0
     skips = 0
-    for key in DB:
+    # need to call keys() as DB is voliatle
+    for key in DB.keys():
         val = DB[key]
         if not val.updated or val.nwsli is None:
             skips += 1
             continue
         val.sanityCheck()
-        iem = access.Ob(val.nwsli, val.network)
+        iem = Observation(val.nwsli, val.network, val.ts)
         val.avgWinds()
-        val.ts += mx.DateTime.RelativeDateTime(second=0)
-        iem.setObTime(val.ts)
         if val.tmpf is None or val.tmpf == 460:
             iem.data['tmpf'] = None
             iem.data['relh'] = None
@@ -102,19 +110,15 @@ def saveData():
         iem.data['pmonth'] = float(val.pMonth)
         iem.data['gust'] = float(val.xsped) * 0.86897
         iem.data['max_drct'] = val.xdrct
-        try:
-            iem.updateDatabase(None, dbpool=DBPOOL)
-            val.updated = False
-            updates += 1
-        except:
-            traceback.print_exc()
-            continue
+        iem.save(txn)
+        val.updated = False
+        updates += 1
         val.xsped = 0
         del(iem)
 
     timer_end = mx.DateTime.now()
-    print "Time: %.2fs Updates: %s Skips: %s" % ( timer_end - timer_start, 
-                                                  updates, skips)                                            
+    print "Time: %.2fs Updates: %s Skips: %s" % (timer_end - timer_start,
+                                                 updates, skips)
 
 application = service.Application("NWN 2 DB")
 serviceCollection = service.IServiceCollection(application)
@@ -124,8 +128,8 @@ remoteServerPass = secret.cfg['hubpass']
 clientFactory = NWNClientFactory(remoteServerUser,
                                  remoteServerPass)
 
-client = internet.TCPClient(secret.cfg['hubserver'], 
+client = internet.TCPClient(secret.cfg['hubserver'],
                             secret.cfg['hubport'], clientFactory)
-client.setServiceParent( serviceCollection )
-LC = LoopingCall( saveData )
+client.setServiceParent(serviceCollection)
+LC = LoopingCall(saver)
 LC.start(59)
