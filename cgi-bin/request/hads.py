@@ -14,6 +14,7 @@ PGCONN = psycopg2.connect(database='hads', host='iemdb', user='nobody')
 
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 
+
 def get_time(form):
     """ Get timestamps """
     y = int(form.getfirst('year'))
@@ -31,12 +32,13 @@ def get_time(form):
     ets = ets.replace(tzinfo=pytz.timezone("UTC"))
     return sts, ets
 
+
 def threshold_search(table, threshold, thresholdvar, delimiter):
     """ Do the threshold searching magic """
     cols = list(table.columns.values)
     searchfor = "HGI%s" % (thresholdvar.upper(),)
     cols5 = [s[:5] for s in cols]
-    if not searchfor in cols5:
+    if searchfor not in cols5:
         error("Could not find %s variable for this site!" % (searchfor,))
         return
     mycol = cols[cols5.index(searchfor)]
@@ -64,11 +66,12 @@ def threshold_search(table, threshold, thresholdvar, delimiter):
             above = False
             maxrunning = -99
             maxvalid = None
-        
+
     if found is False:
         error("# OOPS, did not find any exceedance!")
 
     return pd.DataFrame(res)
+
 
 def error(msg):
     """ send back an error """
@@ -76,10 +79,11 @@ def error(msg):
     sys.stdout.write(msg)
     sys.exit(0)
 
+
 def main():
     """ Go do something """
     form = cgi.FieldStorage()
-    #network = form.getfirst('network')
+    # network = form.getfirst('network')
     delimiter = DELIMITERS.get(form.getfirst('delim', 'comma'))
     what = form.getfirst('what', 'dl')
     threshold = float(form.getfirst('threshold', -99))
@@ -88,38 +92,42 @@ def main():
     stations = form.getlist('stations')
     if len(stations) == 1:
         stations.append('XXXXXXX')
-    
+
     table = "raw%s" % (sts.year,)
-    sql = """SELECT station, valid at time zone 'UTC' as utc_valid, 
-    key, value from """+table+""" 
+    sql = """SELECT station, valid at time zone 'UTC' as utc_valid,
+    key, value from """+table+"""
     WHERE station in %s and valid BETWEEN '%s' and '%s'
-    and value > -999""" % (tuple(stations),
-                                                              sts, ets)
+    and value > -999""" % (tuple(stations), sts, ets)
     df = read_sql(sql, PGCONN)
-    
+    if len(df) == 0:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write("Sorry, no results found for query!")
+        return
     table = df.pivot_table(values='value', columns=['key'], index=['station',
-                                                                   'utc_valid'])
+                                                                   'utc_valid']
+                           )
     if threshold >= 0:
         if 'XXXXXXX' not in stations:
             error('Can not do threshold search for more than one station')
             return
         table = threshold_search(table, threshold, thresholdvar, delimiter)
-    
+
     if what == 'txt':
         sys.stdout.write('Content-type: application/octet-stream\n')
         sys.stdout.write(('Content-Disposition: attachment; '
-                          +'filename=hads.txt\n\n'))
+                          'filename=hads.txt\n\n'))
         table.to_csv(sys.stdout, sep=delimiter)
     elif what == 'html':
         sys.stdout.write("Content-type: text/html\n\n")
         table.to_html(sys.stdout)
     elif what == 'excel':
         writer = pd.ExcelWriter('/tmp/ss.xlsx')
-        table.to_excel(writer,'Data', index=True)
+        table.to_excel(writer, 'Data', index=True)
         writer.save()
-    
+
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write("Content-Disposition: attachment;Filename=hads.xlsx\n\n")
+        sys.stdout.write(("Content-Disposition: attachment;"
+                          "Filename=hads.xlsx\n\n"))
         sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
         os.unlink('/tmp/ss.xlsx')
 
