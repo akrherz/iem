@@ -50,7 +50,6 @@ python clean_afos.py
 python unknown_hads.py
 
 cd ../qc
-python check_iem_precip.py
 python hads_nwsli_squawk.py
 
 cd ../ingestors/cocorahs
