@@ -4,34 +4,38 @@ import memcache
 import sys
 import cgi
 
+
 def run():
     """ Actually do the hard work of getting the current SBW in geojson """
     import json
-    import psycopg2
     import psycopg2.extras
     import datetime
 
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     utcnow = datetime.datetime.utcnow()
     sbwtable = "sbw_%s" % (utcnow.year,)
-    
+
+    # Look for polygons into the future as well as we now have Flood products
+    # with a start time in the future
     cursor.execute("""
         SELECT ST_asGeoJson(geom) as geojson, phenomena, eventid, wfo,
         significance, polygon_end
-        from """+sbwtable+""" WHERE polygon_begin <= now() and 
+        from """+sbwtable+""" WHERE
+        polygon_begin <= (now() + '7 days'::interval) and
         polygon_end > now()
     """)
-    
+
     res = {'type': 'FeatureCollection',
            'crs': {'type': 'EPSG',
-                   'properties': {'code': 4326, 'coordinate_order': [1,0]}},
-           'features': [], 
+                   'properties': {'code': 4326, 'coordinate_order': [1, 0]}},
+           'features': [],
            'generation_time': utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
            'count': cursor.rowcount}
     for row in cursor:
         sid = "%(wfo)s.%(phenomena)s.%(significance)s.%(eventid)04i" % row
+        ets = row['polygon_end'].strftime("%Y-%m-%dT%H:%M:%SZ")
         res['features'].append(dict(type="Feature",
                                     id=sid,
                                     properties=dict(
@@ -39,12 +43,12 @@ def run():
                                         significance=row['significance'],
                                         wfo=row['wfo'],
                                         eventid=row['eventid'],
-                                        expire=row['polygon_end'].strftime("%Y-%m-%dT%H:%M:%SZ")
-                                                    ),
+                                        expire=ets),
                                     geometry=json.loads(row['geojson'])
                                     ))
 
-    return json.dumps( res )
+    return json.dumps(res)
+
 
 if __name__ == '__main__':
     # Go Main Go
@@ -61,6 +65,6 @@ if __name__ == '__main__':
         mc.set(mckey, res, 15)
 
     if cb is None:
-        sys.stdout.write( res )
+        sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
