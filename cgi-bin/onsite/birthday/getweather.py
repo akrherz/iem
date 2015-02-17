@@ -7,11 +7,9 @@
 import psycopg2
 import cgi
 import mx.DateTime
-import re
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib/')
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 
 COOP = psycopg2.connect("dbname=coop user=nobody host=iemdb")
 ccursor = COOP.cursor()
