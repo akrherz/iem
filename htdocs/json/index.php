@@ -20,6 +20,21 @@
   $services = array();
 
   $services[] = Array(
+  		"title" => "NWS VTEC Event Listing by WFO by Year",
+  		"url" => "/json/vtec_events.py?wfo={wfo}&year={year}",
+  		"desc" => "Produces a listing of VTEC Events (watch, warning, 
+  		advisories) by year by weather forecast office.",
+  		"vars" => Array(
+  				"wfo" => "3 character WFO identifier",
+  				"year" => "YYYY year"
+  		),
+  		"example" => Array(
+  				"{wfo}" => "DMX",
+  				"{year}" => "2015"
+  		)
+  );
+
+  $services[] = Array(
   		"title" => "NWS Text Products by AWIPS ID and Time Period",
   		"url" => "/json/nwstext_search.py?sts={sts}&ets={ets}&awipsid={awipsid}",
   		"desc" => "Search of NWS Issued Text Products by a time period (in 
