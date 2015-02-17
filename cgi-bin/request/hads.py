@@ -90,6 +90,10 @@ def main():
     thresholdvar = form.getfirst('threshold-var', 'RG')
     sts, ets = get_time(form)
     stations = form.getlist('stations')
+    if len(stations) == 0:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write("Error, no stations specified for the query!")
+        return
     if len(stations) == 1:
         stations.append('XXXXXXX')
 
