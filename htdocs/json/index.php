@@ -94,6 +94,17 @@
   );
   
   $services[] = Array(
+  		"title" => "Current Polygons from Special Weather Statements (SPS)",
+  		"url" => "/geojson/sps.geojson?",
+  		"desc" => "Provides a geojson format of current National Weather Service
+  		polygons that are included with some Special Weather Statements (SPS).",
+  		"vars" => Array(
+  		),
+  		"example" => Array(
+  		)
+  );
+  
+  $services[] = Array(
   		"title" => "Search for Warnings by UGC Code and Date Interval",
   		"url" => "/json/vtec_events_byugc.php?ugc={ugc}&edate={edate}&sdate={sdate}",
   		"desc" => "Provides a json response of archived warnings valid for the
