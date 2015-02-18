@@ -2,8 +2,8 @@
  Generate images used for state brochures
 '''
 import os
-import network
-nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
  "NECLIMATE", "KSCLIMATE", "MOCLIMATE", "KYCLIMATE", "ILCLIMATE", "WICLIMATE",
  "INCLIMATE", "OHCLIMATE", "MICLIMATE"))
 PLOTS = ['annual_sum_precip', 'annual_avg_temp', 'frost_free',

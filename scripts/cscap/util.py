@@ -6,6 +6,16 @@ import gdata.spreadsheets.client
 import gdata.spreadsheets.data as spdata
 import gdata.docs.client
 
+import json
+import os
+
+# Load up the CONFIG
+CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
+
+def save_config():
+    """ Save the configuration to disk """
+    json.dump(CONFIG, open('mytokens.json', 'w'))
+
 class Worksheet(object):
     
     def __init__(self, doc_client, spr_client, entry):
@@ -304,3 +314,21 @@ def get_site_metadata(config, spr_client=None):
         meta[d['uniqueid']] = {'climate_site': d['iemclimatesite'].split()[0],
                                }
     return meta
+
+def get_driveclient():
+    """ Return an authorized apiclient """
+    from oauth2client.client import SignedJwtAssertionCredentials
+    from httplib2 import Http
+    from apiclient.discovery import build
+
+    client_email = CONFIG['service_account']
+    with open("CSCAP-6886c10d6ffb.p12") as f:
+        private_key = f.read()
+
+    credentials = SignedJwtAssertionCredentials(client_email, private_key,
+                    'https://www.googleapis.com/auth/drive.readonly')
+
+
+    http_auth = credentials.authorize(Http())
+
+    return build('drive', 'v2', http=http_auth)
