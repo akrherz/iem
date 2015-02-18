@@ -5,8 +5,8 @@ import re
 import string
 import mx.DateTime
 import sys
-import network
-nt = network.Table("ISUAG")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("ISUAG")
 import pg
 mydb = pg.DB('isuag', 'iemdb')
 mydb.query("SET TIME ZONE 'CST6'")

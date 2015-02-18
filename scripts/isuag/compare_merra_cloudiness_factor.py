@@ -1,17 +1,17 @@
 """
 Plot a comparison of MERRA Cloudiness Factor
 """
-import iemdb
+import psycopg2
 import numpy
 import datetime
 import matplotlib.pyplot as plt
 from scipy import stats
-ISUAG = iemdb.connect('isuag', bypass=True)
+ISUAG = psycopg2.connect(databse='isuag', host='iemdb')
 icursor = ISUAG.cursor()
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor()
-import network
-nt = network.Table("ISUAG")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("ISUAG")
 
 def do( station ):
     csite = nt.sts[station]['climate_site']

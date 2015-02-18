@@ -67,8 +67,8 @@ import pytz
 import sys
 import urllib2
 import psycopg2
-import network
-nt = network.Table("RAOB")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("RAOB")
 
 
 class RAOB:

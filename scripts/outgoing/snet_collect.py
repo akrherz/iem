@@ -1,32 +1,36 @@
 """
 Collect up schoolnet data into files we have for outgoing...
 """
-import mesonet
 import sys
 import os
-import mx.DateTime
-import network
+import datetime
+from pyiem.network import Table as NetworkTable
+import pyiem.meteorology as meteorology
+from pyiem.datatypes import temperature, speed
+import pyiem.util as util
 import psycopg2.extras
 import subprocess
-import iemdb
-import access
 import tempfile
+import calendar
+import pytz
 
-gmt = mx.DateTime.gmt()
-tstr = gmt.strftime("%Y%m%d%H%M")
+utc = datetime.datetime.utcnow()
+utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+tstr = utc.strftime("%Y%m%d%H%M")
 
-now = mx.DateTime.now()
+now = utc.astimezone(pytz.timezone("America/Chicago"))
 
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-st = network.Table( ('KCCI','KELO','KIMT') )
+st = NetworkTable(['KCCI', 'KELO', 'KIMT'])
 
 st.sts["SMAI4"]["plot_name"] = "M-town"
 st.sts["SBZI4"]["plot_name"] = "Zoo"
 st.sts["SMSI4"]["plot_name"] = "Barnum"
 st.sts["STQI4"]["plot_name"] = "Tama"
 st.sts["SBOI4"]["plot_name"] = "Boone"
+
 
 def altiTxt(d):
     if d == "":
@@ -37,35 +41,43 @@ def altiTxt(d):
         return "R"
     return "S"
 
+
 def computeOthers(d):
     r = {}
     # Need something to compute other values needed for output
     for sid in d.keys():
-        ob = d[sid].data
-        ob["ticks"] = int(ob["ts"])
-        ob["sped"] = ob["sknt"] * 1.17
+        ob = d[sid]
+        ob["ticks"] = calendar.timegm(ob['valid'].timetuple())
+        if ob['sknt'] is not None:
+            ob["sped"] = ob["sknt"] * 1.17
         if ob.get('tmpf') is not None and ob.get('dwpf') is not None:
-            ob["relh"] = mesonet.relh(ob["tmpf"], ob["dwpf"])
+            tmpf = temperature(ob['tmpf'], 'F')
+            dwpf = temperature(ob['dwpf'], 'F')
+            ob["relh"] = meteorology.relh(tmpf, dwpf).value('%')
         else:
             ob['relh'] = None
         if ob['relh'] == 'M':
             ob['relh'] = None
-            
+
         if (ob.get('tmpf') is not None and ob.get('dwpf') is not None and
-            ob.get('sped') is not None):
-            ob["feel"] = mesonet.feelslike(ob["tmpf"], ob["relh"], ob["sped"])
+                ob.get('sped') is not None):
+            tmpf = temperature(ob['tmpf'], 'F')
+            dwpf = temperature(ob['dwpf'], 'F')
+            sknt = speed(ob['sped'], 'MPH')
+            ob["feel"] = meteorology.feelslike(tmpf, dwpf, sknt).value("F")
         else:
             ob['feel'] = None
         if ob['feel'] == 'M':
             ob['feel'] = None
 
         ob["altiTend"] = 'S'
-        ob["drctTxt"] = mesonet.drct2dirTxt(ob["drct"])
+        ob["drctTxt"] = util.drct2text(ob["drct"])
         if ob["max_drct"] is None:
             ob["max_drct"] = 0
-        ob["max_drctTxt"] = mesonet.drct2dirTxt(ob["max_drct"])
+        ob["max_drctTxt"] = util.drct2text(ob["max_drct"])
         ob["20gu"] = 0
-        ob["gmph"] = ob["gust"] * 1.17
+        if ob['gust'] is not None:
+            ob["gmph"] = ob["gust"] * 1.17
         ob["max_sped"] = ob["max_gust"] * 1.17
         ob["gtim"] = "0000"
         ob["gtim2"] = "12:00 AM"
@@ -75,29 +87,45 @@ def computeOthers(d):
         r[sid] = ob
     return r
 
+
 def get_precip_totals(obs, network):
-    now = mx.DateTime.now()
-    for dy in (2,3,7,14):
-        sql = """SELECT id, sum(pday) as rain from summary s JOIN stations t 
-            ON (t.iemid = s.iemid) WHERE 
-            network = '%s' and day > '%s' and pday >= 0 GROUP by id""" % (
-                                                    network,
-         (now - mx.DateTime.RelativeDateTime(days=dy)).strftime("%Y-%m-%d") )
+    now = datetime.datetime.now()
+    for dy in [2, 3, 7, 14]:
+        sql = """SELECT id, sum(pday) as rain from summary s JOIN stations t
+            ON (t.iemid = s.iemid) WHERE
+            network = '%s' and day > '%s' and pday >= 0 GROUP by id
+            """ % (network,
+                   (now - datetime.timedelta(days=dy)).strftime("%Y-%m-%d"))
         icursor.execute(sql)
         for row in icursor:
-            obs[ row["id"]].data["p%sday" % (dy,)] = row["rain"]
+            obs[row["id"]]["p%sday" % (dy,)] = row["rain"]
+
 
 def formatter(val, precision, mval='M'):
-    if val is None or type(val) == type('s'):
+    if val is None or isinstance(val, str):
         return mval
     fmt = '%%.%sf' % (precision,)
     return fmt % val
 
+
+def get_network(network):
+    obs = {}
+    icursor.execute("""
+    SELECT c.*, s.*, t.id, t.name as sname
+    from current c, summary s, stations t WHERE
+    t.iemid = s.iemid and s.iemid = c.iemid and t.network = '%s' and
+    s.day = 'TODAY' ORDER by random()
+    """ % (network, ))
+    for row in icursor:
+        obs[row['id']] = row.copy()
+    return obs
+
+
 def main():
-    kcci = access.get_network("KCCI", IEM)
-    kelo = access.get_network("KELO", IEM)
-    kimt = access.get_network("KIMT", IEM)
-    
+    kcci = get_network("KCCI")
+    kelo = get_network("KELO")
+    kimt = get_network("KIMT")
+
     get_precip_totals(kcci, 'KCCI')
     get_precip_totals(kelo, 'KELO')
     get_precip_totals(kimt, 'KIMT')
@@ -111,43 +139,41 @@ def main():
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
     of.write("drct_max,max_sped,max_drctTxt,max_srad\n")
     for sid in kcci.keys():
-        v = kcci[sid].data
+        v = kcci[sid]
         try:
-            s = "%s,%s,%s,%s,%s," % (v.get('id'),
-                            v.get('ticks'), formatter(v.get('tmpf'),0, -99), 
-                            formatter(v.get('dwpf'),0, -99),
-                            formatter(v.get('relh'),0, -99) )
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('feel'), 0, -99),
-                        formatter(v.get('pres'), 2, -99),
-                        v.get('altiTend'), v.get('drctTxt'))
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('sped'), 0, -99),
-                        formatter(v.get('sknt'), 0, -99),
-                        formatter(v.get('drct'), 0, -99),
-                        formatter(v.get('20gu'), 0, -99))
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('gmph'), 0, -99),
-                        v.get('gtim'),
-                        formatter(v.get('pday'), 2, -99),
-                        formatter(v.get('pmonth'), 2, -99))
-            s += "%s,%s,%s," % (
-                        formatter(v.get('sknt'), 0, -99),
-                        formatter(v.get('drct'), 0, -99),
-                        formatter(v.get('20gu'), 0, -99))
-            s += "%s,%s,%s,%s\n" % (
-                        formatter(v.get('max_drct'), 0, -99),
-                        formatter(v.get('max_sped'), 0, -99),
-                        v.get('max_drctTxt'),
-                        formatter(v.get('max_srad'), 0, -99))
+            s = ("%s,%s,%s,%s,%s,"
+                 "") % (v.get('id'),
+                        v.get('ticks'), formatter(v.get('tmpf'), 0, -99),
+                        formatter(v.get('dwpf'), 0, -99),
+                        formatter(v.get('relh'), 0, -99))
+            s += "%s,%s,%s,%s," % (formatter(v.get('feel'), 0, -99),
+                                   formatter(v.get('pres'), 2, -99),
+                                   v.get('altiTend'), v.get('drctTxt'))
+            s += "%s,%s,%s,%s," % (formatter(v.get('sped'), 0, -99),
+                                   formatter(v.get('sknt'), 0, -99),
+                                   formatter(v.get('drct'), 0, -99),
+                                   formatter(v.get('20gu'), 0, -99))
+            s += "%s,%s,%s,%s," % (formatter(v.get('gmph'), 0, -99),
+                                   v.get('gtim'),
+                                   formatter(v.get('pday'), 2, -99),
+                                   formatter(v.get('pmonth'), 2, -99))
+            s += "%s,%s,%s," % (formatter(v.get('sknt'), 0, -99),
+                                formatter(v.get('drct'), 0, -99),
+                                formatter(v.get('20gu'), 0, -99))
+            s += "%s,%s,%s,%s\n" % (formatter(v.get('max_drct'), 0, -99),
+                                    formatter(v.get('max_sped'), 0, -99),
+                                    v.get('max_drctTxt'),
+                                    formatter(v.get('max_srad'), 0, -99))
             of.write(s.replace("'", ""))
         except:
             print kcci[sid]
-            print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
+            print sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2])
             sys.exc_traceback = None
 
     of.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat bogus dat' %s" % (tstr, tmpfp), shell=True )
+    subprocess.call(("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat "
+                     "bogus dat' %s") % (tstr, tmpfp), shell=True)
     os.remove(tmpfp)
 
     of = open(tmpfp, 'w')
@@ -156,48 +182,46 @@ def main():
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
     of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online\n")
     for sid in kcci.keys():
-        v = kcci[sid].data
+        v = kcci[sid]
         v['online'] = 1
-        if (now - v['ts']) > 3600:
+        if (now - v['valid']).seconds > 3600:
             v['online'] = 0
         try:
             s = "%s,%s,%s,%s,%s," % (v.get('id'),
-                            v.get('ticks'), formatter(v.get('tmpf'),0), 
-                            formatter(v.get('dwpf'),0),
-                            formatter(v.get('relh'),0) )
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('feel'), 0),
-                        formatter(v.get('pres'), 2),
-                        v.get('altiTend'), v.get('drctTxt'))
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('sped'), 0),
-                        formatter(v.get('sknt'), 0),
-                        formatter(v.get('drct'), 0),
-                        formatter(v.get('20gu'), 0))
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('gmph'), 0),
-                        v.get('gtim'),
-                        formatter(v.get('pday'), 2),
-                        formatter(v.get('pmonth'), 2))
-            s += "%s,%s,%s," % (
-                        formatter(v.get('sknt'), 0),
-                        formatter(v.get('drct'), 0),
-                        formatter(v.get('20gu'), 0))
-            s += "%s,%s,%s,%s,%s,%s\n" % (
-                        formatter(v.get('max_drct'), 0),
-                        formatter(v.get('max_sped'), 0),
-                        v.get('max_drctTxt'), formatter(v.get('srad'), 0),
-                        formatter(v.get('max_srad'), 0),
-                        v.get('online'))
+                                     v.get('ticks'),
+                                     formatter(v.get('tmpf'), 0),
+                                     formatter(v.get('dwpf'), 0),
+                                     formatter(v.get('relh'), 0))
+            s += "%s,%s,%s,%s," % (formatter(v.get('feel'), 0),
+                                   formatter(v.get('pres'), 2),
+                                   v.get('altiTend'), v.get('drctTxt'))
+            s += "%s,%s,%s,%s," % (formatter(v.get('sped'), 0),
+                                   formatter(v.get('sknt'), 0),
+                                   formatter(v.get('drct'), 0),
+                                   formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s," % (formatter(v.get('gmph'), 0),
+                                   v.get('gtim'),
+                                   formatter(v.get('pday'), 2),
+                                   formatter(v.get('pmonth'), 2))
+            s += "%s,%s,%s," % (formatter(v.get('sknt'), 0),
+                                formatter(v.get('drct'), 0),
+                                formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s,%s,%s\n" % (formatter(v.get('max_drct'), 0),
+                                          formatter(v.get('max_sped'), 0),
+                                          v.get('max_drctTxt'),
+                                          formatter(v.get('srad'), 0),
+                                          formatter(v.get('max_srad'), 0),
+                                          v.get('online'))
             of.write(s.replace("'", ""))
         except:
-            print kcci[sid].data
-            print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
+            print kcci[sid]
+            print sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2])
             sys.exc_traceback = None
 
     of.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat bogus dat' %s" % (
-                                                                tstr, tmpfp), shell=True)
+    subprocess.call(("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat "
+                     "bogus dat' %s") % (tstr, tmpfp), shell=True)
     os.remove(tmpfp)
 
     of = open(tmpfp, 'w')
@@ -205,51 +229,49 @@ def main():
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
     of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online\n")
     for sid in kimt.keys():
-        v = kimt[sid].data
+        v = kimt[sid]
         v['online'] = 1
-        if (now - v['ts']) > 3600:
+        if (now - v['valid']).seconds > 3600:
             v['online'] = 0
         try:
             s = "%s,%s,%s,%s,%s," % (v.get('id'),
-                            v.get('ticks'), formatter(v.get('tmpf'),0), 
-                            formatter(v.get('dwpf'),0),
-                            formatter(v.get('relh'),0) )
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('feel'), 0),
-                        formatter(v.get('pres'), 2),
-                        v.get('altiTend'), v.get('drctTxt'))
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('sped'), 0),
-                        formatter(v.get('sknt'), 0),
-                        formatter(v.get('drct'), 0),
-                        formatter(v.get('20gu'), 0))
-            s += "%s,%s,%s,%s," % (
-                        formatter(v.get('gmph'), 0),
-                        v.get('gtim'),
-                        formatter(v.get('pday'), 2),
-                        formatter(v.get('pmonth'), 2))
-            s += "%s,%s,%s," % (
-                        formatter(v.get('sknt'), 0),
-                        formatter(v.get('drct'), 0),
-                        formatter(v.get('20gu'), 0))
-            s += "%s,%s,%s,%s,%s,%s\n" % (
-                        formatter(v.get('max_drct'), 0),
-                        formatter(v.get('max_sped'), 0),
-                        v.get('max_drctTxt'), formatter(v.get('srad'), 0),
-                        formatter(v.get('max_srad'), 0),
-                        v.get('online'))
+                                     v.get('ticks'),
+                                     formatter(v.get('tmpf'), 0),
+                                     formatter(v.get('dwpf'), 0),
+                                     formatter(v.get('relh'), 0))
+            s += "%s,%s,%s,%s," % (formatter(v.get('feel'), 0),
+                                   formatter(v.get('pres'), 2),
+                                   v.get('altiTend'), v.get('drctTxt'))
+            s += "%s,%s,%s,%s," % (formatter(v.get('sped'), 0),
+                                   formatter(v.get('sknt'), 0),
+                                   formatter(v.get('drct'), 0),
+                                   formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s," % (formatter(v.get('gmph'), 0),
+                                   v.get('gtim'),
+                                   formatter(v.get('pday'), 2),
+                                   formatter(v.get('pmonth'), 2))
+            s += "%s,%s,%s," % (formatter(v.get('sknt'), 0),
+                                formatter(v.get('drct'), 0),
+                                formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s,%s,%s\n" % (formatter(v.get('max_drct'), 0),
+                                          formatter(v.get('max_sped'), 0),
+                                          v.get('max_drctTxt'),
+                                          formatter(v.get('srad'), 0),
+                                          formatter(v.get('max_srad'), 0),
+                                          v.get('online'))
             of.write(s.replace("'", ""))
         except:
-            print kimt[sid].data
-            print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
+            print kimt[sid]
+            print sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2])
             sys.exc_traceback = None
 
     of.close()
-    cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' %s" % (
-                                                    tstr, tmpfp)
+    cmd = ("/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat "
+           "bogus dat' %s") % (tstr, tmpfp)
     p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-    data = p.stdout.read()
+    _ = p.stdout.read()
     os.remove(tmpfp)
 
     # Do KCCI stuff in WXC format
@@ -286,31 +308,35 @@ def main():
     for sid in kcci.keys():
         try:
             of.write("%5s %-52s %-20.20s %2s %7.2f %8.2f " % (
-                sid, st.sts[sid]['plot_name'], st.sts[sid]['plot_name'], 'IA', 
+                sid, st.sts[sid]['plot_name'], st.sts[sid]['plot_name'], 'IA',
                 st.sts[sid]['lat'], st.sts[sid]['lon']))
             of.write("%2s %4s %4.0f %4.0f %4.0f %4.0f %4s " % (
-                kcci[sid].data['ts'].day, kcci[sid].data['ts'].hour, 
-                kcci[sid].data.get('tmpf') or -99, kcci[sid].data.get('dwpf') or -99, 
-                kcci[sid].data.get('feel') or -99, kcci[sid].data.get('drct'), 
-                kcci[sid].data.get('drctTxt')))
+                kcci[sid]['valid'].day, kcci[sid]['valid'].hour,
+                kcci[sid].get('tmpf') or -99,
+                kcci[sid].get('dwpf') or -99,
+                kcci[sid].get('feel') or -99, kcci[sid].get('drct') or -99,
+                kcci[sid].get('drctTxt')))
             of.write("%4.0f %4.0f %4.0f %4.0f %3s " % (
-                kcci[sid].data['sknt'], 
-                kcci[sid].data['max_tmpf'], kcci[sid].data['min_tmpf'], 
-                kcci[sid].data['max_sped'], kcci[sid].data.get('max_drctTxt')))
+                kcci[sid].get('sknt') or -99,
+                kcci[sid].get('max_tmpf') or -99,
+                kcci[sid].get('min_tmpf') or -99,
+                kcci[sid].get('max_sped') or -99,
+                kcci[sid].get('max_drctTxt')))
             of.write("%6.2f %6.2f %8s %6.2f %6.2f %6.2f %6.2f\n" % (
-                kcci[sid].data['pday'], kcci[sid].data['pmonth'], 
-                kcci[sid].data.get('gtim2'), kcci[sid].data.get('p2day',0), 
-                kcci[sid].data.get('p3day',0), kcci[sid].data.get('p7day',0), 
-                kcci[sid].data.get('p14day',0) ) )
+                kcci[sid]['pday'], kcci[sid]['pmonth'],
+                kcci[sid].get('gtim2'), kcci[sid].get('p2day', 0),
+                kcci[sid].get('p3day', 0), kcci[sid].get('p7day', 0),
+                kcci[sid].get('p14day', 0)))
 
         except:
-            print kcci[sid].data
-            print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
+            print kcci[sid]
+            print sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2])
             sys.exc_traceback = None
     of.close()
     pqstr = 'data c 000000000000 wxc/wxc_snet8.txt bogus txt'
-    subprocess.call("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_snet8.txt" % (pqstr,),
-                    shell=True)
+    subprocess.call(("/home/ldm/bin/pqinsert -p '%s' "
+                     "/tmp/wxc_snet8.txt") % (pqstr, ), shell=True)
     os.remove("/tmp/wxc_snet8.txt")
 
 if __name__ == '__main__':

@@ -2,11 +2,11 @@ from pyiem.plot import MapPlot
 import psycopg2
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = COOP.cursor()
-import network
+from pyiem.network import Table as NetworkTable
 import numpy as np
 import sys
 import matplotlib.cm as cm
-nt = network.Table("IACLIMATE")
+nt = NetworkTable("IACLIMATE")
 
 rejs = ['IA5493', 'IA0000','IA1954', 'IA1394']
 

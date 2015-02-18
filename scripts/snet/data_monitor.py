@@ -1,9 +1,9 @@
 """
   Process that would continually monitor for interesting stuff!!
 """
-import network
-nt = network.Table(("KCCI", "KIMT", "KELO"))
-import iemdb
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable(("KCCI", "KIMT", "KELO"))
+import psycopg2
 import os
 import sys
 import time
@@ -15,25 +15,28 @@ o.close()
 
 db = {}
 for station in nt.sts.keys():
-  db[station] = {"pday": [0]*60 }
+    db[station] = {"pday": [0]*60}
 
-# Load up arrays for the first time....
+
 def preload():
-    IEM = iemdb.connect('iem', bypass=True)
+    IEM = psycopg2.connect(database='iem', host='iemdb')
     icursor = IEM.cursor()
     icursor.execute("""SELECT pday, t.id from current c, stations t WHERE 
-      t.network in ('KCCI','KELO','KIMT') and c.iemid = t.iemid""")
+      t.network in ('KCCI','KELO','KIMT') and c.iemid = t.iemid
+      and pday is not null""")
     for row in icursor:
         sid = row[1]
         db[sid]["pday"] = [row[0]]*60
     IEM.close()
 
+
 def process(tv):
-    IEM = iemdb.connect('iem', bypass=True)
+    IEM = psycopg2.connect(database='iem', host='iemdb')
     icursor = IEM.cursor()
     icursor2 = IEM.cursor()
     icursor.execute("""SELECT pday, t.id, t.iemid from current c, stations t WHERE 
-      t.network = '%s' and c.iemid = t.iemid""" % (tv,))
+      t.network = '%s' and c.iemid = t.iemid
+      and pday is not null""" % (tv,))
     for row in icursor:
         sid = row[1]
         pday = row[0]

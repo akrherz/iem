@@ -8,8 +8,8 @@ import math
 import mx.DateTime
 import netCDF4
 import psycopg2
-import network
-st = network.Table('IACLIMATE')
+from pyiem.network import Table as NetworkTable
+st = NetworkTable('IACLIMATE')
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 

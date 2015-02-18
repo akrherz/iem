@@ -8,11 +8,12 @@ import datetime
 import os
 import subprocess
 import pytz
-import network
+from pyiem.network import Table as NetworkTable
 
-nt = network.Table(("AWOS", "IA_ASOS"))
+nt = NetworkTable(("AWOS", "IA_ASOS"))
 
-def figurePhase(p1,p2):
+
+def figurePhase(p1, p2):
     ''' Return a string of the moon phase! '''
     if p2 > p1:  # Waning!
         if p1 < 0.1:

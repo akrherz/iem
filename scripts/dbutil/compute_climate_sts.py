@@ -1,8 +1,6 @@
-'''
- Determine when a CLIMATE track site started...
-'''
+"""Determine when a CLIMATE track site started..."""
 import psycopg2
-import network
+from pyiem.network import Table as NetworkTable
 import sys
 import pytz
 import datetime
@@ -13,23 +11,23 @@ mcursor = mesosite.cursor()
 
 net = sys.argv[1]
 
-nt = network.Table( net )
+nt = NetworkTable(net)
 
-acursor.execute("""SELECT station, min(day) from alldata_%s GROUP by station 
+acursor.execute("""SELECT station, min(day) from alldata_%s GROUP by station
   ORDER by min ASC""" % (net[:2]))
 for row in acursor:
     station = row[0]
     ts = datetime.datetime(row[1].year, row[1].month, row[1].day)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-    if not nt.sts.has_key(station):
+    if station not in nt.sts:
         continue
     if nt.sts[station]['archive_begin'] != ts:
-        print 'Updated %s STS WAS: %s NOW: %s' % (station, 
-                    nt.sts[station]['archive_begin'], ts)
-  
-    mcursor.execute("""UPDATE stations SET archive_begin = %s 
-         WHERE id = %s and network = %s""" , (ts, station, net) )
-  
+        print(('Updated %s STS WAS: %s NOW: %s'
+               '') % (station, nt.sts[station]['archive_begin'], ts))
+
+    mcursor.execute("""UPDATE stations SET archive_begin = %s
+         WHERE id = %s and network = %s""", (ts, station, net))
+
 mcursor.close()
 mesosite.commit()
 mesosite.close()

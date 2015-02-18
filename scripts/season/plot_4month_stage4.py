@@ -14,8 +14,8 @@ import netCDF4
 import subprocess
 from pyiem.plot import MapPlot
 from pyiem import iemre
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 
 # Run for a period of 121 days
 ets = datetime.datetime.now() - datetime.timedelta(days=1)

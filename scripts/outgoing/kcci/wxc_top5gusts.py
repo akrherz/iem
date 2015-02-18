@@ -3,14 +3,14 @@ import subprocess
 import datetime
 import sys
 import tempfile
-import tracker
+import pyiem.tracker as tracker
 qc = tracker.loadqc()
-import iemdb
-IEM = iemdb.connect("iem", bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database="iem", host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
-icursor.execute("""SELECT t.id as station from current c, stations t 
-    WHERE t.network = 'KCCI' and 
+icursor.execute("""SELECT t.id as station from current c, stations t
+    WHERE t.network = 'KCCI' and
   valid > 'TODAY' and t.iemid = c.iemid  ORDER by gust DESC""")
 data = {}
 
@@ -24,11 +24,11 @@ for row in icursor:
     data['sid%s' % (i,)] = row[0]
     i += 1
 
-if not data.has_key('sid5'):
+if 'sid5' not in data:
     sys.exit()
 
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5gusts.tpl','r').read() % data )
+os.write(fd, open('top5gusts.tpl', 'r').read() % data)
 os.close(fd)
 
 subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5gusts.scn' %s" % (path,),
@@ -36,9 +36,9 @@ subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5gusts.scn' %s" % (path,),
 os.remove(path)
 
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5gusts_time.tpl','r').read() % data )
+os.write(fd,  open('top5gusts_time.tpl', 'r').read() % data)
 os.close(fd)
 
-subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5gusts_time.scn' %s" % (path,),
-                shell=True)
+subprocess.call(("/home/ldm/bin/pqinsert -p 'auto_top5gusts_time.scn' %s"
+                 "") % (path, ), shell=True)
 os.remove(path)

@@ -4,19 +4,22 @@ import subprocess
 import datetime
 import sys
 import tempfile
-import tracker
+import pyiem.tracker as tracker
 qc = tracker.loadqc()
-import iemdb
-IEM = iemdb.connect("iem", bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database="iem", host="iemdb")
 icursor = IEM.cursor()
 
 dy = int(sys.argv[1])
 now = datetime.datetime.now()
 
-icursor.execute("""SELECT s.id as station, sum(pday) as rain from summary_%s c, stations s 
-  WHERE s.network = 'KCCI' and s.iemid = c.iemid and 
-  day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC""" % ( 
-            now.year, (now - datetime.timedelta(days= int(dy) )).strftime("%Y-%m-%d") ))
+icursor.execute("""SELECT s.id as station, sum(pday) as rain
+    from summary_%s c, stations s
+    WHERE s.network = 'KCCI' and s.iemid = c.iemid and
+    day > '%s' and s.id not in ('SCEI4','SWII4')
+    GROUP by station ORDER by rain DESC
+    """ % (now.year,
+           (now - datetime.timedelta(days=int(dy))).strftime("%Y-%m-%d")))
 data = {}
 
 data['timestamp'] = now
@@ -41,9 +44,9 @@ elif dy == 14:
     data['title'] = "14 DAY RAINFALL"
 
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5rainXday.tpl','r').read() % data )
+os.write(fd,  open('top5rainXday.tpl', 'r').read() % data)
 os.close(fd)
 
-subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5rain_%sday.scn' %s" % (dy, path),
-                shell=True)
+subprocess.call(("/home/ldm/bin/pqinsert -p 'auto_top5rain_%sday.scn' %s"
+                 "") % (dy, path), shell=True)
 os.remove(path)

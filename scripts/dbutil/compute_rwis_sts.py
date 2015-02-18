@@ -1,9 +1,7 @@
-"""
- Figure out when the RWIS data started...
-"""
+"""Figure out when the RWIS data started..."""
 
 import psycopg2
-import network
+from pyiem.network import Table as NetworkTable
 import sys
 import datetime
 import pytz
@@ -17,23 +15,23 @@ mesosite = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = mesosite.cursor()
 
 net = sys.argv[1]
-table = network.Table(net)
+table = NetworkTable(net)
 
-rcursor.execute("""SELECT station, min(valid), max(valid) from alldata 
-    GROUP by station ORDER by min ASC""")
+rcursor.execute("""SELECT station, min(valid), max(valid) from alldata
+                GROUP by station ORDER by min ASC""")
 for row in rcursor:
     station = row[0]
-    if not table.sts.has_key(station):
+    if station not in table.sts:
         continue
     if table.sts[station]['archive_begin'] != row[1]:
-        print 'Updated %s STS WAS: %s NOW: %s' % (station, 
-                    table.sts[station]['archive_begin'], row[1])
-  
-    mcursor.execute("""UPDATE stations SET archive_begin = %s 
-         WHERE id = %s and network = %s""" , (row[1], station, net) )
+        print(('Updated %s STS WAS: %s NOW: %s'
+               '') % (station, table.sts[station]['archive_begin'], row[1]))
+
+    mcursor.execute("""UPDATE stations SET archive_begin = %s
+         WHERE id = %s and network = %s""", (row[1], station, net))
     if mcursor.rowcount == 0:
         print 'ERROR: No rows updated'
-    
+
 mcursor.close()
 mesosite.commit()
 mesosite.close()

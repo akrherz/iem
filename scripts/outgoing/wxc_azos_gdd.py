@@ -4,15 +4,14 @@
 """
 import datetime
 import os
-import Ngl
 import numpy as np
-import shutil
 import sys
+from scipy.interpolate import NearestNDInterpolator
 import psycopg2
 import subprocess
 from pyiem.datatypes import temperature
-import network
-nt = network.Table("ISUSM")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("ISUSM")
 
 ACCESS = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 acursor = ACCESS.cursor()
@@ -26,6 +25,7 @@ mcursor = MESOSITE.cursor()
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 icursor = ISUAG.cursor()
 
+
 def sampler(xaxis, yaxis, vals, x, y):
     ''' This is lame sampler, should replace '''
     i = 0
@@ -34,43 +34,45 @@ def sampler(xaxis, yaxis, vals, x, y):
     j = 0
     while (yaxis[j] < y):
         j += 1
-    return vals[i,j]
+    return vals[i, j]
 
 
 def load_soilt(data):
     soil_obs = []
-    lats = [] 
+    lats = []
     lons = []
     valid = datetime.date.today() - datetime.timedelta(days=1)
     if datetime.datetime.now().hour < 7:
         valid -= datetime.timedelta(days=1)
-    icursor.execute("""SELECT station, tsoil_c_avg from sm_daily WHERE 
-         valid = %s and tsoil_c_avg is not null""", (valid,) )
+    icursor.execute("""SELECT station, tsoil_c_avg from sm_daily WHERE
+         valid = %s and tsoil_c_avg is not null""", (valid,))
     for row in icursor:
         stid = row[0]
-        if not nt.sts.has_key(stid):
+        if stid not in nt.sts:
             continue
-        soil_obs.append( temperature(row[1], 'C').value('F') )
-        lats.append( nt.sts[stid]['lat'] )
-        lons.append( nt.sts[stid]['lon'] )
+        soil_obs.append(temperature(row[1], 'C').value('F'))
+        lats.append(nt.sts[stid]['lat'])
+        lons.append(nt.sts[stid]['lon'])
     if len(lons) < 4:
         print 'outgoing/wxc_azos_gdd.py:: No ISUAG Data for %s' % (valid,)
         sys.exit()
     numxout = 40
     numyout = 40
-    xmin    = min(lons) - 1.
-    ymin    = min(lats) - 1.
-    xmax    = max(lons) + 1.
-    ymax    = max(lats) + 1.
-    xc      = (xmax-xmin)/(numxout-1)
-    yc      = (ymax-ymin)/(numyout-1)
+    xmin = min(lons) - 1.
+    ymin = min(lats) - 1.
+    xmax = max(lons) + 1.
+    ymax = max(lats) + 1.
+    xc = (xmax-xmin)/(numxout-1)
+    yc = (ymax-ymin)/(numyout-1)
 
-    xo = xmin + xc* np.arange(0,numxout)
-    yo = ymin + yc* np.arange(0,numyout)
+    xo = xmin + xc * np.arange(0, numxout)
+    yo = ymin + yc * np.arange(0, numyout)
 
-    analysis = Ngl.natgrid(lons, lats, soil_obs, list(xo), list(yo))
+    xi, yi = np.meshgrid(xo, yo)
+    nn = NearestNDInterpolator((lons, lats), np.array(soil_obs))
+    analysis = nn(xi, yi)
     for sid in data.keys():
-        data[sid]['soilt'] = sampler(xo,yo,analysis, data[sid]['lon'], 
+        data[sid]['soilt'] = sampler(xo, yo, analysis, data[sid]['lon'],
                                      data[sid]['lat'])
 
 
