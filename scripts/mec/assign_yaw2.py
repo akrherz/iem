@@ -40,8 +40,8 @@ def compute_correction(unitnumber, turbineid):
     # Go find interesting cases!
     acursor.execute("""
       SELECT valid, drct from alldata where station = 'SLB'
-      and extract(hour from valid) between 8 and 16 and sknt > 15
-      and valid between '2008-01-01' and '2011-01-01'
+      and extract(hour from valid) between 8 and 16 and sknt > 10
+      and valid between '2008-08-01' and '2008-09-15'
       """)
     asos = []
     turbine = []
@@ -56,6 +56,9 @@ def compute_correction(unitnumber, turbineid):
         asos.append( float(row[1]) )
         turbine.append( float(row2[0]) )
         valid.append(row[0])
+    if len(valid) < 2:
+        print 'missing'
+        return
         
     turbine = np.array(turbine)
         
@@ -98,7 +101,7 @@ def compute_correction(unitnumber, turbineid):
     turbine2 = np.where(turbine2 >= 360, turbine2 - 360, turbine2)
     turbine2 = np.where(turbine2 < 0, turbine2 + 360, turbine2)
     
-    (counts, xedges, yedges, img) = ax[2].hist2d(asos, turbine2, bins=36, cmin=5)
+    (counts, xedges, yedges, img) = ax[2].hist2d(asos, turbine2, bins=36, cmin=1)
     fig.colorbar(img, ax=ax[2])
     ax[2].set_xlabel("Storm Lake AWOS Wind Direction")
     ax[2].set_ylabel("Turbine %s Corrected (%.1f)" % (turbineid, bias))
@@ -120,7 +123,7 @@ def compute_correction(unitnumber, turbineid):
     
     fig.tight_layout()
     
-    fig.savefig('yaw_correction_plots/yaw_correction_%s.png' % (turbineid,))
+    fig.savefig('yaw_correction_plots/yaw3_correction_%s.png' % (turbineid,))
     plt.close()
     return bias
 
@@ -128,13 +131,15 @@ def update_database(unitnumber, turbineid, correction):
     """ Apply this correction """
     cursor2 = PGCONN.cursor()
     cursor2.execute("""UPDATE sampled_data_"""+unitnumber+""" 
-        SET yaw3 = yaw + %s""", 
+        SET yaw3 = yaw + %s where valid between '2008-08-01' and '2008-09-01'""", 
                        (correction,))
     cursor2.execute("""UPDATE sampled_data_"""+unitnumber+"""
-        SET yaw3 = yaw3 - 360. WHERE yaw3 > 360""")
+        SET yaw3 = yaw3 - 360. WHERE yaw3 > 360 and
+        valid between '2008-08-01' and '2008-09-01'""")
 
     cursor2.execute("""UPDATE sampled_data_"""+unitnumber+"""
-        SET yaw3 = yaw3 + 360. WHERE yaw3 < 0""")
+        SET yaw3 = yaw3 + 360. WHERE yaw3 < 0 and
+        valid between '2008-08-01' and '2008-09-01'""")
     
     cursor2.close()
     PGCONN.commit()
@@ -145,6 +150,8 @@ def main():
     for row in cursor:
         print 'ID: %s' % (row[1],),
         correction = compute_correction(row[0], row[1])
+        if correction is None:
+            continue
         print '... correction: %.1f' % (correction,)
         if abs(correction) > 5:
             update_database(row[0], row[1], correction)
