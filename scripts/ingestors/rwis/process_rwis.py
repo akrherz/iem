@@ -215,9 +215,9 @@ def METARwind(sknt, drct, gust):
     d5 = drct
     if str(d5)[-1] == "5":
         d5 -= 5
-    s += "%03i%02i" % (d5, sknt)
+    s += "%03.0f%02.0f" % (d5, sknt)
     if gust is not None:
-        s += "G%02i" % (gust, )
+        s += "G%02.0f" % (gust, )
     s += "KT"
     return s
 
