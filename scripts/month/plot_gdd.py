@@ -1,17 +1,16 @@
-# Generate a plot of GDD 
+"""Generate a plot of GDD"""
 
-import sys, os
-import iemplot
+from pyiem.plot import MapPlot
+import numpy as np
+import datetime
+now = datetime.datetime.now()
 
-import mx.DateTime
-now = mx.DateTime.now()
-
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 
 
 # Compute normal from the climate database
@@ -20,32 +19,23 @@ sql = """SELECT station,
    from alldata_ia WHERE year = %s and month = %s
    GROUP by station""" % (now.year, now.month)
 
+vals = []
 lats = []
 lons = []
-gdd50 = []
-valmask = []
-ccursor.execute( sql )
+ccursor.execute(sql)
 for row in ccursor:
-  if not nt.sts.has_key(row[0]):
-    continue
-  lats.append( nt.sts[row[0]]['lat'] )
-  lons.append( nt.sts[row[0]]['lon'] )
-  gdd50.append( row[1] )
-  valmask.append( True )
+    if row[0] not in nt.sts:
+        continue
+    lats.append(nt.sts[row[0]]['lat'])
+    lons.append(nt.sts[row[0]]['lon'])
+    vals.append(float(row[1]))
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_showvalues'        : True,
- '_valueMask'         : valmask,
- '_format'            : '%.0f',
- '_title'             : "Iowa %s GDD Accumulation" % (
-                        now.strftime("%B %Y"), ),
- 'lbTitleString'      : "[base 50]",
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
+m = MapPlot(title="Iowa %s GDD Accumulation" % (now.strftime("%B %Y"), ),
+            axisbg='white')
+m.contourf(lons, lats, vals, np.linspace(int(min(vals)), int(max(vals))+3, 10),
+           units='base 50')
+m.plot_values(lons, lats, vals, fmt='%.0f')
 
 pqstr = "plot c 000000000000 summary/gdd_mon.png bogus png"
-iemplot.postprocess(tmpfp, pqstr)
+m.postprocess(view=False, pqstr=pqstr)
+m.close()

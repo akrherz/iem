@@ -1,54 +1,37 @@
 # Generate a map of today's record high and low temperature
+from pyiem.plot import MapPlot
 
-import sys, os
-import iemplot
+import datetime
+now = datetime.datetime.now()
 
-import mx.DateTime
-now = mx.DateTime.now()
-
-import network
-nt = network.Table('IACLIMATE')
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable('IACLIMATE')
 nt.sts["IA0200"]["lon"] = -93.6
 nt.sts["IA5992"]["lat"] = 41.65
-import iemdb
 import psycopg2.extras
-coop = iemdb.connect('coop', bypass=True)
+coop = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
 # Compute normal from the climate database
 sql = """SELECT station, max_high, min_low from climate WHERE valid = '2000-%s'
-    and substr(station,0,3) = 'IA'""" % (
-  now.strftime("%m-%d"),)
+    and substr(station,0,3) = 'IA'""" % (now.strftime("%m-%d"),)
 
-lats = []
-lons = []
-highs = []
-lows = []
-labels = []
+obs = []
 c = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
 c.execute(sql)
 for row in c:
     sid = row['station']
-    if sid[2] == 'C' or sid[2:] == '0000' or not nt.sts.has_key(sid):
+    if sid[2] == 'C' or sid[2:] == '0000' or sid not in nt.sts:
         continue
-    labels.append( sid[2:] )
-    lats.append( nt.sts[sid]['lat'] )
-    lons.append( nt.sts[sid]['lon'] )
-    highs.append( row['max_high'] )
-    lows.append( row['min_low'] )
+    obs.append(dict(id=sid[2:], lat=nt.sts[sid]['lat'],
+                    lon=nt.sts[sid]['lon'], tmpf=row['max_high'],
+                    dwpf=row['min_low']))
 
-
-#---------- Plot the points
-
-cfg = {
- 'wkColorMap': 'gsltod',
- '_format': '%.0f',
-# '_labels': labels,
- '_title'       : "Record High + Low Temperature [F] (1893-2008)",
- '_valid'       : now.strftime("%d %b"),
-}
-
-
-tmpfp = iemplot.hilo_valplot(lons, lats, highs, lows, cfg)
-
-pqstr = "plot ac %s0000 climate/iowa_today_rec_hilo_pt.png coop_rec_temp.png png" % (now.strftime("%Y%m%d"),)
-iemplot.postprocess(tmpfp, pqstr)
+m = MapPlot(title="Record High + Low Temperature [F] (1893-%s)" % (now.year,),
+            subtitle="For Date: %s" % (now.strftime("%d %b"),),
+            axisbg='white')
+m.drawcounties()
+m.plot_station(obs)
+pqstr = ("plot ac %s0000 climate/iowa_today_rec_hilo_pt.png coop_rec_temp.png "
+         "coop_avg_temp.png png") % (now.strftime("%Y%m%d"), )
+m.postprocess(view=False, pqstr=pqstr)
+m.close()

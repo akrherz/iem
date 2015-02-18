@@ -4,22 +4,23 @@
 
 import sys
 import netCDF4
-import numpy
+import numpy as np
 import datetime
-import Ngl
 from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt
-import network
+from pyiem.network import Table as NetworkTable
 import psycopg2.extras
 import pytz
+from scipy.interpolate import NearestNDInterpolator
 
-nt = network.Table(('IA_ASOS','MO_ASOS','IL_ASOS', 'ND_ASOS',
-         'WI_ASOS','MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS', 'AWOS',
-         'IN_ASOS','KY_ASOS','OH_ASOS','MI_ASOS'))
+nt = NetworkTable(('IA_ASOS', 'MO_ASOS', 'IL_ASOS', 'ND_ASOS',
+                   'WI_ASOS', 'MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS',
+                   'AWOS', 'IN_ASOS', 'KY_ASOS', 'OH_ASOS', 'MI_ASOS'))
 
-ids = `nt.sts.keys()`
+ids = repr(nt.sts.keys())
 ids = "(%s)" % (ids[1:-1],)
+
 
 def grid_wind(rs):
     """
@@ -35,47 +36,54 @@ def grid_wind(rs):
         if row['sknt'] is None or row['drct'] is None:
             continue
         # mps
-        u,v = meteorology.uv( dt.speed(row['sknt'], 'KT'), 
-                              dt.direction(row['drct'], 'DEG') )
+        (u, v) = meteorology.uv(dt.speed(row['sknt'], 'KT'),
+                                dt.direction(row['drct'], 'DEG'))
         if v is not None:
-            lats.append(  nt.sts[row['station']]['lat'] )
-            lons.append(  nt.sts[row['station']]['lon'] )
-            vdata.append( v.value("MPS") )
-            udata.append( u.value("MPS") )
-            
+            lats.append(nt.sts[row['station']]['lat'])
+            lons.append(nt.sts[row['station']]['lon'])
+            vdata.append(v.value("MPS"))
+            udata.append(u.value("MPS"))
+
     if len(vdata) < 4:
-        print "No wind data at all for time: %s" % (ts,)   
+        print "No wind data at all"
         return None
-    
-    ugrid = Ngl.natgrid(lons, lats, udata, iemre.XAXIS, iemre.YAXIS)
-    vgrid = Ngl.natgrid(lons, lats, vdata, iemre.XAXIS, iemre.YAXIS)
+
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    nn = NearestNDInterpolator((lons, lats), np.array(udata))
+    ugrid = nn(xi, yi)
+    nn = NearestNDInterpolator((lons, lats), np.array(vdata))
+    vgrid = nn(xi, yi)
     if ugrid is not None:
-        ugt = ugrid.transpose()
-        vgt = vgrid.transpose()
+        ugt = ugrid
+        vgt = vgrid
         return ugt, vgt
     else:
         return None, None
+
 
 def grid_skyc(rs):
     lats = []
     lons = []
     vals = []
     for row in rs:
-        v =  max(row['max_skyc1'], row['max_skyc2'], row['max_skyc3'])
+        v = max(row['max_skyc1'], row['max_skyc2'], row['max_skyc3'])
         if v is not None:
-            lats.append(  nt.sts[row['station']]['lat'] )
-            lons.append(  nt.sts[row['station']]['lon'] )
-            vals.append( float(v) )
+            lats.append(nt.sts[row['station']]['lat'])
+            lons.append(nt.sts[row['station']]['lon'])
+            vals.append(float(v))
     if len(vals) < 4:
-        print "No SKYC data at all for time: %s" % (ts,)   
+        print "No SKYC data at all"
         return None
-    grid = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    nn = NearestNDInterpolator((lons, lats), np.array(vals))
+    grid = nn(xi, yi)
     if grid is not None:
-        gt = grid.transpose()
-        gt = numpy.where(gt > 0., gt, 0.0)
-        return numpy.where(gt > 100., 100., gt)
+        gt = grid
+        gt = np.where(gt > 0., gt, 0.0)
+        return np.where(gt > 100., 100., gt)
     else:
         return None
+
 
 def generic_gridder(rs, idx):
     """
@@ -86,16 +94,18 @@ def generic_gridder(rs, idx):
     vals = []
     for row in rs:
         if row[idx] is not None:
-            lats.append( nt.sts[row['station']]['lat'] )
-            lons.append( nt.sts[row['station']]['lon'] )
-            vals.append( row[idx]  )
+            lats.append(nt.sts[row['station']]['lat'])
+            lons.append(nt.sts[row['station']]['lon'])
+            vals.append(row[idx])
     if len(vals) < 4:
         print "Only %s observations found for %s, won't grid" % (len(vals),
-               idx)
+                                                                 idx)
         return None
-    grid = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    nn = NearestNDInterpolator((lons, lats), np.array(vals))
+    grid = nn(xi, yi)
     if grid is not None:
-        return grid.transpose()
+        return grid
     else:
         return None
 
@@ -107,9 +117,10 @@ def grid_hour(nc, ts):
     """
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
-    offset = iemre.hourly_offset( ts )
+    offset = iemre.hourly_offset(ts)
     utcnow = datetime.datetime.utcnow()
-    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC")) - datetime.timedelta(hours=36)
+    utcnow = (utcnow.replace(tzinfo=pytz.timezone("UTC"))
+              - datetime.timedelta(hours=36))
 
     # If we are near realtime, look in IEMAccess instead of ASOS database
     if utcnow < ts:
@@ -118,50 +129,48 @@ def grid_hour(nc, ts):
         table = "current_log"
         pcolumn = "(phour * 25.4)"
         sql = """SELECT t.id as station,
-         max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
-         max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
-         max(getskyc(skyc1)) as max_skyc1,
-         max(getskyc(skyc2)) as max_skyc2,
-         max(getskyc(skyc3)) as max_skyc3,
-         max(case when %s > 0 and %s < 1000 then %s else 0 end) as max_p01m,
-         max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
-         max(case when sknt >= 0 then sknt else 0 end) as sknt, 
-         max(case when sknt >= 0 then drct else 0 end) as drct from %s s, stations t
-         WHERE t.id in %s and t.iemid = s.iemid and 
-         valid >= '%s' and valid < '%s' GROUP by station""" % (
-         pcolumn, pcolumn, pcolumn, table, ids, 
-         ts0, ts1 )
+ max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
+ max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
+ max(getskyc(skyc1)) as max_skyc1,
+ max(getskyc(skyc2)) as max_skyc2,
+ max(getskyc(skyc3)) as max_skyc3,
+ max(case when %s > 0 and %s < 1000 then %s else 0 end) as max_p01m,
+ max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
+ max(case when sknt >= 0 then sknt else 0 end) as sknt,
+ max(case when sknt >= 0 then drct else 0 end) as drct from %s s, stations t
+ WHERE t.id in %s and t.iemid = s.iemid and
+ valid >= '%s' and valid < '%s' GROUP by station
+         """ % (pcolumn, pcolumn, pcolumn, table, ids, ts0, ts1)
     else:
         dbconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "t%s" % (ts.year,)
         pcolumn = "p01i"
         sql = """SELECT station,
-         max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
-         max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
-         max(getskyc(skyc1)) as max_skyc1,
-         max(getskyc(skyc2)) as max_skyc2,
-         max(getskyc(skyc3)) as max_skyc3,
-         max(case when %s > 0 and %s < 1000 then %s else 0 end) as max_p01m,
-         max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
-         max(case when sknt >= 0 then sknt else 0 end) as sknt, 
-         max(case when sknt >= 0 then drct else 0 end) as drct from %s  
-         WHERE station in %s and 
-         valid >= '%s' and valid < '%s' GROUP by station""" % (
-         pcolumn, pcolumn, pcolumn, table, ids, 
-         ts0, ts1 )
+ max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
+ max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
+ max(getskyc(skyc1)) as max_skyc1,
+ max(getskyc(skyc2)) as max_skyc2,
+ max(getskyc(skyc3)) as max_skyc3,
+ max(case when %s > 0 and %s < 1000 then %s else 0 end) as max_p01m,
+ max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
+ max(case when sknt >= 0 then sknt else 0 end) as sknt,
+ max(case when sknt >= 0 then drct else 0 end) as drct from %s
+ WHERE station in %s and
+ valid >= '%s' and valid < '%s' GROUP by station
+         """ % (pcolumn, pcolumn, pcolumn, table, ids, ts0, ts1)
 
-    pcursor.execute( sql )
-    
+    pcursor.execute(sql)
+
     if pcursor.rowcount > 4:
         rs = []
         for row in pcursor:
-            rs.append( row )
+            rs.append(row)
         ures, vres = grid_wind(rs)
         if ures is not None:
             nc.variables['uwnd'][offset] = ures
             nc.variables['vwnd'][offset] = vres
-            
+
         res = generic_gridder(rs, 'max_tmpf')
         if res is not None:
             nc.variables['tmpk'][offset] = dt.temperature(res, 'F').value('K')
@@ -170,21 +179,23 @@ def grid_hour(nc, ts):
         if res is not None:
             nc.variables['skyc'][offset] = res
     else:
-        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d %H:%M"), 
-            pcursor.rowcount)
+        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d %H:%M"),
+                                             pcursor.rowcount)
+
 
 def main():
     """Go Main"""
     if len(sys.argv) == 5:
-        ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
-                           int(sys.argv[3]), int(sys.argv[4]) )
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                               int(sys.argv[3]), int(sys.argv[4]))
     else:
         ts = datetime.datetime.utcnow()
-        ts = ts.replace(second=0,minute=0)
+        ts = ts.replace(second=0, minute=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'a')
-    grid_hour(nc , ts)
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),
+                         'a')
+    grid_hour(nc, ts)
 
     nc.close()
 

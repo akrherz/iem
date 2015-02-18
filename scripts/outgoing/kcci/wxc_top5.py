@@ -6,14 +6,14 @@ import subprocess
 import datetime
 import sys
 import tempfile
-import tracker
+import pyiem.tracker as tracker
 qc = tracker.loadqc()
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
-icursor.execute("""SELECT t.id as station from current c, stations t 
-  WHERE t.network = 'KCCI' and 
+icursor.execute("""SELECT t.id as station from current c, stations t
+  WHERE t.network = 'KCCI' and
   t.iemid = c.iemid and valid > 'TODAY' ORDER by pday DESC""")
 data = {}
 
@@ -27,14 +27,13 @@ for row in icursor:
     data['sid%s' % (i,)] = row[0]
     i += 1
 
-if i == 1 or not data.has_key('sid5'):
+if i == 1 or 'sid5' not in data:
     sys.exit()
 
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5rain.tpl','r').read() % data )
+os.write(fd, open('top5rain.tpl', 'r').read() % data)
 os.close(fd)
 
 subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5rain.scn' %s" % (path,),
                 shell=True)
 os.remove(path)
-

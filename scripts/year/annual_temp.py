@@ -2,8 +2,8 @@ import iemdb, mesonet
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-import network
-nt = network.Table("IACLIMATE")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
 
 ccursor.execute("""SELECT station, avg((high+low)/2.0) from alldata_ia
  WHERE year > 1950 GROUP by station""")

@@ -2,16 +2,16 @@ import os
 import subprocess
 import datetime
 import tempfile
-import tracker
+import pyiem.tracker as tracker
 qc = tracker.loadqc()
-import iemdb
-IEM = iemdb.connect("iem", bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database="iem", host='iemdb')
 icursor = IEM.cursor()
 now = datetime.datetime.now()
 
-icursor.execute("""SELECT s.id as station from summary_%s c, stations s WHERE 
-  s.network = 'KCCI' and s.iemid = c.iemid and 
-  day = 'TODAY'  ORDER by min_tmpf ASC""" % (now.year, ) )
+icursor.execute("""SELECT s.id as station from summary_%s c, stations s WHERE
+  s.network = 'KCCI' and s.iemid = c.iemid and
+  day = 'TODAY'  ORDER by min_tmpf ASC""" % (now.year, ))
 data = {}
 
 data['timestamp'] = now
@@ -23,9 +23,9 @@ for row in icursor:
         continue
     data['sid%s' % (i,)] = row[0]
     i += 1
-    
+
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5lows.tpl','r').read() % data )
+os.write(fd,  open('top5lows.tpl', 'r').read() % data)
 os.close(fd)
 
 subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5lows.scn' %s" % (path,),

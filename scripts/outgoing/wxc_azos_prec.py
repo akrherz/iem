@@ -11,8 +11,8 @@ IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor( cursor_factory=psycopg2.extras.DictCursor )
 COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor( cursor_factory=psycopg2.extras.DictCursor )
-import network
-nt = network.Table(("IA_ASOS", "AWOS"))
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable(("IA_ASOS", "AWOS"))
 
 
 def compute_climate(sts, ets):

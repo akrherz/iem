@@ -1,10 +1,10 @@
 """
  Complain about things, this is what I do best
 """
-import network
-nt = network.Table("KCCI")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("KCCI")
 import psycopg2
-portfolio = psycopg2.connect('dbname=portfolio host=iemdb user=nobody')
+portfolio = psycopg2.connect('dbname=portfolio host=iemdb')
 pcursor = portfolio.cursor()
 
 
