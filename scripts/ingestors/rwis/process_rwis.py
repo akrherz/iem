@@ -7,6 +7,7 @@ import sys
 import numpy as np
 import smtplib
 import psycopg2
+import time
 import urllib2
 import subprocess
 from email.mime.text import MIMEText
@@ -284,14 +285,36 @@ def update_iemaccess(obs):
     IEM.commit()
 
 
+def get_file(uri):
+    """Utility to make an honest attempt at getting a file
+
+    Args:
+      uri (str): The URI to fetch
+
+    Returns:
+      data fetched from remote site
+    """
+    data = ""
+    attempts = 3
+    while (data is None or data == "") and attempts > 0:
+        try:
+            data = urllib2.urlopen(uri).read()
+        except:
+            time.sleep(4)
+        attempts -= 1
+    return data
+
+
 def fetch_files():
     """Download the files we need"""
     props = util.get_properties()
     # get atmosfn
     atmosfn = "%s/rwis.txt" % (INCOMING, )
-    data = urllib2.urlopen(("ftp://rwis:%s@165.206.203.34/ExpApAirData.txt"
-                            "") % (props['rwis_ftp_password'],),
-                           timeout=30).read()
+    data = get_file(("ftp://rwis:%s@165.206.203.34/ExpApAirData.txt"
+                    "") % (props['rwis_ftp_password'],))
+    if data is None or data == "":
+        print('RWIS Download of ExpApAirData.txt failed, aborting')
+        sys.exit()
     fp = open(atmosfn, 'w')
     fp.write(data)
     fp.close()
@@ -302,14 +325,16 @@ def fetch_files():
 
     # get sfcfn
     sfcfn = "%s/rwis_sf.txt" % (INCOMING, )
-    data = urllib2.urlopen(("ftp://rwis:%s@165.206.203.34/ExpSfData.txt"
-                            "") % (props['rwis_ftp_password'],),
-                           timeout=30).read()
+    data = get_file(("ftp://rwis:%s@165.206.203.34/ExpSfData.txt"
+                     "") % (props['rwis_ftp_password'],))
+    if data is None or data == "":
+        print('RWIS Download of ExpSfData.txt failed, aborting')
+        sys.exit()
     fp = open(sfcfn, 'w')
     fp.write(data)
     fp.close()
     # Insert into LDM
-    pqstr = "plot ac %s rwis.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
+    pqstr = "plot ac %s rwis_sf.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
     subprocess.call(("/home/ldm/bin/pqinsert -i -p '%s' %s "
                      "") % (pqstr, sfcfn), shell=True)
 
