@@ -32,7 +32,8 @@ def do(netname, pname):
     NT = NetworkTable(None)
     obs = {}
     for row in mcursor:
-        NT.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2])
+        NT.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2],
+                              tzname='America/Chicago')
         fn = "%s/%s.jpg" % (mydir, row[0])
         if not os.path.isfile(fn):
             print 'Missing webcam file: %s' % (fn,)
@@ -41,7 +42,6 @@ def do(netname, pname):
         valid = (datetime.datetime(1970, 1, 1) +
                  datetime.timedelta(seconds=ticks))
         valid = valid.replace(tzinfo=pytz.timezone("UTC"))
-        print valid
         obs[row[0]] = dict(valid=valid)
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), maxoffline=10)
