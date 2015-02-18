@@ -19,11 +19,12 @@ def run():
     # Look for polygons into the future as well as we now have Flood products
     # with a start time in the future
     cursor.execute("""
-        SELECT ST_asGeoJson(geom) as geojson,
+        SELECT ST_asGeoJson(geom) as geojson, product_id,
         issue at time zone 'UTC' as utc_issue,
         expire at time zone 'UTC' as utc_expire
         from text_products WHERE issue < now() and expire > now()
-        and not ST_IsEmpty(geom) and geom is not null
+        and not ST_IsEmpty(geom) and geom is not null and
+        substr(product_id,26, 3) = 'SPS'
     """)
 
     res = {'type': 'FeatureCollection',
@@ -32,12 +33,14 @@ def run():
            'features': [],
            'generation_time': utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
            'count': cursor.rowcount}
-    for i, row in enumerate(cursor):
+    for row in cursor:
         sts = row['utc_issue'].strftime("%Y-%m-%dT%H:%M:%SZ")
         ets = row['utc_expire'].strftime("%Y-%m-%dT%H:%M:%SZ")
+        href = "/api/nwstext/%s.txt" % (row['product_id'], )
         res['features'].append(dict(type="Feature",
-                                    id=i,
+                                    id=row['product_id'],
                                     properties=dict(
+                                        href=href,
                                         issue=sts,
                                         expire=ets),
                                     geometry=json.loads(row['geojson'])
