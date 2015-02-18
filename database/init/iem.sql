@@ -331,6 +331,7 @@ CREATE TABLE current (
     presentwx varchar(24)
 );
 CREATE UNIQUE index current_iemid_idx on current(iemid);
+GRANT SELECT on current to apache,nobody;
 
 CREATE TABLE current_log (
     iemid int REFERENCES stations(iemid),
@@ -391,7 +392,8 @@ CREATE TABLE current_log (
     max_tmpf_6hr real,
     min_tmpf_6hr real,
     max_tmpf_24hr real,
-    min_tmpf_24hr real
+    min_tmpf_24hr real,
+    presentwx varchar(24)
 );
 
 CREATE OR REPLACE FUNCTION current_update_log() RETURNS trigger
@@ -436,6 +438,7 @@ CREATE TABLE summary (
     et_inch real,
     srad_mj real
 );
+GRANT SELECT on summary to nobody,apache;
 
 ---
 --- Hourly precip
