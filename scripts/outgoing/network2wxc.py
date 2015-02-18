@@ -6,8 +6,9 @@ import datetime
 import pytz
 import os
 import sys
-import mesonet
 import subprocess
+from pyiem.datatypes import temperature, speed
+import pyiem.meteorology as meteorology
 import shutil
 
 network = sys.argv[1]
@@ -71,7 +72,7 @@ def s(val):
             return 'M'
     except:
         pass
-    return "%5.1f" % (mesonet.k2f(val),)
+    return "%5.1f" % (temperature(val, 'K').value('F'),)
 
 def s2(val):
     try:
@@ -86,17 +87,18 @@ for sid in indices:
     name = nc.variables["stationName"][idx].tostring().replace('\x00','')
     latitude = nc.variables['latitude'][idx]
     longitude = nc.variables['longitude'][idx]
-    tmpf = s( nc.variables['temperature'][idx] )
-    dwpf = s( nc.variables['dewpoint'][idx] )
+    tmpf = s(nc.variables['temperature'][idx])
+    dwpf = s(nc.variables['dewpoint'][idx])
     qcd = nc.variables['temperatureQCD'][idx][0]
     if qcd < -10 or qcd > 10:
         tmpf = "M"
         dwpf = "M"
     heat = "M"
     if tmpf != "M" and dwpf != "M":
-        relh = mesonet.relh(mesonet.k2f(nc.variables['temperature'][idx]), 
-                            mesonet.k2f(nc.variables['dewpoint'][idx]))
-        heat = "%5.1f" % (mesonet.heatidx(mesonet.k2f(nc.variables['temperature'][idx]), relh),)
+        t = temperature(nc.variables['temperature'][idx], 'K')
+        d = temperature(nc.variables['dewpoint'][idx], 'K')
+        relh = meteorology.relh(t, d).value("%")
+        heat = "%5.1f" % (meteorology.heatindex(t, d).value("F"),)
     drct = s2( nc.variables['windDir'][idx])
     smps = s2( nc.variables['windSpeed'][idx])
     sped = "M"
@@ -105,8 +107,9 @@ for sid in indices:
         
     wcht = "M"
     if tmpf != "M" and sped != "M":
-        wcht = "%5.1f" % (mesonet.wchtidx(mesonet.k2f(nc.variables['temperature'][idx]), 
-                               nc.variables['windSpeed'][idx] * 2.23694),)
+        t = temperature(nc.variables['temperature'][idx], 'K')
+        sped = speed( nc.variables['windSpeed'][idx], 'MPS')
+        wcht = "%5.1f" % (meteorology.windchill(t, sped).value("F"),) 
         
     ts = indices[sid]['ts']
     

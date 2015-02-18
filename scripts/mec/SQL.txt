@@ -30,3 +30,15 @@ CREATE TABLE farm_data(
   online_cnt smallint,
   power real
 );
+
+CREATE TABLE met_tower_data(
+  valid timestamptz,
+  wmps_80 real,
+  drct_80 real,
+  tmpc_80 real,
+  pres_80 real,
+  wmps_40 real,
+  drct_40 real,
+  tmpc_40 real,
+  pres_40 real
+);

@@ -6,7 +6,32 @@
 import traceback
 import mx.DateTime
 import psycopg2.extras
-import mesonet
+
+
+def f2c(thisf):
+    return 5.00/9.00 * (thisf - 32.00)
+
+def metar_tmpf_tgroup(tmpf):
+    """
+    Convert a temperature in F to something metar wants
+    """
+    if tmpf is None:
+        return '////'
+    tmpc = f2c( tmpf )
+    if tmpc < 0:
+        return '1%03.0f' % (0 - (tmpc*10.0),)
+    return '0%03.0f' % ((tmpc*10.0),)
+
+def metar_tmpf(tmpf):
+    """
+    Convert a temperature in F to something metar wants
+    """
+    if tmpf is None:
+        return 'MM'
+    tmpc = f2c( tmpf )
+    if tmpc < 0:
+        return 'M%02.0f' % (0 - tmpc,)
+    return '%02.0f' % (tmpc,)
 
 class mydata(dict):
     
@@ -312,13 +337,13 @@ class Ob(object):
             mdir = 0
         mwind = "%03i%02iKT" % (mdir, self.data.get('sknt', 0) )
         # Temperature
-        mtmp = "%s/%s" % (mesonet.metar_tmpf(self.data.get('tmpf')), 
-                          mesonet.metar_tmpf(self.data.get('dwpf')))
+        mtmp = "%s/%s" % (metar_tmpf(self.data.get('tmpf')), 
+                          metar_tmpf(self.data.get('dwpf')))
         # Altimeter
         malti = "A%04i" % (self.data.get('pres',0) * 100.0,)
         # Remarks
-        tgroup = "T%s%s" % (mesonet.metar_tmpf_tgroup(self.data.get('tmpf')), 
-                            mesonet.metar_tmpf_tgroup(self.data.get('dwpf')))
+        tgroup = "T%s%s" % (metar_tmpf_tgroup(self.data.get('tmpf')), 
+                            metar_tmpf_tgroup(self.data.get('dwpf')))
         # Phour
         phour = "P%04i" % (self.data.get('phour',0),)
         # Pday
