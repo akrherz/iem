@@ -8,6 +8,7 @@ $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,7): "IA_R
 
 define("IEM_APPID", 63);
 $t = new MyView();
+$t->iemss = True;
 $t->title = "RWIS Data Download";
 $t->thispage = "networks-rwis";
 
@@ -17,11 +18,22 @@ $startyr = ($network == 'IA_RWIS') ? 1995: 2009;
 $ys1 = yearSelect2($startyr, date("Y"), "year1");
 $ms1 = monthSelect("", "month1");
 $ds1 = daySelect2("", "day1");
-$hs1 = gmtHourSelect("", "hour1");
+$hs1 = hourSelect("", "hour1");
 $ys2 = yearSelect2($startyr, date("Y"), "year2");
 $ms2 = monthSelect("", "month2");
 $ds2 = daySelect2("", "day2");
-$hs2 = gmtHourSelect("", "hour2");
+$hs2 = hourSelect("", "hour2");
+
+$ar = Array(
+		"Etc/UTC" => "Coordinated Universal Time (UTC)",
+		"America/New_York" => "America/New_York (EST/EDT)",
+		"America/Chicago" => "America/Chicago (CST/CDT)",
+		"America/Denver" => "America/Denver (MST/MDT)",
+		"America/Los_Angeles" => "America/Los_Angeles (WST/WDT)",
+		"America/Anchorage" => "America/Anchorage (AKST/AKDT)",
+);
+$tzselect = make_select("tz", "Etc/UTC", $ar);
+
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -56,21 +68,21 @@ but it mostly in tack outside of those dates.</p>
  and <a href="fe.phtml?network=WY_RWIS">Wyoming</a>.
  
 
-<form method="GET" action="dl.php" name='dl'>
+<form method="GET" action="/cgi-bin/request/rwis.py" name='dl'>
 <input type="hidden" name="minute1" value="0">
 <input type="hidden" name="minute2" value="0">
 <input type="hidden" name="network" value="{$network}">
 
 <div class="row">
-<div class="col-md-6">
+<div class="col-sm-7">
 
-<p><h3>1. Select Station:</h3><br>
-<i>Select One or More or All stations in the network.</i><br />
-{$rselect}
+<div id="iemss" data-network="{$network}"></div>
 
+</div>
+<div class="col-sm-5">
 
-<p><h3>2. Select Start/End Time:</h3><br>
-<i>Times are in UTC. Archive starts in 1995.</i>
+<p><h4>2. Select Start/End Time:</h4>
+<i>Times are in timezone you select in step 5 below.</i>
 <table>
   <tr>
     <td></td>
@@ -95,8 +107,8 @@ but it mostly in tack outside of those dates.</p>
   </tr>
 </table>
 
-<p><h3>3. Select Variables:</h3><br>
-<select size=5 name="vars[]" MULTIPLE>
+<p><h4>3. Select Variables:</h4>
+<select size="5" name="vars" MULTIPLE>
   <option value="tmpf">Air Temperature [F]
   <option value="dwpf">Dew Point Temperature [F]
   <option value="sknt">Wind Speed [knots]
@@ -113,16 +125,20 @@ but it mostly in tack outside of those dates.</p>
   <option value="subf">Subsurface Temperature [F]
 </select>
 
-</div>
-<div class="col-md-6">
 
-<p><h3>4. How to view?</h3><br>
+<p><h4>4. How to view?</h4>
 <select name="what">
-  <option value="download">Download to Disk
-  <option value="view">View on-line
+  <option value="txt">Download as Delimited Text File</option>
+  <option value="excel">Download as Excel</option>
+  <option value="html">View as HTML webpage</option>
 </select>
 
-<p><h3>5. Data Delimitation:</h3><br>
+<p><h4>5. Timezone of Timestamps</h4>
+   <i>This controls the timezone used for presenting the timestamps in the
+    downloaded file.</i>
+   <br />{$tzselect}</p>
+    		
+<p><h4>6. Data Delimitation:</h4>
 How shall the output values be seperated?
 <br><select name="delim">
     <option value="comma">Comma
@@ -131,17 +147,19 @@ How shall the output values be seperated?
    </select>
 
 <p>
-<h3>6. Include Lat / Lons?</h3><img src="/images/gisready.png"><br>
+<h4>7. Include Lat / Lons?</h4><img src="/images/gisready.png">
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
  </select>
+   		
+<p><h4>8. Submit Form:</h4>
+<input type="submit" value="Process Data Request">
+<input type="reset">
 
 </div></div>
 
-<p><h3>Submit Form:</h3><br>
-<input type="submit" value="Process Data Request">
-<input type="reset">
+
 </form>
 EOF;
 $t->render('single.phtml');
