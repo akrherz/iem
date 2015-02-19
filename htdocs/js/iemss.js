@@ -91,7 +91,14 @@ function sortListing(option){
 
 $().ready(function() {  
 	
+	// Make sure clicking the submit button selects all of the selected 
+	// stations, this avoids user confusion
+	$(":submit").click(function (){
+		$('#stations_out option').prop('selected', true);
+	});
+	
 	$("#iemss").append(htmlInterface.join(''));
+
 	network = $("#iemss").attr("data-network");
 	$("#iemss-network").html(network);
 	
@@ -118,6 +125,7 @@ $().ready(function() {
 	$('#iemss-sortbyname').click(function(){
 		sortListing("name");
 	});
+	
 	
 	geojsonSource = new ol.source.GeoJSON({
 		projection : ol.proj.get('EPSG:3857'),

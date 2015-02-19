@@ -5,8 +5,6 @@ $headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
 if (array_key_exists('iemss', $this->vars)){
   $headextra .= <<<EOF
 <link rel="stylesheet" href="/assets/openlayers/3.0.0/css/ol.css" type="text/css">
-<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src='/assets/openlayers/3.0.0/build/ol.js'></script>
 EOF;
 }
 $bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
