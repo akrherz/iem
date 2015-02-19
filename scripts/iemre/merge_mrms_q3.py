@@ -4,8 +4,7 @@ Merge the 1km Q3 24 hour precip data estimates
 import datetime
 import pytz
 import sys
-sys.path.insert(0, '../mrms')
-import util
+import pyiem.mrms as mrms
 import os
 import netCDF4
 import numpy as np
@@ -48,10 +47,10 @@ def run(ts):
     mrms = np.where(mrms < 0, 0, mrms)
 
     # Figure out what we wish to subsample
-    y0 = int((iemre.SOUTH - util.SOUTH) * 100.0)
-    y1 = int((iemre.NORTH - util.SOUTH) * 100.0)
-    x0 = int((iemre.WEST - util.WEST) * 100.0)
-    x1 = int((iemre.EAST - util.WEST) * 100.0)
+    y0 = int((iemre.SOUTH - mrms.SOUTH) * 100.0)
+    y1 = int((iemre.NORTH - mrms.SOUTH) * 100.0)
+    x0 = int((iemre.WEST - mrms.WEST) * 100.0)
+    x1 = int((iemre.EAST - mrms.WEST) * 100.0)
     #print 'y0:%s y1:%s x0:%s x1:%s' % (y0, y1, x0, x1)
     ncprecip[offset, :, :] = mrms[y0:y1, x0:x1]
     #m = MapPlot(sector='midwest')

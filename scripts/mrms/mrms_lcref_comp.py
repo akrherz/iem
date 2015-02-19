@@ -11,8 +11,8 @@ import subprocess
 import json
 import sys
 import pygrib
-import util
 import gzip
+import pyiem.mrms as mrms
 
 def make_colorramp():
     """
@@ -76,7 +76,7 @@ def do( now , realtime=False):
     png.putpalette( make_colorramp() )
     png.save('%s.png' % (tmpfn,))
 
-    util.write_worldfile('%s.wld' % (tmpfn,))
+    mrms.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     prefix = 'lcref'
     pqstr = "/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (

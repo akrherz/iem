@@ -11,7 +11,7 @@ from PIL import Image
 import subprocess
 import json
 import sys
-import util
+import pyiem.mrms as mrms
 import gzip
 import pygrib
 
@@ -63,10 +63,10 @@ def do(now, hr ):
     (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
     png = Image.fromarray( imgdata.astype('u1') )
-    png.putpalette( util.make_colorramp() )
+    png.putpalette(mrms.make_colorramp())
     png.save('%s.png' % (tmpfn,))
-    #os.system('xv %s.png' % (tmpfn,))
-    util.write_worldfile('%s.wld' % (tmpfn,))
+    # os.system('xv %s.png' % (tmpfn,))
+    mrms.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     prefix = 'p%sh' % (hr,)
     pqstr = "/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (
