@@ -275,7 +275,15 @@ def update_iemaccess(obs):
         for varname in ['tmpf', 'dwpf', 'drct', 'sknt', 'gust', 'vsby',
                         'pday', 'tsf0', 'tsf1', 'tsf2', 'tsf3', 'scond0',
                         'scond1', 'scond2', 'scond3']:
-            iemob.data[varname] = ob.get(varname)
+            # Don't insert NaN values into iemaccess
+            thisval = ob.get(varname)
+            if thisval is None:
+                continue
+            # strings fail the isnan check
+            if isinstance(thisval, str):
+                iemob.data[varname] = ob.get(varname)
+            elif not np.isnan(thisval):
+                iemob.data[varname] = ob.get(varname)
         for varname in ['tsub0', 'tsub1', 'tsub2', 'tsub3']:
             if ob.get(varname) is not None:
                 iemob.data['rwis_subf'] = ob.get(varname)
