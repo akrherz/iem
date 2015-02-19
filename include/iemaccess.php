@@ -72,6 +72,7 @@ class IEMAccess {
     ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone '%s' as lvalid,
     max_gust_ts at time zone '%s' as lmax_gust_ts,
     max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    		valid at time zone 'UTC' as utc_valid,
     s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
     s.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') 
@@ -89,6 +90,7 @@ class IEMAccess {
     ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone '%s' as lvalid,
     max_gust_ts at time zone '%s' as lmax_gust_ts,
     max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+  			valid at time zone 'UTC' as utc_valid,
     s.name as sname from
     current c2, summary_%s c, stations s WHERE
     s.state = $1 and (s.network ~* 'RWIS' or s.network ~* 'ASOS' or
@@ -108,6 +110,7 @@ class IEMAccess {
     ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
+    		valid at time zone 'UTC' as utc_valid,
     s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
     s.wfo = '%s' 
@@ -126,6 +129,7 @@ class IEMAccess {
     ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
+    		valid at time zone 'UTC' as utc_valid,
     s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
     s.wfo = '%s' 
@@ -141,7 +145,8 @@ class IEMAccess {
   
   function ge_max_tmpf($size) {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select * from current WHERE
+    $rs = pg_exec($this->dbconn, "select *,
+    		valid at time zone 'UTC' as utc_valid from current WHERE
       valid > (CURRENT_TIMESTAMP - '70 minutes'::interval) and tmpf < 140
       ORDER by tmpf DESC LIMIT $size");
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
@@ -152,7 +157,8 @@ class IEMAccess {
 
   function ge_min_tmpf($size) {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select * from current WHERE
+    $rs = pg_exec($this->dbconn, "select *,
+    		valid at time zone 'UTC' as utc_valid from current WHERE
       valid > (CURRENT_TIMESTAMP - '70 minutes'::interval) and tmpf > -50
       ORDER by tmpf ASC LIMIT $size");
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
