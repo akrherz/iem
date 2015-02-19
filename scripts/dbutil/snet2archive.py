@@ -45,41 +45,44 @@ icursor.execute(sql, args)
  gust    | smallint                 |
 """
 
+
 def formatter(val, precision):
-    if val is None or type(val) == type('s'):
+    if val is None or isinstance(val, str):
         return 'None'
     fmt = '%%.%sf' % (precision,)
     return fmt % val
 
 out = open('/tmp/snet_dbinsert.sql', 'w')
 out.write("DELETE from t%s WHERE valid >= '%s' and valid < '%s';\n" % (
-    sts.strftime("%Y_%m"), sts, ets ))
-out.write("COPY t%s FROM stdin WITH NULL 'None';\n" % (sts.strftime("%Y_%m"),) )
+    sts.strftime("%Y_%m"), sts, ets))
+out.write("COPY t%s FROM stdin WITH NULL 'None';\n" % (sts.strftime("%Y_%m"),))
 i = 0
 for row in icursor:
     if (row['pmonth'] is None):
         row['pmonth'] = 0
     try:
-        s = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (
-                row.get('id'), row.get('valid'), 
-                formatter(row.get('tmpf'), 0), formatter(row.get('dwpf'), 0),
-                formatter(row.get('drct'), 0), row.get('sknt'), row.get('pday'),
-                row.get('pmonth'), row.get('srad'), row.get('relh'),
-                row.get('pres'), formatter(row.get('gust'),0) )
+        s = ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n"
+             "") % (row.get('id'), row.get('valid'),
+                    formatter(row.get('tmpf'), 0),
+                    formatter(row.get('dwpf'), 0),
+                    formatter(row.get('drct'), 0), row.get('sknt'),
+                    row.get('pday'),
+                    row.get('pmonth'), row.get('srad'), row.get('relh'),
+                    row.get('pres'), formatter(row.get('gust'), 0))
     except:
         print 'Fail', row
     out.write(s)
     if i > 0 and i % 1000 == 0:
-        out.write("\.\nCOPY t%s FROM stdin WITH NULL 'None';\n" % (
-                                                    sts.strftime("%Y_%m"),) )
+        out.write(("\.\nCOPY t%s FROM stdin WITH NULL 'None';\n"
+                   "") % (sts.strftime("%Y_%m"), ))
     i += 1
 out.write("\.\n")
 out.close()
 
 proc = subprocess.Popen("psql -h iemdb -f /tmp/snet_dbinsert.sql snet",
-                        shell=True, stdout=subprocess.PIPE, 
+                        shell=True, stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-output = proc.stderr.read().replace("DELETE 0\n","")
+output = proc.stderr.read().replace("DELETE 0\n", "")
 if len(output) > 0:
     print 'Error encountered with dbinsert...'
     print output

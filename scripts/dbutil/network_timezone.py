@@ -14,16 +14,16 @@ for row in mcursor:
     netid = row[0]
     name = row[1]
 
-    mcursor2.execute("""SELECT tzname, count(*) from stations 
-    where network = '%s' and tzname is not null 
+    mcursor2.execute("""SELECT tzname, count(*) from stations
+    where network = '%s' and tzname is not null
     GROUP by tzname ORDER by count DESC""" % (netid,))
     row2 = mcursor2.fetchone()
-    if row2 == None or row2[0] == 'uninhabited':
+    if row2 is None or row2[0] == 'uninhabited':
         print '--> MISSING ID: %s' % (netid, )
     else:
         print 'ID: %s TIMEZONE: %s' % (netid, row2[0])
-        mcursor2.execute("""UPDATE networks SET tzname = '%s' 
-        WHERE id = '%s' """ % (row2[0], netid ))
+        mcursor2.execute("""UPDATE networks SET tzname = '%s'
+        WHERE id = '%s' """ % (row2[0], netid))
 
 mcursor2.close()
 MESOSITE.commit()
