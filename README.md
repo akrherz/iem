@@ -10,6 +10,16 @@ Some IEM cluster details (so I can keep it straight!)
 session.save_handler = memcache
 session.save_path = "tcp://192.168.1.190:11211"
 
+# Considerations prior to rebooting a machine
+
+* make sure LDM cleanly stops
+* check nagios after reboot :)
+
+Machine | Needs
+--------+-------
+iem21   | webcam lapses
+iem30   | None
+iem50   | migrate 202 VIP over to iem30 
 
 #Shared Filesystems
 
