@@ -12,9 +12,9 @@ mcursor2 = MESOSITE.cursor()
 
 # Look for over-reporting COOPs
 icursor.execute("""
- select id, network, count(*), max(raw) from current_log c JOIN stations s 
+ select id, network, count(*), max(raw) from current_log c JOIN stations s
  ON (s.iemid = c.iemid)
- where network ~* 'COOP' and valid > 'TODAY'::date 
+ where network ~* 'COOP' and valid > 'TODAY'::date
  GROUP by id, network ORDER by count DESC
 """)
 for row in icursor:
@@ -26,10 +26,10 @@ for row in icursor:
     mcursor.execute("""SELECT count(*) from stations where id = %s
       """, (sid,))
     row = mcursor.fetchone()
-    if row[0] == 1: # Switch candidate!
+    if row[0] == 1:
         newnetwork = network.replace("_COOP", "_DCP")
         print 'We shall switch %s from %s to %s' % (sid, network, newnetwork)
-        mcursor2.execute("""UPDATE stations SET network = '%s' WHERE id = '%s' 
+        mcursor2.execute("""UPDATE stations SET network = '%s' WHERE id = '%s'
            """ % (newnetwork, sid))
 
 IEM.commit()

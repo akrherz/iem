@@ -9,7 +9,7 @@ mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 
 mcursor.execute("""
- SELECT id, network, ST_x(geom) as lon, ST_y(geom) as lat from stations 
+ SELECT id, network, ST_x(geom) as lon, ST_y(geom) as lat from stations
  WHERE tzname is null""")
 
 for row in mcursor:
@@ -19,7 +19,7 @@ for row in mcursor:
     network = row[1]
 
     mcursor2.execute("""
-    select tzid from tz_world where ST_Intersects(geom, 
+    select tzid from tz_world where ST_Intersects(geom,
     ST_GeomFromText('SRID=4326;POINT(%s %s)'));
       """ % (lon, lat))
     row2 = mcursor2.fetchone()
@@ -28,8 +28,8 @@ for row in mcursor:
                                                                      network,
                                                                      lat, lon))
         mcursor2.execute("""
-        SELECT ST_Distance(geom, 'SRID=4326;POINT(%s %s)') as d, 
-        id, tzname from stations WHERE network = '%s' 
+        SELECT ST_Distance(geom, 'SRID=4326;POINT(%s %s)') as d,
+        id, tzname from stations WHERE network = '%s'
         and tzname is not null ORDER by d ASC LIMIT 1""" % (lon, lat, network))
         row3 = mcursor2.fetchone()
         if row3 is not None:

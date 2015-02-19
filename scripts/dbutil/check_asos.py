@@ -13,7 +13,7 @@ icursor = IEM.cursor()
 
 # Find blank start stations!
 mcursor.execute("""
-    select id, network from stations where archive_begin is null 
+    select id, network from stations where archive_begin is null
     and network ~* 'ASOS' and online ORDER by network
 """)
 for row in mcursor:
@@ -23,7 +23,7 @@ for row in mcursor:
     icursor.execute("""
       SELECT valid from current c JOIN stations t on (t.iemid = c.iemid)
       where t.id = %s and t.network = %s
-      """, (sid, network) )
+      """, (sid, network))
     row = icursor.fetchone()
     if row:
         valid = row[0]
@@ -31,8 +31,8 @@ for row in mcursor:
             print 'No current data for %s %s' % (sid, network)
     else:
         mcursor2.execute(""" UPDATE stations SET online = 'f' where
-            id = %s and network = %s """, (sid, network) )
-        print 'Setting %s %s to offline'  % (sid, network)
+            id = %s and network = %s """, (sid, network))
+        print 'Setting %s %s to offline' % (sid, network)
         continue
     acursor.execute("""
        SELECT min(valid) from alldata where station = %s
