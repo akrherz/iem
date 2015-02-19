@@ -1,7 +1,7 @@
 # Generate a color ramp image, please
 from PIL import Image, ImageDraw, ImageFont
 import numpy
-import util
+import pyiem.mrms as mrms
 
 font = ImageFont.truetype("/home/akrherz/projects/pyVBCam/lib/veramono.ttf", 10)
 
@@ -29,7 +29,7 @@ for i in range(255):
 
 png = Image.fromarray( data )
 #png.putpalette( make_gr_colorramp() )
-ramp = list(util.make_colorramp())
+ramp = list(mrms.make_colorramp())
 ramp[-3:] = [255,255,255]
 png.putpalette(ramp)
 draw = ImageDraw.Draw(png)

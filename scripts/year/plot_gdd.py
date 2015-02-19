@@ -1,12 +1,9 @@
 # Generate a plot of GDD for the ASOS/AWOS network
-
-import sys, os
-sys.path.append("../lib/")
-import iemplot
-
-import mx.DateTime
-now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
-
+from pyiem.plot import MapPlot
+import sys
+import datetime
+now = datetime.datetime.now() - datetime.timedelta(days=1)
+import numpy as np
 from pyiem.network import Table as NetworkTable
 st = NetworkTable('IACLIMATE')
 import psycopg2
@@ -36,32 +33,22 @@ valmask = []
 
 for row in ccursor:
     station = row[0]
-    if not st.sts.has_key(station):
+    if station not in st.sts:
         continue
-    lats.append( st.sts[station]['lat'] )
-    lons.append( st.sts[station]['lon'] )
-    gdd50.append( row[1] )
-    valmask.append( True )
+    lats.append(st.sts[station]['lat'])
+    lons.append(st.sts[station]['lon'])
+    gdd50.append(row[1])
+    valmask.append(True)
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_showvalues'        : True,
- '_valueMask'         : valmask,
- '_format'            : '%.0f',
- '_title'             : "Iowa %s GDD (base=%s) Accumulation" % (
-                        now.strftime("%Y"), gbase),
- '_valid'          : "1 Jan - %s" % (
-                        now.strftime("%d %b %Y"), ),
- 'lbTitleString'      : "[base %s] " % (gbase,),
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
-
+m = MapPlot(axisbg='white',
+            title="Iowa %s GDD (base=%s) Accumulation" % (now.strftime("%Y"),
+                                                          gbase),
+            subtitle="1 Jan - %s" % (now.strftime("%d %b %Y"), ))
+m.contourf(lons, lats, gdd50, np.linspace(min(gdd50), max(gdd50), 10))
 pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
 if gbase == 52:
-  pqstr = "plot c 000000000000 summary/gdd52_jan1.png bogus png"
+    pqstr = "plot c 000000000000 summary/gdd52_jan1.png bogus png"
 elif gbase == 48:
-  pqstr = "plot c 000000000000 summary/gdd48_jan1.png bogus png"
-iemplot.postprocess(tmpfp, pqstr)
+    pqstr = "plot c 000000000000 summary/gdd48_jan1.png bogus png"
+m.postprocess(pqstr=pqstr)
+m.close()

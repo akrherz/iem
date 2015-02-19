@@ -6,8 +6,7 @@ import datetime
 import numpy as np
 import os
 import sys
-sys.path.insert(0, '../mrms')
-import util
+import pyiem.mrms as mrms
 import pytz
 import pygrib
 import gzip
@@ -34,8 +33,9 @@ def doday(ts, realtime):
         if gmt > currenttime:
             break
         gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
-                +"RadarOnly_QPE_01H/"
-                +"RadarOnly_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"))
+                               "RadarOnly_QPE_01H/"
+                               "RadarOnly_QPE_01H_00.00_%Y%m%d-%H%M00"
+                               ".grib2.gz"))
         if not os.path.isfile(gribfn):
             print("q3_today_total.py MISSING %s" % (gribfn,))
             now += interval
@@ -82,7 +82,7 @@ def doday(ts, realtime):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    x,y = np.meshgrid(util.XAXIS, util.YAXIS)
+    (x, y) = np.meshgrid(mrms.XAXIS, mrms.YAXIS)
     m.pcolormesh(x, y, np.flipud(total) / 24.5, clevs, units='inch')
 
     #map.drawstates(zorder=2)

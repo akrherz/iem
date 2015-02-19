@@ -8,7 +8,7 @@ from PIL import Image
 import subprocess
 import json
 import sys
-import util
+import pyiem.mrms as mrms
 import pygrib
 import gzip
 
@@ -52,10 +52,10 @@ def do(now, realtime, delta):
 
     # Create Image
     png = Image.fromarray(np.flipud(imgdata))
-    png.putpalette(util.make_colorramp())
+    png.putpalette(mrms.make_colorramp())
     png.save('%s.png' % (tmpfn,))
 
-    util.write_worldfile('%s.wld' % (tmpfn,))
+    mrms.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     routes = "c" if realtime else ""
     prefix = 'a2m'
@@ -77,7 +77,7 @@ def do(now, realtime, delta):
                "-tr 1000.0 1000.0 %s.png %s.tif") % (tmpfn, tmpfn)
         subprocess.call(cmd, shell=True)
         # Insert into LDM
-        pqstr = ("/home/ldm/bin/pqinsert -p 'plot c %s "
+        pqstr = ("/home/ldm/bin/pqinsert -i -p 'plot c %s "
                  "gis/images/900913/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
                  "") % (now.strftime("%Y%m%d%H%M"), prefix, prefix,
                         now.strftime("%Y%m%d%H%M"), tmpfn)

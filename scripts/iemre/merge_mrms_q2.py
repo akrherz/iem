@@ -5,8 +5,7 @@ import gzip
 import datetime
 import pytz
 import sys
-sys.path.insert(0, '../mrms')
-import util
+import pyiem.mrms as mrms
 import os
 import netCDF4
 import numpy as np
@@ -35,10 +34,10 @@ def run( ts ):
     res = np.where(np.logical_and(data >= 180, data < 255), 
                    125. + ((data - 180) * 5.), res )
 
-    y1 = (iemre.NORTH - util.SOUTH) * 100.0
-    y0 = (iemre.SOUTH - util.SOUTH) * 100.0
-    x0 = (iemre.WEST - util.WEST) * 100.0
-    x1 = (iemre.EAST - util.WEST) * 100.0
+    y1 = (iemre.NORTH - mrms.SOUTH) * 100.0
+    y0 = (iemre.SOUTH - mrms.SOUTH) * 100.0
+    x0 = (iemre.WEST - mrms.WEST) * 100.0
+    x1 = (iemre.EAST - mrms.WEST) * 100.0
     ncprecip[offset,:,:] = res[y0:y1,x0:x1]
     nc.close()
 
@@ -55,5 +54,3 @@ if __name__ == '__main__':
     ts = ts.astimezone( pytz.timezone("America/Chicago") )
     ts = ts.replace(hour=0,minute=0,second=0,microsecond=0)
     run( ts )
-        
-        
