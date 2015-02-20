@@ -13,6 +13,9 @@ data = {'plots': [
         {'id': "21", 'label': "Change in NCDC 81 Daily Climatology over X Days"},
         {'id': "31", 'label': "Extreme Jumps or Dips in High Temperature over X days"},
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
+        {'id': "61",
+         'label': ("High/Low Temp streaks above/below average "
+                   "by NWS CLI Sites")},
         {'id': "19", 'label': "Histogram of Daily High/Low Temperatures"},
         {'id': "35", 'label': "Histogram of X Hour Temperature Changes"},
         {'id': "60", 'label': "Hourly Temperature Frequencies Above/Below Threshold"},
