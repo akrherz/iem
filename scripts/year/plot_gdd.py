@@ -37,18 +37,20 @@ for row in ccursor:
         continue
     lats.append(st.sts[station]['lat'])
     lons.append(st.sts[station]['lon'])
-    gdd50.append(row[1])
+    gdd50.append(float(row[1]))
     valmask.append(True)
 
 m = MapPlot(axisbg='white',
             title="Iowa %s GDD (base=%s) Accumulation" % (now.strftime("%Y"),
                                                           gbase),
             subtitle="1 Jan - %s" % (now.strftime("%d %b %Y"), ))
-m.contourf(lons, lats, gdd50, np.linspace(min(gdd50), max(gdd50), 10))
+minval = min(gdd50)
+rng = max([int(max(gdd50) - minval), 10])
+m.contourf(lons, lats, gdd50, np.linspace(minval, minval+rng, 10))
 pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
 if gbase == 52:
     pqstr = "plot c 000000000000 summary/gdd52_jan1.png bogus png"
 elif gbase == 48:
     pqstr = "plot c 000000000000 summary/gdd48_jan1.png bogus png"
-m.postprocess(pqstr=pqstr)
+m.postprocess(view=False, pqstr=pqstr)
 m.close()
