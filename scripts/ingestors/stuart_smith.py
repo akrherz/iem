@@ -4,6 +4,8 @@
 import subprocess
 import psycopg2
 import datetime
+import os
+import sys
 MESOSITE = psycopg2.connect(database='other', host='iemdb')
 mcursor = MESOSITE.cursor()
 
@@ -15,45 +17,48 @@ row = mcursor.fetchone()
 maxts = None if row[0] is None else datetime.datetime.strptime(
                     row[0].strftime('%m/%d/%y %H:%M:%S'), '%m/%d/%y %H:%M:%S')
 
+if not os.path.isfile("/mnt/rootdocs/Bubbler.csv"):
+    sys.exit()
+
 for line in open('/mnt/rootdocs/Bubbler.csv'):
     tokens = line.strip().split(",")
-    if len(tokens) < 2 or line[0] in ['S','G'] or len(line) > 300:
+    if len(tokens) < 2 or line[0] in ['S', 'G'] or len(line) > 300:
         continue
     # Sometimes the data is corrupted :(
     if len(tokens[0]) > 12:
         continue
     try:
         ts = datetime.datetime.strptime("%s %s" % (tokens[0], tokens[1]),
-                                    '%m/%d/%Y %H:%M:%S')
+                                        '%m/%d/%Y %H:%M:%S')
     except Exception, exp:
-        #print exp
-        #print repr(line)
         continue
     if maxts and ts <= maxts:
         continue
     if len(tokens) == 3:
-        tokens.append( None )
+        tokens.append(None)
     if len(tokens) == 4:
-        tokens.append( None )
-    mcursor.execute("""INSERT into ss_bubbler values (%s, %s, %s, %s)""" , 
+        tokens.append(None)
+    mcursor.execute("""INSERT into ss_bubbler values (%s, %s, %s, %s)""",
                     (ts, tokens[2], tokens[3], tokens[4]))
 
 # Do the STS_GOLD file
 maxts = {}
-mcursor.execute("""SELECT max(valid at time zone 'UTC'), site_serial 
-    from ss_logger_data GROUP by site_serial""")
+mcursor.execute("""SELECT max(valid at time zone 'UTC'), site_serial
+                from ss_logger_data GROUP by site_serial""")
 for row in mcursor:
     # Max standard time value
-    maxts[ row[1] ] = row[0] - datetime.timedelta(hours=6)
-    
+    maxts[row[1]] = row[0] - datetime.timedelta(hours=6)
+
 for sid in [9100104, 9100135, 9100131, 9100156]:
-    ts = maxts.get(sid, datetime.datetime(2000,1,1))
+    ts = maxts.get(sid, datetime.datetime(2000, 1, 1))
     ticks = int(ts.strftime("%s"))
     sql = ("SELECT * from logger_data WHERE site_serial = %s"
-           +" and Date_time > %s") % (sid, ticks)
-    proc = subprocess.Popen("echo '%s' | mdb-sql -p /mnt/sts_gold/sts_gold.mdb" % (sql,),
-                shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    
+           " and Date_time > %s") % (sid, ticks)
+    proc = subprocess.Popen(("echo '%s' | mdb-sql -p "
+                             "/mnt/sts_gold/sts_gold.mdb") % (sql, ),
+                            shell=True, stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+
     data = proc.stdout.read()
     for linenum, line in enumerate(data.split("\n")):
         tokens = line.split("\t")
