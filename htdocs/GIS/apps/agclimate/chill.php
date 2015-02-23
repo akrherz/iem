@@ -1,9 +1,9 @@
 <?php
 include_once("../../../../config/settings.inc.php");
-include_once "$rootpath/include/iemmap.php";
-include_once "$rootpath/include/database.inc.php";
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("ISUAG");
+include_once "../../../../include/iemmap.php";
+include_once "../../../../include/database.inc.php";
+include("../../../../include/network.php");
+$nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
 
@@ -21,7 +21,7 @@ $myStations = $ISUAGcities;
 $height = 480;
 $width = 640;
 
-$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
+$map = ms_newMapObj("../../../../data/gis/base26915.map");
 $map->setProjection("init=epsg:26915");
 $map->setsize($width,$height);
 $map->setextent(175000, 4440000, 775000, 4890000);
@@ -64,22 +64,21 @@ if ($month >= 9) {
 }
 
 $data = Array();
-$sql = "select station, min(valid) as v from hourly WHERE valid > '${sdate}' and c100 < 29 and valid < '${edate}' GROUP by station";
-//echo $sql ."<br />";
+$sql = "select station, min(valid) as v from sm_hourly "
+		."WHERE valid > '${sdate}' and tair_c_avg < f2c(29.0) and "
+		."valid < '${edate}' GROUP by station";
 $rs =  pg_exec($c, $sql);
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  //$bdate = $row["v"];
   $bdate = $sdate;
   $key = $row["station"];
-  if ($key == "A133259") continue;
 
   $data[$key]['name'] = $ISUAGcities[$key]['name'];
   $data[$key]['lon'] = $ISUAGcities[$key]['lon'];
   $data[$key]['lat'] = $ISUAGcities[$key]['lat'];
 
-  $sql = "select count(distinct valid) as c from hourly 
+  $sql = "select count(distinct valid) as c from sm_hourly 
       WHERE station = '$key' and valid > '$bdate' and valid < '$edate'
-      and c100 >= 32 and c100 <= 45";
+      and tair_c_avg >= f2c(32.0) and tair_c_avg <= f2c(45.0)";
   //echo $sql ."<br />";
   $rs2 = pg_exec($c,$sql);
   if (pg_num_rows($rs2) == 0) continue;
@@ -91,14 +90,15 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   // Calculate average?
   $syear = intval(date("Y", strtotime($ISUAGcities[$key]["archive_begin"])));
   $sql = "select count(distinct valid) as c 
-       from hourly WHERE station = '$key' and c100 >= 32 and c100 <= 45 
-       and extract(year from valid) > $syear and 
+       from sm_hourly WHERE station = '$key' and tair_c_avg >= f2c(32) and tair_c_avg <= f2c(45) 
+       and extract(year from valid) >= $syear and 
            extract(year from valid) < extract(year from now()) and
            $dateint ";
   //echo $sql ."<br />";
   $rs2 = pg_exec($c,$sql);
   if (pg_num_rows($rs2) == 0) continue;
   $r = pg_fetch_array($rs2,0);
+  if ((intval(date("Y")) - $syear -1) == 0) continue;
   $avg = ($r["c"]) / (intval(date("Y")) - $syear -1);
 
   $data[$key]['var2'] = round($avg,0);
@@ -116,9 +116,9 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $pt->draw($map, $snet, $img, 1, $val);
 
 
-  $pt = ms_newPointObj();
-  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 2, "(".round($val - $avg,0).")");
+  //$pt = ms_newPointObj();
+  //$pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  //$pt->draw($map, $snet, $img, 2, "(".round($val - $avg,0).")");
 
   // City Name
   $pt = ms_newPointObj();
@@ -135,13 +135,12 @@ iemmap_title($map, $img, "Standard Chill Units [ $sdate thru ". date("Y-m-d", $t
 	($i == 0) ? 'No Data Found!': null);
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage();
 
 if (strlen($direct) > 0) { 
   header("Content-type: image/png");
-  $img->saveImage('');
-} else {
-?>
+  $img->saveImage();
+} else { 
+	$url = $img->saveWebImage();
+	?>
 <img src="<?php echo $url; ?>" border=1>
-
 <?php } ?>
