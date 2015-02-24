@@ -206,6 +206,7 @@ SELECT AddGeometryColumn('ugcs', 'simple_geom', 4326, 'MULTIPOLYGON', 2);
 SELECT AddGeometryColumn('ugcs', 'centroid', 4326, 'POINT', 2);
 GRANT SELECT on ugcs to nobody,apache;
 CREATE INDEX ugcs_ugc_idx on ugcs(ugc);
+create index ugcs_gix on ugcs USING GIST(geom);
 
 ---
 --- Helper function to find a GID for a given UGC code and date!
