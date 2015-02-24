@@ -9,6 +9,16 @@ mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 pcursor = POSTGIS.cursor()
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
+
 # Get listing of stations without a county set
 mcursor.execute("""SELECT iemid, id, name, network, ST_x(geom), ST_y(geom),
     state from stations WHERE (county is null or ugc_county is null
@@ -32,14 +42,16 @@ for row in mcursor:
     and substr(ugc,1,3) = '%s' and end_ts is null""" % (lon, lat, state + "C"))
 
     if pcursor.rowcount != 1:
-        print(("set_county[cnty] fail ID:%s Net:%s St:%s "
+        print(("%s[FAIL]%s set_county[cnty] ID:%s Net:%s St:%s "
                "Lon: %.4f Lat: %.4f\nhttp://mesonet.agron.iastate.edu/sites/"
                "site.php?station=%s&network=%s"
-               "") % (station, network, state, lon, lat, station, network))
+               "") % (bcolors.FAIL, bcolors.ENDC, station, network, state,
+                      lon, lat, station, network))
     else:
         (ugc, ugcname) = pcursor.fetchone()
-        print(("Assinging IEMID: %s SID: %s Network: %s to county: %s [%s]"
-               "") % (iemid, station, network, ugcname, ugc))
+        print(("%s[ OK ]%s IEMID: %s SID: %s Network: %s to county: %s [%s]"
+               "") % (bcolors.OKGREEN, bcolors.ENDC, iemid, station, network,
+                      ugcname, ugc))
         mcursor2.execute("""
             UPDATE stations SET county = %s, ugc_county = %s
             WHERE iemid = %s""", (ugcname, ugc, iemid))
@@ -50,18 +62,21 @@ for row in mcursor:
     and substr(ugc,1,3) = '%s' and end_ts is null""" % (lon, lat, state + "Z"))
 
     if pcursor.rowcount != 1:
-        print(("set_county[zone] fail ID:%s Network:%s State:%s "
+        print(("%s[FAIL]%s set_county[zone] ID:%s Network:%s State:%s "
                "Lon: %.2f Lat: %.2f"
-               "") % (station, network, state, lon, lat))
+               "") % (bcolors.FAIL, bcolors.ENDC, station, network, state,
+                      lon, lat))
     else:
         (ugc, ugcname) = pcursor.fetchone()
-        print(("set_county IEMID: %s SID: %s Network: %s to fx zone: %s [%s]\n"
+        print(("%s[ OK ]%s set_county IEMID: %s SID: %s Network: %s to "
+               "fx zone: %s [%s]\n"
                "http://mesonet.agron.iastate.edu/sites/site.php"
                "?station=%s&network=%s"
-               "") % (iemid, station, network, ugcname, ugc, station, network))
+               "") % (bcolors.OKGREEN, bcolors.ENDC, iemid, station, network,
+                      ugcname, ugc, station, network))
         mcursor2.execute("""
-            UPDATE stations SET county = %s, ugc_county = %s
-            WHERE iemid = %s""", (ugcname, ugc, iemid))
+            UPDATE stations SET ugc_zone = %s
+            WHERE iemid = %s""", (ugc, iemid))
 
 mcursor.close()
 mcursor2.close()
