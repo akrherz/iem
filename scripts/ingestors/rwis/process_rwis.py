@@ -40,6 +40,8 @@ RWIS2METAR = {'00': 'XADA', '01': 'XALG', '02': 'XATN', '03': 'XALT',
               '60': 'XDNI', '61': 'XQCI', '62': 'XSMI', '63': 'XRWI',
               '64': 'XETI', '65': 'XCMI'}
 
+KNOWN_UNKNOWNS = [66, 67, 68]
+
 
 def get_nwsli(rpuid):
     """Lookup a rpuid and return the NWSLI"""
@@ -79,7 +81,9 @@ def merge(atmos, surface):
     for _, row in atmos.iterrows():
         nwsli = get_nwsli(row['Rpuid'])
         if nwsli is None:
-            print('process_rwis: Unknown Rpuid: %s in atmos' % (row['Rpuid'],))
+            if nwsli not in KNOWN_UNKNOWNS:
+                print(('process_rwis: Unknown Rpuid: %s in atmos'
+                       '') % (row['Rpuid'],))
             continue
         if nwsli not in data:
             data[nwsli] = {}
@@ -107,7 +111,9 @@ def merge(atmos, surface):
     for _, row in surface.iterrows():
         nwsli = get_nwsli(row['Rpuid'])
         if nwsli is None:
-            print('process_rwis: Unknown Rpuid: %s in sfc' % (row['Rpuid'],))
+            if nwsli not in KNOWN_UNKNOWNS:
+                print(('process_rwis: Unknown Rpuid: %s in sfc'
+                       '') % (row['Rpuid'],))
             continue
         ts = datetime.datetime.strptime(row['DtTm'], '%m/%d/%y %H:%M')
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
