@@ -47,7 +47,7 @@ def computeOthers(d):
     # Need something to compute other values needed for output
     for sid in d.keys():
         ob = d[sid]
-        ob["ticks"] = calendar.timegm(ob['valid'].timetuple())
+        ob["ticks"] = calendar.timegm(ob['utc_valid'].timetuple())
         if ob['sknt'] is not None:
             ob["sped"] = ob["sknt"] * 1.17
         if ob.get('tmpf') is not None and ob.get('dwpf') is not None:
@@ -111,7 +111,8 @@ def formatter(val, precision, mval='M'):
 def get_network(network):
     obs = {}
     icursor.execute("""
-    SELECT c.*, s.*, t.id, t.name as sname
+    SELECT c.*, s.*, t.id, t.name as sname,
+    c.valid at time zone 'UTC' as utc_valid
     from current c, summary s, stations t WHERE
     t.iemid = s.iemid and s.iemid = c.iemid and t.network = '%s' and
     s.day = 'TODAY' ORDER by random()
