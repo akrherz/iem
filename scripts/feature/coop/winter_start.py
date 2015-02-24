@@ -1,78 +1,54 @@
-import mx.DateTime
-import numpy
-import iemdb, iemplot
-COOP = iemdb.connect("coop", bypass=True)
+import psycopg2
+import datetime
+from pyiem.plot import MapPlot
+from pyiem.network import Table as NetworkTable
+COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-ccursor2 = COOP.cursor()
 
+nt = NetworkTable("NCDC81")
+
+ccursor.execute("""
+    WITH newdates as (
+    SELECT station, valid,
+    (case when extract(month from valid) < 7 then valid + '366 days'::interval
+     else valid end) as newvalid, high, low
+    from ncdc_climate81 where substr(station,1,3) = 'USC'),
+
+    movingavgs as (
+    SELECT station, valid, newvalid,
+    avg((high+low)/2.) OVER (PARTITION by station
+    ORDER by newvalid ASC ROWS BETWEEN 91 PRECEDING AND CURRENT ROW) from
+    newdates),
+
+    ranks as (
+    SELECT station, valid, avg,
+    rank() OVER (PARTITION by station ORDER by avg ASC) from movingavgs)
+
+    SELECT station, valid, avg from ranks WHERE rank = 1
+""")
 lats = []
 lons = []
 vals = []
-ccursor.execute("""
-    SELECT distinct id, x(geom), y(geom) from stations
-    WHERE network ~* 'CLIMATE' and network not in ('HICLIMATE',
-    'AKCLIMATE') 
-""")
 for row in ccursor:
-
-    stid = row[0]
-    # Query out the data
-    data = numpy.zeros( (366*2) )
-    data[:] = 100.
-    ccursor2.execute("""
-    select valid, high from ncdc_climate71 where 
-    station = %s ORDER by valid ASC
-    """, (stid.lower(),))
-    i= 0
-    for row2 in ccursor2:
-        data[i] = row2[1]
-        data[i+366] = row2[1]
-        i += 1
-    if i == 0:
+    station = row[0]
+    if station not in nt.sts:
         continue
-    minv = 100.
-    pos = 0
-
-    for i in range(0,367):
-        val = numpy.average(data[i:i+91])
-        print i, val
-        if val < minv:
-            minv = val
-            pos = i
-
-    if pos < 100:
-        print stid, pos, minv
-        pos += 366
-    vals.append( pos + 1)
-    lats.append( row[2] )
-    lons.append( row[1] )
+    lats.append(nt.sts[station]['lat'])
+    lons.append(nt.sts[station]['lon'])
+    vals.append(int(row[1].strftime("%j")))
 
 labels = []
-sts = mx.DateTime.DateTime(2000,1,1)
-for i in range(320,370,4):
-    ts = sts + mx.DateTime.RelativeDateTime(days=(i-1))
-    labels.append( ts.strftime("%b %d") )
-    
-print labels
-cfg = {
-    '_conus':   True,
-    'wkColorMap': 'BlAqGrYeOrRe',
-     'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- 'cnLevelSelectionMode': 'ManualLevels',
-  'cnLevelSpacingF'      : 4.0,
- 'cnMinLevelValF'       : 320.0,
- 'cnMaxLevelValF'       : 368.0,
- 'lbLabelStride'    : 1,
- 'lbLabelFontHeightF': 0.012,
- '_title'             : "When does winter start? Start Date of Coldest 91 Day Period",
- '_valid'             : "based on NCDC 1971-2000 Climatology Avg(high+low)",
-  'lbTitleString'      : "  ",
-  'cnExplicitLabelBarLabelsOn': True,
-  'lbLabelStrings': labels,
-  
-        }
+sts = datetime.datetime(2000, 1, 1)
+ticks = range(47, 74, 2)
+for i in ticks:
+    ts = sts + datetime.timedelta(days=i)
+    labels.append(ts.strftime("%b %d"))
 
-fp = iemplot.simple_contour(lons, lats, vals, cfg)
-#iemplot.postprocess(fp,"","")
-iemplot.makefeature(fp)
+m = MapPlot(sector='conus', axisbg='white',
+            title=('End Date of Coldest 91 Day Period '
+                   '(End of Winter, Start of Spring)'),
+            subtitle='based on NCDC 1981-2010 Climatology of Average(high+low)'
+            )
+m.contourf(lons, lats, vals, ticks, clevlabels=labels)
+m.postprocess(filename='150225.png')
+m.close()
