@@ -3,12 +3,11 @@
 Return JSON metadata for nexrad information
 """
 import sys
-sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
 import cgi
 import json
 import mx.DateTime
 import os.path
-import iemdb
+import psycopg2
 import glob
 
 NIDS = {
@@ -22,6 +21,7 @@ NIDS = {
     'TR0': 'TDWR Base Reflectivity',
     'TV0': 'TDWR Radial Velocity',
 }
+
 
 def parse_time(s):
     """
@@ -38,28 +38,29 @@ def parse_time(s):
         date = mx.DateTime.gmt()
     return date
 
+
 def available_radars(form):
     """
     Return available RADAR sites for the given location and date!
     """
     lat = form.getvalue('lat', None)
     lon = form.getvalue('lon', None)
-    start_gts = parse_time( form.getvalue('start', '2012-01-27T00:00Z') )
-    MESOSITE = iemdb.connect('mesosite', bypass=True)
+    start_gts = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
+    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
     mcursor = MESOSITE.cursor()
     root = {'radars': []}
     if lat is None or lon is None:
         sql = """
         select id, name,
         ST_x(geom) as lon, ST_y(geom) as lat, network
-        from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
+        from stations where network in ('NEXRAD','ASR4','ASR11','TWDR')
         ORDER by id asc"""
     else:
         sql = """
-        select id, name, ST_x(geom) as lon, ST_y(geom) as lat, network, 
-        ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist 
-        from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
-        and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) < 3 
+        select id, name, ST_x(geom) as lon, ST_y(geom) as lat, network,
+        ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist
+        from stations where network in ('NEXRAD','ASR4','ASR11','TWDR')
+        and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) < 3
         ORDER by dist asc
         """ % (lon, lat, lon, lat)
     mcursor.execute(sql)
@@ -75,6 +76,7 @@ def available_radars(form):
     mcursor.close()
     MESOSITE.close()
     return root
+
 
 def find_scans(root, radar, product, sts, ets):
     """
@@ -95,6 +97,7 @@ def find_scans(root, radar, product, sts, ets):
                 root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
             now += mx.DateTime.RelativeDateTime(minutes=1)
 
+
 def is_realtime(sts):
     """
     Check to see if this time is close to realtime...
@@ -102,6 +105,7 @@ def is_realtime(sts):
     if (mx.DateTime.gmt() - sts).seconds > 3600:
         return False
     return True
+
 
 def list_files(form):
     """
@@ -117,16 +121,16 @@ def list_files(form):
     if len(root['scans']) == 0 and is_realtime(start_gts):
         now = start_gts - mx.DateTime.RelativeDateTime(minutes=10)
         find_scans(root, radar, product, now, end_gts)
-        
+
     return root
+
 
 def list_products(form):
     """
     List available NEXRAD products
     """
     radar = form.getvalue('radar', 'DMX')[:10]
-    now = parse_time( form.getvalue('start', '2012-01-27T00:00Z') )
-    #root = {'metaData': {'nexrad': nexrad, 'product': product}, 'scans' : []}
+    now = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
     root = {'products': []}
     if radar == 'USCOMP':
         for dirname in ['N0Q','N0R']:
@@ -143,10 +147,11 @@ def list_products(form):
                 root['products'].append({'id': dirname, 
                                          'name': NIDS.get(dirname,dirname)})
     return root
-    
+
+
 def main():
     """
-    
+
     """
     form = cgi.FieldStorage()
     operation = form.getvalue('operation', None)
@@ -167,4 +172,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-#END

@@ -2,21 +2,16 @@
 '''
  Generate various plots for ISUSM data
 '''
-import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-
 import psycopg2
 import cgi
-import network
+from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 from pyiem.plot import MapPlot
 
-CTX = {
-    'tmpf': {'title': '2m Air Temperature [F]'},
-    'rh': {'title': '2m Air Humidity [%]'},
-    'high': {'title': "Today's High Temp [F]"},       
-       
-       }
+CTX = {'tmpf': {'title': '2m Air Temperature [F]'},
+       'rh': {'title': '2m Air Humidity [%]'},
+       'high': {'title': "Today's High Temp [F]"}}
+
 
 def get_currents():
     ''' Return dict of current values '''
@@ -32,27 +27,28 @@ def get_currents():
     """)
     valid = None
     for row in cursor:
-        data[ row[0] ] = {'tmpf': row[2],
-                          'rh': row[3],
-                          'valid': row[1], 
-                          'high': None}
+        data[row[0]] = {'tmpf': row[2],
+                        'rh': row[3],
+                        'valid': row[1],
+                        'high': None}
         if valid is None:
             valid = row[1]
-    
+
     # Go get daily values
     cursor2.execute("""SELECT station, tair_c_max from sm_daily
     where valid = %s
     """, (valid,))
     for row in cursor2:
-        data[ row[0] ]['high'] = temperature(row[1], 'C').value('F')
-        
+        data[row[0]]['high'] = temperature(row[1], 'C').value('F')
+
     cursor.close()
     dbconn.close()
     return data
 
+
 def plot(data, v):
     ''' Actually plot this data '''
-    nt = network.Table("ISUSM")
+    nt = NetworkTable("ISUSM")
     lats = []
     lons = []
     vals = []
@@ -60,23 +56,24 @@ def plot(data, v):
     for sid in data.keys():
         if data[sid][v] is None:
             continue
-        lats.append( nt.sts[sid]['lat'] )
-        lons.append( nt.sts[sid]['lon'] )
-        vals.append( data[sid][v] )
+        lats.append(nt.sts[sid]['lat'])
+        lons.append(nt.sts[sid]['lon'])
+        vals.append(data[sid][v])
         valid = data[sid]['valid']
 
     if valid is None:
-        m = MapPlot(sector='iowa', 
-                title='ISU Soil Moisture Network :: %s' % (CTX[v]['title'],),
-                figsize=(8.0,6.4) )
-        m.plot_values([-95,], [41.99], ['No Data Found'], '%s', textsize=30)
+        m = MapPlot(sector='iowa', axisbg='white',
+                    title=('ISU Soil Moisture Network :: %s'
+                           '') % (CTX[v]['title'], ),
+                    figsize=(8.0, 6.4))
+        m.plot_values([-95, ], [41.99, ], ['No Data Found'], '%s', textsize=30)
         m.postprocess(web=True)
         return
 
-    m = MapPlot(sector='iowa', 
+    m = MapPlot(sector='iowa', axisbg='white',
                 title='ISU Soil Moisture Network :: %s' % (CTX[v]['title'],),
                 subtitle='valid %s' % (valid.strftime("%-d %B %Y %I:%M %p"),),
-                figsize=(8.0,6.4))
+                figsize=(8.0, 6.4))
     m.plot_values(lons, lats, vals, '%.1f')
     m.drawcounties()
     m.postprocess(web=True)

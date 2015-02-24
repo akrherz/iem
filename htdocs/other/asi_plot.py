@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 """ ASI Data Timeseries """
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import datetime
 import numpy
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import iemtz
+import pytz
 import cgitb
 cgitb.enable()
 
-import network
-nt = network.Table("ISUASI")
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("ISUASI")
 
 # Query out the CGI variables
 import cgi
@@ -29,18 +28,17 @@ if ("syear" in form and "eyear" in form and
       int(form["emonth"].value), int(form["eday"].value), 
       int(form["ehour"].value), 0)
 else:
-    sts = datetime.datetime(2012,12,1)
-    ets = datetime.datetime(2012,12,3)
+    sts = datetime.datetime(2012, 12, 1)
+    ets = datetime.datetime(2012, 12, 3)
 
 station = form.getvalue('station', 'ISU4003')
-if not nt.sts.has_key(station):
+if station not in nt.sts:
     print 'Content-type: text/plain\n'
     print 'ERROR'
     sys.exit(0)
 
-import iemdb
 import psycopg2.extras
-ISUAG = iemdb.connect('other', bypass=True)
+ISUAG = psycopg2.connect(database='other', host='iemdb', user='nobody')
 icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """SELECT * from asi_data WHERE 
@@ -77,23 +75,24 @@ ax[0].plot(valid, data['ch3avg'], linewidth=2, color='purple', zorder=2, label='
 ax[0].plot(valid, data['ch5avg'], linewidth=2, color='black', zorder=2, label='10m')
 ax[0].set_ylabel("Wind Speed [m/s]")
 ax[0].legend(loc=(0.05, -0.15), ncol=3)
-ax[0].set_xlim( min(valid), max(valid))
-days = (max(valid) - min(valid)).days  
+ax[0].set_xlim(min(valid), max(valid))
+days = (max(valid) - min(valid)).days
+central = pytz.timezone("America/Chicago")
 if days >= 3:
     interval = max(int(days/7), 1)
     ax[0].xaxis.set_major_locator(
                                mdates.DayLocator(interval=interval,
-                                                 tz=iemtz.Central)
+                                                 tz=central)
                                )
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y',
-                                                      tz=iemtz.Central))
+                                                      tz=central))
 else:
     ax[0].xaxis.set_major_locator(
                                mdates.AutoDateLocator(maxticks=10,
-                                                      tz=iemtz.Central)
+                                                      tz=central)
                                )
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b',
-                                                      tz=iemtz.Central))
+                                                      tz=central))
 
 ax[0].set_title("ISUASI Station: %s Timeseries" % (nt.sts[station]['name'],))
 
@@ -103,5 +102,5 @@ ax[1].grid(True)
 ax[1].set_ylabel("Air Temperature [C]")
 ax[1].legend(loc='best')
 
-print "Content-Type: image/png\n"
-plt.savefig( sys.stdout, format='png' )
+sys.stdout.write("Content-Type: image/png\n\n")
+plt.savefig(sys.stdout, format='png')
