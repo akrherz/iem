@@ -59,21 +59,22 @@ for row in mcursor:
     # Lets attempt to find the zone!
     pcursor.execute("""SELECT ugc, name from ugcs WHERE
     ST_Contains(geom, ST_GeomFromText('Point(%s %s)',4326))
-    and substr(ugc,1,3) = '%s' and end_ts is null""" % (lon, lat, state + "Z"))
+    and substr(ugc,1,3) = '%s' and end_ts is null
+    ORDER by begin_ts DESC LIMIT 1""" % (lon, lat, state + "Z"))
 
     if pcursor.rowcount != 1:
         print(("%s[FAIL]%s set_county[zone] ID:%s Network:%s State:%s "
-               "Lon: %.2f Lat: %.2f"
+               "Lon: %.2f Lat: %.2f\n"
+               "http://mesonet.agron.iastate.edu/sites/site.php"
+               "?station=%s&network=%s"
                "") % (bcolors.FAIL, bcolors.ENDC, station, network, state,
-                      lon, lat))
+                      lon, lat, station, network))
     else:
         (ugc, ugcname) = pcursor.fetchone()
         print(("%s[ OK ]%s set_county IEMID: %s SID: %s Network: %s to "
-               "fx zone: %s [%s]\n"
-               "http://mesonet.agron.iastate.edu/sites/site.php"
-               "?station=%s&network=%s"
+               "fx zone: %s [%s]"
                "") % (bcolors.OKGREEN, bcolors.ENDC, iemid, station, network,
-                      ugcname, ugc, station, network))
+                      ugcname, ugc))
         mcursor2.execute("""
             UPDATE stations SET ugc_zone = %s
             WHERE iemid = %s""", (ugc, iemid))
