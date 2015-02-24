@@ -81,7 +81,7 @@ def merge(atmos, surface):
     for _, row in atmos.iterrows():
         nwsli = get_nwsli(row['Rpuid'])
         if nwsli is None:
-            if nwsli not in KNOWN_UNKNOWNS:
+            if int(row['Rpuid']) not in KNOWN_UNKNOWNS:
                 print(('process_rwis: Unknown Rpuid: %s in atmos'
                        '') % (row['Rpuid'],))
             continue
@@ -111,7 +111,7 @@ def merge(atmos, surface):
     for _, row in surface.iterrows():
         nwsli = get_nwsli(row['Rpuid'])
         if nwsli is None:
-            if nwsli not in KNOWN_UNKNOWNS:
+            if int(row['Rpuid']) not in KNOWN_UNKNOWNS:
                 print(('process_rwis: Unknown Rpuid: %s in sfc'
                        '') % (row['Rpuid'],))
             continue
