@@ -220,6 +220,7 @@ EOF;
 		<a class="btn btn-warning btn-block" href="$abstainurl">Abstain ($abstain votes)</a>
 		</div>
 		</div>
+	</div>
 EOF;
 		
 		$t->jsextra = <<<EOF
