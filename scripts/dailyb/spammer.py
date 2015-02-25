@@ -15,16 +15,17 @@ from email.mime.multipart import MIMEMultipart
 
 import wwa
 
+
 def get_github_commits():
     """ Get the recent day's worth of github code commits
-    
+
     Returns:
       txt (str): text variant result
       html (str): html variant result
     """
     utcnow = datetime.datetime.utcnow()
     yesterday = utcnow - datetime.timedelta(hours=24)
-    yesterday = yesterday.replace(hour=12,minute=0,second=0)
+    yesterday = yesterday.replace(hour=12, minute=0, second=0)
     iso = yesterday.strftime("%Y-%m-%dT%H:%M:%SZ")
     uri = "https://api.github.com/repos/akrherz/iem/commits?since=%s" % (iso,)
 
@@ -45,7 +46,7 @@ def get_github_commits():
         valid = (utcvalid.replace(tzinfo=pytz.timezone("UTC"))).astimezone(
                                             pytz.timezone("America/Chicago"))
         res[valid] = commit
-    
+
     keys = res.keys()
     keys.sort()
     for valid in keys:
@@ -177,28 +178,28 @@ def main():
     html = """
     <h3>Iowa Environmental Mesonet Daily Bulletin for %s</h3>
     """ % (now.strftime("%d %B %Y"), )
-    
-    t,h = news()
+
+    t, h = news()
     text += t
     html += h
     t, h = get_github_commits()
-    text += t
-    html += h    
-    t,h = feature()
-    text += t
-    html += h
-    t,h = wwa.run()
+    text += t.encode('ascii', 'ignore')
+    html += "%s" % (h.encode('ascii', 'ignore'),)
+    t, h = feature()
     text += t
     html += h
-    t,h = cowreport()
+    t, h = wwa.run()
     text += t
     html += h
-    
+    t, h = cowreport()
+    text += t
+    html += h
+
     part1 = MIMEText(text, 'plain')
     part2 = MIMEText(html, 'html')
     msg.attach(part1)
     msg.attach(part2)
-    
+
     try:
         s = smtplib.SMTP('mailhub.iastate.edu')
     except:
@@ -206,16 +207,18 @@ def main():
         s = smtplib.SMTP('mailhub.iastate.edu')
     s.sendmail(msg['From'], [msg['To']], msg.as_string())
     s.quit()
-    
+
     # Send forth LDM
     o = open("tmp.txt", 'w')
-    o.write( text )
+    o.write(text)
     o.close()
-    subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt""", shell=True)
+    subprocess.call(('/home/ldm/bin/pqinsert -p "plot c 000000000000 '
+                     'iemdb.txt bogus txt" tmp.txt'), shell=True)
     o = open("tmp.txt", 'w')
-    o.write( html )
+    o.write(html)
     o.close()
-    subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt""", shell=True)
+    subprocess.call(('/home/ldm/bin/pqinsert -p "plot c 000000000000 '
+                     'iemdb.html bogus txt" tmp.txt'), shell=True)
     os.unlink("tmp.txt")
 
 if __name__ == '__main__':
