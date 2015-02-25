@@ -2,13 +2,10 @@
 """
 IEM_APPID = 79
 """
-import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-
 import cgi
 import datetime
-import network
-nt = network.Table(("AWOS", "IA_ASOS"))
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable(("AWOS", "IA_ASOS"))
 
 import psycopg2.extras
 IEM = psycopg2.connect("dbname=iem user=nobody host=iemdb")
@@ -18,7 +15,7 @@ requireHrs = [0]*25
 stData = {}
 totp = {}
 
-# Return the Date we will be looking for...
+
 def doHeader():
     print 'Content-type: text/html \n\n'
     print """

@@ -14,7 +14,7 @@ matplotlib.use('agg')
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 
-from pyiem import network
+from pyiem.network import Table as NetworkTable
 import psycopg2
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
@@ -86,7 +86,7 @@ def process_cgi(form):
                                    )
     
     station = form.getvalue('station', 'IA0200')
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    nt = NetworkTable("%sCLIMATE" % (station[:2],))
     (dates, gdd50, d_gdd50, c_gdd50, precip, d_precip, c_precip, 
      sdd86, d_sdd86, c_sdd86) = get_data(station, startdt, enddt)
     

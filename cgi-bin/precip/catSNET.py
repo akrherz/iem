@@ -4,13 +4,10 @@
 # Daryl Herzmann 06 Mar 2003
 #  7 Mar 2003:	Do some more cleanups
 """
-import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-
 import cgi
 import datetime
-import network
-nt = network.Table(("KCCI", "KIMIT", "KELO"))
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable(("KCCI", "KIMIT", "KELO"))
 
 import psycopg2.extras
 IEM = psycopg2.connect("dbname=iem user=nobody host=iemdb")

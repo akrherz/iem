@@ -14,8 +14,8 @@ def run(station, gddbase):
     import numpy as np
     import psycopg2
     import datetime
-    import network
-    nt = network.Table("%sCLIMATE" % (station[:2].upper(),))
+    from pyiem.network import Table as NetworkTable
+    nt = NetworkTable("%sCLIMATE" % (station[:2].upper(),))
     today = datetime.datetime.now()
     byear = nt.sts[station]['archive_begin'].year
     eyear = today.year + 1

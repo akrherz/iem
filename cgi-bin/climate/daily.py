@@ -12,13 +12,13 @@ import psycopg2
 import numpy
 import cStringIO
 from PIL import Image
-import network
+from pyiem.network import Table as NetworkTable
 import datetime
 
 
 def make_yr_plot(station1, year):
     """ Do it! """
-    nt = network.Table("IACLIMATE")
+    nt = NetworkTable("IACLIMATE")
     
     dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
@@ -74,7 +74,7 @@ def make_yr_plot(station1, year):
 
 def make_plot(station1, station2):
     """ Actually do the expense of making the plot! """
-    nt = network.Table("IACLIMATE")
+    nt = NetworkTable("IACLIMATE")
     
     dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = dbconn.cursor()

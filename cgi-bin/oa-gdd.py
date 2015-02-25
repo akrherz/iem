@@ -10,7 +10,7 @@ os.environ[ 'USER' ] = 'nobody'
 import iemplot
 import cgi
 import datetime
-import network
+from pyiem.network import Table as NetworkTable
 import iemdb
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
@@ -39,7 +39,7 @@ now = datetime.datetime.today()
 if ets > now:
     ets = now
 
-st = network.Table("IACLIMATE")
+st = NetworkTable("IACLIMATE")
 # Now we load climatology
 #sts = {}
 #rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \

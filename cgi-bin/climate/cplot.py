@@ -24,7 +24,7 @@ from matplotlib import pyplot as plt
 import iemdb
 import numpy
 import mx.DateTime
-import network
+from pyiem.network import Table as NetworkTable
 from scipy import stats
 
 META = {
@@ -146,7 +146,7 @@ def get_station_name(station):
     """
     Get the common name for a given station ID
     """
-    nt = network.Table("%sCLIMATE" % (station[:2].upper(),))
+    nt = NetworkTable("%sCLIMATE" % (station[:2].upper(),))
     return nt.sts[station.upper()]['name']
 
 def yearly_plot(ax, cfg):
