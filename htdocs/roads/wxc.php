@@ -10,7 +10,8 @@ header("Content-type: text/plain");
 $sql = "SELECT ST_x(ST_transform(ST_centroid(b.geom),4326)) as lon, 
                ST_y(ST_transform(ST_centroid(b.geom),4326)) as lat,
       * from roads_current r, roads_base b, roads_conditions c WHERE
-  r.segid = b.segid and r.cond_code = c.code";
+  r.segid = b.segid and r.cond_code = c.code
+		and r.valid > (now() - '24 hours'::interval)";
 
 $rs = pg_query($conn, $sql);
 
