@@ -9,15 +9,15 @@
 }
 
 a.book{
-	background:url(/images/book.png) no-repeat 10px 1px #f3f3f3;
+	background:url(/images/book.png) no-repeat 10px 1px;
 	padding-left: 40px;
 }
 a.agweather{
-	background:url(/images/tractor.png) no-repeat 10px 1px #f3f3f3;
+	background:url(/images/tractor.png) no-repeat 10px 1px;
 	padding-left: 40px;
 }
 a.nws{
-	background:url(/images/nws.png) no-repeat 10px 1px #f3f3f3;
+	background:url(/images/nws.png) no-repeat 10px 1px;
 	padding-left: 40px;
 }
 

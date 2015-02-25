@@ -17,10 +17,16 @@ $connection = iemdb("mesosite", TRUE, TRUE);
  cooperating members with observing networks. The data are stored and made 
  available on this website.</p>
 
-<div class="btn-group btn-group-justified">
-<a href="/agweather/" class="btn btn-default agweather">Ag Weather</a>
-<a href="/nws/" class="btn btn-default nws">NWS Users</a>
-<a href="/archive/" class="btn btn-default book">Researchers</a>
+ <div class="row">
+<div class="col-xs-12 col-sm-4">
+<a href="/agweather/" class="btn btn-default btn-block agweather">Ag Weather</a>
+</div>
+<div class="col-xs-12 col-sm-4">
+<a href="/nws/" class="btn btn-default btn-block nws">NWS Users</a>
+</div>
+<div class="col-xs-12 col-sm-4">
+<a href="/archive/" class="btn btn-default btn-block book">Researchers</a>
+</div>
 </div>
 	
 		<?php echo $this->feature; ?>		

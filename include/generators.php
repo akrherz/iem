@@ -157,10 +157,10 @@ function gen_feature($t){
     	<a href="/feature_rss.php"><img src="/images/rss.gif" /></a></div>
     <div class='col-xs-12 col-sm-8'>
         <div class='btn-group row'>
-            <a class="btn btn-default col-xs-3" href="{$fburl}">Facebook</a>
-			<a class="btn btn-default col-xs-3" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
-			<a class="btn btn-default col-xs-4" href="/onsite/features/past.php">Past Features</a>
-			<a class="btn btn-default col-xs-2" href="/onsite/features/tags/">Tags</a>
+            <a class="btn btn-default col-xs-6 col-sm-3" href="{$fburl}">Facebook</a>
+			<a class="btn btn-default col-xs-6 col-sm-3" href="/onsite/features/cat.php?day={$row["permalink"]}">Permalink</a>
+			<a class="btn btn-default col-xs-6 col-sm-4" href="/onsite/features/past.php">Past Features</a>
+			<a class="btn btn-default col-xs-6 col-sm-2" href="/onsite/features/tags/">Tags</a>
          </div>
     </div>
 </div>
@@ -208,10 +208,17 @@ EOF;
 		}
 	
 		$vtext .= <<<EOF
-		<strong>$msg</strong> 
-		<a class="btn btn-success" href="$goodurl">Good ($good votes)</a>
-		<a class="btn btn-danger" href="$badurl">Bad ($bad votes)</a>
-		<a class="btn btn-warning" href="$abstainurl">Abstain ($abstain votes)</a>
+		<div class="row">
+		<div class="col-xs-12 col-sm-3"><strong>$msg</strong></div>
+		<div class="col-xs-12 col-sm-3"> 
+		<a class="btn btn-success btn-block" href="$goodurl">Good ($good votes)</a>
+		</div>
+		<div class="col-xs-12 col-sm-3"> 
+		<a class="btn btn-danger btn-block" href="$badurl">Bad ($bad votes)</a>
+		</div>
+		<div class="col-xs-12 col-sm-3"> 
+		<a class="btn btn-warning btn-block" href="$abstainurl">Abstain ($abstain votes)</a>
+		</div>
 		</div>
 EOF;
 		
