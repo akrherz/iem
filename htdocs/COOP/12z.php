@@ -32,6 +32,20 @@ $t->content = <<<EOF
 	<li><a href="/COOP/">NWS COOP</a></li>
 	<li class="active">12 UTC - 24 Hour Precipitation Analysis</li>
 </ol>
+		
+<h4>TODO list</h4>
+<ul>
+ <li>Add SchoolNet Computed Totals</li>
+ <li>Add DCP Computed Totals</li>
+ <li>Add CoCoRaHS Totals</li>
+ <li>Local Storm Reports</li>
+ <li>ISU Soil Moisture Data</li>
+ <li>Add MRMS Legend to map</li>
+ <li>Include nearby state's data</li>
+ <li>Add option to plot SWE</li>
+ <li>Use 7 AM local vs 12 UTC ??</li>
+</ul>
+		
 <form name="bah">
 <div class="row">
 <div class="col-md-7">
