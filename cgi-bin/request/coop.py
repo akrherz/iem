@@ -15,7 +15,8 @@ from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 import StringIO
 
-def get_scenario_period( ctx ):
+
+def get_scenario_period(ctx):
     """ Compute the inclusive start and end dates to fetch scenario data for 
     Arguments:
         ctx dictionary context this app was called with
@@ -25,13 +26,16 @@ def get_scenario_period( ctx ):
     ets = datetime.date(ctx['scenario_year'], 12, 31)
     return sts, ets
 
-def ssw( txt ):
+
+def ssw(txt):
     """ shortcut """
     sys.stdout.write( txt )
+
 
 def get_database():
     """ Get database """
     return psycopg2.connect(database="coop", host="iemdb", user="nobody")
+
 
 def sane_date(year, month, day):
     """ Attempt to account for usage of days outside of the bounds for 
@@ -40,6 +44,7 @@ def sane_date(year, month, day):
     nextmonth = datetime.date(year, month, 1) + datetime.timedelta(days=35)
     lastday = nextmonth.replace(day=1) - datetime.timedelta(days=1)
     return datetime.date(year, month, min(day, lastday.day))
+
 
 def get_cgi_dates(form):
     """ Figure out which dates are requested via the form, we shall attempt
@@ -55,8 +60,9 @@ def get_cgi_dates(form):
     archive_end = datetime.date.today() - datetime.timedelta(days=1)
     if ets > archive_end:
         ets = archive_end
-        
+
     return [sane_date(y1, m1, d1), ets]
+
 
 def get_cgi_stations(form):
     """ Figure out which stations the user wants, return a list of them """
@@ -65,8 +71,9 @@ def get_cgi_stations(form):
         network = form.getfirst("network")
         nt = NetworkTable(network)
         return nt.sts.keys()
-        
+
     return reqlist
+
 
 def do_apsim( ctx ):
     """

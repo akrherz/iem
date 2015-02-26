@@ -1,14 +1,11 @@
 #!/usr/bin/python
-import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-
 import datetime
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
-ASOS = iemdb.connect('asos', bypass=True)
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
 ADJUSTMENT = 0

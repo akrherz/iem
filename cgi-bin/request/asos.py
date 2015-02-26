@@ -17,6 +17,7 @@ acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+
 def get_stations(form):
     """ Figure out the requested station """
     if not form.has_key("station"):
@@ -29,6 +30,7 @@ def get_stations(form):
         sys.stdout.write("ERROR: station must be specified!")
         sys.exit(0)
     return stations
+
 
 def get_time_bounds(form, tzinfo):
     """ Figure out the exact time bounds desired """
@@ -52,21 +54,22 @@ def get_time_bounds(form, tzinfo):
     except:
         sys.stdout.write("ERROR: Malformed Date!")
         sys.exit()
-    
+
     if sts == ets:
         ets += datetime.timedelta(days=1)
-    
+
     return sts, ets
-    
+
+
 def main():
     """ Go main Go """
     form = cgi.FieldStorage()
     try:
-        tzinfo = pytz.timezone( form.getfirst("tz", "Etc/UTC") )
+        tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
     except:
         sys.stdout.write("Invalid Timezone (tz) provided")
         sys.exit()
-    
+
     # Save direct to disk or view in browser
     direct = True if form.getfirst('direct', 'no') == 'yes' else False
     stations = get_stations(form)
@@ -76,7 +79,7 @@ def main():
         if len(stations) > 1:
             fn = "asos.txt"
         sys.stdout.write('Content-Disposition: attachment; filename=%s\n\n' % (
-                        fn,))
+                         fn,))
     else:
         sys.stdout.write("Content-type: text/plain \n\n")
 
@@ -84,25 +87,23 @@ def main():
     if len(dbstations) == 1:
         dbstations.append('XYZXYZ')
 
-
-
     dataVars = form.getlist("data")
     sts, ets = get_time_bounds(form, tzinfo)
 
     delim = form.getfirst("format")
-    
+
     if "all" in dataVars:
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
-                     +"vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
-                     +"skyl2, skyl3, skyl4, presentwx, metar")
-        outCols = ['tmpf','dwpf','relh', 'drct','sknt','p01i','alti',
-                   'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3', 
-                   'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4', 
+                     "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
+                     "skyl2, skyl3, skyl4, presentwx, metar")
+        outCols = ['tmpf', 'dwpf', 'relh', 'drct', 'sknt', 'p01i', 'alti',
+                   'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3',
+                   'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4',
                    'presentwx', 'metar']
     else:
         dataVars = tuple(dataVars)
         outCols = dataVars
-        dataVars =  str(dataVars)[1:-2]
+        dataVars = str(dataVars)[1:-2]
         queryCols = re.sub("'", " ", dataVars)
 
     if delim == "tdf":
@@ -122,7 +123,7 @@ def main():
         for row in mcursor:
             gtxt[row[0]] = "%.4f%s%.4f%s" % (row['lon'], rD, row['lat'], rD)
 
-    acursor.execute("""SELECT * from alldata 
+    acursor.execute("""SELECT * from alldata
       WHERE valid >= %s and valid < %s and station in %s
       ORDER by valid ASC""", (sts, ets, tuple(dbstations)))
 
@@ -130,7 +131,7 @@ def main():
     sys.stdout.write("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
     sys.stdout.write("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
     sys.stdout.write(("#DEBUG: Data Contact   -> daryl herzmann "
-                      +"akrherz@iastate.edu 515-294-5978\n"))
+                      "akrherz@iastate.edu 515-294-5978\n"))
     sys.stdout.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
     sys.stdout.write("station"+rD+"valid"+rD)
     if gisextra:
@@ -138,7 +139,7 @@ def main():
     sys.stdout.write(queryCols+"\n")
 
     for row in acursor:
-        sys.stdout.write( row["station"] + rD )
+        sys.stdout.write(row["station"] + rD)
         sys.stdout.write( 
             (row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD )
         if gisextra:
@@ -192,9 +193,9 @@ def main():
                     r.append("%s" % (row[data1], ))
             elif row[ data1 ] is None or row[ data1 ] <= -99.0 or row[ data1 ] == "M":
                 r.append("M")
-            else:  
+            else:
                 r.append("%2.2f" % (row[ data1 ],))
         sys.stdout.write("%s\n" % (rD.join(r),))
-        
+
 if __name__ == '__main__':
     main()

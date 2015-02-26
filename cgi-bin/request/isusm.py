@@ -4,7 +4,6 @@
 """
 import cgi
 import datetime
-import psycopg2
 import psycopg2.extras
 import sys
 import pandas as pd
@@ -12,6 +11,7 @@ import cStringIO
 from pyiem.datatypes import temperature
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 
 def get_stations( form ):
     ''' Figure out which stations were requested '''
@@ -22,7 +22,8 @@ def get_stations( form ):
         stations.append('XXXXX')
     return stations
 
-def get_dates( form ):
+
+def get_dates(form):
     ''' Get the start and end dates requested '''
     year1 = form.getfirst('year1', 2013)
     month1 = form.getfirst('month1', 1)
@@ -31,9 +32,9 @@ def get_dates( form ):
     month2 = form.getfirst('month2', 1)
     day2 = form.getfirst('day2', 1)
 
-    sts = datetime.datetime( int(year1), int(month1), int(day1))
-    ets = datetime.datetime( int(year2), int(month2), int(day2))
-    
+    sts = datetime.datetime(int(year1), int(month1), int(day1))
+    ets = datetime.datetime(int(year2), int(month2), int(day2))
+
     if sts > ets:
         sts2 = ets
         ets = sts

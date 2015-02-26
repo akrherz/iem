@@ -9,6 +9,7 @@ import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 cursor = IEM.cursor()
 
+
 def get_data(network, sts, ets, stations=[]):
     ''' Go fetch data please '''
     s = ("station,network,valid,precip_in\n")
@@ -21,7 +22,7 @@ def get_data(network, sts, ets, stations=[]):
         (sts, ets, network, tuple(stations)))
     for row in cursor:
         s += "%s,%s,%s,%s\n" % (row[0], row[1], row[2], row[3]) 
-    
+
     return s
 
 
@@ -42,8 +43,8 @@ def main():
         return
     stations = form.getlist('station')
     network = form.getfirst('network')[:12]
-    sys.stdout.write( get_data(network, sts, ets, stations=stations) )
-    
+    sys.stdout.write(get_data(network, sts, ets, stations=stations))
+
 if __name__ == '__main__':
     # Go Main Go
     main()

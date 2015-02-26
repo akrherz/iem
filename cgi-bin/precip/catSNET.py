@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
-# Generate web output for precip data
-# Daryl Herzmann 06 Mar 2003
-#  7 Mar 2003:	Do some more cleanups
+Generate web output for precip data
 """
 import cgi
 import datetime
