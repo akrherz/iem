@@ -8,28 +8,29 @@
 
 import psycopg2.extras
 import cgi
+import os
 import sys
 import datetime
 import zipfile
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 import StringIO
 
 
 def get_scenario_period(ctx):
-    """ Compute the inclusive start and end dates to fetch scenario data for 
+    """ Compute the inclusive start and end dates to fetch scenario data for
     Arguments:
         ctx dictionary context this app was called with
     """
-    sts = datetime.date(ctx['scenario_year'], ctx['sts'].month,
-                                        ctx['sts'].day)
+    sts = datetime.date(ctx['scenario_year'], ctx['sts'].month, ctx['sts'].day)
     ets = datetime.date(ctx['scenario_year'], 12, 31)
     return sts, ets
 
 
 def ssw(txt):
     """ shortcut """
-    sys.stdout.write( txt )
+    sys.stdout.write(txt)
 
 
 def get_database():
@@ -38,7 +39,7 @@ def get_database():
 
 
 def sane_date(year, month, day):
-    """ Attempt to account for usage of days outside of the bounds for 
+    """ Attempt to account for usage of days outside of the bounds for
     a given month """
     # Calculate the last date of the given month
     nextmonth = datetime.date(year, month, 1) + datetime.timedelta(days=35)
@@ -75,7 +76,7 @@ def get_cgi_stations(form):
     return reqlist
 
 
-def do_apsim( ctx ):
+def do_apsim(ctx):
     """
     [weather.met.weather]
     latitude = 42.1 (DECIMAL DEGREES)
@@ -89,15 +90,15 @@ def do_apsim( ctx ):
         ssw(("ERROR: APSIM output is only "
                           +"permitted for one station at a time."))
         return
-    
+
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     station = ctx['stations'][0]
     table = get_tablename(ctx['stations'])
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
-    
+
     thisyear = datetime.datetime.now().year
     extra = {}
     if ctx['scenario'] == 'yes':
@@ -277,7 +278,7 @@ def do_century( ctx ):
                     data[year][9][idx], data[year][10][idx],
                     data[year][11][idx], data[year][12][idx]
                     ))
-    
+
 def do_daycent( ctx ):
     """ Materialize data for daycent 
 
@@ -351,6 +352,7 @@ def do_daycent( ctx ):
                 f2c(row["high"]), f2c(row["low"]), row["precip"] * 25.4) )
             now += datetime.timedelta(days=1)
 
+
 def get_tablename(stations):
     """ Figure out the table that has the data for these stations """
     states = []
@@ -361,6 +363,7 @@ def get_tablename(stations):
         return "alldata_%s" % (states[0],)
     return "alldata"
 
+
 def get_stationtable(stations):
     """ Figure out our station table! """
     states = []
@@ -370,59 +373,60 @@ def get_stationtable(stations):
             states.append(sid[:2])
             networks.append("%sCLIMATE" % (sid[:2],))
     return NetworkTable(networks)
-    
+
 
 def f2c(val):
     """ Convert temperature in F to C """
     return temperature(val, 'F').value('C')
 
-def do_simple( ctx ):
+
+def do_simple(ctx):
     """ Generate Simple output  """
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     table = get_tablename(ctx['stations'])
-    
+
     nt = get_stationtable(ctx['stations'])
     thisyear = datetime.datetime.now().year
     if len(ctx['stations']) == 1:
         ctx['stations'].append('X')
-    
-    cursor.execute("""
+
+    sql = """
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
-        merra_srad, merra_srad_cs, hrrr_srad, 
-to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date, 
+        merra_srad, merra_srad_cs, hrrr_srad,
+ to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date,
         'YYYY/mm/dd') as day,
         extract(doy from day) as julianday,
         gddxx(50, 86, high, low) as gdd_50_86,
         gddxx(40, 86, high, low) as gdd_40_86,
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
         round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
-        round((precip * 25.4)::numeric,1) as precipmm 
-        from """+table+""" WHERE 
-        station IN """+ str(tuple(ctx['stations'])) +""" and 
+        round((precip * 25.4)::numeric,1) as precipmm
+        from """ + table + """ WHERE
+        station IN """ + str(tuple(ctx['stations'])) + """ and
         day >= %s and day <= %s
-    ), obs as (    
+    ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
-        merra_srad, merra_srad_cs, hrrr_srad, 
+        merra_srad, merra_srad_cs, hrrr_srad,
         to_char(day, 'YYYY/mm/dd') as day,
         extract(doy from day) as julianday,
         gddxx(50, 86, high, low) as gdd_50_86,
         gddxx(40, 86, high, low) as gdd_40_86,
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
         round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
-        round((precip * 25.4)::numeric,1) as precipmm 
-        from """+table+""" WHERE 
-        station IN """+ str(tuple(ctx['stations'])) +""" and 
+        round((precip * 25.4)::numeric,1) as precipmm
+        from """+table+""" WHERE
+        station IN """ + str(tuple(ctx['stations'])) + """ and
         day >= %s and day <= %s
     ), total as (
         SELECT * from obs UNION SELECT * from scenario
     )
-    
-    SELECT * from total ORDER by day ASC
-    """, (ctx['scenario_sts'], ctx['scenario_ets'], ctx['sts'], ctx['ets']) )
+
+    SELECT * from total ORDER by day ASC"""
+    args = (ctx['scenario_sts'], ctx['scenario_ets'], ctx['sts'], ctx['ets'])
 
     cols = ['station', 'station_name', 'day', 'julianday']
     if ctx['inclatlon'] == 'yes':
@@ -430,6 +434,26 @@ to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date,
         cols.insert(3, 'lon')
 
     cols = cols + ctx['myvars']
+
+    if ctx['what'] == 'excel':
+        # Do the excel logic
+        df = pd.read_sql(sql, dbconn, params=args)
+
+        def _gs(x, y):
+            return nt.sts[x][y]
+
+        df['station_name'] = [_gs(x, 'name') for x in df['station']]
+        if 'lat' in cols:
+            df['lat'] = [_gs(x, 'lat') for x in df['station']]
+            df['lon'] = [_gs(x, 'lon') for x in df['station']]
+        ssw("Content-type: application/vnd.ms-excel\n")
+        ssw("Content-Disposition: attachment;Filename=nwscoop.xls\n\n")
+        df.to_excel('/tmp/ss.xls', columns=cols, index=False)
+        ssw(open('/tmp/ss.xls', 'rb').read())
+        os.unlink('/tmp/ss.xls')
+        return
+
+    cursor.execute(sql, args)
 
     ssw("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
     ssw("# Created: %s UTC\n" % (
@@ -456,6 +480,7 @@ to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date,
         for n in cols:
             res.append( str(dc[n]) )
         ssw( (d.join(res)).replace("None", "M") +"\r\n")
+
 
 def do_salus( ctx ):
     """ Generate SALUS
@@ -579,6 +604,7 @@ def do_dndc( ctx ):
     sio.seek(0)
     ssw( sio.read() )
 
+
 def main():
     """ go main go """
     form = cgi.FieldStorage()
@@ -597,8 +623,8 @@ def main():
     else:
         ctx['scenario_year'] = 2099
     ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period( ctx )
-    
-    if "dndc" not in ctx['myvars']:
+
+    if "dndc" not in ctx['myvars'] and ctx['what'] != 'excel':
         if ctx['what'] == 'download':
             ssw("Content-type: application/octet-stream\n")
             ssw(("Content-Disposition: attachment; "
