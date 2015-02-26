@@ -1,11 +1,11 @@
 """
- Need something to build a GEMPAK surface file 
+ Need something to build a GEMPAK surface file
  Daryl Herzmann 22 Mar 2004
  23 Mar 2004	Augh, use GMT!
  31 Mar 2004	Caught error when this bad boy runs at 12:03 AM
 """
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 import psycopg2.extras
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 import mx.DateTime

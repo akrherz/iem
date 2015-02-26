@@ -1,25 +1,20 @@
 #!/usr/bin/python
 """
-Gonna try to make something that can plot most anything under the moon for the COOP 
-data, watch me fail
+Gonna try to make something that can plot most anything under the moon for the
+COOP data, watch me fail
 
 -  seasonal temperatures, ex: summer daily max. temperature
 -  seasonal precipitation, ex: summer annual precip.
 
 """
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-
 import cgi
 import matplotlib
 matplotlib.use('agg')
-#matplotlib.rcParams['font.sans-serif'] = 'Arial'
-#matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['ps.usedistiller'] = 'ghostscript'
-matplotlib.rc('font', family='sans-serif') 
-matplotlib.rc('font', serif='Arial') 
-matplotlib.rc('text', usetex='false') 
-#matplotlib.rcParams.update({'font.size': 22})
+matplotlib.rc('font', family='sans-serif')
+matplotlib.rc('font', serif='Arial')
+matplotlib.rc('text', usetex='false')
 from matplotlib import pyplot as plt
 import psycopg2
 import numpy
@@ -236,7 +231,7 @@ def dailyc_plot(ax, cfg):
     """
     Plot daily climate
     """
-    COOP =psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor()
     chighs = []
     clows = []
@@ -254,15 +249,17 @@ def dailyc_plot(ax, cfg):
     
     COOP.close()
 
+
 def process_cgi(form):
     """
     Handle a CGI request
     """
     cfg = {}
     cfg['station'] = form.getvalue('station')
-    cfg['linregress'] = form.has_key('linregress')
+    cfg['linregress'] = ('linregress' in form)
     cfg['first_year'] = int(form.getvalue('first_year', 1951))
-    cfg['last_year'] = int(form.getvalue('last_year', mx.DateTime.now().year - 1))
+    cfg['last_year'] = int(form.getvalue('last_year',
+                                         mx.DateTime.now().year - 1))
     cfg['plot_type'] = form.getvalue('plot_type', 'annual_sum_precip')
 
     fig = plt.figure()
@@ -275,14 +272,14 @@ def process_cgi(form):
     else:
         yearly_plot(ax, cfg)
 
-    format = form.getvalue('format', 'png')
-    if format in ['eps',]:
+    fmt = form.getvalue('format', 'png')
+    if fmt in ['eps', ]:
         print "Content-Type: application/postscript\n"
-    elif format in ['png',]:
+    elif fmt in ['png', ]:
         print "Content-Type: image/png\n"
-    fig.savefig( sys.stdout, format=format )
+    fig.savefig(sys.stdout, format=format)
 
 if __name__ == '__main__':
     form = cgi.FieldStorage()
-    if form.has_key("station"):
+    if 'station' in form:
         process_cgi(form)
