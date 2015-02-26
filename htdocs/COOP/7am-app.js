@@ -8,6 +8,9 @@ function updateURL(){
 }
 
 function updateMap(){
+	renderattr = $('#renderattr').val();
+	coopLayer.setStyle(coopLayer.getStyle());
+	azosLayer.setStyle(azosLayer.getStyle());
 	updateURL();
 }
 
@@ -20,6 +23,7 @@ function makeVectorLayer(dt, title, group){
 		}),
 		style: function(feature, resolution){
 			txt = (feature.get(renderattr) == 0.001) ? "T" : feature.get(renderattr);
+			txt = (txt == null) ? '.' : txt;
 			return [new ol.style.Style({
 				text: new ol.style.Text({
 					font: '14px Calibri,sans-serif',
@@ -112,7 +116,7 @@ $(document).ready(function(){
                     + feature.getId() +" "+ feature.get('name') +"</strong>"
                     +"<br />Precip: "+ feature.get('pday')
                     +"<br />Snow: "+ feature.get('snow')
-                    +"<br />Snow Depth: "+ feature.get('snwowd')
+                    +"<br />Snow Depth: "+ feature.get('snowd')
                     +"</p>";
                     $('#popover-content').html(content);
                     $(element).popover('show');

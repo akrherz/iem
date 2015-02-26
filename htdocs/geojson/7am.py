@@ -55,8 +55,8 @@ def run_azos(ts):
                                     id=row['id'],
                                     properties=dict(
                                         pday=row['sum'],
-                                        snow='NA',
-                                        snowd='NA',
+                                        snow=None,
+                                        snowd=None,
                                         name=row['name']),
                                     geometry=dict(type='Point',
                                                   coordinates=[row['st_x'],
@@ -78,7 +78,7 @@ def run(ts):
         name from summary s JOIN stations t ON (t.iemid = s.iemid)
         WHERE s.day = %s and t.network = 'IA_COOP' and pday >= 0
         and extract(hour from coop_valid) between 5 and 10
-    """, (ts, ))
+    """, (ts.date(), ))
 
     res = {'type': 'FeatureCollection',
            'crs': {'type': 'EPSG',
