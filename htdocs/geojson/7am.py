@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-""" Generate a GeoJSON of 12z precip data """
+""" Generate a GeoJSON of 7 AM precip data """
 import memcache
 import sys
 import cgi
 import datetime
 import json
 import psycopg2.extras
+import pytz
 
 
 def router(group, ts):
@@ -27,18 +28,21 @@ def run_azos(ts):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utcnow = datetime.datetime.utcnow()
+    # Now we have the tricky work of finding what 7 AM is
+    ts = ts.astimezone(pytz.timezone("America/Chicago"))
+    ts1 = ts.replace(hour=7)
+    ts0 = ts1 - datetime.timedelta(hours=24)
 
     cursor.execute("""
     WITH obs as (
         select iemid, sum(phour) from hourly
         where network in ('AWOS', 'IA_ASOS') and
-        valid between '%s 12:00+00' and '%s 12:00+00' GROUP by iemid
+        valid between %s and %s GROUP by iemid
     )
 
     SELECT name, id, ST_x(geom), ST_y(geom), sum from stations t JOIN obs o
     ON (o.iemid = t.iemid)
-    """ % ((ts - datetime.timedelta(hours=24)).strftime("%Y-%m-%d"),
-          ts.strftime("%Y-%m-%d")))
+    """, (ts0, ts1))
 
     res = {'type': 'FeatureCollection',
            'crs': {'type': 'EPSG',
@@ -107,8 +111,9 @@ if __name__ == '__main__':
     cb = form.getfirst('callback', None)
     dt = form.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, '%Y-%m-%d')
+    ts = ts.replace(hour=12, tzinfo=pytz.timezone("UTC"))
 
-    mckey = "/geojson/12z/%s/%s" % (dt, group)
+    mckey = "/geojson/7am/%s/%s" % (dt, group)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
