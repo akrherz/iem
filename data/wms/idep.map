@@ -49,6 +49,22 @@ END
 
 LAYER
   VALIDATION
+    year                   "^[0-9]{4}$"
+    month                   "^[0-9]{2}$"
+    day                   "^[0-9]{2}$"
+  END
+  DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/mrms/p24h_%year%%month%%day%1200.png"
+  NAME "mrms-12z24h"
+  PROJECTION
+    "init=epsg:4326"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
+
+LAYER
+  VALIDATION
     date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
     year                   "^[0-9]{4}$"
   END
