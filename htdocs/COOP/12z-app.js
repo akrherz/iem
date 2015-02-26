@@ -14,7 +14,6 @@ function updateMap(){
 function makeVectorLayer(dt, title, group){
 	return new ol.layer.Vector({
 		title : title,
-		rendercolor: color,
 		source: new ol.source.GeoJSON({
 			projection: ol.proj.get('EPSG:3857'),
 			url: '/geojson/12z.py?group='+group+'&dt='+dt
