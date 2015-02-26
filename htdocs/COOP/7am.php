@@ -3,7 +3,7 @@ include_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 include_once "../../include/myview.php";
 $t = new MyView();
-$t->title = "12 UTC 24 Hour Precipitation Analysis";
+$t->title = "7 AM 24 Hour Precipitation Analysis";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/assets/openlayers/3.2.1/css/ol.css" type="text/css">
 <link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
@@ -24,14 +24,19 @@ $t->jsextra = <<<EOF
 <script src="/assets/openlayers/3.2.1/build/ol.js" type="text/javascript"></script>
 <script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
 <script src='/assets/openlayers/3.2.1/build/ol3-layerswitcher.js'></script>
-<script src='12z-app.js?v=6'></script>
+<script src='7am-app.js?v=6'></script>
 EOF;
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
 	<li><a href="/COOP/">NWS COOP</a></li>
-	<li class="active">12 UTC - 24 Hour Precipitation Analysis</li>
+	<li class="active">7 AM - 24 Hour Precipitation Analysis</li>
 </ol>
+
+<p>The purpose of this application is to provide a visual comparison of
+	various datasources for what they show for 24 hour precipitation
+	valid at 7 AM local central time.  This application helps in the
+	monthly quality control process of Iowa daily climate data.</p>
 		
 <h4>TODO list</h4>
 <ul>
@@ -43,7 +48,6 @@ $t->content = <<<EOF
  <li>Add MRMS Legend to map</li>
  <li>Include nearby state's data</li>
  <li>Add option to plot SWE</li>
- <li>Use 7 AM local vs 12 UTC ??</li>
 </ul>
 		
 <form name="bah">
