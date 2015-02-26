@@ -3,7 +3,6 @@ import matplotlib
 matplotlib.use('agg')
 import cgi
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import memcache
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm

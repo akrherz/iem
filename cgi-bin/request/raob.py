@@ -8,15 +8,17 @@ import datetime
 import pytz
 import psycopg2
 
+
 def m(val):
     if val is None:
         return 'M'
     return val
 
+
 def fetcher(station, sts, ets):
     dbconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
-    
+
     cursor.execute("""
     SELECT f.valid at time zone 'UTC', p.levelcode, p.pressure, p.height, 
     p.tmpc, p.dwpc, p.drct, round((p.smps * 1.94384)::numeric,0),

@@ -6,6 +6,7 @@ import sys
 import psycopg2.extras
 import pytz
 
+
 def diff(nowVal, pastVal, mulli):
     if nowVal < 0 or pastVal < 0:
         return "%5s," % ("M")
@@ -15,7 +16,8 @@ def diff(nowVal, pastVal, mulli):
 
     return "%5.2f," % (differ * mulli)
 
-def Main():
+
+def main():
     form = cgi.FormContent()
     year = form["year"][0]
     month = form["month"][0]
@@ -116,4 +118,5 @@ def Main():
 
         print
 
-Main()
+if __name__ == '__main__':
+    main()

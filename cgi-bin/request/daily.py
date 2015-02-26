@@ -9,6 +9,7 @@ import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 cursor = IEM.cursor()
 
+
 def get_data(network, sts, ets, stations=[]):
     ''' Go fetch data please '''
     s = ("station,day,max_temp_f,min_temp_f,max_dewpoint_f,"
@@ -23,9 +24,8 @@ def get_data(network, sts, ets, stations=[]):
     for row in cursor:
         s += "%s,%s,%s,%s,%s,%s,%s\n" % (row[0], row[1], row[2], row[3], row[4],
                                       row[5], row[6]) 
-    
-    return s
 
+    return s
 
 if __name__ == '__main__':
     ''' run rabbit run '''

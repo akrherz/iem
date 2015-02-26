@@ -21,7 +21,7 @@ matplotlib.rc('font', serif='Arial')
 matplotlib.rc('text', usetex='false') 
 #matplotlib.rcParams.update({'font.size': 22})
 from matplotlib import pyplot as plt
-import iemdb
+import psycopg2
 import numpy
 import mx.DateTime
 from pyiem.network import Table as NetworkTable
@@ -154,7 +154,7 @@ def yearly_plot(ax, cfg):
     Make a yearly plot of something
     """
     
-    COOP = iemdb.connect('coop', bypass=True)
+    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor()
     
     if cfg['plot_type'] == 'frost_free':
@@ -231,11 +231,12 @@ def yearly_plot(ax, cfg):
         #ypos = max(ydata) - (max(ydata) - min(ydata)) * 0.15
         #ax.text( cfg['first_year'], ypos, '2000 %.2f' % (numpy.average(y00),), color='#CC6633')
 
+
 def dailyc_plot(ax, cfg):
     """
     Plot daily climate
     """
-    COOP = iemdb.connect('coop', bypass=True)
+    COOP =psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor()
     chighs = []
     clows = []

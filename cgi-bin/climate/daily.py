@@ -3,7 +3,6 @@
 import cgi
 import memcache
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -19,7 +18,7 @@ import datetime
 def make_yr_plot(station1, year):
     """ Do it! """
     nt = NetworkTable("IACLIMATE")
-    
+
     dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
 
@@ -36,7 +35,7 @@ def make_yr_plot(station1, year):
         highs2[i] = row[1]
         lows2[i] = row[2]
         valid.append( row[0] )
-        
+
     # Get specified years data
     cursor.execute("""SELECT day, high, low from alldata_ia where
     station = %s and year = %s ORDER by day ASC""", (station1, year))
@@ -49,7 +48,7 @@ def make_yr_plot(station1, year):
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
 
-        
+
     ax[0].plot(valid, highs, color='r', linestyle='-', label='Climate High')
     ax[0].plot(valid, lows, color='b', label='Climate Low')
     ax[0].set_ylabel(r"Temperature $^\circ\mathrm{F}$")

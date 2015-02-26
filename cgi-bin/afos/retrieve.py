@@ -4,6 +4,7 @@ import psycopg2
 import cgi
 import sys
 
+
 def main():
     ''' Go main Go '''
     sys.stdout.write("Content-type: text/plain; charset=""\n\n")
@@ -71,7 +72,7 @@ def main():
         sql = """SELECT data from products WHERE pil IN """+ pilAR +"""
    ORDER by entered DESC LIMIT """+LIMIT
         cursor.execute(sql)
-        
+
     for row in cursor:
         print "\001"
         print (row[0]).replace("\003", "").replace("\001", "").replace("\r\r\n", "\n")
@@ -80,7 +81,6 @@ def main():
     if cursor.rowcount == 0:
         print "Could not Find: "+pil
 
-         
 
 if __name__ == '__main__':
     main()

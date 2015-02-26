@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 """
  Produce a OA GDD Plot, dynamically!
-$Id: $:
 """
-import sys, os
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
-import iemplot
+import sys
+import os
 import cgi
 import datetime
+from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 form = cgi.FieldStorage()
@@ -70,26 +67,17 @@ for row in ccursor:
     continue
   lats.append( st.sts[id]['lat'] )
   lons.append( st.sts[id]['lon'] )
-  gdd50.append( row[1] )
+  gdd50.append(float(row[1]))
   valmask.append( True )
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- #'cnLevelSelectionMode': 'ManualLevels',
- #  'cnLevelSpacingF'      : 50.0,
- #'cnMinLevelValF'       : 900.0,
- #'cnMaxLevelValF'       : 1900.0,
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_showvalues'        : True,
- '_valueMask'         : valmask,
- '_format'            : '%.0f',
- '_title'             : "Iowa %s thru %s GDD(base=%s,max=%s) Accumulation" % (
-                        sts.strftime("%Y: %d %b"), 
-                        (ets - datetime.timedelta(days=1)).strftime("%d %b"),
-                        baseV, maxV),
- 'lbTitleString'      : "F",
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
-iemplot.webprocess(tmpfp)
+m = MapPlot(title=("Iowa %s thru %s GDD(base=%s,max=%s) Accumulation"
+                   "") % (sts.strftime("%Y: %d %b"), 
+                          (ets - datetime.timedelta(days=1)).strftime("%d %b"),
+                          baseV, maxV),
+            axisbg='white')
+m.contourf(lons, lats, gdd50, range(int(min(gdd50)), int(max(gdd50)), 25))
+m.plot_values(lons, lats, gdd50, fmt='%.0f')
+m.drawcounties()
+m.postprocess(web=True)
+m.close()
+

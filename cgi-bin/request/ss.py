@@ -2,10 +2,10 @@
 """
 Return a simple CSV of stuart smith data
 
-Levelogger Reading (ft)    
-Barologger Reading    
-Temp (C)    
-Barologger Air Temp (C)    
+Levelogger Reading (ft)
+Barologger Reading
+Temp (C)
+Barologger Air Temp (C)
 Conductivity (micro-S)
 7.20473    ch1_data_p
 2.68857     ch2_data_p
@@ -26,13 +26,14 @@ lookup = {9100104: "SSP #6",
           9100131: "SSP #1",
           9100156: "SSP #7"}
 
+
 def gage_run(sts, ets, stations, excel):
     """ run() """
     if len(stations) == 0:
         stations = lookup.keys()
     if len(stations) == 1:
         stations.append(0)
-    
+
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
     sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
     site_serial, ch1_data_p, ch2_data_p,
@@ -54,9 +55,9 @@ def gage_run(sts, ets, stations, excel):
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write(df.to_csv(None, header=headers, index=False))
 
+
 def bubbler_run(sts, ets, excel):
     """ run() """
-    
     dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
     sql = """
     WITH one as (SELECT valid, value from ss_bubbler WHERE
@@ -65,7 +66,7 @@ def bubbler_run(sts, ets, excel):
     valid between '%s' and '%s' and field = 'STAGE'),
     three as (SELECT valid, value from ss_bubbler WHERE
     valid between '%s' and '%s' and field = 'Water Temp')
-    
+
     SELECT date(coalesce(one.valid, two.valid, three.valid)) as date, 
     to_char(coalesce(one.valid, two.valid, three.valid), 'HH24:MI:SS') as time,
     one.value, two.value, three.value 
@@ -85,7 +86,8 @@ def bubbler_run(sts, ets, excel):
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write(df.to_csv(None, header=headers, index=False))
-    
+
+
 def main():
     """ Go Main Go """
     form = cgi.FieldStorage()
@@ -101,12 +103,12 @@ def main():
 
     sts = datetime.datetime(year1, month1, day1)
     ets = datetime.datetime(year2, month2, day2)
-    
+
     if opt == 'bubbler':
         bubbler_run(sts, ets, form.getfirst('excel', 'n'))
     elif opt == 'gage':
         gage_run(sts, ets, stations, form.getfirst('excel', 'n'))
-    
+
 
 if __name__ == '__main__':
     main()

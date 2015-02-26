@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-# This is my script that will get the data for the birthday and display it
-# Daryl Herzmann 11-8-99
-# 28 Aug 2002:	Coop DB is now on DB1
-# 13 Feb 2003:	Make this actually work with new Python
 
 import psycopg2
 import cgi
