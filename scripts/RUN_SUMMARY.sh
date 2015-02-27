@@ -2,10 +2,7 @@
 # Run this only a couple of times per day, probably
 #set echo
 
-cd gdd
-python normal_may1.py
-
-cd ../current
+cd current
 python plot_hilo.py 1
 
 cd ../climate
