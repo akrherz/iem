@@ -1,5 +1,5 @@
 """
- Generate a WXC formatted file with moon conditions for Iowa sites.  I am 
+ Generate a WXC formatted file with moon conditions for Iowa sites.  I am
  unsure if the TV folks are still using this or not.  Its easy to generate
 """
 
@@ -26,8 +26,8 @@ def figurePhase(p1, p2):
             return 'Waning_Gibbous'
         else:
             return 'Full Moon'
-  
-    else: # Waxing!
+
+    else:  # Waxing!
         if p1 < 0.1:
             return 'New Moon'
         if p1 < 0.4:
@@ -39,12 +39,13 @@ def figurePhase(p1, p2):
         else:
             return 'Full Moon'
 
+
 def mydate(d):
     ''' Convert string into a datetime obj '''
     if d is None:
-        return datetime.datetime(1989,1,1)
+        return datetime.datetime(1989, 1, 1)
     if d == "":
-        return datetime.datetime(1989,1,1)
+        return datetime.datetime(1989, 1, 1)
 
     gts = datetime.datetime.strptime(str(d), '%Y/%m/%d %H:%M:%S')
     gts = gts.replace(tzinfo=pytz.timezone("UTC"))
@@ -67,20 +68,20 @@ out.write("""Weather Central 001d0300 Surface Data
 
 for station in nt.sts.keys():
     ia = ephem.Observer()
-    ia.lat = `nt.sts[station]['lat']`
-    ia.long = `nt.sts[station]['lon']`
+    ia.lat = str(nt.sts[station]['lat'])
+    ia.long = str(nt.sts[station]['lon'])
     ia.date = '%s 00:00' % (datetime.datetime.utcnow().strftime("%Y/%m/%d"), )
     r1 = mydate(ia.next_rising(m))
     s1 = mydate(ia.next_setting(m))
     p1 = m.moon_phase
 
-    ia.date = '%s 00:00' % ((datetime.datetime.utcnow() - 
-                             datetime.timedelta(days=1)).strftime("%Y/%m/%d"), )
+    ia.date = '%s 00:00' % ((datetime.datetime.utcnow() -
+                             datetime.timedelta(days=1)).strftime("%Y/%m/%d"),)
     r2 = mydate(ia.next_rising(m))
     s2 = mydate(ia.next_setting(m))
     p2 = m.moon_phase
 
-    mp = figurePhase(p1,p2)
+    mp = figurePhase(p1, p2)
     find_d = datetime.datetime.now().strftime("%Y%m%d")
 
     my_rise = r2
@@ -91,10 +92,11 @@ for station in nt.sts.keys():
     if s1.strftime("%Y%m%d") == find_d:
         my_set = s1
 
-    out.write("K%s %-30.30s %6.3f %8.3f %8s %8s %30s AA\n" % (station, 
-                    nt.sts[station]['name'], nt.sts[station]['lat'], 
-                    nt.sts[station]['lon'], my_rise.strftime("%-I:%M %P"), 
-                    my_set.strftime("%-I:%M %P"), mp) )
+    out.write(("K%s %-30.30s %6.3f %8.3f %8s %8s %30s AA\n"
+               ) % (station,
+                    nt.sts[station]['name'], nt.sts[station]['lat'],
+                    nt.sts[station]['lon'], my_rise.strftime("%-I:%M %P"),
+                    my_set.strftime("%-I:%M %P"), mp))
 
 out.close()
 

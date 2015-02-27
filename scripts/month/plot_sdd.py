@@ -1,7 +1,6 @@
-# Generate a plot of SDD 
-
-import sys, os
-import iemplot
+# Generate a plot of SDD
+import sys
+from pyiem.plot import MapPlot
 
 import mx.DateTime
 now = mx.DateTime.now()
@@ -23,26 +22,19 @@ lats = []
 lons = []
 sdd86 = []
 valmask = []
-ccursor.execute( sql )
+ccursor.execute(sql)
 for row in ccursor:
-  lats.append( nt.sts[row[0]]['lat'] )
-  lons.append( nt.sts[row[0]]['lon'] )
-  sdd86.append( row[1] )
-  valmask.append( True )
+    lats.append(nt.sts[row[0]]['lat'])
+    lons.append(nt.sts[row[0]]['lon'])
+    sdd86.append(float(row[1]))
+    valmask.append(True)
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_showvalues'        : True,
- '_valueMask'         : valmask,
- '_format'            : '%.0f',
- '_title'             : "Iowa %s SDD Accumulation" % (
-                        now.strftime("%B %Y"), ),
- 'lbTitleString'      : "[base 86]",
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, sdd86, cfg)
+if max(sdd86) == 0:
+    sys.exit()
 
+m = MapPlot(axisbg='white',
+            title="Iowa %s SDD Accumulation" % (now.strftime("%B %Y"), ))
+m.contourf(lons, lats, sdd86, range(int(min(sdd86)-1), int(max(sdd86)+1)))
 pqstr = "plot c 000000000000 summary/sdd_mon.png bogus png"
-iemplot.postprocess(tmpfp, pqstr)
+m.postprocess(view=False, pqstr=pqstr)
+m.close()
