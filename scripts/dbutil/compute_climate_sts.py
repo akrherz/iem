@@ -17,7 +17,9 @@ acursor.execute("""SELECT station, min(day) from alldata_%s GROUP by station
   ORDER by min ASC""" % (net[:2]))
 for row in acursor:
     station = row[0]
-    ts = datetime.datetime(row[1].year, row[1].month, row[1].day)
+    # Use 12 UTC as the timestamp so to avoid timezone issues with very old
+    # dates, for example 00 UTC on 1 Jan 1893 would go to 31 Dec 1892
+    ts = datetime.datetime(row[1].year, row[1].month, row[1].day, 12, 0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     if station not in nt.sts:
         continue
