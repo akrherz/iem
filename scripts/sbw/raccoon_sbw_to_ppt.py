@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Generate a Powerpoint file for an event.  This script looks for queued jobs 
+"""Generate a Powerpoint file for an event.  This script looks for queued jobs
 within the database and runs them sequentially each minute"""
 __REV__ = "11Feb2013"
 import os
@@ -18,37 +18,41 @@ from odf.draw import Page, Frame, TextBox, Image
 
 SUPER_RES = datetime.datetime(2010, 3, 1)
 
+
 def test_job():
     """
     For command line testing, lets provide a dummy job
     """
     jobs = []
     jobs.append({'wfo': 'FSD', 'radar': 'FSD', 'wtype': 'SV,TO',
-                 'sts': datetime.datetime(2003,6,24, 2),
-                 'ets': datetime.datetime(2003,6,24, 4),
-                 'jobid': random.randint(1,1000000),
+                 'sts': datetime.datetime(2003, 6, 24, 2),
+                 'ets': datetime.datetime(2003, 6, 24, 4),
+                 'jobid': random.randint(1, 1000000),
                  'nexrad_product': 'N0U'})
     return jobs
+
 
 def check_for_work():
     """
     See if we have any requests to process!
     """
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb',
+                                user='nobody')
     mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mcursor2 = MESOSITE.cursor()
-    mcursor.execute("""SELECT jobid, wfo, radar, 
-        sts at time zone 'UTC' as sts, 
+    mcursor.execute("""SELECT jobid, wfo, radar,
+        sts at time zone 'UTC' as sts,
         ets at time zone 'UTC' as ets, nexrad_product, wtype
         from racoon_jobs WHERE processed = False""")
     jobs = []
     for row in mcursor:
         jobs.append(row)
-        mcursor2.execute("""UPDATE racoon_jobs SET processed = True 
+        mcursor2.execute("""UPDATE racoon_jobs SET processed = True
         WHERE jobid = %s""", (row[0],))
     MESOSITE.commit()
     MESOSITE.close()
     return jobs
+
 
 def get_warnings(sts, ets, wfo, wtypes):
     """
@@ -61,35 +65,37 @@ def get_warnings(sts, ets, wfo, wtypes):
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """
     WITH stormbased as (
-        SELECT phenomena, eventid, issue, expire, 
+        SELECT phenomena, eventid, issue, expire,
         ST_Area(ST_Transform(geom,2163))/1000000.0 as polyarea
         from sbw_%s WHERE issue BETWEEN '%s+00' and '%s+00' and
-        wfo = '%s' and phenomena in %s and significance = 'W' and status = 'NEW'
+        wfo = '%s' and phenomena in %s and significance = 'W'
+        and status = 'NEW'
     ), countybased as (
-        SELECT phenomena, eventid, 
+        SELECT phenomena, eventid,
         sum(ST_Area(ST_Transform(u.geom,2163))/1000000.0) as countyarea
         from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
         issue BETWEEN '%s+00' and '%s+00' and
         w.wfo = '%s' and phenomena in %s and significance = 'W'
         GROUP by phenomena, eventid
     )
-    
-    SELECT s.phenomena, s.eventid, 
-    s.issue at time zone 'UTC' as issue, 
+
+    SELECT s.phenomena, s.eventid,
+    s.issue at time zone 'UTC' as issue,
     s.expire at time zone 'UTC' as expire, s.polyarea,
-    c.countyarea from stormbased s JOIN countybased c 
+    c.countyarea from stormbased s JOIN countybased c
     on (c.eventid = s.eventid and c.phenomena = s.phenomena)
-    """ % (sts.year, sts.strftime("%Y-%m-%d %H:%M"), 
+    """ % (sts.year, sts.strftime("%Y-%m-%d %H:%M"),
            ets.strftime("%Y-%m-%d %H:%M"), wfo, phenomenas,
-           sts.year, sts.strftime("%Y-%m-%d %H:%M"), 
+           sts.year, sts.strftime("%Y-%m-%d %H:%M"),
            ets.strftime("%Y-%m-%d %H:%M"), wfo, phenomenas
            )
     pcursor.execute(sql)
     res = []
     for row in pcursor:
-        res.append( row )
+        res.append(row)
     POSTGIS.close()
     return res
+
 
 def do_job(job):
 
@@ -97,10 +103,10 @@ def do_job(job):
 
     os.makedirs("/tmp/%s" % (job['jobid'],))
     os.chdir("/tmp/%s" % (job['jobid'],))
-    
-    basefn = "%s-%s-%s-%s-%s" % (job['wfo'], job['wtype'].replace(",", "_"), 
+
+    basefn = "%s-%s-%s-%s-%s" % (job['wfo'], job['wtype'].replace(",", "_"),
                                  job['radar'], job['sts'].strftime("%Y%m%d%H"),
-                                      job['ets'].strftime("%Y%m%d%H"))
+                                 job['ets'].strftime("%Y%m%d%H"))
     outputfile = "%s.odp" % (basefn,)
 
     doc = OpenDocumentPresentation()
@@ -109,7 +115,8 @@ def do_job(job):
     pagelayout = PageLayout(name="MyLayout")
     doc.automaticstyles.addElement(pagelayout)
     pagelayout.addElement(PageLayoutProperties(margin="0pt", pagewidth="800pt",
-        pageheight="600pt", printorientation="landscape"))
+                                               pageheight="600pt",
+                                               printorientation="landscape"))
 
     # Style for the title frame of the page
     # We set a centered 34pt font with yellowish background
@@ -137,27 +144,28 @@ def do_job(job):
     doc.masterstyles.addElement(masterpage)
 
     dpstyle = Style(name="dp1", family="drawing-page")
-    #dpstyle.addElement(DrawingPageProperties(transitiontype="automatic",
+    # dpstyle.addElement(DrawingPageProperties(transitiontype="automatic",
     #   transitionstyle="move-from-top", duration="PT5S"))
     doc.automaticstyles.addElement(dpstyle)
-    
+
     # Title slide
     page = Page(masterpagename=masterpage)
     doc.presentation.addElement(page)
-    frame = Frame(stylename=indexstyle, width="720pt", height="500pt", 
+    frame = Frame(stylename=indexstyle, width="720pt", height="500pt",
                   x="40pt", y="10pt")
-    page.addElement( frame )
+    page.addElement(frame)
     textbox = TextBox()
     frame.addElement(textbox)
     textbox.addElement(P(text="IEM Raccoon Report"))
-    
-    frame = Frame(stylename=indexstyle, width="720pt", height="500pt", 
+
+    frame = Frame(stylename=indexstyle, width="720pt", height="500pt",
                   x="40pt", y="150pt")
-    page.addElement( frame )
+    page.addElement(frame)
     textbox = TextBox()
     frame.addElement(textbox)
     textbox.addElement(P(text="WFO: %s" % (job['wfo'],)))
-    textbox.addElement(P(text="Radar: %s Product: %s" % (job['radar'], job['nexrad_product'])))
+    textbox.addElement(P(text=("Radar: %s Product: %s"
+                               "") % (job['radar'], job['nexrad_product'])))
     textbox.addElement(P(text="Phenomenas: %s" % (job['wtype'], )))
     textbox.addElement(P(text="Start Time: %s UTC" % (job['sts'].strftime("%d %b %Y %H"),)))
     textbox.addElement(P(text="End Time: %s UTC" % (job['ets'].strftime("%d %b %Y %H"),)))
@@ -167,8 +175,7 @@ def do_job(job):
                                     datetime.datetime.utcnow().strftime("%d %b %Y %H:%M %Z"))))
     textbox.addElement(P(text=""))
     textbox.addElement(P(text="Bugs/Comments/Yelling?: daryl herzmann akrherz@iastate.edu"))
-    
-    
+
     i = 0
     for warning in warnings:
         # Make Index page for the warning
@@ -191,13 +198,13 @@ def do_job(job):
                                     warning['polyarea'] / warning['countyarea'] * 100.0)))
         textbox.addElement(P(text="County Area: %.1f square km (%.1f square miles)" % ( 
                                     warning['countyarea'], warning['countyarea'] * 0.386102)))
-        
+
         url = "http://iem21.local/GIS/radmap.php?"
         url += "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
         url += "&layers[]=uscounties&layers[]=bufferedlsr&lsrbuffer=15"
         url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % ( job['sts'].year, job['wfo'],
                                     warning['phenomena'],warning['eventid'])
-        
+
         cmd = "wget -q -O %i.png '%s'" % (i, url)
         os.system(cmd)
         photoframe = Frame(stylename=photostyle, width="480pt", 
@@ -206,14 +213,14 @@ def do_job(job):
         href = doc.addPicture("%i.png" % (i,))
         photoframe.addElement(Image(href=href))
         i += 1
-        
+
         times = []
         now = warning['issue']
         while now < warning['expire']:
             times.append( now )
             now += datetime.timedelta(minutes=15)
         times.append( warning['expire'] - datetime.timedelta(minutes=1))
-        
+
         for now in times:    
             page = Page(stylename=dpstyle, masterpagename=masterpage)
             doc.presentation.addElement(page)
@@ -225,7 +232,7 @@ def do_job(job):
             textbox.addElement(P(text="%s.W.%04i Time: %s UTC" % ( 
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%d %b %Y %H%M"))))
-            
+
             if job['nexrad_product'] == 'N0U':
                 if now < SUPER_RES:
                     n0qn0r = 'N0V'
@@ -236,7 +243,7 @@ def do_job(job):
                     n0qn0r = 'N0R'
                 else:
                     n0qn0r = 'N0Q'
-            
+
             url = "http://iem21.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (n0qn0r, 
                                                                 job['radar'])
@@ -259,7 +266,7 @@ def do_job(job):
     doc.save(outputfile)
     del doc
     cmd = "unoconv -f ppt %s" % (outputfile,)
-    subprocess.call( cmd, shell=True )
+    subprocess.call(cmd, shell=True)
     pptfn = "%s.ppt" % (basefn,)
     print "Generated %s with %s slides" % (pptfn, i)
     if os.path.isfile(pptfn):
