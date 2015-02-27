@@ -80,7 +80,7 @@ def runner(days):
             """ % (ts.year, sid, ts.strftime("%Y-%m-%d"))
         icursor.execute(sql)
         if icursor.rowcount == 0:
-            print 'NEED entry for %s %s' % (id, ts.strftime("%Y-%m-%d"))
+            print 'NEED entry for %s %s' % (sid, ts.strftime("%Y-%m-%d"))
         else:
             row = icursor.fetchone()
             dbval = row[0]
