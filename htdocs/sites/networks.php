@@ -71,35 +71,37 @@ if (strlen($network) > 0){
 
 		/* Create SHP,DBF bases */
 		$filePre = "${network}_locs";
-		$shpFname = "/var/webtmp/$filePre";
-		@unlink($shpFname.".shp");
-		@unlink($shpFname.".shx");
-		@unlink($shpFname.".dbf");
-		@unlink($shpFname.".zip");
-		$shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
-		$dbfFile = dbase_create( $shpFname.".dbf", array(
-				array("ID", "C", 6),
-				array("NAME", "C", 50),
-				array("NETWORK","C",20),
-				array("BEGINTS","C",16),
-		));
-
-		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-			$pt = ms_newPointobj();
-			$pt->setXY( $row["longitude"], $row["latitude"], 0);
-			$shpFile->addPoint($pt);
-
-			dbase_add_record($dbfFile, array(
-				$row["id"],
-				$row["name"],
-				$row["network"],
-				substr($row["archive_begin"],0,16)));
+		if (! is_file($filePre.".zip")){
+			$shpFname = "/var/webtmp/$filePre";
+			@unlink($shpFname.".shp");
+			@unlink($shpFname.".shx");
+			@unlink($shpFname.".dbf");
+			@unlink($shpFname.".zip");
+			$shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
+			$dbfFile = dbase_create( $shpFname.".dbf", array(
+					array("ID", "C", 6),
+					array("NAME", "C", 50),
+					array("NETWORK","C",20),
+					array("BEGINTS","C",16),
+			));
+	
+			for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+				$pt = ms_newPointobj();
+				$pt->setXY( $row["longitude"], $row["latitude"], 0);
+				$shpFile->addPoint($pt);
+	
+				dbase_add_record($dbfFile, array(
+					$row["id"],
+					$row["name"],
+					$row["network"],
+					substr($row["archive_begin"],0,16)));
+			}
+			unset($shpFile);
+			dbase_close($dbfFile);
+			chdir("/var/webtmp/");
+			copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
+			popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
 		}
-		unset($shpFile);
-		dbase_close($dbfFile);
-		chdir("/var/webtmp/");
-		copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
-		popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
 		$table .= "Shapefile Generation Complete.<br>";
 		$table .= "Please download this <a href=\"/tmp/".$filePre.".zip\">zipfile</a>.";
 		chdir("/mesonet/www/apps/iemwebsite/htdocs/sites/");
