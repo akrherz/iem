@@ -32,6 +32,6 @@ m = MapPlot(title="Record High + Low Temperature [F] (1893-%s)" % (now.year,),
 m.drawcounties()
 m.plot_station(obs)
 pqstr = ("plot ac %s0000 climate/iowa_today_rec_hilo_pt.png coop_rec_temp.png "
-         "coop_avg_temp.png png") % (now.strftime("%Y%m%d"), )
+         "png") % (now.strftime("%Y%m%d"), )
 m.postprocess(view=False, pqstr=pqstr)
 m.close()
