@@ -10,7 +10,7 @@
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
 192.168.0.4      iemfe         iemfe.local
-192.168.0.5      iem5   iem5.local
+192.168.0.5      metvm2.local
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.7      iemvm2
 192.168.0.8      iemvm0
@@ -40,23 +40,22 @@
 192.168.0.233    iemvm3
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
-192.168.0.249    metvm2
 
 #
 # IPs that float thanks to the magic of pulse or keepalived
+# BE CAREFUL HERE not to assign a backup and kvm iron to same service!
 #   iem-director0 <-> iem-director1
 192.168.0.254    iem-gateway   iem-gateway.local
-#   iem50 <-> iem30
-192.168.1.250    iem-mapserver    
+#   VI_1(51) iem50 <-> iem30
+192.168.1.250    iem-mapserver
+#   VI_2(52) metvm5 <-> iem30
+192.168.1.249    iem-memached
+#   VI_3(53) metvm4 <-> iem21
+192.168.1.248    iem-memcached1
+#   VI_4(54) metvm3 <-> metvm2
+192.168.1.247    iem-memcached2
+#   VI_5(55) iem21 <-> iem30
+192.168.1.246    iembot
 
-# IPs that float depending on workload!
-# metvm5, backup iem21
-192.168.1.190    iem-memcached
-# metvm4
-192.168.1.191    iem-memcached1
-# metvm3
-192.168.1.192    iem-memcached2
-# iem30, backup iem21
-192.168.1.193    iembot
 # iem19, backup iem12
 192.168.1.203    iemdb iemdb2
