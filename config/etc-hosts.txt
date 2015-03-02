@@ -49,7 +49,7 @@
 #   VI_1(51) iem50 <-> iem30
 192.168.1.250    iem-mapserver
 #   VI_2(52) metvm5 <-> iem30
-192.168.1.249    iem-memached
+192.168.1.249    iem-memcached
 #   VI_3(53) metvm4 <-> iem21
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm3 <-> metvm2
