@@ -13,7 +13,7 @@
 192.168.0.5      metvm2.local
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.7      iemvm2
-192.168.0.8      iemvm0
+192.168.0.8      metvm1.local
 192.168.0.9      iemvm1        
 192.168.0.10     iem10         iem10.local
 192.168.0.11     iem11         iem11.local iem-syslog
@@ -36,7 +36,6 @@
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
 192.168.0.200    iem-idd0      iem-idd0.local
-192.168.0.231    iemvm1
 192.168.0.233    iemvm3
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
