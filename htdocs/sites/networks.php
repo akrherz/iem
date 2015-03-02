@@ -71,7 +71,7 @@ if (strlen($network) > 0){
 
 		/* Create SHP,DBF bases */
 		$filePre = "${network}_locs";
-		if (! is_file($filePre.".zip")){
+		if (! is_file("/var/webtmp/{$filePre}.zip")){
 			$shpFname = "/var/webtmp/$filePre";
 			@unlink($shpFname.".shp");
 			@unlink($shpFname.".shx");
