@@ -3,6 +3,9 @@
 
 127.0.0.1        iem.local
 127.0.0.1        mesonet.agron.iastate.edu
+# 
+# Iron, in general, these IPs should not be used for services
+#
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
@@ -38,7 +41,13 @@
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
 192.168.0.249    metvm2
+
+#
+# IPs that float thanks to the magic of pulse or keepalived
+#   iem-director0 <-> iem-director1
 192.168.0.254    iem-gateway   iem-gateway.local
+#   iem50 <-> iem30
+192.168.1.250    iem-mapserver    
 
 # IPs that float depending on workload!
 # metvm5, backup iem21
@@ -49,7 +58,5 @@
 192.168.1.192    iem-memcached2
 # iem30, backup iem21
 192.168.1.193    iembot
-# iem50, backup iem30
-192.168.1.202    iem-mapserver 
 # iem19, backup iem12
 192.168.1.203    iemdb iemdb2
