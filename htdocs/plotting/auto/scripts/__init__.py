@@ -57,6 +57,8 @@ data = {'plots': [
         {'id': "27", 'label': "First Fall Freeze then Killing Frost"},
         {'id': "53", 'label': "Hourly Frequency of Temperature within Certain Ranges"},
         {'id': "10", 'label': "Last Spring and First Fall Date above/below given threshold"},
+        {'id': '64',
+         'label': 'Last Snowfall of Each Winter Season'},
         {'id': "33", 'label': "Maximum Low Temperature Drop"},
         {'id': "46", 'label': "Minimum Wind Chill Temperature"},
         {'id': "30", 'label': "Monthly Temperature Range"},
