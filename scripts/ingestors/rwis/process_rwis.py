@@ -38,9 +38,10 @@ RWIS2METAR = {'00': 'XADA', '01': 'XALG', '02': 'XATN', '03': 'XALT',
               '52': 'XCRI', '53': 'XCFI', '54': 'XSYI', '55': 'XBFI',
               '56': 'XDYI', '57': 'XTMI', '58': 'XPFI', '59': 'XCTI',
               '60': 'XDNI', '61': 'XQCI', '62': 'XSMI', '63': 'XRWI',
-              '64': 'XETI', '65': 'XCMI'}
+              '64': 'XETI', '65': 'XCCI', '66': 'XKSI', '67': 'XKNI',
+              '68': 'XCMI'}
 
-KNOWN_UNKNOWNS = [66, 67, 68]
+KNOWN_UNKNOWNS = []
 
 
 def get_nwsli(rpuid):
