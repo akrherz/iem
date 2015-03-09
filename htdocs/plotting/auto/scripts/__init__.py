@@ -32,6 +32,8 @@ data = {'plots': [
     {'label': 'Monthly', 'options': [
         {'id': "55", 'label': "Daily Climatology Comparison"},
         {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
+        {'id': '65',
+         'label': 'Day of the Month with the coldest temperature'},
         {'id': "29", 'label': "Frequency of Hourly Temperature within Range by Month"},
         {'id': "1", 'label': "July-August Days Above Temp v. May-June Precip"},
         {'id': "9", 'label': "Growing Degree Day Climatology and Daily Values for one Year"},
