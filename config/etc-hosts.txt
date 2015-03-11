@@ -14,13 +14,14 @@
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.7      iemvm2
 192.168.0.8      metvm1.local
-192.168.0.9      iemvm1        
-192.168.0.10     iem10         iem10.local
+192.168.0.9      metfs1.local       iem-idd0      iem-idd0.local  
+192.168.0.10     mtarchive.local
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12         postgresread
 192.168.0.21     iem21         iem21.local openfire-bosh
 192.168.0.22     iem22         iem22.local
 192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
+192.168.0.34     meteor.local
 192.168.0.40     iem40         iem40.local
 192.168.0.50     iem50         iem50.local 
 192.168.0.60     iem60         iem60.local
@@ -35,7 +36,6 @@
 192.168.0.107    iemvs107      iemvs107.local
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
-192.168.0.200    iem-idd0      iem-idd0.local
 192.168.0.233    iemvm3
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
