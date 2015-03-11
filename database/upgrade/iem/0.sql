@@ -36,5 +36,7 @@ alter table summary_2015 alter pday set default -99;
 alter table summary_2015 alter pmonth set default -99;
 alter table summary_2015 alter snoww set default -99;
 alter table summary_2015 alter max_drct set default -99;
-alter table summary_2015 add foreign key(iemid) references stations(iemid);
+alter table summary_2015 
+  add foreign key(iemid)
+  references stations(iemid) ON DELETE CASCADE;
 
