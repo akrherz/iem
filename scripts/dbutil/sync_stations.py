@@ -9,7 +9,12 @@ import psycopg2.extras
 MESOSITE = psycopg2.connect(database="mesosite", host='iemdb')
 subscribers = ["iem", "coop", "hads", "asos", "postgis"]
 
+DO_DELETE = False
 if len(sys.argv) == 2:
+    print 'Running with delete option set, this will be slow'
+    DO_DELETE = True
+
+if len(sys.argv) == 3:
     print 'Running laptop syncing from upstream, assume iemdb is localhost!'
     MESOSITE = psycopg2.connect(database='mesosite',
                                 host='mesonet.agron.iastate.edu',
@@ -31,8 +36,23 @@ def sync(dbname):
     row = dbcursor.fetchone()
     maxTS = (row[0] or datetime.datetime(1980, 1, 1))
     maxID = (row[1] or -1)
-    # figure out what has changed!
     cur = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    todelete = []
+    if DO_DELETE:
+        # Generate massive listing of all NWSLIs
+        cur.execute("""SELECT iemid from stations""")
+        iemids = []
+        for row in cur:
+            iemids.append(row[0])
+        # Find what iemids we have in local database
+        dbcursor.execute("""SELECT iemid from stations""")
+        for row in dbcursor:
+            if row[0] not in iemids:
+                todelete.append(row[0])
+        if len(todelete) > 0:
+            dbcursor.execute("""DELETE from stations where iemid in %s
+            """, (tuple(todelete), ))
+    # figure out what has changed!
     cur.execute("""SELECT * from stations WHERE modified > %s or iemid > %s""",
                 (maxTS, maxID))
     for row in cur:
@@ -56,9 +76,9 @@ def sync(dbname):
        sigstage_record = %(sigstage_record)s, ugc_county = %(ugc_county)s,
        ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s
        WHERE iemid = %(iemid)s""", row)
-    print ("DB: %-7s Mod %4s rows TS: %s IEMID: %s"
-           "") % (dbname, cur.rowcount, maxTS.strftime("%Y/%m/%d %H:%M"),
-                  maxID)
+    print ("DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s"
+           "") % (dbname, len(todelete), cur.rowcount,
+                  maxTS.strftime("%Y/%m/%d %H:%M"), maxID)
     # close connection
     dbcursor.close()
     dbconn.commit()
