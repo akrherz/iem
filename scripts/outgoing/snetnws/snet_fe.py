@@ -14,8 +14,8 @@ from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
 NT = NetworkTable(("KCCI", "KELO", "KIMT"))
 import psycopg2
-IEM = psycopg2.connect(database="iem", host='iemdb', user='nobody')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb', user='nobody')
+IEM = psycopg2.connect(database="iem", host='iemdb')
+PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()
