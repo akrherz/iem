@@ -58,7 +58,7 @@ def plotter(fdict):
                        days, threshold))
     ax.set_ylabel("Frequency of Days [%]")
     ax.set_ylim(0, 100)
-    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 85, 100])
+    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
     ax.bar(np.arange(0, 52), freq[:-1])
 
