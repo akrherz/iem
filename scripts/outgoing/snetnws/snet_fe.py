@@ -250,8 +250,9 @@ def doNetwork(_network, shef_fp, thres, qdict):
     hr3_obs = get_network_recent(_network, now + datetime.timedelta(hours=-3))
     hr6_obs = get_network_recent(_network, now + datetime.timedelta(hours=-6))
 
-    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 25)
+    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
     tracker.process_network(obs, '%ssnet' % (_network.lower(), ), NT, thres)
+    tracker.send_emails()
 
     keys = obs.keys()
     keys.sort()
@@ -405,6 +406,11 @@ def main():
     writeCounters()
     closeFiles()
     post_process()
+    # Commit postgres cursors
+    PORTFOLIO.commit()
+    PORTFOLIO.close()
+    IEM.commit()
+    IEM.close()
 
 if __name__ == '__main__':
     main()
