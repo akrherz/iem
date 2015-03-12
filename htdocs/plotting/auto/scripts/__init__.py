@@ -11,6 +11,8 @@ data = {'plots': [
         {'id': "11", 'label': "ASOS/AWOS Daily Maximum Dew Point for a Year"},
         {'id': "32", 'label': "Daily Temperature Departures for One Year"},
         {'id': "21", 'label': "Change in NCDC 81 Daily Climatology over X Days"},
+        {'id': "66",
+         "label": "Consecutative Days with High Temperature Above Threshold"},
         {'id': "31", 'label': "Extreme Jumps or Dips in High Temperature over X days"},
         {'id': "7", 'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "61",
