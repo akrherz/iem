@@ -14,8 +14,8 @@ from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
 NT = NetworkTable(("KCCI", "KELO", "KIMT"))
 import psycopg2
-IEM = psycopg2.connect(database="iem", host='iemdb')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
+IEM = psycopg2.connect(database="iem", host='iemdb', user='nobody')
+PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb', user='nobody')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()
@@ -251,7 +251,8 @@ def doNetwork(_network, shef_fp, thres, qdict):
     hr6_obs = get_network_recent(_network, now + datetime.timedelta(hours=-6))
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
-    tracker.process_network(obs, '%ssnet' % (_network.lower(), ), NT, thres)
+    mynet = NetworkTable(_network)
+    tracker.process_network(obs, '%ssnet' % (_network.lower(), ), mynet, thres)
     tracker.send_emails()
 
     keys = obs.keys()
