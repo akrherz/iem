@@ -28,10 +28,12 @@ class Capabilities (object):
         self.format = format
         self.data   = data
 
+
 class Request (object):
-    def __init__ (self, service):
+    def __init__(self, service):
         self.service = service
-    def getLayer(self, layername):    
+
+    def getLayer(self, layername):
         #try:
         if layername.startswith('idep'):
             (lbl, ltype, date) = layername.split("::", 3)
@@ -355,6 +357,7 @@ def modPythonHandler (apacheReq, service):
             pass
     return apache.OK
 
+
 def wsgiHandler(environ, start_response, service):
     """ This is the WSGI handler """
     from paste.request import parse_formvars
@@ -362,25 +365,25 @@ def wsgiHandler(environ, start_response, service):
     path_info = environ.get("PATH_INFO", "")
 
     if "HTTP_X_FORWARDED_HOST" in environ:
-        host      = "http://" + environ["HTTP_X_FORWARDED_HOST"]
+        host = "http://" + environ["HTTP_X_FORWARDED_HOST"]
     elif "HTTP_HOST" in environ:
-        host      = "http://" + environ["HTTP_HOST"]
+        host = "http://" + environ["HTTP_HOST"]
 
     host += environ["SCRIPT_NAME"]
     req_method = environ["REQUEST_METHOD"]
     try:
         fields = parse_formvars(environ)
 
-        fmt, image = service.dispatchRequest(fields, 
+        fmt, image = service.dispatchRequest(fields,
                                              path_info, req_method, host)
         headers = [('Content-Type', fmt)]
         if fmt.startswith("image/"):
             if service.cache.sendfile:
                 headers.append(('X-SendFile', image))
             if service.cache.expire:
-                headers.append(('Expires', 
-                email.Utils.formatdate(time.time() + service.cache.expire, 
-                                       False, True)))
+                headers.append(('Expires', email.Utils.formatdate(
+                                time.time() + service.cache.expire,
+                                False, True)))
 
         start_response("200 OK", headers)
         if service.cache.sendfile and fmt.startswith("image/"):
@@ -399,13 +402,19 @@ def wsgiHandler(environ, start_response, service):
         msg = "%s" % (str(E),)
     except Exception, E:
         status = "500 Internal Server Error"
-        sys.stderr.write("Path: %s TCError: %s Referrer: %s\n" % (path_info,
-                        str(E).replace("\n", " "), environ.get("HTTP_REFERER")))
-        msg = "An error occurred: %s\n%s\n" % (str(E), 
-            "".join(traceback.format_tb(sys.exc_traceback)))
+        E = str(E)
+        # Swallow this error
+        if E.find("Corrupt, empty or missing file") == -1:
+            sys.stderr.write(("Client: %s Path: %s TCError: %s Referrer: %s\n"
+                              ) % (environ.get("REMOTE_ADDR"), path_info,
+                                   E.replace("\n", " "),
+                                   environ.get("HTTP_REFERER")))
+        msg = ("An error occurred: %s\n%s\n"
+               ) % (E, "".join(traceback.format_tb(sys.exc_traceback)))
 
-    start_response(status, [('Content-Type','text/plain')])
+    start_response(status, [('Content-Type', 'text/plain')])
     return [msg]
+
 
 def cgiHandler (service):
     try:
