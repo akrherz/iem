@@ -26,6 +26,8 @@
 192.168.0.50     iem50         iem50.local 
 192.168.0.60     iem60         iem60.local
 192.168.0.70     iem70         iem70.local
+192.168.0.80     howard.local
+192.168.0.90     comet.local
 192.168.0.100    iemvs100      iemvs100.local
 192.168.0.101    iemvs101      iemvs101.local
 192.168.0.102    iemvs102      iemvs102.local
@@ -36,7 +38,21 @@
 192.168.0.107    iemvs107      iemvs107.local
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
+# somebodies DRAC
+192.168.0.121
+192.168.0.150    iemvs100-ssl.local
+192.168.0.151    iemvs101-ssl.local
+192.168.0.152    iemvs102-ssl.local
+192.168.0.153    iemvs103-ssl.local
+192.168.0.154    iemvs104-ssl.local
+192.168.0.155    iemvs105-ssl.local
+192.168.0.156    iemvs106-ssl.local
+192.168.0.157    iemvs107-ssl.local
+192.168.0.158    iemvs108-ssl.local
+192.168.0.159    iemvs109-ssl.local
 192.168.0.200    metvm0.local
+192.168.0.204    stanley.local
+192.168.0.232    updraft.local
 192.168.0.233    iemvm3
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
