@@ -26,10 +26,10 @@ def get_description():
 
 def plotter( fdict ):
     """ Go """
-    pgconn = psycopg2.connect(database='coop', host='iemdb2', user='nobody')
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb2', 
+    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', 
                                 user='nobody')
     mcursor = MESOSITE.cursor()
 
