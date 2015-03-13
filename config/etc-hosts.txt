@@ -36,6 +36,7 @@
 192.168.0.107    iemvs107      iemvs107.local
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
+192.168.0.200    metvm0.local
 192.168.0.233    iemvm3
 192.168.0.234    iemvm4
 192.168.0.235    iemvm5
@@ -55,6 +56,7 @@
 192.168.1.247    iem-memcached2
 #   VI_5(55) iem21 <-> iem30
 192.168.1.246    iembot
-
-# iem19, backup iem12
-192.168.1.203    iemdb iemdb2
+#   VI_6(56) metvm4 <-> iem12
+192.168.1.245    iemdb
+#   VI_7(57) iem12 <-> metvm4
+192.168.1.244    iemdb2
