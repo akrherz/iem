@@ -405,7 +405,7 @@ def wsgiHandler(environ, start_response, service):
         E = str(E)
         # Swallow this error
         if E.find("Corrupt, empty or missing file") == -1:
-            sys.stderr.write(("Client: %s Path: %s TCError: %s Referrer: %s\n"
+            sys.stderr.write(("[client: %s] Path: %s Err: %s Referrer: %s\n"
                               ) % (environ.get("REMOTE_ADDR"), path_info,
                                    E.replace("\n", " "),
                                    environ.get("HTTP_REFERER")))
