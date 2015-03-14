@@ -14,9 +14,9 @@ RAOB sounding valid at:
       1       WBAN#       WMO#        LAT        LON       ELEV       RTIME
       2       HYDRO       MXWD      TROPL      LINES     TINDEX      SOURCE
       3     (blank)      STAID    (blank)    (blank)      SONDE     WSUNITS
-                        
+
                                 data lines
-      9    PRESSURE     HEIGHT       TEMP      DEWPT   WIND DIR    WIND SPD  HHMM BEARING RANGE
+9 PRESSURE  HEIGHT TEMP      DEWPT   WIND DIR    WIND SPD  HHMM BEARING RANGE
 
 HOUR:   time of report in UTC
 LAT:    latitude in degrees and hundredths
@@ -31,7 +31,7 @@ MXWD:   the pressure of the level having the maximum wind in the sounding.  If
         MXWN is estimated (see section 3.2).
 TROPL:  the pressure of the level containing the tropopause. If within the
         body of the sounding there is no "7" level, then TROPL is estimated
-        (see section 3.3)** 
+        (see section 3.3)**
 LINES:  number of levels in the sounding, including the 4 identification lines.
 TINDEX: indicator for estimated tropopause. A "7" indicates that sufficient
         data was available to attempt the estimation; 11 indicates that data
@@ -73,7 +73,7 @@ nt = NetworkTable("RAOB")
 
 class RAOB:
     ''' Simple class representing a RAOB profile '''
-    
+
     def __init__(self):
         ''' constructor'''
         self.station = None
@@ -103,9 +103,9 @@ class RAOB:
 
     def __str__(self):
         """ override str() """
-        return 'RAOB from %s valid %s with %s levels' % (self.station, 
-                                                        self.valid,
-                                                        len(self.profile))
+        return 'RAOB from %s valid %s with %s levels' % (self.station,
+                                                         self.valid,
+                                                         len(self.profile))
 
     def database_save(self, txn):
         """ Save this to the provided database cursor """
@@ -113,9 +113,9 @@ class RAOB:
         SELECT fid from raob_flights where station = %s and valid = %s
         """, (self.station, self.valid))
         if txn.rowcount == 0:
-            txn.execute("""  
+            txn.execute("""
                 INSERT into raob_flights (valid, station, release_time,
-                hydro_level, maxwd_level, tropo_level) 
+                hydro_level, maxwd_level, tropo_level)
                 values (%s,%s,%s,%s,%s,%s) RETURNING fid
                 """, (self.valid, self.station, self.release_time,
                       self.hydro_level, self.maxwd_level, self.tropo_level))
@@ -123,37 +123,42 @@ class RAOB:
         fid = row[0]
         txn.execute("""DELETE from raob_profile where fid = %s""", (fid,))
         if txn.rowcount > 0:
-            print("RAOB del %s rows for sid: %s valid: %s" % (txn.rowcount,
-                                        self.station, 
-                                        self.valid.strftime("%Y-%m-%d %H")))
+            print(("RAOB del %s rows for sid: %s valid: %s"
+                   ) % (txn.rowcount, self.station,
+                        self.valid.strftime("%Y-%m-%d %H")))
         table = "raob_profile_%s" % (self.valid.year,)
         for d in self.profile:
-            txn.execute("""INSERT into """ + table +"""
+            txn.execute("""INSERT into """ + table + """
             (fid, ts, levelcode,
             pressure, height, tmpc, dwpc, drct, smps, bearing, range_miles)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (fid, d['ts'],
-            d['levelcode'], d['pressure'], d['height'], d['tmpc'], d['dwpc'],
-            d['drct'], d['smps'], d['bearing'], d['range']))
-        
-def conv_press( raw ):
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (fid, d['ts'], d['levelcode'], d['pressure'],
+                  d['height'], d['tmpc'], d['dwpc'], d['drct'], d['smps'],
+                  d['bearing'], d['range']))
+
+
+def conv_press(raw):
     ''' Convert raw string to database value '''
     if raw == '99999':
         return None
     return float(raw) / 10.0
 
-def conv_temp( raw ):
+
+def conv_temp(raw):
     ''' Convert raw string to database value '''
     if raw == '99999':
         return None
     return float(raw) / 10.0
 
-def conv_drct( raw):
+
+def conv_drct(raw):
     ''' Convert raw string to database value '''
     if raw == '99999':
         return None
-    return float(raw) 
+    return float(raw)
 
-def parse( raw, sid ):
+
+def parse(raw, sid):
     """ Parse the raw data and yield RAOB objects """
     rob = None
     for line in raw.split("\n"):
@@ -182,7 +187,7 @@ def parse( raw, sid ):
             rob.tropo_level = conv_press(tokens[3])
         if tokens[0] == '3':
             rob.station = sid
-            rob.wind_units = tokens[3] 
+            rob.wind_units = tokens[3]
             continue
         if tokens[0] in ['4', '5', '6', '9']:
             rob.profile.append({'levelcode': tokens[0],
@@ -198,30 +203,25 @@ def parse( raw, sid ):
                                 })
     if rob is not None:
         yield rob
-        
-def main():
-    ''' see how we are called '''
+
+
+def main(valid):
+    """Run for the given valid time!"""
     DBCONN = psycopg2.connect(database='postgis', host='iemdb')
-    
-    
-    valid = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), int(sys.argv[4]))
-    valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+
     v12 = valid - datetime.timedelta(hours=13)
-    
+
     for sid in nt.sts.keys():
         uri = ("http://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
-              +"start_year=%s;start_month_name=%s;" % (valid.year,
-                                                       valid.strftime("%b"))
-              +"start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;" % (
-                                                                valid.day,
-                                                            valid.hour)
-              +"fcst_len=shortest;airport=%s;" % (sid,)
-              +"text=Ascii%20text%20%28GSD%20format%29;"
-              +"hydrometeors=false&startSecs=%s&endSecs=%s" % (
-                                                        v12.strftime("%s"),
-                                                        valid.strftime("%s") ))
-                
+               "start_year=%s;start_month_name=%s;"
+               ) % (valid.year, valid.strftime("%b"))
+        uri += ("start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;"
+                ) % (valid.day, valid.hour)
+        uri += "fcst_len=shortest;airport=%s;" % (sid,)
+        uri += ("text=Ascii%20text%20%28GSD%20format%29;"
+                "hydrometeors=false&startSecs=%s&endSecs=%s"
+                ) % (v12.strftime("%s"), valid.strftime("%s"))
+
         cursor = DBCONN.cursor()
         try:
             data = urllib2.urlopen(uri, timeout=30).read()
@@ -231,27 +231,26 @@ def main():
                                                exp)
             continue
         try:
-            for rob in parse( data, sid ):
+            for rob in parse(data, sid):
                 nt.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception, exp:
             print 'RAOB FAIL %s %s %s, check /tmp for data' % (sid, valid, exp)
-            o = open("/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")), 
+            o = open("/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")),
                      'w')
-            o.write( data )
+            o.write(data)
             o.close()
         finally:
             cursor.close()
             DBCONN.commit()
-            
-    
+
     # Loop thru and see which stations we were missing data from
     missing = []
     for sid in nt.sts.keys():
         if nt.sts[sid]['online']:
             if nt.sts[sid].get('count', 0) == 0:
                 missing.append(sid)
-    
+
     if len(missing) > 20:
         cursor = DBCONN.cursor()
         for sid in missing:
@@ -260,17 +259,30 @@ def main():
             station = %s""", (sid,))
             row = cursor.fetchone()
             lastts = row[0].astimezone(pytz.timezone("UTC"))
-            print 'RAOB dl fail ts: %s sid: %s last: %s' % (
-                                valid.strftime("%Y-%m-%d %H"),
-                                sid, lastts.strftime("%Y-%m-%d %H"))
+            print(('RAOB dl fail ts: %s sid: %s last: %s'
+                   ) % (valid.strftime("%Y-%m-%d %H"), sid,
+                        lastts.strftime("%Y-%m-%d %H")))
 
     DBCONN.close()
 
+
+def frontend():
+    """Figure out what we need to do here! """
+    valid = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                              int(sys.argv[3]), int(sys.argv[4]))
+    valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+    main(valid)
+    DBCONN = psycopg2.connect(database='postgis', host='iemdb')
+    cursor = DBCONN.cursor()
+    for days in [3, 14, 365]:
+        ts = valid - datetime.timedelta(days=days)
+        cursor.execute("""SELECT count(*) from raob_flights where
+            valid = %s""", (ts,))
+        cnt = cursor.fetchone()[0]
+        if cnt < 100:
+            print(('rucsoundings reprocess: %s due to count of: %s'
+                   ) % (ts, cnt))
+            main(ts)
+
 if __name__ == '__main__':
-    #import glob
-    #files = glob.glob("*fail")
-    #for filename in files:
-    #    print filename
-    #    for rob in parse( open(filename).read()):
-    #        print str(rob)
-    main()
+    frontend()
