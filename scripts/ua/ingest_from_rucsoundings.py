@@ -218,8 +218,8 @@ def main(valid):
         uri += ("start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;"
                 ) % (valid.day, valid.hour)
         uri += "fcst_len=shortest;airport=%s;" % (sid,)
-        uri += ("text=Ascii%20text%20%28GSD%20format%29;"
-                "hydrometeors=false&startSecs=%s&endSecs=%s"
+        uri += "text=Ascii%20text%20%28GSD%20format%29;"
+        uri += ("hydrometeors=false&startSecs=%s&endSecs=%s"
                 ) % (v12.strftime("%s"), valid.strftime("%s"))
 
         cursor = DBCONN.cursor()
