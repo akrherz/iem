@@ -84,6 +84,7 @@ for i in range(len(vals)):
 
 ts2 = datetime.datetime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 gts2 = ts2 + datetime.timedelta(hours=5)
+gts2 = gts2.replace(tzinfo=pytz.timezone("UTC"))
 lts = gts2.astimezone(pytz.timezone("America/Chicago"))
 
 iem = Observation('RLRI4', "OT", lts)
