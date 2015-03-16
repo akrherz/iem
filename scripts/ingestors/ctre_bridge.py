@@ -84,8 +84,9 @@ for i in range(len(vals)):
 
 ts2 = datetime.datetime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 gts2 = ts2 + datetime.timedelta(hours=5)
+lts = gts2.astimezone(pytz.timezone("America/Chicago"))
 
-iem = Observation('RLRI4', "OT", gts2)
+iem = Observation('RLRI4', "OT", lts)
 drct = d['WindDir']
 iem.data['drct'] = drct
 sknt = float(d['WS_mph_S_WVT']) / 1.15
