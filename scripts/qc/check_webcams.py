@@ -44,7 +44,7 @@ def do(netname, pname):
         valid = valid.replace(tzinfo=pytz.timezone("UTC"))
         obs[row[0]] = dict(valid=valid)
 
-    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), maxoffline=10)
+    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
     tracker.process_network(obs, pname, NT, threshold)
     tracker.send_emails()
     IEM.commit()
