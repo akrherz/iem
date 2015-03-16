@@ -38,16 +38,16 @@ function database_failure($DBKEY)
 function iemdb($dbname, $force_new=0, $rw=FALSE)
 {
 	$dbuser = "nobody";
-	$dbhost = "iemdb2"; // read-only host
+	$dbhost = "iemdb"; // read-only host
 	if ($rw) $dbhost = "iemdb"; // rw master
 	if ($dbname == "access"){ $dbname = "iem"; }
 
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);
 	$db = pg_connect( $connstr , $force_new);
-	if (! $db && $dbhost == "iemdb2"){
+	if (! $db ){
 		$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
-				$dbname, "iemdb", $dbuser);
+				$dbname, "iemdb2", $dbuser);
 		$db = pg_connect( $connstr, $force_new);
 	}
 	if (! $db){
