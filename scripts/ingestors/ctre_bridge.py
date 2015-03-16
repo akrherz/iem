@@ -7,6 +7,7 @@
 
 import datetime
 import sys
+import pytz
 import pyiem.util as util
 # Run every 3 minutes
 now = datetime.datetime.now()
@@ -45,8 +46,10 @@ for i in range(len(vals)):
 # Ob times are always CDT
 ts1 = datetime.datetime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 gts1 = ts1 + datetime.timedelta(hours=5)
+gts1 = gts1.replace(tzinfo=pytz.timezone("UTC"))
+lts = gts1.astimezone(pytz.timezone("America/Chicago"))
 
-iem = Observation('RSAI4', "OT", gts1)
+iem = Observation('RSAI4', "OT", lts)
 drct = d['WindDir']
 iem.data['drct'] = drct
 sknt = float(d['WS_mph_S_WVT']) / 1.15
