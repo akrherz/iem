@@ -77,6 +77,8 @@ data = {'plots': [
         {'id': "54", 'label': "Difference between morning low temperatures between two sites"},
         {'id': "18", 'label': "Long term temperature time series"},
         {'id': "45", 'label': "Monthly Frequency of Overcast Conditions"},
+        {'id': "67",
+         'label': "Monthly Frequency of Wind Speeds by Air Temperature"},
         {'id': "37", 'label': "MOS Forecasted Temperature Ranges + Observations"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
