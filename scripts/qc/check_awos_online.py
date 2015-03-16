@@ -24,7 +24,7 @@ obs = {}
 for row in icursor:
     obs[row[0]] = dict(id=row[0], valid=row[1])
 
-tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), maxoffline=10)
+tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
 tracker.process_network(obs, 'iaawos', NT, threshold)
 tracker.send_emails()
 tac = tracker.action_count
