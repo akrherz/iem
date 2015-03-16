@@ -4,11 +4,16 @@ import sys
 import urllib2
 import datetime
 import psycopg2
+import pytz
 from pyiem.observation import Observation
 dbconn = psycopg2.connect(database='iem', host='iemdb')
 cursor = dbconn.cursor()
 
 now = datetime.datetime.now() - datetime.timedelta(hours=3)
+
+lts = datetime.datetime.utcnow()
+lts = lts.replace(tzinfo=pytz.timezone("UTC"))
+lts = lts.astimezone(pytz.timezone("America/Chicago"))
 
 state = sys.argv[1]
 
@@ -45,7 +50,9 @@ for row in data[1:]:
     t = "%s %s" % (cols[header["ObservationDate"]],
                    cols[header["ObservationTime"]].strip())
     ts = datetime.datetime.strptime(t, "%Y-%m-%d %I:%M %p")
-    iem = Observation(sid, "%sCOCORAHS" % (state,), ts)
+    lts = lts.replace(year=ts.year, month=ts.month, day=ts.day,
+                      hour=ts.hour, minute=ts.minute)
+    iem = Observation(sid, "%sCOCORAHS" % (state,), lts)
     iem.data['pday'] = safeP(cols[header["TotalPrecipAmt"]])
     if cols[header["NewSnowDepth"]].strip() != "NA":
         iem.data['snow'] = safeP(cols[header["NewSnowDepth"]])
