@@ -399,7 +399,7 @@ def main():
     now = now.replace(tzinfo=pytz.timezone("UTC"))
     doNetwork('KCCI', DMXRR5, now - datetime.timedelta(minutes=60),
               qdict)
-    doNetwork('KIMT', BADRR5, now - datetime.timedelta(minutes=60),
+    doNetwork('KIMT', BADRR5, now - datetime.timedelta(minutes=180),
               qdict)
     doNetwork('KELO', FSDRR5, now - datetime.timedelta(minutes=300),
               qdict)
