@@ -3,13 +3,16 @@ import datetime
 import re
 import os
 import sys
+import pytz
 from pyiem.datatypes import speed
 from pyiem.observation import Observation
 import psycopg2
 iemaccess = psycopg2.connect(database='iem', host='iemdb')
 cursor = iemaccess.cursor()
-now = datetime.datetime.now()
-fn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
+valid = datetime.datetime.utcnow()
+valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+valid = valid.astimezone(pytz.timezone("America/Chicago"))
+fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
 
 if not os.path.isfile(fn):
     sys.exit(0)
@@ -20,8 +23,8 @@ lastLine = lines[-1]
 tokens = re.split("[\s+]+", lastLine)
 
 tparts = re.split(":", tokens[4])
-valid = now.replace(hour=int(tparts[0]),
-                    minute=int(tparts[1]), second=int(tparts[2]))
+valid = valid.replace(hour=int(tparts[0]),
+                      minute=int(tparts[1]), second=int(tparts[2]))
 
 iem = Observation("OT0002", "OT", valid)
 
