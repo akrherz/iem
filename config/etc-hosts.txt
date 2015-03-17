@@ -18,6 +18,7 @@
 192.168.0.10     mtarchive.local
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12         postgresread
+192.168.0.20     thumper.local
 192.168.0.21     iem21         iem21.local openfire-bosh
 192.168.0.22     iem22         iem22.local
 192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
@@ -53,9 +54,9 @@
 192.168.0.200    metvm0.local
 192.168.0.204    stanley.local
 192.168.0.232    updraft.local
-192.168.0.233    iemvm3
-192.168.0.234    iemvm4
-192.168.0.235    iemvm5
+192.168.0.233    metvm3.local
+192.168.0.234    metvm4.local
+192.168.0.235    metvm5.local
 
 #
 # IPs that float thanks to the magic of pulse or keepalived
@@ -70,7 +71,7 @@
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm3 <-> metvm2
 192.168.1.247    iem-memcached2
-#   VI_5(55) iem21 <-> iem30
+#   VI_5(55) iem6 <-> iem21
 192.168.1.246    iembot
 #   VI_6(56) metvm4 <-> iem12
 192.168.1.245    iemdb
