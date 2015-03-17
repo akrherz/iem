@@ -60,13 +60,13 @@ def plotter(fdict):
         freq.append(row[1] / float(row[2]) * 100.)
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(tmpf, freq, ec='tan', fc='tan')
+    ax.bar(tmpf, freq, ec='green', fc='green')
     avgval = hits / float(cnt) * 100.
     ax.axhline(avgval, lw=2, zorder=2)
     txt = ax.text(tmpf[10], avgval + 1, "Average: %.1f%%" % (avgval,),
-                  va='bottom', zorder=2)
+                  va='bottom', zorder=2, color='yellow', fontsize=14)
     txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                 foreground="w")])
+                                                 foreground="k")])
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\nFrequency of %s+ knot Wind Speeds by Temperature "
                   "for %s (%s-%s)\n"
