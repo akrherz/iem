@@ -19,6 +19,9 @@ PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()
+# Close out the above to prevent tmpfname from sticking around
+os.close(tmpfp)
+os.unlink(tmpfname)
 saofn = "%s.sao" % (tmpfname,)
 csvfn = "%s.csv" % (tmpfname,)
 kelocsvfn = "%s_kelo.csv" % (tmpfname,)
