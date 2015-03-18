@@ -24,7 +24,7 @@ $t->jsextra = <<<EOF
 <script src="/assets/openlayers/3.2.1/build/ol.js" type="text/javascript"></script>
 <script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
 <script src='/assets/openlayers/3.2.1/build/ol3-layerswitcher.js'></script>
-<script src='7am-app.js?v=6'></script>
+<script src='7am-app.js?v=7'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -48,6 +48,7 @@ $t->content = <<<EOF
  <li>Add MRMS Legend to map</li>
  <li>Include nearby state's data</li>
  <li>Add option to plot SWE</li>
+ <li><strike>Draw Counties on Map</strike></li>
 </ul>
 		
 <form name="bah">
