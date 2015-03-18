@@ -70,6 +70,11 @@ $(document).ready(function(){
         			url: get_tms_url()
         		})
         	}), new ol.layer.Tile({
+                title: 'County Boundaries',
+                source: new ol.source.XYZ({
+                        url : '/c/tile.py/1.0.0/c-900913/{z}/{x}/{y}.png'
+                })
+        	}), new ol.layer.Tile({
                 title: 'State Boundaries',
                 source: new ol.source.XYZ({
                         url : '/c/tile.py/1.0.0/s-900913/{z}/{x}/{y}.png'
