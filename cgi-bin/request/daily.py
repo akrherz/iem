@@ -74,7 +74,7 @@ def main():
                         int(form.getfirst('day2')))
 
     sys.stdout.write('Content-type: text/plain\n\n')
-    stations = form.getlist('station')
+    stations = form.getlist('stations')
     network = form.getfirst('network')[:12]
     sys.stdout.write(get_data(network, sts, ets, stations=stations))
 
