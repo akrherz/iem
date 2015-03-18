@@ -30,9 +30,9 @@ def do(ts):
         if station not in data:
             data[station] = {'valid': [], 'tmpf': [], 'dwpf': [], 'p01i': []}
         data[station]['valid'].append(row[3])
-        data[station]['tmpf'].append(row[4])
-        data[station]['dwpf'].append(row[5])
-        data[station]['p01i'].append(row[6])
+        data[station]['tmpf'].append(row[4] if row[4] is not None else np.nan)
+        data[station]['dwpf'].append(row[5] if row[5] is not None else np.nan)
+        data[station]['p01i'].append(row[6] if row[6] is not None else np.nan)
 
     table = "summary_%s" % (ts.year,)
     # Load up current data
