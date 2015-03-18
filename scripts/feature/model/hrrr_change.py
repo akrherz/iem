@@ -4,8 +4,8 @@ import datetime
 import numpy as np
 from pyiem.plot import MapPlot
 from pyiem.datatypes import temperature
-sts = datetime.datetime(2014, 11, 27, 0, 0)
-ets = datetime.datetime(2014, 12, 2, 0, 0)
+sts = datetime.datetime(2015, 3, 16, 12, 0)
+ets = datetime.datetime(2015, 3, 18, 11, 0)
 interval = datetime.timedelta(hours=1)
 
 def do():
@@ -54,7 +54,7 @@ lats = np.load('lats.npy')
 lons = np.load('lons.npy')
 
 m = MapPlot(sector='conus', axisbg='#EEEEEE',
-            title='27 Nov - 1 Dec 2014 :: Coldest 24 Hour Temperature Change',
-            subtitle='based on hourly GFS-LAMP Analyses 6 PM 26 Nov thru 6 PM 1 Dec')
-m.pcolormesh(lons, lats, maxinterval, range(-80,1,5), units='F')
+            title='16 - 18 March 2015 :: Coldest 24 Hour Temperature Change',
+            subtitle='based on hourly HRRR Analyses 7 AM 16 Mar thru 5 AM 18 Mar')
+m.pcolormesh(lons, lats, maxinterval, range(-50,1,5), units='F')
 m.postprocess(filename='test.png')
