@@ -199,7 +199,7 @@ def do_job(job):
         textbox.addElement(P(text="County Area: %.1f square km (%.1f square miles)" % ( 
                                     warning['countyarea'], warning['countyarea'] * 0.386102)))
 
-        url = "http://iem21.local/GIS/radmap.php?"
+        url = "http://iem.local/GIS/radmap.php?"
         url += "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
         url += "&layers[]=uscounties&layers[]=bufferedlsr&lsrbuffer=15"
         url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % ( job['sts'].year, job['wfo'],
@@ -244,7 +244,7 @@ def do_job(job):
                 else:
                     n0qn0r = 'N0Q'
 
-            url = "http://iem21.local/GIS/radmap.php?"
+            url = "http://iem.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (n0qn0r, 
                                                                 job['radar'])
             url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
