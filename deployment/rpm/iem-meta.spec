@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -17,6 +17,15 @@ Requires: PyRSS2Gen
 Requires: twittytwister
 Requires: python-oauth
 Requires: python-simplejson
+Requires: httpd
+Requires: php
+Requires: mod_ssl
+#Requires: odfpy
+#Requires: unoconv
+Requires: fribidi
+Requires: php-pgsql
+Requires: php-ZendFramework
+Requires: proj-epsg
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -36,6 +45,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Wed Mar 18 2015 daryl herzmann <akrherz@iastate.edu>
+- Add webserver requirements
+
 * Tue Mar 17 2015 daryl herzmann <akrherz@iastate.edu>
 - Add more requirements to run iembot
 
