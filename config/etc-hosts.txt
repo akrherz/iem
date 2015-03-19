@@ -19,7 +19,7 @@
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12 iem12.local postgresread
 192.168.0.20     thumper.local
-192.168.0.21     iem21         iem21.local openfire-bosh
+192.168.0.21     iem21         iem21.local 
 192.168.0.22     iem22         iem22.local
 192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
 192.168.0.34     meteor.local
@@ -83,3 +83,5 @@
 192.168.0.242    iem-nwnserver
 #   VI10(60) iem12
 192.168.1.241    iem-ldm
+#   VI11(61) iem12
+192.168.1.240    iem-openfire openfire-bosh
