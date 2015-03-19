@@ -79,3 +79,7 @@
 192.168.1.244    iemdb2
 #   VI_8(58) iemdr1 <-> iemdr0
 192.168.1.243    iem-nfs0
+#   VI_9(59) iem12
+192.168.0.242    iem-nwnserver
+#   VI10(60) iem12
+192.168.0.241    iem-ldm
