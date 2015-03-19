@@ -16,6 +16,8 @@ def get_climate(network, stations=[]):
     for station in stations:
         cldata[nt.sts[station]['ncdc81']] = dict()
         clisites.append(nt.sts[station]['ncdc81'])
+    if len(clisites) == 0:
+        return data
     if len(clisites) == 1:
         clisites.append('XX')
     mesosite = psycopg2.connect(database='coop', host='iemdb', user='nobody')
@@ -75,6 +77,8 @@ def main():
 
     sys.stdout.write('Content-type: text/plain\n\n')
     stations = form.getlist('stations')
+    if len(stations) == 0:
+        stations = form.getlist('station')
     network = form.getfirst('network')[:12]
     sys.stdout.write(get_data(network, sts, ets, stations=stations))
 
