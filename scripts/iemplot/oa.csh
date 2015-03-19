@@ -41,9 +41,9 @@ GDFILE = /mesonet/data/iemplot/grid_25_25.grd
 exit
 EOF
 
-set gdfile="/mesonet/data/gempak/model/ruc/${yyyymmddhh_1h}_ruc252.gem"
+set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
 if (! -e ${gdfile}) then
-  set gdfile="/mesonet/data/gempak/model/ruc/${yyyymmddhh_1h}_ruc236.gem"
+  set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap236.gem"
 endif
 
 gdbiint << EOF > /tmp/oa_gdbiint.out
