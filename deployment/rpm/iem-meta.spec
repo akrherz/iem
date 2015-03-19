@@ -26,6 +26,29 @@ Requires: fribidi
 Requires: php-pgsql
 Requires: php-ZendFramework
 Requires: proj-epsg
+Requires: python-zope-interface
+Requires: nwnserver
+Requires: pyproj
+Requires: numpy
+Requires: python-pillow
+Requires: ImageMagick
+Requires: gdal
+Requires: pygrib
+Requires: gdal-python
+Requires: python-matplotlib
+Requires: python-basemap
+Requires: pyshapelib
+# remove this at some point :(
+Requires: egenix-mx-base
+Requires: netcdf4-python
+Requires: scipy
+Requires: pandas
+# remove this at some point
+Requires: tcsh
+Requires: gifsicle
+Requires: PyGreSQL
+Requires: bc
+Requires: tmpwatch
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -45,6 +68,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Thu Mar 19 2015 daryl herzmann <akrherz@iastate.edu>
+- Add requirements found by moving scripts to iem12
+
 * Wed Mar 18 2015 daryl herzmann <akrherz@iastate.edu>
 - Add webserver requirements
 
