@@ -84,4 +84,4 @@
 #   VI10(60) iem12
 192.168.1.241    iem-ldm
 #   VI11(61) iem12
-192.168.1.240    iem-openfire openfire-bosh
+192.168.0.240    iem-openfire openfire-bosh
