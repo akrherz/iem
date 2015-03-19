@@ -195,7 +195,19 @@ LAYER
  STATUS OFF
 END
 
-
+LAYER
+ NAME ktivback
+ DATA "images/4326/ktiv.tif"
+ PROJECTION
+  "init=epsg:4326"
+ END
+ METADATA
+  "show_in_legend" "0"
+ END
+ TYPE RASTER
+ STATUS OFF
+ PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 
 LAYER
  NAME kcciback
