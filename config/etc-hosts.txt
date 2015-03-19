@@ -82,4 +82,4 @@
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
 #   VI10(60) iem12
-192.168.0.241    iem-ldm
+192.168.1.241    iem-ldm
