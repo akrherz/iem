@@ -29,7 +29,7 @@ set nicetime=`date -d "20${1}-${2}-${3} ${4}:00" +"%b %d %I %p"`
 set generated=`date +"%b %d %I:%M %p"`
 rm mesonet.gif* >& /dev/null
 
-set DEVICE="GF|mesonet.gif|900;700"
+set DEVICE="GIF|mesonet.gif|900;700"
 set AREA="40.15;-97.1;43.85;-89.9"
 
 # Now we plot
