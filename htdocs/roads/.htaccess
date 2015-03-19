@@ -1,3 +1,4 @@
 RewriteEngine On
 RewriteRule ^kcau.jpg kcau.php
+RewriteRule ^ktiv.jpg ktiv.php
 RewriteRule ^kwwl.jpg kwwl.php?v2
