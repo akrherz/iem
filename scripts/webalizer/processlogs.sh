@@ -4,7 +4,7 @@ export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 export dd="`date --date '1 day ago' +'%d'`"
 
 # Go to temp directory, that hopefully has enough space!
-cd /mesonet/tmp
+cd /mesonet/www/logs/tmp
 
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108"
 BASE="/mesonet/www/logs"
