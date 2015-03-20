@@ -11,7 +11,7 @@ from pyiem import iemre
 from pyiem.datatypes import temperature
 
 # Database Connection
-COOP = psycopg2.connect(database='coop', host='iemdb')
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 
@@ -24,33 +24,36 @@ vnameconv = {'high': 'high_tmpk', 'low': 'low_tmpk', 'precip': 'p01d'}
 friends = {}
 weights = {}
 for station in nt.sts.keys():
-    sql = """select id, ST_distance(geom, 'SRID=4326;POINT(%s %s)') from stations
-         WHERE network = '%sCLIMATE' and id != '%s' 
+    sql = """
+        select id, ST_distance(geom, 'SRID=4326;POINT(%s %s)') from stations
+         WHERE network = '%sCLIMATE' and id != '%s'
          and archive_begin < '1951-01-01' and
          substr(id, 3, 1) != 'C' and substr(id, 3,4) != '0000'
          ORDER by st_distance
-         ASC LIMIT 11""" % (nt.sts[station]['lon'], nt.sts[station]['lat'], 
+         ASC LIMIT 11""" % (nt.sts[station]['lon'], nt.sts[station]['lat'],
                             state.upper(), station)
-    ccursor.execute( sql )
+    ccursor.execute(sql)
     friends[station] = []
     weights[station] = []
     for row in ccursor:
-        friends[station].append( row[0] )
-        weights[station].append( 1.0 / row[1] )
-    weights[station] = np.array( weights[station] )
+        friends[station].append(row[0])
+        weights[station].append(1.0 / row[1])
+    weights[station] = np.array(weights[station])
+
 
 def do_var(varname):
     """
     Run our estimator for a given variable
     """
     currentnc = None
-    sql = """select day, station from alldata_%s WHERE %s IS NULL 
+    sql = """select day, station from alldata_%s WHERE %s is null
         and day >= '1893-01-01' ORDER by day ASC""" % (state.lower(), varname)
-    ccursor.execute( sql )
+    ccursor.execute(sql)
+    print nt.sts.keys()
     for row in ccursor:
         day = row[0]
         station = row[1]
-        if not nt.sts.has_key(station):
+        if station not in nt.sts:
             continue
 
         sql = """SELECT station, %s from alldata_%s WHERE %s is not NULL

@@ -13,9 +13,10 @@ import datetime
 COOP = psycopg2.connect(database="coop", host='iemdb')
 ccursor = COOP.cursor()
 
+
 def do_day(valid):
     ''' Process a day please '''
-    
+
     ccursor.execute("""
     SELECT ST_x(geom), ST_y(geom), high, low, precip, snow, snowd from
     alldata a JOIN stations t on (t.id = a.station) 
@@ -146,11 +147,11 @@ def main():
         ets = ets.replace(day=1)
         now = sts
         while now < ets:
-            do_day( now )
+            do_day(now)
             now += datetime.timedelta(days=1)
     else:
-        do_day( datetime.datetime.now() - datetime.timedelta(days=1))
-    
+        do_day(datetime.datetime.now())
+
 if __name__ == '__main__':
     main()
     ccursor.close()
