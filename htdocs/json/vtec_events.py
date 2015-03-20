@@ -22,7 +22,8 @@ def run(wfo, year):
     SELECT distinct phenomena, significance, eventid,
     issue at time zone 'UTC' as utc_issue,
     init_expire at time zone 'UTC' as utc_expire from
-    """+table+""" WHERE wfo = %s
+    """+table+""" WHERE wfo = %s and eventid is not null and
+    phenomena is not null and significance is not null
     ORDER by phenomena ASC, significance ASC, utc_issue ASC
     """, (wfo,))
     lastrow = [None]*5
