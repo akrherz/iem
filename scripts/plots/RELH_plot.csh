@@ -11,7 +11,7 @@ set dd=`date -u +%d`
 set date=${yy}${mm}${dd}
 set hh=`date -u +%H`
 
-set DEVICE="GF|relh.gif"
+set DEVICE="GIF|relh.gif"
 
 setenv DISPLAY localhost:1
 

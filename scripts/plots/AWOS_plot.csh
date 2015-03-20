@@ -23,8 +23,8 @@ setenv DISPLAY localhost:1
 
 rm awos.gif* ceil.gif* >& /dev/null
 
-set DEVICE="GF|awos.gif|650;500"
-set DEVICE2="GF|ceil.gif|650;500"
+set DEVICE="GIF|awos.gif|650;500"
+set DEVICE2="GIF|ceil.gif|650;500"
 
 
 $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out

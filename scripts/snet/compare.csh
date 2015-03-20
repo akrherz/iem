@@ -48,7 +48,7 @@ sfmap << EOF > /tmp/compare_sfmap.out
  TITLE    = 2/-2/${title} Temp Compare SchoolNet [red] 
  CLEAR    = YES
  PANEL    = 0
- DEVICE   = GF|${GFFILE}|650;600
+ DEVICE   = GIF|${GFFILE}|650;600
  PROJ     = LCC
  FILTER   = NO
  TEXT     = 0.8
@@ -73,7 +73,7 @@ sfmap << EOF > /tmp/compare_sfmap.out
  SFPARM	= DWPF
  TITLE	= 2/-2/${title} Dew P Compare SchoolNet [red]
  CLEAR	= YES
- DEVICE	= GF|${GFFILE2}|650;600
+ DEVICE	= GIF|${GFFILE2}|650;600
  COLORS	= 2
  MAP	= 25 + 25//2
  \$MAPFIL = HICNUS.NWS + hipowo.cia
@@ -94,7 +94,7 @@ sfmap << EOF > /tmp/compare_sfmap.out
  SFPARM = ALTM
  TITLE  = 2/-2/${title} Barometer SchoolNet [red]
  CLEAR  = YES
- DEVICE = GF|${GFFILE3}|650;600
+ DEVICE = GIF|${GFFILE3}|650;600
  COLORS = 2
  MAP    = 25 + 25//2
  \$MAPFIL = HICNUS.NWS + hipowo.cia
@@ -115,7 +115,7 @@ sfmap << EOF > /tmp/compare_sfmap.out
  SFPARM = ALTI*100
  TITLE  = 2/-2/${title} Barometer SchoolNet [red]
  CLEAR  = YES
- DEVICE = GF|${GFFILE4}|650;600
+ DEVICE = GIF|${GFFILE4}|650;600
  COLORS = 2
  MAP    = 25 + 25//2
  \$MAPFIL = HICNUS.NWS + hipowo.cia
