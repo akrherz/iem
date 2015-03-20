@@ -73,7 +73,7 @@ def makeConnect():
     notConnected = True
     while notConnected:
         try:
-            tn = telnetlib.Telnet('192.168.0.21',14996)
+            tn = telnetlib.Telnet('iem-nwnserver',14996)
             #tn = telnetlib.Telnet('129.186.185.33',14996)
             tn.read_until("login> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubuser'],) )
