@@ -234,7 +234,7 @@ def main():
         ts = datetime.date(int(sys.argv[2]), int(sys.argv[3]),
                            int(sys.argv[4]))
     else:
-        ts = datetime.date.today() - datetime.timedelta(days=1)
+        ts = datetime.date.today()
     estimate_precip(ts)
     estimate_snow(ts)
     estimate_hilo(ts)

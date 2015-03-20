@@ -75,10 +75,9 @@ def main(ts):
 
 if __name__ == "__main__":
     if len(sys.argv) == 4:
-        ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
-                           int(sys.argv[3]) )
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                               int(sys.argv[3]))
     else:
-        ts = datetime.datetime.now() 
-        ts = ts - datetime.timedelta(days=1)
-        ts = ts.replace(hour=0,minute=0, second=0)
+        ts = datetime.datetime.now()
+        ts = ts.replace(hour=0, minute=0, second=0)
     main(ts)
