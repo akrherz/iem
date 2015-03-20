@@ -16,7 +16,7 @@ set mm = "00"
 
 rm asos.gif* >& /dev/null
 
-set DEVICE="GF|asos.gif"
+set DEVICE="GIF|asos.gif"
 
 
 $GEMEXE/sfmap_gf << EOF > /tmp/sfmap.out

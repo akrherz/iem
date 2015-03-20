@@ -16,7 +16,7 @@ set timestamp="`date -u --date '1 minute' +'%Y%m%d%H00'`"
 
 rm MWmesonet.gif* >& /dev/null
 
-set DEVICE="GF|MWmesonet.gif|900;700"
+set DEVICE="GIF|MWmesonet.gif|900;700"
 
 set AREA="37;-104;48.5;-86"
 
