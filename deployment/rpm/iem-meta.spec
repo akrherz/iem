@@ -49,6 +49,8 @@ Requires: gifsicle
 Requires: PyGreSQL
 Requires: bc
 Requires: tmpwatch
+Requires: gdata
+Requires: pyephem
 
 %description
 A virtual package which makes sure that various requirements are installed
