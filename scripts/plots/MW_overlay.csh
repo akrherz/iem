@@ -28,7 +28,7 @@ set RADTIME="${yy}${MM}${dd}/${hh}${mm}"
 
 rm MWoverlay.gif* >& /dev/null
 
-set DEVICE="GIF|MWoverlay.gif"
+set DEVICE="GIF|MWoverlay.gif|900;700"
 
 #set RADTIME=`cat /tmp/compRADAR.time`
 set AREA="39.25;-98.0;44.75;-89.0"
