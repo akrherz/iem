@@ -17,7 +17,7 @@ set nicetime=`date -d "20${1}-${2}-${3} ${4}:00" +"%b %d %I %p"`
 
 rm mesonet_altm.gif* >& /dev/null
 
-set DEVICE="GF|mesonet_altm.gif|900;700"
+set DEVICE="GIF|mesonet_altm.gif|900;700"
 set AREA="40.15;-97.1;43.85;-89.9"
 #set AREA="38.15;-99.1;45.85;-87.9"
 
