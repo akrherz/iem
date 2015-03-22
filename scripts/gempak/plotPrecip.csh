@@ -55,7 +55,7 @@ gdplot2_gf << EOF > /tmp/plotPrecip_gdplot2.out
  PROJ     = MER
  MAP      = 1
  LATLON   = 0
- DEVICE   = GF|${gif}.gif|650;500
+ DEVICE   = GIF|${gif}.gif|650;500
  STNPLT   =  
  SATFIL   =  
  RADFIL   =  
