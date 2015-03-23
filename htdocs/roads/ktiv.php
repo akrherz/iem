@@ -12,9 +12,11 @@ $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
 
 $map = ms_newMapObj('roads.map');
-$map->setProjection("init=epsg:4326");
 $map->setSize(1920, 1080);
-$map->setExtent(-98.973, 40., -87.84, 44.8);
+//$map->set('units', MS_DD);
+//$map->setProjection("init=epsg:4326");
+//$map->setExtent(-98.973, 40., -87.84, 44.8);
+$map->setExtent(-9300, 4438266, 940009, 4977246);
 $map->selectOutputFormat("png24");
 $img = $map->prepareImage();
 
