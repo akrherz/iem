@@ -16,7 +16,8 @@ mcursor = MESOSITE.cursor()
 
 # look for unknown
 hcursor.execute("""SELECT distinct nwsli, network from unknown
-    WHERE network != '' and network is not null""")
+    WHERE network != '' and network is not null and
+    length(nwsli) = 5""")
 for row in hcursor:
     nwsli = row[0]
     network = row[1]
