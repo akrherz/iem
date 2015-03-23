@@ -19,7 +19,6 @@
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12 iem12.local postgresread
 192.168.0.20     thumper.local
-192.168.0.21     iem21         iem21.local 
 192.168.0.22     iem22         iem22.local
 192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
 192.168.0.34     meteor.local
@@ -67,11 +66,11 @@
 192.168.1.250    iem-mapserver
 #   VI_2(52) metvm5 <-> iem30
 192.168.1.249    iem-memcached
-#   VI_3(53) metvm4 <-> iem21
+#   VI_3(53) metvm4 <-> iem12
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm3 <-> metvm2
 192.168.1.247    iem-memcached2
-#   VI_5(55) iem6 <-> iem21
+#   VI_5(55) iem6
 192.168.1.246    iembot
 #   VI_6(56) metvm4 <-> iem12
 192.168.1.245    iemdb
