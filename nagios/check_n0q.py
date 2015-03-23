@@ -5,7 +5,9 @@ import json
 import datetime
 import sys
 
-j = json.load( open('/home/ldm/data/gis/images/4326/USCOMP/n0q_0.json') )
+prod = sys.argv[1]
+
+j = json.load(open('/home/ldm/data/gis/images/4326/USCOMP/%s_0.json' % (prod,)))
 prodtime = datetime.datetime.strptime(j['meta']['valid'], '%Y-%m-%dT%H:%M:%SZ')
 radarson = int(j['meta']['radar_quorum'].split("/")[0])
 gentime = j['meta']['processing_time_secs']
