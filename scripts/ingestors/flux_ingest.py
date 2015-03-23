@@ -2,6 +2,7 @@
 Ingest files provided by NLAE containing flux information
 """
 import pg
+import os
 import mx.DateTime
 import traceback
 other = pg.DB('other', 'iemdb')
@@ -121,7 +122,11 @@ data = {'nstl10': {},
 
 for fn in fp.keys():
     station = fp[fn]
-    lines = open("%s%s" % (DIR, fn), 'r').readlines()
+    myfn = "%s%s" % (DIR, fn)
+    if not os.path.isfile(myfn):
+        print("flux_ingest.py missing file: %s" % (myfn,))
+        continue
+    lines = open(myfn, 'r').readlines()
     if len(lines) < 2:
         print 'flux_ingest.py file: %s has %s lines?' % (fn, len(lines))
         continue
