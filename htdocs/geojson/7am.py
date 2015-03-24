@@ -32,12 +32,13 @@ def run_azos(ts):
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts1 = ts.replace(hour=7)
     ts0 = ts1 - datetime.timedelta(hours=24)
-
+    sys.stderr.write("%s" % (ts0,))
+    sys.stderr.write("%s" % (ts1,))
     cursor.execute("""
     WITH obs as (
         select iemid, sum(phour) from hourly
         where network in ('AWOS', 'IA_ASOS') and
-        valid between %s and %s GROUP by iemid
+        valid >= %s and valid < %s GROUP by iemid
     )
 
     SELECT name, id, ST_x(geom), ST_y(geom), sum from stations t JOIN obs o
