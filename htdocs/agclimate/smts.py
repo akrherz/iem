@@ -35,9 +35,9 @@ ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """SELECT * from sm_hourly WHERE
-            station = '%s' and valid BETWEEN '%s' and '%s' ORDER by valid ASC
-            """ % (station, sts.strftime("%Y-%m-%d %H:%M"),
-                   ets.strftime("%Y-%m-%d %H:%M"))
+    station = '%s' and valid BETWEEN '%s' and '%s' ORDER by valid ASC
+    """ % (station, sts.strftime("%Y-%m-%d %H:%M"),
+           ets.strftime("%Y-%m-%d %H:%M"))
 icursor.execute(sql)
 d12sm = []
 d24sm = []
@@ -80,23 +80,19 @@ import matplotlib.dates as mdates
 maxy = max([np.max(d12sm), np.max(d24sm), np.max(d50sm)])
 miny = min([np.min(d12sm), np.min(d24sm), np.min(d50sm)])
 
-(fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(7, 10))
+(fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
 ax[0].grid(True)
 ax2 = ax[0].twinx()
 ax2.set_yticks(np.arange(-0.6, 0., 0.1))
 ax2.set_yticklabels(0 - np.arange(-0.6, 0.01, 0.1))
 ax2.set_ylim(-0.6, 0)
 ax2.set_ylabel("Hourly Precipitation [inch]")
-ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=1)
+b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=1)
 
-ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2,
-           label='12 inch')
-ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2,
-           label='24 inch')
-ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2,
-           label='50 inch')
+l1, = ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2)
+l2, = ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2)
+l3, = ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2)
 ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
-ax[0].legend(loc=(0, -0.15), ncol=3)
 
 days = (ets - sts).days
 if days >= 3:
@@ -116,7 +112,18 @@ else:
                              tz=pytz.timezone("America/Chicago")))
 
 ax[0].set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'], ))
+box = ax[0].get_position()
+ax[0].set_position([box.x0, box.y0 + box.height * 0.05, box.width,
+                    box.height * 0.95])
+box = ax2.get_position()
+ax2.set_position([box.x0, box.y0 + box.height * 0.05, box.width,
+                  box.height * 0.95])
+ax[0].legend([l1, l2, l3, b1],
+             ['12 inch', '24 inch', '50 inch', 'Hourly Precip'],
+             bbox_to_anchor=(0.5, -0.15), ncol=4, loc='center',
+             fontsize=12)
 
+# ----------------------------------------
 ax[1].plot(valid, temperature(d12t, 'C').value('F'), linewidth=2, color='r',
            label='12in')
 ax[1].plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
@@ -125,22 +132,31 @@ ax[1].plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
            color='black', label='50in')
 ax[1].grid(True)
 ax[1].set_ylabel(r"Temperature $^\circ$F")
+box = ax[1].get_position()
+ax[1].set_position([box.x0, box.y0 + box.height * 0.05, box.width,
+                    box.height * 0.95])
+
+# ------------------------------------------------------
 
 ax2 = ax[2].twinx()
-ax2.plot(valid, slrkw, color='g', zorder=1)
+l3, = ax2.plot(valid, slrkw, color='g', zorder=1, lw=2)
 ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
 
-ax[2].plot(valid, temperature(tair, 'C').value('F'), linewidth=2, color='blue',
-           zorder=2, label='Air')
-ax[2].plot(valid, temperature(tsoil, 'C').value('F'), linewidth=2,
-           color='red', zorder=2, label='4" Soil')
+
+l1, = ax[2].plot(valid, temperature(tair, 'C').value('F'), linewidth=2,
+                 color='blue', zorder=2)
+l2, = ax[2].plot(valid, temperature(tsoil, 'C').value('F'), linewidth=2,
+                 color='brown', zorder=2)
 ax[2].grid(True)
-ax[2].legend(loc=(.1, 1.01), ncol=2)
+ax[2].legend([l1, l2, l3],
+             ['Air', '4" Soil', 'Solar Radiation'],
+             bbox_to_anchor=(0.5, 1.1), loc='center', ncol=3)
 ax[2].set_ylabel(r"Temperature $^\circ$F")
 
 ax[2].set_zorder(ax2.get_zorder()+1)
 ax[2].patch.set_visible(False)
 # Wow, strange bugs if I did not put this last
 ax[0].set_xlim(min(valid), max(valid))
+
 sys.stdout.write("Content-Type: image/png\n\n")
 plt.savefig(sys.stdout, format='png')
