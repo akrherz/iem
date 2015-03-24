@@ -43,6 +43,9 @@ def do(netname, pname):
                  datetime.timedelta(seconds=ticks))
         valid = valid.replace(tzinfo=pytz.timezone("UTC"))
         obs[row[0]] = dict(valid=valid)
+    # Abort out if no obs are found
+    if len(obs) == 0:
+        return
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
     tracker.process_network(obs, pname, NT, threshold)
