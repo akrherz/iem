@@ -51,6 +51,7 @@ Requires: bc
 Requires: tmpwatch
 Requires: gdata
 Requires: pyephem
+Requires: mailx
 
 %description
 A virtual package which makes sure that various requirements are installed
