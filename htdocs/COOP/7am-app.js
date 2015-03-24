@@ -14,6 +14,19 @@ function updateMap(){
 	updateURL();
 }
 
+function updateDate(){
+	// We have a changed date, hello!
+	var fullDate = $.datepicker.formatDate("yy-mm-dd",
+			$("#datepicker").datepicker('getDate'));
+	map.removeLayer(coopLayer);
+	coopLayer = makeVectorLayer(fullDate, 'NWS COOP Reports', 'coop');
+	map.addLayer(coopLayer);
+	map.removeLayer(azosLayer);
+	azosLayer = makeVectorLayer(fullDate, 'ASOS/AWOS Reports', 'azos');
+	map.addLayer(azosLayer);
+	updateURL();
+}
+
 function makeVectorLayer(dt, title, group){
 	return new ol.layer.Vector({
 		title : title,
