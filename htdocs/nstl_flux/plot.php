@@ -26,16 +26,16 @@ $rs = pg_prepare($pgconn, "METADATA", "SELECT * from flux_meta WHERE
 
 $rs = pg_execute($pgconn, "SELECT", Array(date('Y-m-d', $sts)));
 
-$data = Array("nstl11" => Array(),
-   "nstl10" => Array(),
-   "nstl30ft" => Array(),
-   "nstl110" => Array(),
-   "nstlnsp" => Array() );
-$times = Array("nstl11" => Array(),
-   "nstl10" => Array(),
-   "nstl30ft" => Array(),
-   "nstl110" => Array(),
-   "nstlnsp" => Array() );
+$data = Array("NSTL11" => Array(),
+   "NSTL10" => Array(),
+   "NSTL30FT" => Array(),
+   "NSTL110" => Array(),
+   "NSTLNSPR" => Array());
+$times = Array("NSTL11" => Array(),
+   "NSTL10" => Array(),
+   "NSTL30FT" => Array(),
+   "NSTL110" => Array(),
+   "NSTLNSPR" => Array());
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
 { 
@@ -48,8 +48,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   }
 }
 
-$labels = Array("nstlnsp" => "nstlnsp", "nstl11" => "nstl11", 
-        "nstl10" => "nstl10", "nstl30ft" => "nstl30ft", "nstl110" => "nstl110");
+$labels = Array("NSTLNSPR" => "NSTLNSPR", "NSTL11" => "NSTL11", 
+        "NSTL10" => "NSTL10", "NSTL30FT" => "NSTL30FT", "NSTL110" => "NSTL110");
 $rs = pg_execute($pgconn, "METADATA", Array(date('Y-m-d', $sts)));
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
@@ -100,45 +100,45 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.10, 0.92, "left", "top");
 
 // Create the linear plot
-if (sizeof($data["nstl11"]) > 1) {
- $lineplot=new LinePlot($data["nstl11"], $times["nstl11"]);
+if (sizeof($data["NSTL11"]) > 1) {
+ $lineplot=new LinePlot($data["NSTL11"], $times["NSTL11"]);
  $lineplot->SetColor("red");
- $lineplot->SetLegend( $labels["nstl11"] );
+ $lineplot->SetLegend( $labels["NSTL11"] );
  $lineplot->SetWeight(2);
  $graph->Add($lineplot);
 }
 
-if (sizeof($data["nstl10"]) > 1) {
- $lineplot2=new LinePlot($data["nstl10"], $times["nstl10"]);
+if (sizeof($data["NSTL10"]) > 1) {
+ $lineplot2=new LinePlot($data["NSTL10"], $times["NSTL10"]);
  $lineplot2->SetColor("blue");
- $lineplot2->SetLegend( $labels["nstl10"] );
+ $lineplot2->SetLegend( $labels["NSTL10"] );
  $lineplot2->SetWeight(2);
  $graph->Add($lineplot2);
 }
 
 // Create the linear plot
-if (sizeof($data["nstlnsp"]) > 1) {
- $lineplot3=new LinePlot($data["nstlnsp"], $times["nstlnsp"]);
+if (sizeof($data["NSTLNSPR"]) > 1) {
+ $lineplot3=new LinePlot($data["NSTLNSPR"], $times["NSTLNSPR"]);
  $lineplot3->SetColor("black");
- $lineplot3->SetLegend( $labels["nstlnsp"] );
+ $lineplot3->SetLegend( $labels["NSTLNSPR"] );
  $lineplot3->SetWeight(2);
  $graph->Add($lineplot3);
 }
 
 // Create the linear plot
-if (sizeof($data["nstl30ft"]) > 1) {
- $lineplot4=new LinePlot($data["nstl30ft"], $times["nstl30ft"]);
+if (sizeof($data["NSTL30FT"]) > 1) {
+ $lineplot4=new LinePlot($data["NSTL30FT"], $times["NSTL30FT"]);
  $lineplot4->SetColor("green");
- $lineplot4->SetLegend( $labels["nstl30ft"] );
+ $lineplot4->SetLegend( $labels["NSTL30FT"] );
  $lineplot4->SetWeight(2);
  $graph->Add($lineplot4);
 }
 
 // Create the linear plot
-if (sizeof($data["nstl110"]) > 1) {
- $lineplot5=new LinePlot($data["nstl110"], $times["nstl110"]);
+if (sizeof($data["NSTL110"]) > 1) {
+ $lineplot5=new LinePlot($data["NSTL110"], $times["NSTL110"]);
  $lineplot5->SetColor("brown");
- $lineplot5->SetLegend( $labels["nstl110"] );
+ $lineplot5->SetLegend( $labels["NSTL110"] );
  $lineplot5->SetWeight(2);
  $graph->Add($lineplot5);
 }
