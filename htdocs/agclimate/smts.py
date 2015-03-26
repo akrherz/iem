@@ -116,7 +116,7 @@ if opt == '2':
             mdates.DateFormatter('%-I %p\n%d %b',
                                  tz=pytz.timezone("America/Chicago")))
     ax.axhline(32, linestyle='--', lw=2, color='tan')
-
+    ax.set_ylabel("Temperature $^\circ$F")
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')
     sys.exit()
