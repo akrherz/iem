@@ -25,6 +25,7 @@ if ("year1" in form and "year2" in form and
                             int(form["hour2"].value), 0)
 
 station = form.getvalue('station', 'CAMI4')
+opt = form.getvalue('opt', '1')
 if station not in nt.sts:
     print 'Content-type: text/plain\n'
     print 'ERROR'
@@ -80,6 +81,46 @@ import matplotlib.dates as mdates
 maxy = max([np.max(d12sm), np.max(d24sm), np.max(d50sm)])
 miny = min([np.min(d12sm), np.min(d24sm), np.min(d50sm)])
 
+if opt == '2':
+    (fig, ax) = plt.subplots(1, 1)
+    ax.grid(True)
+    ax.set_title(("ISUSM Station: %s Timeseries\nSoil Temperature at Depth\n "
+                  ) % (nt.sts[station]['name'], ))
+    ax.plot(valid, temperature(tsoil, 'C').value('F'), linewidth=2,
+            color='brown', label='4 inch')
+    ax.plot(valid, temperature(d12t, 'C').value('F'), linewidth=2, color='r',
+            label='12 inch')
+    ax.plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
+            color='purple', label='24 inch')
+    ax.plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
+            color='black', label='50 inch')
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width,
+                    box.height * 0.9])
+    ax.legend(bbox_to_anchor=(0.5, 1.02), ncol=4, loc='center',
+              fontsize=12)
+    days = (ets - sts).days
+    if days >= 3:
+        interval = max(int(days/7), 1)
+        ax.xaxis.set_major_locator(
+            mdates.DayLocator(interval=interval,
+                              tz=pytz.timezone("America/Chicago")))
+        ax.xaxis.set_major_formatter(
+            mdates.DateFormatter('%-d %b\n%Y',
+                                 tz=pytz.timezone("America/Chicago")))
+    else:
+        ax.xaxis.set_major_locator(
+            mdates.AutoDateLocator(maxticks=10,
+                                   tz=pytz.timezone("America/Chicago")))
+        ax.xaxis.set_major_formatter(
+            mdates.DateFormatter('%-I %p\n%d %b',
+                                 tz=pytz.timezone("America/Chicago")))
+    ax.axhline(32, linestyle='--', lw=2, color='tan')
+
+    sys.stdout.write("Content-Type: image/png\n\n")
+    plt.savefig(sys.stdout, format='png')
+    sys.exit()
+
 (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
 ax[0].grid(True)
 ax2 = ax[0].twinx()
@@ -111,7 +152,7 @@ else:
         mdates.DateFormatter('%-I %p\n%d %b',
                              tz=pytz.timezone("America/Chicago")))
 
-ax[0].set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'], ))
+ax[0].set_title("ISUSM Station: %s Timeseries" % (nt.sts[station]['name'], ))
 box = ax[0].get_position()
 ax[0].set_position([box.x0, box.y0 + box.height * 0.05, box.width,
                     box.height * 0.95])

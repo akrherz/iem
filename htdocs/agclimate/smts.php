@@ -19,6 +19,7 @@ $year2 = isset($_REQUEST['year2']) ? intval($_REQUEST['year2']): date("Y", $now)
 $month2 = isset($_REQUEST['month2']) ? intval($_REQUEST['month2']): date("m", $now);
 $day2 = isset($_REQUEST['day2']) ? intval($_REQUEST['day2']): date("d", $now);
 $hour2 = isset($_REQUEST['hour2']) ? intval($_REQUEST['hour2']): date("H", $now);
+$opt = isset($_REQUEST['opt']) ? $_REQUEST['opt'] : '1';
 
 $sselect = networkSelect("ISUSM", $station);
 $y1 = yearSelect2(2012, $year1, "year1");
@@ -30,8 +31,14 @@ $m2 = monthSelect($month2, "month2");
 $d2 = daySelect2($day2, "day2");
 $h2 = hourSelect($hour2, "hour2");
 
-$img = sprintf("smts.py?station=%s&year1=%s&year2=%s&month1=%s&month2=%s&day1=%s&day2=%s&hour1=%s&hour2=%s", 
-		$station, $year1, $year2, $month1, $month2, $day1, $day2, 
+$ar = Array("1" => "3 Panel Plot",
+		"2" => "Just Soil Temps");
+$oselect = make_select("opt", $opt, $ar);
+
+$img = sprintf("smts.py?opt=%s&amp;station=%s&amp;year1=%s&amp;year2=%s"
+		."&amp;month1=%s&amp;month2=%s&amp;day1=%s&amp;day2=%s&amp;"
+		."hour1=%s&amp;hour2=%s", 
+		$opt, $station, $year1, $year2, $month1, $month2, $day1, $day2, 
 		$hour1, $hour2);
 
 $t->content = <<<EOF
@@ -48,11 +55,12 @@ and click the 'Make Plot' button below.
 
 <form name="selector" method="GET" name='getter'>
 
-<table>
-<thead><tr><th>Station</th><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th></tr></thead>
+<table class="table table-bordered">
+<thead><tr><th>Station</th><th>Plot Option</th><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th></tr></thead>
 
 <tbody>
-<tr><th rowspan='2'>{$sselect}</th>
+<tr><td rowspan='2'>{$sselect}</td>
+ <td rowspan="2">{$oselect}</td>
 <td>Start Time</td>
 	<td>{$y1}</td>
 	<td>{$m1}</td>
@@ -74,9 +82,11 @@ and click the 'Make Plot' button below.
 </form>
 
 
-<p><img src="{$img}">
+<p><img src="{$img}" class="img img-responsive">
 
-<p><strong>Plot Description:</strong>
+<p><strong>Plot Description:</strong> This plot is a time series graph of
+observations from a time period and ISU Soil Moisture station of your choice.
+</p>
 EOF;
 $t->render('single.phtml');
 ?>
