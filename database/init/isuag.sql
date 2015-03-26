@@ -91,7 +91,8 @@ CREATE TABLE sm_hourly (
   outofrange06 real,
   outofrange12 real,
   outofrange24 real,
-  outofrange50 real
+  outofrange50 real,
+  battv_min real
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
