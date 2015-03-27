@@ -28,7 +28,9 @@ def do(now, realtime, delta):
     gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/PrecipRate/"
                            "PrecipRate_00.00_%Y%m%d-%H%M00.grib2.gz"))
     if not os.path.isfile(gribfn):
-        print("mrms_rainrate_comp.py MISSING %s" % (gribfn,))
+        # Don't whine about old files being missing
+        if delta < 90:
+            print("mrms_rainrate_comp.py MISSING %s" % (gribfn,))
         return
 
     # http://www.nssl.noaa.gov/projects/mrms/operational/tables.php
