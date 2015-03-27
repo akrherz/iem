@@ -8,10 +8,87 @@ $t->thispage = "iem-info";
 
 $y = date("Y");
 $t->content = <<<EOF
-<h3>IEM Ag Weather/Climate Information</h3><p>
+<ol class="breadcrumb">
+  <li><a href="/">IEM Homepage</a></li>
+  <li class="active">IEM Ag Weather/Climate Information</li>
+</ol>
 
-<div class="warning">Please <a href="/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
-Iowa Ag Weather information in a one-stop location.</div>
+<h3>Are you looking for data?</h3>
+
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+ <th rowspan="2">Variable</th>
+ <th colspan="6">Timescale / Reporting Interval</th>
+</tr>
+<tr>
+<th>Seconds/Minutes</th>
+<th>Hourly</th>
+<th>Daily</th>
+<th>Weekly/Monthly</th>
+<th>Seasonal</th>
+<th>Yearly</th>
+</tr>
+</thead>
+<tbody>
+
+<tr><td>Air Temperature</td>
+<td><a href="/schoolnet/">SchoolNet</a> is the only option for sub-hourly
+data, but it is not of the best quality and the sensors are located on the top
+of buildings.</td>
+<td><a href="/ASOS/">ASOS/AWOS</a> are stations located at airports and are
+the baseline weather observation network. The 
+<a href="/agclimate">ISU Soil Moisture</a> network has data for Iowa.</td>
+<td><a href="/COOP/">NWS COOP</a> has high quality high and low temperature
+reports for 24 hour periods, not always for the calendar day.</td>
+<td colspan="3">The <a href="/climodat/">Climodat</a> reports contain summarized
+data from the NWS COOP network.</td>
+</tr>
+
+<tr><td>Precipitation (liquid + melted snow)</td>
+ <td>The IEM processes the one minute <a href="/request/asos/1min.phtml">Iowa ASOS</a>
+ data, but there is a month delay for receipt of this data.</td>
+ <td>The <a href="/ASOS/">ASOS</a> (not AWOS) sites include a heated sensor that
+ melts snowfall to produce liquid equivalent.</td>
+ <td rowspan="2">The <a href="/COOP/">NWS COOP</a> network report precipitation totals that
+ include melted snowfall.</td>
+ <td colspan="3" rowspan="2"><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
+ data from the NWS COOP network.</td>
+</tr>
+
+<tr><td>Rainfall (liquid only)</td>
+ <td>The <a href="/schoolnet/">SchoolNet</a> sensors do report minute rainfall, 
+ but the data is not of great quality.</td>
+ <td>The <a href="/ASOS/">ASOS/AWOS</a> sites report hourly rainfall as well as
+ the <a href="/agclimate/">ISU Soil Moisture</a> network.</td>
+</tr>
+
+
+<tr><td>Solar Radiation</td>
+<td>Most of the <a href="/schoolnet/">SchoolNet</a> sites report radiation
+data at minute intervals, but the data is not of great quality.</td>
+<td>The <a href="/agclimate/">ISU Soil Moisture</a> network collects solar 
+radiation data hourly.</td>
+<td>The <a href="/agclimate/">ISU Soil Moisture</a> network makes daily 
+summaries available. The IEM also provides estimated radiation data for download
+for <a href="/request/coop/fe.phtml">NWS COOP</a> sites based on model analyses.</td>
+<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+at this time.</td>
+</tr>
+
+<tr><td>Snowfall</td>
+ <td>Does not exist</td>
+ <td>The NWS has paid snowfall observers that report 6 hour snowfall totals, but
+ the IEM does not have a good interface to get this data.</td>
+ <td>The IEM collects the <a href="/COOP/cat.phtml">24 hour snowfall reports</a>
+ from the NWS COOP network.</td>
+ <td></td>
+ <td></td>
+ <td></td>
+</tr>
+
+</tbody>
+</table>
 
 <p>
 
