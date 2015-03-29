@@ -16,7 +16,7 @@ rtype_xref = {
 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'MS Document',
               }
 
-EMAILS = ['labend@iastate.edu','akrherz@iastate.edu', 'landon@iastate.edu',
+EMAILS = ['labend@iastate.edu','akrherz@iastate.edu',
           'lokhande@iastate.edu']
 if len(sys.argv) == 2:
     EMAILS = ['akrherz@iastate.edu',]
