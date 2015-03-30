@@ -57,7 +57,7 @@ gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(MMSL)
-	GDFILE   = RUC2
+	GDFILE   = RAP
 	CINT     = 4
 	LINE     = 4
 	MAP      = 0
@@ -68,7 +68,7 @@ gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
 	PROJ     = LCC
 	CLEAR    = no
 	PANEL	= 0
-	TITLE	= 32/-2/~ RUC2 MMSL
+	TITLE	= 32/-2/~ RAP MMSL
 	SCALE    = 0
 	LATLON   = 0
 	HILO     =  
