@@ -13,6 +13,7 @@ set dd=`date -u --date '1 minute' +%d`
 set date=${yy}${mm}${dd}
 set hh=`date -u --date '1 minute' +%H`
 set timestamp="`date -u --date '1 minute' +'%Y%m%d%H00'`"
+set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
 
 rm MWmesonet.gif* >& /dev/null
 
@@ -49,6 +50,11 @@ sfmap << EOF > /tmp/MWmesonet_sfmap.out
 	exit
 EOF
 
+set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
+if (! -e ${gdfile}) then
+  set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap236.gem"
+endif
+
 
 gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
 	AREA	= ${AREA}
@@ -57,7 +63,7 @@ gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(MMSL)
-	GDFILE   = RAP
+GDFILE   = $gdfile
 	CINT     = 4
 	LINE     = 4
 	MAP      = 0
