@@ -13,7 +13,18 @@ $t->content = <<<EOF
   <li class="active">IEM Ag Weather/Climate Information</li>
 </ol>
 
-<h3>Are you looking for data?</h3>
+<p>The IEM website contains data from many <a href="/sites/locate.php">different observation networks</a>. While 
+you may know what you are looking for, figuring out which network has this data 
+is tricky.  This table is an attempt to help you locate the data / product you
+need.  Please do <a href="/info/contacts.php">contact us</a> with your 
+questions!</p>
+
+<p>IEM's most popular applications:
+<a role="button" class="btn btn-success" href="/plotting/auto/"><i class="glyphicon glyphicon-signal"></i> Automated Graph Generator</a>
+<a role="button" class="btn btn-success" href="/climodat/"><i class="glyphicon glyphicon-list-alt"></i> Climodat</a>
+<a role="button" class="btn btn-success" href="/plotting/coop/acc.phtml"><i class="glyphicon glyphicon-object-align-bottom"></i> Single Site Graphs</a>
+</p>
+
 
 <table class="table table-striped table-bordered">
 <thead>
@@ -45,15 +56,38 @@ reports for 24 hour periods, not always for the calendar day.</td>
 data from the NWS COOP network.</td>
 </tr>
 
+<tr><td>Growing Degree Days</td>
+<td colspan="2">Not applicable</td>
+<td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality 
+information for daily temperatures, but they are not always on a calendar date.
+</td>
+<td colspan="3">The <a href="/climodat/">Climodat</a> reports present summarized GDD data.
+<ul>
+ <li><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></li>
+ <li><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year={$y}">Map of Totals</a></li>
+ <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+</ul>
+</td>
+</tr>
+
 <tr><td>Precipitation (liquid + melted snow)</td>
  <td>The IEM processes the one minute <a href="/request/asos/1min.phtml">Iowa ASOS</a>
  data, but there is a month delay for receipt of this data.</td>
  <td>The <a href="/ASOS/">ASOS</a> (not AWOS) sites include a heated sensor that
  melts snowfall to produce liquid equivalent.</td>
  <td rowspan="2">The <a href="/COOP/">NWS COOP</a> network report precipitation totals that
- include melted snowfall.</td>
+ include melted snowfall.
+ <ul>
+  <li><a href="/data/summary/today_prec.png">Today's total</a></li>
+  </ul>
+ </td>
  <td colspan="3" rowspan="2"><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
- data from the NWS COOP network.</td>
+ data from the NWS COOP network.
+ <ul>
+  <li><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a></li>
+  <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+ </ul>
+ </td>
 </tr>
 
 <tr><td>Rainfall (liquid only)</td>
@@ -76,71 +110,58 @@ for <a href="/request/coop/fe.phtml">NWS COOP</a> sites based on model analyses.
 at this time.</td>
 </tr>
 
+<tr><td>Soil Moisture</td>
+<td>Does not exist.</td>
+<td>The <a href="/agclimate/">ISU Soil Moisture</a> network collects hourly
+soil moisture data.</td>
+<td>The <a href="http://wepp.mesonet.agron.iastate.edu/GIS/sm.phtml?pvar=vsm">Iowa Daily Erosion Project</a>
+produces soil moisture analyses based on a model called WEPP.</td>
+<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+at this time.</td>
+</tr>
+
+<tr><td>Soil Temperature</td>
+<td>Does not exist.</td>
+<td>The <a href="/agclimate/">ISU Soil Moisture</a> network collects hourly
+soil temperature data.</td>
+<td>The <a href="/agclimate/">ISU Soil Moisture</a> network produces daily
+summaries of high and low temperature.
+<ul>
+ <li><a href="/agclimate/soilt.php">County Estimates</a></li>
+ <li><a href="/timemachine/#57.0">Archived County Estimates</a></li>
+</ul>
+</td>
+<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+at this time.</td>
+</tr>
+
+
 <tr><td>Snowfall</td>
  <td>Does not exist</td>
  <td>The NWS has paid snowfall observers that report 6 hour snowfall totals, but
  the IEM does not have a good interface to get this data.</td>
  <td>The IEM collects the <a href="/COOP/cat.phtml">24 hour snowfall reports</a>
  from the NWS COOP network.</td>
- <td></td>
- <td></td>
- <td></td>
+<td colspan="3">Summarized data for this timescale does not exist on the IEM 
+at this time.</td>
 </tr>
+
+<tr><td>Stress Degree Days</td>
+<td colspan="2">Not applicable</td>
+<td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality 
+information for daily temperatures, but they are not always on a calendar date.
+</td>
+<td colspan="3">The <a href="/climodat/">Climodat</a> reports present
+summarized SDD data.
+  	<ul>
+  		<li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
+  		<li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+  	</ul>
+  		</td>
+</tr>
+
 
 </tbody>
-</table>
-
-<p>
-
-<table class="table table-striped">
-<tr>
- <th></th>
- <th>Current</th>
- <th>Growing Season</th>
-</tr>
-
-
-
-<tr>
-  <th>Growing Degree Days</th>
-  <td><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></td>
-  <td><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year={$y}">Map of Totals</a>
-  <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
-</tr>
-
-<tr>
-  <th>Precipitation</th>
-  <td><a href="/data/summary/today_prec.png">Today's total</a></td>
-  <td><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a>
-  <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
-</tr>
-
-
-<tr>
- <th>Soil Moisture</th>
- <td>
- <a href="http://wepp.mesonet.agron.iastate.edu/GIS/sm.phtml?pvar=vsm">Modelled Estimates</a>
- <br /><span class="badge">new!</span> <a href="/agclimate/">ISU Soil Moisture Network</a>
- </td>
- <td></td>
-</tr>
-
-<tr>
- <th>Soil Temperatures</th>
- <td><a href="/agclimate/soilt.php">County Estimates</a>
-  <br /><a href="/timemachine/#57.0">Archived County Estimates</a>
- <br /><span class="badge">new!</span> <a href="/agclimate/">ISU Soil Moisture Network</a>
- </td>
- <td></td>
-</tr>
-
-<tr>
-  <th>Stress Degree Days</th>
-  <td></td>
-  <td><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a>
-  <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
-</tr>
-
 </table>
 
 <h4>Aridity Index for Corn Belt</h4>
