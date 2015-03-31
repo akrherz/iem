@@ -6,7 +6,6 @@ Run from RUN_20_AFTER.sh
 from pyiem.tracker import loadqc
 import subprocess
 import datetime
-import pytz
 import os
 import psycopg2
 import numpy as np
@@ -62,7 +61,7 @@ def main():
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, rr5data)
     os.close(tmpfd)
-    subprocess.call(("/home/ldm/bin/pqinsert -p 'LOCDSMRR5DMX.dat' %s"
+    subprocess.call(("/home/ldm/bin/pqinsert -p 'SUADSMRR5DMX.dat' %s"
                      ) % (tmpfn,), shell=True)
     os.unlink(tmpfn)
 
