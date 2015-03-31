@@ -1,6 +1,7 @@
 <?php
 /* Create a table of soil temperature probabilities based on obs? */
 include("../../config/settings.inc.php");
+define("IEM_APPID", 88);
 include_once "../../include/myview.php";
 $t = new MyView();
 include("../../include/database.inc.php");
@@ -44,7 +45,7 @@ while (list($k,$thres) = each($thresholds))
     @$tblrows[$i] .= sprintf("<td>%.0f</td>", $probs[$i]/$yrs*100);
   }
 }
-$spring = "<table>$row1</tr>";
+$spring = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
 /* Print webpage */
 for ($i=0;$i<182;$i=$i+5) {
   $ts = mktime(0,0,0,1,1,2000) + ($i * 86400);
@@ -76,7 +77,7 @@ while (list($k,$thres) = each($thresholds))
     @$tblrows[$i] .= sprintf("<td>%.0f</td>", $probs[$i]/$yrs*100);
   }
 }
-$fall = "<table>$row1</tr>";
+$fall = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
 /* Print webpage */
 for ($i=182;$i<366;$i=$i+5) {
   $ts = mktime(0,0,0,1,1,2000) + ($i * 86400);
@@ -117,17 +118,17 @@ is not considered.</div>
 <input type="submit" value="Request">
 </form>
 
-<table cellpadding="5" cellspacing="0" border="1">
-<tr>
-<td valign="top">
+<div class="row"><div class="col-md-6">
+
  <h3>Spring Probabilities<br />Given date to July 1rst</h3>
  {$spring}
-</td>
-<td valign="top">
+
+ </div><div class="col-md-6">
+
  <h3>Fall Probabilities<br />July 1rst to given date</h3>
  {$fall}
-</td>
-</table>
+
+ </div></div>
 EOF;
 $t->render('single.phtml');
  ?>
