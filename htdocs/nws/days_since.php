@@ -15,15 +15,15 @@
  reset($vtec_phenomena);
 $pselect = "";
  while (list($key, $value)=each($vtec_phenomena)){
- 	$pselect .= sprintf("<option value='%s'%s>%s</option>\n", $key,
- 			($key == $phenomena) ? " SELECTED='SELECTED'": '', $value);
+ 	$pselect .= sprintf("<option value='%s'%s>%s (%s)</option>\n", $key,
+ 			($key == $phenomena) ? " SELECTED='SELECTED'": '', $value, $key);
  }
  
  reset($vtec_significance);
 $sselect = "";
  while (list($key, $value)=each($vtec_significance)){
- 	$sselect .= sprintf("<option value='%s'%s>%s</option>\n", $key,
- 			($key == $significance) ? " SELECTED='SELECTED'": '', $value);
+ 	$sselect .= sprintf("<option value='%s'%s>%s (%s)</option>\n", $key,
+ 			($key == $significance) ? " SELECTED='SELECTED'": '', $value, $key);
  }
  
  
@@ -32,7 +32,7 @@ $t->content = <<<EOF
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">Days since Last WWA by WFO</li>
 </ol>
- <h3>Days since Last WWA Product by WFO</h3>
+ <h3>Days since Last Watch - Warning - Advisory Product by NWS Forecast Office</h3>
  
  <p>This application generates a map of the number of days since the issuance
  of a particular VTEC encoded Watch, Warning, and Advisory (WWA) by NWS Forecast 
@@ -63,8 +63,9 @@ $t->content = <<<EOF
 <p><input type="submit" value="Generate Map" />
 </form>
 
-<p>Once generated, the map will appear below...
-<p><img src="{$imgurl}" alt="The Map" class="img img-responsive"/>
+<div id="mapwillload"><h4>Your Map is now being generated, it will appear below when ready!</h4></div>
+<img src="{$imgurl}" alt="The Map" class="img img-responsive"
+		onload="document.getElementById('mapwillload').style.opacity=0"/>
 EOF;
 $t->render('single.phtml');
 ?>
