@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -52,6 +52,8 @@ Requires: tmpwatch
 Requires: gdata
 Requires: pyephem
 Requires: mailx
+Requires: xlwt
+Requires: xlrd
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -71,6 +73,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Wed Apr  1 2015 daryl herzmann <ahrherz@iastate.edu>
+- Adding python excel library needed for some scripts
+
 * Thu Mar 19 2015 daryl herzmann <akrherz@iastate.edu>
 - Add requirements found by moving scripts to iem12
 
