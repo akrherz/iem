@@ -22,7 +22,7 @@ docs_client = util.get_docs_client(config)
 
 allowed_depths = ['0 - 10', '10 - 20', '20 - 40', '40 - 60']
 
-query = gdata.docs.client.DocsQuery(show_collections='false', 
+query = gdata.docs.client.DocsQuery(show_collections='false',
                                     title='Soil Texture Data')
 feed = docs_client.GetAllResources(query=query)
 
@@ -31,6 +31,10 @@ for entry in feed:
         continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
+    if YEAR not in spreadsheet.worksheets:
+        print(("Missing %s from %s"
+               ) % (YEAR, spreadsheet.title))
+        continue
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]

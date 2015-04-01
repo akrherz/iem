@@ -24,6 +24,9 @@ python harvest_agronomic.py 2014
 python harvest_soil_nitrate.py 2012
 python harvest_soil_nitrate.py 2013
 python harvest_soil_nitrate.py 2014
+python harvest_soil_texture.py 2012
+python harvest_soil_texture.py 2013
+python harvest_soil_texture.py 2014
 python harvest_soil_bd.py 2013
 python set_dashboard_links.py 2012
 python set_dashboard_links.py 2013
