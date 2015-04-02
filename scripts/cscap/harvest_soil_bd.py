@@ -31,7 +31,7 @@ for entry in feed:
     siteid = spreadsheet.title.split()[0]
     worksheet = spreadsheet.worksheets.get(YEAR)
     if worksheet is None:
-        print 'Missing Soil BD+WR %s sheet for %s' % (YEAR, siteid)
+        # print 'Missing Soil BD+WR %s sheet for %s' % (YEAR, siteid)
         continue
     worksheet.get_cell_feed()
     if siteid == 'DPAC':
@@ -53,7 +53,7 @@ for entry in feed:
         key = "%s|%s|%s|%s" % row
         current[key] = True
     found_vars = []
-    for row in range(4, worksheet.rows+1):
+    for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
         if siteid == 'DPAC':
             depth = worksheet.get_cell_value(row, 3)
