@@ -106,7 +106,8 @@ def main():
     eyear = int(form.getfirst('eyear', datetime.datetime.now().year + 1))
     cb = form.getfirst('callback', None)
 
-    mckey = "/geojson/climodat_dayclimo/%s/%s/%s" % (network, month, day)
+    mckey = "/geojson/climodat_dayclimo/%s/%s/%s/%s/%s" % (network, month, day,
+                                                           syear, eyear)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:

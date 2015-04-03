@@ -21,6 +21,19 @@
  $station = isset($_GET["station"]) ? $_GET["station"] : null;
  $sortdir = isset($_GET["sortdir"]) ? $_GET['sortdir'] : 'ASC';
 
+ $syear = 1800;
+ $eyear = intval(date("Y")) + 1;
+ if ($tbl == "climate51"){
+ 	$syear = 1951;
+ }
+ else if ($tbl == "climate71"){
+ 	$syear = 1971;
+ 	$eyear = 2001;
+ }
+ else if ($tbl == "climate81"){
+ 	$syear = 1981;
+ 	$eyear = 2011;
+ }
  
  $t->title = "NWS COOP Daily Climatology";
  $t->thispage = "climatology-extremes";
@@ -53,8 +66,8 @@ $cities = $nt->table;
  // Option 1, we want climo for one station!
  if ($station != null){
  	if ($sortcol == 'station') $sortcol = 'valid';
-	$jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}");
-	$URI = sprintf("http://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}");
+	$jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
+	$URI = sprintf("http://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
 	$json = Zend_Json::decode($jdata);
 	$data = Array();
 	$table = "";
@@ -92,8 +105,8 @@ $cities = $nt->table;
  // Option 2, just a single date
  } else {
  	if ($sortcol == 'valid') $sortcol = 'station';
- 	$jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}");
- 	$URI = sprintf("http://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}");
+ 	$jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
+ 	$URI = sprintf("http://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
  	$json = Zend_Json::decode($jdata);
  	$data = Array();
  	$table = "";
