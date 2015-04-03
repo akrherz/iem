@@ -20,9 +20,48 @@
   $services = array();
 
   $services[] = Array(
+  		"title" => "NWS COOP Station Climatology",
+  		"url" => "/json/climodat_stclimo.py?station={station}&amp;syear={syear}&amp;eyear={eyear}",
+  		"desc" => "Produces a listing of daily climatology for an IEM tracked
+  		long term climodat site in the midwestern US.",
+  		"vars" => Array(
+  				"station" => "6 character station identifier",
+  				"syear" => "Inclusive start year of the period of interest",
+  				"syear" => "Exclusive end year of the period of interest"
+  		),
+  		"example" => Array(
+  				"{station}" => "IA0200",
+  				"{syear}" => "1800",
+  				"{eyear}" => "2016",
+  		)
+  );
+
+  $services[] = Array(
+  		"title" => "NWS COOP Network Climatology for one day",
+  		"url" => "/geojson/climodat_dayclimo.py?network={network}&amp;day={day}&amp;month={month}&amp;syear={syear}&amp;eyear={eyear}",
+  		"desc" => "Produces a listing of climatology for a single state
+  		for a single day.",
+  		"vars" => Array(
+  				"network" => "state network identifier",
+  				"month" => "Numeric month of interest (1-12)",
+  				"day" => "Numeric day of interest (1-31)",
+  				"syear" => "Inclusive start year of the period of interest",
+  				"syear" => "Exclusive end year of the period of interest"
+  		),
+  		"example" => Array(
+  				"{network}" => "IACLIMATE",
+  				"{month}" => "4",
+  				"{day}" => "3",
+  				"{syear}" => "1800",
+  				"{eyear}" => "2016",
+  		)
+  );
+  
+  
+  $services[] = Array(
   		"title" => "NWS VTEC Event Listing by WFO by Year",
   		"url" => "/json/vtec_events.py?wfo={wfo}&year={year}",
-  		"desc" => "Produces a listing of VTEC Events (watch, warning, 
+  		"desc" => "Produces a listing of VTEC Events (watch, warning,
   		advisories) by year by weather forecast office.",
   		"vars" => Array(
   				"wfo" => "3 character WFO identifier",
@@ -33,7 +72,8 @@
   				"{year}" => "2015"
   		)
   );
-
+  
+  
   $services[] = Array(
   		"title" => "NWS Text Products by AWIPS ID and Time Period",
   		"url" => "/json/nwstext_search.py?sts={sts}&ets={ets}&awipsid={awipsid}",
