@@ -7,6 +7,7 @@
  $t = new MyView();
  
  define("IEM_APPID", 2);
+ require_once 'Zend/Json.php';
  include("../../include/forms.php");
  include("../../include/database.inc.php");
  include("../../include/network.php"); 
@@ -24,26 +25,107 @@
  $t->title = "NWS COOP Daily Climatology";
  $t->thispage = "climatology-extremes";
 
+ function aSortBySecondIndex($multiArray, $secondIndex) {
+ 	while (list($firstIndex, ) = each($multiArray))
+ 		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
+ 	while (list($firstIndex, ) = each($indexMap))
+ 		if (is_numeric($firstIndex))
+ 			$sortedArray[] = $multiArray[$firstIndex];
+ 		else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+ 		return $sortedArray;
+ }
+ function sortBySecondIndex($multiArray, $secondIndex) {
+ 	while (list($firstIndex, ) = each($multiArray))
+ 		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        asort($indexMap);
+ 	while (list($firstIndex, ) = each($indexMap))
+ 		if (is_numeric($firstIndex))
+ 			$sortedArray[] = $multiArray[$firstIndex];
+ 		else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+ 		return $sortedArray;
+ }
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
  $connection = iemdb("coop");
 
- $td = date("Y-m-d", $valid); 
+ $td = date("Y-m-d", $valid);
+ // Option 1, we want climo for one station!
  if ($station != null){
  	if ($sortcol == 'station') $sortcol = 'valid';
- 	$rs = pg_prepare($connection, "SELECT", "SELECT *, extract(month from valid) as month,
- 		extract(day from valid) as day " .
- 		"from $tbl WHERE station = $1" .
- 		"ORDER by ". $sortcol ." ". $sortdir);
- 	$rs = pg_execute($connection, "SELECT", Array($station) );
+	$jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}");
+	$URI = sprintf("http://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}");
+	$json = Zend_Json::decode($jdata);
+	$data = Array();
+	$table = "";
+ 	while(list($key,$val)=each($json['climatology'])){
+ 		$val["valid"]  = mktime(0,0,0, $val["month"], $val["day"], 2000);
+ 		$data[] = $val;
+ 	}
+ 	if ($sortdir == 'ASC'){
+ 		$sorted_data = sortBySecondIndex($data, $sortcol);
+ 	} else{
+	 	$sorted_data = aSortBySecondIndex($data, $sortcol);
+ 	}
+ 	while(list($key,$val)=each($sorted_data)){
+ 		$link = sprintf("extremes.php?day=%s&amp;month=%s&amp;network=%s",
+ 				$day, $month, $network);
+ 		$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
+ 				<td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+ 				<td></td>
+ 				<td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+ 				<td></td>
+ 				<td>%.2f</td><td>%.2f</td><td>%s</td>
+ 				</tr>", $link,
+ 				date("d M", $val["valid"]), $val["years"],
+ 				$val["avg_high"],
+ 				$val["max_high"], implode(", ", $val["max_high_years"]),
+ 				$val["min_high"], implode(", ", $val["min_high_years"]),
+ 				$val["avg_low"],
+ 				$val["max_low"], implode(", ", $val["max_low_years"]),
+ 				$val["min_low"], implode(", ", $val["min_low_years"]),
+ 				$val["avg_precip"], $val["max_precip"],
+ 				implode(", ", $val["max_precip_years"])); 
+ 	}
+	
  	$h3 = "<h3 class=\"heading\">NWS COOP Climatology for ". $cities[strtoupper($station)]["name"] ." (ID: ". $station .")</h3>";
+ // Option 2, just a single date
  } else {
- 	$rs = pg_prepare($connection, "SELECT", "SELECT * " .
- 		"from $tbl WHERE valid = $1 and substr(station,0,3) = $2" .
- 		"ORDER by ". $sortcol ." ". $sortdir);
- 	$rs = pg_execute($connection, "SELECT", Array($td, strtoupper(substr($network,0,2))));
+ 	if ($sortcol == 'valid') $sortcol = 'station';
+ 	$jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}");
+ 	$URI = sprintf("http://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}");
+ 	$json = Zend_Json::decode($jdata);
+ 	$data = Array();
+ 	$table = "";
+ 	while(list($key,$val)=each($json['features'])){
+ 		$data[] = $val['properties'];
+ 	}
+ 	if ($sortdir == 'ASC'){
+ 		$sorted_data = sortBySecondIndex($data, $sortcol);
+ 	} else{
+ 		$sorted_data = aSortBySecondIndex($data, $sortcol);
+ 	}
+ 	while(list($key,$val)=each($sorted_data)){
+ 		$link = sprintf("extremes.php?station=%s&amp;network=%s",
+ 				$val["station"], $network);
+ 		$table .= sprintf("<tr><td><a href=\"%s\">%s</a> (%s)</td><td>%s</td>
+ 				<td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+ 				<td></td>
+ 				<td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+ 				<td></td>
+ 				<td>%.2f</td><td>%.2f</td><td>%s</td>
+ 				</tr>", $link,
+ 				$cities[$val["station"]]['name'], $val["station"], $val["years"],
+ 				$val["avg_high"],
+ 				$val["max_high"], implode(", ", $val["max_high_years"]),
+ 				$val["min_high"], implode(", ", $val["min_high_years"]),
+ 				$val["avg_low"],
+ 				$val["max_low"], implode(", ", $val["max_low_years"]),
+ 				$val["min_low"], implode(", ", $val["min_low_years"]),
+ 				$val["avg_precip"], $val["max_precip"],
+ 				implode(", ", $val["max_precip_years"]));
+ 	}
+ 	
  	$h3 = "<h3 class=\"heading\">NWS COOP Climatology for ". date("d F", $valid) ."</h3>";
  	
  }
@@ -73,37 +155,15 @@ $cities = $nt->table;
  "climate81" => "1981-2010");
   $tblselect = make_select("tbl", $tbl, $ar);
  
-  
+  $sortdir2 = $sortdir == 'ASC' ? 'DESC': 'ASC';
   if ($station != null){
-  	$uribase = sprintf("&station=%s&network=%s&tbl=%s", $station, $network, $tbl);
+  	$uribase = sprintf("&station=%s&network=%s&tbl=%s&amp;sortdir=%s", $station, $network, $tbl, $sortdir2);
   	$h4 = "<a href='extremes.php?sortcol=valid". $uribase ."'>Date</a>";
   }  else {
-  	$uribase = sprintf("&day=%s&month=%s&network=%s&tbl=%s", $day, $month, $network, $tbl);
+  	$uribase = sprintf("&day=%s&month=%s&network=%s&tbl=%s&amp;sortdir=%s", $day, $month, $network, $tbl, $sortdir2);
   	$h4 = "<a href='extremes.php?sortcol=station&day=".$day."&month=".$month."'>Station</a>";
   }
   
-  $table = "";
-  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
-  {
-  if (!array_key_exists(strtoupper($row["station"]), $cities)){
-  continue;
-  }
-  $table .= "<tr ";
-  if ( ($i % 2) == 0)
-  $table .= "class='even'";
-  $table .= ">";
-   if ($station != null){
-  $table .= "<td><a href=\"extremes.php?month=". $row["month"] . "&day=". $row["day"] ."&network=". $network ."\">". date("F d", strtotime($row["valid"])) ."</a></td>";
-  } else {
-  		$table .= "<td><a href=\"extremes.php?station=". $row["station"] . $uribase ."\">". $cities[strtoupper($row["station"])]["name"] ."</a></td>";
-   }
-  				$table .= sprintf("<td>%s</td><td>%.1f</td><td class='red'>%s</td><td>%s</td><td class='blue'>%s</td><td>%s</td><td>&nbsp;</td><td>%.1f</td>
-     <td class='red'>%s</td><td>%s</td><td class='blue'>%s</td><td>%s</td><td>&nbsp;</td><td>%.2f</td><td>%s</td><td>%s</td></tr>\n", $row["years"],
-     $row["high"], $row["max_high"], $row["max_high_yr"], $row["min_high"], $row["min_high_yr"],
-       $row["low"], $row["max_low"] , $row["max_low_yr"] , $row["min_low"], $row["min_low_yr"] ,
-       $row["precip"], $row["max_precip"] , $row["max_precip_yr"] );
-  
- }
   
  $t->content = <<<EOF
  
@@ -114,6 +174,11 @@ COOP stations.  Some records may have occured on multiple years, only one
 is listed here.  You may click on a column to sort it.  You can click on the station
 name to get all daily records for that station or click on the date to get all records
 for that date.</p>
+
+<p>The data found in this table was derived from the following
+<a href="/json/">JSON webservice</a>:<br />
+<code>{$URI}</code>
+</p>
 
 <form method="GET" action="extremes.php" name="myform">
 <table cellpadding=2 cellspacing=0 border=2>
@@ -136,16 +201,8 @@ for that date.</p>
 </form>
 
 <br />
-<style>
-.red{
- color: #f00;
-}
-.blue{
- color: #00f;
-}
-</style>
 
-<table class="table table-condensed table-striped">
+<table class="table table-bordered table-condensed table-striped">
 <thead>
   <tr>
    <th rowspan='2' class='subtitle' valign='top'>
@@ -161,19 +218,19 @@ for that date.</p>
   <tr>
     <th><a href='extremes.php?sortcol=high{$uribase}'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_high{$uribase}'>Max:</a></th>
-       <th><a href='extremes.php?sortcol=max_high_yr{$uribase}'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=max_high_years{$uribase}'>Year:</a></th>
     <th><a href='extremes.php?sortcol=min_high{$uribase}'>Min:</a></th>
-       <th><a href='extremes.php?sortcol=min_high_yr{$uribase}'>Year:</a></th>
-       <td>&nbsp;</td>
+    <th><a href='extremes.php?sortcol=min_high_years{$uribase}'>Year:</a></th>
+    <td>&nbsp;</td>
 	<th><a href='extremes.php?sortcol=low{$uribase}'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_low{$uribase}'>Max:</a></th>
-       <th><a href='extremes.php?sortcol=max_low_yr{$uribase}'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=max_low_years{$uribase}'>Year:</a></th>
     <th><a href='extremes.php?sortcol=min_low{$uribase}'>Min:</a></th>
-        <th><a href='extremes.php?sortcol=min_low_yr{$uribase}'>Year:</a></th>
-        <td>&nbsp;</td>
+    <th><a href='extremes.php?sortcol=min_low_years{$uribase}'>Year:</a></th>
+    <td>&nbsp;</td>
     <th><a href='extremes.php?sortcol=precip{$uribase}'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_precip{$uribase}'>Max:</a></th>
-        <th><a href='extremes.php?sortcol=max_precip_yr{$uribase}'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=max_precip_years{$uribase}'>Year:</a></th>
   </tr>
 </thead>
 <tbody>
