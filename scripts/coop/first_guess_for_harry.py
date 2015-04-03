@@ -10,7 +10,7 @@ for line in open('/tmp/SCIA1107.txt'):
     site = "IA%04i" % (int(tokens[0]),)
     if not site in sites:
         sites.append( site )
-    
+
 print `sites`
 sys.exit()
 """
@@ -188,42 +188,50 @@ IA8693,WHTI4,GC"""
 
 METADATA = {}
 ordering = []
+UNCONV_VARS = []
 for line in DATA.split("\n"):
     tokens = line.split(",")
-    METADATA[ tokens[2].strip() ] = {'IEMRE': tokens[0], 'NWSLI': tokens[1]}
-    ordering.append( tokens[2].strip() )
+    METADATA[tokens[2].strip()] = {'IEMRE': tokens[0], 'NWSLI': tokens[1]}
+    ordering.append(tokens[2].strip())
+
 
 def good_value(val, bad):
     if val == bad:
         return 'M'
     return val
 
+
 def get_site(year, month, iemre, nwsli):
     """
     do our work for this site
     """
     # Create data dictionary to store our wares
-    data = [0,]
+    data = [0, ]
     sts = datetime.datetime(year, month, 1)
     ets = sts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)
-    while sts < ets:
-        data.append({'coop': {'high': '', 'low': '', 'atob': '', 
+    now = sts
+    while now < ets:
+        data.append({'coop': {'high': '', 'low': '', 'atob': '',
                               'prec': '', 'sf': '', 'sog': '',
                               'v': ''},
-                     'iemre': {'high': '', 'low': '', 'atob': '', 
-                              'prec': '', 'sf': '', 'sog': ''}})
-        sts += datetime.timedelta(days=1)
+                     'iemre': {'high': '', 'low': '', 'atob': '',
+                               'prec': '', 'sf': '', 'sog': ''}})
+        now += datetime.timedelta(days=1)
 
-    table = "raw%s_%02i" % (year, month)
+    table = "raw%s" % (year, )
     hcursor.execute("""
-    SELECT valid, key, value from """+table+""" WHERE station = %s
+    SELECT valid, key, value from """ + table + """ WHERE station = %s
+    and valid > %s and valid <= %s
     and value != -9999 and substr(key,3,1) not in ('H','Q') ORDER by valid ASC
-    """, (nwsli,))
+    """, (nwsli, sts.strftime("%Y-%m-%d 00:00"),
+          ets.strftime("%Y-%m-%d 00:00")))
     for row in hcursor:
-        if row[0].month != month:
-            continue
-        idx = int(row[0].day)
+        valid = row[0]
+        # Move midnight data back one minute
+        if valid.hour == 0 and valid.minute == 0:
+            valid = valid - datetime.timedelta(minutes=1)
+        idx = int(valid.day)
         key = row[1]
         if key in ['TAIRGZ']:
             # This is automated station
@@ -243,10 +251,12 @@ def get_site(year, month, iemre, nwsli):
         elif key[:2] in ['PP', 'SF'] and key[2] == 'V':
             data[idx]['coop']['v'] += "%s/%s " % (key, row[2])
         elif key[:2] in ['PP', 'SD', 'SF', 'TA']:
-            print 'Unaccounted for %s %s %s' % (nwsli, row[0], key)
+            if key not in UNCONV_VARS:
+                print 'Unaccounted for %s %s %s' % (nwsli, valid, key)
+                UNCONV_VARS.append(key)
 
     ccursor.execute("""
-    select extract(day from day), high, low, snow, snowd, precip from 
+    select extract(day from day), high, low, snow, snowd, precip from
     alldata_ia where station = %s and year = %s and month = %s
     """, (iemre, year, month))
     for row in ccursor:
@@ -259,12 +269,14 @@ def get_site(year, month, iemre, nwsli):
 
     return data
 
+
 def get_sitename(site):
     mcursor.execute("""SELECT name from stations where network = 'IACLIMATE'
     and id = %s """, (site,))
     if mcursor.rowcount == 0:
         return site
     return mcursor.fetchone()[0]
+
 
 def print_data(year, month, iemre, nwsli, sheet, data):
     """
@@ -273,7 +285,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
     row = sheet.row(0)
     row.write(8, '?')
     row.write(10, '?')
-    row.write(12, "%s %s NWSLI: %s" % (get_sitename(iemre), iemre, nwsli) )
+    row.write(12, "%s %s NWSLI: %s" % (get_sitename(iemre), iemre, nwsli))
     row = sheet.row(1)
     row.write(2, 'YR')
     row.write(3, 'MO')
@@ -305,7 +317,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
         row.write(6, data[idx]['coop']['high'])
         row.write(7, data[idx]['iemre']['low'])
         row.write(8, data[idx]['coop']['low'])
-        row.write(10, data[idx]['coop']['atob']) 
+        row.write(10, data[idx]['coop']['atob'])
         row.write(11, data[idx]['iemre']['prec'])
         row.write(12, data[idx]['coop']['prec'])
         row.write(13, data[idx]['iemre']['sf'])
@@ -314,6 +326,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
         row.write(16, data[idx]['coop']['sog'])
         row.write(17, data[idx]['coop']['v'])
         sts += datetime.timedelta(days=1)
+
 
 def runner(year, month):
     """
@@ -330,24 +343,26 @@ def runner(year, month):
         sheet.col(2).width = 256*5
         sheet.col(3).width = 256*4
         sheet.col(4).width = 256*4
-        for col in range(5,17):
+        for col in range(5, 17):
             sheet.col(col).width = 256*5
-        print_data( year, month, METADATA[label]['IEMRE'],
-                        METADATA[label]['NWSLI'], sheet, data)
+        print_data(year, month, METADATA[label]['IEMRE'],
+                   METADATA[label]['NWSLI'], sheet, data)
     fn = "/tmp/IEM%s%02i.xls" % (year, month)
     book.save(fn)
     return fn
+
 
 def main():
     """Go Main Go """
     if len(sys.argv) == 1:
         lastmonth = datetime.datetime.now() - datetime.timedelta(days=15)
-        fn = runner( lastmonth.year, lastmonth.month)
+        fn = runner(lastmonth.year, lastmonth.month)
         # Email this out!
         msg = MIMEMultipart()
-        msg['Subject'] = 'IEM COOP Report for %s' % (lastmonth.strftime("%b %Y"),)
+        msg['Subject'] = ('IEM COOP Report for %s'
+                          ) % (lastmonth.strftime("%b %Y"),)
         msg['From'] = 'akrherz@iastate.edu'
-        #msg['To'] = 'akrherz@localhost'
+        # msg['To'] = 'akrherz@localhost'
         msg['To'] = 'Harry.Hillaker@iowaagriculture.gov'
         msg.preamble = 'COOP Report'
 
@@ -356,7 +371,8 @@ def main():
         b.set_payload(fp.read())
         encoders.encode_base64(b)
         fp.close()
-        b.add_header('Content-Disposition', 'attachment; filename="%s"' % (fn,))
+        b.add_header('Content-Disposition', 'attachment; filename="%s"' % (fn,
+                                                                           ))
         msg.attach(b)
 
         # Send the email via our own SMTP server.
