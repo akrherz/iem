@@ -21,7 +21,8 @@ def run():
     # with a start time in the future
     cursor.execute("""
         SELECT ST_asGeoJson(geom) as geojson, phenomena, eventid, wfo,
-        significance, polygon_end at time zone 'UTC' as utc_polygon_end
+        significance, polygon_end at time zone 'UTC' as utc_polygon_end,
+        polygon_begin at time zone 'UTC' as utc_polygon_begin, status
         from """+sbwtable+""" WHERE
         polygon_begin <= (now() + '7 days'::interval) and
         polygon_end > now()
@@ -36,13 +37,17 @@ def run():
     for row in cursor:
         sid = "%(wfo)s.%(phenomena)s.%(significance)s.%(eventid)04i" % row
         ets = row['utc_polygon_end'].strftime("%Y-%m-%dT%H:%M:%SZ")
+        sts = row['utc_polygon_begin'].strftime("%Y-%m-%dT%H:%M:%SZ")
+        sid += "."+sts
         res['features'].append(dict(type="Feature",
                                     id=sid,
                                     properties=dict(
+                                        status=row['status'],
                                         phenomena=row['phenomena'],
                                         significance=row['significance'],
                                         wfo=row['wfo'],
                                         eventid=row['eventid'],
+                                        polygon_begin=sts,
                                         expire=ets),
                                     geometry=json.loads(row['geojson'])
                                     ))
