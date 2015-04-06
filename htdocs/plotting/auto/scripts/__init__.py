@@ -68,6 +68,7 @@ data = {'plots': [
         {'id': "46", 'label': "Minimum Wind Chill Temperature"},
         {'id': "30", 'label': "Monthly Temperature Range"},
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
+        {'id': "69", 'label': "Percentage of Year to Date Days Above Average"},
         {'id': "63", 'label': "Records Set by Year (Max High / Min Low)"},
         {'id': "14", 'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
