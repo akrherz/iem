@@ -15,8 +15,12 @@ def query(sql, args=[]):
     Do a query and make it atomic
     """
     hcursor = HADS.cursor()
+    sts = datetime.datetime.now()
     hcursor.execute("set work_mem='16GB'")
     hcursor.execute(sql, args)
+    ets = datetime.datetime.now()
+    print("%6s [%.4fs] %s" % (hcursor.rowcount, (ets - sts).total_seconds(),
+                              sql))
     hcursor.close()
     HADS.commit()
 
