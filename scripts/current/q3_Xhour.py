@@ -68,7 +68,8 @@ def doit(ts, hours):
 
     lts = ts.astimezone(pytz.timezone("America/Chicago"))
     subtitle = 'Total up to %s' % (lts.strftime("%d %B %Y %I:%M %p %Z"),)
-    m = MapPlot(title="NCEP NMQ Q3 %s Hour Precipitation [inch]" % (hours,),
+    m = MapPlot(title=("NCEP MRMS Q3 (RADAR Only) %s Hour "
+                       "Precipitation [inch]") % (hours,),
                 subtitle=subtitle, )
 
     clevs = np.arange(0, 0.2, 0.05)
@@ -77,7 +78,7 @@ def doit(ts, hours):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    m.contourf(mrms.XAXIS, mrms.YAXIS, total / 24.5, clevs)
+    m.contourf(mrms.XAXIS, mrms.YAXIS, np.flipud(total) / 24.5, clevs)
     m.drawcounties()
     m.postprocess(pqstr=pqstr)
 
@@ -85,7 +86,7 @@ def doit(ts, hours):
 def main():
     """Go main"""
     if len(sys.argv) == 7:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                int(sys.argv[3]),
                                int(sys.argv[4]), int(sys.argv[5]))
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
