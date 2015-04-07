@@ -19,8 +19,8 @@ def query(sql, args=[]):
     hcursor.execute("set work_mem='16GB'")
     hcursor.execute(sql, args)
     ets = datetime.datetime.now()
-    print("%6s [%.4fs] %s" % (hcursor.rowcount, (ets - sts).total_seconds(),
-                              sql))
+    print("%7s [%8.4fs] %s" % (hcursor.rowcount, (ets - sts).total_seconds(),
+                               sql))
     hcursor.close()
     HADS.commit()
 
@@ -72,8 +72,8 @@ def main(argv):
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(hour=0, minute=0, second=0, microsecond=0,
                             tzinfo=pytz.timezone("UTC"))
-    # Run for 'yesterday' and 14 days ago
-    for day in [1, 14]:
+    # Run for 'yesterday' and 35 days ago
+    for day in [1, 35]:
         do(utcnow - datetime.timedelta(days=day))
 
 if __name__ == '__main__':
