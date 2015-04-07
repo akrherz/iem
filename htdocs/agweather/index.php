@@ -63,6 +63,7 @@ information for daily temperatures, but they are not always on a calendar date.
 </td>
 <td colspan="3">The <a href="/climodat/">Climodat</a> reports present summarized GDD data.
 <ul>
+ <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
  <li><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></li>
  <li><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year={$y}">Map of Totals</a></li>
  <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
@@ -84,6 +85,7 @@ information for daily temperatures, but they are not always on a calendar date.
  <td colspan="3" rowspan="2"><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
  data from the NWS COOP network.
  <ul>
+  <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
   <li><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a></li>
   <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
  </ul>
@@ -153,10 +155,11 @@ information for daily temperatures, but they are not always on a calendar date.
 </td>
 <td colspan="3">The <a href="/climodat/">Climodat</a> reports present
 summarized SDD data.
-  	<ul>
-  		<li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
-  		<li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
-  	</ul>
+<ul>
+    <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
+  	<li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
+  	<li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+</ul>
   		</td>
 </tr>
 
