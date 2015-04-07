@@ -5,6 +5,7 @@
 """
 import datetime
 import pytz
+import sys
 import psycopg2
 HADS = psycopg2.connect(database='hads', host='iemdb')
 
@@ -57,12 +58,20 @@ def do(ts):
     query(sql)
 
 
-def main():
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
+        utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
+        do(utcnow)
+        return
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(hour=0, minute=0, second=0, microsecond=0,
                             tzinfo=pytz.timezone("UTC"))
-    do(utcnow - datetime.timedelta(days=1))
+    # Run for 'yesterday' and 14 days ago
+    for day in [1, 14]:
+        do(utcnow - datetime.timedelta(days=day))
 
 if __name__ == '__main__':
     # See how we are called
-    main()
+    main(sys.argv)
