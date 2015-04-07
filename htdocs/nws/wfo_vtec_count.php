@@ -86,13 +86,15 @@
  2005.  You can optionally plot up to 4 different VTEC phenomena and significance 
  types.
  
- <div class="warning">Please be patient, this app may take 10-30 seconds to
+ <div class="alert alert-warning">Please be patient, this app may take 10-30 seconds to
  generate the image!</div>
  
 <form method="GET" name="theform">
 
-<table cellpadding='3' cellspacing='0' border='1'>
+<table class="table table-striped table-bordered">
+<thead>
 <tr><th>Enabled:?</th><th>Phenomena</th><th>Significance</th></tr>
+</thead>
 
 <tr>
 <td></td>
