@@ -1,5 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 3);
 include("../../../include/myview.php");
 include("../../../include/iemprop.php");
 include("../../../include/network.php");
@@ -8,10 +9,10 @@ include("../../../include/forms.php");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 
 $t = new MyView();
+$t->iemss = True;
 $t->title = "COOP Quality Controlled and Estimated Data Download";
 $t->thispage = "networks-coop";
 
-define("IEM_APPID", 3);
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $nt = new NetworkTable($network);
 $cities = $nt->table;
@@ -112,13 +113,10 @@ side effect is that data changes as new information becomes available.
 
 <div class="row"><div class="col-sm-6">
 
-<p><h4>1. Select Station:</h4>
-<i>Select One or More or All stations in the network.</i><br />
-<select name="station[]" size="5" MULTIPLE>
-<option value="_ALL">--Select ALL--</option>
-{$sselect}
-</select>
+<h4>1. Select station(s):</h4>
+<div id="iemss" data-network="{$network}"></div>
 
+</div><div class="col-sm-6">
 
 <p><h4>2. Select Start/End Time:</h4>
 <i>Please note the start year in the station selector. Some sites start
@@ -170,7 +168,6 @@ to have your format added to the list!</i>
   <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
 </select>
 
-</div><div class="col-sm-6">
 
 <p><h4>4. How to view?</h4>
 <select name="what">

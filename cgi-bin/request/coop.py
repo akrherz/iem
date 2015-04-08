@@ -68,6 +68,8 @@ def get_cgi_dates(form):
 def get_cgi_stations(form):
     """ Figure out which stations the user wants, return a list of them """
     reqlist = form.getlist("station[]")
+    if len(reqlist) == 0:
+        reqlist = form.getlist('stations')
     if "_ALL" in reqlist:
         network = form.getfirst("network")
         nt = NetworkTable(network)
