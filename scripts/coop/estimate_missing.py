@@ -11,7 +11,7 @@ from pyiem import iemre
 from pyiem.datatypes import temperature
 
 # Database Connection
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 
@@ -49,35 +49,35 @@ def do_var(varname):
     sql = """select day, station from alldata_%s WHERE %s is null
         and day >= '1893-01-01' ORDER by day ASC""" % (state.lower(), varname)
     ccursor.execute(sql)
-    print nt.sts.keys()
     for row in ccursor:
         day = row[0]
         station = row[1]
         if station not in nt.sts:
             continue
 
-        sql = """SELECT station, %s from alldata_%s WHERE %s is not NULL
-            and station in %s and day = '%s'""" % (varname, state, varname,
-                                    tuple(friends[station]), day)
+        sql = """
+            SELECT station, %s from alldata_%s WHERE %s is not NULL
+            and station in %s and day = '%s'
+            """ % (varname, state, varname, tuple(friends[station]), day)
         ccursor2.execute(sql)
         weight = []
         value = []
         for row2 in ccursor2:
             idx = friends[station].index(row2[0])
-            weight.append( weights[station][idx] )
-            value.append( row2[1] )
+            weight.append(weights[station][idx])
+            value.append(row2[1])
 
         if len(weight) < 3:
             # Nearest neighbors failed, so lets look at our grided analysis
             # and sample from it
             if currentnc is None or currentnc.title.find(str(day.year)) == -1:
                 currentnc = netCDF4.Dataset(("/mesonet/data/iemre/"
-                            +"%s_mw_daily.nc") % (day.year,))
+                                             "%s_mw_daily.nc") % (day.year,))
             tidx = iemre.daily_offset(datetime.datetime(day.year, day.month,
                                                         day.day))
-            iidx, jidx = iemre.find_ij(nt.sts[station]['lon'], 
+            iidx, jidx = iemre.find_ij(nt.sts[station]['lon'],
                                        nt.sts[station]['lat'])
-            iemreval = currentnc.variables[vnameconv[varname]][tidx, jidx, 
+            iemreval = currentnc.variables[vnameconv[varname]][tidx, jidx,
                                                                iidx]
             if varname in ('high', 'low'):
                 interp = temperature(iemreval, 'K').value('F')
@@ -91,20 +91,23 @@ def do_var(varname):
         dataformat = '%.2f'
         if varname in ['high', 'low']:
             dataformat = '%.0f'
-        print 'Set station: %s day: %s varname: %s value: %s' % (station,
-                                    day, varname, dataformat % (interp,))
-        sql = """UPDATE alldata_%s SET estimated = true, %s = %s WHERE 
-            station = '%s' and day = '%s'""" % (state.lower(), varname, 
-                                    dataformat % (interp,), station, day)
+        print(('Set station: %s day: %s varname: %s value: %s'
+               ) % (station, day, varname, dataformat % (interp,)))
+        sql = """
+            UPDATE alldata_%s SET estimated = true, %s = %s WHERE
+            station = '%s' and day = '%s'
+            """ % (state.lower(), varname,
+                   dataformat % (interp,), station, day)
         sql = sql.replace(' nan ', ' null ')
-        ccursor2.execute( sql )
+        ccursor2.execute(sql)
+
 
 def main():
     for varname in ['high', 'low', 'precip']:
-        do_var(varname)    
+        do_var(varname)
 
     ccursor2.close()
     COOP.commit()
-    
+
 if __name__ == '__main__':
     main()
