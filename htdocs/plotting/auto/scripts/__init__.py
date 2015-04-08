@@ -88,6 +88,8 @@ data = {'plots': [
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "68",
          'label': "Number of Distinct Phenomena/Significance VTEC per Year"},
+        {'id': "70",
+         'label': "Period between First and Last VTEC Product Each Year"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
         {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
     ]},
