@@ -41,8 +41,8 @@ done
 scp -q root@iem30:${BASE}/access_log-weather.im.iem30 weatherim_access.log
 
 # Step 3, merge the log files back into one
-ionice -c 2 -n 7 csh -c "(/usr/local/bin/mergelog access_log.iemvs* > access.log) >& /dev/null"
-ionice -c 2 -n 7 wc -l access_log.iemvs* 
+csh -c "(/usr/local/bin/mergelog access_log.iemvs* > access.log) >& /dev/null"
+wc -l access_log.iemvs* 
 rm -f access_log.iemvs*
 
 csh -c "(/usr/local/bin/mergelog access_log-wepp.iemvs* > wepp_access.log) >& /dev/null"
@@ -65,7 +65,7 @@ rm -f access_log-sustainablecorn.iemvs*
 wc -l weatherim_access.log
 
 # Step 4, run webalizer against these log files
-ionice -c 2 -n 7 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
