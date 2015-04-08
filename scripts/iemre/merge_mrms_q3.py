@@ -41,19 +41,21 @@ def run(ts):
     tmpfp.close()
     grbs = pygrib.open(tmpfn)
     grb = grbs[1]
+    lats, _ = grb.latlons()
     os.unlink(tmpfn)
 
     val = grb['values']
     # Anything less than zero, we set to zero
     val = np.where(val < 0, 0, val)
 
-    # Figure out what we wish to subsample
-    y0 = int((iemre.SOUTH - mrms.SOUTH) * 100.0)
-    y1 = int((iemre.NORTH - mrms.SOUTH) * 100.0)
+    # CAREFUL HERE!  The MRMS grid is North to South
+    # set top (smallest y)
+    y0 = int((lats[0, 0] - iemre.NORTH) * 100.0)
+    y1 = int((lats[0, 0] - iemre.SOUTH) * 100.0)
     x0 = int((iemre.WEST - mrms.WEST) * 100.0)
     x1 = int((iemre.EAST - mrms.WEST) * 100.0)
     # print 'y0:%s y1:%s x0:%s x1:%s' % (y0, y1, x0, x1)
-    ncprecip[offset, :, :] = val[y0:y1, x0:x1]
+    ncprecip[offset, :, :] = np.flipud(val[y0:y1, x0:x1])
     # m = MapPlot(sector='midwest')
     # x, y = np.meshgrid(nc.variables['lon'][:], nc.variables['lat'][:])
     # m.pcolormesh(x, y, ncprecip[offset,:,:], range(10), latlon=True)
