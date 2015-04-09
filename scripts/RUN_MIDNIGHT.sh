@@ -3,10 +3,7 @@ DD=$(date -u +'%d')
 MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
 
-cd webalizer
-sh processlogs.sh &
-
-cd ../qc
+cd qc
 python adjust_snet_precip.py
 
 cd ../dbutil
