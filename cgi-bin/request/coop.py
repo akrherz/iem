@@ -70,6 +70,10 @@ def get_cgi_stations(form):
     reqlist = form.getlist("station[]")
     if len(reqlist) == 0:
         reqlist = form.getlist('stations')
+    if len(reqlist) == 0:
+        ssw("Content-type: text/plain\n\n")
+        ssw("No stations or station[] specified, need at least one station!")
+        sys.exit()
     if "_ALL" in reqlist:
         network = form.getfirst("network")
         nt = NetworkTable(network)
