@@ -95,6 +95,12 @@ $().ready(function() {
 	// stations, this avoids user confusion
 	$(":submit").click(function (){
 		$('#stations_out option').prop('selected', true);
+		// Stop us if we have no stations selected!
+		if ($('#stations_out option').length == 0){
+			alert("No stations listed in 'Selected Stations'!");
+			return false;
+		}
+		return true;
 	});
 	
 	$("#iemss").append(htmlInterface.join(''));
