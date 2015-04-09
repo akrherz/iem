@@ -3,3 +3,6 @@
 S=/mesonet/www/apps/iemwebsite/scripts
 
 0 0 * * * cd $S/webalizer; sh processlogs.sh
+
+# Local cruft
+@reboot python idadho_cars.py
