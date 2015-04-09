@@ -45,6 +45,10 @@ def main():
         a = imp.load_module(name, fp, pathname, description)
         meta = a.get_description()
         fig = a.plotter(fdict)
+        if isinstance(fig, str):
+            msg = fig
+            fig, ax = plt.subplots(1, 1)
+            ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
         # Place timestamp on the image
         fig.text(0.01, 0.01, ('Plot Generated: %s'
                               ) % (
