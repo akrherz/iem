@@ -105,22 +105,22 @@ p2_examples = [
 ]
 
 
-def tstamp2dt( s ):
+def tstamp2dt(s):
     """ Convert a string to a datetime """
     ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     local_hr = int(s[8:10])
     utc_hr = int(s[12:14])
-    if utc_hr < local_hr: # Next day assumption valid in United States
+    if utc_hr < local_hr:  # Next day assumption valid in United States
         ts += datetime.timedelta(hours=24)
     return ts.replace(hour=utc_hr, minute=int(s[14:16]))
 
 
-def p2_parser( ln ):
+def p2_parser(ln):
     """
     Handle the parsing of a line found in the 6506 report, return QC dict
     """
-    m = P2_RE.match( ln.replace("]", "").replace("[", "") )
+    m = P2_RE.match(ln.replace("]", "").replace("[", ""))
     if m is None:
         print "P2_FAIL:|%s|" % (ln,)
         return None
@@ -142,11 +142,11 @@ def p2_parser( ln ):
     return res
 
 
-def p1_parser( ln ):
+def p1_parser(ln):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
-    m = P1_RE.match( ln.replace("]", "").replace("[", "") )
+    m = P1_RE.match(ln.replace("]", "").replace("[", ""))
     if m is None:
         print "P1_FAIL:|%s|" % (ln,)
         return None
@@ -178,10 +178,10 @@ def p1_parser( ln ):
 
 def test():
     for ex in p1_examples:
-        p1_parser( ex )
+        p1_parser(ex)
 
     for ex in p2_examples:
-        p2_parser( ex )
+        p2_parser(ex)
 
 
 def download(station, monthts):
@@ -276,69 +276,52 @@ def runner(station, monthts):
         if ts.year != monthts.year and not flipped:
             print "  Flipped years from %s to %s" % (monthts.year, ts.year)
             out.write("\.\n")
-            out.write("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (
-                        ts.year,))
+            out.write(("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n"
+                       ) % (ts.year,))
             flipped = True
         ln = ""
         data[ts]['station'] = station
-        for col in ('station', 'ts', 'vis1_coeff', 'vis1_nd', 
-            'vis2_coeff', 'vis2_nd', 'drct', 'sknt','gust_drct', 
-            'gust_sknt', 'ptype', 'precip', 'pres1', 'pres2', 'pres3', 
-            'tmpf','dwpf'):
+        for col in ['station', 'ts', 'vis1_coeff', 'vis1_nd',
+                    'vis2_coeff', 'vis2_nd', 'drct', 'sknt', 'gust_drct',
+                    'gust_sknt', 'ptype', 'precip', 'pres1', 'pres2', 'pres3',
+                    'tmpf', 'dwpf']:
             ln += "%s\t" % (data[ts].get(col) or 'Null',)
         out.write(ln[:-1]+"\n")
     out.write("\.\n")
     out.close()
 
     proc = subprocess.Popen("psql -f %s -h iemdb asos" % (tmpfn,), shell=True,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = proc.stdout.read()
     stderr = proc.stderr.read()
 
-    print ("%s %s processed %s entries [%s to %s UTC]\n"
-           +"STDOUT: %s\nSTDERR: %s") % (
-            datetime.datetime.now().strftime("%H:%M %p"),
-           station, len(data.keys()), mints.strftime("%y%m%d %H:%M"), 
-           maxts.strftime("%y%m%d %H:%M"), stdout.replace("\n", " "), 
-           stderr.replace("\n", " "))
+    print(("%s %s processed %s entries [%s to %s UTC]\n"
+           "STDOUT: %s\nSTDERR: %s"
+           ) % (datetime.datetime.now().strftime("%H:%M %p"),
+                station, len(data.keys()), mints.strftime("%y%m%d %H:%M"),
+                maxts.strftime("%y%m%d %H:%M"), stdout.replace("\n", " "),
+                stderr.replace("\n", " ")))
 
-    os.unlink( tmpfn )
+    if stderr == '':
+        os.unlink(tmpfn)
 
-if len(sys.argv) == 3:
-    for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
-                    'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
-                    'ALO', 'DSM']:
-        runner(station, 
-               datetime.datetime(int(sys.argv[1]),int(sys.argv[2]),1))
-elif len(sys.argv) == 4:
-        if int(sys.argv[3]) != 0:
-            months = [int(sys.argv[3]),]
-        else:
-            months = range(1,13)
-        for month in months:
-            runner(sys.argv[1], 
-               datetime.datetime(int(sys.argv[2]),month,1))
-else:
-    test()
-"""
-           Table "public.t2010_1minute"
-   Column   |           Type           | Modifiers 
-------------+--------------------------+-----------
- station    | character(3)             | 
- valid      | timestamp with time zone | 
- vis1_coeff | real                     | 
- vis1_nd    | character(1)             | 
- vis2_coeff | real                     | 
- vis2_nd    | character(1)             | 
- drct       | smallint                 | 
- sknt       | smallint                 | 
- gust_drct  | smallint                 | 
- gust_sknt  | smallint                 | 
- ptype      | character(2)             | 
- precip     | real                     | 
- pres1      | real                     | 
- pres2      | real                     | 
- pres3      | real                     | 
- tmpf       | smallint                 | 
- dwpf       | smallint                 | 
-"""
+
+def main(argv):
+    if len(argv) == 3:
+        for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
+                        'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
+                        'ALO', 'DSM']:
+            runner(station,
+                   datetime.datetime(int(argv[1]), int(argv[2]), 1))
+    elif len(argv) == 4:
+            if int(argv[3]) != 0:
+                months = [int(argv[3]), ]
+            else:
+                months = range(1, 13)
+            for month in months:
+                runner(sys.argv[1], datetime.datetime(int(argv[2]), month, 1))
+    else:
+        test()
+
+if __name__ == '__main__':
+    main(sys.argv)
