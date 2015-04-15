@@ -3,17 +3,18 @@
 """
 import datetime
 import pytz
-SCRIPT_TIME = datetime.datetime.utcnow()
-SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
-SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
 import subprocess
 import tempfile
 import os
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-NT = NetworkTable(("KCCI", "KELO", "KIMT"))
 import psycopg2
+
+SCRIPT_TIME = datetime.datetime.utcnow()
+SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
+SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
+NT = NetworkTable(("KCCI", "KELO", "KIMT"))
 IEM = psycopg2.connect(database="iem", host='iemdb')
 PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
@@ -112,6 +113,7 @@ def writeHeader():
     SAOFILE.write("SAUS43 KDMX "+sDate+"\015\015\012")
     SAOFILE.write("METAR\015\015\012")
 
+    # NB: why are we doing this addition of four minutes
     now = SCRIPT_TIME + datetime.timedelta(minutes=4)
     sDate = now.strftime("%m%d")
     hour = now.strftime("%H%M")
@@ -223,13 +225,24 @@ def get_network(_network):
 
 
 def get_network_recent(_network, valid):
+    """Return a dictionary of observations for this network at time
+
+    Args:
+      _network (str): network to fetch data for
+      valid (datetime): timestamp of interest
+
+    Returns:
+      dictionary of observations with NWSLI as the key
+    """
     obs = {}
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    # We order by valid DESC so that the last observation into the dictionary
+    # is the closest to this valid timestamp
     cursor.execute("""
     SELECT c.*, t.id from current_log c JOIN stations t ON (t.iemid = c.iemid)
     WHERE t.network = %s and
     c.valid BETWEEN %s and %s::timestamptz + '%s minutes'::interval
-    ORDER by valid ASC
+    ORDER by valid DESC
     """, (_network, valid.strftime("%Y-%m-%d %H:%M"),
           valid.strftime("%Y-%m-%d %H:%M"), 10))
     for row in cursor:
