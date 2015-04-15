@@ -6,7 +6,7 @@ import psycopg2.extras
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-BASEDIR = "/mesonet/share/climodat/coop_data"
+BASEDIR = "/mesonet/share/pickup/coop_data"
 
 for sid in nt.sts.keys():
     fn = "%s/%s.csv" % (BASEDIR, nt.sts[sid]['name'].replace(" ", "_"))
