@@ -69,7 +69,14 @@ if ($prod == 1){
 	$uri = sprintf("%s?month=%s&year=%s&network=%s&station=%s", $products[$prod], 
 		$month, $year, $network, $station);
 }
-$t->content = <<<EOF
+if ($metadata["metasite"] == 't'){
+	$t->content = <<<EOF
+	
+	<p>Sorry, this station identifier is a "meta-site", which means there are 
+	not actual weather observations associated with it.</p>
+EOF;
+} else {
+	$t->content = <<<EOF
 
 {$form}
 
@@ -77,5 +84,6 @@ $t->content = <<<EOF
  <img src="{$uri}" alt="Monthly Plot" class="img img-responsive">
  </div></div>
 EOF;
+}
 $t->render('sites.phtml');
 ?>
