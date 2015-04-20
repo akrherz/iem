@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -54,6 +54,8 @@ Requires: pyephem
 Requires: mailx
 Requires: xlwt
 Requires: xlrd
+Requires: fcgi
+Requires: libpng12
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -73,6 +75,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon Apr 20 2015 daryl herzmann <ahrherz@iastate.edu>
+- Adding requirements found for fastcgi/mapserver
+
 * Wed Apr  1 2015 daryl herzmann <ahrherz@iastate.edu>
 - Adding python excel library needed for some scripts
 
