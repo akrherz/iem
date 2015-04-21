@@ -5,22 +5,22 @@
 """
 import sys
 from pyiem.network import Table as NetworkTable
-table = NetworkTable( ['AWOS', 'IA_ASOS'] )
 import psycopg2
-MOS = psycopg2.connect(database='mos', host='iemdb')
-mcursor = MOS.cursor()
-
 import csv
 import urllib2
 import datetime
 import pytz
 
+table = NetworkTable(['AWOS', 'IA_ASOS'])
+MOS = psycopg2.connect(database='mos', host='iemdb')
+mcursor = MOS.cursor()
+
 BASE_URL = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
-URLS = { 
- 'NAM' : "NAM/CONUS_12km/conduit/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC",
- 'GFS' : "GFS/Global_0p5deg/GFS_Global_0p5deg_%Y%m%d_%H00.grib2/GC",
- 'RAP' : "RAP/CONUS_13km/RR_CONUS_13km_%Y%m%d_%H00.grib2/GC",
-}
+URLS = {'NAM': ("NAM/CONUS_12km/conduit/"
+                "NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"),
+        'GFS': "GFS/Global_0p5deg/GFS_Global_0p5deg_%Y%m%d_%H00.grib2/GC",
+        'RAP': "RAP/CONUS_13km/RR_CONUS_13km_%Y%m%d_%H00.grib2/GC",
+        }
 VLOOKUP = {
  'sbcape': {'NAM': 'Convective_available_potential_energy_surface',
             'GFS': 'Convective_available_potential_energy_surface',
@@ -31,22 +31,18 @@ VLOOKUP = {
  'pwater': {'NAM': 'Precipitable_water_entire_atmosphere_single_layer',
             'GFS': 'Precipitable_water_entire_atmosphere_single_layer',
             'RAP': 'Precipitable_water_entire_atmosphere_single_layer'},
- 'precipcon': {'RAP': 
+ 'precipcon': {'RAP':
                'Convective_precipitation_surface_Mixed_intervals_Accumulation',
-            'NAM': 'Convective_precipitation_surface_3_Hour_Accumulation',
-            'GFS': 
-            'Convective_precipitation_surface_Mixed_intervals_Accumulation',
-           },
- 'precipnon': {'RAP': None,
-            'NAM': None,
-            'GFS': None
-           },
- 'precip': {'RAP': 
-    'Large-scale_precipitation_non-convective_surface_Mixed_intervals_Accumulation',
+               'NAM': 'Convective_precipitation_surface_3_Hour_Accumulation',
+               'GFS':
+               'Convective_precipitation_surface_Mixed_intervals_Accumulation',
+               },
+ 'precip': {'RAP': ('Large-scale_precipitation_non-convective_surface_'
+                    'Mixed_intervals_Accumulation'),
             'NAM': 'Total_precipitation_surface_3_Hour_Accumulation',
             'GFS': 'Total_precipitation_surface_Mixed_intervals_Accumulation',
+            }
            }
-}
 
 
 def run(model, station, lon, lat, ts):
@@ -60,63 +56,62 @@ def run(model, station, lon, lat, ts):
             vstring += "var=%s&" % (VLOOKUP[v][model],)
 
     url = ("%s%s?%slatitude=%s&longitude=%s&temporal=all&vertCoord="
-           +"&accept=csv&point=true") % (BASE_URL, ts.strftime( URLS[model] ), 
+           "&accept=csv&point=true") % (BASE_URL, ts.strftime(URLS[model]),
                                         vstring, lat, lon)
     try:
-        fp = urllib2.urlopen( url , timeout=60)
+        fp = urllib2.urlopen(url, timeout=60)
     except Exception, exp:
         print exp, url
-        print 'FAIL ts: %s station: %s model: %s' % (ts.strftime("%Y-%m-%d %H"), 
-                                                     station, model)
+        print(('FAIL ts: %s station: %s model: %s'
+               ) % (ts.strftime("%Y-%m-%d %H"), station, model))
         return
 
     table = "model_gridpoint_%s" % (ts.year,)
-    sql = """DELETE from """+ table +""" WHERE 
-        station = %s and 
-          model = %s and runtime = %s """
+    sql = """
+        DELETE from """ + table + """ WHERE
+        station = %s and model = %s and runtime = %s
+        """
     args = (station, model, ts)
-    mcursor.execute( sql, args )
+    mcursor.execute(sql, args)
     if mcursor.rowcount > 0:
-        print 'Deleted %s rows for ts: %s station: %s model: %s' % (
-                        mcursor.rowcount, ts, station, model)
+        print('Deleted %s rows for ts: %s station: %s model: %s' % (
+                        mcursor.rowcount, ts, station, model))
 
     count = 0
-    r = csv.DictReader( fp )
+    r = csv.DictReader(fp)
     for row in r:
         for k in row.keys():
-            row[ k[:k.find("[")] ] = row[k]
-        sbcape = row[ VLOOKUP['sbcape'][model] ] 
-        sbcin = row[ VLOOKUP['sbcin'][model] ] 
-        pwater = row[ VLOOKUP['pwater'][model] ] 
-        precipcon = row[ VLOOKUP['precipcon'][model] ] 
-        if model == "RAP22":
-            precip = (float(row[ VLOOKUP['precipcon'][model] ]) + 
-                      float(row[ VLOOKUP['precipnon'][model] ]))
-        else:
-            precip = row[ VLOOKUP['precip'][model] ] 
+            row[k[:k.find("[")]] = row[k]
+        sbcape = row[VLOOKUP['sbcape'][model]]
+        sbcin = row[VLOOKUP['sbcin'][model]]
+        pwater = row[VLOOKUP['pwater'][model]]
+        precipcon = row[VLOOKUP['precipcon'][model]]
+        precip = row[VLOOKUP['precip'][model]]
         if precip < 0:
             precip = None
         if precipcon < 0:
             precipcon = None
         fts = datetime.datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%SZ')
         fts = fts.replace(tzinfo=pytz.timezone("UTC"))
-        sql = """INSERT into """+table+""" (station, model, runtime, 
-              ftime, sbcape, sbcin, pwater, precipcon, precip) 
+        sql = """INSERT into """ + table + """ (station, model, runtime,
+              ftime, sbcape, sbcin, pwater, precipcon, precip)
               VALUES (%s, %s , %s,
               %s, %s, %s, %s, %s, %s )"""
-        args = ( station, model, ts, fts, sbcape, sbcin, pwater, precipcon, 
-                 precip)
-        mcursor.execute( sql, args )
+        args = (station, model, ts, fts, sbcape, sbcin, pwater, precipcon,
+                precip)
+        mcursor.execute(sql, args)
         count += 1
     return count
+
 
 def run_model(model, ts):
     ''' Actually do a model and timestamp '''
     for sid in table.sts.keys():
-        cnt = run(model, "K"+sid, table.sts[sid]['lon'], 
+        cnt = run(model, "K"+sid, table.sts[sid]['lon'],
                   table.sts[sid]['lat'], ts)
         if cnt == 0:
             print 'No data', "K"+sid, ts, model
+
 
 def check_and_run(model, ts):
     ''' Check the database for missing data '''
@@ -124,15 +119,16 @@ def check_and_run(model, ts):
     mcursor.execute("""SELECT * from """+table+""" WHERE
     runtime = %s and model = %s""", (ts, model))
     if mcursor.rowcount < 10:
-        print 'Rerunning %s [runtime=%s] due to rowcount %s' % (model, ts, 
-                                                      mcursor.rowcount)
+        print(('Rerunning %s [runtime=%s] due to rowcount %s'
+               ) % (model, ts, mcursor.rowcount))
         run_model(model, ts)
+
 
 def main():
     """Do Something"""
     gts = datetime.datetime.utcnow()
     if len(sys.argv) == 5:
-        gts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+        gts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                 int(sys.argv[3]), int(sys.argv[4]))
     gts = gts.replace(tzinfo=pytz.timezone("UTC"), minute=0, second=0,
                       microsecond=0)
@@ -142,13 +138,13 @@ def main():
         for model in ['GFS', 'NAM']:
             run_model(model, ts)
             check_and_run(model, ts - datetime.timedelta(days=7))
-    
+
     ts = gts - datetime.timedelta(hours=2)
     run_model("RAP", ts)
     check_and_run('RAP', ts - datetime.timedelta(days=7))
 
 if __name__ == '__main__':
-    #Go Go gadget
+    # Go Go gadget
     main()
     mcursor.close()
     MOS.commit()
