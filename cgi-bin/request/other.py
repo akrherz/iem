@@ -18,6 +18,7 @@ def fetcher(station, sts, ets):
     ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ocursor.execute("""
     SELECT * from alldata where station = %s and valid between %s and %s
+    ORDER by valid ASC
     """, (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
 
     if ocursor.rowcount == 0:
