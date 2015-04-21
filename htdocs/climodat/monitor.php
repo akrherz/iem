@@ -11,6 +11,8 @@ $nt = new NetworkTable("IACLIMATE");
 
 $sdate = isset($_GET["sdate"]) ? $_GET["sdate"]: "04/01/2015";
 $edate = isset($_GET["edate"]) ? $_GET["edate"]: "12/31/2015";
+$gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
+$gddceil = isset($_GET["gddceil"]) ? intval($_GET["gddceil"]) : 86;
 $hiddendates = <<<EOF
 <input type="hidden" name="sdate" value="{$sdate}">
 <input type="hidden" name="edate" value="{$edate}">
@@ -37,17 +39,25 @@ $edatestr = date("Y-m-d", $edate);
 $sstring = "('". implode(",", $s) ."')";
 $sstring = str_replace(",", "','", $sstring);
 $sql = <<<EOF
+WITH climo as (
+  SELECT station, sday, avg(precip) as avg_precip,
+  avg(sdd86(high,low)) as avg_sdd,
+  avg(gddxx({$gddbase}, {$gddceil}, high, low)) as avg_gdd
+  from alldata_ia WHERE station in {$sstring}
+  and year > 1950 GROUP by station, sday)
+  
 select o.station,
-   sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip,
-   sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
+   sum(gddxx({$gddbase}, {$gddceil}, o.high, o.low)) as ogdd50,
+   sum(o.precip) as oprecip,
+   sum(c.avg_gdd) as cgdd50, sum(c.avg_precip) as cprecip,
    max(o.high) as maxtmpf, min(o.low) as mintmpf,
    avg( (o.high + o.low) / 2.0 ) as avgtmpf,
-   sum(sdd86) as csdd86, sum(sdd86(o.high, o.low)) as osdd86
-  from alldata_ia o, climate51 c WHERE
-   c.station in {$sstring}
+   sum(c.avg_sdd) as csdd86, sum(sdd86(o.high, o.low)) as osdd86
+  from alldata_ia o, climo c WHERE
+   o.station in {$sstring}
    and o.station = c.station
    and day >= '{$sdatestr}' and day < '{$edatestr}'
-   and extract(doy from day) = extract(doy from valid)  GROUP by o.station
+   and o.sday = c.sday  GROUP by o.station
    ORDER by o.station ASC
 EOF;
 
@@ -116,13 +126,24 @@ your favorite sites, <strong>please bookmark the page</strong>.</p>
 	<input type="submit" value="Add Station">
 </form>
 
-<br />
+<hr />
+<h4>Table Options</h4>
 
 <form name="dates">
 {$hiddenstations}
-    Start Date: <input type="text" id="sdate" name="sdate">
-    End Date: <input type="text" id="edate" name="edate">
-	<input type="submit" value="Set Start/End Dates">
+<table class="table table-condensed">
+<tr><th>Growing Degree Days</th>
+ <td>base: <input type="text" name="gddbase" size="4" value="{$gddbase}">
+ ceiling: <input type="text" name="gddceil" size="4" value="{$gddceil}">
+ </td></tr>
+
+<tr><th>Period</th><td>start: <input type="text" id="sdate" name="sdate">
+    end: <input type="text" id="edate" name="edate"></td></tr>
+
+<tr><td colspan="2">
+<input type="submit" value="Apply Table Options">
+</td></tr>
+</table>
 </form>
 
 <hr />
@@ -138,7 +159,7 @@ your favorite sites, <strong>please bookmark the page</strong>.</p>
 <thead><tr><th rowspan="2">ID</th>
 	<th rowspan="2">Name</th>
 	<th colspan="3">Precipitation [inch]</th>
-	<th colspan="3">Growing Degree Days (base 50)</th>
+	<th colspan="3">Growing Degree Days (base {$gddbase}, ceil {$gddceil})</th>
 	<th colspan="3">Stress Degree Days (base 86)</th>
 	<th colspan="3">Daily Temperature [F]</th></tr>
 <tr>
