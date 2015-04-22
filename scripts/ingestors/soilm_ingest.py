@@ -202,14 +202,15 @@ def formatter(v):
         return "'%s-06'" % (v,)
     return v
 
+
 def daily_process(nwsli, maxts):
     """ Process the daily file """
-    #print '-------------- DAILY PROCESS ----------------'
+    # print '-------------- DAILY PROCESS ----------------'
     fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
     if not os.path.isfile(fn):
         return 0
     lines = open(fn).readlines()
-    if len(lines) < 6:
+    if len(lines) < 5:
         return 0
     # Read header....
     headers = []
