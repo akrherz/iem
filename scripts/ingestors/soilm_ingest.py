@@ -92,7 +92,7 @@ icursor = ISUAG.cursor()
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
 accesstxn = ACCESS.cursor()
 
-BASE = '/mnt/home/mesonet/sm/'
+BASE = '/mnt/home/loggernet/'
 STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
                           hourly='Calumet/Calumet_HrlySI.dat'),
             'BOOI4': dict(daily='AEAFarm/AEAFarm_DailySI.dat',
@@ -133,7 +133,7 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
     #print '-------------- HOURLY PROCESS ---------------'
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'])
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'].split("/")[1])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -206,7 +206,7 @@ def formatter(v):
 def daily_process(nwsli, maxts):
     """ Process the daily file """
     # print '-------------- DAILY PROCESS ----------------'
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'].split("/")[1])
     if not os.path.isfile(fn):
         return 0
     lines = open(fn).readlines()
