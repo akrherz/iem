@@ -48,7 +48,6 @@ m = MapPlot(axisbg='white',
 minval = min(gdd50)
 rng = max([int(max(gdd50) - minval), 10])
 ramp = np.linspace(minval, minval+rng, 10, dtype=np.int)
-print ramp
 m.contourf(lons, lats, gdd50, ramp)
 pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
 if gbase == 52:
