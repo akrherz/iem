@@ -33,6 +33,7 @@ data = {'plots': [
         {'id': "28", 'label': "Trailing Number of Days Precipitation Total Rank"},
     ]},
     {'label': 'Monthly', 'options': [
+        {'id': "71", 'label': "Average Wind Speed and Direction for Month"},
         {'id': "55", 'label': "Daily Climatology Comparison"},
         {'id': "15", 'label': "Daily Temperature Change Frequencies by Month"},
         {'id': '65',
