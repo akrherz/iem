@@ -21,29 +21,36 @@ def make_daily_plot(station, sts, ets):
     """Generate a daily plot of max/min 4 inch soil temps"""
     icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute("""SELECT date(valid), min(tsoil_c_avg),
-    max(tsoil_c_avg) from sm_hourly where station = '%s'
+    max(tsoil_c_avg), avg(tsoil_c_avg) from sm_hourly where station = '%s'
     and valid >= '%s 00:00' and valid < '%s 23:56'
     and tsoil_c_avg is not null GROUP by date ORDER by date ASC
     """ % (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
     dates = []
     mins = []
     maxs = []
+    avgs = []
     for row in icursor:
         dates.append(row[0])
         mins.append(row[1])
         maxs.append(row[2])
+        avgs.append(row[3])
 
     mins = temperature(np.array(mins), 'C').value('F')
     maxs = temperature(np.array(maxs), 'C').value('F')
+    avgs = temperature(np.array(avgs), 'C').value('F')
     (_, ax) = plt.subplots(1, 1)
-    ax.bar(dates, maxs - mins, bottom=mins, fc='tan', ec='brown')
+    ax.bar(dates, maxs - mins, bottom=mins, fc='tan', ec='brown', zorder=2,
+           align='center', label='Max/Min')
+    ax.scatter(dates, avgs, marker='*', s=30, zorder=3, color='brown',
+               label='Hourly Avg')
     ax.axhline(50, lw=1.5, c='k')
     ax.grid(True)
     ax.set_ylabel("4 inch Soil Temperature $^\circ$F")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
-                  "Daily Max/Min 4 inch Soil Temperatures"
+                  "Daily Max/Min/Avg 4 inch Soil Temperatures"
                   ) % (nt.sts[station]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    ax.legend(loc='best', ncol=2, fontsize=10)
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')
 
