@@ -317,7 +317,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     os.remove(tmpfn)
 
     """ Send the raw datafile to LDM """
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'])
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'].split("/")[1])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
