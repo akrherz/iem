@@ -12,14 +12,13 @@ import string
 This is not good, but necessary.  We translate some sites into others, so to
 maintain a long term record.
 """
-stconv = {
-  'IA6199': 'IA6200', # Oelwein
-  'IA3288': 'IA3290', # Glenwood
-  'IA4963': 'IA8266', # Lowden becomes Tipton
-  'IA7892': 'IA4049', # Stanley becomes Independence
-  'IA0214': 'IA0213', # Anamosa
-  'IA2041': 'IA3980', # Dakota City becomes Humboldt
-}
+stconv = {'IA6199': 'IA6200',  # Oelwein
+          'IA3288': 'IA3290',  # Glenwood
+          'IA4963': 'IA8266',  # Lowden becomes Tipton
+          'IA7892': 'IA4049',  # Stanley becomes Independence
+          'IA0214': 'IA0213',  # Anamosa
+          'IA2041': 'IA3980',  # Dakota City becomes Humboldt
+          }
 
 year = int(sys.argv[1])
 month = int(sys.argv[2])
@@ -37,7 +36,7 @@ COPY alldata_tmp from STDIN with null as 'Null';
 
 hits = 0
 misses = 0
-for line in lines:
+for linenum, line in enumerate(lines):
     tokens = re.split(",", line.replace('"', ""))
     if len(tokens) < 15 or len(tokens[2]) != 4:
         misses += 1
@@ -89,12 +88,17 @@ for line in lines:
     if (lo == ""):
         lo = "Null"
 
-    ts = datetime.datetime(yr, mo, dy)
+    try:
+        ts = datetime.datetime(yr, mo, dy)
+    except:
+        print("timefail yr:%s mo:%s dy:%s linenum:%s" % (yr, mo, dy, linenum))
+        sys.exit()
     day = ts.strftime("%Y-%m-%d")
     sday = ts.strftime("%m%d")
- 
-    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\tNull\tNull\tNull\tNull\n" % (
-                        dbid, day,  hi, lo, pr, sf, sday, yr, mo,sd) )
+
+    alldata.write(("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf"
+                   "\tNull\tNull\tNull\tNull\n"
+                   ) % (dbid, day,  hi, lo, pr, sf, sday, yr, mo, sd))
     hits += 1
 
 print '    got %s good lines %s bad lines' % (hits, misses)
@@ -131,5 +135,5 @@ WHERE
   o.station = e.station
 ;
 COMMIT;
-""" % (year, month, year, month, month, year, month, year) )
+""" % (year, month, year, month, month, year, month, year))
 alldata.close()
