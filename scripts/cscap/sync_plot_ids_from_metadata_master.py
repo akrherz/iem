@@ -10,8 +10,6 @@ config.read('mytokens.cfg')
 
 
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
-
 
 treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
 meta_feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
@@ -22,8 +20,9 @@ treatments, treatment_names = util.build_treatments(treat_feed)
 Okay, we are cross product TIL x ROT x DWN x NIT
 """
 
-headers = ['UniqueID', 'Rep', 'Tillage', 'Rotation', 'Drainage', 
-           'Nitrogen', 'Landscape','My ID']
+headers = ['UniqueID', 'Rep', 'Tillage', 'Rotation', 'Drainage',
+           'Nitrogen', 'Landscape', 'My ID']
+
 
 def get_just_code(text):
     if text == '':
@@ -37,7 +36,7 @@ for entry in meta_feed.entry:
         continue
     print sitekey
     leadpi = data.get('leadpi')
-    pi_spreadsheet = spr_client.get_list_feed( data.get('keyspread'), 'od6' )
+    pi_spreadsheet = spr_client.get_list_feed(data.get('keyspread'), 'od6')
     current_entries = []
     for le in pi_spreadsheet.entry:
         row = le.to_dict()
@@ -45,22 +44,21 @@ for entry in meta_feed.entry:
             if row[key] is None:
                 row[key] = ''
         key = "%s||%s||%s||%s||%s||%s" % (
-                    get_just_code(row.get('tillage').strip()), 
+                    get_just_code(row.get('tillage').strip()),
                     get_just_code(row.get('rotation').strip()),
-                    get_just_code(row.get('nitrogen').strip()), 
-                    get_just_code(row.get('landscape').strip()), 
-                    get_just_code(row.get('drainage').strip()), 
+                    get_just_code(row.get('nitrogen').strip()),
+                    get_just_code(row.get('landscape').strip()),
+                    get_just_code(row.get('drainage').strip()),
                     row.get('rep').strip())
-        current_entries.append( key.replace('None','').replace('none','') )
-        
-    
-    # Figure out how many 
+        current_entries.append(key.replace('None', '').replace('none', ''))
+
+    # Figure out how many
     rows = []
     trt = treatments[sitekey]
-    for k in ['TIL','ROT','DWM','NIT','LND']:
+    for k in ['TIL', 'ROT', 'DWM', 'NIT', 'LND']:
         if len(trt[k]) > 1:
             trt[k].remove(None)
-            
+
     for till in trt['TIL']:
         for rot in trt['ROT']:
             for drain in trt['DWM']:
@@ -90,7 +88,7 @@ for entry in meta_feed.entry:
                             print 'Found new!'
                             print thisID
                             print current_entries
-                            
+
                             rows.append(entry)
     #print len(current_entries), sitekey
     #print pi_spreadsheet.get_id()
