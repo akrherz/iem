@@ -3,7 +3,6 @@
 '''
 import util
 import sys
-import gdata.docs.client
 import ConfigParser
 import psycopg2
 
@@ -18,18 +17,17 @@ pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive_client = util.get_driveclient()
 
-query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='%s GHG Data' % (YEAR,))
-feed = docs_client.GetAllResources(query=query)
+res = drive_client.files(
+        ).list(q="title contains '%s GHG Data'" % (YEAR,)).execute()
 
 PIDS = util.get_xref_siteids_plotids(spr_client, config)
 
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
     for wkey in spreadsheet.worksheets.keys():
         worksheet = spreadsheet.worksheets[wkey]
@@ -42,21 +40,21 @@ for entry in feed:
                 continue
             if val.lower().find("plot id") == 0:
                 plotidcol = col
-            if (val.lower().find("sample key") == 0 or 
-                val.lower().find("samplekey") == 0):
+            if (val.lower().find("sample key") == 0 or
+                    val.lower().find("samplekey") == 0):
                 plotidcol = col
         if plotidcol is None:
             print 'Site: %s is missing plotid column!' % (siteid,)
             continue
         plotids = []
-        for row in range(3,worksheet.rows+1):
+        for row in range(3, worksheet.rows+1):
             plotid = worksheet.get_cell_value(row, plotidcol)
             if plotid is None:
                 continue
             plotid = plotid.replace('band', '').replace('row', '')
             if plotid.lower().strip() not in plotids:
-                plotids.append( plotid.lower().strip() )
-                
+                plotids.append(plotid.lower().strip())
+
         plotids.sort()
         for pid in plotids:
             if pid not in PIDS[siteid.lower()]:
