@@ -1,7 +1,6 @@
 """Scrape out the Soil Bulk Density and Texture data from Google Drive"""
 import util
 import sys
-import gdata.docs.client
 import ConfigParser
 import psycopg2
 
@@ -16,19 +15,19 @@ pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive_client = util.get_driveclient()
 
-query = gdata.docs.client.DocsQuery(show_collections='false',
-                                    title=('Soil Bulk Density and '
-                                           'Water Retention Data'))
-feed = docs_client.GetAllResources(query=query)
+res = drive_client.files().list(q=("title contains '%s'"
+                                   ) % (('Soil Bulk Density and '
+                                           'Water Retention Data'),)
+                                ).execute()
 
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
-    siteid = spreadsheet.title.split()[0]
+    siteid = item['title'].split()[0]
     worksheet = spreadsheet.worksheets.get(YEAR)
     if worksheet is None:
         # print 'Missing Soil BD+WR %s sheet for %s' % (YEAR, siteid)

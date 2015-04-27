@@ -3,7 +3,6 @@
 '''
 import util
 import sys
-import gdata.docs.client
 import ConfigParser
 import psycopg2
 
@@ -18,25 +17,25 @@ pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
 
 allowed_depths = ['0 - 10', '10 - 20', '20 - 40', '40 - 60']
 
-query = gdata.docs.client.DocsQuery(show_collections='false',
-                                    title='Soil Texture Data')
-feed = docs_client.GetAllResources(query=query)
+drive_client = util.get_driveclient()
 
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+res = drive_client.files(
+        ).list(q="title contains 'Soil Texture Data'").execute()
+
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
     if YEAR not in spreadsheet.worksheets:
         # print(("Missing %s from %s") % (YEAR, spreadsheet.title))
         continue
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_cell_feed()
-    siteid = spreadsheet.title.split()[0]
+    siteid = item['title'].split()[0]
     # print 'Processing %s Soil Texture Year %s' % (siteid, YEAR)
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
             worksheet.get_cell_value(1, 2) != 'depth'):

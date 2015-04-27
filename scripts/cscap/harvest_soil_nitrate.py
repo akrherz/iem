@@ -3,7 +3,6 @@
 '''
 import util
 import sys
-import gdata.docs.client
 import ConfigParser
 import psycopg2
 
@@ -18,23 +17,22 @@ pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive_client = util.get_driveclient()
 
-query = gdata.docs.client.DocsQuery(show_collections='false',
-                                    title='Soil Nitrate Data')
-feed = docs_client.GetAllResources(query=query)
+res = drive_client.files(
+        ).list(q="title contains 'Soil Nitrate Data'").execute()
 
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
     worksheet = spreadsheet.worksheets.get(YEAR)
     if worksheet is None:
         # print("Missing Year: %s from %s" % (YEAR, spreadsheet.title))
         continue
     worksheet.get_cell_feed()
-    siteid = spreadsheet.title.split()[0]
+    siteid = item['title'].split()[0]
     # print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
     if worksheet.get_cell_value(1, 1) != 'plotid':
         print 'FATAL site: %s soil nitrate has corrupt headers' % (siteid,)

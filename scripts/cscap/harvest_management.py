@@ -15,9 +15,8 @@ pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
 
-spread = util.Spreadsheet(docs_client, spr_client, 
+spread = util.Spreadsheet(spr_client, 
                           config.get('cscap', 'manstore'))
 
 translate = {'date': 'valid'}
@@ -42,7 +41,7 @@ for sheetkey in ['Operations', 'Management', 'Pesticides']:
         key = "%s,%s,%s,%s,%s" % (v, row[1], row[2], row[3], row[4])
         current[key] = row[5]
     sheet = spread.worksheets[sheetkey]
-    
+
     added = 0
     dups = 0
     entries = 0

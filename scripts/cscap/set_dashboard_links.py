@@ -4,7 +4,6 @@
 import util
 import sys
 import ConfigParser
-import gdata.docs.client
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
@@ -12,9 +11,9 @@ YEAR = sys.argv[1]
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive_client = util.get_driveclient()
 
-ss = util.Spreadsheet(docs_client, spr_client, config.get('cscap', 'dashboard'))
+ss = util.Spreadsheet(spr_client, config.get('cscap', 'dashboard'))
 SHEET = ss.worksheets[YEAR]
 SHEET.get_cell_feed()
 
@@ -23,7 +22,7 @@ for col in range(1, SHEET.cols+1):
     entry = SHEET.get_cell_entry(1, col)
     pos = entry.title.text
     text = entry.cell.input_value
-    column_ids[ int(entry.cell.col) ] = text
+    column_ids[int(entry.cell.col)] = text
 
 lookuprefs = {
               'agr1': 'Agronomic Data',
@@ -83,7 +82,7 @@ lookuprefs = {
               'soil11': 'Soil Texture Data',
               'soil12': 'Soil Texture Data',
               'soil13': 'Soil Texture Data',
-              'soil14': 'Soil Texture Data',              
+              'soil14': 'Soil Texture Data',
               'soil15': 'Soil Nitrate Data',
               'soil16': 'Soil Nitrate Data',
               'soil22': 'Soil Nitrate Data',
@@ -100,27 +99,28 @@ varconv = {
 CACHE = {}
 QUERY_CACHE = {}
 
+
 def docs_query(title):
     """ Make sure we fetch the exact title from Google """
-    if QUERY_CACHE.has_key(title):
-        #print 'QUERY_CACHE HIT'
-        return QUERY_CACHE[ title ]
-    
-    query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                title=title)
-    # We need to go search for the spreadsheet
-    resources = docs_client.GetAllResources(query=query)
-    if len(resources) > 1:
+    if title in QUERY_CACHE:
+        return QUERY_CACHE[title]
+
+    res = drive_client.files().list(q="title contains '%s'" % (title,)
+                                    ).execute()
+    if len(res) > 1:
         delpos = None
-        for i, res in enumerate(resources):
-            if res.title.text.split()[0] != title.split()[0]:
+        for i, item in enumerate(res['items']):
+            if item['title'].split()[0] != title.split()[0]:
                 delpos = i
         if delpos is not None:
-            del(resources[delpos])
-    QUERY_CACHE[title] = resources
-    if len(resources) == 0:
+            del(res['items'][delpos])
+    if len(res['items']) == 0:
         print 'Could not find spreadsheet |%s|' % (title,)
-    return resources
+        QUERY_CACHE[title] = []
+        return []
+    QUERY_CACHE[title] = res['items'][0]
+    return res['items'][0]
+
 
 def do_row(row):
     """ Actually process a row in the SHEET """
@@ -131,28 +131,27 @@ def do_row(row):
         print 'ERROR: Do not know how to reference %s in lookuprefs' % (
                                                                 varname,)
         return
-    
-    for col in range(2,SHEET.cols+1):
+
+    for col in range(2, SHEET.cols+1):
         entry = SHEET.get_cell_entry(row, col)
         if entry is None:
             print 'Found none type entry? row: %s col: %s' % (row, col)
-        siteid = column_ids[ int(entry.cell.col) ]
+        siteid = column_ids[int(entry.cell.col)]
         if siteid in ['', 'Required (R)']:
             continue
 
         querytitle = '%s %s' % (siteid, spreadtitle)
-        resources = docs_query(querytitle)   
+        resources = docs_query(querytitle)
         if len(resources) == 0:
             continue
-    
-        skey = resources[0].get_id().split("/")[-1][14:]
-        if CACHE.has_key(skey):
+        skey = resources['id']
+        if skey in CACHE:
             if CACHE[skey] is False:
                 continue
             list_feed = CACHE[skey]
         else:
             # Get the list feed for this spreadsheet
-            ss = util.Spreadsheet(docs_client, spr_client, resources[0])
+            ss = util.Spreadsheet(spr_client, resources['id'])
             if not ss.worksheets.has_key(YEAR):
                 print 'Year %s not in spread title: |%s %s|' % (YEAR,
                                                         siteid, spreadtitle)
@@ -173,12 +172,8 @@ def do_row(row):
                 misses += 1
             elif data[lookupcol].lower() == 'did not collect':
                 dnc = True
-    
-        #if na:
-        #    print 'Could not find header: %s in spreadtitle: %s %s' % (lookupcol,
-        #                                                    siteid, spreadtitle)
-    
-        uri = resources[0].get_html_link().href
+
+        uri = resources['alternateLink']
         if na:
             newvalue = 'N/A'
         elif dnc:
@@ -192,6 +187,6 @@ def do_row(row):
                 YEAR, siteid, varname, entry.cell.input_value, newvalue)
             entry.cell.input_value = newvalue
             spr_client.update(entry)
-        
-for i in range(5,86):
+
+for i in range(5, 86):
     do_row(i)
