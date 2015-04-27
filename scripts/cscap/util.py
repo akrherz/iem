@@ -12,24 +12,25 @@ import os
 # Load up the CONFIG
 CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
 
+
 def save_config():
     """ Save the configuration to disk """
     json.dump(CONFIG, open('mytokens.json', 'w'))
 
+
 class Worksheet(object):
-    
-    def __init__(self, doc_client, spr_client, entry):
-        self.doc_client = doc_client
+
+    def __init__(self, spr_client, entry):
         self.spr_client = spr_client
         self.entry = entry
         self.set_metadata()
         self.id = entry.id.text.split("/")[-1]
         self.spread_id = entry.id.text.split("/")[-2]
-        
+
     def set_metadata(self):
         self.title = self.entry.title.text
-        self.rows = int( self.entry.row_count.text )
-        self.cols = int( self.entry.col_count.text )
+        self.rows = int(self.entry.row_count.text)
+        self.cols = int(self.entry.col_count.text)
         self.cell_feed = None
         self.list_feed = None
         self.data = {}
@@ -43,7 +44,7 @@ class Worksheet(object):
             return self.list_feed
         self.list_feed = self.spr_client.get_list_feed(self.spread_id, self.id)
         return self.list_feed
-    
+
     def get_cell_feed(self):
         if self.cell_feed is not None:
             return
@@ -144,27 +145,23 @@ class Worksheet(object):
                 self.drop_last_column()
                 return True
         return False
- 
+
+
 class Spreadsheet(object):
-    
-    def __init__(self, docs_client, spr_client, entry):
-        self.docs_client = docs_client
+
+    def __init__(self, spr_client, resource_id):
         self.spr_client = spr_client
-        if type(entry) == type(''):
-            entry = docs_client.get_resource_by_id( entry )
-        self.entry = entry
-        self.id = entry.resource_id.text.split(":")[1]
-        self.title = entry.title.text
+        self.id = resource_id
         self.worksheets = {}
         self.get_worksheets()
-    
+
     def get_worksheets(self):
         """ Get the worksheets associated with this spreadsheet """
-        feed = self.spr_client.GetWorksheets( self.id )
+        feed = self.spr_client.GetWorksheets(self.id)
         for entry in feed.entry:
-            self.worksheets[ entry.title.text ] = Worksheet(self.docs_client,
-                                                            self.spr_client,
-                                                             entry )
+            self.worksheets[entry.title.text] = Worksheet(self.spr_client,
+                                                          entry)
+
 
 def get_xref_siteids_plotids(spr_client, config):
     ''' Get a dict of site IDs with a list of plot IDs for each '''
@@ -315,6 +312,7 @@ def get_site_metadata(config, spr_client=None):
                                }
     return meta
 
+
 def get_driveclient():
     """ Return an authorized apiclient """
     from oauth2client.client import SignedJwtAssertionCredentials
@@ -326,8 +324,7 @@ def get_driveclient():
         private_key = f.read()
 
     credentials = SignedJwtAssertionCredentials(client_email, private_key,
-                    'https://www.googleapis.com/auth/drive.readonly')
-
+        'https://www.googleapis.com/auth/drive.readonly')
 
     http_auth = credentials.authorize(Http())
 

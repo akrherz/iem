@@ -1,5 +1,5 @@
 """
-A script that syncs my google site authentication to a shared folder on google docs
+
 """
 from gdata import gauth
 import gdata.sites.client
