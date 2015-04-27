@@ -21,22 +21,25 @@ for sid in ids:
     if nt.sts[sid]['archive_begin'].year > 1972:
         continue
     cursor.execute("""
-    select valid, alti, mslp from alldata where station = %s and alti > 30.6 
-    and alti < 32 ORDER by alti DESC, valid ASC
+    select extract(year from valid) as yr, max(dwpf) from alldata where
+    station = %s and extract(month from valid) < 4 
+    and dwpf is not null GROUP by yr 
+    ORDER by max ASC
     """, (sid,))
     
     maxval = None
+    thisyear = None
+    years = []
     for i, row in enumerate(cursor):
+        val = round(row[1])
         if i == 0:
-            maxval = row[1]
-        if row[1] != maxval:
-            break
+            maxval = val
+        if row[0] == 2015:
+            thisyear = val
+        if val == maxval:
+            years.append("%.0f" % (row[0],))
         
-        slp = row[2] if row[2] is not None else pressure(row[1], 'IN').value('MB')
-        
-        print """<tr><td>%s</td><td>%s</td><td>%s</td>
-        <td>%s</td><td>%.2f</td><td>%.1f</td></tr>""" % (sid, nt.sts[sid]['name'],
-            nt.sts[sid]['archive_begin'].year,
-                                        row[0].strftime("%d %b %Y %H:%M %p"), row[1], slp)
-    print
+    print '%s,%s,%s,%.0f,%.0f,%s' % (sid, nt.sts[sid]['name'], 
+          nt.sts[sid]['archive_begin'].year, thisyear,
+                                  maxval, "-".join(years))   
 print "</table>"
