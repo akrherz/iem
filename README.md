@@ -8,7 +8,7 @@ Some IEM cluster details (so I can keep it straight!)
 # Point php.ini at memcache for sessions
 [Session]
 session.save_handler = memcache
-session.save_path = "tcp://192.168.1.190:11211"
+session.save_path = "tcp://iem-memached:11211"
 
 # Considerations prior to rebooting a machine
 
@@ -20,6 +20,17 @@ Machine | Needs
 iem21   | webcam lapses
 iem30   | None
 iem50   | migrate 202 VIP over to iem30 
+
+# Where are processes running?!?
+
+Process | Primary | Backup | Monitor?
+--------+---------+--------+---------
+RIDGE   | iem6    | ???    | inbound file queue, check latency 7 radars
+Webcam Lapses | iem6 | ??? | None
+Webcam Current | iem6 | ??? | cron script monitors for offline webcams
+iembot  | iem6    | iem21  | nagios checks for twistd processes running
+nwningest | iem12 | ???    | cron scripts checks SNET sites for being online
+openfire | iem12 | ???     | None
 
 #Shared Filesystems
 
