@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -59,6 +59,10 @@ Requires: libpng12
 Requires: metar
 Requires: python-nose
 Requires: python-six
+Requires: oauth2client
+Requires: python-httplib2
+Requires: google-api-python-client
+Requires: uritemplate
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -78,6 +82,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon Apr 27 2015 daryl herzmann <akrherz@iastate.edu>
+- Google Openauth requirements added
+
 * Thu Apr 23 2015 daryl herzmann <akrherz@iastate.edu>
 - Adding requirements found for python metar
 
