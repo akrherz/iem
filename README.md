@@ -31,6 +31,7 @@ Webcam Current | iem6 | ??? | cron script monitors for offline webcams
 iembot  | iem6    | iem21  | nagios checks for twistd processes running
 nwningest | iem12 | ???    | cron scripts checks SNET sites for being online
 openfire | iem12 | ???     | None
+postgres | metvm4 | iemfe  | None
 
 #Shared Filesystems
 
