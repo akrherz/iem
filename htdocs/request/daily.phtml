@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 90);
 include("../../include/myview.php");
 include_once "../../include/database.inc.php";
 include("../../include/imagemaps.php");
@@ -83,6 +84,10 @@ $t->content = <<<EOF
  <dt>precip_in</dt><dd>Daily Precipitation [inch].</dd>
  <dt>avg_wind_speed_kts</dt><dd>Average Wind Speed [knots]</dd>
  <dt>avg_wind_drct</dt><dd>Average Wind Direction [deg]</dd>
+ <dt>min_rh</dt><dd>Minimum Relative Humidity [%]</dd>
+ <dt>avg_rh</dt><dd>Average Relative Humidity [%]: computed by time averaging
+    		the available reports, it is not average of the daily max/min.</dd>
+ <dt>max_rh</dt><dd>Maximum Relative Humidity [%]</dd>
  <dt>climo_high_f</dt><dd>NCDC 1981-2010 Daily High Temperature Climatology [F]</dd>
  <dt>climo_low_f</dt><dd>NCDC 1981-2010 Daily Low Temperature Climatology [F]</dd>
  <dt>climo_precip_in</dt><dd>NCDC 1981-2010 Daily Precipitation Climatology [inch]</dd>
