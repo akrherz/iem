@@ -6,6 +6,7 @@ import datetime
 import numpy as np
 import pytz
 import sys
+import pyiem.meteorology as meteorology
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 import cgi
@@ -15,6 +16,45 @@ import matplotlib.dates as mdates
 
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 nt = NetworkTable("ISUSM")
+
+
+def make_daily_rad_plot(station, sts, ets):
+    """Generate a daily radiation plot"""
+    # Get clear sky theory
+    theory = meteorology.clearsky_shortwave_irradiance_year(
+                nt.sts[station]['lon'], nt.sts[station]['lat'],
+                nt.sts[station]['elevation'])
+
+    icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor.execute("""SELECT valid, slrmj_tot from sm_daily
+    where station = '%s'
+    and valid >= '%s' and valid <= '%s' and slrmj_tot is not null
+    ORDER by valid ASC
+    """ % (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
+    dates = []
+    vals = []
+    tmax = []
+    for row in icursor:
+        dates.append(row[0])
+        vals.append(row[1])
+        jday = int(row[0].strftime("%j"))
+        if jday > 364:
+            jday = 364
+        tmax.append(theory[jday])
+
+    (_, ax) = plt.subplots(1, 1)
+    ax.bar(dates, vals, fc='tan', ec='brown', zorder=2,
+           align='center', label='Observed')
+    ax.plot(dates, tmax, label=r"Modelled Max $\tau$ =0.75", color='k', lw=1.5)
+    ax.grid(True)
+    ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
+    ax.set_title(("ISUSM Station: %s Timeseries\n"
+                  "Daily Solar Radiation"
+                  ) % (nt.sts[station]['name'], ))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    ax.legend(loc='best', ncol=1, fontsize=10)
+    sys.stdout.write("Content-Type: image/png\n\n")
+    plt.savefig(sys.stdout, format='png')
 
 
 def make_daily_plot(station, sts, ets):
@@ -80,6 +120,9 @@ def main():
         sys.exit(0)
     if opt == '3':
         make_daily_plot(station, sts, ets)
+        return
+    elif opt == '4':
+        make_daily_rad_plot(station, sts, ets)
         return
     icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
