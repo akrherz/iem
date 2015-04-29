@@ -229,19 +229,19 @@ for that date.</p>
    <th colspan='3' class='subtitle'>Precipitation [inch]</th>
   </tr>
   <tr>
-    <th><a href='extremes.php?sortcol=high{$uribase}'>Avg:</a></th>
+    <th><a href='extremes.php?sortcol=avg_high{$uribase}'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_high{$uribase}'>Max:</a></th>
     <th><a href='extremes.php?sortcol=max_high_years{$uribase}'>Year:</a></th>
     <th><a href='extremes.php?sortcol=min_high{$uribase}'>Min:</a></th>
     <th><a href='extremes.php?sortcol=min_high_years{$uribase}'>Year:</a></th>
     <td>&nbsp;</td>
-	<th><a href='extremes.php?sortcol=low{$uribase}'>Avg:</a></th>
+	<th><a href='extremes.php?sortcol=avg_low{$uribase}'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_low{$uribase}'>Max:</a></th>
     <th><a href='extremes.php?sortcol=max_low_years{$uribase}'>Year:</a></th>
     <th><a href='extremes.php?sortcol=min_low{$uribase}'>Min:</a></th>
     <th><a href='extremes.php?sortcol=min_low_years{$uribase}'>Year:</a></th>
     <td>&nbsp;</td>
-    <th><a href='extremes.php?sortcol=precip{$uribase}'>Avg:</a></th>
+    <th><a href='extremes.php?sortcol=avg_precip{$uribase}'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_precip{$uribase}'>Max:</a></th>
     <th><a href='extremes.php?sortcol=max_precip_years{$uribase}'>Year:</a></th>
   </tr>
