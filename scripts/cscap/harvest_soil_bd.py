@@ -98,7 +98,8 @@ for item in res['items']:
         (plotid, varname, depth, subsample) = key.split("|")
         if varname in found_vars:
             print(('harvest_soil_bd rm %s %s %s %s %s %s'
-                   ) % (YEAR, siteid, plotid, varname, depth, subsample))
+                   ) % (YEAR, siteid, plotid, varname, repr(depth),
+                        repr(subsample)))
             pcursor.execute("""DELETE from soil_data where site = %s and
             plotid = %s and varname = %s and year = %s and depth = %s and
             subsample = %s""", (siteid, plotid, varname, YEAR, depth,
