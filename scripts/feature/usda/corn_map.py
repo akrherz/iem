@@ -2,20 +2,20 @@ import datetime
 import numpy
 
 data = {}
-d2014 = {}
+d2015 = {}
 
 for linenum, line in enumerate(open('crop_progress.csv')):
     if linenum == 0:
         continue
     tokens = line.replace('"','').split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 10 and day.day in range(23,30):
+    if day.month == 4 and day.day in range(23,30):
         state = tokens[5]
         val = float(tokens[20])
         if not data.has_key(state):
             data[state] = []
-        if day.year == 2014:
-            d2014[state] = val
+        if day.year == 2015:
+            d2015[state] = val
         else:
             data[state].append( val )
 
@@ -24,8 +24,8 @@ print data['IOWA']
 
 for state in data.keys():
     ar = numpy.array(data[state])
-    print "%s %.1f %.0f" % ( state, numpy.average(ar), d2014[state])
-    results[ state ] = {'d2014': d2014[state], 'avg': numpy.average(ar)}
+    print "%s %.1f %.0f" % ( state, numpy.average(ar), d2015[state])
+    results[ state ] = {'d2015': d2015[state], 'avg': numpy.average(ar)}
     
 from mpl_toolkits.basemap import Basemap
 from osgeo import ogr
@@ -36,15 +36,15 @@ from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb2hex
 import matplotlib.patheffects as PathEffects
-from iem import constants
+from pyiem import iemre
 
 fig = plt.figure(num=None, figsize=(10.24,7.68))
 ax = plt.axes([0.01,0,0.9,0.9], axisbg=(1,1,1))  
 m = Basemap(projection='merc', fix_aspect=False,
-                           urcrnrlat=constants.MW_NORTH,
-                           llcrnrlat=constants.MW_SOUTH,
-                           urcrnrlon=(constants.MW_EAST + 2.),
-                           llcrnrlon=(constants.MW_WEST - 2.),
+                           urcrnrlat=iemre.NORTH,
+                           llcrnrlat=iemre.SOUTH,
+                           urcrnrlon=(iemre.EAST + 2.),
+                           llcrnrlon=(iemre.WEST - 2.),
                            lat_0=45.,lon_0=-92.,lat_ts=42.,
                            resolution='i', ax=ax)
 m.fillcontinents(color='tan',zorder=0)
@@ -70,7 +70,7 @@ while 1:
     if not results.has_key(name.upper()):
         continue
     geom = loads(feature.GetGeometryRef().ExportToWkb())
-    c = cmap(norm([results[name.upper()]['d2014'],]))[0]
+    c = cmap(norm([results[name.upper()]['d2015'],]))[0]
     for polygon in geom:
         a = asarray(polygon.exterior)
         x,y = m(a[:,0], a[:,1])
@@ -79,8 +79,8 @@ while 1:
         patches.append(p)
 
     x,y = m(feature.GetField('x'), feature.GetField('y'))
-    diff = results[name.upper()]['d2014'] - results[name.upper()]['avg']
-    txt = ax.text(x,y, '%.0f%%\n%.0f' % (results[name.upper()]['d2014'],
+    diff = results[name.upper()]['d2015'] - results[name.upper()]['avg']
+    txt = ax.text(x,y, '%.0f%%\n%.0f' % (results[name.upper()]['d2015'],
                                        diff), 
                   verticalalignment='center', horizontalalignment='center', 
                   size=20, zorder=5)
@@ -102,7 +102,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=cmap(norm(bins)),
                 ec='None')
 
-ax.text(0.17, 1.05, "26 Oct 2014 USDA Percentage of Corn Harvested\nPercentage Points Departure from 1980-2013 Average for 23-30 Oct", transform=ax.transAxes,
+ax.text(0.17, 1.05, "26 Apr 2015 USDA Percentage of Corn Acres Planted\nPercentage Points Departure from 1980-2014 Average for 23-30 Apr", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
@@ -112,5 +112,3 @@ ax3 = plt.axes([0.05,0.9,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117),
 ax3.imshow(logo)
 
 fig.savefig('test.png')
-#import iemplot
-#iemplot.makefeature('test')
