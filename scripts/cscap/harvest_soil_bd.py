@@ -19,7 +19,7 @@ drive_client = util.get_driveclient()
 
 res = drive_client.files().list(q=("title contains '%s'"
                                    ) % (('Soil Bulk Density and '
-                                           'Water Retention Data'),)
+                                         'Water Retention Data'),)
                                 ).execute()
 
 for item in res['items']:
@@ -65,6 +65,10 @@ for item in res['items']:
         if plotid is None or depth is None:
             continue
         for col in range(4, worksheet.cols+1):
+            if worksheet.get_cell_value(1, col) is None:
+                # print(("harvest_soil_bd %s(%s) row: %s col: %s is null"
+                #       ) % (siteid, YEAR, row, col))
+                continue
             varname = worksheet.get_cell_value(1, col).strip().split()[0]
             if varname[:4] != 'SOIL':
                 # print 'Invalid varname: %s site: %s year: %s' % (
