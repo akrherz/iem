@@ -21,7 +21,7 @@ LAYER
   LABELCACHE ON
   CLASS
     NAME 'normal'
-    EXPRESSION ([cond_code] = 0)
+    EXPRESSION ([cond_code] = 0 or [cond_code] = 76)
     STYLE
       COLOR 153 153 153
       SIZE 5
@@ -218,7 +218,7 @@ LAYER
   LABELCACHE ON
   CLASS
     NAME 'normal'
-    EXPRESSION ([cond_code] = 0)
+    EXPRESSION ([cond_code] = 0 or [cond_code] = 76)
     STYLE
       COLOR 220 220 220
       SIZE 7
