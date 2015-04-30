@@ -5,9 +5,9 @@ include_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "7 AM 24 Hour Precipitation Analysis";
 $t->headextra = <<<EOF
-<link rel="stylesheet" href="/assets/openlayers/3.2.1/css/ol.css" type="text/css">
+<link rel="stylesheet" href="/assets/openlayers/3.4.0/ol.css" type="text/css">
 <link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
-<link type="text/css" href="/assets/openlayers/3.2.1/css/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/assets/openlayers/3.4.0/ol3-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
         height: 400px;
@@ -21,9 +21,9 @@ $t->headextra = <<<EOF
 EOF;
 
 $t->jsextra = <<<EOF
-<script src="/assets/openlayers/3.2.1/build/ol.js" type="text/javascript"></script>
+<script src="/assets/openlayers/3.4.0/ol.js" type="text/javascript"></script>
 <script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
-<script src='/assets/openlayers/3.2.1/build/ol3-layerswitcher.js'></script>
+<script src='/assets/openlayers/3.4.0/ol3-layerswitcher.js'></script>
 <script src='7am-app.js?v=8'></script>
 EOF;
 
@@ -48,6 +48,7 @@ $t->content = <<<EOF
  <li>Add MRMS Legend to map</li>
  <li>Include nearby state's data</li>
  <li>Add option to plot SWE</li>
+ <li>Add Fisher Porter totals</li>
 </ul>
 		
 <form name="bah">
