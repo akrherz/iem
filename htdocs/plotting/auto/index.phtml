@@ -1,6 +1,7 @@
 <?php 
 
 include_once "../../../config/settings.inc.php";
+define("IEM_APPID", 92);
 include_once "../../../include/myview.php";
 include_once "../../../include/forms.php";
 include_once "../../../include/vtec.php";
@@ -10,7 +11,7 @@ $mesosite = iemdb("mesosite");
 $formhtml = "";
 $image = "";
 $t = new MyView();
-$t->thispage = "networks-coop";
+$t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
  <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
@@ -20,6 +21,7 @@ EOF;
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
 $state = isset($_GET["state"]) ? $_GET["state"]: "IA";
+$lmw = isset($_GET['_l']) ? "$('#_l').click();\n": '';
 
 // Available Plots
 $data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
@@ -28,8 +30,9 @@ $pselect = "<select name=\"q\">";
 while (list($k,$v) = each($jobj->plots)){
 	$pselect .= sprintf("<optgroup label=\"%s\">", $v->label);
 	while (list($k2,$v2) = each($v->options)){
-		$pselect .= sprintf("<option value=\"%s\"%s>%s</option>", $v2->id,
-			($v2->id == $q) ? ' selected="selected"': '', $v2->label);
+		$mwonly = (isset($v2->mw)) ? ' data-mw="true"': '';
+		$pselect .= sprintf("<option value=\"%s\"%s%s>%s</option>", $v2->id,
+			($v2->id == $q) ? ' selected="selected"': '', $mwonly, $v2->label);
 	}
 	$pselect .= "</optgroup>";
 }
@@ -189,6 +192,7 @@ EOF;
 	<img src="$imguri" class="img img-responsive" />
 EOF;
 	}
+	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
 	$formhtml = <<<EOF
 <script>
 function onNetworkChange(newnetwork){
@@ -200,6 +204,7 @@ function onNetworkChange(newnetwork){
 	<form method="GET" name="s" id="myForm">
 	<input type="hidden" name="_wait" value="no" id="_wait">
 	<input type="hidden" name="q" value="{$q}">
+	{$lmwoption}
 	<table class="table table-striped">
 		<thead><tr><th>Description</th><th>Value</th></tr></thead>
 	$form
@@ -223,6 +228,7 @@ are derived from raw observations collected by the IEM.</p>
 <br /><form method="GET" name="t">
 <div class="form-group">
 <h4><span class="glyphicon glyphicon-arrow-right"></span> First, select a chart type::</h4>
+ <input type="checkbox" name="_l" id="_l">Only show options that also work outside Midwest US<br />
 {$pselect}
 <input type="submit" value="Select Plot Type" />
 </div>
@@ -251,6 +257,15 @@ $t->jsextra = <<<EOF
 <script>
 $(document).ready(function(){
 {$jsextra}
+
+	$('#_l').change(function(){
+		if($(this).is(":checked")) {
+			$('select option[data-mw="true"]').addClass('hidden');
+		} else {
+			$('select option[data-mw="true"]').removeClass('hidden');
+		}
+	});
+		{$lmw}
 });
 </script>
 EOF;
