@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -63,6 +63,7 @@ Requires: oauth2client
 Requires: python-httplib2
 Requires: google-api-python-client
 Requires: uritemplate
+Requires: mod_fcgid
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -82,6 +83,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Thu Apr 30 2015 daryl herzmann <akrherz@iastate.edu>
+- Add mod_fcgid in as a requirement
+
 * Mon Apr 27 2015 daryl herzmann <akrherz@iastate.edu>
 - Google Openauth requirements added
 
