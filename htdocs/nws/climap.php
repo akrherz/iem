@@ -10,9 +10,9 @@ $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
 
 $t->headextra = <<<EOF
-<link rel="stylesheet" href="/assets/openlayers/3.1.1/css/ol.css" type="text/css">
+<link rel="stylesheet" href="/assets/openlayers/3.4.0/ol.css" type="text/css">
 <link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
-<link type="text/css" href="/assets/openlayers/3.1.1/css/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/assets/openlayers/3.4.0/ol3-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
 	height: 400px;
@@ -25,9 +25,9 @@ $t->headextra = <<<EOF
 </style>
 EOF;
 $t->jsextra = <<<EOF
-<script src="/assets/openlayers/3.1.1/build/ol.js" type="text/javascript"></script>
+<script src="/assets/openlayers/3.4.0/ol.js" type="text/javascript"></script>
 <script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
-<script src='/assets/openlayers/3.1.1/build/ol3-layerswitcher.js'></script>
+<script src='/assets/openlayers/3.4.0/ol3-layerswitcher.js'></script>
 <script src='climap.js?v=6'></script>
 EOF;
 
@@ -49,9 +49,11 @@ $t->content = <<<EOF
 <form name='bah'><p><strong>Select Variable to Plot:</strong> 
 <select onChange="javascript: updateMap();" id="renderattr">
 	<option value="high">High Temperature</option>
+	<option value="high_depart">High Temperature Departure</option>
 	<option value="high_record">Record High Temperature</option>
 	<option value="high_normal">Normal High Temperature</option>
 	<option value="low">Low Temperature</option>
+	<option value="low_depart">Low Temperature Departure</option>
 	<option value="low_record">Record Low Temperature</option>
 	<option value="low_normal">Normal Low Temperature</option>
 	<option value="precip">Precipitation</option>
