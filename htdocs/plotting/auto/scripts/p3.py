@@ -26,8 +26,10 @@ PDICT = {'max-high': 'Maximum High',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
-    d['description'] = """This plot displays monthly values for a given
-    month over the period of record."""
+    d['description'] = """This plot displays a single month's worth of data
+    over all of the years in the period of record.  In most cases, you can
+    access the raw data for these plots
+    <a href="/climodat/" class="link link-info">here.</a>"""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station'),
@@ -78,28 +80,35 @@ def plotter(fdict):
         data.append(float(row[ptype]))
 
     data = np.array(data)
-    years = np.array(years)
 
     (fig, ax) = plt.subplots(1, 1)
     avgv = np.average(data)
 
-    colorabove = 'r'
-    colorbelow = 'b'
+    # Compute 30 year trailing average
+    tavg = [None]*30
+    for i in range(30, len(data)):
+        tavg.append(np.average(data[i-30:i]))
+
+    a1981_2010 = np.average(data[years.index(1981):years.index(2011)])
+
+    colorabove = 'tomato'
+    colorbelow = 'dodgerblue'
     precision = "%.1f"
     if ptype in ['max-precip', 'sum-precip']:
-        colorabove = 'b'
-        colorbelow = 'r'
+        colorabove = 'dodgerblue'
+        colorbelow = 'tomato'
         precision = "%.2f"
-    bars = ax.bar(years - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(np.array(years) - 0.4, data, fc=colorabove, ec=colorabove)
     for i, bar in enumerate(bars):
         if data[i] < avgv:
             bar.set_facecolor(colorbelow)
             bar.set_edgecolor(colorbelow)
-    ax.axhline(avgv, lw=2, color='k', zorder=2)
-    txt = ax.text(years[10], avgv, "Avg: "+precision % (avgv,),
-                  color='yellow', fontsize=14, va='center')
-    txt.set_path_effects([PathEffects.withStroke(linewidth=5,
-                                                 foreground="k")])
+    lbl = "Avg: "+precision % (avgv,)
+    ax.axhline(avgv, lw=2, color='k', zorder=2, label=lbl)
+    lbl = "1981-2010: "+precision % (a1981_2010,)
+    ax.axhline(a1981_2010, lw=2, color='brown', zorder=2, label=lbl)
+    ax.plot(years, tavg, lw=1.5, color='g', zorder=4, label='Trailing 30yr')
+    ax.plot(years, tavg, lw=3, color='yellow', zorder=3)
     ax.set_xlim(years[0] - 1, years[-1] + 1)
     if ptype.find('precip') == -1 and ptype.find('days') == -1:
         ax.set_ylim(min(data) - 5, max(data) + 5)
@@ -112,6 +121,7 @@ def plotter(fdict):
         units = "days"
     ax.set_ylabel("%s [%s]" % (PDICT[ptype], units))
     ax.grid(True)
+    ax.legend(ncol=3, loc='best', fontsize=10)
     msg = ("[%s] %s %s-%s %s %s"
            ) % (station, nt.sts[station]['name'],
                 min(years), max(years),
