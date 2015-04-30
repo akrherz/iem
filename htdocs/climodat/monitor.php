@@ -28,8 +28,20 @@ if (isset($_GET['r'])){
 		}
 	}
 }
+// Prevent stations from appearing twice in the display
+reset($s);
+$tmpst = Array();
+while (list($k, $v)=each($s)){
+	if (in_array($v, $tmpst)){
+		unset($s[$k]);
+	} else{
+		$tmpst[] = $v;
+	}
+}
+
 $hiddenstations = "";
 $table = "";
+reset($s);
 while (list($k,$v)=each($s)){
 	$hiddenstations .= "<input type=\"hidden\" name=\"s[]\" value=\"$v\">";
 }
