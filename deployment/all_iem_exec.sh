@@ -5,5 +5,7 @@
 MACHINES="iem-director0 iem-director1 iemfe iem6 iem12 iem22 iem30 iem50 iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108"
 for MACH in $MACHINES
 do
-ssh root@$MACH $1
+	echo "----------------------- $MACH -------------------------"
+	ssh root@$MACH $1
+	echo 
 done
