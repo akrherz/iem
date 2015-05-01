@@ -1,46 +1,24 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 77);
+ putenv("TZ=UTC");
+ date_default_timezone_set('UTC');
  include("../../include/myview.php");
  include("../../include/vtec.php"); 
  include("../../include/forms.php");
- include("../../include/database.inc.php");
  include("../../include/imagemaps.php");
+ require_once 'Zend/Json.php';
  
- $pgconn = iemdb('postgis');
  
  $t = new MyView();
- define("IEM_APPID", 77);
-
+ 
  $year = isset($_REQUEST["year"])? intval($_REQUEST["year"]): date("Y");
  $wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"]: "DMX";
  
- $sql = <<<EOF
- WITH stormbased as (
- 	SELECT eventid, phenomena, issue at time zone 'UTC' as utc_issue, 
- 	expire at time zone 'UTC' as utc_expire, 
- 	polygon_begin at time zone 'UTC' as utc_polygon_begin,
- 	polygon_end at time zone 'UTC' as utc_polygon_end,
- 	status, windtag, hailtag, tornadotag, tml_sknt, tornadodamagetag, wfo
- 	from sbw_$year WHERE wfo = $1 and phenomena = $2
- 	and significance = 'W'	and status != 'EXP' and status != 'CAN'
- ),
- 		
- countybased as (
- 	select string_agg( u.name || ' ['||u.state||']', ', ') as locations, 
- 	eventid from warnings_$year w JOIN ugcs u
-    ON (u.gid = w.gid) WHERE w.wfo = $1 and
-    significance = 'W' and phenomena = $2
-    and eventid is not null GROUP by eventid 
- )
- 		
- SELECT c.eventid, c.locations, s.utc_issue, s.utc_expire, 
- s.utc_polygon_begin, s.utc_polygon_end, s.status, s.windtag, s.hailtag,
- s.tornadotag, s.tml_sknt, s.tornadodamagetag, s.wfo, s.phenomena
- from countybased c JOIN stormbased s on (c.eventid = s.eventid)
- ORDER by eventid ASC, utc_polygon_begin ASC
- 
-EOF;
- $rs = pg_prepare($pgconn, "MYSELECT", $sql);
+ $jsonuri = sprintf("http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
+ 		$wfo, $year);
+ $publicjsonuri = sprintf("http://mesonet.agron.iastate.edu/json/ibw_tags.py?wfo=%s&amp;year=%s",
+ 		$wfo, $year);
  
  $t->title = "NWS $wfo issued SVR+TOR Warning Tags for $year";
  $t->headextra = '
@@ -82,7 +60,7 @@ Ext.onReady(function(){
  
 
 function do_col1($row){
-	$ts = strtotime($row["utc_issue"]);
+	$ts = strtotime($row["issue"]);
 	$uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y", $ts),
 			'NEW', $row["wfo"], $row["phenomena"],
 			'W', $row["eventid"]);
@@ -95,15 +73,15 @@ function do_col1($row){
 }
 function do_col2($row){
 	if ($row["status"] == 'NEW'){
-		return date("Y/m/d Hi", strtotime($row["utc_issue"]));
+		return date("Y/m/d Hi", strtotime($row["issue"]));
 	}
-	return date("Y/m/d Hi", strtotime($row["utc_polygon_begin"]));
+	return date("Y/m/d Hi", strtotime($row["polygon_begin"]));
 }
 function do_col3($row){
 	if ($row["status"] == 'NEW'){
-		return date("Hi", strtotime($row["utc_expire"]));
+		return date("Hi", strtotime($row["expire"]));
 	}
-		return date("Hi", strtotime($row["utc_polygon_end"]));
+		return date("Hi", strtotime($row["polygon_end"]));
 }
 function do_row($row){
 	return sprintf("<tr><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
@@ -123,16 +101,19 @@ function do_row($row){
 EOF;
  $tortable = str_replace('svr', 'tor', $svrtable);
 
- $rs = pg_execute($pgconn, "MYSELECT", array($wfo, 'SV'));
- for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
- 	$svrtable .= do_row($row);
+ $data = file_get_contents($jsonuri);
+ $json = Zend_Json::decode($data);
+ 
+ while(list($key, $val)=each($json['results'])){
+ 	if ($val["phenomena"] == 'SV'){
+ 		$svrtable .= do_row($val);
+ 	} else {
+ 		$tortable .= do_row($val);
+ 	}
+ 	
  }
-$svrtable .= "</tbody></table>";
 
-$rs = pg_execute($pgconn, "MYSELECT", array($wfo, 'TO'));
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-	$tortable .= do_row($row);
-}
+$svrtable .= "</tbody></table>";
 $tortable .= "</tbody></table>";
 
 
@@ -166,6 +147,11 @@ $wselect = networkSelect("WFO", $wfo, array(), "wfo");
  </div>
  </div>
  </form>
+ 
+ <div class="alert alert-success">There is a <a href="/json/">JSON-P webservice</a>
+ that provides the data found in this table.  The direct URL is:<br />
+ <code>{$publicjsonuri}</code></div>
+ 
  
  <h3>Tornado Warnings</h3>
  <button id="create-grid2" class="btn btn-info" type="button">Make Table Sortable</button>
