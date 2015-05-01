@@ -149,6 +149,22 @@
   );
   
   $services[] = Array(
+  		"title" => "Search for Storm Based Warnings by Lat/Lon Point",
+  		"url" => "/json/sbw_by_point.py?lon={longitude}&lat={latitude}",
+  		"desc" => "Provides a listing of storm based (polygon) warnings 
+  		based on the provided latitutde and longitude pair for warnings 
+  		dating back to 1 Jan 2005.",
+  		"vars" => Array(
+  				"lat" => "Latitude in degrees",
+  				"lon" => "Longitude in (degrees east)"
+  		),
+  		"example" => Array(
+  				"{latitude}" => "42.5",
+  				"{longitude}" => "-95.0"
+  		)
+  );
+  
+  $services[] = Array(
   		"title" => "Current Polygons from Special Weather Statements (SPS)",
   		"url" => "/geojson/sps.geojson?",
   		"desc" => "Provides a geojson format of current National Weather Service
