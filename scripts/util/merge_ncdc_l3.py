@@ -8,8 +8,8 @@ import subprocess
 import glob
 import shutil
 # 1. Loop over days
-now = datetime.datetime(2009,1,1)
-ets = datetime.datetime(2011,1,1)
+now = datetime.datetime(2009, 1, 1)
+ets = datetime.datetime(2011, 1, 1)
 interval = datetime.timedelta(days=1)
 while now < ets:
     # 2. Loop over nexrads
@@ -19,7 +19,7 @@ while now < ets:
         os.makedirs("old")
         os.makedirs("new")
 
-        oldfn = now.strftime(("/mnt/longterm1/nexrad3_iowa/%Y_%m/"+nexrad
+        oldfn = now.strftime(("/mesonet/ARCHIVE/nexrad/%Y_%m/"+nexrad
                              +"_%Y%m%d.tgz"))
         newfn = now.strftime(("/mesonet/tmp/level3/K"+ nexrad +"%Y%m%d.tar.Z"))
         # 3. Extract IEM archive into /tmp/l3/old

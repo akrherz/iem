@@ -7,6 +7,7 @@ import stat
 import datetime
 SAMPLES = ['KDMX', 'KAMA', 'KLWX', 'KFFC', 'KBMX', 'KBGM', 'KCLE']
 
+
 def check():
     now = datetime.datetime.now()
     count = []
@@ -18,11 +19,11 @@ def check():
         if diff > 300:
             count.append(nexrad)
     return count
-    
+
 if __name__ == '__main__':
     badcount = check()
     msg = '%s/%s outage %s' % (len(badcount), len(SAMPLES),
-                                        ','.join(badcount))
+                               ','.join(badcount))
     if len(badcount) < 3:
         print 'OK - %s' % (msg,)
         sys.exit(0)

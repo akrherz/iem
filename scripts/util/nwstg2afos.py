@@ -14,12 +14,14 @@ BAD_CHARS = "[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 
 PGCONN = psycopg2.connect(database='afos', host='iemdb')
 
+
 def find_awipsid(data):
     """ Attempt to guess the AWIPSID """
     tokens = re.findall("[0-9]{6}\s+([A-Z][A-Z][A-Z0-9][A-Z0-9]{1,3})", data)
     if len(tokens) == 0:
         return None
     return tokens[0]
+
 
 def do(ts):
     """ Process this timestamp """
@@ -71,23 +73,24 @@ def do(ts):
                 except:
                     print 'Parsing Failure', f2.name
                     continue
-            
+
                 if prod.valid.year != ts.year:
                     print 'Invalid timestamp, year mismatch'
                     continue
-            
+
                 table = "products_%s_%s" % (prod.valid.year, 
                                         "0712" if prod.valid.month > 6 else "0106")
-            
+
                 print 'SAVE', f2.name, prod.valid.strftime("%Y%m%d%H%M"), awipsid, prod.afos, table
                 cursor.execute("""INSERT into """+table+"""
             (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)""",
             (bulletin, prod.afos, prod.valid, source, ttaaii))
-            
+
     cursor.close()
     PGCONN.commit()
     subprocess.call("compress %s" % (fn[:-2],), shell=True)
-    
+
+
 def main():
     """ Go Main Go """
     sts = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]),
