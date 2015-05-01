@@ -36,7 +36,7 @@ $img = $map->prepareImage();
 $background = $map->getlayerbyname("kwwlback");
 $background->set("status", MS_ON);
 if ($isnew){
-	$background->set("data", "/mesonet/share/roads/WHO/iowa.png");
+	$background->set("data", "images/26915/who-new.png");
 } else {
 	$background->set("data", "images/26915/who.tif");
 }
