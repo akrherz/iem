@@ -59,6 +59,7 @@ def do(link, target):
         oldtarget = os.path.realpath(link)
         if oldtarget == target:
             return
+        os.unlink(link)
     print("%s -> %s" % (link, target))
     os.symlink(target, link)
 
