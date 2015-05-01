@@ -48,7 +48,14 @@ $_$;
     LANGUAGE sql
     AS $_$select (( (CASE WHEN $3 > $1 THEN (case when $3 > $2 THEN $2 ELSE $3 END ) - $1 ELSE 0 END) + 
     (CASE WHEN $4 > $1 THEN $4 - $1 ELSE 0 END) ) / 2.0)::numeric$_$;
- 
+
+--
+-- Growing Degree Days (only base, no floor nor ceiling)
+-- (base, high, low)
+CREATE FUNCTION gdd_onlybase(real, real, real) RETURNS numeric LANGUAGE sql
+ AS $_$
+  SELECT greatest(0, ($2 + $3) / 2. - $1)::numeric
+ $_$;
 
 
 ---

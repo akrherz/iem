@@ -9,10 +9,16 @@ require_once "../../include/network.php";
 
 $nt = new NetworkTable("IACLIMATE");
 
+function ss($v){
+	if ($v == '') return '';
+	return intval($v);
+}
+
 $sdate = isset($_GET["sdate"]) ? $_GET["sdate"]: "04/01/2015";
 $edate = isset($_GET["edate"]) ? $_GET["edate"]: "12/31/2015";
 $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
-$gddceil = isset($_GET["gddceil"]) ? intval($_GET["gddceil"]) : 86;
+$gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
+$gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
 $hiddendates = <<<EOF
 <input type="hidden" name="sdate" value="{$sdate}">
 <input type="hidden" name="edate" value="{$edate}">
@@ -50,16 +56,20 @@ $sdatestr = date("Y-m-d", $sdate);
 $edatestr = date("Y-m-d", $edate);
 $sstring = "('". implode(",", $s) ."')";
 $sstring = str_replace(",", "','", $sstring);
+$gddstr = "gddxx({$gddbase}, {$gddceil}, high, low)";
+if ($gddfloor == '' || $gddceil == ''){
+	$gddstr = "gdd_onlybase({$gddbase}, high, low)";
+}
 $sql = <<<EOF
 WITH climo as (
   SELECT station, sday, avg(precip) as avg_precip,
   avg(sdd86(high,low)) as avg_sdd,
-  avg(gddxx({$gddbase}, {$gddceil}, high, low)) as avg_gdd
+  avg({$gddstr}) as avg_gdd
   from alldata_ia WHERE station in {$sstring}
   and year > 1950 GROUP by station, sday)
   
 select o.station,
-   sum(gddxx({$gddbase}, {$gddceil}, o.high, o.low)) as ogdd50,
+   sum({$gddstr}) as ogdd50,
    sum(o.precip) as oprecip,
    sum(c.avg_gdd) as cgdd50, sum(c.avg_precip) as cprecip,
    max(o.high) as maxtmpf, min(o.low) as mintmpf,
@@ -129,7 +139,21 @@ $t->content = <<<EOF
 
 <p>The purpose of this page is to provide a one-stop view of summarized 
 IEM Climodat data for a period of your choice.  Once you have configured 
-your favorite sites, <strong>please bookmark the page</strong>.</p>
+your favorite sites, <strong>please bookmark the page</strong>. There are
+options presented on this page on how to compute Growing Degree Days.  Here
+is a description of the three options.</p>
+
+<ul>
+ <li><i>base</i>: This is the base temperature (F) to substract the daily
+ average [(high + low) / 2] temperature from.  The resulting value is 
+ always non-negative.</li>
+ <li><i>floor</i>: If the high or low temperature is below this value, the
+ temperature is set to this value before the averaging is done. Delete the
+ entry to remove this calculation.</li>
+ <li><i>ceiling</i>: If the high temperature is above this value, the 
+ high temperature is set to this value prior to averaging.  Delete the
+ entry to remove this calculation.</li>
+</ul>
 		
 <form name="add">
 {$hiddendates}
@@ -146,6 +170,7 @@ your favorite sites, <strong>please bookmark the page</strong>.</p>
 <table class="table table-condensed">
 <tr><th>Growing Degree Days</th>
  <td>base: <input type="text" name="gddbase" size="4" value="{$gddbase}">
+ floor: <input type="text" name="gddfloor" size="4" value="{$gddfloor}">
  ceiling: <input type="text" name="gddceil" size="4" value="{$gddceil}">
  </td></tr>
 
@@ -171,7 +196,7 @@ your favorite sites, <strong>please bookmark the page</strong>.</p>
 <thead><tr><th rowspan="2">ID</th>
 	<th rowspan="2">Name</th>
 	<th colspan="3">Precipitation [inch]</th>
-	<th colspan="3">Growing Degree Days (base {$gddbase}, ceil {$gddceil})</th>
+	<th colspan="3">Growing Degree Days (base {$gddbase}, floor {$gddfloor}, ceil {$gddceil})</th>
 	<th colspan="3">Stress Degree Days (base 86)</th>
 	<th colspan="3">Daily Temperature [F]</th></tr>
 <tr>
