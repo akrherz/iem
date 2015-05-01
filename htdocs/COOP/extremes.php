@@ -40,7 +40,7 @@
 
  function aSortBySecondIndex($multiArray, $secondIndex) {
  	while (list($firstIndex, ) = each($multiArray))
- 		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
+ 		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
  	while (list($firstIndex, ) = each($indexMap))
  		if (is_numeric($firstIndex))
  			$sortedArray[] = $multiArray[$firstIndex];
