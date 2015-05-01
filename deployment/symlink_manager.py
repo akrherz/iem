@@ -16,7 +16,7 @@ PAIRS = [
          ['/mesonet/ARCHIVE/nexrad', '/mnt/mtarchive/longterm/nexrad3_iowa'],
          ['/mesonet/ARCHIVE/raw', '/mnt/mesonet2/ARCHIVE/raw'],
          ['/mesonet/ARCHIVE/rer', '/mnt/mesonet/ARCHIVE/rer'],
-         ['/mesonet/ARCHIVe/wunder', '/mnt/mesonet2/ARCHIVE/wunder'],
+         ['/mesonet/ARCHIVE/wunder', '/mnt/mesonet2/ARCHIVE/wunder'],
          ['/mesonet/data/alerts', '/mnt/mesonet2/data/alerts'],
          ['/mesonet/data/dm', '/mnt/mesonet2/data/dm'],
          ['/mesonet/data/dotcams', '/mnt/mesonet2/data/dotcams'],
