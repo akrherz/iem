@@ -3,7 +3,7 @@
  * Giveme JSON data listing products  
  */
 
-header('content-type: application/json; charset=utf-8');
+header('Content-type: application/json; charset=utf-8');
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";

@@ -3,7 +3,7 @@
  * This is the example referenced on the /json/ webpage
  */
 
-header('content-type: application/json; charset=utf-8');
+header('Content-type: application/json; charset=utf-8');
 
 
 $json = '{"Name": "daryl", "Profession": "nerd", "Age": 99}';

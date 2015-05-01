@@ -9,25 +9,28 @@ import gdal
 import os
 import sys
 
+
 def get_5():
     gmt = mx.DateTime.gmt()
-    gmt -= mx.DateTime.RelativeDateTime(minutes= gmt.minute % 5)
+    gmt -= mx.DateTime.RelativeDateTime(minutes=gmt.minute % 5)
     return gmt
+
 
 def sample(fp, lon, lat):
     """
     Sample a file
     """
     # Wold file
-    o = open( fp[:-4]+".wld", 'r')
+    o = open(fp[:-4]+".wld", 'r')
     lines = o.readlines()
     o.close()
-    (dx, blah, blah2, dy, x0, y0) = map(float, lines)
+    (dx, _, _, dy, x0, y0) = map(float, lines)
     x = int((lon - x0)/dx)
     y = int((lat - y0)/dy)
     image = gdal.Open(fp)
     ar = image.ReadAsArray()
-    return ar[y,x]
+    return ar[y, x]
+
 
 def five_minute(lon, lat):
     """
@@ -37,7 +40,8 @@ def five_minute(lon, lat):
     attempt = 0
     realfp = None
     while attempt < 10:
-        fp = gmt.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/r5m_%Y%m%d%H%M.png")
+        fp = gmt.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
+                           "GIS/q2/r5m_%Y%m%d%H%M.png"))
         if os.path.isfile(fp):
             realfp = fp
             break
@@ -47,9 +51,10 @@ def five_minute(lon, lat):
         return {}
     return {
             'value': sample(realfp, gmt, lon, lat),
-            'start_time': (gmt - mx.DateTime.RelativeDateTime(minutes=5)).strftime("")
+            'start_time': (gmt - mx.DateTime.RelativeDateTime(
+                                                    minutes=5)).strftime("")
             }
-    
+
 
 if __name__ == '__main__':
     """
@@ -60,4 +65,4 @@ if __name__ == '__main__':
     lon = float(form.getvalue('lon'))
     sys.stdout.write('Content-type: application/json\n\n')
     sys.stdout.write(json.dumps({"ERROR": "No data found"}))
-    #sys.stdout.write(json.dump( five_minute(lon, lat) ))
+    # sys.stdout.write(json.dump( five_minute(lon, lat) ))
