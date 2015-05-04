@@ -121,6 +121,11 @@ EOF;
 $nselect = networkSelect($network, "IA0000", Array(), "s[]");
 
 $t = new MyView();
+$showmap = " hidden";
+if (isset($_GET['map'])){
+	$t->iemss = True;
+	$showmap = "";
+}
 $t->title = "Climodat Station Monitor";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
@@ -136,6 +141,11 @@ $(document).ready(function(){
 	sdate.datepicker('setDate', "$sdatestr");
 	edate = $("#edate").datepicker({altFormat:"yymmdd"});	
 	edate.datepicker('setDate', "$edatestr");
+
+	//Make into more PHP friendly
+	$('#addmapstations').on('click', function(){
+		$('#stations_out').attr('name', 's[]');
+	});
 });
 </script>
 EOF;
@@ -194,6 +204,8 @@ is a description of the three options.</p>
 </form>
 
 <hr />
+<div class="row">
+<div class="col-md-6">
 <h4>Available Stations within Selected State</h4>
 
 <form name="add">
@@ -203,6 +215,26 @@ is a description of the three options.</p>
 	{$nselect}
 	<input type="submit" value="Add Station">
 </form>
+<form name="addfrommap">
+<input type="hidden" name="network" value="{$network}">
+<input type="hidden" name="map" value="1">
+{$hiddendates}
+{$hiddenstations}
+<br /><input type="submit" value="Select Stations From Map">
+</form>
+</div>
+<div class="col-md-6 {$showmap}" id="mappanel">
+<!-- The map, when appropriate -->
+<form name="frommap">
+<input type="hidden" name="network" value="{$network}">
+{$hiddendates}
+{$hiddenstations}
+<div id="iemss" data-network="{$network}"></div>
+
+<br /><input id="addmapstations" type="submit" value="Add Station(s)">
+</form>
+</div>
+</div>
 
 <hr />
 <h4>Table Options</h4>
