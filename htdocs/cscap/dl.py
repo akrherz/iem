@@ -26,7 +26,8 @@ def clean(val):
 def check_auth(form):
     ''' Make sure request is authorized '''
     if form.getfirst('hash') != config.get('appauth', 'sharedkey'):
-        sys.stderr.write("Unauthorized CSCAP hash=%s" % (form.getfirst('hash'),))
+        sys.stderr.write(("Unauthorized CSCAP hash=%s"
+                          ) % (form.getfirst('hash'),))
         sys.exit()
 
 
@@ -216,39 +217,69 @@ def get_dl(form):
         s = str(tuple(sites))
         treatlimiter = """t.site in %s""" % (s,)
 
-    sql = """
-    WITH ad as
-    (SELECT site, plotid, ''::text as depth, varname, year,
-    value, ''::text as subsample
-     from agronomic_data WHERE year in %s),
-    sd as
-    (SELECT site, plotid, depth, varname, year, value, subsample
-     from soil_data WHERE year in %s),
-    sn as
-    (SELECT site, plotid, depth, varname, year, value, ''::text as subsample
-     from soil_nitrate_data WHERE year in %s),
-    tot as
-    (SELECT * from ad UNION select * from sd UNION select * from sn)
+    # columns!
+    cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
+            'tillage', 'drainage', 'landscape']
+    dvars = form.getlist("data")
+    wants_soil = False
+    for dv in dvars:
+        if dv.startswith('SOIL') or dv == 'all':
+            wants_soil = True
+            break
 
-    SELECT site || '|' || p.plotid
-    || '|' || coalesce(depth,'')
-    || '|' || coalesce(subsample, '')
-    || '|' || year
-    || '|' || coalesce(rep, '')
-    || '|' || coalesce(rotation, '')
-    || '|' || coalesce(tillage, '')
-    || '|' || coalesce(drainage, '')
-    || '|' || coalesce(landscape, '') as lbl,
-    varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
-    t.plotid = p.plotid) WHERE 1=1 and %s and %s
-    """ % (yrlist, yrlist, yrlist, treatlimiter, sitelimiter)
+    if wants_soil:
+        sql = """
+        WITH ad as
+        (SELECT site, plotid, ''::text as depth, varname, year,
+        value, '1'::text as subsample
+         from agronomic_data WHERE year in %s),
+        sd as
+        (SELECT site, plotid, depth, varname, year, value, subsample
+         from soil_data WHERE year in %s),
+        tot as
+        (SELECT * from ad UNION select * from sd)
+
+        SELECT site || '|' || p.plotid
+        || '|' || coalesce(depth,'')
+        || '|' || coalesce(subsample, '')
+        || '|' || year
+        || '|' || coalesce(rep, '')
+        || '|' || coalesce(rotation, '')
+        || '|' || coalesce(tillage, '')
+        || '|' || coalesce(drainage, '')
+        || '|' || coalesce(landscape, '') as lbl,
+        varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
+        t.plotid = p.plotid) WHERE 1=1 and %s and %s
+        """ % (yrlist, yrlist, treatlimiter, sitelimiter)
+    else:
+        sql = """
+        WITH ad as
+        (SELECT site, plotid, ''::text as depth, varname, year,
+        value, ''::text as subsample
+         from agronomic_data WHERE year in %s),
+        tot as
+        (SELECT * from ad)
+
+        SELECT site || '|' || p.plotid
+        || '|' || coalesce(depth,'')
+        || '|' || coalesce(subsample, '')
+        || '|' || year
+        || '|' || coalesce(rep, '')
+        || '|' || coalesce(rotation, '')
+        || '|' || coalesce(tillage, '')
+        || '|' || coalesce(drainage, '')
+        || '|' || coalesce(landscape, '') as lbl,
+        varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
+        t.plotid = p.plotid) WHERE 1=1 and %s and %s
+        """ % (yrlist, treatlimiter, sitelimiter)
+
     df = pdsql.read_sql(sql, pgconn)
 
     dnc = form.getfirst('dnc', 'DNC')
     missing = form.getfirst('missing', '.')
 
     def cleaner(val):
-        if val is None or val.strip() == '':
+        if val is None or val.strip() == '' or val.strip() == '.':
             return missing
         if val is not None and val.strip().lower() == 'did not collect':
             return dnc
@@ -256,6 +287,10 @@ def get_dl(form):
     df['value'] = df['value'].apply(cleaner)
     df2 = df.pivot('lbl', 'varname', 'value')
     allcols = df2.columns.values.tolist()
+    if 'all' in dvars:
+        cols = cols + allcols
+    else:
+        cols = cols + dvars
     df2['site'] = [item.split('|')[0] for item in df2.index]
     df2['plotid'] = [item.split('|')[1] for item in df2.index]
     df2['depth'] = [item.split('|')[2] for item in df2.index]
@@ -266,15 +301,6 @@ def get_dl(form):
     df2['tillage'] = [item.split('|')[7] for item in df2.index]
     df2['drainage'] = [item.split('|')[8] for item in df2.index]
     df2['landscape'] = [item.split('|')[9] for item in df2.index]
-
-    # start output
-    cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
-            'tillage', 'drainage', 'landscape']
-    dvars = form.getlist("data")
-    if 'all' in dvars:
-        cols = cols + allcols
-    else:
-        cols = cols + dvars
 
     df2cols = df2.columns.values.tolist()
     for col in cols:
