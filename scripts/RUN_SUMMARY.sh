@@ -29,4 +29,3 @@ python precip.py
 python plot_gdd.py
 python plot_gdd.py gdd52
 python plot_gdd.py gdd48
-
