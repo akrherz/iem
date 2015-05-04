@@ -1,6 +1,4 @@
-'''
- Some simple summary stats for the IEM Daily Bulletin...
-'''
+"""Some simple summary stats for the IEM Daily Bulletin..."""
 import psycopg2
 import datetime
 import pytz
@@ -51,15 +49,17 @@ htmlfmt = """
  <td>%(FFOAX)3s</td><td>%(FFFSD)3s</td><td>---</td></tr>
 </table>
 
-<p>ARX = LaCrosse, WI  DVN = Davenport, IA    DMX = Des Moines, IA 
+<p>ARX = LaCrosse, WI  DVN = Davenport, IA    DMX = Des Moines, IA
 OAX = Omaha, NE     FSD = Sioux Falls, SD
 
 """
 
+
 def run(sts=None, ets=None):
     """ Generate listing of warning counts """
+    # When the start or end time is None, we then want for a period that
+    # comprises yesterday!  Call it 00 UTC to 00 UTC
     if sts is None or ets is None:
-        # We want to run for yesterday!
         utc = datetime.datetime.utcnow()
         utc = utc.replace(tzinfo=pytz.timezone("UTC"), second=0,
                           microsecond=0, minute=0)
@@ -74,10 +74,10 @@ def run(sts=None, ets=None):
     d['TOu'] = 0
     d['SVu'] = 0
     d['FFu'] = 0
-    cursor.execute("""select phenomena, count(*) from sbw_%s 
-        WHERE status = 'NEW' and issue >= '%s' and issue < '%s' 
-        and phenomena IN ('TO','SV','FF') GROUP by phenomena""" % (
-                                        sts.year, sts, ets) )
+    cursor.execute("""select phenomena, count(*) from sbw_%s
+        WHERE status = 'NEW' and issue >= '%s' and issue < '%s'
+        and phenomena IN ('TO','SV','FF') GROUP by phenomena
+        """ % (sts.year, sts, ets))
     for row in cursor:
         d['%su' % (row[0],)] = row[1]
 
@@ -86,12 +86,12 @@ def run(sts=None, ets=None):
     d['SVi'] = 0
     d['FFi'] = 0
     cursor.execute("""
-        select phenomena, count(*) as count 
+        select phenomena, count(*) as count
         from sbw_%s w, states s
-        WHERE ST_contains(s.the_geom, w.geom) and s.state_name = 'Iowa' 
+        WHERE ST_contains(s.the_geom, w.geom) and s.state_name = 'Iowa'
         and issue >= '%s' and issue < '%s' and status = 'NEW'
-        and phenomena IN ('TO','SV','FF') GROUP by phenomena""" % (sts.year,
-                                                                   sts, ets)) 
+        and phenomena IN ('TO','SV','FF') GROUP by phenomena
+        """ % (sts.year, sts, ets))
     for row in cursor:
         d['%si' % (row[0],)] = row[1]
 
@@ -101,11 +101,11 @@ def run(sts=None, ets=None):
         d['SV%s' % (wfo,)] = 0
         d['FF%s' % (wfo,)] = 0
     cursor.execute("""
-  SELECT phenomena, wfo, count(*) as count from sbw_%s WHERE 
-  issue >= '%s' and issue < '%s' and status = 'NEW' 
-  and phenomena IN ('TO','SV','FF') and
-  wfo in ('DMX','FSD','ARX','DVN','OAX') GROUP by wfo, phenomena""" % (sts.year,
-                                                                    sts, ets))
+      SELECT phenomena, wfo, count(*) as count from sbw_%s WHERE
+      issue >= '%s' and issue < '%s' and status = 'NEW'
+      and phenomena IN ('TO','SV','FF') and
+      wfo in ('DMX','FSD','ARX','DVN','OAX') GROUP by wfo, phenomena
+      """ % (sts.year, sts, ets))
     for row in cursor:
         d['%s%s' % (row[0], row[1])] = row[2]
 
@@ -113,14 +113,16 @@ def run(sts=None, ets=None):
     d['TORw'] = 0
     d['SVRw'] = 0
 
-    cursor.execute("""SELECT type, count(*) as count from watches WHERE 
-      issued >= '%s' and issued < '%s' GROUP by type""" % (sts, ets))
+    cursor.execute("""
+        SELECT type, count(*) as count from watches WHERE
+        issued >= '%s' and issued < '%s' GROUP by type
+        """ % (sts, ets))
     for row in cursor:
         d['%sw' % (row[0],)] = row[1]
 
-    label = "%s - %s" % (sts.strftime("%-d %b %Y"), 
-                         ets.strftime("%-d %b %Y %Z"))
-   
+    label = "%s - %s" % (sts.strftime("%-I %p %-d %b %Y"),
+                         ets.strftime("%-I %p %-d %b %Y %Z"))
+
     txt = "> NWS Watch/Warning Summary for %s\n" % (label,)
     html = "<h3>NWS Watch/Warning Summary for %s</h3>" % (label,)
 
@@ -129,9 +131,10 @@ def run(sts=None, ets=None):
 
     return txt, html
 
+
 def main():
     """Lets actually do something """
-    sts = datetime.datetime(2005,11,12,12)
+    sts = datetime.datetime(2015, 5, 4, 0)
     sts = sts.replace(tzinfo=pytz.timezone("UTC"))
     sts = sts.astimezone(pytz.timezone("America/Chicago"))
     sts = sts.replace(hour=0)
