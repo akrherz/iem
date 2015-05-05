@@ -7,7 +7,7 @@
             border: 1px solid black;
         }
     </style>
-    <script src="http://www.openlayers.org/api/2.11/OpenLayers.js"></script>
+    <script src="http://www.openlayers.org/api/2.13.1/OpenLayers.js"></script>
     <script type="text/javascript">
         <!--
 var map,ia_wms;
@@ -17,20 +17,20 @@ var timeout_state=null;
         function init(){
             map = new OpenLayers.Map('map');
 
-            var ol_wms = new OpenLayers.Layer.WMS( "OpenLayers WMS", 
-                "http://labs.metacarta.com/wms/vmap0?", {layers: 'basic'} );
+            var ol_wms = new OpenLayers.Layer.WMS( "OpenLayers WMS",
+                "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'} );
 
             var jpl_wms = new OpenLayers.Layer.WMS( "NASA Global Mosaic",
-                "http://wms.jpl.nasa.gov/wms.cgi", 
-                {layers: "modis,global_mosaic"});
+                "http://t1.hypercube.telascience.org/cgi-bin/landsat7", 
+                {layers: "landsat7"});
 
-	        ia_wms = new OpenLayers.Layer.WMS.Untiled("Nexrad","http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",{layers:"nexrad-n0r-wmst",transparent:true,format:'image/png',time:document.getElementById('time').value});
+            ia_wms = new OpenLayers.Layer.WMS("Nexrad","http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",{layers:"nexrad-n0r-wmst",transparent:true,format:'image/png',time:"2005-08-29T13:00:00Z"});
 
             jpl_wms.setVisibility(false);
 
             map.addLayers([ol_wms, jpl_wms, ia_wms]);
             map.addControl(new OpenLayers.Control.LayerSwitcher());
-            map.zoomToMaxExtent();
+            map.zoomToExtent(new OpenLayers.Bounds(-100.898437,22.148438,-78.398437,39.726563));
         }
 	function pad(i){
 		if (i<10) i='0'+i;
@@ -41,7 +41,8 @@ var timeout_state=null;
 		var d=s[0].split('-');
 		var t=s[1].split(':');
 		var date=Date.UTC(d[0],parseInt(d[1]-1),parseInt(d[2]),parseInt(t[0]),parseInt(t[1]));
-		var nd=new Date(date+i*60*1000);
+		var nd=new Date(date + i * 60 * 1000);
+		
 		var nm=pad(nd.getUTCMonth()+1);
 		var ns=nd.getUTCFullYear()+'-'+nm+'-'+pad(nd.getUTCDate())+'T'+pad(nd.getUTCHours())+':'+pad(nd.getUTCMinutes());
 		return ns;
@@ -49,17 +50,16 @@ var timeout_state=null;
 	function increment_time(){
 		var ns=change_time(document.getElementById('time').value,document.getElementById('increment').value);
 		image.src=ia_wms.getFullRequestString({"TIME":ns})
-		image.onload=function (){
+
 			document.getElementById('time').value=ns;
 			ia_wms.mergeNewParams({"time":ns});
-		}
+	
 	}
 	function decrement_time(){
 		var ns=change_time(document.getElementById('time').value,0-document.getElementById('increment').value);
 		image.src=ia_wms.getFullRequestString({"TIME":ns})
-		image.onload=function (){
 		document.getElementById('time').value=ns;
-		ia_wms.mergeNewParams({"time":ns});}
+		ia_wms.mergeNewParams({"time":ns});
 	}
 	function animate ( ) {
 		increment_time();
