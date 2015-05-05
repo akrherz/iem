@@ -152,16 +152,16 @@ def fetch_daily( form, cols ):
 
     df = pd.DataFrame(values)
     buf = cStringIO.StringIO()
-    df.to_csv(buf, index=False, cols=cols, sep=delim, float_format='%7.2f')
+    df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
     buf.seek(0)
     return buf.read()
     
     
-def fetch_hourly( form , cols):
+def fetch_hourly(form , cols):
     ''' Return a fetching of hourly data '''
-    sts, ets = get_dates( form )
-    stations = get_stations( form )
-    delim = get_delimiter( form )
+    sts, ets = get_dates(form)
+    stations = get_stations(form)
+    delim = get_delimiter(form)
     if delim == 'tab':
         delim = '\t'
     elif delim == 'comma':
@@ -219,13 +219,13 @@ def fetch_hourly( form , cols):
     
     df = pd.DataFrame(values)
     buf = cStringIO.StringIO()
-    df.to_csv(buf, index=False, cols=cols, sep=delim, float_format='%7.2f')
+    df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
     buf.seek(0)
     return buf.read()
 
 
-if __name__ == '__main__':
-    ''' make stuff happen '''
+def main(argv):
+    """Do things"""
     form = cgi.FieldStorage()
     mode = form.getfirst('mode', 'hourly')
     cols = form.getlist('vars')
@@ -241,3 +241,8 @@ if __name__ == '__main__':
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write( res )
+
+if __name__ == '__main__':
+    ''' make stuff happen '''
+    main(sys.argv)
+
