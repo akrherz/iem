@@ -28,13 +28,9 @@ icursor = ISUAG.cursor()
 
 def sampler(xaxis, yaxis, vals, x, y):
     ''' This is lame sampler, should replace '''
-    i = 0
-    while (xaxis[i] < x):
-        i += 1
-    j = 0
-    while (yaxis[j] < y):
-        j += 1
-    return vals[i, j]
+    i = np.digitize([x], xaxis)
+    j = np.digitize([y], yaxis)
+    return vals[i[0], j[0]]
 
 
 def load_soilt(data):
@@ -58,10 +54,10 @@ def load_soilt(data):
         sys.exit()
     numxout = 40
     numyout = 40
-    xmin = min(lons) - 1.
-    ymin = min(lats) - 1.
-    xmax = max(lons) + 1.
-    ymax = max(lats) + 1.
+    xmin = min(lons) - 2.
+    ymin = min(lats) - 2.
+    xmax = max(lons) + 2.
+    ymax = max(lats) + 2.
     xc = (xmax-xmin)/(numxout-1)
     yc = (ymax-ymin)/(numyout-1)
 
@@ -77,16 +73,17 @@ def load_soilt(data):
 
 
 def build_xref():
-    mcursor.execute("""SELECT id, climate_site from stations 
+    mcursor.execute("""SELECT id, climate_site from stations
     WHERE network in ('IA_ASOS','AWOS')""")
     data = {}
     for row in mcursor:
         data[row[0]] = row[1]
     return data
 
+
 def compute_climate(sts, ets):
     sql = """SELECT station, sum(gdd50) as cgdd,
-    sum(precip) as crain from climate WHERE valid >= '2000-%s' and 
+    sum(precip) as crain from climate WHERE valid >= '2000-%s' and
     valid < '2000-%s' and gdd50 is not null GROUP by station""" % (
                                 sts.strftime("%m-%d"), ets.strftime("%m-%d"))
     ccursor.execute(sql)
@@ -94,6 +91,7 @@ def compute_climate(sts, ets):
     for row in ccursor:
         data[row[0]] = {'cgdd': row[1], 'crain': row[2]}
     return data
+
 
 def compute_obs(sts, ets):
     """ Compute the GS values given a start/end time and networks to look at
@@ -104,7 +102,7 @@ SELECT
   sum( case when max_tmpf = -99 THEN 1 ELSE 0 END) as missing,
   sum( gddxx(50, 86, max_tmpf, min_tmpf) ) as gdd,
   sum( case when pday > 0 THEN pday ELSE 0 END ) as precip
-FROM 
+FROM
   summary_%s c, stations s
 WHERE
   s.network in ('IA_ASOS','AWOS') and
@@ -115,14 +113,15 @@ GROUP by s.id, lon, lat
     acursor.execute(sql)
     data = {}
     for row in acursor:
-        data[ row[0] ] = {'id': row[0], 'lon': row[1], 'lat': row[2],
-                          'missing': row[3], 'gdd': row[4], 
-                          'precip': row[5]}
+        data[row[0]] = {'id': row[0], 'lon': row[1], 'lat': row[2],
+                        'missing': row[3], 'gdd': row[4],
+                        'precip': row[5]}
     return data
+
 
 def main():
     sts = datetime.datetime.now()
-    sts =  sts.replace(month=5,day=1)
+    sts = sts.replace(month=5, day=1)
     ets = datetime.datetime.now()
     if sts > ets:
         return
@@ -140,25 +139,26 @@ def main():
    8 Lon
 """ % (ets.strftime("%H"),))
     days = (ets - sts).days
-    data = compute_obs( sts, ets )
+    data = compute_obs(sts, ets)
     load_soilt(data)
-    cdata = compute_climate( sts, ets )
+    cdata = compute_climate(sts, ets)
     xref = build_xref()
     for sid in data.keys():
         if data[sid]['missing'] > (days * 0.1):
             continue
         csite = xref[sid]
-        output.write("K%s %4.0f %4.0f %5.2f %5.2f %5.1f %6.3f %8.3f\n" % (sid, 
-                    data[sid]['gdd'], cdata[ csite ]['cgdd'],
-                    data[sid]['precip'], cdata[ csite ]['crain'], data[sid]['soilt'],
-                    data[sid]['lat'], data[sid]['lon'] ))
+        output.write(("K%s %4.0f %4.0f %5.2f %5.2f %5.1f %6.3f %8.3f\n"
+                      ) % (sid, data[sid]['gdd'], cdata[csite]['cgdd'],
+                           data[sid]['precip'], cdata[csite]['crain'],
+                           data[sid]['soilt'], data[sid]['lat'],
+                           data[sid]['lon']))
     output.close()
-    
+
     pqstr = "data c 000000000000 wxc/wxc_iem_agdata.txt bogus text"
     cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iem_agdata.txt" % (pqstr,)
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/wxc_iem_agdata.txt")
-    
+
 
 if __name__ == '__main__':
     main()
