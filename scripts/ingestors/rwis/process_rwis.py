@@ -374,7 +374,7 @@ def main():
 
     obs = merge(atmos, surface)
     do_windalerts(obs)
-    # do_iemtracker(obs)
+    do_iemtracker(obs)
 
     ts = datetime.datetime.utcnow().strftime("%d%H%M")
     fn1 = "/tmp/IArwis%s.sao" % (ts, )
