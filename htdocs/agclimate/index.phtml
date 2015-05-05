@@ -10,14 +10,16 @@
 $t->jsextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <script src='/assets/openlayers/2.13.1/OpenLayers.js'></script>
-<script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
+<script src="/assets/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='dataexplorer.js?v=3'></script>
-<script src="/js/jquery.datetimepicker.js"></script>
+<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
+<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
 EOF;
 
 $dt = date("Y/m/d H:00", time() - (20*60));
 $t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.css"/ >
+<link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
+<link rel="stylesheet" type="text/css" href="/assets/jquery-ui/1.11.4/jquery-ui.min.css"/ >
 <script>
 	var defaultdt = "{$dt}";
 </script>
