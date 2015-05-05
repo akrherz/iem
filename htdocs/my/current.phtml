@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 93);
 // This page uses cookies to store the favorited stations
 session_start();
 
@@ -12,6 +13,8 @@ include("../../include/myview.php");
 $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
 $refresh = isset($_REQUEST["refresh"]) ? strtolower($_REQUEST["refresh"]): 'yes';
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
+$sortdir = isset($_GET["sortdir"]) ? $_GET['sortdir'] : 'asc';
+$rsortdir = ($sortdir == 'asc') ? 'desc' : 'asc';
 $expiry = 60*60*24*100; // 100 days
 
 
@@ -159,10 +162,10 @@ if (sizeof($mydata) == 0){
 	$t->render('sortables.phtml');
 	die();
 }
-$uri = "current.phtml?refresh=$refresh&metar=$metar&sortcol=";
+$uri = "current.phtml?sortdir={$rsortdir}&amp;refresh=$refresh&amp;metar=$metar&amp;sortcol=";
 
 $finalA = Array();
-if ($sortcol == "sname"){
+if ($sortdir == "asc"){
 	$finalA = sortBySecondIndex($mydata, $sortcol);
 }else{
 	$finalA = aSortBySecondIndex($mydata, $sortcol);
