@@ -20,7 +20,8 @@ $conn = iemdb('postgis');
 
 $colors = Array(
     0 => "255 255 255", // normal
-    
+	76 => "255 255 255",
+		
 	1 => "0 204 0", // wet
     
 	3 => "240 240 0", // Frost
