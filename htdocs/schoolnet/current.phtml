@@ -1,5 +1,6 @@
 <?php 
   include("../../config/settings.inc.php");
+  define("IEM_APPID", 94);
 include("../../include/myview.php");
 $t = new MyView();
   $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
@@ -44,21 +45,17 @@ $content = <<<EOF
 Click on a column to sort it. Perhaps you would like to know 
 <a href="/GIS/apps/snet/raining.php">Where's it raining?</a></p>
 
-<table cellpadding="0" cellspacing="0" border="0">
-<tr>
-   <td class="kcci" align="center"><a href="{$link}?network=KCCI" style="text-decoration: none;"><img src="/schoolnet/images/kcci8.jpg" border="0"><br /><b>SchoolNet8</b></a></td>
-
-    <td class="kelo" align="center"><a href="{$link}?network=KELO" style="text-decoration: none;"><img src="/schoolnet/images/kelo.png" border="0"><br /><b>WeatherNet</b></a></td>
-
-    <td class="kimt" align="center"><a href="{$link}?network=KIMT" style="text-decoration: none;"><img src="/schoolnet/images/kimt_logo.png" border="0"><br /><b>StormNet</b></a></td>
-
-</tr>
-
-<tr>
-  <td colspan="9">
-
-<table width="100%" cellpadding=2><tr><td>
-<table width="100%" cellpadding=2 bgcolor="white"><tr><td>
+<div class="row">
+<div class="col-md-4">
+<a href="{$link}?network=KCCI" style="text-decoration: none;"><img src="/schoolnet/images/kcci8.jpg" border="0"><br /><b>SchoolNet8</b></a>
+</div>
+<div class="col-md-4">
+<a href="{$link}?network=KELO" style="text-decoration: none;"><img src="/schoolnet/images/kelo.png" border="0"><br /><b>WeatherNet</b></a></td>
+</div>
+<div class="col-md-4">
+<a href="{$link}?network=KIMT" style="text-decoration: none;"><img src="/schoolnet/images/kimt_logo.png" border="0"><br /><b>StormNet</b></a></td>
+</div>
+</div>
 EOF;
 
 if (strlen($sortcol) == 0) {
@@ -161,7 +158,8 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th><a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
+	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"glyphicon glyphicon-picture\"></i></a>"
+			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"glyphicon glyphicon-info-sign\"></i></a></td>";
 
 
 	$table .= "<td ";
@@ -196,29 +194,11 @@ while (list ($key, $val) = each ($skippedStations) ) {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th><a href=\"javascript:new_window
-('/content/". strtolower($network) ."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
+	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"glyphicon glyphicon-picture\"></i></a>"
+			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"glyphicon glyphicon-info-sign\"></i></a></td>";
+	
+	$table .= "<td colspan=\"11\">Site offline since: ". strftime("%d %b %Y %I:%M %p", $parts['ts']) ."</td>";
 
-	$table .= "<td bgcolor=\"red\">". strftime("%d %b %I:%M %p", $parts['ts']) ."</td>";
-
-	if ($parts["ts"] < $today) {
-		$table .= "<th colspan=10>Site Offline!</th></tr>";
-	} else {
-		$table .= "<td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
-				round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
-				round($parts["min_tmpf"],0) ."</font>)</td>
-          <td>". $parts["dwpf"] ."</td>
-          <td align='center'>". $parts["relh"] ."%</td>
-          <td>". $parts["feel"] ."</td>
-          <td>". $parts["pres"] ."</td>
-          <td>". $parts["drct"] ."</td>
-            <td>". round($parts["sknt"],0) ."</td>
-            <td>". round($parts["peak"],0) ." @"
-            		. strftime("%I:%M %p", $parts["peak_ts"] )."</td>
-          <td>". $parts["pday"] ."</td>
-          <td>". $parts["pmonth"] ."</td>
-          </tr>\n";
-	}
 } 
 $c = "javascript:new_window_big('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=". strtoupper($network)."&var=";
 
@@ -227,7 +207,7 @@ $content .= <<<EOF
 
 <form method="GET" action="/my/current.phtml">
 
-<table class="ruler" style="width: 100%; font-size: 10pt;">
+<table class="table table-condensed table-striped table-bordered">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
@@ -284,10 +264,6 @@ $content .= <<<EOF
 <input type="reset" value="Reset">
 
 </form>
-
-</td></tr></table>
-</td></tr></table>
-</td></tr></table>
 
 <br><br>
 
