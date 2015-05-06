@@ -18,14 +18,18 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['arguments'] = [
-        dict(type='station', name='station', default='IA0200', label='Select Station:'),
-        dict(type='text', name='year', default='2014', label='Select Year'),        
-        dict(type='text', name='gdd1', default='1135', label='Growing Degree Day Start'),        
-        dict(type='text', name='gdd2', default='1660', label='Growing Degree Day End'),        
+        dict(type='station', name='station', default='IA0200',
+             label='Select Station:'),
+        dict(type='text', name='year', default='2014', label='Select Year'),
+        dict(type='text', name='gdd1', default='1135',
+             label='Growing Degree Day Start'),
+        dict(type='text', name='gdd2', default='1660',
+             label='Growing Degree Day End'),
     ]
     return d
 
-def plotter( fdict ):
+
+def plotter(fdict):
     """ Go """
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -39,30 +43,30 @@ def plotter( fdict ):
 
     ccursor.execute("""
     SELECT day, gdd50(high,low) as gdd
-    from """+table+""" WHERE year = %s and station = %s 
+    from """+table+""" WHERE year = %s and station = %s
     ORDER by day ASC
     """, (year, station))
     days = []
     gdds = []
     for row in ccursor:
-        gdds.append( float(row['gdd']) )
-        days.append( row['day'] )
+        gdds.append(float(row['gdd']))
+        days.append(row['day'])
 
     yticks = []
     yticklabels = []
-    jan1 = datetime.datetime(year,1,1)
+    jan1 = datetime.datetime(year, 1, 1)
     for i in range(110, 270):
         ts = jan1 + datetime.timedelta(days=i)
         if ts.day == 1 or ts.day % 12 == 1:
             yticks.append(i)
-            yticklabels.append( ts.strftime("%-d %b"))
-        
-    gdds = np.array( gdds )
-    sts = datetime.datetime(year,4,1)
-    ets = datetime.datetime(year,6,1)
+            yticklabels.append(ts.strftime("%-d %b"))
+
+    gdds = np.array(gdds)
+    sts = datetime.datetime(year, 4, 1)
+    ets = datetime.datetime(year, 6, 1)
     now = sts
     sz = len(gdds)
-    
+
     days2 = []
     starts = []
     heights = []
@@ -77,20 +81,20 @@ def plotter( fdict ):
         while idx < sz and running < gdd2:
             running += gdds[idx]
             idx += 1
-        success.append( running >= gdd2 )
+        success.append(running >= gdd2)
         idx1 = idx
         days2.append(now)
-        starts.append( idx0 )
-        heights.append( idx1 - idx0)
+        starts.append(idx0)
+        heights.append(idx1 - idx0)
         now += datetime.timedelta(days=1)
 
     heights = np.array(heights)
     success = np.array(success)
     starts = np.array(starts)
-    
+
     cmap = cm.get_cmap('jet')
     bmin = min(heights[success]) - 1
-    bmax = max(heights[success]) +1
+    bmax = max(heights[success]) + 1
     bins = np.arange(bmin, bmax+1.1)
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
@@ -98,31 +102,30 @@ def plotter( fdict ):
     bars = ax.bar(days2, heights, bottom=starts, fc='#EEEEEE')
     for i, bar in enumerate(bars):
         if success[i]:
-            bar.set_facecolor( cmap( norm([heights[i]])[0]) )
+            bar.set_facecolor(cmap(norm([heights[i]])[0]))
     ax.grid(True)
     ax.set_yticks(yticks)
     ax.set_yticklabels(yticklabels)
-    
+
     ax.set_ylim(min(starts)-7, max(starts+heights)+7)
-    
+
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     ax.set_xlabel("Planting Date")
     ax.set_title(("%s [%s] %s GDD [base=50,ceil=86]\n"
-                  +"Period between GDD %s and %s, gray bars incomplete") % (
-                                nt.sts[station]['name'], station, year,
-                                gdd1, gdd2))
-    
+                  "Period between GDD %s and %s, gray bars incomplete"
+                  ) % (nt.sts[station]['name'], station, year, gdd1, gdd2))
+
     ax2 = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
-                      yticks=[], xticks=[])
+                   yticks=[], xticks=[])
     ax2.set_xlabel("Days")
     for i in range(len(bins)):
-        txt = ax2.text(0.52, i, "%g" % (bins[i],), ha='left', va='center',
+        ax2.text(0.52, i, "%g" % (bins[i],), ha='left', va='center',
                           color='k')
-        #txt.set_path_effects([PathEffects.withStroke(linewidth=2,
+        # txt.set_path_effects([PathEffects.withStroke(linewidth=2,
         #                                             foreground="k")])
     ax2.barh(np.arange(len(bins[:-1])), [0.5]*len(bins[:-1]), height=1,
-                color=cmap(norm(bins[:-1])),
-                ec='None')
-    ax2.set_xlim(0,1)
-    
+             color=cmap(norm(bins[:-1])),
+             ec='None')
+    ax2.set_xlim(0, 1)
+
     return plt.gcf()

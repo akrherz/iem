@@ -13,17 +13,6 @@ import matplotlib.dates as mdates
 import netCDF4
 from pyiem import iemre
 
-def get_description():
-    """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['arguments'] = [
-        dict(type='text', name='year', default='2014', label='Enter Year (1893-)'),
-        dict(type='text', name='threshold', default='1.0', label='Precipitation Threshold [inch]'),
-        dict(type='text', name='period', default='7', label='Over Period of Days'),
-        dict(type='clstate', name='state', default='IA', label='For State'),
-    ]
-    return d
-
 STATES = {'IA': 'Iowa',
           'IL': 'Illinois',
           'MO': 'Missouri',
@@ -37,7 +26,23 @@ STATES = {'IA': 'Iowa',
           'OH': 'Ohio',
           'KY': 'Kentucky'}
 
-def plotter( fdict ):
+
+def get_description():
+    """ Return a dict describing how to call this plotter """
+    d = dict()
+    d['arguments'] = [
+        dict(type='text', name='year', default='2014',
+             label='Enter Year (1893-)'),
+        dict(type='text', name='threshold', default='1.0',
+             label='Precipitation Threshold [inch]'),
+        dict(type='text', name='period', default='7',
+             label='Over Period of Days'),
+        dict(type='clstate', name='state', default='IA', label='For State'),
+    ]
+    return d
+
+
+def plotter(fdict):
     """ Go """
     year = int(fdict.get('year', 2014))
     threshold = float(fdict.get('threshold', 1))
@@ -59,18 +64,19 @@ def plotter( fdict ):
     coverage = []
     while now < ets:
         idx = iemre.daily_offset(now)
-        sevenday = np.sum(precip[(idx-period):idx,:,:], 0)
-        pday = np.where(iowa > 0, sevenday[:,:], -1)
-        tots = np.sum(np.where(pday >= (threshold * 25.4), 1, 0 ))
-        days.append( now )
-        coverage.append( tots / float(iowapts) * 100.0)
+        sevenday = np.sum(precip[(idx-period):idx, :, :], 0)
+        pday = np.where(iowa > 0, sevenday[:, :], -1)
+        tots = np.sum(np.where(pday >= (threshold * 25.4), 1, 0))
+        days.append(now)
+        coverage.append(tots / float(iowapts) * 100.0)
 
         now += datetime.timedelta(days=1)
-    
-    (fig, ax) = plt.subplots(1,1)
+
+    (fig, ax) = plt.subplots(1, 1)
     ax.bar(days, coverage, fc='g', ec='g')
-    ax.set_title("IEM Estimated Areal Coverage Percent of %s\n receiving %.2f inches of rain over trailing %s day period" % (STATES[state], 
-                                                                                                                            threshold, period))
+    ax.set_title(("IEM Estimated Areal Coverage Percent of %s\n"
+                  " receiving %.2f inches of rain over trailing %s day period"
+                  ) % (STATES[state], threshold, period))
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax.grid(True)
