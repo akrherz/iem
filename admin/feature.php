@@ -21,7 +21,7 @@ if ($me){
   $logouturl = $facebook->getLogoutUrl();
 }else {
   $loginurl = $facebook->getLoginUrl(Array(
-    'scope' => 'publish_action',
+    'scope' => 'publish_actions',
   		'redirect_uri' => 'https://mesonet.agron.iastate.edu/admin/feature.php'
   ));
 }
