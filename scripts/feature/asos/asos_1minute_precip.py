@@ -1,115 +1,114 @@
 import psycopg2
 import datetime
-import numpy
+import numpy as np
 import pytz
+import matplotlib.pyplot as plt
+import matplotlib.font_manager
+
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
-acursor.execute("SET TIME ZONE 'AST4ADT'")
-stemps = []
-sdrct = []
-ssknt = []
-sdwpf = []
-pres1 = []
-sgust = []
-sprec = numpy.zeros( (3000,), 'f')
+
+sts = datetime.datetime(2015, 5, 6, 21, 30)
+sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+ets = datetime.datetime(2015, 5, 7, 4, 30)
+ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+
+sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
+
+prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
- SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'IST'
- and valid BETWEEN '2015-02-14 00:00' and '2015-02-14 23:59' 
+ SELECT valid, tmpf, dwpf, drct,
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'OKC'
+ and valid >= %s and valid < %s
  ORDER by valid ASC
-""")
+""", (sts, ets))
 tot = 0
 for row in acursor:
-    offset = row[0].hour * 60 + row[0].minute
-    if row[0].day == 36:
-        offset += 1440
-    if row[7] > 0:
-        if row[7] > 0.05:
-            print offset, row[0], row[7]
-        tot += row[7]
-    sprec[offset] = float(row[7] or 0) 
-        
-print tot
+    offset = int((row[0] - sts).days * 1440 + (row[0] - sts).seconds / 60)
+    tot += (row[7] or 0)
+    prec[offset] = tot
 
-acc = numpy.zeros( (3000,), 'f')
-rate15 = numpy.zeros( (3000,), 'f')
-rate60 = numpy.zeros( (3000,), 'f')
-svalid = [0]*3000
-basets = datetime.datetime(2015,2,14)
-basets = basets.replace(tzinfo=pytz.timezone("Atlantic/Bermuda"))
 
-for i in range(3000):
-    acc[i] = acc[i-1] + sprec[i]
-    rate15[i] = numpy.sum(sprec[i-14:i+1]) * 4
-    rate60[i] = numpy.sum(sprec[i-59:i+1])
-    svalid[i] =  basets + datetime.timedelta(minutes=i)
+# Now we need to fill in the holes
+lastval = 0
+for i in range(sz):
+    if prec[i] > -1:
+        lastval = prec[i]
+    if prec[i] < 0:
+        ts = sts + datetime.timedelta(minutes=i)
+        print("Missing %s, assigning %s" % (ts, lastval))
+        prec[i] = lastval
 
-#print acc[818:843]
-#print rate60[818:912]
-#for i in range(818,912):
-#    print "%s,%.0f,%s" % (i, svalid[i], svalid[i])
-#    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+rate1 = np.zeros((sz,), 'f')
+rate15 = np.zeros((sz,), 'f')
+rate60 = np.zeros((sz,), 'f')
+for i in range(1, sz):
+    rate1[i] = (prec[i] - prec[i-1])*60.
+for i in range(15, sz):
+    rate15[i] = (prec[i] - prec[i-15])*4.
+for i in range(60, sz):
+    rate60[i] = (prec[i] - prec[i-60])
 
-# Figure out ticks
-sts = datetime.datetime(2015,2,14,0, 0)
-sts = sts.replace(tzinfo=pytz.timezone("Atlantic/Bermuda"))
-ets = sts + datetime.timedelta(minutes=10*60+1)
-interval = datetime.timedelta(minutes=60)
-now = sts
 xticks = []
 xlabels = []
-xlabels2 = []
-while now <= ets:
-    fmt = "%-I %p"
-    #if now == sts or now.hour == 0:
-    #    fmt = "%-I %p\n%-d %B"
-    
-    #if now == sts or (now.minute == 0 and now.hour % 1 == 0 ):
-    xticks.append( now )
-    xlabels.append( now.strftime(fmt))
-    xlabels2.append( now.strftime(fmt))
+lsts = sts.astimezone(pytz.timezone("America/Chicago"))
+lets = ets.astimezone(pytz.timezone("America/Chicago"))
+interval = datetime.timedelta(minutes=1)
+now = lsts
+i = 0
+while now < lets:
+    if now.minute == 0 and now.hour % 1 == 0:
+        xticks.append(i)
+        xlabels.append(now.strftime("%-I %p"))
+
+    i += 1
     now += interval
-xlabels[-1] = 'Mid'
 
-import matplotlib.pyplot as plt
-import matplotlib.font_manager 
-prop = matplotlib.font_manager.FontProperties(size=12) 
+print xticks
 
-fig = plt.figure()
+prop = matplotlib.font_manager.FontProperties(size=12)
 
+(fig, ax) = plt.subplots(1, 1)
 
-ax = fig.add_subplot(111)
-print numpy.shape(svalid)
-print numpy.shape(acc)
-print numpy.max(rate60)
-ax.bar(svalid, sprec * 60, width=1./1440., fc='b', ec='b', label="Hourly Rate over 1min",
+ax.bar(np.arange(sz), rate1, fc='b', ec='b', label="Hourly Rate over 1min",
        zorder=1)
-ax.plot(svalid, acc, color='k', label="Accumulation",lw=2, zorder=2)
-ax.plot(svalid, rate15, color='yellow', label="Hourly Rate over 15min", linewidth=3.5, zorder=3)
-ax.plot(svalid, rate15, color='k', linewidth=1, zorder=4)
-ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=3.5,zorder=3)
-ax.plot(svalid, rate60, color='k', lw=1, zorder=4)
-x0 = 80
-ax.text(sts + datetime.timedelta(seconds=330), 7.1, "Minute Accums [inch]", va='bottom')
-for i in range(x0,x0+10):
-    ax.text( sts + datetime.timedelta(seconds=330), 7 + (x0-i)*0.29, "%s %.2f" % (
-                                svalid[i].strftime("%-I:%M %p"), sprec[i],),
-             va='top')
+ax.plot(np.arange(sz), prec, color='k', label="Accumulation", lw=2, zorder=2)
+ax.plot(np.arange(sz), rate15, color='tan', label="Hourly Rate over 15min",
+        linewidth=3.5, zorder=3)
+ax.plot(np.arange(sz), rate60, color='r', label="Actual Hourly Rate",
+        lw=3.5, zorder=3)
+
+# Find max rate
+maxi = np.argmax(rate1)
+maxwindow = 0
+maxwindowi = 0
+for i in range(maxi-10, maxi+1):
+    if (prec[i+10] - prec[i]) > maxwindow:
+        maxwindow = prec[i+10] - prec[i]
+        maxwindowi = i
+
+print("MaxI: %s, rate: %s, window: %s-%s" % (maxi, rate1[maxi], maxwindowi,
+                                             maxwindowi+10))
+
+ax.text(0.05, 0.935, "Peak Minute Accums", transform=ax.transAxes,
+        bbox=dict(fc='white', ec='None'))
+for i in range(maxwindowi, maxwindowi+10):
+    ts = lsts + datetime.timedelta(minutes=i)
+    ax.text(0.05, 0.9-(0.035*(i-maxwindowi)),
+            "%s %.2f" % (ts.strftime("%-I:%M %p"), prec[i] - prec[i-1], ),
+            transform=ax.transAxes, bbox=dict(fc='white', ec='None'))
+
 ax.set_xticks(xticks)
 ax.set_ylabel("Precipitation [inch or inch/hour]")
-ax.set_xticklabels(xlabels2)
+ax.set_xticklabels(xlabels)
 ax.grid(True)
-ax.set_xlim(min(xticks), max(xticks))
-ax.legend(loc=2, prop=prop, ncol=1)
-ax.set_ylim(0,10)
-ax.set_xlabel("14 February 2015 (St Thomas Local Time)")
-ax.set_title("14 February 2015 Cyril E King Airport (TIST)\nOne Minute Rainfall 8.73 inches total")
-#ax.set_ylim(0,361)
-#ax.set_yticks((0,90,180,270,360))
-#ax.set_yticklabels(('North','East','South','West','North'))
+ax.set_xlim(0, sz)
+ax.legend(loc='best', prop=prop, ncol=1)
+ax.set_ylim(0, int(np.max(rate1)+1))
+ax.set_xlabel("6 May 2015 (Central Daylight Time)")
+ax.set_title(("6 May 2015 Oklahoma City (KOKC)\n"
+              "One Minute Rainfall %s inches total plotted") % (prec[-1],))
 
 
 fig.savefig('test.png')
-#import iemplot
-#iemplot.makefeature('test')
