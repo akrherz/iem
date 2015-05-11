@@ -16,16 +16,21 @@ def get_description():
     ]
     return d
 
-def plotter( fdict ):
+
+def plotter(fdict):
     """ Go """
     IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     station = fdict.get('station', 'IA0200')
-    year = int(fdict.get('year', datetime.datetime.now().year))
+    today = datetime.datetime.now()
+    year = int(fdict.get('year', today.year))
+    jdaylimit = 367
+    if year == today.year:
+        jdaylimit = int(today.strftime("%j"))
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
-    
+
     table = "alldata_%s" % (station[:2],)
     endyear = int(datetime.datetime.now().year) + 1
     (fig, ax) = plt.subplots(1,1)
@@ -33,13 +38,13 @@ def plotter( fdict ):
     cursor.execute("""
         select precip, sum(precip) OVER (ORDER by precip ASC) as rsum, 
         sum(precip) OVER () as tsum,
-        min(year) OVER () as minyear from """+table+""" where 
-        station = %s and precip >= 0.01 and
+        min(year) OVER () as minyear from """+table+""" where
+        station = %s and precip >= 0.01 and extract(doy from day) < %s and
         year < extract(year from now()) ORDER by precip ASC
-    """, (station,))
+    """, (station, jdaylimit))
     total = None
     base = None
-    bins = [0.01,]
+    bins = [0.01, ]
     minyear = None
     for i, row in enumerate(cursor):
         if i == 0:
@@ -58,7 +63,7 @@ def plotter( fdict ):
     yearlytotals = np.zeros( (endyear-minyear, 5), 'f')
 
     cursor.execute("""
-        SELECT year, 
+        SELECT year,
         sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin0,
         sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin1,
         sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin2,
@@ -69,13 +74,13 @@ def plotter( fdict ):
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot2,
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot3,
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot4
-        from """+table+""" where 
+        from """+table+""" where extract(doy from day) < %s and 
         station = %s and precip > 0 and year > 1879 GROUP by year
-    """, (bins[0], bins[1], bins[1], bins[2], bins[2], bins[3], 
+    """, (bins[0], bins[1], bins[1], bins[2], bins[2], bins[3],
           bins[3], bins[4], bins[4], bins[5],
-          bins[0], bins[1], bins[1], bins[2], bins[2], bins[3], 
+          bins[0], bins[1], bins[1], bins[2], bins[2], bins[3],
           bins[3], bins[4], bins[4], bins[5],
-          station))
+          jdaylimit, station))
     for row in cursor:
         for i in range(5):
             yearlybins[ int(row[0]) - minyear, i] = row['bin%s' % (i,)]
@@ -113,8 +118,11 @@ def plotter( fdict ):
                         +" by rain volume (%.2fin)")  % (normal/5.0,), 
                         transform=ax.transAxes,
             va='top', ha='center')
-    ax.set_title("%s [%s] [%s-%s]\nDaily Precipitation Contributions" % (
-                nt.sts[station]['name'], station, minyear, endyear-2))
+    addl = ""
+    if jdaylimit < 377:
+        addl = " thru %s" % (today.strftime("%-d %b"), )
+    ax.set_title("%s [%s] [%s-%s]\nDaily Precipitation Contributions%s" % (
+                nt.sts[station]['name'], station, minyear, endyear-2, addl))
     ax.set_xticks( np.arange(0,5) )
     xlabels = []
     for i in range(5):
