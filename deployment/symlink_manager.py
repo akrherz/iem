@@ -28,7 +28,7 @@ PAIRS = [
          ['/mesonet/data/madis', '/mnt/mesonet2/data/madis'],
          ['/mesonet/data/model', '/mnt/mesonet2/data/model'],
          ['/mesonet/data/nccf', '/mnt/mesonet2/data/nccf'],
-         ['/mesonet/data/nexrad', '/mnt/mesonet2/data/nexrad'],
+         ['/mesonet/data/nexrad', '/mnt/nexrad3/nexrad'],
          ['/mesonet/data/smos', '/mnt/mesonet2/data/smos'],
          ['/mesonet/data/text', '/mnt/mesonet2/data/text'],
          ['/mesonet/share/cases', '/mnt/mesonet/share/cases'],
