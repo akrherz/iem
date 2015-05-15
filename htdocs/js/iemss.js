@@ -93,7 +93,7 @@ $().ready(function() {
 	
 	// Make sure clicking the submit button selects all of the selected 
 	// stations, this avoids user confusion
-	$(":submit").click(function (){
+	$("#iemss :submit").click(function (){
 		$('#stations_out option').prop('selected', true);
 		// Stop us if we have no stations selected!
 		if ($('#stations_out option').length == 0){
