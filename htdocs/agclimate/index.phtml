@@ -45,14 +45,34 @@ $t->bodyextra = "onload=\"init()\"";
 <form name="mapper">
 <div class="row">
 	<div class="col-md-3 col-sm-5 well">
-<h4>Select Time:</h4> 
+
+<h4>Available Tools:</h4>
+<div class="list-group">
+<a href="/agclimate/soilt.php" class="list-group-item"><i class="glyphicon glyphicon-picture"></i> County Soil Temp Map</a>
+<a href="hist/daily.php" class="list-group-item"><i class="glyphicon glyphicon-cloud-download"></i>  Daily Data Download</a>
+<a href="hist/hourly.php" class="list-group-item"><i class="glyphicon glyphicon-cloud-download"></i> Hourly Data Download</a>
+<a href="/sites/networks.php?network=ISUSM" class="list-group-item"><i class="glyphicon glyphicon-info-sign"></i> Listing of Stations</a>
+<a href="smts.php" class="list-group-item"><i class="glyphicon glyphicon-signal"></i> Plot Time Series</a>
+<a href="info.phtml" class="list-group-item"><i class="glyphicon glyphicon-wrench"></i> Sensor Package</a>
+<a href="current.phtml" class="list-group-item"><i class="glyphicon glyphicon-refresh"></i> Sortable Currents</a>
+<a href="/sites/locate.php?network=ISUSM" class="list-group-item"><i class="glyphicon glyphicon-info-sign"></i> Station Metadata</a>
+<a href="/agclimate/usage/" class="list-group-item"><i class="glyphicon glyphicon-signal"></i> Website Usage Stats</a>
+</div>
+
+	</div>
+	<div class="col-md-9 col-sm-7">
+	
+<div class="row">
+<div class="col-md-6">
+	<h4>Select Time:</h4> 
 <input type="text" id="datetimepicker" name="dosomething" />
 <br />
  <button type="button" class="btn btn-default btn-xs" id="minusoneday">-1 Day</button>
  <button type="button" class="btn btn-default btn-xs" id="minusonehour">-1 HR</button>
  <button type="button" class="btn btn-default btn-xs" id="plusonehour">+1 HR</button>
  <button type="button" class="btn btn-default btn-xs" id="plusoneday">+1 Day</button>
- 
+</div>
+<div class="col-md-6">
 <h4>Select Variable:</h4>
 <select name="varname" id="varpicker">
 	<option value="tmpf">Air Temperature [F]</option>
@@ -74,21 +94,8 @@ $t->bodyextra = "onload=\"init()\"";
 	<option value="soil50t">Soil Temperature (50 inch) [F]</option>
 	<option value="wind">Wind Direction + Speed [mph]</option>
 </select>
-
-<h4>Available Tools:</h4>
-<ul>
-<li><a href="hist/daily.php"><i class="glyphicon glyphicon-cloud-download"></i>  Daily Data Download</a></li>
-<li><a href="hist/hourly.php"><i class="glyphicon glyphicon-cloud-download"></i> Hourly Data Download</a></li>
-<li><a href="/sites/networks.php?network=ISUSM"><i class="glyphicon glyphicon-info-sign"></i> Listing of Stations</a></li>
-<li><a href="smts.php"><i class="glyphicon glyphicon-signal"></i> Plot Time Series</a></li>
-<li><a href="info.phtml"><i class="glyphicon glyphicon-wrench"></i> Sensor Package</a></li>
-<li><a href="current.phtml"><i class="glyphicon glyphicon-refresh"></i> Sortable Currents</a></li>
-<li><a href="/sites/locate.php?network=ISUSM"><i class="glyphicon glyphicon-info-sign"></i> Station Metadata</a></li>
-<li><a href="/agclimate/usage/"><i class="glyphicon glyphicon-signal"></i> Website Usage Stats</a></li>
-</ul>
-
-	</div>
-	<div class="col-md-9 col-sm-7">
+</div></div>
+	
  		<span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
 		<div id="map"></div>
 	</div>
@@ -147,7 +154,7 @@ These stations are scheduled to be removed during the spring of 2014.</p>
   <li><a href="display.php?prod=1">Max/Min Air Temps</a></li>
   <li><a href="display.php?prod=2">Avg 4in Soil Temps</a></li>
   <li><a href="display.php?prod=3">Max/Min 4in Soil Temps</a></li>
-  <li><a href="/data/soilt_day1.png">County-based Soil Temps</a></li>
+  <li><a href="/agclimate/soilt.php">County-based Soil Temps</a></li>
   <li><a href="display.php?prod=4">Solar Radiation Values</a></li>
   <li><a href="/GIS/apps/agclimate/dayplot.phtml?pvar=c90">Precipitation</a></li>
   <li><a href="display.php?prod=6">Potential E-T</a></li>
