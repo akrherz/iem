@@ -9,6 +9,9 @@ python temperature.py
 python today_high.py
 python rwis_station.py
 
+cd ../plots
+csh MW_overlay.csh
+
 cd ../ingestors
 python dot_truckcams.py &
 

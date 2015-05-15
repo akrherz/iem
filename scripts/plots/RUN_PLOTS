@@ -4,5 +4,4 @@
 
 csh AWOS_plot.csh
 csh 20m_radar.csh
-csh MW_overlay.csh
 python plot_rwis_sf.py
