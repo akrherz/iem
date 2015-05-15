@@ -174,17 +174,18 @@ def hourly_process(nwsli, maxts):
             ob.data['relh'] = relh.value('%')
             ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
         ob.data['srad'] = tokens[headers.index('slrkw_avg')]
-        ob.data['phour'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
+        ob.data['phour'] = round(
+            float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
         ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
         ob.data['c1tmpf'] = temperature(
                 float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
         ob.data['c2tmpf'] = temperature(
-                float(tokens[headers.index('t12_c_avg')]), 'C').value('F')        
+                float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
         ob.data['c3tmpf'] = temperature(
-                float(tokens[headers.index('t24_c_avg')]), 'C').value('F')        
+                float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
         ob.data['c4tmpf'] = temperature(
-                float(tokens[headers.index('t50_c_avg')]), 'C').value('F')        
+                float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
         ob.data['c2smv'] = float(tokens[headers.index('vwc_12_avg')]) * 100.0
         ob.data['c3smv'] = float(tokens[headers.index('vwc_24_avg')]) * 100.0
         ob.data['c4smv'] = float(tokens[headers.index('vwc_50_avg')]) * 100.0
@@ -193,6 +194,7 @@ def hourly_process(nwsli, maxts):
         #                                        nwsli, valid)
         processed += 1
     return processed
+
 
 def formatter(v):
     """ Something to format things nicely for SQL"""
@@ -246,7 +248,8 @@ def daily_process(nwsli, maxts):
                     float(tokens[headers.index('tair_c_max')]), 'C').value('F')
         ob.data['min_tmpf'] = temperature(
                     float(tokens[headers.index('tair_c_min')]), 'C').value('F')
-        ob.data['pday'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
+        ob.data['pday'] = round(
+            float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
         ob.data['et_inch'] = float(tokens[headers.index('dailyet')]) / 24.5
         ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
@@ -255,6 +258,7 @@ def daily_process(nwsli, maxts):
         #                                nwsli, valid.strftime("%Y-%m-%d"))
         processed += 1
     return processed
+
 
 def update_pday():
     ''' Compute today's precip from the current_log archive of data '''
