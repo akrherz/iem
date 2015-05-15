@@ -225,7 +225,7 @@ is a description of the three options.</p>
 </div>
 <div class="col-md-6 {$showmap}" id="mappanel">
 <!-- The map, when appropriate -->
-<form name="frommap">
+<form name="iemss">
 <input type="hidden" name="network" value="{$network}">
 {$hiddendates}
 {$hiddenstations}
