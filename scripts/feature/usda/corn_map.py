@@ -4,12 +4,12 @@ import numpy
 data = {}
 d2015 = {}
 
-for linenum, line in enumerate(open('crop_progress.csv')):
+for linenum, line in enumerate(open('corn.csv')):
     if linenum == 0:
         continue
     tokens = line.replace('"','').split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 4 and day.day in range(23,30):
+    if day.month == 5 and day.day in range(14, 22):
         state = tokens[5]
         val = float(tokens[20])
         if not data.has_key(state):
@@ -43,8 +43,8 @@ ax = plt.axes([0.01,0,0.9,0.9], axisbg=(1,1,1))
 m = Basemap(projection='merc', fix_aspect=False,
                            urcrnrlat=iemre.NORTH,
                            llcrnrlat=iemre.SOUTH,
-                           urcrnrlon=(iemre.EAST + 2.),
-                           llcrnrlon=(iemre.WEST - 2.),
+                           urcrnrlon=(iemre.EAST),
+                           llcrnrlon=(iemre.WEST),
                            lat_0=45.,lon_0=-92.,lat_ts=42.,
                            resolution='i', ax=ax)
 m.fillcontinents(color='tan',zorder=0)
@@ -56,7 +56,8 @@ ST_x(ST_Centroid(the_geom)) as x, ST_Y(ST_Centroid(the_geom)) as y from states""
 
 from pyiem.plot import maue
 import matplotlib.colors as mpcolors
-cmap = plt.get_cmap('cubehelix_r')
+cmap = plt.get_cmap('jet')
+cmap.set_over('white')
 bins = range(0,101,10)
 
 norm = mpcolors.BoundaryNorm(bins, cmap.N)
@@ -75,13 +76,13 @@ while 1:
         a = asarray(polygon.exterior)
         x,y = m(a[:,0], a[:,1])
         a = zip(x,y)
-        p = Polygon(a,fc=c,ec='k',zorder=2, lw=.1)
+        p = Polygon(a,fc=c,ec='k',zorder=2, lw=1)
         patches.append(p)
 
     x,y = m(feature.GetField('x'), feature.GetField('y'))
     diff = results[name.upper()]['d2015'] - results[name.upper()]['avg']
-    txt = ax.text(x,y, '%.0f%%\n%.0f' % (results[name.upper()]['d2015'],
-                                       diff), 
+    txt = ax.text(x,y, '%.0f%%\n%s%.0f' % (results[name.upper()]['d2015'],
+                                           '+' if diff > 0 else '', diff),
                   verticalalignment='center', horizontalalignment='center', 
                   size=20, zorder=5)
     txt.set_path_effects([PathEffects.withStroke(linewidth=2, foreground="w")])
@@ -102,7 +103,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=cmap(norm(bins)),
                 ec='None')
 
-ax.text(0.17, 1.05, "26 Apr 2015 USDA Percentage of Corn Acres Planted\nPercentage Points Departure from 1980-2014 Average for 23-30 Apr", transform=ax.transAxes,
+ax.text(0.17, 1.05, "17 May 2015 USDA Percentage of Corn Acres Planted\nPercentage Points Departure from 1980-2014 Average for 14-21 May", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
