@@ -32,7 +32,7 @@ $name = isset($_REQUEST["name"]) ? $_REQUEST["name"]: "";
 $alertMsg = "";
 
 function reloadbot(){
-	return file_get_contents("http://iem.local/iembot-json/reload");
+	return file_get_contents("http://iembot:9003/reload");
 }
 
 
