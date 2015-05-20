@@ -178,8 +178,8 @@ def do_windalerts(obs):
                       stname, sid)
         mt = MIMEText(msg)
         mt['From'] = 'akrherz@iastate.edu'
-        mt['To'] = 'akrherz@iastate.edu'
-        # mt['To'] = 'iarwis-alert@mesonet.agron.iastate.edu'
+        # mt['To'] = 'akrherz@iastate.edu'
+        mt['To'] = 'iarwis-alert@mesonet.agron.iastate.edu'
         mt['Subject'] = 'Iowa RWIS Wind Gust %.0f mph %s' % (smph, stname)
         s = smtplib.SMTP('mailhub.iastate.edu')
         s.sendmail(mt['From'], [mt['To']], mt.as_string())
