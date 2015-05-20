@@ -1,18 +1,18 @@
 # Month percentile 
-import iemdb, network
-import iemplot
+import psycopg2
 from pyiem.plot import MapPlot
 import matplotlib.cm as cm
-nt = network.Table("IACLIMATE")
-COOP = iemdb.connect("coop", bypass=True)
+from pyiem.network import Table as NetworkTable
+nt = NetworkTable("IACLIMATE")
+COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 ccursor.execute("""
-  SELECT station, max(case when year = 2014 then rank else -1 end) as ma, count(*),
-  max(case when year = 2014 then  m else -1 end) from 
+  SELECT station, max(case when year = 2015 then rank else -1 end) as ma, count(*),
+  max(case when year = 2015 then  m else -1 end) from 
   (SELECT station, year, m, rank() over (partition by station ORDER by m ASC)
   from
-    (SELECT station, year, min(low) as m from alldata_ia where
-     month > 6 and sday < '1005' and year > 1950 GROUP by station, year) as foo
+    (SELECT station, year, max(high) as m from alldata_ia where
+     sday < '0520' and year > 1950 GROUP by station, year) as foo
   ) as foo2 WHERE station != 'IA0000' and substr(station,3,1) != 'C' 
   GROUP by station ORDER by ma DESC
 """)
@@ -20,23 +20,20 @@ lats = []
 lons = []
 vals = []
 for row in ccursor:
-
-    if not nt.sts.has_key(row[0]):
+    if row[0] not in nt.sts:
         continue
-    #if nt.sts[row[0]]['archive_begin'].year > 1893:
-    #    continue
+    if row[1] > 30:
+        continue
     print row
-    #vals.append( float(row[3]) / float(row[4]) * 100.0 )
     vals.append( row[1] / float(row[2]) * 100.0 )
     lats.append( nt.sts[row[0]]['lat'] )
     lons.append( nt.sts[row[0]]['lon'] )
 
 import numpy as np
-m = MapPlot(sector='iowa', title='Fall Minimum Temperature Percentile [100=warmest]',
-            subtitle='thru 5 October, 2014 vs 1951-2013')
+m = MapPlot(sector='iowa', title='Spring Maximum Temperature Percentile [100=warmest]',
+            subtitle='thru 19 May, 2015 vs 1951-2014', axisbg='white')
 cmap = cm.get_cmap('jet')
 m.contourf(lons, lats, vals, np.arange(0,101,10), cmap=cmap)
 m.plot_values(lons, lats, vals, '%.0f')
 m.drawcounties()
-m.postprocess(filename='test.ps')
-iemplot.makefeature('test')
+m.postprocess(filename='test.png')
