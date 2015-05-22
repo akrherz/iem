@@ -56,6 +56,8 @@ def main():
 
     form = cgi.FieldStorage()
     wfo = form.getfirst("wfo", "MPX")
+    if len(wfo) == 4:
+        wfo = wfo[1:]
     year = int(form.getfirst("year", 2015))
     cb = form.getfirst('callback', None)
 
