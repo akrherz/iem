@@ -1,7 +1,7 @@
 <?php 
 include_once "../../config/settings.inc.php";
 define("IEM_APPID", 85);
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 3): 'DMX';
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2015;
 
 require_once 'Zend/Json.php';
