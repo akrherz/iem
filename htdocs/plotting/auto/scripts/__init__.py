@@ -132,6 +132,8 @@ data = {'plots': [
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
     {'label': 'NWS Warning Plots', 'options': [
+        {'id': "73",
+         'label': "Number of Watch/Warning/Advisories Issued per Year"},
         {'id': "72",
          'label': "Frequency of Issuance time for Watch/Warning/Advisories"},
         {'id': "52",
