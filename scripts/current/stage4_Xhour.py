@@ -6,7 +6,8 @@ import pygrib
 import datetime
 import pytz
 from pyiem.plot import MapPlot
-import os, sys
+import os
+import sys
 import matplotlib.cm as cm
 
 
@@ -16,15 +17,14 @@ def do(ts, hours):
     """
     ts = ts.replace(minute=0)
     sts = ts - datetime.timedelta(hours=hours)
-    ets = ts 
+    ets = ts
     interval = datetime.timedelta(hours=1)
     now = sts
     total = None
     lts = None
     while now < ets:
-        fn = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
-            now.strftime("%Y/%m/%d"), 
-            now.strftime("%Y%m%d%H") )
+        fn = ("/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib"
+              ) % (now.strftime("%Y/%m/%d"), now.strftime("%Y%m%d%H"))
 
         if os.path.isfile(fn):
             lts = now
@@ -32,22 +32,22 @@ def do(ts, hours):
 
             if total is None:
                 g = grbs[1]
-                total = g["values"]
+                total = g["values"].filled(0)
                 lats, lons = g.latlons()
             else:
-                total += grbs[1]["values"]
+                total += grbs[1]["values"].filled(0)
             grbs.close()
         now += interval
-    
+
     if lts is None and ts.hour > 1:
         print 'Missing StageIV data!'
     if lts is None:
         return
-    
+
     cmap = cm.get_cmap("jet")
     cmap.set_under('white')
     cmap.set_over('black')
-    clevs = [0.01,0.1,0.25,0.5,1,2,3,5,8,9.9]
+    clevs = [0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]
     localtime = (ts - datetime.timedelta(minutes=1)).astimezone(
                                         pytz.timezone("America/Chicago"))
 
@@ -62,13 +62,13 @@ def do(ts, hours):
                                 sector, hours, ts.strftime("%H"))
         if sector == 'iowa':
             m.drawcounties()
-        m.postprocess(pqstr=pqstr)
+        m.postprocess(pqstr=pqstr, view=True)
         m.close()
 
 
 def main():
     if len(sys.argv) == 4:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                int(sys.argv[3]), int(sys.argv[4]))
         hr = int(sys.argv[5])
     else:
