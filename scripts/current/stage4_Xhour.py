@@ -62,7 +62,7 @@ def do(ts, hours):
                                 sector, hours, ts.strftime("%H"))
         if sector == 'iowa':
             m.drawcounties()
-        m.postprocess(pqstr=pqstr, view=True)
+        m.postprocess(pqstr=pqstr)
         m.close()
 
 
