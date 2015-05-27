@@ -48,6 +48,8 @@ def processfile(fp):
     o = open("/mesonet/data/incoming/rwis/%s" % (fp,), 'r')
     data = []
     for row in csv.DictReader(o):
+        if row['Lane_id'] is None:
+            continue
         key = "%s_%s" % (int(row["site_id"]), int(row["Lane_id"]))
         if key not in meta:
             create_sensor(row)
