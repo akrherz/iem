@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -64,6 +64,23 @@ Requires: python-httplib2
 Requires: google-api-python-client
 Requires: uritemplate
 Requires: mod_fcgid
+Requires: lftp
+Requires: nfs-utils
+Requires: make
+Requires: gcc
+Requires: perl
+Requires: zlib-devel
+Requires: libxml2-devel
+Requires: git
+Requires: sysstat
+Requires: unzip
+Requires: keepalived
+Requires: links
+Requires: wget
+Requires: nrpe
+Requires: nagios-plugins-disk
+Requires: perl-Nagios-Plugin
+Requires: perl-Readonly
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -83,6 +100,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Wed May 27 2015 daryl herzmann <akrherz@iastate.edu>
+- Add requirements found with iem50 migration
+
 * Thu Apr 30 2015 daryl herzmann <akrherz@iastate.edu>
 - Add mod_fcgid in as a requirement
 
