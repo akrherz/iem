@@ -108,7 +108,7 @@ details regarding flood state, severity, and forecasted stage.</p>
 <a href="?all">View All</a>
 <p><form method="GET" name="wfo">
 EOF;
-$content .= 'Select by NWS Forecast Office:'. networkSelect("WFO", $wfo);
+$content .= 'Select by NWS Forecast Office:'. networkSelect("WFO", $wfo, Array(), 'wfo');
 $content .= "<input type='submit' value='Select by WFO'>";
 $content .= "</form>";
 $sselect = stateSelect($state);
