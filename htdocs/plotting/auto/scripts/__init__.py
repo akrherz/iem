@@ -92,7 +92,7 @@ data = {'plots': [
     ]},
     {'label': 'Yearly', 'options': [
         {'id': "12", 'mw': True,
-         'label': "Days per year and latest date above given threshold"},
+         'label': "Days per year and first/latest date above given threshold"},
         {'id': "13", 'mw': True,
          'label': "End Date of Summer (warmest 91 day period) per Year"},
         {'id': "27", 'mw': True,
