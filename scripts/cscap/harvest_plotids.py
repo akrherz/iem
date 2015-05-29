@@ -1,10 +1,6 @@
-'''
- Get the Plot IDs harvested!
-
-'''
+"""Get the Plot IDs harvested!"""
 import util
 import sys
-import gdata.docs.client
 import ConfigParser
 import psycopg2
 
@@ -17,11 +13,10 @@ pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive_client = util.get_driveclient()
 
-query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='Plot Identifiers')
-feed = docs_client.GetAllResources(query=query)
+res = drive_client.files().list(
+        q="title contains 'Plot Identifiers'").execute()
 
 translate = {'column': 'col'}
 
@@ -34,10 +29,10 @@ lookup = {'tillage': 'TIL',
 pcursor.execute("""DELETE from plotids""")
 removed = pcursor.rowcount
 added = 0
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
     worksheet = spreadsheet.worksheets['Sheet 1']
     for entry2 in worksheet.get_list_feed().entry:
@@ -46,29 +41,35 @@ for entry in feed:
         vals = []
         for key in d.keys():
             v = None
-            if d[key] is not None:                
+            if d[key] is None:
+                continue
+            if d[key] is not None:
                 v = d[key].strip().replace("[", "").replace("]", "").split()[0]
                 v = "%s%s" % (lookup.get(key, ''), v)
             if key == 'uniqueid':
                 v = v.upper()
-            vals.append( v )
-            cols.append( translate.get(key,key) )
-        sql = """INSERT into plotids(%s) VALUES (%s)""" % (",".join(cols),
-                                                        ','.join(["%s"]*len(cols)))
+            if key.startswith('no3') or key.startswith('_'):
+                continue
+            vals.append(v)
+            cols.append(translate.get(key, key))
+        if len(cols) == 0:
+            continue
+        sql = """
+            INSERT into plotids(%s) VALUES (%s)
+        """ % (",".join(cols), ','.join(["%s"]*len(cols)))
         try:
             pcursor.execute(sql, vals)
-        except Exception,exp:
+        except Exception, exp:
             print exp
-            print spreadsheet.title
+            print item['title']
             print cols
             sys.exit()
         added += 1
-        
+
 if removed > (added + 10):
     print 'Aborting harvest_plotids due to sz'
     sys.exit()
-print "   harvest_plotids %s removed, %s added" % (removed,
-                                                             added)
+print "   harvest_plotids %s removed, %s added" % (removed, added)
 pcursor.close()
 pgconn.commit()
 pgconn.close()
