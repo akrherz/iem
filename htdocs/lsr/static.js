@@ -216,36 +216,6 @@ var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
 });
 
 
-var gphy = new OpenLayers.Layer.Google(
-    "Google Physical",
-    {type      : google.maps.MapTypeId.TERRAIN, 
-     sphericalMercator: true,
-     maxZoomLevel: 15,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-});
-
-var gmap = new OpenLayers.Layer.Google(
-                "Google Streets", // the default
-                {numZoomLevels: 20, sphericalMercator: true,
-     maxZoomLevel: 15,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-}
-            );
-            var ghyb = new OpenLayers.Layer.Google(
-                "Google Hybrid",
-                {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20, sphericalMercator: true,
-     maxZoomLevel: 15,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-}
-            );
-            var gsat = new OpenLayers.Layer.Google(
-                "Google Satellite",
-                {type: google.maps.MapTypeId.SATELLITE, numZoomLevels: 20, sphericalMercator: true,
-     maxZoomLevel: 15,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-}
-            );
-
 var counties = new OpenLayers.Layer.WMS("Counties", "http://mesonet.agron.iastate.edu/c/c.py/",
     {layers      : 'c-900913',
      format      : 'image/png',
@@ -904,11 +874,11 @@ new Ext.Viewport({
         title       : 'Local Storm Report Application',
         collapsible : true,
         collapsed   : true,
-        contentEl   : cfg.header
+        contentEl   : 'iem-header'
     },{
         region:'south',
         height: 10,
-        contentEl: cfg.footer
+        contentEl: 'iem-footer'
     },{
         xtype       : 'panel',
         region      : 'west',
@@ -973,7 +943,8 @@ new Ext.Viewport({
         }],
         xtype    : "gx_mappanel",
         map      : map,
-        layers   : [gphy, gmap, ghyb, gsat, nexradWMS, lsrLayer, sbwLayer, counties],
+        layers   : [new OpenLayers.Layer.OSM("Open Street Map"),
+                    nexradWMS, lsrLayer, sbwLayer, counties],
         extent   : new OpenLayers.Bounds(-20037508, -20037508,
                                              20037508, 20037508.34),
         split    : true
