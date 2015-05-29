@@ -13,12 +13,15 @@ $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 $station = isset($_GET['station'] ) ? $_GET['station'] : "";
  
 if (! isset($_GET["station"])){
-  $t->headextra = <<<EOF
-<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
- <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
- <script src='/js/olselect.php?network=${network}'></script>
+$t->headextra = <<<EOF
+<link rel="stylesheet" href="/vendor/openlayers/3.5.0/ol.css" type="text/css">
+<link type="text/css" href="/vendor/openlayers/3.5.0/ol3-layerswitcher.css" rel="stylesheet" />
 EOF;
- $t->bodyextra = "onload=\"init()\"";
+$t->jsextra = <<<EOF
+<script src="/vendor/openlayers/3.5.0/ol.js" type="text/javascript"></script>
+<script src='/vendor/openlayers/3.5.0/ol3-layerswitcher.js'></script>
+<script src="/js/olselect.php?network=${network}"></script>
+EOF;
 }
 $t->title = "SchoolNet One Minute Time Series";
 $t->thispage = "networks-schoolnet"; 
@@ -68,7 +71,6 @@ if (strlen($station) > 0 ) {
 </style>
 <i>Click black dot to select your site:</i><br />
 <div id="map"></div>
-<div id="sname" unselectable="on">No site selected</div>
 EOF;
  }
 

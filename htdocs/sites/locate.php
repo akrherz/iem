@@ -21,11 +21,14 @@ $t = new MyView();
 $t->title = "Site Locator";
 $t->thispage = "iem-sites";
 $t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
+<link rel="stylesheet" href="/vendor/openlayers/3.5.0/ol.css" type="text/css">
+<link type="text/css" href="/vendor/openlayers/3.5.0/ol3-layerswitcher.css" rel="stylesheet" />
+EOF;
+$t->jsextra = <<<EOF
+<script src="/vendor/openlayers/3.5.0/ol.js" type="text/javascript"></script>
+<script src='/vendor/openlayers/3.5.0/ol3-layerswitcher.js'></script>
 <script src="/js/olselect.php?network=${network}"></script>
 EOF;
-$t->bodyextra = "onload=\"init()\"";
 
 $nselect = selectNetwork($network);
 $n2select = networkSelect($network, "");
@@ -58,7 +61,6 @@ you may find useful.</p>
 </tr></table>
 <br />Or select site from this map by clicking on the black dot....
 <div id="map" style="width:100%; height: 400px;"></div>
-<div id="sname" unselectable="on">No site selected</div>
 </form>
 
 </div>
