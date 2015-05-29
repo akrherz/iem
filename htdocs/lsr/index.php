@@ -2,29 +2,17 @@
 include("../../config/settings.inc.php");
 include_once "../../include/myview.php";
 $t = new MyView();
-$t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+$t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
-<link rel="stylesheet" type="text/css" href="superboxselect.css" />
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-<script src="/vtec/OpenLayers.js"></script>
+<script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
 <script type="text/javascript" src="Printer-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script>
-Ext.namespace("cfg");
-cfg.header = "iem-header";
-cfg.footer = "iem-footer";
-</script>
 <script type="text/javascript" src="static.js?v=18"></script>
-EOF;
-$t->title = "Local Storm Report App";
-$t->thispage ="severe-lsr";
-$t->content = <<<EOF
 <script>
 Ext.onReady(function(){
   var tokens = window.location.href.split('#');
@@ -56,6 +44,15 @@ Ext.onReady(function(){
   }
 });
 </script>
+EOF;
+$t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<link rel="stylesheet" type="text/css" href="superboxselect.css" />
+EOF;
+$t->title = "Local Storm Report App";
+$t->thispage ="severe-lsr";
+$t->content = <<<EOF
+
 <div id="help" style="padding:5px;">
 <h3>Local Storm Report App Help</h3>
 <br />
