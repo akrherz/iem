@@ -1,110 +1,130 @@
 <?php
+/*
+ * Emit some javascript that drives our selector widget, this code is
+ * 'called' from all sorts of apps, so be careful!
+ */
 include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $multi = isset($_GET["multi"]);
 header("Content-type: application/javascript");
-$uri = sprintf("%s/geojson/network.php?network=%s&c=%s", BASEURL, $network,
+$uri = sprintf("/geojson/network.php?network=%s&c=%s", $network,
 	time() );
 
 echo <<<EOF
-var map, selectedFeature, selectControl;
+var map;
+var vectorLayer;
+var element;
+var popup;
 
 function selectAllStations(){
   $("#olstation").find('option').attr('selected','selected');
 }
 
-function cb_siteOver(feature){
-  station = feature.attributes.sid;
-  selectedFeature = feature;
-  $('select[name="station"]').find("option[value=\""+station+"\"]").prop("selected", "selected");
-  document.getElementById("sname").innerHTML = feature.attributes.sname;
-  popup = new OpenLayers.Popup('chicken', 
-              feature.geometry.getBounds().getCenterLonLat(),
-              new OpenLayers.Size(200,20),
-          "<div style='font-size:1em'>" + station +" "+feature.attributes.sname +"</div>",
-              true);
-  feature.popup = popup;
-  map.addPopup(popup);
-};
+$(document).ready(function(){
 
-function cb_siteOut(feature){ 
-    map.removePopup(feature.popup);
-  document.getElementById("sname").innerHTML = "No Site Selected";
-    feature.popup.destroy();
-    feature.popup = null;
-};
-
-
-function init(){
-  // Build Map Object
-  map = new OpenLayers.Map( 'map',{
-        projection: new OpenLayers.Projection('EPSG:900913'),
-        displayProjection: new OpenLayers.Projection('EPSG:4326'),
-        units: 'm',
-        wrapDateLine: false,
-        numZoomLevels: 18,
-        maxResolution: 156543.0339,
-        maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
-                                         20037508, 20037508.34)
-  }); 
-  // Traditional Google Map Layer
-  var googleLayer = new OpenLayers.Layer.Google(
-                'Google Streets',
-                 {'sphericalMercator': true}
-            );
-  var gsat = new OpenLayers.Layer.Google(
-        "Google Satellite",
-        {type: google.maps.MapTypeId.SATELLITE, numZoomLevels: 22}
-  );
-   var styleMap = new OpenLayers.StyleMap({
-       'default': {
-           fillColor: 'yellow',
-           strokeColor: 'black',
-           strokeWidth: 2,
-           pointRadius: 5,
-           strokeOpacity: 1
-       },
-       'select': {
-          fillOpacity: 1,
-          strokeColor: 'white',
-          fillColor: 'red'
-       }
-   });
-
-  var geojson = new OpenLayers.Layer.Vector("{$network} Network", {
-		protocol: new OpenLayers.Protocol.HTTP({
-                    url: "{$uri}",
-                    format: new OpenLayers.Format.GeoJSON()
-    	}),
-    	projection: new OpenLayers.Projection('EPSG:4326'),
-    	styleMap: styleMap,
-    	strategies: [new OpenLayers.Strategy.Fixed()]
+	vectorLayer = new ol.layer.Vector({
+		source: new ol.source.Vector({
+			url: '{$uri}',
+			format: new ol.format.GeoJSON()
+		}),
+		style: function(feature, resolution){
+			return [
+            	new ol.style.Style({
+                	image: new ol.style.Circle({
+                    	fill: new ol.style.Fill({
+                        	color: 'rgba(255,255,0,1)'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: '#000000',
+                            width: 2.25
+                        }),
+                        radius: 7
+                    }),
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255,255,0,1)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#3399CC',
+                        width: 1.25
+                    })
+                })
+            ];
+		}
 	});
-  map.addLayers([googleLayer, gsat, geojson]);
-   
-  // Provide hover capabilities over road_condition layer
-  selectControl = new OpenLayers.Control.SelectFeature(geojson, {
-       onSelect: cb_siteOver, 
-       onUnselect: cb_siteOut
+	vectorLayer.getSource().on('change', function(e){
+		if (vectorLayer.getSource().getState() == 'ready'){
+			map.getView().fitExtent(vectorLayer.getSource().getExtent(),
+					map.getSize());
+		}
+	});
+					
+        map = new ol.Map({
+                target: 'map',
+                layers: [new ol.layer.Tile({
+                title: 'OpenStreetMap',
+                visible: true,
+                        source: new ol.source.OSM()
+                }),
+                new ol.layer.Tile({
+                title: "Global Imagery",
+                visible: false,
+                source: new ol.source.TileWMS({
+                        url: 'http://maps.opengeo.org/geowebcache/service/wms',
+                        params: {LAYERS: 'bluemarble', VERSION: '1.1.1'}
+                })
+                }),
+                vectorLayer
+                ],
+                view: new ol.View({
+                        projection: 'EPSG:3857',
+                        center: [-10575351, 5160979],
+                        zoom: 3
+                })
+        });
+
+	var layerSwitcher = new ol.control.LayerSwitcher();
+    map.addControl(layerSwitcher);
+					
+	jQuery('<div/>', {
+	    id: 'mappopup'
+	}).appendTo('#map');									
+					
+	element = document.getElementById('mappopup');
+	popup = new ol.Overlay({
+        element: element,
+        positioning: 'bottom-center',
+        stopEvent: false
+    });
+    map.addOverlay(popup);
+    
+    // display popup on click
+    map.on('click', function(evt) {
+        var feature = map.forEachFeatureAtPixel(evt.pixel,
+             function(feature, layer) {
+                 return feature;
+             });
+		$(element).popover('destroy');
+        if (feature) {
+            var geometry = feature.getGeometry();
+            var coord = geometry.getCoordinates();
+            popup.setPosition(coord);
+    		$(element).popover({
+			    'placement': 'top',
+    			'animation': false,
+    			'html': true,
+    			'content': '<p>' + feature.get('sname') + '</p>'
+  			});
+    		$(element).popover('show');
+            // Set the select form to proper value
+   		    $('select[name="station"]').find("option[value=\""+ feature.get('sid') +"\"]").prop("selected", "selected");
+  		} 
    });
-   map.addControl(selectControl);
-   selectControl.activate();
+					
+   //geojson.events.register('loadend', geojson, function() {
+   //  var e = geojson.getDataExtent();
+   //  map.setCenter( e.getCenterLonLat(), geojson.getZoomForExtent(e,false));
+   //});
 
-   geojson.events.register('loadend', geojson, function() {
-     var e = geojson.getDataExtent();
-     map.setCenter( e.getCenterLonLat(), geojson.getZoomForExtent(e,false));
-   });
-
-   var proj = new OpenLayers.Projection('EPSG:4326');
-   var proj2 = new OpenLayers.Projection('EPSG:900913');
-   var point = new OpenLayers.LonLat(-93.8, 42.2);
-   point.transform(proj, proj2);
-
-   map.setCenter(point, 7);
-
-
-   map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
-   map.addControl( new OpenLayers.Control.MousePosition() );
-}
+});
 EOF;
 ?>

@@ -4,6 +4,7 @@
  $t = new MyView();
  include("../../../include/database.inc.php");
 
+$network = 'IA_RWIS';
 $ostation = isset($_GET["ostation"]) ? $_GET["ostation"] : "";
 $station = isset($_GET['station']) ? $_GET["station"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
@@ -28,11 +29,14 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
 include("../../../include/imagemaps.php");
 include("../../../include/forms.php");
 $t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
-<script src="/js/olselect.php?network=IA_RWIS"></script>
+<link rel="stylesheet" href="/vendor/openlayers/3.5.0/ol.css" type="text/css">
+<link type="text/css" href="/vendor/openlayers/3.5.0/ol3-layerswitcher.css" rel="stylesheet" />
 EOF;
-$t->bodyextra = "onload=\"init()\"";
+$t->jsextra = <<<EOF
+<script src="/vendor/openlayers/3.5.0/ol.js" type="text/javascript"></script>
+<script src='/vendor/openlayers/3.5.0/ol3-layerswitcher.js'></script>
+<script src="/js/olselect.php?network=${network}"></script>
+EOF;
 $t->title = "RWIS Timeseries Plots";
 $t->thispage = "networks-rwis";
 
@@ -187,7 +191,6 @@ $content .= <<<EOF
 <td>{$nselect}</td>
 <td><input type="submit" value="Make Plot"></tr></table>
 <div id="map"></div>
-<div id="sname" unselectable="on">No site selected</div>
 </form>
 
 

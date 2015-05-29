@@ -16,23 +16,9 @@
  
 $t->thispage = "networks-coop";
 $t->title = "Growing Degree Day Scenarios / Probabilities";
-$t->headextra = <<<EOF
-<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}&c=". time() ."'></script>
-EOF;
-$t->bodyextra = "onload=\"init()\"";
 $nselect = networkSelect($network, $station);
 $t->content = <<<EOF
-<style type="text/css">
-        #map {
-            width: 450px;
-            height: 450px;
-            border: 2px solid black;
-        }
-</style>
-
-<h3 class="heading">Growing Degree Day Probabilities</h3>
+<h3>Growing Degree Day Probabilities</h3>
 
 <p>This application creates two 2-D histograms of GDD accumulation frequencies.
 These frequencies are based on historical data for the specificed site and base
@@ -72,8 +58,7 @@ on record got to {$gddbase} by 1 October prior to a freeze.
 </thead>
 <tbody>
 <tr>
-  <td rowspan="2">{$nselect}
-	<br /><a href="gddprobs.phtml?{$dcgi}">Select via map.</a></td>
+  <td rowspan="2">{$nselect}</td>
   <td><input type="text" size="10" name="gddbase" value="{$gddbase}" /></td>
 </tr>
 </tbody>

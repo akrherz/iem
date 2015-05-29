@@ -10,16 +10,18 @@ $t = new MyView();
 
 $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
 $station = "";
-
-
 $t->headextra = <<<EOF
-<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}&multi'></script>
+<link rel="stylesheet" href="/vendor/openlayers/3.5.0/ol.css" type="text/css">
+<link type="text/css" href="/vendor/openlayers/3.5.0/ol3-layerswitcher.css" rel="stylesheet" />
+EOF;
+$t->jsextra = <<<EOF
+<script src="/vendor/openlayers/3.5.0/ol.js" type="text/javascript"></script>
+<script src='/vendor/openlayers/3.5.0/ol3-layerswitcher.js'></script>
+<script src="/js/olselect.php?network=${network}"></script>
 EOF;
 $t->title = "Download ASOS/AWOS/METAR Data";
 $t->thispage = "networks-asos";
-$t->bodyextra = "onload=\"init()\"";
+
 
 $nselect = networkMultiSelect($network, $station, Array(), "station"); 
 $netselect = selectAzosNetwork($network);

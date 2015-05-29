@@ -53,10 +53,16 @@ if ($station != null){
 $t->title = "SHEF Data by Site by Day";
 $t->thispage = "networks-dcp";
 if ($station == null){
-  $t->headextra = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
- <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
- <script src='/js/olselect.php?network=${network}'></script>";
- $t->bodyextra = "onload=\"init()\"";
+  $t->headextra = <<<EOF
+<link rel="stylesheet" href="/vendor/openlayers/3.5.0/ol.css" type="text/css">
+<link type="text/css" href="/vendor/openlayers/3.5.0/ol3-layerswitcher.css" rel="stylesheet" />
+EOF;
+  $t->jsextra = <<<EOF
+<script src="/vendor/openlayers/3.5.0/ol.js" type="text/javascript"></script>
+<script src='/vendor/openlayers/3.5.0/ol3-layerswitcher.js'></script>
+<script src="/js/olselect.php?network=${network}"></script>
+EOF;
+
 }
 
 $nselect = "<select name=\"network\">";
@@ -88,7 +94,6 @@ if ($station == null){
 </style>
 <i>Click black dot to select your site:</i><br />
 <div id="map"></div>
-<div id="sname" unselectable="on">No site selected</div>
 EOF;
 } else { 
 	if (! $alone){
