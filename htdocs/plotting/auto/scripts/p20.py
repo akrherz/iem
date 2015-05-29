@@ -8,19 +8,26 @@ import datetime
 import calendar
 import numpy as np
 
+
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     ts = datetime.date.today()
+    d['description'] = """This chart displays the number of hourly
+    observations each month that reported measurable precipitation.  Sites
+    are able to report trace amounts, but those reports are not considered
+    in hopes of making the long term climatology comparable.
+    """
     d['arguments'] = [
-        dict(type='zstation', name='zstation', default='AMW', 
+        dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:'),
         dict(type='year', name='year', default=ts.year,
              label='Select Year:'),
     ]
     return d
 
-def plotter( fdict ):
+
+def plotter(fdict):
     """ Go """
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -30,8 +37,6 @@ def plotter( fdict ):
     nt = NetworkTable(network)
     year = int(fdict.get('year', datetime.date.today().year))
 
-    valid = []
-    tmpf = []
     cursor.execute("""
     WITH obs as (
         SELECT distinct date_trunc('hour', valid) as t from alldata
@@ -51,29 +56,29 @@ def plotter( fdict ):
     thisyear = []
     averages = []
     for row in cursor:
-        months.append( row[0] )
+        months.append(row[0])
         if row[1] is not None:
-            thisyear.append( row[1] )
-        averages.append( row[2] )
+            thisyear.append(row[1])
+        averages.append(row[2])
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar( np.arange(1,13)-0.4, averages, fc='blue', label='Climatology')
-    bars = ax.bar( np.arange(1,len(thisyear)+1)-0.2, thisyear, width=0.4, 
-                   fc='yellow', label='%s' % (year,), zorder=2)
-    for i, bar in enumerate(bars):
+    ax.bar(np.arange(1, 13)-0.4, averages, fc='blue', label='Climatology')
+    bars = ax.bar(np.arange(1, len(thisyear)+1)-0.2, thisyear, width=0.4,
+                  fc='yellow', label='%s' % (year,), zorder=2)
+    for i, _ in enumerate(bars):
         txt = ax.text(i+1, thisyear[i]+2, "%.0f" % (thisyear[i],), ha='center')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                     foreground="yellow")])
+                                                     foreground="yellow")])
 
-    ax.set_xticks(range(0,13))
+    ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.set_xlim(0.5, 12.5)
-    ax.set_yticks( np.arange(0, max( max(averages), max(thisyear)) + 20, 12))
-    ax.set_ylabel("Hours")
+    ax.set_yticks(np.arange(0, max(max(averages), max(thisyear)) + 20, 12))
+    ax.set_ylabel("Hours with 0.01+ inch precip")
     ax.grid(True)
     ax.legend()
-    ax.set_title("%s [%s]\nNumber of Hours with Reported Precipitation" % (
-                        nt.sts[station]['name'], station))
-
+    ax.set_title(("%s [%s]\n"
+                  "Number of Hours with *Measurable* Precipitation Reported"
+                  ) % (nt.sts[station]['name'], station))
 
     return fig
