@@ -101,6 +101,9 @@ rcursor.close()
 
 # Get regular obs from Access
 icursor = IEMDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
+# Since we store drct in the RWIS archive as NaN, we better make sure
+# we don't attempt to use these values as it will error out
+icursor.execute("""update current_log set drct = null where drct = 'NaN'""")
 sql = """SELECT c.*, t.id as station from current_log c, stations t
     WHERE valid >= '%s' and valid < '%s'
       and t.network ~* 'RWIS' and t.iemid = c.iemid""" % (ts, ts2)
