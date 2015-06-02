@@ -4,203 +4,133 @@
 """
 import datetime
 import zipfile
-import os
 import sys
-import shutil
 import cgi
-import cgitb
-from osgeo import ogr
+# import cgitb
+import psycopg2
+import shapefile
 import pytz
-cgitb.enable()
-
-source = ogr.Open(("PG:host=iemdb dbname=postgis user=nobody "
-                   "tables=nexrad_attributes_log(geom)"))
-
-# Get CGI vars
-form = cgi.FormContent()
-
-if 'year' in form:
-    year1 = int(form["year"][0])
-    year2 = int(form["year"][0])
-else:
-    year1 = int(form["year1"][0])
-    year2 = int(form["year2"][0])
-month1 = int(form["month1"][0])
-if 'month2' not in form:
-    sys.exit()
-month2 = int(form["month2"][0])
-day1 = int(form["day1"][0])
-day2 = int(form["day2"][0])
-hour1 = int(form["hour1"][0])
-hour2 = int(form["hour2"][0])
-minute1 = int(form["minute1"][0])
-minute2 = int(form["minute2"][0])
-
-sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
-sTS = sTS.replace(tzinfo=pytz.timezone("UTC"))
-eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
-eTS = eTS.replace(tzinfo=pytz.timezone("UTC"))
-
-"""
-Need to limit what we are allowing them to request as the file would get
-massive.  So lets set arbitrary values of
-1) If 2 or more RADARs, less than 7 days
-"""
-radarLimiter = ""
-aRADAR = [1, 2, 3, 4]
-if 'radar' in form:
-    aRADAR = form['radar']
-    aRADAR.append('XXX')  # Hack to make next section work
-    if 'ALL' not in aRADAR:
-        radarLimiter = " and nexrad in %s " % (str(tuple(aRADAR)), )
-if len(aRADAR) > 2 and (eTS - sTS).days > 6:
-    eTS = sTS + datetime.timedelta(days=7)
-
-os.chdir("/tmp/")
-fp = "stormattr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"),
-                          eTS.strftime("%Y%m%d%H%M"))
-for suffix in ['shp', 'shx', 'dbf']:
-    if os.path.isfile("%s.%s" % (fp, suffix)):
-        os.remove("%s.%s" % (fp, suffix))
-
-out_driver = ogr.GetDriverByName('ESRI Shapefile')
-out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
-out_layer = out_ds.CreateLayer("point", None, ogr.wkbPoint)
-fd = ogr.FieldDefn('VALID', ogr.OFTString)
-fd.SetWidth(12)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('STORM_ID', ogr.OFTString)
-fd.SetWidth(2)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('NEXRAD', ogr.OFTString)
-fd.SetWidth(3)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('AZIMUTH', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('RANGE', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('TVS', ogr.OFTString)
-fd.SetWidth(10)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('MESO', ogr.OFTString)
-fd.SetWidth(10)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('POSH', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('POH', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('MAX_SIZE', ogr.OFTReal)
-fd.SetWidth(5)
-fd.SetPrecision(2)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('VIL', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('MAX_DBZ', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('MAX_DBZ_H', ogr.OFTReal)
-fd.SetWidth(5)
-fd.SetPrecision(2)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('TOP', ogr.OFTReal)
-fd.SetWidth(5)
-fd.SetPrecision(2)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('DRCT', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('SKNT', ogr.OFTInteger)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('LAT', ogr.OFTReal)
-fd.SetWidth(7)
-fd.SetPrecision(4)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('LON', ogr.OFTReal)
-fd.SetWidth(9)
-fd.SetPrecision(4)
-out_layer.CreateField(fd)
+import cStringIO
+# cgitb.enable()
 
 
-sql = """
-    SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
-    * , ST_x(geom) as lon, ST_y(geom) as lat
-    from nexrad_attributes_log WHERE
-    valid >= '%s' and valid < '%s' %s  ORDER by valid ASC
-    """ % (sTS.strftime("%Y-%m-%d %H:%M+00"),
-           eTS.strftime("%Y-%m-%d %H:%M+00"), radarLimiter)
+def get_context():
+    """Figure out the CGI variables passed to this script"""
+    form = cgi.FieldStorage()
+    if 'year' in form:
+        year1 = form.getfirst('year')
+        year2 = year1
+    else:
+        year1 = form.getfirst('year1')
+        year2 = form.getfirst('year2')
+    month1 = form.getfirst('month1')
+    month2 = form.getfirst('month2')
+    day1 = form.getfirst('day1')
+    day2 = form.getfirst('day2')
+    hour1 = form.getfirst('hour1')
+    hour2 = form.getfirst('hour2')
+    minute1 = form.getfirst('minute1')
+    minute2 = form.getfirst('minute2')
 
-# print 'Content-type: text/plain\n'
-# print sql
-# sys.exit()
-data = source.ExecuteSQL(sql)
+    sts = datetime.datetime(int(year1), int(month1), int(day1),
+                            int(hour1), int(minute1))
+    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    ets = datetime.datetime(int(year2), int(month2), int(day2),
+                            int(hour2), int(minute2))
+    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 
-sys.stdout.write("Content-type: application/octet-stream\n")
-sys.stdout.write("Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,
-                                                                           ))
-
-
-while True:
-    feat = data.GetNextFeature()
-    if not feat:
-        break
-
-    featDef = ogr.Feature(out_layer.GetLayerDefn())
-    featDef.SetGeometry(feat.GetGeometryRef())
-    featDef.SetField('VALID', feat.GetField("utctime"))
-    featDef.SetField('NEXRAD', feat.GetField("nexrad"))
-    featDef.SetField('STORM_ID', feat.GetField("storm_id"))
-    featDef.SetField('AZIMUTH', feat.GetField("azimuth"))
-    featDef.SetField('RANGE', feat.GetField("range"))
-    featDef.SetField('TVS', feat.GetField("tvs"))
-    featDef.SetField('MESO', feat.GetField("meso"))
-    featDef.SetField('POSH', feat.GetField("posh"))
-    featDef.SetField('POH', feat.GetField("poh"))
-    featDef.SetField('MAX_SIZE', feat.GetField("max_size"))
-    featDef.SetField('VIL', feat.GetField("vil"))
-    featDef.SetField('MAX_DBZ', feat.GetField("max_dbz"))
-    featDef.SetField('MAX_DBZ_H', feat.GetField("max_dbz_height"))
-    featDef.SetField('TOP', feat.GetField("top"))
-    featDef.SetField('DRCT', feat.GetField("drct"))
-    featDef.SetField('SKNT', feat.GetField("sknt"))
-    featDef.SetField('LAT', feat.GetField("lat"))
-    featDef.SetField('LON', feat.GetField("lon"))
-
-    out_layer.CreateFeature(featDef)
-    feat.Destroy()
-
-source.Destroy()
-out_ds.Destroy()
-
-# Create zip file, send it back to the clients
-shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj",
-                fp+".prj")
-z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
-z.write(fp+".shp")
-z.write(fp+".shx")
-z.write(fp+".dbf")
-z.write(fp+".prj")
-z.close()
+    radar = form.getlist('radar')
+    return dict(sts=sts, ets=ets, radar=radar)
 
 
-sys.stdout.write(file(fp+".zip", 'r').read())
+def run(ctx):
+    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
 
-os.remove(fp+".zip")
-os.remove(fp+".shp")
-os.remove(fp+".shx")
-os.remove(fp+".dbf")
-os.remove(fp+".prj")
+    """
+    Need to limit what we are allowing them to request as the file would get
+    massive.  So lets set arbitrary values of
+    1) If 2 or more RADARs, less than 7 days
+    """
+    if len(ctx['radar']) == 1:
+        ctx['radar'].append('XXX')
+    radarlimit = ''
+    if 'ALL' not in ctx['radar']:
+            radarlimit = " and nexrad in %s " % (str(tuple(ctx['radar'])), )
+    if len(ctx['radar']) > 2 and (ctx['ets'] - ctx['sts']).days > 6:
+        ctx['ets'] = ctx['sts'] + datetime.timedelta(days=7)
+
+    sql = """
+        SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
+        storm_id, nexrad, azimuth, range, tvs, meso, posh, poh, max_size,
+        vil, max_dbz, max_dbz_height, top, drct, sknt,
+        ST_y(geom) as lat, ST_x(geom) as lon
+        from nexrad_attributes_log WHERE
+        valid >= '%s' and valid < '%s' %s  ORDER by valid ASC
+        """ % (ctx['sts'].strftime("%Y-%m-%d %H:%M+00"),
+               ctx['ets'].strftime("%Y-%m-%d %H:%M+00"), radarlimit)
+
+    # print 'Content-type: text/plain\n'
+    # print sql
+    # sys.exit()
+    # sys.stderr.write("Begin SQL...")
+    cursor.execute(sql)
+    # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
+
+    w = shapefile.Writer(shapeType=shapefile.POINT)
+    w.field('VALID', 'C', 12)
+    w.field('STORM_ID', 'C', 2)
+    w.field('NEXRAD', 'C', 3)
+    w.field('AZIMUTH', 'I')
+    w.field('RANGE', 'I')
+    w.field('TVS', 'C', 10)
+    w.field('MESO', 'C', 10)
+    w.field('POSH', 'I')
+    w.field('POH', 'I')
+    w.field('MAX_SIZE', 'F', 5, 2)
+    w.field('VIL', 'I')
+    w.field('MAX_DBZ', 'I')
+    w.field('MAX_DBZ_H', 'F', 5, 2)
+    w.field('TOP', 'F', 5, 2)
+    w.field('DRCT', 'I')
+    w.field('SKNT', 'I')
+    w.field('LAT', 'F', 7, 4)
+    w.field('LON', 'F', 9, 4)
+    for row in cursor:
+        w.point(row[-1], row[-2])
+        w.record(*row)
+
+    # sys.stderr.write("End LOOP...")
+
+    shp = cStringIO.StringIO()
+    shx = cStringIO.StringIO()
+    dbf = cStringIO.StringIO()
+
+    fn = "stormattr_%s_%s" % (ctx['sts'].strftime("%Y%m%d%H%M"),
+                              ctx['ets'].strftime("%Y%m%d%H%M"))
+
+    w.save(shp=shp, shx=shx, dbf=dbf)
+    # sys.stderr.write("End of w.save()")
+
+    zio = cStringIO.StringIO()
+    zf = zipfile.ZipFile(zio, mode='w',
+                         compression=zipfile.ZIP_DEFLATED)
+    zf.writestr(fn+'.prj',
+                open(('/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj'
+                      )).read())
+    zf.writestr(fn+".shp", shp.getvalue())
+    zf.writestr(fn+'.shx', shx.getvalue())
+    zf.writestr(fn+'.dbf', dbf.getvalue())
+    zf.close()
+    sys.stdout.write(("Content-Disposition: attachment; "
+                      "filename=%s.zip\n\n") % (fn,))
+    sys.stdout.write(zio.getvalue())
+
+
+def main():
+    """Do something fun!"""
+    ctx = get_context()
+    run(ctx)
+if __name__ == '__main__':
+    # Go Main!
+    main()
