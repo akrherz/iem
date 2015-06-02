@@ -48,15 +48,21 @@ $content = <<<EOF
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
-<table>
-  <tr>
-    <th>RADAR Site:</th>
-    <td></td>
+<table class="table">
+<thead><tr><th>RADAR Site</th><th colspan="6">Time Interval</th>
+		<th>Format</th></tr></thead>
+<tr>
+    <th></th>
+	<th></th>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
-  </tr>
+    <td rowspan="3"><select name="fmt">
+		<option value="shp">ESRI Shapefile</option>
+		<option value="csv">Comma Delimited</option>
+		</select></td>
+</tr>
 
-  <tr>
+<tr>
   <td rowspan='2'>
 EOF;
 $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
@@ -100,7 +106,7 @@ $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL',
 </table>";
 
 $content .= <<<EOF
-<p><input type="submit" value="Giveme shapefile now!">
+<p><input type="submit" value="Giveme data right now!">
 </form>
 
 <h4>Shapefile DBF schema:</h4>
