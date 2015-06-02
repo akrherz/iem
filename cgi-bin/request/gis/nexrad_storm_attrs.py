@@ -2,30 +2,31 @@
 """
     Dump storm attributes from the database to a shapefile for the users
 """
-import datetime 
+import datetime
 import zipfile
 import os
 import sys
 import shutil
 import cgi
 import cgitb
-cgitb.enable()
 from osgeo import ogr
 import pytz
+cgitb.enable()
 
-source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=nexrad_attributes_log(geom)")
+source = ogr.Open(("PG:host=iemdb dbname=postgis user=nobody "
+                   "tables=nexrad_attributes_log(geom)"))
 
 # Get CGI vars
 form = cgi.FormContent()
 
-if form.has_key('year'):
+if 'year' in form:
     year1 = int(form["year"][0])
     year2 = int(form["year"][0])
 else:
     year1 = int(form["year1"][0])
     year2 = int(form["year2"][0])
 month1 = int(form["month1"][0])
-if (not form.has_key("month2")):
+if 'month2' not in form:
     sys.exit()
 month2 = int(form["month2"][0])
 day1 = int(form["day1"][0])
@@ -46,106 +47,112 @@ massive.  So lets set arbitrary values of
 1) If 2 or more RADARs, less than 7 days
 """
 radarLimiter = ""
-aRADAR = [1,2,3,4]
-if form.has_key('radar'):
+aRADAR = [1, 2, 3, 4]
+if 'radar' in form:
     aRADAR = form['radar']
-    aRADAR.append('XXX') # Hack to make next section work
+    aRADAR.append('XXX')  # Hack to make next section work
     if 'ALL' not in aRADAR:
-        radarLimiter = " and nexrad in %s " % ( str( tuple(aRADAR) ), )
+        radarLimiter = " and nexrad in %s " % (str(tuple(aRADAR)), )
 if len(aRADAR) > 2 and (eTS - sTS).days > 6:
     eTS = sTS + datetime.timedelta(days=7)
 
 os.chdir("/tmp/")
 fp = "stormattr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"),
-                           eTS.strftime("%Y%m%d%H%M") )
+                          eTS.strftime("%Y%m%d%H%M"))
 for suffix in ['shp', 'shx', 'dbf']:
     if os.path.isfile("%s.%s" % (fp, suffix)):
         os.remove("%s.%s" % (fp, suffix))
 
-out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+out_driver = ogr.GetDriverByName('ESRI Shapefile')
 out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
 out_layer = out_ds.CreateLayer("point", None, ogr.wkbPoint)
-fd = ogr.FieldDefn('VALID',ogr.OFTString)
+fd = ogr.FieldDefn('VALID', ogr.OFTString)
 fd.SetWidth(12)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('STORM_ID',ogr.OFTString)
+fd = ogr.FieldDefn('STORM_ID', ogr.OFTString)
 fd.SetWidth(2)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('NEXRAD',ogr.OFTString)
+fd = ogr.FieldDefn('NEXRAD', ogr.OFTString)
 fd.SetWidth(3)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('AZIMUTH',ogr.OFTInteger)
+fd = ogr.FieldDefn('AZIMUTH', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('RANGE',ogr.OFTInteger)
+fd = ogr.FieldDefn('RANGE', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('TVS',ogr.OFTString)
+fd = ogr.FieldDefn('TVS', ogr.OFTString)
 fd.SetWidth(10)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('MESO',ogr.OFTString)
+fd = ogr.FieldDefn('MESO', ogr.OFTString)
 fd.SetWidth(10)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('POSH',ogr.OFTInteger)
+fd = ogr.FieldDefn('POSH', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('POH',ogr.OFTInteger)
+fd = ogr.FieldDefn('POH', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('MAX_SIZE',ogr.OFTReal)
+fd = ogr.FieldDefn('MAX_SIZE', ogr.OFTReal)
 fd.SetWidth(5)
 fd.SetPrecision(2)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('VIL',ogr.OFTInteger)
+fd = ogr.FieldDefn('VIL', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('MAX_DBZ',ogr.OFTInteger)
+fd = ogr.FieldDefn('MAX_DBZ', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('MAX_DBZ_H',ogr.OFTReal)
+fd = ogr.FieldDefn('MAX_DBZ_H', ogr.OFTReal)
 fd.SetWidth(5)
 fd.SetPrecision(2)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('TOP',ogr.OFTReal)
+fd = ogr.FieldDefn('TOP', ogr.OFTReal)
 fd.SetWidth(5)
 fd.SetPrecision(2)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('DRCT',ogr.OFTInteger)
+fd = ogr.FieldDefn('DRCT', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('SKNT',ogr.OFTInteger)
+fd = ogr.FieldDefn('SKNT', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('LAT',ogr.OFTReal)
+fd = ogr.FieldDefn('LAT', ogr.OFTReal)
 fd.SetWidth(7)
 fd.SetPrecision(4)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('LON',ogr.OFTReal)
+fd = ogr.FieldDefn('LON', ogr.OFTReal)
 fd.SetWidth(9)
 fd.SetPrecision(4)
 out_layer.CreateField(fd)
 
 
-sql = """SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
+sql = """
+    SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
     * , ST_x(geom) as lon, ST_y(geom) as lat
-    from nexrad_attributes_log WHERE 
-    valid >= '%s' and valid < '%s' %s  ORDER by valid ASC""" % (
-                    sTS.strftime("%Y-%m-%d %H:%M+00"), 
-                    eTS.strftime("%Y-%m-%d %H:%M+00"), radarLimiter) 
+    from nexrad_attributes_log WHERE
+    valid >= '%s' and valid < '%s' %s  ORDER by valid ASC
+    """ % (sTS.strftime("%Y-%m-%d %H:%M+00"),
+           eTS.strftime("%Y-%m-%d %H:%M+00"), radarLimiter)
 
-#print 'Content-type: text/plain\n'
-#print sql
-#sys.exit()
+# print 'Content-type: text/plain\n'
+# print sql
+# sys.exit()
 data = source.ExecuteSQL(sql)
+
+sys.stdout.write("Content-type: application/octet-stream\n")
+sys.stdout.write("Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,
+                                                                           ))
+
 
 while True:
     feat = data.GetNextFeature()
@@ -180,7 +187,8 @@ source.Destroy()
 out_ds.Destroy()
 
 # Create zip file, send it back to the clients
-shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", fp+".prj")
+shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj",
+                fp+".prj")
 z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
 z.write(fp+".shp")
 z.write(fp+".shx")
@@ -188,11 +196,8 @@ z.write(fp+".dbf")
 z.write(fp+".prj")
 z.close()
 
-print "Content-type: application/octet-stream"
-print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-print
 
-print file(fp+".zip", 'r').read(),
+sys.stdout.write(file(fp+".zip", 'r').read())
 
 os.remove(fp+".zip")
 os.remove(fp+".shp")
