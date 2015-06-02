@@ -9,5 +9,6 @@ $t->content = <<<EOF
 <img src="/images/snoopy503.jpg" class="img-responsive" alt="daryl's Cat" />
 EOF;
 $t->render('single.phtml');
-error_log("404 ". $_SERVER["REQUEST_URI"]);
+$ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
+error_log("404 ". $_SERVER["REQUEST_URI"]. ' referer: '. $ref);
 ?>
