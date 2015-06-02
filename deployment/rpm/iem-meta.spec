@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -81,6 +81,14 @@ Requires: nrpe
 Requires: nagios-plugins-disk
 Requires: perl-Nagios-Plugin
 Requires: perl-Readonly
+Requires: php-pecl-memcache
+Requires: python-memcached
+Requires: liberation-serif-fonts
+Requires: liberation-sans-fonts
+Requires: liberation-fonts-common
+Requires: liberation-mono-fonts
+Requires: php-gd
+Requires: dstat
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -100,6 +108,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon Jun  1 2015 daryl herzmann <akrherz@iastate.edu>
+- Add requirements found with iemvs migration
+
 * Wed May 27 2015 daryl herzmann <akrherz@iastate.edu>
 - Add requirements found with iem50 migration
 
