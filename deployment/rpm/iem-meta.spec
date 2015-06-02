@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -89,6 +89,7 @@ Requires: liberation-fonts-common
 Requires: liberation-mono-fonts
 Requires: php-gd
 Requires: dstat
+Requires: pyshp
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -108,6 +109,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Tue Jun  2 2015 daryl herzmann <ahrherz@iastate.edu>
+- Add pyshp as a requirement
+
 * Mon Jun  1 2015 daryl herzmann <akrherz@iastate.edu>
 - Add requirements found with iemvs migration
 
