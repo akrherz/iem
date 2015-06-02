@@ -38,7 +38,10 @@ def get_context():
     ets = datetime.datetime(int(year2), int(month2), int(day2),
                             int(hour2), int(minute2))
     ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-
+    if ets < sts:
+        s = ets
+        ets = sts
+        sts = s
     radar = form.getlist('radar')
     return dict(sts=sts, ets=ets, radar=radar)
 
@@ -75,6 +78,10 @@ def run(ctx):
     # sys.exit()
     # sys.stderr.write("Begin SQL...")
     cursor.execute(sql)
+    if cursor.rowcount == 0:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write("ERROR: no results found for your query")
+        return
     # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
 
     w = shapefile.Writer(shapeType=shapefile.POINT)
