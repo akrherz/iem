@@ -43,7 +43,10 @@ def get_context():
         ets = sts
         sts = s
     radar = form.getlist('radar')
-    return dict(sts=sts, ets=ets, radar=radar)
+
+    fmt = form.getfirst('fmt', 'shp')
+
+    return dict(sts=sts, ets=ets, radar=radar, fmt=fmt)
 
 
 def run(ctx):
@@ -82,7 +85,21 @@ def run(ctx):
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("ERROR: no results found for your query")
         return
+
+    fn = "stormattr_%s_%s" % (ctx['sts'].strftime("%Y%m%d%H%M"),
+                              ctx['ets'].strftime("%Y%m%d%H%M"))
+
     # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
+    if ctx['fmt'] == 'csv':
+        sys.stdout.write("Content-type: application/octet-stream\n")
+        sys.stdout.write(("Content-Disposition: attachment; "
+                          "filename=%s.csv\n\n") % (fn,))
+        sys.stdout.write(("VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
+                          "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,"
+                          "LAT,LON\n"))
+        for row in cursor:
+            sys.stdout.write(",".join([str(s) for s in row])+"\n")
+        return
 
     w = shapefile.Writer(shapeType=shapefile.POINT)
     w.field('VALID', 'C', 12)
@@ -112,9 +129,6 @@ def run(ctx):
     shp = cStringIO.StringIO()
     shx = cStringIO.StringIO()
     dbf = cStringIO.StringIO()
-
-    fn = "stormattr_%s_%s" % (ctx['sts'].strftime("%Y%m%d%H%M"),
-                              ctx['ets'].strftime("%Y%m%d%H%M"))
 
     w.save(shp=shp, shx=shx, dbf=dbf)
     # sys.stderr.write("End of w.save()")
