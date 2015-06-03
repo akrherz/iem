@@ -23,8 +23,9 @@ def get_description():
     d = dict()
     d['data'] = True
     d['description'] = """Simple plot of seasonal or yearly average dew points.
-    This calculation was done by computing the mixing ratio, then averaging,
-    and then computing the dew point from that average.
+    This calculation was done by computing the mixing ratio, then averaging
+    the mixing ratios by year, and then converting that average to a dew point.
+    This was done due to the non-linear nature of dew point.
     """
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
@@ -50,24 +51,35 @@ def plotter(fdict):
 
     nt = NetworkTable(network)
 
-    thisyear = datetime.datetime.now().year
     cursor.execute("""
       SELECT valid, dwpf from alldata where station = %s and dwpf > -90 and
-      dwpf < 100 and valid < '%s-12-01'
-    """, (station, thisyear - 1))
+      dwpf < 100
+    """, (station, ))
 
     months = range(1, 13)
+    today = datetime.datetime.now()
+    lastyear = today.year
     if season == 'spring':
         months = [3, 4, 5]
+        if today.month > 5:
+            lastyear += 1
     if season == 'fall':
         months = [9, 10, 11]
+        if today.month > 11:
+            lastyear += 1
     if season == 'summer':
         months = [6, 7, 8]
+        if today.month > 8:
+            lastyear += 1
     if season == 'winter':
         months = [12, 1, 2]
+        if today.month > 2:
+            lastyear += 1
+
     rows = []
     for row in cursor:
-        if row[0].month not in months:
+        if (row[0].month not in months or row[0].year < startyear or
+                row[0].year >= lastyear):
             continue
         yr = (row[0] + datetime.timedelta(days=31)).year
         r = meteorology.mixing_ratio(temperature(row[1], 'F')).value('KG/KG')
