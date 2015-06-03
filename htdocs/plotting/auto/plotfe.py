@@ -49,10 +49,11 @@ def main():
         a = imp.load_module(name, fp, pathname, description)
         meta = a.get_description()
         response = a.plotter(fdict)
-        if not isinstance(response, list):
+        if not isinstance(response, tuple):
             [fig, df] = [response, None]
         else:
-            [fig, df] = response
+            fig = response[0]
+            df = response[1]
         if isinstance(fig, str):
             msg = fig
             fig, ax = plt.subplots(1, 1)
