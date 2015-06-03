@@ -91,6 +91,8 @@ data = {'plots': [
          'label': "Warmest Months for Average Temperature"},
     ]},
     {'label': 'Yearly', 'options': [
+        {'id': "76",
+         'label': "Average Dew Point by Year or Season"},
         {'id': "12", 'mw': True,
          'label': "Days per year and first/latest date above given threshold"},
         {'id': "74", 'mw': True,
