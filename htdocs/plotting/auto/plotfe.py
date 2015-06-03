@@ -49,7 +49,7 @@ def main():
         a = imp.load_module(name, fp, pathname, description)
         meta = a.get_description()
         response = a.plotter(fdict)
-        if len(response) == 1:
+        if not isinstance(response, list):
             [fig, df] = [response, None]
         else:
             [fig, df] = response
