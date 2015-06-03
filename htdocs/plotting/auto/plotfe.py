@@ -26,11 +26,15 @@ def main():
     fdict = parser(q)
     p = int(form.getfirst('p', 0))
     dpi = int(fdict.get('dpi', 100))
+    fmt = form.getfirst('fmt', 'png')[:3]
 
-    mckey = "/plotting/auto/plot/%s/%s.png" % (p, q)
+    mckey = "/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
-    sys.stdout.write("Content-type: image/png\n\n")
+    if fmt == 'png':
+        sys.stdout.write("Content-type: image/png\n\n")
+    else:
+        sys.stdout.write('Content-type: text/plain\n\n')
     hostname = os.environ.get("SERVER_NAME", "")
     if not res or hostname == "iem.local":
         # Lazy import to help speed things up
@@ -44,7 +48,11 @@ def main():
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
         meta = a.get_description()
-        fig = a.plotter(fdict)
+        response = a.plotter(fdict)
+        if len(response) == 1:
+            [fig, df] = [response, None]
+        else:
+            [fig, df] = response
         if isinstance(fig, str):
             msg = fig
             fig, ax = plt.subplots(1, 1)
@@ -59,6 +67,9 @@ def main():
         ram.seek(0)
         res = ram.read()
         sys.stderr.write("Setting cache: %s" % (mckey,))
+        if fmt != 'png' and df is not None:
+            if fmt == 'csv':
+                res = df.to_csv(index=False)
         mc.set(mckey, res, meta.get('cache', 43200))
     sys.stdout.write(res)
 

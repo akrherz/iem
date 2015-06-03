@@ -7,6 +7,7 @@ from pyiem import network
 import matplotlib.patheffects as PathEffects
 import datetime
 from scipy import stats
+import pandas as pd
 
 PDICT2 = {'winter': 'Winter (Dec, Jan, Feb)',
           'spring': 'Spring (Mar, Apr, May)',
@@ -18,6 +19,7 @@ PDICT2 = {'winter': 'Winter (Dec, Jan, Feb)',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """Simple plot of seasonal/yearly precipitation totals.
     """
     d['arguments'] = [
@@ -58,17 +60,16 @@ def plotter(fdict):
       from """ + table + """ WHERE station = %s GROUP by yr ORDER by yr ASC
     """, (1 if season != 'all' else 0, station))
 
-    years = []
-    data = []
     thisyear = datetime.datetime.now().year
+    rows = []
     for row in ccursor:
         if row['yr'] == thisyear or row['yr'] < startyear:
             continue
-        years.append(row['yr'])
-        data.append(float(row[season]))
+        rows.append(dict(year=int(row['yr']), data=float(row[season])))
+    df = pd.DataFrame(rows)
 
-    data = np.array(data)
-    years = np.array(years)
+    data = np.array(df['data'])
+    years = np.array(df['year'])
 
     (fig, ax) = plt.subplots(1, 1)
     avgv = np.average(data)
@@ -100,4 +101,4 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
     ax.legend(ncol=1)
 
-    return fig
+    return fig, df

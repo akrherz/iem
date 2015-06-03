@@ -183,13 +183,12 @@ EOF;
 		}
 	}
 	$imguri .= str_replace('/', '-', implode($pltvars, "::"));
-	$imguri .= ".png";
 	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
 		$image = "";
 	} else{
 		$image = <<<EOF
 	<p><span class="glyphicon glyphicon-arrow-down"></span> A graph will appear below this text with your specifications from above:<br >
-	<img src="$imguri" class="img img-responsive" />
+	<img src="{$imguri}.png" class="img img-responsive" />
 EOF;
 	}
 	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
@@ -217,6 +216,10 @@ EOF;
 $dhtml = "";
 if ($description != null){
 	$dhtml = sprintf("<div class=\"alert alert-info\"><h4>Plot Description:</h4>%s</div>", $description);
+}
+$dataextra= "";
+if (isset($jobj->data)){
+	$dataextra = "<p><a href=\"{$imguri}.csv\" class=\"btn btn-default\"><i class=\"glyphicon glyphicon-pencil\"></i> View Data (as csv)</a></p>";
 }
 
 $t->content = <<<EOF
@@ -246,6 +249,8 @@ $dhtml
 
 $image
 
+$dataextra
+		
 <div class="alert alert-info"><span class="glyphicon glyphicon-info-sign"></span>
 		If you notice plotting issues with the image above, please 
 		do <a class="alert-link" href="/info/contacts.php">let us know</a> by providing the 

@@ -7,6 +7,7 @@ from pyiem import network
 import matplotlib.patheffects as PathEffects
 import datetime
 from scipy import stats
+import pandas as pd
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
@@ -23,6 +24,7 @@ PDICT3 = {'high': 'High Temperature',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """The number of days for a given season that are
     either above or below some temperature threshold."""
     d['arguments'] = [
@@ -78,47 +80,44 @@ def plotter(fdict):
       from """ + table + """ WHERE station = %s GROUP by yr ORDER by yr ASC
     """, (1 if season != 'all' else 0, station))
 
-    years = []
-    data = []
     thisyear = datetime.datetime.now().year
+    rows = []
     for row in ccursor:
         if row['yr'] == thisyear or row['yr'] < startyear:
             continue
-        years.append(row['yr'])
-        data.append(float(row[season]))
-
-    data = np.array(data)
-    years = np.array(years)
+        rows.append(dict(year=int(row['yr']), data=int(row[season])))
+    df = pd.DataFrame(rows)
 
     (fig, ax) = plt.subplots(1, 1)
-    avgv = np.average(data)
+    avgv = np.average(df['data'])
 
     colorabove = 'r'
     colorbelow = 'b'
     if direction == 'below':
         colorabove = 'b'
         colorbelow = 'r'
-    bars = ax.bar(years - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(df['year'] - 0.4, df['data'], fc=colorabove, ec=colorabove)
     for i, bar in enumerate(bars):
-        if data[i] < avgv:
+        if df['data'][i] < avgv:
             bar.set_facecolor(colorbelow)
             bar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color='k', zorder=2, label='Average')
-    h_slope, intercept, r_value, _, _ = stats.linregress(years, data)
-    ax.plot(years, h_slope * np.array(years) + intercept, '--',
+    h_slope, intercept, r_value, _, _ = stats.linregress(df['year'],
+                                                         df['data'])
+    ax.plot(df['year'], h_slope * np.array(df['year']) + intercept, '--',
             lw=2, color='k', label='Trend')
     ax.text(0.01, 0.99, "Avg: %.1f, slope: %.2f days/century, R$^2$=%.2f" % (
             avgv, h_slope * 100., r_value ** 2),
             transform=ax.transAxes, va='top', bbox=dict(color='white'))
     ax.set_xlabel("Year")
-    ax.set_xlim(min(years)-1, max(years)+1)
-    ax.set_ylim(0, max([max(data) + max(data)/7., 3]))
+    ax.set_xlim(min(df['year'])-1, max(df['year'])+1)
+    ax.set_ylim(0, max([max(df['data']) + max(df['data'])/7., 3]))
     ax.set_ylabel("Number of Days")
     ax.grid(True)
     msg = ("[%s] %s %.0f-%.0f Number of Days [%s] "
            "with %s %s %g%s"
            ) % (station, nt.sts[station]['name'],
-                min(years), max(years),  PDICT2[season],
+                min(df['year']), max(df['year']),  PDICT2[season],
                 PDICT3[varname], PDICT[direction],
                 threshold, "$^\circ$F" if varname != 'precip' else 'inch')
     tokens = msg.split()
@@ -126,4 +125,4 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
     ax.legend(ncol=1)
 
-    return fig
+    return fig, df

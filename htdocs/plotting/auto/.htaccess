@@ -2,5 +2,6 @@ AddHandler cgi-script .py
 Options +ExecCGI
 
 RewriteEngine On
-RewriteRule ^plot/([0-9]{1,12})/(.*).png$ plotfe.py?p=$1&q=$2
+RewriteRule ^plot/([0-9]{1,12})/(.*).png$ plotfe.py?p=$1&q=$2&fmt=png
+RewriteRule ^plot/([0-9]{1,12})/(.*).csv$ plotfe.py?p=$1&q=$2&fmt=csv
 RewriteRule ^meta/([0-9]{1,12}).json$ plotmeta.py?p=$1
