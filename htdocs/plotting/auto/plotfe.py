@@ -70,7 +70,7 @@ def main():
         sys.stderr.write("Setting cache: %s" % (mckey,))
         if fmt != 'png' and df is not None:
             if fmt == 'csv':
-                res = df.to_csv(index=False)
+                res = df.to_csv(index=(len(df.columns) == 1))
         mc.set(mckey, res, meta.get('cache', 43200))
     sys.stdout.write(res)
 
