@@ -93,6 +93,9 @@ data = {'plots': [
     {'label': 'Yearly', 'options': [
         {'id': "12", 'mw': True,
          'label': "Days per year and first/latest date above given threshold"},
+        {'id': "74", 'mw': True,
+         'label': ("Days per year by season or year with temperature "
+                   "above/below threshold")},
         {'id': "13", 'mw': True,
          'label': "End/Start Date of Summer (warmest 91 day period) per Year"},
         {'id': "27", 'mw': True,
@@ -110,6 +113,8 @@ data = {'plots': [
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "69", 'mw': True,
          'label': "Percentage of Year to Date Days Above Average"},
+        {'id': "75", 'mw': True,
+         'label': "Precipitation Totals by Season/Year"},
         {'id': "63", 'mw': True,
          'label': "Records Set by Year (Max High / Min Low)"},
         {'id': "14", 'mw': True,
