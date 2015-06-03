@@ -27,8 +27,9 @@ warnings by their chat partners.
 <ul>
  <li><a href="public.phtml">Public Chatrooms</a> (requires Jabber client and public Jabber account)</li>
  <li><a href="http://weather.im/iembot/">HTML web interface</a>  anybody can view and monitor online!</li>
- <li>XMPP Pubsub node is still in the works</li>
+ <li><a href="http://weather.im/live/">Weather.IM Live Client</a>, interactive chat client.</li>
  <li>Follow iembot on <a href="http://www.twitter.com/iembot">Twitter</a></li>
+ <li><a href="twitter.php">Configure IEMBot</a> to post messages to your twitter account.</li>
 </ul>
 
 <script>
@@ -47,13 +48,13 @@ function urlChanger(){
 <p>All iembot messages are here: <a href="http://weather.im/iembot-rss/wfo/botstalk.xml">http:/weather.im/iembot-rss/wfo/botstalk.xml</a>
 </form>
 
-<h3 class="subtitle">How does <i>iembot</i> work?</h3>
+<h3>How does <i>iembot</i> work?</h3>
 
 <p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information regarding the product and sends it via a Jabber instant message to the bot logged in on the chat server.  The bot then 
 routes the incoming message to a WFO chatroom from which the product was 
 issued.  The entire process takes much less than a second.</p>
 
-<h3 class="subtitle">Why was <i>iembot</i> written?</h3>
+<h3>Why was <i>iembot</i> written?</h3>
 <ol>
  <li>During chats, the NWS should not need to relay details of already issued products to the chatroom.  Replication should always be avoided.</li>
  <li>During onair coverage, the media often are not able to quickly read severe text products that come off the printer.  Instead, they can quickly view the chatroom and clearly see what has just been issued.</li>
@@ -63,7 +64,7 @@ issued.  The entire process takes much less than a second.</p>
  <li>It is a proof of concept for how NWS products can be disseminated securely and synchronously to clients in an Open Source and standards based framework.</li>
 </ol>
 
-<h3 class="subtitle">What does <i>iembot</i> look like in the chatroom?</h3>
+<h3>What does <i>iembot</i> look like in the chatroom?</h3>
 
 <p>Here is a screenshot from the "botstalk" chatroom where <i>iembot</i> dumps all processed messages.  The text in blue can be clicked on for the product text and perhaps a visual display.<br />
 
@@ -107,7 +108,7 @@ issued.  The entire process takes much less than a second.</p>
   <br /><span style="background: #ccc;">EPZ ISSUES <a href="http://mesonet.agron.iastate.edu/p.php?id=16997">THIS IS A REISSUE OF THE RIVER FLOOD WARNING FOR THE RIO GRANDE  IN EL PASO</a> for  El Paso [TX] till 7:00 AM MDT</span></li>
 </ul>
 
-<h3 class="subtitle">Text products iembot parses: (as of 12 Jul 2007)</h3>
+<h3>Text products iembot parses: (as of 12 Jul 2007)</h3>
 <ul>
  <li>Storm Prediction Center Watches (SEL)</li>
  <li>These following PILs with any H-VTEC, VTEC processed<br />
