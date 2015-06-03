@@ -22,7 +22,7 @@ do
     mv -f $BASE/access_log-idep $BASE/access_log-idep.$MACH && \
     mv -f $BASE/access_log-sustainablecorn $BASE/access_log-sustainablecorn.$MACH && \
    	mv -f $BASE/access_log-cocorahs $BASE/access_log-cocorahs.$MACH && \
-    service httpd graceful"
+    systemctl reload httpd.service"
 done
 
 # Step 1a, do weather.im
