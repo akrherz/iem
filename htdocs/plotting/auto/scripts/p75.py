@@ -60,7 +60,10 @@ def plotter(fdict):
       from """ + table + """ WHERE station = %s GROUP by yr ORDER by yr ASC
     """, (1 if season != 'all' else 0, station))
 
-    thisyear = datetime.datetime.now().year
+    today = datetime.datetime.now()
+    thisyear = today.year
+    if season == 'spring' and today.month > 5:
+        thisyear += 1
     rows = []
     for row in ccursor:
         if row['yr'] == thisyear or row['yr'] < startyear:
