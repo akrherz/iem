@@ -152,11 +152,11 @@ def do_windalerts(obs):
             continue
         ob = obs[sid]
         # screening
-        if ob.get('sknt', 0) < 40:
+        if ob.get('gust', 0) < 40:
             continue
-        if np.isnan(ob['sknt']):
+        if np.isnan(ob['gust']):
             continue
-        smph = speed(ob['sknt'], 'KT').value('MPH')
+        smph = speed(ob['gust'], 'KT').value('MPH')
         if smph < 50:
             continue
         if smph > 100:
@@ -174,7 +174,7 @@ def do_windalerts(obs):
         stname = NT.sts[sid]['name']
         msg = ("At %s, a wind gust of %.1f mph (%.1f kts) was recorded "
                "at the %s (%s) Iowa RWIS station"
-               "") % (lts.strftime("%I:%M %p %d %b %Y"), smph, ob['sknt'],
+               "") % (lts.strftime("%I:%M %p %d %b %Y"), smph, ob['gust'],
                       stname, sid)
         mt = MIMEText(msg)
         mt['From'] = 'akrherz@iastate.edu'
