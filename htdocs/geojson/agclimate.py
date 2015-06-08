@@ -108,7 +108,7 @@ def get_data(ts):
         lat = nt.sts[row['station']]['lat']
         q = qcdict.get(row['station'], {})
         data['features'].append({"type": "Feature", "id": i, "properties": {
-            "encrh_avg": "%s%%" % safe(row['encrh_avg'], 1) if row['encrh_avg'] > 5 else "M",
+            "encrh_avg": "%s%%" % safe(row['encrh_avg'], 1) if row['encrh_avg'] > 0 else "M",
             "rh":  "%.0f%%" % (row["rh"],),
             "hrprecip" : safe_p(row['rain_mm_tot']) if not q.get('precip', False) else 'M',
             "et": safe_p(row['etalfalfa']),
