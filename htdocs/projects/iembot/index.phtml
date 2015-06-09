@@ -6,6 +6,19 @@
  $t = new MyView();
  $t->title = "IEMBot Project";
  $t->thispage = "severe-iembot";
+ $t->jsextra = <<<EOF
+<script>
+     $().ready(function(){
+        var tokens = window.location.href.split('#');
+        if (tokens.length == 2){
+            var subtokens = tokens[1].split("_");
+            if (subtokens.length == 2){
+                 revdiv(subtokens[1]);
+            }
+        }
+    });
+</script>
+EOF;
  
  $wselect = "<select name=\"wfo\" onChange=\"javascript: urlChanger(); return false;\">";
 while (list($key, $val) = each($nt->table)){
@@ -13,8 +26,16 @@ while (list($key, $val) = each($nt->table)){
 }
 $wselect .= "</select>";
  
+$channels = file_get_contents('channels.html');
  $t->content = <<<EOF
-<h3>iembot</h3>
+<ol class="breadcrumb">
+ <li><a href="/current/severe.phtml">Severe Weather</a></li>
+ <li class="active">IEMBot Project</li>
+</ol>
+ 
+<ul>
+  <li><a href="#channels">IEMBot Channels</a></li>
+</ul>
 
 <p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
 text products to Jabber chat rooms hosted on the conference.weather.im multi-user
@@ -68,96 +89,30 @@ issued.  The entire process takes much less than a second.</p>
 
 <p>Here is a screenshot from the "botstalk" chatroom where <i>iembot</i> dumps all processed messages.  The text in blue can be clicked on for the product text and perhaps a visual display.<br />
 
-<img src="iembot.png" style="margin: 10px; ">
+<img src="iembot.png" class="img img-responsive">
 
-<h3 class="subtitle">Example <i>iembot</i> messages</h3>
+<a name="channels"><h3>Channels</h3></a>
 
-<p>These are example messages that appear in the chatroom from the iembot user.
+<p>The following is a reference of the association of a NWS Text Product and
+the channels it is assigned.  If you click on the plus button, you can expand
+the listing to show an example product.  The channel templates should not be
+used literally, but the following are the placeholders used and what they
+mean.</p>
 
-<ul>
- <li>Tornado and Severe Thunderstorm Warnings
-  <br /><span style="background: #ccc;">BMX issues <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=BMX&phenomena=SV&eventid=352&significance=W">Severe Thunderstorm Warning</a> for  Montgomery [AL] till 6:30 PM CDT</span></li>
- <li>Followup statements (SVS)
-  <br /><span style="background: #ccc;">BMX cancels <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=BMX&phenomena=SV&eventid=351&significance=W">Severe Thunderstorm Warning</a> for  Perry [AL]</span></li>
- <li>Special Marine Warnings
-  <br /><span style="background: #ccc;">MFL issues <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=MFL&phenomena=MA&eventid=171&significance=W">Marine Warning</a> for  Biscayne Bay, Coastal waters from Deerfield Beach to Ocean Reef FL out 20 nm [AM] till 8:45 AM EDT</span></li>
- <li>Non-precipitating warnings (requires VTEC)
-  <br /><span style="background: #ccc;">OUN issues <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=OUN&phenomena=FW&eventid=43&significance=W">Fire Weather Warning</a> valid at Aug 18, 12:00 PM CDT for  Comanche, Stephens, Garvin, Murray, Pontotoc, Coal, Cotton, Jefferson, Carter, Johnston, Atoka, Love, Marshall, Bryan [OK] and Archer, Clay, Wichita [TX] till Aug 18, 8:00 PM CDT</span></li>
- <li>SPC Mesoscale Convective Discussions (MCD)
-  <br /><span style="background: #ccc;">Storm Prediction Center issues <a href="http://www.spc.noaa.gov/products/md/md1836.html">Mesoscale Discussion #1836</a></span></li>
- <li>SPC Tornado and Severe Thunderstorm watches
-  <br /><span style="background: #ccc;">Storm Prediction Center issues <a href="http://www.spc.noaa.gov/products/watch/ww0728.html">SEVERE TSTM watch</a> till 17:00 UTC</span></li>
- <li>National Hurricane Center products
-  <br /><span style="background: #ccc;">National Hurricane Center issues <a href="http://mesonet.agron.iastate.edu/p.php?id=25692">ADVISORY #32</a> for HURRICANE GORDON</span></li>
- <li>ASOS extreme wind gusts
-  <br /><span style="background: #ccc;">WINNER,SD (KSFD) ASOS reports gust of 55 knots from SSE @ 0344Z
-<br />KSFD 150353Z AUTO 16035G55KT 7SM FEW110 28/12 A2957 RMK AO2 PK WND     15055/0344 SLP991 T02780122 TSNO $</span></li>
- <li>Local Storm Reports (LSR)
-  <br /><span style="background: #ccc;">Monroe [Turner Co, SD] emergency mngr reports <a href="http://mesonet.agron.iastate.edu/cow/maplsr.phtml?lat0=43.49&lon0=-97.22&ts=2006-08-18%2017:18">TSTM WND DMG</a> at 12:18 PM CDT -- 4 to 8 inch diameter tree limbs knocked down</a></span></li>
- <li>WFO optional links to NOW casts, RER statements, Flood warnings/statements, Hurricane Statements, others can be added.
-  <br /><span style="background: #ccc;">SJU issues <a href="http://mesonet.agron.iastate.edu/p.php?id=17302">Flood Advisory (FLS)</a></li>
- <li>NESDIS Satellite Precipitation Estimates (SPE)
-  <br /><span style="background: #ccc;">NESDIS issues <a href="http://mesonet.agron.iastate.edu/p.php?id=17254">Satellite Precipitation Estimates</a></span></li>
- <li>IEM provided SchoolNet wind gust alerts
-   <br /><span style="background: #ccc;">UNITED COMMUNITY _ BOONE [Boone County] SNET reports 55 MPH from the N   @ 05:55 AM</span></li>
- <li>West Texas Mesonet wind gust alerts
-   <br /><span style="background: #ccc;">GRAHAM,TX (XGHS) ASOS reports gust of 52 knots from SSE @ 2110Z
-<br />XGHS 162110Z 15033G52KT -RA 23/19 A3006 RMK AO1 T02280187 P0001  RH 080%
-</span></li>
- <li>Special Weather Statements (SPS)
-  <br /><span style="background: #ccc;">EPZ ISSUES <a href="http://mesonet.agron.iastate.edu/p.php?id=16997">THIS IS A REISSUE OF THE RIVER FLOOD WARNING FOR THE RIO GRANDE  IN EL PASO</a> for  El Paso [TX] till 7:00 AM MDT</span></li>
-</ul>
+<dl class="dl-horizontal">
+ <dt>&lt;afos_pil&gt;</dt><dd>The 4-6 character 'AWIPS ID' or 'AFOS PIL' used
+ within the products WMO header.</dd>
+ <dt>&lt;vtec_phenomena&gt;</dt><dd>2 character VTEC Phenomena</dd>
+ <dt>&lt;vtec_significance&gt;</dt><dd>2 character VTEC Significance</dd>
+ <dt>&lt;vtec_significance&gt;</dt><dd>2 character VTEC Significance</dd>
+ <dt>&lt;wfo&gt;</dt><dd>3 character NWS Forecast Office Idenitifer</dd>
+ <dt>&lt;ugc&gt;</dt><dd>6 character UGC Code</dd>
+ </dl>
+ 
 
-<h3>Text products iembot parses: (as of 12 Jul 2007)</h3>
-<ul>
- <li>Storm Prediction Center Watches (SEL)</li>
- <li>These following PILs with any H-VTEC, VTEC processed<br />
-<ul>
- <li>FWW - Fire Weather Warning</li>
- <li>CFW - Coastal Hazzard Message</li>
- <li>TCV - Hurricane Product</li>
- <li>RFW - Red Flag Warning</li>
- <li>FFA - Areal Flood Watch</li>
- <li>SVR - Severe Thunderstorm Warning</li>
- <li>TOR - Tornado Warning</li>
- <li>SVS - Severe Weather Statement</li>
- <li>SMW - Special Marine Warning</li>
- <li>MWS - Marine Weather Statement</li>
- <li>NPW - Non-Precipitating Warning</li>
- <li>WCN - Watch by County</li>
- <li>WSW - Winter Weather Warning</li>
- <li>EWW - Eye Wall Warning</li>
- <li>FLS - Flood Statement</li>
- <li>FLW - Flood Warning</li>
-</ul>
- </li>
- <li>Local Storm reports (LSR)</li>
- <li>Mesoscale discussions from Storm Prediction Center (SWOMCD)</li>
- <li>These products are presented as generic alerts with links to text<br />
-<ul>
- <li>HLS - Hurricane Local Statement</li>
- <li>TCPAT[0-9] - Atlantic Tropical Advisory</li>
- <li>TCDAT[0-9] - Atlantic Tropical Discussion</li>
- <li>FFW - Flash Flood Warning</li>
- <li>TCM - Tropical Storm Advisory/Discussion</li>
- <li>PSH - Post Hurricane Report</li>
- <li>FLS - Flood Statement</li>
- <li>FLW - Flood Warning</li>
- <li>FFS - Flood Statement</li>
- <li>FTM - Free Text Message</li>
- <li>RER - Record Event Report</li>
- <li>ESF - Hydrological Outlook</li>
- <li>HWO - Hazzardous Weather Outlook</li>
- <li>SPS - Special Weather Statement</li>
- <li>ADM - Administrative Message</li>
- <li>CAE - Child Amber Alert</li>
- <li>TOE - Telephone Outage Emergency</li>
- <li>SPENES - NESDIS Satellite Precipitation Discussion</li>
-</ul>
-</li>
- <li>There are some other custom local products that are routed based on
-  local needs.</li>
-</ul>
+
+		{$channels}
+
 EOF;
 $t->render('single.phtml');
  ?>
