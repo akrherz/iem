@@ -89,6 +89,5 @@ def plotter(fdict):
     tokens = msg.split()
     sz = len(tokens) / 2
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
-    ax.legend(ncol=1)
 
     return fig, df
