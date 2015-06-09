@@ -91,6 +91,7 @@ Requires: php-gd
 Requires: dstat
 Requires: pyshp
 Requires: zip
+Requires: php-devel
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -105,6 +106,8 @@ to make sure the IEM code runs on a system it is deployed on.
 %install
 
 %post
+# pecl install dbase
+# echo "extension=dbase.so" > /etc/php.d/dbase.ini
 
 %files 
 
