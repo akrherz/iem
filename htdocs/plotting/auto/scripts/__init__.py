@@ -115,6 +115,8 @@ data = {'plots': [
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "69", 'mw': True,
          'label': "Percentage of Year to Date Days Above Average"},
+        {'id': "77", 'mw': True,
+         'label': "Period between Last and First High Temperature for Year"},
         {'id': "75", 'mw': True,
          'label': "Precipitation Totals by Season/Year"},
         {'id': "63", 'mw': True,
