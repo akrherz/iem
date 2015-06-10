@@ -38,6 +38,7 @@ def sanityCheck(val, lower, upper, rt):
 
 stations = nc.variables["stationId"][:]
 providers = nc.variables["dataProvider"][:]
+names = nc.variables["stationName"][:]
 tmpk = nc.variables["temperature"][:]
 tmpk_dd = nc.variables["temperatureDD"][:]
 obTime = nc.variables["observationTime"][:]
@@ -82,7 +83,6 @@ MY_PROVIDERS = ["AKDOT",
                 "VTDOT",
                 "MesoWest"
                 ]
-VTWAC = ['UVM01', 'UVM02', 'UVM03', 'UVM04', 'UVM05', 'VEC01', 'VTW01']
 
 
 def provider2network(p):
@@ -98,13 +98,23 @@ for recnum in range(len(providers)):
     thisStation = stations[recnum].tostring().replace('\x00', '')
     if thisProvider not in MY_PROVIDERS:
         continue
-    if thisProvider == 'MesoWest' and thisStation not in VTWAC:
-        continue
+    name = names[recnum].tostring().replace("'",
+                                            "").replace('\x00',
+                                                        '').replace('\xa0',
+                                                                    ' '
+                                                                    ).strip()
+    if thisProvider == 'MesoWest':
+        # get the network from the last portion of the name
+        network = name.split()[-1]
+        if network != 'VTWAC':
+            continue
+    else:
+        network = provider2network(thisProvider)
     db[thisStation] = {}
     ticks = obTime[recnum]
     ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
     db[thisStation]['ts'] = ts.replace(tzinfo=pytz.timezone('UTC'))
-    db[thisStation]['network'] = provider2network(thisProvider)
+    db[thisStation]['network'] = network
     db[thisStation]['pres'] = sanityCheck(pressure[recnum], 0, 1000000, -99)
     db[thisStation]['tmpk'] = sanityCheck(tmpk[recnum], 0, 500, -99)
     db[thisStation]['dwpk'] = sanityCheck(dwpk[recnum], 0, 500, -99)
