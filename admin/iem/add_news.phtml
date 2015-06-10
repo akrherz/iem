@@ -22,6 +22,16 @@ if (strlen($title) > 0) {
 }
 
 $t->title = "Add News Item";
+
+$t->jsextra = "
+<script>
+$('#testhtml').click(function(){
+		$('#testhtml_target').html($('#story').val());
+		});
+</script>
+";
+
+
 $t->content = <<<EOF
 <form method="POST" action="add_news.phtml" name='news'>
 
@@ -31,7 +41,7 @@ $t->content = <<<EOF
 <input type="text" name="url" size="50">
 
 <p>Enter Story (HTML please :) ):<br />
-<textarea name='body' rows="20" cols="70" style="font-family:monospace;"></textarea>
+<textarea id="story" name='body' rows="20" cols="70" style="font-family:monospace;"></textarea>
 
 <p>Enter Author:
  <input type="text" name="author" value="Daryl Herzmann">
@@ -40,9 +50,14 @@ $t->content = <<<EOF
 <input type="text" name="tags" />
 		
 <p>Post Story:
- <input type="submit"><input type="reset">
-
+ <input type="submit">
+ <input type="reset">
+ <a class="btn btn-default" role="button" id="testhtml">Preview</a>
+		
 </form>
+
+<div id="testhtml_target"></div>
+
 EOF;
 $t->render('single.phtml');
 ?>
