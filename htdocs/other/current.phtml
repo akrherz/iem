@@ -1,13 +1,32 @@
 <?php 
  include("../../config/settings.inc.php");
  include("../../include/myview.php");
+ include("../../include/mlib.php"); 
+ include("../../include/iemaccess.php");
+ include("../../include/iemaccessob.php");
+ include_once "../../include/database.inc.php";
+ 
  $t = new MyView();
  $t->current_network = "Other";
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "station";
-
+ $network = isset($_GET["network"]) ? $_GET["network"] : 'OT';
+ 
+ $mesosite = iemdb('mesosite');
+ pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
+ $rs = pg_execute($mesosite, "FINDTZ", Array($network));
+ if (pg_num_rows($rs) < 1){
+ 	$tzname = "America/Chicago";
+ } else {
+ 	$row = pg_fetch_assoc($rs,0);
+ 	$tzname = $row["tzname"];
+ }
+ 
+ 
  $t->title = "Other Currents";
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol\">";
- $t->headextra = <<<EOF
+ $t->refresh = <<<EOF
+ <meta http-equiv="refresh" content="600; URL=current.phtml?newtork={$network}&amp;sortcol=$sortcol">
+EOF;
+ $t->jsextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
@@ -17,12 +36,9 @@ function new_window(url) {
 </script>
 EOF;
  $t->thispage = "current-sort";
-include("../../include/mlib.php"); 
-  include("../../include/iemaccess.php");
-  include("../../include/iemaccessob.php");
 
-$iem = new IEMAccess();
-$rwis = $iem->getNetwork("OT");
+$iem = new IEMAccess($tzname);
+$rwis = $iem->getNetwork($network);
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
@@ -58,11 +74,15 @@ while (list($key, $iemob) = each($rwis) ){
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
 	if ($mydata[$key]["ozone"] < 0) $mydata[$key]["ozone"] = "NA";
 	if ($mydata[$key]["co2"] < 0) $mydata[$key]["co2"] = "NA";
-	if ($mydata[$key]["relh"] < 0)
-		$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
-				f2c($mydata[$key]["dwpf"]) );
-	$mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
-			$mydata[$key]["relh"], $mydata[$key]["sped"]);
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
+       f2c($mydata[$key]["dwpf"]) );
+    if ($mydata[$key]["tmpf"] > -99 && $mydata[$key]["dwpf"] > -99){
+       $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
+         $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    } else {
+        $mydata[$key]["feel"] = null;
+    }
+	
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
 		$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
@@ -95,20 +115,22 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= ">";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
+	$table .= sprintf("<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
+				$key, $network, $key); 
 	$table .= "<td>". $parts["sname"] . "</td><td ";
 	if ($tdiff > 11900){
 		$table .= 'bgcolor="red"';
 		$format = "%b-%d-%y %I:%M %p";
-	} else if ($tdiff > 6900){
+	} else if ($tdiff > 7200){
 		$table .= 'bgcolor="orange"';
 		$format = "%I:%M %p";
-	} else if ($tdiff > 1800){
+	} else if ($tdiff > 3600){
 		$table .= 'bgcolor="green"';
 		$format = "%I:%M %p";
 	} else {
 		$format = "%I:%M %p";
 	}
-	$table .= ">". strftime($format, $parts["ts"]) ."</td>
+	$table .= ">". strftime($format, $rwis[$key]->lts) ."</td>
   <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
   round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
   round($parts["min_tmpf"],0) ."</font>)</td>
@@ -121,47 +143,55 @@ while (list ($key, $val) = each ($finalA))  {
 	}
 	$table .= "</td>
             <td>". round($parts["drct"],0) ."</td>
-	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td><td>". $parts["ozone"] ."</td><td>". $parts["co2"] ."
+	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
 	    </tr>\n";
 }
-$c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=OT&var=";
+$c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network={$network}&var=";
 
+$networks = Array("WTM" => "West Texas Mesonet",
+		"KYMN" => "Kentucky Mesonet",
+		"OT" => "IEM Misc Stations",
+		"VTWAC" => "Vermont Weather Analytics Center");
+$buttons = "";
+while (list($key,$val)=each($networks)){
+	$buttons .= sprintf("<a class=\"btn btn-sm%s\" href=\"current.phtml?network=%s\">%s</a>",
+			($key == $network) ? ' active': '', $key, $val);
+}
 
 $content = <<<EOF
 
-<p><b>Other Networks:</b>  
- <a href="wtm.phtml">West Texas Mesonet</a> &nbsp; -- &nbsp; 
- <a href="kymn.phtml">Kentucky Mesonet</a> 
+<p><b>Other Networks:</b> {$buttons}
  
+<br /><strong>Times shown are for timezone: ${tzname}.</strong> The local day summary
+is based on that timezone.
 <br />Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
 a column to sort it.<br>
 
 <form method="GET" action="/my/current.phtml">
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
+  <th rowspan="2">ID:</th>
   <th rowspan="2">Station:</th>
   <th rowspan="2"><a href="current.phtml?sortcol=ts">Ob Time</a></th>
   <th colspan="3">Temps &deg;F</th>
   <th>&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
-  <th colspan=2>Gas [ppm]</th>
 <tr>
   
   <th>
-   <a href="current.phtml?sortcol=tmpf">Air</a>
-   (<a href="current.phtml?sortcol=max_tmpf">Hi</a> /
-   <a href="current.phtml?sortcol=min_tmpf">Lo</a>)
+   <a href="current.phtml?network={$network}&amp;sortcol=tmpf">Air</a>
+   (<a href="current.phtml?network={$network}&amp;sortcol=max_tmpf">Hi</a> /
+   <a href="current.phtml?network={$network}&amp;sortcol=min_tmpf">Lo</a>)
 </th>
-  <th><a href="current.phtml?sortcol=dwpf">DewP</a></th>
-  <th><a href="current.phtml?sortcol=feel">Feels</a></th>
-  <th><a href="current.phtml?sortcol=relh">RH%</a></th>
-  <th><a href="current.phtml?sortcol=sknt">Speed</a></th>
-  <th><a href="current.phtml?sortcol=drct">Direction</a></th>
-  <th><a href="current.phtml?sortcol=max_sknt">Gust</a>
-    @<a href="current.phtml?sortcol=gtim">Time</a></th>
-  <th>Ozone</th><th>CO2</th>
+  <th><a href="current.phtml?network={$network}&amp;sortcol=dwpf">DewP</a></th>
+  <th><a href="current.phtml?network={$network}&amp;sortcol=feel">Feels</a></th>
+  <th><a href="current.phtml?network={$network}&amp;sortcol=relh">RH%</a></th>
+  <th><a href="current.phtml?network={$network}&amp;sortcol=sknt">Speed</a></th>
+  <th><a href="current.phtml?network={$network}&amp;sortcol=drct">Direction</a></th>
+  <th><a href="current.phtml?network={$network}&amp;sortcol=max_sknt">Gust</a>
+    @<a href="current.phtml?network={$network}&amp;sortcol=gtim">Time</a></th>
 </tr></thead><tbody>
 {$table}
 </tbody>
