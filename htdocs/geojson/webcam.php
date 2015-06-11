@@ -55,7 +55,8 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
                "url" => $url
               ),
              "geometry"=>Array("type"=>"Point",
-                         "coordinates"=>Array($row["lon"],$row["lat"])));
+                         "coordinates"=>Array(floatval($row["lon"]),
+                         					  floatval($row["lat"]))));
 
   $ar["features"][] = $z;
 }
