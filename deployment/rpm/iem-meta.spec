@@ -93,6 +93,7 @@ Requires: pyshp
 Requires: zip
 Requires: php-devel
 Requires: pyLDM
+Requires: gd
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -114,7 +115,10 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
-* Tue Jun  2 2015 daryl herzmann <ahrherz@iastate.edu>
+* Fri Jun 12 2015 daryl herzmann <akrherz@iastate.edu>
+- Migrating iem30 to rhel7 found a missing gd lib
+
+* Tue Jun  2 2015 daryl herzmann <akrherz@iastate.edu>
 - Add pyshp, zip as a requirement
 
 * Mon Jun  1 2015 daryl herzmann <akrherz@iastate.edu>
