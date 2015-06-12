@@ -1,246 +1,40 @@
-<?php include("../../config/settings.inc.php");
+<?php
+include("../../config/settings.inc.php");
+define("IEM_APPID", 95);
 include("../../include/myview.php");
 $t = new MyView();
  include("../../include/cameras.inc.php"); 
  $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
 
- $t->title =  "Current + Live Web Camera Shots";
- $t->thispage = "webcam-viewer";
- $t->headextra = "<script src='http://www.openlayers.org/api/2.12/OpenLayers.js'></script>
- 		<script src='https://maps.googleapis.com/maps/api/js?sensor=false' type='text/javascript'></script>";
- $t->bodyextra = " onload='init()'";
- 
  $camselect = "";
  $cnt = 0;
  while (list($cid, $v) = each($cameras) ) {
  	if ($v["active"] && $v["network"] != "IDOT"){
  		$camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
  		if ($cid == $id) { $camselect .= "checked=\"checked\""; }
- 		$camselect .= " onClick=\"setCameraFromForm();\">". $v["name"] ."</label></div>\n";
+ 		$camselect .= " onClick=\"setCameraFromForm('{$cid}');\">". $v["name"] ."</label></div>\n";
  		$cnt += 1;
  	}
  }
  
+ $t->title =  "Current + Live Web Camera Shots";
+ $t->thispage = "webcam-viewer";
+ $t->jsextra = <<<EOF
+ <script src='/vendor/openlayers/3.6.0/ol.js'></script>
+ <script src='/vendor/openlayers/3.6.0/ol3-layerswitcher.js'></script>
+ <script>
+ 	var cameraID = "{$id}";
+ </script>
+ <script src='viewer.js'></script>
+EOF;
+ $t->headextra = <<<EOF
+<link rel="stylesheet" href="/vendor/openlayers/3.6.0/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/3.6.0/ol3-layerswitcher.css" type="text/css">
+EOF;
+ 
+
+ 
  $t->content = <<<EOF
-<script language="javascript">
-// <!--
-var map;
-var n0q;
-var jsonlayer;
-var sbwlayer;
-var selectControl;
-cameraID = "{$id}";
-ts = null;
-aqlive = 0;
-showlogo = 1;
-
-function selectMapFeature(){
-	selectControl.unselectAll();
-	jsonlayer.features.forEach(function(feat){
-		if (feat.data.cid == cameraID){
-			selectControl.select(feat);
-		}
-	});
-}
-function liveShot()
-{
-	if (aqlive) return;
-	aqlive = true;
-	ts = new Date();
-	document.camera.src = "live.php?id="+ cameraID +"&"+ ts.getTime();
-	aqlive = false;
-}
-function setCameraFromForm(){
-	for (var i=0; i < document.main.id.length; i++)
-	{
-		if (document.main.id[i].checked)
-		{
-			setCamera( document.main.id[i].value );
-		}
-	}
-	selectMapFeature();
-}
-function updateHREF(){
-	window.location.href = '#'+cameraID;
-}
-function refreshCamera()
-{
-    ts = new Date();
-    imgurl = "/data/camera/640x480/"+ cameraID +".jpg?"+ ts.getTime();
-    document.camera.src = imgurl;
-}
-function refreshRADAR(){
-    if (n0q){
-        n0q.redraw(true);
-    }
-}
-function refreshJSON(){
-	if (! jsonlayer.firstLoad){
-	    jsonlayer.refresh(true);
-	    sbwlayer.refresh(true);
-	}
-}
-function setCamera(cid){
-	//console.log("setCamera() called");
-	document.getElementById("c"+cid).checked = true;
-	cameraID = cid;	
-	updateHREF();
-	refreshCamera();
-}
-function cb_siteOver(feature){
-	if (cameraID != feature.data.cid){
-		setCamera( feature.data.cid );  
-	}
-};
-function init()
-{
-
-
-	  // Build Map Object
-	  map = new OpenLayers.Map( 'map',{
-	        projection: new OpenLayers.Projection('EPSG:900913'),
-	        displayProjection: new OpenLayers.Projection('EPSG:4326'),
-	        units: 'm',
-	        wrapDateLine: false,
-	        numZoomLevels: 18,
-	        maxResolution: 156543.0339,
-	        maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
-	                                         20037508, 20037508.34)
-	  });
-
-	  var sbwStyleMap = new OpenLayers.StyleMap({
-       'default': {
-           strokeColor: 'black',
-           strokeWidth: 3,
-           fillOpacity  : 0,
-           strokeOpacity: 1
-       },
-       'select': {
-           strokeWidth: 5
-       }
-});
-	  var sbwLookup = {
- "TO": {strokeColor: 'red'},
- "MA": {strokeColor: 'purple'},
- "FF": {strokeColor: 'green'},
- "EW": {strokeColor: 'green'},
- "FA": {strokeColor: 'green'},
- "FL": {strokeColor: 'green'},
- "FF": {strokeColor: 'green'},
- "SV": {strokeColor: 'yellow'}
-}
-	sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
-
-	  
-	   var styleMap = new OpenLayers.StyleMap({
-	       'default': {
-	    	   externalGraphic: "/images/yellow_arrow.png",
-               graphicHeight: 20,
-               rotation: "\${angle}",
-	           strokeOpacity: 1
-	       },
-	       'select': {
-	          graphicHeight: 30
-	       }
-	   });
-	   // Traditional Google Map Layer
-	   var googleLayer = new OpenLayers.Layer.Google(
-	                 'Google Streets',
-	                  {'sphericalMercator': true}
-	             );
-
-	   sbwlayer = new OpenLayers.Layer.Vector("Storm Based Warnings", {
-           protocol: new OpenLayers.Protocol.HTTP({
-               url: "/geojson/sbw.geojson",
-               format: new OpenLayers.Format.GeoJSON()
-   			}),
-   			projection: new OpenLayers.Projection('EPSG:4326'),
-   			styleMap: sbwStyleMap,
-			firstLoad : true,
-   			strategies: [new OpenLayers.Strategy.Fixed()]
-   		});
-	   
-	   jsonlayer = new OpenLayers.Layer.Vector(" Network", {
-           protocol: new OpenLayers.Protocol.HTTP({
-               url: "/geojson/webcam.php?network=TV",
-               format: new OpenLayers.Format.GeoJSON()
-   			}),
-   			projection: new OpenLayers.Projection('EPSG:4326'),
-   			styleMap: styleMap,
-			firstLoad : true,
-   			strategies: [new OpenLayers.Strategy.Fixed()]
-   		});
-	   jsonlayer.events.register('loadend', jsonlayer, function() {
-			if (jsonlayer.firstLoad){
-		     	var e = jsonlayer.getDataExtent();
-		     	map.setCenter( e.getCenterLonLat(), jsonlayer.getZoomForExtent(e,false));
-				jsonlayer.firstLoad = false;
-			}
-			selectMapFeature();
-		});
-		  		
-	   function get_my_url (bounds) {
-		    var res = this.map.getResolution();
-		    var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-		    var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
-		    var z = this.map.getZoom();
-
-		    var path = z + "/" + x + "/" + y + "." + this.type +"?"+ parseInt(Math.random()*9999);
-		    var url = this.url;
-		    if (url instanceof Array) {
-		        url = this.selectUrl(path, url);
-		    }
-		    return url + this.service +"/"+ this.layername +"/"+ path;
-
-		}
-	   n0q = new OpenLayers.Layer.TMS(
-		        'NEXRAD Base Reflectivity',
-		        '/cache/tile.py/',
-		        {layername      : 'nexrad-n0q-900913',
-		        service         : '1.0.0',
-		        type            : 'png',
-		        visibility      : true,
-		        getURL          : get_my_url,
-		        isBaseLayer     : false}
-		);
-	    map.addLayers([googleLayer, n0q, sbwlayer, jsonlayer ]);
-
-
-
-
-	    			    
-	    selectControl = new OpenLayers.Control.SelectFeature(jsonlayer, {
-			       onSelect: cb_siteOver
-	    });
-	    map.addControl(selectControl);
-	    selectControl.activate();
-
-	    map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
-	    map.addControl( new OpenLayers.Control.MousePosition() );
-
-	var tokens = window.location.href.split('#');
-	if (tokens.length == 2){
-		setCamera(tokens[1]);
-		
-	}
- 	    
-    window.setInterval( refreshRADAR, 150000);
-    window.setInterval( refreshCamera, 60000);
-    window.setInterval( refreshJSON, 65000);
-}
-
-function switchRADAR(){
-	for (var i=0; i < document.radar.nexrad.length; i++)
-	{
-		if (document.radar.nexrad[i].checked)
-		{
-			n0q.layername = document.radar.nexrad[i].value;
-			refreshRADAR();
-		}
-	}
-}
-// -->
-</script>
 
 <div class="row">
 <div class="col-md-6">
