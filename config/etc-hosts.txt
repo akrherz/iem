@@ -84,6 +84,7 @@
 192.168.1.241    iem-ldm
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
-#   VI12(62) osgood <-> metvm0
+#   VI12(62) mtarchive <-> metvm0
 192.168.1.239    iem-memcached3
-
+#   VI13(63) iem12 <-> iem30
+192.168.0.238    iem-weatherim
