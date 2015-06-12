@@ -26,8 +26,8 @@ do
 done
 
 # Step 1a, do weather.im
-ssh root@iem30 "mv -f $BASE/access_log-weather.im $BASE/access_log-weather.im.iem30 && \
-	service httpd restart"
+ssh root@iem12 "mv -f $BASE/access_log-weather.im $BASE/access_log-weather.im.iem12 && \
+	systemctl reload httpd"
 
 # Step 2, bring all these log files back to roost
 for MACH in $MACHINES
@@ -38,7 +38,7 @@ do
 done
 
 # Step 2a, do weather.im
-scp -q root@iem30:${BASE}/access_log-weather.im.iem30 weatherim_access.log
+scp -q root@iem12:${BASE}/access_log-weather.im.iem12 weatherim_access.log
 
 # Step 3, merge the log files back into one
 csh -c "(/usr/local/bin/mergelog access_log.iemvs* > access.log) >& /dev/null"
