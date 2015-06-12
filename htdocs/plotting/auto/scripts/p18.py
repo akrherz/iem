@@ -6,22 +6,24 @@ from pyiem.network import Table as NetworkTable
 import datetime
 import numpy as np
 
+
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     ts = datetime.date.today() - datetime.timedelta(days=365)
     d['arguments'] = [
-        dict(type='zstation', name='zstation', default='AMW', 
+        dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:'),
-    dict(type='date', name='sdate', default=ts.strftime("%Y/%m/%d"), 
-         label='Start Date of Plot:',
-         min="1951/01/01"), # Comes back to python as yyyy-mm-dd
+        dict(type='date', name='sdate', default=ts.strftime("%Y/%m/%d"),
+             label='Start Date of Plot:',
+             min="1951/01/01"),  # Comes back to python as yyyy-mm-dd
         dict(type='text', name='days', default='365',
              label='Days to Plot'),
     ]
     return d
 
-def plotter( fdict ):
+
+def plotter(fdict):
     """ Go """
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -31,8 +33,8 @@ def plotter( fdict ):
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
     nt = NetworkTable(network)
-    sdate = datetime.datetime.strptime( fdict.get('sdate', '2000-01-01'),
-                                        '%Y-%m-%d')
+    sdate = datetime.datetime.strptime(fdict.get('sdate', '2000-01-01'),
+                                       '%Y-%m-%d')
     days = int(fdict.get('days', 365))
     edate = sdate + datetime.timedelta(days=days)
     today = datetime.datetime.today()
@@ -45,8 +47,8 @@ def plotter( fdict ):
     SELECT valid, high, low from ncdc_climate81 where station = %s
     """, (nt.sts[station]['ncdc81'],))
     for row in ccursor:
-        climo[ row[0].strftime("%m%d") ] = dict(high=row[1], low=row[2])
-        
+        climo[row[0].strftime("%m%d")] = dict(high=row[1], low=row[2])
+
     valid = []
     tmpf = []
     cursor.execute("""
@@ -54,8 +56,8 @@ def plotter( fdict ):
      and valid > %s and valid < %s ORDER by valid ASC
     """, (station, sdate, sdate + datetime.timedelta(days=days)))
     for row in cursor:
-        valid.append( row[0] )
-        tmpf.append( row[1] )
+        valid.append(row[0])
+        tmpf.append(row[1])
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -66,27 +68,25 @@ def plotter( fdict ):
     chighs = []
     clows = []
     while now <= edate:
-        cdates.append( now )
-        chighs.append( climo[now.strftime("%m%d")]['high'] )
-        clows.append( climo[now.strftime("%m%d")]['low'] )
+        cdates.append(now)
+        chighs.append(climo[now.strftime("%m%d")]['high'])
+        clows.append(climo[now.strftime("%m%d")]['low'])
         if now.day == 1 or (now.day % 12 == 0 and days < 180):
-            xticks.append( now )
+            xticks.append(now)
             fmt = "%-d"
             if now.day == 1:
                 fmt = "%-d\n%b"
-            xticklabels.append( now.strftime(fmt))
-    
+            xticklabels.append(now.strftime(fmt))
+
         now += datetime.timedelta(days=1)
-    
+
     chighs = np.array(chighs)
     clows = np.array(clows)
-    
-    ax.bar(cdates, chighs - clows, bottom=clows, fc='lightblue', ec='lightblue',
-           label="Daily Climatology")
+
+    ax.bar(cdates, chighs - clows, bottom=clows, fc='lightblue',
+           ec='lightblue', label="Daily Climatology")
     ax.plot(valid, tmpf, color='r', label='Hourly Obs')
-    #ax.plot(valid2, tmpf2, color='k', label='2010-11 Hourly Obs')
     ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
-    #ax.set_xlabel("7 September 2011 (EDT)")
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(sdate, edate)
@@ -94,10 +94,9 @@ def plotter( fdict ):
     ax.legend(loc=2, ncol=2)
     ax.axhline(32, linestyle='-.')
     ax.grid(True)
-    ax.set_title("%s [%s]\nAir Temperature Timeseries %s - %s" % (
-                        nt.sts[station]['name'], station, 
-                        sdate.strftime("%d %b %Y"), 
-                        edate.strftime("%d %b %Y")))
-
+    ax.set_title(("%s [%s]\nAir Temperature Timeseries %s - %s"
+                  ) % (nt.sts[station]['name'], station,
+                       sdate.strftime("%d %b %Y"),
+                       edate.strftime("%d %b %Y")))
 
     return fig
