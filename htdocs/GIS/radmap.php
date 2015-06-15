@@ -678,7 +678,7 @@ if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
 if (in_array("legend", $layers)){
   $map->embedLegend($img);
 }
-$map->drawLabelCache($img);
+//$map->drawLabelCache($img);
 //$map->save("/tmp/test.map");
 
 header("Content-type: image/png");
