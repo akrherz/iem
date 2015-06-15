@@ -116,7 +116,7 @@ END
 #  GROUP smooth_radar
 #  STATUS ON
 #  DATA "/mesonet/data/gis/images/4326/USCOMP/meta/USCOMP_n0r_0.shp"
-#  TYPE ANNOTATION
+#  TYPE POINT
 #  TRANSFORM FALSE
 #  LABELITEM "TS"
 #  METADATA

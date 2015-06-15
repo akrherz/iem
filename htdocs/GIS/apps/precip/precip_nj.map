@@ -148,7 +148,7 @@ LAYER
     NAME iards
     DATA shape/unproj/iowa/iards.shp
     STATUS ON
-    TYPE ANNOTATION
+    TYPE POINT
 #    MINSCALE 50000
     MAXSCALE 600000
     SYMBOLSCALE 2500000
