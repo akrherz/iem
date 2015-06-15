@@ -209,7 +209,7 @@ LAYER
     "wms_title" "Iowa Interstates Conditions"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913"
   END
-  TRANSPARENCY ALPHA
+  #TRANSPARENCY ALPHA
   #FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
    "init=epsg:26915"
