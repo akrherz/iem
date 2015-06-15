@@ -861,10 +861,8 @@ LAYER
     WKT "POINT(100 100)"
   END
   CLASS
-    LABEL
-    END
-  	STYLE
-	    SYMBOL 'iem_logo'
+    STYLE
+      SYMBOL 'iem_logo'
     END
   END
 END
