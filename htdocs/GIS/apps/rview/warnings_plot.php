@@ -6,7 +6,8 @@ $url = "/GIS/radmap.php?";
 
 /* Set us ahead to GMT and then back into the archive */
 $ts = $basets + $tzoff - ($imgi * 60 * $interval );
-$url .= sprintf("ts=%s&width=%s&height=%s&", date("YmdHi", $ts), $width, $height);
+$url .= sprintf("ts=%s&width=%s&height=%s&tz=%s&", date("YmdHi", $ts), $width,
+		$height, $tz);
 
 if (isset($x0)) {
 	$url .= sprintf("bbox=%.3f,%.3f,%.3f,%.3f&", $x0, $y0, $x1, $y1);

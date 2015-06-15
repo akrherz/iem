@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+define("IEM_APPID", 96);
 include("../../../../include/database.inc.php");
 include("../../../../include/vtec.php");
 include("../../../../include/network.php");
@@ -8,7 +9,7 @@ include("../../../../include/myview.php");
 $t = new MyView();
 include('lib.php');
 $baseuri = "warnings.phtml";
-putenv("TZ=GMT");
+putenv("TZ=UTC");
 date_default_timezone_set('UTC');
 
 
