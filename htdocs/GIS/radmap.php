@@ -612,8 +612,21 @@ $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
 $tzformat = "%d %B %Y %-2I:%M %p %Z";
-if (isset($_REQUEST["tz"])) { 
-	date_default_timezone_set($_REQUEST["tz"]); 
+if (isset($_REQUEST["tz"])) {
+	$tz = $_REQUEST["tz"];
+	if ($tz == 'MDT' || $tz == 'MST'){
+		$tz = "America/Denver";
+	}
+	elseif ($tz == 'PDT' || $tz == 'PST'){
+		$tz = "America/Seattle";
+	}
+	elseif ($tz == 'CDT' || $tz == 'CST'){
+		$tz = "America/Chicago";
+	}
+	elseif ($tz == 'EDT' || $tz == 'EST'){
+		$tz = "America/New_York";
+	}
+	date_default_timezone_set($tz); 
 	if ($_REQUEST["tz"] == 'UTC'){
 		$tzformat = "%d %B %Y %-2I:%M %Z";
 	}
