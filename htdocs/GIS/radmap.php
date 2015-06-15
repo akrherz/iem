@@ -660,19 +660,19 @@ $map->drawLabelCache($img);
 $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
 $point->setXY(40, 26);
-$point->draw($map, $layer, $img, 0, " ");
+$point->draw($map, $layer, $img, 0);
 
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
   $layer = $map->getLayerByName("n0r-ramp");
   $point = ms_newpointobj();
   $point->setXY(($width - 80), 15);
-  $point->draw($map, $layer, $img, 0, "");
+  $point->draw($map, $layer, $img, 0);
 }
 if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
   $layer = $map->getLayerByName("n0q-ramp");
   $point = ms_newpointobj();
   $point->setXY(($width - 130), 18);
-  $point->draw($map, $layer, $img, 0, "");
+  $point->draw($map, $layer, $img, 0);
 }
 
 if (in_array("legend", $layers)){
