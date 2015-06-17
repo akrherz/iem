@@ -125,6 +125,9 @@ data = {'plots': [
          'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
+        {'id': "78",
+         'label': ("Average Dew Point/RH% by Air Temperature "
+                   "by Month or Season or Year")},
         {'id': "40",
          'label': "Cloud Amount and Level Timeseries for One Month"},
         {'id': "59",
