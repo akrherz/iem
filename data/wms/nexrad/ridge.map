@@ -82,7 +82,7 @@ LAYER
   END
   OFFSITE 255 255 255
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/ridge/%sector%/%prod%/%sector%_%prod%_%year%%month%%day%%time%.png"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 #
@@ -109,7 +109,7 @@ LAYER
   END
   OFFSITE 0 0 0
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/uscomp/%prod%_%year%%month%%day%%time%.png"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 #
@@ -137,7 +137,7 @@ LAYER
   END
   OFFSITE 0 0 0
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/uscomp/%prod%_%year%%month%%day%%time%.png"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 #
@@ -165,7 +165,7 @@ LAYER
   END
   OFFSITE 0 0 0
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/hicomp/%prod%_%year%%month%%day%%time%.png"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 #
@@ -193,7 +193,7 @@ LAYER
   END
   OFFSITE 0 0 0
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/akcomp/%prod%_%year%%month%%day%%time%.png"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 #
@@ -221,7 +221,7 @@ LAYER
   END
   OFFSITE 0 0 0
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/prcomp/%prod%_%year%%month%%day%%time%.png"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 END
