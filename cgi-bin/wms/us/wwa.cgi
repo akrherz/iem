@@ -7,4 +7,4 @@
 MS_MAPFILE=/mesonet/www/apps/iemwebsite/data/wms/us/wwa.map
 export MS_MAPFILE
 
-timeout 30 /mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv
+/mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv
