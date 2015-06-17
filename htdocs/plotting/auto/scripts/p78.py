@@ -37,7 +37,10 @@ def get_description():
     d['data'] = True
     d['cache'] = 86400
     d['description'] = """This plot displays the average dew point at
-    a given air temperature."""
+    a given air temperature.  The average dew point is computed by taking the
+    observations of mixing ratio, averaging those, and then back computing
+    the dew point temperature.  With that averaged dew point temperature a
+    relative humidity value is computed."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:'),
