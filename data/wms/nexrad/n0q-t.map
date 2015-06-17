@@ -51,7 +51,7 @@ LAYER
   NAME "time_idx"
   TYPE POLYGON
   DATA "the_geom from nexrad_n0q_tindex"
-  FILTER "datetime = '2006-06-23 03:10+00'"
+#  FILTER "datetime = '2006-06-23 03:10+00'"
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
@@ -62,6 +62,7 @@ LAYER
   END
   CONNECTION "dbname=postgis host=iemdb"
   CONNECTIONTYPE postgis
+  MAXFEATURES 1
 END
 
 # raster layer
