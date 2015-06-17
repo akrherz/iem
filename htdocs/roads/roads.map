@@ -682,7 +682,6 @@ LAYER
     "wms_title" "Iowa Interstates Conditions"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913"
   END
-  TRANSPARENCY ALPHA
   PROJECTION
    "init=epsg:26915"
   END
@@ -952,7 +951,6 @@ LAYER
       ANTIALIAS TRUE
     END
   END
-  TRANSPARENCY ALPHA
 END
 
 LAYER
@@ -1034,10 +1032,10 @@ END
 
 LAYER
   NAME credits
-  TYPE ANNOTATION
+  TYPE POINT
   STATUS OFF
   TRANSFORM FALSE
-  LABELCACHE OFF
+  LABELCACHE ON
  METADATA
   "show_in_legend" "0"
  END
