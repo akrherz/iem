@@ -24,8 +24,6 @@ if ($network == 'KCCI'){
 <ul>
  <li><a href="/GIS/apps/mesoplot/plot.php">Rapid Update every Minute</a></li>
  <li><a href="/GIS/apps/mesoplot/plot.php?zoom=1">Zoomed in on Des Moines</a></li>
- <li><a href="/GIS/apps/delta/plot.php?i=15m">15min Pressure Change</a></li>
- <li><a href="/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
 </ul>
 
 </td><td valign="top" width="350">

@@ -23,9 +23,6 @@ utcnow = datetime.datetime.utcnow()
 for row in icursor:
     print "Add iemdb current: ID: %10s NETWORK: %s" % (row['id'],
                                                        row['network'])
-    tbl = 'trend_1h'
-    icursor2.execute("""INSERT into %s (iemid)
-          VALUES ( %s) """ % (tbl,  row['iemid']))
 
     tbl = 'summary_%s' % (utcnow.year,)
     icursor2.execute("""
