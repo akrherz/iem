@@ -53,7 +53,7 @@ $background->draw($img);
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
 if ($isnew){
-	$roads->setFilter("(rtype < 3 or st1 = 163)");
+	$roads->setFilter('([rtype] < 3 or [st1] = 163)');
 }
 for ($k=0;$k<17;$k++)
 {
