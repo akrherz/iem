@@ -62,7 +62,7 @@ LAYER
   END
   CONNECTION "dbname=postgis host=iemdb"
   CONNECTIONTYPE postgis
-  MAXFEATURES 1
+  MAXFEATURES 5
 END
 
 # raster layer
