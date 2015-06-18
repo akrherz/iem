@@ -10,6 +10,20 @@
  
  26 Jun 1988 is bad!
  
+ 
+ http://rda.ucar.edu/dataset/ds608.0
+
+Updates of NARR data from April 1, 2009 to January 31, 2015
+released by NCEP have been archived as "rerun4" version of ds608.0
+dataset in rda.ucar.edu in May 2015.  This update fixes the codes
+that read Mexican precipitation data and a bug introduced when NCEP 
+switched the computer systems. The direct effects of these changes 
+are in the precipitation and in the soil moisture fields.
+
+Review the following pdf file for details.
+    http://rda.ucar.edu/datasets/ds608.0/docs/rr4.pdf
+
+ 
 """
 import netCDF4
 import datetime
