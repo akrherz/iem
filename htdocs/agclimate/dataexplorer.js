@@ -46,151 +46,84 @@ function updateTitle(){
 			+ $('#varpicker :selected').text() + " valid at "+ currentdt);
 	window.location.href = '#'+ varname +'/'+ currentdt.toISOString();
 }
+
 function updateMap(){
 	if (currentdt && typeof currentdt != "string"){
-		gj.protocol.params.dt = currentdt.toISOString();
+		var dt = currentdt.toISOString();
+		gj.setSource(new ol.source.Vector({
+						url: "/geojson/agclimate.py?dt="+dt,
+						format: new ol.format.GeoJSON()
+						})
+		);
 	}
-	gj.refresh();
-	if (n0q.getVisibility()){
-		n0q.redraw();
-		n0q.setVisibility(false);
-		n0q.setVisibility(true);		
-	}
+	n0q.setSource(new ol.source.XYZ({
+	    url: '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-'+currentdt.toIEMString()+'/{z}/{x}/{y}.png'
+					})
+	);
 	updateTitle();
 }
-function get_my_url (bounds) {
-    var res = this.map.getResolution();
-    var x = Math.round((bounds.left - this.maxExtent.left)
-                    / (res * this.tileSize.w));
-    var y = Math.round((this.maxExtent.top - bounds.top)
-                    / (res * this.tileSize.h));
-    var z = this.map.getZoom();
-
-    var path = z + "/" + x + "/" + y + "." + this.type ;
-            /* Need no cache buster now that our service IDs are unique
-             * + "?"+ parseInt(Math.random() * 9999);
-             */
-    var url = this.url;
-    if (url instanceof Array) {
-            url = this.selectUrl(path, url);
-    }
-    return url + this.service + "/ridge::" + this.radar + "-" + this.radarProduct + "-"
-    +  currentdt.toIEMString() + "/" + path;
-}
-function get_my_url2(bounds){
-    var res = this.map.getResolution();
-    var x = Math.round((bounds.left - this.maxExtent.left)
-                    / (res * this.tileSize.w));
-    var y = Math.round((this.maxExtent.top - bounds.top)
-                    / (res * this.tileSize.h));
-    var z = this.map.getZoom();
-
-    var path = z + "/" + x + "/" + y + "." + this.type + "?"
-                    + parseInt(Math.random() * 9999);
-    var url = this.url;
-    if (url instanceof Array) {
-            url = this.selectUrl(path, url);
-    }
-    return url + this.service + "/" + this.layername + "/" + path;
-}
-
-function init(){
-	  // Build Map Object
-	  map = new OpenLayers.Map( 'map',{
-	        projection: new OpenLayers.Projection('EPSG:900913'),
-	        displayProjection: new OpenLayers.Projection('EPSG:4326'),
-	        units: 'm',
-	        wrapDateLine: false,
-	        numZoomLevels: 18,
-	        maxResolution: 156543.0339,
-	        maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
-	                                         20037508, 20037508.34)
-	  });
-	  // Traditional Google Map Layer
-	  var googleLayer = new OpenLayers.Layer.Google(
-	                'Google Streets',
-	                 {'sphericalMercator': true}
-	            );
-
-      n0q = new OpenLayers.Layer.TMS(
-              'NEXRAD Base Reflectivity',
-              'http://mesonet1.agron.iastate.edu/cache/tile.py/', {
-                  layername : 'bogus',
-                  service : '1.0.0',
-                  type : 'png',
-                  visibility : true,
-                  opacity : 1,
-                  getURL : get_my_url,
-                  radarProduct : 'N0Q',
-                  radar : 'USCOMP',
-                  isBaseLayer : false
-          }
-      );
-
-	  
-      var context = {
-    		  getLabel: function(feature){
-    			  return feature.data[varname];
-    		  }
-      };
-      
-	  var template = OpenLayers.Util.extend({
-               label : "${getLabel}",
-               fontColor: "black",
-               fontSize: "14px",
-               fontFamily: "monospace",
-               fontWeight: "bold",
-               labelOutlineColor: "yellow",
-               labelOutlineWidth: 6  
-	   });
-      var style = new OpenLayers.Style(template, {context: context});
-      var styleMap = new OpenLayers.StyleMap(style);
-
-	  gj = new OpenLayers.Layer.Vector("Data", {
-		  protocol: new OpenLayers.Protocol.HTTP({
-			  params: {dt: currentdt.toISOString()},
-	          url: "/geojson/agclimate.py",
-	          format: new OpenLayers.Format.GeoJSON()
-	      }),
-	      projection: new OpenLayers.Projection('EPSG:4326'),
-	      styleMap: styleMap,
-	      strategies: [new OpenLayers.Strategy.Fixed()]
-	  });
-	  
-	  states = new OpenLayers.Layer.TMS('US States',
-              'https://mesonet.agron.iastate.edu/c/c.py/', {
-                      layername : 's-900913',
-                      service : '1.0.0',
-                      type : 'png',
-                      visibility : true,
-                      opacity : 1,
-                      getURL : get_my_url2,
-                      isBaseLayer : false
-              });
-
-	  
-	  map.addLayers([googleLayer, n0q, states, gj]);
-	   
-	  var proj = new OpenLayers.Projection('EPSG:4326');
-	   var proj2 = new OpenLayers.Projection('EPSG:900913');
-	   var point = new OpenLayers.LonLat(-93.8, 42.2);
-	   point.transform(proj, proj2);
-
-	   map.setCenter(point, 7);
 
 
-	   map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
-	   map.addControl( new OpenLayers.Control.MousePosition() );
+var mystyle = new ol.style.Style({
+	text: new ol.style.Text({
+        font: '16px Calibri,sans-serif',
+        fill: new ol.style.Fill({
+        	color: '#000',
+        	width: 3
+        }),
+        stroke: new ol.style.Stroke({
+        	color: '#ff0',
+        	width: 5
+        })
+	})
+});
 
-	   dtpicker = $('#datetimepicker');
-	   dtpicker.datetimepicker({
-		   showMinute: false,
-		   showSecond: false,
-		   onSelect: logic,
-		   minDateTime: (new Date(2013, 1, 1, 0, 0)),
-		   maxDateTime: (new Date()),
-		   timeFormat: 'h:mm TT'
-	   });
+$().ready(function(){
+	gj = new ol.layer.Vector({
+		title: 'ISUSM Data',
+		source: new ol.source.Vector({
+			url: "/geojson/agclimate.py",
+			format: new ol.format.GeoJSON()
+		}),
+		style: function(feature, resolution){
+			mystyle.getText().setText(feature.get(varname));
+			return [mystyle];
+		}
+	});
+	n0q = new ol.layer.Tile({
+	    title: 'NEXRAD Base Reflectivity',
+	    source: new ol.source.XYZ({
+	            url: '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-'+currentdt.toIEMString()+'/{z}/{x}/{y}.png'
+	        })
+	});
+	map = new ol.Map({
+		target: 'map',
+		layers: [new ol.layer.Tile({
+            title: 'OpenStreetMap',
+            visible: true,
+            source: new ol.source.OSM()
+        	}), n0q, gj],
+		view: new ol.View({
+            projection: 'EPSG:3857',
+            center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 7
+		})
+	});
+
+    var layerSwitcher = new ol.control.LayerSwitcher();
+    map.addControl(layerSwitcher);
+
+
+
+	dtpicker = $('#datetimepicker');
+	dtpicker.datetimepicker({
+		showMinute: false,
+		showSecond: false,
+		onSelect: logic,
+		minDateTime: (new Date(2013, 1, 1, 0, 0)),
+		maxDateTime: (new Date()),
+		timeFormat: 'h:mm TT'
+	});
 	   
 	   try{
 		   var tokens = window.location.href.split('#');
@@ -210,7 +143,8 @@ function init(){
 		   
 	   setDate();
 	   updateMap();
-}
+});
+
 function setDate(){
 	   dtpicker.datepicker( "disable" )
 	   	.datetimepicker('setDate', currentdt)
@@ -247,6 +181,6 @@ $('#plusoneday').click(function(e){
 
 $('#varpicker').change(function(){
 	varname = $('#varpicker').val();
-	gj.redraw();
+	gj.setStyle(gj.getStyle());
 	updateTitle();
 });
