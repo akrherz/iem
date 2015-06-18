@@ -1510,44 +1510,6 @@ LAYER
   END
 END
 
-LAYER
-  CONNECTIONTYPE postgis
-  NAME "delta-surface"
-  # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iemdb"
-  # Get the lines from the 'geom' column of the 'roads' table
-  DATA "geom from (select geom, alti_1h,
-    c.iemid as oid from trend_1h c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
-    ) as foo using unique oid using srid=4326"
-  STATUS OFF
-  TYPE POINT
-  LABELCACHE OFF
-  PROJECTION
-   "init=epsg:4326"
-  END
-        LABELITEM 'alti_1h'
-        CLASS
-                EXPRESSION ([alti_1h] < 0)
-                LABEL
-                        COLOR 250 0 0
-                        OUTLINECOLOR 250 250 250
-                        SIZE MEDIUM
-                        TYPE BITMAP
-                        FORCE TRUE
-                END
-        END
-        CLASS
-                EXPRESSION ([alti_1h] > 0)
-                LABEL
-                        COLOR 0 0 0
-                        OUTLINECOLOR 250 250 250
-                        SIZE MEDIUM
-                        TYPE BITMAP
-                        FORCE TRUE
-                END
-        END
-END
-
 ###
 # Watch by County
 LAYER
