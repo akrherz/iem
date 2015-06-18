@@ -31,15 +31,16 @@ for row in icursor:
     vals.append(row['tmpf'])
     valmask.append((row['network'] in ['AWOS', 'IA_ASOS']))
 
-rng = np.arange(-30, 120, 10)
+rng = np.arange(-30, 120, 2)
 
 for sector in ['iowa', 'midwest', 'conus']:
     m = MapPlot(axisbg='white', sector=sector,
                 title="%s 2 meter Air Temperature" % (sector.capitalize(), ),
                 subtitle=now.strftime("%d %b %Y %-I:%M %p"))
-    m.contourf(lons, lats, vals, rng)
+    m.contourf(lons, lats, vals, rng, clevstride=5, units='F')
+    m.plot_values(lons, lats, vals, fmt='%.0f')
     if sector == 'iowa':
-        m.plot_values(lons, lats, vals, fmt='%.0f')
+        m.drawcounties()
     pqstr = ("plot ac %s00 %s_tmpf.png %s_tmpf_%s.png png"
              "") % (datetime.datetime.utcnow().strftime("%Y%m%d%H"),
                     sector, sector, datetime.datetime.utcnow().strftime("%H"))
