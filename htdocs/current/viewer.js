@@ -51,8 +51,9 @@ function refreshCamera()
 }
 function refreshRADAR(){
     if (n0q){
+    	var ts = new Date();
         n0q.setSource(new ol.source.XYZ({
-			url: '/cache/tile.py/1.0.0/'+radar+'/{z}/{x}/{y}.png'
+			url: '/cache/tile.py/1.0.0/'+radar+'/{z}/{x}/{y}.png?'+ ts.getTime()
 		}));
     }
 }
