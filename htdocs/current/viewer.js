@@ -6,6 +6,7 @@ var selectControl;
 var ts = null;
 var aqlive = 0;
 var showlogo = 1;
+var radar = 'nexrad-n0q-900913';
 var selectedCameraFeature;
 
 function selectMapFeature(){
@@ -50,7 +51,9 @@ function refreshCamera()
 }
 function refreshRADAR(){
     if (n0q){
-        n0q.setSource(n0q.getSource());
+        n0q.setSource(new ol.source.XYZ({
+			url: '/cache/tile.py/1.0.0/'+radar+'/{z}/{x}/{y}.png'
+		}));
     }
 }
 function refreshJSON(){
@@ -128,9 +131,9 @@ function switchRADAR(){
 	{
 		if (document.radar.nexrad[i].checked)
 		{
-			v = document.radar.nexrad[i].value;
+			radar = document.radar.nexrad[i].value;
 			n0q.setSource(new ol.source.XYZ({
-				url: '/cache/tile.py/1.0.0/'+v+'/{z}/{x}/{y}.png'
+				url: '/cache/tile.py/1.0.0/'+radar+'/{z}/{x}/{y}.png'
 			}));
 		}
 	}
@@ -164,7 +167,7 @@ $().ready(function(){
 	n0q = new ol.layer.Tile({
 		title: 'NEXRAD Base Reflectivity',
 		source: new ol.source.XYZ({
-			url: '/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png'
+			url: '/cache/tile.py/1.0.0/'+radar+'/{z}/{x}/{y}.png'
 		})
 	});
 	map = new ol.Map({
