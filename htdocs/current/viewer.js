@@ -54,8 +54,14 @@ function refreshRADAR(){
     }
 }
 function refreshJSON(){
-	    jsonlayer.setSource(jsonlayer.getSource());
-	    sbwlayer.setSource(sbwlayer.getSource());
+	    jsonlayer.setSource(new ol.source.Vector({
+			url: "/geojson/webcam.php?network=TV",
+		format: new ol.format.GeoJSON()
+	}));
+	    sbwlayer.setSource(new ol.source.Vector({
+			url: "/geojson/sbw.geojson",
+		format: new ol.format.GeoJSON()
+	}));
 }
 function setCamera(cid){
 	//console.log("setCamera() called");
@@ -174,7 +180,7 @@ $().ready(function(){
 		view: new ol.View({
 			projection: 'EPSG:3857',
 			center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
-			zoom: 7
+			zoom: 6
 		})
 	});
     var layerSwitcher = new ol.control.LayerSwitcher();
