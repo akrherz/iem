@@ -125,6 +125,7 @@ def get_data(ts):
             "soil12m": safe_m(row['vwc_12_avg']),
             "soil24m": safe_m(row['vwc_24_avg']),
             "soil50m": safe_m(row['vwc_50_avg']),
+            "gust": safe(row['ws_mph_max'], 1),
             "wind": "%s@%.0f" % (drct2txt(row['winddir_d1_wvt']),
                                  row['ws_mps_s_wvt'] * 2.23)
             },

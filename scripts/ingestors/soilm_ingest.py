@@ -1,66 +1,7 @@
 """
  Ingest ISU SOILM data!
- 
- Run from RUN_10_AFTER.sh 
- 
- DailySI
- "TIMESTAMP",
- "RECORD",
- "TAir_C_Avg",
- "TAir_C_Max",
- "TAir_C_TMx",
- "TAir_C_Min",
- "TAir_C_TMn",
- "SlrMJ_Tot",
- "Rain_mm_Tot",
- "WS_mps_S_WVT",
- "WindDir_D1_WVT",
- "WindDir_SD1_WVT",
- "WS_mps_Max",
- "WS_mps_TMx",
- "DailyET",
- "TSoil_C_Avg",
- "VWC_12_Avg",
- "VWC_24_Avg",
- "VWC_50_Avg",
- "EC12",
- "EC24",
- "EC50",
- "T12_C_Avg",
- "T24_C_Avg",
- "T50_C_Avg",
- "PA",
- "PA_2",
- "PA_3"
- 
- HrlySI
- "TIMESTAMP",
- "RECORD",
- "TAir_C_Avg",
- "RH",
- "SlrkW_Avg",
- "SlrMJ_Tot",
- "Rain_mm_Tot",
- "WS_mps_S_WVT",
- "WindDir_D1_WVT",
- "WindDir_SD1_WVT",
- "ETAlfalfa",
- "SolarRadCalc",
- "TSoil_C_Avg",
- "VWC_12_Avg",
- "VWC_24_Avg",
- "VWC_50_Avg",
- "EC12",
- "EC24",
- "EC50",
- "T12_C_Avg",
- "T24_C_Avg",
- "T50_C_Avg",
- "PA",
- "PA_2",
- "PA_3"
 
-
+ Run from RUN_10_AFTER.sh
 """
 
 VARCONV = {
@@ -69,9 +10,9 @@ VARCONV = {
            'vwc24_avg': 'vwc_24_avg',
            'vwc50_avg': 'vwc_50_avg',
            'calcvwc06_avg': 'vwc_06_avg',
-        'calcvwc12_avg': 'vwc_12_avg',
-            'calcvwc24_avg': 'vwc_24_avg',
-            'calcvwc50_avg': 'vwc_50_avg',
+           'calcvwc12_avg': 'vwc_12_avg',
+           'calcvwc24_avg': 'vwc_24_avg',
+           'calcvwc50_avg': 'vwc_50_avg',
            }
 
 # stdlib
@@ -177,6 +118,7 @@ def hourly_process(nwsli, maxts):
         ob.data['phour'] = round(
             float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
+        ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
         ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
         ob.data['c1tmpf'] = temperature(
                 float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
