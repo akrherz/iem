@@ -159,6 +159,8 @@ data = {'plots': [
         {'id': "70",
          'label': "Period between First and Last VTEC Product Each Year"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
+        {'id': "80",
+         'label': "Time Duration of a Watch/Warning/Advisory for a UGC"},
         {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
     ]},
     {'label': 'Sustainable Corn Project Plots', 'options': [
