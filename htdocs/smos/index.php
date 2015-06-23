@@ -4,10 +4,12 @@ include("../../include/forms.php");
 include("../../include/myview.php");
 $t = new MyView();
 $t->title = "SMOS Data";
-$t->thispage = "networks-smos";
+$t->thispage = "archive-smos";
 $t->headextra = <<<EOF
-<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<link rel='stylesheet' href='http://openlayers.org/api/2.12/theme/default/style.css' type='text/css'>
+<link rel='stylesheet' href='/assets/openlayers/2.13.1//theme/default/style.css' type='text/css'>
+EOF;
+$t->jsextra = <<<EOF
+<script src='/assets/openlayers/2.13.1/OpenLayers.js'></script>
 <script type='text/javascript'>
 var controls;
 var vectors;
@@ -18,7 +20,7 @@ function init(){
 	feature = new OpenLayers.Feature.Vector(
       	new OpenLayers.Geometry.Point(-10352712, 5160979),
  		{some:'data'},
- 		{externalGraphic: 'http://www.openlayers.org/dev/img/marker.png', 
+ 		{externalGraphic: '/images/marker.png', 
 		graphicHeight: 21, graphicWidth: 16});
 		
 	vectors = new OpenLayers.Layer.Vector('Vector Layer');
@@ -57,7 +59,7 @@ function init(){
 </script>
 <style type='text/css'>
         #map {
-            width: 540px;
+            width: 100%;
             height: 200px;
             border: 2px solid black;
         }
@@ -92,7 +94,7 @@ the Midwestern United States.  The form will provide an error if you attempt
 to request a point outside of the domain.  Data is available since 
 <strong>12 Jan 2010</strong>.<br />
 <form method="GET" action="dl.php" name="dl">
-<table><tr><td valign='top'>
+<div class="row"><div class="col-md-6">
 <i>Enter Latitude/Longitude manually or drag marker on map to the right.</i>
 <table>
 <tr><th>Latitude (north degree)</th>
@@ -120,9 +122,10 @@ to request a point outside of the domain.  Data is available since
     <td>{$d2select}</td>
   </tr>
 </table>
-</td><td>
+</div><div class="col-md-6">
 <div id="map"></div>
-</td></tr></table>
+
+    		</div></div>
 
 <input type="submit" value="Get Data!" />
 	
