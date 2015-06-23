@@ -494,6 +494,27 @@ textTabsLoad = function(){
         var jsonData = Ext.util.JSON.decode(result.responseText);
         /* Remove whatever tabs we currently have going */
         textTabPanel.items.each(function(c){textTabPanel.remove(c);});
+        var fulltext = '<pre>'+ jsonData.data[0].report  +'</pre>';
+        for (var i=0;i<jsonData.data[0].svs.length;i++){
+        	fulltext = fulltext + '<pre>'+ jsonData.data[0].svs[i]  +'</pre>';
+        }
+        
+        textTabPanel.add({
+            title      : 'All',
+            html       : fulltext,
+            xtype      : 'panel',
+            autoScroll : true,
+            tbar       : [
+            {
+              text    : 'Print Text',
+              icon    : 'icons/print.png',
+              cls     : 'x-btn-text-icon',
+              handler : function(){
+                Ext.ux.Printer.print(Ext.getCmp("textTabPanel").getActiveTab());
+              }
+            }
+            ]
+          });
         textTabPanel.add({
           title      : 'Issuance',
           html       : '<pre>'+ jsonData.data[0].report  +'</pre>',
