@@ -9,7 +9,7 @@ $t->thispage = "archive-main";
 $t->title = "Archived Data Resources";
 
 $dllist = get_iemapps_tags("download");
-
+$d = date("Y/m/d");
 $t->content = <<<EOF
 <h3>Archived Data & Plots</h3>
 
@@ -84,7 +84,7 @@ this data back to 2001.  The IEM's archives can be found:
 <ul>
  <li><a href="/wx/afos/">AFOS Product Finder</a>
   <br />If you know what you are looking for, this app works great!</li>
- <li><a href="/archive/data/<?php echo date("Y/m/d"); ?>/text/noaaport/">Simple directory listing</a>
+ <li><a href="/archive/data/{$d}/text/noaaport/">Simple directory listing</a>
   <br />Certain warning type products can be found in the main IEM data archive
   directory structure.</li>
  <li><a href="/wx/afos/list.phtml">List Products by WFO by Date</a>
