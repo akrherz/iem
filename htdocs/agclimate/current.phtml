@@ -17,7 +17,7 @@
  		<tr><th rowspan='2'>Location</th>
  		<th rowspan='2'>Valid</th>
  		<th colspan='3'>Air Temp &deg;F</th>
- 		<th colspan='2'>Wind MPH</th>
+ 		<th colspan='3'>Wind MPH</th>
  		<th colspan='2'>Rain inch</th>
  		<th>4 inches</th>
  		<th colspan='2'>12 inches</th>
@@ -26,7 +26,7 @@
  		</tr>
  		<tr>
  		<th>Ob</th><th>High</th><th>Low</th>
- 		<th>Speed</th><th>Gust</th>
+ 		<th>Speed</th><th>Gust</th><th>Today's Peak</th>
  		<th>Hour</th><th>Day</th>
  		<th>Temp &deg;F</th><th>Temp &deg;F</th><th>Moist %</th>
  		<th>Temp &deg;F</th><th>Moist %</th>
@@ -46,14 +46,15 @@
  	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
  	$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
  			<td>%.1f</td><td>%.1f</td><td>%.1f</td>
- 			<td>%s @ %.0f</td><td>%.0f</td>
+ 			<td>%s @ %.0f</td><td>%.0f</td><td>%.0f @ %s</td>
  			<td>%.2f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%s</td>
  			<td>%.1f</td><td>%s</td>
  			<td>%.1f</td><td>%s</td></tr>", $uri, $nt->table[$sid]['name'],
- 			date("j M g A", $data->ts), $data->db["tmpf"],
+ 			date("g A", $data->ts), $data->db["tmpf"],
  			$data->db["max_tmpf"], $data->db["min_tmpf"], 
  			drct2txt($data->db["drct"]), $data->db["sknt"] * 1.15,
- 			$data->db['gust'] * 1.15,
+ 			$data->db['gust'] * 1.15, $data->db['max_gust'] * 1.15,
+ 			date("g:i A", strtotime($data->db['max_gust_ts'])),
  			$data->db['phour'], $pday, $data->db["c1tmpf"],
  			$data->db["c2tmpf"], 
 			($data->db["c2smv"] < 0) ? "Frozen": round($data->db["c2smv"],1),
