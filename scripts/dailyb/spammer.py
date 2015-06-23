@@ -64,14 +64,16 @@ def get_github_commits():
     
     return txt+"\n", html+"</ul>"
 
+
 def cowreport():
     """ Generate something from the Cow, moooo! """
-    proc = subprocess.Popen('php cowreport.php', shell=True, 
+    proc = subprocess.Popen('php cowreport.php', shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     data = proc.stdout.read()
     html = "<h3>IEM Cow Report</h3><pre>"+ data +"</pre>"
-    txt  = '> IEM Cow Report\n'+ data +'\n'
+    txt = '> IEM Cow Report\n'+ data +'\n'
     return txt, html
+
 
 def feature():
     """ Print the feature for yesterday """
@@ -81,13 +83,13 @@ def feature():
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     # Query
     mcursor.execute("""
-      SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate 
+      SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate
       from feature WHERE date(valid) = 'YESTERDAY'""")
     textfmt = """
  +----------------------------------------------
 %(link)s
  | Title : %(title)s
- | Date  : %(nicedate)s  
+ | Date  : %(nicedate)s
  | Votes : Good: %(good)s   Bad: %(bad)s   Abstain: %(abstain)s
  +---------------------------------------------------------------
 
@@ -97,7 +99,9 @@ def feature():
     htmlfmt = """
 <p><a href="%(link)s">%(title)s</a>
 <br /><strong>Date:</strong> %(nicedate)s
-<br /><strong>Votes:</strong> Good: %(good)s &nbsp;  Bad: %(bad)s  Abstain: %(abstain)s
+<br /><strong>Votes:</strong> Good: %(good)s &nbsp;
+Bad: %(bad)s  Abstain: %(abstain)s
+<br /><img src="%(imgurl)s">
 
 <p>%(story)s
 
@@ -107,14 +111,21 @@ def feature():
 
     for row in mcursor:
         row2 = row.copy()
-        row2['link']  = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=%s" % (lastts.strftime("%Y-%m-%d"),)
-        txt  += textfmt % row2
+        row2['link'] = ("http://mesonet.agron.iastate.edu/onsite/features/"
+                        "cat.php?day=%s"
+                        ) % (lastts.strftime("%Y-%m-%d"),)
+        row2['imgurl'] = ("http://mesonet.agron.iastate.edu/onsite/features/"
+                          "%s/%02i/%s.png"
+                          ) % (row['valid'].year, row['valid'].month,
+                               row['valid'].strftime("%y%m%d"))
+        txt += textfmt % row2
         html += htmlfmt % row2
     if mcursor.rowcount == 0:
         txt += "\n    No feature posted\n\n"
         html += "<strong>No feature posted</strong>"
 
     return txt, html
+
 
 def news():
     """ Print the news that is fit to print """
@@ -124,10 +135,10 @@ def news():
     # Last dailyb delivery
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     mcursor.execute("""
-      SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate 
-      from news WHERE entered > '%s' 
-      ORDER by entered DESC""" % (
-      lastts.strftime("%Y-%m-%d %H:%M"),) )
+      SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate
+      from news WHERE entered > '%s'
+      ORDER by entered DESC
+      """ % (lastts.strftime("%Y-%m-%d %H:%M"),))
 
     textfmt = """
  +----------------------------------------------
@@ -142,7 +153,8 @@ def news():
 """
     htmlfmt = """
 <hr />
-<br /><strong>Title:</strong> <a href="http://mesonet.agron.iastate.edu/onsite/news.phtml?id=%(id)s">%(title)s</a>
+<br /><strong>Title:</strong>
+<a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=%(id)s">%(title)s</a>
 <br /><strong>Date:</strong> %(nicedate)s
 <br /><strong>Author:</strong> %(author)s
 <br /><a href="%(url)s">link</a>
@@ -154,13 +166,14 @@ def news():
     html = "<h3>News</h3>"
 
     for row in mcursor:
-        txt  += textfmt % row
+        txt += textfmt % row
         html += htmlfmt % row
     if mcursor.rowcount == 0:
         txt += "\n    No news is good news\n\n"
         html += "<strong>No news is good news</strong>"
 
     return txt, html
+
 
 def main():
     """ Go Main! """
@@ -172,7 +185,7 @@ def main():
         msg['To'] = 'akrherz@iastate.edu'
     else:
         msg['To'] = 'dailyb@mesonet.agron.iastate.edu'
-    
+
     text = """Iowa Environmental Mesonet Daily Bulletin for %s\n\n""" % (
                                                 now.strftime("%d %B %Y"), )
     html = """
