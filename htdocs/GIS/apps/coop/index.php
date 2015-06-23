@@ -72,7 +72,7 @@ $datalc0->getLabel(0)->set("font", "liberation");
 $datalc0->getLabel(0)->set("size", 12);
 $datalc0->getLabel(0)->set("force", MS_TRUE);
 $datalc0->getLabel(0)->set("partials", MS_TRUE);
-$datalc0->getLabel(0)->set("antialias", MS_TRUE);
+//$datalc0->getLabel(0)->set("antialias", MS_TRUE);
 $datalc0->getLabel(0)->set("position", MS_UR);
 $datalc0->getLabel(0)->set("angle", 0);
 $datalc0->getLabel(0)->set("wrap", 0x57);
@@ -139,11 +139,11 @@ $sql = "SELECT station, years as yrs, ". $dbarray[$plot] ." as d
 
 $rs = pg_query($coopdb, $sql);
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-  $station = $row["station"];
-  $pt = ms_newPointObj();
-  $pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
-  $pt->draw($map, $datal, $img, 0, $row["d"] );
-
+  	$station = $row["station"];
+	if (! array_key_exists($station, $cities)) continue;
+  	$pt = ms_newPointObj();
+  	$pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
+  	$pt->draw($map, $datal, $img, 0, $row["d"] );
 }
 
 $namer->draw($img);
