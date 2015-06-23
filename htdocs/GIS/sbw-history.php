@@ -54,8 +54,7 @@ if ($rows < 2)
 
 $map2 = ms_newMapObj($mapFile);
 $map2->imagecolor->setrgb(155,155,155);
-$map2->set("width", $width);
-$map2->set("height",$height);
+$map2->setSize($width, $height);
 $img2 = $map2->prepareImage();
 
 
@@ -94,7 +93,7 @@ $bar640t->draw($img2);
 
 $tlayer = $map2->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
-$point->setXY(80, 12);
+$point->setXY(80, 8);
 if ($rows > 8){
 $point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History (First 9 shown)");
 } else{
@@ -102,7 +101,7 @@ $point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History");
 }
     
 $point = ms_newpointobj();
-$point->setXY(80, 29);
+$point->setXY(80, 25);
 $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  strtotime($row["init_expire"]) );
 $point->draw($map2, $tlayer, $img2, 1,"$wfo ". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." #$eventid till  $d");
 
@@ -112,7 +111,7 @@ $layer = $map2->getLayerByName("logo");
 //$lcl0s0->set("size", 40);
 $point = ms_newpointobj();
 $point->setXY(40, 26);
-$point->draw($map2, $layer, $img2, 0, "");
+$point->draw($map2, $layer, $img2, 0);
 
 $map2->drawLabelCache($img2);
 
@@ -204,11 +203,11 @@ $sz0 = $row["area"];
 
   $tlayer = $map->getLayerByName("bar640t-title");
   $point = ms_newpointobj();
-  $point->setXY(2, 12);
+  $point->setXY(2, 8);
   $point->draw($map, $tlayer, $img, 0, $vtec_status[$row["status"]] );
-    
+
   $point = ms_newpointobj();
-  $point->setXY(2, 29);
+  $point->setXY(2, 25);
   $d = strftime("%d %b %Y %-2I:%M %p %Z" ,  $ts);
   $point->draw($map, $tlayer, $img, 1,"$d");
 
