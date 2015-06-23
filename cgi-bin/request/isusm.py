@@ -13,7 +13,7 @@ ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
-def get_stations( form ):
+def get_stations(form):
     ''' Figure out which stations were requested '''
     stations = form.getlist('sts')
     if len(stations) == 0:
@@ -32,8 +32,16 @@ def get_dates(form):
     month2 = form.getfirst('month2', 1)
     day2 = form.getfirst('day2', 1)
 
-    sts = datetime.datetime(int(year1), int(month1), int(day1))
-    ets = datetime.datetime(int(year2), int(month2), int(day2))
+    try:
+        sts = datetime.datetime(int(year1), int(month1), int(day1))
+        ets = datetime.datetime(int(year2), int(month2), int(day2))
+    except:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write(("ERROR: Failed to parse specified start and end "
+                          "dates.  Please go back and ensure that you have "
+                          "specified valid dates.  For example, 31 November "
+                          "does not exist."))
+        sys.exit()
 
     if sts > ets:
         sts2 = ets
@@ -43,7 +51,8 @@ def get_dates(form):
         ets = sts + datetime.timedelta(days=1)
     return sts, ets
 
-def get_delimiter( form ):
+
+def get_delimiter(form):
     ''' Figure out what is the requested delimiter '''
     d = form.getvalue('delim', 'comma')
     if d == 'comma':
@@ -51,11 +60,11 @@ def get_delimiter( form ):
     return '\t'
 
 
-def fetch_daily( form, cols ):
+def fetch_daily(form, cols):
     ''' Return a fetching of daily data '''
-    sts, ets = get_dates( form )
-    stations = get_stations( form )
-    delim = get_delimiter( form )
+    sts, ets = get_dates(form)
+    stations = get_stations(form)
+    delim = get_delimiter(form)
     if delim == 'tab':
         delim = '\t'
     elif delim == 'comma':
@@ -63,7 +72,7 @@ def fetch_daily( form, cols ):
     elif delim == 'space':
         delim = ' '
 
-    if len(cols) == 0:    
+    if len(cols) == 0:
         cols = ["station","valid","high", "low", "gdd50", "solar", "precip",
                        "sped", "gust", "et", "soil04t", "soil12t", "soil24t", 
                        "soil50t",
@@ -71,7 +80,7 @@ def fetch_daily( form, cols ):
     else:
         cols.insert(0, 'valid')
         cols.insert(0, 'station')
-    
+
     sql = """
     --- Get the Daily Max/Min soil values
     WITH soils as (
@@ -103,9 +112,9 @@ def fetch_daily( form, cols ):
       sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), str(tuple(stations))
       )
     cursor.execute(sql)
-    
+
     values = []
-    
+
     for row in cursor:
         valid = row['valid']
         station = row['station']
@@ -113,7 +122,7 @@ def fetch_daily( form, cols ):
         low = temperature(row['tair_c_min'], 'C').value('F') if row['tair_c_min'] is not None else -99
         precip = row['rain_mm_tot'] / 24.5 if row['rain_mm_tot'] > 0 else 0
         et = row['dailyet'] / 24.5 if row['dailyet'] > 0 else 0
-        
+
         soil04t = temperature(row['tsoil_c_avg'], 'C').value('F') if row['tsoil_c_avg'] is not None else -99
         soil04tn = temperature(row['soil04tn'], 'C').value('F') if row['soil04tn'] is not None else -99
         soil04tx = temperature(row['soil04tx'], 'C').value('F') if row['soil04tx'] is not None else -99
@@ -129,13 +138,13 @@ def fetch_daily( form, cols ):
         soil50t = temperature(row['t50_c_avg'], 'C').value('F') if row['t50_c_avg'] is not None else -99
         soil50tn = temperature(row['soil50tn'], 'C').value('F') if row['soil50tn'] is not None else -99
         soil50tx = temperature(row['soil50tx'], 'C').value('F') if row['soil50tx'] is not None else -99
-        
+
         soil12vwc = row['vwc_12_avg'] if row['vwc_12_avg'] is not None else -99
         soil24vwc = row['vwc_24_avg'] if row['vwc_24_avg'] is not None else -99
         soil50vwc = row['vwc_50_avg'] if row['vwc_50_avg'] is not None else -99
         speed = row['ws_mps_s_wvt'] * 2.23 if row['ws_mps_s_wvt'] is not None else -99
         gust = row['ws_mps_max'] * 2.23 if row['ws_mps_max'] is not None else -99
-        
+
         values.append( dict(station=station, valid=valid.strftime("%Y-%m-%d"), 
                 high=high, low=low, solar=row['slrmj_tot'], gdd50=row['gdd50'],
                 precip=precip, sped=speed, gust=gust, et=et, 
@@ -155,8 +164,8 @@ def fetch_daily( form, cols ):
     df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
     buf.seek(0)
     return buf.read()
-    
-    
+
+
 def fetch_hourly(form , cols):
     ''' Return a fetching of hourly data '''
     sts, ets = get_dates(form)
@@ -168,7 +177,7 @@ def fetch_hourly(form , cols):
         delim = ','
     elif delim == 'space':
         delim = ' '
-            
+
     if len(cols) == 0:
         cols = ["station","valid","tmpf", "relh", "solar", "precip",
                        "speed", "drct", "et", "soil04t", "soil12t", "soil24t", 
@@ -177,7 +186,7 @@ def fetch_hourly(form , cols):
     else:
         cols.insert(0, 'valid')
         cols.insert(0, 'station')
-    
+
     cursor.execute("""SELECT station, valid, tair_c_avg, rh, slrkw_avg,
     rain_mm_tot, ws_mps_s_wvt, winddir_d1_wvt, etalfalfa, tsoil_c_avg,
     t12_c_avg, t24_c_avg, t50_c_avg, vwc_12_avg, vwc_24_avg, vwc_50_avg
@@ -186,9 +195,9 @@ def fetch_hourly(form , cols):
     ORDER by valid ASC
     """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), 
            str(tuple(stations))))
-    
+
     values = []
-    
+
     for row in cursor:
         valid = row['valid']
         station = row['station']
@@ -206,7 +215,7 @@ def fetch_hourly(form , cols):
         soil12vwc = row['vwc_12_avg'] if row['vwc_12_avg'] is not None else -99
         soil24vwc = row['vwc_24_avg'] if row['vwc_24_avg'] is not None else -99
         soil50vwc = row['vwc_50_avg'] if row['vwc_50_avg'] is not None else -99
-        
+    
         values.append( dict(station=station, valid=valid.strftime("%Y-%m-%d %H:%M"), 
                   tmpf=tmpf, relh=relh, solar=solar, precip=precip, 
                   speed=speed, drct=drct, et=et,  soil04t=soil04t, 
@@ -216,7 +225,6 @@ def fetch_hourly(form , cols):
     if len(values) == 0:
         return 'Sorry, no data found for this query.'
 
-    
     df = pd.DataFrame(values)
     buf = cStringIO.StringIO()
     df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
@@ -240,9 +248,8 @@ def main(argv):
         sys.stdout.write("Content-Disposition: attachment; filename=isusm.txt\n\n") 
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write( res )
+    sys.stdout.write(res)
 
 if __name__ == '__main__':
     ''' make stuff happen '''
     main(sys.argv)
-
