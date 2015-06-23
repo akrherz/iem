@@ -1,35 +1,35 @@
 """
  Check how much SNET data we have
 """
-import os
 import sys
-import stat
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 if __name__ == '__main__':
-    icursor.execute("""SELECT network, 
-    sum(case when valid > now() - '75 minutes'::interval then 1 else 0 end) 
+    icursor.execute("""
+    SELECT network,
+    sum(case when valid > now() - '75 minutes'::interval then 1 else 0 end)
     from current c JOIN stations s on
     (s.iemid = c.iemid)
-    WHERE network in ('KCCI','KELO','KIMT') GROUP by network""")
+    WHERE network in ('KCCI','KELO','KIMT') GROUP by network
+    """)
 
     counts = {'KCCI': 0, 'KELO': 0, 'KIMT': 0}
     total = 0
     for row in icursor:
-        counts[ row[0] ] = row[1]
+        counts[row[0]] = row[1]
         total += row[1]
-    
-    if total > 50:
-        print 'OK - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5' % (total, 
-                                counts['KCCI'], counts['KELO'], counts['KIMT'])
+
+    if total > 40:
+        print(('OK - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
+               ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(0)
     elif total > 20:
-        print 'WARNING - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5' % (total, 
-                                counts['KCCI'], counts['KELO'], counts['KIMT'])
+        print(('WARNING - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
+               ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(1)
     else:
-        print 'CRITICAL - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5' % (total, 
-                                counts['KCCI'], counts['KELO'], counts['KIMT'])
+        print(('CRITICAL - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
+               ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(2)
