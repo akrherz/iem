@@ -8,7 +8,7 @@ cd hrrr
 python plot_ref.py &
 
 cd ../dl
-python download_hrrr_rad.py
+python download_hrrr.py &
 
 cd ../sbw
 python polygonMosaic.py S
