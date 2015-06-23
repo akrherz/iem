@@ -3,18 +3,6 @@
 
  Run from RUN_10_AFTER.sh
 """
-
-VARCONV = {
-           'vwc06_avg': 'vwc_06_avg',
-           'vwc12_avg': 'vwc_12_avg',
-           'vwc24_avg': 'vwc_24_avg',
-           'vwc50_avg': 'vwc_50_avg',
-           'calcvwc06_avg': 'vwc_06_avg',
-           'calcvwc12_avg': 'vwc_12_avg',
-           'calcvwc24_avg': 'vwc_24_avg',
-           'calcvwc50_avg': 'vwc_50_avg',
-           }
-
 # stdlib
 import os
 import pytz
@@ -32,6 +20,17 @@ icursor = ISUAG.cursor()
 
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
 accesstxn = ACCESS.cursor()
+
+VARCONV = {
+           'vwc06_avg': 'vwc_06_avg',
+           'vwc12_avg': 'vwc_12_avg',
+           'vwc24_avg': 'vwc_24_avg',
+           'vwc50_avg': 'vwc_50_avg',
+           'calcvwc06_avg': 'vwc_06_avg',
+           'calcvwc12_avg': 'vwc_12_avg',
+           'calcvwc24_avg': 'vwc_24_avg',
+           'calcvwc50_avg': 'vwc_50_avg',
+           }
 
 BASE = '/mnt/home/loggernet/'
 STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
@@ -71,9 +70,16 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
             }
 
 
+def make_time(s):
+    """Convert a time in the file to a datetime"""
+    ts = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+    ts = ts.replace(tzinfo=pytz.FixedOffset(-360))
+    return ts
+
+
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
-    #print '-------------- HOURLY PROCESS ---------------'
+    # print '-------------- HOURLY PROCESS ---------------'
     fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'].split("/")[1])
     if not os.path.isfile(fn):
         return
@@ -87,15 +93,14 @@ def hourly_process(nwsli, maxts):
     # Read data
     processed = 0
     for i in range(len(lines)-1, 3, -1):
-        tokens = lines[i].strip().replace('"','').split(",")
+        tokens = lines[i].strip().replace('"', '').split(",")
         if len(tokens) != len(headers):
             continue
-        valid = datetime.datetime.strptime(tokens[ headers.index('timestamp')],
-                                           '%Y-%m-%d %H:%M:%S')
-        valid = valid.replace(tzinfo=pytz.FixedOffset(-360))
+        valid = make_time(tokens[headers.index('timestamp')])
         if valid <= maxts:
             break
-        #print valid, tokens[ headers.index('timestamp')]
+        gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
+        # print valid, tokens[ headers.index('timestamp')]
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
         dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
@@ -105,8 +110,8 @@ def hourly_process(nwsli, maxts):
         icursor.execute(sql)
 
         # Update IEMAccess
-        #print nwsli, valid
-        ob = Observation(nwsli, 'ISUSM', 
+        # print nwsli, valid
+        ob = Observation(nwsli, 'ISUSM',
                          valid.astimezone(pytz.timezone("America/Chicago")))
         tmpc = temperature(float(tokens[headers.index('tair_c_avg')]), 'C')
         if tmpc.value('F') > -50 and tmpc.value('F') < 140:
@@ -119,6 +124,8 @@ def hourly_process(nwsli, maxts):
             float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
         ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
+        ob.data['max_gust_ts'] = "%s-06" % (
+            gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
         ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
         ob.data['c1tmpf'] = temperature(
                 float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
@@ -205,22 +212,22 @@ def daily_process(nwsli, maxts):
 def update_pday():
     ''' Compute today's precip from the current_log archive of data '''
     accesstxn.execute("""
-    SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from 
-    current_log s JOIN stations t on (t.iemid = s.iemid) 
+    SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from
+    current_log s JOIN stations t on (t.iemid = s.iemid)
     WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by s.iemid
     """)
     data = {}
     for row in accesstxn:
         data[row[0]] = row[1]
-        
+
     for iemid in data.keys():
         accesstxn.execute("""UPDATE summary SET pday = %s
         WHERE iemid = %s and day = 'TODAY'""", (data[iemid], iemid))
-    
+
 
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
-    data = {'hourly': datetime.datetime(2012, 1, 1, 
+    data = {'hourly': datetime.datetime(2012, 1, 1,
                                         tzinfo=pytz.FixedOffset(-360)), 
             'daily': datetime.date(2012, 1, 1)}
     icursor.execute("""SELECT max(valid) from sm_daily 
@@ -229,12 +236,15 @@ def get_max_timestamps(nwsli):
     if row[0] is not None:
         data['daily'] = row[0]
 
-    icursor.execute("""SELECT max(valid) from sm_hourly 
-        WHERE station = '%s'""" % (nwsli, ))
+    icursor.execute("""
+        SELECT max(valid) from sm_hourly
+        WHERE station = '%s'
+        """ % (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
         data['hourly'] = row[0]
     return data
+
 
 def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     """ Send the raw datafile to LDM """
@@ -244,7 +254,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     lines = open(fn).readlines()
     if len(lines) < 5:
         return
-    
+
     tmpfn = tempfile.mktemp()
     tmpfp = open(tmpfn, 'w')
     tmpfp.write(lines[0])
@@ -269,7 +279,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     lines = open(fn).readlines()
     if len(lines) < 5:
         return
-    
+
     tmpfn = tempfile.mktemp()
     tmpfp = open(tmpfn, 'w')
     tmpfp.write(lines[0])
@@ -283,7 +293,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
                     datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
                     tmpfn)
     proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
-                         stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE)
     proc.stdout.read()
     os.remove(tmpfn)
 
@@ -296,16 +306,16 @@ def main():
         dyprocessed = daily_process(nwsli, maxobs['daily'])
         if hrprocessed > 0:
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
-        #else:
+        # else:
         #    print 'No LDM data sent for %s' % (nwsli,)
     update_pday()
     icursor.close()
     ISUAG.commit()
     ISUAG.close()
-    
+
     accesstxn.close()
     ACCESS.commit()
     ACCESS.close()
-    
+
 if __name__ == '__main__':
     main()
