@@ -101,7 +101,7 @@ if (file_exists($fp)){
 $cp = ms_newLayerObj($map);
 $cp->set("type", MS_SHAPE_POINT);
 $cp->set("status", MS_ON);
-$cp->set("labelcache", MS_OFF);
+$cp->set("labelcache", MS_ON);
 $cl = ms_newClassObj($cp);
 $lbl = new labelObj();
 $cl->addLabel($lbl);
