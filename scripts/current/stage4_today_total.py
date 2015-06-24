@@ -58,10 +58,9 @@ def doday(ts, realtime):
                                                     ts.strftime("%-d %b %Y"),),
                     subtitle=subtitle)
             
-        clevs = np.arange(0,0.2,0.05)
-        clevs = np.append(clevs, np.arange(0.2, 1.0, 0.1))
-        clevs = np.append(clevs, np.arange(1.0, 5.0, 0.25))
-        clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
+        clevs = np.arange(0, 0.25, 0.05)
+        clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
+        clevs = np.append(clevs, np.arange(3., 10.0, 1))
         clevs[0] = 0.01
     
         m.pcolormesh(lons, lats, total / 24.5, clevs, units='inch')
