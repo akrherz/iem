@@ -161,6 +161,10 @@ $().ready(function(){
 		}),
 		style: function(feature, resolution){
 			// OL rotation is in radians!
+			if (feature.getId() == cameraID){
+				cameraStyle2.getImage().setRotation(parseInt(feature.get('angle')) / 180. * 3.14);
+				return [cameraStyle2];				
+			}
 			cameraStyle.getImage().setRotation(parseInt(feature.get('angle')) / 180. * 3.14);
 			return [cameraStyle];
 		}
