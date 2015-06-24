@@ -35,7 +35,11 @@ function make_row($dict, $oddrow){
 	$sitesurl = sprintf("%s/sites/site.php?station=%s&network=%s",
 			BASEURL, $dict["sid"], $dict["network"]);
 
-	$s .= "<th><input type=\"checkbox\" name=\"st[]\" value=\"". $dict["sid"] ."\" /></th>";
+	$s .= <<<EOF
+	<td><input type="checkbox" name="st[]" value="{$dict["sid"]}"/></td>
+	<td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="glyphicon glyphicon-paperclip"></i></a>		
+	</td>
+EOF;
 	$s .= "<td><a href=\"cat.phtml?station=". $dict["sid"] ."&network=". $dict["network"] . "\">". $dict['sid'] ."</a></td>";
 	$s .= "<td><a href=\"$sitesurl\">". $dict["sname"] .", ". $dict["state"] ."</a></td>";
 	$s .= "<td>". $dict["county"] ."</td>";
@@ -76,6 +80,7 @@ while (list($site, $iemob) = each($net) ){
 	$db[$site]['lts'] = $iemob->lts;
 	$db[$site]['sid'] = $site;
 	$db[$site]['sname'] = $iemob->db["sname"];
+	$db[$site]['raw'] = $iemob->db["raw"];
 	$db[$site]['state'] = $iemob->db["state"];
 	$db[$site]['network'] = $iemob->db["network"];
 	$db[$site]['county'] = $iemob->db["county"];
@@ -214,11 +219,10 @@ information on the site. Click on the column heading to sort the column, clickin
 again will reverse the sort.
  
 <form name="st" action="/my/current.phtml" method="GET">
-<table cellspacing="0" cellpadding="2" border="1"
-       style="width: 100%; font-size: 10pt;" class="ruler">
+<table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
-  <th rowspan=2>Add:</th>
+  <th rowspan=2>Add:</th><th rowspan=2>Raw:</th>
   <th rowspan=2><a href="{$one}">SiteID:</a></th>
   <th rowspan=2><a href="{$two}">Station Name:</a></th>
   <th rowspan=2><a href="{$three}">County:</a></th>
