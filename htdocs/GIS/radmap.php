@@ -618,7 +618,7 @@ if (isset($_REQUEST["tz"])) {
 		$tz = "America/Denver";
 	}
 	elseif ($tz == 'PDT' || $tz == 'PST'){
-		$tz = "America/Seattle";
+		$tz = "America/Los_Angeles";
 	}
 	elseif ($tz == 'CDT' || $tz == 'CST'){
 		$tz = "America/Chicago";
