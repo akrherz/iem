@@ -2,10 +2,9 @@
 /**
  * Time for a standard library to access the IEMAccess DB for observations
  *  This could theoretically be distributed to others to access the DB!
- * $Id: $:
  */
 
-include_once("$rootpath/include/database.inc.php");
+include_once dirname(__FILE__) ."/database.inc.php";
 
 class IEMAccess {
   var $dbconn;

@@ -2,11 +2,10 @@
 /* Giveme JSON data for LSRs inside a polygon */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "../../include/lsrs.php";
 require_once "../../include/database.inc.php";
 
 $connect = iemdb("postgis");
-pg_exec($connect, "SET TIME ZONE 'GMT'");
+pg_exec($connect, "SET TIME ZONE 'UTC'");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
@@ -46,7 +45,7 @@ for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
   $q = Array();
   $q["id"] = $i +1;
   $q["valid"] = substr($lsr["valid"],0,16);
-  $q["event"] = @$lsr_types[$lsr["type"]]["name"];
+  $q["event"] = $lsr["typetext"];
   $q["type"] = $lsr["type"];
   $q["magnitude"] = $lsr["magnitude"];
   $q["city"] = $lsr["city"];

@@ -1,5 +1,13 @@
 <?php
-// http://coding.smashingmagazine.com/2011/10/17/getting-started-with-php-templating/
+/* Here lies the dead simple templating engine the IEM uses
+ * 
+ * For example
+ *     $t = new MyView();
+ *     $t->blah = "Hi";
+ *     $t->render('single.phtml');
+ *     
+ *  http://coding.smashingmagazine.com/2011/10/17/getting-started-with-php-templating/
+ */
 class MyView {
     protected $vars = array();
     public function __construct($template_dir = null) {

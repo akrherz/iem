@@ -4,7 +4,10 @@ include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Quality Control";
 $t->thispage = "iem-qc";
-$t->west = <<<EOF
+$t->content = <<<EOF
+
+<div class="row">
+		<div class="col-md-6">
 <h3>Quality Control Products</h3>
 
 <p>This page contains links to Quality Control (QC) products generated on the IEM server.</p>
@@ -16,23 +19,18 @@ $t->west = <<<EOF
  <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
 </ul>
 
-<p><h3 class="subtitle">IEM Tracker Links:</h3>
+<p><h3>IEM Tracker Links:</h3>
 <ul>
    <li>Sites currently <a href="/QC/offline.php">offline</a></li>
    <li><a href="/QC/tickets.phtml">Active Trouble Tickets</a></li>
 </ul>
-EOF;
-$t->east = <<<EOF
-<P><h3 class="subtitle">Data Quantity Charts:</h3>
-<UL>
-	<LI>48 h  <a href="/plotting/stats/reports.php?network=IA_ASOS">Plot</a> of saved ASOS obs</a></LI>
-	<LI>48 h  <a href="/plotting/stats/reports.php?network=AWOS">Plot</a> of saved AWOS obs</a></LI>
-	<LI>48 h  <a href="/plotting/stats/reports.php?network=IA_RWIS">Plot</a> of saved RWIS obs</a></LI>
-</UL>
+</div>
+<div class="col-md-6">
 
+</div>
+</div>
 
 
 EOF;
 $t->render('single.phtml');
 ?>
-

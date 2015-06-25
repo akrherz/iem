@@ -3,7 +3,6 @@
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/vtec.php");
-include("../../include/lsrs.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;

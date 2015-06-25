@@ -1,10 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
-include("../../include/mobile_device_detect.php");
+include_once "../../include/Mobile_Detect.php";
 
 /* Mobile business logic */
-$imobile = mobile_device_detect(true,true,true,true,true,true,true,false,false);
-if ($imobile){
+$detect = new Mobile_Detect;
+if ($detect->isMobile()){
   echo "<html><head><script>
   var tokens = window.location.href.split('#');
   if (tokens.length == 2){

@@ -2,9 +2,8 @@
 
 function ugcStateSelect($state, $selected)
 {
-    global $rootpath;
     $state = substr(strtoupper($state),0,2);
-    include_once("$rootpath/include/database.inc.php");
+	include_once dirname(__FILE__) ."/database.inc.php";
     $dbconn = iemdb('postgis');
     $rs = pg_exec($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
           ." and substr(ugc,1,2) = '$state' ORDER by name ASC");
@@ -22,9 +21,8 @@ function ugcStateSelect($state, $selected)
 
 function selectAzosNetwork($network)
 {   
-    global $rootpath;
     $network = strtoupper($network);
-    include_once("$rootpath/include/database.inc.php");
+	include_once dirname(__FILE__) ."/database.inc.php";
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks WHERE id ~* 'ASOS' or id ~* 'AWOS' ORDER by name ASC");
     $s = "<select name=\"network\">\n";
@@ -39,9 +37,8 @@ function selectAzosNetwork($network)
 
 function selectNetwork($selected, $extra=Array())
 {
-    global $rootpath;
     $selected = strtoupper($selected);
-    include_once("$rootpath/include/database.inc.php");
+    include_once dirname(__FILE__) ."/database.inc.php";
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
     $s = "<select name=\"network\">\n";
@@ -68,9 +65,8 @@ function selectNetwork($selected, $extra=Array())
 function networkMultiSelect($network, $selected, $extra=Array(),
 		$label="station")
 {
-    global $rootpath;
     $s = "";
-    include_once("$rootpath/include/network.php");
+    include_once dirname(__FILE__) ."/database.inc.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     $s .= "<select name=\"${label}\" size=\"5\" MULTIPLE >\n";
@@ -96,9 +92,8 @@ function networkMultiSelect($network, $selected, $extra=Array(),
 function networkSelect($network, $selected, $extra=Array(),
 		$selectName="station")
 {
-    global $rootpath;
     $s = "";
-    include_once("$rootpath/include/network.php");
+    include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     reset($cities);
@@ -128,10 +123,9 @@ function networkSelect($network, $selected, $extra=Array(),
 
 function networkSelectAuto($network, $selected, $extra=Array())
 {
-    global $rootpath;
     $network = strtoupper($network);
     $s = "";
-    include_once("$rootpath/include/network.php");
+    include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     reset($cities);
@@ -158,9 +152,8 @@ function networkSelectAuto($network, $selected, $extra=Array())
 
 function isuagSelect($selected)
 {
-    global $rootpath;
     $s = "";
-    include_once("$rootpath/include/network.php");
+    include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable("ISUAG");
     $cities = $nt->table;
     reset($cities);
@@ -176,8 +169,7 @@ function isuagSelect($selected)
 }
 
 function rwisMultiSelect($selected, $size){
-	global $rootpath;
-    include_once("$rootpath/include/network.php");
+    include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable("IA_RWIS");
     $cities = $nt->table;
   $s = "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";

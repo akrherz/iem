@@ -4,6 +4,24 @@
  */
 include_once dirname(__FILE__) ."/database.inc.php";
 
+function get_news_by_tag($tag){
+	// Generate a listing of recent news items by a certain tag
+	$pgconn = iemdb("mesosite", TRUE, TRUE);
+	$rs = pg_prepare($pgconn, "NEWSTAGSELECT",
+			"SELECT id, entered, title from news WHERE "
+			."tags @> ARRAY[$1]::varchar[] ORDER by entered DESC LIMIT 5");
+	$rs = pg_execute($pgconn, "NEWSTAGSELECT", Array($tag));
+	$s = "<h3>Recent News Items</h3><p>Most recent news items tagged: "
+		."{$tag}</p><ul>";
+	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		$s .= sprintf("<li><a href=\"/onsite/news.phtml?id=%s\">%s</a>"
+				."<br />Posted: %s</li>\n", $row["id"],
+				$row["title"], date("d M Y", strtotime($row["entered"])));
+	}
+	$s .= "</ul>";
+	return $s;
+}
+
 function get_iemapps_tags($tagname){
 	// Get a html list for this tagname
 	$pgconn = iemdb("mesosite", TRUE, TRUE);

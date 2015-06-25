@@ -1,7 +1,7 @@
 <?php
 /* Build Network station tables on demand! */
 
-include_once("$rootpath/include/database.inc.php");
+include_once dirname(__FILE__) ."/network.php";
 
 class StationData {
 

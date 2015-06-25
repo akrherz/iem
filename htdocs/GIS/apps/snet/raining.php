@@ -7,9 +7,48 @@ include_once "../../../../include/iemmap.php";
 include("../../../../include/mlib.php");
 include("../../../../include/forms.php");
 include("../../../../include/network.php");
-include("../../../../include/nexlib2.php");
 include("../../../../include/iemaccess.php");
 include("../../../../include/iemaccessob.php");
+
+$projs = Array("KCC" => "init=epsg:26915",
+		"DMX" => "init=epsg:4326",
+		"FSD" => "init=epsg:4326",
+		"ARX" => "init=epsg:4326",
+		"OAX" => "init=epsg:4326",
+		"ABR" => "init=epsg:4326",
+		"DVN" => "init=epsg:4326",
+		"EAX" => "init=epsg:4326",
+		"MPX" => "init=epsg:4326",
+		"UDX" => "init=epsg:4326"
+);
+
+$extents = Array("KCCI" => Array(176500, 4450000, 710900, 4850000),
+		"KCCIA" => Array(276500, 4650000, 610900, 4850000),
+		"KCCIB" => Array(276500, 4550000, 610900, 4750000),
+		"KCCIC" => Array(276500, 4450000, 610900, 4650000),
+		"DMX" => Array(-96.72, 38.72, -90.72, 44.72),
+		"DMXA" => Array(-95.0, 41.0, -92.0, 44.0),
+		"DMXB" => Array(-95.0, 40.5, -92.0, 43),
+		"DMXC" => Array(-95.0, 40, -92.0, 42.5),
+		"ARX" => Array(-94.18, 40.82, -88.18, 46.82),
+		"DVN" => Array(-93.57, 38.60, -87.57, 44.60),
+		"OAX" => Array(-99.37, 38.32, -93.37, 44.32),
+		"EAX" => Array(-97.25, 35.80, -91.25, 41.80),
+		"MPX" => Array(-96.55, 41.83, -90.55, 47.83),
+		"FSD" => Array(-99.72, 40.58, -93.72, 46.58),
+		"ABR" => Array(-101.40, 42.45, -95.40, 48.45),
+		"UDX" => Array(-105.82, 41.12, -99.82, 47.12)
+);
+
+$wfos = Array("DMX" => "Des Moines",
+		"DVN" => "Davenport",
+		"ARX" => "LaCrosse",
+		"MPX" => "Minneapolis",
+		"FSD" => "Sioux Falls",
+		"OAX" => "Omaha",
+		"EAX" => "Pleasant Hill",
+		"ABR" => "Aberdeen",
+		"UDX" => "Rapid City");
 
 $pgconn = iemdb("access");
  $rad = isset($_GET['rad']) ? $_GET['rad'] : 'DMX';
@@ -127,12 +166,12 @@ foreach($stbl as $key => $value){
 	$pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
 	/** Data is old */
 	if ($now - $data[$key]["ts"] > 1800){
-		$pt->draw($map, $site, $img, 0, "" );
+		$pt->draw($map, $site, $img, 0);
 	} else {
 		if (floatval($data[$key]["tmpf"]) < 32.1) {
-			$pt->draw($map, $site, $img, 2, "" );
+			$pt->draw($map, $site, $img, 2);
 		} else {
-			$pt->draw($map, $site, $img, 1, "" );
+			$pt->draw($map, $site, $img, 1 );
 		}
 	}
 
