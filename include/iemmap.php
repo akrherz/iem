@@ -27,5 +27,4 @@ function iemmap_title($map, $img, $title=null, $subtitle=null){
 	}
 }
 
-
 ?>

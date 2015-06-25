@@ -1,6 +1,7 @@
 <?php 
  include("../../config/settings.inc.php");
  include("../../include/myview.php");
+ include("../../include/generators.php");
  $t = new MyView();
 
  $t->title = "NWS COOP Data";
@@ -101,6 +102,7 @@
 EOF;
  }
  
+$news = get_news_by_tag("coop");
  
 $t->content = <<<EOF
 <div class="row">
@@ -123,7 +125,7 @@ $t->content = <<<EOF
   <a href="/sites/locate.php?network=IA_COOP"><img src="/images/find.png" /><br />Locate Site</a>
  </div>
   <div class="col-md-2 col-sm-2">
-  <a href="cat.phtml"><img src="../images/misc.png" /><br />2004-{$yr}</a>
+  <a href="cat.phtml"><img src="/images/misc.png" /><br />2004-{$yr}</a>
  </div>
   <div class="col-md-2 col-sm-2">
   <a href="/GIS/apps/coop/gsplot.phtml"><img src="/images/view_icon.png" /><br />Growing Season</a>
@@ -140,15 +142,7 @@ techniques.
 <div class="row">
 <div class="col-md-4 col-sm-4">
 
-<h3>Relevant News Items</h3>
-<ul>
- <li><a href="/onsite/news.phtml?id=261">Record Cold between 9-15 August, 2004</a></li>
- <li><a href="/onsite/news.phtml?id=327">Snowfall reports 5-6 Jan, 2005</a></li>
- <li><a href="/onsite/news.phtml?id=375">April 2005 Warmth</a></li>
- <li><a href="/onsite/news.phtml?id=419">100+ Degree Temperatures</a></li>
- <li><a href="/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
- <li><a href="/onsite/news.phtml?id=881">Estimating near-term COOP Data</a></li>
-</ul>
+{$news}
 
 <h3>Data Plots</h3>
 <ul>
@@ -186,7 +180,7 @@ techniques.
 </div><div class="col-md-4 col-sm-4">
 
 
-<p><h3>Download Data:</h3><br>
+<p><h3>Download Data</h3>
 <ul>
   <li><a href="/request/coop/fe.phtml">Download Daily Oberservations</a>
     <br>Pick your site, pick a time period, and download the data.</li>
