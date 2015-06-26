@@ -66,7 +66,7 @@ function networkMultiSelect($network, $selected, $extra=Array(),
 		$label="station")
 {
     $s = "";
-    include_once dirname(__FILE__) ."/database.inc.php";
+    include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     $s .= "<select name=\"${label}\" size=\"5\" MULTIPLE >\n";
