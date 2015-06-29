@@ -4,13 +4,13 @@ import numpy
 import datetime
 import pytz
 
-sts = datetime.datetime(2013,5,1, 0)
+sts = datetime.datetime(2015,5,1, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2013,6,10, 0)
+ets = datetime.datetime(2015,6,28, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 
 
-nc = netCDF4.Dataset('/mesonet/data/iemre/2013_mw_hourly.nc')
+nc = netCDF4.Dataset('/mesonet/data/iemre/2015_mw_hourly.nc')
 lons = nc.variables['lon'][:]
 lats = nc.variables['lat'][:]
 running = numpy.zeros( (len(nc.dimensions['lat']), len(nc.dimensions['lon'])))
@@ -32,20 +32,20 @@ while now < ets:
 nc2 = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
 domain = nc2.variables['domain'][:]
 nc2.close()
-maxval = numpy.where(domain == 1, maxval, 1.e20)
+#maxval = numpy.where(domain == 1, maxval, 1.e20)
 
 m = plot.MapPlot(sector='midwest',
-                title='1 May - 10 June 2013 Max Period between hourly 0.05+ inch Precip',
+                title='1 May - 28 June 2015 Max Period between hourly 0.05+ inch Precip',
                 subtitle='based on NCEP Stage IV data')
 
 extra = lons[-1] + (lons[-1] - lons[-2])
-lons = numpy.concatenate([lons, [extra,]])
+#lons = numpy.concatenate([lons, [extra,]])
 
 extra = lats[-1] + (lats[-1] - lats[-2])
-lats = numpy.concatenate([lats, [extra,]])
+lats[-1] = extra
+#lats = numpy.concatenate([lats, [extra,]])
 
 x, y = numpy.meshgrid(lons, lats)
-m.pcolormesh(x, y, maxval / 24.0, numpy.arange(0,25,1), units='days')
-m.postprocess(filename='test.svg')
-import iemplot
-iemplot.makefeature('test')
+#m.pcolormesh(x, y, maxval / 24.0, numpy.arange(0,25,1), units='days')
+m.contourf(x, y, maxval / 24.0, numpy.arange(0,25,2), units='days')
+m.postprocess(filename='test.png')
