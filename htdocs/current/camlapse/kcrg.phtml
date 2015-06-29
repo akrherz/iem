@@ -14,7 +14,8 @@ $camselect .= "</select>";
 echo <<<EOF
 <html>
 <head>
-<script type="text/javascript" src="flowplayer-3.2.13.min.js"></script>
+<link href="/vendor/flowplayer/6.0.2/skin/minimalist.css" rel="stylesheet">
+<script type="text/javascript" src="/vendor/flowplayer/6.0.2/flowplayer.min.js"></script>
 </head>
 <body>
 
@@ -36,20 +37,32 @@ echo <<<EOF
 
 
 <script>
-flowplayer("player", "flowplayer-3.2.18.swf", {
-   clip:{
-    baseUrl:"/onsite/lapses/auto/",
-    url:"uni_sunrise.flv"}
-   });
-
+flowplayer.conf = {
+	engine: 'flash',
+	swf: '/vendor/flowplayer/6.0.2/flowplayer.swf'
+};
+	ts = new Date();
+	var container = document.getElementById("player");
+	flowplayer(container, {
+		clip : {
+			sources: [{type: 'video/mp4',
+					   src: '/onsite/lapses/auto/kirkwood_sunrise.mp4?'+ ts.getTime()},
+					  {type: 'video/flv',
+					   src: '/onsite/lapses/auto/kirkwood_sunrise.flv?'+ ts.getTime()}
+		
+		]}
+	});
+		
 function myloader()
 {
-  ts = new Date();
-  var mycam = document.theform.mycam.value;
-  var mylapse = document.theform.mylapse.value;
+  	ts = new Date();
+  	var mycam = document.theform.mycam.value;
+  	var mylapse = document.theform.mylapse.value;
 	window.location.href = "#"+mycam+"_"+mylapse;
-  var url =  mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-  \$f().play(url);
+  	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
+  	url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
+	api = flowplayer();
+	api.load([{flash:url, mp4:url2}]);
 }
 
 var tokens = window.location.href.split('#');
