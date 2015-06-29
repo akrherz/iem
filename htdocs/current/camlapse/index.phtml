@@ -5,10 +5,7 @@ $t = new MyView();
 include("../../../include/cameras.inc.php");
 $t->title = "Webcam Lapse Player";
 $t->headextra = <<<EOF
-<link href="skin/minimalist.css" rel="stylesheet">
-EOF;
-$jsextra = <<<EOF
-<script type="text/javascript" src="flowplayer-dev.js"></script>
+<link href="/vendor/flowplayer/6.0.2/skin/minimalist.css" rel="stylesheet">
 EOF;
 $t->thispage = "webcam-lapse";
 
@@ -45,19 +42,37 @@ note the timestamp on the lapses, some of them may be old.</p>
 </div>
 </form>
 EOF;
-$jsextra .= <<<EOF
+$t->jsextra = <<<EOF
+<script type="text/javascript" src="/vendor/flowplayer/6.0.2/flowplayer.min.js"></script>
 <script type="text/javascript">
 flowplayer.conf = {
 	engine: 'flash',
-	swf: 'flowplayer-dev.swf'
+	swf: '/vendor/flowplayer/6.0.2/flowplayer.swf'
 };
-
+		
+function myloader()
+{
+  	ts = new Date();
+  	var mycam = document.theform.mycam.value;
+  	var mylapse = document.theform.mylapse.value;
+	window.location.href = "#"+mycam+"_"+mylapse;
+  	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
+  	url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
+	api = flowplayer();
+	api.load([{flash:url, mp4:url2}]);
+}
+		
 $(function () {
-	$("#player").flowplayer({
-		playlist : [
-			[{flash: '/onsite/lapses/auto/ames_morning.flv',
-			mp4: '/onsite/lapses/auto/ames_morning.mp4'}]
-		]
+	ts = new Date();
+	var container = document.getElementById("player");
+	flowplayer(container, {
+		clip : {
+			sources: [{type: 'video/mp4',
+					   src: '/onsite/lapses/auto/algona_sunrise.mp4?'+ ts.getTime()},
+					  {type: 'video/flv',
+					   src: '/onsite/lapses/auto/algona_sunrise.flv?'+ ts.getTime()}
+		
+		]}
 	});
 
 	var tokens = window.location.href.split('#');
@@ -74,24 +89,8 @@ $(function () {
 });
 
 
-		
-function myloader()
-{
-  	ts = new Date();
-  	var mycam = document.theform.mycam.value;
-  	var mylapse = document.theform.mylapse.value;
-	window.location.href = "#"+mycam+"_"+mylapse;
-  	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-  	url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
-	api = flowplayer();
-	api.load([{flash:url, mp4:url2}]);
-}
-
-
-
-
 </script>
 EOF;
-$t->jsextra = $jsextra;
+
 $t->render('single.phtml');
 ?>
