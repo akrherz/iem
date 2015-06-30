@@ -45,7 +45,7 @@ def fetch(valid):
     outdir = os.path.dirname(outfn)
     if not os.path.isdir(outdir):
         os.makedirs(outdir, mode=0775)  # make sure LDM can then write to dir
-    output = open(outfn, 'ab')
+    output = open(outfn, 'ab', 0664)
 
     req = urllib2.Request(uri[:-4])
     if len(offsets) != 8:
@@ -69,4 +69,5 @@ def main():
 
 
 if __name__ == '__main__':
+    os.umask(0002)
     main()
