@@ -90,7 +90,7 @@ if ($date >= $iemarchive){
 				null as skyc3, null as skyl3, null as presentwx,
 				null as skyc4, null as skyl4, null as max_tmpf_6hr,
 				null as p06i, null as min_tmpf_6hr, null as p03i
-		from t". date("Y", $date) ." where 
+		from alldata where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
 	} else if (preg_match("/ISUSM/", $network)){
@@ -103,7 +103,7 @@ if ($date >= $iemarchive){
 		$db = "asos";
 		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour,
 				null as relh
-				from t". date("Y", $date) ." where
+				from alldata where
 				station = $1  and valid  >= $3 and valid  < $4
 				and $2 = $2 ORDER by valid DESC");
 		
