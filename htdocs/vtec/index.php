@@ -36,8 +36,7 @@ $headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/ext/ux/form/Spinner.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-<script src="OpenLayers.js"></script>
+<script src="OpenLayers_GeoExt.js"></script>
 EOF;
 
 if (isset($_REQUEST["devel"])){
@@ -58,7 +57,7 @@ if (isset($_REQUEST["devel"])){
 <script type="text/javascript" src="js/Ext.ux.SliderTip.js"></script>
 <script type="text/javascript" src="js/static.js"></script>';
 } else {
-	$headextra .= '<script src="app.js?v=7"></script>';
+	$headextra .= '<script src="app.js?v=8"></script>';
 }
 
 $headextra .= <<<EOF
