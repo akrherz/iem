@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -94,6 +94,7 @@ Requires: zip
 Requires: php-devel
 Requires: pyLDM
 Requires: gd
+Requires: ntp
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -115,6 +116,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Tue Jun 30 2015 daryl herzmann <akrherz@iastate.edu>
+- Add ntp
+
 * Fri Jun 12 2015 daryl herzmann <akrherz@iastate.edu>
 - Migrating iem30 to rhel7 found a missing gd lib
 
