@@ -25,6 +25,8 @@ import psycopg2
 ASOS = psycopg2.connect(database='asos', host='iemdb')
 acursor = ASOS.cursor()
 
+SLP = 'Sea Level PressureIn'
+
 
 class OB(object):
     ''' hacky representation of the database schema '''
@@ -82,7 +84,8 @@ def get_job_list():
     if options.network is not None:
         sql = """
             SELECT id, archive_begin from stations
-            where network = %s ORDER by id ASC
+            where network = %s and archive_begin is not null
+            ORDER by id ASC
             """
         acursor.execute(sql, (options.network, ))
         floor = days[0] + datetime.timedelta(days=900)
@@ -106,9 +109,9 @@ def workflow():
     cj = cookielib.CookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
     opener.open(("http://www.wunderground.com/cgi-bin/findweather/"
-                 +"getForecast?setpref=SHOWMETAR&value=1")).read()
+                 "getForecast?setpref=SHOWMETAR&value=1")).read()
 
-    # Iterate 
+    # Iterate
     for station in stations:
         clear_data(station, days[0], days[-1])
         total = 0
@@ -124,9 +127,9 @@ def workflow():
 def process_rawtext(yyyymm):
     """ Process the raw SAO files the IEM has """
     # skip 0z for now
-    sts = datetime.datetime(int(yyyymm[:4]), int(yyyymm[4:]), 1,1)
+    sts = datetime.datetime(int(yyyymm[:4]), int(yyyymm[4:]), 1, 1)
     ets = sts + datetime.timedelta(days=32)
-    ets = ets.replace(day=1,hour=0)
+    ets = ets.replace(day=1, hour=0)
     interval = datetime.timedelta(hours=1)
     now = sts
     stdata = {}
@@ -135,7 +138,7 @@ def process_rawtext(yyyymm):
         if not os.path.isfile(fn):
             now += interval
             continue
-        p = subprocess.Popen(["zcat", fn], stdout = subprocess.PIPE)
+        p = subprocess.Popen(["zcat", fn], stdout=subprocess.PIPE)
         data = p.communicate()[0]
         for product in data.split("\003"):
             tokens = product.split("=")
@@ -149,23 +152,23 @@ def process_rawtext(yyyymm):
                     metar = metar[metar.find("LWIS ")+5:]
                 elif metar.find("SPECI") > -1:
                     metar = metar[metar.find("SPECI")+5:]
-                metar = " ".join( 
-                            metar.replace("\r\r\n"," ").strip().split() )
+                metar = " ".join(
+                            metar.replace("\r\r\n", " ").strip().split())
                 if len(metar.strip()) < 13:
                     continue
                 station = metar[:4]
                 tm = metar[5:11]
                 if metar[11] != 'Z':
                     continue
-                if not stdata.has_key(station):
+                if station not in stdata:
                     stdata[station] = {}
-                if not stdata[station].has_key(tm):
+                if tm not in stdata[station]:
                     stdata[station][tm] = metar
                 else:
                     if len(metar) > len(stdata[station][tm]):
                         stdata[station][tm] = metar
         now += interval
-        
+
     for station in stdata.keys():
         if len(station) == 0:
             continue
@@ -200,27 +203,29 @@ def stup(station):
         return station[1:]
     return station
 
+
 def clear_data(station, sts, ets):
     acursor.execute("""DELETE from alldata WHERE station = %s and
-    valid BETWEEN %s and %s""", (station, sts, 
+    valid BETWEEN %s and %s""", (station, sts,
                                  (ets + datetime.timedelta(days=1))))
     print 'Removed %s rows for station %s' % (acursor.rowcount, station)
     ASOS.commit()
+
 
 def doit(opener, station, now):
     """ Fetch! """
     usedcache = False
     processed = 0
-    
+
     if len(station) == 3:
         faa = "K%s" % (station,)
     else:
         faa = station
-        
+
     mydir = "/mesonet/ARCHIVE/wunder/cache/%s/%s/" % (station, now.year)
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
-  
+
     fn = "%s%s.txt" % (mydir, now.strftime("%Y%m%d"), )
     if os.path.isfile(fn):
         usedcache = True
@@ -229,9 +234,9 @@ def doit(opener, station, now):
             usedcache = False
     if not usedcache:
         url = ("http://www.wunderground.com/history/airport/%s/%s/%-i/%-i/"
-               +"DailyHistory.html?req_city=NA&req_state=NA&"
-               +"req_statename=NA&format=1") % (faa, now.year, now.month, 
-                                                now.day)
+               "DailyHistory.html?req_city=NA&req_state=NA&"
+               "req_statename=NA&format=1") % (faa, now.year, now.month,
+                                               now.day)
         try:
             data = opener.open(url).read()
         except KeyboardInterrupt:
@@ -244,10 +249,10 @@ def doit(opener, station, now):
         o = open(fn, 'w')
         o.write(data)
         o.close()
-  
+
     lines = data.split("\n")
     headers = None
-    for line in lines: 
+    for line in lines:
         line = line.replace("<br />", "").replace("\xff", "")
         if line.strip() == "":
             continue
@@ -255,55 +260,60 @@ def doit(opener, station, now):
         if headers is None:
             headers = {}
             for i in range(len(tokens)):
-                headers[ tokens[i] ] = i
+                headers[tokens[i]] = i
             continue
-  
-        if headers.has_key("FullMetar") and len(tokens) >= headers["FullMetar"]:
-            mstr = (tokens[headers["FullMetar"]]).strip().replace("'",
-                                "").replace("SPECI ","").replace("METAR ","")
+
+        if "FullMetar" in headers and len(tokens) >= headers["FullMetar"]:
+            mstr = (tokens[headers["FullMetar"]]
+                    ).strip().replace("'",
+                                      "").replace("SPECI ",
+                                                  "").replace("METAR ", "")
             ob = process_metar(mstr, now)
             if ob is None:
                 continue
-            
+
             # Account for SLP505 actually being 1050.5 and not 950.5 :(
-            if headers.has_key('Sea Level PressureIn'):
+            if SLP in headers:
                 try:
                     pres = pressure(
-                            float(tokens[headers['Sea Level PressureIn']]),
+                            float(tokens[headers[SLP]]),
                             "IN")
                     diff = pres.value("MB") - ob.mslp
                     if abs(diff) > 25:
                         oldval = ob.mslp
                         ob.mslp = "%.1f" % (pres.value("MB"),)
-                        ob.alti = float(tokens[headers['Sea Level PressureIn']])
+                        ob.alti = float(tokens[headers[SLP]])
                         print 'SETTING PRESSURE %s old: %s new: %s' % (
                                 ob.valid.strftime("%Y/%m/%d %H%M"),
                                 oldval, ob.mslp)
                 except:
                     pass
-                
-            sql = """INSERT into t"""+ `ob.valid.year` +""" (station, valid, 
-            tmpf, dwpf, vsby, drct, sknt, gust, p01i, alti, skyc1, skyc2, 
-            skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar, mslp, presentwx,
-            p03i, p06i, p24i, max_tmpf_6hr, max_tmpf_24hr, min_tmpf_6hr,
-            min_tmpf_24hr) 
-            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, 
-            %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""" 
+
+            sql = """
+                INSERT into t""" + str(ob.valid.year) + """ (station, valid,
+                tmpf, dwpf, vsby, drct, sknt, gust, p01i, alti, skyc1, skyc2,
+                skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar, mslp,
+                presentwx, p03i, p06i, p24i, max_tmpf_6hr, max_tmpf_24hr,
+                min_tmpf_6hr, min_tmpf_24hr)
+                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
             args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
-                ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
-                ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
-                ob.skyl4, 
-                ob.metar.decode('utf-8','replace').encode('ascii','replace'), 
-                ob.mslp, ob.presentwx, ob.p03i,
-                ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
-                ob.min_tmpf_6hr, ob.min_tmpf_24hr) 
+                    ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
+                    ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
+                    ob.skyl4,
+                    ob.metar.decode('utf-8', 'replace').encode('ascii',
+                                                               'replace'),
+                    ob.mslp, ob.presentwx, ob.p03i,
+                    ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
+                    ob.min_tmpf_6hr, ob.min_tmpf_24hr)
 
             acursor.execute(sql, args)
             processed += 1
 
     return processed, usedcache
 
-            
+
 def process_metar(mstr, now):
     """ Do the METAR Processing """
     mtr = None
@@ -318,26 +328,26 @@ def process_metar(mstr, now):
             else:
                 print("MetarParserError:"+msg)
                 return None
-        except Exception,exp:
+        except Exception, exp:
             print("Double Fail: %s %s" % (mstr, exp))
             return None
     if mtr is None or mtr.time is None:
         return None
-    
+
     ob = OB()
     ob.metar = mstr[:254]
-    
-    gts = datetime.datetime( mtr.time.year, mtr.time.month, 
-                mtr.time.day, mtr.time.hour, mtr.time.minute)
+
+    gts = datetime.datetime(mtr.time.year, mtr.time.month,
+                            mtr.time.day, mtr.time.hour, mtr.time.minute)
     gts = gts.replace(tzinfo=pytz.timezone("UTC"))
     # When processing data on the last day of the month, we get GMT times
     # for the first of this month
     if gts.day == 1 and now.day > 10:
         tm = now + datetime.timedelta(days=1)
         gts = gts.replace(year=tm.year, month=tm.month, day=tm.day)
-      
+
     ob.valid = gts
-      
+
     if mtr.temp:
         ob.tmpf = mtr.temp.value("F")
     if (mtr.dewpt):
@@ -356,7 +366,7 @@ def process_metar(mstr, now):
 
     if mtr.press:
         ob.alti = mtr.press.value("IN")
-      
+
     if mtr.press_sea_level:
         ob.mslp = mtr.press_sea_level.value("MB")
 
@@ -365,7 +375,7 @@ def process_metar(mstr, now):
 
     # Do something with sky coverage
     for i in range(len(mtr.sky)):
-        (c, h, b) = mtr.sky[i]
+        (c, h, _) = mtr.sky[i]
         setattr(ob, 'skyc%s' % (i+1), c)
         if h is not None:
             setattr(ob, 'skyl%s' % (i+1), h.value("FT"))
@@ -376,7 +386,7 @@ def process_metar(mstr, now):
         ob.min_tmpf_6hr = mtr.min_temp_6hr.value("F")
     if mtr.max_temp_24hr:
         ob.max_tmpf_24hr = mtr.max_temp_24hr.value("F")
-    if mtr.min_temp_24hr: 
+    if mtr.min_temp_24hr:
         ob.min_tmpf_6hr = mtr.min_temp_24hr.value("F")
     if mtr.precip_3hr:
         ob.p03i = mtr.precip_3hr.value("IN")
@@ -389,9 +399,9 @@ def process_metar(mstr, now):
     if mtr.weather:
         pwx = []
         for x in mtr.weather:
-            pwx.append( ("").join([a for a in x if a is not None]) )
+            pwx.append(("").join([a for a in x if a is not None]))
         ob.presentwx = (",".join(pwx))[:24]
-        
+
     return ob
 
 
