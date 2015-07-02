@@ -1,6 +1,6 @@
 """
  This script downloads the METAR data provided by wunderground, another script
- than compares it with my current archive and that provided by NSSL to see 
+ than compares it with my current archive and that provided by NSSL to see
  if there are any differences.
 
 Arguments
@@ -62,34 +62,39 @@ def get_job_list():
     """ Figure out the days and stations we need to get """
     days = []
     stations = []
-    
+
     parser = OptionParser()
     parser.add_option("-n", "--network", dest="network",
-                  help="IEM network", metavar="NETWORK")
+                      help="IEM network", metavar="NETWORK")
     parser.add_option("-s", "--station", dest="station",
-                  help="IEM station", metavar="STATION")
+                      help="IEM station", metavar="STATION")
     parser.add_option("-m", "--monthdate", dest="monthdate",
-                  help="Month Date", metavar="MONTHDATE")
+                      help="Month Date", metavar="MONTHDATE")
     (options, args) = parser.parse_args()
     if options.monthdate is not None:
         process_rawtext(options.monthdate)
         return [], []
-    now = datetime.date(int(args[0]),1,1)
-    ets = datetime.date(int(args[1]),1,1)
+    now = datetime.date(int(args[0]), 1, 1)
+    ets = datetime.date(int(args[1]), 1, 1)
     while now < ets:
-        days.append( now )
+        days.append(now)
         now += datetime.timedelta(days=1)
     if options.network is not None:
-        sql = """SELECT id from stations where network = %s and
-        archive_begin < %s ORDER by id ASC"""
-        acursor.execute(sql, (options.network, 
-                              days[0] + datetime.timedelta(days=900)) )
+        sql = """
+            SELECT id, archive_begin from stations
+            where network = %s ORDER by id ASC
+            """
+        acursor.execute(sql, (options.network, ))
+        floor = days[0] + datetime.timedelta(days=900)
         for row in acursor:
-            stations.append( row[0] )
+            if row[1].date() > floor:
+                print('Skipping station: %4s sts: %s' % (row[0], row[1]))
+                continue
+            stations.append(row[0])
     else:
-        stations.append( options.station )
-        
+        stations.append(options.station)
 
+    print('Processing %s stations for %s days' % (len(stations), len(days)))
     return stations, days
 
 
