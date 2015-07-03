@@ -9,13 +9,13 @@ for linenum, line in enumerate(open('corn.csv')):
         continue
     tokens = line.replace('"','').split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 5 and day.day in range(14, 22):
+    if day.month == 6 and day.day in range(23, 31):
         state = tokens[5]
         val = float(tokens[20])
         if not data.has_key(state):
             data[state] = []
         if day.year == 2015:
-            d2015[state] = val
+            d2015[state] = min([val, 99.99999])
         else:
             data[state].append( val )
 
@@ -103,7 +103,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=cmap(norm(bins)),
                 ec='None')
 
-ax.text(0.17, 1.05, "17 May 2015 USDA Percentage of Corn Acres Planted\nPercentage Points Departure from 1980-2014 Average for 14-21 May", transform=ax.transAxes,
+ax.text(0.17, 1.05, "28 June 2015 USDA Percentage of Soybean Acres Planted\nPercentage Points Departure from 1980-2014 Average for 23-30 June", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
