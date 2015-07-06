@@ -9,6 +9,8 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 data = {'plots': [
     {'label': 'Daily', 'options': [
         {'id': "11", 'label': "ASOS/AWOS Daily Maximum Dew Point for a Year"},
+        {'id': "82",
+         'label': "Calendar of Daily Observations from Automated Stations"},
         {'id': "32", 'label': "Daily Temperature Departures for One Year",
          'mw': True},
         {'id': "21",
