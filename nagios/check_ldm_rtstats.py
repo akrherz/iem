@@ -1,4 +1,4 @@
-""" Parse the files generated from LDM rtstats 
+""" Parse the files generated from LDM rtstats
 
 
         unotice("%s %s %s %12.0lf %12.0lf %10.2f %4.0f@%s %s",
@@ -13,14 +13,14 @@
                 s_time(buf_a, sizeof(buf_a), sb->recent_a.tv_sec)
         );
 
-20121029204759 20121029204759                     
-laptop.local IDS|DDPLUS 
-chico.unidata.ucar.edu_v_metfs1.agron.iastate.edu         
-8949     
-20333883 
-0.01361     
-982.48 
-2207@0001              
+20121029204759 20121029204759
+laptop.local IDS|DDPLUS
+chico.unidata.ucar.edu_v_metfs1.agron.iastate.edu
+8949
+20333883
+0.01361
+982.48
+2207@0001
 6.10.1
 
 
@@ -29,35 +29,40 @@ import sys
 import os
 import glob
 
+
 def runner(hostname):
     """ Do something! """
     max_latencies = {}
-    dir = "/home/ldm/rtstats/%s" % (hostname,)
-    os.chdir( dir )
+    mydir = "/home/ldm/rtstats/%s" % (hostname,)
+    os.chdir(mydir)
     for subdir in glob.glob("[A-Z]*"):
         os.chdir(subdir)
-        for file in glob.glob("*_v_*"):
-            line = open(file).read()
+        for fn in glob.glob("*_v_*"):
+            line = open(fn).read()
             tokens = line.split()
             if len(tokens) != 11:
                 continue
             feedtype = tokens[3]
             latency = float(tokens[7])
-            if not max_latencies.has_key(feedtype):
+            if feedtype not in max_latencies:
                 max_latencies[feedtype] = []
-            max_latencies[feedtype].append( latency )
+            max_latencies[feedtype].append(latency)
         os.chdir("..")
-    
+
     exitcode = 0
     stats = ""
-    msg = "OK"
+    msg = "LDM OK"
+    idsmsg = "IDS Latency Unknown"
     for feedtype in max_latencies:
-        if  max(max_latencies[feedtype]) > 600 and feedtype == 'IDS|DDSPLUS':
-            exitcode = 1
-        stats += " %s_age=%s;600;1200;0 " % (feedtype.replace("|", "_"), 
-                                                 max(max_latencies[feedtype]))
-    print "%s - OK |%s" % (msg, stats)
+        if feedtype == 'IDS|DDPLUS':
+            idsmsg = "IDS Latency %.0fs" % (max(max_latencies[feedtype]), )
+            if max(max_latencies[feedtype]) > 600:
+                exitcode = 1
+                msg = 'ERROR'
+        stats += " %s_age=%s;600;1200;0 " % (feedtype.replace("|", "_"),
+                                             max(max_latencies[feedtype]))
+    print "%s - %s |%s" % (msg, idsmsg, stats)
     sys.exit(exitcode)
-    
+
 if __name__ == '__main__':
-    runner( sys.argv[1] )
+    runner(sys.argv[1])
