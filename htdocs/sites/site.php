@@ -6,7 +6,7 @@ include("../../include/myview.php");
 include("setup.php");
 
 $alertmsg = "";
-if (isset($_GET["lat"]) && $_GET["lat"] != "move marker" && $_GET["lat"] != "-1"){
+if (isset($_GET["lat"]) && $_GET["lat"] != "move marker" && floatval($_GET["lat"]) != -1){
 	$newlat = floatval($_GET["lat"]);
 	$newlon = floatval($_GET["lon"]);
 	$msg = <<<EOF
