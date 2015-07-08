@@ -38,6 +38,9 @@ data = {'plots': [
         {'id': "22", 'mw': True,
          'label': ("Percentage of Years within Temperature Range "
                    "from Averages")},
+        {'id': "83", 'mw': True,
+         'label': ("Period Averages or Totals of X days around a "
+                   "given day of the year")},
         {'id': "62", 'mw': True,
          'label': "Snow Depth"},
         {'id': "38", 'mw': True,
