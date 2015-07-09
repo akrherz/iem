@@ -8,9 +8,9 @@ import matplotlib.font_manager
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 5, 15, 1, 0)
+sts = datetime.datetime(2015, 7, 7, 7, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 5, 15, 6, 0)
+ets = datetime.datetime(2015, 7, 8, 5, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
@@ -19,7 +19,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'SAN'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'ABI'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -52,13 +52,13 @@ for i in range(60, sz):
 
 xticks = []
 xlabels = []
-lsts = sts.astimezone(pytz.timezone("America/Los_Angeles"))
-lets = ets.astimezone(pytz.timezone("America/Los_Angeles"))
+lsts = sts.astimezone(pytz.timezone("America/Chicago"))
+lets = ets.astimezone(pytz.timezone("America/Chicago"))
 interval = datetime.timedelta(minutes=1)
 now = lsts
 i = 0
 while now < lets:
-    if now.minute == 0 and now.hour % 1 == 0:
+    if now.minute == 0 and now.hour % 2 == 0:
         xticks.append(i)
         xlabels.append(now.strftime("%-I %p"))
 
@@ -104,10 +104,10 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc='best', prop=prop, ncol=1)
-ax.set_ylim(0, int(np.max(rate1)+1))
-ax.set_xlabel("14 May 2015 (Pacific Daylight Time)")
-ax.set_title(("14 May 2015 San Diego (KSAN)\n"
+ax.legend(loc=7, prop=prop, ncol=1)
+ax.set_ylim(0, int(np.max(rate1)+4))
+ax.set_xlabel("7 Jul 2015 (Central Daylight Time)")
+ax.set_title(("7 July 2015 Abilene (KABI)\n"
               "One Minute Rainfall %s inches total plotted") % (prec[-1],))
 
 
