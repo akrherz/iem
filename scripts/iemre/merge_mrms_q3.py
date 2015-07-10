@@ -1,5 +1,5 @@
 """
-Merge the 1km Q3 24 hour precip data estimates
+Merge the 0.01x0.01 Q3 24 hour precip data estimates
 """
 import datetime
 import pytz
@@ -16,37 +16,50 @@ import tempfile
 
 
 def run(ts):
-    """ Actually do the work, please """
+    """Update netcdf file with the MRMS data
+
+    Args:
+      ts (datetime): timestamptz at midnight central time and we are running
+        forward in time
+    """
     nc = netCDF4.Dataset(('/mesonet/data/iemre/%s_mw_mrms_daily.nc'
                           '') % (ts.year,), 'a')
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 
-    # We want this mrms variable to replicate the netcdf file, so the
-    # origin is the southwestern corner
-    ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone(pytz.timezone("UTC"))
 
-    gribfn = gmtts.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
-                             "RadarOnly_QPE_24H/"
-                             "RadarOnly_QPE_24H_00.00_%Y%m%d-%H%M00.grib2.gz"))
-    if not os.path.isfile(gribfn):
-        print("merge_mrms_q3.py MISSING %s" % (gribfn,))
-        return
+    total = None
+    for _ in range(1, 25):
+        gmtts += datetime.timedelta(hours=1)
+        for prefix in ['GaugeCorr', 'RadarOnly']:
+            gribfn = gmtts.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/" +
+                                     prefix + "_QPE_01H/" +
+                                     prefix +
+                                     "_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"
+                                     ))
+            if os.path.isfile(gribfn):
+                break
+        if not os.path.isfile(gribfn):
+            print("merge_mrms_q3.py MISSING %s" % (gribfn,))
+            return
+        fp = gzip.GzipFile(gribfn, 'rb')
+        (_, tmpfn) = tempfile.mkstemp()
+        tmpfp = open(tmpfn, 'wb')
+        tmpfp.write(fp.read())
+        tmpfp.close()
+        grbs = pygrib.open(tmpfn)
+        grb = grbs[1]
+        lats, _ = grb.latlons()
+        os.unlink(tmpfn)
 
-    fp = gzip.GzipFile(gribfn, 'rb')
-    (_, tmpfn) = tempfile.mkstemp()
-    tmpfp = open(tmpfn, 'wb')
-    tmpfp.write(fp.read())
-    tmpfp.close()
-    grbs = pygrib.open(tmpfn)
-    grb = grbs[1]
-    lats, _ = grb.latlons()
-    os.unlink(tmpfn)
-
-    val = grb['values']
-    # Anything less than zero, we set to zero
-    val = np.where(val < 0, 0, val)
+        val = grb['values']
+        # Anything less than zero, we set to zero
+        val = np.where(val < 0, 0, val)
+        if total is None:
+            total = val
+        else:
+            total += val
 
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
