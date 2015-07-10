@@ -29,6 +29,8 @@ data = {'plots': [
         {'id': "35", 'label': "Histogram of X Hour Temperature Changes"},
         {'id': "60", 'label': ("Hourly Temperature Frequencies "
                                "Above/Below Threshold")},
+        {'id': "84", 'mw': True,
+         'label': "MRMS Q3 Estimated Precipitation (multiday summaries too)"},
         {'id': "34", 'mw': True,
          'label': "Maximum Stretch of Days with High Below Threshold"},
         {'id': "26",
