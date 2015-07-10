@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -95,6 +95,7 @@ Requires: php-devel
 Requires: pyLDM
 Requires: gd
 Requires: ntp
+Requires: jenks
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -116,6 +117,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Tue Jul  7 2015 daryl herzmann <akrherz@iastate.edu>
+- Add requirement for jenks python package
+
 * Tue Jun 30 2015 daryl herzmann <akrherz@iastate.edu>
 - Add ntp
 
