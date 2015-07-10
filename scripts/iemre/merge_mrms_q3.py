@@ -42,7 +42,7 @@ def run(ts):
                 break
         if not os.path.isfile(gribfn):
             print("merge_mrms_q3.py MISSING %s" % (gribfn,))
-            return
+            continue
         fp = gzip.GzipFile(gribfn, 'rb')
         (_, tmpfn) = tempfile.mkstemp()
         tmpfp = open(tmpfn, 'wb')
