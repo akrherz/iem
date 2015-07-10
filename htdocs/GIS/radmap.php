@@ -660,11 +660,11 @@ draw_header($map, $img, $width, $header_height);
 $point->draw($map, $tlayer, $img, 0, $title);
 
 $point = ms_newpointobj();
-$point->setXY(80, 29);
+$point->setXY(80, 26);
 $point->draw($map, $tlayer, $img, 1,"$d");
 if ($plotmeta["subtitle"] != ""){
 	$point = ms_newpointobj();
-	$point->setXY(80, 46);
+	$point->setXY(80, 43);
 	$point->draw($map, $tlayer, $img, 1, $plotmeta["subtitle"]);
 }
 
