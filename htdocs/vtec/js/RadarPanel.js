@@ -396,7 +396,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
                         new OpenLayers.Control.ArgParser()],
             layers :  [baseESRILayer,
                        new OpenLayers.Layer.TMS('RADAR',
-            		   'http://mesonet1.agron.iastate.edu/cache/tile.py/', {
+            		   '/cache/tile.py/', {
             	   layername : 'cwsu-900913',
             	   service : '1.0.0',
             	   type : 'png',
@@ -407,7 +407,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
             	   radarProduct : 'N0Q',
             	   radar : 'DMX',
             	   radarTime : null
-               }),  new OpenLayers.Layer.WMS("Counties", "http://mesonet.agron.iastate.edu/c/c.py/",
+               }),  new OpenLayers.Layer.WMS("Counties", "/c/c.py/",
             		    {layers      : 'c-900913',
             	     format      : 'image/png',
             	     transparent : 'true'},{
@@ -484,13 +484,13 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 		    }
 		});
 		
-		this.countykml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"
-				+ Ext.urlEncode(this.vtec);
-		this.lsrkml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"
-				+ Ext.urlEncode(this.vtec);
-		this.vteckml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"
+		this.countykml = "/kml/sbw_county_intersect.php?"
 			+ Ext.urlEncode(this.vtec);
-		this.placefile = "http://mesonet.agron.iastate.edu/request/grx/vtec.php?"
+		this.lsrkml = "/kml/sbw_lsrs.php?"
+			+ Ext.urlEncode(this.vtec);
+		this.vteckml = "/kml/vtec.php?"
+			+ Ext.urlEncode(this.vtec);
+		this.placefile = "/request/grx/vtec.php?"
 			+ Ext.urlEncode(this.vtec);
 		
 		this.updateURL();
@@ -512,14 +512,14 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 				closeAction : 'hide',
 				title : 'N0R',
 				closable : false,
-				html : '<img src="../GIS/legends/N0R.gif" />'
+				html : '<img src="/GIS/legends/N0R.gif" />'
 			});
 			lw.show();
 			lw.hide();
 		}
 		if (lw !== 'undefined'){
 			lw.setTitle(newValue);
-			lw.update('<img src="../GIS/legends/'+newValue+'.gif" />');
+			lw.update('<img src="/GIS/legends/'+newValue+'.gif" />');
 		}
 	},
 	setTime : function(newValue) {
@@ -717,7 +717,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 	},
 	getRadarLayer : function() {
 		// TODO: This is a hack bug!
-		return this.layers.getAt(4).data.layer;
+		return this.layers.getAt(1).data.layer;
 	},
 	afterRender : function() {
 		//console.log("afterRender called");

@@ -46,7 +46,8 @@ def available_radars(form):
     lat = form.getvalue('lat', None)
     lon = form.getvalue('lon', None)
     start_gts = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
+    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb',
+                                user='nobody')
     mcursor = MESOSITE.cursor()
     root = {'radars': []}
     if lat is None or lon is None:
