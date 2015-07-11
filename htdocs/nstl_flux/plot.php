@@ -143,7 +143,6 @@ if (sizeof($data["NSTL110"]) > 1) {
  $graph->Add($lineplot5);
 }
 
-
 // Display the graph
 $graph->Stroke();
 ?>
