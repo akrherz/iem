@@ -1,6 +1,5 @@
 """
 Sync authorized users on Google Sites to Google Drive
-
 """
 import gdata.docs.client
 import gdata.docs.data
@@ -12,40 +11,33 @@ import util
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
-
-docs_client = util.get_docs_client( config )
-spr_client = util.get_sites_client( config )
+spr_client = util.get_sites_client(config)
+service = util.get_driveclient()
 
 site_users = []
 for acl in spr_client.get_acl_feed().entry:
-    #print "IN: ||%s||" % (acl.scope.value,)
-    userid =  acl.scope.value 
-    if userid not in site_users:
-        site_users.append( acl.scope.value )
-
-query = gdata.docs.client.DocsQuery(show_collections='true', 
-                                    title='CSCAP Internal Documents')
-feed = docs_client.GetAllResources(query=query)
-cscap = feed[0]
-acl_feed = docs_client.GetResourceAcl( cscap )
-for acl in acl_feed.entry:
-    #print acl.role.value, acl.scope.type, acl.scope.value
     userid = acl.scope.value
-    #print "OUT: ||%s||" % (userid,)
-    if userid in site_users:
-        site_users.remove( userid )
+    if userid not in site_users:
+        site_users.append(acl.scope.value)
 
-acls = []
+# Get a listing of current permissions
+perms = service.permissions().list(fileId=config.get('cscap', 'folderkey')).execute()
+for item in perms.get('items', []):
+    email = item['emailAddress']
+    if email in site_users:
+        site_users.remove(email)
+        continue
+    print("Email: %s can access Drive, not sites" % (email,))
+
 for loser in site_users:
-    print 'Adding %s as writer to CSCAP Internal Documents Collection' % (loser,)
-    acls.append( gdata.docs.data.AclEntry(
-                    scope=gdata.acl.data.AclScope(value=loser, type='user'),
-                    role=gdata.acl.data.AclRole(value='writer'),
-                    batch_operation=gdata.data.BatchOperation(type='insert'),
-                    )
-                )
-            
-if len(acls) > 0:
-    feed = docs_client.BatchProcessAclEntries(cscap, acls)
-    for entry in feed.entry:
-        print entry.role.value, entry.title.text
+    print loser
+    continue
+    id_resp = service.permissions().getIdForEmail(email=loser).execute()
+    id2 = id_resp['id']
+    print(('Adding %s[%s] as writer to CSCAP Internal Documents Collection'
+           ) % (loser, id2))
+    newperm = dict(id=id2, type='user', role='writer',
+                   sendNotificationEmails=False)
+    res = service.permissions().insert(fileId=config.get('cscap', 'folderkey'),
+                                       body=newperm).execute()
+    print res
