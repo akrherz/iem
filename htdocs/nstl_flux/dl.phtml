@@ -23,7 +23,7 @@ $sts = mktime(0,0,0,$smonth, $sday, $syear);
 $ets = mktime(0,0,0,$emonth, $eday, $eyear);
 
 $pg_conn = iemdb("other");
-pg_exec($pg_conn, "SET TIME ZONE 'GMT'");
+pg_exec($pg_conn, "SET TIME ZONE 'UTC'");
 
 $sql = sprintf("SELECT * from flux_data WHERE valid >= '%s 00:00' and 
 		valid < '%s 23:59' and station IN $stationString 
