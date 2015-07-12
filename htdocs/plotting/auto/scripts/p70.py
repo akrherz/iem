@@ -1,20 +1,21 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import pyiem.nws.vtec as vtec
 import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
 import calendar
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """This chart shows the period between the first
-    and last watch, warning, advisory issued by an office per year.
+    and last watch, warning, advisory (WWA) issued by an office per year. The
+    right hand chart displays the number of unique WWA events issued for
+    that year.
     """
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
@@ -30,6 +31,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -39,26 +43,27 @@ def plotter(fdict):
 
     nt = NetworkTable('WFO')
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
-
     cursor.execute("""
-        SELECT extract(year from issue) as yr, min(issue), max(issue)
+        SELECT extract(year from issue) as yr, min(issue), max(issue),
+        count(distinct eventid)
         from warnings where wfo = %s and phenomena = %s and significance = %s
         GROUP by yr ORDER by yr ASC
     """, (station, phenomena, significance))
 
-    years = []
-    starts = []
-    ends = []
+    rows = []
     for row in cursor:
-        years.append(int(row[0]))
-        starts.append(int(row[1].strftime("%j")))
-        ends.append(int(row[2].strftime("%j")))
-    ends = np.array(ends)
-    starts = np.array(starts)
-    years = np.array(years)
+        rows.append(dict(year=int(row[0]), startdoy=int(row[1].strftime("%j")),
+                         enddoy=int(row[2].strftime("%j")), count=int(row[3])))
+    df = pd.DataFrame(rows)
+
+    ends = np.array(df['enddoy'])
+    starts = np.array(df['startdoy'])
+    years = np.array(df['year'])
 
     thisyear = datetime.datetime.now().year
+
+    fig = plt.Figure()
+    ax = plt.axes([0.1, 0.1, 0.7, 0.8])
 
     bars = ax.barh(years-0.4, (ends - starts), left=starts, fc='blue')
     if years[-1] == thisyear:
@@ -75,4 +80,11 @@ def plotter(fdict):
     ax.set_ylabel("Year")
     ax.set_ylim(years[0]-0.5, years[-1]+0.5)
 
-    return fig
+    ax = plt.axes([0.82, 0.1, 0.13, 0.8])
+    ax.barh(years-0.4, df['count'], fc='blue')
+    ax.set_ylim(years[0]-0.5, years[-1]+0.5)
+    plt.setp(ax.get_yticklabels(), visible=False)
+    ax.grid(True)
+    ax.set_xlabel("# Events")
+
+    return fig, df
