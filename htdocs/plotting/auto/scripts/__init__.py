@@ -77,6 +77,8 @@ data = {'plots': [
          'label': "Monthly Temperature/Precipitation Distributions"},
         {'id': "42",
          'label': "Hourly Temperature Streaks Above/Below Threshold"},
+        {'id': "85",
+         'label': "Hourly Temperature Frequencies by Month"},
         {'id': "24", 'mw': True,
          'label': "Monthly Precipitation Climate District Ranks"},
         {'id': "8", 'mw': True,
