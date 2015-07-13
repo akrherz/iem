@@ -3,7 +3,7 @@
 """
 import psycopg2
 import datetime
-ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+ISUAG = psycopg2.connect(database='isuag', host='iemdb')
 cursor = ISUAG.cursor()
 cursor2 = ISUAG.cursor()
 
