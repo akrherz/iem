@@ -16,7 +16,7 @@ def get_events(lon, lat):
     cursor.execute("""
   select wfo, significance, phenomena, issue, expire, eventid from sbw
   where status = 'NEW' and
-  ST_Contains(geom, ST_SetSRID(ST_GeomFromText('POINT(%s %s)'),4326))
+  ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326))
   and phenomena in ('SV', 'TO', 'FF', 'FL', 'MA', 'FA') and
   issue > '2005-10-01'
   ORDER by issue ASC
