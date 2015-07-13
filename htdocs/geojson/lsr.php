@@ -80,8 +80,8 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
         from sbw_%s
         WHERE wfo = '%s' and issue <= '%s' 
         and issue > '%s'::timestamp - '7 days'::interval and expire > '%s'
-        and ST_GeometryFromEWKT('SRID=4326;POINT(%s %s)') && geom
-        and ST_contains(geom, ST_GeometryFromEWKT('SRID=4326;POINT(%s %s)') )", 
+        and ST_GeomFromEWKT('SRID=4326;POINT(%s %s)') && geom
+        and ST_contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)') )", 
         substr($row["valid"],0,4), $wfo, $row["valid"], $row['valid'], 
         $row["valid"], $lon, $lat, $lon, $lat );
      $rs2 = pg_query($postgis, $sql);
