@@ -59,8 +59,8 @@ def main():
             fig, ax = plt.subplots(1, 1)
             ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
         # Place timestamp on the image
-        fig.text(0.01, 0.01, ('Plot Generated: %s'
-                              ) % (
+        plt.figtext(0.01, 0.01, ('Plot Generated: %s'
+                                 ) % (
             datetime.datetime.now().strftime("%-d %b %Y %-I:%M %p"),),
             va='bottom', ha='left', fontsize=10)
         ram = cStringIO.StringIO()
