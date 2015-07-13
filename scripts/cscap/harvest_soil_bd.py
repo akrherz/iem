@@ -25,7 +25,11 @@ res = drive_client.files().list(q=("title contains '%s'"
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(spr_client, item['id'])
+    try:
+        spreadsheet = util.Spreadsheet(spr_client, item['id'])
+    except Exception, exp:
+        print("harvest_soil_bd FAIL: %s\n%s" % (exp, item['title']))
+        continue
     spreadsheet.get_worksheets()
     siteid = item['title'].split()[0]
     worksheet = spreadsheet.worksheets.get(YEAR)
