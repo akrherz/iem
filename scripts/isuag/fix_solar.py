@@ -11,8 +11,8 @@ cursor2 = ISUAG.cursor()
 def main():
     """ Go main go """
     cursor.execute("""
-     SELECT station, valid from sm_daily where slrmj_tot is null or
-     slrmj_tot = 0 and valid > '2015-04-14' ORDER by valid ASC
+     SELECT station, valid from sm_daily where (slrmj_tot is null or
+     slrmj_tot = 0) and valid > '2015-04-14' ORDER by valid ASC
     """)
     for row in cursor:
         station = row[0]
