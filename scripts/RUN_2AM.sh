@@ -6,6 +6,9 @@ sh run_plots.sh
 cd ../climodat
 sh run.sh &
 
+cd ../iemre
+python grid_rsds.py
+
 cd ../coop
 python hrrr_solarrad.py
 DD=$(date +%d)
