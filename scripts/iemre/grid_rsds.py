@@ -1,6 +1,6 @@
 """Do the gridding of Solar Radiation Data
 
-Called from RUN_2AM.sh
+Called from RUN_MIDNIGHT.sh
 """
 import netCDF4
 import pygrib
@@ -71,7 +71,6 @@ def do_hrrr(ts):
                          'a')
     offset = iemre.daily_offset(ts)
     data = nc.variables['rsds'][offset, :, :]
-    print np.shape(total), np.shape(data)
     for i, lon in enumerate(iemre.XAXIS):
         for j, lat in enumerate(iemre.YAXIS):
             (x, y) = LCC(lon, lat)
