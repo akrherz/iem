@@ -34,6 +34,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
+    from matplotlib.ticker import FormatStrFormatter
+
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -58,7 +60,7 @@ def plotter(fdict):
 
     ends = np.array(df['enddoy'])
     starts = np.array(df['startdoy'])
-    years = np.array(df['year'])
+    years = np.array(df['year'], 'i')
 
     thisyear = datetime.datetime.now().year
 
@@ -79,6 +81,8 @@ def plotter(fdict):
     ax.set_xlim(1, 366)
     ax.set_ylabel("Year")
     ax.set_ylim(years[0]-0.5, years[-1]+0.5)
+    xFormatter = FormatStrFormatter('%d')
+    ax.yaxis.set_major_formatter(xFormatter)
 
     ax = plt.axes([0.82, 0.1, 0.13, 0.8])
     ax.barh(years-0.4, df['count'], fc='blue')
@@ -86,5 +90,6 @@ def plotter(fdict):
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Events")
+    ax.yaxis.set_major_formatter(xFormatter)
 
     return fig, df
