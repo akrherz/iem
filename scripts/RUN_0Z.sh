@@ -1,9 +1,12 @@
 # Jobs run at 00 UTC
 
+cd util
+python make_ridge_dirs.py
+
 # Wait a bit, so that more obs can come in
 sleep 300
 
-cd 00z
+cd ../00z
 python awos_rtp.py
 
 cd ../ingestors
