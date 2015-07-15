@@ -21,7 +21,7 @@ def compute_bounds(lons, lats):
     x2, y1 = np.unravel_index(dist.argmin(), dist.shape)
     dist = ((lats - ref.MW_SOUTH)**2 + (lons - ref.MW_EAST)**2)**0.5
     x1, y2 = np.unravel_index(dist.argmin(), dist.shape)
-    return x1 - 40, x2 + 40, y1 - 40, y2 + 40
+    return x1 - 50, x2 + 40, y1 - 50, y2 + 40
 
 
 def run(utc, routes):
