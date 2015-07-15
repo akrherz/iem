@@ -5,7 +5,7 @@ import pandas as pd
 
 PDICT = {'TS': 'Thunder (TS)',
          '-SN': 'Light Snow (-SN)',
-         '+SN': 'Heavy Snow (+SN)',
+         'PSN': 'Heavy Snow (+SN)',  # +SN causes CGI issues
          'FZFG': 'Freezing Fog (FZFG)',
          'FG': 'Fog (FG)',
          'BLSN': 'Blowing Snow (BLSN)'}
@@ -41,6 +41,10 @@ def plotter(fdict):
     network = fdict.get('network', 'IA_ASOS')
     nt = NetworkTable(network)
     code = fdict.get('code', 'TS')
+    PDICT[code]
+    if code == 'PSN':
+        code = "+SN"
+        PDICT['+SN'] = PDICT['PSN']
 
     data = np.ma.zeros((24, 52), 'f')
 
@@ -48,12 +52,12 @@ def plotter(fdict):
     WITH data as (
     SELECT valid at time zone %s + '10 minutes'::interval as v
     from alldata where
-    station = %s and presentwx ~* %s and valid > '1971-01-01')
+    station = %s and presentwx LIKE '%%""" + code + """%%' and valid > '1971-01-01')
 
     SELECT distinct extract(week from v) as week,
     extract(year from v) as year, extract(hour from v) as hour
     from data
-    """, (nt.sts[station]['tzname'], station, code))
+    """, (nt.sts[station]['tzname'], station))
 
     minyear = 2099
     maxyear = 1800
