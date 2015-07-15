@@ -93,7 +93,7 @@ def plotter(fdict):
 
     # Bottom grid
     lax = plt.axes([0.1, 0.1, 0.7, 0.15])
-    lax.bar(np.arange(0, 52), np.sum(data, 0))
+    lax.bar(np.arange(0, 52), np.sum(data, 0), facecolor='tan')
     lax.set_xlim(-0.5, 51.5)
     lax.grid(True)
     yloc = plt.MaxNLocator(3)
@@ -105,7 +105,7 @@ def plotter(fdict):
 
     # Right grid
     rax = plt.axes([0.8, 0.25, 0.15, 0.65])
-    rax.barh(np.arange(0, 24)-0.4, np.sum(data, 1))
+    rax.barh(np.arange(0, 24)-0.4, np.sum(data, 1), facecolor='tan')
     rax.set_ylim(-0.5, 23.5)
     rax.set_yticks([])
     xloc = plt.MaxNLocator(3)
