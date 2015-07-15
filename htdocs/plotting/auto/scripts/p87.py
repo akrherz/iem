@@ -81,6 +81,7 @@ def plotter(fdict):
     cax.set_ylabel("Count")
     ax.set_ylim(-0.5, 23.5)
     ax.set_yticks((0, 4, 8, 12, 16, 20))
+    ax.set_ylabel("Local Time, %s" % (nt.sts[station]['tzname'],))
     ax.set_yticklabels(('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'))
     ax.set_title(("[%s] %s %s Reports\n[%.0f - %.0f]"
                   " by hour and by week of the year"
