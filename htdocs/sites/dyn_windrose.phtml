@@ -18,7 +18,7 @@ $nsector = isset($_GET['nsector']) ? $_GET['nsector']: 36;
 
 
 if (isset($_GET["hour1"])){
-	$rose_uri = "/cgi-bin/windrose.py?nsector=$nsector&station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2&units=$units";
+	$rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2&units=$units";
 	if (isset($_GET["hourlimit"])){
 	  $rose_uri .= "&hourlimit=1";
 	}

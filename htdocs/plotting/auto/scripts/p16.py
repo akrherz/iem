@@ -3,7 +3,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
-from pyiem.windrose.windrose import WindroseAxes
+from windrose import WindroseAxes
 from matplotlib.patches import Rectangle
 import datetime
 
