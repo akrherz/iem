@@ -1,4 +1,5 @@
 <?php
+session_start();
 /* Web based feature publisher */
 include("../config/settings.inc.php");
 include_once "../include/myview.php";
