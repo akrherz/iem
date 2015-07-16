@@ -145,6 +145,8 @@ data = {'plots': [
                    "by Month or Season or Year")},
         {'id': "40",
          'label': "Cloud Amount and Level Timeseries for One Month"},
+        {'id': "88",
+         'label': "Cloudiness Impact on Hourly Temperatures"},
         {'id': "59",
          'label': "Daily u and v Wind Component Climatologies"},
         {'id': "54",
