@@ -1,11 +1,12 @@
 # Lets run some diagnostics on blizzard criterion
 
 import pylab
-import iemdb, network
+import psycopg2
+from pyiem.network import Table as NetworkTable
 import numpy
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
-st = network.Table( ('IA_ASOS', 'AWOS') )
+st = NetworkTable( ('IA_ASOS', 'AWOS') )
 
 bestvsby = {}
 bestsknt = {}

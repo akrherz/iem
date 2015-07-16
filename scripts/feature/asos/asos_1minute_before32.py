@@ -1,6 +1,6 @@
-import iemdb
+import psycopg2
 import numpy
-ASOS = iemdb.connect('asos', bypass=True)
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 acursor2 = ASOS.cursor()
 
@@ -61,5 +61,4 @@ ax.set_ylim(30,40)
 ax.legend()
 
 fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+
