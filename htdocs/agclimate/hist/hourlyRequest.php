@@ -8,10 +8,10 @@
  $t->title = "ISU AgClimate Legacy Hourly Data Request";
  $t->thispage ="networks-agclimate";
 
- $ys = yearSelect2(1986, date("Y"), "startYear"); 
+ $ys = yearSelect2(1986, date("Y"), "startYear", '', 2014); 
  $ms = monthSelect(1, "startMonth"); 
  $ds = daySelect2(1, "startDay"); 
- $ys2 = yearSelect2(1986, date("Y"), "endYear"); 
+ $ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014); 
  $ms2 = monthSelect(date("m"), "endMonth");
  $ds2 = daySelect2(date("d"), "endDay");
  
@@ -23,7 +23,7 @@
 
 <h4>Hourly Data Request Form</h4>
 
-<div class="alert alert-info">
+<div class="alert alert-danger">
 This download page is for the legacy sites.  To download data from the new
 ISU Soil Moisture network, please visit 
 <a class="alert-link" href="hourly.php">this page</a>.

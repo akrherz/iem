@@ -212,10 +212,10 @@ function yearSelect($start, $selected){
   return $s;
 }
 
-function yearSelect2($start, $selected, $fname, $jsextra=''){
+function yearSelect2($start, $selected, $fname, $jsextra='', $endyear=null){
   $start = intval($start);
   $now = time();
-  $tyear = strftime("%Y", $now);
+  $tyear = ($endyear != null)? $endyear: strftime("%Y", $now);
   $s = "<select name='$fname' {$jsextra}>\n";
   for ($i=$start; $i<=$tyear;$i++) {
     $s .= "<option value='".$i ."' ";
