@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from windrose.windrose import WindroseAxes
+from windrose import WindroseAxes
 import math
 from matplotlib.patches import Rectangle
 
