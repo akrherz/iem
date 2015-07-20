@@ -1,8 +1,8 @@
 """ Attempt to compute the time of a record high temperature! """
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-ASOS = iemdb.connect('asos', bypass=True)
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
 # Get records
@@ -72,5 +72,3 @@ ax.legend(loc=(.45, .8))
 ax.grid(True)
 
 fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
