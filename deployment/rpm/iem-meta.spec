@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -42,7 +42,8 @@ Requires: pyshapelib
 Requires: egenix-mx-base
 Requires: netcdf4-python
 Requires: scipy
-Requires: pandas
+# EPEL
+Requires: python-pandas
 # remove this at some point
 Requires: tcsh
 Requires: gifsicle
@@ -118,6 +119,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon Jul 20 2015 daryl herzmann <akrherz@iastate.edu>
+- Take pandas from EPEL and not local version
+
 * Thu Jul 16 2015 daryl herzmann <akrherz@iastate.edu>
 - Add windrose package requirements
 
