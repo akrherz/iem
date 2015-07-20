@@ -60,6 +60,7 @@ data = {'plots': [
     {'label': 'Monthly', 'options': [
         {'id': "71", 'label': "Average Wind Speed and Direction for Month"},
         {'id': "55", 'label': "Daily Climatology Comparison"},
+        {'id': "17", 'label': "Daily High/Low Temps with Climatology"},
         {'id': "15", 'mw': True,
          'label': "Daily Temperature Change Frequencies by Month"},
         {'id': '65', 'mw': True,
