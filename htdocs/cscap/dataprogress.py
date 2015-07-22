@@ -105,8 +105,8 @@ if __name__ == '__main__':
     sys.stdout.write("""<!DOCTYPE html>
     <html lang='en'>
     <head>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/bootstrap-override.css" rel="stylesheet">
+    <link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/vendor/bootstrap/3.3.5/css/bootstrap-override.css" rel="stylesheet">
     </head>    
     <body>
     <style>

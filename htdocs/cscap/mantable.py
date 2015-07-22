@@ -173,9 +173,9 @@ def main():
     sys.stdout.write("""<!DOCTYPE html>
 <html lang='en'>
 <head>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/bootstrap-override.css" rel="stylesheet">
-</head>    
+    <link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/vendor/bootstrap/3.3.5/css/bootstrap-override.css" rel="stylesheet">
+</head>
 <body>
 
 <p>The data presented on this page is current as of the last sync of 
@@ -357,6 +357,6 @@ Google Data to the ISU Database Server.  You can <br />
 </body>
 </html>
     """ % (reloadres, table, table2, table3, table4, table5))
-    
+
 if __name__ == '__main__':
     main()
