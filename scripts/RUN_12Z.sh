@@ -32,7 +32,8 @@ python set_dashboard_links.py 2012
 python set_dashboard_links.py 2013
 python set_dashboard_links.py 2014
 python set_dashboard_links.py 2015
-python email_daily_changes.py 
+python email_daily_changes.py cscap
+python email_daily_changes.py td
 
 
 # Rerun yesterday and today

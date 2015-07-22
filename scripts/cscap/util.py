@@ -210,7 +210,8 @@ def get_spreadsheet_client(config):
     token.authorize(spr_client)
     return spr_client
 
-def get_sites_client(config):
+
+def get_sites_client(config, site='sustainablecorn'):
     """ Return an authorized sites client """
     import gdata.sites.client as sclient
     token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
@@ -219,7 +220,7 @@ def get_sites_client(config):
                     scope=config.get('googleauth', 'scopes'),
                     refresh_token=config.get('googleauth', 'refresh_token'))
 
-    spr_client = sclient.SitesClient(site='sustainablecorn')
+    spr_client = sclient.SitesClient(site=site)
     token.authorize(spr_client)
     return spr_client
 
