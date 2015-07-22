@@ -9,10 +9,10 @@ set hh="$4"
 set timestamp="$1$2$3/${4}00"
 set ldmstamp="$1$2$3${4}00"
 
-set DEVICE="GF|MWmesonet.gif|900;700"
-set AREA="37;-104;48.5;-86"
+set DEVICE="GIF|HI_${ldmstamp}.gif|900;700"
+set AREA="18.5;-162;22.5;-153"
 
-rm -f MWmesonet.gif
+rm -f HImesonet.gif
 
 gddelt << EOF > gddelt.out
   GDFILE   = metar.grd
@@ -57,7 +57,7 @@ sfmap << EOF > sfmap.out
  	DATTIM   =  ${date}/${hh}
  	SFFILE   =  metar.gem
  	LATLON   =  0
-        TITLE    =  32/-1/~ MidWest Mesonet Data
+        TITLE    =  32/-1/~ Hawaii Data
         CLEAR    =  yes
         PANEL    =  0
         DEVICE   = ${DEVICE}
@@ -84,17 +84,17 @@ gdcntr << EOF > gdcntr.out
 	GVCORD   = NONE
 	GFUNC    = SM9S(MMSL)
 	GDFILE   = metar.grd
-	CINT     = 4
+	CINT     = 1
 	LINE     = 4
 	MAP      = 0
 	TEXT     = 1
 	DEVICE   = ${DEVICE}
 	SATFIL   =  
 	RADFIL   =  
-	PROJ     = LCC
+	PROJ     = LCC/20;-160;24
 	CLEAR    = no
 	PANEL	= 0
-	TITLE	= 32/-2/~ MMSL
+	TITLE	= 
 	SCALE    = 0
 	LATLON   = 0
 	HILO     =  
@@ -116,6 +116,3 @@ EOF
 
 ${GEMEXE}/gpend
 
-if (-e MWmesonet.gif) then
-  /home/ldm/bin/pqinsert -p "plot a $ldmstamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif
-endif
