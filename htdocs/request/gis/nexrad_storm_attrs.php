@@ -8,7 +8,7 @@ define("IEM_APPID", 109);
 $t = new MyView();
 $t->thispage = "gis-";
 $t->jsextra = <<<EOF
-<script src="/js/jquery.js"></script><script>
+<script>
 $('select[name=station]').change( function() {
 	nexrad = $('select[name=station]').val();
 	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
