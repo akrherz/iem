@@ -1,12 +1,12 @@
 import numpy
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 
-elnino = [] # Starts 1950
+elnino = []  # Starts 1950
 mcursor.execute("""
  SELECT extract(year from monthdate + '1 month'::interval) as yr, avg(anom_34)
  from elnino where extract(month from monthdate) in (12,1,2) GROUP by yr
