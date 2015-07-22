@@ -5,29 +5,35 @@
 import ConfigParser
 import sys
 import util
+import os
 import datetime
 import pytz
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-EMAILS = ['labend@iastate.edu', 'akrherz@iastate.edu',
-          'lokhande@iastate.edu']
-if len(sys.argv) == 2:
-    EMAILS = ['akrherz@iastate.edu', ]
+CFG = {'cscap': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
+                             'lokhande@iastate.edu'],
+                     title="Sustainable Corn"
+                     ),
+       'td': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu'],
+                  title='Transforming Drainage'
+                  )
+       }
 
 
-def sites_changelog(yesterday, html):
+def sites_changelog(regime, yesterday, html):
     html += """
-    <h4>Sustainablecorn Internal Website Changes</h4>
+    <h4>%s Internal Website Changes</h4>
     <table border="1" cellpadding="3" cellspacing="0">
     <thead><tr><th>Time</th><th>Activity</th></tr></thead>
-    <tbody>"""
+    <tbody>""" % (CFG[regime]['title'],)
 
     config = ConfigParser.ConfigParser()
     config.read('mytokens.cfg')
 
-    s = util.get_sites_client(config)
+    site = 'sustainablecorn' if regime == 'cscap' else 'transformingdrainage'
+    s = util.get_sites_client(config, site)
     feed = s.get_activity_feed()
     tablerows = []
     for entry in feed.entry:
@@ -53,11 +59,11 @@ def sites_changelog(yesterday, html):
     return html
 
 
-def drive_changelog(yesterday, html):
+def drive_changelog(regime, yesterday, html):
     """ Do something """
     drive = util.get_driveclient()
 
-    start_change_id = util.CONFIG.get("changestamp", "1")
+    start_change_id = util.CONFIG.get("changestamp_"+regime, "1")
 
     html += """<p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
@@ -84,6 +90,16 @@ def drive_changelog(yesterday, html):
             changestamp = item['id']
             if item['deleted']:
                 continue
+            # Need to see which base folder this file is in!
+            parents = drive.parents().list(fileId=item['fileId']).execute()
+            good = False
+            for parent in parents['items']:
+                if parent['id'] == util.CONFIG[regime]['basefolder']:
+                    good = True
+            if not good:
+                # print(('Skipping %s as it is other project'
+                #       ) % (item['file']['title'], ))
+                continue
             modifiedDate = datetime.datetime.strptime(
                 item['file']['modifiedDate'][:19], '%Y-%m-%dT%H:%M:%S')
             modifiedDate = modifiedDate.replace(tzinfo=pytz.timezone("UTC"))
@@ -101,7 +117,7 @@ def drive_changelog(yesterday, html):
         if not page_token:
             break
 
-    util.CONFIG['changestamp'] = changestamp
+    util.CONFIG['changestamp_'+regime] = changestamp
     if hits == 0:
         html += """<tr><td colspan="4">No Changes Found...</td></tr>\n"""
 
@@ -111,22 +127,27 @@ def drive_changelog(yesterday, html):
     return html
 
 
-def main():
+def main(argv):
     """Do Fun things"""
+    regime = "cscap" if argv[1] == 'cscap' else 'td'
+    if os.environ.get('HOSTNAME', '') == 'laptop.local':
+        CFG[regime]['emails'] = ['akrherz@iastate.edu', ]
+
     today = datetime.datetime.utcnow()
     today = today.replace(tzinfo=pytz.timezone("UTC"), hour=12,
                           minute=0, second=0, microsecond=0)
     yesterday = today - datetime.timedelta(days=1)
     html = """
-<h3>CSCAP Cloud Data Changes</h3>
+<h3>%s Cloud Data Changes</h3>
 <br />
 <p>Period: 7 AM %s - 7 AM %s
 
-<h4>Sustainablecorn Google Drive File Changes</h4>
-""" % (yesterday.strftime("%-d %B %Y"), today.strftime("%-d %B %Y"))
+<h4>Google Drive File Changes</h4>
+""" % (CFG[regime]['title'], yesterday.strftime("%-d %B %Y"),
+       today.strftime("%-d %B %Y"))
 
-    html = drive_changelog(yesterday, html)
-    html = sites_changelog(yesterday, html)
+    html = drive_changelog(regime, yesterday, html)
+    html = sites_changelog(regime, yesterday, html)
 
     html += """<p>That is all...</p>"""
     # debugging
@@ -135,18 +156,18 @@ def main():
         o.write(html)
         o.close()
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "%s CSCAP Data ChangeLog" % (yesterday.strftime("%-d %b"),
-                                                  )
+    msg['Subject'] = "%s %s Data ChangeLog" % (yesterday.strftime("%-d %b"),
+                                               CFG[regime]['title'])
     msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
-    msg['To'] = ','.join(EMAILS)
+    msg['To'] = ','.join(CFG[regime]['emails'])
 
     part2 = MIMEText(html, 'html')
 
     msg.attach(part2)
 
     s = smtplib.SMTP('mailhub.iastate.edu')
-    s.sendmail(msg['From'], EMAILS, msg.as_string())
+    s.sendmail(msg['From'], CFG[regime]['emails'], msg.as_string())
     s.quit()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
