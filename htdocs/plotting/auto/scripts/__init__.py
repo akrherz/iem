@@ -52,6 +52,8 @@ data = {'plots': [
          'label': "Spread of Daily High and Low Temperatures"},
         {'id': "4", 'mw': True,
          'label': "State Areal Coverage of Precip Intensity over X Days"},
+        {'id': "89", 'mw': True,
+         'label': "State Areal Coverage/Efficiency of Precipitation"},
         {'id': "81", 'mw': True,
          'label': "Standard Deviation of Daily Temperatures"},
         {'id': "28", 'mw': True,
