@@ -7,9 +7,9 @@ cursor = dbconn.cursor()
 cursor.execute("""
  SELECT d, count(*), sum(c) from
  (SELECT extract(doy from issue) as d, extract(year from issue) as yr, 
- count(*) as c from warnings
- where gtype = 'P' and significance = 'W' and phenomena in ('SV','TO')
- and issue > '2002-01-01' and issue < '2013-01-01'
+ count(*) as c from sbw
+ where status = 'NEW' and significance = 'W' and phenomena in ('SV','TO')
+ and issue > '2002-01-01' and issue < '2015-01-01'
  GROUP by d, yr) as foo
  GROUP by d ORDER by d ASC
 
@@ -20,9 +20,9 @@ cnt = []
 avg = []
 for row in cursor:
     days.append( row[0] )
-    cnt.append( float(row[1]) / 11.0 * 100.0)
-    avg.append( float(row[2]) / 11.0 )
-    
+    cnt.append( float(row[1]) / 13.0 * 100.0)
+    avg.append( float(row[2]) / 13.0 )
+
 (fig, ax) = plt.subplots(1,1)
 ax.bar(days, cnt, fc='green', ec='green')
 
@@ -40,6 +40,4 @@ y2.set_ylabel("Average Warning Count", color='skyblue')
 y2.tick_params(axis='y', colors='skyblue')
 ax.tick_params(axis='y', colors='green')
 
-fig.savefig('test.svg')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

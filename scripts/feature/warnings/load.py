@@ -8,7 +8,7 @@ def getp(phenomena):
      WITH data as 
      (SELECT t, count(*) from
      (select phenomena, generate_series(issue, expire, '1 minute'::interval) as t
-     from warnings_2014 where gtype = 'P' and issue > '2014-04-27' and
+     from sbw_2014 where status = 'NEW' and issue > '2014-04-27' and
      phenomena in %s) as foo
      GROUP by t),
      
@@ -62,6 +62,4 @@ ax.set_ylabel("Active Warning Count")
 ax.legend(loc=2)
 ax.set_xlabel("Central Daylight Time, thru 5:30 AM 29 April 2014")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
