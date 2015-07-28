@@ -5,9 +5,9 @@ include_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "7 AM 24 Hour Precipitation Analysis";
 $t->headextra = <<<EOF
-<link rel="stylesheet" href="/assets/openlayers/3.4.0/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/3.6.0/ol.css" type="text/css">
 <link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
-<link type="text/css" href="/assets/openlayers/3.4.0/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/3.6.0/ol3-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
         height: 400px;
@@ -21,9 +21,9 @@ $t->headextra = <<<EOF
 EOF;
 
 $t->jsextra = <<<EOF
-<script src="/assets/openlayers/3.4.0/ol.js" type="text/javascript"></script>
+<script src="/vendor/openlayers/3.6.0/ol.js" type="text/javascript"></script>
 <script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
-<script src='/assets/openlayers/3.4.0/ol3-layerswitcher.js'></script>
+<script src='/vendor/openlayers/3.6.0/ol3-layerswitcher.js'></script>
 <script src='7am-app.js?v=8'></script>
 EOF;
 
@@ -45,7 +45,6 @@ $t->content = <<<EOF
  <li>Add CoCoRaHS Totals</li>
  <li>Local Storm Reports</li>
  <li>ISU Soil Moisture Data</li>
- <li>Add MRMS Legend to map</li>
  <li>Include nearby state's data</li>
  <li>Add option to plot SWE</li>
  <li>Add Fisher Porter totals</li>
@@ -60,6 +59,7 @@ $t->content = <<<EOF
 		<option value='snow'>Snowfall</option>
 		<option value='snowd'>Snow Depth [inch]</option>	
 	</select>
+	<br /><strong>MRMS Legend:</strong> <img src="/images/mrms_q3_p24h.png" />
 </div>
 <div class="col-md-5">
 		<strong>View Date:</strong>
