@@ -181,7 +181,6 @@ $cl->set("name", "ccc");
 $cl->addLabel(new labelObj());
 $lbl = $cl->getLabel(0);
 $lbl->set("type", MS_TRUETYPE);
-$lbl->set("antialias", MS_OFF);
 $lbl->set("font", "liberation");
 $lbl->set("size", 18);
 //$lbl->set("color", $black);
