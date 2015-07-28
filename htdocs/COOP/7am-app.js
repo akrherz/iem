@@ -1,5 +1,5 @@
 var renderattr = "pday";
-var map, coopLayer, azosLayer;
+var map, coopLayer, azosLayer, mrmsLayer;
 
 function updateURL(){
     var t = $.datepicker.formatDate("yymmdd",
@@ -24,13 +24,17 @@ function updateDate(){
 	map.removeLayer(azosLayer);
 	azosLayer = makeVectorLayer(fullDate, 'ASOS/AWOS Reports', 'azos');
 	map.addLayer(azosLayer);
+	mrmsLayer.setSource(new ol.source.XYZ({
+			url: get_tms_url()
+	}));
 	updateURL();
 }
 
 function makeVectorLayer(dt, title, group){
 	return new ol.layer.Vector({
 		title : title,
-		source: new ol.source.GeoJSON({
+		source: new ol.source.Vector({
+			format: new ol.format.GeoJSON(),
 			projection: ol.proj.get('EPSG:3857'),
 			url: '/geojson/7am.py?group='+group+'&dt='+dt
 		}),
@@ -55,7 +59,7 @@ function makeVectorLayer(dt, title, group){
 }
 function get_tms_url(){
     // Generate the TMS URL given the current settings
-    return '/cache/tile.py/1.0.0/idep0::mrms-12z24h::'+$.datepicker.formatDate("yy-mm-dd", new Date())+'/{z}/{x}/{y}.png';
+    return '/cache/tile.py/1.0.0/idep0::mrms-12z24h::'+$.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate'))+'/{z}/{x}/{y}.png';
 }
 
 $(document).ready(function(){
@@ -75,14 +79,16 @@ $(document).ready(function(){
 	azosLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()),
 			'ASOS/AWOS Reports', 'azos');
 
+	mrmsLayer = new ol.layer.Tile({
+		title : 'MRMS 12z 24 Hour',
+		source: new ol.source.XYZ({
+			url: get_tms_url()
+		})
+	});
+	
     map = new ol.Map({
         target: 'map',
-        layers: [new ol.layer.Tile({
-        		title : 'MRMS 12z 24 Hour',
-        		source: new ol.source.XYZ({
-        			url: get_tms_url()
-        		})
-        	}), new ol.layer.Tile({
+        layers: [mrmsLayer, new ol.layer.Tile({
                 title: 'County Boundaries',
                 source: new ol.source.XYZ({
                         url : '/c/tile.py/1.0.0/c-900913/{z}/{x}/{y}.png'
