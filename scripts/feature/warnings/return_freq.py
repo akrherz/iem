@@ -71,6 +71,4 @@ ax.legend(fontsize=12)
 ax.set_xlim(0.5,10.5)
 ax.set_xlabel("Days (~ 7 AM to 7 AM) After Initial Severe Wx Date")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

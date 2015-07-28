@@ -1,7 +1,8 @@
 
 from matplotlib import pyplot as plt
-import iemdb, numpy, iemplot
-POSTGIS = iemdb.connect("postgis", bypass=True)
+import psycopg2
+import numpy
+POSTGIS = psycopg2.connect(database="postgis", host="iemdb", user='nobody')
 pcursor = POSTGIS.cursor()
 
 def get_data(st):
@@ -58,5 +59,5 @@ ax.grid(True)
 ax.set_xlim(1996.5,2014.5)
 ax.set_ylabel("Watches Touching Iowa [%]")
 
-fig.savefig("test.ps")
-iemplot.makefeature("test")
+fig.savefig("test.png")
+
