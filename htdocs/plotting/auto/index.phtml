@@ -136,6 +136,10 @@ if (isset($_GET["q"])){
 			$netselect = vtecSigSelect($value);
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
 		}
+		elseif ($v->type == "state"){
+			$netselect = stateSelect($value);
+			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+		}
 		elseif ($v->type == "clstate"){
 			$netselect = make_select($v->name, $value, $states);
 			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";

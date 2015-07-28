@@ -182,6 +182,8 @@ data = {'plots': [
         {'id': "80",
          'label': "Time Duration of a Watch/Warning/Advisory for a UGC"},
         {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
+        {'id': "90",
+         'label': "Year of Last Issued Watch/Warning/Advisory by state/wfo"},
     ]},
     {'label': 'Sustainable Corn Project Plots', 'options': [
         {'id': "49", 'mw': True,
