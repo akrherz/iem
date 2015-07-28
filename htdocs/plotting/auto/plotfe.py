@@ -4,6 +4,7 @@ import cgi
 import memcache
 import sys
 import os
+import datetime
 
 
 def parser(cgistr):
@@ -42,9 +43,9 @@ def main():
         matplotlib.use('agg')
         import matplotlib.pyplot as plt
         import cStringIO
-        import datetime
         import imp
         name = 'scripts/p%s' % (p,)
+        start_time = datetime.datetime.now()
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
         meta = a.get_description()
@@ -58,10 +59,12 @@ def main():
             msg = fig
             fig, ax = plt.subplots(1, 1)
             ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
+        end_time = datetime.datetime.now()
         # Place timestamp on the image
-        plt.figtext(0.01, 0.01, ('Plot Generated: %s'
+        plt.figtext(0.01, 0.01, ('Plot Generated at %s in %.2fs'
                                  ) % (
-            datetime.datetime.now().strftime("%-d %b %Y %-I:%M %p"),),
+            datetime.datetime.now().strftime("%-d %b %Y %-I:%M %p"),
+            (end_time - start_time).total_seconds()),
             va='bottom', ha='left', fontsize=10)
         ram = cStringIO.StringIO()
         plt.savefig(ram, format='png', dpi=dpi)
