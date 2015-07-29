@@ -131,6 +131,5 @@ def plotter(fdict):
     cmap.set_over('white')
     cmap.set_under('white')
     m.fill_ugcs(data, bins, cmap=cmap, ilabel=ilabel)
-    # if t == 'cwa':
-    #    m.drawcwas()
+
     return m.fig, df
