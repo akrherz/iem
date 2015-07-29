@@ -8,11 +8,11 @@ Generate a PNG windrose based on the CGI parameters, called from
 import datetime
 import numpy
 from pyiem.plot import windrose
+import cgi
 import cgitb
 cgitb.enable()
 
 # Query out the CGI variables
-import cgi
 form = cgi.FieldStorage()
 if ("year1" in form and "year2" in form and
         "month1" in form and "month2" in form and
@@ -65,6 +65,10 @@ try:
 except:
     nsector = 36
 
+rmax = None
+if "staticrange" in form and form["staticrange"].value == "1":
+    rmax = 100
+
 windrose(form["station"].value, database=database, sts=sts, ets=ets,
          months=months, hours=hours, units=units, nsector=nsector,
-         justdata=("justdata" in form))
+         justdata=("justdata" in form), rmax=rmax)

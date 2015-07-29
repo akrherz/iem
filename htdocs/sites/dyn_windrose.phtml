@@ -28,6 +28,9 @@ if (isset($_GET["hour1"])){
 	if (isset($_GET["hourrangelimit"])){
 		$rose_uri .= "&hourrangelimit=1";
 	}
+	if (isset($_GET["staticrange"])){
+		$rose_uri .= "&staticrange=1";
+	}
 	$rosedata_uri = "{$rose_uri}&justdata=true";
 }
 
@@ -61,7 +64,7 @@ windrose is derived in three ways:
 <h4>Select Start/End Time:</h4><br>
 <i>(Times are in US Central Standard/Daylight Time, sorry)</i>
 
-<table>
+<table class="table table-bordered table-condensed">
   <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
@@ -77,6 +80,9 @@ $content .= '>2. Limit to Month of Start Time
 <br /><input type="checkbox" name="hourrangelimit" value="1" ';
 if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" "; 
 $content .= '>3. Limit to Range of hours given by start and end time
+<br /><input type="checkbox" name="staticrange" value="1" ';
+if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" "; 
+$content .= '>Optional: Hard code the frequency axis limit to 100%
 <br />Display Units: <select name="units">
  <option value="kts" ';
 if ($units == "kts"){ $content .= "SELECTED='SELECTED'"; } 
