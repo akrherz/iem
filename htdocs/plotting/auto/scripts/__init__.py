@@ -15,6 +15,8 @@ data = {'plots': [
          'mw': True},
         {'id': "21",
          'label': "Change in NCDC 81 Daily Climatology over X Days"},
+        {'id': "91", 'mw': True,
+         "label": "Consecutative Day Statistics of High+Low Temps / Precip"},
         {'id': "66", 'mw': True,
          "label": "Consecutative Days with High Temperature Above Threshold"},
         {'id': "31", 'mw': True,
