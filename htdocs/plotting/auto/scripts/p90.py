@@ -107,8 +107,12 @@ def plotter(fdict):
         title = "Count for %s" % (year,)
         datavar = "count"
 
+    if len(rows) == 0:
+        return("Sorry, no data found for query!")
     df = pd.DataFrame(rows)
     bins = range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1)
+    if len(bins) < 3:
+        bins.append(bins[-1]+1)
     if len(bins) > 8:
         bins = np.linspace(np.min(df[datavar][:]), np.max(df[datavar][:])+2,
                            8, dtype='i')
