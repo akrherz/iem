@@ -44,7 +44,7 @@ pg_prepare($mesosite, "INJECTOR", "INSERT into feature
 
 $rooturl = "http://mesonet.agron.iastate.edu";
 $permalink = sprintf('%s/onsite/features/cat.php?day=%s', $rooturl, date("Y-m-d") );
-$thumbnail = sprintf('%s/onsite/features/%s_s.png', $rooturl, 
+$thumbnail = sprintf('%s/onsite/features/%s.png', $rooturl, 
              date("Y/m/ymd") );
 
 $attachment = Array(
