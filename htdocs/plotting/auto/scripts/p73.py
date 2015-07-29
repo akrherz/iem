@@ -1,6 +1,3 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import datetime
 import numpy as np
@@ -36,6 +33,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -51,7 +51,7 @@ def plotter(fdict):
     if limit.lower() == 'yes':
         lastdoy = int(datetime.datetime.today().strftime("%j")) + 1
 
-    wfo_limiter = " and wfo = '%s' " % (station,)
+    wfo_limiter = " and wfo = '%s' " % (station if len(station) == 3 else station[1:],)
     if station == '_ALL':
         wfo_limiter = ''
     doy_limiter = ''
@@ -73,6 +73,8 @@ def plotter(fdict):
     for row in cursor:
         years.append(row[0])
         counts.append(row[1])
+    if len(years) == 0:
+        return("Sorry, no data found!")
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(np.array(years)-0.4, counts)

@@ -68,7 +68,8 @@ def plotter(fdict):
             select ugc, max(issue at time zone 'UTC') from warnings
             WHERE wfo = %s and phenomena = %s and significance = %s
             GROUP by ugc
-            """, (station, phenomena, significance))
+            """, (station if len(station) == 3 else station[1:],
+                  phenomena, significance))
         else:
             cursor.execute("""
             select ugc, max(issue at time zone 'UTC') from warnings
@@ -91,7 +92,8 @@ def plotter(fdict):
             select ugc, count(*) from """ + table + """
             WHERE wfo = %s and phenomena = %s and significance = %s
             GROUP by ugc
-            """, (station, phenomena, significance))
+            """, (station if len(station) == 3 else station[1:],
+                  phenomena, significance))
         else:
             cursor.execute("""
             select ugc, count(*) from """ + table + """
@@ -124,7 +126,9 @@ def plotter(fdict):
         subtitle = "Plotted for %s, %s" % (state_names[state],
                                            subtitle)
     m = MapPlot(sector=('state' if t == 'state' else 'cwa'),
-                state=state, cwa=station, axisbg='white',
+                state=state,
+                cwa=(station if len(station) == 3 else station[1:]),
+                axisbg='white',
                 title=('%s %s %s (%s.%s)'
                        ) % (title, vtec._phenDict[phenomena],
                             vtec._sigDict[significance],
