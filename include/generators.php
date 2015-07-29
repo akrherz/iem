@@ -142,13 +142,13 @@ function gen_feature($t){
 	}
 	
 	
-	$fref = "/mesonet/share/features/". $row["imageref"] ."_s.png";
+	$fref = "/mesonet/share/features/". $row["imageref"] .".png";
 	$width = 320;
 	$height = 240;
 	if (is_file($fref)){
 		list($width, $height, $type, $attr) = @getimagesize($fref);
 	}
-	$imghref = sprintf("/onsite/features/%s_s.png", $row["imageref"]);
+	$imghref = sprintf("/onsite/features/%s.png", $row["imageref"]);
 	$bigimghref = sprintf("/onsite/features/%s.png", $row["imageref"]);
 	
 	$linktext = "";
