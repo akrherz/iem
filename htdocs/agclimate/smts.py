@@ -22,7 +22,7 @@ def make_daily_rad_plot(station, sts, ets):
     """Generate a daily radiation plot"""
     # Get clear sky theory
     theory = meteorology.clearsky_shortwave_irradiance_year(
-                nt.sts[station]['lon'], nt.sts[station]['lat'],
+                nt.sts[station]['lat'],
                 nt.sts[station]['elevation'])
 
     icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
