@@ -77,7 +77,7 @@ $t->east = <<<EOF
   <br />Map of the number of VTEC events by WFO for a time period of your choice.</li>
    <li><a href="/vtec/yearly_counts.php">Number of VTEC Events by year</a>
   <br />Table of the number of VTEC events by year.</li>
-  <li><a href="days_since.php">Days Since VTEC Product</a>
+  <li><a href="/plotting/auto/?q=92">Days Since VTEC Product</a>
   <br />Map of the number of days since a WFO issued a VTEC Product.</li>
  <li><a href="/vtec/">VTEC Browser</a>
   <br />Interactive display of VTEC products.</li>
