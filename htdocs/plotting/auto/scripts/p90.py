@@ -198,7 +198,7 @@ def plotter(fdict):
         years = maxv.year - minv.year + 1
         df['average'] = df['count'] / years
         for key in data:
-            data[key] = data[key] / float(years)
+            data[key] = round(data[key] / float(years), 2)
         bins = range(0, int(np.max(df[datavar][:]))+2, 1)
     else:
         bins = range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1)
