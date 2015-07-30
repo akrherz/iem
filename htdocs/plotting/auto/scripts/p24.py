@@ -9,15 +9,17 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['cache'] = 86400
     d['description'] = """This map presents IEM computed precipitation
     ranks for a month and year of your choice.  The map unit is climate
     districts for which the IEM generates spatially weighted daily averages
     for."""
+    today = datetime.date.today() - datetime.timedelta(days=28)
     d['arguments'] = [
-        dict(type='year', name='year', default='2014',
+        dict(type='year', name='year', default=today.year,
              label='Select Year:',
              min=1893),  # Comes back to python as yyyy-mm-dd
-        dict(type='month', name='month', default='9',
+        dict(type='month', name='month', default=today.month,
              label='Select Month:'),
     ]
     return d
@@ -64,7 +66,7 @@ def plotter(fdict):
     cmap = cm.get_cmap("BrBG_r")
     cmap.set_under('white')
     cmap.set_over('black')
-    m.fill_climdiv(data,
+    m.fill_climdiv(data, ilabel=True, plotmissing=False,
                    bins=[1, 5, 10, 25, 50, 75, 100, years-10, years-5, years],
                    cmap=cmap)
 
