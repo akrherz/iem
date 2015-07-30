@@ -9,7 +9,9 @@ from pyiem.network import Table as NetworkTable
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State'}
 PDICT2 = {'lastyear': 'Year of Last Issuance for UGC',
-          'yearcount': 'Count of Events for Given Year'}
+          'yearcount': 'Count of Events for Given Year',
+          'yearavg': 'Yearly Average Count between Start and End Year',
+          'total': 'Total Count between Start and End Date'}
 PDICT3 = {'yes': 'YES: Label Counties/Zones',
           'no': 'NO: Do not Label Counties/Zones'}
 
@@ -31,7 +33,16 @@ def get_description():
         dict(type='select', name='ilabel', default='yes', options=PDICT3,
              label='Overlay values on map?'),
         dict(type='year', min=1986, name='year', default=today.year,
-             label='Select year (where appropriate):'),
+             label='Select start year (where appropriate):'),
+        dict(type='year', min=1986, name='year2', default=today.year,
+             label='Select end year (inclusive, where appropriate):'),
+        dict(type='date', name='sdate',
+             default=today.strftime("%Y/%m/%d"),
+             label='Start Date (for "total" option):', min="1986/01/01"),
+        dict(type='date', name='edate',
+             default=today.strftime("%Y/%m/%d"),
+             label='End Date (not inclusive, for "total" option):',
+             min="1986/01/01"),
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO: (ignored if plotting state)'),
         dict(type='state', name='state',
@@ -57,9 +68,14 @@ def plotter(fdict):
     phenomena = fdict.get('phenomena', 'TO')
     significance = fdict.get('significance', 'A')
     station = fdict.get('station', 'DMX')[:4]
+    sdate = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01'),
+                                       '%Y-%m-%d')
+    edate = datetime.datetime.strptime(fdict.get('edate', '2015-01-01'),
+                                       '%Y-%m-%d')
     t = fdict.get('t', 'state')
     varname = fdict.get('v', 'lastyear')
     year = int(fdict.get('year', 2015))
+    year2 = int(fdict.get('year2', 2015))
     ilabel = (fdict.get('ilabel', 'no') == 'yes')
     nt = NetworkTable("WFO")
     if varname == 'lastyear':
@@ -108,11 +124,84 @@ def plotter(fdict):
             data[row[0]] = row[1]
         title = "Count for %s" % (year,)
         datavar = "count"
+    elif varname == 'total':
+        table = "warnings"
+        if t == 'cwa':
+            cursor.execute("""
+            select ugc, count(*), min(issue at time zone 'UTC'),
+            max(issue at time zone 'UTC') from """ + table + """
+            WHERE wfo = %s and phenomena = %s and significance = %s
+            and issue >= %s and issue <= %s
+            GROUP by ugc
+            """, (station if len(station) == 3 else station[1:],
+                  phenomena, significance,
+                  sdate, edate))
+        else:
+            cursor.execute("""
+            select ugc, count(*), min(issue at time zone 'UTC'),
+            max(issue at time zone 'UTC') from """ + table + """
+            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+            and significance = %s and issue >= %s and issue < %s
+            GROUP by ugc
+            """, (state, phenomena, significance,
+                  sdate, edate))
+        rows = []
+        data = {}
+        for row in cursor:
+            rows.append(dict(count=row[1], year=year,
+                             ugc=row[0], minissue=row[2], maxissue=row[3]))
+            data[row[0]] = row[1]
+        title = "Total between %s and %s" % (sdate.strftime("%d %b %Y"),
+                                             edate.strftime("%d %b %Y"))
+        datavar = "count"
+    elif varname == 'yearavg':
+        table = "warnings"
+        if t == 'cwa':
+            cursor.execute("""
+            select ugc, count(*), min(issue at time zone 'UTC'),
+            max(issue at time zone 'UTC') from """ + table + """
+            WHERE wfo = %s and phenomena = %s and significance = %s
+            and issue >= %s and issue <= %s
+            GROUP by ugc
+            """, (station if len(station) == 3 else station[1:],
+                  phenomena, significance,
+                  datetime.date(year, 1, 1), datetime.date(year2 + 1, 1, 1)))
+        else:
+            cursor.execute("""
+            select ugc, count(*), min(issue at time zone 'UTC'),
+            max(issue at time zone 'UTC') from """ + table + """
+            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+            and significance = %s and issue >= %s and issue < %s
+            GROUP by ugc
+            """, (state, phenomena, significance,
+                  datetime.date(year, 1, 1), datetime.date(year2 + 1, 1, 1)))
+        rows = []
+        data = {}
+        minv = datetime.datetime(2050, 1, 1)
+        maxv = datetime.datetime(1986, 1, 1)
+        for row in cursor:
+            if row[2] < minv:
+                minv = row[2]
+            if row[3] > maxv:
+                maxv = row[3]
+            rows.append(dict(count=row[1], year=year,
+                             ugc=row[0], minissue=row[2], maxissue=row[3]))
+            data[row[0]] = row[1]
+        title = ("Yearly Avg: %s and %s"
+                 ) % (minv.strftime("%d %b %Y"), maxv.strftime("%d %b %Y"))
+        datavar = "average"
 
     if len(rows) == 0:
         return("Sorry, no data found for query!")
     df = pd.DataFrame(rows)
-    bins = range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1)
+    if varname == 'yearavg':
+        years = maxv.year - minv.year + 1
+        df['average'] = df['count'] / years
+        for key in data:
+            data[key] = data[key] / float(years)
+        bins = range(0, int(np.max(df[datavar][:]))+2, 1)
+    else:
+        bins = range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1)
     if len(bins) < 3:
         bins.append(bins[-1]+1)
     if len(bins) > 8:
