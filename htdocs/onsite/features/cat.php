@@ -48,7 +48,6 @@ if ($row["fbid"] == null){
 
 $day = $row["d"];
 $prettyday = date("l, d F Y", $valid);
-$thumb = sprintf("/onsite/features/%s_s.%s", $row["imageref"], $fmt);
 $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $fmt);
 
 $linktext = "";
@@ -87,7 +86,7 @@ $content = <<<EOF
 
 <div class="row">
 <div class="col-md-6">
-<a href="{$big}"><img src="{$thumb}" class="img img-responsive"></a>
+<a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
 <br /><a href="{$big}">View larger image</a>
 <br />{$row["caption"]}
 {$linktext}
@@ -107,9 +106,9 @@ $content .= <<<EOF
  		</div><!-- ./row -->
  		<div class="clearfix">&nbsp;</div>
 <div class="clearfix">&nbsp;</div>
- 		<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
+ 		<div id="fb-root"></div><script src="https://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
 <fb:comments send_notification_uid="16922938" title="{$row["title"]}" 
- href="http://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$day}" 
+ href="https://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$day}" 
  xid="{$row["fbid"]}" numposts="6" width="600"></fb:comments>
 EOF;
 $t->content = $content;
