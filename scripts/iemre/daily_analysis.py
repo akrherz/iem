@@ -6,6 +6,7 @@ import netCDF4
 import numpy as np
 import datetime
 import psycopg2
+import pytz
 from pyiem import iemre, datatypes
 from psycopg2.extras import DictCursor
 from scipy.interpolate import NearestNDInterpolator
@@ -36,7 +37,20 @@ def generic_gridder(rs, idx):
     grid = nn(xi, yi)
     
     return grid
-    
+
+
+def do_precip(nc, ts):
+    """Compute the precip totals based on the hourly analysis totals"""
+    offset = iemre.daily_offset(ts)
+    ets = ts.replace(hour=12, tzinfo=pytz.timezone("UTC"))
+    sts = ets - datetime.timedelta(hours=24)
+    offset1 = iemre.hourly_offset(sts)
+    offset2 = iemre.hourly_offset(ets)
+    hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,))
+    phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
+    nc.variables['p01d'][offset] = phour
+    hnc.close()
+
 
 def grid_day(nc, ts):
     """
@@ -50,8 +64,8 @@ def grid_day(nc, ts):
        from summary_%s c, stations s WHERE day = '%s' and 
        s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-        'OH_ASOS', 'AWOS') and c.iemid = s.iemid 
-       and pday >= 0""" % (ts.year, ts.strftime("%Y-%m-%d")))
+        'OH_ASOS', 'AWOS') and c.iemid = s.iemid
+        """ % (ts.year, ts.strftime("%Y-%m-%d")))
 
     if icursor.rowcount > 4:
         res = generic_gridder(icursor, 'highdata')
@@ -60,17 +74,19 @@ def grid_day(nc, ts):
         res = generic_gridder(icursor, 'lowdata')
         nc.variables['low_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
         icursor.scroll(0, mode='absolute')
-        res = generic_gridder(icursor, 'precipdata')
-        nc.variables['p01d'][offset] = res * 25.4
+        #res = generic_gridder(icursor, 'precipdata')
+        #nc.variables['p01d'][offset] = res * 25.4
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"), 
             icursor.rowcount)
 
-def main(ts):
 
+def main(ts):
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'a')
-    grid_day(nc , ts)
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),
+                         'a')
+    grid_day(nc, ts)
+    do_precip(nc, ts)
     nc.close()
 
 if __name__ == "__main__":
