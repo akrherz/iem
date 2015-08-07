@@ -98,6 +98,7 @@ Requires: gd
 Requires: ntp
 Requires: jenks
 Requires: windrose
+Requires: net-tools
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -119,6 +120,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Fri Aug  7 2015 daryl herzmann <akrherz@iastate.edu>
+- Added net-tools so that we have ifconfig
+
 * Mon Jul 20 2015 daryl herzmann <akrherz@iastate.edu>
 - Take pandas from EPEL and not local version
 
