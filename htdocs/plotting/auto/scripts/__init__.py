@@ -160,6 +160,7 @@ data = {'plots': [
         {'id': "87",
          'label': ("Frequency of METAR Code (Thunder, etc) "
                    "by week by hour")},
+        {'id': "93", 'label': "Heat Index Hourly Histogram"},
         {'id': "18", 'label': "Long term temperature time series"},
         {'id': "45", 'label': "Monthly Frequency of Overcast Conditions"},
         {'id': "67",
