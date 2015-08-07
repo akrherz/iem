@@ -60,6 +60,21 @@ def sites_changelog(regime, yesterday, html):
     return html
 
 
+def get_base_folder_id(drive, fileid, depth=0):
+    """Find the base folder of this fileid"""
+    # print("Here with fileid: %s depth: %s" % (fileid, depth))
+    depth += 1
+    if depth > 10:
+        print('iterloop exceeded, returning None')
+        return None
+    parents = drive.parents().list(fileId=fileid).execute()
+    for p1 in parents['items']:
+        if p1['id'] in [util.CONFIG['td']['basefolder'],
+                        util.CONFIG['cscap']['basefolder']]:
+            return p1['id']
+        return get_base_folder_id(drive, p1['id'], depth)
+
+
 def drive_changelog(regime, yesterday, html):
     """ Do something """
     drive = util.get_driveclient()
@@ -92,14 +107,10 @@ def drive_changelog(regime, yesterday, html):
             if item['deleted']:
                 continue
             # Need to see which base folder this file is in!
-            parents = drive.parents().list(fileId=item['fileId']).execute()
-            good = False
-            for parent in parents['items']:
-                if parent['id'] == util.CONFIG[regime]['basefolder']:
-                    good = True
-            if not good:
-                # print(('Skipping %s as it is other project'
-                #       ) % (item['file']['title'], ))
+            parentid = get_base_folder_id(drive, item['fileId'])
+            if parentid != util.CONFIG[regime]['basefolder']:
+                print(('Skipping %s as it is other project'
+                       ) % (item['file']['title'], ))
                 continue
             modifiedDate = datetime.datetime.strptime(
                 item['file']['modifiedDate'][:19], '%Y-%m-%dT%H:%M:%S')
