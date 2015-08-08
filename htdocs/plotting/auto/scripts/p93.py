@@ -60,9 +60,9 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1)
     yloc = 0.9
     ax.text(0.7, 0.94, 'Avg:',
-            transform=ax.transAxes, color='r')
-    ax.text(0.85, 0.94, '%s:' % (highlightyear,),
             transform=ax.transAxes, color='b')
+    ax.text(0.85, 0.94, '%s:' % (highlightyear,),
+            transform=ax.transAxes, color='r')
     for level in range(90, 121):
         x.append(level)
         y.append(len(df[df['heatindex'] >= level]) / years)
@@ -72,9 +72,9 @@ def plotter(fdict):
             ax.text(0.6, yloc, '%s' % (level,),
                     transform=ax.transAxes)
             ax.text(0.7, yloc, '%.1f' % (y[-1],),
-                    transform=ax.transAxes, color='r')
-            ax.text(0.85, yloc, '%.0f' % (y2[-1],),
                     transform=ax.transAxes, color='b')
+            ax.text(0.85, yloc, '%.0f' % (y2[-1],),
+                    transform=ax.transAxes, color='r')
             yloc -= 0.04
     x = np.array(x, dtype=np.float64)
     ax.scatter(x, y, color='b', label='Avg')
