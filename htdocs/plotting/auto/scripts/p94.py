@@ -54,11 +54,12 @@ def plotter(fdict):
     lows = [None]*25
     for row in cursor:
         i = int(row[0].split()[0])
-        highs[23-i] = row[1]
-        lows[23-i] = row[2]
-        rows.append(dict(offset=(23-i), avg_high=row[1], avg_low=row[2]))
-    highs[24] = highs[0]
-    lows[24] = lows[0]
+        highs[24-i] = row[1]
+        lows[24-i] = row[2]
+        rows.append(dict(offset=(24-i), avg_high=row[1], avg_low=row[2]))
+    rows.append(dict(offset=0, avg_high=highs[24], avg_low=lows[24]))
+    highs[0] = highs[24]
+    lows[0] = lows[24]
     df = pd.DataFrame(rows)
     (fig, ax) = plt.subplots(1, 1)
     ax.plot(hrs, np.array(highs) - highs[0], label="High Temp", lw=2,
