@@ -61,11 +61,11 @@ def main():
             ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
         end_time = datetime.datetime.now()
         # Place timestamp on the image
-        plt.figtext(0.01, 0.01, ('Plot Generated at %s in %.2fs'
-                                 ) % (
+        plt.figtext(0.01, 0.005, ('Plot Generated at %s in %.2fs'
+                                  ) % (
             datetime.datetime.now().strftime("%-d %b %Y %-I:%M %p"),
             (end_time - start_time).total_seconds()),
-            va='bottom', ha='left', fontsize=10)
+            va='bottom', ha='left', fontsize=8)
         ram = cStringIO.StringIO()
         plt.savefig(ram, format='png', dpi=dpi)
         ram.seek(0)
