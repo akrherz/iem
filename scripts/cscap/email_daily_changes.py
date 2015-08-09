@@ -67,7 +67,11 @@ def get_base_folder_id(drive, fileid, depth=0):
     if depth > 10:
         print('iterloop exceeded, returning None')
         return None
-    parents = drive.parents().list(fileId=fileid).execute()
+    try:
+        parents = drive.parents().list(fileId=fileid).execute()
+    except Exception, exp:
+        print("Exception %s for %s" % (exp, fileid))
+        return None
     for p1 in parents['items']:
         if p1['id'] in [util.CONFIG['td']['basefolder'],
                         util.CONFIG['cscap']['basefolder']]:
