@@ -82,6 +82,7 @@ $cow->setWind( $wind );
 $cow->setLimitType( $wtype );
 $cow->setLimitLSRType( $ltype );
 $cow->setLSRBuffer( $lsrbuffer );
+$cow->setWarningBuffer($warnbuffer);
 if (isset($useWindHailTag) && $useWindHailTag == 'Y'){
 	$cow->useWindHailTag = true;
 }
