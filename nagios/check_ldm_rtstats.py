@@ -28,6 +28,16 @@ chico.unidata.ucar.edu_v_metfs1.agron.iastate.edu
 import sys
 import os
 import glob
+import stat
+import datetime
+
+
+def get_fileage(fn):
+    """Return the age of the file in seconds"""
+    now = datetime.datetime.now()
+    mtime = os.stat(fn)[stat.ST_MTIME]
+    ts = datetime.datetime.fromtimestamp(mtime)
+    return (now - ts).total_seconds()
 
 
 def runner(hostname):
@@ -38,6 +48,11 @@ def runner(hostname):
     for subdir in glob.glob("[A-Z]*"):
         os.chdir(subdir)
         for fn in glob.glob("*_v_*"):
+            age = get_fileage(fn)
+            # Don't consider any files older than 15 minutes
+            if age > 15*60:
+                # print('Skipping %s due to age of %s' % (fn, age))
+                continue
             line = open(fn).read()
             tokens = line.split()
             if len(tokens) != 11:
@@ -49,9 +64,9 @@ def runner(hostname):
             max_latencies[feedtype].append(latency)
         os.chdir("..")
 
-    exitcode = 0
+    exitcode = 2
     stats = ""
-    msg = "LDM OK"
+    msg = "LDM Unknown"
     idsmsg = "IDS Latency Unknown"
     for feedtype in max_latencies:
         if feedtype == 'IDS|DDPLUS':
