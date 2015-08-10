@@ -21,6 +21,7 @@ function cow($dbconn){
     $this->ltype = Array();      /* LSR Types to verify with */
     $this->hailsize = 0.75;      /* Hail size limitation */
     $this->lsrbuffer = 15;       /* LSR report buffer in km */
+    $this->warningbuffer = 0.01;   // Buffer warnings by this number of degrees
     $this->wind = 58;			/* Wind threshold in mph */
     $this->useWindHailTag = false;  /* Option to use wind hail tag to verify */
     $this->limitwarns = false;  /* Limit listed warnings to wind and hail criterion */
@@ -41,6 +42,9 @@ function callDB($sql){
     return $rs;
 }
 
+function setWarningBuffer($b){
+	$this->warningbuffer = $b;
+}
 function setLSRBuffer($buffer){
     $this->lsrbuffer = $buffer;
 }
@@ -471,8 +475,8 @@ function sbwVerify() {
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
          from lsrs_%s w WHERE 
-         geom && ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326),0.01) and 
-         ST_contains(ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326),0.01), geom) 
+         geom && ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326), %s) and 
+         ST_contains(ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326), %s), geom) 
          and %s and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
@@ -480,7 +484,8 @@ function sbwVerify() {
          or type = 'F' or type = 'x')
          and valid >= '%s+00' and valid <= '%s+00' 
          ORDER by valid ASC", 
-         $v["year"], $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
+         $v["year"], $v["geom"], $this->warningbuffer, 
+        		$v["geom"], $this->warningbuffer, $this->sqlLSRTypeBuilder(), 
          $v["wfo"], $this->getVerifyHailSize($v), $this->getVerifyWind($v),
          date("Y/m/d H:i", strtotime($v["issue"])),
          date("Y/m/d H:i", $v["expire"]) );
