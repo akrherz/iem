@@ -74,6 +74,9 @@ def runner(hostname):
             if max(max_latencies[feedtype]) > 600:
                 exitcode = 1
                 msg = 'ERROR'
+            else:
+                exitcode = 0
+                msg = 'OK'
         stats += " %s_age=%s;600;1200;0 " % (feedtype.replace("|", "_"),
                                              max(max_latencies[feedtype]))
     print "%s - %s |%s" % (msg, idsmsg, stats)
