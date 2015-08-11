@@ -1,22 +1,17 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import numpy as np
-from matplotlib import mlab
-import matplotlib.dates as mdates
-import matplotlib.cm as cm
-from matplotlib.colors import rgb2hex
-import matplotlib.colors as mpcolors
-import matplotlib.patheffects as PathEffects
-import sys
 import datetime
 from pyiem import network
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
+    d['description'] = """This plot presents the period over which growing
+    degree days were accumulated between the two thresholds provided by
+    the user.  The colors represent the number of days for the period shown."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
@@ -31,6 +26,12 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    import matplotlib.cm as cm
+    import matplotlib.colors as mpcolors
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -71,6 +72,7 @@ def plotter(fdict):
     starts = []
     heights = []
     success = []
+    rows = []
     while now < ets:
         idx = int(now.strftime("%j")) - 1
         running = 0
@@ -86,8 +88,11 @@ def plotter(fdict):
         days2.append(now)
         starts.append(idx0)
         heights.append(idx1 - idx0)
+        rows.append(dict(plant_date=now, start_doy=idx0, end_doy=idx1,
+                         success=success[-1]))
         now += datetime.timedelta(days=1)
 
+    df = pd.DataFrame(rows)
     heights = np.array(heights)
     success = np.array(success)
     starts = np.array(starts)
@@ -128,4 +133,4 @@ def plotter(fdict):
              ec='None')
     ax2.set_xlim(0, 1)
 
-    return plt.gcf()
+    return plt.gcf(), df
