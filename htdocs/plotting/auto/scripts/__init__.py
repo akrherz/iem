@@ -77,6 +77,8 @@ data = {'plots': [
          'label': "July-August Days Above Temp v. May-June Precip"},
         {'id': "9", 'mw': True, 'label': ("Growing Degree Day Climatology "
                                           "and Daily Values for one Year")},
+        {'id': "95", 'mw': True,
+         'label': "Monthly Precipitation / Temperature with El Nino Indices"},
         {'id': "2", 'mw': True,
          'label': "Month Precipitation v Month Growing Degree Day Departures"},
         {'id': "3", 'mw': True,
