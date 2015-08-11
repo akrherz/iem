@@ -15,7 +15,8 @@ def get_description():
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
-        dict(type='text', name='year', default='2014', label='Select Year'),
+        dict(type='year', name='year', default=datetime.date.today().year,
+             label='Select Year', min=1893),
         dict(type='text', name='gdd1', default='1135',
              label='Growing Degree Day Start'),
         dict(type='text', name='gdd2', default='1660',
