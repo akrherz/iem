@@ -29,10 +29,6 @@ def plotter( fdict ):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', 
-                                user='nobody')
-    mcursor = MESOSITE.cursor()
-
     station = fdict.get('station', 'IA0000')
     nt = NetworkTable("%sCLIMATE" % (station[:2].upper(),))
     table = "alldata_%s" % (station[:2],)
@@ -40,18 +36,18 @@ def plotter( fdict ):
     years = int(fdict.get('years', 8))
 
     sts = datetime.datetime(syear, 1, 1)
-    ets = datetime.datetime(syear+years,1,1)
+    ets = datetime.datetime(syear+years, 1, 1)
     archiveend = datetime.date.today() + datetime.timedelta(days=1)
     archiveend = archiveend.replace(day=1)
 
     elnino = []
     elninovalid = []
-    mcursor.execute("""SELECT anom_34, monthdate from elnino 
-        where monthdate >= %s and monthdate < %s 
+    cursor.execute("""SELECT anom_34, monthdate from elnino
+        where monthdate >= %s and monthdate < %s
         ORDER by monthdate ASC""", (sts, ets))
-    for row in mcursor:
-        elnino.append( float(row[0]) )
-        elninovalid.append( row[1] )
+    for row in cursor:
+        elnino.append(float(row[0]))
+        elninovalid.append(row[1])
 
     elnino = np.array(elnino)
 
