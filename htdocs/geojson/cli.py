@@ -47,7 +47,7 @@ def get_data(ts, fmt):
     precip_jul1, precip_dec1, precip_dec1_normal, precip_record,
     precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
     snow_dec1, snow_record, snow_jul1_normal,
-    snow_dec1_normal, snow_month_normal
+    snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """, (ts.date(),))
@@ -72,6 +72,8 @@ def get_data(ts, fmt):
                 "precip_month":  str(sanitize(row["precip_month"])),
                 "precip_jan1":  str(sanitize(row["precip_jan1"])),
                 "precip_jan1_normal": str(sanitize(row["precip_jan1_normal"])),
+                "precip_jun1":  str(sanitize(row["precip_jun1"])),
+                "precip_jun1_normal": str(sanitize(row["precip_jun1_normal"])),
                 "precip_jul1":  str(sanitize(row["precip_jul1"])),
                 "precip_dec1":  str(sanitize(row["precip_dec1"])),
                 "precip_dec1_normal": str(sanitize(row["precip_dec1_normal"])),
