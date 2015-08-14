@@ -824,7 +824,6 @@ CREATE RULE replace_riverpro AS ON INSERT TO riverpro WHERE (EXISTS (SELECT 1 FR
 --- VTEC Table
 ---
 CREATE TABLE warnings (
-    id serial,
     issue timestamp with time zone,
     expire timestamp with time zone,
     updated timestamp with time zone,
