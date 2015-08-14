@@ -24,6 +24,8 @@ GRANT SELECT on raob_profile_2015 to nobody,apache;
 CREATE INDEX raob_profile_2015_fid_idx 
 	on raob_profile_2015(fid);
 
+-- !!!!!!!!!!!!! WARNING !!!!!!!!!!!!
+-- look what was done in 9.sql and replicate that for 2016 updates
 CREATE TABLE warnings_2015() inherits (warnings);
 CREATE INDEX warnings_2015_combo_idx on 
 	warnings_2015(wfo, phenomena, eventid, significance);
