@@ -55,7 +55,16 @@ def plotter(fdict):
                           ) % (sdate.year, ), 'r')
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
-    p01d = np.sum(nc.variables['p01d'][idx0:idx1, :, :], 0) / 24.5
+    if (idx1 - idx0) < 32:
+        p01d = np.sum(nc.variables['p01d'][idx0:idx1, :, :], 0) / 24.5
+    else:
+        # Too much data can overwhelm this app, need to chunk it
+        for i in range(idx0, idx1, 10):
+            i2 = min([idx0+10, idx1])
+            if idx0 == i:
+                p01d = np.sum(nc.variables['p01d'][idx0:i2, :, :], 0) / 24.5
+            else:
+                p01d += np.sum(nc.variables['p01d'][idx0:i2, :, :], 0) / 24.5
     nc.close()
 
     if sdate == edate:
@@ -76,11 +85,11 @@ def plotter(fdict):
         clevs = np.arange(0, 0.5, 0.1)
         clevs = np.append(clevs, np.arange(0.5, 6., 0.5))
         clevs = np.append(clevs, np.arange(6., 21.0, 2))
-    elif days > 29:
+    if days > 29:
         clevs = np.arange(0, 1., 0.25)
         clevs = np.append(clevs, np.arange(1., 6., 1.))
         clevs = np.append(clevs, np.arange(6., 31.0, 1))
-    elif days > 90:
+    if days > 90:
         clevs = np.arange(0, 2., 0.5)
         clevs = np.append(clevs, np.arange(2., 10., 2.))
         clevs = np.append(clevs, np.arange(10., 61.0, 5.))
