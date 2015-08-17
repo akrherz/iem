@@ -1,10 +1,6 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import datetime
 import pytz
-import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 
@@ -30,6 +26,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -57,15 +57,24 @@ def plotter(fdict):
     labels = []
     types = []
     for row in cursor:
+        endts = max(row[4],
+                    row[5]).replace(tzinfo=pytz.timezone("UTC"))
         events.append((row[3].replace(tzinfo=pytz.timezone("UTC")),
-                       max(row[4],
-                           row[5]).replace(tzinfo=pytz.timezone("UTC")),
+                       endts,
                        row[2]))
         labels.append("%s %s" % (vtec._phenDict[row[0]],
                                  vtec._sigDict[row[1]]))
         types.append("%s.%s" % (row[0], row[1]))
 
-    (fig, ax) = plt.subplots()
+    # If we have lots of WWA, we need to expand vertically a bunch, lets
+    # assume we can plot 5 WAA per 100 pixels
+    if len(events) > 20:
+        height = int(len(events) / 6.0) + 1
+        (fig, ax) = plt.subplots(figsize=(8, height))
+        fontsize = 8
+    else:
+        (fig, ax) = plt.subplots()
+        fontsize = 10
 
     used = []
 
@@ -87,10 +96,13 @@ def plotter(fdict):
         if xpos > halfway:
             align = 'right'
             xpos = e[0] - datetime.timedelta(minutes=90)
+        textcolor = vtec.NWS_COLORS.get(
+                        types[i] if types[i] != 'TO.A' else 'X', 'k')
         ax.text(xpos, i+1,
                 labels[i].replace("Weather", "Wx") + " " + str(e[2]),
-                color=vtec.NWS_COLORS.get(types[i], 'k'), ha=align,
-                va='center', bbox=dict(color='white'))
+                color=textcolor, ha=align,
+                va='center', bbox=dict(color='white', boxstyle='square,pad=0'),
+                fontsize=fontsize)
 
     ax.set_ylabel("Sequential Product Number")
     ax.set_title(("%s-%s NWS %s\nissued Watch/Warning/Advisories"
