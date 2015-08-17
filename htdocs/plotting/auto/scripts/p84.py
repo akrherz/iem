@@ -60,11 +60,11 @@ def plotter(fdict):
     else:
         # Too much data can overwhelm this app, need to chunk it
         for i in range(idx0, idx1, 10):
-            i2 = min([idx0+10, idx1])
+            i2 = min([i+10, idx1])
             if idx0 == i:
-                p01d = np.sum(nc.variables['p01d'][idx0:i2, :, :], 0) / 24.5
+                p01d = np.sum(nc.variables['p01d'][i:i2, :, :], 0) / 24.5
             else:
-                p01d += np.sum(nc.variables['p01d'][idx0:i2, :, :], 0) / 24.5
+                p01d += np.sum(nc.variables['p01d'][i:i2, :, :], 0) / 24.5
     nc.close()
 
     if sdate == edate:
