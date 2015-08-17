@@ -66,7 +66,7 @@ SELECT wfo, count(*) from total GROUP by wfo ORDER by count DESC
                                ) % (sts.strftime("%d %b %Y %H:00"),
                                     ets.strftime("%d %b %Y %H:00"),
                                     subtitle))
-    p.fill_cwas(data, bins=bins)
+    p.fill_cwas(data, bins=bins, ilabel=True)
     p.postprocess(web=True, memcache=mc, memcachekey=key, memcacheexpire=1800)
 
 
