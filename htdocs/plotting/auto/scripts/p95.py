@@ -4,6 +4,9 @@ from pyiem import network
 import datetime
 import pandas as pd
 
+PDICT = {'none': 'Show all values',
+         'hide': 'Show "strong" events'}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -26,6 +29,8 @@ def get_description():
              label='Number of Months to Average:'),
         dict(type='text', name='lag', default=-3,
              label='Number of Months to Lag for SOI Value:'),
+        dict(type="select", name='h', default='none', options=PDICT,
+             label='Hide/Show week SOI events -0.5 to 0.5'),
     ]
     return d
 
@@ -51,6 +56,7 @@ def plotter(fdict):
     lagmonths = int(fdict.get('lag', -3))
     months = int(fdict.get('months', 2))
     month = int(fdict.get('month', 9))
+    h = fdict.get('h', 'none')
 
     wantmonth = month + lagmonths
     yearoffset = 0
@@ -116,7 +122,12 @@ def plotter(fdict):
         ys.append(y)
         val = yearly[year]['nino']
         c = cmap(norm([val])[0])
-        ax.scatter(x, y, facecolor=c, edgecolor='k', s=60, zorder=3)
+        if h == 'hide' and val > -0.5 and val < 0.5:
+            ax.scatter(x, y, facecolor='#EEEEEE', edgecolor='#EEEEEE', s=30,
+                       zorder=2, marker='s')
+        else:
+            ax.scatter(x, y, facecolor=c, edgecolor='k', s=60, zorder=3,
+                       marker='o')
         rows.append(dict(year=year, precip=x, tmpf=y, soi3m=val))
 
     ax.axhline(np.average(ys), lw=2, color='k', linestyle='-.', zorder=2)
