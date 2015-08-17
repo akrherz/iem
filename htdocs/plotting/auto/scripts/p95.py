@@ -9,7 +9,13 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
-    d['description'] = """
+    d['description'] = """This chart displays the combination of average
+    temperature and total precipitation for one or more months of your choice.
+    The dots are colorized based on the Southern Oscillation Index (SOI) value
+    for a month of your choice.  Many times, users want to compare the SOI
+    value with monthly totals for a period a few months after the validity of
+    the SOI value.  The thought is that there is some lag time for the impacts
+    of a given SOI to be felt in the midwestern US.
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
@@ -98,26 +104,34 @@ def plotter(fdict):
     ax.set_title(msg)
 
     cmap = plt.get_cmap("RdYlGn")
-    zdata = np.arange(-3.5, 3.6, 0.5)
+    zdata = np.arange(-2.0, 2.1, 0.5)
     norm = mpcolors.BoundaryNorm(zdata, cmap.N)
     rows = []
+    xs = []
+    ys = []
     for year in yearly:
         x = yearly[year]['precip']
         y = np.average(yearly[year]['temp'])
+        xs.append(x)
+        ys.append(y)
         val = yearly[year]['nino']
         c = cmap(norm([val])[0])
-        ax.scatter(x, y, facecolor=c, edgecolor='k', s=60)
+        ax.scatter(x, y, facecolor=c, edgecolor='k', s=60, zorder=3)
         rows.append(dict(year=year, precip=x, tmpf=y, soi3m=val))
+
+    ax.axhline(np.average(ys), lw=2, color='k', linestyle='-.', zorder=2)
+    ax.axvline(np.average(xs), lw=2, color='k', linestyle='-.', zorder=2)
 
     sm = plt.cm.ScalarMappable(norm, cmap)
     sm.set_array(zdata)
-    cb = fig.colorbar(sm)
+    cb = fig.colorbar(sm, extend='both')
     cb.set_label("<-- El Nino :: SOI :: La Nina -->")
 
     ax.grid(True)
     ax.set_xlim(left=-0.01)
-    ax.set_xlabel("Total Precipitation [inch]")
-    ax.set_ylabel("Average Temperature $^\circ$F")
+    ax.set_xlabel("Total Precipitation [inch], Avg: %.2f" % (np.average(xs),))
+    ax.set_ylabel("Average Temperature $^\circ$F, Avg: %.1f" % (np.average(ys),
+                                                                ))
     df = pd.DataFrame(rows)
     plt.tight_layout()
 
