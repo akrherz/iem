@@ -6,11 +6,14 @@ import netCDF4
 import pygrib
 import pyproj
 import datetime
+import psycopg2
 import pytz
 import os
 import sys
 import numpy as np
 from pyiem import iemre
+from scipy.interpolate import NearestNDInterpolator
+
 
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
@@ -18,6 +21,37 @@ LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
 
 SWITCH_DATE = datetime.datetime(2014, 10, 10, 20)
 SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.timezone("UTC"))
+
+
+def do_coop(ts):
+    """Use COOP solar radiation data"""
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+
+    cursor.execute("""SELECT ST_x(geom), ST_y(geom),
+        coalesce(narr_srad, merra_srad) from alldata a JOIN stations t
+        ON (a.station = t.id) WHERE
+        day = %s and t.network ~* 'CLIMATE' and substr(id, 3, 1) != 'C'
+        and substr(id, 3, 4) != '0000'
+    """, (ts.strftime("%Y-%m-%d"), ))
+    lons = []
+    lats = []
+    vals = []
+    for row in cursor:
+        lons.append(row[0])
+        lats.append(row[1])
+        vals.append(row[2])
+
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
+                               np.array(vals))
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),
+                         'a')
+    offset = iemre.daily_offset(ts)
+    # Data above is MJ / d / m-2, we want W / m-2
+    nc.variables['rsds'][offset, :, :] = nn(xi, yi) * 1000000. / 86400.
+    nc.close()
 
 
 def do_hrrr(ts):
@@ -89,4 +123,7 @@ if __name__ == '__main__':
         sts = datetime.datetime.now() - datetime.timedelta(days=1)
         sts = sts.replace(hour=12)
     sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-    do_hrrr(sts)
+    if sts.year >= 2014:
+        do_hrrr(sts)
+    else:
+        do_coop(sts)
