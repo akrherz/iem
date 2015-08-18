@@ -38,6 +38,8 @@ def do_coop(ts):
     lats = []
     vals = []
     for row in cursor:
+        if row[2] is None or row[2] < 0:
+            continue
         lons.append(row[0])
         lats.append(row[1])
         vals.append(row[2])
