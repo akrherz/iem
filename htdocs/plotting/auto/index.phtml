@@ -176,6 +176,8 @@ if (isset($_GET["q"])){
 			$dpname = "datepicker_". $v->name;
 			$jsextra .= <<<EOF
 $( "#{$dpname}" ).datepicker({
+	changeMonth: true,
+	changeYear: true,
 		dateFormat : "yy/mm/dd",
 		minDate    : new Date("{$v->min}")});
 $("#{$dpname}").datepicker('setDate', new Date("{$value}"));
