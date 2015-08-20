@@ -11,6 +11,8 @@ data = {'plots': [
         {'id': "11", 'label': "ASOS/AWOS Daily Min/Max Dew Point for a Year"},
         {'id': "94",
          "label": "Bias of 24 Hour High+Low Computation by Hour"},
+        {'id': "96",
+         "label": "Bias of 24 Hour Precipitation Computation by Hour"},
         {'id': "82",
          'label': "Calendar of Daily Observations from Automated Stations"},
         {'id': "32", 'label': "Daily Temperature Departures for One Year",
