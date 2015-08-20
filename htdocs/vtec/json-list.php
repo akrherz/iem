@@ -24,7 +24,8 @@ $sql = <<<EOF
  to_char(min(issue), 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
  to_char(max(expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
  to_char(min(product_issue), 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
- to_char(max(init_expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired
+ to_char(max(init_expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired,
+ max(hvtec_nwsli) as nwsli
  
  from warnings_$year w JOIN ugcs u
  ON (u.gid = w.gid) WHERE w.wfo = '$wfo' and
@@ -50,7 +51,7 @@ $sql = <<<EOF
  	significance = '$significance' and phenomena = '$phenomena' 
  	and eventid is not null and status = 'NEW')
  			
- SELECT s.area, c.locations, c.eventid, 
+ SELECT s.area, c.locations, c.eventid, null as nwsli,
  to_char(issued, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
  to_char(expired, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
  to_char(product_issued, 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
