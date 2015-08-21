@@ -64,15 +64,17 @@ def plotter(fdict):
     # lats = np.concatenate([lats, [extra, ]])
     x, y = np.meshgrid(lons, lats)
 
-    m = MapPlot(sector=sector,
+    m = MapPlot(sector=sector, axisbg='white',
                 title=('%s - %s Precipitation Departure [inch]'
                        ) % (date1.strftime("%d %b %Y"),
                             date2.strftime("%d %b %Y")),
                 subtitle='%s vs 1950-2014 Climatology' % (date1.year,))
     rng = int(max([0 - np.min(diff), np.max(diff)]))
+    cmap = cm.get_cmap('RdYlBu')
+    cmap.set_bad('white')
     m.contourf(x, y, diff, np.linspace(0 - rng - 0.5, rng + 0.6, 10,
                                        dtype='i'),
-               cmap=cm.get_cmap('RdYlBu'), units='inch')
+               cmap=cmap, units='inch')
     if sector == 'iowa':
         m.drawcounties()
     nc.close()
