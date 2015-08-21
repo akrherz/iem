@@ -8,6 +8,8 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 # Association of plots
 data = {'plots': [
     {'label': 'Daily', 'options': [
+        {'id': "97", 'mw': True,
+         "label": "Accumulated Departures of Precipitation [map]"},
         {'id': "11", 'label': "ASOS/AWOS Daily Min/Max Dew Point for a Year"},
         {'id': "94",
          "label": "Bias of 24 Hour High+Low Computation by Hour"},
