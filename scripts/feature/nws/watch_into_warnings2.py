@@ -23,18 +23,18 @@ combo2 as (
 
 """
 
-data = """  1 |  32 |   123
-  2 |  33 |   153
-  3 |  51 |   256
-  4 | 119 |   541
-  5 |  86 |   466
-  6 |  59 |   361
-  7 |  32 |   121
-  8 |  24 |   110
-  9 |  23 |   116
- 10 |  27 |   144
- 11 |  38 |   129
- 12 |  26 |   118"""
+data = """   1 |   1 |    26
+  2 |   3 |    80
+  3 |  16 |   222
+  4 |  17 |   521
+  5 |  18 |   782
+  6 |  37 |  1297
+  7 |  15 |   885
+  8 |  22 |   637
+  9 |   6 |   208
+ 10 |   5 |   112
+ 11 |   3 |    37
+ 12 |   6 |    37"""
 
 ratio = []
 h, a = 0, 0
@@ -56,8 +56,8 @@ for i, r in enumerate(ratio):
 ax.set_ylim(0, 33)
 ax.set_yticks(np.arange(0, 31, 5))
 ax.grid(True)
-ax.set_title(("1 Oct 2005 - 22 Aug 2015 Percentage of SPC Tornado Watches"
-              "\nthat receive no Tornado Warnings, Overall (%.0f/%.0f %.1f%%)"
+ax.set_title(("1 Oct 2005 - 22 Aug 2015 Percentage of SPC Svr Tstorm Watches"
+              "\nthat receive no Svr Tstorm Warnings, Overall (%.0f/%.0f %.1f%%)"
               ) % (h, a, h / a * 100.))
 ax.set_xticks(range(1, 13))
 ax.set_xticklabels(calendar.month_abbr[1:])
