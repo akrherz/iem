@@ -1,9 +1,8 @@
 import mx.DateTime
-import iemdb
-from pyIEM import mesonet
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-ASOS = iemdb.connect('asos', bypass=True)
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
 FAIRS = [
@@ -137,14 +136,15 @@ FAIRS = [
 [mx.DateTime.DateTime(2012,8,9),mx.DateTime.DateTime(2012,8,19)],
 [mx.DateTime.DateTime(2013,8,8),mx.DateTime.DateTime(2013,8,18)],
 [mx.DateTime.DateTime(2014,8,7),mx.DateTime.DateTime(2014,8,17)],
+[mx.DateTime.DateTime(2015,8,13),mx.DateTime.DateTime(2015,8,23)],
 ]
 
 import numpy
 import numpy.ma
 
-avgH = numpy.ma.zeros( (2015-1880) )
-avgL = numpy.ma.zeros( (2015-1880) )
-precip = numpy.ma.zeros( (2015-1880) )
+avgH = numpy.ma.zeros( (2016-1880) )
+avgL = numpy.ma.zeros( (2016-1880) )
+precip = numpy.ma.zeros( (2016-1880) )
 precip[:] = -0.000000001
 #heatcnt = numpy.ma.zeros( (2012-1880) )
 #heatcnt[:] = -1
@@ -214,19 +214,19 @@ avgLL = numpy.ma.average(avgL)
 import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(2,1, sharex=True)
-bars = ax[0].bar(numpy.arange(1880,2015)-0.4, avgH, edgecolor='r', facecolor='r')
+bars = ax[0].bar(numpy.arange(1880,2016)-0.4, avgH, edgecolor='r', facecolor='r')
 for bar in bars:
     if bar.get_height() < avgHH:
         bar.set_facecolor('b')
         bar.set_edgecolor('b')
 ax[0].bar(numpy.arange(1942,1946), [110,110,110,110], fc='#EEEEEE', ec='#EEEEEE')
-ax[0].set_xlim(1879.5,2014.5)
+ax[0].set_xlim(1879.5,2015.5)
 ax[0].set_ylim(70,100)
 ax[0].grid(True)
 ax[0].set_title("Iowa State Fair Average Daily Temps (Des Moines wx site)")
 ax[0].set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
 
-bars = ax[1].bar(numpy.arange(1880,2015)-0.4, avgL, edgecolor='r', facecolor='r')
+bars = ax[1].bar(numpy.arange(1880,2016)-0.4, avgL, edgecolor='r', facecolor='r')
 for bar in bars:
     if bar.get_height() < avgLL:
         bar.set_facecolor('b')
@@ -236,6 +236,4 @@ ax[1].set_ylim(50,75)
 ax[1].grid(True)
 ax[1].set_ylabel("Low Temperature $^{\circ}\mathrm{F}$")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
