@@ -1,0 +1,58 @@
+<?php 
+include_once "../../config/settings.inc.php";
+define("IEM_APPID", 99);
+include_once "../../include/myview.php";
+include_once "../../include/database.inc.php";
+
+$pgconn = iemdb('hads');
+$rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown"
+		." WHERE length(nwsli) = 5 and "
+		."nwsli ~* '[A-Z][A-Z][A-Z][A-Z][0-9]' "
+		."GROUP by nwsli ORDER by nwsli ASC");
+$table = <<<EOF
+<table id="table1" class="table table-striped table-bordered">
+<thead><tr><th>NWSLI</th><th>WMO Source</th><th>Recent Product</th></tr></thead>
+<tbody>
+EOF;
+for($i=0; $row=@pg_fetch_array($rs, $i); $i++){
+	$table .= sprintf("<tr><th>%s</th><td>%s</td><td>"
+			."<a href=\"/p.php?pid=%s\">%s</a></td>\n",
+			$row[0], substr($row[1], 13, 4), $row[1], $row[1]);
+}
+$table .= "</tbody></table>";
+
+$t = new MyView();
+$t->title = "Unknown NWSLIs used in SHEF Products";
+$t->jsextra = <<<EOF
+<script src="/js/jquery.table-filter.min.js"></script>
+<script>
+   $("#table1").filterTable({label: "Filter Table By: "});
+</script>
+EOF;
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+		<li><a href="/DCP/">HADS/DCP Mainpage</a></li>
+		<li class="active">Unknown NWSLIs</li>
+</ol>
+
+<h3>Unknown NWSLIs used in SHEF Products</h3>
+
+<p>The IEM attempts to process all SHEF encoded products that come via a
+NOAAPort data stream.  The identifiers used by the stations reported in this
+data feed are supposed to adhere the <a href="http://www.nws.noaa.gov/om/water/resources/SHEF_CodeManual_5July2012.pdf">SHEF Manual</a>
+specification for site identifiers.  The most common set of identifiers are
+found within the National Weather Service Location Identifier (NWSLI) database.
+Unfortunately, not all site ids used by issuance centers are contained within
+NWSLI.  This page lists out unknown NWSLI'ish identifiers.  The IEM attempts
+to rectify this list daily, so there may be some false positive listed.</p>
+
+<p>This page is similiar to
+<a href="http://www.nohrsc.noaa.gov/shef_archive/tomb.html">NOHRSC's Unknown Stations</a>
+page, but this page only contains <b>NWSLI-like identifiers</b>.</p>
+
+{$table}
+
+EOF;
+$t->render('single.phtml');
+?>
