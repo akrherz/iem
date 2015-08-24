@@ -11,7 +11,8 @@ import tempfile
 import os
 import sys
 
-def do( sts ):
+
+def do(sts):
     """ Run for a given date! """
     sts = sts.replace(tzinfo=pytz.timezone("UTC"))
 
@@ -21,34 +22,37 @@ def do( sts ):
 
     now = sts
     while now < ets:
-        archivefn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/rad_%Y%m%d%H%M.nc") 
+        archivefn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/"
+                                  "NARR/rad_%Y%m%d%H%M.nc"))
         if os.path.isfile(archivefn):
             now += interval
             continue
-        uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr-a/"+
-                           "%Y%m/%Y%m%d/narr-a_221_%Y%m%d_%H00_000.grb?"+
-                           "var=Downward_shortwave_radiation_flux&spatial=all"+
-                           "&temporal=all")
-    
+        uri = now.strftime(("http://nomads.ncdc.noaa.gov/thredds/ncss/"
+                            "grid/narr-a/%Y%m/%Y%m%d/"
+                            "narr-a_221_%Y%m%d_%H00_000.grb?"
+                            "var=Downward_shortwave_radiation_flux&spatial=all"
+                            "&temporal=all"))
+
         try:
             req = urllib2.Request(uri)
             data = urllib2.urlopen(req).read()
         except:
             print 'NARR Download failed for: %s' % (uri,)
             sys.exit()
-        
+
         tmpfn = tempfile.mktemp()
         o = open(tmpfn, 'w')
-        o.write( data )
+        o.write(data)
         o.close()
-    
-        cmd = "/home/ldm/bin/pqinsert -p 'data a %s bogus model/NARR/rad_%s.nc nc' %s" % (
-                                                now.strftime("%Y%m%d%H%M"),
-                                                now.strftime("%Y%m%d%H%M"), tmpfn)
+
+        cmd = ("/home/ldm/bin/pqinsert -p 'data a %s bogus "
+               "model/NARR/rad_%s.nc nc' %s"
+               ) % (now.strftime("%Y%m%d%H%M"),
+                    now.strftime("%Y%m%d%H%M"), tmpfn)
         subprocess.call(cmd, shell=True)
-    
+
         os.remove(tmpfn)
         now += interval
-    
+
 if __name__ == '__main__':
-    do( datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])) )
+    do(datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
