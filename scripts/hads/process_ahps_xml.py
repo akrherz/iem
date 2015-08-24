@@ -1,19 +1,20 @@
-"""
- Ingest the rich metadata found within the AHPS2 website!
+"""Ingest the rich metadata found within the AHPS2 website!
 """
 from twisted.words.xish import xpath, domish
 import urllib2
 import psycopg2
 import sys
-mesosite = psycopg2.connect(database='mesosite', host='iemdb')
-mcursor = mesosite.cursor()
 from pyiem.network import Table as NetworkTable
 
-def process_site( nwsli, network ):
-    
+mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+mcursor = mesosite.cursor()
+
+
+def process_site(nwsli, network):
+
     url = ("http://water.weather.gov/ahps2/hydrograph_to_xml.php?"
-           +"gage=%s&output=xml") % (nwsli,)
-    
+           "gage=%s&output=xml") % (nwsli,)
+
     elementStream = domish.elementStream()
     roots = []
     results = []
@@ -35,11 +36,14 @@ def process_site( nwsli, network ):
         print "XML ERROR"
         print url
         return
-    
+
     elem = results[0]
-    
+
     nodes = xpath.queryForNodes('/site/sigstages', elem)
-    
+    if nodes is None:
+        print "No data found for", nwsli
+        return
+
     sigstages = nodes[0]
     data = {'id': nwsli, 'network': network, 'sigstage_low': None,
             'sigstage_action': None, 'sigstage_bankfull': None,
@@ -49,27 +53,29 @@ def process_site( nwsli, network ):
         val = str(s)
         if val == '':
             continue
-        data['sigstage_%s' %(s.name,)] =  float(val)
+        data['sigstage_%s' % (s.name, )] = float(val)
 
-    if not data.has_key('sigstage_low'):
+    if 'sigstage_low' not in data:
         print 'No Data', nwsli, network
         return
 
-    print "%s %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f" % (data['id'], 
-                            data['sigstage_low'] or -99, 
-                            data['sigstage_action'] or -99, 
-                            data['sigstage_bankfull'] or -99, 
-                            data['sigstage_flood'] or -99,
-                            data['sigstage_moderate'] or -99, 
-                            data['sigstage_major'] or -99,
-                            data['sigstage_record'] or -99)
+    print(("%s %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f"
+           ) % (data['id'], data['sigstage_low'] or -99,
+                data['sigstage_action'] or -99,
+                data['sigstage_bankfull'] or -99,
+                data['sigstage_flood'] or -99,
+                data['sigstage_moderate'] or -99,
+                data['sigstage_major'] or -99,
+                data['sigstage_record'] or -99))
     mcursor.execute("""UPDATE stations SET sigstage_low = %(sigstage_low)s,
-    sigstage_action = %(sigstage_action)s, sigstage_bankfull = %(sigstage_bankfull)s,
-    sigstage_flood = %(sigstage_flood)s, sigstage_moderate = %(sigstage_moderate)s,
+    sigstage_action = %(sigstage_action)s,
+    sigstage_bankfull = %(sigstage_bankfull)s,
+    sigstage_flood = %(sigstage_flood)s,
+    sigstage_moderate = %(sigstage_moderate)s,
     sigstage_major = %(sigstage_major)s, sigstage_record = %(sigstage_record)s
     WHERE id = %(id)s and network = %(network)s """, data)
 
-print '%5s %5s %5s %5s %5s %5s %5s %5s' % ("NWSLI", "LOW", "ACTN", "BANK", 
+print '%5s %5s %5s %5s %5s %5s %5s %5s' % ("NWSLI", "LOW", "ACTN", "BANK",
                                            "FLOOD", "MOD", "MAJOR", "REC")
 net = sys.argv[1]
 nt = NetworkTable(net)
