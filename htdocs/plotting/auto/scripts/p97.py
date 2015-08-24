@@ -29,7 +29,7 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
-        dict(type='select', name='sector', default='iowa',
+        dict(type='select', name='sector', default='IA',
              label='Plot Sector:', options=PDICT),
         dict(type='date', name='date1',
              default=(today -
