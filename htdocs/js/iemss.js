@@ -133,7 +133,8 @@ $().ready(function() {
 	});
 	
 	
-	geojsonSource = new ol.source.GeoJSON({
+	geojsonSource = new ol.source.Vector({
+		format: new ol.format.GeoJSON(),
 		projection : ol.proj.get('EPSG:3857'),
 		url : '/geojson/network.php?network='+network
 	});
@@ -181,7 +182,7 @@ $().ready(function() {
 			});
 			sortListing("id");
 			$('#stations_in').filterByText($('#stationfilter'), true);
-			map.getView().fitExtent(geojsonSource.getExtent(), map.getSize());
+			map.getView().fit(geojsonSource.getExtent(), map.getSize());
 		}
 	});
 
