@@ -15,7 +15,7 @@ hcursor2 = HADS.cursor()
 mcursor = MESOSITE.cursor()
 
 # look for unknown
-hcursor.execute("""SELECT distinct nwsli from unknown
+hcursor.execute("""SELECT distinct nwsli, network from unknown
     WHERE length(nwsli) = 5""")
 for row in hcursor:
     nwsli = row[0]
