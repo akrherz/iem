@@ -53,7 +53,7 @@ $(document).ready(function(){
 	});
 	vectorLayer.getSource().on('change', function(e){
 		if (vectorLayer.getSource().getState() == 'ready'){
-			map.getView().fitExtent(vectorLayer.getSource().getExtent(),
+			map.getView().fit(vectorLayer.getSource().getExtent(),
 					map.getSize());
 		}
 	});

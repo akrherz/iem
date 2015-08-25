@@ -15,8 +15,7 @@ $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 
 $t->thispage = "roads-maps";
 $t->headextra = <<<EOF
-<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-<script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
+<script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
 <script type="text/javascript">
 /* 'Globals' */
 var map, selectedFeature, selectControl;
@@ -53,10 +52,7 @@ function init(){
   }); 
 
   // Traditional Google Map Layer
-  var googleLayer = new OpenLayers.Layer.Google(
-                'Google Streets',
-                 {'sphericalMercator': true}
-            );
+  var osm = new OpenLayers.Layer.OSM("Open Street Map");
 
    // styleMap for the road conditions
    var styleMap = new OpenLayers.StyleMap({
@@ -165,7 +161,7 @@ var nexrad = new OpenLayers.Layer.TMS(
    nexrad.setVisibility(false);
 
    // Finally add layers to the map :)
-   map.addLayers([googleLayer, nexrad, road_condition, pavetemps, airtemps]);
+   map.addLayers([osm, nexrad, road_condition, pavetemps, airtemps]);
 
   
    var proj = new OpenLayers.Projection('EPSG:4326');

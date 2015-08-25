@@ -7,23 +7,13 @@ include("../../include/imagemaps.php");
 include("../../include/forms.php");
 
 $t = new MyView();
+$t->iemss = True;
 
 $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
 $station = "";
-$t->headextra = <<<EOF
-<link rel="stylesheet" href="/vendor/openlayers/3.5.0/ol.css" type="text/css">
-<link type="text/css" href="/vendor/openlayers/3.5.0/ol3-layerswitcher.css" rel="stylesheet" />
-EOF;
-$t->jsextra = <<<EOF
-<script src="/vendor/openlayers/3.5.0/ol.js" type="text/javascript"></script>
-<script src='/vendor/openlayers/3.5.0/ol3-layerswitcher.js'></script>
-<script src="/js/olselect.php?network=${network}"></script>
-EOF;
 $t->title = "Download ASOS/AWOS/METAR Data";
 $t->thispage = "networks-asos";
 
-
-$nselect = networkMultiSelect($network, $station, Array(), "station"); 
 $netselect = selectAzosNetwork($network);
 
 $y1select = yearSelect2(1928, date("Y"), "year1"); 
@@ -90,9 +80,8 @@ of seconds to process your request and provide the result.</div>
 
 <h4>1) Select Station/Network by clicking on location: </h4>
 
-<form method="GET" action="/cgi-bin/request/asos.py" name="olselect">
-<div id="map"></div>
-<div id="sname">No site selected</div>
+<form method="GET" action="/cgi-bin/request/asos.py" name="iemss">
+<div id="iemss" data-network="{$network}" data-name="station"></div>
 
 <p><strong>Download Variable Description</strong>
 
@@ -147,11 +136,6 @@ by site. Values in inches</dd>
 
 </div>
 <div class="col-sm-5">
-
-<h4>1) Selected Station(s):</h4>
-<p>You can download from one or more stations. 
-<a href="javascript: selectAllStations();">select all</a></p>
- {$nselect}
 
 <h4>2) Select From Available Data:</h4>
 <p><strong>Note:</strong> Cloud information and raw METAR data is not available 
