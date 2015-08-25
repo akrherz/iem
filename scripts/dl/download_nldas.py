@@ -37,5 +37,5 @@ def do(ts):
         os.remove(tmpfn)
 
 if __name__ == '__main__':
-    ts = datetime.datetime.utcnow() - datetime.timedelta(days=4)
+    ts = datetime.datetime.utcnow() - datetime.timedelta(days=5)
     do(ts)
