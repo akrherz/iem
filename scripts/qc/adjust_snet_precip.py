@@ -8,13 +8,14 @@
 
 """
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor()
 import mx.DateTime
 import sys
 import os
 from pyiem.network import Table as NetworkTable
 nt = NetworkTable(["KCCI", "KIMT", "KELO"])
+
+IEM = psycopg2.connect(database='iem', host='iemdb')
+icursor = IEM.cursor()
 
 
 def process(ts):
