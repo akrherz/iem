@@ -2,29 +2,29 @@
 """
  Dump LSRs to a shapefile
 """
-import datetime 
+import datetime
 import zipfile
 import os
 import sys
-import shutil
 import cgi
-import cgitb
-cgitb.enable()
-from osgeo import ogr
+import shapefile
+import psycopg2
+import cStringIO
 
-source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody")
+pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+cursor = pgconn.cursor()
 
 # Get CGI vars
 form = cgi.FormContent()
 
-if form.has_key('year'):
+if 'year' in form:
     year1 = int(form["year"][0])
     year2 = int(form["year"][0])
 else:
     year1 = int(form["year1"][0])
     year2 = int(form["year2"][0])
 month1 = int(form["month1"][0])
-if (not form.has_key("month2")):
+if 'month2' not in form:
     sys.exit()
 month2 = int(form["month2"][0])
 day1 = int(form["day1"][0])
@@ -35,144 +35,88 @@ minute1 = int(form["minute1"][0])
 minute2 = int(form["minute2"][0])
 
 wfoLimiter = ""
-if form.has_key('wfo[]'):
+if 'wfo[]' in form:
     aWFO = form['wfo[]']
-    aWFO.append('XXX') # Hack to make next section work
+    aWFO.append('XXX')  # Hack to make next section work
     if "ALL" not in aWFO:
-        wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
+        wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)), )
 
 sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
 eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
 
-os.chdir("/tmp/")
-fp = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
+os.chdir('/tmp')
+fn = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M"))
 for suffix in ['shp', 'shx', 'dbf', 'csv']:
-    if os.path.isfile("%s.%s" % (fp, suffix)):
-        os.remove("%s.%s" % (fp, suffix))
+    if os.path.isfile("%s.%s" % (fn, suffix)):
+        os.remove("%s.%s" % (fn, suffix))
 
-csv = open("%s.csv" % (fp,), 'w')
-csv.write("VALID,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,STATE,SOURCE,REMARK\n")
+csv = open("%s.csv" % (fn,), 'w')
+csv.write(("VALID,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,STATE,"
+           "SOURCE,REMARK\n"))
 
-out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
-out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
-out_layer = out_ds.CreateLayer("point", None, ogr.wkbPoint)
-fd = ogr.FieldDefn('VALID',ogr.OFTString)
-fd.SetWidth(12)
-out_layer.CreateField(fd)
+cursor.execute("""
+    SELECT distinct
+    to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
+    magnitude, wfo, type, typetext,
+    city, county, state, source, substr(remark,0,100) as tremark,
+    ST_y(geom), ST_x(geom) from lsrs WHERE
+    valid >= '%s+00' and valid < '%s+00' %s
+    ORDER by dvalid ASC
+    """ % (sTS.strftime("%Y-%m-%d %H:%M"),
+           eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter))
 
-fd = ogr.FieldDefn('MAG',ogr.OFTReal)
-fd.SetPrecision(2)
-out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('WFO',ogr.OFTString)
-fd.SetWidth(3)
-out_layer.CreateField(fd)
+w = shapefile.Writer(shapeType=shapefile.POINT)
+w.field('VALID', 'C', 12)
+w.field('MAG', 'F', 5, 2)
+w.field('WFO', 'C', 3)
+w.field('TYPECODE', 'C', 1)
+w.field('TYPETEXT', 'C', 40)
+w.field('CITY', 'C', 40)
+w.field('COUNTY', 'C', 40)
+w.field('STATE', 'C', 2)
+w.field('SOURCE', 'C', 40)
+w.field('REMARK', 'C', 100)
+w.field('LAT', 'F', 7, 4)
+w.field('LON', 'F', 9, 4)
+for row in cursor:
+    w.point(row[-1], row[-2])
+    w.record(*row)
+    csv.write(("%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+               ) % (row[0], row[-2], row[-1], row[1], row[2], row[3], row[4],
+                    row[5], row[6], row[7], row[8],
+                    row[9].replace(",", "_") if row[9] is not None else ''))
 
-fd = ogr.FieldDefn('TYPECODE',ogr.OFTString)
-fd.SetWidth(1)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('TYPETEXT',ogr.OFTString)
-fd.SetWidth(40)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('CITY',ogr.OFTString)
-fd.SetWidth(40)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('COUNTY',ogr.OFTString)
-fd.SetWidth(40)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('STATE',ogr.OFTString)
-fd.SetWidth(2)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('SOURCE',ogr.OFTString)
-fd.SetWidth(40)
-out_layer.CreateField(fd)
-
-fd = ogr.FieldDefn('REMARK',ogr.OFTString)
-fd.SetWidth(100)
-out_layer.CreateField(fd)
-
-sql = """SELECT distinct geom, valid, magnitude, type, wfo, city, typetext,
-    county, source, substr(remark,0,100) as tremark, state,
-    to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime 
-    , ST_x(geom), ST_y(geom) from lsrs WHERE 
-	valid >= '%s+00' and valid < '%s+00' %s 
-	ORDER by valid ASC""" % (sTS.strftime("%Y-%m-%d %H:%M"), 
-    eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter )
-
-data = source.ExecuteSQL(sql)
-
-while True:
-    feat = data.GetNextFeature()
-    if not feat:
-        break
-
-    featDef = ogr.Feature(out_layer.GetLayerDefn())
-    featDef.SetGeometry(feat.GetGeometryRef())
-    u = feat.GetField("utctime")
-    featDef.SetField('VALID', u)
-    m = feat.GetField("magnitude")
-    featDef.SetField('MAG', m)
-    t = feat.GetField("type")
-    featDef.SetField('TYPECODE', t)
-    w = feat.GetField("wfo")
-    featDef.SetField('WFO', w)
-    c = feat.GetField("city")
-    featDef.SetField('CITY', c)
-    tt = feat.GetField("typetext")
-    featDef.SetField('TYPETEXT', tt)
-    co = feat.GetField("county")
-    featDef.SetField('COUNTY', co)
-    src = feat.GetField("source")
-    featDef.SetField('SOURCE', src)
-    tr = feat.GetField("tremark")
-    featDef.SetField('REMARK', tr)
-    st = feat.GetField("state")
-    featDef.SetField('STATE', st)
-
-    out_layer.CreateFeature(featDef)
-    feat.Destroy()
-    csv.write("%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (
-            u, feat.GetField("st_y"), 
-            feat.GetField("st_x"), m,
-            w, t, 
-            tt, c,
-            co, st, src,
-            tr.replace(",", "_")))
-
-source.Destroy()
-out_ds.Destroy()
 csv.close()
 
-# Create zip file, send it back to the clients
-shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", fp+".prj")
-z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
-z.write(fp+".shp")
-z.write(fp+".shx")
-z.write(fp+".dbf")
-z.write(fp+".prj")
-z.write(fp+".csv")
-z.close()
+shp = cStringIO.StringIO()
+shx = cStringIO.StringIO()
+dbf = cStringIO.StringIO()
+
+w.save(shp=shp, shx=shx, dbf=dbf)
+
+zio = cStringIO.StringIO()
+zf = zipfile.ZipFile(zio, mode='w',
+                     compression=zipfile.ZIP_DEFLATED)
+zf.writestr(fn+'.prj',
+            open(('/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj'
+                  )).read())
+zf.writestr(fn+".shp", shp.getvalue())
+zf.writestr(fn+'.shx', shx.getvalue())
+zf.writestr(fn+'.dbf', dbf.getvalue())
+zf.writestr(fn+'.csv', open(fn+'.csv', 'r').read())
+zf.close()
+
 
 if "justcsv" in form:
     sys.stdout.write("Content-type: application/octet-stream\n")
-    sys.stdout.write("Content-Disposition: attachment; filename=%s.csv\n\n" % (
-                                                                        fp,))
-    sys.stdout.write( file(fp+".csv", 'r').read() )    
-    
-else:
-    sys.stdout.write("Content-type: application/octet-stream\n")
-    print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-    print
-    
-    print file(fp+".zip", 'r').read(),
+    sys.stdout.write(("Content-Disposition: attachment; filename=%s.csv\n\n"
+                      ) % (fn,))
+    sys.stdout.write(open(fn+".csv", 'r').read())
 
-os.remove(fp+".zip")
-os.remove(fp+".shp")
-os.remove(fp+".shx")
-os.remove(fp+".dbf")
-os.remove(fp+".prj")
+else:
+    sys.stdout.write(("Content-Disposition: attachment; "
+                      "filename=%s.zip\n\n") % (fn,))
+    sys.stdout.write(zio.getvalue())
+
+os.remove(fn+".csv")
