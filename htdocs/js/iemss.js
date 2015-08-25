@@ -106,6 +106,10 @@ $().ready(function() {
 	$("#iemss").append(htmlInterface.join(''));
 
 	network = $("#iemss").attr("data-network");
+	var select_name = $("#iemss").attr("data-name");
+	if (select_name){
+		$("#stations_out").attr("name", select_name);
+	}
 	$("#iemss-network").html(network);
 	
 	$('#stations_add').click(function() {  
