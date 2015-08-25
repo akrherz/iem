@@ -2,7 +2,7 @@
 $jsextra = array_key_exists('jsextra', $this->vars)? $this->jsextra : '';
 if (array_key_exists('iemss', $this->vars)){
 	$jsextra .= <<<EOF
-<script src="/assets/openlayers/3.0.0/build/ol.js"></script>
+<script src="/vendor/openlayers/3.8.2/ol.js"></script>
 <script src="/js/iemss.js"></script>
 EOF;
 }
