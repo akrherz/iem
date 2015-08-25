@@ -45,8 +45,8 @@ If you are looking for a real-time source of lsr shapefiles, you can find that
  {$ss}
 </select>
 <h4>Select time interval</h4>
-<i>(Times are in UTC.  LSRs <b>issued</b> between these times
-will be included in the output GIS file...)</i>
+<i>(Times are in UTC.  Local Storm Reports with an event time <b>valid</b>
+between these times selected below will be included in the output GIS file...)</i>
 <table class="table table-condensed table-bordered table-striped">
   <thead><tr>
     <td></td>
@@ -85,13 +85,15 @@ will be included in the output GIS file...)</i>
 VALID    Timestamp of LSR in GMT/UTC time
 MAG      Magnitude value of the LSR
 WFO      Weather Forecast Office originating the LSR
-TYPECODE 1 character identifier of the report type
+TYPECODE 1 character identifier of the report type, IEM specific
 TYPETEXT Textual value of LSR type used in report
 CITY     Location used for the LSR 
 COUNTY   County/Parish of the LSR city
 STATE    Two character state abbreviation
 SOURCE   Who reported the LSR
 REMARK   Text summary with the LSR
+LAT      Latitude
+LON      Longitude
 </pre>
 
 <h4>Archive notes:</h4>
