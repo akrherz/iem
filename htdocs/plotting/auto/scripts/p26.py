@@ -1,11 +1,6 @@
-"""
-  Fall Minimum by Date
-"""
 import psycopg2.extras
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import datetime
 from pyiem.network import Table as NetworkTable
 
@@ -16,6 +11,10 @@ PDICT = {'fall': 'Minimum Temperature after 1 July',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
+    d['description'] = """This plot presents the climatology and actual
+    year's progression of warmest to date or coldest to date temperature.
+    The simple average is presented along with the percentile intervals."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
@@ -29,6 +28,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -97,6 +99,13 @@ def plotter(fdict):
                 continue
             dyear.append(np.ma.max(data[idx, :doy]))
 
+    # http://stackoverflow.com/questions/19736080
+    d = dict(doy=pd.Series(doys), min=pd.Series(mins), max=pd.Series(maxs),
+             p2p5=pd.Series(p2p5),
+             p97p5=pd.Series(p97p5), p25=pd.Series(p25),
+             p75=pd.Series(p75), avg=pd.Series(avg),
+             thisyear=pd.Series(dyear))
+    df = pd.DataFrame(d)
     (fig, ax) = plt.subplots(1, 1)
 
     ax.fill_between(doys, mins, maxs, color='pink', zorder=1, label='Range')
@@ -134,4 +143,4 @@ def plotter(fdict):
                                         '50$^{th}$ %tile', 'Average',
                                         '%s' % (year,)], loc=loc)
 
-    return fig
+    return fig, df
