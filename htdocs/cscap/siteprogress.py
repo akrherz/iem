@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-''' Print out a big thing of progress bars, gasp '''
-
 import sys
 import psycopg2
 import cgi
@@ -19,20 +17,22 @@ def get_data(mode, data):
     -- Periods
     sum(case when lower(value) in ('.') then 1 else 0 end),
     -- We have some value, not a number
-    sum(case when lower(value) in ('did not collect', 'n/a') then 1 else 0 end),
+    sum(case when lower(value) in ('did not collect', 'n/a')
+        then 1 else 0 end),
     -- We have a null
     sum(case when value is null then 1 else 0 end),
     count(*) from """+table+"""
     WHERE (value is Null or lower(value) != 'n/a')
     GROUP by site""")
     for row in cursor:
-        entry = data.setdefault(row[0], dict(hits=0, dots=0, other=0,
-                                             nulls=0, tot=0))
-        entry['hits'] += row[1]
-        entry['dots'] += row[2]
-        entry['other'] += row[3]
-        entry['nulls'] += row[4]
-        entry['tot'] += row[5]
+        for site in [row[0], '_ALL']:
+            entry = data.setdefault(site, dict(hits=0, dots=0, other=0,
+                                               nulls=0, tot=0))
+            entry['hits'] += row[1]
+            entry['dots'] += row[2]
+            entry['other'] += row[3]
+            entry['nulls'] += row[4]
+            entry['tot'] += row[5]
 
 
 def make_progress(row):
@@ -71,9 +71,9 @@ if __name__ == '__main__':
     sites = data.keys()
     sites.sort()
     sys.stdout.write("""<!DOCTYPE html>
-    <html lang='en'>
-    <head>
-    <link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+<html lang='en'>
+<head>
+<link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <title>CSCAP Research Site Agronomic+Soils Data Progress</title>
     </head>
     <body>
@@ -96,16 +96,30 @@ if __name__ == '__main__':
     <span class="btn btn-danger">no entry / empty</span>
 
     <p>This page lists the data progress for Agronomic + Soils variables
-    collected by the Google Spreadsheets.</p>
+    collected by the Google Spreadsheets. These values are valid for the
+    duration of the project 2011-2015.</p>
 
-    <table class='table table-striped table-bordered'>
-    <thead><tr><th>SiteID</th><th>Progress</th><th>Percent Done (green + orange)</th></tr></thead>
+<table class='table table-striped table-bordered'>
+<thead><tr>
+    <th width="20%">SiteID</th>
+    <th width="60%">Progress</th>
+    <th width="20%">Percent Done (green + orange)</th>
+</tr></thead>
     """)
     for sid in sites:
+        if sid == '_ALL':
+            continue
         sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
         row = data[sid]
         sys.stdout.write('<td>%s</td>' % (make_progress(row)))
         sys.stdout.write("<td>%.2f%%</td>" % (((row['hits'] + row['other']) /
                                                float(row['tot'])) * 100.))
         sys.stdout.write("</tr>\n\n")
+    sid = "_ALL"
+    sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
+    row = data[sid]
+    sys.stdout.write('<td>%s</td>' % (make_progress(row)))
+    sys.stdout.write("<td>%.2f%%</td>" % (((row['hits'] + row['other']) /
+                                           float(row['tot'])) * 100.))
+    sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
