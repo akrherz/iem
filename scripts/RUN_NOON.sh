@@ -21,6 +21,4 @@ python daily_estimator.py SD
 python daily_estimator.py NE
 python daily_estimator.py KS
 python daily_estimator.py MO
-
-cd ../coop
 python compute_0000.py
