@@ -1,9 +1,17 @@
 import numpy as np
 from pyiem import iemre
+from pyiem.datatypes import temperature
 import datetime
 import netCDF4
+from collections import OrderedDict
 
-PDICT = {'rsds': 'Solar Radiation'}
+PDICT = OrderedDict({'p01d_12z': '24 Hour Precipitation at 12 UTC',
+                     'p01d': 'Calendar Day Precipitation',
+                     'low_tmpk': 'Minimum Temperature',
+                     'high_tmpk': 'Maximum Temperature',
+                     'p01d': 'Calendar Day Precipitation',
+                     'rsds': 'Solar Radiation',
+                     })
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
 
@@ -44,8 +52,26 @@ def plotter(fdict):
     lons = nc.variables['lon'][:]
     if varname == 'rsds':
         # Value is in W m**-2, we want MJ
-        data = nc.variables['rsds'][idx0, :, :] * 86400. / 1000000.
+        data = nc.variables[varname][idx0, :, :] * 86400. / 1000000.
         units = 'MJ d-1'
+        clevs = np.arange(0, 37, 3.)
+        clevs[0] = 0.01
+        clevstride = 1
+    elif varname in ['p01d', 'p01d_12z']:
+        # Value is in W m**-2, we want MJ
+        data = nc.variables[varname][idx0, :, :] / 25.4
+        units = 'inch'
+        clevs = np.arange(0, 0.25, 0.05)
+        clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
+        clevs = np.append(clevs, np.arange(3., 10.0, 1))
+        clevs[0] = 0.01
+        clevstride = 1
+    elif varname in ['high_tmpk', 'low_tmpk']:
+        # Value is in W m**-2, we want MJ
+        data = temperature(nc.variables[varname][idx0, :, :], 'K').value('F')
+        units = 'F'
+        clevs = np.arange(-30, 120, 2)
+        clevstride = 5
     nc.close()
 
     title = date.strftime("%-d %B %Y")
@@ -56,12 +82,10 @@ def plotter(fdict):
                 )
     if np.ma.is_masked(np.max(data)):
         return 'Data Unavailable'
-    clevs = np.arange(0, 37, 3.)
-    clevs[0] = 0.01
     x, y = np.meshgrid(lons, lats)
     if ptype == 'c':
-        m.contourf(x, y, data, clevs, units=units)
+        m.contourf(x, y, data, clevs, clevstride=clevstride, units=units)
     else:
-        m.pcolormesh(x, y, data, clevs, units=units)
+        m.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
 
     return m.fig
