@@ -898,8 +898,6 @@ LAYER
   END
   LABELCACHE ON
   CLASS
-   LABEL
-   END
    SYMBOL 1
    COLOR 255 0 0
    SIZE 5
@@ -949,8 +947,6 @@ LAYER
     LABEL
       COLOR  255 255 0
       OUTLINECOLOR  0 0 0
-      #SHADOWCOLOR 0 0 0
-      #SHADOWSIZE 1 1
       SIZE 14
       MINSIZE 4
       MAXSIZE 18
@@ -967,9 +963,6 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR 0 0 0
-#      OUTLINECOLOR 0 0 0
-#      SHADOWCOLOR 0 0 0
-#      SHADOWSIZE 1 1
       SIZE 7
       MINSIZE 4
       MAXSIZE 18
@@ -990,8 +983,6 @@ LAYER
       MAXSIZE 18
       TYPE TRUETYPE
       FONT 'liberation'
-      #TYPE BITMAP
-      #SIZE LARGE
       ANTIALIAS TRUE
       BUFFER 2
       FORCE TRUE
@@ -1004,7 +995,7 @@ LAYER
   NAME cityname
   STATUS ON
   TYPE POINT
-  LABELCACHE OFF
+  LABELCACHE ON
   PROJECTION
     "init=epsg:4326"
   END

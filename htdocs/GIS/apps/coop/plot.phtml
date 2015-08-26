@@ -98,11 +98,13 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $states->draw($img);
 
-$c = iemdb("coop");
-
 if ($source == "qc")
 {
-	$sql = sprintf("SELECT * from alldata WHERE day = '%s' and %s is not null", adodb_date("Y-m-d", $ts), $var );
+	$c = iemdb("coop");
+	$sql = sprintf("SELECT * from alldata_ia "
+			."WHERE day = '%s' and %s is not null"
+			." and substr(station, 3, 1) != 'C' and station != 'IA0000'",
+			adodb_date("Y-m-d", $ts), $var );
 	$cutstring1 = 2;
 	$cutstring2 = 4;
 } else {
@@ -140,7 +142,7 @@ foreach($vals as $key => $value){
 	if ($showlabels){
 		$pt = ms_newPointObj();
 		$pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-		$pt->draw($map, $ponly, $img, 0, '' );
+		$pt->draw($map, $ponly, $img, 0);
 
 		$pt = ms_newPointObj();
 		$pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
@@ -153,7 +155,6 @@ foreach($vals as $key => $value){
 	if ($value == 0.0001) $value = "T";
 	$pt->draw($map, $snet, $img, 2, $value);
 }
-$map->drawLabelCache($img);
 
 if ($i == 0)
 	plotNoData($map, $img);
@@ -192,7 +193,7 @@ $t->content = <<<EOF
 choice.
 
 <form method="GET" name="myform">
-<table cellpadding="2" border="1" cellspacing="0">
+<table class="table table-bordered">
  <tr>
    <th>Select Datasource:</th>
    <th>Select Parameter:</th>
