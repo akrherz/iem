@@ -29,6 +29,7 @@ import sys
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 import datetime
+import netCDF4
 import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 import psycopg2.extras
@@ -50,35 +51,12 @@ for sid in nt.sts.keys():
 
 
 def estimate_precip(ts):
-    """Estimate precipitation based on COOP reports that morning"""
-    # Query Obs
-    vals = []
-    lats = []
-    lons = []
-    icursor.execute("""
-        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, pday
-        from summary_%s c, stations s WHERE day = '%s' and
-        s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
-        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP') and c.iemid = s.iemid
-        and pday >= 0
-    """ % (ts.year, ts.strftime("%Y-%m-%d")))
-    for row in icursor:
-        lats.append(row['lat'])
-        lons.append(row['lon'])
-        vals.append(row['pday'])
-
-    if len(lats) < 5:
-        print 'WARNING: less than 5 precip obs were found!'
-        for sid in nt.sts.keys():
-            nt.sts[sid]['pday'] = 0
-        return
-
-    # Create the analysis
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
-                               np.array(vals))
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    grid = nn(xi, yi)
+    """Estimate precipitation based on IEMRE"""
+    idx = iemre.daily_offset(ts)
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
+                         'r')
+    grid = nc.variables['p01d_12z'][idx, :, :] / 25.4
+    nc.close()
 
     for sid in nt.sts.keys():
         precip = grid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]

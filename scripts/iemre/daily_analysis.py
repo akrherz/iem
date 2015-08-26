@@ -24,26 +24,27 @@ def generic_gridder(rs, idx):
     vals = []
     for row in rs:
         if row[idx] is not None:
-            lats.append(  row['lat']  )
-            lons.append(  row['lon'] )
-            vals.append( row[idx]  )
+            lats.append(row['lat'])
+            lons.append(row['lon'])
+            vals.append(row[idx])
     if len(vals) < 4:
-        print "Only %s observations found for %s, won't grid" % (len(vals),
-               idx)
+        print(("Only %s observations found for %s, won't grid"
+               ) % (len(vals), idx))
         return None
-    
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)), np.array(vals))
+
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
+                               np.array(vals))
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     grid = nn(xi, yi)
-    
+
     return grid
 
 
 def do_precip(nc, ts):
     """Compute the precip totals based on the hourly analysis totals"""
     offset = iemre.daily_offset(ts)
-    ets = ts.replace(hour=12, tzinfo=pytz.timezone("UTC"))
-    sts = ets - datetime.timedelta(hours=24)
+    sts = ts.replace(hour=6, tzinfo=pytz.timezone("UTC"))
+    ets = sts + datetime.timedelta(hours=24)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
     hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,))
@@ -52,16 +53,31 @@ def do_precip(nc, ts):
     hnc.close()
 
 
+def do_precip12(nc, ts):
+    """Compute the 24 Hour precip at 12 UTC, we do some more tricks though"""
+    offset = iemre.daily_offset(ts)
+    ets = ts.replace(hour=12, tzinfo=pytz.timezone("UTC"))
+    sts = ets - datetime.timedelta(hours=24)
+    offset1 = iemre.hourly_offset(sts)
+    offset2 = iemre.hourly_offset(ets)
+    hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,))
+    phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
+    nc.variables['p01d_12z'][offset] = phour
+    hnc.close()
+
+
 def grid_day(nc, ts):
     """
     """
     offset = iemre.daily_offset(ts)
     icursor.execute("""
-       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
+       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat,
        (CASE WHEN pday >= 0 then pday else null end) as precipdata,
-       (CASE WHEN max_tmpf > -50 and max_tmpf < 130 then max_tmpf else null end) as highdata,
-       (CASE WHEN min_tmpf > -50 and min_tmpf < 95 then min_tmpf else null end) as lowdata 
-       from summary_%s c, stations s WHERE day = '%s' and 
+       (CASE WHEN max_tmpf > -50 and max_tmpf < 130
+           then max_tmpf else null end) as highdata,
+       (CASE WHEN min_tmpf > -50 and min_tmpf < 95
+           then min_tmpf else null end) as lowdata
+       from summary_%s c, stations s WHERE day = '%s' and
        s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
         'OH_ASOS', 'AWOS') and c.iemid = s.iemid
@@ -69,16 +85,16 @@ def grid_day(nc, ts):
 
     if icursor.rowcount > 4:
         res = generic_gridder(icursor, 'highdata')
-        nc.variables['high_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
+        nc.variables['high_tmpk'][offset] = datatypes.temperature(res,
+                                                'F').value('K')
         icursor.scroll(0, mode='absolute')
         res = generic_gridder(icursor, 'lowdata')
-        nc.variables['low_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
+        nc.variables['low_tmpk'][offset] = datatypes.temperature(res,
+                                                'F').value('K')
         icursor.scroll(0, mode='absolute')
-        #res = generic_gridder(icursor, 'precipdata')
-        #nc.variables['p01d'][offset] = res * 25.4
     else:
-        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"), 
-            icursor.rowcount)
+        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
+                                             icursor.rowcount)
 
 
 def main(ts):
@@ -87,6 +103,7 @@ def main(ts):
                          'a')
     grid_day(nc, ts)
     do_precip(nc, ts)
+    do_precip12(nc, ts)
     nc.close()
 
 if __name__ == "__main__":
