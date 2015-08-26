@@ -79,6 +79,14 @@ def init_year(ts):
     p01d.coordinates = "lon lat"
     p01d.description = "Precipitation accumulation for the day"
 
+    p01d12 = nc.createVariable('p01d_12z', numpy.float, ('time', 'lat', 'lon'),
+                               fill_value=1.e20)
+    p01d12.units = 'mm'
+    p01d12.long_name = 'Precipitation'
+    p01d12.standard_name = 'Precipitation'
+    p01d12.coordinates = "lon lat"
+    p01d12.description = "24 Hour Precipitation Ending 12 UTC"
+
     rsds = nc.createVariable('rsds', numpy.float, ('time', 'lat', 'lon'),
                              fill_value=1.e20)
     rsds.units = "W m-2"

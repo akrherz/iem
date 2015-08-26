@@ -9,12 +9,12 @@ for yr in range(1893, 2016):
         continue
     print fn
     nc = netCDF4.Dataset(fn, 'a')
-    rsds = nc.createVariable('rsds', np.float, ('time', 'lat', 'lon'),
+    rsds = nc.createVariable('p01d_12z', np.float, ('time', 'lat', 'lon'),
                              fill_value=1.e20)
-    rsds.units = "W m-2"
-    rsds.long_name = 'surface_downwelling_shortwave_flux_in_air'
-    rsds.standard_name = 'surface_downwelling_shortwave_flux_in_air'
+    rsds.units = "mm"
+    rsds.long_name = 'Precipitation'
+    rsds.standard_name = 'Precipitation'
     rsds.coordinates = "lon lat"
-    rsds.description = "Global Shortwave Irradiance"
+    rsds.description = "24 Hour Precipitation Ending 12 UTC"
     nc.sync()
     nc.close()
