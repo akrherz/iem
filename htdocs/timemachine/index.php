@@ -5,12 +5,12 @@ $t = new MyView();
 $t->title = "Time Machine";
 define("IEM_APPID", 148);
 $t->thispage="archive-tm";
-$t->headextra = '
+$t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/packages/ext-theme-neptune/build/ext-theme-neptune.js"></script>
 <script type="text/javascript" src="static.js?v=18"></script>
-';
+EOF;
 
 $t->content = <<<EOF
 <style>
