@@ -31,14 +31,16 @@ from pyiem.network import Table as NetworkTable
 import datetime
 import netCDF4
 import numpy as np
+from pyiem.datatypes import temperature
 from scipy.interpolate import NearestNDInterpolator
 import psycopg2.extras
 COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-IEM = psycopg2.connect(database='iem', host='iemdb')
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
+TABLE = "alldata_%s" % (state, )
 
 # Pre-compute the grid location of each climate site
 nt = NetworkTable("%sCLIMATE" % (state.upper(),))
@@ -133,77 +135,54 @@ def estimate_snow(ts):
 
 def estimate_hilo(ts):
     """Estimate the High and Low Temperature based on gridded data"""
-    # Query Obs
-    # Query Obs
-    highs = []
-    lows = []
-    lats = []
-    lons = []
-    icursor.execute("""
-        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, max_tmpf, min_tmpf
-        from summary_%s c, stations s WHERE day = '%s' and
-        s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
-        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP') and c.iemid = s.iemid
-        and max_tmpf > -50 and max_tmpf < 130 and
-        min_tmpf < 90 and min_tmpf > -60
-    """ % (ts.year, ts.strftime("%Y-%m-%d")))
-    for row in icursor:
-        lats.append(row['lat'])
-        lons.append(row['lon'])
-        highs.append(row['max_tmpf'])
-        lows.append(row['min_tmpf'])
-
-    if len(lats) < 5:
-        print 'WARNING: less than 5 temperature obs were found!'
-        for sid in nt.sts.keys():
-            nt.sts[sid]['high'] = 0
-            nt.sts[sid]['low'] = 0
-        return
-
-    # Create the analysis
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
-                               np.array(highs))
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    highgrid = nn(xi, yi)
-
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
-                               np.array(lows))
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    lowgrid = nn(xi, yi)
+    idx = iemre.daily_offset(ts)
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
+                         'r')
+    highgrid = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
+                           'K').value('F')
+    lowgrid = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
+                          'K').value('F')
+    nc.close()
 
     for sid in nt.sts.keys():
-        high = highgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        if not np.isnan(high):
-            nt.sts[sid]['high'] = "%.0f" % (high,)
-        low = lowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        if not np.isnan(low):
-            nt.sts[sid]['low'] = "%.0f" % (low,)
+        val = highgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if val > -80 and val < 140:
+            nt.sts[sid]['high'] = "%.0f" % (val, )
+        val = lowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if val > -80 and val < 140:
+            nt.sts[sid]['low'] = "%.0f" % (val, )
 
 
 def commit(ts):
     """
     Inject into the database!
     """
-    # Remove old entries
-    ccursor.execute("""
-        DELETE from alldata_%s WHERE day = '%s'
-    """ % (state.lower(), ts.strftime("%Y-%m-%d")))
-    if ccursor.rowcount > 0:
-        print 'Removed %s rows from alldata_%s table' % (ccursor.rowcount,
-                                                         state.lower())
     # Inject!
     for sid in nt.sts.keys():
         if sid[2] == 'C' or sid[2:] == '0000':
             continue
+        # See if we currently have data
+        ccursor.execute("""
+            SELECT day from """ + TABLE + """
+            WHERE station = %s and day = %s
+            """, (sid, ts))
+        if ccursor.rowcount == 0:
+            ccursor.execute("""INSERT INTO """ + TABLE + """
+            (station, day, sday, year, month)
+            VALUES (%s, %s, %s, %s, %s)
+            """, (sid, ts, ts.strftime("%m%d"), ts.year, ts.month))
         sql = """
-            INSERT into alldata_"""+state+""" (station, day, high, low,
-            precip, snow, sday, year, month, snowd, estimated) values (%s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, 't')"""
-        args = (sid, ts, nt.sts[sid]['high'], nt.sts[sid]['low'],
+            UPDATE """ + TABLE + """ SET high = %s, low = %s,
+            precip = %s, snow = %s, snowd = %s, estimated = 't'
+            WHERE day = %s and station = %s
+            """
+        args = (nt.sts[sid]['high'], nt.sts[sid]['low'],
                 nt.sts[sid]['precip'], nt.sts[sid]['snow'],
-                ts.strftime("%m%d"), ts.year, ts.month, nt.sts[sid]['snowd'])
+                nt.sts[sid]['snowd'], ts, sid)
         ccursor.execute(sql, args)
+        if ccursor.rowcount != 1:
+            print(("ERROR: %s update of %s %s resulted in %s rows"
+                   ) % (TABLE, sid, ts, ccursor.rowcount))
 
 
 def main():
