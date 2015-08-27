@@ -86,6 +86,8 @@ def grid_day12(nc, ts):
     cursor.execute("""
        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat,
        (CASE WHEN pday >= 0 then pday else null end) as precipdata,
+       (CASE WHEN snow >= 0 then snow else null end) as snowdata,
+       (CASE WHEN snowd >= 0 then snowd else null end) as snowddata,
        (CASE WHEN max_tmpf > -50 and max_tmpf < 130
            then max_tmpf else null end) as highdata,
        (CASE WHEN min_tmpf > -50 and min_tmpf < 95
@@ -101,11 +103,19 @@ def grid_day12(nc, ts):
         res = generic_gridder(cursor, 'highdata')
         nc.variables['high_tmpk_12z'][offset] = datatypes.temperature(
                                                 res, 'F').value('K')
+
         cursor.scroll(0, mode='absolute')
         res = generic_gridder(cursor, 'lowdata')
         nc.variables['low_tmpk_12z'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
+
         cursor.scroll(0, mode='absolute')
+        res = generic_gridder(cursor, 'snowdata')
+        nc.variables['snow_12z'][offset] = res * 25.4
+
+        cursor.scroll(0, mode='absolute')
+        res = generic_gridder(cursor, 'snowddata')
+        nc.variables['snowd_12z'][offset] = res * 25.4
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
                                              cursor.rowcount)

@@ -9,20 +9,21 @@ for yr in range(1893, 2016):
         continue
     print fn
     nc = netCDF4.Dataset(fn, 'a')
-    high12 = nc.createVariable('high_tmpk_12z', np.float,
-                               ('time', 'lat', 'lon'),
-                               fill_value=1.e20)
-    high12.units = "K"
-    high12.long_name = "2m Air Temperature 24 Hour Max at 12 UTC"
-    high12.standard_name = "2m Air Temperature"
-    high12.coordinates = "lon lat"
+    snow = nc.createVariable('snow_12z', np.float, ('time', 'lat', 'lon'),
+                             fill_value=1.e20)
+    snow.units = 'mm'
+    snow.long_name = 'Snowfall'
+    snow.standard_name = 'Snowfall'
+    snow.coordinates = "lon lat"
+    snow.description = "Snowfall accumulation for the day"
 
-    low12 = nc.createVariable('low_tmpk_12z', np.float,
-                              ('time', 'lat', 'lon'),
+    snowd = nc.createVariable('snowd_12z', np.float, ('time', 'lat', 'lon'),
                               fill_value=1.e20)
-    low12.units = "K"
-    low12.long_name = "2m Air Temperature 12 Hour Min at 12 UTC"
-    low12.standard_name = "2m Air Temperature"
-    low12.coordinates = "lon lat"
+    snowd.units = 'mm'
+    snowd.long_name = 'Snow Depth'
+    snowd.standard_name = 'Snow Depth'
+    snowd.coordinates = "lon lat"
+    snowd.description = "Snow depth at time of observation"
+
     nc.sync()
     nc.close()

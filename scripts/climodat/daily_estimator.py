@@ -32,12 +32,9 @@ import datetime
 import netCDF4
 import numpy as np
 from pyiem.datatypes import temperature
-from scipy.interpolate import NearestNDInterpolator
 import psycopg2.extras
 COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
 TABLE = "alldata_%s" % (state, )
@@ -67,7 +64,7 @@ def estimate_precip(ts):
             nt.sts[sid]['precip'] = 0.0001
         elif precip < 0:
             nt.sts[sid]['precip'] = 0
-        elif np.isnan(precip):
+        elif np.isnan(precip) or np.ma.is_masked(precip):
             nt.sts[sid]['precip'] = 0
         else:
             nt.sts[sid]['precip'] = "%.2f" % (precip,)
@@ -75,62 +72,20 @@ def estimate_precip(ts):
 
 def estimate_snow(ts):
     """Estimate the Snow based on COOP reports"""
-    # Query Obs
-    snowd = []
-    snow = []
-    lats = []
-    lons = []
-    icursor.execute("""
-        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, snow, snowd
-        from summary_%s c, stations s WHERE day = '%s' and
-        s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
-        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP') and c.iemid = s.iemid
-        and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d")))
-    for row in icursor:
-        lats.append(row['lat'])
-        lons.append(row['lon'])
-        snow.append(row['snow'])
-        snowd.append(row['snowd'])
-
-    if len(lats) < 5:
-        for sid in nt.sts.keys():
-            nt.sts[sid]['snow'] = 0
-            nt.sts[sid]['snowd'] = 0
-        return
-
-    # Create the analysis
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
-                               np.array(snow))
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    snowgrid = nn(xi, yi)
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
-                               np.array(snowd))
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    snowdgrid = nn(xi, yi)
+    idx = iemre.daily_offset(ts)
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
+                         'r')
+    snowgrid = nc.variables['snow_12z'][idx, :, :] / 25.4
+    snowdgrid = nc.variables['snowd_12z'][idx, :, :] / 25.4
+    nc.close()
 
     for sid in nt.sts.keys():
-        snow = snowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        # denote trace
-        if snow > 0 and snow < 0.1:
-            nt.sts[sid]['snow'] = 0.0001
-        elif snow < 0:
-            nt.sts[sid]['snow'] = 0
-        elif np.isnan(snow):
-            nt.sts[sid]['snow'] = 0
-        else:
-            nt.sts[sid]['snow'] = "%.1f" % (snow, )
-
-        snowd = snowdgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        # denote trace
-        if snowd > 0 and snowd < 0.1:
-            nt.sts[sid]['snowd'] = 0.0001
-        elif snowd < 0:
-            nt.sts[sid]['snowd'] = 0
-        elif np.isnan(snowd):
-            nt.sts[sid]['snowd'] = 0
-        else:
-            nt.sts[sid]['snowd'] = "%.1f" % (snowd,)
+        val = snowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if val >= 0 and val < 100:
+            nt.sts[sid]['snow'] = "%.1f" % (val, )
+        val = snowdgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if val >= 0 and val < 140:
+            nt.sts[sid]['snowd'] = "%.1f" % (val, )
 
 
 def estimate_hilo(ts):
@@ -203,6 +158,3 @@ if __name__ == '__main__':
     ccursor.close()
     COOP.commit()
     COOP.close()
-    icursor.close()
-    IEM.commit()
-    IEM.close()
