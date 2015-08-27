@@ -83,57 +83,6 @@ of seconds to process your request and provide the result.</div>
 <form method="GET" action="/cgi-bin/request/asos.py" name="iemss">
 <div id="iemss" data-network="{$network}" data-name="station"></div>
 
-<p><strong>Download Variable Description</strong>
-
-<dl class="dl-horizontal">
-<dt>station:</dt>
-<dd>three or four character site identifier</dd>
-<dt>valid:</dt>
-<dd>timestamp of the observation</dd>
-<dt>tmpf:</dt>
-<dd>Air Temperature in Fahrenheit, typically @ 2 meters</dd>
-<dt>dwpf:</dt>
-<dd>Dew Point Temperature in Fahrenheit, typically @ 2 meters</dd>
-<dt>relh:</dt>
-<dd>Relative Humidity in %</dd>
-<dt>drct:</dt>
-<dd>Wind Direction in degrees from north</dd>
-<dt>sknt:</dt>
-<dd>Wind Speed in knots	</dd>
-<dt>p01i:</dt>
-<dd>One hour precipitation for the period from the observation time
-to the time of the previous hourly precipitation reset.  This varies slightly
-by site. Values in inches</dd>
-<dt>alti:</dt>
-<dd>Pressure altimeter in inches</dd>
-<dt>mslp:</dt>
-<dd>Sea Level Pressure in millibar</dd>
-<dt>vsby:</dt>
-<dd>Visibility in miles</dd>
-<dt>gust:</dt>
-<dd>Wind Gust in knots</dd>
-<dt>skyc1:</dt>
-<dd>Sky Level 1 Coverage</dd>
-<dt>skyc2:</dt>
-<dd>Sky Level 2 Coverage</dd>
-<dt>skyc3:</dt>
-<dd>Sky Level 3 Coverage</dd>
-<dt>skyc4:</dt>
-<dd>Sky Level 4 Coverage</dd>
-<dt>skyl1:</dt>
-<dd>Sky Level 1 Altitude in feet</dd>
-<dt>skyl2:</dt>
-<dd>Sky Level 2 Altitude in feet</dd>
-<dt>skyl3:</dt>
-<dd>Sky Level 3 Altitude in feet</dd>
-<dt>skyl4:</dt>
-<dd>Sky Level 4 Altitude in feet</dd>
-<dt>presentwx:</dt>
-<dd>Present Weather Codes (space seperated)</dd>
-<dt>metar:</dt>
-<dd>unprocessed reported observation in METAR format</dd>
-</dl>
-
 </div>
 <div class="col-sm-5">
 
@@ -215,6 +164,61 @@ day worth of data.</p>
  		</div>
  		
 </form>
+
+<p><strong>Download Variable Description</strong>
+
+<dl class="dl-horizontal">
+<dt>station:</dt>
+<dd>three or four character site identifier</dd>
+<dt>valid:</dt>
+<dd>timestamp of the observation</dd>
+<dt>tmpf:</dt>
+<dd>Air Temperature in Fahrenheit, typically @ 2 meters</dd>
+<dt>dwpf:</dt>
+<dd>Dew Point Temperature in Fahrenheit, typically @ 2 meters</dd>
+<dt>relh:</dt>
+<dd>Relative Humidity in %</dd>
+<dt>drct:</dt>
+<dd>Wind Direction in degrees from north</dd>
+<dt>sknt:</dt>
+<dd>Wind Speed in knots	</dd>
+<dt>p01i:</dt>
+<dd>One hour precipitation for the period from the observation time
+to the time of the previous hourly precipitation reset.  This varies slightly
+by site. Values are in inches. This value may or may not contain frozen
+		precipitation melted by some device on the sensor or estimated
+		by some other means.  Unfortunately, we do not know of an
+		authoritative database denoting which station has which sensor.</dd>
+<dt>alti:</dt>
+<dd>Pressure altimeter in inches</dd>
+<dt>mslp:</dt>
+<dd>Sea Level Pressure in millibar</dd>
+<dt>vsby:</dt>
+<dd>Visibility in miles</dd>
+<dt>gust:</dt>
+<dd>Wind Gust in knots</dd>
+<dt>skyc1:</dt>
+<dd>Sky Level 1 Coverage</dd>
+<dt>skyc2:</dt>
+<dd>Sky Level 2 Coverage</dd>
+<dt>skyc3:</dt>
+<dd>Sky Level 3 Coverage</dd>
+<dt>skyc4:</dt>
+<dd>Sky Level 4 Coverage</dd>
+<dt>skyl1:</dt>
+<dd>Sky Level 1 Altitude in feet</dd>
+<dt>skyl2:</dt>
+<dd>Sky Level 2 Altitude in feet</dd>
+<dt>skyl3:</dt>
+<dd>Sky Level 3 Altitude in feet</dd>
+<dt>skyl4:</dt>
+<dd>Sky Level 4 Altitude in feet</dd>
+<dt>presentwx:</dt>
+<dd>Present Weather Codes (space seperated)</dd>
+<dt>metar:</dt>
+<dd>unprocessed reported observation in METAR format</dd>
+</dl>
+
 EOF;
 $t->render('single.phtml');
 ?>
