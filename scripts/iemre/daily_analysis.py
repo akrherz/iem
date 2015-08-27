@@ -41,13 +41,19 @@ def generic_gridder(rs, idx):
 
 
 def do_precip(nc, ts):
-    """Compute the precip totals based on the hourly analysis totals"""
-    offset = iemre.daily_offset(ts)
-    sts = ts.replace(hour=6, tzinfo=pytz.timezone("UTC"))
-    ets = sts + datetime.timedelta(hours=24)
+    """Compute the 6 UTC to 6 UTC precip
+
+    We need to be careful here as the timestamp sent to this app is today,
+    we are actually creating the analysis for yesterday
+    """
+    ets = ts.replace(hour=6, tzinfo=pytz.timezone("UTC"))
+    sts = ets - datetime.timedelta(hours=24)
+    offset = iemre.daily_offset(sts)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
-    hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,))
+    # print("Computing p01d for %s [idx:%s] %s->%s" % (sts, offset, offset1,
+    #                                                 offset2))
+    hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (sts.year,))
     phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
     nc.variables['p01d'][offset] = phour
     hnc.close()
@@ -60,6 +66,8 @@ def do_precip12(nc, ts):
     sts = ets - datetime.timedelta(hours=24)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
+    # print("Computing p01d_12z for %s [idx:%s] %s->%s" % (ts, offset, offset1,
+    #                                                     offset2))
     hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,))
     phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
     nc.variables['p01d_12z'][offset] = phour
