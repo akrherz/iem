@@ -16,8 +16,10 @@ def do_day(valid):
     idx = iemre.daily_offset(valid)
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year, ),
                          'r')
-    high = temperature(nc.variables['high_tmpk'][idx, :, :], 'K').value('F')
-    low = temperature(nc.variables['low_tmpk'][idx, :, :], 'K').value('F')
+    high = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
+                       'K').value('F')
+    low = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
+                      'K').value('F')
     precip = nc.variables['p01d_12z'][idx, :, :] / 25.4
     nc.close()
     for state in ('IA', 'NE', 'MN', 'WI', 'MI', 'OH', 'IN', 'IL', 'MO',
