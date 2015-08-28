@@ -5,6 +5,8 @@
  $t->thispage = 'archive-iemre'; 
  $t->title = "Reanalysis Data";
 
+ $s4link = sprintf("/archive/data/%s/stage4/", date("Y/m/d"));
+ 
  $t->content = <<<EOF
 <h3>IEM Reanalysis (IEMRE)</h3><p>
 
@@ -32,9 +34,6 @@ quality sensor observations can be.  Producing a gridded analysis is one
 way to produce a dataset from point observations which can be sampled as
 a means of spatial interpolation.</li>
 
- <li><strong>Why just Iowa? I'm interested in the corn belt.</strong>
- <br />Yes, someday we hope to expand to at least the corn belt.</li>
-
  <li><strong>Isn't this a duplication of effort?</strong>
  <br />While there are other "reanalysis" type projects out there with
 data freely available, many times their data does not update in near real-time
@@ -44,6 +43,53 @@ also produce an analysis on sub-hourly timescales.</li>
 
  		</div>
  		</div>
+
+<h3>Data Flow</h3>
+ 
+<div class="row">
+ 	<div class="col-md-4">
+	<h4>1. Input Datasets</h4>
+ 	<ul>
+ 		<li><strong>NCEP Stage IV Precipitation</strong>
+ 		<br />This is an hourly gridded product with precipitation estimates
+ 		derived by RADAR and then bias corrected by gauge data. The IEM
+ 		caches the <a href="{$s4link}">grib data</a> and makes hourly
+ 		plots available <a href="/timemachine/#40.0">here</a>.</li>
+ 		
+ 		<li><strong>MRMS Precipitation</strong>
+ 		<br />Currently, this is only used to populate a daily total in a
+ 		dedicated netcdf file.</li>
+
+ 		<li>ASOS/AWOS Daily Summaries</li>
+ 		<li>NWS Daily Climate Summaries</li>
+ 		<li>HRRR/MERRA/NARR Daily Solar Radiation</li>
+ 		<li>NWS COOPerative Observations</li>
+ 		<li>Manually QC'd Iowa COOP data from Iowa's State Climatologist</li>
+ 		<li>NCDC QC'd COOP Data</li>
+ 	</ul>
+ 	</div>
+ 	<div class="col-md-4">
+	<h4>2. IEM ReAnalysis Gridded Datasets</h4>
+ 	<ul>
+ 		<li><a href="/plotting/auto/q=86">Daily Maps of Gridded Variables</a>
+ 		<br />View a smoothed or gridded plot of IEMRE data</li>
+ 		<li>Download the raw NetCDF Files <a href="/onsite/iemre/">here</a>.</li>
+ 	</ul>
+ 	</div>
+ 	<div class="col-md-4">
+	<h4>3. Climodat Station Data</h4>
+	<p>The location of the IEM Longterm tracked climate stations are used to
+ 		sample from the IEMRE grid to produce daily values of high / low
+ 		temperature, precipitation, snowfall, snow depth, and radiation.  For
+ 		some stations, a direct copy of the corresponding ASOS station data
+ 		is used.</p>
+ 	<ul>
+ 		<li><a href="/climodat/">Climodat Reports</a>
+ 		<br />These are pre-generated reports answering many of the commonly
+ 		asked climatology questions.</li>
+ 	</ul>
+ 	</div>
+</div>
  		
 <br clear="all" />
 <h3>Data Availability</h3>
