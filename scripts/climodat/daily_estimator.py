@@ -35,9 +35,28 @@ from pyiem.datatypes import temperature
 import psycopg2.extras
 COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+IEM = psycopg2.connect(database='iem', host='iemdb')
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
 TABLE = "alldata_%s" % (state, )
+
+HARDCODE = {
+    'IA1063': 'BRL',
+    'IA1314': 'CID',
+    'IA2070': 'DVN',
+    'IA2203': 'DSM',
+    'IA2367': 'DBQ',
+    'IA2723': 'EST',
+    'IA4106': 'IOW',
+    'IA4587': 'LWD',
+    'IA5199': 'MIW',
+    'IA5235': 'MCW',
+    'IA6389': 'OTM',
+    'IA7708': 'SUX',
+    'IA7844': 'SPW',
+    'IA8706': 'ALO',
+    }
 
 # Pre-compute the grid location of each climate site
 nt = NetworkTable("%sCLIMATE" % (state.upper(),))
@@ -54,18 +73,22 @@ def estimate_precip(ts):
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
                          'r')
-    grid = nc.variables['p01d_12z'][idx, :, :] / 25.4
+    grid12 = nc.variables['p01d_12z'][idx, :, :] / 25.4
+    grid00 = nc.variables['p01d'][idx, :, :] / 25.4
     nc.close()
 
     for sid in nt.sts.keys():
-        precip = grid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if nt.sts[sid]['precip24_hour'] in [0, 22, 23]:
+            precip = grid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        else:
+            precip = grid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         # denote trace
         if precip > 0 and precip < 0.01:
             nt.sts[sid]['precip'] = 0.0001
         elif precip < 0:
             nt.sts[sid]['precip'] = 0
         elif np.isnan(precip) or np.ma.is_masked(precip):
-            nt.sts[sid]['precip'] = 0
+            nt.sts[sid]['precip'] = None
         else:
             nt.sts[sid]['precip'] = "%.2f" % (precip,)
 
@@ -75,15 +98,15 @@ def estimate_snow(ts):
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
                          'r')
-    snowgrid = nc.variables['snow_12z'][idx, :, :] / 25.4
-    snowdgrid = nc.variables['snowd_12z'][idx, :, :] / 25.4
+    snowgrid12 = nc.variables['snow_12z'][idx, :, :] / 25.4
+    snowdgrid12 = nc.variables['snowd_12z'][idx, :, :] / 25.4
     nc.close()
 
     for sid in nt.sts.keys():
-        val = snowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        val = snowgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         if val >= 0 and val < 100:
             nt.sts[sid]['snow'] = "%.1f" % (val, )
-        val = snowdgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        val = snowdgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         if val >= 0 and val < 140:
             nt.sts[sid]['snowd'] = "%.1f" % (val, )
 
@@ -93,17 +116,28 @@ def estimate_hilo(ts):
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
                          'r')
-    highgrid = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
-                           'K').value('F')
-    lowgrid = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
-                          'K').value('F')
+    highgrid12 = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
+                             'K').value('F')
+    lowgrid12 = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
+                            'K').value('F')
+    highgrid00 = temperature(nc.variables['high_tmpk'][idx, :, :],
+                             'K').value('F')
+    lowgrid00 = temperature(nc.variables['low_tmpk'][idx, :, :],
+                            'K').value('F')
     nc.close()
 
     for sid in nt.sts.keys():
-        val = highgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if nt.sts[sid]['temp24_hour'] in [0, 22, 23]:
+            val = highgrid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        else:
+            val = highgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         if val > -80 and val < 140:
             nt.sts[sid]['high'] = "%.0f" % (val, )
-        val = lowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+
+        if nt.sts[sid]['temp24_hour'] in [0, 22, 23]:
+            val = lowgrid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        else:
+            val = lowgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         if val > -80 and val < 140:
             nt.sts[sid]['low'] = "%.0f" % (val, )
 
@@ -115,6 +149,9 @@ def commit(ts):
     # Inject!
     for sid in nt.sts.keys():
         if sid[2] == 'C' or sid[2:] == '0000':
+            continue
+        if nt.sts[sid]['precip'] is None and nt.sts[sid]['high'] is None:
+            # print("SID %s skipped due to no data!" % (sid,))
             continue
         # See if we currently have data
         ccursor.execute("""
@@ -140,17 +177,40 @@ def commit(ts):
                    ) % (TABLE, sid, ts, ccursor.rowcount))
 
 
+def hardcode(ts):
+    """Stations that are hard coded against an ASOS site"""
+    for sid in HARDCODE.keys():
+        if sid not in nt.sts:
+            continue
+        icursor.execute("""
+        SELECT max_tmpf, min_tmpf, pday from summary s JOIN stations t
+        on (t.iemid = s.iemid) WHERE t.id = %s and s.day = %s and
+        t.network ~* 'ASOS'
+        """, (HARDCODE[sid], ts))
+        if icursor.rowcount == 1:
+            row = icursor.fetchone()
+            nt.sts[sid]['high'] = row[0]
+            nt.sts[sid]['low'] = row[1]
+            nt.sts[sid]['precip'] = row[2]
+
+
 def main():
     """main()"""
+    dates = []
+    today = datetime.date.today()
     if len(sys.argv) == 5:
-        ts = datetime.date(int(sys.argv[2]), int(sys.argv[3]),
-                           int(sys.argv[4]))
+        dates.append(datetime.date(int(sys.argv[2]), int(sys.argv[3]),
+                                   int(sys.argv[4])))
     else:
-        ts = datetime.date.today()
-    estimate_precip(ts)
-    estimate_snow(ts)
-    estimate_hilo(ts)
-    commit(ts)
+        dates.append(today)
+        dates.append(datetime.date.today() - datetime.timedelta(days=1))
+    for ts in dates:
+        estimate_precip(ts)
+        estimate_snow(ts)
+        estimate_hilo(ts)
+        if ts != today:
+            hardcode(ts)
+        commit(ts)
 
 if __name__ == '__main__':
     ''' See how we are called '''

@@ -2,11 +2,15 @@
 Harry Hillaker kindly provides a monthly file of his QC'd COOP observations
 This script processes them into something we can insert into the IEM database
 """
-
 import sys
 import re
 import datetime
 import string
+import psycopg2
+import pandas as pd
+
+pgconn = psycopg2.connect(database='coop', host='iemdb')
+cursor = pgconn.cursor()
 
 """
 This is not good, but necessary.  We translate some sites into others, so to
@@ -22,18 +26,17 @@ stconv = {'IA6199': 'IA6200',  # Oelwein
 
 year = int(sys.argv[1])
 month = int(sys.argv[2])
+
+
+def f(val):
+    return float(val) if val is not None else None
+
 fn = "/mesonet/data/harry/%s/SCIA%s%02i.txt" % (year, str(year)[2:], month)
 print "Processing File: ", fn
 
 lines = open(fn, 'r').readlines()
 
-alldata = open('/tmp/harry.sql', 'w')
-alldata.write("""BEGIN;
--- Remove anything old that may be in alldata_tmp
-DELETE from alldata_tmp;
-COPY alldata_tmp from STDIN with null as 'Null';
-""")
-
+rows = []
 hits = 0
 misses = 0
 for linenum, line in enumerate(lines):
@@ -54,86 +57,101 @@ for linenum, line in enumerate(lines):
     pr = string.strip(tokens[12])
     sf = string.strip(tokens[14])
     sd = string.strip(tokens[16])
-    if (pr == "T"):
+    if pr == "T":
         pr = 0.0001
-    if (sf == "T"):
+    if sf == "T":
         sf = 0.0001
-    if (sd == "T"):
+    if sd == "T":
         sd = 0.0001
-    if (sf == "M"):
+    if sf == "M":
         sf = ""
-    if (sd == "M"):
+    if sd == "M":
         sd = ""
-    if (hi == "M"):
+    if hi == "M":
         hi = ""
-    if (lo == "M"):
+    if lo == "M":
         lo = ""
-    if (pr == "M"):
+    if pr == "M":
         pr = ""
-    if (pr == "C"):
+    if pr == "C":
         pr = ""
-    if (sf == "C"):
+    if sf == "C":
         sf = ""
-    if (sd == "C"):
+    if sd == "C":
         sd = ""
 
-    if (sf == ""):
+    if sf == "":
         sf = 0
-    if (sd == ""):
+    if sd == "":
         sd = 0
-    if (pr == ""):
+    if pr == "":
         pr = 0
-    if (hi == ""):
-        hi = "Null"
-    if (lo == ""):
-        lo = "Null"
+    if hi == "":
+        hi = None
+    if lo == "":
+        lo = None
 
     try:
-        ts = datetime.datetime(yr, mo, dy)
+        ts = datetime.date(yr, mo, dy)
     except:
         print("timefail yr:%s mo:%s dy:%s linenum:%s" % (yr, mo, dy, linenum))
         sys.exit()
-    day = ts.strftime("%Y-%m-%d")
-    sday = ts.strftime("%m%d")
+    cursor.execute("""SELECT high, low, precip, snow, snowd from alldata_ia
+    WHERE station = %s and day = %s""", (dbid, ts))
+    if cursor.rowcount == 0:
+        print("ERROR: missing %s %s" % (dbid, ts))
+        cursor.execute("""INSERT INTO alldata_ia
+            (station, day, sday, year, month)
+            VALUES (%s, %s, %s, %s, %s)
+            """, (dbid, ts, ts.strftime("%m%d"), ts.year, ts.month))
+    else:
+        row = cursor.fetchone()
+        rows.append(dict(ehi=row[0], hi=f(hi), elo=row[1], lo=f(lo),
+                         epr=row[2], pr=f(pr), esf=row[3], sf=f(sf),
+                         esd=row[4], sd=f(sd), day=ts, station=dbid))
 
-    alldata.write(("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf"
-                   "\tNull\tNull\tNull\tNull\n"
-                   ) % (dbid, day,  hi, lo, pr, sf, sday, yr, mo, sd))
+    cursor.execute("""
+        UPDATE alldata_ia SET high = %s, low= %s, precip = %s, snow = %s,
+        snowd = %s WHERE station = %s and day = %s RETURNING high
+        """, (hi, lo, pr, sf, sd, dbid, ts))
+    if cursor.rowcount != 1:
+        print("ERROR: update not==1, %s %s cnt:%s" % (dbid, ts,
+                                                      cursor.rowcount))
     hits += 1
 
 print '    got %s good lines %s bad lines' % (hits, misses)
 
-alldata.write("""\.
--- Now we need to clear the old estimates away
-INSERT into alldata_estimates SELECT * from alldata_ia WHERE year = %s
- and month = %s;
-DELETE from alldata_ia WHERE year = %s and month = %s;
-INSERT into alldata_ia SELECT * from alldata_tmp;
+print(('V %5s %5s %5s %5s %6s %6s %4s %6s %6s %4s'
+       ) % ('Est', 'HH', 'Bias', 'STD', '+Dif', 'station', 'date', '-Dif',
+            'station', 'date'))
+df = pd.DataFrame(rows)
+details = ""
+for v in ['hi', 'lo', 'pr', 'sf', 'sd']:
+    df['diff_'+v] = df['e'+v] - df[v]
+    sortdesc = df.sort('diff_'+v, ascending=False)
+    smax = sortdesc.index[0]
+    sortasc = df.sort('diff_'+v, ascending=True)
+    smin = sortasc.index[0]
 
--- Now we print out some estimation stats
-SELECT
-  round(avg( e.rainfall - o.rainfall)::numeric,4) as rain_bias,
-  round(avg( e.avghigh - o.avghigh)::numeric,4) as high_bias,
-  round(avg( e.avglow - o.avglow)::numeric,4) as low_bias,
-  round(avg( e.snowfall - o.snowfall)::numeric,4) as snowfall_bias,
+    print(("%s %5.2f %5.2f %5.2f %5.2f %6.2f %6s %8s %6.2f %6s %8s"
+           ) % (v, df['e'+v].mean(), df[v].mean(),
+                df['e'+v].mean() - df[v].mean(), df['diff_'+v].std(),
+                df['diff_'+v][smax], df['station'][smax],
+                df['day'][smax].strftime("%m%d"), df['diff_'+v][smin],
+                df['station'][smin], df['day'][smin].strftime("%m%d"))
+          )
+    details += "---------------------------------------------------\n"
+    for i in sortdesc.index[:5]:
+        details += ("%s %s %s %6.2f -> %6.2f (%6.2f)\n"
+                    ) % (v, df['station'][i], df['day'][i].strftime("%m%d"),
+                         df['e'+v][i], df[v][i], df['diff_'+v][i])
+    for i in sortasc.index[:5]:
+        details += ("%s %s %s %6.2f -> %6.2f (%6.2f)\n"
+                    ) % (v, df['station'][i], df['day'][i].strftime("%m%d"),
+                         df['e'+v][i], df[v][i], df['diff_'+v][i])
 
-  round(avg( abs(e.rainfall - o.rainfall) )::numeric,4) as rain_me,
-  round(avg( abs(e.avghigh - o.avghigh) )::numeric,4) as high_me,
-  round(avg( abs(e.avglow - o.avglow) )::numeric,4) as low_me,
-  round(avg( abs(e.snowfall - o.snowfall) )::numeric,4) as snowfall_me
+print details
 
-FROM
-  (select station, sum(precip) as rainfall, sum(snow) as snowfall,
-          avg(high) as avghigh, avg(low) as avglow
-   from alldata_ia
-   WHERE month = %s and year = %s GROUP by station) as o,
-  (select station, sum(precip) as rainfall, sum(snow) as snowfall,
-          avg(high) as avghigh, avg(low) as avglow
-   from alldata_estimates
-   WHERE month = %s and year = %s GROUP by station) as e
-WHERE
-  o.station = e.station
-;
-COMMIT;
-""" % (year, month, year, month, month, year, month, year))
-alldata.close()
+
+cursor.close()
+pgconn.commit()
