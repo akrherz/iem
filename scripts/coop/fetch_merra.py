@@ -8,6 +8,7 @@ import urllib2
 import os
 import sys
 import subprocess
+import glob
 
 
 def trans(now):
@@ -55,7 +56,12 @@ def do_month(sts):
         now += interval
 
     os.chdir(dirname)
-    subprocess.call("gunzip *.gz", shell=True)
+    for fn in glob.glob("*.gz"):
+        fn2 = fn[:-3]
+        if os.path.isfile(fn2):
+            os.unlink(fn2)
+        subprocess.call("gunzip %s" % (fn, ), shell=True)
+        os.unlink(fn)
 
 
 def main():
