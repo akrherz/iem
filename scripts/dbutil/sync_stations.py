@@ -17,9 +17,9 @@ if len(sys.argv) == 2:
 if len(sys.argv) == 3:
     print 'Running laptop syncing from upstream, assume iemdb is localhost!'
     MESOSITE = psycopg2.connect(database='mesosite',
-                                host='mesonet.agron.iastate.edu',
+                                host='129.186.185.33',
                                 user='nobody')
-    subscribers.append('mesosite')
+    subscribers.insert(0, 'mesosite')
 
 
 def sync(dbname):

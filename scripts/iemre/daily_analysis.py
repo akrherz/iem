@@ -4,9 +4,11 @@
 import sys
 import netCDF4
 import numpy as np
+from pandas.io.sql import read_sql
 import datetime
 import psycopg2
 import pytz
+from scipy.stats import zscore
 from pyiem import iemre, datatypes
 from psycopg2.extras import DictCursor
 from scipy.interpolate import NearestNDInterpolator
@@ -15,25 +17,31 @@ pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 cursor = pgconn.cursor(cursor_factory=DictCursor)
 
 
-def generic_gridder(rs, idx):
+def generic_gridder(df, idx):
     """
     Generic gridding algorithm for easy variables
     """
-    lats = []
-    lons = []
-    vals = []
-    for row in rs:
-        if row[idx] is not None:
-            lats.append(row['lat'])
-            lons.append(row['lon'])
-            vals.append(row[idx])
-    if len(vals) < 4:
-        print(("Only %s observations found for %s, won't grid"
-               ) % (len(vals), idx))
-        return None
+    window = 2.0
+    f1 = df[df[idx].notnull()]
+    for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
+        for lon in np.arange(iemre.WEST, iemre.EAST, window):
+            (west, east, south, north) = (lon, lon + window, lat, lat + window)
+            box = f1[(f1['lat'] >= south) & (f1['lat'] < north) &
+                     (f1['lon'] >= west) & (f1['lon'] < east)]
+            if len(box.index) < 4:
+                continue
+            z = np.abs(zscore(box[idx]))
+            # Compute where the standard dev is +/- 2std
+            bad = box[z > 1.5]
+            df.loc[bad.index, idx] = np.nan
+            # for _, row in bad.iterrows():
+            #    print _, idx, row['station'], row['name'], row[idx]
 
-    nn = NearestNDInterpolator((np.array(lons), np.array(lats)),
-                               np.array(vals))
+    good = df[df[idx].notnull()]
+
+    nn = NearestNDInterpolator((np.array(good['lon']),
+                                np.array(good['lat'])),
+                               np.array(good[idx]))
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     grid = nn(xi, yi)
 
@@ -83,8 +91,9 @@ def grid_day12(nc, ts):
     """
     offset = iemre.daily_offset(ts)
     print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
-    cursor.execute("""
-       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat,
+    sql = """
+       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
+       s.id as station, s.name as name,
        (CASE WHEN pday >= 0 then pday else null end) as precipdata,
        (CASE WHEN snow >= 0 then snow else null end) as snowdata,
        (CASE WHEN snowd >= 0 then snowd else null end) as snowddata,
@@ -97,28 +106,26 @@ def grid_day12(nc, ts):
         'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
         'OH_COOP') and c.iemid = s.iemid and
         extract(hour from c.coop_valid) between 4 and 11
-        """ % (ts.year, ts.strftime("%Y-%m-%d")))
+        """ % (ts.year, ts.strftime("%Y-%m-%d"))
+    df = read_sql(sql, pgconn)
 
-    if cursor.rowcount > 4:
-        res = generic_gridder(cursor, 'highdata')
+    if len(df.index) > 4:
+        res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk_12z'][offset] = datatypes.temperature(
                                                 res, 'F').value('K')
 
-        cursor.scroll(0, mode='absolute')
-        res = generic_gridder(cursor, 'lowdata')
+        res = generic_gridder(df, 'lowdata')
         nc.variables['low_tmpk_12z'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
 
-        cursor.scroll(0, mode='absolute')
-        res = generic_gridder(cursor, 'snowdata')
+        res = generic_gridder(df, 'snowdata')
         nc.variables['snow_12z'][offset] = res * 25.4
 
-        cursor.scroll(0, mode='absolute')
-        res = generic_gridder(cursor, 'snowddata')
+        res = generic_gridder(df, 'snowddata')
         nc.variables['snowd_12z'][offset] = res * 25.4
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
-                                             cursor.rowcount)
+                                             len(df.index))
 
 
 def grid_day(nc, ts):
@@ -126,8 +133,9 @@ def grid_day(nc, ts):
     """
     offset = iemre.daily_offset(ts)
     print(('cal hi/lo for %s [idx:%s]') % (ts, offset))
-    cursor.execute("""
-       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat,
+    sql = """
+       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
+       s.name, s.id as station,
        (CASE WHEN pday >= 0 then pday else null end) as precipdata,
        (CASE WHEN max_tmpf > -50 and max_tmpf < 130
            then max_tmpf else null end) as highdata,
@@ -137,17 +145,16 @@ def grid_day(nc, ts):
        s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
         'OH_ASOS', 'AWOS') and c.iemid = s.iemid
-        """ % (ts.year, ts.strftime("%Y-%m-%d")))
+        """ % (ts.year, ts.strftime("%Y-%m-%d"))
+    df = read_sql(sql, pgconn)
 
-    if cursor.rowcount > 4:
-        res = generic_gridder(cursor, 'highdata')
+    if len(df.index) > 4:
+        res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk'][offset] = datatypes.temperature(
                                                 res, 'F').value('K')
-        cursor.scroll(0, mode='absolute')
-        res = generic_gridder(cursor, 'lowdata')
+        res = generic_gridder(df, 'lowdata')
         nc.variables['low_tmpk'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
-        cursor.scroll(0, mode='absolute')
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
                                              cursor.rowcount)

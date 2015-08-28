@@ -8,7 +8,9 @@ from collections import OrderedDict
 PDICT = OrderedDict({'p01d_12z': '24 Hour Precipitation at 12 UTC',
                      'p01d': 'Calendar Day Precipitation',
                      'low_tmpk': 'Minimum Temperature',
+                     'low_tmpk_12z': 'Minimum Temperature at 12 UTC',
                      'high_tmpk': 'Maximum Temperature',
+                     'high_tmpk_12z': 'Maximum Temperature at 12 UTC',
                      'p01d': 'Calendar Day Precipitation',
                      'rsds': 'Solar Radiation',
                      })
@@ -66,7 +68,7 @@ def plotter(fdict):
         clevs = np.append(clevs, np.arange(3., 10.0, 1))
         clevs[0] = 0.01
         clevstride = 1
-    elif varname in ['high_tmpk', 'low_tmpk']:
+    elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z']:
         # Value is in W m**-2, we want MJ
         data = temperature(nc.variables[varname][idx0, :, :], 'K').value('F')
         units = 'F'
