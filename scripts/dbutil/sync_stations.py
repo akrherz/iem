@@ -74,7 +74,8 @@ def sync(dbname):
        sigstage_moderate = %(sigstage_moderate)s,
        sigstage_major = %(sigstage_major)s,
        sigstage_record = %(sigstage_record)s, ugc_county = %(ugc_county)s,
-       ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s
+       ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s,
+       temp24_hour = %(temp24_hour)s, precip24_hour = %(precip24_hour)s
        WHERE iemid = %(iemid)s""", row)
     print ("DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s"
            "") % (dbname, len(todelete), cur.rowcount,
