@@ -59,11 +59,13 @@ def grid_day(nc, ts):
     if cursor.rowcount > 4:
         res = generic_gridder(cursor, 'high')
         if res is not None:
-            nc.variables['high_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
+            nc.variables['high_tmpk'][offset] = datatypes.temperature(
+                                                        res, 'F').value('K')
         cursor.scroll(0, mode='absolute')
         res = generic_gridder(cursor, 'low')
         if res is not None:
-            nc.variables['low_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
+            nc.variables['low_tmpk'][offset] = datatypes.temperature(
+                                                        res, 'F').value('K')
         cursor.scroll(0, mode='absolute')
         res = generic_gridder(cursor, 'precip')
         if res is not None:
