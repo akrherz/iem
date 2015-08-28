@@ -17,7 +17,7 @@ echo "Generating estimates for missing data"
 python ../../coop/estimate_missing.py IA
 echo "Redoing estimates, this will take a bit!"
 # Estimate ia0000
-python ../../coop/compute_0000.py $1 $2 >& /dev/null
+python ../../climodat/compute_0000.py $1 $2 >& /dev/null
 # Compute new records
 python new_records.py $1 $2
 echo "Redoing MERRA Solar Estimates"
