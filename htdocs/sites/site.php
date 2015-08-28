@@ -6,12 +6,21 @@ include("../../include/myview.php");
 include("setup.php");
 
 $alertmsg = "";
-if (isset($_GET["lat"]) && $_GET["lat"] != "move marker" && floatval($_GET["lat"]) != -1){
+if (isset($_GET["lat"]) && $_GET["lat"] != "move marker" && floatval($_GET["lat"]) != 0){
 	$newlat = floatval($_GET["lat"]);
 	$newlon = floatval($_GET["lon"]);
+	$email = isset($_GET["email"]) ? $_GET["email"]: 'n/a';
 	$msg = <<<EOF
-{$_SERVER["REMOTE_ADDR"]} suggests moving $station [{$network}] to
-{$newlon} {$newlat}
+IEM Sites Move Request
+======================
+> REMOTE_ADDR: {$_SERVER["REMOTE_ADDR"]}
+> ID:          {$station}
+> NETWORK:     {$network}
+> LON:         {$newlon}
+> LAT:         {$newlat}
+> EMAIL:       {$email}
+
+http://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
 EOF;
 	mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
 	$alertmsg = "<div class=\"alert alert-danger\">Thanks! Your suggested move was submitted for evaluation.</div>";
@@ -53,8 +62,12 @@ $t->content = <<<EOF
 	<form name="updatecoords" method="GET">
 	<input type="hidden" value="{$network}" name="network">
 	<input type="hidden" value="{$station}" name="station">
-	New Latitude: <input id="newlat" type="text" size="10" name="lat" value="move marker">
-	New Longitude: <input id="newlon" type="text" size="10" name="lon" value="move marker">
+	New Latitude: <input id="newlat" type="text" size="10" name="lat" placeholder="move marker">
+	New Longitude: <input id="newlon" type="text" size="10" name="lon" placeholder="move marker">
+	<br />Enter Your Email Address [1]: <input type="text" size="40" name="email" placeholder="optional">
+	<br />[1] Your email address will not be shared nor will you be added to any
+	lists. The IEM developer will simply email you back after consideration of
+	this request.
 	<input type="submit" value="Submit Update"></form>
 </div>
 </div>
