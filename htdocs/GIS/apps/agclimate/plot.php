@@ -143,7 +143,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
   // Red Dot... 
   $pt = ms_newPointObj();
   $pt->setXY($nt->table[$key]['lon'], $nt->table[$key]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, ' ' );
+  $pt->draw($map, $ponly, $img, 0);
 
   if (strpos($pvar, ',') !== false){
   	// Value UL
@@ -158,7 +158,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
   	$pt = ms_newPointObj();
   	$pt->setXY($nt->table[$key]['lon'], $nt->table[$key]['lat'], 0);
   	$pt->draw($map, $snet, $img, 2, 
-        round($row[$p2], $rnd[$pvar]) ." ". $row[$p2 .'_f'] );
+   	     round($row[$p2], $rnd[$pvar]) ." ". $row[$p2 .'_f'] );
 
   } else {
   	
