@@ -2,11 +2,8 @@
  Generate the climodat reports, please!  Run from run.sh
 """
 import pg
-mydb = pg.connect('coop', 'iemdb', user='nobody')
 import traceback
 import psycopg2.extras
-pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 import genPrecipEvents
 import gen30rains
@@ -33,6 +30,11 @@ import constants
 import sys
 
 import datetime
+
+mydb = pg.connect('coop', 'iemdb', user='nobody')
+pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 update_all = True if datetime.datetime.today().day == 1 else False
 
 runstations = constants.nt.sts.keys()
@@ -53,7 +55,7 @@ def run_station(dbid):
     sql = """
         SELECT d.*, c.climoweek from %s d, climoweek c
         WHERE station = '%s' and day >= '%s-01-01' and d.sday = c.sday
-        and precip is not null
+        and precip is not null and high is not null and low is not null
         ORDER by day ASC
         """ % (table, dbid, constants.startyear(dbid))
     rs = caller(mydb.query, sql).dictresult()
