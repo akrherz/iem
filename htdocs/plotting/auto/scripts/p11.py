@@ -4,6 +4,9 @@ import datetime
 from pyiem.network import Table as NetworkTable
 import pandas as pd
 
+PDICT = {'touches': 'Daily Range Touches Emphasis',
+         'above': 'Daily Range At or Above Emphasis'}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -19,6 +22,8 @@ def get_description():
              default=today.year, label='Enter Year:'),
         dict(type='text', name='emphasis', default='-99',
              label='Temperature(&deg;F) Line of Emphasis (-99 disables):'),
+        dict(type='select', name='opt', label='Option for Highlighting',
+             default='touches', options=PDICT),
     ]
     return d
 
@@ -37,6 +42,7 @@ def plotter(fdict):
     nt = NetworkTable(network)
     year = int(fdict.get('year', 2014))
     emphasis = int(fdict.get('emphasis', -99))
+    opt = fdict.get('opt', 'touches')
 
     table = "summary_%s" % (year,)
 
@@ -64,12 +70,15 @@ def plotter(fdict):
     bars = ax.bar(df['day'], df['max_dwpf'] - df['min_dwpf'], ec='g', fc='g',
                   bottom=df['min_dwpf'], zorder=1)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
+    hits = []
     if emphasis > -99:
-        for _, bar in enumerate(bars):
+        for i, bar in enumerate(bars):
             y = bar.get_y() + bar.get_height()
-            if y >= emphasis:
+            if ((y >= emphasis and opt == 'touches') or
+                    (bar.get_y() >= emphasis and opt == 'above')):
                 bar.set_facecolor('r')
                 bar.set_edgecolor('r')
+                hits.append(df.loc[i, 'day'])
         ax.axhline(emphasis, lw=2, color='k')
         ax.text(days[-1] + datetime.timedelta(days=2),
                 emphasis, "%s" % (emphasis,), ha='left',
@@ -79,5 +88,14 @@ def plotter(fdict):
     ax.set_title("%s [%s] %s Daily Min/Max Dew Point\nPeriod: %s to %s" % (
                 nt.sts[station]['name'], station, year,
                 min(days).strftime("%-d %b"), max(days).strftime("%-d %b")))
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.05,
+                     box.width, box.height * 0.95])
+    ax.set_xlabel(("Days meeting emphasis: %s, first: %s last: %s"
+                   ) % (len(hits),
+                        hits[0].strftime("%B %d") if len(hits) > 0 else 'None',
+                        hits[-1].strftime("%B %d") if len(hits) > 0 else 'None'
+                        ))
 
     return fig, df
