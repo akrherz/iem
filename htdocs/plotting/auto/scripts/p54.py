@@ -2,15 +2,18 @@ import psycopg2.extras
 import numpy as np
 import datetime
 import calendar
-import sys
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
-    d['description'] = """"""
+    d['description'] = """This application plots the difference in morning
+    low temperature between two sites of your choice.  The morning is
+    defined as the period between midnight and 8 AM local time."""
     d['arguments'] = [
         dict(type='zstation', name='zstation1', default='ALO',
              network='IA_ASOS', label='Select Station 1:'),
@@ -65,6 +68,10 @@ def plotter(fdict):
         weeks.append(int(row[0].strftime("%W")))
         deltas.append(row[1])
         sknts.append(row[2])
+    df = pd.DataFrame(dict(day=pd.Series(days),
+                           week=pd.Series(weeks),
+                           delta=pd.Series(deltas),
+                           sknt=pd.Series(sknts)))
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -72,13 +79,13 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(2,1)
+    (fig, ax) = plt.subplots(2, 1)
 
-    ax[0].set_title("[%s] %s minus [%s] %s\nMid-7AM Low Temp Difference Period: %s - %s" % (station1, 
-                                                    nt1.sts[station1]['name'],
-                                                    station2,
-                                                    nt2.sts[station2]['name'],
-                                                    min(days), max(days)))
+    ax[0].set_title(("[%s] %s minus [%s] %s\n"
+                     "Mid-7AM Low Temp Difference Period: %s - %s"
+                     ) % (station1, nt1.sts[station1]['name'],
+                          station2, nt2.sts[station2]['name'],
+                          min(days), max(days)))
 
     bins = np.arange(-20.5, 20.5, 1)
     H, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
@@ -92,9 +99,8 @@ def plotter(fdict):
 
     y = []
     for i in range(np.shape(H)[0]):
-        y.append(np.ma.sum( H[i,:] * (bins[:-1]+0.5) ) / np.ma.sum(H[i,:]))
+        y.append(np.ma.sum(H[i, :] * (bins[:-1]+0.5)) / np.ma.sum(H[i, :]))
 
-    sys.stderr.write(str(y))
     ax[0].plot(xedges[:-1]*7, y, zorder=3, lw=3, color='k')
     ax[0].plot(xedges[:-1]*7, y, zorder=3, lw=1, color='w')
 
@@ -117,7 +123,6 @@ def plotter(fdict):
     for i in range(np.shape(H)[0]):
         y.append(np.ma.sum(H[i, :] * (bins[:-1]+0.5)) / np.ma.sum(H[i, :]))
 
-    sys.stderr.write(str(y))
     ax[1].plot(xedges[:-1], y, zorder=3, lw=3, color='k')
     ax[1].plot(xedges[:-1], y, zorder=3, lw=1, color='w')
 
@@ -133,4 +138,4 @@ def plotter(fdict):
                "%s\nColder" % (station1,), transform=ax[1].transAxes,
                va='bottom', ha='right', fontsize=8)
 
-    return fig
+    return fig, df
