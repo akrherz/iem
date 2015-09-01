@@ -79,3 +79,16 @@ for row in acursor:
     """, (row[0],))
 
 ASOS.commit()
+
+
+def print_blank_sname():
+    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    cursor = pgconn.cursor()
+    cursor.execute("""SELECT id, network from stations
+    WHERE name is null or name = '' ORDER by iemid ASC LIMIT 5""")
+
+    print '------ Sites with empty station names ------'
+    for row in cursor:
+        print "%10s %s" % (row[0], row[1])
+
+print_blank_sname()
