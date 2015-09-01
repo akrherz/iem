@@ -84,9 +84,14 @@ $table = <<<EOF
 </tr>
 </thead>
 EOF;
+function departure($actual, $normal){
+	if ($actual == null || $normal == null) return "M";
+	return $actual - $normal;
+}
 function departcolor($actual, $normal){
+	if ($actual == null || $normal == null) return "#FFF";
 	$diff = $actual - $normal;
-	if ($diff == null || $diff == 0) return "#fff";
+	if ($diff == 0) return "#fff";
 	if ($diff >= 10) return "#FF1493";
 	if ($diff > 0) return "#D8BFD8";
 	if ($diff > -10) return "#87CEEB";
@@ -96,6 +101,16 @@ function departcolor($actual, $normal){
 function trace($val){
 	if ($val == 0.0001) return 'T';
 	return $val;
+}
+function new_record($actual, $record){
+	if ($actual == null || $record == null) return "";
+	if ($actual == $record) return "<i class=\"glyphicon glyphicon-star-empty\"></i>";
+	if ($actual > $record) return "<i class=\"glyphicon glyphicon-star\"></i>";
+}
+function new_record2($actual, $record){
+	if ($actual == null || $record == null) return "";
+	if ($actual == $record) return "<i class=\"glyphicon glyphicon-star-empty\"></i>";
+	if ($actual < $record) return "<i class=\"glyphicon glyphicon-star\"></i>";
 }
 for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 	$uri = sprintf("/p.php?pid=%s", $row["product"]);
@@ -112,33 +127,39 @@ for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 	}
 	$table .= sprintf("<tr><td nowrap><a href=\"%s\"><i class=\"glyphicon glyphicon-list-alt\" alt=\"View Text\"></i></a>
 			%s</td>
-			<td>%s</td><td nowrap>%s</td><td>%s</td>
+			<td>%s%s</td><td nowrap>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
 			<th class=\"empty\"></th>
-			<td>%s</td><td nowrap>%s</td><td>%s</td>
+			<td>%s%s</td><td nowrap>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
 			<th class=\"empty\"></th>
-			<td>%s</td><td>%s</td><td>%s</td>
+			<td>%s%s</td><td>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td>%s</td>
 			<th class=\"empty\"></th>
-			<td>%s</td><td>%s</td><td>%s</td>
+			<td>%s%s</td><td>%s</td><td>%s</td>
 			<td>%s</td>
 			</tr>", $uri, $col1, 
-			$row["high"], $row["high_time"], $row["high_record"],
+			$row["high"], new_record($row["high"], $row["high_record"]),
+			$row["high_time"], $row["high_record"],
 			$row["hry"], $row["high_normal"],
 			departcolor($row["high"], $row["high_normal"]),
-			$row["high"] - $row["high_normal"],
+			departure($row["high"], $row["high_normal"]),
 			
-			$row["low"], $row["low_time"], $row["low_record"],
+			$row["low"], new_record2($row["low"], $row["low_record"]),
+			$row["low_time"], $row["low_record"],
 			$row["lry"], $row["low_normal"],
 			departcolor($row["low"], $row["low_normal"]),
-			$row["low"] - $row["low_normal"],
+			departure($row["low"], $row["low_normal"]),
 			
-			trace($row["precip"]), trace($row["precip_record"]), $row["pry"],
+			trace($row["precip"]),
+			new_record($row["precip"], $row["precip_record"]),
+			trace($row["precip_record"]), $row["pry"],
 			trace($row["precip_normal"]), trace($row["precip_month"]), 
 			trace($row["precip_month_normal"]),
 			
-			trace($row["snow"]), trace($row["snow_record"]), $row["sry"],
+			trace($row["snow"]),
+			new_record($row["snow"], $row["snow_record"]),
+			trace($row["snow_record"]), $row["sry"],
 			trace($row["snow_month"])
 				
 		);
@@ -192,6 +213,10 @@ $t->content = <<<EOF
 <div class="table-responsive">
 	{$table}
 </div>
+
+<p><strong>Key:</strong> &nbsp; &nbsp;
+			<i class="glyphicon glyphicon-star-empty"></i> Record Tied,
+			<i class="glyphicon glyphicon-star"></i> Record Set.</p>
 
 EOF;
 
