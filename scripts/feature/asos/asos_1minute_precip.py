@@ -8,10 +8,11 @@ import matplotlib.font_manager
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 8, 9, 7, 0)
+sts = datetime.datetime(2015, 8, 31, 8, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 8, 9, 12, 0)
+ets = datetime.datetime(2015, 8, 31, 13, 15)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+tzname = 'America/New_York'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -19,7 +20,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'AMW'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'CHS'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -52,8 +53,8 @@ for i in range(60, sz):
 
 xticks = []
 xlabels = []
-lsts = sts.astimezone(pytz.timezone("America/Chicago"))
-lets = ets.astimezone(pytz.timezone("America/Chicago"))
+lsts = sts.astimezone(pytz.timezone(tzname))
+lets = ets.astimezone(pytz.timezone(tzname))
 interval = datetime.timedelta(minutes=1)
 now = lsts
 i = 0
@@ -106,8 +107,8 @@ ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=1, prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+4))
-ax.set_xlabel("9 Aug 2015 (Central Daylight Time)")
-ax.set_title(("9 August 2015 Ames (KAMW)\n"
+ax.set_xlabel("31 Aug 2015 (Eastern Daylight Time)")
+ax.set_title(("31 August 2015 Charleston, SC (KCHS)\n"
               "One Minute Rainfall %s inches total plotted") % (prec[-1],))
 
 
