@@ -18,9 +18,8 @@ for table in ['current', 'summary']:
      DELETE from %s where
      iemid = (select iemid from stations where id = '%s' and network = '%s')
     """ % (table, station, network))
-    if icursor.rowcount != 1:
-        print(('Updating table: %s resulted in %s rows removed'
-               ) % (table, icursor.rowcount))
+    print(('Updating table: %s resulted in %s rows removed'
+           ) % (table, icursor.rowcount))
 
 
 icursor.close()
@@ -29,9 +28,8 @@ IEM.commit()
 mcursor.execute("""
     DELETE from stations where id = '%s' and network = '%s'
 """ % (station, network))
-if mcursor.rowcount != 1:
-    print(('Updating mesosite resulted in %s rows removed'
-           ) % (icursor.rowcount, ))
+print(('Updating mesosite resulted in %s rows removed'
+       ) % (icursor.rowcount, ))
 
 mcursor.close()
 MESOSITE.commit()
