@@ -110,19 +110,20 @@ def drive_changelog(regime, yesterday, html):
             changestamp = item['id']
             if item['deleted']:
                 continue
-            # Need to see which base folder this file is in!
-            parentid = get_base_folder_id(drive, item['fileId'])
-            if parentid != util.CONFIG[regime]['basefolder']:
-                print(('Skipping %s as it is other project'
-                       ) % (item['file']['title'], ))
-                continue
+            # don't do more work when this file actually did not change
             modifiedDate = datetime.datetime.strptime(
                 item['file']['modifiedDate'][:19], '%Y-%m-%dT%H:%M:%S')
             modifiedDate = modifiedDate.replace(tzinfo=pytz.timezone("UTC"))
             if modifiedDate < yesterday:
                 continue
+            # Need to see which base folder this file is in!
+            parentid = get_base_folder_id(drive, item['fileId'])
+            if parentid != util.CONFIG[regime]['basefolder']:
+                print(('Skipping %s as it is other project'
+                       ) % (repr(item['file']['title']), ))
+                continue
             uri = item['file']['alternateLink']
-            title = item['file']['title']
+            title = item['file']['title'].encode('ascii', 'ignore')
             author = item['file']['lastModifyingUserName']
             localts = modifiedDate.astimezone(pytz.timezone("America/Chicago"))
             hits += 1
