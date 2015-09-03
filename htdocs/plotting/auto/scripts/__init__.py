@@ -73,6 +73,8 @@ data = {'plots': [
         {'id': "17", 'label': "Daily High/Low Temps with Climatology"},
         {'id': "15", 'mw': True,
          'label': "Daily Temperature Change Frequencies by Month"},
+        {'id': "98", 'mw': True,
+         'label': "Day of Month Frequency of meeting temp/precip threshold"},
         {'id': '65', 'mw': True,
          'label': 'Day of the Month with the coldest temperature'},
         {'id': "29",
