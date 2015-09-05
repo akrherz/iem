@@ -10,6 +10,10 @@ cd ../dbutil
 sh save_snet_raw.sh
 python asos2archive.py
 
+# Need this done so that certain variables are there for DEP
+cd ../asos
+python compute_daily.py
+
 cd ../smos
 python plot.py 0
 
