@@ -45,11 +45,17 @@ def plot(ax, interval, valid, tmpf, year, lines):
             return lines
         if len(lines) > 10:
             return lines
-        lines.append(ax.plot(valid, tmpf, lw=2)[0])
         delta = ((valid[-1] - valid[0]).days * 86400. +
                  (valid[-1] - valid[0]).seconds)
         i = tmpf.index(min(tmpf))
-        ax.text(valid[i], tmpf[i], "%s\n%.1fd" % (year, delta / 86400.),
+        mylbl = "%s\n%.1fd" % (year, delta / 86400.)
+        lines.append(ax.plot(valid, tmpf, lw=2,
+                             label=mylbl.replace("\n", " "))[0])
+        lines[-1].hours = round((valid[-1] - valid[0]).seconds / 3600., 2)
+        lines[-1].days = (valid[-1] - valid[0]).days
+        lines[-1].year = year
+        lines[-1].mylbl = mylbl
+        ax.text(valid[i], tmpf[i], mylbl,
                 ha='center', va='center',
                 bbox=dict(color=lines[-1].get_color()),
                 color='white')
@@ -109,7 +115,9 @@ def plotter(fdict):
     rows = []
     for line in lines:
         xdata = line.get_xdata()
-        rows.append(dict(start=xdata[0], end=xdata[-1]))
+        rows.append(dict(start=xdata[0].replace(year=line.year),
+                         end=xdata[-1].replace(year=line.year),
+                         hours=line.hours, days=line.days))
     df = pd.DataFrame(rows)
 
     sts = datetime.datetime(2000, month, 1)
@@ -131,5 +139,10 @@ def plotter(fdict):
                        hours / 24.0, mydir, threshold))
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
     # ax.set_ylim(bottom=43)
-
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.15,
+                     box.width, box.height * 0.85])
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+              fancybox=True, shadow=True, ncol=5, fontsize=12,
+              columnspacing=1)
     return fig, df
