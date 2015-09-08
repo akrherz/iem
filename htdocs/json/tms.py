@@ -35,7 +35,8 @@ def run():
 
     return json.dumps(res)
 
-if __name__ == '__main__':
+
+def main():
     sys.stdout.write("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
@@ -56,3 +57,6 @@ if __name__ == '__main__':
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
+if __name__ == '__main__':
+    main()
