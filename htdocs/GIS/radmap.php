@@ -610,7 +610,7 @@ if (in_array("airtemps", $layers)){
 
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
-$point->setXY(80, 12);
+$point->setXY(80, 9);
 $tzformat = "%d %B %Y %-2I:%M %p %Z";
 if (isset($_REQUEST["tz"])) {
 	$tz = $_REQUEST["tz"];
@@ -628,7 +628,7 @@ if (isset($_REQUEST["tz"])) {
 	}
 	date_default_timezone_set($tz); 
 	if ($_REQUEST["tz"] == 'UTC'){
-		$tzformat = "%d %B %Y %-2I:%M %Z";
+		$tzformat = "%d %B %Y %H:%M %Z";
 	}
 }
 $d = strftime($tzformat ,  $ts); 
