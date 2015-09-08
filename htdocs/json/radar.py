@@ -69,10 +69,11 @@ def available_radars(form):
                            'lat': 42.5, 'lon': -95, 'type': 'COMPOSITE'})
     for row in mcursor:
         radar = row[0]
-        if not os.path.isdir(start_gts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+
-                    radar)):
+        if not os.path.isdir(start_gts.strftime(("/mesonet/ARCHIVE/data/"
+                                                 "%Y/%m/%d/GIS/ridge/" +
+                                                 radar))):
             continue
-        root['radars'].append({'id': radar, 'name': row[1], 'lat': row[3], 
+        root['radars'].append({'id': radar, 'name': row[1], 'lat': row[3],
                                'lon': row[2], 'type': row[4]})
     mcursor.close()
     MESOSITE.close()
@@ -84,17 +85,22 @@ def find_scans(root, radar, product, sts, ets):
     Find scans for a given radar, product, and start and end time
     """
     now = sts
-    if radar in ['USCOMP',]:
+    if radar in ['USCOMP', ]:
         now -= mx.DateTime.RelativeDateTime(minutes=(now.minute % 5))
         while now < ets and len(root['scans']) < 501:
-            if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"+
-                    product.lower() +"_%Y%m%d%H%M.png") ):
+            if os.path.isfile(now.strftime(("/mesonet/ARCHIVE/data/"
+                                            "%Y/%m/%d/GIS/uscomp/" +
+                                            product.lower() +
+                                            "_%Y%m%d%H%M.png"))):
                 root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
             now += mx.DateTime.RelativeDateTime(minutes=5)
     else:
         while now < ets and len(root['scans']) < 501:
-            if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+
-                    radar+"/"+product+"/"+radar+"_"+product+"_%Y%m%d%H%M.png") ):
+            if os.path.isfile(now.strftime("/mesonet/ARCHIVE/data/"
+                                           "%Y/%m/%d/GIS/ridge/" +
+                                           radar + "/" + product +
+                                           "/" + radar + "_" +
+                                           product + "_%Y%m%d%H%M.png")):
                 root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
             now += mx.DateTime.RelativeDateTime(minutes=1)
 
@@ -114,9 +120,8 @@ def list_files(form):
     """
     radar = form.getvalue('radar', 'DMX')[:10]
     product = form.getvalue('product', 'N0Q')[:3]
-    start_gts = parse_time( form.getvalue('start', '2012-01-27T00:00Z') )
-    end_gts = parse_time( form.getvalue('end', '2012-01-27T01:00Z') )
-    #root = {'metaData': {'nexrad': nexrad, 'product': product}, 'scans' : []}
+    start_gts = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
+    end_gts = parse_time(form.getvalue('end', '2012-01-27T01:00Z'))
     root = {'scans': []}
     find_scans(root, radar, product, start_gts, end_gts)
     if len(root['scans']) == 0 and is_realtime(start_gts):
@@ -134,19 +139,21 @@ def list_products(form):
     now = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
     root = {'products': []}
     if radar == 'USCOMP':
-        for dirname in ['N0Q','N0R']:
-            testfp = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"+
-                                  dirname.lower()+"_%Y%m%d0000.png")
+        for dirname in ['N0Q', 'N0R']:
+            testfp = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
+                                   "uscomp/" + dirname.lower() +
+                                   "_%Y%m%d0000.png"))
             if os.path.isfile(testfp):
-                root['products'].append({'id': dirname, 
-                                         'name': NIDS.get(dirname,dirname)})
+                root['products'].append({'id': dirname,
+                                         'name': NIDS.get(dirname, dirname)})
     else:
-        basedir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+radar)
-        if os.path.isdir( basedir ):
-            os.chdir( basedir )
+        basedir = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/" +
+                                radar))
+        if os.path.isdir(basedir):
+            os.chdir(basedir)
             for dirname in glob.glob("???"):
-                root['products'].append({'id': dirname, 
-                                         'name': NIDS.get(dirname,dirname)})
+                root['products'].append({'id': dirname,
+                                         'name': NIDS.get(dirname, dirname)})
     return root
 
 
@@ -155,6 +162,10 @@ def main():
 
     """
     form = cgi.FieldStorage()
+    if os.environ['REQUEST_METHOD'] not in ['GET', 'POST']:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write("HTTP METHOD NOT ALLOWED")
+        return
     operation = form.getvalue('operation', None)
     callback = form.getvalue('callback', None)
     if callback is not None:
@@ -163,11 +174,11 @@ def main():
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
     if operation == "list":
-        sys.stdout.write(json.dumps( list_files(form) ))
+        sys.stdout.write(json.dumps(list_files(form)))
     elif operation == "available":
-        sys.stdout.write(json.dumps( available_radars(form) ))
+        sys.stdout.write(json.dumps(available_radars(form)))
     elif operation == "products":
-        sys.stdout.write(json.dumps( list_products(form) ))
+        sys.stdout.write(json.dumps(list_products(form)))
     if callback is not None:
         sys.stdout.write(')')
 
