@@ -1,24 +1,19 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
-import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
-import numpy as np
-import pytz
 
 PDICT = {
      "hadgem=a1b": "HADGEM A1B",
-     "cnrm=a1b" : "CNRM A1B",
-     "echam5=a1b" : "ECHAM5 A1B",
-     "echo=a1b" : "ECHO A1B",
-     "pcm=a1b" : "PCM A1B",
+     "cnrm=a1b": "CNRM A1B",
+     "echam5=a1b": "ECHAM5 A1B",
+     "echo=a1b": "ECHO A1B",
+     "pcm=a1b": "PCM A1B",
      "miroc_hi=a1b": "MIROC_HI A1B",
      "cgcm3_t47=a1b": "CGCM3_T47 A1B",
      "giss_aom=a1b": "GISS_AOM A1B",
      "hadcm3=a1b": "HADCM3 A1B",
      "cgcm3_t63=a1b": "CGCM3_T63 A1B",
     }
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -34,15 +29,18 @@ def get_description():
     return d
 
 
-def plotter( fdict ):
+def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     station = fdict.get('station', 'ISUAG')
     nt = NetworkTable("CSCAP")
     clstation = nt.sts[station]['climate_site']
-    (model, scenario)  = fdict.get('model', 'hadgem=a1b').split("=")
+    (model, scenario) = fdict.get('model', 'hadgem=a1b').split("=")
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -50,7 +48,7 @@ def plotter( fdict ):
     SELECT extract(year from day) as yr, sum(case when precip > 0
     THEN 1 else 0 end) from hayhoe_daily WHERE precip is not null and
     station = %s and model = %s and scenario = %s
-    GROUP by yr ORDER by yr ASC 
+    GROUP by yr ORDER by yr ASC
     """, (clstation, model, scenario))
     years = []
     precip = []
@@ -58,11 +56,10 @@ def plotter( fdict ):
         years.append(row[0])
         precip.append(row[1])
 
-
     ax.bar(years, precip, ec='b', fc='b')
     ax.grid(True)
     ax.set_ylabel("Days Per Year")
     ax.set_title("%s %s\n%s %s :: Days per Year with Measurable Precip" % (
             station, nt.sts[station]['name'], model,
-                                   scenario))
+            scenario))
     return fig
