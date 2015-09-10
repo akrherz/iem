@@ -9,6 +9,7 @@ import urllib2
 import sys
 import datetime
 import os
+import time
 
 
 def fetch(valid):
@@ -53,8 +54,20 @@ def fetch(valid):
                                                     len(offsets), valid))
     for pr in offsets:
         req.headers['Range'] = 'bytes=%s-%s' % (pr[0], pr[1])
-        f = urllib2.urlopen(req, timeout=30)
-        output.write(f.read())
+        attempt = 0
+        f = None
+        while attempt < 10:
+            try:
+                f = urllib2.urlopen(req, timeout=30)
+            except:
+                time.sleep(10)
+                attempt += 1
+                continue
+            attempt = 10
+        if f is None:
+            print("download_hrrr.py failure for uri: %s" % (uri,))
+        else:
+            output.write(f.read())
 
     output.close()
 
