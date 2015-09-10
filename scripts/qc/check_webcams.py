@@ -31,12 +31,15 @@ def do(netname, pname):
     """, (netname, ))
     NT = NetworkTable(None)
     obs = {}
+    missing = 0
     for row in mcursor:
         NT.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2],
                               tzname='America/Chicago')
         fn = "%s/%s.jpg" % (mydir, row[0])
         if not os.path.isfile(fn):
-            print 'Missing webcam file: %s' % (fn,)
+            missing += 1
+            if missing > 1:
+                print 'Missing webcam file: %s' % (fn,)
             continue
         ticks = os.stat(fn)[stat.ST_MTIME]
         valid = (datetime.datetime(1970, 1, 1) +
