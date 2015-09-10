@@ -83,7 +83,7 @@ def do(ts):
             # print vname, oldval, newval
             if newval is None or np.isnan(newval):
                 continue
-            if oldval is None or oldval in [-99, 99]:
+            if oldval is None:
                 fmt = "%.2f" if vname == 'pday' else '%.0f'
                 tokens.append("%s = %s" % (vname, fmt % newval))
 
