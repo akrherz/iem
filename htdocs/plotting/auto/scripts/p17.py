@@ -65,7 +65,8 @@ def plotter(fdict):
     lows = [99]*days
 
     cursor.execute("""
-    SELECT day, max_tmpf, min_tmpf from """+table+""" s JOIN stations t
+    SELECT day, coalesce(max_tmpf, -99), coalesce(min_tmpf, 99)
+    from """+table+""" s JOIN stations t
     on (t.iemid = s.iemid) WHERE id = %s and network = %s and
     day >= %s and day < %s
     """, (station, network, sts, ets))
