@@ -100,10 +100,10 @@ def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid):
 
 def main():
     if len(sys.argv) == 4:
-        do_day(datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                                 int(sys.argv[3])))
+        do_day(datetime.date(int(sys.argv[1]), int(sys.argv[2]),
+                             int(sys.argv[3])))
     elif len(sys.argv) == 3:
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        sts = datetime.date(int(sys.argv[1]), int(sys.argv[2]), 1)
         ets = sts + datetime.timedelta(days=35)
         ets = ets.replace(day=1)
         now = sts
@@ -111,7 +111,7 @@ def main():
             do_day(now)
             now += datetime.timedelta(days=1)
     else:
-        do_day(datetime.datetime.now())
+        do_day(datetime.date.today())
 
 if __name__ == '__main__':
     main()
