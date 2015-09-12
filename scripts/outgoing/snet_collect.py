@@ -82,6 +82,8 @@ def computeOthers(d):
             ob["max_sped"] = ob["max_gust"] * 1.17
         else:
             ob['max_sped'] = 0
+        ob['pday'] = 0 if ob['pday'] is None else ob['pday']
+        ob['pmonth'] = 0 if ob['pmonth'] is None else ob['pmonth']
         ob["gtim"] = "0000"
         ob["gtim2"] = "12:00 AM"
         if ob["max_gust_ts"] is not None and ob["max_gust_ts"] != "null":
@@ -101,7 +103,9 @@ def get_precip_totals(obs, network):
                    (now - datetime.timedelta(days=dy)).strftime("%Y-%m-%d"))
         icursor.execute(sql)
         for row in icursor:
-            obs[row["id"]]["p%sday" % (dy,)] = row["rain"]
+            obs[row["id"]]["p%sday" % (dy,)] = (row["rain"]
+                                                if row['rain'] is not None
+                                                else 0)
 
 
 def formatter(val, precision, mval='M'):
