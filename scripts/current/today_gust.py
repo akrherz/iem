@@ -32,7 +32,7 @@ vals = []
 valmask = []
 icursor.execute(sql)
 for row in icursor:
-    if row[4] == 0:
+    if row[4] == 0 or row[4] is None:
         continue
     lats.append(row[3])
     lons.append(row[2])
