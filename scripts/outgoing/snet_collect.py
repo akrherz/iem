@@ -78,7 +78,10 @@ def computeOthers(d):
         ob["20gu"] = 0
         if ob['gust'] is not None:
             ob["gmph"] = ob["gust"] * 1.17
-        ob["max_sped"] = ob["max_gust"] * 1.17
+        if ob['max_gust'] is not None:
+            ob["max_sped"] = ob["max_gust"] * 1.17
+        else:
+            ob['max_sped'] = 0
         ob["gtim"] = "0000"
         ob["gtim2"] = "12:00 AM"
         if ob["max_gust_ts"] is not None and ob["max_gust_ts"] != "null":
