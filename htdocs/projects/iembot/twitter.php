@@ -32,13 +32,15 @@ function reloadbot(){
 $msg = Array();
 //------------------------------------------------------------
 if (isset($_REQUEST['add']) && $channel != '' && $screen_name != ''){
-	pg_execute($pgconn, 'ADDSUB', Array($_SESSION["screen_name"], $channel));
+	pg_execute($pgconn, 'ADDSUB', Array(strtolower($_SESSION["screen_name"]),
+			$channel));
 	reloadbot();
 	$msg[] = sprintf("Added channel subscription %s for user %s, reloaded bot",
 			$channel, $_SESSION["screen_name"]);
 }
 if (isset($_REQUEST['del']) && $channel != '' && $screen_name != ''){
-	pg_execute($pgconn, 'DELSUB', Array($_SESSION["screen_name"], $channel));
+	pg_execute($pgconn, 'DELSUB', Array(strtolower($_SESSION["screen_name"]),
+			$channel));
 	reloadbot();
 	$msg[] = sprintf("Deleted channel subscription %s for user %s, reloaded bot",
 			$channel, $_SESSION["screen_name"]);
@@ -71,7 +73,7 @@ if ($screen_name == ''){
 }
 
 $sselect2 = "";
-$rs = pg_execute($pgconn, "SELECTSUBS", Array($screen_name));
+$rs = pg_execute($pgconn, "SELECTSUBS", Array(strtolower($screen_name)));
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	$sselect2 .= sprintf('<tr><th>%s</th><td>%s</td>
     	<td><a href="?del&amp;channel=%s">Unsubscribe</a></tr>',
