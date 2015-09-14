@@ -15,8 +15,8 @@ SCRIPT_TIME = datetime.datetime.utcnow()
 SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
 SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
 NT = NetworkTable(("KCCI", "KELO", "KIMT"))
-IEM = psycopg2.connect(database="iem", host='iemdb')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
+IEM = psycopg2.connect(database="iem", host='iemdb', user='nobody')
+PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb', user='nobody')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()
@@ -166,7 +166,10 @@ def writeCounters():
 
 def fetch_pmonth(obs, nwsli):
     if nwsli in obs:
-        return obs[nwsli].get('pmonth', -1)
+        val = obs[nwsli].get('pmonth', -1)
+        if val is None:
+            return -1
+        return val
     return -1
 
 
