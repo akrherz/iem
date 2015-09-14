@@ -8,7 +8,7 @@ Some IEM cluster details (so I can keep it straight!)
 # Point php.ini at memcache for sessions
 [Session]
 session.save_handler = memcache
-session.save_path = "tcp://iem-memached:11211"
+session.save_path = "tcp://iem-memcached:11211"
 
 # Considerations prior to rebooting a machine
 
