@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 100);
 include("../../include/myview.php");
 include("../../include/database.inc.php");
 $t = new MyView();
@@ -11,8 +12,8 @@ $rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base
     WHERE status != 'CLOSED' ORDER by id ASC");
 pg_close($conn);
 
-$ars = Array("iaawos" => "", "iarwis" => "", "kcci" => "", "kelo" => "",
-		"kimt" => "");
+$ars = Array("isusm" => "", "iaawos" => "", "iarwis" => "", 
+		"kcci" => "", "kelo" => "", "kimt" => "");
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
@@ -28,6 +29,12 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
      </tr>";
 	@$ars[$row["portfolio"]] .= $s;
  }
+ 
+ reset($ars);
+ while( list($key, $val) = each($ars)){
+ 	if ($val == '')
+ 		$ars[$key] = "<tr><td colspan=\"6\">No Open/Active Tickets Found</td></tr>";
+ }
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -42,12 +49,22 @@ header is presented, but in the future more info will be made publicly
 available.  If you have any questions or comments about a ticket listed,
 please feel free to <a href="/info/contacts.php">Contact Us</a>.
 
+<h3>Iowa State Soil Moisture Network</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+ <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
+ <th>Ticket Topic:</th></tr>
+</thead>
+{$ars["isusm"]}
+</table><br><br>
+
 <h3>Iowa AWOS network</h3>
 <table class="table table-striped">
 <thead>
 <tr>
- <th>ID</th><td>Status:</td><td>Opened:</td><td>Updated:</td><td>Site:</td>
- <td>Ticket Topic:</td></tr>
+ <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
+ <th>Ticket Topic:</th></tr>
 </thead>
 {$ars["iaawos"]}
 </table><br><br>
@@ -55,9 +72,9 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
 <h3>Iowa RWIS network</h3>
 <table class="table table-striped">
 <thead><tr>
- <th>ID</th><td>Status:</td><td>Opened:</td><td>Updated:</td><td>Site:</td>
- <td>Ticket Topic:</td></tr>
- </thead>
+ <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
+ <th>Ticket Topic:</th></tr>
+</thead>
  {$ars["iarwis"]}
 </table><br><br>
 
@@ -65,8 +82,8 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
 <table class="table table-striped">
 <thead>
 <tr>
- <th>ID</th><td>Status:</td><td>Opened:</td><td>Updated:</td><td>Site:</td>
- <td>Ticket Topic:</td></tr>
+ <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
+ <th>Ticket Topic:</th></tr>
 </thead>
  {$ars["kccisnet"]}
 </table><br><br>
@@ -75,9 +92,9 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
 <table class="table table-striped">
 <thead>
 <tr>
- <th>ID</th><td>Status:</td><td>Opened:</td><td>Updated:</td><td>Site:</td>
- <td>Ticket Topic:</td></tr>
- </thead>
+ <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
+ <th>Ticket Topic:</th></tr>
+</thead>
  {$ars["kelosnet"]}
 </table><br><br></div>
 
@@ -85,9 +102,9 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
 <table class="table table-striped">
 <thead>
 <tr>
- <th>ID</th><td>Status:</td><td>Opened:</td><td>Updated:</td><td>Site:</td>
- <td>Ticket Topic:</td></tr>
- </thead>
+ <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
+ <th>Ticket Topic:</th></tr>
+</thead>
  {$ars["kimtsnet"]}
 </table>
 EOF;
