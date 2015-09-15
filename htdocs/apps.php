@@ -8,6 +8,12 @@ $dbconn = iemdb("mesosite");
  
 $t->title = "Application Listing";
 $t->thispage = "iem-apps";
+$t->jsextra = <<<EOF
+<script src="/js/jquery.table-filter.min.js"></script>
+<script>
+   $("#table1").filterTable({label: "Filter Table Using Text: "});
+</script>
+EOF;
 
 $table = "";
 $tags = Array();
@@ -24,10 +30,12 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
 $t->content = <<<EOF
  <h3>IEM Application Listing</h3>
- <p>These are applications internally indexed by the IEM.  This list is created to help index content
- on this website.
+ <p>This website contains a large number of 'applications' which allow for
+ dynamic query and product generation.  This page displays a listing of these
+ apps along with a brief description.  The tags shown are used to organize the
+ apps and provide a 'Related' menu on individual pages.</p>
  
- <p><table class="table table-striped">
+ <p><table class="table table-striped table-bordered" id="table1">
  <thead>
  <tr><th>Title</th><th>Description</th><th>Tags</th></tr>
  </thead>
