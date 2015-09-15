@@ -15,8 +15,8 @@ SCRIPT_TIME = datetime.datetime.utcnow()
 SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
 SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
 NT = NetworkTable(("KCCI", "KELO", "KIMT"))
-IEM = psycopg2.connect(database="iem", host='iemdb', user='nobody')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb', user='nobody')
+IEM = psycopg2.connect(database="iem", host='iemdb')
+PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()
