@@ -13,7 +13,7 @@ import unittest
 import tempfile
 
 
-def mt(tmpf, depth, q):
+def mt(prefix, tmpf, depth, q):
     """Properly encode a value at depth into SHEF"""
     if tmpf is None or 'soil4' in q or np.isnan(tmpf):
         return ""
@@ -22,7 +22,7 @@ def mt(tmpf, depth, q):
     if tmpf < 0:
         val = 0 - val
 
-    return "/TV %.3f" % (val, )
+    return "/%s %.3f" % (prefix, val)
 
 
 def generate_rr5():
@@ -36,7 +36,8 @@ def generate_rr5():
 
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
-    cursor.execute("""SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf
+    cursor.execute("""SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
+    c2smv, c3smv, c4smv
     from current c JOIN stations t
     on (t.iemid = c.iemid) WHERE t.network = 'ISUSM' and
     valid > (now() - '90 minutes'::interval)""")
@@ -47,10 +48,14 @@ def generate_rr5():
         else:
             tmpf = "%.1f" % (row[2],)
         data += (".A %s %s C DH%s/TA %s%s%s%s%s\n"
+                 ".A1 %s%s%s\n"
                  ) % (row[0], row[1].strftime("%Y%m%d"),
-                      row[1].strftime("%H%M"), tmpf, mt(row[3], '4', q),
-                      mt(row[4], '12', q), mt(row[5], '24', q),
-                      mt(row[6], '50', q))
+                      row[1].strftime("%H%M"), tmpf,
+                      mt('TV', row[3], '4', q), mt('TV', row[4], '12', q),
+                      mt('TV', row[5], '24', q), mt('TV', row[6], '50', q),
+                      mt('MW', row[7], '12', q),
+                      mt('MW', row[8], '24', q), mt('MW', row[9], '50', q)
+                      )
     return data
 
 
