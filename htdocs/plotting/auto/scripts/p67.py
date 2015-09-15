@@ -1,16 +1,15 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 import psycopg2.extras
 import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """This plot displays the frequency of having a
     reported wind speed be above a given threshold by reported temperature
@@ -28,6 +27,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -48,7 +50,8 @@ def plotter(fdict):
     GROUP by t ORDER by t ASC
     """, (station, month, threshold))
     tmpf = []
-    freq = []
+    events = []
+    total = []
     hits = 0
     cnt = 0
     for row in cursor:
@@ -57,10 +60,15 @@ def plotter(fdict):
         tmpf.append(row[0])
         hits += row[1]
         cnt += row[2]
-        freq.append(row[1] / float(row[2]) * 100.)
+        events.append(row[1])
+        total.append(row[2])
+
+    df = pd.DataFrame(dict(tmpf=pd.Series(tmpf), events=pd.Series(events),
+                           total=pd.Series(total)))
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(tmpf, freq, ec='green', fc='green')
+    ax.bar(tmpf, df['events'] / df['total'] * 100., width=1.1, ec='green',
+           fc='green')
     avgval = hits / float(cnt) * 100.
     ax.axhline(avgval, lw=2, zorder=2)
     txt = ax.text(tmpf[10], avgval + 1, "Average: %.1f%%" % (avgval,),
@@ -82,4 +90,4 @@ def plotter(fdict):
     ax.set_xlabel("Air Temperature $^\circ$F")
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
 
-    return fig
+    return fig, df
