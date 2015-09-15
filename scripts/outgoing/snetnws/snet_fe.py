@@ -99,8 +99,8 @@ def metar(ob):
     # Phour
     phour = "P%04i" % (ob.get('p01i', 0), )
     # Pday
-    pday = "7%04i" % (ob.get('pday', 0), )
-    return "%s %s %s %s RMK %s %s %s %s=\015\015\012" % (mid, mtrts, mwind,
+    pday = "" if ob.get('pday') is None else " 7%04i" % (ob.get('pday'), )
+    return "%s %s %s %s RMK %s %s %s%s=\015\015\012" % (mid, mtrts, mwind,
                                                          mtmp, malti, tgroup,
                                                          phour, pday)
 
