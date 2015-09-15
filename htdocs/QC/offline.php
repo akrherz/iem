@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 101);
 include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Quality Control, Sites Offline";
@@ -51,6 +52,7 @@ $kelo = networkOffline("KELO");
 $kimt = networkOffline("KIMT");
 $rwis = networkOffline("IA_RWIS");
 $awos = networkOffline("AWOS");
+$isusm = networkOffline("ISUSM");
 $t->content = <<< EOF
 <ol class="breadcrumb">
  <li><a href="/QC/">Quality Control</a></li>
@@ -69,6 +71,10 @@ to a wide range of factors.  Here is a listing of sites currently offline.
  <th align="left">Name</th>
  <th align="left">Flagged Offline At</th></tr>
 </thead>
+<tr><td colspan="3" style="background: #CCCCCC;"><b>ISU Soil Moisture Network</b>
+  (3 hour tolerance)</td></tr>
+{$isusm}
+
 <tr><td colspan="3" style="background: #CCCCCC;"><b>KCCI School Network</b>
   (30 minute tolerance)</td></tr>
 {$kcci}

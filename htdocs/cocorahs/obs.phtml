@@ -85,7 +85,10 @@ if (strlen($station) > 0) {
   	if ($sortvar == "") $sortvar = "day";
 
 	$content = <<<EOF
-<h3>CoCoRaHS obs listed by station</h3>
+<ol class="breadcrumb">
+ <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
+ <li class="active">CoCoRaHS obs listed by station</li>
+</ol>
 
 (<i>Click on a date to get all obs for a particular date.</i>)
 <form name="switchnwsli" action="obs.phtml" method="GET">
@@ -99,7 +102,12 @@ EOF;
   $link = "obs.phtml?date=".$date."&network=". $network ."&sortvar=";
   if ($sortvar == "") $sortvar = "id";
 $content = <<<EOF
-<h3 class="subtitle">CoCoRaHS obs listed by date</h3>(<i>Click on the Station Number to view all obs from one station.</i>)
+<ol class="breadcrumb">
+ <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
+ <li class="active">CoCoRaHS obs listed by date</li>
+</ol>
+
+<p><i>Click on the Station Number to view all obs from one station.</i></p>
 <form name="switchdate" action="obs.phtml" method="GET">
 <p>Enter Date:<input type="text" size="11" maxlength="10" name="date" value="{$date}">
 Select State: {$nselect}
@@ -109,7 +117,7 @@ EOF;
 } 
 
 $content .= <<<EOF
-<p><table border="1" cellspacing=0 cellpadding=2>
+<p><table class="table table-striped table-bordered">
 <tr>
   <th><a href="<?php echo $link; ?>station">ID #:</a></th>
   <th>Site Name:</th>

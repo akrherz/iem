@@ -1,6 +1,7 @@
 <?php 
 session_start();
 require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 102);
 include_once "../../../include/myview.php";
 require_once "../../../include/twitteroauth/twitteroauth.php";
 require_once "../../../include/iemprop.php";

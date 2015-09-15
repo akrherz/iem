@@ -140,7 +140,7 @@ EOF;
 EOF;
    $content .= "<td ";
    if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
-     $content .= 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
+     $content .= 'bgcolor="red">'. strftime("%d %b %Y %I:%M %p", $value["ts"]) .'</td>';
    } else {
      $content .= ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
    }
