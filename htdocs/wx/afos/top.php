@@ -26,7 +26,7 @@
   <td><input type="submit" value="GET"></td>
 
   <td valign="top" align="right"><b><a target="display" href="bottom.php">NWS Text Product Finder</a></b><br>
-  <a target="_top" href="http://mesonet.agron.iastate.edu">Iowa Environmental Mesonet</a><br>
+  <a target="_top" href="/">Iowa Environmental Mesonet</a><br>
   <b>*</b>Unofficial data for educational use only.
 
 </tr></table>

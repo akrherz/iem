@@ -1,5 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 38);
 include("../../../include/myview.php");
 include("../../../include/database.inc.php");
 include("../../../include/network.php");
@@ -9,7 +10,6 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 
 $yselect = yearSelect2(2004, $year, "year");
 
-define("IEM_APPID", 38);
 $t = new MyView();
 $t->thispage = "networks-awos";
 $t->title = "Iowa AWOS Monthly Precipitation";
