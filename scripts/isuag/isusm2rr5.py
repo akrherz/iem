@@ -68,7 +68,7 @@ def generate_rr5():
 def main():
     """Go Main Go"""
     rr5data = generate_rr5()
-    print rr5data
+    # print rr5data
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, rr5data)
     os.close(tmpfd)
