@@ -37,7 +37,7 @@ def generate_rr5():
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
-    c2smv, c3smv, c4smv
+    c2smv, c3smv, c4smv, phour
     from current c JOIN stations t
     on (t.iemid = c.iemid) WHERE t.network = 'ISUSM' and
     valid > (now() - '90 minutes'::interval)""")
@@ -46,15 +46,21 @@ def generate_rr5():
         if 'tmpf' in q or row[2] is None:
             tmpf = "M"
         else:
-            tmpf = "%.1f" % (row[2],)
+            tmpf = "%.1f" % (row[2], )
+        if 'precip' in q or row[10] is None:
+            precip = "M"
+        else:
+            precip = "%.2f" % (row[10], )
         data += (".A %s %s C DH%s/TA %s%s%s%s%s\n"
-                 ".A1 %s%s%s\n"
+                 ".A1 %s%s%s/PPH %s\n"
                  ) % (row[0], row[1].strftime("%Y%m%d"),
                       row[1].strftime("%H%M"), tmpf,
                       mt('TV', row[3], '4', q), mt('TV', row[4], '12', q),
                       mt('TV', row[5], '24', q), mt('TV', row[6], '50', q),
-                      mt('MW', row[7], '12', q),
-                      mt('MW', row[8], '24', q), mt('MW', row[9], '50', q)
+                      mt('MW', max([0, row[7]]), '12', q),
+                      mt('MW', max([0, row[8]]), '24', q),
+                      mt('MW', max([0, row[9]]), '50', q),
+                      precip
                       )
     return data
 
@@ -62,7 +68,7 @@ def generate_rr5():
 def main():
     """Go Main Go"""
     rr5data = generate_rr5()
-    # print rr5data
+    print rr5data
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, rr5data)
     os.close(tmpfd)
