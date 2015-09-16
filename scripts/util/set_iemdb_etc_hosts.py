@@ -25,6 +25,7 @@ def main():
     os.write(tmpfd, '\n'.join(result))
     os.close(tmpfd)
     os.rename(tmpfn, '/etc/hosts')
+    os.chmod('/etc/hosts', 0644)
 
 
 if __name__ == '__main__':
