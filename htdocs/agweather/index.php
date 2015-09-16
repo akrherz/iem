@@ -79,8 +79,9 @@ information for daily temperatures, but they are not always on a calendar date.
  <td rowspan="2">The <a href="/COOP/">NWS COOP</a> network report precipitation totals that
  include melted snowfall.
  <ul>
+  <li><a href="/COOP/extremes.php">Daily Climatology</a></li>
   <li><a href="/data/summary/today_prec.png">Today's total</a></li>
-  </ul>
+ </ul>
  </td>
  <td colspan="3" rowspan="2"><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
  data from the NWS COOP network.
