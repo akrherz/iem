@@ -38,11 +38,11 @@ EOF;
  <p>{$row["story"]}</p>
  {$appurl}
 EOF;
-  $t = htmlentities($row["title"]);
+  $t = $row["title"];
   $v = substr($row["valid"],0,10);
   echo <<<EOF
 <item>
-<title>{$t}</title>
+<title><![CDATA[{$t}]]></title>
 <author>akrherz@iastate.edu (Daryl Herzmann)</author>
 <link>http://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</link>
 <guid>http://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</guid>
