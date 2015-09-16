@@ -13,6 +13,9 @@ python current_bias.py GFS
 cd ../rtma
 python wind_power.py &
 
+cd ../hads
+python process_hads_inbound.py &
+
 cd ../plots
 ./RUN_PLOTS
 
