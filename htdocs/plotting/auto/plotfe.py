@@ -44,7 +44,10 @@ def main():
         import matplotlib.pyplot as plt
         import cStringIO
         import imp
-        name = 'scripts/p%s' % (p,)
+        if p >= 100:
+            name = "scripts100/p%s" % (p, )
+        else:
+            name = 'scripts/p%s' % (p,)
         start_time = datetime.datetime.now()
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)

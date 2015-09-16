@@ -14,7 +14,10 @@ if __name__ == '__main__':
         import scripts
         data = scripts.data
     else:
-        name = 'scripts/p%s' % (p,)
+        if p >= 100:
+            name = 'scripts100/p%s' % (p, )
+        else:
+            name = 'scripts/p%s' % (p,)
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
         data = a.get_description()
