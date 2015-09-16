@@ -120,6 +120,8 @@ data = {'plots': [
     {'label': 'Yearly', 'options': [
         {'id': "76",
          'label': "Average Dew Point by Year or Season"},
+        {'id': "99", 'label': "Daily High + Low Temperatures with Departures",
+         'mw': True},
         {'id': "12", 'mw': True,
          'label': "Days per year and first/latest date above given threshold"},
         {'id': "74", 'mw': True,

@@ -20,7 +20,7 @@ need.  Please do <a href="/info/contacts.php">contact us</a> with your
 questions!</p>
 
 <p>IEM's most popular applications:
-<a role="button" class="btn btn-success" href="/plotting/auto/"><i class="glyphicon glyphicon-signal"></i> Automated Graph Generator</a>
+<a role="button" class="btn btn-success" href="/plotting/auto/"><i class="glyphicon glyphicon-signal"></i> Automated Data Plotting</a>
 <a role="button" class="btn btn-success" href="/climodat/"><i class="glyphicon glyphicon-list-alt"></i> Climodat</a>
 <a role="button" class="btn btn-success" href="/plotting/coop/acc.phtml"><i class="glyphicon glyphicon-object-align-bottom"></i> Single Site Graphs</a>
 </p>
@@ -50,10 +50,15 @@ of buildings.</td>
 <td><a href="/ASOS/">ASOS/AWOS</a> are stations located at airports and are
 the baseline weather observation network. The 
 <a href="/agclimate">ISU Soil Moisture</a> network has data for Iowa.</td>
+
 <td><a href="/COOP/">NWS COOP</a> has high quality high and low temperature
 reports for 24 hour periods, not always for the calendar day.</td>
+
 <td colspan="3">The <a href="/climodat/">Climodat</a> reports contain summarized
-data from the NWS COOP network.</td>
+data from the NWS COOP network.
+
+<br /><a href="/plotting/auto/?q=99">Plot of Daily Departures by Year</a>
+</td>
 </tr>
 
 <tr><td>Growing Degree Days</td>
@@ -79,9 +84,21 @@ information for daily temperatures, but they are not always on a calendar date.
  <td rowspan="2">The <a href="/COOP/">NWS COOP</a> network report precipitation totals that
  include melted snowfall.
  <ul>
+  <li><a href="/COOP/7am.php">Map of Daily COOP Reports</a></li>
   <li><a href="/COOP/extremes.php">Daily Climatology</a></li>
   <li><a href="/data/summary/today_prec.png">Today's total</a></li>
  </ul>
+ 
+ <br />The IEM processes gridded analyses of precipitation
+ <ul>
+   <li><a href="/plotting/auto/?q=86&var=p01d">IEM Reanalysis</a></li>
+   <li><a href="/timemachine/#45.0">MRMS ~1km Product</a></li>
+   <li><a href="/timemachine/#41.0">NCEP Stage IV</a></li>
+ </ul>
+ 
+ <br />There are daily <a href="/request/daily.phtml">ASOS precip reports</a>
+ available for download.
+ 
  </td>
  <td colspan="3" rowspan="2"><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
  data from the NWS COOP network.
@@ -90,6 +107,10 @@ information for daily temperatures, but they are not always on a calendar date.
   <li><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a></li>
   <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
  </ul>
+ 
+ <br /><a href="/plotting/auto/?q=97">Maps of Departures</a> from average.
+ <br /><a href="/plotting/auto/?q=84">Multiday summaries of MRMS estimates</a>.
+ 
  </td>
 </tr>
 

@@ -15,62 +15,6 @@ from pyiem.network import Table as NetworkTable
 import datetime
 
 
-def make_yr_plot(station1, year):
-    """ Do it! """
-    nt = NetworkTable("IACLIMATE")
-
-    dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = dbconn.cursor()
-
-    cursor.execute(""" SELECT valid, high, low from climate51 WHERE
-     station = %s ORDER by valid ASC""", (station1,))
-    highs = numpy.zeros( (cursor.rowcount))
-    lows = numpy.zeros( (cursor.rowcount))
-    highs2 = numpy.zeros( (cursor.rowcount))
-    lows2 = numpy.zeros( (cursor.rowcount))
-    valid = []
-    for i, row in enumerate(cursor):
-        highs[i] = row[1]
-        lows[i] = row[2]
-        highs2[i] = row[1]
-        lows2[i] = row[2]
-        valid.append( row[0] )
-
-    # Get specified years data
-    cursor.execute("""SELECT day, high, low from alldata_ia where
-    station = %s and year = %s ORDER by day ASC""", (station1, year))
-    valid2 = []
-
-    for i, row in enumerate(cursor):
-        highs2[i] = row[1]
-        lows2[i] = row[2]
-        valid2.append( row[0].replace(year=2000) )
-
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
-
-
-    ax[0].plot(valid, highs, color='r', linestyle='-', label='Climate High')
-    ax[0].plot(valid, lows, color='b', label='Climate Low')
-    ax[0].set_ylabel(r"Temperature $^\circ\mathrm{F}$")
-    ax[0].set_title("[%s] %s Climatology & %s Observations" % (station1, 
-                                        nt.sts[station1]['name'], year))
-
-    ax[0].plot(valid2, highs2[:len(valid2)], color='brown', label='%s High' % (year,))
-    ax[0].plot(valid2, lows2[:len(valid2)], color='green', label='%s Low' % (year,))
-        
-    ax[1].plot(valid, highs2 - highs, color='r', label='High Diff %s - Climate' % (year))
-    ax[1].plot(valid, lows2 - lows, color='b', label='Low Diff')
-    ax[1].set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
-    ax[1].legend(fontsize=10, ncol=2, loc='best')
-    ax[1].grid(True)
-    
-    ax[0].legend(fontsize=10, ncol=2, loc=8)
-    ax[0].grid()
-    ax[0].xaxis.set_major_locator(
-                               mdates.MonthLocator(interval=1)
-                               )
-    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
-
 def make_plot(station1, station2):
     """ Actually do the expense of making the plot! """
     nt = NetworkTable("IACLIMATE")
@@ -158,8 +102,6 @@ def main():
     if not res:
         if plottype == 'daily':
             make_plot(station1, station2) 
-        elif plottype == 'compare':
-            make_yr_plot(station1, year)
         res = postprocess()
         mc.set(mckey, res, 86400)
     sys.stdout.write( res )
