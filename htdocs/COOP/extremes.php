@@ -81,8 +81,8 @@ $cities = $nt->table;
 	 	$sorted_data = aSortBySecondIndex($data, $sortcol);
  	}
  	while(list($key,$val)=each($sorted_data)){
- 		$link = sprintf("extremes.php?day=%s&amp;month=%s&amp;network=%s",
- 				$day, $month, $network);
+ 		$link = sprintf("extremes.php?day=%s&amp;month=%s&amp;network=%s&amp;tbl=%s",
+ 				$day, $month, $network, $tbl);
  		$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
  				<td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
  				<td></td>
@@ -119,8 +119,8 @@ $cities = $nt->table;
  		$sorted_data = aSortBySecondIndex($data, $sortcol);
  	}
  	while(list($key,$val)=each($sorted_data)){
- 		$link = sprintf("extremes.php?station=%s&amp;network=%s",
- 				$val["station"], $network);
+ 		$link = sprintf("extremes.php?station=%s&amp;network=%s&amp;tbl=%s",
+ 				$val["station"], $network, $tbl);
  		$table .= sprintf("<tr><td><a href=\"%s\">%s</a> (%s)</td><td>%s</td>
  				<td>%.1f</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
  				<td></td>
@@ -139,7 +139,7 @@ $cities = $nt->table;
  				implode(", ", $val["max_precip_years"]));
  	}
  	
- 	$h3 = "<h3 class=\"heading\">NWS COOP Climatology for ". date("d F", $valid) ."</h3>";
+ 	$h3 = "<h3>NWS COOP Climatology for ". date("d F", $valid) ."</h3>";
  	
  }
 
@@ -194,22 +194,23 @@ for that date.</p>
 </p>
 
 <form method="GET" action="extremes.php" name="myform">
-<table cellpadding=2 cellspacing=0 border=2>
+<table class="table table-bordered">
+<thead>
 <tr>
- <td>Select State:</td>
- <td>{$netselect}
- </td>
- <td>Select Date:</td>
- <td>{$mselect}
-  {$dselect}
-
-  </td>
- <td>Record Database:</td>
-<td>{$tblselect}
-</td>
-<td>
-<input type="submit" value="Request">
-</td></tr>
+ <th>Select State:</th>
+ <th>Select Date:</th>
+ <th>Select Record Database:</th>
+ <th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+ <td>{$netselect}</td>
+ <td>{$mselect} {$dselect}</td>
+ <td>{$tblselect}</td>
+<td><input type="submit" value="Request"></td>
+</tr>
+</tbody>
 </table>
 </form>
 
