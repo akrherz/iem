@@ -1,13 +1,11 @@
 """
  Monthly precip reliability
 """
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import numpy as np
 from pyiem import network
 import calendar
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -29,8 +27,12 @@ def get_description():
     precipitation for a period of your choice. """
     return d
 
+
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     coop = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -69,8 +71,8 @@ def plotter(fdict):
     ax.set_xlim(0.5, 12.5)
     ax.set_ylabel("Percentage of Months, n=%.0f years" % (years,))
     ax.set_title(("%s [%s] Monthly Precipitation Reliability\n"
-        +"Period: %s-%s, %% of Months above %s%% of Long Term Avg") % (
-        nt.sts[station]['name'], station, syear,
-        eyear, threshold))
+                  "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
+                  ) % (nt.sts[station]['name'], station, syear,
+                       eyear, threshold))
 
     return fig
