@@ -1,12 +1,10 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 from pyiem.datatypes import speed
 import psycopg2.extras
 import numpy as np
 import datetime
 import calendar
 import math
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'mps': 'Meters per Second',
@@ -43,6 +41,7 @@ def uv(sped, drct):
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """This plot may take a while to appear!  It contains
     the approximate daily climatology of component wind speed."""
@@ -58,6 +57,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -84,6 +86,10 @@ def plotter(fdict):
     u = speed(uwnd / cnt, 'MPS').value(units.upper())
     v = speed(vwnd / cnt, 'mps').value(units.upper())
 
+    df = pd.DataFrame(dict(u=pd.Series(u),
+                           v=pd.Series(v),
+                           day_of_year=pd.Series(np.arange(1, 366))))
+
     (fig, ax) = plt.subplots(1, 1)
 
     ax.plot(np.arange(1, 366), smooth(u[:-1], 14, 'hamming'), color='r',
@@ -106,5 +112,4 @@ def plotter(fdict):
     ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width,
                      box.height * 0.9])
 
-
-    return fig
+    return fig, df

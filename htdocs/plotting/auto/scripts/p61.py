@@ -1,9 +1,6 @@
 
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
-import matplotlib
-matplotlib.use('agg')
-from pyiem.plot import MapPlot
 import datetime
 
 PDICT = {'low': 'Low Temperature',
@@ -29,6 +26,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    from pyiem.plot import MapPlot
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

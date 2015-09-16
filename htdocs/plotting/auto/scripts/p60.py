@@ -1,7 +1,3 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.colors as mpcolors
 import psycopg2.extras
 import numpy as np
 import datetime
@@ -17,7 +13,7 @@ def get_description():
     d = dict()
     d['cache'] = 86400
     d['description'] = """This plot presents the hourly frequency of having
-    a certain temperature above or below a given threshold.  Values are 
+    a certain temperature above or below a given threshold.  Values are
     partitioned by week of the year to smooth out some of the day to day
     variation."""
     d['arguments'] = [
@@ -31,8 +27,12 @@ def get_description():
     return d
 
 
-def plotter( fdict ):
+def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mpcolors
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -58,13 +58,13 @@ def plotter( fdict ):
     for row in cursor:
         data[row[1], row[0]-1] = row[2] / float(row[3]) * 100.
 
-    sts = datetime.datetime(2012,1,1)
+    sts = datetime.datetime(2012, 1, 1)
     xticks = []
-    for i in range(1,13):
+    for i in range(1, 13):
         ts = sts.replace(month=i)
         xticks.append(float(ts.strftime("%j")) / 7.0)
 
-    (fig, ax) = plt.subplots(1,1)
+    (fig, ax) = plt.subplots(1, 1)
     cmap = plt.get_cmap('jet')
     cmap.set_under('white')
     bins = np.arange(0, 101, 5)
@@ -78,14 +78,14 @@ def plotter( fdict ):
                 nt.sts[station]['name'], station, PDICT[direction], threshold,
                 nt.sts[station]['archive_begin'].year,
                 datetime.datetime.now().year), size=12)
-    
+
     ax.set_xticks(xticks)
     ax.set_ylabel("%s Timezone" % (nt.sts[station]['tzname'],))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_xlim(0,53)
-    ax.set_ylim(0,24)
+    ax.set_xlim(0, 53)
+    ax.set_ylim(0, 24)
     ax.set_yticks([0, 4, 8, 12, 16, 20, 24])
-    ax.set_yticklabels(['12 AM', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM', 'Mid'])
+    ax.set_yticklabels(['12 AM', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM',
+                        'Mid'])
 
-        
     return fig
