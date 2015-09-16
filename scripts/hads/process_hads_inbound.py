@@ -15,6 +15,9 @@ def main():
     SELECT distinct station, valid,
     key, value from raw_inbound""")
     cursor.execute("""TRUNCATE raw_inbound""")
+    cursor.close()
+    pgconn.commit()
+    cursor = pgconn.cursor()
     cursor.execute("""SELECT station, valid at time zone 'UTC',
     key, value from raw_inbound_tmp""")
     for row in cursor:
@@ -23,6 +26,7 @@ def main():
         cursor2.execute("""INSERT into """ + table + """
         (station, valid, key, value) VALUES (%s, %s, %s, %s)
         """, [row[0], ts, row[2], row[3]])
+    cursor.execute("""TRUNCATE raw_inbound_tmp""")
 
 if __name__ == '__main__':
     pgconn = psycopg2.connect(database='hads', host='iemdb')
