@@ -39,7 +39,7 @@ function makeVectorLayer(dt, title, group){
 			url: '/geojson/7am.py?group='+group+'&dt='+dt
 		}),
 		style: function(feature, resolution){
-			txt = (feature.get(renderattr) == 0.001) ? "T" : feature.get(renderattr);
+			txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
 			txt = (txt == null) ? '.' : txt;
 			return [new ol.style.Style({
 				text: new ol.style.Text({

@@ -22,7 +22,7 @@ if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
 function precip_formatter($val){
 	if ($val == '') return '';
-	if ($val == 0.001) return 'T';
+	if ($val == 0.0001) return 'T';
 	if ($val < 0) return 'M';
 	return $val;
 }
@@ -100,7 +100,7 @@ while (list($site, $iemob) = each($net) ){
 	$db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : "";
 	$db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : "";
 	$db[$site]["ratio"] = -1;
-	if ($db[$site]["snow"] > 0.001 && $db[$site]["pday"] > 0.001)
+	if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001)
 	{
 		$db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
 	}
