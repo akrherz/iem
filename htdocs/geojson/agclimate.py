@@ -104,10 +104,12 @@ def get_data(ts):
     SELECT * from sm_hourly where valid = %s
     """, (ts,))
     for i, row in enumerate(cursor):
-        lon = nt.sts[row['station']]['lon']
-        lat = nt.sts[row['station']]['lat']
-        q = qcdict.get(row['station'], {})
-        data['features'].append({"type": "Feature", "id": i, "properties": {
+        sid = row['station']
+        lon = nt.sts[sid]['lon']
+        lat = nt.sts[sid]['lat']
+        q = qcdict.get(sid, {})
+        data['features'].append({"type": "Feature",
+                                 "id": sid, "properties": {
             "encrh_avg": "%s%%" % safe(row['encrh_avg'], 1) if row['encrh_avg'] > 0 else "M",
             "rh":  "%.0f%%" % (row["rh"],),
             "hrprecip" : safe_p(row['rain_mm_tot']) if not q.get('precip', False) else 'M',
@@ -115,9 +117,9 @@ def get_data(ts):
             "bat": safe(row['battv_min'], 2),
             "radmj": safe(row['slrmj_tot'], 2),
             "tmpf": safe_t(row['tair_c_avg']),
-            "high": safe_t(daily.get(row['station'], {}).get('max_tmpf', None), 'F'),
-            "low": safe_t(daily.get(row['station'], {}).get('min_tmpf', None), 'F'),
-            "pday": safe(daily.get(row['station'], {}).get('pday', None), 2) if not q.get('precip', False) else 'M',
+            "high": safe_t(daily.get(sid, {}).get('max_tmpf', None), 'F'),
+            "low": safe_t(daily.get(sid, {}).get('min_tmpf', None), 'F'),
+            "pday": safe(daily.get(sid, {}).get('pday', None), 2) if not q.get('precip', False) else 'M',
             "soil04t": safe_t(row['tsoil_c_avg']) if not q.get('soil4', False) else 'M',
             "soil12t": safe_t(row['t12_c_avg']),
             "soil24t": safe_t(row['t24_c_avg']),
@@ -127,7 +129,8 @@ def get_data(ts):
             "soil50m": safe_m(row['vwc_50_avg']),
             "gust": safe(row['ws_mph_max'], 1),
             "wind": "%s@%.0f" % (drct2txt(row['winddir_d1_wvt']),
-                                 row['ws_mps_s_wvt'] * 2.23)
+                                 row['ws_mps_s_wvt'] * 2.23),
+            'name': nt.sts[sid]['name']
             },
             "geometry": {"type": "Point",
                          "coordinates": [lon, lat]
