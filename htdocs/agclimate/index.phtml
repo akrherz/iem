@@ -8,8 +8,8 @@
  $t->thispage = "networks-agclimate";
  
 $t->jsextra = <<<EOF
-<script src='/vendor/openlayers/3.8.2/ol.js'></script>
-<script src='/vendor/openlayers/3.8.2/ol3-layerswitcher.js'></script>
+<script src='/vendor/openlayers/3.9.0/ol.js'></script>
+<script src='/vendor/openlayers/3.9.0/ol3-layerswitcher.js'></script>
 <script src="/assets/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='dataexplorer.js?v=4'></script>
 <script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
@@ -18,8 +18,8 @@ EOF;
 
 $dt = date("Y/m/d H:00", time() - (20*60));
 $t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="/vendor/openlayers/3.8.2/ol.css"/ >
-<link rel="stylesheet" type="text/css" href="/vendor/openlayers/3.8.2/ol3-layerswitcher.css"/ >
+<link rel="stylesheet" type="text/css" href="/vendor/openlayers/3.9.0/ol.css"/ >
+<link rel="stylesheet" type="text/css" href="/vendor/openlayers/3.9.0/ol3-layerswitcher.css"/ >
 <link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
 <link rel="stylesheet" type="text/css" href="/assets/jquery-ui/1.11.4/jquery-ui.min.css"/ >
 <script>
@@ -30,6 +30,9 @@ $t->headextra = <<<EOF
     width: 100%;
     height: 400px;
   }
+.popover-content {
+  min-width: 180px;
+}
 </style>
 EOF;
  
@@ -100,6 +103,7 @@ EOF;
 	
  		<span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
 		<div id="map"></div>
+ 		<div id="popup" title="Station Information"></div>
 	</div>
 </div>
 </form>

@@ -110,6 +110,35 @@ $().ready(function(){
 		})
 	});
 
+	// Popup showing the position the user clicked
+	var popup = new ol.Overlay({
+		element: document.getElementById('popup')
+	});
+	map.addOverlay(popup);
+	// Support clicking on the map to get more details on the station
+	map.on('click', function(evt){
+		//console.log("click()...");
+		var element = popup.getElement();
+		$(element).popover('destroy');
+		var pixel = map.getEventPixel(evt.originalEvent);
+        var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+            return feature;
+        });
+        if (feature){
+        	popup.setPosition(evt.coordinate);
+        	  $(element).popover({
+        		   'placement': 'top',
+        		    'animation': false,
+        		    'html': true,
+        		   'content': ['<p>Site ID: <code>'+ feature.getId() + '</code>',
+        		               'Name: '+ feature.get('name'),
+        		               'Air Temp: '+ feature.get('tmpf'),
+        		               '</p>'].join('<br/>')
+        	});
+        	  $(element).popover('show');
+        }
+	});
+	
     var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
