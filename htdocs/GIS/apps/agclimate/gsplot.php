@@ -315,7 +315,7 @@ foreach($vals as $key => $value){
   // Red Dot... 
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, ' ' );
+  $pt->draw($map, $ponly, $img, 0);
 
   // Value UL
   $pt = ms_newPointObj();
@@ -354,9 +354,9 @@ foreach($vals as $key => $value){
   }
 }
 
-$map->drawLabelCache($img);
 iemmap_title($map, $img, $year." ". $varDef[$var] , 
 	"(". $sstr_txt ." - ". $estr_txt .")");
+$map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
