@@ -34,7 +34,8 @@ $h2 = hourSelect($hour2, "hour2");
 $ar = Array("1" => "3 Panel Plot",
 		"2" => "Just Soil Temps",
 		"3" => "Daily Max/Min 4 Inch Soil Temps",
-		"4" => "Daily Solar Radiation");
+		"4" => "Daily Solar Radiation",
+		"5" => "Daily Potential Evapotranspiration");
 $oselect = make_select("opt", $opt, $ar);
 
 $img = sprintf("smts.py?opt=%s&amp;station=%s&amp;year1=%s&amp;year2=%s"

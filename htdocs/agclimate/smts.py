@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """ Soil Moisture Timeseries """
-import matplotlib
-matplotlib.use('agg')
 import datetime
 import numpy as np
 import pytz
@@ -11,11 +9,51 @@ from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 import cgi
 import psycopg2.extras
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 nt = NetworkTable("ISUSM")
+
+
+def make_daily_pet_plot(station, sts, ets):
+    """Generate a daily PET plot"""
+    icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor.execute("""WITH climo as (
+        select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
+        from daily where station = 'A130209' GROUP by mmdd
+    ), obs as (
+        SELECT valid, dailyet / 25.4 as et, to_char(valid, 'mmdd') as mmdd
+        from sm_daily WHERE station = '%s' and valid >= '%s' and valid <= '%s'
+    )
+
+    select o.valid, o.et, c.et from obs o
+    JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
+    """ % (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
+    dates = []
+    o_dailyet = []
+    c_et = []
+    for row in icursor:
+        dates.append(row[0])
+        o_dailyet.append(row[1] if row[1] is not None else 0)
+        c_et.append(row[2])
+
+    (_, ax) = plt.subplots(1, 1)
+    ax.bar(dates, o_dailyet, fc='brown', ec='brown', zorder=1,
+           align='center', label='Observed')
+    ax.plot(dates, c_et, label="Climatology", color='k', lw=1.5, zorder=2)
+    ax.grid(True)
+    ax.set_ylabel("Potential Evapotranspiration [inch]")
+    ax.set_title(("ISUSM Station: %s Timeseries\n"
+                  "Potential Evapotranspiration, "
+                  "Climatology from Ames 1986-2014"
+                  ) % (nt.sts[station]['name'], ))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    ax.legend(loc='best', ncol=1, fontsize=10)
+    sys.stdout.write("Content-Type: image/png\n\n")
+    plt.savefig(sys.stdout, format='png')
 
 
 def make_daily_rad_plot(station, sts, ets):
@@ -123,6 +161,9 @@ def main():
         return
     elif opt == '4':
         make_daily_rad_plot(station, sts, ets)
+        return
+    elif opt == '5':
+        make_daily_pet_plot(station, sts, ets)
         return
     icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
