@@ -64,7 +64,8 @@ for item in res['items']:
         subsample = "1"
         for col in range(3, worksheet.cols+1):
             if worksheet.get_cell_value(1, col) is None:
-                print siteid
+                print(('harvest_soil_texture Year: %s Site: %s Col: %s is null'
+                       ) % (YEAR, siteid, col))
                 continue
             varname = worksheet.get_cell_value(1, col).strip().split()[0]
             val = worksheet.get_cell_value(row, col)
