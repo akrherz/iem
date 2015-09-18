@@ -95,7 +95,7 @@ def logic(ugccode, iemid, station, name, network, lon, lat, state):
 mcursor.execute("""SELECT iemid, id, name, network, ST_x(geom), ST_y(geom),
     state from stations WHERE (county is null or ugc_county is null
     or ugc_zone is null) and country = 'US' and state is not null
-    and state not in ('PR', 'DC', 'GU', 'PU', 'P1', 'P3', 'P4', 'P5')
+    and state not in ('PR', 'DC', 'GU', 'PU', 'P1', 'P2', 'P3', 'P4', 'P5')
     ORDER by modified DESC
     """)
 
