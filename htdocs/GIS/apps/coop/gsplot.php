@@ -138,7 +138,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 		  	  // Red Dot...  
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, '' );
+  $pt->draw($map, $ponly, $img, 0);
 
   // City Name
   $pt = ms_newPointObj();
