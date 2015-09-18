@@ -60,7 +60,7 @@ def sites_changelog(regime, yesterday, html):
     return html
 
 
-def get_base_folder_id(drive, fileid, depth=0):
+def get_base_folder_id(regime, drive, fileid, depth=0):
     """Find the base folder of this fileid"""
     # print("Here with fileid: %s depth: %s" % (fileid, depth))
     depth += 1
@@ -70,13 +70,13 @@ def get_base_folder_id(drive, fileid, depth=0):
     try:
         parents = drive.parents().list(fileId=fileid).execute()
     except Exception, exp:
-        print("Exception %s for %s" % (exp, fileid))
+        print("%s Exception %s for %s" % (regime, exp, fileid))
         return None
     for p1 in parents['items']:
         if p1['id'] in [util.CONFIG['td']['basefolder'],
                         util.CONFIG['cscap']['basefolder']]:
             return p1['id']
-        return get_base_folder_id(drive, p1['id'], depth)
+        return get_base_folder_id(regime, drive, p1['id'], depth)
 
 
 def drive_changelog(regime, yesterday, html):
@@ -117,7 +117,7 @@ def drive_changelog(regime, yesterday, html):
             if modifiedDate < yesterday:
                 continue
             # Need to see which base folder this file is in!
-            parentid = get_base_folder_id(drive, item['fileId'])
+            parentid = get_base_folder_id(regime, drive, item['fileId'])
             if parentid != util.CONFIG[regime]['basefolder']:
                 print(('Skipping %s as it is other project'
                        ) % (repr(item['file']['title']), ))
