@@ -1,7 +1,8 @@
 import psycopg2.extras
 import numpy as np
 from pyiem import network
-import calendar
+import pandas as pd
+
 
 PDICT = {'max-high': 'Maximum High',
          'avg-high': 'Average High',
@@ -45,8 +46,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='localhost', user='nobody',
-                            port=5555)
+    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     station = fdict.get('station', 'IA0000')
@@ -82,7 +82,8 @@ def plotter(fdict):
     for row in ccursor:
         years.append(row['year'])
         data.append(float(row[ptype]))
-
+    df = pd.DataFrame(dict(year=pd.Series(years),
+                           data=pd.Series(data)))
     data = np.array(data)
 
     (fig, ax) = plt.subplots(1, 1)
@@ -136,4 +137,4 @@ def plotter(fdict):
     sz = len(tokens) / 2
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
-    return fig
+    return fig, df
