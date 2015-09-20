@@ -150,6 +150,8 @@ data = {'plots': [
          'label': "Precipitation Totals by Season/Year"},
         {'id': "63", 'mw': True,
          'label': "Records Set by Year (Max High / Min Low)"},
+        {'id': "100", 'mw': True,
+         'label': "Temperature / Precipitation Statistics by Year"},
         {'id': "14", 'mw': True,
          'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
