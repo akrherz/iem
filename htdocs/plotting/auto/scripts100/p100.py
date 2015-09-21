@@ -70,7 +70,7 @@ def plotter(fdict):
     sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when low < %s then 1 else 0 end) as "days-lows-below",
     avg(precip) as "avg-precip",
-    avg(case when precip > 0 then precip else null end) as "avg-precip2",
+    avg(case when precip >= 0.01 then precip else null end) as "avg-precip2",
     sum(case when precip >= %s then 1 else 0 end) as "days-precip"
   from """+table+"""
   where station = %s
