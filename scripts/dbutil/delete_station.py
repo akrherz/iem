@@ -29,7 +29,7 @@ mcursor.execute("""
     DELETE from stations where id = '%s' and network = '%s'
 """ % (station, network))
 print(('Updating mesosite resulted in %s rows removed'
-       ) % (icursor.rowcount, ))
+       ) % (mcursor.rowcount, ))
 
 mcursor.close()
 MESOSITE.commit()
