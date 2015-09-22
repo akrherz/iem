@@ -1,7 +1,4 @@
 import psycopg2.extras
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
@@ -10,7 +7,7 @@ from pyiem.network import Table as NetworkTable
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
-    d['description'] = """This chart plots the last one plus inch snowfall 
+    d['description'] = """This chart plots the last one plus inch snowfall
     of each winter season and then the number of days the snow persisted as
     per snowdepth measurements."""
     d['arguments'] = [
@@ -22,6 +19,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
