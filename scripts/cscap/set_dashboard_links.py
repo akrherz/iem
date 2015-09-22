@@ -152,9 +152,9 @@ def do_row(row):
         else:
             # Get the list feed for this spreadsheet
             ss = util.Spreadsheet(spr_client, resources['id'])
-            if not ss.worksheets.has_key(YEAR):
-                print 'Year %s not in spread title: |%s %s|' % (YEAR,
-                                                        siteid, spreadtitle)
+            if YEAR not in ss.worksheets:
+                print(('Year %s not in spread title: |%s %s|'
+                       ) % (YEAR, siteid, spreadtitle))
                 CACHE[skey] = False
                 continue
             list_feed = ss.worksheets[YEAR].get_list_feed()
@@ -165,7 +165,7 @@ def do_row(row):
         lookupcol = varconv.get(varname, varname)
         for entry2 in list_feed.entry:
             data = entry2.to_dict()
-            if not data.has_key(lookupcol):
+            if lookupcol not in data:
                 na = True
                 break
             if data[lookupcol] is None:
