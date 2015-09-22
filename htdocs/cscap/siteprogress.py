@@ -103,7 +103,8 @@ if __name__ == '__main__':
 <thead><tr>
     <th width="20%">SiteID</th>
     <th width="60%">Progress</th>
-    <th width="20%">Percent Done (green + orange)</th>
+    <th width="10%">Count</th>
+    <th width="10%">Percent Done (green + orange)</th>
 </tr></thead>
     """)
     for sid in sites:
@@ -112,6 +113,7 @@ if __name__ == '__main__':
         sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
         row = data[sid]
         sys.stdout.write('<td>%s</td>' % (make_progress(row)))
+        sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
         sys.stdout.write("<td>%.2f%%</td>" % (((row['hits'] + row['other']) /
                                                float(row['tot'])) * 100.))
         sys.stdout.write("</tr>\n\n")
@@ -119,6 +121,7 @@ if __name__ == '__main__':
     sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
     row = data[sid]
     sys.stdout.write('<td>%s</td>' % (make_progress(row)))
+    sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
     sys.stdout.write("<td>%.2f%%</td>" % (((row['hits'] + row['other']) /
                                            float(row['tot'])) * 100.))
     sys.stdout.write("</tr>\n\n")
