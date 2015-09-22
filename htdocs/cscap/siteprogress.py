@@ -7,7 +7,7 @@ DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb',
 cursor = DBCONN.cursor()
 
 
-def get_data(mode, data):
+def get_data(mode, data, arr):
     ''' Do stuff '''
     table = 'agronomic_data' if mode == 'agronomic' else 'soil_data'
     cursor.execute("""SELECT site,
@@ -28,11 +28,20 @@ def get_data(mode, data):
         for site in [row[0], '_ALL']:
             entry = data.setdefault(site, dict(hits=0, dots=0, other=0,
                                                nulls=0, tot=0))
-            entry['hits'] += row[1]
-            entry['dots'] += row[2]
-            entry['other'] += row[3]
-            entry['nulls'] += row[4]
-            entry['tot'] += row[5]
+            tot = 0
+            if arr[0]:
+                entry['hits'] += row[1]
+                tot += row[1]
+            if arr[1]:
+                entry['dots'] += row[2]
+                tot += row[2]
+            if arr[2]:
+                entry['other'] += row[3]
+                tot += row[3]
+            if arr[3]:
+                entry['nulls'] += row[4]
+                tot += row[4]
+            entry['tot'] += tot
 
 
 def make_progress(row):
@@ -64,9 +73,19 @@ if __name__ == '__main__':
     sys.stdout.write('Content-type: text/html\n\n')
     form = cgi.FieldStorage()
     mode = form.getfirst('mode', 'agronomic')
+    show_has = (form.getfirst('has', '0') == '1')
+    show_period = (form.getfirst('period', '0') == '1')
+    show_dnc = (form.getfirst('dnc', '0') == '1')
+    show_no = (form.getfirst('no', '0') == '1')
+    if form.getfirst('a') is None:
+        show_has = True
+        show_period = True
+        show_dnc = True
+        show_no = True
     data = {}
-    get_data('agronomic', data)
-    get_data('soils', data)
+    arr = [show_has, show_period, show_dnc, show_no]
+    get_data('agronomic', data, arr)
+    get_data('soils', data, arr)
 
     sites = data.keys()
     sites.sort()
@@ -89,7 +108,18 @@ if __name__ == '__main__':
     z-index: 2;
  }
     </style>
-    <span>Key:</span>
+
+    <form method="GET" name="c">
+    <p><strong>Which statuses to show?</strong> &nbsp;
+    <input type="hidden" name="a" value="b">
+    <input type="checkbox" name="has" value="1"%s>has data &nbsp;
+    <input type="checkbox" name="period" value="1"%s>periods &nbsp;
+    <input type="checkbox" name="dnc" value="1"%s>did not collect &nbsp;
+    <input type="checkbox" name="no" value="1"%s>no entry / empty &nbsp;
+    <input type="submit" value="Update Page">
+    </p>
+    </form>
+    <p><span>Key:</span>
     <span class="btn btn-success">has data</span>
     <span class="btn btn-info">periods</span>
     <span class="btn btn-warning">did not collect</span>
@@ -101,12 +131,16 @@ if __name__ == '__main__':
 
 <table class='table table-striped table-bordered'>
 <thead><tr>
-    <th width="20%">SiteID</th>
-    <th width="60%">Progress</th>
-    <th width="10%">Count</th>
-    <th width="10%">Percent Done (green + orange)</th>
+    <th width="20%%">SiteID</th>
+    <th width="60%%">Progress</th>
+    <th width="10%%">Count</th>
+    <th width="10%%">Percent Done (green + orange)</th>
 </tr></thead>
-    """)
+    """ % ('' if not show_has else ' checked="checked"',
+           '' if not show_period else ' checked="checked"',
+           '' if not show_dnc else ' checked="checked"',
+           '' if not show_no else ' checked="checked"'
+           ))
     for sid in sites:
         if sid == '_ALL':
             continue
