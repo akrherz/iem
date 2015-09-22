@@ -1,15 +1,14 @@
 import psycopg2.extras
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import numpy as np
 import datetime
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This chart plots the number of daily maximum
     high temperatures and daily minimum low temperatures set by year.  Ties
     are not included."""
@@ -22,6 +21,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -61,6 +63,11 @@ def plotter(fdict):
     for year in range(syear, eyear+1):
         expect[year-syear] = 365.0/float(year-syear+1)
 
+    df = pd.DataFrame(dict(expected=pd.Series(expect),
+                           highs=pd.Series(hyears),
+                           lows=pd.Series(lyears),
+                           year=np.arange(syear, eyear+1)))
+
     (fig, ax) = plt.subplots(2, 1, sharex=True, sharey=True)
     rects = ax[0].bar(np.arange(syear, eyear+1)-0.5, hyears,
                       facecolor='b', edgecolor='b')
@@ -92,4 +99,4 @@ def plotter(fdict):
     ax[1].set_ylabel("Records set per year")
     ax[1].text(eyear-50, 22, "Min Low Temperature")
 
-    return fig
+    return fig, df
