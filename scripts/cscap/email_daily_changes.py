@@ -13,11 +13,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 CFG = {'cscap': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
-                             'lokhande@iastate.edu'],
+                             'lokhande@iastate.edu', 'gio@iastate.edu'],
                      title="Sustainable Corn"
                      ),
        'td': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
-                          'breinhart3@gmail.com'],
+                          'breinhart3@gmail.com', 'gio@iastate.edu'],
                   title='Transforming Drainage'
                   )
        }
