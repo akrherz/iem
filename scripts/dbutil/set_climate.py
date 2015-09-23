@@ -20,7 +20,8 @@ def do(col):
         st = row[2]
         # Don't attempt to assign a climate_site to sites outside of mainland
         if (col == 'climate_site' and
-                st in ['PR', 'DC', 'GU', 'PU', 'P1', 'P3', 'P4', 'P5']):
+                st in ['PR', 'DC', 'GU', 'PU', 'P1', 'P2', 'P3', 'P4', 'P5',
+                       'VI']):
             continue
         # Find the closest site
         if col == 'climate_site':
