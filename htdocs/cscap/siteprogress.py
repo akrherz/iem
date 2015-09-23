@@ -113,7 +113,7 @@ if __name__ == '__main__':
     <p><strong>Which statuses to show?</strong> &nbsp;
     <input type="hidden" name="a" value="b">
     <input type="checkbox" name="has" value="1"%s>has data &nbsp;
-    <input type="checkbox" name="period" value="1"%s>periods &nbsp;
+    <input type="checkbox" name="period" value="1"%s>periods (missing) &nbsp;
     <input type="checkbox" name="dnc" value="1"%s>did not collect &nbsp;
     <input type="checkbox" name="no" value="1"%s>no entry / empty &nbsp;
     <input type="submit" value="Update Page">
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     </form>
     <p><span>Key:</span>
     <span class="btn btn-success">has data</span>
-    <span class="btn btn-info">periods</span>
+    <span class="btn btn-info">periods (missing)</span>
     <span class="btn btn-warning">did not collect</span>
     <span class="btn btn-danger">no entry / empty</span>
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     <th width="20%%">SiteID</th>
     <th width="60%%">Progress</th>
     <th width="10%%">Count</th>
-    <th width="10%%">Percent Done (green + orange)</th>
+    <th width="10%%">Percent Done</th>
 </tr></thead>
     """ % ('' if not show_has else ' checked="checked"',
            '' if not show_period else ' checked="checked"',
