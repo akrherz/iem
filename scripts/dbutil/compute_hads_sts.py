@@ -21,9 +21,7 @@ def do(network, sid):
             return minv
 
 
-def main(argv):
-    """Go main Go"""
-    network = argv[1]
+def do_network(network):
     nt = NetworkTable(network)
     for sid in nt.sts.keys():
         sts = do(network, sid)
@@ -41,6 +39,25 @@ def main(argv):
             WHERE id = %s and network = %s""", (sts, sid, network))
             cursor.close()
             MESOSITEDB.commit()
+
+
+def main(argv):
+    """Go main Go"""
+    if len(argv) == 1:
+        # If we run without args, we pick a "random" network!
+        cursor = MESOSITEDB.cursor()
+        cursor.execute("""
+            SELECT id from networks where id ~* 'DCP'
+            ORDER by id ASC
+        """)
+        networks = []
+        for row in cursor:
+            networks.append(row[0])
+        network = networks[365 % len(networks)]
+        print("dbutil/compute_hads_sts.py auto-picked %s" % (network, ))
+    else:
+        network = argv[1]
+    do_network(network)
 
 if __name__ == '__main__':
     main(sys.argv)
