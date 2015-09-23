@@ -11,6 +11,7 @@ import datetime
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 CACHEDIR = "/mesonet/share/windrose/climate/yearly"
 
+
 def do_network(network):
     """Process a network"""
     # Update the STS while we are at it, this will help the database get
@@ -19,6 +20,7 @@ def do_network(network):
                     shell=True)
     subprocess.call("python drive_network_windrose.py %s" % (network,),
                     shell=True)
+
 
 def main():
     """Main"""

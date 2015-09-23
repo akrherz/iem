@@ -10,7 +10,7 @@ from twisted.internet.task import LoopingCall
 from twisted.python import log
 import secret
 import re
-import mx.DateTime
+import datetime
 import pyiem.nwnformat as nwnformat
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
@@ -80,7 +80,7 @@ def saveData(txn):
     """
     Save data to the IEM database
     """
-    timer_start = mx.DateTime.now()
+    timer_start = datetime.datetime.now()
     updates = 0
     skips = 0
     # need to call keys() as DB is voliatle
@@ -116,9 +116,10 @@ def saveData(txn):
         val.xsped = 0
         del(iem)
 
-    timer_end = mx.DateTime.now()
-    print "Time: %.2fs Updates: %s Skips: %s" % (timer_end - timer_start,
-                                                 updates, skips)
+    timer_end = datetime.datetime.now()
+    print(("Time: %.2fs Updates: %s Skips: %s"
+           ) % ((timer_end - timer_start).total_seconds(),
+                updates, skips))
 
 application = service.Application("NWN 2 DB")
 serviceCollection = service.IServiceCollection(application)
