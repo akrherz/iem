@@ -1,17 +1,19 @@
 """ Create a simple prinout of observation quanity in the database """
+import numpy as np
 import datetime
-now = datetime.datetime.utcnow()
-import numpy
-counts = numpy.zeros((120,12))
-mslp = numpy.zeros((120,12))
-metar = numpy.zeros((120,12))
-
 import psycopg2
+import sys
+
+now = datetime.datetime.utcnow()
+counts = np.zeros((120, 12))
+mslp = np.zeros((120, 12))
+metar = np.zeros((120, 12))
+
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
-import sys
 stid = sys.argv[1]
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -29,10 +31,10 @@ acursor.execute("""SELECT extract(year from valid) as yr,
  station = %s GROUP by yr, mo ORDER by yr ASC, mo ASC""", (stid,))
 
 for row in acursor:
-    counts[int(row[0]-1900),int(row[1]-1)] = row[2]
-    mslp[int(row[0]-1900),int(row[1]-1)] = row[3]
-    metar[int(row[0]-1900),int(row[1]-1)] = row[4]
-    
+    counts[int(row[0]-1900), int(row[1]-1)] = row[2]
+    mslp[int(row[0]-1900), int(row[1]-1)] = row[3]
+    metar[int(row[0]-1900), int(row[1]-1)] = row[4]
+
 
 def d(hits, total):
     if total == 0:
@@ -50,30 +52,32 @@ for i in range(120):
     year = 1900 + i
     if year > now.year:
         continue
-    if not output and numpy.max(counts[i,:]) == 0:
+    if not output and np.max(counts[i, :]) == 0:
         continue
     output = True
-    
+
     if len(sys.argv) < 3:
-        print "%s %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i" % (year,
-                counts[i,0],counts[i,1],counts[i,2],counts[i,3],
-                counts[i,4],counts[i,5],counts[i,6],counts[i,7],
-                counts[i,8],counts[i,9],counts[i,10],counts[i,11])
+        print(("%s %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i"
+               ) % (year,
+                    counts[i, 0], counts[i, 1], counts[i, 2], counts[i, 3],
+                    counts[i, 4], counts[i, 5], counts[i, 6], counts[i, 7],
+                    counts[i, 8], counts[i, 9], counts[i, 10], counts[i, 11]))
     else:
         if sys.argv[2] == 'metar':
             data = metar
         else:
             data = mslp
-        print "%s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s" % (year,
-                d(data[i,0], counts[i,0]),
-                d(data[i,1], counts[i,1]),
-                d(data[i,2], counts[i,2]),
-                d(data[i,3], counts[i,3]),
-                d(data[i,4], counts[i,4]),
-                d(data[i,5], counts[i,5]),
-                d(data[i,6], counts[i,6]),
-                d(data[i,7], counts[i,7]),
-                d(data[i,8], counts[i,8]),
-                d(data[i,9], counts[i,9]),
-                d(data[i,10], counts[i,10]),
-                d(data[i,11], counts[i,11]))
+        print(("%s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s"
+               ) % (year,
+                    d(data[i, 0], counts[i, 0]),
+                    d(data[i, 1], counts[i, 1]),
+                    d(data[i, 2], counts[i, 2]),
+                    d(data[i, 3], counts[i, 3]),
+                    d(data[i, 4], counts[i, 4]),
+                    d(data[i, 5], counts[i, 5]),
+                    d(data[i, 6], counts[i, 6]),
+                    d(data[i, 7], counts[i, 7]),
+                    d(data[i, 8], counts[i, 8]),
+                    d(data[i, 9], counts[i, 9]),
+                    d(data[i, 10], counts[i, 10]),
+                    d(data[i, 11], counts[i, 11])))

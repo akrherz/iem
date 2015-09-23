@@ -1,7 +1,7 @@
-'''
+"""
  Reprocess RAW METAR data stored in the database, so to include more fields
-'''
-from metar import Metar
+"""
+from metar.metar import Metar
 import psycopg2
 import mx.DateTime
 
@@ -10,22 +10,21 @@ icursor = IEM.cursor()
 icursor.execute("SET TIME ZONE 'GMT'")
 icursor2 = IEM.cursor()
 
-sts = mx.DateTime.DateTime(2011,1,1)
-ets = mx.DateTime.DateTime(2012,1,1)
+sts = mx.DateTime.DateTime(2011, 1, 1)
+ets = mx.DateTime.DateTime(2012, 1, 1)
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = sts
 while now < ets:
     icursor.execute("""
-  select valid, station, metar from t%s 
+  select valid, station, metar from t%s
   where metar is not null and valid >= '%s' and valid < '%s'
-    """ % (now.year, now.strftime("%Y-%m-%d"), 
-    (now+interval).strftime("%Y-%m-%d")))
+    """ % (now.year, now.strftime("%Y-%m-%d"),
+           (now+interval).strftime("%Y-%m-%d")))
     total = 0
     for row in icursor:
         try:
-            mtr = Metar.Metar(row[2], row[0].month, row[0].year)
+            mtr = Metar(row[2], row[0].month, row[0].year)
         except:
-            #print 'Error', row
             continue
         sql = 'update t%s SET ' % (now.year,)
         if mtr.max_temp_6hr:
@@ -34,7 +33,7 @@ while now < ets:
             sql += "min_tmpf_6hr = %s," % (mtr.min_temp_6hr.value("F"),)
         if mtr.max_temp_24hr:
             sql += "max_tmpf_24hr = %s," % (mtr.max_temp_24hr.value("F"),)
-        if mtr.min_temp_24hr: 
+        if mtr.min_temp_24hr:
             sql += "min_tmpf_24hr = %s," % (mtr.min_temp_24hr.value("F"),)
         if mtr.precip_3hr:
             sql += "p03i = %s," % (mtr.precip_3hr.value("IN"),)
@@ -47,15 +46,15 @@ while now < ets:
         if mtr.weather:
             pwx = []
             for x in mtr.weather:
-                pwx.append( ("").join([a for a in x if a is not None]) )
+                pwx.append(("").join([a for a in x if a is not None]))
             sql += "presentwx = '%s'," % ((",".join(pwx))[:24], )
         if sql == "update t%s SET " % (now.year,):
             continue
         sql = "%s WHERE station = '%s' and valid = '%s'" % (sql[:-1], row[1],
-                                                    row[0])
-        #print sql
+                                                            row[0])
+        # print sql
         icursor2.execute(sql)
-        total += 1 
+        total += 1
         if total % 1000 == 0:
             print 'Done', total, now
             IEM.commit()
