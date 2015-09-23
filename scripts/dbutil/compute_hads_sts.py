@@ -11,18 +11,14 @@ MESOSITEDB = psycopg2.connect(database='mesosite', host='iemdb')
 
 def do(network, sid):
     cursor = HADSDB.cursor()
-    running = None
-    # We work backwards
-    for yr in range(THISYEAR, 2001, -1):
+    for yr in range(2002, THISYEAR + 1):
         cursor.execute("""
             SELECT min(valid) from raw""" + str(yr) + """
             WHERE station = %s
         """, (sid,))
         minv = cursor.fetchone()[0]
-        if minv is None:
-            return running
-        running = minv
-    return running
+        if minv is not None:
+            return minv
 
 
 def main(argv):
