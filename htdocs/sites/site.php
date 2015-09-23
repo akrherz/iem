@@ -6,7 +6,12 @@ include("../../include/myview.php");
 include("setup.php");
 
 $alertmsg = "";
-if (isset($_GET["lat"]) && $_GET["lat"] != "move marker" && floatval($_GET["lat"]) != 0){
+if (isset($_GET["lat"]) &&
+		$_GET["lat"] != "move marker" &&
+		floatval($_GET["lat"]) != 0 &&
+		floatval($_GET["lat"]) != -1 &&
+		floatval($_GET["lon"]) != 0 &&
+		floatval($_GET["lon"]) != -1){
 	$newlat = floatval($_GET["lat"]);
 	$newlon = floatval($_GET["lon"]);
 	$email = isset($_GET["email"]) ? $_GET["email"]: 'n/a';
