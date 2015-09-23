@@ -8,6 +8,3 @@ python to_iemaccess.py
 
 cd ../../outgoing
 python network2wxc.py APRSWXNET bogus &
-
-cd ../snet
-./RUN.csh

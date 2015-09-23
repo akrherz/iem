@@ -2,11 +2,11 @@
   Process that would continually monitor for interesting stuff!!
 """
 from pyiem.network import Table as NetworkTable
-nt = NetworkTable(("KCCI", "KIMT", "KELO"))
 import psycopg2
 import os
 import sys
 import time
+nt = NetworkTable(("KCCI", "KIMT", "KELO"))
 
 # Write PID
 o = open('data_monitor.pid', 'w')

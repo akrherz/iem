@@ -4,7 +4,8 @@
 
 # Make sure the PID exists before attempting to kill it!
 if [ -e snet2access.pid ]; then
-	kill -9 `cat snet2access.pid`	
+	kill -9 `cat snet2access.pid`
+	rm -f snet2access.pid
 fi
 sleep 1
 twistd --pidfile=snet2access.pid --logfile=/mesonet/data/logs/snet2access.log -y snet2access.py
