@@ -19,10 +19,9 @@ for row in mcursor:
     network = row[2]
     # Look for matching WFO
     mcursor2.execute("""
-    select c.wfo
+    select c.wfo, ST_Distance(c.the_geom, s.geom) as dist
     from stations s, cwa c WHERE
-    s.geom && c.the_geom and ST_contains(c.the_geom, s.geom)
-    and iemid = %s
+    iemid = %s ORDER by dist ASC LIMIT 1
     """, (iemid, ))
     if mcursor2.rowcount > 0:
         row2 = mcursor2.fetchone()
