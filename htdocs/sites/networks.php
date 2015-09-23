@@ -187,7 +187,6 @@ of the networks listed below.  If there is a particular format for a station
 table that you need, please <a href="/info/contacts.php">let us know</a>.</p>
 
 <form method="GET" action="networks.php" name="networkSelect">
-{$sextra}
 <table>
 <tr>
   <th>Select Observing Network:</th>
