@@ -26,6 +26,7 @@ python warn_cache.py &
 cd ../dbutil
 python clean_afos.py
 python unknown_hads.py
+python compute_hads_sts.py
 
 cd ../qc
 python hads_nwsli_squawk.py
