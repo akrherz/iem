@@ -4,6 +4,7 @@
 import psycopg2.extras
 import numpy as np
 import datetime
+import calendar
 from pyiem.network import Table as NetworkTable
 
 
@@ -38,12 +39,14 @@ def plotter(fdict):
     station = fdict.get('station', 'IA0200')
     year = int(fdict.get('year', 2014))
     month = int(fdict.get('month', 11))
-
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     thismonth = datetime.date.today()
     oldmonth = datetime.date(year, month, 1)
+    sts = datetime.date(thismonth.year, thismonth.month, 1)
+    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+    days = int((ets - sts).days)
 
     # beat month
     cursor.execute("""SELECT extract(day from day), (high+low)/2. from
@@ -57,14 +60,15 @@ def plotter(fdict):
 
     # build history
     cursor.execute("""SELECT year, day, (high+low)/2. from
-    """+table+""" WHERE station = %s and month = %s
+    """+table+""" WHERE station = %s and month = %s and
+    extract(day from day) <= %s
     ORDER by day ASC
-    """, (station, thismonth.month))
+    """, (station, thismonth.month, days))
 
     for i, row in enumerate(cursor):
         if i == 0:
             baseyear = row[0]
-            data = np.ones((thismonth.year - row[0] + 1, 31)) * -99
+            data = np.ones((thismonth.year - row[0] + 1, days)) * -99
         data[row[0]-baseyear, row[1].day-1] = row[2]
 
     # overwrite our current month's data
@@ -88,19 +92,22 @@ def plotter(fdict):
     # this looks like a bug, but is legit
     ax.plot(np.arange(1, thismonth.day), avgs[-2, :thismonth.day-1], zorder=2,
             lw=2, color='brown',
-            label="%s, %.2f$^\circ$F" % (thismonth.strftime("%b %Y"),
-                                         avgs[-2, thismonth.day-1]))
+            label="%s %s, %.2f$^\circ$F" % (
+                calendar.month_abbr[thismonth.month], thismonth.year,
+                avgs[-2, thismonth.day-1]))
     ax.plot(np.arange(1, len(prevavg)+1), prevavg, lw=2, color='k', zorder=3,
-            label="%s, %.2f$^\circ$F" % (oldmonth.strftime("%b %Y"),
-                                         prevavg[-1]))
+            label="%s %s, %.2f$^\circ$F" % (
+                calendar.month_abbr[oldmonth.month], oldmonth.year,
+                prevavg[-1]))
 
     ax.set_title(("[%s] %s scenarios for %s\n"
-                  "1-%s [%s] + %s-%s [%s-%s] beats %s %s/%s (%.1f%%)"
+                  "1-%s [%s] + %s-%s [%s-%s] beats %s %s %s/%s (%.1f%%)"
                   ) % (station,
                        nt.sts[station]['name'], thismonth.strftime("%b %Y"),
                        thismonth.day, thismonth.year,
                        thismonth.day + 1, days, baseyear, thismonth.year - 1,
-                       oldmonth.strftime("%b %Y"), beats, np.shape(data)[0]-1,
+                       calendar.month_abbr[oldmonth.month], oldmonth.year,
+                       beats, np.shape(data)[0]-1,
                        beats / float(np.shape(data)[0]-1) * 100.))
     ax.set_xlim(1, days)
     ax.set_ylabel("Month to Date Average Temp $^\circ$F")
