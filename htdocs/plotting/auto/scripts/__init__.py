@@ -76,7 +76,7 @@ data = {'plots': [
         {'id': "98", 'mw': True,
          'label': "Day of Month Frequency of meeting temp/precip threshold"},
         {'id': '65', 'mw': True,
-         'label': 'Day of the Month with the coldest temperature'},
+         'label': 'Day of the Month with the coldest/warmest temperature'},
         {'id': "29",
          'label': "Frequency of Hourly Temperature within Range by Month"},
         {'id': "1", 'mw': True,
