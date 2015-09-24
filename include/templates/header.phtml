@@ -4,7 +4,7 @@ $refresh = array_key_exists('refresh', $this->vars)? $this->refresh : '';
 $headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
 if (array_key_exists('iemss', $this->vars)){
   $headextra .= <<<EOF
-<link rel="stylesheet" href="/vendor/openlayers/3.8.2/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/3.9.0/ol.css" type="text/css">
 EOF;
 }
 $bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';

@@ -1,4 +1,5 @@
 <?php
+$OL = "3.9.0";
 include("../../config/settings.inc.php");
 define("IEM_APPID", 95);
 include("../../include/myview.php");
@@ -20,16 +21,16 @@ $t = new MyView();
  $t->title =  "Current + Live Web Camera Shots";
  $t->thispage = "webcam-viewer";
  $t->jsextra = <<<EOF
- <script src='/vendor/openlayers/3.8.2/ol.js'></script>
- <script src='/vendor/openlayers/3.8.2/ol3-layerswitcher.js'></script>
+ <script src='/vendor/openlayers/{$OL}/ol.js'></script>
+ <script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
  <script>
  	var cameraID = "{$id}";
  </script>
  <script src='viewer.js'></script>
 EOF;
  $t->headextra = <<<EOF
-<link rel="stylesheet" href="/vendor/openlayers/3.8.2/ol.css" type="text/css">
-<link rel="stylesheet" href="/vendor/openlayers/3.8.2/ol3-layerswitcher.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" type="text/css">
 EOF;
  
 
