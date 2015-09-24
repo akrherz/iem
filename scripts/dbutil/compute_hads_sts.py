@@ -53,7 +53,8 @@ def main(argv):
         networks = []
         for row in cursor:
             networks.append(row[0])
-        network = networks[365 % len(networks)]
+        jday = int(datetime.date.today().strftime("%j"))
+        network = networks[jday % len(networks)]
         print("dbutil/compute_hads_sts.py auto-picked %s" % (network, ))
     else:
         network = argv[1]
