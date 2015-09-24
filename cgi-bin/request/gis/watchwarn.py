@@ -8,8 +8,6 @@ import os
 import shutil
 import cgi
 import pytz
-#import cgitb
-#cgitb.enable()
 import sys
 import datetime
 from osgeo import ogr
@@ -19,7 +17,7 @@ source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody")
 
 # Get CGI vars
 form = cgi.FormContent()
-if form.has_key('year'):
+if 'year' in form:
     year1 = int(form["year"][0])
     year2 = int(form["year"][0])
 else:
@@ -27,9 +25,9 @@ else:
     year2 = int(form["year2"][0])
 
 month1 = int(form["month1"][0])
-if not form.has_key("month2"):
+if 'month2' not in form:
     sys.exit()
-if year1 < 1986 or year1 > now.year: 
+if year1 < 1986 or year1 > now.year:
     sys.exit()
 month2 = int(form["month2"][0])
 day1 = int(form["day1"][0])
@@ -45,19 +43,19 @@ eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
 eTS = eTS.replace(tzinfo=pytz.timezone("UTC"))
 
 wfoLimiter = ""
-if form.has_key('wfo[]'):
+if 'wfo[]' in form:
     aWFO = form['wfo[]']
-    aWFO.append('XXX') # Hack to make next section work
+    aWFO.append('XXX')  # Hack to make next section work
     if 'ALL' not in aWFO:
-        wfoLimiter = " and w.wfo in %s " % ( str( tuple(aWFO) ), )
+        wfoLimiter = " and w.wfo in %s " % (str(tuple(aWFO)), )
 
-if form.has_key('wfos[]'):
+if 'wfos[]' in form:
     aWFO = form['wfos[]']
-    aWFO.append('XXX') # Hack to make next section work
+    aWFO.append('XXX')  # Hack to make next section work
     if 'ALL' not in aWFO:
-        wfoLimiter = " and w.wfo in %s " % ( str( tuple(aWFO) ), )
+        wfoLimiter = " and w.wfo in %s " % (str(tuple(aWFO)), )
 
-fp = "wwa_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
+fp = "wwa_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M"))
 timeopt = int(form.get('timeopt', [1])[0])
 if timeopt == 2:
     year3 = int(form['year3'][0])
@@ -74,55 +72,56 @@ for suffix in ['shp', 'shx', 'dbf']:
     if os.path.isfile("%s.%s" % (fp, suffix)):
         os.remove("%s.%s" % (fp, suffix))
 
-out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+out_driver = ogr.GetDriverByName('ESRI Shapefile')
 out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
 out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
-fd = ogr.FieldDefn('WFO',ogr.OFTString)
+fd = ogr.FieldDefn('WFO', ogr.OFTString)
 fd.SetWidth(3)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('ISSUED',ogr.OFTString)
+fd = ogr.FieldDefn('ISSUED', ogr.OFTString)
 fd.SetWidth(12)
 
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('EXPIRED',ogr.OFTString)
+fd = ogr.FieldDefn('EXPIRED', ogr.OFTString)
 fd.SetWidth(12)
 
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('INIT_ISS',ogr.OFTString)
+fd = ogr.FieldDefn('INIT_ISS', ogr.OFTString)
 fd.SetWidth(12)
 
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('INIT_EXP',ogr.OFTString)
+fd = ogr.FieldDefn('INIT_EXP', ogr.OFTString)
 fd.SetWidth(12)
 
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('PHENOM',ogr.OFTString)
+fd = ogr.FieldDefn('PHENOM', ogr.OFTString)
 fd.SetWidth(2)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('GTYPE',ogr.OFTString)
+fd = ogr.FieldDefn('GTYPE', ogr.OFTString)
 fd.SetWidth(1)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('SIG',ogr.OFTString)
+fd = ogr.FieldDefn('SIG', ogr.OFTString)
 fd.SetWidth(1)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('ETN',ogr.OFTString)
+fd = ogr.FieldDefn('ETN', ogr.OFTString)
 fd.SetWidth(4)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('STATUS',ogr.OFTString)
+fd = ogr.FieldDefn('STATUS', ogr.OFTString)
 fd.SetWidth(3)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('NWS_UGC',ogr.OFTString)
+fd = ogr.FieldDefn('NWS_UGC', ogr.OFTString)
 fd.SetWidth(6)
 out_layer.CreateField(fd)
-fd = ogr.FieldDefn('AREA_KM2',ogr.OFTReal)
+fd = ogr.FieldDefn('AREA_KM2', ogr.OFTReal)
 fd.SetPrecision(2)
 out_layer.CreateField(fd)
 
 limiter = ""
-if form.has_key("limit0"):
-    limiter += " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
+if 'limit0' in form:
+    limiter += (
+        " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' ")
 
-sbwlimiter = " WHERE gtype = 'P' " if form.has_key("limit1") else ""
+sbwlimiter = " WHERE gtype = 'P' " if 'limit1' in form else ""
 
 table1 = "warnings"
 table2 = "sbw"
@@ -134,7 +133,7 @@ if sTS.year == eTS.year:
         table2 = 'sbw_2014'
 
 geomcol = "geom"
-if form.has_key('simple') and form['simple'][0] == 'yes':
+if 'simple' in form and form['simple'][0] == 'yes':
     geomcol = "simple_geom"
 
 cols = """%s, gtype, significance, wfo, status, eventid, ugc, phenomena,
@@ -142,14 +141,14 @@ cols = """%s, gtype, significance, wfo, status, eventid, ugc, phenomena,
 
 timelimit = "issue >= '%s' and issue < '%s'" % (sTS, eTS)
 if timeopt == 2:
-    timelimit = "issue <= '%s' and issue > '%s' and expire > '%s'" % (sTS, 
-            sTS + datetime.timedelta(days=-30), sTS)
+    timelimit = "issue <= '%s' and issue > '%s' and expire > '%s'" % (
+        sTS, sTS + datetime.timedelta(days=-30), sTS)
 
 sql = """
 WITH stormbased as (
- SELECT geom, 'P'::text as gtype, significance, wfo, status, eventid, 
+ SELECT geom, 'P'::text as gtype, significance, wfo, status, eventid,
  ''::text as ugc,
- phenomena, geom as simple_geom,  
+ phenomena, geom as simple_geom,
  ST_area( ST_transform(w.geom,2163) ) / 1000000.0 as area2d,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
@@ -158,7 +157,8 @@ WITH stormbased as (
  from %s w WHERE status = 'NEW' and %s %s %s
 ),
 countybased as (
- SELECT u.simple_geom as simple_geom, u.geom as geom, 'C'::text as gtype, significance, 
+ SELECT u.simple_geom as simple_geom, u.geom as geom, 'C'::text as gtype,
+ significance,
  w.wfo, status, eventid, u.ugc, phenomena,
  ST_area( ST_transform(u.geom,2163) ) / 1000000.0 as area2d,
  to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
@@ -169,12 +169,12 @@ countybased as (
  %s %s %s
  )
  SELECT %s from stormbased UNION SELECT %s from countybased %s
-""" % ( table2, timelimit, wfoLimiter, limiter,
-        table1, timelimit, wfoLimiter, limiter,
+""" % (table2, timelimit, wfoLimiter, limiter,
+       table1, timelimit, wfoLimiter, limiter,
        cols, cols, sbwlimiter)
-#print 'Content-type: text/plain\n'
-#print sql
-#sys.exit()
+# print 'Content-type: text/plain\n'
+# print sql
+# sys.exit()
 data = source.ExecuteSQL(sql)
 
 while True:
@@ -196,8 +196,9 @@ while True:
     featDef.SetField('STATUS', feat.GetField("status"))
     featDef.SetField('NWS_UGC', feat.GetField("ugc"))
     featDef.SetField('AREA_KM2', feat.GetField("area2d"))
-    if ((feat.GetField("significance") is None or 
-        feat.GetField("significance") == "") and feat.GetField("phenomena") == 'FF'):
+    if ((feat.GetField("significance") is None or
+            feat.GetField("significance") == "") and
+            feat.GetField("phenomena") == 'FF'):
         featDef.SetField('SIG', 'W')
         featDef.SetField('ETN', "-1")
         featDef.SetField('STATUS', "ZZZ")
@@ -209,7 +210,8 @@ source.Destroy()
 out_ds.Destroy()
 
 # Create zip file, send it back to the clients
-shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", fp+".prj")
+shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj",
+                fp+".prj")
 z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
 z.write(fp+".shp")
 z.write(fp+".shx")
@@ -218,11 +220,9 @@ z.write(fp+".prj")
 z.close()
 
 sys.stdout.write("Content-type: application/octet-stream\n")
-sys.stdout.write("Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,))
-
-sys.stdout.write( file(fp+".zip", 'r').read() )
+sys.stdout.write(
+    "Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,))
+sys.stdout.write(file(fp+".zip", 'r').read())
 
 for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
     os.remove("%s.%s" % (fp, suffix))
-
-# END
