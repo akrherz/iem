@@ -6,8 +6,8 @@ define("IEM_APPID", 146);
 $t = new MyView();
 $t->thispage = "archive-raob";
 $t->jsextra=<<<EOF
-<script src='http://code.jquery.com/ui/1.10.3/jquery-ui.js'></script>
-<script src='timepicker.js'></script>
+<script src='/assets/jquery-ui/1.11.4/jquery-ui.min.js'></script>
+<script src='/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js'></script>
 <script type="text/javascript">
 $(function(){
 	$("#startdate").datetimepicker({
@@ -24,22 +24,9 @@ $(function(){
 </script>
 EOF;
 $t->headextra= <<<EOF
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
-<style>
-/* css for timepicker */
-.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
-.ui-timepicker-div dl { text-align: left; }
-.ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
-.ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
-.ui-timepicker-div td { font-size: 90%; }
-.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
-
-.ui-timepicker-rtl{ direction: rtl; }
-.ui-timepicker-rtl dl { text-align: right; }
-.ui-timepicker-rtl dl dd { margin: 0 65px 10px 10px; }
-</style>
-
-		
+<link rel="stylesheet" href="/assets/jquery-ui/1.11.4/jquery-ui.min.css">
+<link rel="stylesheet" href="/assets/jquery-ui/1.11.4/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css">		
 EOF;
 $t->title = "Rawinsonde Data Archive";
 $nselect = networkSelect("RAOB", "OAX");
