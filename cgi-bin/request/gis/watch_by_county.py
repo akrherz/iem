@@ -10,7 +10,7 @@ from osgeo import ogr
 
 # Get CGI vars
 form = cgi.FormContent()
-if form.has_key("year"):
+if "year" in form:
     year = int(form["year"][0])
     month = int(form["month"][0])
     day = int(form["day"][0])
@@ -22,10 +22,10 @@ else:
     ts = datetime.datetime.utcnow()
     fp = "watch_by_county"
 
-if form.has_key("etn"):
-    etnLimiter = "and eventid = %s" % ( int(form["etn"][0]), )
-    fp = "watch_by_county_%s_%s" % (ts.strftime("%Y%m%d%H%M"), 
-                                  int(form["etn"][0]))
+if "etn" in form:
+    etnLimiter = "and eventid = %s" % (int(form["etn"][0]), )
+    fp = "watch_by_county_%s_%s" % (ts.strftime("%Y%m%d%H%M"),
+                                    int(form["etn"][0]))
 else:
     etnLimiter = ""
 
@@ -35,46 +35,48 @@ for suffix in ['shp', 'shx', 'dbf']:
         os.remove("%s.%s" % (fp, suffix))
 
 table = "warnings_%s" % (ts.year, )
-source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=%s(tgeom)" % (
-                                                                table,))
+source = ogr.Open(
+    "PG:host=iemdb dbname=postgis user=nobody tables=%s(tgeom)" % (table,))
 
-out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+out_driver = ogr.GetDriverByName('ESRI Shapefile')
 out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
 out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
-fd = ogr.FieldDefn('ISSUED',ogr.OFTString)
+fd = ogr.FieldDefn('ISSUED', ogr.OFTString)
 fd.SetWidth(12)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('EXPIRED',ogr.OFTString)
+fd = ogr.FieldDefn('EXPIRED', ogr.OFTString)
 fd.SetWidth(12)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('PHENOM',ogr.OFTString)
+fd = ogr.FieldDefn('PHENOM', ogr.OFTString)
 fd.SetWidth(2)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('SIG',ogr.OFTString)
+fd = ogr.FieldDefn('SIG', ogr.OFTString)
 fd.SetWidth(1)
 out_layer.CreateField(fd)
 
-fd = ogr.FieldDefn('ETN',ogr.OFTInteger)
+fd = ogr.FieldDefn('ETN', ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-sql = """select phenomena, eventid, ST_multi(ST_union(u.geom)) as tgeom, 
-        max(to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcexpire,
-        min(to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcissue
-       from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'A' and 
-       phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 
-       and issue <= '%s' and 
-       expire > '%s' %s GROUP by phenomena, eventid ORDER by phenomena ASC
-       """ % (ts.year, ts.strftime("%Y-%m-%d %H:%M+00"), 
-              ts.strftime("%Y-%m-%d %H:%M+00"),
-              ts.strftime("%Y-%m-%d %H:%M+00"), etnLimiter)
+sql = """
+    select phenomena, eventid, ST_multi(ST_union(u.geom)) as tgeom,
+    max(to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcexpire,
+    min(to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcissue
+    from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'A'
+    and phenomena IN ('TO','SV')
+    and issue > '%s'::timestamp -'3 days':: interval
+    and issue <= '%s' and
+    expire > '%s' %s GROUP by phenomena, eventid ORDER by phenomena ASC
+""" % (ts.year, ts.strftime("%Y-%m-%d %H:%M+00"),
+       ts.strftime("%Y-%m-%d %H:%M+00"),
+       ts.strftime("%Y-%m-%d %H:%M+00"), etnLimiter)
 
-#print 'Content-type: text/plain\n'
-#print sql
-#sys.exit()
+# print 'Content-type: text/plain\n'
+# print sql
+# sys.exit()
 data = source.ExecuteSQL(sql)
 
 while True:
@@ -82,10 +84,9 @@ while True:
     if not feat:
         break
     geom = feat.GetGeometryRef()
-    #geom = geom.Simplify(0.001)
-    
+
     featDef = ogr.Feature(out_layer.GetLayerDefn())
-    featDef.SetGeometry( geom )
+    featDef.SetGeometry(geom)
     featDef.SetField('PHENOM', feat.GetField("phenomena"))
     featDef.SetField('SIG', 'A')
     featDef.SetField('ETN', feat.GetField("eventid"))
@@ -98,10 +99,9 @@ while True:
 source.Destroy()
 out_ds.Destroy()
 
-
-
 # Create zip file, send it back to the clients
-shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", fp+".prj")
+shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj",
+                fp+".prj")
 z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
 z.write(fp+".shp")
 z.write(fp+".shx")
@@ -109,11 +109,10 @@ z.write(fp+".dbf")
 z.write(fp+".prj")
 z.close()
 
-print "Content-type: application/octet-stream"
-print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-print
-
-print file(fp+".zip", 'r').read(),
+sys.stdout.write("Content-type: application/octet-stream\n")
+sys.stdout.write(
+    "Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,))
+sys.stdout.write(file(fp+".zip", 'r').read())
 
 os.remove(fp+".zip")
 os.remove(fp+".shp")
