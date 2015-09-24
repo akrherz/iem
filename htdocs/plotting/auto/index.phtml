@@ -193,8 +193,11 @@ EOF;
 		$image = "";
 	} else{
 		$image = <<<EOF
-	<p><span class="glyphicon glyphicon-arrow-down"></span> A graph will appear below this text with your specifications from above:<br >
-	<img src="{$imguri}.png" class="img img-responsive" />
+<div id="willload"><span class="glyphicon glyphicon-arrow-down"></span> 
+<img src="/images/wait24trans.gif" />
+A graph will appear below this text with your specifications from above:
+</div>
+	<img src="{$imguri}.png" class="img img-responsive" id="theimage" />
 EOF;
 	}
 	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
@@ -232,7 +235,8 @@ $t->content = <<<EOF
 <h3>Automated Data Plotter</h3>
 
 <p>This application dynamically generates many types of graphs.  These graphs
-are derived from raw observations collected by the IEM.</p>
+are derived from processing of various data sources done by the IEM.  Please
+feel free to use these generated graphics in whatever way you wish.</p>
 
 <br /><form method="GET" name="t">
 <div class="form-group">
@@ -257,9 +261,10 @@ $image
 
 $dataextra
 		
-<div class="alert alert-info"><span class="glyphicon glyphicon-info-sign"></span>
+<div><span class="glyphicon glyphicon-info-sign"></span>
 		If you notice plotting issues with the image above, please 
-		do <a class="alert-link" href="/info/contacts.php">let us know</a> by providing the 
+		do <a class="alert-link" href="/info/contacts.php">let us know</a>
+		by providing the 
 		URL address currently shown by your web browser.</div>
 
 EOF;
@@ -268,7 +273,10 @@ $t->jsextra = <<<EOF
 <script>
 $(document).ready(function(){
 {$jsextra}
-
+	$('#theimage').on('load', function(){
+		// console.log("load() fired...");
+		$('#willload').css('display', 'none');
+	});
 	$('#_l').change(function(){
 		if($(this).is(":checked")) {
 			$('select option[data-mw="true"]').addClass('hidden');
