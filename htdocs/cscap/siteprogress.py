@@ -45,7 +45,7 @@ def get_data(mode, data, arr):
                 entry['nulls'] += row[4]
                 tot += row[4]
             entry['tot'] += tot
-            entry['all'] = row[5]
+            entry['all'] += row[5]
 
 
 def make_progress(row):
@@ -153,7 +153,7 @@ if __name__ == '__main__':
         row = data[sid]
         sys.stdout.write('<td>%s</td>' % (make_progress(row)))
         sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
-        sys.stdout.write("<td>%.2f%%</td>" % (((row['hits2'] + row['other2']) /
+        sys.stdout.write("<td>%.0f%%</td>" % (((row['hits2'] + row['other2']) /
                                                float(row['all'])) * 100.))
         sys.stdout.write("</tr>\n\n")
     sid = "_ALL"
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     row = data[sid]
     sys.stdout.write('<td>%s</td>' % (make_progress(row)))
     sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
-    sys.stdout.write("<td>%.2f%%</td>" % (((row['hits2'] + row['other2']) /
+    sys.stdout.write("<td>%.0f%%</td>" % (((row['hits2'] + row['other2']) /
                                            float(row['all'])) * 100.))
     sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
