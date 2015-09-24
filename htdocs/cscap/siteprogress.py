@@ -27,8 +27,11 @@ def get_data(mode, data, arr):
     for row in cursor:
         for site in [row[0], '_ALL']:
             entry = data.setdefault(site, dict(hits=0, dots=0, other=0,
-                                               nulls=0, tot=0))
+                                               nulls=0, tot=0, all=0,
+                                               hits2=0, other2=0))
             tot = 0
+            entry['hits2'] += row[1]
+            entry['other2'] += row[3]
             if arr[0]:
                 entry['hits'] += row[1]
                 tot += row[1]
@@ -42,6 +45,7 @@ def get_data(mode, data, arr):
                 entry['nulls'] += row[4]
                 tot += row[4]
             entry['tot'] += tot
+            entry['all'] = row[5]
 
 
 def make_progress(row):
@@ -127,7 +131,8 @@ if __name__ == '__main__':
 
     <p>This page lists the data progress for Agronomic + Soils variables
     collected by the Google Spreadsheets. These values are valid for the
-    duration of the project 2011-2015.</p>
+    duration of the project 2011-2015. This page DOES NOT list data progress
+    for greenhouse gas, drainage, soil moisture, nor pest (IPM) data.</p>
 
 <table class='table table-striped table-bordered'>
 <thead><tr>
@@ -148,15 +153,15 @@ if __name__ == '__main__':
         row = data[sid]
         sys.stdout.write('<td>%s</td>' % (make_progress(row)))
         sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
-        sys.stdout.write("<td>%.2f%%</td>" % (((row['hits'] + row['other']) /
-                                               float(row['tot'])) * 100.))
+        sys.stdout.write("<td>%.2f%%</td>" % (((row['hits2'] + row['other2']) /
+                                               float(row['all'])) * 100.))
         sys.stdout.write("</tr>\n\n")
     sid = "_ALL"
     sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
     row = data[sid]
     sys.stdout.write('<td>%s</td>' % (make_progress(row)))
     sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
-    sys.stdout.write("<td>%.2f%%</td>" % (((row['hits'] + row['other']) /
-                                           float(row['tot'])) * 100.))
+    sys.stdout.write("<td>%.2f%%</td>" % (((row['hits2'] + row['other2']) /
+                                           float(row['all'])) * 100.))
     sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
