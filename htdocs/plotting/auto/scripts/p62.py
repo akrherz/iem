@@ -1,11 +1,6 @@
 import psycopg2.extras
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.colors as mpcolors
 import numpy as np
 import datetime
-import calendar
 from pyiem.network import Table as NetworkTable
 
 
@@ -22,6 +17,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mpcolors
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -52,7 +51,7 @@ def plotter(fdict):
         obs[year-syear, doy + 61] = val
 
     obs.mask = np.where(obs < 0, True, False)
-    #obs[obs == 0] = -1
+    # obs[obs == 0] = -1
 
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
@@ -64,7 +63,8 @@ def plotter(fdict):
                  '') % (station, nt.sts[station]['name'], minyear, eyear))
 
     cmap = plt.get_cmap("jet")
-    norm = mpcolors.BoundaryNorm([0.01,0.1,1,2,3,4,5,6,9,12,15,18,21,24,30,36],
+    norm = mpcolors.BoundaryNorm([0.01, 0.1, 1, 2, 3, 4, 5, 6, 9, 12,
+                                  15, 18, 21, 24, 30, 36],
                                  cmap.N)
     cmap.set_bad('#EEEEEE')
     cmap.set_under('white')
