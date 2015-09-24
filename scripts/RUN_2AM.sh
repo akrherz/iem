@@ -25,11 +25,9 @@ python warn_cache.py &
 
 cd ../dbutil
 python clean_afos.py
-python unknown_hads.py
 python compute_hads_sts.py
-
-cd ../qc
-python hads_nwsli_squawk.py
+python clean_unknown_hads.py
+python unknown_stations.py
 
 cd ../ingestors/cocorahs
 python redo_day.py IA
