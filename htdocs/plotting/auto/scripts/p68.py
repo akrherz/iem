@@ -1,20 +1,19 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
-import pyiem.nws.vtec as vtec
 import numpy as np
-import datetime
 from pyiem.network import Table as NetworkTable
-import calendar
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """This chart shows the number of VTEC phenomena and
     significance combinations issued by a NWS Forecast Office for a given year.
+    Please note that not all current-day VTEC products were started in 2005,
+    some came a few years later.  So numbers in 2005 are not directly
+    comparable to 2015.
     """
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
@@ -25,6 +24,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -61,6 +63,9 @@ def plotter(fdict):
     for row in cursor:
         years.append(int(row[0]))
         count.append(int(row[1]))
+    df = pd.DataFrame(dict(year=pd.Series(years),
+                           count=pd.Series(count),
+                           wfo=pd.Series([station]*len(years))))
 
     ax.bar(np.array(years)-0.4, count, width=0.8, fc='b', ec='b')
     for yr, val in zip(years, count):
@@ -72,4 +77,4 @@ def plotter(fdict):
     ax.grid()
     ax.set_ylabel("Count")
 
-    return fig
+    return fig, df

@@ -1,16 +1,15 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import numpy as np
 from pyiem import network
 import matplotlib.patheffects as PathEffects
 import datetime
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """The frequency of days per year for the current
     year to date period that the high temperature was above average."""
     d['arguments'] = [
@@ -22,6 +21,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -46,7 +48,8 @@ def plotter(fdict):
     for row in ccursor:
         years.append(row['year'])
         data.append(float(row['sum']) / float(row['count']) * 100.)
-
+    df = pd.DataFrame(dict(year=pd.Series(years),
+                           freq=pd.Series(data)))
     data = np.array(data)
     years = np.array(years)
 
@@ -79,4 +82,4 @@ def plotter(fdict):
     sz = len(tokens) / 2
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
-    return fig
+    return fig, df

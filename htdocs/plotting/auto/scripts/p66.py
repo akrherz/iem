@@ -1,16 +1,15 @@
 import psycopg2.extras
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This chart plots the frequency of having a streak
     of days above a given high temperature threshold."""
     d['arguments'] = [
@@ -26,6 +25,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -50,6 +52,8 @@ def plotter(fdict):
     for row in cursor:
         freq[int(row[0]) - 1] = row[1] * 100.
 
+    df = pd.DataFrame(dict(week=pd.Series(np.arange(1, 54)),
+                           freq=pd.Series(freq)))
     fig, ax = plt.subplots(1, 1, sharex=True)
 
     ax.set_title(("[%s] %s\nFrequency of %s Consec Days"
@@ -71,4 +75,4 @@ def plotter(fdict):
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 53)
-    return fig
+    return fig, df
