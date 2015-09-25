@@ -52,7 +52,7 @@ def generate_rr5():
         else:
             precip = "%.2f" % (row[10], )
         data += (".A %s %s C DH%s/TA %s%s%s%s%s\n"
-                 ".A1 %s%s%s/PPH %s\n"
+                 ".A1 %s%s%s/PPHRP %s\n"
                  ) % (row[0], row[1].strftime("%Y%m%d"),
                       row[1].strftime("%H%M"), tmpf,
                       mt('TV', row[3], '4', q), mt('TV', row[4], '12', q),
