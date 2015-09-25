@@ -201,6 +201,8 @@ data = {'plots': [
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
         {'id': "80",
          'label': "Time Duration of a Watch/Warning/Advisory for a UGC"},
+        {'id': "101",
+         'label': "Top 25 Most Frequent VTEC Products by Office/NWS"},
         {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
         {'id': "90",
          'label': "UGC Statistics for Watch/Warning/Advisory by state/wfo"},
