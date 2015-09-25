@@ -34,11 +34,11 @@ ax2.set_ylabel("Avg Number of Total Watches per day (dots)", color='r')
 ax.grid(True)
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
 ax.set_title("1997-2014 Storm Prediction Center Watches")
-ax.set_ylabel("Ratio of Severe Tstorm to Tornado Watches (bars)", color='green')
+ax.set_ylabel("Ratio of Severe Tstorm to Tornado Watches (bars)",
+              color='green')
 ax.set_xlim(days[0], days[-1])
 ax2.set_ylim(bottom=0)
 ax2.tick_params(axis='y', colors='red')
 ax.tick_params(axis='y', colors='green')
 
 fig.savefig('test.png')
-

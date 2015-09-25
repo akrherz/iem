@@ -113,7 +113,3 @@ ax3.set_xlim(1950.5,2012.5)
 """
 #ax3.set_xlabel("*2011 total thru 26 July")
 fig.savefig('test.png')
-#import iemplot
-#iemplot.makefeature('test')
-
-

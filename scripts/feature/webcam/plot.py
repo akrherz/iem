@@ -43,6 +43,4 @@ txt = ax.text(1.5, 1.5, "Does a Red Sky predict Precipitation?\n2006-2013 Ames/N
               color='k', fontsize=20, ha='center')
 txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                  foreground="white")])
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

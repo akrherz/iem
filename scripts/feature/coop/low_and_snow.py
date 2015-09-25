@@ -1,5 +1,5 @@
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 ccursor.execute("""
@@ -32,6 +32,4 @@ ax2.set_ylabel("Frequency of Low Temp per Year", color='r')
 ax.set_xlabel("Daily Low Temperature $^{\circ}\mathrm{F}$")
 ax.grid(True)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

@@ -13,7 +13,7 @@ def do(lon, lat):
     loc = ephem.Observer()
     loc.lat = `lat`
     loc.long = `lon`
-    
+
     delta = []
     days = []
     sts = datetime.datetime(2004,1,1)
@@ -60,6 +60,4 @@ ax[1].set_yticks(range(-360,361,60))
 ax[1].set_yticklabels( range(-6,7,1))
 ax[1].set_ylabel("Daily Daylight Change [minutes]", fontsize=10)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

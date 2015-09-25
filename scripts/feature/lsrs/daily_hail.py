@@ -53,6 +53,4 @@ ax.set_xticklabels( ('Jan 1', 'Feb 19', 'Apr 8', 'May 27', 'Jul 15', 'Sep 2', 'O
 ax.set_ylabel("Local Hour")
 ax.set_xlabel("Week of Year")
 fig.colorbar( res )
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

@@ -43,6 +43,4 @@ ax.grid(True)
 ax.set_title("2000-2012 Marshalltown RWIS US-30\nAverage Noon-4 PM Pavement Temperature")
 ax.set_ylabel('Average Temperature $^{\circ}\mathrm{F}$', color='b')
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

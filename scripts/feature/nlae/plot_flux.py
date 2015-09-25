@@ -54,6 +54,4 @@ ax[0].xaxis.set_major_locator(
 ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
 ax[0].set_ylabel("Short Wave Rad $W m^{-2}$")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

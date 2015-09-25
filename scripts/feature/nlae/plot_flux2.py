@@ -64,6 +64,4 @@ ax.grid(True)
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
 ax.set_ylabel("Latent Heat Flux $W m^{-2}$")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

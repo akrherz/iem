@@ -1,8 +1,6 @@
 import matplotlib.colors as mpcolors
 import matplotlib.cm as cm
 import psycopg2
-import datetime
-import subprocess
 import numpy as np
 
 from pyiem.plot import MapPlot

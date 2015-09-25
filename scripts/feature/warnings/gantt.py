@@ -73,6 +73,4 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b',
 ax.grid(True)
 ax2.legend(loc=4, ncol=2)
 fig.tight_layout()
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

@@ -3,6 +3,7 @@ import psycopg2
 pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
 
+
 def getp(phenomena):
     cursor.execute("""
      WITH data as 
@@ -11,10 +12,10 @@ def getp(phenomena):
      from sbw_2014 where status = 'NEW' and issue > '2014-04-27' and
      phenomena in %s) as foo
      GROUP by t),
-     
+
      ts as (select generate_series('2014-04-27 00:00-05'::timestamptz,
       '2014-04-29 05:30-05'::timestamptz, '1 minute'::interval) as t) 
-      
+
      SELECT ts.t, data.count from ts LEFT JOIN data on (data.t = ts.t)
      ORDER by ts.t ASC
     """, (phenomena,))

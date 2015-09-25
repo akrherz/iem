@@ -79,6 +79,4 @@ ax2.set_ylabel("Storm Speed [kts]")
 ax2.grid(True)
 fig.colorbar(res)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
