@@ -4,12 +4,12 @@ import datetime
 import os
 import sys
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 import subprocess
 import pytz
 import psycopg2.extras
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+pgconn = psycopg2.connect(database='iem', host='iemdb')
+icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 fn = None
 for i in range(0, 4):
@@ -160,7 +160,8 @@ for sid in db.keys():
     if db[sid]['subk'] > 0:
         iem.data['rwis_subf'] = temperature(db[sid]['subk'], 'K').value('F')
     if db[sid]['pday'] >= 0:
-        iem.data['pday'] = float(db[sid]['pday']) * (1.00/25.4)
+        iem.data['pday'] = round(distance(db[sid]['pday'], 'MM').value("IN"),
+                                 2)
     if not iem.save(icursor):
         print(("MADIS Extract: %s found new station: %s network: %s"
               "") % (fn.split("/")[-1], sid, db[sid]['network']))
@@ -172,5 +173,5 @@ for sid in db.keys():
     del(iem)
 nc.close()
 icursor.close()
-IEM.commit()
-IEM.close()
+pgconn.commit()
+pgconn.close()

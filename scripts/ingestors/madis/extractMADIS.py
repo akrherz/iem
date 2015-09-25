@@ -8,12 +8,13 @@ import pytz
 import sys
 import psycopg2
 from pyiem.datatypes import temperature
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor()
 import netCDF4
 import numpy as np
 import warnings
 warnings.simplefilter("ignore", UserWarning)
+
+pgconn = psycopg2.connect(database='iem', host='iemdb')
+icursor = pgconn.cursor()
 
 utcnow = datetime.datetime.utcnow()
 for i in range(10):
@@ -91,5 +92,5 @@ for p in range(providers.shape[0]):
 
 nc.close()
 icursor.close()
-IEM.commit()
-IEM.close()
+pgconn.commit()
+pgconn.close()

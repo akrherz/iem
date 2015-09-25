@@ -5,13 +5,14 @@ import os
 import re
 import sys
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor()
 import netCDF4
 import numpy as np
 import datetime
 import pytz
 from pyiem.datatypes import temperature
+
+IEM = psycopg2.connect(database='iem', host='iemdb')
+icursor = IEM.cursor()
 
 now = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
 
@@ -59,27 +60,27 @@ for j in range(ids.shape[0]):
         continue
     if sid[0] == "K":
         ts = datetime.datetime(1971, 1, 1) + datetime.timedelta(
-                                seconds = nc.variables["timeObs"][j])
+                                seconds=nc.variables["timeObs"][j])
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
         (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
         (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
         (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
-        if (not np.ma.is_masked( nc_tmpk[j] ) and 
-            not np.ma.is_masked( tmpkQCD[j,0] ) and 
-            not np.ma.is_masked( tmpkQCD[j,6])):
-            tmpf = check(temperature( nc_tmpk[j], 'K').value('F'))
-            tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[j,0])
-            tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[j,6])
-        if (not np.ma.is_masked( nc_dwpk[j] ) and 
-            not np.ma.is_masked( dwpkQCD[j,0] ) and 
-            not np.ma.is_masked( dwpkQCD[j,6])):
-            dwpf = check(temperature(nc_dwpk[j], 'K' ).value('F'))
-            dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j,0])
-            dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[j,6])
-        if not np.ma.is_masked( nc_alti[j] ):
+        if (not np.ma.is_masked(nc_tmpk[j]) and
+                not np.ma.is_masked(tmpkQCD[j, 0]) and
+                not np.ma.is_masked(tmpkQCD[j, 6])):
+            tmpf = check(temperature(nc_tmpk[j], 'K').value('F'))
+            tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[j, 0])
+            tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[j, 6])
+        if (not np.ma.is_masked(nc_dwpk[j]) and
+                not np.ma.is_masked(dwpkQCD[j, 0]) and
+                not np.ma.is_masked(dwpkQCD[j, 6])):
+            dwpf = check(temperature(nc_dwpk[j], 'K').value('F'))
+            dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j, 0])
+            dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[j, 6])
+        if not np.ma.is_masked(nc_alti[j]):
             alti = check(nc_alti[j] / 100.0 * 0.0295298)
-            alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298)
-            alti_qc_sc = figureAlti(alti, altiQCD[j,6] * 0.0295298)
+            alti_qc_av = figureAlti(alti, altiQCD[j, 0] * 0.0295298)
+            alti_qc_sc = figureAlti(alti, altiQCD[j, 6] * 0.0295298)
         sql = """
             UPDATE %s SET tmpf = %s, tmpf_qc_av = %s,
             tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
