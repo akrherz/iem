@@ -1,10 +1,9 @@
 """Need something to generate a kitchen sink report of Climate Data"""
-import sys
 import constants
 import psycopg2.extras
+from pyiem.network import Table as NetworkTable
 pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-from pyiem.network import Table as NetworkTable
 nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
                    'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
                    'SDCLIMATE', 'NDCLIMATE', 'NECLIMATE', 'KSCLIMATE',
@@ -29,16 +28,16 @@ def metadata(sid, csv):
 def process(sid, csv):
     # Fetch Yearly Totals
     cursor.execute("""
-        SELECT year, round(avg(high)::numeric,1) as avg_high, 
-        round(avg(low)::numeric,1) as avg_low, 
-        round(sum(precip)::numeric,2) as rain from %s 
+        SELECT year, round(avg(high)::numeric,1) as avg_high,
+        round(avg(low)::numeric,1) as avg_low,
+        round(sum(precip)::numeric,2) as rain from %s
         WHERE station = '%s' and year >= %s GROUP by year ORDER by year ASC
     """ % (constants.get_table(sid), sid, constants.startyear(sid)))
 
     data = {}
     for row in cursor:
         year = row["year"]
-        data[year] = {'oHigh': row["avg_high"], 'oLow': row["avg_low"], 
+        data[year] = {'oHigh': row["avg_high"], 'oLow': row["avg_low"],
                       'oRain': row["rain"]}
 
     for i in range(1893, constants._ENDYEAR):
