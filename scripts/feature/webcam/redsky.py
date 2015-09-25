@@ -98,7 +98,7 @@ while now < ets:
     f = Image.open('webcam.jpg' )
     (w,h) = f.size
     (redish,g,b) = f.resize( (1,1), Image.ANTIALIAS).getpixel((0,0))
-    
+
     if redish > 120 and g < 110: # Our arb thresholding
         print 'SET', sunset, redish , w * h,
         output.write('SET,%s,%s,' % (sunset, redish))
@@ -118,8 +118,7 @@ while now < ets:
     if diff > maxv:
         maxv = redish
         os.rename('webcam.jpg', 'max2.jpg')
-    
-    
+
     now += datetime.timedelta(days=1)
 
 output.close()

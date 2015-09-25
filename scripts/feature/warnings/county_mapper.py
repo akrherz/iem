@@ -12,7 +12,7 @@ opts = {'subtitle': "In Tornado, SVR, or Flash Flood Warnings",
         'sdate': datetime.date(1997, 1, 1),
         'edate': datetime.date(2015, 1, 1),
         'normalized': True,
-        'dbcols': ('TO', 'SV', 'FF'),
+        'dbcols': ('TO', 'SV', 'FF')
         }
 opts['title'] = "Yearly Average Minutes"
 opts['years'] = float(opts['edate'].year - opts['sdate'].year)

@@ -1,9 +1,9 @@
-
 from matplotlib import pyplot as plt
 import psycopg2
 import numpy
 POSTGIS = psycopg2.connect(database="postgis", host="iemdb", user='nobody')
 pcursor = POSTGIS.cursor()
+
 
 def get_data(st):
   pcursor.execute("""select extract(year from issued) as yr, count(*) 
@@ -17,6 +17,7 @@ def get_data(st):
     data.append( row[1] )
   print data
   return data
+
 
 def get_total():
   pcursor.execute("""Select extract(year from issued) as year, 
@@ -60,4 +61,3 @@ ax.set_xlim(1996.5,2014.5)
 ax.set_ylabel("Watches Touching Iowa [%]")
 
 fig.savefig("test.png")
-

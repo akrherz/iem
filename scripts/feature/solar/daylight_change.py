@@ -45,6 +45,4 @@ m = MapPlot(sector='midwest', title='21 Jun to 22 Jun 2013 Decrease in Daylight 
 
 m.contourf(iemre.XAXIS, iemre.YAXIS, secs, np.arange(2,6.1,0.25), units='seconds')
 
-m.postprocess(filename='test.svg')
-import iemplot
-iemplot.makefeature('test')
+m.postprocess(filename='test.png')

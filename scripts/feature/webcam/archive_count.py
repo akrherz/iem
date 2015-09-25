@@ -37,6 +37,4 @@ ax.set_ylabel("Webcam Images Saved Per Year [millions]")
 ax.set_xlabel("*2013 total extrapolated")
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

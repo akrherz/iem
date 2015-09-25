@@ -69,6 +69,4 @@ ax.set_ylabel("Reported Hail Size [inch]")
 ax.set_xlabel("Surface Air Temperature $^{\circ}\mathrm{F}$\nwithin ~40 miles and 30 minutes of report")
 ax.set_ylim(0,3)
 ax.legend(loc='best')
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

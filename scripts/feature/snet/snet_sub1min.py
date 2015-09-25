@@ -139,6 +139,4 @@ ax[1].set_ylim(0,361)
 ax[1].set_yticklabels( ['N','E','S','W','N'] )
 ax[2].set_yticks( numpy.arange(1006,1014) )
 ax[2].set_yticklabels( numpy.arange(1006,1015) )
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

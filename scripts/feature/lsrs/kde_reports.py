@@ -10,7 +10,7 @@ cursor = POSTGIS.cursor()
 
 lons = []
 lats = []
-cursor.execute(""" 
+cursor.execute("""
   SELECT x(geom), y(geom), valid,
   x(ST_Transform(geom,2163)), y(ST_Transform(geom,2163)) from lsrs 
   where  typetext = 'HAIL'
@@ -58,9 +58,7 @@ m.pcolormesh(X, Y, Z, numpy.arange(0,0.006,.0003), cmap=plt.cm.gist_earth_r,
 #m.ax.scatter(xs, ys, marker='+', zorder=20, s=100, color='k')
 
 #m.drawcounties()
-m.postprocess(filename='test.svg')
-import iemplot
-iemplot.makefeature('test')
+m.postprocess(filename='test.png')
 
 """
 
