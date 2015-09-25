@@ -68,16 +68,19 @@ for recnum in range(len(providers)):
             continue
     else:
         network = provider2network(thisProvider)
-    mcursor.execute("""SELECT * from stations where id = %s and network = %s""",
-                    (stid, network))
+    mcursor.execute("""
+        SELECT * from stations where id = %s and network = %s
+    """, (stid, network))
     if mcursor.rowcount > 0:
         continue
     print 'Adding network: %s station: %s %s' % (network, stid, name)
-    sql = """INSERT into stations(id, network, synop, country, plot_name,
-    name, state, elevation, online, geom, metasite) VALUES ('%s', '%s', 9999, 'US',
-    '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')""" % (stid,
-    network, name, name, network[:2], elevations[recnum], longitudes[recnum],
-    latitudes[recnum])
+    sql = """
+        INSERT into stations(id, network, synop, country, plot_name,
+        name, state, elevation, online, geom, metasite)
+        VALUES ('%s', '%s', 9999, 'US',
+        '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')
+    """ % (stid, network, name, name, network[:2], elevations[recnum],
+           longitudes[recnum], latitudes[recnum])
     mcursor.execute(sql)
 nc.close()
 mcursor.close()
