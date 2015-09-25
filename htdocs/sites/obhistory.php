@@ -38,14 +38,17 @@ function vis_formatter($val){
 function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
 	return sprintf("<tr style=\"background: %s;\"><td>%s</td><td>%s</td><td>%s</td>
-	<td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-	<td><span class=\"high\">%s</span></td><td><span class=\"low\">%s</span></td><td>%.0f%%</td>
+	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+	<td><span class=\"high\">%s</span></td>
+	<td><span class=\"low\">%s</span></td>
+	<td>%.0f%%</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
 	<tr style=\"background: %s;\" class=\"metar\"><td colspan=\"15\">%s</td></tr>", 
 	($i % 2 == 0)? "#FFF": "#EEE", 
 	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
 	sky_formatter($row), $row["presentwx"], temp_formatter($row["tmpf"]), 
 	temp_formatter($row["dwpf"]),
+	temp_formatter(feels_like($row["tmpf"], $row["dwpf"], $row["sknt"] * 1.15)),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
 	$row["alti"], $row["pres"], $row["phour"], $row["p03i"], $row["p06i"],
@@ -208,13 +211,29 @@ $content .= <<<EOF
 <thead>
 <tr align="center" bgcolor="#b0c4de">
 <th rowspan="3">Time</th>
-<th rowspan="3">Wind<br>(mph)</th><th rowspan="3">Vis.<br>(mi.)</th>
-<th rowspan="3">Sky Cond.<br />(100s ft)</th><th rowspan="3">Present Wx</th>
-<th colspan="4">Temperature (&ordm;F)</th><th rowspan="3">Relative<br>Humidity</th><th colspan="2">Pressure</th><th colspan="3">Precipitation (in.)</th></tr>
-<tr align="center" bgcolor="#b0c4de"><th rowspan="2">Air</th><th rowspan="2">Dwpt</th><th colspan="2">6 hour</th>
-<th rowspan="2">altimeter<br>(in.)</th><th rowspan="2">sea level<br>(mb)</th><th rowspan="2">1 hr</th>
-<th rowspan="2">3 hr</th><th rowspan="2">6 hr</th></tr>
+<th rowspan="3">Wind<br>(mph)</th>
+<th rowspan="3">Vis.<br>(mi.)</th>
+<th rowspan="3">Sky Cond.<br />(100s ft)</th>
+<th rowspan="3">Present Wx</th>
+<th colspan="5">Temperature (&ordm;F)</th>
+<th rowspan="3">Relative<br>Humidity</th>
+<th colspan="2">Pressure</th>
+<th colspan="3">Precipitation (in.)</th></tr>
+
+<tr align="center" bgcolor="#b0c4de">
+<th rowspan="2">Air</th>
+<th rowspan="2">Dwpt</th>
+<th rowspan="2">Feels Like</th>
+<th colspan="2">6 hour</th>
+<th rowspan="2">altimeter<br>(in.)</th>
+<th rowspan="2">sea level<br>(mb)</th>
+<th rowspan="2">1 hr</th>
+<th rowspan="2">3 hr</th>
+<th rowspan="2">6 hr</th>
+</tr>
+
 <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>
+
 </thead>
 <tbody>
 {$table}
