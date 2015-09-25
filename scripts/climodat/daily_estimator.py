@@ -189,9 +189,12 @@ def hardcode(ts):
         """, (HARDCODE[sid], ts))
         if icursor.rowcount == 1:
             row = icursor.fetchone()
-            nt.sts[sid]['high'] = row[0]
-            nt.sts[sid]['low'] = row[1]
-            nt.sts[sid]['precip'] = row[2]
+            if row[0] is not None:
+                nt.sts[sid]['high'] = row[0]
+            if row[1] is not None:
+                nt.sts[sid]['low'] = row[1]
+            if row[2] is not None:
+                nt.sts[sid]['precip'] = row[2]
 
 
 def main():
