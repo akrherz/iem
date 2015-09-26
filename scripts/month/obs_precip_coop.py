@@ -1,18 +1,18 @@
 # Generate a map of this month's observed precip
 
 from pyiem.plot import MapPlot
-
-import mx.DateTime
-now = mx.DateTime.now()
-
 import psycopg2
+
+import datetime
+now = datetime.datetime.now()
+
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """SELECT id,
-    sum(CASE WHEN pday < 0 THEN 0 ELSE pday END) as precip,
-    sum(CASE when pday < 0 THEN 1 ELSE 0 END) as missing,
+    sum(pday) as precip,
+    sum(CASE when pday is null THEN 1 ELSE 0 END) as missing,
     ST_x(s.geom) as lon, ST_y(s.geom) as lat from summary_%s c JOIN stations s
     ON (s.iemid = c.iemid)
     WHERE s.network in ('IA_COOP') and s.iemid = c.iemid and
