@@ -7,6 +7,7 @@ sts = datetime.datetime(2014, 11, 1, 0, 0)
 ets = datetime.datetime(2014, 11, 22, 17, 0)
 interval = datetime.timedelta(hours=1)
 
+
 def do():
     now = sts
     while now < ets:
@@ -18,11 +19,11 @@ def do():
         grbs = pygrib.open(fn)
         try:
             gs = grbs.select(name='2 metre temperature')
-        except:            
+        except:
             print fn
             now += interval
             continue
-        
+
         g = gs[0]['values']
         if now == sts:
             lats,lons = gs[0].latlons()
@@ -32,11 +33,11 @@ def do():
         current = np.where(g < 273, current + 1, 0)
         maxinterval = np.where(current > maxinterval, current, maxinterval)
         now += interval
-    
+
     np.save('maxinterval.npy', np.array(maxinterval))
     np.save('lats.npy', lats)
     np.save('lons.npy', lons)
-        
+
 #do()
 maxinterval = np.load('maxinterval.npy')
 lats = np.load('lats.npy')

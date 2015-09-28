@@ -9,10 +9,11 @@ grb = g[1]
 lats, lons = grb.latlons()
 
 m = MapPlot(sector='conus',
-  title='Weather Prediction Center (WPC) 5 Day Forecasted Precipitation',
-  subtitle='7 PM 18 June thru 7 PM 23 June 2015')
+            title=("Weather Prediction Center (WPC) "
+                   "5 Day Forecasted Precipitation"),
+            subtitle='7 PM 18 June thru 7 PM 23 June 2015')
 
 m.contourf(lons, lats, distance(grb['values'], 'MM').value('IN'),
-           np.arange(0,7.6,0.25), units='inches')
+           np.arange(0, 7.6, 0.25), units='inches')
 
 m.postprocess(filename='test.png')

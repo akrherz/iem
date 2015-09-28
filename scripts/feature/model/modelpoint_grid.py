@@ -11,8 +11,10 @@ icursor = IEM.cursor()
 # GFS has 8 days worth of data
 # NAM has 3.5 days
 PLOTDAYS = 7
-sts = datetime.datetime(2014,9,20,0, tzinfo=pytz.timezone("America/Chicago"))
-#___________________________
+# TODO: this is a bug here
+sts = datetime.datetime(2014, 9, 20, 0,
+                        tzinfo=pytz.timezone("America/Chicago"))
+#
 # No more custom
 MODELDAYS = PLOTDAYS+ 6
 msts = sts - datetime.timedelta(days=8)
@@ -114,6 +116,4 @@ ax.set_ylabel('Model Run')
 
 ax.text(-0.01, 1, "Obs->", ha='right', va='top', transform=ax.transAxes)
 
-import iemplot
-fig.savefig('test.ps')
-iemplot.makefeature('test')
+fig.savefig('test.png')
