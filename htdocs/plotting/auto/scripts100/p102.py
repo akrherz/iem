@@ -12,7 +12,11 @@ def get_description():
     d = dict()
     d['data'] = True
     d['cache'] = 3600
-    d['description'] = """"""
+    d['description'] = """The National Weather Service issues Local Storm
+    Reports (LSRs) with a label associated with each report indicating the
+    source of the report.  This plot summarizes the number of reports
+    received each year by each source type.  The values are the ranks for
+    that year with 1 indicating the largest."""
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
@@ -70,9 +74,12 @@ def plotter(fdict):
     ax2 = ax.twinx()
     # Do last year as right side
     dyear = df[df['yr'] == eyear].sort(['rank'], ascending=True)
-    i = 1
+    i = 0
     y2labels = []
     for _, row in dyear.iterrows():
+        i += 1
+        if i > 20:
+            break
         src = row['src']
         y2labels.append(src)
         if src in ylabels:
@@ -81,9 +88,6 @@ def plotter(fdict):
         d = df[df['src'] == src].sort(['yr'])
         ax.plot(np.array(d['yr']), np.array(d['rank']), lw=2, label=src,
                 marker=MARKERS[i % len(MARKERS)])
-        i += 1
-        if i > 20:
-            break
 
     ax2.set_yticks(range(1, len(y2labels)+1))
     ax2.set_yticklabels(["%s %s" % (i+1, s) for i, s in enumerate(y2labels)])
