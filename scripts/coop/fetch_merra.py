@@ -61,7 +61,6 @@ def do_month(sts):
         if os.path.isfile(fn2):
             os.unlink(fn2)
         subprocess.call("gunzip %s" % (fn, ), shell=True)
-        os.unlink(fn)
 
 
 def main():
