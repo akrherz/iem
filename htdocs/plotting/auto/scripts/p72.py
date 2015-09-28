@@ -1,19 +1,17 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import pyiem.nws.vtec as vtec
 import numpy as np
-import pytz
 from pyiem.network import Table as NetworkTable
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['cache'] = 86400
+    d['data'] = True
     d['description'] = """This chart presents a histogram of issuance times
-    for a given watch, wawrning, or advisory type for a given office."""
+    for a given watch, warning, or advisory type for a given office."""
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
@@ -27,6 +25,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -56,11 +57,13 @@ def plotter(fdict):
     data = np.zeros((24,), 'f')
     for row in cursor:
         data[int(row[0])] = row[1]
+    df = pd.DataFrame(dict(hour=pd.Series(np.arange(24)),
+                           count=pd.Series(data)))
 
-    ax.bar(np.arange(24), data / float(sum(data)) * 100., ec='b', fc='b')
+    ax.bar(np.arange(24) - 0.4, data / float(sum(data)) * 100., ec='b', fc='b')
     ax.grid()
     ax.set_xticks(range(0, 25, 1))
-    ax.set_xlim(0, 24)
+    ax.set_xlim(-0.5, 23.5)
     ax.set_xticklabels(["Mid", "", "", "3 AM", "", "", "6 AM", "", "", '9 AM',
                         "", "", "Noon", "", "", "3 PM", "", "", "6 PM",
                         "", "", "9 PM", "", "", "Mid"])
@@ -69,4 +72,5 @@ def plotter(fdict):
     ax.set_title(("[%s] %s :: Issuance Time Frequency\n%s %s (%s.%s)"
                   ) % (wfo, nt.sts[wfo]['name'], vtec._phenDict[phenomena],
                        vtec._sigDict[significance], phenomena, significance))
-    return fig
+
+    return fig, df
