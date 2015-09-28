@@ -63,6 +63,4 @@ ax.set_yticklabels( ylabels , va='bottom')
 ax.set_title("GFS Model Precipitation Forecast for Des Moines\nSuccessive forecasts made prior to recent snowfall events")
 ax.set_xlabel("Days prior to event, bars normalized for each event")
 fig.tight_layout()
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

@@ -130,6 +130,4 @@ ax2.set_xlabel("Tornado Warn Speed [kts], Slower: %.1f%%" % (slower/float(len(TO
 ax2.set_ylabel("Svr T'storm Warn Speed [kts]")
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

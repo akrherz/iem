@@ -96,6 +96,4 @@ ax.set_xlim(-0.5, 7.5)
 ax.set_title("Des Moines NWS 100% Chance of Precipitation Forecast\nAfternoon ZFP for Polk County 1 Jan 2009 - 18 Feb 2013")
 ax.set_ylabel("Events (out of 1145 forecasts)")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test') 
+fig.savefig('test.png')

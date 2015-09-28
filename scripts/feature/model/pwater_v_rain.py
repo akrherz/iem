@@ -1,8 +1,10 @@
-import iemdb
+import psycopg2
 import numpy.ma
-MOS = iemdb.connect('mos', bypass=True)
+import matplotlib.pyplot as plt
+
+MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
 mcursor = MOS.cursor()
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 # Get rain obs
@@ -12,8 +14,8 @@ ccursor.execute("""
     month = 5 and station = 'IA2203' and precip > 0.001
 """)
 for row in ccursor:
-    obs[ row[0].strftime("%Y%m%d") ] = row[1]
-    
+    obs[row[0].strftime("%Y%m%d") ] = row[1]
+
 # Get pwater
 mcursor.execute("""
     SELECT runtime, pwater from model_gridpoint where station = 'KDSM'
@@ -32,8 +34,7 @@ for row in mcursor:
     total[bin] += 1
     pwater.append( row[1] )
     precip.append( obs.get(row[0].strftime("%Y%m%d"), 0) )
-    
-import matplotlib.pyplot as plt
+
 
 fig, ax = plt.subplots(2, 1)
 hits.mask = numpy.where(hits == 0, True, False)
@@ -68,6 +69,4 @@ ax[1].grid(True)
 ax[1].set_xlim(0,51)
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

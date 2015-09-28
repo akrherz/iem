@@ -53,6 +53,4 @@ ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'
 ax.set_xlabel('*2010 Data Valid Thru 24 October')
 ax.grid(True)
 ax.legend(loc=2)
-import iemplot
-fig.savefig('test.ps')
-iemplot.makefeature('test')
+fig.savefig('test.png')
