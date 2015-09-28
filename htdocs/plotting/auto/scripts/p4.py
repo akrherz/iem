@@ -1,17 +1,8 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-import psycopg2.extras
 import numpy as np
-from scipy import stats
-from pyiem import network
-import matplotlib.patheffects as PathEffects
 import datetime
-import calendar
-import matplotlib.dates as mdates
 import netCDF4
 from pyiem import iemre
+import pandas as pd
 
 STATES = {'IA': 'Iowa',
           'IL': 'Illinois',
@@ -30,9 +21,14 @@ STATES = {'IA': 'Iowa',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
+    d['description'] = """Using the gridded IEM ReAnalysis of daily
+    precipitation.  This chart presents the areal coverage of some trailing
+    number of days precipitation for a state of your choice."""
+    today = datetime.date.today()
     d['arguments'] = [
-        dict(type='text', name='year', default='2014',
-             label='Enter Year (1893-)'),
+        dict(type='year', name='year', default=today.year,
+             label='Select Year', min=1893),
         dict(type='text', name='threshold', default='1.0',
              label='Precipitation Threshold [inch]'),
         dict(type='text', name='period', default='7',
@@ -44,6 +40,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
     year = int(fdict.get('year', 2014))
     threshold = float(fdict.get('threshold', 1))
     period = int(fdict.get('period', 7))
@@ -71,6 +71,8 @@ def plotter(fdict):
         coverage.append(tots / float(iowapts) * 100.0)
 
         now += datetime.timedelta(days=1)
+    df = pd.DataFrame(dict(day=pd.Series(days),
+                           coverage=pd.Series(coverage)))
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(days, coverage, fc='g', ec='g')
@@ -80,4 +82,4 @@ def plotter(fdict):
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax.grid(True)
-    return fig
+    return fig, df

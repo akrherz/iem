@@ -1,10 +1,8 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import numpy as np
 from matplotlib import mlab
-import calendar 
+import calendar
+import datetime
 
 PDICT = {'sum-precip': 'Total Precipitation [inch]',
          'avg-high': 'Average Daily High [F]',
@@ -29,10 +27,11 @@ STATES = {'IA': 'Iowa',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    today = datetime.date.today()
     d['arguments'] = [
         dict(type='clstate', name='state', default='IA',
              label='Select State:'),
-        dict(type='text', name='year', default='2014',
+        dict(type='year', name='year', default=today.year,
              label='Select Year'),
         dict(type='month', name='month', default='6', label='Select Month'),
         dict(type='select', name='type', default='sum-precip',
@@ -43,6 +42,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

@@ -1,7 +1,3 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import psycopg2.extras
 import numpy as np
 import datetime
@@ -31,6 +27,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
