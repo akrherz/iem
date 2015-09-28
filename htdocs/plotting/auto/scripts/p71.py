@@ -1,14 +1,10 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as PathEffects
 import psycopg2.extras
 import datetime
-import calendar
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import drct2text
 from pyiem.datatypes import speed
+import pandas as pd
 
 PDICT = {'KT': 'knots',
          'MPH': 'miles per hour',
@@ -19,6 +15,7 @@ PDICT = {'KT': 'knots',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """This plot displays daily average wind speeds for
     a given year and month of your choice.  These values are computed by the
@@ -51,6 +48,10 @@ def draw_line(plt, x, y, angle):
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.patheffects as PathEffects
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -79,12 +80,14 @@ def plotter(fdict):
         days.append(row[0].day)
         drct.append(row[2])
         sknt.append(row[1])
-
+    df = pd.DataFrame(dict(day=pd.Series(days),
+                           drct=pd.Series(drct),
+                           sknt=pd.Series(sknt)))
     sknt = speed(np.array(sknt), 'KT').value(units)
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(np.array(days)-0.4, sknt, ec='green', fc='green')
     pos = max([min(sknt) / 2.0, 0.5])
-    for d, s, r in zip(days, sknt, drct):
+    for d, _, r in zip(days, sknt, drct):
         draw_line(plt, d, max(sknt)+0.5, (270. - r) / 180. * np.pi)
         txt = ax.text(d, pos, drct2text(r), ha='center', rotation=90,
                       color='white', va='center')
@@ -99,4 +102,4 @@ def plotter(fdict):
 
     ax.set_ylabel("Average Wind Speed [%s]" % (PDICT.get(units),))
 
-    return fig
+    return fig, df
