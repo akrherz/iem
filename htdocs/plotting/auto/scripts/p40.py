@@ -1,7 +1,3 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import psycopg2.extras
 import numpy as np
 import datetime
@@ -35,6 +31,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
