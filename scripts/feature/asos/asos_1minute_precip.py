@@ -5,12 +5,13 @@ import pytz
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 
-ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
+                        port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 9, 23, 9, 0)
+sts = datetime.datetime(2015, 9, 27, 19, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 9, 24, 4, 0)
+ets = datetime.datetime(2015, 9, 28, 5, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/Chicago'
 
@@ -20,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'OMA'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'MOB'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -107,8 +108,8 @@ ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=1, prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+4))
-ax.set_xlabel("23 September 2015 (Central Daylight Time)")
-ax.set_title(("23 September 2015 Omaha, NE (KOMA)\n"
+ax.set_xlabel("27 September 2015 (Central Daylight Time)")
+ax.set_title(("27 September 2015 Mobile, AL (KMOB)\n"
               "One Minute Rainfall %s inches total plotted") % (prec[-1],))
 
 
