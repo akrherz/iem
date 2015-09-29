@@ -51,7 +51,7 @@ for suffix in ['shp', 'shx', 'dbf', 'csv']:
         os.remove("%s.%s" % (fn, suffix))
 
 csv = open("%s.csv" % (fn,), 'w')
-csv.write(("VALID,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,STATE,"
+csv.write(("VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,STATE,"
            "SOURCE,REMARK\n"))
 
 cursor.execute("""
@@ -59,7 +59,9 @@ cursor.execute("""
     to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
     magnitude, wfo, type, typetext,
     city, county, state, source, substr(remark,0,100) as tremark,
-    ST_y(geom), ST_x(geom) from lsrs WHERE
+    ST_y(geom), ST_x(geom),
+    to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2
+    from lsrs WHERE
     valid >= '%s+00' and valid < '%s+00' %s
     ORDER by dvalid ASC
     """ % (sTS.strftime("%Y-%m-%d %H:%M"),
@@ -80,11 +82,11 @@ w.field('REMARK', 'C', 100)
 w.field('LAT', 'F', 7, 4)
 w.field('LON', 'F', 9, 4)
 for row in cursor:
-    w.point(row[-1], row[-2])
-    w.record(*row)
-    csv.write(("%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
-               ) % (row[0], row[-2], row[-1], row[1], row[2], row[3], row[4],
-                    row[5], row[6], row[7], row[8],
+    w.point(row[-2], row[-3])
+    w.record(*row[:-1])
+    csv.write(("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+               ) % (row[0], row[12], row[-3], row[-2], row[1], row[2], row[3],
+                    row[4], row[5], row[6], row[7], row[8],
                     row[9].replace(",", "_") if row[9] is not None else ''))
 
 csv.close()
