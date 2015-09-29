@@ -40,12 +40,12 @@ def get_data(mode, data, arr):
                 tot += row[2]
             if arr[2]:
                 entry['other'] += row[3]
-                tot += row[3]
+                # tot += row[3]
             if arr[3]:
                 entry['nulls'] += row[4]
                 tot += row[4]
             entry['tot'] += tot
-            entry['all'] += row[5]
+            entry['all'] += (row[5] - row[3])
 
 
 def make_progress(row):
@@ -63,14 +63,11 @@ def make_progress(row):
   <div class="progress-bar progress-bar-info" style="width: %.1f%%">
     <span>%s</span>
   </div>
-  <div class="progress-bar progress-bar-warning" style="width: %.1f%%">
-    <span>%s</span>
-  </div>
   <div class="progress-bar progress-bar-danger" style="width: %.1f%%">
     <span>%s</span>
   </div>
 </div>""" % (hits - 0.05, row['hits'], dots - 0.05, row['dots'],
-             other - 0.05, row['other'],
+             # other - 0.05, row['other'],
              nulls - 0.05, row['nulls'])
 
 if __name__ == '__main__':
@@ -86,6 +83,11 @@ if __name__ == '__main__':
         show_period = True
         show_dnc = True
         show_no = True
+    # Forget the above, we hard code things like so
+    show_has = True
+    show_period = True
+    show_dnc = True
+    show_no = True
     data = {}
     arr = [show_has, show_period, show_dnc, show_no]
     get_data('agronomic', data, arr)
@@ -112,7 +114,7 @@ if __name__ == '__main__':
     z-index: 2;
  }
     </style>
-
+    <!--
     <form method="GET" name="c">
     <p><strong>Which statuses to show?</strong> &nbsp;
     <input type="hidden" name="a" value="b">
@@ -122,7 +124,7 @@ if __name__ == '__main__':
     <input type="checkbox" name="no" value="1"%s>no entry / empty &nbsp;
     <input type="submit" value="Update Page">
     </p>
-    </form>
+    </form> -->
     <p><span>Key:</span>
     <span class="btn btn-success">has data</span>
     <span class="btn btn-info">periods (missing)</span>
@@ -153,7 +155,7 @@ if __name__ == '__main__':
         row = data[sid]
         sys.stdout.write('<td>%s</td>' % (make_progress(row)))
         sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
-        sys.stdout.write("<td>%.0f%%</td>" % (((row['hits2'] + row['other2']) /
+        sys.stdout.write("<td>%.0f%%</td>" % (((row['hits2']) /
                                                float(row['all'])) * 100.))
         sys.stdout.write("</tr>\n\n")
     sid = "_ALL"
@@ -161,7 +163,7 @@ if __name__ == '__main__':
     row = data[sid]
     sys.stdout.write('<td>%s</td>' % (make_progress(row)))
     sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
-    sys.stdout.write("<td>%.0f%%</td>" % (((row['hits2'] + row['other2']) /
+    sys.stdout.write("<td>%.0f%%</td>" % (((row['hits2']) /
                                            float(row['all'])) * 100.))
     sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
