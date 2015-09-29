@@ -1,7 +1,7 @@
 import mx.DateTime
 import numpy
-import iemdb, iemplot
-COOP = iemdb.connect("coop", bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 ccursor2 = COOP.cursor()
 

@@ -84,6 +84,4 @@ ax[2].plot([1894,2013], [intercept + (1894 * h_slope), intercept + (2013 * h_slo
 ax[2].text(1900, 61, r"$\frac{\Delta days}{decade} = %.2f,R^2=%.2f$" % (
                 h_slope * 10.0, h_r_value ** 2), va='bottom')
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

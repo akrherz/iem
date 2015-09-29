@@ -53,6 +53,4 @@ ax.set_ylabel("Previous Year Colder than 2013")
 
 ax.grid(True)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
