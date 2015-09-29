@@ -38,7 +38,4 @@ ax.set_ylabel("Precipitation Departure [inch]")
 ax.set_xlabel("From Date to 15 April 2013")
 
 
-fig.savefig('test.ps')
-
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

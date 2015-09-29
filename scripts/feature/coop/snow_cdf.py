@@ -80,6 +80,4 @@ for i in range(5):
   xlabels.append( "%.2f-%.2f" % (bins[i],bins[i+1]))
 ax.set_xticklabels( xlabels )
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
