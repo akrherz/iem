@@ -31,8 +31,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody',
-                                port=5555)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA2203')
     season = fdict.get('season', 'fall')
