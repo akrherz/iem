@@ -134,7 +134,8 @@ if __name__ == '__main__':
     <p>This page lists the data progress for Agronomic + Soils variables
     collected by the Google Spreadsheets. These values are valid for the
     duration of the project 2011-2015. This page DOES NOT list data progress
-    for greenhouse gas, drainage, soil moisture, nor pest (IPM) data.</p>
+    for management metadata, greenhouse gas, drainage, soil moisture,
+    nor pest (IPM) data.</p>
 
 <table class='table table-striped table-bordered'>
 <thead><tr>
