@@ -32,19 +32,19 @@ function getter(){
 			done	
 }
 
-getter GoesEast1V${tm}.tif $BASE/GOESeast/GoesEast1V${tm}.tif
-getter GoesEast1V${tm}.tfw $BASE/GOESeast/GoesEast1V${tm}.tfw
-getter GoesEast04I3${tm}.tif $BASE/GOESeast/GoesEast04I3${tm}.tif
-getter GoesEast04I3${tm}.tfw $BASE/GOESeast/GoesEast04I3${tm}.tfw
-getter GoesEast04I4${tm}.tif $BASE/GOESeast/GoesEast04I4${tm}.tif
-getter GoesEast04I4${tm}.tfw $BASE/GOESeast/GoesEast04I4${tm}.tfw
+getter GoesEast1V${tm}.tif $BASE/GOESeast/GoesEast1V_latest.tif
+getter GoesEast1V${tm}.tfw $BASE/GOESeast/GoesEast1V_latest.tfw
+getter GoesEast04I3${tm}.tif $BASE/GOESeast/GoesEast04I3_latest.tif
+getter GoesEast04I3${tm}.tfw $BASE/GOESeast/GoesEast04I3_latest.tfw
+getter GoesEast04I4${tm}.tif $BASE/GOESeast/GoesEast04I4_latest.tif
+getter GoesEast04I4${tm}.tfw $BASE/GOESeast/GoesEast04I4_latest.tfw
 
-getter GoesWest1V${tm}.tif $BASE/GOESwest/GoesWest1V${tm}.tif 
-getter GoesWest1V${tm}.tfw $BASE/GOESwest/GoesWest1V${tm}.tfw
-getter GoesWest04I3${tm}.tif $BASE/GOESwest/GoesWest04I3${tm2}.tif
-getter GoesWest04I3${tm}.tfw $BASE/GOESwest/GoesWest04I3${tm2}.tfw
-getter GoesWest04I4${tm}.tif $BASE/GOESwest/GoesWest04I4${tm2}.tif
-getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4${tm2}.tfw
+getter GoesWest1V${tm}.tif $BASE/GOESwest/GoesWest1V_latest.tif 
+getter GoesWest1V${tm}.tfw $BASE/GOESwest/GoesWest1V_latest.tfw
+getter GoesWest04I3${tm}.tif $BASE/GOESwest/GoesWest04I3_latest.tif
+getter GoesWest04I3${tm}.tfw $BASE/GOESwest/GoesWest04I3_latest.tfw
+getter GoesWest04I4${tm}.tif $BASE/GOESwest/GoesWest04I4_latest.tif
+getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4_latest.tfw
 
 #ls -l *.tif
 #ls -l *.tfw
