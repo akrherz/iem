@@ -1,8 +1,8 @@
 from pandas.io.sql import read_sql
 import psycopg2
 from pyiem import network
-import sys
 import numpy as np
+import calendar
 
 PDICT = {'spring': '1 January - 30 June',
          'fall': '1 July - 31 December'}
@@ -44,24 +44,28 @@ def plotter(fdict):
         case when month > 6 then 'fall' else 'spring' end as season
         from """ + table + """ WHERE station = %s),
     data as (
-        SELECT year, season,
+        SELECT year, day, season,
         max(high) OVER (PARTITION by year, season ORDER by day ASC
                         ROWS BETWEEN 183 PRECEDING and CURRENT ROW) as mh,
         min(low) OVER (PARTITION by year, season ORDER by day ASC
                        ROWS BETWEEN 183 PRECEDING and CURRENT ROW) as ml
         from obs),
     lows as (
-        SELECT distinct year, ml as level, season from data
-        where season = 'fall'),
+        SELECT year, day, ml as level, season,
+        rank() OVER (PARTITION by year, ml ORDER by day ASC) from data
+        WHERE season = 'fall'),
     highs as (
-        SELECT distinct year, mh as level, season from data
-        where season = 'spring')
+        SELECT year, day, mh as level, season,
+        rank() OVER (PARTITION by year, mh ORDER by day ASC) from data
+        WHERE season = 'spring')
 
-    SELECT year, level, season from lows UNION
-    SELECT year, level, season from highs
+    (SELECT year, day, extract(doy from day) as doy,
+     level, season from lows WHERE rank = 1) UNION
+    (SELECT year, day, extract(doy from day) as doy,
+     level, season from highs WHERE rank = 1)
     """, pgconn, params=[station])
     df2 = df[df['season'] == season]
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(3, 1, figsize=(7, 10))
     dyear = df2.groupby(['year']).count()
     ax[0].bar(dyear.index, dyear['level'], facecolor='tan', edgecolor='tan')
     ax[0].axhline(dyear['level'].mean(), lw=2)
@@ -81,5 +85,19 @@ def plotter(fdict):
     ax[1].axvline(32, lw=2)
     ax[1].grid(True)
     ax[1].set_xlabel("Temperature $^\circ$F, 32 degrees highlighted")
+
+    ax[2].hist(np.array(df2['doy'], 'f'),
+               bins=np.arange(df2['doy'].min(),
+                              df2['doy'].max()+1, 3),
+               normed=True, facecolor='tan')
+    ax[2].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
+                      305, 335, 365))
+    ax[2].set_xticklabels(calendar.month_abbr[1:])
+    ax[2].set_xlim(df2['doy'].min() - 3,
+                   df2['doy'].max() + 3)
+
+    ax[2].set_ylabel("Probability Density")
+    ax[2].grid(True)
+    ax[2].set_xlabel("Day of Year, 3 Day Bins")
 
     return fig, df
