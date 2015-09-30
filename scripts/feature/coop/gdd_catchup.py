@@ -89,6 +89,4 @@ ax.annotate("With daily record heat\ngoing foward, we'd reach average\njust afte
                 connectionstyle="arc,angleA=0,armA=30,rad=10"))
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

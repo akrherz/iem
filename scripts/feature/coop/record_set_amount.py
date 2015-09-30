@@ -1,5 +1,7 @@
 import psycopg2
 import datetime
+import matplotlib.pyplot as plt
+
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = COOP.cursor()
 
@@ -23,9 +25,7 @@ for row in cursor:
         ldates.append( row[1] )
         lamount.append( row[3] - records[row[0]]['low']  )
         records[row[0]]['low'] = row[3]
-        
 
-import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
@@ -47,6 +47,4 @@ ax.set_title("1893-3 March 2014 Waterloo Daily Record Temp Beat Margin")
 ax.set_ylim(-30,30)
 ax.legend(ncol=2, fontsize=12)
 
-fig.savefig("test.ps")
-import iemplot
-iemplot.makefeature("test")
+fig.savefig("test.png")

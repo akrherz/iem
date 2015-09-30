@@ -1,6 +1,6 @@
 import numpy
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
+import psycopg2
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 icursor = COOP.cursor()
 
 [R, D] = range(2)

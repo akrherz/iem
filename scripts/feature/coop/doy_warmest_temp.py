@@ -55,6 +55,4 @@ ax.set_title("1880-2013 Des Moines Latest Date for High Temperature")
 ax.set_ylabel("High Temperature $^\circ$F")
 ax.set_xlabel("*2013 data thru 2 September")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

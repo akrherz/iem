@@ -47,6 +47,4 @@ ax2.set_xticks(numpy.arange(1,14))
 ax2.set_xlim(0.8,13.2)
 ax2.set_xticklabels(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','All') )
 
-import iemplot
-fig.savefig('test.ps')
-iemplot.makefeature('test')
+fig.savefig('test.png')

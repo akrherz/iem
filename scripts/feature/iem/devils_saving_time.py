@@ -1,8 +1,8 @@
 
 from matplotlib import pyplot as plt
-import iemdb
+import psycopg2
 import mx.DateTime
-asos = iemdb.connect('asos', bypass=True)
+asos = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = asos.cursor()
 
 acursor.execute("""
@@ -62,6 +62,4 @@ ax.set_xticklabels(xticklabels)
 ax.grid()
 ax.legend(ncol=2,loc=3)
 ax.set_ylabel("Temperature Difference (CST-CDT) $^{\circ}\mathrm{F}$")
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

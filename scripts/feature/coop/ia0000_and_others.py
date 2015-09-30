@@ -59,6 +59,4 @@ ax[1,1].grid(True)
 ax[1,1].text(0.8, 20, "October", ha='center')
 ax[1,1].set_xlabel("Precipitation [inch]")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

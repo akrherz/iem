@@ -22,6 +22,4 @@ ax.grid(True)
 ax.set_xticklabels(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'))
 ax.set_title("1893-2013 Ames Daily Hi-Lo Temp Difference")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

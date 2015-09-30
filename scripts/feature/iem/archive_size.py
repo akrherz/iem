@@ -208,6 +208,4 @@ ax.annotate("Add Some Model Surface Analysis", xy=(datetime.datetime(2013,4,1), 
                 connectionstyle="angle,angleA=0,angleB=90,rad=1"))
 
 
-fig.savefig('test.svg')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

@@ -80,6 +80,4 @@ ax.set_xlabel("*2013 (red) Streak in-progress, should end 29 March")
 
 ax.grid(True)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

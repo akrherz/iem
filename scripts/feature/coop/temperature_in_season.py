@@ -59,6 +59,4 @@ ax.set_ylabel("Percentage of High Temperature Events")
 ax.set_xlabel("Daily High Temperature $^{\circ}\mathrm{F}$")
 ax.set_title("1893-2012 Des Moines Daily High Temperature\nFrequency of High Temp within period of 91 warmest days")
 
-fig.savefig('test.svg')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

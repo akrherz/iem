@@ -57,7 +57,5 @@ ax2.set_ylabel("Average Wind Speed [kts]")
 ax2.grid(True)
 ax2.set_xlabel("*2011 Forecasted Value")
 
-fig.savefig('test.ps')
+fig.savefig('test.png')
 
-import iemplot
-iemplot.makefeature('test')

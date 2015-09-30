@@ -49,6 +49,4 @@ ax.set_xlim(-0.5,11)
 ax.set_ylim(0,41)
 ax.set_title("Iowa Presidential Caucus Weather")
 ax.set_ylabel("7 PM Temperature $^{\circ}\mathrm{F}$")
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

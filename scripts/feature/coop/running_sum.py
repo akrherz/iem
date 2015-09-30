@@ -42,6 +42,4 @@ ax.set_ylabel("Accumulated Days Above Average")
 ax.set_title("Ames Accumulated Days with High Temp Above Average")
 
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

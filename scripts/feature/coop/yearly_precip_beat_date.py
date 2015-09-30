@@ -41,6 +41,4 @@ ax.grid(True)
 ax.set_xlim(1900,2015)
 ax.set_ylim(120,367)
 
-fig.savefig('test.svg')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

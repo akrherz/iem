@@ -1,11 +1,12 @@
 import psycopg2
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-cursor = COOP.cursor()
 from pyiem.plot import MapPlot
 import numpy as np
 
-import network
-nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
+from pyiem.network import Table as NetworkTable
+
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+cursor = COOP.cursor()
+nt = NetworkTable(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
  "NECLIMATE", "KSCLIMATE", "MOCLIMATE", "KYCLIMATE", "ILCLIMATE", "WICLIMATE",
  "INCLIMATE", "OHCLIMATE", "MICLIMATE"))
 
