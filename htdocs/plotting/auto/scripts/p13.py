@@ -1,10 +1,7 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import psycopg2.extras
 import numpy as np
 import datetime
+import pandas as pd
 from scipy import stats
 from pyiem.network import Table as NetworkTable
 
@@ -15,6 +12,7 @@ PDICT = {'end_summer': 'End of Summer', 'start_summer': 'Start of Summer'}
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This chart presents the start or end date of the
     warmest 91 day period each year.
     """
@@ -29,6 +27,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -45,16 +46,22 @@ def plotter(fdict):
         from
             (select day, year, avg((high+low)/2.) OVER
             (ORDER by day ASC rows 91 preceding) from """ + table + """
-            where station = %s and year < %s) as foo) as foo2 where rank = 1
+            where station = %s) as foo) as foo2 where rank = 1
             ORDER by day DESC
-    """, (station, datetime.datetime.now().year))
+    """, (station, ))
     years = []
     maxsday = []
+    today = datetime.date.today()
+    today_doy = int(today.strftime("%j"))
     delta = 0 if which == 'end_summer' else 91
     for row in cursor:
+        if row['year'] == today.year and (row['d'] + 10) > today_doy:
+            continue
         maxsday.append(row['d'] - delta)
         years.append(row['year'])
 
+    df = pd.DataFrame(dict(year=pd.Series(years),
+                           doy=pd.Series(maxsday)))
     maxsday = np.array(maxsday)
 
     (fig, ax) = plt.subplots(1, 1)
@@ -87,4 +94,4 @@ def plotter(fdict):
     ax.set_xlim(min(years)-1, max(years)+1)
     ax.set_ylim(min(maxsday)-5, max(maxsday)+5)
 
-    return fig
+    return fig, df
