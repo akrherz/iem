@@ -3,6 +3,9 @@
 cd isuag
 sh run_plots.sh
 
+cd ../iemre
+python daily_analysis.py $(date --date '1 day ago' +'%Y %m %d')
+
 cd ../climodat
 sh run.sh &
 
