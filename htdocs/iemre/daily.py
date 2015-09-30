@@ -58,17 +58,27 @@ def main():
         'daily_high_f': myrounder(
            datatypes.temperature(
                 nc.variables['high_tmpk'][offset, j, i], 'K').value('F'), 1),
+        '12z_high_f': myrounder(
+           datatypes.temperature(
+                nc.variables['high_tmpk_12z'][offset, j, i],
+                'K').value('F'), 1),
         'climate_daily_high_f': myrounder(
            datatypes.temperature(
                 cnc.variables['high_tmpk'][coffset, j, i], 'K').value("F"), 1),
         'daily_low_f': myrounder(
            datatypes.temperature(
                 nc.variables['low_tmpk'][offset, j, i], 'K').value("F"), 1),
+        '12z_low_f': myrounder(
+           datatypes.temperature(
+                nc.variables['low_tmpk_12z'][offset, j, i],
+                'K').value('F'), 1),
         'climate_daily_low_f': myrounder(
            datatypes.temperature(
                 cnc.variables['low_tmpk'][coffset, j, i], 'K').value("F"), 1),
         'daily_precip_in': myrounder(
            nc.variables['p01d'][offset, j, i] / 25.4, 2),
+        '12z_precip_in': myrounder(
+           nc.variables['p01d_12z'][offset, j, i] / 25.4, 2),
         'climate_daily_precip_in': myrounder(
            cnc.variables['p01d'][coffset, j, i] / 25.4, 2),
       })
