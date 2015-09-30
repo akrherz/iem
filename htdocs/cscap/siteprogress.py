@@ -127,8 +127,8 @@ if __name__ == '__main__':
     </form> -->
     <p><span>Key:</span>
     <span class="btn btn-success">has data</span>
-    <span class="btn btn-info">periods (missing)</span>
-    <span class="btn btn-warning">did not collect</span>
+    <span class="btn btn-info">periods (missing)</span><!--
+    <span class="btn btn-warning">did not collect</span> -->
     <span class="btn btn-danger">no entry / empty</span>
 
     <p>This page lists the data progress for Agronomic + Soils variables
