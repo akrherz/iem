@@ -1,6 +1,4 @@
-'''
- Consume a REST service of DOT Snowplow locations and data
-'''
+"""Consume a REST service of DOT Snowplow locations and data"""
 import urllib2
 import json
 import psycopg2
@@ -28,69 +26,72 @@ def workflow():
         current[row[0]] = row[1]
 
     valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.timezone("UTC"),microsecond=0)
+    valid = valid.replace(tzinfo=pytz.timezone("UTC"), microsecond=0)
 
     try:
-        data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+        data = json.loads(urllib2.urlopen(URI, timeout=30).read())
     except Exception, exp:
-        #print 'dot_plows download fail %s' % (exp,)
+        # print 'dot_plows download fail %s' % (exp,)
         data = {}
     newplows = {}
     for feat in data.get('features', []):
         logdt = feat['attributes']['LOGDT']
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
-                              hour=ts.hour,minute=ts.minute,second=ts.second)
+                              hour=ts.hour, minute=ts.minute, second=ts.second)
         label = feat['attributes']['LABEL']
 
-        if current.get(label, None) is None and not newplows.has_key(label):
-            #print 'New IDOT Snowplow #%s "%s" Valid: %s' % (len(current)+1,
+        if current.get(label, None) is None and label not in newplows:
+            # print 'New IDOT Snowplow #%s "%s" Valid: %s' % (len(current)+1,
             #                                                label, valid)
             newplows[label] = 1
             cursor.execute("""INSERT into idot_snowplow_current(label, valid)
             VALUES (%s,%s)""", (label, valid))
         if current.get(label, None) is None or current[label] < valid:
-            cursor.execute("""UPDATE idot_snowplow_current 
-            SET
-            valid = %s, 
-            heading = %s,
-            velocity = %s,
-            roadtemp = %s,
-            airtemp = %s,
-            solidmaterial = %s,
-            liquidmaterial = %s,
-            prewetmaterial = %s,
-            solidsetrate = %s,
-            liquidsetrate = %s,
-            prewetsetrate = %s,
-            leftwingplowstate = %s,
-            rightwingplowstate = %s,
-            frontplowstate = %s,
-            underbellyplowstate = %s,
-            solid_spread_code = %s,
-            road_temp_code = %s,
-            geom = 'SRID=4326;POINT(%s %s)'
-            WHERE label = %s""", (valid, feat['attributes']['HEADING'],
-                feat['attributes']['VELOCITY'],
-                feat['attributes']['ROADTEMP'],
-                feat['attributes']['AIRTEMP'],
-                feat['attributes']['SOLIDMATERIAL'],
-                feat['attributes']['LIQUIDMATERIAL'],
-                feat['attributes']['PREWETMATERIAL'],
-                feat['attributes']['SOLIDSETRATE'],
-                feat['attributes']['LIQUIDSETRATE'],
-                feat['attributes']['PREWETSETRATE'],
-                feat['attributes']['LEFTWINGPLOWSTATE'],
-                feat['attributes']['RIGHTWINGPLOWSTATE'],
-                feat['attributes']['FRONTPLOWSTATE'],
-                feat['attributes']['UNDERBELLYPLOWSTATE'],
-                feat['attributes']['SOLID_SPREAD_CODE'],
-                feat['attributes']['ROAD_TEMP_CODE'],
-                feat['attributes']['XPOSITION'],
-                feat['attributes']['YPOSITION'],
-                                  label)) 
+            cursor.execute("""
+                UPDATE idot_snowplow_current
+                SET
+                valid = %s,
+                heading = %s,
+                velocity = %s,
+                roadtemp = %s,
+                airtemp = %s,
+                solidmaterial = %s,
+                liquidmaterial = %s,
+                prewetmaterial = %s,
+                solidsetrate = %s,
+                liquidsetrate = %s,
+                prewetsetrate = %s,
+                leftwingplowstate = %s,
+                rightwingplowstate = %s,
+                frontplowstate = %s,
+                underbellyplowstate = %s,
+                solid_spread_code = %s,
+                road_temp_code = %s,
+                geom = 'SRID=4326;POINT(%s %s)'
+                WHERE label = %s
+            """, (valid, feat['attributes']['HEADING'],
+                  feat['attributes']['VELOCITY'],
+                  feat['attributes']['ROADTEMP'],
+                  feat['attributes']['AIRTEMP'],
+                  feat['attributes']['SOLIDMATERIAL'],
+                  feat['attributes']['LIQUIDMATERIAL'],
+                  feat['attributes']['PREWETMATERIAL'],
+                  feat['attributes']['SOLIDSETRATE'],
+                  feat['attributes']['LIQUIDSETRATE'],
+                  feat['attributes']['PREWETSETRATE'],
+                  feat['attributes']['LEFTWINGPLOWSTATE'],
+                  feat['attributes']['RIGHTWINGPLOWSTATE'],
+                  feat['attributes']['FRONTPLOWSTATE'],
+                  feat['attributes']['UNDERBELLYPLOWSTATE'],
+                  feat['attributes']['SOLID_SPREAD_CODE'],
+                  feat['attributes']['ROAD_TEMP_CODE'],
+                  feat['attributes']['XPOSITION'],
+                  feat['attributes']['YPOSITION'],
+                  label))
             # Archive it too
-            cursor.execute("""INSERT into idot_snowplow_2013_2014
+            cursor.execute("""
+            INSERT into idot_snowplow_2013_2014
             (label, valid, heading, velocity, roadtemp, airtemp, solidmaterial,
             liquidmaterial, prewetmaterial, solidsetrate, liquidsetrate,
             prewetsetrate, leftwingplowstate, rightwingplowstate,
@@ -98,24 +99,25 @@ def workflow():
             road_temp_code, geom)
              values
             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            , %s, 'SRID=4326;POINT(%s %s)')""" , (label, valid, feat['attributes']['HEADING'],
-                feat['attributes']['VELOCITY'],
-                feat['attributes']['ROADTEMP'],
-                feat['attributes']['AIRTEMP'],
-                feat['attributes']['SOLIDMATERIAL'],
-                feat['attributes']['LIQUIDMATERIAL'],
-                feat['attributes']['PREWETMATERIAL'],
-                feat['attributes']['SOLIDSETRATE'],
-                feat['attributes']['LIQUIDSETRATE'],
-                feat['attributes']['PREWETSETRATE'],
-                feat['attributes']['LEFTWINGPLOWSTATE'],
-                feat['attributes']['RIGHTWINGPLOWSTATE'],
-                feat['attributes']['FRONTPLOWSTATE'],
-                feat['attributes']['UNDERBELLYPLOWSTATE'],
-                feat['attributes']['SOLID_SPREAD_CODE'],
-                feat['attributes']['ROAD_TEMP_CODE'],
-                feat['attributes']['XPOSITION'],
-                feat['attributes']['YPOSITION']))
+            , %s, 'SRID=4326;POINT(%s %s)')
+            """, (label, valid, feat['attributes']['HEADING'],
+                  feat['attributes']['VELOCITY'],
+                  feat['attributes']['ROADTEMP'],
+                  feat['attributes']['AIRTEMP'],
+                  feat['attributes']['SOLIDMATERIAL'],
+                  feat['attributes']['LIQUIDMATERIAL'],
+                  feat['attributes']['PREWETMATERIAL'],
+                  feat['attributes']['SOLIDSETRATE'],
+                  feat['attributes']['LIQUIDSETRATE'],
+                  feat['attributes']['PREWETSETRATE'],
+                  feat['attributes']['LEFTWINGPLOWSTATE'],
+                  feat['attributes']['RIGHTWINGPLOWSTATE'],
+                  feat['attributes']['FRONTPLOWSTATE'],
+                  feat['attributes']['UNDERBELLYPLOWSTATE'],
+                  feat['attributes']['SOLID_SPREAD_CODE'],
+                  feat['attributes']['ROAD_TEMP_CODE'],
+                  feat['attributes']['XPOSITION'],
+                  feat['attributes']['YPOSITION']))
 
     postgis.commit()
     postgis.close()
