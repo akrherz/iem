@@ -4,10 +4,11 @@ import matplotlib.cm as cm
 import numpy as np
 import datetime
 from pyiem.plot import MapPlot
+import psycopg2
+from pyiem.tracker import loadqc
 
 now = datetime.datetime.now()
-
-import psycopg2
+qdict = loadqc()
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
@@ -31,6 +32,8 @@ dsm = None
 for row in icursor:
     if row[0] == 'DSM':
         dsm = row[3]
+    if qdict.get(row[0], {}).get('tmpf') is not None:
+        continue
     lats.append(row[2])
     lons.append(row[1])
     vals.append(row[3])
