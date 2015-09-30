@@ -1,6 +1,6 @@
 """
   Iowa DOT Truck dash camera imagery.  Save this to the IEM archives
-  
+
   /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
 import urllib2
@@ -18,7 +18,8 @@ URI = ("https://geonexusr.iowadot.gov/arcgis/rest/services/Operations/"
 
 
 def get_label(attrs):
-    ''' Figure out the site label given the attributes, this will change later'''
+    '''Figure out the site label given the attributes, this will change later
+    '''
     return attrs['PHOTO_URL'].split("/")[-1].split("_")[0]
 
 
@@ -29,17 +30,17 @@ def get_current_fn(label):
 
 def get_archive_fn(label, utc):
     ''' Return how this is stored for current data '''
-    return 'camera/idot_trucks/%s/%s_%s.jpg' % (label, label, 
+    return 'camera/idot_trucks/%s/%s_%s.jpg' % (label, label,
                                                 utc.strftime("%Y%m%d%H%M"))
 
 
 def workflow():
-    ''' Do stuff '''  
+    ''' Do stuff '''
     valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),microsecond=0)
-    
+    valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),
+                          microsecond=0)
     try:
-        data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+        data = json.loads(urllib2.urlopen(URI, timeout=30).read())
     except:
         return
     if len(data.get('features', [])) == 0:
@@ -50,13 +51,14 @@ def workflow():
     cursor.execute("""SELECT label, idnum from idot_dashcam_current""")
     current = {}
     for row in cursor:
-        current[ row[0] ] = row[1]
+        current[row[0]] = row[1]
 
     for feat in data['features']:
         logdt = feat['attributes']['PHOTO_FILEDATE']
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
-                              hour=ts.hour,minute=ts.minute,second=ts.second)
+                              hour=ts.hour, minute=ts.minute,
+                              second=ts.second)
         label = get_label(feat['attributes'])
         idnum = feat['attributes']['PHOTO_UID']
         if idnum <= current.get(label, 0):
@@ -64,24 +66,23 @@ def workflow():
 
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
-        #print label, utc, feat['attributes']['PHOTO_URL']
+        # print label, utc, feat['attributes']['PHOTO_URL']
         try:
-            image = urllib2.urlopen(feat['attributes']['PHOTO_URL'], timeout=15).read()
+            image = urllib2.urlopen(feat['attributes']['PHOTO_URL'],
+                                    timeout=15).read()
         except urllib2.URLError, exp:
-            print('dot_truckcams.py dl fail |%s| %s' % (exp, 
-                                            feat['attributes']['PHOTO_URL']))
+            print(('dot_truckcams.py dl fail |%s| %s'
+                   ) % (exp, feat['attributes']['PHOTO_URL']))
             continue
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(image)
         tmp.close()
-        cmd = "/home/ldm/bin/pqinsert -p 'plot ac %s %s %s jpg' %s" % (
-                            utc.strftime("%Y%m%d%H%M"), 
-                            get_current_fn(label),
-                            get_archive_fn(label, utc),
-                                                   tmp.name)
+        cmd = ("/home/ldm/bin/pqinsert -p 'plot ac %s %s %s jpg' %s"
+               ) % (utc.strftime("%Y%m%d%H%M"), get_current_fn(label),
+                    get_archive_fn(label, utc), tmp.name)
         proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
-        output = proc.stderr.read()
-        #if output != "":
+        _ = proc.stderr.read()
+        # if output != "":
         #    print '-------------------------'
         #    print '  dot_truckcams.py pqinsert stderr result:'
         #    print output
@@ -89,13 +90,13 @@ def workflow():
         #    print 'URI: %s' % (feat['attributes']['PHOTO_URL'],)
         #    print '-------------------------\n'
         os.unlink(tmp.name)
-        
-        geom = 'SRID=4326;POINT(%s %s)' % (feat['geometry']['x'], 
+
+        geom = 'SRID=4326;POINT(%s %s)' % (feat['geometry']['x'],
                                            feat['geometry']['y'])
-        cursor.execute("""INSERT into idot_dashcam_current(label, valid, idnum,
-        geom) VALUES (%s, %s, %s, %s)""", (label, valid, idnum, geom))
-        #print 'IDNUM: %(IDNUM)s %(URL)s' % feat['attributes'], valid
-        #print 'lon: %s lat: %s' % (feat['geometry']['x'], feat['geometry']['y'])
+        cursor.execute("""
+            INSERT into idot_dashcam_current(label, valid, idnum,
+            geom) VALUES (%s, %s, %s, %s)
+        """, (label, valid, idnum, geom))
 
     cursor.close()
     POSTGIS.commit()
