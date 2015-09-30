@@ -44,9 +44,4 @@ ax.set_xlabel("* 2012 Warmest")
 #ax.set_xticks( numpy.arange(1895,2015,5) )
 ax.grid(True)
 
-import iemplot
-fig.savefig('test.ps')
-iemplot.makefeature('test')
-
-#for i in range(7):
-#  print i, total_error[i] / 117.0, total_rain[i] / 117.0, total_snow[i] / 117.0
+fig.savefig('test.png')

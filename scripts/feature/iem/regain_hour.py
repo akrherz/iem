@@ -1,7 +1,9 @@
-import iemdb
 import numpy
 import ephem
 import mx.DateTime
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.font_manager
 
 def compute_sunrise(lat, long):
     arr = []
@@ -74,9 +76,7 @@ doy, ames, rames = compute_sunrise('41.99206','-93.62183')
 doy, stl, rstl = compute_sunrise('38.75245','-90.3734')
 doy, msp, rmsp = compute_sunrise('44.88537','-93.23131')
 
-import matplotlib.pyplot as plt
-import numpy as np
-import matplotlib.font_manager
+
 prop = matplotlib.font_manager.FontProperties(size=12)
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -110,6 +110,4 @@ ax.set_yticklabels( ('5 AM', '5:30', '6 AM', '6:30', '7 AM', '7:30', '8 AM', '8:
 ax.set_title("Number of Days to retrieve our stolen morning daylight hour")
 ax.grid(True)
 ax.legend(loc=4, prop=prop)
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

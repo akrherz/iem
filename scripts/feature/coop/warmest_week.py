@@ -51,6 +51,5 @@ ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%b'))
 ax[1].set_ylabel("Week was the warmest (# yrs)")
 ax[1].set_xlim(min(dates),max(dates))
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
+

@@ -160,6 +160,4 @@ ax[1].grid(True)
 
 fig.tight_layout()
 
-fig.savefig('121211.ps')
-#import iemplot
-#iemplot.makefeature('test')
+fig.savefig('121211.png')

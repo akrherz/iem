@@ -58,6 +58,4 @@ ax.axhline(np.average(juliandays), linestyle='-.', lw=2, color='r')
 ax.set_yticklabels( ('Sep 15', 'Sep 22', 'Oct 1', 'Oct 8', 'Oct 15', 'Oct 22', 'Nov 1', 'Nov 8', 'Nov 15') )
 
 ax.grid(True)
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
