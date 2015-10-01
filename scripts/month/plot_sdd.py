@@ -1,15 +1,15 @@
 # Generate a plot of SDD
 import sys
 from pyiem.plot import MapPlot
-
 import mx.DateTime
+import psycopg2
+from pyiem.network import Table as NetworkTable
+
 now = mx.DateTime.now()
 
-import psycopg2
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
-from pyiem.network import Table as NetworkTable
 nt = NetworkTable("IACLIMATE")
 
 # Compute normal from the climate database
@@ -29,7 +29,7 @@ for row in ccursor:
     sdd86.append(float(row[1]))
     valmask.append(True)
 
-if max(sdd86) == 0:
+if len(sdd86) < 5 or max(sdd86) == 0:
     sys.exit()
 
 m = MapPlot(axisbg='white',
