@@ -88,7 +88,7 @@ def make_progress(row):
     <span>%s</span>
   </div>
 </div>""" % (hits - 0.05, row['hits'], dots - 0.05, row['dots'], 
-             other - 0.05, row['other'], 
+             other - 0.05, row['other'],
              nulls - 0.05, row['nulls'])
 
 if __name__ == '__main__':
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     year = int(form.getfirst('year', 2011))
     mode = form.getfirst('mode', 'agronomic')
     build_vars(mode)
-    
+
     data, dvars = get_data(year, mode)
 
     sites = data.keys()
@@ -106,8 +106,8 @@ if __name__ == '__main__':
     <html lang='en'>
     <head>
     <link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/vendor/bootstrap/3.3.5/css/bootstrap-override.css" rel="stylesheet">
-    </head>    
+    <link href="/css/bootstrap-override.css" rel="stylesheet">
+    </head>
     <body>
     <style>
     .progress{
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     z-index: 2;
  }
     </style>
-    
+
 <div class="row well">
     <div class="col-md-4 col-sm-4">Select Mode:</div>
     <div class="col-md-4 col-sm-4">
