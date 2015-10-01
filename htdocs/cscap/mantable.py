@@ -5,7 +5,8 @@ import psycopg2
 import cgi
 import subprocess
 import os
-DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb', user='nobody')
+DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb',
+                          user='nobody')
 cursor = DBCONN.cursor()
 
 ALL = " ALL SITES"
@@ -16,16 +17,18 @@ COVER_SITES = ['MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
                'SEPAC', 'BRADFORD.B1', 'BRADFORD.B2',
                'BRADFORD.C', 'FREEMAN']
 
+
 def reload_data():
     """ Run the sync script to download data from Google """
     os.chdir("/mesonet/www/apps/iemwebsite/scripts/cscap")
     p = subprocess.Popen("python harvest_management.py", shell=True,
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     return """<div class="alert alert-info">
     Here is the result of sync process<br />
     <pre>%s %s</pre>
     </div>""" % (p.stdout.read(), p.stderr.read())
+
 
 def main():
     sys.stdout.write('Content-type: text/html\n\n')
@@ -86,11 +89,11 @@ def main():
                 data[site][cropyear][operation+"1"] = valid
             else:
                 data[site][cropyear][operation+"2"] = valid
-            
+
         elif operation in ['sample_soilnitrate', 'sample_covercrop']:
             # We only want 'fall' events
             season = 'fall_'
-            if valid.month in [6,7,8]:
+            if valid.month in [6, 7, 8]:
                 continue
             elif valid.month < 6:
                 season = 'spring_'
@@ -114,9 +117,9 @@ def main():
                         data[site].get(yr2, {}).get(op, ''),)
         table += "</tr>"
 
-    #---------------------------------------------------------------
+    # ---------------------------------------------------------------
     table2 = ""
-    for site in COVER_SITES: #data.keys():
+    for site in COVER_SITES:  # data.keys():
         table2 += "<tr><td>%s</td>" % (site,)
         for yr in ['2011', '2012', '2013', '2014', '2015']:
             for op in ['fall_sample_soilnitrate_corn',
@@ -124,15 +127,15 @@ def main():
                 table2 += "<td>%s</td>" % (
                         data[site].get(yr, {}).get(op, ''),)
             yr2 = str(int(yr)+1)
-            for op in ['fall_sample_covercrop_corn', 
+            for op in ['fall_sample_covercrop_corn',
                        'fall_sample_covercrop_soy']:
                 table2 += "<td>%s</td>" % (
                         data[site].get(yr2, {}).get(op, ''),)
         table2 += "</tr>"
 
-    #---------------------------------------------------------------
+    # ---------------------------------------------------------------
     table3 = ""
-    for site in COVER_SITES: #data.keys():
+    for site in COVER_SITES:  # data.keys():
         table3 += "<tr><td>%s</td>" % (site,)
         for yr in ['2012', '2013', '2014', '2015']:
             for op in ['spring_sample_covercrop_corn',
@@ -148,9 +151,9 @@ def main():
                         data[site].get(yr, {}).get(op, ''),)
         table3 += "</tr>"
 
-    #---------------------------------------------------------------
+    # ---------------------------------------------------------------
     table4 = ""
-    for site in COVER_SITES: #data.keys():
+    for site in COVER_SITES:  # data.keys():
         table4 += "<tr><td>%s</td>" % (site,)
         for yr in ['2011', '2012', '2013', '2014', '2015']:
             for op in ['plant_corn',
@@ -169,12 +172,12 @@ def main():
                 table5 += "<td>%s</td>" % (
                         data[site].get(yr, {}).get(op, ''),)
         table5 += "</tr>"
-    
+
     sys.stdout.write("""<!DOCTYPE html>
 <html lang='en'>
 <head>
     <link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/vendor/bootstrap/3.3.5/css/bootstrap-override.css" rel="stylesheet">
+    <link href="/css/bootstrap-override.css" rel="stylesheet">
 </head>
 <body>
 
