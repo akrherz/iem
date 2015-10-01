@@ -5,6 +5,10 @@ import datetime
 import pandas as pd
 
 
+PDICT = {'precip': 'Total Precipitation',
+         'avgt': 'Average Temperature'}
+
+
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
@@ -16,6 +20,8 @@ def get_description():
     for."""
     today = datetime.date.today() - datetime.timedelta(days=28)
     d['arguments'] = [
+        dict(type='select', name='var', default='precip',
+             label='Select Variable', options=PDICT),
         dict(type='year', name='year', default=today.year,
              label='Select Year:',
              min=1893),  # Comes back to python as yyyy-mm-dd
@@ -35,35 +41,45 @@ def plotter(fdict):
 
     year = int(fdict.get('year', 2014))
     month = int(fdict.get('month', 9))
+    varname = fdict.get('var', 'precip')
 
     lastyear = datetime.date.today().year
     years = lastyear - 1893 + 1
 
     cursor.execute("""
     with monthly as (
-        SELECT year, station, sum(precip) as p from alldata
+        SELECT year, station,
+        sum(precip) as p,
+        avg((high+low)/2.) as avgt
+        from alldata
         WHERE substr(station,3,1) = 'C' and month = %s
         GROUP by year, station),
     ranks as (
         SELECT station, year,
-        rank() OVER (PARTITION by station ORDER by p DESC) from monthly)
+        rank() OVER (PARTITION by station ORDER by p DESC) as precip_rank,
+        rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
+        from monthly)
 
-    SELECT station, rank from ranks where year = %s """, (month, year))
+    SELECT station, precip_rank, avgt_rank from ranks
+    where year = %s """, (month, year))
     data = {}
     rows = []
     for row in cursor:
-        data[row['station']] = row['rank']
-        rows.append(dict(station=row['station'], rank=row['rank']))
+        data[row['station']] = row[varname + '_rank']
+        rows.append(dict(station=row['station'], year=year, month=month,
+                         precip_rank=row['precip_rank'],
+                         avgt_rank=row['avgt_rank']))
     df = pd.DataFrame(rows)
 
     m = MapPlot(sector='midwest', axisbg='white',
-                title='%s %s Precipitation Total Ranks by Climate District' % (
-                        year, calendar.month_name[month]),
+                title='%s %s %s Ranks by Climate District' % (
+                        year, calendar.month_name[month], PDICT[varname]),
                 subtitle=('Based on IEM Estimates, '
-                          '1 is wettest out of %s total years (1893-%s)'
-                          ) % (years, lastyear)
+                          '1 is %s out of %s total years (1893-%s)'
+                          ) % ('wettest' if varname == 'precip' else 'hottest',
+                               years, lastyear)
                 )
-    cmap = cm.get_cmap("BrBG_r")
+    cmap = cm.get_cmap("BrBG_r" if varname == 'precip' else 'BrBG')
     cmap.set_under('white')
     cmap.set_over('black')
     m.fill_climdiv(data, ilabel=True, plotmissing=False,
