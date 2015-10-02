@@ -8,7 +8,9 @@ Generate a PNG windrose based on the CGI parameters, called from
 import datetime
 import numpy
 from pyiem.plot import windrose
+from pyiem.network import Table as NetworkTable
 import cgi
+import sys
 import cgitb
 cgitb.enable()
 
@@ -69,6 +71,15 @@ rmax = None
 if "staticrange" in form and form["staticrange"].value == "1":
     rmax = 100
 
-windrose(form["station"].value, database=database, sts=sts, ets=ets,
-         months=months, hours=hours, units=units, nsector=nsector,
-         justdata=("justdata" in form), rmax=rmax)
+nt = NetworkTable(form['network'].value)
+res = windrose(form["station"].value, database=database, sts=sts, ets=ets,
+               months=months, hours=hours, units=units, nsector=nsector,
+               justdata=("justdata" in form), rmax=rmax,
+               sname=nt.sts[form['station'].value]['name'])
+if 'justdata' in form:
+    # We want text
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write(res)
+else:
+    sys.stdout.write("Content-type: image/png\n\n")
+    res.savefig(sys.stdout, format='png')

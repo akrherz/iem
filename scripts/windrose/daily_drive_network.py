@@ -8,7 +8,7 @@ import subprocess
 import stat
 import datetime
 
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 CACHEDIR = "/mesonet/share/windrose/climate/yearly"
 
 
