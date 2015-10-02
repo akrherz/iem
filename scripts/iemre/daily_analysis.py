@@ -145,7 +145,13 @@ def grid_day(nc, ts):
        (CASE WHEN max_tmpf > -50 and max_tmpf < 130
            then max_tmpf else null end) as highdata,
        (CASE WHEN min_tmpf > -50 and min_tmpf < 95
-           then min_tmpf else null end) as lowdata
+           then min_tmpf else null end) as lowdata,
+       (CASE WHEN max_dwpf > -50 and max_dwpf < 130
+           then max_dwpf else null end) as highdwpf,
+       (CASE WHEN min_dwpf > -50 and min_dwpf < 95
+           then min_dwpf else null end) as lowdwpf,
+        (CASE WHEN avg_sknt >= 0 and avg_sknt < 100
+         then avg_sknt else null end) as avgsknt
        from summary_%s c, stations s WHERE day = '%s' and
        s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
@@ -160,6 +166,14 @@ def grid_day(nc, ts):
         res = generic_gridder(df, 'lowdata')
         nc.variables['low_tmpk'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
+        hres = generic_gridder(df, 'highdwpf')
+        lres = generic_gridder(df, 'lowdwpf')
+        nc.variables['avg_dwpk'][offset] = datatypes.temperature(
+                                            (hres + lres) / 2., 'F').value('K')
+        res = generic_gridder(df, 'avgsknt')
+        res = np.where(res < 0, 0, res)
+        nc.variables['wind_speed'][offset] = datatypes.speed(
+                                            res, 'KT').value('MPS')
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
                                              cursor.rowcount)

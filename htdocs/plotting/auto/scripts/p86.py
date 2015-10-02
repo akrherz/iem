@@ -1,6 +1,6 @@
 import numpy as np
 from pyiem import iemre
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, speed
 import datetime
 import netCDF4
 from collections import OrderedDict
@@ -13,6 +13,8 @@ PDICT = OrderedDict({'p01d_12z': '24 Hour Precipitation at 12 UTC',
                      'high_tmpk_12z': 'Maximum Temperature at 12 UTC',
                      'p01d': 'Calendar Day Precipitation',
                      'rsds': 'Solar Radiation',
+                     'avg_dwpk': 'Average Dew Point',
+                     'wind_speed': 'Average Wind Speed',
                      })
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
@@ -59,6 +61,12 @@ def plotter(fdict):
         clevs = np.arange(0, 37, 3.)
         clevs[0] = 0.01
         clevstride = 1
+    elif varname in ['wind_speed', ]:
+        data = speed(nc.variables[varname][idx0, :, :], 'MPS').value('MPH')
+        units = 'mph'
+        clevs = np.arange(0, 41, 2)
+        clevs[0] = 0.01
+        clevstride = 2
     elif varname in ['p01d', 'p01d_12z']:
         # Value is in W m**-2, we want MJ
         data = nc.variables[varname][idx0, :, :] / 25.4
@@ -68,7 +76,8 @@ def plotter(fdict):
         clevs = np.append(clevs, np.arange(3., 10.0, 1))
         clevs[0] = 0.01
         clevstride = 1
-    elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z']:
+    elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
+                     'avg_dwpk']:
         # Value is in W m**-2, we want MJ
         data = temperature(nc.variables[varname][idx0, :, :], 'K').value('F')
         units = 'F'
