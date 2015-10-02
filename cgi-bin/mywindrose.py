@@ -7,7 +7,7 @@ Generate a PNG windrose based on the CGI parameters, called from
 """
 import datetime
 import numpy
-from pyiem.plot import windrose
+from pyiem.windrose_utils import windrose
 from pyiem.network import Table as NetworkTable
 import cgi
 import sys
