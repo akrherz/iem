@@ -57,8 +57,8 @@ if (isset($_REQUEST['cb'])){
 	$_SESSION['screen_name'] = $screen_name;
 	$access_token 	= $tok['oauth_token'];
 	$access_token_secret = $tok['oauth_token_secret'];
-	pg_execute($pgconn, "DELETEAUTH", Array($screen_name));
-	pg_execute($pgconn, "SAVEAUTH", Array($screen_name, $access_token,
+	pg_execute($pgconn, "DELETEAUTH", Array(strtolower($screen_name)));
+	pg_execute($pgconn, "SAVEAUTH", Array(strtolower($screen_name), $access_token,
 			$access_token_secret));
 	reloadbot();
 	$msg[] = sprintf("Saved authorization for user %s", $screen_name);
