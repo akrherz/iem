@@ -35,6 +35,4 @@ ax.set_xlim(1879,2015)
 ax.set_title("1880-2014 Des Moines Easter High Temperature")
 ax.set_ylabel("High Temperature $^\circ$F")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
