@@ -1,18 +1,16 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as PathEffects
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
 import calendar
 import numpy as np
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     ts = datetime.date.today()
+    d['data'] = True
     d['description'] = """This chart displays the number of hourly
     observations each month that reported measurable precipitation.  Sites
     are able to report trace amounts, but those reports are not considered
@@ -29,6 +27,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.patheffects as PathEffects
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -60,7 +62,9 @@ def plotter(fdict):
         if row[1] is not None:
             thisyear.append(row[1])
         averages.append(row[2])
-
+    df = pd.DataFrame(dict(month=pd.Series(months),
+                           thisyear=pd.Series(thisyear),
+                           average=pd.Series(averages)))
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(np.arange(1, 13)-0.4, averages, fc='blue', label='Climatology')
     bars = ax.bar(np.arange(1, len(thisyear)+1)-0.2, thisyear, width=0.4,
@@ -81,4 +85,4 @@ def plotter(fdict):
                   "Number of Hours with *Measurable* Precipitation Reported"
                   ) % (nt.sts[station]['name'], station))
 
-    return fig
+    return fig, df
