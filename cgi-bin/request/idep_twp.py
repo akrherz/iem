@@ -2,12 +2,12 @@
 """
 Not sure if this is even used!
 """
+import cgi
+import mx.DateTime
 import psycopg2.extras
 WEPP = psycopg2.connect(database='wepp', host='iemdb', user='nobody')
 wcursor = WEPP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-import cgi
-import mx.DateTime
 form = cgi.FormContent()
 if 'd' in form:
     ts = mx.DateTime.strptime(form['d'][0], '%Y-%m-%d')
