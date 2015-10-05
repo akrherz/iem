@@ -23,10 +23,10 @@ for row in cursor:
     if row[0][2] == 'C' or row[0] in ['IA0000']:
         continue
     print row
-    
-    lats.append( nt.sts[row[0]]['lat'] )
-    lons.append( nt.sts[row[0]]['lon'] )
-    ranks.append( row[1] )
+
+    lats.append(nt.sts[row[0]]['lat'])
+    lons.append(nt.sts[row[0]]['lon'])
+    ranks.append(row[1])
 
 m = MapPlot(title="Where would Sioux City's 41.14 inch 2014 Total Rank?",
             subtitle='period 1893-2014, number of years (out of 122) with local total over 41.14 inches',
