@@ -1,10 +1,6 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2
 import numpy as np
 from pyiem.network import Table as NetworkTable
-import matplotlib.patheffects as PathEffects
 import datetime
 from scipy import stats
 import pandas as pd
@@ -40,6 +36,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
 
