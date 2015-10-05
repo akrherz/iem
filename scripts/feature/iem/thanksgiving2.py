@@ -50,9 +50,7 @@ ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
 #ax.set_xticks( numpy.arange(1895,2015,5) )
 ax.grid(True)
 
-import iemplot
-fig.savefig('test.ps')
-iemplot.makefeature('test')
+fig.savefig('test.png')
 
 #for i in range(7):
 #  print i, total_error[i] / 117.0, total_rain[i] / 117.0, total_snow[i] / 117.0

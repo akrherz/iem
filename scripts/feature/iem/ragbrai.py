@@ -112,6 +112,4 @@ ax2.text(1990,-5, "Head-winds")
 
 ax2.grid(True)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

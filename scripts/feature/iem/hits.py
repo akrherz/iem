@@ -6,24 +6,24 @@ y = []
 for line in open('hits.txt'):
     tokens = line.split(":")
     ts = datetime.datetime.strptime(tokens[0], '%d %b %Y')
-    x.append( ts )
-    y.append( int(tokens[1])  )
+    x.append(ts)
+    y.append(int(tokens[1]))
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 ax.semilogy(x, y, lw=3)
-#ax.set_xlim( x[0].ticks(), x[-1].ticks() )
+# ax.set_xlim( x[0].ticks(), x[-1].ticks() )
 xticks = []
 xticklabels = []
-ts0 = datetime.datetime(2001,1,1)
-ts1 = datetime.datetime(2015,1,2)
+ts0 = datetime.datetime(2001, 1, 1)
+ts1 = datetime.datetime(2015, 1, 2)
 interval = datetime.timedelta(days=1)
 now = ts0
 while now < ts1:
-    if  (now.day == 1 and now.month == 1):
-        xticks.append( now )
-        xticklabels.append( now.strftime("%Y"))
+    if now.day == 1 and now.month == 1:
+        xticks.append(now)
+        xticklabels.append(now.strftime("%Y"))
     now += interval
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels, fontsize=20, rotation=90)

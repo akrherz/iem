@@ -49,7 +49,4 @@ for sid in ['CBF', 'AXA','SHL','BNW','TNU','AWG','DEH']:
 ax.grid(True)
 ax.legend(loc=2, ncol=4, prop=prop)
 
-import iemplot
-fig.savefig('test.ps')
-
-iemplot.makefeature('test')
+fig.savefig('test.png')

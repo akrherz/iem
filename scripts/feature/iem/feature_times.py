@@ -46,6 +46,4 @@ h_slope, intercept, r_value, p_value, std_err = stats.linregress(ds2, favorable)
 ds3 = np.array(ds2)
 ax[1].plot(dates2, h_slope * ds3 + intercept, lw=2, color='yellow')
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

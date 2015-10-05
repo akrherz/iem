@@ -29,6 +29,4 @@ ax.set_xlim(datetime.date(2010,6,1), datetime.date(2013,4,1))
 ax.set_yscale('log')
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
 ax.grid(True)
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

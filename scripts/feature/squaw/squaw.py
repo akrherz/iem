@@ -30,6 +30,4 @@ ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'
 ax.set_xlim(0,366)
 ax.set_yscale('log')
 ax.grid(True)
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
