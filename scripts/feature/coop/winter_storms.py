@@ -1,5 +1,7 @@
 import psycopg2
 import numpy
+import matplotlib.pyplot as plt
+import mx.DateTime
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
@@ -29,9 +31,6 @@ for row in ccursor:
     else:
         is_storm = False
 
-import matplotlib.pyplot as plt
-import mx.DateTime
-
 xticks = [1,32,62,93,124,155, 183, 214, 244]
 xticklabels = ['1 Sep','1 Oct', '1 Nov', '1 Dec', '1 Jan','1 Feb', '1 Mar', '1 Apr', '1 May']
 
@@ -49,7 +48,6 @@ ax3.set_title("Des Moines Total Snowfall\nEach Winter between 1900-2013")
 ax3.grid(True)
 ax3.set_yticks([0,10,25,50,75,100])
 #ax3.set_ylim(0,31)  
-#ax3.set_xlabel("* 2014-2015 thru 22 December")
 ax3.set_ylabel("Percentage of Average Total")
 ax3.legend(loc=2)
 
