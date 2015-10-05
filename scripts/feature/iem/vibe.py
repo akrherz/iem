@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import calendar
 
-climo = [               18.5,
+climo = [18.5,
    24.8035714285714,
    37.0483870967742,
                49.8,

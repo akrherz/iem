@@ -34,6 +34,4 @@ ax.grid(True)
 
 plt.colorbar(res)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

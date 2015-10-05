@@ -42,6 +42,4 @@ ax.set_ylabel("Precipitable Water [inch]")
 ax.set_xlabel("2012")
 ax.set_xlim(min(xticks), max(xticks)+192000)
 ax.grid(True)
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature("test")
+fig.savefig('test.png')

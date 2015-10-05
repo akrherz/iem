@@ -77,6 +77,4 @@ ax.set_ylabel("Frequency [%]")
 ax.set_title("Des Moines 1895-2013 White Christmas")
 ax.legend(loc=2)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
