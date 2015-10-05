@@ -65,13 +65,27 @@ def do_precip(nc, ts):
     offset = iemre.daily_offset(ts)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
-    print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
-           ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                ets.strftime("%Y%m%d%H"), offset2))
-    hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (sts.year,))
-    phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
+    if ts.month == 1 and ts.day == 1:
+        print(("p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
+               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                    ets.strftime("%Y%m%d%H"), offset2))
+        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
+            ets.year,))
+        phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
+        hnc.close()
+        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
+            sts.year,))
+        phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
+        hnc.close()
+    else:
+        print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
+               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                    ets.strftime("%Y%m%d%H"), offset2))
+        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
+            sts.year,))
+        phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
+        hnc.close()
     nc.variables['p01d'][offset] = phour
-    hnc.close()
 
 
 def do_precip12(nc, ts):
@@ -82,13 +96,27 @@ def do_precip12(nc, ts):
     sts = ets - datetime.timedelta(hours=24)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
-    print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
-           ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                ets.strftime("%Y%m%d%H"), offset2))
-    hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,))
-    phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
+    if ts.month == 1 and ts.day == 1:
+        print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
+               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                    ets.strftime("%Y%m%d%H"), offset2))
+        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
+            ets.year,))
+        phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
+        hnc.close()
+        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
+            sts.year,))
+        phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
+        hnc.close()
+    else:
+        print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
+               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                    ets.strftime("%Y%m%d%H"), offset2))
+        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
+            ts.year,))
+        phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
+        hnc.close()
     nc.variables['p01d_12z'][offset] = phour
-    hnc.close()
 
 
 def grid_day12(nc, ts):
