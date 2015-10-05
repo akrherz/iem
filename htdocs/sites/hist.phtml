@@ -133,14 +133,14 @@ if ($mode == "monthly"){
 			Null as max_tmpf_qc, Null as max_gust,
 			null as min_tmpf_qc, station as id, snow, snowd,
 			null as cv from $table WHERE
-			day = '".$dateStr."' ORDER by $sortvar $sortorder";
+			day = '".$dateStr."' ORDER by $sortvar $sortorder NULLS LAST";
 	} else {
 		$sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
 			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 			max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.iemid = s.iemid 
 		   and t.network = '$network' and
-		   day = '". $dateStr ."'  ORDER by $sortvar $sortorder";
+		   day = '". $dateStr ."'  ORDER by $sortvar $sortorder NULLS LAST";
 	}
 }
 
