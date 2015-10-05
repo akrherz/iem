@@ -2,7 +2,6 @@
  Use the Site Data Collected and then see what columns exist within the
  Agronomic Data Sheets.
 """
-import gdata.docs.client
 import ConfigParser
 import sys
 import util
@@ -14,21 +13,23 @@ config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
 
 sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
 sdc, sdc_names = util.build_sdc(sdc_feed)
+print sdc['2015'].keys()
 
-query = gdata.docs.client.DocsQuery(show_collections='false',
-                                    title='Agronomic Data')
-feed = docs_client.GetAllResources(query=query)
-feed.reverse()
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+drive_client = util.get_driveclient()
+
+res = drive_client.files().list(q="title contains 'Agronomic Data'").execute()
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
-    sitekey = spreadsheet.title.split()[0].lower()
-    print '------------> %s [%s] [%s]' % (YEAR, sitekey, spreadsheet.title)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
+    sitekey = item['title'].split()[0].lower()
+    print '------------> %s [%s] [%s]' % (YEAR, sitekey, item['title'])
+    if YEAR not in spreadsheet.worksheets:
+        print('%s does not have Year: %s in worksheet' % (sitekey, YEAR))
+        continue
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_list_feed()
     if len(worksheet.list_feed.entry) == 0:
@@ -50,7 +51,3 @@ for entry in feed:
         if sh.find("AGR") == 0:
             print 'SHOULDHAVE %s' % (sh,)
             error = True
-            #worksheet.add_column(sh, sdc_names[sh]['name'],
-            #                         sdc_names[sh]['units'])
-    #if error:
-    #    sys.exit()

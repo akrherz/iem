@@ -105,16 +105,16 @@ class Worksheet(object):
                                              str(self.cols))
             entry.cell.input_value = lbl
             self.spr_client.update(entry)
-            
+
         self.refetch_feed()
         self.cell_feed = None
-        
+
     def drop_last_column(self):
         self.cols = self.cols - 1
         self.entry.col_count.text = "%s" % (self.cols,)
         self.entry = self.spr_client.update(self.entry)
         self.cell_feed = None
-        
+
     def trim_columns(self):
         """ Attempt to trim off any extraneous columns """
         self.get_cell_feed()
@@ -174,8 +174,9 @@ def get_xref_siteids_plotids(spr_client, config):
             d = entry.to_dict()
             if d['plotid'] is None:
                 continue
-            data[uniqueid.lower()].append( d['plotid'].lower() )
+            data[uniqueid.lower()].append(d['plotid'].lower())
     return data
+
 
 def get_xref_plotids(spr_client, config):
     ''' Build the xreference of siteID to plotid spreadsheet keys '''
@@ -259,6 +260,7 @@ def build_treatments(feed):
                     data[sitekey]['REPS'] = int(cell)
     
     return data, treatment_names
+
 
 def build_sdc(feed):
     """
