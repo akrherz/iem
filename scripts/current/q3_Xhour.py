@@ -28,10 +28,13 @@ def doit(ts, hours):
     total = None
     while now < ets:
         gmt = now.astimezone(pytz.timezone("UTC"))
-        gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/"
-                               "RadarOnly_QPE_01H/"
-                               "RadarOnly_QPE_01H_"
-                               "00.00_%Y%m%d-%H%M00.grib2.gz"))
+        for prefix in ['GaugeCorr', 'RadarOnly']:
+            gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/" +
+                                   prefix + "_QPE_01H/" +
+                                   prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
+                                   ".grib2.gz"))
+            if os.path.isfile(gribfn):
+                break
         if not os.path.isfile(gribfn):
             print("q3_Xhour.py MISSING %s" % (gribfn,))
             now += interval
@@ -70,7 +73,7 @@ def doit(ts, hours):
     subtitle = 'Total up to %s' % (lts.strftime("%d %B %Y %I:%M %p %Z"),)
     m = MapPlot(title=("NCEP MRMS Q3 (RADAR Only) %s Hour "
                        "Precipitation [inch]") % (hours,),
-                subtitle=subtitle, )
+                subtitle=subtitle)
 
     clevs = np.arange(0, 0.2, 0.05)
     clevs = np.append(clevs, np.arange(0.2, 1.0, 0.1))
