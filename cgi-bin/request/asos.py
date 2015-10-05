@@ -20,7 +20,7 @@ mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 def get_stations(form):
     """ Figure out the requested station """
-    if not form.has_key("station"):
+    if "station" not in form:
         sys.stdout.write("Content-type: text/plain \n\n")
         sys.stdout.write("ERROR: station must be specified!")
         sys.exit(0)
@@ -40,7 +40,7 @@ def get_time_bounds(form, tzinfo):
     m2 = int(form.getfirst('month2'))
     d1 = int(form.getfirst('day1'))
     d2 = int(form.getfirst('day2'))
-    # Construct dt instances in the right timezone, this logic sucks, but is 
+    # Construct dt instances in the right timezone, this logic sucks, but is
     # valid, have to go to UTC first then back to the local timezone
     sts = datetime.datetime.utcnow()
     sts = sts.replace(tzinfo=pytz.timezone("UTC"))
@@ -108,18 +108,18 @@ def main():
 
     if delim == "tdf":
         rD = "\t"
-        queryCols = re.sub("," , "\t", queryCols) 
+        queryCols = re.sub(",", "\t", queryCols)
     else:
         rD = ","
 
     gtxt = {}
     gisextra = False
-    if form.getfirst("latlon", "no") == "yes": 
+    if form.getfirst("latlon", "no") == "yes":
         gisextra = True
-        mcursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat 
+        mcursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat
              from stations WHERE id in %s
-             and (network ~* 'AWOS' or network ~* 'ASOS')""", 
-             (tuple(dbstations),))
+             and (network ~* 'AWOS' or network ~* 'ASOS')
+        """, (tuple(dbstations),))
         for row in mcursor:
             gtxt[row[0]] = "%.4f%s%.4f%s" % (row['lon'], rD, row['lat'], rD)
 
@@ -140,17 +140,17 @@ def main():
 
     for row in acursor:
         sys.stdout.write(row["station"] + rD)
-        sys.stdout.write( 
-            (row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD )
+        sys.stdout.write(
+            (row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
         if gisextra:
-            sys.stdout.write( gtxt.get(row['station'], "M%sM%s" % (rD, rD)) )
+            sys.stdout.write(gtxt.get(row['station'], "M%sM%s" % (rD, rD)))
         r = []
         for data1 in outCols:
             if data1 == 'relh':
                 if row['tmpf'] is not None and row['dwpf'] is not None:
                     tmpf = temperature(row['tmpf'], 'F')
                     dwpf = temperature(row['dwpf'], 'F')
-                    val = meteorology.relh( tmpf, dwpf )
+                    val = meteorology.relh(tmpf, dwpf)
                     r.append("%.2f" % (val.value("%"),))
                 else:
                     r.append("M")
@@ -171,13 +171,13 @@ def main():
                     r.append("M")
             elif data1 == 'tmpc':
                 if row['tmpf'] is not None:
-                    val = temperature( row['tmpf'] , 'F').value('C')
+                    val = temperature(row['tmpf'], 'F').value('C')
                     r.append("%.2f" % (val, ))
                 else:
                     r.append("M")
             elif data1 == 'dwpc':
                 if row['dwpf'] is not None:
-                    val = temperature( row['dwpf'], 'F').value('C')
+                    val = temperature(row['dwpf'], 'F').value('C')
                     r.append("%.2f" % (val, ))
                 else:
                     r.append("M")
@@ -186,15 +186,16 @@ def main():
                     r.append("%s" % (row['presentwx'].replace(",", " "), ))
                 else:
                     r.append("M")
-            elif data1 in ["metar","skyc1","skyc2","skyc3","skyc4"]:
+            elif data1 in ["metar", "skyc1", "skyc2", "skyc3", "skyc4"]:
                 if row[data1] is None:
                     r.append("M")
                 else:
                     r.append("%s" % (row[data1], ))
-            elif row[ data1 ] is None or row[ data1 ] <= -99.0 or row[ data1 ] == "M":
+            elif (row[data1] is None or row[data1] <= -99.0 or
+                  row[data1] == "M"):
                 r.append("M")
             else:
-                r.append("%2.2f" % (row[ data1 ],))
+                r.append("%2.2f" % (row[data1], ))
         sys.stdout.write("%s\n" % (rD.join(r),))
 
 if __name__ == '__main__':

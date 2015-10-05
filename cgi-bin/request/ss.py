@@ -42,12 +42,13 @@ def gage_run(sts, ets, stations, excel):
     site_serial in %s ORDER by valid ASC""" % (sts, ets, str(tuple(stations)))
     df = pd.read_sql(sql, dbconn)
     headers = ['date', 'time', 'site_serial', 'Levelogger Reading (ft)',
-               'Barologger Reading', 'Water Temp (C)', 
+               'Barologger Reading', 'Water Temp (C)',
                'Barologger Air Temp (C)', 'Conductivity (micro-S)']
 
     if excel == 'yes':
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write("Content-Disposition: attachment;Filename=stuartsmith.xls\n\n")
+        sys.stdout.write(("Content-Disposition: attachment;"
+                          "Filename=stuartsmith.xls\n\n"))
         df.to_excel('/tmp/ss.xls', header=headers, index=False)
         sys.stdout.write(open('/tmp/ss.xls', 'rb').read())
         os.unlink('/tmp/ss.xls')
@@ -67,11 +68,11 @@ def bubbler_run(sts, ets, excel):
     three as (SELECT valid, value from ss_bubbler WHERE
     valid between '%s' and '%s' and field = 'Water Temp')
 
-    SELECT date(coalesce(one.valid, two.valid, three.valid)) as date, 
+    SELECT date(coalesce(one.valid, two.valid, three.valid)) as date,
     to_char(coalesce(one.valid, two.valid, three.valid), 'HH24:MI:SS') as time,
-    one.value, two.value, three.value 
+    one.value, two.value, three.value
     from one FULL OUTER JOIN two on (one.valid = two.valid)
-             FULL OUTER JOIN three on (coalesce(two.valid,one.valid) = three.valid)
+        FULL OUTER JOIN three on (coalesce(two.valid,one.valid) = three.valid)
     ORDER by date ASC, time ASC
     """ % (sts, ets, sts, ets, sts, ets)
     df = pd.read_sql(sql, dbconn)
@@ -79,7 +80,8 @@ def bubbler_run(sts, ets, excel):
 
     if excel == 'yes':
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write("Content-Disposition: attachment;Filename=bubbler.xls\n\n")
+        sys.stdout.write(("Content-Disposition: attachment;"
+                          "Filename=bubbler.xls\n\n"))
         df.to_excel('/tmp/ss.xls', header=headers, index=False)
         sys.stdout.write(open('/tmp/ss.xls', 'rb').read())
         os.unlink('/tmp/ss.xls')
