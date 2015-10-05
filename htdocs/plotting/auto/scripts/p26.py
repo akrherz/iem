@@ -6,6 +6,8 @@ from pyiem.network import Table as NetworkTable
 
 PDICT = {'fall': 'Minimum Temperature after 1 July',
          'spring': 'Maximum Temperature before 1 July'}
+PDICT2 = {'high': 'High Temperature',
+          'low': 'Low Temperature'}
 
 
 def get_description():
@@ -22,6 +24,8 @@ def get_description():
              label='Year to Highlight:'),
         dict(type='select', name='half', default='fall',
              label='Option to Plot:', options=PDICT),
+        dict(type='select', name='var', default='low',
+             label='Variable to Plot:', options=PDICT2),
     ]
     return d
 
@@ -38,6 +42,7 @@ def plotter(fdict):
     thisyear = today.year
     year = int(fdict.get('year', thisyear))
     station = fdict.get('station', 'IA0200')
+    varname = fdict.get('var', 'low')
     half = fdict.get('half', 'fall')
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -45,13 +50,15 @@ def plotter(fdict):
     startyear = int(nt.sts[station]['archive_begin'].year)
     data = np.ma.ones((thisyear-startyear+1, 366)) * 199
     if half == 'fall':
-        cursor.execute("""SELECT extract(doy from day), year, low from
+        cursor.execute("""SELECT extract(doy from day), year,
+            """ + varname + """ from
             """+table+""" WHERE station = %s and low is not null and
-            year >= %s""", (station, startyear))
+            high is not null and year >= %s""", (station, startyear))
     else:
-        cursor.execute("""SELECT extract(doy from day), year, high from
+        cursor.execute("""SELECT extract(doy from day), year,
+            """ + varname + """ from
             """+table+""" WHERE station = %s and high is not null and
-            year >= %s""", (station, startyear))
+            low is not null and year >= %s""", (station, startyear))
     for row in cursor:
         data[row[1] - startyear, row[0] - 1] = row[2]
 
@@ -121,11 +128,11 @@ def plotter(fdict):
     if half == 'fall':
         ax.set_xlim(200, 366)
         ax.text(220, 32.4, r'32$^\circ$F', ha='left')
-        title = "Minimum Temperature after 1 July"
+        title = "Minimum Daily %s Temperature after 1 July"
     else:
         ax.set_xlim(0, 181)
-        title = "Maximum Temperature before 1 July"
-
+        title = "Maximum Daily %s Temperature before 1 July"
+    title = title % (varname.capitalize(), )
     ax.set_ylabel(title + " $^\circ$F")
     ax.set_title("%s-%s %s %s\n%s" % (startyear,
                                       thisyear-1, station,
