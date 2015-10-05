@@ -65,7 +65,7 @@ def do_precip(nc, ts):
     offset = iemre.daily_offset(ts)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
-    if ts.month == 1 and ts.day == 1:
+    if ts.month == 12 and ts.day == 31:
         print(("p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
                ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                     ets.strftime("%Y%m%d%H"), offset2))
