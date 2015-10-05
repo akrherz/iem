@@ -16,6 +16,7 @@ import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 import StringIO
+import unittest
 
 
 def get_scenario_period(ctx):
@@ -94,7 +95,7 @@ def do_apsim(ctx):
      """
     if len(ctx['stations']) > 1:
         ssw(("ERROR: APSIM output is only "
-                          +"permitted for one station at a time."))
+             "permitted for one station at a time."))
         return
 
     dbconn = get_database()
@@ -113,18 +114,18 @@ def do_apsim(ctx):
         cursor.execute("""
             SELECT day, high, low, precip, 1 as doy,
             coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-            from """+table+""" WHERE station = %s 
+            from """ + table + """ WHERE station = %s
             and day >= %s and day <= %s
             """, (ctx['stations'][0], sts, ets))
         for row in cursor:
             ts = row[0].replace(year=thisyear)
-            extra[ ts ] = row
-            extra[ ts ]['doy'] = int(ts.strftime("%j"))
-        febtest = datetime.date(thisyear, 3, 1 ) - datetime.timedelta(days=1)
-        if not extra.has_key(febtest):
+            extra[ts] = row
+            extra[ts]['doy'] = int(ts.strftime("%j"))
+        febtest = datetime.date(thisyear, 3, 1) - datetime.timedelta(days=1)
+        if febtest not in extra:
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
-    
+
     ssw("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
     ssw("! Created: %s UTC\n" % (
                 datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
@@ -135,10 +136,10 @@ def do_apsim(ctx):
     if ctx['scenario'] == 'yes':
         ssw("! !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
                             ctx['ets'], ctx['scenario_year']))
-    
+
     ssw("[weather.met.weather]\n")
     ssw("latitude = %.1f (DECIMAL DEGREES)\n" % ( nt.sts[ station ]["lat"]) )
-    
+
     # Compute average temperature!
     cursor.execute("""
         SELECT avg((high+low)/2) as avgt from climate51 WHERE station = %s 
@@ -146,7 +147,7 @@ def do_apsim(ctx):
     row = cursor.fetchone()
     ssw("tav = %.3f (oC) ! annual average ambient temperature\n" % (
             temperature(row['avgt'], 'F').value('C'),))
-    
+
     # Compute the annual amplitude in temperature
     cursor.execute("""
         select max(avg) as h, min(avg) as l from
@@ -158,7 +159,7 @@ def do_apsim(ctx):
     ssw("amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n" % (
         (temperature(row['h'], 'F').value('C') - 
         temperature(row['l'], 'F').value('C')), ))
-    
+
     ssw("""year        day       radn       maxt       mint      rain
   ()         ()   (MJ/m^2)       (oC)       (oC)       (mm)\n""")
 
@@ -167,20 +168,20 @@ def do_apsim(ctx):
             SELECT day, high, low, precip,
             extract(doy from day) as doy,
             0 as srad
-            from hayhoe_daily WHERE station = %s 
+            from hayhoe_daily WHERE station = %s
             and day >= %s and scenario = %s and model = %s
             ORDER by day ASC
         """, (ctx['stations'][0], ctx['sts'],
-              ctx['hayhoe_scenario'], ctx['hayhoe_model']) )   
-    else:    
+              ctx['hayhoe_scenario'], ctx['hayhoe_model']))
+    else:
         cursor.execute("""
-            SELECT day, high, low, precip, 
+            SELECT day, high, low, precip,
             extract(doy from day) as doy,
             coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-            from """+table+""" 
-            WHERE station = %s and 
+            from """ + table + """
+            WHERE station = %s and
             day >= %s and day <= %s ORDER by day ASC
-            """, (station, ctx['sts'], ctx['ets']) )
+            """, (station, ctx['sts'], ctx['ets']))
     for row in cursor:
         srad = -99 if row['srad'] is None else row['srad']
         ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % (
@@ -188,7 +189,6 @@ def do_apsim(ctx):
             temperature(row["high"], 'F').value('C'), 
             temperature(row["low"], 'F').value('C'), 
             row["precip"] * 25.4 ))
-    
 
     if len(extra) > 0:
         dec31 = datetime.date(thisyear, 12, 31)
@@ -202,6 +202,7 @@ def do_apsim(ctx):
                 temperature(row["low"], 'F').value('C'), 
                 row["precip"] * 25.4 ) )
             now += datetime.timedelta(days=1)
+
 
 def do_century( ctx ):
     """ Materialize the data in Century Format 
@@ -285,8 +286,8 @@ def do_century( ctx ):
                     data[year][11][idx], data[year][12][idx]
                     ))
 
-def do_daycent( ctx ):
-    """ Materialize data for daycent 
+def do_daycent(ctx):
+    """ Materialize data for daycent
 
     Daily Weather Data File (use extra weather drivers = 0):
     > 1 1 1990 1 7.040 -10.300 0.000
@@ -608,7 +609,7 @@ def do_dndc( ctx ):
     ssw("Content-type: application/octet-stream\n")
     ssw("Content-Disposition: attachment; filename=dndc.zip\n\n")
     sio.seek(0)
-    ssw( sio.read() )
+    ssw(sio.read())
 
 
 def main():
@@ -628,40 +629,40 @@ def main():
         ctx['scenario_year'] = int(form.getfirst('scenario_year', 2099))
     else:
         ctx['scenario_year'] = 2099
-    ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period( ctx )
+    ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period(ctx)
 
-    if "dndc" not in ctx['myvars'] and ctx['what'] != 'excel':
+    if "apsim" in ctx['myvars']:
+        ssw("Content-type: text/plain\n\n")
+    elif "dndc" not in ctx['myvars'] and ctx['what'] != 'excel':
         if ctx['what'] == 'download':
             ssw("Content-type: application/octet-stream\n")
             ssw(("Content-Disposition: attachment; "
-                              +"filename=changeme.txt\n\n"))        
+                 "filename=changeme.txt\n\n"))
         else:
             ssw("Content-type: text/plain\n\n")
-        
-    
+
     # OK, now we fret
     if "daycent" in ctx['myvars']:
-        do_daycent( ctx )
+        do_daycent(ctx)
     elif "century" in ctx['myvars']:
-        do_century( ctx )
+        do_century(ctx)
     elif "apsim" in ctx['myvars']:
-        do_apsim( ctx )
+        do_apsim(ctx)
     elif "dndc" in ctx['myvars']:
-        do_dndc( ctx )    
+        do_dndc(ctx)
     elif "salus" in ctx['myvars']:
-        do_salus( ctx )
+        do_salus(ctx)
     else:
-        do_simple( ctx )
+        do_simple(ctx)
 
 if __name__ == '__main__':
     main()
-    
-import unittest
+
+
 class tests(unittest.TestCase):
-    
+
     def test_sane_date(self):
         """ Test our sane_date() method"""
-        self.assertEquals(sane_date(2000,9,31), datetime.date(2000,9,30))
-        self.assertEquals(sane_date(2000,2,31), datetime.date(2000,2,29))
-        self.assertEquals(sane_date(2000,1,15), datetime.date(2000,1,15))
-        
+        self.assertEquals(sane_date(2000, 9, 31), datetime.date(2000, 9, 30))
+        self.assertEquals(sane_date(2000, 2, 31), datetime.date(2000, 2, 29))
+        self.assertEquals(sane_date(2000, 1, 15), datetime.date(2000, 1, 15))
