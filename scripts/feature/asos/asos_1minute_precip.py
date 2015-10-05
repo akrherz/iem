@@ -9,11 +9,11 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 9, 27, 19, 0)
+sts = datetime.datetime(2015, 10, 3, 5, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 9, 28, 5, 0)
+ets = datetime.datetime(2015, 10, 4, 5, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/Chicago'
+tzname = 'America/New_York'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -21,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'MOB'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'CHS'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -106,10 +106,10 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc=1, prop=prop, ncol=1)
-ax.set_ylim(0, int(np.max(rate1)+4))
-ax.set_xlabel("27 September 2015 (Central Daylight Time)")
-ax.set_title(("27 September 2015 Mobile, AL (KMOB)\n"
+ax.legend(loc=(0.4, 0.7), prop=prop, ncol=1)
+ax.set_ylim(0, int(np.max(rate1)+6))
+ax.set_xlabel("1 AM 3 Oct to 1 AM 4 Oct 2015 (Eastern Daylight Time)")
+ax.set_title(("3 October 2015 Charleston, SC (KCHS)\n"
               "One Minute Rainfall %s inches total plotted") % (prec[-1],))
 
 
