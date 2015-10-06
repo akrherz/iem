@@ -154,6 +154,8 @@ data = {'plots': [
          'label': "Step Ups in High Temp / Step Downs in Low Temp by Year"},
         {'id': "100", 'mw': True,
          'label': "Temperature / Precipitation Statistics by Year"},
+        {'id': "104", 'mw': True,
+         'label': "Trailing X day temp/precip departures (weather cycling)"},
         {'id': "14", 'mw': True,
          'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
