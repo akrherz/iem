@@ -9,9 +9,9 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 10, 3, 5, 0)
+sts = datetime.datetime(2015, 10, 4, 5, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 10, 4, 5, 0)
+ets = datetime.datetime(2015, 10, 5, 1, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/New_York'
 
@@ -21,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'CHS'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'CAE'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -108,9 +108,9 @@ ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.4, 0.7), prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+6))
-ax.set_xlabel("1 AM 3 Oct to 1 AM 4 Oct 2015 (Eastern Daylight Time)")
-ax.set_title(("3 October 2015 Charleston, SC (KCHS)\n"
-              "One Minute Rainfall %s inches total plotted") % (prec[-1],))
+ax.set_xlabel("4 October 2015 (Eastern Daylight Time)")
+ax.set_title(("4 October 2015 Columbia, SC (KCAE)\n"
+              "One Minute Rainfall %.2f inches total plotted") % (prec[-1],))
 
 
 fig.savefig('test.png')
