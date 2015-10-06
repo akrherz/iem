@@ -1,9 +1,6 @@
-
 import psycopg2.extras
-import calendar
 from pyiem.plot import MapPlot
 import matplotlib.cm as cm
-import datetime
 
 pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
