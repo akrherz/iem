@@ -1,10 +1,6 @@
 import psycopg2.extras
 import datetime
 import numpy as np
-import matplotlib
-matplotlib.use('agg')
-from pyiem.plot import MapPlot
-import matplotlib.cm as cm
 
 PDICT = {'high': 'High temperature',
          'low': 'Low Temperature'}
@@ -13,6 +9,8 @@ PDICT = {'high': 'High temperature',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['description'] = """This map displays an analysis of the change in
+    average high or low temperature over a time period of your choice."""
     d['arguments'] = [
         dict(type='date', name='date1', default='2014/09/01',
              label='From Date (ignore year):',
@@ -29,6 +27,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    from pyiem.plot import MapPlot
+    import matplotlib.cm as cm
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -56,6 +58,7 @@ def plotter(fdict):
     SELECT d.station, ST_x(geom) as lon, ST_y(geom) as lat,
     t2_high -  t1_high as high, t2_low - t1_low as low from data d JOIN
     stations s on (s.id = d.station) where s.network = 'NCDC81'
+    and s.state not in ('HI', 'AK')
     """, (date2, date1))
     vals = []
     lons = []
