@@ -122,7 +122,6 @@ def do(date):
             total = rad * 10800.0  # 3 hr rad to total rad
         else:
             total += (rad * 10800.0)
-
         nc.close()
         now += interval
 
@@ -151,6 +150,9 @@ def do(date):
         if rad_mj < 0:
             print 'WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0])
             continue
+        if np.isnan(rad_mj):
+            print('NARR SRAD is NaN, station: %s' % (row[0], ))
+            rad_mj = None
 
         ccursor2.execute("""
         UPDATE alldata_""" + row[0][:2] + """ SET narr_srad = %s WHERE
