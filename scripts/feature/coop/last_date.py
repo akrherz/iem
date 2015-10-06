@@ -2,8 +2,8 @@ import psycopg2
 import matplotlib.pyplot as plt
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
-nt = NetworkTable("IACLIMATE")
 import datetime
+nt = NetworkTable("IACLIMATE")
 
 pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
