@@ -246,11 +246,11 @@ Ext.onReady(function() {
 //		itemSelector : 'div.search-item',
 		hideTrigger : false,
 		listeners : {
-			select : function(cb, records, idx) {
+			select : function(cb, record, idx) {
 				eventStore.load({
 					add : false,
 					params : {
-						ugc : records[0].data.ugc,
+						ugc : record.data.ugc,
 						sdate : Ext.Date.format(
 								Ext.getCmp('sdate').getValue(),
 						'Y/m/d'),
@@ -259,8 +259,8 @@ Ext.onReady(function() {
 						'Y/m/d')
 					}
 				});
-				gp.ugc = records[0].data.ugc;
-				gp.setTitle("VTEC Events for: " + records[0].data.nicename);
+				gp.ugc = record.data.ugc;
+				gp.setTitle("VTEC Events for: " + record.data.nicename);
 				alinkUGC();
 				return false;
 			}
@@ -300,11 +300,11 @@ Ext.onReady(function() {
 		selectOnFocus : true,
 		id : 'stateselector',
 		listeners : {
-			select : function(cb, records, idx) {
+			select : function(cb, record, idx) {
 				ugcStore.load({
 							add : false,
 							params : {
-								state : records[0].data.abbr
+								state: record.data.abbr
 							}
 						});
 				return false;
