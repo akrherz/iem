@@ -1,6 +1,3 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
@@ -11,6 +8,10 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     ts = datetime.date.today() - datetime.timedelta(days=365)
+    d['description'] = """This chart displays a simple time series of
+    observed air temperatures for a location of your choice.  For sites in the
+    US, the daily high and low temperature climatology is presented as a
+    filled bar for each day plotted."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:'),
@@ -25,6 +26,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
