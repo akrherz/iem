@@ -24,7 +24,7 @@
  $xborder = (int) ($x_pad/2) -5;
 
 
- ImageTTFText($gif, $font_size, 0, (int) ($x_pad/2)+1, $dy + (int) ($y_pad/2), $grey, $Font, $label);
+ //ImageTTFText($gif, $font_size, 0, (int) ($x_pad/2)+1, $dy + (int) ($y_pad/2), $grey, $Font, $label);
  ImageTTFText($gif, $font_size, 0, (int) ($x_pad/2) , $dy + (int) ($y_pad/2)-1, $black, $Font, $label);
 
  header("content-type: image/png");
