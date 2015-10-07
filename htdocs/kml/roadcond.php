@@ -39,81 +39,52 @@ $sql = "SELECT ST_askml(ST_Simplify(simple_geom,100)) as kml,
 $rs = pg_query($conn, $sql);
 
 // holy cow, colors are ABGR ! :(
+$styles = Array(
+		0 => "ff000000",
+		1 => "ff00CC00",
+		3 => "ff00f0f0",
+		7 => "ff00f0f0",
+		11 => "ff00f0f0",
+		15 => "ffc5c5ff",
+		19 => "ff9932fe",
+		23 => "ffb500b5",
+		27 => "ffc5c5ff",
+		31 => "ff9933fe",
+		35 => "ffb500b5",
+		39 => "ffffffdc",
+		43 => "fffe9900",
+		47 => "ff9E0000",
+		51 => "ff015ffe",
+		56 => "ffc5c5ff",
+		60 => "ff9933fe",
+		76 => "ff000000",
+		86 => "ff0000ff",
+		);
 
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://www.opengis.net/kml/2.2\">
- <Document>
-
-<Style id=\"code0\">
-  <LineStyle><color>ff000000</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code1\">
-  <LineStyle><color>ff00CC00</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code3\">
-  <LineStyle><color>ff00f0f0</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code7\">
-  <LineStyle><color>ff00f0f0</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code11\">
-  <LineStyle><color>ff00f0f0</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code15\">
-  <LineStyle><color>ffc5c5ff</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code19\">
-  <LineStyle><color>ff9932fe</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code23\">
-  <LineStyle><color>ffb500b5</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code27\">
-  <LineStyle><color>ffc5c5ff</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code31\">
-  <LineStyle><color>ff9933fe</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code35\">
-  <LineStyle><color>ffb500b5</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code39\">
-  <LineStyle><color>ffffffdc</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code43\">
-  <LineStyle><color>fffe9900</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code47\">
-  <LineStyle><color>ff9E0000</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code51\">
-  <LineStyle><color>ff015ffe</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code56\">
-  <LineStyle><color>ffc5c5ff</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code60\">
-  <LineStyle><color>ff9933fe</color><width>${linewidth}</width></LineStyle>
-</Style>
-<Style id=\"code86\">
-  <LineStyle><color>ff0000ff</color><width>${linewidth}</width></LineStyle>
-</Style>
- <ScreenOverlay id=\"legend_bar\">
+$uri = urlencode($valid);
+echo <<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+<ScreenOverlay id="legend_bar">
    <visibility>1</visibility>
    <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20". urlencode($valid) ."</href>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20{$uri}</href>
    </Icon>
-   <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
-  </ScreenOverlay>
-";
+   <overlayXY x=".3" y="0.99" xunits="fraction" yunits="fraction"/>
+   <screenXY x=".3" y="0.99" xunits="fraction" yunits="fraction"/>
+   <size x="0" y="0" xunits="pixels" yunits="pixels"/>
+</ScreenOverlay>
+EOF;
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $minor = $row["minor"];
   $major = $row["major"];
-
+	$c = "ff000000";
+	if (array_key_exists($row["cond_code"], $styles)){
+		$c = $styles[$row["cond_code"]];
+	}
 
   echo "<Placemark>
 <name>$major $minor</name>
@@ -124,13 +95,14 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
    </p>
         ]]>
     </description>
-    <styleUrl>#code".$row["cond_code"] ."</styleUrl>";
+<Style><LineStyle><color>{$c}</color><width>${linewidth}</width></LineStyle></Style>
+";
   echo $row["kml"];
   echo "</Placemark>";
 }
 echo "</Document>
 </kml>";
 
-$memcache->set("/kml/roadcond.php|$linewidth", ob_get_contents(), false, 300);
+@$memcache->set("/kml/roadcond.php|$linewidth", ob_get_contents(), false, 300);
 ob_end_flush();
 ?>
