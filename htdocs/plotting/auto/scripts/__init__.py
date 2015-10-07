@@ -139,6 +139,8 @@ data = {'plots': [
         {'id': '64', 'mw': True,
          'label': 'Last Snowfall of Each Winter Season'},
         {'id': "33", 'mw': True, 'label': "Maximum Low Temperature Drop"},
+        {'id': "105", 'mw': True,
+         'label': "Maximum Period between Precipitation Amounts"},
         {'id': "46", 'label': "Minimum Wind Chill Temperature"},
         {'id': "30", 'mw': True, 'label': "Monthly Temperature Range"},
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
