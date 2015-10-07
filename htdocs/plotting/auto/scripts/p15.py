@@ -1,11 +1,6 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as PathEffects
 import psycopg2.extras
 import numpy as np
 import calendar
-import sys
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 
@@ -17,6 +12,8 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['description'] = """This plot displays the directional frequency of
+    day to day changes in high or low temperature summarized by month."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:'),
@@ -28,6 +25,10 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.patheffects as PathEffects
     IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -99,6 +100,7 @@ def plotter(fdict):
     ax.set_xticks(np.arange(1, 13))
     ax.legend(ncol=3)
     ax.set_xlim(0.5, 12.5)
+    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_ylabel("Percentage of Days [%]")
     ax.set_title(("%s [%s]\nDay to Day %s Temperature Change"
                   ) % (nt.sts[station]['name'], station, varname.title()))

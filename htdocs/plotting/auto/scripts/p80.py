@@ -1,12 +1,7 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import psycopg2.extras
 import pyiem.nws.vtec as vtec
 import numpy as np
-import pytz
 import pandas as pd
-import sys
 
 
 def get_description():
@@ -29,6 +24,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -44,11 +42,9 @@ def plotter(fdict):
     where ugc = %s and end_ts is null and s.network = 'WFO'
     """, (ugc,))
     wfo = None
-    tzname = None
     name = ""
     if cursor.rowcount == 1:
         row = cursor.fetchone()
-        tzname = row[1]
         wfo = row[0]
         name = row[2]
 

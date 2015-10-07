@@ -1,13 +1,8 @@
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as PathEffects
 import psycopg2.extras
 import datetime
-import calendar
 import numpy as np
 from pyiem.network import Table as NetworkTable
-from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
+from pyiem.meteorology import mixing_ratio, dewpoint_from_pq
 from pyiem.datatypes import temperature, pressure, mixingratio
 import pandas as pd
 
@@ -53,6 +48,9 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
