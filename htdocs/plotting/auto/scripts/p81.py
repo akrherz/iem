@@ -1,7 +1,5 @@
 import psycopg2.extras
-import numpy as np
 from pyiem import network
-import datetime
 import pandas as pd
 import calendar
 

@@ -28,7 +28,7 @@ def get_description():
     d = dict()
     d['data'] = True
     d['description'] = """This plot displays the frequency of a daily high
-    or low temperature being within a certain bounds of the long term NCDC
+    or low temperature being within a certain bounds of the long term NCEI
     climatology for the location."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
@@ -95,7 +95,7 @@ def plotter(fdict):
     ax.axhline(50, lw=2, color='green', zorder=2)
     ax.set_ylabel("Percentage of Years [%]")
     ax.set_title(("%s [%s]\nFreq of Temp between "
-                  "%s$^\circ$F and %s$^\circ$F of NCDC81 Average"
+                  "%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
                   ) % (station, nt.sts[station]['name'], minv, maxv))
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.legend(loc='best')

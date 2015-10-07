@@ -1,9 +1,7 @@
 import psycopg2.extras
-import numpy as np
 from pyiem.network import Table as NetworkTable
 import datetime
 import pandas as pd
-import calendar
 
 PDICT = {'max_tmpf': 'High Temperature',
          'min_tmpf': 'Low Temperature',
@@ -37,6 +35,8 @@ def get_description():
 
 def safe(row, varname):
     val = row[varname]
+    if val is None:
+        return 'M'
     if varname == 'pday':
         if val == 0.0001:
             return 'T'
@@ -80,7 +80,7 @@ def plotter(fdict):
     df = pd.DataFrame(rows)
 
     title = '[%s] %s Daily %s' % (station, nt.sts[station]['name'],
-                                PDICT.get(varname))
+                                  PDICT.get(varname))
 
     fig = calendar_plot(sdate, edate, data,
                         title=title)
