@@ -3,6 +3,8 @@ import psycopg2
 from pyiem.plot import MapPlot
 import matplotlib.cm as cm
 from pyiem.network import Table as NetworkTable
+import numpy as np
+
 nt = NetworkTable("IACLIMATE")
 COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
 ccursor = COOP.cursor()
@@ -29,7 +31,6 @@ for row in ccursor:
     lats.append( nt.sts[row[0]]['lat'] )
     lons.append( nt.sts[row[0]]['lon'] )
 
-import numpy as np
 m = MapPlot(sector='iowa', title='Spring Maximum Temperature Percentile [100=warmest]',
             subtitle='thru 19 May, 2015 vs 1951-2014', axisbg='white')
 cmap = cm.get_cmap('jet')
