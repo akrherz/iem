@@ -7,12 +7,14 @@ $linewidth = isset($_REQUEST['linewidth']) ? intval($_REQUEST["linewidth"]): 3;
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
 
+if (! isset($_GET["cachebust"])){
 // Try to get it from memcached
 $memcache = new Memcache;
 $memcache->connect('iem-memcached', 11211);
 $val = $memcache->get("/kml/roadcond.php|$linewidth");
 if ($val){
 	die($val);
+}
 }
 // Need to buffer the output so that we can save it to memcached later
 ob_start();
@@ -32,7 +34,7 @@ $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 $tbl = "roads_current";
 if (isset($_GET["test"])){ $tbl = "roads_current_test"; }
 
-$sql = "SELECT ST_askml(ST_Simplify(simple_geom,100)) as kml,
+$sql = "SELECT ST_askml(ST_Simplify(ST_Buffer(simple_geom, 100),100)) as kml,
       * from $tbl r, roads_base b, roads_conditions c WHERE
   r.segid = b.segid and r.cond_code = c.code";
 
@@ -60,12 +62,14 @@ $styles = Array(
 		76 => "ff000000",
 		86 => "ff0000ff",
 		);
+$stext = "";
+while (list($key, $value) = each($styles)){
+	$stext .= sprintf("<Style id=\"style%s\"><PolyStyle><color>%s</color></PolyStyle></Style>\n",
+			$key, $value);
+}
 
 $uri = urlencode($valid);
-echo <<<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-<Document>
+/*
 <ScreenOverlay id="legend_bar">
    <visibility>1</visibility>
    <Icon>
@@ -75,33 +79,41 @@ echo <<<EOF
    <screenXY x=".3" y="0.99" xunits="fraction" yunits="fraction"/>
    <size x="0" y="0" xunits="pixels" yunits="pixels"/>
 </ScreenOverlay>
+ */
+echo <<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+ <name>Iowa Winter Road Conditions delivered by the IEM</name>
+{$stext}
+<Folder>
 EOF;
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
+	if ($row["kml"] ==  "") continue;
   $minor = $row["minor"];
   $major = $row["major"];
-	$c = "ff000000";
+	$ccode = $row["cond_code"];
 	if (array_key_exists($row["cond_code"], $styles)){
-		$c = $styles[$row["cond_code"]];
+		$ccode = 0;
 	}
 
-  echo "<Placemark>
-<name>$major $minor</name>
-    <description>
-        <![CDATA[
+  echo "<Placemark><name>$major $minor</name>
+    <description><![CDATA[
   <p><font color=\"red\"><i>Road:</i> $major :: $minor</font>
   <br /><font color=\"red\"><i>Status:</i> ". $row["raw"] ."</font> 
    </p>
-        ]]>
-    </description>
-<Style><LineStyle><color>{$c}</color><width>${linewidth}</width></LineStyle></Style>
+        ]]></description><styleUrl>#style{$ccode}</styleUrl>
 ";
   echo $row["kml"];
-  echo "</Placemark>";
+  echo "</Placemark>\n";
 }
-echo "</Document>
-</kml>";
+echo <<<EOF
+</Folder>
+</Document>
+</kml>
+EOF;
 
 @$memcache->set("/kml/roadcond.php|$linewidth", ob_get_contents(), false, 300);
 ob_end_flush();
