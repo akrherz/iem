@@ -11,6 +11,29 @@ COOP = psycopg2.connect(database="coop", host='iemdb')
 ccursor = COOP.cursor()
 
 
+def update_database(stid, valid, high, low, precip):
+    """Update the database with these newly computed values!"""
+    table = "alldata_%s" % (stid[:2], )
+    # See if we need to add an entry
+    ccursor.execute("""SELECT day from """ + table + """ WHERE day = %s
+    and station = %s""", (valid, stid))
+    if ccursor.rowcount != 1:
+        ccursor.execute("""INSERT into """ + table + """ (station, day,
+        high, low, precip, estimated, year, month, sday) VALUES
+        (%s, %s, %s, %s, %s, 't', %s, %s, %s)
+        """, (stid, valid, high, low, precip, valid.year, valid.month,
+              valid.strftime("%m%d")))
+    # Now we update
+    ccursor.execute("""
+        UPDATE """ + table + """
+        SET high = %s, low = %s, precip = %s
+        WHERE station = %s and day = %s
+    """, (high, low, precip, stid, valid))
+    if ccursor.rowcount != 1:
+        print('compute_0000:update_database updated %s row for %s %s' % (
+            ccursor.rowcount, stid, valid))
+
+
 def do_day(valid):
     """ Process a day please """
     idx = iemre.daily_offset(valid)
@@ -48,20 +71,7 @@ def do_climdiv_day(stabbr, valid, highgrid, lowgrid, precipgrid):
         print(('%s %s-%s-%s High: %5.1f Low: %5.1f Precip: %4.2f'
                ) % (stid, valid.year, valid.month,
                     valid.day, high, low, precip))
-
-        # Now we insert into the proper database!
-        ccursor.execute("""
-            DELETE from alldata_""" + stabbr + """
-            WHERE station = %s and day = %s""", (stid, valid))
-
-        ccursor.execute("""
-            INSERT into alldata_"""+stabbr+"""
-            (station, day, high, low, precip, estimated,
-            year, month, sday)
-            VALUES ('%s', '%s', %.0f, %.0f, %.2f, true, '%s',
-            '%s', '%s')
-        """ % (stid, valid, high, low, precip, valid.year,
-               valid.month, "%02i%02i" % (valid.month, valid.day)))
+        update_database(stid, valid, high, low, precip)
 
     sw_nc.close()
 
@@ -84,18 +94,7 @@ def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid):
            ) % (stabbr, valid.year, valid.month,
                 valid.day, high, low, precip))
 
-    # Now we insert into the proper database!
-    ccursor.execute("""
-        DELETE from alldata_""" + stabbr + """
-        WHERE station = %s and day = %s""", (stabbr + "0000", valid))
-    ccursor.execute("""
-        INSERT into alldata_""" + stabbr + """
-        (station, day, high, low, precip, estimated,
-        year, month, sday)
-        VALUES ('%s', '%s', %.0f, %.0f, %.2f, true, '%s',
-        '%s', '%s')
-    """ % (stabbr + "0000", valid, high, low, precip,
-           valid.year, valid.month, "%02i%02i" % (valid.month, valid.day)))
+    update_database(stabbr+"0000", valid, high, low, precip)
 
 
 def main():
