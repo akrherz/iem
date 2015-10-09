@@ -65,7 +65,7 @@ if ($q > 0){
 			." to_char(valid, 'YYYY/mm/dd') as d2, title from feature"
 			." WHERE substr(appurl, 1, 14) = '/plotting/auto' and "
 			." appurl ~* $1 ORDER by valid DESC");
-	$rs = pg_execute($mesosite, "FINDFEAT", Array("q={$q}"));
+	$rs = pg_execute($mesosite, "FINDFEAT", Array("q={$q}&"));
 	if (pg_numrows($rs) > 0){
 		$flist = <<<EOF
 <h3>IEM Daily Features using this plot</h3>
