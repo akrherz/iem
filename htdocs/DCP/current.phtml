@@ -90,7 +90,7 @@ $content = <<<EOF
 </form>
 
 <p>Sorted by: {$cols[$sortcol]}
-<table style="width: 100%; font-size: 10pt;" cellpadding="2" border="1" cellspacing="0">
+<table class="table table-condensed table-striped table-bordered">
 <thead>
 <tr>
   <th><a href="{$baseurl2}station">SiteID:</a></th>
@@ -98,17 +98,17 @@ $content = <<<EOF
   <th><a href="{$baseurl2}valid">Valid:</a></th>
   <th><a href="{$baseurl2}HGIZ">Stage</a> [ft]</th>
   <th><a href="{$baseurl2}TAIZ">Temp</a> [F]</th>
+  <th><a href="{$baseurl2}TWIZ">Water Temp</a> [F]</th>
   <th><a href="{$baseurl2}PPHZ">1h Rain</a> [in]</th>
-  <th><a href="{$baseurl2}PPDZ">Today Rain</a> [in]</th></tr></thead>
+  <th><a href="{$baseurl2}PPDZ">Today Rain</a> [in]</th>
+  <th><a href="{$baseurl2}VBIZ">Battery</a> [V]</th>
+  </tr></thead>
 <tbody>
 EOF;
- $oddrow = true;
  $now = time();
  while (list($site, $value) = each($final) ){
-   $content .= "<tr ";
-   if ($oddrow) $content .= "bgcolor=\"#EEEEEE\"";
    $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
-   $content .= "><td><a href=\"$url\">$site</a></td>
+   $content .= "<tr><td><a href=\"$url\">$site</a></td>
     <td>". $value["name"] ."</font></td>";
    $content .= "<td ";
    $tdiff = $now - $value["valid"];
@@ -128,7 +128,13 @@ EOF;
    } else {
    	$content .= "<td></td>";
    }
-
+   
+   if (array_key_exists('TWIZ', $value)){
+   	$content .= sprintf("<td>%s</td>", $value["TWIZ"]);
+   } else {
+   	$content .= "<td></td>";
+   }
+    
    if (array_key_exists('PPHZ', $value)){
    	$content .= sprintf("<td>%s</td>", $value["PPHZ"]);
    } else {
@@ -140,12 +146,18 @@ EOF;
    } else {
    	$content .= "<td></td>";
    }
-	$content .= "</tr>";    
+  
+   if (array_key_exists('VBIZ', $value)){
+   	$content .= sprintf("<td>%s</td>", $value["VBIZ"]);
+   } else {
+   	$content .= "<td></td>";
+   }
+    
+   
+   $content .= "</tr>";    
 	if ($shef)
 	{
-		$content .= "<tr ";
-		if ($oddrow) $content .= "bgcolor=\"#EEEEEE\"";
-		$content .= "><td colspan=7>";
+		$content .= "<tr><td colspan=\"9\">";
 		reset($value);
 		while (list($k,$v)=each($value)){
 			if ($k == 'name' || $k == 'valid') continue;
@@ -153,11 +165,10 @@ EOF;
         }
         $content .= "</td></tr>";
 	}
-   $oddrow = ! $oddrow;
  }
 $content .= <<<EOF
 </tbody><tfoot>
-<tr><td colspan=7>&nbsp;</td></tr>
+<tr><td colspan="9">&nbsp;</td></tr>
 </tfoot></table>
 EOF;
 $t->content = $content;
