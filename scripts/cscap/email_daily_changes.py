@@ -17,7 +17,7 @@ CFG = {'cscap': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
                      title="Sustainable Corn"
                      ),
        'td': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
-                          'breinhart3@gmail.com', 'gio@iastate.edu'],
+                          'breinhar@purdue.edu', 'gio@iastate.edu'],
                   title='Transforming Drainage'
                   )
        }
