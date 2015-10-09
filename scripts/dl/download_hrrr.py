@@ -10,6 +10,26 @@ import sys
 import datetime
 import os
 import time
+import pygrib
+
+
+def need_to_run(valid):
+    """ Check to see if we already have the radiation data we need"""
+    gribfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
+                             "%H/hrrr.t%Hz.3kmf00.grib2"))
+    if not os.path.isfile(gribfn):
+        return True
+    try:
+        grbs = pygrib.open(gribfn)
+        for name in ['Downward short-wave radiation flux',
+                     'Upward long-wave radiation flux']:
+            grbs.select(name=name)
+        # print("%s had everything we desired!" % (gribfn, ))
+        return False
+    except Exception, _:
+        # print gribfn, _
+        return True
+    return True
 
 
 def fetch(valid):
@@ -17,7 +37,6 @@ def fetch(valid):
     80:54371554:d=2014101002:ULWRF:top of atmosphere:anl:
     81:56146124:d=2014101002:DSWRF:surface:anl:
     """
-
     uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
                           "nonoperational/com/hrrr/prod/hrrr.%Y%m%d/hrrr.t%Hz."
                           "wrfprsf00.grib2.idx"))
@@ -74,11 +93,18 @@ def fetch(valid):
 
 def main():
     """ Go Main Go"""
-    ts = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    times = []
     if len(sys.argv) == 5:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), int(sys.argv[4]))
-    fetch(ts)
+        times.append(datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                                       int(sys.argv[3]), int(sys.argv[4])))
+    else:
+        times.append(datetime.datetime.utcnow() - datetime.timedelta(hours=1))
+        times.append(datetime.datetime.utcnow() - datetime.timedelta(hours=6))
+        times.append(datetime.datetime.utcnow() - datetime.timedelta(hours=24))
+    for ts in times:
+        if not need_to_run(ts):
+            continue
+        fetch(ts)
 
 
 if __name__ == '__main__':
