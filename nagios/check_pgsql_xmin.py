@@ -4,12 +4,11 @@
   the default postgresql setting from 200 mil to 180 mil as the database does
   lots of writes and autovac sometimes can not keep up.
 """
-import os
 import sys
-import stat
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
+
 
 def check():
     icursor.execute("""
@@ -19,18 +18,19 @@ def check():
     row = icursor.fetchone()
 
     return row
-    
+
 if __name__ == '__main__':
     dbname, count = check()
     if count < 191000000:
-        print 'OK - %s %s |count=%s;191000000;195000000;220000000' % (count, 
-                                                            dbname, count)
+        print 'OK - %s %s |count=%s;191000000;195000000;220000000' % (count,
+                                                                      dbname,
+                                                                      count)
         sys.exit(0)
     elif count < 195000000:
-        print 'WARNING - %s %s |count=%s;191000000;195000000;220000000' % (count, 
-                                                            dbname, count)
+        print(('WARNING - %s %s |count=%s;191000000;195000000;220000000'
+               ) % (count, dbname, count))
         sys.exit(1)
     else:
-        print 'CRITICAL - %s %s |count=%s;191000000;195000000;220000000' % (count, 
-                                                            dbname, count)
+        print(('CRITICAL - %s %s |count=%s;191000000;195000000;220000000'
+               ) % (count, dbname, count))
         sys.exit(2)

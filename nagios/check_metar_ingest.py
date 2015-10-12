@@ -1,12 +1,11 @@
 """
- Check how much HADS data we have
+ Check how much METAR data we have
 """
-import os
 import sys
-import stat
 import psycopg2
 IEM = psycopg2.connect(database='iem', host=sys.argv[1], user='nobody')
 icursor = IEM.cursor()
+
 
 def check():
     icursor.execute("""SELECT count(*) from current c JOIN stations s on
@@ -15,7 +14,7 @@ def check():
     row = icursor.fetchone()
 
     return row[0]
-    
+
 if __name__ == '__main__':
     count = check()
     if count > 3000:
