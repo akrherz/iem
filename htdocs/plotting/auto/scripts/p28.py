@@ -1,9 +1,7 @@
-"""
-  Fall Minimum by Date
-"""
 import psycopg2.extras
 import numpy as np
 import datetime
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 
 
@@ -11,6 +9,11 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     today = datetime.date.today()
+    d['data'] = True
+    d['description'] = """This plot presents three metrics for to date
+    precipitation accumulation over a given number of trailing days.  The
+    lines represent the actual and maximum accumulations for the period.
+    The blue bars represent the rank with 1 being the wettest on record."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
@@ -102,5 +105,9 @@ def plotter(fdict):
     y2.set_ylabel("Precipitation [inch]")
 
     y2.legend()
+    df = pd.DataFrame(dict(day=np.arange(-365, 0),
+                           maxaccum=maxes[::-1],
+                           accum=totals[::-1],
+                           rank=ranks[::-1]))
 
-    return fig
+    return fig, df
