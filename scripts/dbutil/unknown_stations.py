@@ -31,9 +31,6 @@ for priority in ['priority DESC', 'maxp ASC']:
             WHERE station = %s ORDER by p ASC""", (row[0],))
         for row2 in acursor:
             print '    %s %s %s' % (row2[0], row2[1], row2[2])
-        hcursor2.execute("""
-        DELETE from unknown where nwsli = %s
-        """, (row[0],))
 
 print '----- Unknown NWSLIs from COOPish sites -----'
 hcursor.execute("""
@@ -56,9 +53,6 @@ for row in hcursor:
     ORDER by p ASC""", (row[0],))
     for row2 in acursor:
         print '    %s %s %s' % (row2[0], row2[1], row2[2])
-    hcursor2.execute("""
-    DELETE from unknown where nwsli = %s
-    """, (row[0],))
 
 
 HADS.commit()
