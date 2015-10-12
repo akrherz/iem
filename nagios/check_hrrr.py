@@ -3,8 +3,8 @@
 '''
 import os
 import sys
-import stat
 import datetime
+
 
 def check():
     ''' Do the chec please '''
@@ -12,7 +12,7 @@ def check():
     diff = None
     for hr in range(8):
         fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                          +"hrrr.t%Hz.3kmf00.grib2"))
+                           "hrrr.t%Hz.3kmf00.grib2"))
         now = now - datetime.timedelta(hours=1)
         if not os.path.isfile(fn):
             continue
@@ -20,7 +20,7 @@ def check():
         break
 
     return diff, now
-    
+
 if __name__ == '__main__':
     diff, now = check()
     stats = "|age=%s;4;5;6" % (diff if diff is not None else -1,)

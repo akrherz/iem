@@ -1,20 +1,21 @@
 """
- Check how much HADSA data we have
+ Check how much HADS data we have
 """
-import os
 import sys
-import stat
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
+
 def check():
-    icursor.execute("""SELECT count(*) from current_shef 
-    WHERE valid > now() - '1 hour'::interval""")
+    icursor.execute("""
+        SELECT count(*) from current_shef
+        WHERE valid > now() - '1 hour'::interval
+    """)
     row = icursor.fetchone()
 
     return row[0]
-    
+
 if __name__ == '__main__':
     count = check()
     if count > 10000:
