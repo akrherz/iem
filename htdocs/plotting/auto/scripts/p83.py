@@ -3,7 +3,6 @@ import numpy as np
 from pyiem import network
 import datetime
 import pandas as pd
-import calendar
 from scipy import stats
 
 PDICT = {'high': 'Average High Temperature',
