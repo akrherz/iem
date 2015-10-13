@@ -14,8 +14,10 @@ def translate(df):
     for colname in df.columns:
         tokens = colname.split()
         name = None
-        if colname.startswith('Port '):
-            name = 'd%s' % (tokens[1], )
+        if colname.find('Measurement Time') > 0:
+            name = "valid"
+        elif colname.startswith('Port '):
+            name = 'd%s' % (tokens[1].split(".")[0], )
             if colname.find('Bulk EC') > 0:
                 name += "ec"
             elif colname.find('VWC') > 0:
@@ -38,15 +40,34 @@ def process1(fn, timefmt='%d-%b-%Y %H:%M:%S'):
     return df
 
 
+def process3(fn):
+    mydict = pd.read_excel(fn, sheetname=None, index_col=False)
+    # Need to load up rows 0 and 1 into the column names
+    for sheetname in mydict:
+        df = mydict[sheetname]
+        row0 = df.iloc[0, :]
+        row1 = df.iloc[1, :]
+        reg = {df.columns[0]: 'valid'}
+        for c, r0, r1 in zip(df.columns, row0, row1):
+            reg[c] = "%s %s %s" % (c, r0, r1)
+        df.rename(columns=reg, inplace=True)
+        df.drop(df.head(2).index, inplace=True)
+        translate(df)
+    return mydict
+
+
 def database_save(uniqueid, plot, df):
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
     cursor = pgconn.cursor()
+    for i, val in enumerate(df['valid']):
+        if not isinstance(val, datetime.datetime):
+            print i, val
     minvalid = df['valid'].min()
     maxvalid = df['valid'].max()
     tzoff = "05" if uniqueid not in CENTRAL_TIME else "06"
     cursor.execute("""
         DELETE from decagon_data WHERE
-        uniqueid = %s and plotid = %s and valid >= %s and valid < %s
+        uniqueid = %s and plotid = %s and valid >= %s and valid <= %s
     """, (uniqueid, plot, minvalid.strftime("%Y-%m-%d %H:%M-"+tzoff),
           maxvalid.strftime("%Y-%m-%d %H:%M-"+tzoff)))
     if cursor.rowcount > 0:
@@ -89,9 +110,17 @@ def main(argv):
         df = process1(fn)
     elif fmt == '2':
         df = process1(fn, '%m/%d/%y %H:%M %p')
-    print(("File: %s found: %s lines for columns %s"
-           ) % (fn, len(df.index), df.columns))
-    database_save(uniqueid, plot, df)
+    elif fmt == '3':
+        df = process3(fn)
+    if isinstance(df, dict):
+        for plot in df:
+            print(("File: %s[%s] found: %s lines for columns %s"
+                   ) % (fn, plot, len(df[plot].index), df[plot].columns))
+            database_save(uniqueid, plot, df[plot])
+    else:
+        print(("File: %s found: %s lines for columns %s"
+               ) % (fn, len(df.index), df.columns))
+        database_save(uniqueid, plot, df)
 
 if __name__ == '__main__':
     main(sys.argv)
