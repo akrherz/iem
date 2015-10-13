@@ -5,6 +5,9 @@ import calendar
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 
+PDICT = {'low': 'Morning Low (midnight to 8 AM)',
+         'high': 'Afternoon High (noon to 8 PM)'}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -12,13 +15,18 @@ def get_description():
     d['data'] = True
     d['cache'] = 86400
     d['description'] = """This application plots the difference in morning
-    low temperature between two sites of your choice.  The morning is
-    defined as the period between midnight and 8 AM local time."""
+    low or afternoon high temperature between two sites of your choice.
+    The morning is
+    defined as the period between midnight and 8 AM local time.  The afternoon
+    high is defined as the period between noon and 8 PM.  If any difference
+    is greater than 25 degrees, it is omitted from this analysis."""
     d['arguments'] = [
         dict(type='zstation', name='zstation1', default='ALO',
              network='IA_ASOS', label='Select Station 1:'),
         dict(type='zstation', name='zstation2', default='OLZ',
              network='AWOS', label='Select Station 2:'),
+        dict(type='select', name='varname', default='low', options=PDICT,
+             label='Select Comparison'),
     ]
     return d
 
@@ -36,26 +44,32 @@ def plotter(fdict):
     network1 = fdict.get('network1', 'IA_ASOS')
     station2 = fdict.get('zstation2', 'OLZ')
     network2 = fdict.get('network2', 'AWOS')
+    varname = fdict.get('varname', 'low')
 
     nt1 = NetworkTable(network1)
     nt2 = NetworkTable(network2)
 
+    aggfunc = "min"
+    tlimit = "0 and 8"
+    if varname == 'high':
+        aggfunc = "max"
+        tlimit = "12 and 20"
     cursor.execute("""
     WITH one as (
-      SELECT date(valid), min(tmpf::int), avg(sknt)
+      SELECT date(valid), """ + aggfunc + """(tmpf::int) as d, avg(sknt)
       from alldata where station = %s
-      and extract(hour from valid at time zone %s) between 0 and 8
-      and tmpf is not null and tmpf between -70 and 140  GROUP by date),
+      and extract(hour from valid at time zone %s) between """ + tlimit + """
+      and tmpf between -70 and 140  GROUP by date),
 
     two as (
-      SELECT date(valid), min(tmpf::int), avg(sknt)
+      SELECT date(valid), """ + aggfunc + """(tmpf::int) as d, avg(sknt)
       from alldata where station = %s
-      and extract(hour from valid at time zone %s) between 0 and 8
-      and tmpf is not null and tmpf between -70 and 140 GROUP by date)
+      and extract(hour from valid at time zone %s) between """ + tlimit + """
+      and tmpf between -70 and 140 GROUP by date)
 
-    SELECT one.date, one.min- two.min, one.avg, two.avg from
+    SELECT one.date, one.d- two.d, one.avg, two.avg from
     one JOIN two on (one.date = two.date) WHERE one.avg >= 0
-    and one.min - two.min between -25 and 25
+    and one.d - two.d between -25 and 25
     """, (station1, nt1.sts[station1]['tzname'],
           station2, nt2.sts[station2]['tzname']))
 
@@ -82,10 +96,12 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(2, 1)
 
     ax[0].set_title(("[%s] %s minus [%s] %s\n"
-                     "Mid-7AM Low Temp Difference Period: %s - %s"
-                     ) % (station1, nt1.sts[station1]['name'],
-                          station2, nt2.sts[station2]['name'],
-                          min(days), max(days)))
+                     "%s Temp Difference Period: %s - %s"
+                     ) % (
+        station1, nt1.sts[station1]['name'],
+        station2, nt2.sts[station2]['name'],
+        "Mid - 8 AM Low" if varname == 'low' else 'Noon - 8 PM High',
+        min(days), max(days)))
 
     bins = np.arange(-20.5, 20.5, 1)
     H, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
@@ -107,7 +123,8 @@ def plotter(fdict):
     rng = min([max([max(deltas), 0-min(deltas)]), 12])
     ax[0].set_ylim(0-rng-2, rng+2)
     ax[0].grid(True)
-    ax[0].set_ylabel("Low Temp Diff $^\circ$F")
+    ax[0].set_ylabel(("%s Temp Diff $^\circ$F"
+                      ) % ('Low' if varname == 'low' else 'High',))
     ax[0].text(-0.01, 1.02, "%s\nWarmer" % (station1,),
                transform=ax[0].transAxes, va='top', ha='right', fontsize=8)
     ax[0].text(-0.01, -0.02, "%s\nColder" % (station1,),
@@ -130,7 +147,8 @@ def plotter(fdict):
     ax[1].grid(True)
     ax[1].set_xlim(left=-0.25)
     ax[1].set_xlabel("Average Wind Speed [kts] for %s" % (station1,))
-    ax[1].set_ylabel("Low Temp Diff $^\circ$F")
+    ax[1].set_ylabel(("%s Temp Diff $^\circ$F"
+                      ) % ('Low' if varname == 'low' else 'High',))
     ax[1].text(-0.01, 1.02,
                "%s\nWarmer" % (station1,), transform=ax[1].transAxes,
                va='top', ha='right', fontsize=8)
