@@ -37,6 +37,7 @@ function vis_formatter($val){
 }
 function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
+	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
 	return sprintf("<tr style=\"background: %s;\"><td>%s</td><td>%s</td><td>%s</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
 	<td><span class=\"high\">%s</span></td>
@@ -48,7 +49,7 @@ function formatter($i, $row){
 	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
 	sky_formatter($row), $row["presentwx"], temp_formatter($row["tmpf"]), 
 	temp_formatter($row["dwpf"]),
-	temp_formatter(feels_like($row["tmpf"], $row["dwpf"], $row["sknt"] * 1.15)),
+	temp_formatter(feels_like($row["tmpf"], $relh, $row["sknt"] * 1.15)),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
 	$row["alti"], $row["pres"], $row["phour"], $row["p03i"], $row["p06i"],
