@@ -175,8 +175,8 @@ data = {'plots': [
         {'id': "59",
          'label': "Daily u and v Wind Component Climatologies"},
         {'id': "54",
-         'label': ("Difference between morning low temperatures "
-                   "between two sites")},
+         'label': ("Difference between morning low "
+                   "or afternoon high temperature between two sites")},
         {'id': "87",
          'label': ("Frequency of METAR Code (Thunder, etc) "
                    "by week by hour")},
