@@ -52,6 +52,9 @@ data = {'plots': [
         {'id': "83", 'mw': True,
          'label': ("Period Averages or Totals of X days around a "
                    "given day of the year")},
+        {'id': "107", 'mw': True,
+         'label': ("Period Statistics of Temp/Precip for a date period "
+                   "each year")},
         {'id': "62", 'mw': True,
          'label': "Snow Depth"},
         {'id': "38", 'mw': True,
