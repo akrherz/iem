@@ -2,25 +2,26 @@ import psycopg2.extras
 import numpy as np
 from pyiem import network
 import datetime
+from collections import OrderedDict
 
-MDICT = {'all': 'No Month/Time Limit',
-         'spring': 'Spring (MAM)',
-         'fall': 'Fall (SON)',
-         'winter': 'Winter (DJF)',
-         'summer': 'Summer (JJA)',
-         'jan': 'January',
-         'feb': 'February',
-         'mar': 'March',
-         'apr': 'April',
-         'may': 'May',
-         'jun': 'June',
-         'jul': 'July',
-         'aug': 'August',
-         'sep': 'September',
-         'oct': 'October',
-         'nov': 'November',
-         'dec': 'December'
-         }
+# Use OrderedDict to keep webform select in this same order!
+MDICT = OrderedDict([('all', 'No Month/Season Limit'),
+                    ('spring', 'Spring (MAM)'),
+                     ('fall', 'Fall (SON)'),
+                     ('winter', 'Winter (DJF)'),
+                     ('summer', 'Summer (JJA)'),
+                     ('jan', 'January'),
+                     ('feb', 'February'),
+                     ('mar', 'March'),
+                     ('apr', 'April'),
+                     ('may', 'May'),
+                     ('jun', 'June'),
+                     ('jul', 'July'),
+                     ('aug', 'August'),
+                     ('sep', 'September'),
+                     ('oct', 'October'),
+                     ('nov', 'November'),
+                     ('dec', 'December')])
 
 
 def get_description():
