@@ -73,12 +73,19 @@ def database_save(uniqueid, plot, df):
     if cursor.rowcount > 0:
         print("DELETED %s rows previously saved!" % (cursor.rowcount, ))
 
-    def v(val):
+    def v(row, name):
+        val = row[name]
         if isinstance(val, str):
             if val.strip().lower() in ['nan', ]:
                 return 'null'
             return val
-        if np.isnan(val):
+        try:
+            if np.isnan(val):
+                return 'null'
+        except Exception, exp:
+            print exp
+            print(('Val: %s[%s] Name: %s Valid: %s'
+                   ) % (val, type(val), name, row['valid']))
             return 'null'
         return val
     for _, row in df.iterrows():
@@ -89,11 +96,11 @@ def database_save(uniqueid, plot, df):
         %s, %s, %s, %s, %s, %s, %s,
         %s, %s)
         """ % (uniqueid, plot, row['valid'].strftime("%Y-%m-%d %H:%M-"+tzoff),
-               v(row['d1moisture']), v(row['d1temp']), v(row['d1ec']),
-               v(row['d2moisture']), v(row['d2temp']),
-               v(row['d3moisture']), v(row['d3temp']),
-               v(row['d4moisture']), v(row['d4temp']),
-               v(row['d5moisture']), v(row['d5temp'])))
+               v(row, 'd1moisture'), v(row, 'd1temp'), v(row, 'd1ec'),
+               v(row, 'd2moisture'), v(row, 'd2temp'),
+               v(row, 'd3moisture'), v(row, 'd3temp'),
+               v(row, 'd4moisture'), v(row, 'd4temp'),
+               v(row, 'd5moisture'), v(row, 'd5temp')))
 
     cursor.close()
     pgconn.commit()
