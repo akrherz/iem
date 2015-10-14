@@ -1,0 +1,98 @@
+<?php
+include_once "../../include/forms.php";
+// with data as (select distinct '"'||uniqueid || '::'|| plotid || '"' as bah from decagon_data) SELECT bah || '=>' || bah || ',' as d from data ORDER by d;
+$ar = Array(
+		"DPAC::NE"=>"DPAC::NE",
+		"DPAC::NW"=>"DPAC::NW",
+		"DPAC::SE"=>"DPAC::SE",
+		"DPAC::SW"=>"DPAC::SW",
+		"GILMORE::11-1"=>"GILMORE::11-1",
+		"GILMORE::11-2"=>"GILMORE::11-2",
+		"GILMORE::12-2"=>"GILMORE::12-2",
+		"GILMORE::14-1"=>"GILMORE::14-1",
+		"GILMORE::14-2"=>"GILMORE::14-2",
+		"GILMORE::16-2"=>"GILMORE::16-2",
+		"GILMORE::17-3"=>"GILMORE::17-3",
+		"GILMORE::19-1"=>"GILMORE::19-1",
+		"GILMORE::19-3"=>"GILMORE::19-3",
+		"GILMORE::21-3"=>"GILMORE::21-3",
+		"GILMORE::22-3"=>"GILMORE::22-3",
+		"GILMORE::24-3"=>"GILMORE::24-3",
+		"GILMORE::3-1"=>"GILMORE::3-1",
+		"GILMORE::4-1"=>"GILMORE::4-1",
+		"ISUAG::302E"=>"ISUAG::302E",
+		"ISUAG::302W"=>"ISUAG::302W",
+		"ISUAG::308E"=>"ISUAG::308E",
+		"ISUAG::311W"=>"ISUAG::311W",
+		"ISUAG::402W"=>"ISUAG::402W",
+		"ISUAG::408E"=>"ISUAG::408E",
+		"ISUAG::408W"=>"ISUAG::408W",
+		"ISUAG::410E"=>"ISUAG::410E",
+		"SEPAC::10"=>"SEPAC::10",
+		"SEPAC::11"=>"SEPAC::11",
+		"SEPAC::12"=>"SEPAC::12",
+		"SEPAC::5"=>"SEPAC::5",
+		"SEPAC::6"=>"SEPAC::6",
+		"SEPAC::7"=>"SEPAC::7",
+		"SEPAC::8"=>"SEPAC::8",
+		"SEPAC::9"=>"SEPAC::9",
+		"SERF::1"=>"SERF::1",
+		"SERF::2"=>"SERF::2",
+		"SERF::3"=>"SERF::3",
+		"SERF::4"=>"SERF::4",
+		"SERF::5"=>"SERF::5",
+		"SERF::6"=>"SERF::6",
+		"SERF::7"=>"SERF::7",
+		"SERF::8"=>"SERF::8",
+		);
+$site = isset($_GET["site"]) ? $_GET["site"]: 'ISUAG::302E';
+$date = isset($_GET["date"]) ? $_GET["date"]: '2014-01-10';
+$days = isset($_GET["days"]) ? intval($_GET["days"]): 1;
+$siteselect = make_select("site", $site, $ar);
+
+$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s", $site, $date,
+		$days);
+
+echo <<<EOF
+<html lang='en'>
+<head>
+<link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/bootstrap-override.css" rel="stylesheet">
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />  
+</head>
+<body>
+
+<h3>CSCAP Decagon Data Plotting</h3>
+    
+<form method="GET" name="plot1">
+<table class="table table-bordered">
+<thead><tr><th>Select Site:</th><th>Select Start Date</th><th>Number of Days to Plot</th></tr></thead>
+<tbody><tr><td>
+{$siteselect}
+</td>
+<td><input type="text" id="datepicker" name="date" value="{$date}" /></td>
+<td><input type="text" name="days" value="{$days}" /></td>
+</tr></tbody>
+</table>
+
+<input type="submit" value="Make Plot">
+</form>
+
+<p><img src="{$imageurl}">
+		
+<script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
+<script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+ <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script>
+$(document).ready(function(){
+	$( "#datepicker" ).datepicker({dateFormat:"yy-mm-dd",
+		defaultDate: "{$date}",
+		minDate: new Date(2011, 1, 1),
+		maxDate: new Date(2016, 1, 1)});		
+});
+		
+</script>
+</body>
+</html>
+EOF;
+?>
