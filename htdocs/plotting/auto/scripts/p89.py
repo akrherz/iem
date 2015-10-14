@@ -4,19 +4,20 @@ import matplotlib.dates as mdates
 import netCDF4
 from pyiem import iemre
 import pandas as pd
+from collections import OrderedDict
 
-STATES = {'IA': 'Iowa',
-          'IL': 'Illinois',
-          'MO': 'Missouri',
-          'KS': 'Kansas',
-          'NE': 'Nebraska',
-          'SD': 'South Dakota',
-          'ND': 'North Dakota',
-          'MN': 'Minnesota',
-          'WI': 'Wisconsin',
-          'MI': 'Michigan',
-          'OH': 'Ohio',
-          'KY': 'Kentucky'}
+STATES = OrderedDict([('IA', 'Iowa'),
+                      ('IL', 'Illinois'),
+                      ('MO', 'Missouri'),
+                      ('KS', 'Kansas'),
+                      ('NE', 'Nebraska'),
+                      ('SD', 'South Dakota'),
+                      ('ND', 'North Dakota'),
+                      ('MN', 'Minnesota'),
+                      ('WI', 'Wisconsin'),
+                      ('MI', 'Michigan'),
+                      ('OH', 'Ohio'),
+                      ('KY', 'Kentucky')])
 
 
 def get_description():
