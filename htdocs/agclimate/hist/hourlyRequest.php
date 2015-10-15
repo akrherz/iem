@@ -61,7 +61,7 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 
 <p><b><h4 class="subtitle">Select data:</h4></b>
   <input type="checkbox" name="vars[]" value="c100">Air Temperature [F]<BR>
-  <input type="checkbox" name="vars[]" value="c800">Solar Radiation Values [kilo calorie per meter squared]<BR>
+  <input type="checkbox" name="vars[]" value="c800">Solar Radiation Values [kilo calorie per meter squared per second]<br />
   <input type="checkbox" name="vars[]" value="c900">Precipitation [inches]<BR>
   <input type="checkbox" name="vars[]" value="c300">4 inch Soil Temperatures [F]<BR>
   <input type="checkbox" name="vars[]" value="c200">Relative Humidity [%]<BR>
