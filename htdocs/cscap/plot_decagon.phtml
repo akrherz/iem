@@ -3,6 +3,7 @@ include_once "../../include/forms.php";
 
 $site = isset($_GET["site"]) ? $_GET["site"]: 'ISUAG::302E';
 $date = isset($_GET["date"]) ? $_GET["date"]: '2014-06-10';
+$view = isset($_GET['view']) ? $_GET['view']: 'plot';
 $errmsg = "";
 if (strlen($date) != 10){
 	$errmsg = "<div class='alert alert-warning'>Invalid Date Specified!</div>";
@@ -74,8 +75,25 @@ $ar = Array(
 		'3' => 'Hourly Averages');
 $ptypeselect = make_select("ptype", $ptype, $ar);
 
-$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s", 
-		$site, $date, $days, $ptype);
+$ar = Array(
+		'plot'=> 'View Plot',
+		'html' => 'View Raw Data in HTML Table',
+		'csv' => 'View Data as csv'
+		);
+$viewselect = make_select('view', $view, $ar);
+
+$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s&view=%s", 
+		$site, $date, $days, $ptype, $view);
+$interface = "<img src=\"{$imageurl}\">";
+if ($view != 'plot'){
+	$uri = sprintf("http://iem.local/cscap/%s", $imageurl);
+	$data = file_get_contents($uri);
+	if ($view == 'html'){
+		$interface = $data;
+	} else{
+		$interface = sprintf("<pre>%s</pre>", $data);
+	}
+}
 
 echo <<<EOF
 <html lang='en'>
@@ -93,20 +111,21 @@ echo <<<EOF
 <form method="GET" name="plot1">
 <table class="table table-bordered">
 <thead><tr><th>Select Site and Plot:</th><th>Select Start Date</th>
-<th>Number of Days to Plot</th><th>Plot Type</th></tr></thead>
+<th>Number of Days to Plot</th><th>Plot Type</th><th>View Option</th></tr></thead>
 <tbody><tr><td>
 {$siteselect}
 </td>
 <td><input type="text" id="datepicker" name="date" value="{$date}" /></td>
-<td><input type="text" name="days" value="{$days}" /></td>
+<td><input type="text" name="days" value="{$days}" size="4" /></td>
 <td>{$ptypeselect}</td>
+<td>{$viewselect}</td>
 </tr></tbody>
 </table>
 
 <input type="submit" value="Make Plot">
 </form>
 
-<p><img src="{$imageurl}"></p>
+<p>{$interface}</p>
 
 <h3>Observation Site Collection Interval</h3>
 
