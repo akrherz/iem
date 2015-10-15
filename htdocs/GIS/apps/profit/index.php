@@ -77,7 +77,6 @@ $t->content = <<<EOF
   <input type="radio" id="y2011" name="whichyear" value="2011"><label for="y2011">2011</label>
   <input type="radio" id="y2012" name="whichyear" value="2012"><label for="y2012">2012</label>
   <input type="radio" id="y2013" name="whichyear" value="2013"><label for="y2013">2013</label>
-  <input type="radio" id="y2014" name="whichyear" value="2014"><label for="y2014">2014</label>
   <input type="radio" id="y2015" name="whichyear" value="2015" checked="checked"><label for="y2015">2015</label>
 </div>
 		
