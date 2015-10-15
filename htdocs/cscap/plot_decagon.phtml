@@ -39,6 +39,13 @@ $ar = Array(
  "ISUAG::408E"=>"ISUAG 408E (2011-05-24 to 2014-12-31) [1317 days]",
  "ISUAG::408W"=>"ISUAG 408W (2011-05-24 to 2014-12-31) [1317 days]",
  "ISUAG::410E"=>"ISUAG 410E (2011-05-24 to 2014-12-31) [1317 days]",
+		"NAEW::WS109"=>"NAEW WS109 (2013-04-09 to 2014-12-31) [631 days]",
+		"NAEW::WS111"=>"NAEW WS111 (2013-04-10 to 2014-12-31) [630 days]",
+		"NAEW::WS113"=>"NAEW WS113 (2013-04-10 to 2014-12-31) [630 days]",
+		"NAEW::WS115"=>"NAEW WS115 (2014-01-09 to 2014-12-31) [356 days]",
+		"NAEW::WS118"=>"NAEW WS118 (2013-04-09 to 2014-12-31) [631 days]",
+		"NAEW::WS123"=>"NAEW WS123 (2013-04-15 to 2014-12-31) [625 days]",
+		"NAEW::WS127"=>"NAEW WS127 (2013-04-15 to 2014-12-31) [625 days]",
  "SEPAC::10"=>"SEPAC 10 (2011-07-13 to 2014-09-30) [1175 days]",
  "SEPAC::11"=>"SEPAC 11 (2011-07-13 to 2014-09-30) [1175 days]",
  "SEPAC::12"=>"SEPAC 12 (2011-07-13 to 2014-09-30) [1175 days]",
@@ -55,13 +62,16 @@ $ar = Array(
  "SERF::6"=>"SERF 6 (2011-06-03 to 2014-12-31) [1307 days]",
  "SERF::7"=>"SERF 7 (2011-06-03 to 2014-12-31) [1307 days]",
  "SERF::8"=>"SERF 8 (2011-06-03 to 2014-12-31) [1307 days]",
-		
+ "WATERMAN::1"=>"WATERMAN 1 (2013-09-18 to 2014-12-22) [460 days]",
+ "WATERMAN::4"=>"WATERMAN 4 (2013-09-18 to 2014-12-22) [460 days]",
+ "WATERMAN::5"=>"WATERMAN 5 (2013-09-18 to 2014-12-22) [460 days]",		
 		);
 $siteselect = make_select("site", $site, $ar);
 
 $ar = Array(
 		'1' => 'Timeseries',
-		'2' => 'Daily Averages');
+		'2' => 'Daily Averages',
+		'3' => 'Hourly Averages');
 $ptypeselect = make_select("ptype", $ptype, $ar);
 
 $imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s", 
@@ -96,8 +106,21 @@ echo <<<EOF
 <input type="submit" value="Make Plot">
 </form>
 
-<p><img src="{$imageurl}">
-		
+<p><img src="{$imageurl}"></p>
+
+<h3>Observation Site Collection Interval</h3>
+
+<p>This table lists the observation time interval at each site:
+<pre>
+DPAC     5 minute
+GILMORE  5 minute
+ISUAG    5 minute
+NAEW    30 minute
+SEPAC    5 minute
+SERF     5 minute
+WATERMAN 2 minute
+</pre></p>
+
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
