@@ -1,0 +1,91 @@
+# Mapserver mapfile for IDEP 
+MAP
+NAME "IDEP"
+STATUS ON
+SIZE 800 600
+EXTENT -179 1 -40 89
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+IMAGECOLOR -1 -1 -1
+
+PROJECTION
+   "init=epsg:4326"
+END
+
+WEB
+  MINSCALE 90000
+  MAXSCALE 4650000
+  IMAGEPATH "/var/webtmp/"
+  IMAGEURL "/tmp/"
+  #LOG "/var/webtmp/w0.log"
+  METADATA
+   "wms_title" "IEM WMS IDEP Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/idep.cgi?"
+   "wms_srs" "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
+   "wms_abstract" "IEM generated IDEP imagery."
+   "wms_keywords" "WEPP"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+   "wms_enable_request" "*"
+  END
+END
+
+LAYER
+  DATA "/mesonet/data/gis/static/images/26915/iowa/profit2015.tif"
+  NAME "profit2015"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
+
+LAYER
+  DATA "/mesonet/data/gis/static/images/26915/iowa/profit2014.tif"
+  NAME "profit2014"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
+
+LAYER
+  DATA "/mesonet/data/gis/static/images/26915/iowa/profit2013.tif"
+  NAME "profit2013"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
+
+LAYER
+  DATA "/mesonet/data/gis/static/images/26915/iowa/profit2012.tif"
+  NAME "profit2012"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
+
+LAYER
+  DATA "/mesonet/data/gis/static/images/26915/iowa/profit2011.tif"
+  NAME "profit2011"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
+
+
+
+END
