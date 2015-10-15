@@ -1,5 +1,11 @@
 <?php
 include_once "../../include/forms.php";
+
+$site = isset($_GET["site"]) ? $_GET["site"]: 'ISUAG::302E';
+$date = isset($_GET["date"]) ? $_GET["date"]: '2014-06-10';
+$days = isset($_GET["days"]) ? intval($_GET["days"]): 1;
+$ptype = isset($_GET['ptype']) ? $_GET['ptype']: '1';
+
 // with data as (select distinct '"'||uniqueid || '::'|| plotid || '"' as bah from decagon_data) SELECT bah || '=>' || bah || ',' as d from data ORDER by d;
 $ar = Array(
 		"DPAC::NE"=>"DPAC::NE",
@@ -45,13 +51,15 @@ $ar = Array(
 		"SERF::7"=>"SERF::7",
 		"SERF::8"=>"SERF::8",
 		);
-$site = isset($_GET["site"]) ? $_GET["site"]: 'ISUAG::302E';
-$date = isset($_GET["date"]) ? $_GET["date"]: '2014-01-10';
-$days = isset($_GET["days"]) ? intval($_GET["days"]): 1;
 $siteselect = make_select("site", $site, $ar);
 
-$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s", $site, $date,
-		$days);
+$ar = Array(
+		'1' => 'Timeseries',
+		'2' => 'Daily Averages');
+$ptypeselect = make_select("ptype", $ptype, $ar);
+
+$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s", 
+		$site, $date, $days, $ptype);
 
 echo <<<EOF
 <html lang='en'>
@@ -66,12 +74,14 @@ echo <<<EOF
     
 <form method="GET" name="plot1">
 <table class="table table-bordered">
-<thead><tr><th>Select Site:</th><th>Select Start Date</th><th>Number of Days to Plot</th></tr></thead>
+<thead><tr><th>Select Site:</th><th>Select Start Date</th>
+<th>Number of Days to Plot</th><th>Plot Type</th></tr></thead>
 <tbody><tr><td>
 {$siteselect}
 </td>
 <td><input type="text" id="datepicker" name="date" value="{$date}" /></td>
 <td><input type="text" name="days" value="{$days}" /></td>
+<td>{$ptypeselect}</td>
 </tr></tbody>
 </table>
 
