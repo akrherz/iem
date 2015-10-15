@@ -36,6 +36,7 @@ def make_plot(form):
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
     tzname = 'America/Chicago' if uniqueid in ['ISUAG', 'SERF', 'GILMORE'] else 'America/New_York'
     tz = pytz.timezone(tzname)
+    viewopt = form.getfirst('view', 'plot')
     ptype = form.getfirst('ptype', '1')
     if ptype == '1':
         df = read_sql("""SELECT valid at time zone 'UTC' as v,
@@ -68,6 +69,15 @@ def make_plot(form):
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     if len(df.index) < 3:
         send_error("No Data Found, sorry!")
+    if viewopt != 'plot':
+        if viewopt == 'html':
+            sys.stdout.write("Content-type: text/html\n\n")
+            sys.stdout.write(df.to_html())
+            return
+        if viewopt == 'csv':
+            sys.stdout.write("Content-type: text/plain\n\n")
+            sys.stdout.write(df.to_csv())
+            return
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
     ax[0].set_title(("Decagon Temperature + Moisture for\n%s %s %s to %s"
