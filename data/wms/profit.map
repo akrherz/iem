@@ -86,6 +86,16 @@ LAYER
   TYPE RASTER
 END
 
+LAYER
+  DATA "/mesonet/data/gis/static/images/26915/iowa/profit2010.tif"
+  NAME "profit2010"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  OFFSITE 0 0 0
+  TYPE RASTER
+END
 
 
 END
