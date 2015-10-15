@@ -46,6 +46,16 @@ def make_plot(form):
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
+    elif ptype == '3':
+        df = read_sql("""SELECT date_trunc('hour', valid) as v,
+        avg(d1temp) as d1t, avg(d2temp) as d2t,
+        avg(d3temp) as d3t, avg(d4temp) as d4t, avg(d5temp) as d5t,
+        avg(d1moisture) as d1m, avg(d2moisture) as d2m,
+        avg(d3moisture) as d3m, avg(d4moisture) as d4m,
+        avg(d5moisture) as d5m
+        from decagon_data WHERE uniqueid = %s and plotid = %s
+        and valid between %s and %s GROUP by v ORDER by v ASC
+        """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     else:
         df = read_sql("""SELECT date(valid) as v,
         avg(d1temp) as d1t, avg(d2temp) as d2t,
