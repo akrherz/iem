@@ -59,6 +59,13 @@ $(document).ready(function(){
                         source: new ol.source.XYZ({
                                 url : '/c/tile.py/1.0.0/profit2011/{z}/{x}/{y}.png'
                         })
+                }),
+                new ol.layer.Tile({
+                        title: 'Profit 2010',
+						visible: false,
+                        source: new ol.source.XYZ({
+                                url : '/c/tile.py/1.0.0/profit2010/{z}/{x}/{y}.png'
+                        })
                 })],
 		view: new ol.View({
                         projection: 'EPSG:3857',
