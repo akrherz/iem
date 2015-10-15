@@ -60,24 +60,27 @@ def make_plot(form):
         send_error("No Data Found, sorry!")
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
-    ax[0].set_title(("Decagon Temperature + Moisture for\n%s %s %s -> %s"
+    ax[0].set_title(("Decagon Temperature + Moisture for\n%s %s %s to %s"
                      ) % (uniqueid, plotid, sts.date(), ets.date()))
-    ax[0].plot(df['v'], df['d1t'], lw=2, label='10cm')
-    ax[0].plot(df['v'], df['d2t'], lw=2, label='20cm')
-    ax[0].plot(df['v'], df['d3t'], lw=2, label='40cm')
-    ax[0].plot(df['v'], df['d4t'], lw=2, label='60cm')
-    ax[0].plot(df['v'], df['d5t'], lw=2, label='100cm')
+    ax[0].plot(df['v'], df['d1t'], c='r', lw=2, label='10cm')
+    ax[0].plot(df['v'], df['d2t'], c='purple', lw=2, label='20cm')
+    ax[0].plot(df['v'], df['d3t'], c='b', lw=2, label='40cm')
+    ax[0].plot(df['v'], df['d4t'], c='g', lw=2, label='60cm')
+    ax[0].plot(df['v'], df['d5t'], c='turquoise', lw=2, label='100cm')
     ax[0].grid()
     ax[0].set_ylabel("Temperature [C]")
     ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, -0.001), ncol=5,
                  fontsize=12)
 
-    ax[1].plot(df['v'], df['d1m'], lw=2)
-    ax[1].plot(df['v'], df['d2m'], lw=2)
-    ax[1].plot(df['v'], df['d3m'], lw=2)
-    ax[1].plot(df['v'], df['d4m'], lw=2)
-    ax[1].plot(df['v'], df['d5m'], lw=2)
+    ax[1].plot(df['v'], df['d1m'], c='r', lw=2)
+    ax[1].plot(df['v'], df['d2m'], c='purple', lw=2)
+    ax[1].plot(df['v'], df['d3m'], c='b', lw=2)
+    ax[1].plot(df['v'], df['d4m'], c='g', lw=2)
+    ax[1].plot(df['v'], df['d5m'], c='turquoise', lw=2)
     ax[1].grid(True)
+    v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
+             df['d4m'].min(), df['d5m'].min()])
+    ax[1].set_ylim(0 if v > 0 else v)
     ax[1].set_ylabel("Volumetric Soil Moisture [%]", fontsize=9)
     if days > 4:
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y',
