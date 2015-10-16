@@ -58,7 +58,7 @@ def make_plot(form):
         and valid between %s and %s GROUP by v ORDER by v ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     else:
-        df = read_sql("""SELECT date(valid) as v,
+        df = read_sql("""SELECT date(valid at time zone %s) as v,
         avg(d1temp) as d1t, avg(d2temp) as d2t,
         avg(d3temp) as d3t, avg(d4temp) as d4t, avg(d5temp) as d5t,
         avg(d1moisture) as d1m, avg(d2moisture) as d2m,
@@ -66,21 +66,35 @@ def make_plot(form):
         avg(d5moisture) as d5m
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s GROUP by v ORDER by v ASC
-        """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
+        """, pgconn, params=(tzname, uniqueid, plotid, sts.date(), ets.date()))
     if len(df.index) < 3:
         send_error("No / Not Enough Data Found, sorry!")
+    if ptype not in ['2', ]:
+        df['v'] = df['v'].apply(
+            lambda x: x.tz_localize('UTC').tz_convert(tzname))
+
     if viewopt != 'plot':
+        df.rename(columns=dict(v='timestamp', d1t='Depth1 Temp (C)',
+                               d2t='Depth2 Temp (C)', d3t='Depth3 Temp (C)',
+                               d4t='Depth4 Temp (C)', d5t='Depth5 Temp (C)',
+                               d1m='Depth1 Moisture (1)',
+                               d2m='Depth2 Moisture (1)',
+                               d3m='Depth3 Moisture (1)',
+                               d4m='Depth4 Moisture (1)',
+                               d5m='Depth5 Moisture (1)'),
+                  inplace=True)
         if viewopt == 'html':
             sys.stdout.write("Content-type: text/html\n\n")
-            sys.stdout.write(df.to_html())
+            sys.stdout.write(df.to_html(index=False))
             return
         if viewopt == 'csv':
             sys.stdout.write("Content-type: text/plain\n\n")
-            sys.stdout.write(df.to_csv())
+            sys.stdout.write(df.to_csv(index=False))
             return
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
-    ax[0].set_title(("Decagon Temperature + Moisture for\n%s %s %s to %s"
+    ax[0].set_title(("Decagon Temperature + Moisture for\n"
+                     "Site:%s Plot:%s Period:%s to %s"
                      ) % (uniqueid, plotid, sts.date(), ets.date()))
     ax[0].plot(df['v'], df['d1t'].astype('f'), c='r', lw=2, label='10cm')
     ax[0].plot(df['v'], df['d2t'].astype('f'), c='purple', lw=2, label='20cm')
@@ -104,13 +118,15 @@ def make_plot(form):
     v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
               df['d4m'].max(), df['d5m'].max()])
     ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
-    ax[1].set_ylabel("Volumetric Soil Moisture [%]", fontsize=9)
+    ax[1].set_ylabel("Volumetric Soil Moisture [1]", fontsize=9)
     if days > 4:
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y',
                                                              tz=tz))
     else:
         ax[1].xaxis.set_major_formatter(
             mdates.DateFormatter('%I %p\n%-d %b', tz=tz))
+    ax[1].set_xlabel("Time (%s Timezone)" % (tzname, ))
+    plt.subplots_adjust(bottom=0.15)
     sys.stdout.write("Content-type: image/png\n\n")
     ram = cStringIO.StringIO()
     fig.savefig(ram, format='png')
