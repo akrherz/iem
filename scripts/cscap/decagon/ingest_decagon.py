@@ -11,6 +11,7 @@ CENTRAL_TIME = ['ISUAG', 'GILMORE', 'SERF']
 def translate(df):
     """Translate data columns"""
     x = {}
+    # print df.columns
     for colname in df.columns:
         tokens = colname.split()
         name = None
@@ -73,8 +74,14 @@ def database_save(uniqueid, plot, df):
     if cursor.rowcount > 0:
         print("DELETED %s rows previously saved!" % (cursor.rowcount, ))
 
+    if 'd1ec' not in df.columns:
+        print('MISSING d1ec, using nulls')
+        df['d1ec'] = None
+
     def v(row, name):
         val = row[name]
+        if val is None:
+            return 'null'
         if isinstance(val, str):
             if val.strip().lower() in ['nan', ]:
                 return 'null'
@@ -92,10 +99,20 @@ def database_save(uniqueid, plot, df):
         cursor.execute("""
         INSERT into decagon_data(uniqueid, plotid, valid, d1moisture, d1temp,
         d1ec, d2moisture, d2temp, d3moisture, d3temp, d4moisture, d4temp,
-        d5moisture, d5temp) VALUES ('%s', '%s', '%s', %s, %s,
+        d5moisture, d5temp, d1moisture_qc, d1temp_qc,
+        d1ec_qc, d2moisture_qc, d2temp_qc, d3moisture_qc, d3temp_qc,
+        d4moisture_qc, d4temp_qc,
+        d5moisture_qc, d5temp_qc) VALUES ('%s', '%s', '%s', %s, %s,
+        %s, %s, %s, %s, %s, %s, %s,
+        %s, %s, %s, %s,
         %s, %s, %s, %s, %s, %s, %s,
         %s, %s)
         """ % (uniqueid, plot, row['valid'].strftime("%Y-%m-%d %H:%M-"+tzoff),
+               v(row, 'd1moisture'), v(row, 'd1temp'), v(row, 'd1ec'),
+               v(row, 'd2moisture'), v(row, 'd2temp'),
+               v(row, 'd3moisture'), v(row, 'd3temp'),
+               v(row, 'd4moisture'), v(row, 'd4temp'),
+               v(row, 'd5moisture'), v(row, 'd5temp'),
                v(row, 'd1moisture'), v(row, 'd1temp'), v(row, 'd1ec'),
                v(row, 'd2moisture'), v(row, 'd2temp'),
                v(row, 'd3moisture'), v(row, 'd3temp'),
