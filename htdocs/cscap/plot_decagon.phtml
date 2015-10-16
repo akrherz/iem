@@ -70,9 +70,10 @@ $ar = Array(
 $siteselect = make_select("site", $site, $ar);
 
 $ar = Array(
-		'1' => 'Timeseries',
+		'1' => 'Observations (no aggregation)',
+		'3' => 'Hourly Averages',
 		'2' => 'Daily Averages',
-		'3' => 'Hourly Averages');
+		);
 $ptypeselect = make_select("ptype", $ptype, $ar);
 
 $ar = Array(
@@ -115,11 +116,11 @@ echo <<<EOF
 <form method="GET" name="plot1">
 <table class="table table-bordered">
 <thead><tr><th>Select Site and Plot:</th><th>Select Start Date</th>
-<th>Number of Days to Plot</th><th>Plot Type</th><th>View Option</th></tr></thead>
+<th>Number of Days to Plot</th><th>Timeseries Aggregation:</th><th>View Option</th></tr></thead>
 <tbody><tr><td>
 {$siteselect}
 </td>
-<td><input type="text" id="datepicker" name="date" value="{$date}" /></td>
+<td><input type="text" id="datepicker" name="date" value="{$date}" size="11" /></td>
 <td><input type="text" name="days" value="{$days}" size="4" /></td>
 <td>{$ptypeselect}</td>
 <td>{$viewselect}</td>

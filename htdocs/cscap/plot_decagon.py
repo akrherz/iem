@@ -90,7 +90,7 @@ def make_plot(form):
                label='100cm')
     ax[0].grid()
     ax[0].set_ylabel("Temperature [C]")
-    ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, -0.001), ncol=5,
+    ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, 0), ncol=5,
                  fontsize=12)
 
     ax[1].plot(df['v'], df['d1m'].astype('f'), c='r', lw=2)
@@ -101,7 +101,9 @@ def make_plot(form):
     ax[1].grid(True)
     v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
              df['d4m'].min(), df['d5m'].min()])
-    ax[1].set_ylim(0 if v > 0 else v)
+    v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
+              df['d4m'].max(), df['d5m'].max()])
+    ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
     ax[1].set_ylabel("Volumetric Soil Moisture [%]", fontsize=9)
     if days > 4:
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y',
