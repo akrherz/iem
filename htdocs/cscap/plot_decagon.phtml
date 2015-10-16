@@ -18,6 +18,8 @@ $ar = Array(
  "DPAC::NW"=>"DPAC NW (2011-07-01 to 2014-12-04) [1252 days]",
  "DPAC::SE"=>"DPAC SE (2011-07-01 to 2014-12-04) [1252 days]",
  "DPAC::SW"=>"DPAC SW (2011-07-01 to 2014-12-04) [1252 days]",
+ "GILMORE::3-1"=>"GILMORE 3-1 (2011-06-01 to 2013-10-28) [880 days]",
+ "GILMORE::4-1"=>"GILMORE 4-1 (2011-06-01 to 2013-12-31) [944 days]",
  "GILMORE::11-1"=>"GILMORE 11-1 (2011-06-01 to 2013-12-16) [929 days]",
  "GILMORE::11-2"=>"GILMORE 11-2 (2011-06-01 to 2013-12-31) [944 days]",
  "GILMORE::12-2"=>"GILMORE 12-2 (2011-06-01 to 2013-12-31) [944 days]",
@@ -30,11 +32,9 @@ $ar = Array(
  "GILMORE::21-3"=>"GILMORE 21-3 (2011-06-01 to 2013-12-31) [944 days]",
  "GILMORE::22-3"=>"GILMORE 22-3 (2011-06-01 to 2013-10-18) [870 days]",
  "GILMORE::24-3"=>"GILMORE 24-3 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::3-1"=>"GILMORE 3-1 (2011-06-01 to 2013-10-28) [880 days]",
- "GILMORE::4-1"=>"GILMORE 4-1 (2011-06-01 to 2013-12-31) [944 days]",
  "ISUAG::302E"=>"ISUAG 302E (2011-05-24 to 2014-12-31) [1317 days]",
  "ISUAG::302W"=>"ISUAG 302W (2011-05-24 to 2014-12-31) [1317 days]",
- "ISUAG::308E"=>"ISUAG 308E (2000-01-02 to 2014-12-31) [5477 days]",
+ "ISUAG::308E"=>"ISUAG 308E (2011-05-24 to 2014-12-31) [5477 days]",
  "ISUAG::311W"=>"ISUAG 311W (2011-05-24 to 2014-12-31) [1317 days]",
  "ISUAG::402W"=>"ISUAG 402W (2011-05-27 to 2014-12-31) [1314 days]",
  "ISUAG::408E"=>"ISUAG 408E (2011-05-24 to 2014-12-31) [1317 days]",
@@ -47,14 +47,14 @@ $ar = Array(
 		"NAEW::WS118"=>"NAEW WS118 (2013-04-09 to 2014-12-31) [631 days]",
 		"NAEW::WS123"=>"NAEW WS123 (2013-04-15 to 2014-12-31) [625 days]",
 		"NAEW::WS127"=>"NAEW WS127 (2013-04-15 to 2014-12-31) [625 days]",
- "SEPAC::10"=>"SEPAC 10 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::11"=>"SEPAC 11 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::12"=>"SEPAC 12 (2011-07-13 to 2014-09-30) [1175 days]",
  "SEPAC::5"=>"SEPAC 5 (2011-07-13 to 2014-09-30) [1175 days]",
  "SEPAC::6"=>"SEPAC 6 (2011-06-30 to 2014-09-30) [1188 days]",
  "SEPAC::7"=>"SEPAC 7 (2011-06-30 to 2014-09-30) [1188 days]",
  "SEPAC::8"=>"SEPAC 8 (2011-07-13 to 2014-09-30) [1175 days]",
  "SEPAC::9"=>"SEPAC 9 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::10"=>"SEPAC 10 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::11"=>"SEPAC 11 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::12"=>"SEPAC 12 (2011-07-13 to 2014-09-30) [1175 days]",
  "SERF::1"=>"SERF 1 (2011-06-03 to 2014-12-31) [1307 days]",
  "SERF::2"=>"SERF 2 (2011-06-07 to 2014-05-22) [1080 days]",
  "SERF::3"=>"SERF 3 (2011-06-03 to 2014-12-31) [1307 days]",
@@ -82,10 +82,9 @@ $ar = Array(
 		);
 $viewselect = make_select('view', $view, $ar);
 
-$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s&view=%s", 
-		$site, $date, $days, $ptype, $view);
-$interface = "<img src=\"{$imageurl}\">";
 if ($view != 'plot'){
+	$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s&view=%s", 
+		$site, $date, $days, $ptype, $view);
 	$uri = sprintf("http://iem.local/cscap/%s", $imageurl);
 	$data = file_get_contents($uri);
 	if ($view == 'html'){
@@ -93,6 +92,11 @@ if ($view != 'plot'){
 	} else{
 		$interface = sprintf("<pre>%s</pre>", $data);
 	}
+} else {
+	$imageurl = sprintf("decagon_%s_%s_%s_%s.png", 
+		$site, $date, $days, $ptype);
+	$interface = "<img src=\"{$imageurl}\">";
+	
 }
 
 echo <<<EOF

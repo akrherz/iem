@@ -68,7 +68,7 @@ def make_plot(form):
         and valid between %s and %s GROUP by v ORDER by v ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     if len(df.index) < 3:
-        send_error("No Data Found, sorry!")
+        send_error("No / Not Enough Data Found, sorry!")
     if viewopt != 'plot':
         if viewopt == 'html':
             sys.stdout.write("Content-type: text/html\n\n")
@@ -82,21 +82,22 @@ def make_plot(form):
     (fig, ax) = plt.subplots(2, 1, sharex=True)
     ax[0].set_title(("Decagon Temperature + Moisture for\n%s %s %s to %s"
                      ) % (uniqueid, plotid, sts.date(), ets.date()))
-    ax[0].plot(df['v'], df['d1t'], c='r', lw=2, label='10cm')
-    ax[0].plot(df['v'], df['d2t'], c='purple', lw=2, label='20cm')
-    ax[0].plot(df['v'], df['d3t'], c='b', lw=2, label='40cm')
-    ax[0].plot(df['v'], df['d4t'], c='g', lw=2, label='60cm')
-    ax[0].plot(df['v'], df['d5t'], c='turquoise', lw=2, label='100cm')
+    ax[0].plot(df['v'], df['d1t'].astype('f'), c='r', lw=2, label='10cm')
+    ax[0].plot(df['v'], df['d2t'].astype('f'), c='purple', lw=2, label='20cm')
+    ax[0].plot(df['v'], df['d3t'].astype('f'), c='b', lw=2, label='40cm')
+    ax[0].plot(df['v'], df['d4t'].astype('f'), c='g', lw=2, label='60cm')
+    ax[0].plot(df['v'], df['d5t'].astype('f'), c='turquoise', lw=2,
+               label='100cm')
     ax[0].grid()
     ax[0].set_ylabel("Temperature [C]")
     ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, -0.001), ncol=5,
                  fontsize=12)
 
-    ax[1].plot(df['v'], df['d1m'], c='r', lw=2)
-    ax[1].plot(df['v'], df['d2m'], c='purple', lw=2)
-    ax[1].plot(df['v'], df['d3m'], c='b', lw=2)
-    ax[1].plot(df['v'], df['d4m'], c='g', lw=2)
-    ax[1].plot(df['v'], df['d5m'], c='turquoise', lw=2)
+    ax[1].plot(df['v'], df['d1m'].astype('f'), c='r', lw=2)
+    ax[1].plot(df['v'], df['d2m'].astype('f'), c='purple', lw=2)
+    ax[1].plot(df['v'], df['d3m'].astype('f'), c='b', lw=2)
+    ax[1].plot(df['v'], df['d4m'].astype('f'), c='g', lw=2)
+    ax[1].plot(df['v'], df['d5m'].astype('f'), c='turquoise', lw=2)
     ax[1].grid(True)
     v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
              df['d4m'].min(), df['d5m'].min()])
