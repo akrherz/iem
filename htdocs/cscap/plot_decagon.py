@@ -40,30 +40,30 @@ def make_plot(form):
     ptype = form.getfirst('ptype', '1')
     if ptype == '1':
         df = read_sql("""SELECT valid at time zone 'UTC' as v,
-        d1temp as d1t, d2temp as d2t, d3temp as d3t, d4temp as d4t,
-        d5temp as d5t,
-        d1moisture as d1m, d2moisture as d2m, d3moisture as d3m,
-        d4moisture as d4m, d5moisture as d5m
+        d1temp_qc as d1t, d2temp_qc as d2t, d3temp_qc as d3t, d4temp_qc as d4t,
+        d5temp_qc as d5t,
+        d1moisture_qc as d1m, d2moisture_qc as d2m, d3moisture_qc as d3m,
+        d4moisture_qc as d4m, d5moisture_qc as d5m
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     elif ptype == '3':
         df = read_sql("""SELECT date_trunc('hour', valid) as v,
-        avg(d1temp) as d1t, avg(d2temp) as d2t,
-        avg(d3temp) as d3t, avg(d4temp) as d4t, avg(d5temp) as d5t,
-        avg(d1moisture) as d1m, avg(d2moisture) as d2m,
-        avg(d3moisture) as d3m, avg(d4moisture) as d4m,
-        avg(d5moisture) as d5m
+        avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
+        avg(d3temp_qc) as d3t, avg(d4temp_qc) as d4t, avg(d5temp_qc) as d5t,
+        avg(d1moisture_qc) as d1m, avg(d2moisture_qc) as d2m,
+        avg(d3moisture_qc) as d3m, avg(d4moisture_qc) as d4m,
+        avg(d5moisture_qc) as d5m
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s GROUP by v ORDER by v ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     else:
         df = read_sql("""SELECT date(valid at time zone %s) as v,
-        avg(d1temp) as d1t, avg(d2temp) as d2t,
-        avg(d3temp) as d3t, avg(d4temp) as d4t, avg(d5temp) as d5t,
-        avg(d1moisture) as d1m, avg(d2moisture) as d2m,
-        avg(d3moisture) as d3m, avg(d4moisture) as d4m,
-        avg(d5moisture) as d5m
+        avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
+        avg(d3temp_qc) as d3t, avg(d4temp_qc) as d4t, avg(d5temp_qc) as d5t,
+        avg(d1moisture_qc) as d1m, avg(d2moisture_qc) as d2m,
+        avg(d3moisture_qc) as d3m, avg(d4moisture_qc) as d4m,
+        avg(d5moisture_qc) as d5m
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s GROUP by v ORDER by v ASC
         """, pgconn, params=(tzname, uniqueid, plotid, sts.date(), ets.date()))
