@@ -38,14 +38,14 @@ data = {'plots': [
         {'id': "60", 'label': ("Hourly Temperature Frequencies "
                                "Above/Below Threshold")},
         {'id': "86", 'mw': True, 'label': "IEM Daily Reanalysis Plots"},
-        {'id': "84", 'mw': True,
-         'label': "MRMS Q3 Estimated Precipitation (multiday summaries too)"},
         {'id': "34", 'mw': True,
-         'label': "Maximum Stretch of Days with High Below Threshold"},
+         'label': "Max Stretch of Days with High/Low Above/Below Threshold"},
         {'id': "26",
          'label': "Min Daily Low after 1 July / Max Daily High before 1 July"},
         {'id': "5", 'mw': True,
          'label': "Minimum Daily Temperature Range"},
+        {'id': "84", 'mw': True,
+         'label': "MRMS Q3 Estimated Precipitation (multiday summaries too)"},
         {'id': "22", 'mw': True,
          'label': ("Percentage of Years within Temperature Range "
                    "from Averages")},
