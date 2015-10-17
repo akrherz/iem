@@ -8,6 +8,7 @@ import gdata.docs.client
 
 import json
 import os
+from gdata.docs.service import FOLDERS_SCHEME_PREFIX
 
 # Load up the CONFIG
 CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
@@ -332,3 +333,28 @@ def get_driveclient():
     http_auth = credentials.authorize(Http())
 
     return build('drive', 'v2', http=http_auth)
+
+
+def get_folders(drive):
+    """Return a dict of Google Drive Folders"""
+    f = {}
+
+    folders = drive.files().list(
+        q="mimeType = 'application/vnd.google-apps.folder'",
+        maxResults=999).execute()
+    for _, item in enumerate(folders['items']):
+        f[item['id']] = dict(title=item['title'], parents=[],
+                             basefolder=None)
+        for parent in item['parents']:
+            f[item['id']]['parents'].append(parent['id'])
+
+    for thisfolder in f:
+        # title = f[thisfolder]['title']
+        if len(f[thisfolder]['parents']) == 0:
+            continue
+        parentfolder = f[thisfolder]['parents'][0]
+        while len(f[parentfolder]['parents']) > 0:
+            parentfolder = f[parentfolder]['parents'][0]
+        # print title, '->', f[parentfolder]['title']
+        f[thisfolder]['basefolder'] = parentfolder
+    return f

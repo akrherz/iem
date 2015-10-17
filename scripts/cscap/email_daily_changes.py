@@ -60,34 +60,15 @@ def sites_changelog(regime, yesterday, html):
     return html
 
 
-def get_base_folder_id(regime, drive, fileid, depth=0):
-    """Find the base folder of this fileid"""
-    # print("Here with fileid: %s depth: %s" % (fileid, depth))
-    depth += 1
-    if depth > 10:
-        print('iterloop exceeded, returning None')
-        return None
-    try:
-        parents = drive.parents().list(fileId=fileid).execute()
-    except Exception, exp:
-        print("%s Exception %s for %s" % (regime, exp, fileid))
-        return None
-    for p1 in parents['items']:
-        if p1['id'] in [util.CONFIG['td']['basefolder'],
-                        util.CONFIG['cscap']['basefolder']]:
-            return p1['id']
-        return get_base_folder_id(regime, drive, p1['id'], depth)
-
-
 def drive_changelog(regime, yesterday, html):
     """ Do something """
     drive = util.get_driveclient()
-
+    folders = util.get_folders(drive)
     start_change_id = util.CONFIG.get("changestamp_"+regime, "1")
 
     html += """<p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
-<tr><th>Changestamp</th><th>Time</th><th>Author</th><th>Resource</th></tr>
+<tr><th>#</th><th>Time</th><th>Author</th><th>Folder</th><th>Resource</th></tr>
 </thead>
 <tbody>"""
 
@@ -117,26 +98,37 @@ def drive_changelog(regime, yesterday, html):
             if modifiedDate < yesterday:
                 continue
             # Need to see which base folder this file is in!
-            parentid = get_base_folder_id(regime, drive, item['fileId'])
-            if parentid != util.CONFIG[regime]['basefolder']:
-                print(('Skipping %s as it is other project'
-                       ) % (repr(item['file']['title']), ))
+            isproject = False
+            for parent in item['file']['parents']:
+                if parent['id'] not in folders:
+                    print(('[%s] file: %s has unknown parent: %s'
+                           ) % (regime, item['id'], parent['id']))
+                    continue
+                if (folders[parent['id']]['basefolder'] ==
+                        util.CONFIG[regime]['basefolder']):
+                    isproject = True
+            if not isproject:
+                print(('[%s] %s skipped'
+                       ) % (regime, repr(item['file']['title'])))
                 continue
             uri = item['file']['alternateLink']
             title = item['file']['title'].encode('ascii', 'ignore')
             author = item['file']['lastModifyingUserName']
             localts = modifiedDate.astimezone(pytz.timezone("America/Chicago"))
             hits += 1
+            pfolder = item['file']['parents'][0]['id']
             html += """
-<tr><td>%s</td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>
+<tr><td>%s</td><td>%s</td><td>%s</td>
+<td><a href="https://docs.google.com/folderview?id=%s&usp=drivesdk">%s</a></td>
+<td><a href="%s">%s</a></td></tr>
             """ % (changestamp, localts.strftime("%-d %b %I:%M %P"),
-                   author, uri, title)
+                   author, pfolder, folders[pfolder]['title'], uri, title)
         if not page_token:
             break
 
     util.CONFIG['changestamp_'+regime] = changestamp
     if hits == 0:
-        html += """<tr><td colspan="4">No Changes Found...</td></tr>\n"""
+        html += """<tr><td colspan="5">No Changes Found...</td></tr>\n"""
 
     html += """</tbody></table>"""
 
@@ -168,7 +160,7 @@ def main(argv):
 
     html += """<p>That is all...</p>"""
     # debugging
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 3:
         o = open('/tmp/out.html', 'w')
         o.write(html)
         o.close()
