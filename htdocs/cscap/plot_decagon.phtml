@@ -79,7 +79,8 @@ $ptypeselect = make_select("ptype", $ptype, $ar);
 $ar = Array(
 		'plot'=> 'View Plot',
 		'html' => 'View Raw Data in HTML Table',
-		'csv' => 'View Data as csv'
+		'csv' => 'Download as CSV File',
+		'excel' => 'Download as Excel File'
 		);
 $viewselect = make_select('view', $view, $ar);
 
@@ -87,11 +88,12 @@ if ($view != 'plot'){
 	$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s&view=%s", 
 		$site, $date, $days, $ptype, $view);
 	$uri = sprintf("http://iem.local/cscap/%s", $imageurl);
-	$data = file_get_contents($uri);
 	if ($view == 'html'){
+		$data = file_get_contents($uri);
 		$interface = $data;
 	} else{
-		$interface = sprintf("<pre>%s</pre>", $data);
+		Header(sprintf("Location: /cscap/%s", $imageurl));
+		die();
 	}
 } else {
 	$imageurl = sprintf("decagon_%s_%s_%s_%s.png", 
