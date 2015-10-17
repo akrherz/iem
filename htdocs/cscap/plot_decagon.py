@@ -4,10 +4,12 @@ import psycopg2
 import matplotlib
 import sys
 import cStringIO
+import pandas as pd
 from pandas.io.sql import read_sql
 import cgi
 import datetime
 import pytz
+import os
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.dates as mdates  # NOPEP8
@@ -88,8 +90,24 @@ def make_plot(form):
             sys.stdout.write(df.to_html(index=False))
             return
         if viewopt == 'csv':
-            sys.stdout.write("Content-type: text/plain\n\n")
+            sys.stdout.write('Content-type: application/octet-stream\n')
+            sys.stdout.write(('Content-Disposition: attachment; '
+                              'filename=%s_%s_%s_%s.csv\n\n'
+                              ) % (uniqueid, plotid, sts.strftime("%Y%m%d"),
+                                   ets.strftime("%Y%m%d")))
             sys.stdout.write(df.to_csv(index=False))
+            return
+        if viewopt == 'excel':
+            sys.stdout.write('Content-type: application/octet-stream\n')
+            sys.stdout.write(('Content-Disposition: attachment; '
+                              'filename=%s_%s_%s_%s.xlsx\n\n'
+                              ) % (uniqueid, plotid, sts.strftime("%Y%m%d"),
+                                   ets.strftime("%Y%m%d")))
+            writer = pd.ExcelWriter('/tmp/ss.xlsx')
+            df.to_excel(writer, 'Data', index=False)
+            writer.save()
+            sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+            os.unlink('/tmp/ss.xlsx')
             return
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
@@ -118,7 +136,8 @@ def make_plot(form):
     v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
               df['d4m'].max(), df['d5m'].max()])
     ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
-    ax[1].set_ylabel("Volumetric Soil Moisture [1]", fontsize=9)
+    ax[1].set_ylabel("Volumetric Soil Moisture [cm$^{3}$ cm$^{-3}$]",
+                     fontsize=9)
     if days > 4:
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y',
                                                              tz=tz))
