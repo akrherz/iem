@@ -14,58 +14,58 @@ $ptype = isset($_GET['ptype']) ? $_GET['ptype']: '1';
 
 //with data as (select uniqueid, plotid, min(date(valid)), max(date(valid)) from decagon_data GROUP by uniqueid, plotid) SELECT '"'||uniqueid || '::'|| plotid || '"=>"' || uniqueid || ' '||plotid||' ('|| min ||' to '|| max ||') ['|| (max - min) ||' days]",' as d from data ORDER by d;
 $ar = Array(
- "DPAC::NE"=>"DPAC NE (2011-07-01 to 2014-12-04) [1252 days]",
- "DPAC::NW"=>"DPAC NW (2011-07-01 to 2014-12-04) [1252 days]",
- "DPAC::SE"=>"DPAC SE (2011-07-01 to 2014-12-04) [1252 days]",
- "DPAC::SW"=>"DPAC SW (2011-07-01 to 2014-12-04) [1252 days]",
- "GILMORE::3-1"=>"GILMORE 3-1 (2011-06-01 to 2013-10-28) [880 days]",
- "GILMORE::4-1"=>"GILMORE 4-1 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::11-1"=>"GILMORE 11-1 (2011-06-01 to 2013-12-16) [929 days]",
- "GILMORE::11-2"=>"GILMORE 11-2 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::12-2"=>"GILMORE 12-2 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::14-1"=>"GILMORE 14-1 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::14-2"=>"GILMORE 14-2 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::16-2"=>"GILMORE 16-2 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::17-3"=>"GILMORE 17-3 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::19-1"=>"GILMORE 19-1 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::19-3"=>"GILMORE 19-3 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::21-3"=>"GILMORE 21-3 (2011-06-01 to 2013-12-31) [944 days]",
- "GILMORE::22-3"=>"GILMORE 22-3 (2011-06-01 to 2013-10-18) [870 days]",
- "GILMORE::24-3"=>"GILMORE 24-3 (2011-06-01 to 2013-12-31) [944 days]",
- "ISUAG::302E"=>"ISUAG 302E (2011-05-24 to 2014-12-31) [1317 days]",
- "ISUAG::302W"=>"ISUAG 302W (2011-05-24 to 2014-12-31) [1317 days]",
- "ISUAG::308E"=>"ISUAG 308E (2011-05-24 to 2014-12-31) [5477 days]",
- "ISUAG::311W"=>"ISUAG 311W (2011-05-24 to 2014-12-31) [1317 days]",
- "ISUAG::402W"=>"ISUAG 402W (2011-05-27 to 2014-12-31) [1314 days]",
- "ISUAG::408E"=>"ISUAG 408E (2011-05-24 to 2014-12-31) [1317 days]",
- "ISUAG::408W"=>"ISUAG 408W (2011-05-24 to 2014-12-31) [1317 days]",
- "ISUAG::410E"=>"ISUAG 410E (2011-05-24 to 2014-12-31) [1317 days]",
-		"NAEW::WS109"=>"NAEW WS109 (2013-04-09 to 2014-12-31) [631 days]",
-		"NAEW::WS111"=>"NAEW WS111 (2013-04-10 to 2014-12-31) [630 days]",
-		"NAEW::WS113"=>"NAEW WS113 (2013-04-10 to 2014-12-31) [630 days]",
-		"NAEW::WS115"=>"NAEW WS115 (2013-04-15 to 2014-12-31) [356 days]",
-		"NAEW::WS118"=>"NAEW WS118 (2013-04-09 to 2014-12-31) [631 days]",
-		"NAEW::WS123"=>"NAEW WS123 (2013-04-15 to 2014-12-31) [625 days]",
-		"NAEW::WS127"=>"NAEW WS127 (2013-04-15 to 2014-12-31) [625 days]",
- "SEPAC::5"=>"SEPAC 5 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::6"=>"SEPAC 6 (2011-06-30 to 2014-09-30) [1188 days]",
- "SEPAC::7"=>"SEPAC 7 (2011-06-30 to 2014-09-30) [1188 days]",
- "SEPAC::8"=>"SEPAC 8 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::9"=>"SEPAC 9 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::10"=>"SEPAC 10 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::11"=>"SEPAC 11 (2011-07-13 to 2014-09-30) [1175 days]",
- "SEPAC::12"=>"SEPAC 12 (2011-07-13 to 2014-09-30) [1175 days]",
- "SERF::1"=>"SERF 1 (2011-06-03 to 2014-12-31) [1307 days]",
- "SERF::2"=>"SERF 2 (2011-06-07 to 2014-05-22) [1080 days]",
- "SERF::3"=>"SERF 3 (2011-06-03 to 2014-12-31) [1307 days]",
- "SERF::4"=>"SERF 4 (2011-06-03 to 2014-12-31) [1307 days]",
- "SERF::5"=>"SERF 5 (2011-06-03 to 2014-12-31) [1307 days]",
- "SERF::6"=>"SERF 6 (2011-06-03 to 2014-12-31) [1307 days]",
- "SERF::7"=>"SERF 7 (2011-06-03 to 2014-12-31) [1307 days]",
- "SERF::8"=>"SERF 8 (2011-06-03 to 2014-12-31) [1307 days]",
- "WATERMAN::1"=>"WATERMAN 1 (2013-09-18 to 2014-12-22) [460 days]",
- "WATERMAN::4"=>"WATERMAN 4 (2013-09-18 to 2014-12-22) [460 days]",
- "WATERMAN::5"=>"WATERMAN 5 (2013-09-18 to 2014-12-22) [460 days]",		
+ "DPAC::NE"=>"DPAC [IN] NE (2011-07-01 to 2014-12-04) [1252 days]",
+ "DPAC::NW"=>"DPAC [IN] NW (2011-07-01 to 2014-12-04) [1252 days]",
+ "DPAC::SE"=>"DPAC [IN] SE (2011-07-01 to 2014-12-04) [1252 days]",
+ "DPAC::SW"=>"DPAC [IN] SW (2011-07-01 to 2014-12-04) [1252 days]",
+ "GILMORE::3-1"=>"GILMORE [IA] 3-1 (2011-06-01 to 2013-10-28) [880 days]",
+ "GILMORE::4-1"=>"GILMORE [IA] 4-1 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::11-1"=>"GILMORE [IA] 11-1 (2011-06-01 to 2013-12-16) [929 days]",
+ "GILMORE::11-2"=>"GILMORE [IA] 11-2 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::12-2"=>"GILMORE [IA] 12-2 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::14-1"=>"GILMORE [IA] 14-1 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::14-2"=>"GILMORE [IA] 14-2 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::16-2"=>"GILMORE [IA] 16-2 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::17-3"=>"GILMORE [IA] 17-3 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::19-1"=>"GILMORE [IA] 19-1 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::19-3"=>"GILMORE [IA] 19-3 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::21-3"=>"GILMORE [IA] 21-3 (2011-06-01 to 2013-12-31) [944 days]",
+ "GILMORE::22-3"=>"GILMORE [IA] 22-3 (2011-06-01 to 2013-10-18) [870 days]",
+ "GILMORE::24-3"=>"GILMORE [IA] 24-3 (2011-06-01 to 2013-12-31) [944 days]",
+ "ISUAG::302E"=>"ISUAG [IA] 302E (2011-05-24 to 2014-12-31) [1317 days]",
+ "ISUAG::302W"=>"ISUAG [IA] 302W (2011-05-24 to 2014-12-31) [1317 days]",
+ "ISUAG::308E"=>"ISUAG [IA] 308E (2011-05-24 to 2014-12-31) [5477 days]",
+ "ISUAG::311W"=>"ISUAG [IA] 311W (2011-05-24 to 2014-12-31) [1317 days]",
+ "ISUAG::402W"=>"ISUAG [IA] 402W (2011-05-27 to 2014-12-31) [1314 days]",
+ "ISUAG::408E"=>"ISUAG [IA] 408E (2011-05-24 to 2014-12-31) [1317 days]",
+ "ISUAG::408W"=>"ISUAG [IA] 408W (2011-05-24 to 2014-12-31) [1317 days]",
+ "ISUAG::410E"=>"ISUAG [IA] 410E (2011-05-24 to 2014-12-31) [1317 days]",
+		"NAEW::WS109"=>"NAEW [OH] WS109 (2013-04-09 to 2014-12-31) [631 days]",
+		"NAEW::WS111"=>"NAEW [OH] WS111 (2013-04-10 to 2014-12-31) [630 days]",
+		"NAEW::WS113"=>"NAEW [OH] WS113 (2013-04-10 to 2014-12-31) [630 days]",
+		"NAEW::WS115"=>"NAEW [OH] WS115 (2013-04-15 to 2014-12-31) [356 days]",
+		"NAEW::WS118"=>"NAEW [OH] WS118 (2013-04-09 to 2014-12-31) [631 days]",
+		"NAEW::WS123"=>"NAEW [OH] WS123 (2013-04-15 to 2014-12-31) [625 days]",
+		"NAEW::WS127"=>"NAEW [OH] WS127 (2013-04-15 to 2014-12-31) [625 days]",
+ "SEPAC::5"=>"SEPAC [IN] 5 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::6"=>"SEPAC [IN] 6 (2011-06-30 to 2014-09-30) [1188 days]",
+ "SEPAC::7"=>"SEPAC [IN] 7 (2011-06-30 to 2014-09-30) [1188 days]",
+ "SEPAC::8"=>"SEPAC [IN] 8 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::9"=>"SEPAC [IN] 9 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::10"=>"SEPAC [IN] 10 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::11"=>"SEPAC [IN] 11 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SEPAC::12"=>"SEPAC [IN] 12 (2011-07-13 to 2014-09-30) [1175 days]",
+ "SERF::1"=>"SERF [IA] 1 (2011-06-03 to 2014-12-31) [1307 days]",
+ "SERF::2"=>"SERF [IA] 2 (2011-06-07 to 2014-05-22) [1080 days]",
+ "SERF::3"=>"SERF [IA] 3 (2011-06-03 to 2014-12-31) [1307 days]",
+ "SERF::4"=>"SERF [IA] 4 (2011-06-03 to 2014-12-31) [1307 days]",
+ "SERF::5"=>"SERF [IA] 5 (2011-06-03 to 2014-12-31) [1307 days]",
+ "SERF::6"=>"SERF [IA] 6 (2011-06-03 to 2014-12-31) [1307 days]",
+ "SERF::7"=>"SERF [IA] 7 (2011-06-03 to 2014-12-31) [1307 days]",
+ "SERF::8"=>"SERF [IA] 8 (2011-06-03 to 2014-12-31) [1307 days]",
+ "WATERMAN::1"=>"WATERMAN [OH] 1 (2013-09-18 to 2014-12-22) [460 days]",
+ "WATERMAN::4"=>"WATERMAN [OH] 4 (2013-09-18 to 2014-12-22) [460 days]",
+ "WATERMAN::5"=>"WATERMAN [OH] 5 (2013-09-18 to 2014-12-22) [460 days]",		
 		);
 $siteselect = make_select("site", $site, $ar);
 
@@ -129,7 +129,7 @@ echo <<<EOF
 </tr></tbody>
 </table>
 
-<input type="submit" value="Make Plot">
+<input type="submit" value="Run">
 </form>
 
 <p>{$interface}</p>
@@ -141,6 +141,10 @@ echo <<<EOF
 The timestamps presented should be valid for the local time zone of the sensor
 and are daylight saving time aware.  The daily aggregates should compute the
 daily summaries in the time zone of the station.
+</li>
+<li><strong>What quality control procedures have been implemented?</strong><br />
+Please see this <a href="https://docs.google.com/document/d/1K_FtA-nkhCVlkBULgwOpYb4FmMptaZDuEcaqaj7fS-U/edit">Google Drive Doc</a> for more details on this and the flags used
+to denote quality control.
 </li>
 </ol>
 
