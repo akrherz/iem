@@ -50,7 +50,8 @@ def make_plot(form):
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
     elif ptype == '3':
-        df = read_sql("""SELECT date_trunc('hour', valid) as v,
+        df = read_sql("""SELECT
+        date_trunc('hour', valid at time zone 'UTC') as v,
         avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
         avg(d3temp_qc) as d3t, avg(d4temp_qc) as d4t, avg(d5temp_qc) as d5t,
         avg(d1moisture_qc) as d1m, avg(d2moisture_qc) as d2m,
