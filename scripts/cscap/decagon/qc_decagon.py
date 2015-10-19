@@ -37,36 +37,42 @@ def bounds_check():
                 #    print vname, row[0].strftime("%Y%m%d%H%M"), row[1]
 
 
-def ticker():
+def ticker_temp():
     """ QC any values that tick too quickly over some period of time"""
     cursor = pgconn.cursor()
     entries = get_entries()
+    n = 'temp'
+    threshold = 10
     for (uniqueid, plotid) in entries:
+        cursor2 = pgconn.cursor()
         for v in range(1, 6):
-            for n, threshold in zip(['moisture', 'temp', 'ec'],
-                                    [0.05, 2, 0.05]):
-                if v > 1 and n == 'ec':
-                    continue
-                vname = "d%s%s" % (v, n)
-                cursor.execute("""WITH data as(
-                SELECT lag(valid) OVER (ORDER by valid ASC) as lag_valid,
-                valid, lead(valid) OVER (ORDER by valid ASC) as lead_valid,
-                lag("""+vname+""") OVER (ORDER by valid ASC) as lag_var,
-                """ + vname + """ as var,
-                lead("""+vname+""") OVER (ORDER by valid ASC) as lead_var
-                from decagon_data
-                WHERE uniqueid = %s and plotid = %s)
-                select lag_valid, valid, lead_valid, lag_var, var, lead_var
-                from data WHERE abs(var - lag_var) > %s and
-                (valid - lag_valid) < '2 hours'::interval ORDER by valid
-                """, (uniqueid, plotid, threshold))
-                print(('Site: %s Plotid: %s Var: %-11s Hits: %s'
-                       ) % (uniqueid, plotid, vname, cursor.rowcount))
-                for row in cursor:
-                    print(("valid: %s %s went from %s to %s at %s"
-                           ) % (row[0].strftime("%Y%m%d %H%M"), vname,
-                                row[3], row[4], row[1].strftime("%Y%m%d %H%M"))
-                          )
+            vname = "d%s%s_qc" % (v, n)
+            vflag = "d%s%s_flag" % (v, n)
+            cursor.execute("""WITH data as(
+            SELECT lag(valid) OVER (ORDER by valid ASC) as lag_valid,
+            valid, lead(valid) OVER (ORDER by valid ASC) as lead_valid,
+            lag("""+vname+""") OVER (ORDER by valid ASC) as lag_var,
+            """ + vname + """ as var,
+            lead("""+vname+""") OVER (ORDER by valid ASC) as lead_var
+            from decagon_data
+            WHERE uniqueid = %s and plotid = %s and """+vname+""" is not null)
+            select lag_valid, valid, lead_valid, lag_var, var, lead_var
+            from data WHERE abs(var - lag_var) > %s and
+            (valid - lag_valid) < '2 hours'::interval ORDER by valid
+            """, (uniqueid, plotid, threshold))
+            print(('Site: %s Plotid: %s Var: %-11s Hits: %s'
+                   ) % (uniqueid, plotid, vname, cursor.rowcount))
+            for row in cursor:
+                print(("valid: %s %s went from %s to %s at %s"
+                       ) % (row[0].strftime("%Y%m%d %H%M"), vname,
+                            row[3], row[4], row[1].strftime("%Y%m%d %H%M"))
+                      )
+                cursor2.execute("""UPDATE decagon_data SET
+                """ + vname + """ = null, """ + vflag + """ = 'T'
+                WHERE uniqueid = %s and plotid = %s and valid = %s
+                """, (uniqueid, plotid, row[1]))
+        cursor2.close()
+        pgconn.commit()
 
 
 def replace999():
@@ -89,5 +95,5 @@ if __name__ == '__main__':
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
 
     # replace999()
-    # ticker()
-    bounds_check()
+    ticker_temp()
+    # bounds_check()
