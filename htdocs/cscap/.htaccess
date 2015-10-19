@@ -12,4 +12,4 @@ Options +ExecCGI
 #</LIMIT>
 
 RewriteEngine On
-RewriteRule ^decagon_(.*)_(.*)_(.*)_(.*).png$ plot_decagon.py?site=$1&date=$2&days=$3&ptype=$4&view=plot
+RewriteRule ^decagon_(.*)_(.*)_(.*)_(.*)_(.*).png$ plot_decagon.py?site=$1&date=$2&days=$3&ptype=$4&depth=$5&view=plot

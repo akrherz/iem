@@ -4,6 +4,7 @@ include_once "../../include/forms.php";
 $site = isset($_GET["site"]) ? $_GET["site"]: 'ISUAG::302E';
 $date = isset($_GET["date"]) ? $_GET["date"]: '2014-06-10';
 $view = isset($_GET['view']) ? $_GET['view']: 'plot';
+$depth = isset($_GET['depth']) ? $_GET['depth']: 'all';
 $errmsg = "";
 if (strlen($date) != 10){
 	$errmsg = "<div class='alert alert-warning'>Invalid Date Specified!</div>";
@@ -84,9 +85,19 @@ $ar = Array(
 		);
 $viewselect = make_select('view', $view, $ar);
 
+$ar = Array(
+		'all' => 'All Depths, one plot',
+		'1' => '10cm, all plots for site',
+		'2' => '20cm, all plots for site',
+		'3' => '40cm, all plots for site',
+		'4' => '60cm, all plots for site',
+		'5' => '100cm, all plots for site',
+		);
+$depthselect = make_select('depth', $depth, $ar);
+
 if ($view != 'plot'){
-	$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s&view=%s", 
-		$site, $date, $days, $ptype, $view);
+	$imageurl = sprintf("plot_decagon.py?site=%s&date=%s&days=%s&ptype=%s&view=%s&depth=%s", 
+		$site, $date, $days, $ptype, $view, $depth);
 	$uri = sprintf("http://iem.local/cscap/%s", $imageurl);
 	if ($view == 'html'){
 		$data = file_get_contents($uri);
@@ -96,8 +107,8 @@ if ($view != 'plot'){
 		die();
 	}
 } else {
-	$imageurl = sprintf("decagon_%s_%s_%s_%s.png", 
-		$site, $date, $days, $ptype);
+	$imageurl = sprintf("decagon_%s_%s_%s_%s_%s.png", 
+		$site, $date, $days, $ptype, $depth);
 	$interface = "<img src=\"{$imageurl}\">";
 	
 }
@@ -117,12 +128,18 @@ echo <<<EOF
 
 <form method="GET" name="plot1">
 <table class="table table-bordered">
-<thead><tr><th>Select Site and Plot:</th><th>Select Start Date</th>
-<th>Number of Days to Plot</th><th>Timeseries Aggregation:</th><th>View Option</th></tr></thead>
+<thead><tr><th>Select Site and Plot:</th><th>Depth Option:</th><th>Select Start Date</th>
+</tr></thead>
 <tbody><tr><td>
 {$siteselect}
-</td>
+</td><td>{$depthselect}</td>
 <td><input type="text" id="datepicker" name="date" value="{$date}" size="11" /></td>
+</tr></tbody></table>
+
+<table class="table table-bordered">
+<thead><tr><th>Number of Days to Plot</th>
+<th>Timeseries Aggregation:</th><th>View Option</th></tr></thead>
+<tbody><tr>
 <td><input type="text" name="days" value="{$days}" size="4" /></td>
 <td>{$ptypeselect}</td>
 <td>{$viewselect}</td>
