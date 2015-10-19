@@ -6,6 +6,7 @@ import sys
 import psycopg2.extras
 import ConfigParser
 import cgi
+import pandas as pd
 import pandas.io.sql as pdsql
 
 config = ConfigParser.ConfigParser()
@@ -311,10 +312,16 @@ def get_dl(form):
     if fmt == 'excel':
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
         sys.stdout.write((
-            "Content-Disposition: attachment;Filename=cscap.xls\n\n"))
-        df2.to_excel('/tmp/cscap.xls', columns=cols, index=False,
-                     encoding='latin-1')
-        return open('/tmp/cscap.xls', 'rb').read()
+            "Content-Disposition: attachment;Filename=cscap.xlsx\n\n"))
+        writer = pd.ExcelWriter("/tmp/cscap.xlsx", engine='xlsxwriter')
+        df2.to_excel(writer, columns=cols, index=False,
+                     encoding='latin-1', sheet_name='Sheet1')
+        workbook = writer.book
+        worksheet = writer.sheets['Sheet1']
+        format2 = workbook.add_format({'num_format': '@'})
+        worksheet.set_column('A:D', None, format2)
+        writer.save()
+        return open('/tmp/cscap.xlsx', 'rb').read()
     elif fmt == 'tab':
         sys.stdout.write("Content-type: text/plain\n\n")
         return df2.to_csv(columns=cols, sep='\t', index=False)
