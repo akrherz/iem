@@ -88,6 +88,9 @@ def plotter(fdict):
             fmt = "%b"
         xticklabels.append(v.strftime(fmt))
         xticks.append(v)
+    while len(xticks) > 9:
+        xticks = xticks[::2]
+        xticklabels = xticklabels[::2]
 
     bars = ax.bar(valid, diff, fc='r', ec='r', width=30)
     for bar in bars:
