@@ -42,10 +42,16 @@ def make_plot(form):
     ptype = form.getfirst('ptype', '1')
     if ptype == '1':
         df = read_sql("""SELECT valid at time zone 'UTC' as v,
-        d1temp_qc as d1t, d2temp_qc as d2t, d3temp_qc as d3t, d4temp_qc as d4t,
-        d5temp_qc as d5t,
-        d1moisture_qc as d1m, d2moisture_qc as d2m, d3moisture_qc as d3m,
-        d4moisture_qc as d4m, d5moisture_qc as d5m
+        d1temp_qc as d1t, coalesce(d1temp_flag, '') as d1t_f,
+        d2temp_qc as d2t, coalesce(d2temp_flag, '') as d2t_f,
+        d3temp_qc as d3t, coalesce(d3temp_flag, '') as d3t_f,
+        d4temp_qc as d4t, coalesce(d4temp_flag, '') as d4t_f,
+        d5temp_qc as d5t, coalesce(d5temp_flag, '') as d5t_f,
+        d1moisture_qc as d1m, coalesce(d1moisture_flag, '') as d1m_f,
+        d2moisture_qc as d2m, coalesce(d2moisture_flag, '') as d2m_f,
+        d3moisture_qc as d3m, coalesce(d3moisture_flag, '') as d3m_f,
+        d4moisture_qc as d4m, coalesce(d4moisture_flag, '') as d4m_f,
+        d5moisture_qc as d5m, coalesce(d5moisture_flag, '') as d5m_f
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
@@ -60,6 +66,9 @@ def make_plot(form):
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s GROUP by v ORDER by v ASC
         """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
+        for n in ['m', 't']:
+            for i in range(1, 6):
+                df["d%s%s_f" % (n, i)] = '-'
     else:
         df = read_sql("""SELECT date(valid at time zone %s) as v,
         avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
@@ -70,6 +79,9 @@ def make_plot(form):
         from decagon_data WHERE uniqueid = %s and plotid = %s
         and valid between %s and %s GROUP by v ORDER by v ASC
         """, pgconn, params=(tzname, uniqueid, plotid, sts.date(), ets.date()))
+        for n in ['m', 't']:
+            for i in range(1, 6):
+                df["d%s%s_f" % (n, i)] = '-'
     if len(df.index) < 3:
         send_error("No / Not Enough Data Found, sorry!")
     if ptype not in ['2', ]:
@@ -84,7 +96,18 @@ def make_plot(form):
                                d2m='Depth2 Moisture (1)',
                                d3m='Depth3 Moisture (1)',
                                d4m='Depth4 Moisture (1)',
-                               d5m='Depth5 Moisture (1)'),
+                               d5m='Depth5 Moisture (1)',
+                               d1t_f='Depth1 Temp Flag',
+                               d2t_f='Depth2 Temp Flag',
+                               d3t_f='Depth3 Temp Flag',
+                               d4t_f='Depth4 Temp Flag',
+                               d5t_f='Depth5 Temp Flag',
+                               d1m_f='Depth1 Moisture Flag',
+                               d2m_f='Depth2 Moisture Flag',
+                               d3m_f='Depth3 Moisture Flag',
+                               d4m_f='Depth4 Moisture Flag',
+                               d5m_f='Depth5 Moisture Flag',
+                               ),
                   inplace=True)
         if viewopt == 'html':
             sys.stdout.write("Content-type: text/html\n\n")
