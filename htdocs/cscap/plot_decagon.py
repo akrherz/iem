@@ -64,9 +64,10 @@ def make_plot(form):
         from decagon_data WHERE uniqueid = %s """+plotid_limit+"""
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, sts.date(), ets.date()))
-    elif ptype == '3':
+    elif ptype in ['3', '4']:
+        res = 'hour' if ptype == '3' else 'week'
         df = read_sql("""SELECT
-        date_trunc('hour', valid at time zone 'UTC') as v, plotid,
+        date_trunc('"""+res+"""', valid at time zone 'UTC') as v, plotid,
         avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
         avg(d3temp_qc) as d3t, avg(d4temp_qc) as d4t, avg(d5temp_qc) as d5t,
         avg(d1moisture_qc) as d1m, avg(d2moisture_qc) as d2m,
