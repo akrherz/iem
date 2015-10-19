@@ -14,6 +14,11 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.dates as mdates  # NOPEP8
 
+DEPTHS = [None, '10 cm', '20 cm', '40 cm', '60 cm', '100 cm']
+LINESTYLE = ['-', '-', '-', '-', '-', '-',
+             '-', '-', '-.', '-.', '-.', '-.', '-.',
+             '-', '-.', '-.', '-.', '-.', '-.']
+
 
 def send_error(msg):
     """" """
@@ -40,8 +45,12 @@ def make_plot(form):
     tz = pytz.timezone(tzname)
     viewopt = form.getfirst('view', 'plot')
     ptype = form.getfirst('ptype', '1')
+    plotid_limit = "and plotid = '%s'" % (plotid, )
+    depth = form.getfirst('depth', 'all')
+    if depth != 'all':
+        plotid_limit = ""
     if ptype == '1':
-        df = read_sql("""SELECT valid at time zone 'UTC' as v,
+        df = read_sql("""SELECT valid at time zone 'UTC' as v, plotid,
         d1temp_qc as d1t, coalesce(d1temp_flag, '') as d1t_f,
         d2temp_qc as d2t, coalesce(d2temp_flag, '') as d2t_f,
         d3temp_qc as d3t, coalesce(d3temp_flag, '') as d3t_f,
@@ -52,33 +61,33 @@ def make_plot(form):
         d3moisture_qc as d3m, coalesce(d3moisture_flag, '') as d3m_f,
         d4moisture_qc as d4m, coalesce(d4moisture_flag, '') as d4m_f,
         d5moisture_qc as d5m, coalesce(d5moisture_flag, '') as d5m_f
-        from decagon_data WHERE uniqueid = %s and plotid = %s
+        from decagon_data WHERE uniqueid = %s """+plotid_limit+"""
         and valid between %s and %s ORDER by valid ASC
-        """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
+        """, pgconn, params=(uniqueid, sts.date(), ets.date()))
     elif ptype == '3':
         df = read_sql("""SELECT
-        date_trunc('hour', valid at time zone 'UTC') as v,
+        date_trunc('hour', valid at time zone 'UTC') as v, plotid,
         avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
         avg(d3temp_qc) as d3t, avg(d4temp_qc) as d4t, avg(d5temp_qc) as d5t,
         avg(d1moisture_qc) as d1m, avg(d2moisture_qc) as d2m,
         avg(d3moisture_qc) as d3m, avg(d4moisture_qc) as d4m,
         avg(d5moisture_qc) as d5m
-        from decagon_data WHERE uniqueid = %s and plotid = %s
-        and valid between %s and %s GROUP by v ORDER by v ASC
-        """, pgconn, params=(uniqueid, plotid, sts.date(), ets.date()))
+        from decagon_data WHERE uniqueid = %s """+plotid_limit+"""
+        and valid between %s and %s GROUP by v, plotid ORDER by v ASC
+        """, pgconn, params=(uniqueid, sts.date(), ets.date()))
         for n in ['m', 't']:
             for i in range(1, 6):
                 df["d%s%s_f" % (n, i)] = '-'
     else:
-        df = read_sql("""SELECT date(valid at time zone %s) as v,
+        df = read_sql("""SELECT date(valid at time zone %s) as v, plotid,
         avg(d1temp_qc) as d1t, avg(d2temp_qc) as d2t,
         avg(d3temp_qc) as d3t, avg(d4temp_qc) as d4t, avg(d5temp_qc) as d5t,
         avg(d1moisture_qc) as d1m, avg(d2moisture_qc) as d2m,
         avg(d3moisture_qc) as d3m, avg(d4moisture_qc) as d4m,
         avg(d5moisture_qc) as d5m
-        from decagon_data WHERE uniqueid = %s and plotid = %s
-        and valid between %s and %s GROUP by v ORDER by v ASC
-        """, pgconn, params=(tzname, uniqueid, plotid, sts.date(), ets.date()))
+        from decagon_data WHERE uniqueid = %s  """+plotid_limit+"""
+        and valid between %s and %s GROUP by v, plotid ORDER by v ASC
+        """, pgconn, params=(tzname, uniqueid, sts.date(), ets.date()))
         for n in ['m', 't']:
             for i in range(1, 6):
                 df["d%s%s_f" % (n, i)] = '-'
@@ -135,31 +144,57 @@ def make_plot(form):
             return
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
+    lbl = "Plot:%s" % (plotid,)
+    if depth != 'all':
+        lbl = "Depth:%s" % (DEPTHS[int(depth)],)
     ax[0].set_title(("Decagon Temperature + Moisture for\n"
-                     "Site:%s Plot:%s Period:%s to %s"
-                     ) % (uniqueid, plotid, sts.date(), ets.date()))
-    ax[0].plot(df['v'], df['d1t'].astype('f'), c='r', lw=2, label='10cm')
-    ax[0].plot(df['v'], df['d2t'].astype('f'), c='purple', lw=2, label='20cm')
-    ax[0].plot(df['v'], df['d3t'].astype('f'), c='b', lw=2, label='40cm')
-    ax[0].plot(df['v'], df['d4t'].astype('f'), c='g', lw=2, label='60cm')
-    ax[0].plot(df['v'], df['d5t'].astype('f'), c='turquoise', lw=2,
-               label='100cm')
+                     "Site:%s %s Period:%s to %s"
+                     ) % (uniqueid, lbl, sts.date(), ets.date()))
+    if depth == 'all':
+        ax[0].plot(df['v'], df['d1t'].astype('f'), c='r', lw=2,
+                   label=DEPTHS[1])
+        ax[0].plot(df['v'], df['d2t'].astype('f'), c='purple', lw=2,
+                   label=DEPTHS[2])
+        ax[0].plot(df['v'], df['d3t'].astype('f'), c='b', lw=2,
+                   label=DEPTHS[3])
+        ax[0].plot(df['v'], df['d4t'].astype('f'), c='g', lw=2,
+                   label=DEPTHS[4])
+        ax[0].plot(df['v'], df['d5t'].astype('f'), c='turquoise', lw=2,
+                   label=DEPTHS[5])
+        lines = 5
+    else:
+        dlevel = "d%st" % (depth, )
+        for i, plotid in enumerate(df['plotid'].unique()):
+            df2 = df[df['plotid'] == plotid]
+            ax[0].plot(df2['v'], df2[dlevel].astype('f'), lw=2,
+                       label=plotid, linestyle=LINESTYLE[i])
+        lines = len(df['plotid'].unique())
+
     ax[0].grid()
     ax[0].set_ylabel("Temperature [C]")
-    ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, 0), ncol=5,
-                 fontsize=12)
-
-    ax[1].plot(df['v'], df['d1m'].astype('f'), c='r', lw=2)
-    ax[1].plot(df['v'], df['d2m'].astype('f'), c='purple', lw=2)
-    ax[1].plot(df['v'], df['d3m'].astype('f'), c='b', lw=2)
-    ax[1].plot(df['v'], df['d4m'].astype('f'), c='g', lw=2)
-    ax[1].plot(df['v'], df['d5m'].astype('f'), c='turquoise', lw=2)
+    if lines < 7:
+        ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, 0), ncol=6,
+                     fontsize=12)
+    else:
+        ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, 0), ncol=6,
+                     fontsize=8)
+    if depth == 'all':
+        ax[1].plot(df['v'], df['d1m'].astype('f'), c='r', lw=2)
+        ax[1].plot(df['v'], df['d2m'].astype('f'), c='purple', lw=2)
+        ax[1].plot(df['v'], df['d3m'].astype('f'), c='b', lw=2)
+        ax[1].plot(df['v'], df['d4m'].astype('f'), c='g', lw=2)
+        ax[1].plot(df['v'], df['d5m'].astype('f'), c='turquoise', lw=2)
+        v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
+                 df['d4m'].min(), df['d5m'].min()])
+        v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
+                  df['d4m'].max(), df['d5m'].max()])
+        ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
+    else:
+        dlevel = "d%sm" % (depth, )
+        for plotid in df['plotid'].unique():
+            df2 = df[df['plotid'] == plotid]
+            ax[1].plot(df2['v'], df2[dlevel].astype('f'), lw=2)
     ax[1].grid(True)
-    v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
-             df['d4m'].min(), df['d5m'].min()])
-    v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
-              df['d4m'].max(), df['d5m'].max()])
-    ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
     ax[1].set_ylabel("Volumetric Soil Moisture [cm$^{3}$ cm$^{-3}$]",
                      fontsize=9)
     if days > 4:
