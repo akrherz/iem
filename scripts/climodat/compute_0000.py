@@ -21,14 +21,14 @@ def update_database(stid, valid, high, low, precip):
         ccursor.execute("""INSERT into """ + table + """ (station, day,
         high, low, precip, estimated, year, month, sday) VALUES
         (%s, %s, %s, %s, %s, 't', %s, %s, %s)
-        """, (stid, valid, high, low, precip, valid.year, valid.month,
-              valid.strftime("%m%d")))
+        """, (stid, valid, high, low, round(precip, 2), valid.year,
+              valid.month, valid.strftime("%m%d")))
     # Now we update
     ccursor.execute("""
         UPDATE """ + table + """
         SET high = %s, low = %s, precip = %s
         WHERE station = %s and day = %s
-    """, (high, low, precip, stid, valid))
+    """, (high, low, round(precip, 2), stid, valid))
     if ccursor.rowcount != 1:
         print('compute_0000:update_database updated %s row for %s %s' % (
             ccursor.rowcount, stid, valid))
