@@ -8,7 +8,6 @@ import gdata.docs.client
 
 import json
 import os
-from gdata.docs.service import FOLDERS_SCHEME_PREFIX
 
 # Load up the CONFIG
 CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
@@ -98,8 +97,9 @@ class Worksheet(object):
             entry.cell.input_value = ""
             self.spr_client.update(entry)
 
-            updateFeed = spdata.build_batch_cells_update(self.spread_id, self.id)
-            for row in range(1, int(self.rows)+1): 
+            updateFeed = spdata.build_batch_cells_update(self.spread_id,
+                                                         self.id)
+            for row in range(1, int(self.rows)+1):
                 updateFeed.add_set_cell(str(row), str(col), "")
             self.cell_feed = self.spr_client.batch(updateFeed, force=True)
 
@@ -118,11 +118,11 @@ class Worksheet(object):
         self.entry.col_count.text = "%s" % (self.cols,)
         self.entry = self.spr_client.update(self.entry)
 
-        for i, lbl in enumerate([label, row2, row3]): 
+        for i, lbl in enumerate([label, row2, row3]):
             if lbl is None:
                 continue
-            entry = self.spr_client.get_cell(self.spread_id, self.id, 
-                                             str(i+1), 
+            entry = self.spr_client.get_cell(self.spread_id, self.id,
+                                             str(i+1),
                                              str(self.cols))
             entry.cell.input_value = lbl
             self.spr_client.update(entry)
@@ -147,19 +147,21 @@ class Worksheet(object):
             for row in range(1, int(self.rows)+1):
                 if self.data.get(str(row), {}).get(str(col)) is not None:
                     found_data = True
-                    print 'ERROR row: %s has data: %s' % (row,
-                                    self.data[str(row)][str(col)])
+                    print(('ERROR row: %s has data: %s'
+                           ) % (row, self.data[str(row)][str(col)]))
             if not found_data:
                 print 'Deleting column %s' % (col,)
                 if col == int(self.cols):
                     self.drop_last_column()
                     return True
                 # Move columns left
-                updateFeed = spdata.build_batch_cells_update(self.spread_id, self.id)
+                updateFeed = spdata.build_batch_cells_update(self.spread_id,
+                                                             self.id)
                 for col2 in range(int(col), int(self.cols)):
-                    for row in range(1, int(self.rows)+1): 
-                        updateFeed.add_set_cell(str(row), str(col2), 
-                                                self.get_cell_value(row, col2 + 1))
+                    for row in range(1, int(self.rows)+1):
+                        updateFeed.add_set_cell(str(row), str(col2),
+                                                self.get_cell_value(row,
+                                                                    col2 + 1))
                 self.cell_feed = self.spr_client.batch(updateFeed, force=True)
                 # Drop last column
                 self.refetch_feed()
@@ -205,28 +207,32 @@ def get_xref_plotids(spr_client, config):
     data = {}
     for entry in feed.entry:
         d = entry.to_dict()
-        data[ d['uniqueid'] ] = d['keyspread']
+        data[d['uniqueid']] = d['keyspread']
     return data
+
 
 def get_docs_client(config):
     """ Return an authorized docs client """
-    token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
-                    client_secret=config.get('appauth', 'app_secret'),
-                    user_agent='daryl.testing',
-                    scope=config.get('googleauth', 'scopes'),
-                    refresh_token=config.get('googleauth', 'refresh_token'))
+    token = gdata.gauth.OAuth2Token(
+        client_id=config.get('appauth', 'client_id'),
+        client_secret=config.get('appauth', 'app_secret'),
+        user_agent='daryl.testing',
+        scope=config.get('googleauth', 'scopes'),
+        refresh_token=config.get('googleauth', 'refresh_token'))
 
     docs_client = gdata.docs.client.DocsClient()
     token.authorize(docs_client)
     return docs_client
 
+
 def get_spreadsheet_client(config):
     """ Return an authorized spreadsheet client """
-    token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
-                    client_secret=config.get('appauth', 'app_secret'),
-                    user_agent='daryl.testing',
-                    scope=config.get('googleauth', 'scopes'),
-                    refresh_token=config.get('googleauth', 'refresh_token'))
+    token = gdata.gauth.OAuth2Token(
+        client_id=config.get('appauth', 'client_id'),
+        client_secret=config.get('appauth', 'app_secret'),
+        user_agent='daryl.testing',
+        scope=config.get('googleauth', 'scopes'),
+        refresh_token=config.get('googleauth', 'refresh_token'))
 
     spr_client = gdata.spreadsheets.client.SpreadsheetsClient()
     token.authorize(spr_client)
@@ -236,15 +242,17 @@ def get_spreadsheet_client(config):
 def get_sites_client(config, site='sustainablecorn'):
     """ Return an authorized sites client """
     import gdata.sites.client as sclient
-    token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
-                    client_secret=config.get('appauth', 'app_secret'),
-                    user_agent='daryl.testing',
-                    scope=config.get('googleauth', 'scopes'),
-                    refresh_token=config.get('googleauth', 'refresh_token'))
+    token = gdata.gauth.OAuth2Token(
+        client_id=config.get('appauth', 'client_id'),
+        client_secret=config.get('appauth', 'app_secret'),
+        user_agent='daryl.testing',
+        scope=config.get('googleauth', 'scopes'),
+        refresh_token=config.get('googleauth', 'refresh_token'))
 
     spr_client = sclient.SitesClient(site=site)
     token.authorize(spr_client)
     return spr_client
+
 
 def build_treatments(feed):
     """
@@ -259,27 +267,28 @@ def build_treatments(feed):
         if data is None:
             data = {}
             for key in row.keys():
-                if key in ['uniqueid','name','key'] or key[0] == '_':
+                if key in ['uniqueid', 'name', 'key'] or key[0] == '_':
                     continue
                 print 'Found Key: %s' % (key,)
-                data[key] = {'TIL': [None,], 'ROT': [None,], 'DWM': [None,], 
-                             'NIT': [None,], 
-                             'LND': [None,], 'REPS': 1}
-        if not row.has_key('key') or row['key'] is None or row['key'] == '':
+                data[key] = {'TIL': [None, ], 'ROT': [None, ], 'DWM': [None, ],
+                             'NIT': [None, ],
+                             'LND': [None, ], 'REPS': 1}
+        if 'key' not in row or row['key'] is None or row['key'] == '':
             continue
         treatment_key = row['key']
         treatment_names[treatment_key] = row['name'].strip()
         for colkey in row.keys():
             cell = row[colkey]
-            if colkey in data.keys(): # Is sitekey
+            if colkey in data.keys():  # Is sitekey
                 sitekey = colkey
                 if cell is not None and cell != '':
                     if treatment_key[:3] in data[sitekey].keys():
-                        data[sitekey][treatment_key[:3]].append( treatment_key )
-                if treatment_key == 'REPS' and cell not in ('?','TBD', None):
-                    print 'Found REPS for site: %s as: %s' % (sitekey, int(cell))
+                        data[sitekey][treatment_key[:3]].append(treatment_key)
+                if treatment_key == 'REPS' and cell not in ('?', 'TBD', None):
+                    print 'Found REPS for site: %s as: %s' % (sitekey,
+                                                              int(cell))
                     data[sitekey]['REPS'] = int(cell)
-    
+
     return data, treatment_names
 
 
@@ -298,9 +307,9 @@ def build_sdc(feed):
         if data is None:
             data = {'2011': {}, '2012': {}, '2013': {}, '2014': {}, '2015': {}}
             for key in row.keys():
-                if key in ['uniqueid','name','key'] or key[0] == '_':
+                if key in ['uniqueid', 'name', 'key'] or key[0] == '_':
                     continue
-                site_ids.append( key )
+                site_ids.append(key)
                 for yr in ['2011', '2012', '2013', '2014', '2015']:
                     data[yr][key] = []
         # If the 'KEY' column is blank or has nothing in it, skip it...
@@ -315,11 +324,12 @@ def build_sdc(feed):
             if row[sitekey] is None:
                 continue
             for yr in ['2011', '2012', '2013', '2014', '2015']:
-                if (row[sitekey].strip().lower() == 'x' or 
-                    row[sitekey].find('%s' % (yr[2:],)) > -1):
-                    data[yr][sitekey].append( sdc_key )
+                if (row[sitekey].strip().lower() == 'x' or
+                        row[sitekey].find('%s' % (yr[2:],)) > -1):
+                    data[yr][sitekey].append(sdc_key)
 
     return data, sdc_names
+
 
 def get_site_metadata(config, spr_client=None):
     '''
@@ -328,10 +338,10 @@ def get_site_metadata(config, spr_client=None):
     meta = {}
     if spr_client is None:
         spr_client = get_spreadsheet_client(config)
-        
+
     lf = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
     for entry in lf.entry:
-        d = entry.to_dict()    
+        d = entry.to_dict()
         meta[d['uniqueid']] = {'climate_site': d['iemclimatesite'].split()[0],
                                }
     return meta
@@ -347,7 +357,8 @@ def get_driveclient():
     with open("CSCAP-6886c10d6ffb.p12") as f:
         private_key = f.read()
 
-    credentials = SignedJwtAssertionCredentials(client_email, private_key,
+    credentials = SignedJwtAssertionCredentials(
+        client_email, private_key,
         'https://www.googleapis.com/auth/drive.readonly')
 
     http_auth = credentials.authorize(Http())
