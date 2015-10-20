@@ -41,6 +41,29 @@ def process1(fn, timefmt='%d-%b-%Y %H:%M:%S'):
     return df
 
 
+def process4(fn):
+    """See MASON for an example"""
+    df = pd.read_excel(fn, index_col=False, skiprows=[0, 1, 3, 4, 5])
+    x = {'20': 'd2', '40': 'd3', '60': 'd4', '80': 'd5'}
+    extract = {}
+    for col in df.columns[1:]:
+        plotid = col[:-3]
+        depth = col[-2:]
+        e = extract.setdefault(plotid, [df.columns[0]])
+        e.append(col)
+    print extract
+    mydict = {}
+    for plotid in extract.keys():
+        mydict[plotid] = df[extract[plotid]].copy()
+        rename = {df.columns[0]: 'valid'}
+        for col in mydict[plotid].columns[1:]:
+            depth = col[-2:]
+            rename[col] = "%smoisture" % (x[depth], )
+        mydict[plotid].rename(columns=rename, inplace=True)
+        print mydict[plotid].columns
+    return mydict
+
+
 def process3(fn):
     mydict = pd.read_excel(fn, sheetname=None, index_col=False)
     # Need to load up rows 0 and 1 into the column names
@@ -74,12 +97,8 @@ def database_save(uniqueid, plot, df):
     if cursor.rowcount > 0:
         print("DELETED %s rows previously saved!" % (cursor.rowcount, ))
 
-    if 'd1ec' not in df.columns:
-        print('MISSING d1ec, using nulls')
-        df['d1ec'] = None
-
     def v(row, name):
-        val = row[name]
+        val = row.get(name)
         if val is None:
             return 'null'
         if isinstance(val, str):
@@ -136,6 +155,8 @@ def main(argv):
         df = process1(fn, '%m/%d/%y %H:%M %p')
     elif fmt == '3':
         df = process3(fn)
+    elif fmt == '4':
+        df = process4(fn)
     if isinstance(df, dict):
         for plot in df:
             print(("File: %s[%s] found: %s lines for columns %s"

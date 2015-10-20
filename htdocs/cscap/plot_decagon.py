@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.dates as mdates  # NOPEP8
 
 DEPTHS = [None, '10 cm', '20 cm', '40 cm', '60 cm', '100 cm']
+
 LINESTYLE = ['-', '-', '-', '-', '-', '-',
              '-', '-', '-.', '-.', '-.', '-.', '-.',
              '-', '-.', '-.', '-.', '-.', '-.']
@@ -35,6 +36,9 @@ def send_error(msg):
 def make_plot(form):
     """Make the plot"""
     (uniqueid, plotid) = form.getfirst('site', 'ISUAG::302E').split("::")
+    if uniqueid == 'MASON':
+        DEPTHS[1] = None
+        DEPTHS[5] = '80 cm'
 
     sts = datetime.datetime.strptime(form.getfirst('date', '2014-01-01'),
                                      '%Y-%m-%d')
@@ -99,24 +103,27 @@ def make_plot(form):
             lambda x: x.tz_localize('UTC').tz_convert(tzname))
 
     if viewopt != 'plot':
-        df.rename(columns=dict(v='timestamp', d1t='Depth1 Temp (C)',
-                               d2t='Depth2 Temp (C)', d3t='Depth3 Temp (C)',
-                               d4t='Depth4 Temp (C)', d5t='Depth5 Temp (C)',
-                               d1m='Depth1 Moisture (1)',
-                               d2m='Depth2 Moisture (1)',
-                               d3m='Depth3 Moisture (1)',
-                               d4m='Depth4 Moisture (1)',
-                               d5m='Depth5 Moisture (1)',
-                               d1t_f='Depth1 Temp Flag',
-                               d2t_f='Depth2 Temp Flag',
-                               d3t_f='Depth3 Temp Flag',
-                               d4t_f='Depth4 Temp Flag',
-                               d5t_f='Depth5 Temp Flag',
-                               d1m_f='Depth1 Moisture Flag',
-                               d2m_f='Depth2 Moisture Flag',
-                               d3m_f='Depth3 Moisture Flag',
-                               d4m_f='Depth4 Moisture Flag',
-                               d5m_f='Depth5 Moisture Flag',
+        df.rename(columns=dict(v='timestamp',
+                               d1t='%s Temp (C)' % (DEPTHS[1], ),
+                               d2t='%s Temp (C)' % (DEPTHS[2], ),
+                               d3t='%s Temp (C)' % (DEPTHS[3], ),
+                               d4t='%s Temp (C)' % (DEPTHS[4], ),
+                               d5t='%s Temp (C)' % (DEPTHS[5], ),
+                               d1m='%s Moisture (cm3/cm3)' % (DEPTHS[1], ),
+                               d2m='%s Moisture (cm3/cm3)' % (DEPTHS[2], ),
+                               d3m='%s Moisture (cm3/cm3)' % (DEPTHS[3], ),
+                               d4m='%s Moisture (cm3/cm3)' % (DEPTHS[4], ),
+                               d5m='%s Moisture (cm3/cm3)' % (DEPTHS[5], ),
+                               d1t_f='%s Temp Flag' % (DEPTHS[1], ),
+                               d2t_f='%s Temp Flag' % (DEPTHS[2], ),
+                               d3t_f='%s Temp Flag' % (DEPTHS[3], ),
+                               d4t_f='%s Temp Flag' % (DEPTHS[4], ),
+                               d5t_f='%s Temp Flag' % (DEPTHS[5], ),
+                               d1m_f='%s Moisture Flag' % (DEPTHS[1], ),
+                               d2m_f='%s Moisture Flag' % (DEPTHS[2], ),
+                               d3m_f='%s Moisture Flag' % (DEPTHS[3], ),
+                               d4m_f='%s Moisture Flag' % (DEPTHS[4], ),
+                               d5m_f='%s Moisture Flag' % (DEPTHS[5], ),
                                ),
                   inplace=True)
         if viewopt == 'html':
@@ -189,7 +196,7 @@ def make_plot(form):
                  df['d4m'].min(), df['d5m'].min()])
         v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
                   df['d4m'].max(), df['d5m'].max()])
-        ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
+        #ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
     else:
         dlevel = "d%sm" % (depth, )
         for plotid in df['plotid'].unique():
