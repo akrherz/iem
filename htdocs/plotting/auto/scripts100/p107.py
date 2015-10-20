@@ -73,27 +73,46 @@ def plotter(fdict):
     GROUP by yr ORDER by yr ASC
     """, pgconn, params=(station, tuple(sdays)))
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
+    (fig, ax) = plt.subplots(2, 1)
 
-    bars = ax.bar(df['yr'], df[varname], facecolor='r', edgecolor='r')
+    bars = ax[0].bar(df['yr'], df[varname], facecolor='r', edgecolor='r')
     thisvalue = "M"
     for bar, x, y in zip(bars, df['yr'], df[varname]):
         if x == year:
             bar.set_facecolor('g')
             bar.set_edgecolor('g')
             thisvalue = y
-    ax.set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
-    ax.axhline(np.average(df[varname]), lw=2,
-               label='Avg: %.2f' % (np.average(df[varname]), ))
+    ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
+    ax[0].axhline(np.average(df[varname]), lw=2,
+                  label='Avg: %.2f' % (np.average(df[varname]), ))
     ylabel = "Temperature $^\circ$F"
     if varname in ['precip', ]:
         ylabel = "Precipitation [inch]"
-    ax.set_ylabel(ylabel)
-    ax.set_title(("[%s] %s\n%s between %s and %s"
-                  ) % (station, nt.sts[station]['name'], PDICT.get(varname),
-                       sts.strftime("%d %b"), ets.strftime("%d %b")))
-    ax.grid(True)
-    ax.legend(ncol=2, fontsize=10)
-    ax.set_xlim(df['yr'].min()-1, df['yr'].max()+1)
+    ax[0].set_ylabel(ylabel)
+    ax[0].set_title(("[%s] %s\n%s between %s and %s"
+                     ) % (station, nt.sts[station]['name'], PDICT.get(varname),
+                          sts.strftime("%d %b"), ets.strftime("%d %b")))
+    ax[0].grid(True)
+    ax[0].legend(ncol=2, fontsize=10)
+    ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
 
+    # Plot 2: CDF
+    X2 = np.sort(df[varname])
+    ptile = np.percentile(df[varname], [0, 5, 50, 95, 100])
+    N = len(df[varname])
+    F2 = np.array(range(N))/float(N) * 100.
+    ax[1].plot(X2, 100. - F2)
+    ax[1].set_xlabel(ylabel)
+    ax[1].set_ylabel("Observed Frequency [%]")
+    ax[1].grid(True)
+    ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
+    mysort = df.sort(varname, ascending=True)
+    info = ("Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
+            "Max: %.2f %.0f"
+            ) % (df[varname].min(), df['yr'][mysort.index[0]], ptile[1],
+                 np.average(df[varname]), np.std(df[varname]),
+                 ptile[3], df[varname].max(),
+                 df['yr'][mysort.index[-1]])
+    ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
+               bbox=dict(color='white', edgecolor='k'))
     return fig, df
