@@ -221,7 +221,7 @@ def get_dl(form):
 
     # columns!
     cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
-            'tillage', 'drainage', 'landscape']
+            'tillage', 'drainage', 'nitrogen', 'landscape']
     dvars = form.getlist("data")
     wants_soil = False
     for dv in dvars:
@@ -249,6 +249,7 @@ def get_dl(form):
         || '|' || coalesce(rotation, '')
         || '|' || coalesce(tillage, '')
         || '|' || coalesce(drainage, '')
+        || '|' || coalesce(nitrogen, '')
         || '|' || coalesce(landscape, '') as lbl,
         varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
         t.plotid = p.plotid) WHERE 1=1 and %s and %s
@@ -270,6 +271,7 @@ def get_dl(form):
         || '|' || coalesce(rotation, '')
         || '|' || coalesce(tillage, '')
         || '|' || coalesce(drainage, '')
+        || '|' || coalesce(nitrogen, '')
         || '|' || coalesce(landscape, '') as lbl,
         varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
         t.plotid = p.plotid) WHERE 1=1 and %s and %s
@@ -302,7 +304,8 @@ def get_dl(form):
     df2['rotation'] = [item.split('|')[6] for item in df2.index]
     df2['tillage'] = [item.split('|')[7] for item in df2.index]
     df2['drainage'] = [item.split('|')[8] for item in df2.index]
-    df2['landscape'] = [item.split('|')[9] for item in df2.index]
+    df2['nitrogen'] = [item.split('|')[9] for item in df2.index]
+    df2['landscape'] = [item.split('|')[10] for item in df2.index]
 
     df2cols = df2.columns.values.tolist()
     for col in cols:
