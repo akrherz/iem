@@ -94,6 +94,6 @@ def replace999():
 if __name__ == '__main__':
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
 
-    # replace999()
-    ticker_temp()
+    replace999()
+    # ticker_temp()
     # bounds_check()
