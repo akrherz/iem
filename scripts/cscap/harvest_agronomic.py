@@ -57,7 +57,8 @@ for item in res['items']:
             plotid = worksheet.get_cell_value(row, plotidcol)
             if plotid is None:
                 continue
-            val = worksheet.get_cell_value(row, col)
+            val = worksheet.get_cell_value(row, col, numeric=True)
+            # print row, col, plotid, varname, YEAR, val
             try:
                 pcursor.execute("""
                     INSERT into agronomic_data

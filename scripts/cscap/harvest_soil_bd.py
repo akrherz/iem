@@ -81,7 +81,7 @@ for item in res['items']:
                 continue
             if varname not in found_vars:
                 found_vars.append(varname)
-            val = worksheet.get_cell_value(row, col)
+            val = worksheet.get_cell_value(row, col, numeric=True)
             try:
                 pcursor.execute("""
                     INSERT into soil_data(site, plotid, varname, year,
