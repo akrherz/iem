@@ -253,8 +253,12 @@ if ($description != null){
 	$dhtml = sprintf("<div class=\"alert alert-info\"><h4>Plot Description:</h4>%s</div>", $description);
 }
 $dataextra= "";
-if (isset($jobj->data)){
-	$dataextra = "<p><a href=\"{$imguri}.csv\" class=\"btn btn-default\"><i class=\"glyphicon glyphicon-pencil\"></i> View Data (as csv)</a></p>";
+if (isset($jobj->data) && $jobj->data){
+	$dataextra = <<<EOF
+<p><a href="{$imguri}.csv" class="btn btn-default"><i class="glyphicon glyphicon-pencil"></i> View Data (as csv)</a>
+<a href="{$imguri}.xlsx" class="btn btn-default"><i class="glyphicon glyphicon-pencil"></i> Download as Excel</a>
+</p>
+EOF;
 }
 
 $t->content = <<<EOF

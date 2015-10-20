@@ -5,6 +5,8 @@ import memcache
 import sys
 import os
 import datetime
+import pandas as pd
+import tempfile
 
 
 def parser(cgistr):
@@ -27,15 +29,19 @@ def main():
     fdict = parser(q)
     p = int(form.getfirst('p', 0))
     dpi = int(fdict.get('dpi', 100))
-    fmt = form.getfirst('fmt', 'png')[:3]
+    fmt = form.getfirst('fmt', 'png')[:4]
 
     mckey = "/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if fmt == 'png':
         sys.stdout.write("Content-type: image/png\n\n")
-    else:
+    elif fmt == 'csv':
         sys.stdout.write('Content-type: text/plain\n\n')
+    else:
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write((
+            "Content-Disposition: attachment;Filename=iem.xlsx\n\n"))
     hostname = os.environ.get("SERVER_NAME", "")
     if not res or hostname == "iem.local":
         # Lazy import to help speed things up
@@ -77,7 +83,18 @@ def main():
         if fmt != 'png' and df is not None:
             if fmt == 'csv':
                 res = df.to_csv(index=(len(df.columns) == 1))
-        mc.set(mckey, res, meta.get('cache', 43200))
+            elif fmt == 'xlsx':
+                (_, tmpfn) = tempfile.mkstemp()
+                writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
+                df.to_excel(writer, index=(len(df.columns) == 1),
+                            encoding='latin-1', sheet_name='Sheet1')
+                writer.close()
+                res = open(tmpfn, 'rb').read()
+                os.unlink(tmpfn)
+        try:
+            mc.set(mckey, res, meta.get('cache', 43200))
+        except:
+            sys.stderr.write("Exception while writting key: %s" % (mckey, ))
     sys.stdout.write(res)
 
 if __name__ == '__main__':

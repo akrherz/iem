@@ -149,8 +149,8 @@ def plotter(fdict):
     ax.bar(days-0.45, ltop-lbottom, facecolor='blue', width=0.7,
            bottom=lbottom, zorder=1, alpha=0.3, label='Morning Low')
 
-    ax.scatter(days+0.1, hobs, zorder=2, s=40, c='red', label='Actual')
-    ax.scatter(days-0.1, lobs, zorder=2, s=40, c='blue', label='Actual')
+    ax.scatter(days+0.1, hobs, zorder=2, s=40, c='red', label='Actual High')
+    ax.scatter(days-0.1, lobs, zorder=2, s=40, c='blue', label='Actual Low')
 
     ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
     ax.grid(True)
