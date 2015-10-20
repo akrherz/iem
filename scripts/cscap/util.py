@@ -52,9 +52,15 @@ class Worksheet(object):
         self.cell_feed = self.spr_client.get_cells(self.spread_id, self.id)
         for entry in self.cell_feed.entry:
             row = entry.cell.row
-            if not self.data.has_key(row):
+            if row not in self.data:
                 self.data[row] = {}
-            self.data[ row ][ entry.cell.col ] = entry.cell.input_value
+            # https://developers.google.com/google-apps/spreadsheets/?hl=en#working_with_cell-based_feeds
+            # The input_value could be a function, pick the numeric_value
+            # first, which can be None for non-numeric types
+            if entry.cell.numeric_value is not None:
+                self.data[row][entry.cell.col] = entry.cell.numeric_value
+            else:
+                self.data[row][entry.cell.col] = entry.cell.input_value
 
     def get_cell_value(self, row, col):
         return self.data.get(str(row), {}).get(str(col))
