@@ -6,6 +6,7 @@ import sys
 import psycopg2.extras
 import ConfigParser
 import cgi
+import numpy as np
 import pandas as pd
 import pandas.io.sql as pdsql
 
@@ -319,8 +320,8 @@ def get_dl(form):
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
         format2 = workbook.add_format({'num_format': '@'})
-        worksheet.set_column('A:D', None, format2)
-        writer.save()
+        worksheet.set_column('B:E', None, format2)
+        writer.close()
         return open('/tmp/cscap.xlsx', 'rb').read()
     elif fmt == 'tab':
         sys.stdout.write("Content-type: text/plain\n\n")
