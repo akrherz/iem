@@ -57,10 +57,13 @@ class Worksheet(object):
             # https://developers.google.com/google-apps/spreadsheets/?hl=en#working_with_cell-based_feeds
             # The input_value could be a function, pick the numeric_value
             # first, which can be None for non-numeric types
-            if entry.cell.numeric_value is not None:
-                self.data[row][entry.cell.col] = entry.cell.numeric_value
-            else:
-                self.data[row][entry.cell.col] = entry.cell.input_value
+            #if entry.cell.numeric_value is not None:
+            #    self.data[row][entry.cell.col] = entry.cell.numeric_value
+            #else:
+            #    self.data[row][entry.cell.col] = entry.cell.input_value
+            # more thought necessary here as this converts columns we do not
+            # wish to convert
+            self.data[row][entry.cell.col] = entry.cell.input_value
 
     def get_cell_value(self, row, col):
         return self.data.get(str(row), {}).get(str(col))
