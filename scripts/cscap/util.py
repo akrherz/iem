@@ -35,6 +35,7 @@ class Worksheet(object):
         self.cell_feed = None
         self.list_feed = None
         self.data = {}
+        self.numdata = {}
 
     def refetch_feed(self):
         self.entry = self.spr_client.get_worksheet(self.spread_id, self.id)
@@ -52,21 +53,31 @@ class Worksheet(object):
         self.cell_feed = self.spr_client.get_cells(self.spread_id, self.id)
         for entry in self.cell_feed.entry:
             row = entry.cell.row
-            if row not in self.data:
-                self.data[row] = {}
+            _rowstore = self.data.setdefault(row, dict())
             # https://developers.google.com/google-apps/spreadsheets/?hl=en#working_with_cell-based_feeds
             # The input_value could be a function, pick the numeric_value
             # first, which can be None for non-numeric types
-            #if entry.cell.numeric_value is not None:
-            #    self.data[row][entry.cell.col] = entry.cell.numeric_value
-            #else:
-            #    self.data[row][entry.cell.col] = entry.cell.input_value
-            # more thought necessary here as this converts columns we do not
-            # wish to convert
-            self.data[row][entry.cell.col] = entry.cell.input_value
+            if entry.cell.numeric_value is not None:
+                _numstore = self.numdata.setdefault(row, dict())
+                _numstore[entry.cell.col] = entry.cell.numeric_value
+            _rowstore[entry.cell.col] = entry.cell.input_value
 
-    def get_cell_value(self, row, col):
-        return self.data.get(str(row), {}).get(str(col))
+    def get_cell_value(self, row, col, numeric=False):
+        """Return the cell value
+
+        Args:
+          row (int): the raw desired
+          col (int): the column desired
+          numeric (bool): Attempt to use the numeric value before the text val
+
+        Returns:
+          object
+        """
+        if not numeric:
+            return self.data.get(str(row), {}).get(str(col))
+        txtval = self.data.get(str(row), {}).get(str(col))
+        numval = self.numdata.get(str(row), {}).get(str(col))
+        return (numval if numval is not None else txtval)
 
     def get_cell_entry(self, row, col):
         for entry in self.cell_feed.entry:

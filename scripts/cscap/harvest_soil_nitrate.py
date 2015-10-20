@@ -77,7 +77,7 @@ for item in res['items']:
                        ) % (worksheet.get_cell_value(1, col).strip(),
                             siteid, YEAR))
                 continue
-            val = worksheet.get_cell_value(row, col)
+            val = worksheet.get_cell_value(row, col, numeric=True)
             if varname not in found_vars:
                 found_vars.append(varname)
             try:

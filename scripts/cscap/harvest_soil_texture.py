@@ -68,7 +68,7 @@ for item in res['items']:
                        ) % (YEAR, siteid, col))
                 continue
             varname = worksheet.get_cell_value(1, col).strip().split()[0]
-            val = worksheet.get_cell_value(row, col)
+            val = worksheet.get_cell_value(row, col, numeric=True)
             if varname == 'subsample':
                 subsample = val
                 continue
