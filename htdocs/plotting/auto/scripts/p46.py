@@ -2,11 +2,16 @@ import psycopg2.extras
 import datetime
 import numpy as np
 from pyiem.network import Table as NetworkTable
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
+    d['description'] = """This chart presents the frequency of observed
+    minimum wind chill for a winter season each year over the period of
+    record for the observation site."""
     d['cache'] = 86400
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
@@ -43,6 +48,8 @@ def plotter(fdict):
         years.append(int(row[0]))
         mins.append(float(row[1]))
 
+    df = pd.DataFrame(dict(year=pd.Series(years),
+                           min_windchill=pd.Series(mins)))
     mins = np.array(mins)
 
     ys = []
@@ -70,4 +77,4 @@ def plotter(fdict):
     ax[1].set_ylabel("Minimum Wind Chill $^\circ$F")
     ax[1].grid(True)
     ax[1].set_xlabel("Year label for spring portion of season")
-    return fig
+    return fig, df
