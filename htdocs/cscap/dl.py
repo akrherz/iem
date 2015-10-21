@@ -221,7 +221,7 @@ def get_dl(form):
 
     # columns!
     cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
-            'tillage', 'drainage', 'nitrogen', 'landscape']
+            'crop', 'tillage', 'drainage', 'nitrogen', 'landscape']
     dvars = form.getlist("data")
     wants_soil = False
     for dv in dvars:
@@ -306,11 +306,24 @@ def get_dl(form):
     df2['drainage'] = [item.split('|')[8] for item in df2.index]
     df2['nitrogen'] = [item.split('|')[9] for item in df2.index]
     df2['landscape'] = [item.split('|')[10] for item in df2.index]
+    df2['crop'] = None
 
     df2cols = df2.columns.values.tolist()
     for col in cols:
         if col not in df2cols:
             cols.remove(col)
+
+    # Assign in Rotations
+    rotdf = pdsql.read_sql("""SELECT * from xref_rotation""", pgconn)
+
+    def find_rotation(rotation, year):
+        try:
+            return rotdf[rotdf['code'] == rotation]['y%s' % (year, )].values[0]
+        except:
+            return ''
+    for i in df2.index:
+        df2.ix[i]['crop'] = find_rotation(df2.ix[i]['rotation'],
+                                          df2.ix[i]['year'])
 
     fmt = form.getfirst('format', 'csv')
     if fmt == 'excel':
