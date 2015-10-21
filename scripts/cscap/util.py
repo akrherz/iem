@@ -359,7 +359,7 @@ def get_driveclient():
 
     credentials = SignedJwtAssertionCredentials(
         client_email, private_key,
-        'https://www.googleapis.com/auth/drive.readonly')
+        'https://www.googleapis.com/auth/drive')
 
     http_auth = credentials.authorize(Http())
 
