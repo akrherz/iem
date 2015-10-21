@@ -11,7 +11,7 @@ $t->thispage = "climate-today";
 
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/assets/openlayers/3.4.0/ol.css" type="text/css">
-<link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link type="text/css" href="/assets/openlayers/3.4.0/ol3-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
@@ -26,7 +26,7 @@ $t->headextra = <<<EOF
 EOF;
 $t->jsextra = <<<EOF
 <script src="/assets/openlayers/3.4.0/ol.js" type="text/javascript"></script>
-<script src="/assets/jquery-ui/1.11.2/jquery-ui.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/assets/openlayers/3.4.0/ol3-layerswitcher.js'></script>
 <script src='climap.js?v=6'></script>
 EOF;

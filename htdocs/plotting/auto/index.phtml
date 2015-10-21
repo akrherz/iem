@@ -14,7 +14,7 @@ $t = new MyView();
 $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
- <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+ <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
 EOF;
 
 
@@ -301,7 +301,7 @@ $dataextra
 		
 EOF;
 $t->jsextra = <<<EOF
-<script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script>
 $(document).ready(function(){
 {$jsextra}

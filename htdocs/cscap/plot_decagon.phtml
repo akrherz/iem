@@ -139,11 +139,18 @@ echo <<<EOF
 <head>
 <link href="/vendor/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
 <link href="/css/bootstrap-override.css" rel="stylesheet">
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />  
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" /> 
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.theme.css" />  
+<title>CSCAP Decagon Data Plotting/Download</title>
+<style>
+select {
+  color: #000;
+}
+</style>
 </head>
 <body>
 
-<h3>CSCAP Decagon Data Plotting</h3>
+<h3>CSCAP Decagon Data Plotting/Download</h3>
 
 {$errmsg}
 
@@ -200,9 +207,9 @@ to denote quality control.
 [OH] WATERMAN 2 minute
 </pre></p>
 
-<script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
- <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script>
 $(document).ready(function(){
 	$( "#datepicker" ).datepicker({dateFormat:"yy-mm-dd",
