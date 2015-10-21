@@ -4,12 +4,18 @@
 import psycopg2.extras
 import numpy as np
 import calendar
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
+    d['description'] = """This chart displays the combination of liquid
+    precipitation with snowfall totals for a given month.  The liquid totals
+    include the melted snow.  So this plot does <strong>not</strong> show
+    the combination of non-frozen vs frozen precipitation."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:'),
@@ -50,6 +56,9 @@ def plotter(fdict):
         years.append(row[0])
         precip.append(float(row[1]))
         snow.append(float(row[2]))
+    df = pd.DataFrame(dict(year=pd.Series(years),
+                           precip=pd.Series(precip),
+                           snow=pd.Series(snow)))
 
     precip = np.array(precip)
     snow = np.array(snow)
@@ -77,4 +86,4 @@ def plotter(fdict):
     ax.set_ylabel("Snowfall Total [inch]")
     ax.set_xlabel("Precipitation Total (liquid + melted) [inch]")
     ax.legend(loc=2, scatterpoints=1)
-    return fig
+    return fig, df
