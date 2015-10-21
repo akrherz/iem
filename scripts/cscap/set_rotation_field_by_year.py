@@ -1,9 +1,7 @@
 """
- Go into the various sheets and replace the rotation text with something 
+ Go into the various sheets and replace the rotation text with something
  explicit for the year
 """
-
-import gdata.docs.client
 import ConfigParser
 import util
 
@@ -11,7 +9,7 @@ config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive = util.get_driveclient()
 
 xref_plotids = util.get_xref_plotids(spr_client, config)
 
@@ -22,38 +20,40 @@ rotations = {}
 for entry in xref_feed.entry:
     data = entry.to_dict()
 
-    rotations[ data['code'] ] = data
+    rotations[data['code']] = data
 
-# Get data spreadsheets 
-query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='Agronomic Data')
-feed = docs_client.GetAllResources(query=query)
+res = drive.files().list(q="title contains 'Agronomic Data'").execute()
 
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
-    siteid = spreadsheet.title.split()[0]
+    siteid = item['title'].split()[0]
+    print('Running for site: "%s"...' % (siteid, ))
 
     plotid_feed = spr_client.get_list_feed(xref_plotids[siteid], 'od6')
     plotids = {}
     for entry2 in plotid_feed.entry:
         row = entry2.to_dict()
-        plotids[ row['plotid'] ] = row['rotation'].split()[0].replace("[", 
-                                                    "").replace("]", "")
-    
+        if row['rotation'] is None:
+            print('ERROR: Found null rotation for plotids!')
+            continue
+        plotids[row['plotid']] = row['rotation'].split(
+            )[0].replace("[", "").replace("]", "")
+
     for yr in ['2011', '2012', '2013', '2014', '2015']:
-    #for yr in ['2011', ]:
-        print '------------>', spreadsheet.title, yr
+        if yr not in spreadsheet.worksheets:
+            continue
+        print '--->', item['title'], yr
         worksheet = spreadsheet.worksheets[yr]
         worksheet.get_list_feed()
         for entry in worksheet.list_feed.entry:
             data = entry.to_dict()
             if data['uniqueid'] is None:
                 continue
-            code = data['rotation'].split()[0].replace("[", "").replace("]", 
-                                                        "").replace("ROT", "")
+            code = data['rotation'].split(
+                )[0].replace("[", "").replace("]", "").replace("ROT", "")
             newval = "ROT%s :: %s" % (code,  rotations["ROT"+code]["y"+yr])
             if plotids[data['plotid']] != code:
                 print 'Plot:%s Rotation PlotIdSheet->%s AgSheet->%s' % (
@@ -63,4 +63,3 @@ for entry in feed:
                                                  data['rotation'])
                 entry.set_value('rotation', newval)
                 spr_client.update(entry)
-            
