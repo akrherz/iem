@@ -128,13 +128,13 @@ if (isset($_GET['map'])){
 }
 $t->title = "Climodat Station Monitor";
 $t->headextra = <<<EOF
-<link rel="stylesheet" href="/assets/jquery-ui/1.11.2/jquery-ui.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 EOF;
 
 $sdatestr = date("m/d/Y", $sdate);
 $edatestr = date("m/d/Y", $edate);
 $t->jsextra = <<<EOF
-<script src="/assets/jquery-ui/1.11.2/jquery-ui.min.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
 	sdate = $("#sdate").datepicker({altFormat:"yymmdd"});

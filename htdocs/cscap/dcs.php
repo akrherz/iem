@@ -37,10 +37,10 @@ function radio($varname, $vals){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
  <title>CSCAP Data Collection Sheet Interface</title>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
     <link rel='stylesheet' media='print' href='dcs-print.css' />
     <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
   
  
  

@@ -6,7 +6,7 @@ define("IEM_APPID", 146);
 $t = new MyView();
 $t->thispage = "archive-raob";
 $t->jsextra=<<<EOF
-<script src='/assets/jquery-ui/1.11.4/jquery-ui.min.js'></script>
+<script src='/vendor/jquery-ui/1.11.4/jquery-ui.min.js'></script>
 <script src='/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js'></script>
 <script type="text/javascript">
 $(function(){
@@ -24,8 +24,8 @@ $(function(){
 </script>
 EOF;
 $t->headextra= <<<EOF
-<link rel="stylesheet" href="/assets/jquery-ui/1.11.4/jquery-ui.min.css">
-<link rel="stylesheet" href="/assets/jquery-ui/1.11.4/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.theme.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css">		
 EOF;
 $t->title = "Rawinsonde Data Archive";
