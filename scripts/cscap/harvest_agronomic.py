@@ -1,7 +1,7 @@
 """
 Harvest the Agronomic Data into the ISU Database
 """
-import util
+import util  # @UnresolvedImport
 import sys
 import ConfigParser
 import psycopg2

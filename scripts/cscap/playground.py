@@ -1,5 +1,4 @@
-import util
-import sys
+import util  # @UnresolvedImport
 import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
@@ -8,13 +7,27 @@ FOLDERS = {}
 
 drive = util.get_driveclient()
 
+id_resp = drive.permissions(
+            ).getIdForEmail(email='cscap.automation@gmail.com').execute()
+uid = id_resp['id']
+
+res = drive.files().list(q="'me' in owners").execute()
+for item in res['items']:
+    print item['title']
+    permission = drive.permissions().get(
+        fileId=item['id'], permissionId=uid).execute()
+    permission['role'] = 'owner'
+    print drive .permissions().update(
+        fileId=item['id'], permissionId=uid, body=permission,
+        transferOwnership=True).execute()
+
+"""
 body = {'title': 'My Title 22',
         'mimeType': 'application/vnd.google-apps.spreadsheet',
         'parents': [{'id': '0B6ZGw0coobCxTnVsb0RLQUd1U0U'}]}
 res = drive.files().insert(body=body).execute()
 print res['parents']
 
-"""
 folders = drive.files().list(q="mimeType = 'application/vnd.google-apps.folder'",
                              maxResults=999).execute()
 for i, item in enumerate(folders['items']):

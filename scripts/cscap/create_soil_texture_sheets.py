@@ -57,7 +57,7 @@ for entry in meta_feed.entry:
                 'percent silt',    'percent clay',    'texture',
                 'pH',    'cmol kg-1',    '%',    '%']
     headers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
-    depths = ['0-10', '10-20', '20-40', '40-60']
+    depths = ['0 - 10', '10 - 20', '20 - 40', '40 - 60']
 
     # Figure out how many
     rows = []
