@@ -1,11 +1,13 @@
 import psycopg2.extras
 import pyiem.nws.vtec as vtec
 import numpy as np
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """For a given watch/warning/advisory type and forecast
     zone, what is the frequency by time of day that the product was valid.  The
@@ -82,6 +84,9 @@ def plotter(fdict):
     for row in cursor:
         data[int(row[0])] = row[1]
 
+    df = pd.DataFrame(dict(minute=pd.Series(np.arange(1440)),
+                           events=pd.Series(data)))
+
     ax.bar(np.arange(1440), data / float(cnt) * 100., ec='b', fc='b')
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
@@ -99,4 +104,4 @@ def plotter(fdict):
                        sts.strftime("%Y-%m-%d %I:%M %p"),
                        ets.strftime("%Y-%m-%d %I:%M %p")))
     ax.set_xlim(0, 1441)
-    return fig
+    return fig, df

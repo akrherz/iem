@@ -71,9 +71,9 @@ def plotter(fdict):
         weekcount[int(row[1])-1] += 1
         eventcount[int(row[1])-1] += row[2]
 
-    df = pd.DataFrame(dict(week=pd.Series(range(1, 54)),
-                           weekcount=pd.Series(weekcount),
-                           eventcount=pd.Series(eventcount)))
+    df = pd.DataFrame(dict(weekcount=pd.Series(weekcount),
+                           eventcount=pd.Series(eventcount)),
+                      index=pd.Series(range(1, 54), name='week'))
 
     if max(weekcount) == 0:
         return "ERROR: No Results Found!"
