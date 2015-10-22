@@ -86,10 +86,12 @@ data = {'plots': [
          'label': "July-August Days Above Temp v. May-June Precip"},
         {'id': "9", 'mw': True, 'label': ("Growing Degree Day Climatology "
                                           "and Daily Values for one Year")},
-        {'id': "95", 'mw': True,
-         'label': "Monthly Precipitation / Temperature with El Nino Indices"},
         {'id': "2", 'mw': True,
          'label': "Month Precipitation v Month Growing Degree Day Departures"},
+        {'id': "57", 'mw': True,
+         'label': "Monthly Precipitation/Temperature Records"},
+        {'id': "95", 'mw': True,
+         'label': "Monthly Precipitation/Temperature with El Nino Indices"},
         {'id': "24", 'mw': True,
          'label': "Monthly Precipitation/Temperature Climate District Ranks"},
         {'id': "3", 'mw': True,
@@ -117,8 +119,6 @@ data = {'plots': [
          'label': "Snowfall vs Precipitation Total for a Month"},
         {'id': "39", 'mw': True,
          'label': "Scenarios for this month besting some previous month"},
-        {'id': "57", 'mw': True,
-         'label': "Warmest Months for Average Temperature"},
     ]},
     {'label': 'Yearly', 'options': [
         {'id': "76",

@@ -82,11 +82,11 @@ def main():
         sys.stderr.write("Setting cache: %s" % (mckey,))
         if fmt != 'png' and df is not None:
             if fmt == 'csv':
-                res = df.to_csv(index=(len(df.columns) == 1))
+                res = df.to_csv()
             elif fmt == 'xlsx':
                 (_, tmpfn) = tempfile.mkstemp()
                 writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
-                df.to_excel(writer, index=(len(df.columns) == 1),
+                df.to_excel(writer,
                             encoding='latin-1', sheet_name='Sheet1')
                 writer.close()
                 res = open(tmpfn, 'rb').read()

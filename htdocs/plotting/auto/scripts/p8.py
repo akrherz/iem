@@ -5,6 +5,7 @@ import psycopg2.extras
 import numpy as np
 from pyiem import network
 import calendar
+import pandas as pd
 
 
 def get_description():
@@ -20,6 +21,7 @@ def get_description():
         dict(type='text', name='threshold', default='80',
              label='Threshold Percentage [%]:'),
     ]
+    d['data'] = True
     d['description'] = """This plot presents the frequency of having
     a month's preciptation at or above some threshold.  This threshold
     is compared against the long term climatology for the site and month. This
@@ -59,6 +61,8 @@ def plotter(fdict):
     years = float(1 + eyear - syear)
     for row in cursor:
         vals.append(row[1] / years * 100.)
+    df = pd.DataFrame(dict(freq=pd.Series(vals, index=range(1, 13))),
+                      index=pd.Series(range(1, 13), name='month'))
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -75,4 +79,4 @@ def plotter(fdict):
                   ) % (nt.sts[station]['name'], station, syear,
                        eyear, threshold))
 
-    return fig
+    return fig, df

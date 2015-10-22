@@ -4,7 +4,7 @@ from scipy import stats
 from pyiem import network
 import datetime
 import calendar
-import pandas as pd
+from pandas.io.sql import read_sql
 
 
 def get_description():
@@ -25,6 +25,9 @@ def get_description():
     units of standard deviation.  So a value of one would represent an one
     standard deviation departure from long term mean.  The mean and standard
     deviation is computed against the current / period of record climatology.
+    The circle represents a line of equal extremity as compared with the year
+    of your choosing.  The dots greater than 2.5 sigma from center are
+    labelled with the year they represent.
     """
     return d
 
@@ -35,8 +38,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
     month = int(fdict.get('month', 7))
@@ -44,70 +46,42 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    ccursor.execute("""
-     SELECT stddev(sp) as p, avg(sp) as pavg,
-        stddev(tp) as t, avg(tp) as tavg  from
- (    SELECT year, sum(precip) as sp,
-         sum(gdd50(high::numeric,low::numeric)) as tp
-      from """+table+"""
-      where station = %s and month = %s
-      GROUP by year) as foo
-    """, (station, month))
-    row = ccursor.fetchone()
-    if row is None or row['p'] is None:
+    df = read_sql("""
+        SELECT year, sum(precip) as total_precip,
+        sum(gdd50(high::numeric,low::numeric)) as gdd50 from """+table+"""
+        WHERE station = %s and month = %s GROUP by year
+    """, pgconn, params=(station, month), index_col='year')
+    if len(df.index) == 0:
         return "ERROR: No Data Found"
-    pstd = float(row['p'])
-    pavg = float(row['pavg'])
-    tstd = float(row['t'])
-    tavg = float(row['tavg'])
 
-    ccursor.execute("""SELECT year, sum(precip) as sp,
-      sum(gdd50(high::numeric,low::numeric)) as tp from """ + table + """
-      where station = %s and month = %s
-      GROUP by year ORDER by year ASC""", (station, month))
+    gstats = df.gdd50.describe()
+    pstats = df.total_precip.describe()
 
-    tsigma = []
-    psigma = []
-    years = []
-    dist = []
-    for row in ccursor:
-        t = float((float(row['tp']) - tavg) / tstd)
-        p = float((float(row['sp']) - pavg) / pstd)
-        d = ((t * t) + (p * p))**0.5
-        tsigma.append(t)
-        psigma.append(p)
-        dist.append(d)
-        years.append(int(row['year']))
+    df['precip_sigma'] = (df.total_precip - pstats['mean']) / pstats['std']
+    df['gdd50_sigma'] = (df.gdd50 - gstats['mean']) / gstats['std']
+    df['distance'] = (df.precip_sigma ** 2 + df.gdd50_sigma ** 2) ** 0.5
 
-    if len(years) == 0:
-        return "ERROR: No Data Found!"
-
-    tsigma = np.array(tsigma)
-    psigma = np.array(psigma)
-    df = pd.DataFrame(dict(year=pd.Series(years),
-                           temp_sigma=pd.Series(tsigma),
-                           prec_sigma=pd.Series(psigma)))
-
-    h_slope, intercept, r_value, _, _ = stats.linregress(tsigma, psigma)
+    h_slope, intercept, r_value, _, _ = stats.linregress(df['gdd50_sigma'],
+                                                         df['precip_sigma'])
 
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.scatter(tsigma, psigma)
+    ax.scatter(df['gdd50_sigma'], df['precip_sigma'])
     ax.plot([-4, 4], [y1, y2], label="Slope=%.2f\nR$^2$=%.2f" % (h_slope,
                                                                  r_value ** 2))
-    xmax = max(abs(tsigma)) + 0.5
-    ymax = max(abs(psigma)) + 0.5
+    xmax = df.gdd50_sigma.abs().max() + 0.25
+    ymax = df.precip_sigma.abs().max() + 0.25
     ax.set_xlim(0 - xmax, xmax)
     ax.set_ylim(0 - ymax, ymax)
-    for i in range(len(years)):
-        if years[i] in [year, ] or dist[i] > 2.5:
-            ax.text(tsigma[i], psigma[i], ' %.0f' % (years[i],), va='center')
+    events = df.query("distance > 2.5 or year == %.0f" % (year, ))
+    for _year, row in events.iterrows():
+        ax.text(row['gdd50_sigma'], row['precip_sigma'],
+                ' %.0f' % (_year,), va='center')
 
-    if year in years:
-        c = Circle((0, 0), radius=dist[years.index(year)], facecolor='none')
-        ax.add_patch(c)
+    c = Circle((0, 0), radius=df.loc[year].distance, facecolor='none')
+    ax.add_patch(c)
     ax.set_xlabel("Growing Degree Day Departure ($\sigma$)")
     ax.set_ylabel("Precipitation Departure ($\sigma$)")
     ax.grid(True)
