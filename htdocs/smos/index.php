@@ -2,61 +2,16 @@
 include("../../config/settings.inc.php");
 include("../../include/forms.php");
 include("../../include/myview.php");
+$OL = "3.9.0";
 $t = new MyView();
 $t->title = "SMOS Data";
 $t->thispage = "archive-smos";
 $t->headextra = <<<EOF
-<link rel='stylesheet' href='/assets/openlayers/2.13.1//theme/default/style.css' type='text/css'>
+<link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 EOF;
 $t->jsextra = <<<EOF
-<script src='/assets/openlayers/2.13.1/OpenLayers.js'></script>
-<script type='text/javascript'>
-var controls;
-var vectors;
-var feature;
-function init(){
-	var proj = new OpenLayers.Projection('EPSG:4326');
-				
-	feature = new OpenLayers.Feature.Vector(
-      	new OpenLayers.Geometry.Point(-10352712, 5160979),
- 		{some:'data'},
- 		{externalGraphic: '/images/marker.png', 
-		graphicHeight: 21, graphicWidth: 16});
-		
-	vectors = new OpenLayers.Layer.Vector('Vector Layer');
-	
-		
-		
-    controls = {
-        drag: new OpenLayers.Control.DragFeature(vectors, {
-			onComplete: function(feature, pixel) {
-				geo = feature.geometry.clone();
-				geo.transform(map.getProjectionObject(), proj);
-				document.getElementById('lon').value = geo.x;
-				document.getElementById('lat').value = geo.y;
-}
-		})
-    };
-      var map = new OpenLayers.Map({
-          div: 'map',
-          theme: null,
-          layers: [
-              new OpenLayers.Layer.OSM('OpenStreetMap', null, {
-                  transitionEffect: 'resize'
-              }), vectors
-          ],
-          zoom: 1
-      });
-      for(var key in controls) {
-          map.addControl(controls[key]);
-			controls[key].activate();
-		}
-		map.setCenter(new OpenLayers.LonLat(-93.0, 42.0).transform(
-        	proj, map.getProjectionObject()), 5);
-		
-		vectors.addFeatures(feature);
-}
-</script>
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script src="smosmap.js"></script>
 <style type='text/css'>
         #map {
             width: 100%;
@@ -65,7 +20,6 @@ function init(){
         }
 </style>
 EOF;
-$t->bodyextra = "onload=\"init();\"";
 
 $y1select = yearSelect2(2012, 2010, "year1");
 $m1select = monthSelect2(1, "month1");
