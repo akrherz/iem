@@ -30,7 +30,7 @@ data = {'plots': [
         {'id': "7", 'mw': True,
          'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "61",
-         'label': ("High/Low Temp streaks above/below average "
+         'label': ("High/Low Temp above/below avg OR dry streaks "
                    "by NWS CLI Sites")},
         {'id': "19", 'mw': True,
          'label': "Histogram of Daily High/Low Temperatures"},
