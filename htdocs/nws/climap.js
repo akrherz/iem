@@ -26,7 +26,8 @@ function updateDate(){
 
 function makeVectorLayer(dt){
 	return new ol.layer.Vector({
-		source: new ol.source.GeoJSON({
+		source: new ol.source.Vector({
+			format: new ol.format.GeoJSON(),
 		  	projection: ol.proj.get('EPSG:3857'),
 		    url: '/geojson/cli.py?dt='+dt
 	  	}),
@@ -97,8 +98,8 @@ $(document).ready(function(){
 		layers: [new ol.layer.Tile({
 			title: "Global Imagery",
 			source: new ol.source.TileWMS({
-				url: 'http://maps.opengeo.org/geowebcache/service/wms',
-				params: {LAYERS: 'bluemarble', VERSION: '1.1.1'}
+				url: 'http://demo.opengeo.org/geoserver/wms',
+				params: {LAYERS: 'nasa:bluemarble', VERSION: '1.1.1'}
 			})
 		}),
 		new ol.layer.Tile({
