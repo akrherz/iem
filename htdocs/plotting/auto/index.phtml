@@ -93,7 +93,7 @@ if (isset($_GET["q"])){
 	$form = "";
 	while (list($k,$v) = each($jobj->arguments)){
 		$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
-		$pltvars[] = sprintf("%s:%s", $v->name, $value);
+		$thisrow = null;
 		// BEGIN generation of interfaces based on types
 		if ($v->type == "zstation"){
 			// Build out listing of networks, if we have not already
@@ -115,13 +115,12 @@ if (isset($_GET["q"])){
 			$defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
 			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". 
-				networkSelect($network, $value, Array(), $v->name) ."</td></tr>";
+			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
 		}
 		elseif ($v->type == "ugc"){
 			$stateselect = stateSelect($state, "onNetworkChange");
-			$form .= "<tr><td>". $v->label ."</td><td>". $stateselect ." ". ugcStateSelect($state, $value) ."</td></tr>";
+			$thisrow = $stateselect ." ". ugcStateSelect($state, $value);
 			$pltvars[] = sprintf("%s:%s", "state", $state);
 		}
 		elseif ($v->type == "station"){
@@ -142,7 +141,7 @@ if (isset($_GET["q"])){
 				);
 			}
 			$netselect = make_select("network", $network, $networks, "onNetworkChange");
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ." ". networkSelect($network, $value) ."</td></tr>";
+			$thisrow = $netselect ." ". networkSelect($network, $value);
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
 		elseif ($v->type == "networkselect"){
@@ -151,52 +150,46 @@ if (isset($_GET["q"])){
 				$extra["_ALL"] = Array('name'=>' -- All Sites --');
 			}
 			$netselect = networkSelect($v->network, $value, $extra, "station");
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect  ."</td></tr>";
+			$thisrow = $netselect;
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
 		elseif ($v->type == "phenomena"){
 			$netselect = vtecPhenoSelect($value);
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+			$thisrow = $netselect;
 		}
 		elseif ($v->type == "significance"){
 			$netselect = vtecSigSelect($value);
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+			$thisrow = $netselect;
 		}
 		elseif ($v->type == "state"){
 			$netselect = stateSelect($value);
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+			$thisrow = $netselect;
 		}
 		elseif ($v->type == "clstate"){
 			$netselect = make_select($v->name, $value, $states);
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+			$thisrow = $netselect;
 		}
 		elseif ($v->type == "text"){
-			$form .= "<tr><td>". $v->label ."</td>
-			<td><input value=\"$value\" type=\"text\" name=\"". $v->name ."\"></td></tr>" ;
+			$thisrow = "<input value=\"$value\" type=\"text\" name=\"". $v->name ."\">";
 		}
 		elseif ($v->type == "month"){
-			$form .= "<tr><td>". $v->label ."</td>
-			<td>". monthSelect2( $value, $v->name) ."</td></tr>" ;
+			$thisrow = monthSelect2( $value, $v->name);
 		}
 		elseif ($v->type == "zhour"){
-			$form .= "<tr><td>". $v->label ."</td>
-			<td>". gmtHourSelect( $value, $v->name) ."</td></tr>" ;
+			$thisrow = gmtHourSelect( $value, $v->name);
 		}
 		elseif ($v->type == "hour"){
-			$form .= "<tr><td>". $v->label ."</td>
-			<td>". hourSelect( $value, $v->name) ."</td></tr>" ;
+			$thisrow = hourSelect( $value, $v->name);
 		}
 		elseif ($v->type == "day"){
-			$form .= "<tr><td>". $v->label ."</td>
-			<td>". daySelect( $value, $v->name) ."</td></tr>" ;
+			$thisrow = daySelect( $value, $v->name);
 		}
 		elseif ($v->type == "year"){
-			$form .= "<tr><td>". $v->label ."</td>
-			<td>". yearSelect2(isset($v->min) ? $v->min: 1893, $value, $v->name) ."</td></tr>" ;
+			$thisrow = yearSelect2(isset($v->min) ? $v->min: 1893, $value, $v->name);
 		}
 		elseif ($v->type == "select"){
 			$netselect = make_select($v->name, $value, $v->options);
-			$form .= "<tr><td>". $v->label ."</td><td>". $netselect ."</td></tr>";
+			$thisrow = $netselect;
 		}
 		elseif ($v->type == "date"){
 			$dpname = "datepicker_". $v->name;
@@ -209,9 +202,26 @@ $( "#{$dpname}" ).datepicker({
 $("#{$dpname}").datepicker('setDate', new Date("{$value}"));
 	
 EOF;
-			$form .= "<tr><td>". $v->label ."</td>"
-					."<td><input type=\"text\" name=\"". $v->name 
-					."\" id=\"{$dpname}\" /> (YYYY/mm/dd)</td></tr>";
+			$thisrow = "<input type=\"text\" name=\"". $v->name 
+					."\" id=\"{$dpname}\" /> (YYYY/mm/dd)";
+		}
+		if ($thisrow != null){
+			if (isset($v->optional) && $v->optional){
+				// Okay, we have an optional field, so we carry around an
+				// extra $_GET var prefixed with _opt_
+				$opton = isset($_GET["_opt_". $v->name]) ? ($_GET["_opt_". $v->name] == 'on') : false;
+				$thisrow = sprintf("<input class=\"optcontrol\" %s type=\"checkbox\" value=\"on\" name=\"%s\">"
+						."<div id=\"%s\" style=\"display: %s;\">%s</div>",
+						$opton ? " checked=\"checked\"": "",
+						"_opt_". $v->name, "_opt_". $v->name,
+						$opton ? "block": 'none', $thisrow);
+				if ($opton){
+					$pltvars[] = sprintf("%s:%s", $v->name, $value);
+				}
+			} else{
+				$pltvars[] = sprintf("%s:%s", $v->name, $value);
+			}
+			$form .= "<tr><td>{$v->label}</td><td>{$thisrow}</td></tr>";
 		}
 	}
 	$imguri .= str_replace('/', '-', implode($pltvars, "::"));
@@ -228,6 +238,12 @@ EOF;
 	}
 	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
 	$formhtml = <<<EOF
+<style>
+.optcontrol {
+  float: left;
+  margin-right: 10px !important;
+}
+</style>
 <script>
 function onNetworkChange(newnetwork){
     $("#_wait").val("yes");
@@ -305,8 +321,19 @@ $t->jsextra = <<<EOF
 <script>
 $(document).ready(function(){
 {$jsextra}
+    $('.optcontrol').change(function(){
+        if (this.checked){
+        	$("#"+ this.name).css('display', 'block');
+        } else {
+        	$("#"+ this.name).css('display', 'none');
+        }
+    });
 	$('#theimage').on('load', function(){
 		// console.log("load() fired...");
+		$('#willload').css('display', 'none');
+	});
+	$('#theimage').on('error', function(){
+		// console.log("error() fired...");
 		$('#willload').css('display', 'none');
 	});
 	$('#_l').change(function(){
