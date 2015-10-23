@@ -1,5 +1,5 @@
 import psycopg2.extras
-import numpy as np
+import pandas as pd
 import calendar
 from pyiem.network import Table as NetworkTable
 
@@ -7,9 +7,11 @@ from pyiem.network import Table as NetworkTable
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """Displays the number of times that a single day's
-    precipitation was greater than all of the other days of the month
-    combined."""
+    precipitation was greater than some portion of the monthly total. The
+    default settings provide the frequency of getting half of the month's
+    precipitation within one 24 hour period."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:'),
@@ -41,15 +43,19 @@ def plotter(fdict):
          SELECT month, sum(case when max > (sum * %s) then 1 else 0 end),
          count(*) from monthly GROUP by month ORDER by month ASC
          """, (station, threshold / 100.))
-    data = [0]*12
+    df = pd.DataFrame(dict(freq=None, events=None,
+                           month=pd.Series(calendar.month_abbr[1:],
+                                           index=range(1, 13))),
+                      index=pd.Series(range(1, 13), name='mo'))
     for row in cursor:
-        data[row[0]-1] = row[1] / float(row[2]) * 100.
+        df.at[row[0], 'events'] = row[1]
+        df.at[row[0], 'freq'] = row[1] / float(row[2]) * 100.
 
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.bar(np.arange(1, 13) - 0.4, data)
-    for i, y in enumerate(data):
-        ax.text(i+1, y+2, "%.1f%%" % (y,), ha='center')
+    ax.bar(df.index - 0.4, df.freq)
+    for i, row in df.iterrows():
+        ax.text(i, row['freq']+2, "%.1f%%" % (row['freq'],), ha='center')
     ax.set_title(("[%s] %s\nFreq of One Day Having %.0f%% of That Month's "
                   "Precip Total"
                   ) % (station, nt.sts[station]['name'], threshold))
@@ -59,6 +65,6 @@ def plotter(fdict):
     ax.set_ylabel("Percentage of Years")
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_xticks(np.arange(1, 13))
+    ax.set_xticks(range(1, 13))
 
-    return fig
+    return fig, df
