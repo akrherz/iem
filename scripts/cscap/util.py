@@ -4,7 +4,6 @@ Utility Functions that are common to our scripts, I hope
 import gdata.gauth
 import gdata.spreadsheets.client
 import gdata.spreadsheets.data as spdata
-import gdata.docs.client
 
 import json
 import os
@@ -209,20 +208,6 @@ def get_xref_plotids(spr_client, config):
         d = entry.to_dict()
         data[d['uniqueid']] = d['keyspread']
     return data
-
-
-def get_docs_client(config):
-    """ Return an authorized docs client """
-    token = gdata.gauth.OAuth2Token(
-        client_id=config.get('appauth', 'client_id'),
-        client_secret=config.get('appauth', 'app_secret'),
-        user_agent='daryl.testing',
-        scope=config.get('googleauth', 'scopes'),
-        refresh_token=config.get('googleauth', 'refresh_token'))
-
-    docs_client = gdata.docs.client.DocsClient()
-    token.authorize(docs_client)
-    return docs_client
 
 
 def get_spreadsheet_client(config):

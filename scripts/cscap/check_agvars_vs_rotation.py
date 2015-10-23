@@ -1,13 +1,12 @@
-import gdata.docs.client
 import ConfigParser
-import util
+import util  # @UnresolvedImport
 import sys
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
 spr_client = util.get_spreadsheet_client(config)
-docs_client = util.get_docs_client(config)
+drive = util.get_driveclient()
 
 xref_plotids = util.get_xref_plotids(spr_client, config)
 
@@ -15,45 +14,44 @@ xref_feed = spr_client.get_list_feed(config.get('cscap', 'xrefrot'), 'od6')
 rotations = {}
 for entry in xref_feed.entry:
     data = entry.to_dict()
-    rotations[ data['code'] ] = data
+    rotations[data['code']] = data
 
 # Build xref of cropmate with variables
 cropmates = {}
 xref_feed = spr_client.get_list_feed(config.get('cscap', 'xrefrotvars'), 'od6')
 for entry in xref_feed.entry:
     data = entry.to_dict()
-    if not cropmates.has_key(data['cropmate']):
-        cropmates[data['cropmate']] = []
-    cropmates[ data['cropmate'] ].append( data['variable'].lower() )
+    res = cropmates.setdefault(data['cropmate'], [])
+    res.append(data['variable'].lower())
 
+res = drive.files().list(q="title contains 'Agronomic Data'").execute()
 
-# Get data spreadsheets 
-query = gdata.docs.client.DocsQuery(show_collections='false',
-                                    title='Agronomic Data')
-feed = docs_client.GetAllResources(query=query)
-
-for entry in feed:
-    if entry.get_resource_type() != 'spreadsheet':
+for item in res['items']:
+    if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
+    print('Processing %s' % (item['title'], ))
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
-    siteid = spreadsheet.title.split()[0]
+    siteid = item['title'].split()[0]
     plotid_feed = spr_client.get_list_feed(xref_plotids[siteid], 'od6')
     plotids = {}
     for entry2 in plotid_feed.entry:
         row = entry2.to_dict()
-        if not row.has_key('rotation'):
+        if 'rotation' not in row:
             print 'Invalid headers in plotid sheet for %s\n headers: %s' % (
-                                                        spreadsheet.title,
+                                                        item['title'],
                                                         " ".join(row.keys()))
             sys.exit()
-            
-        plotids[ row['plotid'] ] = row['rotation'].split()[0].replace("[",
-                                                    "").replace("]", "")
+        if row['rotation'] is None:
+            continue
+        plotids[row['plotid']] = row['rotation'].split()[0].replace(
+            "[", "").replace("]", "")
 
-    for yr in ['2011', '2012', '2013','2014', '2015' ]:
+    for yr in ['2011', '2012', '2013', '2014', '2015']:
         ylookup = 'y%s' % (yr,)
-        print '------------>', spreadsheet.title, yr
+        if yr not in spreadsheet.worksheets:
+            continue
+        print('----> %s' % (yr, ))
         worksheet = spreadsheet.worksheets[yr]
         worksheet.get_list_feed()
         for entry in worksheet.list_feed.entry:
@@ -66,25 +64,29 @@ for entry in feed:
             for col in data.keys():
                 if col[:3] != 'agr':
                     continue
-                #if (col in cropmates.get(crop, []) and data[col] == "."):
-                #    print 'Setting to DNC', data['plotid'], crop, col, data[col]
+                # if (col in cropmates.get(crop, []) and data[col] == "."):
+                #  print 'Setting to DNC', data['plotid'], crop, col, data[col]
                 #    entry.set_value(col, 'did not collect')
-                #    dirty = True                    
-                if (col not in cropmates.get(crop, []) and 
-                    (data[col] is None or 
-                    data[col].lower() in ['.', 'did not collect'])):
-                    print 'Setting to n/a', data['plotid'], crop, col, data[col]
+                #    dirty = True
+                if (col not in cropmates.get(crop, []) and
+                        (data[col] is None or
+                         data[col].lower() in ['.', 'did not collect'])):
+                    print(('    Setting to n/a PlotId: %s Crop: %s '
+                           'Col: %s Data: %s'
+                           ) % (data['plotid'], crop, col, data[col]))
                     entry.set_value(col, 'n/a')
                     dirty = True
                 if data[col] is None:
                     continue
-                    #print 'Setting to .', data['plotid'], crop, col
-                    #entry.set_value(col, '.')
-                    #dirty = True
-                elif (col not in cropmates.get(crop, []) and 
-                    data[col].lower() not in ['.', 'did not collect', 'n/a']):
-                    print "PlotID: %s crop: %s has data [%s] for %s" % (
-                                        data['plotid'], crop, data[col], 
-                                        col.upper())
+                    # print 'Setting to .', data['plotid'], crop, col
+                    # entry.set_value(col, '.')
+                    # dirty = True
+                elif (col not in cropmates.get(crop, []) and
+                      data[col].lower() not in ['.', 'did not collect',
+                                                'n/a', 'Not available']):
+                    print(("    PlotID: %s crop: %s has data [%s] for %s"
+                           ) % (data['plotid'], crop, data[col],
+                                col.upper()))
             if dirty:
+                # print("updating...")
                 spr_client.update(entry)

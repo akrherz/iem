@@ -1,7 +1,3 @@
-"""
-Add columns arbitrarily to the Agronomic sheets
-"""
-
 import gdata.docs.client
 import ConfigParser
 import util

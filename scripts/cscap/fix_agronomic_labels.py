@@ -42,4 +42,3 @@ for entry in feed:
             print ' ... updated'
         else:
             print ' ... not found!'
-        
