@@ -1,15 +1,19 @@
-import psycopg2.extras
+import psycopg2
+import sys
 import numpy as np
 from pyiem import network
 import calendar
 import datetime
+from pandas.io.sql import read_sql
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This chart produces the daily climatology of
-    Growing Degree Days for a location of your choice. """
+    Growing Degree Days for a location of your choice. Please note that
+    Feb 29 is not considered for this analysis."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
@@ -28,8 +32,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0200')
     thisyear = datetime.datetime.now().year
@@ -40,29 +43,32 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
     syear = max(nt.sts[station]['archive_begin'].year, 1893)
-    obs = np.ma.ones(((thisyear+1)-syear, 366), 'f') * -1
 
-    ccursor.execute("""
-    SELECT year, extract(doy from day),
-    gddxx("""+str(base)+""", """+str(ceiling)+""", high, low)
-    from """+table+"""
-      WHERE station = %s and year > 1892
-    """, (station, ))
-    for row in ccursor:
-        obs[row[0] - syear, row[1] - 1] = row[2]
+    glabel = "gdd%s%s" % (base, ceiling)
+    df = read_sql("""
+    SELECT year, sday,
+    gddxx("""+str(base)+""", """+str(ceiling)+""", high, low) as """+glabel+"""
+    from """+table+""" WHERE station = %s and year > 1892 and sday != '0229'
+    """, pgconn, params=(station, ))
 
-    obs.mask = np.where(obs < 0, True, False)
-
-    avg = np.average(obs[:-1, :], 0)
+    # Do some magic!
+    df2 = df[['sday', glabel]].groupby('sday').describe(
+                percentiles=[.05, .25, .75, .95])
+    df2 = df2.unstack(level=-1)
     (fig, ax) = plt.subplots(1, 1)
-    ax.plot(np.arange(1, 367), avg, color='r', zorder=2, lw=2.,
-            label='Average')
-    ax.scatter(np.arange(1, 367), obs[year-syear, :], color='b',  zorder=2,
-               label='%s' % (year,))
-    p5, p25, p75, p95 = np.percentile(obs[:-1, :], [5, 25, 75, 95], 0)
-    ax.bar(np.arange(1, 367), p95 - p5, bottom=p5, ec='tan', fc='tan',
+    ax.plot(np.arange(1, 366), df2[(glabel, 'mean')], color='r', zorder=2,
+            lw=2., label='Average')
+    _data = df[df['year'] == year][[glabel, 'sday']]
+    _data.sort('sday', inplace=True)
+    ax.scatter(np.arange(1, _data[glabel].shape[0] + 1),
+               _data[glabel], color='b',
+               zorder=2, label='%s' % (year,))
+    ax.bar(np.arange(1, 366), df2[(glabel, '95%')] - df2[(glabel, '5%')],
+           bottom=df2[(glabel, '5%')], ec='tan', fc='tan',
            zorder=1, label='5-95 Percentile')
-    ax.bar(np.arange(1, 367), p75 - p25, bottom=p25, ec='lightblue',
+    ax.bar(np.arange(1, 366), df2[(glabel, '75%')] - df2[(glabel, '25%')],
+           bottom=df2[(glabel, '25%')],
+           ec='lightblue',
            fc='lightblue', zorder=1, label='25-75 Percentile')
     ax.set_xlim(1, 367)
     ax.set_ylim(-0.25, 40)
@@ -76,4 +82,9 @@ def plotter(fdict):
     ax.legend(ncol=2)
     ax.set_xticklabels(calendar.month_abbr[1:])
 
-    return fig
+    # collapse the multiindex for columns
+    df2.columns = ['_'.join(col).strip() for col in df2.columns.values]
+    return fig, df2
+
+if __name__ == '__main__':
+    plotter(dict())
