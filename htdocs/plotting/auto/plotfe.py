@@ -86,6 +86,7 @@ def main():
             elif fmt == 'xlsx':
                 (_, tmpfn) = tempfile.mkstemp()
                 writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
+                df.index.name = None
                 df.to_excel(writer,
                             encoding='latin-1', sheet_name='Sheet1')
                 writer.close()
