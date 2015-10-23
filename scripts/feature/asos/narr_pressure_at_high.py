@@ -59,6 +59,4 @@ m.pcolormesh(lons, lats, total / float(cursor.rowcount), np.arange(5650,5951,20)
 #x,y = m.map(xs,ys)
 #print xx
 m.plot_values(xs,ys, xx, '%s', textsize=16)
-m.postprocess(filename='test.ps')
-import iemplot
-iemplot.makefeature('test')
+m.postprocess(filename='test.png')

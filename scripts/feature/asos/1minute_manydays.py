@@ -70,6 +70,4 @@ ax.set_title("Des Moines 26-28 August 2013 Temperature Timeseries")
 ax.set_ylabel("Temperature $^\circ$F")
 ax.set_xlabel("* Smooth applied to one minute time-series")
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
