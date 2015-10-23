@@ -2,18 +2,14 @@
  List out the folders on the Google Drive and see who their owners are!
 """
 import util
-import ConfigParser
-import gdata.docs.client
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+drive = util.get_driveclient()
 
-docs_client = util.get_docs_client(config)
+res = drive.files().list(
+        q="mimeType = 'application/vnd.google-apps.folder'",
+        maxResults=999).execute()
 
-query = gdata.docs.client.DocsQuery(categories=['folder'], 
-                                    params={'showfolders': 'true'})
-feed = docs_client.GetAllResources(query=query)
-
-for entry in feed:
-    if entry.author[0].email.text != 'cscap.automation@gmail.com':
-        print entry.title.text, entry.author[0].email.text
+for item in res['items']:
+    for owner in item['owners']:
+        if owner['emailAddress'] != 'cscap.automation@gmail.com':
+            print item['title'], owner['emailAddress']
