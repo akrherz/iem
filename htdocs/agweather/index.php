@@ -22,7 +22,7 @@ questions!</p>
 <p>IEM's most popular applications:
 <a role="button" class="btn btn-success" href="/plotting/auto/"><i class="glyphicon glyphicon-signal"></i> Automated Data Plotting</a>
 <a role="button" class="btn btn-success" href="/climodat/"><i class="glyphicon glyphicon-list-alt"></i> Climodat</a>
-<a role="button" class="btn btn-success" href="/plotting/coop/acc.phtml"><i class="glyphicon glyphicon-object-align-bottom"></i> Single Site Graphs</a>
+<a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="glyphicon glyphicon-object-align-bottom"></i> Single Site Graphs</a>
 </p>
 
 
@@ -71,7 +71,7 @@ information for daily temperatures, but they are not always on a calendar date.
  <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
  <li><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></li>
  <li><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year={$y}">Map of Totals</a></li>
- <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+ <li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
 </ul>
 </td>
 </tr>
@@ -105,7 +105,7 @@ information for daily temperatures, but they are not always on a calendar date.
  <ul>
   <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
   <li><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a></li>
-  <li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+  <li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
  </ul>
  
  <br /><a href="/plotting/auto/?q=97">Maps of Departures</a> from average.
@@ -180,7 +180,7 @@ summarized SDD data.
 <ul>
     <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
   	<li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
-  	<li><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></li>
+  	<li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
 </ul>
   		</td>
 </tr>
