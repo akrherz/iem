@@ -68,6 +68,4 @@ ax.set_title("1933-2012 Des Moines Heat Index\ncontour is heat index delta at te
 fig.tight_layout()
 #fig.colorbar(cs)
 
-fig.savefig('test.svg')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
