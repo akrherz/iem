@@ -31,7 +31,7 @@ def main():
     dpi = int(fdict.get('dpi', 100))
     fmt = form.getfirst('fmt', 'png')[:4]
 
-    mckey = "/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)
+    mckey = ("/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)).replace(" ", "")
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if fmt == 'png':

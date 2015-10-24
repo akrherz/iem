@@ -15,6 +15,7 @@ $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
 EOF;
 
 
@@ -161,6 +162,15 @@ if (isset($_GET["q"])){
 			$netselect = vtecSigSelect($value);
 			$thisrow = $netselect;
 		}
+		elseif ($v->type == "vtec_ps"){
+			// Tricky here, we need name to represent the suffix to the name
+			$suffix = $v->name;
+			$value = isset($_GET["phenomena{$suffix}"]) ? $_GET["phenomena{$suffix}"] : '';
+			$netselect = vtecPhenoSelect($value, "phenomena{$suffix}");
+			$value = isset($_GET["significance{$suffix}"]) ? $_GET["significance{$suffix}"] : '';
+			$netselect2 = vtecSigSelect($value, "significance{$suffix}");
+			$thisrow = sprintf("%s &nbsp; %s", $netselect, $netselect2);
+		}
 		elseif ($v->type == "state"){
 			$netselect = stateSelect($value);
 			$thisrow = $netselect;
@@ -191,13 +201,28 @@ if (isset($_GET["q"])){
 			$netselect = make_select($v->name, $value, $v->options);
 			$thisrow = $netselect;
 		}
+		elseif ($v->type == 'datetime'){
+			$dpname = "timepicker_". $v->name;
+			$jsextra .= <<<EOF
+$( "#{$dpname}" ).datetimepicker({
+	changeMonth: true,
+	changeYear: true,
+	dateFormat: "yy/mm/dd",
+	timeFormat: "HHmm", 
+	minDate    : new Date("{$v->min}")});
+$("#{$dpname}").datetimepicker('setDate', $.datepicker.parseDateTime('yy/mm/dd', 'HHmm', '{$value}'));
+			
+EOF;
+			$thisrow = "<input type=\"text\" name=\"". $v->name
+			."\" id=\"{$dpname}\" /> (YYYY/mm/dd HH24MI)";
+		}
 		elseif ($v->type == "date"){
 			$dpname = "datepicker_". $v->name;
 			$jsextra .= <<<EOF
 $( "#{$dpname}" ).datepicker({
 	changeMonth: true,
 	changeYear: true,
-		dateFormat : "yy/mm/dd",
+		dateFormat: "yy/mm/dd",
 		minDate    : new Date("{$v->min}")});
 $("#{$dpname}").datepicker('setDate', new Date("{$value}"));
 	
@@ -216,10 +241,24 @@ EOF;
 						"_opt_". $v->name, "_opt_". $v->name,
 						$opton ? "block": 'none', $thisrow);
 				if ($opton){
-					$pltvars[] = sprintf("%s:%s", $v->name, $value);
+					if ($v->type == 'vtec_ps'){
+						$value = isset($_GET["phenomena{$suffix}"]) ? $_GET["phenomena{$suffix}"] : '';
+						$pltvars[] = sprintf("phenomena%s:%s", $v->name, $value);
+						$value = isset($_GET["significance{$suffix}"]) ? $_GET["significance{$suffix}"] : '';
+						$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
+					} else {
+						$pltvars[] = sprintf("%s:%s", $v->name, $value);
+					}
 				}
 			} else{
-				$pltvars[] = sprintf("%s:%s", $v->name, $value);
+				if ($v->type == 'vtec_ps'){
+					$value = isset($_GET["phenomena{$suffix}"]) ? $_GET["phenomena{$suffix}"] : '';
+					$pltvars[] = sprintf("phenomena%s:%s", $v->name, $value);
+					$value = isset($_GET["significance{$suffix}"]) ? $_GET["significance{$suffix}"] : '';
+					$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
+				} else {
+					$pltvars[] = sprintf("%s:%s", $v->name, $value);
+				}
 			}
 			$form .= "<tr><td>{$v->label}</td><td>{$thisrow}</td></tr>";
 		}
@@ -318,6 +357,8 @@ $dataextra
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
+<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
 <script>
 $(document).ready(function(){
 {$jsextra}

@@ -89,11 +89,11 @@ function stateSelect($selected, $jscallback=''){
 	return $s;
 }
 
-function vtecPhenoSelect($selected)
+function vtecPhenoSelect($selected, $name='phenomena')
 {
  global $vtec_phenomena;
  reset($vtec_phenomena);
- $s = "<select name=\"phenomena\" style=\"width: 195px;\">\n";
+ $s = "<select name=\"{$name}\" style=\"width: 195px;\">\n";
  while( list($key, $value) = each($vtec_phenomena) ){
   $s .= "<option value=\"$key\" ";
   if ($selected == $key) $s .= "SELECTED";
@@ -103,11 +103,11 @@ function vtecPhenoSelect($selected)
  return $s;
 }
 
-function vtecSigSelect($selected)
+function vtecSigSelect($selected, $name='significance')
 {
  global $vtec_significance;
  reset($vtec_significance);
- $s = "<select name=\"significance\" style=\"width: 195px;\">\n";
+ $s = "<select name=\"{$name}\" style=\"width: 195px;\">\n";
  while( list($key, $value) = each($vtec_significance) ){
   $s .= "<option value=\"$key\" ";
   if ($selected == $key) $s .= "SELECTED";
