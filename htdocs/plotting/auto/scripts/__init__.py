@@ -219,6 +219,8 @@ data = {'plots': [
         {'id': "101",
          'label': "Top 25 Most Frequent VTEC Products by Office/NWS"},
         {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
+        {'id': "109",
+         'label': "WFO VTEC Event Counts for a Given Period (map)"},
         {'id': "90",
          'label': "UGC Statistics for Watch/Warning/Advisory by state/wfo"},
     ]},
