@@ -92,6 +92,7 @@ function stateSelect($selected, $jscallback=''){
 function vtecPhenoSelect($selected)
 {
  global $vtec_phenomena;
+ reset($vtec_phenomena);
  $s = "<select name=\"phenomena\" style=\"width: 195px;\">\n";
  while( list($key, $value) = each($vtec_phenomena) ){
   $s .= "<option value=\"$key\" ";
@@ -105,6 +106,7 @@ function vtecPhenoSelect($selected)
 function vtecSigSelect($selected)
 {
  global $vtec_significance;
+ reset($vtec_significance);
  $s = "<select name=\"significance\" style=\"width: 195px;\">\n";
  while( list($key, $value) = each($vtec_significance) ){
   $s .= "<option value=\"$key\" ";
@@ -118,6 +120,7 @@ function vtecSigSelect($selected)
 function wfoSelect($selected)
 {
  global $wfos;
+ reset($wfos);
  $s = "<select name=\"wfo\" style=\"width: 195px;\">\n";
  while( list($key, $value) = each($wfos) ){
    $s .= "<option value=\"$key\" ";
