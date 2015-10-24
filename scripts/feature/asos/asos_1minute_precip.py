@@ -9,11 +9,11 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 10, 4, 5, 0)
+sts = datetime.datetime(2015, 10, 23, 11, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 10, 5, 1, 0)
+ets = datetime.datetime(2015, 10, 24, 6, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/New_York'
+tzname = 'America/Chicago'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -21,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'CAE'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'ACT'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -108,8 +108,8 @@ ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.4, 0.7), prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+6))
-ax.set_xlabel("4 October 2015 (Eastern Daylight Time)")
-ax.set_title(("4 October 2015 Columbia, SC (KCAE)\n"
+ax.set_xlabel("23 October 2015 (Central Daylight Time)")
+ax.set_title(("23 October 2015 Waco, TX (KACT)\n"
               "One Minute Rainfall %.2f inches total plotted") % (prec[-1],))
 
 
