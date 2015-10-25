@@ -142,7 +142,7 @@ data = {'plots': [
          'label': ("Last Spring and First Fall Date "
                    "above/below given threshold")},
         {'id': '64', 'mw': True,
-         'label': 'Last Snowfall of Each Winter Season'},
+         'label': 'Last or First Snowfall of Each Winter Season'},
         {'id': "33", 'mw': True, 'label': "Maximum Low Temperature Drop"},
         {'id': "105", 'mw': True,
          'label': "Maximum Period between Precipitation Amounts"},
