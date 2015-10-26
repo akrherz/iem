@@ -6,6 +6,7 @@ import cgi
 import datetime
 import psycopg2
 import os
+import pytz
 
 
 def run(sts, ets):
@@ -17,11 +18,11 @@ def run(sts, ets):
 
     sql = """SELECT * from feel_data_hourly where
     valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
-    df2 = pd.read_sql(sql, dbconn)
+    df2 = pd.read_sql(sql, dbconn, index_col='valid', parse_dates='valid')
 
-    writer = pd.ExcelWriter('/tmp/ss.xlsx')
+    writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter')
     df.to_excel(writer, 'Daily Data', index=False)
-    df2.to_excel(writer, 'Hourly Data', index=False)
+    df2.to_excel(writer, 'Hourly Data', index=True)
     writer.save()
 
     sys.stdout.write("Content-type: application/vnd.ms-excel\n")
