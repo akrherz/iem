@@ -23,6 +23,8 @@ def get_description():
     d['cache'] = 360
     d['description'] = """Timeseries of recent observations."""
     d['arguments'] = [
+        dict(type='sid', label='Select IEM Tracked Station',
+             name='station', default='AMW'),
     ]
     return d
 

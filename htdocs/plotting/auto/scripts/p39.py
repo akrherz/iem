@@ -1,6 +1,3 @@
-"""
-  Fall Minimum by Date
-"""
 import psycopg2.extras
 import numpy as np
 import datetime
@@ -17,12 +14,14 @@ def get_description():
     with the scenarios of the remaining days for this month from each of
     the past years.  These scenarios provide a good approximation of what is
     possible for the remainder of the month."""
+    today = datetime.date.today()
+    lastmonth = (today.replace(day=1)) - datetime.timedelta(days=25)
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
-        dict(type='year', name='year', default='2014', min=1893,
+        dict(type='year', name='year', default=lastmonth.year, min=1893,
              label='Select Year to Compare With:'),
-        dict(type='month', name='month', default='11',
+        dict(type='month', name='month', default=lastmonth.month,
              label='Select Month to Compare With:'),
     ]
     return d
