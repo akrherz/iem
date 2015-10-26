@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """Generate a Powerpoint file for an event.  This script looks for queued jobs
 within the database and runs them sequentially each minute"""
-__REV__ = "11Feb2013"
-import os
-os.putenv("DISPLAY", "localhost:1")
 import sys
 import shutil
 import datetime
@@ -15,7 +12,10 @@ from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.text import P
 from odf.draw import Page, Frame, TextBox, Image
+import os
+os.putenv("DISPLAY", "localhost:1")
 
+__REV__ = "11Feb2013"
 SUPER_RES = datetime.datetime(2010, 3, 1)
 
 
@@ -167,48 +167,57 @@ def do_job(job):
     textbox.addElement(P(text=("Radar: %s Product: %s"
                                "") % (job['radar'], job['nexrad_product'])))
     textbox.addElement(P(text="Phenomenas: %s" % (job['wtype'], )))
-    textbox.addElement(P(text="Start Time: %s UTC" % (job['sts'].strftime("%d %b %Y %H"),)))
-    textbox.addElement(P(text="End Time: %s UTC" % (job['ets'].strftime("%d %b %Y %H"),)))
+    textbox.addElement(P(
+        text="Start Time: %s UTC" % (job['sts'].strftime("%d %b %Y %H"),)))
+    textbox.addElement(P(
+        text="End Time: %s UTC" % (job['ets'].strftime("%d %b %Y %H"),)))
     textbox.addElement(P(text=""))
     textbox.addElement(P(text="Raccoon Version: %s" % (__REV__,)))
     textbox.addElement(P(text="Generated on: %s" % (
-                                    datetime.datetime.utcnow().strftime("%d %b %Y %H:%M %Z"))))
+        datetime.datetime.utcnow().strftime("%d %b %Y %H:%M %Z"))))
     textbox.addElement(P(text=""))
-    textbox.addElement(P(text="Bugs/Comments/Yelling?: daryl herzmann akrherz@iastate.edu"))
+    textbox.addElement(P(
+        text="Bugs/Comments/Yelling?: daryl herzmann akrherz@iastate.edu"))
 
     i = 0
     for warning in warnings:
         # Make Index page for the warning
         page = Page(masterpagename=masterpage)
         doc.presentation.addElement(page)
-        titleframe = Frame(stylename=indexstyle, width="700pt", height="500pt", 
-                       x="10pt", y="10pt")
+        titleframe = Frame(stylename=indexstyle, width="700pt", height="500pt",
+                           x="10pt", y="10pt")
         page.addElement(titleframe)
         textbox = TextBox()
         titleframe.addElement(textbox)
-        textbox.addElement(P(text="%s.O.NEW.K%s.%s.W.%04i" % ( 
+        textbox.addElement(P(text="%s.O.NEW.K%s.%s.W.%04i" % (
                                     job['sts'].year, job['wfo'],
-                                warning['phenomena'],warning['eventid'])))
-        textbox.addElement(P(text="Issue: %s UTC" % ( 
-                                    warning['issue'].strftime("%d %b %Y %H:%M"),)))
-        textbox.addElement(P(text="Expire: %s UTC" % ( 
-                                    warning['expire'].strftime("%d %b %Y %H:%M"),)))
-        textbox.addElement(P(text="Poly Area: %.1f sq km (%.1f sq mi) [%.1f%% vs County]" % ( 
-                                    warning['polyarea'], warning['polyarea'] * 0.386102,
-                                    warning['polyarea'] / warning['countyarea'] * 100.0)))
-        textbox.addElement(P(text="County Area: %.1f square km (%.1f square miles)" % ( 
-                                    warning['countyarea'], warning['countyarea'] * 0.386102)))
+                                    warning['phenomena'], warning['eventid'])))
+        textbox.addElement(P(
+            text="Issue: %s UTC" % (
+                warning['issue'].strftime("%d %b %Y %H:%M"),)))
+        textbox.addElement(P(
+            text="Expire: %s UTC" % (
+                warning['expire'].strftime("%d %b %Y %H:%M"),)))
+        textbox.addElement(P(
+            text="Poly Area: %.1f sq km (%.1f sq mi) [%.1f%% vs County]" % (
+                warning['polyarea'], warning['polyarea'] * 0.386102,
+                warning['polyarea'] / warning['countyarea'] * 100.0)))
+        textbox.addElement(P(
+            text="County Area: %.1f square km (%.1f square miles)" % (
+                warning['countyarea'], warning['countyarea'] * 0.386102)))
 
-        url = "http://iem.local/GIS/radmap.php?"
-        url += "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
-        url += "&layers[]=uscounties&layers[]=bufferedlsr&lsrbuffer=15"
-        url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % ( job['sts'].year, job['wfo'],
-                                    warning['phenomena'],warning['eventid'])
+        url = ("http://iem.local/GIS/radmap.php?"
+               "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw"
+               "&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr"
+               "&lsrbuffer=15")
+        url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % (
+            job['sts'].year, job['wfo'],
+            warning['phenomena'], warning['eventid'])
 
         cmd = "wget -q -O %i.png '%s'" % (i, url)
         os.system(cmd)
-        photoframe = Frame(stylename=photostyle, width="480pt", 
-                               height="360pt", x="160pt", y="200pt")
+        photoframe = Frame(stylename=photostyle, width="480pt",
+                           height="360pt", x="160pt", y="200pt")
         page.addElement(photoframe)
         href = doc.addPicture("%i.png" % (i,))
         photoframe.addElement(Image(href=href))
@@ -217,20 +226,20 @@ def do_job(job):
         times = []
         now = warning['issue']
         while now < warning['expire']:
-            times.append( now )
+            times.append(now)
             now += datetime.timedelta(minutes=15)
-        times.append( warning['expire'] - datetime.timedelta(minutes=1))
+        times.append(warning['expire'] - datetime.timedelta(minutes=1))
 
-        for now in times:    
+        for now in times:
             page = Page(stylename=dpstyle, masterpagename=masterpage)
             doc.presentation.addElement(page)
-            titleframe = Frame(stylename=titlestyle, width="720pt", height="56pt", 
-                           x="40pt", y="10pt")
+            titleframe = Frame(stylename=titlestyle, width="720pt",
+                               height="56pt", x="40pt", y="10pt")
             page.addElement(titleframe)
             textbox = TextBox()
             titleframe.addElement(textbox)
-            textbox.addElement(P(text="%s.W.%04i Time: %s UTC" % ( 
-                                    warning['phenomena'],warning['eventid'],
+            textbox.addElement(P(text="%s.W.%04i Time: %s UTC" % (
+                                    warning['phenomena'], warning['eventid'],
                                     now.strftime("%d %b %Y %H%M"))))
 
             if job['nexrad_product'] == 'N0U':
@@ -245,18 +254,19 @@ def do_job(job):
                     n0qn0r = 'N0Q'
 
             url = "http://iem.local/GIS/radmap.php?"
-            url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (n0qn0r, 
-                                                                job['radar'])
+            url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (
+                n0qn0r, job['radar'])
             url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
             url += "layers[]=lsrs&ts2=%s&" % (
-                    (now + datetime.timedelta(minutes=15)).strftime("%Y%m%d%H%M"),)
-            url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % ( job['sts'].year, job['wfo'],
-                                    warning['phenomena'],warning['eventid'],
-                                    now.strftime("%Y%m%d%H%M"))
+                (now + datetime.timedelta(minutes=15)).strftime("%Y%m%d%H%M"),)
+            url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % (
+                job['sts'].year, job['wfo'],
+                warning['phenomena'], warning['eventid'],
+                now.strftime("%Y%m%d%H%M"))
 
             cmd = "wget -q -O %i.png '%s'" % (i, url)
             os.system(cmd)
-            photoframe = Frame(stylename=photostyle, width="640pt", 
+            photoframe = Frame(stylename=photostyle, width="640pt",
                                height="480pt", x="80pt", y="70pt")
             page.addElement(photoframe)
             href = doc.addPicture("%i.png" % (i,))
