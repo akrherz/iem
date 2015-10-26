@@ -14,15 +14,55 @@ $OL = "3.9.0";
    $station = substr($_REQUEST["id"],0,6);
  }
 
+ $xref = Array("01" => "110/",
+ 		"02" => "111/",
+ 		"03" => "112/",
+ 		"04" => "113/var:maxmin::",
+ 		"05" => "113/var:precip::",
+ 		"06" => "113/var:range::",
+ 		"07" => "113/var:means::",
+ 		"08" => "114/",
+ 		"09" => "10/base:32::varname:low::direction:below",
+ 		"10" => "10/base:30::varname:low::direction:below",
+ 		"11" => "10/base:28::varname:low::direction:below",
+ 		"12" => "10/base:26::varname:low::direction:below",
+ 		"13" => "10/base:24::varname:low::direction:below",
+ 		"14" => "115/varname:avg_high",
+ 		"15" => "115/varname:avg_low",
+ 		"16" => "115/varname:avg_temp",
+ 		"17" => "115/varname:precip",
+ 		"18" => "116/varname:hdd",
+ 		"19" => "116/varname:cdd",
+ 		"20" => "117/",
+ 		"21" => "118/varname:precip_days",
+ 		"22" => "119/",
+ 		"23" => "120/",
+ 		"24" => "121/",
+ 		"25" => "118/varname:snow_days",
+ 		"26" => "122/",
+ 		"27" => "123/",
+ 		"28" => "124/",
+ 		);
+ 
  if (isset($_GET["dl"]) ){
-   if (is_file("/mesonet/share/climodat/reports/${station}_${report}.txt") ){
-     header("Content-type: application/octet-stream");
-     header("Content-Disposition: attachment; filename=${station}_${report}.txt");
-     readfile("/mesonet/share/climodat/reports/${station}_${report}.txt");
-     die();
+ 	if (array_key_exists($report, $xref)){
+ 		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
+ 				$xref[$report], $station, $network);
+ 		echo file_get_contents($uri);
+     	die();
    }
  }
-
+ if (isset($_GET["xlsx"]) ){
+ 	if (array_key_exists($report, $xref)){
+ 		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.xlsx",
+ 				$xref[$report], $station, $network);
+        header("Content-type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment;Filename=iem.xlsx");
+ 		echo file_get_contents($uri);
+ 		die();
+ 	}
+ }
+ 
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $t = new MyView();
 $t->thispage = "climatology-climodat";
@@ -42,6 +82,7 @@ EOF;
 }
 $enddate = date('d M Y', $coop_archive_end);
 $nselect = networkSelect($network, $station );
+
 
 $ar = Array(
 	"Precipitation" => Array(
@@ -122,7 +163,10 @@ data back to 1893, so their reports contain data dating back to then.
 
 <div class="alert alert-info">The daily observations that are used in these 
 summary reports can be downloaded from 
-<a class="alert-link" href="/request/coop/fe.phtml">here</a>.</div>
+<a class="alert-link" href="/request/coop/fe.phtml">here</a>.  A major
+update was made to this application on 26 October 2015.  If you have issues
+with the newly created reports, please <a href="/info/contacts.php">contact us</a>.
+</div>
 
 
 <div id="iem-form2">
@@ -142,25 +186,33 @@ summary reports can be downloaded from
 <p>
 EOF;
 
-if (is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
-$content .= <<<EOF
+if ($station != ""){
+	$content .= <<<EOF
 <table cellpadding="2"><tr><th>Download Options</th><td><form name="dl" action="index.phtml">
   <input type="hidden" name="dl" value="yes">
   <input type="hidden" name="station" value="$station"> 
   <input type="hidden" name="report" value="$report">
   <input type="submit" value="Download Text Version">
 </form></td>
-<td><form name="excel" action="as-excel.php">
+<td><form name="excel" action="index.phtml">
+  <input type="hidden" name="xlsx" value="yes">
   <input type="hidden" name="station" value="$station"> 
   <input type="hidden" name="report" value="$report">
   <input type="submit" value="Download Excel Version"></form></td>
 </tr></table>
 <pre>
 EOF;
-  $content .= file_get_contents("/mesonet/share/climodat/reports/${station}_$report.txt");
-$content .= "</pre>\n";
+	if (array_key_exists($report, $xref)){
+		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
+				$xref[$report], $station, $network);
+		$content .= file_get_contents($uri);
+	} 
+	elseif (is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
+		$content .= file_get_contents("/mesonet/share/climodat/reports/${station}_$report.txt");
+	}
+	$content .= "</pre>\n";
 } else {
-$content .= <<<EOF
+	$content .= <<<EOF
 	<style type="text/css">
         #map {
             width: 640px;

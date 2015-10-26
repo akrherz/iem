@@ -36,7 +36,7 @@ def main():
     res = mc.get(mckey)
     if fmt == 'png':
         sys.stdout.write("Content-type: image/png\n\n")
-    elif fmt == 'csv':
+    elif fmt in ['csv', 'txt']:
         sys.stdout.write('Content-type: text/plain\n\n')
     else:
         sys.stdout.write("Content-type: application/vnd.ms-excel\n")
@@ -60,10 +60,14 @@ def main():
         meta = a.get_description()
         response = a.plotter(fdict)
         if not isinstance(response, tuple):
-            [fig, df] = [response, None]
+            [fig, df, report] = [response, None, None]
         else:
             fig = response[0]
             df = response[1]
+            if len(response) == 3:
+                report = response[2]
+            else:
+                report = None
         if isinstance(fig, str):
             msg = fig
             fig, ax = plt.subplots(1, 1)
@@ -80,18 +84,22 @@ def main():
         ram.seek(0)
         res = ram.read()
         sys.stderr.write("Setting cache: %s" % (mckey,))
-        if fmt != 'png' and df is not None:
-            if fmt == 'csv':
-                res = df.to_csv()
-            elif fmt == 'xlsx':
-                (_, tmpfn) = tempfile.mkstemp()
-                writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
-                df.index.name = None
-                df.to_excel(writer,
-                            encoding='latin-1', sheet_name='Sheet1')
-                writer.close()
-                res = open(tmpfn, 'rb').read()
-                os.unlink(tmpfn)
+        if fmt != 'png':
+            if df is not None:
+                if fmt == 'csv':
+                    res = df.to_csv()
+                elif fmt == 'xlsx':
+                    (_, tmpfn) = tempfile.mkstemp()
+                    writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
+                    df.index.name = None
+                    df.to_excel(writer,
+                                encoding='latin-1', sheet_name='Sheet1')
+                    writer.close()
+                    res = open(tmpfn, 'rb').read()
+                    os.unlink(tmpfn)
+            if fmt == 'txt' and report is not None:
+                sys.stdout.write(report)
+                return
         try:
             mc.set(mckey, res, meta.get('cache', 43200))
         except:

@@ -4,6 +4,7 @@ from pyiem import network
 from scipy import stats
 import calendar
 import pandas as pd
+import datetime
 
 PDICT = {'above': 'First Spring/Last Fall Temperature Above Threshold',
          'below': 'Last Spring/First Fall Temperature Below Threshold'}
@@ -53,20 +54,28 @@ def plotter(fdict):
     sql = """select year,
      max(case when """+varname+""" < %s and month < 7
          then extract(doy from day) else 0 end) as spring,
+     max(case when """+varname+""" < %s and month < 7
+         then day else null end) as spring_date,
      min(case when """+varname+""" < %s and month > 6
-         then extract(doy from day) else 388 end) as fall
+         then extract(doy from day) else 388 end) as fall,
+     min(case when """+varname+""" < %s and month > 6
+         then day else null end) as fall_date
     from """+table+""" where station = %s
     GROUP by year ORDER by year ASC"""
     if direction == 'above':
         sql = """select year,
              min(case when """+varname+""" > %s and month < 7
                  then extract(doy from day) else 183 end) as spring,
+             min(case when """+varname+""" > %s and month < 7
+                 then day else null end) as spring_date,
              max(case when """+varname+""" > %s and month > 6
-                 then extract(doy from day) else 183 end) as fall
+                 then extract(doy from day) else 183 end) as fall,
+             max(case when """+varname+""" > %s and month > 6
+                 then day else null end) as fall_date
             from """+table+""" where station = %s
             GROUP by year ORDER by year ASC"""
 
-    ccursor.execute(sql, (threshold, threshold, station))
+    ccursor.execute(sql, (threshold, threshold, threshold, threshold, station))
     rows = []
     for row in ccursor:
         if row['year'] < startyear:
@@ -76,9 +85,30 @@ def plotter(fdict):
         if row['fall'] == 183 and row['spring'] == 183:
             continue
         rows.append(dict(year=row['year'], spring=row['spring'],
-                         fall=row['fall']))
+                         fall=row['fall'], spring_date=row['spring_date'],
+                         fall_date=row['fall_date']))
 
     df = pd.DataFrame(rows)
+    df['season'] = df['fall'] - df['spring']
+    res = """# LENGTH OF SEASON FOR STATION NUMBER  %s   BASE TEMP=%s
+# LAST SPRING OCCURENCE FIRST FALL OCCURENCE
+   YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON
+""" % (station, threshold)
+    for _, row in df.iterrows():
+        res += ("%7i%4i%6i%4i        %4i%6i%4i          %.0fs\n"
+                ) % (row['year'], row['spring_date'].month,
+                     row['spring_date'].day,
+                     row['spring'], row['fall_date'].month,
+                     row['fall_date'].day,
+                     row['fall'], row['season'])
+    sts = datetime.date(2000,
+                        1, 1) + datetime.timedelta(days=df['spring'].mean())
+    ets = datetime.date(2000,
+                        1, 1) + datetime.timedelta(days=df['fall'].mean())
+    res += ("%7s%4i%6i%4i        %4i%6i%4i          %.0fs\n"
+            ) % ("MEAN", sts.month, sts.day, df['spring'].mean(),
+                 ets.month, ets.day, df['spring'].mean(),
+                 df['season'].mean())
     years = np.array(df['year'])
     spring = np.array(df['spring'])
     fall = np.array(df['fall'])
@@ -107,4 +137,4 @@ def plotter(fdict):
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.set_ylim(min(spring) - 5, max(fall) + 40)
     ax.set_xlim(min(years)-1, max(years)+1)
-    return fig, df
+    return fig, df, res
