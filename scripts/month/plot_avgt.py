@@ -3,8 +3,8 @@ from pyiem.plot import MapPlot
 import datetime
 import sys
 import numpy as np
-now = datetime.datetime.now()
 import psycopg2.extras
+now = datetime.datetime.now()
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
