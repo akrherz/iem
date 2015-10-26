@@ -57,6 +57,8 @@ data = {'plots': [
         {'id': "107", 'mw': True,
          'label': ("Period Statistics of Temp/Precip for a date period "
                    "each year")},
+        {'id': "43",
+         'label': "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
         {'id': "62", 'mw': True,
          'label': "Snow Depth"},
         {'id': "38", 'mw': True,

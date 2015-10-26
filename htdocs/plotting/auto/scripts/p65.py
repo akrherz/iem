@@ -1,8 +1,7 @@
-import psycopg2.extras
-import numpy as np
+import psycopg2
 import datetime
 import calendar
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'cold': 'Coldest Temperature',
@@ -14,12 +13,13 @@ def get_description():
     d = dict()
     d['data'] = True
     d['description'] = """This plot displays the frequency of a given day
-    in the month having the coldest high or lowtemperature of that month for
+    in the month having the coldest high or low temperature of that month for
     a year."""
+    today = datetime.date.today()
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:'),
-        dict(type='month', name='month', default='3',
+        dict(type='month', name='month', default=today.month,
              label='Select Month:'),
         dict(type="select", name='dir', default='cold',
              label='Select variable to plot:', options=PDICT),
@@ -33,7 +33,6 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     station = fdict.get('station', 'IA2203')
     month = int(fdict.get('month', 3))
@@ -47,7 +46,7 @@ def plotter(fdict):
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     s = "ASC" if mydir == 'cold' else 'DESC'
-    cursor.execute("""
+    df = read_sql("""
         with ranks as (
             select day, high, low,
     rank() OVER (PARTITION by year ORDER by high """ + s + """) as high_rank,
@@ -60,18 +59,10 @@ def plotter(fdict):
             SELECT extract(day from day) as dom, count(*) from ranks
             where low_rank = 1 GROUP by dom)
 
-        select coalesce(h.dom, l.dom), h.count, l.count from
+        select coalesce(h.dom, l.dom) as dom, h.count as high_count,
+        l.count as low_count from
         highs h FULL OUTER JOIN lows l on (h.dom = l.dom) ORDER by h.dom
-    """, (station, month))
-    high_hits = np.zeros((31,), 'f')
-    low_hits = np.zeros((31,), 'f')
-    for row in cursor:
-        high_hits[int(row[0])-1] = row[1]
-        low_hits[int(row[0])-1] = row[2]
-
-    df = pd.DataFrame(dict(day=np.arange(1, days + 1),
-                           high=high_hits[:days],
-                           low=low_hits[:days]))
+    """, pgconn, params=(station, month))
 
     fig, ax = plt.subplots(2, 1, sharex=True)
     lbl = 'Coldest' if mydir == 'cold' else 'Hottest'
@@ -83,7 +74,7 @@ def plotter(fdict):
     ax[0].set_ylabel("Years (ties split)")
 
     ax[0].grid(True)
-    ax[0].bar(np.arange(1, 32) - 0.4, high_hits)
+    ax[0].bar(df['dom'] - 0.4, df['high_count'])
 
     ax[1].set_title(("Having %s Low Temperature of %s"
                      ) % (lbl, calendar.month_name[month], ),
@@ -91,7 +82,7 @@ def plotter(fdict):
     ax[1].set_ylabel("Years (ties split)")
     ax[1].grid(True)
     ax[1].set_xlabel("Day of %s" % (calendar.month_name[month], ))
-    ax[1].bar(np.arange(1, 32) - 0.4, low_hits)
+    ax[1].bar(df['dom'] - 0.4, df['low_count'])
     ax[1].set_xlim(0.5, days + 0.5)
 
     return fig, df
