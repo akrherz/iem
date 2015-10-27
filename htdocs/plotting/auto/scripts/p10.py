@@ -90,12 +90,20 @@ def plotter(fdict):
 
     df = pd.DataFrame(rows)
     df['season'] = df['fall'] - df['spring']
-    res = """# LENGTH OF SEASON FOR STATION NUMBER  %s   BASE TEMP=%s
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+# LENGTH OF SEASON FOR STATION NUMBER  %s   BASE TEMP=%s
 # LAST SPRING OCCURENCE FIRST FALL OCCURENCE
    YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON
-""" % (station, threshold)
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'], station, threshold)
     for _, row in df.iterrows():
-        res += ("%7i%4i%6i%4i        %4i%6i%4i          %.0fs\n"
+        res += ("%7i%4i%6i%4i        %4i%6i%4i          %.0f\n"
                 ) % (row['year'], row['spring_date'].month,
                      row['spring_date'].day,
                      row['spring'], row['fall_date'].month,
@@ -105,7 +113,7 @@ def plotter(fdict):
                         1, 1) + datetime.timedelta(days=df['spring'].mean())
     ets = datetime.date(2000,
                         1, 1) + datetime.timedelta(days=df['fall'].mean())
-    res += ("%7s%4i%6i%4i        %4i%6i%4i          %.0fs\n"
+    res += ("%7s%4i%6i%4i        %4i%6i%4i          %.0f\n"
             ) % ("MEAN", sts.month, sts.day, df['spring'].mean(),
                  ets.month, ets.day, df['spring'].mean(),
                  df['season'].mean())

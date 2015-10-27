@@ -27,10 +27,18 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    res = """# Number of days exceeding given temperature thresholds
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+# Number of days exceeding given temperature thresholds
 # -20, -10, 0, 32 are days with low temperature at or below value
 # 50, 70, 80, 93, 100 are days with high temperature at or above value
-"""
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
     res += ("%s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n"
             "") % ('YEAR', -20, -10, 0, 32, 50, 70, 80, 93, 100)
 

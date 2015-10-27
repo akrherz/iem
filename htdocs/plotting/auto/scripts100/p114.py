@@ -32,14 +32,16 @@ def plotter(fdict):
     and year < %s GROUP by year ORDER by year ASC
     """, pgconn, params=(station, datetime.date.today().year), index_col=None)
 
-    res = ("""\
+    res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
-# Report Generated:
-# Climate Record:  ->  (data after  is preliminary)
+# Report Generated: %s
+# Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # OF DAYS EACH YEAR WHERE MIN >=32 F
-""" % (station, nt.sts[station]['name']))
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
 
     for _, row in df.iterrows():
         res += "%s %3i\n" % (row['year'], row['count'])

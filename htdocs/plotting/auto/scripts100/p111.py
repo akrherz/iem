@@ -1,6 +1,7 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+import datetime
 
 
 def get_description():
@@ -32,13 +33,15 @@ def plotter(fdict):
 
     res = ("""\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
-# Report Generated:
-# Climate Record:  ->  (data after  is preliminary)
+# Report Generated: %s
+# Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # Top 30 single day rainfalls
  MONTH  DAY  YEAR   AMOUNT
-""" % (station, nt.sts[station]['name']))
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name']))
 
     for _, row in df.iterrows():
         res += "%4i%7i%6i%9.2f\n" % (row['day'].month, row['day'].day,

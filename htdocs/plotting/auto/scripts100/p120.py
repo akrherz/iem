@@ -49,11 +49,19 @@ def plotter(fdict):
 
     sts = datetime.date(2000, 1, 1)
     running = {32: 0.0, 28: 0.0, 26: 0.0, 22: 0.0}
-    res = """# Low Temperature exceedence probabilities
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+# Low Temperature exceedence probabilities
 # (On a certain date, what is the chance a temperature below a certain
 # threshold will be observed again that spring)
  DOY Date    <33  <29  <27  <23
-"""
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
     ar = []
     for day in range(181, 29, -1):
         ts = sts + datetime.timedelta(days=day-1)
