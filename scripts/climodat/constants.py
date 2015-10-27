@@ -3,6 +3,7 @@
 import pg
 import mx.DateTime
 from pyiem.network import Table as NetworkTable
+import psycopg2
 nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
                    'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
                    'SDCLIMATE', 'NDCLIMATE', 'NECLIMATE', 'KSCLIMATE',
@@ -16,7 +17,6 @@ _ENDTS = mx.DateTime.DateTime(_ENDYEAR, 1, 1)
 
 mydb = pg.connect('coop', 'iemdb', user='nobody')
 
-import psycopg2
 mesosite = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = mesosite.cursor()
 mcursor.execute("""

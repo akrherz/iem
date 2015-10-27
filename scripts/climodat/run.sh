@@ -13,4 +13,4 @@ cd /mesonet/share/pickup/coop_data/
 zip -q coop_data.zip *.csv
 
 cd /mesonet/share/climodat/
-zip -q -r everything.zip ks reports
+zip -q -r everything.zip ks

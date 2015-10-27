@@ -3,13 +3,13 @@
  make the climodat reports happy...
 """
 import sys
-state = sys.argv[1]
 import mx.DateTime
 from pyiem.network import Table as NetworkTable
-nt = NetworkTable("%sCLIMATE" % (state,))
-
 import constants
 import psycopg2
+
+state = sys.argv[1]
+nt = NetworkTable("%sCLIMATE" % (state,))
 COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor()
 
