@@ -26,7 +26,8 @@ data = {'plots': [
         {'id': "91", 'mw': True,
          "label": "Consecutative Day Statistics of High+Low Temps / Precip"},
         {'id': "66", 'mw': True,
-         "label": "Consecutative Days with High Temperature Above Threshold"},
+         "label": ("Consecutative Days with High/Low Temp "
+                   "Above/Below Threshold")},
         {'id': "31", 'mw': True,
          'label': "Extreme Jumps or Dips in High Temperature over X days"},
         {'id': "7", 'mw': True,
