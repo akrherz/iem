@@ -129,22 +129,41 @@ $content = <<<EOF
 <h3>IEM "Climodat" Reports</h3>
 
 <p>These "Climodat" reports provide some answers to the most common climatological
-questions we get routinely asked.  These reports are based on the daily 
-climate observations from the <a href="/COOP/">NWS COOP</a> network.  
-We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files 
-which contain the much of the raw information used to generate the reports. 
-There is a <a href="monitor.php">station monitor app</a> that allows you to see
-current summarized statistics for a station collection of your choice.</p>
+questions we get routinely asked.  Here are some important notes about the
+products presented on this page.</p>
 
-<p><strong>Note on data sources:</strong>
-<br />The <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist</a> 
+<ol>
+<li>These reports are based on the daily 
+climate observations from the <a href="/COOP/">NWS COOP</a> network.  Some quality
+control is done and estimating is done to create a complete time series without
+missing data. You can <a href="/request/coop/fe.phtml">download the daily data</a>.</li>
+
+<li>We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files 
+which contain the much of the raw information used to generate the reports.</li>
+
+<li>There is a <a href="monitor.php">station monitor app</a> that allows you to see
+current summarized statistics for a station collection of your choice.</li>
+
+<li>For the Iowa data, the <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist</a> 
 provides the IEM with a monthly update of
 quality controlled observational data.  This procedure takes a good deal of 
 time on his behalf. Quality controlled information exists from 
-<b>1 Jan 1951 till {$enddate}</b>.  Any months of data
+<b>1 Jan 1951 till {$enddate}</b>. Any months of data
 afterwards are based on preliminary data from 
-<a href="http://www.ncdc.noaa.gov">NCDC</a> and other sources. Some sites have 
-data back to 1893, so their reports contain data dating back to then.
+<a href="http://www.ncdc.noaa.gov">NCDC</a> and other sources.</li>
+
+<li>Some sites have 
+data back to 1893, so their reports contain data dating back to then.</li>
+
+<li>This <a href="/plotting/auto/">Automated Data Plotting</a> application on
+this website contains charts and downloadable datasets that may interest you.</li>
+
+<li><strong>Update 27 Oct 2015:</strong> 
+The plain text reports are dynamically generated on this page and no
+longer directly available for bulk download. The format of the generated Excel
+files is somewhat different now as well.  If this causes you heartburn, please
+do <a href="/info/contacts.php">let us know</a>!</li>
+</ol>
 
 <p>Data is available from the following states: 
 <a href="index.phtml?network=ILCLIMATE">Illinois</a> ,
@@ -161,45 +180,42 @@ data back to 1893, so their reports contain data dating back to then.
 <a href="index.phtml?network=SDCLIMATE">South Dakota</a> ,
 <a href="index.phtml?network=WICLIMATE">Wisconsin</a>.
 
-<div class="alert alert-info">The daily observations that are used in these 
-summary reports can be downloaded from 
-<a class="alert-link" href="/request/coop/fe.phtml">here</a>.  A major
-update was made to this application on 26 October 2015.  If you have issues
-with the newly created reports, please <a href="/info/contacts.php">contact us</a>.
-</div>
-
 
 <div id="iem-form2">
 <form method="GET" action="index.phtml" name="olselect">
 <input type="hidden" name="network" value="{$network}" />
 
-<table cellpadding=2 cellspacing=1>
+<table class="table table-condensed">
+<thead>
   <tr><th>Select Climate Station:</th><th>Select Report:</th><td></td></tr>
-
+</thead>
+<tbody>
 <tr><td>{$nselect}
 <br />or <a href="index.phtml?report=${report}">Select from map</a></td>
 
 <td valign="top">
 {$vselect}</td>
-<td><input type="submit" value="View Report"></td></tr></table>
+<td><input type="submit" value="View Report"></td></tr>
+</tbody>		
+</table>
 </form>
 <p>
 EOF;
 
 if ($station != ""){
+	$tokens = split("/", $xref[$report]);
+	$autoploturi = sprintf("/plotting/auto/?q=%s&amp;station=%s&amp;network=%s&amp;_fmt=text",
+			$tokens[0], $station, $network);
+	$dluri = sprintf("/climodat/?station=%s&amp;network=%s&amp;dl=yes&amp;report=%s",
+			$station, $network, $report);
+	$xluri = sprintf("/climodat/?station=%s&amp;network=%s&amp;xlsx=yes&amp;report=%s",
+			$station, $network, $report);
 	$content .= <<<EOF
-<table cellpadding="2"><tr><th>Download Options</th><td><form name="dl" action="index.phtml">
-  <input type="hidden" name="dl" value="yes">
-  <input type="hidden" name="station" value="$station"> 
-  <input type="hidden" name="report" value="$report">
-  <input type="submit" value="Download Text Version">
-</form></td>
-<td><form name="excel" action="index.phtml">
-  <input type="hidden" name="xlsx" value="yes">
-  <input type="hidden" name="station" value="$station"> 
-  <input type="hidden" name="report" value="$report">
-  <input type="submit" value="Download Excel Version"></form></td>
-</tr></table>
+<p>
+<a href="{$dluri}" class="btn btn-primary"><i class="glyphicon glyphicon-book"></i> Download This Report</a>
+<a href="{$xluri}" class="btn btn-primary"><i class="glyphicon glyphicon-download"></i> Download This Report as Excel</a>
+<a href="{$autoploturi}" class="btn btn-primary"><i class="glyphicon glyphicon-signal"></i> View This Report in Autoplot App</a>
+</p>
 <pre>
 EOF;
 	if (array_key_exists($report, $xref)){
@@ -213,14 +229,14 @@ EOF;
 	$content .= "</pre>\n";
 } else {
 	$content .= <<<EOF
-	<style type="text/css">
-        #map {
-            width: 640px;
-            height: 400px;
-            border: 2px solid black;
-        }
+<style type="text/css">
+#map {
+   width: 640px;
+   height: 400px;
+   border: 2px solid black;
+}
 </style>
-<i>Click black dot to select your site:</i><br />
+<i>Click black dot to select your site and then select a report to view</i><br />
 <div id="map"></div>
 
 
