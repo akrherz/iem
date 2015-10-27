@@ -4,16 +4,16 @@
 import sys
 from pyiem.plot import MapPlot
 import datetime
-now = datetime.datetime.now()
-
+import psycopg2.extras
 from pyiem.network import Table as NetworkTable
+now = datetime.datetime.now()
 nt = NetworkTable("IACLIMATE")
 # Help plot readability
 nt.sts["IA0200"]["lon"] = -93.4
 nt.sts["IA5992"]["lat"] = 41.65
-import psycopg2.extras
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 
 def runYear(year):
     # Grab the data
@@ -27,15 +27,15 @@ def runYear(year):
     lons = []
     vals = []
     labels = []
-    ccursor.execute( sql )
+    ccursor.execute(sql)
     for row in ccursor:
         sid = row['station']
-        if not nt.sts.has_key(sid):
+        if sid not in nt.sts:
             continue
-        labels.append( sid[2:] )
-        lats.append( nt.sts[sid]['lat'] )
-        lons.append( nt.sts[sid]['lon'] )
-        vals.append( row['total'] )
+        labels.append(sid[2:])
+        lats.append(nt.sts[sid]['lat'])
+        lons.append(nt.sts[sid]['lon'])
+        vals.append(row['total'])
         maxday = row['max']
 
     m = MapPlot(title="Total Precipitation [inch] (%s)" % (year,),
@@ -49,4 +49,4 @@ def runYear(year):
 
 
 if __name__ == '__main__':
-    runYear( sys.argv[1] )
+    runYear(sys.argv[1])

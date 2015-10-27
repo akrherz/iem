@@ -1,8 +1,9 @@
 """Dump!"""
 import constants
 from pyiem.network import Table as NetworkTable
-nt = NetworkTable("IACLIMATE")
 import psycopg2.extras
+
+nt = NetworkTable("IACLIMATE")
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
