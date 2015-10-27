@@ -33,27 +33,36 @@ def plotter(fdict):
     varname = fdict.get('var', 'maxmin')
 
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
     if varname == 'maxmin':
-        res = """\
+        res += """\
 # DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR STATION NUMBER  %s
      JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
  DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
 """ % (nt.sts[station]['archive_begin'].year, datetime.date.today().year,
        station)
     elif varname == 'means':
-        res = """\
+        res += """\
 # DAILY MEAN HIGHS AND LOWS FOR STATION NUMBER  %s
      JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
  DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
 """ % (station, )
     elif varname == 'range':
-        res = """\
+        res += """\
 # RECORD LARGEST AND SMALLEST DAILY RANGES (MAX-MIN) FOR STATION NUMBER  %s
      JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
  DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
 """ % (station, )
     else:
-        res = """\
+        res += """\
 # DAILY MAXIMUM PRECIPITATION FOR STATION NUMBER %s
      JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC
 """ % (station, )

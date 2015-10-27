@@ -27,8 +27,16 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-
-    res = ("# THESE ARE THE HEAT STRESS VARIABLES FOR STATION #  %s\n"
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
+    res += ("# THESE ARE THE HEAT STRESS VARIABLES FOR STATION #  %s\n"
            ) % (station,)
 
     s = nt.sts[station]['archive_begin']

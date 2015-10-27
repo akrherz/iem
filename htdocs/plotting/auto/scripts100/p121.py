@@ -31,13 +31,21 @@ def plotter(fdict):
     e = datetime.date.today()
     YEARS = e.year - s.year + 1
 
-    res = """# SEASONAL TEMPERATURE CYCLES PER YEAR
-# 1 CYCLE IS A TEMPERATURE VARIATION FROM A VALUE BELOW A THRESHOLD 
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+# SEASONAL TEMPERATURE CYCLES PER YEAR
+# 1 CYCLE IS A TEMPERATURE VARIATION FROM A VALUE BELOW A THRESHOLD
 #   TO A VALUE EXCEEDING A THRESHOLD.  THINK OF IT AS FREEZE/THAW CYCLES
 #  FIRST DATA COLUMN WOULD BE FOR CYCLES EXCEEDING 26 AND 38 DEGREES F
 THRES  26-38   26-38   24-40   24-40   20-44   20-44   14-50   14-50
 YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
-"""
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
 
     data = {}
     for yr in range(s.year, e.year + 1):

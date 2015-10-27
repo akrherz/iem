@@ -108,15 +108,17 @@ def plotter(fdict):
 
     res = ("""\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
-# Report Generated:
-# Climate Record:  ->  (data after  is preliminary)
+# Report Generated: %s
+# Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # Based on climoweek periods, this report summarizes liquid precipitation.
 #                                     Number of precip events - (%% of total)
  CL                MAX         MEAN   0.01-    0.26-    0.51-    1.01-            TOTAL
  WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS
-""" % (station, nt.sts[station]['name']))
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name']))
 
     annEvents = 0
     cat1t = 0

@@ -60,7 +60,16 @@ def plotter(fdict):
     station = %s and day < %s GROUP by year, month
     """, pgconn, params=(station, TODAY), index_col=None)
 
-    res = """# %s
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
+    res += """# %s
 YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   ANN
 """ % (LABELS[varname], )
 

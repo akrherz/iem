@@ -43,16 +43,17 @@ def plotter(fdict):
         offset = int(row[0]) - startyear
         data[0, offset, :] += np.where(precip >= CATS, 1, 0)
         data[int(row[2]), offset, :] += np.where(precip >= CATS, 1, 0)
-
     res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # Number of days per year with precipitation at or above threshold [inch]
 # Partitioned by month of the year, 'ANN' represents the entire year
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].strftime("%d %b %Y"),
-       datetime.date.today().strftime("%d %b %Y"))
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
 
     for c in range(len(CATS)):
         res += """YEAR %4.2f JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN

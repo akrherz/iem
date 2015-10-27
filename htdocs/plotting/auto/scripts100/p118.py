@@ -1,6 +1,7 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+import datetime
 
 PDICT = {'precip_days': 'Precipitation Days',
          'snow_days': 'Snowfall Days'}
@@ -41,14 +42,16 @@ def plotter(fdict):
 
     res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
-# Report Generated: --
-# Climate Record: -- -> --
+# Report Generated: %s
+# Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # NUMBER OF DAYS WITH PRECIPITATION PER MONTH PER YEAR
 # Days with a trace accumulation are not included
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
-""" % (station, nt.sts[station]['name'])
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
 
     for year in df.index.levels[0]:
         res += "%4i  " % (year,)

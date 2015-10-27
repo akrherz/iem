@@ -23,18 +23,19 @@ def wrap(cnt, s=None):
     else:
         return ""
 
-# http://stackoverflow.com/questions/4494404
+
 def contiguous_regions(condition):
+    # http://stackoverflow.com/questions/4494404
     """Finds contiguous True regions of the boolean array "condition". Returns
     a 2D array where the first column is the start index of the region and the
     second column is the end index."""
 
     # Find the indicies of changes in "condition"
-    #d = np.diff(condition)
+    # d = np.diff(condition)
     d = np.subtract(condition[1:], condition[:-1], dtype=np.float)
-    idx, = d.nonzero() 
+    idx, = d.nonzero()
 
-    # We need to start things after the change in "condition". Therefore, 
+    # We need to start things after the change in "condition". Therefore,
     # we'll shift the index by 1 to the right.
     idx += 1
 
@@ -44,11 +45,12 @@ def contiguous_regions(condition):
 
     if condition[-1]:
         # If the end of condition is True, append the length of the array
-        idx = np.r_[idx, condition.size] # Edit
+        idx = np.r_[idx, condition.size]  # Edit
 
     # Reshape the result into two columns
-    idx.shape = (-1,2)
+    idx.shape = (-1, 2)
     return idx
+
 
 def plotter(fdict):
     """ Go """
@@ -61,9 +63,17 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    res = """# First occurance of record consecutive number of days 
+    res = """\
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: %s
+# Climate Record: %s -> %s
+# Site Information: [%s] %s
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+# First occurance of record consecutive number of days
 # above or below a temperature threshold
-"""
+""" % (datetime.date.today().strftime("%d %b %Y"),
+       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       nt.sts[station]['name'])
     res += "#   %-27s %-27s  %-27s %-27s\n" % (" Low Cooler Than",
                                                " Low Warmer Than",
                                                " High Cooler Than",
@@ -123,25 +133,25 @@ def plotter(fdict):
         res += ("%3i %5s %10s %10s %5s %10s %10s  "
                 "%5s %10s %10s %5s %10s %10s\n"
                 ) % (thres,
-    wrap(max_bl),
-    wrap(max_bl, (max_bl_ts -
-            datetime.timedelta(days=max_bl)).strftime("%m/%d/%Y")), 
-    wrap(max_bl, max_bl_ts.strftime("%m/%d/%Y") ),
-
-    wrap(max_al),
-    wrap(max_al, (max_al_ts -
-            datetime.timedelta(days=max_al)).strftime("%m/%d/%Y")), 
-    wrap(max_al, max_al_ts.strftime("%m/%d/%Y") ),
-
-    wrap(max_bh),
-    wrap(max_bh, (max_bh_ts -
-            datetime.timedelta(days=max_bh)).strftime("%m/%d/%Y")), 
-    wrap(max_bh, max_bh_ts.strftime("%m/%d/%Y") ),
-
-    wrap(max_ah),
-    wrap(max_ah, (max_ah_ts -
-            datetime.timedelta(days=max_ah)).strftime("%m/%d/%Y")), 
-    wrap(max_ah, max_ah_ts.strftime("%m/%d/%Y")))
+                        wrap(max_bl),
+                        wrap(max_bl, (max_bl_ts -
+                                datetime.timedelta(days=max_bl)).strftime("%m/%d/%Y")), 
+                        wrap(max_bl, max_bl_ts.strftime("%m/%d/%Y") ),
+                    
+                        wrap(max_al),
+                        wrap(max_al, (max_al_ts -
+                                datetime.timedelta(days=max_al)).strftime("%m/%d/%Y")), 
+                        wrap(max_al, max_al_ts.strftime("%m/%d/%Y") ),
+                    
+                        wrap(max_bh),
+                        wrap(max_bh, (max_bh_ts -
+                                datetime.timedelta(days=max_bh)).strftime("%m/%d/%Y")), 
+                        wrap(max_bh, max_bh_ts.strftime("%m/%d/%Y") ),
+                    
+                        wrap(max_ah),
+                        wrap(max_ah, (max_ah_ts -
+                                datetime.timedelta(days=max_ah)).strftime("%m/%d/%Y")), 
+                        wrap(max_ah, max_ah_ts.strftime("%m/%d/%Y")))
 
 
     return None, None, res
