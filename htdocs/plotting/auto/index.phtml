@@ -22,6 +22,7 @@ EOF;
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
 $state = isset($_GET["state"]) ? $_GET["state"]: "IA";
+$fmt = isset($_GET["_fmt"]) ? $_GET["_fmt"]: 'png';
 $lmw = isset($_GET['_l']) ? "$('#_l').click();\n": '';
 
 // Available Plots
@@ -88,10 +89,15 @@ if (isset($_GET["q"])){
 	$q = intval($_GET["q"]);
 	$data = file_get_contents("http://iem.local/plotting/auto/meta/$q.json");
 	$jobj = json_decode($data);
+	// Default format to text in a certain case
+	if (isset($jobj->report) && ! isset($_GET["_fmt"])){
+		$fmt = "text";
+	}
 	$description = isset($jobj->description) ? $jobj->description: null;
 	$imguri = "/plotting/auto/plot/$q/";
 	$pltvars = Array();
 	$form = "";
+	
 	while (list($k,$v) = each($jobj->arguments)){
 		$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
 		$thisrow = null;
@@ -290,13 +296,30 @@ EOF;
 	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
 		$image = "";
 	} else{
-		$image = <<<EOF
+		if ($fmt == 'text'){
+			$res = file_get_contents("http://iem.local{$imguri}.txt");
+			$image = <<<EOF
+<pre>
+{$res}
+</pre>			
+EOF;
+		} else {
+			$image = <<<EOF
 <div id="willload"><span class="glyphicon glyphicon-arrow-down"></span> 
 <img src="/images/wait24trans.gif" />
 A graph will appear below this text with your specifications from above:
 </div>
 	<img src="{$imguri}.png" class="img img-responsive" id="theimage" />
 EOF;
+		}
+	}
+	// Some tricky logic here about format
+	if (isset($jobj->report) && $jobj->report){
+		$ar = Array("text" => "Plain Text",
+				"png" => "Chart Image (PNG)");
+		$thisi = make_select("_fmt", $fmt, $ar);
+		$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
+				$thisi);
 	}
 	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
 	$formhtml = <<<EOF

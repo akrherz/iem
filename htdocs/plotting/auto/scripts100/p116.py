@@ -11,11 +11,12 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['report'] = True
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station'),
-        dict(type='select', options=PDICT, default='cdd',
+        dict(type='select', options=PDICT, default='cdd', name='var',
              label='Select Variable'),
     ]
     return d

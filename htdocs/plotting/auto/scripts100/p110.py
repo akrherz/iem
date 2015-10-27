@@ -65,6 +65,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['report'] = True
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
