@@ -77,6 +77,8 @@ data = {'plots': [
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "71", 'label': "Average Wind Speed and Direction for Month"},
+        {'id': "1", 'mw': True,
+         'label': "Comparison of Multi-Month Totals/Averages"},
         {'id': "55", 'label': "Daily Climatology Comparison"},
         {'id': "17", 'label': "Daily High/Low Temps with Climatology"},
         {'id': "15", 'mw': True,
@@ -87,8 +89,6 @@ data = {'plots': [
          'label': 'Day of the Month with the coldest/warmest temperature'},
         {'id': "29",
          'label': "Frequency of Hourly Temperature within Range by Month"},
-        {'id': "1", 'mw': True,
-         'label': "July-August Days Above Temp v. May-June Precip"},
         {'id': "9", 'mw': True, 'label': ("Growing Degree Day Climatology "
                                           "and Daily Values for one Year")},
         {'id': "2", 'mw': True,
