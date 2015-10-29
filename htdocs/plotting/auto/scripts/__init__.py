@@ -77,6 +77,8 @@ data = {'plots': [
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "71", 'label': "Average Wind Speed and Direction for Month"},
+        {'id': "125", 'mw': True,
+         'label': "Climatological Maps of Monthly Averages"},
         {'id': "1", 'mw': True,
          'label': "Comparison of Multi-Month Totals/Averages"},
         {'id': "55", 'label': "Daily Climatology Comparison"},
