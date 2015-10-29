@@ -7,7 +7,10 @@ from pyiem.network import Table as NetworkTable
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
-    d['description'] = """ """
+    d['description'] = """This chart presents the daily snow depth reports
+    as a image.  Each box represents an individual day's report with the
+    color denoting the amount.  Values in light gray are missing in the
+    database."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:')
