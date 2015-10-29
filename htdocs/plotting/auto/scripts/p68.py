@@ -1,7 +1,6 @@
-import psycopg2.extras
-import numpy as np
+import psycopg2
 from pyiem.network import Table as NetworkTable
-import pandas as pd
+from pandas.io.sql import read_sql
 
 
 def get_description():
@@ -28,7 +27,6 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     station = fdict.get('station', 'DMX')[:4]
 
@@ -38,42 +36,36 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, sharex=True)
 
     if station == '_ALL':
-        cursor.execute("""
+        df = read_sql("""
             with obs as (
                 SELECT distinct extract(year from issue) as yr,
                 phenomena, significance from warnings WHERE
                 phenomena is not null and significance is not null and
                 issue > '2005-01-01' and issue is not null
             )
-            SELECT yr, count(*) from obs GROUP by yr ORDER by yr ASC
-            """)
+            SELECT yr as year, count(*) from obs GROUP by yr ORDER by yr ASC
+            """, pgconn, index_col=None)
     else:
-        cursor.execute("""
+        df = read_sql("""
             with obs as (
                 SELECT distinct extract(year from issue) as yr,
                 phenomena, significance from warnings WHERE
                 wfo = %s and phenomena is not null and significance is not null
                 and issue > '2005-01-01' and issue is not null
             )
-            SELECT yr, count(*) from obs GROUP by yr ORDER by yr ASC
-            """, (station, ))
+            SELECT yr as year, count(*) from obs GROUP by yr ORDER by yr ASC
+            """, pgconn, params=(station, ), index_col=None)
 
-    years = []
-    count = []
-    for row in cursor:
-        years.append(int(row[0]))
-        count.append(int(row[1]))
-    df = pd.DataFrame(dict(year=pd.Series(years),
-                           count=pd.Series(count),
-                           wfo=pd.Series([station]*len(years))))
+    df['wfo'] = station
+    df['year'] = df['year'].astype('i')
 
-    ax.bar(np.array(years)-0.4, count, width=0.8, fc='b', ec='b')
-    for yr, val in zip(years, count):
+    ax.bar(df['year']-0.4, df['count'], width=0.8, fc='b', ec='b')
+    for yr, val in zip(df['year'], df['count']):
         ax.text(yr, val+1, "%s" % (val,), ha='center')
     ax.set_title(("[%s] NWS %s\nCount of Distinct VTEC Phenomena/"
                   "Significance - %i to %i"
                   ) % (station, nt.sts[station]['name'],
-                       years[0], years[-1]))
+                       df['year'].min(), df['year'].max()))
     ax.grid()
     ax.set_ylabel("Count")
 
