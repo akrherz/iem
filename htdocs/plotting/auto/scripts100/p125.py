@@ -73,7 +73,7 @@ def plotter(fdict):
 
     df2 = df[df['month'] == month]
     title = "%s" % (PDICT3[varname], )
-    m = MapPlot(sector=sector, state=state,
+    m = MapPlot(sector=sector, state=state, axisbg='white',
                 title=('NCEI 1981-2010 Climatology of %s %s'
                        ) % (calendar.month_name[month], title),
                 subtitle=('based on National Centers for '
