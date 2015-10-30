@@ -22,6 +22,8 @@ PRECISION = {'total_precip': 2,
              'avg_temp': 1,
              'avg_high': 1,
              'avg_low': 1}
+PDICT4 = {'monthly': 'Monthly Averages',
+          'yearly': 'Yearly Averages'}
 
 
 def get_description():
@@ -31,6 +33,8 @@ def get_description():
     d['description'] = """This application produces map analysis of
     climatological averages."""
     d['arguments'] = [
+        dict(type='select', name='over', default='monthly',
+             options=PDICT4, label='Show Monthly or Annual Averages'),
         dict(type='select', name='sector', default='state',
              options=PDICT, label='Select Map Region'),
         dict(type='clstate', name='state', default='IA',
@@ -55,6 +59,7 @@ def plotter(fdict):
     varname = fdict.get('var', 'total_precip')
     sector = fdict.get('sector', 'state')
     opt = fdict.get('opt', 'both')
+    over = fdict.get('over', 'monthly')
     month = int(fdict.get('month', datetime.date.today().month))
 
     df = read_sql("""
@@ -69,13 +74,23 @@ def plotter(fdict):
     ON (d.station = t.id) WHERE t.network = 'NCDC81' and
     t.state in ('IA', 'ND', 'SD', 'NE', 'KS', 'MO', 'IL', 'WI', 'MN', 'MI',
     'IN', 'OH', 'KY')
-    """, pgconn, index_col=None)
+    """, pgconn, index_col=['station', 'month'])
 
-    df2 = df[df['month'] == month]
-    title = "%s" % (PDICT3[varname], )
+    if over == 'monthly':
+        title = "%s %s" % (calendar.month_name[month], PDICT3[varname])
+        df.reset_index(inplace=True)
+        df2 = df[df['month'] == month]
+    else:
+        title = "Annual %s" % (PDICT3[varname], )
+        if varname == 'total_precip':
+            df2 = df.sum(axis=0, level='station')
+        else:
+            df2 = df.mean(axis=0, level='station')
+        df2['lat'] = df['lat'].mean(axis=0, level='station')
+        df2['lon'] = df['lon'].mean(axis=0, level='station')
     m = MapPlot(sector=sector, state=state, axisbg='white',
-                title=('NCEI 1981-2010 Climatology of %s %s'
-                       ) % (calendar.month_name[month], title),
+                title=('NCEI 1981-2010 Climatology of %s'
+                       ) % (title,),
                 subtitle=('based on National Centers for '
                           'Environmental Information (NCEI) 1981-2010'
                           ' Climatology'))
@@ -94,4 +109,4 @@ def plotter(fdict):
     return m.fig, df
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(over='annual'))
