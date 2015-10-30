@@ -7,8 +7,8 @@ include("../../include/database.inc.php");
 include("../../include/forms.php"); 
 $dbconn = iemdb('postgis');
 
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
-$season = isset($_GET["season"]) ? intval($_GET["season"]) : date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]) : intval(date("m"));
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
 $segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
 $valid = isset($_GET["valid"]) ? substr($_GET["valid"],0,16) : "";
 
@@ -22,7 +22,7 @@ $t->jsextra = <<<EOF
 EOF;
 
 $segselect = segmentSelect($dbconn, $segid);
-$ys = yearSelect2(2006, $season, "season");
+$ys = yearSelect2(2006, $year, "year");
 $ms = monthSelect($month);
 
 $content = <<<EOF
@@ -46,6 +46,11 @@ $content = <<<EOF
 </table>
 </form>
 EOF;
+
+$year1 = ($month < 7) ? ($year - 1) : $year;
+$year2 = ($month < 7) ? $year : ($year + 1);
+$logtable = sprintf("roads_%s_%s_log", $year1, $year2);
+
 if (isset($_GET["month"]) && isset($_GET["segid"]) )
 {
   $content .= "<div class=\"alert-info\">Here is a listing of historical 
@@ -58,9 +63,8 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
   		<thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
   		<th>Condition</th></tr></thead><tbody>";
 
-  if ($month > 9 and $season == 2011){ $season = 2012;}
    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, 
-   roads_${season}_log l, roads_conditions c WHERE l.segid = $1 and 
+   ${logtable} l, roads_conditions c WHERE l.segid = $1 and 
    extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
   $rs = pg_execute($dbconn, "SELECT", Array($segid, $month));
 
@@ -91,7 +95,7 @@ else if ( isset($_GET["valid"]) )
   		<thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
   		<th>Condition</th></tr></thead><tbody>";
     $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, 
-    		b.segid from roads_base b, roads_${season}_log l, roads_conditions c 
+    		b.segid from roads_base b, ${logtable} l, roads_conditions c 
     		WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid 
     		ORDER by major ASC");
   
