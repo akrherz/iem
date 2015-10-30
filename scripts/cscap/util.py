@@ -4,9 +4,14 @@ Utility Functions that are common to our scripts, I hope
 import gdata.gauth
 import gdata.spreadsheets.client
 import gdata.spreadsheets.data as spdata
+from oauth2client.client import SignedJwtAssertionCredentials
+from httplib2 import Http
+from apiclient.discovery import build
 
+import time
 import json
 import os
+import random
 
 # Load up the CONFIG
 CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
@@ -15,6 +20,17 @@ CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
 def save_config():
     """ Save the configuration to disk """
     json.dump(CONFIG, open('mytokens.json', 'w'))
+
+
+def exponential_backoff(func, *args, **kwargs):
+    """Call Google's API with some grace to allow for errors"""
+    for i in range(5):
+        try:
+            return func(*args, **kwargs)
+        except Exception, exp:
+            print("%s/5 %s traceback: %s" % (i+1, func.__name__, exp))
+            time.sleep((2 ** i) + (random.randint(0, 1000) / 1000))
+    return None
 
 
 class Worksheet(object):
@@ -36,19 +52,27 @@ class Worksheet(object):
         self.numdata = {}
 
     def refetch_feed(self):
-        self.entry = self.spr_client.get_worksheet(self.spread_id, self.id)
+        self.entry = exponential_backoff(self.spr_client.get_worksheet,
+                                         self.spread_id, self.id)
         self.set_metadata()
 
     def get_list_feed(self):
+        """Get a ListFeed for this Worksheet
+
+        Returns:
+          list_feed
+        """
         if self.list_feed is not None:
             return self.list_feed
-        self.list_feed = self.spr_client.get_list_feed(self.spread_id, self.id)
+        self.list_feed = exponential_backoff(self.spr_client.get_list_feed,
+                                             self.spread_id, self.id)
         return self.list_feed
 
     def get_cell_feed(self):
         if self.cell_feed is not None:
             return
-        self.cell_feed = self.spr_client.get_cells(self.spread_id, self.id)
+        self.cell_feed = exponential_backoff(self.spr_client.get_cells,
+                                             self.spread_id, self.id)
         for entry in self.cell_feed.entry:
             row = entry.cell.row
             _rowstore = self.data.setdefault(row, dict())
@@ -94,13 +118,14 @@ class Worksheet(object):
             print 'Found %s in column %s, deleting column' % (label, col)
             entry = self.get_cell_entry(1, col)
             entry.cell.input_value = ""
-            self.spr_client.update(entry)
+            exponential_backoff(self.spr_client.update, entry)
 
             updateFeed = spdata.build_batch_cells_update(self.spread_id,
                                                          self.id)
             for row in range(1, int(self.rows)+1):
                 updateFeed.add_set_cell(str(row), str(col), "")
-            self.cell_feed = self.spr_client.batch(updateFeed, force=True)
+            self.cell_feed = exponential_backoff(self.spr_client.batch,
+                                                 updateFeed, force=True)
 
         self.refetch_feed()
         while self.trim_columns():
@@ -115,16 +140,17 @@ class Worksheet(object):
                 return
         self.cols = self.cols + 1
         self.entry.col_count.text = "%s" % (self.cols,)
-        self.entry = self.spr_client.update(self.entry)
+        self.entry = exponential_backoff(self.spr_client.update, self.entry)
 
         for i, lbl in enumerate([label, row2, row3]):
             if lbl is None:
                 continue
-            entry = self.spr_client.get_cell(self.spread_id, self.id,
-                                             str(i+1),
-                                             str(self.cols))
+            entry = exponential_backoff(self.spr_client.get_cell,
+                                        self.spread_id, self.id,
+                                        str(i+1),
+                                        str(self.cols))
             entry.cell.input_value = lbl
-            self.spr_client.update(entry)
+            exponential_backoff(self.spr_client.update, entry)
 
         self.refetch_feed()
         self.cell_feed = None
@@ -132,7 +158,7 @@ class Worksheet(object):
     def drop_last_column(self):
         self.cols = self.cols - 1
         self.entry.col_count.text = "%s" % (self.cols,)
-        self.entry = self.spr_client.update(self.entry)
+        self.entry = exponential_backoff(self.spr_client.update, self.entry)
         self.cell_feed = None
 
     def trim_columns(self):
@@ -161,7 +187,8 @@ class Worksheet(object):
                         updateFeed.add_set_cell(str(row), str(col2),
                                                 self.get_cell_value(row,
                                                                     col2 + 1))
-                self.cell_feed = self.spr_client.batch(updateFeed, force=True)
+                self.cell_feed = exponential_backoff(self.spr_client.batch,
+                                                     updateFeed, force=True)
                 # Drop last column
                 self.refetch_feed()
                 self.drop_last_column()
@@ -179,7 +206,7 @@ class Spreadsheet(object):
 
     def get_worksheets(self):
         """ Get the worksheets associated with this spreadsheet """
-        feed = self.spr_client.GetWorksheets(self.id)
+        feed = exponential_backoff(self.spr_client.GetWorksheets, self.id)
         for entry in feed.entry:
             self.worksheets[entry.title.text] = Worksheet(self.spr_client,
                                                           entry)
@@ -191,7 +218,8 @@ def get_xref_siteids_plotids(spr_client, config):
     data = {}
     for uniqueid in spreadkeys.keys():
         data[uniqueid.lower()] = []
-        feed = spr_client.get_list_feed(spreadkeys[uniqueid], 'od6')
+        feed = exponential_backoff(spr_client.get_list_feed,
+                                   spreadkeys[uniqueid], 'od6')
         for entry in feed.entry:
             d = entry.to_dict()
             if d['plotid'] is None:
@@ -202,7 +230,8 @@ def get_xref_siteids_plotids(spr_client, config):
 
 def get_xref_plotids(spr_client, config):
     ''' Build the xreference of siteID to plotid spreadsheet keys '''
-    feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
+    feed = exponential_backoff(spr_client.get_list_feed,
+                               config.get('cscap', 'metamaster'), 'od6')
     data = {}
     for entry in feed.entry:
         d = entry.to_dict()
@@ -324,7 +353,8 @@ def get_site_metadata(config, spr_client=None):
     if spr_client is None:
         spr_client = get_spreadsheet_client(config)
 
-    lf = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
+    lf = exponential_backoff(spr_client.get_list_feed,
+                             config.get('cscap', 'metamaster'), 'od6')
     for entry in lf.entry:
         d = entry.to_dict()
         meta[d['uniqueid']] = {'climate_site': d['iemclimatesite'].split()[0],
@@ -334,10 +364,6 @@ def get_site_metadata(config, spr_client=None):
 
 def get_driveclient():
     """ Return an authorized apiclient """
-    from oauth2client.client import SignedJwtAssertionCredentials
-    from httplib2 import Http
-    from apiclient.discovery import build
-
     client_email = CONFIG['service_account']
     with open("CSCAP-6886c10d6ffb.p12") as f:
         private_key = f.read()
