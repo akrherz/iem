@@ -78,7 +78,7 @@ data = {'plots': [
     {'label': 'Monthly', 'options': [
         {'id': "71", 'label': "Average Wind Speed and Direction for Month"},
         {'id': "125", 'mw': True,
-         'label': "Climatological Maps of Monthly Averages"},
+         'label': "Climatological Maps of Annual/Monthly Averages"},
         {'id': "1", 'mw': True,
          'label': "Comparison of Multi-Month Totals/Averages"},
         {'id': "55", 'label': "Daily Climatology Comparison"},
@@ -130,6 +130,8 @@ data = {'plots': [
     {'label': 'Yearly', 'options': [
         {'id': "76",
          'label': "Average Dew Point by Year or Season"},
+        {'id': "125", 'mw': True,
+         'label': "Climatological Maps of Annual/Monthly Averages"},
         {'id': "99", 'label': "Daily High + Low Temperatures with Departures",
          'mw': True},
         {'id': "12", 'mw': True,
