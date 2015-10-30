@@ -157,7 +157,7 @@ data = {'plots': [
         {'id': "30", 'mw': True, 'label': "Monthly Temperature Range"},
         {'id': "44", 'label': "NWS Office Accumulated SVR+TOR Warnings"},
         {'id': "69", 'mw': True,
-         'label': "Percentage of Year to Date Days Above Average"},
+         'label': "Percentage of Days each Year Above Average"},
         {'id': "77", 'mw': True,
          'label': "Period between Last and First High Temperature for Year"},
         {'id': "75", 'mw': True,
