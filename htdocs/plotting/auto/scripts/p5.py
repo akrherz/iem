@@ -1,4 +1,5 @@
-import psycopg2.extras
+import psycopg2
+from pandas.io.sql import read_sql
 import numpy as np
 from pyiem import network
 import calendar
@@ -7,6 +8,7 @@ import calendar
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This plot displays the dates with the smallest
     difference between the high and low temperature by month. In the case
     of a tie, the first occurence is shown."""
@@ -22,29 +24,29 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    ccursor.execute("""
-    select month, to_char(day, 'Mon dd, YYYY'), high, low, rank() OVER
+    df = read_sql("""
+    select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, rank() OVER
     (PARTITION by month ORDER by day DESC) from
     (select month, day, high, low, rank() OVER
         (PARTITION by month ORDER by (high-low) ASC) from """ + table + """
         where station = %s and high >= low) as foo
         WHERE rank = 1 ORDER by month ASC, day DESC
-    """, (station, ))
+    """, pgconn, params=(station, ), index_col='month')
     labels = []
     ranges = []
-    for row in ccursor:
-        if row[4] != 1:
+    for i, row in df.iterrows():
+        if row['rank'] != 1:
             continue
-        labels.append("%s (%s/%s) - %s" % (row[2]-row[3], row[2], row[3],
-                                           row[1]))
-        ranges.append(row[2] - row[3])
+        labels.append("%s (%s/%s) - %s" % (row['high']-row['low'], row['high'],
+                                           row['low'],
+                                           row['dd']))
+        ranges.append(row['high'] - row['low'])
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -59,4 +61,4 @@ def plotter(fdict):
     ax.set_title("%s [%s]\nMinimum Daily Temperature Range by Month" % (
                  nt.sts[station]['name'], station))
 
-    return fig
+    return fig, df

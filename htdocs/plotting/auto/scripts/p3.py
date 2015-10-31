@@ -1,8 +1,8 @@
-import psycopg2.extras
+import psycopg2
 import numpy as np
 from pyiem import network
 import calendar
-import pandas as pd
+from pandas.io.sql import read_sql
 
 PDICT = {'max-high': 'Maximum High',
          'avg-high': 'Average High',
@@ -45,8 +45,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
     month = int(fdict.get('month', 7))
@@ -56,7 +55,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    ccursor.execute("""
+    df = read_sql("""
     SELECT year,
     max(high) as "max-high",
     min(high) as "min-high",
@@ -72,27 +71,20 @@ def plotter(fdict):
   from """+table+"""
   where station = %s and month = %s
   GROUP by year ORDER by year ASC
-    """, (threshold, threshold, threshold, station, month))
-
-    years = []
-    data = []
-    for row in ccursor:
-        years.append(row['year'])
-        data.append(float(row[ptype]))
-    df = pd.DataFrame(dict(year=pd.Series(years),
-                           data=pd.Series(data)))
-
-    data = np.array(data)
+    """, pgconn, params=(threshold, threshold, threshold, station, month),
+                  index_col='year')
 
     (fig, ax) = plt.subplots(1, 1)
-    avgv = np.average(data)
+    data = df[ptype].values
+    avgv = df[ptype].mean()
 
     # Compute 30 year trailing average
     tavg = [None]*30
     for i in range(30, len(data)):
         tavg.append(np.average(data[i-30:i]))
 
-    a1981_2010 = np.average(data[years.index(1981):years.index(2011)])
+    # End interval is inclusive
+    a1981_2010 = df.loc[1981:2010, ptype].mean()
 
     colorabove = 'tomato'
     colorbelow = 'dodgerblue'
@@ -101,7 +93,7 @@ def plotter(fdict):
         colorabove = 'dodgerblue'
         colorbelow = 'tomato'
         precision = "%.2f"
-    bars = ax.bar(np.array(years) - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(df.index.values - 0.4, data, fc=colorabove, ec=colorabove)
     for i, bar in enumerate(bars):
         if data[i] < avgv:
             bar.set_facecolor(colorbelow)
@@ -110,9 +102,10 @@ def plotter(fdict):
     ax.axhline(avgv, lw=2, color='k', zorder=2, label=lbl)
     lbl = "1981-2010: "+precision % (a1981_2010,)
     ax.axhline(a1981_2010, lw=2, color='brown', zorder=2, label=lbl)
-    ax.plot(years, tavg, lw=1.5, color='g', zorder=4, label='Trailing 30yr')
-    ax.plot(years, tavg, lw=3, color='yellow', zorder=3)
-    ax.set_xlim(years[0] - 1, years[-1] + 1)
+    ax.plot(df.index.values, tavg, lw=1.5, color='g', zorder=4,
+            label='Trailing 30yr')
+    ax.plot(df.index.values, tavg, lw=3, color='yellow', zorder=3)
+    ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     if ptype.find('precip') == -1 and ptype.find('days') == -1:
         ax.set_ylim(min(data) - 5, max(data) + 5)
 
@@ -127,7 +120,7 @@ def plotter(fdict):
     ax.legend(ncol=3, loc='best', fontsize=10)
     msg = ("[%s] %s %s-%s %s %s"
            ) % (station, nt.sts[station]['name'],
-                min(years), max(years),
+                df.index.min(), df.index.max(),
                 calendar.month_name[month], PDICT[ptype])
     if ptype.find("days") == 0:
         msg += " (%s)" % (threshold,)
