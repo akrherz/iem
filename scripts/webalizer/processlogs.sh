@@ -66,6 +66,7 @@ wc -l weatherim_access.log
 
 # Step 4, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T access.log
+rsync -av /mesonet/www/logs/usage/mesonet.agron.iastate.edu /mesonet/share/usage/
 /home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
