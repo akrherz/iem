@@ -47,6 +47,8 @@ data = {'plots': [
          'label': "Min Daily Low after 1 July / Max Daily High before 1 July"},
         {'id': "5", 'mw': True,
          'label': "Minimum Daily Temperature Range"},
+        {'id': "126",
+         'label': "Mixing Ratio Climatology and Yearly Timeseries Plot"},
         {'id': "84", 'mw': True,
          'label': "MRMS Q3 Estimated Precipitation (multiday summaries too)"},
         {'id': "22", 'mw': True,
