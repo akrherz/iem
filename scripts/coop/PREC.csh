@@ -12,10 +12,3 @@ zip -q coop_${Date}.zip coop_${Date}.txt coop_${Date}.prj coop_${Date}.shp coop_
 
 /home/ldm/bin/pqinsert -p "zip ac $ftime gis/shape/4326/iem/coopobs.zip GIS/coop_${Date}.zip zip" coop_${Date}.zip
 rm -f coop_${Date}.* 
-
-
-python monthPrecip.py
-python yearPrecip.py
-python dayPrecip.py
-/home/ldm/bin/pqinsert -p "plot ac $ftime text/IEMNWSDPR.txt coopobs.txt txt" IEMNWSDPR.txt >& /dev/null
-rm IEMNWSDPR.txt
