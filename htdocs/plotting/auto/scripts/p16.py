@@ -1,6 +1,7 @@
-import psycopg2.extras
+import psycopg2
 from pyiem.network import Table as NetworkTable
 import datetime
+from pandas.io.sql import read_sql
 
 PDICT = {'ts': 'Thunderstorm (TS) Reported',
          'tmpf_above': 'Temperature At or Above Threshold (F)',
@@ -32,6 +33,10 @@ MDICT = {'all': 'No Month/Time Limit',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
+    d['description'] = """This application generates a wind rose for a given
+    criterion being meet. A wind rose plot is a convenient way of summarizing
+    wind speed and direction."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:'),
@@ -52,8 +57,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     from windrose import WindroseAxes
     from matplotlib.patches import Rectangle
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
@@ -92,29 +96,21 @@ def plotter(fdict):
         limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
         title = "Dew Point at or above %s$^\circ$F" % (threshold,)
 
-    cursor.execute("""
-     SELECT valid, drct, sknt from alldata where station = %s and
+    df = read_sql("""
+     SELECT valid, drct, sknt * 1.15 as smph from alldata
+     where station = %s and
      """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
      and extract(month from valid) in %s
-    """, (station, tuple(months)))
-    sped = []
-    drct = []
-    for i, row in enumerate(cursor):
-        if i == 0:
-            minvalid = row[0]
-            maxvalid = row[0]
-        if row[0] < minvalid:
-            minvalid = row[0]
-        if row[0] > maxvalid:
-            maxvalid = row[0]
-        sped.append(row[2] * 1.15)
-        drct.append(row[1])
+    """, pgconn, params=(station, tuple(months)), index_col='valid')
+    minvalid = df.index.min()
+    maxvalid = df.index.max()
 
-    fig = plt.figure(figsize=(6, 7), facecolor='w', edgecolor='w')
-    rect = [0.1, 0.09, 0.8, 0.8]
+    fig = plt.figure(figsize=(6, 7.2), facecolor='w', edgecolor='w')
+    rect = [0.08, 0.1, 0.8, 0.8]
     ax = WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
-    ax.bar(drct, sped, normed=True, bins=[0, 2, 5, 7, 10, 15, 20], opening=0.8,
+    ax.bar(df['drct'].values, df['smph'].values,
+           normed=True, bins=[0, 2, 5, 7, 10, 15, 20], opening=0.8,
            edgecolor='white', nsector=18)
     handles = []
     for p in ax.patches_list:
@@ -122,8 +118,9 @@ def plotter(fdict):
         handles.append(Rectangle((0, 0), 0.1, 0.3,
                                  facecolor=color, edgecolor='black'))
     l = fig.legend(handles,
-                   ('2-5', '5-7', '7-10', '10-15', '15-20', '20+'), loc=3,
-                   ncol=6, title='Wind Speed [%s]' % ('mph',),
+                   ('2-5', '5-7', '7-10', '10-15', '15-20', '20+'),
+                   loc=(0.01, 0.03), ncol=6,
+                   title='Wind Speed [%s]' % ('mph',),
                    mode=None, columnspacing=0.9, handletextpad=0.45)
     plt.setp(l.get_texts(), fontsize=10)
 
@@ -134,9 +131,10 @@ def plotter(fdict):
                              nt.sts[station]['name'],
                              title),
                    fontsize=16, ha='center', va='top')
-    plt.gcf().text(0.01, 0.1, "Generated: 8 September 2014",
-                   verticalalignment="bottom")
-    plt.gcf().text(0.95, 0.1, "n=%s" % (len(drct),),
+    plt.gcf().text(0.95, 0.12, "n=%s" % (len(df.index),),
                    verticalalignment="bottom", ha='right')
 
-    return fig
+    return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
