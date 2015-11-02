@@ -45,7 +45,8 @@ def make_plot(form):
     days = int(form.getfirst('days', 1))
     ets = sts + datetime.timedelta(days=days)
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
-    tzname = 'America/Chicago' if uniqueid in ['ISUAG', 'SERF', 'GILMORE'] else 'America/New_York'
+    tzname = 'America/Chicago' if uniqueid in [
+        'ISUAG', 'SERF', 'GILMORE'] else 'America/New_York'
     tz = pytz.timezone(tzname)
     viewopt = form.getfirst('view', 'plot')
     ptype = form.getfirst('ptype', '1')
@@ -172,7 +173,9 @@ def make_plot(form):
         lines = 5
     else:
         dlevel = "d%st" % (depth, )
-        for i, plotid in enumerate(df['plotid'].unique()):
+        plot_ids = df['plotid'].unique()
+        plot_ids.sort()
+        for i, plotid in enumerate(plot_ids):
             df2 = df[df['plotid'] == plotid]
             ax[0].plot(df2['v'], df2[dlevel].astype('f'), lw=2,
                        label=plotid, linestyle=LINESTYLE[i])
@@ -192,16 +195,19 @@ def make_plot(form):
         ax[1].plot(df['v'], df['d3m'].astype('f'), c='b', lw=2)
         ax[1].plot(df['v'], df['d4m'].astype('f'), c='g', lw=2)
         ax[1].plot(df['v'], df['d5m'].astype('f'), c='turquoise', lw=2)
-        v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
-                 df['d4m'].min(), df['d5m'].min()])
-        v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
-                  df['d4m'].max(), df['d5m'].max()])
-        #ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
+        # v = min([df['d1m'].min(), df['d2m'].min(), df['d3m'].min(),
+        #         df['d4m'].min(), df['d5m'].min()])
+        # v2 = max([df['d1m'].max(), df['d2m'].max(), df['d3m'].max(),
+        #          df['d4m'].max(), df['d5m'].max()])
+        # ax[1].set_ylim(0 if v > 0 else v, v2 + v2 * 0.05)
     else:
         dlevel = "d%sm" % (depth, )
-        for plotid in df['plotid'].unique():
+        plot_ids = df['plotid'].unique()
+        plot_ids.sort()
+        for i, plotid in enumerate(plot_ids):
             df2 = df[df['plotid'] == plotid]
-            ax[1].plot(df2['v'], df2[dlevel].astype('f'), lw=2)
+            ax[1].plot(df2['v'], df2[dlevel].astype('f'), lw=2,
+                       linestyle=LINESTYLE[i])
     ax[1].grid(True)
     ax[1].set_ylabel("Volumetric Soil Moisture [cm$^{3}$ cm$^{-3}$]",
                      fontsize=9)
