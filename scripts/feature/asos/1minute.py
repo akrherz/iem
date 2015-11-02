@@ -2,6 +2,8 @@ import psycopg2
 import datetime
 import pytz
 from pyiem.network import Table as NetworkTable
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 nt = NetworkTable("IA_ASOS")
 
@@ -20,10 +22,6 @@ def get_data(station):
         valid.append(row[0])
         tmpf.append(row[1])
     return valid, tmpf
-
-
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 (fig, ax) = plt.subplots(1, 1)
 

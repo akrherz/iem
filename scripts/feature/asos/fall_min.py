@@ -3,7 +3,6 @@
 from pyiem.plot import MapPlot
 import datetime
 import psycopg2
-import numpy as np
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
@@ -24,10 +23,11 @@ for row in icursor:
     valmask.append(row[1] in ['IA_ASOS', 'AWOS'])
     print row[4], row[0]
 
-m = MapPlot(title="2014-2015 Winter Minimum Temperature $^\circ$F", axisbg='white',
-            subtitle='Automated Weather Stations, Valid Fall 2014 - %s' % (datetime.datetime.now().strftime("%d %b %Y"),)
-)
-#m.contourf(lons, lats, vals, np.arange(-30,1,4))
+m = MapPlot(title="2014-2015 Winter Minimum Temperature $^\circ$F",
+            axisbg='white',
+            subtitle=('Automated Weather Stations, Valid Fall 2014 - %s'
+                      ) % (datetime.datetime.now().strftime("%d %b %Y"),))
+# m.contourf(lons, lats, vals, np.arange(-30,1,4))
 m.plot_values(lons, lats, vals, '%.0f', valmask)
 m.drawcounties()
 m.postprocess(filename='150223.png')

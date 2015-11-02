@@ -57,6 +57,4 @@ ax.grid(True)
 ax.set_title("1973-2013 Daily Frequency of 1+ Sub-Zero $^{\circ}\mathrm{F}$ Wind Chill Ob")
 ax.legend()
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')

@@ -83,6 +83,4 @@ ax[1].legend(ncol=3, loc=(0.13,1.01))
 ax[1].grid(True)
 ax[0].grid(True)
 
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
