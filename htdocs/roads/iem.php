@@ -145,7 +145,7 @@ $point = ms_newpointobj();
 $point->setXY(500, 22);
 $point->draw($map, $layer, $img, 1, "Limited Visibility");
 
-
+$map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
