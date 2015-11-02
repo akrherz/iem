@@ -24,7 +24,9 @@ def get_description():
     d['data'] = True
     d['description'] = """Using the gridded IEM ReAnalysis of daily
     precipitation.  This chart presents the areal coverage of some trailing
-    number of days precipitation for a state of your choice."""
+    number of days precipitation for a state of your choice.  This application
+    does not properly account for the trailing period of precipitation during
+    the first few days of January."""
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='year', name='year', default=today.year,

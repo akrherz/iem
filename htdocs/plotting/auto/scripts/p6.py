@@ -1,5 +1,5 @@
-import psycopg2.extras
-import numpy as np
+import psycopg2
+from pandas.io.sql import read_sql
 from matplotlib import mlab
 import calendar
 import datetime
@@ -28,12 +28,17 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     today = datetime.date.today()
+    d['description'] = """This application plots out the distribution of
+    some monthly metric for single month for all tracked sites within one
+    state."""
+    d['data'] = True
     d['arguments'] = [
         dict(type='clstate', name='state', default='IA',
              label='Select State:'),
         dict(type='year', name='year', default=today.year,
              label='Select Year'),
-        dict(type='month', name='month', default='6', label='Select Month'),
+        dict(type='month', name='month', default=today.month,
+             label='Select Month'),
         dict(type='select', name='type', default='sum-precip',
              label='Which metric to plot?', options=PDICT),
     ]
@@ -45,8 +50,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     state = fdict.get('state', 'IA')
     year = int(fdict.get('year', 2014))
@@ -54,33 +58,23 @@ def plotter(fdict):
     ptype = fdict.get('type', 'sum-precip')
     table = "alldata_%s" % (state,)
 
-    data = []
-    ccursor.execute("""
+    df = read_sql("""
     SELECT station,
     sum(precip) as "sum-precip",
     avg(high) as "avg-high",
     avg(low) as "avg-low",
     avg((high+low)/2.) as "avg-t"
     from """+table+""" WHERE year = %s and month = %s GROUP by station
-    """, (year, month))
-    stateavg = None
-    for row in ccursor:
-        if row['station'][2:] == '0000':
-            stateavg = row[ptype]
-            continue
-        if row['station'][2] == 'C':
-            continue
-        data.append(float(row[ptype]))
-
-    data = np.array(data)
+    """, pgconn, params=(year, month), index_col='station')
+    stateavg = df.at["%s0000" % (state, ), ptype]
 
     (fig, ax) = plt.subplots(1, 1)
-    n, bins, patches = ax.hist(data, 20, fc='lightblue', ec='lightblue', 
-                               normed=1)
-    y = mlab.normpdf(bins, np.average(data), np.std(data))
+    _, bins, _ = ax.hist(df[ptype], 20, fc='lightblue', ec='lightblue',
+                         normed=1)
+    y = mlab.normpdf(bins, df[ptype].mean(), df[ptype].std())
     ax.plot(bins, y, 'r--', lw=2,
             label=("Normal Dist.\n$\sigma$=%.2f $\mu$=%.2f"
-                   ) % (np.std(data), np.average(data)))
+                   ) % (df[ptype].std(), df[ptype].mean()))
     if stateavg is not None:
         ax.axvline(stateavg, label='Statewide Avg\n%.2f' % (stateavg,),
                    color='g', lw=2)
@@ -89,7 +83,7 @@ def plotter(fdict):
     ax.set_ylabel("Normalized Frequency")
     ax.set_title(("%s %s %s %s Distribution\nNumber of stations: %s"
                   ) % (STATES[state], year, calendar.month_name[month],
-                       PDICT[ptype], len(data)))
+                       PDICT[ptype], len(df.index)))
     ax.grid(True)
 
-    return fig
+    return fig, df
