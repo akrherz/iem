@@ -1,9 +1,9 @@
-import psycopg2.extras
+import psycopg2
 from pyiem.network import Table as NetworkTable
 import datetime
 import calendar
 import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
 
 
 def get_description():
@@ -31,15 +31,14 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.patheffects as PathEffects
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
     nt = NetworkTable(network)
     year = int(fdict.get('year', datetime.date.today().year))
 
-    cursor.execute("""
+    df = read_sql("""
     WITH obs as (
         SELECT distinct date_trunc('hour', valid) as t from alldata
         WHERE station = %s and p01i >= 0.01
@@ -53,31 +52,23 @@ def plotter(fdict):
     )
     SELECT a.month, m.count, a.avg from averages a LEFT JOIN myyear m
     on (m.month = a.month) ORDER by a.month ASC
-    """, (station, year))
-    months = []
-    thisyear = []
-    averages = []
-    for row in cursor:
-        months.append(row[0])
-        if row[1] is not None:
-            thisyear.append(row[1])
-        averages.append(row[2])
-    df = pd.DataFrame(dict(month=pd.Series(months),
-                           thisyear=pd.Series(thisyear),
-                           average=pd.Series(averages)))
+    """, pgconn, params=(station, year), index_col=None)
+
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(np.arange(1, 13)-0.4, averages, fc='blue', label='Climatology')
-    bars = ax.bar(np.arange(1, len(thisyear)+1)-0.2, thisyear, width=0.4,
+    ax.bar(df['month'] - 0.4, df['avg'], fc='blue', label='Climatology')
+    bars = ax.bar(df['month']-0.2, df['count'], width=0.4,
                   fc='yellow', label='%s' % (year,), zorder=2)
     for i, _ in enumerate(bars):
-        txt = ax.text(i+1, thisyear[i]+2, "%.0f" % (thisyear[i],), ha='center')
+        txt = ax.text(i+1, df['count'][i]+2, "%.0f" % (df['count'][i],),
+                      ha='center')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                      foreground="yellow")])
 
     ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.set_xlim(0.5, 12.5)
-    ax.set_yticks(np.arange(0, max(max(averages), max(thisyear)) + 20, 12))
+    ax.set_yticks(np.arange(0, max(df['count'].max(), df['avg'].max()) + 20,
+                            12))
     ax.set_ylabel("Hours with 0.01+ inch precip")
     ax.grid(True)
     ax.legend()

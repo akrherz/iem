@@ -46,7 +46,8 @@ def plotter(fdict):
         from
             (select day, year, avg((high+low)/2.) OVER
             (ORDER by day ASC rows 91 preceding) from """ + table + """
-            where station = %s) as foo) as foo2 where rank = 1
+            where station = %s and day > '1893-01-01') as foo)
+            as foo2 where rank = 1
             ORDER by day DESC
     """, (station, ))
     years = []
