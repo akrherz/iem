@@ -2,6 +2,7 @@ import psycopg2.extras
 import numpy as np
 from scipy.stats import norm
 import datetime
+import pandas as pd
 
 STATES = {'IA': 'Iowa',
           'IL': 'Illinois',
@@ -20,6 +21,7 @@ STATES = {'IA': 'Iowa',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This plot displays the distribution of observed
     daily high and low temperatures for a given day and given state.  The
     dataset is fit with a simple normal distribution based on the simple
@@ -62,9 +64,10 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.hist(highs, bins=(np.max(highs)-np.min(highs)),
-            histtype='step', normed=True,
-            color='r',  zorder=1)
+    n, bins, _ = ax.hist(highs, bins=(np.max(highs)-np.min(highs)),
+                         histtype='step', normed=True,
+                         color='r',  zorder=1)
+    high_freq = pd.Series(n, index=bins[:-1])
     mu, std = norm.fit(highs)
     xmin, xmax = plt.xlim()
     x = np.linspace(xmin, xmax, 100)
@@ -76,9 +79,12 @@ def plotter(fdict):
             va='top', ha='left', color='r',
             transform=ax.transAxes, bbox=dict(color='white'))
 
-    ax.hist(lows, bins=(np.max(highs)-np.min(highs)),
-            histtype='step', normed=True,
-            color='b',  zorder=1)
+    n, bins, _ = ax.hist(lows, bins=(np.max(lows)-np.min(lows)),
+                         histtype='step', normed=True,
+                         color='b',  zorder=1)
+    low_freq = pd.Series(n, index=bins[:-1])
+    df = pd.DataFrame(dict(low_freq=low_freq, high_freq=high_freq))
+    df.index.name = 'tmpf'
     mu, std = norm.fit(lows)
     xmin, xmax = plt.xlim()
     x = np.linspace(xmin, xmax, 100)
@@ -97,4 +103,7 @@ def plotter(fdict):
     ax.set_xlabel("Temperature $^\circ$F")
     ax.set_ylabel("Probability")
 
-    return fig
+    return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

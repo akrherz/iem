@@ -2,7 +2,7 @@ import psycopg2.extras
 import calendar
 import matplotlib.cm as cm
 import datetime
-import pandas as pd
+from pandas.io.sql import read_sql
 
 
 PDICT = {'precip': 'Total Precipitation',
@@ -37,7 +37,6 @@ def plotter(fdict):
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     year = int(fdict.get('year', 2014))
     month = int(fdict.get('month', 9))
@@ -46,7 +45,7 @@ def plotter(fdict):
     lastyear = datetime.date.today().year
     years = lastyear - 1893 + 1
 
-    cursor.execute("""
+    df = read_sql("""
     with monthly as (
         SELECT year, station,
         sum(precip) as p,
@@ -61,15 +60,7 @@ def plotter(fdict):
         from monthly)
 
     SELECT station, precip_rank, avgt_rank from ranks
-    where year = %s """, (month, year))
-    data = {}
-    rows = []
-    for row in cursor:
-        data[row['station']] = row[varname + '_rank']
-        rows.append(dict(station=row['station'], year=year, month=month,
-                         precip_rank=row['precip_rank'],
-                         avgt_rank=row['avgt_rank']))
-    df = pd.DataFrame(rows)
+    where year = %s """, pgconn, params=(month, year), index_col='station')
 
     m = MapPlot(sector='midwest', axisbg='white',
                 title='%s %s %s Ranks by Climate District' % (
@@ -82,7 +73,7 @@ def plotter(fdict):
     cmap = cm.get_cmap("BrBG_r" if varname == 'precip' else 'BrBG')
     cmap.set_under('white')
     cmap.set_over('black')
-    m.fill_climdiv(data, ilabel=True, plotmissing=False,
+    m.fill_climdiv(df[varname+'_rank'], ilabel=True, plotmissing=False,
                    bins=[1, 5, 10, 25, 50, 75, 100, years-10, years-5, years],
                    cmap=cmap)
 
