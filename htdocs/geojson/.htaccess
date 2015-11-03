@@ -4,3 +4,4 @@ Options +ExecCGI
 RewriteEngine On
 RewriteRule ^sbw.geojson(.*) sbw.py$1 [QSA]
 RewriteRule ^sps.geojson(.*) sps.py$1 [QSA]
+RewriteRule ^winter_roads.geojson(.*) winter_roads.py$1 [QSA]

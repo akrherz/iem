@@ -33,6 +33,17 @@
   				"{year}" => "2015"
   		)
   );
+
+  $services[] = Array(
+  		"title" => "Iowa Winter Road Conditions",
+  		"url" => "/geojson/winter_roads.geojson",
+  		"desc" => "This service provides the most recent Iowa Winter Road
+  		Conditions.",
+  		"vars" => Array(
+  				),
+  		"example" => Array(
+  				)
+  		);
   
   $services[] = Array(
   		"title" => "NWS COOP Station Climatology",
