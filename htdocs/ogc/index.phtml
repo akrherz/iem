@@ -56,7 +56,7 @@ map.addMapType(custommap4);
 
 <p>Here is <a href="googlemaps_v3.html">an example for Google Maps v3</a>. 
 
-<h4>OpenLayers</h4>
+<h4>OpenLayers v2</h4>
 <p>Here is an example for <a href="http://openlayers.org">OpenLayers</a> and assumes your map projection
 is in spherical mercator.  Or check out this 
 <a href="openlayers_example.html">self contained</a> and fully functional 
@@ -89,6 +89,16 @@ var n0q = new OpenLayers.Layer.TMS(
 /* you'd then add n0q to your map object */
 </pre>
 
+<h4>OpenLayers v3</h4>
+<p>Here is a <a href="ol3_example.html">self contained example</a> for OpenLayers v3.</p>
+<pre>
+var tms = new ol.layer.Tile({
+            title: 'GOES East IR Satellite',
+            visible: false,
+            source: new ol.source.XYZ({
+                    url : '/cache/tile.py/1.0.0/goes-east-ir-4km-900913/{z}/{x}/{y}.png'
+            });
+</pre>
 
 
 <h4>Other Tile Map Services</h4>
