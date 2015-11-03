@@ -1,0 +1,56 @@
+<html>
+<head>
+  <title>IEM TMS + OpenLayers Example</title>
+  <link type="text/css" href="/vendor/openlayers/3.9.0/ol.css" rel="stylesheet" />
+  <link type="text/css" href="/vendor/openlayers/3.9.0/ol3-layerswitcher.css" rel="stylesheet" />
+  <script src="/vendor/openlayers/3.9.0/ol.js"></script> 
+  <script src="/vendor/openlayers/3.9.0/ol3-layerswitcher.js"></script> 
+  
+<script type="text/javascript">
+var map;
+var n0q;
+
+/*
+ * You need to wrap your DOM manipulators into a function that is called after
+ * the DOM is rendered!  Notice the onload="" attribute to the body tag below
+ */
+function init(){
+	map = new ol.Map({
+		target: 'map',
+		layers: [new ol.layer.Tile({
+            title: 'OpenStreetMap',
+            visible: true,
+            source: new ol.source.OSM()
+        }), new ol.layer.Tile({
+            title: 'GOES East IR Satellite',
+            visible: false,
+            source: new ol.source.XYZ({
+                    url : '/cache/tile.py/1.0.0/goes-east-ir-4km-900913/{z}/{x}/{y}.png'
+            })
+   		}), new ol.layer.Tile({
+            title: 'NEXRAD Base Reflectivity',
+            source: new ol.source.XYZ({
+                    url : '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-0/{z}/{x}/{y}.png'
+            })
+   		})
+		         
+		],
+        view: new ol.View({
+            projection: 'EPSG:3857',
+            center: [-10575351, 5160979],
+            zoom: 3
+    	})
+	});
+
+	var layerSwitcher = new ol.control.LayerSwitcher();
+    map.addControl(layerSwitcher);
+	
+}
+</script>
+</head>
+<body onload="init()">
+	
+<div style="width:100%; height:100%" id="map"></div>
+	
+</body>
+</html>
