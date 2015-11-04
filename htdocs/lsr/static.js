@@ -269,7 +269,6 @@ var sbwLookup = {
  "EW": {strokeColor: 'green'},
  "FA": {strokeColor: 'green'},
  "FL": {strokeColor: 'green'},
- "FF": {strokeColor: 'green'},
  "SV": {strokeColor: 'yellow'}
 }
 
@@ -292,6 +291,7 @@ var lsrLookup = {
  "D": {externalGraphic: "icons/winddamage.png"},
  "E": {externalGraphic: "icons/flood.png"},
  "F": {externalGraphic: "icons/flood.png"},
+ "v": {externalGraphic: "icons/flood.png"},
  "G": {externalGraphic: "icons/wind.png"},
  "H": {externalGraphic: "icons/hail.png"},
  "I": {externalGraphic: "icons/hot.png"},
