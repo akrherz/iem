@@ -3,6 +3,7 @@
  * Print out a listing of COOP sites and observation frequency
  */
 include("../../config/settings.inc.php");
+define("IEM_APPID", 113);
 include("../../include/myview.php");
 $t = new MyView();
 
@@ -52,14 +53,17 @@ for($i=0;$row=@pg_fetch_assoc($data,$i);$i++){
 
 
 $t->content = <<<EOF
-<h3>NWS COOP Observation Counts by Month by WFO</h3>
+<ol class="breadcrumb">
+ <li><a href="/nws/">NWS User Resources</a></li>
+ <li class="active">NWS COOP Observation Counts by Month by WFO</li>
+</ol>
 
 <p>This application prints out a summary of COOP reports received by the IEM 
 on a per month and per WFO basis.  Errors do occur and perhaps the IEM's ingestor
 is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</a> of any errors you may suspect!
 
 <form method="GET" name="changeme">
-<table cellpadding="2" border="1" cellspacing="0">
+<table class="table table-condensed">
 <tr>
 <td><strong>Select WFO:</strong><select name="wfo">
 {$wselect}
@@ -73,7 +77,7 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 
 <h3>COOP Report for wfo: {$wfo}, month: {$month}, year: {$year}</h3>
 
-<table class="table table-striped table-condensed">
+<table class="table table-striped table-condensed table-bordered">
 <tr><th>NWSLI</th><th>Name</th><th>Possible</th>
 <th>Precip Obs</th><th>Temperature Obs</th><th>Snowfall Obs</th><th>Snowdepth Obs</th></tr>
 {$table}
