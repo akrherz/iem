@@ -2,12 +2,14 @@ import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
 import numpy as np
+from pandas.io.sql import read_sql
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     ts = datetime.date.today() - datetime.timedelta(days=365)
+    d['data'] = True
     d['description'] = """This chart displays a simple time series of
     observed air temperatures for a location of your choice.  For sites in the
     US, the daily high and low temperature climatology is presented as a
@@ -30,7 +32,6 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -53,15 +54,11 @@ def plotter(fdict):
     for row in ccursor:
         climo[row[0].strftime("%m%d")] = dict(high=row[1], low=row[2])
 
-    valid = []
-    tmpf = []
-    cursor.execute("""
+    df = read_sql("""
      SELECT valid, tmpf from alldata WHERE station = %s
      and valid > %s and valid < %s ORDER by valid ASC
-    """, (station, sdate, sdate + datetime.timedelta(days=days)))
-    for row in cursor:
-        valid.append(row[0])
-        tmpf.append(row[1])
+    """, ASOS, params=(station, sdate, sdate + datetime.timedelta(days=days)),
+                  index_col='valid')
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -89,12 +86,12 @@ def plotter(fdict):
 
     ax.bar(cdates, chighs - clows, bottom=clows, fc='lightblue',
            ec='lightblue', label="Daily Climatology")
-    ax.plot(valid, tmpf, color='r', label='Hourly Obs')
+    ax.plot(df.index.values, df['tmpf'], color='r', label='Hourly Obs')
     ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(sdate, edate)
-    ax.set_ylim(top=max(tmpf)+15.)
+    ax.set_ylim(top=df['tmpf'].max() + 15.)
     ax.legend(loc=2, ncol=2)
     ax.axhline(32, linestyle='-.')
     ax.grid(True)
@@ -103,4 +100,4 @@ def plotter(fdict):
                        sdate.strftime("%d %b %Y"),
                        edate.strftime("%d %b %Y")))
 
-    return fig
+    return fig, df

@@ -1,6 +1,7 @@
-import psycopg2.extras
+import psycopg2
 import datetime
 import numpy as np
+from pandas.io.sql import read_sql
 
 PDICT = {'high': 'High temperature',
          'low': 'Low Temperature'}
@@ -9,13 +10,17 @@ PDICT = {'high': 'High temperature',
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This map displays an analysis of the change in
     average high or low temperature over a time period of your choice."""
+    today = datetime.date.today()
+    threeweeks = today - datetime.timedelta(days=21)
     d['arguments'] = [
-        dict(type='date', name='date1', default='2014/09/01',
+        dict(type='date', name='date1',
+             default=threeweeks.strftime("%Y/%m/%d"),
              label='From Date (ignore year):',
              min="2014/01/01"),  # Comes back to python as yyyy-mm-dd
-        dict(type='date', name='date2', default='2014/09/22',
+        dict(type='date', name='date2', default=today.strftime("%Y/%m/%d"),
              label='To Date (ignore year):',
              min="2014/01/01"),  # Comes back to python as yyyy-mm-dd
         dict(type='select', name='varname', default='high',
@@ -32,7 +37,6 @@ def plotter(fdict):
     from pyiem.plot import MapPlot
     import matplotlib.cm as cm
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     date1 = datetime.datetime.strptime(fdict.get('date1', '2014-09-01'),
                                        '%Y-%m-%d')
@@ -43,7 +47,7 @@ def plotter(fdict):
 
     varname = fdict.get('varname', 'low')
 
-    cursor.execute("""
+    df = read_sql("""
     WITH t2 as (
          SELECT station, high, low from ncdc_climate81 WHERE
          valid = %s
@@ -59,17 +63,10 @@ def plotter(fdict):
     t2_high -  t1_high as high, t2_low - t1_low as low from data d JOIN
     stations s on (s.id = d.station) where s.network = 'NCDC81'
     and s.state not in ('HI', 'AK')
-    """, (date2, date1))
-    vals = []
-    lons = []
-    lats = []
-    for row in cursor:
-        lats.append(row['lat'])
-        lons.append(row['lon'])
-        vals.append(row[varname])
+    """, pgconn, params=(date2, date1), index_col='station')
 
     days = int((date2 - date1).days)
-    extent = int(max(abs(min(vals)), abs(max(vals))))
+    extent = int(df[varname].abs().max())
     m = MapPlot(sector='conus',
                 title=('%s Day Change in %s NCDC 81 Climatology'
                        ) % (days, PDICT[varname]),
@@ -77,7 +74,7 @@ def plotter(fdict):
                                             date2.strftime("%-d %B"))
                 )
     cmap = cm.get_cmap("RdBu_r")
-    m.contourf(lons, lats, vals, np.arange(0-extent, extent+1, 2), cmap=cmap,
-               units='F')
+    m.contourf(df['lon'].values, df['lat'].values, df[varname].values,
+               np.arange(0-extent, extent+1, 2), cmap=cmap, units='F')
 
-    return m.fig
+    return m.fig, df
