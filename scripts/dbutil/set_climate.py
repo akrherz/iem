@@ -10,7 +10,7 @@ mcursor2 = MESOSITE.cursor()
 
 def do(col):
     # Query out all sites with a null climate_site
-    mcursor.execute("""SELECT id, geom, state from stations
+    mcursor.execute("""SELECT id, geom, state, iemid, network from stations
         WHERE """+col+""" IS NULL and country = 'US' and state is not null
     """)
 
@@ -18,6 +18,8 @@ def do(col):
         thisID = row[0]
         thisGEOM = row[1]
         st = row[2]
+        iemid = row[3]
+        network = row[4]
         # Don't attempt to assign a climate_site to sites outside of mainland
         if (col == 'climate_site' and
                 st in ['PR', 'DC', 'GU', 'PU', 'P1', 'P2', 'P3', 'P4', 'P5',
@@ -37,9 +39,10 @@ def do(col):
             print 'Could not find %s site for: %s' % (col, thisID)
         else:
             sql = """UPDATE stations SET %s = '%s' WHERE
-                 id = '%s'""" % (col, row2[0], thisID)
+                 iemid = %s""" % (col, row2[0], iemid)
             mcursor2.execute(sql)
-            print 'Set %s: %s for ID: %s' % (col, row2[0], thisID)
+            print('Set %s: %s for ID: %s[%s]' % (
+                    col, row2[0], thisID, network))
 
 do("climate_site")
 do("ncdc81")
