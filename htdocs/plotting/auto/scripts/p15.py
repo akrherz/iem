@@ -1,7 +1,7 @@
-import psycopg2.extras
+import psycopg2
 import numpy as np
 import calendar
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'high': 'High temperature',
@@ -29,8 +29,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.patheffects as PathEffects
-    IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0200')
     varname = fdict.get('varname', 'low')
@@ -39,7 +38,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
 
-    cursor.execute("""
+    df = read_sql("""
     with obs as
     (select month, high, lag(high) OVER (ORDER by day ASC) as lhigh,
     low, lag(low) OVER (ORDER by day ASC) as llow from """ + table + """
@@ -53,18 +52,10 @@ def plotter(fdict):
     sum(case when low = llow then 1 else 0 end) as low_unch,
     sum(case when low < llow then 1 else 0 end) as low_lower
     from obs GROUP by month ORDER by month ASC
-    """, (station,))
-
-    rows = []
-    for row in cursor:
-        rows.append(dict(month=row['month'],
-                         increase=row["%s_greater" % (varname,)],
-                         nochange=row["%s_unch" % (varname,)],
-                         decrease=row["%s_lower" % (varname,)]))
-    df = pd.DataFrame(rows)
-    increase = np.array(df['increase'], 'f')
-    nochange = np.array(df['nochange'], 'f')
-    decrease = np.array(df['decrease'], 'f')
+    """, pgconn, params=(station,), index_col='month')
+    increase = df[varname+'_greater'].values.astype('f')
+    nochange = df[varname+'_unch'].values.astype('f')
+    decrease = df[varname+'_lower'].values.astype('f')
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -106,3 +97,6 @@ def plotter(fdict):
                   ) % (nt.sts[station]['name'], station, varname.title()))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

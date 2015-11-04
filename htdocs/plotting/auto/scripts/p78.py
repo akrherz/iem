@@ -51,9 +51,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    import matplotlib.patheffects as PathEffects
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
