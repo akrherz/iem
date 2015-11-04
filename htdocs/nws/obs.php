@@ -1,9 +1,16 @@
 <?php
  include("../../config/settings.inc.php");
- include("../../include/myview.php");
- $t = new MyView();
- 
  define("IEM_APPID", 40);
+ include("../../include/myview.php");
+ include("../../include/mlib.php"); 
+ include("../../include/network.php");
+ include("../../include/forms.php");
+ include("../../include/station.php");
+ include("../../include/iemaccess.php");
+ include("../../include/iemaccessob.php");
+  
+  $t = new MyView();
+ 
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "peak";
  $metar = isset($_GET["metar"]) ? $_GET['metar'] : "no";
  $sorder = isset($_GET["sorder"]) ? $_GET["sorder"] : "desc";
@@ -13,14 +20,8 @@
  $t->title = "Obs by NWS Forecast Office";
 
   $t->thispage = "current-sort";
-  include("../../include/mlib.php"); 
-  include("../../include/network.php");
   $nt = new NetworkTable("WFO");
-  include("../../include/forms.php");
-  include("../../include/station.php");
-  include("../../include/iemaccess.php");
-  include("../../include/iemaccessob.php");
-
+ 
 $iem = new IEMAccess();
 $asos = $iem->getWFO($wfo);
 
@@ -186,7 +187,7 @@ $t->content = <<<EOF
 <p>
 <form method="GET" action="obs.php" name="work">
 <input type="hidden" value="{$sortcol}" name="sortcol">
-<table border=1 cellspacing=0 cellpadding=1>
+<table class="table table-condensed">
 <tr>
  <th>Select WFO: {$wselect}</td>
   <th>View Options:</th>

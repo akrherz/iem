@@ -1,13 +1,14 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 108);
  include("../../include/myview.php");
  include("../../include/forms.php");
  include("../../include/mlib.php");
-  include("../../include/network.php");
-  $nt = new NetworkTable("WFO");
- $t = new MyView();
- define("IEM_APPID", 108);
- $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
+ include("../../include/network.php");
+
+$nt = new NetworkTable("WFO");
+$t = new MyView();
+$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]): 2012;
 $sid = isset($_REQUEST["sid"]) ? intval($_REQUEST["sid"]): 1;
 $eid = isset($_REQUEST["eid"]) ? intval($_REQUEST["eid"]): 999;
@@ -49,8 +50,8 @@ $yselect = yearSelect(2005, $year);
 
 $postgis = iemdb("postgis");
 $asos = iemdb("asos");
-pg_query($postgis, "SET TIME ZONE 'GMT'");
-pg_query($asos, "SET TIME ZONE 'GMT'");
+pg_query($postgis, "SET TIME ZONE 'UTC'");
+pg_query($asos, "SET TIME ZONE 'UTC'");
 
 $rs = pg_prepare($postgis, "FIND", "SELECT array_to_string(array_accum(ugc),',')
 		as a, eventid, issue, expire from
@@ -167,7 +168,7 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
   					WHERE valid BETWEEN '$issue' and '$expire' and 
   					station in $stations
   					ORDER by station, valid ASC");
-  	$table .= "<table cellpadding='3' cellspacing='0' border='1'>";
+  	$table .= "<table class=\"table table-condensed\">";
   	$ostation = "";
   	$stfound = 0;
   	for($j=0;$row2=@pg_fetch_assoc($rs2,$j);$j++){
@@ -195,12 +196,15 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
 
 $t->content = <<<EOF
-  <h2>NWS Watch/Warning/Advisory + ASOS Observations</h2>
+<ol class="breadcrumb">
+ <li><a href="/nws/">NWS User Resources</a></li>
+ <li class="current">NWS Watch/Warning/Advisory + ASOS Observations</li>
+</ol>
   
   <p>This app allows you to view an office's warnings for a year and
   then looks for ASOS/AWOS observations valid for the warning period. The observations
   presented are coded like:
-  <br />ID DDHHMI TMPF/DWPF RELH VSBY SKNT/GUST WC WINDCHILL
+  <br /><code>ID DDHHMI TMPF/DWPF RELH VSBY SKNT/GUST WC WINDCHILL</code>
   <br />Where ID is the station identifier, DDHHMI is the day-hour-minute of the
   observation in UTC, TMPF is the air temperature in Fahrenheit, DWPF is the
   dew point temperature in Fahrenheit, RELH is the relative humidity, VSBY is
@@ -213,7 +217,7 @@ $t->content = <<<EOF
   <form method="GET" name="theform">
   
   <p>
-  <table cellpadding='3' cellspacing='0' border='1'>
+  <table class="table table-condensed">
   <tr>
     <th>WWA Type:</th>
     <th>Start Event ID:</th>
@@ -230,7 +234,7 @@ $t->content = <<<EOF
     </tr>
     </table>
   
-  <table cellpadding='3' cellspacing='0' border='1'>
+  <table class="table table-condensed">
   <tr>	
   	<th>Relative Humidity Threshold (%):</th>
   	<th>Wind Speed Threshold (kts):</th>
