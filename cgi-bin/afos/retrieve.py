@@ -6,19 +6,25 @@ import sys
 
 
 def main():
-    ''' Go main Go '''
-    sys.stdout.write("Content-type: text/plain; charset=""\n\n")
-    form = cgi.FormContent()
-    if "pil" in form:
-        pil0 = form["pil"][0].upper()
-    else:
+    """Process the request"""
+    # Attempt to keep the file from downloading and just displaying in chrome
+    sys.stdout.write("X-Content-Type-Options: nosniff\n")
+    sys.stdout.write("Content-type: text/plain\n\n")
+    form = cgi.FieldStorage()
+    pil0 = form.getfirst('pil', '')[:6]
+    limit = int(form.getfirst('limit', 1))
+    center = form.getfirst('center', '')[:4]
+    sdate = form.getfirst('sdate', '')[:10]
+    edate = form.getfirst('edate', '')[:10]
+    fmt = form.getfirst('fmt', 'text')
+    if pil0 == '':
         sys.stdout.write("ERROR: No pil specified...")
         return
-
-    if "limit" in form:
-        LIMIT = str(form["limit"][0])
-    else:
-        LIMIT = "1"
+    centerlimit = '' if center == '' else (" and source = '%s' " % (center, ))
+    timelimit = ''
+    if sdate != '' and edate != '':
+        timelimit = (" and entered >= '%s' and entered < '%s' "
+                     ) % (sdate, edate)
 
     pils = pil0.split(",")
     myPils = []
@@ -45,7 +51,7 @@ def main():
             SELECT raw from current_log c JOIN stations t
             on (t.iemid = c.iemid)
             WHERE raw != '' and id = '%s' ORDER by valid DESC LIMIT %s
-            """ % (myPils[0][3:].strip(), LIMIT)
+            """ % (myPils[0][3:].strip(), limit)
         cursor.execute(sql)
         for row in cursor:
             sys.stdout.write("\001\n")
@@ -67,21 +73,30 @@ def main():
     # Do optimized query first, see if we can get our limit right away
     sql = """
         SELECT data from products WHERE pil IN """ + pilAR + """
-        and entered > now() - '2 days'::interval
-        ORDER by entered DESC LIMIT """+LIMIT
+        and entered > now() - '2 days'::interval %s %s
+        ORDER by entered DESC LIMIT %s""" % (centerlimit, timelimit, limit)
 
     cursor.execute(sql)
-    if cursor.rowcount != int(LIMIT):
+    if cursor.rowcount != limit:
         sql = """
-            SELECT data from products WHERE pil IN """ + pilAR + """
-            ORDER by entered DESC LIMIT """+LIMIT
+            SELECT data from products WHERE pil IN """ + pilAR + """ %s %s
+            ORDER by entered DESC LIMIT %s """ % (centerlimit, timelimit,
+                                                  limit)
         cursor.execute(sql)
 
     for row in cursor:
-        print "\001"
-        print (row[0]).replace("\003",
-                               "").replace("\001", "").replace("\r\r\n", "\n")
-        print "\n\003"
+        if fmt == 'html':
+            sys.stdout.write("<pre>\n")
+        else:
+            sys.stdout.write("\001\n")
+        # Remove control characters from the product as we are including
+        # them manually here...
+        sys.stdout.write((row[0]).replace(
+            "\003", "").replace("\001\r\r\n", "").replace("\r\r\n", "\n"))
+        if fmt == 'html':
+            sys.stdout.write("</pre>\n")
+        else:
+            sys.stdout.write("\n\003\n")
 
     if cursor.rowcount == 0:
         print "Could not Find: "+pil

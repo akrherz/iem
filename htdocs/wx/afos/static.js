@@ -1,4 +1,5 @@
 Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
+Ext.Ajax.setTimeout(500000);
 var tabs;
 
 // http://druckit.wordpress.com/2014/02/15/ext-js-4-printing-the-contents-of-an-ext-panel/
@@ -108,9 +109,6 @@ var cp = new Ext.state.CookieProvider({
 Ext.state.Manager.setProvider(cp);
 
 
-
-
-
 var refreshAction = new Ext.Action({
 	text: 'Refresh',
 	handler: function() {
@@ -118,10 +116,10 @@ var refreshAction = new Ext.Action({
 		var tokens= id.split("-");
 		var uri;
 		if (tokens.length == 2){
-			uri = 'retreive.php?pil='+ tokens[0] +'&cnt='+ tokens[1];
+			uri = '/cgi-bin/afos/retrieve.py?fmt=html&pil='+ tokens[0] +'&limit='+ tokens[1];
 		}
 		if (tokens.length == 3){
-			uri = 'retreive.php?pil='+ tokens[0] +'&cnt='+ tokens[1] +'&center='+ tokens[2];
+			uri = '/cgi-bin/afos/retrieve.py?fmt=html&pil='+ tokens[0] +'&limit='+ tokens[1] +'&center='+ tokens[2];
 		}
 		tabs.getActiveTab().getLoader().load({
 			url       : uri, 
@@ -152,8 +150,8 @@ var addTab = function(id, center, cnt, sdate, edate) {
     tid = tid.toUpperCase();
     var a = Ext.getCmp(tid);
     if (a !== undefined){ tabs.setActiveTab(tid); return; }
-    var uri = 'retreive.php?pil='+id+'&cnt='+cnt+'&sdate='+Ext.Date.format(sdate, 'Y-m-d')
-    		+'&edate='+ Ext.Date.format(edate, 'Y-m-d');
+    var uri = '/cgi-bin/afos/retrieve.py?pil='+id+'&limit='+cnt+'&sdate='+Ext.Date.format(sdate, 'Y-m-d')
+    		+'&edate='+ Ext.Date.format(edate, 'Y-m-d') +'&fmt=html';
     var title = id;
     if (center != null){
     	uri = uri +"&center="+center;
