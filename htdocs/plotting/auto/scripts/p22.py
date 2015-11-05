@@ -1,7 +1,7 @@
-import psycopg2.extras
+import psycopg2
 import calendar
 import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'high': 'High temperature',
@@ -48,7 +48,6 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
 
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     minv = int(fdict.get('min', -5))
     maxv = int(fdict.get('max', 5))
@@ -60,38 +59,30 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
-    cursor.execute("""
+    df = read_sql("""
     WITH climate as (
         SELECT to_char(valid, 'mmdd') as sday, high, low from
         ncdc_climate81 where station = %s
     )
     SELECT extract(doy from day) as doy, count(*),
     SUM(case when a.high >= (c.high + %s) and a.high < (c.high + %s)
-            then 1 else 0 end),
+            then 1 else 0 end) as high_count,
     SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
-            then 1 else 0 end)
+            then 1 else 0 end) as low_count
     FROM """+table+""" a JOIN climate c
     on (a.sday = c.sday)
     WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
-    """, (nt.sts[station]['ncdc81'], minv, maxv, minv, maxv, station))
-    doys = []
-    hvals = []
-    lvals = []
-    rows = []
-    for row in cursor:
-        doys.append(row[0])
-        hvals.append(row[2]/float(row[1])*100.)
-        lvals.append(row[3]/float(row[1])*100.)
-        rows.append(dict(doy=row[0],
-                         high=row[2]/float(row[1])*100.,
-                         low=row[3]/float(row[1])*100.))
-    df = pd.DataFrame(rows)
-    hvals = smooth(np.array(hvals), 7, 'flat')
-    lvals = smooth(np.array(lvals), 7, 'flat')
+    """, pgconn, params=(nt.sts[station]['ncdc81'], minv, maxv, minv, maxv,
+                         station), index_col='doy')
+
+    df['high_freq'] = df['high_count'] / df['count'] * 100.
+    df['low_freq'] = df['low_count'] / df['count'] * 100.
+    hvals = smooth(df['high_freq'].values, 7, 'flat')
+    lvals = smooth(df['low_freq'].values, 7, 'flat')
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.plot(doys, hvals[3:-3], color='r', label='High', zorder=1)
-    ax.plot(doys, lvals[3:-3], color='b', label='Low', zorder=1)
+    ax.plot(df.index.values, hvals[3:-3], color='r', label='High', zorder=1)
+    ax.plot(df.index.values, lvals[3:-3], color='b', label='Low', zorder=1)
     ax.axhline(50, lw=2, color='green', zorder=2)
     ax.set_ylabel("Percentage of Years [%]")
     ax.set_title(("%s [%s]\nFreq of Temp between "

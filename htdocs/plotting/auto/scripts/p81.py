@@ -1,6 +1,6 @@
-import psycopg2.extras
+import psycopg2
 from pyiem import network
-import pandas as pd
+from pandas.io.sql import read_sql
 import calendar
 
 PDICT = {'high': 'High Temperature',
@@ -31,8 +31,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
     varname = fdict.get('var', 'high')
@@ -42,7 +41,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    ccursor.execute("""
+    df = read_sql("""
     with data as (
         select extract(doy from day) as doy,
         day, """+varname+""" as v from """+table+""" WHERE
@@ -54,19 +53,15 @@ def plotter(fdict):
     deltaagg as (
         SELECT doy, stddev(d) from deltas GROUP by doy)
 
-    SELECT d.doy, d.stddev, y.stddev from deltaagg d JOIN doyagg y ON
+    SELECT d.doy, d.stddev as d2d_stddev,
+    y.stddev as doy_stddev from deltaagg d JOIN doyagg y ON
     (y.doy = d.doy) WHERE d.doy < 366 ORDER by d.doy ASC
-    """, (station, ))
-    rows = []
-    for row in ccursor:
-        rows.append(dict(doy=row[0], d2d_stddev=row[1],
-                         doy_stddev=row[2]))
-    df = pd.DataFrame(rows)
+    """, pgconn, params=(station, ), index_col='doy')
 
     fig, ax = plt.subplots(2, 1, sharex=True)
-    ax[0].plot(df['doy'], df['doy_stddev'], lw=2, color='r',
+    ax[0].plot(df.index.values, df['doy_stddev'], lw=2, color='r',
                label='Single Day')
-    ax[0].plot(df['doy'], df['d2d_stddev'], lw=2, color='b',
+    ax[0].plot(df.index.values, df['d2d_stddev'], lw=2, color='b',
                label='Day to Day')
     ax[0].legend(loc='best', fontsize=10, ncol=2)
 
@@ -79,7 +74,7 @@ def plotter(fdict):
     sz = len(tokens) / 2
     ax[0].set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
-    ax[1].plot(df['doy'], df['doy_stddev'] / df['d2d_stddev'], lw=2,
+    ax[1].plot(df.index.values, df['doy_stddev'] / df['d2d_stddev'], lw=2,
                color='g')
     ax[1].set_ylabel("Ratio SingleDay/Day2Day")
     ax[1].grid(True)
