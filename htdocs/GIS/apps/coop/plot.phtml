@@ -188,6 +188,13 @@ $sizeselect = make_select("size", $size, $ar);
 
 $showlabels = ($showlabels) ? " CHECKED=\"CHECKED\" ": "";
 
+$minusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;month=%s&amp;day=%s&amp;size=%s",
+		$source, $var, date("Y", $ts - 86400), date("m", $ts - 86400),
+		date("d", $ts - 86400), $size);
+$plusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;month=%s&amp;day=%s&amp;size=%s",
+		$source, $var, date("Y", $ts + 86400), date("m", $ts + 86400),
+		date("d", $ts + 86400), $size);
+
 $t->content = <<<EOF
 <p>With this application, you can plot COOP observations for a date of your
 choice.
@@ -210,7 +217,10 @@ choice.
   <td>{$mselect}</td>
   <td>{$dselect}</td>
   <td>{$sizeselect}</td>
-  <td><input type="submit" value="Make Plot"></td>
+  <td><input type="submit" value="Make Plot">
+  <a href="{$minusone}" class="btn btn-default"><i class="glyphicon glyphicon-minus"></i> 1 Day</a>
+  <a href="{$plusone}" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> 1 Day</a>
+  </td>
   </tr>
 </table>
 <input type="checkbox" name="labels"{$showlabels}>Show point labels
