@@ -39,7 +39,6 @@ def sites_changelog(regime, yesterday, html):
     opt = {'max-results': 999}
     feed = s.get_activity_feed(**opt)
     tablerows = []
-    print len(feed.entry)
     for entry in feed.entry:
         ts = datetime.datetime.strptime(entry.updated.text,
                                         '%Y-%m-%dT%H:%M:%S.%fZ')
