@@ -20,7 +20,8 @@ lf = spreadsheet.worksheets['Research Site Metadata'].get_list_feed()
 for entry in lf.entry:
     data = entry.to_dict()
     siteid = data['uniqueid'].strip()
-    name = '%s - %s' % (siteid, data['leadpi'])
+    name = ('%s [%s]' % (data['farmfieldname'][:(61-len(data['leadpi']))],
+                         data['leadpi'])).replace("\n", " ")
     if data['latitudedd.d'] == 'TBD':
         print 'Skipping %s due to TBD location' % (name,)
         continue
@@ -35,8 +36,12 @@ for entry in lf.entry:
                                                     data['longitudeddd.d'],
                                                     data['latitudedd.d'])))
     else:
+        cursor.execute("""UPDATE stations SET name = %s
+        WHERE id = %s and network = 'TD' RETURNING climate_site
+        """, (name, siteid))
         climatesite = cursor.fetchone()[0]
-        if climatesite is not None and climatesite != '':
+        if (climatesite is not None and climatesite != '' and
+                climatesite != data['iemclimatesite']):
             entry.set_value('iemclimatesite', climatesite)
             print 'Setting climate site: %s for site: %s' % (climatesite,
                                                              siteid)
