@@ -35,8 +35,11 @@ def sites_changelog(regime, yesterday, html):
 
     site = 'sustainablecorn' if regime == 'cscap' else 'transformingdrainage'
     s = util.get_sites_client(config, site)
-    feed = s.get_activity_feed()
+    # Fetch more results for sites activity feed
+    opt = {'max-results': 999}
+    feed = s.get_activity_feed(**opt)
     tablerows = []
+    print len(feed.entry)
     for entry in feed.entry:
         ts = datetime.datetime.strptime(entry.updated.text,
                                         '%Y-%m-%dT%H:%M:%S.%fZ')
