@@ -4,12 +4,14 @@ from pyiem import network
 import datetime
 from scipy import stats
 import pandas as pd
+from collections import OrderedDict
 
-PDICT2 = {'winter': 'Winter (Dec, Jan, Feb)',
-          'spring': 'Spring (Mar, Apr, May)',
-          'summer': 'Summer (Jun, Jul, Aug)',
-          'fall': 'Fall (Sep, Oct, Nov)',
-          'all': 'Entire Year'}
+PDICT2 = OrderedDict([
+        ('winter', 'Winter (Dec, Jan, Feb)'),
+        ('spring', 'Spring (Mar, Apr, May)'),
+        ('summer', 'Summer (Jun, Jul, Aug)'),
+        ('fall', 'Fall (Sep, Oct, Nov)'),
+        ('all', 'Entire Year')])
 
 
 def get_description():

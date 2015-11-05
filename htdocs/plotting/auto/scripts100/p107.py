@@ -3,9 +3,13 @@ from pyiem import network
 import numpy as np
 from pandas.io.sql import read_sql
 import datetime
+from collections import OrderedDict
 
-PDICT = {'avg_temp': 'Average Temperature',
-         'precip': 'Total Precipitation'}
+PDICT = OrderedDict([
+        ('avg_high_temp', 'Average High Temperature'),
+        ('avg_low_temp', 'Average Low Temperature'),
+        ('avg_temp', 'Average Temperature'),
+        ('precip', 'Total Precipitation')])
 
 
 def get_description():
@@ -53,7 +57,7 @@ def plotter(fdict):
     days = int(fdict.get('days', 14))
     sts = datetime.date(2012, int(fdict.get('month', 10)),
                         int(fdict.get('day', 1)))
-    ets = sts + datetime.timedelta(days=days)
+    ets = sts + datetime.timedelta(days=(days - 1))
     varname = fdict.get('varname', 'avg_temp')
     year = int(fdict.get('year', datetime.date.today().year))
     table = "alldata_%s" % (station[:2],)
@@ -66,7 +70,8 @@ def plotter(fdict):
     doff = (days + 1) if ets.year != sts.year else 0
     df = read_sql("""
     SELECT extract(year from day - '"""+str(doff)+""" days'::interval) as yr,
-    avg((high+low)/2.) as avg_temp,
+    avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
+    avg(low) as avg_low_temp,
     sum(precip) as precip
     from """ + table + """
     WHERE station = %s and sday in %s
@@ -83,18 +88,22 @@ def plotter(fdict):
             bar.set_edgecolor('g')
             thisvalue = y
     ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
-    ax[0].axhline(np.average(df[varname]), lw=2,
-                  label='Avg: %.2f' % (np.average(df[varname]), ))
+    ax[0].axhline(df[varname].mean(), lw=2,
+                  label='Avg: %.2f' % (df[varname].mean(), ))
     ylabel = "Temperature $^\circ$F"
     if varname in ['precip', ]:
         ylabel = "Precipitation [inch]"
     ax[0].set_ylabel(ylabel)
-    ax[0].set_title(("[%s] %s\n%s between %s and %s"
+    ax[0].set_title(("[%s] %s\n%s from %s through %s"
                      ) % (station, nt.sts[station]['name'], PDICT.get(varname),
                           sts.strftime("%d %b"), ets.strftime("%d %b")))
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
+    ax[0].set_ylim(0, df[varname].max() * 1.2)
+    box = ax[0].get_position()
+    ax[0].set_position([box.x0, box.y0 + 0.02,
+                        box.width, box.height * 0.98])
 
     # Plot 2: CDF
     X2 = np.sort(df[varname])
