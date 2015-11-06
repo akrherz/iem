@@ -11,7 +11,7 @@ def main():
     sys.stdout.write("X-Content-Type-Options: nosniff\n")
     sys.stdout.write("Content-type: text/plain\n\n")
     form = cgi.FieldStorage()
-    pil0 = form.getfirst('pil', '')[:6].upper()
+    pil0 = form.getfirst('pil', '').upper()
     limit = int(form.getfirst('limit', 1))
     center = form.getfirst('center', '')[:4]
     sdate = form.getfirst('sdate', '')[:10]
