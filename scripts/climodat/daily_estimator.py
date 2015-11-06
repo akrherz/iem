@@ -216,7 +216,7 @@ def main():
         commit(ts)
 
 if __name__ == '__main__':
-    ''' See how we are called '''
+    # See how we are called
     main()
     ccursor.close()
     COOP.commit()
