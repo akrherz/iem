@@ -85,6 +85,7 @@ EOF;
 	}
 }
 
+$nassmsg = "";
 if (isset($_GET["q"])){
 	$q = intval($_GET["q"]);
 	$data = file_get_contents("http://iem.local/plotting/auto/meta/$q.json");
@@ -92,6 +93,14 @@ if (isset($_GET["q"])){
 	// Default format to text in a certain case
 	if (isset($jobj->report) && ! isset($_GET["_fmt"])){
 		$fmt = "text";
+	}
+	if (isset($jobj->nass) && $jobj->nass){
+		$nassmsg = <<<EOF
+<div class="alert alert-warning">This data presentation utilizes the
+	<a href="http://quickstats.nass.usda.gov/">USDA NASS Quickstats</a>.
+	This presentation is not endorsed nor certified by USDA.
+</div>
+EOF;
 	}
 	$description = isset($jobj->description) ? $jobj->description: null;
 	$imguri = "/plotting/auto/plot/$q/";
@@ -387,6 +396,8 @@ feel free to use these generated graphics in whatever way you wish.</p>
 <hr />
 
 $dhtml
+
+$nassmsg
 
 $image
 
