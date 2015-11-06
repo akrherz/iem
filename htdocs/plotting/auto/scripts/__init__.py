@@ -205,6 +205,10 @@ data = {'plots': [
          'label': "MOS Forecasted Temperature Ranges + Observations"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
+    {'label': 'NASS Quickstats (USDA Crop Statistics)', 'options': [
+        {'id': "127",
+         'label': ("Crop Progress by Year")},
+    ]},
     {'label': 'NWS Warning Plots', 'options': [
         {'id': "92",
          'label': "Days since Last Watch/Warning/Advisory by WFO"},
