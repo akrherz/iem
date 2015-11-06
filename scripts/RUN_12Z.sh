@@ -44,5 +44,12 @@ python rwis2archive.py $(date -u +'%Y %m %d')
 python ot2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
 python ot2archive.py $(date -u +'%Y %m %d')
 
+cd ../ingestors
+DOY=$(date +%u)
+if [ "$DOY" -eq "2" ]
+	then
+		python nass_quickstats.py	
+fi
+
 cd ../util
 csh BACKUP.csh
