@@ -37,8 +37,6 @@ def pil_logic(s):
 def main():
     """Process the request"""
     # Attempt to keep the file from downloading and just displaying in chrome
-    sys.stdout.write("X-Content-Type-Options: nosniff\n")
-    sys.stdout.write("Content-type: text/plain\n\n")
     form = cgi.FieldStorage()
     pils = pil_logic(form.getfirst('pil', ''))
     limit = int(form.getfirst('limit', 1))
@@ -46,6 +44,11 @@ def main():
     sdate = form.getfirst('sdate', '')[:10]
     edate = form.getfirst('edate', '')[:10]
     fmt = form.getfirst('fmt', 'text')
+    sys.stdout.write("X-Content-Type-Options: nosniff\n")
+    if fmt == 'text':
+        sys.stdout.write("Content-type: text/plain\n\n")
+    elif fmt == 'html':
+        sys.stdout.write("Content-type: text/html\n\n")
     if len(pils) == 0:
         sys.stdout.write("ERROR: No pil specified...")
         return
@@ -65,9 +68,15 @@ def main():
             """ % (pils[0][3:].strip(), limit)
         cursor.execute(sql)
         for row in cursor:
-            sys.stdout.write("\001\n")
+            if fmt == 'html':
+                sys.stdout.write("<pre>\n")
+            else:
+                sys.stdout.write("\001\n")
             sys.stdout.write(row[0].replace("\r\r\n", "\n"))
-            sys.stdout.write("\n\003")
+            if fmt == 'html':
+                sys.stdout.write("</pre>\n")
+            else:
+                sys.stdout.write("\003\n")
         if cursor.rowcount == 0:
             sys.stdout.write("ERROR: METAR lookup for %s failed" % (
                                                 pils[0][3:].strip(), ))
@@ -89,7 +98,7 @@ def main():
     # Do optimized query first, see if we can get our limit right away
     sql = """
         SELECT data from products WHERE %s
-        and entered > now() - '2 days'::interval %s %s
+        and entered > now() - '31 days'::interval %s %s
         ORDER by entered DESC LIMIT %s""" % (pillimit, centerlimit,
                                              timelimit, limit)
 
