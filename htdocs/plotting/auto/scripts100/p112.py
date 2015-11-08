@@ -31,9 +31,9 @@ def modMonth(stationID, db, monthly, mo1, mo2, mt1, mt2, nt):
         now = datetime.date(year, 1, 1)
         m1 = now.replace(month=mo1)
         m2 = now.replace(month=mo2)
-        if m1 >= e:
+        if m1 >= e or m1 not in db:
             db[m1] = {40: 'M', 48: 'M', 50: 'M', 52: 'M'}
-        if m2 >= e:
+        if m2 >= e or m2 not in db:
             db[m2] = {40: 'M', 48: 'M', 50: 'M', 52: 'M'}
         res += ("%5i%7s%7s%7s%7s%7s%7s%7s%7s\n"
                 ) % (now.year, db[m1][40], db[m1][48], db[m1][50],
@@ -87,7 +87,8 @@ def plotter(fdict):
     sum(gddxx(48,86,high,low)) as gdd48,
     sum(gddxx(50,86,high,low)) as gdd50,
     sum(gddxx(52,86,high,low)) as gdd52
-     from """+table+""" WHERE station = %s GROUP by year, month
+    from """+table+""" WHERE station = %s
+    GROUP by year, month
     """, pgconn, params=(station,), index_col=None)
 
     res = """\
@@ -100,7 +101,7 @@ def plotter(fdict):
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
        nt.sts[station]['name'])
     res += ("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID %s\n"
-               ) % (station, )
+            ) % (station, )
 
     monthly = [0]*13
     for i in range(13):
