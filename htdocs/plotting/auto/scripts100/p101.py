@@ -13,7 +13,9 @@ def get_description():
     d['cache'] = 3600
     d['description'] = """This chart displays the relative frequency of
     VTEC products.  This is computed by taking the unique combination of
-    events and UGC county/zones.  The values plotted are relative to the
+    events and UGC county/zones.  Restating and for example, a single
+    Severe Thunderstorm Warning covering portions of two counties would
+    count as two events in this summary. The values plotted are relative to the
     most frequent product."""
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
