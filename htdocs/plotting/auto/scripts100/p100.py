@@ -1,26 +1,27 @@
-import psycopg2.extras
+import psycopg2
 import numpy as np
 from pyiem import network
-import pandas as pd
+from pandas.io.sql import read_sql
+from collections import OrderedDict
 
-
-PDICT = {'max-high': 'Maximum High',
-         'avg-high': 'Average High',
-         'min-high': 'Minimum High',
-         'max-low': 'Maximum Low',
-         'avg-low': 'Average Low',
-         'min-low': 'Minimum Low',
-         'max-precip': 'Maximum Daily Precip',
-         'sum-precip': 'Total Precipitation',
-         'avg-precip': 'Daily Average Precipitation',
-         'avg-precip2': 'Daily Average Precipitation (on wet days)',
-         'days-precip': 'Days with Precipitation Above (threshold)',
-         'days-high-above':
-         'Days with High Temp Greater Than or Equal To (threshold)',
-         'days-lows-above':
-         'Days with Low Temp Greater Than or Equal To (threshold)',
-         'days-lows-below': 'Days with Low Temp Below (threshold)',
-         }
+PDICT = OrderedDict([
+    ('max-high', 'Maximum High'),
+    ('avg-high', 'Average High'),
+    ('min-high', 'Minimum High'),
+    ('max-low', 'Maximum Low'),
+    ('avg-low', 'Average Low'),
+    ('min-low', 'Minimum Low'),
+    ('max-precip', 'Maximum Daily Precip'),
+    ('sum-precip', 'Total Precipitation'),
+    ('avg-precip', 'Daily Average Precipitation'),
+    ('avg-precip2', 'Daily Average Precipitation (on wet days)'),
+    ('days-precip', 'Days with Precipitation Above (threshold)'),
+    ('days-high-above',
+     'Days with High Temp Greater Than or Equal To (threshold)'),
+    ('days-lows-above',
+     'Days with Low Temp Greater Than or Equal To (threshold)'),
+    ('days-lows-below', 'Days with Low Temp Below (threshold)')
+    ])
 
 
 def get_description():
@@ -28,7 +29,7 @@ def get_description():
     d = dict()
     d['description'] = """This plot displays a metric for each year.
     In most cases, you can access the raw data for these plots
-    <a href="/climodat/" class="link link-info">here.</a>"""
+    <a href="/climodat/" class="alert-link">here.</a>"""
     d['data'] = True
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
@@ -46,8 +47,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
     ptype = fdict.get('type', 'max_high')
@@ -56,7 +56,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    ccursor.execute("""
+    df = read_sql("""
     SELECT year,
     max(high) as "max-high",
     min(high) as "min-high",
@@ -75,26 +75,20 @@ def plotter(fdict):
   from """+table+"""
   where station = %s
   GROUP by year ORDER by year ASC
-    """, (threshold, threshold, threshold, threshold, station))
-
-    years = []
-    data = []
-    for row in ccursor:
-        years.append(row['year'])
-        data.append(float(row[ptype]))
-    df = pd.DataFrame(dict(year=pd.Series(years),
-                           data=pd.Series(data)))
-    data = np.array(data)
+    """, pgconn, params=(threshold, threshold, threshold, threshold, station),
+                  index_col='year')
 
     (fig, ax) = plt.subplots(1, 1)
-    avgv = np.average(data)
+    avgv = df[ptype].mean()
+    data = df[ptype].values
+    years = df.index.values
 
     # Compute 30 year trailing average
     tavg = [None]*30
     for i in range(30, len(data)):
         tavg.append(np.average(data[i-30:i]))
 
-    a1981_2010 = np.average(data[years.index(1981):years.index(2011)])
+    a1981_2010 = df.loc[1981:2011, ptype].mean()
 
     colorabove = 'tomato'
     colorbelow = 'dodgerblue'
