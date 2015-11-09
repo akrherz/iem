@@ -5,12 +5,9 @@ include("../../../../config/settings.inc.php");
  //   Give the user the climate data in the format they want...
  // -----------------------------------------------------------------
 
-// Load MapScript
 
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
+include_once "../../../../include/database.inc.php";
+include_once "../../../../include/network.php";
 $month = isset($_GET["month"]) ? $_GET["month"] : die();
 $day = isset($_GET["day"]) ? $_GET["day"] : die();
 
@@ -58,9 +55,11 @@ $filePre = strftime('%m%d', $ts) ."_coop";
 
 
 $pgcon = iemdb("coop");
-$rs = pg_exec($pgcon, "select c.*, 
+$rs = pg_exec($pgcon, "select c.*, ST_X(s.geom) as lon, ST_Y(s.geom) as lat,
+		s.name,
    to_char(c.valid, 'YYYYMMDD') as cvalid from 
-   climate c WHERE c.valid = '". $sqlDate ."' ");
+   climate c JOIN stations s ON (c.station = s.id)
+   WHERE c.valid = '". $sqlDate ."' and s.network ~* 'CLIMATE'");
 
 pg_close($pgcon);
 
@@ -92,9 +91,9 @@ $dbfFile = dbase_create( $shpFname.".dbf", array(
 
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
-  addPoint($row, $cities[strtoupper($row["station"])]["lon"], 
-                 $cities[strtoupper($row["station"])]["lat"],
-                 $cities[strtoupper($row["station"])]["name"]);
+  addPoint($row, $row["lon"], 
+                 $row["lat"],
+                 $row["name"]);
 } // End of for
 
 $shpFile->free();
