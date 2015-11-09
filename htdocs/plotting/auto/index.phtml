@@ -179,9 +179,19 @@ EOF;
 						"WICLIMATE" => "Wisconsin"
 				);
 			}
-			$netselect = make_select("network", $network, $networks, "onNetworkChange");
-			$thisrow = $netselect ." ". networkSelect($network, $value);
-			$pltvars[] = sprintf("%s:%s", "network", $network);
+			// Assume if we have station, then we don't have multiple stations
+			if ($v->name == "station1"){
+				$networkcgi = "network1";
+			}else if ($v->name == "station2"){
+				$networkcgi = "network2";
+			}else {
+				$networkcgi = "network";
+			}
+			$defaultnetwork = isset($v->network) ? $v->network : "IACLIMATE";
+			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
+			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
+			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
+			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
 		}
 		elseif ($v->type == "networkselect"){
 			$extra = Array();
