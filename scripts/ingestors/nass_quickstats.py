@@ -6,7 +6,7 @@ import pandas as pd
 import psycopg2
 import sys
 
-PGCONN = psycopg2.connect(database='coop')
+PGCONN = psycopg2.connect(database='coop', host='iemdb')
 
 
 def get_file():
