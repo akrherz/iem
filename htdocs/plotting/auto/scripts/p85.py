@@ -1,8 +1,7 @@
-import psycopg2.extras
+import psycopg2
 from pyiem.network import Table as NetworkTable
 import calendar
-import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
 
 PDICT = {'above': 'At or Above Temperature',
          'below': 'Below Temperature'}
@@ -33,8 +32,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
@@ -47,26 +45,25 @@ def plotter(fdict):
     nt = NetworkTable(network)
     tzname = nt.sts[station]['tzname']
 
-    cursor.execute("""
+    df = read_sql("""
     WITH data as (
         SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
         from alldata where station = %s and tmpf > -90 and tmpf < 150
         and extract(month from valid) = %s)
 
-    SELECT extract(hour from v) as hr,
+    SELECT extract(hour from v) as hour,
     sum(case when tmpf::int < %s THEN 1 ELSE 0 END) as below,
     sum(case when tmpf::int >= %s THEN 1 ELSE 0 END) as above,
     count(*) from data
-    GROUP by hr ORDER by hr ASC
-    """, (tzname, station, month, thres, thres))
-    rows = []
-    for row in cursor:
-        rows.append(dict(hour=row[0],
-                         below=float(row[1]) / float(row[3]) * 100.,
-                         above=float(row[2]) / float(row[3]) * 100.))
-    df = pd.DataFrame(rows)
-    freq = np.array(df[mydir])
-    hours = np.array(df['hour'])
+    GROUP by hour ORDER by hour ASC
+    """, pgconn, params=(tzname, station, month, thres, thres),
+                  index_col='hour')
+
+    df['below_freq'] = df['below'].values.astype('f') / df['count'] * 100.
+    df['above_freq'] = df['above'].values.astype('f') / df['count'] * 100.
+
+    freq = df[mydir+"_freq"].values
+    hours = df.index.values
 
     (fig, ax) = plt.subplots(1, 1)
     bars = ax.bar(hours-0.4, freq, fc='blue')
