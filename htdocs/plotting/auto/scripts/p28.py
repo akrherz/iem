@@ -94,7 +94,7 @@ def plotter(fdict):
                   ) % (station, nt.sts[station]['name'], baseyear+2,
                        datetime.datetime.now().year,
                        date.strftime("%-d %b %Y")))
-    ax.set_ylabel("Rank [1=wettest] (bars)")
+    ax.set_ylabel("Rank [1=wettest] (bars)", color='b')
     ax.set_xlim(-367, 0.5)
 
     y2 = ax.twinx()

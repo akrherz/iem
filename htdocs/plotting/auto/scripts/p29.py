@@ -1,11 +1,10 @@
-
-import psycopg2.extras
+import psycopg2
 import pytz
 from pyiem.network import Table as NetworkTable
 import datetime
 import calendar
 import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
 
 
 def get_description():
@@ -33,8 +32,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
@@ -43,7 +41,7 @@ def plotter(fdict):
     t2 = int(fdict.get('t2', 70))
     nt = NetworkTable(network)
 
-    cursor.execute("""
+    df = read_sql("""
     WITH obs as (
         SELECT date_trunc('hour', valid) as t, avg(tmpf) as tmp from alldata
         WHERE station = %s and (extract(minute from valid) > 50 or
@@ -51,22 +49,14 @@ def plotter(fdict):
         extract(hour from valid at time zone 'UTC') = %s and tmpf is not null
         GROUP by t
     )
-    SELECT extract(month from t) as mo,
+    SELECT extract(month from t) as month,
     sum(case when round(tmp::numeric,0) >= %s
-        and round(tmp::numeric,0) <= %s then 1 else 0 end),
-    count(*) from obs GROUP by mo ORDER by mo ASC
-    """, (station, hour, t1, t2))
-    months = []
-    freq = []
-    rows = []
-    for row in cursor:
-        val = float(row[1]) / float(row[2]) * 100.
-        rows.append(dict(month=row[0], val=val))
-        months.append(row[0])
-        freq.append(val)
-    df = pd.DataFrame(rows)
+        and round(tmp::numeric,0) <= %s then 1 else 0 end) as hits,
+    count(*) from obs GROUP by month ORDER by month ASC
+    """, pgconn, params=(station, hour, t1, t2), index_col='month')
+    df['freq'] = df['hits'] / df['count'] * 100.
     (fig, ax) = plt.subplots(1, 1)
-    bars = ax.bar(np.arange(1, 13) - 0.4, freq, fc='blue')
+    bars = ax.bar(np.arange(1, 13) - 0.4, df['freq'], fc='blue')
     for i, bar in enumerate(bars):
         ax.text(i+1, bar.get_height()+3, "%.1f%%" % (bar.get_height(),),
                 ha='center', fontsize=12)
