@@ -23,7 +23,7 @@ $(document).ready(function(){
                         title: 'Profitability',
 						visible: true,
                         source: new ol.source.XYZ({
-                                url : '/c/tile.py/1.0.0/profit2015/{z}/{x}/{y}.png'
+                                url : '/c/tile.py/1.0.0/profit2010/{z}/{x}/{y}.png'
                         })
                 });
 		
@@ -73,11 +73,11 @@ $t->content = <<<EOF
 </style>
 <div style="width:100%; height:100%" id="map">
 <div id="yearselect">
-  <input type="radio" id="y2010" name="whichyear" value="2010"><label for="y2010">2010</label>
+  <input type="radio" id="y2010" name="whichyear" value="2010" checked="checked"><label for="y2010">2010</label>
   <input type="radio" id="y2011" name="whichyear" value="2011"><label for="y2011">2011</label>
   <input type="radio" id="y2012" name="whichyear" value="2012"><label for="y2012">2012</label>
   <input type="radio" id="y2013" name="whichyear" value="2013"><label for="y2013">2013</label>
-  <input type="radio" id="y2015" name="whichyear" value="2015" checked="checked"><label for="y2015">2015</label>
+  <input type="radio" id="y2015" name="whichyear" value="2015"><label for="y2015">2015</label>
 </div>
 		
 <div id="legend"><img src="profit_legend.png" /></div>		
