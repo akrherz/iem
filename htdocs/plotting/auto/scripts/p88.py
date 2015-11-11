@@ -87,4 +87,5 @@ def plotter(fdict):
                         'Sep 2', 'Oct 21', 'Dec 9'))
 
     ax.set_yticklabels(('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'))
+
     return fig, df

@@ -52,7 +52,8 @@ def plotter(fdict):
     WITH data as (
     SELECT valid at time zone %s + '10 minutes'::interval as v
     from alldata where
-    station = %s and presentwx LIKE '%%""" + code + """%%' and valid > '1971-01-01')
+    station = %s and presentwx LIKE '%%""" + code + """%%'
+    and valid > '1971-01-01')
 
     SELECT distinct extract(week from v) as week,
     extract(year from v) as year, extract(hour from v) as hour
@@ -116,4 +117,5 @@ def plotter(fdict):
     rax.xaxis.set_major_locator(xloc)
     rax.xaxis.get_major_ticks()[0].label1.set_visible(False)
     rax.grid(True)
+
     return fig, df
