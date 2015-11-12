@@ -8,8 +8,6 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 # Association of plots
 data = {'plots': [
     {'label': 'Daily', 'options': [
-        {'id': "97", 'mw': True,
-         "label": "Accumulated Departures of Precipitation [map]"},
         {'id': "108", 'mw': True,
          "label": "Accumulated Station Departures of Precipitation/GDD/SDD"},
         {'id': "11", 'label': "ASOS/AWOS Daily Min/Max Dew Point for a Year"},
@@ -60,6 +58,8 @@ data = {'plots': [
         {'id': "107", 'mw': True,
          'label': ("Period Statistics of Temp/Precip for a date period "
                    "each year")},
+        {'id': "97", 'mw': True,
+         "label": "Period Statistics for an Exact Stretch of Days"},
         {'id': "43",
          'label': "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
         {'id': "62", 'mw': True,
