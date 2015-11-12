@@ -380,7 +380,7 @@ LAYER
   NAME "visibility"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select random() as boid, (CASE WHEN c.limited_vis THEN 1 ELSE 0 END) as lv, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid  and c.valid > (now() - '24 hours'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "geom from (select random() as boid, (CASE WHEN c.limited_vis THEN 1 ELSE 0 END) as lv, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid  and c.valid > (now() - '31 days'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
   DUMP TRUE
@@ -409,7 +409,7 @@ LAYER
   NAME "roads"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select b.st1, b.us1, b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1  and c.valid > (now() - '24 hours'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "geom from (select b.st1, b.us1, b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1  and c.valid > (now() - '31 days'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
   DUMP TRUE
@@ -674,7 +674,7 @@ LAYER
   NAME "roads-inter"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 and c.valid > (now() - '24 hours'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "geom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 and c.valid > (now() - '31 days'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
   METADATA
