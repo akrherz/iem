@@ -157,7 +157,7 @@ def do_windalerts(obs):
         if np.isnan(ob['gust']):
             continue
         smph = speed(ob['gust'], 'KT').value('MPH')
-        if smph < 65:
+        if smph < 50:
             continue
         if smph > 100:
             print(('process_rwis did not relay gust %.1f MPH from %s'
