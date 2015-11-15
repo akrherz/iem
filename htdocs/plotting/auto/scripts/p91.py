@@ -18,7 +18,8 @@ def get_description():
     d['data'] = True
     d['description'] = """This plot produces statistics on min, max, and
     average values of a variable over a window of days.  The labels get
-    a bit confusing, but we are looking for previous of time with temperature
+    a bit confusing, but we are looking for previous periods of time with
+    temperature
     above or below a given threshold.  For precipitation, it is only a period
     with each day above a given threshold and the average over that period.
     """

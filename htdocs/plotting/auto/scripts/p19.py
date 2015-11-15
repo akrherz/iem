@@ -3,6 +3,7 @@ import numpy as np
 from pyiem import network
 import datetime
 from collections import OrderedDict
+import pandas as pd
 
 # Use OrderedDict to keep webform select in this same order!
 MDICT = OrderedDict([('all', 'No Month/Season Limit'),
@@ -27,6 +28,7 @@ MDICT = OrderedDict([('all', 'No Month/Season Limit'),
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """This chart displays a histogram of daily high
     and low temperatures for a station of your choice."""
     d['arguments'] = [
@@ -81,6 +83,11 @@ def plotter(fdict):
     bins = np.arange(-20, 121, binsize)
 
     H, xedges, yedges = np.histogram2d(lows, highs, bins)
+    rows = []
+    for i, x in enumerate(xedges[:-1]):
+        for j, y in enumerate(yedges[:-1]):
+            rows.append(dict(high=y, low=x, count=H[i, j]))
+    df = pd.DataFrame(rows)
     years = float(
         datetime.datetime.now().year - nt.sts[station]['archive_begin'].year
         )
@@ -113,4 +120,4 @@ def plotter(fdict):
     ax.text(32, 120, "32$^\circ$F", va='top', ha='center', color='white',
             bbox=dict(color='k', edgecolor='none'), fontsize=8)
 
-    return fig
+    return fig, df
