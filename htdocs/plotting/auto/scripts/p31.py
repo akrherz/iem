@@ -1,6 +1,3 @@
-"""
-  Fall Minimum by Date
-"""
 import psycopg2.extras
 import numpy as np
 import datetime
