@@ -135,6 +135,16 @@ def plotter(fdict):
         data[row[0]]['doy'].append(row[1])
         data[row[0]]['counts'].append(row[2])
         rows.append(dict(year=row[0], day_of_year=row[1], count=row[2]))
+    # append on a lastdoy value so all the plots go to the end
+    for yr in range(2003, datetime.datetime.now().year):
+        if len(data[yr]['doy']) == 0 or data[yr]['doy'][-1] >= lastdoy:
+            continue
+        data[yr]['doy'].append(lastdoy)
+        data[yr]['counts'].append(data[yr]['counts'][-1])
+    data[datetime.datetime.now().year]['doy'].append(
+        int(datetime.datetime.today().strftime("%j")) + 1)
+    data[datetime.datetime.now().year]['counts'].append(
+        data[datetime.datetime.now().year]['counts'][-1])
     df = pd.DataFrame(rows)
 
     (fig, ax) = plt.subplots(1, 1)
@@ -144,7 +154,7 @@ def plotter(fdict):
             continue
         l = ax.plot(data[yr]['doy'], data[yr]['counts'], lw=2,
                     label="%s (%s)" % (str(yr), data[yr]['counts'][-1]),
-                    drawstyle='steps')
+                    drawstyle='steps-post')
         ann.append(
             ax.text(data[yr]['doy'][-1]+1, data[yr]['counts'][-1],
                     "%s" % (yr,), color='w', va='center',
