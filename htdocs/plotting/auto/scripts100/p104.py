@@ -127,17 +127,17 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_position([0.1, 0.1, 0.7, 0.8])
     y = 0.96
-    pos = [1.01, 1.08, 1.15]
+    pos = [1.01, 1.15, 1.22]
     ax.text(pos[0], y + 0.04, "Date", transform=ax.transAxes, fontsize=10)
     ax.text(pos[1], y + 0.04, "T $\sigma$", transform=ax.transAxes,
-            fontsize=10)
+            fontsize=10, ha='right')
     ax.text(pos[2], y + 0.04, "P $\sigma$", transform=ax.transAxes,
-            fontsize=10)
+            fontsize=10, ha='right')
     for l, t, p, a in zip(lbls, tsigma, psigma, aligns):
         ax.text(pos[0], y, "%s" % (l,), transform=ax.transAxes, fontsize=10)
         ax.text(pos[1], y, "%.1f" % (t,), transform=ax.transAxes, fontsize=10,
-                color=get_color(t, 't'))
+                color=get_color(t, 't'), ha='right')
         ax.text(pos[2], y, "%.1f" % (p,), transform=ax.transAxes, fontsize=10,
-                color=get_color(p, 'p'))
+                color=get_color(p, 'p'), ha='right')
         y -= 0.04
     return fig, df
