@@ -19,7 +19,9 @@ def get_file():
            "ftp://ftp.nass.usda.gov/quickstats/qs.all_%s.txt.gz"
            ) % (today.strftime("%Y%m%d"), )
 
-    subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    _ = proc.stdout.read()
 
     cmd = "cd /mesonet/tmp; gunzip qstats.txt.gz"
     subprocess.Popen(cmd, shell=True)
