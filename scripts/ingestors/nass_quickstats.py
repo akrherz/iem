@@ -15,7 +15,7 @@ def get_file():
         print('    skipping download as we already have the file')
         return
     today = datetime.date.today()
-    cmd = ("wget -q -o /mesonet/tmp/qstats.txt.gz "
+    cmd = ("wget -q -O /mesonet/tmp/qstats.txt.gz "
            "ftp://ftp.nass.usda.gov/quickstats/qs.all_%s.txt.gz"
            ) % (today.strftime("%Y%m%d"), )
 
