@@ -3,9 +3,6 @@
 cd isuag
 sh run_plots.sh
 
-cd ../iemre
-python daily_analysis.py $(date --date '1 day ago' +'%Y %m %d')
-
 # Run the climodat estimator to get sites that are valid at midnight
 # only for Iowa at the moment as we have no other such sites outside of
 # Iowa

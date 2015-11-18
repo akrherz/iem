@@ -14,6 +14,10 @@ python asos2archive.py
 cd ../asos
 python compute_daily.py
 
+# Need this done so that IEMRE daily grids are there for DEP
+cd ../iemre
+python daily_analysis.py $(date --date '1 day ago' +'%Y %m %d')
+
 cd ../smos
 python plot.py 0
 
