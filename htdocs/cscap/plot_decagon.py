@@ -219,6 +219,8 @@ def make_plot(form):
             mdates.DateFormatter('%I %p\n%-d %b', tz=tz))
     ax[1].set_xlabel("Time (%s Timezone)" % (tzname, ))
     plt.subplots_adjust(bottom=0.15)
+    box = ax[1].get_position()
+    ax[1].set_position([box.x0, box.y0, box.width, box.height * 0.95])
     sys.stdout.write("Content-type: image/png\n\n")
     ram = cStringIO.StringIO()
     fig.savefig(ram, format='png')
