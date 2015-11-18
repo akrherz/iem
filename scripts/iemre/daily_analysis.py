@@ -3,7 +3,7 @@
 This is tricky as some variables we can compute sooner than others.  We run
 this script twice per day:
 
-    RUN_2AM.sh for just the 'calendar day' variables yesterday
+    RUN_MIDNIGHT.sh for just the 'calendar day' variables yesterday
     RUN_NOON.sh for the 12z today vals and calendar day yesterday
 """
 import sys
