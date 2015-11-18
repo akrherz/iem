@@ -59,14 +59,17 @@ def plotter(fdict):
     """, pgconn, params=(level, station), index_col='month')
     df['rank'] = (df['count'] - df['hits']) / df['count'] * 100.
     df['avg_days'] = df['hits'] / years
-
+    df['return_interval'] = 1.0 / df['avg_days']
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
     (fig, ax) = plt.subplots(1, 1)
 
     ax.bar(df.index.values, df['rank'], fc='tan', zorder=1,
            ec='orange', align='edge', width=0.4)
 
-    ax.set_title(("Monthly Frequency of Daily %s of %s+\nfor [%s] %s (%s-%s)"
-                  ) % (PDICT[varname], level, station,
+    units = 'inch' if varname in ['precip', ] else 'F'
+    ax.set_title(("Monthly Frequency of Daily %s of %s+ %s\n"
+                  "for [%s] %s (%s-%s)"
+                  ) % (PDICT[varname], level, units, station,
                        nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,
                        datetime.date.today().year))
@@ -74,20 +77,24 @@ def plotter(fdict):
     ax.set_ylabel("Percentile [%]", color='tan')
     ax.set_ylim(0, 105)
     ax2 = ax.twinx()
-    ax2.bar(df.index.values, df['avg_days'], width=-0.4, align='edge',
+    ax2.bar(df.index.values, df['return_interval'], width=-0.4, align='edge',
             fc='blue', ec='k', zorder=1)
-    ax2.set_ylabel("Avg # of Days per Month per Year (%.2f Total)" % (
+    ax2.set_ylabel("Return Interval (years) (%.2f Days per Year)" % (
                                             df['avg_days'].sum(),),
                    color='b')
-
+    ax2.set_ylim(0, df['return_interval'].max() * 1.1)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0.5, 12.5)
     for idx, row in df.iterrows():
         ax.text(idx, row['rank'], "%.1f" % (row['rank'],),
                 ha='left', color='k', zorder=5, fontsize=11)
-        ax2.text(idx, row['avg_days'], "%.1f" % (row['avg_days'],),
-                 ha='right', color='k', zorder=5, fontsize=11)
+        if not np.isnan(row['return_interval']):
+            ax2.text(idx, row['return_interval'],
+                     "%.1f" % (row['return_interval'],),
+                     ha='right', color='k', zorder=5, fontsize=11)
+        else:
+            ax2.text(idx, 0., "n/a", ha='right')
 
     return fig, df
 
