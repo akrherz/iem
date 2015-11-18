@@ -85,6 +85,8 @@ data = {'plots': [
          'label': "Comparison of Multi-Month Totals/Averages"},
         {'id': "55", 'label': "Daily Climatology Comparison"},
         {'id': "17", 'label': "Daily High/Low Temps with Climatology"},
+        {'id': "129", 'mw': True,
+         'label': "Daily Observation Percentiles/Frequencies by Month"},
         {'id': "15", 'mw': True,
          'label': "Daily Temperature Change Frequencies by Month"},
         {'id': "98", 'mw': True,
