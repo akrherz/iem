@@ -12,6 +12,9 @@ PDICT = OrderedDict([
     ('precip', 'Precipitation')
     ])
 
+PDICT2 = {'above': 'At or Above',
+          'below': 'Below'}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -25,6 +28,8 @@ def get_description():
     d['arguments'] = [
         dict(type='select', options=PDICT, name='var',
              label='Select Variable to Plot', default='precip'),
+        dict(type='select', options=PDICT2, name='dir',
+             label='Direction of Percentile', default='above'),
         dict(type='text', name='level', default='2',
              label='Daily Variable Level (inch or degrees F):'),
         dict(type='station', name='station', default='IA2203',
@@ -43,15 +48,17 @@ def plotter(fdict):
     station = fdict.get('station', 'IA2203').upper()
     varname = fdict.get('var', 'precip')[:10]
     level = float(fdict.get('level', 2))
+    mydir = fdict.get('dir', 'above')
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
     years = (datetime.date.today().year -
              nt.sts[station]['archive_begin'].year + 1.0)
 
     plimit = '' if varname != 'precip' else ' and precip >= 0.01 '
+    comp = ">=" if mydir == 'above' else "<"
     df = read_sql("""
     SELECT month,
-    sum(case when """+varname+""" >= %s then 1 else 0 end) as hits,
+    sum(case when """+varname+""" """+comp+""" %s then 1 else 0 end) as hits,
     count(*)
     from """+table+"""
     WHERE station = %s """+plimit+"""
@@ -67,9 +74,9 @@ def plotter(fdict):
            ec='orange', align='edge', width=0.4)
 
     units = 'inch' if varname in ['precip', ] else 'F'
-    ax.set_title(("Monthly Frequency of Daily %s of %s+ %s\n"
+    ax.set_title(("Monthly Frequency of Daily %s %s %s+ %s\n"
                   "for [%s] %s (%s-%s)"
-                  ) % (PDICT[varname], level, units, station,
+                  ) % (PDICT[varname], PDICT2[mydir], level, units, station,
                        nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,
                        datetime.date.today().year))
