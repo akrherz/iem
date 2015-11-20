@@ -66,7 +66,7 @@ def plotter(fdict):
         if mydir == 'first':
             idx = tuple(idx).index(1)
         else:
-            idx = 366 - tuple(idx[::-1]).index(1)
+            idx = 365 - tuple(idx[::-1]).index(1)
         for sfree in range(idx+1, 366):
             if sd[sfree] <= 0.01:
                 break
@@ -80,7 +80,9 @@ def plotter(fdict):
         else:
             color = 'r'
         # print year, idx, s[idx], sd[idx:sfree]
-        rows.append(dict(year=year, snow_doy=(idx+183), color=color,
+        dt = datetime.date(year, 1, 1) + datetime.timedelta(days=(idx+183))
+        rows.append(dict(year=year, snow_date=dt, snow_doy=(idx+183),
+                         color=color, days=cnt,
                          snowfree_doy=(sfree+183), snowfall=s[idx]))
 
     df = pd.DataFrame(rows)
@@ -131,8 +133,9 @@ def plotter(fdict):
                      box.height * 0.9])
     ax2.set_position([box.x0, box.y0 + box.height * 0.1, box.width,
                      box.height * 0.9])
-
+    df.set_index('year', inplace=True)
+    del(df['color'])
     return fig, df
 
 if __name__ == '__main__':
-    plotter(dict(dir='first'))
+    plotter(dict(dir='last'))
