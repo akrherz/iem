@@ -103,10 +103,11 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <p><strong>View on web browser or</strong> &nbsp; 
  <br /><input type="checkbox" name="todisk" value="yes">Download directly to disk
 
-<p><strong>How should the values be separated?:</strong> &nbsp; 
-<select name="delim">
-  <option value="comma">by commas
-  <option value="tab">by tabs
+<p><strong>How should the data be formatted?:</strong> &nbsp; 
+<select name="format">
+	<option value="excel">Microsoft Excel (xlsx)</option>
+	<option value="comma">Comma Delimited Text File</option>
+  	<option value="tab">Tab Delimited Text File</option>
 </select>
 
 <p><h4>Submit your request:</h4>

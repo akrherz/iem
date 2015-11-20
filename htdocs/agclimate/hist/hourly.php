@@ -91,9 +91,12 @@ wish to change this to <a href="daily.php">daily data</a>.
  		
  		
 <p><input type="checkbox" name="todisk" value="yes">Download directly to disk
-<br>Delimination: <select name="delim">
-  <option value="comma">Comma Delimited
-  <option value="tab">Tab Delimited
+
+ <p><strong>How should the data be formatted?:</strong> &nbsp; 
+<select name="format">
+	<option value="excel">Microsoft Excel (xlsx)</option>
+	<option value="comma">Comma Delimited Text File</option>
+  	<option value="tab">Tab Delimited Text File</option>
 </select>
 
 <p><b><h4 class="subtitle">Submit your request:</h4></b>
