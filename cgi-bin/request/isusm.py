@@ -6,6 +6,7 @@ import cgi
 import datetime
 import psycopg2.extras
 import sys
+import os
 import pandas as pd
 import cStringIO
 from pyiem.datatypes import temperature
@@ -187,14 +188,7 @@ def fetch_daily(form, cols):
                            soil12vwc=soil12vwc, soil24vwc=soil24vwc,
                            soil50vwc=soil50vwc))
 
-    if len(values) == 0:
-        return 'Sorry, no data found for this query.'
-
-    df = pd.DataFrame(values)
-    buf = cStringIO.StringIO()
-    df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
-    buf.seek(0)
-    return buf.read()
+    return values, cols
 
 
 def fetch_hourly(form, cols):
@@ -267,15 +261,7 @@ def fetch_hourly(form, cols):
                            soil12t=soil12t, soil24t=soil24t, soil50t=soil50t,
                            soil12vwc=soil12vwc, soil24vwc=soil24vwc,
                            soil50vwc=soil50vwc))
-
-    if len(values) == 0:
-        return 'Sorry, no data found for this query.'
-
-    df = pd.DataFrame(values)
-    buf = cStringIO.StringIO()
-    df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
-    buf.seek(0)
-    return buf.read()
+    return values, cols
 
 
 def main(argv):
@@ -283,20 +269,43 @@ def main(argv):
     form = cgi.FieldStorage()
     mode = form.getfirst('mode', 'hourly')
     cols = form.getlist('vars')
-    if mode == 'hourly':
-        res = fetch_hourly(form, cols)
-    else:
-        res = fetch_daily(form, cols)
-
+    fmt = form.getfirst('format', 'csv').lower()
     todisk = form.getfirst('todisk', 'no')
+    if mode == 'hourly':
+        values, cols = fetch_hourly(form, cols)
+    else:
+        values, cols = fetch_daily(form, cols)
+
+    if len(values) == 0:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write('Sorry, no data found for this query.')
+        return
+
+    df = pd.DataFrame(values)
+    if fmt == 'excel':
+        writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter')
+        df.to_excel(writer, 'Data', columns=cols, index=False)
+        writer.save()
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write(("Content-Disposition: attachment;"
+                          "Filename=isusm.xlsx\n\n"))
+        sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+        os.unlink('/tmp/ss.xlsx')
+        return
+
+    delim = "," if fmt == 'comma' else '\t'
+    buf = cStringIO.StringIO()
+    df.to_csv(buf, index=False, columns=cols, sep=delim, float_format='%7.2f')
+    buf.seek(0)
+
     if todisk == 'yes':
         sys.stdout.write("Content-type: text/plain\n")
         sys.stdout.write(("Content-Disposition: attachment; "
                           "filename=isusm.txt\n\n"))
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(res)
+    sys.stdout.write(buf.read())
 
 if __name__ == '__main__':
-    ''' make stuff happen '''
+    # make stuff happen
     main(sys.argv)
