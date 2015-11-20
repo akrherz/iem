@@ -94,8 +94,8 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 	if ($row["kml"] ==  "") continue;
   $minor = $row["minor"];
   $major = $row["major"];
-	$ccode = $row["cond_code"];
-	if (array_key_exists($row["cond_code"], $styles)){
+	$ccode = intval($row["cond_code"]);
+	if (! array_key_exists($ccode, $styles)){
 		$ccode = 0;
 	}
 
