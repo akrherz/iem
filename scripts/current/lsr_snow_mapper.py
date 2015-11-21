@@ -34,7 +34,9 @@ def run(basets, endts, view):
                                     lat=(lat+mybuffer/2.),
                                     val=0, used=True, textplot=False))
                 continue
-            df.at[df2.index[0], 'used'] = True
+            maxval = df.at[df2.index[0], 'val']
+            df.loc[df2[df2['val'] > (maxval * 0.5)].index, 'used'] = True
+            df.loc[df2[df2['val'] < (maxval * 0.5)].index, 'textplot'] = False
     dfnew = pd.DataFrame(newrows)
     df = df.append(dfnew)
     cdf = df[df['used']]
