@@ -79,7 +79,7 @@ x2,y2=m(-88.1321, 45.2504)
 
 img=mpimg.imread('/tmp/ames.jpg')
 ax.imshow(img, extent=(x,x2,y, y2) )
-ax.set_title("12 January 2015 :: Terra MODIS True Color")
+ax.set_title("22 November 2015 :: Aqua MODIS True Color")
 
 m.drawstates(linewidth=2.5)
 plt.savefig('test.png')
