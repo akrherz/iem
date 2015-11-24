@@ -1,6 +1,6 @@
 """Create an analysis of LSR snowfall reports"""
 import numpy as np
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, nwssnow
 import pyiem.reference as reference
 import datetime
 import unittest
@@ -42,13 +42,14 @@ def run(basets, endts, view):
     cdf = df[df['used']]
     tdf = df[df['textplot']]
 
-    rng = [0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 7, 9, 11, 13, 15, 17]
-
+    rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
+    cmap = nwssnow()
     m = MapPlot(sector='iowa', axisbg='white',
                 title="Local Storm Report Snowfall Total Analysis",
                 subtitle=("Reports past 12 hours: %s"
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng)
+    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
+               cmap=cmap)
     m.drawcounties()
     m.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
                   fmt='%.1f')
@@ -61,7 +62,8 @@ def run(basets, endts, view):
                 title="Local Storm Report Snowfall Total Analysis",
                 subtitle=("Reports valid over past 12 hours: %s"
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng)
+    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
+               cmap=cmap)
     m.drawcounties()
     pqstr = "plot c 000000000000 lsr_snowfall_nv.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
@@ -71,7 +73,8 @@ def run(basets, endts, view):
                 title="Local Storm Report Snowfall Total Analysis",
                 subtitle=("Reports past 12 hours: %s"
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng)
+    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
+               cmap=cmap)
     pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
     m.close()
