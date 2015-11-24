@@ -1,0 +1,5 @@
+AddHandler cgi-script .py
+Options +ExecCGI
+
+RewriteEngine On
+RewriteRule ^snowfall_oa.png snowfall_oa.py [QSA]
