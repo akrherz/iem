@@ -52,39 +52,41 @@ def plotter(fdict):
     nt = NetworkTable('WFO')
 
     if split == 'jan1':
-        sql = """SELECT extract(year from issue) as year,
+        sql = """SELECT extract(year from issue)::int as year,
         min(issue at time zone 'UTC') as min_issue,
         max(issue at time zone 'UTC') as max_issue,
         count(distinct eventid)
         from warnings where wfo = %s and phenomena = %s and significance = %s
         and issue is not null
         GROUP by year ORDER by year ASC"""
-        doffset = 0
-        doffset2 = 0
-        months = calendar.month_abbr[1:]
     else:
-        sql = """SELECT extract(year from issue + '6 months'::interval) as year,
+        sql = """SELECT
+        extract(year from issue - '6 months'::interval)::int as year,
         min(issue at time zone 'UTC') as min_issue,
         max(issue at time zone 'UTC') as max_issue,
         count(distinct eventid)
         from warnings where wfo = %s and phenomena = %s and significance = %s
         and issue is not null
         GROUP by year ORDER by year ASC"""
-        doffset = 183
-        doffset2 = 365
-        months = calendar.month_abbr[7:] + calendar.month_abbr[1:7]
     df = read_sql(sql, pgconn, params=(station, phenomena, significance),
-                  index_col='year')
+                  index_col=None)
 
-    df['startdoy'] = df['min_issue'].apply(lambda x: int(x.strftime("%j")))
-    df['enddoy'] = df['max_issue'].apply(lambda x: int(x.strftime("%j")))
+    def myfunc(row):
+        year = row[0]
+        valid = row[1]
+        if year == valid.year:
+            return int(valid.strftime("%j"))
+        else:
+            days = (datetime.date(year+1, 1, 1) -
+                    datetime.date(year, 1, 1)).days
+            return int(valid.strftime("%j")) + days
+    df['startdoy'] = df[['year', 'min_issue']].apply(myfunc, axis=1)
+    df['enddoy'] = df[['year', 'max_issue']].apply(myfunc, axis=1)
+    df.set_index('year', inplace=True)
 
-    ends = df['enddoy'].values + doffset2
+    ends = df['enddoy'].values
     starts = df['startdoy'].values
-    if split == 'jul1':
-        starts = np.where(starts < 183, starts + doffset2, starts)
-        ends = np.where(ends < 183, ends + doffset2, ends)
-    years = df.index.values.astype('i')
+    years = df.index.values
 
     fig = plt.Figure()
     ax = plt.axes([0.1, 0.1, 0.7, 0.8])
@@ -98,7 +100,7 @@ def plotter(fdict):
       datetime.timedelta(days=int(np.average(starts[:-1])))).strftime(
                                                                 "%-d %b"),
      (datetime.date(2000, 1, 1) +
-      datetime.timedelta(days=int(np.average(ends[:-1]))+doffset2)).strftime(
+      datetime.timedelta(days=int(np.average(ends[:-1])))).strftime(
                                                                 "%-d %b")),
                   color='red')
     ax.set_title(("[%s] NWS %s\nPeriod between First and Last %s %s"
@@ -106,11 +108,12 @@ def plotter(fdict):
                        vtec._phenDict[phenomena],
                        vtec._sigDict[significance]))
     ax.grid()
-    days = np.array([1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
-                     305, 335])
-    ax.set_xticks(days + doffset)
-    ax.set_xticklabels(months)
-    ax.set_xlim(1 + doffset, 366 + doffset)
+    days = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
+            305, 335]
+    days = days + [x + 365 for x in days]
+    ax.set_xticks(days)
+    ax.set_xticklabels(calendar.month_abbr[1:] + calendar.month_abbr[1:])
+    ax.set_xlim(df['startdoy'].min() - 10, df['enddoy'].max() + 10)
     ax.set_ylabel("Year")
     ax.set_ylim(years[0]-0.5, years[-1]+0.5)
     xFormatter = FormatStrFormatter('%d')
