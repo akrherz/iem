@@ -43,7 +43,10 @@ $(document).ready(function(){
 			format: new ol.format.GeoJSON()
 		}),
 		style: function(feature, resolution){
-			style.getStroke().setColor(rcLookup[feature.get('code')]);
+			try{
+				style.getStroke().setColor(rcLookup[feature.get('code')]);
+			} catch(e) {
+			}
 			return [style];
 		}
 	});
