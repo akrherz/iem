@@ -71,7 +71,7 @@ $(document).ready(function(){
 	var data = {};
 	$.ajax({
   type: "POST",
-  url: 'snowfall_oa.py',
+  url: 'lsr_oa.py',
   data: data,
   success: function(mydata){
 		var $img = $( '<img/>', {                
