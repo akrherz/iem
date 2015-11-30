@@ -48,7 +48,7 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 	<li><a href="/data/lsr_snowfall.png">Snowfall Analysis [Iowa]</a> of
 		recent LSRs. <a href="/data/lsr_snowfall_nv.png">Iowa map without
 		labels</a>.</li>
-	<li><a href="/data/mw_lsr_snowfall.pnh">Snowfall Analysis [MidWest]</a>
+	<li><a href="/data/mw_lsr_snowfall.png">Snowfall Analysis [MidWest]</a>
 		of recent LSRs.</li>
 	<li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Past 24 hours of Storm Reports</a>
  <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.  The file is updated every 5 minutes.</li>
