@@ -222,7 +222,8 @@ def plotter(fdict):
                        ) % (title, vtec._phenDict[phenomena],
                             vtec._sigDict[significance],
                             phenomena, significance),
-                subtitle=subtitle, nocaption=True
+                subtitle=subtitle, nocaption=True,
+                titlefontsize=16
                 )
     cmap = plt.get_cmap('Paired')
     cmap.set_over('white')
