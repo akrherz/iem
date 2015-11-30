@@ -41,6 +41,23 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
  <li><a href="/data/awos_rtp.shef">12Z SHEF</a></li>
 </ul>
 
+<h4>Local Storm Reports (LSR)</h4>
+<p>The IEM processes LSRs issued by the NWS in real-time. A number of
+	applications on this website utilize this source of reports.</p>
+<ul>
+	<li><a href="/data/lsr_snowfall.png">Snowfall Analysis [Iowa]</a> of
+		recent LSRs. <a href="/data/lsr_snowfall_nv.png">Iowa map without
+		labels</a>.</li>
+	<li><a href="/data/mw_lsr_snowfall.pnh">Snowfall Analysis [MidWest]</a>
+		of recent LSRs.</li>
+	<li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Past 24 hours of Storm Reports</a>
+ <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.  The file is updated every 5 minutes.</li>
+ <li><a href="/request/gis/lsrs.phtml">Archived Local Storm Reports</a>
+ <br />Generate a shapefile of LSRs for a period of your choice dating back 
+  to 2003!</li>
+		<li><a href="/lsr/">Local Storm Report App</a></li>
+</ul>
+
 <h4>Model Data</h4>
 <ul>
  <li><a href="/mos/">Model Output Statistics</a>
