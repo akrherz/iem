@@ -1,0 +1,6 @@
+AddHandler cgi-script .py
+Options +ExecCGI
+
+RewriteEngine On
+RewriteRule ^pl_(.*)_(.*).xml pl.py?network=$1&station=$2 [QSA]
+RewriteRule ^sd_(.*)_(.*).xml sd.py?network=$1&station=$2 [QSA]
