@@ -1,0 +1,36 @@
+<!-- ================================ -->
+<!--           AGGREGATOR             -->
+<!-- ================================ -->
+
+<gmd:CI_ResponsibleParty xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sfl="http://sawi.gst.com/nmpa/sfl.xsd" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:swe="http://www.opengis.net/swe/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:nmpa="http://sawi.gst.com/nmpa/schema/metaExtension.xsd" xmlns:gco="http://schemas.opengis.net/iso/19139/20070417/gco/gco.xsd" xsi:schemaLocation="http://sawi.gst.com/nmpa/schema/sfl.xsd" id="IEM">
+  <gmd:individualName>IEM</gmd:individualName>
+  <gmd:organisationName><gco:CharacterString>Iowa Environmental Mesonet of Iowa State University</gco:CharacterString></gmd:organisationName>
+  <gmd:positionName><gco:CharacterString>Staff</gco:CharacterString></gmd:positionName>
+  <gmd:contactInfo>
+    <gmd:phone>515-294-5978</gmd:phone>
+    <gmd:address>
+      <gmd:deliveryPoint>3015 Agronomy Hall</gmd:deliveryPoint>
+      <gmd:city>Ames</gmd:city>
+      <gmd:administrativeArea>Iowa</gmd:administrativeArea>
+      <gmd:postalCode>50010</gmd:postalCode>
+      <gmd:country>United States</gmd:country>
+      <gmd:electronicMailAddress>akrherz@iastate.edu</gmd:electronicMailAddress>
+    </gmd:address>
+    <gmd:onlineResource>
+      <gmd:CI_OnlineResource>
+        <gmd:linkage>
+          <gmd:URL>https://mesonet.agron.iastate.edu/</gmd:URL>
+        </gmd:linkage>
+      </gmd:CI_OnlineResource>
+    </gmd:onlineResource>
+    <gmd:hoursOfService>
+      <gco:CharacterString>Monday-Friday, 8am-5pm</gco:CharacterString>
+    </gmd:hoursOfService>
+    <gmd:contactInstructions>
+      <gco:CharacterString>Email or Call</gco:CharacterString>
+    </gmd:contactInstructions>
+  </gmd:contactInfo>
+  <gmd:role>
+        <gmd:CI_RoleCode codeList="http://www.example.com/" codeListValue="http://www.example.com/">N/A</gmd:CI_RoleCode>   <!-- role codes have not yet been defined -->
+  </gmd:role>
+</gmd:CI_ResponsibleParty>
