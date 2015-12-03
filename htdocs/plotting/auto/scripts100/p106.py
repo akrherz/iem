@@ -76,10 +76,8 @@ def plotter(fdict):
 
     if opt == 'tmpf_above':
         limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
-        title = "Air Temp at or above %s$^\circ$F" % (threshold,)
     else:
         limiter = "round(tmpf::numeric,0) < %s" % (threshold,)
-        title = "Air Temp below %s$^\circ$F" % (threshold,)
 
     cursor.execute("""
         WITH obs as (
