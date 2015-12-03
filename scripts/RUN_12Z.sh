@@ -5,6 +5,9 @@ cd 12z
 python awos_rtp.py
 python asos_low.py
 
+cd ../util
+python daily_archive_backup.py
+
 # Run this twice as to account for some timezones west of Hawaii
 cd ../asos
 python compute_daily.py
