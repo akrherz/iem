@@ -19,16 +19,18 @@ def run(date):
     cmd = "tar -czf %s /mesonet/ARCHIVE/data/%s" % (tarfn,
                                                     date.strftime("%Y/%m/%d"))
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-    # Step 2: Split this big file into 14GB chunks, each file will have suffix
-    # .aa then .ab then .ac etc
-    cmd = "split --bytes=14000M %s %s." % (tarfn, tarfn,)
-    subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-    # Step 3: remove big tar file, unused...
-    os.unlink(tarfn)
-    # Step 4: Create a series of put commands to send each of these split files
+    sz = os.path.getsize(tarfn)
+    if sz > 14000000000:
+        # Step 2: Split this big file into 14GB chunks, each file will have
+        # suffix .aa then .ab then .ac etc
+        cmd = "split --bytes=14000M %s %s." % (tarfn, tarfn,)
+        subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
+        files = "; ".join(["put %s" % (x, )
+                           for x in glob.glob("%s.??" % (tarfn, ))])
+    else:
+        files = "put %s" % (tarfn, )
+    # Step 3: Create a series of put commands to send each of these split files
     # up to box
-    files = "; ".join(["put %s" % (x, )
-                       for x in glob.glob("%s.??" % (tarfn, ))])
     cmd = ("lftp -u akrherz@iastate.edu -e 'cd IEMArchive; mkdir %s; cd %s; "
            " %s; bye' "
            "ftps://ftp.box.com") % (date.year, date.year, files)
@@ -36,7 +38,7 @@ def run(date):
                             stderr=subprocess.PIPE)
     print("CyBox: %s\n%s" % (tarfn, proc.stdout.read()))
     # Step 5: delete uploaded files!
-    for fn in glob.glob("%s.??" % (tarfn,)):
+    for fn in glob.glob("%s*" % (tarfn,)):
         os.unlink(fn)
 
 
