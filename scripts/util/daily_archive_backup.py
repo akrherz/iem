@@ -9,6 +9,7 @@ import subprocess
 import os
 import sys
 import glob
+from pyiem.util import send2box
 
 
 def run(date):
@@ -25,18 +26,11 @@ def run(date):
         # suffix .aa then .ab then .ac etc
         cmd = "split --bytes=14000M %s %s." % (tarfn, tarfn,)
         subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-        files = "; ".join(["put %s" % (x, )
-                           for x in glob.glob("%s.??" % (tarfn, ))])
+        files = glob.glob("%s.??" % (tarfn, ))
     else:
-        files = "put %s" % (tarfn, )
-    # Step 3: Create a series of put commands to send each of these split files
-    # up to box
-    cmd = ("lftp -u akrherz@iastate.edu -e 'cd IEMArchive; mkdir %s; cd %s; "
-           " %s; bye' "
-           "ftps://ftp.box.com") % (date.year, date.year, files)
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-    print("CyBox: %s\n%s" % (tarfn, proc.stdout.read()))
+        files = [tarfn, ]
+
+    send2box(files, date.strftime("/IEMArchive/%Y/%m"))
     # Step 5: delete uploaded files!
     for fn in glob.glob("%s*" % (tarfn,)):
         os.unlink(fn)
