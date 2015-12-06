@@ -78,6 +78,8 @@ data = {'plots': [
          'label': "Trailing Number of Days Precipitation Total Rank"},
     ]},
     {'label': 'Monthly', 'options': [
+        {'id': "130", 'mw': True,
+         'label': "Average High/Low Temperature with/without Snowcover"},
         {'id': "71", 'label': "Average Wind Speed and Direction for Month"},
         {'id': "125", 'mw': True,
          'label': "Climatological Maps of Annual/Monthly Averages"},
