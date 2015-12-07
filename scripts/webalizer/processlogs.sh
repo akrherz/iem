@@ -81,25 +81,41 @@ rm -f agclimate.log
 mkdir -p /mesonet/www/logs/old_logs/$yyyymm
 mv access.log access_log-$dd
 gzip access_log-$dd
-mv access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+mv access_log-$dd.gz iem_access_log-${yyyymm}${dd}.gz
 
 mv wepp_access.log wepp_access_log-$dd
 gzip wepp_access_log-$dd
-mv wepp_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+mv wepp_access_log-$dd.gz wepp_access_log-${yyyymm}${dd}.gz
 
 mv idep_access.log idep_access_log-$dd
 gzip idep_access_log-$dd
-mv idep_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+mv idep_access_log-$dd.gz idep_access_log-${yyyymm}${dd}.gz
 
 mv cocorahs_access.log cocorahs_access_log-$dd
 gzip cocorahs_access_log-$dd
-mv cocorahs_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+mv cocorahs_access_log-$dd.gz cocorahs_access_log-${yyyymm}${dd}.gz
 
 mv sustainablecorn_access.log sustainablecorn_access_log-$dd
 gzip sustainablecorn_access_log-$dd
-mv sustainablecorn_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+mv sustainablecorn_access_log-$dd.gz sustainablecorn_access_log-${yyyymm}${dd}.gz
 
 mv weatherim_access.log weatherim_access_log-$dd
 gzip weatherim_access_log-$dd
-mv weatherim_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+mv weatherim_access_log-$dd.gz wxim_access_log-${yyyymm}${dd}.gz
+
+lftp -u akrherz@iastate.edu ftps://ftp.box.com << EOM
+cd IEMWWWLogs
+mkdir $yyyymm
+cd $yyyymm
+put iem_access_log-${yyyymm}${dd}.gz
+put wepp_access_log-${yyyymm}${dd}.gz
+put idep_access_log-${yyyymm}${dd}.gz
+put cocorahs_access_log-${yyyymm}${dd}.gz
+put sustainablecorn_access_log-${yyyymm}${dd}.gz
+put wxim_access_log-${yyyymm}${dd}.gz
+bye
+EOM
+
+mv *_access_log-${yyyymm}${dd}.gz ../save/
+tmpwatch 10d ../save
 # Done!
