@@ -47,6 +47,7 @@ m.contourf(lons, lats, vals, np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3,
            units='miles', cmap=cm.get_cmap('gray'))
 
 m.plot_values(lons, lats, vals, '%.1f', valmask)
+m.drawcounties()
 
 pqstr = ("plot ac %s00 iowa_vsby.png vsby_contour_%s00.png png"
          "") % (datetime.datetime.utcnow().strftime("%Y%m%d%H"),
