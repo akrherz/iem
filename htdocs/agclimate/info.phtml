@@ -34,22 +34,22 @@ $t->content = <<<EOF
 
 <div class="alert alert-info">These stations were removed in spring 2014.</div>
 		
-<table>
+<table class="table table-striped">
 <caption>Station Id conversion table</caption>
 <tr><th>StationId:</th><th>Station Name:</th><th>Data Starts At:</th><th>Data Ends At:</th></tr>
-<tr><td>a130209</td><td>Ames</td><td>Jul 01, 1986</td><td>Current</td></tr>
-<tr><td>a131069</td><td>Calmar</td><td>Sep 21, 2001 </td><td>Current</td></tr>  
-<tr><td>a131299</td><td>Castana</td><td>May 19, 1988</td><td>Current</td></tr>
-<tr><td>a131329</td><td>Cedar Rapids </td><td>Jun 22, 1998</td><td>Current</td></tr>
-<tr><td>a131559</td><td>Chariton</td><td>Aug 17, 1988</td><td>Current</td></tr>
-<tr><td>a131909</td><td>Crawfordsville</td><td>Jan 01, 1990</td><td>Current</td></tr>
-<tr><td>a130219</td><td>Gilbert</td><td>Aug 28, 1986</td><td>Current</td></tr>
-<tr><td>a135879</td><td>Nashua</td><td>Sep 01, 1988</td><td>Current</td></tr>
-<tr><td>a138019</td><td>Sutherlan</td><td>Jul 23, 1988</td><td>Current</td></tr>
-<tr><td>a134759</td><td>Lewis</td><td>Jun 19, 1997</td><td>Current</td></tr>
+<tr><td>a130209</td><td>Ames</td><td>Jul 01, 1986</td><td>Apr 23, 2014</td></tr>
+<tr><td>a131069</td><td>Calmar</td><td>Sep 21, 2001 </td><td>Jan 8, 2014</td></tr>  
+<tr><td>a131299</td><td>Castana</td><td>May 19, 1988</td><td>Jan 8, 2014</td></tr>
+<tr><td>a131329</td><td>Cedar Rapids </td><td>Jun 22, 1998</td><td>Apr 23, 2014</td></tr>
+<tr><td>a131559</td><td>Chariton</td><td>Aug 17, 1988</td><td>Jan 8, 2014</td></tr>
+<tr><td>a131909</td><td>Crawfordsville</td><td>Jan 01, 1990</td><td>Apr 23, 2014</td></tr>
+<tr><td>a130219</td><td>Gilbert</td><td>Aug 28, 1986</td><td>Jan 8, 2014</td></tr>
+<tr><td>a135879</td><td>Nashua</td><td>Sep 01, 1988</td><td>Apr 16, 2014</td></tr>
+<tr><td>a138019</td><td>Sutherlan</td><td>Jul 23, 1988</td><td>Aug 7, 2013</td></tr>
+<tr><td>a134759</td><td>Lewis</td><td>Jun 19, 1997</td><td>Apr 16, 2014</td></tr>
 <tr><td>a136949</td><td>Rhodes</td><td>May 17, 1999</td><td>Oct 11,2006</td></tr>
-<tr><td>a134309</td><td>Kanawha</td><td>Jun 19, 1997</td><td>Current</td></tr>
-<tr><td>a135849</td><td>Muscatine</td><td>Mar 27, 2000</td><td>Current</td></tr>
+<tr><td>a134309</td><td>Kanawha</td><td>Jun 19, 1997</td><td>Apr 23, 2014</td></tr>
+<tr><td>a135849</td><td>Muscatine</td><td>Mar 27, 2000</td><td>Apr 16, 2014</td></tr>
 </table>
 <!--
 <tr><td>a133259</td><td>          </td><td>Jan 01, 1990</td><td>Current</td></tr>
@@ -64,10 +64,10 @@ $t->content = <<<EOF
 		<div class="col-md-6 col-sm-6">
 		<h4>Units for Data</h4>
 
-<table>
+<table class="table table-striped">
 <tr><td>Evapotranspiration</td><td>inches</td></tr>
 <tr><td>Precipation</td><td>inches</td></tr>
-<tr><td>Hourly Solar Radiation</td><td>Kilo calories per hour per meter squared</td></tr>
+<tr><td>Hourly Solar Radiation</td><td>Kilo calories per meter squared per hour</td></tr>
 <tr><td>Daily Solar Radiation</td><td>Langleys</td></tr>
 <tr><td>Temperatures</td><td>Fahrenhit</td></tr>
 <tr><td>Wind speeds</td><td>MPH</td></tr>
