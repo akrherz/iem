@@ -84,6 +84,7 @@ def plotter(fdict):
         """, pgconn, params=(station,  tuple(months)), index_col=None)
     df['freq'] = df['hits'] / df['count'] * 100.
     df2 = df[df['count'] > 2]
+    avg = df['hits'].sum() / float(df['count'].sum()) * 100.
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(df2['t'], df2['freq'], ec='green', fc='green', width=1)
@@ -102,5 +103,7 @@ def plotter(fdict):
     if df2['t'].min() < 30:
         ax.axvline(32, lw=2, color='k')
         ax.text(32, -4, "32", ha='center')
+    ax.axhline(avg, lw=2, color='k')
+    ax.text(df2['t'].min() + 5, avg + 2, "Avg: %.1f%%" % (avg,))
 
     return fig, df
