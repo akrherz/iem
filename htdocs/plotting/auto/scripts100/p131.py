@@ -1,29 +1,27 @@
 import psycopg2
 import datetime
-import numpy as np
+from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
-from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
-from pyiem.datatypes import temperature, pressure, mixingratio
 from pandas.io.sql import read_sql
 
-MDICT = {'all': 'No Month/Time Limit',
-         'spring': 'Spring (MAM)',
-         'fall': 'Fall (SON)',
-         'winter': 'Winter (DJF)',
-         'summer': 'Summer (JJA)',
-         'jan': 'January',
-         'feb': 'February',
-         'mar': 'March',
-         'apr': 'April',
-         'may': 'May',
-         'jun': 'June',
-         'jul': 'July',
-         'aug': 'August',
-         'sep': 'September',
-         'oct': 'October',
-         'nov': 'November',
-         'dec': 'December'
-         }
+MDICT = OrderedDict([
+         ('all', 'No Month/Time Limit'),
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('jan', 'January'),
+         ('feb', 'February'),
+         ('mar', 'March'),
+         ('apr', 'April'),
+         ('may', 'May'),
+         ('jun', 'June'),
+         ('jul', 'July'),
+         ('aug', 'August'),
+         ('sep', 'September'),
+         ('oct', 'October'),
+         ('nov', 'November'),
+         ('dec', 'December')])
 
 
 def get_description():
