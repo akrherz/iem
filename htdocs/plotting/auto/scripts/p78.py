@@ -5,25 +5,26 @@ from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
 from pyiem.datatypes import temperature, pressure, mixingratio
 import pandas as pd
+from collections import OrderedDict
 
-MDICT = {'all': 'No Month/Time Limit',
-         'spring': 'Spring (MAM)',
-         'fall': 'Fall (SON)',
-         'winter': 'Winter (DJF)',
-         'summer': 'Summer (JJA)',
-         'jan': 'January',
-         'feb': 'February',
-         'mar': 'March',
-         'apr': 'April',
-         'may': 'May',
-         'jun': 'June',
-         'jul': 'July',
-         'aug': 'August',
-         'sep': 'September',
-         'oct': 'October',
-         'nov': 'November',
-         'dec': 'December'
-         }
+MDICT = OrderedDict([
+         ('all', 'No Month/Time Limit'),
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('jan', 'January'),
+         ('feb', 'February'),
+         ('mar', 'March'),
+         ('apr', 'April'),
+         ('may', 'May'),
+         ('jun', 'June'),
+         ('jul', 'July'),
+         ('aug', 'August'),
+         ('sep', 'September'),
+         ('oct', 'October'),
+         ('nov', 'November'),
+         ('dec', 'December')])
 
 
 def get_description():
