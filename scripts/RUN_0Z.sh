@@ -27,12 +27,12 @@ python stage4_12z_adjust.py
 
 cd ../dl
 # at 0z, -6 days is available, hopefully!
-python download_narr.py $(date -u --date '6 days ago' +'%Y %m %d')
-python download_narr.py $(date -u --date '30 days ago' +'%Y %m %d')
-python download_nldas.py
+#python download_narr.py $(date -u --date '6 days ago' +'%Y %m %d')
+#python download_narr.py $(date -u --date '30 days ago' +'%Y %m %d')
+#python download_nldas.py
 cd ../coop
-python narr_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
-python narr_solarrad.py $(date -u --date '31 days ago' +'%Y %m %d')
+#python narr_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
+#python narr_solarrad.py $(date -u --date '31 days ago' +'%Y %m %d')
 
 cd ../qc
 python check_n0q.py
