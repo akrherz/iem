@@ -21,10 +21,11 @@ spread = util.Spreadsheet(spr_client,
 translate = {'date': 'valid'}
 
 
-for sheetkey in ['Operations', 'Management', 'Pesticides']:
+TABS = ['Field Operations', 'Management', 'Pesticides']
+for sheetkey in TABS:
     current = {}
     found = {}
-    if sheetkey == 'Operations':
+    if sheetkey == TABS[0]:
         pcursor.execute("""
             SELECT valid, uniqueid, updated, operation, cropyear, oid
             from operations
@@ -58,7 +59,7 @@ for sheetkey in ['Operations', 'Management', 'Pesticides']:
             continue
         key = ('%s,%s,%s,%s,%s'
                ) % (d.get('date', ''), d.get('uniqueid'), d.get('updated'),
-                    d.get('operation' if sheetkey == 'Operations' else 'crop',
+                    d.get('operation' if sheetkey == TABS[0] else 'crop',
                           ''), d.get('cropyear'))
         if key in current:
             del(current[key])
@@ -74,17 +75,18 @@ for sheetkey in ['Operations', 'Management', 'Pesticides']:
             vals.append(d[key])
             cols.append(translate.get(key, key))
 
+        table = sheetkey if sheetkey != TABS[0] else 'operations'
         sql = """
             INSERT into %s(%s) VALUES (%s)
-            """ % (sheetkey, ",".join(cols), ','.join(["%s"]*len(cols)))
+            """ % (table, ",".join(cols), ','.join(["%s"]*len(cols)))
         pcursor.execute(sql, vals)
         added += 1
 
     for key in current.keys():
-        pcursor.execute("""DELETE from """+sheetkey+""" WHERE oid = %s""",
+        pcursor.execute("""DELETE from """+table+""" WHERE oid = %s""",
                         (current[key],))
 
-    print "   harvest_management %s %4s rows %4s dups %4s add %4s del" % (
+    print "   harvest_management %16s %4s rows %4s dups %4s add %4s del" % (
         sheetkey, entries, dups, added, len(current))
 
 pcursor.close()
