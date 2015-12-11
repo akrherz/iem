@@ -78,7 +78,6 @@ grep " /agclimate" access.log > agclimate.log
 rm -f agclimate.log
 
 # Step 5, archive these files
-mkdir -p /mesonet/www/logs/old_logs/$yyyymm
 mv access.log access_log-$dd
 gzip access_log-$dd
 mv access_log-$dd.gz iem_access_log-${yyyymm}${dd}.gz
