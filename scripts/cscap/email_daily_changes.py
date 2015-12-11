@@ -70,22 +70,22 @@ def drive_changelog(regime, yesterday, html):
 
     html += """<p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
-<tr><th>#</th><th>Time</th><th>Author</th><th>Folder</th><th>Resource</th></tr>
+<tr><th>Folder</th><th>Resource</th></tr>
 </thead>
 <tbody>"""
 
     largestChangeId = -1
     hits = 0
     page_token = None
+    param = {'includeDeleted': False, 'maxResults': 1000}
     while True:
-        param = {}
         if start_change_id:
             param['startChangeId'] = start_change_id
         if page_token:
             param['pageToken'] = page_token
-        print(("Requesting start_change_id: %s "
+        print(("[%s] Requesting start_change_id: %s "
                "largestChangeId: %s page_token: %s"
-               ) % (start_change_id, largestChangeId, page_token))
+               ) % (regime, start_change_id, largestChangeId, page_token))
         response = drive.changes().list(**param).execute()
         largestChangeId = response['largestChangeId']
         page_token = response.get('nextPageToken')
@@ -120,11 +120,28 @@ def drive_changelog(regime, yesterday, html):
             hits += 1
             pfolder = item['file']['parents'][0]['id']
             html += """
-<tr><td>%s</td><td>%s</td><td>%s</td>
+<tr>
 <td><a href="https://docs.google.com/folderview?id=%s&usp=drivesdk">%s</a></td>
 <td><a href="%s">%s</a></td></tr>
-            """ % (changestamp, localts.strftime("%-d %b %I:%M %P"),
-                   author, pfolder, folders[pfolder]['title'], uri, title)
+            """ % (pfolder, folders[pfolder]['title'], uri, title)
+            # Now we check revisions
+            revisions = drive.revisions().list(
+                            fileId=item['file']['id']).execute()
+            for item2 in revisions['items']:
+                md = datetime.datetime.strptime(
+                                                item2['modifiedDate'][:19],
+                                                '%Y-%m-%dT%H:%M:%S')
+                md = md.replace(tzinfo=pytz.timezone("UTC"))
+                if md < yesterday:
+                    continue
+                localts = md.astimezone(pytz.timezone("America/Chicago"))
+                luser = item2['lastModifyingUser']
+                html += """
+<tr><td colspan="2"><img src="%s" style="height:25px;"/> %s by
+ %s (%s)</td></tr>
+                """ % (luser['picture']['url'],
+                       localts.strftime("%-d %b %-I:%M %p"),
+                       luser['displayName'], luser['emailAddress'])
         if not page_token:
             break
 
