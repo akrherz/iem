@@ -8,7 +8,6 @@ import datetime
 import subprocess
 import os
 import sys
-import glob
 from pyiem.util import send2box
 
 
@@ -20,20 +19,8 @@ def run(date):
     cmd = "tar -czf %s /mesonet/ARCHIVE/data/%s" % (tarfn,
                                                     date.strftime("%Y/%m/%d"))
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-    sz = os.path.getsize(tarfn)
-    if sz > 14000000000:
-        # Step 2: Split this big file into 14GB chunks, each file will have
-        # suffix .aa then .ab then .ac etc
-        cmd = "split --bytes=14000M %s %s." % (tarfn, tarfn,)
-        subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-        files = glob.glob("%s.??" % (tarfn, ))
-    else:
-        files = [tarfn, ]
-
-    send2box(files, date.strftime("/IEMArchive/%Y/%m"))
-    # Step 5: delete uploaded files!
-    for fn in glob.glob("%s*" % (tarfn,)):
-        os.unlink(fn)
+    send2box(tarfn, date.strftime("/IEMArchive/%Y/%m"))
+    os.unlink(tarfn)
 
 
 def main(argv):
