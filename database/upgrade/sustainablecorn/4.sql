@@ -1,2 +1,2 @@
 -- Add storage of new notill column
-ALTER TABLE operations add notill varchar;
+ALTER TABLE management add notill varchar;
