@@ -1,6 +1,33 @@
 """Consume DOT REST Service with Iowa Winter Road Conditions
 
 Run every five minutes from RUN_5MIN.sh
+
+      "attributes" : {
+        "OBJECTID" : 38,
+        "SEGMENT_ID" : 1883,
+        "ROUTE" : "I-35",
+        "NAMEID" : "I-35: Swaledale Exit to Exit 194 (Clear Lake)",
+        "LONGNAME" : "I-35,.... LAKE)",
+        "DISTRICT" : "D2-  Hanlontown-Mason City",
+        "SUBAREA" : "Hanlontown",
+        "PRIMARYMP" : 182.5526287,
+        "PRIMARYLAT" : 42.97979554,
+        "PRIMARYLONG" : -93.34460851,
+        "SECONDARYMP" : 194.004904,
+        "SECONDARYLAT" : 43.145956,
+        "SECONDARYLONG" : -93,
+        "EVENT_ID" : "IASEG-187400",
+        "EVENT_UPDATE" : 73,
+        "HL_PAVEMENT_CONDITION" : "seasonal roadway conditions",
+        "LOC_LINK_DIRECTION" : "both directions",
+        "ROAD_CONDITION" : "Seasonal",
+        "GIS_CREATION_DATE" : 1449769515000,
+        "CARS_MSG_UPDATE_DATE" : 1449766817000,
+        "CARS_MSG_INITIAL_DATE" : 1449766817000,
+        "PH_PAVEMENT_CONDITION" : "",
+        "SHAPE_Length" : 25598.2073258733
+      },
+
 """
 import urllib2
 import json
@@ -41,20 +68,20 @@ ROADCOND = {
 lookup = {}
 current = {}
 cursor.execute("""
-    select c.segid, b.longname, c.cond_code from
+    select c.segid, b.longname, c.cond_code, b.idot_id from
     roads_current c JOIN roads_base b on (c.segid = b.segid)
     """)
 for row in cursor:
-    lookup[row[1]] = row[0]
+    lookup[row[3]] = row[0]
     current[row[0]] = row[2]
 
 j = json.loads(urllib2.urlopen(URI, timeout=30).read())
 
 for feat in j['features']:
-    segid = lookup.get(feat['attributes']['LONGNAME'])
+    segid = lookup.get(feat['attributes']['SEGMENT_ID'])
     if segid is None:
-        print("ingest_roads_rest unknown longname '%s'" % (
-            feat['attributes']['LONGNAME'],))
+        print("ingest_roads_rest unknown longname '%s' segment_id '%s'" % (
+            feat['attributes']['LONGNAME'], feat['attributes']['SEGMENT_ID']))
         continue
     raw = feat['attributes']['HL_PAVEMENT_CONDITION']
     cond = ROADCOND.get(raw)
@@ -71,10 +98,12 @@ for feat in j['features']:
     print valid
     # Save to log
     cursor.execute("""INSERT into roads_2015_2016_log(segid, valid, cond_code,
-    raw) VALUES (%s, %s, %s, %s)""", (segid, valid, cond, raw))
+    raw) VALUES (%s, %s, %s, %s)""", (segid,
+                                      valid.strftime("%Y-%m-%d %H:%M-06"),
+                                      cond, raw))
     # Update currents
     cursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s
-    WHERE segid = %s""", (cond, valid, segid))
+    WHERE segid = %s""", (cond, valid.strftime("%Y-%m-%d %H:%M-06"), segid))
 
 cursor.close()
 pgconn.commit()
