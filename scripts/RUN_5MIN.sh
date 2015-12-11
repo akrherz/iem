@@ -2,6 +2,9 @@
 cd cache 
 sh download_wwa.sh &
 
+cd ../roads
+python ingest_roads_rest.py &
+
 cd ../ingestors/ifc
 python ingest_ifc_precip.py &
 
