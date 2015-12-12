@@ -115,7 +115,6 @@ def drive_changelog(regime, yesterday, html):
                 continue
             uri = item['file']['alternateLink']
             title = item['file']['title'].encode('ascii', 'ignore')
-            author = item['file']['lastModifyingUserName']
             localts = modifiedDate.astimezone(pytz.timezone("America/Chicago"))
             hits += 1
             pfolder = item['file']['parents'][0]['id']
@@ -124,22 +123,34 @@ def drive_changelog(regime, yesterday, html):
 <td><a href="https://docs.google.com/folderview?id=%s&usp=drivesdk">%s</a></td>
 <td><a href="%s">%s</a></td></tr>
             """ % (pfolder, folders[pfolder]['title'], uri, title)
+            hit = False
+            if 'headRevisionId' in item['file']:
+                revisions = drive.revisions().list(
+                                fileId=item['file']['id']).execute()
+                for item2 in revisions['items']:
+                    md = datetime.datetime.strptime(
+                                                    item2['modifiedDate'][:19],
+                                                    '%Y-%m-%dT%H:%M:%S')
+                    md = md.replace(tzinfo=pytz.timezone("UTC"))
+                    if md < yesterday:
+                        continue
+                    localts = md.astimezone(pytz.timezone("America/Chicago"))
+                    luser = item2['lastModifyingUser']
+                    hit = True
+                    html += """
+    <tr><td colspan="2"><img src="%s" style="height:25px;"/> %s by
+     %s (%s)</td></tr>
+                    """ % ((luser['picture']['url']
+                            if 'picture' in luser else ''),
+                           localts.strftime("%-d %b %-I:%M %p"),
+                           luser['displayName'], luser['emailAddress'])
             # Now we check revisions
-            revisions = drive.revisions().list(
-                            fileId=item['file']['id']).execute()
-            for item2 in revisions['items']:
-                md = datetime.datetime.strptime(
-                                                item2['modifiedDate'][:19],
-                                                '%Y-%m-%dT%H:%M:%S')
-                md = md.replace(tzinfo=pytz.timezone("UTC"))
-                if md < yesterday:
-                    continue
-                localts = md.astimezone(pytz.timezone("America/Chicago"))
-                luser = item2['lastModifyingUser']
+            if not hit or 'headRevisionId' not in item['file']:
+                luser = item['file']['lastModifyingUser']
                 html += """
 <tr><td colspan="2"><img src="%s" style="height:25px;"/> %s by
  %s (%s)</td></tr>
-                """ % (luser['picture']['url'],
+                """ % (luser['picture']['url'] if 'picture' in luser else '',
                        localts.strftime("%-d %b %-I:%M %p"),
                        luser['displayName'], luser['emailAddress'])
         if not page_token:
