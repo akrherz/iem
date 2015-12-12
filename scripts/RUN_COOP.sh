@@ -8,3 +8,4 @@ php wxc_coop.php
 cd ../coop
 csh PREC.csh
 python 12z_precip.py
+python year_precip.py
