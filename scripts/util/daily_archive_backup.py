@@ -19,7 +19,8 @@ def run(date):
     cmd = "tar -czf %s /mesonet/ARCHIVE/data/%s" % (tarfn,
                                                     date.strftime("%Y/%m/%d"))
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-    send2box(tarfn, date.strftime("/IEMArchive/%Y/%m"))
+    send2box(tarfn, date.strftime("/IEMArchive/%Y/%m"),
+             tmpdir="/mesonet/tmp")
     os.unlink(tarfn)
 
 
