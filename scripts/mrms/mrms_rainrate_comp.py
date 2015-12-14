@@ -1,4 +1,10 @@
-"""Generate a composite of the MRMS PrecipRate"""
+"""Generate a composite of the MRMS PrecipRate
+
+Within a two minute window, maybe the max rate we could see is 0.2 inches,
+which is 5 mm.  So if we want to store 5mm in 250 bins, we have a resolution
+of 0.02 mm per index.
+
+"""
 import datetime
 import pytz
 import numpy as np
@@ -23,7 +29,7 @@ def do(now, realtime, delta):
     metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'product': 'a2m',
-                'units': '0.1 mm'}
+                'units': '0.02 mm'}
 
     gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/PrecipRate/"
                            "PrecipRate_00.00_%Y%m%d-%H%M00.grib2.gz"))
@@ -46,7 +52,7 @@ def do(now, realtime, delta):
 
     val = grb['values']
     # Convert into units of 0.1 mm accumulation
-    val = val / 60.0 * 2.0 * 10.0
+    val = val / 60.0 * 2.0 * 50.0
     val = np.where(val < 0., 255., val)
     imgdata[:, :] = np.flipud(val.astype('int'))
 
