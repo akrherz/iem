@@ -4,6 +4,8 @@ include("../../../../config/settings.inc.php");
 $layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
 $var    =  isset( $_GET['var']) ? $_GET['var'] : "tmpf";
 $network = isset($_GET['network']) ? $_GET['network'] : "";
+$height = isset($_GET['height']) ? intval($_GET['height']) : 350;
+$width = isset($_GET['width']) ? intval($_GET['width']) : 450;
 $st = isset($_GET['st']) ? $_GET['st'] : Array();
 
 
@@ -18,11 +20,9 @@ function mktitle($map, $imgObj, $titlet) {
     $titlet);
 }
 
-
-
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+include("../../../../include/mlib.php");
+include("../../../../include/iemaccess.php");
+include("../../../../include/iemaccessob.php");
 
 function skntChar($sknt){
   if ($sknt < 2)  return chr(0);
@@ -89,8 +89,6 @@ $rnd = Array("alti" => 2, "phour" => 2, "vsby" => 1,"tmpf" => 0,"dwpf"=>0,
 
 $lats = Array();
 $lons = Array();
-$height = 350;
-$width = 450;
 
 foreach($sts as $key => $value){
   $lats[$key] = $sts[$key]->db["y"];
@@ -103,7 +101,7 @@ $lon0 = min($lons);
 $lon1 = max($lons);
 
 $map = ms_newMapObj("../../../../data/gis/base4326.map");
-
+$map->setSize($width, $height);
 $pad = 0.6;
 $lpad = 0.6;
 
