@@ -269,11 +269,13 @@ function daySelect2($selected, $name, $jsextra=''){
   return $s;
 } // End 
 
-function segmentSelect($dbconn, $selected, $name="segid")
+function segmentSelect($dbconn, $year, $month, $selected, $name="segid")
 { 
   $s = "<select name=\"$name\">\n";
-  $rs = pg_query($dbconn, "SELECT segid, major, minor from roads_base ORDER by major ASC");
-  
+  $rs = pg_prepare($dbconn, "R_S",
+  		"SELECT segid, major, minor from roads_base "
+  		." WHERE archive_begin <= $1 and archive_end > $1 ORDER by major ASC");
+  $rs = pg_execute($dbconn, "R_S", Array("${year}-${month}-01"));
   for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
   { 
     $s .= "<option value=\"". $row["segid"] ."\" ";
