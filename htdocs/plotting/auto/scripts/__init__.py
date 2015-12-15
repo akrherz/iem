@@ -76,6 +76,8 @@ data = {'plots': [
          'label': "Standard Deviation of Daily Temperatures"},
         {'id': "28", 'mw': True,
          'label': "Trailing Number of Days Precipitation Total Rank"},
+        {'id': "132", 'mw': True,
+         'label': "Top 10 Precip/Temperature Values by Month/Seaseon"},
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "130", 'mw': True,
