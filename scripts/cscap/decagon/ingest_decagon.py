@@ -32,7 +32,7 @@ def translate(df):
     df.rename(columns=x, inplace=True)
 
 
-def process1(fn, timefmt='%d-%b-%Y %H:%M:%S'):
+def process1(fn, timefmt='%m/%d/%y %H:%M'):
     df = pd.read_table(fn, sep='\t', index_col=False)
     df['valid'] = df['Measurement Time'].apply(
         lambda s: datetime.datetime.strptime(s.strip(), timefmt))
