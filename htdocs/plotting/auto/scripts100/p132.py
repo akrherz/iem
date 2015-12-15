@@ -101,6 +101,8 @@ def plotter(fdict):
     sorder = 'ASC' if varname in ['min_greatest_low', ] else 'DESC'
     df = read_sql("""WITH data as (
         SELECT month, day, day - '%s days'::interval as start_date,
+        count(*) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
+        current row) as count,
         sum(precip) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
         current row) as total_precip,
         min(high) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
@@ -111,10 +113,10 @@ def plotter(fdict):
 
         SELECT day as end_date, start_date, """+varname+""" from data WHERE
         month in %s and
-        extract(month from start_date) in %s
+        extract(month from start_date) in %s and count = %s
         ORDER by """+varname+""" """+sorder+""" LIMIT 10
-        """, pgconn, params=(days - 1, days - 1, days - 1, days - 1,
-                             station,  tuple(months), tuple(months)),
+        """, pgconn, params=(days - 1, days - 1, days - 1, days - 1, days - 1,
+                             station,  tuple(months), tuple(months), days),
                   index_col=None)
     if len(df.index) == 0:
         return 'Error, no results returned!'
