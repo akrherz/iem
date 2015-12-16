@@ -9,3 +9,5 @@ cd ../coop
 csh PREC.csh
 python 12z_precip.py
 python year_precip.py
+python month_precip.py
+python day_precip.py
