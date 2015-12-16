@@ -3,6 +3,7 @@ import numpy as np
 from pyiem import network
 import datetime
 import pandas as pd
+from scipy import stats
 
 PDICT = {'none': 'Show all values',
          'hide': 'Show "strong" events'}
@@ -31,6 +32,8 @@ def get_description():
              label='Number of Months to Lag for SOI Value:'),
         dict(type="select", name='h', default='none', options=PDICT,
              label='Hide/Show week SOI events -0.5 to 0.5'),
+        dict(type='text', default=datetime.date.today().year, name='year',
+             label='Year(s) to Highlight in Chart (comma delimited)'),
     ]
     return d
 
@@ -39,8 +42,9 @@ def title(wanted):
     """ Make a title """
     t1 = datetime.date(2000, wanted[0], 1)
     t2 = datetime.date(2000, wanted[-1], 1)
-    return "Avg Precip + Temp for %s thru %s," % (t1.strftime("%B"),
-                                                  t2.strftime("%B"))
+    return "Avg Precip + Temp for %s%s," % (
+        t1.strftime("%B"),
+        " thru %s" % (t2.strftime("%B"),) if wanted[0] != wanted[-1] else '')
 
 
 def plotter(fdict):
@@ -56,6 +60,7 @@ def plotter(fdict):
     lagmonths = int(fdict.get('lag', -3))
     months = int(fdict.get('months', 2))
     month = int(fdict.get('month', 9))
+    highyears = [int(x) for x in fdict.get('year', '2015').split(",")]
     h = fdict.get('h', 'none')
 
     wantmonth = month + lagmonths
@@ -103,7 +108,8 @@ def plotter(fdict):
         data['precip'] += _precip
         data['temp'].append(float(_temp))
 
-    fig, ax = plt.subplots(1, 1)
+    fig = plt.figure(figsize=(10, 6))
+    ax = plt.axes([0.1, 0.12, 0.5, 0.75])
     msg = ("[%s] %s\n%s\n%s SOI (3 month average)"
            ) % (station, nt.sts[station]['name'], title(wanted),
                 datetime.date(2000, wantmonth, 1).strftime("%B"))
@@ -128,6 +134,9 @@ def plotter(fdict):
         else:
             ax.scatter(x, y, facecolor=c, edgecolor='k', s=60, zorder=3,
                        marker='o')
+        if year in highyears:
+            ax.text(x, y + 0.2, "%s" % (year, ), ha='center', va='bottom',
+                    zorder=5)
         rows.append(dict(year=year, precip=x, tmpf=y, soi3m=val))
 
     ax.axhline(np.average(ys), lw=2, color='k', linestyle='-.', zorder=2)
@@ -135,7 +144,7 @@ def plotter(fdict):
 
     sm = plt.cm.ScalarMappable(norm, cmap)
     sm.set_array(zdata)
-    cb = fig.colorbar(sm, extend='both')
+    cb = plt.colorbar(sm, extend='both')
     cb.set_label("<-- El Nino :: SOI :: La Nina -->")
 
     ax.grid(True)
@@ -144,6 +153,30 @@ def plotter(fdict):
     ax.set_ylabel("Average Temperature $^\circ$F, Avg: %.1f" % (np.average(ys),
                                                                 ))
     df = pd.DataFrame(rows)
-    plt.tight_layout()
+    ax2 = plt.axes([0.67, 0.6, 0.28, 0.35])
+    ax2.scatter(df['soi3m'].values, df['tmpf'].values)
+    ax2.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
+    ax2.set_ylabel("Avg Temp $^\circ$F")
+    slp, intercept, r_value, _, _ = stats.linregress(df['soi3m'].values,
+                                                     df['tmpf'].values)
+    y1 = -2.0 * slp + intercept
+    y2 = 2.0 * slp + intercept
+    ax2.plot([-2, 2], [y1, y2])
+    ax2.text(0.97, 0.9, "R$^2$=%.2f" % (r_value**2, ),
+             ha='right', transform=ax2.transAxes, bbox=dict(color='white'))
+    ax2.grid(True)
+
+    ax3 = plt.axes([0.67, 0.1, 0.28, 0.35])
+    ax3.scatter(df['soi3m'].values, df['precip'].values)
+    ax3.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
+    ax3.set_ylabel("Total Precip [inch]")
+    slp, intercept, r_value, _, _ = stats.linregress(df['soi3m'].values,
+                                                     df['precip'].values)
+    y1 = -2.0 * slp + intercept
+    y2 = 2.0 * slp + intercept
+    ax3.plot([-2, 2], [y1, y2])
+    ax3.text(0.97, 0.9, "R$^2$=%.2f" % (r_value**2, ),
+             ha='right', transform=ax3.transAxes, bbox=dict(color='white'))
+    ax3.grid(True)
 
     return fig, df
