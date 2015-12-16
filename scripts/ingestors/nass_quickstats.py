@@ -16,7 +16,7 @@ def get_file():
         return
     today = datetime.date.today()
     cmd = ("wget -q -O /mesonet/tmp/qstats.txt.gz "
-           "ftp://ftp.nass.usda.gov/quickstats/qs.all_%s.txt.gz"
+           "ftp://ftp.nass.usda.gov/quickstats/qs.crops_%s.txt.gz"
            ) % (today.strftime("%Y%m%d"), )
 
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
