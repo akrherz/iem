@@ -83,8 +83,7 @@ def drive_changelog(regime, yesterday, html):
             param['startChangeId'] = start_change_id
         if page_token:
             param['pageToken'] = page_token
-        print(("[%s] Requesting start_change_id: %s "
-               "largestChangeId: %s page_token: %s"
+        print(("[%s] start_change_id: %s largestChangeId: %s page_token: %s"
                ) % (regime, start_change_id, largestChangeId, page_token))
         response = drive.changes().list(**param).execute()
         largestChangeId = response['largestChangeId']
@@ -124,7 +123,8 @@ def drive_changelog(regime, yesterday, html):
 <td><a href="%s">%s</a></td></tr>
             """ % (pfolder, folders[pfolder]['title'], uri, title)
             hit = False
-            if 'headRevisionId' in item['file']:
+            if 'version' in item['file']:
+                lastmsg = ""
                 revisions = drive.revisions().list(
                                 fileId=item['file']['id']).execute()
                 for item2 in revisions['items']:
@@ -137,15 +137,18 @@ def drive_changelog(regime, yesterday, html):
                     localts = md.astimezone(pytz.timezone("America/Chicago"))
                     luser = item2['lastModifyingUser']
                     hit = True
-                    html += """
+                    thismsg = """
     <tr><td colspan="2"><img src="%s" style="height:25px;"/> %s by
      %s (%s)</td></tr>
                     """ % ((luser['picture']['url']
                             if 'picture' in luser else ''),
                            localts.strftime("%-d %b %-I:%M %p"),
                            luser['displayName'], luser['emailAddress'])
+                    if thismsg != lastmsg:
+                        html += thismsg
+                    lastmsg = thismsg
             # Now we check revisions
-            if not hit or 'headRevisionId' not in item['file']:
+            if not hit:
                 luser = item['file']['lastModifyingUser']
                 html += """
 <tr><td colspan="2"><img src="%s" style="height:25px;"/> %s by
@@ -176,14 +179,16 @@ def main(argv):
     today = today.replace(tzinfo=pytz.timezone("UTC"), hour=12,
                           minute=0, second=0, microsecond=0)
     yesterday = today - datetime.timedelta(days=1)
+    localts = yesterday.astimezone(pytz.timezone("America/Chicago"))
     html = """
 <h3>%s Cloud Data Changes</h3>
 <br />
-<p>Period: 7 AM %s - 7 AM %s
+<p>Period: %s - %s
 
 <h4>Google Drive File Changes</h4>
-""" % (CFG[regime]['title'], yesterday.strftime("%-d %B %Y"),
-       today.strftime("%-d %B %Y"))
+""" % (CFG[regime]['title'],
+       (localts - datetime.timedelta(hours=24)).strftime("%-I %p %-d %B %Y"),
+       localts.strftime("%-I %p %-d %B %Y"))
 
     html = drive_changelog(regime, yesterday, html)
     html = sites_changelog(regime, yesterday, html)
