@@ -55,7 +55,7 @@ for sheetkey in TABS:
         entries += 1
         d = entry.to_dict()
         # Units row has n/a as the date, so skip it
-        if d.get('date') == 'n/a':
+        if d.get('date') == 'mm/dd/yyyy':
             continue
         key = ('%s,%s,%s,%s,%s'
                ) % (d.get('date', ''), d.get('uniqueid'), d.get('updated'),
@@ -72,6 +72,8 @@ for sheetkey in TABS:
         cols = []
         vals = []
         for key in d.keys():
+            if key.startswith('gio'):
+                continue
             vals.append(d[key])
             cols.append(translate.get(key, key))
 
