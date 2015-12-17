@@ -12,6 +12,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+FMIME = 'application/vnd.google-apps.folder'
 CFG = {'cscap': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
                              'lokhande@iastate.edu', 'gio@iastate.edu'],
                      title="Sustainable Corn"
@@ -123,10 +124,15 @@ def drive_changelog(regime, yesterday, html):
 <td><a href="%s">%s</a></td></tr>
             """ % (pfolder, folders[pfolder]['title'], uri, title)
             hit = False
-            if 'version' in item['file']:
+            if 'version' in item['file'] and item['file']['mimeType'] != FMIME:
                 lastmsg = ""
-                revisions = drive.revisions().list(
-                                fileId=item['file']['id']).execute()
+                try:
+                    revisions = drive.revisions().list(
+                        fileId=item['file']['id']).execute()
+                except:
+                    print(('[%s] file %s (%s) failed revisions'
+                           ) % (regime, title, item['file']['mimeType']))
+                    revisions = {'items': []}
                 for item2 in revisions['items']:
                     md = datetime.datetime.strptime(
                                                     item2['modifiedDate'][:19],
