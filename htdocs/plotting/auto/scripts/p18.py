@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
@@ -10,6 +11,7 @@ def get_description():
     d = dict()
     ts = datetime.date.today() - datetime.timedelta(days=365)
     d['data'] = True
+    d['highcharts'] = True
     d['description'] = """This chart displays a simple time series of
     observed air temperatures for a location of your choice.  For sites in the
     US, the daily high and low temperature climatology is presented as a
@@ -26,15 +28,66 @@ def get_description():
     return d
 
 
-def plotter(fdict):
-    """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
+def highcharts(fdict):
+    """ Highcharts output """
+    station = fdict.get('zstation', 'AMW')
+    network = fdict.get('network', 'IA_ASOS')
+    nt = NetworkTable(network)
+    sdate = datetime.datetime.strptime(fdict.get('sdate', '2000-01-01'),
+                                       '%Y-%m-%d')
+    days = int(fdict.get('days', 365))
+    edate = sdate + datetime.timedelta(days=days)
+    today = datetime.datetime.today()
+    if edate > today:
+        edate = today
+        days = (edate - sdate).days
+
+    climo, df = get_data(fdict)
+    ranges = []
+    now = sdate
+    while now <= edate:
+        ranges.append([int(now.strftime("%s")) * 1000.,
+                       climo[now.strftime("%m%d")]['low'],
+                       climo[now.strftime("%m%d")]['high']])
+        now += datetime.timedelta(days=1)
+
+    j = dict()
+    j['title'] = dict(text='[%s] %s Time Series' % (station,
+                                                    nt.sts[station]['name']))
+    j['xAxis'] = dict(type='datetime')
+    j['yAxis'] = dict(title=dict(text='Temperature °F'))
+    j['tooltip'] = {'crosshairs': True,
+                    'shared': True,
+                    'valueSuffix': '°F'}
+    j['legend'] = dict()
+    j['exporting'] = {'enabled': True}
+    j['chart'] = {'zoomType': 'x'}
+    j['plotOptions'] = {'line': {'turboThreshold': 0}}
+    j['series'] = [
+        {'name': 'Temperature',
+         'data': zip(df.ticks.values.tolist(), df.tmpf.values.tolist()),
+         'zIndex': 1,
+         'color': '#FF0000',
+         'lineWidth': 2,
+         'marker': {'enabled': False},
+         'type': 'line'},
+        {'name': 'Range',
+         'data': ranges,
+         'type': 'arearange',
+         'lineWidth': 0,
+         'linkedTo': ':previous',
+         'color': '#ADD8E6',
+         'fillOpacity': 0.3,
+         'zIndex': 0
+         }]
+
+    return j
+
+
+def get_data(fdict):
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
     nt = NetworkTable(network)
@@ -55,11 +108,35 @@ def plotter(fdict):
         climo[row[0].strftime("%m%d")] = dict(high=row[1], low=row[2])
 
     df = read_sql("""
-     SELECT valid, tmpf from alldata WHERE station = %s
-     and valid > %s and valid < %s ORDER by valid ASC
+     SELECT valid,
+     extract(epoch from valid) * 1000 as ticks,
+     tmpf::int from alldata WHERE station = %s
+     and valid > %s and valid < %s and tmpf is not null ORDER by valid ASC
     """, ASOS, params=(station, sdate, sdate + datetime.timedelta(days=days)),
                   index_col='valid')
 
+    return climo, df
+
+
+def plotter(fdict):
+    """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+
+    station = fdict.get('zstation', 'AMW')
+    network = fdict.get('network', 'IA_ASOS')
+    nt = NetworkTable(network)
+    sdate = datetime.datetime.strptime(fdict.get('sdate', '2000-01-01'),
+                                       '%Y-%m-%d')
+    days = int(fdict.get('days', 365))
+    edate = sdate + datetime.timedelta(days=days)
+    today = datetime.datetime.today()
+    if edate > today:
+        edate = today
+        days = (edate - sdate).days
+
+    climo, df = get_data(fdict)
     (fig, ax) = plt.subplots(1, 1)
 
     xticks = []
