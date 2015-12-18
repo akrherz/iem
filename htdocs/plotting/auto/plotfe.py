@@ -7,7 +7,8 @@ import os
 import datetime
 import pandas as pd
 import tempfile
-
+import imp
+        
 
 def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting
@@ -36,6 +37,8 @@ def main():
     res = mc.get(mckey)
     if fmt == 'png':
         sys.stdout.write("Content-type: image/png\n\n")
+    elif fmt == 'js':
+        sys.stdout.write("Content-type: application/javascript\n\n")
     elif fmt in ['csv', 'txt']:
         sys.stdout.write('Content-type: text/plain\n\n')
     else:
@@ -43,13 +46,23 @@ def main():
         sys.stdout.write((
             "Content-Disposition: attachment;Filename=iem.xlsx\n\n"))
     hostname = os.environ.get("SERVER_NAME", "")
-    if not res or hostname == "iem.local":
+    if not res and fmt == 'js':
+        import json
+        # We can short circuit things
+        if p >= 100:
+            name = "scripts100/p%s" % (p, )
+        else:
+            name = 'scripts/p%s' % (p,)
+        fp, pathname, description = imp.find_module(name)
+        a = imp.load_module(name, fp, pathname, description)
+        res = '$("#ap_container").highcharts(%s);' % (
+                json.dumps(a.highcharts(fdict)), )
+    elif not res or hostname == "iem.local":
         # Lazy import to help speed things up
         import matplotlib
         matplotlib.use('agg')
         import matplotlib.pyplot as plt
         import cStringIO
-        import imp
         if p >= 100:
             name = "scripts100/p%s" % (p, )
         else:
