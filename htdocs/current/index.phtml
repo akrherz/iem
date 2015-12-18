@@ -1,9 +1,6 @@
 <?php 
-/*
- * Mainpage of currents for the website, kind of ugly, but it is OK
- */
 require '../../config/settings.inc.php';
-include_once('../../include/myview.php');
+include_once '../../include/myview.php';
 
 $t = new MyView();
 $t->thispage = "current-products";
@@ -19,22 +16,28 @@ $t->content = <<<EOF
 <h4>IEM Station Plot</h4>
 <a href="/timemachine/#1.0"><img class="img-responsive" src="/data/mesonet.gif" /></a>
 
-<h3 class="subtitle">Mesonet Plots</h3>
+<h3>Mesonet Plots</h3>
 <ul>
- <li><a href="/timemachine/#1.0">Iowa Mesonet Plot</a> [<a href="loop.phtml?prod=mesonet">Loop</a>]</li>
- <li><a href="/timemachine/#4.0">Upper Mid-West</a> [<a href="loop.phtml?prod=mwmesonet">Loop</a>]</li>
+ <li><a href="/timemachine/#1.0">Iowa Mesonet Plot</a>
+ 	[<a href="loop.phtml?prod=mesonet">Loop</a>]</li>
+ <li><a href="/timemachine/#4.0">Upper Mid-West</a>
+ 	[<a href="loop.phtml?prod=mwmesonet">Loop</a>]</li>
+ <li><a href="http://www.rap.ucar.edu/weather/surface/">RAP Surface Page</a>
+  <br />Excellent website with surface plots</li>
+ 	
 </ul>
 
-
-<h3 class="subtitle">Temperature</h3>
+<h3>Temperature</h3>
 <ul>
  <li><a href="/timemachine/#63.0">12Z Low Temperature</a></li>
  <li><a href="/data/summary/iowa_asos_high.png">Today High Temperature</a></li>
+ <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
 </ul>
 
-<h3 class="subtitle">NMQ Q2 Precipitation Plots</h3>
-<p>These plots are from the <a href="http://nmq.ou.edu">National Mosaic QPE</a>
-project providing precipitation estimates at a 5 minute and 1 km interval.
+<h3>MRMS Q3 Precipitation Plots</h3>
+<p>These plots are from the
+ <a href="http://www.nssl.noaa.gov/projects/mrms/">National Mosaic QPE</a>
+project providing precipitation estimates at a 2 minute and 1 km interval.
 <ul>
   <li><a href="/timemachine/#44.{$mhourlink}">Current Precip Intensity</a></li>
   <li><a href="/timemachine/#45.{$mhourlink}">Today's Precip</a></li>
@@ -43,19 +46,14 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
   <li>6 Hour Total (<a href="/data/iowa_q2_6h.png">Current</a> or <a href="../timemachine/#48.0">Archive</a> )</li>
 </ul>
 
-
-
-<h3 class="subtitle">External Website Resources:</h3>
-<a href="http://www.rap.ucar.edu/weather/surface/">RAP Surface Page</a>
-
 </div><div class="col-md-4">
 
-		<h4>Current Temperatures</h4>
+<h4>Current Temperatures</h4>
 <a href="/data/iowa_tmpf.png"><img src="/data/iowa_tmpf.png" class="img-responsive"/></a>
 <br />
 		
 
-<h3 class="subtitle">Single Variable Plots</h3>
+<h3>Single Variable Plots</h3>
 <ul>  <li><a href="/data/mesonet_altm.gif">Altimeter</a></li>
   <li><a href="/data/ceil.gif">Ceiling</a></li>
   <li><a href="/data/heat.gif">Heat Index</a></li>
@@ -64,7 +62,7 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 
 </ul>
 
-<h3 class="subtitle">Precipitation</h3>
+<h3>Precipitation</h3>
 <ul>
   <li><a href="/timemachine/#82.0">Iowa Flood Center RADAR Estimates</a></li>
   <li><a href="/timemachine/#37.0">Iowa Precipitation Contour [COOP]</a></li>
@@ -74,26 +72,24 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
   <li><a href="/timemachine/#41.{$daylink}">Iowa StageIV Daily Estimate</a></li>
   <li><a href="/timemachine/#42.{$daylink}">Midwest Daily Estimate</a></li>
   <li><a href="/timemachine/#43.{$daylink}">US StageIV Daily Estimate</a></li>
-
   <li><a href="/data/1hprecip.gif">ASOS + AWOS (Last Hour)</a></li>
   <li><a href="/data/summary/today_prec.png">ASOS + AWOS (Today)</a></li>
 </ul>
 
 </div><div class="col-md-4">
 
-		<h4>Rainfall Today</h4>
+<h4>Rainfall Today</h4>
 <a href="/timemachine/#45.{$daylink}"><img src="/data/iowa_q2_1d.png" class="img-responsive"/></a>
 <br />
 		
 <h3>Wind Plots</h3>
 <ul>
   <li><a href="/timemachine/#60.{$mhourlink}">Wind Power Potential</a></li>
-  <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
   <li><a href="/timemachine/#16.{$daylink}">Wind Gust Today</a></li>
 </ul>
 
 
-<h3 class="subtitle">Gridded Surface Plots:</h3>
+<h3>Gridded Surface Plots:</h3>
 <table>
 <tr><td>
   <br><a href="/data/surfaceTW0.gif">Temps & Winds</a></td><td>
@@ -116,15 +112,15 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 </table>
 
 
-
-<p><h3 class="subtitle">Soundings:</h3>
-<a href="http://www.rap.ucar.edu/weather/upper/sla_wp.gif">Slater Profiler</a>
-<br /><a href="http://www.rap.ucar.edu/weather/upper/dvn.gif">Davenport</a>
-<br><a href="http://www.rap.ucar.edu/weather/upper/oax.gif">Omaha</a>
-<br><a href="http://www.rap.ucar.edu/weather/upper/mpx.gif">Minneapolis</a>
-<br><a href="http://www.rap.ucar.edu/weather/upper/top.gif">Topeka</a>
-<br /><a href="http://www.uni.edu/storm/">Profiling Radiometer @UNI</a>
-
+<h3>Soundings:</h3>
+<ul>
+<li><a href="http://www.rap.ucar.edu/weather/upper/sla_wp.gif">Slater Profiler</a></li>
+<li><a href="http://www.rap.ucar.edu/weather/upper/dvn.gif">Davenport</a></li>
+<li><a href="http://www.rap.ucar.edu/weather/upper/oax.gif">Omaha</a></li>
+<li><a href="http://www.rap.ucar.edu/weather/upper/mpx.gif">Minneapolis</a></li>
+<li><a href="http://www.rap.ucar.edu/weather/upper/top.gif">Topeka</a></li>
+<li><a href="http://www.uni.edu/storm/wximages/skewt.html">Profiling Radiometer @UNI</a></li>
+</ul>
 		</div>
 </div>
 EOF;
