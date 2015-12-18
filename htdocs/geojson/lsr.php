@@ -49,12 +49,12 @@ if (isset($_REQUEST["phenomena"])){
 	$str_wfo_list = "and wfo in ('$wfoList')";
 	if ($wfoList == ""){  $str_wfo_list = ""; }
 	
-	$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
-			to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
-      ST_x(geom) as lon, ST_y(geom) as lat 
-      FROM lsrs WHERE
-      valid BETWEEN $1 and $2 $str_wfo_list
-      LIMIT 3000");
+	$rs = pg_prepare($postgis, "SELECT", "SELECT distinct *, 
+		to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
+		ST_x(geom) as lon, ST_y(geom) as lat 
+      	FROM lsrs WHERE
+      	valid BETWEEN $1 and $2 $str_wfo_list
+      	LIMIT 3000");
 
 	$rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
                                            date("Y-m-d H:i", $ets) ) );
