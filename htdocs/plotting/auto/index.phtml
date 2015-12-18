@@ -10,6 +10,7 @@ include_once "../../../include/database.inc.php";
 $mesosite = iemdb("mesosite");
 $formhtml = "";
 $image = "";
+$extrascripts = "";
 $t = new MyView();
 $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
@@ -93,6 +94,9 @@ if (isset($_GET["q"])){
 	// Default format to text in a certain case
 	if (isset($jobj->report) && ! isset($_GET["_fmt"])){
 		$fmt = "text";
+	}
+	if (isset($jobj->highcharts) && ! isset($_GET["_fmt"])){
+		$fmt = "js";
 	}
 	if (isset($jobj->nass) && $jobj->nass){
 		$nassmsg = <<<EOF
@@ -322,6 +326,15 @@ EOF;
 {$res}
 </pre>			
 EOF;
+		} elseif ($fmt == 'js'){
+			$image = '<div id="ap_container" style="width:100%s;height:400px;"></div>';
+			$jsextra .= "Highcharts.setOptions({global: { useUTC: false } });";
+			$extrascripts .= <<<EOF
+<script src="/vendor/highcharts/4.2.0/highcharts.js"></script>		
+<script src="/vendor/highcharts/4.2.0/highcharts-more.js"></script>		
+<script src="/vendor/highcharts/4.2.0/modules/exporting.js"></script>		
+<script src="${imguri}.js"></script>		
+EOF;
 		} else {
 			$image = <<<EOF
 <div id="willload"><span class="glyphicon glyphicon-arrow-down"></span> 
@@ -335,6 +348,13 @@ EOF;
 	// Some tricky logic here about format
 	if (isset($jobj->report) && $jobj->report){
 		$ar = Array("text" => "Plain Text",
+				"png" => "Chart Image (PNG)");
+		$thisi = make_select("_fmt", $fmt, $ar);
+		$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
+				$thisi);
+	}
+	if (isset($jobj->highcharts) && $jobj->highcharts){
+		$ar = Array("js" => "Interactive Chart",
 				"png" => "Chart Image (PNG)");
 		$thisi = make_select("_fmt", $fmt, $ar);
 		$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
@@ -426,6 +446,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
 <script src="/assets/jquery-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
+{$extrascripts}
 <script>
 $(document).ready(function(){
 {$jsextra}
