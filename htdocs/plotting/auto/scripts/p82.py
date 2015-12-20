@@ -1,11 +1,16 @@
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
+from collections import OrderedDict
 import pandas as pd
+from pandas.io.sql import read_sql
 
-PDICT = {'max_tmpf': 'High Temperature',
-         'min_tmpf': 'Low Temperature',
-         'pday': 'Precipitation'}
+PDICT = OrderedDict([
+        ('max_tmpf', 'High Temperature'),
+        ('high_departure', 'High Temperature Departure'),
+        ('min_tmpf', 'Low Temperature'),
+        ('low_departure', 'Low Temperature Departure'),
+        ('pday', 'Precipitation')])
 
 
 def get_description():
@@ -66,6 +71,12 @@ def plotter(fdict):
 
     nt = NetworkTable(network)
 
+    # Get Climatology
+    cdf = read_sql("""SELECT to_char(valid, 'mmdd') as sday, high, low,
+    precip from ncdc_climate81 WHERE station = %s
+    """, psycopg2.connect(database='coop', host='iemdb', user='nobody'),
+                   params=(nt.sts[station]['ncdc81'],), index_col='sday')
+
     cursor.execute("""
     SELECT day, max_tmpf, min_tmpf, pday from summary s JOIN stations t
     on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
@@ -74,9 +85,16 @@ def plotter(fdict):
     rows = []
     data = {}
     for row in cursor:
-        data[row[0]] = {'val': safe(row, varname)}
+        hd = row['max_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'high']
+        ld = row['min_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'low']
         rows.append(dict(day=row['day'], max_tmpf=row['max_tmpf'],
+                         high_departure=hd, low_departure=ld,
                          min_tmpf=row['min_tmpf'], pday=row['pday']))
+        data[row[0]] = {'val': safe(rows[-1], varname)}
+        if varname == 'high_departure':
+            data[row[0]]['color'] = 'b' if hd < 0 else 'r'
+        elif varname == 'low_departure':
+            data[row[0]]['color'] = 'b' if ld < 0 else 'r'
     df = pd.DataFrame(rows)
 
     title = '[%s] %s Daily %s' % (station, nt.sts[station]['name'],
