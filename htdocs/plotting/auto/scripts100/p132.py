@@ -70,7 +70,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    station = fdict.get('station', 'IA_2203')
+    station = fdict.get('station', 'IA2203')
     network = fdict.get('network', 'IACLIMATE')
     month = fdict.get('month', 'all')
     varname = fdict.get('var', 'total_precip')
