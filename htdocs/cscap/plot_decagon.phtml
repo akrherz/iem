@@ -13,12 +13,18 @@ if (strlen($date) != 10){
 $days = isset($_GET["days"]) ? intval($_GET["days"]): 1;
 $ptype = isset($_GET['ptype']) ? $_GET['ptype']: '1';
 
-//with data as (select uniqueid, plotid, min(date(valid)), max(date(valid)) from decagon_data GROUP by uniqueid, plotid) SELECT '"'||uniqueid || '::'|| plotid || '"=>"' || uniqueid || ' '||plotid||' ('|| min ||' to '|| max ||') ['|| (max - min) ||' days]",' as d from data ORDER by d;
+/* with data as (select uniqueid, plotid, min(date(valid)),
+ max(date(valid)) from decagon_data GROUP by uniqueid, plotid)
+ 
+ SELECT '"'||uniqueid || '::'|| plotid || '"=>"' || uniqueid || ' '||
+ plotid||' ('|| min ||' to '|| max ||') ['|| (max - min) ||' days]",' as d
+ from data ORDER by d;
+*/
 $ar = Array(
- "DPAC::NE"=>"DPAC NE (2011-07-01 to 2014-12-04) [1252 days]",
- "DPAC::NW"=>"DPAC NW (2011-07-01 to 2014-12-04) [1252 days]",
- "DPAC::SE"=>"DPAC SE (2011-07-01 to 2014-12-04) [1252 days]",
- "DPAC::SW"=>"DPAC SW (2011-07-01 to 2014-12-04) [1252 days]",
+ "DPAC::NE"=>"DPAC NE (2011-07-01 to 2015-12-06) [1619 days]",
+ "DPAC::NW"=>"DPAC NW (2011-07-01 to 2015-12-06) [1619 days]",
+ "DPAC::SE"=>"DPAC SE (2011-07-01 to 2015-12-06) [1619 days]",
+ "DPAC::SW"=>"DPAC SW (2011-07-01 to 2015-12-06) [1619 days]",
  "GILMORE::3-1"=>"GILMORE 3-1 (2011-06-01 to 2013-10-28) [880 days]",
  "GILMORE::4-1"=>"GILMORE 4-1 (2011-06-01 to 2013-12-31) [944 days]",
  "GILMORE::11-1"=>"GILMORE 11-1 (2011-06-01 to 2013-12-16) [929 days]",
@@ -61,13 +67,13 @@ $ar = Array(
 		"MASON::602"=>"MASON 602 (2014-06-06 to 2014-10-24) [140 days]",
 		"MASON::603"=>"MASON 603 (2014-06-06 to 2014-10-24) [140 days]",
 		"MASON::604"=>"MASON 604 (2014-06-06 to 2014-10-24) [140 days]",
-		"NAEW::WS109"=>"NAEW WS109 (2013-04-09 to 2014-12-31) [631 days]",
-		"NAEW::WS111"=>"NAEW WS111 (2013-04-10 to 2014-12-31) [630 days]",
-		"NAEW::WS113"=>"NAEW WS113 (2013-04-10 to 2014-12-31) [630 days]",
-		"NAEW::WS115"=>"NAEW WS115 (2013-04-15 to 2014-12-31) [356 days]",
-		"NAEW::WS118"=>"NAEW WS118 (2013-04-09 to 2014-12-31) [631 days]",
-		"NAEW::WS123"=>"NAEW WS123 (2013-04-15 to 2014-12-31) [625 days]",
-		"NAEW::WS127"=>"NAEW WS127 (2013-04-15 to 2014-12-31) [625 days]",
+ "NAEW::WS109"=>"NAEW WS109 (2013-04-09 to 2015-11-02) [937 days]",
+ "NAEW::WS111"=>"NAEW WS111 (2013-04-10 to 2015-11-02) [936 days]",
+ "NAEW::WS113"=>"NAEW WS113 (2013-04-10 to 2015-11-02) [936 days]",
+ "NAEW::WS115"=>"NAEW WS115 (2013-04-15 to 2015-11-02) [931 days]",
+ "NAEW::WS118"=>"NAEW WS118 (2013-04-09 to 2015-11-02) [937 days]",
+ "NAEW::WS123"=>"NAEW WS123 (2013-04-15 to 2015-11-02) [931 days]",
+ "NAEW::WS127"=>"NAEW WS127 (2013-04-15 to 2015-10-17) [915 days]",
  "SEPAC::5"=>"SEPAC 5 (2011-07-13 to 2014-09-30) [1175 days]",
  "SEPAC::6"=>"SEPAC 6 (2011-06-30 to 2014-09-30) [1188 days]",
  "SEPAC::7"=>"SEPAC 7 (2011-06-30 to 2014-09-30) [1188 days]",
@@ -201,12 +207,20 @@ to denote quality control.
 [IN] DPAC     5 minute  10 20 40 60 100 cm 
 [IA] GILMORE  5 minute  10 20 40 60 100 cm
 [IA] ISUAG    5 minute  10 20 40 60 100 cm
-[MI] MASON   60 minute     20 40 60 80  cm
-[OH] NAEW    30 minute  TBD
+[MI] MASON   60 minute     20 40 60  80 cm
+[OH] NAEW    30 minute   5 10 20 30  50 cm
 [IN] SEPAC    5 minute  10 20 40 60 100 cm
 [IA] SERF     5 minute  10 20 40 60 100 cm
 [OH] WATERMAN 2 minute  10 20 40 60 100 cm
 </pre></p>
+
+<h3>Notes</h3>
+
+<ul>
+ <li>NAEW soil moisture sensor depths were   
+ aligned when possible with VICMS in MN for data compilation. However, a
+ rock layer prohibits sensor installation deeper than 50 cm.</li>
+</ul>
 
 <script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
