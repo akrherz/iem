@@ -39,6 +39,12 @@ def make_plot(form):
     if uniqueid == 'MASON':
         DEPTHS[1] = None
         DEPTHS[5] = '80 cm'
+    elif uniqueid == 'NAEW':
+        DEPTHS[1] = '5 cm'
+        DEPTHS[2] = '10 cm'
+        DEPTHS[3] = '20 cm'
+        DEPTHS[4] = '30 cm'
+        DEPTHS[5] = '50 cm'
 
     sts = datetime.datetime.strptime(form.getfirst('date', '2014-01-01'),
                                      '%Y-%m-%d')
