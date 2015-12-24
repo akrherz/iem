@@ -188,8 +188,9 @@ for feat in j['features']:
                                       valid.strftime("%Y-%m-%d %H:%M-06"),
                                       cond, raw))
     # Update currents
-    cursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s
-    WHERE segid = %s""", (cond, valid.strftime("%Y-%m-%d %H:%M-06"), segid))
+    cursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s,
+    raw = %s WHERE segid = %s
+    """, (cond, valid.strftime("%Y-%m-%d %H:%M-06"), raw, segid))
     dirty = True
 
 if dirty:
