@@ -30,7 +30,6 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    import matplotlib.patheffects as PathEffects
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
     station = fdict.get('zstation', 'AMW')
@@ -55,23 +54,31 @@ def plotter(fdict):
     """, pgconn, params=(station, year), index_col=None)
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(df['month'] - 0.4, df['avg'], fc='blue', label='Climatology')
-    bars = ax.bar(df['month']-0.2, df['count'], width=0.4,
-                  fc='yellow', label='%s' % (year,), zorder=2)
+    monthly = df['avg'].values.tolist()
+    bars = ax.bar(df['month'] - 0.4, monthly, fc='red', ec='red',
+                  width=0.4, label='Climatology')
     for i, _ in enumerate(bars):
-        txt = ax.text(i+1, df['count'][i]+2, "%.0f" % (df['count'][i],),
-                      ha='center')
-        txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                     foreground="yellow")])
+        ax.text(i+1-0.25, monthly[i]+1, "%.0f" % (monthly[i],), ha='center')
+    thisyear = df['count'].values.tolist()
+    bars = ax.bar(np.arange(1, 13), thisyear, fc='blue', ec='blue', width=0.4,
+                  label=str(year))
+    for i, _ in enumerate(bars):
+        if not np.isnan(thisyear[i]):
+            ax.text(i+1+0.25, thisyear[i]+1, "%.0f" % (thisyear[i],),
+                    ha='center')
 
     ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.set_xlim(0.5, 12.5)
+    ax.set_ylim(0, max([df['count'].max(), df['avg'].max()]) * 1.2)
     ax.set_yticks(np.arange(0, max(df['count'].max(), df['avg'].max()) + 20,
                             12))
     ax.set_ylabel("Hours with 0.01+ inch precip")
+    if datetime.date.today().year == year:
+        ax.set_xlabel("Valid till %s" % (
+            datetime.date.today().strftime("%-d %B"),))
     ax.grid(True)
-    ax.legend()
+    ax.legend(ncol=2)
     ax.set_title(("%s [%s]\n"
                   "Number of Hours with *Measurable* Precipitation Reported"
                   ) % (nt.sts[station]['name'], station))
