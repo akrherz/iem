@@ -173,9 +173,11 @@ for feat in j['features']:
     raw = feat['attributes']['HL_PAVEMENT_CONDITION']
     cond = ROADCOND.get(raw)
     if cond is None:
-        print(("ingest_roads_reset longname '%s' has unknown cond '%s'"
+        print(("ingest_roads_reset longname '%s' has unknown cond '%s'\n%s"
                ) % (feat['attributes']['LONGNAME'],
-                    feat['attributes']['HL_PAVEMENT_CONDITION']))
+                    feat['attributes']['HL_PAVEMENT_CONDITION'],
+                    json.dumps(feat['attributes'], sort_keys=True,
+                               indent=4, separators=(',', ': '))))
         continue
     if cond == current[segid]:
         continue
