@@ -127,6 +127,7 @@ URI = ("http://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
 pgconn = psycopg2.connect(database='postgis', host='iemdb')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+# NB: Could be 'null' (None) as well
 ROADCOND = {
     'dry pavement': 0,
     'wet': 1,
@@ -171,6 +172,8 @@ for feat in j['features']:
             feat['attributes']['LONGNAME'], feat['attributes']['SEGMENT_ID']))
         continue
     raw = feat['attributes']['HL_PAVEMENT_CONDITION']
+    if raw is None:
+        continue
     cond = ROADCOND.get(raw)
     if cond is None:
         print(("ingest_roads_reset longname '%s' has unknown cond '%s'\n%s"
