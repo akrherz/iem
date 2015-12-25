@@ -15,9 +15,9 @@
 
 HTTP_SRC = "http://ia.carsprogram.org/IAcarssegment/IA_road_conditions.txt"
 #FINAL_LOCATION = "/data/Incoming/WAN_NWWSDSMSTOIA.dat"
-FINAL_LOCATION = "/usr/local/utils/stoia/LOC_DSMSTOIA.dat"
-LOG_FILENAME = "/usr/local/utils/stoia/STOIA_acquisition.log"
-PREV_PRODUCT = "/usr/local/utils/stoia/prevSTOIA.txt"
+FINAL_LOCATION = "/tmp/LOC_DSMSTOIA.dat"
+LOG_FILENAME = "/tmp/STOIA_acquisition.log"
+PREV_PRODUCT = "/tmp/prevSTOIA.txt"
 
 import urllib2, logging, traceback, sys, os, tempfile, StringIO
 import datetime
@@ -54,14 +54,15 @@ def ship2ldad( data ):
     """
     Writes the data to a file for LDAD to then deal with
     """
-    f = open ("/usr1/stoia/pre_ldad_STOIA.txt", 'w')
+    f = open ("/tmp/pre_ldad_STOIA.txt", 'w')
     f.write( data )
     f.close()
 
-    os.system("sync")
 
     logging.debug("Shipping %s product to LDAD via scp" % (f.name,) )
-    os.system("scp -q %s ldad@ls1-dmx.dmx.noaa.gov:%s" % (f.name, FINAL_LOCATION) )
+    os.system("cp %s %s" % (f.name, FINAL_LOCATION) )
+    os.system("python /home/ldm/pyWWA/util/make_text_noaaportish.py %s" % (FINAL_LOCATION,))
+    os.system("cat %s | python /home/ldm/pyWWA/parsers/stoia_parser.py" % (FINAL_LOCATION,))
 
 def fix_header( data ):
     """
@@ -70,14 +71,17 @@ def fix_header( data ):
     """
     # Formulate the new header
     now = datetime.datetime.now()
-    newdata = """
+    utcnow = datetime.datetime.utcnow()
+    newdata = """000
+SXUS43 KDMX %s
+STOIA
 
 IOWA ROAD CONDITIONS
 IOWA DEPARTMENT OF PUBLIC SAFETY
 RELAYED BY THE NATIONAL WEATHER SERVICE DES MOINES IA
 %s
 
-""" % ((now.strftime("%-I%M %p CST %a %b %d %Y").upper()),)
+""" % (utcnow.strftime("%d%H%M"), (now.strftime("%-I%M %p CST %a %b %d %Y").upper()),)
 
     # Strip off everything before the first *
     return newdata + data[data.find("*"):]
