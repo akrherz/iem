@@ -32,6 +32,7 @@ Run every five minutes from RUN_5MIN.sh
 import urllib2
 import json
 import datetime
+import sys
 import psycopg2.extras
 import shapelib
 import dbflib
@@ -163,6 +164,12 @@ for row in cursor:
     current[row[0]] = row[2]
 
 j = json.loads(urllib2.urlopen(URI, timeout=30).read())
+
+if 'features' not in j:
+    print(('ingest_roads_rest got invalid RESULT:\n%s' % (
+                json.dumps(j, sort_keys=True, indent=4, separators=(',', ': ')
+                           ))))
+    sys.exit()
 
 dirty = False
 for feat in j['features']:
