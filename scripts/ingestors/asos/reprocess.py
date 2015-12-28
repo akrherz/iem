@@ -109,7 +109,8 @@ def workflow():
     cj = cookielib.CookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
     opener.open(("http://www.wunderground.com/cgi-bin/findweather/"
-                 "getForecast?setpref=SHOWMETAR&value=1")).read()
+                 "getForecast?setpref=SHOWMETAR&value=1"),
+                timeout=30).read()
 
     # Iterate
     for station in stations:
@@ -238,7 +239,7 @@ def doit(opener, station, now):
                "req_statename=NA&format=1") % (faa, now.year, now.month,
                                                now.day)
         try:
-            data = opener.open(url).read()
+            data = opener.open(url, timeout=30).read()
         except KeyboardInterrupt:
             sys.exit()
         except:
