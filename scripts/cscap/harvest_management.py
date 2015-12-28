@@ -47,6 +47,7 @@ for sheetkey in TABS:
         key = "%s,%s,%s,%s,%s" % (v, row[1], row[2], row[3], row[4])
         current[key] = row[5]
     sheet = spread.worksheets[sheetkey]
+    table = sheetkey if sheetkey != TABS[0] else 'operations'
 
     added = 0
     dups = 0
@@ -77,7 +78,6 @@ for sheetkey in TABS:
             vals.append(d[key])
             cols.append(translate.get(key, key))
 
-        table = sheetkey if sheetkey != TABS[0] else 'operations'
         sql = """
             INSERT into %s(%s) VALUES (%s)
             """ % (table, ",".join(cols), ','.join(["%s"]*len(cols)))
