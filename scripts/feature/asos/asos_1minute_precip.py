@@ -9,9 +9,9 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2015, 10, 25, 8, 0)
+sts = datetime.datetime(2015, 12, 25, 10, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2015, 10, 26, 6, 0)
+ets = datetime.datetime(2015, 12, 26, 4, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/Chicago'
 
@@ -21,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'MSY'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'DCU'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -107,9 +107,9 @@ ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.4, 0.7), prop=prop, ncol=1)
-ax.set_ylim(0, int(np.max(rate1)+6))
-ax.set_xlabel("25 October 2015 (Central Daylight Time)")
-ax.set_title(("25 October 2015 New Orleans, LA (KMSY)\n"
+ax.set_ylim(0, int(np.max(rate1)+4))
+ax.set_xlabel("25 December 2015 (Central Standard Time)")
+ax.set_title(("25 December 2015 Decatur, AL (KDCU)\n"
               "One Minute Rainfall, %.2f inches total plotted") % (prec[-1],))
 
 
