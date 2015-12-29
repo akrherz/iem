@@ -21,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'FYV'
+ sknt, pres1, gust_sknt, precip from t2015_1minute WHERE station = 'RUE'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -109,7 +109,7 @@ ax.set_xlim(0, sz)
 ax.legend(loc=(0.4, 0.7), prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+7))
 ax.set_xlabel("27 December 2015 (Central Standard Time)")
-ax.set_title(("27 December 2015 Fayetteville, AR (KFYV)\n"
+ax.set_title(("27 December 2015 Russellville, AR (KRUE)\n"
               "One Minute Rainfall, %.2f inches total plotted") % (prec[-1],))
 
 
