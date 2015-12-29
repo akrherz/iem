@@ -121,9 +121,7 @@ def export_shapefile(txn, tp):
     for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
         os.unlink("iaroad_cond.%s" % (suffix,))
 
-URI = ("http://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
-       "Road_Conditions/FeatureServer/0/query?"
-       "where=OBJECTID%3E1&outFields=*&returnGeometry=false&f=json")
+URI = ("http://www.iowadot.gov/gis/data/road_conditions.geojson")
 
 pgconn = psycopg2.connect(database='postgis', host='iemdb')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -173,27 +171,28 @@ if 'features' not in j:
 
 dirty = False
 for feat in j['features']:
-    segid = lookup.get(feat['attributes']['SEGMENT_ID'])
+    props = feat['properties']
+    segid = lookup.get(props['SEGMENT_ID'])
     if segid is None:
         print("ingest_roads_rest unknown longname '%s' segment_id '%s'" % (
-            feat['attributes']['LONGNAME'], feat['attributes']['SEGMENT_ID']))
+            props['LONGNAME'], props['SEGMENT_ID']))
         continue
-    raw = feat['attributes']['HL_PAVEMENT_CONDITION']
+    raw = props['HL_PAVEMENT_CONDITION']
     if raw is None:
         continue
     cond = ROADCOND.get(raw)
     if cond is None:
         print(("ingest_roads_reset longname '%s' has unknown cond '%s'\n%s"
-               ) % (feat['attributes']['LONGNAME'],
-                    feat['attributes']['HL_PAVEMENT_CONDITION'],
-                    json.dumps(feat['attributes'], sort_keys=True,
+               ) % (props['LONGNAME'],
+                    props['HL_PAVEMENT_CONDITION'],
+                    json.dumps(props, sort_keys=True,
                                indent=4, separators=(',', ': '))))
         continue
     if cond == current[segid]:
         continue
-    valid = (datetime.datetime(1970, 1, 1) +
-             datetime.timedelta(
-                seconds=feat['attributes']['CARS_MSG_UPDATE_DATE']/1000.))
+    # 2015-12-29T16:56:07-06:00
+    valid = datetime.datetime.strptime(props['CARS_MSG_UPDATE_DATE'][:19],
+                                       '%Y-%m-%dT%H:%M:%S')
     # Save to log
     cursor.execute("""INSERT into roads_2015_2016_log(segid, valid, cond_code,
     raw) VALUES (%s, %s, %s, %s)""", (segid,
