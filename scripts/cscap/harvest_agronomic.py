@@ -41,7 +41,6 @@ for item in res['items']:
     for row in pcursor:
         key = "%s|%s" % row
         current[key] = True
-    found_vars = []
     for col in range(1, worksheet.cols+1):
         val = worksheet.get_cell_value(1, col)
         if val is None:
@@ -51,8 +50,6 @@ for item in res['items']:
         if val.find("AGR") != 0:
             continue
         varname = val
-        if varname not in found_vars:
-            found_vars.append(varname)
         for row in range(4, worksheet.rows+1):
             plotid = worksheet.get_cell_value(row, plotidcol)
             if plotid is None:
@@ -78,12 +75,11 @@ for item in res['items']:
                 del(current[key])
     for key in current:
         (plotid, varname) = key.split("|")
-        if varname in found_vars:
-            print 'harvest_agronomic REMOVE %s %s %s' % (siteid, plotid,
-                                                         varname)
-            pcursor.execute("""DELETE from agronomic_data where site = %s and
+        print 'harvest_agronomic REMOVE %s %s %s' % (siteid, plotid,
+                                                     varname)
+        pcursor.execute("""DELETE from agronomic_data where site = %s and
             plotid = %s and varname = %s and year = %s
-            """, (siteid, plotid, varname, YEAR))
+        """, (siteid, plotid, varname, YEAR))
     if newvals > 0:
         print(('harvest_agronomic year: %s site: %s had %s new values'
                '') % (YEAR, siteid, newvals))
