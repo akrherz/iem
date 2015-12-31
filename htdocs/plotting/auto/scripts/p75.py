@@ -67,7 +67,7 @@ def plotter(fdict):
         thisyear += 1
     rows = []
     for row in ccursor:
-        if row['yr'] == thisyear or row['yr'] < startyear:
+        if row['yr'] < startyear:
             continue
         rows.append(dict(year=int(row['yr']), data=float(row[season])))
     df = pd.DataFrame(rows)
