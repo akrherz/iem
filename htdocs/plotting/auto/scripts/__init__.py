@@ -77,7 +77,7 @@ data = {'plots': [
         {'id': "28", 'mw': True,
          'label': "Trailing Number of Days Precipitation Total Rank"},
         {'id': "132", 'mw': True,
-         'label': "Top 10 Precip/Temperature Values by Month/Seaseon"},
+         'label': "Top 10 Precip/Temperature Values by Month/Season"},
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "130", 'mw': True,
