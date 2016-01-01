@@ -72,15 +72,15 @@ for item in res['items']:
             varname = worksheet.get_cell_value(1, col).strip().split()[0]
             val = worksheet.get_cell_value(row, col, numeric=True)
             if varname == 'subsample':
-                subsample = val
+                subsample = "%.0f" % (float(val), )
                 continue
             elif varname[:4] != 'SOIL':
                 print(('Invalid varname: %s site: %s year: %s'
                        ) % (worksheet.get_cell_value(1, col).strip(),
                             siteid, YEAR))
                 continue
-            if subsample != "1":
-                continue
+            # if subsample != "1":
+            #    continue
             try:
                 pcursor.execute("""
                     INSERT into soil_data(site, plotid, varname, year,
