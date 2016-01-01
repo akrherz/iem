@@ -331,7 +331,7 @@ def build_sdc(feed):
             continue
         # This is our Site Data Collected Key Identifier
         sdc_key = row['key']
-        sdc_names[sdc_key] = {'name': row['name'], 'units': row['units']}
+        sdc_names[sdc_key] = {'name': row['name']}
 
         # Iterate over our site_ids
         for sitekey in site_ids:

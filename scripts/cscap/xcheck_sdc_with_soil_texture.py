@@ -1,7 +1,3 @@
-"""
- Use the Site Data Collected and then see what columns exist within the
- Agronomic Data Sheets.
-"""
 import ConfigParser
 import sys
 import util
@@ -19,7 +15,11 @@ sdc, sdc_names = util.build_sdc(sdc_feed)
 
 drive_client = util.get_driveclient()
 
-res = drive_client.files().list(q="title contains 'Agronomic Data'").execute()
+ALLOWED = ['SOIL26', 'SOIL27', 'SOIL28', 'SOIL6',
+           'SOIL11', 'SOIL12', 'SOIL13', 'SOIL14']
+
+res = drive_client.files().list(
+    q="title contains 'Soil Texture Data Data'").execute()
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
@@ -41,12 +41,21 @@ for item in res['items']:
     error = False
     for key in keys:
         if key.upper() not in shouldhave:
-            if key.upper().find("AGR") == 0:
-                print 'EXTRA %s' % (key.upper(),)
-                error = True
+            if key.upper().find("SOIL") == 0:
+                vals = []
+                for entry4 in worksheet.list_feed.entry:
+                    d = entry4.to_dict()
+                    if d[key] not in vals:
+                        vals.append(d[key])
+                print 'EXTRA %s' % (key.upper(),), vals
+                if len(vals) < 4:
+                    if raw_input("DELETE? y/n ") == 'y':
+                        print("Deleting...")
+                        worksheet.del_column(key.upper())
+                        worksheet.get_list_feed()
         else:
             shouldhave.remove(key.upper())
     for sh in shouldhave:
-        if sh.find("AGR") == 0:
+        if sh.find("SOIL") == 0 and sh in ALLOWED:
             print 'SHOULDHAVE %s' % (sh,)
             error = True
