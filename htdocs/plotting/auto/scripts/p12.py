@@ -3,8 +3,14 @@ from pandas.io.sql import read_sql
 import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
+from collections import OrderedDict
 
-PDICT = {'last': 'Last Date At or Above', 'first': 'First Date At or Above'}
+PDICT = OrderedDict([
+    ('last', 'Last Date At or Above'),
+    ('first', 'First Date At or Above'),
+    ('first_low', 'First Date Below (Low Temperature)'),
+    ('last_low', 'Last Date Below (Low Temperature)')
+    ])
 
 
 def get_description():
@@ -12,9 +18,9 @@ def get_description():
     d = dict()
     d['data'] = True
     d['description'] = """This plot presents the yearly first or last date
-    of a given high temperature along with the number of days that year above
-    the threshold along with the cumulative distribution function for the
-    first date!
+    of a given high or low temperature along with the number of days that
+    year above/below the threshold along with the cumulative distribution
+    function for the first date!
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
@@ -42,28 +48,44 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
 
+    opp = ' low < ' if which.find("_low") > 0 else ' high >= '
     df = read_sql("""
-    SELECT year,
-    min(case when high >= %s then extract(doy from day) else 366 end) as nday,
-    max(case when high >= %s then extract(doy from day) else 0 end) as xday,
-    sum(case when high >= %s then 1 else 0 end) as count from """+table+"""
-    WHERE station = %s and day >= '1893-01-01'
-    GROUP by year ORDER by year ASC
-    """, pgconn, params=(threshold, threshold, threshold, station),
-                  index_col='year')
+        with data as (
+            SELECT extract(year from day + '%s months'::interval) as season,
+            high, low, day from """+table+""" WHERE station = %s
+            and day >= '1893-01-01'),
+        agg1 as (
+            SELECT season,
+            min(case when """+opp+""" %s then day else null end) as nday,
+            max(case when """+opp+""" %s then day else null end) as xday,
+            sum(case when """+opp+""" %s then 1 else 0 end) as count
+            from data GROUP by season)
+    SELECT season::int, count, nday, extract(doy from nday) as nday_doy,
+    xday, extract(doy from xday) as xday_doy from agg1
+    ORDER by season ASC
+    """, pgconn, params=(6 if which.find('_low') > 0 else 0,
+                         station, threshold, threshold, threshold),
+                  index_col='season')
+    # We need to do some magic to julian dates straight
+    if which.find('_low') > 0:
+        df.loc[df['nday_doy'] < 183, 'nday_doy'] += 365.
+        df.loc[df['xday_doy'] < 183, 'xday_doy'] += 365.
     # Set NaN where we did not meet conditions
     zeros = df[df['count'] == 0].index.values
-    col = 'xday' if which == 'last' else 'nday'
+    col = 'xday_doy' if which.find('last') == 0 else 'nday_doy'
     df2 = df[df['count'] > 0]
 
     (fig, ax) = plt.subplots(1, 1)
     ax.scatter(df2[col], df2['count'])
     ax.grid(True)
-    ax.set_ylabel("Days At or Above High Temperature")
-    ax.set_title(("%s [%s] Days per Year at or above %s $^\circ$F\nversus "
+    ax.set_ylabel("Days %s Temp of %s$^\circ$F" % (
+        ('Below Low' if which.find('_low') > 0 else
+         'At or Above High'), threshold))
+    ax.set_title(("%s [%s] Days per Year %s %s $^\circ$F\nversus "
                   "%s Date of that Temperature") % (
-                nt.sts[station]['name'], station, threshold,
-                "Latest" if which == 'last' else 'First'))
+                nt.sts[station]['name'], station,
+                ('below' if which.find('_low') > 0 else 'at or above'),
+                threshold, "Latest" if which == 'last' else 'First'))
 
     xticks = []
     xticklabels = []
@@ -90,7 +112,7 @@ def plotter(fdict):
                          "Avg Count: %.1f days"
                          ) % (len(zeros),
                               ("[" +
-                               ",".join(zeros) + "]"
+                               ",".join([str(z) for z in zeros]) + "]"
                                ) if len(zeros) < 4 else "",
                               avgd.strftime("%-d %b"),
                               df2['count'].mean()),
@@ -109,3 +131,7 @@ def plotter(fdict):
             "%s" % (idx,), va='bottom')
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict(which='first_low', threshold=0))
