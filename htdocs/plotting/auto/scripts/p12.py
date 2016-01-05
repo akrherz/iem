@@ -119,6 +119,7 @@ def plotter(fdict):
             transform=ax.transAxes, va='top', bbox=dict(color='white'))
 
     ax.set_xlim(df2[col].min() - 10, df2[col].max() + 10)
+    ax.set_ylim(0, df2['count'].max() * 1.2)
 
     idx = df2[col].idxmax()
     ax.text(df2.at[idx, col] + 1, df2.at[idx, 'count'],
