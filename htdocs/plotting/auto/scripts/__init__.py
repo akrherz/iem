@@ -145,7 +145,8 @@ data = {'plots': [
         {'id': "99", 'label': "Daily High + Low Temperatures with Departures",
          'mw': True},
         {'id': "12", 'mw': True,
-         'label': "Days per year and first/latest date above given threshold"},
+         'label': ("Days per year and first/latest date "
+                   "above/below given threshold")},
         {'id': "74", 'mw': True,
          'label': ("Days per year by season or year with temperature "
                    "above/below threshold")},
