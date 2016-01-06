@@ -65,7 +65,7 @@ def plotter(fdict):
     on (t.iemid = s.iemid) WHERE id = %s and network = %s and
     day >= %s and day < %s ORDER by day ASC
     """, pgconn_iem,  params=(station, network, sts, ets), index_col='sday')
-    has_data = (len(df.index) > 0)
+    has_data = (df['max_tmpf'].max() > -90)
 
     # Get the normals
     cdf = read_sql("""
@@ -101,6 +101,8 @@ def plotter(fdict):
 
     i = 0
     for _, row in df.iterrows():
+        if row['max_tmpf'] is None or row['min_tmpf'] is None:
+            continue
         txt = ax.text(i+1-0.15, row['max_tmpf']+0.5,
                       "%.0f" % (row['max_tmpf'],),
                       fontsize=10, ha='center', va='bottom', color='k')
