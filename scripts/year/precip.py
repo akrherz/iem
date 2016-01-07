@@ -1,5 +1,5 @@
 from pyiem.plot import MapPlot
-import mx.DateTime
+import datetime
 import numpy as np
 import psycopg2
 from pyiem.network import Table as NetworkTable
@@ -7,7 +7,7 @@ st = NetworkTable('IACLIMATE')
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
-ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+ts = datetime.datetime.now() - datetime.timedelta(days=1)
 
 nrain = []
 lats = []
@@ -30,8 +30,10 @@ m = MapPlot(axisbg='white',
             title=("Iowa %s Normal Precipitation Accumulation"
                    ) % (ts.strftime("%Y"), ),
             subtitle="1 Jan - %s" % (ts.strftime("%d %b %Y"), ))
-m.contourf(lons, lats, nrain, np.arange(int(min(nrain))-1, int(max(nrain))+1),
-           units='inch')
+rng = np.arange(int(min(nrain))-1, int(max(nrain))+1)
+if max(nrain) < 10:
+    rng = np.arange(0, 10)
+m.contourf(lons, lats, nrain, rng, units='inch')
 pqstr = "plot c 000000000000 summary/year/normals.png bogus png"
 m.postprocess(view=False, pqstr=pqstr)
 m.close()
@@ -61,8 +63,10 @@ m = MapPlot(axisbg='white',
             title=("Iowa %s Precipitation Depature"
                    ) % (ts.strftime("%Y"), ),
             subtitle="1 Jan - %s" % (ts.strftime("%d %b %Y"), ))
-m.contourf(lons, lats, nrain, np.arange(int(min(nrain))-1, int(max(nrain))+1),
-           units='inch')
+rng = np.arange(int(min(nrain))-1, int(max(nrain))+1)
+if max(nrain) < 10:
+    rng = np.arange(0, 10)
+m.contourf(lons, lats, nrain, rng, units='inch')
 pqstr = "plot c 000000000000 summary/year/diff.png bogus png"
 m.postprocess(view=False, pqstr=pqstr)
 m.close()
