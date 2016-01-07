@@ -141,6 +141,10 @@ def drive_changelog(regime, yesterday, html):
                     if md < yesterday:
                         continue
                     localts = md.astimezone(pytz.timezone("America/Chicago"))
+                    if 'lastModifyingUser' not in item2:
+                        print(('[%s] file: %s has no User? %s'
+                               ) % (regime, title, item2))
+                        continue
                     luser = item2['lastModifyingUser']
                     hit = True
                     thismsg = """
@@ -161,7 +165,7 @@ def drive_changelog(regime, yesterday, html):
  %s (%s)</td></tr>
                 """ % (luser['picture']['url'] if 'picture' in luser else '',
                        localts.strftime("%-d %b %-I:%M %p"),
-                       luser['displayName'], luser['emailAddress'])
+                       luser['displayName'], luser.get('emailAddress', 'n/a'))
         if not page_token:
             break
 
