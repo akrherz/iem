@@ -171,6 +171,8 @@ data = {'plots': [
          'label': "Percentage of Days each Year Above Average"},
         {'id': "77", 'mw': True,
          'label': "Period between Last and First High Temperature for Year"},
+        {'id': "134", 'mw': True,
+         'label': "Period each year that was warmest/coldest/wettest"},
         {'id': "75", 'mw': True,
          'label': "Precipitation Totals by Season/Year"},
         {'id': "63", 'mw': True,
