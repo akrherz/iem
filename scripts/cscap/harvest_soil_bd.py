@@ -22,6 +22,9 @@ res = drive_client.files().list(q=("title contains '%s'"
                                          'Water Retention Data'),)
                                 ).execute()
 
+DOMAIN = ['SOIL1', 'SOIL2', 'SOIL29', 'SOIL30', 'SOIL31', 'SOIL32',
+          'SOIL33', 'SOIL34', 'SOIL35', 'SOIL39']
+
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
@@ -55,7 +58,6 @@ for item in res['items']:
     for row in pcursor:
         key = "%s|%s|%s|%s" % row
         current[key] = True
-    found_vars = []
     for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
         if siteid == 'DPAC':
@@ -79,8 +81,6 @@ for item in res['items']:
                 #                    worksheet.get_cell_value(1,col).strip(),
                 #                    siteid, YEAR)
                 continue
-            if varname not in found_vars:
-                found_vars.append(varname)
             val = worksheet.get_cell_value(row, col, numeric=True)
             try:
                 pcursor.execute("""
@@ -100,7 +100,7 @@ for item in res['items']:
                 del(current[key])
     for key in current:
         (plotid, varname, depth, subsample) = key.split("|")
-        if varname in found_vars:
+        if varname in DOMAIN:
             print(('harvest_soil_bd rm %s %s %s %s %s %s'
                    ) % (YEAR, siteid, plotid, varname, repr(depth),
                         repr(subsample)))
