@@ -9,6 +9,8 @@ PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
         ('avg_low_temp', 'Average Low Temperature'),
         ('avg_temp', 'Average Temperature'),
+        ('max_low', 'Maximum High Temperature'),
+        ('min_low', 'Minimum Low Temperature'),
         ('precip', 'Total Precipitation')])
 
 
@@ -41,6 +43,8 @@ def get_description():
 
 
 def nice(val):
+    if val == 'M':
+        return 'M'
     if val < 0.01 and val > 0:
         return 'Trace'
     return '%.2f' % (val, )
@@ -72,7 +76,9 @@ def plotter(fdict):
     SELECT extract(year from day - '"""+str(doff)+""" days'::interval) as yr,
     avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
     avg(low) as avg_low_temp,
-    sum(precip) as precip
+    sum(precip) as precip,
+    min(low) as min_low,
+    max(high) as max_high
     from """ + table + """
     WHERE station = %s and sday in %s
     GROUP by yr ORDER by yr ASC
@@ -100,7 +106,8 @@ def plotter(fdict):
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
-    ax[0].set_ylim(0, df[varname].max() * 1.2)
+    ax[0].set_ylim(top=(df[varname].max() + (
+                                df[varname].max() - df[varname].min()) * .2))
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + 0.02,
                         box.width, box.height * 0.98])
