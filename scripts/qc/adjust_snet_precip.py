@@ -8,7 +8,7 @@
 
 """
 import psycopg2
-import mx.DateTime
+import datetime
 import sys
 import os
 from pyiem.network import Table as NetworkTable
@@ -30,7 +30,7 @@ def process(ts):
 
         maxPrecip = -99
         lines = open(fp).readlines()
-        for line in lines[-10:]:
+        for line in lines[-100:]:
             tokens = line.split(",")
             pDay = float(tokens[9][:-2])
             if (pDay > maxPrecip):
@@ -45,10 +45,10 @@ def process(ts):
                                   ts.strftime("%Y-%m-%d"))
         icursor.execute(sql)
 
-ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+ts = datetime.datetime.now() - datetime.timedelta(days=1)
 if (len(sys.argv) == 4):
-    ts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]),
-                              int(sys.argv[3]))
+    ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                           int(sys.argv[3]))
 process(ts)
 """
 sts = mx.DateTime.DateTime(2004,1,1)
