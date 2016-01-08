@@ -35,7 +35,8 @@ for item in res['items']:
     siteid = item['title'].split()[0]
     # print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
     if worksheet.get_cell_value(1, 1) != 'plotid':
-        print 'FATAL site: %s soil nitrate has corrupt headers' % (siteid,)
+        print(('harvest_soil_nitrate: %s[%s] cell(1,1)="%s", skipping'
+               ) % (siteid, YEAR, worksheet.get_cell_value(1, 1)))
         continue
     startcol = 3
     if worksheet.get_cell_value(1, 2) == 'depth':

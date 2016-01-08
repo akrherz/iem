@@ -42,8 +42,9 @@ for item in res['items']:
     # print 'Processing %s Soil Texture Year %s' % (siteid, YEAR)
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
             worksheet.get_cell_value(1, 2) != 'depth'):
-        print 'FATAL site: %s %s soil nitrate has corrupt headers' % (siteid,
-                                                                      YEAR)
+        print(('harvest_soil_texture %s[%s] headers: "%s","%s", skipping'
+               ) % (siteid, YEAR, worksheet.get_cell_value(1, 1),
+                    worksheet.get_cell_value(1, 2)))
         continue
 
     # Load up current data
