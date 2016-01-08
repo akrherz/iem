@@ -395,6 +395,9 @@ def get_folders(drive):
         if len(f[thisfolder]['parents']) == 0:
             continue
         parentfolder = f[thisfolder]['parents'][0]
+        if parentfolder not in f:
+            print("ERROR: parentfolder: %s not in f" % (parentfolder,))
+            continue
         while len(f[parentfolder]['parents']) > 0:
             parentfolder = f[parentfolder]['parents'][0]
         # print title, '->', f[parentfolder]['title']
