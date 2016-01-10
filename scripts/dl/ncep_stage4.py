@@ -26,10 +26,13 @@ def download(now):
                                              "data/nccf/com/hourly/prod/"
                                              "nam_pcpn_anal.%Y%m%d/"
                                              "ST4.%Y%m%d%H")), hr)
-        data = exponential_backoff(urllib2.urlopen, url, timeout=60).read()
+        data = exponential_backoff(urllib2.urlopen, url, timeout=60)
+        if data is None:
+            print('ncep_stage4.py: dl %s failed' % (url,))
+            continue
         # Same temp file
         o = open("tmp.grib.gz", 'wb')
-        o.write(data)
+        o.write(data.read())
         o.close()
         subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
@@ -50,10 +53,13 @@ def download(now):
                                                  "data/nccf/com/hourly/prod/"
                                                  "nam_pcpn_anal.%Y%m%d/"
                                                  "ST2ml%Y%m%d%H")), hr)
-        data = exponential_backoff(urllib2.urlopen, url, timeout=60).read()
+        data = exponential_backoff(urllib2.urlopen, url, timeout=60)
+        if data is None:
+            print('ncep_stage4.py: dl %s failed' % (url,))
+            continue
         # Same temp file
         o = open("tmp.grib.gz", 'wb')
-        o.write(data)
+        o.write(data.read())
         o.close()
         subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
