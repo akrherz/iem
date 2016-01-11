@@ -58,7 +58,7 @@ def plotter(fdict):
     sum(precip) as precip,
     avg(high) as avg_high, avg(low) as avg_low,
     avg((high+low)/2.) as avg_temp from """+table+""" WHERE
-    station = %s and day < %s GROUP by year, month
+    station = %s and day < %s GROUP by year, month ORDER by year ASC, month ASC
     """, pgconn, params=(station, TODAY), index_col=None)
 
     res = """\
