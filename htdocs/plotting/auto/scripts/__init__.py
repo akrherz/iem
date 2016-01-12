@@ -136,6 +136,8 @@ data = {'plots': [
          'label': "Scenarios for this month besting some previous month"},
     ]},
     {'label': 'Yearly', 'options': [
+        {'id': "135", 'mw': True,
+         'label': "Accumulated Days with High/Low Above/Below Threshold"},
         {'id': "76",
          'label': "Average Dew Point by Year or Season"},
         {'id': "125", 'mw': True,
