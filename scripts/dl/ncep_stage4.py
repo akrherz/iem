@@ -17,7 +17,7 @@ def download(now):
               nam_pcpn_anal.20090916/ST4.2009091618.01h.gz
     """
     hours = [1, ]
-    if now.hour % 6 == 0:
+    if now.hour % 6 == 0 and offset != 0:
         hours.append(6)
     if now.hour == 12 and offset != 0:
         hours.append(24)
