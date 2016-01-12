@@ -68,7 +68,7 @@ if timeopt == 2:
     fp = "wwa_%s" % (sTS.strftime("%Y%m%d%H%M"), )
 
 os.chdir("/tmp/")
-for suffix in ['shp', 'shx', 'dbf']:
+for suffix in ['shp', 'shx', 'dbf', 'txt', 'zip']:
     if os.path.isfile("%s.%s" % (fp, suffix)):
         os.remove("%s.%s" % (fp, suffix))
 
@@ -172,6 +172,9 @@ countybased as (
 """ % (table2, timelimit, wfoLimiter, limiter,
        table1, timelimit, wfoLimiter, limiter,
        cols, cols, sbwlimiter)
+dtext = open("%s.txt" % (fp, ), 'w')
+dtext.write(sql)
+dtext.close()
 # print 'Content-type: text/plain\n'
 # print sql
 # sys.exit()
@@ -217,6 +220,7 @@ z.write(fp+".shp")
 z.write(fp+".shx")
 z.write(fp+".dbf")
 z.write(fp+".prj")
+z.write(fp+".txt")
 z.close()
 
 sys.stdout.write("Content-type: application/octet-stream\n")
