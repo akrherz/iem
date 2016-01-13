@@ -251,7 +251,7 @@ def main(valid):
             if nt.sts[sid].get('count', 0) == 0:
                 missing.append(sid)
 
-    if len(missing) > 20:
+    if len(missing) > 40:
         cursor = DBCONN.cursor()
         for sid in missing:
             # Go find the last ob we have for the site
