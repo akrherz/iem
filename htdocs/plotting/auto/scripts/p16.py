@@ -2,32 +2,33 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 import datetime
 from pandas.io.sql import read_sql
+from collections import OrderedDict
 
-PDICT = {'ts': 'Thunderstorm (TS) Reported',
-         'tmpf_above': 'Temperature At or Above Threshold (F)',
-         'tmpf_below': 'Temperature Below Threshold (F)',
-         'dwpf_above': 'Dew Point At or Above Threshold (F)',
-         'dwpf_below': 'Dew Point Below Threshold (F)',
-         }
+PDICT = OrderedDict([
+         ('ts', 'Thunderstorm (TS) Reported'),
+         ('tmpf_above', 'Temperature At or Above Threshold (F)'),
+         ('tmpf_below', 'Temperature Below Threshold (F)'),
+         ('dwpf_above', 'Dew Point At or Above Threshold (F)'),
+         ('dwpf_below', 'Dew Point Below Threshold (F)')])
 
-MDICT = {'all': 'No Month/Time Limit',
-         'spring': 'Spring (MAM)',
-         'fall': 'Fall (SON)',
-         'winter': 'Winter (DJF)',
-         'summer': 'Summer (JJA)',
-         'jan': 'January',
-         'feb': 'February',
-         'mar': 'March',
-         'apr': 'April',
-         'may': 'May',
-         'jun': 'June',
-         'jul': 'July',
-         'aug': 'August',
-         'sep': 'September',
-         'oct': 'October',
-         'nov': 'November',
-         'dec': 'December'
-         }
+MDICT = OrderedDict([
+         ('all', 'No Month/Time Limit'),
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('jan', 'January'),
+         ('feb', 'February'),
+         ('mar', 'March'),
+         ('apr', 'April'),
+         ('may', 'May'),
+         ('jun', 'June'),
+         ('jul', 'July'),
+         ('aug', 'August'),
+         ('sep', 'September'),
+         ('oct', 'October'),
+         ('nov', 'November'),
+         ('dec', 'December')])
 
 
 def get_description():
