@@ -1,7 +1,9 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
 import datetime
+import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.util import drct2text
 from collections import OrderedDict
 
 PDICT = OrderedDict([
@@ -35,6 +37,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['highcharts'] = True
     d['description'] = """This application generates a wind rose for a given
     criterion being meet. A wind rose plot is a convenient way of summarizing
     wind speed and direction."""
@@ -51,6 +54,179 @@ def get_description():
     return d
 
 
+def highcharts(fdict):
+    """ Generate the highcharts variant"""
+    import matplotlib
+    matplotlib.use('agg')
+    from windrose.windrose import histogram
+    ctx = get_context(fdict)
+    dir_edges, var_bins, table = histogram(ctx['df']['drct'].values,
+                                           ctx['df']['smph'].values,
+                                           np.array([0, 2, 5, 7, 10, 15, 20]),
+                                           18, True)
+    arr = [drct2text(mydir) for mydir in dir_edges]
+    return """
+    var arr = """+str(arr)+""";
+    $("#ap_container").highcharts({
+    series: [{name: '2 - 5',
+                    data: """+str(zip(arr, table[1]))+""",
+                    _colorIndex: 0},
+                   {name: '5 - 7',
+                    data: """+str(zip(arr, table[2]))+""",
+                    _colorIndex: 1},
+                   {name: '7 - 10',
+                    data: """+str(zip(arr, table[3]))+""",
+                    _colorIndex: 2},
+                   {name: '10 - 15',
+                    data: """+str(zip(arr, table[4]))+""",
+                    _colorIndex: 3},
+                   {name: '15 - 20',
+                    data: """+str(zip(arr, table[5]))+""",
+                    _colorIndex: 4},
+                   {name: '20 +',
+                    data: """+str(zip(arr, table[6]))+""",
+                    _colorIndex: 5}],
+    chart: {
+            polar: true,
+            type: 'column'
+    },
+    title: {
+            'text': '"""+ctx['title']+"""'
+    },
+    subtitle: {
+            'text': '"""+ctx['subtitle']+"""'
+    },
+    pane: {
+            'size': '85%'
+    },
+    legend: {
+        title: {text: 'Wind Speed [MPH]'},
+            align: 'right',
+            verticalAlign: 'top',
+            y: 100,
+            layout: 'vertical'
+    },
+    xAxis: {
+        'tickInterval': 18./8.,
+        'labels': {
+                   formatter: function(){
+                       var v = this.value.toFixed(1);
+                       if (v == '0.0') {return 'N';}
+                       if (v == '2.3') {return 'NE';}
+                       if (v == '4.5') {return 'E';}
+                       if (v == '6.8') {return 'SE';}
+                       if (v == '9.0') {return 'S';}
+                       if (v == '11.3') {return 'SW';}
+                       if (v == '13.5') {return 'W';}
+                       if (v == '15.8') {return 'NW';}
+                       return v;
+                   }
+        }
+    },
+    yAxis: {
+            'min': 0,
+            'endOnTick': false,
+            'showLastLabel': true,
+            'title': {
+                'text': 'Frequency (%)'
+            },
+            'reversedStacks': false
+        },
+    tooltip: {
+        positioner: function () {
+                return { x: 10, y: 10 };
+            },
+            'valueSuffix': '%',
+            shared: true,
+            valueDecimals: 1,
+            formatter: function () {
+            var s = '<b>' + arr[this.x] + ' ('+ this.points[0].total.toFixed(1)+'%)</b>';
+
+            $.each(this.points, function () {
+                s += '<br/>' + this.series.name + ': ' +
+                    this.y.toFixed(1) + '%';
+            });
+
+            return s;
+        },
+    },
+    plotOptions: {
+            'series': {
+                'stacking': 'normal',
+                'shadow': false,
+                'groupPadding': 0,
+                'pointPlacement': 'on'
+            }
+    }
+    });
+    """
+
+
+def get_context(fdict):
+    """Do the agnostic stuff"""
+    ctx = {}
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+
+    ctx['station'] = fdict.get('zstation', 'AMW')
+    ctx['network'] = fdict.get('network', 'IA_ASOS')
+    ctx['threshold'] = int(fdict.get('threshold', 80))
+    ctx['opt'] = fdict.get('opt', 'ts')
+    ctx['month'] = fdict.get('month', 'all')
+    ctx['nt'] = NetworkTable(ctx['network'])
+
+    if ctx['month'] == 'all':
+        months = range(1, 13)
+    elif ctx['month'] == 'fall':
+        months = [9, 10, 11]
+    elif ctx['month'] == 'winter':
+        months = [12, 1, 2]
+    elif ctx['month'] == 'spring':
+        months = [3, 4, 5]
+    elif ctx['month'] == 'summer':
+        months = [6, 7, 8]
+    else:
+        ts = datetime.datetime.strptime("2000-"+ctx['month']+"-01", '%Y-%b-%d')
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month, 999]
+
+    limiter = "presentwx ~* 'TS'"
+    title = "Thunderstorm (TS) contained in METAR"
+    if ctx['opt'] == 'tmpf_above':
+        limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
+        title = "Air Temp at or above %s$^\circ$F" % (ctx['threshold'],)
+    elif ctx['opt'] == 'tmpf_below':
+        limiter = "round(tmpf::numeric,0) < %s" % (ctx['threshold'],)
+        title = "Air Temp below %s$^\circ$F" % (ctx['threshold'],)
+    elif ctx['opt'] == 'dwpf_below':
+        limiter = "round(dwpf::numeric,0) < %s" % (ctx['threshold'],)
+        title = "Dew Point below %s$^\circ$F" % (ctx['threshold'],)
+    elif ctx['opt'] == 'dwpf_above':
+        limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
+        title = "Dew Point at or above %s$^\circ$F" % (
+                                                            ctx['threshold'],)
+
+    ctx['df'] = read_sql("""
+     SELECT valid, drct, sknt * 1.15 as smph from alldata
+     where station = %s and
+     """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
+     and extract(month from valid) in %s
+    """, pgconn, params=(ctx['station'], tuple(months)), index_col='valid')
+    minvalid = ctx['df'].index.min()
+    maxvalid = ctx['df'].index.max()
+
+    ctx['plottitle'] = ("%s-%s %s Wind Rose, month=%s\n%s\nWhen  "
+                        "%s") % (minvalid.year,
+                                 maxvalid.year, ctx['station'],
+                                 ctx['month'].upper(),
+                                 ctx['nt'].sts[ctx['station']]['name'],
+                                 title)
+    ctx['title'] = "%s-%s %s Wind Rose, month=%s" % (
+        minvalid.year, maxvalid.year, ctx['station'], ctx['month'].upper())
+    ctx['subtitle'] = "%s, %s" % (ctx['nt'].sts[ctx['station']]['name'],
+                                  title.replace("$^\circ$", ""))
+    return ctx
+
+
 def plotter(fdict):
     """ Go """
     import matplotlib
@@ -58,59 +234,13 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     from windrose import WindroseAxes
     from matplotlib.patches import Rectangle
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    threshold = int(fdict.get('threshold', 80))
-    opt = fdict.get('opt', 'ts')
-    month = fdict.get('month', 'all')
-    nt = NetworkTable(network)
-
-    if month == 'all':
-        months = range(1, 13)
-    elif month == 'fall':
-        months = [9, 10, 11]
-    elif month == 'winter':
-        months = [12, 1, 2]
-    elif month == 'spring':
-        months = [3, 4, 5]
-    elif month == 'summer':
-        months = [6, 7, 8]
-    else:
-        ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
-
-    limiter = "presentwx ~* 'TS'"
-    title = "Thunderstorm (TS) contained in METAR"
-    if opt == 'tmpf_above':
-        limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
-        title = "Air Temp at or above %s$^\circ$F" % (threshold,)
-    elif opt == 'tmpf_below':
-        limiter = "round(tmpf::numeric,0) < %s" % (threshold,)
-        title = "Air Temp below %s$^\circ$F" % (threshold,)
-    elif opt == 'dwpf_below':
-        limiter = "round(dwpf::numeric,0) < %s" % (threshold,)
-        title = "Dew Point below %s$^\circ$F" % (threshold,)
-    elif opt == 'dwpf_above':
-        limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
-        title = "Dew Point at or above %s$^\circ$F" % (threshold,)
-
-    df = read_sql("""
-     SELECT valid, drct, sknt * 1.15 as smph from alldata
-     where station = %s and
-     """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
-     and extract(month from valid) in %s
-    """, pgconn, params=(station, tuple(months)), index_col='valid')
-    minvalid = df.index.min()
-    maxvalid = df.index.max()
+    ctx = get_context(fdict)
 
     fig = plt.figure(figsize=(6, 7.2), facecolor='w', edgecolor='w')
     rect = [0.08, 0.1, 0.8, 0.8]
     ax = WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
-    ax.bar(df['drct'].values, df['smph'].values,
+    ax.bar(ctx['df']['drct'].values, ctx['df']['smph'].values,
            normed=True, bins=[0, 2, 5, 7, 10, 15, 20], opening=0.8,
            edgecolor='white', nsector=18)
     handles = []
@@ -125,17 +255,13 @@ def plotter(fdict):
                    mode=None, columnspacing=0.9, handletextpad=0.45)
     plt.setp(l.get_texts(), fontsize=10)
 
-    plt.gcf().text(0.5, 0.99,
-                   ("%s-%s %s Wind Rose, month=%s\n%s\nWhen  "
-                    "%s") % (minvalid.year,
-                             maxvalid.year, station, month.upper(),
-                             nt.sts[station]['name'],
-                             title),
+    plt.gcf().text(0.5, 0.99, ctx['plottitle'],
                    fontsize=16, ha='center', va='top')
-    plt.gcf().text(0.95, 0.12, "n=%s" % (len(df.index),),
+    plt.gcf().text(0.95, 0.12, "n=%s" % (len(ctx['df'].index),),
                    verticalalignment="bottom", ha='right')
 
-    return fig, df
+    return fig, ctx['df']
 
 if __name__ == '__main__':
-    plotter(dict())
+    highcharts(dict(station='AMW', month='jan', opt='tmpf_above',
+                    threshold=32))
