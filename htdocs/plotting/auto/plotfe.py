@@ -8,7 +8,7 @@ import datetime
 import pandas as pd
 import tempfile
 import imp
-        
+
 
 def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting
@@ -23,6 +23,20 @@ def parser(cgistr):
     return d
 
 
+def send_content_type(fmt):
+    """Send the content-type header for this fmt"""
+    if fmt == 'png':
+        sys.stdout.write("Content-type: image/png\n\n")
+    elif fmt == 'js':
+        sys.stdout.write("Content-type: application/javascript\n\n")
+    elif fmt in ['csv', 'txt']:
+        sys.stdout.write('Content-type: text/plain\n\n')
+    else:
+        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
+        sys.stdout.write((
+            "Content-Disposition: attachment;Filename=iem.xlsx\n\n"))
+
+
 def main():
     """See how we are called"""
     form = cgi.FieldStorage()
@@ -34,19 +48,13 @@ def main():
 
     mckey = ("/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)).replace(" ", "")
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
-    res = mc.get(mckey)
-    if fmt == 'png':
-        sys.stdout.write("Content-type: image/png\n\n")
-    elif fmt == 'js':
-        sys.stdout.write("Content-type: application/javascript\n\n")
-    elif fmt in ['csv', 'txt']:
-        sys.stdout.write('Content-type: text/plain\n\n')
-    else:
-        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write((
-            "Content-Disposition: attachment;Filename=iem.xlsx\n\n"))
     hostname = os.environ.get("SERVER_NAME", "")
-    if not res and fmt == 'js':
+    res = mc.get(mckey) if hostname != 'laptop.local' else None
+    send_content_type(fmt)
+    if res:
+        sys.stdout.write(res)
+        return
+    if fmt == 'js':
         import json
         # We can short circuit things
         if p >= 100:
@@ -60,7 +68,12 @@ def main():
         if isinstance(res, dict):
             res = '$("#ap_container").highcharts(%s);' % (
                     json.dumps(a.highcharts(fdict)), )
-    elif not res or hostname == "iem.local":
+        meta = a.get_description()
+        try:
+            mc.set(mckey, res, meta.get('cache', 43200))
+        except:
+            sys.stderr.write("Exception while writting key: %s" % (mckey, ))
+    else:
         # Lazy import to help speed things up
         import matplotlib
         matplotlib.use('agg')
