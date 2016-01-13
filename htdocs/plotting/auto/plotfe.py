@@ -55,8 +55,11 @@ def main():
             name = 'scripts/p%s' % (p,)
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
-        res = '$("#ap_container").highcharts(%s);' % (
-                json.dumps(a.highcharts(fdict)), )
+        # Allow returning of javascript as a string
+        res = a.highcharts(fdict)
+        if isinstance(res, dict):
+            res = '$("#ap_container").highcharts(%s);' % (
+                    json.dumps(a.highcharts(fdict)), )
     elif not res or hostname == "iem.local":
         # Lazy import to help speed things up
         import matplotlib
