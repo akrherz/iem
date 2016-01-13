@@ -60,22 +60,29 @@ def plotter(fdict):
         now += datetime.timedelta(days=1)
 
     df = read_sql("""
-    SELECT to_char(day, 'mmdd') as sday, day, max_tmpf, min_tmpf
+    SELECT day, max_tmpf, min_tmpf,
+    extract(day from day) as day_of_month
     from """+table+""" s JOIN stations t
     on (t.iemid = s.iemid) WHERE id = %s and network = %s and
     day >= %s and day < %s ORDER by day ASC
-    """, pgconn_iem,  params=(station, network, sts, ets), index_col='sday')
+    """, pgconn_iem,  params=(station, network, sts, ets),
+                  index_col='day_of_month')
     has_data = (df['max_tmpf'].max() > -90)
 
     # Get the normals
     cdf = read_sql("""
-    SELECT to_char(valid, 'mmdd') as sday, valid, high, low from
+    SELECT valid, high, low,
+    extract(day from valid) as day_of_month from
     ncdc_climate81 where station = %s
     and extract(month from valid) = %s ORDER by valid ASC
     """, pgconn_coop, params=(nt.sts[station]['ncdc81'], month),
-                   index_col='sday')
+                   index_col='day_of_month')
 
-    df = cdf.join(df)
+    if len(cdf.index) > 0:
+        df = cdf.join(df)
+    else:
+        df['high'] = None
+        df['low'] = None
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -84,15 +91,15 @@ def plotter(fdict):
                          edgecolor='None')
         ax.add_patch(rect)
 
-    ax.plot(np.arange(1, days+1), df['high'].values, zorder=3, marker='o',
+    ax.plot(df.index.values, df['high'].values, zorder=3, marker='o',
             color='pink')
-    ax.plot(np.arange(1, days+1), df['low'].values, zorder=3, marker='o',
+    ax.plot(df.index.values, df['low'].values, zorder=3, marker='o',
             color='skyblue')
     if has_data:
-        ax.bar(np.arange(1, days+1) - 0.3, df['max_tmpf'].values,
+        ax.bar(df.index.values - 0.3, df['max_tmpf'].values,
                fc='r', ec='k', width=0.3,
                linewidth=0.6)
-        ax.bar(np.arange(1, days+1), df['min_tmpf'].values,
+        ax.bar(df.index.values, df['min_tmpf'].values,
                fc='b', ec='k', width=0.3,
                linewidth=0.6)
     else:
