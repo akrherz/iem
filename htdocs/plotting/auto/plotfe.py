@@ -49,7 +49,7 @@ def main():
     mckey = ("/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)).replace(" ", "")
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     hostname = os.environ.get("SERVER_NAME", "")
-    res = mc.get(mckey) if hostname != 'laptop.local' else None
+    res = mc.get(mckey) if hostname != 'iem.local' else None
     send_content_type(fmt)
     if res:
         sys.stdout.write(res)
