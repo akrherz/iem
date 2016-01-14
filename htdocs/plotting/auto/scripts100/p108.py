@@ -87,7 +87,7 @@ def plotter(fdict):
         df2 = read_sql("""SELECT sday, day,
             gddxx(%s, %s, o.high, o.low) as o"""+glabel+""",
             o.precip as oprecip, sdd86(o.high, o.low) as osdd86
-            from alldata_ia o WHERE
+            from """+table+""" o WHERE
             o.station = %s and o.day >= %s and
             o.day <= %s and sday != '0229' ORDER by o.day ASC
         """, pgconn, params=(gddbase, gddceil, station, s1, s2),
