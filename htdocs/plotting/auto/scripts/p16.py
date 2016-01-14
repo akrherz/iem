@@ -101,10 +101,8 @@ def highcharts(fdict):
     },
     legend: {
         title: {text: 'Wind Speed [MPH]'},
-            align: 'right',
-            verticalAlign: 'top',
-            y: 100,
-            layout: 'vertical'
+            verticalAlign: 'bottom',
+            layout: 'horizontal'
     },
     xAxis: {
         'tickInterval': 18./8.,
