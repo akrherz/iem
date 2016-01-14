@@ -79,11 +79,12 @@ def plotter(fdict):
                          sdate, edate),
                   index_col='sday')
 
+    yeardelta = edate.year - sdate.year
     for year in [year2, year3, year4]:
         if year == 0:
             continue
         s1 = sdate.replace(year=year)
-        s2 = edate.replace(year=year)
+        s2 = edate.replace(year=(year+yeardelta))
         df2 = read_sql("""SELECT sday, day,
             gddxx(%s, %s, o.high, o.low) as o"""+glabel+""",
             o.precip as oprecip, sdd86(o.high, o.low) as osdd86
@@ -160,17 +161,17 @@ def plotter(fdict):
         if year == 0:
             continue
         label = "%s" % (year, )
-        ax1.plot(df['day'], df['cumsum_o%s_%s' % (glabel, year)], label=label,
-                 lw=2, c=color)
-        ax2.plot(df['day'], df['diff_%s_%s' % (glabel, year)], label=label,
-                 lw=2, c=color)
+        ax1.plot(df['day'], df['cumsum_o%s_%s' % (glabel, year)].values,
+                 label=label, lw=2, c=color)
+        ax2.plot(df['day'], df['diff_%s_%s' % (glabel, year)].values,
+                 label=label, lw=2, c=color)
         ymax = max([df['diff_%s_%s' % (glabel, year)].abs().max() * 1.1,
                     ax2.get_ylim()[1]])
         ax2.set_ylim(0-ymax, ymax)
-        ax3.plot(df['day'], df['cumsum_oprecip_%s' % (year, )], label=label,
-                 lw=2, c=color)
-        ax4.plot(df['day'], df['cumsum_osdd86_%s' % (year, )], label=label,
-                 lw=2, c=color)
+        ax3.plot(df['day'], df['cumsum_oprecip_%s' % (year, )].values,
+                 label=label, lw=2, c=color)
+        ax4.plot(df['day'], df['cumsum_osdd86_%s' % (year, )].values,
+                 label=label, lw=2, c=color)
     if (df['day'].iat[-1] - df['day'].iat[0]).days < 32:
         ax1.xaxis.set_major_locator(mdates.DayLocator(interval=7))
     else:
