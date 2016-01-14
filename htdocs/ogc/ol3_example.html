@@ -1,10 +1,10 @@
 <html>
 <head>
   <title>IEM TMS + OpenLayers Example</title>
-  <link type="text/css" href="/vendor/openlayers/3.9.0/ol.css" rel="stylesheet" />
-  <link type="text/css" href="/vendor/openlayers/3.9.0/ol3-layerswitcher.css" rel="stylesheet" />
-  <script src="/vendor/openlayers/3.9.0/ol.js"></script> 
-  <script src="/vendor/openlayers/3.9.0/ol3-layerswitcher.js"></script> 
+  <link type="text/css" href="/vendor/openlayers/3.12.1/ol.css" rel="stylesheet" />
+  <link type="text/css" href="/vendor/openlayers/3.12.1/ol3-layerswitcher.css" rel="stylesheet" />
+  <script src="/vendor/openlayers/3.12.1/ol.js"></script> 
+  <script src="/vendor/openlayers/3.12.1/ol3-layerswitcher.js"></script> 
   
 <script type="text/javascript">
 var map;
@@ -15,6 +15,14 @@ var n0q;
  * the DOM is rendered!  Notice the onload="" attribute to the body tag below
  */
 function init(){
+	// Initially the layername is set to some random timestamp, which is
+	// layer updated in refresher()
+	n0q = new ol.layer.Tile({
+        title: 'NEXRAD Base Reflectivity',
+        source: new ol.source.XYZ({
+                url : '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-201506172005/{z}/{x}/{y}.png'
+        })
+	});
 	map = new ol.Map({
 		target: 'map',
 		layers: [new ol.layer.Tile({
@@ -27,13 +35,7 @@ function init(){
             source: new ol.source.XYZ({
                     url : '/cache/tile.py/1.0.0/goes-east-ir-4km-900913/{z}/{x}/{y}.png'
             })
-   		}), new ol.layer.Tile({
-            title: 'NEXRAD Base Reflectivity',
-            source: new ol.source.XYZ({
-                    url : '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-0/{z}/{x}/{y}.png'
-            })
-   		})
-		         
+   		}), n0q  
 		],
         view: new ol.View({
             projection: 'EPSG:3857',
@@ -44,6 +46,32 @@ function init(){
 
 	var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
+    
+    // Query an IEM JSON service to get the latest timestamps for the TMSs
+    // requires Jquery
+    function refresher(){
+    	$.getJSON('/json/tms.json', function(data){
+
+    		$.each(data.services, function(key, val){
+    			if (val.id == 'ridge_uscomp_n0q'){
+    				var dt = new Date(val.utc_valid);
+    				n0q.set('title', "NEXRAD N0Q @"
+    	  				  	+ ("0"+dt.getUTCHours()).slice(-2)
+    	  				  	+ ("0"+dt.getUTCMinutes()).slice(-2)
+    	  				  	+ " UTC");
+    				n0q.setSource(new ol.source.XYZ({
+    					url : '/cache/tile.py/1.0.0/'+val.layername+'/{z}/{x}/{y}.png'
+    				}));
+    			}
+    		})
+    	});
+
+    }
+    refresher();
+    window.setInterval(function(){
+		refresher();
+    }, 5*60000);
+    
 	
 }
 </script>
@@ -52,5 +80,6 @@ function init(){
 	
 <div style="width:100%; height:100%" id="map"></div>
 	
+<script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 </body>
 </html>
