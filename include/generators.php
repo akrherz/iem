@@ -165,6 +165,24 @@ function gen_feature($t){
 		}
 		$tagtext .= "</small>";
 	}
+	$jsextra = "";
+	$imgiface = "<a href=\"$bigimghref\"><img src=\"$bigimghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
+	if ($row["javascripturl"]){
+		$imgiface = <<<EOF
+<div class="hidden-sm hidden-xs">
+<div id="ap_container" style="width:100%s;height:400px;"></div>
+</div>
+<div class="visible-sm visible-xs">
+<a href="$bigimghref"><img src="$bigimghref" alt="Feature" class="img img-responsive" /></a>
+</div>
+EOF;
+		$jsextra = <<<EOF
+<script src="/vendor/highcharts/4.2.0/highcharts.js"></script>		
+<script src="/vendor/highcharts/4.2.0/highcharts-more.js"></script>		
+<script src="/vendor/highcharts/4.2.0/modules/exporting.js"></script>		
+<script src="{$row["javascripturl"]}"></script>
+EOF;
+	}
 	
 	$s .= <<<EOF
 <div class="panel panel-default top-buffer">
@@ -189,7 +207,7 @@ function gen_feature($t){
 
 	
 		<div class="thumbnail col-xs-12 col-sm-7 pull-right">
-			<a href="$bigimghref"><img src="$bigimghref" alt="Feature" class="img img-responsive" /></a>
+			{$imgiface}
 			<div class="caption"><span>{$row["caption"]}</span>{$linktext}</div>
 		</div>
 		
@@ -262,6 +280,7 @@ window.fbAsyncInit = function() {
 	  });
 }
 </script>
+{$jsextra}
 EOF;
 		$huri = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ;
 		$fbtext = <<<EOF
