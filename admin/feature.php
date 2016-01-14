@@ -27,6 +27,7 @@ if ($me){
   ));
 }
 
+$javascripturl = isset($_REQUEST["javascripturl"]) ? $_REQUEST["javascripturl"] : null;
 $appurl = isset($_REQUEST["appurl"]) ? $_REQUEST["appurl"] : null;
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
 $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
@@ -36,9 +37,9 @@ $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ?
           true : false;
 
 $mesosite = iemdb("mesosite", TRUE, TRUE);
-pg_prepare($mesosite, "INJECTOR", "INSERT into feature 
-  (title, story, caption, voting, tags, fbid, appurl) VALUES 
-  ($1   , $2   , $3   , $4     , $5  , $6, $7)");
+pg_prepare($mesosite, "INJECTOR", "INSERT into feature ".
+  "(title, story, caption, voting, tags, fbid, appurl, javascripturl) VALUES ".
+  "($1, $2, $3, $4, $5, $6, $7, $8)");
 
 
 
@@ -74,7 +75,7 @@ if ($story != null && $title != null &&
     isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
-             $voting, $tags, $story_fbid, $appurl) );
+             $voting, $tags, $story_fbid, $appurl, $javascripturl) );
 }
 
 $app = "";
@@ -87,6 +88,10 @@ $t->content = <<<EOF
 
 {$app}
 
+<ul class="breadcrumb">
+<li><a href="/admin/">Admin Mainpage</a></li>
+</ul>
+		
 <h3>IEM Feature Publisher</h3>
 <form method="POST">
 
@@ -104,6 +109,9 @@ $t->content = <<<EOF
 
 <p>AppURL:
 <br /><input type="text" name="appurl" size="80" /></p>
+
+<p>Javascript URI:
+<br /><input type="text" name="javascripturl" size="80" /></p>
 
 <p>Publish Facebook?
 <br /><input type="checkbox" name="facebook" value="yes" />Yes</p>
