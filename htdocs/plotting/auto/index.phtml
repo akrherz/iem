@@ -327,7 +327,9 @@ EOF;
 </pre>			
 EOF;
 		} elseif ($fmt == 'js'){
-			$image = '<div id="ap_container" style="width:100%s;height:400px;"></div>';
+			// Add debug to the screen so to allow easy copy/paste
+			$image = ($_SERVER['SERVER_NAME'] == 'iem.local') ? "<pre>iem.local: ${imguri}.js</pre>": ""; 
+			$image .= '<div id="ap_container" style="width:100%s;height:400px;"></div>';
 			$jsextra .= "Highcharts.setOptions({global: { useUTC: false } });";
 			$extrascripts .= <<<EOF
 <script src="/vendor/highcharts/4.2.0/highcharts.js"></script>		
