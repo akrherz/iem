@@ -1,11 +1,10 @@
-"""
- Use the Site Data Collected and then see what columns exist within the
- Agronomic Data Sheets.
-"""
 import ConfigParser
 import sys
 import util  # @UnresolvedImport
 import copy
+import re
+
+VARNAME_RE = re.compile("^(SOIL[0-9]+)")
 
 YEAR = sys.argv[1]
 
@@ -19,7 +18,13 @@ sdc, sdc_names = util.build_sdc(sdc_feed)
 
 drive_client = util.get_driveclient()
 
-res = drive_client.files().list(q="title contains 'Agronomic Data'").execute()
+ALLOWED = ['SOIL15', 'SOIL23', 'SOIL16', 'SOIL22', 'SOIL25', 'SOIL95',
+           'SOIL94', 'SOIL93', 'SOIL92', 'SOIL91', 'SOIL90', 'SOIL89',
+           'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84']
+
+res = drive_client.files().list(q=("title contains '%s'"
+                                   ) % (('Soil Nitrate Data'),)
+                                ).execute()
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
@@ -40,9 +45,9 @@ for item in res['items']:
     shouldhave = copy.deepcopy(sdc[YEAR][sitekey])
     error = False
     for key in keys:
-        if not key.upper().startswith("AGR"):
+        if not key.upper().startswith("SOIL"):
             continue
-        varname = key.upper()
+        varname = VARNAME_RE.findall(key.upper())[0]
         if varname not in shouldhave:
             vals = []
             for entry4 in worksheet.list_feed.entry:
@@ -50,14 +55,14 @@ for item in res['items']:
                 if d[key] not in vals:
                     vals.append(d[key])
             print 'EXTRA %s' % (varname,), vals
-            if len(vals) < 5:
+            if len(vals) < 4:
                 if raw_input("DELETE? y/n ") == 'y':
                     print("Deleting...")
-                    worksheet.del_column(varname)
+                    worksheet.del_column(key.upper())
                     worksheet.get_list_feed()
         else:
             shouldhave.remove(varname)
     for sh in shouldhave:
-        if sh.startswith('AGR'):
+        if sh.find("SOIL") == 0 and sh in ALLOWED:
             print 'SHOULDHAVE %s' % (sh,)
             error = True

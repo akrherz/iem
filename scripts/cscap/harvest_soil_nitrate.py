@@ -1,7 +1,7 @@
 '''
  Scrape out the Soil Nitrate data from Google Drive
 '''
-import util
+import util  # @UnresolvedImport
 import sys
 import ConfigParser
 import psycopg2
@@ -21,6 +21,10 @@ drive_client = util.get_driveclient()
 
 res = drive_client.files(
         ).list(q="title contains 'Soil Nitrate Data'").execute()
+
+DOMAIN = ['SOIL15', 'SOIL23', 'SOIL16', 'SOIL22', 'SOIL25', 'SOIL95',
+          'SOIL94', 'SOIL93', 'SOIL92', 'SOIL91', 'SOIL90', 'SOIL89',
+          'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84']
 
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
@@ -56,7 +60,6 @@ for item in res['items']:
     for row in pcursor:
         key = "%s|%s|%s|%s" % row
         current[key] = True
-    found_vars = []
 
     for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
@@ -79,8 +82,10 @@ for item in res['items']:
                             siteid, YEAR))
                 continue
             val = worksheet.get_cell_value(row, col, numeric=True)
-            if varname not in found_vars:
-                found_vars.append(varname)
+            if varname not in DOMAIN:
+                print(("harvest_soil_nitrate %s[%s] found additional var: %s"
+                       ) % (siteid, YEAR, varname))
+                DOMAIN.append(varname)
             try:
                 pcursor.execute("""
                     INSERT into soil_data(site, plotid, varname, year,
@@ -100,7 +105,7 @@ for item in res['items']:
 
     for key in current:
         (plotid, varname, depth, subsample) = key.split("|")
-        if varname in found_vars:
+        if varname in DOMAIN:
             print(('harvest_soil_nitrate rm %s %s %s %s %s %s'
                    ) % (YEAR, siteid, plotid, varname, depth, subsample))
             pcursor.execute("""DELETE from soil_data where site = %s and
