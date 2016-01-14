@@ -20,6 +20,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['highcharts'] = True
     d['description'] = """This chart plots the monthly percentiles that
     a given daily value has.  For example, where would a daily 2 inch
     precipitation rank for each month of the year.  Having a two inch event
@@ -38,13 +39,10 @@ def get_description():
     return d
 
 
-def plotter(fdict):
-    """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
+def get_context(fdict):
+    """ Get the context """
+    ctx = {}
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
     station = fdict.get('station', 'IA2203').upper()
     varname = fdict.get('var', 'precip')[:10]
     level = float(fdict.get('level', 2))
@@ -68,18 +66,93 @@ def plotter(fdict):
     df['avg_days'] = df['hits'] / years
     df['return_interval'] = 1.0 / df['avg_days']
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    ctx['df'] = df
+    ctx['station'] = station
+    ctx['nt'] = nt
+    ctx['mydir'] = mydir
+    ctx['level'] = level
+    ctx['varname'] = varname
+    units = 'inch' if varname in ['precip', ] else 'F'
+    ctx['title'] = ("Monthly Frequency of Daily %s %s %s+ %s"
+                    ) % (PDICT[varname], PDICT2[mydir], level, units)
+    ctx['subtitle'] = ("for [%s] %s (%s-%s)"
+                       ) % (station,
+                            nt.sts[station]['name'],
+                            nt.sts[station]['archive_begin'].year,
+                            datetime.date.today().year)
+    return ctx
+
+
+def highcharts(fdict):
+    """ Go """
+    ctx = get_context(fdict)
+
+    return """
+    var avg_days = """ + str(ctx['df']['avg_days'].values.tolist()) + """;
+$("#ap_container").highcharts({
+    title: {text: '""" + ctx['title'] + """'},
+    subtitle: {text: '""" + ctx['subtitle'] + """'},
+    yAxis: [{
+            min: 0, max: 100,
+            title: {
+                text: 'Percentile'
+            }
+        }, {
+            min: 0,
+            title: {
+                text: 'Return Period (years)'
+            },
+            opposite: true
+    }],
+    tooltip: {
+            shared: true,
+            formatter: function() {
+                var s = '<b>' + this.x +'</b>';
+                s += '<br /><b>Percentile:</b> '+ this.points[0].y.toFixed(2);
+s += '<br /><b>Return Interval:</b> '+ this.points[1].y.toFixed(2) +" years";
+s += '<br /><b>Avg Days per Month:</b> '+ (1. / this.points[1].y).toFixed(2);
+                return s;
+            }
+    },
+    plotOptions: {
+            column: {
+                grouping: false,
+                shadow: false,
+                borderWidth: 0
+            }
+    },
+    series : [{
+        name: 'Percentile',
+        data: """ + str(ctx['df']['rank'].values.tolist()) + """,
+        pointPadding: 0.2,
+        pointPlacement: -0.2
+    },{
+        name: 'Return Interval',
+        data: """ + str(ctx['df']['return_interval'].values.tolist()) + """,
+        pointPadding: 0.2,
+        pointPlacement: 0.2,
+        yAxis: 1
+    }],
+    chart: {type: 'column'},
+    xAxis: {categories: """ + str(calendar.month_abbr[1:]) + """}
+
+});
+    """
+
+
+def plotter(fdict):
+    """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    ctx = get_context(fdict)
     (fig, ax) = plt.subplots(1, 1)
+    df = ctx['df']
 
     ax.bar(df.index.values, df['rank'], fc='tan', zorder=1,
            ec='orange', align='edge', width=0.4)
 
-    units = 'inch' if varname in ['precip', ] else 'F'
-    ax.set_title(("Monthly Frequency of Daily %s %s %s+ %s\n"
-                  "for [%s] %s (%s-%s)"
-                  ) % (PDICT[varname], PDICT2[mydir], level, units, station,
-                       nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
-                       datetime.date.today().year))
+    ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
     ax.grid(True)
     ax.set_ylabel("Percentile [%]", color='tan')
     ax.set_ylim(0, 105)
