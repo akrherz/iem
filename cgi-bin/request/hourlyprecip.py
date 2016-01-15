@@ -2,12 +2,13 @@
 import cgi
 import datetime
 import sys
+import pytz
 import psycopg2
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 cursor = IEM.cursor()
 
 
-def get_data(network, sts, ets, stations=[]):
+def get_data(network, sts, ets, tzinfo, stations=[]):
     ''' Go fetch data please '''
     s = ("station,network,valid,precip_in\n")
     if len(stations) == 1:
@@ -18,7 +19,10 @@ def get_data(network, sts, ets, stations=[]):
         ORDER by valid ASC
         """, (sts, ets, network, tuple(stations)))
     for row in cursor:
-        s += "%s,%s,%s,%s\n" % (row[0], row[1], row[2], row[3])
+        s += ("%s,%s,%s,%s\n"
+              ) % (row[0], row[1],
+                   (row[2].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M"),
+                   row[3])
 
     return s
 
@@ -27,6 +31,7 @@ def main():
     """ run rabbit run """
     sys.stdout.write('Content-type: text/plain\n\n')
     form = cgi.FieldStorage()
+    tzinfo = pytz.timezone(form.getfirst("tz", "America/Chicago"))
     try:
         sts = datetime.date(int(form.getfirst('year1')),
                             int(form.getfirst('month1')),
@@ -40,7 +45,7 @@ def main():
         return
     stations = form.getlist('station')
     network = form.getfirst('network')[:12]
-    sys.stdout.write(get_data(network, sts, ets, stations=stations))
+    sys.stdout.write(get_data(network, sts, ets, tzinfo, stations=stations))
 
 if __name__ == '__main__':
     # Go Main Go
