@@ -398,8 +398,14 @@ def get_folders(drive):
         if parentfolder not in f:
             print("ERROR: parentfolder: %s not in f" % (parentfolder,))
             continue
-        while len(f[parentfolder]['parents']) > 0:
+        while parentfolder in f and len(f[parentfolder]['parents']) > 0:
             parentfolder = f[parentfolder]['parents'][0]
         # print title, '->', f[parentfolder]['title']
         f[thisfolder]['basefolder'] = parentfolder
     return f
+
+
+def get_ssclient():
+    """Return a smartsheet enabled client"""
+    import smartsheet
+    return smartsheet.Smartsheet(CONFIG['ss_access_token'])
