@@ -1,6 +1,9 @@
 var htmlInterface = ['<div class="panel panel-default">',
   '<div class="panel-heading">',
-    '<h3 class="panel-title">Select Widget for <span id="iemss-network"></span> Network</h3>',
+    '<a class="btn btn-default pull-right" href="/" id="iemss-metadata-link" target="_new">',
+    '<i class="glyphicon glyphicon-info-sign"></i> Station Metadata</a>',
+    '<h3 class="panel-title">Select Widget for <span id="iemss-network"></span> Network</h3> ',
+    '<br class="clearfix" />',
   '</div>',
   '<div class="panel-body">',
 '<div class="row">',
@@ -41,7 +44,7 @@ var htmlInterface = ['<div class="panel panel-default">',
 '</div>',
 '<br />',
 '<div class="row"><div class="col-sm-12">',
-		'<div id="map" style="width:100%; height:400px" data-network="IA_DCP"></div>',
+		'<div id="map" style="width:100%; height:400px"></div>',
 '</div></div>',
   '</div><!-- End of panel-body -->',
 '</div><!-- End of panel -->'];
@@ -111,6 +114,7 @@ $().ready(function() {
 		$("#stations_out").attr("name", select_name);
 	}
 	$("#iemss-network").html(network);
+	$("#iemss-metadata-link").attr('href', '/sites/networks.php?network='+network);
 	
 	$('#stations_add').click(function() {  
 		return !$('#stations_in option:selected').remove().appendTo('#stations_out');  
