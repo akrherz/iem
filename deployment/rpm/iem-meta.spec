@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 23%{?dist}
+Release: 25%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -102,6 +102,12 @@ Requires: windrose
 Requires: net-tools
 Requires: service_identity
 Requires: XlsxWriter
+Requires: python-requests
+Requires: requests-toolbelt
+Requires: smartsheet-python-sdk
+Requires: certifi
+Requires: Fiona
+Requires: geopandas
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -123,6 +129,12 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon Jan 18 2016 daryl herzmann <akrherz@iastate.edu>
+- Added GeoPandas requirement
+
+* Thu Jan 14 2016 daryl herzmann <akrherz@iastate.edu>
+- Added Smartsheet SDK and requirements
+
 * Mon Oct 19 2015 daryl herzmann <akrherz@iastate.edu>
 - Added XlsxWriter for usage by pandas
 
