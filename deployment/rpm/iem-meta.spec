@@ -108,6 +108,7 @@ Requires: smartsheet-python-sdk
 Requires: certifi
 Requires: Fiona
 Requires: geopandas
+Requires: rasterio
 
 %description
 A virtual package which makes sure that various requirements are installed
