@@ -43,6 +43,7 @@ def get_fileage(fn):
 def runner(hostname):
     """ Do something! """
     max_latencies = {}
+    host_latencies = {}
     mydir = "/home/ldm/rtstats/%s" % (hostname,)
     os.chdir(mydir)
     for subdir in glob.glob("[A-Z]*"):
@@ -61,7 +62,9 @@ def runner(hostname):
             latency = float(tokens[7])
             if feedtype not in max_latencies:
                 max_latencies[feedtype] = []
+                host_latencies[feedtype] = []
             max_latencies[feedtype].append(latency)
+            host_latencies[feedtype].append(fn)
         os.chdir("..")
 
     exitcode = 2
@@ -70,8 +73,11 @@ def runner(hostname):
     idsmsg = "IDS Latency Unknown"
     for feedtype in max_latencies:
         if feedtype == 'IDS|DDPLUS':
-            idsmsg = "IDS Latency %.0fs" % (max(max_latencies[feedtype]), )
-            if max(max_latencies[feedtype]) > 600:
+            idx = max_latencies[feedtype].index(min(max_latencies[feedtype]))
+            idsmsg = ("IDS Latency %.0fs %s"
+                      ) % (min(max_latencies[feedtype]),
+                           host_latencies[feedtype][idx])
+            if min(max_latencies[feedtype]) > 600:
                 exitcode = 1
                 msg = 'ERROR'
             else:
