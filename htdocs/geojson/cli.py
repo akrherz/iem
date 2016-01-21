@@ -47,7 +47,8 @@ def get_data(ts, fmt):
     precip_jul1, precip_dec1, precip_dec1_normal, precip_record,
     precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
     snow_dec1, snow_record, snow_jul1_normal,
-    snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal
+    snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal,
+    snow_jul1 - snow_jul1_normal as snow_jul1_depart
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """, (ts.date(),))
@@ -85,6 +86,7 @@ def get_data(ts, fmt):
                 "snow_dec1":  str(sanitize(row["snow_dec1"])),
                 "snow_record":  str(sanitize(row["snow_record"])),
                 "snow_jul1_normal":  str(sanitize(row["snow_jul1_normal"])),
+                "snow_jul1_depart":  str(sanitize(row["snow_jul1_depart"])),
                 "snow_dec1_normal":  str(sanitize(row["snow_dec1_normal"])),
                 "snow_month_normal":  str(sanitize(row["snow_month_normal"])),
             },
@@ -101,7 +103,7 @@ def get_data(ts, fmt):
                 "precip_jul1,precip_dec1,precip_dec1_normal,precip_record,"
                 "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
                 "snow_jul1_normal,snow_dec1_normal,"
-                "snow_month_normal")
+                "snow_month_normal,snow_jul1_depart")
         res = cols+"\n"
         for feat in data['features']:
             for col in cols.split(","):
