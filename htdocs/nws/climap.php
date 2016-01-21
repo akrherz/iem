@@ -8,7 +8,7 @@ include "../../include/myview.php";
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
-$OL = '3.9.0';
+$OL = '3.12.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
@@ -70,6 +70,7 @@ $t->content = <<<EOF
 	<option value="snow_month">Snowfall this month</option>
 	<option value="snow_jun1">Snowfall since June 1</option>
 	<option value="snow_jul1">Snowfall since July 1</option>
+	<option value="snow_jul1_depart">Snowfall since July 1 Departure</option>
 	<option value="snow_dec1">Snowfall since December 1</option>
 	<option value="snow_record">Snowfall Record</option>
 </select>	
