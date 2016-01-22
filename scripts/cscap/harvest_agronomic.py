@@ -19,21 +19,23 @@ pcursor = pgconn.cursor()
 spr_client = util.get_spreadsheet_client(config)
 drive_client = util.get_driveclient()
 
+
+def delete_entries(current, siteid):
+    for key in current:
+        (plotid, varname) = key.split("|")
+        print 'harvest_agronomic REMOVE %s %s %s' % (siteid, plotid,
+                                                     varname)
+        pcursor.execute("""DELETE from agronomic_data where site = %s and
+            plotid = %s and varname = %s and year = %s
+        """, (siteid, plotid, varname, YEAR))
+
+
 res = drive_client.files().list(q="title contains 'Agronomic Data'").execute()
 
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
-    spreadsheet = util.Spreadsheet(spr_client, item['id'])
-    spreadsheet.get_worksheets()
-    worksheet = spreadsheet.worksheets.get(YEAR)
-    if worksheet is None:
-        print 'Missing Year: %s from %s' % (YEAR, item['title'])
-        continue
-    worksheet.get_cell_feed()
     siteid = item['title'].split()[0]
-    newvals = 0
-
     # Load up current data, incase we need to do some deleting
     current = {}
     pcursor.execute("""SELECT plotid, varname
@@ -41,6 +43,17 @@ for item in res['items']:
     for row in pcursor:
         key = "%s|%s" % row
         current[key] = True
+
+    spreadsheet = util.Spreadsheet(spr_client, item['id'])
+    spreadsheet.get_worksheets()
+    worksheet = spreadsheet.worksheets.get(YEAR)
+    if worksheet is None:
+        print 'Missing Year: %s from %s' % (YEAR, item['title'])
+        delete_entries(current, siteid)
+        continue
+    worksheet.get_cell_feed()
+    newvals = 0
+
     for col in range(1, worksheet.cols+1):
         val = worksheet.get_cell_value(1, col)
         if val is None:
@@ -73,13 +86,7 @@ for item in res['items']:
             key = "%s|%s" % (plotid, varname)
             if key in current:
                 del(current[key])
-    for key in current:
-        (plotid, varname) = key.split("|")
-        print 'harvest_agronomic REMOVE %s %s %s' % (siteid, plotid,
-                                                     varname)
-        pcursor.execute("""DELETE from agronomic_data where site = %s and
-            plotid = %s and varname = %s and year = %s
-        """, (siteid, plotid, varname, YEAR))
+    delete_entries(current, siteid)
     if newvals > 0:
         print(('harvest_agronomic year: %s site: %s had %s new values'
                '') % (YEAR, siteid, newvals))
