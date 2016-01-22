@@ -1,7 +1,5 @@
-'''
- Harvest the data in the data management store!
-'''
-import util
+"""Harvest the data in the data management store!"""
+import util  # @UnresolvedImport
 import ConfigParser
 import psycopg2
 
@@ -68,7 +66,9 @@ for sheetkey in TABS:
             dups += 1
             continue
         if key in found:
-            print 'DUP: ', key
+            _t = key.split(",")
+            print(("harvest_management DUP: %s on %s for %s[%s]"
+                   ) % (_t[3], _t[0], _t[1], _t[4]))
             continue
         cols = []
         vals = []
@@ -88,8 +88,8 @@ for sheetkey in TABS:
         pcursor.execute("""DELETE from """+table+""" WHERE oid = %s""",
                         (current[key],))
 
-    print "   harvest_management %16s %4s rows %4s dups %4s add %4s del" % (
-        sheetkey, entries, dups, added, len(current))
+    print(("harvest_management %16s rows:%4s dups:%4s add:%4s del:%4s"
+           ) % (sheetkey, entries, dups, added, len(current)))
 
 pcursor.close()
 pgconn.commit()
