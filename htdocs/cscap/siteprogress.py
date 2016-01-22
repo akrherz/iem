@@ -2,6 +2,8 @@
 import sys
 import psycopg2
 import cgi
+import datetime
+from pandas.io.sql import read_sql
 DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb',
                           user='nobody')
 cursor = DBCONN.cursor()
@@ -70,9 +72,51 @@ def make_progress(row):
              # other - 0.05, row['other'],
              nulls - 0.05, row['nulls'])
 
-if __name__ == '__main__':
-    sys.stdout.write('Content-type: text/html\n\n')
+
+def do_site(site):
+    """Print out a simple listing of trouble"""
+    df = read_sql("""
+    with ag as (
+        select year, varname, value, count(*) from agronomic_data
+        where site = %s and (value is null or value in ('', '.'))
+        GROUP by year, varname, value),
+    soil as (
+        select year, varname, value, count(*) from soil_data
+        where site = %s and (value is null or value in ('', '.'))
+        GROUP by year, varname, value)
+
+    SELECT * from ag UNION select * from soil ORDER by year ASC, varname ASC
+    """, DBCONN, params=(site, site), index_col=None)
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write("CSCAP Variable Progress Report\n")
+    sys.stdout.write("Site: %s\n" % (site,))
+    sys.stdout.write("Generated: %s\n" % (
+        datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), ))
+    sys.stdout.write("Total Missing: %s\n" % (df['count'].sum(),))
+    sys.stdout.write("%4s %-10s %-10s %-6s\n" % ('YEAR', 'VARNAME', 'VALUE',
+                                                 'COUNT'))
+
+    def nice(val):
+        if val is None:
+            return 'Empty'
+        if val == '':
+            return 'Empty'
+        if val == '.':
+            return "Period"
+        return val
+
+    for _, row in df.iterrows():
+        sys.stdout.write("%s %-10s %-10s %-6s\n" % (row['year'],
+                                                    row['varname'],
+                                                    nice(row['value']),
+                                                    row['count']))
+
+
+def main():
     form = cgi.FieldStorage()
+    if 'site' in form:
+        do_site(form.getfirst('site'))
+        return
     mode = form.getfirst('mode', 'agronomic')
     show_has = (form.getfirst('has', '0') == '1')
     show_period = (form.getfirst('period', '0') == '1')
@@ -95,6 +139,7 @@ if __name__ == '__main__':
 
     sites = data.keys()
     sites.sort()
+    sys.stdout.write('Content-type: text/html\n\n')
     sys.stdout.write("""<!DOCTYPE html>
 <html lang='en'>
 <head>
@@ -152,7 +197,8 @@ if __name__ == '__main__':
     for sid in sites:
         if sid == '_ALL':
             continue
-        sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
+        sys.stdout.write("""
+        <tr><th><a href="siteprogress.py?site=%s"><i class="glyphicon glyphicon-search"></i> %s</a></th>""" % (sid, sid))
         row = data[sid]
         sys.stdout.write('<td>%s</td>' % (make_progress(row)))
         sys.stdout.write("<td>%.0f</td>" % (row['tot'], ))
@@ -168,3 +214,6 @@ if __name__ == '__main__':
                                            float(row['all'])) * 100.))
     sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
+
+if __name__ == '__main__':
+    main()
