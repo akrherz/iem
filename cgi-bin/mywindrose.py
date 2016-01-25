@@ -11,8 +11,6 @@ from pyiem.windrose_utils import windrose
 from pyiem.network import Table as NetworkTable
 import cgi
 import sys
-import cgitb
-cgitb.enable()
 
 # Query out the CGI variables
 form = cgi.FieldStorage()
@@ -40,6 +38,8 @@ elif "hour1" in form and "hour2" in form and "hourrangelimit" in form:
         hours = numpy.arange(sts.hour, 24)
         hours = numpy.append(hours, numpy.arange(0, ets.hour))
     else:
+        if sts.hour == ets.hour:
+            ets += datetime.timedelta(hours=1)
         hours = numpy.arange(sts.hour, ets.hour)
 else:
     hours = numpy.arange(0, 24)
