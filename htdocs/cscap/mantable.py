@@ -113,9 +113,10 @@ def main():
                 table += "<td>%s</td>" % (
                         data[site].get(yr, {}).get(op, ''),)
             yr2 = str(int(yr)+1)
-            for op in ['plant_rye-corn-res', 'plant_rye-soy-res']:
-                table += "<td>%s</td>" % (
-                        data[site].get(yr2, {}).get(op, ''),)
+            if yr != '2015':
+                for op in ['plant_rye-corn-res', 'plant_rye-soy-res']:
+                    table += "<td>%s</td>" % (
+                            data[site].get(yr2, {}).get(op, ''),)
         table += "</tr>"
 
     # ---------------------------------------------------------------
@@ -199,7 +200,7 @@ Google Data to the ISU Database Server.  You can <br />
   <th colspan="4">2012-2013</th>
   <th colspan="4">2013-2014</th>
   <th colspan="4">2014-2015</th>
-  <th colspan="4">2015-2016</th>
+  <th colspan="2">2015-2016</th>
  </tr>
  <tr>
   <th colspan="2">cash harvest</th>
@@ -211,10 +212,8 @@ Google Data to the ISU Database Server.  You can <br />
   <th colspan="2">cash harvest</th>
   <th colspan="2">cover seeding</th>
   <th colspan="2">cash harvest</th>
-  <th colspan="2">cover seeding</th>
  </tr>
  <tr>
-  <th>Corn</th><th>Soybean</th>
   <th>Corn</th><th>Soybean</th>
   <th>Corn</th><th>Soybean</th>
   <th>Corn</th><th>Soybean</th>
