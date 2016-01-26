@@ -49,9 +49,7 @@ def plotter(fdict):
 
     tokens = varname.split("_")
     orderer = "(high - low)"
-    if tokens[1] == 'snow':
-        orderer = 'snow'
-    else:
+    if tokens[1] != 'range':
         orderer = tokens[1]
 
     if tokens[0] == 'min':
