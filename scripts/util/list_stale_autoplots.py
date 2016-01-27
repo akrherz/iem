@@ -28,5 +28,9 @@ for row in cursor:
 
 df = pd.DataFrame.from_dict(q, orient='index')
 df.columns = ['valid']
+maxval = df.index.max()
+for i in range(1, maxval):
+    if i not in q:
+        print("No entries for: %4i" % (i, ))
 df.sort_values(by='valid', inplace=True)
 print df.head()
