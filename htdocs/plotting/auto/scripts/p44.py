@@ -141,10 +141,11 @@ def plotter(fdict):
             continue
         data[yr]['doy'].append(lastdoy)
         data[yr]['counts'].append(data[yr]['counts'][-1])
-    data[datetime.datetime.now().year]['doy'].append(
-        int(datetime.datetime.today().strftime("%j")) + 1)
-    data[datetime.datetime.now().year]['counts'].append(
-        data[datetime.datetime.now().year]['counts'][-1])
+    if len(data[datetime.datetime.now().year]['doy']) > 0:
+        data[datetime.datetime.now().year]['doy'].append(
+            int(datetime.datetime.today().strftime("%j")) + 1)
+        data[datetime.datetime.now().year]['counts'].append(
+            data[datetime.datetime.now().year]['counts'][-1])
     df = pd.DataFrame(rows)
 
     (fig, ax) = plt.subplots(1, 1)
