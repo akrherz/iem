@@ -15,6 +15,7 @@ $minute1 = isset($_GET["minute1"]) ? $_GET["minute1"]: 0;
 $minute2 = isset($_GET["minute2"]) ? $_GET["minute2"]: 0;
 $units = isset($_GET["units"]) ? $_GET["units"]: "mph";
 $nsector = isset($_GET['nsector']) ? $_GET['nsector']: 36;
+$level = isset($_GET["level"]) ? $_GET['level']: 1000;
 
 
 if (isset($_GET["hour1"])){
@@ -31,6 +32,7 @@ if (isset($_GET["hour1"])){
 	if (isset($_GET["staticrange"])){
 		$rose_uri .= "&staticrange=1";
 	}
+	if ($network == 'RAOB') $rose_uri .= "&level=". $level;
 	$rosedata_uri = "{$rose_uri}&justdata=true";
 }
 
@@ -43,7 +45,11 @@ if ($metadata["archive_begin"]){
 
 $t->thispage ="iem-sites";
 $t->title = "Custom Wind Roses";
-$t->sites_current="custom_windrose"; 
+$t->sites_current="custom_windrose";
+$tznote = "(Times are in US Central Standard/Daylight Time, sorry)";
+if ($network == 'RAOB'){
+	$tznote = "(Times presented are in UTC)";
+}
 $content = <<<EOF
 <h3>Custom Wind Rose Plots</h3>
 
@@ -62,7 +68,7 @@ windrose is derived in three ways:
 <input type="hidden" name="station" value="{$station}">
 <input type="hidden" name="network" value="{$network}">
 <h4>Select Start/End Time:</h4><br>
-<i>(Times are in US Central Standard/Daylight Time, sorry)</i>
+<i>{$tznote}</i>
 
 <table class="table table-bordered table-condensed">
   <tr>
@@ -71,6 +77,28 @@ windrose is derived in three ways:
     <th>Hour</th><th>Minute</th>
 <td rowspan="3">
 EOF;
+$hs1 = hourSelect($hour1, "hour1");
+$hs2 = hourSelect($hour2, "hour2");
+$mi1 = minuteSelect($minute1, "minute1");
+$mi2 = minuteSelect($minute2, "minute2");
+if ($network == 'RAOB'){
+	$levels = Array(1000 => 1000,
+			925 => 925,
+			850 => 850,
+			700 => 700,
+			500 => 500,
+			400 => 400,
+			300 => 300,
+			250 => 250,
+			150 => 150,
+			100 => 100);
+	$content .= 'Select Pressure Level: ' . make_select("level", $level, $levels) .' hPa<br />';
+	$hours = Array(0 => 0, 12 => 12);
+	$hs1 = make_select("hour1", $hour1, $hours);
+	$hs2 = make_select("hour2", $hour2, $hours);
+	$mi1 = "";
+	$mi2 = "";
+}
 $content .= '<input type="checkbox" name="hourlimit" value="1" ';
 if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" "; 
 $content .= '>1. Limit to Hour of Start Time
@@ -100,6 +128,8 @@ while(list($k,$v)=each($opts)){
 	$content .= sprintf("<option value=\"%s\" %s>%s</option>\n", $v, 
 			($nsector == $v) ? 'selected="selected"': '',$v);
 }
+
+
 $content .= '
 </select>
 
@@ -118,10 +148,10 @@ $content .= '
      '. daySelect2($day1, "day1") .'
     </td>
     <td>
-     '. hourSelect($hour1, "hour1") .'
+     '. $hs1 .'
     </td>
     <td>
-     '. minuteSelect($minute1, "minute1") .'
+     '. $mi1 .'
     </td>
   </tr>
 
@@ -135,10 +165,10 @@ $content .= '
      '. daySelect2($day2, "day2").'
     </td>
     <td>
-     '. hourSelect($hour2, "hour2") .'
+     '. $hs2 .'
     </td>
     <td>
-     '. minuteSelect($minute2, "minute2") .'
+     '. $mi2 .'
     </td>
   </tr>
 </table>

@@ -66,7 +66,10 @@ while (list($key,$val) = each($o))
 	}
 	// Do not display links to pages that only work for sites that produce
 	// data that we consume!
-	if ($metadata["metasite"] == 't' && ! array_key_exists("metaok", $val)){
+	if ($network == 'RAOB' && $key == 'custom_windrose'){
+		
+	}
+	else if ($metadata["metasite"] == 't' && ! array_key_exists("metaok", $val)){
 		continue;
 	}
   	$uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);

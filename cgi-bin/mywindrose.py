@@ -57,10 +57,12 @@ else:
 database = 'asos'
 if form["network"].value in ('KCCI', 'KELO', 'KIMT'):
     database = 'snet'
-elif form["network"].value in ('IA_RWIS'):
+elif form["network"].value in ('IA_RWIS', ):
     database = 'rwis'
-elif form["network"].value in ('ISUSM'):
+elif form["network"].value in ('ISUSM', ):
     database = 'isuag'
+elif form["network"].value in ('RAOB', ):
+    database = 'postgis'
 
 try:
     nsector = int(form['nsector'].value)
@@ -75,7 +77,8 @@ nt = NetworkTable(form['network'].value)
 res = windrose(form["station"].value, database=database, sts=sts, ets=ets,
                months=months, hours=hours, units=units, nsector=nsector,
                justdata=("justdata" in form), rmax=rmax,
-               sname=nt.sts[form['station'].value]['name'])
+               sname=nt.sts[form['station'].value]['name'],
+               level=form.getfirst('level', None))
 if 'justdata' in form:
     # We want text
     sys.stdout.write("Content-type: text/plain\n\n")
