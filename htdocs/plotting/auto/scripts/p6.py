@@ -58,9 +58,24 @@ def plotter(fdict):
     year = int(fdict.get('year', 2014))
     month = int(fdict.get('month', 6))
     ptype = fdict.get('type', 'sum-precip')
-    ptype_climo = "climo_%s" % (ptype.split("-")[1], )
+    ptype_climo = ptype.split("-")[1]
     table = "alldata_%s" % (state,)
 
+    # Compute the bulk statistics for climatology
+    df = read_sql("""
+    WITH yearly as (
+        SELECT station, year, sum(precip) as sum_precip,
+        avg(high) as avg_high, avg(low) as avg_low,
+        avg((high+low)/2.) as avg_temp from """ + table + """
+        WHERE month = %s GROUP by station, year)
+
+    SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
+    avg(avg_high) as avg_high, stddev(avg_high) as std_high,
+    avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
+    avg(avg_low) as avg_low, stddev(avg_low) as std_low from yearly
+   """, pgconn, params=(month, ), index_col=None)
+    climo_avg = df.at[0, 'avg_'+ptype_climo]
+    climo_std = df.at[0, 'std_'+ptype_climo]
     df = read_sql("""
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
@@ -91,16 +106,17 @@ def plotter(fdict):
             label=("%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
                    ) % (year, df[ptype].std(), df[ptype].mean()))
 
-    _, bins = np.histogram(df[ptype_climo].dropna(), 20, normed=1)
-    y = mlab.normpdf(bins, df[ptype_climo].mean(), df[ptype_climo].std())
+    bins = np.linspace(climo_avg - (climo_std * 3.),
+                       climo_avg + (climo_std * 3.), 30)
+    y = mlab.normpdf(bins, climo_avg, climo_std)
     ax.plot(bins, y, 'g--', lw=2,
             label=("Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
-                   ) % (df[ptype_climo].std(), df[ptype_climo].mean()))
+                   ) % (climo_std, climo_avg))
 
     if stateavg is not None:
         ax.axvline(stateavg, label='%s Statewide Avg %.2f' % (year, stateavg),
                    color='b', lw=2)
-    stateavg = df.at["%s0000" % (state, ), ptype_climo]
+    stateavg = df.at["%s0000" % (state, ), 'climo_'+ptype_climo]
     if stateavg is not None:
         ax.axvline(stateavg, label='Climo Statewide Avg %.2f' % (stateavg,),
                    color='g', lw=2)
@@ -113,6 +129,8 @@ def plotter(fdict):
     box = ax.get_position()
     ax.set_position([box.x0, 0.25, box.width, 0.65])
     ax.legend(ncol=2, fontsize=12, loc=(-0.05, -0.3))
+    if ptype == 'sum-precip':
+        ax.set_xlim(left=0)
 
     return fig, df
 
