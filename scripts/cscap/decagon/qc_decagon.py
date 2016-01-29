@@ -5,7 +5,7 @@ def get_entries():
     """Return a list of entries for usage"""
     cursor = pgconn.cursor()
     cursor.execute("""SELECT distinct uniqueid, plotid from decagon_data
-    ORDER by uniqueid, plotid""")
+    WHERE uniqueid = 'STJOHNS' ORDER by uniqueid, plotid""")
     entries = []
     for row in cursor:
         entries.append([row[0], row[1]])
@@ -95,5 +95,5 @@ if __name__ == '__main__':
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
 
     replace999()
-    # ticker_temp()
-    # bounds_check()
+    ticker_temp()
+    bounds_check()

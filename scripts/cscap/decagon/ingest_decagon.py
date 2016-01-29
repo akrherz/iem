@@ -1,6 +1,8 @@
 """Process the decagon data"""
 import psycopg2
 import sys
+import os
+import glob
 import datetime
 import pandas as pd
 import numpy as np
@@ -80,14 +82,40 @@ def process3(fn):
     return mydict
 
 
+def process5(uniqueid, dirname):
+    """Look through a directory of XL files"""
+    os.chdir(dirname)
+    files = glob.glob("WS3*.xlsx")
+    files.sort()
+    for fn in files:
+        plotid = fn.split()[0]
+        df = pd.read_excel(fn, index_col=False)
+        row0 = df.iloc[0, :]
+        row1 = df.iloc[1, :]
+        reg = {df.columns[0]: 'valid'}
+        for c, r0, r1 in zip(df.columns, row0, row1):
+            reg[c] = "%s %s %s" % (c, r0, r1)
+        df.rename(columns=reg, inplace=True)
+        df.drop(df.head(2).index, inplace=True)
+        translate(df)
+        print(("File: %s[%s] found: %s lines for columns %s"
+               ) % (fn, plotid, len(df.index), df.columns))
+        if len(df.index) > 0:
+            database_save(uniqueid, plotid, df)
+    return {}
+
+
 def database_save(uniqueid, plot, df):
     pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
     cursor = pgconn.cursor()
-    for i, val in enumerate(df['valid']):
-        if not isinstance(val, datetime.datetime):
-            print i, val
+    for i, row in df.iterrows():
+        if not isinstance(row['valid'], datetime.datetime):
+            print('Row df.index=%s, valid=%s, culling' % (i, row['valid']))
+            df.drop(i, inplace=True)
     minvalid = df['valid'].min()
     maxvalid = df['valid'].max()
+    print("Time Domain: %s - %s" % (minvalid, maxvalid))
+
     tzoff = "05" if uniqueid not in CENTRAL_TIME else "06"
     cursor.execute("""
         DELETE from decagon_data WHERE
@@ -96,6 +124,9 @@ def database_save(uniqueid, plot, df):
           maxvalid.strftime("%Y-%m-%d %H:%M-"+tzoff)))
     if cursor.rowcount > 0:
         print("DELETED %s rows previously saved!" % (cursor.rowcount, ))
+        if minvalid.year < 2011 or maxvalid.year > 2015:
+            print("FIXME!")
+            sys.exit()
 
     def v(row, name):
         val = row.get(name)
@@ -105,13 +136,17 @@ def database_save(uniqueid, plot, df):
             if val.strip().lower() in ['nan', ]:
                 return 'null'
             return val
+        # elif isinstance(val, pd.core.series.Series):
+        #    print val
+        #    print row
+        #    sys.exit()
         try:
             if np.isnan(val):
                 return 'null'
         except Exception, exp:
             print exp
-            print(('Val: %s[%s] Name: %s Valid: %s'
-                   ) % (val, type(val), name, row['valid']))
+            print(('Plot: %s Val: %s[%s] Name: %s Valid: %s'
+                   ) % (plot, val, type(val), name, row['valid']))
             return 'null'
         return val
     for _, row in df.iterrows():
@@ -157,10 +192,13 @@ def main(argv):
         df = process3(fn)
     elif fmt == '4':
         df = process4(fn)
+    elif fmt == '5':
+        df = process5(uniqueid, fn)
     if isinstance(df, dict):
         for plot in df:
             print(("File: %s[%s] found: %s lines for columns %s"
-                   ) % (fn, plot, len(df[plot].index), df[plot].columns))
+                   ) % (fn, plot, len(df[plot].index),
+                        df[plot].columns))
             database_save(uniqueid, plot, df[plot])
     else:
         print(("File: %s found: %s lines for columns %s"
