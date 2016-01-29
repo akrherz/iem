@@ -3,31 +3,39 @@ import numpy as np
 from pyiem import network
 import calendar
 from pandas.io.sql import read_sql
+from collections import OrderedDict
 
-PDICT = {'max-high': 'Maximum High',
-         'avg-high': 'Average High',
-         'min-high': 'Minimum High',
-         'max-low': 'Maximum Low',
-         'avg-low': 'Average Low',
-         'min-low': 'Minimum Low',
-         'max-precip': 'Maximum Daily Precip',
-         'sum-precip': 'Total Precipitation',
-         'days-high-above':
-         'Days with High Temp Greater Than or Equal To (threshold)',
-         'days-lows-above':
-         'Days with Low Temp Greater Than or Equal To (threshold)',
-         'days-lows-below': 'Days with Low Temp Below (threshold)',
-         }
+PDICT = OrderedDict([
+         ('max-high', 'Maximum High'),
+         ('avg-high', 'Average High'),
+         ('min-high', 'Minimum High'),
+         ('max-low', 'Maximum Low'),
+         ('avg-low', 'Average Low'),
+         ('min-low', 'Minimum Low'),
+         ('max-precip', 'Maximum Daily Precip'),
+         ('sum-precip', 'Total Precipitation'),
+         ('days-high-above',
+          'Days with High Temp Greater Than or Equal To (threshold)'),
+         ('days-high-above-avg',
+          'Days with High Temp Greater Than or Equal To Average'),
+         ('days-lows-above',
+          'Days with Low Temp Greater Than or Equal To (threshold)'),
+         ('days-lows-below', 'Days with Low Temp Below (threshold)'),
+         ('days-lows-below-avg', 'Days with Low Temp Below Average')
+         ])
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['highcharts'] = True
     d['description'] = """This plot displays a single month's worth of data
     over all of the years in the period of record.  In most cases, you can
     access the raw data for these plots
-    <a href="/climodat/" class="link link-info">here.</a>"""
+    <a href="/climodat/" class="link link-info">here.</a>  For the variables
+    comparing the daily temperatures against average, the average is taken
+    from the NCEI current 1981-2010 climatology."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station'),
@@ -40,11 +48,51 @@ def get_description():
     return d
 
 
-def plotter(fdict):
-    """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
+def highcharts(fdict):
+    """Go high charts"""
+    ctx = get_context(fdict)
+    return """
+$("#ap_container").highcharts({
+    title: {text: '""" + ctx['title'] + """'},
+    subtitle: {text: '""" + ctx['subtitle'] + """'},
+    chart: {zoomType: 'x'},
+    tooltip: {shared: true},
+    xAxis: {title: {text: 'Year'}},
+    yAxis: {title: {text: '"""+ctx['ylabel'].replace("$^\circ$", "F")+"""'}},
+    series: [{
+        name: '""" + ctx['ptype'] + """',
+        type: 'column',
+        width: 0.8,
+        pointStart: """ + str(ctx['df'].index.min()) + """,
+        pointInterval: 1,
+        data: """ + str(ctx['data'].tolist()) + """
+        }, {
+        tooltip: {
+            valueDecimals: 2
+        },
+        name: '30 Year Trailing Avg',
+        pointStart: """ + str(ctx['df'].index.min() + 30) + """,
+        pointInterval: 1,
+            width: 2,
+        data: """ + str(ctx['tavg'][30:]) + """
+        },{
+            tooltip: {
+                valueDecimals: 2
+            },
+            name: 'Average',
+            width: 2,
+            pointPadding: 0.1,
+            pointStart: """ + str(ctx['df'].index.min()) + """,
+            pointInterval: 1,
+            data: """ + str([ctx['avgv']] * len(ctx['df'].index)) + """
+        }]
+});
+    """
+
+
+def get_context(fdict):
+    """ Get the context"""
+    ctx = dict()
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
@@ -56,76 +104,101 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
+    WITH climo as (SELECT to_char(valid, 'mmdd') as sday,
+    high, low from ncdc_climate81 WHERE
+    station = %s)
+
     SELECT year,
-    max(high) as "max-high",
-    min(high) as "min-high",
-    avg(high) as "avg-high",
-    max(low) as "max-low",
-    min(low) as "min-low",
-    avg(low) as "avg-low",
-    max(precip) as "max-precip",
-    sum(precip) as "sum-precip",
-    sum(case when high >= %s then 1 else 0 end) as "days-high-above",
-    sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
-    sum(case when low < %s then 1 else 0 end) as "days-lows-below"
-  from """+table+"""
+    max(o.high) as "max-high",
+    min(o.high) as "min-high",
+    avg(o.high) as "avg-high",
+    max(o.low) as "max-low",
+    min(o.low) as "min-low",
+    avg(o.low) as "avg-low",
+    max(o.precip) as "max-precip",
+    sum(o.precip) as "sum-precip",
+    sum(case when o.high >= %s then 1 else 0 end) as "days-high-above",
+    sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
+    sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
+    sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
+    sum(case when o.low < %s then 1 else 0 end) as "days-lows-below"
+  from """+table+""" o JOIN climo c on (o.sday = c.sday)
   where station = %s and month = %s
   GROUP by year ORDER by year ASC
-    """, pgconn, params=(threshold, threshold, threshold, station, month),
+    """, pgconn, params=(nt.sts[station]['ncdc81'], threshold, threshold,
+                         threshold, station, month),
                   index_col='year')
 
-    (fig, ax) = plt.subplots(1, 1)
     data = df[ptype].values
-    avgv = df[ptype].mean()
-
+    ctx['data'] = data
+    ctx['avgv'] = df[ptype].mean()
+    ctx['df'] = df
     # Compute 30 year trailing average
     tavg = [None]*30
     for i in range(30, len(data)):
         tavg.append(np.average(data[i-30:i]))
-
+    ctx['tavg'] = tavg
     # End interval is inclusive
-    a1981_2010 = df.loc[1981:2010, ptype].mean()
+    ctx['a1981_2010'] = df.loc[1981:2010, ptype].mean()
+    ctx['ptype'] = ptype
+    ctx['station'] = station
+    ctx['threshold'] = threshold
+    ctx['month'] = month
+    ctx['title'] = ("[%s] %s %s-%s"
+                    ) % (station, nt.sts[station]['name'],
+                         df.index.min(), df.index.max())
+    ctx['subtitle'] = ("%s %s"
+                       ) % (calendar.month_name[month], PDICT[ptype])
+    if ptype.find("days") == 0 and ptype.find('avg') == -1:
+        ctx['subtitle'] += " (%s)" % (threshold,)
+
+    units = "$^\circ$F"
+    if ctx['ptype'].find('precip') > 0:
+        units = "inches"
+    elif ctx['ptype'].find('days') > 0:
+        units = "days"
+    ctx['ylabel'] = "%s [%s]" % (PDICT[ctx['ptype']], units)
+    return ctx
+
+
+def plotter(fdict):
+    """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    ctx = get_context(fdict)
+
+    (fig, ax) = plt.subplots(1, 1)
 
     colorabove = 'tomato'
     colorbelow = 'dodgerblue'
     precision = "%.1f"
-    if ptype in ['max-precip', 'sum-precip']:
+    if ctx['ptype'] in ['max-precip', 'sum-precip']:
         colorabove = 'dodgerblue'
         colorbelow = 'tomato'
         precision = "%.2f"
-    bars = ax.bar(df.index.values - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(ctx['df'].index.values - 0.4, ctx['data'],
+                  fc=colorabove, ec=colorabove)
     for i, bar in enumerate(bars):
-        if data[i] < avgv:
+        if ctx['data'][i] < ctx['avgv']:
             bar.set_facecolor(colorbelow)
             bar.set_edgecolor(colorbelow)
-    lbl = "Avg: "+precision % (avgv,)
-    ax.axhline(avgv, lw=2, color='k', zorder=2, label=lbl)
-    lbl = "1981-2010: "+precision % (a1981_2010,)
-    ax.axhline(a1981_2010, lw=2, color='brown', zorder=2, label=lbl)
-    ax.plot(df.index.values, tavg, lw=1.5, color='g', zorder=4,
+    lbl = "Avg: "+precision % (ctx['avgv'],)
+    ax.axhline(ctx['avgv'], lw=2, color='k', zorder=2, label=lbl)
+    lbl = "1981-2010: "+precision % (ctx['a1981_2010'],)
+    ax.axhline(ctx['a1981_2010'], lw=2, color='brown', zorder=2, label=lbl)
+    ax.plot(ctx['df'].index.values, ctx['tavg'], lw=1.5, color='g', zorder=4,
             label='Trailing 30yr')
-    ax.plot(df.index.values, tavg, lw=3, color='yellow', zorder=3)
-    ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
-    if ptype.find('precip') == -1 and ptype.find('days') == -1:
-        ax.set_ylim(min(data) - 5, max(data) + 5)
+    ax.plot(ctx['df'].index.values, ctx['tavg'], lw=3, color='yellow',
+            zorder=3)
+    ax.set_xlim(ctx['df'].index.min() - 1, ctx['df'].index.max() + 1)
+    if ctx['ptype'].find('precip') == -1 and ctx['ptype'].find('days') == -1:
+        ax.set_ylim(min(ctx['data']) - 5, max(ctx['data']) + 5)
 
     ax.set_xlabel("Year")
-    units = "$^\circ$F"
-    if ptype.find('precip') > 0:
-        units = "inches"
-    elif ptype.find('days') > 0:
-        units = "days"
-    ax.set_ylabel("%s [%s]" % (PDICT[ptype], units))
+    ax.set_ylabel(ctx['ylabel'])
     ax.grid(True)
     ax.legend(ncol=3, loc='best', fontsize=10)
-    msg = ("[%s] %s %s-%s %s %s"
-           ) % (station, nt.sts[station]['name'],
-                df.index.min(), df.index.max(),
-                calendar.month_name[month], PDICT[ptype])
-    if ptype.find("days") == 0:
-        msg += " (%s)" % (threshold,)
-    tokens = msg.split()
-    sz = len(tokens) / 2
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
+    ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
 
-    return fig, df
+    return fig, ctx['df']
