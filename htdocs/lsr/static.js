@@ -709,7 +709,12 @@ lsrGridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex : "lon",
             hidden    : true
-   }],
+        },{
+        	header: 'Remark',
+        	sortable: true,
+        	dataIndex: 'remark',
+        	hidden: true
+        }],
    sm: new GeoExt.grid.FeatureSelectionModel() 
 });
 
