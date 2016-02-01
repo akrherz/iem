@@ -107,14 +107,22 @@ class Worksheet(object):
                 return entry
         return None
 
-    def del_column(self, label):
+    def del_column(self, label, sloppy=False):
         """ Delete a column from the worksheet that has a given label
         this also zeros out any data in the column too
+
+        Args:
+          label (str): the column label based on the first row's value
+          sloppy (bool): should we only find that the contents start the value
         """
         self.get_cell_feed()
+        worked = False
         for col in range(1, int(self.cols)+1):
-            if self.get_cell_value(1, col) != label:
+            if self.get_cell_value(1, col) != label and not sloppy:
                 continue
+            if sloppy and not self.get_cell_value(1, col).startswith(label):
+                continue
+            worked = True
             print 'Found %s in column %s, deleting column' % (label, col)
             entry = self.get_cell_entry(1, col)
             entry.cell.input_value = ""
@@ -127,6 +135,12 @@ class Worksheet(object):
             self.cell_feed = exponential_backoff(self.spr_client.batch,
                                                  updateFeed, force=True)
 
+        if not worked:
+            print("Error, did not find column |%s| for deletion" % (label,))
+            print("The columns were:")
+            for col in range(1, int(self.cols)+1):
+                print("  %2i |%s|" % (col, self.get_cell_value(1, col)))
+            return
         self.refetch_feed()
         while self.trim_columns():
             print 'Trimming Columns!'
