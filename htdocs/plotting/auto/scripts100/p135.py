@@ -1,6 +1,5 @@
 import psycopg2
 import datetime
-import numpy as np
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
@@ -41,6 +40,7 @@ def highcharts(fdict):
     """ Highcharts Output """
     station = fdict.get('station', 'IA2203')
     network = fdict.get('network', 'IACLIMATE')
+    varname = fdict.get('var', 'high_above')
     nt = NetworkTable(network)
     df = get_data(fdict, nt)
 
@@ -50,8 +50,8 @@ def highcharts(fdict):
             '<span style="font-size: 10px">{point.key: %b %e}</span><br/>'}
     j['title'] = {'text': '%s [%s] %s %sF' % (nt.sts[station]['name'],
                                               station,
-                                              PDICT[fdict.get('var')],
-                                              int(fdict.get('threshold')))}
+                                              PDICT[varname],
+                                              int(fdict.get('threshold', 32)))}
     j['yAxis'] = {'title': {'text': 'Accumulated Days'}, 'startOnTick': False}
     j['xAxis'] = {
             'type': 'datetime',

@@ -1,5 +1,4 @@
 import psycopg2
-import datetime
 import calendar
 import numpy as np
 from pandas.io.sql import read_sql
@@ -35,6 +34,8 @@ def plotter(fdict):
         util_practice_desc = 'GRAIN'
         ORDER by week_ending ASC
     """, pgconn, params=(state,), index_col=None)
+    if len(df.index) == 0:
+        return "ERROR: No data found!"
     df['yeari'] = df['year'] - df['year'].min()
 
     (fig, ax) = plt.subplots(1, 1)
