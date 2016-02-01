@@ -19,7 +19,8 @@ CONFIG = json.load(open('%s/mytokens.json' % (os.path.dirname(__file__),)))
 
 def save_config():
     """ Save the configuration to disk """
-    json.dump(CONFIG, open('mytokens.json', 'w'))
+    json.dump(CONFIG, open('mytokens.json', 'w'), sort_keys=True,
+              indent=4, separators=(',', ': '))
 
 
 def exponential_backoff(func, *args, **kwargs):
