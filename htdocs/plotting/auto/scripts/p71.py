@@ -80,6 +80,8 @@ def plotter(fdict):
         days.append(row[0].day)
         drct.append(row[2])
         sknt.append(row[1])
+    if len(sknt) == 0:
+        return "ERROR: No Data Found"
     df = pd.DataFrame(dict(day=pd.Series(days),
                            drct=pd.Series(drct),
                            sknt=pd.Series(sknt)))
@@ -103,3 +105,6 @@ def plotter(fdict):
     ax.set_ylabel("Average Wind Speed [%s]" % (PDICT.get(units),))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter({})

@@ -76,7 +76,7 @@ def plotter(fdict):
     varname = fdict.get('var', 'total_precip')
     if varname not in METRICS:
         return 'ERROR with var variable'
-    days = int(fdict.get('days', 'days'))
+    days = int(fdict.get('days', 1))
 
     nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2], )

@@ -8,6 +8,7 @@ import datetime
 import pandas as pd
 import tempfile
 import imp
+import traceback
 
 
 def parser(cgistr):
@@ -37,6 +38,14 @@ def send_content_type(fmt):
             "Content-Disposition: attachment;Filename=iem.xlsx\n\n"))
 
 
+def handle_error(exp):
+    sys.stdout.write("Status: 500\n")
+    sys.stdout.write("Content-type: text/plain\n\n")
+    traceback.print_exc(file=sys.stdout)
+    traceback.print_exc(file=sys.stderr)
+    sys.exit()
+
+
 def main():
     """See how we are called"""
     form = cgi.FieldStorage()
@@ -50,8 +59,8 @@ def main():
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     hostname = os.environ.get("SERVER_NAME", "")
     res = mc.get(mckey) if hostname != 'iem.local' else None
-    send_content_type(fmt)
     if res:
+        send_content_type(fmt)
         sys.stdout.write(res)
         return
     if fmt == 'js':
@@ -69,6 +78,7 @@ def main():
             res = '$("#ap_container").highcharts(%s);' % (
                     json.dumps(a.highcharts(fdict)), )
         meta = a.get_description()
+        sys.stderr.write("Setting cache: %s" % (mckey,))
         try:
             mc.set(mckey, res, meta.get('cache', 43200))
         except:
@@ -87,7 +97,10 @@ def main():
         fp, pathname, description = imp.find_module(name)
         a = imp.load_module(name, fp, pathname, description)
         meta = a.get_description()
-        response = a.plotter(fdict)
+        try:
+            response = a.plotter(fdict)
+        except Exception as exp:
+            handle_error(exp)
         if not isinstance(response, tuple):
             [fig, df, report] = [response, None, None]
         else:
@@ -112,7 +125,6 @@ def main():
         plt.savefig(ram, format='png', dpi=dpi)
         ram.seek(0)
         res = ram.read()
-        sys.stderr.write("Setting cache: %s" % (mckey,))
         if fmt != 'png':
             if df is not None:
                 if fmt == 'csv':
@@ -127,12 +139,15 @@ def main():
                     res = open(tmpfn, 'rb').read()
                     os.unlink(tmpfn)
             if fmt == 'txt' and report is not None:
+                send_content_type(fmt)
                 sys.stdout.write(report)
                 return
+        sys.stderr.write("Setting cache: %s" % (mckey,))
         try:
             mc.set(mckey, res, meta.get('cache', 43200))
         except:
             sys.stderr.write("Exception while writting key: %s" % (mckey, ))
+    send_content_type(fmt)
     sys.stdout.write(res)
 
 if __name__ == '__main__':

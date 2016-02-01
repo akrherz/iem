@@ -50,7 +50,7 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
-    ptype = fdict.get('type', 'max_high')
+    ptype = fdict.get('type', 'max-high')
     threshold = int(fdict.get('threshold', -99))
 
     table = "alldata_%s" % (station[:2],)

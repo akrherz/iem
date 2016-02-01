@@ -1,5 +1,4 @@
-import psycopg2.extras
-import numpy as np
+import psycopg2
 from scipy import stats
 from pyiem import network
 import datetime
@@ -80,8 +79,9 @@ def plotter(fdict):
         ax.text(row['gdd50_sigma'], row['precip_sigma'],
                 ' %.0f' % (_year,), va='center')
 
-    c = Circle((0, 0), radius=df.loc[year].distance, facecolor='none')
-    ax.add_patch(c)
+    if year in df.index:
+        c = Circle((0, 0), radius=df.loc[year].distance, facecolor='none')
+        ax.add_patch(c)
     ax.set_xlabel("Growing Degree Day Departure ($\sigma$)")
     ax.set_ylabel("Precipitation Departure ($\sigma$)")
     ax.grid(True)

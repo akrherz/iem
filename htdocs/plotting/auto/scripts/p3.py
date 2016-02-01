@@ -97,7 +97,7 @@ def get_context(fdict):
 
     station = fdict.get('station', 'IA0000')
     month = int(fdict.get('month', 7))
-    ptype = fdict.get('type', 'max_high')
+    ptype = fdict.get('type', 'max-high')
     threshold = int(fdict.get('threshold', -99))
 
     table = "alldata_%s" % (station[:2],)

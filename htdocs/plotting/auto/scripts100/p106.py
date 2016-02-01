@@ -1,28 +1,29 @@
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
+from collections import OrderedDict
 
 PDICT = {'tmpf_above': 'Temperature At or Above Threshold (F)',
          'tmpf_below': 'Temperature Below Threshold (F)'}
 
-MDICT = {'all': 'No Month/Time Limit',
-         'spring': 'Spring (MAM)',
-         'fall': 'Fall (SON)',
-         'winter': 'Winter (DJF)',
-         'summer': 'Summer (JJA)',
-         'jan': 'January',
-         'feb': 'February',
-         'mar': 'March',
-         'apr': 'April',
-         'may': 'May',
-         'jun': 'June',
-         'jul': 'July',
-         'aug': 'August',
-         'sep': 'September',
-         'oct': 'October',
-         'nov': 'November',
-         'dec': 'December'
-         }
+MDICT = OrderedDict([
+        ('all', 'No Month/Time Limit'),
+        ('spring', 'Spring (MAM)'),
+        ('fall', 'Fall (SON)'),
+        ('winter', 'Winter (DJF)'),
+        ('summer', 'Summer (JJA)'),
+        ('jan', 'January'),
+        ('feb', 'February'),
+        ('mar', 'March'),
+        ('apr', 'April'),
+        ('may', 'May'),
+        ('jun', 'June'),
+        ('jul', 'July'),
+        ('aug', 'August'),
+        ('sep', 'September'),
+        ('oct', 'October'),
+        ('nov', 'November'),
+        ('dec', 'December')])
 
 
 def get_description():
@@ -55,7 +56,7 @@ def plotter(fdict):
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
     threshold = int(fdict.get('threshold', 80))
-    opt = fdict.get('opt', 'ts')
+    opt = fdict.get('opt', 'tmpf_above')
     month = fdict.get('month', 'all')
     nt = NetworkTable(network)
 
