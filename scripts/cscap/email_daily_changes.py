@@ -4,7 +4,7 @@
 """
 import ConfigParser
 import sys
-import util
+import util  # @UnresolvedImport
 import os
 import datetime
 import pytz
@@ -13,12 +13,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 FMIME = 'application/vnd.google-apps.folder'
-CFG = {'cscap': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
-                             'lokhande@iastate.edu', 'gio@iastate.edu'],
+CFG = {'cscap': dict(emails=util.CONFIG['cscap']['email_daily_list'],
                      title="Sustainable Corn"
                      ),
-       'td': dict(emails=['labend@iastate.edu', 'akrherz@iastate.edu',
-                          'breinhar@purdue.edu', 'gio@iastate.edu'],
+       'td': dict(emails=util.CONFIG['td']['email_daily_list'],
                   title='Transforming Drainage'
                   )
        }
