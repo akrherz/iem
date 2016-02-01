@@ -11,20 +11,26 @@ PGCONN = psycopg2.connect(database='coop', host='iemdb')
 
 def get_file():
     """Download and gunzip the file from the FTP site"""
+    os.chdir("/mesonet/tmp")
     if os.path.isfile("/mesonet/tmp/qstats.txt"):
         print('    skipping download as we already have the file')
         return
-    today = datetime.date.today()
-    cmd = ("wget -q -O /mesonet/tmp/qstats.txt.gz "
-           "ftp://ftp.nass.usda.gov/quickstats/qs.crops_%s.txt.gz"
-           ) % (today.strftime("%Y%m%d"), )
+    for i in range(0, -7, -1):
+        now = datetime.date.today() + datetime.timedelta(days=i)
+        fn = "qs.crops_%s.txt.gz" % (now.strftime("%Y%m%d"),)
+        cmd = ("wget -q "
+               "ftp://ftp.nass.usda.gov/quickstats/%s") % (fn, )
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        proc.stdout.read()
+        if os.path.isfile(fn):
+            break
 
+    cmd = "cd /mesonet/tmp; mv %s qstats.txt.gz; gunzip qstats.txt.gz" % (fn,)
+    # Popen is async, so we need to read from it!
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-    _ = proc.stdout.read()
-
-    cmd = "cd /mesonet/tmp; gunzip qstats.txt.gz"
-    subprocess.Popen(cmd, shell=True)
+    proc.stdout.read()
 
 
 def database(df):
