@@ -65,7 +65,7 @@ def drive_changelog(regime, yesterday, html):
     """ Do something """
     drive = util.get_driveclient()
     folders = util.get_folders(drive)
-    start_change_id = util.CONFIG.get("changestamp_"+regime, "1")
+    start_change_id = util.CONFIG[regime]["changestamp"]
 
     html += """<p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
@@ -167,7 +167,7 @@ def drive_changelog(regime, yesterday, html):
         if not page_token:
             break
 
-    util.CONFIG['changestamp_'+regime] = changestamp
+    util.CONFIG[regime]['changestamp'] = changestamp
     if hits == 0:
         html += """<tr><td colspan="5">No Changes Found...</td></tr>\n"""
 
@@ -180,8 +180,6 @@ def drive_changelog(regime, yesterday, html):
 def main(argv):
     """Do Fun things"""
     regime = "cscap" if argv[1] == 'cscap' else 'td'
-    if os.environ.get('HOSTNAME', '') == 'laptop.local':
-        CFG[regime]['emails'] = ['akrherz@iastate.edu', ]
 
     today = datetime.datetime.utcnow()
     today = today.replace(tzinfo=pytz.timezone("UTC"), hour=12,
