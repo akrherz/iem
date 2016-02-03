@@ -91,7 +91,8 @@ archive status and dbf schema below. The IEM's archive is certainly not complete
 If you are looking for a real-time source of warning shapefiles, 
 you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
-<div class="alert alert-warning"> Due to transient server load or other issues, this application sometimes fails to 
+<div class="alert alert-warning"> Due to transient server load or other issues,
+this application sometimes fails to 
 generate output.  You may wish to try shorting the duration of your 
 request or email <a href="/info/contacts.php">us</a> for help.
 </div>
@@ -101,6 +102,7 @@ request or email <a href="/info/contacts.php">us</a> for help.
 <div style="background: #EEEEEE; border: #000 solid 1px; padding: 5px;">
 
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
+<input type="hidden" value="yes" name="simple">
 
 <h4>Limit Weather Forecast Office (WFO)</h4>
 {$wselect}
@@ -145,10 +147,12 @@ request or email <a href="/info/contacts.php">us</a> for help.
 
 <br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
 <br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
+<!--
 <br /><input type="checkbox" name="simple" value="yes">Use simplified geometries
 instead of the high resolution AWIPS zones database.  This trims the file size
 significantly, but topology is not conserved. If you just want to make maps at
 state level scale, pick this option.
+-->
 <script type="text/javascript">
 function kmlsub(f, url){
 	f.action = url;
@@ -203,6 +207,18 @@ roughly 2 AM this morning.</p>
 </div><!-- ./col -->
 </div><!-- ./row -->
 
+<h4>Service changes:</h4>
+<ul>
+	<li><strong>3 Feb 2016</strong>: This service used to allow the download
+	of the high-resolution AWIPS counties/zones shapes.  Sadly, the size
+	of these polygons would overwhelm the backend data service.  So now
+	this service only returns the simplified county/zone polygons. You
+	may wish to do a join against the
+	<a href="http://www.nws.noaa.gov/geodata/">AWIPS Geodatabase</a> to
+	get the high resolution depiction. The <code>NWS_UGC</code> column is what
+	you would use to join.</li>	
+</ul>
+		
 <h4>Archive status:</h4>
 <table class="table table-bordered table-striped">
 <thead>
