@@ -5,6 +5,7 @@ import util  # @UnresolvedImport
 import sys
 import ConfigParser
 import psycopg2
+import datetime
 
 YEAR = sys.argv[1]
 
@@ -22,7 +23,7 @@ drive_client = util.get_driveclient()
 res = drive_client.files(
         ).list(q="title contains 'Soil Nitrate Data'").execute()
 
-DOMAIN = ['SOIL15', 'SOIL23', 'SOIL16', 'SOIL22', 'SOIL25', 'SOIL95',
+DOMAIN = ['SOIL15', 'SOIL22', 'SOIL16', 'SOIL22', 'SOIL25', 'SOIL95',
           'SOIL94', 'SOIL93', 'SOIL92', 'SOIL91', 'SOIL90', 'SOIL89',
           'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84']
 
@@ -55,10 +56,10 @@ for item in res['items']:
 
     # Load up current data
     current = {}
-    pcursor.execute("""SELECT plotid, varname, depth, subsample
+    pcursor.execute("""SELECT plotid, varname, depth, subsample, sampledate
     from soil_data WHERE site = %s and year = %s""", (siteid, YEAR))
     for row in pcursor:
-        key = "%s|%s|%s|%s" % row
+        key = "%s|%s|%s|%s|%s" % row
         current[key] = True
 
     for row in range(3, worksheet.rows+1):
@@ -72,15 +73,25 @@ for item in res['items']:
 
         for col in range(startcol, worksheet.cols+1):
             if worksheet.get_cell_value(1, col) is None:
-                print(("harvest_soil_nitrate site: %s year: %s col: %s is null"
+                print(("h_soil_nitrate site: %s year: %s col: %s is null"
                        ) % (siteid, YEAR, col))
                 continue
-            varname = worksheet.get_cell_value(1, col).strip().split()[0]
-            if varname[:4] != 'SOIL':
-                print(('Invalid varname: %s site: %s year: %s'
-                       ) % (worksheet.get_cell_value(1, col).strip(),
-                            siteid, YEAR))
+            colheading = worksheet.get_cell_value(1, col).strip()
+            if not colheading.startswith('SOIL'):
+                print(('Invalid colheading: %s site: %s year: %s'
+                       ) % (colheading, siteid, YEAR))
                 continue
+            # Attempt to tease out the sampledate
+            tokens = colheading.split()
+            varname = tokens[0]
+            datetest = tokens[1]
+            if len(datetest.split("/")) == 3:
+                date = datetime.datetime.strptime(datetest, '%m/%d/%Y')
+            else:
+                if row == 3:
+                    print(("h_soil_nitrate %s[%s] unknown sample date %s"
+                           ) % (siteid, YEAR, repr(colheading)))
+                date = None
             val = worksheet.get_cell_value(row, col, numeric=True)
             if varname not in DOMAIN:
                 print(("harvest_soil_nitrate %s[%s] found additional var: %s"
@@ -89,29 +100,38 @@ for item in res['items']:
             try:
                 pcursor.execute("""
                     INSERT into soil_data(site, plotid, varname, year,
-                    depth, value, subsample)
-                    values (%s, %s, %s, %s, %s, %s, %s)
+                    depth, value, subsample, sampledate)
+                    values (%s, %s, %s, %s, %s, %s, %s, %s)
                     """, (siteid, plotid, varname, YEAR, depth, val,
-                          subsample))
+                          subsample, date))
             except Exception, exp:
                 print(('site: %s year: %s HARVEST_SOIL_NITRATE TRACEBACK'
                        ) % (siteid, YEAR))
                 print exp
-                print '%s %s %s %s %s' % (siteid, plotid, varname, depth, val)
+                print '%s %s %s %s %s %s' % (siteid, plotid, varname, depth,
+                                             date, val)
                 sys.exit()
-            key = "%s|%s|%s|%s" % (plotid, varname, depth, subsample)
+            key = ("%s|%s|%s|%s|%s"
+                   ) % (plotid, varname, depth, subsample,
+                        date if date is None else date.strftime("%Y-%m-%d"))
             if key in current:
                 del(current[key])
 
     for key in current:
-        (plotid, varname, depth, subsample) = key.split("|")
+        (plotid, varname, depth, subsample, date) = key.split("|")
+        if date != 'None':
+            datesql = " and sampledate = '%s' " % (date, )
+        else:
+            datesql = " and sampledate is null "
         if varname in DOMAIN:
-            print(('harvest_soil_nitrate rm %s %s %s %s %s %s'
-                   ) % (YEAR, siteid, plotid, varname, depth, subsample))
-            pcursor.execute("""DELETE from soil_data where site = %s and
-            plotid = %s and varname = %s and year = %s and depth = %s and
-            subsample = %s""", (siteid, plotid, varname, YEAR, depth,
-                                subsample))
+            print(('h_soil_nitrate rm %s %s %s %s %s %s %s'
+                   ) % (YEAR, siteid, plotid, varname, depth, subsample,
+                        date))
+            pcursor.execute("""
+                DELETE from soil_data where site = %s and
+                plotid = %s and varname = %s and year = %s and depth = %s and
+                subsample = %s """ + datesql + """
+            """, (siteid, plotid, varname, YEAR, depth, subsample))
 
     # print "...done"
 pcursor.close()
