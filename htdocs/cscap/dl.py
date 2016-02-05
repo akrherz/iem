@@ -6,7 +6,6 @@ import sys
 import psycopg2.extras
 import ConfigParser
 import cgi
-import numpy as np
 import pandas as pd
 import pandas.io.sql as pdsql
 
@@ -26,8 +25,10 @@ def clean(val):
 
 
 def check_auth(form):
-    ''' Make sure request is authorized '''
+    """ Make sure request is authorized """
     if form.getfirst('hash') != config.get('appauth', 'sharedkey'):
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write("Unauthorized request!")
         sys.stderr.write(("Unauthorized CSCAP hash=%s"
                           ) % (form.getfirst('hash'),))
         sys.exit()
@@ -221,7 +222,8 @@ def get_dl(form):
 
     # columns!
     cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
-            'crop', 'tillage', 'drainage', 'nitrogen', 'landscape']
+            'crop', 'tillage', 'drainage', 'nitrogen', 'landscape',
+            'sampledate']
     dvars = form.getlist("data")
     wants_soil = False
     for dv in dvars:
@@ -233,11 +235,11 @@ def get_dl(form):
         sql = """
         WITH ad as
         (SELECT site, plotid, ''::text as depth, varname, year,
-        value, '1'::text as subsample
+        value, '1'::text as subsample, null::date as sampledate
          from agronomic_data WHERE year in %s),
         sd as
-        (SELECT site, plotid, depth, varname, year, value, subsample
-         from soil_data WHERE year in %s),
+        (SELECT site, plotid, depth, varname, year, value, subsample,
+        sampledate from soil_data WHERE year in %s),
         tot as
         (SELECT * from ad UNION select * from sd)
 
@@ -250,15 +252,18 @@ def get_dl(form):
         || '|' || coalesce(tillage, '')
         || '|' || coalesce(drainage, '')
         || '|' || coalesce(nitrogen, '')
-        || '|' || coalesce(landscape, '') as lbl,
-        varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
+        || '|' || coalesce(landscape, '')
+        || '|' || (case when sampledate is null then ''
+                   else sampledate::text end) as lbl,
+        varname, value
+        from tot t JOIN plotids p on (t.site = p.uniqueid and
         t.plotid = p.plotid) WHERE 1=1 and %s and %s
         """ % (yrlist, yrlist, treatlimiter, sitelimiter)
     else:
         sql = """
         WITH ad as
         (SELECT site, plotid, ''::text as depth, varname, year,
-        value, ''::text as subsample
+        value, ''::text as subsample, ''::text as sampledate
          from agronomic_data WHERE year in %s),
         tot as
         (SELECT * from ad)
@@ -272,12 +277,14 @@ def get_dl(form):
         || '|' || coalesce(tillage, '')
         || '|' || coalesce(drainage, '')
         || '|' || coalesce(nitrogen, '')
-        || '|' || coalesce(landscape, '') as lbl,
-        varname, value from tot t JOIN plotids p on (t.site = p.uniqueid and
-        t.plotid = p.plotid) WHERE 1=1 and %s and %s
+        || '|' || coalesce(landscape, '')
+        || '|' || coalesce(sampledate, '') as lbl,
+        varname, value from tot t JOIN plotids p on
+        (t.site = p.uniqueid and t.plotid = p.plotid) WHERE 1=1 and %s and %s
         """ % (yrlist, treatlimiter, sitelimiter)
 
     df = pdsql.read_sql(sql, pgconn)
+    sys.stderr.write(str(df.columns))
 
     dnc = form.getfirst('dnc', 'DNC')
     missing = form.getfirst('missing', '.')
@@ -295,6 +302,7 @@ def get_dl(form):
         cols = cols + allcols
     else:
         cols = cols + dvars
+    sys.stderr.write(str(cols))
     df2['site'] = [item.split('|')[0] for item in df2.index]
     df2['plotid'] = [item.split('|')[1] for item in df2.index]
     df2['depth'] = [item.split('|')[2] for item in df2.index]
@@ -306,6 +314,7 @@ def get_dl(form):
     df2['drainage'] = [item.split('|')[8] for item in df2.index]
     df2['nitrogen'] = [item.split('|')[9] for item in df2.index]
     df2['landscape'] = [item.split('|')[10] for item in df2.index]
+    df2['sampledate'] = [item.split('|')[11] for item in df2.index]
     df2['crop'] = None
 
     df2cols = df2.columns.values.tolist()

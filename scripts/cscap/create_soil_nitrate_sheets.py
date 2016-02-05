@@ -1,6 +1,6 @@
 import gdata.spreadsheets.data
 import ConfigParser
-import util
+import util  # @UnresolvedImport
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
