@@ -1,20 +1,17 @@
 """Harvest the data in the data management store!"""
-import util  # @UnresolvedImport
-import ConfigParser
+import pyiem.cscap_utils as util
 import psycopg2
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 pgconn = psycopg2.connect(database='sustainablecorn', user='mesonet',
-                          host=config.get('database', 'host'))
+                          host=config['database']['host'])
 pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
 
-spread = util.Spreadsheet(spr_client,
-                          config.get('cscap', 'manstore'))
+spread = util.Spreadsheet(spr_client, config['cscap']['manstore'])
 
 translate = {'date': 'valid'}
 

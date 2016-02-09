@@ -1,9 +1,10 @@
 """
  List out the folders on the Google Drive and see who their owners are!
 """
-import util
+import pyiem.cscap_utils as util
 
-drive = util.get_driveclient()
+config = util.get_config()
+drive = util.get_driveclient(config)
 
 res = drive.files().list(
         q="mimeType = 'application/vnd.google-apps.folder'",

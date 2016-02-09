@@ -2,19 +2,17 @@
  Something that will create dataspreadsheets based on entries in the table
 """
 import gdata.spreadsheets.data
-import ConfigParser
-import util
 import copy
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
-meta_feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
-sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
-treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
+meta_feed = spr_client.get_list_feed(config['cscap']['metamaster'], 'od6')
+sdc_feed = spr_client.get_list_feed(config['cscap']['sdckey'], 'od6')
+treat_feed = spr_client.get_list_feed(config['cscap']['treatkey'], 'od6')
 
 treatments, treatment_names = util.build_treatments(treat_feed)
 sdc, sdc_names = util.build_sdc(sdc_feed)

@@ -2,14 +2,12 @@
   Look at the Agronomic Sheets and see if the number of rows match between
   2011 and the rest of the years
 """
-import ConfigParser
-import util  # @UnresolvedImport
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
 res = drive.files().list(q="title contains 'Agronomic Data'").execute()
 

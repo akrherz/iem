@@ -2,18 +2,16 @@
  Go into the various sheets and replace the rotation text with something
  explicit for the year
 """
-import ConfigParser
-import util
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
 xref_plotids = util.get_xref_plotids(spr_client, config)
 
-xref_feed = spr_client.get_list_feed(config.get('cscap', 'xrefrot'), 'od6')
+xref_feed = spr_client.get_list_feed(config['cscap']['xrefrot'], 'od6')
 
 rotations = {}
 

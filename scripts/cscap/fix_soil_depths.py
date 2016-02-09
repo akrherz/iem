@@ -1,15 +1,12 @@
 """Correct the labels used for soil depths in the sheets"""
-import util
-import ConfigParser
+import pyiem.cscap_utils as util
 import sys
 
 ALLOWED = ['depth (cm)', 'cm']
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
-
+config = util.get_config()
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
 # Fake last conditional to make it easy to reprocess one site...
 res = drive.files().list(q=("(title contains 'Soil Bulk Density' or "
@@ -37,7 +34,7 @@ for i, item in enumerate(res['items']):
                         if current.find("/") > 0:
                             tokens = current.split("/")[:2]
                         if len(tokens) == 1:
-                            print('ERROR: "%s"' % (current, ))
+                            print('ERROR: "%s" %s' % (current, repr(tokens)))
                             sys.exit()
                     newval = '%s - %s' % (tokens[0].strip(),
                                           tokens[1].strip())

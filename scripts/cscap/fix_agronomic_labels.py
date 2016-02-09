@@ -3,15 +3,12 @@
  row 2 with a new value
 """
 import gdata.docs.client
-import ConfigParser
-
-import util
+import pyiem.cscap_utils as util
 
 VARID = 'agr43' # lowercase
 NEWVAL = '[43] Red clover or mixed cover crop total carbon in late fall of previous year'
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)

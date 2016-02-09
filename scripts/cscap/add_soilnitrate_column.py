@@ -1,11 +1,9 @@
 """
 Add a column to the soil nitrate sheets
 """
-import ConfigParser
-import util
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)

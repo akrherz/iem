@@ -1,23 +1,16 @@
 """
  Something that will create soil texture sheets
 """
-import gdata.spreadsheets.client
 import gdata.spreadsheets.data
-import gdata.docs.data
-import gdata.docs.client
-import gdata.gauth
-import ConfigParser
-import util
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
-
+config = util.get_config()
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
-meta_feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
-sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
-treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
+meta_feed = spr_client.get_list_feed(config['cscap']['metamaster'], 'od6')
+sdc_feed = spr_client.get_list_feed(config['cscap']['sdckey'], 'od6')
+treat_feed = spr_client.get_list_feed(config['cscap']['treatkey'], 'od6')
 
 
 DONE = ['vicms']

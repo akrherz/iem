@@ -1,18 +1,16 @@
 """
 Interogate the spreadsheets and see if the units values have been modified
 """
-import util  # @UnresolvedImport
-import ConfigParser
+import pyiem.cscap_utils as util
+config = util.get_config()
 
 types = {'Agronomic Data': 3,
          'Soil Nitrate Data': 2,
          'Soil Texture Data': 3,
          'Soil Bulk Density and Water Retention Data': 2}
 
-drive = util.get_driveclient()
-smartsheet = util.get_ssclient()
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+drive = util.get_driveclient(config)
+smartsheet = util.get_ssclient(config)
 spr_client = util.get_spreadsheet_client(config)
 
 # Build the XREF of IDs to units

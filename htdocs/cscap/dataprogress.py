@@ -4,22 +4,23 @@
 import sys
 import psycopg2
 import cgi
-DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb', user='nobody')
+import pyiem.cscap_utils as util
+DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb',
+                          user='nobody')
 cursor = DBCONN.cursor()
 
 ALL = " ALL SITES"
 varorder = []
 varlookup = {}
 
+CFG = "/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.json"
+
+
 def build_vars(mode):
     ''' build vars '''
-    sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/cscap')
-    import util
-    import ConfigParser
-    config = ConfigParser.ConfigParser()
-    config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
+    config = util.get_config(CFG)
     spr_client = util.get_spreadsheet_client(config)
-    feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
+    feed = spr_client.get_list_feed(config['cscap']['sdckey'], 'od6')
     places = 3 if mode != 'soil' else 4
     prefix = 'AGR' if mode != 'soil' else 'SOIL'
     for entry in feed.entry:
@@ -28,7 +29,7 @@ def build_vars(mode):
             continue
         varorder.append( data['key'].strip() )
         varlookup[ data['key'].strip() ] = data['name'].strip()
-    
+
 
 def get_data(year, mode):
     ''' Do stuff '''
@@ -66,6 +67,7 @@ def get_data(year, mode):
     
     return data, dvars
 
+
 def make_progress(row):
     ''' return string for progress bar '''
     if row is None:
@@ -87,7 +89,7 @@ def make_progress(row):
   <div class="progress-bar progress-bar-danger" style="width: %.1f%%">
     <span>%s</span>
   </div>
-</div>""" % (hits - 0.05, row['hits'], dots - 0.05, row['dots'], 
+</div>""" % (hits - 0.05, row['hits'], dots - 0.05, row['dots'],
              other - 0.05, row['other'],
              nulls - 0.05, row['nulls'])
 
@@ -131,7 +133,7 @@ if __name__ == '__main__':
         <a href="dataprogress.py?mode=soil">Soil Data</a>
     </div>
 </div>
-    
+
     <form method="GET" name='theform'>
     <input type="hidden" name="mode" value="%s" />
     Select Year; <select name="year">
@@ -142,9 +144,9 @@ if __name__ == '__main__':
             checked = " selected='selected'"
         sys.stdout.write("""<option value="%s" %s>%s</option>\n""" % (yr, 
                                                             checked, yr))
-    
+
     sys.stdout.write("</select><br />")
-    
+
     ids = form.getlist('ids')
     dvars = varorder
     if len(ids) > 0:
@@ -156,7 +158,7 @@ if __name__ == '__main__':
         sys.stdout.write("""<input type='checkbox' name='ids' 
         value='%s'%s><abbr title="%s">%s</abbr></input> &nbsp; """ % (varid, 
                                             checked, varlookup[varid], varid))
-    
+
     sys.stdout.write("""
     <input type="submit" value="Generate Table">
     </form>
@@ -166,7 +168,7 @@ if __name__ == '__main__':
     <span class="btn btn-warning">did not collect</span>
     <span class="btn btn-danger">no entry / empty</span>
     <table class='table table-striped table-bordered'>
-    
+
     """)
     sys.stdout.write("<thead><tr><th>SiteID</th>")
     for dv in dvars:
@@ -180,7 +182,7 @@ if __name__ == '__main__':
             sys.stdout.write('<td>%s</td>' % (make_progress(row)))
         sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
-    
+
     sys.stdout.write("""
     <h3>Data summary for all sites included</h3>
     <p>
@@ -197,5 +199,5 @@ if __name__ == '__main__':
         sys.stdout.write("<tr><th>%s %s</th><td>%s</td></tr>" % (
                                                     datavar, varlookup[datavar],
                                                         make_progress(row)))
-    
+
     sys.stdout.write('</table></p>')

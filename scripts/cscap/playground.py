@@ -1,12 +1,29 @@
-import util  # @UnresolvedImport
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+import datetime
+import pytz
+import pyiem.cscap_utils as util
+
+config = util.get_config()
 
 FOLDERS = {}
 
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
+print drive.files(
+        ).delete(fileId='1W_gQBFxxOVpUkdzDoM3eKmYbGbPuofYl29WfHUDlsUo').execute()
+
+sys.exit()
+res = drive.revisions().list(
+        fileId='1TbvxhjXNrE-pQoi7_lpkODinXsgRKHhdz_9m_wYR37U').execute()
+for item2 in res['items']:
+    md = datetime.datetime.strptime(item2['modifiedDate'][:19],
+                                    '%Y-%m-%dT%H:%M:%S')
+    md = md.replace(tzinfo=pytz.timezone("UTC"))
+    luser = item2['lastModifyingUser']
+    print '----------------------------------------------------------'
+    print md, luser['emailAddress']
+    print item2
+
+"""
 id_resp = drive.permissions(
             ).getIdForEmail(email='cscap.automation@gmail.com').execute()
 uid = id_resp['id']
@@ -21,7 +38,6 @@ for item in res['items']:
         fileId=item['id'], permissionId=uid, body=permission,
         transferOwnership=True).execute()
 
-"""
 body = {'title': 'My Title 22',
         'mimeType': 'application/vnd.google-apps.spreadsheet',
         'parents': [{'id': '0B6ZGw0coobCxTnVsb0RLQUd1U0U'}]}
