@@ -12,6 +12,8 @@ URI = ("https://geonexusr.iowadot.gov/ArcGIS/rest/services/Operations/"
        "&where=label+is+not+null&time=&returnCountOnly=false&"
        "returnIdsOnly=false&returnGeometry=true&maxAllowableOffset="
        "&outSR=&outFields=*&f=json")
+CEILING = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+CEILING = CEILING.replace(tzinfo=pytz.timezone("UTC"))
 
 
 def workflow():
@@ -39,6 +41,9 @@ def workflow():
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour, minute=ts.minute, second=ts.second)
+        if valid > CEILING:
+            # print 'Hi', valid
+            continue
         label = feat['attributes']['LABEL']
 
         if current.get(label, None) is None and label not in newplows:
