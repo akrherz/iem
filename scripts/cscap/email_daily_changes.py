@@ -2,21 +2,20 @@
   My purpose in life is to send an email each day with changes found
   on the Google Drive
 """
-import ConfigParser
 import sys
-import util  # @UnresolvedImport
-import os
+import pyiem.cscap_utils as util
 import datetime
 import pytz
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+config = util.get_config()
 FMIME = 'application/vnd.google-apps.folder'
-CFG = {'cscap': dict(emails=util.CONFIG['cscap']['email_daily_list'],
+CFG = {'cscap': dict(emails=config['cscap']['email_daily_list'],
                      title="Sustainable Corn"
                      ),
-       'td': dict(emails=util.CONFIG['td']['email_daily_list'],
+       'td': dict(emails=config['td']['email_daily_list'],
                   title='Transforming Drainage'
                   )
        }
@@ -28,9 +27,6 @@ def sites_changelog(regime, yesterday, html):
     <table border="1" cellpadding="3" cellspacing="0">
     <thead><tr><th>Time</th><th>Activity</th></tr></thead>
     <tbody>""" % (CFG[regime]['title'],)
-
-    config = ConfigParser.ConfigParser()
-    config.read('mytokens.cfg')
 
     site = 'sustainablecorn' if regime == 'cscap' else 'transformingdrainage'
     s = util.get_sites_client(config, site)
@@ -63,9 +59,9 @@ def sites_changelog(regime, yesterday, html):
 
 def drive_changelog(regime, yesterday, html):
     """ Do something """
-    drive = util.get_driveclient()
+    drive = util.get_driveclient(config)
     folders = util.get_folders(drive)
-    start_change_id = util.CONFIG[regime]["changestamp"]
+    start_change_id = config[regime]["changestamp"]
 
     html += """<p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
@@ -105,7 +101,7 @@ def drive_changelog(regime, yesterday, html):
                            ) % (regime, item['id'], parent['id']))
                     continue
                 if (folders[parent['id']]['basefolder'] ==
-                        util.CONFIG[regime]['basefolder']):
+                        config[regime]['basefolder']):
                     isproject = True
             if not isproject:
                 print(('[%s] %s skipped'
@@ -167,13 +163,13 @@ def drive_changelog(regime, yesterday, html):
         if not page_token:
             break
 
-    util.CONFIG[regime]['changestamp'] = changestamp
+    config[regime]['changestamp'] = changestamp
     if hits == 0:
         html += """<tr><td colspan="5">No Changes Found...</td></tr>\n"""
 
     html += """</tbody></table>"""
 
-    util.save_config()
+    util.save_config(config)
     return html
 
 

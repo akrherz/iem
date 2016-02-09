@@ -1,16 +1,14 @@
-import ConfigParser
-import util  # @UnresolvedImport
+import pyiem.cscap_utils as util
 import sys
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
 xref_plotids = util.get_xref_plotids(spr_client, config)
 
-xref_feed = spr_client.get_list_feed(config.get('cscap', 'xrefrot'), 'od6')
+xref_feed = spr_client.get_list_feed(config['cscap']['xrefrot'], 'od6')
 rotations = {}
 for entry in xref_feed.entry:
     data = entry.to_dict()
@@ -18,7 +16,7 @@ for entry in xref_feed.entry:
 
 # Build xref of cropmate with variables
 cropmates = {}
-xref_feed = spr_client.get_list_feed(config.get('cscap', 'xrefrotvars'), 'od6')
+xref_feed = spr_client.get_list_feed(config['cscap']['xrefrotvars'], 'od6')
 for entry in xref_feed.entry:
     data = entry.to_dict()
     res = cropmates.setdefault(data['cropmate'], [])
@@ -88,5 +86,5 @@ for item in res['items']:
                            ) % (data['plotid'], crop, data[col],
                                 col.upper()))
             if dirty:
-                # print("updating...")
-                spr_client.update(entry)
+                print("updating...")
+                # spr_client.update(entry)

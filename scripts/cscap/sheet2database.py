@@ -1,12 +1,10 @@
 """A direct copy of a Google Spreadsheet to a postgresql database"""
 import psycopg2
-import util
-import ConfigParser
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 pgconn = psycopg2.connect(database='sustainablecorn',
-                          host=config.get('database', 'host'))
+                          host=config['database']['host'])
 spr_client = util.get_spreadsheet_client(config)
 
 JOB_LISTING = [

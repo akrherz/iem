@@ -1,24 +1,22 @@
 '''
  Scrape out the Soil Nitrate data from Google Drive
 '''
-import util  # @UnresolvedImport
 import sys
-import ConfigParser
+import pyiem.cscap_utils as util
 import psycopg2
 import datetime
 
 YEAR = sys.argv[1]
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 pgconn = psycopg2.connect(database='sustainablecorn',
-                          host=config.get('database', 'host'))
+                          host=config['database']['host'])
 pcursor = pgconn.cursor()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-drive_client = util.get_driveclient()
+drive_client = util.get_driveclient(config)
 
 res = drive_client.files(
         ).list(q="title contains 'Soil Nitrate Data'").execute()

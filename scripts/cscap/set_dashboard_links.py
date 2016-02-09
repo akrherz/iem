@@ -1,19 +1,18 @@
 """
   This script updates the data dashboard
 """
-import util
 import sys
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+import pyiem.cscap_utils as util
+
+config = util.get_config()
 
 YEAR = sys.argv[1]
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
-drive_client = util.get_driveclient()
+drive_client = util.get_driveclient(config)
 
-ss = util.Spreadsheet(spr_client, config.get('cscap', 'dashboard'))
+ss = util.Spreadsheet(spr_client, config['cscap']['dashboard'])
 SHEET = ss.worksheets[YEAR]
 SHEET.get_cell_feed()
 

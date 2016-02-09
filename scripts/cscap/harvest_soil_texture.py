@@ -1,18 +1,16 @@
 '''
  Scrape out the Soil Texture data from Google Drive
 '''
-import util
+import pyiem.cscap_utils as util
 import sys
-import ConfigParser
 import psycopg2
 
 YEAR = sys.argv[1]
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 pgconn = psycopg2.connect(database='sustainablecorn',
-                          host=config.get('database', 'host'))
+                          host=config['database']['host'])
 pcursor = pgconn.cursor()
 
 # Get me a client, stat
@@ -20,7 +18,7 @@ spr_client = util.get_spreadsheet_client(config)
 
 allowed_depths = ['0 - 10', '10 - 20', '20 - 40', '40 - 60']
 
-drive_client = util.get_driveclient()
+drive_client = util.get_driveclient(config)
 
 DOMAIN = ['SOIL26', 'SOIL27', 'SOIL28', 'SOIL6',
           'SOIL11', 'SOIL12', 'SOIL13', 'SOIL14']

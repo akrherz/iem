@@ -1,6 +1,5 @@
-import ConfigParser
 import sys
-import util
+import pyiem.cscap_utils as util
 import copy
 import re
 
@@ -8,15 +7,14 @@ VARNAME_RE = re.compile("^(SOIL[0-9]+)")
 
 YEAR = sys.argv[1]
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
 
-sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
+sdc_feed = spr_client.get_list_feed(config['cscap']['sdckey'], 'od6')
 sdc, sdc_names = util.build_sdc(sdc_feed)
 
-drive_client = util.get_driveclient()
+drive_client = util.get_driveclient(config)
 
 ALLOWED = ['SOIL1', 'SOIL2', 'SOIL29', 'SOIL30', 'SOIL31', 'SOIL32',
            'SOIL33', 'SOIL34', 'SOIL35', 'SOIL39']
@@ -58,7 +56,7 @@ for item in res['items']:
             if len(vals) < 4:
                 if raw_input("DELETE? y/n ") == 'y':
                     print("Deleting...")
-                    worksheet.del_column(key.upper())
+                    worksheet.del_column(varname, sloppy=True)
                     worksheet.get_list_feed()
         else:
             shouldhave.remove(varname)

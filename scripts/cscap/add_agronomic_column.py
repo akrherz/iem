@@ -1,10 +1,7 @@
 import gdata.docs.client
-import ConfigParser
-import util
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
-
+config = util.get_config()
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)

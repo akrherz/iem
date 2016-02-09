@@ -1,8 +1,7 @@
 """Remove a column from all Agronomic Sheets!"""
-import util
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+import pyiem.cscap_utils as util
+
+config = util.get_config()
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)

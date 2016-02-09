@@ -1,14 +1,11 @@
-import util
-import ConfigParser
+import pyiem.cscap_utils as util
 import psycopg2
 
 pgconn = psycopg2.connect(database='mesosite', host='iemdb', port=5555,
                           user='mesonet')
 cursor = pgconn.cursor()
 
-
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
 

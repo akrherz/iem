@@ -1,18 +1,12 @@
 """
 Sync authorized users on Google Sites to Google Drive
 """
-import gdata.docs.client
-import gdata.docs.data
-import gdata.acl.data
-import gdata.data
-import ConfigParser
-import util
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_sites_client(config)
-service = util.get_driveclient()
+service = util.get_driveclient(config)
 
 site_users = []
 for acl in spr_client.get_acl_feed().entry:
@@ -21,7 +15,8 @@ for acl in spr_client.get_acl_feed().entry:
         site_users.append(acl.scope.value)
 
 # Get a listing of current permissions
-perms = service.permissions().list(fileId=config.get('cscap', 'folderkey')).execute()
+perms = service.permissions().list(
+    fileId=config['cscap']['folderkey']).execute()
 for item in perms.get('items', []):
     email = item['emailAddress']
     if email in site_users:
@@ -38,6 +33,6 @@ for loser in site_users:
            ) % (loser, id2))
     newperm = dict(id=id2, type='user', role='writer',
                    sendNotificationEmails=False)
-    res = service.permissions().insert(fileId=config.get('cscap', 'folderkey'),
+    res = service.permissions().insert(fileId=config['cscap']['folderkey'],
                                        body=newperm).execute()
     print res

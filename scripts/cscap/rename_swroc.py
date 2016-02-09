@@ -1,12 +1,9 @@
 """SWROC sites changed to HICKS"""
-import util
-import ConfigParser
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
-
+config = util.get_config()
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient()
+drive = util.get_driveclient(config)
 
 # Fake last conditional to make it easy to reprocess one site...
 res = drive.files().list(q=("(title contains 'Soil Bulk Density' or "

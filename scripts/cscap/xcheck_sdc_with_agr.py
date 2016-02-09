@@ -2,22 +2,20 @@
  Use the Site Data Collected and then see what columns exist within the
  Agronomic Data Sheets.
 """
-import ConfigParser
+import pyiem.cscap_utils as util
 import sys
-import util  # @UnresolvedImport
 import copy
 
 YEAR = sys.argv[1]
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
 
-sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
+sdc_feed = spr_client.get_list_feed(config['cscap']['sdckey'], 'od6')
 sdc, sdc_names = util.build_sdc(sdc_feed)
 
-drive_client = util.get_driveclient()
+drive_client = util.get_driveclient(config)
 
 res = drive_client.files().list(q="title contains 'Agronomic Data'").execute()
 for item in res['items']:

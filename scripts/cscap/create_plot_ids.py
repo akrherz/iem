@@ -5,14 +5,12 @@ import sys
 import gdata.spreadsheets.data
 import gdata.docs.data
 import gdata.docs.client
-import ConfigParser
-import util
+import pyiem.cscap_utils as util
 
 print 'This is non-func, but worth while to keep around'
 sys.exit()
 
-config = ConfigParser.ConfigParser()
-config.read('mytokens.cfg')
+config = util.get_config()
 
 spr_client = util.get_spreadsheet_client(config)
 
@@ -21,8 +19,8 @@ query = gdata.docs.client.DocsQuery(show_collections='true',
 feed = docs_client.GetAllResources(query=query)
 sync_data = feed[0]
 
-treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
-meta_feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
+treat_feed = spr_client.get_list_feed(config['cscap']['treatkey'], 'od6')
+meta_feed = spr_client.get_list_feed(config['cscap']['metamaster'], 'od6')
 
 treatments, treatment_names = util.build_treatments(treat_feed)
 
@@ -41,7 +39,7 @@ for entry in meta_feed.entry:
     leadpi = data.get('leadpi')
     colfolder = data.get('colfolder')
     collect = docs_client.get_resource_by_id(colfolder)
-    
+
     # Figure out how many 
     rows = []
     trt = treatments[sitekey]
