@@ -42,7 +42,8 @@ def workflow():
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour, minute=ts.minute, second=ts.second)
         if valid > CEILING:
-            # print 'Hi', valid
+            # print json.dumps(feat, sort_keys=True,
+            #                 indent=4, separators=(',', ': '))
             continue
         label = feat['attributes']['LABEL']
 
