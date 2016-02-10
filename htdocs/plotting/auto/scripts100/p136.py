@@ -5,6 +5,11 @@ from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 
+PDICT = OrderedDict([(0, 'Include calm observations'),
+                     (2, 'Include only non-calm observations >= 2kt'),
+                     (5, 'Include only non-calm observations >= 5kt'),
+                     ])
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -24,6 +29,8 @@ def get_description():
              label='Select Station:'),
         dict(type='year', name='season', default=datetime.datetime.now().year,
              label='Select Season to Highlight'),
+        dict(type='select', name='wind', default=0, options=PDICT,
+             label='Include Calm Observations? (wind threshold)'),
     ]
     return d
 
@@ -103,21 +110,20 @@ def get_context(fdict):
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
+    sknt = int(fdict.get('wind', 0))
     nt = NetworkTable(network)
     df = read_sql("""WITH data as (
         SELECT valid, lag(valid) OVER (ORDER by valid ASC),
         extract(year from valid + '5 months'::interval) as season,
         wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
         WHERE station = %s and tmpf is not null and sknt is not null
-        and tmpf < 50 ORDER by valid)
+        and tmpf < 50 and sknt >= %s ORDER by valid)
     SELECT case when (valid - lag) < '3 hours'::interval then (valid - lag)
     else '3 hours'::interval end as timedelta, wcht,
     season from data
-    """, pgconn, params=(station, ), index_col=None)
+    """, pgconn, params=(station, sknt), index_col=None)
 
     df2 = pd.DataFrame()
-    # Don't consider the last season
-    maxseason = df['season'].max()
     for i in range(32, -51, -1):
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
@@ -126,7 +132,8 @@ def get_context(fdict):
     ctx['df'] = df2
     ctx['title'] = ("[%s] %s Wind Chill Hours"
                     ) % (station, nt.sts[station]['name'])
-    ctx['subtitle'] = "Hours below threshold by season"
+    ctx['subtitle'] = ("Hours below threshold by season (wind >= %.0f kts)"
+                       ) % (sknt,)
     ctx['dfdescribe'] = df2.iloc[:-1].describe()
     ctx['season'] = int(fdict.get('season', datetime.datetime.now().year))
     ctx['lines'] = {}
