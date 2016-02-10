@@ -58,15 +58,6 @@ $("#ap_container").highcharts({
     xAxis: {title: {text: 'Wind Chill Temperature (F)'}},
     yAxis: {title: {text: 'Total Time Hours [expressed in days]'}},
     series: ["""+s+"""{
-        name: 'Min',
-        type: 'line',
-        marker: {
-            lineWidth: 2,
-            lineColor: '"""+ctx['lines']['min']['c']+"""'
-        },
-        data: """+str([list(a) for a in zip(ctx['lines']['min']['x'],
-                                            ctx['lines']['min']['y'])])+"""
-        },{
         name: '25%',
         type: 'line',
         marker: {
@@ -149,8 +140,8 @@ def get_context(fdict):
             'c': 'blue',
             'label': str(ctx['season'])}
 
-    lbls = ['min', '25%', 'mean', '75%', 'max']
-    colors = ['purple', 'g', 'k', 'r', 'orange']
+    lbls = ['25%', 'mean', '75%', 'max']
+    colors = ['g', 'k', 'r', 'orange']
     for color, lbl in zip(colors, lbls):
         s = ctx['dfdescribe'].loc[[lbl]].transpose()
         s = s.dropna().astype('timedelta64[h]')
