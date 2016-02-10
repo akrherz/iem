@@ -110,7 +110,7 @@ $("#ap_container").highcharts({
 def get_context(fdict):
     """ Get the data"""
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    station = fdict.get('station', 'AMW')
+    station = fdict.get('zstation', 'AMW')
     network = fdict.get('network', 'IA_ASOS')
     nt = NetworkTable(network)
     df = read_sql("""WITH data as (
