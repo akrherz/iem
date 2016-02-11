@@ -118,6 +118,6 @@ def plotter(fdict):
             bbox=dict(color='k'), fontsize=8)
     ax.axvline(32, linestyle='-', lw=1, color='k')
     ax.text(32, 120, "32$^\circ$F", va='top', ha='center', color='white',
-            bbox=dict(color='k', edgecolor='none'), fontsize=8)
+            bbox=dict(facecolor='k', edgecolor='none'), fontsize=8)
 
     return fig, df

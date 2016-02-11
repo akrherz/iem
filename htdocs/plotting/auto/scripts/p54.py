@@ -106,7 +106,7 @@ def plotter(fdict):
     bins = np.arange(-20.5, 20.5, 1)
     H, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
     H = np.ma.array(H)
-    H.mask = np.where(H < 1, True, False)
+    H.mask = np.ma.where(H < 1, True, False)
     ax[0].pcolormesh((xedges - 1) * 7, yedges, H.transpose(),
                      cmap=cm.get_cmap("Greens"))
     ax[0].set_xticks(xticks)
@@ -137,11 +137,15 @@ def plotter(fdict):
                      cmap=cm.get_cmap('Greens'))
 
     y = []
+    x = []
     for i in range(np.shape(H)[0]):
-        y.append(np.ma.sum(H[i, :] * (bins[:-1]+0.5)) / np.ma.sum(H[i, :]))
+        _ = np.ma.sum(H[i, :] * (bins[:-1]+0.5)) / np.ma.sum(H[i, :])
+        if not np.ma.is_masked(_):
+            x.append(xedges[i])
+            y.append(_)
 
-    ax[1].plot(xedges[:-1], y, zorder=3, lw=3, color='k')
-    ax[1].plot(xedges[:-1], y, zorder=3, lw=1, color='w')
+    ax[1].plot(x, y, zorder=3, lw=3, color='k')
+    ax[1].plot(x, y, zorder=3, lw=1, color='w')
 
     ax[1].set_ylim(0-rng-2, rng+2)
     ax[1].grid(True)
@@ -157,3 +161,6 @@ def plotter(fdict):
                va='bottom', ha='right', fontsize=8)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
