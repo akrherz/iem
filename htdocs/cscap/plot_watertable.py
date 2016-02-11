@@ -105,10 +105,9 @@ def make_plot(form):
             return
 
     (fig, ax) = plt.subplots(1, 1, sharex=True)
-    lbl = "Plot:%s" % (plotid,)
-    ax.set_title(("Decagon Temperature + Moisture for\n"
-                  "Site:%s %s Period:%s to %s"
-                  ) % (uniqueid, lbl, sts.date(), ets.date()))
+    ax.set_title(("Water Table Depth for\n"
+                  "Site:%s Period:%s to %s"
+                  ) % (uniqueid, sts.date(), ets.date()))
     plot_ids = df['plotid'].unique()
     plot_ids.sort()
     for i, plotid in enumerate(plot_ids):
