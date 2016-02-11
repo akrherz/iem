@@ -68,7 +68,7 @@ def plotter(fdict):
     titles = {'initial': 'Initial Issuance',
               'final': 'Final Duration'}
     for col in ['final', 'initial']:
-        sortd = df.sort(col)
+        sortd = df.sort_values(by=col)
         x = []
         y = []
         i = 0

@@ -67,8 +67,9 @@ def plotter(fdict):
     days = np.array(df['day'])
 
     (fig, ax) = plt.subplots(1, 1)
-    bars = ax.bar(df['day'], df['max_dwpf'] - df['min_dwpf'], ec='g', fc='g',
-                  bottom=df['min_dwpf'], zorder=1)
+    bars = ax.bar(df['day'].values,
+                  (df['max_dwpf'] - df['min_dwpf']).values, ec='g', fc='g',
+                  bottom=df['min_dwpf'].values, zorder=1)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     hits = []
     if emphasis > -99:

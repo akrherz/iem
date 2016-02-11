@@ -1,5 +1,4 @@
 import psycopg2
-import sys
 import numpy as np
 from pyiem import network
 import calendar
@@ -59,7 +58,7 @@ def plotter(fdict):
     ax.plot(np.arange(1, 366), df2[(glabel, 'mean')], color='r', zorder=2,
             lw=2., label='Average')
     _data = df[df['year'] == year][[glabel, 'sday']]
-    _data.sort('sday', inplace=True)
+    _data.sort_values(by='sday', inplace=True)
     ax.scatter(np.arange(1, _data[glabel].shape[0] + 1),
                _data[glabel], color='b',
                zorder=2, label='%s' % (year,))
