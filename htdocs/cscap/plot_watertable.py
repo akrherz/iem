@@ -10,6 +10,7 @@ import cgi
 import datetime
 import pytz
 import os
+import numpy as np
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.dates as mdates  # NOPEP8
@@ -39,7 +40,8 @@ def make_plot(form):
                                      '%Y-%m-%d')
     days = int(form.getfirst('days', 1))
     ets = sts + datetime.timedelta(days=days)
-    pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb')
+    pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb',
+                              user='nobody')
     tzname = 'America/Chicago' if uniqueid in [
         'ISUAG', 'SERF', 'GILMORE'] else 'America/New_York'
     tz = pytz.timezone(tzname)
@@ -74,7 +76,7 @@ def make_plot(form):
         df['v'] = df['v'].apply(
             lambda x: x.tz_localize('UTC').tz_convert(tzname))
 
-    if viewopt != 'plot':
+    if viewopt not in ['plot', 'js']:
         df.rename(columns=dict(v='timestamp',
                                depth='Depth (mm)'
                                ),
@@ -104,35 +106,46 @@ def make_plot(form):
             os.unlink('/tmp/ss.xlsx')
             return
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
-    ax.set_title(("Water Table Depth for\n"
-                  "Site:%s Period:%s to %s"
-                  ) % (uniqueid, sts.date(), ets.date()))
+    # Begin highcharts output
+    sys.stdout.write("Content-type: application/javascript\n\n")
+    title = ("Water Table Depth for Site: %s (%s to %s)"
+             ) % (uniqueid, sts.strftime("%-d %b %Y"),
+                  ets.strftime("%-d %b %Y"))
+    s = []
     plot_ids = df['plotid'].unique()
     plot_ids.sort()
-    for i, plotid in enumerate(plot_ids):
+    df['ticks'] = df['v'].astype(np.int64) // 10 ** 6
+    for plotid in plot_ids:
         df2 = df[df['plotid'] == plotid]
-        ax.plot(df2['v'], df2['depth'].astype('f'), lw=2,
-                label=plotid, linestyle=LINESTYLE[i])
-    lines = len(df['plotid'].unique())
-
-    ax.grid()
-    ax.set_ylabel("Depth [mm]")
-    box = ax.get_position()
-    ax.set_position((box.x0, 0.15, box.width, 0.75))
-    if lines < 7:
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=6,
-                  fontsize=12)
-    else:
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=6,
-                  fontsize=8)
-    yrange = ax.get_ylim()
-    ax.set_ylim(yrange[1], 0)
-    sys.stdout.write("Content-type: image/png\n\n")
-    ram = cStringIO.StringIO()
-    fig.savefig(ram, format='png')
-    ram.seek(0)
-    sys.stdout.write(ram.read())
+        s.append("""{
+            name: '"""+plotid+"""',
+            data: """ + str([[a, b] for a, b in zip(df2['ticks'].values,
+                                                    df2['depth'].values)]) + """
+        }""")
+    series = ",".join(s)
+    sys.stdout.write("""
+$("#hc").highcharts({
+    title: {text: '"""+title+"""'},
+    chart: {zoomType: 'x'},
+    yAxis: {title: {text: 'Depth (mm)'},
+        reversed: true
+    },
+    plotOptions: {line: {turboThreshold: 0}},
+    xAxis: {
+        type: 'datetime'
+    },
+    tooltip: {
+        dateTimeLabelFormats: {
+            hour: "%b %e %Y, %H:%M",
+            minute: "%b %e %Y, %H:%M"
+        },
+        shared: true,
+        valueDecimals: 0,
+        valueSuffix: ' mm'
+    },
+    series: ["""+series+"""]
+});
+    """)
 
 
 def main():
