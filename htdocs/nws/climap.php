@@ -8,7 +8,7 @@ include "../../include/myview.php";
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
-$OL = '3.12.1';
+$OL = '3.13.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
@@ -28,7 +28,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
-<script src='climap.js?v=7'></script>
+<script src='climap.js?v=8'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -46,7 +46,13 @@ $t->content = <<<EOF
 <div class="row">
 <div class="col-md-12">
 		
-<form name='bah'><p><strong>Select Variable to Plot:</strong> 
+<div class="pull-right">
+<i class="glyphicon glyphicon-text-size"></i>
+<button id="fminus" class="btn btn-default"><i class="glyphicon glyphicon-minus"></i></button>
+<button id="fplus" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i></button>
+</div>
+
+		<form name='bah'><p><strong>Select Variable to Plot:</strong> 
 <select onChange="javascript: updateMap();" id="renderattr">
 	<option value="high">High Temperature</option>
 	<option value="high_depart">High Temperature Departure</option>
@@ -79,6 +85,7 @@ $t->content = <<<EOF
 		<input type="text" id="datepicker" size="30">
 		
 </form>
+
 		
 <div id="map" class="map">
 		<div id="popup"></div>

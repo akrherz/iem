@@ -2,6 +2,7 @@ var renderattr = "high";
 var vectorLayer;
 var map;
 var element;
+var fontSize = 14;
 
 function updateURL(){
 	var t = $.datepicker.formatDate("yymmdd", 
@@ -24,6 +25,52 @@ function updateDate(){
 	updateURL();
 }
 
+var vectorStyleFunction = function(feature, resolution){
+	var style;
+	if (feature.get(renderattr) != "M"){
+  		style = [new ol.style.Style({
+  	        fill: new ol.style.Fill({
+  	          color: 'rgba(255, 255, 255, 0.6)'
+  	        }),
+  	        stroke: new ol.style.Stroke({
+  	          color: '#319FD3',
+  	          width: 1
+  	        }),
+  	        text: new ol.style.Text({
+  	          font: fontSize+'px Calibri,sans-serif',
+  	          text: feature.get(renderattr),
+  	          fill: new ol.style.Fill({
+  	            color: '#fff',
+  	            width: 3
+  	          })
+  	        })
+  	      })];
+	} else {
+		style = [new ol.style.Style({
+		    image: new ol.style.Circle({
+		           fill: new ol.style.Fill({
+  			           color: 'rgba(255,255,255,0.4)'
+  			       }),
+		           stroke: new ol.style.Stroke({
+  			           color: '#3399CC',
+	  			         width: 1.25
+	  			       }),
+		           radius: 5
+		         }),
+		         fill: new ol.style.Fill({
+		           color: 'rgba(255,255,255,0.4)'
+		       }),
+		         stroke: new ol.style.Stroke({
+		           color: '#3399CC',
+		         width: 1.25
+		       })
+		       })
+		     ];
+	}
+  	return style;	
+}
+
+
 function makeVectorLayer(dt){
 	return new ol.layer.Vector({
 		source: new ol.source.Vector({
@@ -31,50 +78,7 @@ function makeVectorLayer(dt){
 		  	projection: ol.proj.get('EPSG:3857'),
 		    url: '/geojson/cli.py?dt='+dt
 	  	}),
-	  	style: function(feature, resolution){
-	  		if (feature.get(renderattr) != "M"){
-		  		style = [new ol.style.Style({
-		  	        fill: new ol.style.Fill({
-		  	          color: 'rgba(255, 255, 255, 0.6)'
-		  	        }),
-		  	        stroke: new ol.style.Stroke({
-		  	          color: '#319FD3',
-		  	          width: 1
-		  	        }),
-		  	        text: new ol.style.Text({
-		  	          font: '14px Calibri,sans-serif',
-		  	          text: feature.get(renderattr),
-		  	          fill: new ol.style.Fill({
-		  	            color: '#fff',
-		  	            width: 3
-		  	          })
-		  	        })
-		  	      })];
-	  		} else {
-	  			style = [
-	  			       new ol.style.Style({
-	  			         image: new ol.style.Circle({
-	  			           fill: new ol.style.Fill({
-		  			           color: 'rgba(255,255,255,0.4)'
-		  			       }),
-	  			           stroke: new ol.style.Stroke({
-		  			           color: '#3399CC',
-			  			         width: 1.25
-			  			       }),
-	  			           radius: 5
-	  			         }),
-	  			         fill: new ol.style.Fill({
-	  			           color: 'rgba(255,255,255,0.4)'
-	  			       }),
-	  			         stroke: new ol.style.Stroke({
-	  			           color: '#3399CC',
-	  			         width: 1.25
-	  			       })
-	  			       })
-	  			     ];
-	  		}
-		  	return style;
-	  	}
+	  	style: vectorStyleFunction
 	});
 }
 
@@ -179,4 +183,16 @@ $(document).ready(function(){
 			updateDate();
 		}
 	}
+	
+	// Font size buttons
+	$('#fplus').click(function(){
+		fontSize += 2;
+		vectorLayer.setStyle(vectorStyleFunction);
+	});
+	$('#fminus').click(function(){
+		fontSize -= 2;
+		vectorLayer.setStyle(vectorStyleFunction);
+	});
+
+	
 });
