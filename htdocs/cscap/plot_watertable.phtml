@@ -44,6 +44,7 @@ $ar = Array(
 		);
 $viewselect = make_select('view', $view, $ar);
 
+$jsextra = "";
 if ($view != 'plot'){
 	$imageurl = sprintf("plot_watertable.py?site=%s&date=%s&days=%s&ptype=%s&view=%s", 
 		$site, $date, $days, $ptype, $view);
@@ -56,10 +57,12 @@ if ($view != 'plot'){
 		die();
 	}
 } else {
-	$imageurl = sprintf("watertable_%s_%s_%s_%s.png", 
+	$jsurl = sprintf("watertable_%s_%s_%s_%s.js", 
 		$site, $date, $days, $ptype);
-	$interface = "<img src=\"{$imageurl}\">";
-	
+	$jsextra = "<script src=\"{$jsurl}\"></script>";
+	$interface = <<<EOF
+<div id="hc" style="width: 100%; height: 400px;"></div>
+EOF;
 }
 
 echo <<<EOF
@@ -107,6 +110,9 @@ select {
 
 <p>{$interface}</p>
 
+<p><i>Pro Tip:</i> You can click the legend name to toggle showing and hiding
+the data series</p>
+
 <h3>Frequently Asked Questions</h3>
 
 <ol>
@@ -135,9 +141,13 @@ to denote quality control.
  <li></li>
 </ul>
 
-<script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="/vendor/highcharts/4.2.0/highcharts.js"></script>
+<script src="/vendor/highcharts/4.2.0/highcharts-more.js"></script>
+<script src="/vendor/highcharts/4.2.0/modules/exporting.js"></script>
+{$jsextra}
 <script>
 $(document).ready(function(){
 	$( "#datepicker" ).datepicker({dateFormat:"yy-mm-dd",
