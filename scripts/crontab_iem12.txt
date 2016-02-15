@@ -38,27 +38,6 @@ S=/mesonet/www/apps/iemwebsite/scripts
 # Email Harry RR3 data
 14 14 * * 5 cd $S/coop; python email_RR3_to_harry.py
 
-# Archive Bufkit!
-# Eta
-05 0 * * *   cd $S/cache; ./downloadNAM.csh 00
-05 6 * * *   cd $S/cache; ./downloadNAM.csh 06
-05 12 * * *  cd $S/cache; ./downloadNAM.csh 12
-05 18 * * *  cd $S/cache; ./downloadNAM.csh 18
-# GFS
-00 0 * * *   cd $S/cache; ./downloadGFS.csh 00
-00 6 * * *   cd $S/cache; ./downloadGFS.csh 06
-00 12 * * *  cd $S/cache; ./downloadGFS.csh 12
-00 18 * * *  cd $S/cache; ./downloadGFS.csh 18
-# RUC
-50 20 * * *  cd $S/cache; csh downloadRAP.csh 00
-50 23  * * * cd $S/cache; csh downloadRAP.csh 03
-50 2  * * *  cd $S/cache; csh downloadRAP.csh 06
-50 5  * * *  cd $S/cache; csh downloadRAP.csh 09
-50 8  * * *  cd $S/cache; csh downloadRAP.csh 12
-50 11  * * * cd $S/cache; csh downloadRAP.csh 15
-50 14  * * * cd $S/cache; csh downloadRAP.csh 18
-50 17  * * * cd $S/cache; csh downloadRAP.csh 21
-
 # Get GIS Sat Data!
 27 * * * * cd $S/cache; sh nesdis_satellite.sh 45
 57 * * * * cd $S/cache; sh nesdis_satellite.sh 15
