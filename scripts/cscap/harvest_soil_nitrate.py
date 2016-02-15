@@ -23,7 +23,16 @@ res = drive_client.files(
 
 DOMAIN = ['SOIL15', 'SOIL22', 'SOIL16', 'SOIL22', 'SOIL25', 'SOIL95',
           'SOIL94', 'SOIL93', 'SOIL92', 'SOIL91', 'SOIL90', 'SOIL89',
-          'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84']
+          'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84', 'SOIL99']
+
+# Load up what data we have for this year
+current = {}
+pcursor.execute("""SELECT site, plotid, varname, depth, subsample, sampledate
+ from soil_data WHERE year = %s and varname in %s""", (YEAR,
+                                                       tuple(DOMAIN)))
+for row in pcursor:
+    key = "%s|%s|%s|%s|%s|%s" % row
+    current[key] = True
 
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
@@ -51,14 +60,6 @@ for item in res['items']:
         locationcol = 2
     else:
         locationcol = None
-
-    # Load up current data
-    current = {}
-    pcursor.execute("""SELECT plotid, varname, depth, subsample, sampledate
-    from soil_data WHERE site = %s and year = %s""", (siteid, YEAR))
-    for row in pcursor:
-        key = "%s|%s|%s|%s|%s" % row
-        current[key] = True
 
     for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
@@ -109,27 +110,26 @@ for item in res['items']:
                 print '%s %s %s %s %s %s' % (siteid, plotid, varname, depth,
                                              date, val)
                 sys.exit()
-            key = ("%s|%s|%s|%s|%s"
-                   ) % (plotid, varname, depth, subsample,
+            key = ("%s|%s|%s|%s|%s|%s"
+                   ) % (siteid, plotid, varname, depth, subsample,
                         date if date is None else date.strftime("%Y-%m-%d"))
             if key in current:
                 del(current[key])
 
-    for key in current:
-        (plotid, varname, depth, subsample, date) = key.split("|")
-        if date != 'None':
-            datesql = " and sampledate = '%s' " % (date, )
-        else:
-            datesql = " and sampledate is null "
-        if varname in DOMAIN:
-            print(('h_soil_nitrate rm %s %s %s %s %s %s %s'
-                   ) % (YEAR, siteid, plotid, varname, depth, subsample,
-                        date))
-            pcursor.execute("""
-                DELETE from soil_data where site = %s and
-                plotid = %s and varname = %s and year = %s and depth = %s and
-                subsample = %s """ + datesql + """
-            """, (siteid, plotid, varname, YEAR, depth, subsample))
+for key in current:
+    (siteid, plotid, varname, depth, subsample, date) = key.split("|")
+    if date != 'None':
+        datesql = " and sampledate = '%s' " % (date, )
+    else:
+        datesql = " and sampledate is null "
+    print(('h_soil_nitrate rm %s %s %s %s %s %s %s'
+           ) % (YEAR, siteid, plotid, varname, depth, subsample,
+                date))
+    pcursor.execute("""
+        DELETE from soil_data where site = %s and
+        plotid = %s and varname = %s and year = %s and depth = %s and
+        subsample = %s """ + datesql + """
+    """, (siteid, plotid, varname, YEAR, depth, subsample))
 
     # print "...done"
 pcursor.close()
