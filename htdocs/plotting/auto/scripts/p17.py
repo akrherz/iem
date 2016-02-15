@@ -83,7 +83,6 @@ def plotter(fdict):
     else:
         df['high'] = None
         df['low'] = None
-
     (fig, ax) = plt.subplots(1, 1)
 
     for day in weekends:
@@ -108,7 +107,8 @@ def plotter(fdict):
 
     i = 0
     for _, row in df.iterrows():
-        if row['max_tmpf'] is None or row['min_tmpf'] is None:
+        if np.isnan(row['max_tmpf']) or np.isnan(row['min_tmpf']):
+            i += 1
             continue
         txt = ax.text(i+1-0.15, row['max_tmpf']+0.5,
                       "%.0f" % (row['max_tmpf'],),
@@ -143,3 +143,7 @@ def plotter(fdict):
     ax.yaxis.grid(linestyle='-')
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter({'month': 2, 'year': 2016, 'station': 'Y39W3',
+             'network': 'WI_COOP'})
