@@ -9,7 +9,13 @@ $OL = "3.9.0";
  $report = isset($_REQUEST["report"])? substr($_REQUEST["report"],0,2): "01";
  $station = isset($_REQUEST["station"])? substr($_REQUEST["station"],0,6) : "";
  $network = isset($_REQUEST['network']) ? $_REQUEST['network'] : 'IACLIMATE';
-
+// Make sure that our network matches the station, silly bots
+if ($station != ""){
+	if (substr($station, 0, 2) != substr($network, 0, 2)){
+		$network = sprintf("%sCLIMATE", substr($station, 0, 2));
+	}
+}
+ 
  if (isset($_GET["id"])){
    $station = substr($_REQUEST["id"],0,6);
  }
