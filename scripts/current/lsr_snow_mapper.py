@@ -53,6 +53,7 @@ def run(basets, endts, view):
     m.drawcounties()
     m.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
                   fmt='%.1f')
+    m.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
     m.close()
@@ -65,6 +66,7 @@ def run(basets, endts, view):
     m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
                cmap=cmap)
     m.drawcounties()
+    m.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall_nv.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
     m.close()
@@ -75,6 +77,7 @@ def run(basets, endts, view):
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
     m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
                cmap=cmap)
+    m.drawcities()
     pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
     m.close()
