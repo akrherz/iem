@@ -50,26 +50,27 @@ def make_plot(form):
     plotid_limit = "and plotid = '%s'" % (plotid, )
     if ptype == '1':
         df = read_sql("""SELECT valid at time zone 'UTC' as v, plotid,
-        depth_mm_qc as depth, coalesce(depth_mm_qcflag, '') as depth_f
-        from watertable_data WHERE uniqueid = %s
+        discharge_m3_qc as discharge,
+        coalesce(discharge_m3_qcflag, '') as discharge_f
+        from tileflow_data WHERE uniqueid = %s
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, sts.date(), ets.date()))
     elif ptype in ['3', '4']:
         res = 'hour' if ptype == '3' else 'week'
         df = read_sql("""SELECT
         date_trunc('"""+res+"""', valid at time zone 'UTC') as v, plotid,
-        avg(depth_mm_qc) as depth
-        from watertable_data WHERE uniqueid = %s
+        avg(discharge_m3_qc) as discharge
+        from tileflow_data WHERE uniqueid = %s
         and valid between %s and %s GROUP by v, plotid ORDER by v ASC
         """, pgconn, params=(uniqueid, sts.date(), ets.date()))
-        df["depth_f"] = '-'
+        df["discharge_f"] = '-'
     else:
         df = read_sql("""SELECT date(valid at time zone %s) as v, plotid,
-        avg(depth_mm_qc) as depth
-        from watertable_data WHERE uniqueid = %s
+        avg(discharge_m3_qc) as discharge
+        from tileflow_data WHERE uniqueid = %s
         and valid between %s and %s GROUP by v, plotid ORDER by v ASC
         """, pgconn, params=(tzname, uniqueid, sts.date(), ets.date()))
-        df["depth_f"] = '-'
+        df["discharge_f"] = '-'
     if len(df.index) < 3:
         send_error("No / Not Enough Data Found, sorry!")
     if ptype not in ['2', ]:
@@ -78,7 +79,7 @@ def make_plot(form):
 
     if viewopt not in ['plot', 'js']:
         df.rename(columns=dict(v='timestamp',
-                               depth='Depth (mm)'
+                               discharge='Discharge (m3)'
                                ),
                   inplace=True)
         if viewopt == 'html':
@@ -117,18 +118,17 @@ def make_plot(form):
     df['ticks'] = df['v'].astype(np.int64) // 10 ** 6
     for plotid in plot_ids:
         df2 = df[df['plotid'] == plotid]
-        s.append(("""{
+        s.append(("""{type: 'line',
             name: '"""+plotid+"""',
             data: """ + str([[a, b] for a, b in zip(df2['ticks'].values,
-                                                    df2['depth'].values)]) + """
+                                                    df2['discharge'].values)]) + """
         }""").replace("None", "null").replace("nan", "null"))
     series = ",".join(s)
     sys.stdout.write("""
 $("#hc").highcharts({
     title: {text: '"""+title+"""'},
     chart: {zoomType: 'x'},
-    yAxis: {title: {text: 'Depth (mm)'},
-        reversed: true
+    yAxis: {title: {text: 'Discharge (m3)'}
     },
     plotOptions: {line: {turboThreshold: 0}},
     xAxis: {
@@ -141,7 +141,7 @@ $("#hc").highcharts({
         },
         shared: true,
         valueDecimals: 0,
-        valueSuffix: ' mm'
+        valueSuffix: ' m3'
     },
     series: ["""+series+"""]
 });
