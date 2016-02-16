@@ -7,6 +7,17 @@ import numpy as np
 CENTRAL_TIME = ['ISUAG', 'GILMORE', 'SERF']
 
 
+def process2(fn):
+    """ Format 2, SERF"""
+    df = pd.read_excel(fn, sheetname=None, skiprows=[0, ], parse_cols="H,I")
+    for plotid in df:
+        print plotid, df[plotid].columns
+        df[plotid].dropna(inplace=True)
+        df[plotid]['valid'] = df[plotid]['Date-Time']
+        df[plotid]['depth'] = df[plotid]['Level below ground'] * 0.3048 * 1000.
+    return df
+
+
 def process1(fn):
     """Format 1, DPAC"""
     df = pd.read_csv(fn, sep='\t')
@@ -83,8 +94,12 @@ def main(argv):
     plotid = argv[4]
     if fmt == '1':
         df = process1(fn)
+        database_save(df, uniqueid, plotid)
+    elif fmt == '2':
+        df = process2(fn)
+        for plotid in df:
+            database_save(df[plotid], uniqueid, plotid)
 
-    database_save(df, uniqueid, plotid)
 
 if __name__ == '__main__':
     main(sys.argv)
