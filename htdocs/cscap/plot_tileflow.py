@@ -108,9 +108,10 @@ def make_plot(form):
     plot_ids = df['plotid'].unique()
     plot_ids.sort()
     df['ticks'] = df['v'].astype(np.int64) // 10 ** 6
+    seriestype = 'line' if ptype == '1' else 'column'
     for plotid in plot_ids:
         df2 = df[df['plotid'] == plotid]
-        s.append(("""{type: 'column',
+        s.append(("""{type: '""" + seriestype + """',
             name: '"""+plotid+"""',
             data: """ + str([[a, b] for a, b in zip(df2['ticks'].values,
                                                     df2['discharge'].values)]) + """
