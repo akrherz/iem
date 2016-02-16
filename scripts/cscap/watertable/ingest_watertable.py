@@ -7,6 +7,22 @@ import numpy as np
 CENTRAL_TIME = ['ISUAG', 'GILMORE', 'SERF']
 
 
+def process3(fn):
+    """ Format 3, STJOHNS"""
+    df = pd.read_excel(fn, sheetname=None)
+    for plotid in df:
+        print plotid, df[plotid].columns
+        df[plotid].dropna(inplace=True)
+        df[plotid]['valid'] = df[plotid][['Date', 'Time']].apply(
+            lambda x: datetime.datetime.strptime("%s/%s/%s %s" % (x[0].month,
+                                                            x[0].day,
+                                                            x[0].year, x[1]),
+                                                 '%m/%d/%Y %H:%M:%S'),
+                                                                 axis=1)
+        df[plotid]['depth'] = df[plotid]['Water Table Depth below Ground'] * 10.
+    return df
+
+
 def process2(fn):
     """ Format 2, SERF"""
     df = pd.read_excel(fn, sheetname=None, skiprows=[0, ], parse_cols="H,I")
@@ -97,6 +113,10 @@ def main(argv):
         database_save(df, uniqueid, plotid)
     elif fmt == '2':
         df = process2(fn)
+        for plotid in df:
+            database_save(df[plotid], uniqueid, plotid)
+    elif fmt == '3':
+        df = process3(fn)
         for plotid in df:
             database_save(df[plotid], uniqueid, plotid)
 
