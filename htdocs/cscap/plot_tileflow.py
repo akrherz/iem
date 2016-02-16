@@ -50,26 +50,18 @@ def make_plot(form):
     plotid_limit = "and plotid = '%s'" % (plotid, )
     if ptype == '1':
         df = read_sql("""SELECT valid at time zone 'UTC' as v, plotid,
-        discharge_m3_qc as discharge,
-        coalesce(discharge_m3_qcflag, '') as discharge_f
+        discharge_mm_qc as discharge,
+        coalesce(discharge_mm_qcflag, '') as discharge_f
         from tileflow_data WHERE uniqueid = %s
         and valid between %s and %s ORDER by valid ASC
         """, pgconn, params=(uniqueid, sts.date(), ets.date()))
-    elif ptype in ['3', '4']:
-        res = 'hour' if ptype == '3' else 'week'
+    elif ptype == '2':
         df = read_sql("""SELECT
-        date_trunc('"""+res+"""', valid at time zone 'UTC') as v, plotid,
-        avg(discharge_m3_qc) as discharge
+        date_trunc('month', valid at time zone 'UTC') as v, plotid,
+        sum(discharge_mm_qc) as discharge
         from tileflow_data WHERE uniqueid = %s
         and valid between %s and %s GROUP by v, plotid ORDER by v ASC
         """, pgconn, params=(uniqueid, sts.date(), ets.date()))
-        df["discharge_f"] = '-'
-    else:
-        df = read_sql("""SELECT date(valid at time zone %s) as v, plotid,
-        avg(discharge_m3_qc) as discharge
-        from tileflow_data WHERE uniqueid = %s
-        and valid between %s and %s GROUP by v, plotid ORDER by v ASC
-        """, pgconn, params=(tzname, uniqueid, sts.date(), ets.date()))
         df["discharge_f"] = '-'
     if len(df.index) < 3:
         send_error("No / Not Enough Data Found, sorry!")
@@ -118,7 +110,7 @@ def make_plot(form):
     df['ticks'] = df['v'].astype(np.int64) // 10 ** 6
     for plotid in plot_ids:
         df2 = df[df['plotid'] == plotid]
-        s.append(("""{type: 'line',
+        s.append(("""{type: 'column',
             name: '"""+plotid+"""',
             data: """ + str([[a, b] for a, b in zip(df2['ticks'].values,
                                                     df2['discharge'].values)]) + """
@@ -128,7 +120,7 @@ def make_plot(form):
 $("#hc").highcharts({
     title: {text: '"""+title+"""'},
     chart: {zoomType: 'x'},
-    yAxis: {title: {text: 'Discharge (m3)'}
+    yAxis: {title: {text: 'Discharge (mm)'}
     },
     plotOptions: {line: {turboThreshold: 0}},
     xAxis: {
@@ -141,7 +133,7 @@ $("#hc").highcharts({
         },
         shared: true,
         valueDecimals: 0,
-        valueSuffix: ' m3'
+        valueSuffix: ' mm'
     },
     series: ["""+series+"""]
 });
