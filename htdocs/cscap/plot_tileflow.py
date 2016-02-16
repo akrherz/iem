@@ -101,7 +101,7 @@ def make_plot(form):
 
     # Begin highcharts output
     sys.stdout.write("Content-type: application/javascript\n\n")
-    title = ("Water Table Depth for Site: %s (%s to %s)"
+    title = ("Tile Flow for Site: %s (%s to %s)"
              ) % (uniqueid, sts.strftime("%-d %b %Y"),
                   ets.strftime("%-d %b %Y"))
     s = []
