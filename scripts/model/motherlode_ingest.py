@@ -91,7 +91,7 @@ def run(model, station, lon, lat, ts):
             precip = None
         if precipcon < 0:
             precipcon = None
-        fts = datetime.datetime.strptime(row['date'], '%Y-%m-%dT%H:%M:%SZ')
+        fts = datetime.datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ')
         fts = fts.replace(tzinfo=pytz.timezone("UTC"))
         sql = """INSERT into """ + table + """ (station, model, runtime,
               ftime, sbcape, sbcin, pwater, precipcon, precip)
