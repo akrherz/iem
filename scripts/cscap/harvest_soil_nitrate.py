@@ -23,7 +23,9 @@ res = drive_client.files(
 
 DOMAIN = ['SOIL15', 'SOIL22', 'SOIL16', 'SOIL22', 'SOIL25', 'SOIL95',
           'SOIL94', 'SOIL93', 'SOIL92', 'SOIL91', 'SOIL90', 'SOIL89',
-          'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84', 'SOIL99']
+          'SOIL88', 'SOIL87', 'SOIL86', 'SOIL85', 'SOIL84', 'SOIL99',
+          'SOIL23', 'SOIL76', 'SOIL77', 'SOIL78', 'SOIL79', 'SOIL80',
+          'SOIL81', 'SOIL82', 'SOIL83']
 
 # Load up what data we have for this year
 current = {}
