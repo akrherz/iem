@@ -20,8 +20,12 @@ LINESTYLE = ['-', '-', '-', '-', '-', '-',
              '-', '-.', '-.', '-.', '-.', '-.', '-.', '-.', '-.', '-.', '-.']
 
 
-def send_error(msg):
+def send_error(viewopt, msg):
     """" """
+    if viewopt == 'js':
+        sys.stdout.write("Content-type: application/javascript\n\n")
+        sys.stdout.write("alert('No data found, sorry');")
+        sys.exit()
     fig, ax = plt.subplots(1, 1)
     ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
     sys.stdout.write("Content-type: image/png\n\n")
@@ -71,7 +75,7 @@ def make_plot(form):
         """, pgconn, params=(tzname, uniqueid, sts.date(), ets.date()))
         df["depth_f"] = '-'
     if len(df.index) < 3:
-        send_error("No / Not Enough Data Found, sorry!")
+        send_error(viewopt, "No / Not Enough Data Found, sorry!")
     if ptype not in ['2', ]:
         df['v'] = df['v'].apply(
             lambda x: x.tz_localize('UTC').tz_convert(tzname))
