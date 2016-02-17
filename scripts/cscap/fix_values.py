@@ -13,6 +13,10 @@ res = drive.files().list(q=("title contains 'Soil Bulk Density' or "
                             "title contains 'Agronomic Data'"),
                          maxResults=999).execute()
 
+HEADERS = ['uniqueid', 'plotid', 'depth', 'tillage', 'rotation', 'soil6',
+           'nitrogen', 'drainage', 'rep', 'subsample', 'landscape',
+           'notes', 'herbicide', 'sampledate']
+
 sz = len(res['items'])
 for i, item in enumerate(res['items']):
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
@@ -22,21 +26,37 @@ for i, item in enumerate(res['items']):
     for year in spreadsheet.worksheets:
         print('%3i/%3i sheet "%s" for "%s"' % (i + 1, sz, year, item['title']))
         lf = spreadsheet.worksheets[year].get_list_feed()
-        for entry in lf.entry:
+        for rownum, entry in enumerate(lf.entry):
             dirty = False
             data = entry.to_dict()
             for key, value in data.iteritems():
+                if key in HEADERS:
+                    continue
                 newvalue = value
                 if value is None:
                     continue
-                if value in ['N/A', 'NA']:
+                if value in ['N/A', 'NA', 'n/a', 'Grass, no crop']:
                     newvalue = 'n/a'
-                if value in ['Did not collect', 'DID NOT COLLECT',
-                             'Did Not Collect']:
+                elif value in ['.', '-', '..']:
+                    newvalue = '.'
+                elif value in ['Did not collect', 'DID NOT COLLECT',
+                               'Did Not Collect', 'fire loss', 'dnc',
+                               'did  not collect', 'Not collected',
+                               'Farm sold', 'DNC', 'Drowned out',
+                               'Farm was not available', 'did not collect',
+                               'outlier', 'not collected', '#NUM!',
+                               'no sample']:
                     newvalue = 'did not collect'
+                else:
+                    try:
+                        float(value)
+                    except:
+                        if rownum > 1:
+                            print("    invalid key:%s val:%s" % (key, value))
+                        continue
                 if newvalue != value:
                     entry.set_value(key, newvalue)
-                    print('    "%s" -> "%s"' % (value, newvalue))
+                    print('    key:%s "%s" -> "%s"' % (key, value, newvalue))
                     dirty = True
             if dirty:
                 util.exponential_backoff(spr_client.update, entry)
