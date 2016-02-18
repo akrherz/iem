@@ -141,13 +141,18 @@ def drive_changelog(regime, yesterday, html):
                         continue
                     luser = item2['lastModifyingUser']
                     hit = True
+                    display_name = luser['displayName']
+                    email_address = luser['emailAddress']
+                    if display_name == config['service_account']:
+                        display_name = "daryl's magic"
+                        email_address = "akrherz@iastate.edu"
                     thismsg = """
     <tr><td colspan="2"><img src="%s" style="height:25px;"/> %s by
      %s (%s)</td></tr>
                     """ % ((luser['picture']['url']
                             if 'picture' in luser else ''),
                            localts.strftime("%-d %b %-I:%M %p"),
-                           luser['displayName'], luser['emailAddress'])
+                           display_name, email_address)
                     if thismsg != lastmsg:
                         html += thismsg
                     lastmsg = thismsg
