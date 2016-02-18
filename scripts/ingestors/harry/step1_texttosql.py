@@ -71,9 +71,9 @@ for linenum, line in enumerate(lines):
         hi = ""
     if lo == "M":
         lo = ""
-    if pr in ["M", "C", "*"]:
+    if pr in ["M", "C", "*", "?"]:
         pr = None
-    if sf in ["M", "C", "*"]:
+    if sf in ["M", "C", "*", "?"]:
         sf = None
 
     if sf == "":
