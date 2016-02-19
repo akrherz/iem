@@ -67,7 +67,7 @@ for ($i = 0; $i < $num; $i++){
 <div class="row">
 	<div class="col-md-6">
 	<a href="/onsite/features/{$row["imageref"]}.{$fmt}">
-<img src="/onsite/features/{$row["imageref"]}_s.{$fmt}" alt="Feature" class="img img-responsive" /></a>
+<img src="/onsite/features/{$row["imageref"]}.{$fmt}" alt="Feature" class="img img-responsive" /></a>
 <br />{$row["caption"]}
 	</div>
 	<div class="col-md-6">
