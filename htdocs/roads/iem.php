@@ -118,7 +118,6 @@ $logokey_c3 = ms_newClassObj($logokey);
 $logokey_c3s0 = ms_newStyleObj($logokey_c3);
 $l = $logokey_c3->addLabel(new labelObj());
 $logokey_c3->getLabel(0)->set("buffer", 10);
-$logokey_c3->getLabel(0)->set("type", MS_BITMAP);
 $logokey_c3->getLabel(0)->set("size", MS_MEDIUM);
 $logokey_c3->getLabel(0)->color->setRGB(0,0,0);
 $bpt = ms_newpointobj();
