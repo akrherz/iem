@@ -105,7 +105,7 @@ $cp->set("labelcache", MS_ON);
 $cl = ms_newClassObj($cp);
 $lbl = new labelObj();
 $cl->addLabel($lbl);
-$cl->getLabel(0)->set("type", MS_TRUETYPE);
+//$cl->getLabel(0)->set("type", MS_TRUETYPE);
 $cl->getLabel(0)->set("size", 10);
 $cl->getLabel(0)->set("position", MS_CR);
 $cl->getLabel(0)->set("font", "liberation-bold");
@@ -118,7 +118,7 @@ $cl->getLabel(0)->color->setRGB(0, 0, 0);
 $cl2 = ms_newClassObj($cp);
 $lbl = new labelObj();
 $cl2->addLabel($lbl);
-$cl2->getLabel(0)->set("type", MS_TRUETYPE);
+//$cl2->getLabel(0)->set("type", MS_TRUETYPE);
 $cl2->getLabel(0)->set("size", "10");
 $cl2->getLabel(0)->set("font", "esri34");
 $cl2->getLabel(0)->set("position", MS_CC);
@@ -126,15 +126,6 @@ $cl2->getLabel(0)->set("force", MS_ON);
 $cl2->getLabel(0)->set("partials", MS_ON);
 $cl2->getLabel(0)->outlinecolor->setRGB(0, 0, 0);
 $cl2->getLabel(0)->color->setRGB(255, 255, 255);
-
-//$sl = ms_newStyleObj($cl);
-//$sl->set("symbolname", "arrow");
-//$sl->set("size", 8);
-//$sl->color->setRGB(255, 255, 255);
-//$sl = ms_newStyleObj($cl);
-//$sl->set("symbolname", "circle");
-//$sl->set("size", 6);
-//$sl->color->setRGB(0, 0, 0);
 
 
 $img = $map->prepareImage();
