@@ -14,6 +14,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
+    d['highcharts'] = True
     d['description'] = """This plot presents the climatology and actual
     year's progression of warmest to date or coldest to date temperature.
     The simple average is presented along with the percentile intervals."""
@@ -30,11 +31,9 @@ def get_description():
     return d
 
 
-def plotter(fdict):
-    """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
+def get_context(fdict):
+    """ Get the raw infromations we need"""
+    ctx = {}
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -107,36 +106,119 @@ def plotter(fdict):
             dyear.append(np.ma.max(data[idx, :doy]))
 
     # http://stackoverflow.com/questions/19736080
-    d = dict(doy=pd.Series(doys), min=pd.Series(mins), max=pd.Series(maxs),
+    d = dict(doy=pd.Series(doys), mins=pd.Series(mins), maxs=pd.Series(maxs),
              p2p5=pd.Series(p2p5),
              p97p5=pd.Series(p97p5), p25=pd.Series(p25),
              p75=pd.Series(p75), avg=pd.Series(avg),
              thisyear=pd.Series(dyear))
     df = pd.DataFrame(d)
-    (fig, ax) = plt.subplots(1, 1)
+    sts = datetime.date(2000, 1, 1) + datetime.timedelta(days=doys[0]-1)
+    df['dates'] = pd.date_range(sts, periods=len(doys))
+    df.set_index('doy', inplace=True)
+    ctx['df'] = df
+    ctx['year'] = year
+    ctx['half'] = half
+    if ctx['half'] == 'fall':
+        title = "Minimum Daily %s Temperature after 1 July"
+    else:
+        title = "Maximum Daily %s Temperature before 1 July"
+    title = title % (varname.capitalize(), )
+    ctx['ylabel'] = title
+    ctx['title'] = "%s-%s %s %s\n%s" % (startyear,
+                                        thisyear-1, station,
+                                        nt.sts[station]['name'], title)
+    return ctx
 
-    ax.fill_between(doys, mins, maxs, color='pink', zorder=1, label='Range')
-    ax.fill_between(doys, p2p5, p97p5, color='tan', zorder=2, label='95 tile')
-    ax.fill_between(doys, p25, p75, color='gold', zorder=3, label='50 tile')
-    a = ax.plot(doys, avg, zorder=4, color='k', lw=2, label='Average')
-    ax.plot(doys[:len(dyear)], dyear, color='white', lw=3.5, zorder=5)
-    b = ax.plot(doys[:len(dyear)], dyear, color='b', lw=1.5, zorder=6,
-                label='%s' % (year,))
+
+def highcharts(fdict):
+    """ Do highcharts """
+    ctx = get_context(fdict)
+
+    rng = ctx['df'][['dates', 'mins', 'maxs']].to_json(orient='values')
+    p95 = ctx['df'][['dates', 'p2p5', 'p97p5']].to_json(orient='values')
+    p50 = ctx['df'][['dates', 'p25', 'p75']].to_json(orient='values')
+    mean = ctx['df'][['dates', 'avg']].to_json(orient='values')
+    thisyear = ctx['df'][['dates', 'thisyear']].to_json(orient='values')
+    return """
+$("#ap_container").highcharts({
+    title: {text: '""" + ctx['title'].replace("\n", " ") + """'},
+    tooltip: {shared: true,
+        xDateFormat: '%B %d'},
+    xAxis: {type: 'datetime',
+        dateTimeLabelFormats: {
+            day: '%b %e',
+            week: '%b %e',
+            month: '%b %e'}},
+    yAxis: {title: {text: '"""+ctx['ylabel']+"""'}},
+    series: [{
+        name: 'Range',
+        type: 'arearange',
+        color: 'pink',
+        tooltip: {valueDecimals: 0},
+        data: """+rng+"""
+    },{
+        name: '95th',
+        type: 'arearange',
+        color: 'tan',
+        tooltip: {valueDecimals: 2},
+        data: """+p95+"""
+    },{
+        name: '50th',
+        type: 'arearange',
+        color: 'gold',
+        tooltip: {valueDecimals: 2},
+        data: """+p50+"""
+    },{
+        name: 'Average',
+        type: 'line',
+        color: 'black',
+        tooltip: {valueDecimals: 2},
+        data: """+mean+"""
+    },{
+        name: '"""+str(ctx['year'])+"""',
+        type: 'line',
+        color: 'blue',
+        tooltip: {valueDecimals: 0},
+        shadow: {'color': 'white'},
+        data: """+thisyear+"""
+    }]
+});
+    """
+
+
+def plotter(fdict):
+    """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    ctx = get_context(fdict)
+    df = ctx['df']
+
+    (fig, ax) = plt.subplots(1, 1)
+    doys = df.index.values
+    ax.fill_between(doys, df['mins'], df['maxs'], color='pink',
+                    zorder=1, label='Range')
+    ax.fill_between(doys, df['p2p5'], df['p97p5'],
+                    color='tan', zorder=2, label='95 tile')
+    ax.fill_between(doys, df['p25'], df['p75'],
+                    color='gold', zorder=3, label='50 tile')
+    a = ax.plot(doys, df['avg'], zorder=4, color='k', lw=2,
+                label='Average')
+    series = df['thisyear'].dropna()
+    ax.plot(series.index.values, series.values, color='white',
+            lw=3.5, zorder=5)
+    b = ax.plot(series.index.values, series.values, color='b', lw=1.5,
+                zorder=6, label='%s' % (ctx['year'],))
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
                         'Sep', 'Oct', 'Nov', 'Dec'))
-    if half == 'fall':
+    if ctx['half'] == 'fall':
         ax.set_xlim(200, 366)
         ax.text(220, 32.4, r'32$^\circ$F', ha='left')
-        title = "Minimum Daily %s Temperature after 1 July"
     else:
         ax.set_xlim(0, 181)
-        title = "Maximum Daily %s Temperature before 1 July"
-    title = title % (varname.capitalize(), )
-    ax.set_ylabel(title + " $^\circ$F")
-    ax.set_title("%s-%s %s %s\n%s" % (startyear,
-                                      thisyear-1, station,
-                                      nt.sts[station]['name'], title))
+    ax.set_ylabel("%s $^\circ$F" % (ctx['ylabel'], ))
+    ax.set_title(ctx['title'])
     ax.axhline(32, linestyle='--', lw=1, color='k', zorder=6)
     ax.grid(True)
 
@@ -145,9 +227,12 @@ def plotter(fdict):
     r2 = Rectangle((0, 0), 1, 1, fc='tan')
     r3 = Rectangle((0, 0), 1, 1, fc='gold')
 
-    loc = 1 if half == 'fall' else 4
+    loc = 1 if ctx['half'] == 'fall' else 4
     ax.legend([r, r2, r3, a[0], b[0]], ['Range', '95$^{th}$ %tile',
                                         '50$^{th}$ %tile', 'Average',
-                                        '%s' % (year,)], loc=loc)
+                                        '%s' % (ctx['year'],)], loc=loc)
 
     return fig, df
+
+if __name__ == '__main__':
+    highcharts({'year': 2016, 'half': 'spring', 'var': 'high'})
