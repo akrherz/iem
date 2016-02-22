@@ -94,7 +94,8 @@ for item in res['items']:
                 print '%s %s %s %s %s' % (siteid, plotid, varname, depth, val,
                                           subsample)
                 sys.exit()
-            key = "|".join([siteid, plotid, varname, depth, subsample])
+            key = "%s|%s|%s|%s|%s" % (siteid, plotid, varname, depth,
+                                      subsample)
             if key in current:
                 del(current[key])
 
