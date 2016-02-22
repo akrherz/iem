@@ -23,6 +23,16 @@ res = drive_client.files().list(q=("title contains '%s'"
 DOMAIN = ['SOIL1', 'SOIL2', 'SOIL29', 'SOIL30', 'SOIL31', 'SOIL32',
           'SOIL33', 'SOIL34', 'SOIL35', 'SOIL39']
 
+# Load up current data, incase we need to do some deleting
+current = {}
+pcursor.execute("""
+    SELECT site, plotid, varname, depth, subsample
+    from soil_data WHERE year = %s and varname in %s
+    """, (YEAR, tuple(DOMAIN)))
+for row in pcursor:
+    key = "|".join(row)
+    current[key] = True
+
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
@@ -49,13 +59,6 @@ for item in res['items']:
             worksheet.get_cell_value(1, 3))
         continue
 
-    # Load up current data, incase we need to do some deleting
-    current = {}
-    pcursor.execute("""SELECT plotid, varname, depth, subsample
-    from soil_data WHERE site = %s and year = %s""", (siteid, YEAR))
-    for row in pcursor:
-        key = "%s|%s|%s|%s" % row
-        current[key] = True
     for row in range(3, worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
         if siteid == 'DPAC':
@@ -93,19 +96,20 @@ for item in res['items']:
                 print '%s %s %s %s %s %s' % (siteid, plotid, varname, depth,
                                              val, subsample)
                 sys.exit()
-            key = "%s|%s|%s|%s" % (plotid, varname, depth, subsample)
+            key = "|".join([siteid, plotid, varname, depth, subsample])
             if key in current:
                 del(current[key])
-    for key in current:
-        (plotid, varname, depth, subsample) = key.split("|")
-        if varname in DOMAIN:
-            print(('harvest_soil_bd rm %s %s %s %s %s %s'
-                   ) % (YEAR, siteid, plotid, varname, repr(depth),
-                        repr(subsample)))
-            pcursor.execute("""DELETE from soil_data where site = %s and
-            plotid = %s and varname = %s and year = %s and depth = %s and
-            subsample = %s""", (siteid, plotid, varname, YEAR, depth,
-                                subsample))
+
+for key in current:
+    (siteid, plotid, varname, depth, subsample) = key.split("|")
+    if varname in DOMAIN:
+        print(('harvest_soil_bd rm %s %s %s %s %s %s'
+               ) % (YEAR, siteid, plotid, varname, repr(depth),
+                    repr(subsample)))
+        pcursor.execute("""DELETE from soil_data where site = %s and
+        plotid = %s and varname = %s and year = %s and depth = %s and
+        subsample = %s""", (siteid, plotid, varname, YEAR, depth,
+                            subsample))
 
 
 pcursor.close()
