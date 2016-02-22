@@ -30,7 +30,7 @@ pcursor.execute("""
     from soil_data WHERE year = %s and varname in %s
     """, (YEAR, tuple(DOMAIN)))
 for row in pcursor:
-    key = "|".join(row)
+    key = "|".join([str(s) for s in row])
     current[key] = True
 
 for item in res['items']:
