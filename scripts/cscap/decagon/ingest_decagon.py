@@ -7,7 +7,7 @@ import datetime
 import pandas as pd
 import numpy as np
 
-CENTRAL_TIME = ['ISUAG', 'GILMORE', 'SERF']
+CENTRAL_TIME = ['ISUAG', 'ISUAG.USB', 'GILMORE', 'SERF']
 
 
 def translate(df):
@@ -132,8 +132,8 @@ def database_save(uniqueid, plot, df):
         val = row.get(name)
         if val is None:
             return 'null'
-        if isinstance(val, str):
-            if val.strip().lower() in ['nan', ]:
+        if isinstance(val, (str, unicode)):
+            if val.strip().lower() in ['nan', '-999']:
                 return 'null'
             return val
         # elif isinstance(val, pd.core.series.Series):
@@ -147,6 +147,7 @@ def database_save(uniqueid, plot, df):
             print exp
             print(('Plot: %s Val: %s[%s] Name: %s Valid: %s'
                    ) % (plot, val, type(val), name, row['valid']))
+            sys.exit()
             return 'null'
         return val
     for _, row in df.iterrows():
