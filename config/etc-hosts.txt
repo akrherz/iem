@@ -2,6 +2,7 @@
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 127.0.0.1        iem.local
+127.0.0.1        iem-backend.local
 127.0.0.1        mesonet.agron.iastate.edu
 # 
 # Iron, in general, these IPs should not be used for services
