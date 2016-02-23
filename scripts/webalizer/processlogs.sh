@@ -6,7 +6,7 @@ export dd="`date --date '1 day ago' +'%d'`"
 # Go to temp directory, that hopefully has enough space!
 cd /mesonet/www/logs/tmp
 
-MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108"
+MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108 iemvs109"
 BASE="/mesonet/www/logs"
 CONFBASE="/mesonet/www/apps/iemwebsite/scripts/webalizer"
 
