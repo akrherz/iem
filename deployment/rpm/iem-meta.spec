@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 26%{?dist}
+Release: 27%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -111,6 +111,7 @@ Requires: geopandas
 Requires: rasterio
 Requires: python-enum34
 Requires: affine
+Requires: rsa
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -132,6 +133,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Tue Feb 23 2016 daryl herzmann <akrherz@iastate.edu>
+- Need rsa package for updated oauth2client
+
 * Mon Jan 18 2016 daryl herzmann <akrherz@iastate.edu>
 - Added GeoPandas requirement
 
