@@ -80,9 +80,11 @@ def plotter(fdict):
 
     if len(cdf.index) > 0:
         df = cdf.join(df)
+        has_climo = True
     else:
         df['high'] = None
         df['low'] = None
+        has_climo = False
     (fig, ax) = plt.subplots(1, 1)
 
     for day in weekends:
@@ -90,10 +92,11 @@ def plotter(fdict):
                          edgecolor='None')
         ax.add_patch(rect)
 
-    ax.plot(df.index.values, df['high'].values, zorder=3, marker='o',
-            color='pink')
-    ax.plot(df.index.values, df['low'].values, zorder=3, marker='o',
-            color='skyblue')
+    if has_climo:
+        ax.plot(df.index.values, df['high'].values, zorder=3, marker='o',
+                color='pink')
+        ax.plot(df.index.values, df['low'].values, zorder=3, marker='o',
+                color='skyblue')
     if has_data:
         ax.bar(df.index.values - 0.3, df['max_tmpf'].values,
                fc='r', ec='k', width=0.3,
@@ -107,6 +110,8 @@ def plotter(fdict):
 
     i = 0
     for _, row in df.iterrows():
+        if not has_data:
+            continue
         if np.isnan(row['max_tmpf']) or np.isnan(row['min_tmpf']):
             i += 1
             continue
@@ -145,5 +150,5 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter({'month': 2, 'year': 2016, 'station': 'Y39W3',
-             'network': 'WI_COOP'})
+    plotter({'month': 2, 'year': 2016, 'station': 'SBZI4',
+             'network': 'KCCI'})
