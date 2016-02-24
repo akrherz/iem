@@ -2,6 +2,32 @@
 """
 import pyiem.cscap_utils as util
 
+
+def has_or_create_worksheet(ssclient, sheet, title, rows, cols):
+    sheet.get_worksheets()
+    if title not in sheet.worksheets:
+        print 'Adding worksheet with title: %s' % (title, )
+        ssclient.add_worksheet(sheet.id, title, rows, cols)
+        sheet.get_worksheets()
+    return sheet.worksheets[title]
+
+
+def has_or_create_sheet(drive, colfolder, title):
+    """ Create or find this sheet!"""
+    res = util.exponential_backoff(drive.files().list(
+        q=("mimeType = 'application/vnd.google-apps.spreadsheet' "
+           "and title = '%s' and '%s' in parents"
+           ) % (title, colfolder)).execute)
+    if len(res['items']) == 0:
+        body = {'title': title,
+                'mimeType': 'application/vnd.google-apps.spreadsheet',
+                'parents': [{'id': colfolder}]
+                }
+        print("Creating Tile Flow Sheet: %s in %s" % (title, colfolder))
+        res = drive.files().insert(body=body).execute()
+        return res['id']
+    return res['items'][0]['id']
+
 config = util.get_config()
 ssclient = util.get_spreadsheet_client(config)
 drive = util.get_driveclient(config)
@@ -18,7 +44,7 @@ for entry in sheet.list_feed.entry:
         continue
     site = row['siteid']
     d = sites.setdefault(site, [])
-    d.append(row['plotid'])
+    d.append(row['waterqualityid'])
     pis[site] = row['leadpi']
 
 # Use SDC to figure out years
@@ -41,11 +67,11 @@ for col in range(2, sheet.cols + 1):
     years[site] = util.translate_years(val)
 
 # Now we dance
-DONE = ['STORY', 'SERF_SD', 'CLAY_R', 'SERF_IA', 'SWROC', 'STJOHNS',
-        'MUDS2', 'BEAR', "UBWC", 'MAASS']
+NOT_DONE = ['BATH_A', 'TIDE_NEW', 'TIDE_OLD']
 for site in sites:
-    if site in DONE:
+    if site not in NOT_DONE:
         continue
+    print("---- Processing: %s -----" % (site, ))
     # Compute the base folder
     foldername = "%s - %s" % (site, pis[site])
     res = util.exponential_backoff(drive.files().list(
@@ -57,13 +83,8 @@ for site in sites:
         continue
     colfolder = res['items'][0]['id']
     title = "%s Tile Nitrate-N" % (site, )
-    body = {'title': title,
-            'mimeType': 'application/vnd.google-apps.spreadsheet',
-            'parents': [{'id': colfolder}]
-            }
-    print("Creating Tile Flow Sheet: %s in %s" % (title, colfolder))
-    res = drive.files().insert(body=body).execute()
-    spreadkey = res['id']
+    spreadkey = has_or_create_sheet(drive, colfolder, title)
+    spreadsheet = util.Spreadsheet(ssclient, spreadkey)
     row1 = ['Date']
     row2 = ['MM/DD/YYYY']
     for p in sites[site]:
@@ -73,16 +94,31 @@ for site in sites:
             row1.append("%s %s" % (p, v))
             row2.append(u)
     for yr in years[site]:
-        print 'Adding worksheet for year: %s' % (yr, )
-        sheet = ssclient.add_worksheet(spreadkey, str(yr), 10, len(row1))
+        worksheet = has_or_create_worksheet(ssclient, spreadsheet, str(yr), 10,
+                                            len(row1))
+        worksheet.get_cell_feed()
+        if worksheet.cols != len(row1):
+            print("len mismatch worksheet.cols: %s, new: %s" % (worksheet.cols,
+                                                                len(row1)))
         for colnum in range(len(row1)):
-            cell = ssclient.get_cell(spreadkey, sheet.get_worksheet_id(),
-                                     1, colnum + 1)
-            cell.cell.input_value = row1[colnum]
-            ssclient.update(cell)
-            cell = ssclient.get_cell(spreadkey, sheet.get_worksheet_id(),
-                                     2, colnum + 1)
-            cell.cell.input_value = row2[colnum]
-            ssclient.update(cell)
-    sheet = ssclient.get_worksheet(spreadkey, 'od6')
-    ssclient.delete(sheet)
+            if colnum >= worksheet.cols:
+                print("Expanding %s[%s] by one column" % (title, yr))
+                worksheet.expand_cols(1)
+            cell = worksheet.get_cell_entry(1, colnum + 1)
+            if cell.cell.input_value != row1[colnum]:
+                cell.cell.input_value = row1[colnum]
+                util.exponential_backoff(ssclient.update, cell)
+            cell = worksheet.get_cell_entry(2, colnum + 1)
+            if cell.cell.input_value != row2[colnum]:
+                cell.cell.input_value = row2[colnum]
+                util.exponential_backoff(ssclient.update, cell)
+        delcols = []
+        for colnum in range(len(row1), worksheet.cols):
+            delcols.append(worksheet.get_cell_value(1, colnum+1))
+        if len(delcols) > 0:
+            for delcol in delcols:
+                print("   deleting column %s %s" % (yr, delcol))
+                worksheet.del_column(delcol)
+    if 'sheet1' in spreadsheet.worksheets:
+        sheet = ssclient.get_worksheet(spreadkey, 'od6')
+        ssclient.delete(sheet)
