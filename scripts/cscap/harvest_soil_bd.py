@@ -37,12 +37,13 @@ for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
     try:
+        # print("Processing %s %s" % (item['title'], item['id']))
         spreadsheet = util.Spreadsheet(spr_client, item['id'])
     except Exception, exp:
         print("harvest_soil_bd FAIL: %s\n%s" % (exp, item['title']))
         continue
-    spreadsheet.get_worksheets()
     siteid = item['title'].split()[0]
+    spreadsheet.get_worksheets()
     worksheet = spreadsheet.worksheets.get(YEAR)
     if worksheet is None:
         # print 'Missing Soil BD+WR %s sheet for %s' % (YEAR, siteid)
@@ -107,10 +108,12 @@ for key in current:
         print(('harvest_soil_bd rm %s %s %s %s %s %s'
                ) % (YEAR, siteid, plotid, varname, repr(depth),
                     repr(subsample)))
+        d1 = "depth is null" if depth == 'None' else "depth = '%s'" % (depth,)
+        d2 = ("subsample is null" if subsample == 'None'
+              else "subsample = '%s'" % (subsample, ))
         pcursor.execute("""DELETE from soil_data where site = %s and
-        plotid = %s and varname = %s and year = %s and depth = %s and
-        subsample = %s""", (siteid, plotid, varname, YEAR, depth,
-                            subsample))
+        plotid = %s and varname = %s and year = %s and """ + d1 + """ and
+        """ + d2, (siteid, plotid, varname, YEAR))
 
 
 pcursor.close()
