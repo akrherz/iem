@@ -41,7 +41,7 @@ sites = {}
 pis = {}
 for entry in sheet.list_feed.entry:
     row = entry.to_dict()
-    if row['tileflowandtilenitrate-nyesno'] == 'NO':
+    if row['watertabledepthyesno'] == 'NO':
         continue
     site = row['siteid']
     d = sites.setdefault(site, [])
@@ -68,9 +68,9 @@ for col in range(2, sheet.cols + 1):
     years[site] = util.translate_years(val)
 
 # Now we dance
-DONE = []
+NOT_DONE = ['BATH_A', 'TIDE_NEW', 'TIDE_OLD']
 for site in sites:
-    if site in DONE:
+    if site not in NOT_DONE:
         continue
     if years[site] is None or len(years[site]) == 0:
         continue

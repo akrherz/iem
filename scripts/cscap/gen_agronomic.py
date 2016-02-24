@@ -52,8 +52,10 @@ for entry in worksheet.list_feed.entry:
         d[plotid][str(year)] = {'corn': (opt.find("C") > -1),
                                 'soy': (opt.find('S') > -1),
                                 'wheat': (opt.find('W') > -1)}
-
+NOT_DONE = ['BATH_A', 'TIDE_NEW', 'TIDE_OLD']
 for site in sites:
+    if site not in NOT_DONE:
+        continue
     foldername = "%s - %s" % (site, pis[site])
     print("Searching for foldername |%s|" % (foldername, ))
     res = util.exponential_backoff(drive.files().list(
