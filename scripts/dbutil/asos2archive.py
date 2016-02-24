@@ -65,7 +65,7 @@ for row in icursor:
             row['skyc3'], row['skyc4'], row['skyl1'], row['skyl2'],
             row['skyl3'], row['skyl4'], row['raw'], row['p03i'], row['p06i'],
             row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
-            row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['pres'],
+            row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
             row['presentwx'])
 
     acursor.execute(sql, args)
