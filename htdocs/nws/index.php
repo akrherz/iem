@@ -105,16 +105,19 @@ $t->east = <<<EOF
 
 <h4>Storm Based Warnings</h4>
 <ul>
- <li><a href="/cow/">IEM Cow</a>
-  <br />Interactive Storm Based Warning verification app</li>
-   <li><a href="/raccoon/">IEM Raccoon</a>
-  <br />Generate Microsoft Powerpoint of Storm Based Warnings for a WFO 
-  and RADAR site of your choice.</li>
  <li><a href="/request/gis/watchwarn.phtml">GIS Shapefiles</a>
   <br />of archived Storm Based Warning polygons.</li>
+ <li><a href="/cow/">IEM Cow</a>
+  <br />Interactive Storm Based Warning verification app</li>
+ <li><a href="/raccoon/">IEM Raccoon</a>
+  <br />Generate Microsoft Powerpoint of Storm Based Warnings for a WFO 
+  and RADAR site of your choice.</li>
  <li><a href="/nws/list_tags.php">List SVR+TOR Warning Tags</a>
   <br />This application will list tags used in Severe Thunderstorm and
 		Tornado warnings by NWS Office by Year.</li>
+ <li><a href="/cow/sbwsum.phtml">Summary Images of Daily Storm Based Warnings</a>
+  <br />Displays just the storm based warning geometries for one UTC day
+		at a time.</li>
 </ul>
 
 <h4>Text Product Archives</h4>

@@ -11,11 +11,11 @@ cd ../dl
 python download_hrrr.py &
 
 cd ../sbw
-python polygonMosaic.py S
+python polygon_mosaic.py S
 sleep 2
-python polygonMosaic.py T
+python polygon_mosaic.py T
 sleep 2
-python polygonMosaic.py W
+python polygon_mosaic.py W
 
 cd ../qc
 python check_webcams.py
