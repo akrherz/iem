@@ -21,7 +21,7 @@ res = drive_client.files().list(q=("title contains '%s'"
                                 ).execute()
 
 DOMAIN = ['SOIL1', 'SOIL2', 'SOIL29', 'SOIL30', 'SOIL31', 'SOIL32',
-          'SOIL33', 'SOIL34', 'SOIL35', 'SOIL39']
+          'SOIL33', 'SOIL34', 'SOIL35', 'SOIL39', 'SOIL41', 'SOIL42']
 
 # Load up current data, incase we need to do some deleting
 current = {}
