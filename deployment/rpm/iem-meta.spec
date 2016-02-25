@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 27%{?dist}
+Release: 28%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -112,6 +112,7 @@ Requires: rasterio
 Requires: python-enum34
 Requires: affine
 Requires: rsa
+Requires: pyasn1-modules
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -133,6 +134,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Thu Feb 25 2016 daryl herzmann <akrherz@iastate.edu>
+- Need pyasn1-modules
+
 * Tue Feb 23 2016 daryl herzmann <akrherz@iastate.edu>
 - Need rsa package for updated oauth2client
 
