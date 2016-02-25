@@ -47,7 +47,7 @@ m = MapPlot(sector='iowa',
             title=("%s Iowa ASOS/AWOS High Temperature"
                    "") % (now.strftime("%-d %b %Y"),),
             subtitle='map valid: %s' % (now.strftime("%d %b %Y %-I:%M %p"), ))
-
+# m.debug = True
 if dsm is None:
     dsm = vals[0]
 
@@ -56,7 +56,8 @@ top = int(dsm) + 15
 bins = np.linspace(bottom, top, 11)
 cmap = cm.get_cmap('jet')
 m.contourf(lons, lats, vals, bins, units='F', cmap=cmap)
-m.plot_values(lons, lats, vals, '%.0f', valmask=valmask, labels=labels)
+m.plot_values(lons, lats, vals, '%.0f', valmask=valmask, labels=labels,
+              labelbuffer=10)
 m.drawcounties()
 
 pqstr = "plot ac %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
