@@ -20,7 +20,7 @@ allowed_depths = ['0 - 10', '10 - 20', '20 - 40', '40 - 60']
 
 drive_client = util.get_driveclient(config)
 
-DOMAIN = ['SOIL26', 'SOIL27', 'SOIL28', 'SOIL6',
+DOMAIN = ['SOIL26', 'SOIL27', 'SOIL28', 'SOIL6', 'SOIL8', 'SOIL40',
           'SOIL11', 'SOIL12', 'SOIL13', 'SOIL14']
 
 # Load up current data
