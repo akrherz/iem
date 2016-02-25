@@ -4,13 +4,15 @@
 """
 import sys
 import psycopg2.extras
-import ConfigParser
 import cgi
+import datetime
 import pandas as pd
 import pandas.io.sql as pdsql
+import pyiem.cscap_utils as util
 
-config = ConfigParser.ConfigParser()
-config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
+
+config = util.get_config(
+    '/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.json')
 
 
 def clean(val):
@@ -26,7 +28,7 @@ def clean(val):
 
 def check_auth(form):
     """ Make sure request is authorized """
-    if form.getfirst('hash') != config.get('appauth', 'sharedkey'):
+    if form.getfirst('hash') != config['appauth']['sharedkey']:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Unauthorized request!")
         sys.stderr.write(("Unauthorized CSCAP hash=%s"
@@ -223,7 +225,7 @@ def get_dl(form):
     # columns!
     cols = ['year', 'site', 'plotid', 'depth', 'subsample', 'rep', 'rotation',
             'crop', 'tillage', 'drainage', 'nitrogen', 'landscape',
-            'sampledate']
+            'herbicide', 'sampledate']
     dvars = form.getlist("data")
     wants_soil = False
     for dv in dvars:
@@ -231,6 +233,7 @@ def get_dl(form):
             wants_soil = True
             break
 
+    sys.stderr.write("1. %s\n" % (datetime.datetime.now(), ))
     if wants_soil:
         sql = """
         WITH ad as
@@ -253,6 +256,7 @@ def get_dl(form):
         || '|' || coalesce(drainage, '')
         || '|' || coalesce(nitrogen, '')
         || '|' || coalesce(landscape, '')
+        || '|' || coalesce(herbicide, '')
         || '|' || (case when sampledate is null then ''
                    else sampledate::text end) as lbl,
         varname, value
@@ -278,13 +282,15 @@ def get_dl(form):
         || '|' || coalesce(drainage, '')
         || '|' || coalesce(nitrogen, '')
         || '|' || coalesce(landscape, '')
+        || '|' || coalesce(herbicide, '')
         || '|' || coalesce(sampledate, '') as lbl,
         varname, value from tot t JOIN plotids p on
         (t.site = p.uniqueid and t.plotid = p.plotid) WHERE 1=1 and %s and %s
         """ % (yrlist, treatlimiter, sitelimiter)
 
     df = pdsql.read_sql(sql, pgconn)
-    sys.stderr.write(str(df.columns))
+    sys.stderr.write("2. %s\n" % (datetime.datetime.now(), ))
+    # sys.stderr.write(str(df.columns))
 
     dnc = form.getfirst('dnc', 'DNC')
     missing = form.getfirst('missing', '.')
@@ -292,8 +298,11 @@ def get_dl(form):
     def cleaner(val):
         if val is None or val.strip() == '' or val.strip() == '.':
             return missing
-        if val is not None and val.strip().lower() == 'did not collect':
-            return dnc
+        if val is not None:
+            if val.strip().lower() == 'did not collect':
+                return dnc
+            if val.strip() == 'n/a':
+                return "N/A"
         return val
     df['value'] = df['value'].apply(cleaner)
     df2 = df.pivot('lbl', 'varname', 'value')
@@ -302,20 +311,14 @@ def get_dl(form):
         cols = cols + allcols
     else:
         cols = cols + dvars
-    sys.stderr.write(str(cols))
-    df2['site'] = [item.split('|')[0] for item in df2.index]
-    df2['plotid'] = [item.split('|')[1] for item in df2.index]
-    df2['depth'] = [item.split('|')[2] for item in df2.index]
-    df2['subsample'] = [item.split('|')[3] for item in df2.index]
-    df2['year'] = [item.split('|')[4] for item in df2.index]
-    df2['rep'] = [item.split('|')[5] for item in df2.index]
-    df2['rotation'] = [item.split('|')[6] for item in df2.index]
-    df2['tillage'] = [item.split('|')[7] for item in df2.index]
-    df2['drainage'] = [item.split('|')[8] for item in df2.index]
-    df2['nitrogen'] = [item.split('|')[9] for item in df2.index]
-    df2['landscape'] = [item.split('|')[10] for item in df2.index]
-    df2['sampledate'] = [item.split('|')[11] for item in df2.index]
+    # sys.stderr.write(str(cols))
+    (df2['site'], df2['plotid'], df2['depth'], df2['subsample'],
+     df2['year'], df2['rep'], df2['rotation'], df2['tillage'],
+     df2['drainage'], df2['nitrogen'], df2['landscape'],
+     df2['herbicide'], df2['sampledate']
+     ) = zip(*[item.split('|') for item in df2.index])
     df2['crop'] = None
+    sys.stderr.write("3. %s\n" % (datetime.datetime.now(), ))
 
     df2cols = df2.columns.values.tolist()
     for col in cols:
@@ -323,16 +326,19 @@ def get_dl(form):
             cols.remove(col)
 
     # Assign in Rotations
-    rotdf = pdsql.read_sql("""SELECT * from xref_rotation""", pgconn)
+    rotdf = pdsql.read_sql("""
+        SELECT * from xref_rotation
+        """, pgconn, index_col='code')
 
     def find_rotation(rotation, year):
         try:
-            return rotdf[rotdf['code'] == rotation]['y%s' % (year, )].values[0]
+            return rotdf.at[rotation, 'y%s' % (year, )]
         except:
             return ''
-    for i in df2.index:
-        df2.ix[i]['crop'] = find_rotation(df2.ix[i]['rotation'],
-                                          df2.ix[i]['year'])
+    df2['crop'] = df2[['rotation', 'year']].apply(lambda x:
+                                                  find_rotation(x[0], x[1]),
+                                                  axis=1)
+    sys.stderr.write("4. %s\n" % (datetime.datetime.now(), ))
 
     fmt = form.getfirst('format', 'csv')
     if fmt == 'excel':
@@ -352,6 +358,7 @@ def get_dl(form):
         sys.stdout.write("Content-type: text/plain\n\n")
         return df2.to_csv(columns=cols, sep='\t', index=False)
     sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stderr.write("5. %s\n" % (datetime.datetime.now(), ))
     return df2.to_csv(columns=cols, index=False)
 
 
