@@ -28,9 +28,11 @@ lookup = {'tillage': 'TIL',
 pcursor.execute("""DELETE from plotids""")
 removed = pcursor.rowcount
 added = 0
+sheets = 0
 for item in res['items']:
     if item['mimeType'] != 'application/vnd.google-apps.spreadsheet':
         continue
+    sheets += 1
     spreadsheet = util.Spreadsheet(spr_client, item['id'])
     spreadsheet.get_worksheets()
     worksheet = spreadsheet.worksheets['Sheet 1']
@@ -44,7 +46,8 @@ for item in res['items']:
                 continue
             if d[key] is not None:
                 v = d[key].strip().replace("[", "").replace("]", "").split()[0]
-                v = "%s%s" % (lookup.get(key, ''), v)
+                if v != 'N/A':
+                    v = "%s%s" % (lookup.get(key, ''), v)
             if key == 'uniqueid':
                 v = v.upper()
             if key.startswith('no3') or key.startswith('_'):
@@ -65,10 +68,11 @@ for item in res['items']:
             sys.exit()
         added += 1
 
+print(("harvest_plotids, removed: %s, added: %s, sheets: %s"
+       ) % (removed, added, sheets))
 if removed > (added + 10):
-    print 'Aborting harvest_plotids due to sz'
+    print("harvest_plotids, aborting due to large difference")
     sys.exit()
-print "   harvest_plotids %s removed, %s added" % (removed, added)
 pcursor.close()
 pgconn.commit()
 pgconn.close()
