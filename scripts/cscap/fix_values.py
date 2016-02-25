@@ -45,7 +45,8 @@ for i, item in enumerate(res['items']):
                                'Farm sold', 'DNC', 'Drowned out',
                                'Farm was not available', 'did not collect',
                                'outlier', 'not collected', '#NUM!',
-                               'no sample']:
+                               'no sample', 'missing',
+                               'didi not collect']:
                     newvalue = 'did not collect'
                 else:
                     try:
