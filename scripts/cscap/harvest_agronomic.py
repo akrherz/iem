@@ -46,7 +46,6 @@ for item in res['items']:
     spreadsheet.get_worksheets()
     worksheet = spreadsheet.worksheets.get(YEAR)
     if worksheet is None:
-        print 'Missing Year: %s from %s' % (YEAR, item['title'])
         delete_entries(current, siteid)
         continue
     worksheet.get_cell_feed()
