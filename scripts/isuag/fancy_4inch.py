@@ -97,8 +97,8 @@ m = MapPlot(sector='iowa',
                       "ISUSM network observations (red numbers)"))
 m.contourf(clons, clats, cobs, np.arange(10, 101, 5), cmap=cm.get_cmap('jet'),
            units=r'$^\circ$F')
-m.plot_values(clons, clats, cobs, fmt='%.0f', textsize=11)
-m.plot_values(lons, lats, soil_obs, fmt='%.0f', color='r')
+m.plot_values(lons, lats, soil_obs, fmt='%.0f', color='r', labelbuffer=5)
+m.plot_values(clons, clats, cobs, fmt='%.0f', textsize=11, labelbuffer=5)
 # for lo, la, ob in zip(clons, clats, cobs):
 #    xi, yi = m.map(lo, la)
 #    txt = m.ax.text(xi, yi, "%.0f" % (ob,))
