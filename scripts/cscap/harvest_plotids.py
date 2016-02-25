@@ -20,6 +20,7 @@ translate = {'column': 'col'}
 
 lookup = {'tillage': 'TIL',
           'rotation': 'ROT',
+          'herbicide': 'HERB',
           'drainage': 'DWM',
           'nitrogen': 'NIT',
           'landscape': 'LND'}
