@@ -5,7 +5,7 @@ def get_entries():
     """Return a list of entries for usage"""
     cursor = pgconn.cursor()
     cursor.execute("""SELECT distinct uniqueid, plotid from decagon_data
-    WHERE uniqueid = 'STJOHNS' ORDER by uniqueid, plotid""")
+    WHERE uniqueid = 'ISUAG.USB' ORDER by uniqueid, plotid""")
     entries = []
     for row in cursor:
         entries.append([row[0], row[1]])
