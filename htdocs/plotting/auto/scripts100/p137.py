@@ -113,8 +113,9 @@ def plotter(fdict):
                        "%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
                                              val), ha='center')
 
-    slp, intercept, r, _, _ = stats.linregress(df.index.values,
-                                               df['winter_end_doy'].values)
+    df2 = df.dropna()
+    slp, intercept, r, _, _ = stats.linregress(df2.index.values,
+                                               df2['winter_end_doy'].values)
     ax[1].scatter(df.index.values, df['winter_end_doy'].values)
     ax[1].grid(True)
     # Do labelling
@@ -141,8 +142,8 @@ def plotter(fdict):
                transform=ax[1].transAxes)
     ax[1].set_ylim(bottom=(ax[1].get_ylim()[0] - 10))
 
-    slp, intercept, r, _, _ = stats.linregress(df.index.values,
-                                               df['spring_length'])
+    slp, intercept, r, _, _ = stats.linregress(df2.index.values,
+                                               df2['spring_length'])
     ax[2].scatter(df.index.values, df['spring_length'])
     ax[2].set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax[2].set_ylabel("Length of 'Spring' [days]")
