@@ -59,7 +59,7 @@ def sites_changelog(regime, yesterday, html):
 
 def drive_changelog(regime, yesterday, html):
     """ Do something """
-    drive = util.get_driveclient(config)
+    drive = util.get_driveclient(config, regime)
     folders = util.get_folders(drive)
     start_change_id = config[regime]["changestamp"]
 
