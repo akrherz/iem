@@ -45,7 +45,7 @@ def main():
         'plant_rye-corn-res', 'plant_rye-soy-res', 'sample_soilnitrate',
         'sample_covercrop', 'termination_rye_corn', 'termination_rye_soy',
         'plant_corn', 'plant_soy', 'fertilizer_synthetic')
-        and cropyear != '2016'
+        and cropyear != '2016' and valid is not null
         ORDER by valid ASC
     """)
     data = {}
