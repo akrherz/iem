@@ -30,7 +30,7 @@ def has_or_create_sheet(drive, colfolder, title):
 
 config = util.get_config()
 spr_client = util.get_spreadsheet_client(config)
-drive = util.get_driveclient(config)
+drive = util.get_driveclient(config, 'td')
 
 sites = {}
 pis = {}
@@ -51,8 +51,11 @@ for entry in worksheet.list_feed.entry:
             continue
         d[plotid][str(year)] = {'corn': (opt.find("C") > -1),
                                 'soy': (opt.find('S') > -1),
-                                'wheat': (opt.find('W') > -1)}
-NOT_DONE = ['BATH_A', 'TIDE_NEW', 'TIDE_OLD']
+                                'wheat': (opt.find('W') > -1),
+                                'popcorn': (opt.find('P') > -1),
+                                'sugarbeets': (opt.find("B") > -1),
+                                }
+NOT_DONE = ['AUGLA', 'HENRY']
 for site in sites:
     if site not in NOT_DONE:
         continue
@@ -78,11 +81,11 @@ for site in sites:
     if len(years) == 0:
         continue
     for yr in years:
-        worksheet = has_or_create_worksheet(spr_client, spreadsheet, str(yr),
-                                            10, 2)
         corn = False
         soy = False
         wheat = False
+        sugarbeets = False
+        popcorn = False
         for plotid in sites[site]:
             if yr not in sites[site][plotid]:
                 continue
@@ -92,6 +95,10 @@ for site in sites:
                 soy = True
             if sites[site][plotid][yr]['wheat']:
                 wheat = True
+            if sites[site][plotid][yr]['sugarbeets']:
+                sugarbeets = True
+            if sites[site][plotid][yr]['popcorn']:
+                popcorn = True
         row1 = ['Plot ID', ]
         row2 = ['', ]
         if corn:
@@ -109,8 +116,18 @@ for site in sites:
             row2.append('kg ha-1')
             row1.append('AGR22 Wheat grain moisture')
             row2.append('%')
+        if popcorn:
+            row1.append('AGR58 Popcorn yield @ 13.5% MB')
+            row2.append('kg ha-1')
+            row1.append('AGR59 Popcorn grain moisture')
+            row2.append('%')
+        if sugarbeets:
+            row1.append('AGR60 Sugarbeet yield (root; fresh weight)')
+            row2.append('kg ha-1')
         if len(row1) == 1:
             continue
+        worksheet = has_or_create_worksheet(spr_client, spreadsheet, str(yr),
+                                            10, 2)
         for colnum in range(len(row1)):
             if colnum >= worksheet.cols:
                 print("Expanding %s[%s] by one column" % (title, yr))
