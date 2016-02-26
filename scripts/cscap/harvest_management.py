@@ -51,7 +51,7 @@ for sheetkey in TABS:
         entries += 1
         d = entry.to_dict()
         # Units row has n/a as the date, so skip it
-        if d.get('date') == 'mm/dd/yyyy':
+        if d.get('date') in ['mm/dd/yyyy', '', None]:
             continue
         key = ('%s,%s,%s,%s,%s'
                ) % (d.get('date', ''), d.get('uniqueid'), d.get('updated'),
