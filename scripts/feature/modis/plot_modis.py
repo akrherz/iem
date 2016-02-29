@@ -71,15 +71,15 @@ plt.savefig('test.png')
 (fig, ax) = plt.subplots(1,1)
 
 m = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
-            llcrnrlon=-99,urcrnrlon=-89,resolution='i',
+            llcrnrlon=-97,urcrnrlon=-90,resolution='i',
             ax=ax, fix_aspect=False)
 
-x,y= m(-99.4023, 38.7753)
-x2,y2=m(-88.1321, 45.2504)
+x,y= m(-99.4023, 38.8753)
+x2,y2=m(-88.1321, 45.3504)
 
-img=mpimg.imread('/tmp/ames.jpg')
+img=mpimg.imread('ames.jpg')
 ax.imshow(img, extent=(x,x2,y, y2) )
-ax.set_title("22 November 2015 :: Aqua MODIS True Color")
+ax.set_title("2 January 2016 :: Terra MODIS True Color")
 
 m.drawstates(linewidth=2.5)
 plt.savefig('test.png')
