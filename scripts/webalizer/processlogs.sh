@@ -20,6 +20,7 @@ do
 	ssh root@$MACH "mv -f $BASE/access_log $BASE/access_log.$MACH && \
     mv -f $BASE/access_log-wepp $BASE/access_log-wepp.$MACH && \
     mv -f $BASE/access_log-idep $BASE/access_log-idep.$MACH && \
+    mv -f $BASE/access_log-datateam $BASE/access_log-datateam.$MACH && \
     mv -f $BASE/access_log-sustainablecorn $BASE/access_log-sustainablecorn.$MACH && \
    	mv -f $BASE/access_log-cocorahs $BASE/access_log-cocorahs.$MACH && \
     systemctl reload httpd.service"
@@ -61,6 +62,10 @@ csh -c "(/usr/local/bin/mergelog access_log-sustainablecorn.iemvs* > sustainable
 wc -l access_log-sustainablecorn.iemvs* 
 rm -f access_log-sustainablecorn.iemvs*
 
+csh -c "(/usr/local/bin/mergelog access_log-datateam.iemvs* > datateam_access.log) >& /dev/null"
+wc -l access_log-datateam.iemvs* 
+rm -f access_log-datateam.iemvs*
+
 # Step 3a, do weather.im
 wc -l weatherim_access.log
 
@@ -72,6 +77,7 @@ rsync -av /mesonet/www/logs/usage/mesonet.agron.iastate.edu /mesonet/share/usage
 /home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/idep.conf idep_access.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf weatherim_access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf datateam_access.log
 
 grep " /agclimate" access.log > agclimate.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log
@@ -102,6 +108,10 @@ mv weatherim_access.log weatherim_access_log-$dd
 gzip weatherim_access_log-$dd
 mv weatherim_access_log-$dd.gz wxim_access_log-${yyyymm}${dd}.gz
 
+mv datateam_access.log datateam_access_log-$dd
+gzip datateam_access_log-$dd
+mv datateam_access_log-$dd.gz datateam_access_log-${yyyymm}${dd}.gz
+
 lftp -u akrherz@iastate.edu ftps://ftp.box.com << EOM
 cd IEMWWWLogs
 mkdir $yyyymm
@@ -112,6 +122,7 @@ put idep_access_log-${yyyymm}${dd}.gz
 put cocorahs_access_log-${yyyymm}${dd}.gz
 put sustainablecorn_access_log-${yyyymm}${dd}.gz
 put wxim_access_log-${yyyymm}${dd}.gz
+put datateam_access_log-${yyyymm}${dd}.gz
 bye
 EOM
 
