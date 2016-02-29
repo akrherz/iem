@@ -50,14 +50,7 @@ def merge(ts):
     iemre_total = np.sum(nc.variables["p01m"][offset0:offset1, :, :], axis=0)
     iemre_total = np.where(iemre_total > 0., iemre_total, 0.00024)
     iemre_total = np.where(iemre_total < 10000., iemre_total, 0.00024)
-    print(("Stage IV 24h [Avg %5.2f Max %5.2f] "
-           "IEMRE Hourly [Avg %5.2f Max: %5.2f]"
-           ) % (np.average(stage4), np.max(stage4),
-                np.average(iemre_total), np.max(iemre_total)))
     multiplier = stage4 / iemre_total
-    print(("Multiplier MIN: %5.2f  AVG: %5.2f  MAX: %5.2f"
-           ) % (np.min(multiplier), np.average(multiplier),
-                np.max(multiplier)))
     for offset in range(offset0, offset1):
         # Get the unmasked dadta
         data = nc.variables["p01m"][offset, :, :]
@@ -69,17 +62,7 @@ def merge(ts):
         adjust = np.where(adjust > 250.0, 0, adjust)
         nc.variables["p01m"][offset, :, :] = np.where(adjust < 0.01, 0, adjust)
         ts = ts0 + datetime.timedelta(hours=offset-offset0)
-        print(("%s IEMRE %5.2f %5.2f Adjusted %5.2f %5.2f"
-               ) % (ts.strftime("%Y-%m-%d %H"),
-                    np.average(data), np.max(data),
-                    np.average(nc.variables["p01m"][offset]),
-                    np.max(nc.variables["p01m"][offset])))
     nc.sync()
-    iemre2 = np.sum(nc.variables["p01m"][offset0:offset1, :, :], axis=0)
-    print(("Stage IV 24h [Avg %5.2f Max %5.2f] "
-           "IEMRE Hourly [Avg %5.2f Max: %5.2f]"
-           ) % (np.average(stage4), np.max(stage4),
-                np.average(iemre2), np.max(iemre2)))
     nc.close()
 
 if __name__ == "__main__":
