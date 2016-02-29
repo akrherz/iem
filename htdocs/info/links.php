@@ -67,7 +67,7 @@ access this data in the following locations:</p>
 
 <p><h3>Publicity</h3>
 <br />Sep 2005, <a href="http://www.unidata.ucar.edu/newsletter/05sep/05sepel.html#Article2">Unidata Newsletter</a>
-<br>27 Feb 2004, <a href="http://www.iastate.edu/Inside/2004/0227/weather.shtml">Inside Iowa State</a>
+<br>27 Feb 2004, <a href="http://archive.inside.iastate.edu/2004/0227/weather.shtml">Inside Iowa State</a>
 <br>Jan 2004, <a href="http://www.agron.iastate.edu/Agron/News/2003_Agron_Alumni_News_Web.pdf">2003 Agronomy Alumni Newsletter</a>
 <br>01 Jul 2003, <a href="http://www.iastate.edu/~nscentral/releases/2003/jul/mesonet.shtml">Iowa State News Service</a>
 <br>27 Feb 2003, <a href="http://www.zwire.com/site/news.cfm?newsid=7200551&BRD=1813&PAG=461&dept_id=68588&rfi=6">Iowa Falls Times-Citizen</a>
