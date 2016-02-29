@@ -19,38 +19,8 @@ python spammer.py
 cd ../ingestors/other
 python feel_ingest.py
 
-cd ../../cscap
-python harvest_management.py
-python harvest_agronomic.py 2011
-python harvest_agronomic.py 2012
-python harvest_agronomic.py 2013
-python harvest_agronomic.py 2014
-python harvest_agronomic.py 2015
-
-python harvest_soil_nitrate.py 2011
-python harvest_soil_nitrate.py 2012
-python harvest_soil_nitrate.py 2013
-python harvest_soil_nitrate.py 2014
-python harvest_soil_nitrate.py 2015
-
-python harvest_soil_texture.py 2011
-python harvest_soil_texture.py 2012
-python harvest_soil_texture.py 2013
-python harvest_soil_texture.py 2014
-python harvest_soil_texture.py 2015
-
-python harvest_soil_bd.py 2011
-python harvest_soil_bd.py 2012
-python harvest_soil_bd.py 2013
-python harvest_soil_bd.py 2014
-python harvest_soil_bd.py 2015
-
-python email_daily_changes.py cscap
-python email_daily_changes.py td
-
-
 # Rerun yesterday and today
-cd ../dbutil
+cd ../../dbutil
 python rwis2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
 python rwis2archive.py $(date -u +'%Y %m %d')
 python ot2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
