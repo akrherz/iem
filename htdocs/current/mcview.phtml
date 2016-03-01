@@ -25,8 +25,8 @@
  $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("h");
  $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
 
- /** Acceptable number of frames are between 1 and 100 */
- if (intval($frames) > 100 || intval($frames) < 1) $frames = 13;
+ /** Acceptable number of frames are between 1 and 10000 */
+ if (intval($frames) > 10000 || intval($frames) < 1) $frames = 13;
  /** Acceptable interval is between 5 and 60 */
  if (intval($interval) > 60 || intval($interval) < 5) $interval = 5;
 
@@ -345,7 +345,7 @@ $t->content = <<<EOF
 {$modeselect}
 
 <p><strong>Frames:</strong><br />
-<input type="text" size="3" name="frames" value="{$frames}">
+<input type="text" size="5" name="frames" value="{$frames}">
 
 <p><strong>Frame Interval:</strong><br />
 {$intselect}
