@@ -3,9 +3,6 @@
 cd isuag
 sh run_plots.sh
 
-cd ../util
-python i5_2_cybox.py &
-
 # Run the climodat estimator to get sites that are valid at midnight
 # only for Iowa at the moment as we have no other such sites outside of
 # Iowa
