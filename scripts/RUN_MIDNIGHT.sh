@@ -6,6 +6,9 @@ YYYY=$(date -u +'%Y')
 cd qc
 python adjust_snet_precip.py
 
+cd ../util
+python i5_2_cybox.py &
+
 cd ../dbutil
 sh save_snet_raw.sh
 python asos2archive.py
