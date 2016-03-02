@@ -13,18 +13,18 @@ MDICT = OrderedDict([
          ('fall', 'Fall (SON)'),
          ('winter', 'Winter (DJF)'),
          ('summer', 'Summer (JJA)'),
-         ('jan', 'January'),
-         ('feb', 'February'),
-         ('mar', 'March'),
-         ('apr', 'April'),
-         ('may', 'May'),
-         ('jun', 'June'),
-         ('jul', 'July'),
-         ('aug', 'August'),
-         ('sep', 'September'),
-         ('oct', 'October'),
-         ('nov', 'November'),
-         ('dec', 'December')])
+         ('1', 'January'),
+         ('2', 'February'),
+         ('3', 'March'),
+         ('4', 'April'),
+         ('5', 'May'),
+         ('6', 'June'),
+         ('7', 'July'),
+         ('8', 'August'),
+         ('9', 'September'),
+         ('10', 'October'),
+         ('11', 'November'),
+         ('12', 'December')])
 
 
 def get_description():
@@ -58,7 +58,7 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     year = int(fdict.get('year', 2014))
-    month = fdict.get('month', 'sep')
+    month = fdict.get('month', 9)
     varname = fdict.get('var', 'precip')
     l = "0 days"
     if month == 'fall':
@@ -75,14 +75,8 @@ def plotter(fdict):
         months = [6, 7, 8]
         label = "Summer (JJA)"
     else:
-        if month in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
-                     '12']:
-            months = [int(month), ]
-        else:
-            ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
-            # make sure it is length two for the trick below in SQL
-            months = [ts.month, 999]
-            label = calendar.month_name[ts.month]
+        months = [int(month), ]
+        label = calendar.month_name[int(month)]
 
     lastyear = datetime.date.today().year
     years = lastyear - 1893 + 1
