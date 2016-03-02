@@ -75,10 +75,14 @@ def plotter(fdict):
         months = [6, 7, 8]
         label = "Summer (JJA)"
     else:
-        ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
-        label = calendar.month_name[ts.month]
+        if month in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                     '12']:
+            months = [int(month), ]
+        else:
+            ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
+            # make sure it is length two for the trick below in SQL
+            months = [ts.month, 999]
+            label = calendar.month_name[ts.month]
 
     lastyear = datetime.date.today().year
     years = lastyear - 1893 + 1
