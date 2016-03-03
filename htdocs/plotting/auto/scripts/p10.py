@@ -103,6 +103,8 @@ def plotter(fdict):
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
        nt.sts[station]['name'], station, threshold)
     for _, row in df.iterrows():
+        if row['spring_date'] is None or row['fall_date'] is None:
+            continue
         res += ("%7i%4i%6i%4i        %4i%6i%4i          %.0f\n"
                 ) % (row['year'], row['spring_date'].month,
                      row['spring_date'].day,
