@@ -24,8 +24,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0200')
@@ -33,7 +31,6 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    TODAY = datetime.date.today().replace(day=1)
 
     df = read_sql("""
     SELECT year, month, sum(precip) as sum_precip,
@@ -51,6 +48,11 @@ def plotter(fdict):
     sum(gddxx(52,86,high,low)) as gdd52
      from """+table+""" WHERE station = %s GROUP by year, month
     """, pgconn, params=(station,), index_col=None)
+    df['monthdate'] = df[['year', 'month']].apply(lambda x: datetime.date(x[0],
+                                                                          x[1],
+                                                                          1),
+                                                  axis=1)
+    df.set_index('monthdate', inplace=True)
 
     res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
@@ -62,50 +64,38 @@ def plotter(fdict):
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
        nt.sts[station]['name'])
     res += """# THESE ARE THE MONTHLY %s (base=65) FOR STATION  %s
-YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC
+YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    \
+OCT    NOV    DEC
 """ % (PDICT[varname].upper(), station)
 
-    db = {}
-    db60 = {}
-    for i, row in df.iterrows():
-        mo = datetime.date(int(row['year']), int(row['month']), 1)
-        db[mo] = row[varname+"65"]
-        db60[mo] = row[varname+"60"]
-
-    moTot = {}
-    moTot60 = {}
-    for mo in range(1, 13):
-        moTot[mo] = 0
-        moTot60[mo] = 0
-
     second = """# THESE ARE THE MONTHLY %s (base=60) FOR STATION  %s
-YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" % (
+YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    \
+OCT    NOV    DEC
+""" % (
         PDICT[varname].upper(), station)
-    yrCnt = 0
-    for yr in range(nt.sts[station]['archive_begin'].year, TODAY.year + 1):
-        yrCnt += 1
+    minyear = df['year'].min()
+    maxyear = df['year'].max()
+    for yr in range(minyear, maxyear + 1):
         res += ("%4i" % (yr,))
         second += "%4i" % (yr,)
         for mo in range(1, 13):
             ts = datetime.date(yr, mo, 1)
-            if (ts >= TODAY):
+            if ts not in df.index:
                 res += ("%7s" % ("M",))
                 second += "%7s" % ("M",)
                 continue
-            if (ts < TODAY):
-                moTot[mo] += db[ts]
-                moTot60[mo] += db60[ts]
-            res += ("%7.0f" % (db[ts],))
-            second += "%7.0f" % (db60[ts],)
+            row = df.loc[ts]
+            res += ("%7.0f" % (row[varname+"65"],))
+            second += "%7.0f" % (row[varname+"60"],)
         res += ("\n")
         second += "\n"
 
     res += ("MEAN")
     second += "MEAN"
-    YRCNT = [(TODAY.year - nt.sts[station]['archive_begin'].year)]*13
     for mo in range(1, 13):
-        res += ("%7.0f" % (float(moTot[mo]) / float(YRCNT[mo]), ))
-        second += "%7.0f" % (float(moTot60[mo]) / float(YRCNT[mo]), )
+        df2 = df[df['month'] == mo]
+        res += ("%7.0f" % (df2[varname+"65"].mean(), ))
+        second += "%7.0f" % (df2[varname+"60"].mean(), )
     res += ("\n")
     second += "\n"
     res += second
