@@ -20,15 +20,12 @@ do
 	ssh root@$MACH "mv -f $BASE/access_log $BASE/access_log.$MACH && \
     mv -f $BASE/access_log-wepp $BASE/access_log-wepp.$MACH && \
     mv -f $BASE/access_log-idep $BASE/access_log-idep.$MACH && \
+    mv -f $BASE/access_log-weather.im $BASE/access_log-weather.im.$MACH && \
     mv -f $BASE/access_log-datateam $BASE/access_log-datateam.$MACH && \
     mv -f $BASE/access_log-sustainablecorn $BASE/access_log-sustainablecorn.$MACH && \
    	mv -f $BASE/access_log-cocorahs $BASE/access_log-cocorahs.$MACH && \
     systemctl reload httpd.service"
 done
-
-# Step 1a, do weather.im
-ssh root@iem12 "mv -f $BASE/access_log-weather.im $BASE/access_log-weather.im.iem12 && \
-	systemctl reload httpd"
 
 # Step 2, bring all these log files back to roost
 for MACH in $MACHINES
@@ -37,9 +34,6 @@ do
 	scp -l 750000 -q root@${MACH}:${BASE}/*${MACH} .
 	ssh root@$MACH "rm -f $BASE/access_log.$MACH"
 done
-
-# Step 2a, do weather.im
-scp -q root@iem12:${BASE}/access_log-weather.im.iem12 weatherim_access.log
 
 # Step 3, merge the log files back into one
 csh -c "(/usr/local/bin/mergelog access_log.iemvs* > access.log) >& /dev/null"
@@ -66,8 +60,9 @@ csh -c "(/usr/local/bin/mergelog access_log-datateam.iemvs* > datateam_access.lo
 wc -l access_log-datateam.iemvs* 
 rm -f access_log-datateam.iemvs*
 
-# Step 3a, do weather.im
-wc -l weatherim_access.log
+csh -c "(/usr/local/bin/mergelog access_log-weather.im.iemvs* > weatherim_access.log) >& /dev/null"
+wc -l access_log-weather.im.iemvs* 
+rm -f access_log-weather.im.iemvs*
 
 # Step 4, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T access.log
