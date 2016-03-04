@@ -2,6 +2,7 @@ import psycopg2
 import numpy as np
 from pyiem import network
 import calendar
+import datetime
 from pandas.io.sql import read_sql
 from collections import OrderedDict
 
@@ -16,6 +17,7 @@ PDICT = OrderedDict([
          ('sum-precip', 'Total Precipitation'),
          ('days-high-above',
           'Days with High Temp Greater Than or Equal To (threshold)'),
+         ('days-high-below', 'Days with High Temp Below (threshold)'),
          ('days-high-above-avg',
           'Days with High Temp Greater Than or Equal To Average'),
          ('days-lows-above',
@@ -23,6 +25,24 @@ PDICT = OrderedDict([
          ('days-lows-below', 'Days with Low Temp Below (threshold)'),
          ('days-lows-below-avg', 'Days with Low Temp Below Average')
          ])
+
+MDICT = OrderedDict([
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('1', 'January'),
+         ('2', 'February'),
+         ('3', 'March'),
+         ('4', 'April'),
+         ('5', 'May'),
+         ('6', 'June'),
+         ('7', 'July'),
+         ('8', 'August'),
+         ('9', 'September'),
+         ('10', 'October'),
+         ('11', 'November'),
+         ('12', 'December')])
 
 
 def get_description():
@@ -36,10 +56,12 @@ def get_description():
     <a href="/climodat/" class="link link-info">here.</a>  For the variables
     comparing the daily temperatures against average, the average is taken
     from the NCEI current 1981-2010 climatology."""
+    today = datetime.date.today()
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station'),
-        dict(type='month', name='month', default='7', label='Month'),
+        dict(type='select', name='month', default=today.month,
+             label='Month/Season', options=MDICT),
         dict(type='select', name='type', default='max-high',
              label='Which metric to plot?', options=PDICT),
         dict(type='text', name='threshold', default='-99',
@@ -58,7 +80,7 @@ $("#ap_container").highcharts({
     chart: {zoomType: 'x'},
     tooltip: {shared: true},
     xAxis: {title: {text: 'Year'}},
-    yAxis: {title: {text: '"""+ctx['ylabel'].replace("$^\circ$", "F")+"""'}},
+    yAxis: {title: {text: '"""+ctx['ylabel'].replace("$^\circ$", "")+"""'}},
     series: [{
         name: '""" + ctx['ptype'] + """',
         type: 'column',
@@ -96,19 +118,37 @@ def get_context(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     station = fdict.get('station', 'IA0000')
-    month = int(fdict.get('month', 7))
+    month = fdict.get('month', 7)
     ptype = fdict.get('type', 'max-high')
     threshold = int(fdict.get('threshold', -99))
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
+    l = "0 days"
+    if month == 'fall':
+        months = [9, 10, 11]
+        label = "Fall (SON)"
+    elif month == 'winter':
+        months = [12, 1, 2]
+        l = "31 days"
+        label = "Winter (DJF)"
+    elif month == 'spring':
+        months = [3, 4, 5]
+        label = "Spring (MAM)"
+    elif month == 'summer':
+        months = [6, 7, 8]
+        label = "Summer (JJA)"
+    else:
+        months = [int(month), ]
+        label = calendar.month_name[int(month)]
+
     df = read_sql("""
     WITH climo as (SELECT to_char(valid, 'mmdd') as sday,
     high, low from ncdc_climate81 WHERE
     station = %s)
 
-    SELECT year,
+    SELECT extract(year from day + '"""+l+"""'::interval)::int as myyear,
     max(o.high) as "max-high",
     min(o.high) as "min-high",
     avg(o.high) as "avg-high",
@@ -118,16 +158,17 @@ def get_context(fdict):
     max(o.precip) as "max-precip",
     sum(o.precip) as "sum-precip",
     sum(case when o.high >= %s then 1 else 0 end) as "days-high-above",
+    sum(case when o.high < %s then 1 else 0 end) as "days-high-below",
     sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
     sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
     sum(case when o.low < %s then 1 else 0 end) as "days-lows-below"
   from """+table+""" o JOIN climo c on (o.sday = c.sday)
-  where station = %s and month = %s
-  GROUP by year ORDER by year ASC
+  where station = %s and month in %s
+  GROUP by myyear ORDER by myyear ASC
     """, pgconn, params=(nt.sts[station]['ncdc81'], threshold, threshold,
-                         threshold, station, month),
-                  index_col='year')
+                         threshold, threshold, station, tuple(months)),
+                  index_col='myyear')
 
     data = df[ptype].values
     ctx['data'] = data
@@ -148,7 +189,7 @@ def get_context(fdict):
                     ) % (station, nt.sts[station]['name'],
                          df.index.min(), df.index.max())
     ctx['subtitle'] = ("%s %s"
-                       ) % (calendar.month_name[month], PDICT[ptype])
+                       ) % (label, PDICT[ptype])
     if ptype.find("days") == 0 and ptype.find('avg') == -1:
         ctx['subtitle'] += " (%s)" % (threshold,)
 
