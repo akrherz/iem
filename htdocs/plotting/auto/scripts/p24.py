@@ -44,7 +44,7 @@ def get_description():
         dict(type='year', name='year', default=today.year,
              label='Select Year:',
              min=1893),
-        dict(type='select', name='month', default=today.strftime("%b").lower(),
+        dict(type='select', name='month', default=today.month,
              label='Month Limiter', options=MDICT),
     ]
     return d
