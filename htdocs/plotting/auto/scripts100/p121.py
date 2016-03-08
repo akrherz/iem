@@ -58,7 +58,8 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
     cycPos = {'26s': -1, '24s': -1, '20s': -1, '14s': -1}
 
     cursor.execute("""SELECT day, high, low from """+table+"""
-    WHERE station = %s ORDER by day ASC""", (station, ))
+    WHERE station = %s and high is not null and low is not null
+    ORDER by day ASC""", (station, ))
     for row in cursor:
         ts = row[0]
         high = int(row[1])

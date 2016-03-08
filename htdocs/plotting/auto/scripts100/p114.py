@@ -23,7 +23,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    station = fdict.get('station', 'IA0200')
+    station = fdict.get('station', 'IA0200').upper()
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))

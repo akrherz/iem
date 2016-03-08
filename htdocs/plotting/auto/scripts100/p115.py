@@ -2,7 +2,6 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
-import numpy as np
 
 PDICT = {'precip': 'Total Precipitation',
          'avg_high': 'Average High Temperature',
@@ -46,7 +45,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    station = fdict.get('station', 'IA0200')
+    station = fdict.get('station', 'IA0200').upper()
     varname = fdict.get('var', 'precip')
 
     table = "alldata_%s" % (station[:2], )
