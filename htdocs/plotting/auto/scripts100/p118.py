@@ -28,7 +28,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    station = fdict.get('station', 'IA0200')
+    station = fdict.get('station', 'IA0200').upper()
     varname = fdict.get('var', 'precip_days')
 
     table = "alldata_%s" % (station[:2], )
