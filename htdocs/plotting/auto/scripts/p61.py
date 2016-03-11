@@ -125,6 +125,7 @@ def plotter(fdict):
                           'valid for %s') % (today.strftime("%-d %b %Y"), ))
     m.plot_values(lons, lats, vals, color=colors, labels=labels,
                   labeltextsize=(8 if sector != 'state' else 12),
-                  textsize=(12 if sector != 'state' else 16))
+                  textsize=(12 if sector != 'state' else 16),
+                  labelbuffer=10)
 
     return m.fig, df
