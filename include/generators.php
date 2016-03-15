@@ -99,48 +99,12 @@ function gen_feature($t){
                 ORDER by valid DESC LIMIT 1";
 	$result = pg_exec($connection, $query1);
 	$row = pg_fetch_assoc($result,0);
-	$foid = $row["oid"];
 	$good = intval($row["good"]);
 	$bad = intval($row["bad"]);
 	$abstain = intval($row["abstain"]);
 	$tags = ($row["tags"] != null) ? explode(",", $row["tags"]): Array();
 	$fbid = $row["fbid"];
 	$fburl = "http://www.facebook.com/pages/IEM/157789644737?v=wall&story_fbid=".$fbid;
-	/* Hehe, check for a IEM vote! */
-	$voted = FALSE;
-
-	if (array_key_exists('foid', $_COOKIE) && $_COOKIE["foid"] == $foid)
-	{
-		$voted = TRUE;
-	} elseif (getenv("REMOTE_ADDR") == "129.186.142.22" || getenv("REMOTE_ADDR") == "129.186.142.37")
-	{
-	
-	} elseif (isset($_GET["feature_good"]))
-	{
-		setcookie("foid", $foid, time()+100600);
-		$voted = TRUE;
-	
-		$isql = "UPDATE feature SET good = good + 1 WHERE oid = $foid";
-		$good += 1;
-		pg_exec($connection, $isql);
-	} elseif (isset($_GET["feature_bad"]))
-	{
-		setcookie("foid", $foid, time()+100600);
-		$voted = TRUE;
-	
-		$isql = "UPDATE feature SET bad = bad + 1 WHERE oid = $foid";
-		$bad += 1;
-		pg_exec($connection, $isql);
-	} elseif (isset($_GET["feature_abstain"]))
-	{
-		setcookie("foid", $foid, time()+100600);
-		$voted = TRUE;
-	
-		$isql = "UPDATE feature SET abstain = abstain + 1 WHERE oid = $foid";
-		$abstain += 1;
-		pg_exec($connection, $isql);
-	}
-	
 	
 	$fref = "/mesonet/share/features/". $row["imageref"] .".png";
 	$width = 320;
@@ -230,30 +194,18 @@ EOF;
 		$fbtext = "";
 		$vtext = "";
 	} else {
-		$vtext = "<div style='clear:both;'>";
-		if ($voted){
-			$goodurl = "#";
-			$badurl = "#";
-			$abstainurl = "#";
-			$msg = "Thanks for voting!";
-		} else {
-			$goodurl = "/?feature_good";
-			$badurl = "/?feature_bad";
-			$abstainurl = "/?feature_abstain";
-			$msg = "Rate Feature";
-		}
-	
-		$vtext .= <<<EOF
+		$vtext = <<<EOF
+		<div style="clear:both;">
 		<div class="row">
-		<div class="col-xs-12 col-sm-3"><strong>$msg</strong></div>
+		<div class="col-xs-12 col-sm-3"><strong><span id="feature_msg">Rate Feature</span></strong></div>
 		<div class="col-xs-12 col-sm-3"> 
-		<a class="btn btn-success btn-block" href="$goodurl">Good ($good votes)</a>
+<button class="btn btn-success btn-block feature_btn" role="button" data-voting="good">Good (<span id="feature_good_votes">$good</span> votes)</button>
 		</div>
 		<div class="col-xs-12 col-sm-3"> 
-		<a class="btn btn-danger btn-block" href="$badurl">Bad ($bad votes)</a>
+<button class="btn btn-danger btn-block feature_btn" role="button" data-voting="bad">Bad (<span id="feature_bad_votes">$bad</span> votes)</button>
 		</div>
 		<div class="col-xs-12 col-sm-3"> 
-		<a class="btn btn-warning btn-block" href="$abstainurl">Abstain ($abstain votes)</a>
+<button class="btn btn-warning btn-block feature_btn" role="button" data-voting="abstain">Abstain (<span id="feature_abstain_votes">$abstain</span> votes)</button>
 		</div>
 		</div>
 	</div>
@@ -279,6 +231,22 @@ window.fbAsyncInit = function() {
 	    });
 	  });
 }
+function onFeatureData(data){
+  	$("#feature_good_votes").html(data.good);
+  	$("#feature_bad_votes").html(data.bad);
+  	$("#feature_abstain_votes").html(data.abstain);
+  	if (! data.can_vote){
+  		$("#feature_msg").html("<i class=\"glyphicon glyphicon-ok\"></i> Thanks for voting!");
+  		$("button.feature_btn").prop("disabled",true);
+  	}
+}
+$("button.feature_btn").click(function(){
+  $.get("/onsite/features/vote/"+ $(this).data('voting') +".json", onFeatureData);
+});
+$(document).ready(function(){
+  $.get("/onsite/features/vote.json", onFeatureData);
+});
+
 </script>
 {$jsextra}
 EOF;
