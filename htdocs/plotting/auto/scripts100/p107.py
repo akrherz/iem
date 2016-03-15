@@ -107,7 +107,7 @@ def plotter(fdict):
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
     ax[0].set_ylim(top=(df[varname].max() + (
-                                df[varname].max() - df[varname].min()) * .2))
+                                df[varname].max() - df[varname].min()) * .3))
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + 0.02,
                         box.width, box.height * 0.98])
