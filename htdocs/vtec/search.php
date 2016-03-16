@@ -2,15 +2,17 @@
 include("../../config/settings.inc.php");
 define("IEM_APPID", 154);
 include("../../include/myview.php");
+require_once "../../include/iemprop.php";
+$gmapskey = get_iemprop("google.maps.key");
 $t = new MyView();
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=13"></script>
+<script type="text/javascript" src="search.js?v=14"></script>
 EOF;
 $t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
 		  <style>
   #map {
@@ -55,7 +57,15 @@ marker to where you are interested in.  Once you stop dragging the marker, the
 grid will update and provide a listing of storm based warnings found.  
 <br clear="all" />
 <div class="row">
-		<div class="col-md-4"><div id="map"></div></div>
+	<div class="col-md-4">
+		<p><strong>Either enter coordinates manually:</strong><br />
+		<i>Latitude (deg N):</i> <input size="8" id="lat"><br />
+		<i>Longitude (deg W):</i> <input size="8" id="lon">
+		<button class="btn btn-default" id="manualpt">Update</button>
+		</p>
+		<p><strong>Or drag marker to select coordinate:</strong><br />
+		<div id="map"></div>
+	</div>
 		<div class="col-md-8"><div id="warntable" style="width: 100%"></div></div>
 </div>
 
