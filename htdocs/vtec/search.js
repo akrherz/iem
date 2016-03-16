@@ -4,10 +4,12 @@ function utcdate(v, record){
 	return (Ext.Date.parseDate(v, 'c')).toUTC();
 }
 
+var marker;
 var warnStore;
 var eventStore;
 var warntable;
 var pDict;
+var map;
 var sDict;
 var vtec_sig_dict = [
 ['W','Warning'],
@@ -537,7 +539,15 @@ Ext.onReady(function() {
 
 	}
 
+	$("#manualpt").click(function(){
+		var la = $("#lat").val();
+		var lo = $("#lon").val();
+		var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
+		marker.setPosition(latlng);
+		updateMarkerPosition(latlng);
+	});
 });
+
 
 function updateMarkerPosition(latLng) {
 	// callback on when the map marker is moved
@@ -545,19 +555,22 @@ function updateMarkerPosition(latLng) {
 		lon: latLng.lng(),
 		lat: latLng.lat()
 	}});
+	$("#lat").val(latLng.lat().toFixed(4));
+	$("#lon").val(latLng.lng().toFixed(4));
 	warntable.setTitle( Ext.String.format("SBW Events for Lat: {0} Lon: {1}", 
 		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
 	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
+	map.setCenter(latLng);
 }
 function initialize() {
 	var latLng = new google.maps.LatLng(41.53, -93.653);
-	var map = new google.maps.Map(document.getElementById('map'), {
+	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 5,
 		center: latLng,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	});
-	var marker = new google.maps.Marker({
+	marker = new google.maps.Marker({
 		position: latLng,
 		title: 'Point A',
 		map: map,
@@ -574,7 +587,7 @@ function initialize() {
 		var tokens2 = tokens[1].split("/");
 		if (tokens2.length == 3){
 			if (tokens2[0] == 'bypoint'){
-				latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
+				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
 				marker.setPosition(latlng);
 				updateMarkerPosition(latlng);
 			}
