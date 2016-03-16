@@ -60,7 +60,7 @@ grid will update and provide a listing of storm based warnings found.
 	<div class="col-md-4">
 		<p><strong>Either enter coordinates manually:</strong><br />
 		<i>Latitude (deg N):</i> <input size="8" id="lat"><br />
-		<i>Longitude (deg W):</i> <input size="8" id="lon">
+		<i>Longitude (deg E):</i> <input size="8" id="lon">
 		<button class="btn btn-default" id="manualpt">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
