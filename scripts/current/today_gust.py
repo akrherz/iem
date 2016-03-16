@@ -53,7 +53,8 @@ m = MapPlot(title="Iowa ASOS/AWOS Peak Wind Speed Reports",
             subtitle="%s" % (now.strftime("%d %b %Y"), ),
             sector='iowa')
 m.contourf(lons, lats, vals, clevs, units='MPH')
-m.plot_values(lons, lats, vals, '%.0f', valmask=valmask)
+m.plot_values(lons, lats, vals, '%.0f', valmask=valmask,
+              labelbuffer=10)
 m.drawcounties()
 m.postprocess(pqstr=pqstr, view=False)
 m.close()
