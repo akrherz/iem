@@ -123,6 +123,8 @@ data = {'plots': [
          'label': "Monthly Precipitation Reliability"},
         {'id': "23", 'mw': True,
          'label': "Monthly Station Departures + El Nino 3.4 Index"},
+        {'id': "138",
+         'label': "Monthly Wind Speed and Wind Direction Averages"},
         {'id': "36", 'mw': True,
          'label': "Month warmer than other Month for Year"},
         {'id': "58", 'mw': True,
