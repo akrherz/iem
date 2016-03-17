@@ -242,9 +242,10 @@ def create_netcdf(station, metadata):
 
     return nc
 
+
 def process(station, metadata):
-    ''' Lets process something, stat 
-    
+    ''' Lets process something, stat
+
     ['TMAX', 'TMIN', 'TOBS', 'PRCP', 'SNOW', 'SNWD', 'EVAP', 'MNPN', 'MXPN',
      'WDMV', 'DAEV', 'MDEV', 'DAWM', 'MDWM', 'WT05', 'SN01', 'SN02', 'SN03', 
      'SX01', 'SX02', 'SX03', 'MDPR', 'MDSF', 'SN51', 'SN52', 'SN53', 'SX51', 
@@ -253,7 +254,7 @@ def process(station, metadata):
     '''
     fp = get_file(station)
     if fp is None:
-        return
+        return#
     nc = create_netcdf(station, metadata)
     if nc is None:
         return
@@ -281,17 +282,17 @@ def process(station, metadata):
             v = varconv(d['value%s' % (i,)], d['element'])
             if v is not None:
                 data[day][d['element']] = v
-            
-    #table = "alldata_%s" % (station[:2],)
+
+    table = "alldata_%s" % (station[:2],)
     keys = data.keys()
-    #keys.sort()
+    keys.sort()
     
-    #obs = {}
-    #cursor.execute("""SELECT day, high, low, precip, snow, snowd from
-    #        """+table+""" where station = %s""", (station,))
-    #for row in cursor:
-    #    obs[row[0]] = row[1:]
-    #print 'loadvars'
+    obs = {}
+    cursor.execute("""SELECT day, high, low, precip, snow, snowd from
+            """+table+""" where station = %s""", (station,))
+    for row in cursor:
+        obs[row[0]] = row[1:]
+    print 'loadvars'
     pr_mflag = nc.variables['pr_mflag'][:]
     pr_sflag = nc.variables['pr_sflag'][:]
     pr_qflag = nc.variables['pr_qflag'][:]
@@ -350,8 +351,6 @@ def process(station, metadata):
         if data[d].get('TMIN') is not None:
             tmin[offset] = temperature(data[d].get('TMIN'),
                                                    'F').value('K')
-        # abort out for now
-        continue
         if row is None:
             print 'No data for %s %s' % (station, d)
             cursor.execute("""INSERT into %s(station, day, sday,
