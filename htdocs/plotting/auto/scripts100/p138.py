@@ -1,11 +1,8 @@
 import psycopg2
-import datetime
-from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 from pyiem import meteorology
 from pyiem.util import drct2text
-import pandas as pd
 from pyiem.datatypes import direction, speed
 import calendar
 
@@ -80,7 +77,7 @@ def plotter(fdict):
                                        boxstyle='square,pad=0.03',))
     ax.set_ylim(12.5, 0.5)
     ax.set_title(("[%s] %s [%s-%s]\nMonthly Average Wind Speed and"
-                  "Vector Average Direction"
+                  " Vector Average Direction"
                   ) % (station, nt.sts[station]['name'],
                        df['ts'].min().year,
                        df['ts'].max().year))
