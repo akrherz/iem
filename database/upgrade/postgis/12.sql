@@ -26,6 +26,7 @@ CREATE INDEX raob_profile_2016_fid_idx
 
 -- !!!!!!!!!!!!! WARNING !!!!!!!!!!!!
 -- look what was done in 9.sql and replicate that for 2017 updates
+-- look at 15.sql too :(
 CREATE TABLE warnings_2016() inherits (warnings);
 CREATE INDEX warnings_2016_combo_idx on 
 	warnings_2016(wfo, phenomena, eventid, significance);

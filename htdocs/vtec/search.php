@@ -15,7 +15,7 @@ $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
 		  <style>
-  #map {
+  .map {
     width: 100%;
     height: 400px;
     float: left;
@@ -64,7 +64,7 @@ grid will update and provide a listing of storm based warnings found.
 		<button class="btn btn-default" id="manualpt">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
-		<div id="map"></div>
+		<div id="map" class="map"></div>
 	</div>
 		<div class="col-md-8"><div id="warntable" style="width: 100%"></div></div>
 </div>
@@ -92,7 +92,17 @@ an office that did not exist at the time.</div>
 <br />
 
 <div class="row">
-		<div class="col-md-4"><div id="myform" style="width:100%"></div></div>
+		<div class="col-md-4"><div id="myform" style="width:100%"></div>
+		
+		<p><strong>You can otherwise search by lat/lon point. The start and
+		end date set above are used with this option as well:</strong><br />
+		<i>Latitude (deg N):</i> <input size="8" id="lat2"><br />
+		<i>Longitude (deg E):</i> <input size="8" id="lon2">
+		<button class="btn btn-default" id="manualpt2">Update</button>
+		</p>
+		<p><strong>Or drag marker to select coordinate:</strong><br />
+		<div id="map2" class="map"></div>
+		</div>
 		<div class="col-md-8"><div id="mytable" style="width:100%"></div></div>
 </div>
 		

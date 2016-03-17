@@ -7,6 +7,10 @@ require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 $dbconn = iemdb('postgis');
 pg_query($dbconn, "SET TIME ZONE 'UTC'");
+$ugc = isset($_REQUEST["ugc"]) ? $_REQUEST["ugc"] : 'IAC001';
+$sdate = isset($_REQUEST["sdate"]) ? $_REQUEST["sdate"] : '1986/1/1';
+$edate = isset($_REQUEST["edate"]) ? $_REQUEST["edate"] : 'TODAY';
+
 $rs = pg_prepare($dbconn, "SELECT", "SELECT 
 		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
         to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
@@ -16,9 +20,6 @@ $rs = pg_prepare($dbconn, "SELECT", "SELECT
 		from warnings WHERE ugc = $1 and issue > $2::date 
 		and issue < $3::date ORDER by issue ASC");
 
-$ugc = isset($_REQUEST["ugc"]) ? $_REQUEST["ugc"] : 'IAC001';
-$sdate = isset($_REQUEST["sdate"]) ? $_REQUEST["sdate"] : '1986/1/1';
-$edate = isset($_REQUEST["edate"]) ? $_REQUEST["edate"] : 'TODAY';
 
 
 $rs = pg_execute($dbconn, "SELECT", Array($ugc, $sdate, $edate));
