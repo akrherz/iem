@@ -9,7 +9,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=14"></script>
+<script type="text/javascript" src="search.js?v=15"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -31,7 +31,7 @@ $t->content = <<<EOF
 Warning, and Advisories.  There are currently two options:
 <ul>
 	<li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
-	<li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone</a></li>
+	<li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone or by Point</a></li>
 </ul>
 
 <div class="alert alert-info"><strong>Troubles downloading Excel File?</strong>
@@ -70,7 +70,7 @@ grid will update and provide a listing of storm based warnings found.
 </div>
 
 <br clear="all" />
-<h3><a name="byugc">2.</a> Search for NWS Watch/Warning/Advisories Products by County/Zone</h3>
+<h3><a name="byugc">2.</a> Search for NWS Watch/Warning/Advisories Products by County/Zone or by Point</h3>
 <br />
 <p>The NWS issues watch, warnings, and advisories (WWA) for counties/parishes.  For 
 some products (like winter warnings), they issue for forecast zones.  
@@ -88,7 +88,15 @@ some products (like winter warnings), they issue for forecast zones.
 <br />
 <div class="alert alert-warning">Please note: NWS forecast offices have 
 changed over the years, this application may incorrectly label old warnings as coming from
-an office that did not exist at the time.</div>
+an office that did not exist at the time.
+		
+	<br /><strong>Also note:</strong> This particular search interface will return
+		<strong>false-positives</strong> for some warnings that are now fully polygon/storm based. The IEM
+		database tracks the UGC areas associated with the storm based warnings. So querying
+		by UGC (even if you query by point), will return some warnings that were not actually
+		active for that point, but were technically active for that UGC of which the point
+		falls inside of. Please use the above search for these types of warnings!
+		</div>
 <br />
 
 <div class="row">
