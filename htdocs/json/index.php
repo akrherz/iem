@@ -174,6 +174,26 @@
   				"{longitude}" => "-95.0"
   		)
   );
+
+  $services[] = Array(
+  		"title" => "Search for VTEC Events by Lat/Lon Point",
+  		"url" => "/json/vtec_events_bypoint.py?lon={longitude}&lat={latitude}&sdate={sdate}&edate={edate}",
+  		"desc" => "Provides a listing of VTEC events that were valid for
+  		a given latitude and longitude point.",
+  		"vars" => Array(
+  				"lat" => "Latitude in degrees",
+  				"lon" => "Longitude in (degrees east)",
+  				"sdate" => "YYYY-mm-dd Start Date (UTC)",
+  		  		"edate" => "YYYY-mm-dd End Date (UTC)",
+  				),
+  		"example" => Array(
+  				"{latitude}" => "42.5",
+  				"{longitude}" => "-95.0",
+  				"{sdate}" => "2015/06/01",
+  				"{edate}" => "2015/07/01",
+  				)
+  		);
+  
   
   $services[] = Array(
   		"title" => "Current Polygons from Special Weather Statements (SPS)",

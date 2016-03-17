@@ -5,12 +5,17 @@ function utcdate(v, record){
 }
 
 var marker;
+var marker2;
 var warnStore;
 var eventStore;
 var warntable;
+var eventTable;
 var pDict;
 var map;
+var map2;
 var sDict;
+var sdate;
+var edate;
 var vtec_sig_dict = [
 ['W','Warning'],
 ['Y','Advisory'],
@@ -261,8 +266,8 @@ Ext.onReady(function() {
 						'Y/m/d')
 					}
 				});
-				gp.ugc = record.data.ugc;
-				gp.setTitle("VTEC Events for: " + record.data.nicename);
+				eventTable.ugc = record.data.ugc;
+				eventTable.setTitle("VTEC Events for: " + record.data.nicename);
 				alinkUGC();
 				return false;
 			}
@@ -315,7 +320,7 @@ Ext.onReady(function() {
 	});
 
 	/* Date Selectors */
-	var sdate = new Ext.form.DateField({
+	sdate = new Ext.form.DateField({
 		fieldLabel : 'Start UTC Date',
 		id : 'sdate',
 		format : 'd M Y',
@@ -323,7 +328,7 @@ Ext.onReady(function() {
 		maxValue : Ext.Date.add(new Date(), Date.DAY, 1),
 		value : new Date('1/1/1986')
 	});
-	var edate = new Ext.form.DateField({
+	edate = new Ext.form.DateField({
 		fieldLabel : 'End UTC Date',
 		id : 'edate',
 		format : 'd M Y',
@@ -342,6 +347,9 @@ Ext.onReady(function() {
 			id : 'eventbutton',
 			text : 'Load Grid with Settings Above',
 			handler : function(){
+
+				eventStore.getProxy().setUrl('/json/vtec_events_byugc.php');
+
 				eventStore.load({
 					add : false,
 					params : {
@@ -358,7 +366,7 @@ Ext.onReady(function() {
 			}
 		}]
 	});
-	var gp = Ext.create('My.grid.ExcelGridPanel', {
+	eventTable = Ext.create('My.grid.ExcelGridPanel', {
 			ugc : '',
 				height : 500,
 				title : 'Events Listing',
@@ -422,8 +430,8 @@ Ext.onReady(function() {
 							}
 						}]
 			});
-	gp.render('mytable');
-	gp.doLayout();
+	eventTable.render('mytable');
+	eventTable.doLayout();
 	
 	warnStore = new Ext.data.Store({
 		autoLoad : false,
@@ -533,7 +541,7 @@ Ext.onReady(function() {
 						'Y/m/d')
 					}
 				});
-				gp.setTitle("Event Listing for UGC "+ tokens2[2]);
+				eventTable.setTitle("Event Listing for UGC "+ tokens2[2]);
 			}
 		}
 
@@ -545,6 +553,13 @@ Ext.onReady(function() {
 		var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
 		marker.setPosition(latlng);
 		updateMarkerPosition(latlng);
+	});
+	$("#manualpt2").click(function(){
+		var la = $("#lat2").val();
+		var lo = $("#lon2").val();
+		var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
+		marker2.setPosition(latlng);
+		updateMarkerPosition2(latlng);
 	});
 });
 
@@ -563,9 +578,33 @@ function updateMarkerPosition(latLng) {
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
 	map.setCenter(latLng);
 }
+
+function updateMarkerPosition2(latLng) {
+	// callback on when the map marker is moved
+	eventStore.getProxy().setUrl('/json/vtec_events_bypoint.py');
+	eventStore.load({add: false, params: {
+		sdate: Ext.Date.format(Ext.getCmp('sdate').getValue(), 'Y/m/d'),
+		edate: Ext.Date.format(Ext.getCmp('edate').getValue(), 'Y/m/d'),
+		lon: latLng.lng(),
+		lat: latLng.lat()
+	}});
+	$("#lat2").val(latLng.lat().toFixed(4));
+	$("#lon2").val(latLng.lng().toFixed(4));
+	eventTable.setTitle( Ext.String.format("Events for Lat: {0} Lon: {1}", 
+		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
+	window.location.href = Ext.String.format("#eventsbypoint/{0}/{1}", 
+			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
+	map2.setCenter(latLng);
+}
+
 function initialize() {
 	var latLng = new google.maps.LatLng(41.53, -93.653);
 	map = new google.maps.Map(document.getElementById('map'), {
+		zoom: 5,
+		center: latLng,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	});
+	map2 = new google.maps.Map(document.getElementById('map2'), {
 		zoom: 5,
 		center: latLng,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -576,9 +615,18 @@ function initialize() {
 		map: map,
 		draggable: true
 	});
+	marker2 = new google.maps.Marker({
+		position: latLng,
+		title: 'Point A',
+		map: map2,
+		draggable: true
+	});
 
 	google.maps.event.addListener(marker, 'dragend', function() {
 		updateMarkerPosition(marker.getPosition());
+	});
+	google.maps.event.addListener(marker2, 'dragend', function() {
+		updateMarkerPosition2(marker.getPosition());
 	});
 
 	// Do the anchor tag linking, please
@@ -590,6 +638,11 @@ function initialize() {
 				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
 				marker.setPosition(latlng);
 				updateMarkerPosition(latlng);
+			}
+			if (tokens2[0] == 'eventsbypoint'){
+				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
+				marker2.setPosition(latlng);
+				updateMarkerPosition2(latlng);
 			}
 		}
 	}
