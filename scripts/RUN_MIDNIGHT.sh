@@ -7,7 +7,7 @@ cd qc
 python adjust_snet_precip.py
 
 cd ../util
-python i5_2_cybox.py &
+timeout -k 85000 python i5_2_cybox.py &
 
 cd ../dbutil
 sh save_snet_raw.sh
