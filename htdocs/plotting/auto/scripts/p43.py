@@ -1,5 +1,4 @@
 import psycopg2.extras
-import datetime
 import matplotlib.dates as mdates
 import pytz
 from pyiem.network import Table as NetworkTable
@@ -21,7 +20,9 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['cache'] = 360
-    d['description'] = """Timeseries of recent observations."""
+    d['description'] = """This plot presents a recent time series of
+    observations.  Please note the colors and axes labels used to denote
+    which variable is which in the combination plots."""
     d['arguments'] = [
         dict(type='sid', label='Select IEM Tracked Station',
              name='station', default='AMW'),
@@ -85,6 +86,7 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(3, 1, figsize=(8, 10), sharex=True)
 
+    # ____________PLOT 1___________________________
     if len(tmpf['v']) > 1:
         ax[0].plot(tmpf['v'], tmpf['d'], label='Air Temp', lw=2, color='r',
                    zorder=2)
@@ -99,30 +101,9 @@ def plotter(fdict):
     ax[0].set_ylabel("Temperature [F]")
     plt.setp(ax[0].get_xticklabels(), visible=True)
 
-    if len(vsby['v']) > 1:
-        ax[2].scatter(vsby['v'], vsby['d'], label='Visibility', marker='*',
-                      s=40, color='r')
-        ax[2].set_ylim(0, 14)
-
-    # -----------------------------------------------------------------------
-    global mytz
-    mytz = pytz.timezone(nt.sts[station]['tzname'])
-    ax[2].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 25, 6),
-                                                     tz=mytz))
-    formatter = FuncFormatter(tsfmt)
-    ax[2].xaxis.set_major_formatter(formatter)
-    ax[2].grid(True)
-    ax[2].set_ylabel("Visibility [miles]", color='r')
-    if len(ceil['v']) > 1:
-        ax2 = ax[2].twinx()
-        ax2.scatter(ceil['v'], ceil['d'], label='Visibility', marker='o',
-                    s=40, color='b')
-        ax2.set_ylabel("Overcast Ceiling [k ft]", color='b')
-        ax2.set_ylim(bottom=0)
-
-    # ------------------------------------------------------------------------
+    # _____________PLOT 2____________________________
     if len(smph['v']) > 1:
-        ax[1].plot(smph['v'], smph['d'])
+        ax[1].plot(smph['v'], smph['d'], color='b')
         ax[1].set_ylabel("Wind Speed [MPH]", color='b')
         ax[1].set_ylim(bottom=0)
     if len(drct['v']) > 1:
@@ -132,8 +113,27 @@ def plotter(fdict):
         ax3.set_yticks([0, 90, 180, 270, 360])
         ax3.set_yticklabels(['N', 'E', 'S', 'W', 'N'])
         ax3.scatter(drct['v'], drct['d'], s=40, color='g', marker='+')
-
     ax[1].grid(True)
     ax[1].set_xlabel("Plot Time Zone: %s" % (nt.sts[station]['tzname'],))
+
+    # _____________PLOT 3___________________________
+    global mytz
+    mytz = pytz.timezone(nt.sts[station]['tzname'])
+    ax[2].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 25, 6),
+                                                     tz=mytz))
+    formatter = FuncFormatter(tsfmt)
+    ax[2].xaxis.set_major_formatter(formatter)
+    ax[2].grid(True)
+    ax[2].set_ylabel("Visibility [miles]", color='b')
+    if len(ceil['v']) > 1:
+        ax2 = ax[2].twinx()
+        ax2.scatter(ceil['v'], ceil['d'], label='Visibility', marker='o',
+                    s=40, color='g')
+        ax2.set_ylabel("Overcast Ceiling [k ft]", color='g')
+        ax2.set_ylim(bottom=0)
+    if len(vsby['v']) > 1:
+        ax[2].scatter(vsby['v'], vsby['d'], label='Visibility', marker='*',
+                      s=40, color='b')
+        ax[2].set_ylim(0, 14)
 
     return fig
