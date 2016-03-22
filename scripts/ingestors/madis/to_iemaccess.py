@@ -4,7 +4,7 @@ import datetime
 import os
 import sys
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, distance
+from pyiem.datatypes import temperature, distance, speed
 import subprocess
 import pytz
 import psycopg2.extras
@@ -144,9 +144,9 @@ for sid in db.keys():
     if db[sid]['drct'] >= 0:
         iem.data['drct'] = db[sid]['drct']
     if db[sid]['smps'] >= 0:
-        iem.data['sknt'] = db[sid]['smps'] * (1/0.5148)
+        iem.data['sknt'] = speed(db[sid]['smps'], 'MPS').value('KT')
     if db[sid]['gmps'] >= 0:
-        iem.data['gust'] = db[sid]['gmps'] * (1/0.5148)
+        iem.data['gust'] = speed(db[sid]['gmps'], 'MPS').value('KT')
     if db[sid]['pres'] > 0:
         iem.data['pres'] = (float(db[sid]['pres']) / 100.00) * 0.02952
     if db[sid]['rtk1'] > 0:
