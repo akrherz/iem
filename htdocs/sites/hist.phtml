@@ -173,7 +173,7 @@ if ($mode == "monthly") {
   	if ($row["pday"] < 0.01 && $row["pday"] > 0){
   		$str .= "<br>Rain: Trace ";
   	} else {
-  		$str .= "<br>Rain: ". $row["pday"];
+  		$str .= "<br>Rain: ". sprintf("%.2f", $row["pday"]);
   	}
   }
   if ($row["snow"] != null && $row["snow"] >= 0){
