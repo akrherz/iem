@@ -30,7 +30,9 @@ for fn in glob.glob("*.zip"):
     local_filenames[rp].append(fn2)
     remote_filenames[rp].append(fn)
 
+fs = None
 for rp in remote_filenames:
-    util.send2box(local_filenames[rp], rp, remotenames=remote_filenames[rp])
+    fs = util.send2box(local_filenames[rp], rp,
+                       remotenames=remote_filenames[rp], fs=fs)
     for fn in local_filenames[rp]:
         os.unlink(fn)
