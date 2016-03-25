@@ -153,6 +153,7 @@ EOF;
 $states = Array(
 		'IACLIMATE' => 'Iowa',
 		'ILCLIMATE' => 'Illinois',
+		'INCLIMATE' => 'Indiana',
 		'KSCLIMATE' => 'Kansas',
 		'KYCLIMATE' => 'Kentucky',
 		'MICLIMATE' => 'Michigan',
