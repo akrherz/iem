@@ -96,6 +96,7 @@ var expander2 = new Ext.grid.RowExpander({
            {name: 'area', type: 'float'},
            {name: 'significance'},
            {name: 'phenomena'},
+           {name: 'fcster'},
            {name: 'eventid', type: 'int'},
            {name: 'issued', type: 'date'},
            {name: 'expired', type: 'date'},
@@ -691,7 +692,9 @@ eventsPanel = new Ext.grid.GridPanel({
         {header: "Area km**2", width: 70, sortable: true, 
          dataIndex: 'area'},
         {header: "Locations", id:"locations", width: 250, sortable: true, 
-         dataIndex: 'locations'}
+         dataIndex: 'locations'},
+        {header: "Forecaster", id:"fcster", width: 70, sortable: true, 
+         dataIndex: 'fcster'}
     ]),
     plugins      : filters,
     stripeRows   : true,

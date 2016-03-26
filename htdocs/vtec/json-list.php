@@ -25,7 +25,7 @@ $sql = <<<EOF
  to_char(max(expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
  to_char(min(product_issue), 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
  to_char(max(init_expire), 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired,
- max(hvtec_nwsli) as nwsli
+ max(hvtec_nwsli) as nwsli, max(fcster) as fcster
  
  from warnings_$year w JOIN ugcs u
  ON (u.gid = w.gid) WHERE w.wfo = '$wfo' and
@@ -40,7 +40,8 @@ $sql = <<<EOF
  	select string_agg( u.name || ' ['||u.state||']', ', ') as locations, eventid,
 	min(issue) as issued, max(expire) as expired,
 	min(product_issue) as product_issued,
-	max(init_expire) as init_expired from warnings_$year w JOIN ugcs u
+	max(init_expire) as init_expired, max(fcster) as fcster
+	from warnings_$year w JOIN ugcs u
  	ON (u.gid = w.gid) WHERE w.wfo = '$wfo' and
  	significance = '$significance' and phenomena = '$phenomena' 
  	and eventid is not null GROUP by eventid ),
@@ -55,7 +56,8 @@ $sql = <<<EOF
  to_char(issued, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
  to_char(expired, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
  to_char(product_issued, 'YYYY-MM-DDThh24:MI:SSZ') as iso_product_issued,
- to_char(init_expired, 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired
+ to_char(init_expired, 'YYYY-MM-DDThh24:MI:SSZ') as iso_init_expired,
+ c.fcster
  from 
  stormbased s JOIN countybased c on (c.eventid = s.eventid)
  ORDER by c.eventid ASC
@@ -77,6 +79,7 @@ for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
   $z["expired"] = $z["iso_expired"];
   $z["product_issued"] = $z["iso_product_issued"];
   $z["init_expired"] = $z["iso_init_expired"];
+  $z["fcster"] = $z["fcster"];
   $ar["products"][] = $z;
 }
 
