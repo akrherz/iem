@@ -135,9 +135,9 @@ def plotter(fdict):
     resdf.dropna(inplace=True)
     (fig, ax) = plt.subplots(1, 1)
     ax.scatter(resdf[varname1+"_1"], resdf[varname2+"_2"], marker='s',
-               facecolor='b', edgecolor='b')
+               facecolor='b', edgecolor='b', label=None, zorder=3)
     ax.set_title(("%s-%s %s [%s]\n"
-                  "Comparison of Monthly Periods"
+                  "Comparison of Monthly Periods, Quadrant Frequency Labelled"
                   ) % (resdf.index.min(), resdf.index.max(),
                        nt.sts[station]['name'], station))
     ax.grid(True)
@@ -154,14 +154,44 @@ def plotter(fdict):
     ymonths = ", ".join([calendar.month_abbr[x] for x in months2])
     t1 = "" if varname1 not in ['days_high_aoa', ] else " %.0f" % (threshold,)
     t2 = "" if varname2 not in ['days_high_aoa', ] else " %.0f" % (threshold,)
-    ax.set_xlabel("%s\n%s%s [%s]" % (xmonths, PDICT[varname1], t1,
-                                     UNITS[varname1]), fontsize=12)
-    ax.set_ylabel("%s\n%s%s [%s]" % (ymonths, PDICT[varname2], t2,
-                                     UNITS[varname2]), fontsize=12)
+    x = resdf["%s_1" % (varname1, )].mean()
+    y = resdf["%s_2" % (varname2, )].mean()
+    ax.set_xlabel("%s\n%s%s [%s], Avg: %.1f" % (xmonths, PDICT[varname1], t1,
+                                                UNITS[varname1], x),
+                  fontsize=12)
+    ax.set_ylabel("%s\n%s%s [%s], Avg: %.1f" % (ymonths, PDICT[varname2], t2,
+                                                UNITS[varname2], y),
+                  fontsize=12)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.05,
                      box.width, box.height * 0.95])
+    ax.axhline(y, linestyle='--', color='g')
+    ax.axvline(x, linestyle='--', color='g')
+    ur = len(resdf[(resdf["%s_1" % (varname1, )] >= x) &
+                   (resdf["%s_2" % (varname1, )] >= y)].index)
+    ax.text(0.95, 0.75, "%s (%.1f%%)" % (ur,
+                                         ur / float(len(resdf.index)) * 100.),
+            color='tan', fontsize=24, transform=ax.transAxes, ha='right',
+            zorder=2)
+    lr = len(resdf[(resdf["%s_1" % (varname1, )] >= x) &
+                   (resdf["%s_2" % (varname1, )] < y)].index)
+    ax.text(0.95, 0.25, "%s (%.1f%%)" % (lr,
+                                         lr / float(len(resdf.index)) * 100.),
+            color='tan', fontsize=24, transform=ax.transAxes, ha='right',
+            zorder=2)
+    ll = len(resdf[(resdf["%s_1" % (varname1, )] < x) &
+                   (resdf["%s_2" % (varname1, )] < y)].index)
+    ax.text(0.05, 0.25, "%s (%.1f%%)" % (ll,
+                                         ll / float(len(resdf.index)) * 100.),
+            color='tan', fontsize=24, transform=ax.transAxes, ha='left',
+            zorder=2)
+    ul = len(resdf[(resdf["%s_1" % (varname1, )] < x) &
+                   (resdf["%s_2" % (varname1, )] >= y)].index)
+    ax.text(0.05, 0.75, "%s (%.1f%%)" % (ul,
+                                         ul / float(len(resdf.index)) * 100.),
+            color='tan', fontsize=24, transform=ax.transAxes, ha='left',
+            zorder=2)
     return fig, resdf
 
 if __name__ == '__main__':
