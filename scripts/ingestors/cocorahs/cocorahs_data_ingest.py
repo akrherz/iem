@@ -22,7 +22,7 @@ url = ("http://data.cocorahs.org/Cocorahs/export/exportreports.aspx"
        "Date=%s&TimesInGMT=False") % (state,
                                       now.strftime("%m/%d/%Y%%20%H:00%%20%P"))
 req = urllib2.Request(url)
-data = urllib2.urlopen(req).readlines()
+data = urllib2.urlopen(req, timeout=30).readlines()
 
 
 # Process Header
