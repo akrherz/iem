@@ -41,6 +41,8 @@ data = {'plots': [
         {'id': "60", 'label': ("Hourly Temperature Frequencies "
                                "Above/Below Threshold")},
         {'id': "86", 'mw': True, 'label': "IEM Daily Reanalysis Plots"},
+        {'id': "139",
+         'label': "Largest Local Calendar Day Temperature Differences"},
         {'id': "34", 'mw': True,
          'label': "Max Stretch of Days with High/Low Above/Below Threshold"},
         {'id': "26",
