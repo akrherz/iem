@@ -102,6 +102,8 @@ def plotter(fdict):
                                row['difference'], row['min'], row['max']),
                  fontproperties=font0)
         y -= 0.07
+    fig.text(0.5, y, "* based on hourly temps, not daily summaries",
+             ha='center')
     return fig, df
 
 if __name__ == '__main__':
