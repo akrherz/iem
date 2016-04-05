@@ -25,6 +25,7 @@ function cow($dbconn){
     $this->wind = 58;			/* Wind threshold in mph */
     $this->useWindHailTag = false;  /* Option to use wind hail tag to verify */
     $this->limitwarns = false;  /* Limit listed warnings to wind and hail criterion */
+	$this->fcster = ''; // allowing for filtering based on product signature
 }
 
 /* Standard Workflow */
@@ -42,6 +43,15 @@ function callDB($sql){
     return $rs;
 }
 
+function setForecaster($s){
+	$this->fcster = $s;
+}
+function sqlForecasterBuilder(){
+	if ($this->fcster == '') {
+		return '';
+	}
+	return sprintf(" and fcster = '%s' ", $this->fcster);
+}
 function setWarningBuffer($b){
 	$this->warningbuffer = $b;
 }
@@ -323,16 +333,16 @@ function loadWarnings(){
 		sum(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as carea,
 		min(issue) as missue,
 		max(expire) as mexpire,
-		extract(year from issue at time zone 'UTC') as year
+		extract(year from issue at time zone 'UTC') as year, w.fcster
 		from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE           
         w.gid is not null and %s and
 		issue >= '%s' and issue < '%s' and expire < '%s' 
-		and %s %s
-		GROUP by w.wfo, phenomena, eventid, significance, year
+		and %s %s %s
+		GROUP by w.wfo, phenomena, eventid, significance, year, fcster
     )
 	SELECT  
 		s.year, s.wfo, s.phenomena, s.eventid, s.tgeom, c.missue as issue, 
-			c.mexpire as expire, c.statuses,
+			c.mexpire as expire, c.statuses, c.fcster,
 			s.significance, s.hailtag, s.windtag, c.carea, c.ar_ugc,
 			s.lat0, s.lon0, s.perimeter, s.parea, c.ar_ugcname
 			from stormbased s JOIN countybased c on 
@@ -344,7 +354,8 @@ function loadWarnings(){
 	$this->sqlTypeBuilder(), $this->sqlTagLimiter(),
 	$this->sqlWFOBuilder(), date("Y/m/d H:i", $this->sts), 
 	date("Y/m/d H:i", $this->ets),  date("Y/m/d H:i", $this->ets),
-    $this->sqlTypeBuilder(), $this->sqlTagLimiter() );
+    $this->sqlTypeBuilder(), $this->sqlTagLimiter(),
+			$this->sqlForecasterBuilder());
 	
 	//die("<pre>$sql</pre>");
 	$rs = $this->callDB($sql);
@@ -379,6 +390,7 @@ function loadWarnings(){
         $this->warnings[$key]["parea"] = $row["parea"];
         $this->warnings[$key]["ugc"] = explode(",",$row["ar_ugc"]);
         $this->warnings[$key]["ugcname"] = explode("|",$row["ar_ugcname"]);
+        $this->warnings[$key]["fcster"] = $row["fcster"];
     } /* End of rs for loop */
 
 } /* End of loadWarnings() */
