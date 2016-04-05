@@ -17,7 +17,7 @@ function printLSR($lsr)
   if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
   $uri = sprintf("../lsr/#%s/%s/%s", $lsr["wfo"], gmdate("YmdHi", $lsr["ts"]),
          gmdate("YmdHi", $lsr["ts"]) );
-  return sprintf("<tr style=\"background: #eee;\"><td></td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"4\">%s</td></tr>", 
+  return sprintf("<tr style=\"background: #eee;\"><td></td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"5\">%s</td></tr>", 
     $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"], $lsr["remark"]);
 }
 function clean_area_verify($buffered, $parea){
@@ -48,7 +48,7 @@ function printWARN($cow, $warn)
   		<td><a href=\"%s\">%s</a></td><td>%.0f sq km</td>
   		<td>%.0f sq km</td><td>%.0f %%</td>
   		<td>%.0f%% <a href=\"/GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>
-  		<td>%s</td></tr>\n", 
+  		<td>%s</td><td>%s</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["expire"]), 
     $uri, implode(", ", $warn["ugcname"]), $uri, $warn["status"], $warn["parea"], 
@@ -56,7 +56,7 @@ function printWARN($cow, $warn)
     $bratio,
     date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
     $warn["eventid"], $lsrbuffer,
-    clean_area_verify($warn["buffered"], $warn["parea"]));
+    clean_area_verify($warn["buffered"], $warn["parea"]), $warn["fcster"]);
 
   reset($warn["lsrs"]);
   if (sizeof($warn["lsrs"]) == 0 && $warn["verify"]){
@@ -83,6 +83,7 @@ $cow->setLimitType( $wtype );
 $cow->setLimitLSRType( $ltype );
 $cow->setLSRBuffer( $lsrbuffer );
 $cow->setWarningBuffer($warnbuffer);
+$cow->setForecaster($fcster);
 if (isset($useWindHailTag) && $useWindHailTag == 'Y'){
 	$cow->useWindHailTag = true;
 }
@@ -142,10 +143,21 @@ $allleadtime = sprintf("%.1f", $cow->computeAllLeadTime());
 $maxleadtime = sprintf("%.1f", $cow->computeMaxLeadTime());
 $minleadtime = sprintf("%.1f", $cow->computeMinLeadTime());
 
+$fwarning = "";
+if ($fcster != ''){
+	$fwarning = <<<EOF
+<div class="alert alert-warning">
+	<strong>This display is filtered for product signature: "{$fcster}".
+	This means that the 'Unwarned Events' are not accurate as they may have
+	verified by warnings signed by a different string.</strong></div>
+EOF;
+}
+
 $content .= <<<EOF
 <h3>Summary:</h3>
 <b>Begin Date:</b> {$dstat} <b>End Date:</b> {$dstat1}
 <br />* These numbers are not official and should be used for educational purposes only.
+${fwarning}
 
 <div class="row">
   <div class="col-sm-2">
@@ -194,14 +206,44 @@ $content .= <<<EOF
 <br />The second line is for details on any local storm reports.
 <br />
 <table cellspacing="0" cellpadding="2" border="1">
-<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>SBW Area: (P)</th><th>County Area: (C)</th><th>Size %<br /> (C-P)/C:</th><th>Perimeter Ratio:</th><th>Areal Verif. %:</th></tr>
-<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><th colspan="4">Remarks</th></tr>
+<tr>
+	<td></td>
+	<th>Issued:</th>
+	<th>Expired:</th>
+	<th colspan="2">County:</th>
+	<th>Final Status:</th>
+	<th>SBW Area: (P)</th>
+	<th>County Area: (C)</th>
+	<th>Size %<br /> (C-P)/C:</th>
+	<th>Perimeter Ratio:</th>
+	<th>Areal Verif. %:</th>
+	<th>Signature</th>
+</tr>
+<tr bgcolor="#eee">
+	<th>lsr</th>
+	<th>Valid</th>
+	<th>Lead Time:</th>
+	<th>County</th>
+	<th>City</th>
+	<th>Type</th>
+	<th>Magnitude</th>
+	<th colspan="5">Remarks</th>
+</tr>
 {$wtable}
 </table>
 
-<h3 class="heading">Storm Reports without warning:</h3> 
-<table cellspacing="1" cellpadding="2" border="1">
-<tr><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th></tr>
+<h3>Storm Reports without warning:</h3> 
+<table class="table table-bordered table-condensed">
+<tr>
+	<th>lsr</th>
+	<th>Valid</th>
+	<th>Lead Time:</th>
+	<th>County</th>
+	<th>City</th>
+	<th>Type</th>
+	<th>Magnitude</th>
+	<th>Remark</th>
+</tr>
 {$ltable}
 </table>
 EOF;

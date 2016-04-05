@@ -24,6 +24,7 @@ putenv("TZ=UTC");
  $warnbuffer = isset($_GET["warnbuffer"]) ? floatval($_GET["warnbuffer"]) : 0.01;
  $useWindHailTag = isset($_REQUEST["windhailtag"]) ? $_REQUEST["windhailtag"] : 'N';
  $limitwarns = isset($_REQUEST["limitwarns"]) ? $_REQUEST["limitwarns"] : 'N';
+ $fcster = isset($_GET["fcster"]) ? $_GET["fcster"]: '';
 
  $abegin = mktime(0,0,0,6,8,2005);
  if ($sts < $abegin){ $sts = $abegin; }
@@ -113,10 +114,20 @@ putenv("TZ=UTC");
 EOF;
 	$tagselect .= (($limitwarns == 'Y')? " CHECKED": "");
 	$tagselect .= ">When possible, limit considered warnings to your hail/wind threshold";
-  
+
+$forecaster_form = "";
+$resetlink = "/cow/";
+// Allow for a special bypass to expose this configuration setting
+if (isset($_GET["f"])){
+	$resetlink = "/cow/?f";
+	$forecaster_form = <<<EOF
+	<input type="hidden" name="f" />
+<br />Filter by Product Signature (exact match):<input type="text" name="fcster" size="15" value="{$fcster}" />
+EOF;
+}
  
 $content = <<<EOF
-<a href="/cow/">Reset Application</a> (All timestamps are displayed in UTC)
+<a href="{$resetlink}">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow" rel="nofollow">
 
 <div class="row">
@@ -167,7 +178,10 @@ function ltypeSelect()
 <button onclick="return ltypeSelect()">Select All</button> {$ltselect}
 </td></tr>
 
- <tr><td colspan="2">{$tagselect}</td></tr>
+ <tr><td colspan="2">
+ {$tagselect}
+ {$forecaster_form}
+ </td></tr>
 		
 </table>
 	
@@ -177,11 +191,12 @@ function ltypeSelect()
 <input type="submit" value="Go Cow Go">
 </form>
 EOF;
-if (isset($_GET["hail"])){ include("worker.php"); }
-      else {
+if (isset($_GET["hail"])){ 
+ 	include("worker.php");
+} else {
 $content .= <<<EOF
 
-<h3 class="heading">IEM Cow (NWS Storm Based Warning Verification)</h3>
+<h3>IEM Cow (NWS Storm Based Warning Verification)</h3>
 
 <p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
 educational purposes only.  This application allows you to view warnings
@@ -239,5 +254,5 @@ with the area of the storm based warning to yield a percentage.</li>
 EOF;
 } 
 $t->content = $content;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
