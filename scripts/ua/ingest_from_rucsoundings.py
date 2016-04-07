@@ -96,10 +96,11 @@ class RAOB:
 
     def conv_speed(self, raw):
         ''' convert sped to mps units '''
-        if raw == '99999':
+        if raw in ['99999', '-9999.00']:
             return None
         if self.wind_units == 'kt':
             return float(raw) * 0.5144
+        return float(raw)
 
     def __str__(self):
         """ override str() """
