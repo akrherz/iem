@@ -1,4 +1,5 @@
 # Start of Mapfile (radmapserver.map)
+MAP
 NAME radmapserver
 STATUS ON
 SIZE 450 350
@@ -14,10 +15,10 @@ END
 
 # Map interface definition
 WEB
-  LOG "/var/www/htdocs/mstmp/radmapserver.log"
+  LOG "/tmp/radmapserver.log"
   TEMPLATE radmapserver.html
-  IMAGEPATH "/var/www/htdocs/mstmp/"
-  IMAGEURL "/mstmp/"
+  IMAGEPATH "/var/webtmp/"
+  IMAGEURL "/tmp/"
 END
 
 # Our Geo-referenced RADAR layer
@@ -25,7 +26,7 @@ LAYER
   TYPE RASTER
   STATUS ON
   NAME radar
-  DATA "/var/www/htdocs/radmapserver/gisdata/radar.tif"
+  DATA "/mesonet/www/apps/iemwebsite/htdocs/radmapserver/gisdata/radar.tif"
   PROJECTION
    "init=epsg:4326"
   END
@@ -37,7 +38,7 @@ LAYER
   TYPE POLYGON
   STATUS ON
   NAME states
-  DATA "/var/www/htdocs/radmapserver/gisdata/states.shp"
+  DATA "/mesonet/www/apps/iemwebsite/htdocs/radmapserver/gisdata/states.shp"
   PROJECTION
     "init=epsg:4326"
   END
