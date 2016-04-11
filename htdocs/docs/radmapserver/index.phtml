@@ -5,7 +5,7 @@ $t = new MyView();
 $t->title = "RadMapserver Docs";
 
 $t->content = <<<EOF
-<h3 class="heading">NEXRAD Composite + Mapserver Documentation</h3>
+<h3>NEXRAD Composite + Mapserver Documentation</h3>
 
 <div class="text">
 <p>This page hopefully explains how to produce a geo-referenced NEXRAD composite
@@ -22,21 +22,21 @@ The HOWTO is available in various formats.
   <li><a href="howto.txt">Plain Text</a></li>
 </ul>
 
-<h3 class="subtitle">Links:</h3>
+<h3>Links:</h3>
 Links to resources you may find useful.
 <ul>
-  <li>Mapserver (<a href="http://mapserver.gis.umn.edu">http://mapserver.gis.umn.edu</a>)</li>
+  <li>Mapserver (<a href="http://mapserver.org">http://mapserver.org</a>)</li>
 </ul>
 
-<h3 class="subtitle">Files:</h3>
+<h3>Files:</h3>
 Links to files referenced in this HOWTO:
 <ul>
   <li><a href="radmapserver-files.tar.gz">radmapserver-files.tar.gz</a></li>
   <ul>
-    <li><a href="radmapserver/radmapserver.map">radmapserver.map file</a></li>
-    <li><a href="radmapserver/radmapserver.html">radmapserver.html template file</a></li>
-    <li><a href="radmapserver/gisdata/radar.tif">Sample TIFF RADAR file</a></li>
-    <li><a href="radmapserver/gisdata/radar.wld">Sample world file for RADAR TIFF</a></li>
+    <li><a href="/radmapserver/radmapserver.map">radmapserver.map file</a></li>
+    <li><a href="/radmapserver/radmapserver.html">radmapserver.html template file</a></li>
+    <li><a href="/radmapserver/gisdata/radar.tif">Sample TIFF RADAR file</a></li>
+    <li><a href="/radmapserver/gisdata/radar.wld">Sample world file for RADAR TIFF</a></li>
     <li><a href="states.zip">Upper midwest states shapefile</a></li>
   </ul>
   <li><a href="nex2img.tar.gz">nex2img</a> program for GEMPAK</li>
@@ -49,19 +49,22 @@ Links to files referenced in this HOWTO:
 <br>(<i>Generated every 5 minutes</i>)<p>
 
 <h3 class="subtitle">IEM RADAR Applications:</h3>
-<li><a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings.phtml">Nationwide Warnings & Loops</a></li>
-<li><a href="http://mesonet.agron.iastate.edu/current/mcview.phtml">Current &
+<li><a href="/GIS/apps/rview/warnings.phtml">Nationwide Warnings & Loops</a></li>
+<li><a href="/current/mcview.phtml">Current &
 Archived Iowa Composite Loops</a></li><p>
 
 <h3 class="subtitle">HOWTO Online Demo:</h3>
 <li>Here is the working demo: <a
-href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/radmapserver/radmapserver.map&layers=states">demo</a>.</li><p>
+href="/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/htdocs/radmapserver/radmapserver.map&layers=states">demo</a>.</li><p>
 
 <h3 class="subtitle">News:</h3>
+<ul>
+		<li><strong>11 Apr 2016:</strong> corrected some URIs</li>
 <li><b>28 Jul 2004:</b> Updated for Mapserver 4.x support.  URL fixes.</li>
 <li><b>28 Jul 2003:</b> Release the nationwide composite.</li>
 <li><b>25 Jul 2003:</b> Initial release for review.</li>
-
+</ul>
+		
 </td></tr></table></div>
 EOF;
 $t->render('single.phtml');
