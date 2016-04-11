@@ -33,6 +33,7 @@ cd ../dl
 cd ../coop
 #python narr_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
 #python narr_solarrad.py $(date -u --date '31 days ago' +'%Y %m %d')
+python ndfd_extract.py
 
 cd ../qc
 python check_n0q.py
