@@ -44,7 +44,7 @@ def do_precip(gribs, ftime, data):
         data['y'] = llcrnry + dy * np.arange(ny)
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
-    d = data['fx'].setdefault(dict(precip=None, high=None, low=None))
+    d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None))
     print("Writting precip %s from ftime: %s" % (key, ftime))
     if d['precip'] is None:
         d['precip'] = sel[0].values
@@ -59,7 +59,7 @@ def do_temp(name, dkey, gribs, ftime, data):
         return
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
-    d = data['fx'].setdefault(dict(precip=None, high=None, low=None))
+    d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None))
     print("Writting %s %s from ftime: %s" % (name, key, ftime))
     d[dkey] = temperature(sel[0].values, 'K').value('F')
 
