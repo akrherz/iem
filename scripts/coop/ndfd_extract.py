@@ -44,11 +44,12 @@ def do_precip(gribs, ftime, data):
         data['y'] = llcrnry + dy * np.arange(ny)
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
+    d = data['fx'].setdefault(dict(precip=None, high=None, low=None))
     print("Writting precip %s from ftime: %s" % (key, ftime))
-    if data['fx'][key]['precip'] is None:
-        data['fx'][key]['precip'] = sel[0].values
+    if d['precip'] is None:
+        d['precip'] = sel[0].values
     else:
-        data['fx'][key]['precip'] += sel[0].values
+        d['precip'] += sel[0].values
 
 
 def do_temp(name, dkey, gribs, ftime, data):
@@ -58,17 +59,14 @@ def do_temp(name, dkey, gribs, ftime, data):
         return
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
+    d = data['fx'].setdefault(dict(precip=None, high=None, low=None))
     print("Writting %s %s from ftime: %s" % (name, key, ftime))
-    data['fx'][key][dkey] = temperature(sel[0].values, 'K').value('F')
+    d[dkey] = temperature(sel[0].values, 'K').value('F')
 
 
 def process(ts):
     """Do Work"""
     data = {'x': None, 'y': None, 'proj': None, 'fx': dict()}
-    for day in range(0, 6):
-        now = ts + datetime.timedelta(days=day)
-        data['fx'][now.strftime("%Y-%m-%d")] = {'high': None, 'low': None,
-                                                'precip': None}
     for fhour in range(1, 200):
         ftime = ts + datetime.timedelta(hours=fhour)
         fn = ("/mesonet/ARCHIVE/data/%s/%02i/%02i/model/ndfd/%02i/"
