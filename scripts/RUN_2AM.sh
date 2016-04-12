@@ -26,6 +26,9 @@ if [ "$DOY" -eq "1" ]
 		python email_iass_report.py weekly	
 fi
 
+cd ../dl
+python download_cfs.py &
+
 cd ../cache
 python warn_cache.py &
 
