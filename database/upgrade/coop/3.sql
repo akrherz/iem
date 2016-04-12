@@ -12,7 +12,8 @@ CREATE TABLE alldata_forecast(
   day date,
   high int,
   low int,
-  precip real
+  precip real,
+  srad real
 );
 GRANT SELECT on alldata_forecast to nobody,apache;
 CREATE INDEX alldata_forecast_idx on alldata_forecast(station, day);
