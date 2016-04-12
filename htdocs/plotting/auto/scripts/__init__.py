@@ -57,9 +57,12 @@ data = {'plots': [
         {'id': "83", 'mw': True,
          'label': ("Period Averages or Totals of X days around a "
                    "given day of the year")},
+        {'id': "140",
+         'label': ("Period Statistics of Temp/Precip/Wind for a date period "
+                   "each year [ASOS/Automated Stations]")},
         {'id': "107", 'mw': True,
          'label': ("Period Statistics of Temp/Precip for a date period "
-                   "each year")},
+                   "each year [COOP/Climate Sites]")},
         {'id': "97", 'mw': True,
          "label": "Period Statistics for an Exact Stretch of Days"},
         {'id': "43",
