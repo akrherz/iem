@@ -43,7 +43,7 @@ def do_agg(dkey, fname, ts, data):
             data['y'] = lat[:, 0]
             data['x'] = lon[0, :]
         ftime = ts + datetime.timedelta(hours=grib.forecastTime)
-        cst = ftime - datetime.timedelta(hours=6)
+        cst = ftime - datetime.timedelta(hours=7)
         key = cst.strftime("%Y-%m-%d")
         d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None,
                                             srad=None))
@@ -62,7 +62,7 @@ def do_temp(dkey, fname, func, ts, data):
     gribs = pygrib.open(fn)
     for grib in gribs:
         ftime = ts + datetime.timedelta(hours=grib.forecastTime)
-        cst = ftime - datetime.timedelta(hours=6)
+        cst = ftime - datetime.timedelta(hours=7)
         key = cst.strftime("%Y-%m-%d")
         if key not in data['fx']:
             continue
