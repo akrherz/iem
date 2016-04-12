@@ -12,6 +12,12 @@ def conv( raw):
         return None
     return float(raw) 
 
+def conv_speed(raw):
+    ''' convert sped to mps units '''
+    if raw in ['99999', '-9999.00']:
+        return None
+    return float(raw) * 0.5144
+
 sts = datetime.datetime(1989, 9, 25)
 ets = datetime.datetime(1989, 9, 26)
 interval = datetime.timedelta(days=1)
@@ -75,7 +81,7 @@ exit
                                 'tmpc': conv(float(tokens[1])),
                                 'dwpc': conv(float(tokens[2])),
                                 'drct': conv(float(tokens[4])),
-                                'smps': myraob.conv_speed(tokens[5]),
+                                'smps': conv_speed(tokens[5]),
                                 'ts': None,
                                 'bearing': None,
                                 'range': None
