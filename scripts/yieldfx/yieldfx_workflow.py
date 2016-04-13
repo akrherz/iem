@@ -73,7 +73,9 @@ def write_and_upload(df, location):
     remotefn = "%s_%s.met" % (location, today.strftime("%Y%m%d"))
     dbx.files_upload(open(tmpfn).read(),
                      "/YieldForecast/Daryl/%s" % (remotefn, ))
-    os.remove(tmpfn)
+    # Save file for usage by web plotting...
+    os.chmod(tmpfn, 0644)
+    os.rename(tmpfn, "/mesonet/share/pickup/yieldfx/%s.txt" % (location,))
 
 
 def qc(df):
