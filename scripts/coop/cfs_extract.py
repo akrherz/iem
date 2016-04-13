@@ -85,6 +85,15 @@ def process(ts):
     return data
 
 
+def bnds(val, lower, upper):
+    """Make sure a value is between the bounds, or else it is None"""
+    if val is None:
+        return None
+    if val < lower or val > upper:
+        return None
+    return val
+
+
 def dbsave(ts, data):
     """Save the data! """
     pgconn = psycopg2.connect(database='coop', host='iemdb')
@@ -119,14 +128,16 @@ def dbsave(ts, data):
         j = np.digitize([nt.sts[sid]['lat']], data['y'])[0]
         for date in data['fx']:
             d = data['fx'][date]
+            high = bnds(temperature(d['high'][j, i], 'K').value('F'), -70, 140)
+            low = bnds(temperature(d['low'][j, i], 'K').value('F'), -90, 120)
+            precip = bnds(round(float(d['precip'][j, i] / 25.4), 2), 0, 30)
+            srad = bnds(d['srad'][j, i] / 1000000., 0, 50)
+            if high is None or low is None or precip is None or srad is None:
+                continue
             cursor.execute("""INSERT into alldata_forecast(modelid,
             station, day, high, low, precip, srad)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (modelid, sid, date,
-                  temperature(d['high'][j, i], 'K').value('F'),
-                  temperature(d['low'][j, i], 'K').value('F'),
-                  round(float(d['precip'][j, i] / 25.4), 2),
-                  d['srad'][j, i] / 1000000.))
+            """, (modelid, sid, date, high, low, precip, srad))
     cursor.close()
     pgconn.commit()
 
