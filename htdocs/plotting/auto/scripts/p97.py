@@ -98,11 +98,12 @@ def plotter(fdict):
                        ) % (date1.strftime("%d %b %Y"),
                             date2.strftime("%d %b %Y"), PDICT2.get(varname),
                             UNITS.get(varname)),
-                subtitle=('%s is compared with 1950-2014 Climatology'
-                          ' when appropriate') % (date1.year,))
+                subtitle=('%s is compared with 1951-%s Climatology'
+                          ' to compute departures'
+                          ) % (date1.year, datetime.date.today().year - 1))
     if varname in ['precip_depart', ]:
-        rng = df[varname].abs().max() * 1.2
-        clevels = np.linspace(0 - rng, rng, 6)
+        rng = df[varname].abs().describe(percentiles=[0.95])['95%']
+        clevels = np.linspace(0 - rng, rng, 7)
         fmt = '%.2f'
     else:
         minv = df[varname].min() - 5
@@ -116,7 +117,7 @@ def plotter(fdict):
                df[varname].values, clevels, clevlabels=clevlabels,
                cmap=cmap, units=UNITS.get(varname))
     m.plot_values(df['lon'].values, df['lat'].values,
-                  df[varname].values, fmt=fmt)
+                  df[varname].values, fmt=fmt, labelbuffer=15)
     if sector == 'IA':
         m.drawcounties()
 

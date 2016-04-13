@@ -43,6 +43,8 @@ data = {'plots': [
         {'id': "86", 'mw': True, 'label': "IEM Daily Reanalysis Plots"},
         {'id': "139",
          'label': "Largest Local Calendar Day Temperature Differences"},
+        {'id': "97", 'mw': True,
+         "label": "Map of Departures/Stats over One Period of Days"},
         {'id': "34", 'mw': True,
          'label': "Max Stretch of Days with High/Low Above/Below Threshold"},
         {'id': "26",
@@ -63,8 +65,6 @@ data = {'plots': [
         {'id': "107", 'mw': True,
          'label': ("Period Statistics of Temp/Precip for a date period "
                    "each year [COOP/Climate Sites]")},
-        {'id': "97", 'mw': True,
-         "label": "Period Statistics for an Exact Stretch of Days"},
         {'id': "43",
          'label': "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
         {'id': "62", 'mw': True,
