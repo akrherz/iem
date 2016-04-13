@@ -38,3 +38,6 @@ fi
 
 cd ../util
 csh BACKUP.csh
+
+cd ../yieldfx
+python yieldfx_workflow.py
