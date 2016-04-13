@@ -16,8 +16,13 @@ import pyproj
 import numpy as np
 import pygrib
 import os
+import logging
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
+
+logging.basicConfig()
+logger = logging.getLogger()
+logger.setLevel(logging.WARNING)
 
 nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
                    'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
@@ -45,7 +50,7 @@ def do_precip(gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None))
-    print("Writting precip %s from ftime: %s" % (key, ftime))
+    logger.debug("Writting precip %s from ftime: %s" % (key, ftime))
     if d['precip'] is None:
         d['precip'] = sel[0].values
     else:
@@ -60,7 +65,7 @@ def do_temp(name, dkey, gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None))
-    print("Writting %s %s from ftime: %s" % (name, key, ftime))
+    logger.debug("Writting %s %s from ftime: %s" % (name, key, ftime))
     d[dkey] = temperature(sel[0].values, 'K').value('F')
 
 
@@ -74,13 +79,22 @@ def process(ts):
               ) % (ts.year, ts.month, ts.day, ts.hour, ts.hour, fhour)
         if not os.path.isfile(fn):
             continue
-        print("-> " + fn)
+        logger.debug("-> " + fn)
         gribs = pygrib.open(fn)
         do_precip(gribs, ftime, data)
         do_temp('Maximum temperature', 'high', gribs, ftime, data)
         do_temp('Minimum temperature', 'low', gribs, ftime, data)
 
     return data
+
+
+def bnds(val, lower, upper):
+    """Make sure a value is between the bounds, or else it is None"""
+    if val is None:
+        return None
+    if val < lower or val > upper:
+        return None
+    return val
 
 
 def dbsave(ts, data):
@@ -95,7 +109,7 @@ def dbsave(ts, data):
         cursor.execute("""DELETE from alldata_forecast where
         modelid = %s""", (modelid,))
         if cursor.rowcount > 0:
-            print("Removed %s previous entries" % (cursor.rowcount,))
+            logger.warn("Removed %s previous entries" % (cursor.rowcount,))
     else:
         cursor.execute("""INSERT into forecast_inventory(model, modelts)
         VALUES ('NDFD', %s) RETURNING id""", (ts,))
@@ -105,7 +119,7 @@ def dbsave(ts, data):
         d = data['fx'][date]
         if (d['high'] is None or d['low'] is None or
                 d['precip'] is None):
-            print("Missing data for date: %s" % (date,))
+            logger.debug("Missing data for date: %s" % (date,))
             del(data['fx'][date])
 
     for sid in nt.sts.keys():
@@ -117,20 +131,26 @@ def dbsave(ts, data):
         j = np.digitize([y], data['y'])[0]
         for date in data['fx']:
             d = data['fx'][date]
+            high = bnds(float(d['high'][j, i]), -70, 140)
+            low = bnds(float(d['low'][j, i]), -90, 100)
+            precip = bnds(float(d['precip'][j, i] / 25.4), 0, 30)
+            if high is None or low is None or precip is None:
+                continue
             cursor.execute("""INSERT into alldata_forecast(modelid,
             station, day, high, low, precip)
             VALUES (%s, %s, %s, %s, %s, %s)
-            """, (modelid, sid, date, float(d['high'][j, i]),
-                  float(d['low'][j, i]),
-                  round(float(d['precip'][j, i] / 25.4), 2)))
+            """, (modelid, sid, date, high, low, round(precip, 2)))
     cursor.close()
     pgconn.commit()
 
 
 def main(argv):
     """Go!"""
-    # Extract 12 UTC Data
-    ts = datetime.datetime.utcnow()
+    # Extract 00 UTC Data
+    if len(argv) == 4:
+        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
+    else:
+        ts = datetime.datetime.utcnow()
     ts = ts.replace(tzinfo=pytz.timezone("UTC"), hour=0, minute=0, second=0,
                     microsecond=0)
     data = process(ts)
