@@ -78,7 +78,7 @@ def write_and_upload(df, location):
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0644)
     # os.rename fails here due to cross device link bug
-    subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.txt"
+    subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.met"
                      ) % (tmpfn, location), shell=True)
 
 
