@@ -11,7 +11,10 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['description'] = """This plot presents the frequency of a given hourly
-    temperature being within the bounds of two temperature thresholds.
+    temperature being within the bounds of two temperature thresholds. The
+    hour is specified in UTC (Coordinated Universal Time) and observations
+    are rounded forward in time such that an observation at :54 after the
+    hour is moved to the top of the hour.
     """
     d['data'] = True
     d['arguments'] = [
@@ -43,23 +46,32 @@ def plotter(fdict):
 
     df = read_sql("""
     WITH obs as (
-        SELECT date_trunc('hour', valid) as t, avg(tmpf) as tmp from alldata
+        SELECT date_trunc('hour', valid) as t,
+        round(avg(tmpf)::numeric, 0) as tmp from alldata
         WHERE station = %s and (extract(minute from valid) > 50 or
         extract(minute from valid) = 10) and
         extract(hour from valid at time zone 'UTC') = %s and tmpf is not null
         GROUP by t
     )
     SELECT extract(month from t) as month,
-    sum(case when round(tmp::numeric,0) >= %s
-        and round(tmp::numeric,0) <= %s then 1 else 0 end) as hits,
+    sum(case when tmp >= %s and tmp <= %s then 1 else 0 end) as hits,
+    sum(case when tmp > %s then 1 else 0 end) as above,
+    sum(case when tmp < %s then 1 else 0 end) as below,
     count(*) from obs GROUP by month ORDER by month ASC
-    """, pgconn, params=(station, hour, t1, t2), index_col='month')
+    """, pgconn, params=(station, hour, t1, t2, t2, t1), index_col='month')
     df['freq'] = df['hits'] / df['count'] * 100.
+    df['above_freq'] = df['above'] / df['count'] * 100.
+    df['below_freq'] = df['below'] / df['count'] * 100.
     (fig, ax) = plt.subplots(1, 1)
-    bars = ax.bar(np.arange(1, 13) - 0.4, df['freq'], fc='blue')
+    bars = ax.bar(np.arange(1, 13) - 0.4, df['freq'], fc='tan',
+                  label='%s - %s' % (t1, t2), zorder=2)
+    ax.scatter(df.index.values, df['above_freq'], marker='s', s=40,
+               label="Above %s" % (t2,), color='r', zorder=3)
+    ax.scatter(df.index.values, df['below_freq'], marker='s', s=40,
+               label="Below %s" % (t1,), color='b', zorder=3)
     for i, bar in enumerate(bars):
         ax.text(i+1, bar.get_height()+3, "%.1f%%" % (bar.get_height(),),
-                ha='center', fontsize=12)
+                ha='center', fontsize=12, zorder=4)
     ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.grid(True)
@@ -74,5 +86,7 @@ def plotter(fdict):
                   "Temp between %s$^\circ$F and %s$^\circ$F"
                   ) % (nt.sts[station]['name'], station, hour,
                        localt.strftime("%-I %p"), t1, t2))
-
+    ax.legend(loc=(0.05, -0.14), ncol=3, fontsize=14)
+    pos = ax.get_position()
+    ax.set_position([pos.x0, pos.y0 + 0.07, pos.width, pos.height * 0.93])
     return fig, df
