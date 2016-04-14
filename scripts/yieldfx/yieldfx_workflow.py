@@ -18,6 +18,7 @@ from pyiem.datatypes import temperature, distance
 from pyiem.meteorology import gdd
 import psycopg2
 import os
+import subprocess
 from pyiem.util import get_properties
 
 XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
@@ -72,10 +73,13 @@ def write_and_upload(df, location):
     today = datetime.date.today()
     remotefn = "%s_%s.met" % (location, today.strftime("%Y%m%d"))
     dbx.files_upload(open(tmpfn).read(),
-                     "/YieldForecast/Daryl/%s" % (remotefn, ))
+                     "/YieldForecast/Daryl/%s" % (remotefn, ),
+                     mode=dropbox.files.WriteMode.overwrite)
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0644)
-    os.rename(tmpfn, "/mesonet/share/pickup/yieldfx/%s.txt" % (location,))
+    # os.rename fails here due to cross device link bug
+    subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.txt"
+                     ) % (tmpfn, location), shell=True)
 
 
 def qc(df):
