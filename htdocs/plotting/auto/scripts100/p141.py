@@ -10,7 +10,7 @@ from pyiem.datatypes import temperature, distance
 
 STATIONS = OrderedDict([
         ('ames', 'Ames'),
-        ('cobbs', 'Cobbs'),
+        ('cobs', 'COBS (Ames)'),
         ('crawfordsville', 'Crawfordsville'),
         ('lewis', 'Lewis'),
         ('nashua', 'Nashua'),
