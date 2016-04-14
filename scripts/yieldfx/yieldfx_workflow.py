@@ -31,7 +31,7 @@ XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
 
 def p(val, prec):
     if val is None or np.isnan(val):
-        return 'M'
+        return '?'
     _fmt = "%%.%sf" % (prec,)
     return _fmt % (val,)
 
@@ -44,19 +44,19 @@ def write_and_upload(df, location):
     for line in open("baseline/%s.txt" % (location, )):
         if line.startswith("year"):
             break
-        os.write(tmpfd, line.strip()+"\n")
-    os.write(tmpfd, ('! auto-generated at %sZ by daryl akrherz@iastate.edu\n'
+        os.write(tmpfd, line.strip()+"\r\n")
+    os.write(tmpfd, ('! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n'
                      ) % (datetime.datetime.utcnow().isoformat(),))
     fmt = ("%-10s%-10s%-10s%-10s%-10s%-10s"
-           "%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\n")
+           "%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n")
     os.write(tmpfd, fmt % ('year', 'day', 'radn', 'maxt', 'mint', 'rain',
                            'gdd', 'st4', 'st12', 'st24', 'st50',
                            'sm12', 'sm24', 'sm50'))
     os.write(tmpfd, fmt % ('()', '()', '(MJ/m^2)', '(oC)', '(oC)', '(mm)',
                            '(oF)', '(oC)', '(oC)', '(oC)', '(oC)',
-                           '(1)', '(1)', '(1)'))
-    fmt = ("%-10i%-10i%-10s%-10s%-10s%-10s%-10s"
-           "%-10s%-10s%-10s%-10s%-10s%-10s%-10s\n")
+                           '(mm/mm)', '(mm/mm)', '(mm/mm)'))
+    fmt = (" %-9i%-10i%-10s%-10s%-10s%-10s%-10s"
+           "%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n")
     for valid, row in df.iterrows():
         os.write(tmpfd, fmt % (valid.year,
                                int(valid.strftime("%j")),
