@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 31%{?dist}
+Release: 32%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -101,6 +101,7 @@ Requires: jenks
 Requires: windrose
 Requires: net-tools
 Requires: service_identity
+Requires: characteristic
 Requires: XlsxWriter
 Requires: python-requests
 Requires: requests-toolbelt
@@ -137,6 +138,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Thu Apr 14 2016 daryl herzmann <akrherz@iastate.edu>
+- Added characteristic for service_identity
+
 * Mon Apr 11 2016 daryl herzmann <akrherz@iastate.edu>
 - Added dropbox for yield project
 
