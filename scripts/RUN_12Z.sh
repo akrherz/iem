@@ -16,6 +16,9 @@ python compute_daily.py $(date -u --date '2 days ago' +'%Y %m %d')
 cd ../dailyb
 python spammer.py
 
+cd ../dl
+python fill_mrms_holes.py
+
 cd ../coop
 python cfs_extract.py &
 
