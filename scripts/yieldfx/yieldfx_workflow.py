@@ -22,7 +22,7 @@ import subprocess
 from pyiem.util import get_properties
 
 XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
-        'cobbs': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
+        'cobs': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
         'crawfordsville': {'isusm': 'CRFI4', 'climodat': 'IA8688'},
         'lewis': {'isusm': 'OKLI4', 'climodat': 'IA0364'},
         'nashua': {'isusm': 'NASI4', 'climodat': 'IA1402'},
