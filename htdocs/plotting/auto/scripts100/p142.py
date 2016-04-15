@@ -113,7 +113,7 @@ def plotter(fdict):
     ax.legend(ncol=3, fontsize=12, loc='best')
     ax.text(1, -0.12, "%s to %s" % (sts.strftime("%-d %b %Y"),
                                     ets.strftime("%-d %b %Y")), va='bottom',
-            ha='right', textsize=12, transform=ax.transAxes)
+            ha='right', fontsize=12, transform=ax.transAxes)
 
     return fig, df
 
