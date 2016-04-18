@@ -31,7 +31,7 @@ XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
 
 def p(val, prec):
     if val is None or np.isnan(val):
-        return '?'
+        return '99'
     _fmt = "%%.%sf" % (prec,)
     return _fmt % (val,)
 
@@ -90,7 +90,7 @@ def qc(df):
 
 def load_baseline(location):
     """return a dataframe of this location's data"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb')
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     df = read_sql("""
         SELECT *, extract(doy from valid) as doy,
         extract(year from valid) as year
@@ -105,15 +105,12 @@ def load_baseline(location):
 
 def replace_forecast(df, location):
     """Replace dataframe data with forecast for this location"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb')
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     today = datetime.date.today()
-    jan1 = today.replace(month=1, day=1)
     coop = XREF[location]['climodat']
     years = [int(y) for y in np.arange(df.index.values.min().year,
                                        df.index.values.max().year + 1)]
-    if jan1.year in years:
-        years.remove(jan1.year)
     cursor.execute("""
         SELECT day, high, low, precip from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'NDFD'
@@ -128,10 +125,21 @@ def replace_forecast(df, location):
         for year in years:
             df.loc[valid.replace(year=year), rcols] = (maxc, minc, rain)
 
+    # Need to get radiation from CFS
+    cursor.execute("""
+        SELECT day, srad from alldata_forecast WHERE
+        modelid = (SELECT id from forecast_inventory WHERE model = 'CFS'
+        ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
+    """, (coop, today))
+    for row in cursor:
+        valid = row[0]
+        for year in years:
+            df.loc[valid.replace(year=year), 'radn'] = row[1]
+
 
 def replace_cfs(df, location):
     """Replace the CFS data for this year!"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb')
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     coop = XREF[location]['climodat']
     today = datetime.date.today() + datetime.timedelta(days=3)
@@ -157,7 +165,7 @@ def replace_obs(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     isusm = XREF[location]['isusm']
     today = datetime.date.today()
@@ -191,7 +199,7 @@ def replace_obs(df, location):
                                                        row[9], row[10])
     # Go get precip from Climodat
     coop = XREF[location]['climodat']
-    pgconn = psycopg2.connect(database='coop', host='iemdb')
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT day, precip from alldata_ia where year = %s and station = %s
