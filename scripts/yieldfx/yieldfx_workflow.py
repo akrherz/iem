@@ -41,7 +41,7 @@ def write_and_upload(df, location):
     props = get_properties()
     dbx = dropbox.Dropbox(props.get('dropbox.token'))
     (tmpfd, tmpfn) = tempfile.mkstemp()
-    for line in open("baseline/%s.txt" % (location, )):
+    for line in open("baseline/%s.met" % (location, )):
         if line.startswith("year"):
             break
         os.write(tmpfd, line.strip()+"\r\n")
@@ -172,12 +172,11 @@ def replace_obs(df, location):
     jan1 = today.replace(month=1, day=1)
     years = [int(y) for y in np.arange(df.index.values.min().year,
                                        df.index.values.max().year + 1)]
-    # TODO: support the ugliness of Leap day
+
     cursor.execute("""
         select valid, tair_c_max, tair_c_min, slrmj_tot, vwc_12_avg,
         vwc_24_avg, vwc_50_avg, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg
-        from sm_daily WHERE station = %s and valid >= %s and
-        to_char(valid, 'mmdd') != '0229'
+        from sm_daily WHERE station = %s and valid >= %s
         """, (isusm, jan1))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'sm12', 'sm24', 'sm50',
              'st4', 'st12', 'st24', 'st50', ]
@@ -185,6 +184,8 @@ def replace_obs(df, location):
         valid = row[0]
         _gdd = gdd(temperature(row[1], 'C'), temperature(row[2], 'C'))
         for year in years:
+            if valid.month == 2 and valid.day == 29 and year % 4 != 0:
+                continue
             if (year == jan1.year and
                     not np.isnan(df.at[valid.replace(year=jan1.year),
                                        'maxt'])):
@@ -203,12 +204,14 @@ def replace_obs(df, location):
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT day, precip from alldata_ia where year = %s and station = %s
-        and day < %s and sday != '0229'
+        and day < %s
         """, (jan1.year, coop, today))
     for row in cursor:
         valid = row[0]
         pcpn = distance(row[1], 'IN').value('MM')
         for year in years:
+            if valid.month == 2 and valid.day == 29 and year % 4 != 0:
+                continue
             df.at[valid.replace(year=year), 'rain'] = pcpn
 
 
