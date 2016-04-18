@@ -89,20 +89,20 @@ def plotter(fdict):
     resdf['doy'] = thisyear['doy']
     resdf.reset_index(inplace=True)
     resdf.set_index('doy', inplace=True)
-    for ptype, unit in zip(['gdd', 'rain'], ['F', 'in']):
-        resdf[ptype+'cum_climo[%s]' % (unit, )
-              ] = cdf.groupby('doy')[ptype+'cum'].mean()
-        resdf[ptype+'cum_min[%s]' % (unit, )
-              ] = df.groupby('doy')[ptype+'cum'].min()
-        resdf[ptype+'cum_max[%s]' % (unit, )
-              ] = df.groupby('doy')[ptype+'cum'].max()
-    for ptype in ['maxt', 'mint']:
-        resdf[ptype+'_climo[F]'] = temperature(
-            cdf.groupby('doy')[ptype].mean().values, 'C').value('F')
-        resdf[ptype+'_min[F]'] = temperature(
-            df.groupby('doy')[ptype].min().values, 'C').value('F')
-        resdf[ptype+'_max[F]'] = temperature(
-            df.groupby('doy')[ptype].max().values, 'C').value('F')
+    for _ptype, unit in zip(['gdd', 'rain'], ['F', 'in']):
+        resdf[_ptype+'cum_climo[%s]' % (unit, )
+              ] = cdf.groupby('doy')[_ptype+'cum'].mean()
+        resdf[_ptype+'cum_min[%s]' % (unit, )
+              ] = df.groupby('doy')[_ptype+'cum'].min()
+        resdf[_ptype+'cum_max[%s]' % (unit, )
+              ] = df.groupby('doy')[_ptype+'cum'].max()
+    for _ptype in ['maxt', 'mint']:
+        resdf[_ptype+'_climo[F]'] = temperature(
+            cdf.groupby('doy')[_ptype].mean().values, 'C').value('F')
+        resdf[_ptype+'_min[F]'] = temperature(
+            df.groupby('doy')[_ptype].min().values, 'C').value('F')
+        resdf[_ptype+'_max[F]'] = temperature(
+            df.groupby('doy')[_ptype].max().values, 'C').value('F')
 
     (fig, ax) = plt.subplots(1, 1)
     if ptype in ['gdd', 'rain']:
