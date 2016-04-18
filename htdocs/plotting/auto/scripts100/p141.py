@@ -1,6 +1,3 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-import numpy as np
 import calendar
 import pandas as pd
 import datetime
@@ -41,7 +38,7 @@ def load(dirname, location):
     """ Read a file please """
     data = []
     idx = []
-    for line in open("%s/%s.txt" % (dirname, location)):
+    for line in open("%s/%s.met" % (dirname, location)):
         line = line.strip()
         if not line.startswith('19') and not line.startswith('20'):
             continue
@@ -84,9 +81,30 @@ def plotter(fdict):
                location)
 
     today = datetime.date.today()
+    thisyear = df[df['year'] == today.year]
+
+    # Create a specialized result dataframe for CSV, Excel output options
+    resdf = pd.DataFrame(index=thisyear.index)
+    resdf.index.name = 'date'
+    resdf['doy'] = thisyear['doy']
+    resdf.reset_index(inplace=True)
+    resdf.set_index('doy', inplace=True)
+    for ptype, unit in zip(['gdd', 'rain'], ['F', 'in']):
+        resdf[ptype+'cum_climo[%s]' % (unit, )
+              ] = cdf.groupby('doy')[ptype+'cum'].mean()
+        resdf[ptype+'cum_min[%s]' % (unit, )
+              ] = df.groupby('doy')[ptype+'cum'].min()
+        resdf[ptype+'cum_max[%s]' % (unit, )
+              ] = df.groupby('doy')[ptype+'cum'].max()
+    for ptype in ['maxt', 'mint']:
+        resdf[ptype+'_climo[F]'] = temperature(
+            cdf.groupby('doy')[ptype].mean().values, 'C').value('F')
+        resdf[ptype+'_min[F]'] = temperature(
+            df.groupby('doy')[ptype].min().values, 'C').value('F')
+        resdf[ptype+'_max[F]'] = temperature(
+            df.groupby('doy')[ptype].max().values, 'C').value('F')
 
     (fig, ax) = plt.subplots(1, 1)
-    thisyear = df[df['year'] == today.year]
     if ptype in ['gdd', 'rain']:
         ax.plot(thisyear['doy'], thisyear[ptype+'cum'], zorder=4, color='b',
                 lw=2, label='%s Obs + CFS Forecast' % (today.year,))
@@ -125,7 +143,7 @@ def plotter(fdict):
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0 + 0.05, pos.width, pos.height * 0.95])
 
-    return fig, df
+    return fig, resdf
 
 if __name__ == '__main__':
     plotter(dict())
