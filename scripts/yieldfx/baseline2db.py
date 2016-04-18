@@ -8,7 +8,7 @@ pgconn = psycopg2.connect(database='coop', host='iemdb')
 cursor = pgconn.cursor()
 
 os.chdir('baseline')
-for fn in glob.glob("*.txt"):
+for fn in glob.glob("*.met"):
     location = fn[:-4]
     cursor.execute("""
         DELETE from yieldfx_baseline where station = %s
