@@ -20,6 +20,16 @@
   $services = array();
 
   $services[] = Array(
+  		"title" => "IEM Tracked Networks Metadata",
+  		"url" => "/geojson/networks.geojson",
+  		"desc" => "A GeoJSON listing of IEM labelled networks.",
+  		"vars" => Array(
+  				),
+  		"example" => Array(
+  				)
+  		);
+  
+  $services[] = Array(
   		"title" => "NWS Impact Based Warnings Tags",
   		"url" => "/json/ibw_tags.py?year={year}&amp;wfo={wfo}",
   		"desc" => "Produces a listing of Impact Warning Tags used in Severe
