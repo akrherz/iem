@@ -1,7 +1,13 @@
 import psycopg2
 import calendar
 import numpy as np
+from collections import OrderedDict
 from pandas.io.sql import read_sql
+
+PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
+                     ('PCT HARVESTED', 'Harvest (Grain)')])
+PDICT2 = OrderedDict([('CORN', 'Corn'),
+                      ('SOYBEANS', 'Soybean')])
 
 
 def get_description():
@@ -12,7 +18,11 @@ def get_description():
     d['description'] = """This chart presents harvest or planting progress."""
     d['arguments'] = [
         dict(type='state', name='state', default='IA',
-             label='Select State:')
+             label='Select State:'),
+        dict(type='select', name='unit_desc', default='PCT HARVESTED',
+             options=PDICT, label='Which Operation?'),
+        dict(type='select', name='commodity_desc', default='CORN',
+             options=PDICT2, label='Which Crop?'),
     ]
     return d
 
@@ -26,14 +36,21 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     state = fdict.get('state', 'IA')[:2]
+    unit_desc = fdict.get('unit_desc', 'PCT HARVESTED').upper()
+    commodity_desc = fdict.get('commodity_desc', 'CORN').upper()
+
+    util_practice_desc = ('GRAIN' if (unit_desc == 'PCT HARVESTED' and
+                                      commodity_desc == 'CORN')
+                          else 'ALL UTILIZATION PRACTICES')
 
     df = read_sql("""
         select year, week_ending, num_value from nass_quickstats
-        where commodity_desc = 'CORN' and statisticcat_desc = 'PROGRESS'
-        and unit_desc = 'PCT HARVESTED' and state_alpha = %s and
-        util_practice_desc = 'GRAIN'
+        where commodity_desc = %s and statisticcat_desc = 'PROGRESS'
+        and unit_desc = %s and state_alpha = %s and
+        util_practice_desc = %s and num_value is not null
         ORDER by week_ending ASC
-    """, pgconn, params=(state,), index_col=None)
+    """, pgconn, params=(commodity_desc, unit_desc, state, util_practice_desc),
+                  index_col=None)
     if len(df.index) == 0:
         return "ERROR: No data found!"
     df['yeari'] = df['year'] - df['year'].min()
@@ -78,15 +95,19 @@ def plotter(fdict):
     fig.colorbar(res)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_xlim(200, 360)
+    # We need to compute the domain of this plot
+    maxv = np.max(data, 0)
+    minv = np.min(data, 0)
+    ax.set_xlim(np.argmin(maxv > 0) - 7, np.argmax(minv > 99) + 7)
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
     ax.grid(True)
     lastweek = df['week_ending'].max()
     ax.set_xlabel("X denotes %s value of %.0f%%" % (
                         lastweek.strftime("%d %b %Y"), dlast))
-    ax.set_title(("USDA NASS %i-%i %s Corn Harvest Progress\n"
+    ax.set_title(("USDA NASS %i-%i %s %s %s Progress\n"
                   "Daily Linear Interpolated Values Between Weekly Reports"
-                  ) % (year0, lastyear, state))
+                  ) % (year0, lastyear, state, PDICT2.get(commodity_desc),
+                       PDICT.get(unit_desc)))
 
     return fig, df
 
