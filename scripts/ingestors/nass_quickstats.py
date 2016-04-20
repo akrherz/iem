@@ -39,12 +39,9 @@ def database(df):
     cursor.execute("""SET TIME ZONE 'UTC'""")
     df.columns = [x.lower() for x in df.columns]
     df = df.where((pd.notnull(df)), None)
+    df['num_value'] = pd.to_numeric(df['value'], errors='coerse')
     df2 = df[df['commodity_desc'].isin(['CORN', 'SOYBEANS'])]
     for _, row in df2.iterrows():
-        try:
-            value = float(row['value'].replace(",", ""))
-        except:
-            value = None
         try:
             # If we are not in addall mode, we have to be careful!
             cursor.execute("""INSERT into nass_quickstats(source_desc, sector_desc,
@@ -94,7 +91,7 @@ def database(df):
                   row['load_time'],
                   row['value'],
                   row['cv_%'],
-                  value))
+                  row['num_value']))
         except Exception, exp:
             print exp
             for key in row.keys():
