@@ -11,3 +11,4 @@ Options +ExecCGI
 
 # 
 RewriteRule ^smplot/([0-9]{1,12})/(.*).png$ isusm.py?t=$1&v=$2
+RewriteRule isusm.csv nmp_csv.py
