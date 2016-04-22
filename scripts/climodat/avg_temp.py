@@ -44,7 +44,7 @@ def runYear(year):
                 subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
                 axisbg='white')
     m.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
-                  labelcolor='tan')
+                  labelcolor='tan', fmt='%.1f')
     pqstr = "plot m %s bogus %s/summary/avg_high.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
     m.postprocess(pqstr=pqstr)
@@ -70,7 +70,7 @@ def runYear(year):
                 subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
                 axisbg='white')
     m.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
-                  labelcolor='tan')
+                  labelcolor='tan', fmt='%.1f')
     pqstr = "plot m %s bogus %s/summary/avg_low.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
     m.postprocess(pqstr=pqstr)
