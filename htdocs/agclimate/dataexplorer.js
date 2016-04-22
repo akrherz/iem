@@ -1,6 +1,7 @@
 var map, gj, dtpicker, n0q;
 var varname = 'tmpf';
 var currentdt = new Date(defaultdt);
+var timeChanged = false;
 
 function pad(number) {
     var r = String(number);
@@ -38,13 +39,20 @@ if ( !Date.prototype.toISOString ) {
 	}
 
 function logic( dstring ){
+	//console.log("logic() was called...");
+	timeChanged = true;
 	currentdt = dtpicker.datetimepicker('getDate'); // toISOString()
 	updateMap();
 }
 function updateTitle(){
 	$('#maptitle').text("The map is displaying "
 			+ $('#varpicker :selected').text() + " valid at "+ currentdt);
-	window.location.href = '#'+ varname +'/'+ currentdt.toISOString();
+	//console.log("updateTitle()..."+ timeChanged);
+	if (timeChanged){
+		window.location.href = '#'+ varname +'/'+ currentdt.toISOString();
+	} else {
+		window.location.href = '#'+ varname;		
+	}
 }
 
 function updateMap(){
@@ -162,6 +170,7 @@ $().ready(function(){
 			   $('#varpicker').val(varname);
 			   if (tokens2.length == 2){
 				   currentdt = (new Date(Date.parse(tokens2[1])));
+				   timeChanged = true;
 			   }
 			   gj.redraw();
 		   }
@@ -181,6 +190,7 @@ function setDate(){
 }
 
 $('#plusonehour').click(function(e){
+	timeChanged = true;
 	$(this).removeClass('focus');	
 	currentdt = new Date(currentdt.valueOf() + 3600000);
 	   setDate();
@@ -188,6 +198,7 @@ $('#plusonehour').click(function(e){
 });
 
 $('#minusonehour').click(function(e){
+	timeChanged = true;
 	$(this).removeClass('focus');
 	currentdt = new Date(currentdt.valueOf() - 3600000);
 	setDate();
@@ -195,6 +206,7 @@ $('#minusonehour').click(function(e){
 });
 
 $('#minusoneday').click(function(e){
+	timeChanged = true;
 	$(this).removeClass('focus');
 	currentdt = new Date(currentdt.valueOf() - (24 * 3600000));
 	setDate();
@@ -202,6 +214,7 @@ $('#minusoneday').click(function(e){
 });
 
 $('#plusoneday').click(function(e){
+	timeChanged = true;
 	$(this).removeClass('focus');
 	currentdt = new Date(currentdt.valueOf() + (24 * 3600000));
 	setDate();
