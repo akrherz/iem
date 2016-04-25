@@ -66,8 +66,6 @@ def main(argv):
     """Do Something"""
     ets = datetime.datetime.utcnow().replace(minute=0, second=0,
                                              microsecond=0)
-    # Don't run too aggressively up until the current time
-    ets -= datetime.timedelta(minutes=15)
     sts = ets - datetime.timedelta(hours=24)
     [do(prod, sts, ets) for prod in PRODS]
 
