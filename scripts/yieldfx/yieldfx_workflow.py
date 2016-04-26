@@ -8,6 +8,7 @@
  - Upload the resulting file <site>_YYYYmmdd.met
 """
 import dropbox
+import requests
 import sys
 import datetime
 import numpy as np
@@ -34,6 +35,30 @@ def p(val, prec):
         return '99'
     _fmt = "%%.%sf" % (prec,)
     return _fmt % (val,)
+
+
+def upload_summary_plots():
+    """Some additional work"""
+    props = get_properties()
+    dbx = dropbox.Dropbox(props.get('dropbox.token'))
+    for location in XREF:
+        for interval in ['mar15', 'nov1']:
+            (tmpfd, tmpfn) = tempfile.mkstemp()
+            uri = ("http://iem.local/plotting/auto/plot/143/"
+                   "location:%s::s:%s::dpi:100.png"
+                   ) % (location, interval)
+            res = requests.get(uri)
+            os.write(tmpfd, res.content)
+            os.close(tmpfd)
+            today = datetime.date.today()
+            remotefn = "%s_%s_%s.png" % (location, today.strftime("%Y%m%d"),
+                                         interval)
+            dbx.files_upload(
+                open(tmpfn).read(),
+                ("/YieldForecast/Daryl/2016 vs other years plots/%s"
+                 ) % (remotefn, ),
+                mode=dropbox.files.WriteMode.overwrite)
+            os.unlink(tmpfn)
 
 
 def write_and_upload(df, location):
@@ -241,6 +266,8 @@ def do(location):
     qc(df)
     # 8. Write and upload the file
     write_and_upload(df, location)
+    # 9. Upload summary plots
+    upload_summary_plots()
 
 
 def main(argv):
