@@ -4,21 +4,20 @@
 import sys
 import numpy
 
-import mx.DateTime
-now = mx.DateTime.now()
-
+import datetime
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor()
-
 from pyiem.plot import MapPlot
 from pyiem.datatypes import speed
+
+now = datetime.datetime.now()
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
   select s.id, s.network,
   ST_x(s.geom) as lon, ST_y(s.geom) as lat,
-  case when c.max_sknt > c.max_gust then c.max_sknt else c.max_gust END as wind
+  greatest(c.max_sknt, c.max_gust) as wind
   from summary_%s c, current c2, stations s
   WHERE s.iemid = c.iemid and c2.valid > 'TODAY' and c.day = 'TODAY'
   and c2.iemid = s.iemid
