@@ -6,7 +6,7 @@ import pandas as pd
 QRE = re.compile("q=([0-9]+)")
 # Some autoplots will likely never see a feature
 NO_FEATURES = [17, 49, 50, 51, 110, 111, 112, 113, 114, 115, 116, 117,
-               118, 119, 120, 121, 122, 123, 124]
+               118, 119, 120, 121, 122, 123, 124, 143, 141]
 
 pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
