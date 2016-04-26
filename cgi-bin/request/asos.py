@@ -13,7 +13,8 @@ from pyiem.datatypes import temperature
 from pyiem import meteorology
 
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+acursor = ASOS.cursor('mystream',
+                      cursor_factory=psycopg2.extras.DictCursor)
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
