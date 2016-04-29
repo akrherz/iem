@@ -1,12 +1,12 @@
-""" Accumulate PET for this year and previous ones """
-import iemdb
-ISUAG = iemdb.connect('squaw', bypass=True)
-icursor = ISUAG.cursor()
+import psycopg2
 import numpy.ma
 import datetime
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+ISUAG = psycopg2.connect(database='squaw', host='iemdb')
+icursor = ISUAG.cursor()
 (fig, ax) = plt.subplots(1, 1)
 
 icursor.execute("""SELECT date(valid) as d, max(cfs) from real_flow

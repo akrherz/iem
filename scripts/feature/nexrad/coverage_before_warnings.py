@@ -134,8 +134,8 @@ def run():
                         "1 PM", "2 PM"])
     ax.set_ylabel("Times are always Central Daylight Time")
     ax.set_xlabel("Partitioned by month, %.0f total days" % (np.sum(total), ))
-    ax.text(0, -0.06, "Events\nNo 'Storms'", transform=ax.transAxes, ha='right',
-            va='top')
+    ax.text(0, -0.06, "Events\nNo 'Storms'", transform=ax.transAxes,
+            ha='right', va='top')
     ax.set_position([0.15, 0.15, 0.6, 0.75])
     fig.savefig('test.png')
 
