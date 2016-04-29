@@ -24,6 +24,7 @@ PLOTS = OrderedDict([
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """ """
     d['arguments'] = [
         dict(type='select', name='location', default='ames',
@@ -81,14 +82,21 @@ def plotter(fdict):
                location)
 
     today = datetime.date.today()
-    thisyear = df[df['year'] == today.year]
+    thisyear = df[df['year'] == today.year].copy()
+    thisyear.reset_index(inplace=True)
+    thisyear.set_index('doy', inplace=True)
 
     # Create a specialized result dataframe for CSV, Excel output options
     resdf = pd.DataFrame(index=thisyear.index)
     resdf.index.name = 'date'
-    resdf['doy'] = thisyear['doy']
+    resdf['doy'] = thisyear.index.values
     resdf.reset_index(inplace=True)
     resdf.set_index('doy', inplace=True)
+
+    # write current year data back to resdf
+    for _v, _u in zip(['gddcum', 'raincum', 'mint', 'maxt'],
+                      ['F', 'in', 'F', 'F']):
+        resdf["%s[%s]" % (_v, _u)] = thisyear[_v]
     for _ptype, unit in zip(['gdd', 'rain'], ['F', 'in']):
         resdf[_ptype+'cum_climo[%s]' % (unit, )
               ] = cdf.groupby('doy')[_ptype+'cum'].mean()
@@ -106,7 +114,8 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
     if ptype in ['gdd', 'rain']:
-        ax.plot(thisyear['doy'], thisyear[ptype+'cum'], zorder=4, color='b',
+        ax.plot(thisyear.index.values, thisyear[ptype+'cum'], zorder=4,
+                color='b',
                 lw=2, label='%s Obs + CFS Forecast' % (today.year,))
         climo = cdf.groupby('doy')[ptype+'cum'].mean()
         ax.plot(climo.index.values, climo.values, lw=2, color='k',
@@ -116,7 +125,7 @@ def plotter(fdict):
         ax.fill_between(xrng.index.values, nrng.values, xrng.values,
                         color='tan', label="Range", zorder=2)
     else:
-        ax.plot(thisyear['doy'],
+        ax.plot(thisyear.index.values,
                 temperature(thisyear[ptype], 'C').value('F'),
                 zorder=4, color='b',
                 lw=2, label='%s Obs + CFS Forecast' % (today.year,))
