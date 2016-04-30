@@ -19,7 +19,7 @@ icursor = pgconn.cursor()
 utcnow = datetime.datetime.utcnow()
 for i in range(10):
     now = utcnow - datetime.timedelta(hours=i)
-    fn = "/mesonet/data/madis/mesonet/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
+    fn = "/mesonet/data/madis/mesonet1/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
     if os.path.isfile(fn):
         break
 

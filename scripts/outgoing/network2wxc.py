@@ -15,7 +15,6 @@ network = sys.argv[1]
 wxcfn = sys.argv[2]
 
 utc = datetime.datetime.utcnow()
-#utc = datetime.datetime(2013,3,9,22)
 utc = utc.replace(tzinfo=pytz.timezone("UTC"))
 
 
@@ -40,18 +39,18 @@ out.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
 fn = None
 for i in range(4):
     now= utc - datetime.timedelta(hours=i)
-    testfn = now.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
+    testfn = now.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
     if os.path.isfile(testfn):
         fn = testfn
         break
 
 if fn is None:
     sys.exit()
-    
+
 indices = {}
 BOGUS = datetime.datetime(2000,1,1)
 BOGUS = BOGUS.replace(tzinfo=pytz.timezone("UTC"))
-    
+
 nc = netCDF4.Dataset(fn, 'r')
 
 for i,provider in enumerate(nc.variables["dataProvider"][:]):
@@ -65,6 +64,7 @@ for i,provider in enumerate(nc.variables["dataProvider"][:]):
 
     if ts > indices.get(sid, {'ts': BOGUS})['ts']:
         indices[sid] = {'ts': ts, 'idx': i}
+
 
 def s(val):
     try:
@@ -104,20 +104,20 @@ for sid in indices:
     sped = "M"
     if smps != "M":
         sped = "%5.1f" % (nc.variables['windSpeed'][idx] * 2.23694,)
-        
+
     wcht = "M"
     if tmpf != "M" and sped != "M":
         t = temperature(nc.variables['temperature'][idx], 'K')
         sped = speed( nc.variables['windSpeed'][idx], 'MPS')
         wcht = "%5.1f" % (meteorology.windchill(t, sped).value("F"),) 
-        
+
     ts = indices[sid]['ts']
-    
+
     out.write("%5.5s %25.25s %8.4f %10.4f %02i %02i %5s %5s %5s %5s %5s %5s\n" % (sid, name, latitude,
                                                    longitude, ts.hour,
                                                    ts.minute, tmpf, dwpf,
                                                    drct, sped, heat, wcht))
-    
+
 nc.close()
 out.close()
 pqstr = "data c 000000000000 wxc/wxc_%s.txt bogus txt" % (network.lower(),)
