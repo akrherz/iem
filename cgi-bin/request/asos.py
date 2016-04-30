@@ -19,6 +19,21 @@ MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
+def check_load():
+    """A crude check that aborts this script if there is too much
+    demand at the moment"""
+    mcursor.execute("""
+    select pid from pg_stat_activity where query ~* 'FETCH'
+    and datname = 'asos'""")
+    if mcursor.rowcount > 9:
+        sys.stderr.write(("/cgi-bin/request/asos.py over capacity: %s"
+                          ) % (mcursor.rowcount,))
+        sys.stdout.write("Content-type: text/plain \n")
+        sys.stdout.write('Status: 503 Service Unavailable\n\n')
+        sys.stdout.write("ERROR: server over capacity, please try later")
+        sys.exit(0)
+
+
 def get_stations(form):
     """ Figure out the requested station """
     if "station" not in form:
@@ -64,6 +79,7 @@ def get_time_bounds(form, tzinfo):
 
 def main():
     """ Go main Go """
+    check_load()
     form = cgi.FieldStorage()
     try:
         tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
