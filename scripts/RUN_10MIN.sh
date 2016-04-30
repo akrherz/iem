@@ -15,7 +15,10 @@ csh MW_overlay.csh
 cd ../ingestors
 python dot_truckcams.py &
 
-cd ../summary
+cd madis
+python extract_hfmetar.py &
+
+cd ../../summary
 python updateRain.py
 
 cd ../outgoing
