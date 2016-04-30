@@ -59,7 +59,7 @@ for j in range(ids.shape[0]):
     if len(sid) < 4:
         continue
     if sid[0] == "K":
-        ts = datetime.datetime(1971, 1, 1) + datetime.timedelta(
+        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
                                 seconds=nc.variables["timeObs"][j])
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
         (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
