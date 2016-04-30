@@ -80,7 +80,7 @@ if ($metadata["archive_begin"]){
 $iemarchive = mktime(0,0,0,date("m"), date("d"), date("Y")) - 86400;
 if ($date >= $iemarchive){
 	$db = "iem";
-	$sql = sprintf("SELECT c.*
+	$sql = sprintf("SELECT distinct c.*
 	from current_log c JOIN stations s on (s.iemid = c.iemid)
 	and s.id = $1 and s.network = $2 and 
 	valid  >= $3 and valid  < $4 
