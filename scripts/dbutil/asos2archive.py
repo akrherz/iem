@@ -45,7 +45,7 @@ sql = "DELETE from t%s WHERE valid >= '%s' and valid <= '%s'" % (sts.year,
 acursor.execute(sql)
 
 # Get obs from Access
-sql = """SELECT c.*, t.network, t.id from
+sql = """SELECT distinct c.*, t.network, t.id from
     current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
     valid >= %s and valid <= %s and """+networks+"""
     """
