@@ -31,6 +31,7 @@ def process(ncfn):
     network ~* 'ASOS' or network = 'AWOS' and country = 'US'""")
     for row in icursor:
         xref[row[0]] = row[1]
+    icursor.close()
     nc = netCDF4.Dataset(ncfn)
     data = {}
     for vname in ['stationId', 'observationTime', 'temperature', 'dewpoint',
@@ -157,13 +158,14 @@ def process(ncfn):
         except:
             pass
 
+        icursor = IEM.cursor()
         if not iem.save(icursor, force_current_log=True):
             print(("extract_hfmetar: unknown station? %s %s %s\n%s"
                    ) % (sid3, network, ts, mtr))
             pass
 
-    icursor.close()
-    IEM.commit()
+        icursor.close()
+        IEM.commit()
 
 
 def find_fn(argv):
