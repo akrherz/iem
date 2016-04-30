@@ -161,12 +161,13 @@ def process(ncfn):
             iem.data['alti'] = round(data['altimeter'][i], 2)
             mtr += "A%4i " % (iem.data['alti'] * 100.,)
 
+        mtr += "RMK "
         if (data['precipAccumQCR'][i] == 0 and
                 data['precipAccum'][i] is not np.ma.masked):
             if data['precipAccum'][i] > 0:
                 iem.data['phour'] = round(data['precipAccum'][i], 2)
+                mtr += "P%04i " % (iem.data['phour'] * 100.,)
 
-        mtr += "RMK "
         if tgroup != "T":
             mtr += "%s " % (tgroup, )
         autoremark = tostring(data['autoRemark'][i])
