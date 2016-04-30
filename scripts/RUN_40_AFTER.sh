@@ -36,6 +36,7 @@ python scan_ingest.py
 cd ../madis
 python extractMADIS.py
 python extractMetarQC.py
+python extract_hfmetar.py 2 &
 
 cd ../cocorahs
 python cocorahs_stations.py IA
