@@ -17,6 +17,7 @@ warnings.simplefilter("ignore", RuntimeWarning)
 # prevent core.py:3785: UserWarning: Warning: converting a masked element to nan.
 warnings.simplefilter("ignore", UserWarning)
 
+
 def sanityCheck(val, lower, upper, goodfmt, bv):
     if (val > lower and val < upper):
         return goodfmt % (val,)
@@ -32,7 +33,7 @@ fmt = ("STN,DATE,TIME,T,TD,WCI,RH,THI,DIR,SPD,GST,ALT,SLP,VIS,SKY,CEIL,"
 format_tokens = fmt.split(",")
 
 gmt = mx.DateTime.gmt()
-fn = "/mesonet/data/madis/mesonet/%s.nc" % (gmt.strftime("%Y%m%d_%H00"),) 
+fn = "/mesonet/data/madis/mesonet1/%s.nc" % (gmt.strftime("%Y%m%d_%H00"), )
 if not os.path.isfile(fn):
     if gmt.minute > 10:
         print '%s does not exist' % (fn,)

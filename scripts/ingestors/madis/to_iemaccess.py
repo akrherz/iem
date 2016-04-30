@@ -14,7 +14,7 @@ icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 fn = None
 for i in range(0, 4):
     ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
-    testfn = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
+    testfn = ts.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
     if os.path.isfile(testfn):
         fn = testfn
         break
