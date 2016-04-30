@@ -48,7 +48,7 @@ acursor.execute(sql)
 icursor.execute("""
 with data as (
     select c.oid,
-    row_number() OVER (PARTITION by c.iemid, valid ORDER by length(raw) ASC)
+    row_number() OVER (PARTITION by c.iemid, valid ORDER by length(raw) DESC)
     from current_log c JOIN stations t on (c.iemid = t.iemid)
     where network ~* 'ASOS' and valid >= %s and valid <= %s)
 
