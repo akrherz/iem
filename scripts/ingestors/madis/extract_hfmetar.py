@@ -18,6 +18,29 @@ import warnings
 warnings.simplefilter('ignore', RuntimeWarning)
 
 
+def vsbyfmt(val):
+    """ Tricky formatting of vis"""
+    if val == 0:
+        return 0
+    if val <= 0.125:
+        return "1/8"
+    if val <= 0.25:
+        return "1/4"
+    if val <= 0.375:
+        return "3/8"
+    if val <= 0.5:
+        return "1/2"
+    if val <= 1.1:
+        return "1"
+    if val <= 1.6:
+        return "1 1/2"
+    if val <= 2.1:
+        return "2"
+    if val <= 2.6:
+        return "2 1/2"
+    return int(val)
+
+
 def tostring(val):
     return re.sub('\x00', '', val.tostring()).strip()
 
@@ -94,7 +117,7 @@ def process(ncfn):
         if (data['visibilityQCR'][i] == 0 and
                 data['visibility'][i] is not np.ma.masked):
             iem.data['vsby'] = float(data['visibility'][i])
-            mtr += "%sSM " % (int(iem.data['vsby']), )
+            mtr += "%sSM " % (vsbyfmt(iem.data['vsby']), )
 
         presentwx = tostring(data['presWx'][i])
         if presentwx != '':
