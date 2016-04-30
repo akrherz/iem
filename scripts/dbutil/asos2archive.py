@@ -44,8 +44,22 @@ sql = "DELETE from t%s WHERE valid >= '%s' and valid <= '%s'" % (sts.year,
                                                                  sts, ets)
 acursor.execute(sql)
 
+# delete dups from current_log
+icursor.execute("""
+with data as (
+    select c.oid,
+    row_number() OVER (PARTITION by c.iemid, valid ORDER by length(raw) ASC)
+    from current_log c JOIN stations t on (c.iemid = t.iemid)
+    where network ~* 'ASOS' and valid >= %s and valid <= %s)
+
+ DELETE from current_log c USING data d WHERE c.oid = d.oid
+ and d.row_number > 1""", (sts, ets))
+icursor.close()
+IEM.commit()
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 # Get obs from Access
-sql = """SELECT distinct c.*, t.network, t.id from
+sql = """SELECT c.*, t.network, t.id from
     current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
     valid >= %s and valid <= %s and """+networks+"""
     """
