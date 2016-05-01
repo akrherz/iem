@@ -10,7 +10,7 @@ from pandas.io.sql import read_sql
 def do(date):
     """Do the necessary work for this date"""
     pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
-    iem_pgconn = psycopg2.connect(database='iem')
+    iem_pgconn = psycopg2.connect(database='iem', host='iemdb')
     icursor = iem_pgconn.cursor()
     df = read_sql("""
     SELECT id, iemid, tzname from stations where network ~* 'DCP'
