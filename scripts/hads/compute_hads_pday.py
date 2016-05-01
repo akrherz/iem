@@ -51,7 +51,7 @@ def do(date):
         iemid = df.loc[station, 'iemid']
         icursor.execute("""UPDATE summary_"""+str(date.year)+"""
         SET pday = %s WHERE iemid = %s and day = %s
-        """, (pday, iemid, date, pday))
+        """, (pday, iemid, date))
         if icursor.rowcount == 0:
             print("Adding record %s[%s] for day %s" % (station, iemid, date))
             icursor.execute("""INSERT into summary_"""+str(date.year)+"""
