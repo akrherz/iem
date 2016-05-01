@@ -9,3 +9,6 @@ cd ../plots
 
 cd ../isuag
 python isusm2rr5.py
+
+cd ../hads
+python compute_hads_pday.py
