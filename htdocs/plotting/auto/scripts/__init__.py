@@ -238,6 +238,8 @@ data = {'plots': [
          'label': "Monthly Frequency of Wind Speeds by Air Temperature"},
         {'id': "37",
          'label': "MOS Forecasted Temperature Ranges + Observations"},
+        {'id': "146",
+         'label': "Temperature Frequency by Week During Precipitation"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
     {'label': 'NASS Quickstats (USDA Crop Statistics)', 'options': [
