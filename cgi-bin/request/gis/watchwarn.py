@@ -130,16 +130,16 @@ countybased as (
        geomcol, table1, timelimit, wfoLimiter, limiter,
        cols, cols, sbwlimiter)
 
-dtext = open("%s.txt" % (fp, ), 'w')
-dtext.write(sql)
-dtext.close()
-
 pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 df = GeoDataFrame.from_postgis(sql, pgconn, 'geo')
+if len(df.index) == 0:
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write("ERROR: No results found for query, please try again")
+    sys.exit()
+
 # Capitolize columns please
 df.columns = [s.upper() if s != 'geo' else s for s in df.columns.values]
 df.to_file(fp+".shp")
-
 
 shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj",
                 fp+".prj")
@@ -149,7 +149,6 @@ z.write(fp+".shp")
 z.write(fp+".shx")
 z.write(fp+".dbf")
 z.write(fp+".prj")
-z.write(fp+".txt")
 z.close()
 
 sys.stdout.write("Content-type: application/octet-stream\n")
