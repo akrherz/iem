@@ -126,8 +126,8 @@ def plotter(fdict):
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                      foreground="w")])
         i += 1
-    ax.set_ylim(min(df['low'].min(), df['min_tmpf'].min()) - 5,
-                max(df['high'].max(), df['max_tmpf'].max()) + 5)
+    ax.set_ylim(np.nanmin([df['low'].min(), df['min_tmpf'].min()]) - 5,
+                np.nanmax([df['high'].max(), df['max_tmpf'].max()]) + 5)
     ax.set_xlim(0.5, days + 0.5)
     ax.set_xticks(np.arange(1, days+1))
     ax.set_xticklabels(np.arange(1, days+1), fontsize=8)
@@ -150,5 +150,5 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter({'month': 2, 'year': 2016, 'station': 'SBZI4',
-             'network': 'KCCI'})
+    plotter({'month': 4, 'year': 2016, 'station': 'RAYQ1',
+             'network': 'CA_AB_DCP'})
