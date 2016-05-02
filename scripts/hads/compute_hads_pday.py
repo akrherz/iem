@@ -12,9 +12,16 @@ def do(date):
     pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
     iem_pgconn = psycopg2.connect(database='iem', host='iemdb')
     icursor = iem_pgconn.cursor()
+    # load up the current obs
     df = read_sql("""
-    SELECT id, iemid, tzname from stations where network ~* 'DCP'
-    """, pgconn, index_col='id')
+    WITH dcp as (
+        SELECT id, iemid, tzname from stations where network ~* 'DCP'
+    ), obs as (
+        SELECT iemid, pday from summary_"""+str(date.year)+"""
+        WHERE day = %s)
+    SELECT d.id, d.iemid, d.tzname, o.pday from
+    dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
+    """, iem_pgconn, params=(date,), index_col='id')
     bases = {}
     for tzname in df['tzname'].unique():
         ts = datetime.datetime(date.year, date.month, date.day, 12)
@@ -32,13 +39,14 @@ def do(date):
     """, pgconn, params=(sts, ets), index_col=None)
     obsdf['utc_valid'] = obsdf['utc_valid'].dt.tz_localize('utc')
     precip = np.zeros((24*60))
+    grouped = obsdf.groupby('station')
     for station in obsdf['station'].unique():
-        precip[:] = 0
-        stdf = obsdf[obsdf['station'] == station].copy()
         if station not in df.index:
             continue
+        precip[:] = 0
         tz = df.loc[station, 'tzname']
-        for _, row in stdf.iterrows():
+        current_pday = df.loc[station, 'pday']
+        for _, row in grouped.get_group(station).iterrows():
             ts = row['utc_valid'].to_datetime()
             if ts <= bases[tz]:
                 continue
@@ -46,8 +54,11 @@ def do(date):
             t0 = max([0, t1 - 60.])
             precip[t0:t1] = row['value'] / 60.
         pday = np.sum(precip)
-        if pday > 50:
+        if pday > 50 or np.allclose([pday, ], [current_pday, ]):
+            # print("Skipping %s %s==%s" % (station, current_pday,
+            #                              pday))
             continue
+        # print("Updating %s old: %s new: %s" % (station, current_pday, pday))
         iemid = df.loc[station, 'iemid']
         icursor.execute("""UPDATE summary_"""+str(date.year)+"""
         SET pday = %s WHERE iemid = %s and day = %s
