@@ -208,7 +208,7 @@ def main():
                     r.append("M")
                 else:
                     r.append("%s" % (row[data1], ))
-            elif (row[data1] is None or row[data1] <= -99.0 or
+            elif (row.get(data1) is None or row[data1] <= -99.0 or
                   row[data1] == "M"):
                 r.append("M")
             else:
