@@ -202,7 +202,7 @@ Timestamps displayed are the local time for the sensor.
 
 <form method="GET" action="/my/current.phtml">
 
-<table style="width: 100%; font-size: 10pt;" cellspacing=0 cellpadding=1 border=1>
+<table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
