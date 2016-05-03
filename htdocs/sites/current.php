@@ -68,8 +68,29 @@
    "srad" => "Solar Radiation",
    "alti" => "Altimeter [inches]", "pday" => "Daily Precipitation [inches]",
    "pmonth" => "Monthly Precipitation [inches]",
-   "gust" => "Wind Gust [knots]", "raw" => "Raw Observation/Product");
+   "gust" => "Wind Gust [knots]", 
+ 	"c1tmpf" => "Soil Temperature [F]",	
+ 	"c2tmpf" => "Soil Temperature [F]",	
+ 	"c3tmpf" => "Soil Temperature [F]",
+ 	"c4tmpf" => "Soil Temperature [F]",
+ 	"c5tmpf" => "Soil Temperature [F]",
+ 	"c1smv" => "Soil Moisture [%]",
+ 	"c2smv" => "Soil Moisture [%]",
+ 	"c3smv" => "Soil Moisture [%]",
+ 	"c4smv" => "Soil Moisture [%]",
+ 	"c5smv" => "Soil Moisture [%]",		
+ "raw" => "Raw Observation/Product");
 
+ if ($network == 'ISUSM'){
+ 	$vardict["c1tmpf"] = "4 inch Soil Temperature [F]";
+ 	$vardict["c2tmpf"] = "12 inch Soil Temperature [F]";
+ 	$vardict["c3tmpf"] = "24 inch Soil Temperature [F]";
+ 	$vardict["c4tmpf"] = "50 inch Soil Temperature [F]";
+ 	$vardict["c2smv"] = "12 inch Soil Moisture [%]";
+ 	$vardict["c3smv"] = "24 inch Soil Moisture [%]";
+ 	$vardict["c4smv"] = "50 inch Soil Moisture [%]";
+ }
+ 
  $table = "<table class=\"table table-striped\">";
  foreach ( $vardict as $key => $value ) {
  	if (array_key_exists($key, $rs) && $rs[$key] != "" && $rs[$key] != -99) {
