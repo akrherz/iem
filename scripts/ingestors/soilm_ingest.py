@@ -139,7 +139,7 @@ def hourly_process(nwsli, maxts):
         ob.data['c3smv'] = float(tokens[headers.index('vwc_24_avg')]) * 100.0
         ob.data['c4smv'] = float(tokens[headers.index('vwc_50_avg')]) * 100.0
         ob.save(accesstxn)
-        #    print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
+        # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
         processed += 1
     return processed
@@ -149,7 +149,7 @@ def formatter(v):
     """ Something to format things nicely for SQL"""
     if v.find("NAN") > -1:
         return 'Null'
-    if v.find(" ") > -1: #Timestamp
+    if v.find(" ") > -1:  # Timestamp
         return "'%s-06'" % (v,)
     return v
 
@@ -170,15 +170,15 @@ def daily_process(nwsli, maxts):
     # Read data
     processed = 0
     for i in range(len(lines)-1, 3, -1):
-        tokens = lines[i].strip().replace('"','').split(",")
+        tokens = lines[i].strip().replace('"', '').split(",")
         if len(tokens) != len(headers):
             continue
-        valid = datetime.datetime.strptime(tokens[ headers.index('timestamp')][:10],
-                                           '%Y-%m-%d')
+        valid = datetime.datetime.strptime(
+            tokens[headers.index('timestamp')][:10], '%Y-%m-%d')
         valid = valid.date() - datetime.timedelta(days=1)
         if valid < maxts:
             break
-        if valid == maxts: # Reprocess
+        if valid == maxts:  # Reprocess
             icursor.execute("""DELETE from sm_daily WHERE valid = '%s' and
             station = '%s' """ % (valid.strftime("%Y-%m-%d"), nwsli))
         # We are ready for dbinserting!
@@ -203,7 +203,7 @@ def daily_process(nwsli, maxts):
         ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
         ob.save(accesstxn)
-        #    print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
+        # print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
         #                                nwsli, valid.strftime("%Y-%m-%d"))
         processed += 1
     return processed
@@ -228,9 +228,9 @@ def update_pday():
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
     data = {'hourly': datetime.datetime(2012, 1, 1,
-                                        tzinfo=pytz.FixedOffset(-360)), 
+                                        tzinfo=pytz.FixedOffset(-360)),
             'daily': datetime.date(2012, 1, 1)}
-    icursor.execute("""SELECT max(valid) from sm_daily 
+    icursor.execute("""SELECT max(valid) from sm_daily
         WHERE station = '%s'""" % (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
@@ -264,9 +264,10 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     for linenum in range(0 - dyprocessed, 0):
         tmpfp.write(lines[linenum])
     tmpfp.close()
-    cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_daily.txt bogus txt' %s" % (
-                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
-                    tmpfn)
+    cmd = ("/home/ldm/bin/pqinsert -p "
+           "'data c %s csv/isusm/%s_daily.txt bogus txt' %s"
+           ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
+                tmpfn)
     p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
     p.stdout.read()
@@ -289,9 +290,10 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     for linenum in range(0 - hrprocessed, 0):
         tmpfp.write(lines[linenum])
     tmpfp.close()
-    cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_hourly.txt bogus txt' %s" % (
-                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
-                    tmpfn)
+    cmd = ("/home/ldm/bin/pqinsert -p "
+           "'data c %s csv/isusm/%s_hourly.txt bogus txt' %s"
+           ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
+                tmpfn)
     proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE)
     proc.stdout.read()
