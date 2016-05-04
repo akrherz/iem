@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
+                     ('PCT EMERGED', 'Emerged'),
                      ('PCT HARVESTED', 'Harvest (Grain)')])
 PDICT2 = OrderedDict([('CORN', 'Corn'),
                       ('SOYBEANS', 'Soybean')])
