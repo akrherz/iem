@@ -8,8 +8,8 @@ import datetime
 import json
 import numpy as np
 import warnings
-warnings.simplefilter("ignore", UserWarning)
 from json import encoder
+warnings.simplefilter("ignore", UserWarning)
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
@@ -86,7 +86,7 @@ res = {'data': [], }
 
 
 def clean(val):
-    if np.isnan(val) or np.ma.is_masked(val):
+    if val is None or np.isnan(val) or np.ma.is_masked(val):
         return None
     return float(val)
 
