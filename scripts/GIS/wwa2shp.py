@@ -79,7 +79,7 @@ sql = """
  to_char(polygon_begin at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated,
  to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
  to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_init_expire
- from sbw_%s WHERE polygon_begin <= '%s' and expire > '%s' 
+ from sbw_%s WHERE polygon_begin <= '%s' and polygon_end > '%s'
 
 UNION
 
