@@ -51,6 +51,8 @@ def make_daily_pet_plot(station, sts, ets):
                   "Climatology from Ames 1986-2014"
                   ) % (nt.sts[station]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    interval = len(dates) / 7 + 1
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=1, fontsize=10)
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')
@@ -85,11 +87,13 @@ def make_daily_rad_plot(station, sts, ets):
            align='center', label='Observed')
     ax.plot(dates, tmax, label=r"Modelled Max $\tau$ =0.75", color='k', lw=1.5)
     ax.grid(True)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    interval = len(dates) / 7 + 1
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Daily Solar Radiation"
                   ) % (nt.sts[station]['name'], ))
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
     ax.legend(loc='best', ncol=1, fontsize=10)
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')
@@ -128,6 +132,8 @@ def make_daily_plot(station, sts, ets):
                   "Daily Max/Min/Avg 4 inch Soil Temperatures"
                   ) % (nt.sts[station]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    interval = len(dates) / 7 + 1
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=2, fontsize=10)
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')

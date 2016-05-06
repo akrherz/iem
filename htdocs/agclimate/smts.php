@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 114);
 include_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
@@ -9,8 +10,8 @@ include("../../include/forms.php");
 include("../../include/imagemaps.php"); 
 
 $now = time();
-$d2 = time() - 3 * 86400;
-$station = isset($_GET["station"]) ? $_GET["station"] : "CAMI4";
+$d2 = time() - 5 * 86400;
+$station = isset($_GET["station"]) ? $_GET["station"] : "AEEI4";
 $year1 = isset($_REQUEST['year1']) ? intval($_REQUEST['year1']): date("Y", $d2);
 $month1 = isset($_REQUEST['month1']) ? intval($_REQUEST['month1']): date("m", $d2);
 $day1 = isset($_REQUEST['day1']) ? intval($_REQUEST['day1']): date("d", $d2);
