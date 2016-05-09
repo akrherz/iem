@@ -118,6 +118,9 @@ def main():
                    'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4',
                    'presentwx', 'metar']
     else:
+        for _colname in ['station', 'valid']:
+            if _colname in dataVars:
+                dataVars.remove(_colname)
         dataVars = tuple(dataVars)
         outCols = dataVars
         dataVars = str(dataVars)[1:-2]
