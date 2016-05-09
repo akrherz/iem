@@ -6,8 +6,8 @@ import psycopg2
 import sys
 import datetime
 import numpy as np
-from pyiem.datatypes import speed, direction
-from pyiem import meteorology
+import warnings
+warnings.simplefilter("ignore", RuntimeWarning)
 
 
 def do(ts):
@@ -20,19 +20,19 @@ def do(ts):
     select station, network, iemid, valid at time zone tzname,
     tmpf, dwpf, p01i from alldata d JOIN stations t on (t.id = d.station)
     where (network ~* 'ASOS' or network = 'AWOS')
-    and valid between %s and %s
+    and valid between %s and %s ORDER by valid ASC
     """, (ts - datetime.timedelta(days=2), ts + datetime.timedelta(days=2)))
     data = {}
     for row in cursor:
         if row[3].strftime("%m%d") != ts.strftime("%m%d"):
             continue
         station = "%s|%s|%s" % (row[0], row[1], row[2])
-        if station not in data:
-            data[station] = {'valid': [], 'tmpf': [], 'dwpf': [], 'p01i': []}
-        data[station]['valid'].append(row[3])
-        data[station]['tmpf'].append(row[4] if row[4] is not None else np.nan)
-        data[station]['dwpf'].append(row[5] if row[5] is not None else np.nan)
-        data[station]['p01i'].append(row[6] if row[6] is not None else np.nan)
+        _d = data.setdefault(station,
+                             {'valid': [], 'tmpf': [], 'dwpf': [], 'p01i': []})
+        _d['valid'].append(row[3])
+        _d['tmpf'].append(row[4] if row[4] is not None else np.nan)
+        _d['dwpf'].append(row[5] if row[5] is not None else np.nan)
+        _d['p01i'].append(row[6] if row[6] is not None else np.nan)
 
     table = "summary_%s" % (ts.year,)
     # Load up current data
@@ -61,6 +61,7 @@ def do(ts):
         computed['min_tmpf'] = np.nanmin(data[stid]['tmpf'])
         computed['max_dwpf'] = np.nanmax(data[stid]['dwpf'])
         computed['min_dwpf'] = np.nanmin(data[stid]['tmpf'])
+        # BUG: obs that may spill over the top of the hour
         pday = [0]*24
         for i, valid in enumerate(data[stid]['valid']):
             p01i = data[stid]['p01i'][i]
