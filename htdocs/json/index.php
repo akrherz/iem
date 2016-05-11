@@ -20,6 +20,16 @@
   $services = array();
 
   $services[] = Array(
+  		"title" => "Current NEXRAD Storm Attribute Table",
+  		"url" => "/geojson/nexrad_attr.geojson",
+  		"desc" => "A GeoJSON summary of current NEXRAD Storm Attributes",
+  		"vars" => Array(
+  				),
+  		"example" => Array(
+  				)
+  		);
+ 
+  $services[] = Array(
   		"title" => "IEM Tracked Networks Metadata",
   		"url" => "/geojson/networks.geojson",
   		"desc" => "A GeoJSON listing of IEM labelled networks.",
