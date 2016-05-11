@@ -69,8 +69,8 @@ $ar = Array("type"=>"FeatureCollection",
 
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 {
-  $lon = $row["lon"];
-  $lat = $row["lat"];
+  $lon = floatval($row["lon"]);
+  $lat = floatval($row["lat"]);
   $wfo = $row["wfo"];
   $products = "N/A";
   if (isset($_GET["inc_ap"]) && $_GET["inc_ap"] == "yes")
