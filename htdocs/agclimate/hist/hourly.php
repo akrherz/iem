@@ -80,7 +80,7 @@ wish to change this to <a href="daily.php">daily data</a>.
 <br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
 <br /><input type="checkbox" name="vars" value="speed">Average Wind Speed [mph]
 <br /><input type="checkbox" name="vars" value="drct">Wind Direction [deg]
-<br /><input type="checkbox" name="vars" value="et">Potential Evapotranspiration[inch]
+<br /><input type="checkbox" name="vars" value="et"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [inch]
 <br /><input type="checkbox" name="vars" value="soil04t">4 inch Soil Temperature [F]
 <br /><input type="checkbox" name="vars" value="soil12t">12 inch Soil Temperature [F]
 <br /><input type="checkbox" name="vars" value="soil24t">24 inch Soil Temperature [F]
