@@ -128,6 +128,16 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(years, fall-spring, bottom=spring, ec='tan', fc='tan', zorder=1)
+    for _v in [fall, spring]:
+        avgv = int(np.average(_v))
+        ts = datetime.date(2000,
+                           1, 1) + datetime.timedelta(days=(avgv-1))
+        ax.text(years[-1] + 3, avgv, ts.strftime("Avg:\n%-d %b"),
+                ha='left', va='center')
+        ax.axhline(avgv, color='k')
+    days = np.average(fall-spring)
+    ax.text(1.02, 0.5, "<- %.1f days ->" % (days,), transform=ax.transAxes,
+            rotation=-90)
     ax.plot(years, years * s_slp + s_int, lw=3,
             zorder=2, label=r"%.2f $\frac{days}{100y}$ R$^2$=%.2f" % (
                                                         s_slp * 100.,
