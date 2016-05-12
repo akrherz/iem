@@ -101,9 +101,14 @@ def hourly_process(nwsli, maxts):
             break
         gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
         # print valid, tokens[ headers.index('timestamp')]
-        # We are ready for dbinserting!
-        dbcols = "station,valid," + ",".join(headers[2:])
+        # We are ready for dbinserting, we duplicate the data for the _qc
+        # column
+        dbcols = ("station,valid,%s,%s"
+                  ) % (",".join(headers[2:]),
+                       ",".join(["%s_qc" % (h,) for h in headers[2:]]))
         dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
+        for v in tokens[2:]:
+            dbvals += "%s," % (formatter(v),)
         for v in tokens[2:]:
             dbvals += "%s," % (formatter(v),)
         sql = "INSERT into sm_hourly (%s) values (%s)" % (dbcols, dbvals[:-1])
@@ -182,8 +187,12 @@ def daily_process(nwsli, maxts):
             icursor.execute("""DELETE from sm_daily WHERE valid = '%s' and
             station = '%s' """ % (valid.strftime("%Y-%m-%d"), nwsli))
         # We are ready for dbinserting!
-        dbcols = "station,valid," + ",".join(headers[2:])
-        dbvals = "'%s','%s'," % (nwsli, valid.strftime("%Y-%m-%d"))
+        dbcols = ("station,valid,%s,%s"
+                  ) % (",".join(headers[2:]),
+                       ",".join(["%s_qc" % (h,) for h in headers[2:]]))
+        dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
+        for v in tokens[2:]:
+            dbvals += "%s," % (formatter(v),)
         for v in tokens[2:]:
             dbvals += "%s," % (formatter(v),)
         sql = "INSERT into sm_daily (%s) values (%s)" % (dbcols, dbvals[:-1])
