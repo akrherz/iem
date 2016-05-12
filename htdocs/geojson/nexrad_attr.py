@@ -5,22 +5,44 @@ import sys
 import cgi
 
 
-def run():
+def run(ts):
     """ Actually do the hard work of getting the geojson """
     import json
     import psycopg2.extras
     import datetime
+    import pytz
 
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utcnow = datetime.datetime.utcnow()
 
-    cursor.execute("""
-        SELECT ST_x(geom) as lon, ST_y(geom) as lat, *,
-        valid at time zone 'UTC' as utc_valid from
-        nexrad_attributes WHERE valid > now() - '30 minutes'::interval
-    """)
+    if ts == '':
+        cursor.execute("""
+            SELECT ST_x(geom) as lon, ST_y(geom) as lat, *,
+            valid at time zone 'UTC' as utc_valid from
+            nexrad_attributes WHERE valid > now() - '30 minutes'::interval
+        """)
+    else:
+        valid = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S')
+        valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+        tbl = "nexrad_attributes_%s" % (valid.year, )
+        cursor.execute("""
+        with vcps as (
+            SELECT distinct nexrad, valid from """ + tbl + """
+            where valid between %s and %s),
+        agg as (
+            select nexrad, valid,
+            row_number() OVER (PARTITION by nexrad
+                ORDER by (greatest(valid, %s) - least(valid, %s)) ASC)
+            as rank from vcps)
+        SELECT n.*, ST_x(geom) as lon, ST_y(geom) as lat,
+        n.valid at time zone 'UTC' as utc_valid
+        from """ + tbl + """ n, agg a WHERE
+        a.rank = 1 and a.nexrad = n.nexrad and a.valid = n.valid
+        ORDER by n.nexrad ASC
+        """, (valid - datetime.timedelta(minutes=10),
+              valid + datetime.timedelta(minutes=10), valid, valid))
 
     res = {'type': 'FeatureCollection',
            'crs': {'type': 'EPSG',
@@ -62,13 +84,14 @@ def main():
 
     form = cgi.FieldStorage()
     cb = form.getfirst('callback', None)
+    ts = form.getfirst('valid', '')[:19]  # ISO-8601ish
 
-    mckey = "/geojson/nexrad_attr.geojson"
+    mckey = "/geojson/nexrad_attr.geojson|%s" % (ts,)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = run()
-        mc.set(mckey, res, 30)
+        res = run(ts)
+        mc.set(mckey, res, 30 if ts == '' else 3600)
 
     if cb is None:
         sys.stdout.write(res)
