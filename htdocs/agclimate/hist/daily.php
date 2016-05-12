@@ -94,7 +94,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
 <br /><input type="checkbox" name="vars" value="sped">Average Wind Speed [mph]
 <br /><input type="checkbox" name="vars" value="gust">Wind Gust [mph]
-<br /><input type="checkbox" name="vars" value="et">Potential Evapotranspiration[inch]
+<br /><input type="checkbox" name="vars" value="et"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [inch]
 {$soilopts}
 <br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]

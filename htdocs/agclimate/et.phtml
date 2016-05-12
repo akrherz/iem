@@ -1,0 +1,62 @@
+<?php 
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+
+$t = new MyView();
+$t->title = "ISU Soil Moisture Network Evapotranspiration Details";
+
+$t->content = <<<EOF
+<ul class="breadcrumb">
+		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+		<li class="current">ET Details</li>
+</ul>
+
+<div class="alert alert-danger">DRAFT DOCUMENT, Work in Progress 12 May 2016</div>
+		
+<h3>Evapotranspiration Details</h3>
+
+<p>Evapotranspiration (ET) is a term that describes the transport of water from
+	the ground surface and soil to the atmosphere.  This includes processes like
+	evaporation of liquid water and transpiration done by vegetation.  It is
+	an important part of the Water Cycle and knowing the amount of ET happening
+	during the growing season is important for usage in modelling, irrigation,
+	and crop management.</p>
+
+<h4>So lets 'observe' ET!</h4>
+		
+<p>Directly measuring ET is not practical as you would have to somehow account
+	for every molecule of water vapor and know its exact source to know if it
+	contributed to the local ET.  The most common approach to directly
+	measuring ET is very expensive as it involves tracking air flow and
+	moisture in 3 dimensions. Another approach is through the usage of a
+	lysimeters, which attempt to keep an accounting of soil water.</p>
+
+<p>So when all else fails, we can produce model estimates based on more
+	commonly collected data.  That is what the legacy ISU AgClimate Network
+	and now ISU Soil Moisture Network has done.  This page attempts to fully
+	document the equations used and the application caveats of the data.</p>
+
+<h3>Estimating Evapotranspiration</h3>
+
+<div class="alert alert-info">The estimation techniques described should apply
+		for both the legacy ISU AgClimate Network and the current ISU Soil
+		Moisture Network.</div>
+
+<p>Hourly estimates of ET are made by a set of equations found on the Campbell
+		Scientific Data Logger.  These hourly values are then summed to produce
+		calendar day totals to avoid confusion with having slightly conflicting
+		ET values for a given day.</p>
+
+<p>The hourly ET is estimated by the <a href="https://www.researchgate.net/profile/Richard_Allen10/publication/43255787_The_ASCE_Standardized_Reference_Evapotranspiration_Equation/links/004635370511b8b1ae000000.pdf">ASCE Standardized Reference Evapotranspiration Equation</a>
+		, which assumes a reference tall crop (alfalfa).
+		
+<p><strong>References:</strong>
+<ol>
+	<li><a href="https://en.wikipedia.org/wiki/Evapotranspiration">Wikipedia's Evapotranspiration</a></li>
+</ol></p>
+
+EOF;
+
+$t->render('single.phtml');
+
+?>
