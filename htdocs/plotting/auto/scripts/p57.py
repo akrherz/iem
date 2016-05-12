@@ -80,8 +80,10 @@ def plotter(fdict):
     col = "%s_%s" % (agg, varname)
     ax.bar(np.arange(1, 13) - 0.4, resdf[col], fc='pink')
     for month, row in resdf.iterrows():
+        if np.isnan(row[col]):
+            continue
         ax.text(month, row[col],
-                "%s\n%.2f" % (row[col+'_year'], row[col]), ha='center',
+                "%.0f\n%.2f" % (row[col+'_year'], row[col]), ha='center',
                 va='bottom')
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(top=resdf[col].max()*1.2)
@@ -101,3 +103,6 @@ def plotter(fdict):
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.95])
 
     return fig, resdf
+
+if __name__ == '__main__':
+    plotter(dict())
