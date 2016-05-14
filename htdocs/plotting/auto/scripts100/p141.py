@@ -31,19 +31,24 @@ def get_description():
              label='Select Location:', options=STATIONS),
         dict(type='select', name='ptype', default='gdd',
              label='Select Plot Type:', options=PLOTS),
+        dict(type='text', name='sdate', default='mar15',
+             label='Start Date:')
     ]
     return d
 
 
-def load(dirname, location):
+def load(dirname, location, sdate):
     """ Read a file please """
     data = []
     idx = []
+    mindoy = int(sdate.strftime("%j"))
     for line in open("%s/%s.met" % (dirname, location)):
         line = line.strip()
         if not line.startswith('19') and not line.startswith('20'):
             continue
         tokens = line.split()
+        if int(tokens[1]) < mindoy:
+            continue
         data.append(tokens)
         ts = (datetime.date(int(tokens[0]), 1, 1) +
               datetime.timedelta(days=int(tokens[1])-1))
@@ -76,10 +81,11 @@ def plotter(fdict):
 
     location = fdict.get('location', 'ames')
     ptype = fdict.get('ptype', 'gdd')
+    sdate = datetime.datetime.strptime(fdict.get('sdate', 'jan1'), '%b%d')
     _, _ = STATIONS[location], PLOTS[ptype]
-    df = load("/mesonet/share/pickup/yieldfx", location)
+    df = load("/mesonet/share/pickup/yieldfx", location, sdate)
     cdf = load("/mesonet/www/apps/iemwebsite/scripts/yieldfx/baseline",
-               location)
+               location, sdate)
 
     today = datetime.date.today()
     thisyear = df[df['year'] == today.year].copy()
@@ -147,7 +153,7 @@ def plotter(fdict):
                    365))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.grid(True)
-    ax.set_xlim(int(datetime.date(today.year, 3, 15).strftime("%j")),
+    ax.set_xlim(int(sdate.strftime("%j")),
                 int(datetime.date(today.year, 12, 1).strftime("%j")))
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0 + 0.05, pos.width, pos.height * 0.95])
