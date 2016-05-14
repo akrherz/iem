@@ -27,7 +27,7 @@ def get_description():
              default=today.year),
         dict(type='month', name='month',
              label='Select Month to Compare by Year:',
-             default=today.year),
+             default=today.month),
     ]
     return d
 
