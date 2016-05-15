@@ -5,12 +5,12 @@ from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
 
 STATIONS = OrderedDict([
-        ('ames', 'Ames'),
-        ('cobs', 'COBS (Ames)'),
-        ('crawfordsville', 'Crawfordsville'),
-        ('lewis', 'Lewis'),
-        ('nashua', 'Nashua'),
-        ('sutherland', 'Sutherland')])
+        ('ames', 'Central (Ames'),
+        ('cobs', 'Central (COBS)'),
+        ('crawfordsville', 'Southeast (Crawfordsville)'),
+        ('lewis', 'Southwest (Lewis)'),
+        ('nashua', 'Northeast (Nashua)'),
+        ('sutherland', 'Northwest (Sutherland)')])
 
 SDATES = OrderedDict([
         ('nov1', 'November 1'),
