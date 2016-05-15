@@ -6,12 +6,12 @@ from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
 
 STATIONS = OrderedDict([
-        ('ames', 'Ames'),
-        ('cobs', 'COBS (Ames)'),
-        ('crawfordsville', 'Crawfordsville'),
-        ('lewis', 'Lewis'),
-        ('nashua', 'Nashua'),
-        ('sutherland', 'Sutherland')])
+        ('ames', 'Central (Ames'),
+        ('cobs', 'Central (COBS)'),
+        ('crawfordsville', 'Southeast (Crawfordsville)'),
+        ('lewis', 'Southwest (Lewis)'),
+        ('nashua', 'Northeast (Nashua)'),
+        ('sutherland', 'Northwest (Sutherland)')])
 
 PLOTS = OrderedDict([
         ('gdd', 'Growing Degree Days [F]'),
@@ -100,9 +100,13 @@ def plotter(fdict):
     resdf.set_index('doy', inplace=True)
 
     # write current year data back to resdf
-    for _v, _u in zip(['gddcum', 'raincum', 'mint', 'maxt'],
-                      ['F', 'in', 'F', 'F']):
+    for _v, _u in zip(['gddcum', 'raincum'],
+                      ['F', 'in']):
         resdf["%s[%s]" % (_v, _u)] = thisyear[_v]
+    for _v in ['mint', 'maxt']:
+        resdf["%s[F]" % (_v)] = temperature(thisyear[_v].values,
+                                            'C').value('F')
+    resdf['rain[in]'] = distance(thisyear['rain'], 'MM').value('IN')
     for _ptype, unit in zip(['gdd', 'rain'], ['F', 'in']):
         resdf[_ptype+'cum_climo[%s]' % (unit, )
               ] = cdf.groupby('doy')[_ptype+'cum'].mean()
