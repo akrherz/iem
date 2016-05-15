@@ -133,6 +133,7 @@ def replace_forecast(df, location):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     today = datetime.date.today()
+    nextjan1 = datetime.date(today.year + 1, 1, 1)
     coop = XREF[location]['climodat']
     years = [int(y) for y in np.arange(df.index.values.min().year,
                                        df.index.values.max().year + 1)]
@@ -155,7 +156,8 @@ def replace_forecast(df, location):
         SELECT day, srad from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'CFS'
         ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
-    """, (coop, today))
+        and day < %s
+    """, (coop, today, nextjan1))
     for row in cursor:
         valid = row[0]
         for year in years:
