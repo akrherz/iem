@@ -29,6 +29,10 @@ XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
         'nashua': {'isusm': 'NASI4', 'climodat': 'IA1402'},
         'sutherland': {'isusm': 'CAMI4', 'climodat': 'IA1442'}}
 
+DO_UPLOAD = (len(sys.argv) == 1)
+if not DO_UPLOAD:
+    print("Disabling dropbox upload of results")
+
 
 def p(val, prec):
     if val is None or np.isnan(val):
@@ -53,11 +57,12 @@ def upload_summary_plots():
             today = datetime.date.today()
             remotefn = "%s_%s_%s.png" % (location, today.strftime("%Y%m%d"),
                                          interval)
-            dbx.files_upload(
-                open(tmpfn).read(),
-                ("/YieldForecast/Daryl/2016 vs other years plots/%s"
-                 ) % (remotefn, ),
-                mode=dropbox.files.WriteMode.overwrite)
+            if DO_UPLOAD:
+                dbx.files_upload(
+                    open(tmpfn).read(),
+                    ("/YieldForecast/Daryl/2016 vs other years plots/%s"
+                     ) % (remotefn, ),
+                    mode=dropbox.files.WriteMode.overwrite)
             os.unlink(tmpfn)
 
 
@@ -97,9 +102,10 @@ def write_and_upload(df, location):
 
     today = datetime.date.today()
     remotefn = "%s_%s.met" % (location, today.strftime("%Y%m%d"))
-    dbx.files_upload(open(tmpfn).read(),
-                     "/YieldForecast/Daryl/%s" % (remotefn, ),
-                     mode=dropbox.files.WriteMode.overwrite)
+    if DO_UPLOAD:
+        dbx.files_upload(open(tmpfn).read(),
+                         "/YieldForecast/Daryl/%s" % (remotefn, ),
+                         mode=dropbox.files.WriteMode.overwrite)
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0644)
     # os.rename fails here due to cross device link bug
@@ -123,6 +129,17 @@ def load_baseline(location):
         """, pgconn, params=(location,), index_col='valid')
     # we want data from 1980 to this year
     today = datetime.date.today()
+    # So now, we need to move any data that exists for this year and overwrite
+    # the previous years with that data.  This is QC'd prior to any new obs
+    # are taken from ISUSM
+    rcols = ['radn', 'maxt', 'mint', 'rain']
+    for date, row in df[df['year'] == today.year].iterrows():
+        for year in range(1980, today.year):
+            if date.month == 2 and date.day == 29 and year % 4 != 0:
+                continue
+            df.loc[date.replace(year=year), rcols] = (row['radn'], row['maxt'],
+                                                      row['mint'], row['rain'])
+    # Fill out the time domain
     dec31 = today.replace(month=12, day=31)
     df = df.reindex(index=pd.date_range(datetime.date(1980, 1, 1), dec31).date)
     return df
@@ -202,29 +219,35 @@ def replace_obs(df, location):
 
     cursor.execute("""
         select valid, tair_c_max, tair_c_min, slrmj_tot, vwc_12_avg,
-        vwc_24_avg, vwc_50_avg, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg
-        from sm_daily WHERE station = %s and valid >= %s
+        vwc_24_avg, vwc_50_avg, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
+        rain_mm_tot from sm_daily WHERE station = %s and valid >= %s
         """, (isusm, jan1))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'sm12', 'sm24', 'sm50',
-             'st4', 'st12', 'st24', 'st50', ]
+             'st4', 'st12', 'st24', 'st50', 'rain']
     for row in cursor:
         valid = row[0]
+        # Does our df currently have data for this date?  If so, we shall do
+        # no more
+        dont_replace = valid in df.index
+        if not dont_replace:
+            print("Supplementing %s for date %s" % (location, valid))
         _gdd = gdd(temperature(row[1], 'C'), temperature(row[2], 'C'))
         for year in years:
             if valid.month == 2 and valid.day == 29 and year % 4 != 0:
                 continue
-            if (year == jan1.year and
-                    not np.isnan(df.at[valid.replace(year=jan1.year),
-                                       'maxt'])):
+            if dont_replace:
                 df.loc[valid.replace(year=year),
-                       rcols[3:]] = (_gdd, row[4], row[5],
-                                     row[6], row[7], row[8],
-                                     row[9], row[10])
+                       rcols[3:-1]] = (_gdd, row[4], row[5],
+                                       row[6], row[7], row[8],
+                                       row[9], row[10])
                 continue
             df.loc[valid.replace(year=year), rcols] = (row[1], row[2], row[3],
                                                        _gdd, row[4], row[5],
                                                        row[6], row[7], row[8],
-                                                       row[9], row[10])
+                                                       row[9], row[10], row[11]
+                                                       )
+    # We no longer want to use rain from climodat...
+    return
     # Go get precip from Climodat
     coop = XREF[location]['climodat']
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
