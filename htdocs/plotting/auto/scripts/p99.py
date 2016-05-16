@@ -44,7 +44,7 @@ def plotter(fdict):
         WITH days as (
             select generate_series('%s-01-01'::date, '%s-12-31'::date,
                 '1 day'::interval)::date as day,
-                to_char(generate_series('2015-01-01'::date, '2015-12-31'::date,
+                to_char(generate_series('%s-01-01'::date, '%s-12-31'::date,
                 '1 day'::interval)::date, 'mmdd') as sday
         ),
         climo as (
@@ -63,7 +63,8 @@ def plotter(fdict):
         SELECT t.day, t.sday, t.high, t.low, c.avg_high, c.avg_low,
         c.stddev_high, c.stddev_low from thisyear2 t JOIN climo c on
         (t.sday = c.sday) ORDER by t.day ASC
-    """, pgconn, params=(year, year, station, station, year), index_col='day')
+    """, pgconn, params=(year, year, year, year,
+                         station, station, year), index_col='day')
     df.index.name = 'Date'
     df['high_sigma'] = (df['high'] - df['avg_high']) / df['stddev_high']
     df['low_sigma'] = (df['low'] - df['avg_low']) / df['stddev_low']
