@@ -11,8 +11,8 @@ import cgi
 import psycopg2.extras
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+import matplotlib.pyplot as plt  # NOPEP8
+import matplotlib.dates as mdates  # NOPEP8
 
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 nt = NetworkTable("ISUSM")
@@ -25,7 +25,7 @@ def make_daily_pet_plot(station, sts, ets):
         select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
         from daily where station = 'A130209' GROUP by mmdd
     ), obs as (
-        SELECT valid, dailyet / 25.4 as et, to_char(valid, 'mmdd') as mmdd
+        SELECT valid, dailyet_qc / 25.4 as et, to_char(valid, 'mmdd') as mmdd
         from sm_daily WHERE station = '%s' and valid >= '%s' and valid <= '%s'
     )
 
@@ -66,9 +66,9 @@ def make_daily_rad_plot(station, sts, ets):
                 nt.sts[station]['elevation'])
 
     icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor.execute("""SELECT valid, slrmj_tot from sm_daily
+    icursor.execute("""SELECT valid, slrmj_tot_qc from sm_daily
     where station = '%s'
-    and valid >= '%s' and valid <= '%s' and slrmj_tot is not null
+    and valid >= '%s' and valid <= '%s' and slrmj_tot_qc is not null
     ORDER by valid ASC
     """ % (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
     dates = []
@@ -102,9 +102,9 @@ def make_daily_rad_plot(station, sts, ets):
 def make_daily_plot(station, sts, ets):
     """Generate a daily plot of max/min 4 inch soil temps"""
     icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor.execute("""SELECT date(valid), min(tsoil_c_avg),
-    max(tsoil_c_avg), avg(tsoil_c_avg) from sm_hourly where station = '%s'
-    and valid >= '%s 00:00' and valid < '%s 23:56'
+    icursor.execute("""SELECT date(valid), min(tsoil_c_avg_qc),
+    max(tsoil_c_avg_qc), avg(tsoil_c_avg_qc) from sm_hourly
+    where station = '%s' and valid >= '%s 00:00' and valid < '%s 23:56'
     and tsoil_c_avg is not null GROUP by date ORDER by date ASC
     """ % (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
     dates = []
@@ -190,17 +190,17 @@ def main():
     slrkw = []
     rain = []
     for row in icursor:
-        slrkw.append(row['slrkw_avg'] or np.nan)
-        d12sm.append(row['vwc_12_avg'] or np.nan)
-        d12t.append(row['t12_c_avg'] or np.nan)
-        d24t.append(row['t24_c_avg'] or np.nan)
-        d50t.append(row['t50_c_avg'] or np.nan)
-        d24sm.append(row['vwc_24_avg'] or np.nan)
-        d50sm.append(row['vwc_50_avg'] or np.nan)
+        slrkw.append(row['slrkw_avg_qc'] or np.nan)
+        d12sm.append(row['vwc_12_avg_qc'] or np.nan)
+        d12t.append(row['t12_c_avg_qc'] or np.nan)
+        d24t.append(row['t24_c_avg_qc'] or np.nan)
+        d50t.append(row['t50_c_avg_qc'] or np.nan)
+        d24sm.append(row['vwc_24_avg_qc'] or np.nan)
+        d50sm.append(row['vwc_50_avg_qc'] or np.nan)
         valid.append(row['valid'])
-        rain.append(row['rain_mm_tot'] or np.nan)
-        tair.append(row['tair_c_avg'] or np.nan)
-        tsoil.append(row['tsoil_c_avg'] or np.nan)
+        rain.append(row['rain_mm_tot_qc'] or np.nan)
+        tair.append(row['tair_c_avg_qc'] or np.nan)
+        tsoil.append(row['tsoil_c_avg_qc'] or np.nan)
 
     slrkw = np.array(slrkw)
     rain = np.array(rain)
@@ -213,18 +213,19 @@ def main():
     tair = np.array(tair)
     tsoil = np.array(tsoil)
 
-    maxy = max([np.max(d12sm), np.max(d24sm), np.max(d50sm)])
-    miny = min([np.min(d12sm), np.min(d24sm), np.min(d50sm)])
+    # maxy = max([np.max(d12sm), np.max(d24sm), np.max(d50sm)])
+    # miny = min([np.min(d12sm), np.min(d24sm), np.min(d50sm)])
 
     if opt == '2':
-        (fig, ax) = plt.subplots(1, 1)
+        (_, ax) = plt.subplots(1, 1)
         ax.grid(True)
-        ax.set_title(("ISUSM Station: %s Timeseries\nSoil Temperature at Depth\n "
+        ax.set_title(("ISUSM Station: %s Timeseries\n"
+                      "Soil Temperature at Depth\n "
                       ) % (nt.sts[station]['name'], ))
         ax.plot(valid, temperature(tsoil, 'C').value('F'), linewidth=2,
                 color='brown', label='4 inch')
-        ax.plot(valid, temperature(d12t, 'C').value('F'), linewidth=2, color='r',
-                label='12 inch')
+        ax.plot(valid, temperature(d12t, 'C').value('F'), linewidth=2,
+                color='r', label='12 inch')
         ax.plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
                 color='purple', label='24 inch')
         ax.plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
@@ -250,13 +251,14 @@ def main():
             ax.xaxis.set_major_formatter(
                 mdates.DateFormatter('%-I %p\n%d %b',
                                      tz=pytz.timezone("America/Chicago")))
-        ax.axhline(32, linestyle='--', lw=2, color='tan')
+        if ax.get_ylim()[0] < 40:
+            ax.axhline(32, linestyle='--', lw=2, color='tan')
         ax.set_ylabel("Temperature $^\circ$F")
         sys.stdout.write("Content-Type: image/png\n\n")
         plt.savefig(sys.stdout, format='png')
         sys.exit()
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
+    (_, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
     ax[0].grid(True)
     ax2 = ax[0].twinx()
     ax2.set_yticks(np.arange(-0.6, 0., 0.1))
@@ -266,8 +268,10 @@ def main():
     b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=1)
 
     l1, = ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2)
-    l2, = ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2)
-    l3, = ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2)
+    l2, = ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple',
+                     zorder=2)
+    l3, = ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black',
+                     zorder=2)
     ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
 
     days = (ets - sts).days
@@ -287,7 +291,8 @@ def main():
             mdates.DateFormatter('%-I %p\n%d %b',
                                  tz=pytz.timezone("America/Chicago")))
 
-    ax[0].set_title("ISUSM Station: %s Timeseries" % (nt.sts[station]['name'], ))
+    ax[0].set_title(("ISUSM Station: %s Timeseries"
+                     ) % (nt.sts[station]['name'], ))
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + box.height * 0.05, box.width,
                         box.height * 0.95])
@@ -300,8 +305,8 @@ def main():
                  fontsize=12)
 
     # ----------------------------------------
-    ax[1].plot(valid, temperature(d12t, 'C').value('F'), linewidth=2, color='r',
-               label='12in')
+    ax[1].plot(valid, temperature(d12t, 'C').value('F'), linewidth=2,
+               color='r', label='12in')
     ax[1].plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
                color='purple', label='24in')
     ax[1].plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
