@@ -11,8 +11,8 @@ cursor2 = ISUAG.cursor()
 def main():
     """ Go main go """
     cursor.execute("""
-     SELECT station, valid from sm_daily where (slrmj_tot is null or
-     slrmj_tot = 0) and valid > '2015-04-14' ORDER by valid ASC
+     SELECT station, valid from sm_daily where (slrmj_tot_qc is null or
+     slrmj_tot_qc = 0) and valid > '2015-04-14' ORDER by valid ASC
     """)
     for row in cursor:
         station = row[0]
@@ -28,7 +28,7 @@ def main():
             continue
         print('%s %s -> %.2f (%s obs)' % (station, v1.strftime("%d %b %Y"),
                                           row2[0], row2[1]))
-        cursor2.execute("""UPDATE sm_daily SET slrmj_tot = %s
+        cursor2.execute("""UPDATE sm_daily SET slrmj_tot_qc = %s
         WHERE station = %s and valid = %s""", (row2[0], station, row[1]))
 
     cursor2.close()
