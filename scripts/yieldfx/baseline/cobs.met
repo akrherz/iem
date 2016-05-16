@@ -3,8 +3,9 @@ latitude = 42.03 (DECIMAL DEGREES)
 Location = COBS yield forecast plots
 tav = 9.291749 (oC) ! annual average ambient temperature
 amp = 29.74443 (oC) ! annual amplitude in mean monthly temperature
-! Last updated April 2016 (data checked until March 31, 2016 by SVA)
 ! source: Synthetic file from Ames farm (1/1/1980 to 12/31/2008; including legacy, coops) and Cobs measured data from 2008 to today.
+! Last updated April 2016 (data checked until March 31, 2016 by SVA)
+! Data from April 1 to end of 2016 is from the Ames met file, including cfs model
 year          day           radn          maxt          mint          rain
 ()            ()            (MJ/m^2)      (oC)          (oC)          (mm)
  1980          1             2.703        -0.6          -3.9           0 

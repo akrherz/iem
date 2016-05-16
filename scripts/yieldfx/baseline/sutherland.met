@@ -8,7 +8,8 @@ amp = 30.80581 (oC) ! annual amplitude in mean monthly temperature
 ! This file synthesizes info from ISU Moisture + coops + legacy network plus daymet. 
 ! Solar sensor damaged Aug 1, 2015 to May 10, 2016. Radiation estimated from Coops (solar = Prighmar solar/1.23)
 ! from May 10, 2016 i use again ISU Moisture network for solar radiation 
-! All values checked - last update May 12, 2016 by SVA. 
+! All values checked - last update May 15, 2016 by SVA. 
+! Data from may 15 to end of 2016 from cfs model
 year          day           radn          maxt          mint          rain
 ()            ()            (MJ/m^2)      (oC)          (oC)          (mm)
  1980          1             3.6          -1.1          -7.8           0 
@@ -13293,3 +13294,5 @@ year          day           radn          maxt          mint          rain
  2016          131           14.33         22.96         12.06         0.7899919 
  2016          132           10.03         18.38         8.96          14.224 
  2016          133           18.01         15.77         6.38          0 
+ 2016          134           9.2           10.09         3.866         0.7899919 
+ 2016          135           22.73         13.47         0.388         0 
