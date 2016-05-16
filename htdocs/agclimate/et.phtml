@@ -11,7 +11,7 @@ $t->content = <<<EOF
 		<li class="current">ET Details</li>
 </ul>
 
-<div class="alert alert-danger">DRAFT DOCUMENT, Work in Progress 12 May 2016</div>
+<div class="alert alert-danger">DRAFT DOCUMENT, Work in Progress 16 May 2016</div>
 		
 <h3>Evapotranspiration Details</h3>
 
@@ -47,12 +47,46 @@ $t->content = <<<EOF
 		calendar day totals to avoid confusion with having slightly conflicting
 		ET values for a given day.</p>
 
-<p>The hourly ET is estimated by the <a href="https://www.researchgate.net/profile/Richard_Allen10/publication/43255787_The_ASCE_Standardized_Reference_Evapotranspiration_Equation/links/004635370511b8b1ae000000.pdf">ASCE Standardized Reference Evapotranspiration Equation</a>
-		, which assumes a reference tall crop (alfalfa).
+<p>The hourly ET is estimated by the <a href="http://www.kimberly.uidaho.edu/water/asceewri/ASCE_Standardized_Ref_ET_Eqn_Phoenix2000.pdf">ASCE Standardized Reference Evapotranspiration Equation</a>
+		, which assumes a reference tall crop (alfalfa).  The equation is as follows,
+		taken from the aforementioned reference.
+
+<br /><img src="images/eqn2_et.png" alt="Reference ET Equation" /></p>
+
+<p>The terms are defined as:
+	<table class="table table-striped table-condensed table-bordered">
+<thead><tr><th>Symbol</th><th>Description</th><th>Units</th></tr></thead>
+<tbody>
+		<tr>
+		<td>&Delta;</td>
+		<td>Slope of the vapor pressure-tempertaure curve, estimated by using
+		the mean temperature for the day or hour.</td>
+		<td>kPa &deg;C<sup>-1</sup></td>
+		</tr>
+
+		<tr>
+		<td>R<sub>n</sub></td>
+		<td>Net Radition.  This is the combination of received shortwave minus
+		the amount reflected by the crop (albedo) and longwave transmitted by
+		the soil.</td>
+		<td>MJ m<sup>-2</sup> d<sup>-1</sup></td>
+		</tr>
+		
+		<tr>
+		<td>G</td>
+		<td>Ground Soil Heat Flux.</td>
+		<td>MJ m<sup>-2</sup> d<sup>-1</sup></td>
+		</tr>
+		
+</tbody>
+</table>
 		
 <p><strong>References:</strong>
 <ol>
 	<li><a href="https://en.wikipedia.org/wiki/Evapotranspiration">Wikipedia's Evapotranspiration</a></li>
+	<li><a href="http://www.kimberly.uidaho.edu/water/asceewri/ASCE_Standardized_Ref_ET_Eqn_Phoenix2000.pdf">ASCE Standardized Reference ET</a></li>
+	<li><a href="http://www.kimberly.uidaho.edu/water/fao56/fao56.pdf">FAO 56</a></li>
+	<li><a href="https://github.com/woodcrafty/PyETo">Python Implementation</a> of FAO 56 and other equations</li>
 </ol></p>
 
 EOF;
