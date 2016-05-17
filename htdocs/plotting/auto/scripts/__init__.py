@@ -30,6 +30,8 @@ data = {'plots': [
          'label': "Daily Records for each month of year"},
         {'id': "31", 'mw': True,
          'label': "Extreme Jumps or Dips in High Temperature over X days"},
+        {'id': "147", 'mw': True,
+         'label': "Frequency of One Station Warmer/Wetter than Another"},
         {'id': "7", 'mw': True,
          'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "61",
