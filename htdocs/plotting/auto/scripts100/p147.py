@@ -27,6 +27,8 @@ def get_description():
              label='Select Station #2:'),
         dict(type='select', name='pvar', default='high', options=PDICT,
              label='Which variable to plot?'),
+        dict(type='text', name='mag', default='1',
+             label='By how much warmer [F] or wetter [inch]')
     ]
     return d
 
@@ -40,6 +42,7 @@ def plotter(fdict):
     station2 = fdict.get('station2', 'IA2203')
     network1 = fdict.get('network1', 'IACLIMATE')
     network2 = fdict.get('network2', 'IACLIMATE')
+    mag = float(fdict.get('mag', '1'))
     nt1 = NetworkTable(network1)
     nt2 = NetworkTable(network2)
     pvar = fdict.get('pvar', 'high')
@@ -56,12 +59,13 @@ def plotter(fdict):
         """ + table2 + """ WHERE station = %s)
 
     SELECT extract(doy from o.day) as doy, count(*),
-    sum(case when o.high > t.high then 1 else 0 end) as high_hits,
-    sum(case when o.low > t.low then 1 else 0 end) as low_hits,
-    sum(case when o.precip > t.precip then 1 else 0 end) as precip_hits,
-    sum(case when o.avgt > t.avgt then 1 else 0 end) as avgt_hits
+    sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,
+    sum(case when o.low >= (t.low + %s) then 1 else 0 end) as low_hits,
+    sum(case when o.precip >= (t.precip + %s) then 1 else 0 end) as precip_hits,
+    sum(case when o.avgt >= (t.avgt + %s) then 1 else 0 end) as avgt_hits
     from obs1 o JOIN obs2 t on (o.day = t.day) GROUP by doy ORDER by doy ASC
-    """, pgconn, params=(station1, station2), index_col='doy')
+    """, pgconn, params=(station1, station2, mag, mag, mag, mag),
+                  index_col='doy')
     for _v in ['high', 'low', 'avgt', 'precip']:
         df['%s_freq[%%]' % (_v, )] = df["%s_hits" % (_v,)] / df['count'] * 100.
 
@@ -72,9 +76,11 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel(("Percentage [%%], Ave: %.1f%%"
                    ) % (df[pvar + '_freq[%]'].mean(),))
-    ax.set_title(("%s [%s] Daily %s\n%s Than %s [%s]"
+    v = int(mag) if pvar != 'precip' else round(mag, 2)
+    units = " inch" if pvar == 'precip' else "$^\circ$F"
+    ax.set_title(("%s [%s] Daily %s\n%s+%s %s Than %s [%s]"
                   ) % (nt1.sts[station1]['name'], station1, PDICT[pvar],
-                       "Warmer" if pvar != 'precip' else 'Wetter',
+                       v, units, "Warmer" if pvar != 'precip' else 'Wetter',
                        nt2.sts[station2]['name'], station2))
     ax.set_xlim(0, 366)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
