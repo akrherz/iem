@@ -63,7 +63,8 @@ def plotter(fdict):
     agg2 a LEFT JOIN myyear m
     on (m.month = a.month) ORDER by a.month ASC
     """, pgconn, params=(station, year), index_col=None)
-
+    if len(df.index) == 0:
+        return "No Precipitation Data Found for Site"
     (fig, ax) = plt.subplots(1, 1)
     monthly = df['avg'].values.tolist()
     bars = ax.bar(df['month'] - 0.4, monthly, fc='red', ec='red',
@@ -100,3 +101,6 @@ def plotter(fdict):
                   ) % (nt.sts[station]['name'], station))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict(zstation='CGS', network='MD_ASOS', year=2016))
