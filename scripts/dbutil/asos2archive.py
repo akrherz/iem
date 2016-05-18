@@ -69,10 +69,14 @@ for row in icursor:
     sql = """INSERT into t""" + repr(sts.year) + """ (station, valid, tmpf,
     dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
     skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
-    min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, presentwx)
+    min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, presentwx, report_type)
     values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-    %s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
+    # TODO: differentiate between 2 (Routine) and 3 (SPECI)
+    rtype = (1
+             if row['raw'] is not None and row['raw'].find(' HFMETAR') > -1
+             else 2)
     args = (row['id'], row['valid'], row['tmpf'],
             row['dwpf'], row['drct'], row['sknt'], row['alti'],
             row['phour'], row['gust'], row['vsby'], row['skyc1'], row['skyc2'],
@@ -80,12 +84,14 @@ for row in icursor:
             row['skyl3'], row['skyl4'], row['raw'], row['p03i'], row['p06i'],
             row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
             row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
-            row['presentwx'])
+            row['presentwx'], rtype)
 
     acursor.execute(sql, args)
 
 if icursor.rowcount == 0:
-    print '%s - %s Nothing done for asos2archive.py?' % (sts, ets)
+    print(("%s - %s Nothing done for asos2archive.py?"
+           ) % (sts.strftime("%Y-%m-%dT%H:%M"), ets.strftime("%Y-%m-%dT%H:%M"))
+          )
 
 icursor.close()
 IEM.commit()
