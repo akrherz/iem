@@ -89,6 +89,7 @@ def main():
 
     # Save direct to disk or view in browser
     direct = True if form.getfirst('direct', 'no') == 'yes' else False
+    report_type = form.getlist('report_type')
     stations = get_stations(form)
     if direct:
         sys.stdout.write('Content-type: application/octet-stream\n')
@@ -143,8 +144,14 @@ def main():
         for row in mcursor:
             gtxt[row[0]] = "%.4f%s%.4f%s" % (row['lon'], rD, row['lat'], rD)
 
+    rlimiter = ""
+    if len(report_type) == 1:
+        rlimiter = " and report_type = %s" % (int(report_type[0]),)
+    elif len(report_type) > 1:
+        rlimiter = (" and report_type in %s"
+                    ) % (tuple([int(a) for a in report_type]), )
     acursor.execute("""SELECT * from alldata
-      WHERE valid >= %s and valid < %s and station in %s
+      WHERE valid >= %s and valid < %s and station in %s """+rlimiter+"""
       ORDER by valid ASC""", (sts, ets, tuple(dbstations)))
 
     sys.stdout.write("#DEBUG: Format Typ    -> %s\n" % (delim,))
