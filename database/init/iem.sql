@@ -395,6 +395,7 @@ CREATE TABLE current_log (
     min_tmpf_24hr real,
     presentwx varchar(24)
 );
+ALTER TABLE current_log SET WITH oids;
 
 CREATE OR REPLACE FUNCTION current_update_log() RETURNS trigger
     LANGUAGE plpgsql
