@@ -154,8 +154,18 @@ day worth of data.</p>
   <option value="yes">Save result data to file on computer</option>
 </select></p>
 		
-		
-<h4>6) Finally, get Data:</h4>
+<h4>6) Limit Report Types</h4>
+
+<p><span class="badge">New!</span> This attempts to filter the downloaded data
+	to only include those reports you want.  In the future, this will deliniate
+	between routine and special obs. Select the report types to include.
+<br /> 
+<select name="report_type" size="5" MULTIPLE>
+	<option value="1" selected>MADIS HFMETAR</option>
+	<option value="2" selected>Routine + SPECIals</option>
+</select>
+
+<h4>7) Finally, get Data:</h4>
 
   <input type="submit" value="Get Data">
   <input type="reset">
