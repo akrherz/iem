@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from pyiem.network import Table as NetworkTable
 import calendar
 import pytz
+import os
 from pyiem.plot import maue
 cmap = maue()
 cmap.set_bad('white')
@@ -14,7 +15,8 @@ cmap.set_over('black')
 today = datetime.datetime.now()
 today = today.replace(tzinfo=pytz.timezone("UTC"))
 
-POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='iemdb')
+POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='localhost',
+                           port=5555)
 
 
 def run(nexrad):
@@ -23,7 +25,7 @@ def run(nexrad):
     doy = []
     minvalid = datetime.datetime(2016, 1, 1)
     minvalid = minvalid.replace(tzinfo=pytz.timezone("UTC"))
-    cursor = POSTGIS.cursor('fetchattr')
+    cursor = POSTGIS.cursor()
     cursor.execute("""
     SELECT drct, sknt, extract(doy from valid), valid
     from nexrad_attributes_log WHERE nexrad = %s and sknt > 0
@@ -84,6 +86,9 @@ def main():
     """ See how we are called """
     nt = NetworkTable(["NEXRAD", "TWDR"])
     for sid in nt.sts.keys():
+        if os.path.isfile("%s_histogram.png" % (sid,)):
+            print("  Skipping %s" % (sid,))
+            continue
         run(sid)
 
 if __name__ == '__main__':
