@@ -1,29 +1,29 @@
 import math
-import re
 import psycopg2.extras
-import mx.DateTime
 import pyproj
 P2163 = pyproj.Proj(init='epsg:2163')
-postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+postgis = psycopg2.connect(database='postgis', host='localhost',
+                           port=5555, user='mesonet')
 pcursor = postgis.cursor(cursor_factory=psycopg2.extras.DictCursor)
-pcursor2 = postgis.cursor(cursor_factory=psycopg2.extras.DictCursor)
+pcursor2 = postgis.cursor()
 
-def rotate(x,y,rad):
-    return (x * math.cos(-rad) - y * math.sin(-rad)), (x * math.sin(-rad) + y * math.cos(-rad))
 
-def dir2ccwrot(dir):
+def rotate(x, y, rad):
+    return [(x * math.cos(-rad) - y * math.sin(-rad)),
+            (x * math.sin(-rad) + y * math.cos(-rad))]
+
+
+def dir2ccwrot(mydir):
     # Convert to CCW
-    if dir >= 270 and dir <= 360:
-        return 0 - (dir - 270)
-    if dir >= 180 and dir < 270:
-        return 270 - dir
-    if dir >= 90 and dir < 180:
-        return 180 - (dir - 90)
-    if dir >= 0 and dir < 90:
-        return 180 + (90 - dir )
+    if mydir >= 270 and mydir <= 360:
+        return 0 - (mydir - 270)
+    if mydir >= 180 and mydir < 270:
+        return 270 - mydir
+    if mydir >= 90 and mydir < 180:
+        return 180 - (mydir - 90)
+    if mydir >= 0 and mydir < 90:
+        return 180 + (90 - mydir)
 
-#for i in range(0,360,10):
-#    print i, dir2ccwrot( i )
 
 warnX = []
 warnY = []
@@ -44,66 +44,60 @@ dXT = []
 dDist = []
 offsetX = []
 offsetY = []
-#output = open('xy.dat', 'w')
+# output = open('xy.dat', 'w')
 
 pcursor.execute("""
-  SELECT ST_x(ST_Centroid(ST_Transform(geom,2163))) as center_x,  
-    ST_y(ST_Centroid(ST_Transform(geom,2163))) as center_y, *, ST_AsText(geom) as gtext,
-     ST_x(ST_CEntroid(geom)) as lon, ST_y(ST_Centroid(geom)) as lat,
-     ST_AsText(ST_Transform(geom,2163)) as projtext
-    from warnings
-    WHERE issue > '2008-01-01' and issue < '2014-01-01' and gtype = 'P' 
-    and significance = 'W' and 
-    phenomena in ('TO') and wfo = 'MPX'
-""") # and wfo = 'DMX' and eventid = 13 and phenomena= 'TO' and issue < '2009-01-01'
-i = 0
-for row in pcursor:
-    issue = mx.DateTime.strptime(str(row['issue'])[:16], '%Y-%m-%d %H:%M')
-    expire = mx.DateTime.strptime(str(row['expire'])[:16], '%Y-%m-%d %H:%M')
+    SELECT issue, init_expire, tml_direction, tml_sknt,
+    ST_x(tml_geom) as tml_lat, ST_y(tml_geom) as tml_lon, wfo,
+    phenomena, significance, eventid from sbw WHERE
+    phenomena = 'TO' and status = 'NEW' and wfo = 'IND'
+    and issue between '2008-01-01' and '2016-01-01'
+    """)
+for i, row in enumerate(pcursor):
+    issue = row['issue']
+    expire = row['init_expire']
     i += 1
     if i % 1000 == 0:
-        print 'Done', i
-    tokens = re.findall(r'TIME...MOT...LOC [0-9]{4}Z ([0-9]{1,3})DEG ([0-9]{1,3})KT ([0-9]+) ([0-9]+)', row['report'])
-    if len(tokens) == 0:
-        print 'FAIL', row['wfo'], row['eventid'], row['issue']
+        print('Done %s' % (i,))
+    tml_direction = row['tml_direction']
+    tml_sknt = row['tml_sknt']
+    if float(tml_sknt) == 0:
         continue
-    (dir, sknt, lat100, lon100) = tokens[0]
-    lon = 0 - (int(lon100) / 100.)
-    lat = int(lat100) / 100.
+    lat = row['tml_lat']
+    lon = row['tml_lon']
+    if lat is None:
+        continue
     xTML, yTML = P2163(lon, lat)
-    if float(sknt) == 0:
-        continue
-    smps = float(sknt) * 0.514
-    dir = float(dir)
+    smps = float(tml_sknt) * 0.514
     # This is the from angle, need to rotate 180 to get the to angle
-    angle = dir2ccwrot( dir )
+    angle = dir2ccwrot(tml_direction)
     rad = math.radians(angle)
-    print dir, angle, rad
-    
-    xTML2 = xTML + math.cos(rad)*smps*1800. # 30 min
-    yTML2 = yTML + math.sin(rad)*smps*1800. # 30 min
-    ulX = xTML + math.cos(rad+math.pi/2.)*10000.
-    ulY = yTML + math.sin(rad+math.pi/2.)*10000. # 10km "north"
-    llX = xTML - math.cos(rad+math.pi/2.)*10000.
-    llY = yTML - math.sin(rad+math.pi/2.)*10000. # 10km "south"
-    urX = xTML2 + math.cos(rad+math.pi/2.)*10000.
-    urY = yTML2 + math.sin(rad+math.pi/2.)*10000. # 10km "north"
-    lrX = xTML2 - math.cos(rad+math.pi/2.)*30000.
-    lrY = yTML2 - math.sin(rad+math.pi/2.)*30000. # 30km "south"
+    print tml_direction, angle, rad
 
-    
+    xTML2 = xTML + math.cos(rad)*smps*1800.  # 30 min
+    yTML2 = yTML + math.sin(rad)*smps*1800.  # 30 min
+    ulX = xTML + math.cos(rad+math.pi/2.)*10000.
+    ulY = yTML + math.sin(rad+math.pi/2.)*10000.  # 10km "north"
+    llX = xTML - math.cos(rad+math.pi/2.)*10000.
+    llY = yTML - math.sin(rad+math.pi/2.)*10000.  # 10km "south"
+    urX = xTML2 + math.cos(rad+math.pi/2.)*10000.
+    urY = yTML2 + math.sin(rad+math.pi/2.)*10000.  # 10km "north"
+    lrX = xTML2 - math.cos(rad+math.pi/2.)*30000.
+    lrY = yTML2 - math.sin(rad+math.pi/2.)*30000.  # 30km "south"
+
     # Find LSRs
     sql = """
     INSERT into bot_warnings(issue, expire, gtype, wfo,
     geom, eventid, phenomena, significance) VALUES ('%s', '%s',
-    'P', '%s', 
-    ST_Transform(ST_GeomFromText('SRID=2163;MULTIPOLYGON(((%s %s, %s %s, %s %s, %s %s, %s %s)))'),4326),
+    'P', '%s',
+    ST_Transform(ST_GeomFromText('SRID=2163;MULTIPOLYGON(((%s %s, %s %s,
+    %s %s, %s %s, %s %s)))'),4326),
     %s, '%s', '%s')
-    """ % (row['issue'].strftime("%Y-%m-%d %H:%M"), row['expire'].strftime("%Y-%m-%d %H:%M"),
+    """ % (issue, expire,
            row['wfo'], llX, llY, ulX, ulY, urX, urY, lrX, lrY, llX, llY,
            row['eventid'], row['phenomena'], row['significance'])
-    #print sql
-    pcursor2.execute( sql )
+    # print sql
+    pcursor2.execute(sql)
 
 pcursor2.close()
 postgis.commit()
