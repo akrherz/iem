@@ -295,9 +295,9 @@ def doit(opener, station, now):
                 tmpf, dwpf, vsby, drct, sknt, gust, p01i, alti, skyc1, skyc2,
                 skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar, mslp,
                 presentwx, p03i, p06i, p24i, max_tmpf_6hr, max_tmpf_24hr,
-                min_tmpf_6hr, min_tmpf_24hr)
+                min_tmpf_6hr, min_tmpf_24hr, report_type)
                 values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                %s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, 2)
             """
             args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
                     ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
