@@ -20,14 +20,12 @@ for row in cursor:
     """, (row[0], row[1], row[2]))
     for row2 in cursor2:
         key = "%s.%s" % (row2[0], row2[1])
-        if not hits.has_key(key):
+        if key not in hits:
             hits[key] = 0
         hits[key] += 1
     if cursor2.rowcount == 0:
         misses += 1
 
-
-
 print 'Misses %s %.1f%%' % (misses, misses / float(total) * 100.0)
 for key in hits.keys():
-    print '%s %s %.1f%%' % (key, hits[key], hits[key] / float(total) * 100.0)         
+    print '%s %s %.1f%%' % (key, hits[key], hits[key] / float(total) * 100.0)
