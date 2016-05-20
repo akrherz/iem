@@ -221,6 +221,7 @@ def replace_obs(df, location):
         select valid, tair_c_max, tair_c_min, slrmj_tot, vwc_12_avg,
         vwc_24_avg, vwc_50_avg, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
         rain_mm_tot from sm_daily WHERE station = %s and valid >= %s
+        ORDER by valid
         """, (isusm, jan1))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'sm12', 'sm24', 'sm50',
              'st4', 'st12', 'st24', 'st50', 'rain']
@@ -228,7 +229,7 @@ def replace_obs(df, location):
         valid = row[0]
         # Does our df currently have data for this date?  If so, we shall do
         # no more
-        dont_replace = valid in df.index
+        dont_replace = not np.isnan(df.at[valid, 'mint'])
         if not dont_replace:
             print("Supplementing %s for date %s" % (location, valid))
         _gdd = gdd(temperature(row[1], 'C'), temperature(row[2], 'C'))
