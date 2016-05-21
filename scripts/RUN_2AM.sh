@@ -42,5 +42,12 @@ cd ../ingestors/cocorahs
 python redo_day.py IA
 python redo_day.py IL
 
+cd ../asos_1minute
+if [ $DD -eq "09" ]
+then
+	python parse_ncdc_asos1minute.py
+fi
+
+
 cd ../../windrose
 python daily_drive_network.py

@@ -192,14 +192,16 @@ def download(station, monthts):
     datadir = "%s/data/%s" % (BASEDIR, station)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
-    for page in [5,6]:
+    for page in [5, 6]:
         uri = baseuri + "640%s-%s/640%s0K%s%s.dat" % (page, monthts.year, page,
-                                    station, monthts.strftime("%Y%m"))
+                                                      station,
+                                                      monthts.strftime("%Y%m"))
         url = urllib2.Request(uri)
         fp = urllib2.urlopen(url)
         data = fp.read()
         o = open("%s/640%s0K%s%s.dat" % (datadir, page,
-                                    station, monthts.strftime("%Y%m")),'w')
+                                         station, monthts.strftime("%Y%m")),
+                 'w')
         o.write(data)
         o.close()
 
@@ -211,40 +213,43 @@ def runner(station, monthts):
 
     # Our final amount of data
     data = {}
-    if os.path.isfile("64050K%s%s%02i" % (station,monthts.year, monthts.month)):
+    if os.path.isfile("64050K%s%s%02i" % (station, monthts.year,
+                                          monthts.month)):
         fn5 = '64050K%s%s%02i' % (station, monthts.year, monthts.month)
-        fn6 = '64060K%s%s%02i' % (station, monthts.year, monthts.month)        
+        fn6 = '64060K%s%s%02i' % (station, monthts.year, monthts.month)
     else:
-        fn5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
-                station, monthts.year, monthts.month)
-        fn6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
-                station, monthts.year, monthts.month)
-        if not os.path.isfile( fn5 ):
+        fn5 = ('%sdata/%s/64050K%s%s%02i.dat'
+               ) % (BASEDIR, station,
+                    station, monthts.year, monthts.month)
+        fn6 = ('%sdata/%s/64060K%s%s%02i.dat'
+               ) % (BASEDIR, station,
+                    station, monthts.year, monthts.month)
+        if not os.path.isfile(fn5):
             try:
                 download(station, monthts)
             except Exception, exp:
                 print 'download() error', exp
-            if not os.path.isfile( fn5 ) or not os.path.isfile( fn6 ):
-                print "NCDC did not have %s station for %s" % (station,
-                                                    monthts.strftime("%b %Y"))
+            if not os.path.isfile(fn5) or not os.path.isfile(fn6):
+                print(("NCDC did not have %s station for %s"
+                       ) % (station, monthts.strftime("%b %Y")))
                 return
     # We have two files to worry about
     print "Processing 64050: %s" % (fn5,)
     for ln in open(fn5):
-        d = p1_parser( ln )
+        d = p1_parser(ln)
         if d is None:
             continue
-        data[ d['ts'] ] = d
+        data[d['ts']] = d
 
     print "Processing 64060: %s" % (fn6,)
     for ln in open(fn6):
-        d = p2_parser( ln )
+        d = p2_parser(ln)
         if d is None:
             continue
-        if not data.has_key( d['ts'] ):
-            data[ d['ts'] ] = {}
+        if d['ts'] not in data:
+            data[d['ts']] = {}
         for k in d.keys():
-            data[ d['ts'] ][ k ] = d[k]
+            data[d['ts']][k] = d[k]
 
     if len(data) == 0:
         print 'No data found for station: %s' % (station,)
@@ -262,8 +267,8 @@ def runner(station, monthts):
             maxts = ts
 
     tmpfn = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
-    out = open( tmpfn , 'w')
-    out.write("""DELETE from alldata_1minute WHERE station = '%s' and 
+    out = open(tmpfn, 'w')
+    out.write("""DELETE from alldata_1minute WHERE station = '%s' and
                valid >= '%s' and valid <= '%s';\n""" % (station, mints, maxts))
     out.write("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (
          monthts.year,))
@@ -321,7 +326,13 @@ def main(argv):
             for month in months:
                 runner(sys.argv[1], datetime.datetime(int(argv[2]), month, 1))
     else:
-        test()
+        # default to last month
+        ts = datetime.date.today() - datetime.timedelta(days=19)
+        for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
+                        'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
+                        'ALO', 'DSM']:
+            runner(station,
+                   datetime.datetime(ts.year, ts.month, 1))
 
 if __name__ == '__main__':
     main(sys.argv)
