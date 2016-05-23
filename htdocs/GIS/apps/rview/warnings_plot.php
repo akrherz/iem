@@ -68,6 +68,8 @@ if (in_array("warnings", $layers)){
 
 if ($lsrwindow > 0){
 	$lsr_etime = $ts + ($lsrwindow * 60);
-	$url .= sprintf("layers[]=lsrs&ts2=%s", date("YmdHi", $lsr_etime));
+	$lsr_stime = $ts - ($lsrwindow * 60);
+	$url .= sprintf("layers[]=lsrs&ts1=%s&ts2=%s", date("YmdHi", $lsr_stime),
+			date("YmdHi", $lsr_etime));
 }
 ?>

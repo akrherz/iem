@@ -79,9 +79,11 @@ width="640" height="480" alt="radmap image"/>
  <li><i>watch_by_county</i> - Convective Watch-by-County</li>
  <li><i>watches</i> - Polygon SPC Watch boundaries</li>
 </ul>
-<p>[1] Storm reports are plotting valid at the given time (variable ts). To specify
-a time range, set a ts2 variable to the UTC time in the future at the end of the time range
-you want. For example, &amp;ts=200806071000&amp;ts2=200806071015 to get LSRs between 10 and 1015z.
+<p>[1] Storm reports are plotting valid at the given time (variable ts).
+		To specify a time range, set ts1 and ts2 variable to the UTC start
+		and end time respectively.
+		For example, &amp;ts1=200806071000&amp;ts2=200806071015 to get LSRs
+		between 10 and 1015z.</p>
 <p>[2] Logic is applied to these layers to find the closest imagery to the specified
 time or the realtime imagery if no time (variable ts) is specified.
 </div>
@@ -148,10 +150,11 @@ used to find the closest imagery in time.
 </div>
 
 <div class="item">
- <h4>&amp;ts2=YYYYMMDDHHII</h4>
+ <h4>&amp;ts1=YYYYMMDDHHII&amp;ts2=YYYYMMDDHHII</h4>
 <div class="desc">
-  Timestamp in GMT for the end time to look for Local Storm Reports.  For example, 6:45 GMT on 
-5 Jun 2005 would be "200506050645".
+  Start and end timestamp in UTC for to look for Local Storm Reports. 
+  For example, 6:45 GMT on 5 Jun 2005 would be "200506050645". If ts1 is not
+  specified, it defaults to the value of ts.
 </div>
 </div>
 
@@ -202,6 +205,8 @@ os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
  <li><strong>14 Apr 2012:</strong> Another cleanup and add ridge and GOES
  imagery layers as available plotting options.</li>
  <li><strong>4 May 2012:</strong> Add incorporated places as a layer option.</li>
+ <li><strong>22 May 2016:</strong> Clarified the Local Storm Reports timestamp
+		options.</li>
 </ul>
 EOF;
 $t->render('single.phtml');
