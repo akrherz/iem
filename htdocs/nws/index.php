@@ -20,6 +20,9 @@ $t->west = <<<EOF
  <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
  <br />Simple app to plot out current/historical DCP (river gauges) data for a site
  of your choice.</li>
+ <li><a href="/plotting/auto/">Automated Data Plotting</a>
+ <br />Generation of plots and spreadsheet summaries for many of the datasets
+		that the curates.</li>
 	<li>Daily Climate Summary (AFOS: CLI Product) 
 		<a href="climap.php">Interactive Map</a> or 
 		<a href="clitable.php">Text Table</a></li>
@@ -33,9 +36,9 @@ $t->west = <<<EOF
 </ul>
 
 <h4>Iowa AWOS RTP First Guess</h4>
-<blockquote>The IEM processes an auxillary feed of Iowa AWOS data direct
+<p>The IEM processes an auxillary feed of Iowa AWOS data direct
 from the Iowa DOT.  This information is used to produce a more accurate
-first guess at fields the NWS needs for their RTP product.</blockquote>
+first guess at fields the NWS needs for their RTP product.</p>
 <ul>
  <li><a href="/data/awos_rtp_00z.shef">0Z SHEF</a></li>
  <li><a href="/data/awos_rtp.shef">12Z SHEF</a></li>

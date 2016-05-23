@@ -1,11 +1,13 @@
 import psycopg2
+from tqdm import tqdm
 
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+POSTGIS = psycopg2.connect(database='postgis', host='localhost',
+                           port=5555, user='nobody')
 cursor = POSTGIS.cursor()
 cursor2 = POSTGIS.cursor()
 
 cursor.execute("""
- SELECT ugc, issue, expire, wfo from warnings where phenomena = 'SV' and
+ SELECT ugc, issue, expire, wfo from warnings_temp where phenomena = 'SV' and
  significance = 'W' and issue > '2005-10-01' and ugc is not null
 """)
 total = cursor.rowcount
@@ -13,9 +15,9 @@ print 'Events is ', total
 
 hits = {}
 misses = 0
-for row in cursor:
+for row in tqdm(cursor, total=total):
     cursor2.execute("""
-    SELECT distinct phenomena, significance from warnings
+    SELECT distinct phenomena, significance from warnings_temp
     where ugc = %s and expire > %s and issue < %s and significance = 'A'
     """, (row[0], row[1], row[2]))
     for row2 in cursor2:

@@ -48,7 +48,7 @@ offsetY = []
 
 pcursor.execute("""
     SELECT issue, init_expire, tml_direction, tml_sknt,
-    ST_x(tml_geom) as tml_lat, ST_y(tml_geom) as tml_lon, wfo,
+    ST_x(tml_geom) as tml_lon, ST_y(tml_geom) as tml_lat, wfo,
     phenomena, significance, eventid from sbw WHERE
     phenomena = 'TO' and status = 'NEW' and wfo = 'IND'
     and issue between '2008-01-01' and '2016-01-01'
@@ -88,11 +88,11 @@ for i, row in enumerate(pcursor):
     # Find LSRs
     sql = """
     INSERT into bot_warnings(issue, expire, gtype, wfo,
-    geom, eventid, phenomena, significance) VALUES ('%s', '%s',
+    geom, eventid, phenomena, significance, status) VALUES ('%s', '%s',
     'P', '%s',
     ST_Transform(ST_GeomFromText('SRID=2163;MULTIPOLYGON(((%s %s, %s %s,
     %s %s, %s %s, %s %s)))'),4326),
-    %s, '%s', '%s')
+    %s, '%s', '%s', 'NEW')
     """ % (issue, expire,
            row['wfo'], llX, llY, ulX, ulY, urX, urY, lrX, lrY, llX, llY,
            row['eventid'], row['phenomena'], row['significance'])
