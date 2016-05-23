@@ -203,11 +203,16 @@ $ts = isset($_GET["ts"]) ? gmmktime(
  substr($_GET["ts"],8,2), substr($_GET["ts"],10,2), 0,
  substr($_GET["ts"],4,2), substr($_GET["ts"],6,2), substr($_GET["ts"],0,4)): 
  time();
-$ts2 = isset($_GET["ts2"]) ? gmmktime(
+$ts1 = isset($_GET["ts1"]) ? gmmktime(
+ substr($_GET["ts1"],8,2), substr($_GET["ts1"],10,2), 0,
+ substr($_GET["ts1"],4,2), substr($_GET["ts1"],6,2), substr($_GET["ts1"],0,4)): 
+ 0;
+ $ts2 = isset($_GET["ts2"]) ? gmmktime(
  substr($_GET["ts2"],8,2), substr($_GET["ts2"],10,2), 0,
  substr($_GET["ts2"],4,2), substr($_GET["ts2"],6,2), substr($_GET["ts2"],0,4)): 
  0;
 if (isset($dts) && ! isset($_GET["ts"])) { $ts = $dts; }
+if ($ts1 == 0) { $ts1 = $ts; }
 if (isset($dts2) && ! isset($_GET["ts2"])) { $ts2 = $dts2; }
 /* Make sure we have a minute %5 */
 if (time() - $ts > 300)
@@ -506,11 +511,11 @@ $w0c->draw($img);
 $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"]);
 $lsrs->set("status",in_array("lsrs", $layers) );
-if ($ts2 > $ts){
+if ($ts2 > $ts1){
  $sql = "geom from (select distinct city, magnitude, valid, geom, "
  		."type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
  		."from lsrs WHERE "
- 		."valid >= '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00' and "
+ 		."valid >= '". gmstrftime("%Y-%m-%d %H:%M", $ts1) .":00+00' and "
  		."valid < '". gmstrftime("%Y-%m-%d %H:%M", $ts2) .":00+00' "
  		."ORDER by valid DESC) as foo USING unique k USING SRID=4326";
 } else {
