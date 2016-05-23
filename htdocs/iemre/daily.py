@@ -81,6 +81,8 @@ def main():
            nc.variables['p01d_12z'][offset, j, i] / 25.4, 2),
         'climate_daily_precip_in': myrounder(
            cnc.variables['p01d'][coffset, j, i] / 25.4, 2),
+        'srad_mj': myrounder(
+           nc.variables['rsds'][offset, j, i] * 86400. / 1000000., 2),
       })
     nc.close()
     cnc.close()

@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 
 # Third party
+import numpy as np
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity
 import pyiem.meteorology as met
@@ -21,6 +22,7 @@ icursor = ISUAG.cursor()
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
 accesstxn = ACCESS.cursor()
 
+REPROCESS_SOLAR = False
 VARCONV = {
            'vwc06_avg': 'vwc_06_avg',
            'vwc12_avg': 'vwc_12_avg',
@@ -210,6 +212,11 @@ def daily_process(nwsli, maxts):
             float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
         ob.data['et_inch'] = float(tokens[headers.index('dailyet')]) / 24.5
         ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
+        if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
+            print(("soilm_ingest.py station: %s ts: %s has 0 solar"
+                   ) % (nwsli, valid.strftime("%Y-%m-%d")))
+            global REPROCESS_SOLAR
+            REPROCESS_SOLAR = True
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
         ob.save(accesstxn)
         # print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
@@ -327,6 +334,11 @@ def main():
     accesstxn.close()
     ACCESS.commit()
     ACCESS.close()
+
+    if REPROCESS_SOLAR:
+        print("Calling fix_solar.py")
+        os.chdir("../isuag")
+        subprocess.call("python fix_solar.py", shell=True)
 
 if __name__ == '__main__':
     main()
