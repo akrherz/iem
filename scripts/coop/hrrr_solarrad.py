@@ -21,8 +21,7 @@ cursor2 = COOP.cursor()
 
 
 def run(ts):
-    ''' Process data for this timestamp '''
-
+    """Process data for this timestamp"""
     total = None
     xaxis = None
     yaxis = None
@@ -120,7 +119,7 @@ def main():
         run(ts)
 
 if __name__ == '__main__':
-    ''' run main() run '''
+    # run main() run
     main()
     cursor.close()
     cursor2.close()
