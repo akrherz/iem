@@ -5,29 +5,45 @@ import datetime
 from scipy import stats
 import pandas as pd
 from pyiem import meteorology
+from collections import OrderedDict
 from pyiem.datatypes import temperature, mixingratio, pressure
 
-PDICT2 = {'winter': 'Winter (Dec, Jan, Feb)',
-          'spring': 'Spring (Mar, Apr, May)',
-          'summer': 'Summer (Jun, Jul, Aug)',
-          'fall': 'Fall (Sep, Oct, Nov)',
-          'all': 'Entire Year'}
+MDICT = OrderedDict([
+         ('all', 'No Month/Time Limit'),
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('jan', 'January'),
+         ('feb', 'February'),
+         ('mar', 'March'),
+         ('apr', 'April'),
+         ('may', 'May'),
+         ('jun', 'June'),
+         ('jul', 'July'),
+         ('aug', 'August'),
+         ('sep', 'September'),
+         ('oct', 'October'),
+         ('nov', 'November'),
+         ('dec', 'December')])
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
-    d['description'] = """Simple plot of seasonal or yearly average dew points.
+    d['description'] = """Simple plot of yearly average dew points by year,
+    season, or month.
     This calculation was done by computing the mixing ratio, then averaging
     the mixing ratios by year, and then converting that average to a dew point.
-    This was done due to the non-linear nature of dew point.
+    This was done due to the non-linear nature of dew point when expressed in
+    units of temperature.
     """
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
              label='Select Station'),
         dict(type='select', name='season', default='winter',
-             label='Select Season:', options=PDICT2),
+             label='Select Time Period:', options=MDICT),
         dict(type="year", name="year", default=1893,
              label="Start Year of Plot"),
     ]
@@ -45,35 +61,41 @@ def plotter(fdict):
     station = fdict.get('station', 'DSM')
     network = fdict.get('network', 'IA_ASOS')
     season = fdict.get('season', 'winter')
-    _ = PDICT2[season]
+    _ = MDICT[season]
     startyear = int(fdict.get('year', 1893))
 
     nt = NetworkTable(network)
 
-    cursor.execute("""
-      SELECT valid, dwpf from alldata where station = %s and dwpf > -90 and
-      dwpf < 100
-    """, (station, ))
-
-    months = range(1, 13)
     today = datetime.datetime.now()
     lastyear = today.year
-    if season == 'spring':
+    if season == 'all':
+        months = range(1, 13)
+    elif season == 'spring':
         months = [3, 4, 5]
         if today.month > 5:
             lastyear += 1
-    if season == 'fall':
+    elif season == 'fall':
         months = [9, 10, 11]
         if today.month > 11:
             lastyear += 1
-    if season == 'summer':
+    elif season == 'summer':
         months = [6, 7, 8]
         if today.month > 8:
             lastyear += 1
-    if season == 'winter':
+    elif season == 'winter':
         months = [12, 1, 2]
         if today.month > 2:
             lastyear += 1
+    else:
+        ts = datetime.datetime.strptime("2000-"+season+"-01", '%Y-%b-%d')
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month, 999]
+        lastyear += 1
+
+    cursor.execute("""
+      SELECT valid, dwpf from alldata where station = %s and dwpf > -90 and
+      dwpf < 100 and extract(month from valid) in %s
+    """, (station,  tuple(months)))
 
     rows = []
     for row in cursor:
@@ -119,7 +141,7 @@ def plotter(fdict):
     ax.grid(True)
     msg = ("[%s] %s %.0f-%.0f Average Dew Point [%s] "
            ) % (station, nt.sts[station]['name'],
-                min(years), max(years),  PDICT2[season])
+                min(years), max(years),  MDICT[season])
     tokens = msg.split()
     sz = len(tokens) / 2
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
