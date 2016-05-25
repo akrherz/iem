@@ -75,7 +75,7 @@ for row in icursor:
 
     # TODO: differentiate between 2 (Routine) and 3 (SPECI)
     rtype = (1
-             if row['raw'] is not None and row['raw'].find(' HFMETAR') > -1
+             if row['raw'] is not None and row['raw'].find(' MADISHF') > -1
              else 2)
     args = (row['id'], row['valid'], row['tmpf'],
             row['dwpf'], row['drct'], row['sknt'], row['alti'],
