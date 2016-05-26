@@ -183,11 +183,11 @@ def daily_process(nwsli, maxts):
         valid = datetime.datetime.strptime(
             tokens[headers.index('timestamp')][:10], '%Y-%m-%d')
         valid = valid.date() - datetime.timedelta(days=1)
-        if valid < maxts:
+        if valid <= maxts:
             break
-        if valid == maxts:  # Reprocess
-            icursor.execute("""DELETE from sm_daily WHERE valid = '%s' and
-            station = '%s' """ % (valid.strftime("%Y-%m-%d"), nwsli))
+        # if valid == maxts:  # Reprocess
+        #    icursor.execute("""DELETE from sm_daily WHERE valid = '%s' and
+        #    station = '%s' """ % (valid.strftime("%Y-%m-%d"), nwsli))
         # We are ready for dbinserting!
         dbcols = ("station,valid,%s,%s"
                   ) % (",".join(headers[2:]),
