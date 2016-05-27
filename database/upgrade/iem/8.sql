@@ -57,7 +57,7 @@ create table summary_2016(
         and day < '2017-01-01'::date)) 
   INHERITS (summary);
 CREATE INDEX summary_2016_day_idx on summary_2016(day);
-CREATE INDEX summary_2016_iemid_day_idx on summary_2016(iemid, day);
+CREATE UNIQUE INDEX summary_2016_iemid_day_idx on summary_2016(iemid, day);
 GRANT SELECT on summary_2016 to nobody,apache;
 alter table summary_2016 
   add foreign key(iemid)
