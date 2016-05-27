@@ -79,6 +79,7 @@ def plotter(fdict):
     avg(min_tmpf) as avg_low_temp,
     sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,
     min(min_tmpf) as min_low,
+    max(min_tmpf) as max_low,
     max(max_tmpf) as max_high
     from summary s JOIN stations t on (s.iemid = t.iemid)
     WHERE t.network = %s and t.id = %s and to_char(day, 'mmdd') in %s
