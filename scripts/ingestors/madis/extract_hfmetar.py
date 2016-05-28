@@ -22,17 +22,17 @@ TIMEZONES = {None: pytz.timezone('UTC')}
 
 pgconn = psycopg2.connect(dbname='iem', host='iemdb', user='nobody')
 txn = pgconn.cursor()
-txn.execute("""SELECT id, network, tzname from stations
+txn.execute("""SELECT id, tzname from stations
     where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
     """)
 news = 0
 for row in txn:
-    LOC2TZ[row['id']] = row['tzname']
-    if row['tzname'] not in TIMEZONES:
+    LOC2TZ[row[0]] = row[1]
+    if row[1] not in TIMEZONES:
         try:
-            TIMEZONES[row['tzname']] = pytz.timezone(row['tzname'])
+            TIMEZONES[row[1]] = pytz.timezone(row[1])
         except:
-            TIMEZONES[row['tzname']] = pytz.timezone("UTC")
+            TIMEZONES[row[1]] = pytz.timezone("UTC")
 
 
 def vsbyfmt(val):
