@@ -17,6 +17,23 @@ from metar import Metar
 import warnings
 warnings.simplefilter('ignore', RuntimeWarning)
 
+LOC2TZ = {}
+TIMEZONES = {None: pytz.timezone('UTC')}
+
+pgconn = psycopg2.connect(dbname='iem', host='iemdb', user='nobody')
+txn = pgconn.cursor()
+txn.execute("""SELECT id, network, tzname from stations
+    where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
+    """)
+news = 0
+for row in txn:
+    LOC2TZ[row['id']] = row['tzname']
+    if row['tzname'] not in TIMEZONES:
+        try:
+            TIMEZONES[row['tzname']] = pytz.timezone(row['tzname'])
+        except:
+            TIMEZONES[row['tzname']] = pytz.timezone("UTC")
+
 
 def vsbyfmt(val):
     """ Tricky formatting of vis"""
@@ -91,7 +108,8 @@ def process(ncfn):
 
         mtr = "%s %sZ AUTO " % (sid, ts.strftime("%d%H%M"))
         network = xref.get(sid3, 'ASOS')
-        iem = Observation(sid3, network, ts)
+        iem = Observation(sid3, network,
+                          ts.astimezone(TIMEZONES[LOC2TZ.get(sid3, None)]))
         #  06019G23KT
         if (data['windDirQCR'][i] == 0 and
                 data['windDir'][i] is not np.ma.masked):
