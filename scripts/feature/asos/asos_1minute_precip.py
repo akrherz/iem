@@ -9,9 +9,9 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2016, 3, 8, 22, 0)
+sts = datetime.datetime(2016, 5, 27, 1, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2016, 3, 10, 6, 0)
+ets = datetime.datetime(2016, 5, 27, 7, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/Chicago'
 
@@ -21,7 +21,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2016_1minute WHERE station = 'MLU'
+ sknt, pres1, gust_sknt, precip from t2016_1minute WHERE station = 'AUS'
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (sts, ets))
@@ -60,7 +60,7 @@ interval = datetime.timedelta(minutes=1)
 now = lsts
 i = 0
 while now < lets:
-    if now.minute == 0 and now.hour % 4 == 0:
+    if now.minute == 0 and now.hour % 1 == 0:
         xticks.append(i)
         xlabels.append(now.strftime("%-I %p"))
 
@@ -108,9 +108,9 @@ ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.3, 0.7), prop=prop, ncol=1)
-ax.set_ylim(0, int(np.max(rate1)+10))
-ax.set_xlabel("8-9 March 2016 (Central Standard Time)")
-ax.set_title(("8 - 9 March 2016 Monroe, LA (KMLU)\n"
+ax.set_ylim(0, int(np.max(rate1)+5))
+ax.set_xlabel("26-27 May 2016 (Central Daylight Time)")
+ax.set_title(("26-27 May 2016 Austin Bergstrom, TX (KAUS)\n"
               "One Minute Rainfall, %.2f inches total plotted") % (prec[-1],))
 
 
