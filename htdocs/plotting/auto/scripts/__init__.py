@@ -169,6 +169,8 @@ data = {'plots': [
          'label': "End/Start Date of Summer (warmest 91 day period) per Year"},
         {'id': "27", 'mw': True,
          'label': "First Fall Temp Below Threshold (First Freeze/Frost)"},
+        {'id': "148", 'mw': True,
+         'label': "Holiday Daily Weather Observations each year"},
         {'id': "53", 'label': ("Hourly Frequency of Temperature within "
                                "Certain Ranges")},
         {'id': "10", 'mw': True,
