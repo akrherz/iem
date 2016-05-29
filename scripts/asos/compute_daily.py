@@ -27,14 +27,12 @@ def do(ts):
     tmpf, dwpf from
     alldata d JOIN stations t on (t.id = d.station)
     where (network ~* 'ASOS' or network = 'AWOS')
-    and valid between %s and %s ORDER by valid ASC
+    and valid between %s and %s and t.tzname is not null
+    ORDER by valid ASC
     """, (ts - datetime.timedelta(days=2), ts + datetime.timedelta(days=2)))
     wdata = dict()
     rhdata = dict()
     for row in cursor:
-        if row[5] is None:
-            print("asos/compute_daily.py %s has none timestamp!" % (row[0],))
-            continue
         if row[5].strftime("%m%d") != ts.strftime("%m%d"):
             continue
         station = "%s|%s|%s" % (row[0], row[1], row[2])
