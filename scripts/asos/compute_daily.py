@@ -32,6 +32,9 @@ def do(ts):
     wdata = dict()
     rhdata = dict()
     for row in cursor:
+        if row[5] is None:
+            print("asos/compute_daily.py %s has none timestamp!" % (row[0],))
+            continue
         if row[5].strftime("%m%d") != ts.strftime("%m%d"):
             continue
         station = "%s|%s|%s" % (row[0], row[1], row[2])
