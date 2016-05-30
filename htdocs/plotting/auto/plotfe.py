@@ -8,6 +8,7 @@ import datetime
 import pandas as pd
 import tempfile
 import imp
+import pytz
 import traceback
 
 
@@ -116,9 +117,12 @@ def main():
             ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
         end_time = datetime.datetime.now()
         # Place timestamp on the image
+        utcnow = datetime.datetime.utcnow(
+                                        ).replace(tzinfo=pytz.timezone("UTC"))
+        now = utcnow.astimezone(pytz.timezone("America/Chicago"))
         plt.figtext(0.01, 0.005, ('Plot Generated at %s in %.2fs'
                                   ) % (
-            datetime.datetime.now().strftime("%-d %b %Y %-I:%M %p"),
+            now.strftime("%-d %b %Y %-I:%M %Z"),
             (end_time - start_time).total_seconds()),
             va='bottom', ha='left', fontsize=8)
         ram = cStringIO.StringIO()
