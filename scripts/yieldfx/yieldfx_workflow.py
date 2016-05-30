@@ -218,9 +218,11 @@ def replace_obs(df, location):
                                        df.index.values.max().year + 1)]
 
     cursor.execute("""
-        select valid, tair_c_max, tair_c_min, slrmj_tot, vwc_12_avg,
-        vwc_24_avg, vwc_50_avg, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
-        rain_mm_tot from sm_daily WHERE station = %s and valid >= %s
+        select valid, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
+        vwc_12_avg_qc,
+        vwc_24_avg_qc, vwc_50_avg_qc, tsoil_c_avg_qc, t12_c_avg_qc,
+        t24_c_avg_qc, t50_c_avg_qc,
+        rain_mm_tot_qc from sm_daily WHERE station = %s and valid >= %s
         ORDER by valid
         """, (isusm, jan1))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'sm12', 'sm24', 'sm50',
