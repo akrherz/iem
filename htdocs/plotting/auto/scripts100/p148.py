@@ -11,6 +11,7 @@ PDICT = OrderedDict([
 PDICT2 = OrderedDict([
         ('high', 'High Temperature [F]'),
         ('low', 'Low Temperature [F]'),
+        ('precip', 'Precipitation [inch]'),
         ])
 
 
@@ -61,7 +62,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     df = read_sql("""
-    SELECT year, high from """ + table + """ WHERE station = %s
+    SELECT year, high, precip from """ + table + """ WHERE station = %s
     and day in %s ORDER by year ASC
     """, pgconn, params=(station, tuple(days)),
                   index_col='year')
