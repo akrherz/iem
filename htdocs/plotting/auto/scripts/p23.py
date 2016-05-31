@@ -2,6 +2,12 @@ import psycopg2.extras
 import numpy as np
 from pyiem.network import Table as NetworkTable
 import datetime
+from collections import OrderedDict
+
+PDICT = OrderedDict([
+            ('avg_temp', 'Average Temperature [F]'),
+            ('precip', 'Total Precipitation [inch]')
+            ])
 
 
 def get_description():
@@ -9,7 +15,8 @@ def get_description():
     d = dict()
     year = datetime.date.today().year - 7
     d['description'] = """This plot presents the combination of monthly
-    temperature departures and El Nino index values."""
+    temperature or precipitation departures and El Nino index values."""
+    d['data'] = True
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
@@ -17,6 +24,8 @@ def get_description():
              label='Start Year of Plot', min=1950),
         dict(type='text', name='years', default='8',
              label='Number of Years to Plot'),
+        dict(type='select', name='var', default='avg_temp',
+             label='Which Monthly Variable to plot?', options=PDICT),
     ]
     return d
 
@@ -34,11 +43,13 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     syear = int(fdict.get('syear', 2007))
     years = int(fdict.get('years', 8))
+    varname = fdict.get('var', 'avg_temp')
 
     sts = datetime.datetime(syear, 1, 1)
     ets = datetime.datetime(syear+years, 1, 1)
     archiveend = datetime.date.today() + datetime.timedelta(days=1)
-    archiveend = archiveend.replace(day=1)
+    if archiveend.day < 20:
+        archiveend = archiveend.replace(day=1)
 
     elnino = []
     elninovalid = []
@@ -52,28 +63,36 @@ def plotter(fdict):
     elnino = np.array(elnino)
 
     cursor.execute("""
- WITH climo as (
- SELECT month, avg((high+low)/2.) from """+table+""" where station = %s
- and day < %s GROUP by month),
+ WITH climo2 as (
+ SELECT year, month, avg((high+low)/2.), sum(precip)
+ from """+table+""" where station = %s
+ and day < %s GROUP by year, month),
+ climo as (select month, avg(avg) as t, avg(sum) as p from climo2
+  GROUP by month),
 
  obs as (
- SELECT year, month, avg((high+low)/2.) from """+table+""" where station = %s
+ SELECT year, month, avg((high+low)/2.),
+ sum(precip) from """+table+""" where station = %s
  and day < %s and year >= %s and year < %s GROUP by year, month)
 
- SELECT obs.year, obs.month, obs.avg - climo.avg from obs JOIN climo on
+ SELECT obs.year, obs.month, obs.avg - climo.t,
+ obs.sum - climo.p from obs JOIN climo on
  (climo.month = obs.month)
  ORDER by obs.year ASC, obs.month ASC
 
     """, (station, archiveend, station, archiveend, sts.year, ets.year))
     diff = []
+    pdiff = []
     valid = []
     for row in cursor:
         valid.append(datetime.datetime(row[0], row[1], 1))
         diff.append(float(row[2]))
+        pdiff.append(float(row[3]))
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.set_title(("[%s] %s\nMonthly Departure of Average Temperature + "
-                  "El Nino 3.4 Index") % (station, nt.sts[station]['name']))
+    ax.set_title(("[%s] %s\nMonthly Departure of %s + "
+                  "El Nino 3.4 Index") % (station, nt.sts[station]['name'],
+                                          PDICT.get(varname)))
 
     xticks = []
     xticklabels = []
@@ -92,11 +111,17 @@ def plotter(fdict):
         xticks = xticks[::2]
         xticklabels = xticklabels[::2]
 
-    bars = ax.bar(valid, diff, fc='r', ec='r', width=30)
+    _a = 'r'
+    _b = 'b'
+    if varname == 'precip':
+        _a = 'b'
+        _b = 'r'
+    bars = ax.bar(valid, diff if varname == 'avg_temp' else pdiff,
+                  fc=_a, ec=_a, width=30, align='center')
     for bar in bars:
         if bar.get_xy()[1] < 0:
-            bar.set_facecolor('b')
-            bar.set_edgecolor('b')
+            bar.set_facecolor(_b)
+            bar.set_edgecolor(_b)
 
     ax2 = ax.twinx()
 
@@ -104,12 +129,12 @@ def plotter(fdict):
     ax2.set_ylabel("El Nino 3.4 Index (line)")
     ax2.set_ylim(-3, 3)
 
-    ax.set_ylabel("Avg Temperature Departure [F] (bars)")
+    ax.set_ylabel("%s Departure (bars)" % (PDICT.get(varname), ))
     ax.grid(True)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(sts, ets)
-    maxv = np.max(np.absolute(diff)) + 2
+    maxv = np.max(np.absolute(diff if varname == 'avg_temp' else pdiff)) + 2
     ax.set_ylim(0-maxv, maxv)
 
     return fig
