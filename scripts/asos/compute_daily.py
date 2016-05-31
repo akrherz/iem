@@ -70,6 +70,11 @@ def do(ts):
             runningrh += (delta * rhdata[stid]['rh'][i])
             now = valid
 
+        if runningtime == 0:
+            print(("compute_daily %s has time domain %s %s"
+                   ) % (stid, rhdata[stid]['valid'][0],
+                        rhdata[stid]['valid'][-1]))
+            continue
         avg_rh = clean_rh(runningrh / runningtime)
         min_rh = clean_rh(min(rhdata[stid]['rh']))
         max_rh = clean_rh(max(rhdata[stid]['rh']))
@@ -104,6 +109,11 @@ def do(ts):
             runningv += (delta * wdata[stid]['v'][i])
             now = valid
 
+        if runningtime == 0:
+            print(("compute_daily %s has time domain %s %s"
+                   ) % (stid, wdata[stid]['valid'][0],
+                        wdata[stid]['valid'][-1]))
+            continue
         sknt = runningsknt / runningtime
         u = speed(runningu / runningtime, 'KT')
         v = speed(runningv / runningtime, 'KT')
