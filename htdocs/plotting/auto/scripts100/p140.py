@@ -127,7 +127,7 @@ def plotter(fdict):
     ax[1].set_ylabel("Observed Frequency [%]")
     ax[1].grid(True)
     ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
-    mysort = df.sort(varname, ascending=True)
+    mysort = df.sort_values(by=varname, ascending=True)
     info = ("Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
             "Max: %.2f %.0f"
             ) % (df[varname].min(), df['yr'][mysort.index[0]], ptile[1],
@@ -135,5 +135,5 @@ def plotter(fdict):
                  ptile[3], df[varname].max(),
                  df['yr'][mysort.index[-1]])
     ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
-               bbox=dict(color='white', edgecolor='k'))
+               bbox=dict(facecolor='white', edgecolor='k'))
     return fig, df
