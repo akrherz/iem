@@ -122,7 +122,7 @@ def main():
         now = utcnow.astimezone(pytz.timezone("America/Chicago"))
         plt.figtext(0.01, 0.005, ('Plot Generated at %s in %.2fs'
                                   ) % (
-            now.strftime("%-d %b %Y %-I:%M %Z"),
+            now.strftime("%-d %b %Y %-I:%M %p %Z"),
             (end_time - start_time).total_seconds()),
             va='bottom', ha='left', fontsize=8)
         ram = cStringIO.StringIO()
