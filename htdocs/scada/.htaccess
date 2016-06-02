@@ -1,0 +1,15 @@
+AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
+AuthGroupFile /dev/null
+AuthName Administrative
+AuthType Basic
+
+order deny,allow
+require user mec
+
+AddHandler cgi-script .py
+Options +ExecCGI
+
+RewriteEngine On
+RewriteRule ^i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
+RewriteRule ^map_power_([0-9]*).png$ map_power.py?ts=$1
+RewriteRule ^turbine_ts_([0-9]*)_(.*).png$ turbine_ts.py?date=$1&turbinename=$2
