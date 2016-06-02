@@ -4,12 +4,12 @@ import psycopg2
 import cgi
 import datetime
 import sys
-import matplotlib
-matplotlib.use("agg")
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import pytz
 from pandas.io.sql import read_sql
+import matplotlib
+matplotlib.use("agg")
+import matplotlib.pyplot as plt  # NOPEP8
+import matplotlib.dates as mdates  # NOPEP8
 
 PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
                           user='mesonet')
