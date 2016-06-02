@@ -1,0 +1,27 @@
+<?php 
+include_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/iemprop.php";
+$gmapskey = get_iemprop("google.maps.key");
+
+$t = new MyView();
+$t->title = "SCADA Stuff";
+$t->headextra = <<<EOF
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
+<script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
+<script src="map.js"></script>
+EOF;
+$t->bodyextra = " onload=\"init();\"";
+$t->content = <<<EOF
+
+<br />
+<a href="map_power.phtml">Map / Power Diagnostics by Minute</a>
+		<hr>
+
+<div id="map" style="width:100%; height:500px;"></div>
+
+
+EOF;
+
+$t->render('single.phtml');
+?>
