@@ -6,7 +6,9 @@ this script twice per day:
     RUN_MIDNIGHT.sh for just the 'calendar day' variables yesterday
     RUN_NOON.sh for the 12z today vals and calendar day yesterday
 """
+import os
 import sys
+import subprocess
 import netCDF4
 import numpy as np
 from pandas.io.sql import read_sql
@@ -69,8 +71,11 @@ def do_precip(nc, ts):
         print(("p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
                ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                     ets.strftime("%Y%m%d%H"), offset2))
-        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
-            ets.year,))
+        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ets.year,)
+        if not os.path.isfile(ncfn):
+            print("Missing %s" % (ncfn,))
+            return
+        hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
         hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
@@ -81,8 +86,11 @@ def do_precip(nc, ts):
         print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
                ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                     ets.strftime("%Y%m%d%H"), offset2))
-        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
-            sts.year,))
+        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (sts.year,)
+        if not os.path.isfile(ncfn):
+            print("Missing %s" % (ncfn,))
+            return
+        hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     nc.variables['p01d'][offset] = phour
@@ -100,8 +108,11 @@ def do_precip12(nc, ts):
         print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
                ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                     ets.strftime("%Y%m%d%H"), offset2))
-        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
-            ets.year,))
+        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ets.year,)
+        if not os.path.isfile(ncfn):
+            print("Missing %s" % (ncfn,))
+            return
+        hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
         hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
@@ -112,8 +123,11 @@ def do_precip12(nc, ts):
         print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
                ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                     ets.strftime("%Y%m%d%H"), offset2))
-        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
-            ts.year,))
+        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,)
+        if not os.path.isfile(ncfn):
+            print("Missing %s" % (ncfn,))
+            return
+        hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     nc.variables['p01d_12z'][offset] = phour
@@ -209,8 +223,12 @@ def grid_day(nc, ts):
 
 def main(ts, irealtime):
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),
-                         'a')
+    ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
+    if not os.path.isfile(ncfn):
+        print("will create %s" % (ncfn, ))
+        cmd = "python init_daily.py %s" % (ts.year,)
+        subprocess.call(cmd, shell=True)
+    nc = netCDF4.Dataset(ncfn, 'a')
     # For this date, the 12 UTC COOP obs will match the date
     grid_day12(nc, ts)
     do_precip12(nc, ts)
@@ -218,8 +236,12 @@ def main(ts, irealtime):
     # This is actually yesterday!
     if irealtime:
         ts -= datetime.timedelta(days=1)
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),
-                         'a')
+    ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
+    if not os.path.isfile(ncfn):
+        print("will create %s" % (ncfn, ))
+        cmd = "python init_daily.py %s" % (ts.year,)
+        subprocess.call(cmd, shell=True)
+    nc = netCDF4.Dataset(ncfn, 'a')
     grid_day(nc, ts)
     do_precip(nc, ts)
     nc.close()
