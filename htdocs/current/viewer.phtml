@@ -41,23 +41,23 @@ EOF;
  
  $t->content = <<<EOF
 <style>
- h2 {
+ h3 {
    margin-top: 0px;
 }
 </style>
  
      <div class="row">
-     	<div class="col-sm-6">
-     	<h3>Webcam Viewer App</h3>
+     	<div class="col-sm-4">
+     	<h3><i class="glyphicon glyphicon-camera"></i> IEM Webcam Viewer</h3>
      	</div>
-        <div class='col-sm-3'>
-    <strong>Application Mode:</strong>
+        <div class='col-sm-4'>
+    <strong>Mode:</strong>
 <div class="btn-group" id="toggle_event_mode">
 	<button type="button" class="btn btn-info locked_active">Realtime</button>
 	<button type="button" class="btn btn-default unlocked_inactive">Archive</button>
 </div>
 		</div>
-        <div class='col-sm-3'>
+        <div class='col-sm-4'>
         <div id="dtdiv" style="display: none;">
     <strong>Date &amp; Time:</strong> (click calendar icon)
         <div class="form-group">
@@ -74,18 +74,18 @@ EOF;
  
 <div class="row">
 <div class="col-md-6">
-<h2 id="webcam_title">Application is Loading...</h2>
 <img id="webcam_image" name="camera" src="/data/camera/640x480/{$id}.jpg" class="img img-responsive" />
+<h3 id="webcam_title">Application is Loading...</h3>
 </div>
 <div class="col-md-6">
-<h2 id="radar_title">Application is Loading...</h2>
 <div style="width: 100%; height: 400px;" id="map"></div>
+<h3 id="radar_title">Application is Loading...</h3>
 </div>
 
 <br clear="all" />
 
 <form name="main" target="JavaScript: func()">
-<b>Select Camera:</b>
+<b>Select camera by clicking arrow on map or from list below:</b>
 <div class="row">
 {$camselect}
 </div>
@@ -94,23 +94,30 @@ EOF;
 </form>
 
 
-<div style="padding: 5px;">
+<div class="row">
+		<div class="col-sm-12">
 
 
-<h3>JavaScript Web Camera Viewer Help</h3>
+<h3>Application Details</h3>
 
-<p>This page should never reload.  The refreshing of the web camera images is controlled by Javascript.  The images will automatically reload:
-<ul>
-	<li>every minute</li>
-	<li>when you select a camera site</li>
-	<li>when you click the 'Live Shot' button.</li>
-</ul></p>
+<p>This webpage should dynamically update while in "Realtime" mode, so there
+	is no need to refresh the page.  If you click the "Archive" mode option,
+	a time selector will appear and all presented data should be approximately
+	valid at that time.</p>
 
-<p>The Live Shot images are being acquired directly from the camera!  Please
-be patient after clicking the 'Live Shot' button for it may take a few 
-seconds to contact the camera.  When the display refreshes 
-by itself, the image is coming from a cache which may be up to 5 minutes old.
-This is done since bandwidth to the cameras is limited.</p>
+<p>Routinely, the IEM is archiving webcam imagery every 5 minutes.  During
+	interesting weather, this interval is decreased to every 1 minute.  So
+	if you pick a minute (ie 35) divisible by 5, you are most likely to
+	get an archived image.</p>
+		
+<p>The arrows on the map represent the direction at which the webcam is
+	pointed.  Due to software and hardware issues, these directions can
+	sometimes be off.</p>
+		
+<p>More information on the IEM's webcam work can be found
+	<a href="/projects/webcam.php">here</a>.</p>
+
+		</div>
 </div>
 EOF;
 $t->render('full.phtml');

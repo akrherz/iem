@@ -6,7 +6,6 @@ var selectControl;
 var ts = null;
 var aqlive = 0;
 var showlogo = 1;
-var radar = 'nexrad-n0q-900913';
 var selectedCameraFeature;
 var realtimeMode = true;
 var webcamURLS = {};
@@ -53,10 +52,10 @@ function updateHREF(){
 function updateCamera()
 {
     var imgurl = webcamURLS[cameraID];
-    // console.log("updateCamera: "+ imgurl);
     if (imgurl !== undefined){
     	$("#webcam_image").attr('src', imgurl);
-    	$("#webcam_title").html(webcamNames[cameraID] +' @ '+
+    	$("#webcam_title").html(cameraID.substring(0, 4) +"-TV " +
+    		webcamNames[cameraID] +' @ '+
     		moment(webcamTimes[cameraID]).format("h:mm A"));
     	updateHREF();
     }
@@ -113,12 +112,11 @@ function refreshJSON(){
 		url += "?ts=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
 	}
 	sbwlayer.setSource(new ol.source.Vector({
-		url: "/geojson/sbw.geojson",
+		url: url,
 		format: new ol.format.GeoJSON()
 	}));
 }
 function setCamera(cid){
-	//console.log("setCamera() called");
 	document.getElementById("c"+cid).checked = true;
 	cameraID = cid;	
 	updateHREF();
@@ -164,19 +162,6 @@ var cameraStyle2 = new ol.style.Style({
 	})
 });
 
-function switchRADAR(){
-	for (var i=0; i < document.radar.nexrad.length; i++)
-	{
-		if (document.radar.nexrad[i].checked)
-		{
-			radar = document.radar.nexrad[i].value;
-			n0q.setSource(new ol.source.XYZ({
-				url: '/cache/tile.py/1.0.0/'+radar+'/{z}/{x}/{y}.png'
-			}));
-		}
-	}
-}
-
 function parseURI(){
 	var tokens = window.location.href.split('#');
 	if (tokens.length == 2){
@@ -216,7 +201,6 @@ $().ready(function(){
 		defaultDate: new Date()
 	});
 	$('#dtpicker').on('dp.change', function(){
-		console.log("dp.change!");
 		if (!realtimeMode) {
 			refreshJSON();
 			refreshRADAR();
