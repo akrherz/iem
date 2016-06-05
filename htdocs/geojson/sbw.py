@@ -5,16 +5,24 @@ import sys
 import cgi
 
 
-def run():
+def run(ts):
     """ Actually do the hard work of getting the current SBW in geojson """
     import json
     import psycopg2.extras
     import datetime
+    import pytz
 
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    utcnow = datetime.datetime.utcnow()
+    if ts == '':
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC")
+                                                    )
+        t0 = utcnow + datetime.timedelta(days=7)
+    else:
+        utcnow = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%SZ').replace(
+                                                tzinfo=pytz.timezone("UTC"))
+        t0 = utcnow
     sbwtable = "sbw_%s" % (utcnow.year,)
 
     # Look for polygons into the future as well as we now have Flood products
@@ -24,9 +32,9 @@ def run():
         significance, polygon_end at time zone 'UTC' as utc_polygon_end,
         polygon_begin at time zone 'UTC' as utc_polygon_begin, status
         from """+sbwtable+""" WHERE
-        polygon_begin <= (now() + '7 days'::interval) and
-        polygon_end > now()
-    """)
+        polygon_begin <= %s and
+        polygon_end > %s
+    """, (t0, utcnow))
 
     res = {'type': 'FeatureCollection',
            'crs': {'type': 'EPSG',
@@ -55,21 +63,25 @@ def run():
     return json.dumps(res)
 
 
-if __name__ == '__main__':
-    # Go Main Go
+def main():
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
     cb = form.getfirst('callback', None)
+    ts = form.getfirst('ts', '')
 
-    mckey = "/geojson/sbw.geojson"
+    mckey = "/geojson/sbw.geojson|%s" % (ts,)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = run()
-        mc.set(mckey, res, 15)
+        res = run(ts)
+        mc.set(mckey, res, 15 if ts == '' else 3600)
 
     if cb is None:
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
+if __name__ == '__main__':
+    # Go Main Go
+    main()

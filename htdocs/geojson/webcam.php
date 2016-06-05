@@ -11,10 +11,22 @@ $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,4): "KCCI
 $connect = iemdb("mesosite");
 
 if ($ts > 0){
-  $result = pg_exec($connect, sprintf("SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
-    from camera_log c, webcams w
-    WHERE valid = '%s' and c.cam = w.id and w.network = '%s' ORDER by name ASC", 
-    date('Y-m-d H:i', $ts), $network) );
+	if ($network != 'TV'){
+  		$result = pg_exec($connect, 
+  		sprintf("SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
+    			from camera_log c, webcams w
+    			WHERE valid = '%s' and c.cam = w.id
+  				and w.network = '%s' ORDER by name ASC", 
+    			date('Y-m-d H:i', $ts), $network));
+	} else {
+		$result = pg_exec($connect,
+				sprintf("SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
+    			from camera_log c, webcams w
+    			WHERE valid = '%s' and c.cam = w.id
+				and w.network in ('KCRG', 'KCCI', 'KELO')
+  				ORDER by name ASC",
+						date('Y-m-d H:i', $ts)));
+	}
 } else if ($network == 'TV'){
 	$result = pg_exec($connect, "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
 			from camera_current c, webcams w
@@ -40,13 +52,13 @@ $ar = Array("type"=>"FeatureCollection",
 
 for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 {
-  if ($ts > 0){
-    $url = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/camera/%s/%s_%s.jpg", gmdate("Y/m/d", $ts), $row["cam"], $row["cam"], gmdate("YmdHi", $ts) );
-  } else {
-    $url = "http://mesonet.agron.iastate.edu/data/camera/stills/". $row["cam"] .".jpg"; 
-  }
+	$valid = strtotime($row["valid"]);
+  $url = sprintf("//mesonet.agron.iastate.edu/archive/data/".
+  		"%s/camera/%s/%s_%s.jpg", gmdate("Y/m/d", $valid), $row["cam"],
+  		$row["cam"], gmdate("YmdHi", $valid) );
   $z = Array("type"=>"Feature", "id"=>$row["id"],
              "properties"=>Array(
+             		"valid" => gmdate("Y-m-d\\TH:i:s\\Z", $valid),
                "cid" => $row["id"],
                "name" => $row["name"], 
                "county" => $row["county"], 

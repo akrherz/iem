@@ -1,5 +1,5 @@
 <?php
-$OL = "3.9.0";
+$OL = "3.16.0";
 include("../../config/settings.inc.php");
 define("IEM_APPID", 95);
 include("../../include/myview.php");
@@ -23,6 +23,9 @@ $t = new MyView();
  $t->jsextra = <<<EOF
  <script src='/vendor/openlayers/{$OL}/ol.js'></script>
  <script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
+ <script src="/vendor/moment/2.13.0/moment.min.js"></script>
+ <script src="/vendor/moment/2.13.0/moment.min.js"></script>
+ <script src="/vendor/bootstrap-datetimepicker/4.17.37/bootstrap-datetimepicker.min.js"></script>
  <script>
  	var cameraID = "{$id}";
  </script>
@@ -31,64 +34,52 @@ EOF;
  $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" type="text/css">
+<link rel="stylesheet" href="/vendor/bootstrap-datetimepicker/4.17.37/bootstrap-datetimepicker.min.css" type="text/css">
 EOF;
  
 
  
  $t->content = <<<EOF
-
+<style>
+ h2 {
+   margin-top: 0px;
+}
+</style>
+ 
+     <div class="row">
+     	<div class="col-sm-6">
+     	<h3>Webcam Viewer App</h3>
+     	</div>
+        <div class='col-sm-3'>
+    <strong>Application Mode:</strong>
+<div class="btn-group" id="toggle_event_mode">
+	<button type="button" class="btn btn-info locked_active">Realtime</button>
+	<button type="button" class="btn btn-default unlocked_inactive">Archive</button>
+</div>
+		</div>
+        <div class='col-sm-3'>
+        <div id="dtdiv" style="display: none;">
+    <strong>Date &amp; Time:</strong> (click calendar icon)
+        <div class="form-group">
+                <div class='input-group date' id='dtpicker'>
+                    <input type='text' class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        </div>
+     </div>
+ 
 <div class="row">
 <div class="col-md-6">
-
-<img name="camera" src="/data/camera/640x480/{$id}.jpg" class="img img-responsive" />
-
+<h2 id="webcam_title">Application is Loading...</h2>
+<img id="webcam_image" name="camera" src="/data/camera/640x480/{$id}.jpg" class="img img-responsive" />
 </div>
 <div class="col-md-6">
-
-
+<h2 id="radar_title">Application is Loading...</h2>
 <div style="width: 100%; height: 400px;" id="map"></div>
-<br />
-<form name="radar">
-<div class="row">
-<div class="col-md-6">
-<input type="radio" name="nexrad" value="nexrad-n0q-900913"
-             onclick="switchRADAR()" checked="checked">US Composite</input>
-</div>
-<div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::DVN-N0Q-0"
-             onclick="switchRADAR()">Davenport Reflectivity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::DVN-N0U-0"
-             onclick="switchRADAR()">Davenport Velocity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::DMX-N0Q-0"
-             onclick="switchRADAR()">Des Moines Reflectivity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::DMX-N0U-0"
-             onclick="switchRADAR()">Des Moines Velocity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::ARX-N0Q-0"
-             onclick="switchRADAR()">LaCrosse Reflectivity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::ARX-N0U-0"
-             onclick="switchRADAR()">LaCrosse Velocity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::FSD-N0Q-0"
-             onclick="switchRADAR()">Sioux Falls Reflectivity</input>
-</div>
-             <div class="col-md-6">
-<input type="radio" name="nexrad" value="ridge::FSD-N0U-0"
-             onclick="switchRADAR()">Sioux Falls Velocity</input>
-</div>
-</form>
-
-</div>
 </div>
 
 <br clear="all" />
@@ -122,5 +113,5 @@ by itself, the image is coming from a cache which may be up to 5 minutes old.
 This is done since bandwidth to the cameras is limited.</p>
 </div>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
