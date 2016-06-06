@@ -73,9 +73,10 @@ function getRADARSource(){
 	var dt = moment();
 	if (!realtimeMode) dt = $('#dtpicker').data('DateTimePicker').date();
 	dt.subtract(dt.minutes() % 5, 'minutes');
+	var prod = dt.year() < 2011 ? 'N0R': 'N0Q';
 	$("#radar_title").html('US Composite Reflectivity @ '+ dt.format("h:mm A"));
     return new ol.source.XYZ({
-		url: '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-'+dt.utc().format('YMMDDHHmm')+'/{z}/{x}/{y}.png'
+		url: '/cache/tile.py/1.0.0/ridge::USCOMP-'+prod+'-'+dt.utc().format('YMMDDHHmm')+'/{z}/{x}/{y}.png'
 	});
 }
 
