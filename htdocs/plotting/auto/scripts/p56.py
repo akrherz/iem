@@ -59,6 +59,7 @@ def plotter(fdict):
         SELECT distinct extract(year from issue) as yr,
         extract(week from issue) as week, eventid from warnings WHERE
         wfo = %s and phenomena = %s and significance = %s
+        and issue is not null
     )
     SELECT yr, week, count(*) from obs GROUP by yr, week ORDER by yr ASC
     """, (station, phenomena, significance))
