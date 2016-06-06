@@ -16,7 +16,7 @@ $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
-<link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
+ <link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
 EOF;
 
 
@@ -274,8 +274,9 @@ EOF;
 $( "#{$dpname}" ).datepicker({
 	changeMonth: true,
 	changeYear: true,
-		dateFormat: "yy/mm/dd",
-		minDate    : new Date("{$v->min}")});
+	dateFormat: "yy/mm/dd",
+	maxDate: new Date(),
+	minDate: new Date("{$v->min}")});
 $("#{$dpname}").datepicker('setDate', new Date("{$value}"));
 	
 EOF;
@@ -368,6 +369,12 @@ EOF;
 .optcontrol {
   float: left;
   margin-right: 10px !important;
+}
+.ui-datepicker-year {
+  color: #000;
+}
+.ui-datepicker-month {
+  color: #000;
 }
 </style>
 <script>
