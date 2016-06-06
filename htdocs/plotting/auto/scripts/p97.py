@@ -20,12 +20,15 @@ PDICT = OrderedDict([
     ('midwest', 'Mid West US')])
 
 PDICT2 = OrderedDict([
+    ('avg_temp_depart', 'Average Temperature Departure'),
+    ('min_low_temp', 'Minimum Low Temperature'),
     ('precip_depart', 'Precipitation Departure'),
-    ('min_low_temp', 'Minimum Low Temperature')])
+    ])
 
 UNITS = {
     'precip_depart': 'inch',
     'min_low_temp': 'F',
+    'avg_temp_depart': 'F',
     }
 
 
@@ -77,17 +80,20 @@ def plotter(fdict):
         day >= %s and day < %s and
         substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'),
     climo as (
-        SELECT station, to_char(valid, 'mmdd') as sday, precip from
+        SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low from
         climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
-        o.high, o.low from obs o JOIN climo c ON
+        o.high, o.low,
+        (o.high + o.low)/2. - (c.high + c.low)/2. as temp_diff
+        from obs o JOIN climo c ON
         (o.station = c.station and o.sday = c.sday)),
     agg as (
         SELECT station, sum(precip_diff) as precip_depart,
-        min(low) as min_low_temp from combo GROUP by station)
+        min(low) as min_low_temp,
+        avg(temp_diff) as avg_temp_depart from combo GROUP by station)
 
-    SELECT d.station, d.precip_depart, d.min_low_temp,
+    SELECT d.station, d.precip_depart, d.min_low_temp, d.avg_temp_depart,
     ST_x(t.geom) as lon, ST_y(t.geom) as lat from agg d
     JOIN stations t on (d.station = t.id) WHERE t.network ~* 'CLIMATE'
     """, pgconn, params=(date1, date2), index_col='station')
@@ -101,7 +107,7 @@ def plotter(fdict):
                 subtitle=('%s is compared with 1951-%s Climatology'
                           ' to compute departures'
                           ) % (date1.year, datetime.date.today().year - 1))
-    if varname in ['precip_depart', ]:
+    if varname in ['precip_depart', 'avg_temp_depart']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
         clevels = np.linspace(0 - rng, rng, 7)
         fmt = '%.2f'
