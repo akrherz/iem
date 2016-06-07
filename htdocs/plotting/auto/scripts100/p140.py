@@ -10,7 +10,7 @@ PDICT = OrderedDict([
         ('avg_low_temp', 'Average Low Temperature'),
         ('avg_temp', 'Average Temperature'),
         ('avg_wind_speed', 'Average Wind Speed'),
-        ('max_low', 'Maximum High Temperature'),
+        ('max_high', 'Maximum High Temperature'),
         ('min_low', 'Minimum Low Temperature'),
         ('precip', 'Total Precipitation')])
 
