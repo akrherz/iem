@@ -96,7 +96,8 @@ def plotter(fdict):
     avgs = np.average(yearlybins, 0)
     dlast = yearlybins[year-minyear, :]
 
-    bars = ax.bar(np.arange(5) - 0.4, avgs, width=0.4, fc='b', label='Average')
+    bars = ax.bar(np.arange(5) - 0.4, avgs, width=0.4, fc='b',
+                  label='Average = %.2f"' % (normal,))
     for i in range(len(bars)):
         ax.text(bars[i].get_x()+0.2, avgs[i] + 1.5, "%.1f" % (avgs[i],),
                 ha='center', zorder=2)
@@ -108,7 +109,8 @@ def plotter(fdict):
                 zorder=1)
 
     bars = ax.bar(np.arange(5), dlast, width=0.4, fc='r',
-                  label='%s' % (year,))
+                  label='%s = %.2f"' % (year,
+                                        np.sum(yearlytotals[year-minyear, :])))
     for i in range(len(bars)):
         ax.text(bars[i].get_x()+0.2, dlast[i] + 1.5, "%.0f" % (dlast[i],),
                 ha='center')
