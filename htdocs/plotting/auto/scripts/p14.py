@@ -133,5 +133,6 @@ def plotter(fdict):
     for i in range(5):
         xlabels.append("%.2f-%.2f" % (bins[i], bins[i+1]))
     ax.set_xticklabels(xlabels)
+    ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
 
     return fig
