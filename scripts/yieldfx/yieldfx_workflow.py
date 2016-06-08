@@ -227,13 +227,14 @@ def replace_obs(df, location):
         """, (isusm, jan1))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'sm12', 'sm24', 'sm50',
              'st4', 'st12', 'st24', 'st50', 'rain']
+    replaced = []
     for row in cursor:
         valid = row[0]
         # Does our df currently have data for this date?  If so, we shall do
         # no more
         dont_replace = not np.isnan(df.at[valid, 'mint'])
         if not dont_replace:
-            print("Supplementing %s for date %s" % (location, valid))
+            replaced.append(valid)
         _gdd = gdd(temperature(row[1], 'C'), temperature(row[2], 'C'))
         for year in years:
             if valid.month == 2 and valid.day == 29 and year % 4 != 0:
@@ -249,6 +250,11 @@ def replace_obs(df, location):
                                                        row[6], row[7], row[8],
                                                        row[9], row[10], row[11]
                                                        )
+    if len(replaced) > 0:
+        print("yieldfx_workflow supplemented %s from %s to %s" % (location,
+                                                                  replaced[0],
+                                                                  replaced[-1]
+                                                                  ))
     # We no longer want to use rain from climodat...
     return
     # Go get precip from Climodat
