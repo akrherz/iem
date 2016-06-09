@@ -22,10 +22,13 @@ def do(turbine_id):
         d.power - w.p as pdiff
         from wfavg w, data d WHERE w.valid = d.valid and d.turbine_id = %s
         and d.yawangle is not null and d.windspeed is not null
+        and extract(hour from d.valid) not in (6, 7, 18, 19)
     )
 
-    select (yawangle / 5)::int * 5 as yaw, avg(wdiff) as avg_wdiff,
-    avg(pdiff) as avg_pdiff from combo GROUP by yaw ORDER by yaw ASC
+    select case when (extract(hour from valid) < 6 or
+        extract(hour from valid) > 19) then 'n' else 'd' end as tod,
+    (yawangle / 5)::int * 5 as yaw, avg(wdiff) as avg_wdiff,
+    avg(pdiff) as avg_pdiff from combo GROUP by tod, yaw ORDER by yaw ASC
     """, pgconn, params=(turbine_id, ), index_col=None)
     if len(df.index) == 0:
         return
@@ -34,7 +37,12 @@ def do(turbine_id):
 
     ax[0].set_title("Turbine %s Bias from Wind Farm Average by Yaw Angle" % (
                                                                 turbine_id,))
-    ax[0].bar(df['yaw'], df['avg_wdiff'], width=5)
+    df2 = df[df['tod'] == 'n']
+    ax[0].step(df2['yaw'], df2['avg_wdiff'], lw=2,
+               label='Night')
+    df2 = df[df['tod'] == 'd']
+    ax[0].step(df2['yaw'], df2['avg_wdiff'], lw=2,
+               label='Day')
     ax[0].set_xlim(0, 360)
     ax[0].set_xticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
     ax[0].set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'])
@@ -42,8 +50,14 @@ def do(turbine_id):
     ax[0].set_ylabel("Wind Speed Diff [mps]")
     ax[0].grid(True)
     ax[0].set_xlabel("Yaw [deg N]")
+    ax[0].legend(loc=3, ncol=2, fontsize=10)
 
-    ax[1].bar(df['yaw'], df['avg_pdiff'], width=5)
+    df2 = df[df['tod'] == 'n']
+    ax[1].step(df2['yaw'], df2['avg_pdiff'], lw=2,
+               label='Night')
+    df2 = df[df['tod'] == 'd']
+    ax[1].step(df2['yaw'], df2['avg_pdiff'], lw=2,
+               label='Day')
     ax[1].set_xlim(0, 360)
     ax[1].set_xticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
     ax[1].set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'])
@@ -51,8 +65,9 @@ def do(turbine_id):
     ax[1].set_ylabel("Power Difference [kW]")
     ax[1].grid(True)
     ax[1].set_xlabel("Yaw [deg N]")
+    ax[1].legend(loc=3, ncol=2, fontsize=10)
 
-    fig.savefig("yaw_bias_%s.png" % (turbine_id,))
+    fig.savefig("yaw_bias_%s_daynight.png" % (turbine_id,))
     plt.close()
 
 for i in range(101, 184):
