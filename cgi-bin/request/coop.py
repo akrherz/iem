@@ -14,7 +14,7 @@ import datetime
 import zipfile
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 import StringIO
 import unittest
 
@@ -348,7 +348,8 @@ def do_daycent(ctx):
     for row in cursor:
         ssw("%s %s %s %s %.2f %.2f %.2f\n" % (row["day"].day, 
             row["day"].month, row["day"].year, int(row["doy"]),
-            f2c(row["high"]), f2c(row["low"]), row["precip"] * 25.4) )
+            f2c(row["high"]), f2c(row["low"]),
+            distance(row["precip"], 'IN').value('CM')))
     if len(extra) > 0:
         dec31 = datetime.date(thisyear, 12, 31)
         now = row['day']
@@ -356,7 +357,8 @@ def do_daycent(ctx):
             row = extra[now]
             ssw("%s %s %s %s %.2f %.2f %.2f\n" % (now.day, 
                 now.month,  now.year, int(now.strftime("%j")), 
-                f2c(row["high"]), f2c(row["low"]), row["precip"] * 25.4) )
+                f2c(row["high"]), f2c(row["low"]),
+                distance(row["precip"], 'IN').value('CM')))
             now += datetime.timedelta(days=1)
 
 
