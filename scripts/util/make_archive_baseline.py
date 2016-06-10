@@ -1,4 +1,7 @@
-"""Make an empty tree of RIDGE folders
+"""Setup some baseline archive folders / files to prevent 404s
+
+ - RIDGE folders
+ - NOAAport archive files
 
 Since we have web scrapers, we need to have empty folders to keep the Server
 from having lots of 404s
@@ -6,11 +9,14 @@ from having lots of 404s
 import os
 import sys
 import grp
+import subprocess
 from pyiem.network import Table as NetworkTable
 import datetime
 
 PRODS = {'NEXRAD': ['N0Q', 'N0S', 'N0U', 'N0Z', 'NET'],
          'TWDR': ['NET', 'TR0', 'TV0']}
+PILS = ("LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS"
+        "|FLW|SPS|SEL|SWO|FFW").split("|")
 
 
 def chgrp(filepath, gid):
@@ -47,6 +53,15 @@ def main(argv):
             if os.path.isdir(mydir):
                 continue
             supermakedirs(mydir, 0775, grp.getgrnam('ldm')[2])
+    # Do noaaport text
+    basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/noaaport")
+    supermakedirs(basedir, 0775, grp.getgrnam('ldm')[2])
+    os.chdir(basedir)
+    for pil in PILS:
+        fn = "%s_%s.txt" % (pil, ts.strftime("%Y%m%d"))
+        subprocess.call("touch %s" % (fn,), shell=True)
+        os.chmod(fn, 0664)
+        chgrp(fn, grp.getgrnam('ldm')[2])
 
 if __name__ == '__main__':
     main(sys.argv)
