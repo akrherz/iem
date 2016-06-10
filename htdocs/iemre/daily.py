@@ -72,6 +72,9 @@ def main():
            datatypes.temperature(
                 nc.variables['low_tmpk_12z'][offset, j, i],
                 'K').value('F'), 1),
+        'avg_dewpoint_f': myrounder(
+           datatypes.temperature(
+                nc.variables['avg_dwpk'][offset, j, i], 'K').value('F'), 1),
         'climate_daily_low_f': myrounder(
            datatypes.temperature(
                 cnc.variables['low_tmpk'][coffset, j, i], 'K').value("F"), 1),
@@ -83,6 +86,8 @@ def main():
            cnc.variables['p01d'][coffset, j, i] / 25.4, 2),
         'srad_mj': myrounder(
            nc.variables['rsds'][offset, j, i] * 86400. / 1000000., 2),
+        'avg_windspeed_mps': myrounder(
+           nc.variables['wind_speed'][offset, j, i], 2),
       })
     nc.close()
     cnc.close()
