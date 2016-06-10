@@ -12,10 +12,10 @@ for row in cursor:
 for db in dbs:
   if db <= 'cscap':
     continue
-  print("running %s" % (db,))
-  oldpg = psycopg2.connect(database=db, host='localhost', port=5555, user='mesonet')
+  print("running %s..." % (db,))
+  oldpg = psycopg2.connect(database=db, host='localhost', port=5556, user='mesonet')
   ocursor = oldpg.cursor()
-  newpg = psycopg2.connect(database=db, host='localhost', port=5556, user='mesonet')
+  newpg = psycopg2.connect(database=db, host='localhost', port=5555, user='mesonet')
   ncursor = newpg.cursor()
 
   tables = []
