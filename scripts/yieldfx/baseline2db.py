@@ -3,9 +3,24 @@ import psycopg2
 import glob
 import os
 import datetime
+from pyiem.datatypes import speed
 
 pgconn = psycopg2.connect(database='coop', host='iemdb')
 cursor = pgconn.cursor()
+
+# Need to have a merge of windspeed and average rh
+dsm = {}
+ipgconn = psycopg2.connect(database='iem', host='iemdb')
+icursor = ipgconn.cursor()
+icursor.execute("""
+    select day, avg_sknt, avg_rh from summary where iemid = 37004
+    and day >= '1980-01-01' ORDER by day ASC""")
+for row in icursor:
+    if row[1] is None or row[2] is None:
+        dsm[row[0]] = dsm[row[0] - datetime.timedelta(days=1)]
+    else:
+        dsm[row[0]] = {'wind_speed': speed(row[1], 'KTS').value('MPS'),
+                       'avg_rh': row[2]}
 
 os.chdir('baseline')
 for fn in glob.glob("*.met"):
@@ -22,9 +37,11 @@ for fn in glob.glob("*.met"):
         valid = (datetime.date(int(tokens[0]), 1, 1) +
                  datetime.timedelta(days=int(tokens[1])-1))
         cursor.execute("""INSERT into yieldfx_baseline (station, valid,
-        radn, maxt, mint, rain) VALUES (%s, %s, %s, %s, %s, %s)
+        radn, maxt, mint, rain, windspeed, rh) VALUES (%s, %s, %s, %s, %s, %s,
+        %s, %s)
         """, (location, valid, float(tokens[2]), float(tokens[3]),
-              float(tokens[4]), float(tokens[5])))
+              float(tokens[4]), float(tokens[5]),
+              dsm[valid]['wind_speed'], dsm[valid]['avg_rh']))
 
 cursor.close()
 pgconn.commit()
