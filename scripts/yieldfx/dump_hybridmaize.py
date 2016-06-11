@@ -52,10 +52,10 @@ for i, site in enumerate(SITES):
     fn = "%s_HM_%s.wth" % (site, today.strftime("%Y%m%d"))
     o = open(fn, 'w')
     o.write("""\
-  %s        IA   Lat.(deg)= %.2f  Long.(deg)=%.2f  Elev.(m)=%.0f.
-%.2f (Lat.)
-year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd
-                MJ/m2   oC      oC      %%       mm      km/hr
+  %s        IA   Lat.(deg)= %.2f  Long.(deg)=%.2f  Elev.(m)=%.0f.\r
+%.2f (Lat.)\r
+year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
+                MJ/m2   oC      oC      %%       mm      km/hr\r
 """ % (site.upper(), nt.sts[XREF[i]]['lat'], nt.sts[XREF[i]]['lon'],
        nt.sts[XREF[i]]['lat'], nt.sts[XREF[i]]['elevation']))
 
@@ -70,7 +70,7 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd
             for j, key in enumerate(['radn', 'maxt', 'mint', 'rh', 'rain',
                                      'windspeed']):
                 row[j+1] = thisyear[idx][key]
-        o.write(("%s\t%4s\t%.3f\t%.1f\t%.1f\t%.0f\t%.1f\t%.1f\n"
+        o.write(("%s\t%4s\t%.3f\t%.1f\t%.1f\t%.0f\t%.1f\t%.1f\r\n"
                  ) % (row[0].year, int(row[0].strftime("%j")),
                       row[1], row[2], row[3], row[4], row[5],
                       speed(row[6], 'MPS').value('KMH')))
