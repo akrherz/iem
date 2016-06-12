@@ -10,6 +10,8 @@ data = {'plots': [
     {'label': 'Daily', 'options': [
         {'id': "108", 'mw': True,
          "label": "Accumulated Station Departures of Precipitation/GDD/SDD"},
+        {'id': "149", 'mw': True,
+         "label": "Arridity Index (High Temperature minus Precip Departures)"},
         {'id': "11", 'label': "ASOS/AWOS Daily Min/Max Dew Point for a Year"},
         {'id': "94",
          "label": "Bias of 24 Hour High+Low Computation by Hour"},
