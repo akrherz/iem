@@ -85,27 +85,27 @@ def fetch_daily(form, cols):
     --- Get the Daily Max/Min soil values
     WITH soils as (
       SELECT station, date(valid) as date,
-      min(tsoil_c_avg) as soil04tn, max(tsoil_c_avg) as soil04tx,
-      min(t12_c_avg) as soil12tn, max(t12_c_avg) as soil12tx,
-      min(t24_c_avg) as soil24tn, max(t24_c_avg) as soil24tx,
-      min(t50_c_avg) as soil50tn, max(t50_c_avg) as soil50tx
+      min(tsoil_c_avg_qc) as soil04tn, max(tsoil_c_avg_qc) as soil04tx,
+      min(t12_c_avg_qc) as soil12tn, max(t12_c_avg_qc) as soil12tx,
+      min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
+      min(t50_c_avg_qc) as soil50tn, max(t50_c_avg_qc) as soil50tx
       from sm_hourly where
       valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
       GROUP by station, date
     ), daily as (
-      SELECT station, valid, tair_c_max, tair_c_min, slrmj_tot,
-      rain_mm_tot, dailyet, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
-      vwc_12_avg, vwc_24_avg, vwc_50_avg, ws_mps_s_wvt, ws_mps_max
+      SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
+      rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc,
+      vwc_12_avg_qc, vwc_24_avg_qc, vwc_50_avg_qc, ws_mps_s_wvt_qc, ws_mps_max_qc
       from sm_daily WHERE
       valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     )
     SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
-    s.soil50tn, s.soil50tx, tair_c_max, tair_c_min, slrmj_tot,
-    rain_mm_tot, dailyet, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
-    vwc_12_avg, vwc_24_avg, vwc_50_avg, ws_mps_s_wvt, ws_mps_max,
-    round(gddxx(50, 86, c2f( tair_c_max ),
-    c2f( tair_c_min ))::numeric,1) as gdd50
+    s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
+    rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc,
+    vwc_12_avg_qc, vwc_24_avg_qc, vwc_50_avg_qc, ws_mps_s_wvt_qc, ws_mps_max_qc,
+    round(gddxx(50, 86, c2f( tair_c_max_qc ),
+    c2f( tair_c_min_qc ))::numeric,1) as gdd50
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
     """ % (
@@ -119,18 +119,18 @@ def fetch_daily(form, cols):
     for row in cursor:
         valid = row['valid']
         station = row['station']
-        high = temperature(row['tair_c_max'],
+        high = temperature(row['tair_c_max_qc'],
                            'C').value(
-            'F') if row['tair_c_max'] is not None else -99
-        low = temperature(row['tair_c_min'],
+            'F') if row['tair_c_max_qc'] is not None else -99
+        low = temperature(row['tair_c_min_qc'],
                           'C').value(
-            'F') if row['tair_c_min'] is not None else -99
-        precip = row['rain_mm_tot'] / 24.5 if row['rain_mm_tot'] > 0 else 0
-        et = row['dailyet'] / 24.5 if row['dailyet'] > 0 else 0
+            'F') if row['tair_c_min_qc'] is not None else -99
+        precip = row['rain_mm_tot_qc'] / 24.5 if row['rain_mm_tot_qc'] > 0 else 0
+        et = row['dailyet_qc'] / 24.5 if row['dailyet_qc'] > 0 else 0
 
-        soil04t = temperature(row['tsoil_c_avg'],
+        soil04t = temperature(row['tsoil_c_avg_qc'],
                               'C').value(
-            'F') if row['tsoil_c_avg'] is not None else -99
+            'F') if row['tsoil_c_avg_qc'] is not None else -99
         soil04tn = temperature(row['soil04tn'],
                                'C').value(
             'F') if row['soil04tn'] is not None else -99
@@ -138,9 +138,9 @@ def fetch_daily(form, cols):
                                'C').value(
             'F') if row['soil04tx'] is not None else -99
 
-        soil12t = temperature(row['t12_c_avg'],
+        soil12t = temperature(row['t12_c_avg_qc'],
                               'C').value(
-            'F') if row['t12_c_avg'] is not None else -99
+            'F') if row['t12_c_avg_qc'] is not None else -99
         soil12tn = temperature(row['soil12tn'],
                                'C').value(
             'F') if row['soil12tn'] is not None else -99
@@ -148,9 +148,9 @@ def fetch_daily(form, cols):
                                'C').value(
             'F') if row['soil12tx'] is not None else -99
 
-        soil24t = temperature(row['t24_c_avg'],
+        soil24t = temperature(row['t24_c_avg_qc'],
                               'C').value(
-            'F') if row['t24_c_avg'] is not None else -99
+            'F') if row['t24_c_avg_qc'] is not None else -99
         soil24tn = temperature(row['soil24tn'],
                                'C').value(
             'F') if row['soil24tn'] is not None else -99
@@ -158,9 +158,9 @@ def fetch_daily(form, cols):
                                'C').value(
             'F') if row['soil24tx'] is not None else -99
 
-        soil50t = temperature(row['t50_c_avg'],
+        soil50t = temperature(row['t50_c_avg_qc'],
                               'C').value(
-            'F') if row['t50_c_avg'] is not None else -99
+            'F') if row['t50_c_avg_qc'] is not None else -99
         soil50tn = temperature(row['soil50tn'],
                                'C').value(
             'F') if row['soil50tn'] is not None else -99
@@ -168,16 +168,16 @@ def fetch_daily(form, cols):
                                'C').value(
             'F') if row['soil50tx'] is not None else -99
 
-        soil12vwc = row['vwc_12_avg'] if row['vwc_12_avg'] is not None else -99
-        soil24vwc = row['vwc_24_avg'] if row['vwc_24_avg'] is not None else -99
-        soil50vwc = row['vwc_50_avg'] if row['vwc_50_avg'] is not None else -99
-        speed = (row['ws_mps_s_wvt'] * 2.23 if row['ws_mps_s_wvt'] is not None
+        soil12vwc = row['vwc_12_avg_qc'] if row['vwc_12_avg_qc'] is not None else -99
+        soil24vwc = row['vwc_24_avg_qc'] if row['vwc_24_avg_qc'] is not None else -99
+        soil50vwc = row['vwc_50_avg_qc'] if row['vwc_50_avg_qc'] is not None else -99
+        speed = (row['ws_mps_s_wvt_qc'] * 2.23 if row['ws_mps_s_wvt_qc'] is not None
                  else -99)
-        gust = (row['ws_mps_max'] * 2.23 if row['ws_mps_max'] is not None
+        gust = (row['ws_mps_max_qc'] * 2.23 if row['ws_mps_max_qc'] is not None
                 else -99)
 
         values.append(dict(station=station, valid=valid.strftime("%Y-%m-%d"),
-                           high=high, low=low, solar=row['slrmj_tot'],
+                           high=high, low=low, solar=row['slrmj_tot_qc'],
                            gdd50=row['gdd50'], precip=precip, sped=speed,
                            gust=gust, et=et, soil04t=soil04t, soil12t=soil12t,
                            soil24t=soil24t, soil50t=soil50t,
@@ -212,9 +212,12 @@ def fetch_hourly(form, cols):
         cols.insert(0, 'valid')
         cols.insert(0, 'station')
 
-    cursor.execute("""SELECT station, valid, tair_c_avg, rh, slrkw_avg,
-    rain_mm_tot, ws_mps_s_wvt, winddir_d1_wvt, etalfalfa, tsoil_c_avg,
-    t12_c_avg, t24_c_avg, t50_c_avg, vwc_12_avg, vwc_24_avg, vwc_50_avg
+    cursor.execute("""SELECT station, valid, tair_c_avg_qc, rh_qc,
+    slrkw_avg_qc,
+    rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc, etalfalfa_qc,
+    tsoil_c_avg_qc,
+    t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, vwc_12_avg_qc,
+    vwc_24_avg_qc, vwc_50_avg_qc
     from sm_hourly
     WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     ORDER by valid ASC
@@ -226,33 +229,33 @@ def fetch_hourly(form, cols):
     for row in cursor:
         valid = row['valid']
         station = row['station']
-        tmpf = temperature(row['tair_c_avg'],
+        tmpf = temperature(row['tair_c_avg_qc'],
                            'C').value(
-            'F') if row['tair_c_avg'] is not None else -99
-        relh = row['rh'] if row['rh'] is not None else -99
-        solar = row['slrkw_avg'] if row['slrkw_avg'] is not None else -99
-        precip = (row['rain_mm_tot'] / 24.5 if row['rain_mm_tot'] is not None
+            'F') if row['tair_c_avg_qc'] is not None else -99
+        relh = row['rh_qc'] if row['rh_qc'] is not None else -99
+        solar = row['slrkw_avg_qc'] if row['slrkw_avg_qc'] is not None else -99
+        precip = (row['rain_mm_tot_qc'] / 24.5 if row['rain_mm_tot_qc'] is not None
                   else -99)
-        speed = (row['ws_mps_s_wvt'] * 2.23 if row['ws_mps_s_wvt'] is not None
+        speed = (row['ws_mps_s_wvt_qc'] * 2.23 if row['ws_mps_s_wvt_qc'] is not None
                  else -99)
-        drct = (row['winddir_d1_wvt'] if row['winddir_d1_wvt'] is not None
+        drct = (row['winddir_d1_wvt_qc'] if row['winddir_d1_wvt_qc'] is not None
                 else -99)
-        et = row['etalfalfa'] / 24.5 if row['etalfalfa'] is not None else -99
-        soil04t = temperature(row['tsoil_c_avg'],
+        et = row['etalfalfa_qc'] / 24.5 if row['etalfalfa_qc'] is not None else -99
+        soil04t = temperature(row['tsoil_c_avg_qc'],
                               'C').value(
-            'F') if row['tsoil_c_avg'] is not None else -99
-        soil12t = temperature(row['t12_c_avg'],
+            'F') if row['tsoil_c_avg_qc'] is not None else -99
+        soil12t = temperature(row['t12_c_avg_qc'],
                               'C').value(
-            'F') if row['t12_c_avg'] is not None else -99
-        soil24t = temperature(row['t24_c_avg'],
+            'F') if row['t12_c_avg_qc'] is not None else -99
+        soil24t = temperature(row['t24_c_avg_qc'],
                               'C').value(
-            'F') if row['t24_c_avg'] is not None else -99
-        soil50t = temperature(row['t50_c_avg'],
+            'F') if row['t24_c_avg_qc'] is not None else -99
+        soil50t = temperature(row['t50_c_avg_qc'],
                               'C').value(
-            'F') if row['t50_c_avg'] is not None else -99
-        soil12vwc = row['vwc_12_avg'] if row['vwc_12_avg'] is not None else -99
-        soil24vwc = row['vwc_24_avg'] if row['vwc_24_avg'] is not None else -99
-        soil50vwc = row['vwc_50_avg'] if row['vwc_50_avg'] is not None else -99
+            'F') if row['t50_c_avg_qc'] is not None else -99
+        soil12vwc = row['vwc_12_avg_qc'] if row['vwc_12_avg_qc'] is not None else -99
+        soil24vwc = row['vwc_24_avg_qc'] if row['vwc_24_avg_qc'] is not None else -99
+        soil50vwc = row['vwc_50_avg_qc'] if row['vwc_50_avg_qc'] is not None else -99
 
         values.append(dict(station=station,
                            valid=valid.strftime("%Y-%m-%d %H:%M"),
