@@ -5,9 +5,10 @@ require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 
 $connect = iemdb("postgis");
-pg_exec($connect, "SET TIME ZONE 'GMT'");
+pg_exec($connect, "SET TIME ZONE 'UTC'");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+if ($year == 0) die("ERROR: invalid \$year set");
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
