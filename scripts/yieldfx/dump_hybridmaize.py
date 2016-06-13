@@ -61,7 +61,8 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
 
     # Get the baseline obs
     cursor.execute("""SELECT valid, radn, maxt, mint, rh, rain, windspeed
-    from yieldfx_baseline WHERE station = %s ORDER by valid ASC
+    from yieldfx_baseline WHERE station = %s and valid < '2016-01-01'
+    ORDER by valid ASC
     """, (site, ))
     for row in cursor:
         row = list(row)
