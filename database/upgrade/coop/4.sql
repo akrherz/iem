@@ -5,5 +5,7 @@ CREATE TABLE yieldfx_baseline(
   radn real,
   maxt real,
   mint real,
-  rain real);
+  rain real,
+  windspeed real,
+  rh real);
 GRANT SELECT on yieldfx_baseline to nobody,apache;
