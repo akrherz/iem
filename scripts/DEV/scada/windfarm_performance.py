@@ -12,8 +12,7 @@ pgconn = psycopg2.connect(database='scada')
 
 df = read_sql("""
     SELECT windspeed::int as ws, yawangle::int as yaw, avg(power) as p
-    from data where alpha1 < 1 and windspeed is not null
-    and yawangle is not null GROUP by ws, yaw
+    from cleanpower GROUP by ws, yaw
     """, pgconn, index_col=None)
 
 cmap = plt.cm.get_cmap('jet')
@@ -39,4 +38,4 @@ ax.grid(True)
 ax.set_ylabel("Wind Speed [mps]")
 ax.set_xlabel("Yaw Direction [deg N]")
 
-fig.savefig('test.png')
+fig.savefig('test2.png')
