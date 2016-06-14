@@ -121,7 +121,7 @@ data = {'plots': [
         {'id': "95", 'mw': True,
          'label': "Monthly Precipitation/Temperature with El Nino Indices"},
         {'id': "24", 'mw': True,
-         'label': "Monthly Precipitation/Temperature Climate District Ranks"},
+         'label': "Monthly Precipitation/Temperature Climate District Ranks/Arridity"},
         {'id': "3", 'mw': True,
          'label': "Monthly Precipitation/Temperature Statistics by Year"},
         {'id': "6", 'mw': True,
