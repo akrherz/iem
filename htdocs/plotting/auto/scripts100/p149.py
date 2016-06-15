@@ -65,7 +65,7 @@ def plotter(fdict):
 
     SELECT day, (a.avgt - b.avg_avgt) / b.std_avgt as t,
     (a.sump - b.avg_sump) / b.std_sump as p
-    from agg a JOIN agg2 b on (a.sday = b.sday) WHERE day >= %s and day < %s
+    from agg a JOIN agg2 b on (a.sday = b.sday) WHERE day >= %s and day <= %s
     ORDER by day ASC
     """, pgconn, params=(days - 1, days - 1, days - 1, station, days,
                          sts, ets),
