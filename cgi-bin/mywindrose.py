@@ -46,8 +46,6 @@ else:
 
 if "units" in form and form["units"].value in ['mph', 'kts', 'mps', 'kph']:
     units = form["units"].value
-    if units == 'kts':
-        units = 'kt'
 else:
     units = "mph"
 
