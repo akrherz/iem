@@ -106,8 +106,9 @@ def plotter(fdict):
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
-    ax[0].set_ylim(top=(df[varname].max() + (
-                                df[varname].max() - df[varname].min()) * .3))
+    rng = df[varname].max() - df[varname].min()
+    ax[0].set_ylim(df[varname].min() - rng * .3,
+                   df[varname].max() + rng * .3)
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + 0.02,
                         box.width, box.height * 0.98])
@@ -122,7 +123,7 @@ def plotter(fdict):
     ax[1].set_ylabel("Observed Frequency [%]")
     ax[1].grid(True)
     ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
-    mysort = df.sort(varname, ascending=True)
+    mysort = df.sort_values(by=varname, ascending=True)
     info = ("Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
             "Max: %.2f %.0f"
             ) % (df[varname].min(), df['yr'][mysort.index[0]], ptile[1],
@@ -130,5 +131,9 @@ def plotter(fdict):
                  ptile[3], df[varname].max(),
                  df['yr'][mysort.index[-1]])
     ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
-               bbox=dict(color='white', edgecolor='k'))
+               bbox=dict(facecolor='white', edgecolor='k'))
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
