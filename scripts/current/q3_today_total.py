@@ -13,7 +13,7 @@ import gzip
 import tempfile
 import matplotlib
 matplotlib.use('agg')
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, nwsprecip
 
 
 def doday(ts, realtime):
@@ -74,10 +74,10 @@ def doday(ts, realtime):
     if not realtime:
         routes = 'a'
 
-    clevs = np.arange(0, 0.25, 0.05)
-    clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
-    clevs = np.append(clevs, np.arange(3., 10.0, 1))
-    clevs[0] = 0.01
+    # clevs = np.arange(0, 0.25, 0.05)
+    # clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
+    # clevs = np.append(clevs, np.arange(3., 10.0, 1))
+    clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
 
     sector = 'iowa'
     pqstr = ("plot %s %s00 %s_q2_1d.png %s_q2_1d.png png"
@@ -88,7 +88,8 @@ def doday(ts, realtime):
 
     (x, y) = np.meshgrid(mrms.XAXIS, mrms.YAXIS)
 
-    m.pcolormesh(x, y, np.flipud(total) / 24.5, clevs, units='inch')
+    m.pcolormesh(x, y, np.flipud(total) / 24.5, clevs,
+                 cmap=nwsprecip(), units='inch')
     m.drawcounties()
     m.postprocess(pqstr=pqstr, view=False)
     m.close()
