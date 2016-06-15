@@ -4,11 +4,10 @@
 
 import pygrib
 import datetime
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, nwsprecip
 import os
 import sys
 import pytz
-import numpy as np
 
 
 def doday(ts, realtime):
@@ -26,7 +25,7 @@ def doday(ts, realtime):
     while now < ets:
         gmt = now.astimezone(pytz.timezone("UTC"))
         fn = gmt.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
-                           +"stage4/ST4.%Y%m%d%H.01h.grib"))
+                           "stage4/ST4.%Y%m%d%H.01h.grib"))
         if os.path.isfile(fn):
             lts = now
             grbs = pygrib.open(fn)
@@ -50,37 +49,35 @@ def doday(ts, realtime):
     if not realtime:
         routes = 'a'
     for sector in ['iowa', 'midwest', 'conus']:
-        pqstr = "plot %s %s00 %s_stage4_1d.png %s_stage4_1d.png png" % (routes,
-                ts.strftime("%Y%m%d%H"), sector, sector )
-        
+        pqstr = ("plot %s %s00 %s_stage4_1d.png %s_stage4_1d.png png"
+                 ) % (routes,
+                      ts.strftime("%Y%m%d%H"), sector, sector)
+
         m = MapPlot(sector=sector,
                     title="%s NCEP Stage IV Today's Precipitation" % (
                                                     ts.strftime("%-d %b %Y"),),
                     subtitle=subtitle)
-            
-        clevs = np.arange(0, 0.25, 0.05)
-        clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
-        clevs = np.append(clevs, np.arange(3., 10.0, 1))
-        clevs[0] = 0.01
-    
-        m.pcolormesh(lons, lats, total / 24.5, clevs, units='inch')
-    
-        #map.drawstates(zorder=2)
+
+        clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
+        m.pcolormesh(lons, lats, total / 24.5, clevs,
+                     cmap=nwsprecip(), units='inch')
+
+        # map.drawstates(zorder=2)
         if sector == 'iowa':
             m.drawcounties()
         m.postprocess(pqstr=pqstr)
         m.close()
-    
-    
-def main():
-    ''' Go Main Go 
 
-    So the past hour's stage IV is available by about 50 after, so we should 
+
+def main():
+    ''' Go Main Go
+
+    So the past hour's stage IV is available by about 50 after, so we should
     run for a day that is 90 minutes in the past by default
 
     '''
     if len(sys.argv) == 4:
-        date = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+        date = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                  int(sys.argv[3]), 12, 0)
         realtime = False
     else:
