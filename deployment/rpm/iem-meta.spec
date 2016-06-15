@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 32%{?dist}
+Release: 33%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -117,6 +117,7 @@ Requires: pyasn1-modules
 Requires: python-pyasn1
 Requires: mod_auth_openidc
 Requires: dropbox
+Requires: tqdm
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -138,6 +139,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Wed Jun 15 2016 daryl herzmann <akrherz@iastate.edu>
+- Added tqdm
+
 * Thu Apr 14 2016 daryl herzmann <akrherz@iastate.edu>
 - Added characteristic for service_identity
 
