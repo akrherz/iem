@@ -34,7 +34,7 @@ def do_download(valid):
     files = []
     for varname in ['ppt', 'tmax', 'tmin']:
         d = "2" if varname == 'ppt' else '1'
-        for classify in ['early', 'provisional', 'stable']:
+        for classify in ['stable', 'provisional', 'early']:
             localfn = valid.strftime(("PRISM_" + varname + "_" + classify +
                                       "_4kmD" + d +
                                       "_%Y%m%d_bil"))
