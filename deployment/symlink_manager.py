@@ -23,6 +23,7 @@ PAIRS = [
          ['/mesonet/data/gempak', '/mnt/mesonet2/data/gempak'],
          ['/mesonet/data/harry', '/mnt/mesonet/ARCHIVE/raw/harry'],
          ['/mesonet/data/iemre', '/mnt/mesonet/data/iemre'],
+         ['/mesonet/data/prism', '/mnt/mesonet/data/prism'],
          ['/mesonet/data/incoming', '/mnt/mesonet2/data/incoming'],
          ['/mesonet/data/logs', '/mnt/mesonet2/data/logs'],
          ['/mesonet/data/madis', '/mnt/mesonet2/data/madis'],
