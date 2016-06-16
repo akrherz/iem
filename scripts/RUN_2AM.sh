@@ -51,3 +51,8 @@ fi
 
 cd ../../windrose
 python daily_drive_network.py
+
+cd ../prism
+python ingest_prism.py $(date --date '7 days ago' +'%Y %m %d')
+python ingest_prism.py $(date --date '60 days ago' +'%Y %m %d')
+python ingest_prism.py $(date --date '90 days ago' +'%Y %m %d')

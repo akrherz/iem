@@ -4,6 +4,9 @@
 cd smos
 python plot.py 12
 
+cd ../prism
+python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d') &
+
 cd ../iemre
 python daily_analysis.py
 
