@@ -20,6 +20,26 @@
   $services = array();
 
   $services[] = Array(
+  		"title" => "Oregon State PRISM Grid Cell Daily Sample",
+  		"url" => "/json/prism/{lon}/{lat}/{date_or_daterange}?",
+  		"desc" => "Produces a daily time series for a grid cell that covers".
+  		" the specified latitude and longitude (negative E values).".
+  		" Credit: <a href='http://prism.oregonstate.edu'>PRISM Climate Group</a>,".
+  		" Oregon State University, created 4 Feb 2004.",
+  		"vars" => Array(
+  				"lat" => "Latitude (deg N)",
+  				"lon" => "Longitude (deg E)",
+  				"date_or_daterange" => "YYYYmmdd or YYYYmmdd-YYYYmmdd (inclusive)",
+  				),
+  		"example" => Array(
+  				"{lat}" => "41.99",
+  				"{lon}" => "-95.55",
+  				"{date_or_daterange}" => "20151215-20160115"
+  				)
+  		);
+  
+  
+  $services[] = Array(
   		"title" => "Local Storm Reports for One Storm Based Warning",
   		"url" => "/geojson/lsr.php?year={year}&amp;wfo={wfo}".
   			"&amp;eventid={eventid}&amp;phenomena={phenomena}".

@@ -1,3 +1,10 @@
+When referring to the data, the
+source must be clearly and prominently stated and include, 
+at a minimum, our name, URL, and the date of data
+creation. For example:
+
+PRISM Climate Group, Oregon State University, http://prism.oregonstate.edu, created 4 Feb 2004.
+
 gdalinfo says the grid is:
 
 Upper Left  (-125.0208333,  49.9375000) (125d 1'15.00"W, 49d56'15.00"N)
