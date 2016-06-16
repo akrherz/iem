@@ -101,5 +101,6 @@ def plotter(fdict):
         m.pcolormesh(x, y, p01d, clevs, label='inches')
     if sector == 'iowa':
         m.drawcounties()
+        m.drawcities()
 
     return m.fig
