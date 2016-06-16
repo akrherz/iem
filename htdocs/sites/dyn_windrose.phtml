@@ -16,10 +16,15 @@ $minute2 = isset($_GET["minute2"]) ? $_GET["minute2"]: 0;
 $units = isset($_GET["units"]) ? $_GET["units"]: "mph";
 $nsector = isset($_GET['nsector']) ? $_GET['nsector']: 36;
 $level = isset($_GET["level"]) ? $_GET['level']: 1000;
+$fmt = isset($_GET["fmt"]) ? $_GET["fmt"]: 'png';
 
 
 if (isset($_GET["hour1"])){
-	$rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2&units=$units";
+	$rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&station=$station".
+		"&network=$network&day1=$day1&day2=$day2&month1=$month1&".
+		"month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&".
+		"hour2=$hour2&minute1=$minute1&minute2=$minute2&".
+		"units=$units&amp;fmt=$fmt";
 	if (isset($_GET["hourlimit"])){
 	  $rose_uri .= "&hourlimit=1";
 	}
@@ -50,6 +55,12 @@ $tznote = "(Times are in US Central Standard/Daylight Time, sorry)";
 if ($network == 'RAOB'){
 	$tznote = "(Times presented are in UTC)";
 }
+
+$ar = Array("png" => "PNG Image (.PNG)",
+		"pdf" => "Portable Document Format (.PDF)",
+		"svg" => "Scalable Vector Graphic (.SVG)");
+$fselect = make_select("fmt", $fmt, $ar);
+
 $content = <<<EOF
 <h3>Custom Wind Rose Plots</h3>
 
@@ -133,6 +144,7 @@ while(list($k,$v)=each($opts)){
 $content .= '
 </select>
 
+<br />Image Format: '. $fselect .'
 <br /><input type="submit"></td>
   </tr>
 
@@ -177,7 +189,16 @@ $content .= '
 if (isset($rose_uri)){
   $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
   $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='glyphicon glyphicon-list'></i> View raw data for chart</a><br />";
-  $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
+  if ($fmt == 'pdf'){
+  	$content .= <<<EOF
+<object id="windrose-plot" src="{$rose_uri}" width="700px" height="700px">
+    <embed src="{$rose_uri}" width="700px" height="700px">
+    </embed>
+</object>
+EOF;
+  } else {
+	  $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
+  }
 } else {
   $content .= "<div class=\"alert alert-info\">Please make your custom plot
   		selections above</a>";

@@ -84,5 +84,16 @@ if 'justdata' in form:
     sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write(res)
 else:
-    sys.stdout.write("Content-type: image/png\n\n")
-    res.savefig(sys.stdout, format='png')
+    fmt = form.getfirst('fmt', 'png')
+    if fmt == 'png':
+        ct = "image/png"
+    elif fmt == 'pdf':
+        ct = "application/pdf"
+    elif fmt == 'svg':
+        ct = "image/svg+xml"
+    else:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write("Invalid fmt set")
+        sys.exit(0)
+    sys.stdout.write("Content-type: %s\n\n" % (ct,))
+    res.savefig(sys.stdout, format=fmt)
