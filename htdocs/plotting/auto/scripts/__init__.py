@@ -248,6 +248,10 @@ data = {'plots': [
          'label': "Temperature Frequency by Week During Precipitation"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
+    {'label': 'Upper Air / RAOB Sounding Plots', 'options': [
+        {'id': "150",
+         'label': ("Single Sounding Mandatory Level Percentile Ranks")},
+    ]},
     {'label': 'NASS Quickstats (USDA Crop Statistics)', 'options': [
         {'id': "127",
          'label': ("Crop Progress by Year")},
