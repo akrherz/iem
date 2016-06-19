@@ -213,6 +213,9 @@ def main(valid):
     v12 = valid - datetime.timedelta(hours=13)
 
     for sid in nt.sts.keys():
+        # skip virtual sites
+        if sid.startswidth("_"):
+            continue
         uri = ("http://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
                "start_year=%s;start_month_name=%s;"
                ) % (valid.year, valid.strftime("%b"))

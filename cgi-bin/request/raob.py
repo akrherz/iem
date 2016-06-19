@@ -2,6 +2,7 @@
 """
 Download interface for data from RAOB network
 """
+from pyiem.network import Table as NetworkTable
 import cgi
 import sys
 import datetime
@@ -18,18 +19,22 @@ def m(val):
 def fetcher(station, sts, ets):
     dbconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
+    stations = [station, ]
+    if station.startswith("_"):
+        nt = NetworkTable("RAOB")
+        stations = nt.sts[station]['name'].split("--")[1].strip().split(",")
 
     cursor.execute("""
     SELECT f.valid at time zone 'UTC', p.levelcode, p.pressure, p.height,
     p.tmpc, p.dwpc, p.drct, round((p.smps * 1.94384)::numeric,0),
-    p.bearing, p.range_miles from raob_profile p JOIN raob_flights f on
-    (f.fid = p.fid) WHERE f.station = %s and valid >= %s and valid < %s
-    """, (station, sts, ets))
+    p.bearing, p.range_miles, f.station from raob_profile p JOIN raob_flights f on
+    (f.fid = p.fid) WHERE f.station in %s and valid >= %s and valid < %s
+    """, (tuple(stations), sts, ets))
     sys.stdout.write(("station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
                       "dwpc,drct,speed_kts,bearing,range_sm\n"))
     for row in cursor:
         sys.stdout.write(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
-                          ) % (station, m(row[0]),
+                          ) % (row[10], m(row[0]),
                                m(row[1]), m(row[2]), m(row[3]), m(row[4]),
                                m(row[5]), m(row[6]), m(row[7]),
                                m(row[8]), m(row[9])))
@@ -41,7 +46,7 @@ if __name__ == '__main__':
     ets = datetime.datetime.strptime(form.getfirst('ets', ''),
                                      '%m/%d/%Y %H:%M')
     ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-    station = form.getfirst('station', 'OAX')[:4]
+    station = form.getfirst('station', 'KOAX')[:4]
     if form.getfirst('dl', None) is not None:
         sys.stdout.write('Content-type: application/octet-stream\n')
         sys.stdout.write(("Content-Disposition: attachment; "

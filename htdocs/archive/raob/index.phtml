@@ -47,6 +47,8 @@ $t->content = <<<EOF
  provide metadata on that level of data.  The start time is inclusive and
  end time is exclusive.  Special soundings should be in this archive as well.
 
+ <p><a class="btn btn-default" href="/plotting/auto/?q=150">View Sounding Percentiles</a></p>
+ 
 <table><tr><td valign="top">
 <strong>Level Codes</strong><br />
 <ul>
@@ -75,7 +77,7 @@ range_sm     Ballon range from launch in statute miles
 </td>
 </table>
 <form method="GET" action="/cgi-bin/request/raob.py">
-<table cellpadding="3" cellspacing="0" border="1">
+<table class="table table-bordered">
 <tr><th>Select Site: {$nselect}</th>
 <td>Start Time: <input type="text" name="sts" id="startdate" width="20"/></td>
 <td>End Time: <input type="text" name="ets" id="enddate" width="20" /></td>
