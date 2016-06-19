@@ -58,11 +58,14 @@ def upload_summary_plots():
             remotefn = "%s_%s_%s.png" % (location, today.strftime("%Y%m%d"),
                                          interval)
             if DO_UPLOAD:
-                dbx.files_upload(
+                try:
+                    dbx.files_upload(
                     open(tmpfn).read(),
                     ("/YieldForecast/Daryl/2016 vs other years plots/%s"
                      ) % (remotefn, ),
                     mode=dropbox.files.WriteMode.overwrite)
+                except:
+                    print 'dropbox fail'
             os.unlink(tmpfn)
 
 
@@ -103,9 +106,12 @@ def write_and_upload(df, location):
     today = datetime.date.today()
     remotefn = "%s_%s.met" % (location, today.strftime("%Y%m%d"))
     if DO_UPLOAD:
-        dbx.files_upload(open(tmpfn).read(),
+        try:
+            dbx.files_upload(open(tmpfn).read(),
                          "/YieldForecast/Daryl/%s" % (remotefn, ),
                          mode=dropbox.files.WriteMode.overwrite)
+        except:
+            print 'dropbox fail'
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0644)
     # os.rename fails here due to cross device link bug
