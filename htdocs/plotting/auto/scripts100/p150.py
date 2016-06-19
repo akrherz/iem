@@ -28,7 +28,7 @@ def get_description():
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='networkselect', name='station', network='RAOB',
-             default='KOAX', label='Select Station:'),
+             default='_OAX', label='Select Station:'),
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
              min='1946/01/01',
              label='Date of the Sounding:'),
@@ -48,7 +48,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    station = fdict.get('station', 'KOAX')
+    station = fdict.get('station', '_OAX')
     varname = fdict.get('var', 'tmpc')
     network = 'RAOB'
     ts = datetime.datetime.strptime(fdict.get('date', '2015-12-25'),
@@ -62,6 +62,11 @@ def plotter(fdict):
         vlimit = (" and extract(month from f.valid) = %s "
                   ) % (ts.month,)
     nt = NetworkTable(network)
+    name = nt.sts[station]['name']
+    stations = [station, ]
+    if station.startswith("_"):
+        name = nt.sts[station]['name'].split("--")[0]
+        stations = nt.sts[station]['name'].split("--")[1].strip().split(",")
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 
     df = read_sql("""
@@ -86,14 +91,14 @@ def plotter(fdict):
         min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
         max(p.smps) OVER (PARTITION by p.pressure) as smps_max
         from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
-        WHERE f.station = %s
+        WHERE f.station in %s
         and extract(hour from f.valid at time zone 'UTC') = %s
         """ + vlimit + """
         and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
         150, 100, 70, 50, 10))
 
     select * from data where valid = %s ORDER by pressure DESC
-    """, pgconn, params=(station, hour, ts),
+    """, pgconn, params=(tuple(stations), hour, ts),
                   index_col='pressure')
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
@@ -104,7 +109,7 @@ def plotter(fdict):
     y2labels = []
     fmt = '%.1f' if varname not in ['hght', ] else '%.0f'
     for i, bar in enumerate(bars):
-        ax.text(bar.get_width() + 1, i, fmt % (bar.get_width(),),
+        ax.text(bar.get_width() + 1, i, '%.1f' % (bar.get_width(),),
                 va='center', bbox=dict(color='white'))
         y2labels.append((fmt + ' (' + fmt + ' ' + fmt + ')'
                          ) % (df.iloc[i][varname],
@@ -114,11 +119,11 @@ def plotter(fdict):
     ax.set_yticklabels(['%.0f' % (a, ) for a in df.index.values])
     ax.set_ylim(-0.5, len(df.index) - 0.5)
     ax.set_xlabel("Percentile [100 = highest]")
-    ax.set_ylabel("Mandatory Pressure Level")
+    ax.set_ylabel("Mandatory Pressure Level (hPa)")
     plt.gcf().text(0.5, 0.9,
                    ("%s %s %s Sounding\n"
                     "(%s-%s) Percentile Ranks (%s) for %s"
-                    ) % (station, nt.sts[station]['name'],
+                    ) % (station, name,
                          ts.strftime("%Y/%m/%d %H UTC"),
                          df.iloc[0]['min_valid'].year,
                          df.iloc[0]['max_valid'].year,
