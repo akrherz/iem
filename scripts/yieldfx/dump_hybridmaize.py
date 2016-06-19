@@ -10,9 +10,9 @@ from pyiem.util import get_properties
 nt = NetworkTable("ISUSM")
 SITES = ['ames', 'nashua', 'sutherland', 'crawfordsville', 'lewis']
 XREF = ['BOOI4', 'NASI4', 'CAMI4', 'CRFI4', 'OKLI4']
-pgconn = psycopg2.connect(database='coop', host='iemdb')
+pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
-ipgconn = psycopg2.connect(database='iem', host='iemdb')
+ipgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = ipgconn.cursor()
 props = get_properties()
 dbx = dropbox.Dropbox(props.get('dropbox.token'))
@@ -60,21 +60,20 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
        nt.sts[XREF[i]]['lat'], nt.sts[XREF[i]]['elevation']))
 
     # Get the baseline obs
-    cursor.execute("""SELECT valid, radn, maxt, mint, rh, rain, windspeed
-    from yieldfx_baseline WHERE station = %s and valid < '2016-01-01'
-    ORDER by valid ASC
-    """, (site, ))
-    for row in cursor:
-        row = list(row)
-        if row[0].replace(year=today.year) < today:
-            idx = row[0].strftime("%m%d")
-            for j, key in enumerate(['radn', 'maxt', 'mint', 'rh', 'rain',
-                                     'windspeed']):
-                row[j+1] = thisyear[idx][key]
+    sts = datetime.date(2016, 1, 1)
+    ets = today
+    now = sts
+    while now < ets:
+        idx = now.strftime("%m%d")
+        row = [now, None, None, None, None, None, None]
+        for j, key in enumerate(['radn', 'maxt', 'mint', 'rh', 'rain',
+                                 'windspeed']):
+            row[j+1] = thisyear[idx][key]
         o.write(("%s\t%4s\t%.3f\t%.1f\t%.1f\t%.0f\t%.1f\t%.1f\r\n"
                  ) % (row[0].year, int(row[0].strftime("%j")),
                       row[1], row[2], row[3], row[4], row[5],
                       speed(row[6], 'MPS').value('KMH')))
+        now += datetime.timedelta(days=1)
     o.close()
     dbx.files_upload(open(fn).read(),
                      "/Hybrid-Maize-Metfiles/%s" % (fn, ),
