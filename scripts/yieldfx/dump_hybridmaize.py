@@ -75,8 +75,11 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
                       speed(row[6], 'MPS').value('KMH')))
         now += datetime.timedelta(days=1)
     o.close()
-    dbx.files_upload(open(fn).read(),
+    try:
+        dbx.files_upload(open(fn).read(),
                      "/Hybrid-Maize-Metfiles/%s" % (fn, ),
                      mode=dropbox.files.WriteMode.overwrite)
-    subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.wth"
+        subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.wth"
                      ) % (fn, site), shell=True)
+    except:
+        print 'fail'
