@@ -4,16 +4,18 @@ import datetime
 import numpy as np
 from pyiem.plot import MapPlot
 import calendar
+from collections import OrderedDict
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
 PDICT2 = {'both': 'Show both contour and values',
           'values': 'Show just the values',
           'contour': 'Show just the contour'}
-PDICT3 = {'total_precip': 'Total Precipitation',
-          'avg_temp': 'Average Temperature',
-          'avg_high': 'Average High Temperature',
-          'avg_low': 'Average Low Temperature'}
+PDICT3 = OrderedDict([
+        ('total_precip', 'Total Precipitation'),
+        ('avg_temp', 'Average Temperature'),
+        ('avg_high', 'Average High Temperature'),
+        ('avg_low', 'Average Low Temperature')])
 UNITS = {'total_precip': 'inch',
          'avg_temp': 'F',
          'avg_high': 'F',
@@ -31,7 +33,8 @@ def get_description():
     d = dict()
     d['data'] = True
     d['description'] = """This application produces map analysis of
-    climatological averages."""
+    climatological averages. These averages are solely derived from the
+    published NCDC 1981-2010 Climatology."""
     d['arguments'] = [
         dict(type='select', name='over', default='monthly',
              options=PDICT4, label='Show Monthly or Annual Averages'),
