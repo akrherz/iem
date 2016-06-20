@@ -214,7 +214,7 @@ def main(valid):
 
     for sid in nt.sts.keys():
         # skip virtual sites
-        if sid.startswidth("_"):
+        if sid.startswith("_"):
             continue
         uri = ("http://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
                "start_year=%s;start_month_name=%s;"
