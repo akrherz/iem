@@ -157,6 +157,9 @@ data = {'plots': [
          'label': "Average Dew Point by Year or Season"},
         {'id': "125", 'mw': True,
          'label': "Climatological Maps of Annual/Monthly Averages"},
+        {'id': "151", 'mw': True,
+         'label': ("Climatological Maps of Differences between "
+                   "Two Periods")},
         {'id': "128", 'mw': True,
          'label': "Comparison of Yearly Summaries between two stations"},
         {'id': "99", 'label': "Daily High + Low Temperatures with Departures",
