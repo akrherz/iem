@@ -128,7 +128,7 @@ s += '<br /><b>Avg Days per Month:</b> '+ (1. / this.points[1].y).toFixed(2);
         pointPlacement: -0.2
     },{
         name: 'Return Interval',
-        data: """ + str(ctx['df']['return_interval'].values.tolist()) + """,
+        data: """ + ctx['df']['return_interval'].to_json(orient='records') + """,
         pointPadding: 0.2,
         pointPlacement: 0.2,
         yAxis: 1
