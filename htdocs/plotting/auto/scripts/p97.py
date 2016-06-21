@@ -22,12 +22,14 @@ PDICT = OrderedDict([
 PDICT2 = OrderedDict([
     ('avg_temp_depart', 'Average Temperature Departure'),
     ('min_low_temp', 'Minimum Low Temperature'),
+    ('gdd_depart', 'Growing Degree Days (50/86) Departure'),
     ('precip_depart', 'Precipitation Departure'),
     ])
 
 UNITS = {
     'precip_depart': 'inch',
     'min_low_temp': 'F',
+    'gdd_depart': 'F',
     'avg_temp_depart': 'F',
     }
 
@@ -76,25 +78,26 @@ def plotter(fdict):
     table = "alldata_%s" % (sector, ) if sector != 'midwest' else "alldata"
     df = read_sql("""
     WITH obs as (
-        SELECT station, sday, high, low, precip from """ + table + """ WHERE
+        SELECT station, gddxx(50, 86, high, low) as gdd50,
+        sday, high, low, precip from """ + table + """ WHERE
         day >= %s and day < %s and
         substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'),
     climo as (
-        SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low from
-        climate51),
+        SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
+        gdd50 from climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
-        o.high, o.low,
+        o.high, o.low, o.gdd50 - c.gdd50 as gdd50_diff,
         (o.high + o.low)/2. - (c.high + c.low)/2. as temp_diff
         from obs o JOIN climo c ON
         (o.station = c.station and o.sday = c.sday)),
     agg as (
         SELECT station, sum(precip_diff) as precip_depart,
-        min(low) as min_low_temp,
+        min(low) as min_low_temp, sum(gdd50_diff) as gdd_depart,
         avg(temp_diff) as avg_temp_depart from combo GROUP by station)
 
     SELECT d.station, d.precip_depart, d.min_low_temp, d.avg_temp_depart,
-    ST_x(t.geom) as lon, ST_y(t.geom) as lat from agg d
+    d.gdd_depart, ST_x(t.geom) as lon, ST_y(t.geom) as lat from agg d
     JOIN stations t on (d.station = t.id) WHERE t.network ~* 'CLIMATE'
     """, pgconn, params=(date1, date2), index_col='station')
 
@@ -117,7 +120,7 @@ def plotter(fdict):
         clevels = np.linspace(minv, maxv, 6, dtype='i')
         fmt = '%.0f'
     clevlabels = [fmt % x for x in clevels]
-    cmap = cm.get_cmap('RdYlBu')
+    cmap = cm.get_cmap('RdYlBu' if varname == 'precip_depart' else 'RdYlBu_r')
     cmap.set_bad('white')
     m.contourf(df['lon'].values, df['lat'].values,
                df[varname].values, clevels, clevlabels=clevlabels,
