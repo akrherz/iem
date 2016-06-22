@@ -76,21 +76,25 @@ def do(valid, yawsource):
     pitch = np.array(pitch)
     vals = np.array(vals)
     avgv = np.average(vals)
-    # vals2 = vals - avgv
+    vals2 = vals - avgv
     fig = plt.figure(figsize=(12.8, 7.2))
     ax = fig.add_axes([0.14, 0.1, 0.52, 0.8])
 
     cmap = plt.cm.get_cmap('jet')
     cmap.set_under('tan')
     cmap.set_over('black')
-    clevs = np.arange(0, 1651, 150)
+    # cmap = plt.cm.get_cmap('seismic')
+    # clevs = np.arange(-250, 251, 50)
+    clevs = np.arange(0, 1501, 150)
     norm = mpcolors.BoundaryNorm(clevs, cmap.N)
     ax.quiver(lons, lats, u, v, zorder=1)
     ax.scatter(lons, lats, c=vals, norm=norm, edgecolor='none',
                cmap=cmap, s=100, zorder=2)
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
-    ax.set_title(("Farm Turbine Power [kW] (1min sampled dataset)\n"
+    ax.xaxis.set_major_formatter(plt.NullFormatter())
+    ax.yaxis.set_major_formatter(plt.NullFormatter())
+    ax.set_title(("Turbine Power [kW]\n"
                   "Valid: %s"
                   ) % (valid.strftime("%d %b %Y %I:%M %p")))
     make_colorbar(clevs, norm, cmap)
@@ -104,7 +108,7 @@ def do(valid, yawsource):
             transform=ax.transAxes)
     ax.set_xlabel("Longitude $^\circ$E")
     ax.set_ylabel("Latitude $^\circ$N")
-    ax.set_xlim(-93.49, -93.298)
+    ax.set_xlim(-93.475, -93.328)
     ax.set_ylim(42.20, 42.31)
 
     # Next plot

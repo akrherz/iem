@@ -98,7 +98,7 @@ def do(valid, yawsource):
                cmap=cmap, s=100, zorder=2)
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
-    ax.set_title(("'I050' Farm Turbine Power [kW] (1min sampled dataset)\n"
+    ax.set_title(("Farm Turbine Power [kW] (1min sampled dataset)\n"
                   "Valid: %s, yaw source: %s"
                   ) % (valid.strftime("%d %b %Y %I:%M %p"),
                        yawdict.get(yawsource, yawsource)))
@@ -115,6 +115,8 @@ def do(valid, yawsource):
     ax.set_ylabel("Latitude $^\circ$N")
     ax.set_xlim(-94.832, -94.673)
     ax.set_ylim(42.545, 42.671)
+    ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
 
     # Next plot
     ax2 = fig.add_axes([0.7, 0.80, 0.28, 0.18])
