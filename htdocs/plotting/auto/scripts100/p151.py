@@ -176,7 +176,7 @@ def plotter(fdict):
     title = "%s %s" % (MDICT[month], PDICT3[varname])
     m = MapPlot(sector=sector, state=state, axisbg='white',
                 title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
-                       ) % (p2syear, p2eyear, p1syear, p2eyear, title),
+                       ) % (p2syear, p2eyear, p1syear, p1eyear, title),
                 subtitle=('based on IEM Archives'),
                 titlefontsize=14)
     # Create 9 levels centered on zero
