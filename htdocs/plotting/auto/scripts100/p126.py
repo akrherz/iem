@@ -2,6 +2,7 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 import datetime
 import calendar
+import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.meteorology import mixing_ratio, relh
 from pyiem.datatypes import temperature
@@ -21,7 +22,12 @@ def get_description():
     vapor in the air.  The second being vapor pressure deficit, which reports
     the difference between vapor pressure and saturated vapor pressure.
     The vapor pressure calculation shown here makes no accounting for
-    leaf tempeature."""
+    leaf tempeature. The saturation vapor pressure is computed by the
+    Tetens formula (Buck, 1981).
+
+    <br />On 22 June 2016, this plot was modified to display the range of
+    daily averages and not the range of instantaneous observations.
+    """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:'),
@@ -57,13 +63,16 @@ def plotter(fdict):
     df['relh'] = relh(temperature(df['tmpf'].values, 'F'),
                       temperature(df['dwpf'].values, 'F')).value('%')
     df['tmpc'] = temperature(df['tmpf'].values, 'F').value('C')
-    df['svp'] = 610.7 * 10 ** (7.5 * df['tmpc'].values /
-                               (237.3 + df['tmpc'].values))
+    df['svp'] = 0.611 * np.exp(17.502 * df['tmpc'].values /
+                               (240.97 + df['tmpc'].values))
     df['vpd'] = (1. - (df['relh'] / 100.)) * df['svp']
     df['mixing_ratio'] = mixing_ratio(
                             temperature(df['dwpf'].values, 'F')).value('KG/KG')
 
-    df2 = df[['doy', varname]].groupby('doy').describe()
+    dailymeans = df[['year', 'doy', varname]].groupby(['year', 'doy']).mean()
+    dailymeans = dailymeans.reset_index()
+
+    df2 = dailymeans[['doy', varname]].groupby('doy').describe()
     df2 = df2.unstack(level=-1)
 
     dyear = df[df['year'] == year]
@@ -72,7 +81,7 @@ def plotter(fdict):
     df3['diff'] = df3[(varname, 'mean')] - df2[(varname, 'mean')]
 
     (fig, ax) = plt.subplots(2, 1)
-    multiplier = 1000. if varname == 'mixing_ratio' else 0.01
+    multiplier = 1000. if varname == 'mixing_ratio' else 10.
     ax[0].fill_between(df2.index.values, df2[(varname, 'min')] * multiplier,
                        df2[(varname, 'max')] * multiplier, color='gray')
 
@@ -114,4 +123,4 @@ def plotter(fdict):
     return fig, df3
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter({'var': 'vpd'})
