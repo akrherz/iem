@@ -2,7 +2,7 @@ import psycopg2
 from pandas.io.sql import read_sql
 import datetime
 import numpy as np
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, centered_bins
 from collections import OrderedDict
 
 PDICT = {'state': 'State Level Maps (select state)',
@@ -57,7 +57,7 @@ def get_description():
     d['description'] = """This map produces an analysis of change in
     some climatological value between two periods of your choosing."""
     d['arguments'] = [
-        dict(type='select', name='month', default='monthly',
+        dict(type='select', name='month', default='all',
              options=MDICT, label='Show Monthly or Annual Averages'),
         dict(type='select', name='sector', default='state',
              options=PDICT, label='Select Map Region'),
@@ -181,8 +181,7 @@ def plotter(fdict):
                 titlefontsize=14)
     # Create 9 levels centered on zero
     abval = df[varname].abs().max()
-    levels = np.linspace(0 - abval, abval, 9)
-    levels = [round(x, PRECISION[varname]) for x in levels]
+    levels = centered_bins(abval)
     if opt in ['both', 'contour']:
         m.contourf(df['lon'].values, df['lat'].values,
                    df[varname].values, levels,

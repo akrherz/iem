@@ -2,7 +2,7 @@ import psycopg2
 from pandas.io.sql import read_sql
 import datetime
 import numpy as np
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, centered_bins
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -104,8 +104,7 @@ def plotter(fdict):
                 titlefontsize=14)
     # Create 9 levels centered on zero
     abval = df['season_delta'].abs().max()
-    levels = np.linspace(0 - abval, abval, 9)
-    levels = [round(x, 1) for x in levels]
+    levels = centered_bins(abval)
     if opt in ['both', 'contour']:
         m.contourf(df['lon'].values, df['lat'].values,
                    df['season_delta'].values, levels,
