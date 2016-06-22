@@ -26,6 +26,13 @@ if [ "$DOY" -eq "1" ]
 		python email_iass_report.py weekly	
 fi
 
+cd ../util
+if [ $DD -eq "02" ]
+	then
+		sh monthly.sh $(date --date '3 days ago' +'%Y %m')
+fi
+
+
 cd ../dl
 python download_cfs.py &
 
