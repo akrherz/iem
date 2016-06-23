@@ -9,7 +9,7 @@ EOF;
 }
 $bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
 $twimage = array_key_exists('twitter_image', $this->vars) ? 
-				$this->twitter_image : 'http://mesonet.agron.iastate.edu/images/logo_small.png';
+				$this->twitter_image : 'https://mesonet.agron.iastate.edu/images/logo_small.png';
 $twdescription = array_key_exists('twitter_description', $this->vars) ? 
 				$this->twitter_description : 'Iowa Environmental Mesonet of Iowa State University';
 ?>
@@ -36,15 +36,16 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
       <script src="/js/html5shiv.js"></script>
       <script src="/js/respond.min.js"></script>
     <![endif]-->
-    <meta name="twitter:card" content="summary">
-	<meta name="twitter:image:src" content="<?php echo $twimage; ?>">
-	<meta name="twitter:title" content="<?php echo $title; ?>">
-	<meta name="twitter:description" content="<?php echo $twdescription; ?>">
-	<meta name="twitter:url" content="http://mesonet.agron.iastate.edu">
-	<meta name="twitter:creator" content="@akrherz">
-	<meta name="twitter:image:width" content="85">
-	<meta name="twitter:image:height" content="65">
 
+	<!-- Essential Social Tags -->
+	<meta property="og:title" content="<?php echo $title; ?>">
+	<meta property="og:description" content="<?php echo $twdescription; ?>">
+	<meta property="og:image" content="<?php echo $twimage; ?>">
+	<meta property="og:url" content="https://mesonet.agron.iastate.edu">
+	<meta name="twitter:card" content="summary">
+
+	<!-- Non-essential -->
+	<meta name="twitter:creator" content="@akrherz">
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-precomposed.png">
