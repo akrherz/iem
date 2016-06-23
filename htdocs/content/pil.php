@@ -15,16 +15,20 @@ if ($val){
 // Need to buffer the output so that we can save it to memcached later
 ob_start();
 
-$img = ImageCreate(85, 65);
+$img = ImageCreate(80, 80);
 $white = ImageColorAllocate($img,255,255,255);
 $black = ImageColorAllocate($img,0,0,0);
-ImageFilledRectangle($img,0,0, 85, 65, $white);
+$ee = ImageColorAllocate($img,150,150,150);
+ImageFilledRectangle($img,0,0, 85, 85, $white);
 //$logo = imagecreatefrompng("../images/logo_small.png");
 //imagecopy($img, $logo, 0, 0, 0, 0, 85, 65);
-imagettftext($img, 24, 0, 5, 30, $black, 
+imagettftext($img, 32, 0, 1, 35, $black, 
 	"/usr/share/fonts/liberation/LiberationMono-Bold.ttf", substr($pil,0,3));
-imagettftext($img, 24, 0, 5, 60, $black,
-"/usr/share/fonts/liberation/LiberationMono-Bold.ttf", substr($pil,3,3));
+imagettftext($img, 12, 0, 31, 54, $ee, 
+	"/usr/share/fonts/liberation/LiberationMono-Bold.ttf", "by");
+imagettftext($img, 14, 0, 1, 74, $black,
+"/usr/share/fonts/liberation/LiberationMono-Bold.ttf",
+		sprintf("NWS %s", substr($pil,3,3)));
 
 header("content-type: image/png");
 ImagePng($img);
