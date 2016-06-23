@@ -50,7 +50,7 @@ if ($e == null){
 }
 
 $t->title = sprintf("%s from NWS %s", substr($pil,0,3), substr($pil,3,3));
-$t->twitter_image = "http://mesonet.agron.iastate.edu/content/pil_${pil}.png";
+$t->twitter_image = "/content/pil_${pil}.png";
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
 if (pg_numrows($rs) < 1){
