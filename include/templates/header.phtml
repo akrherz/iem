@@ -41,7 +41,7 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
 	<meta property="og:title" content="<?php echo $title; ?>">
 	<meta property="og:description" content="<?php echo $twdescription; ?>">
 	<meta property="og:image" content="https://mesonet.agron.iastate.edu<?php echo $twimage; ?>">
-	<meta property="og:url" content="https://mesonet.agron.iastate.edu">
+	<meta property="og:url" content="https://mesonet.agron.iastate.edu<?php echo htmlentities($_SERVER["REQUEST_URI"]); ?>">
 	<meta name="twitter:card" content="summary">
 
 	<!-- Non-essential -->
