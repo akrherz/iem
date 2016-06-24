@@ -32,7 +32,6 @@ archive of presentations.</li>
 <ul>
 <!--
   <LI><a href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS%2Fapps%2Fiatorn%2Fiatorn.map">Historical Iowa Tornado Database</a></LI>
-  <LI><a href="/GIS/apps/precip/">Realtime Precipitation Analysis</a></LI>
   <LI><a href="/GIS/apps/pcs/">2002 NEXRAD vs ASOS Precip Comparison</a></LI>
 -->
   <li><a href="/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
