@@ -14,7 +14,8 @@ cmap.set_over("black")
 
 m = MapPlot(sector='nws', axisbg='#EEEEEE',
             title='1+ TOR warn for 100 most active TOR warn days 1986-2015',
-            subtitle='A day is defined as 12 to12 UTC period, did the county get 1+ warning during those 100 events?',
+            subtitle=('A day is defined as 12 to12 UTC period, did the '
+                      'county get 1+ warning during those 100 events?'),
             cwas=True)
 
 bins = np.arange(0, 101, 10)
