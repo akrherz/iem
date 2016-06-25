@@ -12,8 +12,7 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 sql = """SELECT id, s.network, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
     avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt
     from summary_%s c JOIN stations s ON (s.iemid = c.iemid)
-    WHERE (s.network ~* 'ASOS' or s.network = 'AWOS') and
-    s.country = 'US' and
+    WHERE s.network in ('IA_ASOS', 'AWOS') and
     extract(month from day) = extract(month from now())
     and max_tmpf > -30 and min_tmpf < 90 GROUP by id, s.network, lon, lat
 """ % (now.year,)
@@ -39,7 +38,9 @@ m = MapPlot(axisbg='white',
             subtitle=("Average of the High + Low ending: %s"
                       "") % (now.strftime("%d %B"), ))
 m.contourf(lons, lats, vals, np.linspace(int(min(vals)), int(max(vals)) + 3,
-                                         10))
+                                         10, dtype='i'))
+m.drawcounties()
+m.plot_values(lons, lats, vals, '%.1f')
 pqstr = "plot c 000000000000 summary/mon_mean_T.png bogus png"
 m.postprocess(view=False, pqstr=pqstr)
 m.close()
