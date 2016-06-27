@@ -65,9 +65,9 @@ def plotter(fdict):
 
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
-    (fig, ax) = plt.subplots(1, 1)
+    ax = plt.axes([0.1, 0.12, 0.8, 0.78])
 
-    ax.scatter(df['gdd50_sigma'], df['precip_sigma'])
+    ax.scatter(df['gdd50_sigma'], df['precip_sigma'], label=None)
     ax.plot([-4, 4], [y1, y2], label="Slope=%.2f\nR$^2$=%.2f" % (h_slope,
                                                                  r_value ** 2))
     xmax = df.gdd50_sigma.abs().max() + 0.25
@@ -85,10 +85,11 @@ def plotter(fdict):
     ax.set_xlabel("Growing Degree Day Departure ($\sigma$)")
     ax.set_ylabel("Precipitation Departure ($\sigma$)")
     ax.grid(True)
-    ax.legend(fontsize=10)
     ax.set_title(("%s %s [%s]\n"
                   "Growing Degree Day (base=50) + Precipitation Departure"
                   ) % (
         calendar.month_name[month], nt.sts[station]['name'], station))
+    ax.legend(loc='upper right', bbox_to_anchor=(0.99, -0.04),
+              ncol=2, fontsize=10)
 
-    return fig, df
+    return plt.gcf(), df
