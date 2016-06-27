@@ -12,6 +12,7 @@ import sys
 import os
 import subprocess
 import requests
+import pygrib
 from pyiem.util import exponential_backoff
 
 
@@ -28,12 +29,20 @@ def dl(now, varname):
     o = open(tmpfn, 'wb')
     o.write(response.content)
     o.close()
-    # Inject into LDM
-    cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
-           "model/cfs/%02i/%s.01.%s.daily.grib2 grib' %s"
-           ) % (now.strftime("%Y%m%d%H%M"), now.hour, varname,
-                now.strftime("%Y%m%d%H"), tmpfn)
-    subprocess.call(cmd, shell=True)
+    # Check out this file to see how much data we actually have, it had
+    # better be a big number
+    grb = pygrib.open(tmpfn)
+    # 6 hourly data, we want at least 300 days?, so 4x300
+    if grb.messages < 1200:
+        print(("download_cfs %s %s has only %s messages, need 1200+"
+               ) % (now, varname, grb.messages))
+    else:
+        # Inject into LDM
+        cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
+               "model/cfs/%02i/%s.01.%s.daily.grib2 grib' %s"
+               ) % (now.strftime("%Y%m%d%H%M"), now.hour, varname,
+                    now.strftime("%Y%m%d%H"), tmpfn)
+        subprocess.call(cmd, shell=True)
 
     os.remove(tmpfn)
 
