@@ -14,7 +14,7 @@ IEM = psycopg2.connect(database='iem', host='iemdb')
 PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
 
-threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
+threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=12)
 threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
 
 icursor = IEM.cursor()
