@@ -6,7 +6,7 @@ from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
 
 STATIONS = OrderedDict([
-        ('ames', 'Central (Ames'),
+        ('ames', 'Central (Ames)'),
         ('cobs', 'Central (COBS)'),
         ('crawfordsville', 'Southeast (Crawfordsville)'),
         ('lewis', 'Southwest (Lewis)'),
