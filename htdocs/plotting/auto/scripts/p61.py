@@ -10,7 +10,7 @@ PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
 SECTORS = OrderedDict([('conus', 'CONUS'),
                        ('midwest', 'Mid West'),
                        ('state', 'Select a State'),
-                       ('wfo', 'Select a NWS Weather Forecast Office')])
+                       ('cwa', 'Select a NWS Weather Forecast Office')])
 
 
 def get_description():
