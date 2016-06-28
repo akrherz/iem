@@ -10,7 +10,7 @@
 """
 import netCDF4
 import datetime
-import numpy
+import numpy as np
 import psycopg2
 import sys
 import os
@@ -22,8 +22,8 @@ ccursor2 = COOP.cursor()
 def get_gp(xc, yc, x, y):
     """ Return the grid point closest to this point """
     distance = []
-    xidx = (numpy.abs(xc-x)).argmin()
-    yidx = (numpy.abs(yc-y)).argmin()
+    xidx = (np.abs(xc-x)).argmin()
+    yidx = (np.abs(yc-y)).argmin()
     dx = x - xc[xidx]
     dy = y - yc[yidx]
     movex = -1
@@ -42,35 +42,37 @@ def get_gp(xc, yc, x, y):
 
 def do(date):
     """ Process for a given date
-    6z file has 6z to 9z data
     """
     sts = date.replace(hour=6)  # 6z
     ets = sts + datetime.timedelta(days=1)
 
-    fn = sts.strftime("/mesonet/merra/%Y/%Y%m%d.nc")
-    fn2 = ets.strftime("/mesonet/merra/%Y/%Y%m%d.nc")
+    fn = sts.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+    fn2 = ets.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(fn):
-        print 'MISSING MERRA', fn
+        print(("merra_solarrad %s miss[%s] -> fail"
+               ) % (sts.strftime("%Y%m%d"), fn))
         return
-    if not os.path.isfile(fn2):
-        print 'MISSING MERRA', fn2
-        return
-
     nc = netCDF4.Dataset(fn)
-    rad = nc.variables['swgdn'][7:, :, :]
-    cs_rad = nc.variables['swgdnclr'][7:, :, :]
-    xc = nc.variables['longitude'][:]
-    yc = nc.variables['latitude'][:]
+    rad = nc.variables['SWGDN'][7:, :, :]
+    cs_rad = nc.variables['SWGDNCLR'][7:, :, :]
+    xc = nc.variables['lon'][:]
+    yc = nc.variables['lat'][:]
     nc.close()
 
-    nc = netCDF4.Dataset(fn2)
-    rad2 = nc.variables['swgdn'][:7, :, :]
-    cs_rad2 = nc.variables['swgdnclr'][:7, :, :]
-    nc.close()
+    if not os.path.isfile(fn2):
+        print(("merra_solarrad %s miss[%s] -> zeros"
+               ) % (sts.strftime("%Y%m%d"), fn2))
+        rad2 = 0
+        cs_rad2 = 0
+    else:
+        nc = netCDF4.Dataset(fn2)
+        rad2 = nc.variables['SWGDN'][:7, :, :]
+        cs_rad2 = nc.variables['SWGDNCLR'][:7, :, :]
+        nc.close()
 
     # W m-2 -> J m-2 s-1 -> J m-2 dy-1
-    total = (numpy.sum(rad, 0) + numpy.sum(rad2, 0)) * 3600.0
-    cs_total = (numpy.sum(cs_rad, 0) + numpy.sum(cs_rad2, 0)) * 3600.0
+    total = (np.sum(rad, 0) + np.sum(rad2, 0)) * 3600.0
+    cs_total = (np.sum(cs_rad, 0) + np.sum(cs_rad2, 0)) * 3600.0
 
     ccursor.execute("""
         SELECT station, ST_x(geom), ST_y(geom)
@@ -106,7 +108,7 @@ def do(date):
         if rad_mj < 0:
             print 'WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0])
             continue
-        # print "station: %s rad: %.1f" % (row[0], langleys)
+        # print "station: %s rad: %.1f" % (row[0], rad_mj)
         ccursor2.execute("""
         UPDATE alldata_"""+row[0][:2]+""" SET merra_srad = %s,
         merra_srad_cs = %s WHERE

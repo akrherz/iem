@@ -5,6 +5,7 @@ import os
 # LINK , TARGET
 PAIRS = [
          ['/mesonet/merra', '/mnt/mtarchive/longterm/merra'],
+         ['/mesonet/merra2', '/mnt/mtarchive/longterm/merra2'],
          ['/mesonet/nawips', '/mnt/mesonet2/gempak'],
          ['/mesonet/scripts', '/mnt/mesonet2/scripts'],
          ['/mesonet/TABLES', '/mnt/mesonet2/TABLES'],
