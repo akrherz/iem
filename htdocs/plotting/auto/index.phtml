@@ -202,7 +202,7 @@ EOF;
 			if (isset($v->all)){
 				$extra["_ALL"] = Array('name'=>' -- All Sites --');
 			}
-			$netselect = networkSelect($v->network, $value, $extra, "station");
+			$netselect = networkSelect($v->network, $value, $extra, $v->name);
 			$thisrow = $netselect;
 			$pltvars[] = sprintf("%s:%s", "network", $network);
 		}
