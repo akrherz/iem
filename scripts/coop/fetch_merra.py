@@ -2,22 +2,33 @@
  Monthly download of the MERRA data, website suggests that the previous
  month is available around the 2-3 week of the next month, so this is run
  from RUN_MIDNIGHT.sh, but only on the 21rst of each month
+
+MERRA2 Variables we want to process
+-----------------------------------
+http://goldsmr4.sci.gsfc.nasa.gov/data/MERRA2_MONTHLY/M2TMNXLND.5.12.4/doc/
+MERRA2.README.pdf
+
+(M2T1NXRAD)
+SWGDNCLR    surface incoming shortwave flux assuming clear sky
+SWTDN       toa incoming shortwave flux
+SWGDN       surface incoming shortwave flux
+SWGDNCLR    surface incoming shortwave flux assuming clear sky
 """
 import datetime
 import urllib2
 import os
 import sys
-import subprocess
-import glob
 
 
 def trans(now):
     """ Hacky hack hack """
     if now.year < 1993:
-        return '101'
+        return '100'
     if now.year < 2001:
-        return '201'
-    return '300'
+        return '200'
+    if now.year < 2011:
+        return '300'
+    return '400'
 
 
 def do_month(sts):
@@ -30,37 +41,28 @@ def do_month(sts):
     now = sts
     while now < ets:
         uri = now.strftime(
-            ("http://goldsmr2.sci.gsfc.nasa.gov/daac-bin/OTF/"
-             "HTTP_services.cgi?FILENAME=%%2Fdata%%2Fs4pa%%2FMERRA%%2"
-             "FMAT1NXRAD.5.2.0%%2F%Y%%2F%m%%2FMERRA"+trans(now)+".prod.assim."
-             "tavg1_2d_rad_Nx.%Y%m%d.hdf&FORMAT=TmV0Q0RGL2d6aXAv&"
-             "BBOX=22.852,-129.727,52.383,-60.117&LABEL=MERRA" +
-             trans(now) + ".prod.assim.tavg1_2d_rad_Nx.%Y%m%d.SUB.nc.gz&"
-             "FLAGS=&SHORTNAME=MAT1NXRAD&SERVICE=SUBSET_LATS4D&LAYERS=&"
-             "VERSION=1.02&VARIABLES=swtdn,swgdn,swgdnclr,tauhgh,taulow,"
-             "taumid,tautot,cldhgh,cldlow,cldmid,cldtot"))
-
+            ("http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
+             "HTTP_services.cgi?FILENAME=/data/s4pa/MERRA2"
+             "/M2T1NXRAD.5.12.4/%Y/%m/MERRA2_"+trans(now)+".tavg1_2d_rad_"
+             "Nx.%Y%m%d.nc4&FORMAT=bmM0Lw&"
+             "BBOX=22.852,-129.727,52.383,-60.117"
+             "&LABEL=MERRA2_"+trans(now)+".tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
+             "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
+             "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"))
         try:
             req = urllib2.Request(uri)
             data = urllib2.urlopen(req).read()
-        except:
-            uri = uri.replace("MERRA300", "MERRA301")
-            req = urllib2.Request(uri)
-            data = urllib2.urlopen(req).read()
-        dirname = now.strftime("/mesonet/merra/%Y")
+        except Exception as exp:
+            print uri
+            print exp
+            return
+        dirname = now.strftime("/mesonet/merra2/%Y")
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
-        fp = open(now.strftime("/mesonet/merra/%Y/%Y%m%d.nc.gz"), 'w')
+        fp = open(now.strftime("/mesonet/merra2/%Y/%Y%m%d.nc"), 'w')
         fp.write(data)
         fp.close()
         now += interval
-
-    os.chdir(dirname)
-    for fn in glob.glob("*.gz"):
-        fn2 = fn[:-3]
-        if os.path.isfile(fn2):
-            os.unlink(fn2)
-        subprocess.call("gunzip %s" % (fn, ), shell=True)
 
 
 def main():
