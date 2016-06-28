@@ -261,17 +261,19 @@ def main():
     (_, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
     ax[0].grid(True)
     ax2 = ax[0].twinx()
+    ax[0].set_zorder(ax2.get_zorder()+1)
+    ax[0].patch.set_visible(False)
     ax2.set_yticks(np.arange(-0.6, 0., 0.1))
     ax2.set_yticklabels(0 - np.arange(-0.6, 0.01, 0.1))
     ax2.set_ylim(-0.6, 0)
     ax2.set_ylabel("Hourly Precipitation [inch]")
-    b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=1)
+    b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=4)
 
-    l1, = ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2)
+    l1, = ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=5)
     l2, = ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple',
-                     zorder=2)
+                     zorder=5)
     l3, = ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black',
-                     zorder=2)
+                     zorder=5)
     ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
 
     days = (ets - sts).days
