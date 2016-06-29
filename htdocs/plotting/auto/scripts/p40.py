@@ -113,7 +113,7 @@ def plotter(fdict):
 
     ax.legend([r, r4, r2, r3], ['Clear', 'Some', 'Unknown',
                                 'Obscured by Overcast'],
-              loc='upper center',
-              bbox_to_anchor=(0.5, -0.08), fancybox=True, shadow=True, ncol=4)
+              loc='upper center', fontsize=14,
+              bbox_to_anchor=(0.5, -0.09), fancybox=True, shadow=True, ncol=4)
 
     return fig
