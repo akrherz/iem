@@ -39,6 +39,7 @@ def do_month(sts):
 
     interval = datetime.timedelta(days=1)
     now = sts
+    failures = 0
     while now < ets:
         uri = now.strftime(
             ("http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
@@ -59,6 +60,14 @@ def do_month(sts):
         dirname = now.strftime("/mesonet/merra2/%Y")
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
+        if len(data) < 1000:
+            print(("fetch_merra %s resulted in %s bytes, retry"
+                   ) % (now.strftime("%Y%m%d"), len(data)))
+            failures += 1
+            if failures > 10:
+                print("fetch_merra aborting with too many failures")
+                return
+            continue
         fp = open(now.strftime("/mesonet/merra2/%Y/%Y%m%d.nc"), 'w')
         fp.write(data)
         fp.close()
