@@ -14,7 +14,7 @@ $t->west = <<<EOF
 referenced data.  Since the IEM contains many spatially referenced datasets, it would only seem
 natural to integrate IEM data into GIS applications.<p>
 
-<h3 class="subtitle">Presentations & Docs:</h3>
+<h3>Presentations & Docs:</h3>
 <ul>
  <li><i>28 Jul 2003:</i> <a href="/docs/radmapserver/">NEXRAD + Mapserver HOWTO</a>
 <br />A HowTo on generating NEXRAD composite images with GEMPAK and 
@@ -28,12 +28,8 @@ archive of presentations.</li>
 </ul>
 
 
-<p><h3 class="subtitle">Web Applications:</h3>
+<p><h3>Web Applications:</h3>
 <ul>
-<!--
-  <LI><a href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS%2Fapps%2Fiatorn%2Fiatorn.map">Historical Iowa Tornado Database</a></LI>
-  <LI><a href="/GIS/apps/pcs/">2002 NEXRAD vs ASOS Precip Comparison</a></LI>
--->
   <li><a href="/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
   <li><a href="/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
   <li><a href="/my/current.php">Dynamic Plotting</a></li>
@@ -41,26 +37,26 @@ archive of presentations.</li>
 </ul>
 
 
-<p><h3 class="subtitle">Links:</h3>
+<p><h3>Links:</h3>
 <ul>
- <li><a href="http://drought.unl.edu/dm/dmshps_archive.htm">US Drought Monitor GIS data</a>
+ <li><a href="http://droughtmonitor.unl.edu/MapsAndData.aspx">US Drought Monitor GIS data</a>
   <br />Download current and historical drought monitor products in GIS formats</li>
  <li><a href="http://www.ncdc.noaa.gov/swdi/">NCDC Severe Weather Data Inventory</a>
  <br />A tremendous website with lots of hard to find data!</li>
  <li><a href="http://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
  <br />Archive of NCDC provided storm reports (1950-)!</li>
- <li><a href="http://gis.ncdc.noaa.gov/aimstools/gis.jsp">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
+ <li><a href="https://gis.ncdc.noaa.gov/map/viewer/#app=cdo">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
  <li><a href="http://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
   <br />Weather data integrated into Google Earth!</li>
  <li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
 	<br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
  <li><a href="/GIS/software.php">GIS Software</a></li>
  <li>Scott Shipley's <a href="http://geog.gmu.edu/projects/wxproject/nex2shp/nexrad.htm">NEXRAD to shapefile</a> converter.
- <li><a href="http://www.ftw.nrcs.usda.gov/prism/prism.html">USDA PRISM</a> data page (GIS Climate Data).</li>
+ <li><a href="http://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
  <li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
  <li>NOAA's Ken Waters work with <a href="http://www.weather.gov/regsci/gis/">GIS and NWS warnings</a><br />They have some historical GIS datasets of warnings too.</li>
  <li><a href="http://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
- <li><a href="http://map06.gsfc.nasa.gov/">NASA MAP'06 program</a>
+ <li><a href="http://map.nasa.gov/MAP06/">NASA MAP'06 program</a>
   <br />Has some GIS satellite data.</li>
 </ul>
 EOF;
@@ -69,7 +65,7 @@ $t->east = <<<EOF
 <img src="/images/gisready.png">You may have noticed this image appearing on
 IEM webpages.  It signifies that the data link is ready for most GIS systems.
 
-<p><h3 class="subtitle">IEM GIS Projects</h3>
+<p><h3>IEM GIS Projects</h3>
 <ul>
  <li><a href="goes.phtml">GOES Satellite GIS Products</a>
   <br />Current and archived GIS products from NOAA's GOES satellites</li>
@@ -92,7 +88,7 @@ back to 1951.</li>
   <br />Information about the NEXRAD composites that the IEM generates.</li>
 </ul>
 
-<p><h3 class="subtitle">GIS Shapefiles:</h3>
+<p><h3>GIS Shapefiles:</h3>
 <ul>
  <li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Past 24 hours of Storm Reports</a>
  <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.  The file is updated every 5 minutes.</li>
