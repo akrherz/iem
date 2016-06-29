@@ -49,9 +49,10 @@ python mrms_monthly_plot.py
 # Assume we have MERRA data by the 28th each month
 if [ $DD -eq "28" ]
 then
-	cd ../coop
+	cd ../dl
 	python fetch_merra.py
 	MM=$(date -u --date '1 month ago' +'%m')
 	YYYY=$(date -u --date '1 month ago' +'%Y')
+	cd ../coop
 	python merra_solarrad.py $YYYY $MM
 fi
