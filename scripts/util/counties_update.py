@@ -114,8 +114,8 @@ while feat is not None:
     countnew += 1
     feat = lyr.GetNextFeature()
 
-cursor.execute("""UPDATE nws_ugc SET simple_geom = ST_Simplify(geom, 0.01)""")
-cursor.execute("""UPDATE nws_ugc SET centroid = ST_Centroid(geom)""")
+cursor.execute("""UPDATE ugcs SET simple_geom = ST_Simplify(geom, 0.01)""")
+cursor.execute("""UPDATE ugcs SET centroid = ST_Centroid(geom)""")
 
 mydb.commit()
 cursor.close()
