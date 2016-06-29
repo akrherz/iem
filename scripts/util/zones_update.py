@@ -1,5 +1,5 @@
 """
-My purpose in life is to take the NWS AWIPS Geodata Zones Shapefile and 
+My purpose in life is to take the NWS AWIPS Geodata Zones Shapefile and
 dump them into the PostGIS database!  I was bootstraped like so:
 
 python zones_update.py z_16mr06 2006 03 16
@@ -40,6 +40,7 @@ import zipfile
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 cursor = POSTGIS.cursor()
 
+
 def Area(feat, *args):
     """
     Backport a feature from the future!
@@ -62,7 +63,7 @@ os.chdir('/tmp')
 zipfn = "%s.zip" % (DATESTAMP,)
 if not os.path.isfile(zipfn):
     url = urllib2.Request(('http://www.weather.gov/geodata/catalog/wsom/'
-                       +'data/%s') % (zipfn,))
+                           'data/%s') % (zipfn,))
     print 'Downloading %s ...' % (zipfn,)
     o = open(zipfn, 'wb')
     o.write(urllib2.urlopen(url).read())
@@ -98,22 +99,21 @@ while feat is not None:
         zone = ugc[-3:]
     else:
         state = feat.GetField('STATE')
-        zone  = feat.GetField('ZONE')
+        zone = feat.GetField('ZONE')
         cwa = feat.GetField('CWA')
-        name  = feat.GetField('NAME')
+        name = feat.GetField('NAME')
         ugc = "%s%s%s" % (state, GEO_TYP, zone)
     if state is None or zone is None:
         print "Nulls: State [%s] Zone [%s] Name [%s]" % (state, zone, name)
         feat = lyr.GetNextFeature()
         continue
 
-
     geo = feat.GetGeometryRef()
     if not geo:
         feat = lyr.GetNextFeature()
         continue
     area = Area(geo)
-    
+
     # This is tricky. We want to have our multipolygon have its biggest polygon
     # first in the multipolygon.  This will allow some plotting simplification
     # later as we will only consider the first polygon
@@ -121,7 +121,7 @@ while feat is not None:
     idx = []
     for i in range(geo.GetGeometryCount()):
         _g = geo.GetGeometryRef(i)
-        if Area(_g) > thismaxa: 
+        if Area(_g) > thismaxa:
             thismaxa = Area(_g)
             idx.insert(0, i)
         else:
@@ -134,14 +134,14 @@ while feat is not None:
             _n = ogr.Geometry(ogr.wkbPolygon)
             _n.AddGeometry(_g)
             _g = _n
-        newgeo.AddGeometry( _g )
-    
+        newgeo.AddGeometry(_g)
+
     wkt = newgeo.ExportToWkt()
 
-    if ugcs.has_key(ugc):
+    if ugc in ugcs:
         if area < ugcs[ugc]:
             print ('Skipping %s [area: %.5f], since we had a previously '
-                   +'bigger one') % (ugc, area)
+                   'bigger one') % (ugc, area)
             feat = lyr.GetNextFeature()
             continue
     ugcs[ugc] = area
@@ -156,23 +156,23 @@ while feat is not None:
 
     # OK, lets see if this UGC is new
     cursor.execute("""SELECT ugc from ugcs where ugc = %s
-        and end_ts is null and name = %s and 
+        and end_ts is null and name = %s and
         geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)) and
-        wfo = %s""", 
-        (ugc, name, wkt, cwa))
-    
+        wfo = %s
+        """, (ugc, name, wkt, cwa))
+
     # NOOP
     if cursor.rowcount == 1:
         countnoop += 1
         feat = lyr.GetNextFeature()
         continue
-        
+
     # Go find the previous geom and truncate the time
     cursor.execute("""
-        UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null""", 
-            (TS, ugc))
-    
-    # Finally, insert the new geometry   
+        UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null
+        """, (TS, ugc))
+
+    # Finally, insert the new geometry
     cursor.execute("""
     INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom)
     VALUES (%s, %s, %s, %s, %s,
