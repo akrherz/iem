@@ -36,7 +36,29 @@ $ar = Array("1" => "3 Panel Plot",
 		"2" => "Just Soil Temps",
 		"3" => "Daily Max/Min 4 Inch Soil Temps",
 		"4" => "Daily Solar Radiation",
-		"5" => "Daily Potential Evapotranspiration");
+		"5" => "Daily Potential Evapotranspiration",
+		"6" => "Histogram of Volumetric Soil Moisture",
+		"7" => "Daily Soil Water + Change");
+$dd = "This plot is a time series graph of
+observations from a time period and ISU Soil Moisture station of your choice.";
+$desc = Array("1" => $dd,
+		"2" => $dd,
+		"3" => $dd,
+		"4" => $dd,
+		"5" => $dd);
+$desc["6"] = <<<EOF
+This plot presents a histogram of hourly volumetric soil moisture observations.
+The y-axis is expressed in logarithmic to better show the low frequency obs
+within the distribution.
+EOF;
+$desc["7"] = <<<EOF
+This plot computes the daily change in soil water approximately between
+the depths of 6 to 30 inches.  This is using only two measurements at
+12, and 24 inch depths.  The 12 inch depth is assumed to cover the
+6-18 inch layer and the 24 inch depth to cover 18-30 layer.
+EOF;
+
+$thedescription = $desc[$opt];
 $oselect = make_select("opt", $opt, $ar);
 
 $img = sprintf("smts.py?opt=%s&amp;station=%s&amp;year1=%s&amp;year2=%s"
@@ -88,8 +110,7 @@ and click the 'Make Plot' button below.
 
 <p><img src="{$img}" class="img img-responsive">
 
-<p><strong>Plot Description:</strong> This plot is a time series graph of
-observations from a time period and ISU Soil Moisture station of your choice.
+<p><strong>Plot Description:</strong> {$thedescription}
 </p>
 EOF;
 $t->render('single.phtml');
