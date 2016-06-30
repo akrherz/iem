@@ -12,18 +12,19 @@ import datetime
 import sys
 import zipfile
 
+
 def go(valid, period):
     """ Actually do the work! """
     fn = valid.strftime(('/mesonet/ARCHIVE/data/%Y/%m/%d/'
-                         +'GIS/mrms/p'+str(period)+'h_%Y%m%d%H%M.png'))
+                         'GIS/mrms/p'+str(period)+'h_%Y%m%d%H%M.png'))
     if not os.path.isfile(fn):
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("ERROR: Data File Not Found!")
         return
     img = imread(fn)
     size = np.shape(img)
-    #print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
-    data = np.ones( size, np.uint16) * 65535
+    # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
+    data = np.ones(size, np.uint16) * 65535
 
     """
     000 -> 099  0.25mm  000.00 to 024.75
@@ -32,29 +33,29 @@ def go(valid, period):
     254                 500.00+
     255  MISSING/BAD DATA
     """
-    data = np.where( np.logical_and(img >= 180, img < 255), 
-                     (125. + (img-180) * 5.0) * 10, 
-                     data)
-    data = np.where( np.logical_and(img >= 100, img < 180), 
-                     (25. + (img-100) * 1.25) * 10, 
-                     data)
-    #print '2', np.max(data), np.min(data), data[0,0]
-    data = np.where( np.logical_and(img >= 0, img < 100),
-                     (img * 0.25) * 10,
-                     data)
-    #print '4', np.max(data), np.min(data), data[0,0]
+    data = np.where(np.logical_and(img >= 180, img < 255),
+                    (125. + (img-180) * 5.0) * 10,
+                    data)
+    data = np.where(np.logical_and(img >= 100, img < 180),
+                    (25. + (img-100) * 1.25) * 10,
+                    data)
+    # print '2', np.max(data), np.min(data), data[0,0]
+    data = np.where(np.logical_and(img >= 0, img < 100),
+                    (img * 0.25) * 10,
+                    data)
+    # print '4', np.max(data), np.min(data), data[0,0]
 
     data = data.astype(np.uint16)
-    #print '5', np.max(data), np.min(data), data[0,0]
+    # print '5', np.max(data), np.min(data), data[0,0]
 
     drv = gdal.GetDriverByName('HFA')
     outfn = "mrms_%sh_%s.img" % (period, valid.strftime("%Y%m%d%H%M"))
-    ds = drv.Create(outfn, size[1], size[0], 1, 
-        gdal.GDT_UInt16, options = [ 'COMPRESS=YES' ])
-    proj = osr.SpatialReference()  
-    proj.SetWellKnownGeogCS( "EPSG:4326" )
-    ds.SetProjection( proj.ExportToWkt()  )
-    ds.GetRasterBand(1).WriteArray( data )
+    ds = drv.Create(outfn, size[1], size[0], 1,
+                    gdal.GDT_UInt16, options=['COMPRESS=YES'])
+    proj = osr.SpatialReference()
+    proj.SetWellKnownGeogCS("EPSG:4326")
+    ds.SetProjection(proj.ExportToWkt())
+    ds.GetRasterBand(1).WriteArray(data)
     ds.GetRasterBand(1).SetNoDataValue(65535)
     ds.GetRasterBand(1).SetScale(0.1)
     ds.GetRasterBand(1).SetUnitType('mm')
@@ -63,9 +64,10 @@ def go(valid, period):
                                                         period, title))
     # Optional, allows ArcGIS to auto show a legend
     ds.GetRasterBand(1).ComputeStatistics(True)
-    # top left x, w-e pixel resolution, rotation, top left y, rotation, n-s pixel resolution
-    ds.SetGeoTransform( [ -130., 0.01, 0, 
-                     55.0, 0, -0.01 ] )
+    # top left x, w-e pixel resolution, rotation,
+    # top left y, rotation, n-s pixel resolution
+    ds.SetGeoTransform([-130., 0.01, 0,
+                        55.0, 0, -0.01])
     # close file
     del ds
 
@@ -79,25 +81,30 @@ def go(valid, period):
     sys.stdout.write("Content-type: application/octet/stream\n")
     sys.stdout.write('Content-Disposition: attachment; filename=%s\n\n' % (
                                                             zipfn,))
-    sys.stdout.write( open(zipfn, 'rb').read() )
+    sys.stdout.write(open(zipfn, 'rb').read())
 
     os.unlink(outfn)
     os.unlink(zipfn)
     os.unlink(outfn+".aux.xml")
 
+
+def main():
+    """Do Something"""
+    os.chdir("/tmp")
+
+    form = cgi.FieldStorage()
+    year = int(form.getfirst('year', 2016))
+    month = int(form.getfirst('month', 4))
+    day = int(form.getfirst('day', 13))
+    hour = int(form.getfirst('hour', 18))
+    minute = int(form.getfirst('minute', 0))
+
+    period = int(form.getfirst('period', 1))
+
+    valid = datetime.datetime(year, month, day, hour, minute)
+
+    go(valid, period)
+
 if __name__ == '__main__':
     # Go Main Go
-    os.chdir("/tmp")
-    
-    form = cgi.FieldStorage()
-    year = int(form.getfirst('year', 2014))
-    month = int(form.getfirst('month', 9))
-    day = int(form.getfirst('day', 4))
-    hour = int(form.getfirst('hour', 0))
-    minute = int(form.getfirst('minute', 0))
-    
-    period = int(form.getfirst('period', 24))
-    
-    valid = datetime.datetime(year, month, day, hour, minute)
-    
-    go(valid, period)
+    main()
