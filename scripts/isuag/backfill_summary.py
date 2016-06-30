@@ -3,7 +3,7 @@
  happier
 '''
 import psycopg2
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 
 ISUAG = psycopg2.connect(database='isuag', host='iemdb')
 icursor = ISUAG.cursor()
@@ -28,20 +28,21 @@ for row in icursor:
                           (SELECT iemid from stations where id = '%s' and
                           network = 'ISUSM'), '%s', %s, %s, %s
                           )
-                          """ % (row[0], row[1], row[2] / 24.5, high, low))
+                          """ % (row[0], row[1],
+                                 distance(row[2], 'MM').value('IN'), high, low))
     else:
         row2 = iemcursor.fetchone()
         if (row2[1] is None or row2[2] is None or 
-            round(row2[0],2) != round((row[2] / 24.5),2) or
+            round(row2[0],2) != round((distance(row[2], 'MM').value('IN')),2) or
             round(high,2) != round(row2[1],2) or 
             round(low,2) != round(row2[2],2)):
             print 'Mismatch %s %s old: %s new: %s' % (row[0], row[1], row2[0],
-                                                      row[2] / 24.5)
+                                                      distance(row[2], 'MM').value('IN'))
             
             iemcursor.execute("""UPDATE summary SET pday = %s, max_tmpf = %s,
             min_tmpf = %s WHERE
             iemid = (select iemid from stations WHERE network = 'ISUSM' and
-            id = %s) and day = %s""", (row[2] / 24.5, high, low, row[0], row[1]))
+            id = %s) and day = %s""", (distance(row[2], 'MM').value('IN'), high, low, row[0], row[1]))
 
 iemcursor.close()
 IEM.commit()

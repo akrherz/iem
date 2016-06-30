@@ -1,4 +1,5 @@
 import netCDF4
+from pyiem.datatypes import distance
 import matplotlib
 matplotlib.use('agg')
 from pyiem.plot import MapPlot
@@ -27,7 +28,8 @@ def do_month(year, month, routes):
 
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
-    p01d = np.sum(nc.variables['p01d'][idx0:idx1,:,:],0) / 24.5
+    p01d = distance(np.sum(nc.variables['p01d'][idx0:idx1,:,:],0),
+                    'MM').value('IN')
     nc.close()
 
     m = MapPlot(sector='iowa', title='MRMS %s - %s Total Precipitation' % (

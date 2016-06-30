@@ -13,7 +13,7 @@ import tempfile
 # Third party
 import numpy as np
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, humidity
+from pyiem.datatypes import temperature, humidity, distance
 import pyiem.meteorology as met
 import psycopg2
 ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
@@ -128,7 +128,9 @@ def hourly_process(nwsli, maxts):
             ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
         ob.data['srad'] = tokens[headers.index('slrkw_avg')]
         ob.data['phour'] = round(
-            float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
+            distance(
+                     float(tokens[headers.index('rain_mm_tot')]),
+                     'MM').value('IN'), 2)
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
         ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
         ob.data['max_gust_ts'] = "%s-06" % (
@@ -208,9 +210,10 @@ def daily_process(nwsli, maxts):
                     float(tokens[headers.index('tair_c_max')]), 'C').value('F')
         ob.data['min_tmpf'] = temperature(
                     float(tokens[headers.index('tair_c_min')]), 'C').value('F')
-        ob.data['pday'] = round(
-            float(tokens[headers.index('rain_mm_tot')]) / 24.5, 2)
-        ob.data['et_inch'] = float(tokens[headers.index('dailyet')]) / 24.5
+        ob.data['pday'] = round(distance(
+            float(tokens[headers.index('rain_mm_tot')]), 'MM').value('IN'), 2)
+        ob.data['et_inch'] = distance(
+            float(tokens[headers.index('dailyet')]), 'MM').value('IN')
         ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
         if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
             print(("soilm_ingest.py station: %s ts: %s has 0 solar"
