@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pytz
 import sys
+from pandas.io.sql import read_sql
 import pyiem.meteorology as meteorology
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
@@ -139,6 +140,88 @@ def make_daily_plot(station, sts, ets):
     plt.savefig(sys.stdout, format='png')
 
 
+def make_vsm_histogram_plot(station, sts, ets):
+    """Option 6"""
+    df = read_sql("""
+        SELECT
+        CASE WHEN t12_c_avg_qc > 1 then vwc_12_avg_qc else null end as v12,
+        CASE WHEN t24_c_avg_qc > 1 then vwc_24_avg_qc else null end as v24,
+        CASE WHEN t50_c_avg_qc > 1 then vwc_50_avg_qc else null end as v50
+        from sm_hourly
+        where station = %s and valid >= %s and valid < %s
+    """, ISUAG, params=(station, sts, ets), index_col=None)
+
+    (_, ax) = plt.subplots(3, 1, sharex=True)
+    ax[0].set_title(("ISUSM Station: %s VWC Histogram\n"
+                     "For un-frozen condition between %s and %s"
+                     ) % (nt.sts[station]['name'],
+                          sts.strftime("%-d %b %Y"),
+                          ets.strftime("%-d %b %Y")))
+    for i, col in enumerate(['v12', 'v24', 'v50']):
+        ax[i].hist(df[col] * 100., bins=50, range=(0, 50), normed=True)
+        ax[i].set_ylabel("Frequency")
+        ax[i].grid(True)
+        ax[i].text(0.99, 0.99, "%s inches" % (col[1:],),
+                   transform=ax[i].transAxes, ha='right', va='top')
+        ax[i].set_yscale("log")
+
+    ax[2].set_xlabel("Volumetric Water Content [%]")
+    sys.stdout.write("Content-Type: image/png\n\n")
+    plt.savefig(sys.stdout, format='png')
+
+
+def make_daily_water_change_plot(station, sts, ets):
+    """Option 7"""
+    df = read_sql("""
+    WITH obs as (
+        SELECT valid,
+        CASE WHEN t12_c_avg_qc > 1 then vwc_12_avg_qc else null end as v12,
+        CASE WHEN t24_c_avg_qc > 1 then vwc_24_avg_qc else null end as v24,
+        CASE WHEN t50_c_avg_qc > 1 then vwc_50_avg_qc else null end as v50
+        from sm_daily
+        where station = %s and valid >= %s and valid < %s)
+
+    SELECT valid,
+    v12, v12 - lag(v12) OVER (ORDER by valid ASC) as v12_delta,
+    v24, v24 - lag(v24) OVER (ORDER by valid ASC) as v24_delta,
+    v50, v50 - lag(v50) OVER (ORDER by valid ASC) as v50_delta
+    from obs ORDER by valid ASC
+    """, ISUAG, params=(station, sts, ets), index_col=None)
+    # df.interpolate(inplace=True, axis=1, method='nearest')
+    l1 = 12.
+    l2 = 12.
+    l3 = 0.
+    df['change'] = (df['v12_delta'] * l1 + df['v24_delta'] * l2 +
+                    df['v50_delta'] * l3)
+    df['depth'] = df['v12'] * l1 + df['v24'] * l2 + df['v50'] * l3
+
+    (_, ax) = plt.subplots(2, 1, sharex=True)
+    ax[0].plot(df['valid'].values, df['depth'], color='b', lw=2)
+    for level in [0.15, 0.25, 0.35, 0.45]:
+        ax[0].axhline((l1+l2+l3) * level, c='k')
+        ax[0].text(df['valid'].values[-1], (l1+l2+l3) * level,
+                   "  %.0f%%" % (level * 100.,), va='center')
+    ax[0].grid(True)
+    ax[0].set_ylabel("Water Depth [inch]")
+    ax[0].set_title(("ISUSM Station: %s Daily Soil (6-30\") Water\n"
+                    "For un-frozen condition between %s and %s"
+                     ) % (nt.sts[station]['name'],
+                          sts.strftime("%-d %b %Y"),
+                          ets.strftime("%-d %b %Y")))
+    bars = ax[1].bar(df['valid'].values, df['change'].values, fc='b', ec='b')
+    for bar in bars:
+        if bar.get_y() < 0:
+            bar.set_facecolor('r')
+            bar.set_edgecolor('r')
+    ax[1].set_ylabel("Soil Water Change [inch]")
+    ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    interval = len(df.index) / 7 + 1
+    ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=interval))
+    ax[1].grid(True)
+    sys.stdout.write("Content-Type: image/png\n\n")
+    plt.savefig(sys.stdout, format='png')
+
+
 def main():
 
     # Query out the CGI variables
@@ -171,47 +254,27 @@ def main():
     elif opt == '5':
         make_daily_pet_plot(station, sts, ets)
         return
-    icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    elif opt == '6':
+        make_vsm_histogram_plot(station, sts, ets)
+        return
+    elif opt == '7':
+        make_daily_water_change_plot(station, sts, ets)
+        return
 
-    sql = """SELECT * from sm_hourly WHERE
-        station = '%s' and valid BETWEEN '%s' and '%s' ORDER by valid ASC
-        """ % (station, sts.strftime("%Y-%m-%d %H:%M"),
-               ets.strftime("%Y-%m-%d %H:%M"))
-    icursor.execute(sql)
-    d12sm = []
-    d24sm = []
-    d50sm = []
-    d12t = []
-    d24t = []
-    d50t = []
-    tair = []
-    tsoil = []
-    valid = []
-    slrkw = []
-    rain = []
-    for row in icursor:
-        slrkw.append(row['slrkw_avg_qc'] or np.nan)
-        d12sm.append(row['vwc_12_avg_qc'] or np.nan)
-        d12t.append(row['t12_c_avg_qc'] or np.nan)
-        d24t.append(row['t24_c_avg_qc'] or np.nan)
-        d50t.append(row['t50_c_avg_qc'] or np.nan)
-        d24sm.append(row['vwc_24_avg_qc'] or np.nan)
-        d50sm.append(row['vwc_50_avg_qc'] or np.nan)
-        valid.append(row['valid'])
-        rain.append(row['rain_mm_tot_qc'] or np.nan)
-        tair.append(row['tair_c_avg_qc'] or np.nan)
-        tsoil.append(row['tsoil_c_avg_qc'] or np.nan)
-
-    slrkw = np.array(slrkw)
-    rain = np.array(rain)
-    d12sm = np.array(d12sm)
-    d24sm = np.array(d24sm)
-    d50sm = np.array(d50sm)
-    d12t = np.array(d12t)
-    d24t = np.array(d24t)
-    d50t = np.array(d50t)
-    tair = np.array(tair)
-    tsoil = np.array(tsoil)
+    df = read_sql("""SELECT * from sm_hourly WHERE
+        station = %s and valid BETWEEN %s and %s ORDER by valid ASC
+        """, ISUAG,  params=(station, sts, ets), index_col='valid')
+    slrkw = df['slrkw_avg_qc']
+    d12sm = df['vwc_12_avg_qc']
+    d12t = df['t12_c_avg_qc']
+    d24t = df['t24_c_avg_qc']
+    d50t = df['t50_c_avg_qc']
+    d24sm = df['vwc_24_avg_qc']
+    d50sm = df['vwc_50_avg_qc']
+    rain = df['rain_mm_tot_qc']
+    tair = df['tair_c_avg_qc']
+    tsoil = df['tsoil_c_avg_qc']
+    valid = df.index.values
 
     # maxy = max([np.max(d12sm), np.max(d24sm), np.max(d50sm)])
     # miny = min([np.min(d12sm), np.min(d24sm), np.min(d50sm)])
