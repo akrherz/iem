@@ -7,6 +7,7 @@ import numpy as np
 import os
 import sys
 import pyiem.mrms as mrms
+from pyiem.datatypes import distance
 import pytz
 import pygrib
 import gzip
@@ -88,7 +89,7 @@ def doday(ts, realtime):
 
     (x, y) = np.meshgrid(mrms.XAXIS, mrms.YAXIS)
 
-    m.pcolormesh(x, y, np.flipud(total) / 24.5, clevs,
+    m.pcolormesh(x, y, distance(np.flipud(total), 'MM').value('IN'), clevs,
                  cmap=nwsprecip(), units='inch')
     m.drawcounties()
     m.postprocess(pqstr=pqstr, view=False)

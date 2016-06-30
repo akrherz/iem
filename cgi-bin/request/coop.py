@@ -259,7 +259,7 @@ def do_century( ctx ):
                                            'tmax': -99}
         
         data[ row['year'] ][ row['month'] ] = {
-             'prec' :  row['prec'] * 24.5,
+             'prec' :  distance(row['prec'], 'IN').value('MM'),
              'tmin' : temperature(float(row['tmin']), 'F').value('C'),
              'tmax' : temperature(float(row['tmax']), 'F').value('C'),
             }

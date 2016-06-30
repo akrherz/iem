@@ -125,8 +125,10 @@ def fetch_daily(form, cols):
         low = temperature(row['tair_c_min_qc'],
                           'C').value(
             'F') if row['tair_c_min_qc'] is not None else -99
-        precip = row['rain_mm_tot_qc'] / 24.5 if row['rain_mm_tot_qc'] > 0 else 0
-        et = row['dailyet_qc'] / 24.5 if row['dailyet_qc'] > 0 else 0
+        precip = (distance(row['rain_mm_tot_qc'], 'MM').value('IN')
+                  if row['rain_mm_tot_qc'] > 0 else 0)
+        et = (distance(row['dailyet_qc'], 'MM').value('IN')
+              if row['dailyet_qc'] > 0 else 0)
 
         soil04t = temperature(row['tsoil_c_avg_qc'],
                               'C').value(
@@ -234,13 +236,14 @@ def fetch_hourly(form, cols):
             'F') if row['tair_c_avg_qc'] is not None else -99
         relh = row['rh_qc'] if row['rh_qc'] is not None else -99
         solar = row['slrkw_avg_qc'] if row['slrkw_avg_qc'] is not None else -99
-        precip = (row['rain_mm_tot_qc'] / 24.5 if row['rain_mm_tot_qc'] is not None
-                  else -99)
+        precip = (distance(row['rain_mm_tot_qc'], 'MM').value('IN')
+                  if row['rain_mm_tot_qc'] is not None else -99)
         speed = (row['ws_mps_s_wvt_qc'] * 2.23 if row['ws_mps_s_wvt_qc'] is not None
                  else -99)
         drct = (row['winddir_d1_wvt_qc'] if row['winddir_d1_wvt_qc'] is not None
                 else -99)
-        et = row['etalfalfa_qc'] / 24.5 if row['etalfalfa_qc'] is not None else -99
+        et = (distance(row['etalfalfa_qc'], 'MM').value('IN')
+              if row['etalfalfa_qc'] is not None else -99)
         soil04t = temperature(row['tsoil_c_avg_qc'],
                               'C').value(
             'F') if row['tsoil_c_avg_qc'] is not None else -99

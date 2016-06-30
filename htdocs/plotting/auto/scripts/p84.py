@@ -2,6 +2,7 @@ import numpy as np
 from pyiem import iemre
 import datetime
 import netCDF4
+from pyiem.datatypes import distance
 
 PDICT = {'iowa': 'Iowa',
          'midwest': 'Midwest'}
@@ -56,15 +57,18 @@ def plotter(fdict):
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
     if (idx1 - idx0) < 32:
-        p01d = np.sum(nc.variables['p01d'][idx0:idx1, :, :], 0) / 24.5
+        p01d = distance(np.sum(nc.variables['p01d'][idx0:idx1, :, :], 0),
+                        'MM').value('IN')
     else:
         # Too much data can overwhelm this app, need to chunk it
         for i in range(idx0, idx1, 10):
             i2 = min([i+10, idx1])
             if idx0 == i:
-                p01d = np.sum(nc.variables['p01d'][i:i2, :, :], 0) / 24.5
+                p01d = distance(np.sum(nc.variables['p01d'][i:i2, :, :], 0),
+                                'MM').value('IN')
             else:
-                p01d += np.sum(nc.variables['p01d'][i:i2, :, :], 0) / 24.5
+                p01d += distance(np.sum(nc.variables['p01d'][i:i2, :, :], 0),
+                                 'MM').value('IN')
     nc.close()
 
     if sdate == edate:

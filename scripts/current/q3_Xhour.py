@@ -11,7 +11,7 @@ import pytz
 import gzip
 import pygrib
 import tempfile
-
+from pyiem.datatypes import distance
 from pyiem.plot import MapPlot
 
 
@@ -81,7 +81,8 @@ def doit(ts, hours):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    m.contourf(mrms.XAXIS, mrms.YAXIS, np.flipud(total) / 24.5, clevs)
+    m.contourf(mrms.XAXIS, mrms.YAXIS,
+               distance(np.flipud(total), 'MM').value('IN'), clevs)
     m.drawcounties()
     m.postprocess(pqstr=pqstr)
 

@@ -4,6 +4,7 @@
 
 import pygrib
 import datetime
+from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, nwsprecip
 import os
 import sys
@@ -59,7 +60,7 @@ def doday(ts, realtime):
                     subtitle=subtitle)
 
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
-        m.pcolormesh(lons, lats, total / 24.5, clevs,
+        m.pcolormesh(lons, lats, distance(total, 'MM').value('IN'), clevs,
                      cmap=nwsprecip(), units='inch')
 
         # map.drawstates(zorder=2)

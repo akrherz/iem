@@ -8,7 +8,7 @@ import psycopg2.extras
 import netCDF4
 import datetime
 from pyiem import iemre
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 
 # Database Connection
 COOP = psycopg2.connect(database='coop', host='iemdb')
@@ -82,7 +82,7 @@ def do_var(varname):
             if varname in ('high', 'low'):
                 interp = temperature(iemreval, 'K').value('F')
             else:
-                interp = iemreval / 24.5
+                interp = distance(iemreval, 'MM').value('IN')
             print '--> Neighbor failure, %s %s %s' % (station, day, varname)
         else:
             mass = sum(weight)

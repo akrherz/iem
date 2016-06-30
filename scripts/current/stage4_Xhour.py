@@ -5,6 +5,7 @@ Create a variable X hour plot of stage IV estimates
 import pygrib
 import datetime
 import pytz
+from pyiem.datatypes import distance
 from pyiem.plot import MapPlot
 import os
 import sys
@@ -56,7 +57,8 @@ def do(ts, hours):
                     title='NCEP Stage IV %s Hour Precipitation' % (hours,),
                     subtitle='Total up to %s' % (
                                     localtime.strftime("%d %B %Y %I %p %Z"),))
-        m.pcolormesh(lons, lats, total / 24.5, clevs, units='inch')
+        m.pcolormesh(lons, lats, distance(total, 'MM').value('IN'), clevs,
+                     units='inch')
         pqstr = "plot %s %s00 %s_stage4_%sh.png %s_stage4_%sh_%s.png png" % (
                                 'ac', ts.strftime("%Y%m%d%H"), sector, hours,
                                 sector, hours, ts.strftime("%H"))
