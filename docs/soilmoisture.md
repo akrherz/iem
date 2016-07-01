@@ -13,8 +13,30 @@
     this issue is resolved...
   - [ ] daryl should implement a replacement of the winter time precip so to
     allow for more complete data
-  - [ ] change the alerting threshold for offline alerts as they are being
+  - [x] change the alerting threshold for offline alerts as they are being
     ignored by others
   - Ethan is funded 100% now from Experiment Station, so can work on this
   - [ ] create electronic version of the checklist for stations to do
   - Email Tim and Ethan on issues at the same time.
+
+ 29 Jun 2016
+  Tim Goode, Mark Honeyman, Ethan, Flory, Archontoulis, Taylor, Vanloocke.
+  Arritt
+  - Dr Honeyman has a draft agreement that was worked on with legal council
+    for the sites that are on private farms
+  - Dr Taylor expressed a need to start replacing the wind sensors soon
+  - He has a spot in mind (Marcus, IA) for the current unused station
+  - Discussion about how soil moisture calibration is done in Oklahoma and
+    how we could apply it here
+    - They take two samples down to 5ft and then do gravimetric
+  - Dr Taylor believes that we don't need per-site logger program calibrations
+    of the sensors, errors are within 2%
+  - Flory is going to look into multiplexors
+  - [ ] daryl's TODO item on replacing winter precip was discussed again
+  - Voted to have a bare soil requirement, Dr Honeyman will email out the group
+  - We can likely increase the reporting interval as the timing and bandwidth
+    exists
+  - The door was opened again for having the Hort/Vineyard stations join the
+    network
+  - Discussion on what the Iowa Flood Center is deploying for soil moisture
+    stations.
