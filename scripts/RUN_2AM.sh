@@ -29,7 +29,7 @@ fi
 cd ../util
 if [ $DD -eq "02" ]
 	then
-		sh monthly.sh $(date --date '3 days ago' +'%Y %m')
+		sh monthly.sh $(date --date '3 days ago' +'%y %m')
 fi
 
 
