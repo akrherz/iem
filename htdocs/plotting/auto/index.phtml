@@ -17,6 +17,12 @@ $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
  <link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
+ <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+  <style>
+    .select2-results .select2-disabled,  .select2-results__option[aria-disabled=true] { 
+    display: none;
+    }
+  </style>
 EOF;
 
 
@@ -34,8 +40,10 @@ while (list($k,$v) = each($jobj->plots)){
 	$pselect .= sprintf("<optgroup label=\"%s\">", $v->label);
 	while (list($k2,$v2) = each($v->options)){
 		$mwonly = (isset($v2->mw)) ? ' data-mw="true"': '';
-		$pselect .= sprintf("<option value=\"%s\"%s%s>%s</option>", $v2->id,
-			($v2->id == $q) ? ' selected="selected"': '', $mwonly, $v2->label);
+		$pselect .= sprintf("<option value=\"%s\"%s%s>%s (#%s)</option>",
+				$v2->id,
+			($v2->id == $q) ? ' selected="selected"': '', $mwonly, $v2->label,
+				$v2->id);
 	}
 	$pselect .= "</optgroup>";
 }
@@ -455,6 +463,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
 <script src="/assets/jquery-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 {$extrascripts}
 <script>
 $(document).ready(function(){
@@ -476,16 +485,16 @@ $(document).ready(function(){
 	});
 	$('#_l').change(function(){
 		if($(this).is(":checked")) {
-			$('select option[data-mw="true"]').addClass('hidden');
+			$('select option[data-mw="true"]').prop('disabled', 'disabled');
 		} else {
-			$('select option[data-mw="true"]').removeClass('hidden');
+			$('select option[data-mw="true"]').prop('disabled', false);
 		}
+	    $('select[name="q"]').select2();
 	});
 		{$lmw}
+    $('select[name="q"]').select2();
 });
 </script>
 EOF;
 $t->render('single.phtml');
-
-
 ?>
