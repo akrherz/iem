@@ -9,7 +9,7 @@ import sys
 import os
 import pandas as pd
 import cStringIO
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
