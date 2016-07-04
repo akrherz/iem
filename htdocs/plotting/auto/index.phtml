@@ -278,13 +278,15 @@ EOF;
 		}
 		elseif ($v->type == "date"){
 			$dpname = "datepicker_". $v->name;
+			$mindate = isset($v->min) ? $v->min: '1893/1/1';
+			$maxdate = isset($v->max) ? $v->max: Date("Y/m/d");
 			$jsextra .= <<<EOF
 $( "#{$dpname}" ).datepicker({
 	changeMonth: true,
 	changeYear: true,
 	dateFormat: "yy/mm/dd",
-	maxDate: new Date(),
-	minDate: new Date("{$v->min}")});
+	maxDate: new Date("{$maxdate}"),
+	minDate: new Date("{$mindate}")});
 $("#{$dpname}").datepicker('setDate', new Date("{$value}"));
 	
 EOF;
