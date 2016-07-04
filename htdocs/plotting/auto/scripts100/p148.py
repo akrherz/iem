@@ -7,6 +7,7 @@ import mx.DateTime
 
 PDICT = OrderedDict([
         ('memorial', 'Memorial Day'),
+        ('exact', 'Same Date each Year'),
         ])
 PDICT2 = OrderedDict([
         ('high', 'High Temperature [F]'),
@@ -30,6 +31,9 @@ def get_description():
              label='Select Station:'),
         dict(type='select', name='date', default='memorial', options=PDICT,
              label='Which date/holiday to plot?'),
+        dict(type='date', name='thedate', default='2000/01/01',
+             min='2000/01/01', max='2000/12/31',
+             label='Same date each year to plot (when selected above):'),
         dict(type='select', name='var', default='high',
              label='Which variable to plot?', options=PDICT2)
     ]
@@ -54,30 +58,47 @@ def plotter(fdict):
     station = fdict.get('station', 'IA0200')
     network = fdict.get('network', 'IACLIMATE')
     varname = fdict.get('var', 'high')
+    thedate = datetime.datetime.strptime(fdict.get('thedate', '2000-01-01'),
+                                         '%Y-%m-%d')
+
     date = fdict.get('date', 'memorial')
     nt = NetworkTable(network)
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    days = memorial_days()
-
     table = "alldata_%s" % (station[:2], )
-    df = read_sql("""
-    SELECT year, high, precip from """ + table + """ WHERE station = %s
-    and day in %s ORDER by year ASC
-    """, pgconn, params=(station, tuple(days)),
-                  index_col='year')
+    if date == 'exact':
+        df = read_sql("""
+        SELECT year, high, precip from """ + table + """ WHERE station = %s
+        and sday = %s ORDER by year ASC
+        """, pgconn, params=(station, thedate.strftime("%m%d")),
+                      index_col='year')
+        subtitle = thedate.strftime("%B %-d")
+    else:
+        days = memorial_days()
+
+        df = read_sql("""
+        SELECT year, high, precip from """ + table + """ WHERE station = %s
+        and day in %s ORDER by year ASC
+        """, pgconn, params=(station, tuple(days)),
+                      index_col='year')
+        subtitle = PDICT[date]
 
     (fig, ax) = plt.subplots(1, 1)
 
     ax.bar(df.index.values, df[varname], fc='r', ec='r', align='center')
-    ax.axhline(df[varname].mean())
+    mean = df[varname].mean()
+    ax.axhline(mean)
+    ax.text(df.index.values[-1] + 1, mean, '%.2f' % (mean,), ha='left',
+            va='center')
     ax.grid(True)
     ax.set_title(("%s [%s] Daily %s\non %s"
                   ) % (nt.sts[station]['name'], station, PDICT2[varname],
-                       PDICT[date]))
+                       subtitle))
     ax.set_xlim(df.index.values.min() - 1,
                 df.index.values.max() + 1)
     ax.set_ylabel(PDICT2[varname])
+    if varname != 'precip':
+        ax.set_ylim(df[varname].min() - 5, df[varname].max() + 5)
     return fig, df
 
 

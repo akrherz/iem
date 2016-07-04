@@ -179,7 +179,7 @@ data = {'plots': [
          'label': ("Growing Season Differences Map between "
                    "Two Periods")},
         {'id': "148", 'mw': True,
-         'label': "Holiday Daily Weather Observations each year"},
+         'label': "Holiday or Same Day Daily Weather Observations each year"},
         {'id': "53", 'label': ("Hourly Frequency of Temperature within "
                                "Certain Ranges")},
         {'id': "10", 'mw': True,
