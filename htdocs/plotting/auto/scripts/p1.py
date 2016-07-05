@@ -1,7 +1,7 @@
 import psycopg2
 import numpy as np
 from scipy import stats
-from pyiem import network
+from pyiem import network, util
 from pandas.io.sql import read_sql
 import datetime
 import calendar
@@ -36,17 +36,17 @@ def get_description():
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station'),
-        dict(type='text', name='threshold', default='93',
+        dict(type='int', name='threshold', default='93',
              label='Daily Temperature Threshold (when appropriate)'),
         dict(type='month', name='month1', default=yesterday.month,
              label='Month 1 for Comparison'),
-        dict(type='text', name='num1', default=2,
+        dict(type='int', name='num1', default=2,
              label='Number of Additional Months for Comparison 1'),
         dict(type='select', options=PDICT, default='total_precip', name='var1',
              label='Comparison 1 Variable'),
         dict(type='month', name='month2', default=yesterday.month,
              label='Month 2 for Comparison'),
-        dict(type='text', name='num2', default=2,
+        dict(type='int', name='num2', default=2,
              label='Number of Additional Months for Comparison 2'),
         dict(type='select', options=PDICT, default='avg_temp', name='var2',
              label='Comparison 2 Variable'),
@@ -104,14 +104,15 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     today = datetime.date.today()
-    station = fdict.get('station', 'IA0000')
-    threshold = int(fdict.get('threshold', 93))
-    month1 = int(fdict.get('month1', 10))
-    varname1 = fdict.get('var1', 'total_precip')
-    num1 = min([12, int(fdict.get('num1', 2))])
-    month2 = int(fdict.get('month2', 8))
-    varname2 = fdict.get('var2', 'avg_temp')
-    num2 = min([12, int(fdict.get('num2', 2))])
+    ctx = util.get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['threshold']
+    month1 = ctx['month1']
+    varname1 = ctx['var1']
+    num1 = min([12, ctx['num1']])
+    month2 = ctx['month2']
+    varname2 = ctx['var2']
+    num2 = min([12, ctx['num2']])
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
     table = "alldata_%s" % (station[:2],)
@@ -169,25 +170,25 @@ def plotter(fdict):
     ax.axhline(y, linestyle='--', color='g')
     ax.axvline(x, linestyle='--', color='g')
     ur = len(resdf[(resdf["%s_1" % (varname1, )] >= x) &
-                   (resdf["%s_2" % (varname1, )] >= y)].index)
+                   (resdf["%s_2" % (varname2, )] >= y)].index)
     ax.text(0.95, 0.75, "%s (%.1f%%)" % (ur,
                                          ur / float(len(resdf.index)) * 100.),
             color='tan', fontsize=24, transform=ax.transAxes, ha='right',
             zorder=2)
     lr = len(resdf[(resdf["%s_1" % (varname1, )] >= x) &
-                   (resdf["%s_2" % (varname1, )] < y)].index)
+                   (resdf["%s_2" % (varname2, )] < y)].index)
     ax.text(0.95, 0.25, "%s (%.1f%%)" % (lr,
                                          lr / float(len(resdf.index)) * 100.),
             color='tan', fontsize=24, transform=ax.transAxes, ha='right',
             zorder=2)
     ll = len(resdf[(resdf["%s_1" % (varname1, )] < x) &
-                   (resdf["%s_2" % (varname1, )] < y)].index)
+                   (resdf["%s_2" % (varname2, )] < y)].index)
     ax.text(0.05, 0.25, "%s (%.1f%%)" % (ll,
                                          ll / float(len(resdf.index)) * 100.),
             color='tan', fontsize=24, transform=ax.transAxes, ha='left',
             zorder=2)
     ul = len(resdf[(resdf["%s_1" % (varname1, )] < x) &
-                   (resdf["%s_2" % (varname1, )] >= y)].index)
+                   (resdf["%s_2" % (varname2, )] >= y)].index)
     ax.text(0.05, 0.75, "%s (%.1f%%)" % (ul,
                                          ul / float(len(resdf.index)) * 100.),
             color='tan', fontsize=24, transform=ax.transAxes, ha='left',

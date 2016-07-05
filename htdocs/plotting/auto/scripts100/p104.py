@@ -1,5 +1,5 @@
 import psycopg2
-from pyiem import network
+from pyiem import network, util
 import numpy as np
 import datetime
 import pandas as pd
@@ -29,9 +29,9 @@ def get_description():
         dict(type='date', name='date2',
              default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):', min="1893/01/01"),
-        dict(type="text", name="days", default="14",
+        dict(type="int", name="days", default="14",
              label="Number of Trailing Days to Use (X)"),
-        dict(type="text", name="days2", default="7",
+        dict(type="int", name="days2", default="7",
              label="Interval to Compute Trailing Statistics (Y)"),
 
     ]
@@ -56,13 +56,12 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
 
-    station = fdict.get('station', 'IA2203')
-    days = int(fdict.get('days', 14))
-    days2 = int(fdict.get('days2', 7))
-    date1 = datetime.datetime.strptime(fdict.get('date1', '2015-01-01'),
-                                       '%Y-%m-%d')
-    date2 = datetime.datetime.strptime(fdict.get('date2', '2015-02-01'),
-                                       '%Y-%m-%d')
+    ctx = util.get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    days = ctx['days']
+    days2 = ctx['days2']
+    date1 = ctx['date1']
+    date2 = ctx['date2']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))

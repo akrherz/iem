@@ -31,6 +31,10 @@ def send_content_type(fmt):
         sys.stdout.write("Content-type: image/png\n\n")
     elif fmt == 'js':
         sys.stdout.write("Content-type: application/javascript\n\n")
+    elif fmt == 'svg':
+        sys.stdout.write("Content-type: image/svg+xml\n\n")
+    elif fmt == 'pdf':
+        sys.stdout.write("Content-type: application/pdf\n\n")
     elif fmt in ['csv', 'txt']:
         sys.stdout.write('Content-type: text/plain\n\n')
     else:
@@ -126,7 +130,7 @@ def main():
             (end_time - start_time).total_seconds()),
             va='bottom', ha='left', fontsize=8)
         ram = cStringIO.StringIO()
-        plt.savefig(ram, format='png', dpi=dpi)
+        plt.savefig(ram, format=fmt, dpi=dpi)
         ram.seek(0)
         res = ram.read()
         if fmt != 'png':

@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem import util
 
 
 def get_description():
@@ -35,9 +36,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     pcursor = pgconn.cursor()
-    syear = int(fdict.get('syear', 2009))
-    eyear = int(fdict.get('eyear', 2015)) + 1
-    station = fdict.get('station', 'DMX')[:4]
+    ctx = util.get_autoplot_context(fdict, get_description())
+    syear = ctx['syear']
+    eyear = ctx['eyear'] + 1
+    station = ctx['station'][:4]
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear, 1, 1)
     nt = NetworkTable('WFO')

@@ -1,6 +1,6 @@
 import psycopg2
 import numpy as np
-from pyiem import network
+from pyiem import network, util
 from pandas.io.sql import read_sql
 from collections import OrderedDict
 
@@ -36,7 +36,7 @@ def get_description():
              label='Select Station'),
         dict(type='select', name='type', default='max-high',
              label='Which metric to plot?', options=PDICT),
-        dict(type='text', name='threshold', default='-99',
+        dict(type='float', name='threshold', default=-99,
              label='Threshold (optional, specify when appropriate):'),
     ]
     return d
@@ -49,9 +49,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    station = fdict.get('station', 'IA0000')
-    ptype = fdict.get('type', 'max-high')
-    threshold = int(fdict.get('threshold', -99))
+    ctx = util.get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['threshold']
+    ptype = ctx['type']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
