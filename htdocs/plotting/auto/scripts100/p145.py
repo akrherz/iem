@@ -1,6 +1,7 @@
 import psycopg2
 import datetime
 import calendar
+from pyiem import util
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 
@@ -50,8 +51,9 @@ def plotter(fdict):
     today = datetime.date.today()
     nt = NetworkTable("ISUSM")
     oldnt = NetworkTable("ISUAG")
-    station = fdict.get('station', 'BOOI4')
-    year = int(fdict.get('year', today.year))
+    ctx = util.get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    year = ctx['year']
     _ = nt.sts[station]
     oldstation = XREF.get(station, 'A130209')
 
@@ -81,13 +83,13 @@ def plotter(fdict):
         else:
             units = 'C'
             cursor.execute("""
-            SELECT valid, tsoil_c_avg from sm_daily WHERE
+            SELECT valid, tsoil_c_avg_qc from sm_daily WHERE
             station = '%s' and valid >='%s-01-01' and
-            valid < '%s-01-01' ORDER by valid ASC""" % (station, yr, yr+1))
+            valid < '%s-01-01' and tsoil_c_avg_qc is not null
+            ORDER by valid ASC""" % (station, yr, yr+1))
         for row in cursor:
             x.append(int(row[0].strftime("%j")) + 1)
             y.append(temperature(row[1], units).value('F'))
-
         color = 'skyblue'
         if yr == year:
             color = 'r'

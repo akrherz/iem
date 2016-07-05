@@ -7,4 +7,6 @@ RewriteRule ^plot/([0-9]{1,12})/(.*).csv$ plotfe.py?p=$1&q=$2&fmt=csv
 RewriteRule ^plot/([0-9]{1,12})/(.*).txt$ plotfe.py?p=$1&q=$2&fmt=txt
 RewriteRule ^plot/([0-9]{1,12})/(.*).xlsx$ plotfe.py?p=$1&q=$2&fmt=xlsx
 RewriteRule ^plot/([0-9]{1,12})/(.*).js$ plotfe.py?p=$1&q=$2&fmt=js
+RewriteRule ^plot/([0-9]{1,12})/(.*).pdf$ plotfe.py?p=$1&q=$2&fmt=pdf
+RewriteRule ^plot/([0-9]{1,12})/(.*).svg$ plotfe.py?p=$1&q=$2&fmt=svg
 RewriteRule ^meta/([0-9]{1,12}).json$ plotmeta.py?p=$1

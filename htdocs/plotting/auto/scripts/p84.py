@@ -1,7 +1,8 @@
 import numpy as np
-from pyiem import iemre
+from pyiem import iemre, util
 import datetime
 import netCDF4
+import os
 from pyiem.datatypes import distance
 
 PDICT = {'iowa': 'Iowa',
@@ -38,22 +39,21 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
-    ptype = fdict.get('ptype', 'c')
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01'),
-                                       '%Y-%m-%d')
-    edate = datetime.datetime.strptime(fdict.get('edate', '2015-01-01'),
-                                       '%Y-%m-%d')
+    ctx = util.get_autoplot_context(fdict, get_description())
+    ptype = ctx['ptype']
+    sdate = ctx['sdate']
+    edate = ctx['edate']
     if sdate.year != edate.year:
         return 'Sorry, do not support multi-year plots yet!'
     days = (edate - sdate).days
-    sector = fdict.get('sector', 'iowa')
-    if PDICT.get(sector) is None:
-        return
+    sector = ctx['sector']
 
     idx0 = iemre.daily_offset(sdate)
     idx1 = iemre.daily_offset(edate) + 1
-    nc = netCDF4.Dataset(("/mesonet/data/iemre/%s_mw_mrms_daily.nc"
-                          ) % (sdate.year, ), 'r')
+    ncfn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (sdate.year, )
+    if not os.path.isfile(ncfn):
+        return "No MRMS data for that year, sorry."
+    nc = netCDF4.Dataset(ncfn, 'r')
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
     if (idx1 - idx0) < 32:

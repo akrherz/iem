@@ -1,6 +1,6 @@
 from pandas.io.sql import read_sql
 import psycopg2
-from pyiem import network
+from pyiem import network, util
 import numpy as np
 import calendar
 
@@ -33,8 +33,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    station = fdict.get('station', 'IA2203')
-    season = fdict.get('season', 'fall')
+    ctx = util.get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    season = ctx['season']
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 

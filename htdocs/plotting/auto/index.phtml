@@ -239,7 +239,7 @@ EOF;
 			$netselect = make_select($v->name, $value, $states);
 			$thisrow = $netselect;
 		}
-		elseif ($v->type == "text"){
+		elseif ($v->type == "text" || $v->type == "int" || $v->type == 'float'){
 			$thisrow = "<input value=\"$value\" type=\"text\" name=\"". $v->name ."\">";
 		}
 		elseif ($v->type == "month"){
@@ -348,31 +348,37 @@ EOF;
 <script src="/vendor/highcharts/4.2.0/modules/exporting.js"></script>		
 <script src="${imguri}.js"></script>		
 EOF;
-		} else {
+		} elseif ($fmt == 'png' || $fmt == 'svg') {
 			$image = <<<EOF
 <div id="willload"><span class="glyphicon glyphicon-arrow-down"></span> 
 <img src="/images/wait24trans.gif" />
 A graph will appear below this text with your specifications from above:
 </div>
-	<img src="{$imguri}.png" class="img img-responsive" id="theimage" />
+	<img src="{$imguri}.{$fmt}" class="img img-responsive" id="theimage" />
+EOF;
+		} elseif ($fmt == 'pdf'){
+			$image = <<<EOF
+<object id="windrose-plot" src="{$imguri}.{$fmt}" width="700px" height="700px">
+    <embed src="{$imguri}.{$fmt}" width="700px" height="700px">
+    </embed>
+</object>
+			
 EOF;
 		}
 	}
 	// Some tricky logic here about format
+	$ar = Array("png" => "Chart Image (.PNG)",
+			"svg" => "Scalable Vector Graphic (.SVG)",
+			"pdf" => "Portable Document Format (.PDF)");
 	if (isset($jobj->report) && $jobj->report){
-		$ar = Array("text" => "Plain Text",
-				"png" => "Chart Image (PNG)");
-		$thisi = make_select("_fmt", $fmt, $ar);
-		$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
-				$thisi);
+		$ar["text"] = "Plain Text";
 	}
-	if (isset($jobj->highcharts) && $jobj->highcharts){
-		$ar = Array("js" => "Interactive Chart",
-				"png" => "Chart Image (PNG)");
-		$thisi = make_select("_fmt", $fmt, $ar);
-		$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
-				$thisi);
+	elseif (isset($jobj->highcharts) && $jobj->highcharts){
+		$ar["js"] = "Interactive Chart";
 	}
+	$thisi = make_select("_fmt", $fmt, $ar);
+	$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
+			$thisi);
 	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
 	$formhtml = <<<EOF
 <style>

@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem import util
 
 MARKERS = ['8', '>', '<', 'v', 'o', 'h', '*']
 
@@ -35,9 +36,10 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    station = fdict.get('station', 'DMX')[:4]
-    syear = int(fdict.get('syear', 2006))
-    eyear = int(fdict.get('eyear', 2015))
+    ctx = util.get_autoplot_context(fdict, get_description())
+    station = ctx['station'][:4]
+    syear = ctx['year']
+    eyear = ctx['eyear']
     nt = NetworkTable('WFO')
     wfo_limiter = " and wfo = '%s' " % (
         station if len(station) == 3 else station[1:],)
@@ -55,13 +57,13 @@ def plotter(fdict):
                                                   method='first')
     (fig, ax) = plt.subplots(1, 1)
     # Do 2006 as left side
-    dyear = df[df['yr'] == syear].sort(['rank'], ascending=True)
+    dyear = df[df['yr'] == syear].sort_values(by=['rank'], ascending=True)
     i = 1
     ylabels = []
     for _, row in dyear.iterrows():
         src = row['src']
         ylabels.append(src)
-        d = df[df['src'] == src].sort(['yr'])
+        d = df[df['src'] == src].sort_values(by=['yr'])
         ax.plot(np.array(d['yr']), np.array(d['rank']), lw=2, label=src,
                 marker=MARKERS[i % len(MARKERS)])
         i += 1
@@ -73,7 +75,7 @@ def plotter(fdict):
 
     ax2 = ax.twinx()
     # Do last year as right side
-    dyear = df[df['yr'] == eyear].sort(['rank'], ascending=True)
+    dyear = df[df['yr'] == eyear].sort_values(by=['rank'], ascending=True)
     i = 0
     y2labels = []
     for _, row in dyear.iterrows():
@@ -85,7 +87,7 @@ def plotter(fdict):
         if src in ylabels:
             continue
         ylabels.append(src)
-        d = df[df['src'] == src].sort(['yr'])
+        d = df[df['src'] == src].sort_values(by=['yr'])
         ax.plot(np.array(d['yr']), np.array(d['rank']), lw=2, label=src,
                 marker=MARKERS[i % len(MARKERS)])
 
