@@ -130,9 +130,10 @@ def main():
             (end_time - start_time).total_seconds()),
             va='bottom', ha='left', fontsize=8)
         ram = cStringIO.StringIO()
-        plt.savefig(ram, format=fmt, dpi=dpi)
-        ram.seek(0)
-        res = ram.read()
+        if fmt in ['png', 'pdf', 'svg']:
+            plt.savefig(ram, format=fmt, dpi=dpi)
+            ram.seek(0)
+            res = ram.read()
         if fmt != 'png':
             if df is not None:
                 if fmt == 'csv':
