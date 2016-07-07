@@ -33,7 +33,7 @@ def dl(now, varname):
     # better be a big number
     grb = pygrib.open(tmpfn)
     # 6 hourly data, we want at least 300 days?, so 4x300
-    if grb.messages < 1200:
+    if grb.messages < 1190:
         print(("download_cfs %s %s has only %s messages, need 1200+"
                ) % (now, varname, grb.messages))
     else:
