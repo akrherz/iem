@@ -12,11 +12,7 @@ import requests
 from pyiem.util import exponential_backoff
 import tempfile
 import subprocess
-import logging
 
-logging.basicConfig()
-logger = logging.getLogger()
-# logger.setLevel(logging.DEBUG)
 
 PRODS = {'GaugeCorr_QPE_01H': datetime.timedelta(minutes=60),
          'PrecipFlag': datetime.timedelta(minutes=2),
@@ -32,10 +28,9 @@ def fetch(prod, now):
                         prod + "/MRMS_" + prod +
                         "_00.00_%Y%m%d-%H%M%S.grib2.gz"))
 
-    logger.debug("Fetching %s" % (uri,))
     res = exponential_backoff(requests.get, uri, timeout=60)
     if res is None or res.status_code != 200:
-        logger.error("fill_mrms_holes failed to dl: %s" % (uri,))
+        print("MISS %s %s" % (now.strftime("%Y-%m-%dT%H:%MZ"), prod))
         return
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, res.content)
@@ -57,7 +52,6 @@ def do(prod, sts, ets):
                            prod + "/" + prod + "_00.00_%Y%m%d-%H%M%S.grib2.gz"
                            ))
         if not os.path.isfile(fn):
-            logger.info("%s is missing for time: %s" % (prod, now))
             fetch(prod, now)
         now += PRODS.get(prod)
 
