@@ -157,7 +157,7 @@ def process(ncfn):
         tgroup = "T"
         if (data['temperatureQCR'][i] == 0 and
                 data['temperature'][i] is not np.ma.masked):
-            iem.data['tmpf'] = float(data['temperature'][i])
+            # iem.data['tmpf'] = float(data['temperature'][i])
             tmpc = float(data['temperatureC'][i])
             t = "%s%02i/" % ("M" if tmpc < 0 else "",
                              tmpc if tmpc > 0 else (0 - tmpc))
@@ -165,7 +165,7 @@ def process(ncfn):
                                   (tmpc if tmpc > 0 else (0 - tmpc)) * 10.)
         if (data['dewpointQCR'][i] == 0 and
                 data['dewpoint'][i] is not np.ma.masked):
-            iem.data['dwpf'] = float(data['dewpoint'][i])
+            # iem.data['dwpf'] = float(data['dewpoint'][i])
             tmpc = float(data['dewpointC'][i])
             if t != "":
                 t = "%s%s%02i " % (t, "M" if tmpc < 0 else "",
