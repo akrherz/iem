@@ -188,6 +188,8 @@ def plotter(fdict):
                              df['p1_avg_days_high_above'])
     # Reindex so that most extreme values are first
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
+    # drop 5% most extreme events, too much?
+    df2 = df.iloc[int(len(df.index) * 0.05):]
 
     title = "%s %s" % (MDICT[month], PDICT3[varname])
     title = title.replace("[Threshold]", '%.1f' % (threshold,))
@@ -195,21 +197,21 @@ def plotter(fdict):
                 title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
                        ) % (p2syear, p2eyear, p1syear, p1eyear, title),
                 subtitle=('based on IEM Archives'),
-                titlefontsize=14)
+                titlefontsize=12)
     # Create 9 levels centered on zero
-    abval = df[varname].abs().max()
+    abval = df2[varname].abs().max()
     levels = centered_bins(abval)
     if opt in ['both', 'contour']:
-        m.contourf(df['lon'].values, df['lat'].values,
-                   df[varname].values, levels,
+        m.contourf(df2['lon'].values, df2['lat'].values,
+                   df2[varname].values, levels,
                    cmap=plt.get_cmap(('seismic_r' if varname == 'total_precip'
                                       else 'seismic')),
                    units=UNITS[varname])
     if sector == 'state':
         m.drawcounties()
     if opt in ['both', 'values']:
-        m.plot_values(df['lon'].values, df['lat'].values,
-                      df[varname].values,
+        m.plot_values(df2['lon'].values, df2['lat'].values,
+                      df2[varname].values,
                       fmt='%%.%if' % (PRECISION[varname],))
 
     return m.fig, df
