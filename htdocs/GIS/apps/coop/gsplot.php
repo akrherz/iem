@@ -91,9 +91,9 @@ $buf = 35000; // 35km
 $xsz = $row[1] - $row[0];
 $ysz = $row[3] - $row[2];
 if (($ysz + 100000) > $xsz){
-	$map->setsize(600,800);
+	$map->setsize(768, 1024);
 } else {
-	$map->setsize(800,600);
+	$map->setsize(1024, 768);
 }
 $map->setextent($row[0] - $buf, $row[2] - $buf,
 		$row[1] + $buf, $row[3] + $buf);
@@ -143,7 +143,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   // City Name
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $snet, $img, 3, $cities[$ukey]['name'] );
+  $pt->draw($map, $snet, $img, 3, substr($ukey, 2, 4));
 
 		  // Value UL
   $pt = ms_newPointObj();
