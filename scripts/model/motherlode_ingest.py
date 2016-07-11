@@ -59,7 +59,7 @@ def run(model, station, lon, lat, ts):
            "&accept=csv&point=true") % (BASE_URL, ts.strftime(URLS[model]),
                                         vstring, lat, lon)
     try:
-        fp = urllib2.urlopen(url, timeout=60)
+        fp = urllib2.urlopen(url, timeout=120)
     except Exception, exp:
         print exp, url
         print(('FAIL ts: %s station: %s model: %s'
