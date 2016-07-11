@@ -18,12 +18,6 @@ DD=$(date +%d)
 if [ $DD -eq "01" ]
 	then
 	python first_guess_for_harry.py
-	python email_iass_report.py monthly
-fi
-DOY=$(date +%u)
-if [ "$DOY" -eq "1" ]
-	then
-		python email_iass_report.py weekly	
 fi
 
 cd ../util
