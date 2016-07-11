@@ -15,6 +15,9 @@ import requests
 import pygrib
 from pyiem.util import exponential_backoff
 
+# Should have at least 9 months of data, so roughtly
+REQUIRED_MSGS = 9 * 30 * 4
+
 
 def dl(now, varname):
     """get the files"""
@@ -32,10 +35,9 @@ def dl(now, varname):
     # Check out this file to see how much data we actually have, it had
     # better be a big number
     grb = pygrib.open(tmpfn)
-    # 6 hourly data, we want at least 300 days?, so 4x300
-    if grb.messages < 1180:
-        print(("download_cfs %s %s has only %s messages, need 1200+"
-               ) % (now, varname, grb.messages))
+    if grb.messages < REQUIRED_MSGS:
+        print(("download_cfs %s %s has only %s messages, need %s+"
+               ) % (now, varname, grb.messages, REQUIRED_MSGS))
     else:
         # Inject into LDM
         cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
