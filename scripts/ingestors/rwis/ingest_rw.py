@@ -1,5 +1,5 @@
 # Ingest the RWIS rainwise data
-import pandas
+import pandas as pd
 import urllib2
 import psycopg2
 import datetime
@@ -50,7 +50,7 @@ def process(nwsli, lastts):
         # print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
         return
     try:
-        df = pandas.DataFrame.from_csv(data)
+        df = pd.DataFrame.from_csv(data)
     except Exception, exp:
         print "ingest_rw.py pandas fail for sid: %s\nreason: %s" % (
                                         nwsli, exp)
@@ -95,6 +95,8 @@ def process(nwsli, lastts):
     sdf = df.sort_values(by=['utc'], ascending=[True])
 
     for _, row in sdf.iterrows():
+        if pd.isnull(row['utc']):
+            continue
         utc = datetime.datetime.strptime(row['utc'], '%Y-%m-%d %H:%M:%S')
         utc = utc.replace(tzinfo=pytz.timezone("UTC"))
 
