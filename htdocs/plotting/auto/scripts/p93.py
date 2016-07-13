@@ -5,6 +5,10 @@ import pandas as pd
 import datetime
 from pyiem.datatypes import temperature
 import pyiem.meteorology as pymet
+from pyiem.util import get_autoplot_context
+
+PDICT = {'yes': 'Yes, Include only Year to Date period each year',
+         'no': 'No, Include all available data for each year'}
 
 
 def get_description():
@@ -19,6 +23,8 @@ def get_description():
              label='Select Station:'),
         dict(type='year', minvalue=1973, default=datetime.date.today().year,
              name='year', label='Year to Highlight'),
+        dict(type='select', options=PDICT, name='ytd', default='no',
+             label='Include Only Year to Date Data?'),
     ]
     return d
 
@@ -31,15 +37,21 @@ def plotter(fdict):
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('zstation', 'DSM')
-    network = fdict.get('network', 'IA_ASOS')
-    highlightyear = int(fdict.get('year', 2015))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    highlightyear = ctx['year']
+    ytd = ctx['ytd']
     nt = NetworkTable(network)
+    doylimiter = ""
+    if ytd == 'yes':
+        doylimiter = (" and extract(doy from valid) < "
+                      " extract(doy from 'TODAY'::date) ")
 
     cursor.execute("""
     SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf), avg(dwpf)
     from alldata WHERE station = %s and tmpf >= 80 and dwpf >= 30
-    and dwpf <= tmpf and valid > '1973-01-01' GROUP by d
+    and dwpf <= tmpf and valid > '1973-01-01' """ + doylimiter + """ GROUP by d
     """, (station, ))
 
     rows = []
@@ -85,10 +97,15 @@ def plotter(fdict):
     ax.set_yticks(range(0, int(max(y)), 24))
     ax.set_ylabel("Hours Per Year")
     ax.set_xlabel("Heat Index Temp $^\circ$F")
+    title = 'till %s' % (datetime.date.today().strftime("%-d %b"),)
+    title = "Entire Year" if ytd == 'no' else title
     ax.set_title(("[%s] %s %s-%s\n"
-                  "Heat Index (when accretive to air temp) Histogram"
+                  "Heat Index (when accretive to air temp) Histogram (%s)"
                   ) % (station, nt.sts[station]['name'],
                        minyear,
-                       datetime.date.today().year))
+                       datetime.date.today().year, title))
     ax.legend(loc=(0.2, 0.8), scatterpoints=1)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict(ytd='yes', network='IA_ASOS', zstation='DSM'))
