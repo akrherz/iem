@@ -38,11 +38,12 @@ function vis_formatter($val){
 function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
 	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
+	$relh = ($relh != null) ? intval($relh): "";
 	return sprintf("<tr style=\"background: %s;\"><td>%s</td><td>%s</td><td>%s</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
 	<td><span class=\"high\">%s</span></td>
 	<td><span class=\"low\">%s</span></td>
-	<td>%.0f%%</td>
+	<td>%s%%</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
 	<tr style=\"background: %s;\" class=\"metar\"><td colspan=\"15\">%s</td></tr>", 
 	($i % 2 == 0)? "#FFF": "#EEE", 
