@@ -13,7 +13,7 @@ function c2f($myC){
 
 //_____________________________________________________________
 function f2c($tmpf){
-
+	if ($tmpf == null) return null;
   return round( ((5.00/9.00) * ((float)$tmpf - 32.00) ), 2);
 
 } // End of function f2c()
@@ -31,6 +31,7 @@ function dwpf($tmpf, $relh){
 // /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prvapr.f
 // /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prrelh.f
 function relh($tmpc, $dwpc){
+	if ($tmpc == null || $dwpc == null) return null;
   $e  = 6.112 * exp( (17.67 * (float)$dwpc) / ((float)$dwpc + 243.5));
   $es  = 6.112 * exp( (17.67 * (float)$tmpc) / ((float)$tmpc + 243.5));
   $relh = ( $e / $es ) * 100.00;
@@ -84,6 +85,7 @@ function wcht_idx($tmpf, $sped){
 //
 //  Feels like
 function feels_like($tmpf, $relh, $sped){
+	if ($tmpf == null || $relh == null || $sped == null) return null;
   if ($tmpf > 50){
     return heat_idx($tmpf, $relh);
   } else {
