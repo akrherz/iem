@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 from pyiem import network
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,9 +18,9 @@ def get_description():
              label='Select Station:'),
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Select Year', min=1893),
-        dict(type='text', name='gdd1', default='1135',
+        dict(type='int', name='gdd1', default='1135',
              label='Growing Degree Day Start'),
-        dict(type='text', name='gdd2', default='1660',
+        dict(type='int', name='gdd2', default='1660',
              label='Growing Degree Day End'),
     ]
     return d
@@ -36,10 +37,11 @@ def plotter(fdict):
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('station', 'IA0200')
-    year = int(fdict.get('year', 2014))
-    gdd1 = int(fdict.get('gdd1', 1135))
-    gdd2 = int(fdict.get('gdd2', 1660))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    year = ctx['year']
+    gdd1 = ctx['gdd1']
+    gdd2 = ctx['gdd2']
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
@@ -93,6 +95,8 @@ def plotter(fdict):
                          success=success[-1]))
         now += datetime.timedelta(days=1)
 
+    if True not in success:
+        return "No data, pick lower GDD values"
     df = pd.DataFrame(rows)
     heights = np.array(heights)
     success = np.array(success)
@@ -135,3 +139,6 @@ def plotter(fdict):
     ax2.set_xlim(0, 1)
 
     return plt.gcf(), df
+
+if __name__ == '__main__':
+    plotter(dict())
