@@ -4,9 +4,22 @@ import datetime
 import netCDF4
 import os
 from pyiem.datatypes import distance
+from collections import OrderedDict
 
-PDICT = {'iowa': 'Iowa',
-         'midwest': 'Midwest'}
+PDICT = OrderedDict([
+    ('IA', 'Iowa'),
+    ('IL', 'Illinois'),
+    ('KS', 'Kansas'),
+    ('KY', 'Kentucky'),
+    ('MI', 'Michigan'),
+    ('MN', 'Minnesota'),
+    ('MO', 'Missouri'),
+    ('NE', 'Nebraska'),
+    ('ND', 'North Dakota'),
+    ('OH', 'Ohio'),
+    ('SD', 'South Dakota'),
+    ('WI', 'Wisconsin'),
+    ('midwest', 'Mid West US')])
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
 
@@ -20,7 +33,7 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
-        dict(type='select', name='sector', default='iowa',
+        dict(type='select', name='sector', default='IA',
              label='Select Sector:', options=PDICT),
         dict(type='select', name='ptype', default='c',
              label='Select Plot Type:', options=PDICT2),
@@ -38,7 +51,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    from pyiem.plot import MapPlot
+    from pyiem.plot import MapPlot, nwsprecip
     ctx = util.get_autoplot_context(fdict, get_description())
     ptype = ctx['ptype']
     sdate = ctx['sdate']
@@ -76,33 +89,31 @@ def plotter(fdict):
     else:
         title = "%s to %s (inclusive)" % (sdate.strftime("%-d %b %Y"),
                                           edate.strftime("%-d %b %Y"))
-    m = MapPlot(sector=sector, axisbg='white', nocaption=True,
+    if sector == 'midwest':
+        state = None
+    else:
+        state = sector
+        sector = 'state'
+    m = MapPlot(sector=sector, state=state, axisbg='white', nocaption=True,
                 title='NOAA MRMS Q3:: %s Total Precip' % (title,),
                 subtitle='Data from NOAA MRMS Project, GaugeCorr and RadarOnly'
                 )
     if np.ma.is_masked(np.max(p01d)):
         return 'Data Unavailable'
-    clevs = np.arange(0, 0.25, 0.05)
-    clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
-    clevs = np.append(clevs, np.arange(3., 10.0, 1))
+    clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
     if days > 6:
-        clevs = np.arange(0, 0.5, 0.1)
-        clevs = np.append(clevs, np.arange(0.5, 6., 0.5))
-        clevs = np.append(clevs, np.arange(6., 21.0, 2))
+        clevs = [0.01, 0.3, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20]
     if days > 29:
-        clevs = np.arange(0, 1., 0.25)
-        clevs = np.append(clevs, np.arange(1., 6., 1.))
-        clevs = np.append(clevs, np.arange(6., 31.0, 1))
+        clevs = [0.01, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35]
     if days > 90:
-        clevs = np.arange(0, 2., 0.5)
-        clevs = np.append(clevs, np.arange(2., 10., 2.))
-        clevs = np.append(clevs, np.arange(10., 61.0, 5.))
-    clevs[0] = 0.01
+        clevs = [0.01, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35, 40]
     x, y = np.meshgrid(lons, lats)
+    cmap = nwsprecip()
+    cmap.set_over('k')
     if ptype == 'c':
-        m.contourf(x, y, p01d, clevs, label='inches')
+        m.contourf(x, y, p01d, clevs, cmap=cmap, label='inches')
     else:
-        m.pcolormesh(x, y, p01d, clevs, label='inches')
+        m.pcolormesh(x, y, p01d, clevs, cmap=cmap, label='inches')
     if sector == 'iowa':
         m.drawcounties()
         m.drawcities()
