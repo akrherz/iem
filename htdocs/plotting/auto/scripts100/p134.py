@@ -4,9 +4,14 @@ import numpy as np
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
+                     ('coldest_hitemp', 'Coldest Average High Temperature'),
+                     ('coldest_lotemp', 'Coldest Average Low Temperature'),
                      ('warmest_temp', 'Warmest Average Temperature'),
+                     ('warmest_hitemp', 'Warmest Average High Temperature'),
+                     ('warmest_lotemp', 'Warmest Average Low Temperature'),
                      ('wettest', 'Highest Precipitation')])
 
 
@@ -24,7 +29,7 @@ def get_description():
              label='Select Station:'),
         dict(type='select', name='var', default='coldest_temp',
              label='Which Metric', options=PDICT),
-        dict(type="text", name="days", default=7,
+        dict(type="int", name="days", default=7,
              label='Over How Many Days?'),
     ]
     return d
@@ -33,34 +38,44 @@ def get_description():
 def get_data(fdict):
     """ Get the data"""
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203')
-    days = int(fdict.get('days', 7))
-    varname = fdict.get('var', 'coldest_temp')
-    _ = PDICT[varname]
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    days = ctx['days']
+    varname = ctx['var']
     table = "alldata_%s" % (station[:2], )
-    offset = 6 if varname in ['coldest_temp'] else 0
+    offset = 6 if varname.startswith('coldest') else 0
     df = read_sql("""
     WITH data as (
     SELECT day, extract(year from day + '%s months'::interval) as season,
     avg((high+low)/2.) OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
+    avg(high) OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
+    avg(low) OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
     sum(precip) OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
     from """+table+""" WHERE station = %s),
     agg1 as (
         SELECT season, day, avg_temp,
         rank() OVER (PARTITION by season ORDER by avg_temp ASC)
             as coldest_temp_rank,
+        rank() OVER (PARTITION by season ORDER by avg_hitemp ASC)
+            as coldest_hitemp_rank,
+        rank() OVER (PARTITION by season ORDER by avg_lotemp ASC)
+            as coldest_lotemp_rank,
         rank() OVER (PARTITION by season ORDER by avg_temp DESC)
             as warmest_temp_rank,
+        rank() OVER (PARTITION by season ORDER by avg_hitemp DESC)
+            as warmest_hitemp_rank,
+        rank() OVER (PARTITION by season ORDER by avg_lotemp DESC)
+            as warmest_lotemp_rank,
         rank() OVER (PARTITION by season ORDER by sum_precip DESC)
             as wettest_rank,
         count(*) OVER (PARTITION by season)
         from data)
     SELECT season, day, extract(doy from day - '%s days'::interval) as doy,
     avg_temp from agg1 where """+varname+"""_rank = 1 and count > 270
-    """, pgconn, params=(offset, days - 1, days - 1, station, days - 1),
+    """, pgconn, params=(offset, days - 1, days - 1, days - 1, days - 1,
+                         station, days - 1),
                   index_col='season')
-    if varname in ['coldest_temp']:
+    if varname.startswith('coldest'):
         df.loc[df['doy'] < 183, 'doy'] += 365.
     return df
 
@@ -71,10 +86,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
-    station = fdict.get('station', 'IA2203')
-    network = fdict.get('network', 'IACLIMATE')
-    days = int(fdict.get('days', 7))
-    varname = fdict.get('var', 'coldest_temp')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    days = ctx['days']
+    varname = ctx['var']
     nt = NetworkTable(network)
     df = get_data(fdict)
     if len(df.index) == 0:
