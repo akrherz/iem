@@ -89,11 +89,13 @@ only use this layer when you are using the data!  Thanks...</td>
 
 <tr>
   <th><a href="l3attr.txt">NEXRAD Level3 Attributes</a></th>
-  <td>http://mesonet.agron.iastate.edu/request/grx/l3attr.txt?<br />
+  <td>http://mesonet.agron.iastate.edu/request/grx/l3attr.txt<br />
   <i>Notes:</i> This is a placefile of the level3 NEXRAD storm attributes. This
 may be useful when looking at level2 data.  You can optionally pass a nexrad
 		3 character ID to limit the display to a certain NEXRAD. ie)
-		l3attr.txt?nexrad=DMX</td>
+		l3attr.txt?nexrad=DMX .  Otherwise, the service will utilize the
+		longitude and latitude passed to the server by the Gibson Ridge Client
+		to limit the displayed attributes.</td>
 </tr>
 
 <tr>
