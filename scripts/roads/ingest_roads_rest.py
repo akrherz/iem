@@ -35,7 +35,9 @@ import datetime
 import sys
 import psycopg2.extras
 import shapelib
+import requests
 import dbflib
+from pyiem.util import exponential_backoff
 from pyiem import wellknowntext
 import zipfile
 import subprocess
@@ -121,7 +123,7 @@ def export_shapefile(txn, tp):
     for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
         os.unlink("iaroad_cond.%s" % (suffix,))
 
-URI = ("http://www.iowadot.gov/gis/data/road_conditions.geojson")
+URI = "http://www.iowadot.gov/gis/data/road_conditions.geojson"
 
 pgconn = psycopg2.connect(database='postgis', host='iemdb')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -161,7 +163,8 @@ for row in cursor:
     lookup[row[3]] = row[0]
     current[row[0]] = row[2]
 
-j = json.loads(urllib2.urlopen(URI, timeout=30).read())
+r = exponential_backoff(requests.get, URI, timeout=30)
+j = json.loads(r.content)
 
 if 'features' not in j:
     print(('ingest_roads_rest got invalid RESULT:\n%s' % (
