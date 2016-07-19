@@ -114,7 +114,7 @@ def plotter(fdict):
         m.contourf(x, y, p01d, clevs, cmap=cmap, label='inches')
     else:
         m.pcolormesh(x, y, p01d, clevs, cmap=cmap, label='inches')
-    if sector == 'iowa':
+    if sector != 'midwest':
         m.drawcounties()
         m.drawcities()
 
