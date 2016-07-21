@@ -5,10 +5,16 @@ YYYY=$(date -u +'%Y')
 MM=$(date -u +'%m')
 DD=$(date -u +'%d')
 HH=$(date -u +'%H')
+LHH=$(date +'%H')
 
-cd mos
-python current_bias.py NAM
-python current_bias.py GFS
+cd iemre
+# MRMS hourly totals arrive shortly after the top of the hour
+if [ $LHH -eq "00" ]
+then
+	python merge_mrms_q3.py	$(date --date '1 day ago' +'%Y %m %d')
+else
+	python merge_mrms_q3.py	
+fi
 
 cd ../rtma
 python wind_power.py &
@@ -30,7 +36,6 @@ cd ../current
 python plot_hilo.py 0
 python ifc_today_total.py
 
-
 cd ../summary
 python hourly_precip.py
 python update_snet_precip.py
@@ -43,7 +48,6 @@ cd ../iemplot
 
 cd ../dbutil
 python asos2archive.py iowa
-
 
 cd ../iemre
 python hourly_analysis.py
@@ -75,3 +79,6 @@ then
 	python ingest_from_rucsoundings.py $YYYY $MM $DD 12
 fi
 
+cd ../mos
+python current_bias.py NAM
+python current_bias.py GFS

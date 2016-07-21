@@ -28,6 +28,9 @@ def run(ts):
     ncprecip = nc.variables['p01d']
 
     gmtts = ts.astimezone(pytz.timezone("UTC"))
+    utcnow = datetime.datetime.utcnow().replace(minute=0, second=0,
+                                                microsecond=0)
+    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
 
     total = None
     lats = None
@@ -42,7 +45,8 @@ def run(ts):
             if os.path.isfile(gribfn):
                 break
         if not os.path.isfile(gribfn):
-            print("merge_mrms_q3.py MISSING %s" % (gribfn,))
+            if gmtts < utcnow:
+                print("merge_mrms_q3.py MISSING %s" % (gribfn,))
             continue
         fp = gzip.GzipFile(gribfn, 'rb')
         (_, tmpfn) = tempfile.mkstemp()
@@ -96,7 +100,8 @@ def main():
         ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                int(sys.argv[3]), 12, 0)
     else:
-        ts = datetime.datetime.now() - datetime.timedelta(hours=24)
+        # default to noon today
+        ts = datetime.datetime.now()
         ts = ts.replace(hour=12)
 
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))

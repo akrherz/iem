@@ -36,7 +36,6 @@ cd ../outgoing
 python wxc_moon.py
 
 cd ../iemre
-python merge_mrms_q3.py
 python grid_rsds.py
 
 cd ../dbutil 
