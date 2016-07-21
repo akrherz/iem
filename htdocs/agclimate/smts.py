@@ -6,7 +6,7 @@ import pytz
 import sys
 from pandas.io.sql import read_sql
 import pyiem.meteorology as meteorology
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
 import cgi
 import psycopg2.extras
@@ -172,6 +172,12 @@ def make_vsm_histogram_plot(station, sts, ets):
 
 def make_daily_water_change_plot(station, sts, ets):
     """Option 7"""
+    # Get daily precip
+    pdf = read_sql("""
+    SELECT valid, rain_mm_tot_qc from sm_daily where station = %s
+    and valid >= %s and valid <= %s ORDER by valid ASC
+    """, ISUAG, params=(station, sts.date(), ets.date()), index_col='valid')
+
     df = read_sql("""
     WITH obs as (
         SELECT valid,
@@ -218,6 +224,17 @@ def make_daily_water_change_plot(station, sts, ets):
     interval = len(df.index) / 7 + 1
     ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax[1].grid(True)
+
+    if (ets - sts).total_seconds() < (60 * 86400):
+        ylim = ax[1].get_ylim()[1]
+        # Attempt to place precip text above this plot
+        pdf['pday'] = distance(pdf['rain_mm_tot_qc'].values, 'MM').value('IN')
+        for valid, row in pdf.iterrows():
+            if row['pday'] > 0:
+                ax[1].text(valid, ylim, "%.2f" % (row['pday'],), rotation=90,
+                           va='bottom', color='b')
+        ax[1].text(-0.01, 1.05, "Rain ->", ha='right',
+                   transform=ax[1].transAxes, color='b')
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')
 
