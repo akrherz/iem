@@ -55,7 +55,8 @@ $desc["7"] = <<<EOF
 This plot computes the daily change in soil water approximately between
 the depths of 6 to 30 inches.  This is using only two measurements at
 12, and 24 inch depths.  The 12 inch depth is assumed to cover the
-6-18 inch layer and the 24 inch depth to cover 18-30 layer.
+6-18 inch layer and the 24 inch depth to cover 18-30 layer.  If you select a
+period of less than 60 days, the daily rainfall will be plotted as well.
 EOF;
 
 $thedescription = $desc[$opt];
