@@ -45,6 +45,7 @@ def plotter(fdict):
         rows.append(dict(wfo=wfo, days=row[1]))
         data[wfo] = max([row[1], 0])
     df = pd.DataFrame(rows)
+    df.set_index('wfo', inplace=True)
 
     m = MapPlot(sector='nws', axisbg='white', nocaption=True,
                 title='Days since Last %s %s by NWS Office' % (
