@@ -82,3 +82,9 @@ fi
 cd ../mos
 python current_bias.py NAM
 python current_bias.py GFS
+
+if [ $HH -eq "01" ]
+then
+	cd ../coop
+	python ndfd_extract.py
+fi
