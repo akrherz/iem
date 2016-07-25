@@ -10,6 +10,8 @@ PDICT = OrderedDict([
         ('high_departure', 'High Temperature Departure'),
         ('min_tmpf', 'Low Temperature'),
         ('low_departure', 'Low Temperature Departure'),
+        ('max_dwpf', 'Highest Dew Point Temperature'),
+        ('min_dwpf', 'Lowest Dew Point Temperature'),
         ('pday', 'Precipitation')])
 
 
@@ -78,7 +80,8 @@ def plotter(fdict):
                    params=(nt.sts[station]['ncdc81'],), index_col='sday')
 
     cursor.execute("""
-    SELECT day, max_tmpf, min_tmpf, pday from summary s JOIN stations t
+    SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
+    pday from summary s JOIN stations t
     on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
     t.id = %s and t.network = %s ORDER by day ASC
     """, (sdate, edate, station, network))
@@ -88,6 +91,7 @@ def plotter(fdict):
         hd = row['max_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'high']
         ld = row['min_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'low']
         rows.append(dict(day=row['day'], max_tmpf=row['max_tmpf'],
+                         min_dwpf=row['min_dwpf'], max_dwpf=row['max_dwpf'],
                          high_departure=hd, low_departure=ld,
                          min_tmpf=row['min_tmpf'], pday=row['pday']))
         data[row[0]] = {'val': safe(rows[-1], varname)}
