@@ -154,7 +154,10 @@ def main(argv):
     ts = ts.replace(tzinfo=pytz.timezone("UTC"), hour=0, minute=0, second=0,
                     microsecond=0)
     data = process(ts)
-    dbsave(ts, data)
+    if data['proj'] is None:
+        print("ERROR: ndfd_extract.py found no data!")
+    else:
+        dbsave(ts, data)
 
 if __name__ == '__main__':
     main(sys.argv)
