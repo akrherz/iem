@@ -65,7 +65,8 @@ RANGE:   Range (nautical miles) from the ground point for this level.
 import datetime
 import pytz
 import sys
-import urllib2
+from pyiem.util import exponential_backoff
+import requests
 import psycopg2
 from pyiem.network import Table as NetworkTable
 nt = NetworkTable("RAOB")
@@ -227,22 +228,19 @@ def main(valid):
                 ) % (v12.strftime("%s"), valid.strftime("%s"))
 
         cursor = DBCONN.cursor()
-        try:
-            data = urllib2.urlopen(uri, timeout=30).read()
-        except Exception, exp:
-            print 'RAOB dl failed %s %s %s' % (sid,
-                                               valid.strftime("%Y-%m-%d %H"),
-                                               exp)
+        r = exponential_backoff(requests.get, uri, timeout=30)
+        if r is None:
+            print("ingest_from_rucsoundings failed %s for %s" % (sid, valid))
             continue
         try:
-            for rob in parse(data, sid):
+            for rob in parse(r.content, sid):
                 nt.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception, exp:
             print 'RAOB FAIL %s %s %s, check /tmp for data' % (sid, valid, exp)
             o = open("/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")),
                      'w')
-            o.write(data)
+            o.write(r.content)
             o.close()
         finally:
             cursor.close()
