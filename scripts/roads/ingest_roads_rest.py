@@ -29,7 +29,6 @@ Run every five minutes from RUN_5MIN.sh
       },
 
 """
-import urllib2
 import json
 import datetime
 import sys
@@ -164,6 +163,8 @@ for row in cursor:
     current[row[0]] = row[2]
 
 r = exponential_backoff(requests.get, URI, timeout=30)
+if r is None:
+    sys.exit()
 j = json.loads(r.content)
 
 if 'features' not in j:
