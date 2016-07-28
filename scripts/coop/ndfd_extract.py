@@ -78,6 +78,7 @@ def process(ts):
               "ndfd.t%02iz.awp2p5f%03i.grib2"
               ) % (ts.year, ts.month, ts.day, ts.hour, ts.hour, fhour)
         if not os.path.isfile(fn):
+            logger.debug("ndfd_extract missing: %s" % (fn,))
             continue
         logger.debug("-> " + fn)
         gribs = pygrib.open(fn)
@@ -122,6 +123,7 @@ def dbsave(ts, data):
             logger.debug("Missing data for date: %s" % (date,))
             del(data['fx'][date])
 
+    found_data = False
     for sid in nt.sts.keys():
         # Skip virtual stations
         if sid[2:] == '0000' or sid[2] == 'C':
@@ -140,8 +142,11 @@ def dbsave(ts, data):
             station, day, high, low, precip)
             VALUES (%s, %s, %s, %s, %s, %s)
             """, (modelid, sid, date, high, low, round(precip, 2)))
+            found_data = True
     cursor.close()
-    pgconn.commit()
+    # Don't commit the cursor when there is no good data found!
+    if found_data:
+        pgconn.commit()
 
 
 def main(argv):
