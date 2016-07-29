@@ -201,7 +201,8 @@ def process(ncfn):
             pass
 
         icursor = IEM.cursor()
-        if not iem.save(icursor, force_current_log=True):
+        if not iem.save(icursor, force_current_log=True,
+                        skip_current=True):
             print(("extract_hfmetar: unknown station? %s %s %s\n%s"
                    ) % (sid3, network, ts, mtr))
             pass

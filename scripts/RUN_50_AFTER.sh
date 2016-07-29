@@ -17,12 +17,15 @@ python stage4_hourlyre.py
 python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
 python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
+cd ../ingestors/madis
+python extract_hfmetar.py 2 &
+
 # Run HRRR radiation ingest at 10 PM, so that we have this available
 # for ISUSM et al
 HH=$(date +%H)
 if [ "$HH" -eq "22" ]
 	then
-		cd ../coop
+		cd ../../coop
 		python hrrr_solarrad.py $(date +'%Y %m %d')	
 fi
 
