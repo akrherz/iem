@@ -137,7 +137,7 @@ def main():
         if fmt != 'png':
             if df is not None:
                 if fmt == 'csv':
-                    res = df.to_csv()
+                    res = df.to_csv(index=(df.index.name is not None))
                 elif fmt == 'xlsx':
                     (_, tmpfn) = tempfile.mkstemp()
                     writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
