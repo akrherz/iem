@@ -122,7 +122,8 @@ data = {'plots': [
         {'id': "95", 'mw': True,
          'label': "Monthly Precipitation/Temperature with El Nino Indices"},
         {'id': "24", 'mw': True,
-         'label': "Monthly Precipitation/Temperature Climate District Ranks/Arridity"},
+         'label': ("Monthly Precipitation/Temperature "
+                   "Climate District Ranks/Arridity")},
         {'id': "3", 'mw': True,
          'label': "Monthly Precipitation/Temperature Statistics by Year"},
         {'id': "6", 'mw': True,
@@ -243,6 +244,8 @@ data = {'plots': [
          'label': ("Frequency of Overcast Clouds by Air Temperature "
                    "by month/season")},
         {'id': "93", 'label': "Heat Index Hourly Histogram"},
+        {'id': "153",
+         'label': "Hourly Temp/Dew Point Extremes by Month/Season/Year"},
         {'id': "106",
          'label': "Hourly temp distributions on days exceeding temperature"},
         {'id': "18", 'label': "Long term temperature time series"},
