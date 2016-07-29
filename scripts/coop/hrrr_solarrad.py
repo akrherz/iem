@@ -38,7 +38,8 @@ def run(ts):
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            print 'coop/hrrr_solarrad.py %s had no solar rad' % (fn,)
+            if utc.hour != 3:
+                print 'coop/hrrr_solarrad.py %s had no solar rad' % (fn,)
             continue
         if len(grb) == 0:
             print 'Could not find SWDOWN in HRR %s' % (fn,)
