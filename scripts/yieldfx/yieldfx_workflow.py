@@ -60,10 +60,10 @@ def upload_summary_plots():
             if DO_UPLOAD:
                 try:
                     dbx.files_upload(
-                    open(tmpfn).read(),
-                    ("/YieldForecast/Daryl/2016 vs other years plots/%s"
-                     ) % (remotefn, ),
-                    mode=dropbox.files.WriteMode.overwrite)
+                        open(tmpfn).read(),
+                        ("/YieldForecast/Daryl/2016 vs other years plots/%s"
+                         ) % (remotefn, ),
+                        mode=dropbox.files.WriteMode.overwrite)
                 except:
                     print 'dropbox fail'
             os.unlink(tmpfn)
@@ -107,9 +107,10 @@ def write_and_upload(df, location):
     remotefn = "%s_%s.met" % (location, today.strftime("%Y%m%d"))
     if DO_UPLOAD:
         try:
-            dbx.files_upload(open(tmpfn).read(),
-                         "/YieldForecast/Daryl/%s" % (remotefn, ),
-                         mode=dropbox.files.WriteMode.overwrite)
+            dbx.files_upload(
+                open(tmpfn).read(),
+                "/YieldForecast/Daryl/%s" % (remotefn, ),
+                mode=dropbox.files.WriteMode.overwrite)
         except:
             print 'dropbox fail'
     # Save file for usage by web plotting...
