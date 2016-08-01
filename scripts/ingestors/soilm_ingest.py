@@ -34,41 +34,24 @@ VARCONV = {
            'calcvwc50_avg': 'vwc_50_avg',
            }
 
-BASE = '/mnt/home/loggernet/'
-STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
-                          hourly='Calumet/Calumet_HrlySI.dat'),
-            'BOOI4': dict(daily='AEAFarm/AEAFarm_DailySI.dat',
-                          hourly='AEAFarm/AEAFarm_HrlySI.dat'),
-            'WMNI4': dict(daily='Wellman/Wellman_DailySI.dat',
-                          hourly='Wellman/Wellman_HrlySI.dat'),
-            'SBEI4': dict(daily='Sibley/Sibley_DailySI.dat',
-                          hourly='Sibley/Sibley_HrlySI.dat'),
-            'NASI4': dict(daily='Nashua/Nashua_DailySI.dat',
-                          hourly='Nashua/Nashua_HrlySI.dat'),
-            'OKLI4': dict(daily='Lewis/Lewis_DailySI.dat',
-                          hourly='Lewis/Lewis_HrlySI.dat'),
-            'WTPI4': dict(daily='WestPoint/WestPoint_DailySI.dat',
-                          hourly='WestPoint/WestPoint_HrlySI.dat'),
-            'DONI4': dict(daily='Doon/Doon_DailySI.dat',
-                          hourly='Doon/Doon_HrlySI.dat'),
-            'KNAI4': dict(daily='Kanawha/Kanawha_DailySI.dat',
-                          hourly='Kanawha/Kanawha_HrlySI.dat'),
-            'GREI4': dict(daily='Greenfield/Greenfield_DailySI.dat',
-                          hourly='Greenfield/Greenfield_HrlySI.dat'),
-            'NWLI4': dict(daily='Newell/Newell_DailySI.dat',
-                          hourly='Newell/Newell_HrlySI.dat'),
-            'AEEI4': dict(daily='Ames/Ames_DailySI.dat',
-                          hourly='Ames/Ames_HrlySI.dat'),
-            'CNAI4': dict(daily='Castana/Castana_DailySI.dat',
-                          hourly='Castana/Castana_HrlySI.dat'),
-            'CHAI4': dict(daily='Chariton/Chariton_DailySI.dat',
-                          hourly='Chariton/Chariton_HrlySI.dat'),
-            'CRFI4': dict(daily='Crawfordsville/Crawfordsville_DailySI.dat',
-                          hourly='Crawfordsville/Crawfordsville_HrlySI.dat'),
-            'FRUI4': dict(daily='Muscatine/Muscatine_DailySI.dat',
-                          hourly='Muscatine/Muscatine_HrlySI.dat'),
-            'CIRI4': dict(daily='CedarRapids/CedarRapids_DailySI.dat',
-                          hourly='CedarRapids/CedarRapids_HrlySI.dat'),
+BASE = '/mnt/home/loggernet'
+STATIONS = {'CAMI4': 'Calumet',
+            'BOOI4': 'AEAFarm',
+            'WMNI4': 'Wellman',
+            'SBEI4': 'Sibley',
+            'NASI4': 'Nashua',
+            'OKLI4': 'Lewis',
+            'WTPI4': 'WestPoint',
+            'DONI4': 'Doon',
+            'KNAI4': 'Kanawha',
+            'GREI4': 'Greenfield',
+            'NWLI4': 'Newell',
+            'AEEI4': 'Ames',
+            'CNAI4': 'Castana',
+            'CHAI4': 'Chariton',
+            'CRFI4': 'Crawfordsville',
+            'FRUI4': 'Muscatine',
+            'CIRI4': 'CedarRapids',
             }
 
 
@@ -79,10 +62,85 @@ def make_time(s):
     return ts
 
 
+def m15_process(nwsli, maxts):
+    """ Process the 15minute file """
+    fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
+    if not os.path.isfile(fn):
+        return
+    lines = open(fn).readlines()
+    if len(lines) < 5:
+        return
+    # Read header....
+    headers = []
+    for col in lines[1].strip().replace('"', '').split(","):
+        headers.append(VARCONV.get(col.lower(), col.lower()))
+    # Read data
+    processed = 0
+    for i in range(len(lines)-1, 3, -1):
+        tokens = lines[i].strip().replace('"', '').split(",")
+        if len(tokens) != len(headers):
+            continue
+        valid = make_time(tokens[headers.index('timestamp')])
+        if valid <= maxts:
+            break
+        gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
+        # print valid, tokens[ headers.index('timestamp')]
+        # We are ready for dbinserting, we duplicate the data for the _qc
+        # column
+        dbcols = ("station,valid,%s,%s"
+                  ) % (",".join(headers[2:]),
+                       ",".join(["%s_qc" % (h,) for h in headers[2:]]))
+        dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
+        for v in tokens[2:]:
+            dbvals += "%s," % (formatter(v),)
+        for v in tokens[2:]:
+            dbvals += "%s," % (formatter(v),)
+        sql = "INSERT into sm_15minute (%s) values (%s)" % (dbcols,
+                                                            dbvals[:-1])
+        icursor.execute(sql)
+
+        # Update IEMAccess
+        # print nwsli, valid
+        ob = Observation(nwsli, 'ISUSM',
+                         valid.astimezone(pytz.timezone("America/Chicago")))
+        tmpc = temperature(float(tokens[headers.index('tair_c_avg')]), 'C')
+        if tmpc.value('F') > -50 and tmpc.value('F') < 140:
+            ob.data['tmpf'] = tmpc.value('F')
+            relh = humidity(float(tokens[headers.index('rh')]), '%')
+            ob.data['relh'] = relh.value('%')
+            ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
+        ob.data['srad'] = tokens[headers.index('slrkw_avg')]
+        ob.data['phour'] = round(
+            distance(
+                     float(tokens[headers.index('rain_mm_tot')]),
+                     'MM').value('IN'), 2)
+        ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
+        ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
+        ob.data['max_gust_ts'] = "%s-06" % (
+            gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
+        ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
+        ob.data['c1tmpf'] = temperature(
+                float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
+        ob.data['c2tmpf'] = temperature(
+                float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
+        ob.data['c3tmpf'] = temperature(
+                float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
+        ob.data['c4tmpf'] = temperature(
+                float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
+        ob.data['c2smv'] = float(tokens[headers.index('vwc_12_avg')]) * 100.0
+        ob.data['c3smv'] = float(tokens[headers.index('vwc_24_avg')]) * 100.0
+        ob.data['c4smv'] = float(tokens[headers.index('vwc_50_avg')]) * 100.0
+        ob.save(accesstxn, force_current_log=True)
+        # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
+        #                                        nwsli, valid)
+        processed += 1
+    return processed
+
+
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
     # print '-------------- HOURLY PROCESS ---------------'
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'].split("/")[1])
+    fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -166,7 +224,7 @@ def formatter(v):
 def daily_process(nwsli, maxts):
     """ Process the daily file """
     # print '-------------- DAILY PROCESS ----------------'
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'].split("/")[1])
+    fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
         return 0
     lines = open(fn).readlines()
@@ -248,6 +306,8 @@ def get_max_timestamps(nwsli):
     """ Fetch out our max values """
     data = {'hourly': datetime.datetime(2012, 1, 1,
                                         tzinfo=pytz.FixedOffset(-360)),
+            '15minute': datetime.datetime(2012, 1, 1,
+                                          tzinfo=pytz.FixedOffset(-360)),
             'daily': datetime.date(2012, 1, 1)}
     icursor.execute("""SELECT max(valid) from sm_daily
         WHERE station = '%s'""" % (nwsli, ))
@@ -262,12 +322,20 @@ def get_max_timestamps(nwsli):
     row = icursor.fetchone()
     if row[0] is not None:
         data['hourly'] = row[0]
+
+    icursor.execute("""
+        SELECT max(valid) from sm_15minute
+        WHERE station = '%s'
+        """ % (nwsli, ))
+    row = icursor.fetchone()
+    if row[0] is not None:
+        data['15minute'] = row[0]
     return data
 
 
 def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     """ Send the raw datafile to LDM """
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'].split("/")[1])
+    fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -293,7 +361,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     os.remove(tmpfn)
 
     """ Send the raw datafile to LDM """
-    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'].split("/")[1])
+    fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -323,6 +391,8 @@ def main():
     """ Go main Go """
     for nwsli in STATIONS.keys():
         maxobs = get_max_timestamps(nwsli)
+        if nwsli != 'BOOI4':
+            _ = m15_process(nwsli, maxobs['15minute'])
         hrprocessed = hourly_process(nwsli, maxobs['hourly'])
         dyprocessed = daily_process(nwsli, maxobs['daily'])
         if hrprocessed > 0:
