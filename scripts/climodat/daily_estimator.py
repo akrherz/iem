@@ -56,6 +56,15 @@ HARDCODE = {
     'IA7708': 'SUX',
     'IA7844': 'SPW',
     'IA8706': 'ALO',
+
+    'WI5479': 'MKE',
+    'WI3269': 'GRB',
+    'WI7113': 'RHI',
+    'WI2428': 'EAU',
+    'WI4961': 'MSN',
+    'WI4370': 'LSE',
+    # AUW Wausau is missing
+
     }
 
 # Pre-compute the grid location of each climate site
@@ -185,8 +194,8 @@ def hardcode(ts):
         icursor.execute("""
         SELECT max_tmpf, min_tmpf, pday from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE t.id = %s and s.day = %s and
-        t.network ~* 'ASOS'
-        """, (HARDCODE[sid], ts))
+        t.network = %s
+        """, (HARDCODE[sid], ts, state + "_ASOS"))
         if icursor.rowcount == 1:
             row = icursor.fetchone()
             if row[0] is not None:
