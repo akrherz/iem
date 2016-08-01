@@ -11,7 +11,7 @@ import osgeo.gdal as gdal
 from pyiem.datatypes import distance
 import matplotlib
 matplotlib.use('agg')
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, nwsprecip  # NOPEP8
 
 
 def doday(ts, realtime):
@@ -58,10 +58,8 @@ def doday(ts, realtime):
     if not realtime:
         routes = 'a'
 
-    clevs = np.arange(0, 0.25, 0.05)
-    clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
-    clevs = np.append(clevs, np.arange(3., 10.0, 1))
-    clevs[0] = 0.01
+    clevs = [0.01, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8,
+             10]
 
     sector = 'iowa'
     pqstr = ("plot %s %s00 %s_ifc_1d.png %s_ifc_1d.png png"
@@ -74,7 +72,8 @@ def doday(ts, realtime):
     yaxis = 40.133331 + np.arange(1057) * 0.004167
     (x, y) = np.meshgrid(xaxis, yaxis)
 
-    m.pcolormesh(x, y, distance(total, 'MM').value("IN"), clevs, units='inch')
+    m.pcolormesh(x, y, distance(total, 'MM').value("IN"), clevs,
+                 cmap=nwsprecip(), units='inch')
     m.drawcounties()
     m.postprocess(pqstr=pqstr, view=False)
     m.close()
