@@ -54,6 +54,9 @@ if ($station != ""){
  	if (array_key_exists($report, $xref)){
  		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
  				$xref[$report], $station, $network);
+        header("Content-type: text/plain");
+        header(sprintf("Content-Disposition: attachment;Filename=%s_%s.txt",
+        		$station, $report));
  		echo file_get_contents($uri);
      	die();
    }
