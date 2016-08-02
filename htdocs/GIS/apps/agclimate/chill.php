@@ -107,7 +107,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   // Red Dot... 
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, ' ' );
+  $pt->draw($map, $ponly, $img, 0);
 
 
   // Value UL
