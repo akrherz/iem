@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sfl:SensorCharacteristic xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd"
+xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gts="http://www.isotc211.org/2005/gts"
+xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss"
+xmlns:om="http://www.opengis.net/om/2.0" xmlns:sfl="http://sawi.gst.com/nmpa/sfl.xsd"
+xmlns:swe="http://www.opengis.net/swe/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://sawi.gst.com/nmpa/sfl.xsd"                                
+gml:id="SensorCharacteristic_CS_CS655">
+
+<!-- ================================================================================ -->
+<!--  Description:                                                                    -->
+<!--      This SensorCharacteristic file describes the Campbell Scientific CS655      -->
+<!--      soil moisture sensor.                                                       -->
+<!-- ================================================================================ -->
+
+<!-- ================================ -->
+<!--           MANUFACTURER           -->
+<!-- ================================ -->
+<!-- This section is used to identify the manufacturer -->
+
+<sfl:manufacturer xlink:href="http://sawi.gst.com/nmpa/rp/rp_CampbellSci.xml" />
+
+
+<!-- ================================ -->
+<!--             MODEL                -->
+<!-- ================================ -->
+<!-- This section is used to describe the manufacturer-designated model number -->
+
+<sfl:model>CS655</sfl:model>
+
+<!-- ================================ -->
+<!--      OPERATIONAL COMPONENTS      -->
+<!-- ================================ -->
+<!-- These properties relate the operational aspects of the sensor -->
+
+<sfl:operationalComponent>
+  <swe:QuantityRange definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingTemperature">
+    <swe:uom code="K"/>                                                                   
+    <swe:value>283.15 303.15</swe:value>     <!-- These SI units correspond to 10C and 30C -->
+  </swe:QuantityRange>
+</sfl:operationalComponent>
+
+<sfl:operationalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#maxCableLength">
+    <swe:uom code="m"/>
+    <swe:value>100</swe:value>     <!-- Volts DC -->
+  </swe:Quantity>
+</sfl:operationalComponent>
+
+<sfl:operationalComponent>
+  <swe:QuantityRange definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingVoltage">
+    <swe:uom code="V"/>
+    <swe:value>9 18</swe:value>  <!-- VDC -->
+  </swe:QuantityRange>
+</sfl:operationalComponent>
+
+
+<!-- ================================ -->
+<!--       PHYSICAL COMPONENTS        -->
+<!-- ================================ -->
+<!-- These properties relate the physical aspects of the sensor -->
+
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#netWeight">
+    <swe:uom code="kg"/>
+    <swe:value>.280</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#length">
+    <swe:uom code="m"/>
+    <swe:value>.30</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#diameter">
+    <swe:uom code="m"/>
+    <swe:value>.0032</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+
+<!-- ================================ -->
+<!--    Provides: Solar Radiation     -->
+<!-- ================================ -->
+
+<sfl:provides>
+ <sfl:SensingProcedure xlink:href="https://mesonet.agron.iastate.edu/metadata/xml/sp_CS_CS655.xml" />
+</sfl:provides>
+
+
+<!-- ================================ -->
+<!--     Anything else?               -->
+<!-- ================================ -->
+
+</sfl:SensorCharacteristic>

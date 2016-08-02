@@ -1,0 +1,82 @@
+<!-- ================================================================== -->
+<!-- Title:   HMP45C Relative Humidity SensingProcedure File            -->
+<!-- Date:    September 20, 2012                                        -->
+<!-- Author:  H. Brown                                                  -->
+<!-- ================================================================== -->
+
+ <sfl:SensingProcedure gml:id="HMP45C_RelativeHumidity">
+    <sfl:method>The HMP45C uses a Vaisala HUMICAP 180 capacitive relative humidity sensor (in combination with temperature) to determine RH.</sfl:method>
+    <sfl:observedProperty xlink:href="http://sawi.gst.com/nmpa/docs/terms.html#relativeHumidity" /> <!-- FIXME: Update Terms file -->
+    <sfl:unitOfMeasure uom="1" />    <!-- signifies percent, or '%' -->
+    <sfl:qualifiedBy>
+      <sfl:MeasurementCapability gml:id="RelativeHumidity">
+
+        <sfl:accuracy>
+          <sfl:ComplexConditionalValue>        <!-- Case 1: 20C, 0-90% RH -->                           <!-- Is this the way to format this? -->
+            <sfl:condition>                    <!-- temperature-->
+              <swe:Quantity>
+                <swe:uom code="degK" />
+                <swe:value>293.15</swe:value>  <!-- 20C -->
+              </swe:Quantity>
+            </sfl:condition>
+            <sfl:condition>                    <!--IF 0<= relative humidity < 90 -->
+              <swe:QuantityRange>
+                <swe:uom code="%" />           <!-- % -->
+                <swe:value>0 90</swe:value>    <!-- 0-90% Humidity -->
+              </swe:QuantityRange>
+            </sfl:condition>
+            <sfl:value> 
+              <swe:QuantityRange>
+                <swe:uom code="%" />           <!-- % -->
+                <swe:value>-2 2</swe:value>
+              </swe:QuantityRange>
+            </sfl:value>
+          </sfl:ComplexConditionalValue>
+
+          <sfl:ComplexConditionalValue>        <!-- Case 2: 20C, 90-100% RH -->
+            <sfl:condition>                    <!-- temperature-->
+              <swe:Quantity>
+                <swe:uom code="degK" />
+                <swe:value>293.15</swe:value>  <!-- 20C -->
+              </swe:Quantity>
+            </sfl:condition>
+            <sfl:condition>                    <!-- IF 90<=relative humidity<=100 -->
+              <swe:QuantityRange>
+                <swe:uom code="%" />           <!-- % -->
+                <swe:value>90 10</swe:value>
+              </swe:QuantityRange>
+            </sfl:condition>
+            <sfl:value> 
+              <swe:QuantityRange>
+                <swe:uom code="%" />           <!-- % -->
+                <swe:value>-3 3</swe:value>
+              </swe:QuantityRange>
+            </sfl:value>
+          </sfl:ComplexConditionalValue>
+        </sfl:accuracy>
+
+        <sfl:range>
+          <swe:QuantityRange>
+            <swe:uom code="%"/>                <!-- % -->
+            <swe:value>0 100</swe:value>       <!-- % relative humidity -->
+          </swe:QuantityRange>
+        </sfl:range>
+
+        <sfl:resolution>
+          <swe:Quantity>
+            <swe:uom code="%" />               <!-- % -->
+            <swe:value>0.00992</swe:value>     <!--  (1V-0.008V)/100% = 0.00992 V/%  -->
+          </swe:Quantity>
+        </sfl:resolution>
+
+      <sfl:extension>
+          <swe:QuantityRange gml:id="OutputSignalRange" definition="http://sawi.gst.com/nmpa/docs/terms.html#outputSignalRange"> <!-- FIXME: Update Terms file -->
+            <swe:uom code="V" />
+            <swe:value>0.008 1.0</swe:value>
+          </swe:QuantityRange>
+      </sfl:extension>
+
+      </sfl:MeasurementCapability>
+    </sfl:qualifiedBy>
+    <sfl:implementedBy xlink:href="http://sawi.gst.com/nmpa/sensor/characteristic/sc_Vaisala_HMP45C.xml" />
+  </sfl:SensingProcedure>

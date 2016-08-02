@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sfl:SensorCharacteristic xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd"
+xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gts="http://www.isotc211.org/2005/gts"
+xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss"
+xmlns:om="http://www.opengis.net/om/2.0" xmlns:sfl="http://sawi.gst.com/nmpa/schema/sfl.xsd"
+xmlns:swe="http://www.opengis.net/swe/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://sawi.gst.com/nmpa/schema/sfl.xsd"                                
+gml:id="SensorCharacteristic_RMY_05103">
+
+<!-- ================================================================================ -->
+<!--  Description:                                                                    -->
+<!--      This SensorCharacteristic file describes the R.M. Young 05103 Wind sensor.  -->
+<!--  Date:                                                                           -->
+<!--      August 21, 2012  -  HB                                                      -->
+<!--  Modifications:                                                                  -->
+<!--                                                                                  -->
+<!-- ================================================================================ -->
+
+
+
+<!-- ================================ -->
+<!--           MANUFACTURER           -->
+<!-- ================================ -->
+<!-- This section is used to identify the manufacturer -->
+
+<sfl:manufacturer xlink:href="http://sawi.gst.com/nmpa/rp/rp_RMYoung.xml" />
+
+
+
+<!-- ================================ -->
+<!--             MODEL                -->
+<!-- ================================ -->
+<!-- This section is used to describe the manufacturer-designated model number -->
+
+<sfl:model>05103</sfl:model>
+
+
+
+<!-- ================================ -->
+<!--      OPERATIONAL COMPONENTS      -->
+<!-- ================================ -->
+<!-- These properties relate the operational aspects of the sensor -->
+
+<sfl:operationalComponent>
+  <swe:QuantityRange definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingTemperature">
+    <swe:uom code="K"/>                                                                   
+    <swe:value>223.15 323.15</swe:value>     <!-- These SI units correspond to -50C and +50C -->
+  </swe:QuantityRange>
+</sfl:operationalComponent>
+
+<sfl:operationalComponent>
+  <swe:QuantityRange definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingVoltage">
+    <swe:uom code="VDC"/>                                                                   
+    <swe:value>8 24</swe:value>
+  </swe:QuantityRange>
+</sfl:operationalComponent>
+
+
+<!-- ================================ -->
+<!--       PHYSICAL COMPONENTS        -->
+<!-- ================================ -->
+<!-- These properties relate the physical aspects of the sensor -->
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#netWeight">
+    <swe:uom code="kg"/>
+    <swe:value>1.5</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#propellerDiameter">
+    <swe:uom code="m"/>
+    <swe:value>.18</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#propellerBlades">
+    <swe:uom code="1"/>
+    <swe:value>4</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#height">
+    <swe:uom code="m"/>
+    <swe:value>.37</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#width">
+    <swe:uom code="m"/>
+    <swe:value>-</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#length">
+    <swe:uom code="m"/>
+    <swe:value>0.55</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#mainHousingDiameter-CS-05103">
+    <swe:uom code="m"/>
+    <swe:value>0.05</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#mountingPipeDiameter-CS-05103">
+    <swe:uom code="m"/>
+    <swe:value>0.55</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<!-- ================================ -->
+<!--       Provides:                  -->
+<!--          Wind Speed              -->
+<!--          Wind Direction          -->
+<!-- ================================ -->
+
+<sfl:provides>
+ <sfl:SensingProcedure xlink:href="https://mesonet.agron.iastate.edu/metdata/xml/sp_CS_03002_windSpeed.xml" />
+ <sfl:SensingProcedure xlink:href="https://mesonet.agron.iastate.edu/metadata/xml/sp_CS_03002_windDirection.xml" />
+</sfl:provides>
+
+
+<!-- ================================ -->
+<!--     Anything else?               -->
+<!-- ================================ -->
+
+</sfl:SensorCharacteristic>
