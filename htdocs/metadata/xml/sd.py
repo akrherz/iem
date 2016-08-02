@@ -41,7 +41,7 @@ gml:id="sd_%(network)s_%(station)s">
       <sfl:serialNumber></sfl:serialNumber>
       <sfl:characteristics xlink:href="https://mesonet.agron.iastate.edu/metadata/xml/sc_CS_03002.xml"/>
       <sfl:senses>
-        <sfl:Sensing gml:id="CS_03003_1">
+        <sfl:Sensing gml:id="CS_03002_1">
           <sfl:sensingProcedure xlink:href="https://mesonet.agron.iastate.edu/metadata/xml/sp_CS_03002.xml" />
           <sfl:unitOfMeasure uom="m/s"/>
           <sfl:active>true</sfl:active>
@@ -53,12 +53,12 @@ gml:id="sd_%(network)s_%(station)s">
 
   <sfl:boundTo xlink:href="https://mesonet.agron.iastate.edu/metadata/xml/pl_%(network)s_%(station)s.xml" />
 
-</sfl:SensorDeployment>""" % dict(network=network, station=station,
-                                  name=nt.sts[station]['name'],
-                                  lat=nt.sts[station]['lat'],
-                                  lon=nt.sts[station]['lon'],
-                                  sts=nt.sts[station]['archive_begin'].strftime(
-                                        "%Y-%m-%dT%H:%M:%SZ"))
+</sfl:SensorDeployment>
+""" % dict(network=network, station=station,
+           name=nt.sts[station]['name'],
+           lat=nt.sts[station]['lat'],
+           lon=nt.sts[station]['lon'],
+           sts=nt.sts[station]['archive_begin'].strftime("%Y-%m-%dT%H:%M:%SZ"))
 
     sys.stdout.write("Content-type: text/xml\n\n")
     sys.stdout.write(xs)

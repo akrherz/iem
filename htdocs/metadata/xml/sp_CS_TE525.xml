@@ -1,0 +1,54 @@
+<!-- ================================================================== -->
+<!-- Title:   TE525USW Rain Fall SensingProcedure File                  -->
+<!-- Date:    September 20, 2012                                        -->
+<!-- Author:  H. Brown                                                  -->
+<!-- ================================================================== -->
+
+<sfl:SensingProcedure
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd"
+xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gts="http://www.isotc211.org/2005/gts"
+xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss"
+xmlns:om="http://www.opengis.net/om/2.0" xmlns:sfl="http://sawi.gst.com/nmpa/schema/sfl.xsd"
+xmlns:swe="http://www.opengis.net/swe/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://sawi.gst.com/nmpa/schema/sfl.xsd" 
+gml:id="TE525USW_RainFall">
+    <sfl:method>TE525USW counts the number of tips (via potted reed switch) of a spout of known volume.</sfl:method>
+    <sfl:observedProperty xlink:href="http://sawi.gst.com/nmpa/docs/terms.html#rainfall" />
+    <sfl:unitOfMeasure uom="m" />
+    <sfl:alternativeUnitOfMeasure uom="in" />
+    <sfl:qualifiedBy>
+      <sfl:MeasurementCapability gml:id="Rainfall">
+
+        <sfl:accuracy>
+          <sfl:ComplexConditionalValue>
+            <sfl:condition> <!-- maximum rain fall rate -->
+              <swe:Quantity>
+                <swe:uom code="m/hr" />
+                <swe:value>0.05</swe:value>
+              </swe:Quantity>
+            </sfl:condition>
+            <sfl:value> 
+              <swe:Quantity>
+                <swe:uom code="%" />
+                <swe:value>1</swe:value>
+              </swe:Quantity>
+            </sfl:value>
+          </sfl:ComplexConditionalValue>
+        </sfl:accuracy>
+
+        <sfl:resolution>
+          <swe:Quantity>
+            <swe:uom code="m" />
+            <swe:value>0.000254</swe:value>
+          </swe:Quantity>
+        </sfl:resolution>
+
+      <sfl:extension>
+        <!-- none at this time -->
+      </sfl:extension>
+
+      </sfl:MeasurementCapability>
+    </sfl:qualifiedBy>
+    <sfl:implementedBy xlink:href="http://sawi.gst.com/nmpa/sensor/characteristic/sc_TE_TE525USW.xml" />
+  </sfl:SensingProcedure>

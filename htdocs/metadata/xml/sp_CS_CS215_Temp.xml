@@ -1,0 +1,51 @@
+<!-- ================================================================== -->
+<!-- Title:   HMP45C Air Temperature SensingProcedure File              -->
+<!-- Date:    September 20, 2012                                        -->
+<!-- Author:  H. Brown                                                  -->
+<!-- ================================================================== -->
+
+ <sfl:SensingProcedure gml:id="HMP45C_Temperature">
+    <sfl:method>The HMP45C uses a platinum resistance temperature detector.</sfl:method>
+    <sfl:observedProperty xlink:href="http://sawi.gst.com/nmpa/docs/terms.html#temperature" /> <!-- FIXME: Update Terms file -->
+    <sfl:unitOfMeasure uom="degK" />
+    <sfl:alternativeUnitOfMeasure uom="degC" />
+    <sfl:alternativeUnitOfMeasure uom="degF" />
+    <sfl:qualifiedBy>
+      <sfl:MeasurementCapability gml:id="AirTemperature">
+
+        <sfl:accuracy>
+          <sfl:value>
+            <swe:QuantityRange>
+              <swe:uom code="K" />
+              <swe:value>-0.3 0.3</swe:value>
+            </swe:QuantityRange>
+          </sfl:value>
+        </sfl:accuracy>
+
+        <sfl:range>
+          <swe:QuantityRange>
+            <swe:uom code="K"/>
+            <swe:value>233.15 333.15</swe:value>   <!-- -40C to 60C -->
+          </swe:QuantityRange>
+        </sfl:range>
+
+        <sfl:resolution>
+          <swe:Quantity>
+            <swe:uom code="degK" />
+            <swe:value>0.00992</swe:value>
+          </swe:Quantity>
+        </sfl:resolution>
+
+      <sfl:extension>
+     <!-- Does this need surrounding tags? Should this be moved to the SensorCharacteristic file? -->
+     <!--     <swe:QuantityRange gml:id="outputSignalRange">
+            <swe:uom code="V" />
+            <swe:value>0.008 1.0</swe:value>
+          </swe:QuantityRange>
+     -->
+      </sfl:extension>
+
+      </sfl:MeasurementCapability>
+    </sfl:qualifiedBy>
+    <sfl:implementedBy xlink:href="http://sawi.gst.com/nmpa/sensor/characteristic/sc_Vaisala_HMP45C.xml" />
+  </sfl:SensingProcedure>

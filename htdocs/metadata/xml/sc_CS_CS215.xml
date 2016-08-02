@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sfl:SensorCharacteristic xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd"
+xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gts="http://www.isotc211.org/2005/gts"
+xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss"
+xmlns:om="http://www.opengis.net/om/2.0" xmlns:sfl="http://sawi.gst.com/nmpa/sfl.xsd"
+xmlns:swe="http://www.opengis.net/swe/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://sawi.gst.com/nmpa/sfl.xsd"                                
+gml:id="SensorCharacteristic_Vaisala_PTB110">
+
+<!-- ================================================================================ -->
+<!--  Description:                                                                    -->
+<!--      This SensorCharacteristic file describes the Vaisala HMP45C Temperature     -->
+<!--      and relative humidity sensor.                                               -->
+<!--  Date:                                                                           -->
+<!--    September 17, 2012  -  HB                                                     -->
+<!--  Modifications:                                                                  -->
+<!--                                                                                  -->
+<!-- ================================================================================ -->
+
+
+
+<!-- ================================ -->
+<!--           MANUFACTURER           -->
+<!-- ================================ -->
+<!-- This section is used to identify the manufacturer -->
+
+<sfl:manufacturer xlink:href="http://sawi.gst.com/nmpa/rp/rp_Vaisala.xml" />
+
+
+
+<!-- ================================ -->
+<!--             MODEL                -->
+<!-- ================================ -->
+<!-- This section is used to describe the manufacturer-designated model number -->
+
+<sfl:model>HMP45C</sfl:model>
+
+
+
+<!-- ================================ -->
+<!--      OPERATIONAL COMPONENTS      -->
+<!-- ================================ -->
+<!-- These properties relate the operational aspects of the sensor -->
+
+<sfl:operationalComponent>
+  <swe:QuantityRange definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingTemperature">
+    <swe:uom code="K"/>                                                                   
+    <swe:value>233.15 333.15</swe:value>     <!-- These SI units correspond to -40C and +60C -->
+  </swe:QuantityRange>
+</sfl:operationalComponent>
+
+<sfl:operationalComponent>
+  <swe:QuantityRange definition="http://sawi.gst.com/nmpa/docs/terms.html#storageTemperature">
+    <swe:uom code="K"/>                                                                   
+    <swe:value>233.15 353.15</swe:value>     <!-- These SI units correspond to -40C and +60C -->
+  </swe:QuantityRange>
+</sfl:operationalComponent>
+
+<sfl:operationalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingVoltage">
+    <swe:uom code="VDC"/>                                                                   
+    <swe:value>12</swe:value>
+  </swe:Quantity>
+</sfl:operationalComponent>
+
+<sfl:operationalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#operatingCurrent">
+    <swe:uom code="A"/>                                                                   
+    <swe:value>.004</swe:value>
+  </swe:Quantity>
+</sfl:operationalComponent>
+
+
+<!-- ================================ -->
+<!--       PHYSICAL COMPONENTS        -->
+<!-- ================================ -->
+<!-- These properties relate the physical aspects of the sensor -->
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#probeLength">
+    <swe:uom code="m"/>
+    <swe:value>0.254</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#bodyDiameter">
+    <swe:uom code="m"/>
+    <swe:value>0.025</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<sfl:physicalComponent>
+  <swe:Quantity definition="http://sawi.gst.com/nmpa/docs/terms.html#settlingTime">
+    <swe:uom code="s"/>
+    <swe:value>0.15</swe:value>
+  </swe:Quantity>
+</sfl:physicalComponent>
+
+<!-- ================================ -->
+<!--   Provides:                      -->
+<!--        Temperature               -->
+<!--        Relative Humidity         -->
+<!-- ================================ -->
+
+<sfl:provides>
+ <sfl:SensingProcedure xlink:href="http://sawi.gst.com/nmpa/sensor/procedure/sp_Vaisala_HMP45C_temp.xml" />
+ <sfl:SensingProcedure xlink:href="http://sawi.gst.com/nmpa/sensor/procedure/sp_Vaisala_HMP45C_rh.xml" />
+</sfl:provides>
+
+<!-- ================================ -->
+<!--     Anything else?               -->
+<!-- ================================ -->
+
+</sfl:SensorCharacteristic>
