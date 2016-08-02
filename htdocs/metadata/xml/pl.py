@@ -46,7 +46,7 @@ gml:id="%(network)s_%(station)s">
 
     <sfl:deploymentLocation>
       <gml:Point srsName="urn:ogc:def:crs:EPSG::4326" srsDimension="3">
-        <gml:pos>%(lat).4s %(lon).4s 0.0</gml:pos>
+        <gml:pos>%(lat).4s %(lon).4s %(elev).1f</gml:pos>
       </gml:Point>
     </sfl:deploymentLocation>
 
@@ -81,6 +81,7 @@ gml:id="%(network)s_%(station)s">
 </sfl:Platform>""" % dict(network=network, station=station,
                           name=nt.sts[station]['name'],
                           lat=nt.sts[station]['lat'],
+                          elev=nt.sts[station]['elevation'],
                           lon=nt.sts[station]['lon'],
                           sts=nt.sts[station]['archive_begin'].strftime(
                                 "%Y-%m-%dT%H:%M:%SZ"))
