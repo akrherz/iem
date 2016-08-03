@@ -55,8 +55,7 @@ python hourly_analysis.py
 python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 
 cd ../mrms
-python mrms_raster_p1h.py $YYYY $MM $DD $HH
-python mrms_raster_pXXh.py $YYYY $MM $DD $HH
+python make_mrms_rasters.py $YYYY $MM $DD $HH
 
 cd ../smos
 python ingest_smos.py
