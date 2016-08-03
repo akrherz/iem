@@ -14,35 +14,49 @@ import cStringIO
 pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
 
-# Get CGI vars
-form = cgi.FormContent()
 
-if 'year' in form:
-    year1 = int(form["year"][0])
-    year2 = int(form["year"][0])
-else:
-    year1 = int(form["year1"][0])
-    year2 = int(form["year2"][0])
-month1 = int(form["month1"][0])
-if 'month2' not in form:
-    sys.exit()
-month2 = int(form["month2"][0])
-day1 = int(form["day1"][0])
-day2 = int(form["day2"][0])
-hour1 = int(form["hour1"][0])
-hour2 = int(form["hour2"][0])
-minute1 = int(form["minute1"][0])
-minute2 = int(form["minute2"][0])
+def get_time_domain(form):
+    """Figure out the start and end timestamps"""
+    if 'recent' in form:
+        # Allow for specifying a recent number of seconds
+        eTS = datetime.datetime.utcnow()
+        seconds = abs(int(form.getfirst('recent')))
+        sTS = eTS - datetime.timedelta(seconds=seconds)
+        return sTS, eTS
+
+    if 'year' in form:
+        year1 = int(form.getfirst("year"))
+        year2 = int(form.getfirst("year"))
+    else:
+        year1 = int(form.getfirst("year1"))
+        year2 = int(form.getfirst("year2"))
+    month1 = int(form.getfirst("month1"))
+    if form.getfirst('month2') is None:
+        sys.exit()
+    month2 = int(form.getfirst("month2"))
+    day1 = int(form.getfirst("day1"))
+    day2 = int(form.getfirst("day2"))
+    hour1 = int(form.getfirst("hour1"))
+    hour2 = int(form.getfirst("hour2"))
+    minute1 = int(form.getfirst("minute1"))
+    minute2 = int(form.getfirst("minute2"))
+    sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
+    eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
+
+    return sTS, eTS
+
+# Get CGI vars
+form = cgi.FieldStorage()
+
+(sTS, eTS) = get_time_domain(form)
 
 wfoLimiter = ""
 if 'wfo[]' in form:
-    aWFO = form['wfo[]']
+    aWFO = form.getlist('wfo[]')
     aWFO.append('XXX')  # Hack to make next section work
     if "ALL" not in aWFO:
         wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)), )
 
-sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
-eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
 
 os.chdir('/tmp')
 fn = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M"))
@@ -67,6 +81,10 @@ cursor.execute("""
     """ % (sTS.strftime("%Y-%m-%d %H:%M"),
            eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter))
 
+if cursor.rowcount == 0:
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write("ERROR: No results found for query.")
+    sys.exit()
 
 w = shapefile.Writer(shapeType=shapefile.POINT)
 w.field('VALID', 'C', 12)
