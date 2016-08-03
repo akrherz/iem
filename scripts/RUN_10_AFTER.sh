@@ -15,6 +15,7 @@ then
 else
 	python merge_mrms_q3.py	
 fi
+python merge_ifc.py
 
 cd ../rtma
 python wind_power.py &
