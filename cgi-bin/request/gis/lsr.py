@@ -15,6 +15,12 @@ pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
 
 
+def send_error(msg):
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write(msg)
+    sys.exit()
+
+
 def get_time_domain(form):
     """Figure out the start and end timestamps"""
     if 'recent' in form:
@@ -44,6 +50,10 @@ def get_time_domain(form):
     eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
 
     return sTS, eTS
+
+if os.environ['REQUEST_METHOD'] == 'OPTIONS':
+    sys.stdout.write("Access-Control-Allow-Methods: GET, POST, OPTIONS\n\n")
+    sys.exit()
 
 # Get CGI vars
 form = cgi.FieldStorage()
@@ -82,9 +92,7 @@ cursor.execute("""
            eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter))
 
 if cursor.rowcount == 0:
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write("ERROR: No results found for query.")
-    sys.exit()
+    send_error("ERROR: No results found for query.")
 
 w = shapefile.Writer(shapeType=shapefile.POINT)
 w.field('VALID', 'C', 12)
