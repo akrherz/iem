@@ -38,6 +38,14 @@ archive status and dbf schema below. The IEM's archive is certainly not complete
 If you are looking for a real-time source of lsr shapefiles, you can find that 
 		<a href="/data/gis/shape/4326/us/lsr_24hour.zip">here.</a></p>
 
+<p><strong>Looking to automate the downloading of LSRs?</strong>
+<br />You can use the following URI form to get the most recent number of seconds
+worth of LSRs.  Note that these times are based on the valid time of the LSR and
+not the issuance of the text product itself that contained the LSR.
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=ALL&amp;recent=86400&amp;justcsv=1</code>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=DMX&amp;wfo[]=DVN&amp;recent=86400&amp;justcsv=1</code>
+<br />Omit the justcsv portion to return the zipped shapefile.</p>
+		
 <form method="GET" action="/cgi-bin/request/gis/lsr.py">
 <h4>Limit Weather Forecast Office (WFO)</h4>
 <select name="wfo[]" MULTIPLE size="5">
