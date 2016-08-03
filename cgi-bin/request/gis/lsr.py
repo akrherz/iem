@@ -52,7 +52,7 @@ def get_time_domain(form):
     return sTS, eTS
 
 if os.environ['REQUEST_METHOD'] == 'OPTIONS':
-    sys.stdout.write("Access-Control-Allow-Methods: GET, POST, OPTIONS\n\n")
+    sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
     sys.exit()
 
 # Get CGI vars
