@@ -16,7 +16,6 @@ import json
 import pygrib
 import gzip
 import unittest
-from pyiem.util import exponential_backoff
 import requests
 
 TMP = "/mesonet/tmp"
@@ -94,8 +93,8 @@ def doit(gts, hr):
         gribfn = now.strftime((TMP + "/" + mproduct +
                                "_00.00_%Y%m%d-%H%M00.grib2.gz"))
         if not os.path.isfile(gribfn):
-            res = exponential_backoff(requests.get, uri, timeout=60)
-            if res is None:
+            res = requests.get(uri, timeout=60)
+            if res.status_code != 200:
                 # Cut down on logged errors
                 if gribfn in MISSED_FILES:
                     return
