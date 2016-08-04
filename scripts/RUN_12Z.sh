@@ -51,6 +51,3 @@ csh BACKUP.csh
 cd ../yieldfx
 python yieldfx_workflow.py
 python dump_hybridmaize.py
-
-cd ../dl
-python fill_mrms_holes.py

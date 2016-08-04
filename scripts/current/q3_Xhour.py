@@ -11,8 +11,11 @@ import pytz
 import gzip
 import pygrib
 import tempfile
+import requests
 from pyiem.datatypes import distance
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, nwsprecip
+
+TMP = "/mesonet/tmp"
 
 
 def doit(ts, hours):
@@ -28,15 +31,22 @@ def doit(ts, hours):
     total = None
     while now < ets:
         gmt = now.astimezone(pytz.timezone("UTC"))
+        gribfn = None
         for prefix in ['GaugeCorr', 'RadarOnly']:
-            gribfn = gmt.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/" +
-                                   prefix + "_QPE_01H/" +
-                                   prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
-                                   ".grib2.gz"))
-            if os.path.isfile(gribfn):
-                break
-        if not os.path.isfile(gribfn):
-            print("q3_Xhour.py MISSING %s" % (gribfn,))
+            fn = gmt.strftime((prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
+                               ".grib2.gz"))
+            res = requests.get(gmt.strftime(
+                    ("http://mtarchive.geol.iastate.edu/%Y/%m/%d/mrms/ncep/" +
+                     prefix + "_QPE_01H/" + fn)), timeout=30)
+            if res.status_code != 200:
+                continue
+            o = open(TMP + "/" + fn, 'wb')
+            o.write(res.content)
+            o.close()
+            gribfn = "%s/%s" % (TMP, fn)
+            break
+        if gribfn is None:
+            print("q3_Xhour.py[%s] MISSING %s" % (hours, now))
             now += interval
             continue
         fp = gzip.GzipFile(gribfn, 'rb')
@@ -56,6 +66,7 @@ def doit(ts, hours):
                                             total >= 0),
                              grb['values'] + total, maxgrid)
         now += interval
+        os.unlink(gribfn)
 
     if total is None:
         print("q3_Xhour.py no data ts: %s hours: %s" % (ts, hours))
@@ -75,16 +86,14 @@ def doit(ts, hours):
                        "Precipitation [inch]") % (hours,),
                 subtitle=subtitle)
 
-    clevs = np.arange(0, 0.2, 0.05)
-    clevs = np.append(clevs, np.arange(0.2, 1.0, 0.1))
-    clevs = np.append(clevs, np.arange(1.0, 5.0, 0.25))
-    clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
-    clevs[0] = 0.01
+    clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
 
     m.contourf(mrms.XAXIS, mrms.YAXIS,
-               distance(np.flipud(total), 'MM').value('IN'), clevs)
+               distance(np.flipud(total), 'MM').value('IN'), clevs,
+               cmap=nwsprecip())
     m.drawcounties()
-    m.postprocess(pqstr=pqstr)
+    m.postprocess(pqstr=pqstr, view=False)
+    m.close()
 
 
 def main():

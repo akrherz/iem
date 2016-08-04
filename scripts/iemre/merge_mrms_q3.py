@@ -11,8 +11,10 @@ import numpy as np
 from pyiem import iemre
 import pygrib
 import gzip
+import requests
 import tempfile
-# from pyiem.plot import MapPlot
+
+TMP = "/mesonet/tmp"
 
 
 def run(ts):
@@ -36,19 +38,27 @@ def run(ts):
     lats = None
     for _ in range(1, 25):
         gmtts += datetime.timedelta(hours=1)
+        gribfn = None
         for prefix in ['GaugeCorr', 'RadarOnly']:
-            gribfn = gmtts.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/" +
-                                     prefix + "_QPE_01H/" +
-                                     prefix +
-                                     "_QPE_01H_00.00_%Y%m%d-%H%M00.grib2.gz"
-                                     ))
-            if os.path.isfile(gribfn):
-                break
-        if not os.path.isfile(gribfn):
+            fn = gmtts.strftime((prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
+                                 ".grib2.gz"))
+            res = requests.get(gmtts.strftime(
+                    ("http://mtarchive.geol.iastate.edu/%Y/%m/%d/mrms/ncep/" +
+                     prefix + "_QPE_01H/" + fn)), timeout=30)
+            if res.status_code != 200:
+                continue
+            o = open(TMP + "/" + fn, 'wb')
+            o.write(res.content)
+            o.close()
+            gribfn = "%s/%s" % (TMP, fn)
+            break
+        if gribfn is None:
             if gmtts < utcnow:
-                print("merge_mrms_q3.py MISSING %s" % (gribfn,))
+                print("merge_mrms_q3.py MISSING %s" % (gmtts, ))
             continue
+        # print("Using -> %s" % (gribfn,))
         fp = gzip.GzipFile(gribfn, 'rb')
+
         (_, tmpfn) = tempfile.mkstemp()
         tmpfp = open(tmpfn, 'wb')
         tmpfp.write(fp.read())
@@ -67,6 +77,8 @@ def run(ts):
         else:
             total += val
 
+        os.unlink(gribfn)
+
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
     y0 = int((lats[0, 0] - iemre.NORTH) * 100.0)
@@ -76,20 +88,6 @@ def run(ts):
     # print 'y0:%s y1:%s x0:%s x1:%s lat0:%s offset:%s ' % (y0, y1, x0, x1,
     #                                                      lats[0, 0], offset)
     ncprecip[offset, :, :] = np.flipud(total[y0:y1, x0:x1])
-    """
-    from pyiem.plot import MapPlot
-    import matplotlib.pyplot as plt
-    m = MapPlot(sector='midwest')
-    x, y = np.meshgrid(nc.variables['lon'][:], nc.variables['lat'][:])
-    m.pcolormesh(x, y, ncprecip[offset,:,:], range(10), latlon=True)
-    m.postprocess(filename='test3.png')
-    (fig, ax) = plt.subplots()
-    ax.imshow(mrms)
-    fig.savefig('test.png')
-    (fig, ax) = plt.subplots()
-    ax.imshow(mrms[y0:y1,x0:x1])
-    fig.savefig('test2.png')
-    """
     nc.close()
 
 
