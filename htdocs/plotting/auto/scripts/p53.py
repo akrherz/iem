@@ -3,6 +3,10 @@ import datetime
 import calendar
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
+
+PDICT = {'tmpf': 'Air Temperature',
+         'dwpf': 'Dew Point Temperature'}
 
 
 def get_description():
@@ -18,15 +22,17 @@ def get_description():
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:'),
-        dict(type='text', name='t1', default=0,
+        dict(type='select', options=PDICT, default='tmpf', name='var',
+             label='Select temperature to plot:'),
+        dict(type='int', name='t1', default=0,
              label='Temperature Threshold #1 (lowest)'),
-        dict(type='text', name='t2', default=32,
+        dict(type='int', name='t2', default=32,
              label='Temperature Threshold #2'),
-        dict(type='text', name='t3', default=50,
+        dict(type='int', name='t3', default=50,
              label='Temperature Threshold #3'),
-        dict(type='text', name='t4', default=70,
+        dict(type='int', name='t4', default=70,
              label='Temperature Threshold #4'),
-        dict(type='text', name='t5', default=90,
+        dict(type='int', name='t5', default=90,
              label='Temperature Threshold #5 (highest)'),
     ]
     return d
@@ -40,26 +46,30 @@ def plotter(fdict):
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    t1 = int(fdict.get('t1', 0))
-    t2 = int(fdict.get('t2', 0))
-    t3 = int(fdict.get('t3', 0))
-    t4 = int(fdict.get('t4', 0))
-    t5 = int(fdict.get('t5', 0))
+    ctx = get_autoplot_context(fdict, get_description())
+
+    station = ctx['zstation']
+    network = ctx['network']
+    t1 = ctx['t1']
+    t2 = ctx['t2']
+    t3 = ctx['t3']
+    t4 = ctx['t4']
+    t5 = ctx['t5']
+    v = ctx['var']
 
     nt = NetworkTable(network)
 
     cursor.execute("""
     SELECT extract(week from valid) as w,
-    sum(case when tmpf::int < %s then 1 else 0 end),
-    sum(case when tmpf::int < %s then 1 else 0 end),
-    sum(case when tmpf::int < %s then 1 else 0 end),
-    sum(case when tmpf::int < %s then 1 else 0 end),
-    sum(case when tmpf::int < %s then 1 else 0 end),
+    sum(case when """ + v + """::int < %s then 1 else 0 end),
+    sum(case when """ + v + """::int < %s then 1 else 0 end),
+    sum(case when """ + v + """::int < %s then 1 else 0 end),
+    sum(case when """ + v + """::int < %s then 1 else 0 end),
+    sum(case when """ + v + """::int < %s then 1 else 0 end),
     count(*)
-    from alldata where station = %s and tmpf is not null
+    from alldata where station = %s and """ + v + """ is not null
     and extract(minute  from valid  - '1 minute'::interval) > 49
+    and report_type = 2
     GROUP by w ORDER by w ASC
     """, (t1, t2, t3, t4, t5, station))
     weeks = []
@@ -106,9 +116,9 @@ def plotter(fdict):
 
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\n"
-                  "Hourly Temperature ($^\circ$F) Frequencies (%s-%s)"
+                  "Hourly %s ($^\circ$F) Frequencies (%s-%s)"
                   ) % (nt.sts[station]['name'], station,
-                       nt.sts[station]['archive_begin'].year,
+                       PDICT[v], nt.sts[station]['archive_begin'].year,
                        datetime.datetime.now().year))
     ax.set_ylabel("Frequency [%]")
 
