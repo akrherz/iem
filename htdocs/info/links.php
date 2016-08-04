@@ -23,8 +23,9 @@ $t->content = <<<EOF
  <li><a href="http://chiliweb.southalabama.edu/">South Alabama Mesonet</a></li>
  <li><a href="http://mesonet.tamu.edu/">Texas Mesonet</a></li>
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
+ <li><a href="http://agwx.soils.wisc.edu/uwex_agwx/awon">Wisconsin Extension AgWeather</a></li>
 </ul>
-
+		
 
 <h3>Real Time Air Quality Charts and Maps</h3>
 
