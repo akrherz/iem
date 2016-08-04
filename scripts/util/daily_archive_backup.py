@@ -31,6 +31,9 @@ def main(argv):
         while now < ets:
             run(now)
             now += datetime.timedelta(days=1)
+    elif len(argv) == 4:
+        now = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        run(now)
     else:
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
         run(yesterday)
