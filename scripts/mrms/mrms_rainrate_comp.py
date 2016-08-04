@@ -17,6 +17,9 @@ import sys
 import pyiem.mrms as mrms
 import pygrib
 import gzip
+import requests
+
+TMP = "/mesonet/tmp"
 
 
 def do(now, realtime, delta):
@@ -31,13 +34,17 @@ def do(now, realtime, delta):
                 'product': 'a2m',
                 'units': '0.02 mm'}
 
-    gribfn = now.strftime(("/mnt/a4/data/%Y/%m/%d/mrms/ncep/PrecipRate/"
-                           "PrecipRate_00.00_%Y%m%d-%H%M00.grib2.gz"))
-    if not os.path.isfile(gribfn):
-        # Don't whine about old files being missing
-        if delta < 90:
-            print("mrms_rainrate_comp.py MISSING %s" % (gribfn,))
+    fn = now.strftime("PrecipRate_00.00_%Y%m%d-%H%M00.grib2.gz")
+    uri = now.strftime(("http://mtarchive.geol.iastate.edu/%Y/%m/%d/"
+                        "mrms/ncep/PrecipRate/" + fn))
+    gribfn = "%s/%s" % (TMP, fn)
+    res = requests.get(uri, timeout=30)
+    if res.status_code != 200:
+        print("mrms_rainrate_comp.py MISSING %s" % (gribfn,))
         return
+    o = open(gribfn, 'wb')
+    o.write(res.content)
+    o.close()
 
     # http://www.nssl.noaa.gov/projects/mrms/operational/tables.php
     # Says units are mm/hr
@@ -49,6 +56,7 @@ def do(now, realtime, delta):
     grbs = pygrib.open(tmpfn)
     grb = grbs[1]
     os.unlink(tmpfn)
+    os.unlink(gribfn)
 
     val = grb['values']
     # Convert into units of 0.1 mm accumulation

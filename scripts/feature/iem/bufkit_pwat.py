@@ -13,7 +13,8 @@ valid = []
 xticks = []
 xticklabels = []
 while now < ets:
-    fp = now.strftime("/mnt/a4/data/%Y/%m/%d/bufkit/%H/nam/nam_kdsm.buf")
+    # TODO: fetch from mtarchive
+    fp = now.strftime("...data/%Y/%m/%d/bufkit/%H/nam/nam_kdsm.buf")
     if not os.path.isfile(fp):
       vals.append( vals[-1] )
       valid.append( now.ticks() )
