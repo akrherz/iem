@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^vtec_(.*).png radmap.php?layers[]=nexrad&layers[]=sbw&layers[]=sbwh&layers[]=uscounties&vtec=$1&width=1200&height=630
