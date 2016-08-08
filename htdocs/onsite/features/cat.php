@@ -102,6 +102,12 @@ EOF;
     if ($row["abstain"] > 0) $content .= " <br />Abstain = ". $row["abstain"] ;
   }
   $content .= "<br />". printTags(explode(",", $row["tags"]));
+
+// We fouled up for a while here and was using http:// on the homepage
+// and https:// here.  Rectify
+$fbhttpref = "https";
+if ($valid < strtotime("2016-08-09")) $fbhttpref = "http";
+
 $content .= <<<EOF
 </div>
  		</div><!-- ./row -->
@@ -109,7 +115,7 @@ $content .= <<<EOF
 <div class="clearfix">&nbsp;</div>
  		<div id="fb-root"></div><script src="https://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
 <fb:comments send_notification_uid="16922938" title="{$row["title"]}" 
- href="https://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$day}" 
+ href="{$fbhttpref}://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$day}" 
  xid="{$row["fbid"]}" numposts="6" width="600"></fb:comments>
 EOF;
 $t->content = $content;

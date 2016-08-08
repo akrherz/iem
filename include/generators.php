@@ -250,7 +250,7 @@ $(document).ready(function(){
 </script>
 {$jsextra}
 EOF;
-		$huri = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ;
+		$huri = "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ;
 		$fbtext = <<<EOF
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOF;
