@@ -2,9 +2,13 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 import calendar
 from pandas.io.sql import read_sql
+from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
-PDICT = {'above': 'At or Above Temperature',
-         'below': 'Below Temperature'}
+PDICT = OrderedDict([
+    ('above', 'At or Above Temperature'),
+    ('below', 'Below Temperature'),
+    ])
 
 
 def get_description():
@@ -19,10 +23,10 @@ def get_description():
              label='Select Station:'),
         dict(type='month', name='month', default=7,
              label='Month:'),
-        dict(type='text', name='t', default=80,
+        dict(type='int', name='t', default=80,
              label='Temperature Threshold (F):'),
         dict(type='select', name='dir', default='above',
-             label='Threshold Direction:', options=PDICT),
+             label='Threshold Option:', options=PDICT),
     ]
     return d
 
@@ -34,13 +38,12 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    month = int(fdict.get('month', 7))
-    thres = int(fdict.get('t', 80))
-    mydir = fdict.get('dir', 'above')
-    if PDICT.get(mydir) is None:
-        return 'Invalid dir provided'
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    month = int(ctx['month'])
+    thres = ctx['t']
+    mydir = ctx['dir']
 
     nt = NetworkTable(network)
     tzname = nt.sts[station]['tzname']
@@ -49,7 +52,7 @@ def plotter(fdict):
     WITH data as (
         SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
         from alldata where station = %s and tmpf > -90 and tmpf < 150
-        and extract(month from valid) = %s)
+        and extract(month from valid) = %s and report_type = 2)
 
     SELECT extract(hour from v) as hour,
     sum(case when tmpf::int < %s THEN 1 ELSE 0 END) as below,
