@@ -108,11 +108,13 @@ if ($mode == "monthly"){
 				low as min_tmpf, precip as pday,
 				Null as max_tmpf_qc, Null as max_gust,
 				null as min_tmpf_qc, snow, snowd,
+				null as min_rh, null as max_rh,
 				null as cv from $table WHERE
 				month = $month and year = $year and
 				station = '".$station."' ORDER by day ASC";
 	} else {
 		$sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
+				min_rh, max_rh,
 			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 		   max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.id = '". $station ."' and
@@ -131,11 +133,13 @@ if ($mode == "monthly"){
 		$sql = "SELECT high as max_tmpf, to_char(day, 'YYYYMMDD') as dvalid,
 			low as min_tmpf, precip as pday,
 			Null as max_tmpf_qc, Null as max_gust,
+			null as min_rh, null as max_rh,
 			null as min_tmpf_qc, station as id, snow, snowd,
 			null as cv from $table WHERE
 			day = '".$dateStr."' ORDER by $sortvar $sortorder NULLS LAST";
 	} else {
 		$sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
+				min_rh, max_rh,
 			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 			max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.iemid = s.iemid 
@@ -190,13 +194,18 @@ if ($mode == "monthly") {
     $str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
          "<br>(". $gs .")";
   }
+  if ($row["min_rh"] != null){
+  	$str .= sprintf("<br />RH%% Rng: %.0f-%.0f", $row["min_rh"],
+  			$row["max_rh"]);
+  }
   $db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
 
- $htmlout = printMonth($year, $month, $db, 
- 		"/sites/hist.phtml?network=$network&station=$station" , 
- 		"/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
  } /* End of for */
-
+ 
+ $htmlout = printMonth($year, $month, $db,
+ 		"/sites/hist.phtml?network=$network&station=$station" ,
+ 		"/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
+ 
  $htmlout .= sprintf('<p><img src="month_hilo_plot.php?month=%s&year=%s&network=%s&station=%s"><br /><strong>Description:</strong> This chart of the monthly temperature data.  The bars are the observations and the dots are climatology.', $month, $year, $network, $station);
  $htmlout .= sprintf('<p><img src="/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.', 
  		$network, $station, $month, $year);
