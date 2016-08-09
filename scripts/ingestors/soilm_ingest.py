@@ -32,6 +32,10 @@ VARCONV = {
            'calcvwc12_avg': 'vwc_12_avg',
            'calcvwc24_avg': 'vwc_24_avg',
            'calcvwc50_avg': 'vwc_50_avg',
+           "outofrange06": "P06OutOfRange",
+           "outofrange12": "P12OutOfRange",
+           "outofrange24": "P24OutOfRange",
+           "outofrange50": "P50OutOfRange"
            }
 
 BASE = '/mnt/home/loggernet'
@@ -391,8 +395,7 @@ def main():
     """ Go main Go """
     for nwsli in STATIONS.keys():
         maxobs = get_max_timestamps(nwsli)
-        if nwsli != 'BOOI4':
-            _ = m15_process(nwsli, maxobs['15minute'])
+        _ = m15_process(nwsli, maxobs['15minute'])
         hrprocessed = hourly_process(nwsli, maxobs['hourly'])
         dyprocessed = daily_process(nwsli, maxobs['daily'])
         if hrprocessed > 0:
