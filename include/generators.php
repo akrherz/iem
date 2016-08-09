@@ -104,7 +104,8 @@ function gen_feature($t){
 	$abstain = intval($row["abstain"]);
 	$tags = ($row["tags"] != null) ? explode(",", $row["tags"]): Array();
 	$fbid = $row["fbid"];
-	$fburl = "http://www.facebook.com/pages/IEM/157789644737?v=wall&story_fbid=".$fbid;
+	$fburl = sprintf("https://www.facebook.com/permalink.php?".
+			"story_fbid=%s&id=157789644737", $fbid);
 	
 	$fref = "/mesonet/share/features/". $row["imageref"] .".png";
 	$width = 320;
