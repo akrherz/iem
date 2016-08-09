@@ -2,29 +2,34 @@
 session_start();
 /* Web based feature publisher */
 include("../config/settings.inc.php");
-include_once "../include/myview.php";
+include("../include/database.inc.php");
+require_once "../include/myview.php";
+require_once "../include/Facebook/autoload.php";
+
 $t = new MyView();
 
-include("../include/database.inc.php");
-include("../include/facebook.php");
+$fb = new \Facebook\Facebook([
+  'app_id' => '148705700931',
+  'app_secret' => $fb_feature_secret,
+  'default_graph_version' => 'v2.4'
+]);
+$helper = $fb->getRedirectLoginHelper();
+$permissions = ['publish_pages'];
+$callback = 'https://mesonet.agron.iastate.edu/admin/feature.php';
+$loginUrl = $helper->getLoginUrl($callback, $permissions);
+$logoutUrl = $helper->getLogoutUrl($callback, $permissions);
 
-$facebook = new Facebook(Array(
-  'appId' => '148705700931',
-  'secret' => $fb_feature_secret,
-  'cookie' => true,
-));
-$me = null;
-$uid = $facebook->getUser();
-if ($uid){    
-	$me = $facebook->api('/me');
+try {
+	$accessToken = $helper->getAccessToken();
+	if ($accessToken) $_SESSION['facebook_access_token'] = (string) $accessToken;
+} catch(Facebook\Exceptions\FacebookSDKException $e) {
+	// There was an error communicating with Graph
+	echo $e->getMessage();
+	exit;
 }
-if ($me){
-  $logouturl = $facebook->getLogoutUrl();
-}else {
-  $loginurl = $facebook->getLoginUrl(Array(
-    'scope' => 'publish_actions',
-  		'redirect_uri' => 'https://mesonet.agron.iastate.edu/admin/feature.php'
-  ));
+if (isset($_SESSION['facebook_access_token'])) {
+	$accessToken = $_SESSION['facebook_access_token'];
+	$fb->setDefaultAccessToken($accessToken);
 }
 
 $javascripturl = isset($_REQUEST["javascripturl"]) ? $_REQUEST["javascripturl"] : null;
@@ -41,35 +46,48 @@ pg_prepare($mesosite, "INJECTOR", "INSERT into feature ".
   "(title, story, caption, voting, tags, fbid, appurl, javascripturl) VALUES ".
   "($1, $2, $3, $4, $5, $6, $7, $8)");
 
+$app = "";
+if ($accessToken){
+	$response = $fb->get('/me');
+	$userNode = $response->getGraphUser();
+	$app .= "Hello, ". $userNode->getName() ."!<a href=\"$logoutUrl\">Logout</a>";
+} else {
+	$app .= "<a href=\"$loginUrl\">Login</a>";
+}
 
-
-$rooturl = "http://mesonet.agron.iastate.edu";
+$rooturl = "https://mesonet.agron.iastate.edu";
 $permalink = sprintf('%s/onsite/features/cat.php?day=%s', $rooturl, date("Y-m-d") );
 $thumbnail = sprintf('%s/onsite/features/%s.png', $rooturl, 
              date("Y/m/ymd") );
 
-$attachment = Array(
- 'name' => 'IEM Feature',
- 'href' => $permalink,
- 'caption' => 'caption',
- 'description' => 'Feature Image',
- 'media' => array(array('type' => 'image',
-    'src' => $thumbnail,
-    'href' => $permalink)),
-);
-$action_links = array(
-  array('text' => 'Permalink',
-        'href' => $permalink));
+
+$action_links = [
+		'name' => 'Permalink',
+        'link' => $permalink
+];
 
 if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
-  $fbid = $facebook->api(Array("method"=>'stream.publish', 
-       "message" => $_REQUEST["story"],
-       "attachment" => $attachment,
-       "action_links" => $action_links,
-    //   "target_id" => null,
-       "uid" => 157789644737));
-  $story_fbid = explode("_", $fbid);
-  $story_fbid = str_replace('"', '', $story_fbid[1]);
+	
+	$data = [
+		 'name' => 'IEM Feature',
+			'message' => $story,
+			'link' => $permalink,
+			'picture' => $thumbnail,
+			'description' => $title,
+	];
+	try{
+		// Get a page access token to use
+		$response = $fb->get('/157789644737?fields=access_token');
+		$fbid = $response->getGraphNode();
+		$response = $fb->post('/157789644737/feed', $data, $fbid["access_token"]);
+		$fbid = $response->getGraphNode();
+	} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		// There was an error communicating with Graph
+		echo $e->getMessage();
+		exit;
+	}
+	$story_fbid = explode("_", $fbid['id']);
+  	$story_fbid = $story_fbid[1];
 }
 if ($story != null && $title != null &&
     isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
@@ -78,12 +96,6 @@ if ($story != null && $title != null &&
              $voting, $tags, $story_fbid, $appurl, $javascripturl) );
 }
 
-$app = "";
-if ($me){ 
-	$app .= "Hello, ". $me["name"] ."!<a href=\"$logouturl\">Logout</a>";
-} else {
-	$app .= "<a href=\"$loginurl\">Login</a>";
-}
 $t->content = <<<EOF
 
 {$app}
