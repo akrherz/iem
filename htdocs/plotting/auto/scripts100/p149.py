@@ -2,6 +2,8 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
+import numpy as np
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,18 +19,28 @@ def get_description():
     statistics.  You can optionally plot this index for two other period of
     days of your choice.  Entering '0' will disable additional lines appearing
     on the plot.
+
+    <br />You can also optionally generate this plot for the same period of
+    days over different years of your choice.  When plotted over multiple
+    years, only "Number of Days #1' is considered.  An additional year is
+    plotted representing the best root mean squared error fit to the selected
+    year's data.
     """
     today = datetime.date.today()
     sts = today - datetime.timedelta(days=180)
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
-        dict(type='text', name='days', default=91,
+        dict(type='int', name='days', default=91,
              label='Number of Days #1'),
-        dict(type='text', name='days2', default=0,
+        dict(type='int', name='days2', default=0,
              label='Number of Days #2 (0 disables)'),
-        dict(type='text', name='days3', default=0,
+        dict(type='int', name='days3', default=0,
              label='Number of Days #3 (0 disables)'),
+        dict(type='year', name='year2', default=2004, optional=True,
+             label="Compare with year (optional):"),
+        dict(type='year', name='year3', default=2012, optional=True,
+             label="Compare with year (optional)"),
         dict(type='date', name='sdate', default=sts.strftime("%Y/%m/%d"),
              min='1893/01/01',
              label='Start Date of Plot'),
@@ -46,17 +58,19 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    station = fdict.get('station', 'IA0200')
-    network = fdict.get('network', 'IACLIMATE')
-    days = int(fdict.get('days', 91))
-    days2 = int(fdict.get('days2', 0))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    days = ctx['days']
+    days2 = ctx['days2']
     _days2 = days2 if days2 > 0 else 1
-    days3 = int(fdict.get('days3', 0))
+    days3 = ctx['days3']
     _days3 = days3 if days3 > 0 else 1
-    sts = datetime.datetime.strptime(fdict.get('sdate', '2015-12-25'),
-                                     '%Y-%m-%d')
-    ets = datetime.datetime.strptime(fdict.get('edate', '2015-12-25'),
-                                     '%Y-%m-%d')
+    sts = ctx['sdate']
+    ets = ctx['edate']
+    yrrange = ets.year - sts.year
+    year2 = ctx.get('year2')  # could be null!
+    year3 = ctx.get('year3')  # could be null!
     nt = NetworkTable(network)
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
@@ -91,44 +105,104 @@ def plotter(fdict):
     (a.sump2 - b.avg_sump2) / b.std_sump2 as p2,
     (a.avgt3 - b.avg_avgt3) / b.std_avgt3 as t3,
     (a.sump3 - b.avg_sump3) / b.std_sump3 as p3
-    from agg a JOIN agg2 b on (a.sday = b.sday) WHERE day >= %s and day <= %s
+    from agg a JOIN agg2 b on (a.sday = b.sday)
     ORDER by day ASC
     """, pgconn, params=(days - 1, days - 1, days - 1,
                          _days2 - 1, _days2 - 1, _days2 - 1,
                          _days3 - 1, _days3 - 1, _days3 - 1,
-                         station, days,
-                         sts, ets),
+                         station, days),
                   index_col='day')
     df['arridity'] = df['t'] - df['p']
     df['arridity2'] = df['t2'] - df['p2']
     df['arridity3'] = df['t3'] - df['p3']
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.plot(df.index.values, df['arridity'], color='r', lw=2,
-            label='%s days' % (days,))
-    maxval = df['arridity'].abs().max() + 0.25
-    if days2 > 0:
-        ax.plot(df.index.values, df['arridity2'], color='b', lw=2,
-                label='%s days' % (days2,))
-        maxval = max([maxval, df['arridity2'].abs().max() + 0.25])
-    if days3 > 0:
-        ax.plot(df.index.values, df['arridity3'], color='g', lw=2,
-                label='%s days' % (days3,))
-        maxval = max([maxval, df['arridity3'].abs().max() + 0.25])
+    if year2 is None:
+        df2 = df.loc[sts:ets]
+        ax.plot(df2.index.values, df2['arridity'], color='r', lw=2,
+                label='%s days' % (days,))
+        maxval = df2['arridity'].abs().max() + 0.25
+        if days2 > 0:
+            ax.plot(df2.index.values, df2['arridity2'], color='b', lw=2,
+                    label='%s days' % (days2,))
+            maxval = max([maxval, df2['arridity2'].abs().max() + 0.25])
+        if days3 > 0:
+            ax.plot(df2.index.values, df2['arridity3'], color='g', lw=2,
+                    label='%s days' % (days3,))
+            maxval = max([maxval, df2['arridity3'].abs().max() + 0.25])
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+        title = ""
+    else:
+        df2 = df.loc[sts:ets]
+        ax.plot(np.arange(len(df2.index)), df2['arridity'], color='r', lw=2,
+                label='%s' % (ets.year,))
+        maxval = df2['arridity'].abs().max() + 0.25
+        if year2 is not None:
+            sts2 = sts.replace(year=(year2 - yrrange))
+            ets2 = ets.replace(year=year2)
+            xticks = []
+            xticklabels = []
+            now = sts2
+            i = 0
+            while now < ets2:
+                if now.day == 1:
+                    xticks.append(i)
+                    xticklabels.append(now.strftime("%b"))
+                i += 1
+                now += datetime.timedelta(days=1)
+            ax.set_xticks(xticks)
+            ax.set_xticklabels(xticklabels)
+            df2 = df.loc[sts2:ets2]
+            ax.plot(np.arange(len(df2.index)), df2['arridity'], color='b',
+                    lw=2, label='%s' % (year2,))
+            maxval = max([maxval, df2['arridity'].abs().max() + 0.25])
+        if year3 is not None:
+            sts2 = sts.replace(year=(year3 - yrrange))
+            ets2 = ets.replace(year=year3)
+            df2 = df.loc[sts2:ets2]
+            ax.plot(np.arange(len(df2.index)), df2['arridity'], color='g',
+                    lw=2, label='%s' % (year3,))
+            maxval = max([maxval, df2['arridity'].abs().max() + 0.25])
+
+        # Compute year of best fit
+        arridity = df.loc[sts:ets, 'arridity'].values
+        mae = 100
+        useyear = None
+        for _year in range(1951, datetime.date.today().year + 1):
+            if _year == ets.year:
+                continue
+            sts2 = sts.replace(year=(_year - yrrange))
+            ets2 = ets.replace(year=_year)
+            arridity2 = df.loc[sts2:ets2, 'arridity'].values
+            sz = min([len(arridity2), len(arridity)])
+            error = (np.mean((arridity2[:sz] - arridity[:sz])**2))**0.5
+            if error < mae:
+                mae = error
+                useyear = _year
+        if useyear:
+            sts2 = sts.replace(year=(useyear - yrrange))
+            ets2 = ets.replace(year=useyear)
+            df2 = df.loc[sts2:ets2]
+            ax.plot(np.arange(len(df2.index)), df2['arridity'], color='k',
+                    lw=2, label='%s (%s best match)' % (useyear, ets.year))
+            maxval = max([maxval, df2['arridity'].abs().max() + 0.25])
+        title = "%s Day" % (days,)
+        ax.set_xlabel("%s to %s" % (sts.strftime("%-d %b"),
+                                    ets.strftime("%-d %b")))
     ax.grid(True)
-    ax.set_title(("%s [%s] %s Day Arridity Index\n"
+    ax.set_title(("%s [%s] %s Arridity Index\n"
                   "Std. High Temp Departure minus Std. Precip Departure"
-                  ) % (nt.sts[station]['name'], station, days))
+                  ) % (nt.sts[station]['name'], station, title))
     ax.set_ylim(0 - maxval, maxval)
     ax.set_ylabel("Arridity Index")
     ax.text(1.01, 0.75, "<-- More Water Stress", ha='left', va='center',
             transform=ax.transAxes, rotation=-90)
     ax.text(1.01, 0.25, "Less Water Stress -->", ha='left', va='center',
             transform=ax.transAxes, rotation=-90)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    ax.legend(ncol=3, loc='best')
+    ax.legend(ncol=4, loc='best', fontsize=10)
     return fig, df
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(year2=2016, sdate='2016-2-1', edate='2016-8-9',
+                 network='IACLIMATE'))
