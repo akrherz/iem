@@ -1,15 +1,16 @@
 <?php 
 include("../../../config/settings.inc.php");
 include_once "../../../include/myview.php";
+include("../../../include/forms.php"); 
+
 $t = new MyView();
 $t->title = "B548 Agronomy Time Series";
+$t->thispage = "networks-other";
 
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 $ts = mktime(0,0,0,$month, $day, $year);
-$THISPAGE = "networks-other";
-include("../../../include/forms.php"); 
 
 $battery = "";
 if ($ts < mktime(0,0,0,7,9,2006)) { 
@@ -30,6 +31,11 @@ $p = sprintf("ot_10min.phtml?year=%s&month=%s&day=%s", date("Y", $ts - 86400),
 		date("m", $ts - 86400), date("d", $ts - 86400) );
 
 $t->content = <<<EOF
+<ol class="breadcrumb">
+<li><a href="/other/">Other Networks</a></li>
+<li class="active">B548 Agronomy Server Room</li>
+</ol>
+
 <p>The IEM server resides in a room that is climate controlled by a 
 dedicated heat exchanger.  This page presents daily plots of logged 
 temperatures.  There are four one-wire sensors measuring ambient temperature.
@@ -57,11 +63,11 @@ cooled air departs the heat exchanger.</li>
 <p><a href="{$p}">View Previous Day</a> 
 &nbsp; &nbsp; <a href="{$n}">View Next Day</a> 
 
-<BR>
-  <img src="{$url}" ALT="Time Series">
-<BR>
+<br>
+  <img src="{$url}" alt="Time Series" class="img img-responsive">
+<br>
 {$battery}
-<BR>
+<br>
 
 <p>
 <strong>Interesting Data Traces</strong>
@@ -75,6 +81,8 @@ cooled air departs the heat exchanger.</li>
   <br />Flooding impacts ISU campus and the chilled water is shut off for a while.</li>
  <li><a href="ot_10min.phtml?year=2013&month=06&day=24">24 Jun 2013</a> 
   <br />Chilled water is turned off for an hour to check metering.</li>
+ <li><a href="ot_10min.phtml?year=2016&month=8&day=9">9 Aug 2016</a> 
+  <br />Fan bracket is repaired on heat exchanger.</li>
 </ul>
 
 EOF;
