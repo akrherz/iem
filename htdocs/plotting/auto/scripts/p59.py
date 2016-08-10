@@ -110,7 +110,9 @@ def plotter(fdict):
                      box.height * 0.9])
 
     ax = axes[1]
-    ax.plot(np.arange(1, 366), smooth(mag[:-1]), color='g', lw=2)
+    ax.plot(np.arange(1, 366), smooth(mag[:-1]), color='g', lw=2,
+            label='Speed Magnitude')
+    ax.legend(loc='best')
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365])
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_ylabel("Average Speed %s" % (PDICT[units],))
