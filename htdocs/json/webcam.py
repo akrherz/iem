@@ -12,6 +12,7 @@ import pytz
 dbconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 cursor = dbconn.cursor()
 
+
 def dance(cid, start_ts, end_ts):
     """ Go get the dictionary of data we need and deserve """
     data = {'images': []}
@@ -20,11 +21,15 @@ def dance(cid, start_ts, end_ts):
         cam = %s and valid >= %s and valid < %s
     """, (cid, start_ts, end_ts))
     for row in cursor:
-        uri = row[0].strftime("http://mesonet.agron.iastate.edu/archive/data/%Y/%m/%d/camera/"+cid+"/"+cid+"_%Y%m%d%H%M.jpg")
-        data['images'].append(dict(valid=row[0].strftime("%Y-%m-%dT%H:%M:00Z"), 
-                                   drct=row[1], href=uri))
-    
+        uri = row[0].strftime(("http://mesonet.agron.iastate.edu/archive/"
+                               "data/%Y/%m/%d/camera/" + cid + "/" +
+                               cid + "_%Y%m%d%H%M.jpg"))
+        data['images'].append(
+            dict(valid=row[0].strftime("%Y-%m-%dT%H:%M:00Z"),
+                 drct=row[1], href=uri))
+
     return data
+
 
 def main():
     """ Do something, one time """
@@ -44,7 +49,7 @@ def main():
         end_ts = end_ts.replace(tzinfo=pytz.timezone("UTC"))
 
     sys.stdout.write("Content-type: application/json\n\n")
-    sys.stdout.write( json.dumps( dance(cid, start_ts, end_ts) ) )
+    sys.stdout.write(json.dumps(dance(cid, start_ts, end_ts)))
 
 if __name__ == '__main__':
     main()

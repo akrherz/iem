@@ -9,17 +9,18 @@ import datetime
 import pytz
 import json
 
+
 def run(sts, ets, awipsid):
     """ Actually do some work! """
     import psycopg2
-    
+
     dbconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
-    
+
     res = {'results': []}
     cursor.execute("""
-    SELECT data, 
-    to_char(entered at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ'), 
+    SELECT data,
+    to_char(entered at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ'),
     source, wmo from products WHERE pil = %s
     and entered >= %s and entered < %s ORDER by entered ASC
     """, (awipsid, sts, ets))
@@ -30,6 +31,7 @@ def run(sts, ets, awipsid):
                                    cccc=row[2]))
     return json.dumps(res)
 
+
 def main():
     """ Do Stuff """
     sys.stdout.write("Content-type: application/json\n\n")
@@ -39,8 +41,8 @@ def main():
     sts = form.getfirst('sts')
     ets = form.getfirst('ets')
     cb = form.getfirst('callback', None)
-    
-    mckey = "/json/nwstext_search/%s/%s/%s?callback=%s" % (sts, ets, 
+
+    mckey = "/json/nwstext_search/%s/%s/%s?callback=%s" % (sts, ets,
                                                            awipsid, cb)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
@@ -52,16 +54,15 @@ def main():
         now = datetime.datetime.utcnow()
         now = now.replace(tzinfo=pytz.timezone("UTC"))
         cacheexpire = 0 if ets < now else 120
-            
+
         res = run(sts, ets, awipsid)
         mc.set(mckey, res, cacheexpire)
 
     if cb is None:
-        sys.stdout.write( res )
+        sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':
     main()
-    
