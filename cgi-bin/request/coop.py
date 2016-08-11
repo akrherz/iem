@@ -131,18 +131,18 @@ def do_apsim(ctx):
                 datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),))
     ssw("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
     ssw("! Station: %s %s\n" % (station, nt.sts[station]['name']))
-    ssw("! Data Period: %s - %s\n" % (ctx['sts'], 
+    ssw("! Data Period: %s - %s\n" % (ctx['sts'],
                                       ctx['ets']))
     if ctx['scenario'] == 'yes':
         ssw("! !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
                             ctx['ets'], ctx['scenario_year']))
 
     ssw("[weather.met.weather]\n")
-    ssw("latitude = %.1f (DECIMAL DEGREES)\n" % ( nt.sts[ station ]["lat"]) )
+    ssw("latitude = %.1f (DECIMAL DEGREES)\n" % (nt.sts[station]["lat"], ))
 
     # Compute average temperature!
     cursor.execute("""
-        SELECT avg((high+low)/2) as avgt from climate51 WHERE station = %s 
+        SELECT avg((high+low)/2) as avgt from climate51 WHERE station = %s
         """, (station,))
     row = cursor.fetchone()
     ssw("tav = %.3f (oC) ! annual average ambient temperature\n" % (
@@ -152,13 +152,14 @@ def do_apsim(ctx):
     cursor.execute("""
         select max(avg) as h, min(avg) as l from
             (SELECT extract(month from valid) as month, avg((high+low)/2.)
-             from climate51 
+             from climate51
              WHERE station = %s GROUP by month) as foo
-             """, (station,) )
+             """, (station,))
     row = cursor.fetchone()
-    ssw("amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n" % (
-        (temperature(row['h'], 'F').value('C') - 
-        temperature(row['l'], 'F').value('C')), ))
+    ssw(("amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n"
+         ) % (
+              (temperature(row['h'], 'F').value('C') -
+               temperature(row['l'], 'F').value('C'))))
 
     ssw("""year        day       radn       maxt       mint      rain
   ()         ()   (MJ/m^2)       (oC)       (oC)       (mm)\n""")
@@ -184,11 +185,12 @@ def do_apsim(ctx):
             """, (station, ctx['sts'], ctx['ets']))
     for row in cursor:
         srad = -99 if row['srad'] is None else row['srad']
-        ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % (
-            row["day"].year, int(row["doy"]), srad, 
-            temperature(row["high"], 'F').value('C'), 
-            temperature(row["low"], 'F').value('C'), 
-            row["precip"] * 25.4 ))
+        ssw(("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n"
+             ) % (
+                  row["day"].year, int(row["doy"]), srad,
+                  temperature(row["high"], 'F').value('C'),
+                  temperature(row["low"], 'F').value('C'),
+                  row["precip"] * 25.4))
 
     if len(extra) > 0:
         dec31 = datetime.date(thisyear, 12, 31)
@@ -196,42 +198,43 @@ def do_apsim(ctx):
         while now <= dec31:
             row = extra[now]
             srad = -99 if row['srad'] is None else row['srad']
-            ssw("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n" % ( 
-                now.year, int(row['doy']), srad, 
-                temperature(row["high"], 'F').value('C'), 
-                temperature(row["low"], 'F').value('C'), 
-                row["precip"] * 25.4 ) )
+            ssw(("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n"
+                 ) % (
+                      now.year, int(row['doy']), srad,
+                      temperature(row["high"], 'F').value('C'),
+                      temperature(row["low"], 'F').value('C'),
+                      row["precip"] * 25.4))
             now += datetime.timedelta(days=1)
 
 
-def do_century( ctx ):
-    """ Materialize the data in Century Format 
+def do_century(ctx):
+    """ Materialize the data in Century Format
     * Century format  (precip cm, avg high C, avg low C)
-    prec  1980   2.60   6.40   0.90   1.00   0.70   0.00  
+    prec  1980   2.60   6.40   0.90   1.00   0.70   0.00
     tmin  1980  14.66  12.10   7.33  -0.89  -5.45  -7.29
-    tmax  1980  33.24  30.50  27.00  18.37  11.35   9.90  
-    prec  1981  12.00   7.20   0.60   4.90   1.10   0.30 
-    tmin  1981  14.32  12.48   8.17   0.92  -3.25  -8.90 
-    tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82 
+    tmax  1980  33.24  30.50  27.00  18.37  11.35   9.90
+    prec  1981  12.00   7.20   0.60   4.90   1.10   0.30
+    tmin  1981  14.32  12.48   8.17   0.92  -3.25  -8.90
+    tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82
     """
     if len(ctx['stations']) > 1:
         ssw(("ERROR: Century output is only "
-                          +"permitted for one station at a time."))
+             "permitted for one station at a time."))
         return
 
     station = ctx['stations'][0]
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
-    
+
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     # Automatically set dates to start and end of year to make output clean
     sts = datetime.date(ctx['sts'].year, 1, 1)
     ets = datetime.date(ctx['ets'].year, 12, 31)
     if ets >= datetime.date.today():
         ets = datetime.date.today() - datetime.timedelta(days=1)
-    
+
     table = get_tablename(ctx['stations'])
     thisyear = datetime.datetime.now().year
     cursor.execute("""
@@ -245,23 +248,23 @@ def do_century( ctx ):
     ), data as (
       SELECT * from obs UNION select * from scenario
     )
-    
+
     SELECT year, month, avg(high) as tmax, avg(low) as tmin,
     sum(precip) as prec from data GROUP by year, month
-    """, (station, ctx['scenario_sts'], ctx['scenario_ets'], 
+    """, (station, ctx['scenario_sts'], ctx['scenario_ets'],
           station, sts, ets))
     data = {}
     for row in cursor:
-        if not data.has_key(row['year']):
-            data[ row['year'] ] = {}
+        if row['year'] not in data:
+            data[row['year']] = {}
             for mo in range(1, 13):
-                data[ row['year'] ][mo] = {'prec': -99, 'tmin': -99,
-                                           'tmax': -99}
-        
-        data[ row['year'] ][ row['month'] ] = {
-             'prec' :  distance(row['prec'], 'IN').value('MM'),
-             'tmin' : temperature(float(row['tmin']), 'F').value('C'),
-             'tmax' : temperature(float(row['tmax']), 'F').value('C'),
+                data[row['year']][mo] = {'prec': -99, 'tmin': -99,
+                                         'tmax': -99}
+
+        data[row['year']][row['month']] = {
+             'prec': distance(row['prec'], 'IN').value('MM'),
+             'tmin': temperature(float(row['tmin']), 'F').value('C'),
+             'tmax': temperature(float(row['tmax']), 'F').value('C'),
             }
 
     ssw("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
@@ -277,21 +280,23 @@ def do_century( ctx ):
     for year in range(sts.year, ets.year+1):
         for idx in idxs:
             ssw(("%s  %s%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f"
-                    +"%7.2f%7.2f%7.2f%7.2f%7.2f\n") % (idx, year,
-                    data[year][1][idx], data[year][2][idx],
-                    data[year][3][idx], data[year][4][idx],
-                    data[year][5][idx], data[year][6][idx],
-                    data[year][7][idx], data[year][8][idx],
-                    data[year][9][idx], data[year][10][idx],
-                    data[year][11][idx], data[year][12][idx]
-                    ))
+                 "%7.2f%7.2f%7.2f%7.2f%7.2f\n"
+                 ) % (idx, year,
+                      data[year][1][idx], data[year][2][idx],
+                      data[year][3][idx], data[year][4][idx],
+                      data[year][5][idx], data[year][6][idx],
+                      data[year][7][idx], data[year][8][idx],
+                      data[year][9][idx], data[year][10][idx],
+                      data[year][11][idx], data[year][12][idx]
+                      ))
+
 
 def do_daycent(ctx):
     """ Materialize data for daycent
 
     Daily Weather Data File (use extra weather drivers = 0):
     > 1 1 1990 1 7.040 -10.300 0.000
- 
+
     NOTES:
     Column 1 - Day of month, 1-31
     Column 2 - Month of year, 1-12
@@ -299,18 +304,18 @@ def do_daycent(ctx):
     Column 4 - Day of the year, 1-366
     Column 5 - Maximum temperature for day, degrees C
     Column 6 - Minimum temperature for day, degrees C
-    Column 7 - Precipitation for day, centimeters    
+    Column 7 - Precipitation for day, centimeters
     """
     if len(ctx['stations']) > 1:
         ssw(("ERROR: Daycent output is only "
-                          +"permitted for one station at a time."))
+             "permitted for one station at a time."))
         return
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     table = get_tablename(ctx['stations'])
-    
+
     extra = {}
     thisyear = datetime.datetime.now().year
     if ctx['scenario'] == 'yes':
@@ -318,47 +323,49 @@ def do_daycent(ctx):
         ets = datetime.datetime(int(ctx['scenario_year']), 12, 31)
         cursor.execute("""
             SELECT day, high, low, precip
-            from """+table+""" WHERE station = %s 
+            from """ + table + """ WHERE station = %s
             and day >= %s and day <= %s
             """, (ctx['stations'][0], sts, ets))
         for row in cursor:
             ts = row[0].replace(year=thisyear)
-            extra[ ts ] = row
-        febtest = datetime.date(thisyear, 3, 1 ) - datetime.timedelta(days=1)
-        if not extra.has_key(febtest):
+            extra[ts] = row
+        febtest = datetime.date(thisyear, 3, 1) - datetime.timedelta(days=1)
+        if febtest not in extra:
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
     if ctx.get('hayhoe_model') is not None:
         cursor.execute("""
             SELECT day, high, low, precip,
             extract(doy from day) as doy
-            from hayhoe_daily WHERE station = %s 
+            from hayhoe_daily WHERE station = %s
             and day >= %s and scenario = %s and model = %s
             ORDER by day ASC
         """, (ctx['stations'][0], ctx['sts'],
-              ctx['hayhoe_scenario'], ctx['hayhoe_model']) )        
+              ctx['hayhoe_scenario'], ctx['hayhoe_model']))
     else:
         cursor.execute("""
             SELECT day, high, low, precip,
             extract(doy from day) as doy
-            from """+table+""" WHERE station = %s 
+            from """ + table + """ WHERE station = %s
             and day >= %s and day <= %s ORDER by day ASC
-        """, (ctx['stations'][0], ctx['sts'], ctx['ets']) )
+        """, (ctx['stations'][0], ctx['sts'], ctx['ets']))
     ssw("Daily Weather Data File (use extra weather drivers = 0):\n\n")
     for row in cursor:
-        ssw("%s %s %s %s %.2f %.2f %.2f\n" % (row["day"].day, 
-            row["day"].month, row["day"].year, int(row["doy"]),
-            f2c(row["high"]), f2c(row["low"]),
-            distance(row["precip"], 'IN').value('CM')))
+        ssw(("%s %s %s %s %.2f %.2f %.2f\n"
+             ) % (row["day"].day,
+                  row["day"].month, row["day"].year, int(row["doy"]),
+                  f2c(row["high"]), f2c(row["low"]),
+                  distance(row["precip"], 'IN').value('CM')))
     if len(extra) > 0:
         dec31 = datetime.date(thisyear, 12, 31)
         now = row['day']
         while now <= dec31:
             row = extra[now]
-            ssw("%s %s %s %s %.2f %.2f %.2f\n" % (now.day, 
-                now.month,  now.year, int(now.strftime("%j")), 
-                f2c(row["high"]), f2c(row["low"]),
-                distance(row["precip"], 'IN').value('CM')))
+            ssw(("%s %s %s %s %.2f %.2f %.2f\n"
+                 ) % (now.day,
+                      now.month,  now.year, int(now.strftime("%j")),
+                      f2c(row["high"]), f2c(row["low"]),
+                      distance(row["precip"], 'IN').value('CM')))
             now += datetime.timedelta(days=1)
 
 
@@ -367,7 +374,7 @@ def get_tablename(stations):
     states = []
     for sid in stations:
         if sid[:2] not in states:
-            states.append( sid[:2])
+            states.append(sid[:2])
     if len(states) == 1:
         return "alldata_%s" % (states[0],)
     return "alldata"
@@ -473,10 +480,9 @@ def do_simple(ctx):
         ssw("# !SCENARIO DATA! inserted after: %s replicating year: %s\n" % (
                             ctx['ets'], ctx['scenario_year']))
 
-
     p = {'comma': ',', 'tab': '\t', 'space': ' '}
-    d = p[ ctx['delim'] ]
-    ssw( d.join( cols ) +"\r\n")
+    d = p[ctx['delim']]
+    ssw(d.join(cols) + "\r\n")
 
     for row in cursor:
         sid = row["station"]
@@ -495,113 +501,115 @@ def do_salus(ctx):
     """ Generate SALUS
     StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum
     CTRL, 1981, 1, 5.62203, 2.79032, -3.53361, 5.43766, NaN, NaN, NaN, 2
-    CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3 
+    CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     """
     if len(ctx['stations']) > 1:
         ssw(("ERROR: SALUS output is only "
-                          +"permitted for one station at a time."))
+             "permitted for one station at a time."))
         return
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    scenario_year = 2030    
+
+    scenario_year = 2030
     asts = datetime.date(2030, 1, 1)
     if ctx['scenario'] == 'yes':
         # Tricky!
         scenario_year = ctx['scenario_year']
         today = datetime.date.today()
         asts = datetime.date(scenario_year, today.month, today.day)
-    
+
     table = get_tablename(ctx['stations'])
     station = ctx['stations'][0]
     thisyear = datetime.datetime.now().year
     cursor.execute("""
     WITH scenario as (
-        SELECT 
-    ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
+        SELECT
+ ('""" + str(thisyear) + """-'||month||'-'||extract(day from day))::date as day,
         high, low, precip, station,
-        coalesce(narr_srad, merra_srad, hrrr_srad) as srad 
-        from """+table+""" WHERE station = %s and 
-        day >= %s and year = %s
-    ), obs as (    
-        SELECT day, 
-        high, low, precip,  station, 
         coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-        from """+table+""" WHERE station = %s and 
+        from """ + table + """ WHERE station = %s and
+        day >= %s and year = %s
+    ), obs as (
+        SELECT day,
+        high, low, precip,  station,
+        coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+        from """ + table + """ WHERE station = %s and
         day >= %s and day <= %s ORDER by day ASC
     ), total as (
-        SELECT *, extract(doy from day) as doy from obs 
+        SELECT *, extract(doy from day) as doy from obs
         UNION SELECT * from scenario
     )
-    
+
     SELECT * from total ORDER by day ASC
-    """, (station, asts, scenario_year, station, ctx['sts'], ctx['ets']) )
+    """, (station, asts, scenario_year, station, ctx['sts'], ctx['ets']))
     ssw(("StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, "
-         +"Wind, Par, dbnum\n"))
+         "Wind, Par, dbnum\n"))
     for i, row in enumerate(cursor):
         srad = -99 if row['srad'] is None else row['srad']
-        ssw("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n" % ( 
-                station[:4], row["day"].year,
-                int(row["doy"]), srad,  
-                temperature(row["high"], 'F').value('C'), 
-                temperature(row["low"], 'F').value('C'), 
-                row["precip"] * 25.4, i + 2))
+        ssw(("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n"
+             ) % (
+                  station[:4], row["day"].year,
+                  int(row["doy"]), srad,
+                  temperature(row["high"], 'F').value('C'),
+                  temperature(row["low"], 'F').value('C'),
+                  row["precip"] * 25.4, i + 2))
 
-def do_dndc( ctx ):
-    """ Process DNDC 
+
+def do_dndc(ctx):
+    """ Process DNDC
     * One file per year! named StationName / StationName_YYYY.txt
     * julian day, tmax C , tmin C, precip cm seperated by space
     """
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     table = get_tablename(ctx['stations'])
-    
+
     nt = get_stationtable(ctx['stations'])
-    
+
     if len(ctx['stations']) == 1:
         ctx['stations'].append('X')
-        
-    scenario_year = 2030    
+
+    scenario_year = 2030
     asts = datetime.date(2030, 1, 1)
     if ctx['scenario'] == 'yes':
         # Tricky!
         scenario_year = ctx['scenario_year']
         today = datetime.date.today()
         asts = datetime.date(scenario_year, today.month, today.day)
-        
+
     thisyear = datetime.datetime.now().year
     cursor.execute("""
         WITH scenario as (
-            SELECT 
+            SELECT
     ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
             high, low, precip, station from """+table+"""
-            WHERE station IN """+ str(tuple(ctx['stations'])) +""" and 
+            WHERE station IN """ + str(tuple(ctx['stations'])) + """ and
             day >= %s and year = %s),
         obs as (
-            SELECT day, high, low, precip, station from """+table+"""
-            WHERE station IN """+ str(tuple(ctx['stations'])) +""" and 
+            SELECT day, high, low, precip, station from """ + table + """
+            WHERE station IN """ + str(tuple(ctx['stations'])) + """ and
             day >= %s and day <= %s),
         total as (
-            SELECT *, extract(doy from day) as doy from obs UNION 
+            SELECT *, extract(doy from day) as doy from obs UNION
             SELECT *, extract(doy from day) as doy from scenario
         )
-        
-        SELECT * from total ORDER by day ASC 
+
+        SELECT * from total ORDER by day ASC
     """, (asts, scenario_year, ctx['sts'], ctx['ets']))
     zipfiles = {}
     for row in cursor:
         station = row['station']
         sname = nt.sts[station]['name'].replace(" ", "_")
         fn = "%s/%s_%s.txt" % (sname, sname, row['day'].year)
-        if not zipfiles.has_key(fn):
+        if fn not in zipfiles:
             zipfiles[fn] = ""
-        zipfiles[fn] += "%s %.2f %.2f %.2f\n" % ( 
-                        int(row["doy"]), 
-                        temperature(row["high"], 'F').value('C'), 
-                        temperature(row["low"], 'F').value('C'), 
-                        row["precip"] * 2.54 )
+        zipfiles[fn] += ("%s %.2f %.2f %.2f\n"
+                         ) % (int(row["doy"]),
+                              temperature(row["high"], 'F').value('C'),
+                              temperature(row["low"], 'F').value('C'),
+                              row["precip"] * 2.54)
 
     sio = StringIO.StringIO()
     z = zipfile.ZipFile(sio, 'a')
