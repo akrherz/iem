@@ -408,7 +408,7 @@ def do_simple(ctx):
         merra_srad, merra_srad_cs, hrrr_srad,
  to_char(('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date,
         'YYYY/mm/dd') as day,
-        extract(doy from day) as julianday,
+        extract(doy from day) as doy,
         gddxx(50, 86, high, low) as gdd_50_86,
         gddxx(40, 86, high, low) as gdd_40_86,
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
@@ -421,7 +421,7 @@ def do_simple(ctx):
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         merra_srad, merra_srad_cs, hrrr_srad,
         to_char(day, 'YYYY/mm/dd') as day,
-        extract(doy from day) as julianday,
+        extract(doy from day) as doy,
         gddxx(50, 86, high, low) as gdd_50_86,
         gddxx(40, 86, high, low) as gdd_40_86,
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
@@ -437,7 +437,7 @@ def do_simple(ctx):
     SELECT * from total ORDER by day ASC"""
     args = (ctx['scenario_sts'], ctx['scenario_ets'], ctx['sts'], ctx['ets'])
 
-    cols = ['station', 'station_name', 'day', 'julianday']
+    cols = ['station', 'station_name', 'day', 'doy']
     if ctx['inclatlon'] == 'yes':
         cols.insert(2, 'lat')
         cols.insert(3, 'lon')
@@ -484,14 +484,14 @@ def do_simple(ctx):
         dc['station_name'] = nt.sts[sid]['name']
         dc['lat'] = "%.4f" % (nt.sts[sid]['lat'],)
         dc['lon'] = "%.4f" % (nt.sts[sid]['lon'],)
-        dc['julianday'] = "%.0f" % (dc['julianday'],)
+        dc['doy'] = "%.0f" % (dc['doy'],)
         res = []
         for n in cols:
-            res.append( str(dc[n]) )
-        ssw( (d.join(res)).replace("None", "M") +"\r\n")
+            res.append(str(dc[n]))
+        ssw((d.join(res)).replace("None", "M") + "\r\n")
 
 
-def do_salus( ctx ):
+def do_salus(ctx):
     """ Generate SALUS
     StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum
     CTRL, 1981, 1, 5.62203, 2.79032, -3.53361, 5.43766, NaN, NaN, NaN, 2
