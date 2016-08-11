@@ -9,7 +9,7 @@ import sys
 import datetime
 import pytz
 import psycopg2.extras
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
 
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
@@ -183,12 +183,14 @@ def main():
                     r.append("M")
             elif data1 == 'sped':
                 if row['sknt'] >= 0:
-                    r.append("%.1f" % (row['sknt'] * 1.14, ))
+                    r.append("%.1f" % (speed(row['sknt'],
+                                             'KT').value('MPH'), ))
                 else:
                     r.append("M")
             elif data1 == 'gust_mph':
                 if row['gust'] >= 0:
-                    r.append("%.1f" % (row['gust'] * 1.14, ))
+                    r.append("%.1f" % (speed(row['gust'],
+                                             'KT').value('MPH'), ))
                 else:
                     r.append("M")
             elif data1 == 'p01m':
