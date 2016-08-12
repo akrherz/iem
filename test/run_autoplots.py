@@ -53,6 +53,9 @@ def main():
             timing.append({'i': i, 'fmt': fmt,
                            'secs': (ets - sts).total_seconds()})
         i += 1
+    if len(timing) == 0:
+        print("WARNING: no timing results found!")
+        return
     df = pd.DataFrame(timing)
     df.set_index('i', inplace=True)
     df.sort_values('secs', ascending=False, inplace=True)
