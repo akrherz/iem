@@ -13,9 +13,10 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq python-psycopg2
   - sudo apt-get install apache2
-  - sudo mkdir -p /etc/apache2/conf.d
-  - sudo cp -f config/00iem.conf /etc/apache2/sites-available/
-  - sudo cp config/mesonet.inc /etc/apache2/conf.d/
+# we do things the old fashioned way, we earn it
+  - sudo echo "<VirtualHost *:80>" > /etc/apache2/sites-available/iem.conf
+  - sudo cat config/00iem.conf >> /etc/apache2/sites-available/iem.conf
+  - sudo echo "</VirtualHost>" >> /etc/apache2/sites-available/iem.conf
   - sudo service apache2 restart
   - "pip install pandas"
   - "pip install requests"
