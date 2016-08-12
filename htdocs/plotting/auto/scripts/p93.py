@@ -65,7 +65,7 @@ def plotter(fdict):
     df = read_sql("""
     SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf,
     avg(dwpf)::int as dwpf
-    from alldata WHERE station = %s and tmpf >= 50 and dwpf >= 30
+    from alldata WHERE station = %s and tmpf >= 50
     and dwpf <= tmpf and valid > '1973-01-01'
     and report_type = 2 """ + doylimiter + """ GROUP by d
     """, ASOS, params=(station, ), index_col=None)
