@@ -2,6 +2,7 @@ sudo: required
 addons:
   hosts:
     - iemdb
+    - iem.local
 virtualenv:
   system_site_packages: true
 language: python
@@ -13,8 +14,13 @@ before_install:
   - sudo apt-get install -qq python-psycopg2
   - sudo apt-get install apache2
   - sudo service apache2 restart
+  - "pip install pandas"
+  - "pip install requests"
 install:
   - "pip install --upgrade pip"
 before_script:
   - cd database; sh bootstrap.sh
-  - cd database; python schema_manager.py
+  - python schema_manager.py
+  - cd ..
+script:
+  - python test/run_autoplots.py
