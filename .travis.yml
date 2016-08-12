@@ -11,6 +11,8 @@ before_install:
   - sudo add-apt-repository ppa:ubuntugis/ppa -y
   - sudo apt-get update -qq
   - sudo apt-get install -qq python-psycopg2
+  - sudo apt-get install apache2
+  - sudo service apache2 restart
 install:
   - "pip install --upgrade pip"
 before_script:
