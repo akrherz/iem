@@ -110,7 +110,7 @@ run
 exit
 """ % (stid,))
     o.close()
-    r = subprocess.Popen("sflist < fn", stdin=subprocess.PIPE,
+    r = subprocess.Popen("timeout 30 sflist < fn", stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True)
     # need to make this sync, so that fn2 is accurate
