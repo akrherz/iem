@@ -8,6 +8,7 @@
   ServerAlias mesonet1.agron.iastate.edu
   ServerAlias mesonet2.agron.iastate.edu
   ServerAlias mesonet3.agron.iastate.edu
+  ServerAlias iem.local
   ServerAdmin akrherz@iastate.edu
   DocumentRoot /mesonet/www/apps/iemwebsite/htdocs
   CustomLog /mesonet/www/logs/access_log combined
