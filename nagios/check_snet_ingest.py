@@ -21,7 +21,7 @@ if __name__ == '__main__':
         counts[row[0]] = row[1]
         total += row[1]
 
-    if total > 30:
+    if total > 20:
         print(('OK - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(0)
