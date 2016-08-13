@@ -14,6 +14,7 @@ before_install:
   - sudo apt-get install -qq python-psycopg2
   - sudo apt-get install apache2 libapache2-mod-wsgi
   - sudo a2enmod headers
+  - sudo a2enmod rewrite
 # we do things the old fashioned way, we earn it
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/conf.d/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/conf.d/iem.conf > /dev/null
