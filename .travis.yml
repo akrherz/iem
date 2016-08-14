@@ -18,8 +18,7 @@ before_install:
   - sudo a2enmod headers
   - sudo a2enmod rewrite
   - sudo a2enmod proxy
-  - echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/fqdn.conf
-  - sudo a2enconf fqdn
+  - echo "ServerName localhost" | sudo tee /etc/apache2/conf.d/fqdn
 # we do things the old fashioned way, we earn it
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/conf.d/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/conf.d/iem.conf > /dev/null
