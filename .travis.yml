@@ -10,6 +10,7 @@ python:
   - "2.7"
 before_install:
   - sudo mkdir -p /mesonet/www/apps
+  - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /mesonet/www/apps/iemwebsite
   - sudo add-apt-repository ppa:ubuntugis/ppa -y
   - sudo apt-get update -qq
