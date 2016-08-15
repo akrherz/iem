@@ -796,7 +796,7 @@ CREATE TABLE text_products (
 );
 select addgeometrycolumn('','text_products','geom',4326,'MULTIPOLYGON',2);
 
-grant select on text_products to apache;
+grant select on text_products to apache,nobody;
 
 create index text_products_idx 
   on text_products(product_id);
@@ -812,7 +812,7 @@ CREATE TABLE riverpro (
     severity character(1)
 );
 
-grant select on riverpro to apache;
+grant select on riverpro to apache,nobody;
 
 CREATE UNIQUE INDEX riverpro_nwsli_idx ON riverpro USING btree (nwsli);
 
@@ -846,7 +846,7 @@ CREATE TABLE warnings (
 ) WITH OIDS;
 select addgeometrycolumn('','warnings','geom',4326,'MULTIPOLYGON',2);
 
-grant select on warnings to apache;
+grant select on warnings to apache,nobody;
 
 CREATE TABLE warnings_1986() inherits (warnings);
 CREATE INDEX warnings_1986_combo_idx on 
@@ -1194,7 +1194,7 @@ select addgeometrycolumn('','sbw','geom',4326,'MULTIPOLYGON',2);
 select addGeometryColumn('sbw', 'tml_geom', 4326, 'POINT', 2);
 select addGeometryColumn('sbw', 'tml_geom_line', 4326, 'LINESTRING', 2);
 
-grant select on sbw to apache;
+grant select on sbw to apache,nobody;
 
 CREATE table sbw_2002() inherits (sbw);
 create index sbw_2002_idx on sbw_2002(wfo,eventid,significance,phenomena);
@@ -1621,7 +1621,7 @@ CREATE TABLE hvtec_nwsli (
 );
 
 select addgeometrycolumn('','hvtec_nwsli','geom',4326,'POINT',2);
-grant select on hvtec_nwsli to apache;
+grant select on hvtec_nwsli to apache,nobody;
 
 ---
 --- UGC Lookup Table
