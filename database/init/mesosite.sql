@@ -50,9 +50,6 @@ CREATE TABLE iembot_social_log(
   response_code int
 );
 CREATE index iembot_social_log_valid_idx on iembot_social_log(valid);
-ALTER TABLE iembot_social_log OWNER to nwschatwrite;
-GRANT SELECT on iembot_social_log to nwschatread;
-
 
 ---
 --- networks we process!
