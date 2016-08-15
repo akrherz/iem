@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2016, 8, 12, 9, 0)
+sts = datetime.datetime(2016, 8, 12, 5, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2016, 8, 14, 5, 0)
+ets = datetime.datetime(2016, 8, 14, 0, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/Chicago'
-station = 'LFT'
+station = 'BTR'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -107,10 +107,10 @@ ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.7, 0.4), prop=prop, ncol=1)
-ax.set_ylim(0, 21)  # int(np.max(rate1)+5))
-ax.set_yticks(range(0, 22, 3))
+ax.set_ylim(0, 15)  # int(np.max(rate1)+5))
+ax.set_yticks(range(0, 15, 2))
 ax.set_xlabel("12-13 Aug 2016 (Central Daylight Time)")
-ax.set_title(("12-13 Aug 2016 Lafayette Regional, LA (KLFT)\n"
+ax.set_title(("12-13 Aug 2016 Baton Rouge, LA (KBTR)\n"
               "One Minute Rainfall, %.2f inches total plotted") % (prec[-1],))
 
 
