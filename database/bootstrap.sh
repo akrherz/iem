@@ -9,8 +9,8 @@ asos  hads      mos        rwis     squaw \
 awos iem       other      scan     wepp \
 coop isuag      portfolio  smos
 do
-  psql -c "create database $db;" -U postgres
-  psql -f init/${db}.sql -U postgres $db
+ psql -c "create database $db;" -U postgres
+ psql -f init/${db}.sql -U postgres -q $db
 done
 
 

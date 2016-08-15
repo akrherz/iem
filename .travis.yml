@@ -1,8 +1,10 @@
 sudo: required
+dist: trusty
 addons:
   hosts:
     - iemdb
     - iem.local
+    - iem-memcached
 virtualenv:
   system_site_packages: true
 language: python
@@ -12,21 +14,26 @@ before_install:
   - sudo mkdir -p /mesonet/www/apps
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /mesonet/www/apps/iemwebsite
+  - echo `pwd`
+  - chmod 755 $HOME
   - sudo add-apt-repository ppa:ubuntugis/ppa -y
   - sudo apt-get update -qq
-  - sudo apt-get install -qq python-psycopg2 python-numpy
-  - sudo apt-get install apache2 libapache2-mod-wsgi
-  - sudo a2enmod headers
-  - sudo a2enmod rewrite
-  - sudo a2enmod proxy
-  - echo "ServerName localhost" | sudo tee /etc/apache2/conf.d/fqdn
+  - sudo apt-get install -qq python-matplotlib python-psycopg2 python-numpy python-scipy python-memcache libhdf5-serial-dev hdf5-tools
+  - sudo apt-get install apache2 libapache2-mod-wsgi memcached libnetcdf-dev
+  - sudo service memcached start
+  - sudo a2enmod headers rewrite proxy cgi
 # we do things the old fashioned way, we earn it
-  - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/conf.d/iem.conf > /dev/null
-  - cat config/mesonet.inc | sudo tee -a /etc/apache2/conf.d/iem.conf > /dev/null
-  - echo '</VirtualHost>' | sudo tee -a /etc/apache2/conf.d/iem.conf > /dev/null
+  - sudo a2dissite 000-default.conf
+  - sudo cp config/mesonetdir.conf /etc/apache2/sites-enabled/
+  - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
+  - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
+  - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
-  - "pip install pandas"
-  - "pip install requests"
+  # apt provided requests, pandas is too old
+  - "sudo pip install requests"
+  - "sudo pip install pandas"
+  - "sudo pip install netCDF4"
+  - "sudo pip install -e git+https://github.com/akrherz/pyIEM.git#egg=pyIEM"
 install:
   - "pip install --upgrade pip"
 before_script:

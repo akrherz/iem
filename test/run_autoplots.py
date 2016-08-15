@@ -15,7 +15,11 @@ def get_formats(i):
         print("%s. %s -> HTTP: %s" % (i, uri, res.status_code))
         print(res.text)
         return
-    json = res.json()
+    try:
+        json = res.json()
+    except:
+        print("%s %s -> json failed" % (i, res.content))
+        return
     fmts = ['png', ]
     if 'report' in json and json['report']:
         fmts.append('txt')
