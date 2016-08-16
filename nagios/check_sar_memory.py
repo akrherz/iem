@@ -17,7 +17,12 @@ def process(res):
            ) % (tokens[3], tokens[1], tokens[2], tokens[3], tokens[4],
                 tokens[5], tokens[6], tokens[7], tokens[8], tokens[9],
                 tokens[10]))
-    sys.exit(0)
+    if float(tokens[3]) > 95:
+        sys.exit(2)
+    elif float(tokens[3]) > 90:
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 
 def main():
