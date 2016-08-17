@@ -116,7 +116,8 @@ data = {'plots': [
         {'id': "9", 'mw': True, 'label': ("Growing Degree Day Climatology "
                                           "and Daily Values for one Year")},
         {'id': "42",
-         'label': "Hourly Temperature Streaks Above/Below Threshold"},
+         'label': ("Hourly Temperature/Dew Point "
+                   "Streaks Above/Below Threshold")},
         {'id': "154",
          'label': "Hourly Temperature Averages by Month"},
         {'id': "85",
