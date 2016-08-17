@@ -36,7 +36,8 @@ def do_iowa_azos():
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     df = read_sql("""
     select id, n.name as station, st_y(geom) as latitude,
-    st_x(geom) as longitude, s.day, s.max_tmpf as high, s.min_tmpf as low
+    st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
+    s.min_tmpf::int as low
     from stations n JOIN """ + table + """ s on (n.iemid = s.iemid)
     WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
     """, pgconn, params=(yesterday,))
