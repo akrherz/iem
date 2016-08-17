@@ -5,6 +5,7 @@ first four columns need to be
 ID,Station,Latitude,Longitude
 """
 import cgi
+import datetime
 import sys
 import psycopg2
 from pandas.io.sql import read_sql
@@ -28,6 +29,20 @@ def do_webcams(network):
     return df
 
 
+def do_iowa_azos():
+    """Dump high and lows for Iowa ASOS + AWOS """
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    table = "summary_%s" % (yesterday.year,)
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    df = read_sql("""
+    select id, n.name as station, st_y(geom) as latitude,
+    st_x(geom) as longitude, s.day, s.max_tmpf as high, s.min_tmpf as low
+    from stations n JOIN """ + table + """ s on (n.iemid = s.iemid)
+    WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
+    """, pgconn, params=(yesterday,))
+    return df
+
+
 def router(q):
     """Process and return dataframe"""
     if q == 'iaroadcond':
@@ -40,6 +55,8 @@ def router(q):
         df = do_iariver()
     elif q == 'isusm':
         df = do_isusm()
+    elif q == 'iowayesterday':
+        df = do_iowa_azos()
     elif q == 'kcrgcitycam':
         df = do_webcams('KCRG')
     else:
