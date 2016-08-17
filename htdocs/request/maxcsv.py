@@ -29,10 +29,9 @@ def do_webcams(network):
     return df
 
 
-def do_iowa_azos():
+def do_iowa_azos(date):
     """Dump high and lows for Iowa ASOS + AWOS """
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    table = "summary_%s" % (yesterday.year,)
+    table = "summary_%s" % (date.year,)
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     df = read_sql("""
     select id, n.name as station, st_y(geom) as latitude,
@@ -40,7 +39,7 @@ def do_iowa_azos():
     s.min_tmpf::int as low
     from stations n JOIN """ + table + """ s on (n.iemid = s.iemid)
     WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
-    """, pgconn, params=(yesterday,))
+    """, pgconn, params=(date,))
     return df
 
 
@@ -57,7 +56,9 @@ def router(q):
     elif q == 'isusm':
         df = do_isusm()
     elif q == 'iowayesterday':
-        df = do_iowa_azos()
+        df = do_iowa_azos(datetime.date.today() - datetime.timedelta(days=1))
+    elif q == 'iowatoday':
+        df = do_iowa_azos(datetime.date.today())
     elif q == 'kcrgcitycam':
         df = do_webcams('KCRG')
     else:
