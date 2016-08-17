@@ -269,6 +269,8 @@ data = {'plots': [
          'label': ("Single Sounding Mandatory Level Percentile Ranks")},
     ]},
     {'label': 'NASS Quickstats (USDA Crop Statistics)', 'options': [
+        {'id': "156",
+         'label': ("Crop Condition by Year for Six States")},
         {'id': "127",
          'label': ("Crop Progress by Year")},
     ]},
