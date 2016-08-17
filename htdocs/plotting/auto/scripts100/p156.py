@@ -99,8 +99,8 @@ def plotter(fdict):
                 else:
                     ax[row, col].plot(s2.index.values,
                                       s2['num_value'].values, c='tan')
-            if row == 1 and col == 1:
-                ax[row, col].legend(ncol=5, loc=(-0.95, 1.02), prop=prop)
+            if row == 0 and col == 0:
+                ax[row, col].legend(ncol=5, loc=(0.4, -0.19), prop=prop)
             ax[row, col].set_xticks((121, 152, 182, 213, 244, 274, 305,
                                      335, 365))
             ax[row, col].set_xticklabels(calendar.month_abbr[5:])
@@ -127,4 +127,4 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(commodity_desc='SOYBEAN', y1=2012, y2=2005, y3=1988, y4=1993))
