@@ -81,7 +81,7 @@ def main():
       GROUP by station ORDER by station DESC
       """ % (s.strftime("%Y-%m-%d %H:%M"), e.strftime("%Y-%m-%d %H:%M")))
     row = acursor.fetchone()
-    awind = row[0]
+    awind = row[1]
 
     print 'Content-type: text/plain\n\n'
     print '  Orange City Climate Summary\n'
