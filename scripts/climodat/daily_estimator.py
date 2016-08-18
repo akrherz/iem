@@ -65,6 +65,21 @@ HARDCODE = {
     'WI4370': 'LSE',
     # AUW Wausau is missing
 
+    'KS8830': 'ICT',
+    'KS2164': 'DDC',
+    'KS3153': 'GLD',
+    'KS4559': 'LWC',
+    'KS4972': 'MHK',
+    'KS9999': 'SLN',
+    'KS8167': 'TOP',
+    # KCNK | KS7248       | CONCORDIA
+    # KCNU | KS3984       | CHANUTE
+    # KEMP | KS4937       | EMPORIA
+    # KGCK | KS2980       | GARDEN_CITY
+    # KHLC | KS8498       | HILL_CITY
+    # KOJC | KS7809       | OLATHE (OJC)
+    # KP28 | KS6549       | MEDICINE_LODGE
+
     }
 
 # Pre-compute the grid location of each climate site
