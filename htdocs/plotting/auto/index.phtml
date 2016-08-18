@@ -232,7 +232,7 @@ EOF;
 			$thisrow = sprintf("%s &nbsp; %s", $netselect, $netselect2);
 		}
 		elseif ($v->type == "state"){
-			$netselect = stateSelect($value);
+			$netselect = stateSelect($value, '', $v->name);
 			$thisrow = $netselect;
 		}
 		elseif ($v->type == "clstate"){
