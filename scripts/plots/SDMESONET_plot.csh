@@ -1,9 +1,4 @@
 #!/bin/csh
-#		SDMESONET_plot.csh
-#  Adapted from IAMESONET_plot.csh eh?
-#  9 Jan 2003:	Use RUC2 ISOBARS
-# 17 Feb 2003:	Use GIF driver
-#####################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -14,12 +9,12 @@ set mm=`date -u +%m`
 set dd=`date -u +%d`
 set date=${yy}${mm}${dd}
 set hh=`date -u +%H`
-
+set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
 set nicetime=`date +"%b %d %I %p"`
 
 rm mesonet.gif* >& /dev/null
 
-set DEVICE="GIF|mesonet.gif|700;500"
+set DEVICE="GIF|mesonet.gif|900;700"
 set AREA="42.6;-104.5;46;-96"
 
 # Now we plot
@@ -50,16 +45,18 @@ sfmap << EOF > /tmp/SDMESONET_sfmap.out
 	exit
 EOF
 
+set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
+if (! -e ${gdfile}) then
+  set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap236.gem"
+endif
 
 gdcntr << EOF > /tmp/SDMESONET_gdcntr.out
 	GAREA    = ${AREA}
-#	GDATTIM  = ${date}/${hh}
-	GDATTIM  = F000
+	GDATTIM  = F001
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(MMSL)
-#	GDFILE   = /mesonet/data/gempak/mw_surface.grd
-	GDFILE   = RUC2
+GDFILE   = $gdfile
 	CINT     = 1
 	LINE     = 4
 	MAP      = 0
@@ -93,7 +90,6 @@ EOF
 ${GEMEXE}/gpend
 
 if (-e mesonet.gif) then
-#	~/bin/logo.csh ~/plots/mesonet.gif
   /home/ldm/bin/pqinsert -p "plot c 000000000000 SD/mesonet.gif bogus gif" mesonet.gif >& /dev/null
   rm -f mesonet.gif
 endif
