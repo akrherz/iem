@@ -17,9 +17,9 @@ def process(res):
            ) % (tokens[1], tokens[1], tokens[2], tokens[3], tokens[4],
                 tokens[5], tokens[6], tokens[7], tokens[8], tokens[9],
                 tokens[10]))
-    if float(tokens[1]) < 500000:
+    if float(tokens[1]) < 200000:
         sys.exit(2)
-    elif float(tokens[1]) < 1000000:
+    elif float(tokens[1]) < 400000:
         sys.exit(1)
     else:
         sys.exit(0)
