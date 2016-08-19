@@ -1,11 +1,15 @@
-import psycopg2.extras
+import psycopg2
 import numpy as np
 import datetime
 import calendar
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
+PDICT2 = {'tmpf': "Air Temperature",
+          'dwpf': "Dew Point Temp"}
 
 
 def get_description():
@@ -16,10 +20,13 @@ def get_description():
     a certain temperature above or below a given threshold.  Values are
     partitioned by week of the year to smooth out some of the day to day
     variation."""
+    d['data'] = True
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:'),
-        dict(type='text', name='threshold', default=32,
+        dict(type='select', name='var', default='tmpf', options=PDICT2,
+             label='Which Variable:'),
+        dict(type='int', name='threshold', default=32,
              label='Temperature Threshold (F)'),
         dict(type='select', name='direction', default='below',
              label='Threshold direction:', options=PDICT),
@@ -34,29 +41,34 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.colors as mpcolors
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    threshold = int(fdict.get('threshold', 32))
-    direction = fdict.get('direction', 'below')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    threshold = ctx['threshold']
+    direction = ctx['direction']
+    varname = ctx['var']
 
     nt = NetworkTable(network)
 
     mydir = "<" if direction == 'below' else '>='
 
-    cursor.execute("""
+    df = read_sql("""
     WITH data as (
  SELECT extract(week from valid) as week,
  extract(hour from (valid + '10 minutes'::interval) at time zone %s) as hour,
- tmpf from alldata where station = %s and tmpf between -70 and 140
+ """ + varname + """ as d from alldata where
+      station = %s and """ + varname + """ between -70 and 140
     )
-    SELECT week, hour, sum(case when tmpf """+mydir+""" %s then 1 else 0 end),
+    SELECT week::int, hour::int,
+    sum(case when d """+mydir+""" %s then 1 else 0 end),
     count(*) from data GROUP by week, hour
-    """, (nt.sts[station]['tzname'], station, threshold))
+    """, ASOS, params=(nt.sts[station]['tzname'], station, threshold),
+                  index_col=None)
     data = np.zeros((24, 53), 'f')
-    for row in cursor:
-        data[row[1], row[0]-1] = row[2] / float(row[3]) * 100.
+    df['freq[%]'] = df['sum'] / df['count'] * 100.
+    for _, row in df.iterrows():
+        data[row['hour'], row['week'] - 1] = row['freq[%]']
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -74,8 +86,9 @@ def plotter(fdict):
                     extent=[0, 53, 24, 0], cmap=cmap, norm=norm)
     fig.colorbar(res, label='%', extend='min')
     ax.grid(True, zorder=11)
-    ax.set_title("%s [%s]\nHourly Temp Frequencies %s %s$^\circ$F (%s-%s)" % (
-                nt.sts[station]['name'], station, PDICT[direction], threshold,
+    ax.set_title("%s [%s]\nHourly %s %s %s$^\circ$F (%s-%s)" % (
+                nt.sts[station]['name'], station, PDICT2[varname],
+                PDICT[direction], threshold,
                 nt.sts[station]['archive_begin'].year,
                 datetime.datetime.now().year), size=12)
 
@@ -88,4 +101,4 @@ def plotter(fdict):
     ax.set_yticklabels(['12 AM', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM',
                         'Mid'])
 
-    return fig
+    return fig, df
