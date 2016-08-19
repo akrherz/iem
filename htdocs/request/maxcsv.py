@@ -21,7 +21,7 @@ def do_webcams(network):
     """direction arrows"""
     pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
     df = read_sql("""
-    select cam as id, w.name as station, st_y(geom) as latitude,
+    select cam as locationid, w.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, drct
     from camera_current c JOIN webcams w on (c.cam = w.id)
     WHERE c.valid > (now() - '30 minutes'::interval) and w.network = %s
@@ -34,7 +34,7 @@ def do_iowa_azos(date):
     table = "summary_%s" % (date.year,)
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     df = read_sql("""
-    select id, n.name as station, st_y(geom) as latitude,
+    select id as locationid, n.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
     s.min_tmpf::int as low, pday as precip
     from stations n JOIN """ + table + """ s on (n.iemid = s.iemid)
@@ -74,6 +74,7 @@ def main():
     sys.stdout.write("Content-type: text/plain\n\n")
     df = router(q)
     sys.stdout.write(df.to_csv(None, index=False))
+    sys.stdout.write("\n")
 
 if __name__ == '__main__':
     main()
