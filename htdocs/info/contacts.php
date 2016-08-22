@@ -4,14 +4,13 @@ include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Contacts";
 
-
 $t->west = <<<EOF
-<h3>IEM Contacts</font></h3>
+<h3>IEM Contacts</h3>
 
 <p><div class="alert alert-info">We are very responsive to emails!  Please
  consider emailing us before calling!</div>
 		
-<p><h3 class="subtitle">IEM Coordinator:</h3><br>
+<p><h3>IEM Coordinator:</h3><br>
 		
 <p>Dr Raymond Arritt
 <br>3010 Agronomy Hall
@@ -19,7 +18,7 @@ $t->west = <<<EOF
 <br>Ames, IA 50011
 <br><i>Email:</i> <a href="mailto:rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu">rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu</a>
 
-<h3>IEM Assistant Scientist:</h3><br>
+<h3>IEM Systems Analyst:</h3><br>
 		
 <p>Daryl Herzmann
 <br>3010 Agronomy Hall
@@ -30,18 +29,17 @@ $t->west = <<<EOF
 <br /><i>Jabber:</i> akrherz@jabber.org
 <br /><i>Google Talk</i> akrherz@gmail.com
 <br /><i>Twitter</i> <a href="https://twitter.com/akrherz">@akrherz</a> 
-<br><i>Yahoo IM:</i> iowamesonet , <img src="http://opi.yahoo.com/online?u=iowamesonet&m=g&t=1">
 
-<p>If all those fail you, try <i>Daryl's Cell Phone! </i> 515.451.9249
+<p>If all those fail you, try <i>Daryl's Cell Phone!</i> 515.451.9249
 
 EOF;
+
 $t->east = <<<EOF
 <a href="http://www.nsf.gov"><img src="/images/nsf.gif" border="0"></a>
 <br clear="all" />This website is based upon work supported by grants from the National Science
 Foundation. Opinions, findings, and conclusions or recommendations
 expressed in this material are those of the author(s) and do not necessarily
 reflect the views of the National Science Foundation.
-
 EOF;
 $t->render('single.phtml');
 ?>
