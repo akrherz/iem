@@ -10,6 +10,7 @@ import sys
 import datetime
 import os
 import time
+import requests
 import pygrib
 
 
@@ -38,14 +39,19 @@ def fetch(valid):
     81:56146124:d=2014101002:DSWRF:surface:anl:
     """
     uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
-                          "nonoperational/com/hrrr/prod/hrrr.%Y%m%d/hrrr.t%Hz."
+                          "com/hrrr/prod/hrrr.%Y%m%d/hrrr.t%Hz."
                           "wrfprsf00.grib2.idx"))
-    data = urllib2.urlopen(uri, timeout=30)
+    req = requests.get(uri, timeout=30)
+    if req.status_code != 200:
+        print("download_hrrr failed to get idx\n%s" % (uri,))
+        return
 
     offsets = []
     neednext = False
-    for line in data:
+    for line in req.content.split("\n"):
         tokens = line.split(":")
+        if len(tokens) < 3:
+            continue
         if neednext:
             offsets[-1].append(int(tokens[1]))
             neednext = False
@@ -68,7 +74,7 @@ def fetch(valid):
     output = open(outfn, 'ab', 0664)
 
     req = urllib2.Request(uri[:-4])
-    if len(offsets) != 8:
+    if len(offsets) != 9:
         print("download_hrrr_rad warning, found %s gribs for %s" % (
                                                     len(offsets), valid))
     for pr in offsets:
