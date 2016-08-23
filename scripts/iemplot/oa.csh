@@ -49,7 +49,7 @@ endif
 gdbiint << EOF > /tmp/oa_gdbiint.out
  GDFILE   = $gdfile
 GDOUTF   = /mesonet/data/iemplot/grid_oa.grd
- GFUNC    = MMSL
+ GFUNC    = MUL(0.01,MSLMA)
  GLEVEL   = 0
  GVCORD   = NONE
  GDATTIM  = F001
