@@ -47,7 +47,7 @@ EOF
 
 set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
 if (! -e ${gdfile}) then
-  set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap236.gem"
+set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap130.gem"
 endif
 
 gdcntr << EOF > /tmp/SDMESONET_gdcntr.out
