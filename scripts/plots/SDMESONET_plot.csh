@@ -55,7 +55,7 @@ gdcntr << EOF > /tmp/SDMESONET_gdcntr.out
 	GDATTIM  = F001
 	GLEVEL   = 0
 	GVCORD   = NONE
-	GFUNC    = SM9S(MMSL)
+	GFUNC    = SM9S(MUL(0.01,MSLMA))
 GDFILE   = $gdfile
 	CINT     = 1
 	LINE     = 4
