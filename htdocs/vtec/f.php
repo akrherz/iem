@@ -46,8 +46,8 @@ $ogtitle = sprintf("%s %s %s %s", $wfo, $vtec_phenomena[$phenomena],
 <meta property="og:url" content="<?php echo $ogurl; ?>">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@akrherz">
-<meta name="og:image:width" content="1200">
-<meta name="og:image:height" content="630">
+<meta name="og:image:width" content="600">
+<meta name="og:image:height" content="315">
 <meta name="og:site_name" content="Iowa Environmental Mesonet">
 <meta name="twitter:image:alt" content="Visualization of the VTEC Product">
 </head>
