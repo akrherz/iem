@@ -106,49 +106,67 @@ $width = isset($_GET["width"]) ? intval($_GET["width"]) : 640;
 $height = isset($_GET["height"]) ? intval($_GET["height"]) : 480;
 $lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]): 15;
 
-
-
-/* Now, maybe we set a VTEC string, lets do all sorts of fun */
+// Now, maybe we set a VTEC string, lets do all sorts of fun
 $vtec_limiter = "";
 if (isset($_GET["vtec"]))
 {
+	// we may have gotten here with '-' or '.' in vtec string, rectify
 	$cvtec = str_replace("-", ".", strtoupper($_GET["vtec"]));
-  $tokens = explode(".", $cvtec);
-  if (sizeof($tokens) == 7){
-    list($year, $pclass, $status, $wfo, $phenomena, $significance, 
-    		$eventid) = explode(".", $cvtec);
-  } else {
-    list($year, $wfo, $phenomena, $significance, 
-    		$eventid) = explode(".", $cvtec);
-  }
-  $eventid = intval($eventid);
-  $year = intval($year);
-  $wfo = substr($wfo,1,3);
-  /* First, we query for a bounding box please */
-  $query1 = "SELECT max(issue) as v, max(expire) as e, "
-        ."ST_xmax(ST_extent(u.geom)) as x1, ST_xmin(ST_extent(u.geom)) as x0, "
-        ."ST_ymin(ST_extent(u.geom)) as y0, ST_ymax(ST_extent(u.geom)) as y1 "
-        ."from warnings_$year w JOIN ugcs u on (u.gid = w.gid) "
-        ."WHERE w.wfo = '$wfo' and "
-        ."phenomena = '$phenomena' and eventid = $eventid "
-        ."and significance = '$significance'";
-  $result = pg_exec($postgis, $query1);
-  $row = pg_fetch_array($result, 0); 
-  $lpad = 0.5;
-  $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
-  $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
-  $xc = $x0 + ($row["x1"] - $row["x0"]) / 2;
-  $yc = $y0 + ($row["y1"] - $row["y0"]) / 2;
+  	$tokens = explode(".", $cvtec);
+ 	if (sizeof($tokens) == 7){
+    	list($year, $pclass, $status, $wfo, $phenomena, $significance, 
+    		 $eventid) = explode(".", $cvtec);
+  	} else {
+    	list($year, $wfo, $phenomena, $significance, 
+    		 $eventid) = explode(".", $cvtec);
+    }
+  	$eventid = intval($eventid);
+  	$year = intval($year);
+  	$wfo = substr($wfo,1,3);
+  	// Try to find this warning as a polygon first, then look at warnings table
+  	$sql = <<<EOF
+  	with one as (
+  		SELECT max(issue) as v, max(expire) as e, ST_extent(geom),
+  		max('P')::text as gtype
+  		from sbw_{$year}
+  		WHERE wfo = $1 and phenomena = $2 and eventid = $3 and
+  		significance = $4 and status = 'NEW'),
+  	two as (
+  		SELECT max(issue) as v, max(expire) as e, ST_extent(u.geom),
+  		'C'::text as gtype from warnings_{$year} w JOIN ugcs u on (w.gid = u.gid)
+  		WHERE w.wfo = $1 and phenomena = $2 and eventid = $3 and
+  		significance = $4),
+  	agg as (SELECT * from one UNION ALL select * from two)
 
-  $sector = "custom";
-  $sectors["custom"] = Array("epsg"=> 4326, "ext" => Array($x0,$y0,$x1,$y1) );
+  	SELECT v, e, ST_xmax(st_extent) as x1, st_xmin(st_extent) as x0,
+  	ST_ymax(st_extent) as y1, st_ymin(st_extent) as y0, gtype from agg
+  	WHERE gtype is not null LIMIT 1
+EOF;
+  	$rs = pg_prepare($postgis, "OOR", $sql);
+  	$rs = pg_execute($postgis, "OOR", Array($wfo, $phenomena, $eventid,
+  			$significance));
+	if (pg_num_rows($rs) != 1) exit("ERROR: Unable to find warning!");
+  	$row = pg_fetch_assoc($rs, 0); 
+  	$lpad = 0.5;
+  	$y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
+  	$x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
+  	$xc = $x0 + ($row["x1"] - $row["x0"]) / 2;
+  	$yc = $y0 + ($row["y1"] - $row["y0"]) / 2;
 
-  $dts = strtotime( $row["v"] );
-  $dts2 = strtotime( $row["e"] );
+  	$sector = "custom";
+  	$sectors["custom"] = Array("epsg"=> 4326, "ext" => Array($x0,$y0,$x1,$y1));
 
-  $vtec_limiter = sprintf("and phenomena = '%s' and eventid = %s and 
-    significance = '%s' and w.wfo = '%s'", $phenomena, $eventid, 
-    $significance, $wfo);
+  	$dts = strtotime($row["v"]);
+  	$dts2 = strtotime($row["e"]);
+
+  	$vtec_limiter = sprintf("and phenomena = '%s' and eventid = %s and 
+    	significance = '%s' and w.wfo = '%s'", $phenomena, $eventid, 
+    	$significance, $wfo);
+	if ($row["gtype"] == 'P') {
+		$layers[] = 'sbw';
+	} else {
+		$layers[] = 'cbw';
+	}
 }
 if (isset($_REQUEST['pid']))
 {
@@ -426,13 +444,13 @@ if (isset($_REQEST["pid"]))
 }
 
 
-/* Plot the warning explicitly */
-if (isset($_REQUEST["vtec"]))
+// Draws the county-based VTEC warning, only if "cbw" in $layers
+if (isset($_REQUEST["vtec"]) && in_array("cbw", $layers))
 {
   $wc = ms_newLayerObj($map);
-  $wc->setConnectionType( MS_POSTGIS);
+  $wc->setConnectionType(MS_POSTGIS);
   $wc->set("connection", $_DATABASES["postgis"]);
-  $wc->set("status", in_array("cbw", $layers) );
+  $wc->set("status", MS_ON);
   $sql = sprintf("geom from (select eventid, w.wfo, significance, "
   		."phenomena, u.geom, random() as oid from warnings_$year w JOIN ugcs u "
   		."on (u.gid = w.gid) WHERE w.wfo = '$wfo' "
@@ -474,25 +492,26 @@ if (in_array("sbwh", $layers) && intval(gmstrftime("%Y",$ts)) > 2001){
 
 
 /* Storm Based Warning */
-$ptext = "phenomena";
-if (in_array("sbw", $layers) && in_array("cbw", $layers))
-{
-  $ptext = "'ZZ' as phenomena";
+if (in_array("sbw", $layers)  && intval(gmstrftime("%Y",$ts)) > 2001){
+	$ptext = "phenomena";
+	if (in_array("sbw", $layers) && in_array("cbw", $layers))
+	{
+	  $ptext = "'ZZ' as phenomena";
+	}
+	$sbw = $map->getlayerbyname("sbw");
+	$sbw->set("status", MS_ON);
+	$sbw->set("connection", $_DATABASES["postgis"]);
+	//$sbw->set("maxscale", 10000000);
+	$sql = sprintf("geom from (select %s, geom, random() as oid from sbw_%s w "
+	    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' "
+		."and polygon_end > '%s:00+00' "
+	    ."%s) as foo using unique oid using SRID=4326", 
+	    $ptext, gmstrftime("%Y",$ts),
+	    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
+	    $vtec_limiter );
+	$sbw->set("data", $sql);
+	$sbw->draw($img);
 }
-$sbw = $map->getlayerbyname("sbw");
-$sbw->set("status", (in_array("sbw", $layers)  && 
-			intval(gmstrftime("%Y",$ts)) > 2001));
-$sbw->set("connection", $_DATABASES["postgis"]);
-//$sbw->set("maxscale", 10000000);
-$sql = sprintf("geom from (select %s, geom, random() as oid from sbw_%s w "
-    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' "
-	."and polygon_end > '%s:00+00' "
-    ."%s) as foo using unique oid using SRID=4326", 
-    $ptext, gmstrftime("%Y",$ts),
-    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
-    $vtec_limiter );
-$sbw->set("data", $sql);
-$sbw->draw($img);
 
 /* warnings by county */
 $w0c = $map->getlayerbyname("warnings0_c");
