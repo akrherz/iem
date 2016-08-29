@@ -79,7 +79,7 @@ data = {'plots': [
         {'id': "25", 'mw': True,
          'label': "Spread of Daily High and Low Temperatures"},
         {'id': "137", 'mw': True,
-         'label': "Start Date of Spring Statistics"},
+         'label': "Start Date of Spring/Fall with Statistics"},
         {'id': "4", 'mw': True,
          'label': "State Areal Coverage of Precip Intensity over X Days"},
         {'id': "89", 'mw': True,

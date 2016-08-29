@@ -3,6 +3,10 @@ import datetime
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 from scipy import stats
+from pyiem.util import get_autoplot_context
+
+PDICT = {'spring': 'Spring Season',
+         'fall': 'Fall Season'}
 
 
 def get_description():
@@ -11,7 +15,8 @@ def get_description():
     d['data'] = True
     d['cache'] = 86400
     d['description'] = """This plot displays some metrics about the start
-    date and duration of the spring season.  The definition of the season
+    date and duration of the spring or fall season.
+    The definition of the season
     being the period between the coldest 91 day stretch and subsequent
     warmest 91 day stretch.  91 days being approximately 1/4 of the year,
     assuming the four seasons are to be equal duration.  Of course, this is
@@ -20,6 +25,8 @@ def get_description():
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
+        dict(type='select', name='season', default='spring',
+             options=PDICT, label='Which Season to Highlight:'),
         dict(type='year', name='year',
              default=(datetime.date.today().year - 2),
              label='Select Start Year (3 years plotted) for Top Panel:'),
@@ -33,9 +40,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    station = fdict.get('station', 'IA0200')
-    network = fdict.get('network', 'IACLIMATE')
-    year = int(fdict.get('year', (datetime.date.today().year - 2)))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    year = ctx['year']
+    season = ctx['season']
     nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
 
@@ -85,6 +94,10 @@ def plotter(fdict):
         for col in ['winter', 'winter_end_doy', 'winter_end']:
             df.at[datetime.date.today().year, col] = None
     df['spring_length'] = df['summer_end_doy'] - 91 - df['winter_end_doy']
+    # fall is a bit tricker
+    df['fall_length'] = None
+    df['fall_length'].values[:-1] = ((df['winter_end_doy'].values[1:] + 365) -
+                                     91 - df['summer_end_doy'].values[:-1])
 
     (fig, ax) = plt.subplots(3, 1, figsize=(8, 9))
 
@@ -114,24 +127,27 @@ def plotter(fdict):
                                              val), ha='center')
 
     df2 = df.dropna()
+    p2col = 'winter_end_doy' if season == 'spring' else 'summer_end_doy'
     slp, intercept, r, _, _ = stats.linregress(df2.index.values,
-                                               df2['winter_end_doy'].values)
-    ax[1].scatter(df.index.values, df['winter_end_doy'].values)
+                                               df2[p2col].values)
+    ax[1].scatter(df.index.values, df[p2col].values)
     ax[1].grid(True)
     # Do labelling
     yticks = []
     yticklabels = []
-    for doy in range(int(df['winter_end_doy'].min()),
-                     int(df['winter_end_doy'].max())):
+    for doy in range(int(df[p2col].min()),
+                     int(df[p2col].max())):
         date = datetime.date(2000, 1, 1) + datetime.timedelta(days=(doy - 1))
         if date.day in [1, 15]:
             yticks.append(doy)
             yticklabels.append(date.strftime("%-d %b"))
     ax[1].set_yticks(yticks)
     ax[1].set_yticklabels(yticklabels)
-    ax[1].set_ylabel("Date of Minimum (Spring Start)")
+    lbl = ("Date of Minimum (Spring Start)" if season == 'spring'
+           else "Date of Maximum (Fall Start)")
+    ax[1].set_ylabel(lbl)
     ax[1].set_xlim(df.index.min() - 1, df.index.max() + 1)
-    avgv = df['winter_end_doy'].mean()
+    avgv = df[p2col].mean()
     ax[1].axhline(avgv, color='r')
     ax[1].plot(df.index.values, intercept + (df.index.values * slp))
     d = (datetime.date(2000, 1, 1) +
@@ -142,13 +158,14 @@ def plotter(fdict):
                transform=ax[1].transAxes)
     ax[1].set_ylim(bottom=(ax[1].get_ylim()[0] - 10))
 
+    p3col = 'spring_length' if season == 'spring' else 'fall_length'
     slp, intercept, r, _, _ = stats.linregress(df2.index.values,
-                                               df2['spring_length'])
-    ax[2].scatter(df.index.values, df['spring_length'])
+                                               df2[p3col])
+    ax[2].scatter(df.index.values, df[p3col])
     ax[2].set_xlim(df.index.min() - 1, df.index.max() + 1)
-    ax[2].set_ylabel("Length of 'Spring' [days]")
+    ax[2].set_ylabel("Length of '%s' [days]" % (season.capitalize(),))
     ax[2].grid(True)
-    avgv = df['spring_length'].mean()
+    avgv = df[p3col].mean()
     ax[2].axhline(avgv, color='r')
     ax[2].plot(df.index.values, intercept + (df.index.values * slp))
     ax[2].text(0.02, 0.02,
@@ -161,4 +178,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(season='fall', station='IA0200', network='IACLIMATE'))
