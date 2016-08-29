@@ -13,11 +13,20 @@ SWGDNCLR    surface incoming shortwave flux assuming clear sky
 SWTDN       toa incoming shortwave flux
 SWGDN       surface incoming shortwave flux
 SWGDNCLR    surface incoming shortwave flux assuming clear sky
+
+NOTE: we need to have a ~/.netrc file to make this script happy.
+
 """
 import datetime
-import urllib2
 import os
 import sys
+from pyiem.util import get_properties
+import logging
+import subprocess
+
+logging.basicConfig(level=logging.DEBUG)
+
+PROPS = get_properties()
 
 
 def trans(now):
@@ -39,7 +48,6 @@ def do_month(sts):
 
     interval = datetime.timedelta(days=1)
     now = sts
-    failures = 0
     while now < ets:
         uri = now.strftime(
             ("http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
@@ -50,27 +58,15 @@ def do_month(sts):
              "&LABEL=MERRA2_"+trans(now)+".tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
              "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
              "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"))
-        try:
-            req = urllib2.Request(uri)
-            data = urllib2.urlopen(req).read()
-        except Exception as exp:
-            print uri
-            print exp
-            return
         dirname = now.strftime("/mesonet/merra2/%Y")
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
-        if len(data) < 1000:
-            print(("fetch_merra %s resulted in %s bytes, retry"
-                   ) % (now.strftime("%Y%m%d"), len(data)))
-            failures += 1
-            if failures > 10:
-                print("fetch_merra aborting with too many failures")
-                return
-            continue
-        fp = open(now.strftime("/mesonet/merra2/%Y/%Y%m%d.nc"), 'w')
-        fp.write(data)
-        fp.close()
+        localfn = now.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+        cmd = ("curl -n -c ~/.urscookies -b ~/.urscookies -L "
+               "--url '%s' -o %s") % (uri, localfn)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
+                                stderr=subprocess.PIPE)
+        _ = proc.stderr.read()
         now += interval
 
 
