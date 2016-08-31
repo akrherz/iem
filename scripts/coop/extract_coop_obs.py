@@ -76,7 +76,7 @@ csv.write('snow_in,snow_depth_in,prec_mon_in,snow_mon_in,elevation_m\n')
 
 dbf = dbflib.create("coop_"+ts)
 dbf.add_field("SID", dbflib.FTString, 5, 0)
-dbf.add_field("SITE_NAME", dbflib.FTString, 40, 0)
+dbf.add_field("SITE_NAME", dbflib.FTString, 64, 0)
 dbf.add_field("ELEV_M", dbflib.FTDouble, 10, 2)
 dbf.add_field("YYYYMMDD", dbflib.FTString, 8, 0)
 dbf.add_field("HHMM", dbflib.FTString, 4, 0)
@@ -111,7 +111,7 @@ for sid in cob.keys():
         cob[sid]["PMOI"] = -99.
     if cob[sid]["SMOI"] < 0:
         cob[sid]["SMOI"] = -99.
-    # print cob[sid], id
+    # print cob[sid], sid
     dbf.write_record(j, (sid, cob[sid]["NAME"], cob[sid]['ELEV_M'], ts, "1200",
                          cob[sid]["TMPX"], cob[sid]["TMPN"], cob[sid]["P24I"],
                          cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"],
