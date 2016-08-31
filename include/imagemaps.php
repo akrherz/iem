@@ -41,7 +41,7 @@ function selectNetwork($selected, $extra=Array())
     include_once dirname(__FILE__) ."/database.inc.php";
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
-    $s = "<select name=\"network\">\n";
+    $s = "<select class=\"iemselect2\" name=\"network\">\n";
     reset($extra);
     while (list($idx,$sid) = each($extra))
     {
@@ -97,7 +97,7 @@ function networkSelect($network, $selected, $extra=Array(),
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     reset($cities);
-    $s .= "<select name=\"$selectName\">\n";
+    $s .= "<select class=\"iemselect2\" name=\"$selectName\">\n";
     while (list($sid, $tbl) = each($cities))
     {
         $s .= "<option value=\"$sid\" ";
@@ -129,7 +129,7 @@ function networkSelectAuto($network, $selected, $extra=Array())
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     reset($cities);
-    $s .= "<select name=\"station\" onChange=\"this.form.submit()\">\n";
+    $s .= "<select class=\"iemselect2\" name=\"station\" onChange=\"this.form.submit()\">\n";
     while (list($sid, $tbl) = each($cities))
     {
         if ($tbl["network"] != $network) continue;

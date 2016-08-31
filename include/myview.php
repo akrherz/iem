@@ -12,6 +12,8 @@ class MyView {
     protected $vars = array();
     public function __construct($template_dir = null) {
             $this->template_dir =  dirname(__FILE__).'/templates/';
+            $this->headextra = '';
+            $this->jsextra = '';
     }
     public function render($template_file) {
         if (file_exists($this->template_dir.$template_file)) {

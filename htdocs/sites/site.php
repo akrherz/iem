@@ -5,6 +5,9 @@ include("../../include/myview.php");
 
 include("setup.php");
 
+require_once "../../include/iemprop.php";
+$gmapskey = get_iemprop("google.maps.key");
+
 $alertmsg = "";
 if (isset($_GET["lat"]) &&
 		$_GET["lat"] != "move marker" &&
@@ -36,7 +39,9 @@ EOF;
 $t = new MyView();
 $t->thispage="iem-sites";
 $t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
-$t->headextra = '<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>';
+$t->headextra = <<<EOF
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
+EOF;
 $t->sites_current = "base";
 
 $lat = sprintf("%.5f", $cities[$station]["lat"]);
