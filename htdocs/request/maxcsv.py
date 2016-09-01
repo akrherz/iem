@@ -43,9 +43,76 @@ def do_iowa_azos(date):
     return df
 
 
+def do_ahps(nwsli):
+    """Create a dataframe with AHPS river stage and CFS information"""
+    pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    # Get metadata
+    cursor.execute("""
+        SELECT name, st_x(geom), st_y(geom) from stations
+        where id = %s and network ~* 'DCP'
+    """, (nwsli,))
+    row = cursor.fetchone()
+    latitude = row[2]
+    longitude = row[1]
+    stationname = row[0]
+    # Get the last forecast
+    cursor.execute("""
+        select id, forecast_sts at time zone 'UTC',
+        generationtime at time zone 'UTC', primaryname, primaryunits,
+        secondaryname, secondaryunits
+        from hml_forecast where station = %s
+        and generationtime > now() - '7 days'::interval
+        ORDER by issued DESC LIMIT 1
+    """, (nwsli,))
+    row = cursor.fetchone()
+    primaryname = row[3]
+    primaryunits = row[4]
+    secondaryname = row[5]
+    secondaryunits = row[6]
+    y = "{}".format(row[2].year)
+    # Get the latest forecast
+    fdf = read_sql("""
+    SELECT valid, primary_value, secondary_value, 'F' as type from
+    hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
+    ORDER by valid ASC
+    """, pgconn, params=(row[0],), index_col=None)
+    # Get the obs
+    plabel = "{}[{}]".format(primaryname, primaryunits)
+    slabel = "{}[{}]".format(secondaryname, secondaryunits)
+    odf = read_sql("""
+    WITH primaryv as (
+      SELECT valid, value from hml_observed_data WHERE station = %s
+      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
+    ), secondaryv as (
+      SELECT valid, value from hml_observed_data WHERE station = %s
+      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
+    )
+    SELECT p.valid, p.value as primary_value, s.value as secondary_value,
+    'O' as type
+    from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
+    ORDER by p.valid ASC
+    """, pgconn, params=(nwsli, plabel, nwsli, slabel),
+                   index_col=None)
+    sys.stderr.write(str(primaryname))
+    sys.stderr.write(str(secondaryname))
+    df = odf.append(fdf)
+    df['locationid'] = nwsli
+    df['locationname'] = stationname
+    df['latitude'] = latitude
+    df['longitude'] = longitude
+    df[plabel] = df['primary_value']
+    df[slabel] = df['secondary_value']
+    df = df[['locationid', 'locationname', 'latitude', 'longitude',
+             'valid', 'type', plabel, slabel]]
+    return df
+
+
 def router(q):
     """Process and return dataframe"""
-    if q == 'iaroadcond':
+    if q.startswith("ahps_"):
+        df = do_ahps(q[5:].upper())
+    elif q == 'iaroadcond':
         df = do_iaroadcond()
     elif q == 'iadotplows':
         df = do_iadotplows()
