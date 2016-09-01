@@ -27,7 +27,7 @@ WEB
   MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/tmp/warning0.log"
+  #LOG "/tmp/warning0.log"
 END
 
 OUTPUTFORMAT

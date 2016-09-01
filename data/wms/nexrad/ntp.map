@@ -32,7 +32,7 @@ WEB
   MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/tmp/ntp.log"
+  #LOG "/tmp/ntp.log"
   METADATA
    "wms_title" "IEM NEXRAD NTP WMS"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?"
