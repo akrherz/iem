@@ -10,6 +10,7 @@ import sys
 import psycopg2
 from pandas.io.sql import read_sql
 
+SSW = sys.stdout.write
 #>> *         Road condition dots
 #>> *         DOT plows
 #>> *         RWIS sensor data
@@ -67,15 +68,16 @@ def do_ahps(nwsli):
     """, (nwsli,))
     row = cursor.fetchone()
     primaryname = row[3]
+    generationtime = row[2]
     primaryunits = row[4]
     secondaryname = row[5]
     secondaryunits = row[6]
-    y = "{}".format(row[2].year)
+    y = "{}".format(generationtime.year)
     # Get the latest forecast
     fdf = read_sql("""
     SELECT valid, primary_value, secondary_value, 'F' as type from
     hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
-    ORDER by valid DESC
+    ORDER by valid ASC
     """, pgconn, params=(row[0],), index_col=None)
     # Get the obs
     plabel = "{}[{}]".format(primaryname, primaryunits)
@@ -104,15 +106,29 @@ def do_ahps(nwsli):
     df['Time'] = df['valid'].dt.strftime("%m/%d/%Y %H:%M")
     df[plabel] = df['primary_value']
     df[slabel] = df['secondary_value']
-    df = df[['locationid', 'locationname', 'latitude', 'longitude',
-             'Time', 'type', plabel, slabel]]
-    return df
+    # we have to do the writing from here
+    SSW("Content-type: text/plain\n\n")
+    SSW("Observed Data:,,\n")
+    SSW("|Date(UTC)|,|Stage|,|--Flow-|\n")
+    odf = df[df['type'] == 'O']
+    for _, row in odf.iterrows():
+        SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
+                                      row['Flow[kcfs]']))
+    SSW("Forecast Data (Issued %s UTC):,\n" % (
+        generationtime.strftime("%m-%d-%Y %H:%M:%S"),))
+    SSW("|Date(UTC)|,|Stage|,|--Flow-|\n")
+    odf = df[df['type'] == 'F']
+    for _, row in odf.iterrows():
+        SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
+                                      row['Flow[kcfs]']))
+
+    sys.exit(0)
 
 
 def router(q):
     """Process and return dataframe"""
     if q.startswith("ahps_"):
-        df = do_ahps(q[5:].upper())
+        do_ahps(q[5:].upper())  # we write ourselves and exit
     elif q == 'iaroadcond':
         df = do_iaroadcond()
     elif q == 'iadotplows':
@@ -139,8 +155,8 @@ def main():
     """Do Something"""
     form = cgi.FieldStorage()
     q = form.getfirst('q')
-    sys.stdout.write("Content-type: text/plain\n\n")
     df = router(q)
+    sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write(df.to_csv(None, index=False))
     sys.stdout.write("\n")
 
