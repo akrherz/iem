@@ -111,9 +111,9 @@ def do_ahps(nwsli):
     SSW("Observed Data:,,\n")
     SSW("|Date(UTC)|,|Stage|,|--Flow-|\n")
     odf = df[df['type'] == 'O']
-    for _, row in odf.iterrows():
-        SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
-                                      row['Flow[kcfs]']))
+    row = odf.iloc[0]
+    SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
+                                  row['Flow[kcfs]']))
     SSW("Forecast Data (Issued %s UTC):,\n" % (
         generationtime.strftime("%m-%d-%Y %H:%M:%S"),))
     SSW("|Date(UTC)|,|Stage|,|--Flow-|\n")
