@@ -22,7 +22,7 @@ WEB
   MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/tmp/w0.log"
+  #LOG "/tmp/w0.log"
   METADATA
    "wms_title" "IEM GOES WV WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/goes/hawaii_wv.map&SERVICE=WMS&"

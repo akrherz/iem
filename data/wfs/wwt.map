@@ -32,7 +32,7 @@ WEB
   MAXSCALE 4650000
   IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/w0.log"
+  #LOG "/var/www/htdocs/tmp/w0.log"
   METADATA
    "wfs_title" "IEM Weather Warnings"
    "ows_service_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/wwt.map&amp;"

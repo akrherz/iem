@@ -20,7 +20,7 @@ WEB
   MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/tmp/political.log"
+  #LOG "/tmp/political.log"
   METADATA
    "wms_title" "IEM Political Boundaries Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/political.map&SERVICE=WMS&"
