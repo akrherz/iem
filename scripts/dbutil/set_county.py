@@ -1,7 +1,7 @@
 """
   Need to set station metadata for county name for a given site...
 """
-
+import sys
 import psycopg2
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
@@ -20,6 +20,8 @@ class bcolors:
 
 
 def msg(text):
+    if not sys.stdout.isatty():
+        return text
     if text == 'OK':
         return "%s[ OK ]%s" % (bcolors.OKGREEN, bcolors.ENDC)
     elif text == "FAIL":
@@ -57,7 +59,7 @@ def logic(ugccode, iemid, station, name, network, lon, lat, state):
             SELECT ugc, name,
             ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) as d
             from ugcs WHERE substr(ugc,1,3) = '%s' and end_ts is null and
-            ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) < 0.5
+            ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) < 2
             ORDER by d ASC LIMIT 1
         """ % (lon, lat, state + ugccode, lon, lat))
         if pcursor.rowcount == 1:
