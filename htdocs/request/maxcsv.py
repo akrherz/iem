@@ -75,7 +75,7 @@ def do_ahps(nwsli):
     fdf = read_sql("""
     SELECT valid, primary_value, secondary_value, 'F' as type from
     hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
-    ORDER by valid ASC
+    ORDER by valid DESC
     """, pgconn, params=(row[0],), index_col=None)
     # Get the obs
     plabel = "{}[{}]".format(primaryname, primaryunits)
@@ -91,20 +91,21 @@ def do_ahps(nwsli):
     SELECT p.valid, p.value as primary_value, s.value as secondary_value,
     'O' as type
     from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
-    ORDER by p.valid ASC
+    ORDER by p.valid DESC
     """, pgconn, params=(nwsli, plabel, nwsli, slabel),
                    index_col=None)
     sys.stderr.write(str(primaryname))
     sys.stderr.write(str(secondaryname))
-    df = odf.append(fdf)
+    df = fdf.append(odf)
     df['locationid'] = nwsli
     df['locationname'] = stationname
     df['latitude'] = latitude
     df['longitude'] = longitude
+    df['Time'] = df['valid'].dt.strftime("%m/%d/%Y %H:%M")
     df[plabel] = df['primary_value']
     df[slabel] = df['secondary_value']
     df = df[['locationid', 'locationname', 'latitude', 'longitude',
-             'valid', 'type', plabel, slabel]]
+             'Time', 'type', plabel, slabel]]
     return df
 
 
