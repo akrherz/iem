@@ -3,6 +3,10 @@
 # the master file for this is on github, so edit there!
 # I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/"
 
+  # Use a daily deadicated log file, this avoids server reloads every day
+  # which are not much fun when servicing a 1,000 req/sec
+  CustomLog "|/usr/sbin/rotatelogs /mesonet/www/logs/iem-%Y%m%d 86400" custom
+
   ServerName mesonet.agron.iastate.edu
   ServerAlias www.mesonet.agron.iastate.edu
   ServerAlias mesonet1.agron.iastate.edu
@@ -149,6 +153,13 @@
  
   Alias /data "/home/ldm/data"
   <Directory "/home/ldm/data">
+    Options Indexes MultiViews
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+  </Directory>
+
+  <Directory "/mnt/a4">
     Options Indexes MultiViews
     AllowOverride None
     Order allow,deny
