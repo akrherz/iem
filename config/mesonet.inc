@@ -15,7 +15,6 @@
   ServerAlias iem.local
   ServerAdmin akrherz@iastate.edu
   DocumentRoot /mesonet/www/apps/iemwebsite/htdocs
-  CustomLog /mesonet/www/logs/access_log combined
 
   WSGIScriptAlias /cache/tile.py /mesonet/www/apps/iemwebsite/htdocs/cache/tile.wsgi
   WSGIScriptAlias /cache/c.py /mesonet/www/apps/iemwebsite/htdocs/cache/tile.wsgi
