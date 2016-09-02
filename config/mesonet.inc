@@ -5,7 +5,7 @@
 
   # Use a daily deadicated log file, this avoids server reloads every day
   # which are not much fun when servicing a 1,000 req/sec
-  CustomLog "|/usr/sbin/rotatelogs /mesonet/www/logs/iem-%Y%m%d 86400" custom
+  CustomLog "|/usr/sbin/rotatelogs /mesonet/www/logs/iem-%Y%m%d 86400" combined
 
   ServerName mesonet.agron.iastate.edu
   ServerAlias www.mesonet.agron.iastate.edu
