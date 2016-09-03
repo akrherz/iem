@@ -3,7 +3,6 @@
  * JSONP service for IEM Tracked network metadata
  */
 header('content-type: application/json; charset=utf-8');
-require_once 'Zend/Json.php';
 include_once "../../config/settings.inc.php";
 include_once "../../include/database.inc.php";
 include_once "../../include/network.php";
@@ -22,7 +21,7 @@ while (list($sid,$data) = each($nt->table))
   $ar["stations"][] = $z;
 }
 
-$json = Zend_Json::encode($ar);
+$json = json_encode($ar);
 
 # JSON if no callback
 if( ! isset($_REQUEST['callback']))

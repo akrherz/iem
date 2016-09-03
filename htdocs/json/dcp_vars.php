@@ -5,8 +5,6 @@
  * Currently called by /DCP/plot.phtml
  */
 header('content-type: application/json; charset=utf-8');
-
-require_once 'Zend/Json.php';
 include_once "../../config/settings.inc.php";
 include_once "../../include/database.inc.php";
 $hads = iemdb('hads');
@@ -15,7 +13,7 @@ $rs = pg_prepare($hads, "SELECT", "SELECT distinct key from $table " .
 		"WHERE station = $1");
 
 $station = isset($_REQUEST["station"]) ? strtoupper($_REQUEST["station"]) : 
-			die(Zend_Json::encode('Please provide a station variable (NWSLI)')); 
+			die(json_encode('Please provide a station variable (NWSLI)')); 
 
 $rs = pg_execute($hads, "SELECT", Array($station));
 
@@ -27,7 +25,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   $ar["vars"][] = $z;
 }
 
-$json = Zend_Json::encode($ar);
+$json = json_encode($ar);
 
 # JSON if no callback
 if( ! isset($_REQUEST['callback']))

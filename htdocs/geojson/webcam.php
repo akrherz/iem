@@ -1,7 +1,6 @@
 <?php
 /* Giveme JSON data listing products */
 header("Content-type: application/vnd.geo+json");
-require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 
@@ -73,6 +72,6 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
   $ar["features"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 
 ?>

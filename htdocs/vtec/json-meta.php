@@ -1,7 +1,6 @@
 <?php
 header('Content-type: application/json');
 /* Giveme JSON data listing products */
-require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 
@@ -44,6 +43,6 @@ for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
   $ar["meta"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 
 ?>

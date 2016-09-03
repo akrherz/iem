@@ -4,7 +4,6 @@ define("IEM_APPID", 85);
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2015;
 
-require_once 'Zend/Json.php';
 include_once "../../include/myview.php";
 include_once "../../include/vtec.php";
 include_once "../../include/forms.php";
@@ -13,7 +12,7 @@ include_once "../../include/imagemaps.php";
 $uri = sprintf("http://iem.local/json/vtec_events.py?wfo=%s&year=%s", 
 		$wfo, $year);
 $data = file_get_contents($uri);
-$json = Zend_Json::decode($data);
+$json = json_decode($data);
 $table = "";
 while(list($key, $val)=each($json['events'])){
 	$table .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td>".

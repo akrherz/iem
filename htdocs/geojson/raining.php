@@ -1,7 +1,6 @@
 <?php
 /* Giveme JSON data listing of Sites where it is raining */
 header("Content-type: application/vnd.geo+json");
-require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 include("../../include/iemaccess.php");
@@ -55,6 +54,6 @@ while (list($key, $iemob) = each($iemdata) ){
   $ar["features"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 
 ?>

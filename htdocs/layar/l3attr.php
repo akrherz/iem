@@ -2,7 +2,6 @@
 /* Generate JSON of l3 nexrad attributes! */
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
-require_once 'Zend/Json.php';
 $postgis = iemdb("postgis");
 
 
@@ -23,7 +22,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as la
 $rs = pg_execute($postgis, "SELECT", Array());
 if (pg_num_rows($rs) == 0){
   $json = array("hotspots"=> Array(), "layer"=>"nexradl3attr", "errorString"=>"Sorry, no attributes close to you right now!", "morePages"=>false, "errorCode"=>21, "nextPageKey"=>null);
-  echo  Zend_Json::encode($json);
+  echo  json_encode($json);
   exit; // 
 
 }
@@ -70,5 +69,5 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 }
 
 
-echo  Zend_Json::encode($json);
+echo  json_encode($json);
 ?>

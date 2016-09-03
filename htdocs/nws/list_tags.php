@@ -7,9 +7,7 @@
  include("../../include/vtec.php"); 
  include("../../include/forms.php");
  include("../../include/imagemaps.php");
- require_once 'Zend/Json.php';
- 
- 
+  
  $t = new MyView();
  
  $year = isset($_REQUEST["year"])? intval($_REQUEST["year"]): date("Y");
@@ -102,7 +100,7 @@ EOF;
  $tortable = str_replace('svr', 'tor', $svrtable);
 
  $data = file_get_contents($jsonuri);
- $json = Zend_Json::decode($data);
+ $json = json_decode($data);
  
  while(list($key, $val)=each($json['results'])){
  	if ($val["phenomena"] == 'SV'){

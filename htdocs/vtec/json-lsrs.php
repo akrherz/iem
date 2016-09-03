@@ -1,6 +1,5 @@
 <?php
 /* Giveme JSON data for LSRs inside a polygon */
-require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 
@@ -54,6 +53,6 @@ for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
   $ar["lsrs"][] = $q;
 }
 header("Content-type: application/json");
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 
 ?>

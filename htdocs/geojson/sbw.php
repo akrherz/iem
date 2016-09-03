@@ -3,7 +3,6 @@
  * Generate GeoJSON SBW information for a period of choice
  */
 header("Content-type: application/vnd.geo+json");
-require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/vtec.php");
@@ -112,5 +111,5 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
                          
   $ar["features"][] = $z;
 }
-echo str_replace($reps, $subs, Zend_Json::encode($ar));
+echo str_replace($reps, $subs, json_encode($ar));
 ?>
