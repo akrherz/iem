@@ -1,7 +1,6 @@
 <?php
 /* Generate a KML file of a network locations, yummy */
 header("Content-type: application/vnd.geo+json");
-require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/network.php");
@@ -28,5 +27,5 @@ while (list($sid,$data) = each($nt->table))
   $ar["features"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 ?>

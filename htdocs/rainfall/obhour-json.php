@@ -1,6 +1,5 @@
 <?php
 /* Giveme JSON data for zones affected by warning */
-require_once 'Zend/Json.php';
 include('../../config/settings.inc.php');
 include("../../include/database.inc.php");
 
@@ -67,6 +66,6 @@ while( list($station,$d) = each($data) )
   $ar["precip"][] = $d;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 
 ?>

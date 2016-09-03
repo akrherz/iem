@@ -7,7 +7,6 @@
  $t = new MyView();
  
  define("IEM_APPID", 2);
- require_once 'Zend/Json.php';
  include("../../include/forms.php");
  include("../../include/database.inc.php");
  include("../../include/network.php"); 
@@ -68,7 +67,7 @@ $cities = $nt->table;
  	if ($sortcol == 'station') $sortcol = 'valid';
 	$jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
 	$URI = sprintf("http://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
-	$json = Zend_Json::decode($jdata);
+	$json = json_decode($jdata);
 	$data = Array();
 	$table = "";
  	while(list($key,$val)=each($json['climatology'])){
@@ -107,7 +106,7 @@ $cities = $nt->table;
  	if ($sortcol == 'valid') $sortcol = 'station';
  	$jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
  	$URI = sprintf("http://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
- 	$json = Zend_Json::decode($jdata);
+ 	$json = json_decode($jdata);
  	$data = Array();
  	$table = "";
  	while(list($key,$val)=each($json['features'])){

@@ -3,7 +3,6 @@
  * Generate GeoJSON LSR information for a period of choice
  */
 header("Content-type: application/vnd.geo+json");
-require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/vtec.php");
@@ -128,5 +127,5 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   $ar["features"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 ?>

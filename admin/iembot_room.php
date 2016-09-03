@@ -2,7 +2,6 @@
 /* Controller for NWSBot stuff in rooms
  * 
  */ 
-require_once 'Zend/Json.php';
 require_once '../config/settings.inc.php';
 include("../include/database.inc.php");
 //$dbconn = iemdb("mesosite");
@@ -43,5 +42,5 @@ for ($i=0;$row=@pg_fetch_array($rs, $i);$i++){
 	$ar["synd"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+echo json_encode($ar);
 ?>
