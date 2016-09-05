@@ -12,7 +12,7 @@ include_once "../../include/imagemaps.php";
 $uri = sprintf("http://iem.local/json/vtec_events.py?wfo=%s&year=%s", 
 		$wfo, $year);
 $data = file_get_contents($uri);
-$json = json_decode($data);
+$json = json_decode($data, $assoc=TRUE);
 $table = "";
 while(list($key, $val)=each($json['events'])){
 	$table .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td>".

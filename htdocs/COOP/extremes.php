@@ -106,7 +106,7 @@ $cities = $nt->table;
  	if ($sortcol == 'valid') $sortcol = 'station';
  	$jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
  	$URI = sprintf("http://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
- 	$json = json_decode($jdata);
+ 	$json = json_decode($jdata, $assoc=TRUE);
  	$data = Array();
  	$table = "";
  	while(list($key,$val)=each($json['features'])){
