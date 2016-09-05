@@ -4,8 +4,10 @@ from pandas.io.sql import read_sql
 from collections import OrderedDict
 import datetime
 import mx.DateTime
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
+        ('labor', 'Labor Day'),
         ('memorial', 'Memorial Day'),
         ('exact', 'Same Date each Year'),
         ])
@@ -40,6 +42,16 @@ def get_description():
     return d
 
 
+def labor_days():
+    days = []
+    for year in range(1893, datetime.date.today().year + 1):
+        sep7 = mx.DateTime.DateTime(year, 9, 7)
+        labor = sep7 + mx.DateTime.RelativeDateTime(
+                                        weekday=(mx.DateTime.Monday, 0))
+        days.append(datetime.date(year, 9, labor.day))
+    return days
+
+
 def memorial_days():
     days = []
     for year in range(1971, datetime.date.today().year + 1):
@@ -55,29 +67,34 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    station = fdict.get('station', 'IA0200')
-    network = fdict.get('network', 'IACLIMATE')
-    varname = fdict.get('var', 'high')
-    thedate = datetime.datetime.strptime(fdict.get('thedate', '2000-01-01'),
-                                         '%Y-%m-%d')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    varname = ctx['var']
+    thedate = ctx['thedate']
+    date = ctx['date']
 
-    date = fdict.get('date', 'memorial')
     nt = NetworkTable(network)
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     table = "alldata_%s" % (station[:2], )
     if date == 'exact':
         df = read_sql("""
-        SELECT year, high, precip from """ + table + """ WHERE station = %s
+        SELECT year, high, day, precip from """ + table + """
+        WHERE station = %s
         and sday = %s ORDER by year ASC
         """, pgconn, params=(station, thedate.strftime("%m%d")),
                       index_col='year')
         subtitle = thedate.strftime("%B %-d")
     else:
-        days = memorial_days()
+        if date == 'memorial':
+            days = memorial_days()
+        else:
+            days = labor_days()
 
         df = read_sql("""
-        SELECT year, high, precip from """ + table + """ WHERE station = %s
+        SELECT year, high, day, precip from """ + table + """
+        WHERE station = %s
         and day in %s ORDER by year ASC
         """, pgconn, params=(station, tuple(days)),
                       index_col='year')
