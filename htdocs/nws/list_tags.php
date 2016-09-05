@@ -100,7 +100,7 @@ EOF;
  $tortable = str_replace('svr', 'tor', $svrtable);
 
  $data = file_get_contents($jsonuri);
- $json = json_decode($data);
+ $json = json_decode($data, $assoc=TRUE);
  
  while(list($key, $val)=each($json['results'])){
  	if ($val["phenomena"] == 'SV'){
