@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2016, 8, 23, 7, 0)
+sts = datetime.datetime(2016, 9, 2, 4, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2016, 8, 24, 4, 0)
+ets = datetime.datetime(2016, 9, 3, 6, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'Pacific/Honolulu'
-station = 'HTO'
+tzname = 'America/New_York'
+station = 'CRE'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -92,11 +92,12 @@ for i in range(maxi-10, maxi+1):
 print("MaxI: %s, rate: %s, window: %s-%s" % (maxi, rate1[maxi], maxwindowi,
                                              maxwindowi+10))
 
-ax.text(0.05, 0.935, "Peak 10min Window", transform=ax.transAxes,
+x = 0.2
+ax.text(x, 0.935, "Peak 10min Window", transform=ax.transAxes,
         bbox=dict(fc='white', ec='None'))
 for i in range(maxwindowi+1, maxwindowi+11):
     ts = lsts + datetime.timedelta(minutes=i)
-    ax.text(0.05, 0.9-(0.035*(i-maxwindowi-1)),
+    ax.text(x, 0.9-(0.035*(i-maxwindowi-1)),
             "%s %.2f" % (ts.strftime("%-I:%M %p"), prec[i] - prec[i-1], ),
             transform=ax.transAxes, fontsize=10,
             bbox=dict(fc='white', ec='None'))
@@ -106,11 +107,11 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc=(0.7, 0.4), prop=prop, ncol=1)
+ax.legend(loc=(0.7, 0.6), prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+2))
 ax.set_yticks(range(0, 10, 1))
-ax.set_xlabel("22-23 Aug 2016 (Pacific/Honolulu)")
-ax.set_title(("22-23 Aug 2016 Hilo, HI (PHTO)\n"
+ax.set_xlabel("2 September 2016 (%s)" % (tzname,))
+ax.set_title(("2 September 2016 North Myrtle Beach, SC (KCRE)\n"
               "One Minute Rainfall, %.2f inches total plotted") % (prec[-1],))
 
 
