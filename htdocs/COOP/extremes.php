@@ -67,7 +67,7 @@ $cities = $nt->table;
  	if ($sortcol == 'station') $sortcol = 'valid';
 	$jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
 	$URI = sprintf("http://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
-	$json = json_decode($jdata);
+	$json = json_decode($jdata, $assoc=TRUE);
 	$data = Array();
 	$table = "";
  	while(list($key,$val)=each($json['climatology'])){
