@@ -116,7 +116,7 @@ $(document).ready(function(){
   			});
     		$(element).popover('show');
             // Set the select form to proper value
-   		    $('select[name="station"]').find("option[value=\""+ feature.get('sid') +"\"]").prop("selected", "selected");
+   		    $('select[name="station"]').select2().val(feature.get('sid')).trigger('change');
   		} 
    });
 					
