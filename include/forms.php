@@ -2,11 +2,12 @@
 /**
  * Library for doing repetetive forms stuff
  */
-function make_select($name, $selected, $ar, $jscallback=""){
+function make_select($name, $selected, $ar, $jscallback="", $cssclass=''){
 	// Create a simple HTML select box
         reset($ar);
-	$s = sprintf("<select name=\"%s\"%s>\n", $name, 
-			($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "");
+	$s = sprintf("<select name=\"%s\"%s%s>\n", $name, 
+			($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "",
+			($cssclass != "")? " class=\"$cssclass\"" : "");
 	while( list($key,$val) = each($ar)){
 		if (is_array($val)){
 			$s .= "<optgroup label=\"$key\">\n";
