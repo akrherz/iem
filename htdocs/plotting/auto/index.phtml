@@ -35,7 +35,7 @@ $lmw = isset($_GET['_l']) ? "$('#_l').click();\n": '';
 // Available Plots
 $data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
 $jobj = json_decode($data);
-$pselect = "<select name=\"q\">";
+$pselect = "<select name=\"q\" class=\"iemselect2\">";
 while (list($k,$v) = each($jobj->plots)){
 	$pselect .= sprintf("<optgroup label=\"%s\">", $v->label);
 	while (list($k2,$v2) = each($v->options)){
@@ -201,7 +201,8 @@ EOF;
 			}
 			$defaultnetwork = isset($v->network) ? $v->network : "IACLIMATE";
 			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
-			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
+			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange",
+					"iemselect2");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
 		}
@@ -500,7 +501,7 @@ $(document).ready(function(){
 	    $('select[name="q"]').select2();
 	});
 		{$lmw}
-    $('select[name="q"]').select2();
+    $(".iemselect2").select2();
 });
 </script>
 EOF;
