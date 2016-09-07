@@ -193,6 +193,14 @@ the summer months (Apr-Sep).</li>
 	<li><strong>8 Aug 2014:</strong> The spatial domain of the N0Q composite
 	was expanded 1 degree east and south.  The reason is that the clipping was
 	occurring on the eastern and southern borders of the domain.</li>
+<li><strong>7 Sep 2016 1940 UTC</strong>: The original intent of the N0Q
+composites was to provide imagery at a resolution of 0.5 dBZ.  After some
+investigation, it was discovered that the N0Q composites only contained data
+at values of whole integer values of dBZ. After some debugging of GEMPAK, the
+issue was <a href="https://github.com/Unidata/gempak/pull/11">hopefully fixed within GEMPAK</a>.  The good news is that this bug did
+not impact any processing of the file.  The conversion of color index and
+RGB colors to dBZ was OK.  There just was not any data at those 0.5 dBZ, non-int
+values.</li>
 </ul>
 
 <h3>Product Generation:</h3>
