@@ -30,16 +30,19 @@ def get_colortable(prod):
     return ct
 
 
-n0rct = get_colortable('n0r')
+n0rct = get_colortable('n0q')
 
 
 def do(ts):
     """Process!"""
-    fn = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png")
+    fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
+                      "uscomp/n0q_%Y%m%d%H%M.png"))
+    if not os.path.isfile(fn):
+        print("Missing %s" % (fn,))
+        return
     print ts.strftime("%Y%m%d %H%M")
     n0r = gdal.Open(fn)
-    n0rd = n0r.ReadAsArray() + 6.
-    n0rd[0, :6] = range(6)
+    n0rd = n0r.ReadAsArray()
 
     out_driver = gdal.GetDriverByName("gtiff")
     outdataset = out_driver.Create('tmp.tiff', n0r.RasterXSize,
@@ -55,8 +58,8 @@ def do(ts):
     os.unlink("tmp.tiff")
     subprocess.call("mv tmp.png %s" % (fn,), shell=True)
 
-sts = datetime.datetime(2015, 3, 19, 17, 30)
-ets = datetime.datetime(2015, 3, 27, 17, 50)
+sts = datetime.datetime(2010, 11, 13, 16, 25)
+ets = datetime.datetime(2012, 10,  1, 0, 0)
 interval = datetime.timedelta(minutes=5)
 now = sts
 while now < ets:
