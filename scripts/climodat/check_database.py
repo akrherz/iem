@@ -65,7 +65,8 @@ for station in nt.sts.keys():
         now = sts
         while now < ets:
             ccursor.execute("""SELECT * from %s WHERE station = '%s'
-                and day = '%s'""" % (table, station, now.strftime("%Y-%m-%d")))
+                and valid = '%s'
+                """ % (table, station, now.strftime("%Y-%m-%d")))
             if ccursor.rowcount == 0:
                 print "Add %s station: %s day: %s" % (table, station,
                                                       now.strftime("%Y-%m-%d"))
