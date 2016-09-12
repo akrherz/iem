@@ -163,7 +163,8 @@ def create_netcdf(station, metadata):
     nc.US_state = metadata['state']
     nc.ncdc_identifier = ncdcid
     nc.station_name = metadata['name']
-    reclen = int((2016-1850) * 365.25) + 1
+    lastyear = datetime.date.today().year + 1
+    reclen = int((lastyear-1850) * 365.25) + 1
 
     nc.createDimension('time', reclen)
 
