@@ -72,6 +72,8 @@ data = {'plots': [
                    "each year [COOP/Climate Sites]")},
         {'id': "43",
          'label': "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
+        {'id': "157",
+         'label': "Relative Humidity Max/Min/Avg by Day of Year"},
         {'id': "62", 'mw': True,
          'label': "Snow Depth"},
         {'id': "38", 'mw': True,
