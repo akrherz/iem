@@ -12,7 +12,18 @@ include_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "NWS Text Product by Issuing Center by Date";
 $t->thispage ="archive-afos";
-
+$t->headextra = <<<EOF
+ <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+EOF;
+$t->jsextra = <<<EOF
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script>
+$(document).ready(function(){
+    $(".iemselect2").select2();
+});
+</script>
+EOF;
+ 
 $wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"] : null;
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
 $dbsource = $source;
