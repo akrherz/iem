@@ -20,7 +20,8 @@ def get_description():
     for that calendar day.  This app presents these values along with
     a simple climatology computed by averaging the daily observations. You
     can also plot a frequency of the RH value being above or below
-    some threshold."""
+    some threshold. This frequency is grouped by week of the year to
+    provide some smoothing to the metric."""
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
@@ -66,7 +67,7 @@ def plotter(fdict):
     df = read_sql("""
     SELECT day, extract(doy from day) as doy, extract(year from day) as year,
     extract(week from day) as week,
-    max_rh, min_rh,
+    max_rh, min_rh, avg_rh,
     case when """ + varname + """ """ + op + """ %s then 1 else 0 end
     as rh_exceed
     from summary s JOIN stations t
@@ -81,16 +82,18 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
     ax.plot(gdf.index.values, gdf['max_rh'].values, color='b', lw=2,
-            label='Ave Max')
+            label='Max')
+    ax.plot(gdf.index.values, gdf['avg_rh'].values, color='g', lw=2,
+            label='Avg')
     ax.plot(gdf.index.values, gdf['min_rh'].values, color='k', lw=2,
-            label='Ave Min')
+            label='Min')
     ax.plot(wdf.index.values * 7, wdf['rh_exceed'].values * 100.,
             color='r', lw=2)
 
     ax.bar(thisyear['doy'].values, thisyear['max_rh'] - thisyear['min_rh'],
            bottom=thisyear['min_rh'].values, ec='lightblue', fc='lightblue',
            label='%s Obs' % (year,))
-    ax.legend(ncol=3, loc=(0.4, -0.12), fontsize=12)
+    ax.legend(ncol=4, loc=(0.35, -0.12), fontsize=12)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
                    305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
