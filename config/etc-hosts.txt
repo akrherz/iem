@@ -16,7 +16,7 @@
 192.168.0.7      iemvm2
 192.168.0.8      metvm1.local
 192.168.0.9      metfs1.local       iem-idd0      iem-idd0.local  
-192.168.0.10     mtarchive.local
+192.168.0.10     metvm7.local
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12 iem12.local
 192.168.0.20     thumper.local
@@ -87,7 +87,7 @@
 192.168.1.241    iem-ldm
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
-#   VI12(62) mtarchive <-> metvm0
+#   VI12(62) metvm7 <-> metvm0
 192.168.1.239    iem-memcached3
 #   VI13(63) iem12 <-> iem30
 192.168.0.238    iem-weatherim
