@@ -88,7 +88,9 @@ class Request (object):
                 uri = "year=%s&month=%s&day=%s&time=%s&" % (year,
                                                             month, day, ts)
             else:
-                mylayername = 'ridge'
+                if sector in ['USCOMP', 'HICOMP', 'AKCOMP', 'PRCOMP']:
+                    prod = prod.lower()
+                mylayername = 'ridge-composite-single'
                 uri = ''
             layer = self.service.layers[mylayername]
             layer.name = layername
@@ -427,16 +429,18 @@ def wsgiHandler(environ, start_response, service):
                               ) % (environ.get("REMOTE_ADDR"), path_info,
                                    E.replace("\n", " "),
                                    environ.get("HTTP_REFERER")))
-        else:
-            missfn = ""
-            f = re.search("/mesonet/ARCHIVE/data/(?P<a>[a-zA-Z0-9/\._\-]+)&",
-                          E)
-            if f:
-                missfn = f.groupdict()['a']
-            sys.stderr.write(("[client: %s] Path: %s errored with "
-                              "missing file %s Referrer: %s\n"
-                              ) % (environ.get("REMOTE_ADDR"), path_info,
-                                   missfn, environ.get("HTTP_REFERER")))
+        # nice code, but we are getting invalid requests into the near future
+        # which error out.
+        # else:
+        #    missfn = ""
+        #    f = re.search("/mesonet/ARCHIVE/data/(?P<a>[a-zA-Z0-9/\._\-]+)&",
+        #                  E)
+        #    if f:
+        #        missfn = f.groupdict()['a']
+        #    sys.stderr.write(("[client: %s] Path: %s errored with "
+        #                      "missing file %s Referrer: %s\n"
+        #                      ) % (environ.get("REMOTE_ADDR"), path_info,
+        #                           missfn, environ.get("HTTP_REFERER")))
         msg = ("An error occurred: %s\n%s\n"
                ) % (E, "".join(traceback.format_tb(sys.exc_traceback)))
 
