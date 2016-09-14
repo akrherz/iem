@@ -10,6 +10,7 @@ class TileCacheLayerNotFoundException(Exception):
 class TileCacheFutureException(Exception):
     pass
 
+import re
 import sys, cgi, time, os, traceback, email, ConfigParser
 import Cache, Caches
 import Layer, Layers
@@ -193,29 +194,35 @@ class Service (object):
         xml.append("</cross-domain-policy>")        
         return ('text/xml', "\n".join(xml))       
 
-    def renderTile (self, tile, force = False):
-        from warnings import warn
-        start = time.time()
-
-        # do more cache checking here: SRS, width, height, layers 
-
+    def renderTile(self, tile, force=False):
+        """render a Tile please"""
         layer = tile.layer
+        if layer.debug:
+            start = time.time()
+
+        # do more cache checking here: SRS, width, height, layers
+
         image = None
-        if not force: image = self.cache.get(tile)
+        if not force:
+            image = self.cache.get(tile)
         if not image:
             data = layer.render(tile, force=force)
-            if (data): image = self.cache.set(tile, data)
-            else: raise Exception("Zero length data returned from layer.")
+            if data:
+                image = self.cache.set(tile, data)
+            else:
+                raise Exception("Zero length data returned from layer.")
             if layer.debug:
-                sys.stderr.write(
-                "Cache miss: %s, Tile: x: %s, y: %s, z: %s, time: %s\n" % (
-                    tile.bbox(), tile.x, tile.y, tile.z, (time.time() - start)) )
+                sys.stderr.write(("Cache miss: %s, Tile: x: %s, y: %s, z: %s, "
+                                  "time: %s\n"
+                                  ) % (tile.bbox(), tile.x, tile.y, tile.z,
+                                       (time.time() - start)))
         else:
             if layer.debug:
-                sys.stderr.write(
-                "Cache hit: %s, Tile: x: %s, y: %s, z: %s, time: %s, debug: %s\n" % (
-                    tile.bbox(), tile.x, tile.y, tile.z, (time.time() - start), layer.debug) )
-        
+                sys.stderr.write(("Cache hit: %s, Tile: x: %s, y: %s, z: %s, "
+                                  "time: %s, debug: %s\n"
+                                  ) % (tile.bbox(), tile.x, tile.y, tile.z,
+                                       (time.time() - start), layer.debug))
+
         return (layer.mime_type, image)
 
     def expireTile (self, tile):
@@ -229,51 +236,59 @@ class Service (object):
                     coverage = Layer.Tile(layer,x,y,z)
                     self.cache.delete(coverage)
 
-    def dispatchRequest (self, params, path_info="/", req_method="GET", host="http://example.com/"):
-        if self.metadata.has_key('exception'):
-            raise TileCacheException("%s\n%s" % (self.metadata['exception'], self.metadata['traceback']))
+    def dispatchRequest(self, params, path_info="/", req_method="GET",
+                        host="http://example.com/"):
+        """dispatch the request!"""
+        if 'exception' in self.metadata:
+            raise TileCacheException("%s\n%s" % (self.metadata['exception'],
+                                                 self.metadata['traceback']))
         if path_info.find("crossdomain.xml") != -1:
             return self.generate_crossdomain_xml()
 
         if path_info.split(".")[-1] == "kml":
-            from TileCache.Services.KML import KML 
+            from TileCache.Services.KML import KML
             return KML(self).parse(params, path_info, host)
-        
-        if params.has_key("scale") or params.has_key("SCALE"): 
+
+        # A shortcut for the most common usage case of a TMS call
+        # any empty dict is False
+        if bool(params) is False:
+            from TileCache.Services.TMS import TMS
+            tile = TMS(self).parse(params, path_info, host)
+        elif "scale" in params or "SCALE" in params:
             from TileCache.Services.WMTS import WMTS
             tile = WMTS(self).parse(params, path_info, host)
-        elif params.has_key("service") or params.has_key("SERVICE") or \
-           params.has_key("REQUEST") and params['REQUEST'] == "GetMap" or \
-           params.has_key("request") and params['request'] == "GetMap": 
+        elif ("service" in params or "SERVICE" in params or
+                "REQUEST" in params and params['REQUEST'] == "GetMap" or
+                "request" in params and params['request'] == "GetMap"):
             from TileCache.Services.WMS import WMS
             tile = WMS(self).parse(params, path_info, host)
-        elif params.has_key("L") or params.has_key("l") or \
-             params.has_key("request") and params['request'] == "metadata":
+        elif ("L" in params or "l" in params or
+                "request" in params and params['request'] == "metadata"):
             from TileCache.Services.WorldWind import WorldWind
             tile = WorldWind(self).parse(params, path_info, host)
-        elif params.has_key("interface"):
+        elif "interface" in params:
             from TileCache.Services.TileService import TileService
             tile = TileService(self).parse(params, path_info, host)
-        elif params.has_key("v") and \
-             (params['v'] == "mgm" or params['v'] == "mgmaps"):
-            from TileCache.Services.MGMaps import MGMaps 
+        elif ("v" in params and
+                (params['v'] == "mgm" or params['v'] == "mgmaps")):
+            from TileCache.Services.MGMaps import MGMaps
             tile = MGMaps(self).parse(params, path_info, host)
-        elif params.has_key("tile"):
-            from TileCache.Services.VETMS import VETMS 
+        elif "tile" in params:
+            from TileCache.Services.VETMS import VETMS
             tile = VETMS(self).parse(params, path_info, host)
-        elif params.has_key("format") and params['format'].lower() == "json":
-            from TileCache.Services.JSON import JSON 
+        elif "format" in params and params['format'].lower() == "json":
+            from TileCache.Services.JSON import JSON
             return JSON(self).parse(params, path_info, host)
         else:
             from TileCache.Services.TMS import TMS
             tile = TMS(self).parse(params, path_info, host)
-        
+
         if isinstance(tile, Layer.Tile):
             if req_method == 'DELETE':
                 self.expireTile(tile)
                 return ('text/plain', 'OK')
             else:
-                return self.renderTile(tile, params.has_key('FORCE'))
+                return self.renderTile(tile, 'FORCE' in params)
         elif isinstance(tile, list):
             if req_method == 'DELETE':
                 [self.expireTile(t) for t in tile]
@@ -287,9 +302,9 @@ class Service (object):
                     import cStringIO as StringIO
                 except ImportError:
                     import StringIO
-                
+
                 result = None
-                
+
                 for t in tile:
                     (format, data) = self.renderTile(t, params.has_key('FORCE'))
                     image = Image.open(StringIO.StringIO(data))
@@ -300,7 +315,7 @@ class Service (object):
                             result.paste(image, None, image)
                         except Exception, E:
                             raise Exception("Could not combine images: Is it possible that some layers are not \n8-bit transparent images? \n(Error was: %s)" % E) 
-                
+
                 buffer = StringIO.StringIO()
                 result.save(buffer, result.format)
                 buffer.seek(0)
@@ -309,32 +324,33 @@ class Service (object):
         else:
             return (tile.format, tile.data)
 
-def modPythonHandler (apacheReq, service):
+
+def modPythonHandler(apacheReq, service):
     from mod_python import apache, util
     try:
-        if apacheReq.headers_in.has_key("X-Forwarded-Host"):
+        if "X-Forwarded-Host" in apacheReq.headers_in:
             host = "http://" + apacheReq.headers_in["X-Forwarded-Host"]
         else:
             host = "http://" + apacheReq.headers_in["Host"]
         host += apacheReq.uri[:-len(apacheReq.path_info)]
-        format, image = service.dispatchRequest( 
-                                util.FieldStorage(apacheReq), 
-                                apacheReq.path_info,
-                                apacheReq.method,
-                                host )
-        apacheReq.content_type = format
+        fmt, image = service.dispatchRequest(util.FieldStorage(apacheReq),
+                                             apacheReq.path_info,
+                                             apacheReq.method,
+                                             host)
+        apacheReq.content_type = fmt
         apacheReq.status = apache.HTTP_OK
         if format.startswith("image/"):
             if service.cache.sendfile:
                 apacheReq.headers_out['X-SendFile'] = image
             if service.cache.expire:
-                apacheReq.headers_out['Expires'] = email.Utils.formatdate(time.time() + service.cache.expire, False, True)
-                
+                apacheReq.headers_out['Expires'] = email.Utils.formatdate(
+                    time.time() + service.cache.expire, False, True)
+
         apacheReq.set_content_length(len(image))
         apacheReq.send_http_header()
         if format.startswith("image/") and service.cache.sendfile:
             apacheReq.write("")
-        else: 
+        else:
             apacheReq.write(image)
     except IOError, E:
         pass
@@ -344,14 +360,14 @@ def modPythonHandler (apacheReq, service):
         apacheReq.send_http_header()
         apacheReq.write("An error occurred: %s\n" % (str(E)))
     except Exception, E:
-        apache.log_error("TCError: %s %s" % (str(E), apacheReq.uri), 
-                        apache.APLOG_ERR)
+        apache.log_error("TCError: %s %s" % (str(E), apacheReq.uri),
+                         apache.APLOG_ERR)
         apacheReq.content_type = "text/plain"
         apacheReq.status = apache.HTTP_INTERNAL_SERVER_ERROR
         apacheReq.send_http_header()
         try:
             apacheReq.write("An error occurred: %s\n%s\n" % (
-                str(E), 
+                str(E),
                 "".join(traceback.format_tb(sys.exc_traceback))))
         except:
             pass
@@ -409,6 +425,16 @@ def wsgiHandler(environ, start_response, service):
                               ) % (environ.get("REMOTE_ADDR"), path_info,
                                    E.replace("\n", " "),
                                    environ.get("HTTP_REFERER")))
+        else:
+            missfn = ""
+            f = re.search("/mesonet/ARCHIVE/data/(?P<a>[a-zA-Z0-9/\._\-]+)&",
+                          E)
+            if f:
+                missfn = f.groupdict()['a']
+            sys.stderr.write(("[client: %s] Path: %s errored with "
+                              "missing file %s\n"
+                              ) % (environ.get("REMOTE_ADDR"), path_info,
+                                   missfn))
         msg = ("An error occurred: %s\n%s\n"
                ) % (E, "".join(traceback.format_tb(sys.exc_traceback)))
 
@@ -416,7 +442,7 @@ def wsgiHandler(environ, start_response, service):
     return [msg]
 
 
-def cgiHandler (service):
+def cgiHandler(service):
     try:
         params = {}
         input = cgi.FieldStorage()
