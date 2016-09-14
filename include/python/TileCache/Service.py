@@ -35,71 +35,73 @@ class Request (object):
         self.service = service
 
     def getLayer(self, layername):
-        #try:
         if layername.startswith('idep'):
             (lbl, ltype, date) = layername.split("::", 3)
             scenario = lbl[4:]
-            uri = 'date=%s&year=%s&month=%s&day=%s&scenario=%s' % (date, 
-                                                        date[:4], 
-                                                       date[5:7], date[8:10],
-                                                       scenario)
+            uri = ('date=%s&year=%s&month=%s&day=%s&scenario=%s'
+                   ) % (date, date[:4], date[5:7], date[8:10], scenario)
             layer = self.service.layers['idep']
             layer.name = layername
             layer.layers = ltype
             layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
         elif layername.startswith('goes::'):
-            (bird,channel, tstring) = (layername.split("::")[1]).split('-')
+            (bird, channel, tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
                 mylayername = 'goes-t'
                 year = tstring[:4]
                 month = tstring[4:6]
                 day = tstring[6:8]
                 ts = tstring[8:12]
-                uri = "year=%s&month=%s&day=%s&time=%s&" % (year, 
-                                            month, day,  ts)
+                uri = "year=%s&month=%s&day=%s&time=%s&" % (year,
+                                                            month, day, ts)
             else:
                 mylayername = 'goes'
                 uri = ''
             layer = self.service.layers[mylayername]
             layer.name = layername
             layer.url = "%sbird=%s&channel=%s&%s" % (
-                layer.metadata['baseurl'], bird, channel, uri)                                                                     
+                layer.metadata['baseurl'], bird, channel, uri)
         elif layername.find("::") > 0:
-            (sector,prod,tstring) = (layername.split("::")[1]).split('-')
+            (sector, prod, tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
                 utcnow = (datetime.datetime.utcnow() +
                           datetime.timedelta(minutes=5)).strftime("%Y%m%d%H%M")
                 if tstring > utcnow:
-                    raise TileCacheFutureException("Specified time in the future!")
+                    raise TileCacheFutureException(
+                        "Specified time in the future!")
                 mylayername = 'ridge-t'
-                if sector in ['USCOMP', 'HICOMP', 'AKCOMP']:
+                year = tstring[:4]
+                month = tstring[4:6]
+                day = tstring[6:8]
+                ts = tstring[8:12]
+                if sector in ['USCOMP', 'HICOMP', 'AKCOMP', 'PRCOMP']:
                     mylayername = 'ridge-composite-t'
                     if prod == 'N0R':
                         mylayername = 'ridge-composite-t-n0r'
                     sector = sector.lower()
                     prod = prod.lower()
-                year = tstring[:4]
-                month = tstring[4:6]
-                day = tstring[6:8]
-                ts = tstring[8:12]
-                uri = "year=%s&month=%s&day=%s&time=%s&" % (year, 
-                                            month, day,  ts)
+                    # these should always be for a minutes mod 5
+                    # if not, save the users from themselves
+                    if ts[-1] not in ["0", "5"]:
+                        extra = "5" if ts[-1] > "5" else "0"
+                        ts = "%s%s" % (ts[:3], extra)
+                uri = "year=%s&month=%s&day=%s&time=%s&" % (year,
+                                                            month, day, ts)
             else:
                 mylayername = 'ridge'
                 uri = ''
             layer = self.service.layers[mylayername]
             layer.name = layername
             layer.url = "%ssector=%s&prod=%s&%s" % (layer.metadata['baseurl'],
-                sector, prod, uri)
+                                                    sector, prod, uri)
         else:
             layer = self.service.layers.get(layername, None)
             if layer is None:
-                raise TileCacheLayerNotFoundException("Layer %s not found" % (layername,))
+                raise TileCacheLayerNotFoundException(("Layer %s not found"
+                                                       ) % (layername,))
         return layer
-        #except:
-        #    raise TileCacheException("The requested layer (%s) does not exist. Available layers are: \n * %s" % (layername, "\n * ".join(self.service.layers.keys()))) 
 
-    
+
 def import_module(name):
     """Helper module to import any module based on a name, and return the module."""
     mod = __import__(name)
