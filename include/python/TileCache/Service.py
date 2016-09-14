@@ -90,7 +90,9 @@ class Request (object):
             else:
                 if sector in ['USCOMP', 'HICOMP', 'AKCOMP', 'PRCOMP']:
                     prod = prod.lower()
-                mylayername = 'ridge-composite-single'
+                    mylayername = 'ridge-composite-single'
+                else:
+                    mylayername = 'ridge-single'
                 uri = ''
             layer = self.service.layers[mylayername]
             layer.name = layername
