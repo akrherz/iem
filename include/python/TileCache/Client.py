@@ -48,27 +48,23 @@ class WMS (object):
 
     def url (self):
         return self.base + urllib.urlencode(self.params)
-    
-    def fetch (self):
+
+    def fetch(self):
+        """Fetch image from backend"""
         urlrequest = urllib2.Request(self.url())
-        # urlrequest.add_header("User-Agent",
-        #    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)" )
-        response = None
-        while response is None:
-            try:
-                response = self.client.open(urlrequest)
-                data = response.read()
-                # check to make sure that we have an image...
-                msg = response.info()
-                if msg.has_key("Content-Type"):
-                    ctype = msg['Content-Type']
-                    if ctype[:5].lower() != 'image':
-                        if HIDE_ALL:
-                            raise Exception("Did not get image data back. (Adjust HIDE_ALL for more detail.)")
-                        else:
-                            raise Exception("Did not get image data back. \nURL: %s\nContent-Type Header: %s\nResponse: \n%s" % (self.url(), ctype, data))
-            except httplib.BadStatusLine:
-                response = None # try again
+        response = self.client.open(urlrequest)
+        data = response.read()
+        # check to make sure that we have an image...
+        msg = response.info()
+        ctype = msg.get('Content-Type', '')
+        if ctype[:5].lower() != 'image':
+            if HIDE_ALL:
+                raise Exception(("Did not get image data back. "
+                                 "(Adjust HIDE_ALL for more detail.)"))
+            else:
+                raise Exception(("Did not get image data back. \n"
+                                 "URL: %s\nContent-Type Header: %s\n"
+                                 "Response: \n%s") % (self.url(), ctype, data))
         return data, response
 
     def setBBox (self, box):
