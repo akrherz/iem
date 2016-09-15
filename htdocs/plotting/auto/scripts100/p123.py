@@ -1,6 +1,6 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+import pandas as pd
 import datetime
 import numpy as np
 
@@ -95,6 +95,7 @@ def plotter(fdict):
         lows[i] = row[1]
 
     startyear = max([1900, nt.sts[station]['archive_begin'].year])
+    rows = []
     for thres in range(-20, 101, 2):
         condition = lows < thres
         max_bl = 0
@@ -112,7 +113,8 @@ def plotter(fdict):
             if (stop - start) > max_al:
                 max_al = int(stop - start)
                 max_al_ts = datetime.date(startyear,
-                            1, 1) + datetime.timedelta(days=int(stop))
+                                          1, 1) + datetime.timedelta(
+                                              days=int(stop))
         condition = highs < thres
         max_bh = 0
         max_bh_ts = datetime.date.today()
@@ -120,7 +122,8 @@ def plotter(fdict):
             if (stop - start) > max_bh:
                 max_bh = int(stop - start)
                 max_bh_ts = datetime.date(startyear,
-                            1, 1) + datetime.timedelta(days=int(stop))
+                                          1, 1) + datetime.timedelta(
+                                              days=int(stop))
         condition = highs >= thres
         max_ah = 0
         max_ah_ts = datetime.date.today()
@@ -131,31 +134,49 @@ def plotter(fdict):
                                           1, 1) + datetime.timedelta(
                                                         days=int(stop))
 
+        max_bl_sdate = (max_bl_ts - datetime.timedelta(days=max_bl)
+                        ).strftime("%m/%d/%Y")
+        max_bl_edate = max_bl_ts.strftime("%m/%d/%Y")
+        max_bh_sdate = (max_bh_ts - datetime.timedelta(days=max_bh)
+                        ).strftime("%m/%d/%Y")
+        max_bh_edate = max_bh_ts.strftime("%m/%d/%Y")
+        max_al_sdate = (max_al_ts - datetime.timedelta(days=max_al)
+                        ).strftime("%m/%d/%Y")
+        max_al_edate = max_al_ts.strftime("%m/%d/%Y")
+        max_ah_sdate = (max_ah_ts - datetime.timedelta(days=max_ah)
+                        ).strftime("%m/%d/%Y")
+        max_ah_edate = max_ah_ts.strftime("%m/%d/%Y")
+        rows.append(dict(thres=thres, max_low_below=max_bl,
+                         max_high_below=max_bh, max_low_above=max_al,
+                         max_high_above=max_ah,
+                         max_low_below_sdate=max_bl_sdate,
+                         max_low_below_edate=max_bl_edate,
+                         max_low_above_sdate=max_al_sdate,
+                         max_low_above_edate=max_al_edate,
+                         max_high_below_sdate=max_bh_sdate,
+                         max_high_below_edate=max_bh_edate,
+                         max_high_above_sdate=max_ah_sdate,
+                         max_high_above__edate=max_ah_edate))
         res += ("%3i %5s %10s %10s %5s %10s %10s  "
                 "%5s %10s %10s %5s %10s %10s\n"
                 ) % (thres,
-                        wrap(max_bl),
-                        wrap(max_bl, (max_bl_ts -
-                                datetime.timedelta(days=max_bl)).strftime("%m/%d/%Y")), 
-                        wrap(max_bl, max_bl_ts.strftime("%m/%d/%Y") ),
-                    
-                        wrap(max_al),
-                        wrap(max_al, (max_al_ts -
-                                datetime.timedelta(days=max_al)).strftime("%m/%d/%Y")), 
-                        wrap(max_al, max_al_ts.strftime("%m/%d/%Y") ),
-                    
-                        wrap(max_bh),
-                        wrap(max_bh, (max_bh_ts -
-                                datetime.timedelta(days=max_bh)).strftime("%m/%d/%Y")), 
-                        wrap(max_bh, max_bh_ts.strftime("%m/%d/%Y") ),
-                    
-                        wrap(max_ah),
-                        wrap(max_ah, (max_ah_ts -
-                                datetime.timedelta(days=max_ah)).strftime("%m/%d/%Y")), 
-                        wrap(max_ah, max_ah_ts.strftime("%m/%d/%Y")))
+                     wrap(max_bl),
+                     wrap(max_bl, max_bl_sdate),
+                     wrap(max_bl, max_bl_edate),
+                     wrap(max_al),
+                     wrap(max_al, max_al_sdate),
+                     wrap(max_al, max_al_edate),
+                     wrap(max_bh),
+                     wrap(max_bh, max_bh_sdate),
+                     wrap(max_bh, max_bh_edate),
+                     wrap(max_ah),
+                     wrap(max_ah, max_ah_sdate),
+                     wrap(max_ah, max_ah_edate))
 
-
-    return None, None, res
+    df = pd.DataFrame(rows)
+    df.set_index('thres', inplace=True)
+    df.index.name = 'threshold'
+    return None, df, res
 
 if __name__ == '__main__':
     plotter(dict())
