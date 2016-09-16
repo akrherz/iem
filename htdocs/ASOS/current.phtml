@@ -23,7 +23,16 @@
   $t->title = "{$network} Current Conditions";
   $t->refresh = "<meta http-equiv=\"refresh\" content=\"1200;\">";
   $t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+EOF;
+  $t->jsextra = <<<EOF
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
+  		
 <script language="JavaScript" type="text/javascript">
+$(document).ready(function(){
+    $(".iemselect2").select2();
+});
+  		
 <!--//BEGIN Script
 function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
@@ -121,7 +130,7 @@ if($format == 'csv'){
 	die();
 }
 
-$nselect = '<select name="network">';
+$nselect = '<select class="iemselect2" name="network">';
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'ASOS' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
@@ -161,7 +170,7 @@ $day = date("d");
 $tkeys = array_keys($nt->table);
 $station = $tkeys[0];
 $table = <<<EOF
-<table border=1 cellspacing=0 cellpadding=1>
+<table class="table table-bordered table-condensed">
 <tr>
   <td>
 <form method="GET" action="current.phtml">

@@ -109,12 +109,13 @@ if ($mode == "monthly"){
 				Null as max_tmpf_qc, Null as max_gust,
 				null as min_tmpf_qc, snow, snowd,
 				null as min_rh, null as max_rh,
+				null as max_dwpf, null as min_dwpf,
 				null as cv from $table WHERE
 				month = $month and year = $year and
 				station = '".$station."' ORDER by day ASC";
 	} else {
 		$sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
-				min_rh, max_rh,
+				min_rh, max_rh, max_dwpf, min_dwpf,
 			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 		   max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.id = '". $station ."' and
@@ -134,12 +135,13 @@ if ($mode == "monthly"){
 			low as min_tmpf, precip as pday,
 			Null as max_tmpf_qc, Null as max_gust,
 			null as min_rh, null as max_rh,
+			null as max_dwpf, null as min_dwpf,
 			null as min_tmpf_qc, station as id, snow, snowd,
 			null as cv from $table WHERE
 			day = '".$dateStr."' ORDER by $sortvar $sortorder NULLS LAST";
 	} else {
 		$sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
-				min_rh, max_rh,
+				min_rh, max_rh, max_dwpf, min_dwpf,
 			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 			max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.iemid = s.iemid 
@@ -231,6 +233,8 @@ summary information.</p>
 <th><a href="{$uri}station">Location:</a></th>
 <th><a href="{$uri}max_tmpf">High:</a></th>
 <th><a href="{$uri}min_tmpf">Low:</a></th>
+<th><a href="{$uri}max_dwpf">Max Dew Point [F]:</a></th>
+<th><a href="{$uri}min_dwpf">Min Dew Point [F]:</a></th>
 <th><a href="{$uri}pday">Rainfall</a></th>
 <th><a href="{$uri}max_gust">Peak Gust:</a></th>
 <th><a href="{$uri}max_gust_ts">Time of Gust</a></th>
@@ -263,7 +267,11 @@ EOF;
 	    	$htmlout .= "<td><strike>". $row["min_tmpf"] ."</strike></td>";
 	  	else
 	    	$htmlout .= "<td>". $row["min_tmpf"] ."</td>";
-	  
+
+	    $htmlout .= "<td>". $row["max_dwpf"] ."</td>";
+	    $htmlout .= "<td>". $row["min_dwpf"] ."</td>";
+	     
+	    	
 	  	if ($row["pday"] < 0)
 	    	$htmlout .= "<td>M</td>";
 	  	else
