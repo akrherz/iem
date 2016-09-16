@@ -312,4 +312,8 @@ data = {'plots': [
         {'id': "51", 'mw': True,
          'label': "Frequency of No Daily Precipitation over 7 Days"},
     ]},
+    {'label': 'Tall Towers Plots', 'options': [
+        {'id': "158", 'mw': True,
+         'label': "1 Second Interval Time Series "},
+    ]},
 ]}
