@@ -21,6 +21,8 @@ for fn in glob.glob("*.zip"):
     if valid >= ceiling:
         continue
     rp = valid.strftime("/NTRANS/wxarchive/%Y/%m/%d/%H")
+    if fn.startswith("fx"):
+        rp = valid.strftime("/NTRANS/wxarchive/forecast/%Y/%m")
     if rp not in remote_filenames:
         local_filenames[rp] = []
         remote_filenames[rp] = []
