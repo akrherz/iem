@@ -21,22 +21,44 @@ $hs2 = gmtHourSelect("", "hour2");
 
 $rselect = rwisMultiSelect("", 5); 
 
+$ar = Array(
+		"Etc/UTC" => "Coordinated Universal Time (UTC)",
+		"America/New_York" => "America/New_York (EST/EDT)",
+		"America/Chicago" => "America/Chicago (CST/CDT)",
+		"America/Denver" => "America/Denver (MST/MDT)",
+		"America/Los_Angeles" => "America/Los_Angeles (WST/WDT)",
+		"America/Anchorage" => "America/Anchorage (AKST/AKDT)",
+		);
+$tzselect = make_select("tz", "Etc/UTC", $ar);
+
 $t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/RWIS/">RWIS Homepage</a></li>
+ <li class="active">Traffic Download</li>
+</ol>
 
 <p>This page provides the IEM collected archive of Iowa RWIS Traffic Data.
 
 
-<form method="GET" action="traffic_dl.php">
+<form method="GET" action="/cgi-bin/request/rwis.py">
+<input type="hidden" value="traffic" name="src">
+<input type="hidden" value="lane_id" name="vars">
+<input type="hidden" value="avg_speed" name="vars">
+<input type="hidden" value="avg_headway" name="vars">
+<input type="hidden" value="normal_vol" name="vars">
+<input type="hidden" value="long_vol" name="vars">
+<input type="hidden" value="occupancy" name="vars">
+
 
 <table>
 <tr><td width="50%">
 
-<p><h3 class="subtitle">1. Select Station:</h3><br>
+<p><h3>1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br />
 {$rselect}
 
 
-<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<p><h3>2. Select Start/End Time:</h3><br>
 <i>Times are in UTC. Archive starts in December 2008.</i>
 <table>
   <tr>
@@ -66,13 +88,18 @@ $t->content = <<<EOF
 
 </td><td valign="TOP">
 
-<p><h3 class="subtitle">3. How to view?</h3><br>
+<p><h4>3. Timezone of Timestamps</h4>
+   <i>This controls the timezone used for presenting the timestamps in the
+    downloaded file.</i>
+   <br />{$tzselect}</p>
+    		
+<p><h3 class="subtitle">4. How to view?</h3><br>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
 </select>
 
-<p><h3 class="subtitle">4. Data Delimitation:</h3><br>
+<p><h3 class="subtitle">5. Data Delimitation:</h3><br>
 How shall the output values be seperated?
 <br><select name="delim">
     <option value="comma">Comma
@@ -81,7 +108,7 @@ How shall the output values be seperated?
    </select>
 
 <p>
-<h3 class="subtitle">5. Include Lat / Lons?</h3><img src="/images/gisready.png"><br>
+<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="/images/gisready.png"><br>
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
@@ -89,7 +116,7 @@ How shall the output values be seperated?
 
 </td></tr></table>
 
-<p><h3 class="subtitle">Submit Form:</h3><br>
+<p><h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>

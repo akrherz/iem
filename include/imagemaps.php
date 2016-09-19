@@ -172,7 +172,7 @@ function rwisMultiSelect($selected, $size){
     include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable("IA_RWIS");
     $cities = $nt->table;
-  $s = "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
+  $s = "<select name=\"stations\" size=\"". $size ."\" MULTIPLE>\n";
   $s .= "<option value=\"_ALL\">Select All</option>\n";
   reset($cities);
   while( list($key, $val) = each($cities) ) {

@@ -29,8 +29,8 @@ def get_time(form, tzname):
     d2 = int(form.getfirst('day2'))
     h1 = int(form.getfirst('hour1'))
     h2 = int(form.getfirst('hour2'))
-    mi1 = int(form.getfirst('minute1'))
-    mi2 = int(form.getfirst('minute2'))
+    mi1 = int(form.getfirst('minute1', 0))
+    mi2 = int(form.getfirst('minute2', 0))
     sts = ts.replace(year=y1, month=m1, day=d1, hour=h1, minute=mi1)
     ets = ts.replace(year=y2, month=m2, day=d2, hour=h2, minute=mi2)
     return sts, ets
@@ -53,6 +53,7 @@ def main():
     delimiter = DELIMITERS.get(form.getfirst('delim', 'comma'))
     what = form.getfirst('what', 'dl')
     tzname = form.getfirst('tz', 'UTC')
+    src = form.getfirst('src', 'atmos')
     sts, ets = get_time(form, tzname)
     stations = form.getlist('stations')
     if len(stations) == 0:
@@ -62,10 +63,14 @@ def main():
     if len(stations) == 1:
         stations.append('XXXXXXX')
 
-    sql = """SELECT *, valid at time zone '%s' as obtime from alldata
-    WHERE station in %s and valid BETWEEN '%s' and '%s' ORDER by valid ASC
-    """ % (tzname, tuple(stations), sts, ets)
-    df = read_sql(sql, PGCONN)
+    tbl = ''
+    if src in ['soil', 'traffic']:
+        tbl = '_%s' % (src,)
+    sql = """SELECT *, valid at time zone %s as obtime from
+    alldata"""+tbl+"""
+    WHERE station in %s and valid BETWEEN %s and %s ORDER by valid ASC
+    """
+    df = read_sql(sql, PGCONN, params=(tzname, tuple(stations), sts, ets))
     if len(df) == 0:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Sorry, no results found for query!")
