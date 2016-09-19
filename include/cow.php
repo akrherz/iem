@@ -214,6 +214,7 @@ function computeAveragePerimeterRatio(){
        $shared += $v["sharedborder"];
        $total += $v["perimeter"];
    }
+   if ($total == 0) return 0;
    return ($shared / $total * 100.0);
 }
 
