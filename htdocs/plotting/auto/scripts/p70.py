@@ -71,6 +71,11 @@ def plotter(fdict):
     df = read_sql(sql, pgconn, params=(station, phenomena, significance),
                   index_col=None)
 
+    # Since many VTEC events start in 2005, we should not trust any
+    # data that has its first year in 2005
+    if df['year'].min() == 2005:
+        df = df[df['year'] > 2005]
+
     def myfunc(row):
         year = row[0]
         valid = row[1]
