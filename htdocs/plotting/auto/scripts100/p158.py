@@ -334,4 +334,6 @@ def plotter(fdict):
                 label='%sm' % (height,))
     ax.legend(loc='best')
     ax.grid(True)
+    # remove timezone since excel no likely
+    ctx['df'].index = ctx['df'].index.tz_localize(None)
     return fig, ctx['df']
