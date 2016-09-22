@@ -2,6 +2,7 @@
 
 include_once "../../../config/settings.inc.php";
 define("IEM_APPID", 92);
+$HC = "4.2.7";
 include_once "../../../include/myview.php";
 include_once "../../../include/forms.php";
 include_once "../../../include/vtec.php";
@@ -344,9 +345,9 @@ EOF;
 			$image .= '<div id="ap_container" style="width:100%s;height:400px;"></div>';
 			$jsextra .= "Highcharts.setOptions({global: { useUTC: false } });";
 			$extrascripts .= <<<EOF
-<script src="/vendor/highcharts/4.2.0/highcharts.js"></script>		
-<script src="/vendor/highcharts/4.2.0/highcharts-more.js"></script>		
-<script src="/vendor/highcharts/4.2.0/modules/exporting.js"></script>		
+<script src="/vendor/highcharts/${HC}/highcharts.js"></script>		
+<script src="/vendor/highcharts/${HC}/highcharts-more.js"></script>		
+<script src="/vendor/highcharts/${HC}/modules/exporting.js"></script>		
 <script src="${imguri}.js"></script>		
 EOF;
 		} elseif ($fmt == 'png' || $fmt == 'svg') {
