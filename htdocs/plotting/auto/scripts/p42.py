@@ -153,12 +153,12 @@ def plotter(fdict):
         sts = datetime.datetime(2000, 6, 1)
         ets = datetime.datetime(2000, 8, 31)
     else:
-        sts = datetime.datetime(2000, int(month), 1)
-        ets = sts + datetime.timedelta(days=35)
-        ets = ets.replace(day=1)
-        ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%m-%d')
+        ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
+        sts = datetime.datetime(2000, ts.month, 1)
+        ets = sts + datetime.timedelta(days=35)
+        ets = ets.replace(day=1)
 
     cursor.execute("""
       SELECT valid, round(""" + varname + """::numeric,0)
@@ -210,9 +210,10 @@ def plotter(fdict):
         sts = min(x0)
         ets = max(x1)
     ax.set_xlim(sts, ets)
-    ax.xaxis.set_major_locator(
-        mdates.DayLocator(interval=((ets - sts).days / 10),
-                          tz=pytz.timezone(nt.sts[station]['tzname'])))
+    if (ets - sts).days > 10:
+        ax.xaxis.set_major_locator(
+            mdates.DayLocator(interval=((ets - sts).days / 10),
+                              tz=pytz.timezone(nt.sts[station]['tzname'])))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     ax.grid(True)
     ax.set_ylabel("%s $^\circ$F" % (PDICT2.get(varname),))
@@ -233,4 +234,5 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter(dict(station='DSM', network='IA_ASOS', m='all', threshold=78))
+    plotter(dict(station='DSM', network='IA_ASOS', m='sep', threshold=70,
+                 hours=36, var='dwpf', dir='above'))
