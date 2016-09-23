@@ -226,6 +226,10 @@ data = {'plots': [
         {'id': "14", 'mw': True,
          'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
+    {'label': 'Hydrology Plots', 'options': [
+        {'id': "160",
+         'label': ("River Guage Obs and Forecasts from HML Products")},
+    ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
         {'id': "78",
          'label': ("Average Dew Point/RH% by Air Temperature "
@@ -267,10 +271,6 @@ data = {'plots': [
         {'id': "155",
          'label': "Top Ten Hourly Precipitation Reports"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
-    ]},
-    {'label': 'Upper Air / RAOB Sounding Plots', 'options': [
-        {'id': "150",
-         'label': ("Single Sounding Mandatory Level Percentile Ranks")},
     ]},
     {'label': 'NASS Quickstats (USDA Crop Statistics)', 'options': [
         {'id': "156",
@@ -317,5 +317,9 @@ data = {'plots': [
     {'label': 'Tall Towers Plots', 'options': [
         {'id': "158", 'mw': True,
          'label': "1 Second Interval Time Series "},
+    ]},
+    {'label': 'Upper Air / RAOB Sounding Plots', 'options': [
+        {'id': "150",
+         'label': ("Single Sounding Mandatory Level Percentile Ranks")},
     ]},
 ]}
