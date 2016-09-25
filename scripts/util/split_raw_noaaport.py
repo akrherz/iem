@@ -1,35 +1,33 @@
-
-import mx.DateTime, os
+import os
+import datetime
+import subprocess
 from pyiem.nws.product import TextProduct
 
-sts = mx.DateTime.DateTime(2011,7,19)
-ets = mx.DateTime.DateTime(2011,8,3)
-interval = mx.DateTime.RelativeDateTime(days=1)
+os.chdir("/mesonet/tmp")
+sts = datetime.datetime(2011, 7, 19)
+ets = datetime.datetime(2011, 8, 3)
+interval = datetime.timedelta(days=1)
 
 now = sts
-while(now < ets):
-  out = open('%s.data' % (now.strftime("%Y%m%d"),), 'w')
-  os.system("tar -zxf /mesonet/ARCHIVE/raw/noaaport/%s.tgz" % (now.strftime("%Y%m%d"),))
-  for q in range(0,24):
-    print now, q
-    #fp = "/home/ldm/offline/text/%s%02i.txt" % (now.strftime("%d"), q)
-    fp = "%s%02i.txt" % (now.strftime("%d"), q)
-    if not os.path.isfile(fp):
-      print 'Missing', fp
-      continue
-    o = open(fp).read()
-    prods = o.split("\003")
-    del o
-    for prod in prods:
-      #if (prod.find("EOKI4 ") < 0 and prod.find("DLDI4 ") < 0):
-      #  continue
-      try:
-        p = TextProduct(prod)
-      except:
-        continue
-      #if (p.afos is not None and p.afos[:3] in ['MET', 'MAV']):
-      if (p.afos is not None and p.afos[:3] in ['TAF','MTR']):
-        out.write(prod +"\003")
-    os.unlink("%s%02i.txt" % (now.strftime("%d"), q))
-  out.close()
-  now += interval
+while now < ets:
+    out = open('%s.data' % (now.strftime("%Y%m%d"),), 'w')
+    subprocess.call(("tar -zxf /mesonet/ARCHIVE/raw/noaaport/%s.tgz"
+                     ) % (now.strftime("%Y%m%d"),))
+    for q in range(0, 24):
+        print now, q
+        fn = "%s%02i.txt" % (now.strftime("%d"), q)
+        if not os.path.isfile(fn):
+            print 'Missing', fn
+            continue
+        o = open(fn).read()
+        prods = o.split("\003")
+        for prod in prods:
+            try:
+                p = TextProduct(prod)
+            except:
+                continue
+            if p.afos is not None and p.afos[:3] in ['HML', ]:
+                out.write(prod + "\003")
+        os.unlink("%s%02i.txt" % (now.strftime("%d"), q))
+    out.close()
+    now += interval
