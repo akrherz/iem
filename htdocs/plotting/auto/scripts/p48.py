@@ -2,6 +2,7 @@ import psycopg2.extras
 import pyiem.nws.vtec as vtec
 import numpy as np
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -11,7 +12,9 @@ def get_description():
     d['cache'] = 86400
     d['description'] = """For a given watch/warning/advisory type and forecast
     zone, what is the frequency by time of day that the product was valid.  The
-    total number of events for the county/zone is used for the frequency."""
+    total number of events for the county/zone is used for the frequency. Due
+    to how the NWS issues some products for counties and some products for
+    zones, you may need to try twice to get the proper one selected."""
     d['arguments'] = [
         dict(type='ugc', name='ugc',
              default='IAZ048', label='Select UGC Zone/County:'),
@@ -30,10 +33,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    ugc = fdict.get('ugc', 'IAZ048')
-    phenomena = fdict.get('phenomena', 'WC')
-    significance = fdict.get('significance', 'W')
+    ugc = ctx['ugc']
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
 
     (fig, ax) = plt.subplots(1, 1)
 
