@@ -83,6 +83,8 @@ def get_context(fdict):
     ctx['odf'] = df.pivot('valid', 'label', 'value')
     ctx['df'] = pd.merge(ctx['df'], ctx['odf'], left_on='valid',
                          right_index=True, how='left', sort=False)
+    ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
+    ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
     return ctx
 
 
@@ -115,12 +117,10 @@ def highcharts(fdict):
             }
     """)
     series = ",".join(lines)
-    title = "[%s] %s" % (ctx['station'], ctx['name'])
-    subtitle = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
     return """
 $("#ap_container").highcharts({
-    title: {text: '""" + title + """'},
-    subtitle: {text: '""" + subtitle + """'},
+    title: {text: '""" + ctx['title'] + """'},
+    subtitle: {text: '""" + ctx['subtitle'] + """'},
     chart: {zoomType: 'x'},
     tooltip: {
         shared: true,
@@ -138,16 +138,25 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
     ctx = get_context(fdict)
     df = ctx['df']
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(10, 6))
     fxs = df['id'].unique()
     for fx in fxs:
         df2 = df[df['id'] == fx]
         issued = df2.iloc[0]['issued'].strftime("%-m/%-d %Hz")
-        ax.plot(df2['valid'], df2[ctx['var'] + '_value'], label=issued)
-    ax.plot(ctx['odf'].index.values, ctx['odf'][ctx[ctx['var']]], lw=2, label='Obs')
-    ax.legend()
+        ax.plot(df2['valid'], df2[ctx['var'] + '_value'], zorder=2,
+                label=issued)
+    ax.plot(ctx['odf'].index.values, ctx['odf'][ctx[ctx['var']]], lw=2,
+            color='k', label='Obs', zorder=4)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    pos = ax.get_position()
+    ax.grid(True)
+    ax.set_ylabel(ctx[ctx['var']])
+    ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
+    ax.set_position([pos.x0, pos.y0, 0.6, 0.8])
+    ax.legend(loc=(1.0, 0.0))
     return fig, df
 
 if __name__ == '__main__':
