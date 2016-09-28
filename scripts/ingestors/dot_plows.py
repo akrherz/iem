@@ -1,17 +1,12 @@
 """Consume a REST service of DOT Snowplow locations and data"""
-import urllib2
+import requests
 import json
 import psycopg2
 import pytz
 import datetime
 
-URI = ("https://geonexusr.iowadot.gov/ArcGIS/rest/services/Operations/"
-       "Realtime_Trucks/MapServer/1/query?text=&geometry=&"
-       "geometryType=esriGeometryPoint&inSR="
-       "&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds="
-       "&where=label+is+not+null&time=&returnCountOnly=false&"
-       "returnIdsOnly=false&returnGeometry=true&maxAllowableOffset="
-       "&outSR=&outFields=*&f=json")
+URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
+       "8a3118f14fc24bfb93eb769e997597f9/data")
 CEILING = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
 CEILING = CEILING.replace(tzinfo=pytz.timezone("UTC"))
 
@@ -30,13 +25,12 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("UTC"), microsecond=0)
 
-    try:
-        data = json.loads(urllib2.urlopen(URI, timeout=30).read())
-    except Exception, exp:
-        # print 'dot_plows download fail %s' % (exp,)
-        data = {}
+    req = requests.get(URI, timeout=30)
+    data = {}
+    if req.status_code == 200:
+        data = json.loads(req.content)
     newplows = {}
-    for feat in data.get('features', []):
+    for feat in data['layers'][0].get('featureSet', {}).get('features', []):
         logdt = feat['attributes']['LOGDT']
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
@@ -90,8 +84,8 @@ def workflow():
                   feat['attributes']['RIGHTWINGPLOWSTATE'],
                   feat['attributes']['FRONTPLOWSTATE'],
                   feat['attributes']['UNDERBELLYPLOWSTATE'],
-                  feat['attributes']['SOLID_SPREAD_CODE'],
-                  feat['attributes']['ROAD_TEMP_CODE'],
+                  None,  # SOIL_SPREAD_CODE
+                  None,  # ROAD_TEMP_CODE,
                   feat['attributes']['XPOSITION'],
                   feat['attributes']['YPOSITION'],
                   label))
@@ -120,8 +114,8 @@ def workflow():
                   feat['attributes']['RIGHTWINGPLOWSTATE'],
                   feat['attributes']['FRONTPLOWSTATE'],
                   feat['attributes']['UNDERBELLYPLOWSTATE'],
-                  feat['attributes']['SOLID_SPREAD_CODE'],
-                  feat['attributes']['ROAD_TEMP_CODE'],
+                  None,
+                  None,
                   feat['attributes']['XPOSITION'],
                   feat['attributes']['YPOSITION']))
 
