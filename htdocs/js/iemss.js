@@ -120,7 +120,9 @@ $().ready(function() {
 		return !$('#stations_in option:selected').remove().appendTo('#stations_out');  
 	});  
 	$('#stations_addall').click(function() {  
-		return !$('#stations_in option').remove().appendTo('#stations_out');  
+		var ret = !$('#stations_in option').remove().appendTo('#stations_out');
+		$('#stations_out option').prop('selected', true);
+		return ret;
 	});  
 	$('#stations_delall').click(function() {  
 		return !$('#stations_out option').remove().appendTo('#stations_in');  
