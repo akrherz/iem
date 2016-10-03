@@ -11,11 +11,11 @@ interval = datetime.timedelta(days=1)
 now = sts
 while now < ets:
     out = open('%s.data' % (now.strftime("%Y%m%d"),), 'w')
-    subprocess.call(("tar -zxf /mesonet/ARCHIVE/raw/noaaport/%s.tgz"
-                     ) % (now.strftime("%Y%m%d"),))
+    subprocess.call(("tar -zxf /mesonet/ARCHIVE/raw/noaaport/%s/%s.tgz"
+                     ) % (now.year, now.strftime("%Y%m%d")), shell=True)
     for q in range(0, 24):
         print now, q
-        fn = "%s%02i.txt" % (now.strftime("%d"), q)
+        fn = "%s%02i.txt" % (now.strftime("%Y%m%d"), q)
         if not os.path.isfile(fn):
             print 'Missing', fn
             continue
@@ -28,6 +28,6 @@ while now < ets:
                 continue
             if p.afos is not None and p.afos[:3] in ['HML', ]:
                 out.write(prod + "\003")
-        os.unlink("%s%02i.txt" % (now.strftime("%d"), q))
+        os.unlink(fn)
     out.close()
     now += interval
