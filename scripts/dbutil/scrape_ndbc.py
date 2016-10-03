@@ -63,7 +63,8 @@ def do(nwsli):
 
 
 def main():
-    pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
+                              user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""SELECT distinct nwsli from unknown where
     product ~* 'OSO' ORDER by nwsli""")

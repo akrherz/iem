@@ -2,7 +2,7 @@ import psycopg2
 import pandas as pd
 import matplotlib.pyplot as plt
 
-pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+pgconn = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
 cursor = pgconn.cursor()
 
 

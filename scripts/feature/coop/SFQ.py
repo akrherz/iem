@@ -7,7 +7,7 @@ from _sqlite3 import Row
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-HADS = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+HADS = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
 cursor = HADS.cursor()
 
 STATIONS = OrderedDict([('BSPM2', 'Baltimore BWI\n'),

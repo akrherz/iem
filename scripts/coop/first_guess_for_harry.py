@@ -28,7 +28,7 @@ MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-HADS = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+HADS = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
 hcursor = HADS.cursor()
 
 DATA = """IA0112,ALBI4,A

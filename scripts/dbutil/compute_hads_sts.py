@@ -5,7 +5,7 @@ import psycopg2
 import datetime
 
 THISYEAR = datetime.datetime.now().year
-HADSDB = psycopg2.connect(database='hads', host='iemdb')
+HADSDB = psycopg2.connect(database='hads', host='iemdb-hads')
 MESOSITEDB = psycopg2.connect(database='mesosite', host='iemdb')
 
 

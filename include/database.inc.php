@@ -10,8 +10,8 @@ $_DATABASES = Array(
  'access' => "dbname=iem host=iemdb user=nobody connect_timeout=5",
  'iem' => "dbname=iem host=iemdb user=nobody connect_timeout=5",
  'afos' => "dbname=afos host=iemdb user=nobody connect_timeout=5",
- 'hads' => "dbname=hads host=iemdb user=nobody connect_timeout=5",
- 'asos' => "dbname=asos host=iemdbuser=nobody connect_timeout=5",
+ 'hads' => "dbname=hads host=iemdb-hads user=nobody connect_timeout=5",
+ 'asos' => "dbname=asos host=iemdb user=nobody connect_timeout=5",
  'coop' => "dbname=coop host=iemdb user=nobody connect_timeout=5",
  'awos' => "dbname=awos host=iemdb user=nobody connect_timeout=5",
  'mos' => "dbname=mos host=iemdb user=nobody connect_timeout=5",
@@ -41,7 +41,8 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 	$dbhost = "iemdb"; // read-only host
 	if ($rw) $dbhost = "iemdb"; // rw master
 	if ($dbname == "access"){ $dbname = "iem"; }
-
+	if ($dbname == "hads") $dbhost = "iemdb-hads";
+	
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);
 	$db = pg_connect( $connstr , $force_new);
