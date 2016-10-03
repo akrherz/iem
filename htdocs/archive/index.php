@@ -43,6 +43,9 @@ having difficulty finding something, please let us know. </p>
 <h3>RADAR Data</h3>
 <ul>
 
+<li><a href="https://s3.amazonaws.com/noaa-nexrad-level2/index.html">Amazon S3 NEXRAD II Archive</a>
+<br />Your first stop if you are looking for archived Level II files!</li>
+
 <li><a href="/archive/nexrad/">NIDS NEXRAD Data</a>
  <br>NEXRAD data from the seven sites (DMX,DVN,OAX,FSD,ARX,MPX,EAX) with
 Iowa coverage.  Since mid April 2002, all NIDS products are archived. Before
