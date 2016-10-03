@@ -4,8 +4,11 @@ import datetime
 from collections import OrderedDict
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
+from pyiem.datatypes import speed
 
 PDICT = OrderedDict([
+        ('avg_smph', 'Average Wind Speed [mph]'),
         ('max_tmpf', 'High Temperature'),
         ('high_departure', 'High Temperature Departure'),
         ('min_tmpf', 'Low Temperature'),
@@ -59,17 +62,12 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('station', 'DSM')
-    varname = fdict.get('var', 'pday')
-    network = fdict.get('network', 'IA_ASOS')
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01'),
-                                       '%Y-%m-%d')
-    edate = datetime.datetime.strptime(fdict.get('edate', '2015-02-01'),
-                                       '%Y-%m-%d')
-    sdate = sdate.date()
-    edate = edate.date()
-    if PDICT.get(varname) is None:
-        return
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
+    network = ctx['network']
+    sdate = ctx['sdate']
+    edate = ctx['edate']
 
     nt = NetworkTable(network)
 
@@ -81,7 +79,7 @@ def plotter(fdict):
 
     cursor.execute("""
     SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
-    pday from summary s JOIN stations t
+    pday, coalesce(avg_sknt, 0) as avg_sknt from summary s JOIN stations t
     on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
     t.id = %s and t.network = %s ORDER by day ASC
     """, (sdate, edate, station, network))
@@ -91,6 +89,7 @@ def plotter(fdict):
         hd = row['max_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'high']
         ld = row['min_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'low']
         rows.append(dict(day=row['day'], max_tmpf=row['max_tmpf'],
+                         avg_smph=speed(row['avg_sknt'], 'KT').value('MPH'),
                          min_dwpf=row['min_dwpf'], max_dwpf=row['max_dwpf'],
                          high_departure=hd, low_departure=ld,
                          min_tmpf=row['min_tmpf'], pday=row['pday']))
