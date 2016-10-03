@@ -8,7 +8,7 @@
 
 import psycopg2
 
-HADS = psycopg2.connect(database='hads', host='iemdb')
+HADS = psycopg2.connect(database='hads', host='iemdb-hads')
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()

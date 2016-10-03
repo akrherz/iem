@@ -7,7 +7,7 @@ import datetime
 import pytz
 import sys
 import psycopg2
-HADS = psycopg2.connect(database='hads', host='iemdb')
+HADS = psycopg2.connect(database='hads', host='iemdb-hads')
 
 
 def query(sql, args=[]):

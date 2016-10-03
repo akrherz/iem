@@ -46,7 +46,8 @@ def do_iowa_azos(date):
 
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
+                              user='nobody')
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""

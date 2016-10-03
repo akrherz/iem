@@ -4,7 +4,7 @@
 Run from RUN_2AM.sh
 """
 import psycopg2
-HADS = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+HADS = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()

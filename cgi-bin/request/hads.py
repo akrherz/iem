@@ -10,7 +10,7 @@ import os
 import pandas as pd
 from pandas.io.sql import read_sql
 import psycopg2
-PGCONN = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+PGCONN = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
 
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 

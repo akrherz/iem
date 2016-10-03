@@ -29,7 +29,7 @@ def main():
     cursor.execute("""TRUNCATE raw_inbound_tmp""")
 
 if __name__ == '__main__':
-    pgconn = psycopg2.connect(database='hads', host='iemdb')
+    pgconn = psycopg2.connect(database='hads', host='iemdb-hads')
     cursor2 = pgconn.cursor()
     main()
     cursor2.close()

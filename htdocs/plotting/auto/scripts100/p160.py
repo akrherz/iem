@@ -38,7 +38,8 @@ def get_description():
 
 
 def get_context(fdict):
-    pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
+                              user='nobody')
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
 

@@ -27,7 +27,8 @@ def sync(dbname):
     Actually do the syncing, please
     """
     # connect to synced database
-    dbconn = psycopg2.connect(database=dbname, host='iemdb')
+    dbhost = "iemdb" if dbname != 'hads' else 'iemdb-hads'
+    dbconn = psycopg2.connect(database=dbname, host=dbhost)
     dbcursor = dbconn.cursor()
     # Figure out our latest revision
     dbcursor.execute("""

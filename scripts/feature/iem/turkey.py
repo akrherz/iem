@@ -35,7 +35,7 @@ p26915 = pyproj.Proj(init="EPSG:26915")
 central = pytz.timezone("America/Chicago")
 nt = NetworkTable("IA_DCP")
 
-pgconn = psycopg2.connect(database='hads', host='iemdb', user='nobody')
+pgconn = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
 
 df = read_sql("""
     SELECT distinct station, valid, key, value from raw2016_08 where
