@@ -5,7 +5,7 @@ Return JSON metadata for nexrad information
 import sys
 import cgi
 import json
-import mx.DateTime
+import datetime
 import os.path
 import psycopg2
 import glob
@@ -29,13 +29,13 @@ def parse_time(s):
     """
     try:
         if len(s) == 17:
-            date = mx.DateTime.strptime(s, '%Y-%m-%dT%H:%MZ')
+            date = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%MZ')
         elif len(s) == 20:
-            date = mx.DateTime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+            date = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
         else:
-            date = mx.DateTime.gmt()
+            date = datetime.datetime.utcnow()
     except:
-        date = mx.DateTime.gmt()
+        date = datetime.datetime.utcnow()
     return date
 
 
@@ -81,35 +81,53 @@ def available_radars(form):
 
 
 def find_scans(root, radar, product, sts, ets):
-    """
-    Find scans for a given radar, product, and start and end time
+    """Find scan times with data
+
+    Note that we currently have a 500 length hard coded limit, so if we are
+    interested in a long term time period, we should lengthen out our
+    interval to look for files
+
+    Args:
+      root (dict): where we write our findings to
+      radar (string): radar we are interested in
+      product (string): NEXRAD product of interest
+      sts (datetime): start time to look for data
+      ets (datetime): end time to look for data
     """
     now = sts
+    times = []
     if radar in ['USCOMP', ]:
-        now -= mx.DateTime.RelativeDateTime(minutes=(now.minute % 5))
-        while now < ets and len(root['scans']) < 501:
+        # These are every 5 minutes, so 288 per day
+        now -= datetime.timedelta(minutes=(now.minute % 5))
+        while now < ets:
             if os.path.isfile(now.strftime(("/mesonet/ARCHIVE/data/"
                                             "%Y/%m/%d/GIS/uscomp/" +
                                             product.lower() +
                                             "_%Y%m%d%H%M.png"))):
-                root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
-            now += mx.DateTime.RelativeDateTime(minutes=5)
+                times.append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
+            now += datetime.timedelta(minutes=5)
     else:
-        while now < ets and len(root['scans']) < 501:
+        while now < ets:
             if os.path.isfile(now.strftime("/mesonet/ARCHIVE/data/"
                                            "%Y/%m/%d/GIS/ridge/" +
                                            radar + "/" + product +
                                            "/" + radar + "_" +
                                            product + "_%Y%m%d%H%M.png")):
-                root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
-            now += mx.DateTime.RelativeDateTime(minutes=1)
+                times.append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
+            now += datetime.timedelta(minutes=1)
+    if len(times) > 500:
+        # Do some filtering
+        interval = (len(times) / 500) + 1
+        times = times[::interval]
+
+    root['scans'] = times
 
 
 def is_realtime(sts):
     """
     Check to see if this time is close to realtime...
     """
-    if (mx.DateTime.gmt() - sts).seconds > 3600:
+    if (datetime.datetime.utcnow() - sts).total_seconds() > 3600:
         return False
     return True
 
@@ -122,10 +140,13 @@ def list_files(form):
     product = form.getvalue('product', 'N0Q')[:3]
     start_gts = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
     end_gts = parse_time(form.getvalue('end', '2012-01-27T01:00Z'))
+    # practical limit here of 10 days
+    if (start_gts + datetime.timedelta(days=10)) < end_gts:
+        end_gts = start_gts + datetime.timedelta(days=10)
     root = {'scans': []}
     find_scans(root, radar, product, start_gts, end_gts)
     if len(root['scans']) == 0 and is_realtime(start_gts):
-        now = start_gts - mx.DateTime.RelativeDateTime(minutes=10)
+        now = start_gts - datetime.timedelta(minutes=10)
         find_scans(root, radar, product, now, end_gts)
 
     return root
@@ -158,9 +179,7 @@ def list_products(form):
 
 
 def main():
-    """
-
-    """
+    """Do awesome things"""
     form = cgi.FieldStorage()
     if os.environ['REQUEST_METHOD'] not in ['GET', 'POST']:
         sys.stdout.write("Content-type: text/plain\n\n")
