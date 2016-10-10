@@ -41,6 +41,9 @@ python grid_rsds.py
 cd ../dbutil 
 python hads_delete_dups.py
 
+cd ../hads
+python dedup_hml_forecasts.py
+
 cd ../mrms
 python create_daily_symlink.py $(date --date '1 day ago' +'%Y %m %d')
 python mrms_monthly_plot.py
