@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2016, 9, 2, 4, 0)
+sts = datetime.datetime(2016, 10, 7, 9, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2016, 9, 3, 6, 0)
+ets = datetime.datetime(2016, 10, 8, 5, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/New_York'
-station = 'CRE'
+station = 'SAV'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -107,11 +107,11 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc=(0.7, 0.6), prop=prop, ncol=1)
+ax.legend(loc=(0.4, 0.6), prop=prop, ncol=1)
 ax.set_ylim(0, int(np.max(rate1)+2))
 ax.set_yticks(range(0, 10, 1))
-ax.set_xlabel("2 September 2016 (%s)" % (tzname,))
-ax.set_title(("2 September 2016 North Myrtle Beach, SC (KCRE)\n"
+ax.set_xlabel("7 October 2016 (%s)" % (tzname,))
+ax.set_title(("7 October 2016 Savannah, GA (KSAV)\n"
               "One Minute Rainfall, %.2f inches total plotted") % (prec[-1],))
 
 
