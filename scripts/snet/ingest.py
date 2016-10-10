@@ -21,8 +21,8 @@ from email.MIMEText import MIMEText
 import mx.DateTime
 
 # Local stuff
-import nwnOB
-import secret
+import nwnOB  # @UnresolvedImport
+import secret  # @UnresolvedImport
 
 import psycopg2.extras
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
@@ -309,14 +309,14 @@ def windGustAlert():
                     db[sid].maxSPED > db[sid].windGustAlert):
                 # Set the value for the last alert generated!
                 db[sid].windGustAlert = db[sid].maxSPED
-                sendWindAlert(id, db[sid].maxSPED, db[sid].maxDrctTxt,
+                sendWindAlert(sid, db[sid].maxSPED, db[sid].maxDrctTxt,
                               myThreshold)
                 continue
             # If the windGustAlert is None, then we should alert too
             if db[sid].windGustAlert is None:
                 # Set the value for the last alert generated!
                 db[sid].windGustAlert = db[sid].maxSPED
-                sendWindAlert(id, db[sid].maxSPED, db[sid].maxDrctTxt,
+                sendWindAlert(sid, db[sid].maxSPED, db[sid].maxDrctTxt,
                               myThreshold)
                 continue
 
@@ -328,7 +328,7 @@ def windGustAlert():
                     alertDrctTxt = db[sid].aDrctTxt[pos]
                     db[sid].maxDrctTxt = alertDrctTxt
                     db[sid].maxSPED_ts = db[sid].valid
-            sendWindAlert(id, max(db[sid].aSPED), alertDrctTxt, myThreshold)
+            sendWindAlert(sid, max(db[sid].aSPED), alertDrctTxt, myThreshold)
 
 
 def clearObs():
@@ -359,7 +359,7 @@ def main():
             dryRun = 0
         if (dryRun > 2):
             logger.info(" ABORT ABORT")
-            raise "ZZZZZZZ"
+            raise Exception("ZZZZZZZ")
         averageWinds()
         windGustAlert()
         logData(goodLines)
