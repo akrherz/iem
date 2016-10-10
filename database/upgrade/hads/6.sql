@@ -36,3 +36,5 @@ create table hml_observed_data_2013(
 CREATE INDEX hml_observed_data_2013_idx on
 	hml_observed_data_2013(station, valid);
 GRANT SELECT on hml_observed_data_2013 to nobody,apache;
+
+CREATE INDEX hml_forecast_issued_idx on hml_forecast(issued);
