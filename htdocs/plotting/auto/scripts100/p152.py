@@ -1,8 +1,7 @@
 import psycopg2
 from pandas.io.sql import read_sql
-import datetime
-import numpy as np
 from pyiem.plot import MapPlot, centered_bins
+from pyiem.util import get_autoplot_context
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -42,14 +41,14 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    state = fdict.get('state', 'IA')[:2]
-    sector = fdict.get('sector', 'state')
-    opt = fdict.get('opt', 'both')
-    p1syear = int(fdict.get('p1syear', 1951))
-    p1eyear = int(fdict.get('p1eyear', 1980))
-    p2syear = int(fdict.get('p2syear', 1981))
-    p2eyear = int(fdict.get('p2eyear', 2010))
+    ctx = get_autoplot_context(fdict, get_description())
+    state = ctx['state'][:2]
+    sector = ctx['sector']
+    opt = ctx['opt']
+    p1syear = ctx['p1syear']
+    p1eyear = ctx['p1eyear']
+    p2syear = ctx['p2syear']
+    p2eyear = ctx['p2eyear']
 
     table = "alldata"
     if sector == 'state':
@@ -88,7 +87,7 @@ def plotter(fdict):
     and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
     """, pgconn, params=[p1syear, p1eyear,
                          p2syear, p2eyear],
-                  index_col=None)
+                  index_col='station')
     df['p1_season'] = df['p1_first_fall'] - df['p1_last_spring']
     df['p2_season'] = df['p2_first_fall'] - df['p2_last_spring']
     df['season_delta'] = df['p2_season'] - df['p1_season']
@@ -99,7 +98,7 @@ def plotter(fdict):
     title = 'Number of Days in Growing Season '
     m = MapPlot(sector=sector, state=state, axisbg='white',
                 title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
-                       ) % (p2syear, p2eyear, p1syear, p2eyear, title),
+                       ) % (p2syear, p2eyear, p1syear, p1eyear, title),
                 subtitle=('based on IEM Archives'),
                 titlefontsize=14)
     # Create 9 levels centered on zero
