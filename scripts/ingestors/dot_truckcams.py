@@ -3,24 +3,18 @@
 
   /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
-import urllib2
-import json
 import psycopg2
 import pytz
 import datetime
 import subprocess
 import tempfile
 import os
+import requests
+import pyproj
 
-URI = ("https://geonexusr.iowadot.gov/arcgis/rest/services/Operations/"
-       "Truck_Images/MapServer/3/query?outFields=*&outSR=4326&"
-       "f=json&where=PHOTO_UID%3E0&returnGeometry=true&returnIdsOnly=false")
-
-
-def get_label(attrs):
-    '''Figure out the site label given the attributes, this will change later
-    '''
-    return attrs['PHOTO_URL'].split("/")[-1].split("_")[0]
+P3857 = pyproj.Proj(init='EPSG:3857')
+URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
+       "71846cc4c673428ca35057d6849ee0c6/data")
 
 
 def get_current_fn(label):
@@ -39,12 +33,12 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),
                           microsecond=0)
-    try:
-        data = json.loads(urllib2.urlopen(URI, timeout=30).read())
-    except:
+    req = requests.get(URI, timeout=30)
+    if req.status_code != 200:
         return
-    if len(data.get('features', [])) == 0:
-        return
+    data = req.json()
+    featureset = data['layers'][0].get('featureSet', dict())
+    features = featureset.get('features', [])
     POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
     cursor = POSTGIS.cursor()
 
@@ -53,13 +47,15 @@ def workflow():
     for row in cursor:
         current[row[0]] = row[1]
 
-    for feat in data['features']:
+    for feat in features:
         logdt = feat['attributes']['PHOTO_FILEDATE']
+        if logdt is None:
+            continue
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour, minute=ts.minute,
                               second=ts.second)
-        label = get_label(feat['attributes'])
+        label = feat['attributes']['PHOTO_ANUMBER']
         idnum = feat['attributes']['PHOTO_UID']
         if idnum <= current.get(label, 0):
             continue
@@ -67,15 +63,13 @@ def workflow():
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
         # print label, utc, feat['attributes']['PHOTO_URL']
-        try:
-            image = urllib2.urlopen(feat['attributes']['PHOTO_URL'],
-                                    timeout=15).read()
-        except urllib2.URLError, exp:
+        req = requests.get(feat['attributes']['PHOTO_URL'], timeout=15)
+        if req.status_code != 200:
             print(('dot_truckcams.py dl fail |%s| %s'
-                   ) % (exp, feat['attributes']['PHOTO_URL']))
+                   ) % (req.status_code, feat['attributes']['PHOTO_URL']))
             continue
         tmp = tempfile.NamedTemporaryFile(delete=False)
-        tmp.write(image)
+        tmp.write(req.content)
         tmp.close()
         cmd = ("/home/ldm/bin/pqinsert -p 'plot ac %s %s %s jpg' %s"
                ) % (utc.strftime("%Y%m%d%H%M"), get_current_fn(label),
@@ -91,8 +85,8 @@ def workflow():
         #    print '-------------------------\n'
         os.unlink(tmp.name)
 
-        geom = 'SRID=4326;POINT(%s %s)' % (feat['geometry']['x'],
-                                           feat['geometry']['y'])
+        pt = P3857(feat['geometry']['x'], feat['geometry']['y'], inverse=True)
+        geom = 'SRID=4326;POINT(%s %s)' % (pt[0], pt[1])
         cursor.execute("""
             INSERT into idot_dashcam_current(label, valid, idnum,
             geom) VALUES (%s, %s, %s, %s)
