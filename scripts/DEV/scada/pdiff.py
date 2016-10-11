@@ -1,12 +1,7 @@
-import numpy as np
 import psycopg2
-import datetime
 import matplotlib.pyplot as plt
-import matplotlib.colors as mpcolors
 from pandas.io.sql import read_sql
-import matplotlib.colorbar as mpcolorbar  # NOPEP8
-import matplotlib.patheffects as PathEffects  # NOPEP8
-from matplotlib.mlab import griddata
+import pandas as pd
 
 pgconn = psycopg2.connect(database='scada')
 
@@ -26,7 +21,7 @@ def do(turbine_id):
 
     select classify as tod,
     (yawangle / 5)::int * 5 as yaw, avg(wdiff) as avg_wdiff,
-    avg(pdiff) as avg_pdiff from
+    avg(pdiff) as avg_pdiff, count(*) from
     combo c JOIN stability s on (c.valid = s.valid)
     GROUP by tod, yaw ORDER by yaw ASC
     """, pgconn, params=(turbine_id, ), index_col=None)
@@ -65,6 +60,12 @@ def do(turbine_id):
 
     fig.savefig("yaw_bias_%s_stability.png" % (turbine_id,))
     plt.close()
+
+    writer = pd.ExcelWriter('pdiff_%s.xlsx' % (turbine_id,),
+                            engine='xlsxwriter')
+
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
 
 for i in range(101, 184):
     print i
