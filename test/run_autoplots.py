@@ -25,6 +25,9 @@ def get_formats(i):
         fmts.append('txt')
     if 'highcharts' in json and json['highcharts']:
         fmts.append('js')
+    if json.get('data', False):
+        fmts.append('csv')
+        fmts.append('xlsx')
     return fmts
 
 
