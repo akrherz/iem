@@ -2,7 +2,6 @@ import numpy as np
 import calendar
 import psycopg2
 import datetime
-import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from collections import OrderedDict
@@ -76,9 +75,8 @@ def plotter(fdict):
         o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
         ORDER by a.sday ASC
     """, pgconn, params=(station, station, year), index_col='sday')
-    df['max_narr_smooth'] = pd.rolling_mean(df['max_narr'],
-                                            window=7, min_periods=1,
-                                            center=True)
+    df['max_narr_smooth'] = df['max_narr'].rolling(window=7, min_periods=1,
+                                                   center=True).mean()
     df['best'] = df['narr_srad'].fillna(
                                     df['merra_srad']).fillna(df['hrrr_srad'])
 

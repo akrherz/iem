@@ -35,9 +35,12 @@ def run_plot(i, fmt):
     """Run this plot"""
     uri = "http://iem.local/plotting/auto/plot/%s/dpi:100.%s" % (i, fmt)
     res = requests.get(uri)
-    if res.status_code != 200:
-        print("%s. %s -> HTTP: %s" % (i, uri, res.status_code))
-        print(res.text)
+    if res.status_code != 200 or len(res.content) == 0:
+        print("%s. %s -> HTTP: %s len(content): %s" % (i, uri[16:],
+                                                       res.status_code,
+                                                       len(res.content)))
+        if len(res.content) > 0:
+            print(res.text)
         return False
 
     return True
