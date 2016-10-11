@@ -3,6 +3,7 @@
 psql -c 'create user nobody;' -U postgres
 psql -c 'create user apache;' -U postgres
 psql -c 'create user mesonet;' -U postgres
+psql -c 'create user ldm;' -U postgres
 psql -c 'create user apiuser;' -U postgres
 
 for db in afos mesosite postgis snet \
