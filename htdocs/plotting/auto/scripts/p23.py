@@ -3,6 +3,7 @@ import numpy as np
 from pyiem.network import Table as NetworkTable
 import datetime
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
             ('avg_temp', 'Average Temperature [F]'),
@@ -16,13 +17,12 @@ def get_description():
     year = datetime.date.today().year - 7
     d['description'] = """This plot presents the combination of monthly
     temperature or precipitation departures and El Nino index values."""
-    d['data'] = True
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
         dict(type='year', name='syear', default=year,
              label='Start Year of Plot', min=1950),
-        dict(type='text', name='years', default='8',
+        dict(type='int', name='years', default='8',
              label='Number of Years to Plot'),
         dict(type='select', name='var', default='avg_temp',
              label='Which Monthly Variable to plot?', options=PDICT),
@@ -37,13 +37,14 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA0000')
+    station = ctx['station']
     nt = NetworkTable("%sCLIMATE" % (station[:2].upper(),))
     table = "alldata_%s" % (station[:2],)
-    syear = int(fdict.get('syear', 2007))
-    years = int(fdict.get('years', 8))
-    varname = fdict.get('var', 'avg_temp')
+    syear = ctx['syear']
+    years = ctx['years']
+    varname = ctx['var']
 
     sts = datetime.datetime(syear, 1, 1)
     ets = datetime.datetime(syear+years, 1, 1)

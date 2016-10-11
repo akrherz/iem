@@ -2,6 +2,7 @@ import psycopg2.extras
 import pandas as pd
 import calendar
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -28,9 +29,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA2203')
-    threshold = float(fdict.get('threshold', 50.))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = float(ctx['threshold'])
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -43,7 +44,7 @@ def plotter(fdict):
          SELECT month, sum(case when max > (sum * %s) then 1 else 0 end),
          count(*) from monthly GROUP by month ORDER by month ASC
          """, (station, threshold / 100.))
-    df = pd.DataFrame(dict(freq=None, events=None,
+    df = pd.DataFrame(dict(freq=pd.Series(), events=pd.Series(),
                            month=pd.Series(calendar.month_abbr[1:],
                                            index=range(1, 13))),
                       index=pd.Series(range(1, 13), name='mo'))
@@ -68,3 +69,6 @@ def plotter(fdict):
     ax.set_xticks(range(1, 13))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

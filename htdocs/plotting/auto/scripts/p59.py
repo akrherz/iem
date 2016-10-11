@@ -15,7 +15,7 @@ PDICT = {'mps': 'Meters per Second',
 
 
 def smooth(x):
-    return pd.rolling_mean(x, 7, min_periods=1)
+    return pd.Series(x).rolling(7, min_periods=1).mean()
 
 
 def uv(sped, drct):
