@@ -38,13 +38,29 @@ function get_file_size($filename, $size_in = 'MB') {
 	return $size . ' ' . $size_in;
 }
 
-
+$location_select_groups = array('states', 'wfo');
+$location_select_group_count = count($location_select_groups);
+$location_select_group_meta = array(
+    'states' => array(
+        'title' => 'Limit State'
+    ),
+    'wfo' => array(
+        'title' => 'Limit Weather Forecast Office (WFO)'
+    )
+);
+$selected_group = 'wfo';
 $wselect = "<select name=\"wfos[]\" MULTIPLE size=\"5\">";
 $wselect .= "<option value=\"ALL\" SELECTED>All Available</option>";
 while( list($key, $value) = each($nt->table) ){
   $wselect .= "<option value='$key'>[$key] ". $nt->table[$key]["name"] ."</option>\n";
 }
 $wselect .= "</select>";
+
+$location_select_html = array(
+    'states' => stateSelect('AL', '', 'states[]', 5, true),
+    'wfo' => $wselect
+);
+
 $y1select = yearSelect2(1986, date("Y"), "year1");
 $m1select = monthSelect2(0,"month1");
 $d1select = daySelect2(0, "day1");
@@ -103,9 +119,30 @@ request or email <a href="/info/contacts.php">us</a> for help.
 
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 <input type="hidden" value="yes" name="simple">
+EOF;
 
-<h4>Limit Weather Forecast Office (WFO)</h4>
-{$wselect}
+for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
+    $group_key = $location_select_groups[$group_idx];
+    $group_meta = $location_select_group_meta[$group_key];
+    $group_selected = ($group_key === $selected_group);
+    $group_input_css = 'location_group';
+    $group_select_container_id = $group_input_css . '-' . $group_key;
+    if($group_selected){
+        $group_input_checked = 'checked';
+    }
+    else{
+        $group_input_checked = '';
+    }
+    $content .= '<h4>';
+    $content .=   '<input type="radio" name="location_group" value="'.$group_key.'"';
+    $content .=   ' ' . $group_input_checked . '>';
+    $content .=   ' ' . $group_meta['title'];
+    $content .= '</h4>';
+    $content .= '<div class="' . $group_input_css . '" id="' . $group_select_container_id . '">';
+    $content .= $location_select_html[$group_key];
+    $content .= '</div>';
+}
+$content .= <<<EOF
 
 <h4>Select time interval</h4>
 <i>(Times are in UTC.</i>
@@ -246,4 +283,85 @@ roughly 2 AM this morning.</p>
 EOF;
 $t->content = $content;
 $t->render('single.phtml');
+
+function debug_print_array($array,$exit = 0,$outputType = 'text',$fakeName='array'){
+    $isHTML=$isLog=$isPHP=false;
+
+    $newline='';
+    $needOutput=false;
+    $needLoop=false;
+    if($outputType == 'html'){
+        $isHTML=true;
+        $newline='<br>';
+        $needOutput=true;
+        $needLoop=true;
+    }
+    elseif($outputType == 'log'){
+        $isLog=true;
+        $newline="\n";
+        $needOutput=true;
+        $needLoop=true;
+    }
+    elseif($outputType == 'php'){
+        $isPHP=true;
+        $newline='<br>';
+        $needOutput=true;
+        $needLoop=true;
+    }
+
+    $output='';
+
+    $string=(!$isLog)?'<pre>':'';
+    if($needOutput){ $output.=$string; } else{ echo $string; }
+
+    if($needLoop){
+
+        if($isPHP){
+            $arrayName='$';
+        }
+        $arrayName=$fakeName;
+
+        foreach($array as $key=>$value){
+            if(is_array($array[$key])){
+                foreach($array[$key] as $subkey=>$subvalue){
+                    if(is_array($array[$key][$subkey])){
+                        foreach($array[$key][$subkey] as $subsubkey=>$subsubvalue){
+                            $quote=(is_numeric($value)) ? '' : '"';
+                            $string=$arrayName.'[\''.$key.'\'][\''.$subkey.'\'][\''.$subsubkey.'\']='.$quote.$subsubvalue.$quote.';'.$newline;
+                            if($needOutput){ $output.=$string; } else{ echo $string; }
+                        }
+                    }
+                    else{
+                        //Not an array
+                        $quote=(is_numeric($value)) ? '' : '"';
+                        $string=$arrayName.'[\''.$key.'\'][\''.$subkey.'\']='.$quote.$subvalue.$quote.';'.$newline;
+                        if($needOutput){ $output.=$string; } else{ echo $string; }
+                    }
+                }
+            }
+            else{
+                //Not an array
+                $quote=(is_numeric($value)) ? '' : '"';
+                $string=$arrayName.'[\''.$key.'\']='.$quote.$value.$quote.';'.$newline;
+                if($needOutput){ $output.=$string; } else{ echo $string; }
+            }
+        }
+    }
+    else{
+        print_r($array);
+    }
+    //print_r($array);
+    //var_dump($array);
+
+    $string=(!$isLog)?'</pre>':'';
+    if($needOutput){ $output.=$string; } else{ echo $string; }
+
+    if($needOutput){
+        return $output;
+    }
+
+    if($exit == 1){
+        exit;
+    }
+}
 ?>
