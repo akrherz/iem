@@ -77,7 +77,8 @@ def pull_wfos_in_states(pg_cursor, state_abbreviations):
         if pg_cursor.rowcount > 0:
             rows = pg_cursor.fetchall()
             for row in rows:
-                wfo_list.append(row[0])
+                if row[0] is not None:
+                    wfo_list.append(row[0])
     except Exception as e:
         msg = "Unexpected error: %s" % sys.exc_info()[0]
         sys.stdout.write(msg)
