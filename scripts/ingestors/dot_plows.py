@@ -32,6 +32,8 @@ def workflow():
     newplows = {}
     for feat in data['layers'][0].get('featureSet', {}).get('features', []):
         logdt = feat['attributes']['LOGDT']
+        if logdt is None:
+            continue
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour, minute=ts.minute, second=ts.second)
