@@ -531,11 +531,12 @@ for a given network that collects webcams and a UTC timestamp.",
   );
   $table = "";
   while (list($key, $ws) = each($services)){
-  	$table .= sprintf("<div class='sect'><strong>%s</strong>
+  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"glyphicon glyphicon-bookmark\"></i></a><a name=\"%s\">%s</a></strong>
 	<br /><strong>URI:</strong> %s%s&amp;callback=gotData
 	<br /><strong>Description:</strong> %s
 	<br /><strong>Method GET Parameters:</strong>
 	<br /><table border='1' cellspacing='0' cellpadding='3'>",
+  			urlencode($ws["title"]), urlencode($ws["title"]),
   			$ws["title"], ROOTURL, $ws["url"], $ws["desc"]);
   	while (list($key2, $vs) = each($ws['vars'])){
   		$table .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
