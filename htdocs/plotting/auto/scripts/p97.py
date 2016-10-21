@@ -22,6 +22,8 @@ PDICT = OrderedDict([
 PDICT2 = OrderedDict([
     ('avg_temp_depart', 'Average Temperature Departure'),
     ('min_low_temp', 'Minimum Low Temperature'),
+    ('gdd_sum', 'Growing Degree Days (50/86) Total'),
+    ('cgdd_sum', 'Growing Degree Days Climatology (50/86)'),
     ('gdd_depart', 'Growing Degree Days (50/86) Departure'),
     ('precip_depart', 'Precipitation Departure'),
     ])
@@ -30,6 +32,8 @@ UNITS = {
     'precip_depart': 'inch',
     'min_low_temp': 'F',
     'gdd_depart': 'F',
+    'gdd_sum': 'F',
+    'cgdd_sum': 'F',
     'avg_temp_depart': 'F',
     }
 
@@ -87,18 +91,23 @@ def plotter(fdict):
         gdd50 from climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
-        o.high, o.low, o.gdd50 - c.gdd50 as gdd50_diff,
+        o.high, o.low, o.gdd50, c.gdd50 as cgdd50,
+        o.gdd50 - c.gdd50 as gdd50_diff,
         (o.high + o.low)/2. - (c.high + c.low)/2. as temp_diff
         from obs o JOIN climo c ON
         (o.station = c.station and o.sday = c.sday)),
     agg as (
         SELECT station, sum(precip_diff) as precip_depart,
         min(low) as min_low_temp, sum(gdd50_diff) as gdd_depart,
-        avg(temp_diff) as avg_temp_depart from combo GROUP by station)
+        avg(temp_diff) as avg_temp_depart, sum(gdd50) as gdd_sum,
+        sum(cgdd50) as cgdd_sum
+        from combo GROUP by station)
 
     SELECT d.station, d.precip_depart, d.min_low_temp, d.avg_temp_depart,
-    d.gdd_depart, ST_x(t.geom) as lon, ST_y(t.geom) as lat from agg d
-    JOIN stations t on (d.station = t.id) WHERE t.network ~* 'CLIMATE'
+    d.gdd_depart, d.gdd_sum, d.cgdd_sum,
+    ST_x(t.geom) as lon, ST_y(t.geom) as lat
+    from agg d JOIN stations t on (d.station = t.id)
+    WHERE t.network ~* 'CLIMATE'
     """, pgconn, params=(date1, date2), index_col='station')
 
     sector2 = "state" if sector != 'midwest' else 'midwest'
@@ -126,7 +135,7 @@ def plotter(fdict):
                df[varname].values, clevels, clevlabels=clevlabels,
                cmap=cmap, units=UNITS.get(varname))
     m.plot_values(df['lon'].values, df['lat'].values,
-                  df[varname].values, fmt=fmt, labelbuffer=15)
+                  df[varname].values, fmt=fmt, labelbuffer=10)
     if sector == 'IA':
         m.drawcounties()
 
