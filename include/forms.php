@@ -2,26 +2,27 @@
 /**
  * Library for doing repetetive forms stuff
  */
-function make_select($name, $selected, $ar, $jscallback=""){
-	// Create a simple HTML select box
+function make_select($name, $selected, $ar, $jscallback="", $cssclass=''){
+        // Create a simple HTML select box
         reset($ar);
-	$s = sprintf("<select name=\"%s\"%s>\n", $name, 
-			($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "");
-	while( list($key,$val) = each($ar)){
-		if (is_array($val)){
-			$s .= "<optgroup label=\"$key\">\n";
-			while( list($k2,$v2) = each($val)){
-				$s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $k2,
-						($selected == $k2)? " SELECTED": "", $v2);
-			}
-			$s .= "</optgroup>";
-		} else {
-			$s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $key,
-				($selected == $key)? " SELECTED": "", $val);
-		}
-	}
-	$s .= "</select>\n";
-	return $s;
+        $s = sprintf("<select name=\"%s\"%s%s>\n", $name, 
+                        ($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "",
+                        ($cssclass != "")? " class=\"$cssclass\"" : "");
+        while( list($key,$val) = each($ar)){
+                if (is_array($val)){
+                        $s .= "<optgroup label=\"$key\">\n";
+                        while( list($k2,$v2) = each($val)){
+                                $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $k2,
+                                                ($selected == $k2)? " SELECTED": "", $v2);
+                        }
+                        $s .= "</optgroup>";
+                } else {
+                        $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $key,
+                                ($selected == $key)? " SELECTED": "", $val);
+                }
+        }
+        $s .= "</select>\n";
+        return $s;
 }
 
 function stateSelect($selected, $jscallback='', $name='state', $size = 1, $multiple = false){
