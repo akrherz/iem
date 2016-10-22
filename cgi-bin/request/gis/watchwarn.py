@@ -12,6 +12,8 @@ import psycopg2
 from geopandas import GeoDataFrame
 
 now = datetime.datetime.now()
+has_error = False
+error_message = 'Unknown error occurred'
 
 
 def get_time_extent(form):
@@ -38,22 +40,81 @@ def get_time_extent(form):
     ets = ets.replace(tzinfo=pytz.timezone('UTC'))
     return sts, ets
 
+
+def parse_state_location_group(pg_connection, state_abbreviations):
+    wfoLimiter = ''
+    wfo_list = pull_wfos_in_states(pg_connection.cursor(), state_abbreviations)
+    sys.stdout.write("Content-type: text/plain\n\n")
+    if len(wfo_list) > 0:
+        wfoLimiter = " and w.wfo in %s " % (str(tuple(wfo_list)),)
+
+    return wfoLimiter
+
+
+def parse_wfo_location_group():
+    wfoLimiter = ''
+    if 'wfo[]' in form:
+        aWFO = form.getlist('wfo[]')
+        aWFO.append('XXX')  # Hack to make next section work
+        if 'ALL' not in aWFO:
+            wfoLimiter = " and w.wfo in %s " % (str(tuple(aWFO)),)
+
+    if 'wfos[]' in form:
+        aWFO = form.getlist('wfos[]')
+        aWFO.append('XXX')  # Hack to make next section work
+        if 'ALL' not in aWFO:
+            wfoLimiter = " and w.wfo in %s " % (str(tuple(aWFO)),)
+    return wfoLimiter
+
+
+def pull_wfos_in_states(pg_cursor, state_abbreviations):
+    wfo_list = []
+
+    try:
+        pg_cursor.execute("""
+            SELECT distinct wfo FROM stations WHERE state IN %s""" % (str(tuple(state_abbreviations)), ))
+
+        if pg_cursor.rowcount > 0:
+            rows = pg_cursor.fetchall()
+            for row in rows:
+                if row[0] is not None:
+                    wfo_list.append(row[0])
+    except Exception as e:
+        msg = "Unexpected error: %s" % sys.exc_info()[0]
+        sys.stdout.write(msg)
+    return wfo_list
+
 form = cgi.FieldStorage()
 sts, ets = get_time_extent(form)
+pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+mcursor = pgconn.cursor()
 
-wfoLimiter = ""
-if 'wfo[]' in form:
-    aWFO = form.getlist('wfo[]')
-    aWFO.append('XXX')  # Hack to make next section work
-    if 'ALL' not in aWFO:
-        wfoLimiter = " and w.wfo in %s " % (str(tuple(aWFO)), )
+if 'location_group' in form:
+    location_group = form.getfirst('location_group')
+    if 'states' == location_group:
+        if 'states[]' in form:
+            states = form.getlist('states[]')
+            wfoLimiter = parse_state_location_group(pgconn, states)
+        else:
+            error_message = 'No state specified'
+            has_error = True
+    elif 'wfo' == location_group:
+        wfoLimiter = parse_wfo_location_group()
+    else:
+        # Unknown location_group
+        has_error = True
+        error_message = 'Unknown location_group (%s)' % (location_group, )
+else:
+    error_message = 'No location_group specified'
+    has_error = True
 
-if 'wfos[]' in form:
-    aWFO = form.getlist('wfos[]')
-    aWFO.append('XXX')  # Hack to make next section work
-    if 'ALL' not in aWFO:
-        wfoLimiter = " and w.wfo in %s " % (str(tuple(aWFO)), )
+if has_error:
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write("ERROR: %s" % (error_message, ))
+    sys.exit()
 
+# Change to postgis db once we have the wfo list
+pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 fp = "wwa_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
 timeopt = int(form.getfirst('timeopt', [1])[0])
 if timeopt == 2:
@@ -130,7 +191,7 @@ countybased as (
        geomcol, table1, timelimit, wfoLimiter, limiter,
        cols, cols, sbwlimiter)
 
-pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+
 df = GeoDataFrame.from_postgis(sql, pgconn, 'geo')
 if len(df.index) == 0:
     sys.stdout.write("Content-type: text/plain\n\n")

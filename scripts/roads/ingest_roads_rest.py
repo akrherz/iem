@@ -56,7 +56,7 @@ def export_shapefile(txn, tp):
     """Export a Shapefile of Road Conditions"""
     os.chdir("/tmp")
     dbf = dbflib.create("iaroad_cond")
-    dbf.add_field("SEGID", dbflib.FTInteger, 4, 0)
+    dbf.add_field("SEGID", dbflib.FTInteger, 6, 0)
     dbf.add_field("MAJOR", dbflib.FTString, 10, 0)
     dbf.add_field("MINOR", dbflib.FTString, 128, 0)
     dbf.add_field("US1", dbflib.FTInteger, 4, 0)
@@ -122,7 +122,8 @@ def export_shapefile(txn, tp):
     for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
         os.unlink("iaroad_cond.%s" % (suffix,))
 
-URI = "http://www.iowadot.gov/gis/data/road_conditions.geojson"
+URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
+       "5d6c7d6963e549539ead6e50d89bdd08/data")
 
 pgconn = psycopg2.connect(database='postgis', host='iemdb')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -165,17 +166,18 @@ for row in cursor:
 r = exponential_backoff(requests.get, URI, timeout=30)
 if r is None:
     sys.exit()
-j = json.loads(r.content)
+j = r.json()
 
-if 'features' not in j:
+if 'layers' not in j:
     print(('ingest_roads_rest got invalid RESULT:\n%s' % (
                 json.dumps(j, sort_keys=True, indent=4, separators=(',', ': ')
                            ))))
     sys.exit()
 
+featureset = j['layers'][0]['featureSet']
 dirty = False
-for feat in j['features']:
-    props = feat['properties']
+for feat in featureset['features']:
+    props = feat['attributes']
     segid = lookup.get(props['SEGMENT_ID'])
     if segid is None:
         print("ingest_roads_rest unknown longname '%s' segment_id '%s'" % (
@@ -195,8 +197,8 @@ for feat in j['features']:
     if cond == current[segid]:
         continue
     # 2015-12-29T16:56:07-06:00
-    valid = datetime.datetime.strptime(props['CARS_MSG_UPDATE_DATE'][:19],
-                                       '%Y-%m-%dT%H:%M:%S')
+    valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
+        seconds=props['CARS_MSG_UPDATE_DATE']/1000.)
     # Save to log
     cursor.execute("""INSERT into roads_2015_2016_log(segid, valid, cond_code,
     raw) VALUES (%s, %s, %s, %s)""", (segid,

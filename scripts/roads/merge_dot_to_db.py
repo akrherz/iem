@@ -1,70 +1,107 @@
 """Importing IDOT provided Road Conditions
 
-shp2pgsql -s 26915 ROAD_COND_SEGMENTS_STAGE.shp new_roads | psql postgis
+Fall 2016 notes
 
-1049 rows entered
+ shp2pgsql -s 3857 SEGMENTS_WGS84_SPHERICAL.shp new_roads | psql postgis
 
- gid        | integer                         |
- segment_id | numeric(10,0)                   |
- route_name | character varying(10)           |
- name_id    | character varying(100)          |
- primary_la | numeric                         |
- primary_lo | numeric                         |
- secondary_ | numeric                         |
- secondary1 | numeric                         |
- segment_st | date                            |
- segment_en | date                            |
- primary_mp | numeric                         |
- secondary2 | numeric                         |
- id         | numeric                         |
- long_name  | character varying(165)          |
- area       | character varying(50)           |
- sub_area   | character varying(50)           |
- lrs_rte_id | character varying(20)           |
- sys_id     | numeric                         |
- rte_num    | numeric                         |
- geom       | geometry(MultiLineString,26915) |
+
+update new_roads SEt nameid = replace(nameid, 'I-35/80', 'I-80'),
+ route_name = 'I-80'  where route_name ~* '/';
+
+1031 rows entered
+
+ gid        | integer                        |
+ segment_id | numeric(10,0)                  |
+ route      | character varying(80)          |
+ nameid     | character varying(80)          |
+ longname   | character varying(156)         |
+ district   | character varying(80)          |
+ subarea    | character varying(80)          |
+ primarymp  | numeric                        |
+ primarylat | numeric                        |
+ primarylon | numeric                        |
+ secondarym | numeric                        |
+ secondaryl | numeric                        |
+ secondar_1 | numeric                        |
+ event_id   | character varying(80)          |
+ event_upda | numeric(10,0)                  |
+ hl_pavemen | character varying(80)          |
+ loc_link_d | character varying(80)          |
+ road_condi | character varying(80)          |
+ cars_msg_u | date                           |
+ cars_msg_i | date                           |
+ ph_pavemen | character varying(80)          |
+ shape_leng | numeric                        |
+ district_n | numeric(10,0)                  |
+ cost_cente | character varying(80)          |
+ editor     | character varying(80)          |
+ edited_dat | date                           |
+ condition_ | date                           |
+ conditio_1 | date                           |
+ conditio_2 | numeric                        |
+ route_name | character varying(80)          |
+ geom       | geometry(MultiLineString,3857) |
+
+
 
 roads base is
 
  segid       | integer                         | This is autoset
- major       | character varying(10)           | directly use route_name
- minor       | character varying(128)          | split name_id by :, take 2
- us1         | smallint                        | sys_id == 2, take rte_num
- st1         | smallint                        | sys_id == 3, take rte_num
- int1        | smallint                        | sys_id == 1, take rte_num
- type        | smallint                        | directly use sys_id
+ major       | character varying(10)           | directly use route
+ minor       | character varying(128)          | split nameid by :, take 2
+ us1         | smallint                        | logic on route
+ st1         | smallint                        | logic on route
+ int1        | smallint                        | logic on route
+ type        | smallint                        | logic on route
  wfo         | character(3)                    | assign later with spatial Q
- tempval     | numeric                         | unused?  will drop?
- longname    | character varying(256)          | directly use long_name
+ longname    | character varying(256)          | directly use longname
  geom        | geometry(MultiLineString,26915) | directly use geom
  simple_geom | geometry(MultiLineString,26915) | compute via Spatial Q
+ idot_id       | integer                         | use segment_id
+ archive_begin | timestamp with time zone        | unset
+ archive_end   | timestamp with time zone        | unset
 
 
 """
+import sys
 import psycopg2
 conn = psycopg2.connect(database='postgis', host='iemdb')
+conn2 = psycopg2.connect(database='postgis', host='localhost', port=5555,
+                         user='mesonet')
 cursor = conn.cursor()
-cursor2 = conn.cursor()
+cursor2 = conn2.cursor()
+
+cursor2.execute("""DELETE from roads_current""")
 
 cursor.execute("""
-     SELECT route_name, name_id, sys_id, rte_num, long_name, geom
+     SELECT route_name, nameid, longname, ST_Transform(geom, 26915), segment_id
      from new_roads
 """)
 for row in cursor:
-    (route_name, name_id, sys_id, rte_num, long_name, geom) = row
+    (route, name_id, longname, geom, gid) = row
+    major = route
+    minor = name_id.split(":")[1]
+    (typ, num) = route.replace("-", " ").split()
+    int1 = num if typ == 'I' else None
+    us1 = num if typ == 'US' else None
+    st1 = num if typ == 'IA' else None
+    if typ not in ['I', 'US', 'IA']:
+        print("Totally unknown, abort %s" % (route,))
+        sys.exit()
+    sys_id = 1
+    if typ == 'US':
+        sys_id = 2
+    elif typ == 'IA':
+        sys_id = 3
+    idot_id = gid
 
-    int1 = rte_num if sys_id == 1 else None
-    us1 = rte_num if sys_id == 2 else None
-    st1 = rte_num if sys_id == 3 else None
     # OK, insert this into the database!
     cursor2.execute("""
-    INSERT into roads_base(major, minor, us1, st1, int1, type, geom, longname)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING segid
-    """, (route_name.strip(),
-          name_id.split(":")[1].strip(),
-          us1, st1, int1,
-          sys_id, geom, long_name))
+    INSERT into roads_base(major, minor, us1, st1, int1, type, geom, longname,
+    idot_id)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING segid
+    """, (major, minor, us1, st1, int1,
+          sys_id, geom, longname, idot_id))
     segid = cursor2.fetchone()[0]
     # Create the simplified geom
     cursor2.execute("""UPDATE roads_base
@@ -77,7 +114,7 @@ for row in cursor:
     substr(ugc, 1, 2) = 'IA' and b.segid = %s
     and u.end_ts is null ORDER by ST_Distance ASC""", (segid,))
     wfo = cursor2.fetchone()[0]
-    print('Added [%s] "%s" segid:%s wfo:%s' % (route_name, name_id, segid,
+    print('Added [%s] "%s" segid:%s wfo:%s' % (longname, name_id, segid,
                                                wfo))
     cursor2.execute("""UPDATE roads_base SET wfo = %s WHERE segid = %s
     """, (wfo, segid))
@@ -90,3 +127,5 @@ for row in cursor:
 cursor2.close()
 conn.commit()
 conn.close()
+conn2.commit()
+conn2.close()
