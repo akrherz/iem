@@ -8,6 +8,9 @@ from twisted.application import service, internet
 from twisted.enterprise import adbapi
 from twisted.internet.task import LoopingCall
 from twisted.python import log
+import sys
+import os
+sys.path.insert(0, os.getcwd())
 import secret
 import re
 import datetime
