@@ -48,7 +48,7 @@ def do(date):
         tz = df.loc[station, 'tzname']
         current_pday = df.loc[station, 'pday']
         for _, row in grouped.get_group(station).iterrows():
-            ts = row['utc_valid'].to_datetime()
+            ts = row['utc_valid'].to_pydatetime()
             if ts <= bases[tz]:
                 continue
             t1 = (ts - bases[tz]).total_seconds() / 60.
