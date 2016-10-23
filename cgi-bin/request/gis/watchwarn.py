@@ -44,7 +44,6 @@ def get_time_extent(form):
 def parse_state_location_group(pg_connection, state_abbreviations):
     wfoLimiter = ''
     wfo_list = pull_wfos_in_states(pg_connection.cursor(), state_abbreviations)
-    sys.stdout.write("Content-type: text/plain\n\n")
     if len(wfo_list) > 0:
         wfoLimiter = " and w.wfo in %s " % (str(tuple(wfo_list)),)
 
