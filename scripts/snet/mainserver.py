@@ -35,7 +35,9 @@ reactor.installResolver(base.BlockingResolver())
 
 # Import nwnserver stuff!
 from nwnserver import hubclient, proxyserver, pollerserv, filewatcher
-
+import os
+import sys
+sys.path.insert(0, os.getpwd())
 import secret
 
 # Create the Python Hub application
