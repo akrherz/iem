@@ -11,11 +11,22 @@ import psycopg2
 from pandas.io.sql import read_sql
 
 SSW = sys.stdout.write
-#>> *         Road condition dots
 #>> *         DOT plows
 #>> *         RWIS sensor data
 #>> *         River gauges
 #>> *         Ag data (4" soil temps)
+
+
+def do_iaroadcond():
+    """Iowa DOT Road Conditions as dots"""
+    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    df = read_sql("""
+    select b.idot_id as locationid, b.longname as locationname,
+    ST_y(ST_transform(ST_centroid(b.geom),4326)) as latitude,
+    ST_x(ST_transform(ST_centroid(b.geom),4326)) as longitude, cond_code
+    from roads_base b JOIN roads_current c on (c.segid = b.segid)
+    """, pgconn)
+    return df
 
 
 def do_webcams(network):
@@ -157,9 +168,9 @@ def main():
     form = cgi.FieldStorage()
     q = form.getfirst('q')
     df = router(q)
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(df.to_csv(None, index=False))
-    sys.stdout.write("\n")
+    SSW("Content-type: text/plain\n\n")
+    SSW(df.to_csv(None, index=False))
+    SSW("\n")
 
 if __name__ == '__main__':
     main()
