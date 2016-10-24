@@ -71,7 +71,8 @@ def pull_wfos_in_states(pg_cursor, state_abbreviations):
 
     try:
         pg_cursor.execute("""
-            SELECT distinct wfo FROM stations WHERE state IN %s""" % (str(tuple(state_abbreviations)), ))
+            SELECT distinct wfo FROM stations WHERE state IN %s
+        """ % (str(tuple(state_abbreviations)), ))
 
         if pg_cursor.rowcount > 0:
             rows = pg_cursor.fetchall()
@@ -79,7 +80,7 @@ def pull_wfos_in_states(pg_cursor, state_abbreviations):
                 if row[0] is not None:
                     wfo_list.append(row[0])
     except Exception as e:
-        msg = "Unexpected error: %s" % sys.exc_info()[0]
+        msg = "Unexpected error: %s" % (e,)
         sys.stdout.write(msg)
     return wfo_list
 
@@ -88,24 +89,20 @@ sts, ets = get_time_extent(form)
 pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = pgconn.cursor()
 
-if 'location_group' in form:
-    location_group = form.getfirst('location_group')
-    if 'states' == location_group:
-        if 'states[]' in form:
-            states = form.getlist('states[]')
-            wfoLimiter = parse_state_location_group(pgconn, states)
-        else:
-            error_message = 'No state specified'
-            has_error = True
-    elif 'wfo' == location_group:
-        wfoLimiter = parse_wfo_location_group()
+location_group = form.getfirst('location_group', 'wfo')
+if 'states' == location_group:
+    if 'states[]' in form:
+        states = form.getlist('states[]')
+        wfoLimiter = parse_state_location_group(pgconn, states)
     else:
-        # Unknown location_group
+        error_message = 'No state specified'
         has_error = True
-        error_message = 'Unknown location_group (%s)' % (location_group, )
+elif 'wfo' == location_group:
+    wfoLimiter = parse_wfo_location_group()
 else:
-    error_message = 'No location_group specified'
+    # Unknown location_group
     has_error = True
+    error_message = 'Unknown location_group (%s)' % (location_group, )
 
 if has_error:
     sys.stdout.write("Content-type: text/plain\n\n")
