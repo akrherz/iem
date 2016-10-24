@@ -1,8 +1,11 @@
-import iemdb
-import numpy
-import numpy.ma
-OTHER = iemdb.connect('other', bypass=True)
+import psycopg2
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+OTHER = psycopg2.connect(database='other', host='iemdb', user='nobody')
 ocursor = OTHER.cursor()
+
 
 def getsite(station):
     ocursor.execute("""
@@ -14,26 +17,25 @@ def getsite(station):
     soil = []
     val2 = []
     for row in ocursor:
-        valid.append( row[0] )
-        soil.append( row[1] )
-        val2.append( row[2] )
+        valid.append(row[0])
+        soil.append(row[1])
+        val2.append(row[2])
     return valid, soil, val2
 
 v1, s1, s2 = getsite('nstl11')
-#v2, s2 = getsite('nstlnsp')
-s1 = numpy.array( s1 )
-s2 = numpy.array( s2 )
+# v2, s2 = getsite('nstlnsp')
+s1 = np.array(s1)
+s2 = np.array(s2)
 
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
-(fig, ax) = plt.subplots(2,1, sharex=True)
+(fig, ax) = plt.subplots(2, 1, sharex=True)
 
 ax[0].bar(v1, s2, label='Downwelling', zorder=1, fc='tan', ec='tan')
 ax[0].bar(v1, s1, label='Upwelling', zorder=2, fc='green', ec='green')
 ax[0].legend(loc=2, prop={'size': 9})
 
-ax[0].set_title("NLAE Flux Site 2014 Data over Corn Crop (local noon each day)")
+ax[0].set_title(("NLAE Flux Site 2014 Data over Corn Crop "
+                 "(local noon each day)"))
 
 albedo = s1 / s2
 ax[1].bar(v1, albedo, fc='g', ec='g')
@@ -43,8 +45,8 @@ ax[0].grid(True)
 
 bbox_props = dict(boxstyle="rarrow,pad=0.3", fc="cyan", ec="b", lw=2)
 t = ax[1].text(0.1, 0.5, "Snow!", ha="right", va="center", rotation=15,
-            size=10, transform=ax[1].transAxes,
-            bbox=bbox_props)
+               size=10, transform=ax[1].transAxes,
+               bbox=bbox_props)
 bb = t.get_bbox_patch()
 bb.set_boxstyle("rarrow", pad=0.6)
 

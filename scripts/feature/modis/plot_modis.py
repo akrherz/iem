@@ -40,34 +40,32 @@ a = np.asarray(geom.exterior)
 x,y = m.map(a[:,0], a[:,1])
 m.ax.plot(x,y, color='red', lw=2.5, zorder=2)
 
+"""
+(fig, ax) = plt.subplots(2, 1)
 
-(fig, ax) = plt.subplots(2,1)
-
-m = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
-            llcrnrlon=-99,urcrnrlon=-89,resolution='i',
+m = Basemap(projection='cea', llcrnrlat=40, urcrnrlat=44,
+            llcrnrlon=-99, urcrnrlon=-89, resolution='i',
             ax=ax[0], fix_aspect=False)
-m2 = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
-            llcrnrlon=-99,urcrnrlon=-89,resolution='i',
-            ax=ax[1], fix_aspect=False)
+m2 = Basemap(projection='cea', llcrnrlat=40, urcrnrlat=44,
+             llcrnrlon=-99, urcrnrlon=-89, resolution='i',
+             ax=ax[1], fix_aspect=False)
 
-x,y= m(-99.4023, 38.7753)
-x2,y2=m(-88.1321, 45.2504)
+x, y = m(-99.4023, 38.7753)
+x2, y2 = m(-88.1321, 45.2504)
 
-img=mpimg.imread('/tmp/ames2012.jpg')
-ax[0].imshow(img, extent=(x,x2,y, y2) )
-ax[0].set_title("15 September 2012 :: Aqua MODIS True Color")
+img = mpimg.imread('aug22.jpg')
+ax[0].imshow(img, extent=(x, x2, y, y2))
+ax[0].set_title("22 August 2016 :: Terra MODIS True Color")
 
-img=mpimg.imread('/tmp/ames2014.jpg')
-ax[1].imshow(img, extent=(x,x2,y, y2) )
-ax[1].set_title("16 September 2014 :: Aqua MODIS True Color")
+img = mpimg.imread('oct23.jpg')
+ax[1].imshow(img, extent=(x, x2, y, y2))
+ax[1].set_title("23 October 2016 :: Aqua MODIS True Color")
 
 m.drawstates(linewidth=2.5)
 m2.drawstates(linewidth=2.5)
-"""
 plt.savefig('test.png')
-#import iemplot
-#iemplot.makefeature('test')
 
+"""
 (fig, ax) = plt.subplots(1,1)
 
 m = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
@@ -83,3 +81,4 @@ ax.set_title("2 January 2016 :: Terra MODIS True Color")
 
 m.drawstates(linewidth=2.5)
 plt.savefig('test.png')
+"""

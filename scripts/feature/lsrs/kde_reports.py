@@ -12,7 +12,7 @@ lons = []
 lats = []
 cursor.execute("""
   SELECT x(geom), y(geom), valid,
-  x(ST_Transform(geom,2163)), y(ST_Transform(geom,2163)) from lsrs 
+  x(ST_Transform(geom,2163)), y(ST_Transform(geom,2163)) from lsrs
   where  typetext = 'HAIL'
   and x(geom) between %s and %s and y(geom) between %s and %s
   and magnitude >= 1 ORDER by valid ASC
@@ -31,13 +31,13 @@ for row in cursor:
         if ddelta < 15000 and tdelta < 15*60:
             dup = True
     if dup:
-        #print 'DUP', row
+        # print 'DUP', row
         continue
     recent.append([valid, row[3], row[4]])
-    lons.append( row[0] )
-    lats.append( row[1] )
-    
-X, Y = numpy.mgrid[reference.MW_WEST:reference.MW_EAST:50j, 
+    lons.append(row[0])
+    lats.append(row[1])
+
+X, Y = numpy.mgrid[reference.MW_WEST:reference.MW_EAST:50j,
                    reference.MW_SOUTH:reference.MW_NORTH:50j]
 positions = numpy.vstack([X.ravel(), Y.ravel()])
 values = numpy.vstack([lons, lats])
@@ -49,15 +49,15 @@ m = MapPlot(sector='midwest',
             subtitle='2003 - May 2013, gaussian kernel, 15min/15km duplicate rule applied')
 
 m.pcolormesh(X, Y, Z, numpy.arange(0,0.006,.0003), cmap=plt.cm.gist_earth_r,
-            latlon=True)
+             latlon=True)
 
-#xs, ys = m.map(-93.72, 41.72)
-#m.ax.scatter(xs, ys, marker='o', zorder=20, s=50, color='k')
+# xs, ys = m.map(-93.72, 41.72)
+# m.ax.scatter(xs, ys, marker='o', zorder=20, s=50, color='k')
 
-#xs, ys = m.map(lons, lats)
-#m.ax.scatter(xs, ys, marker='+', zorder=20, s=100, color='k')
+# xs, ys = m.map(lons, lats)
+# m.ax.scatter(xs, ys, marker='+', zorder=20, s=100, color='k')
 
-#m.drawcounties()
+# m.drawcounties()
 m.postprocess(filename='test.png')
 
 """

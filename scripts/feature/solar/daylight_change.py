@@ -9,10 +9,11 @@ sun = ephem.Sun()
 nc = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
 w = nc.variables['domain'][:]
 
+
 def do(lat, lon):
     loc = ephem.Observer()
-    loc.lat = `lat`
-    loc.long = `lon`
+    loc.lat = str(lat)
+    loc.long = str(lon)
     loc.date = "2013/06/21"
 
     rise1 = loc.next_rising(sun).datetime()
@@ -26,23 +27,25 @@ def do(lat, lon):
     day2 = (set2 - rise2).seconds + (set2 - rise2).microseconds / 1000000.0
     return day1 - day2
 
-xs,ys = np.meshgrid( np.concatenate([iemre.XAXIS, [iemre.XAXIS[-1] + 0.25,]]), 
-                     np.concatenate([iemre.YAXIS, [iemre.YAXIS[-1] + 0.25,]]))
+xs, ys = np.meshgrid(np.concatenate([iemre.XAXIS, [iemre.XAXIS[-1] + 0.25, ]]),
+                     np.concatenate([iemre.YAXIS, [iemre.YAXIS[-1] + 0.25, ]]))
 
-secs = np.zeros( np.shape(w) , 'f')
+secs = np.zeros(np.shape(w), 'f')
 
 for i, lon in enumerate(iemre.XAXIS):
     print i, len(iemre.XAXIS)
     for j, lat in enumerate(iemre.YAXIS):
-        secs[j,i] = do(lat, lon)
+        secs[j, i] = do(lat, lon)
 
 print np.shape(w)
 print np.shape(secs)
-#secs = np.where(w == 1, secs, 0)
+# secs = np.where(w == 1, secs, 0)
 
-m = MapPlot(sector='midwest', title='21 Jun to 22 Jun 2013 Decrease in Daylight Time',
+m = MapPlot(sector='midwest',
+            title='21 Jun to 22 Jun 2013 Decrease in Daylight Time',
             subtitle='No local topography considered')
 
-m.contourf(iemre.XAXIS, iemre.YAXIS, secs, np.arange(2,6.1,0.25), units='seconds')
+m.contourf(iemre.XAXIS, iemre.YAXIS, secs, np.arange(2, 6.1, 0.25),
+           units='seconds')
 
 m.postprocess(filename='test.png')
