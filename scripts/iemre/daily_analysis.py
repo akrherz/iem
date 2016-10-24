@@ -28,6 +28,10 @@ def generic_gridder(df, idx):
     """
     Generic gridding algorithm for easy variables
     """
+    # print(("Processing generic_gridder for column: %s min:%.2f max:%.2f"
+    #       ) % (idx, df[idx].min(), df[idx].max()))
+    if df[idx].max() == 0 and df[idx].max() == 0:
+        return 0
     window = 2.0
     f1 = df[df[idx].notnull()]
     for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
