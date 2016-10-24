@@ -289,6 +289,8 @@ data = {'plots': [
          'label': "Frequency of Issuance time for Watch/Warning/Advisories"},
         {'id': "52",
          'label': "Gaant Chart of WFO Issued Watch/Warning/Advisories"},
+        {'id': "163",
+         'label': "Local Storm Reports Issued by WFO [map]"},
         {'id': "102",
          'label': "Local Storm Report Source Type Ranks by Year"},
         {'id': "44",
