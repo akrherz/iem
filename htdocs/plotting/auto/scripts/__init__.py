@@ -268,6 +268,8 @@ data = {'plots': [
          'label': "Monthly Frequency of Wind Speeds by Air Temperature"},
         {'id': "37",
          'label': "MOS Forecasted Temperature Ranges + Observations"},
+        {'id': "162",
+         'label': "Overcast Sky Condition 2D Histogram (Level by Week)"},
         {'id': "146",
          'label': "Temperature Frequency by Week During Precipitation"},
         {'id': "155",
