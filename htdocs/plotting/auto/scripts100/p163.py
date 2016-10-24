@@ -7,8 +7,53 @@ from collections import OrderedDict
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context
 
-MDICT = OrderedDict([('none', 'All LSR Types'),
-                     ('nrs', 'All LSR Types except HEAVY RAIN + SNOW')])
+MDICT = OrderedDict([
+ ('NONE', 'All LSR Types'),
+ ('NRS', 'All LSR Types except HEAVY RAIN + SNOW'),
+ ("AVALANCHE", "AVALANCHE"),
+ ("BLIZZARD", "BLIZZARD"),
+ ("COASTAL FLOOD", "COASTAL FLOOD"),
+ ("DEBRIS FLOW", "DEBRIS FLOW"),
+ ("DENSE FOG", "DENSE FOG"),
+ ("DOWNBURST", "DOWNBURST"),
+ ("DUST STORM", "DUST STORM"),
+ ("EXCESSIVE HEAT", "EXCESSIVE HEAT"),
+ ("EXTREME COLD", "EXTREME COLD"),
+ ("EXTR WIND CHILL", "EXTR WIND CHILL"),
+ ("FLASH FLOOD", "FLASH FLOOD"),
+ ("FLOOD", "FLOOD"),
+ ("FOG", "FOG"),
+ ("FREEZE", "FREEZE"),
+ ("FREEZING DRIZZLE", "FREEZING DRIZZLE"),
+ ("FREEZING RAIN", "FREEZING RAIN"),
+ ("FUNNEL CLOUD", "FUNNEL CLOUD"),
+ ("HAIL", "HAIL"),
+ ("HEAVY RAIN", "HEAVY RAIN"),
+ ("HEAVY SLEET", "HEAVY SLEET"),
+ ("HEAVY SNOW", "HEAVY SNOW"),
+ ("HIGH ASTR TIDES", "HIGH ASTR TIDES"),
+ ("HIGH SURF", "HIGH SURF"),
+ ("HIGH SUST WINDS", "HIGH SUST WINDS"),
+ ("HURRICANE", "HURRICANE"),
+ ("ICE STORM", "ICE STORM"),
+ ("LAKESHORE FLOOD", "LAKESHORE FLOOD"),
+ ("LIGHTNING", "LIGHTNING"),
+ ("LOW ASTR TIDES", "LOW ASTR TIDES"),
+ ("MARINE TSTM WIND", "MARINE TSTM WIND"),
+ ("NON-TSTM WND DMG", "NON-TSTM WND DMG"),
+ ("NON-TSTM WND GST", "NON-TSTM WND GST"),
+ ("RAIN", "RAIN"),
+ ("RIP CURRENTS", "RIP CURRENTS"),
+ ("SLEET", "SLEET"),
+ ("SNOW", "SNOW"),
+ ("STORM SURGE", "STORM SURGE"),
+ ("TORNADO", "TORNADO"),
+ ("TROPICAL STORM", "TROPICAL STORM"),
+ ("TSTM WND DMG", "TSTM WND DMG"),
+ ("TSTM WND GST", "TSTM WND GST"),
+ ("WALL CLOUD", "WALL CLOUD"),
+ ("WATER SPOUT", "WATER SPOUT"),
+ ("WILDFIRE", "WILDFIRE")])
 
 
 def get_description():
@@ -28,7 +73,7 @@ def get_description():
              default=today.strftime("%Y/%m/%d 0000"),
              label='End Date / Time (UTC):',
              min="2006/01/01 0000"),
-        dict(type='select', name='filter', default='all', options=MDICT,
+        dict(type='select', name='filter', default='NONE', options=MDICT,
              label='Local Storm Report Type Filter'),
     ]
     return d
@@ -45,9 +90,12 @@ def plotter(fdict):
     ets = ctx['edate']
     ets = ets.replace(tzinfo=pytz.utc)
     myfilter = ctx['filter']
-    tlimiter = ''
-    if myfilter == 'nrs':
+    if myfilter == 'NONE':
+        tlimiter = ''
+    elif myfilter == 'NRS':
         tlimiter = " and typetext not in ('HEAVY RAIN', 'SNOW') "
+    else:
+        tlimiter = " and typetext = '%s' " % (myfilter,)
 
     df = read_sql("""
     SELECT wfo, count(*) from lsrs
