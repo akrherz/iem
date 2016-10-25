@@ -3,6 +3,7 @@ dist: trusty
 addons:
   hosts:
     - iemdb
+    - iemdb-hads
     - iem.local
     - iem-memcached
 virtualenv:

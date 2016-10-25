@@ -27,7 +27,8 @@ def check_management(cursor):
 
 def run_db(dbname):
     """ Lets do an actual database """
-    dbconn = psycopg2.connect(database=dbname, host='iemdb')
+    host = 'iemdb' if dbname != 'hads' else 'iemdb-hads'
+    dbconn = psycopg2.connect(database=dbname, host=host)
     cursor = dbconn.cursor()
 
     check_management(cursor)
