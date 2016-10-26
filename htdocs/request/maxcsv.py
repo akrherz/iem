@@ -21,7 +21,8 @@ def do_iaroadcond():
     """Iowa DOT Road Conditions as dots"""
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     df = read_sql("""
-    select b.idot_id as locationid, b.longname as locationname,
+    select b.idot_id as locationid,
+    replace(b.longname, ',', ' ') as locationname,
     ST_y(ST_transform(ST_centroid(b.geom),4326)) as latitude,
     ST_x(ST_transform(ST_centroid(b.geom),4326)) as longitude, cond_code
     from roads_base b JOIN roads_current c on (c.segid = b.segid)
