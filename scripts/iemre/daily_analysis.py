@@ -39,7 +39,8 @@ def generic_gridder(df, idx):
             (west, east, south, north) = (lon, lon + window, lat, lat + window)
             box = f1[(f1['lat'] >= south) & (f1['lat'] < north) &
                      (f1['lon'] >= west) & (f1['lon'] < east)]
-            if len(box.index) < 4:
+            # can't QC data that is all equal
+            if len(box.index) < 4 or box[idx].min() == box[idx].max():
                 continue
             z = np.abs(zscore(box[idx]))
             # Compute where the standard dev is +/- 2std
