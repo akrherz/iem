@@ -47,6 +47,9 @@ def workflow():
             # print 'New IDOT Snowplow #%s "%s" Valid: %s' % (len(current)+1,
             #                                                label, valid)
             newplows[label] = 1
+            if len(label) > 20:
+                print("Invalid dot_plow feed label of %s" % (repr(label),))
+                continue
             cursor.execute("""INSERT into idot_snowplow_current(label, valid)
             VALUES (%s,%s)""", (label, valid))
         if current.get(label, None) is None or current[label] < valid:
