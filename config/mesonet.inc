@@ -161,6 +161,12 @@
     Allow from all
   </Directory>
 
+Alias /tmp /var/webtmp
+<Directory "/var/webtmp">
+  AllowOverride None
+</Directory>
+
+
   # Trailing slashes are very, very important!
   ProxyPass /arcgis	http://iem-arcgis:6080/arcgis
 

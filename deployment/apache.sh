@@ -1,11 +1,23 @@
 #!/bin/sh
-# Deployment script for apache!
-SVNROOT="/mesonet/www/apps/iemwebsite"
+# This script assembles all the various apache configs provided by this
+# project and others for usage by an IEM webfarm node
 
-cp -f $SVNROOT/config/geoserver.conf /etc/httpd/conf.d/
-cp -f $SVNROOT/config/backend-vhost.conf /etc/httpd/conf.d/backend.conf
-cp -f $SVNROOT/config/mesonet.inc /etc/httpd/conf.d/mesonet.inc
-cp -f $SVNROOT/config/00iem.conf /etc/httpd/conf.d/
-cp -f /mesonet/www/apps/weppwebsite/etc/apache_vhost.conf /etc/httpd/conf.d/wepp.conf
-cp -r $SVNROOT/config/00iem-ssl.conf /etc/httpd/conf.d/
-service httpd reload
+APPS="/mesonet/www/apps"
+CONFD="/etc/httpd/conf.d/"
+
+cp -f $APPS/iemwebsite/deployment/apache_configs/*.conf $CONFD
+
+cp -f $APPS/idep/config/apache-vhost.conf $CONFD/idep.conf
+cp -f $APPS/weather.im/config/weather-im-vhost.conf $CONFD
+cp -f $APPS/iemwebsite/config/mesonet.inc $CONFD
+cp -f $APPS/iemwebsite/config/00iem.conf $CONFD
+cp -f $APPS/iemwebsite/config/00iem-ssl.conf $CONFD
+cp -f $APPS/vendor/conf/vendor.conf $CONFD
+cp -f $APPS/weppwebsite/etc/apache_vhost.conf $CONFD/wepp.conf
+cp -f $APPS/cocorahs/config/apache-vhost.conf $CONFD/cocorahs.conf
+cp -f $APPS/nwnwebsite/deployment/schoolnet8-vhost.conf $CONFD/iem-schoolnet8.conf
+echo "Header set X-IEM-ServerID $(hostname)" > $CONFD/iemvs.conf
+
+echo "=== datateam.conf, clients.conf one-offs ATTM ==="
+# Finally, reload httpd
+systemctl reload httpd
