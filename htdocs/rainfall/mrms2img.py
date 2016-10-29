@@ -21,7 +21,7 @@ def go(valid, period):
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("ERROR: Data File Not Found!")
         return
-    img = imread(fn)
+    img = imread(fn, mode='P')
     size = np.shape(img)
     # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
     data = np.ones(size, np.uint16) * 65535
