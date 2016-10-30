@@ -4,6 +4,7 @@ import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
     ('last', 'Last Date At or Above'),
@@ -25,10 +26,12 @@ def get_description():
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:'),
-        dict(type='text', name='threshold', default='90',
+        dict(type='int', name='threshold', default='90',
              label='Enter Threshold:'),
         dict(type='select', name='which', default='last',
              label='Date Option:', options=PDICT),
+        dict(type='year', name='year', default=datetime.date.today().year,
+             label='Year to Highlight in Chart:'),
     ]
     return d
 
@@ -39,12 +42,13 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
-    threshold = int(fdict.get('threshold', 90))
-    which = fdict.get('which', 'last')
+    threshold = ctx['threshold']
+    which = ctx['which']
+    year = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
 
@@ -130,7 +134,10 @@ def plotter(fdict):
     idx = df2['count'].idxmax()
     ax.text(df2.at[idx, col] + 1, df2.at[idx, 'count'],
             "%s" % (idx,), va='bottom')
-
+    if year in df2.index:
+        df3 = df2.loc[year]
+        ax.scatter(df3[col], df3['count'], zorder=5, color='r')
+        ax.text(df3[col], df3['count'], "%s" % (year,), zorder=5, color='r')
     return fig, df
 
 
