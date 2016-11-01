@@ -38,7 +38,7 @@ var vectorStyleFunction = function(feature, resolution){
   	        }),
   	        text: new ol.style.Text({
   	          font: fontSize+'px Calibri,sans-serif',
-  	          text: feature.get(renderattr),
+  	          text: feature.get(renderattr).toString(),
   	          fill: new ol.style.Fill({
   	            color: '#fff',
   	            width: 3
