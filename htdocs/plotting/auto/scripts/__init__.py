@@ -58,6 +58,9 @@ data = {'plots': [
                    "and Yearly Timeseries Plot")},
         {'id': "84", 'mw': True,
          'label': "MRMS Q3 Estimated Precipitation (multiday summaries too)"},
+        {'id': "164",
+         'label': ("Percentage of NWS CLI Sites Reporting Daily Above/Below "
+                   "Temps or Precip/Snow")},
         {'id': "22", 'mw': True,
          'label': ("Percentage of Years within Temperature Range "
                    "from Averages")},
