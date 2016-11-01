@@ -2,7 +2,8 @@ import psycopg2
 from pyiem import network
 import numpy as np
 import calendar
-import pandas as pd
+from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'yes': 'Yes, consider trace reports',
          'no': 'No, omit trace reports'}
@@ -21,7 +22,7 @@ def get_description():
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station'),
-        dict(type="text", name="thres", default="0.10",
+        dict(type="float", name="thres", default="0.10",
              label="Precipitation Threshold (inch)"),
         dict(type='select', name='trace', default='no',
              label='Include "trace" reports in the analysis?', options=PDICT),
@@ -45,15 +46,14 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor()
-
-    station = fdict.get('station', 'IA2203')
-    threshold = float(fdict.get('thres', 0.10))
-    use_trace = (fdict.get('trace', 'no').lower() == 'yes')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['thres']
+    use_trace = (ctx['trace'] == 'yes')
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    cursor.execute("""
+    df = read_sql("""
     with data as (
       select sday, day, precip from """ + table + """
       where station = %s),
@@ -76,16 +76,12 @@ def plotter(fdict):
       SELECT sday, precip, day - max(rday) OVER (ORDER by day ASC) as diff,
       day - max(rday2) OVER (ORDER by day ASC) as diff2 from agg2)
 
-    SELECT sday, max(precip), max(diff), max(diff2) from agg3
+    SELECT sday, max(precip) as maxp, max(diff) as d1, max(diff2) as d2
+    from agg3 WHERE sday != '0229'
     GROUP by sday ORDER by sday ASC
-    """, (station, station, 0.0001 if use_trace else 0.01, station, threshold))
-    rows = []
-    for row in cursor:
-        if row[0] == '0229':
-            continue
-        rows.append(dict(sday=row[0], maxp=row[1], d1=row[2], d2=row[3]))
-
-    df = pd.DataFrame(rows)
+    """, pgconn, params=(station, station,
+                         0.0001 if use_trace else 0.01, station, threshold),
+                  index_col='sday')
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
 

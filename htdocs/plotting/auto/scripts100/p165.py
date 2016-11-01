@@ -91,7 +91,7 @@ def plotter(fdict):
     df['pdate'] = df['doy'].apply(f)
 
     m = MapPlot(sector='state', state=sector, axisbg='white', nocaption=True,
-                title="%s %s$^\circ$F" % (PDICT2[varname], threshold),
+                title="%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold),
                 subtitle='based on NWS COOP and IEM Daily Estimates')
     levs = np.linspace(df['doy'].min() - 3, df['doy'].max() + 3, 7, dtype='i')
     levlables = map(f, levs)

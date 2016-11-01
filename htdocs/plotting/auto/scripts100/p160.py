@@ -91,7 +91,7 @@ def get_context(fdict):
                              right_index=True, how='left', sort=False)
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
     ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
-    if len(ctx['df'].index) == 0:
+    if len(ctx['df'].index) == 0 and len(ctx['odf'].index) > 0:
         ctx['primary'] = ctx['odf'].columns[0]
         ctx['secondary'] = ctx['odf'].columns[1]
     return ctx
@@ -157,12 +157,13 @@ def plotter(fdict):
         issued = df2.iloc[0]['issued'].strftime("%-m/%-d %Hz")
         ax.plot(df2['valid'], df2[ctx['var'] + '_value'], zorder=2,
                 label=issued)
-    ax.plot(ctx['odf'].index.values, ctx['odf'][ctx[ctx['var']]], lw=2,
-            color='k', label='Obs', zorder=4)
+    if len(ctx['odf'].index) > 0:
+        ax.plot(ctx['odf'].index.values, ctx['odf'][ctx[ctx['var']]], lw=2,
+                color='k', label='Obs', zorder=4)
+        ax.set_ylabel(ctx[ctx['var']])
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
     pos = ax.get_position()
     ax.grid(True)
-    ax.set_ylabel(ctx[ctx['var']])
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
     ax.set_position([pos.x0, pos.y0, 0.6, 0.8])
     ax.legend(loc=(1.0, 0.0))
