@@ -131,6 +131,7 @@ iemdata.wfos = [
  ['GRB','GREEN_BAY'],
  ['GRR','GRAND_RAPIDS'],
  ['GSP','GREENVILLE/SPARTANBURG'],
+ ['GUM','GUAM'],
  ['GYX','GRAY'],
  ['HFO','HONOLULU'],
  ['HGX','HOUSTON/GALVESTON'],
