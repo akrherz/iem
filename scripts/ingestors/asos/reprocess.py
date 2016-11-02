@@ -116,8 +116,12 @@ def workflow():
     for station in stations:
         clear_data(station, days[0], days[-1])
         total = 0
+        valids = []
         for day in days:
-            (processed, usedcache) = doit(opener, station, day)
+            # save some memory, CPU time
+            if day.month == 1 and day.day == 1:
+                valids = []
+            (processed, usedcache) = doit(opener, station, day, valids)
             total += processed
             ASOS.commit()
             if not usedcache:
@@ -213,7 +217,7 @@ def clear_data(station, sts, ets):
     ASOS.commit()
 
 
-def doit(opener, station, now):
+def doit(opener, station, now, valids):
     """ Fetch! """
     usedcache = False
     processed = 0
@@ -270,8 +274,9 @@ def doit(opener, station, now):
                                       "").replace("SPECI ",
                                                   "").replace("METAR ", "")
             ob = process_metar(mstr, now)
-            if ob is None:
+            if ob is None or ob.valid in valids:
                 continue
+            valids.append(ob.valid)
 
             # Account for SLP505 actually being 1050.5 and not 950.5 :(
             if SLP in headers:
