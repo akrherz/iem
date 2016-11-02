@@ -8,6 +8,9 @@ PDICT = {'state': 'State Level Maps (select state)',
 PDICT2 = {'both': 'Show both contour and values',
           'values': 'Show just the values',
           'contour': 'Show just the contour'}
+PDICT3 = {'season': 'Number of Days in Growing Season',
+          'spring': 'Date of Last Spring Freeze',
+          'fall': 'Date of First Fall Freeze'}
 
 
 def get_description():
@@ -23,6 +26,8 @@ def get_description():
              label='Select State to Plot (when appropriate)'),
         dict(type='select', name='opt', options=PDICT2, default='both',
              label='Map Plot/Contour View Option'),
+        dict(type='select', name='var', options=PDICT3, default='season',
+             label='Variable to Plot'),
         dict(type='year', name='p1syear', default=1951,
              label='Start Year (inclusive) of Period One:'),
         dict(type='year', name='p1eyear', default=1980,
@@ -49,6 +54,7 @@ def plotter(fdict):
     p1eyear = ctx['p1eyear']
     p2syear = ctx['p2syear']
     p2eyear = ctx['p2eyear']
+    varname = ctx['var']
 
     table = "alldata"
     if sector == 'state':
@@ -91,30 +97,32 @@ def plotter(fdict):
     df['p1_season'] = df['p1_first_fall'] - df['p1_last_spring']
     df['p2_season'] = df['p2_first_fall'] - df['p2_last_spring']
     df['season_delta'] = df['p2_season'] - df['p1_season']
+    df['spring_delta'] = df['p2_last_spring'] - df['p1_last_spring']
+    df['fall_delta'] = df['p2_first_fall'] - df['p1_first_fall']
     # Reindex so that most extreme values are first
-    df = df.reindex(df['season_delta'].abs().sort_values(
+    df = df.reindex(df[varname + '_delta'].abs().sort_values(
                                                 ascending=False).index)
 
-    title = 'Number of Days in Growing Season '
+    title = PDICT3[varname]
     m = MapPlot(sector=sector, state=state, axisbg='white',
                 title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
                        ) % (p2syear, p2eyear, p1syear, p1eyear, title),
                 subtitle=('based on IEM Archives'),
                 titlefontsize=14)
     # Create 9 levels centered on zero
-    abval = df['season_delta'].abs().max()
+    abval = df[varname + '_delta'].abs().max()
     levels = centered_bins(abval)
     if opt in ['both', 'contour']:
         m.contourf(df['lon'].values, df['lat'].values,
-                   df['season_delta'].values, levels,
+                   df[varname + '_delta'].values, levels,
                    cmap=plt.get_cmap('seismic'),
                    units='days')
     if sector == 'state':
         m.drawcounties()
     if opt in ['both', 'values']:
         m.plot_values(df['lon'].values, df['lat'].values,
-                      df['season_delta'].values,
-                      fmt='%.1f')
+                      df[varname + '_delta'].values,
+                      fmt='%.1f', labelbuffer=5)
 
     return m.fig, df
 
