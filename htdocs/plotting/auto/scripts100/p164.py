@@ -96,8 +96,10 @@ def plotter(fdict):
                   ) % (sts.strftime("%-d %b %Y"), ets.strftime("%-d %b %Y"),
                        MDICT.get(varname)))
     ax.set_xlabel(xlabel)
-    ax.set_xticks([-100, -90, -75, -50, -25, -10, 0, 10, 25,
-                   50, 75, 90, 100])
+    ticks = [-100, -90, -75, -50, -25, -10, 0, 10, 25,
+             50, 75, 90, 100]
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([abs(x) for x in ticks])
     plt.setp(ax.get_xticklabels(), rotation=30)
     ax.set_position([0.2, 0.15, 0.75, 0.75])
 
