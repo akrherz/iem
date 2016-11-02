@@ -85,10 +85,10 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1)
     ax.barh(df.index.values,
             0 - (df[varname + '_below'] / df[varname + '_count'] * 100.),
-            fc=colors[1], ec=colors[1], align='center')
+            fc=colors[0], ec=colors[0], align='center')
     ax.barh(df.index.values,
             df[varname + '_above'] / df[varname + '_count'] * 100.,
-            fc=colors[0], ec=colors[0], align='center')
+            fc=colors[1], ec=colors[1], align='center')
     ax.set_xlim(-100, 100)
     ax.grid(True)
     ax.set_title(("Percentage of CONUS NWS First Order CLImate Sites\n"
