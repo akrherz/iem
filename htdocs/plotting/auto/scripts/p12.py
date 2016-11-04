@@ -21,7 +21,10 @@ def get_description():
     d['description'] = """This plot presents the yearly first or last date
     of a given high or low temperature along with the number of days that
     year above/below the threshold along with the cumulative distribution
-    function for the first date!
+    function for the first date!  When you select a low temperature option,
+    the season displayed in the chart and available download spreadsheet
+    represents the start year of the winter season.  Rewording, the year 2016
+    would represent the period of 1 July 2016 to 30 Jun 2017.
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
@@ -59,19 +62,24 @@ def plotter(fdict):
             high, low, day from """+table+""" WHERE station = %s
             and day >= '1893-01-01'),
         agg1 as (
-            SELECT season,
+            SELECT season - %s as season,
+            count(*) as obs,
             min(case when """+opp+""" %s then day else null end) as nday,
             max(case when """+opp+""" %s then day else null end) as xday,
             sum(case when """+opp+""" %s then 1 else 0 end) as count
             from data GROUP by season)
-    SELECT season::int, count, nday, extract(doy from nday) as nday_doy,
+    SELECT season::int, count, obs, nday, extract(doy from nday) as nday_doy,
     xday, extract(doy from xday) as xday_doy from agg1
     ORDER by season ASC
     """, pgconn, params=(6 if which.find('_low') > 0 else 0,
-                         station, threshold, threshold, threshold),
+                         station,
+                         1 if which.find('_low') > 0 else 0,
+                         threshold, threshold, threshold),
                   index_col='season')
     # We need to do some magic to julian dates straight
     if which.find('_low') > 0:
+        # drop the first row
+        df.drop(df.index.values[0], inplace=True)
         df.loc[df['nday_doy'] < 183, 'nday_doy'] += 365.
         df.loc[df['xday_doy'] < 183, 'xday_doy'] += 365.
     # Set NaN where we did not meet conditions
@@ -142,4 +150,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(which='first_low', threshold=0))
+    plotter(dict(which='first_low', threshold=32, year=2016))
