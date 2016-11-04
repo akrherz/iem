@@ -3,6 +3,7 @@ from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
 import numpy as np
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -23,27 +24,29 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor()
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA0200')
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     CATS = np.array([0.01, 0.5, 1., 2., 3., 4.])
 
     startyear = nt.sts[station]['archive_begin'].year
-    years = datetime.date.today().year - startyear
     # 0.01, 0.5, 1, 2, 3, 4
-    data = np.zeros((13, years+1, 6), 'i')
-    cursor.execute("""SELECT year, precip, month from """+table+"""
-    WHERE station = '%s'""" % (station, ))
-    for row in cursor:
-        precip = float(row[1])
-        if precip <= 0:
-            continue
-        offset = int(row[0]) - startyear
-        data[0, offset, :] += np.where(precip >= CATS, 1, 0)
-        data[int(row[2]), offset, :] += np.where(precip >= CATS, 1, 0)
+    df = read_sql("""
+        SELECT year, month,
+        sum(case when precip >= %s then 1 else 0 end) as cat1,
+        sum(case when precip >= %s then 1 else 0 end) as cat2,
+        sum(case when precip >= %s then 1 else 0 end) as cat3,
+        sum(case when precip >= %s then 1 else 0 end) as cat4,
+        sum(case when precip >= %s then 1 else 0 end) as cat5,
+        sum(case when precip >= %s then 1 else 0 end) as cat6
+        from """ + table + """ WHERE station = %s GROUP by year, month
+        ORDER by year, month
+    """, pgconn, params=(CATS[0], CATS[1], CATS[2], CATS[3], CATS[4],
+                         CATS[5], station), index_col=['year', 'month'])
+
     res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -56,16 +59,20 @@ def plotter(fdict):
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
        nt.sts[station]['name'])
 
-    for c in range(len(CATS)):
-        res += """YEAR %4.2f JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
-""" % (CATS[c],)
+    for i, cat in enumerate(CATS):
+        col = "cat%s" % (i+1,)
+        res += ("YEAR %4.2f JAN FEB MAR APR MAY JUN "
+                "JUL AUG SEP OCT NOV DEC ANN\n") % (cat,)
         for yr in range(startyear, datetime.date.today().year + 1):
-            res += "%s %4.2f " % (yr, CATS[c])
+            res += "%s %4.2f " % (yr, cat)
             for mo in range(1, 13):
-                res += "%3.0f " % (data[mo, yr-startyear, c], )
-            res += "%3.0f\n" % (data[0, yr-startyear, c], )
+                if (yr, mo) in df.index:
+                    res += "%3.0f " % (df.at[(yr, mo), col], )
+                else:
+                    res += "%3s " % ('M', )
+            res += "%3.0f\n" % (df.loc[(yr, slice(1, 12)), col].sum(), )
 
-    return None, None, res
+    return None, df, res
 
 if __name__ == '__main__':
     plotter(dict())

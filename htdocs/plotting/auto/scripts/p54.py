@@ -1,9 +1,10 @@
-import psycopg2.extras
+import psycopg2
 import numpy as np
 import datetime
 import calendar
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'low': 'Morning Low (midnight to 8 AM)',
          'high': 'Afternoon High (noon to 8 PM)'}
@@ -19,7 +20,8 @@ def get_description():
     The morning is
     defined as the period between midnight and 8 AM local time.  The afternoon
     high is defined as the period between noon and 8 PM.  If any difference
-    is greater than 25 degrees, it is omitted from this analysis."""
+    is greater than 25 degrees, it is omitted from this analysis.  This app
+    may take a while to generate a plot, so please be patient!"""
     d['arguments'] = [
         dict(type='zstation', name='zstation1', default='ALO',
              network='IA_ASOS', label='Select Station 1:'),
@@ -37,14 +39,13 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station1 = fdict.get('zstation1', 'ALO')
-    network1 = fdict.get('network1', 'IA_ASOS')
-    station2 = fdict.get('zstation2', 'OLZ')
-    network2 = fdict.get('network2', 'AWOS')
-    varname = fdict.get('varname', 'low')
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
+    station1 = ctx['zstation1']
+    network1 = ctx['network1']
+    station2 = ctx['zstation2']
+    network2 = ctx['network2']
+    varname = ctx['varname']
 
     nt1 = NetworkTable(network1)
     nt2 = NetworkTable(network2)
@@ -54,7 +55,7 @@ def plotter(fdict):
     if varname == 'high':
         aggfunc = "max"
         tlimit = "12 and 20"
-    cursor.execute("""
+    df = read_sql("""
     WITH one as (
       SELECT date(valid), """ + aggfunc + """(tmpf::int) as d, avg(sknt)
       from alldata where station = %s
@@ -67,25 +68,16 @@ def plotter(fdict):
       and extract(hour from valid at time zone %s) between """ + tlimit + """
       and tmpf between -70 and 140 GROUP by date)
 
-    SELECT one.date, one.d- two.d, one.avg, two.avg from
-    one JOIN two on (one.date = two.date) WHERE one.avg >= 0
+    SELECT one.date as day,
+    extract(week from one.date) as week,
+    one.d - two.d as delta,
+    one.avg as sknt,
+    two.avg as sknt2
+    from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
     and one.d - two.d between -25 and 25
-    """, (station1, nt1.sts[station1]['tzname'],
-          station2, nt2.sts[station2]['tzname']))
-
-    weeks = []
-    deltas = []
-    days = []
-    sknts = []
-    for row in cursor:
-        days.append(row[0])
-        weeks.append(int(row[0].strftime("%W")))
-        deltas.append(row[1])
-        sknts.append(row[2])
-    df = pd.DataFrame(dict(day=pd.Series(days),
-                           week=pd.Series(weeks),
-                           delta=pd.Series(deltas),
-                           sknt=pd.Series(sknts)))
+    """, pgconn, params=(station1, nt1.sts[station1]['tzname'],
+                         station2, nt2.sts[station2]['tzname']),
+                  index_col=None)
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -101,10 +93,12 @@ def plotter(fdict):
         station1, nt1.sts[station1]['name'],
         station2, nt2.sts[station2]['name'],
         "Mid - 8 AM Low" if varname == 'low' else 'Noon - 8 PM High',
-        min(days), max(days)))
+        df['day'].min(), df['day'].max()))
 
     bins = np.arange(-20.5, 20.5, 1)
-    H, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
+    H, xedges, yedges = np.histogram2d(df['week'].values,
+                                       df['delta'].values,
+                                       [range(0, 54), bins])
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
     ax[0].pcolormesh((xedges - 1) * 7, yedges, H.transpose(),
@@ -120,7 +114,7 @@ def plotter(fdict):
     ax[0].plot(xedges[:-1]*7, y, zorder=3, lw=3, color='k')
     ax[0].plot(xedges[:-1]*7, y, zorder=3, lw=1, color='w')
 
-    rng = min([max([max(deltas), 0-min(deltas)]), 12])
+    rng = min([max([df['delta'].max(), 0 - df['delta'].min()]), 12])
     ax[0].set_ylim(0-rng-2, rng+2)
     ax[0].grid(True)
     ax[0].set_ylabel(("%s Temp Diff $^\circ$F"
@@ -130,7 +124,9 @@ def plotter(fdict):
     ax[0].text(-0.01, -0.02, "%s\nColder" % (station1,),
                transform=ax[0].transAxes, va='bottom', ha='right', fontsize=8)
 
-    H, xedges, yedges = np.histogram2d(sknts, deltas, [range(0, 31), bins])
+    H, xedges, yedges = np.histogram2d(df['sknt'].values,
+                                       df['delta'].values,
+                                       [range(0, 31), bins])
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)
     ax[1].pcolormesh((xedges - 0.5), yedges, H.transpose(),

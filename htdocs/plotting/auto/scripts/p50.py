@@ -1,5 +1,6 @@
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {
      "hadgem=a1b": "HADGEM A1B",
@@ -35,12 +36,13 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('station', 'ISUAG')
+    station = ctx['station']
     nt = NetworkTable("CSCAP")
     clstation = nt.sts[station]['climate_site']
-    (model, scenario) = fdict.get('model', 'hadgem=a1b').split("=")
+    (model, scenario) = ctx['model'].split("=")
 
     (fig, ax) = plt.subplots(1, 1)
 

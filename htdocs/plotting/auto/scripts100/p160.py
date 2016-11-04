@@ -149,6 +149,8 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     ctx = get_context(fdict)
+    if len(ctx['df'].index) == 0 and len(ctx['odf'].index) == 0:
+        return "No Data Found!"
     df = ctx['df']
     (fig, ax) = plt.subplots(1, 1, figsize=(10, 6))
     fxs = df['id'].unique()

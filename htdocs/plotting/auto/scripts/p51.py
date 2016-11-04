@@ -1,5 +1,7 @@
-import psycopg2.extras
+import psycopg2
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {
      "hadgem=a1b": "HADGEM A1B",
@@ -18,13 +20,16 @@ PDICT = {
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['cache'] = 86400
     d['description'] = """Days per year with measurable precipitation. """
     d['arguments'] = [
         dict(type='networkselect', name='station', network='CSCAP',
              default='ISUAG', label='Select CSCAP Site:'),
         dict(type='select', name='model', default='echo=a1b',
-             label='Select Model:', options=PDICT)
+             label='Select Model:', options=PDICT),
+        dict(type='int', name='days', default=7,
+             label='Number of Days'),
     ]
     return d
 
@@ -35,17 +40,16 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'ISUAG')
-    days = int(fdict.get('days', 7))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    days = ctx['days']
     nt = NetworkTable("CSCAP")
     clstation = nt.sts[station]['climate_site']
-    (model, scenario) = fdict.get('model', 'hadgem=a1b').split("=")
+    (model, scenario) = ctx['model'].split("=")
 
     (fig, ax) = plt.subplots(1, 1)
 
-    cursor.execute("""
+    df = read_sql("""
     WITH data as (
     SELECT day, sum(precip) OVER (ORDER by day ASC ROWS BETWEEN %s preceding
     and current row) from hayhoe_daily WHERE precip is not null and
@@ -53,19 +57,15 @@ def plotter(fdict):
     )
 
     SELECT extract(year from day) as yr, sum(case when
-     sum < 0.01 then 1 else 0 end) from data WHERE extract(month from day) in
+     sum < 0.01 then 1 else 0 end) as precip
+     from data WHERE extract(month from day) in
      (3,4,5,6,7,8) GROUP by yr ORDER by yr ASC
-    """, (days - 1, clstation, model, scenario))
-    years = []
-    precip = []
-    for row in cursor:
-        years.append(row[0])
-        precip.append(row[1])
+    """, pgconn, params=(days - 1, clstation, model, scenario), index_col='yr')
 
-    ax.bar(years, precip, ec='b', fc='b')
+    ax.bar(df.index.values, df['precip'].values, ec='b', fc='b')
     ax.grid(True)
     ax.set_ylabel("Days Per Year")
     ax.set_title(("%s %s\n%s %s :: Spring/Summer with No Precip over %s days"
                   ) % (station, nt.sts[station]['name'], model,
                        scenario, days))
-    return fig
+    return fig, df

@@ -188,6 +188,8 @@ data = {'plots': [
          'label': "First Fall Temp Below Threshold (First Freeze/Frost)"},
         {'id': "165", 'mw': True,
          'label': "First Fall/Last Spring Temp Below Threshold [map]"},
+        {'id': "119",
+         'label': "Frequency of First Fall Low Temperature by Day of Year"},
         {'id': "152", 'mw': True,
          'label': ("Growing Season Differences Map between "
                    "Two Periods")},

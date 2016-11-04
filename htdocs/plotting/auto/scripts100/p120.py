@@ -1,7 +1,9 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+import pandas as pd
 import datetime
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -9,10 +11,19 @@ def get_description():
     d = dict()
     d['data'] = True
     d['report'] = True
-    d['description'] = """ """
+    d['description'] = """This chart presents the accumulated frequency of
+    having the last spring temperature at or below a given threshold."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station'),
+        dict(type='int', name='t1', default=32,
+             label='First Threshold (F)'),
+        dict(type='int', name='t2', default=28,
+             label='Second Threshold (F)'),
+        dict(type='int', name='t3', default=26,
+             label='Third Threshold (F)'),
+        dict(type='int', name='t4', default=22,
+             label='Fourth Threshold (F)'),
     ]
     return d
 
@@ -21,35 +32,42 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor()
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    thresholds = [ctx['t1'], ctx['t2'], ctx['t3'], ctx['t4']]
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    cnt = {}
-    for day in range(30, 183):
-        cnt[day] = {32: 0.0, 28: 0.0, 26: 0.0, 22: 0.0}
-    cnt_years = {32: 0.0, 28: 0.0, 26: 0.0, 22: 0.0}
+    # Load up dict of dates..
 
-    for base in (32, 28, 26, 22):
+    df = pd.DataFrame({'dates': pd.date_range("2000/01/29", "2000/06/30"),
+                       '%scnts' % (thresholds[0],): 0,
+                       '%scnts' % (thresholds[1],): 0,
+                       '%scnts' % (thresholds[2],): 0,
+                       '%scnts' % (thresholds[3],): 0},
+                      index=range(29, 183))
+    df.index.name = 'doy'
+
+    for base in thresholds:
         # Query Last doy for each year in archive
-        sql = """
-            select year, max(extract(doy from day)) as doy from """+table+"""
-            WHERE month < 7 and low <= %s and low > -40 and station = '%s'
-            and month > 1
-            GROUP by year ORDER by doy ASC
-        """ % (base, station)
-        cursor.execute(sql)
-        cnt_years[base] = cursor.rowcount
-        if cursor.rowcount == 0:
-            return
-        for row in cursor:
-            cnt[row[1]][base] += 1.0
+        df2 = read_sql("""
+            select year,
+            max(case when low <= %s then extract(doy from day)
+                else 0 end) as doy from
+            """ + table + """
+            WHERE month < 7 and station = %s and year < %s
+            GROUP by year
+        """, pgconn,  params=(base, station, datetime.date.today().year),
+                       index_col=None)
+        for _, row in df2.iterrows():
+            if row['doy'] == 0:
+                continue
+            df.loc[0:row['doy'], '%scnts' % (base,)] += 1
+        df['%sfreq' % (base,)] = df['%scnts' % (base,)] / len(df2.index) * 100.
 
-    sts = datetime.date(2000, 1, 1)
-    running = {32: 0.0, 28: 0.0, 26: 0.0, 22: 0.0}
     res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -58,29 +76,42 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # Low Temperature exceedence probabilities
 # (On a certain date, what is the chance a temperature below a certain
-# threshold will be observed again that spring)
- DOY Date    <33  <29  <27  <23
+# threshold would be observed again that spring season)
+ DOY Date    <%s  <%s  <%s  <%s
 """ % (datetime.date.today().strftime("%d %b %Y"),
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
-    ar = []
-    for day in range(181, 29, -1):
-        ts = sts + datetime.timedelta(days=day-1)
-        for base in (32, 28, 26, 22):
-            running[base] += cnt[day][base]
-        if day % 2 == 0:
-            ar.append((" %3s %s  %3i  %3i  %3i  %3i"
-                       "") % (ts.strftime("%-j"),
-                              ts.strftime("%b %d"),
-                              running[32] / cnt_years[32] * 100.0,
-                              running[28] / cnt_years[28] * 100.0,
-                              running[26] / cnt_years[26] * 100.0,
-                              running[22] / cnt_years[22] * 100.0))
+       nt.sts[station]['name'], thresholds[0] + 1,
+       thresholds[1] + 1, thresholds[2] + 1, thresholds[3] + 1)
+    fcols = ['%sfreq' % (s,) for s in thresholds]
+    mindate = None
+    for doy, row in df.iterrows():
+        if doy % 2 != 0:
+            continue
+        if row[fcols[3]] < 100 and mindate is None:
+            mindate = row['dates'] - datetime.timedelta(days=5)
+        res += (" %3s %s  %3i  %3i  %3i  %3i\n"
+                ) % (row['dates'].strftime("%-j"),
+                     row['dates'].strftime("%b %d"),
+                     row[fcols[0]], row[fcols[1]], row[fcols[2]],
+                     row[fcols[3]])
 
-    ar.reverse()
-    res += ("\n".join(ar))
+    (fig, ax) = plt.subplots(1, 1)
+    for base in thresholds:
+        ax.plot(df['dates'].values, df['%sfreq' % (base,)],
+                label="%s" % (base,), lw=2)
 
-    return None, None, res
+    ax.legend(loc='best')
+    ax.set_xlim(mindate)
+    ax.xaxis.set_major_locator(mdates.DayLocator([1, 7, 14, 21]))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
+    ax.set_title(("Frequency of First Fall Temperature\n"
+                  "%s %s (%s-%s)"
+                  ) % (station, nt.sts[station]['name'],
+                       nt.sts[station]['archive_begin'].year,
+                       datetime.date.today().year))
+    ax.grid(True)
+    df.reset_index(inplace=True)
+    return fig, df, res
 
 if __name__ == '__main__':
     plotter(dict())

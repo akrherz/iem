@@ -1,7 +1,8 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+import pandas as pd
 import datetime
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -23,14 +24,13 @@ def plotter(fdict):
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     s = nt.sts[station]['archive_begin']
     e = datetime.date.today()
-    YEARS = e.year - s.year + 1
 
     res = """\
 # IEM Climodat http://mesonet.agron.iastate.edu/climodat/
@@ -48,10 +48,10 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
        nt.sts[station]['name'])
 
-    data = {}
-    for yr in range(s.year, e.year + 1):
-        data[yr] = {'26s': 0, '26f': 0, '24s': 0, '24f': 0,
-                    '20s': 0, '20f': 0, '14s': 0, '14f': 0}
+    df = pd.DataFrame({'26s': 0, '26f': 0, '24s': 0, '24f': 0,
+                       '20s': 0, '20f': 0, '14s': 0, '14f': 0},
+                      index=pd.Series(range(s.year, e.year + 1),
+                                      name='year'))
 
     prs = [[26, 38], [24, 40], [20, 44], [14, 50]]
 
@@ -76,42 +76,28 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
             if cycPos[key] == 1 and low < l:
                 # print 'Cycled lower', low, ts
                 cycPos[key] = -1
-                data[ts.year][ckey] += 0.5
+                df.loc[ts.year, ckey] += 0.5
 
             # cycled higher
             if cycPos[key] == -1 and high > u:
                 # print 'Cycled higher', high, ts
                 cycPos[key] = 1
-                data[ts.year][ckey] += 0.5
+                df.loc[ts.year, ckey] += 0.5
 
-    s26 = 0
-    f26 = 0
-    s24 = 0
-    f24 = 0
-    s20 = 0
-    f20 = 0
-    s14 = 0
-    f14 = 0
-    for yr in range(s.year, e.year + 1):
-        s26 += data[yr]['26s']
-        f26 += data[yr]['26f']
-        s24 += data[yr]['24s']
-        f24 += data[yr]['24f']
-        s20 += data[yr]['20s']
-        f20 += data[yr]['20f']
-        s14 += data[yr]['14s']
-        f14 += data[yr]['14f']
+    for yr, row in df.iterrows():
         res += ("%s   %-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i\n"
-                   "") % (yr, data[yr]['26s'],
-                          data[yr]['26f'], data[yr]['24s'], data[yr]['24f'],
-                          data[yr]['20s'], data[yr]['20f'], data[yr]['14s'],
-                          data[yr]['14f'])
+                ) % (yr, row['26s'],
+                     row['26f'], row['24s'], row['24f'],
+                     row['20s'], row['20f'], row['14s'],
+                     row['14f'])
 
     res += ("AVG    %-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f\n"
-               "") % (s26/YEARS, f26/YEARS, s24/YEARS, f24/YEARS, s20/YEARS,
-                      f20/YEARS, s14/YEARS, f14/YEARS)
+            ) % (df['26s'].mean(),
+                 df['26f'].mean(), df['24s'].mean(), df['24f'].mean(),
+                 df['20s'].mean(), df['20f'].mean(), df['14s'].mean(),
+                 df['14f'].mean())
 
-    return None, None, res
+    return None, df, res
 
 if __name__ == '__main__':
     plotter(dict())
