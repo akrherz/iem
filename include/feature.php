@@ -96,7 +96,7 @@ if ($row["voting"] == "f"){
 	$s .= "<div style=\"float: left; margin-bottom: 5px;\"><strong>$msg</strong> <a class=\"button add\" href=\"$goodurl\" rel=\"nofollow\">Good ($good votes)</a><a class=\"button delete\" href=\"$badurl\" rel=\"nofollow\">Bad ($bad votes)</a></div>";
 	$s .= "<div id=\"fb-root\"></div>";
 	define("FBEXTRA", True);
-	$s .= "<fb:comments send_notification_uid=\"16922938\"  title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
+	$s .= "<fb:comments send_notification_uid=\"16922938\"  title=\"". $row["title"] ."\" \" href=\"https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
 
 	$s .= "</div>";
 }

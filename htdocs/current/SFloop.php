@@ -5,7 +5,7 @@
 
 <HTML>
         <HEAD>
-                <BASE HREF="http://mesonet.agron.iastate.edu/data/">
+                <BASE HREF="https://mesonet.agron.iastate.edu/data/">
                 <TITLE>IEM | Surface Data Looper</TITLE>
 
 <SCRIPT LANGUAGE="JavaScript">

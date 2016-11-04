@@ -69,7 +69,7 @@ def make_output(nt, station, reportid):
     """ Create and return the output file used for this reportid """
     fn = "/mesonet/share/climodat/reports/%s_%s.txt" % (station, reportid)
     fp = open(fn, 'w')
-    fp.write("""# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+    fp.write("""# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s (data after %s is preliminary)
 # Site Information: [%s] %s

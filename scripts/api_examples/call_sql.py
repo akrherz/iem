@@ -20,7 +20,7 @@ WITH data as (
 
 """ % (threshold,)}
 
-url = 'http://mesonet.agron.iastate.edu/api/sql/database/coop'
+url = 'https://mesonet.agron.iastate.edu/api/sql/database/coop'
 url = '%s?%s' % (url, urllib.urlencode(data) )
 
 data = json.load( urllib2.urlopen(url) )

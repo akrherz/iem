@@ -91,7 +91,7 @@ def plotter(fdict):
     df = pd.DataFrame(rows)
     df['season'] = df['fall'] - df['spring']
     res = """\
-# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
 # Site Information: [%s] %s

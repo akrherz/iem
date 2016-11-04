@@ -22,7 +22,7 @@ def main(argv):
         ORDER by coloridx ASC
         """, PGCONN, params=(rasterid,), index_col='coloridx')
     # Go get a raster
-    req = requests.get(("http://mesonet.agron.iastate.edu/archive/data/"
+    req = requests.get(("https://mesonet.agron.iastate.edu/archive/data/"
                         "2012/09/01/GIS/uscomp/n0q_201209010000.png"))
     o = open('/tmp/check_raster.png', 'wb')
     o.write(req.content)

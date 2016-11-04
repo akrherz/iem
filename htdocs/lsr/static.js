@@ -197,7 +197,7 @@ nexradSlider.on('changecomplete', function(){
 });
 
 var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
-   "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",
+   "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",
    {
      layers      : "nexrad-n0r-wmst",
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
@@ -216,7 +216,7 @@ var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
 });
 
 
-var counties = new OpenLayers.Layer.WMS("Counties", "http://mesonet.agron.iastate.edu/c/c.py/",
+var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iastate.edu/c/c.py/",
     {layers      : 'c-900913',
      format      : 'image/png',
      transparent : 'true'},{
@@ -406,7 +406,7 @@ sbwGridPanel = new Ext.grid.GridPanel({
             cls       : 'x-btn-text-icon',
             listeners : {
                click  : function() {
-                  uri = "http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
+                  uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
                   s = Ext.getCmp("wfoselector").getValue();
                   sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();
@@ -582,7 +582,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
             cls       : 'x-btn-text-icon',
             listeners : {
                click  : function() {
-                  uri = "http://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?";
+                  uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?";
                   s = Ext.getCmp("wfoselector").getValue();
                   sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();

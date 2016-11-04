@@ -102,7 +102,7 @@
   [1m1.3.  The Quick and Dirty version[0m
 
   The files used in this howto are available here:
-  <http://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-
+  <https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-
   files.tar.gz>.
 
 
@@ -213,7 +213,7 @@
 
        ______________________________________________________________________
        $ cd $NAWIPS
-       $ wget http://mesonet.agron.iastate.edu/docs/radmapserver/nex2img.tar.gz
+       $ wget https://mesonet.agron.iastate.edu/docs/radmapserver/nex2img.tar.gz
        $ tar -zxvf nex2img.tar.gz
        $ cd unidata/programs/nex2img
        $ make clean
@@ -443,7 +443,7 @@
 
        ______________________________________________________________________
        $ cd /tmp
-       $ wget http://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz
+       $ wget https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz
        $ cd /var/www/htdocs
        $ mkdir mstmp
        $ chown apache mstmp
@@ -594,7 +594,7 @@
   The IEM is generating a nationwide composite of base reflectivity
   every 5 minutes.  This product is available in this directory:
   ______________________________________________________________________
-  http://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/
+  https://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/
   ______________________________________________________________________
 
 
@@ -616,7 +616,7 @@
 
        cd /tmp
 
-       wget -q http://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/n0r_0.tif.Z
+       wget -q https://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/n0r_0.tif.Z
        uncompress n0r_0.tif.Z
 
        cd ${DATADIR}
@@ -663,7 +663,7 @@
   timestamps on the generated images.  Here is an example of output
   using this 'hack'.  At some point, I will add this hack to the HOWTO.
 
-       <http://mesonet.agron.iastate.edu/data/mwcomp.png>
+       <https://mesonet.agron.iastate.edu/data/mwcomp.png>
 
 
   [1m7.2.  Contact info[0m

@@ -43,7 +43,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   else{ $v = $vectors["W"]; }
 
   if (!$overview)
-  echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"http://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"], $key);
+  echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"https://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"], $key);
   if ($overview)
   $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,7,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $drct, $key, $cameras[$key]["name"]);
   if (!$overview)

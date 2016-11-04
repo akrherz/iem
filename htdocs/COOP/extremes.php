@@ -66,7 +66,7 @@ $cities = $nt->table;
  if ($station != null){
  	if ($sortcol == 'station') $sortcol = 'valid';
 	$jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
-	$URI = sprintf("http://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
+	$URI = sprintf("https://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
 	$json = json_decode($jdata, $assoc=TRUE);
 	$data = Array();
 	$table = "";
@@ -105,7 +105,7 @@ $cities = $nt->table;
  } else {
  	if ($sortcol == 'valid') $sortcol = 'station';
  	$jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
- 	$URI = sprintf("http://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
+ 	$URI = sprintf("https://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
  	$json = json_decode($jdata, $assoc=TRUE);
  	$data = Array();
  	$table = "";

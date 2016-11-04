@@ -2,9 +2,9 @@ RewriteEngine On
 # Lots of old links out there to bad URIs
 RewriteRule ^index\.(html|pl|php)$ /agclimate/ [R]
 
-Redirect /agclimate/daily-pics http://mesonet.agron.iastate.edu/agclimate/daily_pics
-Redirect /agclimate/daily_pics http://mesonet.agron.iastate.edu/data/agclimate
-Redirect /agclimate/info.txt http://mesonet.agron.iastate.edu/agclimate/info.phtml
+Redirect /agclimate/daily-pics https://mesonet.agron.iastate.edu/agclimate/daily_pics
+Redirect /agclimate/daily_pics https://mesonet.agron.iastate.edu/data/agclimate
+Redirect /agclimate/info.txt https://mesonet.agron.iastate.edu/agclimate/info.phtml
 
 AddHandler cgi-script .py
 Options +ExecCGI

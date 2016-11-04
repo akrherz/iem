@@ -264,7 +264,7 @@ EOF;
 $radlinks = "";
 foreach ($radtimes as $value ){
 	$myhref = "/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $value ) .".png";
-	$myhref2 = "http://mesonet.agron.iastate.edu{$myhref}";
+	$myhref2 = "https://mesonet.agron.iastate.edu{$myhref}";
 	$radlinks .= "<li><a href='$myhref'>$myhref2</a> (<a href='/request/gis/n0r2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a>)</li>\n";
 }
 

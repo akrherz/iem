@@ -73,7 +73,7 @@ $uri = urlencode($valid);
 <ScreenOverlay id="legend_bar">
    <visibility>1</visibility>
    <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20{$uri}</href>
+       <href>https://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20{$uri}</href>
    </Icon>
    <overlayXY x=".3" y="0.99" xunits="fraction" yunits="fraction"/>
    <screenXY x=".3" y="0.99" xunits="fraction" yunits="fraction"/>

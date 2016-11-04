@@ -69,7 +69,7 @@ def plotter(fdict):
         df['%sfreq' % (base,)] = df['%scnts' % (base,)] / len(df2.index) * 100.
 
     res = """\
-# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
 # Site Information: [%s] %s

@@ -111,10 +111,10 @@ Bad: %(bad)s  Abstain: %(abstain)s
 
     for row in mcursor:
         row2 = row.copy()
-        row2['link'] = ("http://mesonet.agron.iastate.edu/onsite/features/"
+        row2['link'] = ("https://mesonet.agron.iastate.edu/onsite/features/"
                         "cat.php?day=%s"
                         ) % (lastts.strftime("%Y-%m-%d"),)
-        row2['imgurl'] = ("http://mesonet.agron.iastate.edu/onsite/features/"
+        row2['imgurl'] = ("https://mesonet.agron.iastate.edu/onsite/features/"
                           "%s/%02i/%s.png"
                           ) % (row['valid'].year, row['valid'].month,
                                row['valid'].strftime("%y%m%d"))

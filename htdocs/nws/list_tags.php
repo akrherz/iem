@@ -15,7 +15,7 @@
  
  $jsonuri = sprintf("http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
  		$wfo, $year);
- $publicjsonuri = sprintf("http://mesonet.agron.iastate.edu/json/ibw_tags.py?wfo=%s&amp;year=%s",
+ $publicjsonuri = sprintf("https://mesonet.agron.iastate.edu/json/ibw_tags.py?wfo=%s&amp;year=%s",
  		$wfo, $year);
  
  $t->title = "NWS $wfo issued SVR+TOR Warning Tags for $year";

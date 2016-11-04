@@ -23,7 +23,7 @@ if (strlen($station) > 0 ){
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-<li><a href="http://mesonet.agron.iastate.edu/">IEM</a></li>
+<li><a href="https://mesonet.agron.iastate.edu/">IEM</a></li>
 <li><a href="/climate/">Climatology</a></li>
 <li class="active">COOP Daily Extremes</li>
 </ol>

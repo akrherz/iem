@@ -1,4 +1,4 @@
-IEM Climodat Reports http://mesonet.agron.iastate.edu/climodat
+IEM Climodat Reports https://mesonet.agron.iastate.edu/climodat
 README for monthly 'Kitchen Sink' reports
 
 Data Source:

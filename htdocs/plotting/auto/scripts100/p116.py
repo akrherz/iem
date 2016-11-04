@@ -55,7 +55,7 @@ def plotter(fdict):
     df.set_index('monthdate', inplace=True)
 
     res = """\
-# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
 # Site Information: [%s] %s

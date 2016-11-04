@@ -33,7 +33,7 @@ $result = pg_exec($connect, "SELECT * from webcams WHERE
 
 for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 {
-  $tpl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%%Y/%%m/%%d/".
+  $tpl = sprintf("https://mesonet.agron.iastate.edu/archive/data/%%Y/%%m/%%d/".
   		"camera/%s/%s_%%Y%%m%%d%%H%%i.jpg", $row["id"],
          $row["id"]);
   $z = Array("id" => $row["id"],

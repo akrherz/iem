@@ -31,11 +31,11 @@ WEB
   MINSCALE 90000
   MAXSCALE 4650000
   IMAGEPATH "/home/httpd/html/tmp/"
-  IMAGEURL "http://mesonet.agron.iastate.edu/tmp/"
+  IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
   LOG "/home/httpd/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/html/GIS/maps/kcciradar.map&amp;"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/html/GIS/maps/kcciradar.map&amp;"
    "wms_srs" "EPSG:26915"
    "wms_abstract" "Ba Ba Ba"
 #   "wms_fees" "None"

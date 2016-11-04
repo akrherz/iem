@@ -18,9 +18,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="http://mesonet.agron.iastate.edu/feature_rss.php" rel="self" type="application/rss+xml" />
+<atom:link href="https://mesonet.agron.iastate.edu/feature_rss.php" rel="self" type="application/rss+xml" />
 <title>Iowa Environmental Mesonet Daily Feature</title>
-<link>http://mesonet.agron.iastate.edu</link>
+<link>https://mesonet.agron.iastate.edu</link>
 <description>Iowa Environmental Mesonet Daily Feature</description>
 <lastBuildDate>{$d}</lastBuildDate>
 EOF;
@@ -44,8 +44,8 @@ EOF;
 <item>
 <title><![CDATA[{$t}]]></title>
 <author>akrherz@iastate.edu (Daryl Herzmann)</author>
-<link>http://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</link>
-<guid>http://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</guid>
+<link>https://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</link>
+<guid>https://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</guid>
 <description><![CDATA[{$cbody}]]></description>
 </item>
 EOF;

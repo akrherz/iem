@@ -30,7 +30,7 @@ IEM Sites Move Request
 > LAT:         {$newlat}
 > EMAIL:       {$email}
 
-http://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
+https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
 EOF;
 	mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
 	$alertmsg = "<div class=\"alert alert-danger\">Thanks! Your suggested move was submitted for evaluation.</div>";

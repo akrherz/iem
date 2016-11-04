@@ -6,7 +6,7 @@ import sys
 import memcache
 import datetime
 
-URLBASE = "http://mesonet.agron.iastate.edu/data/camera/idot_trucks"
+URLBASE = "https://mesonet.agron.iastate.edu/data/camera/idot_trucks"
 
 
 def s2icon(s):

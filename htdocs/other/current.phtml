@@ -146,7 +146,7 @@ while (list ($key, $val) = each ($finalA))  {
 	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
 	    </tr>\n";
 }
-$c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network={$network}&var=";
+$c = "javascript:new_window('https://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network={$network}&var=";
 
 $networks = Array("WTM" => "West Texas Mesonet",
 		"KYMN" => "Kentucky Mesonet",

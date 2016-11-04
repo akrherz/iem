@@ -35,7 +35,7 @@ WEB
   #LOG "/mesonet/www/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n1p.cgi?"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n1p.cgi?"
    "wms_srs" "EPSG:4326"
    "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III 1 hour rainfall estimate."
    "wms_keywords" "NEXRAD,N1P"

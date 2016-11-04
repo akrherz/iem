@@ -1,6 +1,6 @@
 <hr>
-<a href="http://mesonet.agron.iastate.edu/">Mesonet Homepage</a> &nbsp; <B>|</B> &nbsp;
-<a href="http://mesonet.agron.iastate.edu/GIS/">GIS Applications</a>
+<a href="https://mesonet.agron.iastate.edu/">Mesonet Homepage</a> &nbsp; <B>|</B> &nbsp;
+<a href="https://mesonet.agron.iastate.edu/GIS/">GIS Applications</a>
 <hr>
 <form method=GET action="/cgi-bin/mapserv/mapserv">
 

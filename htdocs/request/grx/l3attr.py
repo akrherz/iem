@@ -25,7 +25,7 @@ from pyiem.datatypes import speed
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj(init='epsg:3857')
 
-ICONFILE = "http://mesonet.agron.iastate.edu/request/grx/storm_attribute.png"
+ICONFILE = "https://mesonet.agron.iastate.edu/request/grx/storm_attribute.png"
 SECONDS = np.array([15*60, 30*60, 45*60, 60*60])
 RADARS = """pabc,-161.876
 pacg,-135.528

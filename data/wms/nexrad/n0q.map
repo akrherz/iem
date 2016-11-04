@@ -36,7 +36,7 @@ WEB
   #LOG "/tmp/n0q-w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?"
    "wms_srs" "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III base reflectivity."
    "wms_keywords" "NEXRAD,n0q"

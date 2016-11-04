@@ -3,7 +3,7 @@
 
 import cgi, re, time, printHTML, math, os, sys
 
-htmlRoot = 'http://mesonet.agron.iastate.edu/~mm5/current'
+htmlRoot = 'https://mesonet.agron.iastate.edu/~mm5/current'
 
 def Main():
 	form = cgi.FormContent()

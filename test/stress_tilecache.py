@@ -14,7 +14,7 @@ cnt = 0
 start = datetime.datetime.now()
 istart = start
 while now < ets:
-    uri = now.strftime(("http://mesonet.agron.iastate.edu/"
+    uri = now.strftime(("https://mesonet.agron.iastate.edu/"
                         "c/tile.py/1.0.0/ridge::USCOMP-N0R-"
                         "%Y%m%d%H%M/"+str(random.randint(0, 10)) +
                         "/"+str(random.randint(0, 10))+"/" +

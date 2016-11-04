@@ -32,7 +32,7 @@ that the API presented here may change in the future.
 
 <h3>Basic HTML example:</h3>
 <pre>
-&lt;img src="http://mesonet.agron.iastate.edu/GIS/radmap.php?layers[]=nexrad&amp;sector=conus&amp;ts=200806071000" /&gt;
+&lt;img src="https://mesonet.agron.iastate.edu/GIS/radmap.php?layers[]=nexrad&amp;sector=conus&amp;ts=200806071000" /&gt;
 </pre>
 <img src="/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000" 
 width="640" height="480" alt="radmap image"/>
@@ -180,7 +180,7 @@ now = datetime.datetime(2008,8,3,0,0)
 ets = datetime.datetime(2008,8,3,12,0)
 interval = datetime.timedelta(minutes=5)
 
-baseuri = "http://mesonet.agron.iastate.edu/GIS/radmap.php?"
+baseuri = "https://mesonet.agron.iastate.edu/GIS/radmap.php?"
 baseuri += "width=800&amp;height=600&amp;bbox=-95,42.5,-89,45.5"
 baseuri += "&amp;layers[]=uscounties&amp;layers[]=nexrad&amp;layers[]=sbw"
 baseuri += "&amp;layers[]=watch_by_county"

@@ -52,7 +52,7 @@ was contributed by Derek Swingley.
 var tileNEX = new GTileLayer(null,null,null); 
 tileNEX.getTileUrl = function(tile,zoom) {
    /* Include date at the end as a cachebuster */
-   return "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/"
+   return "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/"
    + zoom + "/" + tile.x + "/" + tile.y +".png?"+ (new Date()).getTime(); 
 };
 tileNEX.isPng = function() { return true;};
@@ -88,7 +88,7 @@ function get_my_url (bounds) {
 }
 var n0q = new OpenLayers.Layer.TMS(
         'NEXRAD Base Reflectivity',
-        'http://mesonet.agron.iastate.edu/cache/tile.py/',
+        'https://mesonet.agron.iastate.edu/cache/tile.py/',
         {layername      : 'nexrad-n0q-900913',
         service         : '1.0.0',
         type            : 'png',
@@ -168,71 +168,71 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 <strong>Services</strong>
 <ul>
 <li>Iowa Precipitation
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
 <li>MRMS Q3 Precipitation (Missing data is grey)
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms.cgi?</code>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms.cgi?</code>
  <br /><i>Layer:</i> <strong>mrms_p72h</strong> 72 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p48h</strong> 48 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p24h</strong> 24 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p1h</strong> One Hour Precipitation
  </li>
 <li>MRMS Q3 Precipitation (Missing data is transparent)
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms_nn.cgi?</code>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms_nn.cgi?</code>
  <br /><i>Layer:</i> <strong>mrms_p72h</strong> 72 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p48h</strong> 48 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p24h</strong> 24 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p1h</strong> One Hour Precipitation
  </li>
 <li>CONUS GOES Infrared Satellite
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?</code></li>
 <hr />
 <li>CONUS GOES Visible Satellite
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_vis.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_vis.cgi?</code></li>
 
 <li>GOES East 3.9 um (channel 2) imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_3.9.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_3.9.cgi?</code></li>
 <li>GOES West 3.9 um (channel 2) imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_3.9.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_3.9.cgi?</code></li>
 
 <li>GOES East 13.3 um (channel 6) imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_13.3.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_13.3.cgi?</code></li>
 <li>GOES West 13.3 um (channel 6) imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_13.3.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_13.3.cgi?</code></li>
 		
 <li>GOES East infrared imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_ir.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_ir.cgi?</code></li>
 <li>GOES West infrared imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_ir.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_ir.cgi?</code></li>
 <li>GOES East visible imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_vis.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_vis.cgi?</code></li>
 <li>GOES West visible imagery
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_vis.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_vis.cgi?</code></li>
 <li>GOES West Alaska Regional imagery visible
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_vis.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_vis.cgi?</code></li>
 <li>GOES West Alaska Regional imagery infrared
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_ir.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_ir.cgi?</code></li>
 <li>GOES West Alaska Regional imagery water vapor
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_wv.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_wv.cgi?</code></li>
 <li>GOES West Hawaii Regional imagery visible
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_vis.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_vis.cgi?</code></li>
 <li>GOES West Hawaii Regional imagery infrared
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_ir.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_ir.cgi?</code></li>
 <li>GOES West Hawaii Regional imagery water vapor
-<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_wv.cgi?</code></li>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_wv.cgi?</code></li>
 
 <hr />
 <li>CONUS NEXRAD Base Reflectivity (n0q) 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?</code></li>
 <li>Historical CONUS NEXRAD Base Reflectivity [WMS-T] (n0q) 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi?</code></li>
  <li>Historical CONUS NEXRAD Base Reflectivity [WMS-T] (n0r) 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?</code></li>
 <li>CONUS NEXRAD 1 Hour Precipitation (n1p) 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n1p.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n1p.cgi?</code></li>
 <li>CONUS NEXRAD Storm Total Precipitation (ntp) 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?</code></li>
 <li>RIDGE Single NEXRAD Imagery 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?sector=XXX&amp;prod=XXX&amp;</code>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?sector=XXX&amp;prod=XXX&amp;</code>
   <br />You also need to provide two CGI variables for the NEXRAD identifier
   and level III product you want. For example, sector=DMX&amp;prod=N0Q
   <br />
@@ -245,7 +245,7 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 		a specific volume scan time from IEM's archive of imagery.  You need
 		to specify the prod and sector like with the "single" layer, but also
 		need to include a year, month, day and time.  All of these values are 
-		in UTC.  Here's an <a href="http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
+		in UTC.  Here's an <a href="https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
 		that gets NEXRAD RTX N0Q product for 27 Jan 2015 at 23:03 UTC.  You 
 		must know the volume scan times prior to making the request.  There
 		are <a href="/json/">JSON</a> services that can help you out. 
@@ -255,12 +255,12 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
  
  <hr />
  <li>NWS Current Warnings
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?</code>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?</code>
 </li>
 <li>Iowa Rainfall Estimates
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
 <li>Iowa Winter Road Conditions 
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code>
+ <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code>
  <br /><i>Layer:</i> <strong>roadcond-noninterstate</strong> Non Interstate Road Conditions
  <br /><i>Layer:</i> <strong>roadcond-interstate</strong> Interstate Road Conditions
 </li>
@@ -279,17 +279,17 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 
 <!-- No worky at the moment
 <li>Iowa Rainfall Estimates
- <br /><code>http://mesonet.agron.iastate.edu/wfs/rainfall.php?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/wfs/rainfall.php?</code></li>
 -->
 
 <li>National Weather Service Warnings Current
- <br /><code>http://mesonet.agron.iastate.edu/wfs/ww.php?</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/wfs/ww.php?</code></li>
 
 <li>National Weather Service Warnings Archive For UTC Date (since 11 Jul 2002)
- <br /><code>http://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;</code></li>
 
 <li>National Weather Service Warnings Archive At Given UTC Time(since 11 Jul 2002)
- <br /><code>http://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;time=HH:MI&amp;</code></li>
+ <br /><code>https://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;time=HH:MI&amp;</code></li>
 
 
 </ul>

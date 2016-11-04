@@ -33,7 +33,7 @@ def plotter(fdict):
     e = datetime.date.today()
 
     res = """\
-# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
 # Site Information: [%s] %s

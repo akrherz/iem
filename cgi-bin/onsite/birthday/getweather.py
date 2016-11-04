@@ -158,7 +158,7 @@ def Main():
 		city = form["city"][0].upper()
 	except:
 		print "<P><P><B>Invalid Post:</B><BR>"
-		print "Please use this URL <a href='/onsite/birthday/'>http://mesonet.agron.iastate.edu/onsite/birthday/</a>"
+		print "Please use this URL <a href='/onsite/birthday/'>https://mesonet.agron.iastate.edu/onsite/birthday/</a>"
 		sys.exit(0)	
 
 	cityName = nt.sts[city]['name']

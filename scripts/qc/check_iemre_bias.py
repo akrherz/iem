@@ -16,7 +16,7 @@ df = read_sql("""
     ON (s.iemid = t.iemid) WHERE t.network = 'WI_ASOS' and t.id = 'LSE'
     ORDER by day ASC""", pgconn, index_col='day')
 
-uri = ("http://mesonet.agron.iastate.edu/iemre/multiday/2016-01-01/"
+uri = ("https://mesonet.agron.iastate.edu/iemre/multiday/2016-01-01/"
        "2016-07-19/%.2f/%.2f/json"
        ) % (nt.sts['LSE']['lat'], nt.sts['LSE']['lon'])
 r = requests.get(uri)

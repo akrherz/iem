@@ -33,7 +33,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
     <name>". str_replace('&', '&amp;', $row["name"]) ."</name>
     <description>
 <![CDATA[
-  <p><img src=\"http://mesonet.agron.iastate.edu/data/camera/stills/". $row["cam"] .".jpg\" /></p>
+  <p><img src=\"https://mesonet.agron.iastate.edu/data/camera/stills/". $row["cam"] .".jpg\" /></p>
         ]]>
     </description>
     <styleUrl>#iemstyle</styleUrl>

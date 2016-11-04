@@ -64,8 +64,8 @@ function init(){
     }
     n0q = new OpenLayers.Layer.TMS(
                 'NEXRAD Base Reflect',
-                'http://mesonet.agron.iastate.edu/c/tile.py/',
-                // Find more layer names here: http://mesonet.agron.iastate.edu/ogc/
+                'https://mesonet.agron.iastate.edu/c/tile.py/',
+                // Find more layer names here: https://mesonet.agron.iastate.edu/ogc/
                 {layername      : 'ridge::USCOMP-N0Q-0',
                 service         : '1.0.0',
                 type            : 'png',
@@ -75,7 +75,7 @@ function init(){
     );
     var irsat = new OpenLayers.Layer.TMS(
             'GOES East IR Satellite',
-            'http://mesonet.agron.iastate.edu/cache/tile.py/',
+            'https://mesonet.agron.iastate.edu/cache/tile.py/',
             {layername      : 'goes-east-ir-4km-900913',
             service         : '1.0.0',
             type            : 'png',
@@ -85,7 +85,7 @@ function init(){
     );
     var vissat = new OpenLayers.Layer.TMS(
             'GOES East Vis Satellite',
-            'http://mesonet.agron.iastate.edu/cache/tile.py/',
+            'https://mesonet.agron.iastate.edu/cache/tile.py/',
             {layername      : 'goes-east-vis-1km-900913',
             service         : '1.0.0',
             type            : 'png',
@@ -95,7 +95,7 @@ function init(){
     );
     var aksat = new OpenLayers.Layer.TMS(
             'Alaska Vis Satellite',
-            'http://mesonet.agron.iastate.edu/cache/tile.py/',
+            'https://mesonet.agron.iastate.edu/cache/tile.py/',
             {layername      : 'alaska-vis-900913',
             service         : '1.0.0',
             type            : 'png',
@@ -105,7 +105,7 @@ function init(){
     );
     var hawaiisat = new OpenLayers.Layer.TMS(
             'Hawaii Vis Satellite',
-            'http://mesonet.agron.iastate.edu/cache/tile.py/',
+            'https://mesonet.agron.iastate.edu/cache/tile.py/',
             {layername      : 'hawaii-vis-900913',
             service         : '1.0.0',
             type            : 'png',
@@ -116,7 +116,7 @@ function init(){
     
     var states = new OpenLayers.Layer.TMS(
             'US State Borders',
-            'http://mesonet.agron.iastate.edu/c/tile.py/',
+            'https://mesonet.agron.iastate.edu/c/tile.py/',
             {layername      : 's-900913',
             service         : '1.0.0',
             type            : 'png',
@@ -127,7 +127,7 @@ function init(){
     
     var wwa = new OpenLayers.Layer.WMS(
     		"WWA",
-    		"http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?",
+    		"https://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?",
     		{layers: "warnings_c", transparent: "TRUE", format: 'image/png'},
     		{isBaseLayer: false, buffer:0, singleTile: false,
     		 opacity: 0.5, visibility: false}

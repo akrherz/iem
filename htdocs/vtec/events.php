@@ -48,7 +48,7 @@ your favorite spreadsheet program for further usage!</div>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>http://mesonet.agron.iastate.edu/json/vtec_events.py?wfo={$wfo}&amp;year={$year}
+<br /><code>https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo={$wfo}&amp;year={$year}
 </code></p>
 
 <form method="GET" action="events.php">

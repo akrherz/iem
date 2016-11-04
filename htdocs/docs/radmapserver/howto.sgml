@@ -64,7 +64,7 @@ base composite reflectivity as a proof of concept.
 
 <sect1>The Quick and Dirty version
 <p>
-The files used in this howto are available here: <url url="http://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz">.
+The files used in this howto are available here: <url url="https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz">.
 </p>
 <p>
 <itemize>
@@ -174,7 +174,7 @@ within GIS.
 Building nex2img is very straightforward with GEMPAK already installed.
 <tscreen><code>
 $ cd $NAWIPS
-$ wget http://mesonet.agron.iastate.edu/docs/radmapserver/nex2img.tar.gz
+$ wget https://mesonet.agron.iastate.edu/docs/radmapserver/nex2img.tar.gz
 $ tar -zxvf nex2img.tar.gz
 $ cd unidata/programs/nex2img
 $ make clean
@@ -391,7 +391,7 @@ your CGI-BIN directory is <it>/var/www/cgi-bin</it>, you will want to issue the
 following commands as a privileged user to these directories.
 <tscreen><code>
 $ cd /tmp
-$ wget http://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz
+$ wget https://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz
 $ cd /var/www/htdocs
 $ mkdir mstmp
 $ chown apache mstmp
@@ -529,7 +529,7 @@ from NEXRAD data.
 <p>
 The IEM is generating a nationwide composite of base reflectivity every 5
 minutes.  This product is available in this directory:
-<code>http://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/
+<code>https://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/
 </code>
 The IEM is generating a PNG and TIFF formatted image.  There is also a 
 compressed TIFF image available in that directory as well.  The file prefix
@@ -547,7 +547,7 @@ set DATADIR="/set/me/to/something"
 
 cd /tmp
 
-wget -q http://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/n0r_0.tif.Z
+wget -q https://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/n0r_0.tif.Z
 uncompress n0r_0.tif.Z
 
 cd ${DATADIR}
@@ -595,7 +595,7 @@ system.  I have built hacks using DBF files in order to get timestamps on the
 generated images.  Here is an example of output using this 'hack'.  At some 
 point, I will add this hack to the HOWTO.
 <tscreen>
-<url url="http://mesonet.agron.iastate.edu/data/mwcomp.png">
+<url url="https://mesonet.agron.iastate.edu/data/mwcomp.png">
 </tscreen>
 </p>
 </sect1>

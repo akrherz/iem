@@ -4,7 +4,7 @@
 
 import cgi
 
-htmlBase = "http://mesonet.agron.iastate.edu/~mm5/Endow/Images/"
+htmlBase = "https://mesonet.agron.iastate.edu/~mm5/Endow/Images/"
 
 def Main():
 	print 'Content-type: text/html \n\n'

@@ -35,7 +35,7 @@ WEB
   #LOG "/tmp/ntp.log"
   METADATA
    "wms_title" "IEM NEXRAD NTP WMS"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?"
    "wms_srs" "EPSG:4326"
    "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III storm total precipitation."
    "wms_keywords" "NEXRAD,NTP"

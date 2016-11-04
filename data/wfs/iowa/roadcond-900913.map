@@ -14,7 +14,7 @@ WEB
   IMAGEURL "/tmp/"
   METADATA
     "wfs_title"	"IEM Iowa Road Conditions"
-    "wfs_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi"
+    "wfs_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi"
     "wms_srs"	"EPSG:900913 EPSG:3857"
     "wfs_srs"	"EPSG:900913 EPSG:3857"
     "wfs_abstract" "Ba Ba Ba"

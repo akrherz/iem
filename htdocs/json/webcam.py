@@ -21,7 +21,7 @@ def dance(cid, start_ts, end_ts):
         cam = %s and valid >= %s and valid < %s
     """, (cid, start_ts, end_ts))
     for row in cursor:
-        uri = row[0].strftime(("http://mesonet.agron.iastate.edu/archive/"
+        uri = row[0].strftime(("https://mesonet.agron.iastate.edu/archive/"
                                "data/%Y/%m/%d/camera/" + cid + "/" +
                                cid + "_%Y%m%d%H%M.jpg"))
         data['images'].append(

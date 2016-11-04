@@ -9,7 +9,7 @@ import urllib2
 startts = datetime.datetime(2012, 8, 1)
 endts = datetime.datetime(2012, 9, 1)
 
-SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
+SERVICE = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
 SERVICE += "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
 
 SERVICE += startts.strftime('year1=%Y&month1=%m&day1=%d&')
@@ -25,7 +25,7 @@ for state in states.split():
 
 for network in networks:
     # Get metadata
-    uri = "http://mesonet.agron.iastate.edu/geojson/network.php?network=%s" % (
+    uri = "https://mesonet.agron.iastate.edu/geojson/network.php?network=%s" % (
                                                                     network,)
     data = urllib2.urlopen(uri)
     jdict = json.load(data)

@@ -11,7 +11,7 @@ import datetime
 now = datetime.date(2009,1,1)
 ets = datetime.date(2014,1,1)
 
-URI = "http://mesonet.agron.iastate.edu/json/radar?"
+URI = "https://mesonet.agron.iastate.edu/json/radar?"
 RADAR = "EAX"
 PRODUCT = "N0Z"
 
@@ -34,7 +34,7 @@ while now < ets:
 
         #for suffix in ['png', 'wld']:
         for suffix in ['png',]:
-            tileuri = valid.strftime(("http://mesonet.agron.iastate.edu/archive/"
+            tileuri = valid.strftime(("https://mesonet.agron.iastate.edu/archive/"
                     +"data/%Y/%m/%d/GIS/ridge/"+RADAR+"/"+PRODUCT+"/"+RADAR
                     +"_"+PRODUCT+"_%Y%m%d%H%M."+suffix))
         

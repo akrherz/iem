@@ -75,7 +75,7 @@ def logic(ugccode, iemid, station, name, network, lon, lat, state):
             result = True
         else:
             print(("%s set_county[%s] ID:%s Net:%s St:%s "
-                   "Lon:%.4f Lat:%.4f\nhttp://mesonet.agron.iastate.edu/sites/"
+                   "Lon:%.4f Lat:%.4f\nhttps://mesonet.agron.iastate.edu/sites/"
                    "site.php?station=%s&network=%s"
                    "") % (msg("FAIL"), ugccode, station, network, state,
                           lon, lat, station, network))

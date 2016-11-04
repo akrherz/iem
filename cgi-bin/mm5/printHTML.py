@@ -5,7 +5,7 @@ def printTop():
 	print """
 <HTML>
 	<HEAD>
-		<BASE HREF="http://mesonet.agron.iastate.edu/~mm5/">
+		<BASE HREF="https://mesonet.agron.iastate.edu/~mm5/">
 		<TITLE> Seasonal Forecast -- Weather Data Viewer</TITLE>
 
 <SCRIPT LANGUAGE="JavaScript">

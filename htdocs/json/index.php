@@ -572,7 +572,7 @@ for a given network that collects webcams and a UTC timestamp.",
   }
  &lt;/script&gt;
  &lt;script type="text/javascript"
-         src="http://mesonet.agron.iastate.edu/json/example.php?callback=gotData"&gt;
+         src="https://mesonet.agron.iastate.edu/json/example.php?callback=gotData"&gt;
  
  </pre>
  

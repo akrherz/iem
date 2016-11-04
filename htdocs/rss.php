@@ -20,9 +20,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="http://mesonet.agron.iastate.edu/rss.php" rel="self" type="application/rss+xml" />
+<atom:link href="https://mesonet.agron.iastate.edu/rss.php" rel="self" type="application/rss+xml" />
 <title>IEM News and Notes</title>
-<link>http://mesonet.agron.iastate.edu</link>
+<link>https://mesonet.agron.iastate.edu</link>
 <description>Iowa Environmental Mesonet News and Notes</description>
 <lastBuildDate>{$bd}</lastBuildDate>
 EOF;
@@ -33,8 +33,8 @@ EOF;
   echo "<item>\n";
   echo "<title>". ereg_replace("&","&amp;",$row["title"]) ."</title>\n";
   echo "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";
-  echo "<link>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
-  echo "<guid>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</guid>\n";
+  echo "<link>https://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
+  echo "<guid>https://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</guid>\n";
   echo "<description><![CDATA[". $row["body"] ."]]></description>\n";
   echo "</item>\n";
  }

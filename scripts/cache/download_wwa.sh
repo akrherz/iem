@@ -1,6 +1,6 @@
 #!/bin/bash
 # Cache the weather bureau's WWA map for folks to use
-# http://mesonet.agron.iastate.edu/timemachine/#59.0
+# https://mesonet.agron.iastate.edu/timemachine/#59.0
 
 DSTAMP=$(date -u +'%Y%m%d%H%M')
 

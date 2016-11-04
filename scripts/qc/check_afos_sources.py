@@ -26,7 +26,7 @@ def sample(source, ts):
             continue
         pils.append(row[0])
         utc = row[1].astimezone(pytz.timezone("UTC"))
-        uri = ('http://mesonet.agron.iastate.edu/p.php?pid=%s-%s-%s-%s'
+        uri = ('https://mesonet.agron.iastate.edu/p.php?pid=%s-%s-%s-%s'
                '') % (utc.strftime("%Y%m%d%H%M"), source, row[2], row[0])
         print(' %s' % (uri,))
 

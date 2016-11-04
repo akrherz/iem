@@ -205,7 +205,7 @@ values.</li>
 
 <h3>Product Generation:</h3>
 <div style="float: right; padding: 5px; border: 2px solid #000; margin: 5px;">
-<a href="http://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png"><img src="http://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png" width="480"></a>
+<a href="https://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png"><img src="https://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png" width="480"></a>
 <br />Composite of composites for 18 Oct 2007. Click image for regular size.
 </div>
 <p>The IEM receives a feed of NEXRAD Level III products from the <a href="http://www.unidata.ucar.edu/software/idd/">Unidata Internet Data Distribution</a>. 
@@ -224,15 +224,15 @@ wintertime, this comparison is skipped for most of the country. The final result
 is a PNG formatted image looking much like the example image shown above.
 
 <p>The final image is shipped to the IEM webfarm for archival and use. You can
-always find the 10 most recently generated rasters <a href="http://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">here</a> (n0r_0* is the newest). 
+always find the 10 most recently generated rasters <a href="https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">here</a> (n0r_0* is the newest). 
 You can also find current and historical images in the archive.  The format 
 for the URL is:
 <br /><code style="margin: 20px;">
-http://mesonet.agron.iastate.edu/archive/data/YYYY/mm/dd/GIS/uscomp/
+https://mesonet.agron.iastate.edu/archive/data/YYYY/mm/dd/GIS/uscomp/
 </code>
 <br />For example, here are the images generated for today:
 <code style="margin: 20px;">
-http://mesonet.agron.iastate.edu/archive/data/{$d}/GIS/uscomp/
+https://mesonet.agron.iastate.edu/archive/data/{$d}/GIS/uscomp/
 </code>
 <br />All dates in the archive are in UTC time.
 
@@ -248,7 +248,7 @@ archive folders.  The projection of these images is in EPSG:4326 (WGS84 longlat)
 IEM provides a server-side conversion of the PNG files for delivery of a 
 GeoTIFF.  This application is called like so:
 <br /><code style="margin: 20px;">
-http://mesonet.agron.iastate.edu/request/gis/n0r2gtiff.php?dstr=200711010025
+https://mesonet.agron.iastate.edu/request/gis/n0r2gtiff.php?dstr=200711010025
 </code>
 <br />where <i>dstr</i> specifies the {year}{month}{day}{hour}{minute} in UTC
 of the requested raster.  Rasters are only available at minutes modulo 5.
@@ -269,7 +269,7 @@ or out away from the CONUS are just "black".
 <p>A special way you can interface with this data archive is via the Web 
 Map Service that also supports time based retrieval (<a href="http://www.opengeospatial.org/standards/wms">WMS-T</a>).  Point your WMS-T aware app at:
 <br /><code style="margin: 20px;">
-http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?
+https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?
 </code>
 <br />The <i>nexrad-n0r-wmst</i> layer is time aware!
 

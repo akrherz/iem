@@ -34,7 +34,7 @@ while now < ets:
     sunset = sunset.replace(second=0)
     sunset = sunset - datetime.timedelta(minutes=sunset.minute % 10)
 
-    uri = sunrise.strftime(('http://mesonet.agron.iastate.edu/archive/'
+    uri = sunrise.strftime(('https://mesonet.agron.iastate.edu/archive/'
                             'data/%Y/%m/%d/camera/KCCI-026/'
                             'KCCI-026_%Y%m%d%H%M.jpg'))
     try:
@@ -88,7 +88,7 @@ while now < ets:
         maxv = redish
         os.rename('webcam.jpg', 'max2.jpg')
 
-    uri = sunset.strftime(('http://mesonet.agron.iastate.edu/archive/data/'
+    uri = sunset.strftime(('https://mesonet.agron.iastate.edu/archive/data/'
                            '%Y/%m/%d/camera/KCCI-016/KCCI-016_%Y%m%d%H%M.jpg'))
     try:
         data = urllib2.urlopen(uri).read()

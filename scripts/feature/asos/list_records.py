@@ -18,7 +18,7 @@ def two():
                ) % (nt.sts[sid]['archive_begin'].year, sid,
                     nt.sts[sid]['name']))
         for hrs in range(12, 24*12 + 1, 24):
-            uri = ("http://mesonet.agron.iastate.edu/plotting/auto/plot/42/"
+            uri = ("https://mesonet.agron.iastate.edu/plotting/auto/plot/42/"
                    "zstation:%s::network:IA_ASOS::month:9::dir:above::"
                    "threshold:70::hours:%s::dpi:100.csv") % (sid, hrs)
             data = urllib2.urlopen(uri).read()

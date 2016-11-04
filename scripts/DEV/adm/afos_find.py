@@ -26,8 +26,8 @@ def mycmp(orig, mod, data, data2, line, line2):
         tp = TextProduct(data)
         tp2 = TextProduct(data2)
         print(("%s %s -> %s\n"
-               "%s -> %s\nhttp://mesonet.agron.iastate.edu/p.php?pid=%s\n"
-               "%s -> %s\nhttp://mesonet.agron.iastate.edu/p.php?pid=%s\n") % (
+               "%s -> %s\nhttps://mesonet.agron.iastate.edu/p.php?pid=%s\n"
+               "%s -> %s\nhttps://mesonet.agron.iastate.edu/p.php?pid=%s\n") % (
             orig[0], p1, p2, tp.afos, line, tp.get_product_id(),
             tp2.afos, line2, tp2.get_product_id()))
 

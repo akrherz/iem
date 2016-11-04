@@ -6,7 +6,7 @@ define("IEM_APPID", 20);
 $t->thispage = "archive-schema";
 $t->title = "Archived Data Schema";
 
-$url = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
+$url = sprintf("https://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
 $u = sprintf("<a href=\"%s\">%s</a>\n", $url, $url);
 $d = 
 

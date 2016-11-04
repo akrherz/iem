@@ -29,7 +29,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    res = ("# IEM Climodat http://mesonet.agron.iastate.edu/climodat/\n"
+    res = ("# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
            "# Report Generated: %s\n"
            "# Climate Record: %s -> %s\n"
            "# Site Information: [%s] %s\n"
