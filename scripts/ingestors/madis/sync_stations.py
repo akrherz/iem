@@ -19,31 +19,9 @@ elevations = nc.variables["elevation"][:]
 
 
 MY_PROVIDERS = [
- "AKDOT",
- "CODOT",
- "DEDOT",
- "FLDOT",
- "GADOT",
- "INDOT",
- "KSDOT",
  "KYTC-RWIS",
  "KYMN",
- "MADOT",
- "MEDOT",
- "MDDOT",
- "MIDOT",
- "MNDOT",
- "MODOT",
  "NEDOR",
- "NHDOT",
- "NDDOT",
- "NVDOT",
- "OHDOT",
- "WIDOT",
- "WVDOT",
- "WYDOT",
- "VADOT",
- "VTDOT",
  "MesoWest",
 ]
 
@@ -52,11 +30,14 @@ def provider2network(p):
     """ Convert a MADIS network ID to one that I use, here in IEM land"""
     if p in ['KYMN']:
         return p
-    return '%s_RWIS' % (p[:2],)
+    if len(p) == 5 or p in ['KYTC-RWIS', 'NEDOR']:
+        return '%s_RWIS' % (p[:2],)
+    print("Unsure how to convert %s into a network" % (p,))
+    return None
 
 for recnum in range(len(providers)):
     thisProvider = providers[recnum].tostring().replace('\x00', '')
-    if thisProvider not in MY_PROVIDERS:
+    if not thisProvider.endswith('DOT') and thisProvider not in MY_PROVIDERS:
         continue
     stid = stations[recnum].tostring().replace('\x00', '')
     name = names[recnum].tostring().replace("'",
@@ -71,6 +52,8 @@ for recnum in range(len(providers)):
             continue
     else:
         network = provider2network(thisProvider)
+    if network is None:
+        continue
     mcursor.execute("""
         SELECT * from stations where id = %s and network = %s
     """, (stid, network))

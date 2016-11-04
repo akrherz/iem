@@ -59,33 +59,10 @@ subk1 = nc.variables["roadSubsurfaceTemp1"][:]
 
 db = {}
 
-MY_PROVIDERS = ["AKDOT",
-                "CODOT",
-                "DEDOT",
-                "FLDOT",
-                "GADOT",
-                "INDOT",
-                "KSDOT",
-                "KYTC-RWIS",
+MY_PROVIDERS = ["KYTC-RWIS",
                 "KYMN",
-                "MADOT",
-                "MEDOT",
-                "MIDOT",
-                "MDDOT",
-                "MNDOT",
-                "MODOT",
                 "NEDOR",
-                "NHDOT",
-                "NDDOT",
-                "NVDOT",
-                "OHDOT",
-                "WIDOT",
-                "WVDOT",
-                "WYDOT",
-                "VADOT",
-                "VTDOT",
-                "MesoWest"
-                ]
+                "MesoWest"]
 
 
 def provider2network(p):
@@ -94,12 +71,15 @@ def provider2network(p):
         return p
     if p == 'MesoWest':
         return 'VTWAC'
-    return '%s_RWIS' % (p[:2],)
+    if len(p) == 5 or p in ['KYTC-RWIS', 'NEDOR']:
+        return '%s_RWIS' % (p[:2],)
+    print("Unsure how to convert %s into a network" % (p,))
+    return None
 
 for recnum in range(len(providers)):
     thisProvider = providers[recnum].tostring().replace('\x00', '')
     thisStation = stations[recnum].tostring().replace('\x00', '')
-    if thisProvider not in MY_PROVIDERS:
+    if not thisProvider.endswith('DOT') and thisProvider not in MY_PROVIDERS:
         continue
     name = names[recnum].tostring().replace("'",
                                             "").replace('\x00',
@@ -113,6 +93,8 @@ for recnum in range(len(providers)):
             continue
     else:
         network = provider2network(thisProvider)
+    if network is None:
+        continue
     db[thisStation] = {}
     ticks = obTime[recnum]
     ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
