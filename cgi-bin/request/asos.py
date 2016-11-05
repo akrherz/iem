@@ -219,7 +219,7 @@ def main():
                 if row[data1] is None:
                     r.append("M")
                 else:
-                    r.append("%s" % (row[data1], ))
+                    r.append("%s" % (row[data1].replace(",", " "), ))
             elif (row.get(data1) is None or row[data1] <= -99.0 or
                   row[data1] == "M"):
                 r.append("M")
