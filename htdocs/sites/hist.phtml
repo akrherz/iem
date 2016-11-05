@@ -10,7 +10,11 @@ include("../../include/myview.php");
 $t = new MyView();
 
 /* Get vars */
-$year = isset($_GET['year']) ? intval($_GET['year']) : date("Y", time() - 86400);
+$year = isset($_GET['year']) ? intval($_GET['year']) : intval(date("Y", time() - 86400));
+// Don't allow dates into the future
+if ($year > intval(gmdate("Y"))){
+	$year = intval(gmdate("Y"));
+}
 $month = isset($_GET['month']) ? intval($_GET['month']) : date("m", time() - 86400);
 $day = isset($_GET['day']) ? intval($_GET['day']) : 1;
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'monthly';
