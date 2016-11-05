@@ -2,7 +2,7 @@
 include_once "../../config/settings.inc.php";
 define("IEM_APPID", 85);
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2015;
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
 
 include_once "../../include/myview.php";
 include_once "../../include/vtec.php";
