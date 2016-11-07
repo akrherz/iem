@@ -122,8 +122,10 @@ while ( list($key, $val) = each($mydata) ) {
 
 fclose($rwis);
 
-$pqstr = "data c 000000000000 wxc/wxc_iadot.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iadot.txt", $pqstr);
+$pqstr = sprintf("data c %s wxc/wxc_iadot.txt bogus txt",
+		gmdate("YmdHi"));
+$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_iadot.txt",
+		$pqstr);
 system($cmd);
 unlink("/tmp/wxc_iadot.txt");
 
@@ -215,8 +217,10 @@ while ( list($key, $val) = each($mydata) ) {
 
 fclose($rwis);
 
-$pqstr = "data c 000000000000 wxc/wxc_ildot.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_ildot.txt", $pqstr);
+$pqstr = sprintf("data c %s wxc/wxc_ildot.txt bogus txt",
+		gmdate("YmdHi"));
+$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_ildot.txt",
+		$pqstr);
 system($cmd);
 unlink("/tmp/wxc_ildot.txt");
 
@@ -345,12 +349,16 @@ while ( list($key, $val) = each($mydata) ) {
 fclose($rwis);
 fclose($rwiscsv);
 
-$pqstr = "data c 000000000000 wxc/wxc_oh_in_kydot.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_oh_in_kydot.txt", $pqstr);
+$pqstr = sprintf("data c %s wxc/wxc_oh_in_kydot.txt bogus txt",
+		gmdate("YmdHi"));
+$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_oh_in_kydot.txt",
+		$pqstr);
 system($cmd);
 
-$pqstr = "data c 000000000000 csv/oh_in_kydot.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/csv_oh_in_kydot.txt", $pqstr);
+$pqstr = sprintf("data c %s csv/oh_in_kydot.txt bogus txt",
+		gmdate("YmdHi"));
+$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/csv_oh_in_kydot.txt",
+		$pqstr);
 system($cmd);
 
 
