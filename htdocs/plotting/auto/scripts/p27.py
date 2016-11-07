@@ -1,11 +1,12 @@
 """
   Fall Minimum by Date
 """
-import psycopg2.extras
+import psycopg2
+from pandas.io.sql import read_sql
 import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
-import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -18,9 +19,9 @@ def get_description():
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
-        dict(type='text', name='t1', default=32,
+        dict(type='int', name='t1', default=32,
              label='Temperature Threshold 1:'),
-        dict(type='text', name='t2', default=29,
+        dict(type='int', name='t2', default=29,
              label='Temperature Threshold 2:'),
     ]
     return d
@@ -32,33 +33,27 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA0200')
-    t1 = int(fdict.get('t1', 32))
-    t2 = int(fdict.get('t2', 29))
+    station = ctx['station']
+    t1 = ctx['t1']
+    t2 = ctx['t2']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
-    cursor.execute("""
+    df = read_sql("""
         SELECT year,
         min(low) as min_low,
         min(case when low < %s then extract(doy from day)
-            else 999 end) as t1,
+            else 999 end) as t1_doy,
         min(case when low < %s then extract(doy from day)
-            else 999 end) as t2
+            else 999 end) as t2_doy
         from """+table+""" where station = %s and month > 6
         GROUP by year ORDER by year ASC
-    """, (t1, t2, station))
+    """, pgconn, params=(t1, t2, station), index_col='year')
+    df = df[df['t2_doy'] < 400]
 
-    rows = []
-    for row in cursor:
-        if row['t2'] > 400:
-            continue
-        rows.append(dict(year=row['year'], t1_doy=row['t1'], t2_doy=row['t2']))
-
-    df = pd.DataFrame(rows)
     doy = np.array(df['t1_doy'], 'i')
     doy2 = np.array(df['t2_doy'], 'i')
 

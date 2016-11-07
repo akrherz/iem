@@ -3,6 +3,7 @@ from pyiem.network import Table as NetworkTable
 import numpy as np
 import pandas as pd
 import datetime
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -19,7 +20,7 @@ def get_description():
     observation over the years is problematic."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
     ]
     return d
 
@@ -31,9 +32,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'DSM')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
     nt = NetworkTable(network)
 
     cursor.execute("""

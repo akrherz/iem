@@ -104,12 +104,13 @@ def plotter(fdict):
     ax.set_xlim(mindate)
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 7, 14, 21]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
-    ax.set_title(("Frequency of First Fall Temperature\n"
+    ax.set_title(("Frequency of First Fall Temperature At or Below Threshold\n"
                   "%s %s (%s-%s)"
                   ) % (station, nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,
                        datetime.date.today().year))
     ax.grid(True)
+    ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
     df.reset_index(inplace=True)
     return fig, df, res
 
