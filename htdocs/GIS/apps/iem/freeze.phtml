@@ -39,6 +39,8 @@ else if ($state == "IA_NE")
   $sextent = "-93.6,41.9,-90,43.8";
 else if ($state == "IA_SE")
   $sextent = "-93.6,40.3,-90,41.9";
+else if ($state == "IA_C")
+  $sextent = "-95.1,41.1,-91.5,42.7";
 else if ($state == "IA_SW")
   $sextent = "-96.6,40.3,-93.6,41.9";
 else if ($state == "IA_NW")
@@ -124,7 +126,7 @@ EOF;
  $sselect = "<select name=\"ba\" onChange=\"location=this.form.ba.options[this.form.ba.selectedIndex].value\">";
  $sselect .= "<option value=\"#\"> -- User Defined -- </option>";
  $ar = Array("A"=> "Midwest US", "AK" => "Alaska", "HI" => "Hawaii",
- "IL" => "Illinois", "IA" => "Iowa", "IA_NE" => "Iowa Northeast", 
+ "IL" => "Illinois", "IA" => "Iowa", "IA_C" => "Iowa Central", "IA_NE" => "Iowa Northeast", 
  "IA_SE" => "Iowa Southeast", "IA_SW" => "Iowa Southwest", "IA_NW" => "Iowa Northwest",
  "KS" => "Kansas", "NE" => "Nebraska", "MN_N" => "Minnesota North",
  "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota", 
