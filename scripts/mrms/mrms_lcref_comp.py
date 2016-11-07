@@ -11,11 +11,8 @@ import subprocess
 import json
 import sys
 import pygrib
-import requests
 import gzip
 import pyiem.mrms as mrms
-
-TMP = "/mesonet/tmp"
 
 
 def make_colorramp():
@@ -46,17 +43,11 @@ def do(now, realtime=False):
                 'product': 'lcref',
                 'units': '0.5 dBZ'}
 
-    fn = now.strftime("SeamlessHSR_00.00_%Y%m%d-%H%M00.grib2.gz")
-    uri = now.strftime(("http://mtarchive.geol.iastate.edu/%Y/%m/%d/"
-                        "mrms/ncep/SeamlessHSR/" + fn))
-    gribfn = "%s/%s" % (TMP, fn)
-    res = requests.get(uri, timeout=30)
-    if res.status_code != 200:
-        print("mrms_lcref_comp.py MISSING %s" % (gribfn,))
+    gribfn = mrms.fetch('SeamlessHSR', now)
+    if gribfn is None:
+        print(("mrms_lcref_comp.py NODATA for SeamlessHSR: %s"
+               ) % (now.strftime("%Y-%m-%dT%H:%MZ"),))
         return
-    o = open(gribfn, 'wb')
-    o.write(res.content)
-    o.close()
 
     fp = gzip.GzipFile(gribfn, 'rb')
     (_, tmpfn) = tempfile.mkstemp()
