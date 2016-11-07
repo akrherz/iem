@@ -115,16 +115,17 @@ def highcharts(fdict):
             }
         """)
     ctx['odf']['ticks'] = ctx['odf'].index.values.astype(np.int64) // 10 ** 6
-    v = ctx['odf'][['ticks', ctx[ctx['var']]]].to_json(orient='values')
-    lines.append("""{
-            name: 'Obs',
-            type: 'line',
-            color: 'black',
-            lineWidth: 3,
-            tooltip: {valueDecimal: 1},
-            data: """+v+"""
-            }
-    """)
+    if ctx['var'] in ctx:
+        v = ctx['odf'][['ticks', ctx[ctx['var']]]].to_json(orient='values')
+        lines.append("""{
+                name: 'Obs',
+                type: 'line',
+                color: 'black',
+                lineWidth: 3,
+                tooltip: {valueDecimal: 1},
+                data: """+v+"""
+                }
+        """)
     series = ",".join(lines)
     return """
 $("#ap_container").highcharts({
@@ -136,7 +137,7 @@ $("#ap_container").highcharts({
         crosshairs: true
     },
     xAxis: {type: 'datetime'},
-    yAxis: {title: {text: '"""+ctx[ctx['var']]+"""'}},
+    yAxis: {title: {text: '""" + ctx.get(ctx['var'], 'primary') + """'}},
     series: [""" + series + """]
 });
     """
