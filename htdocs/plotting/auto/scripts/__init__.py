@@ -308,6 +308,8 @@ data = {'plots': [
          'label': "Number of Watch/Warning/Advisories Issued per Year"},
         {'id': "70",
          'label': "Period between First and Last VTEC Product Each Year"},
+        {'id': "166",
+         'label': "Storm Prediction Center Watches per Year for a State"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
         {'id': "80",
          'label': "Time Duration of a Watch/Warning/Advisory for a UGC"},
