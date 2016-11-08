@@ -90,7 +90,7 @@ def plotter(fdict):
                    "%.1f%%" % (row['state_percent'],), ha='center',
                    rotation=90, va='top', color='white')
     ax[2].grid(True)
-    ax[2].set_ylabel("%% Touching State")
+    ax[2].set_ylabel("% Touching State")
 
     ax[0].set_xlim(df.index.values[0] - 0.5,
                    df.index.values[-1] + 0.5)

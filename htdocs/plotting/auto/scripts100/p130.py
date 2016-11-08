@@ -1,9 +1,8 @@
 import psycopg2
-import calendar
-import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -16,7 +15,7 @@ def get_description():
     snow cover report.  Also with the quality of the snow cover data."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
     ]
     return d
 
@@ -27,8 +26,8 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203').upper()
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station'].upper()
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
     df = read_sql("""

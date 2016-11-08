@@ -2,6 +2,7 @@ import psycopg2
 from pandas.io.sql import read_sql
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
     ('avg_high', 'Average High Temperature'),
@@ -23,9 +24,9 @@ def get_description():
         dict(type='select', options=PDICT, name='var',
              label='Select Variable to Plot', default='avg_temp'),
         dict(type='station', name='station1', default='IA2203',
-             label='Select First Station:'),
+             label='Select First Station:', network='IACLIMATE'),
         dict(type='station', name='station2', default='IA0200',
-             label='Select Secont Station:'),
+             label='Select Secont Station:', network='IACLIMATE'),
     ]
     return d
 
@@ -36,14 +37,14 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station1 = fdict.get('station1', 'IA2203').upper()
-    station2 = fdict.get('station2', 'IA0200').upper()
+    ctx = get_autoplot_context(fdict, get_description())
+    station1 = ctx['station1'].upper()
+    station2 = ctx['station2'].upper()
     table1 = "alldata_%s" % (station1[:2], )
     table2 = "alldata_%s" % (station2[:2], )
     nt1 = NetworkTable("%sCLIMATE" % (station1[:2],))
     nt2 = NetworkTable("%sCLIMATE" % (station2[:2],))
-    varname = fdict.get('var', 'avg_temp')
+    varname = ctx['var']
 
     df = read_sql("""WITH one as (
       SELECT year, sum(precip) as one_total_precip,

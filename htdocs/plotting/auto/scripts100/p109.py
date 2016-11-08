@@ -5,6 +5,7 @@ import datetime
 import pytz
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot
+# get_autoplot_context does not support vtec_ps
 
 
 def get_description():
