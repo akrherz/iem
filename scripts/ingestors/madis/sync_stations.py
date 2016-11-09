@@ -31,6 +31,8 @@ def provider2network(p):
     if p in ['KYMN']:
         return p
     if len(p) == 5 or p in ['KYTC-RWIS', 'NEDOR']:
+        if p[:2] == 'IA':
+            return None
         return '%s_RWIS' % (p[:2],)
     print("Unsure how to convert %s into a network" % (p,))
     return None
