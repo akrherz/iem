@@ -255,6 +255,9 @@ data = {'plots': [
         {'id': "54",
          'label': ("Difference between morning low "
                    "or afternoon high temperature between two sites")},
+        {'id': "167",
+         'label': ("Flight / Aviation Condition (VFR, MVFR, IFR, LIFR) "
+                   "hourly for one month")},
         {'id': "87",
          'label': ("Frequency of METAR Code (Thunder, etc) "
                    "by week by hour")},
