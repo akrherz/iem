@@ -1,16 +1,12 @@
-"""
-Download and process the scan dataset
-"""
-
-import urllib
-import urllib2
+"""Download and process the scan dataset"""
+import requests
 import datetime
 import pytz
+import psycopg2
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 nt = NetworkTable("SCAN")
-import psycopg2
 SCAN = psycopg2.connect(database='scan', host='iemdb')
 scursor = SCAN.cursor()
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
@@ -183,14 +179,13 @@ def main():
     for sid in nt.sts.keys():
         # iem uses S<id> and scan site uses just <id>
         postvars['sitenum'] = sid[1:]
-        data = urllib.urlencode(postvars)
-        req = urllib2.Request(URI, data)
         try:
-            response = urllib2.urlopen(req, timeout=15)
-        except Exception, exp:
+            req = requests.get(URI, params=postvars, timeout=10)
+            response = req.content
+        except Exception as exp:
             print 'scan_ingest.py Failed to download: %s %s' % (sid, exp)
             continue
-        lines = response.readlines()
+        lines = response.split("\n")
         cols = lines[2].split(",")
         data = {}
         for row in lines[3:]:
