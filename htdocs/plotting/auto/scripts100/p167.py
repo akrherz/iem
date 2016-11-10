@@ -12,9 +12,9 @@ def get_description():
     d = dict()
     d['data'] = True
     d['cache'] = 86400
-    d['description'] = """This chart summarizes Flight Condition by hour
+    d['description'] = """This chart summarizes Flight Category by hour
     and day of a given month.  In the case of multiple observations for a
-    given hour, the worst condition is plotted.
+    given hour, the worst category is plotted.
 
 <table class="table table-condensed table-bordered">
 <thead><tr><th>code</th><th>Label</th><th>Description</th></tr></thead>
@@ -23,7 +23,7 @@ def get_description():
 that hour</td></tr>
 <tr><td>VFR</td><td>Visual Flight Rules</td><td>
 Ceiling >3000' AGL and visibility >5 statutes miles (green)</td></tr>
-<tr><td>MVFR</td><td>Manual Visual Flight Rules</td><td>
+<tr><td>MVFR</td><td>Marginal Visual Flight Rules</td><td>
 1000-3000' ceilings and/or 3-5 statute miles, inclusive (blue)</td></tr>
 <tr><td>IFR</td><td>Instrument Fight Rules</td><td>
 500 - <1000' ceilings and/or 1 to <3 statute miles (red)</td></tr>
@@ -121,7 +121,7 @@ def plotter(fdict):
 
     ax.set_axis_bgcolor('skyblue')
 
-    ax.set_title(('[%s] %s %s Flight Condition\n'
+    ax.set_title(('[%s] %s %s Flight Category\n'
                   'based on Hourly METAR Cloud Amount/Level'
                   ' and Visibility Reports'
                   ) % (station, nt.sts[station]['name'],
