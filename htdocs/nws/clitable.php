@@ -219,6 +219,16 @@ $t->content = <<<EOF
 			<i class="glyphicon glyphicon-star"></i> Record Set.</p>
 
 EOF;
-
+$t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+EOF;
+$t->jsextra = <<<EOF
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script>
+$(document).ready(function(){
+	$(".iemselect2").select2();
+});
+</script>
+EOF;
 $t->render('single.phtml');
 ?>
