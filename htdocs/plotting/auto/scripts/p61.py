@@ -3,6 +3,7 @@ from pyiem.network import Table as NetworkTable
 import datetime
 from pandas.io.sql import read_sql
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
                      ('low', 'Low Temperature'),
@@ -46,11 +47,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-
-    varname = fdict.get('var', 'high')
-    sector = fdict.get('sector', 'conus')
-    state = fdict.get('state', 'IA')
-    wfo = fdict.get('wfo', 'DMX')
+    ctx = get_autoplot_context(fdict, get_description())
+    varname = ctx['var']
+    sector = ctx['sector']
+    state = ctx['state']
+    wfo = ctx['wfo']
     if varname not in PDICT:
         return None
 
@@ -60,57 +61,59 @@ def plotter(fdict):
     yesterday = today - datetime.timedelta(days=1)
     d180 = today - datetime.timedelta(days=180)
 
-    dbcol = 'high' if varname in ['precip', ] else varname
     df = read_sql("""
      with obs as (
       select station, valid,
-      (case when """ + dbcol + """ > """ + dbcol + """_normal
-      then 1 else 0 end) as hit,
+      (case when low > low_normal then 1 else 0 end) as low_hit,
+      (case when high > high_normal then 1 else 0 end) as high_hit,
       (case when precip >= 0.01 then 1 else 0 end) as precip_hit
       from cli_data
-      where """ + dbcol + """ is not null
-      and """ + dbcol + """_normal is not null
+      where high is not null
+      and high_normal is not null and low is not null and
+      low_normal is not null
       and valid > %s and valid <= %s),
 
       totals as (
       SELECT station,
-      max(case when hit = 0 then valid else %s end) as last_below,
-      max(case when hit = 1 then valid else %s end) as last_above,
+      max(case when low_hit = 0 then valid else %s end) as last_low_below,
+      max(case when low_hit = 1 then valid else %s end) as last_low_above,
+      max(case when high_hit = 0 then valid else %s end) as last_high_below,
+      max(case when high_hit = 1 then valid else %s end) as last_high_above,
       max(case when precip_hit = 0 then valid else %s end) as last_dry,
       max(case when precip_hit = 1 then valid else %s end) as last_wet,
       count(*) as count from obs GROUP by station)
 
-      SELECT station, last_below, last_above, last_dry, last_wet
+      SELECT station, last_low_below, last_low_above, last_high_below,
+      last_high_above, last_dry, last_wet
       from totals where count > 170
-      ORDER by least(last_below, last_above) ASC
-    """, pgconn, params=(d180, today, d180, d180, d180, d180))
+    """, pgconn, params=(d180, today, d180, d180, d180, d180, d180, d180),
+                  index_col='station')
 
     lats = []
     lons = []
     vals = []
     colors = []
     labels = []
+    df['precip_days'] = (df['last_dry'] - df['last_wet']).dt.days
+    df['low_days'] = (df['last_low_above'] - df['last_low_below']).dt.days
+    df['high_days'] = (df['last_high_above'] - df['last_high_below']).dt.days
+    # reorder the frame so that the largest values come first
+    df = df.reindex(df[varname+'_days'].abs(
+        ).sort_values(ascending=False).index)
 
-    for _, row in df.iterrows():
-        if row['station'] not in nt.sts:
+    for station, row in df.iterrows():
+        if station not in nt.sts:
             continue
-        lats.append(nt.sts[row['station']]['lat'])
-        lons.append(nt.sts[row['station']]['lon'])
+        lats.append(nt.sts[station]['lat'])
+        lons.append(nt.sts[station]['lon'])
         if varname == 'precip':
             last_wet = row['last_wet']
-            last_dry = row['last_dry']
-            days = (last_dry - last_wet).days
-            if last_wet in [today, yesterday]:
-                days = 0
+            days = 0 if last_wet in [today, yesterday] else row['precip_days']
         else:
-            last_above = row['last_above']
-            last_below = row['last_below']
-            days = 0 - (last_below - last_above).days
-            if last_above in [today, yesterday]:
-                days = (last_above - last_below).days
+            days = row[varname + '_days']
         vals.append(days)
         colors.append('r' if days > 0 else 'b')
-        labels.append(row[0])
+        labels.append(station[1:])
 
     title = ('Consecutive Days with %s Temp '
              'above(+)/below(-) Average') % (varname.capitalize(),)
@@ -129,3 +132,6 @@ def plotter(fdict):
                   labelbuffer=10)
 
     return m.fig, df
+
+if __name__ == '__main__':
+    plotter(dict(var='precip'))
