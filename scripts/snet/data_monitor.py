@@ -1,6 +1,4 @@
-"""
-  Process that would continually monitor for interesting stuff!!
-"""
+"""Process that would continually monitor for interesting stuff!!"""
 from pyiem.network import Table as NetworkTable
 import psycopg2
 import os
@@ -32,9 +30,13 @@ def preload():
 
 def process(tv):
     """Process a given network of stations"""
-    IEM = psycopg2.connect(database='iem', host='iemdb')
-    icursor = IEM.cursor()
-    icursor2 = IEM.cursor()
+    try:
+        IEM = psycopg2.connect(database='iem', host='iemdb')
+        icursor = IEM.cursor()
+        icursor2 = IEM.cursor()
+    except Exception as exp:
+        print(exp)
+        return
     icursor.execute("""SELECT pday, t.id, t.iemid, phour
         from current c JOIN stations t on (c.iemid = t.iemid)
         WHERE t.network = '%s' and pday is not null""" % (tv,))
