@@ -47,6 +47,8 @@ data = {'plots': [
         {'id': "86", 'mw': True, 'label': "IEM Daily Reanalysis Plots"},
         {'id': "139",
          'label': "Largest Local Calendar Day Temperature Differences"},
+        {'id': "168", 'mw': True,
+         "label": "Latest Date of Year for High Temperature"},
         {'id': "97", 'mw': True,
          "label": "Map of Departures/Stats over One Period of Days"},
         {'id': "34", 'mw': True,
