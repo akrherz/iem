@@ -207,7 +207,7 @@ for feat in featureset['features']:
     # Update currents
     cursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s,
     raw = %s WHERE segid = %s
-    """, (cond, valid.strftime("%Y-%m-%d %H:%M-06"), raw, segid))
+    """, (cond, valid.strftime("%Y-%m-%d %H:%M+00"), raw, segid))
     dirty = True
 
 if dirty:
