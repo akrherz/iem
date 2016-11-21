@@ -274,6 +274,8 @@ data = {'plots': [
          'label': "Hourly Temp/Dew Point Frequency by-year by-hour-of-day"},
         {'id': "106",
          'label': "Hourly temp distributions on days exceeding temperature"},
+        {'id': "169",
+         'label': "Largest Rise/Drop in Temperature over X Hours"},
         {'id': "18", 'label': "Long term temperature time series"},
         {'id': "45", 'label': "Monthly Frequency of Overcast Conditions"},
         {'id': "67",
