@@ -22,7 +22,7 @@ before_install:
   - sudo apt-get install -qq python-matplotlib python-mpltoolkits.basemap python-psycopg2 python-numpy python-scipy python-memcache libhdf5-serial-dev hdf5-tools
   - sudo apt-get install apache2 libapache2-mod-wsgi memcached libnetcdf-dev
   - sudo service memcached start
-  - sudo a2enmod headers rewrite proxy cgi
+  - sudo a2enmod headers rewrite proxy cgi expires
 # we do things the old fashioned way, we earn it
   - sudo a2dissite 000-default.conf
   - sudo cp config/mesonetdir.conf /etc/apache2/sites-enabled/
