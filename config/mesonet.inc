@@ -387,30 +387,20 @@ AddHandler cgi-script .py
 Options +ExecCGI
 </Location>
 
-<Location "/request/grx">
-AddHandler cgi-script .py
-Options +ExecCGI
-
-RewriteRule iadot_trucks.txt iadot_trucks.py
-# Legacy link was removed 5 Jan 2015
-RewriteRule idot_trucks.php iadot_trucks.py
-
-# .php was legacy stuff, lets not break old paths
-RewriteRule l3attr.(php|txt) l3attr.py [QSA]
-
-</Location>
-
-<Location "/request/wxc">
-AddHandler cgi-script .py
-Options +ExecCGI
-
-RewriteRule idot_trucks.txt idot_trucks.py
-</Location>
-
 <Location "/request">
 AddHandler cgi-script .py
 Options +ExecCGI
 RewriteRule maxcsv/(.*).txt$ maxcsv.py?q=$1
+
+RewriteRule grx/iadot_trucks.txt grx/iadot_trucks.py
+# Legacy link was removed 5 Jan 2015
+RewriteRule grx/idot_trucks.php grx/iadot_trucks.py
+
+# .php was legacy stuff, lets not break old paths
+RewriteRule grx/l3attr.(php|txt) grx/l3attr.py [QSA]
+
+RewriteRule wxc/idot_trucks.txt wxc/idot_trucks.py
+
 </Location>
 
 <Location "/roads">
