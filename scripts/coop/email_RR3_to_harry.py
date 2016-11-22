@@ -1,5 +1,6 @@
 """
-Run at Friday afternoon and email harry 
+Send Harry Hillaker a weekly email summarizing the past seven days worth of
+RR3 products.
 """
 import smtplib
 from email import encoders
@@ -12,11 +13,11 @@ AFOS = psycopg2.connect(database='afos', host='iemdb', user='nobody')
 acursor = AFOS.cursor()
 
 now = mx.DateTime.now()
-sts = now + mx.DateTime.RelativeDateTime(days=-7,hour=0)
+sts = now + mx.DateTime.RelativeDateTime(days=-7, hour=0)
 
 acursor.execute("""
-  SELECT data, source from products where 
-  pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD','RR3OAX','RR1FSD') 
+  SELECT data, source from products where
+  pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD','RR3OAX','RR1FSD')
   and entered > '%s' ORDER by entered ASC
 """ % (sts.strftime("%Y-%m-%d %H:%M"), ))
 
@@ -26,18 +27,18 @@ for wfo in WFOS:
     files[wfo] = open('/tmp/%sRR3.txt' % (wfo,), 'w')
 
 for row in acursor:
-    files[row[1]].write( row[0].replace("\001", "") )
+    files[row[1]].write(row[0].replace("\001", ""))
     files[row[1]].write("\n")
 
 for wfo in WFOS:
     files[wfo].close()
 
 msg = MIMEMultipart()
-msg['Subject'] = 'NWS RR3 Data for %s - %s' % (sts.strftime("%d %b %Y"), 
+msg['Subject'] = 'NWS RR3 Data for %s - %s' % (sts.strftime("%d %b %Y"),
                                                now.strftime("%d %b %Y"))
 msg['From'] = 'akrherz@iastate.edu'
 msg['To'] = 'Harry.Hillaker@iowaagriculture.gov'
-#msg['To'] = 'akrherz@localhost'
+# msg['To'] = 'akrherz@localhost'
 msg.preamble = 'RR3 Report'
 
 fn = "RR3-%s-%s.txt" % (sts.strftime("%Y%m%d"), now.strftime("%Y%m%d"))
