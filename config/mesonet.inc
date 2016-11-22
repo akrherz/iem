@@ -305,7 +305,7 @@ RewriteRule map/daily/([0-9]{8})_([a-z0-9_]+).png map.py?type=daily&date=$1&plot
 AddHandler cgi-script .py
 Options +ExecCGI
 
-RewriteRule radar radar.py
+RewriteRule json/radar$ radar.py
 RewriteRule tms.json tms.py [QSA]
 RewriteRule qpe/([0-9\.\-]+)/([0-9\.\-]+)/(json) qpe.py?lat=$2&lon=$1&format=$3
 RewriteRule raob/([0-9]{12})/([A-Z0-9]{3,4})$ raob.py?ts=$1&station=$2 [QSA]
