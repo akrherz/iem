@@ -2,7 +2,7 @@
 cd /mesonet/www/apps/nwnwebsite/scripts
 php drive_lsd_generation.php &
 
-cd /mesonet/www/apps/iemwebsite/scripts/sbw
+cd /opt/iem/scripts/sbw
 python raccoon_sbw_to_ppt.py &
 
 cd ../GIS

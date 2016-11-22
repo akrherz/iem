@@ -1,9 +1,0 @@
-# http://enable-cors.org/server_apache.html
-Header set Access-Control-Allow-Origin "*"
-
-AddHandler cgi-script .py
-Options +ExecCGI
-
-RewriteEngine On 
-RewriteRule ^sql/database/([a-z]+)$ sql.py?database=$1 [QSA]
-RewriteRule ^nwstext/([0-9A-Z\-]{31}).txt$ nwstext.py?p=$1 [QSA]

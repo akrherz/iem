@@ -6,11 +6,11 @@ NAME "weatherwarn"
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONtsET "/mesonet/www/apps/iemwebsite/data/gis/fonts.list"
+FONtsET "/opt/iem/data/gis/fonts.list"
 EXTENT -155.0 15.0 -30.0 70.0
 UNIts DD
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
@@ -35,7 +35,7 @@ WEB
   #LOG "/var/www/htdocs/tmp/w0.log"
   METADATA
    "wfs_title" "IEM Weather Warnings"
-   "ows_service_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/wwt.map&amp;"
+   "ows_service_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wfs/wwt.map&amp;"
    "wfs_srs" "EPSG:4326"
    "wfs_abstract" "Archived NWS Watch, Warning, Advisories"
    "ows_fees" "None"

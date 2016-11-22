@@ -131,11 +131,11 @@ out_ds.Destroy()
 
 z = zipfile.ZipFile("current_ww.zip", 'w', zipfile.ZIP_DEFLATED)
 z.write("current_ww.shp")
-shutil.copy('/mesonet/www/apps/iemwebsite/scripts/GIS/current_ww.shp.xml', 'current_ww.shp.xml')
+shutil.copy('/opt/iem/scripts/GIS/current_ww.shp.xml', 'current_ww.shp.xml')
 z.write("current_ww.shp.xml")
 z.write("current_ww.shx")
 z.write("current_ww.dbf")
-shutil.copy('/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj', 'current_ww.prj')
+shutil.copy('/opt/iem/data/gis/meta/4326.prj', 'current_ww.prj')
 z.write("current_ww.prj")
 z.close()
 

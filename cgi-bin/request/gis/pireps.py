@@ -109,7 +109,7 @@ def run(ctx):
     zf = zipfile.ZipFile(zio, mode='w',
                          compression=zipfile.ZIP_DEFLATED)
     zf.writestr(fn+'.prj',
-                open(('/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj'
+                open(('/opt/iem/data/gis/meta/4326.prj'
                       )).read())
     zf.writestr(fn+".shp", shp.getvalue())
     zf.writestr(fn+'.shx', shx.getvalue())

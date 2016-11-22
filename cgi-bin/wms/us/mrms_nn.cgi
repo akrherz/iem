@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MS_MAPFILE=/mesonet/www/apps/iemwebsite/data/wms/us/mrms_nn.map
+MS_MAPFILE=/opt/iem/data/wms/us/mrms_nn.map
 export MS_MAPFILE
 
-/mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv
+/opt/iem/cgi-bin/mapserv/mapserv

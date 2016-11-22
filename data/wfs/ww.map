@@ -10,7 +10,7 @@ FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -155.0 15.0 -30.0 70.0
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
@@ -35,7 +35,7 @@ WEB
   #LOG "/tmp/w0.log"
   METADATA
    "wfs_title" "IEM Weather Warnings"
-   "ows_service_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/ww.map&amp;"
+   "ows_service_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wfs/ww.map&amp;"
    "wfs_srs" "EPSG:4326"
    "wfs_abstract" "Archived NWS Watch, Warning, Advisories"
    "ows_fees" "None"

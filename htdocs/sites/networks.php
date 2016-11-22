@@ -99,12 +99,12 @@ if (strlen($network) > 0){
 			unset($shpFile);
 			dbase_close($dbfFile);
 			chdir("/var/webtmp/");
-			copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
+			copy("/opt/iem/data/gis/meta/4326.prj", $filePre.".prj");
 			popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
 		}
 		$table .= "Shapefile Generation Complete.<br>";
 		$table .= "Please download this <a href=\"/tmp/".$filePre.".zip\">zipfile</a>.";
-		chdir("/mesonet/www/apps/iemwebsite/htdocs/sites/");
+		chdir("/opt/iem/htdocs/sites/");
 }
 else if ($format == "awips") {
 	if (! $nohtml) $table .= "<pre>\n";

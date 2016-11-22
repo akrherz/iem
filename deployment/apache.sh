@@ -5,13 +5,13 @@
 APPS="/mesonet/www/apps"
 CONFD="/etc/httpd/conf.d/"
 
-cp -f $APPS/iemwebsite/deployment/apache_configs/*.conf $CONFD
+cp -f /opt/iem/deployment/apache_configs/*.conf $CONFD
 
 cp -f $APPS/idep/config/apache-vhost.conf $CONFD/idep.conf
 cp -f $APPS/weather.im/config/weather-im-vhost.conf $CONFD
-cp -f $APPS/iemwebsite/config/mesonet.inc $CONFD
-cp -f $APPS/iemwebsite/config/00iem.conf $CONFD
-cp -f $APPS/iemwebsite/config/00iem-ssl.conf $CONFD
+cp -f /opt/iem/config/mesonet.inc $CONFD
+cp -f /opt/iem/config/00iem.conf $CONFD
+cp -f /opt/iem/config/00iem-ssl.conf $CONFD
 cp -f $APPS/vendor/conf/vendor.conf $CONFD
 cp -f $APPS/weppwebsite/etc/apache_vhost.conf $CONFD/wepp.conf
 cp -f $APPS/cocorahs/config/apache-vhost.conf $CONFD/cocorahs.conf

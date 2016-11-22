@@ -1,6 +1,6 @@
 # Only edit on github!
 
-S=/mesonet/www/apps/iemwebsite/scripts
+S=/opt/iem/scripts
 
 0 0 * * * cd $S/webalizer; sh processlogs.sh
 

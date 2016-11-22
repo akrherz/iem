@@ -14,7 +14,7 @@ cd /mesonet/data/incoming/rwis
 wget -nd -m -q "ftp://rwis:${FTPPASS}@165.206.203.34/*.csv"
 /home/ldm/bin/pqinsert -i -p "plot ac $GTS rwis_traffic.txt raw/rwis/${GTS}traffic.txt txt" TrafficFile.csv 
 /home/ldm/bin/pqinsert -i -p "plot ac $GTS rwis_probe.txt raw/rwis/${GTS}probe.txt txt" DeepTempProbeFile.csv 
-cd /mesonet/www/apps/iemwebsite/scripts/ingestors/rwis
+cd /opt/iem/scripts/ingestors/rwis
 python mini_portable.py
 python process_traffic.py
 python process_soil.py

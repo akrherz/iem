@@ -91,7 +91,7 @@ def plotter(fdict):
     _, _ = STATIONS[location], SDATES[sdate]
     # we need to compute totals using two datasources
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
-    cdf = load("/mesonet/www/apps/iemwebsite/scripts/yieldfx/baseline",
+    cdf = load("/opt/iem/scripts/yieldfx/baseline",
                location, sdate)
 
     today = datetime.date.today()

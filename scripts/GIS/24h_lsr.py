@@ -85,7 +85,7 @@ z = zipfile.ZipFile("lsr_24hour.zip", 'w', zipfile.ZIP_DEFLATED)
 z.write("lsr_24hour.shp")
 z.write("lsr_24hour.shx")
 z.write("lsr_24hour.dbf")
-shutil.copy('/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj', 'lsr_24hour.prj')
+shutil.copy('/opt/iem/data/gis/meta/4326.prj', 'lsr_24hour.prj')
 z.write("lsr_24hour.prj")
 z.close()
 

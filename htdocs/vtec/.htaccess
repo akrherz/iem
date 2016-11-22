@@ -1,5 +1,0 @@
-RewriteEngine On
-RewriteRule ^([^\.]+)\.html index.php?vtec=$1 [L]
-# This can't be right....
-#RewriteRule ^#(.*)$ /vtec/#$1 [R=301,NE]
-RewriteRule f/(.*)$ f.php?vtec=$1 [L]

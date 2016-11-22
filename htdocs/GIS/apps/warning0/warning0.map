@@ -5,14 +5,14 @@ MAP
 NAME warning0
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/www/apps/iemwebsite/data/gis/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 #EXTENT -2223813 -1746393 2207341 1701506
 EXTENT -2110437.902319 -2251067.927455 2548326.285559 1239063.127472
 UNITS METERS
 #EXTENT -126 26 -66 50
 #UNITS DD
 #SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
 TRANSPARENT off

@@ -14,7 +14,7 @@ python:
 before_install:
   - sudo mkdir -p /mesonet/www/apps
   - sudo mkdir -p /mesonet/www/logs
-  - sudo ln -s `pwd` /mesonet/www/apps/iemwebsite
+  - sudo ln -s `pwd` /opt/iem
   - echo `pwd`
   - chmod 755 $HOME
   - sudo add-apt-repository ppa:ubuntugis/ppa -y

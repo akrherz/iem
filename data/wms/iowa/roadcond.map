@@ -7,7 +7,7 @@ EXTENT -97 40 -89 44
 UNITS DD
 IMAGECOLOR 140 144 90
 IMAGETYPE PNG24
-SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/stations.sym"
 
 
 #

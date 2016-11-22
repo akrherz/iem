@@ -4,7 +4,7 @@
 #echo -e "\n"
 #exit 0
 
-MS_MAPFILE=/mesonet/www/apps/iemwebsite/data/wms/us/wwa.map
+MS_MAPFILE=/opt/iem/data/wms/us/wwa.map
 export MS_MAPFILE
 
-/mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv
+/opt/iem/cgi-bin/mapserv/mapserv

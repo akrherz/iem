@@ -2,8 +2,8 @@ import os
 import sys
 
 tilecachepath, wsgi_file = os.path.split(__file__)
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/include/python/')
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/include/python/TileCache/')
+sys.path.insert(0, '/opt/iem/include/python/')
+sys.path.insert(0, '/opt/iem/include/python/TileCache/')
 
 from TileCache.Service import Service, wsgiHandler
 cfgfiles = (os.path.join(tilecachepath, "tilecache.cfg"))

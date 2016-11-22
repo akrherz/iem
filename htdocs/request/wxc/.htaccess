@@ -1,5 +1,0 @@
-AddHandler cgi-script .py
-Options +ExecCGI
-
-RewriteEngine On
-RewriteRule idot_trucks.txt idot_trucks.py

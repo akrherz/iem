@@ -26,7 +26,7 @@ LAYER
   TYPE RASTER
   STATUS ON
   NAME radar
-  DATA "/mesonet/www/apps/iemwebsite/htdocs/radmapserver/gisdata/radar.tif"
+  DATA "/opt/iem/htdocs/radmapserver/gisdata/radar.tif"
   PROJECTION
    "init=epsg:4326"
   END
@@ -38,7 +38,7 @@ LAYER
   TYPE POLYGON
   STATUS ON
   NAME states
-  DATA "/mesonet/www/apps/iemwebsite/htdocs/radmapserver/gisdata/states.shp"
+  DATA "/opt/iem/htdocs/radmapserver/gisdata/states.shp"
   PROJECTION
     "init=epsg:4326"
   END

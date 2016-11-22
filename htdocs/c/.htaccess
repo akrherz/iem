@@ -1,9 +1,0 @@
-#AddHandler python-program .py
-#PythonPath "sys.path + ['/mesonet/www/apps/iemwebsite/include/python/']"
-#PythonInterpPerDirectory On
-#PythonHandler TileCache.Service
-#PythonOption TileCacheConfig /mesonet/www/apps/iemwebsite/htdocs/c/tilecache.cfg
-  
-# http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-ExpiresActive On
-ExpiresDefault "access plus 14 days"

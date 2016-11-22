@@ -1,5 +1,0 @@
-AddHandler cgi-script .py
-Options +ExecCGI
-
-RewriteEngine On
-RewriteRule ^maxcsv/(.*).txt$ maxcsv.py?q=$1

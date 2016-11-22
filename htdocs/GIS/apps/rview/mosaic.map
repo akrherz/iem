@@ -11,7 +11,7 @@ EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
 UNITS METERS
 SHAPEPATH "/home/ldm/data/gis/"
-SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
 TRANSPARENT OFF

@@ -100,7 +100,7 @@ source.Destroy()
 out_ds.Destroy()
 
 # Create zip file, send it back to the clients
-shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj",
+shutil.copyfile("/opt/iem/data/gis/meta/4326.prj",
                 fp+".prj")
 z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
 z.write(fp+".shp")

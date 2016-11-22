@@ -84,7 +84,7 @@ def plotter(fdict):
     sdate = datetime.datetime.strptime(fdict.get('sdate', 'jan1'), '%b%d')
     _, _ = STATIONS[location], PLOTS[ptype]
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
-    cdf = load("/mesonet/www/apps/iemwebsite/scripts/yieldfx/baseline",
+    cdf = load("/opt/iem/scripts/yieldfx/baseline",
                location, sdate)
 
     today = datetime.date.today()

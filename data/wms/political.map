@@ -23,7 +23,7 @@ WEB
   #LOG "/tmp/political.log"
   METADATA
    "wms_title" "IEM Political Boundaries Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/political.map&SERVICE=WMS&"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/political.map&SERVICE=WMS&"
    "wms_srs" "EPSG:900913 EPSG:3857"
    "wms_abstract" "IEM generated political boundaries."
    "wms_keywords" "states,counties"

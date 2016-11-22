@@ -1,6 +1,0 @@
-AddHandler cgi-script .py
-Options +ExecCGI
-
-RewriteEngine On
-RewriteRule ^vote/(good|bad|abstain).json$ vote.py?vote=$1
-RewriteRule ^vote.json$ vote.py
