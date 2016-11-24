@@ -348,16 +348,13 @@ Options +ExecCGI
 RewriteRule days_since_([A-Z][A-Z])_([A-Z]).png /plotting/auto/plot/92/phenomena:$1::significance:$2::dpi:100.png
 </Location>
 
-<Location "/onsite/features/tags">
-RewriteRule ([^\.]+)\.html index.php?tag=$1 [L]
-</Location>
-
-<Location "/onsite/features">
+<Location "/onsite">
 AddHandler cgi-script .py
 Options +ExecCGI
 
-RewriteRule vote/(good|bad|abstain).json$ vote.py?vote=$1
-RewriteRule vote.json$ vote.py
+  RewriteRule onsite/features/tags/([^\.]+)\.html features/tags/index.php?tag=$1 [L]
+RewriteRule vote/(good|bad|abstain).json$ features/vote.py?vote=$1
+RewriteRule vote.json$ features/vote.py
 </Location>
 
 <Location "/other">
