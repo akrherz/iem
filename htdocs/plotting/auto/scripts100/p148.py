@@ -10,6 +10,7 @@ PDICT = OrderedDict([
         ('labor', 'Labor Day'),
         ('memorial', 'Memorial Day'),
         ('exact', 'Same Date each Year'),
+        ('thanksgiving', 'Thanksgiving'),
         ])
 PDICT2 = OrderedDict([
         ('high', 'High Temperature [F]'),
@@ -40,6 +41,17 @@ def get_description():
              label='Which variable to plot?', options=PDICT2)
     ]
     return d
+
+
+def thanksgiving():
+    days = []
+    # monday is 0
+    offsets = [3, 2, 1, 0, 6, 5, 4]
+    for year in range(1893, datetime.date.today().year + 1):
+        nov1 = datetime.datetime(year, 11, 1)
+        r1 = nov1 + datetime.timedelta(days=offsets[nov1.weekday()])
+        days.append(r1 + datetime.timedelta(days=21))
+    return days
 
 
 def labor_days():
@@ -89,6 +101,8 @@ def plotter(fdict):
     else:
         if date == 'memorial':
             days = memorial_days()
+        elif date == 'thanksgiving':
+            days = thanksgiving()
         else:
             days = labor_days()
 
