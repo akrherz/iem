@@ -278,6 +278,8 @@ data = {'plots': [
          'label': "Largest Rise/Drop in Temperature over X Hours"},
         {'id': "18", 'label': "Long term temperature time series"},
         {'id': "45", 'label': "Monthly Frequency of Overcast Conditions"},
+        {'id': "170",
+         'label': "Monthly Frequency of Present Weather Code in METAR Report"},
         {'id': "67",
          'label': "Monthly Frequency of Wind Speeds by Air Temperature"},
         {'id': "37",
