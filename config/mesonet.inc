@@ -109,24 +109,7 @@
 	Redirect permanent /data/gis/images/unproj /data/gis/images/4326
   	Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
   </Directory>
-  
-
-  Alias "/onsite/features/2002" "/mesonet/share/features/2002"
-  Alias "/onsite/features/2003" "/mesonet/share/features/2003"
-  Alias "/onsite/features/2004" "/mesonet/share/features/2004"
-  Alias "/onsite/features/2005" "/mesonet/share/features/2005"
-  Alias "/onsite/features/2006" "/mesonet/share/features/2006"
-  Alias "/onsite/features/2007" "/mesonet/share/features/2007"
-  Alias "/onsite/features/2008" "/mesonet/share/features/2008"
-  Alias "/onsite/features/2009" "/mesonet/share/features/2009"
-  Alias "/onsite/features/2010" "/mesonet/share/features/2010"
-  Alias "/onsite/features/2011" "/mesonet/share/features/2011"
-  Alias "/onsite/features/2012" "/mesonet/share/features/2012"
-  Alias "/onsite/features/2013" "/mesonet/share/features/2013"
-  Alias "/onsite/features/2014" "/mesonet/share/features/2014"
-  Alias "/onsite/features/2015" "/mesonet/share/features/2015"
-  Alias "/onsite/features/2016" "/mesonet/share/features/2016"
-  
+    
   Alias "/onsite/lapses" "/mesonet/share/lapses"
   Alias "/onsite/windrose" "/mesonet/share/windrose"
   Alias "/onsite/iemre" "/mesonet/share/iemre"
@@ -145,13 +128,6 @@
 
   Alias "/pickup"    "/mesonet/share/pickup"  
   <Directory "/mesonet/share/pickup">
-    AllowOverride All
-    Options FollowSymLinks Indexes MultiViews
-    Order allow,deny
-    Allow from all
-  </Directory>
-
-  <Directory "/mesonet/share/features">
     AllowOverride All
     Options FollowSymLinks Indexes MultiViews
     Order allow,deny
@@ -308,6 +284,7 @@
     RewriteRule tags/([^\.]+)\.html tags/index.php?tag=$1 [L]
     RewriteRule vote/(good|bad|abstain).json$ vote.py?vote=$1
     RewriteRule vote.json$ vote.py
+    RewriteRule ^[0-9]{4}/[0-9]{2}/.*$ content.py [PT]
   </Directory>
 
   <Directory "/opt/iem/htdocs/other">

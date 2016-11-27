@@ -178,7 +178,7 @@ EOF;
 		
 		<h4 style="display: inline;">{$row["title"]}</h4>
 		
-			<br /><small>Posted: {$row["webdate"]}</small>
+			<br /><small>Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
 			{$tagtext}
 			<br />{$row["story"]}
 	
