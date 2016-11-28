@@ -1,0 +1,87 @@
+<?php 
+include("../../../config/settings.inc.php");
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+$t = new MyView();
+$t->title = "IEM NE Ames Time Series";
+$t->thispage = "networks-other";
+
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$myTime = mktime(0,0,0,$month,$day,$year);
+
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$dataurl = "/archive/data/$dirRef/text/ot/ot0006.dat";
+
+$ys = yearSelect(2003, $year);
+$ms = monthSelect($month);
+$ds = daySelect($day);
+
+$titleDate = strftime("%b %d, %Y", $myTime);
+
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
+
+$thisMax = -99;
+$thisMin = 99;
+$maxGust = 0;
+while (list ($line_num, $line) = each ($fcontents)) {
+
+	$parts = split (" ", $line);
+	$tm = $parts[6];
+	$tn = $parts[7];
+	if ($tm > $thisMax){ $thisMax = $tm; }
+	if ($tn < $thisMin){ $thisMin = $tn; }
+	$gust = $parts[11];
+	$gust_time = $parts[12];
+	if ($gust > $maxGust){ $maxGust = $gust; $gustTime = $gust_time;}
+} // End of while
+
+$t->content = <<<EOF
+<ul class="breadcrumb">
+ <li><a href="/other/">Other Stations</a></li>
+ <li class="active">Mesonet NE Ames</li>
+</ul>
+
+<p>You can plot 1 minute data for this location.  Note that 
+the archive <br> begins 24 Oct 2004.</p>
+
+<table>
+<tr class="even"><td>
+
+
+  <form method="GET" action="main.phtml">
+  {$ys} {$ms} {$ds}
+
+  <input type="submit" value="Make Plot"></form>
+
+</td></tr><tr><td>
+
+<BR>
+<a href="{$dataurl}">View raw data file</a><br />
+<div><font>Today's Maximum Temperature: {$thisMax} F<br>
+Today's Minimum Temperature: {$thisMin} F<br></font></div> 
+
+<div><font>Today's Maximum Wind Gust: {$maxGust} mph<br>
+Time of Maximum Wind Gust: {$gustTime}<br><br></font></div>
+
+<img src="1min.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<BR>
+<img src="1min_inside.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<BR>
+<img src="rh.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<BR>
+<img src="baro.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<BR>
+<img src="1min_V.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<BR>
+<img src="dailyrain.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<br />
+<img src="temp_rh.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<BR>
+</td></tr></table>
+</div>
+EOF;
+$t->render('single.phtml');
+?>
