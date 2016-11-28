@@ -4,6 +4,15 @@ from pyiem.network import Table as NetworkTable
 import datetime
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
+from collections import OrderedDict
+
+MDICT = OrderedDict([
+    ('tmpf', 'Air Temperature'),
+    ('dwpf', 'Dew Point Temperature'),
+    ('alti', 'Pressure Altimeter'),
+    ('mslp', 'Sea Level Pressure')])
+UNITS = {'tmpf': '°F', 'dwpf': '°F', 'alti': 'inch', 'mslp': 'mb'}
 
 
 def get_description():
@@ -13,109 +22,110 @@ def get_description():
     d['data'] = True
     d['highcharts'] = True
     d['description'] = """This chart displays a simple time series of
-    observed air temperatures for a location of your choice.  For sites in the
+    an observed variable for a location of your choice.  For sites in the
     US, the daily high and low temperature climatology is presented as a
-    filled bar for each day plotted."""
+    filled bar for each day plotted when Air Temperature is selected."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:'),
         dict(type='date', name='sdate', default=ts.strftime("%Y/%m/%d"),
              label='Start Date of Plot:',
              min="1951/01/01"),  # Comes back to python as yyyy-mm-dd
-        dict(type='text', name='days', default='365',
+        dict(type='int', name='days', default='365',
              label='Days to Plot'),
+        dict(type='select', name='var', options=MDICT, default='tmpf',
+             label='Variable to Plot'),
     ]
     return d
 
 
 def highcharts(fdict):
     """ Highcharts output """
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    nt = NetworkTable(network)
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2000-01-01'),
-                                       '%Y-%m-%d')
-    days = int(fdict.get('days', 365))
-    edate = sdate + datetime.timedelta(days=days)
-    today = datetime.datetime.today()
-    if edate > today:
-        edate = today
-        days = (edate - sdate).days
-
-    climo, df = get_data(fdict)
+    ctx = get_data(fdict)
     ranges = []
-    now = sdate
-    while now <= edate:
+    now = ctx['sdate']
+    while ctx['climo'] is not None and now <= ctx['edate']:
         ranges.append([int(now.strftime("%s")) * 1000.,
-                       climo[now.strftime("%m%d")]['low'],
-                       climo[now.strftime("%m%d")]['high']])
+                       ctx['climo'][now.strftime("%m%d")]['low'],
+                       ctx['climo'][now.strftime("%m%d")]['high']])
         now += datetime.timedelta(days=1)
 
     j = dict()
-    j['title'] = dict(text='[%s] %s Time Series' % (station,
-                                                    nt.sts[station]['name']))
+    j['title'] = dict(text=('[%s] %s Time Series'
+                            ) % (ctx['station'],
+                                 ctx['nt'].sts[ctx['station']]['name']))
     j['xAxis'] = dict(type='datetime')
-    j['yAxis'] = dict(title=dict(text='Temperature °F'))
+    j['yAxis'] = dict(title=dict(text='%s %s' % (MDICT[ctx['var']],
+                                                 UNITS[ctx['var']])))
     j['tooltip'] = {'crosshairs': True,
                     'shared': True,
-                    'valueSuffix': '°F'}
+                    'valueSuffix': " %s" % (UNITS[ctx['var']],)}
     j['legend'] = dict()
     j['exporting'] = {'enabled': True}
     j['chart'] = {'zoomType': 'x'}
     j['plotOptions'] = {'line': {'turboThreshold': 0}}
     j['series'] = [
-        {'name': 'Temperature',
-         'data': zip(df.ticks.values.tolist(), df.tmpf.values.tolist()),
+        {'name': MDICT[ctx['var']],
+         'data': zip(ctx['df'].ticks.values.tolist(),
+                     ctx['df'].datum.values.tolist()),
          'zIndex': 1,
          'color': '#FF0000',
          'lineWidth': 2,
          'marker': {'enabled': False},
-         'type': 'line'},
-        {'name': 'Range',
-         'data': ranges,
-         'type': 'arearange',
-         'lineWidth': 0,
-         'linkedTo': ':previous',
-         'color': '#ADD8E6',
-         'fillOpacity': 0.3,
-         'zIndex': 0
-         }]
+         'type': 'line'}]
+    if len(ranges) > 0:
+        j['series'].append({
+            'name': 'Range',
+            'data': ranges,
+            'type': 'arearange',
+            'lineWidth': 0,
+            'linkedTo': ':previous',
+            'color': '#ADD8E6',
+            'fillOpacity': 0.3,
+            'zIndex': 0
+         })
 
     return j
 
 
 def get_data(fdict):
+    ctx = get_autoplot_context(fdict, get_description())
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    nt = NetworkTable(network)
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2000-01-01'),
-                                       '%Y-%m-%d')
-    days = int(fdict.get('days', 365))
-    edate = sdate + datetime.timedelta(days=days)
-    today = datetime.datetime.today()
-    if edate > today:
-        edate = today
-        days = (edate - sdate).days
+    ctx['station'] = ctx['zstation']
+    ctx['nt'] = NetworkTable(ctx['network'])
+    sdate = ctx['sdate']
+    days = ctx['days']
+    ctx['edate'] = sdate + datetime.timedelta(days=days)
+    today = datetime.date.today()
+    if ctx['edate'] > today:
+        ctx['edate'] = today
+        ctx['days'] = (ctx['edate'] - sdate).days
 
-    climo = {}
-    ccursor.execute("""
-    SELECT valid, high, low from ncdc_climate81 where station = %s
-    """, (nt.sts[station]['ncdc81'],))
-    for row in ccursor:
-        climo[row[0].strftime("%m%d")] = dict(high=row[1], low=row[2])
+    ctx['climo'] = None
+    if ctx['var'] == 'tmpf':
+        ctx['climo'] = {}
+        ccursor.execute("""
+        SELECT valid, high, low from ncdc_climate81 where station = %s
+        """, (ctx['nt'].sts[ctx['station']]['ncdc81'],))
+        for row in ccursor:
+            ctx['climo'][row[0].strftime("%m%d")] = dict(high=row[1],
+                                                         low=row[2])
 
-    df = read_sql("""
+    col = "tmpf::int" if ctx['var'] == 'tmpf' else ctx['var']
+    col = "dwpf::int" if ctx['var'] == 'dwpf' else col
+    ctx['df'] = read_sql("""
      SELECT valid,
      extract(epoch from valid) * 1000 as ticks,
-     tmpf::int from alldata WHERE station = %s
-     and valid > %s and valid < %s and tmpf is not null ORDER by valid ASC
-    """, ASOS, params=(station, sdate, sdate + datetime.timedelta(days=days)),
+     """ + col + """ as datum from alldata WHERE station = %s
+     and valid > %s and valid < %s and """ + ctx['var'] + """ is not null
+     and report_type = 2 ORDER by valid ASC
+    """, ASOS, params=(ctx['station'], sdate,
+                       sdate + datetime.timedelta(days=days)),
                   index_col='valid')
 
-    return climo, df
+    return ctx
 
 
 def plotter(fdict):
@@ -124,32 +134,21 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    nt = NetworkTable(network)
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2000-01-01'),
-                                       '%Y-%m-%d')
-    days = int(fdict.get('days', 365))
-    edate = sdate + datetime.timedelta(days=days)
-    today = datetime.datetime.today()
-    if edate > today:
-        edate = today
-        days = (edate - sdate).days
+    ctx = get_data(fdict)
 
-    climo, df = get_data(fdict)
     (fig, ax) = plt.subplots(1, 1)
 
     xticks = []
     xticklabels = []
-    now = sdate
+    now = ctx['sdate']
     cdates = []
     chighs = []
     clows = []
-    while now <= edate:
+    while ctx['climo'] is not None and now <= ctx['edate']:
         cdates.append(now)
-        chighs.append(climo[now.strftime("%m%d")]['high'])
-        clows.append(climo[now.strftime("%m%d")]['low'])
-        if now.day == 1 or (now.day % 12 == 0 and days < 180):
+        chighs.append(ctx['climo'][now.strftime("%m%d")]['high'])
+        clows.append(ctx['climo'][now.strftime("%m%d")]['low'])
+        if now.day == 1 or (now.day % 12 == 0 and ctx['days'] < 180):
             xticks.append(now)
             fmt = "%-d"
             if now.day == 1:
@@ -157,24 +156,34 @@ def plotter(fdict):
             xticklabels.append(now.strftime(fmt))
 
         now += datetime.timedelta(days=1)
+    while now <= ctx['edate']:
+        if now.day == 1 or (now.day % 12 == 0 and ctx['days'] < 180):
+            xticks.append(now)
+            fmt = "%-d"
+            if now.day == 1:
+                fmt = "%-d\n%b"
+            xticklabels.append(now.strftime(fmt))
+        now += datetime.timedelta(days=1)
 
-    chighs = np.array(chighs)
-    clows = np.array(clows)
-
-    ax.bar(cdates, chighs - clows, bottom=clows, fc='lightblue',
-           ec='lightblue', label="Daily Climatology")
-    ax.plot(df.index.values, df['tmpf'], color='r', label='Hourly Obs')
-    ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
+    if len(chighs) > 0:
+        chighs = np.array(chighs)
+        clows = np.array(clows)
+        ax.bar(cdates, chighs - clows, bottom=clows, fc='lightblue',
+               ec='lightblue', label="Daily Climatology")
+    ax.plot(ctx['df'].index.values, ctx['df']['datum'], color='r',
+            label='Hourly Obs')
+    ax.set_ylabel("%s %s" % (MDICT[ctx['var']], UNITS[ctx['var']]))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
-    ax.set_xlim(sdate, edate)
-    ax.set_ylim(top=df['tmpf'].max() + 15.)
+    ax.set_xlim(ctx['sdate'], ctx['edate'])
+    ax.set_ylim(top=ctx['df'].datum.max() + 15.)
     ax.legend(loc=2, ncol=2)
     ax.axhline(32, linestyle='-.')
     ax.grid(True)
-    ax.set_title(("%s [%s]\nAir Temperature Timeseries %s - %s"
-                  ) % (nt.sts[station]['name'], station,
-                       sdate.strftime("%d %b %Y"),
-                       edate.strftime("%d %b %Y")))
+    ax.set_title(("%s [%s]\n%s Timeseries %s - %s"
+                  ) % (ctx['nt'].sts[ctx['station']]['name'], ctx['station'],
+                       MDICT[ctx['var']],
+                       ctx['sdate'].strftime("%d %b %Y"),
+                       ctx['edate'].strftime("%d %b %Y")))
 
-    return fig, df
+    return fig, ctx['df']

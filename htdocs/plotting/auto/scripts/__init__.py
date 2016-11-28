@@ -276,7 +276,7 @@ data = {'plots': [
          'label': "Hourly temp distributions on days exceeding temperature"},
         {'id': "169",
          'label': "Largest Rise/Drop in Temperature over X Hours"},
-        {'id': "18", 'label': "Long term temperature time series"},
+        {'id': "18", 'label': "Long term observation time series"},
         {'id': "45", 'label': "Monthly Frequency of Overcast Conditions"},
         {'id': "170",
          'label': "Monthly Frequency of Present Weather Code in METAR Report"},
