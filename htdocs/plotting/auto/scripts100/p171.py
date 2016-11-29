@@ -59,7 +59,6 @@ def plotter(fdict):
         SELECT extract(year from i) as yr, extract(month from i) as mo,
         count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
       """, pgconn, params=(phenomena, significance), index_col=None)
-
     if len(df.index) == 0:
         return("Sorry, no data found!")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
@@ -73,10 +72,10 @@ def plotter(fdict):
                       va='center', ha='center', color='white')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                      foreground="k")])
-
     cmap = plt.get_cmap('jet')
     cmap.set_under('white')
-    bounds = np.linspace(1, df['count'].max(), 10, dtype='i')
+    maxval = max([df['count'].max(), 11])
+    bounds = np.linspace(1, maxval, 10, dtype='i')
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
     res = ax.imshow(data, extent=[0.5, 12.5, maxyear + 0.5, minyear - 0.5],
                     interpolation='nearest', aspect='auto', norm=norm)
@@ -89,3 +88,6 @@ def plotter(fdict):
                        vtec._sigDict[significance], phenomena, significance))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict(wfo='DMX', network='WFO', phenomena='FG', significance='Y'))
