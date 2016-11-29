@@ -7,7 +7,7 @@ CONFD="/etc/httpd/conf.d/"
 
 cp -f /opt/iem/deployment/apache_configs/*.conf $CONFD
 
-cp -f $APPS/idep/config/apache-vhost.conf $CONFD/idep.conf
+cp -f /opt/dep/config/apache-vhost.conf $CONFD/idep.conf
 cp -f $APPS/weather.im/config/weather-im-vhost.conf $CONFD
 cp -f /opt/iem/config/mesonet.inc $CONFD
 cp -f /opt/iem/config/00iem.conf $CONFD
