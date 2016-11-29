@@ -315,6 +315,9 @@ data = {'plots': [
          'label': "Number of Distinct Phenomena/Significance VTEC per Year"},
         {'id': "73",
          'label': "Number of Watch/Warning/Advisories Issued per Year"},
+        {'id': "171",
+         'label': ("Number of Watch/Warning/Advisories Issued "
+                   "per Year per Month")},
         {'id': "70",
          'label': "Period between First and Last VTEC Product Each Year"},
         {'id': "166",
