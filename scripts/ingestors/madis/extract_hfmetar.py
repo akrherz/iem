@@ -182,9 +182,13 @@ def process(ncfn):
         mtr += "RMK "
         if (data['precipAccumQCR'][i] == 0 and
                 data['precipAccum'][i] is not np.ma.masked):
-            if data['precipAccum'][i] > 0:
+            if data['precipAccum'][i] >= 0.01:
                 iem.data['phour'] = round(data['precipAccum'][i], 2)
                 mtr += "P%04i " % (iem.data['phour'] * 100.,)
+            elif data['precipAccum'][i] < 0.01 and data['precipAccum'][i] > 0:
+                # Trace
+                mtr += "P0000 "
+                iem.data['phour'] = 0.0001
 
         if tgroup != "T":
             mtr += "%s " % (tgroup, )
@@ -212,14 +216,19 @@ def process(ncfn):
 
 
 def find_fn(argv):
-    utcnow = datetime.datetime.utcnow()
-    start = 0 if len(argv) == 1 else int(argv[1])
-    for i in range(start, 5):
-        ts = utcnow - datetime.timedelta(hours=i)
-        fn = ts.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
-        if os.path.isfile(fn):
-            return fn
-    sys.exit()
+    if len(argv) == 5:
+        utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]),
+                                   int(argv[4]))
+        return utcnow.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
+    else:
+        utcnow = datetime.datetime.utcnow()
+        start = 0 if len(argv) == 1 else int(argv[1])
+        for i in range(start, 5):
+            ts = utcnow - datetime.timedelta(hours=i)
+            fn = ts.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
+            if os.path.isfile(fn):
+                return fn
+        sys.exit()
 
 
 def main(argv):
