@@ -182,6 +182,8 @@ if ($mode == "monthly") {
   if ($row["pday"] >= 0){
   	if ($row["pday"] < 0.01 && $row["pday"] > 0){
   		$str .= "<br>Rain: Trace ";
+  	} elseif ($row["pday"] == null) {
+  		$str .= "<br />Rain: ";
   	} else {
   		$str .= "<br>Rain: ". sprintf("%.2f", $row["pday"]);
   	}
