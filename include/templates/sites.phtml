@@ -10,11 +10,12 @@ $(document).ready(function(){
 });
 </script>
 EOF;
-include 'header.phtml'; ?>
-<?php include 'navbar.phtml'; ?>
-<div class="container">
-<?php 
+include 'header.phtml'; 
+include 'navbar.phtml';
+echo "<div class=\"container\">";
+
 include 'sitebar.phtml';
+
 if (array_key_exists('north', $this->vars)){
 	echo "<div class=\"row\"><div class=\"col-md-12\">\n";
 	echo $this->vars['north'];
@@ -38,6 +39,6 @@ if (array_key_exists('south', $this->vars)){
 	echo $this->vars['south'];
 	echo "</div></div>\n";
 }
+echo "</div><!--/.container-->";
+include 'footer.phtml';
 ?>
-</div><!--/.container-->
-<?php include 'footer.phtml'; ?>

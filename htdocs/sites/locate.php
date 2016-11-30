@@ -67,7 +67,8 @@ you may find useful.</p>
 <td>{$n2select}</td>
 <td><input type="submit" value="Select Station"></td>
 </tr></table>
-<br />Or select site from this map by clicking on the black dot....
+<br />Or select site from this map by clicking on the yellow dot and then clicking
+		the 'Select Station' button above.
 <div id="map" style="width:100%; height: 400px;"></div>
 </form>
 

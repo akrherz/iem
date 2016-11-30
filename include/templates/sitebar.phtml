@@ -2,9 +2,9 @@
 global $metadata;
 global $station;
 global $network;
-include_once(dirname(__FILE__)."/../imagemaps.php");
+include_once dirname(__FILE__)."/../imagemaps.php";
 ?>
-<div class="hidden-print well">
+<div class="hidden-print">
 <form method="GET" name="automatic">
 <?php 
 if (isset($savevars)){
@@ -34,28 +34,38 @@ if (isset($_REQUEST["day"])){
 </ol>
 </form>
 
-<ul class="nav nav-tabs">
+<p>
 <?php
 $o = Array(
   "base" => Array("name" => "Information", "uri" => "site.php?",
-  		"metaok" => TRUE),
-  "current" => Array("name" => "Last Ob", "uri" => "current.php?"),
-  "pics" => Array("name" => "Photographs", "uri" => "pics.php?"),
-  "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?"),
-  "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?"),
+  		"metaok" => TRUE, "icon" => "info-sign"),
+  "current" => Array("name" => "Last Ob", "uri" => "current.php?",
+  		"icon" => "dashboard"),
+  "pics" => Array("name" => "Photographs", "uri" => "pics.php?",
+  		"icon" => "camera"),
+  "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
+  		"icon" => "calendar"),
+  "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
+  		"icon" => "stats"),
   "tables" => Array("name" => "Network Table", "uri" => "networks.php?",
-  		"metaok" => TRUE),
+  		"metaok" => TRUE, "icon" => "menu-hamburger"),
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?",
-  		"metaok" => TRUE),
-  "7dayhilo" => Array("name" => "7 Day High/Low Plot", "uri" => "plot.php?prod=0&amp;"),
-  "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&amp;"),
-  "monthrain" => Array("name" => "Month Rainfall Plot", "uri" => "plot.php?prod=2&amp;"),
-  "obhistory" => Array("name" => "Observation History", "uri" => "obhistory.php?",
+  		"metaok" => TRUE, "icon" => "resize-full"),
+  "7dayhilo" => Array("name" => "7 Day High/Low Plot",
+  		"uri" => "plot.php?prod=0&amp;", "icon" => "stats"),
+  "monthhilo" => Array("name" => "Month High/Low Plot",
+  		"uri" => "plot.php?prod=1&amp;", "icon" => "stats"),
+  "monthrain" => Array("name" => "Month Rainfall Plot",
+  		"uri" => "plot.php?prod=2&amp;", "icon" => "stats"),
+  "obhistory" => Array("name" => "Observation History",
+  		"uri" => "obhistory.php?", "icon" => "time",
 		"azos" => True, "rwis" => True),
-  "windrose" => Array("name" => "Wind Roses", "uri" => "windrose.phtml?"),
+  "windrose" => Array("name" => "Wind Roses",
+  		"uri" => "windrose.phtml?", "icon" => "asterisk"),
   "custom_windrose" => Array("name" => "Custom Wind Roses",
-  		"uri" => "dyn_windrose.phtml?"),
-  "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?"),
+  		"uri" => "dyn_windrose.phtml?", "icon" => "asterisk"),
+  "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?",
+  		"icon" => "calendar"),
 );
 
 while (list($key,$val) = each($o))
@@ -73,21 +83,22 @@ while (list($key,$val) = each($o))
 		continue;
 	}
   	$uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
-  	echo "<li role=\"presentation\"";
-  	if ($this->sites_current == $key) echo " class=\"active\"";
-  	echo sprintf("><a href=\"%s\">%s</a></li>", $uri, $val["name"]);
+  	$active = ($this->sites_current == $key) ? " active": "";
+  	echo sprintf("<a href=\"%s\" class=\"btn btn-default%s\">".
+  			"<span class=\"glyphicon glyphicon-%s\"></span> %s</a>",
+  			$uri, $active, $val["icon"], $val["name"]);
 }
 
 if (preg_match('/ASOS|AWOS/', $network) > 0){
 	$uri = sprintf("/request/download.phtml?network=%s", $network);
-	echo sprintf("<li role=\"presentation\"><a href=\"%s\">Download</a></li>", 
+	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-download\"></span> Download</a>", 
 			$uri);
 }elseif (preg_match('/DCP/', $network) > 0){
 	$uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
-	echo sprintf("<li role=\"presentation\"><a href=\"%s\">Download</a></li>", 
+	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-download\"></span> Download</a>", 
 			$uri);
 	
 }
 ?>
-</ul>
+</p>
 </div>

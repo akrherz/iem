@@ -20,11 +20,13 @@ if (isset($_GET["lat"]) &&
 	$newlat = floatval($_GET["lat"]);
 	$newlon = floatval($_GET["lon"]);
 	$email = isset($_GET["email"]) ? $_GET["email"]: 'n/a';
+	$name = isset($_GET["name"]) ? $_GET["name"]: "n/a";
 	$msg = <<<EOF
 IEM Sites Move Request
 ======================
 > REMOTE_ADDR: {$_SERVER["REMOTE_ADDR"]}
 > ID:          {$station}
+> NAME:        {$name}
 > NETWORK:     {$network}
 > LON:         {$newlon}
 > LAT:         {$newlat}
@@ -66,17 +68,23 @@ $t->content = <<<EOF
 <tr><th>Time Zone:</th><td>{$cities[$station]["tzname"]}</td></tr>
 </table>
 
+<a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary"><span class="glyphicon glyphicon-menu-hamburger"></span> View {$network} Network Table</a>
+
 </div>
 <div class="col-md-8">
 
   <div id="mymap" style="height: 400px; width: 100%;"></div>
- <div><strong>Location Wrong?:</strong> Current Lat:{$lat} Lon:{$lon} <br />
+ <div>
+ <strong>Location Feedback:</strong> Do you believe the shown location to be
+ incorrect?  If so, please consider moving the marker on the map to the proper
+ location and submitting this form for review.
 	<form name="updatecoords" method="GET">
 	<input type="hidden" value="{$network}" name="network">
 	<input type="hidden" value="{$station}" name="station">
 	New Latitude: <input id="newlat" type="text" size="10" name="lat" placeholder="move marker">
 	New Longitude: <input id="newlon" type="text" size="10" name="lon" placeholder="move marker">
 	<br />Enter Your Email Address [1]: <input type="text" size="40" name="email" placeholder="optional">
+	<br />Better Location Name?: <input type="text" name="name" value="{$cities[$station]["name"]}" />
 	<br />[1] Your email address will not be shared nor will you be added to any
 	lists. The IEM developer will simply email you back after consideration of
 	this request.
