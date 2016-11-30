@@ -70,7 +70,7 @@ def main(argv):
     else:
         # We run for the last hour
         ts = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-        ts = ts.replace(minutes=0, seconds=0, microseconds=0,
+        ts = ts.replace(minute=0, second=0, microsecond=0,
                         tzinfo=pytz.utc)
         realtime(ts)
 
