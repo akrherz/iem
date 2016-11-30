@@ -2,13 +2,16 @@
 import netCDF4
 import psycopg2
 import sys
+import datetime
 import numpy as np
-COOP = psycopg2.connect(database='coop', host='iemdb')
+from pandas.io.sql import read_sql
+COOP = psycopg2.connect(database='coop', host='localhost', port=5555,
+                        user='mesonet')
 ccursor = COOP.cursor()
 
 fn = sys.argv[1]
+station = sys.argv[2]
 nc = netCDF4.Dataset(fn)
-out = open('%s.csv' % (fn, ), 'w')
 
 byear = nc.variables['byear'][:]
 maxt = nc.variables['maxt'][:]
@@ -17,43 +20,55 @@ pcpn = nc.variables['pcpn'][:]
 snow = nc.variables['snow'][:]
 snwg = nc.variables['snwg'][:]
 
+current = read_sql("""SELECT day, high, low, precip, snow, snowd from
+    alldata_ia WHERE station = %s ORDER by day ASC
+    """, COOP, params=(station,), index_col='day')
+
 
 def convert(val, precision):
     if val < 0:
-        return 'T'
+        return 0.0001
     if np.ma.is_masked(val) or np.isnan(val):
-        return 'M'
+        return None
     return round(val, precision)
 
+added = 0
 for yr in range(byear, 2016):
     for mo in range(12):
         for dy in range(31):
+            try:
+                date = datetime.date(yr, mo + 1, dy + 1)
+            except:
+                continue
             high = maxt[yr-byear, mo, dy]
             if (np.ma.is_masked(high) or np.isnan(high) or
                     high < -100 or high > 150):
-                high = 'M'
+                high = None
+            else:
+                high = int(high)
 
             low = mint[yr-byear, mo, dy]
             if (np.ma.is_masked(low) or np.isnan(low) or
                     low < -100 or low > 150):
-                low = 'M'
+                low = None
+            else:
+                low = int(low)
 
             precip = convert(pcpn[yr-byear, mo, dy], 2)
             snowfall = convert(snow[yr-byear, mo, dy], 1)
             snowd = convert(snwg[yr-byear, mo, dy], 1)
+            if all([a is None for a in [high, low, precip, snowfall, snowd]]):
+                    continue
+            if date not in current.index.values:
+                sday = "%02i%02i" % (date.month, date.day)
+                added += 1
+                ccursor.execute("""INSERT into alldata_ia(station, day, high,
+                low, precip, snow, sday, year, month, snowd) VALUES (%s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (station, date, high, low, precip, snowfall,
+                      sday, int(date.year), int(date.month), snowd))
 
-            out.write(",".join([str(s) for s in [yr, mo+1, dy+1, high, low,
-                                                 precip,
-                                                 snowfall, snowd]]) + "\n")
-
-            # sql = """INSERT into alldata_tmp(station, day, high, low, precip,
-            # snow, sday, year, month, snowd) VALUES ('IA8706', '%s-%s-%s',
-            # %s, %s, %s, %s, '%02i%02i', %s, %s, %s)""" % (yr,
-            # mo+1, dy+1, high, low, precip, snowfall, mo+1, dy+1, yr, mo+1,
-            # snowd)
-            # ccursor.execute(sql)
-
-out.close()
+print("added %s" % (added,))
 nc.close()
 ccursor.close()
 COOP.commit()
