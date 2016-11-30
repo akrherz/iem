@@ -4,10 +4,13 @@ from pyiem.plot import MapPlot
 import psycopg2
 
 import datetime
-now = datetime.datetime.now()
+now = datetime.date.today()
 
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
+
+day1 = now.replace(day=1)
+day2 = (now + datetime.timedelta(days=35)).replace(day=1)
 
 # Compute normal from the climate database
 sql = """SELECT id,
@@ -16,9 +19,9 @@ sql = """SELECT id,
     ST_x(s.geom) as lon, ST_y(s.geom) as lat from summary_%s c JOIN stations s
     ON (s.iemid = c.iemid)
     WHERE s.network in ('IA_COOP') and s.iemid = c.iemid and
-    extract(month from day) = %s and
-    extract(year from day) = extract(year from now())
-    GROUP by id, lat, lon""" % (now.year, now.strftime("%m"),)
+    day >= '%s' and day < '%s'
+    GROUP by id, lat, lon""" % (now.year, day1.strftime("%Y-%m-%d"),
+                                day2.strftime("%Y-%m-%d"))
 
 lats = []
 lons = []
@@ -26,7 +29,7 @@ precip = []
 labels = []
 icursor.execute(sql)
 for row in icursor:
-    if row[2] > (now.day / 3):
+    if row[2] > (now.day / 3) or row[1] is None:
         continue
 
     sid = row[0]
