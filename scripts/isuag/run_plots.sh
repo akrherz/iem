@@ -2,17 +2,8 @@ dstr=`date --date '1 day ago' +'%Y-%m-%d'`
 WEBHOST="iem.local"
 PQI="/home/ldm/bin/pqinsert"
 
-#python process.py /mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
-#cat report.txt | mail -s "ISU AgClimate Data Report" -c meyers2@iastate.edu akrherz@iastate.edu
-#rm -f report.txt
-
-#python fix_precip.py
-#python fix_precip.py `date --date '2 day ago' +'%Y %m %d'`
-#python fix_precip.py `date --date '3 day ago' +'%Y %m %d'`
-#python compute_soil_hilo.py
-
 fp="air-temp-out"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&pvar=c11\&var2=c12\&date=${dstr} -O air-temp-out.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&pvar=c11,c12\&date=${dstr} -O air-temp-out.png
 convert air-temp-out.png air-temp-out.jpg
 convert air-temp-out.jpg air-temp-out.gif
 gifsicle -b -O2 air-temp-out.gif
@@ -33,7 +24,7 @@ $PQI -p "plot c 000000000000 agclimate/${fp}.jpg bogus jpg" ${fp}.jpg
 rm -f ${fp}.jpg ${fp}.png ${fp}.gif
 
 fp="soil-hilo-out"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&pvar=c300\&date=${dstr} -O soil-hilo-out.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&pvar=c300h,c300l\&date=${dstr} -O soil-hilo-out.png
 convert soil-hilo-out.png soil-hilo-out.jpg
 convert soil-hilo-out.jpg soil-hilo-out.gif
 gifsicle -b -O2 soil-hilo-out.gif
