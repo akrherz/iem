@@ -202,12 +202,12 @@ for feat in featureset['features']:
     # Save to log
     cursor.execute("""INSERT into roads_2015_2016_log(segid, valid, cond_code,
     raw) VALUES (%s, %s, %s, %s)""", (segid,
-                                      valid.strftime("%Y-%m-%d %H:%M"),
+                                      valid.strftime("%Y-%m-%d %H:%M+00"),
                                       cond, raw))
     # Update currents
     cursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s,
     raw = %s WHERE segid = %s
-    """, (cond, valid.strftime("%Y-%m-%d %H:%M"), raw, segid))
+    """, (cond, valid.strftime("%Y-%m-%d %H:%M+00"), raw, segid))
     dirty = True
 
 if dirty:
