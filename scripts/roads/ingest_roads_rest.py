@@ -199,15 +199,16 @@ for feat in featureset['features']:
     # Timestamps appear to be UTC now
     valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
         seconds=props['CARS_MSG_UPDATE_DATE']/1000.)
+    print valid
     # Save to log
     cursor.execute("""INSERT into roads_2015_2016_log(segid, valid, cond_code,
     raw) VALUES (%s, %s, %s, %s)""", (segid,
-                                      valid.strftime("%Y-%m-%d %H:%M+00"),
+                                      valid.strftime("%Y-%m-%d %H:%M"),
                                       cond, raw))
     # Update currents
     cursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s,
     raw = %s WHERE segid = %s
-    """, (cond, valid.strftime("%Y-%m-%d %H:%M+00"), raw, segid))
+    """, (cond, valid.strftime("%Y-%m-%d %H:%M"), raw, segid))
     dirty = True
 
 if dirty:
