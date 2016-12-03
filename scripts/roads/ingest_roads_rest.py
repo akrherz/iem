@@ -199,7 +199,6 @@ for feat in featureset['features']:
     # Timestamps appear to be UTC now
     valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
         seconds=props['CARS_MSG_UPDATE_DATE']/1000.)
-    print valid
     # Save to log
     cursor.execute("""INSERT into roads_2015_2016_log(segid, valid, cond_code,
     raw) VALUES (%s, %s, %s, %s)""", (segid,
