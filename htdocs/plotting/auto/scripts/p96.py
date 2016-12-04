@@ -4,18 +4,22 @@ import numpy as np
 import pandas as pd
 import datetime
 import pytz
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
-    d['desciption'] = """This plot looks at the bias associated with computing
+    d['description'] = """This plot looks at the bias associated with computing
     24 hour precipitation totals using a given hour of the day as the
-    delimiter."""
+    delimiter. This plot will take a number of seconds to generate, so please
+    be patient.  This chart attempts to address the question of if computing
+    24 hour precip totals at midnight or 7 AM biases the totals.  Such biases
+    are commmon when computing this metric for high or low temperature."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
     ]
     return d
 
@@ -27,9 +31,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('zstation', 'DSM')
-    network = fdict.get('network', 'IA_ASOS')
+    station = ctx['zstation']
+    network = ctx['network']
     nt = NetworkTable(network)
 
     jan1 = datetime.datetime.now().replace(hour=0, day=1, month=1, minute=0,

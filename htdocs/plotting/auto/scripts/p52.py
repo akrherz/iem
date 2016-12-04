@@ -1,24 +1,28 @@
-import psycopg2.extras
+import psycopg2
 import datetime
 import pytz
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['cache'] = 600
+    d['data'] = True
     d['description'] = """Gaant chart of watch, warning, and advisories issued
     by an NWS Forecast Office for a start date and number of days of your
-    choice."""
+    choice. The duration of the individual alert is the maximum found between
+    the earliest issuance and latest expiration."""
     d['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
         dict(type='date', name='sdate', default='2015/01/01',
              label='Start Date:',
              min="2005/10/01"),  # Comes back to python as yyyy-mm-dd
-        dict(type='text', name='days', default=10,
+        dict(type='int', name='days', default=10,
              label='Number of Days in Plot'),
     ]
     return d
@@ -31,32 +35,32 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'DMX')
-    sts = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01'),
-                                     '%Y-%m-%d')
-    days = int(fdict.get('days', 10))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    sts = ctx['sdate']
+    sts = datetime.datetime(sts.year, sts.month, sts.day)
+    days = ctx['days']
 
     nt = NetworkTable('WFO')
     tz = pytz.timezone(nt.sts[station]['tzname'])
 
     sts = sts.replace(tzinfo=tz)
     ets = sts + datetime.timedelta(days=days)
-    cursor.execute("""
+    df = read_sql("""
      SELECT phenomena, significance, eventid,
      min(issue at time zone 'UTC') as minissue,
-     max(expire at time zone 'UTC'),
-     max(coalesce(init_expire, expire) at time zone 'UTC') from warnings
+     max(expire at time zone 'UTC') as maxexpire,
+     max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire
+     from warnings
      WHERE wfo = %s and issue > %s and issue < %s
      GROUP by phenomena, significance, eventid
      ORDER by minissue ASC
-    """, (station, sts, ets))
+    """, pgconn, params=(station, sts, ets), index_col=None)
 
     events = []
     labels = []
     types = []
-    for row in cursor:
+    for i, row in df.iterrows():
         endts = max(row[4],
                     row[5]).replace(tzinfo=pytz.timezone("UTC"))
         events.append((row[3].replace(tzinfo=pytz.timezone("UTC")),
@@ -125,4 +129,4 @@ def plotter(fdict):
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=8)
 
-    return fig
+    return fig, df

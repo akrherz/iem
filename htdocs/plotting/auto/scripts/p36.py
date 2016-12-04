@@ -1,6 +1,3 @@
-"""
-  Fall Minimum by Date
-"""
 import psycopg2.extras
 import numpy as np
 import datetime
@@ -8,6 +5,7 @@ import calendar
 import matplotlib.patheffects as PathEffects
 from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -18,7 +16,7 @@ def get_description():
     being warmer than another month for that calendar year."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
     ]
     return d
 
@@ -30,8 +28,8 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
