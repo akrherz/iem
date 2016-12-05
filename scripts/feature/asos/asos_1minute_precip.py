@@ -5,16 +5,16 @@ import pytz
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 
-ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody',
+ASOS = psycopg2.connect(database='asos', host='localhost', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2016, 10, 8, 4, 0)
+sts = datetime.datetime(2016, 12, 3, 6, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2016, 10, 8, 20, 0)
+ets = datetime.datetime(2016, 12, 4, 6, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/New_York'
-station = 'FAY'
+tzname = 'America/Chicago'
+station = 'GLS'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -27,6 +27,7 @@ acursor.execute("""
  ORDER by valid ASC
 """, (station, sts, ets))
 tot = 0
+print("Found %s rows for station" % (acursor.rowcount,))
 for row in acursor:
     offset = int((row[0] - sts).days * 1440 + (row[0] - sts).seconds / 60)
     tot += (row[7] or 0)
@@ -107,12 +108,13 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc=(0.1, 0.3), prop=prop, ncol=1)
+ax.legend(loc=(0.55, 0.7), prop=prop, ncol=1)
 ax.set_ylim(0, 13)
 ax.set_yticks(range(0, 13, 1))
-ax.set_xlabel("8 October 2016 (%s), data is missing after 4 PM" % (tzname,))
-ax.set_title(("8 October 2016 Fayetteville, NC (KFAY)\n"
-              "One Minute Rainfall, %.2f inches total plotted, 14.00 total") % (prec[-1],))
+ax.set_xlabel("3 December 2016 (%s)" % (tzname,))
+ax.set_title(("3 December 2016 Galveston, TX (KGLS)\n"
+              "One Minute Rainfall, %.2f inches total plotted"
+              ) % (prec[-1],))
 
 
 fig.savefig('test.png')
