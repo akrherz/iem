@@ -10,14 +10,16 @@ $t->content = <<<EOF
 
 <h3>OGC Web Services</h3>
 
-<p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC) is a standards organization leading the development of geospatial and location based services.  The OGC has adopted a number of specifications, some of which are used by the IEM.  This page lists these services.</p>
+<p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC) 
+		is a standards organization leading the development of geospatial and 
+		location based services.  The OGC has adopted a number of specifications, 
+		some of which are used by the IEM.  This page lists these services.</p>
 
 <h4>Some items of note:</h4>
 <ol>
- <li>All of these services are also available via https:// connections.  The server SSL certificate
- is formally signed, but not all browsers may recognize the certificate authority (CA).</li>
- <li>There are four DNS aliases for the website (these do not work for HTTPS, sorry!). These can
- be used to support multiple tile requests at once from a client browser.<br />
+ <li>All of these services are available via https:// connections.</li>
+ <li>There are four DNS aliases for the website to allow web browers to make
+	many simultaneous requests against these services.<br />
   <ol>
     <li>mesonet1.agron.iastate.edu</li> 
     <li>mesonet2.agron.iastate.edu</li> 
@@ -26,6 +28,7 @@ $t->content = <<<EOF
    </ol>
    </li>
 </ol>
+
 <h3>Tile Map Service (TMS)</h3>
 
 <p>This service makes for easy integration with web mapping applications like 
