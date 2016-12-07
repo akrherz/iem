@@ -146,7 +146,7 @@ $().ready(function() {
 	geojsonSource = new ol.source.Vector({
 		format: new ol.format.GeoJSON(),
 		projection : ol.proj.get('EPSG:3857'),
-		url : '/geojson/network.php?network='+network
+		url : '/geojson/network/' + network + '.geojson'
 	});
 	geojson = new ol.layer.Vector({
 		source : geojsonSource,

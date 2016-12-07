@@ -25,8 +25,8 @@ for state in states.split():
 
 for network in networks:
     # Get metadata
-    uri = "https://mesonet.agron.iastate.edu/geojson/network.php?network=%s" % (
-                                                                    network,)
+    uri = ("https://mesonet.agron.iastate.edu/"
+           "geojson/network/%s.geojson") % (network,)
     data = urllib2.urlopen(uri)
     jdict = json.load(data)
     for site in jdict['features']:

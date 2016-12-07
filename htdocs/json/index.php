@@ -21,7 +21,7 @@
 
   $services[] = Array(
   		"title" => "Oregon State PRISM Grid Cell Daily Sample",
-  		"url" => "/json/prism/{lon}/{lat}/{date_or_daterange}?",
+  		"url" => "/json/prism/{lon}/{lat}/{date_or_daterange}",
   		"desc" => "Produces a daily time series for a grid cell that covers".
   		" the specified latitude and longitude (negative E values).".
   		" Credit: <a href='http://prism.oregonstate.edu'>PRISM Climate Group</a>,".
@@ -235,7 +235,7 @@
   
   $services[] = Array(
   		"title" => "IEM Tile Map Service Metadata",
-  		"url" => "/json/tms.json?",
+  		"url" => "/json/tms.json",
   		"desc" => "Provides metadata about the currently available Tile Map
   		Services provided by the IEM.  This is useful to determine how to 
   		call back to the Tile Map Services.",
@@ -247,7 +247,7 @@
   
   $services[] = Array(
   		"title" => "Current Storm Based Warnings",
-  		"url" => "/geojson/sbw.geojson?",
+  		"url" => "/geojson/sbw.geojson",
   		"desc" => "Provides a geojson format of current National Weather Service
   		storm based warnings.  There is a 15 second caching done by the server
   		to ease load.  The generation_time attribute is set on the output 
@@ -296,7 +296,7 @@
   
   $services[] = Array(
   		"title" => "Current Polygons from Special Weather Statements (SPS)",
-  		"url" => "/geojson/sps.geojson?",
+  		"url" => "/geojson/sps.geojson",
   		"desc" => "Provides a geojson format of current National Weather Service
   		polygons that are included with some Special Weather Statements (SPS).",
   		"vars" => Array(
@@ -365,7 +365,7 @@
   
   $services[] = Array(
   		"title" => "Data Collection Network Details",
-  		"url" => "/json/network.php?network={network}",
+  		"url" => "/json/network/{network}.geojson",
   		"desc" => "The IEM bunches observation stations into networks. This
 service provides metadata for sites within a network.  A listing of networks
 can be found on <a href='/sites/locate.php'>this page.</a>",
@@ -379,7 +379,7 @@ can be found on <a href='/sites/locate.php'>this page.</a>",
   
   $services[] = Array(
   		"title" => "IEM Archived Data Products",
-  		"url" => "/json/products.php?",
+  		"url" => "/json/products.php",
   		"desc" => "The IEM generates and archives a large number of products.
  This service provides some metadata details necessary to build programic URIs
  against this archive of data.  This service drives the <a href='/timemachine'>Timemachine</a>
@@ -531,18 +531,19 @@ for a given network that collects webcams and a UTC timestamp.",
   );
   $table = "";
   while (list($key, $ws) = each($services)){
+  	$url = $ws['url'];
+  	$uriadd = (strpos($url, "?") === FALSE) ? "?": "&amp;";
   	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"glyphicon glyphicon-bookmark\"></i></a><a name=\"%s\">%s</a></strong>
-	<br /><strong>URI:</strong> %s%s&amp;callback=gotData
+	<br /><strong>URI:</strong> %s%s%scallback=gotData
 	<br /><strong>Description:</strong> %s
 	<br /><strong>Method GET Parameters:</strong>
 	<br /><table border='1' cellspacing='0' cellpadding='3'>",
   			urlencode($ws["title"]), urlencode($ws["title"]),
-  			$ws["title"], ROOTURL, $ws["url"], $ws["desc"]);
+  			$ws["title"], ROOTURL, $url, $uriadd, $ws["desc"]);
   	while (list($key2, $vs) = each($ws['vars'])){
   		$table .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
   	}
   	$table .= "</table>";
-  	$url = $ws['url'];
   	while (list($key2, $vs) = each($ws['example'])){
   		$url = str_replace($key2, $vs, $url);
   	}

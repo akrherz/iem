@@ -7,8 +7,7 @@ include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $multi = isset($_GET["multi"]);
 header("Content-type: application/javascript");
-$uri = sprintf("/geojson/network.php?network=%s&c=%s", $network,
-	time() );
+$uri = sprintf("/geojson/network/%s.geojson", $network);
 
 echo <<<EOF
 var map;
