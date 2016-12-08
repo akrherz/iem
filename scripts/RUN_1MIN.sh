@@ -1,5 +1,5 @@
 # Run every minute!
-cd /mesonet/www/apps/nwnwebsite/scripts
+cd /opt/nwnwebsite/scripts
 php drive_lsd_generation.php &
 
 cd /opt/iem/scripts/sbw
