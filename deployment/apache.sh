@@ -15,7 +15,7 @@ cp -f /opt/iem/config/00iem.conf $CONFD
 cp -f /opt/iem/config/00iem-ssl.conf $CONFD
 cp -f $APPS/vendor/conf/vendor.conf $CONFD
 cp -f $APPS/weppwebsite/etc/apache_vhost.conf $CONFD/wepp.conf
-cp -f $APPS/cocorahs/config/apache-vhost.conf $CONFD/cocorahs.conf
+cp -f /opt/cocorahs/config/apache-vhost.conf $CONFD/cocorahs.conf
 cp -f $APPS/nwnwebsite/deployment/schoolnet8-vhost.conf $CONFD/iem-schoolnet8.conf
 echo "Header set X-IEM-ServerID $(hostname)" > $CONFD/iemvs.conf
 
