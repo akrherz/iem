@@ -1,6 +1,7 @@
 import psycopg2
 import datetime
 import numpy as np
+import matplotlib.pyplot as plt
 
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 cursor = ASOS.cursor()
@@ -54,7 +55,7 @@ d1, t1 = get_day( datetime.datetime(2013,8,26) )
 d2, t2 = get_day( datetime.datetime(2013,8,27) )
 d3, t3 = get_day( datetime.datetime(2013,8,28) )
 
-import matplotlib.pyplot as plt
+
 
 (fig, ax) = plt.subplots(1,1)
 

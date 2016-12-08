@@ -3,6 +3,7 @@ Compute the amount of precipitation that falls during a SVR,TOR warning
 """
 import psycopg2
 import numpy
+import matplotlib.pyplot as plt
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
@@ -40,7 +41,6 @@ for year in range(2002,2015):
     # Get rainfall
     acursor.execute("""
         SELECT valid, precip from t%s_1minute where station = 'DSM' and precip > 0
-        
     """ % (year,))
 
     print year, acursor.rowcount, len(warntimes), len(around)
@@ -56,7 +56,7 @@ print total_in
 print total_arr
 print total_out
 
-import matplotlib.pyplot as plt
+
 
 fig, ax = plt.subplots(2,1, sharex=True)
 

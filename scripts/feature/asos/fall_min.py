@@ -1,5 +1,3 @@
-# Generate current plot of air temperature
-
 from pyiem.plot import MapPlot
 import datetime
 import psycopg2

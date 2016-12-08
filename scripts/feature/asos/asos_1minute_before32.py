@@ -1,5 +1,6 @@
 import psycopg2
 import numpy
+import matplotlib.pyplot as plt
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 acursor2 = ASOS.cursor()
@@ -38,7 +39,6 @@ def do(station):
 
   return max_tmpf, tot_tmpf, tot_sknt, tot_cnt
 
-import matplotlib.pyplot as plt
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -60,5 +60,4 @@ ax.grid(True)
 ax.set_ylim(30,40)
 ax.legend()
 
-fig.savefig('test.ps')
-
+fig.savefig('test.png')

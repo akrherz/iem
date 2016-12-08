@@ -50,8 +50,10 @@ cb.set_ticklabels(['Clear', 'Few', 'Scattered', 'Broken', 'Overcast'])
 ax.set_xlim(-23.5, 23.5)
 ax.grid(True)
 ax.set_ylabel("Year")
-ax.set_xlabel("Hours from first fall sub 29$^\circ$F Temperature, tan is missing")
+ax.set_xlabel(("Hours from first fall sub 29$^\circ$F Temperature, "
+               "tan is missing"))
 ax.set_title(("Ames [AMW] Cloud Coverage Reports\n"
-              "%i-2016 for  +/- 24 hours around first fall  sub 29$^\circ$F Temp"
+              "%i-2016 for  +/- 24 hours around first fall "
+              "sub 29$^\circ$F Temp"
               ) % (baseyear,))
 fig.savefig('test.png')

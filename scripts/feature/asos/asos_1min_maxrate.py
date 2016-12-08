@@ -3,6 +3,7 @@ import datetime
 import pytz
 import numpy as np
 from numpy.lib import stride_tricks
+import matplotlib.pyplot as plt
 
 pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
@@ -51,7 +52,6 @@ ymcw = np.loadtxt('mcw.npyb')
 xdsm = range(1, 6*60+1)
 ydsm = np.loadtxt('dsm.npyb')
 
-import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1, 1)
 

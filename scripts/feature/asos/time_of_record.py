@@ -1,5 +1,6 @@
 """ Attempt to compute the time of a record high temperature! """
 import psycopg2
+import matplotlib.pyplot as plt
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
@@ -53,7 +54,6 @@ for row in ccursor:
     ljday.append( int(row2[0].strftime("%j")))
     ltime.append( row2[0].hour * 60 + row2[0].minute )
 
-import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
@@ -67,8 +67,8 @@ ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'
 ax.set_yticklabels( ('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM', 'Mid'))
 ax.set_yticks( range(0,1441,240))
 ax.set_ylabel("Local Time of Day CST/CDT")
-ax.set_ylim(-1,1440)
+ax.set_ylim(-1, 1440)
 ax.legend(loc=(.45, .8))
 ax.grid(True)
 
-fig.savefig('test.ps')
+fig.savefig('test.png')

@@ -30,7 +30,7 @@ for row in cursor:
     o.write( data )
     o.close()
     """
-    
+
     nc = netCDF4.Dataset("data/hght12_%s.nc" % (row[0].strftime("%Y%m%d"),), 'r')
     idx = np.digitize([500.0], nc.variables['isobaric'][:])[0]
     mslp = nc.variables['Geopotential_height'][0,idx,:,:]
@@ -58,5 +58,5 @@ m.pcolormesh(lons, lats, total / float(cursor.rowcount), np.arange(5650,5951,20)
              units='meters')
 #x,y = m.map(xs,ys)
 #print xx
-m.plot_values(xs,ys, xx, '%s', textsize=16)
+m.plot_values(xs, ys, xx, '%s', textsize=16)
 m.postprocess(filename='test.png')

@@ -17,15 +17,15 @@ odwpf = []
 cursor.execute("""SELECT tmpf, dwpf from alldata where station = 'DSM' and
  tmpf >= 80 and dwpf > 0 and tmpf < 110""")
 for row in cursor:
-    otmpf.append( row[0] )
-    odwpf.append( row[1] )
-    
+    otmpf.append(row[0])
+    odwpf.append(row[1])
+
 otmpf = dt.temperature(numpy.array(otmpf), 'F')
 odwpf = dt.temperature(numpy.array(odwpf), 'F')
 orelh = meteorology.relh(otmpf, odwpf)
 
-tmpf = dt.temperature(numpy.arange(80,110), 'F')
-dwpf = dt.temperature(numpy.arange(40,80), 'F')
+tmpf = dt.temperature(numpy.arange(80, 110), 'F')
+dwpf = dt.temperature(numpy.arange(40, 80), 'F')
 
 (t, d) = numpy.meshgrid(tmpf.value("F"), dwpf.value("F"))
 

@@ -1,5 +1,6 @@
 # Lets run some diagnostics on blizzard criterion
 
+import matplotlib.pyplot as plt
 import pylab
 import psycopg2
 from pyiem.network import Table as NetworkTable
@@ -94,7 +95,6 @@ print 'A hits', len(ahits.keys())
 print 'Hits', len( hits.keys() )
 print hits.keys()
 
-import matplotlib.pyplot as plt
 
 fig = plt.figure()
 fig.text(.5,.97, "Iowa ASOS/AWOS 11-12 Dec 2010 Blizzard Criteria", ha='center')

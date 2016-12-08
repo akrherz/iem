@@ -41,5 +41,5 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter('%-I %p', tz=tz))
 
 ax.set_xlim(datetime.datetime(2015, 2, 5, 10),
             datetime.datetime(2015, 2, 5, 16))
-ax.set_xlabel("CST, One Minute Iowa ASOS Data Provided by NCDC")
+ax.set_xlabel("CST, One Minute Iowa ASOS Data Provided by NCEI")
 fig.savefig('test.png')

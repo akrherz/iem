@@ -1,8 +1,10 @@
 import numpy
-import iemdb
+import psycopg2
 import math
-ASOS = iemdb.connect('asos', bypass=True)
+import matplotlib.pyplot as plt
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
+
 
 def wchtidx(tmpf, sped):
     if sped < 3:
@@ -10,6 +12,7 @@ def wchtidx(tmpf, sped):
     wci = math.pow(sped,0.16);
 
     return 35.74 + .6215 * tmpf - 35.75 * wci + .4275 * tmpf * wci
+
 
 def rect(v):
     if v < 180:
@@ -40,7 +43,6 @@ counts3 = get_station("FSD")
 counts3[365] = counts3[364]
 print counts2[360:370]
 
-import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 

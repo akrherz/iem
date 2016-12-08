@@ -2,8 +2,10 @@ import pandas as pd
 from StringIO import StringIO
 import matplotlib.pyplot as plt
 
-# select precip, sum(precip), count(*) from alldata_1minute
-# where station = 'DSM' and precip > 0 GROUP by precip ORDER by precip ASC;
+"""
+ select precip, sum(precip), count(*) from alldata_1minute
+ where station = 'DSM' and precip > 0 GROUP by precip ORDER by precip ASC;
+"""
 data = StringIO("""rate | total | count
    0.01 | 342.113 | 34209
    0.02 | 54.7011 |  2735
