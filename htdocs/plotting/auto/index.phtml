@@ -257,7 +257,8 @@ EOF;
 			$thisrow = daySelect( $value, $v->name);
 		}
 		elseif ($v->type == "year"){
-			$thisrow = yearSelect2(isset($v->min) ? $v->min: 1893, $value, $v->name);
+			$thisrow = yearSelect2(isset($v->min) ? $v->min: 1893, $value,
+					$v->name, '', isset($v->max) ? $v->max: date("Y"));
 		}
 		elseif ($v->type == "select"){
 			$netselect = make_select($v->name, $value, $v->options);
