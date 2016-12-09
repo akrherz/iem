@@ -21,7 +21,7 @@
 192.168.0.13     iem13         iem13.local  iemdb-hads
 192.168.0.20     thumper.local
 192.168.0.22     iem22         iem22.local
-192.168.0.30     iem30         iem30.local iem-geoserver iem-arcgis
+192.168.0.30     iem30         iem30.local iem-geoserver
 192.168.0.34     meteor.local
 192.168.0.35     cyclone.local
 192.168.0.40     nrel.local

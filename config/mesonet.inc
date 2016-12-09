@@ -41,8 +41,6 @@
   Redirect permanent /data/nexrd2/raw http://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
   Redirect permanent /cscap https://datateam.agron.iastate.edu/cscap
 
-  # Trailing slashes are very, very important!
-  ProxyPass /arcgis	http://iem-arcgis:6080/arcgis
   ErrorDocument 404 /error404.php
 
   <Directory "/opt/iem/htdocs">
