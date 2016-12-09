@@ -76,7 +76,7 @@
 192.168.1.247    iem-memcached2
 #   VI_5(55) iem6
 192.168.1.246    iembot
-#   VI_6(56) metvm4 <-> iem12
+#   VI_6(56) metvm4 <-> iemfe
 192.168.1.245    iemdb
 #   VI_7(57) iemfe <-> metvm4
 192.168.1.244    iemdb2
@@ -90,5 +90,3 @@
 192.168.0.240    iem-openfire openfire-bosh
 #   VI12(62) metvm7 <-> metvm0
 192.168.1.239    iem-memcached3
-#   VI13(63) iem12 <-> iem30
-192.168.0.238    iem-weatherim
