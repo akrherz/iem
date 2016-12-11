@@ -96,16 +96,13 @@ $(document).ready(function(){
 	});
 
 	vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()));
-
+	key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
 	map = new ol.Map({
 		target: 'map',
 		layers: [new ol.layer.Tile({
-			title: "Global Imagery",
-			source: new ol.source.TileWMS({
-				url: 'http://demo.opengeo.org/geoserver/wms',
-				params: {LAYERS: 'nasa:bluemarble', VERSION: '1.1.1'}
-			})
-		}),
+			title: 'Global Imagery',
+	        source: new ol.source.BingMaps({key: key, imagerySet: 'Aerial'})
+	      }),
 		new ol.layer.Tile({
 			title: 'State Boundaries',
 			source: new ol.source.XYZ({
