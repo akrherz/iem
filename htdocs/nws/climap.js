@@ -32,17 +32,17 @@ var vectorStyleFunction = function(feature, resolution){
   	        fill: new ol.style.Fill({
   	          color: 'rgba(255, 255, 255, 0.6)'
   	        }),
-  	        stroke: new ol.style.Stroke({
-  	          color: '#319FD3',
-  	          width: 1
-  	        }),
   	        text: new ol.style.Text({
   	          font: fontSize+'px Calibri,sans-serif',
   	          text: feature.get(renderattr).toString(),
   	          fill: new ol.style.Fill({
-  	            color: '#fff',
-  	            width: 3
-  	          })
+  	            color: '#FFFFFF',
+  	            width: 1
+  	          }),
+  	          stroke: new ol.style.Stroke({
+  	        	  color: '#000000',
+    	          width: 3
+    	      })
   	        })
   	      })];
 	} else {
