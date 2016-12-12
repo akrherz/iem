@@ -1,5 +1,12 @@
 CREATE EXTENSION postgis;
 
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (9, now());
+
 --- ==== TABLES TO investigate deleting
 --- counties
 --- cwas
@@ -60,6 +67,7 @@ CREATE TABLE networks(
   tzname varchar(32)
 );
 GRANT SELECT on networks to nobody,apache;
+SELECT AddGeometryColumn('networks', 'extent', 4326, 'POLYGON', 2);
 
 ---
 --- Missing table: news
@@ -71,7 +79,8 @@ CREATE TABLE news(
   author varchar(100),
   title varchar(100),
   url varchar,
-  views smallint default 0);
+  views smallint default 0,
+  tags varchar(128)[]);
 CREATE INDEX news_entered_idx on news(entered);
 GRANT ALL on news to nobody,apache;
 GRANT ALL on news_id_seq to nobody,apache;
@@ -86,30 +95,6 @@ CREATE TABLE iembot_twitter_subs(
 CREATE UNIQUE index iembot_twitter_subs_idx on 
  iembot_twitter_subs(screen_name, channel);
 GRANT ALL on iembot_twitter_subs to nobody,apache;
-
----
---- RASTER metadata
----
-CREATE TABLE raster_metadata(
-  name varchar(64) UNIQUE,
-  description text,
-  archive_start timestamptz,
-  archive_end timestamptz,
-  units varchar(12),
-  interval int
-);
-GRANT SELECT on raster_metadata to nobody,apache;
-
----
---- RASTER Lookup Tables
----
-CREATE TABLE raster_lookup(
-  name varchar(64),
-  coloridx smallint,
-  value real
-);
-CREATE UNIQUE INDEX raster_lookup_idx on raster_lookup(name,coloridx,value);
-GRANT SELECT on raster_lookup to nobody,apache;
 
 ---
 --- IEMBot channels
@@ -181,14 +166,6 @@ CREATE TABLE iemapps_tags(
 CREATE UNIQUE INDEX iemapps_tags_idx on iemapps_tags(appid,tag);
 GRANT ALL on iemapps_tags to nobody,apache;
 
----
---- El Nino
----
-CREATE TABLE elnino(
-  monthdate date,
-  anom_34 real
-);
-GRANT SELECT on elnino to nobody,apache;
 
 ---
 --- webcam logs
@@ -287,7 +264,7 @@ CREATE TABLE stations(
 	archive_end timestamp with time zone,
 	modified timestamp with time zone,
 	tzname varchar(32),
-	iemid SERIAL,
+	iemid SERIAL UNIQUE NOT NULL,
 	metasite boolean,
 	sigstage_low real,
 	sigstage_action real,
@@ -297,7 +274,10 @@ CREATE TABLE stations(
 	sigstage_major real,
 	sigstage_record real,
 	ugc_county char(6),
-	ugc_zone char(6)
+	ugc_zone char(6),
+	ncdc81 varchar(11),
+	temp24_hour smallint,
+	precip24_hour smallint
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 create index stations_iemid_idx on stations(iemid);
@@ -316,6 +296,13 @@ CREATE OR REPLACE FUNCTION update_modified_column()
 CREATE TRIGGER update_stations_modtime BEFORE UPDATE
         ON stations FOR EACH ROW EXECUTE PROCEDURE 
         update_modified_column();
+
+-- Storage of station attributes
+CREATE TABLE station_attributes(
+	iemid int REFERENCES stations(iemid),
+	attr varchar(128) NOT NULL);
+CREATE UNIQUE index station_attributes_idx on station_attributes(iemid, attr);
+GRANT SELECT on station_attributes to nobody,apache;
 
 ---
 create table iemmaps(
@@ -342,7 +329,9 @@ CREATE table feature(
   voting boolean default true,
   tags varchar(1024),
   fbid bigint,
-  appurl varchar(1024)
+  appurl varchar(1024),
+  javascripturl varchar(1024),
+  views int default 0
 );
 alter table feature SET WITH oids;
 CREATE unique index feature_title_check_idx on feature(title);
@@ -364,3 +353,40 @@ CREATE table shef_extremum_codes(
   code char(1),
   name varchar(128));
 GRANT select on shef_extremum_codes to apache,nobody;
+
+-- Storage of metadata
+CREATE TABLE iemrasters(
+  id SERIAL UNIQUE,
+  name varchar,
+  description text,
+  archive_start timestamptz,
+  archive_end   timestamptz,
+  units varchar(12),
+  interval int
+);
+GRANT SELECT on iemrasters to nobody,apache;
+
+-- Storage of color tables and values
+CREATE TABLE iemrasters_lookup(
+  iemraster_id int REFERENCES iemrasters(id),
+  coloridx smallint,
+  value real,
+  r smallint,
+  g smallint,
+  b smallint
+);
+GRANT SELECT on iemrasters_lookup to nobody,apache;
+
+-- Storage of IEM Dataset Metadata
+
+CREATE TABLE iemdatasets(
+  id serial UNIQUE,
+  name varchar,
+  description text,
+  justification text,
+  homepage varchar,
+  alternatives varchar,
+  archive_begin date,
+  download text
+);
+GRANT SELECT on iemdatasets to nobody,apache;

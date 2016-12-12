@@ -17,6 +17,7 @@ limited time.
 
 Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
+Apache ErrorLog | iem12 | None | None
 iembot  | iem6    | iem12  | nagios checks for twistd processes running
 LDM | iem12 | None | None
 LoggerNet | iem12 | None | None
@@ -24,7 +25,7 @@ mailman | iemfe | None | None
 nwningest | iem12 | None    | cron scripts checks SNET sites for being online
 openfire | iem12 | None     | None
 postgres | metvm6 | iemfe  | None
-samba | iemfe | None | cron scripts check data availability
+samba | iem12 | None | cron scripts check data availability
 SSH | iemfe | None | None
 RIDGE   | iem6    | None    | inbound file queue, check latency 7 radars
 webalizer | iemfe | None | None
