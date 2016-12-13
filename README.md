@@ -24,9 +24,9 @@ LoggerNet | iem12 | None | None
 mailman | iemfe | None | None
 nwningest | iem12 | None    | cron scripts checks SNET sites for being online
 openfire | iem12 | None     | None
-postgres | metvm6 | iemfe  | None
+postgres | metvm6 | iem6  | None
 samba | iem12 | None | cron scripts check data availability
-SSH | iemfe | None | None
+SSH | iem12 | None | None
 RIDGE   | iem6    | None    | inbound file queue, check latency 7 radars
 webalizer | iemfe | None | None
 Webcam Current | iem6 | None | cron script monitors for offline webcams

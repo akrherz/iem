@@ -10,7 +10,7 @@
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
-192.168.0.4      iemfe         iemfe.local postgresread
+192.168.0.4      iemfe         iemfe.local
 192.168.0.5      metvm2.local
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.7      iemvm2
@@ -76,10 +76,10 @@
 192.168.1.247    iem-memcached2
 #   VI_5(55) iem6
 192.168.1.246    iembot
-#   VI_6(56) metvm4 <-> iemfe
+#   VI_6(56) metvm4 <-> iem6
 192.168.1.245    iemdb
-#   VI_7(57) iemfe <-> metvm4
-192.168.1.244    iemdb2
+#   VI_7(57) iem6 <-> metvm4
+192.168.1.244    iemdb2 postgresread
 #   VI_8(58) iemdr1 <-> iemdr0
 192.168.1.243    iem-nfs0
 #   VI_9(59) iem12
