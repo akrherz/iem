@@ -1,3 +1,11 @@
+
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (3, now());
+
 CREATE TABLE products(
   data text,
   pil char(6),
@@ -394,3 +402,129 @@ CREATE INDEX products_2014_0712_pil_idx on products_2014_0712(pil);
 CREATE INDEX products_2014_0712_entered_idx on products_2014_0712(entered);
 CREATE INDEX products_2014_0712_source_idx on products_2014_0712(source);
 grant select on products_2014_0712 to nobody,apache;
+
+-- ________________________________________________________________
+create table products_2015_0106(
+  CONSTRAINT __products20150106_check
+  CHECK(entered >= '2015-01-01 00:00+00'::timestamptz
+        and entered < '2015-07-01 00:00+00'))
+  INHERITS (products);
+
+CREATE INDEX products_2015_0106_pil_idx on products_2015_0106(pil);
+CREATE INDEX products_2015_0106_entered_idx on products_2015_0106(entered);
+CREATE INDEX products_2015_0106_source_idx on products_2015_0106(source);
+grant select on products_2015_0106 to nobody,apache;
+
+-- ________________________________________________________________
+create table products_2015_0712(
+  CONSTRAINT __products20150712_check
+  CHECK(entered >= '2015-07-01 00:00+00'::timestamptz
+        and entered < '2016-01-01 00:00+00'))
+  INHERITS (products);
+
+CREATE INDEX products_2015_0712_pil_idx on products_2015_0712(pil);
+CREATE INDEX products_2015_0712_entered_idx on products_2015_0712(entered);
+CREATE INDEX products_2015_0712_source_idx on products_2015_0712(source);
+grant select on products_2015_0712 to nobody,apache;
+
+-- ________________________________________________________________
+create table products_2016_0106(
+  CONSTRAINT __products20160106_check
+  CHECK(entered >= '2016-01-01 00:00+00'::timestamptz
+        and entered < '2016-07-01 00:00+00'))
+  INHERITS (products);
+
+CREATE INDEX products_2016_0106_pil_idx on products_2016_0106(pil);
+CREATE INDEX products_2016_0106_entered_idx on products_2016_0106(entered);
+CREATE INDEX products_2016_0106_source_idx on products_2016_0106(source);
+grant select on products_2016_0106 to nobody,apache;
+
+-- ________________________________________________________________
+create table products_2016_0712(
+  CONSTRAINT __products20160712_check
+  CHECK(entered >= '2016-07-01 00:00+00'::timestamptz
+        and entered < '2017-01-01 00:00+00'))
+  INHERITS (products);
+
+CREATE INDEX products_2016_0712_pil_idx on products_2016_0712(pil);
+CREATE INDEX products_2016_0712_entered_idx on products_2016_0712(entered);
+CREATE INDEX products_2016_0712_source_idx on products_2016_0712(source);
+grant select on products_2016_0712 to nobody,apache;
+
+create index products_2000_0106_pe_idx on products_2000_0106(pil, entered);
+create index products_2000_0712_pe_idx on products_2000_0712(pil, entered);
+
+create index products_2001_0106_pe_idx on products_2001_0106(pil, entered);
+create index products_2001_0712_pe_idx on products_2001_0712(pil, entered);
+
+create index products_2002_0106_pe_idx on products_2002_0106(pil, entered);
+create index products_2002_0712_pe_idx on products_2002_0712(pil, entered);
+
+create index products_2003_0106_pe_idx on products_2003_0106(pil, entered);
+create index products_2003_0712_pe_idx on products_2003_0712(pil, entered);
+
+create index products_2004_0106_pe_idx on products_2004_0106(pil, entered);
+create index products_2004_0712_pe_idx on products_2004_0712(pil, entered);
+
+create index products_2005_0106_pe_idx on products_2005_0106(pil, entered);
+create index products_2005_0712_pe_idx on products_2005_0712(pil, entered);
+
+create index products_2006_0106_pe_idx on products_2006_0106(pil, entered);
+create index products_2006_0712_pe_idx on products_2006_0712(pil, entered);
+
+create index products_2007_0106_pe_idx on products_2007_0106(pil, entered);
+create index products_2007_0712_pe_idx on products_2007_0712(pil, entered);
+
+create index products_2008_0106_pe_idx on products_2008_0106(pil, entered);
+create index products_2008_0712_pe_idx on products_2008_0712(pil, entered);
+
+create index products_2009_0106_pe_idx on products_2009_0106(pil, entered);
+create index products_2009_0712_pe_idx on products_2009_0712(pil, entered);
+
+create index products_2010_0106_pe_idx on products_2010_0106(pil, entered);
+create index products_2010_0712_pe_idx on products_2010_0712(pil, entered);
+
+create index products_2011_0106_pe_idx on products_2011_0106(pil, entered);
+create index products_2011_0712_pe_idx on products_2011_0712(pil, entered);
+
+create index products_2012_0106_pe_idx on products_2012_0106(pil, entered);
+create index products_2012_0712_pe_idx on products_2012_0712(pil, entered);
+
+create index products_2013_0106_pe_idx on products_2013_0106(pil, entered);
+create index products_2013_0712_pe_idx on products_2013_0712(pil, entered);
+
+create index products_2014_0106_pe_idx on products_2014_0106(pil, entered);
+create index products_2014_0712_pe_idx on products_2014_0712(pil, entered);
+
+create index products_2015_0106_pe_idx on products_2015_0106(pil, entered);
+create index products_2015_0712_pe_idx on products_2015_0712(pil, entered);
+
+create index products_2016_0106_pe_idx on products_2016_0106(pil, entered);
+create index products_2016_0712_pe_idx on products_2016_0712(pil, entered);
+
+-- ________________________________________________________________
+create table products_2017_0106(
+  CONSTRAINT __products20170106_check
+  CHECK(entered >= '2017-01-01 00:00+00'::timestamptz
+        and entered < '2017-07-01 00:00+00'))
+  INHERITS (products);
+
+CREATE INDEX products_2017_0106_pil_idx on products_2017_0106(pil);
+CREATE INDEX products_2017_0106_entered_idx on products_2017_0106(entered);
+CREATE INDEX products_2017_0106_source_idx on products_2017_0106(source);
+create index products_2017_0106_pe_idx on products_2017_0106(pil, entered);
+grant select on products_2017_0106 to nobody,apache;
+
+-- ________________________________________________________________
+create table products_2017_0712(
+  CONSTRAINT __products20170712_check
+  CHECK(entered >= '2017-07-01 00:00+00'::timestamptz
+        and entered < '2018-01-01 00:00+00'))
+  INHERITS (products);
+
+CREATE INDEX products_2017_0712_pil_idx on products_2017_0712(pil);
+CREATE INDEX products_2017_0712_entered_idx on products_2017_0712(entered);
+CREATE INDEX products_2017_0712_source_idx on products_2017_0712(source);
+create index products_2017_0712_pe_idx on products_2017_0712(pil, entered);
+grant select on products_2017_0712 to nobody,apache;
+

@@ -1,3 +1,4 @@
+"""Simple helper script to generate schema"""
 import datetime
 
 prefix = "nldn"
@@ -9,7 +10,7 @@ for month in range(1, 13):
     p1 = sts.strftime("%Y_%m")
 
     print """CREATE TABLE %(p)s%(p1)s(
-  CONSTRAINT __%(p)s%(p1)s_check 
+  CONSTRAINT __%(p)s%(p1)s_check
   CHECK(valid >= '%(d1)s 00:00+00'::timestamptz
         and valid < '%(d2)s 00:00+00'::timestamptz))
   INHERITS (%(p)s_all);

@@ -1,5 +1,12 @@
 CREATE EXTENSION postgis;
 
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (4, now());
+
 ---
 --- Storage of climoweek
 CREATE TABLE climoweek(
@@ -23,49 +30,35 @@ CREATE TABLE hayhoe_daily(
 GRANT SELECT on hayhoe_daily to nobody,apache;
 CREATE INDEX hayhoe_daily_station_idx on hayhoe_daily(station);
 
----
---- Quickstats table
----
-CREATE TABLE quickstats(
-SOURCE_DESC  varchar(60),
-SECTOR_DESC	 varchar(60),
-GROUP_DESC	 varchar(80),
-COMMODITY_DESC varchar(80),
-CLASS_DESC varchar(180),
-PRODN_PRACTICE_DESC varchar(180),
-UTIL_PRACTICE_DESC varchar(180),
-STATISTICCAT_DESC varchar(80),
-UNIT_DESC varchar(60),
-SHORT_DESC varchar(512),
-DOMAIN_DESC varchar(256),
-DOMAINCAT_DESC varchar(512),
-AGG_LEVEL_DESC varchar(40),
-STATE_ANSI varchar(2),
-STATE_FIPS_CODE varchar(2),
-STATE_ALPHA varchar(2),
-STATE_NAME varchar(30),
-ASD_CODE varchar(2),
-ASD_DESC varchar(60),
-COUNTY_ANSI varchar(3),
-COUNTY_CODE varchar(3),
-COUNTY_NAME varchar(30),
-REGION_DESC varchar(80),
-ZIP_5 varchar(5),
-WATERSHED_CODE varchar(8),
-WATERSHED_DESC varchar(120),
-CONGR_DISTRICT_CODE varchar(2),
-COUNTRY_CODE varchar(4),
-COUNTRY_NAME varchar(60),
-LOCATION_DESC varchar(120),
-YEAR varchar(4),
-FREQ_DESC varchar(30),
-BEGIN_CODE varchar(2),
-END_CODE varchar(2),
-REFERENCE_PERIOD_DESC varchar(40),
-WEEK_ENDING varchar(10),
-LOAD_TIME varchar(19),
-VALUE varchar(24)
+CREATE TABLE nass_quickstats(
+        source_desc varchar(60),
+        sector_desc varchar(60),
+        group_desc varchar(80),
+        commodity_desc varchar(80),
+        class_desc varchar(180),
+        prodn_practice_desc varchar(180),
+        util_practice_desc varchar(180),
+        statisticcat_desc varchar(80),
+        unit_desc varchar(60),
+        agg_level_desc varchar(40),
+        state_alpha varchar(2),
+        asd_code smallint,
+        county_ansi smallint,
+        zip_5 int,
+        watershed_code int,
+        country_code smallint,
+        year int,
+        freq_desc varchar(30),
+        begin_code int,
+        end_code int,
+        week_ending date,
+        load_time timestamptz,
+        value varchar(24),
+        cv varchar(7),
+        num_value real
 );
+GRANT SELECT on nass_quickstats to nobody,apache;
+
 
 ---
 --- Temp table
@@ -268,7 +261,9 @@ CREATE TABLE stations(
         sigstage_record real,
         ugc_county char(6),
         ugc_zone char(6),
-        ncdc varchar(11)
+        ncdc varchar(11),
+        temp24_hour smallint,
+        precip24_hour smallint
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 create index stations_iemid_idx on stations(iemid);
@@ -795,3 +790,43 @@ COPY climoweek (sday, climoweek) FROM stdin;
 1230	44
 1231	44
 \.
+
+-- Storage of Nino Data
+CREATE TABLE elnino(
+        monthdate date UNIQUE,
+        anom_34 real,
+        soi_3m real
+);
+GRANT SELECT on elnino to nobody,apache;
+
+-- Storage of Point Extracted Forecast Data
+CREATE TABLE forecast_inventory(
+  id SERIAL UNIQUE,
+  model varchar(32),
+  modelts timestamptz
+);
+GRANT SELECT on forecast_inventory to nobody,apache;
+
+CREATE TABLE alldata_forecast(
+  modelid int REFERENCES forecast_inventory(id),
+  station char(6),
+  day date,
+  high int,
+  low int,
+  precip real,
+  srad real
+);
+GRANT SELECT on alldata_forecast to nobody,apache;
+CREATE INDEX alldata_forecast_idx on alldata_forecast(station, day);
+
+-- Storage of baseline yield forecast data
+CREATE TABLE yieldfx_baseline(
+  station varchar(24),
+  valid date,
+  radn real,
+  maxt real,
+  mint real,
+  rain real,
+  windspeed real,
+  rh real);
+GRANT SELECT on yieldfx_baseline to nobody,apache;
