@@ -198,6 +198,14 @@
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
   </Directory>
 
+  <Directory "/opt/iem/htdocs/wx/afos">
+    AddHandler cgi-script .py
+    Options +ExecCGI
+
+    RewriteRule ([0-9]{12})_([A-Z0-9]+).png$ text2png.py?e=$1&pil=$2
+  </Directory>
+
+
   <Directory "/opt/iem/htdocs/frost">
     AddHandler cgi-script .py
     Options +ExecCGI

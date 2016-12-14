@@ -50,7 +50,6 @@ if ($e == null){
 }
 
 $t->title = sprintf("%s from NWS %s", substr($pil,0,3), substr($pil,3,3));
-$t->twitter_image = "/content/pil_${pil}.png";
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
 if (pg_numrows($rs) < 1){
@@ -63,6 +62,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		$newe = date("YmdHi", $basets);
 		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
+		$t->twitter_image = "/wx/afos/${newe}_${pil}.png";
 		$dstamp = date("Y-m-d H:i", $basets);
 		$listlink = sprintf("list.phtml?source=%s&amp;day=%s&amp;month=%s&amp;year=%s", 
 				$row["source"], date("d", $basets), date("m", $basets), 
