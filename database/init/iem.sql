@@ -2280,11 +2280,6 @@ ALTER TABLE summary
   ADD CONSTRAINT summary_iemid_fkey FOREIGN KEY (iemid)
   REFERENCES stations(iemid) ON DELETE CASCADE;
 
-ALTER TABLE trend_1h
-  DROP CONSTRAINT trend_1h_iemid_fkey,
-  ADD CONSTRAINT trend_1h_iemid_fkey FOREIGN KEY (iemid)
-  REFERENCES stations(iemid) ON DELETE CASCADE;
-
 ALTER TABLE summary_1941
   ADD CONSTRAINT summary_1941_iemid_fkey FOREIGN KEY (iemid)
   REFERENCES stations(iemid) ON DELETE CASCADE;
