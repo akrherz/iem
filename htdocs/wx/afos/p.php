@@ -63,6 +63,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
 		$t->twitter_image = "/wx/afos/${newe}_${pil}.png";
+		$t->twitter_card = "summary_large_image";
 		$dstamp = date("Y-m-d H:i", $basets);
 		$listlink = sprintf("list.phtml?source=%s&amp;day=%s&amp;month=%s&amp;year=%s", 
 				$row["source"], date("d", $basets), date("m", $basets), 
@@ -93,6 +94,8 @@ Received: <strong>{$dstamp} UTC</strong>
 <div class="col-sm-4">
 	<a rel="nofollow" class="btn btn-primary" 
 	href="p.php?pil=$pil">Latest Product</a>
+	<a rel="nofollow" class="btn btn-primary" 
+	href="{$t->twitter_image}">View As Image</a>
 </div>
 </div><!-- ./row -->
 EOF;
