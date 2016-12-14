@@ -1,5 +1,12 @@
 CREATE EXTENSION postgis;
 
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (2, now());
+
 ---
 --- Store grid point geometries
 ---
@@ -630,4 +637,358 @@ GRANT SELECT on data_2014_11 to nobody,apache;
 CREATE INDEX data_2014_12_grid_idx on data_2014_12(grid_idx);
 CREATE INDEX data_2014_12_valid_idx on data_2014_12(valid);
 GRANT SELECT on data_2014_12 to nobody,apache;
- 
+
+ create table data_2015_01( 
+  CONSTRAINT __data_2015_01_check 
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz 
+        and valid < '2015-02-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_01_grid_idx on data_2015_01(grid_idx);
+CREATE INDEX data_2015_01_valid_idx on data_2015_01(valid);
+GRANT SELECT on data_2015_01 to nobody,apache;
+
+
+ create table data_2015_02( 
+  CONSTRAINT __data_2015_02_check 
+  CHECK(valid >= '2015-02-01 00:00+00'::timestamptz 
+        and valid < '2015-03-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_02_grid_idx on data_2015_02(grid_idx);
+CREATE INDEX data_2015_02_valid_idx on data_2015_02(valid);
+GRANT SELECT on data_2015_02 to nobody,apache;
+
+
+ create table data_2015_03( 
+  CONSTRAINT __data_2015_03_check 
+  CHECK(valid >= '2015-03-01 00:00+00'::timestamptz 
+        and valid < '2015-04-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_03_grid_idx on data_2015_03(grid_idx);
+CREATE INDEX data_2015_03_valid_idx on data_2015_03(valid);
+GRANT SELECT on data_2015_03 to nobody,apache;
+
+
+ create table data_2015_04( 
+  CONSTRAINT __data_2015_04_check 
+  CHECK(valid >= '2015-04-01 00:00+00'::timestamptz 
+        and valid < '2015-05-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_04_grid_idx on data_2015_04(grid_idx);
+CREATE INDEX data_2015_04_valid_idx on data_2015_04(valid);
+GRANT SELECT on data_2015_04 to nobody,apache;
+
+
+ create table data_2015_05( 
+  CONSTRAINT __data_2015_05_check 
+  CHECK(valid >= '2015-05-01 00:00+00'::timestamptz 
+        and valid < '2015-06-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_05_grid_idx on data_2015_05(grid_idx);
+CREATE INDEX data_2015_05_valid_idx on data_2015_05(valid);
+GRANT SELECT on data_2015_05 to nobody,apache;
+
+
+ create table data_2015_06( 
+  CONSTRAINT __data_2015_06_check 
+  CHECK(valid >= '2015-06-01 00:00+00'::timestamptz 
+        and valid < '2015-07-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_06_grid_idx on data_2015_06(grid_idx);
+CREATE INDEX data_2015_06_valid_idx on data_2015_06(valid);
+GRANT SELECT on data_2015_06 to nobody,apache;
+
+
+ create table data_2015_07( 
+  CONSTRAINT __data_2015_07_check 
+  CHECK(valid >= '2015-07-01 00:00+00'::timestamptz 
+        and valid < '2015-08-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_07_grid_idx on data_2015_07(grid_idx);
+CREATE INDEX data_2015_07_valid_idx on data_2015_07(valid);
+GRANT SELECT on data_2015_07 to nobody,apache;
+
+
+ create table data_2015_08( 
+  CONSTRAINT __data_2015_08_check 
+  CHECK(valid >= '2015-08-01 00:00+00'::timestamptz 
+        and valid < '2015-09-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_08_grid_idx on data_2015_08(grid_idx);
+CREATE INDEX data_2015_08_valid_idx on data_2015_08(valid);
+GRANT SELECT on data_2015_08 to nobody,apache;
+
+
+ create table data_2015_09( 
+  CONSTRAINT __data_2015_09_check 
+  CHECK(valid >= '2015-09-01 00:00+00'::timestamptz 
+        and valid < '2015-10-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_09_grid_idx on data_2015_09(grid_idx);
+CREATE INDEX data_2015_09_valid_idx on data_2015_09(valid);
+GRANT SELECT on data_2015_09 to nobody,apache;
+
+
+ create table data_2015_10( 
+  CONSTRAINT __data_2015_10_check 
+  CHECK(valid >= '2015-10-01 00:00+00'::timestamptz 
+        and valid < '2015-11-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_10_grid_idx on data_2015_10(grid_idx);
+CREATE INDEX data_2015_10_valid_idx on data_2015_10(valid);
+GRANT SELECT on data_2015_10 to nobody,apache;
+
+
+ create table data_2015_11( 
+  CONSTRAINT __data_2015_11_check 
+  CHECK(valid >= '2015-11-01 00:00+00'::timestamptz 
+        and valid < '2015-12-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_11_grid_idx on data_2015_11(grid_idx);
+CREATE INDEX data_2015_11_valid_idx on data_2015_11(valid);
+GRANT SELECT on data_2015_11 to nobody,apache;
+
+
+ create table data_2015_12( 
+  CONSTRAINT __data_2015_12_check 
+  CHECK(valid >= '2015-12-01 00:00+00'::timestamptz 
+        and valid < '2016-01-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2015_12_grid_idx on data_2015_12(grid_idx);
+CREATE INDEX data_2015_12_valid_idx on data_2015_12(valid);
+GRANT SELECT on data_2015_12 to nobody,apache;
+ create table data_2016_01( 
+  CONSTRAINT __data_2016_01_check 
+  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz 
+        and valid < '2016-02-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_01_grid_idx on data_2016_01(grid_idx);
+CREATE INDEX data_2016_01_valid_idx on data_2016_01(valid);
+GRANT SELECT on data_2016_01 to nobody,apache;
+
+
+ create table data_2016_02( 
+  CONSTRAINT __data_2016_02_check 
+  CHECK(valid >= '2016-02-01 00:00+00'::timestamptz 
+        and valid < '2016-03-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_02_grid_idx on data_2016_02(grid_idx);
+CREATE INDEX data_2016_02_valid_idx on data_2016_02(valid);
+GRANT SELECT on data_2016_02 to nobody,apache;
+
+
+ create table data_2016_03( 
+  CONSTRAINT __data_2016_03_check 
+  CHECK(valid >= '2016-03-01 00:00+00'::timestamptz 
+        and valid < '2016-04-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_03_grid_idx on data_2016_03(grid_idx);
+CREATE INDEX data_2016_03_valid_idx on data_2016_03(valid);
+GRANT SELECT on data_2016_03 to nobody,apache;
+
+
+ create table data_2016_04( 
+  CONSTRAINT __data_2016_04_check 
+  CHECK(valid >= '2016-04-01 00:00+00'::timestamptz 
+        and valid < '2016-05-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_04_grid_idx on data_2016_04(grid_idx);
+CREATE INDEX data_2016_04_valid_idx on data_2016_04(valid);
+GRANT SELECT on data_2016_04 to nobody,apache;
+
+
+ create table data_2016_05( 
+  CONSTRAINT __data_2016_05_check 
+  CHECK(valid >= '2016-05-01 00:00+00'::timestamptz 
+        and valid < '2016-06-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_05_grid_idx on data_2016_05(grid_idx);
+CREATE INDEX data_2016_05_valid_idx on data_2016_05(valid);
+GRANT SELECT on data_2016_05 to nobody,apache;
+
+
+ create table data_2016_06( 
+  CONSTRAINT __data_2016_06_check 
+  CHECK(valid >= '2016-06-01 00:00+00'::timestamptz 
+        and valid < '2016-07-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_06_grid_idx on data_2016_06(grid_idx);
+CREATE INDEX data_2016_06_valid_idx on data_2016_06(valid);
+GRANT SELECT on data_2016_06 to nobody,apache;
+
+
+ create table data_2016_07( 
+  CONSTRAINT __data_2016_07_check 
+  CHECK(valid >= '2016-07-01 00:00+00'::timestamptz 
+        and valid < '2016-08-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_07_grid_idx on data_2016_07(grid_idx);
+CREATE INDEX data_2016_07_valid_idx on data_2016_07(valid);
+GRANT SELECT on data_2016_07 to nobody,apache;
+
+
+ create table data_2016_08( 
+  CONSTRAINT __data_2016_08_check 
+  CHECK(valid >= '2016-08-01 00:00+00'::timestamptz 
+        and valid < '2016-09-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_08_grid_idx on data_2016_08(grid_idx);
+CREATE INDEX data_2016_08_valid_idx on data_2016_08(valid);
+GRANT SELECT on data_2016_08 to nobody,apache;
+
+
+ create table data_2016_09( 
+  CONSTRAINT __data_2016_09_check 
+  CHECK(valid >= '2016-09-01 00:00+00'::timestamptz 
+        and valid < '2016-10-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_09_grid_idx on data_2016_09(grid_idx);
+CREATE INDEX data_2016_09_valid_idx on data_2016_09(valid);
+GRANT SELECT on data_2016_09 to nobody,apache;
+
+
+ create table data_2016_10( 
+  CONSTRAINT __data_2016_10_check 
+  CHECK(valid >= '2016-10-01 00:00+00'::timestamptz 
+        and valid < '2016-11-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_10_grid_idx on data_2016_10(grid_idx);
+CREATE INDEX data_2016_10_valid_idx on data_2016_10(valid);
+GRANT SELECT on data_2016_10 to nobody,apache;
+
+
+ create table data_2016_11( 
+  CONSTRAINT __data_2016_11_check 
+  CHECK(valid >= '2016-11-01 00:00+00'::timestamptz 
+        and valid < '2016-12-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_11_grid_idx on data_2016_11(grid_idx);
+CREATE INDEX data_2016_11_valid_idx on data_2016_11(valid);
+GRANT SELECT on data_2016_11 to nobody,apache;
+
+
+ create table data_2016_12( 
+  CONSTRAINT __data_2016_12_check 
+  CHECK(valid >= '2016-12-01 00:00+00'::timestamptz 
+        and valid < '2017-01-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2016_12_grid_idx on data_2016_12(grid_idx);
+CREATE INDEX data_2016_12_valid_idx on data_2016_12(valid);
+GRANT SELECT on data_2016_12 to nobody,apache;
+ create table data_2017_01( 
+  CONSTRAINT __data_2017_01_check 
+  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz 
+        and valid < '2017-02-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_01_grid_idx on data_2017_01(grid_idx);
+CREATE INDEX data_2017_01_valid_idx on data_2017_01(valid);
+GRANT SELECT on data_2017_01 to nobody,apache;
+
+
+ create table data_2017_02( 
+  CONSTRAINT __data_2017_02_check 
+  CHECK(valid >= '2017-02-01 00:00+00'::timestamptz 
+        and valid < '2017-03-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_02_grid_idx on data_2017_02(grid_idx);
+CREATE INDEX data_2017_02_valid_idx on data_2017_02(valid);
+GRANT SELECT on data_2017_02 to nobody,apache;
+
+
+ create table data_2017_03( 
+  CONSTRAINT __data_2017_03_check 
+  CHECK(valid >= '2017-03-01 00:00+00'::timestamptz 
+        and valid < '2017-04-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_03_grid_idx on data_2017_03(grid_idx);
+CREATE INDEX data_2017_03_valid_idx on data_2017_03(valid);
+GRANT SELECT on data_2017_03 to nobody,apache;
+
+
+ create table data_2017_04( 
+  CONSTRAINT __data_2017_04_check 
+  CHECK(valid >= '2017-04-01 00:00+00'::timestamptz 
+        and valid < '2017-05-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_04_grid_idx on data_2017_04(grid_idx);
+CREATE INDEX data_2017_04_valid_idx on data_2017_04(valid);
+GRANT SELECT on data_2017_04 to nobody,apache;
+
+
+ create table data_2017_05( 
+  CONSTRAINT __data_2017_05_check 
+  CHECK(valid >= '2017-05-01 00:00+00'::timestamptz 
+        and valid < '2017-06-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_05_grid_idx on data_2017_05(grid_idx);
+CREATE INDEX data_2017_05_valid_idx on data_2017_05(valid);
+GRANT SELECT on data_2017_05 to nobody,apache;
+
+
+ create table data_2017_06( 
+  CONSTRAINT __data_2017_06_check 
+  CHECK(valid >= '2017-06-01 00:00+00'::timestamptz 
+        and valid < '2017-07-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_06_grid_idx on data_2017_06(grid_idx);
+CREATE INDEX data_2017_06_valid_idx on data_2017_06(valid);
+GRANT SELECT on data_2017_06 to nobody,apache;
+
+
+ create table data_2017_07( 
+  CONSTRAINT __data_2017_07_check 
+  CHECK(valid >= '2017-07-01 00:00+00'::timestamptz 
+        and valid < '2017-08-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_07_grid_idx on data_2017_07(grid_idx);
+CREATE INDEX data_2017_07_valid_idx on data_2017_07(valid);
+GRANT SELECT on data_2017_07 to nobody,apache;
+
+
+ create table data_2017_08( 
+  CONSTRAINT __data_2017_08_check 
+  CHECK(valid >= '2017-08-01 00:00+00'::timestamptz 
+        and valid < '2017-09-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_08_grid_idx on data_2017_08(grid_idx);
+CREATE INDEX data_2017_08_valid_idx on data_2017_08(valid);
+GRANT SELECT on data_2017_08 to nobody,apache;
+
+
+ create table data_2017_09( 
+  CONSTRAINT __data_2017_09_check 
+  CHECK(valid >= '2017-09-01 00:00+00'::timestamptz 
+        and valid < '2017-10-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_09_grid_idx on data_2017_09(grid_idx);
+CREATE INDEX data_2017_09_valid_idx on data_2017_09(valid);
+GRANT SELECT on data_2017_09 to nobody,apache;
+
+
+ create table data_2017_10( 
+  CONSTRAINT __data_2017_10_check 
+  CHECK(valid >= '2017-10-01 00:00+00'::timestamptz 
+        and valid < '2017-11-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_10_grid_idx on data_2017_10(grid_idx);
+CREATE INDEX data_2017_10_valid_idx on data_2017_10(valid);
+GRANT SELECT on data_2017_10 to nobody,apache;
+
+
+ create table data_2017_11( 
+  CONSTRAINT __data_2017_11_check 
+  CHECK(valid >= '2017-11-01 00:00+00'::timestamptz 
+        and valid < '2017-12-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_11_grid_idx on data_2017_11(grid_idx);
+CREATE INDEX data_2017_11_valid_idx on data_2017_11(valid);
+GRANT SELECT on data_2017_11 to nobody,apache;
+
+
+ create table data_2017_12( 
+  CONSTRAINT __data_2017_12_check 
+  CHECK(valid >= '2017-12-01 00:00+00'::timestamptz 
+        and valid < '2018-01-01 00:00+00')) 
+  INHERITS (data);
+CREATE INDEX data_2017_12_grid_idx on data_2017_12(grid_idx);
+CREATE INDEX data_2017_12_valid_idx on data_2017_12(valid);
+GRANT SELECT on data_2017_12 to nobody,apache;

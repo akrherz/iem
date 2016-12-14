@@ -1,5 +1,12 @@
 CREATE EXTENSION postgis;
 
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (2, now());
+
 --- Tables loaded by shp2pgsql
 ---   + counties
 ---   + hrap_polygons
@@ -531,3 +538,44 @@ CREATE INDEX daily_rainfall_2014_hrap_i_idx on
   daily_rainfall_2014(hrap_i);
 CREATE INDEX daily_rainfall_2014_valid_idx on
   daily_rainfall_2014(valid);
+  
+  CREATE TABLE monthly_rainfall_2015() inherits (monthly_rainfall);
+GRANT SELECT on monthly_rainfall_2015 to nobody,apache;
+ALTER TABLE monthly_rainfall_2015 add constraint __monthly_rainfall_2015__constraint
+  CHECK(valid >= '2015-01-01'::date and valid < '2016-01-01'::date);
+
+CREATE TABLE daily_rainfall_2015() inherits (daily_rainfall);
+GRANT SELECT on daily_rainfall_2015 to nobody,apache;
+ALTER TABLE daily_rainfall_2015 add constraint __daily_rainfall_2015__constraint
+  CHECK(valid >= '2015-01-01'::date and valid < '2016-01-01'::date);
+CREATE INDEX daily_rainfall_2015_hrap_i_idx on
+  daily_rainfall_2015(hrap_i);
+CREATE INDEX daily_rainfall_2015_valid_idx on
+  daily_rainfall_2015(valid);
+CREATE TABLE monthly_rainfall_2016() inherits (monthly_rainfall);
+GRANT SELECT on monthly_rainfall_2016 to nobody,apache;
+ALTER TABLE monthly_rainfall_2016 add constraint __monthly_rainfall_2016__constraint
+  CHECK(valid >= '2016-01-01'::date and valid < '2017-01-01'::date);
+
+CREATE TABLE daily_rainfall_2016() inherits (daily_rainfall);
+GRANT SELECT on daily_rainfall_2016 to nobody,apache;
+ALTER TABLE daily_rainfall_2016 add constraint __daily_rainfall_2016__constraint
+  CHECK(valid >= '2016-01-01'::date and valid < '2017-01-01'::date);
+CREATE INDEX daily_rainfall_2016_hrap_i_idx on
+  daily_rainfall_2016(hrap_i);
+CREATE INDEX daily_rainfall_2016_valid_idx on
+  daily_rainfall_2016(valid);
+CREATE TABLE monthly_rainfall_2017() inherits (monthly_rainfall);
+GRANT SELECT on monthly_rainfall_2017 to nobody,apache;
+ALTER TABLE monthly_rainfall_2017 add constraint __monthly_rainfall_2017__constraint
+  CHECK(valid >= '2017-01-01'::date and valid < '2018-01-01'::date);
+
+CREATE TABLE daily_rainfall_2017() inherits (daily_rainfall);
+GRANT SELECT on daily_rainfall_2017 to nobody,apache;
+ALTER TABLE daily_rainfall_2017 add constraint __daily_rainfall_2017__constraint
+  CHECK(valid >= '2017-01-01'::date and valid < '2018-01-01'::date);
+CREATE INDEX daily_rainfall_2017_hrap_i_idx on
+  daily_rainfall_2017(hrap_i);
+CREATE INDEX daily_rainfall_2017_valid_idx on
+  daily_rainfall_2017(valid);
+  

@@ -1,3 +1,10 @@
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (4, now());
+
 ---
 --- Stuart Smith Park Hydrology Learning Lab
 ---
@@ -403,4 +410,184 @@ create table flux2014(
   INHERITS (flux_data);
 CREATE INDEX flux2014_idx on flux2014(station, valid);
 GRANT SELECT on flux2014 to nobody,apache;
+
+create table t2015(
+  CONSTRAINT __t2015_check
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
+        and valid < '2016-01-01 00:00+00'))
+  INHERITS (alldata);
+CREATE INDEX t2015_idx on t2015(station, valid);
+GRANT SELECT on t2015 to nobody,apache;
+
+create table flux2015(
+  CONSTRAINT __flux2015_check
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
+        and valid < '2016-01-01 00:00+00'))
+  INHERITS (flux_data);
+CREATE INDEX flux2015_idx on flux2015(station, valid);
+GRANT SELECT on flux2015 to nobody,apache;
+
+--
+-- Storage of ISU FEEL Data
+CREATE TABLE feel_data_daily(
+        valid date UNIQUE,
+        AirTemp_Max real,
+        AirTemp_Min real,
+        Rain_Tot real,
+        Windspeed_Max real,
+        SolarRad_MJ_Tot real
+);
+GRANT SELECT on feel_data_daily to nobody,apache;
+
+CREATE TABLE feel_data_hourly(
+        valid timestamptz UNIQUE,
+        BattVolt_Avg real,
+        PanTemp_Avg real,
+        AirTemp_Avg real,
+        RH_Avg real,
+        sat_vp_Avg real,
+        act_vp_Avg real,
+        WindDir_Avg real,
+        Windspeed_Avg real,
+        SolarRad_mV_Avg real,
+        SolarRad_W_Avg real,
+        Soil_Temp_5_Avg real,
+        Rain_Tot real,
+        LWS1_Avg real,
+        LWS2_Avg real,
+        LWS3_Avg real,
+        LWS1_Ohms real,
+        LWS2_Ohms real,
+        LWS3_Ohms real,
+        LWS1_Ohms_Hst real,
+        LWS2_Ohms_Hst real,
+        LWS3_Ohms_Hst real
+);
+GRANT SELECT on feel_data_hourly to nobody,apache;
+
+-- Storage of ncdc HPD data
+--
+CREATE TABLE hpd_alldata(
+  station varchar(6),
+  valid timestamptz,
+  counter real,
+  tmpc real,
+  battery real,
+  calc_precip real
+);
+GRANT SELECT on hpd_alldata to nobody,apache;
+
+-- Individual years
+CREATE TABLE hpd_2009(
+	CONSTRAINT __hpd_2009_check
+	CHECK(valid >= '2009-01-01 00:00+00'::timestamptz
+	      and valid < '2010-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2009 to nobody,apache;
+CREATE INDEX hpd_2009_station_idx on hpd_2009(station);
+
+CREATE TABLE hpd_2010(
+	CONSTRAINT __hpd_2010_check
+	CHECK(valid >= '2010-01-01 00:00+00'::timestamptz
+	      and valid < '2011-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2010 to nobody,apache;
+CREATE INDEX hpd_2010_station_idx on hpd_2010(station);
+
+CREATE TABLE hpd_2011(
+	CONSTRAINT __hpd_2011_check
+	CHECK(valid >= '2011-01-01 00:00+00'::timestamptz
+	      and valid < '2012-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2011 to nobody,apache;
+CREATE INDEX hpd_2011_station_idx on hpd_2011(station);
+
+CREATE TABLE hpd_2012(
+	CONSTRAINT __hpd_2012_check
+	CHECK(valid >= '2012-01-01 00:00+00'::timestamptz
+	      and valid < '2013-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2012 to nobody,apache;
+CREATE INDEX hpd_2012_station_idx on hpd_2012(station);
+
+CREATE TABLE hpd_2013(
+	CONSTRAINT __hpd_2013_check
+	CHECK(valid >= '2013-01-01 00:00+00'::timestamptz
+	      and valid < '2014-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2013 to nobody,apache;
+CREATE INDEX hpd_2013_station_idx on hpd_2013(station);
+
+CREATE TABLE hpd_2014(
+	CONSTRAINT __hpd_2014_check
+	CHECK(valid >= '2014-01-01 00:00+00'::timestamptz
+	      and valid < '2015-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2014 to nobody,apache;
+CREATE INDEX hpd_2014_station_idx on hpd_2014(station);
+
+CREATE TABLE hpd_2015(
+	CONSTRAINT __hpd_2015_check
+	CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
+	      and valid < '2016-01-01 00:00+00'::timestamptz)
+	)
+	INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2015 to nobody,apache;
+CREATE INDEX hpd_2015_station_idx on hpd_2015(station);
+
+create table t2016(
+  CONSTRAINT __t2016_check
+  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz
+        and valid < '2017-01-01 00:00+00'))
+  INHERITS (alldata);
+CREATE INDEX t2016_idx on t2016(station, valid);
+GRANT SELECT on t2016 to nobody,apache;
+
+create table flux2016(
+  CONSTRAINT __flux2016_check
+  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz
+        and valid < '2017-01-01 00:00+00'))
+  INHERITS (flux_data);
+CREATE INDEX flux2016_idx on flux2016(station, valid);
+GRANT SELECT on flux2016 to nobody,apache;
+
+CREATE TABLE hpd_2016(
+        CONSTRAINT __hpd_2016_check
+        CHECK(valid >= '2016-01-01 00:00+00'::timestamptz
+              and valid < '2017-01-01 00:00+00'::timestamptz)
+        )
+        INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2016 to nobody,apache;
+CREATE INDEX hpd_2016_station_idx on hpd_2016(station);
+
+create table t2017(
+  CONSTRAINT __t2017_check
+  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz
+        and valid < '2018-01-01 00:00+00'::timestamptz))
+  INHERITS (alldata);
+CREATE INDEX t2017_idx on t2017(station, valid);
+GRANT SELECT on t2017 to nobody,apache;
+
+create table flux2017(
+  CONSTRAINT __flux2017_check
+  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz
+        and valid < '2018-01-01 00:00+00'::timestamptz))
+  INHERITS (flux_data);
+CREATE INDEX flux2017_idx on flux2017(station, valid);
+GRANT SELECT on flux2017 to nobody,apache;
+
+CREATE TABLE hpd_2017(
+        CONSTRAINT __hpd_2017_check
+        CHECK(valid >= '2017-01-01 00:00+00'::timestamptz
+              and valid < '2018-01-01 00:00+00'::timestamptz)
+        )
+        INHERITS (hpd_alldata);
+GRANT SELECT on hpd_2017 to nobody,apache;
+CREATE INDEX hpd_2017_station_idx on hpd_2017(station);
 

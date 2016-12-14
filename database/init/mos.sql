@@ -1,3 +1,10 @@
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (2, now());
+
 CREATE TABLE model_gridpoint (
     station character varying(4),
     model character varying(12),
@@ -297,3 +304,57 @@ create table t2014(
 CREATE INDEX t2014_idx on t2014(station, model, runtime);
 CREATE INDEX t2014_runtime_idx on t2014(runtime);
 GRANT SELECT on t2014 to nobody,apache;
+
+create table model_gridpoint_2015(
+  CONSTRAINT __model_gridpoint_2015_check
+  CHECK(runtime >= '2015-01-01 00:00+00'::timestamptz
+        and runtime < '2016-01-01 00:00+00'))
+  INHERITS (model_gridpoint);
+CREATE INDEX model_gridpoint_2015_idx
+        on model_gridpoint_2015(station, model, runtime);
+GRANT SELECT on model_gridpoint_2015 to nobody,apache;
+
+create table t2015(
+  CONSTRAINT __t2015_check
+  CHECK(runtime >= '2015-01-01 00:00+00'::timestamptz
+        and runtime < '2016-01-01 00:00+00'))
+  INHERITS (alldata);
+CREATE INDEX t2015_idx on t2015(station, model, runtime);
+CREATE INDEX t2015_runtime_idx on t2015(runtime);
+GRANT SELECT on t2015 to nobody,apache;
+
+create table model_gridpoint_2016(
+  CONSTRAINT __model_gridpoint_2016_check
+  CHECK(runtime >= '2016-01-01 00:00+00'::timestamptz
+        and runtime < '2017-01-01 00:00+00'))
+  INHERITS (model_gridpoint);
+CREATE INDEX model_gridpoint_2016_idx
+        on model_gridpoint_2016(station, model, runtime);
+GRANT SELECT on model_gridpoint_2016 to nobody,apache;
+
+create table t2016(
+  CONSTRAINT __t2016_check
+  CHECK(runtime >= '2016-01-01 00:00+00'::timestamptz
+        and runtime < '2017-01-01 00:00+00'))
+  INHERITS (alldata);
+CREATE INDEX t2016_idx on t2016(station, model, runtime);
+CREATE INDEX t2016_runtime_idx on t2016(runtime);
+GRANT SELECT on t2016 to nobody,apache;
+
+create table model_gridpoint_2017(
+  CONSTRAINT __model_gridpoint_2017_check
+  CHECK(runtime >= '2017-01-01 00:00+00'::timestamptz
+        and runtime < '2018-01-01 00:00+00'::timestamptz))
+  INHERITS (model_gridpoint);
+CREATE INDEX model_gridpoint_2017_idx
+        on model_gridpoint_2017(station, model, runtime);
+GRANT SELECT on model_gridpoint_2017 to nobody,apache;
+
+create table t2017(
+  CONSTRAINT __t2017_check
+  CHECK(runtime >= '2017-01-01 00:00+00'::timestamptz
+        and runtime < '2018-01-01 00:00+00'::timestamptz))
+  INHERITS (alldata);
+CREATE INDEX t2017_idx on t2017(station, model, runtime);
+CREATE INDEX t2017_runtime_idx on t2017(runtime);
+GRANT SELECT on t2017 to nobody,apache;

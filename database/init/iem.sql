@@ -1,5 +1,11 @@
 CREATE EXTENSION postgis;
 
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (11, now());
 
 CREATE TABLE stations(
         id varchar(20),
@@ -33,7 +39,9 @@ CREATE TABLE stations(
         sigstage_record real,
         ugc_county char(6),
         ugc_zone char(6),
-        ncdc varchar(11)
+        ncdc varchar(11),
+        temp24_hour smallint,
+        precip24_hour smallint
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 create index stations_iemid_idx on stations(iemid);
@@ -160,7 +168,9 @@ CREATE TABLE cli_data(
   snow_jun1_normal float,
   snow_jul1_normal float,
   snow_dec1_normal float,
-  snow_month_normal float
+  snow_month_normal float,
+  precip_jun1 real,
+  precip_jun1_normal real
 );
 CREATE UNIQUE index cli_data_idx on cli_data(station,valid);
 GRANT SELECT on cli_data to nobody,apache;
@@ -265,7 +275,9 @@ CREATE TABLE current_tmp(
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    presentwx varchar(24)
+    presentwx varchar(24),
+    battery real,
+    water_tmpf real
 );
 
 CREATE TABLE current (
@@ -328,7 +340,9 @@ CREATE TABLE current (
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    presentwx varchar(24)
+    presentwx varchar(24),
+    battery real
+    water_tmpf real
 );
 CREATE UNIQUE index current_iemid_idx on current(iemid);
 GRANT SELECT on current to apache,nobody;
@@ -393,7 +407,9 @@ CREATE TABLE current_log (
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    presentwx varchar(24)
+    presentwx varchar(24),
+    battery real,
+    water_tmpf real
 );
 ALTER TABLE current_log SET WITH oids;
 
@@ -437,7 +453,14 @@ CREATE TABLE summary (
     coop_tmpf real,
     coop_valid timestamp with time zone,
     et_inch real,
-    srad_mj real
+    srad_mj real,
+    avg_sknt real,
+    vector_avg_drct real,
+    avg_rh real,
+    min_rh real,
+    max_rh real,
+    max_water_tmpf real,
+    min_water_tmpf real
 );
 GRANT SELECT on summary to nobody,apache;
 
@@ -1967,21 +1990,6 @@ alter table summary_2014 alter snoww set default -99;
 alter table summary_2014 alter max_drct set default -99;
 alter table summary_2014 add foreign key(iemid) references stations(iemid);
 
-
-CREATE TABLE trend_15m(
-	iemid int REFERENCES stations(iemid),
-	updated timestamp with time zone,
-	alti_15m real
-);
-GRANT SELECT on trend_15m to nobody,apache;
-
-CREATE TABLE trend_1h(
-	iemid int REFERENCES stations(iemid),
-	updated timestamp with time zone,
-	alti_1h real
-);
-GRANT SELECT on trend_1h to nobody,apache;
-
 CREATE TABLE rwis_locations(
   id smallint UNIQUE,
   nwsli char(5)
@@ -2181,3 +2189,348 @@ CREATE FUNCTION zero_record(text) RETURNS boolean
     RETURN true;
   END;
 $_$;
+
+create table hourly_2015( 
+  CONSTRAINT __hourly_2015_check 
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz 
+        and valid < '2016-01-01 00:00+00')) 
+  INHERITS (hourly);
+CREATE INDEX hourly_2015_idx on hourly_2015(station, network, valid);
+CREATE INDEX hourly_2015_valid_idx on hourly_2015(valid);
+GRANT SELECT on hourly_2015 to nobody,apache;
+CREATE RULE replace_hourly_2015 as 
+    ON INSERT TO hourly_2015
+   WHERE (EXISTS ( SELECT 1
+           FROM hourly_2015
+          WHERE hourly_2015.station::text = new.station::text 
+          AND hourly_2015.network::text = new.network::text 
+          AND hourly_2015.valid = new.valid)) DO INSTEAD  
+         UPDATE hourly_2015 SET phour = new.phour
+  WHERE hourly_2015.station::text = new.station::text AND 
+  hourly_2015.network::text = new.network::text AND 
+  hourly_2015.valid = new.valid;
+
+create table summary_2015( 
+  CONSTRAINT __summary_2015_check 
+  CHECK(day >= '2015-01-01'::date 
+        and day < '2016-01-01'::date)) 
+  INHERITS (summary);
+CREATE INDEX summary_2015_day_idx on summary_2015(day);
+CREATE INDEX summary_2015_iemid_day_idx on summary_2015(iemid, day);
+GRANT SELECT on summary_2015 to nobody,apache;
+alter table summary_2015 alter max_tmpf set default -99;
+alter table summary_2015 alter min_tmpf set default 99;
+alter table summary_2015 alter max_sknt set default 0;
+alter table summary_2015 alter max_gust set default 0;
+alter table summary_2015 alter max_dwpf set default -99;
+alter table summary_2015 alter min_dwpf set default 99;
+alter table summary_2015 alter pday set default -99;
+alter table summary_2015 alter pmonth set default -99;
+alter table summary_2015 alter snoww set default -99;
+alter table summary_2015 alter max_drct set default -99;
+alter table summary_2015 
+  add foreign key(iemid)
+  references stations(iemid) ON DELETE CASCADE;
+
+  --
+-- Set cascading deletes when an entry is removed from the stations table
+--
+ALTER TABLE current
+  DROP CONSTRAINT current_iemid_fkey,
+  ADD CONSTRAINT current_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE current_log
+  DROP CONSTRAINT current_log_iemid_fkey,
+  ADD CONSTRAINT current_log_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE current_qc
+  DROP CONSTRAINT current_qc_iemid_fkey,
+  ADD CONSTRAINT current_qc_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE current_tmp
+  DROP CONSTRAINT current_tmp_iemid_fkey,
+  ADD CONSTRAINT current_tmp_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE events
+  DROP CONSTRAINT events_iemid_fkey,
+  ADD CONSTRAINT events_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE hourly
+  DROP CONSTRAINT hourly_iemid_fkey,
+  ADD CONSTRAINT hourly_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE summary_2014
+  DROP CONSTRAINT summary_2014_iemid_fkey,
+  ADD CONSTRAINT summary_2014_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE summary_2015
+  DROP CONSTRAINT summary_2015_iemid_fkey,
+  ADD CONSTRAINT summary_2015_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE summary
+  DROP CONSTRAINT summary_iemid_fkey,
+  ADD CONSTRAINT summary_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE trend_1h
+  DROP CONSTRAINT trend_1h_iemid_fkey,
+  ADD CONSTRAINT trend_1h_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+ALTER TABLE summary_1941
+  ADD CONSTRAINT summary_1941_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1942
+  ADD CONSTRAINT summary_1942_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1943
+  ADD CONSTRAINT summary_1943_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1944
+  ADD CONSTRAINT summary_1944_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1945
+  ADD CONSTRAINT summary_1945_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1946
+  ADD CONSTRAINT summary_1946_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1947
+  ADD CONSTRAINT summary_1947_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1948
+  ADD CONSTRAINT summary_1948_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1949
+  ADD CONSTRAINT summary_1949_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1950
+  ADD CONSTRAINT summary_1950_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1951
+  ADD CONSTRAINT summary_1951_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1952
+  ADD CONSTRAINT summary_1952_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1953
+  ADD CONSTRAINT summary_1953_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1954
+  ADD CONSTRAINT summary_1954_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1955
+  ADD CONSTRAINT summary_1955_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1956
+  ADD CONSTRAINT summary_1956_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1957
+  ADD CONSTRAINT summary_1957_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1958
+  ADD CONSTRAINT summary_1958_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1959
+  ADD CONSTRAINT summary_1959_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1960
+  ADD CONSTRAINT summary_1960_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1961
+  ADD CONSTRAINT summary_1961_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1962
+  ADD CONSTRAINT summary_1962_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1963
+  ADD CONSTRAINT summary_1963_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1964
+  ADD CONSTRAINT summary_1964_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1965
+  ADD CONSTRAINT summary_1965_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1966
+  ADD CONSTRAINT summary_1966_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1967
+  ADD CONSTRAINT summary_1967_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1968
+  ADD CONSTRAINT summary_1968_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1969
+  ADD CONSTRAINT summary_1969_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1970
+  ADD CONSTRAINT summary_1970_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1971
+  ADD CONSTRAINT summary_1971_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1972
+  ADD CONSTRAINT summary_1972_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1973
+  ADD CONSTRAINT summary_1973_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1974
+  ADD CONSTRAINT summary_1974_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1975
+  ADD CONSTRAINT summary_1975_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1976
+  ADD CONSTRAINT summary_1976_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1977
+  ADD CONSTRAINT summary_1977_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1978
+  ADD CONSTRAINT summary_1978_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1979
+  ADD CONSTRAINT summary_1979_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1980
+  ADD CONSTRAINT summary_1980_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1981
+  ADD CONSTRAINT summary_1981_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1982
+  ADD CONSTRAINT summary_1982_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1983
+  ADD CONSTRAINT summary_1983_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1984
+  ADD CONSTRAINT summary_1984_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1985
+  ADD CONSTRAINT summary_1985_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1986
+  ADD CONSTRAINT summary_1986_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1987
+  ADD CONSTRAINT summary_1987_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1988
+  ADD CONSTRAINT summary_1988_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1989
+  ADD CONSTRAINT summary_1989_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1990
+  ADD CONSTRAINT summary_1990_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1991
+  ADD CONSTRAINT summary_1991_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1992
+  ADD CONSTRAINT summary_1992_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1993
+  ADD CONSTRAINT summary_1993_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+ALTER TABLE summary_1994
+  ADD CONSTRAINT summary_1994_iemid_fkey FOREIGN KEY (iemid)
+  REFERENCES stations(iemid) ON DELETE CASCADE;
+
+-- Create the 2016 tables while we are messing around here
+create table hourly_2016( 
+  CONSTRAINT __hourly_2016_check 
+  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz 
+        and valid < '2017-01-01 00:00+00')) 
+  INHERITS (hourly);
+CREATE INDEX hourly_2016_idx on hourly_2016(station, network, valid);
+CREATE INDEX hourly_2016_valid_idx on hourly_2016(valid);
+GRANT SELECT on hourly_2016 to nobody,apache;
+CREATE RULE replace_hourly_2016 as 
+    ON INSERT TO hourly_2016
+   WHERE (EXISTS ( SELECT 1
+           FROM hourly_2016
+          WHERE hourly_2016.station::text = new.station::text 
+          AND hourly_2016.network::text = new.network::text 
+          AND hourly_2016.valid = new.valid)) DO INSTEAD  
+         UPDATE hourly_2016 SET phour = new.phour
+  WHERE hourly_2016.station::text = new.station::text AND 
+  hourly_2016.network::text = new.network::text AND 
+  hourly_2016.valid = new.valid;
+
+create table summary_2016( 
+  CONSTRAINT __summary_2016_check 
+  CHECK(day >= '2016-01-01'::date 
+        and day < '2017-01-01'::date)) 
+  INHERITS (summary);
+CREATE INDEX summary_2016_day_idx on summary_2016(day);
+CREATE UNIQUE INDEX summary_2016_iemid_day_idx on summary_2016(iemid, day);
+GRANT SELECT on summary_2016 to nobody,apache;
+alter table summary_2016 
+  add foreign key(iemid)
+  references stations(iemid) ON DELETE CASCADE;
+
+DO $$
+DECLARE
+  rec record;
+BEGIN
+FOR rec in SELECT generate_series(1928, 1940) as year LOOP
+EXECUTE format('create table summary_'|| rec.year || '(
+  CONSTRAINT __summary_'|| rec.year || '_check
+  CHECK(day >= %L::date
+        and day <= %L::date))
+  INHERITS (summary)', rec.year || '-01-01', rec.year || '-12-31');
+EXECUTE 'CREATE INDEX summary_'|| rec.year || '_day_idx on summary_'|| rec.year || '(day)';
+EXECUTE 'CREATE UNIQUE INDEX summary_'|| rec.year || '_iemid_day_idx on summary_'|| rec.year || '(iemid, day)';
+EXECUTE 'GRANT SELECT on summary_'|| rec.year || ' to nobody,apache';
+EXECUTE 'alter table summary_'|| rec.year || '
+  add foreign key(iemid)
+  references stations(iemid) ON DELETE CASCADE';
+END LOOP;
+END$$;
+
+-- Create the 2017 tables while we are messing around here
+create table hourly_2017(
+  CONSTRAINT __hourly_2017_check
+  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz
+        and valid < '2018-01-01 00:00+00'::timestamptz))
+  INHERITS (hourly);
+CREATE INDEX hourly_2017_idx on hourly_2017(station, network, valid);
+CREATE INDEX hourly_2017_valid_idx on hourly_2017(valid);
+GRANT SELECT on hourly_2017 to nobody,apache;
+CREATE RULE replace_hourly_2017 as
+    ON INSERT TO hourly_2017
+   WHERE (EXISTS ( SELECT 1
+           FROM hourly_2017
+          WHERE hourly_2017.station::text = new.station::text
+          AND hourly_2017.network::text = new.network::text
+          AND hourly_2017.valid = new.valid)) DO INSTEAD
+         UPDATE hourly_2017 SET phour = new.phour
+  WHERE hourly_2017.station::text = new.station::text AND
+  hourly_2017.network::text = new.network::text AND
+  hourly_2017.valid = new.valid;
+
+create table summary_2017(
+  CONSTRAINT __summary_2017_check
+  CHECK(day >= '2017-01-01'::date
+        and day < '2018-01-01'::date))
+  INHERITS (summary);
+CREATE INDEX summary_2017_day_idx on summary_2017(day);
+CREATE UNIQUE INDEX summary_2017_iemid_day_idx on summary_2017(iemid, day);
+GRANT SELECT on summary_2017 to nobody,apache;
+alter table summary_2017
+  add foreign key(iemid)
+  references stations(iemid) ON DELETE CASCADE;
+
+  

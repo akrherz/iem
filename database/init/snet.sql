@@ -1,3 +1,9 @@
+-- Boilerplate IEM schema_manager_version, the version gets incremented each
+-- time we make an upgrade script
+CREATE TABLE iem_schema_manager_version(
+	version int,
+	updated timestamptz);
+INSERT into iem_schema_manager_version values (2, now());
 
 CREATE FUNCTION local_date(timestamp with time zone) RETURNS date
     LANGUAGE sql IMMUTABLE
@@ -1608,4 +1614,359 @@ GRANT SELECT on t2014_11 to nobody,apache;
 CREATE INDEX t2014_12_station on t2014_12(station);
 CREATE INDEX t2014_12_valid_idx on t2014_12(valid);
 GRANT SELECT on t2014_12 to nobody,apache;
+
+create table t2015_01( 
+  CONSTRAINT __t2015_01_check 
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz 
+        and valid < '2015-02-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_01_station on t2015_01(station);
+CREATE INDEX t2015_01_valid_idx on t2015_01(valid);
+GRANT SELECT on t2015_01 to nobody,apache;
+
+
+ create table t2015_02( 
+  CONSTRAINT __t2015_02_check 
+  CHECK(valid >= '2015-02-01 00:00+00'::timestamptz 
+        and valid < '2015-03-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_02_station on t2015_02(station);
+CREATE INDEX t2015_02_valid_idx on t2015_02(valid);
+GRANT SELECT on t2015_02 to nobody,apache;
+
+
+ create table t2015_03( 
+  CONSTRAINT __t2015_03_check 
+  CHECK(valid >= '2015-03-01 00:00+00'::timestamptz 
+        and valid < '2015-04-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_03_station on t2015_03(station);
+CREATE INDEX t2015_03_valid_idx on t2015_03(valid);
+GRANT SELECT on t2015_03 to nobody,apache;
+
+
+ create table t2015_04( 
+  CONSTRAINT __t2015_04_check 
+  CHECK(valid >= '2015-04-01 00:00+00'::timestamptz 
+        and valid < '2015-05-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_04_station on t2015_04(station);
+CREATE INDEX t2015_04_valid_idx on t2015_04(valid);
+GRANT SELECT on t2015_04 to nobody,apache;
+
+
+ create table t2015_05( 
+  CONSTRAINT __t2015_05_check 
+  CHECK(valid >= '2015-05-01 00:00+00'::timestamptz 
+        and valid < '2015-06-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_05_station on t2015_05(station);
+CREATE INDEX t2015_05_valid_idx on t2015_05(valid);
+GRANT SELECT on t2015_05 to nobody,apache;
+
+
+ create table t2015_06( 
+  CONSTRAINT __t2015_06_check 
+  CHECK(valid >= '2015-06-01 00:00+00'::timestamptz 
+        and valid < '2015-07-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_06_station on t2015_06(station);
+CREATE INDEX t2015_06_valid_idx on t2015_06(valid);
+GRANT SELECT on t2015_06 to nobody,apache;
+
+
+ create table t2015_07( 
+  CONSTRAINT __t2015_07_check 
+  CHECK(valid >= '2015-07-01 00:00+00'::timestamptz 
+        and valid < '2015-08-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_07_station on t2015_07(station);
+CREATE INDEX t2015_07_valid_idx on t2015_07(valid);
+GRANT SELECT on t2015_07 to nobody,apache;
+
+
+ create table t2015_08( 
+  CONSTRAINT __t2015_08_check 
+  CHECK(valid >= '2015-08-01 00:00+00'::timestamptz 
+        and valid < '2015-09-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_08_station on t2015_08(station);
+CREATE INDEX t2015_08_valid_idx on t2015_08(valid);
+GRANT SELECT on t2015_08 to nobody,apache;
+
+
+ create table t2015_09( 
+  CONSTRAINT __t2015_09_check 
+  CHECK(valid >= '2015-09-01 00:00+00'::timestamptz 
+        and valid < '2015-10-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_09_station on t2015_09(station);
+CREATE INDEX t2015_09_valid_idx on t2015_09(valid);
+GRANT SELECT on t2015_09 to nobody,apache;
+
+
+ create table t2015_10( 
+  CONSTRAINT __t2015_10_check 
+  CHECK(valid >= '2015-10-01 00:00+00'::timestamptz 
+        and valid < '2015-11-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_10_station on t2015_10(station);
+CREATE INDEX t2015_10_valid_idx on t2015_10(valid);
+GRANT SELECT on t2015_10 to nobody,apache;
+
+
+ create table t2015_11( 
+  CONSTRAINT __t2015_11_check 
+  CHECK(valid >= '2015-11-01 00:00+00'::timestamptz 
+        and valid < '2015-12-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_11_station on t2015_11(station);
+CREATE INDEX t2015_11_valid_idx on t2015_11(valid);
+GRANT SELECT on t2015_11 to nobody,apache;
+
+
+ create table t2015_12( 
+  CONSTRAINT __t2015_12_check 
+  CHECK(valid >= '2015-12-01 00:00+00'::timestamptz 
+        and valid < '2016-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2015_12_station on t2015_12(station);
+CREATE INDEX t2015_12_valid_idx on t2015_12(valid);
+GRANT SELECT on t2015_12 to nobody,apache;
+create table t2016_01( 
+  CONSTRAINT __t2016_01_check 
+  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz 
+        and valid < '2016-02-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_01_station on t2016_01(station);
+CREATE INDEX t2016_01_valid_idx on t2016_01(valid);
+GRANT SELECT on t2016_01 to nobody,apache;
+
+
+ create table t2016_02( 
+  CONSTRAINT __t2016_02_check 
+  CHECK(valid >= '2016-02-01 00:00+00'::timestamptz 
+        and valid < '2016-03-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_02_station on t2016_02(station);
+CREATE INDEX t2016_02_valid_idx on t2016_02(valid);
+GRANT SELECT on t2016_02 to nobody,apache;
+
+
+ create table t2016_03( 
+  CONSTRAINT __t2016_03_check 
+  CHECK(valid >= '2016-03-01 00:00+00'::timestamptz 
+        and valid < '2016-04-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_03_station on t2016_03(station);
+CREATE INDEX t2016_03_valid_idx on t2016_03(valid);
+GRANT SELECT on t2016_03 to nobody,apache;
+
+
+ create table t2016_04( 
+  CONSTRAINT __t2016_04_check 
+  CHECK(valid >= '2016-04-01 00:00+00'::timestamptz 
+        and valid < '2016-05-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_04_station on t2016_04(station);
+CREATE INDEX t2016_04_valid_idx on t2016_04(valid);
+GRANT SELECT on t2016_04 to nobody,apache;
+
+
+ create table t2016_05( 
+  CONSTRAINT __t2016_05_check 
+  CHECK(valid >= '2016-05-01 00:00+00'::timestamptz 
+        and valid < '2016-06-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_05_station on t2016_05(station);
+CREATE INDEX t2016_05_valid_idx on t2016_05(valid);
+GRANT SELECT on t2016_05 to nobody,apache;
+
+
+ create table t2016_06( 
+  CONSTRAINT __t2016_06_check 
+  CHECK(valid >= '2016-06-01 00:00+00'::timestamptz 
+        and valid < '2016-07-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_06_station on t2016_06(station);
+CREATE INDEX t2016_06_valid_idx on t2016_06(valid);
+GRANT SELECT on t2016_06 to nobody,apache;
+
+
+ create table t2016_07( 
+  CONSTRAINT __t2016_07_check 
+  CHECK(valid >= '2016-07-01 00:00+00'::timestamptz 
+        and valid < '2016-08-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_07_station on t2016_07(station);
+CREATE INDEX t2016_07_valid_idx on t2016_07(valid);
+GRANT SELECT on t2016_07 to nobody,apache;
+
+
+ create table t2016_08( 
+  CONSTRAINT __t2016_08_check 
+  CHECK(valid >= '2016-08-01 00:00+00'::timestamptz 
+        and valid < '2016-09-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_08_station on t2016_08(station);
+CREATE INDEX t2016_08_valid_idx on t2016_08(valid);
+GRANT SELECT on t2016_08 to nobody,apache;
+
+
+ create table t2016_09( 
+  CONSTRAINT __t2016_09_check 
+  CHECK(valid >= '2016-09-01 00:00+00'::timestamptz 
+        and valid < '2016-10-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_09_station on t2016_09(station);
+CREATE INDEX t2016_09_valid_idx on t2016_09(valid);
+GRANT SELECT on t2016_09 to nobody,apache;
+
+
+ create table t2016_10( 
+  CONSTRAINT __t2016_10_check 
+  CHECK(valid >= '2016-10-01 00:00+00'::timestamptz 
+        and valid < '2016-11-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_10_station on t2016_10(station);
+CREATE INDEX t2016_10_valid_idx on t2016_10(valid);
+GRANT SELECT on t2016_10 to nobody,apache;
+
+
+ create table t2016_11( 
+  CONSTRAINT __t2016_11_check 
+  CHECK(valid >= '2016-11-01 00:00+00'::timestamptz 
+        and valid < '2016-12-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_11_station on t2016_11(station);
+CREATE INDEX t2016_11_valid_idx on t2016_11(valid);
+GRANT SELECT on t2016_11 to nobody,apache;
+
+
+ create table t2016_12( 
+  CONSTRAINT __t2016_12_check 
+  CHECK(valid >= '2016-12-01 00:00+00'::timestamptz 
+        and valid < '2017-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2016_12_station on t2016_12(station);
+CREATE INDEX t2016_12_valid_idx on t2016_12(valid);
+GRANT SELECT on t2016_12 to nobody,apache;
+create table t2017_01( 
+  CONSTRAINT __t2017_01_check 
+  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz 
+        and valid < '2017-02-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_01_station on t2017_01(station);
+CREATE INDEX t2017_01_valid_idx on t2017_01(valid);
+GRANT SELECT on t2017_01 to nobody,apache;
+
+
+ create table t2017_02( 
+  CONSTRAINT __t2017_02_check 
+  CHECK(valid >= '2017-02-01 00:00+00'::timestamptz 
+        and valid < '2017-03-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_02_station on t2017_02(station);
+CREATE INDEX t2017_02_valid_idx on t2017_02(valid);
+GRANT SELECT on t2017_02 to nobody,apache;
+
+
+ create table t2017_03( 
+  CONSTRAINT __t2017_03_check 
+  CHECK(valid >= '2017-03-01 00:00+00'::timestamptz 
+        and valid < '2017-04-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_03_station on t2017_03(station);
+CREATE INDEX t2017_03_valid_idx on t2017_03(valid);
+GRANT SELECT on t2017_03 to nobody,apache;
+
+
+ create table t2017_04( 
+  CONSTRAINT __t2017_04_check 
+  CHECK(valid >= '2017-04-01 00:00+00'::timestamptz 
+        and valid < '2017-05-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_04_station on t2017_04(station);
+CREATE INDEX t2017_04_valid_idx on t2017_04(valid);
+GRANT SELECT on t2017_04 to nobody,apache;
+
+
+ create table t2017_05( 
+  CONSTRAINT __t2017_05_check 
+  CHECK(valid >= '2017-05-01 00:00+00'::timestamptz 
+        and valid < '2017-06-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_05_station on t2017_05(station);
+CREATE INDEX t2017_05_valid_idx on t2017_05(valid);
+GRANT SELECT on t2017_05 to nobody,apache;
+
+
+ create table t2017_06( 
+  CONSTRAINT __t2017_06_check 
+  CHECK(valid >= '2017-06-01 00:00+00'::timestamptz 
+        and valid < '2017-07-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_06_station on t2017_06(station);
+CREATE INDEX t2017_06_valid_idx on t2017_06(valid);
+GRANT SELECT on t2017_06 to nobody,apache;
+
+
+ create table t2017_07( 
+  CONSTRAINT __t2017_07_check 
+  CHECK(valid >= '2017-07-01 00:00+00'::timestamptz 
+        and valid < '2017-08-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_07_station on t2017_07(station);
+CREATE INDEX t2017_07_valid_idx on t2017_07(valid);
+GRANT SELECT on t2017_07 to nobody,apache;
+
+
+ create table t2017_08( 
+  CONSTRAINT __t2017_08_check 
+  CHECK(valid >= '2017-08-01 00:00+00'::timestamptz 
+        and valid < '2017-09-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_08_station on t2017_08(station);
+CREATE INDEX t2017_08_valid_idx on t2017_08(valid);
+GRANT SELECT on t2017_08 to nobody,apache;
+
+
+ create table t2017_09( 
+  CONSTRAINT __t2017_09_check 
+  CHECK(valid >= '2017-09-01 00:00+00'::timestamptz 
+        and valid < '2017-10-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_09_station on t2017_09(station);
+CREATE INDEX t2017_09_valid_idx on t2017_09(valid);
+GRANT SELECT on t2017_09 to nobody,apache;
+
+
+ create table t2017_10( 
+  CONSTRAINT __t2017_10_check 
+  CHECK(valid >= '2017-10-01 00:00+00'::timestamptz 
+        and valid < '2017-11-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_10_station on t2017_10(station);
+CREATE INDEX t2017_10_valid_idx on t2017_10(valid);
+GRANT SELECT on t2017_10 to nobody,apache;
+
+
+ create table t2017_11( 
+  CONSTRAINT __t2017_11_check 
+  CHECK(valid >= '2017-11-01 00:00+00'::timestamptz 
+        and valid < '2017-12-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_11_station on t2017_11(station);
+CREATE INDEX t2017_11_valid_idx on t2017_11(valid);
+GRANT SELECT on t2017_11 to nobody,apache;
+
+
+ create table t2017_12( 
+  CONSTRAINT __t2017_12_check 
+  CHECK(valid >= '2017-12-01 00:00+00'::timestamptz 
+        and valid < '2018-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2017_12_station on t2017_12(station);
+CREATE INDEX t2017_12_valid_idx on t2017_12(valid);
+GRANT SELECT on t2017_12 to nobody,apache;
 
