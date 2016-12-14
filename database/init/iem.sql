@@ -341,7 +341,7 @@ CREATE TABLE current (
     max_tmpf_24hr real,
     min_tmpf_24hr real,
     presentwx varchar(24),
-    battery real
+    battery real,
     water_tmpf real
 );
 CREATE UNIQUE index current_iemid_idx on current(iemid);
