@@ -858,7 +858,6 @@ CREATE TABLE warnings_1986() inherits (warnings);
 CREATE INDEX warnings_1986_combo_idx on 
 	warnings_1986(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1986_expire_idx on warnings_1986(expire);
-CREATE INDEX warnings_1986_gtype_idx on warnings_1986(gtype);
 CREATE INDEX warnings_1986_issue_idx on warnings_1986(issue);
 CREATE INDEX warnings_1986_ugc_idx on warnings_1986(ugc);
 CREATE INDEX warnings_1986_wfo_idx on warnings_1986(wfo);
@@ -869,7 +868,6 @@ CREATE TABLE warnings_1987() inherits (warnings);
 CREATE INDEX warnings_1987_combo_idx on 
 	warnings_1987(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1987_expire_idx on warnings_1987(expire);
-CREATE INDEX warnings_1987_gtype_idx on warnings_1987(gtype);
 CREATE INDEX warnings_1987_issue_idx on warnings_1987(issue);
 CREATE INDEX warnings_1987_ugc_idx on warnings_1987(ugc);
 CREATE INDEX warnings_1987_wfo_idx on warnings_1987(wfo);
@@ -880,7 +878,6 @@ CREATE TABLE warnings_1988() inherits (warnings);
 CREATE INDEX warnings_1988_combo_idx on 
 	warnings_1988(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1988_expire_idx on warnings_1988(expire);
-CREATE INDEX warnings_1988_gtype_idx on warnings_1988(gtype);
 CREATE INDEX warnings_1988_issue_idx on warnings_1988(issue);
 CREATE INDEX warnings_1988_ugc_idx on warnings_1988(ugc);
 CREATE INDEX warnings_1988_wfo_idx on warnings_1988(wfo);
@@ -891,7 +888,6 @@ CREATE TABLE warnings_1989() inherits (warnings);
 CREATE INDEX warnings_1989_combo_idx on 
 	warnings_1989(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1989_expire_idx on warnings_1989(expire);
-CREATE INDEX warnings_1989_gtype_idx on warnings_1989(gtype);
 CREATE INDEX warnings_1989_issue_idx on warnings_1989(issue);
 CREATE INDEX warnings_1989_ugc_idx on warnings_1989(ugc);
 CREATE INDEX warnings_1989_wfo_idx on warnings_1989(wfo);
@@ -902,7 +898,6 @@ CREATE TABLE warnings_1990() inherits (warnings);
 CREATE INDEX warnings_1990_combo_idx on 
 	warnings_1990(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1990_expire_idx on warnings_1990(expire);
-CREATE INDEX warnings_1990_gtype_idx on warnings_1990(gtype);
 CREATE INDEX warnings_1990_issue_idx on warnings_1990(issue);
 CREATE INDEX warnings_1990_ugc_idx on warnings_1990(ugc);
 CREATE INDEX warnings_1990_wfo_idx on warnings_1990(wfo);
@@ -913,7 +908,6 @@ CREATE TABLE warnings_1991() inherits (warnings);
 CREATE INDEX warnings_1991_combo_idx on 
 	warnings_1991(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1991_expire_idx on warnings_1991(expire);
-CREATE INDEX warnings_1991_gtype_idx on warnings_1991(gtype);
 CREATE INDEX warnings_1991_issue_idx on warnings_1991(issue);
 CREATE INDEX warnings_1991_ugc_idx on warnings_1991(ugc);
 CREATE INDEX warnings_1991_wfo_idx on warnings_1991(wfo);
@@ -924,7 +918,6 @@ CREATE TABLE warnings_1992() inherits (warnings);
 CREATE INDEX warnings_1992_combo_idx on 
 	warnings_1992(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1992_expire_idx on warnings_1992(expire);
-CREATE INDEX warnings_1992_gtype_idx on warnings_1992(gtype);
 CREATE INDEX warnings_1992_issue_idx on warnings_1992(issue);
 CREATE INDEX warnings_1992_ugc_idx on warnings_1992(ugc);
 CREATE INDEX warnings_1992_wfo_idx on warnings_1992(wfo);
@@ -935,7 +928,6 @@ CREATE TABLE warnings_1993() inherits (warnings);
 CREATE INDEX warnings_1993_combo_idx on 
 	warnings_1993(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1993_expire_idx on warnings_1993(expire);
-CREATE INDEX warnings_1993_gtype_idx on warnings_1993(gtype);
 CREATE INDEX warnings_1993_issue_idx on warnings_1993(issue);
 CREATE INDEX warnings_1993_ugc_idx on warnings_1993(ugc);
 CREATE INDEX warnings_1993_wfo_idx on warnings_1993(wfo);
@@ -946,7 +938,6 @@ CREATE TABLE warnings_1994() inherits (warnings);
 CREATE INDEX warnings_1994_combo_idx on 
 	warnings_1994(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1994_expire_idx on warnings_1994(expire);
-CREATE INDEX warnings_1994_gtype_idx on warnings_1994(gtype);
 CREATE INDEX warnings_1994_issue_idx on warnings_1994(issue);
 CREATE INDEX warnings_1994_ugc_idx on warnings_1994(ugc);
 CREATE INDEX warnings_1994_wfo_idx on warnings_1994(wfo);
@@ -957,7 +948,6 @@ CREATE TABLE warnings_1995() inherits (warnings);
 CREATE INDEX warnings_1995_combo_idx on 
 	warnings_1995(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1995_expire_idx on warnings_1995(expire);
-CREATE INDEX warnings_1995_gtype_idx on warnings_1995(gtype);
 CREATE INDEX warnings_1995_issue_idx on warnings_1995(issue);
 CREATE INDEX warnings_1995_ugc_idx on warnings_1995(ugc);
 CREATE INDEX warnings_1995_wfo_idx on warnings_1995(wfo);
@@ -968,7 +958,6 @@ CREATE TABLE warnings_1996() inherits (warnings);
 CREATE INDEX warnings_1996_combo_idx on 
 	warnings_1996(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1996_expire_idx on warnings_1996(expire);
-CREATE INDEX warnings_1996_gtype_idx on warnings_1996(gtype);
 CREATE INDEX warnings_1996_issue_idx on warnings_1996(issue);
 CREATE INDEX warnings_1996_ugc_idx on warnings_1996(ugc);
 CREATE INDEX warnings_1996_wfo_idx on warnings_1996(wfo);
@@ -979,7 +968,6 @@ CREATE TABLE warnings_1997() inherits (warnings);
 CREATE INDEX warnings_1997_combo_idx on 
 	warnings_1997(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1997_expire_idx on warnings_1997(expire);
-CREATE INDEX warnings_1997_gtype_idx on warnings_1997(gtype);
 CREATE INDEX warnings_1997_issue_idx on warnings_1997(issue);
 CREATE INDEX warnings_1997_ugc_idx on warnings_1997(ugc);
 CREATE INDEX warnings_1997_wfo_idx on warnings_1997(wfo);
@@ -990,7 +978,6 @@ CREATE TABLE warnings_1998() inherits (warnings);
 CREATE INDEX warnings_1998_combo_idx on 
 	warnings_1998(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1998_expire_idx on warnings_1998(expire);
-CREATE INDEX warnings_1998_gtype_idx on warnings_1998(gtype);
 CREATE INDEX warnings_1998_issue_idx on warnings_1998(issue);
 CREATE INDEX warnings_1998_ugc_idx on warnings_1998(ugc);
 CREATE INDEX warnings_1998_wfo_idx on warnings_1998(wfo);
@@ -1001,7 +988,6 @@ CREATE TABLE warnings_1999() inherits (warnings);
 CREATE INDEX warnings_1999_combo_idx on 
 	warnings_1999(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_1999_expire_idx on warnings_1999(expire);
-CREATE INDEX warnings_1999_gtype_idx on warnings_1999(gtype);
 CREATE INDEX warnings_1999_issue_idx on warnings_1999(issue);
 CREATE INDEX warnings_1999_ugc_idx on warnings_1999(ugc);
 CREATE INDEX warnings_1999_wfo_idx on warnings_1999(wfo);
@@ -1012,7 +998,6 @@ CREATE TABLE warnings_2000() inherits (warnings);
 CREATE INDEX warnings_2000_combo_idx on 
 	warnings_2000(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2000_expire_idx on warnings_2000(expire);
-CREATE INDEX warnings_2000_gtype_idx on warnings_2000(gtype);
 CREATE INDEX warnings_2000_issue_idx on warnings_2000(issue);
 CREATE INDEX warnings_2000_ugc_idx on warnings_2000(ugc);
 CREATE INDEX warnings_2000_wfo_idx on warnings_2000(wfo);
@@ -1023,7 +1008,6 @@ CREATE TABLE warnings_2001() inherits (warnings);
 CREATE INDEX warnings_2001_combo_idx on 
 	warnings_2001(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2001_expire_idx on warnings_2001(expire);
-CREATE INDEX warnings_2001_gtype_idx on warnings_2001(gtype);
 CREATE INDEX warnings_2001_issue_idx on warnings_2001(issue);
 CREATE INDEX warnings_2001_ugc_idx on warnings_2001(ugc);
 CREATE INDEX warnings_2001_wfo_idx on warnings_2001(wfo);
@@ -1034,7 +1018,6 @@ CREATE TABLE warnings_2002() inherits (warnings);
 CREATE INDEX warnings_2002_combo_idx on 
 	warnings_2002(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2002_expire_idx on warnings_2002(expire);
-CREATE INDEX warnings_2002_gtype_idx on warnings_2002(gtype);
 CREATE INDEX warnings_2002_issue_idx on warnings_2002(issue);
 CREATE INDEX warnings_2002_ugc_idx on warnings_2002(ugc);
 CREATE INDEX warnings_2002_wfo_idx on warnings_2002(wfo);
@@ -1045,7 +1028,6 @@ CREATE TABLE warnings_2003() inherits (warnings);
 CREATE INDEX warnings_2003_combo_idx on 
 	warnings_2003(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2003_expire_idx on warnings_2003(expire);
-CREATE INDEX warnings_2003_gtype_idx on warnings_2003(gtype);
 CREATE INDEX warnings_2003_issue_idx on warnings_2003(issue);
 CREATE INDEX warnings_2003_ugc_idx on warnings_2003(ugc);
 CREATE INDEX warnings_2003_wfo_idx on warnings_2003(wfo);
@@ -1056,7 +1038,6 @@ CREATE TABLE warnings_2004() inherits (warnings);
 CREATE INDEX warnings_2004_combo_idx on 
 	warnings_2004(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2004_expire_idx on warnings_2004(expire);
-CREATE INDEX warnings_2004_gtype_idx on warnings_2004(gtype);
 CREATE INDEX warnings_2004_issue_idx on warnings_2004(issue);
 CREATE INDEX warnings_2004_ugc_idx on warnings_2004(ugc);
 CREATE INDEX warnings_2004_wfo_idx on warnings_2004(wfo);
@@ -1067,7 +1048,6 @@ CREATE TABLE warnings_2005() inherits (warnings);
 CREATE INDEX warnings_2005_combo_idx on 
 	warnings_2005(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2005_expire_idx on warnings_2005(expire);
-CREATE INDEX warnings_2005_gtype_idx on warnings_2005(gtype);
 CREATE INDEX warnings_2005_issue_idx on warnings_2005(issue);
 CREATE INDEX warnings_2005_ugc_idx on warnings_2005(ugc);
 CREATE INDEX warnings_2005_wfo_idx on warnings_2005(wfo);
@@ -1078,7 +1058,6 @@ CREATE TABLE warnings_2006() inherits (warnings);
 CREATE INDEX warnings_2006_combo_idx on 
 	warnings_2006(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2006_expire_idx on warnings_2006(expire);
-CREATE INDEX warnings_2006_gtype_idx on warnings_2006(gtype);
 CREATE INDEX warnings_2006_issue_idx on warnings_2006(issue);
 CREATE INDEX warnings_2006_ugc_idx on warnings_2006(ugc);
 CREATE INDEX warnings_2006_wfo_idx on warnings_2006(wfo);
@@ -1089,7 +1068,6 @@ CREATE TABLE warnings_2007() inherits (warnings);
 CREATE INDEX warnings_2007_combo_idx on 
 	warnings_2007(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2007_expire_idx on warnings_2007(expire);
-CREATE INDEX warnings_2007_gtype_idx on warnings_2007(gtype);
 CREATE INDEX warnings_2007_issue_idx on warnings_2007(issue);
 CREATE INDEX warnings_2007_ugc_idx on warnings_2007(ugc);
 CREATE INDEX warnings_2007_wfo_idx on warnings_2007(wfo);
@@ -1100,7 +1078,6 @@ CREATE TABLE warnings_2008() inherits (warnings);
 CREATE INDEX warnings_2008_combo_idx on 
 	warnings_2008(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2008_expire_idx on warnings_2008(expire);
-CREATE INDEX warnings_2008_gtype_idx on warnings_2008(gtype);
 CREATE INDEX warnings_2008_issue_idx on warnings_2008(issue);
 CREATE INDEX warnings_2008_ugc_idx on warnings_2008(ugc);
 CREATE INDEX warnings_2008_wfo_idx on warnings_2008(wfo);
@@ -1111,7 +1088,6 @@ CREATE TABLE warnings_2009() inherits (warnings);
 CREATE INDEX warnings_2009_combo_idx on 
 	warnings_2009(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2009_expire_idx on warnings_2009(expire);
-CREATE INDEX warnings_2009_gtype_idx on warnings_2009(gtype);
 CREATE INDEX warnings_2009_issue_idx on warnings_2009(issue);
 CREATE INDEX warnings_2009_ugc_idx on warnings_2009(ugc);
 CREATE INDEX warnings_2009_wfo_idx on warnings_2009(wfo);
@@ -1122,7 +1098,6 @@ CREATE TABLE warnings_2010() inherits (warnings);
 CREATE INDEX warnings_2010_combo_idx on 
 	warnings_2010(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2010_expire_idx on warnings_2010(expire);
-CREATE INDEX warnings_2010_gtype_idx on warnings_2010(gtype);
 CREATE INDEX warnings_2010_issue_idx on warnings_2010(issue);
 CREATE INDEX warnings_2010_ugc_idx on warnings_2010(ugc);
 CREATE INDEX warnings_2010_wfo_idx on warnings_2010(wfo);
@@ -1133,7 +1108,6 @@ CREATE TABLE warnings_2011() inherits (warnings);
 CREATE INDEX warnings_2011_combo_idx on 
 	warnings_2011(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2011_expire_idx on warnings_2011(expire);
-CREATE INDEX warnings_2011_gtype_idx on warnings_2011(gtype);
 CREATE INDEX warnings_2011_issue_idx on warnings_2011(issue);
 CREATE INDEX warnings_2011_ugc_idx on warnings_2011(ugc);
 CREATE INDEX warnings_2011_wfo_idx on warnings_2011(wfo);
@@ -1144,7 +1118,6 @@ CREATE TABLE warnings_2012() inherits (warnings);
 CREATE INDEX warnings_2012_combo_idx on 
 	warnings_2012(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2012_expire_idx on warnings_2012(expire);
-CREATE INDEX warnings_2012_gtype_idx on warnings_2012(gtype);
 CREATE INDEX warnings_2012_issue_idx on warnings_2012(issue);
 CREATE INDEX warnings_2012_ugc_idx on warnings_2012(ugc);
 CREATE INDEX warnings_2012_wfo_idx on warnings_2012(wfo);
@@ -1155,7 +1128,6 @@ CREATE TABLE warnings_2013() inherits (warnings);
 CREATE INDEX warnings_2013_combo_idx on 
 	warnings_2013(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2013_expire_idx on warnings_2013(expire);
-CREATE INDEX warnings_2013_gtype_idx on warnings_2013(gtype);
 CREATE INDEX warnings_2013_issue_idx on warnings_2013(issue);
 CREATE INDEX warnings_2013_ugc_idx on warnings_2013(ugc);
 CREATE INDEX warnings_2013_wfo_idx on warnings_2013(wfo);
@@ -1166,7 +1138,6 @@ CREATE TABLE warnings_2014() inherits (warnings);
 CREATE INDEX warnings_2014_combo_idx on 
 	warnings_2014(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2014_expire_idx on warnings_2014(expire);
-CREATE INDEX warnings_2014_gtype_idx on warnings_2014(gtype);
 CREATE INDEX warnings_2014_issue_idx on warnings_2014(issue);
 CREATE INDEX warnings_2014_ugc_idx on warnings_2014(ugc);
 CREATE INDEX warnings_2014_wfo_idx on warnings_2014(wfo);
@@ -2061,7 +2032,6 @@ CREATE TABLE warnings_2015() inherits (warnings);
 CREATE INDEX warnings_2015_combo_idx on 
 	warnings_2015(wfo, phenomena, eventid, significance);
 CREATE INDEX warnings_2015_expire_idx on warnings_2015(expire);
-CREATE INDEX warnings_2015_gtype_idx on warnings_2015(gtype);
 CREATE INDEX warnings_2015_issue_idx on warnings_2015(issue);
 CREATE INDEX warnings_2015_ugc_idx on warnings_2015(ugc);
 CREATE INDEX warnings_2015_wfo_idx on warnings_2015(wfo);
