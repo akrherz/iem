@@ -88,6 +88,8 @@ for recnum in range(len(providers)):
                                                         '').replace('\xa0',
                                                                     ' '
                                                                     ).strip()
+    if name == '':
+        continue
     if thisProvider == 'MesoWest':
         # get the network from the last portion of the name
         network = name.split()[-1]
