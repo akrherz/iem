@@ -26,9 +26,11 @@ def workflow():
     valid = valid.replace(tzinfo=pytz.timezone("UTC"), microsecond=0)
 
     req = requests.get(URI, timeout=30)
-    data = {}
-    if req.status_code == 200:
-        data = json.loads(req.content)
+    if req.status_code != 200:
+        print(("dot_plows got non-200 status_code: %s\n"
+               "Content: %s") % (req.status_code, req.content))
+        return
+    data = json.loads(req.content)
     newplows = {}
     for feat in data['layers'][0].get('featureSet', {}).get('features', []):
         logdt = feat['attributes']['LOGDT']
