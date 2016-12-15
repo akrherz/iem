@@ -52,6 +52,11 @@ def plotter(fdict):
      and issue < %s
      GROUP by wfo ORDER by m ASC
     """, (edate, significance, phenomena, edate))
+    if cursor.rowcount == 0:
+        return ("No Events Found for %s %s (%s.%s)"
+                ) % (vtec._phenDict.get(phenomena, phenomena),
+                     vtec._sigDict.get(significance, significance),
+                     phenomena, significance)
     data = {}
     rows = []
     for row in cursor:
