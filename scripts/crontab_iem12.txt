@@ -18,6 +18,9 @@ S=/opt/iem/scripts
 59 1 * * * cd $S; sh RUN_2AM.sh
 10 6 * * * cd $S; sh RUN_12Z.sh
 
+# webalizer
+0 0 * * * cd $S/webalizer; sh processlogs.sh
+
 10 * * * * cd $S; sh RUN_10_AFTER.sh 
 20 * * * * cd $S; sh RUN_20_AFTER.sh 
 40 * * * * cd $S; sh RUN_40_AFTER.sh 

@@ -1,8 +1,0 @@
-# Only edit on github!
-
-S=/opt/iem/scripts
-
-0 0 * * * cd $S/webalizer; sh processlogs.sh
-
-# Local cruft
-@reboot python idaho_cars.py
