@@ -50,6 +50,7 @@ mv combined.access_log combined-iem.log
 
 # Step 3, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
+rsync -a /mnt/webalizer/usage/mesonet.agron.iastate.edu /mesonet/share/usage/
 /home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf combined-cocrahs.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf combined-wepp.log
