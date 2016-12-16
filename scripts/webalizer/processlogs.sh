@@ -15,18 +15,17 @@ export dd="`date --date '1 day ago' +'%d'`"
 
 PREFIXES="iem iemssl cocorahs datateam idep schoolnet8 sustainablecorn weatherim wepp"
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108 iemvs109"
-BASE="/mnt/webalizer"
 CONFBASE="/opt/iem/scripts/webalizer"
 
 # Go to temp directory, that hopefully has enough space!
-cd $BASE/tmp
+cd /mnt/webalizer/tmp
 
 # Step 1, bring all these log files back to roost and delete them remotely
 for MACH in $MACHINES
 do
 	# limit file transfer to 750Mbit/s
-	scp -l 750000 -q root@${MACH}:${BASE}/*-${yyyymmdd} .
-	ssh root@$MACH "rm -f $BASE/*-${yyyymmdd}"
+	scp -l 750000 -q root@${MACH}:/mesonet/www/logs/*-${yyyymmdd} .
+	ssh root@$MACH "rm -f /mesonet/www/logs/*-${yyyymmdd}"
 	# rename the files so that they are unique
 	for PREF in $PREFIXES
 	do
