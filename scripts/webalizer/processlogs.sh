@@ -8,6 +8,9 @@
 # sustainablecorn
 # weatherim
 # wepp
+# 
+# RPM requirements for this workflow
+# yum -y install libdb-cxx libmaxminddb gd lftp tcsh tmpwatch
 
 export yyyymmdd="`date --date '1 day ago' +'%Y%m%d'`"
 export yyyymm="`date --date '1 day ago' +'%Y%m'`"

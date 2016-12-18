@@ -1,0 +1,8 @@
+# Only EDIT on github!
+#
+PATH=/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
+PYTHONPATH=/opt/iem/scripts/lib
+S=/opt/iem/scripts
+
+# webalizer
+0 0 * * * cd $S/webalizer; sh processlogs.sh
