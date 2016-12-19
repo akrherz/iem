@@ -53,13 +53,13 @@ mv combined.access_log combined-iem.log
 
 # Step 3, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
-rsync -a /mnt/webalizer/usage/mesonet.agron.iastate.edu iem12:/mesonet/share/usage/
 /home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf combined-cocrahs.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf combined-wepp.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/idep.conf combined-idep.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
+rsync -a /mnt/webalizer/usage/. iem12:/mesonet/share/usage/
 
 grep " /agclimate" combined-iem.log > agclimate.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log
