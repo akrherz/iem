@@ -98,9 +98,11 @@ def plotter(fdict):
 
     ax = plt.axes([0.1, 0.3, 0.8, 0.6])
     lax = plt.axes([0.1, 0.1, 0.8, 0.2])
+    title = PDICT.get(varname)
+    if days == 1:
+        title = title.replace("Average ", "")
     ax.set_title(("%s [%s]\n%i Day Period with %s"
-                  ) % (nt.sts[station]['name'], station, days,
-                       PDICT.get(varname)))
+                  ) % (nt.sts[station]['name'], station, days, title))
     ax.barh(df.index.values, [days]*len(df.index), left=df['doy'].values,
             edgecolor='tan', facecolor='tan')
     ax.grid(True)
