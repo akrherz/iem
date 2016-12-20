@@ -1,8 +1,16 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/forms.php");  
-include("setup.php");
+// Frontend for dynamic windrose generation.  All kinds of options exist in
+// this form and are basically translated into /cgi-bin/mywindrose.py, which
+// then translates into pyIEM.windrose_utils
+require_once "../../config/settings.inc.php";
+include_once "../../include/database.inc.php";
+include_once "../../include/forms.php";  
+include_once "../../include/myview.php";
+
+// Makes sure this page has proper context
+require_once "setup.php";
+
+// HTTP GET vars
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : 1;
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : 1;
 $month1 = isset($_GET["month1"]) ? $_GET["month1"]: date("m");
@@ -17,48 +25,57 @@ $units = isset($_GET["units"]) ? $_GET["units"]: "mph";
 $nsector = isset($_GET['nsector']) ? $_GET['nsector']: 36;
 $level = isset($_GET["level"]) ? $_GET['level']: 1000;
 $fmt = isset($_GET["fmt"]) ? $_GET["fmt"]: 'png';
-
-
-if (isset($_GET["hour1"])){
-	$rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&station=$station".
-		"&network=$network&day1=$day1&day2=$day2&month1=$month1&".
-		"month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&".
-		"hour2=$hour2&minute1=$minute1&minute2=$minute2&".
-		"units=$units&amp;fmt=$fmt";
-	if (isset($_GET["hourlimit"])){
-	  $rose_uri .= "&hourlimit=1";
-	}
-	if (isset($_GET["monthlimit"])){
-	  $rose_uri .= "&monthlimit=1";
-	}
-	if (isset($_GET["hourrangelimit"])){
-		$rose_uri .= "&hourrangelimit=1";
-	}
-	if (isset($_GET["staticrange"])){
-		$rose_uri .= "&staticrange=1";
-	}
-	if ($network == 'RAOB') $rose_uri .= "&level=". $level;
-	$rosedata_uri = "{$rose_uri}&justdata=true";
+$bins = Array(2, 5, 7, 10, 15, 20);
+for ($i=0; $i < sizeof($bins); $i++){
+	$bins[$i] = isset($_GET["bin{$i}"]) ? floatval($_GET["bin{$i}"]): $bins[$i];
 }
 
-include_once "../../include/myview.php";
-$t = new MyView();
+// If hour1 is set, we might as well assume we are wanting a plot
+if (isset($_GET["hour1"])){
+	$rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&amp;station=$station".
+		"&amp;network=$network&amp;day1=$day1&amp;day2=$day2&amp;".
+		"month1=$month1&amp;month2=$month2&amp;year1=$year1&amp;year2=".
+		"$year2&amp;hour1=$hour1&amp;".
+		"hour2=$hour2&amp;minute1=$minute1&amp;minute2=$minute2&amp;".
+		"units=$units&amp;fmt=$fmt";
+	if (isset($_GET["setbins"])){
+		$rose_uri .= sprintf("&amp;bins=%s", implode(",", $bins));
+	}
+	if (isset($_GET["hourlimit"])){
+	  $rose_uri .= "&amp;hourlimit=1";
+	}
+	if (isset($_GET["monthlimit"])){
+	  $rose_uri .= "&amp;monthlimit=1";
+	}
+	if (isset($_GET["hourrangelimit"])){
+		$rose_uri .= "&amp;hourrangelimit=1";
+	}
+	if (isset($_GET["staticrange"])){
+		$rose_uri .= "&amp;staticrange=1";
+	}
+	if ($network == 'RAOB'){
+		$rose_uri .= "&amp;level=". $level;
+	}
+	$rosedata_uri = "{$rose_uri}&amp;justdata=true";
+}
+
 $firstyear = 1995;
 if ($metadata["archive_begin"]){
 	$firstyear = date("Y", strtotime($metadata["archive_begin"]));
 }
 
+$t = new MyView();
 $t->thispage ="iem-sites";
 $t->title = "Custom Wind Roses";
-$t->sites_current="custom_windrose";
+$t->sites_current = "custom_windrose";
 $tznote = "(Times are in US Central Standard/Daylight Time, sorry)";
 if ($network == 'RAOB'){
 	$tznote = "(Times presented are in UTC)";
 }
 
 $ar = Array("png" => "PNG Image (.PNG)",
-		"pdf" => "Portable Document Format (.PDF)",
-		"svg" => "Scalable Vector Graphic (.SVG)");
+			"pdf" => "Portable Document Format (.PDF)",
+			"svg" => "Scalable Vector Graphic (.SVG)");
 $fselect = make_select("fmt", $fmt, $ar);
 
 $content = <<<EOF
@@ -75,10 +92,15 @@ windrose is derived in three ways:
  <li>By only including observations between a start and end hour</li>
 </ol>
 
+<p>You can also, optionally, prescribe six wind speed bins, in the units of
+your choice.  The first bin from zero to your value is assumed to be calm values.
+The last bin represents the last value to infinity.</p>
+
 <form method="GET" name="windrose">
 <input type="hidden" name="station" value="{$station}">
 <input type="hidden" name="network" value="{$network}">
-<h4>Select Start/End Time:</h4><br>
+
+<h4>Select Start/End Time:</h4>
 <i>{$tznote}</i>
 
 <table class="table table-bordered table-condensed">
@@ -110,6 +132,11 @@ if ($network == 'RAOB'){
 	$mi1 = "";
 	$mi2 = "";
 }
+$ar = Array("kts" => "knots (KTS)",
+			"mph" => "miles per hour (MPH)",
+			"mps" => "meters per second (MPS)");
+$uselect = make_select("units", $units, $ar);
+
 $content .= '<input type="checkbox" name="hourlimit" value="1" ';
 if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" "; 
 $content .= '>1. Limit to Hour of Start Time
@@ -121,19 +148,39 @@ if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" ";
 $content .= '>3. Limit to Range of hours given by start and end time
 <br /><input type="checkbox" name="staticrange" value="1" ';
 if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" "; 
-$content .= '>Optional: Hard code the frequency axis limit to 100%
-<br />Display Units: <select name="units">
- <option value="kts" ';
-if ($units == "kts"){ $content .= "SELECTED='SELECTED'"; } 
-$content .= '>Knots
- <option value="mph" ';
-if ($units == "mph"){ $content .= "SELECTED='SELECTED'"; }
-$content .= '>Miles Per Hour
- <option value="mps" ';
-if ($units == "mps"){ $content .= "SELECTED='SELECTED'"; }
-$content .= '>Meters Per Second
-</select>
-<br />Direction Bins: <select name="nsector">';
+$content .= '>Optional: Hard code the frequency axis limit to 100%';
+
+// Allow setting of wind speed bins
+$content .= sprintf("<br /><input type=\"checkbox\" name=\"setbins\" ".
+		"value=\"1\"%s>Optional. User provided wind speed bins<br />".
+		"<div style=\"display: %s;\" id=\"showbins\"> 0 - ".
+		"<input type=\"text\" name=\"bin0\" value=\"%s\" size=\"4\"> - ".
+		"<input type=\"text\" name=\"bin1\" value=\"%s\" size=\"4\"> - ".
+		"<input type=\"text\" name=\"bin2\" value=\"%s\" size=\"4\"> - ".
+		"<input type=\"text\" name=\"bin3\" value=\"%s\" size=\"4\"> - ".
+		"<input type=\"text\" name=\"bin4\" value=\"%s\" size=\"4\"> - ".
+		"<input type=\"text\" name=\"bin5\" value=\"%s\" size=\"4\"> +".
+		"</div>",
+		isset($_GET["setbins"]) ? " checked=\"checked\"": "",
+		isset($_GET["setbins"]) ? "block": "none",
+		$bins[0], $bins[1], $bins[2], $bins[3], $bins[4], $bins[5]);
+$jsextra = <<<EOF
+$(document).ready(function(){
+	$("input[name=setbins]").click(function(){
+		if (this.checked){
+			$("#showbins").show();
+		} else {
+			$("#showbins").hide();
+		}
+	});
+});
+EOF;
+
+// Pick between display units
+$content .= '<br />Display Units: ';
+$content .= $uselect;
+
+$content .= '<br />Direction Bins: <select name="nsector">';
 $opts = Array(8,12,16,20,24,28,32,36);
 while(list($k,$v)=each($opts)){
 	$content .= sprintf("<option value=\"%s\" %s>%s</option>\n", $v, 
@@ -208,11 +255,12 @@ $t->jsextra = <<<EOF
   $('#windrose-plot').load(function(){
 	$('#img-loading').css('display', 'none');	
 	});
-		
+
+{$jsextra}
 </script>
 EOF;
 
 $t->content = $content;
 $t->render('sites.phtml');
  
- ?>
+?>
