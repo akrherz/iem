@@ -2,7 +2,7 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 from pyiem import meteorology
-from pyiem.util import drct2text
+from pyiem.util import drct2text, get_autoplot_context
 from pyiem.datatypes import direction, speed
 import calendar
 
@@ -33,10 +33,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    units = fdict.get('units', 'mph')
+    station = ctx['zstation']
+    network = ctx['network']
+    units = ctx['units']
 
     nt = NetworkTable(network)
 
