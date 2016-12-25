@@ -1,7 +1,6 @@
 """
-My purpose in life is to take the NWS AWIPS Geodata CWA Shapefile and 
+My purpose in life is to take the NWS AWIPS Geodata CWA Shapefile and
 dump them into the PostGIS database!  I was bootstraped like so:
-
 """
 from osgeo import ogr
 from osgeo import _ogr
@@ -12,6 +11,7 @@ import urllib2
 import zipfile
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 cursor = POSTGIS.cursor()
+
 
 def Area(feat, *args):
     """
@@ -34,7 +34,7 @@ os.chdir('/tmp')
 zipfn = "%s.zip" % (DATESTAMP,)
 if not os.path.isfile(zipfn):
     url = urllib2.Request(('http://www.weather.gov/geodata/catalog/wsom/'
-                       +'data/%s') % (zipfn,))
+                           'data/%s') % (zipfn,))
     print 'Downloading %s ...' % (zipfn,)
     o = open(zipfn, 'wb')
     o.write(urllib2.urlopen(url).read())
@@ -71,25 +71,27 @@ while feat is not None:
     area = Area(geo)
     wkt = geo.ExportToWkt()
 
-    if wfos.has_key(wfo):
+    if wfo in wfos:
         if area < wfos[wfo]:
-            print 'Skipping %s [area: %s], since we had a previously bigger one' % (wfo, area)
+            print(('Skipping %s [area: %s], since we had a '
+                   'previously bigger one') % (wfo, area))
             feat = lyr.GetNextFeature()
             continue
     wfos[wfo] = area
 
     # OK, lets see if this UGC is new
-    cursor.execute("""SELECT cwa from cwa where cwa = %s and 
-        the_geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326))""", 
-    (cwa, wkt))
-    
+    cursor.execute("""
+        SELECT cwa from cwa where cwa = %s and
+        the_geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326))
+        """, (cwa, wkt))
+
     # NOOP
     if cursor.rowcount == 1:
         countnoop += 1
         feat = lyr.GetNextFeature()
         continue
-            
-    # Finally, insert the new geometry    
+
+    # Finally, insert the new geometry
     cursor.execute("""
     UPDATE cwa SET the_geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326))
     WHERE cwa = %s

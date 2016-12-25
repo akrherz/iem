@@ -57,12 +57,12 @@ def do(ts):
                 continue
             content = content[pos:]
             awipsid = find_awipsid(content)
-            if (awipsid is not None and 
-                (awipsid.startswith("RR") or awipsid.startswith("MTR")
-                 or awipsid in ["TSTNCF", "WTSNCF"])):
+            if (awipsid is not None and
+                (awipsid.startswith("RR") or awipsid.startswith("MTR") or
+                 awipsid in ["TSTNCF", "WTSNCF"])):
                 print 'Skip', f2.name, awipsid
                 continue
-            # Now we are getting closer, lets split by the delimter as we 
+            # Now we are getting closer, lets split by the delimter as we
             # may have multiple products in one file!
             for bulletin in content.split(delimiter):
                 if len(bulletin) == 0:
@@ -78,13 +78,13 @@ def do(ts):
                     print 'Invalid timestamp, year mismatch'
                     continue
 
-                table = "products_%s_%s" % (prod.valid.year, 
-                                        "0712" if prod.valid.month > 6 else "0106")
+                table = "products_%s_%s" % (prod.valid.year,
+                                            ("0712" if prod.valid.month > 6
+                                             else "0106"))
 
-                print 'SAVE', f2.name, prod.valid.strftime("%Y%m%d%H%M"), awipsid, prod.afos, table
                 cursor.execute("""INSERT into """+table+"""
-            (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)""",
-            (bulletin, prod.afos, prod.valid, source, ttaaii))
+            (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)
+            """, (bulletin, prod.afos, prod.valid, source, ttaaii))
 
     cursor.close()
     PGCONN.commit()
@@ -93,10 +93,10 @@ def do(ts):
 
 def main():
     """ Go Main Go """
-    sts = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]),
-                             int(sys.argv[3]))
-    ets = datetime.datetime( int(sys.argv[4]), int(sys.argv[5]),
-                             int(sys.argv[6]))
+    sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                            int(sys.argv[3]))
+    ets = datetime.datetime(int(sys.argv[4]), int(sys.argv[5]),
+                            int(sys.argv[6]))
     now = sts
     while now <= ets:
         do(now.replace(tzinfo=pytz.timezone("UTC")))

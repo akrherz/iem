@@ -1,6 +1,6 @@
 """
- For some reason, I did not archive NCR for IEM archives, lets take NCDC's files
- and then merge NCR into my archived data!
+ For some reason, I did not archive NCR for IEM archives,
+ lets take NCDC's files and then merge NCR into my archived data!
 """
 import datetime
 import os
@@ -19,9 +19,10 @@ while now < ets:
         os.makedirs("old")
         os.makedirs("new")
 
-        oldfn = now.strftime(("/mesonet/ARCHIVE/nexrad/%Y_%m/"+nexrad
-                             +"_%Y%m%d.tgz"))
-        newfn = now.strftime(("/mesonet/tmp/level3/K"+ nexrad +"%Y%m%d.tar.Z"))
+        oldfn = now.strftime(("/mesonet/ARCHIVE/nexrad/%Y_%m/" + nexrad +
+                              "_%Y%m%d.tgz"))
+        newfn = now.strftime(("/mesonet/tmp/level3/K" + nexrad +
+                              "%Y%m%d.tar.Z"))
         # 3. Extract IEM archive into /tmp/l3/old
         os.chdir("/tmp/l3/old")
         if os.path.isfile(oldfn):
@@ -40,7 +41,8 @@ while now < ets:
         for oldncr in glob.glob("*_NCR???_*"):
             # old KFSD_SDUS83_DPAFSD_200901012223
             # new N3R/N3R_20090101_2059
-            newncr = "/tmp/l3/old/NCR/NCR_%s_%s" % (oldncr[-12:-4], oldncr[-4:])
+            newncr = "/tmp/l3/old/NCR/NCR_%s_%s" % (oldncr[-12:-4],
+                                                    oldncr[-4:])
             shutil.copyfile(oldncr, newncr)
         # 6. Regenerate the tar file
         os.chdir("/tmp/l3/old")
@@ -48,5 +50,5 @@ while now < ets:
         # 7. Cleanup the new and old folders
         os.chdir("/tmp/l3")
         subprocess.call("rm -rf old new", shell=True)
-    
+
     now += interval
