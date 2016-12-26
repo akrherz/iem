@@ -57,6 +57,25 @@ HARDCODE = {
     'IA7844': 'SPW',
     'IA8706': 'ALO',
 
+    # Illinois
+    'IL0338': 'ARR',
+    'IL8740': 'CMI',
+    'IL2193': 'DEC',
+    'IL5079': 'ILX',
+    'IL1577': 'MDW',
+    'IL5751': 'MLI',
+    'IL5430': 'MTO',
+    'IL1549': 'ORD',
+    'IL6711': 'PIA',
+    'IL7382': 'RFD',
+    'IL8179': 'SPI',
+    'IL7072': 'UIN',
+    # KDPA | IL2736       | CHICAGO/DUPAGE
+    # KLOT | IL4530       | ROMEOVILLE/CHI
+    # KLWV | IL6558       | LAWRENCEVILLE
+    # KUGN | IL1549       | WAUKEGAN
+
+    # Wisconsin
     'WI5479': 'MKE',
     'WI3269': 'GRB',
     'WI7113': 'RHI',
@@ -65,6 +84,7 @@ HARDCODE = {
     'WI4370': 'LSE',
     # AUW Wausau is missing
 
+    # Kansas
     'KS8830': 'ICT',
     'KS2164': 'DDC',
     'KS3153': 'GLD',
