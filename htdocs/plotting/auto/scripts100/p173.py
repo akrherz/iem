@@ -26,6 +26,7 @@ def get_description():
     if this logic causes you heartburn!  The format of the date periods is
     two digit month followed by two digit day for both the start and end
     date."""
+    today = datetime.date.today()
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
@@ -43,6 +44,10 @@ def get_description():
              label='Optional. Average for inclusive period of days'),
         dict(type='text', name='p6', optional=True, default='0621-0630',
              label='Optional. Average for inclusive period of days'),
+        dict(type='year', name='y1', optional=True, default=1973,
+             label='Optional. Limit Period of Record to inclusive start year'),
+        dict(type='year', name='y2', optional=True, default=today.year,
+             label='Optional. Limit Period of Record to inclusive end year'),
     ]
     return d
 
@@ -61,14 +66,24 @@ def get_context(fdict):
     p4 = ctx.get('p4')
     p5 = ctx.get('p5')
     p6 = ctx.get('p6')
-
+    y1 = ctx.get('y1')
+    y2 = ctx.get('y2')
     ctx['nt'] = NetworkTable(network)
+
+    ylimiter = ""
+    if y1 is not None and y2 is not None:
+        ylimiter = (" and extract(year from valid) >= %s and "
+                    "extract(year from valid) <= %s "
+                    ) % (y1, y2)
+    else:
+        y1 = ctx['nt'].sts[station]['archive_begin'].year
+        y2 = datetime.date.today().year
 
     df = read_sql("""
     WITH obs as (
         SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
         sknt from alldata where station = %s and sknt >= 0 and sknt < 150
-        and report_type = 2)
+        and report_type = 2 """ + ylimiter + """)
 
     select extract(month from ts)::int as month,
     extract(hour from ts)::int as hour, extract(day from ts)::int as day,
@@ -119,8 +134,7 @@ def get_context(fdict):
                      ) % (ctx['nt'].sts[station]['tzname'],)
     ctx['title'] = ("[%s] %s [%s-%s]"
                     ) % (ctx['station'], ctx['nt'].sts[station]['name'],
-                         ctx['nt'].sts[station]['archive_begin'].year,
-                         datetime.date.today().year)
+                         y1, y2)
     return ctx
 
 
