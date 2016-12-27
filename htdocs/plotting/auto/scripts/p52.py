@@ -114,7 +114,8 @@ def plotter(fdict):
                        nt.sts[station]['name']))
     ax.set_ylim(0.4, len(events)+1)
     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1, tz=tz))
-    ax.xaxis.set_major_locator(mdates.DayLocator(interval=3, tz=tz))
+    xinterval = int(days / 7) + 1
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=xinterval, tz=tz))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b', tz=tz))
 
     ax.grid(True)
