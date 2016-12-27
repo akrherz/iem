@@ -1,5 +1,4 @@
 import psycopg2
-import numpy as np
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
 nt = NetworkTable("IACLIMATE")
@@ -11,10 +10,10 @@ cursor.execute("""
    SELECT station, year, sum(precip) from alldata_ia where
    station in (select distinct station from alldata_ia where year = 1893)
    and year > 1892 GROUP by station, year)
-   
+
  SELECT station, sum(case when sum > 41.14 then 1 else 0 end), count(*)
  from yearly GROUP by station ORDER by sum ASC
-   
+
 """)
 lats = []
 lons = []
@@ -29,7 +28,8 @@ for row in cursor:
     ranks.append(row[1])
 
 m = MapPlot(title="Where would Sioux City's 41.14 inch 2014 Total Rank?",
-            subtitle='period 1893-2014, number of years (out of 122) with local total over 41.14 inches',
+            subtitle=('period 1893-2014, number of years (out of 122) '
+                      'with local total over 41.14 inches'),
             drawstates=True, axisbg='white')
 m.plot_values(lons, lats, ranks, textsize=20, color='r')
 m.drawcounties()

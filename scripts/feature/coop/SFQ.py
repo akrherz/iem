@@ -3,7 +3,6 @@ from collections import OrderedDict
 import datetime
 import pytz
 import matplotlib
-from _sqlite3 import Row
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
@@ -54,7 +53,6 @@ for i, station in enumerate(STATIONS):
         ax.text(ts - datetime.timedelta(hours=3), y,
                 "%.1f" % (row[1], ) if row[1] > 0.05 else 'T',
                 ha='center', va='center')
-        print station, row[0].strftime("%Y%m%d%H%M"), ts.strftime("%Y%m%d%H%M"), row[1]
         total += row[1]
     ax.text(x1 + datetime.timedelta(hours=5), y, "%.1f" % (total,), ha='right',
             va='center')

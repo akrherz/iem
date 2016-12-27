@@ -1,7 +1,6 @@
 """
  Analysis of current MOS temperature bias
 """
-
 import sys
 import psycopg2
 from pyiem.plot import MapPlot
@@ -9,11 +8,11 @@ import matplotlib.cm as cm
 import datetime
 import pytz
 
-
 MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 mcursor = MOS.cursor()
 icursor = IEM.cursor()
+
 
 def doit(now, model):
     """ Figure out the model runtime we care about """
@@ -39,9 +38,9 @@ def doit(now, model):
 
     # Load up the currents!
     icursor.execute("""
-    SELECT 
+    SELECT
       s.id, s.network, tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
-    FROM 
+    FROM
       current c, stations s
     WHERE
       c.iemid = s.iemid and
@@ -53,9 +52,8 @@ def doit(now, model):
     lats = []
     lons = []
     vals = []
-    #valmask = []
     for row in icursor:
-        if not forecast.has_key(row[0]):
+        if row[0] not in forecast:
             continue
 
         diff = forecast[row[0]] - row[2]
@@ -64,7 +62,6 @@ def doit(now, model):
         lats.append(row[4])
         lons.append(row[3])
         vals.append(diff)
-        #valmask.append((row[1] in ['AWOS', 'IA_AWOS']))
 
     cmap = cm.get_cmap("RdYlBu_r")
     cmap.set_under('black')
@@ -72,10 +69,10 @@ def doit(now, model):
 
     localnow = now.astimezone(pytz.timezone("America/Chicago"))
     m = MapPlot(sector='midwest',
-            title="%s MOS Temperature Bias " % (model,),
-            subtitle='Model Run: %s Forecast Time: %s' % (
-                                runtime.strftime("%d %b %Y %H %Z"),
-                                localnow.strftime("%d %b %Y %-I %p %Z")))
+                title="%s MOS Temperature Bias " % (model,),
+                subtitle=('Model Run: %s Forecast Time: %s'
+                          ) % (runtime.strftime("%d %b %Y %H %Z"),
+                               localnow.strftime("%d %b %Y %-I %p %Z")))
     m.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
 
     pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
@@ -85,18 +82,18 @@ def doit(now, model):
     m.close()
 
     m = MapPlot(sector='conus',
-            title="%s MOS Temperature Bias " % (model,),
-            subtitle='Model Run: %s Forecast Time: %s' % (
-                                runtime.strftime("%d %b %Y %H %Z"),
-                                localnow.strftime("%d %b %Y %-I %p %Z"))
-            )
+                title="%s MOS Temperature Bias " % (model,),
+                subtitle=('Model Run: %s Forecast Time: %s'
+                          ) % (runtime.strftime("%d %b %Y %H %Z"),
+                               localnow.strftime("%d %b %Y %-I %p %Z")))
     m.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
 
     pqstr = ("plot ac %s00 conus_%s_mos_T_bias.png "
-             +"conus_%s_mos_T_bias_%s.png png") % (
-                now.strftime("%Y%m%d%H"), model.lower(),
-                model.lower(), now.strftime("%H"))
+             "conus_%s_mos_T_bias_%s.png png"
+             ) % (now.strftime("%Y%m%d%H"), model.lower(),
+                  model.lower(), now.strftime("%H"))
     m.postprocess(pqstr=pqstr, view=False)
+
 
 def main():
     """ Go main go"""

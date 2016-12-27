@@ -43,10 +43,11 @@ for i in rng:
     dt = datetime.date(2015, 1, 1) + datetime.timedelta(days=i)
     labels.append(dt.strftime("%-d %b"))
 
-m = MapPlot(title="Average First Date of Low Temperature At or Below 28$^\circ$F",
+m = MapPlot(title=("Average First Date of Low Temperature "
+                   "At or Below 28$^\circ$F"),
             subtitle="based on stations with data between 1951-2014")
 m.contourf(lons, lats, vals, rng, clevlabels=labels,
            cmap=plt.get_cmap("jet"))
 m.drawcounties()
-#m.plot_values(lons, lats, dates, fmt='%s', labels=sites)
+# m.plot_values(lons, lats, dates, fmt='%s', labels=sites)
 m.postprocess(filename='test.png')

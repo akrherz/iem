@@ -1,23 +1,22 @@
 import psycopg2
+import matplotlib.pyplot as plt
 COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 ccursor.execute("""
  SELECT low, sum(case when snowd > 0 then 1 else 0 end) / count(*):: numeric,
- count(*) from alldata_ia where station = 'IA2203' and low < 32 
+ count(*) from alldata_ia where station = 'IA2203' and low < 32
  and year > 1899 and snowd >= 0 and year < 2012 GROUP by low ORDER by low DESC
 """)
 lows = []
 freq = []
 count = []
 for row in ccursor:
-    lows.append( row[0] )
-    freq.append( float(row[1]) * 100.0 )
-    count.append( float(row[2]) / 111.0 )
-    
-import matplotlib.pyplot as plt
+    lows.append(row[0])
+    freq.append(float(row[1]) * 100.0)
+    count.append(float(row[2]) / 111.0)
 
-(fig, ax) = plt.subplots(1,1)
+(fig, ax) = plt.subplots(1, 1)
 
 ax.plot(lows, freq, color='b')
 
