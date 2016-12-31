@@ -18,18 +18,18 @@ icursor.execute("""
  not s.metasite
 """)
 
-utcnow = datetime.datetime.utcnow()
+now = datetime.datetime.now()
 
 for row in icursor:
     print "Add iemdb current: ID: %10s NETWORK: %s" % (row['id'],
                                                        row['network'])
 
-    tbl = 'summary_%s' % (utcnow.year,)
+    tbl = 'summary_%s' % (now.year,)
     icursor2.execute("""
         INSERT into %s (day, iemid) VALUES ('TODAY', %s)
         """ % (tbl, row['iemid']))
 
-    tbl = 'summary_%s' % ((utcnow + datetime.timedelta(days=1)).year,)
+    tbl = 'summary_%s' % ((now + datetime.timedelta(days=1)).year,)
     icursor2.execute("""INSERT into %s ( day, iemid)
           VALUES ( 'TOMORROW', %s) """ % (tbl, row['iemid']))
     tbl = 'current'
