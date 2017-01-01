@@ -177,8 +177,8 @@ data = {'plots': [
         {'id': "125", 'mw': True,
          'label': "Climatological Maps of Annual/Monthly Averages"},
         {'id': "151", 'mw': True,
-         'label': ("Climatological Maps of Differences between "
-                   "Two Periods")},
+         'label': ("Difference between two periods or "
+                   "single period of years [map]")},
         {'id': "128", 'mw': True,
          'label': "Comparison of Yearly Summaries between two stations"},
         {'id': "99", 'label': "Daily High + Low Temperatures with Departures",

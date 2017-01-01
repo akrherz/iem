@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 from pyiem.plot import MapPlot, centered_bins
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -33,7 +34,7 @@ PRECISION = {'total_precip': 2,
              'avg_low': 1,
              'days_high_above': 1}
 MDICT = OrderedDict([
-         ('all', 'No Month/Time Limit'),
+         ('all', 'Annual'),
          ('spring', 'Spring (MAM)'),
          ('fall', 'Fall (SON)'),
          ('winter', 'Winter (DJF)'),
@@ -51,14 +52,19 @@ MDICT = OrderedDict([
          ('oct', 'October'),
          ('nov', 'November'),
          ('dec', 'December')])
+OPT1 = {'diff': 'Plot Difference',
+        'p1': 'Just Plot Period One Values'}
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
-    d['description'] = """This map produces an analysis of change in
-    some climatological value between two periods of your choosing."""
+    d['description'] = """This map produces an analysis yearly averages. You
+    can either plot the difference between two period of years or simply the
+    years between the first period.  This app is meant to address the question
+    about changes in climate or just to produce a simple plot of yearly
+    averages over some period of years."""
     d['arguments'] = [
         dict(type='select', name='month', default='all',
              options=MDICT, label='Show Monthly or Annual Averages'),
@@ -70,8 +76,10 @@ def get_description():
              label='Map Plot/Contour View Option'),
         dict(type='select', name='var', options=PDICT3, default='total_precip',
              label='Which Variable to Plot'),
-        dict(type='text', name='threshold', default=-99,
+        dict(type='float', name='threshold', default=-99,
              label='Enter threshold (where appropriate)'),
+        dict(type='select', options=OPT1, default='diff', name='opt1',
+             label='Period plotting option'),
         dict(type='year', name='p1syear', default=1951,
              label='Start Year (inclusive) of Period One:'),
         dict(type='year', name='p1eyear', default=1980,
@@ -90,17 +98,21 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    state = fdict.get('state', 'IA')[:2]
-    varname = fdict.get('var', 'total_precip')
-    sector = fdict.get('sector', 'state')
-    threshold = float(fdict.get('threshold', -99))
-    opt = fdict.get('opt', 'both')
-    month = fdict.get('month', 'all')
-    p1syear = int(fdict.get('p1syear', 1951))
-    p1eyear = int(fdict.get('p1eyear', 1980))
-    p2syear = int(fdict.get('p2syear', 1981))
-    p2eyear = int(fdict.get('p2eyear', 2010))
+    state = ctx['state']
+    varname = ctx['var']
+    sector = ctx['sector']
+    threshold = ctx['threshold']
+    opt = ctx['opt']
+    month = ctx['month']
+    p1syear = ctx['p1syear']
+    p1eyear = ctx['p1eyear']
+    p1yearreq = (p1eyear - p1syear)
+    p2syear = ctx['p2syear']
+    p2eyear = ctx['p2eyear']
+    p2yearreq = (p2eyear - p2syear)
+    opt1 = ctx['opt1']
 
     if month == 'all':
         months = range(1, 13)
@@ -148,26 +160,30 @@ def plotter(fdict):
         avg(avg_temp) as avg_temp, avg(avg_high) as avg_high,
         avg(avg_low) as avg_low, avg(sum_sdd) as sdd,
         avg(sum_gdd) as gdd,
-        avg(days_high_above) as avg_days_high_above
+        avg(days_high_above) as avg_days_high_above,
+        count(*) as count
         from period1 GROUP by station),
     p2agg as (
         SELECT station, avg(total_precip) as precip,
         avg(avg_temp) as avg_temp, avg(avg_high) as avg_high,
         avg(avg_low) as avg_low, avg(sum_sdd) as sdd,
         avg(sum_gdd) as gdd,
-        avg(days_high_above) as avg_days_high_above
+        avg(days_high_above) as avg_days_high_above,
+        count(*) as count
         from period2 GROUP by station),
     agg as (
-        SELECT p2.station, p2.precip as p2_precip, p1.precip as p1_precip,
+        SELECT p2.station,
+        p2.precip as p2_total_precip, p1.precip as p1_total_precip,
         p2.gdd as p2_gdd, p1.gdd as p1_gdd,
         p2.sdd as p2_sdd, p1.sdd as p1_sdd,
         p2.avg_temp as p2_avg_temp, p1.avg_temp as p1_avg_temp,
         p1.avg_high as p1_avg_high, p2.avg_high as p2_avg_high,
         p1.avg_low as p1_avg_low, p2.avg_low as p2_avg_low,
-        p1.avg_days_high_above as p1_avg_days_high_above,
-        p2.avg_days_high_above as p2_avg_days_high_above
+        p1.avg_days_high_above as p1_days_high_above,
+        p2.avg_days_high_above as p2_days_high_above
         from p1agg p1 JOIN p2agg p2 on
-        (p1.station = p2.station))
+        (p1.station = p2.station)
+        WHERE p1.count >= %s and p2.count >= %s)
 
     SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat,
     d.* from agg d JOIN stations t ON (d.station = t.id)
@@ -176,34 +192,46 @@ def plotter(fdict):
     'MICLIMATE', 'INCLIMATE', 'OHCLIMATE', 'KYCLIMATE')
     and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
     """, pgconn, params=[threshold, p1syear, p1eyear, tuple(months),
-                         threshold, p2syear, p2eyear, tuple(months)],
+                         threshold, p2syear, p2eyear, tuple(months),
+                         p1yearreq, p2yearreq],
                   index_col=None)
-    df['total_precip'] = df['p2_precip'] - df['p1_precip']
+    df['total_precip'] = df['p2_total_precip'] - df['p1_total_precip']
     df['avg_temp'] = df['p2_avg_temp'] - df['p1_avg_temp']
     df['avg_high'] = df['p2_avg_high'] - df['p1_avg_high']
     df['avg_low'] = df['p2_avg_low'] - df['p1_avg_low']
     df['gdd'] = df['p2_gdd'] - df['p1_gdd']
     df['sdd'] = df['p2_sdd'] - df['p1_sdd']
-    df['days_high_above'] = (df['p2_avg_days_high_above'] -
-                             df['p1_avg_days_high_above'])
+    df['days_high_above'] = (df['p2_days_high_above'] -
+                             df['p1_days_high_above'])
+    column = varname
+    title = "%s %s" % (MDICT[month], PDICT3[varname])
+    title = title.replace("[Threshold]", '%.1f' % (threshold,))
+    if opt1 == 'p1':
+        column = 'p1_%s' % (varname,)
+        title = '%.0f-%.0f %s' % (p1syear, p1eyear, title)
+    else:
+        title = ('%.0f-%.0f minus %.0f-%.0f %s Difference'
+                 ) % (p2syear, p2eyear, p1syear, p1eyear, title)
+
     # Reindex so that most extreme values are first
-    df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
+    df = df.reindex(df[column].abs().sort_values(ascending=False).index)
     # drop 5% most extreme events, too much?
     df2 = df.iloc[int(len(df.index) * 0.05):]
 
-    title = "%s %s" % (MDICT[month], PDICT3[varname])
-    title = title.replace("[Threshold]", '%.1f' % (threshold,))
-    m = MapPlot(sector=sector, state=state, axisbg='white',
-                title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
-                       ) % (p2syear, p2eyear, p1syear, p1eyear, title),
+    m = MapPlot(sector=sector, state=state, axisbg='white', title=title,
                 subtitle=('based on IEM Archives'),
                 titlefontsize=12)
-    # Create 9 levels centered on zero
-    abval = df2[varname].abs().max()
-    levels = centered_bins(abval)
+    if opt1 == 'diff':
+        # Create 9 levels centered on zero
+        abval = df2[column].abs().max()
+        levels = centered_bins(abval)
+    else:
+        levels = [round(v, PRECISION[varname])
+                  for v in np.percentile(df2[column].values, range(0, 101,
+                                                                   10))]
     if opt in ['both', 'contour']:
         m.contourf(df2['lon'].values, df2['lat'].values,
-                   df2[varname].values, levels,
+                   df2[column].values, levels,
                    cmap=plt.get_cmap(('seismic_r' if varname == 'total_precip'
                                       else 'seismic')),
                    units=UNITS[varname])
@@ -211,8 +239,8 @@ def plotter(fdict):
         m.drawcounties()
     if opt in ['both', 'values']:
         m.plot_values(df2['lon'].values, df2['lat'].values,
-                      df2[varname].values,
-                      fmt='%%.%if' % (PRECISION[varname],))
+                      df2[column].values,
+                      fmt='%%.%if' % (PRECISION[varname],), labelbuffer=5)
 
     return m.fig, df
 
