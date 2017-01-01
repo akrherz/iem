@@ -1,6 +1,12 @@
+"""Crude estimator of IEM Climate Stations
+
+This is only run for the exceptions, when data is marked as missing for some
+reason.  The main data estimator is found at `../climodat/daily_estimator.py`.
+
+This script looks for the 11 nearest neighbors and if that fails, it goes
+looking for IEMRE gridded data.
 """
- Crude data estimator!
-"""
+import os
 import sys
 import numpy as np
 from pyiem.network import Table as NetworkTable
@@ -26,12 +32,12 @@ weights = {}
 for station in nt.sts.keys():
     sql = """
         select id, ST_distance(geom, 'SRID=4326;POINT(%s %s)') from stations
-         WHERE network = '%sCLIMATE' and id != '%s'
+         WHERE network ~* 'CLIMATE' and id != '%s'
          and archive_begin < '1951-01-01' and
          substr(id, 3, 1) != 'C' and substr(id, 3,4) != '0000'
          ORDER by st_distance
-         ASC LIMIT 11""" % (nt.sts[station]['lon'], nt.sts[station]['lat'],
-                            state.upper(), station)
+         ASC LIMIT 11
+         """ % (nt.sts[station]['lon'], nt.sts[station]['lat'], station)
     ccursor.execute(sql)
     friends[station] = []
     weights[station] = []
@@ -42,12 +48,12 @@ for station in nt.sts.keys():
 
 
 def do_var(varname):
-    """
-    Run our estimator for a given variable
-    """
+    """Run our estimator for a given variable"""
     currentnc = None
-    sql = """select day, station from alldata_%s WHERE %s is null
-        and day >= '1893-01-01' ORDER by day ASC""" % (state.lower(), varname)
+    sql = """
+        select day, station from alldata_%s WHERE %s is null
+        and day >= '1893-01-01' ORDER by day ASC
+        """ % (state.lower(), varname)
     ccursor.execute(sql)
     for row in ccursor:
         day = row[0]
@@ -56,9 +62,9 @@ def do_var(varname):
             continue
 
         sql = """
-            SELECT station, %s from alldata_%s WHERE %s is not NULL
+            SELECT station, %s from alldata WHERE %s is not NULL
             and station in %s and day = '%s'
-            """ % (varname, state, varname, tuple(friends[station]), day)
+            """ % (varname, varname, tuple(friends[station]), day)
         ccursor2.execute(sql)
         weight = []
         value = []
@@ -71,8 +77,11 @@ def do_var(varname):
             # Nearest neighbors failed, so lets look at our grided analysis
             # and sample from it
             if currentnc is None or currentnc.title.find(str(day.year)) == -1:
-                currentnc = netCDF4.Dataset(("/mesonet/data/iemre/"
-                                             "%s_mw_daily.nc") % (day.year,))
+                ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (day.year,)
+                if not os.path.isfile(ncfn):
+                    print("FATAL: estimate_missing missing: %s" % (ncfn,))
+                    sys.exit()
+                currentnc = netCDF4.Dataset(ncfn)
             tidx = iemre.daily_offset(datetime.datetime(day.year, day.month,
                                                         day.day))
             iidx, jidx = iemre.find_ij(nt.sts[station]['lon'],
