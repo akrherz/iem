@@ -1,16 +1,20 @@
 import psycopg2
 from pandas.io.sql import read_sql
 import datetime
-import numpy as np
-from pyiem.plot import MapPlot, centered_bins
 from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
         ('max_dwpf', 'Highest Dew Point Temperature'),
+        ('min_dwpf', 'Lowest Dew Point Temperature'),
+        ('max_tmpf', 'Highest Air Temperature'),
+        ('min_tmpf', 'Lowest Air Temperature'),
         ])
 UNITS = {'max_dwpf': 'F',
+         'max_tmpf': 'F',
+         'min_dwpf': 'F',
+         'min_tmpf': 'F',
          }
 MDICT = OrderedDict([
          ('all', 'No Month Limit'),
@@ -102,7 +106,8 @@ def plotter(fdict):
         extract(month from valid at time zone %s) in %s),
     agg1 as (
         SELECT extract(hour from ts) as hr, max(idwpf) as max_dwpf,
-        max(itmpf) as max_tmpf from obs GROUP by hr)
+        max(itmpf) as max_tmpf, min(idwpf) as min_dwpf,
+        min(itmpf) as min_tmpf from obs GROUP by hr)
     SELECT o.ts, a.hr::int as hr,
         a.""" + varname + """ from agg1 a JOIN obs o on
         (a.hr = extract(hour from o.ts)
