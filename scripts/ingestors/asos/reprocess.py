@@ -210,9 +210,10 @@ def stup(station):
 
 
 def clear_data(station, sts, ets):
-    acursor.execute("""DELETE from alldata WHERE station = %s and
-    valid BETWEEN %s and %s""", (station, sts,
-                                 (ets + datetime.timedelta(days=1))))
+    acursor.execute("""
+        DELETE from alldata WHERE station = %s and
+        valid BETWEEN %s and %s and report_type = 2
+    """, (station, sts, (ets + datetime.timedelta(days=1))))
     print 'Removed %s rows for station %s' % (acursor.rowcount, station)
     ASOS.commit()
 
