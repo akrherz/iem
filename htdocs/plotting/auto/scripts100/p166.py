@@ -43,7 +43,7 @@ def plotter(fdict):
 
     # Get total issued
     df = read_sql("""
-        Select extract(year from issued) as year,
+        Select extract(year from issued)::int as year,
         count(*) as national_count from watches
         where """ + sqllimit + """
         num < 3000 GROUP by year ORDER by year ASC
@@ -51,7 +51,7 @@ def plotter(fdict):
 
     # Get total issued
     odf = read_sql("""
-        select extract(year from issued) as year, count(*) as state_count
+        select extract(year from issued)::int as year, count(*) as state_count
         from watches w, states s where w.geom && s.the_geom and
         ST_Overlaps(w.geom, s.the_geom) and
         """ + sqllimit + """
@@ -60,6 +60,7 @@ def plotter(fdict):
     """, pgconn, params=(state,), index_col='year')
     df['state_count'] = odf['state_count']
     df['state_percent'] = df['state_count'] / df['national_count'] * 100.
+    df.fillna(0, inplace=True)
 
     (fig, ax) = plt.subplots(3, 1, sharex=True)
 
@@ -96,3 +97,6 @@ def plotter(fdict):
                    df.index.values[-1] + 0.5)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

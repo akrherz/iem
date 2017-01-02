@@ -47,7 +47,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='max_dwpf',
              label='Which Variable', options=METRICS),
         dict(type='select', name='dir', default='aoa',

@@ -12,7 +12,7 @@ MDICT = OrderedDict([
     ('dwpf', 'Dew Point Temperature'),
     ('alti', 'Pressure Altimeter'),
     ('mslp', 'Sea Level Pressure')])
-UNITS = {'tmpf': '°F', 'dwpf': '°F', 'alti': 'inch', 'mslp': 'mb'}
+UNITS = {'tmpf': u'°F', 'dwpf': u'°F', 'alti': 'inch', 'mslp': 'mb'}
 
 
 def get_description():
@@ -27,7 +27,7 @@ def get_description():
     filled bar for each day plotted when Air Temperature is selected."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='date', name='sdate', default=ts.strftime("%Y/%m/%d"),
              label='Start Date of Plot:',
              min="1951/01/01"),  # Comes back to python as yyyy-mm-dd
@@ -187,3 +187,6 @@ def plotter(fdict):
                        ctx['edate'].strftime("%d %b %Y")))
 
     return fig, ctx['df']
+
+if __name__ == '__main__':
+    plotter(dict())

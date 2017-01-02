@@ -36,7 +36,7 @@ def get_description():
     caveats apply with the reporting changes of this over the years."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
 

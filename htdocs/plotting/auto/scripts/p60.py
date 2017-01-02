@@ -23,7 +23,7 @@ def get_description():
     d['data'] = True
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='tmpf', options=PDICT2,
              label='Which Variable:'),
         dict(type='int', name='threshold', default=32,

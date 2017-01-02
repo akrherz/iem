@@ -52,7 +52,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='month', default='all',
              options=MDICT, label='Select Month/Season/All'),
         dict(type='select', name='var', options=PDICT, default='max_dwpf',

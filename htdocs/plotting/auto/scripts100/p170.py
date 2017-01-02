@@ -60,7 +60,8 @@ def plotter(fdict):
         where station = %s and presentwx LIKE '%%""" + pweather + """%%'
         and valid > '1973-01-01')
 
-    SELECT extract(year from date) as year, extract(month from date) as month,
+    SELECT extract(year from date)::int as year,
+    extract(month from date)::int as month,
     count(*) from data GROUP by year, month ORDER by year, month
     """, pgconn, params=(tzname, station), index_col=None)
 
@@ -72,8 +73,9 @@ def plotter(fdict):
                   ) % (station, nt.sts[station]['name'], PDICT[pweather],
                        syear, datetime.date.today().year, pweather))
     df2 = df[df['year'] == year]
-    ax.bar(df2['month'] - 0.4, df2['count'], width=0.4, fc='r', ec='r',
-           label='%s' % (year,))
+    if len(df2.index) > 0:
+        ax.bar(df2['month'] - 0.4, df2['count'], width=0.4, fc='r', ec='r',
+               label='%s' % (year,))
     df2 = df.groupby('month').sum()
     years = (datetime.date.today().year - syear) + 1
     yvals = df2['count'] / years

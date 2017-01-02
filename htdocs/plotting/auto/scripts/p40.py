@@ -23,7 +23,7 @@ def get_description():
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='month', name='month', label='Select Month:',
              default=today.month),
         dict(type='year', name='year', label='Select Year:',

@@ -24,7 +24,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='season', default='spring',
              options=PDICT, label='Which Season to Highlight:'),
         dict(type='year', name='year',

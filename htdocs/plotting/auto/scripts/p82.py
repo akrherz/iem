@@ -30,7 +30,7 @@ def get_description():
     m90 = today - datetime.timedelta(days=90)
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
-             label='Select Station'),
+             network='IA_ASOS', label='Select Station'),
         dict(type='select', name='var', default='pday',
              label='Which Daily Variable:', options=PDICT),
         dict(type='date', name='sdate',

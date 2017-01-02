@@ -30,7 +30,7 @@ def get_description():
     sts = today - datetime.timedelta(days=180)
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             network='IACLIMATE', label='Select Station:'),
         dict(type='int', name='days', default=91,
              label='Number of Days #1'),
         dict(type='int', name='days2', default=0,

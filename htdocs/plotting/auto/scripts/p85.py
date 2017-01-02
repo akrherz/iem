@@ -20,7 +20,7 @@ def get_description():
     above or below a temperature thresold."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='month', name='month', default=7,
              label='Month:'),
         dict(type='int', name='t', default=80,

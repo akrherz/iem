@@ -26,7 +26,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='var', default='coldest_temp',
              label='Which Metric', options=PDICT),
         dict(type="int", name="days", default=7,

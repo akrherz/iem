@@ -20,7 +20,7 @@ def get_description():
     values along with vector-averaged average wind direction."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='units', default='mph',
              options=UNITS, label='Units of Average Wind Speed'),
     ]

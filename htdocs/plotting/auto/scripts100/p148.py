@@ -31,7 +31,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='date', default='memorial', options=PDICT,
              label='Which date/holiday to plot?'),
         dict(type='date', name='thedate', default='2000/01/01',

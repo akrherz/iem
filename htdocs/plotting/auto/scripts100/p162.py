@@ -19,7 +19,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
     ]
     return d
 

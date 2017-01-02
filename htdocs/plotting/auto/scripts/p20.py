@@ -4,6 +4,7 @@ import datetime
 import calendar
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -18,7 +19,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='year', name='year', default=ts.year,
              label='Select Year:'),
     ]
@@ -31,11 +32,12 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    station = ctx['zstation']
+    network = ctx['network']
     nt = NetworkTable(network)
-    year = int(fdict.get('year', datetime.date.today().year))
+    year = ctx['year']
 
     df = read_sql("""
     WITH obs as (
@@ -72,12 +74,13 @@ def plotter(fdict):
     for i, _ in enumerate(bars):
         ax.text(i+1-0.25, monthly[i]+1, "%.0f" % (monthly[i],), ha='center')
     thisyear = df['count'].values.tolist()
-    bars = ax.bar(np.arange(1, 13), thisyear, fc='blue', ec='blue', width=0.4,
-                  label=str(year))
-    for i, _ in enumerate(bars):
-        if not np.isnan(thisyear[i]):
-            ax.text(i+1+0.25, thisyear[i]+1, "%.0f" % (thisyear[i],),
-                    ha='center')
+    if not all([a is None for a in thisyear]):
+        bars = ax.bar(np.arange(1, 13), thisyear, fc='blue', ec='blue',
+                      width=0.4, label=str(year))
+        for i, _ in enumerate(bars):
+            if not np.isnan(thisyear[i]):
+                ax.text(i+1+0.25, thisyear[i]+1, "%.0f" % (thisyear[i],),
+                        ha='center')
 
     ax.scatter(df['month'], df['max'], marker='s', s=45, label="Max",
                zorder=2, color='g')
@@ -103,4 +106,4 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter(dict(zstation='CGS', network='MD_ASOS', year=2016))
+    plotter(dict(zstation='AMW', network='IA_ASOS', year=2017))
