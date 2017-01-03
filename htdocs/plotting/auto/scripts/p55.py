@@ -4,6 +4,7 @@ import datetime
 import calendar
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -18,7 +19,7 @@ def get_description():
     IEM."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             network='IACLIMATE', label='Select Station:'),
         dict(type='month', name='month', default='12',
              label='Select Month:')
     ]
@@ -32,9 +33,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA2203')
-    month = int(fdict.get('month', 12))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    month = ctx['month']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))

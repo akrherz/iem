@@ -4,6 +4,7 @@ import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -16,8 +17,8 @@ def get_description():
     and by month."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
-        dict(type='text', name='threshold', default=10,
+             network='IA_ASOS', label='Select Station:'),
+        dict(type='int', name='threshold', default=10,
              label='Wind Speed Threshold (knots)'),
         dict(type='month', name='month', default='3',
              label='Select Month:'),
@@ -32,11 +33,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    threshold = int(fdict.get('threshold', 10))
-    month = int(fdict.get('month', 3))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    threshold = ctx['threshold']
+    month = ctx['month']
 
     nt = NetworkTable(network)
 
