@@ -1,4 +1,5 @@
 import psycopg2
+import datetime
 import numpy as np
 from pyiem import network, util
 from pandas.io.sql import read_sql
@@ -31,13 +32,18 @@ def get_description():
     In most cases, you can access the raw data for these plots
     <a href="/climodat/" class="alert-link">here.</a>"""
     d['data'] = True
+    eyear = datetime.date.today().year
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
-             label='Select Station'),
+             network='IACLIMATE', label='Select Station'),
         dict(type='select', name='type', default='max-high',
              label='Which metric to plot?', options=PDICT),
         dict(type='float', name='threshold', default=-99,
              label='Threshold (optional, specify when appropriate):'),
+        dict(type='year', name='syear', default=1893,
+             label='Start Year of Plot: (inclusive)'),
+        dict(type='year', name='eyear', default=eyear,
+             label='Start Year of Plot: (inclusive)'),
     ]
     return d
 
@@ -53,6 +59,8 @@ def plotter(fdict):
     station = ctx['station']
     threshold = ctx['threshold']
     ptype = ctx['type']
+    syear = ctx['syear']
+    eyear = ctx['eyear']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -74,9 +82,10 @@ def plotter(fdict):
     avg(case when precip >= 0.01 then precip else null end) as "avg-precip2",
     sum(case when precip >= %s then 1 else 0 end) as "days-precip"
   from """+table+"""
-  where station = %s
+  where station = %s and year >= %s and year <= %s
   GROUP by year ORDER by year ASC
-    """, pgconn, params=(threshold, threshold, threshold, threshold, station),
+    """, pgconn, params=(threshold, threshold, threshold, threshold, station,
+                         syear, eyear),
                   index_col='year')
 
     (fig, ax) = plt.subplots(1, 1)
