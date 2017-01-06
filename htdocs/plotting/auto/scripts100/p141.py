@@ -4,6 +4,7 @@ import datetime
 from collections import OrderedDict
 from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
+from pyiem.util import get_autoplot_context
 
 STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
@@ -78,19 +79,23 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
+    ctx = get_autoplot_context(fdict, get_description())
 
-    location = fdict.get('location', 'ames')
-    ptype = fdict.get('ptype', 'gdd')
-    sdate = datetime.datetime.strptime(fdict.get('sdate', 'jan1'), '%b%d')
-    _, _ = STATIONS[location], PLOTS[ptype]
+    location = ctx['location']
+    ptype = ctx['ptype']
+    sdate = datetime.datetime.strptime(ctx['sdate'], '%b%d')
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
-    cdf = load("/opt/iem/scripts/yieldfx/baseline",
-               location, sdate)
+    cdf = load("/opt/iem/scripts/yieldfx/baseline", location, sdate)
 
     today = datetime.date.today()
     thisyear = df[df['year'] == today.year].copy()
     thisyear.reset_index(inplace=True)
     thisyear.set_index('doy', inplace=True)
+
+    # Drop extra day from cdf during non-leap year
+    if today.year % 4 != 0:
+        cdf = cdf[cdf['doy'] < 366]
+        df = df[df['doy'] < 366]
 
     # Create a specialized result dataframe for CSV, Excel output options
     resdf = pd.DataFrame(index=thisyear.index)
