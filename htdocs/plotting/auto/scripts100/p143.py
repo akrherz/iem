@@ -3,9 +3,10 @@ import datetime
 from collections import OrderedDict
 from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
+from pyiem.util import get_autoplot_context
 
 STATIONS = OrderedDict([
-        ('ames', 'Central (Ames'),
+        ('ames', 'Central (Ames)'),
         ('cobs', 'Central (COBS)'),
         ('crawfordsville', 'Southeast (Crawfordsville)'),
         ('lewis', 'Southwest (Lewis)'),
@@ -14,6 +15,7 @@ STATIONS = OrderedDict([
 
 SDATES = OrderedDict([
         ('nov1', 'November 1'),
+        ('jan1', 'January 1'),
         ('mar15', 'March 15'),
                      ])
 
@@ -25,7 +27,7 @@ def get_description():
     d['arguments'] = [
         dict(type='select', name='location', default='ames',
              label='Select Location:', options=STATIONS),
-        dict(type='select', name='s', default='nov1',
+        dict(type='select', name='s', default='jan1',
              label='Select Plot Start Date:', options=SDATES),
     ]
     return d
@@ -40,6 +42,8 @@ def load(dirname, location, sdate):
         if not line.startswith('19') and not line.startswith('20'):
             continue
         tokens = line.split()
+        if float(tokens[5]) > 90:
+            continue
         data.append(tokens)
         ts = (datetime.date(int(tokens[0]), 1, 1) +
               datetime.timedelta(days=int(tokens[1])-1))
@@ -85,10 +89,9 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-
-    location = fdict.get('location', 'ames')
-    sdate = fdict.get('s', 'nov1')
-    _, _ = STATIONS[location], SDATES[sdate]
+    ctx = get_autoplot_context(fdict, get_description())
+    location = ctx['location']
+    sdate = ctx['s']
     # we need to compute totals using two datasources
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
     cdf = load("/opt/iem/scripts/yieldfx/baseline",
