@@ -25,6 +25,8 @@ data = {'plots': [
          'mw': True},
         {'id': "21",
          'label': "Change in NCDC 81 Daily Climatology over X Days"},
+        {'id': "174",
+         'label': "Compare Daily High/Low Temps for ASOS Stations"},
         {'id': "91", 'mw': True,
          "label": "Consecutative Day Statistics of High+Low Temps / Precip"},
         {'id': "66", 'mw': True,
