@@ -124,13 +124,14 @@ def main():
         utcnow = datetime.datetime.utcnow(
                                         ).replace(tzinfo=pytz.timezone("UTC"))
         now = utcnow.astimezone(pytz.timezone("America/Chicago"))
-        plt.figtext(0.01, 0.005, ('IEM Autoplot App #%s, '
-                                  'generated at %s in %.2fs'
-                                  ) % (p,
-                                       now.strftime("%-d %b %Y %-I:%M %p %Z"),
+        plt.figtext(0.01, 0.005, ('Generated at %s in %.2fs'
+                                  ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),
                                        (end_time - start_time).total_seconds()
                                        ),
                     va='bottom', ha='left', fontsize=8)
+        plt.figtext(0.99, 0.005, ('IEM Autoplot App #%s'
+                                  ) % (p, ),
+                    va='bottom', ha='right', fontsize=8)
         ram = cStringIO.StringIO()
         if fmt in ['png', 'pdf', 'svg']:
             plt.savefig(ram, format=fmt, dpi=dpi)
