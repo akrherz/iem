@@ -90,16 +90,19 @@ def plotter(fdict):
                    "%s Warmer (%.1f%%)" % (station1, freq1),
                    transform=ax[i].transAxes,
                    va='top', ha='center', color='r', fontsize=8)
-        ax[i].text(0.5, 0.05,
+        ax[i].text(0.5, 0.01,
                    "%s Warmer (%.1f%%)" % (station2, freq2),
                    transform=ax[i].transAxes,
                    va='bottom', ha='center', color='b', fontsize=8)
-        ax[i].text(0.95, 0.95,
+        ax[i].text(0.95, 0.99,
                    "Bias: %.2f" % (df[col].mean(),),
                    transform=ax[i].transAxes,
-                   va='center', ha='right', color='k', fontsize=8)
+                   va='top', ha='right', color='k', fontsize=8)
         ax[i].set_ylabel(("%s Temp Difference $^\circ$F"
                           ) % (varname.capitalize(),))
+        y0 = min([df[col].min(), -1])
+        y1 = max([df[col].max(), 1])
+        ax[i].set_ylim(y0 * 1.2, y1 * 1.2)
 
     return fig, df
 
