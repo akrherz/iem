@@ -30,9 +30,8 @@ while (list ($line_num, $line) = each ($fcontents)) {
 
 	$parts = split (" ", $line);
 	$tm = $parts[6];
-	$tn = $parts[7];
 	if ($tm > $thisMax){ $thisMax = $tm; }
-	if ($tn < $thisMin){ $thisMin = $tn; }
+	if ($tm < $thisMin){ $thisMin = $tm; }
 	$gust = $parts[11];
 	$gust_time = $parts[12];
 	if ($gust > $maxGust){ $maxGust = $gust; $gustTime = $gust_time;}
