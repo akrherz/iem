@@ -1,11 +1,12 @@
 """Update the pday column
 
-Run from RUN_10MIN.sh
+Some care has to be made here such that trace values do not accumulate when
+there are actual measurable precip.  Eventually, the DSM or other summary
+messages come and overwrite the trouble. Run from RUN_10MIN.sh
 """
 import psycopg2
 import datetime
-IEM = psycopg2.connect(database='iem', host='localhost', port=5555,
-                       user='mesonet')
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor()
 icursor2 = IEM.cursor()
 
