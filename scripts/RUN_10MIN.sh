@@ -16,7 +16,7 @@ cd ../ingestors
 python dot_truckcams.py &
 
 cd ../summary
-python updateRain.py
+python update_dailyrain.py
 
 cd ../outgoing
 php wxc_rwis.php
