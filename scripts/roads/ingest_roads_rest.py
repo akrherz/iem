@@ -52,7 +52,7 @@ EPSG26915 = ('PROJCS["NAD_1983_UTM_Zone_15N",GEOGCS["GCS_North_American_1983"'
              ',UNIT["Meter",1.0]]')
 
 
-def export_shapefile(txn, tp):
+def export_shapefile(txn, utc):
     """Export a Shapefile of Road Conditions"""
     os.chdir("/tmp")
     dbf = dbflib.create("iaroad_cond")
@@ -112,7 +112,6 @@ def export_shapefile(txn, tp):
     z.write("iaroad_cond.prj")
     z.close()
 
-    utc = tp + datetime.timedelta(hours=6)
     subprocess.call(("/home/ldm/bin/pqinsert -p 'zip ac %s "
                      "gis/shape/26915/ia/iaroad_cond.zip "
                      "GIS/iaroad_cond_%s.zip zip' iaroad_cond.zip"
