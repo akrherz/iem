@@ -1,9 +1,9 @@
 <?php
-$OL = "3.18.2";
+$OL = "3.20.0";
  include("../../../config/settings.inc.php");
  include_once "../../../include/myview.php";
  $t = new MyView();
- include("../../../include/database.inc.php");
+ include_once "../../../include/database.inc.php";
 
 $network = 'IA_RWIS';
 $ostation = isset($_GET["ostation"]) ? $_GET["ostation"] : "";
@@ -27,8 +27,8 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
   $_GET["tmpf"] = "on";
 }
 
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
+include_once "../../../include/imagemaps.php";
+include_once "../../../include/forms.php";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
@@ -56,7 +56,10 @@ $content = <<<EOF
             border: 2px solid black;
         }
 </style>
-
+<ol class="breadcrumb">
+	<li><a href="/RWIS/">RWIS Homepage</a></li>
+	<li class="current">RWIS Temperature Time Series Plots</li>
+</ol>
 
 <p>This application plots a timeseries of data from an Iowa RWIS site 
 of your choice.  You can optionally select which variables to plot and
@@ -84,7 +87,7 @@ if (strlen($station) > 0 ) {
 	pg_close($c0);
 	$cgiStr = "&mode=$mode&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
 
-	$table = "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
+	$table = "<table class=\"table table-bordered\">
       <tr><th colspan=\"3\">Plot Options</th></tr>
       <tr><td><b>Restrict Plot:</b>
       <br><input type=\"checkbox\" name=\"limit\" value=\"yes\" ";
@@ -156,9 +159,11 @@ if (strlen($station) > 0 ) {
 	$rtcheck = ($mode == "rt") ? " CHECKED": "";
 	$hcheck = ($mode == "hist") ? " CHECKED": ""; 
 $content .= <<<EOF
-<table cellpadding="2" cellspacing="0" border="1">
+<table class="table table-bordered">
+<thead>
 <tr><th>Select Station</th><th colspan="5">Timespan</th></tr>
-
+</thead>
+<tbody>
 <tr><td rowspan="2">
   {$nselect}
   <br />Or from <a href="sf_fe.php">a map</a></td>
@@ -174,6 +179,7 @@ $content .= <<<EOF
   <td>Number of days:<br />{$ds2}
    </td>
  </tr>
+</tbody>
 </table>
 
 
@@ -182,9 +188,9 @@ $content .= <<<EOF
   <input type="submit" value="Generate Plot">
   </form>
 
- <br><img src="SFtemps.php?station={$station}{$cgiStr}" alt="Time Series" />
-<br><img src="plot_traffic.php?station={$station}{$cgiStr}" alt="Time Series" />
-<br><img src="plot_soil.php?station={$station}{$cgiStr}" alt="Time Series" />
+ <br><img src="SFtemps.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+<br><img src="plot_traffic.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+<br><img src="plot_soil.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
 EOF;
   } else { 
   $nselect = networkSelect("IA_RWIS", "");
