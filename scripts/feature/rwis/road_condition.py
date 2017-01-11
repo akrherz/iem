@@ -1,113 +1,105 @@
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import psycopg2
+import datetime
+from pandas.io.sql import read_sql
+import pytz
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
-obvalid = []
-obtmpf = []
-obroad = []
-obdwpf = []
-icursor.execute("""SELECT valid, tmpf, dwpf, tsf0 from current_log c JOIN stations s ON
- (s.iemid = c.iemid) WHERE c.valid > '2015-01-20 05:00' and 
- c.valid < '2015-01-20 10:00' 
- and s.id = 'RJFI4' ORDER by valid
- ASC""")
-for row in icursor:
-    obvalid.append( row[0])
-    obtmpf.append( row[1])
-    obdwpf.append(row[2])
-    obroad.append( row[3] )
+obsdf = read_sql("""
+    SELECT valid, tmpf, dwpf, tsf0, tsf1 from current_log c JOIN stations s ON
+    (s.iemid = c.iemid) WHERE c.valid > '2017-01-10 03:00' and
+    c.valid < '2017-01-10 15:00'
+    and s.id = 'RJFI4' ORDER by valid ASC
+    """, IEM, index_col='valid')
 
-#obvalid2 = []
-#obwx = []
-#icursor.execute("""SELECT valid, presentwx from current_log c JOIN stations s ON
-# (s.iemid = c.iemid) WHERE c.valid > '2014-01-16' and c.valid < '2014-01-16 17:30' 
-# and s.id = 'DSM' and presentwx is not null ORDER by valid
-# ASC""")
-#for row in icursor:
-#    obvalid2.append( row[0])
-#    obwx.append( row[1].replace(",FG", "").replace(",FZFG", ""))
+raddf = read_sql("""
+    SELECT valid, srad from current_log c JOIN stations s ON
+    (s.iemid = c.iemid) WHERE c.valid > '2017-01-10 08:00' and
+    c.valid < '2017-01-10 15:00'
+    and s.id = 'SJEI4' ORDER by valid ASC
+    """, IEM, index_col='valid')
+
 
 def get_roads(segid):
-    pcursor.execute("""SELECT valid, cond_code from roads_2015_log where
-      segid = %s and valid > '2015-01-20' ORDER by valid ASC""", (segid,))
+    pcursor.execute("""
+        SELECT valid, cond_code from roads_2015_2016_log where
+        segid = %s and valid > '2017-01-10' ORDER by valid ASC
+    """, (segid,))
 
     valid = []
     codes = []
     oldcode = -1
     for row in pcursor:
         if row[1] != oldcode:
-            valid.append( row[0] )
-            codes.append( row[1] )
+            valid.append(row[0])
+            codes.append(row[1])
         oldcode = row[1]
 
-    valid.append( row[0] )
-    codes.append( row[1] )
+    if row[1] != 0:
+        valid.append(row[0] + datetime.timedelta(days=1))
+        codes.append(0)
     return valid, codes
 
-valid, codes = get_roads(2428)
+valid, codes = get_roads(5575)
+
 
 def get_color(code):
     if code == 0:
         return 'w'
     if code == 1:
         return 'g'
-    if code in [27,15,31,39,3]:
+    if code in [27, 15, 31, 39, 3]:
         return 'yellow'
-    if code in [35,27,47,11]:
+    if code in [35, 27, 47, 11]:
         return 'r'
     return 'k'
-        
 
-import matplotlib.pyplot as plt
 
-(fig, ax) = plt.subplots(1,1, sharex=True)
+(fig, ax) = plt.subplots(1, 1, sharex=True)
+ax.plot(obsdf.index.values, obsdf['tmpf'], lw=2, zorder=3, color='r',
+        label='Air Temp')
+ax.plot(obsdf.index.values, obsdf['dwpf'], lw=2, zorder=3, color='g',
+        label='Dew Point')
+ax.plot(obsdf.index.values, obsdf['tsf0'], lw=2, zorder=3, color='b',
+        label='Road Temp')
+ax.plot(obsdf.index.values, obsdf['tsf1'], lw=2, zorder=3, color='pink',
+        label='Bridge Temp')
 
-for i in range(1,len(valid)):
-    print valid[i-1], valid[i], codes[i-1]
-    rect = plt.Rectangle((valid[i-1],24), 
-                         (valid[i]-valid[i-1]).seconds / (24.0 *1440.0), 1.5,
+ax2 = ax.twinx()
+ax2.plot(raddf.index.values, raddf['srad'], lw=2, zorder=2, color='k')
+ax2.set_ylabel("Solar Radiation [W m$^{-2}$] (black line)")
+ax2.set_ylim(0, 1000)
+
+ax.set_zorder(ax2.get_zorder()+1)
+ax.patch.set_visible(False)
+for i in range(1, len(valid)):
+    days = (valid[i]-valid[i-1]).total_seconds() / 86400.
+    rect = plt.Rectangle((mdates.date2num(valid[i-1]), 35),
+                         days, 1.5,
                          fc=get_color(codes[i-1]), zorder=1, ec='None')
     ax.add_patch(rect)
-    
-ax.plot(obvalid, obtmpf, lw=2, zorder=2, color='b', label='Air Temp')
-ax.plot(obvalid, obdwpf, lw=2, zorder=2, color='g', label='Dew Point')
-ax.plot(obvalid, obroad, lw=2, zorder=2, color='r', label='Road Temp')
-l = ""
-#for v, t in zip(obvalid2, obwx):
-#    if t != l:
-#        l = t
-#        ax.text(v, 39.85, t, rotation=90, va='top', ha='center')
-ax.grid(True)
-ax.set_title("20 Jan 2015 Jefferson RWIS Temps\nDOT/State Patrol Road Condition for US30 near Jefferson")
+    print valid[i-1] + datetime.timedelta(seconds=((days / 2.) * 86400.))
+    ax.text(valid[i-1] + datetime.timedelta(seconds=((days / 2.) * 86400.)),
+            35.5, "Partially Ice Covered", ha='center', va='center')
 
-import pytz, datetime
-now = datetime.datetime(2015,1,20,0,0)
-now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
-ets = datetime.datetime(2015,1,21,0,0)
-ets = ets.replace(tzinfo=pytz.timezone("America/Chicago"))
-interval = datetime.timedelta(seconds=3600)
-xticks = []
-xticklabels = []
-while now < ets:
-    xticks.append( now )
-    xticklabels.append( now.strftime("%-I %p"))
-    now += interval
-ax.set_xticks(xticks)
-ax.set_xticklabels(xticklabels)
-ax.set_xlim(min(obvalid), max(obvalid))
-#ax.set_ylim(24,36)
+l = ""
+ax.grid(True)
+ax.set_title(("10 Jan 2017 Jefferson RWIS Temps + SchoolNet Radiation\n"
+              "DOT/State Patrol Road Condition for US-30 near Jefferson"))
+
+ax.xaxis.set_major_formatter(mdates.DateFormatter("%-I %p",
+                             tz=pytz.timezone("America/Chicago")))
+# ax.set_ylim(24,36)
 ax.set_ylim(22, 36)
 ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
-ax.set_xlabel("Morning of 20 January 2015")
-ax.text( obvalid[-17], 22.7, "Completely Covered\nFrost", ha='center', color='r')
-ax.text( obvalid[-12], 26, "Partially Covered\nFrost", ha='center', color='y')
-#ax.text( obvalid[0], 29.75, "Wet", color='g')
+ax.set_xlabel("10 January 2017 - Central Standard Time")
 ax.axhline(32, color='tan', lw=2)
-ax.axvline(obvalid[-8], color='tan', lw=2)
-ax.legend(loc=2)
+ax.legend(loc=(0.3, 0.2), fontsize=12)
 ax.grid(True)
 
 fig.savefig('test.png')
