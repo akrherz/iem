@@ -27,14 +27,17 @@ $thisMax = -99;
 $thisMin = 99;
 $maxGust = 0;
 while (list ($line_num, $line) = each ($fcontents)) {
-
+    if ($line_num < 5) continue;
 	$parts = split (" ", $line);
-	$tm = $parts[6];
+	$tm = $parts[5];
 	if ($tm > $thisMax){ $thisMax = $tm; }
 	if ($tm < $thisMin){ $thisMin = $tm; }
-	$gust = $parts[11];
+	$gust = floatval($parts[11]);
 	$gust_time = $parts[12];
-	if ($gust > $maxGust){ $maxGust = $gust; $gustTime = $gust_time;}
+	if ($gust > $maxGust){
+		$maxGust = $gust;
+		$gustTime = $gust_time;
+	}
 } // End of while
 
 $t->content = <<<EOF
