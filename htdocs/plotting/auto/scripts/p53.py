@@ -21,7 +21,7 @@ def get_description():
     d['data'] = True
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', options=PDICT, default='tmpf', name='var',
              label='Select temperature to plot:'),
         dict(type='int', name='t1', default=0,

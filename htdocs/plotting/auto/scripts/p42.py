@@ -74,7 +74,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='m', default='all',
              label='Month Limiter', options=MDICT),
         dict(type='select', name='dir', default='above',

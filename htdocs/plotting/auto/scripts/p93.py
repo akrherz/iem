@@ -32,7 +32,7 @@ def get_description():
     dots are to help readability."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='year', minvalue=1973, default=datetime.date.today().year,
              name='year', label='Year to Highlight'),
         dict(type='select', options=VDICT, name='var', default='heatindex',
