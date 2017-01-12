@@ -56,6 +56,20 @@ def do_iowa_azos(date):
     return df
 
 
+def do_iarwis():
+    """Dump RWIS data"""
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    df = read_sql("""
+    select id as locationid, n.name as locationname, st_y(geom) as latitude,
+    st_x(geom) as longitude, tsf0 as pavetmp1, tsf1 as pavetmp2,
+    tsf2 as pavetmp3, tsf3 as pavetmp4
+    from stations n JOIN current s on (n.iemid = s.iemid)
+    WHERE n.network in ('IA_RWIS', 'WI_RWIS', 'IL_RWIS') and
+    s.valid > (now() - '2 hours'::interval)
+    """, pgconn)
+    return df
+
+
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
     pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
@@ -147,7 +161,7 @@ def router(q):
     elif q == 'iadotplows':
         df = do_iadotplows()
     elif q == 'iarwis':
-        df = do_iariws()
+        df = do_iarwis()
     elif q == 'iariver':
         df = do_iariver()
     elif q == 'isusm':
