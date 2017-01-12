@@ -1567,16 +1567,14 @@ LAYER
 END # LAYER
 
 LAYER
-  NAME "iahuc8"
-  CONNECTION "user=nobody dbname=idep host=iemdb"
-  CONNECTIONTYPE POSTGIS
-  DATA "geom from ia_huc8 using srid=26915"
+  NAME "huc8"
+  DATA "/mesonet/data/gis/static/shape/4326/us/huc8_01.shp"
+  TYPE LINE
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:4326"
   END # PROJECTION
   STATUS ON
   TYPE LINE
-  UNITS METERS
   CLASS
     STYLE
       SYMBOL 0
