@@ -5,8 +5,10 @@ from pyiem.plot import MapPlot
 import psycopg2
 import sys
 import numpy as np
-import mx.DateTime
+import datetime
+import pytz
 import matplotlib.cm as cm
+from pandas.io.sql import read_sql
 SMOS = psycopg2.connect(database='smos', host='iemdb', user='nobody')
 scursor = SMOS.cursor()
 
@@ -15,38 +17,21 @@ def makeplot(ts, routes='ac'):
     """
     Generate two plots for a given time GMT
     """
-    sql = """
-    SELECT ST_x(geom), ST_y(geom), 
-    CASE WHEN sm is Null THEN -1 ELSE sm END, 
-    CASE WHEN od is Null THEN -1 ELSE od END from 
-     (SELECT grid_idx, avg(soil_moisture) as sm,
-     avg(optical_depth) as od
-     from data WHERE valid > '%s+00'::timestamptz - '6 hours'::interval
-     and valid < '%s+00'::timestamptz + '6 hours'::interval 
-     GROUP by grid_idx) as foo, grid
-     WHERE foo.grid_idx = grid.idx
-    """ % (ts.strftime('%Y-%m-%d %H:%M'), 
-           ts.strftime('%Y-%m-%d %H:%M'))
-    #sql = """
-    #SELECT x(geom), y(geom), random(), random() from grid
-    #"""
-    scursor.execute( sql )
-    lats = []
-    lons = []
-    sm   = []
-    od   = []
-    for row in scursor:
-        lats.append( float(row[1]) )
-        lons.append( float(row[0]) )
-        sm.append( row[2] * 100.)
-        od.append( row[3] )
-    if len(lats) == 0:
+    df = read_sql("""
+    WITH obs as (
+        SELECT grid_idx, avg(soil_moisture) * 100. as sm,
+        avg(optical_depth) as od from data where valid BETWEEN %s and %s
+        GROUP by grid_idx)
+
+    SELECT ST_x(geom) as lon, ST_y(geom) as lat,
+    CASE WHEN sm is Null THEN -1 ELSE sm END as sm,
+    CASE WHEN od is Null THEN -1 ELSE od END as od
+    from obs o JOIN grid g ON (o.grid_idx = g.idx)
+    """, SMOS,  params=(ts - datetime.timedelta(hours=6),
+                        ts + datetime.timedelta(hours=6)), index_col=None)
+    if len(df.index) == 0:
         # print 'Did not find SMOS data for ts: %s' % (ts,)
         return
-    lats = np.array(lats)
-    lons = np.array(lons)
-    sm = np.array(sm)
-    od = np.array(od)
 
     for sector in ['midwest', 'iowa']:
         clevs = np.arange(0, 71, 5)
@@ -59,7 +44,8 @@ def makeplot(ts, routes='ac'):
         cmap = cm.get_cmap('jet_r')
         cmap.set_under('#EEEEEE')
         cmap.set_over("k")
-        m.hexbin(lons, lats, sm, clevs, units='%', cmap=cmap)
+        m.hexbin(df['lon'].values, df['lat'].values, df['sm'], clevs,
+                 units='%', cmap=cmap)
         pqstr = "plot %s %s00 smos_%s_sm%s.png smos_%s_sm%s.png png" % (
                     routes, ts.strftime("%Y%m%d%H"), sector, ts.strftime("%H"),
                     sector, ts.strftime("%H"))
@@ -78,7 +64,8 @@ def makeplot(ts, routes='ac'):
         cmap = cm.get_cmap('jet')
         cmap.set_under('#EEEEEE')
         cmap.set_over("k")
-        m.hexbin(lons, lats, od, clevs, cmap=cmap)
+        m.hexbin(df['lon'].values, df['lat'].values, df['od'], clevs,
+                 cmap=cmap)
         pqstr = "plot %s %s00 smos_%s_od%s.png smos_%s_od%s.png png" % (
                     routes, ts.strftime("%Y%m%d%H"), sector, ts.strftime("%H"),
                     sector, ts.strftime("%H"))
@@ -86,27 +73,28 @@ def makeplot(ts, routes='ac'):
         m.close()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    # At midnight, we have 12z previous day
-    # At noon, we have 0z of that day
-    # Run for hour
-    if len(sys.argv) == 2:
-        hr = int(sys.argv[1])
-        if hr == 0:
-            ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1,
-                                                                  hour=12)
+    if len(argv) == 2:
+        hr = int(argv[1])
+        if hr == 12:  # Run for the previous UTC day
+            ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
+            ts = ts.replace(tzinfo=pytz.utc).replace(hour=12, minute=0,
+                                                     second=0, microsecond=0)
         else:
-            ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=0)
+            ts = datetime.datetime.utcnow()
+            ts = ts.replace(tzinfo=pytz.utc).replace(hour=0, minute=0,
+                                                     second=0, microsecond=0)
         makeplot(ts)
         # Run a day, a week ago ago as well
         for d in [1, 5]:
-            ts -= mx.DateTime.RelativeDateTime(days=d)
+            ts -= datetime.timedelta(days=d)
             makeplot(ts, 'a')
     else:
-        makeplot(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]),
-                                      int(sys.argv[3]), int(sys.argv[4]), 0),
-                 'a')
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                               int(sys.argv[3]), int(sys.argv[4]))
+        ts = ts.replace(tzinfo=pytz.utc)
+        makeplot(ts, 'a')
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

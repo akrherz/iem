@@ -2,7 +2,7 @@
 # Run at noon local time
 #
 cd smos
-python plot.py 12
+python plot.py 0
 
 cd ../prism
 python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d') &

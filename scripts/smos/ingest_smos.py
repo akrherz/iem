@@ -3,54 +3,79 @@
 import glob
 import os
 import psycopg2
+import re
+import pytz
+import netCDF4
 import datetime
+import StringIO
+
+TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
 SMOS = psycopg2.connect(database='smos', host='iemdb')
 scursor = SMOS.cursor()
 
 
-def consume(fp, ts):
+def consume(fn, ts):
+    """Actually process the filename at given timestamp
     """
-    Actually process a file noted at fp and for time ts
-    """
-    tablets = ts + datetime.timedelta(hours=6)
-    table = "data_%s" % (tablets.strftime("%Y_%m"),)
-    for line in open(fp):
-        tokens = line.replace("\x00", "").strip().split()
-        if len(tokens) != 3:
-            continue
-        (sid, sm, od) = tokens
-        sm = float(sm)
+    table = "data_%s" % (ts.strftime("%Y_%m"),)
+    nc = netCDF4.Dataset(fn)
+    gpids = nc.variables['Grid_Point_ID'][:]
+    sms = nc.variables['Soil_Moisture'][:].tolist()
+    optdepths = nc.variables['Optical_Thickness_Nad'][:].tolist()
+    chi2pds = nc.variables['Chi_2_P'][:].tolist()
+    bad = 0
+    good = 0
+    data = StringIO.StringIO()
+    for gpid, sm, od, chi2pd in zip(gpids, sms, optdepths, chi2pds):
+        if chi2pd > 0.05:
+            bad += 1
+            od = None
+            sm = None
         if sm <= 0 or sm >= 0.7:
             sm = None
-        od = float(od)
         if od <= 0 or od > 1:
             od = None
-        scursor.execute("""
-        INSERT into """+table+"""(grid_idx, valid, soil_moisture,
-        optical_depth) VALUES (%s, '%s-06', %s, %s)
-        """ % (sid,
-               ts.strftime("%Y-%m-%d %H:%M"), sm or 'Null',
-               od or 'Null'))
+        data.write(("%s\t%s\t%s\t%s\n"
+                    ) % (int(gpid), ts.strftime("%Y-%m-%d %H:%M:%S+00"),
+                         sm or '\N', od or '\N'))
+        good += 1
+
+    data.seek(0)
+    scursor.copy_from(data, table, columns=('grid_idx', 'valid',
+                                            'soil_moisture', 'optical_depth'))
+
+
+def fn2datetime(fn):
+    """Convert a filename into a datetime instance
+
+    Example: SM_OPER_MIR_SMUDP2_20161014T002122_20161014T011435_620_001_1.nc
+    """
+    tokens = TSTAMP.findall(fn)
+    if len(tokens) == 0:
+        return None
+    ts = datetime.datetime.strptime(tokens[0], '%Y%m%dT%H%M%S')
+    return ts.replace(tzinfo=pytz.utc)
 
 
 def lookforfiles():
-    """
-    Try to find files to ingest, please
-    """
+    """Look for any new data to ingest"""
     os.chdir("/mesonet/data/smos")
-    files = glob.glob("*.txt")
+    files = glob.glob("*.nc")
     for fn in files:
-        ts = datetime.datetime.strptime(fn, '%Y_%m_%d_%H%M.txt')
+        ts = fn2datetime(fn)
+        if ts is None:
+            print("ingest_smos: fn2datetime fail: %s" % (fn,))
+            continue
         scursor.execute("""
-            SELECT * from obtimes where valid = '%s-06'
-        """ % (ts.strftime("%Y-%m-%d %H:%M"),))
+            SELECT * from obtimes where valid = %s
+        """, (ts,))
         row = scursor.fetchone()
         if row is None:
             # print "INGEST FILE!", file
             consume(fn, ts)
             scursor.execute("""
-            INSERT into obtimes(valid) values ('%s-06')
-            """ % (ts.strftime("%Y-%m-%d %H:%M"),))
+            INSERT into obtimes(valid) values (%s)
+            """, (ts,))
             SMOS.commit()
 
 if __name__ == "__main__":

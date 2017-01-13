@@ -22,7 +22,7 @@ cd ../iemre
 python daily_analysis.py $(date --date '1 day ago' +'%Y %m %d')
 
 cd ../smos
-python plot.py 0
+python plot.py 12
 
 # Wait a bit before doing this
 sleep 600
