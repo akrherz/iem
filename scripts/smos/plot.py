@@ -1,6 +1,4 @@
 """Create a plot of SMOS data for either 0 or 12z"""
-import matplotlib
-matplotlib.use('agg')
 from pyiem.plot import MapPlot
 import psycopg2
 import sys
@@ -30,7 +28,9 @@ def makeplot(ts, routes='ac'):
     """, SMOS,  params=(ts - datetime.timedelta(hours=6),
                         ts + datetime.timedelta(hours=6)), index_col=None)
     if len(df.index) == 0:
-        # print 'Did not find SMOS data for ts: %s' % (ts,)
+        print(("Did not find SMOS data for: %s-%s"
+               ) % (ts - datetime.timedelta(hours=6),
+                    ts + datetime.timedelta(hours=6)))
         return
 
     for sector in ['midwest', 'iowa']:
