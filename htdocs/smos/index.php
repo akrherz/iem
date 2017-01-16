@@ -46,7 +46,7 @@ data from this satellite, generates analysis plots, and makes the raw data avail
 the latitude and longitude pair you provide.  Data is only available here from 
 the Midwestern United States.  The form will provide an error if you attempt
 to request a point outside of the domain.  Data is available since 
-<strong>12 Jan 2010</strong>.<br />
+<strong>31 May 2010</strong>.<br />
 <form method="GET" action="dl.php" name="dl">
 <div class="row"><div class="col-md-6">
 <i>Enter Latitude/Longitude manually or drag marker on map to the right.</i>
@@ -85,18 +85,48 @@ to request a point outside of the domain.  Data is available since
 	
 	</form>
 
-<p><h4>Recent Analysis Plots</h4>
+<p><h4>Recent Analysis Plots at 00 UTC</h4>
 <i>Click image for archived imagery</i>
-<table>
-<tr>
-<td><a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm00.png" width="500" /></a></td>
-<td><a href="/timemachine/#55.0"><img src="/data/smos_iowa_od00.png" width="500" /></a></td>
-</tr>
-<tr>
-<td><a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm00.png" width="500" /></a></td>
-<td><a href="/timemachine/#53.0"><img src="/data/smos_midwest_od00.png" width="500"/></a></td>
-</tr>
-</table>
+
+    		<div class="row">
+    		<div class="col-md-6">
+    		<a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm00.png" class="img img-responsive" /></a>
+    		</div>
+    		<div class="col-md-6">
+    		<a href="/timemachine/#55.0"><img src="/data/smos_iowa_od00.png" class="img img-responsive" /></a>
+    		</div>
+    		</div>
+
+    		<div class="row">
+    		<div class="col-md-6">
+    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_sm00.png" class="img img-responsive" /></a>
+    		</div>
+    		<div class="col-md-6">
+    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_od00.png" class="img img-responsive" /></a>
+    		</div>
+    		</div>
+
+    		<h4>Recent Analysis Plots at 12 UTC</h4>
+    		
+    		<div class="row">
+    		<div class="col-md-6">
+    		<a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm12.png" class="img img-responsive" /></a>
+    		</div>
+    		<div class="col-md-6">
+    		<a href="/timemachine/#55.0"><img src="/data/smos_iowa_od12.png" class="img img-responsive" /></a>
+    		</div>
+    		</div>
+
+    		<div class="row">
+    		<div class="col-md-6">
+    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_sm12.png" class="img img-responsive" /></a>
+    		</div>
+    		<div class="col-md-6">
+    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
+    		</div>
+    		</div>
+    		
+    		
 <br />
 EOF;
 $t->render('single.phtml');
