@@ -16,7 +16,10 @@ python parse0007.py &
 python dot_plows.py &
 python ctre_bridge.py &
 
-cd ../outgoing
+cd other
+python parse0006.py &
+
+cd ../../outgoing
 python snet_collect.py &
 
 cd ../mrms
