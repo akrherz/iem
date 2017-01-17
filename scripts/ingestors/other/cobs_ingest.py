@@ -16,7 +16,7 @@ SID = 'OT0012'
 DIRPATH = "/mnt/mesonet/home/mesonet/ot/ot0005/incoming/Pederson"
 
 HOURLYCONV = {'Batt_Volt': 'battery',
-              'PTemp_C': None,
+              'PTemp_C': None,  # Panel Temperature ?
               'Rain_in_Tot': 'phour',
               'SlrW_Avg': 'srad',
               'SlrMJ_Tot': None,
