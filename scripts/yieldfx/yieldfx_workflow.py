@@ -23,7 +23,7 @@ import subprocess
 from pyiem.util import get_properties
 
 XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
-        'cobs': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
+        'cobs': {'isusm': None, 'station': 'OT0012', 'climodat': 'IA0200'},
         'crawfordsville': {'isusm': 'CRFI4', 'climodat': 'IA8688'},
         'lewis': {'isusm': 'OKLI4', 'climodat': 'IA0364'},
         'nashua': {'isusm': 'NASI4', 'climodat': 'IA1402'},
@@ -45,24 +45,28 @@ def upload_summary_plots():
     """Some additional work"""
     props = get_properties()
     dbx = dropbox.Dropbox(props.get('dropbox.token'))
-    for location in XREF:
-        for interval in ['mar15', 'nov1']:
+    year = datetime.date.today().year
+    interval = 'jan1'
+    for opt in ['yes', 'no']:
+        for location in XREF:
             (tmpfd, tmpfn) = tempfile.mkstemp()
             uri = ("http://iem.local/plotting/auto/plot/143/"
-                   "location:%s::s:%s::dpi:100.png"
-                   ) % (location, interval)
+                   "location:%s::s:%s::opt:%s::dpi:100.png"
+                   ) % (location, interval, opt)
             res = requests.get(uri)
             os.write(tmpfd, res.content)
             os.close(tmpfd)
             today = datetime.date.today()
-            remotefn = "%s_%s_%s.png" % (location, today.strftime("%Y%m%d"),
-                                         interval)
+            remotefn = ("%s_%s_%s%s.png"
+                        ) % (location, today.strftime("%Y%m%d"),
+                             interval, '_yields' if opt == 'yes' else '')
             if DO_UPLOAD:
                 try:
                     dbx.files_upload(
                         open(tmpfn).read(),
-                        ("/YieldForecast/Daryl/2016 vs other years plots/%s"
-                         ) % (remotefn, ),
+                        ("/YieldForecast/Daryl/%s vs other years plots%s/%s"
+                         ) % (year, remotefn,
+                              ' with yields' if opt == 'yes' else ''),
                         mode=dropbox.files.WriteMode.overwrite)
                 except:
                     print 'dropbox fail'
@@ -210,6 +214,54 @@ def replace_cfs(df, location):
         df.loc[row[0], rcols] = [maxt, mint, rain, radn]
 
 
+def replace_obs_iem(df, location):
+    """Replace dataframe data with obs for this location
+
+    Tricky part, if the baseline already provides data for this year, we should
+    use it!
+    """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor()
+    isusm = XREF[location]['station']
+    today = datetime.date.today()
+    jan1 = today.replace(month=1, day=1)
+    years = [int(y) for y in np.arange(df.index.values.min().year,
+                                       df.index.values.max().year + 1)]
+
+    table = "summary_%s" % (jan1.year,)
+    cursor.execute("""
+        select day, max_tmpf, min_tmpf, srad_mj, pday
+        from """ + table + """ s JOIN stations t on (s.iemid = t.iemid)
+        WHERE t.id = %s and max_tmpf is not null ORDER by day ASC
+        """, (isusm,))
+    rcols = ['maxt', 'mint', 'radn', 'gdd', 'rain']
+    replaced = []
+    for row in cursor:
+        valid = row[0]
+        # Does our df currently have data for this date?  If so, we shall do
+        # no more
+        dont_replace = not np.isnan(df.at[valid, 'mint'])
+        if not dont_replace:
+            replaced.append(valid)
+        _gdd = gdd(temperature(row[1], 'F'), temperature(row[2], 'F'))
+        for year in years:
+            if valid.month == 2 and valid.day == 29 and year % 4 != 0:
+                continue
+            if dont_replace:
+                df.loc[valid.replace(year=year),
+                       rcols[3:-1]] = (_gdd, row[4])
+                continue
+            df.loc[valid.replace(year=year), rcols] = (
+                temperature(row[1], 'F').value('C'),
+                temperature(row[2], 'F').value('C'), row[3],
+                _gdd, row[4])
+    if len(replaced) > 0:
+        print("yieldfx_workflow supplemented %s from %s to %s" % (location,
+                                                                  replaced[0],
+                                                                  replaced[-1]
+                                                                  ))
+
+
 def replace_obs(df, location):
     """Replace dataframe data with obs for this location
 
@@ -296,7 +348,10 @@ def do(location):
         df[colname] = None
     # 3. Do data replacement
     # TODO: what to do with RAIN!
-    replace_obs(df, location)
+    if location == 'cobs':
+        replace_obs_iem(df, location)
+    else:
+        replace_obs(df, location)
     # 4. Add forecast data
     replace_forecast(df, location)
     # 5. Add CFS for this year
