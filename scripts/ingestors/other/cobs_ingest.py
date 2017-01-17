@@ -60,7 +60,7 @@ DAILYCONV = {'Batt_Volt_Min': None,
 def clean(key, value):
     if key.startswith('WS'):
         return Q_(value, UREG.mph).to(UREG.knots).m
-    if key.starswith('RH') and value > 100:
+    if key.startswith('RH') and value > 100:
         return 100.
     return value
 
