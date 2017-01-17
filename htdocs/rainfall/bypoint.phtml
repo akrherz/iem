@@ -1,6 +1,6 @@
 <?php
- include("../../config/settings.inc.php");
- include("../../include/database.inc.php");
+ require_once "../../config/settings.inc.php";
+ include_once "../../include/database.inc.php";
  /* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
@@ -11,6 +11,7 @@ $rs = pg_prepare($iem, "SELECTSUM", "SELECT day, pday from
 $rs = pg_prepare($wepp, "SELECTRAIN", "select rainfall / 25.4 as inch, 
 	valid from daily_rainfall
 	WHERE hrap_i = $1 and valid >= $2 and valid < $3 ORDER by valid ASC");
+
 $method = isset($_GET["method"]) ? $_GET["method"] : die('$method not specified');
 $syear = isset($_GET["syear"]) ? intval($_GET["syear"]) : die('$syear not specified');
 $eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]) : die('$eyear not specified');
@@ -36,8 +37,8 @@ if ($method == "geocode")
 {
 	$s = isset($_GET["street"]) ? $_GET["street"] : "100 Main Street";
 	$c = $_GET["city"] .", IA";
-	$data .= "# Request Method: Geocoded $s , $c IA \n";
-	$u = sprintf("http://localhost/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
+	$data .= "# Request Method: Geocoded $s , $c\n";
+	$u = sprintf("http://iem.local/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
 	$res = trim( file_get_contents(str_replace(" ", "%20", $u)) );
 	//echo "GEOCODER RESPONSE:::$res::: $u :::";
 	if (substr($res,0,5) != "ERROR")
