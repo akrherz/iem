@@ -57,6 +57,14 @@ DAILYCONV = {'Batt_Volt_Min': None,
              'T107_F_Avg': None}
 
 
+def clean(key, value):
+    if key.startswith('WS'):
+        return Q_(value, UREG.mph).to(UREG.knots).m
+    if key.starswith('RH') and value > 100:
+        return 100.
+    return value
+
+
 def database(lastob, ddf, hdf):
     """Do the tricky database work"""
     # This should be okay as we are always going to CST
@@ -78,19 +86,12 @@ def database(lastob, ddf, hdf):
                 if value is None:
                     continue
                 # print("D: %s -> %s" % (key, value))
-                if key.startswith('WS'):
-                    ob.data[value] = Q_(daily.iloc[0][key], UREG.mph).to(
-                        UREG.knots).m
-                else:
-                    ob.data[value] = daily.iloc[0][key]
+                ob.data[value] = clean(key, daily.iloc[0][key])
         for key, value in HOURLYCONV.items():
             if value is None:
                 continue
             # print("H: %s -> %s" % (key, value))
-            if key.startswith('WS'):
-                ob.data[value] = Q_(row[key], UREG.mph).to(UREG.knots).m
-            else:
-                ob.data[value] = row[key]
+            ob.data[value] = clean(key, row[key])
         ob.save(icursor)
     icursor.close()
     iemdb.commit()
