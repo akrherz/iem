@@ -39,7 +39,7 @@ tmpf = temperature(iemob.data['tmpf'], 'F')
 relh = humidity(iemob.data['relh'], '%')
 iemob.data['dwpf'] = meteorology.dewpoint(tmpf, relh).value('F')
 iemob.data['sknt'] = speed(float(tokens[9]), 'MPH').value('KT')
-iemob.data['drct'] = tokens[8]
+iemob.data['drct'] = tokens[10]
 iemob.data['alti'] = float(tokens[13])
 iemob.data['pday'] = float(tokens[14])
 iemob.save(icursor)
