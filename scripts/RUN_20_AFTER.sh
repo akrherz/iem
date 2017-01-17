@@ -6,6 +6,9 @@ python soilm_ingest.py
 cd madis
 python extract_hfmetar.py 0 &
 
+cd other
+python cobs_ingest.py
+
 sleep 60
 cd ../../plots
 ./RUN_PLOTS
