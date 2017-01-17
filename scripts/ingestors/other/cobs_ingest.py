@@ -8,7 +8,10 @@ import pytz
 import datetime
 import os
 from pyiem.observation import Observation
+from pint import UnitRegistry
 
+UREG = UnitRegistry()
+Q_ = UREG.Quantity
 SID = 'OT0012'
 DIRPATH = "/mnt/mesonet/home/mesonet/ot/ot0005/incoming/Pederson"
 
@@ -19,12 +22,12 @@ HOURLYCONV = {'Batt_Volt': 'battery',
               'SlrMJ_Tot': None,
               'AirTF_Avg': 'tmpf',
               'RH': 'relh',
-              'WS_mph_Avg': None,  # TODO
-              'WS_mph_Max': None,
+              'WS_mph_Avg': 'sknt',
+              'WS_mph_Max': 'gust',
               'WindDir': 'drct',
               'WS_mph_S_WVT': None,
               'WindDir_D1_WVT': None,
-              'T107_F_Avg': None}
+              'T107_F_Avg': 'c1tmpf'}  # 4 inch soil temp
 
 DAILYCONV = {'Batt_Volt_Min': None,
              'PTemp_C_Max': None,
@@ -33,7 +36,7 @@ DAILYCONV = {'Batt_Volt_Min': None,
              'SlrW_Avg': None,
              'SlrW_Max': None,
              'SlrW_TMx': None,
-             'SlrMJ_Tot': None,
+             'SlrMJ_Tot': 'srad_mj',
              'AirTF_Max': 'max_tmpf',
              'AirTF_TMx': None,
              'AirTF_Min': 'min_tmpf',
@@ -43,7 +46,7 @@ DAILYCONV = {'Batt_Volt_Min': None,
              'RH_TMx': None,
              'RH_Min': 'min_rh',
              'RH_TMn': None,
-             'WS_mph_Max': None,
+             'WS_mph_Max': 'gust',
              'WS_mph_TMx': None,
              'WS_mph_S_WVT': None,
              'WindDir_D1_WVT': None,
@@ -75,12 +78,19 @@ def database(lastob, ddf, hdf):
                 if value is None:
                     continue
                 # print("D: %s -> %s" % (key, value))
-                ob.data[value] = daily.iloc[0][key]
+                if key.startswith('WS'):
+                    ob.data[value] = Q_(daily.iloc[0][key], UREG.mph).to(
+                        UREG.knots).m
+                else:
+                    ob.data[value] = daily.iloc[0][key]
         for key, value in HOURLYCONV.items():
             if value is None:
                 continue
             # print("H: %s -> %s" % (key, value))
-            ob.data[value] = row[key]
+            if key.startswith('WS'):
+                ob.data[value] = Q_(row[key], UREG.mph).to(UREG.knots).m
+            else:
+                ob.data[value] = row[key]
         ob.save(icursor)
     icursor.close()
     iemdb.commit()
