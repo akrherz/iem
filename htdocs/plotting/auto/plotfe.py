@@ -10,6 +10,8 @@ import tempfile
 import imp
 import pytz
 import traceback
+import json
+import cStringIO
 
 
 def parser(cgistr):
@@ -43,101 +45,107 @@ def send_content_type(fmt):
             "Content-Disposition: attachment;Filename=iem.xlsx\n\n"))
 
 
-def handle_error(exp):
+def handle_error(exp, fmt):
     sys.stdout.write("Status: 500\n")
-    sys.stdout.write("Content-type: text/plain\n\n")
-    traceback.print_exc(file=sys.stdout)
-    traceback.print_exc(file=sys.stderr)
+    send_content_type(fmt)
+    if fmt in ['png', 'svg', 'pdf']:
+        import matplotlib
+        matplotlib.use('agg')
+        import matplotlib.pyplot as plt
+        _, ax = plt.subplots(1, 1)
+        ax.text(0.5, 0.5, str(exp), transform=ax.transAxes, ha='center')
+        ram = cStringIO.StringIO()
+        plt.savefig(ram, format=fmt, dpi=100)
+        ram.seek(0)
+        sys.stdout.write(ram.read())
+    else:
+        if isinstance(exp, str):
+            sys.stdout.write(exp)
+        else:
+            traceback.print_exc(file=sys.stdout)
+    if isinstance(exp, Exception):
+        traceback.print_exc(file=sys.stderr)
     sys.exit()
 
 
-def main():
+def get_res_by_fmt(p, fmt, fdict):
+    """Do the work of actually calling things"""
+    if p >= 100:
+        name = "scripts100/p%s" % (p, )
+    else:
+        name = 'scripts/p%s' % (p,)
+    fp, pathname, description = imp.find_module(name)
+    a = imp.load_module(name, fp, pathname, description)
+    meta = a.get_description()
+    # Allow returning of javascript as a string
+    if fmt == 'js':
+        res = a.highcharts(fdict)
+    else:
+        res = a.plotter(fdict)
+        # res should be either a 2 or 3 length tuple, rectify this otherwise
+        if not isinstance(res, tuple):
+            res = [res, None, None]
+        else:
+            if len(res) == 2:
+                res = [res[0], res[1], None]
+
+    return res, meta
+
+
+def plot_metadata(plt, start_time, end_time, p):
+    # Place timestamp on the image
+    utcnow = datetime.datetime.utcnow(
+                                    ).replace(tzinfo=pytz.timezone("UTC"))
+    now = utcnow.astimezone(pytz.timezone("America/Chicago"))
+    plt.figtext(0.01, 0.005, ('Generated at %s in %.2fs'
+                              ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),
+                                   (end_time - start_time).total_seconds()
+                                   ),
+                va='bottom', ha='left', fontsize=8)
+    plt.figtext(0.99, 0.005, ('IEM Autoplot App #%s'
+                              ) % (p, ),
+                va='bottom', ha='right', fontsize=8)
+
+
+def do(form, fmt):
     """See how we are called"""
-    form = cgi.FieldStorage()
     q = form.getfirst('q', "")
     fdict = parser(q)
     p = int(form.getfirst('p', 0))
     dpi = int(fdict.get('dpi', 100))
-    fmt = form.getfirst('fmt', 'png')[:4]
 
     mckey = ("/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)).replace(" ", "")
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     hostname = os.environ.get("SERVER_NAME", "")
     res = mc.get(mckey) if hostname != 'iem.local' else None
     if res:
-        send_content_type(fmt)
         sys.stdout.write(res)
         return
+    # do the call please
+    start_time = datetime.datetime.utcnow()
+    res, meta = get_res_by_fmt(p, fmt, fdict)
+    end_time = datetime.datetime.utcnow()
     if fmt == 'js':
-        import json
-        # We can short circuit things
-        if p >= 100:
-            name = "scripts100/p%s" % (p, )
-        else:
-            name = 'scripts/p%s' % (p,)
-        fp, pathname, description = imp.find_module(name)
-        a = imp.load_module(name, fp, pathname, description)
-        # Allow returning of javascript as a string
-        res = a.highcharts(fdict)
+        # Legacy support of when the js option returns a dictionary, which
+        # we then want to serialize to JSON
         if isinstance(res, dict):
-            res = '$("#ap_container").highcharts(%s);' % (
-                    json.dumps(a.highcharts(fdict)), )
-        meta = a.get_description()
-        sys.stderr.write("Setting cache: %s" % (mckey,))
-        try:
-            mc.set(mckey, res, meta.get('cache', 43200))
-        except:
-            sys.stderr.write("Exception while writting key: %s" % (mckey, ))
+            res = '$("#ap_container").highcharts(%s);' % (json.dumps(res),)
     else:
         # Lazy import to help speed things up
         import matplotlib
         matplotlib.use('agg')
         import matplotlib.pyplot as plt
-        import cStringIO
-        if p >= 100:
-            name = "scripts100/p%s" % (p, )
-        else:
-            name = 'scripts/p%s' % (p,)
-        start_time = datetime.datetime.now()
-        fp, pathname, description = imp.find_module(name)
-        a = imp.load_module(name, fp, pathname, description)
-        meta = a.get_description()
-        try:
-            response = a.plotter(fdict)
-        except Exception as exp:
-            handle_error(exp)
-        if not isinstance(response, tuple):
-            [fig, df, report] = [response, None, None]
-        else:
-            fig = response[0]
-            df = response[1]
-            if len(response) == 3:
-                report = response[2]
-            else:
-                report = None
+        [fig, df, report] = res
+        # If fig is a string, we hit an error!
         if isinstance(fig, str):
-            msg = fig
-            fig, ax = plt.subplots(1, 1)
-            ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center')
-        end_time = datetime.datetime.now()
-        # Place timestamp on the image
-        utcnow = datetime.datetime.utcnow(
-                                        ).replace(tzinfo=pytz.timezone("UTC"))
-        now = utcnow.astimezone(pytz.timezone("America/Chicago"))
-        plt.figtext(0.01, 0.005, ('Generated at %s in %.2fs'
-                                  ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),
-                                       (end_time - start_time).total_seconds()
-                                       ),
-                    va='bottom', ha='left', fontsize=8)
-        plt.figtext(0.99, 0.005, ('IEM Autoplot App #%s'
-                                  ) % (p, ),
-                    va='bottom', ha='right', fontsize=8)
+            handle_error(fig, fmt)
+        plot_metadata(plt, start_time, end_time, p)
         ram = cStringIO.StringIO()
         if fmt in ['png', 'pdf', 'svg']:
             plt.savefig(ram, format=fmt, dpi=dpi)
             ram.seek(0)
             res = ram.read()
-        if fmt != 'png':
+        if fmt in ['csv', 'txt', 'xlsx']:
             if df is not None:
                 if fmt == 'csv':
                     res = df.to_csv(index=(df.index.name is not None))
@@ -151,16 +159,25 @@ def main():
                     res = open(tmpfn, 'rb').read()
                     os.unlink(tmpfn)
             if fmt == 'txt' and report is not None:
-                send_content_type(fmt)
-                sys.stdout.write(report)
-                return
-        sys.stderr.write("Setting cache: %s" % (mckey,))
-        try:
-            mc.set(mckey, res, meta.get('cache', 43200))
-        except:
-            sys.stderr.write("Exception while writting key: %s" % (mckey, ))
+                res = report
+
+    sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s"
+                      ) % (p, (end_time - start_time).total_seconds(), mckey))
+    try:
+        mc.set(mckey, res, meta.get('cache', 43200))
+    except:
+        sys.stderr.write("Exception while writting key: %s" % (mckey, ))
     send_content_type(fmt)
     sys.stdout.write(res)
+
+
+def main():
+    form = cgi.FieldStorage()
+    fmt = form.getfirst('fmt', 'png')[:4]
+    try:
+        do(form, fmt)
+    except Exception as exp:
+        handle_error(exp, fmt)
 
 if __name__ == '__main__':
     main()

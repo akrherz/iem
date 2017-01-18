@@ -39,9 +39,12 @@ def run_plot(i, fmt):
         print("%s. %s -> HTTP: %s len(content): %s" % (i, uri[16:],
                                                        res.status_code,
                                                        len(res.content)))
-        if len(res.content) > 0:
+        if len(res.content) > 0 and fmt not in ['svg', 'png', 'pdf']:
             print(res.text)
         return False
+    if res.status_code == 504:
+        print("%s. %s -> HTTP: %s (timeout)" % (i, uri, res.status_code))
+        return
 
     return True
 
