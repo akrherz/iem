@@ -119,6 +119,7 @@ def do(form, fmt):
     hostname = os.environ.get("SERVER_NAME", "")
     res = mc.get(mckey) if hostname != 'iem.local' else None
     if res:
+        send_content_type(fmt)
         sys.stdout.write(res)
         return
     # do the call please
