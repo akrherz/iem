@@ -122,6 +122,8 @@ Requires: Pint
 Requires: MetPy
 Requires: perl-Monitoring-Plugin
 Requires: perl-Data-Dumper
+Requires: functools32
+Requires: cycler
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -143,7 +145,10 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
-* Fri Sep  2 2016 daryl herzmann <ahrherz@iastate.edu>
+* Wed Jan 18 2017 daryl herzmann <akrherz@iastate.edu>
+- Added functools32 and cycler for matplotlib 2.0.0
+
+* Fri Sep  2 2016 daryl herzmann <akrherz@iastate.edu>
 - Added requirements for updated nagios tcptraffic plugin
 
 * Thu Aug  4 2016 daryl herzmann <akrherz@iastate.edu>
