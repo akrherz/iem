@@ -65,8 +65,8 @@ def upload_summary_plots():
                     dbx.files_upload(
                         open(tmpfn).read(),
                         ("/YieldForecast/Daryl/%s vs other years plots%s/%s"
-                         ) % (year, remotefn,
-                              ' with yields' if opt == 'yes' else ''),
+                         ) % (year, ' with yields' if opt == 'yes' else '',
+                              remotefn),
                         mode=dropbox.files.WriteMode.overwrite)
                 except:
                     print 'dropbox fail'
