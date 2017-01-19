@@ -213,6 +213,17 @@ def replace_cfs(df, location):
         radn = row[4]
         df.loc[row[0], rcols] = [maxt, mint, rain, radn]
 
+    if row[0] == dec31:
+        return
+    now = row[0] + datetime.timedelta(days=1)
+    # OK, if our last row does not equal dec31, we have some more work to do
+    print(("%s Replacing %s->%s with previous year's data"
+           ) % (location, now, dec31))
+    while now <= dec31:
+        lastyear = now.replace(year=(now.year - 1))
+        df.loc[now, rcols] = df.loc[lastyear, rcols]
+        now += datetime.timedelta(days=1)
+
 
 def replace_obs_iem(df, location):
     """Replace dataframe data with obs for this location
@@ -373,3 +384,4 @@ def main(argv):
 
 if __name__ == '__main__':
     main(sys.argv)
+    # do('cobs')
