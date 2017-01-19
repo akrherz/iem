@@ -118,12 +118,12 @@ def process(lastob):
         print("cobs_ingest.py missing %s" % (hourlyfn,))
         return
 
-    ddf = pd.read_csv(dailyfn, header=0,
+    ddf = pd.read_csv(dailyfn, header=0, na_values="7999",
                       skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
     ddf['TIMESTAMP'] = pd.to_datetime(ddf['TIMESTAMP'])
     # Timestamps should be moved back one day
     ddf['date'] = (ddf['TIMESTAMP'] - datetime.timedelta(hours=12)).dt.date
-    hdf = pd.read_csv(hourlyfn, header=0,
+    hdf = pd.read_csv(hourlyfn, header=0, na_values="7999",
                       skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
     hdf['TIMESTAMP'] = pd.to_datetime(hdf['TIMESTAMP'])
     # Move all timestamps to UTC +6
