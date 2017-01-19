@@ -1,10 +1,14 @@
-import psycopg2.extras
+import psycopg2
 import pyiem.nws.vtec as vtec
-import numpy as np
 import datetime
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
+from pyiem import reference
 import calendar
+
+OPT = {'state': 'Summarize by State',
+       'wfo': 'Summarize by NWS Forecast Office'}
 
 
 def get_description():
@@ -20,10 +24,15 @@ def get_description():
     the top plot and 10 events in the bottom plot.  This plot hopefully
     answers the question of which week of the year is most common to get a
     certain WWA type and which week has seen the most WWAs issued.  The plot
-    only considers issuance date."""
+    only considers issuance date. When plotting for a state, an event is
+    defined on a per forecast office basis."""
     d['arguments'] = [
+        dict(type='select', name='opt', options=OPT, default='wfo',
+             label='How to Spatially Group Statistics:'),
+        dict(type='state', name='state',
+             default='IA', label='Select State (if appropriate):'),
         dict(type='networkselect', name='station', network='WFO',
-             default='DMX', label='Select WFO:', all=True),
+             default='DMX', label='Select WFO (if appropriate):'),
         dict(type='phenomena', name='phenomena',
              default='WC', label='Select Watch/Warning Phenomena Type:'),
         dict(type='significance', name='significance',
@@ -38,11 +47,13 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    phenomena = fdict.get('phenomena', 'WC')
-    significance = fdict.get('significance', 'W')
-    station = fdict.get('station', 'DMX')[:4]
+    opt = ctx['opt']
+    state = ctx['state'][:2]
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
+    station = ctx['station'][:4]
 
     nt = NetworkTable('WFO')
 
@@ -54,40 +65,37 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
 
-    cursor.execute("""
+    limiter = " wfo = '%s' " % (station,)
+    title = "[%s] NWS %s" % (station, nt.sts[station]['name'])
+    if opt == 'state':
+        title = "State of %s" % (reference.state_names[state],)
+        limiter = " substr(ugc, 1, 2) = '%s' " % (state,)
+    df = read_sql("""
     with obs as (
         SELECT distinct extract(year from issue) as yr,
-        extract(week from issue) as week, eventid from warnings WHERE
-        wfo = %s and phenomena = %s and significance = %s
+        extract(week from issue) as week, wfo, eventid from warnings WHERE
+        """ + limiter + """ and phenomena = %s and significance = %s
         and issue is not null
     )
     SELECT yr, week, count(*) from obs GROUP by yr, week ORDER by yr ASC
-    """, (station, phenomena, significance))
+    """, pgconn, params=(phenomena, significance), index_col=None)
 
-    weekcount = [0]*53
-    eventcount = [0]*53
-    years = []
-    for row in cursor:
-        years.append(row[0])
-        weekcount[int(row[1])-1] += 1
-        eventcount[int(row[1])-1] += row[2]
+    if len(df.index) == 0:
+        raise Exception("ERROR: No Results Found!")
 
-    df = pd.DataFrame(dict(weekcount=pd.Series(weekcount),
-                           eventcount=pd.Series(eventcount)),
-                      index=pd.Series(range(1, 54), name='week'))
-
-    if max(weekcount) == 0:
-        return "ERROR: No Results Found!"
-
-    ax[0].bar(np.arange(53)*7, weekcount, width=7)
-    ax[0].set_title("[%s] NWS %s\n%s %s (%s.%s) Events - %i to %i" % (
-        station, nt.sts[station]['name'], vtec._phenDict[phenomena],
+    # Top Panel: count
+    gdf = df.groupby('week').count()
+    ax[0].bar((gdf.index.values - 1) * 7, gdf['yr'], width=7)
+    ax[0].set_title("%s\n%s %s (%s.%s) Events - %i to %i" % (
+        title, vtec._phenDict[phenomena],
         vtec._sigDict[significance], phenomena, significance,
-        years[0], years[-1]))
+        df['yr'].min(), df['yr'].max()))
     ax[0].grid()
     ax[0].set_ylabel("Years with 1+ Event")
 
-    ax[1].bar(np.arange(53)*7, eventcount, width=7)
+    # Bottom Panel: events
+    gdf = df.groupby('week').sum()
+    ax[1].bar((gdf.index.values - 1) * 7, gdf['count'], width=7)
     ax[1].set_ylabel("Total Event Count")
     ax[1].grid()
     ax[1].set_xlabel("Partitioned by Week of the Year")
@@ -96,3 +104,6 @@ def plotter(fdict):
     ax[1].set_xlim(0, 366)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
