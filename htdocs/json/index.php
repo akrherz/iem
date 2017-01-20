@@ -247,14 +247,17 @@
   
   $services[] = Array(
   		"title" => "Current Storm Based Warnings",
-  		"url" => "/geojson/sbw.geojson",
+  		"url" => "/geojson/sbw.geojson?ts={ts}",
   		"desc" => "Provides a geojson format of current National Weather Service
   		storm based warnings.  There is a 15 second caching done by the server
   		to ease load.  The generation_time attribute is set on the output 
-  		to diagnose when the file is valid.",
+  		to diagnose when the file is valid.  You can provide a timestamp
+  		to provide archived warnings back to 2002 or so.",
   		"vars" => Array(
+  				"ts" => "ISO-8601 Timestamp YYYY-mm-ddTHH:MI:SSZ (optional)"
   		),
   		"example" => Array(
+  				"{ts}" => "2011-04-27T22:00:00Z"
   		)
   );
   
