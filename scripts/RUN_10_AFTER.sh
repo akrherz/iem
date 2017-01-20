@@ -47,9 +47,6 @@ python plot_obs.py
 cd ../iemplot
 ./RUN.csh
 
-cd ../dbutil
-python asos2archive.py iowa
-
 cd ../iemre
 python hourly_analysis.py
 python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`

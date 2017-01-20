@@ -120,9 +120,10 @@ for all observations, the IEM continues to backfill this information.</p>
 
 <br><br>
 <h4>3) Specific Date Range (If needed):</h4>
-<p><strong>Note:</strong> Data is available from this archive up until the current
-UTC date.  <a href="https://github.com/akrherz/iem/blob/master/scripts/dbutil/asos2archive.py">A process runs</a> at midnight Iowa time to populate the previous UTC's
-day worth of data.</p>
+<p><strong>Note:</strong> There is up to an hour delay for observations to appear
+within this service.  A process runs at approximately 20 minutes after the hour
+to copy over the previous hour's worth of data in the backend database behind
+this service.</p>
 
 <table class="table table-condensed">
 <tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select}</td></tr>

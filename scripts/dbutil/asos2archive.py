@@ -7,8 +7,11 @@
  This script copies from the iem->current_log database table to the asos
  database.  This data is a result of the pyWWA/metar_parser.py process
 
- We run in two modes, once every hour to copy over the Iowa data and once
- at midnight to copy the previous UTC's days worth of METAR data over
+ We run in two modes, once every hour to copy over the past hour's data and
+ then once at midnight to recopy the previous day's data.
+
+ RUN_20_AFTER.sh
+ RUN_MIDNIGHT.sh
 
 """
 import datetime
@@ -16,85 +19,99 @@ import sys
 import pytz
 import psycopg2.extras
 
-ASOS = psycopg2.connect(database='asos', host='iemdb')
-IEM = psycopg2.connect(database='iem', host='iemdb')
-acursor = ASOS.cursor()
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-# Set ourselves back one hour as when we run at 10 after as we don't
-# want to miss data when we run at 00:10 UTC
-utc = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
-utc = utc.replace(tzinfo=pytz.timezone("UTC"), minute=59, second=0,
-                  microsecond=0)
+def compute_time(is_hourly):
+    """Figure out the proper start and end time"""
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    utcnow = utcnow.replace(minute=0, second=0, microsecond=0)
 
-sts = utc.replace(hour=0, minute=0)
+    if is_hourly:
+        lasthour = utcnow - datetime.timedelta(minutes=60)
+        sts = lasthour.replace(minute=0)
+        ets = lasthour.replace(minute=59)
+    else:
+        yesterday = utcnow - datetime.timedelta(hours=24)
+        sts = yesterday.replace(hour=0)
+        ets = sts.replace(hour=23, minute=59)
+    return sts, ets
 
-# Option 1 is to run for 'today' and for Iowa data
-if len(sys.argv) > 1:
-    ets = utc
-    networks = "(network = 'IA_ASOS' or network = 'AWOS')"
-# Option 2 is to run for 'yesterday' and for the entire archive
-else:
-    sts = sts.replace(minute=0) - datetime.timedelta(days=1)
-    ets = sts.replace(hour=23, minute=59)
-    networks = "(network ~* 'ASOS' or network ~* 'AWOS')"
 
-# Delete any obs from yesterday
-sql = "DELETE from t%s WHERE valid >= '%s' and valid <= '%s'" % (sts.year,
-                                                                 sts, ets)
-acursor.execute(sql)
+def main(argv):
+    ASOS = psycopg2.connect(database='asos', host='iemdb')
+    IEM = psycopg2.connect(database='iem', host='iemdb')
+    acursor = ASOS.cursor()
+    icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    is_hourly = (len(argv) > 1)
 
-# delete dups from current_log
-icursor.execute("""
-with data as (
-    select c.oid,
-    row_number() OVER (PARTITION by c.iemid, valid ORDER by length(raw) DESC)
-    from current_log c JOIN stations t on (c.iemid = t.iemid)
-    where network ~* 'ASOS' and valid >= %s and valid <= %s)
+    (sts, ets) = compute_time(is_hourly)
+    # print("Processing %s thru %s" % (sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+    #                                  ets.strftime("%Y-%m-%dT%H:%M:%SZ")))
 
- DELETE from current_log c USING data d WHERE c.oid = d.oid
- and d.row_number > 1""", (sts, ets))
-icursor.close()
-IEM.commit()
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    # Delete any duplicate obs
+    table = "t%s" % (sts.year,)
+    acursor.execute("""
+        DELETE from """ + table + """ WHERE valid >= %s and valid <= %s
+        """, (sts, ets))
 
-# Get obs from Access
-sql = """SELECT c.*, t.network, t.id from
-    current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
-    valid >= %s and valid <= %s and """+networks+"""
-    """
-args = (sts, ets)
-icursor.execute(sql, args)
-for row in icursor:
-    sql = """INSERT into t""" + repr(sts.year) + """ (station, valid, tmpf,
-    dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
-    skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
-    min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, presentwx, report_type)
-    values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    # delete dups from current_log
+    icursor.execute("""
+    with data as (
+        select c.oid,
+        row_number() OVER
+            (PARTITION by c.iemid, valid ORDER by length(raw) DESC)
+        from current_log c JOIN stations t on (c.iemid = t.iemid)
+        where (network ~* 'ASOS' or network = 'AWOS')
+        and valid >= %s and valid <= %s)
 
-    # TODO: differentiate between 2 (Routine) and 3 (SPECI)
-    rtype = (1
-             if row['raw'] is not None and row['raw'].find(' MADISHF') > -1
-             else 2)
-    args = (row['id'], row['valid'], row['tmpf'],
-            row['dwpf'], row['drct'], row['sknt'], row['alti'],
-            row['phour'], row['gust'], row['vsby'], row['skyc1'], row['skyc2'],
-            row['skyc3'], row['skyc4'], row['skyl1'], row['skyl2'],
-            row['skyl3'], row['skyl4'], row['raw'], row['p03i'], row['p06i'],
-            row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
-            row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
-            row['presentwx'], rtype)
+     DELETE from current_log c USING data d WHERE c.oid = d.oid
+     and d.row_number > 1
+    """, (sts, ets))
+    icursor.close()
+    IEM.commit()
+    icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    acursor.execute(sql, args)
+    # Get obs from Access
+    icursor.execute("""SELECT c.*, t.network, t.id from
+        current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
+        valid >= %s and valid <= %s and (network ~* 'ASOS' or network = 'AWOS')
+        """, (sts, ets))
+    for row in icursor:
+        sql = """INSERT into t""" + repr(sts.year) + """ (station, valid, tmpf,
+        dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
+        skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
+        min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, presentwx,
+        report_type)
+        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
-if icursor.rowcount == 0:
-    print(("%s - %s Nothing done for asos2archive.py?"
-           ) % (sts.strftime("%Y-%m-%dT%H:%M"), ets.strftime("%Y-%m-%dT%H:%M"))
-          )
+        # TODO: differentiate between 2 (Routine) and 3 (SPECI)
+        rtype = (1
+                 if row['raw'] is not None and row['raw'].find(' MADISHF') > -1
+                 else 2)
+        args = (row['id'], row['valid'], row['tmpf'],
+                row['dwpf'], row['drct'], row['sknt'], row['alti'],
+                row['phour'], row['gust'], row['vsby'], row['skyc1'],
+                row['skyc2'],
+                row['skyc3'], row['skyc4'], row['skyl1'], row['skyl2'],
+                row['skyl3'], row['skyl4'], row['raw'], row['p03i'],
+                row['p06i'],
+                row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
+                row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
+                row['presentwx'], rtype)
 
-icursor.close()
-IEM.commit()
-ASOS.commit()
-ASOS.close()
-IEM.close()
+        acursor.execute(sql, args)
+
+    if icursor.rowcount == 0:
+        print(("%s - %s Nothing done for asos2archive.py?"
+               ) % (sts.strftime("%Y-%m-%dT%H:%M"),
+                    ets.strftime("%Y-%m-%dT%H:%M"))
+              )
+
+    icursor.close()
+    IEM.commit()
+    ASOS.commit()
+    ASOS.close()
+    IEM.close()
+
+if __name__ == '__main__':
+    main(sys.argv)
