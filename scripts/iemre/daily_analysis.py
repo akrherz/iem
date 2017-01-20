@@ -156,7 +156,7 @@ def grid_day12(nc, ts):
        from summary_%s c, stations s WHERE day = '%s' and
        s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
         'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP') and c.iemid = s.iemid and
+        'OH_COOP', 'IN_COOP') and c.iemid = s.iemid and
         extract(hour from c.coop_valid) between 4 and 11
         """ % (ts.year, ts.strftime("%Y-%m-%d"))
     df = read_sql(sql, pgconn)
