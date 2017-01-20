@@ -389,4 +389,5 @@ CREATE TABLE iemdatasets(
   archive_begin date,
   download text
 );
-GRANT SELECT on iemdatasets to nobody,apache;
+GRANT ALL on iemdatasets to nobody,apache;
+GRANT ALL on iemdatasets_id_seq to nobody,apache;
