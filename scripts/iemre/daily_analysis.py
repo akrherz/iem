@@ -138,6 +138,15 @@ def do_precip12(nc, ts):
     nc.variables['p01d_12z'][offset] = phour
 
 
+def plot(df):
+    from pyiem.plot import MapPlot
+    m = MapPlot(sector='midwest', continentalcolor='white')
+    m.plot_values(df['lon'].values, df['lat'].values, df['highdata'].values,
+                  labelbuffer=0)
+    m.postprocess(filename='test.png')
+    m.close()
+
+
 def grid_day12(nc, ts):
     """Use the COOP data for gridding
     """
@@ -160,15 +169,22 @@ def grid_day12(nc, ts):
         extract(hour from c.coop_valid) between 4 and 11
         """ % (ts.year, ts.strftime("%Y-%m-%d"))
     df = read_sql(sql, pgconn)
+    # plot(df)
 
     if len(df.index) > 4:
         res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk_12z'][offset] = datatypes.temperature(
                                                 res, 'F').value('K')
+        print(("12z hi for %s [idx:%s] "
+               "min: %5.1f max: %5.1f"
+               ) % (ts, offset, np.min(res), np.max(res)))
 
         res = generic_gridder(df, 'lowdata')
         nc.variables['low_tmpk_12z'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
+        print(("12z lo for %s [idx:%s] "
+               "min: %5.1f max: %5.1f"
+               ) % (ts, offset, np.min(res), np.max(res)))
 
         res = generic_gridder(df, 'snowdata')
         nc.variables['snow_12z'][offset] = res * 25.4
@@ -184,7 +200,6 @@ def grid_day(nc, ts):
     """
     """
     offset = iemre.daily_offset(ts)
-    print(('cal hi/lo for %s [idx:%s]') % (ts, offset))
     sql = """
        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
        s.name, s.id as station,
@@ -202,7 +217,7 @@ def grid_day(nc, ts):
        from summary_%s c, stations s WHERE day = '%s' and
        s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-        'OH_ASOS', 'AWOS') and c.iemid = s.iemid
+        'OH_ASOS', 'AWOS', 'IN_ASOS') and c.iemid = s.iemid
         """ % (ts.year, ts.strftime("%Y-%m-%d"))
     df = read_sql(sql, pgconn)
 
@@ -210,9 +225,15 @@ def grid_day(nc, ts):
         res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk'][offset] = datatypes.temperature(
                                                 res, 'F').value('K')
+        print(("cal hi for %s [idx:%s] "
+               "min: %5.1f max: %5.1f"
+               ) % (ts, offset, np.min(res), np.max(res)))
         res = generic_gridder(df, 'lowdata')
         nc.variables['low_tmpk'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
+        print(("cal lo for %s [idx:%s] "
+               "min: %5.1f max: %5.1f"
+               ) % (ts, offset, np.min(res), np.max(res)))
         hres = generic_gridder(df, 'highdwpf')
         lres = generic_gridder(df, 'lowdwpf')
         nc.variables['avg_dwpk'][offset] = datatypes.temperature(
