@@ -1,7 +1,7 @@
 <?php 
  include("../../config/settings.inc.php");
  include("../../include/database.inc.php");
- include("setup.php");
+ require_once "setup.php";
 
  include("../../include/myview.php");
  $t = new MyView();
@@ -33,15 +33,15 @@
  	}
  	
  	$pgconn = iemdb('access');
- 	pg_query($pgconn, "SET time zone '". $metadata['tzname'] ."'");
- 	$rs = pg_prepare($pgconn, "SELECT", "SELECT * from current_shef
- 			where station = $1 ORDER by physical_code ASC");
- 	$rs = pg_execute($pgconn, "SELECT", Array($station));
+ 	$rs = pg_prepare($pgconn, "SELECT", "SELECT *, ".
+ 			"to_char(valid at time zone $1, 'dd Mon YYYY HH:MI AM') as ts ".
+ 			"from current_shef ".
+ 			"where station = $2 ORDER by physical_code ASC");
+ 	$rs = pg_execute($pgconn, "SELECT", Array($metadata['tzname'], $station));
 	$table .= "<table class=\"table table-striped\">
 			<thead><tr><th>Physical Code</th><th>Duration</th><th>Extremum</th>
 			<th>Valid</th><th>Value</th></thead>";
  	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
- 		$ts = strtotime($row["valid"]);
  		$depth = "";
  		if ($row["depth"] > 0){
  			$depth = sprintf("%d inch", $row["depth"]);
@@ -50,7 +50,7 @@
  				$row["physical_code"],$shefcodes[$row["physical_code"]], $depth,
  				$row["duration"], $durationcodes[ $row["duration"] ], 
  				$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
- 				date('d M Y g:i A', $ts), $row["value"]);
+ 				$row["ts"], $row["value"]);
  	}
  	$table .= "</table>";
 } else {
