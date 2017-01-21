@@ -1,4 +1,4 @@
-"""Compute the archive start time of a HADS/DCP network"""
+"""Compute the archive start time of a HADS/DCP/COOP network"""
 from pyiem.network import Table as NetworkTable
 import sys
 import psycopg2
@@ -47,7 +47,7 @@ def main(argv):
         # If we run without args, we pick a "random" network!
         cursor = MESOSITEDB.cursor()
         cursor.execute("""
-            SELECT id from networks where id ~* 'DCP'
+            SELECT id from networks where id ~* 'DCP' or id ~* 'COOP'
             ORDER by id ASC
         """)
         networks = []
