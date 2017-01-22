@@ -203,7 +203,10 @@
   		"title" => "NWS Text Products by AWIPS ID and Time Period",
   		"url" => "/json/nwstext_search.py?sts={sts}&ets={ets}&awipsid={awipsid}",
   		"desc" => "Search of NWS Issued Text Products by a time period (in 
-  		UTC) and an AWIPS ID (sometime called AFOS PIL).",
+  		UTC) and an AWIPS ID (sometime called AFOS PIL).  If you specify
+  		the AWIPS ID to be only three characters, the interruptation is to
+  		search of that base product identifier from any issuance center. For
+  		example, setting LSR would return all LSRXXX products.",
   		"vars" => Array(
   				"sts" => "YYYY-mm-ddTHH:MMZ Inclusive start period (UTC)",
   				"ets" => "YYYY-mm-ddTHH:MMZ end time period (UTC)",

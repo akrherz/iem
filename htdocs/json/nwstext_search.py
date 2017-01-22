@@ -18,12 +18,16 @@ def run(sts, ets, awipsid):
     cursor = dbconn.cursor()
 
     res = {'results': []}
+    pillimit = "pil"
+    if len(awipsid) == 3:
+        pillimit = "substr(pil, 1, 3) "
     cursor.execute("""
     SELECT data,
     to_char(entered at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ'),
-    source, wmo from products WHERE pil = %s
-    and entered >= %s and entered < %s ORDER by entered ASC
-    """, (awipsid, sts, ets))
+    source, wmo from products WHERE
+    entered >= %s and entered < %s and """ + pillimit + """ = %s
+    ORDER by entered ASC
+    """, (sts, ets, awipsid))
     for row in cursor:
         res['results'].append(dict(ttaaii=row[3],
                                    utcvalid=row[1],
