@@ -60,7 +60,7 @@ def plotter(fdict):
         count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
       """, pgconn, params=(phenomena, significance), index_col=None)
     if len(df.index) == 0:
-        return("Sorry, no data found!")
+        raise Exception("Sorry, no data found!")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
 
     minyear = df['yr'].min()
@@ -78,7 +78,8 @@ def plotter(fdict):
     bounds = np.linspace(1, maxval, 10, dtype='i')
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
     res = ax.imshow(data, extent=[0.5, 12.5, maxyear + 0.5, minyear - 0.5],
-                    interpolation='nearest', aspect='auto', norm=norm)
+                    interpolation='nearest', aspect='auto', norm=norm,
+                    cmap=cmap)
     fig.colorbar(res, label='count')
     ax.grid(True)
     ax.set_xticks(range(1, 13))
@@ -90,4 +91,4 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter(dict(wfo='DMX', network='WFO', phenomena='FG', significance='Y'))
+    plotter(dict(wfo='MOB', network='WFO', phenomena='TO', significance='W'))
