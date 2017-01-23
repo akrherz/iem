@@ -214,7 +214,7 @@ EOF;
 			}
 			$netselect = networkSelect($v->network, $value, $extra, $v->name);
 			$thisrow = $netselect;
-			$pltvars[] = sprintf("%s:%s", "network", $network);
+			$pltvars[] = sprintf("%s:%s", "network", $v->network);
 		}
 		elseif ($v->type == "phenomena"){
 			$netselect = vtecPhenoSelect($value);
