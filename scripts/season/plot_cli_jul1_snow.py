@@ -1,39 +1,56 @@
 import psycopg2
+from pandas.io.sql import read_sql
 import datetime
-
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-cursor = IEM.cursor()
-
-
-
-cursor.execute("""
- select station, st_x(geom), st_y(geom), snow_jul1 
- from cli_data c JOIN stations t on (t.id = c.station) 
- WHERE c.valid = 'YESTERDAY' and t.network = 'NWSCLI' and snow_jul1 is not null
-""")
-lats = []
-lons = []
-vals = []
-
-for row in cursor:
-    stid = row[0][-3:]
-    if stid in ['RAP', 'DVN', 'FGF', 'OAX', 'MPX']:
-        continue
-    lats.append(row[2])
-    lons.append(row[1])
-    vals.append(row[3])
-
 from pyiem.plot import MapPlot
 
-yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
-year = yesterday.year if yesterday.month > 6 else yesterday.year - 1
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 
-m = MapPlot(sector='midwest', axisbg='white',
-       title='NWS Total Snowfall (inches) thru %s' % (
-                                    yesterday.strftime("%-d %B %Y"),),
-       subtitle= '1 July %s - %s' % (year, 
-                datetime.datetime.today().strftime("%-d %B %Y"),))
-m.plot_values(lons, lats, vals, fmt='%.1f')
-pqstr = "data ac %s0000 summary/mw_season_snowfall.png mw_season_snowfall.png png" % (
-        datetime.datetime.today().strftime("%Y%m%d"),)
-m.postprocess(view=False, pqstr=pqstr)
+
+def main():
+    df = read_sql("""
+     select station, st_x(geom), st_y(geom), snow_jul1, snow_jul1_normal
+     from cli_data c JOIN stations t on (t.id = c.station)
+     WHERE c.valid = 'YESTERDAY' and t.network = 'NWSCLI'
+     and snow_jul1 is not null and snow_jul1_normal is not null
+     and t.id not in ('RAP', 'DVN', 'FGF', 'OAX', 'MPX')
+    """, IEM, index_col='station')
+    df['departure'] = df['snow_jul1'] - df['snow_jul1_normal']
+    df['colors'] = df['departure'].apply(
+        lambda x: '#ff0000' if x < 0 else '#0000ff')
+
+    yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
+    year = yesterday.year if yesterday.month > 6 else yesterday.year - 1
+
+    m = MapPlot(sector='midwest', axisbg='white',
+                title='NWS Total Snowfall (inches) thru %s' % (
+                                        yesterday.strftime("%-d %B %Y"),),
+                subtitle=('1 July %s - %s'
+                          ) % (
+                    year, datetime.datetime.today().strftime("%-d %B %Y"),))
+    m.plot_values(df['st_x'].values, df['st_y'].values,
+                  df['snow_jul1'].values, fmt='%.1f', labelbuffer=5)
+    pqstr = ("data ac %s0000 summary/mw_season_snowfall.png "
+             "mw_season_snowfall.png png"
+             ) % (datetime.datetime.today().strftime("%Y%m%d"),)
+    m.postprocess(view=False, pqstr=pqstr)
+    m.close()
+
+    # Depature
+    m = MapPlot(sector='midwest', axisbg='white',
+                title='NWS Total Snowfall Departure (inches) thru %s' % (
+                                        yesterday.strftime("%-d %B %Y"),),
+                subtitle=('1 July %s - %s'
+                          ) % (
+                    year, datetime.datetime.today().strftime("%-d %B %Y"),))
+    m.plot_values(df['st_x'].values, df['st_y'].values,
+                  df['departure'].values, color=df['colors'].values,
+                  fmt='%.1f', labelbuffer=5)
+    pqstr = ("data ac %s0000 summary/mw_season_snowfall_departure.png "
+             "mw_season_snowfall_departure.png png"
+             ) % (datetime.datetime.today().strftime("%Y%m%d"),)
+    m.postprocess(view=False, pqstr=pqstr)
+    m.close()
+
+
+if __name__ == '__main__':
+    main()
