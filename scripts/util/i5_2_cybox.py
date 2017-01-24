@@ -34,7 +34,8 @@ for fn in glob.glob("*.zip"):
 
 fs = None
 for rp in remote_filenames:
-    fs = util.send2box(local_filenames[rp], rp,
-                       remotenames=remote_filenames[rp], fs=fs)
-    for fn in local_filenames[rp]:
-        os.unlink(fn)
+    ftps, ress = util.send2box(local_filenames[rp], rp,
+                               remotenames=remote_filenames[rp], fs=fs)
+    for fn, res in zip(local_filenames[rp], ress):
+        if res is not False:
+            os.unlink(fn)
