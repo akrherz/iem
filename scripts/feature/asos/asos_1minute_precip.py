@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='localhost', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2016, 12, 3, 6, 0)
+sts = datetime.datetime(2017, 1, 22, 8, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2016, 12, 4, 6, 0)
+ets = datetime.datetime(2017, 1, 23, 8, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/Chicago'
-station = 'GLS'
+tzname = 'America/Los_Angeles'
+station = 'LGB'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -22,7 +22,7 @@ prec = np.ones((sz,), 'f') * -1
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct,
- sknt, pres1, gust_sknt, precip from t2016_1minute WHERE station = %s
+ sknt, pres1, gust_sknt, precip from t2017_1minute WHERE station = %s
  and valid >= %s and valid < %s
  ORDER by valid ASC
 """, (station, sts, ets))
@@ -98,7 +98,7 @@ ax.text(x, 0.935, "Peak 10min Window", transform=ax.transAxes,
         bbox=dict(fc='white', ec='None'))
 for i in range(maxwindowi+1, maxwindowi+11):
     ts = lsts + datetime.timedelta(minutes=i)
-    ax.text(x, 0.9-(0.035*(i-maxwindowi-1)),
+    ax.text(x, 0.88-(0.05*(i-maxwindowi-1)),
             "%s %.2f" % (ts.strftime("%-I:%M %p"), prec[i] - prec[i-1], ),
             transform=ax.transAxes, fontsize=10,
             bbox=dict(fc='white', ec='None'))
@@ -109,10 +109,10 @@ ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.55, 0.7), prop=prop, ncol=1)
-ax.set_ylim(0, 13)
-ax.set_yticks(range(0, 13, 1))
-ax.set_xlabel("3 December 2016 (%s)" % (tzname,))
-ax.set_title(("3 December 2016 Galveston, TX (KGLS)\n"
+ax.set_ylim(0, 6)
+ax.set_yticks(range(0, 7, 1))
+ax.set_xlabel("22 January 2017 (%s)" % (tzname,))
+ax.set_title(("22 January 2017 Long Beach, CA (KLGB)\n"
               "One Minute Rainfall, %.2f inches total plotted"
               ) % (prec[-1],))
 
