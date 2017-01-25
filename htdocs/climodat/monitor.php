@@ -96,7 +96,7 @@ while (list($state, $stations)=each($stationgrps)){
 	  from alldata_{$state} o, climo c WHERE
 	   o.station in {$sstring}
 	   and o.station = c.station
-	   and day >= '{$sdatestr}' and day < '{$edatestr}'
+	   and day >= '{$sdatestr}' and day <= '{$edatestr}'
 	   and o.sday = c.sday  GROUP by o.station
 	   ORDER by o.station ASC
 EOF;
@@ -194,6 +194,9 @@ is a description of the three options.</p>
  entry to remove this calculation.</li>
 </ul>
 
+<p><strong>Updated 25 Jan 2017:</strong>  To reduce some ambiquity, the
+specified end date is now inclusive.</p>
+
 <hr />
 <h4>Available States with Data</h4>
 
@@ -251,7 +254,7 @@ is a description of the three options.</p>
  </td></tr>
 
 <tr><th>Period</th><td>start: <input type="text" id="sdate" name="sdate">
-    end: <input type="text" id="edate" name="edate"></td></tr>
+    end: <input type="text" id="edate" name="edate"> (inclusive)</td></tr>
 
 <tr><td colspan="2">
 <input type="submit" value="Apply Table Options">
@@ -260,7 +263,7 @@ is a description of the three options.</p>
 </form>
 
 <hr />
-<h4>The following table is valid for a period from {$snice} to {$enice}.</h4>
+<h4>The following table is valid for a period from {$snice} to {$enice} (inclusive).</h4>
 
 <p><i>"Climo"</i> is the climatology value, which is computed over the period of
 1951-2015.</p>
