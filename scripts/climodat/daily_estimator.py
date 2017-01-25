@@ -41,6 +41,15 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 state = sys.argv[1]
 TABLE = "alldata_%s" % (state, )
 
+"""
+with inn as (
+ select climate_site, id, name from stations where network = 'NWSCLI'
+ and state = 'OH' ORDER by id)
+
+ SELECT i.climate_site, i.id, s.name, i.name from
+ inn i JOIN stations s on (i.climate_site = s.id);
+"""
+
 HARDCODE = {
     'IA1063': 'BRL',
     'IA1314': 'CID',
@@ -75,14 +84,18 @@ HARDCODE = {
     # KLWV | IL6558       | LAWRENCEVILLE
     # KUGN | IL1549       | WAUKEGAN
 
-    # Wisconsin
-    'WI5479': 'MKE',
-    'WI3269': 'GRB',
-    'WI7113': 'RHI',
-    'WI2428': 'EAU',
-    'WI4961': 'MSN',
-    'WI4370': 'LSE',
-    # AUW Wausau is missing
+    # Indiana
+    'IN0784': 'BMG',
+    'IN2738': 'EVV',
+    'IN4259': 'EYE',
+    'IN3037': 'FWA',
+    'IN7999': 'GEZ',
+    # IN0877       | KHUF | BOWLING GREEN 1 W           | TERRE HAUTE
+    'IN4259': 'IND',
+    # IN9430       | KLAF | WEST LAFAYETTE 6 NW         | LAFAYETTE
+    'IN6023': 'MIE',
+    'IN8187': 'SBN',
+    # IN4837       | KVPZ | LAPORTE                     | VALPARAISO
 
     # Kansas
     'KS8830': 'ICT',
@@ -100,6 +113,123 @@ HARDCODE = {
     # KOJC | KS7809       | OLATHE (OJC)
     # KP28 | KS6549       | MEDICINE_LODGE
 
+    # Kentucky
+    'KY0909': 'BWG',
+    'KY1855': 'CVG',
+    # KY4746       | KFFT | LEXINGTON BLUEGRASS AP     | CAPITAL CITY AIRPORT/F
+    # KY3714       | KJKL | HAZARD WATER WKS           | JACKSON/J. CARROLL
+    'KY4746': 'LEX',
+    # KY4954       | KLOU | LOUISVILLE INTL AP         | LOUISVILLE/BOWMAN
+    # KY0381       | KLOZ | BARBOURVILLE               | LONDON-CORBIN ARPT
+    # KY5694       | KPAH | MURRAY                     | PADUCAH/BARKLEY
+    'KY4954': 'SDF',
+
+    # Michigan
+    'MI7366': 'ANJ',
+    'MI0164': 'APN',
+    # MI3504       | KAZO | GULL LK BIOLOGICAL STN        | KALAMAZOO
+    'MI3858': 'BIV',
+    'MI0552': 'BTL',
+    'MI2103': 'DTW',
+    'MI2846': 'FNT',
+    'MI3333': 'GRR',
+    'MI3932': 'HTL',
+    'MI4150': 'JXN',
+    'MI4641': 'LAN',
+    # MI7820       | KMBS | STANDISH 5SW                  | SAGINAW
+    'MI5712': 'MKG',
+    'MI5178': 'MQT',
+    # MI5097       | KTVC | MAPLE CITY 1E                 | TRAVERSE CIT
+
+    # Minnesota
+    'MN2248': 'DLH',
+    'MN4026': 'INL',
+    # MN4176       | KMPX | JORDAN 1SSW            | Minneapolis NWS
+    'MN5435': 'MSP',
+    'MN7004': 'RST',
+    'MN7294': 'STC',
+
+    # Missouri
+    # MO4226       | KCGI | JACKSON                  | CAPE GIRARDEAU
+    'MO1791': 'COU',
+    'MO7632': 'DMO',
+    'MO4544': 'IRK',
+    # MO8664       | KJLN | WACO 4N                  | Joplin
+    'MO4359': 'MCI',
+    'MO7976': 'SGF',
+    # MO6357       | KSTJ | OREGON                   | ST. JOSEPH
+    'MO7455': 'STL',
+    'MO8880': 'UNO',
+    # MO7263       | KVIH | ROLLA UNI OF MISSOURI    | VICHY/ROLLA
+
+    # Nebraska
+    'NE0130': 'AIA',
+    'NE1200': 'BBW',
+    'NE7665': 'BFF',
+    'NE1575': 'CDR',
+    'NE4335': 'EAR',
+    'NE3395': 'GRI',
+    'NE3660': 'HSI',
+    'NE4110': 'IML',
+    'NE6065': 'LBF',
+    # NE5105       | KLNK | MALCOLM                | LINCOLN
+    'NE5310': 'MCK',
+    # NE3050       | KOAX | FREMONT                | Omaha - Valley
+    # NE2770       | KODX | ERICSON 8 WNW          | ORD/SHARP FIELD
+    'NE5995': 'OFK',
+    'NE6255': 'OMA',
+    'NE7830': 'SNY',
+    'NE8760': 'VTN',
+
+    # North Dakota
+    'ND0819': 'BIS',
+    # ND2183       | KDIK | THEODORE ROOSEVELT AP     | DICKINSON
+    'ND2859': 'FAR',
+    # ND3621       | KFGF | GRAND FORKS UNIV NWS      | Grand Forks NWS
+    'ND3616': 'GFK',
+    # ND7450       | KHEI | REEDER                    | HETTINGER
+    'ND9425': 'ISN',
+    'ND4413': 'JMS',
+    'ND5988': 'MOT',
+    'ND3376': 'N60',
+
+    # Ohio
+    'OH0058': 'CAK',
+    'OH1657': 'CLE',
+    'OH1786': 'CMH',
+    'OH2075': 'DAY',
+    'OH4865': 'MFD',
+    # OH1905       | KPHD | COSHOCTON AG RSCH STN         | NEW PHILADELPHIA
+    'OH8357': 'TOL',
+    'OH9406': 'YNG',
+    'OH9417': 'ZZV',
+
+    # South Dakota
+    # SD5048       | K2WX | LUDLOW 3 SSE         | BUFFALO
+    'SD7742': '8D3',
+    # SD9999       | KABR | ABERDEEN             | ABERDEEN
+    'SD8932': 'ATY',
+    'SD2087': 'CUT',
+    'SD2852': 'D07',
+    'SD7667': 'FSD',
+    'SD4127': 'HON',
+    'SD9367': 'ICR',
+    # SD6212       | KIEN | OELRICHS             | PINE RIDGE
+    'SD5691': 'MBG',
+    # SD3029       | KMHE | FORESTBURG 3 NE      | MITCHELL
+    # SD1972       | KPHP | COTTONWOOD 2 E       | PHILIP
+    'SD6597': 'PIR',
+    'SD6947': 'RAP',
+    # SD6947       | KUNR | RAPID CITY 4NW       | Rapid City
+
+    # Wisconsin
+    'WI5479': 'MKE',
+    'WI3269': 'GRB',
+    'WI7113': 'RHI',
+    'WI2428': 'EAU',
+    'WI4961': 'MSN',
+    'WI4370': 'LSE',
+    # AUW Wausau is missing
     }
 
 # Pre-compute the grid location of each climate site
