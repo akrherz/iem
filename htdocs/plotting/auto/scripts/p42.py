@@ -228,7 +228,7 @@ def plotter(fdict):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.15,
                      box.width, box.height * 0.85])
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.165),
               fancybox=True, shadow=True, ncol=5, fontsize=12,
               columnspacing=1)
     return fig, df
