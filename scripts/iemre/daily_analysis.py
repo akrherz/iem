@@ -91,9 +91,10 @@ def do_precip(nc, ts):
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
-        print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
-               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                    ets.strftime("%Y%m%d%H"), offset2))
+        if sts.year >= 1900:
+            print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
+                   ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                        ets.strftime("%Y%m%d%H"), offset2))
         ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (sts.year,)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
@@ -113,9 +114,10 @@ def do_precip12(nc, ts):
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
     if ts.month == 1 and ts.day == 1:
-        print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
-               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                    ets.strftime("%Y%m%d%H"), offset2))
+        if sts.year >= 1900:
+            print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
+                   ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                        ets.strftime("%Y%m%d%H"), offset2))
         ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ets.year,)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
@@ -128,9 +130,10 @@ def do_precip12(nc, ts):
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
-        print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
-               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                    ets.strftime("%Y%m%d%H"), offset2))
+        if sts.year >= 1900:
+            print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
+                   ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                        ets.strftime("%Y%m%d%H"), offset2))
         ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
