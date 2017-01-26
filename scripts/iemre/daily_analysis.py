@@ -21,6 +21,7 @@ from psycopg2.extras import DictCursor
 from scipy.interpolate import NearestNDInterpolator
 
 pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+coop_pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 cursor = pgconn.cursor(cursor_factory=DictCursor)
 
 
@@ -152,23 +153,39 @@ def grid_day12(nc, ts):
     """
     offset = iemre.daily_offset(ts)
     print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
-    sql = """
-       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
-       s.id as station, s.name as name,
-       (CASE WHEN pday >= 0 then pday else null end) as precipdata,
-       (CASE WHEN snow >= 0 then snow else null end) as snowdata,
-       (CASE WHEN snowd >= 0 then snowd else null end) as snowddata,
-       (CASE WHEN max_tmpf > -50 and max_tmpf < 130
-           then max_tmpf else null end) as highdata,
-       (CASE WHEN min_tmpf > -50 and min_tmpf < 95
-           then min_tmpf else null end) as lowdata
-       from summary_%s c, stations s WHERE day = '%s' and
-       s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
-        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP', 'IN_COOP') and c.iemid = s.iemid and
-        extract(hour from c.coop_valid) between 4 and 11
-        """ % (ts.year, ts.strftime("%Y-%m-%d"))
-    df = read_sql(sql, pgconn)
+    if ts.year > 2004:
+        sql = """
+           SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
+           s.id as station, s.name as name,
+           (CASE WHEN pday >= 0 then pday else null end) as precipdata,
+           (CASE WHEN snow >= 0 then snow else null end) as snowdata,
+           (CASE WHEN snowd >= 0 then snowd else null end) as snowddata,
+           (CASE WHEN max_tmpf > -50 and max_tmpf < 130
+               then max_tmpf else null end) as highdata,
+           (CASE WHEN min_tmpf > -50 and min_tmpf < 95
+               then min_tmpf else null end) as lowdata
+           from summary_%s c, stations s WHERE day = '%s' and
+           s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
+            'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
+            'OH_COOP', 'IN_COOP') and c.iemid = s.iemid and
+            extract(hour from c.coop_valid) between 4 and 11
+            """ % (ts.year, ts.strftime("%Y-%m-%d"))
+        df = read_sql(sql, pgconn)
+    else:
+        df = read_sql("""
+        WITH mystations as (
+            SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
+            from stations where network in ('IACLIMATE', 'MNCLIMATE',
+            'WICLIMATE', 'ILCLIMATE', 'MOCLIMATE', 'KSCLIMATE', 'NECLIMATE',
+            'SDCLIMATE', 'NDCLIMATE', 'KYCLIMATE', 'MICLIMATE', 'OHCLIMATE',
+            'INCLIMATE') and (temp24_hour is null or
+            temp24_hour between 4 and 10)
+        )
+        SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
+        precip as precipdata, snow as snowdata, snowd as snowddata,
+        high as highdata, low as lowdata from alldata a JOIN mystations m
+        ON (a.station = m.id) WHERE a.day = %s
+        """, coop_pgconn, params=(ts,))
     # plot(df)
 
     if len(df.index) > 4:
@@ -200,27 +217,44 @@ def grid_day(nc, ts):
     """
     """
     offset = iemre.daily_offset(ts)
-    sql = """
-       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
-       s.name, s.id as station,
-       (CASE WHEN pday >= 0 then pday else null end) as precipdata,
-       (CASE WHEN max_tmpf > -50 and max_tmpf < 130
-           then max_tmpf else null end) as highdata,
-       (CASE WHEN min_tmpf > -50 and min_tmpf < 95
-           then min_tmpf else null end) as lowdata,
-       (CASE WHEN max_dwpf > -50 and max_dwpf < 130
-           then max_dwpf else null end) as highdwpf,
-       (CASE WHEN min_dwpf > -50 and min_dwpf < 95
-           then min_dwpf else null end) as lowdwpf,
-        (CASE WHEN avg_sknt >= 0 and avg_sknt < 100
-         then avg_sknt else null end) as avgsknt
-       from summary_%s c, stations s WHERE day = '%s' and
-       s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
-        'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-        'OH_ASOS', 'AWOS', 'IN_ASOS') and c.iemid = s.iemid
-        """ % (ts.year, ts.strftime("%Y-%m-%d"))
-    df = read_sql(sql, pgconn)
-
+    if ts.year > 1927:
+        sql = """
+           SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
+           s.name, s.id as station,
+           (CASE WHEN pday >= 0 then pday else null end) as precipdata,
+           (CASE WHEN max_tmpf > -50 and max_tmpf < 130
+               then max_tmpf else null end) as highdata,
+           (CASE WHEN min_tmpf > -50 and min_tmpf < 95
+               then min_tmpf else null end) as lowdata,
+           (CASE WHEN max_dwpf > -50 and max_dwpf < 130
+               then max_dwpf else null end) as highdwpf,
+           (CASE WHEN min_dwpf > -50 and min_dwpf < 95
+               then min_dwpf else null end) as lowdwpf,
+            (CASE WHEN avg_sknt >= 0 and avg_sknt < 100
+             then avg_sknt else null end) as avgsknt
+           from summary_%s c, stations s WHERE day = '%s' and
+           s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
+            'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
+            'OH_ASOS', 'AWOS', 'IN_ASOS') and c.iemid = s.iemid
+            """ % (ts.year, ts.strftime("%Y-%m-%d"))
+        df = read_sql(sql, pgconn)
+    else:
+        df = read_sql("""
+        WITH mystations as (
+            SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
+            from stations where network in ('IACLIMATE', 'MNCLIMATE',
+            'WICLIMATE', 'ILCLIMATE', 'MOCLIMATE', 'KSCLIMATE', 'NECLIMATE',
+            'SDCLIMATE', 'NDCLIMATE', 'KYCLIMATE', 'MICLIMATE', 'OHCLIMATE',
+            'INCLIMATE') and (temp24_hour is null or
+            temp24_hour between 4 and 10)
+        )
+        SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
+        precip as precipdata, snow as snowdata, snowd as snowddata,
+        high as highdata, low as lowdata,
+        null as highdwpf, null as lowdwpf, null as avgsknt
+        from alldata a JOIN mystations m
+        ON (a.station = m.id) WHERE a.day = %s
+        """, coop_pgconn, params=(ts,))
     if len(df.index) > 4:
         res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk'][offset] = datatypes.temperature(
