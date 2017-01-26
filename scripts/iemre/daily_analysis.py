@@ -51,7 +51,9 @@ def generic_gridder(df, idx):
             #    print _, idx, row['station'], row['name'], row[idx]
 
     good = df[df[idx].notnull()]
-
+    if len(good.index) < 4:
+        print("Not enough data %s" % (idx,))
+        return
     nn = NearestNDInterpolator((np.array(good['lon']),
                                 np.array(good['lat'])),
                                np.array(good[idx]))
@@ -270,12 +272,14 @@ def grid_day(nc, ts):
                ) % (ts, offset, np.min(res), np.max(res)))
         hres = generic_gridder(df, 'highdwpf')
         lres = generic_gridder(df, 'lowdwpf')
-        nc.variables['avg_dwpk'][offset] = datatypes.temperature(
+        if hres is not None and lres is not None:
+            nc.variables['avg_dwpk'][offset] = datatypes.temperature(
                                             (hres + lres) / 2., 'F').value('K')
         res = generic_gridder(df, 'avgsknt')
-        res = np.where(res < 0, 0, res)
-        nc.variables['wind_speed'][offset] = datatypes.speed(
-                                            res, 'KT').value('MPS')
+        if res is not None:
+            res = np.where(res < 0, 0, res)
+            nc.variables['wind_speed'][offset] = datatypes.speed(
+                                                res, 'KT').value('MPS')
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
                                              cursor.rowcount)
