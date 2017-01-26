@@ -51,6 +51,9 @@ def do_var(varname):
             print("\n%s Failure:%s\n%s" % (station, req.content, wsuri))
             continue
         newvalue = estimated["%s%s%s" % (prefix, varname, units)]
+        if newvalue is None:
+            print("IEMRE Failure for day: %s" % (day,))
+            continue
 
         print(('Set station: %s day: %s varname: %s value: %s'
                ) % (station, day, varname, dataformat % (newvalue,)))
