@@ -174,6 +174,11 @@
     RewriteRule isusm.csv nmp_csv.py
   </Directory>
 
+  <Directory "/opt/iem/htdocs/info">
+    RewriteRule datasets/([a-z_]+).html$ datasets.php?id=$1 [QSA]
+    RewriteRule datasets/?$ datasets.php [QSA]
+  </Directory>
+
   <Directory "/opt/iem/htdocs/c">
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On

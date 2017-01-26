@@ -7,63 +7,69 @@ define("IEM_APPID", 84);
 require_once "../../include/database.inc.php";
 $mesosite = iemdb("mesosite");
 require_once "../../include/myview.php";
+require_once "../../include/Parsedown.php";
 $t = new MyView();
-$t->title = "IEM Datasets";
 
 $myid = isset($_GET["id"]) ? $_GET["id"]: null;
-
-if ($myid == null){
-	$rs = pg_query($mesosite, "SELECT * from iemdatasets ORDER by name ASC");
-	$abstract = <<<EOF
-	<p>This page attempts to provide an authoritative listing of 
- <strong>all</strong> (that's the goal at least) datasets curated by the IEM.
- Hopefully this helps folks find the obscure rabbit hole that may have the 
- data you are seeking!
-EOF;
-} else {
-	$rs = pg_prepare($mesosite, "SELECT",
-			"SELECT * from iemdatasets WHERE id = $1");
-	$rs = pg_execute($mesosite, "SELECT", Array($myid));
-	$abstract = <<<EOF
-	<p><a class="btn btn-default" href="datasets.php">View All Datasets</a></p>
-EOF;
+// Sanitize $myid
+if ($myid != null){
+	if (preg_match('/^[a-z_]+$/', $myid) != 1){
+		$myid = null;
+	}
 }
+$t->title = "Datasets :: {$myid}";
 
-$table = "";
-for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
-	$homepage = sprintf("<a class=\"btn btn-default\" href=\"%s\">"
-			."<i class=\"glyphicon glyphicon-home\"></i> Dataset Homepage</a>",
-			$row["homepage"]);
-	$download = sprintf("<a class=\"btn btn-default\" href=\"%s\">"
-			."<i class=\"glyphicon glyphicon-download\"></i> Download</a>",
-			$row["homepage"]);
-	$table .= sprintf("<tr>"
-		."<td><h3><a href=\"#%s\"><i class=\"glyphicon glyphicon-bookmark\">"
-		."</i></a><a name=\"%s\">%s</a> <small>since: %s</small></h3></td>"
-		."<td>%s %s</td>"
-		."</tr>"
-		."<tr><td colspan=\"2\">"
-			."<p><strong>Description:</strong> %s</p>"
-			."<p><strong>Why the IEM collects this dataset?</strong> %s</p>"
-			."<p><strong>Third Party alternatives to this website?</strong> %s</p>"
-		."</td></tr>", $row["id"], $row["id"],
-			$row["name"], $row["archive_begin"],
-			$homepage, $download, $row["description"],
-			$row["justification"], $row["alternatives"]);
-}
-
-
-$t->content = <<<EOF
-
-<h2>IEM Dataset Listing</h2>
-		
-{$abstract}
-
-<div class="table-responsive">
-<table class="table table-striped table-bordered">
-{$table}
-</table> 
+function get_text($pageid){
+	$fn = "../../docs/datasets/${pageid}.md";
+	$Parsedown = new Parsedown();
+	$c = $Parsedown->text(file_get_contents($fn));
+	$ts = date("F d, Y", filemtime($fn));
+	$s = <<<EOF
+<div class="panel panel-info">
+<div class="panel-body">
+			${c}
 </div>
+<div class="panel-footer">Updated: ${ts} <a href="/info/datasets/${pageid}.html">Permalink</a></div>
+</div>
+EOF;
+	return $s;
+}
+
+$content = "";
+$pages = Array();
+if ($myid == null){
+	if ($dh = opendir("../../docs/datasets")){
+		while (($file = readdir($dh)) !== false){
+			if ($file == '.' || $file == '..' || $file == 'template.md') continue;
+			$pageid = preg_replace('/\\.[^.\\s]{2,4}$/', '', $file);
+			$pages[] = $pageid;
+			$content .= get_text($pageid);
+		}
+	}
+} else {
+	$content .= get_text($myid);
+}
+$tags = '';
+while (list($k,$page) = each($pages)){
+	$tags .= sprintf("<a href=\"#%s\" class=\"btn btn-default\">%s</a>", $page, $page);
+}
+if ($tags == ''){
+	$tags = "<a href=\"/info/datasets/\" class=\"btn btn-default\"><i class=\"glyphicon glyphicon-th-list\"></i> List All Datasets</a>";
+} else {
+	$tags = "<strong>Documented Datasets:</strong> :". $tags;
+}
+	
+$t->content = <<<EOF
+<ul class="breadcrumb">
+<li><a href="/info/">IEM Information</a></li>
+<li><a href="/info/datasets/">IEM Dataset Documentation</a></li>
+<li class="active">{$myid}</li>
+</ul>
+
+{$tags}
+
+		{$content}
+		
 EOF;
 
 
