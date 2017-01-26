@@ -40,7 +40,8 @@ def do_var(varname):
         prefix = "12z_" if temp24hour != 0 else 'daily_'
         units = '_in' if varname == 'precip' else '_f'
 
-        wsuri = URI % {'date': day.strftime("%Y-%m-%d"),
+        # pre 1900 dates strftime fails for
+        wsuri = URI % {'date': "%s-%02i-%02i" % (day.year, day.month, day.day),
                        'lon': nt.sts[station]['lon'],
                        'lat': nt.sts[station]['lat']}
         req = requests.get(wsuri)
