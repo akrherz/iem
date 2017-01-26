@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='localhost', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2017, 1, 22, 8, 0)
+sts = datetime.datetime(2017, 1, 19, 8, 30)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2017, 1, 23, 8, 0)
+ets = datetime.datetime(2017, 1, 19, 23, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/Los_Angeles'
-station = 'LGB'
+tzname = 'America/Chicago'
+station = 'BTR'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -93,7 +93,7 @@ for i in range(maxi-10, maxi+1):
 print("MaxI: %s, rate: %s, window: %s-%s" % (maxi, rate1[maxi], maxwindowi,
                                              maxwindowi+10))
 
-x = 0.2
+x = 0.02
 ax.text(x, 0.935, "Peak 10min Window", transform=ax.transAxes,
         bbox=dict(fc='white', ec='None'))
 for i in range(maxwindowi+1, maxwindowi+11):
@@ -109,10 +109,10 @@ ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
 ax.legend(loc=(0.55, 0.7), prop=prop, ncol=1)
-ax.set_ylim(0, 6)
-ax.set_yticks(range(0, 7, 1))
-ax.set_xlabel("22 January 2017 (%s)" % (tzname,))
-ax.set_title(("22 January 2017 Long Beach, CA (KLGB)\n"
+ax.set_ylim(0, 7)
+ax.set_yticks(range(0, 8, 1))
+ax.set_xlabel("19 January 2017 (%s)" % (tzname,))
+ax.set_title(("19 January 2017 Baton Rouge, LA (KBTR)\n"
               "One Minute Rainfall, %.2f inches total plotted"
               ) % (prec[-1],))
 
