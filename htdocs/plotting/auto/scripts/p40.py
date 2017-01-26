@@ -58,6 +58,7 @@ def plotter(fdict):
     df = read_sql("""
     SELECT valid, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4
     from alldata where station = %s and valid BETWEEN %s and %s
+    and report_type = 2
     ORDER by valid ASC
     """, pgconn, params=(station, sts, ets), index_col=None)
 
@@ -67,14 +68,14 @@ def plotter(fdict):
         return "No database entries found for station, sorry!"
 
     for _, row in df.iterrows():
-        delta = (row['valid'] - sts).total_seconds() / 3600 - 1
+        delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)
         data[:, delta] = 0
         for i in range(1, 5):
             a = lookup.get(row['skyc%s' % (i,)], -1)
             if a >= 0:
                 l = row['skyl%s' % (i,)]
                 if l is not None and l > 0:
-                    l = l / 100
+                    l = int(l / 100)
                     if l >= 250:
                         continue
                     data[l:l+4, delta] = a
@@ -82,9 +83,9 @@ def plotter(fdict):
 
     data = np.ma.array(data, mask=np.where(data < 0, True, False))
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
-    ax.set_axis_bgcolor('skyblue')
+    ax.set_facecolor('skyblue')
     ax.set_xticks(np.arange(0, days*24+1, 24))
     ax.set_xticklabels(np.arange(1, days+1))
 
