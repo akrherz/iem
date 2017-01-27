@@ -9,21 +9,21 @@ Arguments
     python reprocess.py --monthdate=200003
 
 """
-import urllib2
-import cookielib
+import traceback
+import pandas as pd
 import datetime
 import time
 import sys
 import os
 import subprocess
 import pytz
+import requests
 from pyiem.datatypes import pressure
 from optparse import OptionParser
 from metar.metar import Metar
 from metar.metar import ParserError as MetarParserError
 import psycopg2
 ASOS = psycopg2.connect(database='asos', host='iemdb')
-acursor = ASOS.cursor()
 
 SLP = 'Sea Level PressureIn'
 
@@ -64,6 +64,7 @@ def get_job_list():
     """ Figure out the days and stations we need to get """
     days = []
     stations = []
+    tznames = []
 
     parser = OptionParser()
     parser.add_option("-n", "--network", dest="network",
@@ -78,12 +79,13 @@ def get_job_list():
         return [], []
     now = datetime.date(int(args[0]), 1, 1)
     ets = datetime.date(int(args[1]), 1, 1)
+    acursor = ASOS.cursor()
     while now < ets:
         days.append(now)
         now += datetime.timedelta(days=1)
     if options.network is not None:
         sql = """
-            SELECT id, archive_begin from stations
+            SELECT id, archive_begin, tzname from stations
             where network = %s and archive_begin is not null
             ORDER by id ASC
             """
@@ -94,39 +96,36 @@ def get_job_list():
                 print('Skipping station: %4s sts: %s' % (row[0], row[1]))
                 continue
             stations.append(row[0])
+            tznames.append(row[2])
     else:
         stations.append(options.station)
+        sql = """
+            SELECT id, archive_begin, tzname from stations
+            where id = %s and network ~* 'ASOS'
+            """
+        acursor.execute(sql, (options.station, ))
+        tznames.append(acursor.fetchone()[2])
 
     print('Processing %s stations for %s days' % (len(stations), len(days)))
-    return stations, days
+    return stations, tznames, days
 
 
 def workflow():
     """ Do some work """
-    stations, days = get_job_list()
+    stations, tznames, days = get_job_list()
 
     # Set the show metar option
-    cj = cookielib.CookieJar()
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    opener.open(("http://www.wunderground.com/cgi-bin/findweather/"
-                 "getForecast?setpref=SHOWMETAR&value=1"),
-                timeout=30).read()
+    jar = requests.cookies.RequestsCookieJar()
+    jar.set('Prefs', 'SHOWMETAR:1')
 
     # Iterate
-    for station in stations:
-        clear_data(station, days[0], days[-1])
-        total = 0
-        valids = []
-        for day in days:
-            # save some memory, CPU time
-            if day.month == 1 and day.day == 1:
-                valids = []
-            (processed, usedcache) = doit(opener, station, day, valids)
-            total += processed
-            ASOS.commit()
-            if not usedcache:
-                time.sleep(0.5)
-        print "%s processed %s entries" % (station, total)
+    removed = 0
+    added = 0
+    for station, tzname in zip(stations, tznames):
+        removed += clear_data(station, tzname, days[0], days[-1])
+        added += doit(jar, station, days)
+    print(("Total stations: %s removed: %s added: %s"
+           ) % (len(stations), removed, added))
 
 
 def process_rawtext(yyyymm):
@@ -209,55 +208,46 @@ def stup(station):
     return station
 
 
-def clear_data(station, sts, ets):
+def clear_data(station, tzname, sts, ets):
+    if tzname is None:
+        tzname = 'UTC'
+    acursor = ASOS.cursor()
+    ets = ets + datetime.timedelta(days=1)
     acursor.execute("""
         DELETE from alldata WHERE station = %s and
-        valid BETWEEN %s and %s and report_type = 2
-    """, (station, sts, (ets + datetime.timedelta(days=1))))
-    print 'Removed %s rows for station %s' % (acursor.rowcount, station)
+        valid at time zone %s >= %s and (valid at time zone %s) < %s
+        and report_type = 2
+    """, (station, tzname, sts, tzname, ets))
+    cnt = acursor.rowcount
+    print(('Removed %s rows for station %s %s->%s(%s)'
+           ) % (cnt, station, sts, ets, tzname))
     ASOS.commit()
+    return cnt
 
 
-def doit(opener, station, now, valids):
-    """ Fetch! """
-    usedcache = False
-    processed = 0
+def to_df(html):
+    """Make a dataframe from this html"""
+    if html.find('obsTable') == -1:
+        return None
+    df = pd.read_html(html, attrs=dict(id='obsTable'))[0]
+    # OK, we should have a round number of rows with the METAR coming below
+    # the observation line
+    if len(df.index) % 2 != 0:
+        raise Exception(("ERROR: dataframe has %s (odd) number of rows"
+                         ) % (len(df.index),))
+    resdf = pd.DataFrame({
+        'FullMetar': df.iloc[1::2, :]['Temp.'].values,
+        'Sea Level PressureIn': df.iloc[::2, :]['Pressure'].values})
+    resdf['Sea Level PressureIn'] = resdf['Sea Level PressureIn'].str.replace(
+                                        '\xa0in', '')
+    return resdf
 
-    if len(station) == 3:
-        faa = "K%s" % (station,)
-    else:
-        faa = station
 
-    mydir = "/mesonet/ARCHIVE/wunder/cache/%s/%s/" % (station, now.year)
-    if not os.path.isdir(mydir):
-        os.makedirs(mydir)
-
-    fn = "%s%s.txt" % (mydir, now.strftime("%Y%m%d"), )
-    if os.path.isfile(fn):
-        usedcache = True
-        data = open(fn).read()
-        if len(data) < 140:
-            usedcache = False
-    if not usedcache:
-        url = ("http://www.wunderground.com/history/airport/%s/%s/%-i/%-i/"
-               "DailyHistory.html?req_city=NA&req_state=NA&"
-               "req_statename=NA&format=1") % (faa, now.year, now.month,
-                                               now.day)
-        try:
-            data = opener.open(url, timeout=30).read()
-        except KeyboardInterrupt:
-            sys.exit()
-        except:
-            print "Download Fail STID: %s NOW: %s" % (station, now)
-            return 0, False
-
-        # Save raw data, since I am an idiot have of the time
-        o = open(fn, 'w')
-        o.write(data)
-        o.close()
-
+def read_legacy(fn):
+    data = open(fn).read()
     lines = data.split("\n")
     headers = None
+    rows = []
     for line in lines:
         line = line.replace("<br />", "").replace("\xff", "")
         if line.strip() == "":
@@ -268,28 +258,88 @@ def doit(opener, station, now, valids):
             for i in range(len(tokens)):
                 headers[tokens[i]] = i
             continue
-
         if "FullMetar" in headers and len(tokens) >= headers["FullMetar"]:
             mstr = (tokens[headers["FullMetar"]]
                     ).strip().replace("'",
                                       "").replace("SPECI ",
                                                   "").replace("METAR ", "")
-            ob = process_metar(mstr, now)
+            pres = None
+            if SLP in headers:
+                value = tokens[headers[SLP]].strip()
+                if value not in ['-', '']:
+                    try:
+                        pres = float(value)
+                    except:
+                        print(("Failed to parse SLP: %s %s"
+                               ) % (repr(headers[SLP]), fn))
+            rows.append({'FullMetar': mstr,
+                         'Sea Level PressureIn': pres})
+    return pd.DataFrame(rows)
+
+
+def get_df(station, now, jar):
+    """Return the dataframe for this station and date"""
+    mydir = "/mesonet/ARCHIVE/wunder/cache/%s/%s/" % (station, now.year)
+    if not os.path.isdir(mydir):
+        os.makedirs(mydir)
+    fn = "%s%s.txt" % (mydir, now.strftime("%Y%m%d"))
+    if os.path.isfile(fn) and len(open(fn).read()) > 140:
+        return read_legacy(fn)
+
+    faa = "K%s" % (station,) if len(station) == 3 else station
+    # Fetch it
+    url = ("https://www.wunderground.com/history/airport/%s/%s/%-i/%-i/"
+           "DailyHistory.html") % (faa, now.year, now.month,
+                                   now.day)
+    try:
+        res = requests.get(url, timeout=30, cookies=jar)
+        time.sleep(1)  # throttle
+        if res.status_code != 200:
+            raise Exception("%s -> %s" % (url, res.status_code))
+        df = to_df(res.content)
+        if df is None:
+            return None
+        df.to_csv(fn, index=False, encoding='utf-8')
+    except KeyboardInterrupt:
+        sys.exit()
+    except ValueError:
+        print("ValueError %s %s" % (station, now))
+        return None
+    except:
+        print("Failure %s %s" % (station, now))
+        traceback.print_exc()
+        return None
+    return df
+
+
+def doit(jar, station, days):
+    """ Fetch! """
+    valids = []
+    inserts = 0
+    baddays = 0
+    acursor = ASOS.cursor()
+    for now in days:
+        if now.month == 1 and now.day == 1:
+            valids = []
+        df = get_df(station, now, jar)
+        if df is None:
+            baddays += 1
+            continue
+        for _, row in df.iterrows():
+            ob = process_metar(row['FullMetar'], now)
             if ob is None or ob.valid in valids:
                 continue
             valids.append(ob.valid)
 
             # Account for SLP505 actually being 1050.5 and not 950.5 :(
-            if SLP in headers:
+            if SLP in row:
                 try:
-                    pres = pressure(
-                            float(tokens[headers[SLP]]),
-                            "IN")
+                    pres = pressure(row['Sea Level PressureIn'].value, "IN")
                     diff = pres.value("MB") - ob.mslp
                     if abs(diff) > 25:
                         oldval = ob.mslp
                         ob.mslp = "%.1f" % (pres.value("MB"),)
-                        ob.alti = float(tokens[headers[SLP]])
+                        ob.alti = row['Sea Level PressureIn'].value
                         print 'SETTING PRESSURE %s old: %s new: %s' % (
                                 ob.valid.strftime("%Y/%m/%d %H%M"),
                                 oldval, ob.mslp)
@@ -316,9 +366,17 @@ def doit(opener, station, now, valids):
                     ob.min_tmpf_6hr, ob.min_tmpf_24hr)
 
             acursor.execute(sql, args)
-            processed += 1
-
-    return processed, usedcache
+            inserts += 1
+            if inserts % 1000 == 0:
+                acursor.close()
+                ASOS.commit()
+                acursor = ASOS.cursor()
+    acursor.close()
+    ASOS.commit()
+    acursor = ASOS.cursor()
+    print("%s Days:%s/%s Inserts: %s" % (station, len(days) - baddays,
+                                         len(days), inserts))
+    return inserts
 
 
 def process_metar(mstr, now):
