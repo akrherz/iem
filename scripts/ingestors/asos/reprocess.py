@@ -355,12 +355,16 @@ def doit(jar, station, days):
                 values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, 2)
             """
+            try:
+                cmtr = ob.metar.decode('utf-8', 'replace').encode('ascii',
+                                                                  'replace')
+            except:
+                print("Non-ASCII METAR? %s" % (repr(ob.metar),))
+                continue
             args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
                     ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
                     ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
-                    ob.skyl4,
-                    ob.metar.decode('utf-8', 'replace').encode('ascii',
-                                                               'replace'),
+                    ob.skyl4, cmtr,
                     ob.mslp, ob.presentwx, ob.p03i,
                     ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
                     ob.min_tmpf_6hr, ob.min_tmpf_24hr)
