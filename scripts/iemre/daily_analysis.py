@@ -158,7 +158,7 @@ def grid_day12(nc, ts):
     """
     offset = iemre.daily_offset(ts)
     print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
-    if ts.year > 2004:
+    if ts.year > 2008:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.id as station, s.name as name,
