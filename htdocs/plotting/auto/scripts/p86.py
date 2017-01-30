@@ -4,18 +4,19 @@ from pyiem.datatypes import temperature, speed
 import datetime
 import netCDF4
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
-PDICT = OrderedDict({'p01d_12z': '24 Hour Precipitation at 12 UTC',
-                     'p01d': 'Calendar Day Precipitation',
-                     'low_tmpk': 'Minimum Temperature',
-                     'low_tmpk_12z': 'Minimum Temperature at 12 UTC',
-                     'high_tmpk': 'Maximum Temperature',
-                     'high_tmpk_12z': 'Maximum Temperature at 12 UTC',
-                     'p01d': 'Calendar Day Precipitation',
-                     'rsds': 'Solar Radiation',
-                     'avg_dwpk': 'Average Dew Point',
-                     'wind_speed': 'Average Wind Speed',
-                     })
+PDICT = OrderedDict((('p01d_12z', '24 Hour Precipitation at 12 UTC'),
+                     ('p01d', 'Calendar Day Precipitation'),
+                     ('low_tmpk', 'Minimum Temperature'),
+                     ('low_tmpk_12z', 'Minimum Temperature at 12 UTC'),
+                     ('high_tmpk', 'Maximum Temperature'),
+                     ('high_tmpk_12z', 'Maximum Temperature at 12 UTC'),
+                     ('p01d', 'Calendar Day Precipitation'),
+                     ('rsds', 'Solar Radiation'),
+                     ('avg_dwpk', 'Average Dew Point'),
+                     ('wind_speed', 'Average Wind Speed'),
+                     ))
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
 
@@ -44,10 +45,10 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
-    ptype = fdict.get('ptype', 'c')
-    date = datetime.datetime.strptime(fdict.get('date', '2015-01-01'),
-                                      '%Y-%m-%d')
-    varname = fdict.get('var', 'rsds')
+    ctx = get_autoplot_context(fdict, get_description())
+    ptype = ctx['ptype']
+    date = ctx['date']
+    varname = ctx['var']
 
     idx0 = iemre.daily_offset(date)
     nc = netCDF4.Dataset(("/mesonet/data/iemre/%s_mw_daily.nc"
@@ -95,8 +96,14 @@ def plotter(fdict):
         return 'Data Unavailable'
     x, y = np.meshgrid(lons, lats)
     if ptype == 'c':
-        m.contourf(x, y, data, clevs, clevstride=clevstride, units=units)
+        # in the case of contour, use the centroids on the grids
+        m.contourf(x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
+                   units=units)
     else:
+        x, y = np.meshgrid(lons, lats)
         m.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
 
     return m.fig
+
+if __name__ == '__main__':
+    plotter(dict(ptype='g', date='2016-01-03', var='high_tmpk_12z'))
