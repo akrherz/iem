@@ -203,7 +203,7 @@ def replace_cfs(df, location):
         SELECT day, high, low, precip, srad from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'CFS'
         ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
-        and day <= %s
+        and day <= %s ORDER by day ASC
     """, (coop, today, dec31))
     rcols = ['maxt', 'mint', 'rain', 'radn']
     for row in cursor:
@@ -217,8 +217,8 @@ def replace_cfs(df, location):
         return
     now = row[0] + datetime.timedelta(days=1)
     # OK, if our last row does not equal dec31, we have some more work to do
-    print(("%s Replacing %s->%s with previous year's data"
-           ) % (location, now, dec31))
+    print(("  Replacing %s->%s with previous year's data"
+           ) % (now, dec31))
     while now <= dec31:
         lastyear = now.replace(year=(now.year - 1))
         df.loc[now, rcols] = df.loc[lastyear, rcols]
@@ -233,7 +233,7 @@ def replace_obs_iem(df, location):
     """
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
-    isusm = XREF[location]['station']
+    station = XREF[location]['station']
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     years = [int(y) for y in np.arange(df.index.values.min().year,
@@ -244,7 +244,7 @@ def replace_obs_iem(df, location):
         select day, max_tmpf, min_tmpf, srad_mj, pday
         from """ + table + """ s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and max_tmpf is not null ORDER by day ASC
-        """, (isusm,))
+        """, (station,))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'rain']
     replaced = []
     for row in cursor:
@@ -267,10 +267,8 @@ def replace_obs_iem(df, location):
                 temperature(row[2], 'F').value('C'), row[3],
                 _gdd, row[4])
     if len(replaced) > 0:
-        print("yieldfx_workflow supplemented %s from %s to %s" % (location,
-                                                                  replaced[0],
-                                                                  replaced[-1]
-                                                                  ))
+        print(("  used IEM Access %s from %s-%s"
+               ) % (station, replaced[0], replaced[-1]))
 
 
 def replace_obs(df, location):
@@ -321,27 +319,8 @@ def replace_obs(df, location):
                                                        row[9], row[10], row[11]
                                                        )
     if len(replaced) > 0:
-        print("yieldfx_workflow supplemented %s from %s to %s" % (location,
-                                                                  replaced[0],
-                                                                  replaced[-1]
-                                                                  ))
-    # We no longer want to use rain from climodat...
-    return
-    # Go get precip from Climodat
-    coop = XREF[location]['climodat']
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor()
-    cursor.execute("""
-        SELECT day, precip from alldata_ia where year = %s and station = %s
-        and day < %s
-        """, (jan1.year, coop, today))
-    for row in cursor:
-        valid = row[0]
-        pcpn = distance(row[1], 'IN').value('MM')
-        for year in years:
-            if valid.month == 2 and valid.day == 29 and year % 4 != 0:
-                continue
-            df.at[valid.replace(year=year), 'rain'] = pcpn
+        print(("  replaced with obs from %s for %s->%s"
+               ) % (isusm, replaced[0], replaced[-1]))
 
 
 def compute_gdd(df):
@@ -351,6 +330,7 @@ def compute_gdd(df):
 
 def do(location):
     """Workflow for a particular location"""
+    print("yieldfx_workflow: Processing '%s'" % (location,))
     # 1. Read baseline
     df = load_baseline(location)
     # 2. Add columns and observed data
