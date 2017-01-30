@@ -24,7 +24,7 @@ def do(iemid, row):
     and coop_valid is null
     ORDER by day
     """, IEM, params=(iemid, row['coop_valid_begin']), index_col='day')
-    print("Found %s entries for %s[%s]" % (len(df.index), nwsli, iemid))
+    updated = 0
     for day, _ in df.iterrows():
         table = day.strftime("raw%Y_%m")
         ts = ts.replace(year=day.year, month=day.month, day=day.day)
@@ -46,7 +46,10 @@ def do(iemid, row):
         UPDATE """ + table + """ SET coop_valid = %s
         WHERE iemid = %s and day = %s
         """, (coopvalid, iemid, day))
+        updated += 1
 
+    print(("%s iemid:%s updated/found %s/%s"
+           ) % (nwsli, iemid, updated, len(df.index)))
     icursor.close()
     IEM.commit()
 
