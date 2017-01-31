@@ -390,7 +390,10 @@ def process_metar(mstr, now):
         try:
             mtr = Metar(mstr, now.month, now.year, allexceptions=True)
         except MetarParserError, exp:
-            msg = str(exp)
+            try:
+                msg = str(exp)
+            except:
+                return None
             if msg.startswith("Unparsed groups:"):
                 badpart = msg.strip().split()[2]
                 mstr = mstr.replace(badpart.replace("'", ''), "")
