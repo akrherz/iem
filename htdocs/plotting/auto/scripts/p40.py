@@ -11,7 +11,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
-    d['cache'] = 86400
+    d['cache'] = 3600
     d['description'] = """This chart is an attempted illustration of the amount
     of cloudiness that existed at a METAR site for a given month.  The chart
     combines reports of cloud amount and level to provide a visual
