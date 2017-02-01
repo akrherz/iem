@@ -5,10 +5,15 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
-PDICT = {'precip': 'Total Precipitation',
-         'arridity': 'Arridity Index',
-         'avgt': 'Average Temperature'}
+PDICT = OrderedDict((
+    ('arridity', 'Arridity Index'),
+    ('avgt', 'Average Temperature'),
+    ('high', 'Average High Temperature'),
+    ('low', 'Average Low Temperature'),
+    ('precip', 'Total Precipitation'),
+    ))
 
 MDICT = OrderedDict([
          ('spring', 'Spring (MAM)'),
@@ -58,10 +63,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    year = int(fdict.get('year', 2014))
-    month = fdict.get('month', 9)
-    varname = fdict.get('var', 'precip')
+    year = ctx['year']
+    month = ctx['month']
+    varname = ctx['var']
     l = "0 days"
     if month == 'fall':
         months = [9, 10, 11]
@@ -88,6 +94,7 @@ def plotter(fdict):
         SELECT extract(year from day + '"""+l+"""'::interval) as myyear,
         station, sum(precip) as p,
         avg((high+low)/2.) as avgt,
+        avg(low) as avglo,
         avg(high) as avghi
         from alldata
         WHERE substr(station,3,1) = 'C' and month in %s
@@ -100,11 +107,16 @@ def plotter(fdict):
         avg(avghi) OVER (PARTITION by station) as avg_high,
         stddev(avghi) OVER (PARTITION by station) as std_high,
         avghi as high,
+        avg(avglo) OVER (PARTITION by station) as avg_low,
+        stddev(avglo) OVER (PARTITION by station) as std_low,
+        avglo as low,
         rank() OVER (PARTITION by station ORDER by p DESC) as precip_rank,
+        rank() OVER (PARTITION by station ORDER by avghi DESC) as high_rank,
+        rank() OVER (PARTITION by station ORDER by avglo DESC) as low_rank,
         rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
         from monthly)
 
-    SELECT station, precip_rank, avgt_rank,
+    SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
     as arridity from ranks
     where year = %s """, pgconn, params=(tuple(months), year),
@@ -137,3 +149,6 @@ def plotter(fdict):
                    cmap=cmap)
 
     return m.fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
