@@ -4,6 +4,7 @@ from matplotlib import mlab
 import calendar
 import datetime
 import numpy as np
+from pyiem.util import get_autoplot_context
 
 PDICT = {'sum-precip': 'Total Precipitation [inch]',
          'avg-high': 'Average Daily High [F]',
@@ -53,11 +54,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    state = fdict.get('state', 'IA')
-    year = int(fdict.get('year', 2014))
-    month = int(fdict.get('month', 6))
-    ptype = fdict.get('type', 'sum-precip')
+    ctx = get_autoplot_context(fdict, get_description())
+    state = ctx['state']
+    year = ctx['year']
+    month = ctx['month']
+    ptype = ctx['type']
     ptype_climo = ptype.split("-")[1]
     table = "alldata_%s" % (state,)
 
@@ -98,7 +99,7 @@ def plotter(fdict):
     """, pgconn, params=(month, year), index_col='station')
     stateavg = df.at["%s0000" % (state, ), ptype]
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     _, bins, _ = ax.hist(df[ptype].dropna(), 20, fc='lightblue',
                          ec='lightblue', normed=1)
     y = mlab.normpdf(bins, df[ptype].mean(), df[ptype].std())
@@ -127,8 +128,8 @@ def plotter(fdict):
                        PDICT[ptype], len(df.index)))
     ax.grid(True)
     box = ax.get_position()
-    ax.set_position([box.x0, 0.25, box.width, 0.65])
-    ax.legend(ncol=2, fontsize=12, loc=(-0.05, -0.3))
+    ax.set_position([box.x0, 0.26, box.width, 0.65])
+    ax.legend(ncol=2, fontsize=12, loc=(-0.05, -0.35))
     if ptype == 'sum-precip':
         ax.set_xlim(left=0)
 
