@@ -6,6 +6,11 @@ import psycopg2
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+# Stop the SSL cert warning :/
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 nt = NetworkTable("SCAN")
 SCAN = psycopg2.connect(database='scan', host='iemdb')
 scursor = SCAN.cursor()
@@ -88,7 +93,7 @@ postvars = {
     'site_network': 'scan',
     'time_zone': 'CST',
 }
-URI = 'http://www.wcc.nrcs.usda.gov/nwcc/view'
+URI = 'https://www.wcc.nrcs.usda.gov/nwcc/view'
 
 
 def savedata(data, maxts):
@@ -180,7 +185,7 @@ def main():
         # iem uses S<id> and scan site uses just <id>
         postvars['sitenum'] = sid[1:]
         try:
-            req = requests.get(URI, params=postvars, timeout=10)
+            req = requests.get(URI, params=postvars, timeout=10, verify=False)
             response = req.content
         except Exception as exp:
             print 'scan_ingest.py Failed to download: %s %s' % (sid, exp)
