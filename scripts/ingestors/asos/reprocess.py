@@ -295,6 +295,7 @@ def get_df(station, now, jar):
         res = requests.get(url, timeout=30, cookies=jar)
         time.sleep(1)  # throttle
         if res.status_code != 200:
+            time.sleep(5)  # allow for transient server errors to subside?
             raise Exception("%s -> %s" % (url, res.status_code))
         df = to_df(res.content)
         if df is None:
