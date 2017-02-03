@@ -23,7 +23,7 @@ PDICT = OrderedDict([
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
 SRCDICT = {'mrms': 'NOAA MRMS (since 1 Jan 2014)',
-           'prism': 'OSU PRISM (since 1 Jan 1980)'}
+           'prism': 'OSU PRISM (since 1 Jan 1981)'}
 
 
 def get_description():
@@ -46,10 +46,10 @@ def get_description():
              label='Select Plot Type:', options=PDICT2),
         dict(type='date', name='sdate',
              default=today.strftime("%Y/%m/%d"),
-             label='Start Date:', min="2014/01/01"),
+             label='Start Date:', min="1981/01/01"),
         dict(type='date', name='edate',
              default=today.strftime("%Y/%m/%d"),
-             label='End Date:', min="2014/01/01"),
+             label='End Date:', min="1981/01/01"),
     ]
     return d
 
