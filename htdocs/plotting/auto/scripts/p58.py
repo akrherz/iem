@@ -54,9 +54,9 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.bar(df.index - 0.4, df.freq)
+    ax.bar(df.index, df.freq, align='center')
     for i, row in df.iterrows():
-        ax.text(i, row['freq']+2, "%.1f%%" % (row['freq'],), ha='center')
+        ax.text(i, row['freq']+2, "%.1f" % (row['freq'],), ha='center')
     ax.set_title(("[%s] %s\nFreq of One Day Having %.0f%% of That Month's "
                   "Precip Total"
                   ) % (station, nt.sts[station]['name'], threshold))

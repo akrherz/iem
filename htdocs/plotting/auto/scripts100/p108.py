@@ -4,6 +4,7 @@ from pandas.io.sql import read_sql
 import datetime
 import numpy as np
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('all', 'Show All Three Plots'),
                      ('gdd', 'Show just Growing Degree Days'),
@@ -34,9 +35,9 @@ def get_description():
         dict(type='date', name='edate',
              default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):', min="1893/01/01"),
-        dict(type="text", name="base", default="50",
+        dict(type="int", name="base", default="50",
              label="Growing Degree Day Base (F)"),
-        dict(type="text", name="ceil", default="86",
+        dict(type="int", name="ceil", default="86",
              label="Growing Degree Day Ceiling (F)"),
         dict(type='year', name='year2', default=1893, optional=True,
              label="Compare with year (optional):"),
@@ -56,21 +57,20 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA2203')
+    station = ctx['station']
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2015-05-01'),
-                                       '%Y-%m-%d').date()
-    edate = datetime.datetime.strptime(fdict.get('edate', '2015-10-01'),
-                                       '%Y-%m-%d').date()
-    year2 = int(fdict.get('year2', 0))
-    year3 = int(fdict.get('year3', 0))
-    year4 = int(fdict.get('year4', 0))
+    sdate = ctx['sdate']
+    edate = ctx['edate']
+    year2 = ctx.get('year2', 0)
+    year3 = ctx.get('year3', 0)
+    year4 = ctx.get('year4', 0)
     wantedyears = [sdate.year, year2, year3, year4]
     yearcolors = ['r', 'g', 'b', 'purple']
-    gddbase = int(fdict.get('base', 50))
-    gddceil = int(fdict.get('ceil', 86))
-    whichplots = fdict.get('which', 'all')
+    gddbase = ctx['base']
+    gddceil = ctx['ceil']
+    whichplots = ctx['which']
     glabel = "gdd%s%s" % (gddbase, gddceil)
 
     table = "alldata_%s" % (station[:2], )
