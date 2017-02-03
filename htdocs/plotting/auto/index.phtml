@@ -353,9 +353,10 @@ EOF;
 EOF;
 		} elseif ($fmt == 'png' || $fmt == 'svg') {
 			$image = <<<EOF
-<div id="willload"><span class="glyphicon glyphicon-arrow-down"></span> 
-<img src="/images/wait24trans.gif" />
-A graph will appear below this text with your specifications from above:
+<div id="willload" style="height: 200px;">
+	<span class="glyphicon glyphicon-arrow-down"></span> 
+	<img src="/images/wait24trans.gif" />
+	A graph will appear below this text with your specifications from above:
 </div>
 	<img src="{$imguri}.{$fmt}" class="img img-responsive" id="theimage" />
 EOF;
@@ -477,6 +478,10 @@ $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 {$extrascripts}
 <script>
+function hideImageLoad(){
+	// console.log("load() fired...");
+	$('#willload').css('display', 'none');
+}
 $(document).ready(function(){
 {$jsextra}
     $('.optcontrol').change(function(){
@@ -487,13 +492,16 @@ $(document).ready(function(){
         }
     });
 	$('#theimage').on('load', function(){
-		// console.log("load() fired...");
-		$('#willload').css('display', 'none');
+		hideImageLoad();
 	});
 	$('#theimage').on('error', function(){
-		// console.log("error() fired...");
-		$('#willload').css('display', 'none');
+		hideImageLoad();
 	});
+    // The image may be cached and return to the user before this javascript
+    // is hit, so we do a check to see if it is indeed loaded now
+	if ($("#theimage").get(0).complete){
+		hideImageLoad();
+	}
 	$('#_l').change(function(){
 		if($(this).is(":checked")) {
 			$('select option[data-mw="true"]').prop('disabled', 'disabled');
