@@ -499,7 +499,7 @@ $(document).ready(function(){
 	});
     // The image may be cached and return to the user before this javascript
     // is hit, so we do a check to see if it is indeed loaded now
-	if ($("#theimage").get(0).complete){
+	if ($("#theimage").get(0) && $("#theimage").get(0).complete){
 		hideImageLoad();
 	}
 	$('#_l').change(function(){
