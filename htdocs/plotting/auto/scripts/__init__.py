@@ -63,7 +63,8 @@ data = {'plots': [
          'label': ("Mixing Ratio / Vapor Pressure Deficit Climatology "
                    "and Yearly Timeseries Plot")},
         {'id': "84", 'mw': True,
-         'label': "MRMS Q3 Estimated Precipitation (multiday summaries too)"},
+         'label': ("MRMS Q3 / PRISM Estimated Precipitation "
+                   "(multiday summaries too)")},
         {'id': "164",
          'label': ("Percentage of NWS CLI Sites Reporting Daily Above/Below "
                    "Temps or Precip/Snow")},
