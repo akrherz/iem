@@ -58,7 +58,7 @@ def plotter(fdict):
     WITH data as (
         SELECT distinct date(valid at time zone %s) from alldata
         where station = %s and presentwx LIKE '%%""" + pweather + """%%'
-        and valid > '1973-01-01')
+        and valid > '1973-01-01' and report_type = 2)
 
     SELECT extract(year from date)::int as year,
     extract(month from date)::int as month,
@@ -74,12 +74,12 @@ def plotter(fdict):
                        syear, datetime.date.today().year, pweather))
     df2 = df[df['year'] == year]
     if len(df2.index) > 0:
-        ax.bar(df2['month'] - 0.4, df2['count'], width=0.4, fc='r', ec='r',
-               label='%s' % (year,))
+        ax.bar(df2['month'].values - 0.2, df2['count'].values,
+               width=0.4, fc='r', ec='r', label='%s' % (year,))
     df2 = df.groupby('month').sum()
     years = (datetime.date.today().year - syear) + 1
     yvals = df2['count'] / years
-    ax.bar(df2.index.values, yvals, width=0.4, fc='b', ec='b',
+    ax.bar(df2.index.values + 0.2, yvals, width=0.4, fc='b', ec='b',
            label='Avg')
     for x, y in zip(df2.index.values, yvals):
         ax.text(x, y + 0.2, "%.1f" % (y,))
@@ -94,4 +94,4 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter(dict(station='DSM', year=2016, var='FG', network='IA_ASOS'))
+    plotter(dict(zstation='ALO', year=2017, var='FG', network='IA_ASOS'))
