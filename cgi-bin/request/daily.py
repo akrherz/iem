@@ -83,6 +83,9 @@ def main():
     stations = form.getlist('stations')
     if len(stations) == 0:
         stations = form.getlist('station')
+    if len(stations) == 0:
+        sys.stdout.write("ERROR: No stations specified for request")
+        return
     network = form.getfirst('network')[:12]
     sys.stdout.write(get_data(network, sts, ets, stations=stations))
 
