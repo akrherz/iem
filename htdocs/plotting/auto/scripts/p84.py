@@ -80,7 +80,7 @@ def plotter(fdict):
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sdate.year,)
         ncvar = 'ppt'
         source = 'OSU PRISM'
-        subtitle = ('PRISM Climate Group, Oregon State University, '
+        subtitle = ('PRISM Climate Group, Oregon State Univ., '
                     'http://prism.oregonstate.edu, created 4 Feb 2004.')
     if not os.path.isfile(ncfn):
         raise Exception("No data for that year, sorry.")
