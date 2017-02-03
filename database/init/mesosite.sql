@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (9, now());
+INSERT into iem_schema_manager_version values (10, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -391,3 +391,13 @@ CREATE TABLE iemdatasets(
 );
 GRANT ALL on iemdatasets to nobody,apache;
 GRANT ALL on iemdatasets_id_seq to nobody,apache;
+
+-- Storage of Autoplot timings and such
+CREATE TABLE autoplot_timing(
+	appid smallint NOT NULL,
+	valid timestamptz NOT NULL,
+	timing real NOT NULL,
+	uri varchar,
+	hostname varchar(24) NOT NULL);
+GRANT SELECT on autoplot_timing to nobody,apache;
+CREATE INDEX autoplot_timing_idx on autoplot_timing(appid);
