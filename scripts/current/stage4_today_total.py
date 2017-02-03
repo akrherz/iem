@@ -40,9 +40,10 @@ def doday(ts, realtime):
             grbs.close()
         now += interval
 
-    if lts is None and ts.hour > 1:
-        print 'stage4_today_total.py found no data!'
     if lts is None:
+        if ts.hour > 1:
+            print(("stage4_today_total.py found no data for date: %s"
+                   ) % (ts,))
         return
     lts = lts - datetime.timedelta(minutes=1)
     subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%I:%M %p %Z"),)
