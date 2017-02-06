@@ -39,7 +39,8 @@ $t->content = <<<EOF
 <p>These values are estimates based on the IEM's collection of various datasets.
 Climatology is based on observations back to 1951.
 
-<table cellpadding="2" cellspacing="0" border="1">
+<table class="table table-striped table-bordered">
+<thead>
  <tr><th rowspan="2">Location</th><th colspan="2">Growing Degree Days</th>
   <th colspan="2">Precipitation</th>
   <th colspan="3">Temperature</th>
@@ -49,7 +50,10 @@ Climatology is based on observations back to 1951.
  <th>Observed</th><th>Climate</th>
  <th>Highest</th><th>Lowest</th><th>Average</th>
  </tr>
+</thead>
+<tbody>
 {$table}
+</tbody>
 </table>
 
 		<h4>Snowfall</h4>
@@ -85,7 +89,7 @@ Climatology is based on observations back to 1951.
 
 
 <h4>Winds</h4>
-<ul">
+<ul>
 <li><a href="/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
 </ul>
 EOF;
