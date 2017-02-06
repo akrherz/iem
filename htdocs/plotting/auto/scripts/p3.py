@@ -14,6 +14,7 @@ PDICT = OrderedDict([
          ('avg-low', 'Average Low'),
          ('min-low', 'Minimum Low'),
          ('avg-temp', 'Average Temp'),
+         ('range-avghi-avglo', 'Range between Average High + Average Low'),
          ('max-precip', 'Maximum Daily Precip'),
          ('sum-precip', 'Total Precipitation'),
          ('days-high-above',
@@ -80,7 +81,7 @@ $("#ap_container").highcharts({
     subtitle: {text: '""" + ctx['subtitle'] + """'},
     chart: {zoomType: 'x'},
     tooltip: {shared: true},
-    xAxis: {title: {text: 'Year'}},
+    xAxis: {title: {text: '""" + ctx['xlabel'] + """'}},
     yAxis: {title: {text: '"""+ctx['ylabel'].replace("$^\circ$", "")+"""'}},
     series: [{
         name: '""" + ctx['ptype'] + """',
@@ -88,6 +89,9 @@ $("#ap_container").highcharts({
         width: 0.8,
         pointStart: """ + str(ctx['df'].index.min()) + """,
         pointInterval: 1,
+        tooltip: {
+            valueDecimals: 2
+        },
         data: """ + str(ctx['data'].tolist()) + """
         }, {
         tooltip: {
@@ -159,6 +163,7 @@ def get_context(fdict):
     avg((o.high + o.low)/2.) as "avg-temp",
     max(o.precip) as "max-precip",
     sum(o.precip) as "sum-precip",
+    avg(o.high) - avg(o.low) as "range-avghi-avglo",
     sum(case when o.high >= %s then 1 else 0 end) as "days-high-above",
     sum(case when o.high < %s then 1 else 0 end) as "days-high-below",
     sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
@@ -172,6 +177,14 @@ def get_context(fdict):
                          threshold, threshold, station, tuple(months)),
                   index_col='myyear')
 
+    # Figure out the max min values to add to the row
+    df2 = df[df[ptype] == df[ptype].max()]
+    xlabel = "Year, Max: %.2f %s%s" % (df[ptype].max(), df2.index.values[0],
+                                       '+' if len(df2.index) > 1 else '')
+    df2 = df[df[ptype] == df[ptype].min()]
+    xlabel += ", Min: %.2f %s%s" % (df[ptype].min(), df2.index.values[0],
+                                    '+' if len(df2.index) > 1 else '')
+    ctx['xlabel'] = xlabel
     data = df[ptype].values
     ctx['data'] = data
     ctx['avgv'] = df[ptype].mean()
@@ -211,7 +224,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ctx = get_context(fdict)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     colorabove = 'tomato'
     colorbelow = 'dodgerblue'
@@ -238,10 +251,14 @@ def plotter(fdict):
     if ctx['ptype'].find('precip') == -1 and ctx['ptype'].find('days') == -1:
         ax.set_ylim(min(ctx['data']) - 5, max(ctx['data']) + 5)
 
-    ax.set_xlabel("Year")
+    ax.set_xlabel(ctx['xlabel'])
     ax.set_ylabel(ctx['ylabel'])
     ax.grid(True)
     ax.legend(ncol=3, loc='best', fontsize=10)
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
 
     return fig, ctx['df']
+
+if __name__ == '__main__':
+    plotter(dict(station='IA8706', network='IACLIMATE',
+                 type='range-avghi-avglo', month=1))
