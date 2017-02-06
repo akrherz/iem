@@ -2,7 +2,7 @@ import psycopg2
 import datetime
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
-from scipy import stats
+from pyiem.util import get_autoplot_context
 from collections import OrderedDict
 
 PDICT = OrderedDict([
@@ -24,11 +24,11 @@ def get_description():
     sts = today - datetime.timedelta(days=720)
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
-        dict(type='text', name='p1', default=31, label='First Period of Days'),
-        dict(type='text', name='p2', default=91,
+             label='Select Station:', network='IACLIMATE'),
+        dict(type='int', name='p1', default=31, label='First Period of Days'),
+        dict(type='int', name='p2', default=91,
              label='Second Period of Days'),
-        dict(type='text', name='p3', default=365,
+        dict(type='int', name='p3', default=365,
              label='Third Period of Days'),
         dict(type='date', name='sdate', default=sts.strftime("%Y/%m/%d"),
              min='1893/01/01',
@@ -48,17 +48,16 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    station = fdict.get('station', 'IA0200')
-    network = fdict.get('network', 'IACLIMATE')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
     nt = NetworkTable(network)
-    p1 = int(fdict.get('p1', 31))
-    p2 = int(fdict.get('p2', 91))
-    p3 = int(fdict.get('p3', 365))
-    pvar = fdict.get('pvar', 'precip')
-    sts = datetime.datetime.strptime(fdict.get('sdate', '2015-12-25'),
-                                     '%Y-%m-%d')
-    ets = datetime.datetime.strptime(fdict.get('edate', '2015-12-25'),
-                                     '%Y-%m-%d')
+    p1 = ctx['p1']
+    p2 = ctx['p2']
+    p3 = ctx['p3']
+    pvar = ctx['pvar']
+    sts = ctx['sdate']
+    ets = ctx['edate']
     bts = sts - datetime.timedelta(days=max([p1, p2, p3]))
 
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
@@ -97,7 +96,7 @@ def plotter(fdict):
     """, pgconn, params=(station, p1, p2, p3, p1, p2, p3, p1, p2, p3,
                          p1, p2, p3, bts, ets, sts, ets), index_col='day')
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     ax.plot(df.index.values, df['p1_'+pvar+'_diff'], lw=2,
             label='%s Day' % (p1, ))
