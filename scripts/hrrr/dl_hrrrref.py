@@ -20,7 +20,7 @@ def run(valid):
         data = None
         while data is None and attempt < 10:
             try:
-                data = urllib2.urlopen(uri, timeout=30)
+                data = urllib2.urlopen(uri, timeout=30).readlines()
             except Exception as exp:
                 print("dl_hrrrref FAIL %s %s %s %s" % (valid, hr, exp, uri))
             attempt += 1
