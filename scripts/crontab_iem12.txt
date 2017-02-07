@@ -45,6 +45,3 @@ S=/opt/iem/scripts
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
 
 15 0,4,9,12,17,20 * * * cd /mesonet/www/apps/nwnwebsite/scripts; php -q driveFX.php
-
-#-- GEMPAK
-6,21,36,51 * * * * cd $S/gempak; ./gridPrecip.csh

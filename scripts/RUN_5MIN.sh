@@ -11,10 +11,7 @@ python ingest_ifc_precip.py &
 cd ../../dl
 python radar_composite.py &
 
-cd ../outgoing
-python dump_precip.py
-
-cd snetnws
+cd ../outgoing/snetnws
 python snet_fe.py &
 
 cd ../../GIS

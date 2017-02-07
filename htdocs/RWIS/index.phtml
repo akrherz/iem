@@ -26,7 +26,7 @@ $t->title = "Iowa DOT RWIS Data";
 
 $camimgs = "";
 for($i=0;$i<$cdict[$camid];$i++){
-	$camimgs .= sprintf("<img src=\"/data/camera/stills/%s-%02d.jpg?%s\" style=\"margin: 2px;\">", 
+	$camimgs .= sprintf("<div class=\"col-md-3\"><img src=\"/data/camera/stills/%s-%02d.jpg?%s\" class=\"img img-responsive\"></div>", 
 			$camid, $i, time() );
 }
 
@@ -54,18 +54,19 @@ supplement their site.
 </div><!-- ./row -->
 
 <h4>Roadside Webcams <a href="camera.phtml" class="btn btn-default">Webcam Archive Viewer</a></h4>
-<div>
+
 <form method="" action="" name="widget">
 Available sites: {$selectform}
 <input type="submit" value="View Webcam">
 </form>
 
+<div class="row">
 {$camimgs}
 </div>
 
 
 <div class="row">
-<div class="col-md-6">
+<div class="col-md-4">
 		
 
   <h3>Current Conditions</h3>
@@ -96,7 +97,28 @@ Available sites: {$selectform}
 
 
 </div>
-<div class="col-md-6">
+<div class="col-md-4">
+<h3>Raw Text Files for Iowa RWIS</h3>
+<p>These are the raw text files provided by the Iowa DOT without any IEM
+manipulation.</p>
+<ul>
+		<li><a href="/data/rwis_probe.txt">Soil Probe Text File</a></li>
+		<li><a href="/data/rwis_traffic.txt">Traffic Text File</a></li>
+		<li><a href="/data/rwis_sf.txt">Surface Text File</a></li>
+		<li><a href="/data/rwis.txt">Atmospheric Text File</a></li>
+</ul>
+
+<h3>Station Plot with NEXRAD</h3>
+<ul>
+   <li><a href="/data/DMX_radar.gif">Des Moines</a></li>
+   <li><a href="/data/OAX_radar.gif">Omaha</a></li>
+   <li><a href="/data/DVN_radar.gif">Davenport</a></li>
+   <li><a href="/data/FSD_radar.gif">Sioux Falls</a></li>
+   <li><a href="/data/ARX_radar.gif">LaCrosse</a></li>
+</ul>
+</div>
+
+<div class="col-md-4">
 
   <h3>Data Download</h3>
 <ul>
@@ -105,14 +127,7 @@ Available sites: {$selectform}
  <li><a href="/request/rwis/traffic.phtml">Traffic Data</a></li>
 </ul>
 
-  <h3 class="subtitle">Station Plot with NEXRAD</h3>
-<ul>
-   <li><a href="/data/DMX_radar.gif">Des Moines</a></li>
-   <li><a href="/data/OAX_radar.gif">Omaha</a></li>
-   <li><a href="/data/DVN_radar.gif">Davenport</a></li>
-   <li><a href="/data/FSD_radar.gif">Sioux Falls</a></li>
-   <li><a href="/data/ARX_radar.gif">LaCrosse</a></li>
-</ul>
+
 
   <h3>Comparisons:</h3>
 <ul>

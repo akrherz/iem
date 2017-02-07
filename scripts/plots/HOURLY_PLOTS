@@ -21,7 +21,6 @@ csh HEAT_plot.csh
 csh WCHT_plot.csh
 csh RELH_plot.csh
 csh ASOS_plot.csh
-csh 1h_precip.csh
 
 cd black
 csh surfaceContours.csh

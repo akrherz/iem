@@ -1,6 +1,4 @@
 #!/bin/csh
-#		20m_radar.csh
-# Script that plots RADAR over the Mesonet data
 
 source /mesonet/nawips/Gemenviron
 
@@ -26,11 +24,10 @@ else
 	set m = "0"
 endif
 
-rm 20radarOverlay.gif* snetRADAR.gif* 20radarOverlay_s.gif* >& /dev/null
+rm 20radarOverlay.gif* 20radarOverlay_s.gif* >& /dev/null
 
 set DEVICE1="GIF|20radarOverlay.gif"
 set DEVICE2="GIF|20radarOverlay_s.gif|500;400"
-set DEVICE3="GIF|snetRADAR.gif|900;700"
 
 
 setenv DATA_DIR /home/ldm/data/nexrad/NIDS/DMX/N0R
@@ -124,11 +121,6 @@ $GEMEXE/sfmap << EOF > /dev/null
 	list
 	run
 
-	DEVICE	= ${DEVICE3}
-	SFFILE	= /mesonet/data/gempak/snet/${date}_snet.gem
-	TITLE	= 32/-1/${date}/${hh}${mm} 20m SNET with RADAR
-	list
-	run
 
 	exit
 EOF
@@ -143,10 +135,4 @@ endif
 if (-e 20radarOverlay_s.gif) then
   /home/ldm/bin/pqinsert -p "plot r 000000000000 20radarOverlay_s_ bogus gif" 20radarOverlay_s.gif
   rm -f 20radarOverlay_s.gif
-endif
-
-if (-e snetRADAR.gif) then
-  /home/ldm/bin/pqinsert -p "plot r 000000000000 snetRADAR_ bogus gif" snetRADAR.gif
-  rm -f snetRADAR.gif
-  
 endif
