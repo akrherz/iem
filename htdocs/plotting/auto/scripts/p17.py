@@ -3,6 +3,7 @@ import datetime
 import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
@@ -19,7 +20,7 @@ def get_description():
     along with the daily climatology for the nearest (sometimes same) location.
     """
     d['arguments'] = [
-        dict(type='zstation', name='station', default='AMW',
+        dict(type='zstation', name='station', default='AMW', network='IA_ASOS',
              label='Select Station:'),
         dict(type="month", name="month", default=mo, label="Select Month"),
         dict(type="year", name="year", default=yr, label="Select Year",
@@ -38,11 +39,11 @@ def plotter(fdict):
     pgconn_iem = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     pgconn_coop = psycopg2.connect(database='coop', host='iemdb',
                                    user='nobody')
-
-    station = fdict.get('station', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    year = int(fdict.get('year', 2014))
-    month = int(fdict.get('month', 8))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    year = ctx['year']
+    month = ctx['month']
     nt = NetworkTable(network)
 
     table = "summary_%s" % (year,)
@@ -105,31 +106,31 @@ def plotter(fdict):
                fc='b', ec='k', width=0.3,
                linewidth=0.6)
     else:
-        ax.text(0.5, 0.5, "No Data Found", transform=ax.transAxes)
+        ax.text(0.5, 0.5, "No Data Found", transform=ax.transAxes,
+                ha='center')
         ax.set_ylim(0, 1)
 
     i = 0
-    for _, row in df.iterrows():
-        if not has_data:
-            continue
-        if np.isnan(row['max_tmpf']) or np.isnan(row['min_tmpf']):
+    if has_data:
+        for _, row in df.iterrows():
+            if np.isnan(row['max_tmpf']) or np.isnan(row['min_tmpf']):
+                i += 1
+                continue
+            txt = ax.text(i+1-0.15, row['max_tmpf']+0.5,
+                          "%.0f" % (row['max_tmpf'],),
+                          fontsize=10, ha='center', va='bottom', color='k')
+            txt.set_path_effects([PathEffects.withStroke(linewidth=2,
+                                                         foreground="w")])
+            txt = ax.text(i+1+0.15, row['min_tmpf']+0.5,
+                          "%.0f" % (row['min_tmpf'],), fontsize=10,
+                          ha='center', va='bottom', color='k')
+            txt.set_path_effects([PathEffects.withStroke(linewidth=2,
+                                                         foreground="w")])
             i += 1
-            continue
-        txt = ax.text(i+1-0.15, row['max_tmpf']+0.5,
-                      "%.0f" % (row['max_tmpf'],),
-                      fontsize=10, ha='center', va='bottom', color='k')
-        txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                     foreground="w")])
-        txt = ax.text(i+1+0.15, row['min_tmpf']+0.5,
-                      "%.0f" % (row['min_tmpf'],), fontsize=10,
-                      ha='center', va='bottom', color='k')
-        txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                     foreground="w")])
-        i += 1
-    ax.set_ylim(np.nanmin([df['low'].min(), df['min_tmpf'].min()]) - 5,
-                np.nanmax([df['high'].max(), df['max_tmpf'].max()]) + 5)
+        ax.set_ylim(np.nanmin([df['low'].min(), df['min_tmpf'].min()]) - 5,
+                    np.nanmax([df['high'].max(), df['max_tmpf'].max()]) + 5)
     ax.set_xlim(0.5, days + 0.5)
-    ax.set_xticks(np.arange(1, days+1))
+    ax.set_xticks(range(1, days+1))
     ax.set_xticklabels(np.arange(1, days+1), fontsize=8)
     ax.set_xlabel(sts.strftime("%B %Y"))
     ax.set_ylabel("Temperature $^\circ$F")
