@@ -2,6 +2,8 @@ import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import numpy as np
 import pandas as pd
+import datetime
+from pyiem.util import get_autoplot_context
 
 PDICT = {'TS': 'Thunder (TS)',
          '-SN': 'Light Snow (-SN)',
@@ -15,16 +17,20 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     d['data'] = True
-    d['desciption'] = """Frequency plot partitioned by hour and week of the
+    d['description'] = """Frequency plot partitioned by hour and week of the
     year for a given METAR code to appear in the present weather. If your
     favorite METAR code is not available in the listing, please let us know!
-    This plot is limited to dates after 1971 to better account for observation
-    changes about that time."""
+    If multiple reports occurred within the same hour during one week, it would
+    only count as one in this analysis."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:'),
         dict(type='select', name='code', default='TS', options=PDICT,
-             label='Code appearing in present weather:')
+             label='Code appearing in present weather:'),
+        dict(type='year', name='syear', default=1971,
+             label='Start Year of Analysis (inclusive):'),
+        dict(type='year', name='eyear', default=datetime.date.today().year,
+             label='End Year of Analysis (inclusive):'),
     ]
     return d
 
@@ -36,12 +42,16 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('zstation', 'DSM')
-    network = fdict.get('network', 'IA_ASOS')
+    station = ctx['zstation']
+    network = ctx['network']
+    syear = ctx['syear']
+    eyear = ctx['eyear']
+    sts = datetime.date(syear, 1, 1)
+    ets = datetime.date(eyear + 1, 1, 1)
     nt = NetworkTable(network)
-    code = fdict.get('code', 'TS')
-    PDICT[code]
+    code = ctx['code']
     if code == 'PSN':
         code = "+SN"
         PDICT['+SN'] = PDICT['PSN']
@@ -53,12 +63,12 @@ def plotter(fdict):
     SELECT valid at time zone %s + '10 minutes'::interval as v
     from alldata where
     station = %s and presentwx LIKE '%%""" + code + """%%'
-    and valid > '1971-01-01')
+    and valid > %s and valid < %s)
 
     SELECT distinct extract(week from v) as week,
     extract(year from v) as year, extract(hour from v) as hour
     from data
-    """, (nt.sts[station]['tzname'], station))
+    """, (nt.sts[station]['tzname'], station, sts, ets))
 
     minyear = 2099
     maxyear = 1800
@@ -68,6 +78,8 @@ def plotter(fdict):
         data[row[2], row[0]-1] += 1
         minyear = min([minyear, row[1]])
         maxyear = max([maxyear, row[1]])
+    if cursor.rowcount == 0:
+        raise Exception("No Data Found!")
     rows = []
     for week in range(52):
         for hour in range(24):
