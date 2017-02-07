@@ -10,6 +10,7 @@ addons:
     - iemdb-hads
     - iem.local
     - iem-memcached
+    - talltowers-db.local
 virtualenv:
   system_site_packages: true
 language: python
