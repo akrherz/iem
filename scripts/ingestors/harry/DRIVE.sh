@@ -8,13 +8,11 @@ fi
 
 # Process
 python step1_texttosql.py $1 $2
-# Inject into database
-psql -f /tmp/harry.sql -h iemdb coop
 # Fill missing data
 python fill_month.py $1 $2
 # Need to produce estimates of temperatures were there are none
 echo "Generating estimates for missing data"
-python ../../coop/estimate_missing.py IA
+python ../../climodat/estimate_missing.py IA
 echo "Redoing estimates, this will take a bit!"
 # Estimate ia0000
 python ../../climodat/compute_0000.py $1 $2 >& /dev/null
