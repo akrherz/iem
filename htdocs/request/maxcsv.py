@@ -8,6 +8,7 @@ import cgi
 import datetime
 import sys
 import psycopg2
+import pytz
 from pandas.io.sql import read_sql
 
 SSW = sys.stdout.write
@@ -70,20 +71,85 @@ def do_iarwis():
     return df
 
 
-def do_ahps(nwsli):
+def do_ahps_obs(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
     pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
                               user='nobody')
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""
-        SELECT name, st_x(geom), st_y(geom) from stations
+        SELECT name, st_x(geom), st_y(geom), tzname from stations
         where id = %s and network ~* 'DCP'
     """, (nwsli,))
     row = cursor.fetchone()
     latitude = row[2]
     longitude = row[1]
     stationname = row[0]
+    tzinfo = pytz.timezone(row[3])
+    # Figure out which keys we have
+    cursor.execute("""
+    with obs as (
+        select distinct key from hml_observed_data where station = %s
+        and valid > now() - '3 days'::interval)
+    SELECT k.id, k.label from hml_observed_keys k JOIN obs o on (k.id = o.key)
+    """, (nwsli,))
+    if cursor.rowcount == 0:
+        SSW('Content-type: text/plain\n\n')
+        SSW("NO DATA")
+        sys.exit()
+    plabel = cursor.fetchone()[1]
+    slabel = cursor.fetchone()[1]
+    df = read_sql("""
+    WITH primaryv as (
+      SELECT valid, value from hml_observed_data WHERE station = %s
+      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
+    ), secondaryv as (
+      SELECT valid, value from hml_observed_data WHERE station = %s
+      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
+    )
+    SELECT p.valid, p.value as primary_value, s.value as secondary_value,
+    'O' as type
+    from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
+    WHERE p.valid > (now() - '72 hours'::interval)
+    ORDER by p.valid DESC
+    """, pgconn, params=(nwsli, plabel, nwsli, slabel),
+                  index_col=None)
+    sys.stderr.write(str(plabel))
+    sys.stderr.write(str(slabel))
+    df['locationid'] = nwsli
+    df['locationname'] = stationname
+    df['latitude'] = latitude
+    df['longitude'] = longitude
+    df['Time'] = df['valid'].dt.tz_convert(
+        tzinfo).dt.strftime("%m/%d/%Y %H:%M")
+    df[plabel] = df['primary_value']
+    df[slabel] = df['secondary_value']
+    # we have to do the writing from here
+    SSW("Content-type: text/plain\n\n")
+    SSW("Observed Data:,,\n")
+    SSW("|Date|,|Stage|,|--Flow-|\n")
+    odf = df[df['type'] == 'O']
+    for _, row in odf.iterrows():
+        SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
+                                      row['Flow[kcfs]']))
+    sys.exit(0)
+
+
+def do_ahps_fx(nwsli):
+    """Create a dataframe with AHPS river stage and CFS information"""
+    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
+                              user='nobody')
+    cursor = pgconn.cursor()
+    # Get metadata
+    cursor.execute("""
+        SELECT name, st_x(geom), st_y(geom), tzname from stations
+        where id = %s and network ~* 'DCP'
+    """, (nwsli,))
+    row = cursor.fetchone()
+    latitude = row[2]
+    longitude = row[1]
+    stationname = row[0]
+    tzinfo = pytz.timezone(row[3])
     # Get the last forecast
     cursor.execute("""
         select id, forecast_sts at time zone 'UTC',
@@ -101,7 +167,7 @@ def do_ahps(nwsli):
     secondaryunits = row[6]
     y = "{}".format(generationtime.year)
     # Get the latest forecast
-    fdf = read_sql("""
+    df = read_sql("""
     SELECT valid, primary_value, secondary_value, 'F' as type from
     hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
     ORDER by valid ASC
@@ -109,41 +175,23 @@ def do_ahps(nwsli):
     # Get the obs
     plabel = "{}[{}]".format(primaryname, primaryunits)
     slabel = "{}[{}]".format(secondaryname, secondaryunits)
-    odf = read_sql("""
-    WITH primaryv as (
-      SELECT valid, value from hml_observed_data WHERE station = %s
-      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
-    ), secondaryv as (
-      SELECT valid, value from hml_observed_data WHERE station = %s
-      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
-    )
-    SELECT p.valid, p.value as primary_value, s.value as secondary_value,
-    'O' as type
-    from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
-    ORDER by p.valid DESC
-    """, pgconn, params=(nwsli, plabel, nwsli, slabel),
-                   index_col=None)
+
     sys.stderr.write(str(primaryname))
     sys.stderr.write(str(secondaryname))
-    df = fdf.append(odf)
+
     df['locationid'] = nwsli
     df['locationname'] = stationname
     df['latitude'] = latitude
     df['longitude'] = longitude
-    df['Time'] = df['valid'].dt.strftime("%m/%d/%Y %H:%M")
+    df['Time'] = df['valid'].dt.tz_convert(
+        tzinfo).dt.strftime("%m/%d/%Y %H:%M")
     df[plabel] = df['primary_value']
     df[slabel] = df['secondary_value']
     # we have to do the writing from here
     SSW("Content-type: text/plain\n\n")
-    SSW("Observed Data:,,\n")
-    SSW("|Date(UTC)|,|Stage|,|--Flow-|\n")
-    odf = df[df['type'] == 'O']
-    row = odf.iloc[0]
-    SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
-                                  row['Flow[kcfs]']))
     SSW("Forecast Data (Issued %s UTC):,\n" % (
         generationtime.strftime("%m-%d-%Y %H:%M:%S"),))
-    SSW("|Date(UTC)|,|Stage|,|--Flow-|\n")
+    SSW("|Date|,|Stage|,|--Flow-|\n")
     odf = df[df['type'] == 'F']
     for _, row in odf.iterrows():
         SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
@@ -154,8 +202,10 @@ def do_ahps(nwsli):
 
 def router(q):
     """Process and return dataframe"""
-    if q.startswith("ahps_"):
-        do_ahps(q[5:].upper())  # we write ourselves and exit
+    if q.startswith("ahpsobs_"):
+        do_ahps_obs(q[8:].upper())  # we write ourselves and exit
+    elif q.startswith("ahpsfx_"):
+        do_ahps_fx(q[7:].upper())  # we write ourselves and exit
     elif q == 'iaroadcond':
         df = do_iaroadcond()
     elif q == 'iadotplows':
