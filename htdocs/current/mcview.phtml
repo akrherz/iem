@@ -19,12 +19,16 @@
  $autopilot = isset($_GET["autopilot"]) ? $_GET["autopilot"]: "no";
 
 /* Lets see what the form is set to */
- $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+ $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
  $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
  $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("h");
  $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
 
+ // Used for the info presented below the plot on getting the raw data
+ $gissource = ($year > 2014) ? 'n0q': 'n0r';
+ $gissourcenum = ($year > 2014) ? '2': '1';
+ 
  /** Acceptable number of frames are between 1 and 10000 */
  if (intval($frames) > 10000 || intval($frames) < 1) $frames = 13;
  /** Acceptable interval is between 5 and 60 */
@@ -263,9 +267,9 @@ EOF;
 
 $radlinks = "";
 foreach ($radtimes as $value ){
-	$myhref = "/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $value ) .".png";
+	$myhref = "/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/${gissource}_". gmdate('YmdHi', $value ) .".png";
 	$myhref2 = "https://mesonet.agron.iastate.edu{$myhref}";
-	$radlinks .= "<li><a href='$myhref'>$myhref2</a> (<a href='/request/gis/n0r2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a>)</li>\n";
+	$radlinks .= "<li><a href='$myhref'>$myhref2</a> (<a href='/request/gis/${gissource}2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a>)</li>\n";
 }
 
 
@@ -369,11 +373,13 @@ $t->content = <<<EOF
 <p><b>GIS NEXRAD layers</b>
 <br />The NEXRAD layer used in these images are available in a georeferenced 
 RASTER format. You will need this 
-<a href="/data/gis/images/4326/USCOMP/n0r_0.wld">this world file</a> 
+<a href="/data/gis/images/4326/USCOMP/{$gissource}_0.wld">this world file</a> 
 rto correctly georeference them.  The projection of 
 these images is geographic NAD83 (<i>unprojected</i>).  You will need to 
 rename the world file to match the filename of the RADAR layer before loading
-into your GIS.
+into your GIS.  You may also be interested in the <a href="/GIS/rasters.php?rid={$gissoucenum}">conversion</a> of
+color index values to dBZ and <a href="/docs/nexrad_composites/">more details</a>
+on these composites.</p>
 <br>
 <ul>
 {$radlinks}
