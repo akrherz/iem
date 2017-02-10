@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (8, now());
+INSERT into iem_schema_manager_version values (9, now());
 
 CREATE TABLE stations(
         id varchar(20),
