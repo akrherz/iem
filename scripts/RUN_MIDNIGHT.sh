@@ -44,6 +44,7 @@ python hads_delete_dups.py
 
 cd ../hads
 python dedup_hml_forecasts.py
+python raw2obs.py
 
 cd ../mrms
 python create_daily_symlink.py $(date --date '1 day ago' +'%Y %m %d')
