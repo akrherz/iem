@@ -59,12 +59,20 @@ CREATE TABLE unknown(
 ---
 ---
 ---
+-- Implement an alldata table, which the yearly tables will inherit
+CREATE TABLE alldata(
+  station varchar(8),
+  valid timestamptz,
+  key varchar(11),
+  value real);
+GRANT SELECT on alldata to nobody,apache;
+
 CREATE TABLE raw2002(
 	station varchar(8),
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2002 to nobody,apache;
 
 create table raw2002_01( 
@@ -184,7 +192,7 @@ CREATE TABLE raw2003(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2003 to nobody,apache;
 
 create table raw2003_01( 
@@ -304,7 +312,7 @@ CREATE TABLE raw2004(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2004 to nobody,apache;
 
 create table raw2004_01( 
@@ -424,7 +432,7 @@ CREATE TABLE raw2005(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2005 to nobody,apache;
 
 create table raw2005_01( 
@@ -544,7 +552,7 @@ CREATE TABLE raw2006(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2006 to nobody,apache;
 
 create table raw2006_01( 
@@ -664,7 +672,7 @@ CREATE TABLE raw2007(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2007 to nobody,apache;
 
 create table raw2007_01( 
@@ -784,7 +792,7 @@ CREATE TABLE raw2008(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2008 to nobody,apache;
 
 create table raw2008_01( 
@@ -904,7 +912,7 @@ CREATE TABLE raw2009(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2009 to nobody,apache;
 
 create table raw2009_01( 
@@ -1024,7 +1032,7 @@ CREATE TABLE raw2010(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2010 to nobody,apache;
 
 create table raw2010_01( 
@@ -1144,7 +1152,7 @@ CREATE TABLE raw2011(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2011 to nobody,apache;
 
 create table raw2011_01( 
@@ -1264,7 +1272,7 @@ CREATE TABLE raw2012(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2012 to nobody,apache;
 
 create table raw2012_01( 
@@ -1384,7 +1392,7 @@ CREATE TABLE raw2013(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2013 to nobody,apache;
 
 create table raw2013_01( 
@@ -1504,7 +1512,7 @@ CREATE TABLE raw2014(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2014 to nobody,apache;
 
 create table raw2014_01( 
@@ -1623,7 +1631,7 @@ CREATE TABLE raw2015(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2015 to nobody,apache;
 
 create table raw2015_01( 
@@ -1757,7 +1765,7 @@ CREATE TABLE raw2016(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2016 to nobody,apache;
 
 create table raw2016_01( 
@@ -2037,7 +2045,7 @@ CREATE TABLE raw2017(
 	valid timestamptz,
 	key varchar(11),
 	value real
-);
+) INHERITS (alldata);
 GRANT SELECT on raw2017 to nobody,apache;
 
 create table raw2017_01( 

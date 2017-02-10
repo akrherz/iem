@@ -16,8 +16,9 @@ def do_network(network):
     """Process a network"""
     # Update the STS while we are at it, this will help the database get
     # stuff cached too
-    subprocess.call("python ../dbutil/compute_asos_sts.py %s" % (network,),
-                    shell=True)
+    if network.find("_ASOS") > 0:
+        subprocess.call("python ../dbutil/compute_asos_sts.py %s" % (network,),
+                        shell=True)
     subprocess.call("python drive_network_windrose.py %s" % (network,),
                     shell=True)
 
@@ -27,7 +28,7 @@ def main():
     mcursor = MESOSITE.cursor()
     now = datetime.datetime.now()
     mcursor.execute("""SELECT max(id), network from stations
-        WHERE (network ~* 'ASOS' or network = 'AWOS')
+        WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP')
         and online = 't' GROUP by network ORDER by random()""")
     for row in mcursor:
         network = row[1]

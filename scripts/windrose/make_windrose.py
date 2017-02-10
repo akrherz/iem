@@ -19,6 +19,8 @@ elif net in ('IA_RWIS'):
     database = 'rwis'
 elif net in ('ISUSM'):
     database = 'isuag'
+elif net.find('_DCP') > 0:
+    database = 'hads'
 
 
 fn = "/mesonet/share/windrose/climate/yearly/%s_yearly.png" % (sid,)

@@ -67,6 +67,8 @@ def main():
         database = 'isuag'
     elif form["network"].value in ('RAOB', ):
         database = 'postgis'
+    elif form["network"].value.find("_DCP") > 0:
+        database = 'hads'
 
     try:
         nsector = int(form['nsector'].value)
