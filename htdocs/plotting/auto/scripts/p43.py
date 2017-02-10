@@ -4,6 +4,7 @@ import pytz
 from pyiem.network import Table as NetworkTable
 import pyiem.datatypes as dt
 from matplotlib.ticker import FuncFormatter
+from pyiem.util import get_autoplot_context
 
 
 def tsfmt(x, pos):
@@ -25,7 +26,7 @@ def get_description():
     which variable is which in the combination plots."""
     d['arguments'] = [
         dict(type='sid', label='Select IEM Tracked Station',
-             name='station', default='AMW'),
+             name='station', default='AMW', network='IA_ASOS'),
     ]
     return d
 
@@ -37,11 +38,14 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
 
     nt = NetworkTable(network)
+    if station not in nt.sts:
+        raise Exception("Station %s does not exist in network %s" % (station,
+                                                                     network))
 
     cursor.execute("""
         SELECT *, valid at time zone 'UTC' as utc_valid
