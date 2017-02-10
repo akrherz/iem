@@ -120,7 +120,8 @@ def plotter(fdict):
     y0 = 0.1
     yheight = 0.75
     dy = (yheight / 24.)
-    ax = plt.axes([0.1, y0, 0.59, yheight])
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
+    ax.set_position([0.1, y0, 0.59, yheight])
     ax.barh(df['hr'], df[varname], align='center')
     ax.set_ylim(-0.5, 23.5)
     ax.set_yticks([0, 4, 8, 12, 16, 20])
@@ -129,7 +130,6 @@ def plotter(fdict):
     ax.set_xlim([df[varname].min() - 5,
                  df[varname].max() + 5])
 
-    fig = plt.gcf()
     fig.text(0.5, 0.9, ("%s [%s] %s-%s\n"
                         "%s [%s]"
                         ) % (nt.sts[station]['name'], station,
