@@ -55,8 +55,8 @@
 192.168.0.200    metvm0.local
 192.168.0.204    stanley.local
 192.168.0.232    updraft.local
-192.168.0.233    metvm3.local   iemdb-hads
-192.168.0.234    metvm4.local
+192.168.0.233    metvm3.local
+192.168.0.234    metvm4.local   iemdb-hads
 192.168.0.235    metvm5.local
 192.168.0.236    metvm6.local
 192.168.0.237    metvm7.local
