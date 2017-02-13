@@ -1,8 +1,7 @@
 """ See akrherz/iem#85 """
 import psycopg2
 import datetime
-pgconn = psycopg2.connect(database='asos', host='localhost', port=5555,
-                          user='mesonet')
+pgconn = psycopg2.connect(database='asos', host='iemdb')
 cursor = pgconn.cursor()
 cursor2 = pgconn.cursor()
 
