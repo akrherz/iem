@@ -8,6 +8,9 @@ import datetime
 import psycopg2
 from pyiem.plot import MapPlot
 from pyiem.datatypes import speed
+# contour.py:370: RuntimeWarning: invalid value encountered in true_divide
+import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
 now = datetime.datetime.now()
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
