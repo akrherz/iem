@@ -2,7 +2,7 @@ MAP
 #
 # Start of map file
 #
-NAME "goes_east_vis"
+NAME "goes_alaska_vis"
 STATUS ON
 SIZE 450 350
 EXTENT -126 24 -66 50
@@ -24,11 +24,11 @@ WEB
   IMAGEURL "/tmp/"
   #LOG "/var/webtmp/w0.log"
   METADATA
-   "wms_title" "IEM GOES VIS WMS Service"
+   "wms_title" "IEM GOES Alaska VIS WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/alaska_vis.map&SERVICE=WMS"
    "wms_srs" "EPSG:4326 EPSG:3857"
-   "wms_abstract" "GOES East VIS Satellite."
-   "wms_keywords" "GOES,EAST,VIS"
+   "wms_abstract" "GOES Alaska VIS Satellite."
+   "wms_keywords" "GOES,ALASKA,VIS"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
