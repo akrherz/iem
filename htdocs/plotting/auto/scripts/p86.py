@@ -82,8 +82,8 @@ def plotter(fdict):
         # Value is in W m**-2, we want MJ
         data = temperature(nc.variables[varname][idx0, :, :], 'K').value('F')
         units = 'F'
-        clevs = np.arange(-30, 120, 2)
-        clevstride = 5
+        clevs = np.arange(-30, 120, 5)
+        clevstride = 2
     nc.close()
 
     title = date.strftime("%-d %B %Y")
@@ -98,7 +98,7 @@ def plotter(fdict):
     if ptype == 'c':
         # in the case of contour, use the centroids on the grids
         m.contourf(x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
-                   units=units)
+                   units=units, ilabel=True, labelfmt='%.0f')
     else:
         x, y = np.meshgrid(lons, lats)
         m.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
