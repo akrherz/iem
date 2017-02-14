@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 36%{?dist}
+Release: 37%{?dist}
 License: distributable
 
 Requires: pyIEM
@@ -124,6 +124,7 @@ Requires: perl-Monitoring-Plugin
 Requires: perl-Data-Dumper
 Requires: functools32
 Requires: cycler
+Requires: python2-attrs
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -145,6 +146,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Tue Feb 14 2017 daryl herzmann <akrherz@iastate.edu>
+- Added python2-attrs as a requirement for updated Twisted
+
 * Wed Jan 18 2017 daryl herzmann <akrherz@iastate.edu>
 - Added functools32 and cycler for matplotlib 2.0.0
 
