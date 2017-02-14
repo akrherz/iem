@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -23,6 +24,8 @@ def get_description():
              label='Select Year to Compare With:'),
         dict(type='month', name='month', default=lastmonth.month,
              label='Select Month to Compare With:'),
+        dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
+             min="1893/01/01", label='Effective Date'),
     ]
     return d
 
@@ -35,15 +38,16 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    station = fdict.get('station', 'IA0200')
-    year = int(fdict.get('year', 2014))
-    month = int(fdict.get('month', 11))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    year = ctx['year']
+    month = ctx['month']
+    effective_date = ctx['date']
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
-    thismonth = datetime.date.today()
     oldmonth = datetime.date(year, month, 1)
-    sts = datetime.date(thismonth.year, thismonth.month, 1)
+    sts = datetime.date(effective_date.year, effective_date.month, 1)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     days = int((ets - sts).days)
 
@@ -60,24 +64,25 @@ def plotter(fdict):
     # build history
     cursor.execute("""SELECT year, day, (high+low)/2. from
     """+table+""" WHERE station = %s and month = %s and
-    extract(day from day) <= %s
+    extract(day from day) <= %s and day < %s
     ORDER by day ASC
-    """, (station, thismonth.month, days))
+    """, (station, effective_date.month, days, ets))
 
     for i, row in enumerate(cursor):
         if i == 0:
             baseyear = row[0]
-            data = np.ones((thismonth.year - row[0] + 1, days)) * -99
+            data = np.ones((effective_date.year - row[0] + 1, days)) * -99
         data[row[0]-baseyear, row[1].day-1] = row[2]
 
     # overwrite our current month's data
+    currentdata = data[-1, :effective_date.day-1]
     for i in range(np.shape(data)[0] - 1):
-        data[i, :thismonth.day-1] = data[-1, :thismonth.day-1]
+        data[i, :effective_date.day-1] = currentdata
     avgs = np.zeros(np.shape(data))
     days = np.shape(data)[1]
     prevavg = []
     for i in range(days):
-        avgs[:-1, i] = np.sum(data[:-1, :i+1], 1) / float(i+1)
+        avgs[:, i] = np.sum(data[:, :i+1], 1) / float(i+1)
         prevavg.append(np.sum(prevmonth[:i+1]) / float(i+1))
 
     (fig, ax) = plt.subplots(1, 1)
@@ -88,12 +93,20 @@ def plotter(fdict):
             beats += 1
         ax.plot(np.arange(1, days+1), avgs[yr, :], zorder=1, color='tan')
 
-    # this looks like a bug, but is legit
-    ax.plot(np.arange(1, thismonth.day), avgs[-2, :thismonth.day-1], zorder=2,
+    ax.plot(np.arange(1, effective_date.day),
+            avgs[-1, :effective_date.day-1], zorder=3,
             lw=2, color='brown',
             label="%s %s, %.2f$^\circ$F" % (
-                calendar.month_abbr[thismonth.month], thismonth.year,
-                avgs[-2, thismonth.day-1]))
+                calendar.month_abbr[effective_date.month], effective_date.year,
+                avgs[-1, effective_date.day-1]))
+    # For historical, we can additionally plot the month values
+    today = datetime.date.today().replace(day=1)
+    if effective_date < today:
+        ax.plot(np.arange(1, days+1), avgs[-1, :], lw=2, color='brown',
+                linestyle='-.', zorder=2,
+                label="%s %s Final, %.2f$^\circ$F" % (
+                calendar.month_abbr[effective_date.month], effective_date.year,
+                avgs[-1, -1]))
     ax.plot(np.arange(1, len(prevavg)+1), prevavg, lw=2, color='k', zorder=3,
             label="%s %s, %.2f$^\circ$F" % (
                 calendar.month_abbr[oldmonth.month], oldmonth.year,
@@ -102,9 +115,11 @@ def plotter(fdict):
     ax.set_title(("[%s] %s scenarios for %s\n"
                   "1-%s [%s] + %s-%s [%s-%s] beats %s %s %s/%s (%.1f%%)"
                   ) % (station,
-                       nt.sts[station]['name'], thismonth.strftime("%b %Y"),
-                       thismonth.day, thismonth.year,
-                       thismonth.day + 1, days, baseyear, thismonth.year - 1,
+                       nt.sts[station]['name'],
+                       effective_date.strftime("%b %Y"),
+                       effective_date.day, effective_date.year,
+                       effective_date.day + 1, days, baseyear,
+                       effective_date.year - 1,
                        calendar.month_abbr[oldmonth.month], oldmonth.year,
                        beats, np.shape(data)[0]-1,
                        beats / float(np.shape(data)[0]-1) * 100.))
@@ -115,3 +130,6 @@ def plotter(fdict):
     ax.legend(loc='best', fontsize=10)
 
     return fig
+
+if __name__ == '__main__':
+    plotter(dict(date='2007-02-15', year=1988, month=5))
