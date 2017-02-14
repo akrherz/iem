@@ -4,6 +4,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 import datetime
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
@@ -11,6 +12,12 @@ PDICT = OrderedDict([
         ('avg_temp', 'Average Temperature'),
         ('max_low', 'Maximum High Temperature'),
         ('min_low', 'Minimum Low Temperature'),
+        ('days-high-above',
+         'Days with High Temp Greater Than or Equal To (threshold)'),
+        ('days-high-below', 'Days with High Temp Below (threshold)'),
+        ('days-lows-above',
+         'Days with Low Temp Greater Than or Equal To (threshold)'),
+        ('days-lows-below', 'Days with Low Temp Below (threshold)'),
         ('precip', 'Total Precipitation')])
 
 
@@ -25,17 +32,19 @@ def get_description():
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month',
              default=(today - datetime.timedelta(days=14)).month,
              label='Start Month:'),
         dict(type='day', name='day',
              default=(today - datetime.timedelta(days=14)).day,
              label='Start Day:'),
-        dict(type="text", name="days", default="14",
+        dict(type="int", name="days", default="14",
              label="Number of Days"),
         dict(type='select', name='varname', default='avg_temp',
              label='Variable to Compute:', options=PDICT),
+        dict(type='float', name='thres', default=-99,
+             label='Threshold (when appropriate):'),
         dict(type='year', name='year', default=today.year,
              label="Year to Highlight in Chart:"),
     ]
@@ -56,14 +65,15 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203')
-    days = int(fdict.get('days', 14))
-    sts = datetime.date(2012, int(fdict.get('month', 10)),
-                        int(fdict.get('day', 1)))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    days = ctx['days']
+    sts = datetime.date(2012, ctx['month'],
+                        ctx['day'])
     ets = sts + datetime.timedelta(days=(days - 1))
-    varname = fdict.get('varname', 'avg_temp')
-    year = int(fdict.get('year', datetime.date.today().year))
+    varname = ctx['varname']
+    year = ctx['year']
+    threshold = ctx['thres']
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
     sdays = []
@@ -78,13 +88,18 @@ def plotter(fdict):
     avg(low) as avg_low_temp,
     sum(precip) as precip,
     min(low) as min_low,
-    max(high) as max_high
+    max(high) as max_high,
+    sum(case when high >= %s then 1 else 0 end) as "days-high-above",
+    sum(case when high < %s then 1 else 0 end) as "days-high-below",
+    sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
+    sum(case when low < %s then 1 else 0 end) as "days-lows-below"
     from """ + table + """
     WHERE station = %s and sday in %s
     GROUP by yr ORDER by yr ASC
-    """, pgconn, params=(station, tuple(sdays)))
+    """, pgconn, params=(threshold, threshold, threshold, threshold,
+                         station, tuple(sdays)))
 
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
     bars = ax[0].bar(df['yr'], df[varname], facecolor='r', edgecolor='r')
     thisvalue = "M"
@@ -99,10 +114,14 @@ def plotter(fdict):
     ylabel = "Temperature $^\circ$F"
     if varname in ['precip', ]:
         ylabel = "Precipitation [inch]"
+    elif varname.find('days') > -1:
+        ylabel = "Days"
     ax[0].set_ylabel(ylabel)
+    title = PDICT.get(varname).replace("(threshold)", str(threshold))
     ax[0].set_title(("[%s] %s\n%s from %s through %s"
-                     ) % (station, nt.sts[station]['name'], PDICT.get(varname),
-                          sts.strftime("%d %b"), ets.strftime("%d %b")))
+                     ) % (station, nt.sts[station]['name'], title,
+                          sts.strftime("%d %b"), ets.strftime("%d %b")),
+                    fontsize=12)
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
