@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'NAM': 'NAM (9 Dec 2008 - current)',
          'GFS': 'GFS (16 Dec 2003 - current)',
@@ -23,7 +24,7 @@ def get_description():
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='month', name='month', label='Select Month:',
              default=today.month),
         dict(type='year', name='year', label='Select Year:',
@@ -44,12 +45,13 @@ def plotter(fdict):
     acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
     MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
     mcursor = MOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    year = int(fdict.get('year', 2014))
-    month = int(fdict.get('month', 12))
-    model = fdict.get('model', 'NAM')
+    station = ctx['zstation']
+    network = ctx['network']
+    year = ctx['year']
+    month = ctx['month']
+    model = ctx['model']
 
     nt = NetworkTable(network)
 
@@ -139,15 +141,17 @@ def plotter(fdict):
     hobs = np.ma.fix_invalid(hobs)
     lobs = np.ma.fix_invalid(lobs)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     ax.set_title('[%s] %s Daily Temperatures\n%s Forecast MOS Range for %s' % (
         station, nt.sts[station]['name'], model, month1.strftime("%B %Y")))
 
-    ax.bar(days-0.25, htop-hbottom, facecolor='pink', width=0.7,
-           bottom=hbottom, zorder=1, alpha=0.3, label='Daytime High')
-    ax.bar(days-0.45, ltop-lbottom, facecolor='blue', width=0.7,
-           bottom=lbottom, zorder=1, alpha=0.3, label='Morning Low')
+    ax.bar(days + 0.1, htop-hbottom, facecolor='pink', width=0.7,
+           bottom=hbottom, zorder=1, alpha=0.3, label='Daytime High',
+           align='center')
+    ax.bar(days - 0.1, ltop-lbottom, facecolor='blue', width=0.7,
+           bottom=lbottom, zorder=1, alpha=0.3, label='Morning Low',
+           align='center')
 
     ax.scatter(days+0.1, hobs, zorder=2, s=40, c='red', label='Actual High')
     ax.scatter(days-0.1, lobs, zorder=2, s=40, c='blue', label='Actual Low')
