@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -14,7 +15,7 @@ def get_description():
     are not included."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:')
+             label='Select Station:', network='IACLIMATE')
     ]
     return d
 
@@ -26,8 +27,8 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA2203')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))

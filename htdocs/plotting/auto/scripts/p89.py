@@ -5,6 +5,7 @@ import netCDF4
 from pyiem import iemre
 import pandas as pd
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 STATES = OrderedDict([('IA', 'Iowa'),
                       ('IL', 'Illinois'),
@@ -36,11 +37,11 @@ def get_description():
     d['arguments'] = [
         dict(type='year', name='year', default=today.year,
              label='Select Year (1893-)'),
-        dict(type='text', name='daythres', default='0.50',
+        dict(type='float', name='daythres', default='0.50',
              label='1 Day Precipitation Threshold [inch]'),
-        dict(type='text', name='period', default='7',
+        dict(type='int', name='period', default='7',
              label='Over Period of Trailing Days'),
-        dict(type='text', name='trailthres', default='0.50',
+        dict(type='float', name='trailthres', default='0.50',
              label='Trailing Day Precipitation Threshold [inch]'),
         dict(type='clstate', name='state', default='IA', label='For State'),
     ]
@@ -52,11 +53,12 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    year = int(fdict.get('year', 2014))
-    daythres = float(fdict.get('daythres', 0.5))
-    trailthres = float(fdict.get('trailthres', 0.5))
-    period = int(fdict.get('period', 7))
-    state = fdict.get('state', 'IA')[:2]
+    ctx = get_autoplot_context(fdict, get_description())
+    year = ctx['year']
+    daythres = ctx['daythres']
+    trailthres = ctx['trailthres']
+    period = ctx['period']
+    state = ctx['state'][:2]
 
     nc2 = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
     iowa = nc2.variables[state][:]

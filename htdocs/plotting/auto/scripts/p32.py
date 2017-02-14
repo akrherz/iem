@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import calendar
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High Temperature',
          'low': 'Low Temperature',
@@ -18,7 +19,7 @@ def get_description():
     average of the daily high and low."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Year to Plot:'),
         dict(type="select", name='var', default='high', options=PDICT,
@@ -34,10 +35,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    year = int(fdict.get('year', 2014))
-    varname = fdict.get('var', 'high')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    year = ctx['year']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))

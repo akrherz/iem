@@ -4,6 +4,7 @@ from pyiem import network
 import datetime
 import pandas as pd
 from scipy import stats
+from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'Average High Temperature',
          'low': 'Average Low Temperature',
@@ -23,7 +24,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='high',
              label='Which Variable:', options=PDICT),
         dict(type='text', name='days', default=45,
@@ -44,11 +45,12 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA0000')
-    varname = fdict.get('var', 'high')
-    month = int(fdict.get('month', 10))
-    day = int(fdict.get('day', 7))
+    station = ctx['station']
+    varname = ctx['var']
+    month = ctx['month']
+    day = ctx['day']
     dt = datetime.date(2000, month, day)
     days = int(fdict.get('days', 45))
     if PDICT.get(varname) is None:
@@ -91,7 +93,7 @@ def plotter(fdict):
 
     x = np.array(df[varname+'_before'], 'f')
     y = np.array(df[varname+'_after'], 'f')
-    fig, ax = plt.subplots(1, 1, sharex=True)
+    fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
     ax.scatter(x, y)
     msg = ("[%s] %s %s over %s days prior to and after %s"
            ) % (station, nt.sts[station]['name'], PDICT.get(varname),

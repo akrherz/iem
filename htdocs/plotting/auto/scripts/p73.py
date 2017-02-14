@@ -3,6 +3,7 @@ import datetime
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
          'no': 'Plot Entire Year'}
@@ -36,11 +37,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'DMX')
-    limit = fdict.get('limit', 'no')
-    phenomena = fdict.get('phenomena', 'FF')
-    significance = fdict.get('significance', 'W')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    limit = ctx['limit']
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
@@ -64,10 +65,10 @@ def plotter(fdict):
       """, pgconn, params=(phenomena, significance))
 
     if len(df.index) == 0:
-        return("Sorry, no data found!")
+        raise Exception("Sorry, no data found!")
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(df['yr']-0.4, df['count'])
+    ax.bar(df['yr'], df['count'], align='center')
     ax.set_xlim(df['yr'].min()-0.5, df['yr'].max()+0.5)
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
