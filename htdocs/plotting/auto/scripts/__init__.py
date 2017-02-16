@@ -232,6 +232,8 @@ data = {'plots': [
          'label': "Soil Temperature Periods Above/Below Threshold in Spring"},
         {'id': "145", 'mw': True,
          'label': "Soil Temperature Daily Time Series by Year"},
+        {'id': "175", 'mw': True,
+         'label': "Snow Coverage Percentage for State For One Winter"},
         {'id': "133", 'mw': True,
          'label': "Snowfall Season Totals Split by Date within Season"},
         {'id': "103", 'mw': True,
