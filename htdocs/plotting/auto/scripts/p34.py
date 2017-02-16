@@ -5,6 +5,7 @@ import calendar
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('high_over', 'High Temperature At or Above'),
                      ('high_under', 'High Temperature Below'),
@@ -23,7 +24,7 @@ def get_description():
              label='Select Station:'),
         dict(type='select', name='var', default='high_under',
              label="Which Streak to Compute:", options=PDICT),
-        dict(type="text", name='threshold', default=32,
+        dict(type="int", name='threshold', default=32,
              label="Temperature Threshold:")
     ]
     return d
@@ -44,30 +45,33 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    threshold = int(fdict.get('threshold', 32))
-    varname = fdict.get('var', 'high_under')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['threshold']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     cursor.execute("""
-        SELECT extract(doy from day) as d, high, low
+        SELECT extract(doy from day)::int as d, high, low, day
         from """+table+""" where station = %s ORDER by day ASC
     """, (station,))
 
     maxperiod = [0]*367
+    enddate = ['']*367
     running = 0
     col = 'high' if varname.find('high') == 0 else 'low'
     myfunc = greater_than_or_equal if varname.find('over') > 0 else less_than
     for row in cursor:
+        doy = row['d']
         if myfunc(row[col], threshold):
             running += 1
         else:
             running = 0
-        if running > maxperiod[int(row['d'])]:
-            maxperiod[int(row['d'])] = running
+        if running > maxperiod[doy]:
+            maxperiod[doy] = running
+            enddate[doy] = row['day']
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -75,10 +79,13 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    df = pd.DataFrame(dict(jdate=pd.Series(np.arange(0, 367)),
-                           maxperiod=pd.Series(maxperiod)))
+    df = pd.DataFrame(dict(mmdd=pd.date_range('1/1/2000',
+                                              '12/31/2000').strftime("%m%d"),
+                           jdate=pd.Series(np.arange(1, 367)),
+                           maxperiod=pd.Series(maxperiod[1:]),
+                           enddate=pd.Series(enddate[1:])))
     (fig, ax) = plt.subplots(1, 1, sharex=True)
-    ax.bar(np.arange(0, 367), maxperiod,  fc='b', ec='b')
+    ax.bar(np.arange(1, 367), maxperiod[1:],  fc='b', ec='b')
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")
     ax.set_title(("%s %s\nMaximum Straight Days with %s %s$^\circ$F"
@@ -89,3 +96,6 @@ def plotter(fdict):
     ax.set_xlim(0, 366)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
