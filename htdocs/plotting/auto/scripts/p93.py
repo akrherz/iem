@@ -145,10 +145,13 @@ def plotter(fdict):
     fig = plt.figure(figsize=(9, 6))
     ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
     yloc = 1.0
-    xloc = 1.15
+    xloc = 1.13
+    yrlabel = ("%s" % (highlightyear,)
+               if varname != 'windchill'
+               else '%s-%s' % (highlightyear, highlightyear + 1))
     ax.text(xloc + 0.08, yloc + 0.04, 'Avg:',
             transform=ax.transAxes, color='b')
-    ax.text(xloc + 0.21, yloc + 0.04, '%s:' % (highlightyear,),
+    ax.text(xloc + 0.21, yloc + 0.04, yrlabel,
             transform=ax.transAxes, color='r')
     df3 = df2[df2['year'] == highlightyear]
     for level in LEVELS[varname]:
@@ -169,7 +172,7 @@ def plotter(fdict):
     rdf = pd.DataFrame({'level': x, 'avg': y, 'd%s' % (highlightyear,): y2})
     x = np.array(x, dtype=np.float64)
     ax.scatter(x, y, color='b', label='Avg')
-    ax.scatter(x, y2, color='r', label="%s" % (highlightyear,))
+    ax.scatter(x, y2, color='r', label=yrlabel)
     ax.grid(True)
     ymax = int(max([max(y), max(y2)]))
     ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
