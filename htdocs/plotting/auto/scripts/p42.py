@@ -168,7 +168,7 @@ def plotter(fdict):
       ORDER by valid ASC
       """, (station, tuple(months)))
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     interval = datetime.timedelta(hours=hours)
 
     valid = []
