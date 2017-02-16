@@ -276,8 +276,8 @@ data = {'plots': [
         {'id': "131",
          'label': ("Frequency of Overcast Clouds by Air Temperature "
                    "by month/season")},
-        {'id': "93", 'label': ("Heat Index / Temperature / Dew Point "
-                               "Hourly Histogram")},
+        {'id': "93", 'label': ("Heat Index / Temperature / Dew Point / "
+                               "Wind Chill Hourly Histogram")},
         {'id': "153",
          'label': "Hourly Temp/Dew Point Extremes by Month/Season/Year"},
         {'id': "159",

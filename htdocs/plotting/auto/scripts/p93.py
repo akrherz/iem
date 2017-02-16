@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 import datetime
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, speed
 import pyiem.meteorology as pymet
 from pyiem.util import get_autoplot_context
 from collections import OrderedDict
@@ -16,10 +16,14 @@ VDICT = OrderedDict([
             ('tmpf', 'Air Temperature'),
             ('dwpf', 'Dew Point Temperature'),
             ('heatindex', 'Heat Index'),
+            ('windchill', 'Wind Chill Index'),
             ])
 LEVELS = {'tmpf': np.arange(85, 115),
           'dwpf': np.arange(60, 85),
-          'heatindex': np.arange(90, 121)}
+          'heatindex': np.arange(90, 121),
+          'windchill': np.arange(-50, 1)}
+OPTDICT = {'no': 'No, only include times when heatindex/windchill is additive',
+           'yes': 'Yes, include all observations'}
 
 
 def get_description():
@@ -28,19 +32,43 @@ def get_description():
     d['data'] = True
     d['description'] = """Caution: This plot takes a bit of time to
     generate. This plot displays a histogram of hourly heat index
-    values or temperature or dew point.  The connecting lines between the
-    dots are to help readability."""
+    values or temperature or dew point or wind chill.
+    The connecting lines between the dots are to help readability. In the
+    case of wind chill, the year shown is for the winter season actual year
+    with December contained within.
+
+    <p>This form provides an option for the case of wind chill and heat index
+    to only include cases that are additive.  What this means is to only
+    include observations where the wind chill temperature is colder than the
+    air temperature or when the heat index temperature is warmer than the
+    air temperature.</p>"""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='year', minvalue=1973, default=datetime.date.today().year,
-             name='year', label='Year to Highlight'),
+             name='year', label='Year to Highlight:'),
         dict(type='select', options=VDICT, name='var', default='heatindex',
              label='Select variable to plot:'),
         dict(type='select', options=PDICT, name='ytd', default='no',
              label='Include Only Year to Date Data?'),
+        dict(type='select', options=OPTDICT, name='inc', default='no',
+             label=('Include cases where windchill or heatindex '
+                    'is not additive')),
     ]
     return d
+
+
+def get_doylimit(ytd, varname):
+    if ytd == 'no':
+        return ''
+    if varname != 'windchill':
+        return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
+    today = datetime.date.today()
+    if today.month > 7:
+        return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
+
+    return ("and (extract(doy from valid) < extract(doy from 'TODAY'::date) "
+            "or extract(month from valid) > 6)")
 
 
 def plotter(fdict):
@@ -56,16 +84,18 @@ def plotter(fdict):
     highlightyear = ctx['year']
     ytd = ctx['ytd']
     varname = ctx['var']
+    inc = ctx['inc']
     nt = NetworkTable(network)
-    doylimiter = ""
-    if ytd == 'yes':
-        doylimiter = (" and extract(doy from valid) < "
-                      " extract(doy from 'TODAY'::date) ")
+    doylimiter = get_doylimit(ytd, varname)
+    tmpflimit = "and tmpf >= 50" if varname != 'windchill' else 'and tmpf < 50'
+    if varname not in ['windchill', 'heatindex']:
+        tmpflimit = ""
 
     df = read_sql("""
     SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf,
-    avg(dwpf)::int as dwpf
-    from alldata WHERE station = %s and tmpf >= 50
+    avg(dwpf)::int as dwpf,
+    avg(coalesce(sknt, 0)) as sknt
+    from alldata WHERE station = %s """ + tmpflimit + """
     and dwpf <= tmpf and valid > '1973-01-01'
     and report_type = 2 """ + doylimiter + """ GROUP by d
     """, ASOS, params=(station, ), index_col=None)
@@ -73,13 +103,38 @@ def plotter(fdict):
 
     df2 = df
     title2 = VDICT[varname]
+    compop = np.greater
+    inctitle = ''
     if varname == 'heatindex':
-        title2 = "Heat Index (when accretive to air temp)"
-        df['heatindex'] = df[['tmpf', 'dwpf']].apply(
-            lambda x: pymet.heatindex(temperature(x[0], 'F'),
-                                      temperature(x[1],
-                                                  'F')).value('F'), axis=1)
-        df2 = df[df['heatindex'] > df['tmpf']]
+        df['heatindex'] = pymet.heatindex(
+            temperature(df['tmpf'].values, 'F'),
+            temperature(df['dwpf'].values, 'F')).value('F')
+        inctitle = " [All Obs Included]"
+        if inc == 'no':
+            df2 = df[df['heatindex'] > df['tmpf']]
+            inctitle = " [Only Additive]"
+        else:
+            df2 = df
+        maxval = int(df2['heatindex'].max() + 1)
+        LEVELS[varname] = np.arange(maxval - 31, maxval)
+    elif varname == 'windchill':
+        compop = np.less
+        df['year'] = df['d'].apply(
+            lambda x: (int(x[:4]) - 1) if int(x[4:6]) < 7 else int(x[:4]))
+        df['windchill'] = pymet.windchill(temperature(df['tmpf'].values, 'F'),
+                                          speed(df['sknt'].values, 'KT')
+                                          ).value('F')
+        inctitle = " [All Obs Included]"
+        if inc == 'no':
+            df2 = df[df['windchill'] < df['tmpf']]
+            inctitle = " [Only Additive]"
+        else:
+            df2 = df
+        minval = int(df2['windchill'].min() - 1)
+        LEVELS[varname] = np.arange(minval, minval + 51)
+    else:
+        maxval = int(df2[varname].max() + 1)
+        LEVELS[varname] = np.arange(maxval - 31, maxval)
 
     minyear = max([1973, nt.sts[station]['archive_begin'].year])
     maxyear = datetime.date.today().year
@@ -87,28 +142,30 @@ def plotter(fdict):
     x = []
     y = []
     y2 = []
-    (fig, ax) = plt.subplots(1, 1)
-    yloc = 0.9
-    ax.text(0.7, 0.94, 'Avg:',
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
+    yloc = 1.0
+    xloc = 1.15
+    ax.text(xloc + 0.08, yloc + 0.04, 'Avg:',
             transform=ax.transAxes, color='b')
-    ax.text(0.85, 0.94, '%s:' % (highlightyear,),
+    ax.text(xloc + 0.21, yloc + 0.04, '%s:' % (highlightyear,),
             transform=ax.transAxes, color='r')
+    df3 = df2[df2['year'] == highlightyear]
     for level in LEVELS[varname]:
         x.append(level)
-        y.append(len(df2[df2[varname] >= level]) / years)
-        y2.append(len(df[np.logical_and(df[varname] >= level,
-                                        df['year'] == highlightyear)]))
+        y.append(len(df2[compop(df2[varname], level)]) / years)
+        y2.append(len(df3[compop(df3[varname], level)]))
         if level % 2 == 0:
-            ax.text(0.6, yloc, '%s' % (level,),
+            ax.text(xloc, yloc, '%s' % (level,),
                     transform=ax.transAxes)
-            ax.text(0.7, yloc, '%.1f' % (y[-1],),
+            ax.text(xloc + 0.08, yloc, '%.1f' % (y[-1],),
                     transform=ax.transAxes, color='b')
-            ax.text(0.85, yloc, '%.0f' % (y2[-1],),
+            ax.text(xloc + 0.21, yloc, '%.0f' % (y2[-1],),
                     transform=ax.transAxes, color='r')
             yloc -= 0.04
+    ax.text(xloc, yloc, 'n=%s' % (len(df2.index),), transform=ax.transAxes)
     for x0, y0, y02 in zip(x, y, y2):
-        c = 'r' if y02 > y0 else 'b'
-        ax.plot([x0, x0], [y0, y02], color=c)
+        ax.plot([x0, x0], [y0, y02], color='k')
     rdf = pd.DataFrame({'level': x, 'avg': y, 'd%s' % (highlightyear,): y2})
     x = np.array(x, dtype=np.float64)
     ax.scatter(x, y, color='b', label='Avg')
@@ -129,12 +186,14 @@ def plotter(fdict):
     title = 'till %s' % (datetime.date.today().strftime("%-d %b"),)
     title = "Entire Year" if ytd == 'no' else title
     ax.set_title(("[%s] %s %s-%s\n"
-                  "%s Histogram (%s)"
+                  "%s Histogram (%s)%s"
                   ) % (station, nt.sts[station]['name'],
                        minyear,
-                       datetime.date.today().year, title2, title))
-    ax.legend(loc=(0.2, 0.8), scatterpoints=1)
+                       datetime.date.today().year, title2, title,
+                       inctitle))
+    ax.legend(loc='best', scatterpoints=1)
     return fig, rdf
 
 if __name__ == '__main__':
-    plotter(dict(ytd='yes', network='IA_ASOS', zstation='AMW'))
+    plotter(dict(ytd='yes', network='IA_ASOS', zstation='AMW',
+                 var='tmpf', inc='yes'))
