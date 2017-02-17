@@ -26,7 +26,7 @@ function liveShot()
 	if (aqlive) return;
 	aqlive = true;
 	ts = new Date();
-	$("#webcam_image").attr('src', "live.php?id="+ cameraID +"&"+ ts.getTime());
+	$("#webcam_image").attr('src', "/current/live/"+ cameraID +".jpg?ts="+ts.getTime());
 	aqlive = false;
 }
 function setCameraFromForm(cid){
