@@ -301,6 +301,14 @@
     RewriteRule ^[0-9]{4}/[0-9]{2}/.*$ content.py [PT]
   </Directory>
 
+  <Directory "/opt/iem/htdocs/current">
+    AddHandler cgi-script .py
+    Options +ExecCGI
+
+	RewriteRule live.php(.*)$ live.py$1
+    RewriteRule live/(.*).jpg live.py?id=$1 [L]
+  </Directory>
+
   <Directory "/opt/iem/htdocs/other">
     AddHandler cgi-script .py
     Options +ExecCGI
