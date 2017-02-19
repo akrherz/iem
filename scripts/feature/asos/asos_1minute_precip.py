@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='localhost', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2017, 1, 19, 8, 30)
+sts = datetime.datetime(2017, 2, 17, 8, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2017, 1, 19, 23, 0)
+ets = datetime.datetime(2017, 2, 18, 8, 0)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/Chicago'
-station = 'BTR'
+tzname = 'America/Los_Angeles'
+station = 'SBA'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -71,7 +71,7 @@ while now < lets:
 
 prop = matplotlib.font_manager.FontProperties(size=12)
 
-(fig, ax) = plt.subplots(1, 1)
+(fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
 ax.bar(np.arange(sz), rate1, fc='b', ec='b', label="Hourly Rate over 1min",
        zorder=1)
@@ -111,8 +111,8 @@ ax.set_xlim(0, sz)
 ax.legend(loc=(0.55, 0.7), prop=prop, ncol=1)
 ax.set_ylim(0, 7)
 ax.set_yticks(range(0, 8, 1))
-ax.set_xlabel("19 January 2017 (%s)" % (tzname,))
-ax.set_title(("19 January 2017 Baton Rouge, LA (KBTR)\n"
+ax.set_xlabel("17 February 2017 (%s)" % (tzname,))
+ax.set_title(("17 February 2017 Santa Barbara, CA (KSBA)\n"
               "One Minute Rainfall, %.2f inches total plotted"
               ) % (prec[-1],))
 
