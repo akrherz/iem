@@ -8,7 +8,7 @@
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="/vendor/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+    <link href="/vendor/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
 </head>
 
 <body> 
@@ -64,6 +64,6 @@
 
 </div>
   <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
-  <script src="/vendor/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>
