@@ -40,8 +40,6 @@ python extract_hfmetar.py 0 &
 
 cd ../cocorahs
 python cocorahs_stations.py IA
-python cocorahs_stations.py IL
-python cocorahs_data_ingest.py IL
 python cocorahs_data_ingest.py IA
 
 cd ../../plots

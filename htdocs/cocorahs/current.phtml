@@ -90,29 +90,20 @@ $cols = Array("ts" => "Valid", "county" => "County",
   "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
   "phour" => "Rainfall One Hour", "pmonth" => "Rainfall for Month");
 
-$ar = Array("IACOCORAHS" => "Iowa",
-"ILCOCORAHS" => "Illinois");
-$nselect = make_select("network", $network, $ar);
-
-$baseurl2 = "current.phtml?network=$network&sortcol=";
+$baseurl2 = "current.phtml?sortcol=";
 $content = <<<EOF
-<form method="GET" action="current.phtml" name="stctrl">
-<input type="hidden" name="sortcol" value="{$sortcol}">
-<b>Show State:</b>{$nselect}
-<input type="submit" value="Go!">
-</form>
 <p>Sorted by: {$cols[$sortcol]}. 
 The number of observations missing for this month is shown in parenthesis.
 <form name="st" action="/my/current.phtml" method="GET">
-<table style="width: 100%; font-size: 10pt;" class="ruler" border="1">
+<table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
-  <th rowspan=2>Add:</th>
-  <th rowspan=2><a href="{$baseurl2}sid">SiteID:</a></th>
-  <th rowspan=2><a href="{$baseurl2}sname">Station Name:</a></th>
-  <th rowspan=2><a href="{$baseurl2}county">County:</a></th>
-  <th rowspan=2><a href="{$baseurl2}ts">Valid:</a></th>
-  <th colspan=5>Hydro</th></tr>
+  <th rowspan="2">Add:</th>
+  <th rowspan="2"><a href="{$baseurl2}sid">SiteID:</a></th>
+  <th rowspan="2"><a href="{$baseurl2}sname">Station Name:</a></th>
+  <th rowspan="2"><a href="{$baseurl2}county">County:</a></th>
+  <th rowspan="2"><a href="{$baseurl2}ts">Valid:</a></th>
+  <th colspan="5">Hydro</th></tr>
 
 <tr>
   <th><a href="{$baseurl2}pday">24hour Rain</a></th>

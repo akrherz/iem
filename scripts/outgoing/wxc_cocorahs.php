@@ -6,7 +6,7 @@ include("../../config/settings.inc.php");
 include("../../include/mlib.php");
 
 include("../../include/network.php");
-$nt = new NetworkTable(Array("IACOCORAHS","ILCOCORAHS") );
+$nt = new NetworkTable("IACOCORAHS");
 include("../../include/iemaccess.php");
 include("../../include/iemaccessob.php");
 $iem = new IEMAccess();

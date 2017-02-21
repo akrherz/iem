@@ -24,8 +24,6 @@
  $nt = new NetworkTable($network);
 
  $ys =  yearSelect(2007, $year, "year");
- $ar = Array("IACOCORAHS" => "Iowa CoCoRaHS", "ILCOCORAHS" => "Illinois CoCoRaHS");
-$nselect = make_select("network", $network, $ar);
  
 if (strlen($station) > 0) {
 	$rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
@@ -110,7 +108,6 @@ $content = <<<EOF
 <p><i>Click on the Station Number to view all obs from one station.</i></p>
 <form name="switchdate" action="obs.phtml" method="GET">
 <p>Enter Date:<input type="text" size="11" maxlength="10" name="date" value="{$date}">
-Select State: {$nselect}
 
 <input type="submit" value="View Date"></form>
 EOF;

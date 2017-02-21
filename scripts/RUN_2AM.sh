@@ -41,7 +41,6 @@ python unknown_stations.py
 
 cd ../ingestors/cocorahs
 python redo_day.py IA
-python redo_day.py IL
 
 cd ../asos_1minute
 if [ $DD -eq "09" ]
