@@ -6,7 +6,7 @@ import psycopg2
 import datetime
 import re
 
-LOGRE = re.compile("Autoplot\[\s?(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
+LOGRE = re.compile("Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
 LOGFN = '/var/log/mesonet/error_log'
 
 
