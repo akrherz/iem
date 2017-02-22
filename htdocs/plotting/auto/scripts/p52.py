@@ -77,7 +77,7 @@ def plotter(fdict):
         (fig, ax) = plt.subplots(figsize=(8, height))
         fontsize = 8
     else:
-        (fig, ax) = plt.subplots()
+        (fig, ax) = plt.subplots(figsize=(8, 6))
         fontsize = 10
 
     used = []
@@ -92,7 +92,7 @@ def plotter(fdict):
 
     for i, e in enumerate(events):
         secs = abs((e[1]-e[0]).days * 86400.0 + (e[1]-e[0]).seconds)
-        ax.barh(i+0.6, secs / 86400.0, left=e[0],
+        ax.barh(i + 1, secs / 86400.0, left=e[0], align='center',
                 fc=vtec.NWS_COLORS.get(types[i], 'k'),
                 ec=vtec.NWS_COLORS.get(types[i], 'k'), label=get_label(i))
         align = 'left'
@@ -131,3 +131,6 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=8)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

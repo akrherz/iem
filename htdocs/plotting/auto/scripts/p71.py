@@ -5,6 +5,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import drct2text
 from pyiem.datatypes import speed
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 PDICT = {'KT': 'knots',
          'MPH': 'miles per hour',
@@ -28,7 +29,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             network='IA_ASOS', label='Select Station:'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
              label='Select Year:'),
         dict(type='month', name='month', default=datetime.datetime.now().month,
@@ -54,14 +55,14 @@ def plotter(fdict):
     import matplotlib.patheffects as PathEffects
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
     units = fdict.get('units', 'MPH').upper()
     if units not in PDICT:
         units = 'MPH'
-    year = int(fdict.get('year', datetime.datetime.now().year))
-    month = int(fdict.get('month', datetime.datetime.now().month))
+    year = ctx['year']
+    month = ctx['month']
     sts = datetime.date(year, month, 1)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     nt = NetworkTable(network)
@@ -87,7 +88,7 @@ def plotter(fdict):
                            sknt=pd.Series(sknt)))
     sknt = speed(np.array(sknt), 'KT').value(units)
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(np.array(days)-0.4, sknt, ec='green', fc='green')
+    ax.bar(np.array(days), sknt, ec='green', fc='green', align='center')
     pos = max([min(sknt) / 2.0, 0.5])
     for d, _, r in zip(days, sknt, drct):
         draw_line(plt, d, max(sknt)+0.5, (270. - r) / 180. * np.pi)
@@ -100,6 +101,7 @@ def plotter(fdict):
                   ) % (nt.sts[station]['name'], station,
                        sts.strftime("%b %Y")))
     ax.set_xlim(0.5, max(days)+0.5)
+    ax.set_xticks(range(1, max(days)+1, 5))
     ax.set_ylim(top=max(sknt)+2)
 
     ax.set_ylabel("Average Wind Speed [%s]" % (PDICT.get(units),))
@@ -107,4 +109,4 @@ def plotter(fdict):
     return fig, df
 
 if __name__ == '__main__':
-    plotter({})
+    plotter(dict())

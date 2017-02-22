@@ -4,6 +4,7 @@ import numpy as np
 from pyiem import network
 import calendar
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict(
     [('min_range', 'Minimum Daily High to Low Temperature Range'),
@@ -26,7 +27,7 @@ def get_description():
     recent occurence is shown."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='min_range',
              label='Select Variable', options=PDICT),
     ]
@@ -39,9 +40,10 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA2203')
-    varname = fdict.get('var', 'min_range')
+    station = ctx['station']
+    varname = ctx['var']
     if varname not in PDICT:
         return "Invalid var specified..."
     table = "alldata_%s" % (station[:2],)
@@ -84,9 +86,9 @@ def plotter(fdict):
             labels.append("%s - %s" % (row[tokens[1]], row['dd']))
         ranges.append(row[tokens[1]])
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
-    ax.barh(np.arange(1, 13) - 0.4, ranges)
+    ax.barh(np.arange(1, 13), ranges, align='center')
     ax.set_yticklabels(calendar.month_name)
     ax.set_yticks(range(0, 13))
     ax.set_ylim(0, 13)

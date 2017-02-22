@@ -3,6 +3,7 @@ import pyiem.nws.vtec as vtec
 import numpy as np
 from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -30,10 +31,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    wfo = fdict.get('station', 'DMX')
-    phenomena = fdict.get('phenomena', 'WC')
-    significance = fdict.get('significance', 'W')
+    wfo = ctx['station']
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
 
     nt = NetworkTable("WFO")
 
@@ -60,7 +62,8 @@ def plotter(fdict):
     df = pd.DataFrame(dict(hour=pd.Series(np.arange(24)),
                            count=pd.Series(data)))
 
-    ax.bar(np.arange(24) - 0.4, data / float(sum(data)) * 100., ec='b', fc='b')
+    ax.bar(np.arange(24), data / float(sum(data)) * 100., ec='b', fc='b',
+           align='center')
     ax.grid()
     ax.set_xticks(range(0, 25, 1))
     ax.set_xlim(-0.5, 23.5)
@@ -74,3 +77,6 @@ def plotter(fdict):
                        vtec._sigDict[significance], phenomena, significance))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

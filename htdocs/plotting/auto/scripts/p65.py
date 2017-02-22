@@ -74,7 +74,7 @@ def plotter(fdict):
     ax[0].set_ylabel("Years (ties split)")
 
     ax[0].grid(True)
-    ax[0].bar(df['dom'] - 0.4, df['high_count'])
+    ax[0].bar(df['dom'], df['high_count'], align='center')
 
     ax[1].set_title(("Having %s Low Temperature of %s"
                      ) % (lbl, calendar.month_name[month], ),
@@ -82,7 +82,10 @@ def plotter(fdict):
     ax[1].set_ylabel("Years (ties split)")
     ax[1].grid(True)
     ax[1].set_xlabel("Day of %s" % (calendar.month_name[month], ))
-    ax[1].bar(df['dom'] - 0.4, df['low_count'])
+    ax[1].bar(df['dom'], df['low_count'], align='center')
     ax[1].set_xlim(0.5, days + 0.5)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

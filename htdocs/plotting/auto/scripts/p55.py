@@ -99,7 +99,7 @@ def plotter(fdict):
 
     days = np.array(days)
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True)
+    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 6))
 
     ax[0].set_title(("%s %s Daily Climate Comparison\n"
                      "Observation Period: %s-%s for %s"
@@ -109,21 +109,21 @@ def plotter(fdict):
                           datetime.datetime.now().year,
                           calendar.month_name[month]), fontsize=12)
 
-    ax[0].bar(days-0.4, o_avgh, width=0.8, fc='tan')
+    ax[0].bar(days, o_avgh, width=0.8, fc='tan', align='center')
     ax[0].plot(days, c81_avgh, lw=2, zorder=2, color='g')
     ax[0].plot(days, c71_avgh, lw=2, zorder=2, color='r')
     ax[0].grid(True)
     ax[0].set_ylabel("High Temp $^\circ$F")
     ax[0].set_ylim(bottom=min([min(o_avgh), min(c71_avgh), min(c81_avgh)])-2)
 
-    ax[1].bar(days-0.4, o_avgl, width=0.8, fc='tan')
+    ax[1].bar(days, o_avgl, width=0.8, fc='tan', align='center')
     ax[1].plot(days, c81_avgl, lw=2, zorder=2, color='g')
     ax[1].plot(days, c71_avgl, lw=2, zorder=2, color='r')
     ax[1].grid(True)
     ax[1].set_ylabel("Low Temp $^\circ$F")
     ax[1].set_ylim(bottom=min([min(o_avgl), min(c71_avgl), min(c81_avgl)])-2)
 
-    ax[2].bar(days-0.4, o_avgt, width=0.8, fc='tan',
+    ax[2].bar(days, o_avgt, width=0.8, fc='tan', align='center',
               label='IEM Observered Avg')
     ax[2].plot(days, c81_avgt, lw=2, zorder=2, color='g',
                label='NCEI 1981-2010')
@@ -140,3 +140,6 @@ def plotter(fdict):
     ax[2].set_xlim(0.5, len(days)+0.5)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

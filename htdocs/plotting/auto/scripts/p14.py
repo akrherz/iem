@@ -1,12 +1,15 @@
 import psycopg2.extras
 import numpy as np
 import datetime
+import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
+    d['data'] = True
     d['description'] = """Using long term data, five precipitation bins are
     constructed such that each bin contributes 20% to the annual precipitation
     total.  Using these 5 bins, an individual year's worth of data is
@@ -14,7 +17,7 @@ def get_description():
     departures can be explained by these differences in precipitation bins."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
              label='Year to Highlight:'),
     ]
@@ -28,10 +31,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
     today = datetime.datetime.now()
-    year = int(fdict.get('year', today.year))
+    year = ctx['year']
     jdaylimit = 367
     if year == today.year:
         jdaylimit = int(today.strftime("%j"))
@@ -40,7 +43,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     endyear = int(datetime.datetime.now().year) + 1
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     cursor.execute("""
         select precip, sum(precip) OVER (ORDER by precip ASC) as rsum,
@@ -65,6 +68,10 @@ def plotter(fdict):
 
     normal = total / float(endyear - minyear - 1)
     bins.append(row['precip'])
+
+    df = pd.DataFrame({'bin': range(1, 6),
+                       'lower': bins[0:-1],
+                       'upper': bins[1:]}, index=range(1, 6))
 
     yearlybins = np.zeros((endyear-minyear, 5), 'f')
     yearlytotals = np.zeros((endyear-minyear, 5), 'f')
@@ -94,25 +101,31 @@ def plotter(fdict):
             yearlytotals[int(row[0]) - minyear, i] = row['tot%s' % (i, )]
 
     avgs = np.average(yearlybins, 0)
+    df['avg_days'] = avgs
     dlast = yearlybins[year-minyear, :]
+    df['days_%s' % (year,)] = dlast
+    df['precip_%s' % (year, )] = yearlytotals[year-minyear, :]
+    df['normal_%s' % (year, )] = normal / 5.
 
-    bars = ax.bar(np.arange(5) - 0.4, avgs, width=0.4, fc='b',
+    ybuffer = (max([max(avgs), max(dlast)]) + 2) * 0.03
+
+    bars = ax.bar(np.arange(5) - 0.2, avgs, width=0.4, fc='b', align='center',
                   label='Average = %.2f"' % (normal,))
     for i in range(len(bars)):
-        ax.text(bars[i].get_x()+0.2, avgs[i] + 1.5, "%.1f" % (avgs[i],),
+        ax.text(bars[i].get_x()+0.2, avgs[i] + ybuffer, "%.1f" % (avgs[i],),
                 ha='center', zorder=2)
         delta = yearlytotals[year-minyear, i] / normal * 100.0 - 20.0
-        ax.text(i, max(avgs[i], dlast[i]) + 4,
+        ax.text(i, max(avgs[i], dlast[i]) + 2 * ybuffer,
                 "%s%.1f%%" % ("+" if delta > 0 else "", delta,),
                 ha='center', color='r',
                 bbox=dict(facecolor='white', edgecolor='white'),
                 zorder=1)
 
-    bars = ax.bar(np.arange(5), dlast, width=0.4, fc='r',
+    bars = ax.bar(np.arange(5) + 0.2, dlast, width=0.4, fc='r', align='center',
                   label='%s = %.2f"' % (year,
                                         np.sum(yearlytotals[year-minyear, :])))
     for i in range(len(bars)):
-        ax.text(bars[i].get_x()+0.2, dlast[i] + 1.5, "%.0f" % (dlast[i],),
+        ax.text(bars[i].get_x()+0.2, dlast[i] + ybuffer, "%.0f" % (dlast[i],),
                 ha='center')
 
     ax.text(0.7, 0.8, ("Red text represents %s bin total\nprecip "
@@ -137,4 +150,7 @@ def plotter(fdict):
     ax.set_xticklabels(xlabels)
     ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
 
-    return fig
+    return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

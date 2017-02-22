@@ -6,6 +6,7 @@ import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('avg_temp', 'Average Daily Temperature'),
                      ('avg_high_temp', 'Average High Temperature'),
@@ -24,7 +25,7 @@ def get_description():
     considered for the analysis."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             network='IACLIMATE', label='Select Station:'),
         dict(type='select', options=PDICT, name='varname', default='avg_temp',
              label='Variable to Plot'),
         dict(type='select', options=PDICT2, name='agg', default='max',
@@ -39,10 +40,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA2203')
-    varname = fdict.get('varname', 'avg_temp')
-    agg = fdict.get('agg', 'max')
+    station = ctx['station']
+    varname = ctx['varname']
+    agg = ctx['agg']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -75,10 +77,10 @@ def plotter(fdict):
     resdf = resdf.groupby(level=0)
     resdf = resdf.last()
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     col = "%s_%s" % (agg, varname)
-    ax.bar(np.arange(1, 13) - 0.4, resdf[col], fc='pink')
+    ax.bar(np.arange(1, 13), resdf[col], fc='pink', align='center')
     for month, row in resdf.iterrows():
         if np.isnan(row[col]):
             continue

@@ -4,6 +4,7 @@ import matplotlib.patheffects as PathEffects
 from pandas.io.sql import read_sql
 from collections import OrderedDict
 import datetime
+from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High Temperature',
          'low': 'Low Temperature',
@@ -38,7 +39,7 @@ def get_description():
     other years with a full year's worth of data."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', options=PDICT, name='var', default='high',
              label='Which variable to plot?'),
         dict(type='select', name='month', default='all',
@@ -53,10 +54,10 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
-    varname = fdict.get('var', 'high')
-    month = fdict.get('month', 'all')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
+    month = ctx['month']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -100,14 +101,14 @@ def plotter(fdict):
     df['low_freq'] = df['low_above'] / df['days'].astype('f') * 100.
     df['avg_freq'] = df['avg_above'] / df['days'].astype('f') * 100.
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = df[varname+'_freq'].mean()
 
     colorabove = 'r'
     colorbelow = 'b'
     data = df[varname+'_freq'].values
-    bars = ax.bar(df.index.values - 0.4, data, fc=colorabove,
-                  ec=colorabove)
+    bars = ax.bar(df.index.values, data, fc=colorabove,
+                  ec=colorabove, align='center')
     for i, bar in enumerate(bars):
         if data[i] < avgv:
             bar.set_facecolor(colorbelow)
@@ -132,3 +133,6 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

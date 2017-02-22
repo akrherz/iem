@@ -1,9 +1,8 @@
 import psycopg2
-import numpy as np
 from pyiem import network
-import datetime
 from scipy import stats
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
@@ -25,14 +24,14 @@ def get_description():
     either above or below some temperature threshold."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', default='winter',
              label='Select Season:', options=PDICT2),
         dict(type='select', name='dir', default='below',
              label='Threshold Direction:', options=PDICT),
         dict(type='select', name='var', default='low',
              label='Which Daily Variable:', options=PDICT3),
-        dict(type='text', name='threshold', default=0,
+        dict(type='float', name='threshold', default=0,
              label='Temperature (F) or Precip (in) Threshold:'),
         dict(type="year", name="year", default=1893,
              label="Start Year of Plot"),
@@ -47,16 +46,13 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
-    season = fdict.get('season', 'winter')
-    _ = PDICT2[season]
-    direction = fdict.get('dir', 'below')
-    _ = PDICT[direction]
-    varname = fdict.get('var', 'low')
-    _ = PDICT3[varname]
-    threshold = float(fdict.get('threshold', 0))
-    startyear = int(fdict.get('year', 1893))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    season = ctx['season']
+    direction = ctx['dir']
+    varname = ctx['var']
+    threshold = ctx['threshold']
+    startyear = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -80,7 +76,7 @@ def plotter(fdict):
     """, pgconn, params=(1 if season != 'all' else 0, station, startyear),
                   index_col='yr')
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = df[season].mean()
 
     colorabove = 'r'
@@ -88,8 +84,8 @@ def plotter(fdict):
     if direction == 'below':
         colorabove = 'b'
         colorbelow = 'r'
-    bars = ax.bar(df.index.values - 0.4, df[season], fc=colorabove,
-                  ec=colorabove)
+    bars = ax.bar(df.index.values, df[season], fc=colorabove,
+                  ec=colorabove, align='center')
     for i, bar in enumerate(bars):
         if df[season].values[i] < avgv:
             bar.set_facecolor(colorbelow)
@@ -119,3 +115,6 @@ def plotter(fdict):
     ax.legend(ncol=1)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

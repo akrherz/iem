@@ -146,7 +146,7 @@ def plotter(fdict):
     resdf = pd.DataFrame(rows)
     resdf.set_index('year', inplace=True)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     for year, row in resdf.iterrows():
         c = 'k'
         sz = 10.

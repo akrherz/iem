@@ -67,16 +67,16 @@ def plotter(fdict):
     """, pgconn, params=(station, year), index_col=None)
     if len(df.index) == 0:
         return "No Precipitation Data Found for Site"
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     monthly = df['avg'].values.tolist()
-    bars = ax.bar(df['month'] - 0.4, monthly, fc='red', ec='red',
-                  width=0.4, label='Climatology')
+    bars = ax.bar(df['month'] - 0.2, monthly, fc='red', ec='red',
+                  width=0.4, label='Climatology', align='center')
     for i, _ in enumerate(bars):
         ax.text(i+1-0.25, monthly[i]+1, "%.0f" % (monthly[i],), ha='center')
     thisyear = df['count'].values.tolist()
     if not all([a is None for a in thisyear]):
-        bars = ax.bar(np.arange(1, 13), thisyear, fc='blue', ec='blue',
-                      width=0.4, label=str(year))
+        bars = ax.bar(np.arange(1, 13) + 0.2, thisyear, fc='blue', ec='blue',
+                      width=0.4, label=str(year), align='center')
         for i, _ in enumerate(bars):
             if not np.isnan(thisyear[i]):
                 ax.text(i+1+0.25, thisyear[i]+1, "%.0f" % (thisyear[i],),

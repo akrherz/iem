@@ -5,6 +5,7 @@ import datetime
 from pyiem.network import Table as NetworkTable
 import calendar
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'jan1': 'January 1',
          'jul1': 'July 1'}
@@ -43,11 +44,11 @@ def plotter(fdict):
     from matplotlib.ticker import FormatStrFormatter
 
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'DMX')[:4]
-    phenomena = fdict.get('phenomena', 'SV')
-    significance = fdict.get('significance', 'W')
-    split = fdict.get('split', 'jan1')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station'][:4]
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
+    split = ctx['split']
 
     nt = NetworkTable('WFO')
 
@@ -93,10 +94,10 @@ def plotter(fdict):
     starts = df['startdoy'].values
     years = df.index.values
 
-    fig = plt.Figure()
+    fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.7, 0.8])
 
-    ax.barh(years-0.4, (ends - starts), left=starts, fc='blue')
+    ax.barh(years, (ends - starts), left=starts, fc='blue', align='center')
     ax.axvline(np.average(starts[:-1]), lw=2, color='red')
     ax.axvline(np.average(ends[:-1]), lw=2, color='red')
     ax.set_xlabel(("Avg Start Date: %s, End Date: %s"
@@ -125,7 +126,7 @@ def plotter(fdict):
     ax.yaxis.set_major_formatter(xFormatter)
 
     ax = plt.axes([0.82, 0.1, 0.13, 0.8])
-    ax.barh(years-0.4, df['count'], fc='blue')
+    ax.barh(years, df['count'], fc='blue', align='center')
     ax.set_ylim(years[0]-0.5, years[-1]+0.5)
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
@@ -135,3 +136,6 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(xloc)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
