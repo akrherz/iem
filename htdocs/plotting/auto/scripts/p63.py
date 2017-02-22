@@ -35,7 +35,7 @@ def plotter(fdict):
     syear = max(1893, nt.sts[station]['archive_begin'].year)
     eyear = datetime.datetime.now().year
 
-    cursor.execute("""SELECT sday, year, high, low from """+table+"""
+    cursor.execute("""SELECT sday, year, high, low, day from """+table+"""
       where station = %s and sday != '0229'
       and year >= %s ORDER by day ASC""", (station, syear))
 
@@ -45,6 +45,7 @@ def plotter(fdict):
     lyears = [0]*(eyear - syear + 1)
     expect = [0]*(eyear - syear + 1)
 
+    # hstraight = 0
     for row in cursor:
         sday = row[0]
         year = row[1]
@@ -57,6 +58,11 @@ def plotter(fdict):
         if high > hrecords[sday]:
             hrecords[sday] = row['high']
             hyears[year - syear] += 1
+            # hstraight += 1
+            # if hstraight > 3:
+            #    print hstraight, sday, row[4]
+        # else:
+        #     hstraight = 0
         if low < lrecords[sday]:
             lrecords[sday] = low
             lyears[year - syear] += 1
@@ -101,3 +107,6 @@ def plotter(fdict):
     ax[1].text(eyear-50, 22, "Min Low Temperature")
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict(station='IA6389', network='IACLIMATE'))
