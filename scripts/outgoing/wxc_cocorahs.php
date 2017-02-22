@@ -27,7 +27,7 @@ fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
    6 Snow Depth
 ", date("Y.m.d.H.I")) );
  
-$states = Array("IA","IL");
+$states = Array("IA");
 reset($states);
 $now = time();
 while(list($k,$state) = each($states)){
