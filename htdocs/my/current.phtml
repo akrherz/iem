@@ -195,6 +195,7 @@ while (list ($key, $val) = each ($finalA))  {
 		$format = "%I:%M %p";
 	}
 	$table .= ">". strftime($format, $parts["ts"]) ."</td>";
+	$table .= sprintf("<td>%s</td>\n", $parts["presentwx"]);
 
 	$table .= "<td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) .")</td>
           <td align='center'>". round($parts["dwpf"],0) ."</td>
@@ -248,6 +249,7 @@ Click on a column to sort it.<br>
   <th rowspan="2">DEL</th>
   <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
   <th rowspan="2"><a href="{$uri}ts">Valid</a></th>
+  <th rowspan="2">Present Wx</th>
   <th colspan=6></td>
   <th colspan="3" bgcolor="#EEEEEE">Wind (knots)</th>
   <th colspan="2" bgcolor="#e6e6fa">Precipitation (inch)</th>
@@ -272,9 +274,7 @@ Click on a column to sort it.<br>
 </tbody>
 <tfoot>
 <tr>
- <td></td>
- <td></td>
- <td></td>
+ <td colspan="4"></td>
  <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=tmpf&{$cgiStr}');">Plot</a> (<a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=max_tmpf&{$cgiStr}');">Plot</a> / <a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=min_tmpf&{$cgiStr}');">Plot</a> )</td>
  <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=dwpf&{$cgiStr}');">Plot</a></td>
  <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=feel&{$cgiStr}');">Plot</a></td>
