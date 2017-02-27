@@ -357,7 +357,7 @@ def hardcode(ts):
         if sid not in nt.sts:
             continue
         icursor.execute("""
-        SELECT max_tmpf, min_tmpf, pday from summary s JOIN stations t
+        SELECT max_tmpf, min_tmpf, pday, snow from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE t.id = %s and s.day = %s and
         t.network = %s
         """, (HARDCODE[sid], ts, state + "_ASOS"))
@@ -369,6 +369,8 @@ def hardcode(ts):
                 nt.sts[sid]['low'] = row[1]
             if row[2] is not None:
                 nt.sts[sid]['precip'] = row[2]
+            if row[3] is not None:
+                nt.sts[sid]['snow'] = row[3]
 
 
 def main():
