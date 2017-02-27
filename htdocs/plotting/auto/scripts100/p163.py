@@ -10,6 +10,7 @@ from pyiem.util import get_autoplot_context
 MDICT = OrderedDict([
  ('NONE', 'All LSR Types'),
  ('NRS', 'All LSR Types except HEAVY RAIN + SNOW'),
+ ('CON', 'Convective LSRs (Tornado, TStorm Gst/Dmg, Hail)'),
  ("AVALANCHE", "AVALANCHE"),
  ("BLIZZARD", "BLIZZARD"),
  ("COASTAL FLOOD", "COASTAL FLOOD"),
@@ -93,7 +94,10 @@ def plotter(fdict):
     if myfilter == 'NONE':
         tlimiter = ''
     elif myfilter == 'NRS':
-        tlimiter = " and typetext not in ('HEAVY RAIN', 'SNOW') "
+        tlimiter = " and typetext not in ('HEAVY RAIN', 'SNOW', 'HEAVY SNOW') "
+    elif myfilter == 'CON':
+        tlimiter = (" and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
+                    "'TSTM WND DMG') ")
     else:
         tlimiter = " and typetext = '%s' " % (myfilter,)
 
@@ -110,6 +114,7 @@ def plotter(fdict):
     bins[-1] += 1
     p = MapPlot(sector='nws', axisbg='white',
                 title='Local Storm Report Counts by NWS Office',
+                subtitlefontsize=10,
                 subtitle=('Valid %s - %s UTC, type limiter: %s'
                           ) % (sts.strftime("%d %b %Y %H:%M"),
                                ets.strftime("%d %b %Y %H:%M"),

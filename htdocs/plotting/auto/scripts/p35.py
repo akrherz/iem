@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def compute_bins(interval):
@@ -22,10 +23,10 @@ def get_description():
     in temperature over a given number of hours."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
-        dict(type='text', name='hours', default=24,
+             label='Select Station:', network='IA_ASOS'),
+        dict(type='int', name='hours', default=24,
              label='Hours:'),
-        dict(type='text', name='interval', default=1,
+        dict(type='float', name='interval', default=1,
              label="Histogram Binning Width (deg F)"),
     ]
     return d
@@ -38,11 +39,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    hours = int(fdict.get('hours', 24))
-    interval = float(fdict.get('interval', 1))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    hours = ctx['hours']
+    interval = ctx['interval']
     if interval > 10 or interval < 0.1:
         return "Invalid interval provided, positive number less than 10"
 

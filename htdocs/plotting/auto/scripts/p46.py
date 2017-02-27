@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -15,7 +16,7 @@ def get_description():
     d['cache'] = 86400
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
     ]
     return d
 
@@ -27,9 +28,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
 
     nt = NetworkTable(network)
 
@@ -60,7 +61,7 @@ def plotter(fdict):
         ys.append(lev)
     ys = np.array(ys)
 
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
     ax[0].barh(ys-0.4, freq, ec='b', fc='b')
     ax[0].set_ylim(-60.5, 0.5)
@@ -77,4 +78,8 @@ def plotter(fdict):
     ax[1].set_ylabel("Minimum Wind Chill $^\circ$F")
     ax[1].grid(True)
     ax[1].set_xlabel("Year label for spring portion of season")
+
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

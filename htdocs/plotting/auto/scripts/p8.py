@@ -6,6 +6,7 @@ import numpy as np
 from pyiem import network
 import calendar
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -13,12 +14,12 @@ def get_description():
     d = dict()
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='syear', default='1993',
              label='Enter Start Year:'),
         dict(type='year', name='eyear', default='2013',
              label='Enter End Year (inclusive):'),
-        dict(type='text', name='threshold', default='80',
+        dict(type='int', name='threshold', default='80',
              label='Threshold Percentage [%]:'),
     ]
     d['data'] = True
@@ -37,11 +38,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     coop = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    syear = int(fdict.get('syear', 1993))
-    eyear = int(fdict.get('eyear', 2013))
-    threshold = int(fdict.get('threshold', 80))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    syear = ctx['syear']
+    eyear = ctx['eyear']
+    threshold = ctx['threshold']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -61,6 +62,8 @@ def plotter(fdict):
     years = float(1 + eyear - syear)
     for row in cursor:
         vals.append(row[1] / years * 100.)
+    if len(vals) == 0:
+        raise Exception("No Data Found!")
     df = pd.DataFrame(dict(freq=pd.Series(vals, index=range(1, 13))),
                       index=pd.Series(range(1, 13), name='month'))
 
@@ -80,3 +83,6 @@ def plotter(fdict):
                        eyear, threshold))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -4,6 +4,7 @@ import datetime
 import calendar
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'Temperature At or Above (AOA) Threshold',
          'below': 'Temperature Below Threshold'}
@@ -19,14 +20,14 @@ def get_description():
     of days above or below a given high or low temperature threshold."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='high', options=PDICT2,
              label='Select which daily variable'),
         dict(type='select', name='dir', default='above', options=PDICT,
              label='Select temperature direction'),
-        dict(type='text', name='threshold', default='60',
+        dict(type='int', name='threshold', default='60',
              label='Temperature Threshold (F):'),
-        dict(type='text', name='days', default='7',
+        dict(type='int', name='days', default='7',
              label='Number of Days:')
     ]
     return d
@@ -38,12 +39,12 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203')
-    days = int(fdict.get('days', 7))
-    threshold = int(fdict.get('threshold', 60))
-    varname = fdict.get('var', 'high')[:4]
-    mydir = fdict.get('dir', 'above')[:5]
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    days = ctx['days']
+    threshold = ctx['threshold']
+    varname = ctx['var']
+    mydir = ctx['dir']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -86,3 +87,6 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 53)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
