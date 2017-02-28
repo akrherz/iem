@@ -25,7 +25,10 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("UTC"), microsecond=0)
 
-    req = requests.get(URI, timeout=30)
+    try:
+        req = requests.get(URI, timeout=30)
+    except requests.exceptions.ReadTimeout:
+        return
     if req.status_code != 200:
         print(("dot_plows got non-200 status_code: %s\n"
                "Content: %s") % (req.status_code, req.content))
