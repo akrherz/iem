@@ -33,7 +33,7 @@ def workflow():
     data = json.loads(req.content)
     newplows = {}
     for feat in data['layers'][0].get('featureSet', {}).get('features', []):
-        logdt = feat['attributes']['LOGDT']
+        logdt = feat['attributes']['MODIFIEDDATE']
         if logdt is None:
             continue
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
