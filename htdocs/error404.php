@@ -6,7 +6,7 @@ $t = new MyView();
 $t->title = "File Not Found (404)";
 $t->content = <<<EOF
 <h3>Requested file was not found</h3>
-<img src="/images/snoopy503.jpg" class="img-responsive" alt="daryl's Cat" />
+<img src="/images/cow404.jpg" class="img img-responsive" alt="404 Cow" />
 EOF;
 $t->render('single.phtml');
 $ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
