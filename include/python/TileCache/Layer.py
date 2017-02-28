@@ -114,7 +114,7 @@ class Layer (object):
     def __init__ (self, name, layers = None, bbox = (-180, -90, 180, 90),
                         data_extent = None,
                         srs  = "EPSG:4326", description = "", maxresolution = None,
-                        size = (256, 256), levels = 22, resolutions = None,
+                        size = (256, 256), levels = 24, resolutions = None,
                         extension = "png", mime_type = None, cache = None,  debug = True, 
                         watermarkimage = None, watermarkopacity = 0.2,
                         spherical_mercator = False,
