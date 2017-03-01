@@ -4,11 +4,14 @@ import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
 import calendar
+from pyiem import reference
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
 
 PDICT = {'jan1': 'January 1',
          'jul1': 'July 1'}
+PDICT2 = {'wfo': 'View by Single NWS Forecast Office',
+          'state': 'View by State'}
 
 
 def get_description():
@@ -24,8 +27,12 @@ def get_description():
     distinct WWA. For VTEC, this is the number of unique event ids.
     """
     d['arguments'] = [
+        dict(type='select', name='opt', default='wfo',
+             options=PDICT2, label='View by WFO or State?'),
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
+        dict(type='state', default='IA', name='state',
+             label='Select State:'),
         dict(type='phenomena', name='phenomena',
              default='SV', label='Select Watch/Warning Phenomena Type:'),
         dict(type='significance', name='significance',
@@ -49,15 +56,21 @@ def plotter(fdict):
     phenomena = ctx['phenomena']
     significance = ctx['significance']
     split = ctx['split']
+    opt = ctx['opt']
+    state = ctx['state']
 
     nt = NetworkTable('WFO')
+    wfolimiter = " wfo = '%s' " % (station,)
+    if opt == 'state':
+        wfolimiter = " substr(ugc, 1, 2) = '%s' " % (state, )
 
     if split == 'jan1':
         sql = """SELECT extract(year from issue)::int as year,
         min(issue at time zone 'UTC') as min_issue,
         max(issue at time zone 'UTC') as max_issue,
-        count(distinct eventid)
-        from warnings where wfo = %s and phenomena = %s and significance = %s
+        count(distinct wfo || eventid)
+        from warnings where """ + wfolimiter + """
+        and phenomena = %s and significance = %s
         and issue is not null
         GROUP by year ORDER by year ASC"""
     else:
@@ -65,11 +78,12 @@ def plotter(fdict):
         extract(year from issue - '6 months'::interval)::int as year,
         min(issue at time zone 'UTC') as min_issue,
         max(issue at time zone 'UTC') as max_issue,
-        count(distinct eventid)
-        from warnings where wfo = %s and phenomena = %s and significance = %s
+        count(distinct wfo || eventid)
+        from warnings where """ + wfolimiter + """
+        and phenomena = %s and significance = %s
         and issue is not null
         GROUP by year ORDER by year ASC"""
-    df = read_sql(sql, pgconn, params=(station, phenomena, significance),
+    df = read_sql(sql, pgconn, params=(phenomena, significance),
                   index_col=None)
 
     # Since many VTEC events start in 2005, we should not trust any
@@ -109,8 +123,12 @@ def plotter(fdict):
       datetime.timedelta(days=int(np.average(ends[:-1])))).strftime(
                                                                 "%-d %b")),
                   color='red')
-    ax.set_title(("[%s] NWS %s\nPeriod between First and Last %s %s"
-                  ) % (station, nt.sts[station]['name'],
+    title = "[%s] NWS %s" % (station, nt.sts[station]['name'])
+    if opt == 'state':
+        title = ("NWS Issued Alerts for State of %s"
+                 ) % (reference.state_names[state],)
+    ax.set_title(("%s\nPeriod between First and Last %s %s"
+                  ) % (title,
                        vtec._phenDict[phenomena],
                        vtec._sigDict[significance]))
     ax.grid()

@@ -4,7 +4,11 @@ import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import calendar
+from pyiem import reference
 from pyiem.util import get_autoplot_context
+
+PDICT = {'wfo': 'Select by NWS Forecast Office',
+         'state': 'Select by State'}
 
 
 def get_description():
@@ -15,10 +19,20 @@ def get_description():
     d['description'] = """This chart displays the monthly number of distinct
     NWS Office issued watch / warning / advisory product. For example, a
     single watch for a dozen counties would only count 1 in this chart. These
-    values are based on unofficial archives maintained by the IEM."""
+    values are based on unofficial archives maintained by the IEM.
+
+    <p>If you select the state wide option, the totalling is a bit different. A
+    single watch issued by multiple WFOs would potentially count as more than
+    one event in this listing.  Sorry, tough issue to get around.  In the case
+    of warnings and advisories, the totals should be good.</p>
+    """
     d['arguments'] = [
+        dict(type='select', name='opt', default='wfo',
+             options=PDICT, label='Summarize by WFO or State?'),
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:', all=True),
+        dict(type='state', name='state',
+             default='IA', label='Select State:'),
         dict(type='phenomena', name='phenomena',
              default='FF', label='Select Watch/Warning Phenomena Type:'),
         dict(type='significance', name='significance',
@@ -39,6 +53,8 @@ def plotter(fdict):
     station = ctx['station']
     phenomena = ctx['phenomena']
     significance = ctx['significance']
+    opt = ctx['opt']
+    state = ctx['state']
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
@@ -47,6 +63,8 @@ def plotter(fdict):
                    ) % (station if len(station) == 3 else station[1:],)
     if station == '_ALL':
         wfo_limiter = ''
+    if opt == 'state':
+        wfo_limiter = " and substr(ugc, 1, 2) = '%s'" % (state, )
 
     df = read_sql("""
         with data as (
@@ -59,6 +77,7 @@ def plotter(fdict):
         SELECT extract(year from i) as yr, extract(month from i) as mo,
         count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
       """, pgconn, params=(phenomena, significance), index_col=None)
+
     if len(df.index) == 0:
         raise Exception("Sorry, no data found!")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
@@ -84,9 +103,15 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_title(("NWS %s\n%s %s (%s.%s) Issued by Year,Month"
-                  ) % (nt.sts[station]['name'], vtec._phenDict[phenomena],
-                       vtec._sigDict[significance], phenomena, significance))
+
+    title = "NWS %s" % (nt.sts[station]['name'], )
+    if opt == 'state':
+        title = ("NWS Issued for Counties/Zones for State of %s"
+                 ) % (reference.state_names[state],)
+    title += ("\n%s %s (%s.%s) Issued by Year,Month"
+              ) % (vtec._phenDict[phenomena],
+                   vtec._sigDict[significance], phenomena, significance)
+    ax.set_title(title)
 
     return fig, df
 
