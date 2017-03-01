@@ -43,6 +43,8 @@ def plotter(fdict):
     network = ctx['network']
 
     nt = NetworkTable(network)
+    if len(nt.sts) == 0:
+        raise Exception("Network Identifier %s is unknown to IEM" % (network,))
     if station not in nt.sts:
         raise Exception("Station %s does not exist in network %s" % (station,
                                                                      network))
