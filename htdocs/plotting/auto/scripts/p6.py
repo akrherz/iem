@@ -5,25 +5,13 @@ import calendar
 import datetime
 import numpy as np
 from pyiem.util import get_autoplot_context
+from pyiem import reference
 
 PDICT = {'sum-precip': 'Total Precipitation [inch]',
          'avg-high': 'Average Daily High [F]',
          'avg-low': 'Average Daily Low [F]',
          'avg-t': 'Average Daily Temp [F]',
          }
-
-STATES = {'IA': 'Iowa',
-          'IL': 'Illinois',
-          'MO': 'Missouri',
-          'KS': 'Kansas',
-          'NE': 'Nebraska',
-          'SD': 'South Dakota',
-          'ND': 'North Dakota',
-          'MN': 'Minnesota',
-          'WI': 'Wisconsin',
-          'MI': 'Michigan',
-          'OH': 'Ohio',
-          'KY': 'Kentucky'}
 
 
 def get_description():
@@ -124,7 +112,8 @@ def plotter(fdict):
     ax.set_xlabel(PDICT[ptype])
     ax.set_ylabel("Normalized Frequency")
     ax.set_title(("%s %s %s %s Distribution\nNumber of stations: %s"
-                  ) % (STATES[state], year, calendar.month_name[month],
+                  ) % (reference.state_names[state], year,
+                       calendar.month_name[month],
                        PDICT[ptype], len(df.index)))
     ax.grid(True)
     box = ax.get_position()

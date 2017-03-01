@@ -3,19 +3,8 @@ import numpy as np
 from scipy.stats import norm
 import datetime
 import pandas as pd
-
-STATES = {'IA': 'Iowa',
-          'IL': 'Illinois',
-          'KS': 'Kansas',
-          'KY': 'Kentucky',
-          'MI': 'Michigan',
-          'MN': 'Minnesota',
-          'MO': 'Missouri',
-          'NE': 'Nebraska',
-          'ND': 'North Dakota',
-          'OH': 'Ohio',
-          'SD': 'South Dakota',
-          'WI': 'Wisconsin'}
+from pyiem import reference
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -45,10 +34,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    month = int(fdict.get('month', 10))
-    day = int(fdict.get('day', 7))
-    state = fdict.get('state', 'IA')
+    month = ctx['month']
+    day = ctx['day']
+    state = ctx['state'][:2]
     table = "alldata_%s" % (state,)
     cursor.execute("""
     SELECT high, low from """+table+""" where sday = %s and
@@ -92,8 +82,8 @@ def plotter(fdict):
     ax.plot(x, p, 'b--', linewidth=2)
 
     ts = datetime.datetime(2000, month, day)
-    ax.set_title("%s %s Temperature Distribution" % (STATES[state],
-                                                     ts.strftime("%d %B")))
+    ax.set_title(("%s %s Temperature Distribution"
+                  ) % (reference.state_names[state], ts.strftime("%d %B")))
 
     ax.text(0.01, 0.99, ("Low Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f"
                          "\n$n$ = %s") % (mu, std, len(lows)),

@@ -3,19 +3,8 @@ import datetime
 import netCDF4
 from pyiem import iemre
 import pandas as pd
-
-STATES = {'IA': 'Iowa',
-          'IL': 'Illinois',
-          'MO': 'Missouri',
-          'KS': 'Kansas',
-          'NE': 'Nebraska',
-          'SD': 'South Dakota',
-          'ND': 'North Dakota',
-          'MN': 'Minnesota',
-          'WI': 'Wisconsin',
-          'MI': 'Michigan',
-          'OH': 'Ohio',
-          'KY': 'Kentucky'}
+from pyiem.util import get_autoplot_context
+from pyiem import reference
 
 
 def get_description():
@@ -31,11 +20,12 @@ def get_description():
     d['arguments'] = [
         dict(type='year', name='year', default=today.year,
              label='Select Year', min=1893),
-        dict(type='text', name='threshold', default='1.0',
+        dict(type='float', name='threshold', default='1.0',
              label='Precipitation Threshold [inch]'),
-        dict(type='text', name='period', default='7',
+        dict(type='int', name='period', default='7',
              label='Over Period of Days'),
-        dict(type='clstate', name='state', default='IA', label='For State'),
+        dict(type='clstate', name='state', default='IA',
+             label='For State'),
     ]
     return d
 
@@ -46,10 +36,11 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    year = int(fdict.get('year', 2014))
-    threshold = float(fdict.get('threshold', 1))
-    period = int(fdict.get('period', 7))
-    state = fdict.get('state', 'IA')[:2]
+    ctx = get_autoplot_context(fdict, get_description())
+    year = ctx['year']
+    threshold = ctx['threshold']
+    period = ctx['period']
+    state = ctx['state']
 
     nc2 = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
     iowa = nc2.variables[state][:]
@@ -80,8 +71,11 @@ def plotter(fdict):
     ax.bar(days, coverage, fc='g', ec='g')
     ax.set_title(("IEM Estimated Areal Coverage Percent of %s\n"
                   " receiving %.2f inches of rain over trailing %s day period"
-                  ) % (STATES[state], threshold, period))
+                  ) % (reference.state_names[state], threshold, period))
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax.grid(True)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

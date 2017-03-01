@@ -4,21 +4,8 @@ import netCDF4
 from pyiem import iemre
 import pandas as pd
 from pyiem.datatypes import distance
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
-
-STATES = OrderedDict([('IA', 'Iowa'),
-                      ('IL', 'Illinois'),
-                      ('MO', 'Missouri'),
-                      ('KS', 'Kansas'),
-                      ('NE', 'Nebraska'),
-                      ('SD', 'South Dakota'),
-                      ('ND', 'North Dakota'),
-                      ('MN', 'Minnesota'),
-                      ('WI', 'Wisconsin'),
-                      ('MI', 'Michigan'),
-                      ('OH', 'Ohio'),
-                      ('KY', 'Kentucky')])
+from pyiem import reference
 
 
 def get_description():
@@ -99,7 +86,7 @@ def plotter(fdict):
     ax.set_title(("IEM Estimated Areal Snow Coverage Percent of %s\n"
                   " percentage of state reporting at least  %.2fin snow"
                   " cover"
-                  ) % (STATES[state], thres))
+                  ) % (reference.state_names[state], thres))
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 15]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))

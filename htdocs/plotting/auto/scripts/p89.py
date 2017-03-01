@@ -4,21 +4,8 @@ import matplotlib.dates as mdates
 import netCDF4
 from pyiem import iemre
 import pandas as pd
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
-
-STATES = OrderedDict([('IA', 'Iowa'),
-                      ('IL', 'Illinois'),
-                      ('MO', 'Missouri'),
-                      ('KS', 'Kansas'),
-                      ('NE', 'Nebraska'),
-                      ('SD', 'South Dakota'),
-                      ('ND', 'North Dakota'),
-                      ('MN', 'Minnesota'),
-                      ('WI', 'Wisconsin'),
-                      ('MI', 'Michigan'),
-                      ('OH', 'Ohio'),
-                      ('KY', 'Kentucky')])
+from pyiem import reference
 
 
 def get_description():
@@ -118,7 +105,8 @@ def plotter(fdict):
     ax[0].legend(loc=2, ncol=2, fontsize=10)
     ax[0].set_title(("IEM Estimated Areal Coverage Percent of %s\n"
                      " receiving daily %.2fin vs trailing %s day %.2fin"
-                     ) % (STATES[state], daythres, period, trailthres))
+                     ) % (reference.state_names[state], daythres, period,
+                          trailthres))
     ax[0].set_ylabel("Areal Coverage [%]")
     ax[0].grid(True)
 
@@ -132,3 +120,6 @@ def plotter(fdict):
                      ) % (trailthres, period, daythres),
                     fontsize=12)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
