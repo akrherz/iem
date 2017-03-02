@@ -9,7 +9,6 @@ PAIRS = [
          ['/mesonet/nawips', '/mnt/mesonet2/gempak'],
          ['/mesonet/scripts', '/mnt/mesonet2/scripts'],
          ['/mesonet/TABLES', '/mnt/mesonet2/TABLES'],
-         ['/mesonet/tmp', '/mnt/mesonet2/tmp'],
          ['/mesonet/wepp', '/mnt/idep'],
          ['/mesonet/ARCHIVE/dailydata', '/mnt/mtarchive/longterm/dailydata'],
          ['/mesonet/ARCHIVE/data', '/mnt/mesonet2/ARCHIVE/data'],
