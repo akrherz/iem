@@ -4,7 +4,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (1, now());
+INSERT into iem_schema_manager_version values (2, now());
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -121,7 +121,19 @@ CREATE TABLE sm_daily (
     encrh_avg_f character(1),
     encrh_avg_qc real,
     nancounttot_f character(1),
-    nancounttot_qc real
+    nancounttot_qc real,
+    calc_vwc_06_avg real,
+    calc_vwc_06_avg_qc real,
+    calc_vwc_06_avg_f char(1),
+    calc_vwc_12_avg real,
+    calc_vwc_12_avg_qc real,
+    calc_vwc_12_avg_f char(1),
+    calc_vwc_24_avg real,
+    calc_vwc_24_avg_qc real,
+    calc_vwc_24_avg_f char(1),
+    calc_vwc_50_avg real,
+    calc_vwc_50_avg_qc real,
+    calc_vwc_50_avg_f char(1)
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
 GRANT SELECT on sm_daily to nobody;
@@ -267,7 +279,19 @@ CREATE TABLE sm_hourly (
     outofrange24_f character(1),
     outofrange24_qc real,
     outofrange50_f character(1),
-    outofrange50_qc real
+    outofrange50_qc real,
+    calc_vwc_06_avg real,
+    calc_vwc_06_avg_qc real,
+    calc_vwc_06_avg_f char(1),
+    calc_vwc_12_avg real,
+    calc_vwc_12_avg_qc real,
+    calc_vwc_12_avg_f char(1),
+    calc_vwc_24_avg real,
+    calc_vwc_24_avg_qc real,
+    calc_vwc_24_avg_f char(1),
+    calc_vwc_50_avg real,
+    calc_vwc_50_avg_qc real,
+    calc_vwc_50_avg_f char(1)
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
@@ -450,7 +474,19 @@ p50outofrange_f char,
 p50outofrange_qc real,
 battv_min real,
 battv_min_f char,
-battv_min_qc real
+battv_min_qc real,
+    calc_vwc_06_avg real,
+    calc_vwc_06_avg_qc real,
+    calc_vwc_06_avg_f char(1),
+    calc_vwc_12_avg real,
+    calc_vwc_12_avg_qc real,
+    calc_vwc_12_avg_f char(1),
+    calc_vwc_24_avg real,
+    calc_vwc_24_avg_qc real,
+    calc_vwc_24_avg_f char(1),
+    calc_vwc_50_avg real,
+    calc_vwc_50_avg_qc real,
+    calc_vwc_50_avg_f char(1)
 );
 
 CREATE UNIQUE index sm_15minute_idx on sm_hourly(station, valid);

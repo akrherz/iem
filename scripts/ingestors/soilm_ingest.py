@@ -28,10 +28,10 @@ VARCONV = {
            'vwc12_avg': 'vwc_12_avg',
            'vwc24_avg': 'vwc_24_avg',
            'vwc50_avg': 'vwc_50_avg',
-           'calcvwc06_avg': 'vwc_06_avg',
-           'calcvwc12_avg': 'vwc_12_avg',
-           'calcvwc24_avg': 'vwc_24_avg',
-           'calcvwc50_avg': 'vwc_50_avg',
+           'calcvwc06_avg': 'calc_vwc_06_avg',
+           'calcvwc12_avg': 'calc_vwc_12_avg',
+           'calcvwc24_avg': 'calc_vwc_24_avg',
+           'calcvwc50_avg': 'calc_vwc_50_avg',
            "outofrange06": "P06OutOfRange",
            "outofrange12": "P12OutOfRange",
            "outofrange24": "P24OutOfRange",
@@ -131,9 +131,12 @@ def m15_process(nwsli, maxts):
                 float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
         ob.data['c4tmpf'] = temperature(
                 float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
-        ob.data['c2smv'] = float(tokens[headers.index('vwc_12_avg')]) * 100.0
-        ob.data['c3smv'] = float(tokens[headers.index('vwc_24_avg')]) * 100.0
-        ob.data['c4smv'] = float(tokens[headers.index('vwc_50_avg')]) * 100.0
+        ob.data['c2smv'] = float(
+            tokens[headers.index('calc_vwc_12_avg')]) * 100.0
+        ob.data['c3smv'] = float(
+            tokens[headers.index('calc_vwc_24_avg')]) * 100.0
+        ob.data['c4smv'] = float(
+            tokens[headers.index('calc_vwc_50_avg')]) * 100.0
         ob.save(accesstxn, force_current_log=True)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
@@ -206,9 +209,12 @@ def hourly_process(nwsli, maxts):
                 float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
         ob.data['c4tmpf'] = temperature(
                 float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
-        ob.data['c2smv'] = float(tokens[headers.index('vwc_12_avg')]) * 100.0
-        ob.data['c3smv'] = float(tokens[headers.index('vwc_24_avg')]) * 100.0
-        ob.data['c4smv'] = float(tokens[headers.index('vwc_50_avg')]) * 100.0
+        ob.data['c2smv'] = float(
+            tokens[headers.index('calc_vwc_12_avg')]) * 100.0
+        ob.data['c3smv'] = float(
+            tokens[headers.index('calc_vwc_24_avg')]) * 100.0
+        ob.data['c4smv'] = float(
+            tokens[headers.index('calc_vwc_50_avg')]) * 100.0
         ob.save(accesstxn)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
