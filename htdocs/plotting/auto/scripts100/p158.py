@@ -141,6 +141,7 @@ function syncTooltip(container, p) {
     });
 }
 options = {
+    global: {useUTC: false},
     chart: {zoomType: 'x'},
     legend: {enabled: true},
     plotOptions: {

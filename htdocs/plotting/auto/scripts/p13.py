@@ -4,6 +4,7 @@ import datetime
 import pandas as pd
 from scipy import stats
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 PDICT = {'end_summer': 'End of Summer', 'start_summer': 'Start of Summer'}
@@ -18,7 +19,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='which', default='end_summer',
              label='Which value to plot:', options=PDICT),
     ]
@@ -32,9 +33,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    which = fdict.get('which', 'end_summer')
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    which = ctx['which']
+    station = ctx['station']
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
 
@@ -48,15 +49,14 @@ def plotter(fdict):
             (ORDER by day ASC rows 91 preceding) from """ + table + """
             where station = %s and day > '1893-01-01') as foo)
             as foo2 where rank = 1
-            ORDER by day DESC
+            ORDER by year ASC
     """, (station, ))
     years = []
     maxsday = []
     today = datetime.date.today()
-    today_doy = int(today.strftime("%j"))
     delta = 0 if which == 'end_summer' else 91
     for row in cursor:
-        if row['year'] == today.year and (row['d'] + 10) > today_doy:
+        if row['year'] == today.year and row['d'] < 270:
             continue
         maxsday.append(row['d'] - delta)
         years.append(row['year'])
@@ -96,3 +96,6 @@ def plotter(fdict):
     ax.set_ylim(min(maxsday)-5, max(maxsday)+5)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

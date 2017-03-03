@@ -129,6 +129,7 @@ def highcharts(fdict):
     series = ",".join(lines)
     return """
 $("#ap_container").highcharts({
+    global: {useUTC: false},
     title: {text: '""" + ctx['title'] + """'},
     subtitle: {text: '""" + ctx['subtitle'] + """'},
     chart: {zoomType: 'x'},

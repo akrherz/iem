@@ -112,6 +112,7 @@ def highcharts(fdict):
                                        ctx['sdate'].day)
     return """
 $("#ap_container").highcharts({
+    global: {useUTC: false},
     title: {text: '""" + ctx['title'] + """'},
     subtitle: {text: '""" + ctx['subtitle'] + """'},
     chart: {zoomType: 'x'},

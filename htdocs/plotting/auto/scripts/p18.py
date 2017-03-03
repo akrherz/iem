@@ -61,6 +61,7 @@ def highcharts(fdict):
                     'shared': True,
                     'valueSuffix': " %s" % (UNITS[ctx['var']],)}
     j['legend'] = dict()
+    j['global'] = {'useUTC': False}
     j['exporting'] = {'enabled': True}
     j['chart'] = {'zoomType': 'x'}
     j['plotOptions'] = {'line': {'turboThreshold': 0}}
