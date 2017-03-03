@@ -32,6 +32,8 @@ data = {'plots': [
         {'id': "66", 'mw': True,
          "label": ("Consecutative Days with High/Low Temp "
                    "Above/Below Threshold")},
+        {'id': "176", 'mw': True,
+         'label': "Daily Records Beat Margin"},
         {'id': "5", 'mw': True,
          'label': "Daily Records for each month of year"},
         {'id': "31", 'mw': True,
