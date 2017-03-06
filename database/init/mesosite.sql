@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (10, now());
+INSERT into iem_schema_manager_version values (11, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
