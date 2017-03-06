@@ -1,434 +1,245 @@
 /*
- * Static Javascript stuff to support the Time Machine :) 
+ * IEM Time Machine
+ * 
+ *  Basically, a browser of archived products that have RESTish URIs
+ *  
  */
-Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
+var dt = moment(); // Current application time
+var irealtime = true; // Is our application in realtime mode or not
 
-var ys, ds, hs, ms, displayDT, combo;
-var currentURI = "";
-var appTime = new Date();
-var pageLoadTime = new Date();
-var appDT = 60;
-var realtime = true;
-	
-/*
- * Logic to make the application auto refresh if it believes we are in 
- * auto refreshing mode. 
- */
-var task = {
-  run: function(){
-      if (realtime){
-        appTime = new Date();
-        setTime();
-        updateDT();
-      }
-  },
-  interval: 300000
-};
-
-/* Provides handy way to convert from local browser time to UTC */
-Ext.override(Date, {
-    toUTC : function() {
-        return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
-    },
-    fromUTC : function() {
-        return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
-    }
-}); 
-
-Ext.define('Product', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'id', type: 'string'},
-        {name: 'time_offset',  type: 'int'},
-        {name: 'name',       type: 'string'},
-        {name: 'groupname',  type: 'string'},
-        {name: 'template',  type: 'string'},
-        {name: 'sts',  type: 'date', dateFormat: 'Y-m-d'},
-        {name: 'interval',  type: 'int'},
-        {name: 'avail_lag',  type: 'int'}
-    ]
-});
-var store = new Ext.data.JsonStore({
-    autoLoad  : true,
-    model : 'Product',
-    proxy: {
-        type: 'ajax',
-        url: '/json/products.php',
-        reader: {
-            type: 'json',
-            rootProperty: 'products',
-            idProperty: 'id'
-        }
-    }
-});
-
-function dayofyear(d) {   // d is a Date object
-	var yn = d.getFullYear();
-	var mn = d.getMonth();
-	var dn = d.getDate();
-	var d1 = new Date(yn,0,1,12,0,0); // noon on Jan. 1
-	var d2 = new Date(yn,mn,dn,12,0,0); // noon on input date
-	var ddiff = Math.round((d2-d1)/864e5);
-	return ddiff+1;
-};
-
-// Put us into archive mode, captian
-function setArchive(){
-	Ext.getCmp("appMode").setText("Archive");
-	realtime = false;	
-} // End of setArchive()
-
-	
-/* Helper function to set the sliders to a given time! */
-function setTime(){
-	var now = new Date();
-	// Figure out if we are switching modes
-	if (realtime &&
-			Ext.Date.add(now, Ext.Date.MINUTE, -3.0 * appDT) > appTime){
-		setArchive();
-	} 
-	if (! realtime &&
-			Ext.Date.add(now, Ext.Date.MINUTE, -3.0 * appDT) < appTime){
-		Ext.getCmp("appMode").setText("Realtime");
-		realtime = true;
+function readHashLink(){
+	var tokens = window.location.href.split("#");
+	if (tokens.length != 2){
+		return;
 	}
-	var g = parseInt(Ext.Date.format(appTime, 'G'));
-	var z = dayofyear(appTime) - 1;
-	var y = parseInt(Ext.Date.format(appTime, 'Y'));
-	var i = parseInt(Ext.Date.format(appTime, 'i'));
-
-	hs.setValue(g);
-	ds.setValue(z); 
-	ys.setValue(y);
-	ms.setValue(i);
-} // End of setTime()
-
-/* Called whenever either the sliders update, the combobox */
-function updateDT(){
-  //console.log("updateDT() appTime is "+ appTime );
-  y = ys.getValue();
-  d = ds.getValue();
-  h = hs.getValue();
-  i = ms.disabled ? 0:  ms.getValue();
-  //console.log("y ["+ y +"] d ["+ d +"] h ["+ h +"] i ["+ i +"]");
-  
-  newTime = new Date('01/01/'+y);
-  newTime = Ext.Date.add(newTime, Ext.Date.DAY, d);
-  newTime = Ext.Date.add(newTime, Ext.Date.HOUR, h);
-  newTime = Ext.Date.add(newTime, Ext.Date.MINUTE, i);
-  //console.log("updateDT() newTime is "+ newTime );
-  if (newTime == appTime && ! displayDT.isInitial){ 
-    //console.log("Shortcircut!");
-    return; 
-  }
-  displayDT.isInitial = false;
-  appTime = newTime;
-  meta = store.getById( combo.getValue() );
-  //console.log( meta);
-  //console.log( combo.getValue() );
-  if (! meta ){ 
-    //console.log("Couldn't find metadata!");
-    return; 
-  }
-  ceiling = (new Date());
-  ceiling = Ext.Date.add(ceiling, Ext.Date.MINUTE, 0 - meta.data.avail_lag);
-  //console.log("Ceiling is "+ ceiling);
-  /* Make sure we aren't in the future! */
-  if (Ext.Date.add(appTime, Ext.Date.MINUTE,-1) > ceiling){
-    //console.log("Date is: "+ (new Date()));
-    //console.log("appTime is: "+ appTime);
-    //console.log("Future timestamp: "+ (appTime.add(Date.MINUTE,-1) - (new Date())) +" diff");
-    appTime = ceiling; 
-    setTime(); 
-    //return; 
-  }
-
-  /* Make sure we aren't in the past! */
-  if (appTime < meta.data.sts){ 
-    //console.log("Timestamp too early...");
-    appTime = meta.data.sts; 
-    setTime(); 
-    //return; 
-  }
-
-  /* 
-   * We need to make sure that we are lined up with where we have data...
-   */
-  gdt = appTime.toUTC();
-  min_from_0z = parseInt( Ext.Date.format(gdt, 'G') ) * 60 + 
-  		parseInt(Ext.Date.format(gdt, 'i')) - meta.data.time_offset;
-  offset = min_from_0z % meta.data.interval;
-  //console.log("TmCheck gdt= "+ gdt +" offset= "+ offset +", min_from_0z= "+ min_from_0z);
-  if (offset != 0){
-    gdt = Ext.Date.add(gdt, Ext.Date.MINUTE, 0 - offset); 
-    appTime = gdt.fromUTC();
-    setTime();
-  }
-
-  if (appDT < 1440){
-	  displayDT.setText(Ext.Date.format(appTime, 'D M d Y') +"<br />"
-			  + Ext.Date.format(appTime, 'g:i A T') );
-  } else{
-	  displayDT.setText(Ext.Date.format(appTime.toUTC(), 'D M d Y') );
-	  
-  }
-	  
-  tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}').replace(/%y/g, '{5}');
-
-  uri = Ext.String.format(tpl, Ext.Date.format(gdt, "Y"), 
-		  Ext.Date.format(gdt, "m"), Ext.Date.format(gdt, "d"), 
-		  Ext.Date.format(gdt, "H"), Ext.Date.format(gdt, "i"), 
-		  Ext.Date.format(gdt, "y") );
-  if (uri != currentURI){
-    Ext.get("imagedisplay").dom.src = uri;
-    currentURI = uri;
-  }
-  window.location.href = Ext.String.format("#{0}.{1}", combo.getValue(), Ext.Date.format(gdt, 'YmdHi')); 
-} // End of updateDT()
-
-function buildUI(){
-	// Need a way to prevent missing images from messing up the page!
-	Ext.get("imagedisplay").dom.onerror = function(){
-		Ext.get("imagedisplay").dom.src = "/images/missing-320x240.jpg";
-	};
-	ys = Ext.create('Ext.slider.Single', {
-	    width: '100%',
-	    minValue: 1893,
-	    renderTo : 'year_select',
-	    maxValue: parseInt( Ext.Date.format(appTime, "Y") ),
-	    labelAlign: 'top',
-	    fieldLabel: 'Year',
-	    listeners: {
-	    	'drag': function(){ setArchive(); updateDT(); }
-	    }
+	var tokens2 = tokens[1].split(".");
+	if (tokens2.length != 2){
+		return;
+	}
+	var pid = tokens2[0];
+	var stamp = tokens2[1];
+	// parse the timestamp
+	if (stamp != "0"){
+		dt = moment.utc(stamp, 'YYYYMMDDHHmm');
+		irealtime = false;
+	}
+	$("#products").val(pid).trigger("change");
+}
+function addproducts(data){
+	// Add entries into the products dropdown
+	var p = $('select[name=products]');
+	var groupname = '';
+	var optgroup;
+	$.each(data.products, function (i, item) {
+		if (groupname != item.groupname){
+			optgroup = $('<optgroup>');
+	        optgroup.attr('label', item.groupname);
+	        p.append(optgroup);
+	        groupname = item.groupname;
+		}
+	    optgroup.append($('<option>', { 
+	        value: item.id,
+	        'data-avail_lag': item.avail_lag,
+	        'data-interval': item.interval,
+	        'data-sts': item.sts,
+	        'data-template': item.template,
+	        'data-time_offset': item.time_offset,
+	        text : item.name 
+	    }));
 	});
-	ds = Ext.create('Ext.slider.Single', {
-	    width: '100%',
-	    renderTo : 'day_select',
-	    minValue: 0,
-	    maxValue: 365,
-	    labelAlign: 'top',
-	    fieldLabel: 'Day of Year',
-	    listeners: {
-	    	'drag': function(){ setArchive(); updateDT(); }
-	    }
+	// now turn it into a select2 widget
+	p.select2();
+	p.on('change', function(e){
+		update();
 	});
-	ms = Ext.create('Ext.slider.Single', {
-	    minValue: 0,
-	    maxValue: 59,
-	    width: '100%',
-	    renderTo : 'minute_select',
-	    labelAlign: 'top',
-	    fieldLabel: 'Minute',
-	    listeners: {
-	    	'drag': function(){ setArchive(); updateDT(); }
-	    }
-	});
-	hs = Ext.create('Ext.slider.Single', {
-	    minValue: 0,
-	    renderTo : 'hour_select',
-	    width: '100%',
-	    maxValue: 23,
-	    labelAlign: 'top',
-	    fieldLabel: 'Hour',
-	    listeners: {
-	    	'drag': function(){ setArchive(); updateDT(); }
-	    }
-	});
-	displayDT = new Ext.Toolbar.TextItem({
-	    html      : 'Loading...',
-	    renderTo: 'displaydt',
-	    isInitial : true, 
-	    style     : {'font-weight': 'bold'}
-	});
+	// read the anchor URI
+	readHashLink();
+}
+function rectifyTime(){
+	// Make sure that our current dt matches what can be provided by the
+	// currently selected option.
+	var opt = getSelectedOption();
+	var ets = moment();
+	var sts = moment(opt.attr('data-sts'));
+	var interval = parseInt(opt.attr('data-interval'));
+	var avail_lag = parseInt(opt.attr('data-avail_lag'));
+	var time_offset = parseInt(opt.attr('data-time_offset'));
+	ets.subtract(time_offset, 'minutes');
+	// Check 1: Bounds check
+	if (dt < sts){
+		dt = sts;
+	}
+	if (dt > ets){
+		dt = ets;
+	}
+	// Check 2: If our modulus is OK, we can quit early
+	if ((dt.hours() * 60 + dt.minutes()) % interval == 0){
+		return;
+	}
 	
-	combo = Ext.create('Ext.form.field.ComboBox', {
-    id            : 'cb',
-    triggerAction : 'all',
-    queryMode     : 'local',
-    renderTo : 'product_select',
-    editable      : false,
-    matchFieldWidth : false,
-    fieldLabel: 'Available Products',
-    labelAlign: 'top',
-    flex: 2,
-    margin: '0 10 0 0',
-    listConfig : {
-    	minWidth : 300,
-    	getInnerTpl : function(){
-    		return '<tpl for=".">'+
-    				'<tpl if="this.groupname != values.groupname">' +
-    				'<tpl exec="this.groupname = values.groupname"></tpl>' +
-    				'<span class="dropdown-header">{groupname}</span>' +
-    				'</tpl>' +
-    				'<div class="x-combo-list-item">{name}</div>' +
-    				'</tpl>';
-    	}
-    },
-    allowBlank    : false,
-    forceSelection: true,
-    store         : store,
-    valueField    : 'id',
-    displayField  : 'name',
-    listeners     : {
-      select      : function(cb, record, idx){
-        appDT = record.data.interval;
+	// Check 3: Place dt on a time that works for the given interval
+	if (interval > 1440){
+		dt.startOf('month');
+	} else if (interval >= 60){
+		// minute has to be zero
+		dt.startOf('hour');
+		if (interval != 60){
+			dt.startOf('day');
+		}
+	} else {
+		dt.startOf('hour');
+	}
+}
+function update(){
+	// called after a slider event, button clicked, realtime refresh
+	// or new product selected
+	var opt = getSelectedOption();
+	rectifyTime();
+	// adjust the sliders
+	var sts = moment(opt.attr('data-sts'));
+	var now = moment();
+	$('#year_slider').slider({
+		min: sts.year(),
+		max: now.year(),
+		value: dt.year()
+	});
+	$('#day_slider').slider({
+		value: dt.dayOfYear()
+	});
+	$('#hour_slider').slider({
+		value: dt.hour()
+	});
+	$('#minute_slider').slider({
+		value: dt.minute()
+	});
+	if (opt.attr('data-interval') > 60){
+		$('#minute_slider').css('display', 'none');
+	} else {
+		$('#minute_slider').css('display', 'block');		
+	}
+	if (opt.attr('data-interval') > 1440){
+		$('#hour_slider').css('display', 'none');
+	} else {
+		$('#hour_slider').css('display', 'block');		
+	}
+	var tpl = opt.attr('data-template');
+	// We support %Y %m %d %H %i %y
+	var url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
+		.replace(/%y/g, dt.utc().format('YY'))
+		.replace(/%m/g, dt.utc().format('MM'))
+		.replace(/%d/g, dt.utc().format('DD'))
+		.replace(/%H/g, dt.utc().format('HH'))
+		.replace(/%i/g, dt.utc().format('mm'));
 
-        /* If we don't have sub hourly data, disable the minute selector */
-        if (appDT >= 60){ 
-          //console.log("Disabling MS"); 
-          ms.disable(); 
-        } else { ms.enable(); }
-
-        /* If we don't have sub daily data, disable the hour selector */
-        if (appDT >= (60*24)){  hs.disable(); }
-        else { hs.enable(); }
-
-        /* If we don't have hourly data */
-        if (appDT > 60){  
-           Ext.getCmp('plushour').disable();
-           Ext.getCmp('minushour').disable();
-        }
-        else {
-           Ext.getCmp('plushour').enable();
-           Ext.getCmp('minushour').enable();
-        }
-
-        ms.increment = appDT;
-        //console.log("Setting MS Increment to "+ ms.increment );
-        ys.minValue = parseInt( Ext.Date.format(record.data.sts, "Y") );
-        ys.setValue( ys.getValue()-1 );
-        ys.setValue( ys.getValue()+1 );
-        updateDT();
-      }
-   }
-});
-
-/*
- * This will be our hacky initializer 
- */
-store.on('load', function(){ 
-  /* Figure out if the desired product is specified in the URL */
-  var tokens = window.location.href.split('#');
-  if (tokens.length == 2){
-    var tokens2 = tokens[1].split(".");
-    idx = tokens2[0];
-    if (tokens2[1] != "0"){
-      gts = Ext.Date.parseDate( tokens2[1], "YmdHi" );
-      appTime = gts.fromUTC();
-    } else {
-    	lag = store.getById(idx).data.avail_lag;
-    	appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, 0 - lag);
-    }
-  } else {
-    /* We are going to default to the IEM Plot */
-    idx = 1;
-  }
-  /* Make sure that our form gets reset based on settings for record */
-  setTime();
-  combo.setValue( idx );
-  combo.fireEvent('select', combo, store.getById(idx), idx);
-  Ext.util.TaskManager.start(task);
-});
-
-
-	Ext.create('Ext.Button', {
-		id : 'appMode',
-		renderTo : 'realtime',
-		text : 'RealTime',
-		handler : function(btn) {
-			if (btn.realtime) {
-				realtime = false;
-				btn.setText("Archive");
-			} else {
-				realtime = true;
-				btn.setText("RealTime");
-				appTime = new Date();
-				setTime();
-				updateDT();
-			}
+	$('#imagedisplay').attr('src', url);
+	window.location.href = '#' + opt.val() + '.' + dt.utc().format('YYYYMMDDHHmm');
+	updateUITimestamp();
+}
+function updateUITimestamp(){
+	$('#utctime').html(dt.utc().format('MMM Do YYYY, HH:mm'));
+	$('#localtime').html(dt.local().format('MMM Do YYYY, h:mm a'));
+}
+function getSelectedOption(){
+	return $('#products :selected');
+}
+function buildUI(){
+	//year
+	$("#year_slider").slider({
+		change: function() {
+			$("#year_handle").text( $( this ).slider( "value" ) );
+		},
+		slide: function( event, ui ) {
+			$("#year_handle").text( $( this ).slider( "value" ) );
+			dt.year(ui.value);
+		    update();
+		    irealtime = false;
+		}
+	});
+	//hour
+	$("#hour_slider").slider({
+		min: 0,
+		max: 23,
+		change: function() {
+			$("#hour_handle").text(dt.local().format('h A'));
+		},
+		slide: function( event, ui ) {
+			$("#hour_handle").text(dt.local().format('h A'));
+			dt.hour(ui.value);
+		    update();
+		    irealtime = false;
+		}
+	});
+	//hour
+	$("#minute_slider").slider({
+		min: 0,
+		max: 59,
+		change: function() {
+			$("#minute_handle").text( $( this ).slider( "value" ) );
+		},
+		slide: function( event, ui ) {
+			$("#minute_handle").text( $( this ).slider( "value" ) );
+			dt.minute(ui.value);
+		    update();
+		    irealtime = false;
+		}
+	});
+	//day
+	$("#day_slider").slider({
+		min: 1,
+		max: 367,
+		change: function() {
+			$("#day_handle").text(dt.local().format('MMM D'));
+		},
+		slide: function( event, ui ) {
+			$("#day_handle").text(dt.local().format('MMM D'));
+			dt.dayOfYear(ui.value);
+		    update();
+		    irealtime = false;
 		}
 	});
 
-Ext.create('Ext.Button', {
-	renderTo: 'pyear',
-	text: '<< Year',
-	 handler: function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.YEAR, -1);
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 text: '<< Day',
-	 renderTo: 'pday',
-	 handler: function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.DAY, -1);
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 id      : 'minushour',
-	 text    : '<< Hour',
-	 renderTo: 'phour',
-	 handler : function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.HOUR, -1);
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 text    : '<< Prev',
-	 renderTo: 'prev',
-	 handler : function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, - appDT );
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 text    : 'Next >>',
-	 renderTo: 'next',
-	 handler : function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, appDT );
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 id      : 'plushour',
-	 text: 'Hour >>',
-	 renderTo: 'nhour',
-	 handler: function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.HOUR, 1);
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 text: 'Day >>',
-	 renderTo: 'nday',
-	 handler: function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.DAY, 1);
-		 setTime();
-		 updateDT();
-	 }
-});
-Ext.create('Ext.Button', {
-	 text: 'Year >>',
-	 renderTo: 'nyear',
-	 handler: function(){
-		 appTime = Ext.Date.add(appTime, Ext.Date.YEAR, 1);
-		 setTime();
-		 updateDT();
-	 }
-});
 	
-} // End of buildUI()
+	// Listen for click
+	$('.btn').on('click', function(){
+		if (this.id == 'next'){
+			var opt = getSelectedOption();
+			dt.add(parseInt(opt.attr('data-interval')), 'minutes');
+		} else if (this.id == 'prev'){
+			var opt = getSelectedOption();
+			dt.add(0 - parseInt(opt.attr('data-interval')), 'minutes');			
+		} else if (this.id == 'realtime'){
+			irealtime = true;
+			dt = moment();
+		} else {
+			dt.add(parseInt($(this).attr('data-offset')), $(this).attr('data-unit'));
+		}
+		update();
+	    irealtime = false;
+		return false;
+	});
 
-
-
-Ext.onReady( function(){
+	// stop depressed buttons
+	$(".btn").mouseup(function(){
+	    $(this).blur();
+	});
+}
+function refresh(){
+	if (irealtime){
+		dt = moment();
+		rectifyTime();
+		update();
+	}
+}
+function onReady(){
 	buildUI();
-});
+	$.ajax("/json/products.php", {
+		success: function(data){
+			addproducts(data);
+		}
+	});
+	//Start the timer
+	window.setTimeout(refresh, 300000);
+}
+
+// When ready
+$(onReady);
