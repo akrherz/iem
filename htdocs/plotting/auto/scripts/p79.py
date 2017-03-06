@@ -6,6 +6,7 @@ from pyiem.meteorology import mixing_ratio, dewpoint_from_pq
 from pyiem.datatypes import temperature, pressure, mixingratio
 import pandas as pd
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -39,7 +40,7 @@ def get_description():
     relative humidity value is computed."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
 
@@ -54,10 +55,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    month = fdict.get('month', 'all')
+    station = ctx['zstation']
+    network = ctx['network']
+    month = ctx['month']
 
     nt = NetworkTable(network)
 
@@ -107,7 +109,7 @@ def plotter(fdict):
     dwpf = df['dwpf']
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(drct-5, dwpf, ec='green', fc='green', width=10)
+    ax.bar(drct, dwpf, ec='green', fc='green', width=10, align='center')
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\nAverage Dew Point by Wind Direction (month=%s) "
                   "(%s-%s)\n"
@@ -124,3 +126,6 @@ def plotter(fdict):
     ax.set_xlabel("Wind Direction")
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
