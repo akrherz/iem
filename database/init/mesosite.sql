@@ -113,6 +113,8 @@ CREATE TABLE iembot_room_subscriptions (
     roomname character varying(64),
     channel character varying(24)
 );
+CREATE UNIQUE index iembot_room_subscriptions_idx on
+  iembot_room_subscriptions(roomname, channel);
 GRANT all on iembot_room_subscriptions to nobody,apache;
 ---
 --- IEMBot room subscriptions
