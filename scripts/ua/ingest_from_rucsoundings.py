@@ -217,7 +217,7 @@ def main(valid):
         # skip virtual sites
         if sid.startswith("_"):
             continue
-        uri = ("http://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
+        uri = ("https://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
                "start_year=%s;start_month_name=%s;"
                ) % (valid.year, valid.strftime("%b"))
         uri += ("start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;"
