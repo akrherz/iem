@@ -27,8 +27,8 @@ for row in acursor:
         print(('Updated %s STS WAS: %s NOW: %s'
                '') % (station, nt.sts[station]['archive_begin'], ts))
 
-    mcursor.execute("""UPDATE stations SET archive_begin = %s
-         WHERE id = %s and network = %s""", (ts, station, net))
+        mcursor.execute("""UPDATE stations SET archive_begin = %s
+             WHERE id = %s and network = %s""", (ts, station, net))
 
 mcursor.close()
 mesosite.commit()
