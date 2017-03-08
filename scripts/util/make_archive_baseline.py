@@ -59,9 +59,10 @@ def main(argv):
     os.chdir(basedir)
     for pil in PILS:
         fn = "%s_%s.txt" % (pil, ts.strftime("%Y%m%d"))
-        subprocess.call("touch %s" % (fn,), shell=True)
-        os.chmod(fn, 0664)
-        chgrp(fn, grp.getgrnam('ldm')[2])
+        if not os.path.isfile(fn):
+            subprocess.call("touch %s" % (fn,), shell=True)
+            os.chmod(fn, 0664)
+            chgrp(fn, grp.getgrnam('ldm')[2])
 
 if __name__ == '__main__':
     main(sys.argv)
