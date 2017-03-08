@@ -103,9 +103,9 @@ HARDCODE = {
     'KS3153': 'GLD',
     'KS4559': 'LWC',
     'KS4972': 'MHK',
-    'KS9999': 'SLN',
+    'KS7160': 'SLN',
     'KS8167': 'TOP',
-    # KCNK | KS7248       | CONCORDIA
+    'KS1767': 'CNK',
     # KCNU | KS3984       | CHANUTE
     # KEMP | KS4937       | EMPORIA
     # KGCK | KS2980       | GARDEN_CITY
@@ -117,11 +117,11 @@ HARDCODE = {
     'KY0909': 'BWG',
     'KY1855': 'CVG',
     # KY4746       | KFFT | LEXINGTON BLUEGRASS AP     | CAPITAL CITY AIRPORT/F
-    # KY3714       | KJKL | HAZARD WATER WKS           | JACKSON/J. CARROLL
+    'KY6110': 'JKL',
     'KY4746': 'LEX',
     # KY4954       | KLOU | LOUISVILLE INTL AP         | LOUISVILLE/BOWMAN
     # KY0381       | KLOZ | BARBOURVILLE               | LONDON-CORBIN ARPT
-    # KY5694       | KPAH | MURRAY                     | PADUCAH/BARKLEY
+    'KY4202': 'PAH',
     'KY4954': 'SDF',
 
     # Michigan
@@ -136,7 +136,7 @@ HARDCODE = {
     'MI3932': 'HTL',
     'MI4150': 'JXN',
     'MI4641': 'LAN',
-    # MI7820       | KMBS | STANDISH 5SW                  | SAGINAW
+    'MI7227': 'MBS',
     'MI5712': 'MKG',
     'MI5178': 'MQT',
     # MI5097       | KTVC | MAPLE CITY 1E                 | TRAVERSE CIT
@@ -207,7 +207,7 @@ HARDCODE = {
     # South Dakota
     # SD5048       | K2WX | LUDLOW 3 SSE         | BUFFALO
     'SD7742': '8D3',
-    # SD9999       | KABR | ABERDEEN             | ABERDEEN
+    'SD0020': 'ABR',
     'SD8932': 'ATY',
     'SD2087': 'CUT',
     'SD2852': 'D07',
@@ -216,7 +216,7 @@ HARDCODE = {
     'SD9367': 'ICR',
     # SD6212       | KIEN | OELRICHS             | PINE RIDGE
     'SD5691': 'MBG',
-    # SD3029       | KMHE | FORESTBURG 3 NE      | MITCHELL
+    'SD6936': 'MHE',
     # SD1972       | KPHP | COTTONWOOD 2 E       | PHILIP
     'SD6597': 'PIR',
     'SD6947': 'RAP',
@@ -229,7 +229,7 @@ HARDCODE = {
     'WI2428': 'EAU',
     'WI4961': 'MSN',
     'WI4370': 'LSE',
-    # AUW Wausau is missing
+    'WI2428': 'AUW',
     }
 
 # Pre-compute the grid location of each climate site
