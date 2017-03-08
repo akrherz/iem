@@ -88,7 +88,7 @@ def plotter(fdict):
 
     df = pd.DataFrame(rows)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     ax.scatter(df['snow_doy'], df['snowfall'], facecolor=df['color'],
                edgecolor=df['color'], s=100)

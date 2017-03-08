@@ -1,6 +1,7 @@
 import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,7 +18,7 @@ def get_description():
     for more details."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=2015,
              label='Year to Highlight'),
     ]
@@ -30,9 +31,9 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
-    year = int(fdict.get('year', 2015))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    year = ctx['year']
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
@@ -49,7 +50,7 @@ def plotter(fdict):
       GROUP by year ORDER by year ASC
     """, pgconn, params=(station,), index_col='year')
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
+    (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
     ax.bar(df.index.values, 0 - df['largest_change'], fc='b', ec='b', zorder=1)
     ax.bar(year, 0 - df.at[year, 'largest_change'], fc='red', ec='red',
            zorder=2)
@@ -65,3 +66,6 @@ def plotter(fdict):
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -5,6 +5,7 @@ import datetime
 from scipy import stats
 import pandas as pd
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT2 = OrderedDict([
         ('winter', 'Winter (Dec, Jan, Feb)'),
@@ -22,7 +23,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', default='winter',
              label='Select Season:', options=PDICT2),
         dict(type="year", name="year", default=1893,
@@ -38,11 +39,11 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0000')
-    season = fdict.get('season', 'winter')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    season = ctx['season']
     _ = PDICT2[season]
-    startyear = int(fdict.get('year', 1893))
+    startyear = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -75,12 +76,12 @@ def plotter(fdict):
     data = np.array(df['data'])
     years = np.array(df['year'])
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = np.average(data)
 
     colorabove = 'seagreen'
     colorbelow = 'lightsalmon'
-    bars = ax.bar(years - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(years, data, fc=colorabove, ec=colorabove, align='center')
     for i, bar in enumerate(bars):
         if data[i] < avgv:
             bar.set_facecolor(colorbelow)
@@ -106,3 +107,6 @@ def plotter(fdict):
     ax.legend(ncol=2, fontsize=10)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

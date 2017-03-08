@@ -4,6 +4,7 @@ from pyiem import network
 import datetime
 import pandas as pd
 from scipy import stats
+from pyiem.util import get_autoplot_context
 
 PDICT = {'none': 'Show all values',
          'hide': 'Show "strong" events'}
@@ -23,12 +24,12 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=9,
              label='Start Month:'),
         dict(type='text', name='months', default=2,
              label='Number of Months to Average:'),
-        dict(type='text', name='lag', default=-3,
+        dict(type='int', name='lag', default=-3,
              label='Number of Months to Lag for SOI Value:'),
         dict(type="select", name='h', default='none', options=PDICT,
              label='Hide/Show week SOI events -0.5 to 0.5'),
@@ -55,13 +56,13 @@ def plotter(fdict):
     import matplotlib.colors as mpcolors
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0000')
-    lagmonths = int(fdict.get('lag', -3))
-    months = int(fdict.get('months', 2))
-    month = int(fdict.get('month', 9))
-    highyears = [int(x) for x in fdict.get('year', '2015').split(",")]
-    h = fdict.get('h', 'none')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    lagmonths = ctx['lag']
+    months = ctx['months']
+    month = ctx['month']
+    highyears = [int(x) for x in ctx['year'].split(",")]
+    h = ctx['h']
 
     wantmonth = month + lagmonths
     yearoffset = 0
@@ -180,3 +181,6 @@ def plotter(fdict):
     ax3.grid(True)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

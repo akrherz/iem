@@ -5,6 +5,7 @@ import datetime
 import pandas as pd
 from pyiem.reference import state_names
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State'}
@@ -63,20 +64,18 @@ def plotter(fdict):
     from pyiem.plot import MapPlot
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    state = fdict.get('state', 'IA')
-    phenomena = fdict.get('phenomena', 'TO')
-    significance = fdict.get('significance', 'A')
-    station = fdict.get('station', 'DMX')[:4]
-    sdate = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01'),
-                                       '%Y-%m-%d')
-    edate = datetime.datetime.strptime(fdict.get('edate', '2015-01-01'),
-                                       '%Y-%m-%d')
-    t = fdict.get('t', 'state')
-    varname = fdict.get('v', 'lastyear')
-    year = int(fdict.get('year', 2015))
-    year2 = int(fdict.get('year2', 2015))
-    ilabel = (fdict.get('ilabel', 'no') == 'yes')
+    ctx = get_autoplot_context(fdict, get_description())
+    state = ctx['state']
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
+    station = ctx['station'][:4]
+    sdate = ctx['sdate']
+    edate = ctx['edate']
+    t = ctx['t']
+    varname = ctx['v']
+    year = ctx['year']
+    year2 = ctx['year2']
+    ilabel = (ctx['ilabel'] == 'yes')
     nt = NetworkTable("WFO")
     if varname == 'lastyear':
         if t == 'cwa':
@@ -192,7 +191,7 @@ def plotter(fdict):
         datavar = "average"
 
     if len(rows) == 0:
-        return("Sorry, no data found for query!")
+        raise Exception("Sorry, no data found for query!")
     df = pd.DataFrame(rows)
     if varname == 'yearavg':
         years = maxv.year - minv.year + 1
@@ -231,3 +230,6 @@ def plotter(fdict):
     m.fill_ugcs(data, bins, cmap=cmap, ilabel=ilabel)
 
     return m.fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

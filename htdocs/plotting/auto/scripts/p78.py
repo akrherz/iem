@@ -6,6 +6,7 @@ from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
 from pyiem.datatypes import temperature, pressure, mixingratio
 import pandas as pd
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -39,7 +40,7 @@ def get_description():
     relative humidity value is computed."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
 
@@ -54,10 +55,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    month = fdict.get('month', 'all')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    month = ctx['month']
 
     nt = NetworkTable(network)
 
@@ -105,7 +106,7 @@ def plotter(fdict):
     dwpf = df['dwpf']
     rh = df['rh']
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.bar(tmpf-0.5, dwpf, ec='green', fc='green', width=1)
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\nAverage Dew Point by Air Temperature (month=%s) "
@@ -127,3 +128,6 @@ def plotter(fdict):
     ax.set_xlabel("Air Temperature $^\circ$F")
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
