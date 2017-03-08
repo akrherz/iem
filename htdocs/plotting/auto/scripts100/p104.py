@@ -1,8 +1,9 @@
 import psycopg2
-from pyiem import network, util
+from pyiem import network
 import numpy as np
 import datetime
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -21,7 +22,7 @@ def get_description():
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='date', name='date1',
              default=(today -
                       datetime.timedelta(days=90)).strftime("%Y/%m/%d"),
@@ -56,7 +57,7 @@ def plotter(fdict):
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
 
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     days = ctx['days']
     days2 = ctx['days2']
@@ -66,7 +67,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     interval = datetime.timedelta(days=days2)
 

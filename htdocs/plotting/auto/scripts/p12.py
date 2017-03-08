@@ -115,7 +115,7 @@ def plotter(fdict):
     col = 'xday_doy' if extrenum == 'last' else 'nday_doy'
     df2 = df[df['count'] > 0]
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.scatter(df2[col], df2['count'])
     ax.grid(True)
     do_labels(ax, extrenum, varname, direction, threshold, station, network,
@@ -135,7 +135,7 @@ def plotter(fdict):
     sortvals = np.sort(df2[col].values)
     yvals = np.arange(len(sortvals)) / float(len(sortvals))
     ax2.plot(sortvals, yvals * 100., color='r')
-    ax2.set_ylabel("Accumulated Frequency [%] (red line)")
+    ax2.set_ylabel("Accumulated Frequency [%] (red line)", color='r')
     ax2.set_yticks([0, 25, 50, 75, 100])
 
     avgd = datetime.datetime(2000, 1, 1) + datetime.timedelta(
@@ -152,20 +152,27 @@ def plotter(fdict):
 
     ax.set_xlim(df2[col].min() - 10, df2[col].max() + 10)
     ax.set_ylim(0, df2['count'].max() * 1.2)
+    ax2.set_ylim(0, 100)
 
     idx = df2[col].idxmax()
-    ax.text(df2.at[idx, col] + 1, df2.at[idx, 'count'],
-            "%s" % (idx,), ha='left')
+    if idx != year:
+        ax.text(df2.at[idx, col] + 1, df2.at[idx, 'count'],
+                "%s" % (idx,), ha='left')
     idx = df2[col].idxmin()
-    ax.text(df2.at[idx, col] - 1, df2.at[idx, 'count'],
-            "%s" % (idx,), va='bottom')
+    if idx != year:
+        ax.text(df2.at[idx, col] - 1, df2.at[idx, 'count'],
+                "%s" % (idx,), va='bottom')
     idx = df2['count'].idxmax()
-    ax.text(df2.at[idx, col] + 1, df2.at[idx, 'count'],
-            "%s" % (idx,), va='bottom')
+    if idx != year:
+        ax.text(df2.at[idx, col] + 1, df2.at[idx, 'count'],
+                "%s" % (idx,), va='bottom')
     if year in df2.index:
         df3 = df2.loc[year]
         ax.scatter(df3[col], df3['count'], zorder=5, color='r')
-        ax.text(df3[col], df3['count'], "%s" % (year,), zorder=5, color='r')
+        ax.text(df3[col], df3['count'] + 1, "%s" % (year,), zorder=5,
+                color='r')
+        ax.axhline(df3['count'])
+        ax.axvline(df3[col])
     return fig, df
 
 
