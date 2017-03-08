@@ -3,6 +3,7 @@ import calendar
 import datetime
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,7 +18,7 @@ def get_description():
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default=today.month,
              label='Month to Plot:'),
         dict(type='year', name='year', default=today.year,
@@ -32,10 +33,10 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
-    month = int(fdict.get('month', 10))
-    year = int(fdict.get('year', 2014))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    month = ctx['month']
+    year = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -85,3 +86,6 @@ def plotter(fdict):
     ax[1].grid(True)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

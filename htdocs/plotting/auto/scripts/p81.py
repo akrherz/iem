@@ -2,6 +2,7 @@ import psycopg2
 from pyiem import network
 from pandas.io.sql import read_sql
 import calendar
+from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High Temperature',
          'low': 'Low Temperature'}
@@ -18,7 +19,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='high',
              label='Which Daily Variable:', options=PDICT),
 
@@ -32,9 +33,9 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
-    varname = fdict.get('var', 'high')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
     if PDICT.get(varname) is None:
         return
 
@@ -58,7 +59,7 @@ def plotter(fdict):
     (y.doy = d.doy) WHERE d.doy < 366 ORDER by d.doy ASC
     """, pgconn, params=(station, ), index_col='doy')
 
-    fig, ax = plt.subplots(2, 1, sharex=True)
+    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(8, 6))
     ax[0].plot(df.index.values, df['doy_stddev'], lw=2, color='r',
                label='Single Day')
     ax[0].plot(df.index.values, df['d2d_stddev'], lw=2, color='b',
@@ -83,3 +84,6 @@ def plotter(fdict):
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].set_xlim(0, 366)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

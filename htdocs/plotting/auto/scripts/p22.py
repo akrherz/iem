@@ -3,6 +3,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High temperature',
          'low': 'Low Temperature'}
@@ -32,10 +33,10 @@ def get_description():
     climatology for the location."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
-        dict(type='text', name='min', default='-5',
+             label='Select Station:', network='IACLIMATE'),
+        dict(type='int', name='min', default='-5',
              label='Lower Bound (F) of Temperature Range'),
-        dict(type='text', name='max', default='5',
+        dict(type='int', name='max', default='5',
              label='Upper Bound (F) of Temperature Range'),
     ]
     return d
@@ -48,14 +49,14 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
 
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    minv = int(fdict.get('min', -5))
-    maxv = int(fdict.get('max', 5))
+    ctx = get_autoplot_context(fdict, get_description())
+    minv = ctx['min']
+    maxv = ctx['max']
     if minv > maxv:
         t = minv
         minv = maxv
         maxv = t
-    station = fdict.get('station', 'IA0200')
+    station = ctx['station']
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
@@ -96,3 +97,6 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.grid(True)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

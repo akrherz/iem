@@ -4,6 +4,7 @@ import calendar
 import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'first': 'First Snowfall after 1 July',
          'last': 'Last Snowfall before 1 July'}
@@ -19,7 +20,7 @@ def get_description():
     this plot."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='text', name='threshold', default='1',
              label='First Snowfall Threshold (T for trace)'),
         dict(type="select", name='dir', default='last', options=PDICT,
@@ -35,10 +36,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA2203')
-    mydir = fdict.get('dir', 'last')
-    threshold = fdict.get('threshold', 1)
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    mydir = ctx['dir']
+    threshold = ctx['threshold']
     threshold = 0.0001 if threshold == 'T' else float(threshold)
 
     table = "alldata_%s" % (station[:2],)

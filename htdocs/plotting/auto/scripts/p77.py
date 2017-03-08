@@ -4,6 +4,7 @@ from pyiem import network
 import datetime
 from pandas.io.sql import read_sql
 import calendar
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,7 +18,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
     ]
     return d
 
@@ -28,8 +29,8 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -48,7 +49,7 @@ def plotter(fdict):
     avg(max) as max_jday from agger GROUP by t ORDER by t ASC
     """, pgconn, params=(station, thisyear), index_col='tmpf')
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.7, 0.8])
     ax2 = plt.axes([0.81, 0.1, 0.15, 0.8])
     height = df['min_jday'][:] + 365. - df['max_jday']
@@ -84,3 +85,6 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

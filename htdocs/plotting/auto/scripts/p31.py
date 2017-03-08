@@ -4,6 +4,7 @@ import datetime
 import calendar
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,8 +18,8 @@ def get_description():
     opposite."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
-        dict(type='text', name='days', default='4',
+             label='Select Station:', network='IACLIMATE'),
+        dict(type='int', name='days', default='4',
              label='Number of Trailing Days:'),
     ]
     return d
@@ -31,9 +32,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    days = int(fdict.get('days', 4))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    days = ctx['days']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -73,7 +74,7 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
+    (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
     ax.bar(weeks*7, jump_up, width=7, fc='r', ec='r')
     ax.bar(weeks*7, jump_down, width=7, fc='b', ec='b')
     ax.grid(True)
@@ -94,3 +95,6 @@ def plotter(fdict):
             color='blue', va='center', ha='center', bbox=dict(color='white'))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

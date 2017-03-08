@@ -2,6 +2,7 @@ import psycopg2.extras
 import numpy as np
 from pyiem import network
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 PDICT = {'precip': 'Precipitation',
          'high': 'High Temperature',
@@ -25,7 +26,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='precip',
              label='Which Variable:', options=PDICT),
     ]
@@ -39,11 +40,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0000')
-    varname = fdict.get('var', 'precip')
-    if PDICT.get(varname) is None:
-        return
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -70,7 +69,7 @@ def plotter(fdict):
                          highest_max=row[4], lowest_max=row[5]))
     df = pd.DataFrame(rows)
 
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
     if varname == 'precip':
         ax.plot(np.arange(1, 32), df['highest_avg'], color='b',
                 label='Highest Average', lw=2)
@@ -106,3 +105,6 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=12)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
