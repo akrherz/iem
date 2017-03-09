@@ -140,13 +140,41 @@ def make_daily_plot(station, sts, ets):
     plt.savefig(sys.stdout, format='png')
 
 
+def make_battery_plot(station, sts, ets):
+    """Generate a plot of battery"""
+    icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor.execute("""SELECT valid, battv_min_qc from sm_hourly
+    where station = '%s' and valid >= '%s 00:00' and valid < '%s 23:56'
+    and battv_min_qc is not null ORDER by valid ASC
+    """ % (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
+    dates = []
+    battv = []
+    for row in icursor:
+        dates.append(row[0])
+        battv.append(row[1])
+
+    (_, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    ax.plot(dates, battv)
+    ax.grid(True)
+    ax.set_ylabel("Battery Voltage $^\circ$F")
+    ax.set_title(("ISUSM Station: %s Timeseries\n"
+                  "Battery Voltage"
+                  ) % (nt.sts[station]['name'], ))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
+    interval = len(dates) / 7 + 1
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
+    ax.legend(loc='best', ncol=2, fontsize=10)
+    sys.stdout.write("Content-Type: image/png\n\n")
+    plt.savefig(sys.stdout, format='png')
+
+
 def make_vsm_histogram_plot(station, sts, ets):
     """Option 6"""
     df = read_sql("""
         SELECT
-        CASE WHEN t12_c_avg_qc > 1 then vwc_12_avg_qc else null end as v12,
-        CASE WHEN t24_c_avg_qc > 1 then vwc_24_avg_qc else null end as v24,
-        CASE WHEN t50_c_avg_qc > 1 then vwc_50_avg_qc else null end as v50
+    CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end as v12,
+    CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end as v24,
+    CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end as v50
         from sm_hourly
         where station = %s and valid >= %s and valid < %s
     """, ISUAG, params=(station, sts, ets), index_col=None)
@@ -277,6 +305,9 @@ def main():
     elif opt == '7':
         make_daily_water_change_plot(station, sts, ets)
         return
+    elif opt == '8':
+        make_battery_plot(station, sts, ets)
+        return
 
     df = read_sql("""SELECT * from sm_hourly WHERE
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
@@ -286,8 +317,8 @@ def main():
     d12t = df['t12_c_avg_qc']
     d24t = df['t24_c_avg_qc']
     d50t = df['t50_c_avg_qc']
-    d24sm = df['vwc_24_avg_qc']
-    d50sm = df['vwc_50_avg_qc']
+    d24sm = df['calc_vwc_24_avg_qc']
+    d50sm = df['calc_vwc_50_avg_qc']
     rain = df['rain_mm_tot_qc']
     tair = df['tair_c_avg_qc']
     tsoil = df['tsoil_c_avg_qc']

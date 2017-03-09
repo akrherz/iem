@@ -38,14 +38,18 @@ $ar = Array("1" => "3 Panel Plot",
 		"4" => "Daily Solar Radiation",
 		"5" => "Daily Potential Evapotranspiration",
 		"6" => "Histogram of Volumetric Soil Moisture",
-		"7" => "Daily Soil Water + Change");
+		"7" => "Daily Soil Water + Change",
+		"8" => "Battery Voltage and Solar Radiation");
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = Array("1" => $dd,
 		"2" => $dd,
 		"3" => $dd,
 		"4" => $dd,
-		"5" => $dd);
+		"5" => $dd,
+		"6" => $dd,
+		"7" => $dd,
+		"8" => $dd);
 $desc["6"] = <<<EOF
 This plot presents a histogram of hourly volumetric soil moisture observations.
 The y-axis is expressed in logarithmic to better show the low frequency obs
