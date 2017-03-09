@@ -2,6 +2,7 @@ import psycopg2.extras
 import pyiem.nws.vtec as vtec
 import numpy as np
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -29,12 +30,12 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ctx = get_autoplot_context(fdict, get_description())
+    ugc = ctx['ugc']
+    phenomena = ctx['phenomena']
+    significance = ctx['significance']
 
-    ugc = fdict.get('ugc', 'IAC153')
-    phenomena = fdict.get('phenomena', 'TO')
-    significance = fdict.get('significance', 'A')
-
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     cursor.execute("""
     SELECT s.wfo, s.tzname, u.name from ugcs u  JOIN stations s
@@ -110,3 +111,6 @@ def plotter(fdict):
                        max(df['issue']).strftime("%-d %b %Y")))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

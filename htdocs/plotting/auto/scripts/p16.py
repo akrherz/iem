@@ -5,6 +5,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import drct2text
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
          ('ts', 'Thunderstorm (TS) Reported'),
@@ -43,12 +44,12 @@ def get_description():
     wind speed and direction."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='opt', default='ts',
              label='Which metric to plot?', options=PDICT),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
-        dict(type='text', name='threshold', default='80',
+        dict(type='int', name='threshold', default='80',
              label='Threshold (when appropriate):')
     ]
     return d
@@ -60,10 +61,10 @@ def highcharts(fdict):
     matplotlib.use('agg')
     from windrose.windrose import histogram
     ctx = get_context(fdict)
-    dir_edges, var_bins, table = histogram(ctx['df']['drct'].values,
-                                           ctx['df']['smph'].values,
-                                           np.array([0, 2, 5, 7, 10, 15, 20]),
-                                           18, True)
+    dir_edges, _, table = histogram(ctx['df']['drct'].values,
+                                    ctx['df']['smph'].values,
+                                    np.array([0, 2, 5, 7, 10, 15, 20]),
+                                    18, True)
     arr = [drct2text(mydir) for mydir in dir_edges]
     return """
     var arr = """+str(arr)+""";
@@ -138,7 +139,8 @@ def highcharts(fdict):
             shared: true,
             valueDecimals: 1,
             formatter: function () {
-            var s = '<b>' + arr[this.x] + ' ('+ this.points[0].total.toFixed(1)+'%)</b>';
+            var s = '<b>' + arr[this.x] +
+                    ' ('+ this.points[0].total.toFixed(1)+'%)</b>';
 
             $.each(this.points, function () {
                 s += '<br/>' + this.series.name + ': ' +
@@ -162,14 +164,9 @@ def highcharts(fdict):
 
 def get_context(fdict):
     """Do the agnostic stuff"""
-    ctx = {}
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-
-    ctx['station'] = fdict.get('zstation', 'AMW')
-    ctx['network'] = fdict.get('network', 'IA_ASOS')
-    ctx['threshold'] = int(fdict.get('threshold', 80))
-    ctx['opt'] = fdict.get('opt', 'ts')
-    ctx['month'] = fdict.get('month', 'all')
+    ctx = get_autoplot_context(fdict, get_description())
+    ctx['station'] = ctx['zstation']
     ctx['nt'] = NetworkTable(ctx['network'])
 
     if ctx['month'] == 'all':

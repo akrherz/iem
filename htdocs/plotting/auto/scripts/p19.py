@@ -4,6 +4,7 @@ from pyiem import network
 import datetime
 from collections import OrderedDict
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 # Use OrderedDict to keep webform select in this same order!
 MDICT = OrderedDict([('all', 'No Month/Season Limit'),
@@ -33,8 +34,8 @@ def get_description():
     and low temperatures for a station of your choice."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
-        dict(type='text', name='binsize', default='10',
+             label='Select Station:', network='IACLIMATE'),
+        dict(type='int', name='binsize', default='10',
              label='Histogram Bin Size:'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
@@ -49,10 +50,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    binsize = int(fdict.get('binsize', 10))
-    month = fdict.get('month', 'all')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    binsize = ctx['binsize']
+    month = ctx['month']
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
     if month == 'all':
@@ -95,7 +96,7 @@ def plotter(fdict):
     H.mask = np.where(H < (1./years), True, False)
     ar = np.argwhere(H.max() == H)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     res = ax.pcolormesh(xedges, yedges, H.transpose())
     fig.colorbar(res, label="Days per Year")
     ax.grid(True)
@@ -121,3 +122,6 @@ def plotter(fdict):
             bbox=dict(facecolor='k', edgecolor='none'), fontsize=8)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

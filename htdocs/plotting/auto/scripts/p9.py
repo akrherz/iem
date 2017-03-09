@@ -4,6 +4,7 @@ from pyiem import network
 import calendar
 import datetime
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -15,12 +16,12 @@ def get_description():
     Feb 29 is not considered for this analysis."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default='2015', min=1893,
              label='Select Year:'),
-        dict(type='text', name='base', default='50',
+        dict(type='int', name='base', default='50',
              label='Enter GDD Base (F):'),
-        dict(type='text', name='ceiling', default='86',
+        dict(type='int', name='ceiling', default='86',
              label='Enter GDD Ceiling (F):'),
     ]
     return d
@@ -32,12 +33,12 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
     thisyear = datetime.datetime.now().year
-    year = int(fdict.get('year', thisyear))
-    base = int(fdict.get('base', 50))
-    ceiling = int(fdict.get('ceiling', 86))
+    year = ctx['year']
+    base = ctx['base']
+    ceiling = ctx['ceiling']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -54,7 +55,7 @@ def plotter(fdict):
     df2 = df[['sday', glabel]].groupby('sday').describe(
                 percentiles=[.05, .25, .75, .95])
     df2 = df2.unstack(level=-1)
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.plot(np.arange(1, 366), df2[(glabel, 'mean')], color='r', zorder=2,
             lw=2., label='Average')
     _data = df[df['year'] == year][[glabel, 'sday']]
