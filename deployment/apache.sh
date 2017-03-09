@@ -9,6 +9,7 @@ cp -f /opt/iem/deployment/apache_configs/*.conf $CONFD
 
 cp -f $APPS/dep/config/apache-vhost.conf $CONFD/idep.conf
 cp -f $APPS/datateam/config/datateam-vhost.conf $CONFD/datateam.conf
+cp -f $APPS/datateam/config/datateam.inc $CONFD/datateam.inc
 cp -f $APPS/weather.im/config/weather-im-vhost.conf $CONFD
 cp -f $APPS/iem/config/mesonet.inc $CONFD
 cp -f $APPS/iem/config/00iem.conf $CONFD
