@@ -6,11 +6,15 @@ from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 import calendar
 import pandas as pd
+from pyiem.util import get_autoplot_context
+from pyiem import reference
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
          'no': 'Plot Entire Year'}
 PDICT2 = {'single': "Plot Single VTEC Phenomena + Significance",
           'svrtor': 'Plot Severe Thunderstorm + Tornado Warnings'}
+PDICT3 = {'wfo': 'Plot for Single/All WFO',
+          'state': 'Plot for a Single State'}
 
 
 def get_description():
@@ -21,10 +25,16 @@ def get_description():
     d['description'] = """This plot displays an accumulated total of
     office issued watch, warning, advisories.  These totals are not official
     and based on IEM processing of NWS text warning data.  The totals are for
-    individual warnings and not some combination of counties + warnings."""
+    individual warnings and not some combination of counties + warnings. The
+    archive begin date varies depending on which phenomena you are interested
+    in."""
     d['arguments'] = [
+        dict(type='select', name='opt', options=PDICT3, default='wfo',
+             label='Plot for a WFO or a State?'),
         dict(type='networkselect', name='station', network='WFO',
-             default='DMX', label='Select WFO:', all=True),
+             default='DMX', label='Select WFO (when appropriate):', all=True),
+        dict(type='state', default='IA', name='state',
+             label='Select State (when appropriate):'),
         dict(type='select', name='limit', default='no',
              label='End Date Limit to Plot:', options=PDICT),
         dict(type='select', name='c', default='svrtor',
@@ -46,12 +56,14 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'DMX')
-    limit = fdict.get('limit', 'no')
-    combo = fdict.get('c', 'svrtor')
-    phenomena = fdict.get('phenomena', 'TO')
-    significance = fdict.get('significance', 'W')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    limit = ctx['limit']
+    combo = ctx['c']
+    phenomena = ctx['phenomena'][:2]
+    significance = ctx['significance'][:2]
+    opt = ctx['opt']
+    state = ctx['state'][:2]
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
@@ -59,85 +71,43 @@ def plotter(fdict):
     lastdoy = 367
     if limit.lower() == 'yes':
         lastdoy = int(datetime.datetime.today().strftime("%j")) + 1
-
+    wfolimiter = " and wfo = '%s' " % (station, )
+    if opt == 'state':
+        wfolimiter = " and substr(ugc, 1, 2) = '%s' " % (state, )
+    eventlimiter = ""
     if combo == 'svrtor':
-        if station == '_ALL':
-            cursor.execute("""
-                with counts as (
-                    select extract(year from issue) as yr,
-                    extract(doy from issue) as doy, count(*) from sbw
-                    where status = 'NEW' and phenomena in ('SV', 'TO')
-                    and significance = 'W' and issue > '2003-01-01'
-                    and extract(doy from issue) < %s
-                    GROUP by yr, doy)
+        eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
+        phenomena = 'TO'
+        significance = 'W'
 
-                SELECT yr, doy, sum(count) OVER (PARTITION by yr
-                ORDER by doy ASC)
-                from counts ORDER by yr ASC, doy ASC
-              """, (lastdoy, ))
-
-        else:
-            cursor.execute("""
-                with counts as (
-                    select extract(year from issue) as yr,
-                    extract(doy from issue) as doy, count(*) from sbw
-                    where status = 'NEW' and phenomena in ('SV', 'TO')
-                    and significance = 'W' and wfo = %s
-                    and issue > '2003-01-01'
-                    and extract(doy from issue) < %s
-                    GROUP by yr, doy)
-
-                SELECT yr, doy, sum(count) OVER (PARTITION by yr
-                ORDER by doy ASC)
-                from counts ORDER by yr ASC, doy ASC
-              """, (station, lastdoy))
-    else:
-        if station == '_ALL':
-            cursor.execute("""
-            WITH data as (
-                SELECT extract(year from issue) as yr,
-                issue, eventid, wfo from warnings WHERE
-                phenomena = %s and significance = %s
-                and extract(doy from issue) < %s
-                and issue > '2003-01-01'),
-            agg1 as (
-                SELECT yr, min(issue) as min_issue, eventid, wfo from data
-                GROUP by yr, eventid, wfo),
-            agg2 as (
-                SELECT yr, extract(doy from min_issue) as doy, count(*)
-                from agg1 GROUP by yr, doy)
-            SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
-            from agg2 ORDER by yr ASC, doy ASC
-            """, (phenomena, significance, lastdoy))
-        else:
-            cursor.execute("""
-            WITH data as (
-                SELECT extract(year from issue) as yr,
-                issue, eventid, wfo from warnings WHERE
-                phenomena = %s and significance = %s and wfo = %s
-                and extract(doy from issue) < %s
-                and issue > '2003-01-01'),
-            agg1 as (
-                SELECT yr, min(issue) as min_issue, eventid, wfo from data
-                GROUP by yr, eventid, wfo),
-            agg2 as (
-                SELECT yr, extract(doy from min_issue) as doy, count(*)
-                from agg1 GROUP by yr, doy)
-            SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
-            from agg2 ORDER by yr ASC, doy ASC
-            """, (phenomena, significance, station, lastdoy))
+    cursor.execute("""
+    WITH data as (
+        SELECT extract(year from issue) as yr,
+        issue, phenomena, significance, eventid, wfo from warnings WHERE
+        ((phenomena = %s and significance = %s) """ + eventlimiter + """)
+        and extract(doy from issue) < %s """ + wfolimiter + """),
+    agg1 as (
+        SELECT yr, min(issue) as min_issue, eventid, wfo, phenomena,
+        significance from data
+        GROUP by yr, eventid, wfo, phenomena, significance),
+    agg2 as (
+        SELECT yr, extract(doy from min_issue) as doy, count(*)
+        from agg1 GROUP by yr, doy)
+    SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
+    from agg2 ORDER by yr ASC, doy ASC
+    """, (phenomena, significance, lastdoy))
 
     data = {}
-    for yr in range(2003, datetime.datetime.now().year + 1):
-        data[yr] = {'doy': [], 'counts': []}
+    for yr in range(1986, datetime.datetime.now().year + 1):
+        data[yr] = {'doy': [0], 'counts': [0]}
     rows = []
     for row in cursor:
         data[row[0]]['doy'].append(row[1])
         data[row[0]]['counts'].append(row[2])
         rows.append(dict(year=row[0], day_of_year=row[1], count=row[2]))
     # append on a lastdoy value so all the plots go to the end
-    for yr in range(2003, datetime.datetime.now().year):
-        if len(data[yr]['doy']) == 0 or data[yr]['doy'][-1] >= lastdoy:
+    for yr in range(1986, datetime.datetime.now().year):
+        if len(data[yr]['doy']) == 1 or data[yr]['doy'][-1] >= lastdoy:
             continue
         data[yr]['doy'].append(lastdoy)
         data[yr]['counts'].append(data[yr]['counts'][-1])
@@ -148,9 +118,9 @@ def plotter(fdict):
             data[datetime.datetime.now().year]['counts'][-1])
     df = pd.DataFrame(rows)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ann = []
-    for yr in range(2003, datetime.datetime.now().year + 1):
+    for yr in range(1986, datetime.datetime.now().year + 1):
         if len(data[yr]['doy']) < 2:
             continue
         l = ax.plot(data[yr]['doy'], data[yr]['counts'], lw=2,
@@ -192,14 +162,22 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.grid(True)
     ax.set_ylabel("Accumulated Count")
+    ax.set_ylim(bottom=0)
     title = "%s %s" % (vtec._phenDict[phenomena], vtec._sigDict[significance])
     if combo == 'svrtor':
         title = "Severe Thunderstorm + Tornado Warning"
-    ax.set_title(("NWS %s\n %s Count"
-                  ) % (nt.sts[station]['name'], title))
+    ptitle = "%s" % (nt.sts[station]['name'],)
+    if opt == 'state':
+        ptitle = ("NWS Issued for Counties/Parishes in %s"
+                  ) % (reference.state_names[state],)
+    ax.set_title(("%s\n %s Count"
+                  ) % (ptitle, title))
     ax.set_xlim(0, lastdoy)
     if lastdoy < 367:
         ax.set_xlabel(("thru approximately %s"
-                       ) % (datetime.date.today().strftime("%-d %b"), ))
+                       ) % (datetime.date.today().strftime("%-d %B"), ))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
