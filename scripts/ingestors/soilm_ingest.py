@@ -56,6 +56,8 @@ STATIONS = {'CAMI4': 'Calumet',
             'CRFI4': 'Crawfordsville',
             'FRUI4': 'Muscatine',
             'CIRI4': 'CedarRapids',
+            # Vineyward
+            'AHTI4': 'AmesHort',
             }
 
 
@@ -207,14 +209,16 @@ def hourly_process(nwsli, maxts):
                 float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
         ob.data['c3tmpf'] = temperature(
                 float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
-        ob.data['c4tmpf'] = temperature(
-                float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
+        if 't50_c_avg' in headers:
+            ob.data['c4tmpf'] = temperature(
+                    float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
         ob.data['c2smv'] = float(
             tokens[headers.index('calc_vwc_12_avg')]) * 100.0
         ob.data['c3smv'] = float(
             tokens[headers.index('calc_vwc_24_avg')]) * 100.0
-        ob.data['c4smv'] = float(
-            tokens[headers.index('calc_vwc_50_avg')]) * 100.0
+        if 'calc_vwc_50_avg' in headers:
+            ob.data['c4smv'] = float(
+                tokens[headers.index('calc_vwc_50_avg')]) * 100.0
         ob.save(accesstxn)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)

@@ -4,7 +4,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (2, now());
+INSERT into iem_schema_manager_version values (3, now());
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -134,7 +134,34 @@ CREATE TABLE sm_daily (
     calc_vwc_24_avg_f char(1),
     calc_vwc_50_avg real,
     calc_vwc_50_avg_qc real,
-    calc_vwc_50_avg_f char(1)
+    calc_vwc_50_avg_f char(1),
+        lwmv_1 real,
+    lwmv_1_qc real,
+    lwmv_1_f character(1),
+    lwmv_2 real,
+    lwmv_2_qc real,
+    lwmv_2_f character(1),
+    lwmdry_1_tot real,
+    lwmdry_1_tot_qc real,
+    lwmdry_1_tot_f character(1),
+    lwmcon_1_tot real,
+    lwmcon_1_tot_qc real,
+    lwmcon_1_tot_f character(1),
+    lwmwet_1_tot real,
+    lwmwet_1_tot_qc real,
+    lwmwet_1_tot_f character(1),
+    lwmdry_2_tot real,
+    lwmdry_2_tot_qc real,
+    lwmdry_2_tot_f character(1),
+    lwmcon_2_tot real,
+    lwmcon_2_tot_qc real,
+    lwmcon_2_tot_f character(1),
+    lwmwet_2_tot real,
+    lwmwet_2_tot_qc real,
+    lwmwet_2_tot_f character(1),
+    bpres_avg real,
+    bpres_avg_qc real,
+    bpres_avg_f character(1)
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
 GRANT SELECT on sm_daily to nobody;
@@ -292,7 +319,35 @@ CREATE TABLE sm_hourly (
     calc_vwc_24_avg_f char(1),
     calc_vwc_50_avg real,
     calc_vwc_50_avg_qc real,
-    calc_vwc_50_avg_f char(1)
+    calc_vwc_50_avg_f char(1),
+        lwmv_1 real,
+    lwmv_1_qc real,
+    lwmv_1_f character(1),
+    lwmv_2 real,
+    lwmv_2_qc real,
+    lwmv_2_f character(1),
+    lwmdry_1_tot real,
+    lwmdry_1_tot_qc real,
+    lwmdry_1_tot_f character(1),
+    lwmcon_1_tot real,
+    lwmcon_1_tot_qc real,
+    lwmcon_1_tot_f character(1),
+    lwmwet_1_tot real,
+    lwmwet_1_tot_qc real,
+    lwmwet_1_tot_f character(1),
+    lwmdry_2_tot real,
+    lwmdry_2_tot_qc real,
+    lwmdry_2_tot_f character(1),
+    lwmcon_2_tot real,
+    lwmcon_2_tot_qc real,
+    lwmcon_2_tot_f character(1),
+    lwmwet_2_tot real,
+    lwmwet_2_tot_qc real,
+    lwmwet_2_tot_f character(1),
+    bpres_avg real,
+    bpres_avg_qc real,
+    bpres_avg_f character(1)
+    
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
