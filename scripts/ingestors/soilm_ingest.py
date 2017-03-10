@@ -17,10 +17,8 @@ from pyiem.datatypes import temperature, humidity, distance
 import pyiem.meteorology as met
 import psycopg2
 ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
-icursor = ISUAG.cursor()
 
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
-accesstxn = ACCESS.cursor()
 
 REPROCESS_SOLAR = False
 VARCONV = {
@@ -70,6 +68,8 @@ def make_time(s):
 
 def m15_process(nwsli, maxts):
     """ Process the 15minute file """
+    icursor = ISUAG.cursor()
+    acursor = ACCESS.cursor()
     fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
         return
@@ -139,16 +139,22 @@ def m15_process(nwsli, maxts):
             tokens[headers.index('calc_vwc_24_avg')]) * 100.0
         ob.data['c4smv'] = float(
             tokens[headers.index('calc_vwc_50_avg')]) * 100.0
-        ob.save(accesstxn, force_current_log=True)
+        ob.save(acursor, force_current_log=True)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
         processed += 1
+    acursor.close()
+    icursor.close()
+    ACCESS.commit()
+    ISUAG.commit()
     return processed
 
 
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
     # print '-------------- HOURLY PROCESS ---------------'
+    icursor = ISUAG.cursor()
+    acursor = ACCESS.cursor()
     fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
         return
@@ -219,10 +225,14 @@ def hourly_process(nwsli, maxts):
         if 'calc_vwc_50_avg' in headers:
             ob.data['c4smv'] = float(
                 tokens[headers.index('calc_vwc_50_avg')]) * 100.0
-        ob.save(accesstxn)
+        ob.save(acursor)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
         processed += 1
+    acursor.close()
+    icursor.close()
+    ACCESS.commit()
+    ISUAG.commit()
     return processed
 
 
@@ -237,6 +247,8 @@ def formatter(v):
 
 def daily_process(nwsli, maxts):
     """ Process the daily file """
+    icursor = ISUAG.cursor()
+    acursor = ACCESS.cursor()
     # print '-------------- DAILY PROCESS ----------------'
     fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(fn):
@@ -293,31 +305,39 @@ def daily_process(nwsli, maxts):
             global REPROCESS_SOLAR
             REPROCESS_SOLAR = True
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
-        ob.save(accesstxn)
+        ob.save(acursor)
         # print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
         #                                nwsli, valid.strftime("%Y-%m-%d"))
         processed += 1
+    icursor.close()
+    acursor.close()
+    ISUAG.commit()
+    ACCESS.commit()
     return processed
 
 
 def update_pday():
     ''' Compute today's precip from the current_log archive of data '''
-    accesstxn.execute("""
+    acursor = ACCESS.cursor()
+    acursor.execute("""
     SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from
     current_log s JOIN stations t on (t.iemid = s.iemid)
     WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by s.iemid
     """)
     data = {}
-    for row in accesstxn:
+    for row in acursor:
         data[row[0]] = row[1]
 
     for iemid in data.keys():
-        accesstxn.execute("""UPDATE summary SET pday = %s
+        acursor.execute("""UPDATE summary SET pday = %s
         WHERE iemid = %s and day = 'TODAY'""", (data[iemid], iemid))
+    acursor.close()
+    ACCESS.commit()
 
 
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
+    icursor = ISUAG.cursor()
     data = {'hourly': datetime.datetime(2012, 1, 1,
                                         tzinfo=pytz.FixedOffset(-360)),
             '15minute': datetime.datetime(2012, 1, 1,
@@ -410,16 +430,7 @@ def main():
         dyprocessed = daily_process(nwsli, maxobs['daily'])
         if hrprocessed > 0:
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
-        # else:
-        #    print 'No LDM data sent for %s' % (nwsli,)
     update_pday()
-    icursor.close()
-    ISUAG.commit()
-    ISUAG.close()
-
-    accesstxn.close()
-    ACCESS.commit()
-    ACCESS.close()
 
     if REPROCESS_SOLAR:
         print("Calling fix_solar.py")
