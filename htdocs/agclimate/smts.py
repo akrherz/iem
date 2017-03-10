@@ -161,8 +161,8 @@ def make_battery_plot(station, sts, ets):
                   "Battery Voltage"
                   ) % (nt.sts[station]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    #interval = len(dates) / 7 + 1
-    #ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
+    # interval = len(dates) / 7 + 1
+    # ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=2, fontsize=10)
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')

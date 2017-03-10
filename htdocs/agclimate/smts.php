@@ -6,8 +6,8 @@ $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
 $t->thispage = "networks-agclimate";
 
-include("../../include/forms.php"); 
-include("../../include/imagemaps.php"); 
+include_once "../../include/forms.php"; 
+include_once "../../include/imagemaps.php"; 
 
 $now = time();
 $d2 = time() - 5 * 86400;
@@ -21,6 +21,15 @@ $month2 = isset($_REQUEST['month2']) ? intval($_REQUEST['month2']): date("m", $n
 $day2 = isset($_REQUEST['day2']) ? intval($_REQUEST['day2']): date("d", $now);
 $hour2 = isset($_REQUEST['hour2']) ? intval($_REQUEST['hour2']): date("H", $now);
 $opt = isset($_REQUEST['opt']) ? $_REQUEST['opt'] : '1';
+
+$sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
+$ets = mktime($hour2, 0, 0, $month2, $day2, $year2);
+$errmsg = "";
+if ($ets <= $sts){
+	$errmsg = "<div class=\"alert alert-warning\">Error, your requested".
+			" End Time is before the Start Time.  Please adjust your selection".
+			" and try once again.</div>";
+}
 
 $sselect = networkSelect("ISUSM", $station);
 $y1 = yearSelect2(2012, $year1, "year1");
@@ -66,11 +75,14 @@ EOF;
 $thedescription = $desc[$opt];
 $oselect = make_select("opt", $opt, $ar);
 
-$img = sprintf("smts.py?opt=%s&amp;station=%s&amp;year1=%s&amp;year2=%s"
+$img = sprintf("<img src=\"smts.py?opt=%s&amp;station=%s&amp;year1=%s&amp;year2=%s"
 		."&amp;month1=%s&amp;month2=%s&amp;day1=%s&amp;day2=%s&amp;"
-		."hour1=%s&amp;hour2=%s", 
+		."hour1=%s&amp;hour2=%s\" class=\"img img-responsive\">", 
 		$opt, $station, $year1, $year2, $month1, $month2, $day1, $day2, 
 		$hour1, $hour2);
+if ($errmsg != ""){
+	$img = $errmsg;
+}
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -87,7 +99,12 @@ and click the 'Make Plot' button below.
 <form name="selector" method="GET" name='getter'>
 
 <table class="table table-bordered">
-<thead><tr><th>Station</th><th>Plot Option</th><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th></tr></thead>
+<thead>
+<tr>
+<th>Station</th><th>Plot Option</th>
+<td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th>
+</tr>
+</thead>
 
 <tbody>
 <tr><td rowspan='2'>{$sselect}</td>
@@ -113,7 +130,7 @@ and click the 'Make Plot' button below.
 </form>
 
 
-<p><img src="{$img}" class="img img-responsive">
+<p>{$img}
 
 <p><strong>Plot Description:</strong> {$thedescription}
 </p>
