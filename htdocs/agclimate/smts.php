@@ -39,7 +39,7 @@ $ar = Array("1" => "3 Panel Plot",
 		"5" => "Daily Potential Evapotranspiration",
 		"6" => "Histogram of Volumetric Soil Moisture",
 		"7" => "Daily Soil Water + Change",
-		"8" => "Battery Voltage and Solar Radiation");
+		"8" => "Battery Voltage");
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = Array("1" => $dd,
