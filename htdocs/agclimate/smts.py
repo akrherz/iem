@@ -209,9 +209,9 @@ def make_daily_water_change_plot(station, sts, ets):
     df = read_sql("""
     WITH obs as (
         SELECT valid,
-        CASE WHEN t12_c_avg_qc > 1 then vwc_12_avg_qc else null end as v12,
-        CASE WHEN t24_c_avg_qc > 1 then vwc_24_avg_qc else null end as v24,
-        CASE WHEN t50_c_avg_qc > 1 then vwc_50_avg_qc else null end as v50
+    CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end as v12,
+    CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end as v24,
+    CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end as v50
         from sm_daily
         where station = %s and valid >= %s and valid < %s)
 
@@ -313,7 +313,7 @@ def main():
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
         """, ISUAG,  params=(station, sts, ets), index_col='valid')
     slrkw = df['slrkw_avg_qc']
-    d12sm = df['vwc_12_avg_qc']
+    d12sm = df['calc_vwc_12_avg_qc']
     d12t = df['t12_c_avg_qc']
     d24t = df['t24_c_avg_qc']
     d50t = df['t50_c_avg_qc']
