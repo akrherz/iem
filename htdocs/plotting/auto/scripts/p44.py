@@ -74,6 +74,8 @@ def plotter(fdict):
     wfolimiter = " and wfo = '%s' " % (station, )
     if opt == 'state':
         wfolimiter = " and substr(ugc, 1, 2) = '%s' " % (state, )
+    if opt == 'wfo' and station == '_ALL':
+        wfolimiter = ''
     eventlimiter = ""
     if combo == 'svrtor':
         eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
@@ -85,7 +87,7 @@ def plotter(fdict):
         SELECT extract(year from issue) as yr,
         issue, phenomena, significance, eventid, wfo from warnings WHERE
         ((phenomena = %s and significance = %s) """ + eventlimiter + """)
-        and extract(doy from issue) < %s """ + wfolimiter + """),
+        and extract(doy from issue) <= %s """ + wfolimiter + """),
     agg1 as (
         SELECT yr, min(issue) as min_issue, eventid, wfo, phenomena,
         significance from data
