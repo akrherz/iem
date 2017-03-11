@@ -7,6 +7,7 @@ import pandas as pd
 from pyiem import meteorology
 from collections import OrderedDict
 from pyiem.datatypes import temperature, mixingratio, pressure
+from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -41,7 +42,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
-             label='Select Station'),
+             label='Select Station', network='IA_ASOS'),
         dict(type='select', name='season', default='winter',
              label='Select Time Period:', options=MDICT),
         dict(type="year", name="year", default=1893,
@@ -57,12 +58,12 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
-
-    station = fdict.get('station', 'DSM')
-    network = fdict.get('network', 'IA_ASOS')
-    season = fdict.get('season', 'winter')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    season = ctx['season']
     _ = MDICT[season]
-    startyear = int(fdict.get('year', 1893))
+    startyear = ctx['year']
 
     nt = NetworkTable(network)
 
@@ -148,3 +149,6 @@ def plotter(fdict):
     ax.legend(ncol=1)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

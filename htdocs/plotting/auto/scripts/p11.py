@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 PDICT = {'touches': 'Daily Range Touches Emphasis',
          'above': 'Daily Range At or Above Emphasis'}
@@ -17,10 +18,10 @@ def get_description():
     as calculated by the IEM based on available observations."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
-        dict(type='text', name='year',
-             default=today.year, label='Enter Year:'),
-        dict(type='text', name='emphasis', default='-99',
+             label='Select Station:', network='IA_ASOS'),
+        dict(type='year', name='year',
+             default=today.year, label='Select Year:'),
+        dict(type='int', name='emphasis', default='-99',
              label='Temperature(&deg;F) Line of Emphasis (-99 disables):'),
         dict(type='select', name='opt', label='Option for Highlighting',
              default='touches', options=PDICT),
@@ -36,13 +37,13 @@ def plotter(fdict):
     import matplotlib.dates as mdates
     IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
     nt = NetworkTable(network)
-    year = int(fdict.get('year', 2014))
-    emphasis = int(fdict.get('emphasis', -99))
-    opt = fdict.get('opt', 'touches')
+    year = ctx['year']
+    emphasis = ctx['emphasis']
+    opt = ctx['opt']
 
     table = "summary_%s" % (year,)
 
@@ -62,11 +63,11 @@ def plotter(fdict):
         rows.append(dict(day=row['day'], min_dwpf=row['min-dwpf'],
                          max_dwpf=row['max-dwpf']))
     if len(rows) == 0:
-        return 'No Data Found!'
+        raise Exception("No Data Found!")
     df = pd.DataFrame(rows)
     days = np.array(df['day'])
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     bars = ax.bar(df['day'].values,
                   (df['max_dwpf'] - df['min_dwpf']).values, ec='g', fc='g',
                   bottom=df['min_dwpf'].values, zorder=1)
@@ -100,3 +101,6 @@ def plotter(fdict):
                         ))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

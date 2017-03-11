@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import datetime
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'fall': 'Minimum Temperature after 1 July',
          'spring': 'Maximum Temperature before 1 July'}
@@ -20,7 +21,7 @@ def get_description():
     The simple average is presented along with the percentile intervals."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
              label='Year to Highlight:'),
         dict(type='select', name='half', default='fall',
@@ -33,16 +34,16 @@ def get_description():
 
 def get_context(fdict):
     """ Get the raw infromations we need"""
-    ctx = {}
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     today = datetime.date.today()
     thisyear = today.year
-    year = int(fdict.get('year', thisyear))
-    station = fdict.get('station', 'IA0200')
-    varname = fdict.get('var', 'low')
-    half = fdict.get('half', 'fall')
+    ctx = get_autoplot_context(fdict, get_description())
+    year = ctx['year']
+    station = ctx['station']
+    varname = ctx['var']
+    half = ctx['half']
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 

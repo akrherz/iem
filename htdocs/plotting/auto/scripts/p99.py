@@ -1,8 +1,8 @@
 import psycopg2
 from pyiem import network
 import datetime
-import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'abs': 'Departure in degrees',
          'sigma': 'Depature in sigma'}
@@ -17,7 +17,7 @@ def get_description():
     d['data'] = True
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Which Year:'),
         dict(type='select', name='delta', options=PDICT,
@@ -33,10 +33,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
-    delta = fdict.get('delta', 'abs')
-    year = int(fdict.get('year', datetime.date.today().year))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    delta = ctx['delta']
+    year = ctx['year']
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     table = "alldata_%s" % (station[:2],)
@@ -69,7 +69,7 @@ def plotter(fdict):
     df['high_sigma'] = (df['high'] - df['avg_high']) / df['stddev_high']
     df['low_sigma'] = (df['low'] - df['avg_low']) / df['stddev_low']
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
+    (fig, ax) = plt.subplots(2, 1, sharex=True, figsize=(8, 6))
 
     ax[0].plot(df.index, df.avg_high, color='r', linestyle='-',
                label='Climate High')
@@ -108,3 +108,6 @@ def plotter(fdict):
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

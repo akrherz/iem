@@ -1,6 +1,7 @@
 import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -29,8 +30,8 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'DMX')[:4]
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station'][:4]
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
