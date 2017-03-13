@@ -173,7 +173,7 @@ def fetch_daily(form, cols):
         soil12vwc = (row['calc_vwc_12_avg_qc']
                      if row['calc_vwc_12_avg_qc'] is not None
                      else -99)
-        soil24vwc = (row['clac_vwc_24_avg_qc']
+        soil24vwc = (row['calc_vwc_24_avg_qc']
                      if row['calc_vwc_24_avg_qc'] is not None
                      else -99)
         soil50vwc = (row['calc_vwc_50_avg_qc']
