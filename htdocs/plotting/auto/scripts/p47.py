@@ -20,7 +20,7 @@ def get_description():
     the liquid equivalent did not include some liquid rainfall."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default='12',
              label='Select Month:'),
         dict(type='year', name='year', default='2014',
@@ -76,3 +76,6 @@ def plotter(fdict):
     ax.set_xlabel("Precipitation Total (liquid + melted) [inch]")
     ax.legend(loc=2, scatterpoints=1)
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

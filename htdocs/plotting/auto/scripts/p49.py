@@ -46,7 +46,7 @@ def plotter(fdict):
     nt = NetworkTable("CSCAP")
     threshold = ctx['threshold']
     clstation = nt.sts[station]['climate_site']
-    (model, scenario) = fdict.get('model', 'hadgem=a1b').split("=")
+    (model, scenario) = ctx['model'].split("=")
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -73,3 +73,6 @@ def plotter(fdict):
             station, nt.sts[station]['name'], model,
             scenario, threshold))
     return fig
+
+if __name__ == '__main__':
+    plotter(dict())

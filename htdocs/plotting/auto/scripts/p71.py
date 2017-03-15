@@ -58,9 +58,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
-    units = fdict.get('units', 'MPH').upper()
-    if units not in PDICT:
-        units = 'MPH'
+    units = ctx['units']
     year = ctx['year']
     month = ctx['month']
     sts = datetime.date(year, month, 1)

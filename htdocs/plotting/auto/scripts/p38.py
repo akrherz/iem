@@ -5,6 +5,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
         ('best', 'Use NARR, then MERRA, then HRRR'),
@@ -39,7 +40,7 @@ def get_description():
     the MERRAv2 lags by about a month, and the NARR is no longer produced."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='select', options=PDICT, default='best', name='var',
              label='Select Radiation Source'),
         dict(type='year', name='year', default=datetime.date.today().year,
@@ -54,10 +55,10 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
-    year = int(fdict.get('year', 2014))
-    varname = fdict.get('var', 'best')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    year = ctx['year']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))

@@ -5,6 +5,7 @@ import calendar
 import datetime
 from pandas.io.sql import read_sql
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
          ('max-high', 'Maximum High'),
@@ -61,12 +62,12 @@ def get_description():
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='month', default=today.month,
              label='Month/Season', options=MDICT),
         dict(type='select', name='type', default='max-high',
              label='Which metric to plot?', options=PDICT),
-        dict(type='text', name='threshold', default='-99',
+        dict(type='float', name='threshold', default='-99',
              label='Threshold (optional, specify when appropriate):'),
     ]
     return d
@@ -119,13 +120,12 @@ $("#ap_container").highcharts({
 
 def get_context(fdict):
     """ Get the context"""
-    ctx = dict()
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
-    month = fdict.get('month', 7)
-    ptype = fdict.get('type', 'max-high')
-    threshold = int(fdict.get('threshold', -99))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    month = ctx['month']
+    ptype = ctx['type']
+    threshold = ctx['threshold']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))

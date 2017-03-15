@@ -2,6 +2,7 @@ import psycopg2
 import datetime
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High temperature',
          'low': 'Low Temperature'}
@@ -37,15 +38,13 @@ def plotter(fdict):
     from pyiem.plot import MapPlot
     import matplotlib.cm as cm
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    date1 = datetime.datetime.strptime(fdict.get('date1', '2014-09-01'),
-                                       '%Y-%m-%d')
-    date2 = datetime.datetime.strptime(fdict.get('date2', '2014-09-22'),
-                                       '%Y-%m-%d')
+    ctx = get_autoplot_context(fdict, get_description())
+    date1 = ctx['date1']
+    date2 = ctx['date2']
     date1 = date1.replace(year=2000)
     date2 = date2.replace(year=2000)
 
-    varname = fdict.get('varname', 'low')
+    varname = ctx['varname']
 
     df = read_sql("""
     WITH t2 as (
@@ -78,3 +77,6 @@ def plotter(fdict):
                np.arange(0-extent, extent+1, 2), cmap=cmap, units='F')
 
     return m.fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

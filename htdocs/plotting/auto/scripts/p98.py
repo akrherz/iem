@@ -22,7 +22,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=9,
              label='Which Month:'),
         dict(type='select', name='var', default='high',
@@ -65,8 +65,8 @@ def plotter(fdict):
         """, COOP, params=(threshold, station, month), index_col='sday')
     df['freq'] = df['hit'] / df['total'] * 100.
 
-    fig, ax = plt.subplots(1, 1)
-    bars = ax.bar(np.arange(1, len(df.index)+1)-0.4, df['freq'])
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    bars = ax.bar(np.arange(1, len(df.index)+1), df['freq'])
     for i, bar in enumerate(bars):
         ax.text(i+1, bar.get_height() + 0.3, '%s' % (df['hit'][i],),
                 ha='center')

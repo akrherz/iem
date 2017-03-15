@@ -27,7 +27,7 @@ def get_description():
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='high',
              label='Which Variable:', options=PDICT),
-        dict(type='text', name='days', default=45,
+        dict(type='int', name='days', default=45,
              label='How many days:'),
         dict(type='month', name='month', default='7',
              label='Select Month:'),
@@ -52,9 +52,7 @@ def plotter(fdict):
     month = ctx['month']
     day = ctx['day']
     dt = datetime.date(2000, month, day)
-    days = int(fdict.get('days', 45))
-    if PDICT.get(varname) is None:
-        return
+    days = ctx['days']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -160,3 +158,6 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=12)
 
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

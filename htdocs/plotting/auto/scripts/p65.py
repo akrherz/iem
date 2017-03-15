@@ -3,6 +3,7 @@ import datetime
 import calendar
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = {'cold': 'Coldest Temperature',
          'hot': 'Hottest Temperature'}
@@ -18,7 +19,7 @@ def get_description():
     today = datetime.date.today()
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default=today.month,
              label='Select Month:'),
         dict(type="select", name='dir', default='cold',
@@ -33,10 +34,10 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203')
-    month = int(fdict.get('month', 3))
-    mydir = fdict.get('dir', 'cold')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    month = ctx['month']
+    mydir = ctx['dir']
     ts = datetime.datetime(2000, month, 1)
     ets = ts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)

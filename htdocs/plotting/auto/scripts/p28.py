@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -17,7 +18,7 @@ def get_description():
     The blue bars represent the rank with 1 being the wettest on record."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
              label='To Date:',
              min="1894/01/01"),  # Comes back to python as yyyy-mm-dd
@@ -28,13 +29,11 @@ def get_description():
 
 def get_ctx(fdict):
     """Get the plotting context """
-    ctx = {}
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    date = datetime.datetime.strptime(fdict.get('date', '2014-10-15'),
-                                      '%Y-%m-%d')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    date = ctx['date']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -86,7 +85,7 @@ def get_ctx(fdict):
         maxes.append(sums[-1])
         avgs.append(np.nanmean(sums))
 
-    ctx['sdate'] = date.date() - datetime.timedelta(days=360)
+    ctx['sdate'] = date - datetime.timedelta(days=360)
     ctx['title'] = "%s %s" % (station,
                               nt.sts[station]['name'])
     ctx['subtitle'] = ("Trailing Days Precipitation Rank [%s-%s] to %s"

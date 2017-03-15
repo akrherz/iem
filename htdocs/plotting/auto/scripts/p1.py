@@ -35,7 +35,7 @@ def get_description():
     <a href="/info/contacts.php">let us know</a>!"""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='int', name='threshold', default='93',
              label='Daily Temperature Threshold (when appropriate)'),
         dict(type='month', name='month1', default=yesterday.month,
@@ -134,7 +134,7 @@ def plotter(fdict):
     resdf = pd.DataFrame({"%s_1" % (varname1, ): xdf[varname1],
                           "%s_2" % (varname2, ): ydf[varname2]})
     resdf.dropna(inplace=True)
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.scatter(resdf[varname1+"_1"], resdf[varname2+"_2"], marker='s',
                facecolor='b', edgecolor='b', label=None, zorder=3)
     ax.set_title(("%s-%s %s [%s]\n"

@@ -75,7 +75,7 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
-    ax.bar(np.arange(0, 52), df['freq'][:-1])
+    ax.bar(df['week'][:-1], df['freq'][:-1])
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []

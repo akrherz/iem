@@ -52,12 +52,9 @@ def plotter(fdict):
     sector = ctx['sector']
     state = ctx['state']
     wfo = ctx['wfo']
-    if varname not in PDICT:
-        return None
 
     nt = NetworkTable("NWSCLI")
-    today = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01'),
-                                       '%Y-%m-%d')
+    today = ctx['sdate']
     yesterday = today - datetime.timedelta(days=1)
     d180 = today - datetime.timedelta(days=180)
 

@@ -5,6 +5,7 @@ from scipy import stats
 import calendar
 import pandas as pd
 import datetime
+from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'First Spring/Last Fall Temperature Above Threshold',
          'below': 'Last Spring/First Fall Temperature Below Threshold'}
@@ -19,12 +20,12 @@ def get_description():
     d['data'] = True
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='direction', default='below',
              label='Threshold Direction', options=PDICT),
         dict(type='select', name='varname', default='low',
              label='Daily High or Low Temperature?', options=PDICT2),
-        dict(type='text', name='threshold', default='32',
+        dict(type='int', name='threshold', default='32',
              label='Enter Threshold Temperature:'),
         dict(type='year', name='year', default=1893,
              label='Start Year of Plot'),
@@ -39,14 +40,12 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('station', 'IA0200')
-    threshold = int(fdict.get('threshold', 32))
-    direction = fdict.get('direction', 'below')
-    varname = fdict.get('varname', 'low')
-    startyear = int(fdict.get('year', 1893))
-    if varname not in PDICT2:
-        varname = 'low'
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['threshold']
+    direction = ctx['direction']
+    varname = ctx['varname']
+    startyear = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
@@ -126,7 +125,7 @@ def plotter(fdict):
     s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
     f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.bar(years, fall-spring, bottom=spring, ec='tan', fc='tan', zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))
@@ -158,3 +157,6 @@ def plotter(fdict):
     ax.set_ylim(min(spring) - 5, max(fall) + 40)
     ax.set_xlim(min(years)-1, max(years)+1)
     return fig, df, res
+
+if __name__ == '__main__':
+    plotter(dict())

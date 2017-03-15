@@ -3,6 +3,7 @@ import datetime
 import psycopg2
 from pandas.io.sql import read_sql
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
     ('IA', 'Iowa'),
@@ -71,13 +72,11 @@ def plotter(fdict):
     import matplotlib.cm as cm
 
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    sector = fdict.get('sector', 'IA')
-    date1 = datetime.datetime.strptime(fdict.get('date1', '2015-01-01'),
-                                       '%Y-%m-%d')
-    date2 = datetime.datetime.strptime(fdict.get('date2', '2015-02-01'),
-                                       '%Y-%m-%d')
-    varname = fdict.get('var', 'precip_depart')
+    ctx = get_autoplot_context(fdict, get_description())
+    sector = ctx['sector']
+    date1 = ctx['date1']
+    date2 = ctx['date2']
+    varname = ctx['var']
 
     table = "alldata_%s" % (sector, ) if sector != 'midwest' else "alldata"
     df = read_sql("""
@@ -140,3 +139,6 @@ def plotter(fdict):
         m.drawcounties()
 
     return m.fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -4,6 +4,7 @@ from pyiem import network
 import datetime
 import calendar
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -13,8 +14,9 @@ def get_description():
     d['data'] = True
     d['arguments'] = [
         dict(type='station', name='station', default='IA0000',
-             label='Select Station'),
-        dict(type='month', name='month', default='7', label='Month'),
+             label='Select Station', network='IACLIMATE'),
+        dict(type='month', name='month', default=today.month,
+             label='Month'),
         dict(type='year', name='year', default=today.year,
              label='Year to Highlight'),
     ]
@@ -38,10 +40,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0000')
-    month = int(fdict.get('month', 7))
-    year = int(fdict.get('year', datetime.datetime.now().year))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    month = ctx['month']
+    year = ctx['year']
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
@@ -65,11 +67,12 @@ def plotter(fdict):
 
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
-    ax = plt.axes([0.1, 0.12, 0.8, 0.78])
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    ax.set_position([0.1, 0.12, 0.8, 0.78])
 
     ax.scatter(df['gdd50_sigma'], df['precip_sigma'], label=None)
-    ax.plot([-4, 4], [y1, y2], label="Slope=%.2f\nR$^2$=%.2f" % (h_slope,
-                                                                 r_value ** 2))
+    ax.plot([-4, 4], [y1, y2], label="Slope=%.2f R$^2$=%.2f" % (h_slope,
+                                                                r_value ** 2))
     xmax = df.gdd50_sigma.abs().max() + 0.25
     ymax = df.precip_sigma.abs().max() + 0.25
     ax.set_xlim(0 - xmax, xmax)
@@ -89,7 +92,10 @@ def plotter(fdict):
                   "Growing Degree Day (base=50) + Precipitation Departure"
                   ) % (
         calendar.month_name[month], nt.sts[station]['name'], station))
-    ax.legend(loc='upper right', bbox_to_anchor=(0.99, -0.04),
+    ax.legend(loc='upper right', bbox_to_anchor=(1.05, -0.04),
               ncol=2, fontsize=10)
 
-    return plt.gcf(), df
+    return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())
