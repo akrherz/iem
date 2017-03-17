@@ -39,6 +39,7 @@ before_install:
   - "sudo pip install requests"
   - "sudo pip install pandas"
   - "sudo pip install netCDF4"
+  - "sudo pip install -r pip_requirements.txt"
   - "sudo pip install -e git+https://github.com/akrherz/pyIEM.git#egg=pyIEM"
 install:
   - "pip install --upgrade pip"
