@@ -4,6 +4,7 @@ import pandas as pd
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([(0, 'Include calm observations'),
                      (2, 'Include only non-calm observations >= 2kt'),
@@ -26,7 +27,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='year', name='season', default=datetime.datetime.now().year,
              label='Select Season to Highlight'),
         dict(type='select', name='wind', default=0, options=PDICT,
@@ -108,9 +109,10 @@ $("#ap_container").highcharts({
 def get_context(fdict):
     """ Get the data"""
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    sknt = int(fdict.get('wind', 0))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    sknt = ctx['wind']
     nt = NetworkTable(network)
     df = read_sql("""WITH data as (
         SELECT valid, lag(valid) OVER (ORDER by valid ASC),
@@ -128,7 +130,6 @@ def get_context(fdict):
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
     df2.fillna(0, inplace=True)
-    ctx = {}
     ctx['df'] = df2
     ctx['title'] = ("[%s] %s Wind Chill Hours"
                     ) % (station, nt.sts[station]['name'])

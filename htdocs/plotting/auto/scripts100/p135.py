@@ -3,6 +3,7 @@ import datetime
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('high_above', 'High Temperature At or Above'),
                      ('high_below', 'High Temperature Below'),
@@ -23,10 +24,10 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='high_above',
              label='Which Metric', options=PDICT),
-        dict(type="text", name="threshold", default=32,
+        dict(type="int", name="threshold", default=32,
              label='Threshold (F)'),
         dict(type="select", name='split', default='jan1',
              options=PDICT2, label='Where to split the year?'),
@@ -110,14 +111,12 @@ def highcharts(fdict):
 def get_data(fdict, nt):
     """ Get the data"""
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203')
-    threshold = int(fdict.get('threshold', 32))
-    varname = fdict.get('var', 'high_above')
-    year = int(fdict.get('year', 2016))
-    split = fdict.get('split', 'jan1')
-    _ = PDICT[varname]
-    _ = PDICT2[split]
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['threshold']
+    varname = ctx['var']
+    year = ctx['year']
+    split = ctx['split']
     table = "alldata_%s" % (station[:2], )
     days = 0 if split == 'jan1' else 183
     opp = " < " if varname.find("_below") > 0 else ' >= '
@@ -157,12 +156,12 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    station = fdict.get('station', 'IA2203')
-    network = "%sCLIMATE" % (station[:2].upper(), )
-    threshold = int(fdict.get('threshold', 32))
-    varname = fdict.get('var', 'high_above')
-    year = int(fdict.get('year', 2016))
-    split = fdict.get('split', 'jan1')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    threshold = ctx['threshold']
+    varname = ctx['var']
+    year = ctx['year']
+    network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
     df = get_data(fdict, nt)
     if len(df.index) == 0:

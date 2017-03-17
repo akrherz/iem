@@ -2,6 +2,7 @@ import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import datetime
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = {'tmpf_above': 'Temperature At or Above Threshold (F)',
          'tmpf_below': 'Temperature Below Threshold (F)'}
@@ -34,12 +35,12 @@ def get_description():
     temperature threshold is for one or more exceedences for the day."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='opt', default='tmpf_above',
              label='Criterion?', options=PDICT),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
-        dict(type='text', name='threshold', default='80',
+        dict(type='int', name='threshold', default='80',
              label='Temperature Threshold (F):')
     ]
     return d
@@ -52,12 +53,12 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    threshold = int(fdict.get('threshold', 80))
-    opt = fdict.get('opt', 'tmpf_above')
-    month = fdict.get('month', 'all')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    threshold = ctx['threshold']
+    opt = ctx['opt']
+    month = ctx['month']
     nt = NetworkTable(network)
 
     if month == 'all':
@@ -110,3 +111,6 @@ def plotter(fdict):
     ax.set_xticks(range(1, 25, 4))
     ax.set_xticklabels(['Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'])
     return fig
+
+if __name__ == '__main__':
+    plotter(dict())

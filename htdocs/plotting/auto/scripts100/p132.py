@@ -4,6 +4,7 @@ import calendar
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -51,10 +52,10 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='total_precip',
              label='Which Metric to Summarize', options=METRICS),
-        dict(type='text', name='days', default=1,
+        dict(type='int', name='days', default=1,
              label='Over how many consecutative days'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
@@ -69,14 +70,14 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA2203')
-    network = fdict.get('network', 'IACLIMATE')
-    month = fdict.get('month', 'all')
-    varname = fdict.get('var', 'total_precip')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    month = ctx['month']
+    varname = ctx['var']
     if varname not in METRICS:
-        return 'ERROR with var variable'
-    days = int(fdict.get('days', 1))
+        raise Exception('ERROR with var variable')
+    days = ctx['days']
 
     nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2], )
@@ -144,6 +145,7 @@ def plotter(fdict):
         ylabels.append(lbl)
 
     ax = plt.axes([0.1, 0.1, 0.5, 0.8])
+    plt.gcf().set_size_inches(8, 6)
     ax.barh(range(10, 0, -1), df[varname], ec='green', fc='green', height=0.8,
             align='center')
     ax2 = ax.twinx()
@@ -166,3 +168,6 @@ def plotter(fdict):
                        datetime.datetime.now().year), size=12)
 
     return plt.gcf(), df
+
+if __name__ == '__main__':
+    plotter(dict())
