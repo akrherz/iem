@@ -1,4 +1,4 @@
 # export CPLUS_INCLUDE_PATH=/usr/include/gdal
 # export C_INCLUDE_PATH=/usr/include/gdal
-GDAL==1.11.2
+GDAL<=1.11.2
 numpy

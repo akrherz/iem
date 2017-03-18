@@ -41,7 +41,7 @@ before_install:
   - "sudo pip install pandas"
   - "sudo pip install netCDF4"
   # Manual trick to get GDAL installed via pip, redundantly defined in requirements.txt
-  - "sudo CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install GDAL==1.11.2"
+  - "sudo CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install GDAL==1.10.0"
   - "sudo pip install -r pip_requirements.txt"
   - "sudo pip install -e git+https://github.com/akrherz/pyIEM.git#egg=pyIEM"
 install:
