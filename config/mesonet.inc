@@ -47,22 +47,19 @@
     # Need FollowSymLinks for mod_rewrite to work!
     Options Indexes FollowSymLinks
     AllowOverride None
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   <Directory "/mesonet/ARCHIVE">
     Options Indexes FollowSymLinks
     AllowOverride All
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   <Directory "/mesonet/share">
     Options Indexes FollowSymLinks
     AllowOverride All
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   ScriptAlias /cgi-bin/ "/opt/iem/cgi-bin/"
@@ -70,8 +67,7 @@
   <Directory "/opt/iem/cgi-bin">
     AllowOverride All
     Options FollowSymLinks
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   <LocationMatch "camera">
@@ -82,16 +78,14 @@
   <Directory "/mesonet/share/usage/mesonet.agron.iastate.edu/">
     Options Indexes MultiViews
     AllowOverride None
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   Alias /agclimate/usage "/mesonet/share/usage/agclimate/"
   <Directory "/mesonet/share/usage/agclimate/">
     Options Indexes MultiViews
     AllowOverride None
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   <Directory "/opt/iem/htdocs/river">
@@ -102,8 +96,7 @@
   <Directory "/home/ldm/data">
     Options Indexes MultiViews FollowSymLinks
     AllowOverride None
-    Order allow,deny
-    Allow from all
+    Require all granted
 	Redirect permanent /data/gis/images/unproj /data/gis/images/4326
   	Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
   </Directory>
@@ -128,8 +121,7 @@
   <Directory "/mesonet/share/pickup">
     AllowOverride All
     Options FollowSymLinks Indexes MultiViews
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   Alias /tmp /var/webtmp
@@ -273,7 +265,6 @@
     AuthName Administrative
     AuthType Basic
 
-    order deny,allow
     require user mec
 
     AddHandler cgi-script .py
@@ -364,7 +355,6 @@
     AuthType Basic
 
     <LIMIT GET>
-      order deny,allow
       require user ames
    </LIMIT>
   </Directory>
@@ -376,7 +366,6 @@
     AuthType Basic
 
     <LIMIT GET>
-      order deny,allow
       require user ames
       require user iowastate
     </LIMIT>
@@ -401,7 +390,6 @@
     AuthName Administrative
     AuthType Basic
 
-    order deny,allow
     require user mec
 
     AddHandler cgi-script .py
