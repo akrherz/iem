@@ -53,7 +53,7 @@ def do(date):
                 continue
             t1 = (ts - bases[tz]).total_seconds() / 60.
             t0 = max([0, t1 - 60.])
-            precip[t0:t1] = row['value'] / 60.
+            precip[int(t0):int(t1)] = row['value'] / 60.
         pday = np.sum(precip)
         if pday > 50 or np.allclose([pday, ], [current_pday, ]):
             # print("Skipping %s %s==%s" % (station, current_pday,
