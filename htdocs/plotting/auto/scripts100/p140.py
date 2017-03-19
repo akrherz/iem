@@ -4,6 +4,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 import datetime
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
@@ -26,14 +27,14 @@ def get_description():
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
-             label='Select Station'),
+             label='Select Station', network='IA_ASOS'),
         dict(type='month', name='month',
              default=(today - datetime.timedelta(days=14)).month,
              label='Start Month:'),
         dict(type='day', name='day',
              default=(today - datetime.timedelta(days=14)).day,
              label='Start Day:'),
-        dict(type="text", name="days", default="14",
+        dict(type="int", name="days", default="14",
              label="Number of Days"),
         dict(type='select', name='varname', default='avg_temp',
              label='Variable to Compute:', options=PDICT),
@@ -57,15 +58,14 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'DSM')
-    network = fdict.get('network', 'IA_ASOS')
-    days = int(fdict.get('days', 14))
-    sts = datetime.date(2012, int(fdict.get('month', 10)),
-                        int(fdict.get('day', 1)))
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    network = ctx['network']
+    days = ctx['days']
+    sts = datetime.date(2012, ctx['month'], ctx['day'])
     ets = sts + datetime.timedelta(days=(days - 1))
-    varname = fdict.get('varname', 'avg_temp')
-    year = int(fdict.get('year', datetime.date.today().year))
+    varname = ctx['varname']
+    year = ctx['year']
     nt = NetworkTable(network)
     sdays = []
     for i in range(days):
@@ -86,7 +86,7 @@ def plotter(fdict):
     GROUP by yr ORDER by yr ASC
     """, pgconn, params=(network, station, tuple(sdays)))
 
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
     bars = ax[0].bar(df['yr'], df[varname], facecolor='r', edgecolor='r',
                      align='center')
@@ -137,3 +137,6 @@ def plotter(fdict):
     ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
                bbox=dict(facecolor='white', edgecolor='k'))
     return fig, df
+
+if __name__ == '__main__':
+    plotter(dict())

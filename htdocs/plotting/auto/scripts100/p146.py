@@ -5,6 +5,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 import pandas as pd
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -19,7 +20,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
     ]
     return d
 
@@ -30,9 +31,9 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
     nt = NetworkTable(network)
 
     df = read_sql("""
@@ -51,7 +52,7 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     bins = np.arange(df['avgt'].min() - 5, df['avgt'].max() + 5, 2)
     H, xedges, yedges = np.histogram2d(df['week'].values,
@@ -89,3 +90,6 @@ def plotter(fdict):
     ax.set_ylabel("Temperature [$^\circ$F]")
 
     return fig, resdf
+
+if __name__ == '__main__':
+    plotter(dict())

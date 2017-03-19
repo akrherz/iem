@@ -3,6 +3,7 @@ from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
         ('all', 'No Month/Time Limit'),
@@ -34,7 +35,7 @@ def get_description():
     day."""
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
     ]
@@ -51,10 +52,10 @@ def plotter(fdict):
     font0.set_family('monospace')
     font0.set_size(16)
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
-    month = fdict.get('month', 'all')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
+    month = ctx['month']
 
     if month == 'all':
         months = range(1, 13)

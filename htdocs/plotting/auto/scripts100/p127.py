@@ -3,6 +3,7 @@ import calendar
 import numpy as np
 from collections import OrderedDict
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
                      ('PCT EMERGED', 'Emerged'),
@@ -35,10 +36,10 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    state = fdict.get('state', 'IA')[:2]
-    unit_desc = fdict.get('unit_desc', 'PCT HARVESTED').upper()
-    commodity_desc = fdict.get('commodity_desc', 'CORN').upper()
+    ctx = get_autoplot_context(fdict, get_description())
+    state = ctx['state'][:2]
+    unit_desc = ctx['unit_desc'].upper()
+    commodity_desc = ctx['commodity_desc'].upper()
 
     util_practice_desc = ('GRAIN' if (unit_desc == 'PCT HARVESTED' and
                                       commodity_desc == 'CORN')

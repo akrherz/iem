@@ -3,9 +3,8 @@ import psycopg2
 import pytz
 import datetime
 from pyiem.network import Table as NetworkTable
-from collections import OrderedDict
-from pyiem.meteorology import gdd
-from pyiem.datatypes import temperature, distance
+from pyiem.datatypes import temperature
+from pyiem.util import get_autoplot_context
 
 XREF = {
     'AEEI4': 'A130209',
@@ -38,9 +37,9 @@ def get_description():
     d['arguments'] = [
         dict(type='networkselect', name='station', network='ISUSM',
              default='BOOI4', label='Select Station:'),
-        dict(type='text', name='hours1', default=48,
+        dict(type='int', name='hours1', default=48,
              label='Stretch of Hours Above Threshold'),
-        dict(type='text', name='hours2', default=24,
+        dict(type='int', name='hours2', default=24,
              label='Stretch of Hours Below Threshold'),
 
     ]
@@ -53,12 +52,12 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
-
-    threshold = int(fdict.get('threshold', 50))
+    ctx = get_autoplot_context(fdict, get_description())
+    threshold = 50
     threshold_c = temperature(threshold, 'F').value('C')
-    hours1 = int(fdict.get('hours1', 48))
-    hours2 = int(fdict.get('hours2', 24))
-    station = fdict.get('station', 'BOOI4')
+    hours1 = ctx['hours1']
+    hours2 = ctx['hours2']
+    station = ctx['station']
     oldstation = XREF[station]
 
     df = read_sql("""
@@ -125,7 +124,7 @@ def plotter(fdict):
                          hours1),
                    index_col=None)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     d2000 = datetime.datetime(2000, 1, 1, 6)
     d2000 = d2000.replace(tzinfo=pytz.timezone("UTC"))

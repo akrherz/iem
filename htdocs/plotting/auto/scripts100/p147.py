@@ -2,8 +2,8 @@ import psycopg2
 import calendar
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
-from scipy import stats
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
         ('precip', 'Precipitation'),
@@ -22,12 +22,12 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station1', default='IA0200',
-             label='Select Station #1:'),
+             label='Select Station #1:', network='IACLIMATE'),
         dict(type='station', name='station2', default='IA2203',
-             label='Select Station #2:'),
+             label='Select Station #2:', network='IACLIMATE'),
         dict(type='select', name='pvar', default='high', options=PDICT,
              label='Which variable to plot?'),
-        dict(type='text', name='mag', default='1',
+        dict(type='float', name='mag', default='1',
              label='By how much warmer [F] or wetter [inch]')
     ]
     return d
@@ -38,14 +38,15 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    station1 = fdict.get('station1', 'IA0200')
-    station2 = fdict.get('station2', 'IA2203')
-    network1 = fdict.get('network1', 'IACLIMATE')
-    network2 = fdict.get('network2', 'IACLIMATE')
-    mag = float(fdict.get('mag', '1'))
+    ctx = get_autoplot_context(fdict, get_description())
+    station1 = ctx['station1']
+    station2 = ctx['station2']
+    network1 = ctx['network1']
+    network2 = ctx['network2']
+    mag = ctx['mag']
     nt1 = NetworkTable(network1)
     nt2 = NetworkTable(network2)
-    pvar = fdict.get('pvar', 'high')
+    pvar = ctx['pvar']
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     table1 = "alldata_%s" % (station1[:2], )
@@ -61,7 +62,7 @@ def plotter(fdict):
     SELECT extract(doy from o.day) as doy, count(*),
     sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,
     sum(case when o.low >= (t.low + %s) then 1 else 0 end) as low_hits,
-    sum(case when o.precip >= (t.precip + %s) then 1 else 0 end) as precip_hits,
+ sum(case when o.precip >= (t.precip + %s) then 1 else 0 end) as precip_hits,
     sum(case when o.avgt >= (t.avgt + %s) then 1 else 0 end) as avgt_hits
     from obs1 o JOIN obs2 t on (o.day = t.day) GROUP by doy ORDER by doy ASC
     """, pgconn, params=(station1, station2, mag, mag, mag, mag),
