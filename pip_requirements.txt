@@ -2,3 +2,4 @@
 # export C_INCLUDE_PATH=/usr/include/gdal
 GDAL<=1.11.2
 numpy
+pyproj
