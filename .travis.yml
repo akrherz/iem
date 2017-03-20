@@ -43,7 +43,7 @@ before_install:
   - echo 'export PATH=/home/travis/miniconda/bin:$PATH' | sudo tee -a /etc/apache2/envvars > /dev/null
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
 install:
-  - if [[ ! -f miniconda/bin/python ]]; then
+  - if [[ ! -f $HOME/miniconda/bin/python ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda;
     fi
