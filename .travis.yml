@@ -1,6 +1,7 @@
 sudo: required
 dist: trusty
 cache:
+  timeout: 1000
   directories:
     - $HOME/.cache/pip
     - $HOME/miniconda
