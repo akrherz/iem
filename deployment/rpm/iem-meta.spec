@@ -2,67 +2,26 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 38%{?dist}
+Release: 39%{?dist}
 License: distributable
 
-Requires: pyIEM
-Requires: mod_wsgi
-Requires: python-paste
-Requires: openpyxl
-Requires: jdcal
-Requires: python-lxml
-Requires: Shapely
-Requires: Twisted
-Requires: PyRSS2Gen
-Requires: twittytwister
-Requires: python-oauth
-Requires: python-simplejson
+# straight forward OS requirements
 Requires: httpd
 Requires: php
 Requires: mod_ssl
-#Requires: odfpy
-#Requires: unoconv
 Requires: fribidi
 Requires: php-pgsql
 Requires: php-ZendFramework
 Requires: proj-epsg
-Requires: python-zope-interface
-Requires: nwnserver
-Requires: pyproj
-Requires: python-pillow
 Requires: ImageMagick
 Requires: gdal
-Requires: pygrib
-Requires: python-matplotlib
-Requires: pyparsing
-Requires: python-basemap
-Requires: pyshapelib
-# remove this at some point :(
-Requires: egenix-mx-base
-Requires: netcdf4-python
-Requires: scipy
-# EPEL
-Requires: python-pandas
-# remove this at some point
 Requires: tcsh
 Requires: gifsicle
-Requires: PyGreSQL
 Requires: bc
 Requires: tmpwatch
-Requires: gdata
-Requires: pyephem
 Requires: mailx
-Requires: xlwt
-Requires: xlrd
 Requires: fcgi
 Requires: libpng12
-Requires: metar
-Requires: python-nose
-Requires: python-six
-Requires: oauth2client
-Requires: python-httplib2
-Requires: google-api-python-client
-Requires: uritemplate
 Requires: mod_fcgid
 Requires: lftp
 Requires: nfs-utils
@@ -82,47 +41,27 @@ Requires: nagios-plugins-disk
 Requires: perl-Nagios-Plugin
 Requires: perl-Readonly
 Requires: php-pecl-memcache
-Requires: python-memcached
 Requires: liberation-serif-fonts
 Requires: liberation-sans-fonts
 Requires: liberation-fonts-common
 Requires: liberation-mono-fonts
 Requires: php-gd
 Requires: dstat
-Requires: pyshp
 Requires: zip
 Requires: php-devel
-Requires: pyLDM
 Requires: gd
 Requires: ntp
-Requires: jenks
-Requires: windrose
 Requires: net-tools
-Requires: service_identity
-Requires: characteristic
-Requires: XlsxWriter
-Requires: python-requests
-Requires: requests-toolbelt
-Requires: smartsheet-python-sdk
-Requires: certifi
-Requires: Fiona
-Requires: geopandas
-Requires: rasterio
-Requires: python-enum34
-Requires: affine
-Requires: rsa
-Requires: pyasn1-modules
-Requires: python-pyasn1
 Requires: mod_auth_openidc
-Requires: dropbox
-Requires: tqdm
-Requires: Pint
-Requires: MetPy
 Requires: perl-Monitoring-Plugin
 Requires: perl-Data-Dumper
-Requires: functools32
-Requires: cycler
-Requires: python2-attrs
+
+# needed for pip provided rrdtool in miniconda
+Requires: rrdtool
+
+# locally built and packaged with a small patch applied for logging
+Requires: mod_wsgi
+
 
 %description
 A virtual package which makes sure that various requirements are installed
@@ -144,6 +83,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon Mar 20 2017 daryl herzmann <akrherz@iastate.edu>
+- Dumped all pure-python stuff as we are now in the conda game
+
 * Fri Mar 17 2017 daryl herzmann <akrherz@iastate.edu>
 - Moving toward pip based python requirements
 

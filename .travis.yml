@@ -17,35 +17,39 @@ language: python
 python:
   - "2.7"
 before_install:
-  - sudo mkdir -p /mesonet/www/apps
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /opt/iem
   - echo `pwd`
   - chmod 755 $HOME
-  - sudo apt-get install libgdal-dev gdal-bin
+  - sudo apt-get install libgdal-dev gdal-bin librrd-dev
   - sudo add-apt-repository ppa:ubuntugis/ppa -y
   - sudo apt-get update -qq
-  - sudo apt-get install -qq python-matplotlib python-mpltoolkits.basemap python-psycopg2 python-numpy python-scipy python-memcache libhdf5-serial-dev hdf5-tools
+  - sudo apt-get install -qq libhdf5-serial-dev hdf5-tools
   - sudo apt-get install apache2 libapache2-mod-wsgi memcached libnetcdf-dev
   - sudo service memcached start
   - sudo a2enmod headers rewrite proxy cgi expires authz_groupfile
-# we do things the old fashioned way, we earn it
+  # we do things the old fashioned way, we earn it
   - sudo a2dissite 000-default.conf
   - sudo cp config/mesonetdir.conf /etc/apache2/sites-enabled/
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
+  # Setup PATH so that miniconda gets in the front
+  - echo 'export PATH=/home/travis/miniconda/bin:$PATH' | sudo tee -a /etc/apache2/envvars > /dev/null
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
-  # apt provided requests, pandas is too old
-  - "sudo pip install requests"
-  - "sudo pip install pandas"
-  - "sudo pip install netCDF4"
-  # Manual trick to get GDAL installed via pip, redundantly defined in requirements.txt
-  - "sudo CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install GDAL==1.10.0"
-  - "sudo pip install -r pip_requirements.txt"
-  - "sudo pip install -e git+https://github.com/akrherz/pyIEM.git#egg=pyIEM"
 install:
-  - "pip install --upgrade pip"
+  - "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  # only needed for pygresql at the moment
+  - conda config --append channels cgat
+  - conda update -q conda
+  - conda install --file conda_requirements.txt
+  # Then do additional pip stuff
+  - pip install -r pip_requirements.txt
 before_script:
   - cd database; sh bootstrap.sh
   - python schema_manager.py
