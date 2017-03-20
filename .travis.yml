@@ -1,5 +1,8 @@
 sudo: required
 dist: trusty
+cache:
+  directories:
+    - $HOME/miniconda
 addons:
   postgresql: "9.5"
   apt:
