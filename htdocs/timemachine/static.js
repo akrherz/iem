@@ -73,21 +73,21 @@ function rectifyTime(){
 		dt = ets;
 	}
 	// Check 2: If our modulus is OK, we can quit early
-	if ((dt.hours() * 60 + dt.minutes()) % interval == 0){
+	if ((dt.utc().hours() * 60 + dt.minutes()) % interval == 0){
 		return;
 	}
 	
 	// Check 3: Place dt on a time that works for the given interval
 	if (interval > 1440){
-		dt.startOf('month');
+		dt.utc().startOf('month');
 	} else if (interval >= 60){
 		// minute has to be zero
-		dt.startOf('hour');
+		dt.utc().startOf('hour');
 		if (interval != 60){
-			dt.startOf('day');
+			dt.utc().startOf('day');
 		}
 	} else {
-		dt.startOf('hour');
+		dt.utc().startOf('hour');
 	}
 }
 function update(){
@@ -101,16 +101,16 @@ function update(){
 	$('#year_slider').slider({
 		min: sts.year(),
 		max: now.year(),
-		value: dt.year()
+		value: dt.utc().year()
 	});
 	$('#day_slider').slider({
-		value: dt.dayOfYear()
+		value: dt.utc().dayOfYear()
 	});
 	$('#hour_slider').slider({
-		value: dt.hour()
+		value: dt.utc().hour()
 	});
 	$('#minute_slider').slider({
-		value: dt.minute()
+		value: dt.utc().minute()
 	});
 	if (opt.attr('data-interval') > 60){
 		$('#minute_slider').css('display', 'none');
