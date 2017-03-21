@@ -57,6 +57,8 @@ install:
   - conda install --file conda_requirements.txt
   # Then do additional pip stuff
   - pip install -r pip_requirements.txt
+  # now delete out some cache stuff, so that our travis-ci cache is still valid
+  - rm -f $HOME/miniconda/pkgs/cache/*
 before_script:
   - cd database; sh bootstrap.sh
   - python schema_manager.py
