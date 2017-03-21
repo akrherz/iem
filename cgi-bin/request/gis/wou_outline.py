@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-""" Generate a Watch Outline for a given SPC convective watch """
+"""Generate a Watch Outline for a given SPC convective watch """
 
-import shapelib
-import dbflib
+import shapefile
 import zipfile
 import os
 import shutil
@@ -10,70 +9,66 @@ import sys
 import cgi
 from pyiem import wellknowntext
 import psycopg2.extras
+
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-pcursor.execute("SET TIME ZONE 'GMT'")
 
-# Get CGI vars
-form = cgi.FormContent()
-year = int(form["year"][0])
-etn = int(form["etn"][0])
-fp = "watch_%s_%s" % (year, etn)
+def main(year, etn):
+    pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-os.chdir("/tmp/")
+    basefn = "watch_%s_%s" % (year, etn)
 
-shp = shapelib.create(fp, shapelib.SHPT_POLYGON)
+    os.chdir("/tmp/")
 
-dbf = dbflib.create(fp)
-dbf.add_field("SIG", dbflib.FTString, 1, 0)
-dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
+    w = shapefile.Writer(shapefile.POLYGON)
+    w.field('SIG', 'C', '1')
+    w.field('ETN', 'I', '4')
 
-sql = """select
-    ST_astext(ST_multi(ST_union(ST_SnapToGrid(u.geom,0.0001)))) as tgeom
-    from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'A'
-    and phenomena IN ('TO','SV') and eventid = %s and
-    ST_isvalid(u.geom) and issue < ((select issued from watches WHERE num = %s
+    sql = """select
+        ST_astext(ST_multi(ST_union(ST_SnapToGrid(u.geom,0.0001)))) as tgeom
+        from warnings_%s w JOIN ugcs u on (u.gid = w.gid)
+        WHERE significance = 'A'
+        and phenomena IN ('TO','SV') and eventid = %s and
+        ST_isvalid(u.geom)
+        and issue < ((select issued from watches WHERE num = %s
         and extract(year from issued) = %s LIMIT 1) + '60 minutes'::interval)
-""" % (year, etn, etn, year)
-pcursor.execute(sql)
+    """ % (year, etn, etn, year)
+    pcursor.execute(sql)
 
-if pcursor.rowcount == 0:
-    sys.exit()
+    if pcursor.rowcount == 0:
+        sys.exit()
 
-row = pcursor.fetchone()
-s = row["tgeom"]
-f = wellknowntext.convert_well_known_text(s)
+    row = pcursor.fetchone()
+    s = row["tgeom"]
+    f = wellknowntext.convert_well_known_text(s)
+    w.poly(parts=f)
+    w.record('A', etn)
+    w.save(basefn)
 
-d = {}
-d["SIG"] = 'A'
-d["ETN"] = etn
+    # Create zip file, send it back to the clients
+    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn, ))
+    z = zipfile.ZipFile(basefn+".zip", 'w', zipfile.ZIP_DEFLATED)
+    for suffix in ['shp', 'shx', 'dbf', 'prj']:
+        z.write("%s.%s" % (basefn, suffix))
+    z.close()
 
-obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f)
-shp.write_object(-1, obj)
-dbf.write_record(0, d)
-del(obj)
+    sys.stdout.write("Content-type: application/octet-stream\n")
+    sys.stdout.write(("Content-Disposition: attachment; filename=%s.zip\n\n"
+                      ) % (basefn, ))
 
-del(shp)
-del(dbf)
+    sys.stdout.write(file("%s.zip" % (basefn, ), 'r').read())
 
-# Create zip file, send it back to the clients
-shutil.copyfile("/opt/iem/data/gis/meta/4326.prj",
-                fp+".prj")
-z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
-z.write(fp+".shp")
-z.write(fp+".shx")
-z.write(fp+".dbf")
-z.write(fp+".prj")
-z.close()
+    for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
+        os.remove("%s.%s" % (basefn, suffix))
 
-sys.stdout.write("Content-type: application/octet-stream\n")
-sys.stdout.write("Content-Disposition: attachment; filename=%s.zip\n" % (fp,))
 
-sys.stdout.write(file(fp+".zip", 'r').read())
+def cgiworkflow():
+    form = cgi.FieldStorage()
+    year = int(form.getfirst("year"))
+    etn = int(form.getfirst("etn"))
 
-os.remove(fp+".zip")
-os.remove(fp+".shp")
-os.remove(fp+".shx")
-os.remove(fp+".dbf")
-os.remove(fp+".prj")
+    main(year, etn)
+
+if __name__ == '__main__':
+    cgiworkflow()
+    # main(2017, 1)

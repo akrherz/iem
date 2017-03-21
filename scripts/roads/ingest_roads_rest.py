@@ -33,9 +33,8 @@ import json
 import datetime
 import sys
 import psycopg2.extras
-import shapelib
+import shapefile
 import requests
-import dbflib
 from pyiem.util import exponential_backoff
 from pyiem import wellknowntext
 import zipfile
@@ -55,53 +54,41 @@ EPSG26915 = ('PROJCS["NAD_1983_UTM_Zone_15N",GEOGCS["GCS_North_American_1983"'
 def export_shapefile(txn, utc):
     """Export a Shapefile of Road Conditions"""
     os.chdir("/tmp")
-    dbf = dbflib.create("iaroad_cond")
-    dbf.add_field("SEGID", dbflib.FTInteger, 6, 0)
-    dbf.add_field("MAJOR", dbflib.FTString, 10, 0)
-    dbf.add_field("MINOR", dbflib.FTString, 128, 0)
-    dbf.add_field("US1", dbflib.FTInteger, 4, 0)
-    dbf.add_field("ST1", dbflib.FTInteger, 4, 0)
-    dbf.add_field("INT1", dbflib.FTInteger, 4, 0)
-    dbf.add_field("TYPE", dbflib.FTInteger, 4, 0)
-    dbf.add_field("VALID", dbflib.FTString, 12, 0)
-    dbf.add_field("COND_CODE", dbflib.FTInteger, 4, 0)
-    dbf.add_field("COND_TXT", dbflib.FTString, 120, 0)
-    dbf.add_field("BAN_TOW", dbflib.FTString, 1, 0)
-    dbf.add_field("LIM_VIS", dbflib.FTString, 1, 0)
-
-    shp = shapelib.create("iaroad_cond", shapelib.SHPT_ARC)
+    w = shapefile.Writer(shapefile.POLYLINE)
+    w.field("SEGID", 'I', 6, 0)
+    w.field("MAJOR", 'S', 10, 0)
+    w.field("MINOR", 'S', 128, 0)
+    w.field("US1", 'I', 4, 0)
+    w.field("ST1", 'I', 4, 0)
+    w.field("INT1", 'I', 4, 0)
+    w.field("TYPE", 'I', 4, 0)
+    w.field("VALID", 'S', 12, 0)
+    w.field("COND_CODE", 'I', 4, 0)
+    w.field("COND_TXT", 'S', 120, 0)
+    w.field("BAN_TOW", 'S', 1, 0)
+    w.field("LIM_VIS", 'S', 1, 0)
 
     txn.execute("""select b.*, c.*, ST_astext(b.geom) as bgeom from
          roads_base b, roads_current c WHERE b.segid = c.segid
          and valid is not null and b.geom is not null""")
-    i = 0
     for row in txn:
         s = row["bgeom"]
         f = wellknowntext.convert_well_known_text(s)
-        valid = row["valid"]
-        d = {}
-        d["SEGID"] = row["segid"]
-        d["MAJOR"] = row["major"]
-        d["MINOR"] = row["minor"]
-        d["US1"] = row["us1"]
-        d["ST1"] = row["st1"]
-        d["INT1"] = row["int1"]
-        d["TYPE"] = row["type"]
-        d["VALID"] = valid.strftime("%Y%m%d%H%M")
-        d["COND_CODE"] = row["cond_code"]
-        d["COND_TXT"] = row["raw"]
-        d["BAN_TOW"] = str(row["towing_prohibited"])[0]
-        d["LIM_VIS"] = str(row["limited_vis"])[0]
+        w.line(parts=f)
+        w.record(row["segid"],
+                 row["major"],
+                 row["minor"],
+                 row["us1"],
+                 row["st1"],
+                 row["int1"],
+                 row["type"],
+                 row["valid"].strftime("%Y%m%d%H%M"),
+                 row["cond_code"],
+                 row["raw"],
+                 str(row["towing_prohibited"])[0],
+                 str(row["limited_vis"])[0])
 
-        obj = shapelib.SHPObject(shapelib.SHPT_ARC, 1, f)
-        shp.write_object(-1, obj)
-        dbf.write_record(i, d)
-
-        del(obj)
-        i += 1
-
-    del(shp)
-    del(dbf)
+    w.save('iaroad_cond')
     z = zipfile.ZipFile("iaroad_cond.zip", 'w')
     z.write("iaroad_cond.shp")
     z.write("iaroad_cond.shx")

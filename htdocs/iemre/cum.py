@@ -7,8 +7,7 @@ import netCDF4
 import datetime
 import json
 import numpy
-import shapelib
-import dbflib
+import shapefile
 import shutil
 import zipfile
 import psycopg2
@@ -75,51 +74,35 @@ if fmt == 'json':
     sys.stdout.write('Content-type: application/json\n\n')
     sys.stdout.write(json.dumps(res))
 
-if format == 'shp':
+if fmt == 'shp':
     # Time to create the shapefiles
-    fp = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
-    shp = shapelib.create("%s.shp" % (fp,), shapelib.SHPT_POLYGON)
+    basefn = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
+    w = shapefile.Writer(shapefile.POLYGON)
+    w.field('GDD', 'D', 10, 2)
+    w.field('PREC_IN', 'D', 10, 2)
 
     for x in iemre.XAXIS:
         for y in iemre.YAXIS:
-            obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1,
-                                     [[(x, y), (x, y+iemre.DY),
-                                       (x+iemre.DX, y+iemre.DY),
-                                       (x+iemre.DX, y), (x, y)]])
-            shp.write_object(-1, obj)
+            w.poly(parts=[[(x, y), (x, y+iemre.DY),
+                           (x+iemre.DX, y+iemre.DY),
+                           (x+iemre.DX, y), (x, y)]])
 
-    del(shp)
-    dbf = dbflib.create(fp)
-    dbf.add_field("GDD", dbflib.FTDouble, 10, 2)
-    dbf.add_field("PREC_IN", dbflib.FTDouble, 10, 2)
-
-    cnt = 0
     for i in range(len(iemre.XAXIS)):
         for j in range(len(iemre.YAXIS)):
-            dbf.write_record(cnt, {'PREC_IN': precip[j, i],
-                                   'GDD': gdd[j, i]})
-            cnt += 1
-
-    del(dbf)
-
+            w.record(gdd[j, i], precip[j, i])
+    w.save(basefn)
     # Create zip file, send it back to the clients
-    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj",
-                    fp+".prj")
-    z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
-    z.write(fp+".shp")
-    z.write(fp+".shx")
-    z.write(fp+".dbf")
-    z.write(fp+".prj")
+    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn, ))
+    z = zipfile.ZipFile("%s.zip" % (basefn,), 'w', zipfile.ZIP_DEFLATED)
+    for suffix in ['shp', 'shx', 'dbf', 'prj']:
+        z.write("%s.%s" % (basefn, suffix))
     z.close()
 
-    print "Content-type: application/octet-stream"
-    print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-    print
+    sys.stdout.write("Content-type: application/octet-stream\n")
+    sys.stdout.write(("Content-Disposition: attachment; filename=%s.zip\n\n"
+                      ) % (basefn, ))
 
-    print file(fp+".zip", 'r').read(),
+    sys.stdout.write(file(basefn+".zip", 'r').read())
 
-    os.remove(fp+".zip")
-    os.remove(fp+".shp")
-    os.remove(fp+".shx")
-    os.remove(fp+".dbf")
-    os.remove(fp+".prj")
+    for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
+        os.unlink("%s.%s" % (basefn, suffix))

@@ -1,9 +1,6 @@
-"""
- Dump 24 hour LSRs to a file
-"""
+"""Dump 24 hour LSRs to a file"""
 
-import shapelib
-import dbflib
+import shapefile
 import mx.DateTime
 import zipfile
 import os
@@ -21,19 +18,16 @@ os.chdir("/tmp/")
 # out of the shapefile
 eTS = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minutes=+1)
 
-shp = shapelib.create("lsr_24hour", shapelib.SHPT_POINT)
-
-dbf = dbflib.create("lsr_24hour")
-dbf.add_field("VALID", dbflib.FTString, 12, 0)
-dbf.add_field("MAG", dbflib.FTDouble, 10, 2)
-dbf.add_field("WFO", dbflib.FTString, 3, 0)
-dbf.add_field("TYPECODE", dbflib.FTString, 1, 0)
-dbf.add_field("TYPETEXT", dbflib.FTString, 40, 0)
-dbf.add_field("CITY", dbflib.FTString, 40, 0)
-dbf.add_field("COUNTY", dbflib.FTString, 40, 0)
-dbf.add_field("SOURCE", dbflib.FTString, 40, 0)
-dbf.add_field("REMARK", dbflib.FTString, 200, 0)
-
+w = shapefile.Writer(shapefile.POINT)
+w.field("VALID", 'C', 12, 0)
+w.field("MAG", 'D', 10, 2)
+w.field("WFO", 'C', 3, 0)
+w.field("TYPECODE", 'C', 1, 0)
+w.field("TYPETEXT", 'C', 40, 0)
+w.field("CITY", 'C', 40, 0)
+w.field("COUNTY", 'C', 40, 0)
+w.field("SOURCE", 'C', 40, 0)
+w.field("REMARK", 'C', 200, 0)
 
 pcursor.execute("""
     SELECT distinct *, ST_astext(geom) as tgeom from lsrs_%s WHERE
@@ -46,26 +40,18 @@ for row in pcursor:
     if s is None or s == "":
         continue
     f = wellknowntext.convert_well_known_text(s)
-
-    d = {}
-    d["VALID"] = row['valid'].strftime("%Y%m%d%H%M")
-    d["MAG"] = float(row['magnitude'] or 0)
-    d["TYPECODE"] = row['type']
-    d["WFO"] = row['wfo']
-    d["TYPETEXT"] = row['typetext']
-    d["CITY"] = row['city']
-    d["COUNTY"] = row['county']
-    d["SOURCE"] = row['source']
-    d["REMARK"] = row['remark'][:200]
-    obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f]])
-    shp.write_object(-1, obj)
-    dbf.write_record(cnt, d)
-    del(obj)
-    cnt += 1
-
-
-del(shp)
-del(dbf)
+    w.point(f[0], f[1])
+    w.record(row['valid'].strftime("%Y%m%d%H%M"),
+             float(row['magnitude'] or 0),
+             row['wfo'],
+             row['type'],
+             row['typetext'],
+             row['city'],
+             row['county'],
+             row['source'],
+             row['remark'][:200]
+             )
+w.save("lsr_24hour.shp")
 z = zipfile.ZipFile("lsr_24hour.zip", 'w', zipfile.ZIP_DEFLATED)
 z.write("lsr_24hour.shp")
 z.write("lsr_24hour.shx")

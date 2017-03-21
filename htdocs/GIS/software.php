@@ -48,13 +48,12 @@ dynamic plots.  Here is a listing of software that you may find useful.</p>
     with the plotting power of MapServer.</td></tr>
 
 <tr class="even">
-  <td colspan=2>Python Shapelib</td></tr>
+  <td colspan=2>PyShp</td></tr>
   <tr>
-   <td>Homepage:</td><td><a href="ftp://intevation.de/users/bh/pyshapelib-0.2.tar.gz">ftp://intevation.de/users/bh/pyshapelib-0.2.tar.gz</a></td></tr>
+   <td>Homepage:</td><td><a href="https://pypi.python.org/pypi/pyshp">https://pypi.python.org/pypi/pyshp</a></td></tr>
   <tr>
    <td colspan=2>
-     PyShapelib provides python bindings to shapelib.  Shapelib is a library
-    for manipulating shapefiles.  Thus you can edit shapefiles from Python.
+     The Python Shapefile Library (pyshp) provides read and write support for the Esri Shapefile format.
    </td></tr>
 
 </table>

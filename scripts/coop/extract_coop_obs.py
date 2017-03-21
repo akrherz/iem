@@ -1,8 +1,7 @@
 """ Dump out obs from the database for use by other apps """
 
 import mx.DateTime
-import shapelib
-import dbflib
+import shapefile
 import psycopg2.extras
 import subprocess
 import os
@@ -74,28 +73,21 @@ csv = open('coop.csv', 'w')
 csv.write('nwsli,site_name,longitude,latitude,date,time,high_f,low_f,prec_in,')
 csv.write('snow_in,snow_depth_in,prec_mon_in,snow_mon_in,elevation_m\n')
 
-dbf = dbflib.create("coop_"+ts)
-dbf.add_field("SID", dbflib.FTString, 5, 0)
-dbf.add_field("SITE_NAME", dbflib.FTString, 64, 0)
-dbf.add_field("ELEV_M", dbflib.FTDouble, 10, 2)
-dbf.add_field("YYYYMMDD", dbflib.FTString, 8, 0)
-dbf.add_field("HHMM", dbflib.FTString, 4, 0)
-dbf.add_field("HI_T_F", dbflib.FTInteger, 10, 0)
-dbf.add_field("LO_T_F", dbflib.FTInteger, 10, 0)
-dbf.add_field("PREC", dbflib.FTDouble, 10, 2)
-dbf.add_field("SNOW", dbflib.FTDouble, 10, 2)
-dbf.add_field("SDEPTH", dbflib.FTDouble, 10, 2)
-dbf.add_field("PMONTH", dbflib.FTDouble, 10, 2)
-dbf.add_field("SMONTH", dbflib.FTDouble, 10, 2)
-
-shp = shapelib.create("coop_"+ts, shapelib.SHPT_POINT)
-
-j = 0
+w = shapefile.Writer(shapefile.POINT)
+w.field("SID", 'C', 5, 0)
+w.field("SITE_NAME", 'C', 64, 0)
+w.field("ELEV_M", 'D', 10, 2)
+w.field("YYYYMMDD", 'C', 8, 0)
+w.field("HHMM", 'C', 4, 0)
+w.field("HI_T_F", 'I', 10, 0)
+w.field("LO_T_F", 'I', 10, 0)
+w.field("PREC", 'D', 10, 2)
+w.field("SNOW", 'D', 10, 2)
+w.field("SDEPTH", 'D', 10, 2)
+w.field("PMONTH", 'D', 10, 2)
+w.field("SMONTH", 'D', 10, 2)
 for sid in cob.keys():
-
-    obj = shapelib.SHPObject(shapelib.SHPT_POINT, j,
-                             [[(cob[sid]["LON"], cob[sid]["LAT"])]])
-    shp.write_object(-1, obj)
+    w.point(cob[sid]["LON"], cob[sid]["LAT"])
     # print id, cob[sid]
     if cob[sid]["TMPX"] < 0:
         cob[sid]["TMPX"] = -99.
@@ -112,10 +104,10 @@ for sid in cob.keys():
     if cob[sid]["SMOI"] < 0:
         cob[sid]["SMOI"] = -99.
     # print cob[sid], sid
-    dbf.write_record(j, (sid, cob[sid]["NAME"], cob[sid]['ELEV_M'], ts, "1200",
-                         cob[sid]["TMPX"], cob[sid]["TMPN"], cob[sid]["P24I"],
-                         cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"],
-                         cob[sid]["SMOI"]))
+    w.record(sid, cob[sid]["NAME"], cob[sid]['ELEV_M'], ts, "1200",
+             cob[sid]["TMPX"], cob[sid]["TMPN"], cob[sid]["P24I"],
+             cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"],
+             cob[sid]["SMOI"])
 
     csv.write(("%s,%s,%.4f,%.4f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.1f\n"
                ) % (sid, cob[sid]["NAME"].replace(",", " "),
@@ -125,9 +117,7 @@ for sid in cob.keys():
                     cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"],
                     cob[sid]["SMOI"], cob[sid]['ELEV_M']))
 
-    del(obj)
-    j += 1
-
+w.save("coop_%s" % (ts, ))
 icursor.close()
 IEM.commit()
 IEM.close()
