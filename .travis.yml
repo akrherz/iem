@@ -47,11 +47,12 @@ install:
       wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda;
       $HOME/miniconda/bin/conda config --set always_yes yes --set changeps1 no;
-      $HOME/miniconda/bin/conda config --add channels conda-forge;
-      $HOME/miniconda/bin/conda config --append channels cgat;
       $HOME/miniconda/bin/conda update -q conda;
     fi
   - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda config --append channels cgat
   - hash -r
   - conda install --file conda_requirements.txt
   # Then do additional pip stuff
