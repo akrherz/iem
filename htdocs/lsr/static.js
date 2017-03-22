@@ -65,9 +65,8 @@ function setLastNEXRAD(){
   now = new Date();
   gmt = now.toUTC();
   gmtl5 = gmt.add(Date.MINUTE, 0 - (parseInt(gmt.format('i')) % 5));
-  Ext.getCmp('nexradslider').maxValue = gmtl5.fromUTC() ;
-  Ext.getCmp('nexradslider').setValue( gmtl5.fromUTC() );
-  //console.log("Setting last NEXRAD slider to:"+ gmtl5 );
+  Ext.getCmp('nexradslider').setMaxValue(gmtl5.fromUTC().getTime());
+  Ext.getCmp('nexradslider').setValue(gmtl5.fromUTC().getTime());
 }
 
 function genSettings(){ 
@@ -106,22 +105,29 @@ function reloadData(){
   sdt = new Date(sts);
   start_utc = sdt.toUTC();
   /* Set the nexradSlider to the top of the hour */
-  nexradSlider.minValue = (start_utc.fromUTC()).add(Date.MINUTE, 
-                          0 - parseInt(start_utc.format('i')) );
+  Ext.getCmp("nexradslider").setMinValue(
+		  (start_utc.fromUTC()).add(Date.MINUTE, 
+                          0 - parseInt(start_utc.format('i')) ).getTime());
 
   ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker2").getValue();
   edt = new Date(ets);
   end_utc = edt.toUTC();
   /* Set the nexradSlider to the top of the next hour */
-  nexradSlider.maxValue = (end_utc.fromUTC()).add(Date.MINUTE, 
-                          60 - parseInt(start_utc.format('i')) );
+  Ext.getCmp("nexradslider").setMaxValue(
+		  (end_utc.fromUTC()).add(Date.MINUTE, 
+                          60 - parseInt(start_utc.format('i')) ).getTime());
   if (Ext.getCmp('rtcheckbox').checked) {
     setLastNEXRAD();
+  } else if (start_utc.getTime() == end_utc.getTime()){
+	  // Mod back 5
+	  var time = (start_utc.fromUTC()).add(Date.MINUTE, 
+              0 - (parseInt(start_utc.format('i')) % 5) ).getTime();
+	  Ext.getCmp("nexradslider").setValue(time);
   } else {
-    nexradSlider.setValue( 0 );
+	Ext.getCmp("nexradslider").setValue(nexradSlider.minValue);
   }
-  nexradSlider.fireEvent('changecomplete');
+  Ext.getCmp("nexradslider").fireEvent('changecomplete');
 
   lsrGridPanel.getStore().reload({
       add    : false,
@@ -169,32 +175,32 @@ options = {
                                              20037508, 20037508.34)
 }
 
-var tip = new Ext.ux.SliderTip({
-  getText: function(slider){
-    return String.format('<b>{0} Local Time</b>',
-           (new Date(slider.getValue())).format('Y-m-d g:i a'));
-    }
-});
-
-
-nexradSlider = new Ext.Slider({
+nexradSlider = {
+	xtype: 'slider',
   id          : 'nexradslider',
   minValue    : (new Date()).getTime(),
   value       : (new Date()).getTime(),
-  maxValue    : (new Date()).getTime() + 1200,
+  maxValue    : (new Date()).getTime() + 600000,
   increment   : 300000,
   isFormField : true,
   width       : 360,
   colspan     : 4,
-  plugins     : [tip]
-});
-
-nexradSlider.on('changecomplete', function(){
-   nexradWMS.mergeNewParams({
-     time: (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
-   });
-   Ext.getCmp("appTime").setText("NEXRAD Valid: "+ (new Date(nexradSlider.getValue())).format('Y-m-d g:i A'));
-});
+  plugins  : [new Ext.slider.Tip({
+	  getText: function(thumb){
+		  return String.format('<b>{0} Local Time</b>',
+	            (new Date(thumb.value)).format('Y-m-d g:i a'));
+	  }
+  })],
+  listeners   : {
+	  changecomplete: function(){
+			var dt = new Date(this.getValue());
+			nexradWMS.mergeNewParams({
+			     time: dt.toUTC().format('Y-m-d\\TH:i')
+			});
+		    Ext.getCmp("appTime").setText("NEXRAD Valid: "+ dt.format('Y-m-d g:i A'));
+	  }
+  }
+};
 
 var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
    "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",
@@ -204,7 +210,7 @@ var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
      transparent : true,
      sphericalMercator: true,
      format      : 'image/png',
-     time        : (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
+     time        : '2017-01-01T00:00'
    },{
      singleTile  : true,
      visibility  : false,
@@ -722,7 +728,9 @@ lsrGridPanel.getStore().on("load", function(mystore, records, options){
     if (records.length > 2999){
         Ext.Msg.alert('Warning', 'Request exceeds 3000 size limit, sorry.');
     }
-    if (records.length > 0){ 
+    if (records.length == 1){ 
+        map.setCenter(lsrLayer.getDataExtent().getCenterLonLat(), 9);
+    } else if (records.length > 0){ 
         map.zoomToExtent( lsrLayer.getDataExtent() );
     } else {
         Ext.Msg.alert('Alert', 'No LSRs found, sorry.');
