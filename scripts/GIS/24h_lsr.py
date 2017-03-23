@@ -20,7 +20,7 @@ eTS = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minutes=+1)
 
 w = shapefile.Writer(shapefile.POINT)
 w.field("VALID", 'C', 12, 0)
-w.field("MAG", 'D', 10, 2)
+w.field("MAG", 'F', 10, 2)
 w.field("WFO", 'C', 3, 0)
 w.field("TYPECODE", 'C', 1, 0)
 w.field("TYPETEXT", 'C', 40, 0)

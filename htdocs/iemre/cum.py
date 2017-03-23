@@ -78,8 +78,8 @@ if fmt == 'shp':
     # Time to create the shapefiles
     basefn = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
     w = shapefile.Writer(shapefile.POLYGON)
-    w.field('GDD', 'D', 10, 2)
-    w.field('PREC_IN', 'D', 10, 2)
+    w.field('GDD', 'F', 10, 2)
+    w.field('PREC_IN', 'F', 10, 2)
 
     for x in iemre.XAXIS:
         for y in iemre.YAXIS:
