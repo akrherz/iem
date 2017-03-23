@@ -5,6 +5,7 @@ import numpy as np
 from pyiem.plot import MapPlot
 import calendar
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -57,13 +58,13 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    state = fdict.get('state', 'IA')[:2]
-    varname = fdict.get('var', 'total_precip')
-    sector = fdict.get('sector', 'state')
-    opt = fdict.get('opt', 'both')
-    over = fdict.get('over', 'monthly')
-    month = int(fdict.get('month', datetime.date.today().month))
+    ctx = get_autoplot_context(fdict, get_description())
+    state = ctx['state'][:2]
+    varname = ctx['var']
+    sector = ctx['sector']
+    opt = ctx['opt']
+    over = ctx['over']
+    month = ctx['month']
 
     df = read_sql("""
     WITH data as (
@@ -110,6 +111,7 @@ def plotter(fdict):
                       fmt='%%.%if' % (PRECISION[varname],))
 
     return m.fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(over='annual'))

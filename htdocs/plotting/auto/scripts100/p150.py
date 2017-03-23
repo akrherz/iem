@@ -5,6 +5,7 @@ from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
 from collections import OrderedDict
+from pyiem.util import get_autoplot_context
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
 PDICT2 = {
@@ -48,15 +49,15 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    station = fdict.get('station', '_OAX')
-    varname = fdict.get('var', 'tmpc')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
     network = 'RAOB'
-    ts = datetime.datetime.strptime(fdict.get('date', '2015-12-25'),
-                                    '%Y-%m-%d')
+    ts = ctx['date']
+    hour = int(ctx['hour'])
+    ts = datetime.datetime(ts.year, ts.month, ts.day, hour)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-    hour = int(fdict.get('hour', '00'))
-    which = fdict.get('which', 'month')
-    ts = ts.replace(hour=hour)
+    which = ctx['which']
     vlimit = ''
     if which == 'month':
         vlimit = (" and extract(month from f.valid) = %s "
@@ -100,6 +101,8 @@ def plotter(fdict):
     select * from data where valid = %s ORDER by pressure DESC
     """, pgconn, params=(tuple(stations), hour, ts),
                   index_col='pressure')
+    if len(df.index) == 0:
+        raise Exception("No data found for query")
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
 

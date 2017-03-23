@@ -14,7 +14,7 @@ def get_description():
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
     ]
     return d
 
@@ -73,6 +73,7 @@ def plotter(fdict):
             res += "%3.0f\n" % (df.loc[(yr, slice(1, 12)), col].sum(), )
 
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

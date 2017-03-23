@@ -5,6 +5,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
     ('high', 'High Temperature'),
@@ -31,22 +32,22 @@ def get_description():
              label='Select Variable to Plot', default='precip'),
         dict(type='select', options=PDICT2, name='dir',
              label='Direction of Percentile', default='above'),
-        dict(type='text', name='level', default='2',
+        dict(type='float', name='level', default='2',
              label='Daily Variable Level (inch or degrees F):'),
         dict(type='station', name='station', default='IA2203',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
     ]
     return d
 
 
 def get_context(fdict):
     """ Get the context """
-    ctx = {}
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    station = fdict.get('station', 'IA2203').upper()
-    varname = fdict.get('var', 'precip')[:10]
-    level = float(fdict.get('level', 2))
-    mydir = fdict.get('dir', 'above')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station'].upper()
+    varname = ctx['var']
+    level = ctx['level']
+    mydir = ctx['dir']
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
     years = (datetime.date.today().year -
@@ -146,7 +147,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     ctx = get_context(fdict)
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     df = ctx['df']
 
     ax.bar(df.index.values, df['rank'], fc='tan', zorder=1,
@@ -177,6 +178,7 @@ def plotter(fdict):
             ax2.text(idx, 0., "n/a", ha='right')
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
