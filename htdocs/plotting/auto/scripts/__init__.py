@@ -161,7 +161,7 @@ data = {'plots': [
                    "of Monthly Total")},
         {'id': "41", 'mw': True,
          'label': ("Quantile / Quantile Plot of Daily Temperatures "
-                   "for Two Months")},
+                   "for Two Months/Periods")},
         {'id': "20", 'label': "Hours of Precipitation by Month"},
         {'id': "47", 'mw': True,
          'label': "Snowfall vs Precipitation Total for a Month"},

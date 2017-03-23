@@ -1,14 +1,38 @@
-import psycopg2.extras
+import psycopg2
+from collections import OrderedDict
 import numpy as np
-import calendar
 import pandas as pd
+from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
-PDICT = {'high': 'Daily High Temperature',
-         'low': 'Daily Low Temperature',
-         'avg': 'Daily Average Temperature'}
+ODICT = OrderedDict([
+    ('max', 'Maximum'),
+    ('min', 'Minimum'),
+    ('avg', 'Average')])
+PDICT = OrderedDict([
+    ('high', 'Daily High Temperature'),
+    ('low', 'Daily Low Temperature'),
+    ('avg', 'Daily Average Temperature')])
+MDICT = OrderedDict([
+         ('all', 'All Year'),
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('1', 'January'),
+         ('2', 'February'),
+         ('3', 'March'),
+         ('4', 'April'),
+         ('5', 'May'),
+         ('6', 'June'),
+         ('7', 'July'),
+         ('8', 'August'),
+         ('9', 'September'),
+         ('10', 'October'),
+         ('11', 'November'),
+         ('12', 'December')])
 
 
 def get_description():
@@ -16,26 +40,99 @@ def get_description():
     d = dict()
     d['data'] = True
     d['description'] = """This plot compares the distribution of daily
-    temperatures for two months for a single station of your choice.  The
-    left hand plot depicts a quantile - quantile plot, which simply plots
+    temperatures for two months or periods for a single station of your choice.
+    The left hand plot depicts a quantile - quantile plot, which simply plots
     the montly percentile values against each other.  You could think of this
     plot as comparable frequencies.  The right hand plot depicts the
     distribution of each month's temperatures expressed as a violin plot. These
     type of plots are useful to see the shape of the distribution.  These plots
-    also contain the mean and extremes of the distributions."""
+    also contain the mean and extremes of the distributions.
+
+    <br />There is an additional bit of functionality allowing for the
+    computation of metrics over a number of trailing days.  When this
+    trailing day window period is set to a value larger than 1 day, you will
+    want to also set the computation method over that window.  The options
+    are:
+    <ul>
+      <li>Max: Take the day with the highest value</li>
+      <li>Avg: Take the average of all days in the window</li>
+      <li>Min: Take the lowest value over the window</li>
+    </ul>
+    <br />Clever combinations of the above allow for assessment of strength
+    and duration of stretches of hot or cold weather.
+    """
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              network='IACLIMATE', label='Select Station:'),
-        dict(type='month', name='month1', default='12',
+        dict(type='select', name='month1', default='12', options=MDICT,
              label='Select Month for x-axis:'),
-        dict(type='month', name='month2', default='07',
+        dict(type='text', default='1893-1950', name='p1', optional=True,
+             label='Inclusive Period of Years for x-axis (Optional)'),
+        dict(type='select', name='month2', default='07', options=MDICT,
              label='Select Month for y-axis:'),
+        dict(type='text', default='1950-2017', name='p2', optional=True,
+             label='Inclusive Period of Years for y-axis (Optional)'),
         dict(type='select', name='var', default='high',
              label='Variable to Compare', options=PDICT),
         dict(type='text', label='x-axis Value to Highlight', default=55,
              name='highlight'),
+        dict(type='int', default='1', name='days',
+             label='Evaluate over X number of days'),
+        dict(type='select', name='opt', options=ODICT, default='max',
+             label='When evaluation over multiple days, how to compute:'),
     ]
     return d
+
+
+def get_data(pgconn, table, station, month, period, varname, days, opt):
+    doffset = "0 days"
+    if len(month) < 3:
+        mlimiter = " and month = %s " % (int(month), )
+    elif month == 'all':
+        mlimiter = ""
+    elif month == 'fall':
+        mlimiter = " and month in (9, 10, 11) "
+    elif month == 'winter':
+        mlimiter = " and month in (12, 1, 2) "
+        doffset = "31 days"
+    elif month == 'spring':
+        mlimiter = " and month in (3, 4, 5) "
+    elif month == 'summer':
+        mlimiter = " and month in (6, 7, 8) "
+
+    ylimiter = ""
+    if period is not None:
+        (y1, y2) = [int(x) for x in period.split("-")]
+        ylimiter = "WHERE myyear >= %s and myyear <= %s" % (y1, y2)
+    if days == 1:
+        df = read_sql("""
+        WITH data as (
+            SELECT
+            extract(year from day + '"""+doffset+"""'::interval)::int as myyear,
+            high, low, (high+low)/2. as avg from """ + table + """
+            WHERE station = %s """ + mlimiter + """)
+        SELECT * from data """ + ylimiter + """
+        """, pgconn, params=(station, ), index_col=None)
+    else:
+        res = ("%s(%s) OVER (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND"
+               " CURRENT ROW) ") % (opt, varname, days - 1)
+        df = read_sql("""
+        WITH data as (
+            SELECT
+            extract(year from day + '"""+doffset+"""'::interval)::int as myyear,
+            high, low, (high+low)/2. as avg, day, month from """ + table + """
+            WHERE station = %s),
+        agg1 as (
+            SELECT myyear, month, """ + res + """ as """ + varname + """
+            from data WHERE 1 = 1 """ + mlimiter + """)
+        SELECT * from agg1 """ + ylimiter + """
+        """, pgconn, params=(station, ), index_col=None)
+
+    mdata = df[varname].values
+    if period is None:
+        y1 = df['myyear'].min()
+        y2 = df['myyear'].max()
+    return mdata, y1, y2
 
 
 def plotter(fdict):
@@ -44,7 +141,6 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
@@ -52,56 +148,58 @@ def plotter(fdict):
     month2 = ctx['month2']
     highlight = float(ctx['highlight'])
     varname = ctx['var']
+    p1 = ctx.get('p1')
+    p2 = ctx.get('p2')
+    days = ctx['days']
+    opt = ctx['opt']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable(network)
 
-    # beat month
-    cursor.execute("""
-    SELECT month, high, low, (high+low)/2. from """+table+"""
-    WHERE station = %s and month in (%s,%s)
-    """, (station, month1, month2))
+    m1data, y1, y2 = get_data(pgconn, table, station, month1, p1, varname,
+                              days, opt)
+    m2data, y3, y4 = get_data(pgconn, table, station, month2, p2, varname,
+                              days, opt)
 
-    data = {month1: [], month2: []}
-    for row in cursor:
-        data[row['month']].append(row[varname])
-    m1data = np.array(data[month1])
-    m2data = np.array(data[month2])
-
-    p1 = np.percentile(m1data, range(0, 101, 5))
-    p2 = np.percentile(m2data, range(0, 101, 5))
-    df = pd.DataFrame({'%s_%s' % (calendar.month_abbr[month1],
-                                  varname): pd.Series(p1),
-                       '%s_%s' % (calendar.month_abbr[month2],
-                                  varname): pd.Series(p2),
+    pc1 = np.percentile(m1data, range(0, 101, 5))
+    pc2 = np.percentile(m2data, range(0, 101, 5))
+    df = pd.DataFrame({'%s_%s_%s_%s' % (MDICT[month1],
+                                        varname, y1, y2): pd.Series(pc1),
+                       '%s_%s_%s_%s' % (MDICT[month2],
+                                        varname, y3, y4): pd.Series(pc2),
                        'quantile': pd.Series(range(0, 101, 5))})
-    s_slp, s_int, s_r, _, _ = stats.linregress(p1, p2)
+    s_slp, s_int, s_r, _, _ = stats.linregress(pc1, pc2)
 
-    ax = plt.axes([0.1, 0.11, 0.5, 0.8])
-    ax.scatter(p1, p2, s=40, marker='s', color='b', zorder=3)
-    ax.plot(p1, p1 * s_slp + s_int, lw=3, color='r',
+    fig = plt.gcf()
+    fig.set_size_inches(8., 6.)
+    ax = plt.axes([0.1, 0.11, 0.5, 0.76])
+    ax.scatter(pc1, pc2, s=40, marker='s', color='b', zorder=3)
+    ax.plot(pc1, pc1 * s_slp + s_int, lw=3, color='r',
             zorder=2, label=r"Fit R$^2$=%.2f" % (s_r ** 2,))
     ax.axvline(highlight, zorder=1, color='k')
     y = highlight * s_slp + s_int
     ax.axhline(y, zorder=1, color='k')
-    ax.text(p1[0], y, "%.0f $^\circ$F" % (y,), va='center',
+    ax.text(pc1[0], y, "%.0f $^\circ$F" % (y,), va='center',
             bbox=dict(color='white'))
-    ax.text(highlight, p2[0], "%.0f $^\circ$F" % (highlight,), ha='center',
+    ax.text(highlight, pc2[0], "%.0f $^\circ$F" % (highlight,), ha='center',
             rotation=90, bbox=dict(color='white'))
-    ax.set_title(("[%s] %s\n%s vs %s %s"
+    t2 = PDICT[varname]
+    if days > 1:
+        t2 = "%s %s over %s days" % (ODICT[opt], PDICT[varname], days)
+    fig.suptitle(("[%s] %s\n%s (%s-%s) vs %s (%s-%s)\n%s"
                   ) % (station, nt.sts[station]['name'],
-                       calendar.month_abbr[month2],
-                       calendar.month_abbr[month1], PDICT[varname]))
-    ax.set_xlabel("%s %s $^\circ$F" % (calendar.month_name[month1],
-                                       PDICT[varname]))
-    ax.set_ylabel("%s %s $^\circ$F" % (calendar.month_name[month2],
-                                       PDICT[varname]))
+                       MDICT[month2], y1, y2,
+                       MDICT[month1], y3, y4, t2))
+    ax.set_xlabel("%s (%s-%s) %s $^\circ$F" % (MDICT[month1], y1, y2,
+                                               PDICT[varname]))
+    ax.set_ylabel("%s (%s-%s) %s $^\circ$F" % (MDICT[month2], y3, y4,
+                                               PDICT[varname]))
     ax.text(0.95, 0.05, "Quantile - Quantile Plot",
             transform=ax.transAxes, ha='right')
     ax.grid(True)
     ax.legend(loc=2)
 
-    ax = plt.axes([0.7, 0.11, 0.27, 0.8])
+    ax = plt.axes([0.7, 0.18, 0.27, 0.68])
     ax.set_title("Distribution")
     v1 = ax.violinplot(m1data, positions=[0, ], showextrema=True,
                        showmeans=True)
@@ -123,15 +221,18 @@ def plotter(fdict):
     for l in ['cmins', 'cmeans', 'cmaxes']:
         v1[l].set_color('b')
 
-    p0 = plt.Rectangle((0, 0), 1, 1, fc="r")
-    p1 = plt.Rectangle((0, 0), 1, 1, fc="b")
-    ax.legend((p0, p1), (calendar.month_abbr[month1],
-                         calendar.month_abbr[month2]),
-              ncol=2, loc=(-0.18, -0.13))
+    pr0 = plt.Rectangle((0, 0), 1, 1, fc="r")
+    pr1 = plt.Rectangle((0, 0), 1, 1, fc="b")
+    ax.legend((pr0, pr1), ("%s (%s-%s), $\mu$=%.1f" % (MDICT[month1], y1,
+                                                       y2, np.mean(m1data)),
+                           "%s (%s-%s), $\mu$=%.1f" % (MDICT[month2], y3,
+                                                       y4, np.mean(m2data))),
+              ncol=1, loc=(-0.28, -0.2))
     ax.set_ylabel("%s $^\circ$F" % (PDICT[varname],))
     ax.grid()
 
-    return plt.gcf(), df
+    return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
