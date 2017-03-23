@@ -101,7 +101,7 @@ states = [
 var varStore = new Ext.data.Store({
 	autoLoad	: false,
 	proxy	: new Ext.data.HttpProxy({
-		url     : '../json/dcp_vars.php'
+		url     : '/json/dcp_vars.php'
 	}),
 	reader: new Ext.data.JsonReader({
 		root: 'vars',
@@ -140,7 +140,7 @@ var varStore = new Ext.data.Store({
 	var stationStore = new Ext.data.Store({
 		autoLoad	: false,
         proxy	: new Ext.data.HttpProxy({
-            url     : '../json/network.php'
+            url     : '/json/network.php'
         }),
         baseParams  : {'network': 'IA_DCP'},
         reader: new Ext.data.JsonReader({

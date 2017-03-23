@@ -371,7 +371,7 @@
   
   $services[] = Array(
   		"title" => "Data Collection Network Details",
-  		"url" => "/json/network/{network}.geojson",
+  		"url" => "/geojson/network.py?network={network}",
   		"desc" => "The IEM bunches observation stations into networks. This
 service provides metadata for sites within a network.  A listing of networks
 can be found on <a href='/sites/locate.php'>this page.</a>",

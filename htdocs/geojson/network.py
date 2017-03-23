@@ -15,7 +15,7 @@ def run(network):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     cursor.execute("""
-        SELECT ST_asGeoJson(geom, 4) as geojson, id, name from stations
+        SELECT ST_asGeoJson(geom, 4) as geojson, * from stations
         WHERE network = %s ORDER by name ASC
     """, (network, ))
 
@@ -28,7 +28,17 @@ def run(network):
         res['features'].append(dict(type="Feature",
                                     id=row['id'],
                                     properties=dict(
+                                        elevation=row['elevation'],
                                         sname=row['name'],
+                                        state=row['state'],
+                                        country=row['country'],
+                                        climate_site=row['climate_site'],
+                                        wfo=row['wfo'],
+                                        tzname=row['tzname'],
+                                        ncdc81=row['ncdc81'],
+                                        ugc_county=row['ugc_county'],
+                                        ugc_zone=row['ugc_zone'],
+                                        county=row['county'],
                                         sid=row['id']),
                                     geometry=json.loads(row['geojson'])
                                     ))
@@ -54,6 +64,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     # Go Main Go
