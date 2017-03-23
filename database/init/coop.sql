@@ -266,7 +266,7 @@ CREATE TABLE stations(
 	precip24_hour smallint
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
-create index stations_iemid_idx on stations(iemid);
+create UNIQUE index stations_iemid_idx on stations(iemid);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to apache,nobody;
 grant all on stations_iemid_seq to nobody,apache;
