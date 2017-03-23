@@ -74,7 +74,7 @@ def get_description():
              label='Inclusive Period of Years for y-axis (Optional)'),
         dict(type='select', name='var', default='high',
              label='Variable to Compare', options=PDICT),
-        dict(type='text', label='x-axis Value to Highlight', default=55,
+        dict(type='float', label='x-axis Value to Highlight', default=55,
              name='highlight'),
         dict(type='int', default='1', name='days',
              label='Evaluate over X number of days'),
@@ -140,13 +140,14 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
+    from matplotlib.font_manager import FontProperties
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
     month1 = ctx['month1']
     month2 = ctx['month2']
-    highlight = float(ctx['highlight'])
+    highlight = ctx['highlight']
     varname = ctx['var']
     p1 = ctx.get('p1')
     p2 = ctx.get('p2')
@@ -161,8 +162,8 @@ def plotter(fdict):
     m2data, y3, y4 = get_data(pgconn, table, station, month2, p2, varname,
                               days, opt)
 
-    pc1 = np.percentile(m1data, range(0, 101, 5))
-    pc2 = np.percentile(m2data, range(0, 101, 5))
+    pc1 = np.percentile(m1data, range(0, 101, 1))
+    pc2 = np.percentile(m2data, range(0, 101, 1))
     df = pd.DataFrame({'%s_%s_%s_%s' % (MDICT[month1],
                                         varname, y1, y2): pd.Series(pc1),
                        '%s_%s_%s_%s' % (MDICT[month2],
@@ -171,9 +172,9 @@ def plotter(fdict):
     s_slp, s_int, s_r, _, _ = stats.linregress(pc1, pc2)
 
     fig = plt.gcf()
-    fig.set_size_inches(8., 6.)
-    ax = plt.axes([0.1, 0.11, 0.5, 0.76])
-    ax.scatter(pc1, pc2, s=40, marker='s', color='b', zorder=3)
+    fig.set_size_inches(10.24, 7.68)
+    ax = plt.axes([0.1, 0.11, 0.4, 0.76])
+    ax.scatter(pc1[::5], pc2[::5], s=40, marker='s', color='b', zorder=3)
     ax.plot(pc1, pc1 * s_slp + s_int, lw=3, color='r',
             zorder=2, label=r"Fit R$^2$=%.2f" % (s_r ** 2,))
     ax.axvline(highlight, zorder=1, color='k')
@@ -199,7 +200,8 @@ def plotter(fdict):
     ax.grid(True)
     ax.legend(loc=2)
 
-    ax = plt.axes([0.7, 0.18, 0.27, 0.68])
+    # Second
+    ax = plt.axes([0.55, 0.18, 0.27, 0.68])
     ax.set_title("Distribution")
     v1 = ax.violinplot(m1data, positions=[0, ], showextrema=True,
                        showmeans=True)
@@ -227,9 +229,29 @@ def plotter(fdict):
                                                        y2, np.mean(m1data)),
                            "%s (%s-%s), $\mu$=%.1f" % (MDICT[month2], y3,
                                                        y4, np.mean(m2data))),
-              ncol=1, loc=(-0.28, -0.2))
+              ncol=1, loc=(0.5, -0.15))
     ax.set_ylabel("%s $^\circ$F" % (PDICT[varname],))
     ax.grid()
+
+    # Third
+    monofont = FontProperties(family='monospace')
+    y = 0.86
+    x = 0.83
+    col1 = "%s_%s_%s_%s" % (MDICT[month1], varname, y1, y2)
+    col2 = "%s_%s_%s_%s" % (MDICT[month2], varname, y3, y4)
+    fig.text(x, y + 0.04, 'Percentile Data    Diff')
+    for percentile in [100, 99, 98, 97, 96, 95, 92, 90, 75, 50, 25, 10,
+                       8, 5, 4, 3, 2, 1]:
+        row = df.loc[percentile]
+        fig.text(x, y, "%3i" % (percentile,),
+                 fontproperties=monofont)
+        fig.text(x + 0.025, y, "%5.1f" % (row[col1], ),
+                 fontproperties=monofont, color='r')
+        fig.text(x + 0.07, y, "%5.1f" % (row[col2], ),
+                 fontproperties=monofont, color='b')
+        fig.text(x + 0.11, y, "%5.1f" % (row[col2] - row[col1], ),
+                 fontproperties=monofont)
+        y -= 0.04
 
     return fig, df
 
