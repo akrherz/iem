@@ -63,6 +63,10 @@ function rectifyTime(){
 	var sts = moment(opt.attr('data-sts'));
 	var interval = parseInt(opt.attr('data-interval'));
 	var avail_lag = parseInt(opt.attr('data-avail_lag'));
+	if (avail_lag > 0){
+		// Adjust the ets such to account for this lag
+		ets.add(0 - avail_lag, 'minutes');
+	}
 	var time_offset = parseInt(opt.attr('data-time_offset'));
 	ets.subtract(time_offset, 'minutes');
 	// Check 1: Bounds check
