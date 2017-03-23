@@ -48,7 +48,8 @@ create index stations_iemid_idx on stations(iemid);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to apache,nobody;
 grant all on stations_iemid_seq to nobody,apache;
-
+GRANT ALL on stations to mesonet,ldm;
+GRANT ALL on stations_iemid_seq to mesonet,ldm;
 
 
 ---
