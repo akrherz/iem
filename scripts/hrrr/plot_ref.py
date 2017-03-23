@@ -1,7 +1,7 @@
 """
 Generate an animated GIF of HRRR forecasted 1km reflectivity
 
-Run at :40 after
+Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 """
 
 import pygrib
@@ -27,10 +27,10 @@ def compute_bounds(lons, lats):
 def run(utc, routes):
     ''' Generate the plot for the given UTC time '''
 
-    subprocess.call("python dl_hrrrref.py %s" % (utc.strftime("%Y %m %d %H"),),
-                    shell=True)
-
     fn = "/tmp/ncep_hrrr_%s.grib2" % (utc.strftime("%Y%m%d%H"),)
+    if not os.path.isfile(fn):
+        subprocess.call(("python dl_hrrrref.py %s"
+                         ) % (utc.strftime("%Y %m %d %H"),), shell=True)
 
     grbs = pygrib.open(fn)
 
@@ -40,13 +40,13 @@ def run(utc, routes):
     lats = None
     lons = None
     i = 0
-    for minute in range(0, 901, 15):
+    for minute in range(0, 18 * 60 + 1, 15):
         now = utc + datetime.timedelta(minutes=minute)
         now = now.astimezone(pytz.timezone("America/Chicago"))
         grbs.seek(0)
         try:
             gs = grbs.select(level=1000, forecastTime=minute)
-        except:
+        except ValueError:
             continue
         g = gs[0]
         if lats is None:
@@ -103,6 +103,7 @@ def main():
                             microsecond=0)
 
     run(utcnow, routes)
+
 
 if __name__ == '__main__':
     # go go gadget

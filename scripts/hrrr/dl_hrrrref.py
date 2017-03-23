@@ -41,6 +41,9 @@ def run(valid):
 
         req = urllib2.Request(uri[:-4])
 
+        if hr > 0 and len(offsets) != 4:
+            print(("dl_hrrrref[%s] hr: %s offsets: %s"
+                   ) % (valid.strftime("%Y%m%d%H"), hr, offsets))
         for pr in offsets:
             req.headers['Range'] = 'bytes=%s-%s' % (pr[0], pr[1])
             f = None
@@ -64,6 +67,7 @@ def main():
     valid = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                               int(sys.argv[3]), int(sys.argv[4]))
     run(valid)
+
 
 if __name__ == '__main__':
     # do main
