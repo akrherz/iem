@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (17, now());
+INSERT into iem_schema_manager_version values (18, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -1164,6 +1164,7 @@ create table sbw(
   hailtag real,
   tornadotag varchar(64),
   tornadodamagetag varchar(64),
+  waterspouttag varchar(64),
   tml_valid timestamp with time zone,
   tml_direction smallint,
   tml_sknt smallint,
