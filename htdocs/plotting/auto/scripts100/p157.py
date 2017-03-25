@@ -25,7 +25,7 @@ def get_description():
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     d['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
-             label='Select Station'),
+             label='Select Station', network='IA_ASOS'),
         dict(type='year', name='year',
              default=today.year,
              label='Start Year to Plot:'),
@@ -112,3 +112,7 @@ def plotter(fdict):
     ax2.set_ylim(0, 100)
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -21,7 +21,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type="float", name="thres", default="0.10",
              label="Precipitation Threshold (inch)"),
         dict(type='select', name='trace', default='no',
@@ -106,3 +106,7 @@ def plotter(fdict):
     ax[1].grid(True)
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

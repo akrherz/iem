@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem import util
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -36,7 +36,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     pcursor = pgconn.cursor()
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     syear = ctx['syear']
     eyear = ctx['eyear'] + 1
     station = ctx['station'][:4]
@@ -59,11 +59,11 @@ def plotter(fdict):
     cnt = 1
     rows = []
     for row in pcursor:
-        l = "%s. %s %s (%s.%s)" % (
+        label = "%s. %s %s (%s.%s)" % (
             cnt, vtec._phenDict.get(row[0], row[0]),
             vtec._sigDict[row[1]], row[0], row[1])
         if cnt < 26:
-            labels.append(l)
+            labels.append(label)
             vals.append(row[3])
         rows.append(dict(phenomena=row[0],
                          significance=row[1],
@@ -74,7 +74,8 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(7, 10))
     vals = np.array(vals)
 
-    ax.barh(np.arange(len(vals))-0.4, vals / float(vals[0]) * 100.0)
+    ax.barh(np.arange(len(vals)), vals / float(vals[0]) * 100.0,
+            align='center')
     for i in range(1, len(vals)):
         y = vals[i] / float(vals[0]) * 100.0
         ax.text(y + 1, i, '%.1f%%' % (y,), va='center')
@@ -92,3 +93,7 @@ def plotter(fdict):
     ax.set_xticks([0, 10, 25, 50, 75, 90, 100])
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -116,5 +116,6 @@ def plotter(fdict):
 
     return fig
 
+
 if __name__ == '__main__':
     plotter(dict())

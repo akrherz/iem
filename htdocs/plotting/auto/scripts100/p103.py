@@ -1,8 +1,9 @@
 from pandas.io.sql import read_sql
 import psycopg2
-from pyiem import network, util
+from pyiem import network
 import numpy as np
 import calendar
+from pyiem.util import get_autoplot_context
 
 PDICT = {'spring': '1 January - 30 June',
          'fall': '1 July - 31 December'}
@@ -19,7 +20,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', options=PDICT,
              label='Select which half of year', default='fall'),
     ]
@@ -33,7 +34,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     season = ctx['season']
     table = "alldata_%s" % (station[:2],)
@@ -102,3 +103,7 @@ def plotter(fdict):
     ax[2].set_xlabel("Day of Year, 3 Day Bins")
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

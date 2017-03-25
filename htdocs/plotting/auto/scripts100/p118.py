@@ -2,6 +2,7 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
+from pyiem.util import get_autoplot_context
 
 PDICT = {'precip_days': 'Precipitation Days',
          'snow_days': 'Snowfall Days'}
@@ -15,8 +16,8 @@ def get_description():
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
-        dict(type='select', name='var', options=PDICT,
+             label='Select Station', network='IACLIMATE'),
+        dict(type='select', name='var', options=PDICT, default='precip_days',
              label='Select Variable'),
     ]
     return d
@@ -27,9 +28,9 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200').upper()
-    varname = fdict.get('var', 'precip_days')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station'].upper()
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
@@ -66,6 +67,7 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
                 res += "    "
         res += " %3i\n" % (total, )
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

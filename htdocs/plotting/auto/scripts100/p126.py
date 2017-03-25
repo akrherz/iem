@@ -6,6 +6,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.meteorology import mixing_ratio, relh
 from pyiem.datatypes import temperature
+from pyiem.util import get_autoplot_context
 
 PDICT = {'mixing_ratio': 'Mixing Ratio [g/kg]',
          'vpd': 'Vapor Pressure Deficit [hPa]'}
@@ -30,7 +31,7 @@ def get_description():
     """
     d['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:'),
+             label='Select Station:', network='IA_ASOS'),
         dict(type='year', name='year', default=today.year,
              label='Select Year to Plot'),
         dict(type='select', name='var', default='mixing_ratio',
@@ -45,12 +46,12 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-
-    station = fdict.get('zstation', 'AMW')
-    network = fdict.get('network', 'IA_ASOS')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['zstation']
+    network = ctx['network']
     nt = NetworkTable(network)
-    year = int(fdict.get('year', 2015))
-    varname = fdict.get('var', 'mixing_ratio')
+    year = ctx['year']
+    varname = ctx['var']
     _ = PDICT[varname]
 
     df = read_sql("""
@@ -121,6 +122,7 @@ def plotter(fdict):
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].grid(True)
     return fig, df3
+
 
 if __name__ == '__main__':
     plotter({'var': 'vpd'})

@@ -1,5 +1,5 @@
 import numpy as np
-from pyiem import util
+from pyiem.util import get_autoplot_context
 import datetime
 from pandas.io.sql import read_sql
 import psycopg2
@@ -62,7 +62,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
     pgconn = psycopg2.connect(dbname='coop', host='iemdb', user='nobody')
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     sector = ctx['sector']
     varname = ctx['var']
     year = ctx['year']
@@ -101,3 +101,7 @@ def plotter(fdict):
     m.drawcounties()
 
     return m.fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

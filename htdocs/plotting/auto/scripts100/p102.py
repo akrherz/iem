@@ -47,7 +47,7 @@ def plotter(fdict):
         wfo_limiter = ''
 
     df = read_sql("""
-        select extract(year from valid) as yr, upper(source) as src,
+        select extract(year from valid)::int as yr, upper(source) as src,
         count(*) from lsrs
         where valid > '""" + str(syear) + """-01-01' and
         valid < '""" + str(eyear + 1) + """-01-01' """ + wfo_limiter + """
@@ -97,7 +97,7 @@ def plotter(fdict):
 
     ax.set_position([0.3, 0.15, 0.4, 0.75])
     ax2.set_position([0.3, 0.15, 0.4, 0.75])
-    ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    ax.set_xticks(range(df['yr'].min(), df['yr'].max(), 2))
     for tick in ax.get_xticklabels():
         tick.set_rotation(90)
     ax.grid()
@@ -110,3 +110,7 @@ def plotter(fdict):
              ha='center')
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

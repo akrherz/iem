@@ -77,7 +77,7 @@ def plotter(fdict):
 
     prop = matplotlib.font_manager.FontProperties(size=10)
 
-    fig, ax = plt.subplots(3, 2, sharex=True, sharey=True)
+    fig, ax = plt.subplots(3, 2, sharex=True, sharey=True, figsize=(8, 6))
 
     i = 0
     for row in range(3):
@@ -125,6 +125,7 @@ def plotter(fdict):
              ha='center')
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(commodity_desc='SOYBEAN', y1=2012, y2=2005, y3=1988, y4=1993))
