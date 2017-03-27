@@ -36,7 +36,7 @@ def get_dates(form):
     try:
         sts = datetime.datetime(int(year1), int(month1), int(day1))
         ets = datetime.datetime(int(year2), int(month2), int(day2))
-    except:
+    except Exception as _:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write(("ERROR: Failed to parse specified start and end "
                           "dates.  Please go back and ensure that you have "
@@ -74,9 +74,9 @@ def fetch_daily(form, cols):
         delim = ' '
 
     if len(cols) == 0:
-        cols = ["station", "valid", "high", "low", "gdd50", "solar", "precip",
-                "sped", "gust", "et", "soil04t", "soil12t", "soil24t",
-                "soil50t", "soil12vwc", "soil24vwc", "soil50vwc"]
+        cols = ["station", "valid", "high", "low", "rh", "gdd50", "solar",
+                "precip", "sped", "gust", "et", "soil04t", "soil12t",
+                "soil24t", "soil50t", "soil12vwc", "soil24vwc", "soil50vwc"]
     else:
         cols.insert(0, 'valid')
         cols.insert(0, 'station')
@@ -84,7 +84,7 @@ def fetch_daily(form, cols):
     sql = """
     --- Get the Daily Max/Min soil values
     WITH soils as (
-      SELECT station, date(valid) as date,
+      SELECT station, date(valid) as date, avg(rh) as rh,
       min(tsoil_c_avg_qc) as soil04tn, max(tsoil_c_avg_qc) as soil04tx,
       min(t12_c_avg_qc) as soil12tn, max(t12_c_avg_qc) as soil12tx,
       min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
@@ -99,7 +99,7 @@ def fetch_daily(form, cols):
       ws_mps_s_wvt_qc, ws_mps_max_qc from sm_daily WHERE
       valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     )
-    SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx,
+    SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx, s.rh,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
     s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
     rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
@@ -188,6 +188,7 @@ def fetch_daily(form, cols):
 
         values.append(dict(station=station, valid=valid.strftime("%Y-%m-%d"),
                            high=high, low=low, solar=row['slrmj_tot_qc'],
+                           rh=row['rh'],
                            gdd50=row['gdd50'], precip=precip, sped=speed,
                            gust=gust, et=et, soil04t=soil04t, soil12t=soil12t,
                            soil24t=soil24t, soil50t=soil50t,
@@ -324,6 +325,7 @@ def main(argv):
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write(buf.read())
+
 
 if __name__ == '__main__':
     # make stuff happen
