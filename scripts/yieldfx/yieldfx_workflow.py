@@ -68,7 +68,7 @@ def upload_summary_plots():
                          ) % (year, ' with yields' if opt == 'yes' else '',
                               remotefn),
                         mode=dropbox.files.WriteMode.overwrite)
-                except:
+                except Exception as _:
                     print 'dropbox fail'
             os.unlink(tmpfn)
 
@@ -115,7 +115,7 @@ def write_and_upload(df, location):
                 open(tmpfn).read(),
                 "/YieldForecast/Daryl/%s" % (remotefn, ),
                 mode=dropbox.files.WriteMode.overwrite)
-        except:
+        except Exception as _:
             print 'dropbox fail'
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0644)
@@ -325,7 +325,8 @@ def replace_obs(df, location):
 
 def compute_gdd(df):
     """Compute GDDs Please"""
-    df['gdd'] = gdd(temperature(df['maxt'], 'C'), temperature(df['mint'], 'C'))
+    df['gdd'] = gdd(temperature(df['maxt'].values, 'C'),
+                    temperature(df['mint'].values, 'C'))
 
 
 def do(location):
@@ -361,6 +362,7 @@ def main(argv):
     """Do Something"""
     for location in XREF:
         do(location)
+
 
 if __name__ == '__main__':
     main(sys.argv)
