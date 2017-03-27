@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Download interface for TallTowers
-"""
+"""Queue insertion for talltowers"""
 
 import cgi
 import re
@@ -12,23 +10,21 @@ import psycopg2.extras
 from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
 
-TT = psycopg2.connect(database='talltowers',
-                      host='talltowers-db.agron.iastate.edu', user='tt_web')
-tcursor = TT.cursor('mystream',
-                    cursor_factory=psycopg2.extras.DictCursor)
+pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='apache')
+
+
+def send_error(msg):
+    sys.stdout.write(msg)
+    sys.exit(0)
 
 
 def get_stations(form):
     """ Figure out the requested station """
     if "station" not in form:
-        sys.stdout.write("Content-type: text/plain \n\n")
-        sys.stdout.write("ERROR: station must be specified!")
-        sys.exit(0)
+        send_error("ERROR: station must be specified!")
     stations = form.getlist("station")
     if len(stations) == 0:
-        sys.stdout.write("Content-type: text/plain \n\n")
-        sys.stdout.write("ERROR: station must be specified!")
-        sys.exit(0)
+        send_error("ERROR: station must be specified!")
     return stations
 
 
@@ -53,9 +49,8 @@ def get_time_bounds(form, tzinfo):
                           second=0, microsecond=0)
         ets = sts.replace(year=y2, month=m2, day=d2, hour=h2, minute=0,
                           second=0, microsecond=0)
-    except:
-        sys.stdout.write("ERROR: Malformed Date!")
-        sys.exit()
+    except Exception as _:
+        send_error("ERROR: Malformed Date!")
 
     if sts == ets:
         ets += datetime.timedelta(days=1)
@@ -66,40 +61,33 @@ def get_time_bounds(form, tzinfo):
 def main():
     """ Go main Go """
     form = cgi.FieldStorage()
+    tzname = form.getfirst("tz", "Etc/UTC")
     try:
-        tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
-    except:
-        sys.stdout.write("Invalid Timezone (tz) provided")
-        sys.exit()
+        tzinfo = pytz.timezone(tzname)
+    except Exception as _:
+        send_error("Invalid Timezone (tz) provided")
 
-    # Save direct to disk or view in browser
-    direct = True if form.getfirst('direct', 'no') == 'yes' else False
     stations = get_stations(form)
-    if direct:
-        sys.stdout.write('Content-type: application/octet-stream\n')
-        fn = "%s.txt" % (stations[0],)
-        if len(stations) > 1:
-            fn = "asos.txt"
-        sys.stdout.write('Content-Disposition: attachment; filename=%s\n\n' % (
-                         fn,))
-    else:
-        sys.stdout.write("Content-type: text/plain \n\n")
-
-    dbstations = stations
-    if len(dbstations) == 1:
-        dbstations.append('XYZXYZ')
-
     sts, ets = get_time_bounds(form, tzinfo)
+    fmt = form.getfirst("format")
+    email = form.getfirst('email')
+    aff = form.getfirst('affiliation')
+    if email is None or email.find("@") == -1:
+        send_error("email is required")
+    if aff is None or len(aff) < 2:
+        send_error("affiliation is required")
 
-    delim = form.getfirst("format")
-
-    if delim == "tdf":
-        rD = "\t"
-    else:
-        rD = ","
-
-    sys.stdout.write("Not working yet, sorry")
+    cursor = pgconn.cursor()
+    cursor.execute("""
+    INSERT into talltowers_analog_queue
+    (stations, sts, ets, fmt, email, aff) VALUES (%s, %s, %s, %s, %s, %s)
+    """, (",".join(stations), sts, ets, fmt, email, aff))
+    cursor.close()
+    pgconn.commit()
 
 
 if __name__ == '__main__':
+    sys.stdout.write("Content-type: text/plain\n\n")
     main()
+    sys.stdout.write(("Thank you, request received, please check your "
+                      "email in a few minutes."))

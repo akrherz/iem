@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (11, now());
+INSERT into iem_schema_manager_version values (12, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -405,3 +405,15 @@ CREATE TABLE autoplot_timing(
 	hostname varchar(24) NOT NULL);
 GRANT SELECT on autoplot_timing to nobody,apache;
 CREATE INDEX autoplot_timing_idx on autoplot_timing(appid);
+
+-- Storage of talltowers analog request queue
+CREATE TABLE talltowers_analog_queue
+    (stations varchar(32),
+    sts timestamptz,
+    ets timestamptz,
+    fmt varchar(32),
+    email varchar(128),
+    aff varchar(256),
+    filled boolean DEFAULT 'f',
+    valid timestamptz DEFAULT now());
+GRANT ALL on talltowers_analog_queue to apache, mesonet;

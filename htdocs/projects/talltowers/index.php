@@ -14,17 +14,19 @@ $t->content = <<<EOF
 	Dr Gene Takle oversees the network.  The IEM is providing data collection
 	support for this network.</p>
 
+<p><a href="http://talltowers.agron.iastate.edu">Tall Towers Project Website</a></p>
 
 <h4>Meteorological Data @ 1 Second Resolution</h4>
 
-<p>This information is freely available from this website.  A
-		<a href="analog_download.php">download interface</a> exists to request
-		this data.</p>
+<p>A <a href="analog_download.php">download interface</a> exists to request
+	this data.  You can also <a href="/plotting/auto/?q=158">generate interactive plots</a>
+	of this dataset.</p>
 		
 <h4>Turbulence Data @ 20 Hertz Resolution</h4>
 
-<p>This information is available on a password protected website found on the
-	<a href="http://talltowers.agron.iastate.edu">Tall Towers Project Website</a>
+<p>This information is currently only available in NetCDF files.  If you would
+like access to them, please email <a href="mailto:gstakle@iastate.edu">Dr Takle (gstakle@iastate.edu)</a>.</p>
+	
 </p>
 
 EOF;
