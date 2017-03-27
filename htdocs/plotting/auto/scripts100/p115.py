@@ -23,9 +23,9 @@ def get_description():
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type="select", name="var", default="precip",
-             label="Select variable:"),
+             label="Select variable:", options=PDICT),
     ]
     return d
 
@@ -33,7 +33,7 @@ def get_description():
 def p(df, year, month, varname, precision):
     try:
         val = df.at[(year, month), varname]
-    except:
+    except Exception as _:
         return ' ****'
     fmt = "%%5.%sf" % (precision, )
     return fmt % val
@@ -69,9 +69,9 @@ def plotter(fdict):
 """ % (datetime.date.today().strftime("%d %b %Y"),
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
        nt.sts[station]['name'])
-    res += """# %s
-YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   ANN
-""" % (LABELS[varname], )
+    res += ("# %s\n"
+            "YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   "
+            "OCT   NOV   DEC   ANN\n") % (LABELS[varname], )
 
     years = df['year'].unique()
     years.sort()
@@ -99,7 +99,8 @@ YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   A
                                    p(grouped, year, 11, varname, prec),
                                    p(grouped, year, 12, varname, prec), yrtot)
     yrtot = yrmean.mean() if varname != 'precip' else yrsum.mean()
-    res += ("MEAN%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f\n") % (
+    res += ("MEAN%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f"
+            "%6.2f%6.2f%6.2f\n") % (
         df[df['month'] == 1][varname].mean(),
         df[df['month'] == 2][varname].mean(),
         df[df['month'] == 3][varname].mean(),
@@ -115,6 +116,7 @@ YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   A
         yrtot)
 
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

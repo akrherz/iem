@@ -13,7 +13,7 @@ def get_description():
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
     ]
     return d
 
@@ -63,6 +63,7 @@ def plotter(fdict):
                 "%(e70)4i %(e80)4i %(e93)4i %(e100)4i\n") % row
 
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

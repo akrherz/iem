@@ -15,7 +15,7 @@ def get_description():
     having the last spring temperature at or below a given threshold."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type='int', name='t1', default=32,
              label='First Threshold (F)'),
         dict(type='int', name='t2', default=28,
@@ -112,6 +112,7 @@ def plotter(fdict):
     ax.grid(True)
     df.reset_index(inplace=True)
     return fig, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())
