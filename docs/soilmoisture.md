@@ -1,3 +1,16 @@
+ 20 Mar 2017
+  Archontoulis, Goode, Ethan, KenP(Nashua), VanLoocke, Berns, Taylor, Flory
+  - Mark Honeyman was unable to attend
+  - The remaining vineyard station modems are in Flory's Office
+  - Discussion on what to do with the precipitation sensors and if we should
+    add a second at each site.  Will be adding a second at AEA Farm to test
+  - [ ] Need to make a correction to Sutherland's precip in 2013
+  - [ ] convert yieldfx reports back to a basis of COOP data
+  - Dr Taylor noted that proximity to power lines help shield the stations
+    from lightning
+  - [ ] engage Dr Honeyman again about automating precip report for farm sites
+    that don't do COOP reporting
+
  25 Aug 2016
   Tim Goode, Mark Honeyman, Ethan, Archontoulis, VanLoocke, Arritt, Cochran
   - Lots of discussion on the 5 vineyard stations, some highlights
