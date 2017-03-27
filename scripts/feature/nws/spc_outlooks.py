@@ -1,33 +1,34 @@
 
-import iemdb
-POSTGIS = iemdb.connect('postgis', bypass=True)
+import matplotlib.pyplot as plt
+import psycopg2
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
-pcursor.execute("""SET TIME ZONE 'GMT'""")
+pcursor.execute("""SET TIME ZONE 'UTC'""")
+
+
 def getdata(year):
     pcursor.execute("""
-select s.valid, extract(doy from s.valid), ST_Area( ST_Transform( 
-    ST_Intersection(s.geom, t.the_geom),26915) ) / 1000000. / 145693.8 
-from spc_outlooks s, states t 
-WHERE ST_Intersects(s.geom, t.the_geom) 
-and t.state_name = 'Iowa' and category = 'SLGT' 
-and s.valid > %s and s.valid < %s and day = 1 
-and extract(hour from s.valid) = 13 
-ORDER by valid ASC
-    """ , ("%s-01-01" % (year,), "%s-01-01" % (year +1,) ))
+    select s.valid, extract(doy from s.valid), ST_Area( ST_Transform(
+    ST_Intersection(s.geom, t.the_geom),26915) ) / 1000000. / 145693.8
+    from spc_outlooks s, states t
+    WHERE ST_Intersects(s.geom, t.the_geom)
+    and t.state_name = 'Iowa' and category = 'SLGT'
+    and s.valid > %s and s.valid < %s and day = 1
+    and extract(hour from s.valid) = 13
+    ORDER by valid ASC
+    """, ("%s-01-01" % (year,), "%s-01-01" % (year + 1, )))
 
     doy = []
     ratio = []
 
     for row in pcursor:
-        doy.append( row[1] )
-        ratio.append( row[2] * 100.0 )
+        doy.append(row[1])
+        ratio.append(row[2] * 100.0)
     return doy, ratio
+
 
 doy2009, ratio2009 = getdata(2009)
 doy2010, ratio2010 = getdata(2010)
-
-import matplotlib.pyplot as plt
-
 
 fig = plt.figure()
 ax = fig.add_subplot(211)

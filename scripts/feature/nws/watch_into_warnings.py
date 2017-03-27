@@ -59,8 +59,8 @@ for wfo in hits.keys():
                 '%s.W' % (phenomena,), 0) / float(totals[wfo]) * 100.0
 
 m = MapPlot(sector='nws', axisbg='white',
-            title=("Conversion [%] of Severe T'Storm Watch Counties/Parishes into "
-                   "SVR Warnings"), titlefontsize=14,
+            title=("Conversion [%] of Severe T'Storm Watch "
+                   "Counties/Parishes into SVR Warnings"), titlefontsize=14,
             subtitle='1 Oct 2005 - 19 May 2016')
 m.fill_cwas(data, ilabel=True, lblformat='%.0f')
 m.postprocess(filename='test.png')

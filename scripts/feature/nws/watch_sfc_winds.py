@@ -1,34 +1,36 @@
-import iemdb
+import psycopg2
 import math
-import Ngl
+import matplotlib.pyplot as plt
 import numpy
 import random
-ASOS = iemdb.connect('asos', bypass=True)
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 pcursor2 = POSTGIS.cursor()
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 
 stations = {}
 
-def dir22(u,v):
-  if (v == 0):
-    v = 0.000000001
-  dd = math.atan(u / v)
-  ddir = (dd * 180.00) / math.pi
 
-  if (u > 0 and v > 0 ): # First Quad
-    ddir = 180 + ddir
-  elif (u > 0 and v < 0 ): # Second Quad
-    ddir = 360 + ddir
-  elif (u < 0 and v < 0 ): # Third Quad
-    ddir = ddir
-  elif (u < 0 and v > 0 ): # Fourth Quad
-    ddir = 180 + ddir
+def dir22(u, v):
+    if (v == 0):
+        v = 0.000000001
+    dd = math.atan(u / v)
+    ddir = (dd * 180.00) / math.pi
 
-  return math.fabs(ddir)
+    if (u > 0 and v > 0): # First Quad
+        ddir = 180 + ddir
+    elif (u > 0 and v < 0): # Second Quad
+        ddir = 360 + ddir
+    elif (u < 0 and v < 0): # Third Quad
+        ddir = ddir
+    elif (u < 0 and v > 0): # Fourth Quad
+        ddir = 180 + ddir
+
+    return math.fabs(ddir)
+
 
 def uv(sped, drct2):
   dirr = drct2 * math.pi / 180.00
@@ -109,7 +111,6 @@ for row in pcursor:
 reports = numpy.array(reports)
 
 dirs = numpy.array( dirs )
-import matplotlib.pyplot as plt
 
 fig = plt.figure()
 ax = fig.add_subplot(111, polar=True)

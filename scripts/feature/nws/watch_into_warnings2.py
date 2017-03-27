@@ -22,6 +22,9 @@ combo2 as (
   count(*) from combo2 GROUP by mo ORDER by mo ASC;
 
 """
+import matplotlib.pyplot as plt
+import calendar
+import numpy as np
 
 data = """  1 |  6622 |   7453
   2 |  9850 |  12204
@@ -39,33 +42,29 @@ data = """  1 |  6622 |   7453
 ratio = []
 h, a = 0, 0
 for line in data.split("\n"):
-  tokens = line.split("|")
-  h += float(tokens[1])
-  a += float(tokens[2])
-  if float(tokens[2]) == 0:
-    ratio.append(0)
-  else:
-    ratio.append( float(tokens[1]) / float(tokens[2]) * 100.)
-
-import matplotlib.pyplot as plt
-import calendar
-import numpy as np
+    tokens = line.split("|")
+    h += float(tokens[1])
+    a += float(tokens[2])
+    if float(tokens[2]) == 0:
+        ratio.append(0)
+    else:
+        ratio.append(float(tokens[1]) / float(tokens[2]) * 100.)
 
 (fig, ax) = plt.subplots(1, 1)
 ax.bar(np.arange(1, 13)-0.4, ratio)
 ax.set_xlim(0.5, 12.5)
 for i, r in enumerate(ratio):
-  if r > 0:
-    ax.text(i+1, r+1, "%.1f%%" % (r, ), ha='center')
+    if r > 0:
+        ax.text(i+1, r+1, "%.1f%%" % (r, ), ha='center')
 ax.set_ylim(0, 100)
 ax.set_yticks(np.arange(0, 101, 25))
 ax.grid(True)
-ax.set_title(("1 Oct 2005 - 22 Aug 2015 Percent of NWS County Svr Tstorm Warnings"
-              "\nthat no SPC Svr Tstorm Watch Active, Overall (%.0f/%.0f %.1f%%)"
+ax.set_title(("1 Oct 2005 - 22 Aug 2015 "
+              "Percent of NWS County Svr Tstorm Warnings\n"
+              "that no SPC Svr Tstorm Watch Active, Overall (%.0f/%.0f %.1f%%)"
               ) % (h, a, h / a * 100.))
 ax.set_xticks(range(1, 13))
 ax.set_xticklabels(calendar.month_abbr[1:])
 ax.set_ylabel("Percentage [%]")
 ax.set_xlabel("*based on unofficial IEM archives of NWS WWA")
 fig.savefig('test.png')
-

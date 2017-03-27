@@ -1,15 +1,17 @@
-import iemdb
+import psycopg2
 import re
 import numpy
 import numpy.ma
 import scipy.stats
 import mx.DateTime
-postgis = iemdb.connect('postgis', bypass=True)
+postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = postgis.cursor()
 
 pcursor.execute("""
-SELECT issue, report, x(ST_Centroid(geom)), y(ST_Centroid(geom)) from warnings where wfo in ('ARX','DVN','DMX','OAX','FSD') and 
-significance = 'W' and gtype = 'P' and phenomena = 'SV' and issue > '2008-01-01' 
+ SELECT issue, report, x(ST_Centroid(geom)), y(ST_Centroid(geom))
+ from warnings where wfo in ('ARX','DVN','DMX','OAX','FSD') and
+ significance = 'W' and gtype = 'P' and phenomena = 'SV' and
+ issue > '2008-01-01'
 """)
 
 SVRs = []
