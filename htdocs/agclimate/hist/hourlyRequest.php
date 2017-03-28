@@ -67,7 +67,7 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
   <input type="checkbox" name="vars[]" value="c200">Relative Humidity [%]<BR>
   <input type="checkbox" name="vars[]" value="c400">Wind Speed [MPH] (~3 meter height)<BR>
   <input type="checkbox" name="vars[]" value="c600">Wind Direction [deg] (~3 meter height)<BR>
-  <input type="checkbox" name="vars[]" value="c700"><a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [inch]<br />
+  <input type="checkbox" name="vars[]" value="c700"><a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [mm/dy]<br />
   
 </td></tr></table>
 
