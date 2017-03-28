@@ -42,6 +42,12 @@ Therefore, this interface requires your email address and affiliation
 to download the file.  You'll be sent an email when the requested data is
 generated (usually within 1-2 minutes.</p>
 
+<h4>Citation</h4>
+
+<p>Acknowledgement is made to Iowa State University use of data from the ISU 
+Tall-Tower Network, which is funded by a grant from the National Science 
+Foundation.</p
+
 <form method="GET" action="/cgi-bin/request/talltowers.py" name="iemss">
 
 <h4>1) Select Tower(s):</h4>
@@ -79,11 +85,32 @@ generated (usually within 1-2 minutes.</p>
 
  </form>
 
+<br /><br />
+
 <p><strong>Download Variable Description</strong>
 
 <dl class="dl-horizontal">
-<dt>station:</dt>
-<dd>three or four character site identifier</dd>
+<dt>tower</dt>
+<dd>National Weather Service Location Identifier</dd>
+
+<dt>valid</dt>
+<dd>Timestamp of the observation in UTC</dd>
+
+<dt>ws_Zm_XX</dt>
+<dd>Wind Speed [mps] at given Z height m AGL for XX sensor</dd>
+
+<dt>winddir_Zm_XX</dt>
+<dd>Wind Direction [deg] at given Z height m AGL for XX sensor</dd>
+
+<dt>rh_Zm</dt>
+<dd>Relative Humidity [%] at given Z height m AGL</dd>
+
+<dt>airtc_Zm</dt>
+<dd>Air Temperature [C] at given Z height m AGL</dd>
+
+<dt>bp_Zm</dt>
+<dd>Pressure [mb] at given Z height m AGL</dd>
+
 </dl>
 
 EOF;

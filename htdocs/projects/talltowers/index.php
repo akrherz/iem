@@ -26,7 +26,13 @@ $t->content = <<<EOF
 
 <p>This information is currently only available in NetCDF files.  If you would
 like access to them, please email <a href="mailto:gstakle@iastate.edu">Dr Takle (gstakle@iastate.edu)</a>.</p>
-	
+
+<h4>Citation</h4>
+
+<p>Acknowledgement is made to Iowa State University use of data from the ISU 
+Tall-Tower Network, which is funded by a grant from the National Science 
+Foundation.</p>
+
 </p>
 
 EOF;

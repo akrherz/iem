@@ -1,4 +1,7 @@
-"""answer any requests for talltowers data"""
+"""answer any requests for talltowers data
+
+Run from RUN_1MIN.sh
+"""
 import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql

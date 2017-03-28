@@ -21,6 +21,7 @@ python parse0006.py &
 
 cd ../../outgoing
 python snet_collect.py &
+python talltowers.py &
 
 cd ../mrms
 python mrms_rainrate_comp.py 
