@@ -89,7 +89,9 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <strong>Select from available variables</strong><br />
 <input type="checkbox" name="vars" value="high">High Temperature [F]
 <br /><input type="checkbox" name="vars" value="low">Low Temperature [F]
+<br /><input type="checkbox" name="vars" value="rh_min">Minimum Relative Humidity [%]
 <br /><input type="checkbox" name="vars" value="rh">Average Relative Humidity [%]
+<br /><input type="checkbox" name="vars" value="rh_max">Maximum Relative Humidity [%]
 <br /><input type="checkbox" name="vars" value="gdd50">Growing Degree Days (base 50) [F]
 <br /><input type="checkbox" name="vars" value="solar">Solar Radiation [MJ]
 <br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
@@ -129,6 +131,8 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <dt>high</dt><dd>High Temperature [F]</dd>
  <dt>low</dt><dd>Low Temperature [F]</dd>
  <dt>rh</dt><dd>Average Relative Humidity [%]</dd>
+ <dt>rh_max</dt><dd>Maximum Relative Humidity based on hourly observations [%]</dd>
+ <dt>rh_min</dt><dd>Minimum Relative Humidity based on hourly observations [%]</dd>
  <dt>gdd50</dt><dd>Growing Degree Days [F]</dd>
  <dt>solar</dt><dd>Solar Radiation [MJ/m^2]</dd>
  <dt>precip</dt><dd>Precipitation [inch]</dd>
