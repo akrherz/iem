@@ -38,6 +38,17 @@ os.chdir("/tmp")
 now = mx.DateTime.gmt()
 eTS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(minutes=+20)
 
+"""
+C is ASCII characters
+N is a double precision integer limited to around 18 characters in length
+D is for dates in the YYYYMMDD format,
+     with no spaces or hyphens between the sections
+F is for floating point numbers with the same length limits as N
+L is for logical data which is stored in the shapefile's attribute table as a
+    short integer as a 1 (true) or a 0 (false).
+    The values it can receive are 1, 0, y, n, Y, N, T, F
+    or the python builtins True and False
+"""
 w = shapefile.Writer(shapefile.POINT)
 w.field("VALID", 'C', 12, 0)
 w.field("STORM_ID", 'C', 2, 0)
@@ -52,9 +63,9 @@ w.field("MAX_SIZE", 'F', 5, 2)
 w.field("VIL", 'N', 3, 0)
 w.field("MAX_DBZ", 'N', 3, 0)
 w.field("MAX_DBZ_H", 'F', 5, 2)
-w.field("TOP", 'F', 5, 2)
-w.field("DRCT", 'F', 3, 0)
-w.field("SKNT", 'F', 3, 0)
+w.field("TOP", 'F', 9, 2)
+w.field("DRCT", 'N', 3, 0)
+w.field("SKNT", 'N', 3, 0)
 w.field("LAT", 'F', 10, 4)
 w.field("LON", 'F', 10, 4)
 
