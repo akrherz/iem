@@ -2,13 +2,17 @@
 import psycopg2
 import sys
 
+YEAR = int(sys.argv[1])
+
 
 def main(argv):
     """Do Something"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='postgis', host='localhost',
+                              port=5555, user='nobody')
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
-    pgconn2 = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn2 = psycopg2.connect(database='coop', host='localhost',
+                               port=5555, user='nobody')
     cursor3 = pgconn2.cursor()
     cursor.execute("""SELECT ugc, ST_X(centroid), ST_Y(centroid)
     from ugcs where state = 'IA' and substr(ugc,3,1) = 'C' and end_ts is null
@@ -27,11 +31,13 @@ def main(argv):
         max(high), min(low), avg((high+low)/2.), sum(precip),
         sum(case when high >= 95 then 1 else 0 end),
         sum(case when low >= 70 then 1 else 0 end) from alldata_ia WHERE
-        station = %s and year >= 2000 and year < 2015 GROUP by year, month
-        """, (sid,))
+        station = %s and year = %s GROUP by year, month
+        """, (sid, YEAR))
         for row in cursor3:
             print ','.join([str(i) for i in [fips, row[0], row[1], row[2],
                                              row[3], row[4], row[5], row[6],
                                              row[7]]])
+
+
 if __name__ == '__main__':
     main(sys.argv)
