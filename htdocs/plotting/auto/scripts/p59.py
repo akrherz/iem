@@ -95,7 +95,7 @@ def plotter(fdict):
             label='v, South(+) : North(-) component', lw=2)
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365])
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.legend(ncol=2, fontsize=11, loc=(0., -0.17))
+    ax.legend(ncol=2, fontsize=11, loc=(0., -0.21))
     ax.grid(True)
     ax.set_xlim(0, 366)
     ax.set_title(("[%s] %s Daily Average Component Wind Speed\n"
@@ -120,6 +120,7 @@ def plotter(fdict):
     ax.set_xlim(0, 366)
 
     return fig, df2
+
 
 if __name__ == '__main__':
     plotter(dict(station='AMW', network='IA_ASOS'))

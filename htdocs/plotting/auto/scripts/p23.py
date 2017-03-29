@@ -1,12 +1,16 @@
 import psycopg2.extras
+from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.network import Table as NetworkTable
 import datetime
+import pandas as pd
 from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
+            ('avg_high', 'Average High Temperature [F]'),
             ('avg_temp', 'Average Temperature [F]'),
+            ('avg_low', 'Average Low Temperature [F]'),
             ('precip', 'Total Precipitation [inch]')
             ])
 
@@ -15,11 +19,12 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     d = dict()
     year = datetime.date.today().year - 7
+    d['data'] = True
     d['description'] = """This plot presents the combination of monthly
     temperature or precipitation departures and El Nino index values."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='syear', default=year,
              label='Start Year of Plot', min=1950),
         dict(type='int', name='years', default='8',
@@ -63,41 +68,42 @@ def plotter(fdict):
 
     elnino = np.array(elnino)
 
-    cursor.execute("""
- WITH climo2 as (
- SELECT year, month, avg((high+low)/2.), sum(precip)
- from """+table+""" where station = %s
- and day < %s GROUP by year, month),
- climo as (select month, avg(avg) as t, avg(sum) as p from climo2
-  GROUP by month),
+    df = read_sql("""
+     WITH climo2 as (
+         SELECT year, month, avg((high+low)/2.), sum(precip),
+         avg(high) as avg_high, avg(low) as avg_low
+         from """ + table + """ where station = %s
+         and day < %s GROUP by year, month),
+     climo as (
+         select month, avg(avg) as t, avg(sum) as p,
+         avg(avg_high) as high, avg(avg_low) as low from climo2
+         GROUP by month),
+    obs as (
+         SELECT year, month, avg((high+low)/2.), avg(high) as avg_high,
+         avg(low) as avg_low,
+         sum(precip) from """ + table + """ where station = %s
+         and day < %s and year >= %s and year < %s GROUP by year, month)
 
- obs as (
- SELECT year, month, avg((high+low)/2.),
- sum(precip) from """+table+""" where station = %s
- and day < %s and year >= %s and year < %s GROUP by year, month)
+    SELECT obs.year, obs.month, obs.avg - climo.t as avg_temp,
+    obs.avg_high - climo.high as avg_high,
+    obs.avg_low - climo.low as avg_low,
+    obs.sum - climo.p as precip from
+    obs JOIN climo on (climo.month = obs.month)
+    ORDER by obs.year ASC, obs.month ASC
+    """, pgconn,  params=(station, archiveend, station, archiveend, sts.year,
+                          ets.year), index_col=None)
+    df['date'] = pd.to_datetime({'year': df['year'], 'month': df['month'],
+                                 'day': 1})
 
- SELECT obs.year, obs.month, obs.avg - climo.t,
- obs.sum - climo.p from obs JOIN climo on
- (climo.month = obs.month)
- ORDER by obs.year ASC, obs.month ASC
-
-    """, (station, archiveend, station, archiveend, sts.year, ets.year))
-    diff = []
-    pdiff = []
-    valid = []
-    for row in cursor:
-        valid.append(datetime.datetime(row[0], row[1], 1))
-        diff.append(float(row[2]))
-        pdiff.append(float(row[3]))
-
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.set_title(("[%s] %s\nMonthly Departure of %s + "
-                  "El Nino 3.4 Index") % (station, nt.sts[station]['name'],
-                                          PDICT.get(varname)))
+                  "El Nino 3.4 Index\n"
+                  "Climatology computed from present day period of record"
+                  ) % (station, nt.sts[station]['name'], PDICT.get(varname)))
 
     xticks = []
     xticklabels = []
-    for v in valid:
+    for v in df['date'].astype(datetime.datetime):
         if v.month not in [1, 7]:
             continue
         if years > 8 and v.month == 7:
@@ -117,7 +123,7 @@ def plotter(fdict):
     if varname == 'precip':
         _a = 'b'
         _b = 'r'
-    bars = ax.bar(valid, diff if varname == 'avg_temp' else pdiff,
+    bars = ax.bar(df['date'].values, df[varname].values,
                   fc=_a, ec=_a, width=30, align='center')
     for bar in bars:
         if bar.get_xy()[1] < 0:
@@ -135,7 +141,11 @@ def plotter(fdict):
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(sts, ets)
-    maxv = np.max(np.absolute(diff if varname == 'avg_temp' else pdiff)) + 2
+    maxv = df[varname].abs().max() + 2
     ax.set_ylim(0-maxv, maxv)
 
-    return fig
+    return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -27,7 +27,7 @@ def get_description():
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=9,
              label='Start Month:'),
-        dict(type='text', name='months', default=2,
+        dict(type='int', name='months', default=2,
              label='Number of Months to Average:'),
         dict(type='int', name='lag', default=-3,
              label='Number of Months to Lag for SOI Value:'),
@@ -181,6 +181,7 @@ def plotter(fdict):
     ax3.grid(True)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
