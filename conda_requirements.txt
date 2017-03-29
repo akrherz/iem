@@ -127,6 +127,7 @@ python-memcached=1.57=py27_0
 pytz=2016.10=py27_0
 qt=4.8.7=7
 rasterio=1.0a7=np112py27_0
+rasterstats=0.12.0=py27_0
 readline=6.2=0
 requests=2.13.0=py27_0
 requests-toolbelt=0.7.1=py27_0
