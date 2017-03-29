@@ -32,7 +32,7 @@ $tzselect = make_select("tz", "Etc/UTC", $ar);
 $t->content = <<<EOF
 
 <ol class="breadcrumb">
- <li><a href="/projects/talltowers/">IEM Tall Towers Homepage</a></li>
+ <li><a href="/projects/iao/">IEM Iowa Atmospheric Observatory Homepage</a></li>
  <li class="active">Analog Download</li>
 </ol>
 

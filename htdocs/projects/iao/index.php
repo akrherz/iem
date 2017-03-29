@@ -4,13 +4,13 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 
 $t = new MyView();
-$t->title = "Tall Towers Project";
+$t->title = "Iowa Atmospheric Observatory";
 
 $t->content = <<<EOF
 
-<h3>ISU Tall Towers Network</h3>
+<h3>Iowa Atmospheric Observatory</h3>
 		
-<p>This network consists of two 120 meter tall intensely instrumented towers.
+<p>This project consists of two 120 meter tall intensely instrumented towers.
 	Dr Gene Takle oversees the network.  The IEM is providing data collection
 	support for this network.</p>
 
