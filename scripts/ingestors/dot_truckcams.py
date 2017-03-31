@@ -11,6 +11,7 @@ import tempfile
 import os
 import requests
 import pyproj
+from pyiem.util import exponential_backoff
 
 P3857 = pyproj.Proj(init='EPSG:3857')
 URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
@@ -63,10 +64,12 @@ def workflow():
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
         # print label, utc, feat['attributes']['PHOTO_URL']
-        req = requests.get(feat['attributes']['PHOTO_URL'], timeout=15)
-        if req.status_code != 200:
+        req = exponential_backoff(requests.get,
+                                  feat['attributes']['PHOTO_URL'], timeout=15)
+        if req is None or req.status_code != 200:
             print(('dot_truckcams.py dl fail |%s| %s'
-                   ) % (req.status_code, feat['attributes']['PHOTO_URL']))
+                   ) % ('req is None' if req is None else req.status_code,
+                        feat['attributes']['PHOTO_URL']))
             continue
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(req.content)
@@ -95,6 +98,7 @@ def workflow():
     cursor.close()
     POSTGIS.commit()
     POSTGIS.close()
+
 
 if __name__ == '__main__':
     workflow()
