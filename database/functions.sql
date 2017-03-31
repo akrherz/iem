@@ -97,6 +97,12 @@ CREATE OR REPLACE FUNCTION hdd65(real, real) RETURNS numeric
  	LANGUAGE sql
  	AS $_$select (case when (65 - (( $1 + $2 )/2.)) > 0 then (65. - ( $1 + $2 )/2.) else 0 end)::numeric$_$;
 
+CREATE FUNCTION hdd(real, real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select (case when ($3 - (( $1 + $2 )/2.)) > 0 then ($3 - ( $1 + $2 )/2.) else 0 end)::numeric$_$;
+ALTER FUNCTION public.hdd(real, real, real) OWNER TO mesonet;
+
+
 ---
 --- Unsure of current usage of this, legacy asos database stuff perhaps
 ---
