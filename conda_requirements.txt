@@ -101,6 +101,7 @@ pango=1.40.4=0
 paste=2.0.3=py27_0
 pbr=1.10.0=py27_0
 pcre=8.39=0
+pika=0.10.0=py27_0
 pillow=4.0.0=py27_2
 pint=0.7.2=py27_2
 pip=9.0.1=py27_0
