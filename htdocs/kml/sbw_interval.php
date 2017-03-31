@@ -156,7 +156,7 @@ function pull_wfos_in_states($db, $state_abbreviations){
 }
 
 function pull_vtec_events_by_wfo_year($db, $year, $wfos, $tsSQL, $tsSQL2){
-    if(count($wfos) > 0){
+    if(count($wfos) > 0 && ! in_array("ALL", $wfos)){
         $wfolimiter = 'wfo IN (\'' . implode("','", $wfos) . '\') and';
     }
     else{
@@ -183,7 +183,6 @@ function pull_vtec_events_by_wfo_year($db, $year, $wfos, $tsSQL, $tsSQL2){
     } else {
         $result = pg_execute($db, "SELECT",  Array($tsSQL, $tsSQL) );
     }
-
     return $result;
 }
 
