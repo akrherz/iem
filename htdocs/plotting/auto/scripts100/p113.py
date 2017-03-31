@@ -2,6 +2,7 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
+from pyiem.util import get_autoplot_context
 
 PDICT = {'maxmin': 'Daily Maximum / Minimums',
          'precip': 'Daily Maximum Precipitation',
@@ -17,7 +18,7 @@ def get_description():
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
         dict(type="select", name="var", default="maxmin", options=PDICT,
              label="Which variable?")
     ]
@@ -29,9 +30,9 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
-    varname = fdict.get('var', 'maxmin')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
 
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     res = """\
@@ -80,7 +81,7 @@ def plotter(fdict):
                 if ts not in df.index:
                     res += bad
                     continue
-            except:
+            except Exception as _:
                 res += bad
                 continue
             row = df.loc[ts]
@@ -99,6 +100,7 @@ def plotter(fdict):
         res += ("\n")
 
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

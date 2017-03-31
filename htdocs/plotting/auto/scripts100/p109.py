@@ -5,7 +5,7 @@ import datetime
 import pytz
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot
-# get_autoplot_context does not support vtec_ps
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -24,10 +24,11 @@ def get_description():
     d['arguments'] = [
         dict(type='datetime', name='sdate',
              default=jan1.strftime("%Y/%m/%d 0000"),
-             label='Start Date / Time (UTC, inclusive):', min="2005/01/01"),
+             label='Start Date / Time (UTC, inclusive):',
+             min="2005/01/01 0000"),
         dict(type='datetime', name='edate',
              default=today.strftime("%Y/%m/%d 0000"),
-             label='End Date / Time (UTC):', min="2005/01/01"),
+             label='End Date / Time (UTC):', min="2005/01/01 0000"),
         dict(type='vtec_ps', name='v1', default='UNUSED',
              label='VTEC Phenomena and Significance 1'),
         dict(type='vtec_ps', name='v2', default='UNUSED', optional=True,
@@ -45,29 +46,27 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-
-    sts = datetime.datetime.strptime(fdict.get('sdate', '2015-01-01 0000'),
-                                     '%Y-%m-%d %H%M')
+    ctx = get_autoplot_context(fdict, get_description())
+    sts = ctx['sdate']
     sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-    ets = datetime.datetime.strptime(fdict.get('edate', '2015-02-01 0000'),
-                                     '%Y-%m-%d %H%M')
+    ets = ctx['edate']
     ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-    p1 = fdict.get('phenomenav1', 'SV')[:2]
-    p2 = fdict.get('phenomenav2', '  ')[:2]
-    p3 = fdict.get('phenomenav3', '  ')[:2]
-    p4 = fdict.get('phenomenav4', '  ')[:2]
+    p1 = ctx['phenomenav1']
+    p2 = ctx['phenomenav2']
+    p3 = ctx['phenomenav3']
+    p4 = ctx['phenomenav4']
     phenomena = []
     for p in [p1, p2, p3, p4]:
-        if p != '  ':
-            phenomena.append(p)
-    s1 = fdict.get('significancev1', 'W')[0]
-    s2 = fdict.get('significancev2', ' ')[0]
-    s3 = fdict.get('significancev3', ' ')[0]
-    s4 = fdict.get('significancev4', ' ')[0]
+        if p is not None:
+            phenomena.append(p[:2])
+    s1 = ctx['significancev1']
+    s2 = ctx['significancev2']
+    s3 = ctx['significancev3']
+    s4 = ctx['significancev4']
     significance = []
     for s in [s1, s2, s3, s4]:
-        if s != '  ':
-            significance.append(s)
+        if s is not None:
+            significance.append(s[0])
 
     pstr = []
     subtitle = ""
@@ -119,6 +118,7 @@ GROUP by wfo, phenomena, significance, year
     p.fill_cwas(df2, bins=bins, ilabel=True)
 
     return p.fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

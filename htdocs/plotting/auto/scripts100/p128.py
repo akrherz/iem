@@ -105,5 +105,6 @@ def plotter(fdict):
     ax.set_ylim(0 - ymax, ymax)
     return fig, df
 
+
 if __name__ == '__main__':
     plotter(dict())

@@ -1,10 +1,7 @@
-import psycopg2.extras
+import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
-import pytz
-from pyiem.nws import vtec
-from pyiem.plot import MapPlot
 
 cweek = {1: '3/1-->3/7   ',
          2: '3/8-->3/14  ',
@@ -165,17 +162,18 @@ def plotter(fdict):
                      cat5, round((float(cat5) / float(totEvents)) * 100.0),
                      totEvents)
 
-
-    res += ("%-17s %5.2f        %4.2f %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i) %4i(%2i)  %5i\n"
+    res += ("%-17s %5.2f        %4.2f %4i(%2i) %4i(%2i) "
+            "%4i(%2i) %4i(%2i) %4i(%2i)  %5i\n"
             ) % (
                  "ANNUAL TOTALS", maxRain, totRain / annEvents,
-            cat1t, (float(cat1t) / float(annEvents)) * 100,
-            cat2t, (float(cat2t) / float(annEvents)) * 100,
-            cat3t, (float(cat3t) / float(annEvents)) * 100,
-            cat4t, (float(cat4t) / float(annEvents)) * 100,
-            cat5t, (float(cat5t) / float(annEvents)) * 100, annEvents)
+                 cat1t, (float(cat1t) / float(annEvents)) * 100,
+                 cat2t, (float(cat2t) / float(annEvents)) * 100,
+                 cat3t, (float(cat3t) / float(annEvents)) * 100,
+                 cat4t, (float(cat4t) / float(annEvents)) * 100,
+                 cat5t, (float(cat5t) / float(annEvents)) * 100, annEvents)
 
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

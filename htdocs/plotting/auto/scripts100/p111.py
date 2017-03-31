@@ -2,6 +2,7 @@ import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import datetime
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -12,7 +13,7 @@ def get_description():
     d['description'] = """ """
     d['arguments'] = [
         dict(type='station', name='station', default='IA2203',
-             label='Select Station'),
+             label='Select Station', network='IACLIMATE'),
     ]
     return d
 
@@ -22,13 +23,14 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     df = read_sql("""
     SELECT day, precip from """+table+""" WHERE station = %s
+    and precip is not null
     ORDER by precip DESC LIMIT 30
     """, pgconn, params=(station,), index_col=None)
 
@@ -49,6 +51,7 @@ def plotter(fdict):
                                      row['day'].year, row["precip"])
 
     return None, df, res
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -156,5 +156,6 @@ def plotter(fdict):
 
     return fig, df
 
+
 if __name__ == '__main__':
     plotter(dict(station='DSM', year=2009, month=1, network='IA_ASOS'))

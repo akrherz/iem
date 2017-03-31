@@ -4,6 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 import psycopg2
+import numpy as np
 
 
 def get_description():
@@ -54,7 +55,7 @@ def plotter(fdict):
                'ties': False}
     x = []
     y = []
-    for level in range(df['high'].max(), 0, -1):
+    for level in np.arange(df['high'].max(), 0, -1):
         if level not in df['high']:
             continue
         df2 = df[df['high'] == level]
@@ -87,3 +88,7 @@ def plotter(fdict):
     ax.set_xlabel("** denotes ties")
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
