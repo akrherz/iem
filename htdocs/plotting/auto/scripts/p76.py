@@ -118,12 +118,12 @@ def plotter(fdict):
     data = np.array(df['r'])
     years = np.array(df.index.astype('i'))
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = np.average(data)
 
     colorabove = 'seagreen'
     colorbelow = 'lightsalmon'
-    bars = ax.bar(years - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(years, data, fc=colorabove, ec=colorabove, align='center')
     for i, bar in enumerate(bars):
         if data[i] < avgv:
             bar.set_facecolor(colorbelow)
@@ -136,7 +136,7 @@ def plotter(fdict):
             avgv, h_slope * 100., r_value ** 2),
             transform=ax.transAxes, va='top', bbox=dict(color='white'))
     ax.set_xlabel("Year")
-    ax.set_xlim(min(years)-1, max(years)+1)
+    # ax.set_xlim(min(years)-1, max(years)+1)
     ax.set_ylim(min(data)-5, max(data) + max(data)/10.)
     ax.set_ylabel("Average Dew Point [F]")
     ax.grid(True)
@@ -149,6 +149,7 @@ def plotter(fdict):
     ax.legend(ncol=1)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

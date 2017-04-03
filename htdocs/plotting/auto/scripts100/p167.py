@@ -117,7 +117,7 @@ def plotter(fdict):
 
     df['flstatus'] = conds
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     ax.set_axis_bgcolor('skyblue')
 
