@@ -9,12 +9,12 @@ ASOS = psycopg2.connect(database='asos', host='localhost', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2017, 2, 17, 8, 0)
+sts = datetime.datetime(2017, 4, 2, 18, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2017, 2, 18, 8, 0)
+ets = datetime.datetime(2017, 4, 3, 5, 1)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
-tzname = 'America/Los_Angeles'
-station = 'SBA'
+tzname = 'America/Chicago'
+station = 'AEX'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -62,7 +62,7 @@ interval = datetime.timedelta(minutes=1)
 now = lsts
 i = 0
 while now < lets:
-    if now.minute == 0 and now.hour % 4 == 0:
+    if now.minute == 0 and now.hour % 1 == 0:
         xticks.append(i)
         xlabels.append(now.strftime("%-I %p"))
 
@@ -98,7 +98,7 @@ ax.text(x, 0.935, "Peak 10min Window", transform=ax.transAxes,
         bbox=dict(fc='white', ec='None'))
 for i in range(maxwindowi+1, maxwindowi+11):
     ts = lsts + datetime.timedelta(minutes=i)
-    ax.text(x, 0.88-(0.05*(i-maxwindowi-1)),
+    ax.text(x, 0.88-(0.04*(i-maxwindowi-1)),
             "%s %.2f" % (ts.strftime("%-I:%M %p"), prec[i] - prec[i-1], ),
             transform=ax.transAxes, fontsize=10,
             bbox=dict(fc='white', ec='None'))
@@ -108,12 +108,12 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc=(0.55, 0.7), prop=prop, ncol=1)
-ax.set_ylim(0, 7)
-ax.set_yticks(range(0, 8, 1))
-ax.set_xlabel("17 February 2017 (%s)" % (tzname,))
-ax.set_title(("17 February 2017 Santa Barbara, CA (KSBA)\n"
-              "One Minute Rainfall, %.2f inches total plotted"
+ax.legend(loc=(0.7, 0.4), prop=prop, ncol=1)
+ax.set_ylim(0, 10)
+ax.set_yticks(range(0, 11, 1))
+ax.set_xlabel("2 April 2017 (%s)" % (tzname,))
+ax.set_title(("2 April 2017 Alexandria, LA (KAEX)\n"
+              "One Minute Rainfall, %.2f inches total plotted, 9.10 Official"
               ) % (prec[-1],))
 
 
