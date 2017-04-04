@@ -19,6 +19,9 @@ def do_network(network):
     if network.find("_ASOS") > 0:
         subprocess.call("python ../dbutil/compute_asos_sts.py %s" % (network,),
                         shell=True)
+    if network.find("_DCP") > 0:
+        subprocess.call("python ../dbutil/compute_hads_sts.py %s" % (network,),
+                        shell=True)
     subprocess.call("python drive_network_windrose.py %s" % (network,),
                     shell=True)
 
@@ -45,6 +48,7 @@ def main():
                 print "Driving network %s because of age!" % (network,)
                 do_network(network)
                 return
+
 
 if __name__ == '__main__':
     main()
