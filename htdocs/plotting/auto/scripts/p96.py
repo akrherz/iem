@@ -72,12 +72,12 @@ def plotter(fdict):
                          zhour=z, localhour=hr))
 
     df = pd.DataFrame(rows)
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     acount = np.average(cnts)
     years = today.year - minvalid.year
     arc = (np.array(cnts)-acount) / float(years)
     maxv = max([0 - np.min(arc), np.max(arc)])
-    l = ax.plot(range(24), arc, color='b', label='Days Bias')
+    line = ax.plot(range(24), arc, color='b', label='Days Bias')
     ax.set_ylim(0 - maxv - 0.2, maxv + 0.2)
 
     ax2 = ax.twinx()
@@ -104,6 +104,10 @@ def plotter(fdict):
                      box.width * .95, box.height])
     ax2.set_position([box.x0, box.y0,
                      box.width * .95, box.height])
-    ax.legend([l[0], l2[0]], ['Days Bias', 'Avg Precip Bias'], loc='best',
+    ax.legend([line[0], l2[0]], ['Days Bias', 'Avg Precip Bias'], loc='best',
               fontsize=10)
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

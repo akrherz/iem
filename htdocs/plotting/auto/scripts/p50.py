@@ -65,3 +65,7 @@ def plotter(fdict):
             station, nt.sts[station]['name'], model,
             scenario))
     return fig
+
+
+if __name__ == '__main__':
+    plotter(dict())

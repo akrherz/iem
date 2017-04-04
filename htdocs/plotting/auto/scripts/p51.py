@@ -69,3 +69,7 @@ def plotter(fdict):
                   ) % (station, nt.sts[station]['name'], model,
                        scenario, days))
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

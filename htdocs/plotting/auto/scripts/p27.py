@@ -18,7 +18,7 @@ def get_description():
     days after that date until threshold 2 was reached."""
     d['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='t1', default=32,
              label='Temperature Threshold 1:'),
         dict(type='int', name='t2', default=29,
@@ -86,3 +86,7 @@ def plotter(fdict):
     ax.grid(True)
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

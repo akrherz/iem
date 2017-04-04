@@ -85,7 +85,7 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
     ax[0].set_title(("[%s] %s minus [%s] %s\n"
                      "%s Temp Difference Period: %s - %s"
@@ -157,6 +157,7 @@ def plotter(fdict):
                va='bottom', ha='right', fontsize=8)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

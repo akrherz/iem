@@ -64,7 +64,7 @@ def plotter(fdict):
                              lastyear=lyear))
     df = pd.DataFrame(rows)
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
+    (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
     x, y = np.meshgrid(np.arange(-0.5, 12.5, 1), np.arange(-0.5, 12.5, 1))
     res = ax.pcolormesh(x, y, np.transpose(matrix))
     for i in range(12):
@@ -94,3 +94,7 @@ def plotter(fdict):
     ax.set_ylabel("...this month for same year")
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
