@@ -1748,13 +1748,8 @@ CREATE TABLE roads_2012_2013_log(
   raw varchar);
 GRANT SELECT on roads_2012_2013_log to nobody,apache;
 
-
-
-
-
-
 ---
---- SPC Convective Outlooks (created: 22 Oct 2010)
+--- SPC Convective Outlooks
 ---
 CREATE TABLE spc_outlooks (
   issue timestamp with time zone,
@@ -1768,6 +1763,7 @@ CREATE TABLE spc_outlooks (
 SELECT addGeometryColumn('', 'spc_outlooks', 'geom', 4326, 'MULTIPOLYGON', 2);
 GRANT SELECT on spc_outlooks to apache,nobody;
 CREATE index spc_outlooks_valid_idx on spc_outlooks(valid);
+CREATE INDEX spc_outlooks_gix ON spc_outlooks USING GIST (geom);
 
 ---
 --- NEXRAD Attributes
