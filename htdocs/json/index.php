@@ -299,7 +299,23 @@
   				)
   		);
   
-  
+  $services[] = Array(
+  		"title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point",
+  		"url" => "/json/spcoutlook.py?lon={longitude}&amp;lat={latitude}&amp;last={last}",
+  		"desc" => "Provides a listing of convective outlooks dating back to".
+  		" March 2002.",
+  		"vars" => Array(
+  				"lat" => "Latitude in degrees",
+  				"lon" => "Longitude in (degrees east)",
+  				"last" => "(Optional) 1 or 0, include only the last outlook for each category"
+  				),
+  		"example" => Array(
+  				"{latitude}" => "42.5",
+  				"{longitude}" => "-95.0",
+  				"{last}" => "0",
+  				)
+  		);
+
   $services[] = Array(
   		"title" => "Current Polygons from Special Weather Statements (SPS)",
   		"url" => "/geojson/sps.geojson",
