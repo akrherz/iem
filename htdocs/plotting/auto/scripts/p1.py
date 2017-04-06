@@ -195,5 +195,6 @@ def plotter(fdict):
             zorder=2)
     return fig, resdf
 
+
 if __name__ == '__main__':
     plotter(dict())

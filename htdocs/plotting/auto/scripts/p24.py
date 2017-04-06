@@ -68,13 +68,13 @@ def plotter(fdict):
     year = ctx['year']
     month = ctx['month']
     varname = ctx['var']
-    l = "0 days"
+    offset = "0 days"
     if month == 'fall':
         months = [9, 10, 11]
         label = "Fall (SON)"
     elif month == 'winter':
         months = [12, 1, 2]
-        l = "32 days"
+        offset = "32 days"
         label = "Winter (DJF)"
     elif month == 'spring':
         months = [3, 4, 5]
@@ -91,7 +91,7 @@ def plotter(fdict):
 
     df = read_sql("""
     with monthly as (
-        SELECT extract(year from day + '"""+l+"""'::interval) as myyear,
+        SELECT extract(year from day + '""" + offset + """'::interval) as myyear,
         station, sum(precip) as p,
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,
@@ -149,6 +149,7 @@ def plotter(fdict):
                    cmap=cmap)
 
     return m.fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

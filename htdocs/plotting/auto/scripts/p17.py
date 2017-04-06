@@ -150,6 +150,7 @@ def plotter(fdict):
 
     return fig, df
 
+
 if __name__ == '__main__':
     plotter({'month': 4, 'year': 2016, 'station': 'RAYQ1',
              'network': 'CA_AB_DCP'})

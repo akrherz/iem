@@ -243,12 +243,12 @@ def plotter(fdict):
         color = p.get_facecolor()
         handles.append(Rectangle((0, 0), 0.1, 0.3,
                                  facecolor=color, edgecolor='black'))
-    l = fig.legend(handles,
-                   ('2-5', '5-7', '7-10', '10-15', '15-20', '20+'),
-                   loc=(0.01, 0.03), ncol=6,
-                   title='Wind Speed [%s]' % ('mph',),
-                   mode=None, columnspacing=0.9, handletextpad=0.45)
-    plt.setp(l.get_texts(), fontsize=10)
+    legend = fig.legend(handles,
+                        ('2-5', '5-7', '7-10', '10-15', '15-20', '20+'),
+                        loc=(0.01, 0.03), ncol=6,
+                        title='Wind Speed [%s]' % ('mph',),
+                        mode=None, columnspacing=0.9, handletextpad=0.45)
+    plt.setp(legend.get_texts(), fontsize=10)
 
     plt.gcf().text(0.5, 0.99, ctx['plottitle'],
                    fontsize=16, ha='center', va='top')
@@ -256,6 +256,7 @@ def plotter(fdict):
                    verticalalignment="bottom", ha='right')
 
     return fig, ctx['df']
+
 
 if __name__ == '__main__':
     highcharts(dict(station='AMW', month='jan', opt='tmpf_above',

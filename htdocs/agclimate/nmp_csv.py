@@ -58,5 +58,6 @@ def main():
     sys.stdout.write("Content-type: text/csv;header=present\n\n")
     do_output()
 
+
 if __name__ == '__main__':
     main()

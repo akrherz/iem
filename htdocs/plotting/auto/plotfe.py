@@ -166,7 +166,7 @@ def do(form, fmt):
                       ) % (p, (end_time - start_time).total_seconds(), mckey))
     try:
         mc.set(mckey, res, meta.get('cache', 43200))
-    except:
+    except Exception as _:
         sys.stderr.write("Exception while writting key: %s" % (mckey, ))
     send_content_type(fmt)
     sys.stdout.write(res)
@@ -179,6 +179,7 @@ def main():
         do(form, fmt)
     except Exception as exp:
         handle_error(exp, fmt)
+
 
 if __name__ == '__main__':
     main()

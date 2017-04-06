@@ -454,5 +454,6 @@ def main():
     sys.stdout.write("Content-Type: image/png\n\n")
     plt.savefig(sys.stdout, format='png')
 
+
 if __name__ == '__main__':
     main()

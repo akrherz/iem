@@ -34,5 +34,6 @@ def main():
     sys.stdout.write("Content-type: application/json\n\n")
     sys.stdout.write(json.dumps(data))
 
+
 if __name__ == '__main__':
     main()
