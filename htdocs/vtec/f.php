@@ -19,7 +19,7 @@ $eventid = intval( $tokens[6] );
 $pgconn = iemdb("postgis");
 $table = sprintf("warnings_%s", $year);
 pg_prepare($pgconn, 's', "SELECT max(report) as r,
-		sumtxt(name::text || ', ') as cnties from warnings_2016 w JOIN ugcs u ".
+		sumtxt(name::text || ', ') as cnties from warnings_". $year ." w JOIN ugcs u ".
 		"on (w.gid = u.gid) WHERE ".
 		"w.wfo = $1 and phenomena = $2 and significance = $3 and
 		eventid = $4");
