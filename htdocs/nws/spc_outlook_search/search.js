@@ -26,6 +26,7 @@ Ext.define('Outlook', {
     extend: 'Ext.data.Model',
     fields: [
         {name: 'threshold',  type: 'string'},
+        {name: 'day', type: 'int', mapping: 'day'},
         {name: 'utc_issue', type: 'date', mapping: 'issue', convert: utcdate},
         {name: 'utc_valid', type: 'date', mapping: 'valid', convert: utcdate},
         {name: 'utc_expire', type: 'date', mapping: 'expire', convert: utcdate},
@@ -72,6 +73,11 @@ Ext.onReady(function() {
 			}
 		}],
 		columns : [{
+			'header' : 'Day',
+			sortable : true,
+			dataIndex : 'day',
+			width : 50
+		},{
 			'header' : 'Threshold',
 			sortable : true,
 			dataIndex : 'threshold',
@@ -153,9 +159,18 @@ Ext.onReady(function() {
 		outlookStore.load({add: false, params: {
 			lon: $("#lon").val(),
 			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? '1': '0'
+			last: $('#last').is(":checked") ? '1': '0',
+			day: $("input[name='day']:checked").val()
 		}});      
     });
+	$('input[type=radio][name=day]').change(function() {
+		outlookStore.load({add: false, params: {
+			lon: $("#lon").val(),
+			lat: $("#lat").val(),
+			last: $('#last').is(":checked") ? '1': '0',
+			day: this.value
+		}});		
+	});
 });
 
 
@@ -164,7 +179,8 @@ function updateMarkerPosition(latLng) {
 	outlookStore.load({add: false, params: {
 		lon: latLng.lng(),
 		lat: latLng.lat(),
-		last: $('#last').is(":checked") ? '1': '0'
+		last: $('#last').is(":checked") ? '1': '0',
+		day: $("input[name='day']:checked").val()
 	}});
 	$("#lat").val(latLng.lat().toFixed(4));
 	$("#lon").val(latLng.lng().toFixed(4));

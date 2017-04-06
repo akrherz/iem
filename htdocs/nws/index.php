@@ -123,6 +123,13 @@ $t->east = <<<EOF
 		at a time.</li>
 </ul>
 
+<h4>Storm Prediction Center Products</h4>
+<ul>
+ <li><a href="/nws/spc_outlook_search/">SPC Outlook search by point</a>
+  <br />Allows answering of the question of when was a given point last under
+some convective outlook or the number of outlooks for a given point.</li>
+</ul>
+
 <h4>Text Product Archives</h4>
 <ul>
  <li><a href="/wx/afos/">AFOS Product Viewer</a>

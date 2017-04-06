@@ -9,7 +9,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=1"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -27,6 +27,10 @@ $t->thispage ="severe-spcoutlook";
 $t->title = "SPC Convective Outlook Search by Point";
 
 $t->content = <<<EOF
+<ol class="breadcrumb">
+  <li><a href="/nws/">NWS Mainpage</a></li>
+  <li class="active">SPC Outlook Search by Point</li>
+</ol>
 <p>This application allows you to search of Storm Prediction Center outlooks by
 point.  The data presented is based on unofficial processing and archving done
 by the IEM.</p>
@@ -57,7 +61,7 @@ There are likely some bugs and rough spots here, so please let <a href="/info/co
 <br />
 This section allows you to specify a point on the map below by dragging the 
 marker to where you are interested in.  Once you stop dragging the marker, the
-grid will update and provide a listing of storm based warnings found.  
+grid will update and provide a listing of the outlooks found.  
 <br clear="all" />
 <div class="row">
 	<div class="col-md-4">
@@ -65,6 +69,9 @@ grid will update and provide a listing of storm based warnings found.
 		<i>Latitude (deg N):</i> <input size="8" id="lat"><br />
 		<i>Longitude (deg E):</i> <input size="8" id="lon">
 		<br /><input type="checkbox" id="last" name="last" value="1"> List Most Recent Event	
+		<br />Select Outlook: <input type="radio" name="day" value="1" checked>Day 1 &nbsp;
+		<input type="radio" name="day" value="2">Day 2 &nbsp;
+		<input type="radio" name="day" value="3">Day 3
 		<br /><button class="btn btn-default" id="manualpt">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
