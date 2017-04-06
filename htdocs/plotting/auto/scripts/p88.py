@@ -60,7 +60,7 @@ def plotter(fdict):
     for row in cursor:
         if row[0] > 52:
             continue
-        data[row[1], row[0]-1] = row[2]
+        data[int(row[1]), int(row[0]) - 1] = row[2]
     rows = []
     for week in range(52):
         for hour in range(24):
@@ -90,6 +90,7 @@ def plotter(fdict):
     ax.set_yticklabels(('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
