@@ -56,6 +56,7 @@ STATIONS = {'CAMI4': 'Calumet',
             'CIRI4': 'CedarRapids',
             # Vineyward
             'AHTI4': 'AmesHort',
+            'OSTI4': 'TasselRidge',
             }
 
 
@@ -436,6 +437,7 @@ def main():
         print("Calling fix_solar.py")
         os.chdir("../isuag")
         subprocess.call("python fix_solar.py", shell=True)
+
 
 if __name__ == '__main__':
     main()
