@@ -75,3 +75,7 @@ def plotter(fdict):
                 lblformat='%.0f')
 
     return m.fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

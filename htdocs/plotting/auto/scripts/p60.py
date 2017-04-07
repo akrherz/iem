@@ -68,7 +68,7 @@ def plotter(fdict):
     data = np.zeros((24, 53), 'f')
     df['freq[%]'] = df['sum'] / df['count'] * 100.
     for _, row in df.iterrows():
-        data[row['hour'], row['week'] - 1] = row['freq[%]']
+        data[int(row['hour']), int(row['week']) - 1] = row['freq[%]']
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -102,3 +102,7 @@ def plotter(fdict):
                         'Mid'])
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
