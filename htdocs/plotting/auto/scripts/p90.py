@@ -38,7 +38,10 @@ def get_description():
     selecting start and end dates to ensure you are getting the plot you
     want.  There are likely some combinations here that will produce a
     broken image symbol.  If you find such a case, please email us the link
-    to this page that shows the broken image!"""
+    to this page that shows the broken image!
+
+    <br /><strong>This app can be very slow</strong>, so please let it grind
+    away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()
     jan1 = today.replace(day=1, month=1)
     d['arguments'] = [
@@ -160,7 +163,7 @@ def do_polygon(ctx):
         if (maxv.year - minv.year) < 3:
             bins = range(int(minv.year) - 4, int(maxv.year) + 2)
         else:
-            bins = range(int(minv.year), int(maxv.year) + 1)
+            bins = range(int(minv.year), int(maxv.year) + 2)
     elif varname == 'yearcount':
         ctx['title'] = "Count for %s" % (year,)
     elif varname == 'total':
@@ -392,4 +395,4 @@ def plotter(fdict):
 
 if __name__ == '__main__':
     plotter(dict(geo='polygon', state='NM', phenomena='SV',
-                 significance='W', v='yearavg', year=1986, year2=2017))
+                 significance='W', v='lastyear', year=1986, year2=2017))
