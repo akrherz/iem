@@ -343,7 +343,8 @@ data = {'plots': [
         {'id': "109",
          'label': "WFO VTEC Event Counts for a Given Period (map)"},
         {'id': "90",
-         'label': "UGC Statistics for Watch/Warning/Advisory by state/wfo"},
+         'label': ("UGC or Polygon SBW Statistics for "
+                   "Watch/Warning/Advisory by state/wfo")},
     ]},
     {'label': 'Sustainable Corn Project Plots', 'options': [
         {'id': "49", 'mw': True,
