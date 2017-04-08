@@ -118,10 +118,13 @@ def do_polygon(ctx):
     affine = Affine(griddelta, 0., west, 0., 0 - griddelta, north)
     ones = np.ones((int(YSZ), int(XSZ)))
     counts = np.zeros((int(YSZ), int(XSZ)))
+    wfolimiter = ""
+    if ctx['t'] == 'cwa':
+        wfolimiter = " wfo = '%s' and " % (station, )
     # do arbitrary buffer to prevent segfaults?
     df = read_postgis("""
     SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire
-     from sbw where
+     from sbw where """ + wfolimiter + """
      phenomena = %s and status = 'NEW' and significance = %s
      and ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
      %s %s, %s %s, %s %s))')) and ST_IsValid(geom)
