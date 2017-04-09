@@ -54,8 +54,8 @@ def plotter(fdict):
         where station = %s and year >= %s
     """, (station, syear))
     for row in cursor:
-        snow[row[1] - syear, row[0] - 1] = row[2]
-        snowd[row[1] - syear, row[0] - 1] = row[3]
+        snow[row[1] - syear, int(row[0] - 1)] = row[2]
+        snowd[row[1] - syear, int(row[0] - 1)] = row[3]
 
     rows = []
     for i, year in enumerate(range(syear, eyear)):
@@ -137,6 +137,7 @@ def plotter(fdict):
     df.set_index('year', inplace=True)
     del(df['color'])
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(dir='last'))

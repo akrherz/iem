@@ -152,7 +152,8 @@ def do(form, fmt):
                     res = df.to_csv(index=(df.index.name is not None))
                 elif fmt == 'xlsx':
                     (_, tmpfn) = tempfile.mkstemp()
-                    writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter')
+                    writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter',
+                                            options={'remove_timezone': True})
                     df.index.name = None
                     df.to_excel(writer,
                                 encoding='latin-1', sheet_name='Sheet1')

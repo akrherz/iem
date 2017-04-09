@@ -84,9 +84,9 @@ def plotter(fdict):
 
     minyear = df['yr'].min()
     maxyear = df['yr'].max()
-    data = np.zeros((maxyear - minyear + 1, 12))
+    data = np.zeros((int(maxyear - minyear + 1), 12))
     for _, row in df.iterrows():
-        data[row['yr'] - minyear, row['mo'] - 1] = row['count']
+        data[int(row['yr'] - minyear), int(row['mo'] - 1)] = row['count']
         txt = ax.text(row['mo'], row['yr'], "%.0f" % (row['count'],),
                       va='center', ha='center', color='white')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
@@ -114,6 +114,7 @@ def plotter(fdict):
     ax.set_title(title)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(wfo='MOB', network='WFO', phenomena='TO', significance='W'))
