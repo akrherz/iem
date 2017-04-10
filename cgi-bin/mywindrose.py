@@ -13,9 +13,26 @@ import cgi
 import sys
 
 
-def main():
-    # Query out the CGI variables
-    form = cgi.FieldStorage()
+def send_error(form, msg):
+    fmt = form.getfirst('fmt', 'png')
+    if fmt == 'png':
+        ct = "image/png"
+    elif fmt == 'pdf':
+        ct = "application/pdf"
+    elif fmt == 'svg':
+        ct = "image/svg+xml"
+    else:
+        sys.stdout.write("Content-type: text/plain\n\n")
+        sys.stdout.write(msg)
+        sys.exit(0)
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1)
+    ax.text(0.5, 0.5, msg, ha='center')
+    sys.stdout.write("Content-type: %s\n\n" % (ct,))
+    fig.savefig(sys.stdout, format=fmt)
+
+
+def get_times(form):
     if ("year1" in form and "year2" in form and
             "month1" in form and "month2" in form and
             "day1" in form and "day2" in form and
@@ -34,6 +51,17 @@ def main():
     else:
         sts = datetime.datetime(1900, 1, 1)
         ets = datetime.datetime(2050, 1, 1)
+
+    return sts, ets
+
+
+def main():
+    # Query out the CGI variables
+    form = cgi.FieldStorage()
+    try:
+        sts, ets = get_times(form)
+    except Exception as _:
+        send_error(form, "Invalid Times Selected, please try again")
 
     if "hour1" in form and "hourlimit" in form:
         hours = numpy.array((int(form["hour1"].value),))
@@ -72,7 +100,7 @@ def main():
 
     try:
         nsector = int(form['nsector'].value)
-    except:
+    except Exception as _:
         nsector = 36
 
     rmax = None
@@ -107,6 +135,7 @@ def main():
             sys.exit(0)
         sys.stdout.write("Content-type: %s\n\n" % (ct,))
         res.savefig(sys.stdout, format=fmt)
+
 
 if __name__ == '__main__':
     main()
