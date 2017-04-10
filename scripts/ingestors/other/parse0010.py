@@ -4,8 +4,9 @@ import re
 import os
 import sys
 import pytz
-from pyiem.datatypes import speed
+from pyiem.datatypes import speed, temperature, humidity
 from pyiem.observation import Observation
+from pyiem.meteorology import dewpoint
 import psycopg2
 iemaccess = psycopg2.connect(database='iem', host='iemdb')
 cursor = iemaccess.cursor()
@@ -30,17 +31,18 @@ valid = valid.replace(hour=int(tparts[0]),
 
 iem = Observation("OT0010", "OT", valid)
 
-sknt = speed(float(tokens[8]), 'MPH').value('KT')
-
 iem.data['tmpf'] = float(tokens[4])
 iem.data['max_tmpf'] = float(tokens[5])
 iem.data['min_tmpf'] = float(tokens[6])
 iem.data['relh'] = int(tokens[7])
+iem.data['dwpf'] = dewpoint(temperature(iem.data['tmpf'], 'F'),
+                            humidity(iem.data['relh'], '%')).value("F")
 iem.data['sknt'] = speed(float(tokens[8]), 'mph').value('KT')
 iem.data['drct'] = int(tokens[9])
 iem.data['max_sknt'] = speed(float(tokens[10]), 'mph').value('KT')
 iem.data['alti'] = float(tokens[12])
 iem.data['pday'] = float(tokens[13])
+iem.data['srad'] = float(tokens[18])
 
 
 iem.save(cursor)
