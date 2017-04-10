@@ -698,7 +698,7 @@ LAYER
   END
   # Flood
   CLASS
-    EXPRESSION /FL|FF|FA/
+    EXPRESSION /FF|FA/
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0

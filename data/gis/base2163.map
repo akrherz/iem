@@ -423,6 +423,22 @@ LAYER
       SYMBOL  'circle'
     END
   END
+  # Flood
+  CLASS
+    EXPRESSION /FF|FA/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 255 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
   CLASS
     EXPRESSION /ZZ/
     STYLE
