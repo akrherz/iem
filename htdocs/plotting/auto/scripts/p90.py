@@ -40,6 +40,11 @@ def get_description():
     broken image symbol.  If you find such a case, please email us the link
     to this page that shows the broken image!
 
+    <br />Storm Based Warning polygons were not official until 1 October 2007,
+    so if you generate plots for years prior to this date, you may notice
+    polygons well outside the County Warning Area bounds.  There was no
+    enforcement of these unofficial polygons to stay within CWA bounds.
+
     <br /><strong>This app can be very slow</strong>, so please let it grind
     away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()

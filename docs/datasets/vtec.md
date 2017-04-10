@@ -46,3 +46,7 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 
     The phenomena code (two characters) and significance code (one character) denote the particular WWA hazzard at play with the product. The [NWS VTEC Site](http://www.nws.noaa.gov/om/vtec/) contains a one pager PDF that documents these codes.  The NWS uses these codes to color encode their WAWA Map found on their homepage.  You can find a lookup reference table of these codes and colors [here](https://github.com/akrherz/pyIEM/blob/master/pyiem/nws/vtec.py).
 
+1. How do polygon warnings exist in the IEM archive prior to being official?
+
+    The NWS offices started experimenting with polygons beginning in 2002.  These polygons were included with the warnings, but sometimes were not geographically valid and/or leaked well outside of a local office's CWA bounds.  On 1 October 2007, these polygons became the official warning for some VTEC types.  In general, the IEM's data ingestor attempts to save these polygons whenever found.
+
