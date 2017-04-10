@@ -18,6 +18,7 @@ python ctre_bridge.py &
 
 cd other
 python parse0006.py &
+python parse0010.py &
 
 cd ../../outgoing
 python snet_collect.py &
