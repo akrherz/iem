@@ -10,13 +10,15 @@ $t->thispage="archive-tm";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui-slider-pips/1.11.4/jquery-ui-slider-pips.css">
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOF;
 $t->jsextra = <<<EOF
 <script src='/vendor/jquery-ui/1.11.4/jquery-ui.min.js'></script>
+<script src='/vendor/jquery-ui-slider-pips/1.11.4/jquery-ui-slider-pips.js'></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script type="text/javascript" src="static.js?v=21"></script>
+<script type="text/javascript" src="static.js?v=22"></script>
 EOF;
 
 $t->content = <<<EOF
@@ -32,12 +34,12 @@ to select a product of your choice from the archive.</p>
 	<div class="col-sm-4" style="margin-bottom: 15px;">
 	<select name="products" id="products"></select>	
 	</div>
-	<div class="col-sm-4" style="margin-bottom: 15px;"><div id="year_slider"><div id="year_handle" style="width: 2em;" class="ui-slider-handle"></div></div></div>
-	<div class="col-sm-2" style="margin-bottom: 15px;"><div id="hour_slider"><div id="hour_handle" style="width: 3em;" class="ui-slider-handle"></div></div></div>
-	<div class="col-sm-2" style="margin-bottom: 15px;"><div id="minute_slider"><div id="minute_handle" style="width: 2em;" class="ui-slider-handle"></div></div></div>
+	<div class="col-sm-4" style="margin-bottom: 15px;"><div id="year_slider"></div></div>
+	<div class="col-sm-2" style="margin-bottom: 15px;"><div id="hour_slider"></div></div>
+	<div class="col-sm-2" style="margin-bottom: 15px;"><div id="minute_slider"></div></div>
 </div>
 <div class="row">
-	<div class="col-sm-12" style="margin-bottom: 15px;"><div id="day_slider"><div id="day_handle" style="width: 4em;" class="ui-slider-handle"></div></div></div>
+	<div class="col-sm-12" style="margin-bottom: 15px;"><div id="day_slider"></div></div>
 </div>
 <div class="row">
 	<div class="col-sm-2 col-xs-3" style="margin-bottom: 15px;"><button class="btn btn-default" id="realtime">Show Latest</button></div>

@@ -106,7 +106,7 @@ function update(){
 		min: sts.year(),
 		max: now.year(),
 		value: dt.utc().year()
-	});
+	}).slider('pips', 'refresh');
 	$('#day_slider').slider({
 		value: dt.utc().dayOfYear()
 	});
@@ -149,58 +149,42 @@ function getSelectedOption(){
 function buildUI(){
 	//year
 	$("#year_slider").slider({
-		change: function() {
-			$("#year_handle").text( $( this ).slider( "value" ) );
-		},
 		slide: function( event, ui ) {
-			$("#year_handle").text( $( this ).slider( "value" ) );
 			dt.year(ui.value);
 		    update();
 		    irealtime = false;
 		}
-	});
+	}).slider("pips").slider("float");
 	//hour
 	$("#hour_slider").slider({
 		min: 0,
 		max: 23,
-		change: function() {
-			$("#hour_handle").text(dt.local().format('h A'));
-		},
 		slide: function( event, ui ) {
-			$("#hour_handle").text(dt.local().format('h A'));
 			dt.hour(ui.value);
 		    update();
 		    irealtime = false;
 		}
-	});
+	}).slider("pips").slider("float");
 	//hour
 	$("#minute_slider").slider({
 		min: 0,
 		max: 59,
-		change: function() {
-			$("#minute_handle").text( $( this ).slider( "value" ) );
-		},
 		slide: function( event, ui ) {
-			$("#minute_handle").text( $( this ).slider( "value" ) );
 			dt.minute(ui.value);
 		    update();
 		    irealtime = false;
 		}
-	});
+	}).slider("pips").slider("float");
 	//day
 	$("#day_slider").slider({
 		min: 1,
 		max: 367,
-		change: function() {
-			$("#day_handle").text(dt.local().format('MMM D'));
-		},
 		slide: function( event, ui ) {
-			$("#day_handle").text(dt.local().format('MMM D'));
 			dt.dayOfYear(ui.value);
 		    update();
 		    irealtime = false;
 		}
-	});
+	}).slider("pips").slider("float");
 
 	
 	// Listen for click
