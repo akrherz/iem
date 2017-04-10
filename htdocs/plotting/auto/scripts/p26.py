@@ -60,7 +60,7 @@ def get_context(fdict):
             """+table+""" WHERE station = %s and high is not null and
             low is not null and year >= %s""", (station, startyear))
     for row in cursor:
-        data[row[1] - startyear, row[0] - 1] = row[2]
+        data[int(row[1] - startyear), int(row[0] - 1)] = row[2]
 
     data.mask = np.where(data == 199, True, False)
 
@@ -77,11 +77,11 @@ def get_context(fdict):
     last_doy = int(today.strftime("%j"))
     if half == 'fall':
         for doy in range(181, 366):
-            l = np.ma.min(data[:-1, 180:doy], 1)
-            avg.append(np.ma.average(l))
-            mins.append(np.ma.min(l))
-            maxs.append(np.ma.max(l))
-            p = np.percentile(l, [2.5, 25, 75, 97.5])
+            low = np.ma.min(data[:-1, 180:doy], 1)
+            avg.append(np.ma.average(low))
+            mins.append(np.ma.min(low))
+            maxs.append(np.ma.max(low))
+            p = np.percentile(low, [2.5, 25, 75, 97.5])
             p2p5.append(p[0])
             p25.append(p[1])
             p75.append(p[2])
@@ -92,11 +92,11 @@ def get_context(fdict):
             dyear.append(np.ma.min(data[idx, 180:doy]))
     else:
         for doy in range(1, 181):
-            l = np.ma.max(data[:-1, :doy], 1)
-            avg.append(np.ma.average(l))
-            mins.append(np.ma.min(l))
-            maxs.append(np.ma.max(l))
-            p = np.percentile(l, [2.5, 25, 75, 97.5])
+            low = np.ma.max(data[:-1, :doy], 1)
+            avg.append(np.ma.average(low))
+            mins.append(np.ma.min(low))
+            maxs.append(np.ma.max(low))
+            p = np.percentile(low, [2.5, 25, 75, 97.5])
             p2p5.append(p[0])
             p25.append(p[1])
             p75.append(p[2])
@@ -234,6 +234,7 @@ def plotter(fdict):
                                         '%s' % (ctx['year'],)], loc=loc)
 
     return fig, df
+
 
 if __name__ == '__main__':
     highcharts({'year': 2016, 'half': 'spring', 'var': 'high'})
