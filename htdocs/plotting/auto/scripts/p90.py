@@ -393,8 +393,10 @@ def plotter(fdict):
         cmap = plt.get_cmap('jet')
         cmap.set_under('white')
         cmap.set_over('black')
-        m.pcolormesh(ctx['lons'], ctx['lats'], ctx['data'],
-                     ctx['bins'], cmap=cmap, units='count')
+        res = m.pcolormesh(ctx['lons'], ctx['lats'], ctx['data'],
+                           ctx['bins'], cmap=cmap, units='count')
+        # Cut down on SVG et al size
+        res.set_rasterized(True)
         if ctx['drawc'] == 'yes':
             m.drawcounties()
 
