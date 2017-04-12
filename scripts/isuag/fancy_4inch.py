@@ -33,15 +33,15 @@ soil_obs = []
 lats = []
 lons = []
 icursor.execute("""
-    SELECT station, tsoil_c_avg from sm_daily
-    where valid = '%s' and tsoil_c_avg > -40
+    SELECT station, tsoil_c_avg_qc from sm_daily
+    where valid = '%s' and tsoil_c_avg_qc > -40
 """ % (ts.strftime("%Y-%m-%d"), ))
 for row in icursor:
     stid = row['station']
     if qdict.get(stid, {}).get('soil4', False):
         # print '%s was QCd out' % (stid,)
         continue
-    soil_obs.append(temperature(row['tsoil_c_avg'], 'C').value('F'))
+    soil_obs.append(temperature(row['tsoil_c_avg_qc'], 'C').value('F'))
     lats.append(nt.sts[stid]['lat'])
     lons.append(nt.sts[stid]['lon'])
 
@@ -57,6 +57,7 @@ def sampler(xaxis, yaxis, vals, x, y):
     while (yaxis[j] < y):
         j += 1
     return vals[i, j]
+
 
 # Grid it
 numxout = 40
