@@ -137,6 +137,8 @@ data = {'plots': [
          'label': "Hourly Temperature Averages by Month"},
         {'id': "85",
          'label': "Hourly Temperature Frequencies by Month"},
+        {'id': "177", 'mw': True,
+         'label': "ISU Soil Moisture Network Timeseries Plots"},
         {'id': "2", 'mw': True,
          'label': "Month Precipitation v Month Growing Degree Day Departures"},
         {'id': "57", 'mw': True,

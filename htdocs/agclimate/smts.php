@@ -75,11 +75,13 @@ EOF;
 $thedescription = $desc[$opt];
 $oselect = make_select("opt", $opt, $ar);
 
-$img = sprintf("<img src=\"smts.py?opt=%s&amp;station=%s&amp;year1=%s&amp;year2=%s"
-		."&amp;month1=%s&amp;month2=%s&amp;day1=%s&amp;day2=%s&amp;"
-		."hour1=%s&amp;hour2=%s\" class=\"img img-responsive\">", 
-		$opt, $station, $year1, $year2, $month1, $month2, $day1, $day2, 
-		$hour1, $hour2);
+$img = sprintf("<img src=\"/plotting/auto/plot/177/network:ISUSM::".
+		"station:%s::opt:%s::sts:%d-%02d-%02d%%20%02d00::".
+		"ets:%d-%02d-%02d%%20%02d00.png".
+		"\">",
+		$station, $opt,
+		$year1, $month1, $day1, $hour1,
+		$year2, $month2, $day2, $hour2);
 if ($errmsg != ""){
 	$img = $errmsg;
 }
