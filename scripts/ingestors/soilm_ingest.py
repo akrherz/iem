@@ -57,6 +57,7 @@ STATIONS = {'CAMI4': 'Calumet',
             # Vineyward
             'AHTI4': 'AmesHort',
             'OSTI4': 'TasselRidge',
+            'XXXI4': 'Bankston',
             }
 
 
