@@ -5,6 +5,7 @@
 
       <b>Site elevation:</b> sea level<br />
 """
+from __future__ import print_function
 import requests
 import psycopg2
 from pyiem.reference import nwsli2country, nwsli2state
@@ -13,6 +14,7 @@ OUTPUT = open('insert.sql', 'w')
 
 
 def compute_network(nwsli):
+    """Figure out the IEM network based on a NWSLI"""
     country = nwsli2country.get(nwsli[3:])
     state = nwsli2state.get(nwsli[3:])
     if country == 'US' and state is not None:
@@ -24,7 +26,8 @@ def compute_network(nwsli):
     return None, None, None
 
 
-def do(nwsli):
+def dowork(nwsli):
+    """do work!"""
     uri = "http://www.ndbc.noaa.gov/station_page.php?station=%s" % (nwsli,)
     req = requests.get(uri)
     if req.status_code != 200:
@@ -63,14 +66,17 @@ def do(nwsli):
 
 
 def main():
+    """Go Main Go!"""
     pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
                               user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""SELECT distinct nwsli from unknown where
     product ~* 'OSO' ORDER by nwsli""")
     for row in cursor:
-        do(row[0])
+        dowork(row[0])
 
     OUTPUT.close()
+
+
 if __name__ == '__main__':
     main()

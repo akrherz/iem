@@ -37,10 +37,11 @@ def compute_time(is_hourly):
 
 
 def main(argv):
-    ASOS = psycopg2.connect(database='asos', host='iemdb')
-    IEM = psycopg2.connect(database='iem', host='iemdb')
-    acursor = ASOS.cursor()
-    icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    """Do Something Good"""
+    asospgconn = psycopg2.connect(database='asos', host='iemdb')
+    iempgconn = psycopg2.connect(database='iem', host='iemdb')
+    acursor = asospgconn.cursor()
+    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     is_hourly = (len(argv) > 1)
 
     (sts, ets) = compute_time(is_hourly)
@@ -67,8 +68,8 @@ def main(argv):
      and d.row_number > 1
     """, (sts, ets))
     icursor.close()
-    IEM.commit()
-    icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    iempgconn.commit()
+    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Get obs from Access
     icursor.execute("""SELECT c.*, t.network, t.id from
@@ -84,7 +85,7 @@ def main(argv):
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
-        # TODO: differentiate between 2 (Routine) and 3 (SPECI)
+        # see @akrherz/iem#104 as an enhancement to differentiate rtype
         rtype = (1
                  if row['raw'] is not None and row['raw'].find(' MADISHF') > -1
                  else 2)
@@ -108,10 +109,11 @@ def main(argv):
               )
 
     icursor.close()
-    IEM.commit()
-    ASOS.commit()
-    ASOS.close()
-    IEM.close()
+    iempgconn.commit()
+    asospgconn.commit()
+    asospgconn.close()
+    iempgconn.close()
+
 
 if __name__ == '__main__':
     main(sys.argv)
