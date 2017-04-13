@@ -4,13 +4,14 @@
  Run from RUN_10_AFTER.sh
 """
 # stdlib
-import os
-import pytz
+from __future__ import print_function
 import datetime
+import os
 import subprocess
 import tempfile
 
 # Third party
+import pytz
 import numpy as np
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity, distance
@@ -20,7 +21,7 @@ ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
 
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
 
-REPROCESS_SOLAR = False
+EVENTS = {'reprocess_solar': False}
 VARCONV = {
            'vwc06_avg': 'vwc_06_avg',
            'vwc12_avg': 'vwc_12_avg',
@@ -57,15 +58,15 @@ STATIONS = {'CAMI4': 'Calumet',
             # Vineyward
             'AHTI4': 'AmesHort',
             'OSTI4': 'TasselRidge',
-            'XXXI4': 'Bankston',
+            'BNKI4': 'Bankston',
             }
 
 
-def make_time(s):
+def make_time(string):
     """Convert a time in the file to a datetime"""
-    ts = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
-    ts = ts.replace(tzinfo=pytz.FixedOffset(-360))
-    return ts
+    tstamp = datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
+    tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
+    return tstamp
 
 
 def m15_process(nwsli, maxts):
@@ -304,8 +305,7 @@ def daily_process(nwsli, maxts):
         if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
             print(("soilm_ingest.py station: %s ts: %s has 0 solar"
                    ) % (nwsli, valid.strftime("%Y-%m-%d")))
-            global REPROCESS_SOLAR
-            REPROCESS_SOLAR = True
+            EVENTS['reprocess_solar'] = True
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
         ob.save(acursor)
         # print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
@@ -330,7 +330,7 @@ def update_pday():
     for row in acursor:
         data[row[0]] = row[1]
 
-    for iemid in data.keys():
+    for iemid in data:
         acursor.execute("""UPDATE summary SET pday = %s
         WHERE iemid = %s and day = 'TODAY'""", (data[iemid], iemid))
     acursor.close()
@@ -371,10 +371,10 @@ def get_max_timestamps(nwsli):
 
 def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     """ Send the raw datafile to LDM """
-    fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
-    if not os.path.isfile(fn):
+    filename = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
+    if not os.path.isfile(filename):
         return
-    lines = open(fn).readlines()
+    lines = open(filename).readlines()
     if len(lines) < 5:
         return
 
@@ -391,16 +391,16 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
            "'data c %s csv/isusm/%s_daily.txt bogus txt' %s"
            ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
                 tmpfn)
-    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
-                         stdout=subprocess.PIPE)
-    p.stdout.read()
+    proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+    proc.stdout.read()
     os.remove(tmpfn)
 
-    """ Send the raw datafile to LDM """
-    fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
-    if not os.path.isfile(fn):
+    # Send the raw datafile to LDM
+    filename = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
+    if not os.path.isfile(filename):
         return
-    lines = open(fn).readlines()
+    lines = open(filename).readlines()
     if len(lines) < 5:
         return
 
@@ -425,7 +425,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
 
 def main():
     """ Go main Go """
-    for nwsli in STATIONS.keys():
+    for nwsli in STATIONS:
         maxobs = get_max_timestamps(nwsli)
         _ = m15_process(nwsli, maxobs['15minute'])
         hrprocessed = hourly_process(nwsli, maxobs['hourly'])
@@ -434,7 +434,7 @@ def main():
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
     update_pday()
 
-    if REPROCESS_SOLAR:
+    if EVENTS['reprocess_solar']:
         print("Calling fix_solar.py")
         os.chdir("../isuag")
         subprocess.call("python fix_solar.py", shell=True)
