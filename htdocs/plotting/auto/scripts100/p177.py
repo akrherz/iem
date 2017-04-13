@@ -1,12 +1,14 @@
+"""ISU Soil Moisture Network Time Series"""
+import datetime
+
 from pyiem import meteorology
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 import psycopg2
-import pandas as pd
-import datetime
 import numpy as np
 import pytz
+import pandas as pd
 from pandas.io.sql import read_sql
 
 PLOTTYPES = {
@@ -22,15 +24,15 @@ PLOTTYPES = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This application generates a series of chart types
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This application generates a series of chart types
     for data from the ISU Soil Moisture Network.
     """
     ets = datetime.datetime.now().replace(minute=0)
     sts = ets - datetime.timedelta(days=7)
-    d['arguments'] = [
-        dict(type='station', name='station', default='AEEI4',
+    desc['arguments'] = [
+        dict(type='networkselect', name='station', default='AEEI4',
              label='Select Station:', network='ISUSM'),
         dict(type='select', name='opt', default="1", options=PLOTTYPES,
              label='Select Plot Type:'),
@@ -41,7 +43,7 @@ def get_description():
              default=ets.strftime("%Y/%m/%d %H%M"),
              label='End Time (Central Time):', min="2012/01/01 0000"),
         ]
-    return d
+    return desc
 
 
 def make_daily_pet_plot(ctx):
@@ -174,7 +176,7 @@ def make_daily_plot(ctx):
                label='Hourly Avg')
     ax.axhline(50, lw=1.5, c='k')
     ax.grid(True)
-    ax.set_ylabel("4 inch Soil Temperature $^\circ$F")
+    ax.set_ylabel(r"4 inch Soil Temperature $^\circ$F")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Daily Max/Min/Avg 4 inch Soil Temperatures"
                   ) % (ctx['nt'].sts[ctx['station']]['name'], ))
@@ -379,11 +381,12 @@ def plot2(ctx):
                                  tz=pytz.timezone("America/Chicago")))
     if ax.get_ylim()[0] < 40:
         ax.axhline(32, linestyle='--', lw=2, color='tan')
-    ax.set_ylabel("Temperature $^\circ$F")
+    ax.set_ylabel(r"Temperature $^\circ$F")
     return fig, df
 
 
 def plot1(ctx):
+    """Do main plotting logic"""
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
