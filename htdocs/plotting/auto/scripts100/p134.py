@@ -1,10 +1,12 @@
-import psycopg2
+"""Extreme period each year"""
 import datetime
-import numpy as np
 from collections import OrderedDict
+
+import psycopg2
+import numpy as np
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
                      ('coldest_hitemp', 'Coldest Average High Temperature'),
@@ -17,14 +19,14 @@ PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the period of consecutive days
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the period of consecutive days
     each year with the extreme criterion meet. In the case of a tie, the
     first period of the season is used for the analysis.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='var', default='coldest_temp',
@@ -32,7 +34,7 @@ def get_description():
         dict(type="int", name="days", default=7,
              label='Over How Many Days?'),
     ]
-    return d
+    return desc
 
 
 def get_data(fdict):
@@ -70,7 +72,8 @@ def get_data(fdict):
             as wettest_rank,
         count(*) OVER (PARTITION by season)
         from data)
-    SELECT season, day, extract(doy from day - '%s days'::interval) as doy,
+    SELECT season, day,
+    extract(doy from day - '%s days'::interval)::int as doy,
     avg_temp from agg1 where """+varname+"""_rank = 1 and count > 270
     """, pgconn, params=(offset, days - 1, days - 1, days - 1, days - 1,
                          station, days - 1),
@@ -120,7 +123,7 @@ def plotter(fdict):
 
     counts = np.zeros(366*2)
     for _, row in df.iterrows():
-        counts[row['doy']:row['doy']+days] += 1
+        counts[int(row['doy']):int(row['doy'] + days)] += 1
 
     lax.bar(np.arange(366*2), counts, edgecolor='blue', facecolor='blue')
     lax.set_ylabel("Years")
@@ -132,6 +135,7 @@ def plotter(fdict):
     lax.set_xlim(df['doy'].min() - 10, df['doy'].max() + 10)
     ax.yaxis.set_major_locator(MaxNLocator(prune='lower'))
     return plt.gcf(), df
+
 
 if __name__ == '__main__':
     plotter(dict())

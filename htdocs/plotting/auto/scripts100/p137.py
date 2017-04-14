@@ -1,9 +1,11 @@
-import psycopg2
+"""Duration of seasons"""
 import datetime
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
 from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 PDICT = {'spring': 'Spring Season',
          'fall': 'Fall Season'}
@@ -11,10 +13,10 @@ PDICT = {'spring': 'Spring Season',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays some metrics about the start
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays some metrics about the start
     date and duration of the spring or fall season.
     The definition of the season
     being the period between the coldest 91 day stretch and subsequent
@@ -22,7 +24,7 @@ def get_description():
     assuming the four seasons are to be equal duration.  Of course, this is
     arbitrary, but interesting to look at!
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='season', default='spring',
@@ -31,7 +33,7 @@ def get_description():
              default=(datetime.date.today().year - 2),
              label='Select Start Year (3 years plotted) for Top Panel:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -105,7 +107,7 @@ def plotter(fdict):
     ax[0].set_title(("%s-%s [%s] %s\n91 Day Average Temperatures"
                      ) % (nt.sts[station]['archive_begin'].year,
                           year + 3, station, nt.sts[station]['name']))
-    ax[0].set_ylabel("Trailing 91 Day Avg T $^{\circ}$F")
+    ax[0].set_ylabel(r"Trailing 91 Day Avg T $^{\circ}$F")
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax[0].grid(True)
 
@@ -117,14 +119,14 @@ def plotter(fdict):
         val = df.at[yr, 'winter']
         if date is not None:
             ax[0].text(date, val - 5,
-                       "%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
-                                             val), ha='center')
+                       r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
+                                              val), ha='center')
         date = df.at[yr, 'summer_end']
         val = df.at[yr, 'summer']
         if date is not None:
             ax[0].text(date, val + 2,
-                       "%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
-                                             val), ha='center')
+                       r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
+                                              val), ha='center')
 
     df2 = df.dropna()
     p2col = 'winter_end_doy' if season == 'spring' else 'summer_end_doy'

@@ -1,10 +1,12 @@
+"""monthly wind speeds"""
+import calendar
+
 import psycopg2
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 from pyiem import meteorology
+from pyiem.network import Table as NetworkTable
 from pyiem.util import drct2text, get_autoplot_context
 from pyiem.datatypes import direction, speed
-import calendar
 
 UNITS = {'mph': 'miles per hour',
          'kt': 'knots',
@@ -13,18 +15,18 @@ UNITS = {'mph': 'miles per hour',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This graph presents monthly average wind speed
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This graph presents monthly average wind speed
     values along with vector-averaged average wind direction."""
-    d['arguments'] = [
-        dict(type='zstation', name='zstation', default='DSM',
+    desc['arguments'] = [
+        dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='units', default='mph',
              options=UNITS, label='Units of Average Wind Speed'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -84,6 +86,7 @@ def plotter(fdict):
                        df['ts'].max().year))
 
     return fig, grp
+
 
 if __name__ == '__main__':
     plotter(dict())

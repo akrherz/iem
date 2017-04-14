@@ -1,11 +1,12 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+import calendar
 import datetime
+
+import psycopg2
+from pandas.io.sql import read_sql
 import pandas as pd
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 from pyiem.datatypes import speed
-import calendar
 
 UNITS = {'mph': 'miles per hour',
          'kt': 'knots',
@@ -14,11 +15,11 @@ UNITS = {'mph': 'miles per hour',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['highcharts'] = True
-    d['description'] = """This chart presents the hourly average wind speeds
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['highcharts'] = True
+    desc['description'] = """This chart presents the hourly average wind speeds
     by month of the year or by custom periods.
     The hours presented are valid in the local time zone
     of the reporting station.  For example in Iowa, 3 PM would represent
@@ -27,7 +28,7 @@ def get_description():
     two digit month followed by two digit day for both the start and end
     date."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='units', default='mph',
@@ -49,7 +50,7 @@ def get_description():
         dict(type='year', name='y2', optional=True, default=today.year,
              label='Optional. Limit Period of Record to inclusive end year'),
     ]
-    return d
+    return desc
 
 
 def get_context(fdict):
@@ -196,6 +197,7 @@ def plotter(fdict):
     ax.set_xlim(0, 23)
 
     return fig, ctx['df']
+
 
 if __name__ == '__main__':
     plotter(dict(p1='0501-0510'))

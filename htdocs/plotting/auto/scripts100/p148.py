@@ -1,12 +1,16 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
-from collections import OrderedDict
+"""Special Days each year"""
 import datetime
+from dateutil.easter import easter as get_easter
+from collections import OrderedDict
+
+import psycopg2
+from pandas.io.sql import read_sql
 import mx.DateTime
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
+        ('easter', 'Easter (Western Church Dates)'),
         ('labor', 'Labor Day'),
         ('memorial', 'Memorial Day'),
         ('exact', 'Same Date each Year'),
@@ -21,15 +25,15 @@ PDICT2 = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents a daily observation for a site
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents a daily observation for a site
     and year on a given date / holiday date each year.  A large caveat to this
     chart is that much of the long term daily climate data is for a 24 hour
     period ending at around 7 AM.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='date', default='memorial', options=PDICT,
@@ -40,10 +44,17 @@ def get_description():
         dict(type='select', name='var', default='high',
              label='Which variable to plot?', options=PDICT2)
     ]
-    return d
+    return desc
+
+
+def easter():
+    """Compute easter"""
+    return [get_easter(year) for year in range(1893,
+                                               datetime.date.today().year + 1)]
 
 
 def thanksgiving():
+    """Thanksgiving please"""
     days = []
     # monday is 0
     offsets = [3, 2, 1, 0, 6, 5, 4]
@@ -55,6 +66,7 @@ def thanksgiving():
 
 
 def labor_days():
+    """Labor Day Please"""
     days = []
     for year in range(1893, datetime.date.today().year + 1):
         sep7 = mx.DateTime.DateTime(year, 9, 7)
@@ -65,6 +77,7 @@ def labor_days():
 
 
 def memorial_days():
+    """Memorial Day Please"""
     days = []
     for year in range(1971, datetime.date.today().year + 1):
         may31 = mx.DateTime.DateTime(year, 5, 31)
@@ -103,6 +116,8 @@ def plotter(fdict):
             days = memorial_days()
         elif date == 'thanksgiving':
             days = thanksgiving()
+        elif date == 'easter':
+            days = easter()
         else:
             days = labor_days()
 
@@ -134,4 +149,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(date='easter'))

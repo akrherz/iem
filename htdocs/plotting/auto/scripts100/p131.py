@@ -1,9 +1,11 @@
-import psycopg2
+"""Plot overcast conditions by temperature"""
 import datetime
 from collections import OrderedDict
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -27,21 +29,21 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the frequency of having overcast
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the frequency of having overcast
     conditions reported by air temperature.  More specifically, this script
     looks for the report of 'OVC' within the METAR sky conditions.  Many
     caveats apply with the reporting changes of this over the years."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -98,7 +100,7 @@ def plotter(fdict):
 
     ax.set_ylabel("Cloudiness Frequency [%]")
     ax.set_ylim(0, 100)
-    ax.set_xlabel("Air Temperature $^\circ$F")
+    ax.set_xlabel(r"Air Temperature $^\circ$F")
     if df2['t'].min() < 30:
         ax.axvline(32, lw=2, color='k')
         ax.text(32, -4, "32", ha='center')
@@ -106,3 +108,7 @@ def plotter(fdict):
     ax.text(df2['t'].min() + 5, avg + 2, "Avg: %.1f%%" % (avg,))
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
