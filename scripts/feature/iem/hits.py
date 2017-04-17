@@ -9,7 +9,7 @@ for line in open('hits.txt'):
     x.append(ts)
     y.append(int(tokens[1]))
 
-fig = plt.figure()
+fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111)
 
 ax.semilogy(x, y, lw=3)
@@ -17,7 +17,7 @@ ax.semilogy(x, y, lw=3)
 xticks = []
 xticklabels = []
 ts0 = datetime.datetime(2001, 1, 1)
-ts1 = datetime.datetime(2015, 1, 2)
+ts1 = datetime.datetime(2018, 1, 2)
 interval = datetime.timedelta(days=1)
 now = ts0
 while now < ts1:
@@ -29,7 +29,7 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels, fontsize=20, rotation=90)
 ax.set_xlabel("Year", fontsize=20)
 ax.set_ylabel("Maximum Daily Web Requests", fontsize=20)
-ax.set_title("IEM Web Requests Milestones [17 Jun 2001-2014]", fontsize=18)
+ax.set_title("IEM Web Requests Milestones [17 Jun 2001-2017]", fontsize=18)
 ax.grid(True)
 plt.setp(ax.get_yticklabels(), fontsize=20)
 fig.tight_layout()
