@@ -1,8 +1,8 @@
 """Special Days each year"""
 import datetime
-from dateutil.easter import easter as get_easter
 from collections import OrderedDict
 
+from dateutil.easter import easter as get_easter
 import psycopg2
 from pandas.io.sql import read_sql
 import mx.DateTime
@@ -27,6 +27,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
+    desc['highcharts'] = True
     desc['cache'] = 86400
     desc['description'] = """This plot presents a daily observation for a site
     and year on a given date / holiday date each year.  A large caveat to this
@@ -87,15 +88,12 @@ def memorial_days():
     return days
 
 
-def plotter(fdict):
-    """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
+def get_context(fdict):
+    """Do the dirty work"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
-    varname = ctx['var']
+    ctx['varname'] = ctx['var']
     thedate = ctx['thedate']
     date = ctx['date']
 
@@ -104,13 +102,13 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     if date == 'exact':
-        df = read_sql("""
+        ctx['df'] = read_sql("""
         SELECT year, high, day, precip from """ + table + """
         WHERE station = %s
         and sday = %s ORDER by year ASC
         """, pgconn, params=(station, thedate.strftime("%m%d")),
-                      index_col='year')
-        subtitle = thedate.strftime("%B %-d")
+                             index_col='year')
+        ctx['subtitle'] = thedate.strftime("%B %-d")
     else:
         if date == 'memorial':
             days = memorial_days()
@@ -121,31 +119,69 @@ def plotter(fdict):
         else:
             days = labor_days()
 
-        df = read_sql("""
+        ctx['df'] = read_sql("""
         SELECT year, high, day, precip from """ + table + """
         WHERE station = %s
         and day in %s ORDER by year ASC
         """, pgconn, params=(station, tuple(days)),
-                      index_col='year')
-        subtitle = PDICT[date]
+                             index_col='year')
+        ctx['subtitle'] = PDICT[date]
+    ctx['title'] = ("%s [%s] Daily %s"
+                    ) % (nt.sts[ctx['station']]['name'], ctx['station'],
+                         PDICT2[ctx['varname']])
+    return ctx
+
+
+def highcharts(fdict):
+    """Generate javascript (Highcharts) variant"""
+    ctx = get_context(fdict)
+    ctx['df'].reset_index(inplace=True)
+    v2 = ctx['df'][['year', ctx['varname']]].to_json(orient='values')
+    series = """{
+        name: '""" + ctx['varname'] + """',
+        data: """ + v2 + """,
+        color: '#0000ff'
+    }
+    """
+
+    return """
+    $("#ap_container").highcharts({
+        chart: {
+            type: 'column',
+            zoomType: 'x'
+        },
+        yAxis: {title: {text: '""" + PDICT2[ctx['varname']] + """'}},
+        title: {text: '""" + ctx['title'] + """'},
+        subtitle: {text: 'On """ + ctx['subtitle'] + """'},
+        series: [""" + series + """]
+    });
+    """
+
+
+def plotter(fdict):
+    """ Go """
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    ctx = get_context(fdict)
 
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.bar(df.index.values, df[varname], fc='r', ec='r', align='center')
-    mean = df[varname].mean()
+    ax.bar(ctx['df'].index.values, ctx['df'][ctx['varname']],
+           fc='r', ec='r', align='center')
+    mean = ctx['df'][ctx['varname']].mean()
     ax.axhline(mean)
-    ax.text(df.index.values[-1] + 1, mean, '%.2f' % (mean,), ha='left',
+    ax.set_title("%s\non%s" % (ctx['title'], ctx['subtitle']))
+    ax.text(ctx['df'].index.values[-1] + 1, mean, '%.2f' % (mean,), ha='left',
             va='center')
     ax.grid(True)
-    ax.set_title(("%s [%s] Daily %s\non %s"
-                  ) % (nt.sts[station]['name'], station, PDICT2[varname],
-                       subtitle))
-    ax.set_xlim(df.index.values.min() - 1,
-                df.index.values.max() + 1)
-    ax.set_ylabel(PDICT2[varname])
-    if varname != 'precip':
-        ax.set_ylim(df[varname].min() - 5, df[varname].max() + 5)
-    return fig, df
+    ax.set_xlim(ctx['df'].index.values.min() - 1,
+                ctx['df'].index.values.max() + 1)
+    ax.set_ylabel(PDICT2[ctx['varname']])
+    if ctx['varname'] != 'precip':
+        ax.set_ylim(ctx['df'][ctx['varname']].min() - 5,
+                    ctx['df'][ctx['varname']].max() + 5)
+    return fig, ctx['df']
 
 
 if __name__ == '__main__':
