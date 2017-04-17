@@ -1,17 +1,20 @@
+"""Seasonal averages of Humudity"""
+import datetime
+from collections import OrderedDict
+
 import psycopg2
 import numpy as np
-from pyiem.network import Table as NetworkTable
-import datetime
 from scipy import stats
 import pandas as pd
 from pyiem import meteorology
-from collections import OrderedDict
+from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature, mixingratio, pressure
 from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
          ('spring', 'Spring (MAM)'),
+         ('spring2', 'Spring (AMJ)'),
          ('fall', 'Fall (SON)'),
          ('winter', 'Winter (DJF)'),
          ('summer', 'Summer (JJA)'),
@@ -31,16 +34,16 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Simple plot of yearly average dew points by year,
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Simple plot of yearly average dew points by year,
     season, or month.
     This calculation was done by computing the mixing ratio, then averaging
     the mixing ratios by year, and then converting that average to a dew point.
     This was done due to the non-linear nature of dew point when expressed in
     units of temperature.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
              label='Select Station', network='IA_ASOS'),
         dict(type='select', name='season', default='winter',
@@ -48,7 +51,7 @@ def get_description():
         dict(type="year", name="year", default=1893,
              label="Start Year of Plot"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -74,6 +77,10 @@ def plotter(fdict):
     elif season == 'spring':
         months = [3, 4, 5]
         if today.month > 5:
+            lastyear += 1
+    elif season == 'spring2':
+        months = [4, 5, 6]
+        if today.month > 6:
             lastyear += 1
     elif season == 'fall':
         months = [9, 10, 11]
@@ -104,13 +111,14 @@ def plotter(fdict):
                 row[0].year >= lastyear):
             continue
         yr = (row[0] + datetime.timedelta(days=31)).year
-        r = meteorology.mixing_ratio(temperature(row[1], 'F')).value('KG/KG')
-        rows.append(dict(year=yr, r=r))
+        mxr = meteorology.mixing_ratio(temperature(row[1], 'F')).value('KG/KG')
+        rows.append(dict(year=yr, r=mxr))
     df = pd.DataFrame(rows)
     group = df.groupby('year')
     df = group.aggregate(np.average)
 
     def to_dwpf(val):
+        """Unsure why I am doing this, like this"""
         return meteorology.dewpoint_from_pq(pressure(1000, 'MB'),
                                             mixingratio(val, 'KG/KG')
                                             ).value('F')
@@ -123,16 +131,16 @@ def plotter(fdict):
 
     colorabove = 'seagreen'
     colorbelow = 'lightsalmon'
-    bars = ax.bar(years, data, fc=colorabove, ec=colorabove, align='center')
-    for i, bar in enumerate(bars):
+    cols = ax.bar(years, data, fc=colorabove, ec=colorabove, align='center')
+    for i, col in enumerate(cols):
         if data[i] < avgv:
-            bar.set_facecolor(colorbelow)
-            bar.set_edgecolor(colorbelow)
+            col.set_facecolor(colorbelow)
+            col.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color='k', zorder=2, label='Average')
     h_slope, intercept, r_value, _, _ = stats.linregress(years, data)
     ax.plot(years, h_slope * np.array(years) + intercept, '--',
             lw=2, color='k', label='Trend')
-    ax.text(0.01, 0.99, "Avg: %.1f, slope: %.2f F/century, R$^2$=%.2f" % (
+    ax.text(0.01, 0.98, "Avg: %.1f, slope: %.2f F/century, R$^2$=%.2f" % (
             avgv, h_slope * 100., r_value ** 2),
             transform=ax.transAxes, va='top', bbox=dict(color='white'))
     ax.set_xlabel("Year")
