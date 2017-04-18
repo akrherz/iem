@@ -72,6 +72,7 @@ def plotter(fdict):
 
     today = datetime.datetime.now()
     lastyear = today.year
+    deltadays = 0
     if season == 'all':
         months = range(1, 13)
     elif season == 'spring':
@@ -91,6 +92,7 @@ def plotter(fdict):
         if today.month > 8:
             lastyear += 1
     elif season == 'winter':
+        deltadays = 31
         months = [12, 1, 2]
         if today.month > 2:
             lastyear += 1
@@ -110,7 +112,7 @@ def plotter(fdict):
         if (row[0].month not in months or row[0].year < startyear or
                 row[0].year >= lastyear):
             continue
-        yr = (row[0] + datetime.timedelta(days=31)).year
+        yr = (row[0] + datetime.timedelta(days=deltadays)).year
         mxr = meteorology.mixing_ratio(temperature(row[1], 'F')).value('KG/KG')
         rows.append(dict(year=yr, r=mxr))
     df = pd.DataFrame(rows)
@@ -154,7 +156,7 @@ def plotter(fdict):
     tokens = msg.split()
     sz = len(tokens) / 2
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
-    ax.legend(ncol=1)
+    ax.legend(ncol=1, loc=1)
 
     return fig, df
 
