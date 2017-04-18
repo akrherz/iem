@@ -351,14 +351,33 @@ EOF;
 <script src="${imguri}.js"></script>		
 EOF;
 		} elseif ($fmt == 'png' || $fmt == 'svg') {
+			$timing_secs = intval($jobj->{"timing[secs]"}) + 1;
+			if ($timing_secs < 1) $timing_secs = 5;
 			$image = <<<EOF
 <div id="willload" style="height: 200px;">
-	<span class="glyphicon glyphicon-arrow-down"></span> 
-	<img src="/images/wait24trans.gif" />
-	A graph will appear below this text with your specifications from above:
+	<p><span class="glyphicon glyphicon-arrow-down"></span> 
+	Based on a sampling of recent timings for this application, plot generation
+ time has averaged {$timing_secs} seconds. Hold on for the plot is generating now!</p>
+	<div class="progress progress-striped active">
+		<div id="timingbar" class="progress-bar progress-bar-warning" role="progressbar"
+	     aria-valuenow="0" aria-valuemin="0" aria-valuemax="{$timing_secs}"
+		 style="width: 0%;"></div>
+	</div>
 </div>
+<br clear="all" />
 	<img src="{$imguri}.{$fmt}" class="img img-responsive" id="theimage" />
 EOF;
+			$jsextra .= <<<EOM
+var timing = 0;
+var progressBar = setInterval(function (){
+	if (timing >= {$timing_secs} || $('#willload').css('display') == 'none'){
+		clearInterval(progressBar);
+	}
+	var width = (timing / {$timing_secs}) * 100.;
+	$("#timingbar").css('width', width +'%').attr('aria-valuenow', width);
+	timing = timing + 0.2;
+}, 200);
+EOM;
 		} elseif ($fmt == 'pdf'){
 			$image = <<<EOF
 <object id="windrose-plot" src="{$imguri}.{$fmt}" width="700px" height="700px">
