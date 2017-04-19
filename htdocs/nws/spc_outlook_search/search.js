@@ -142,7 +142,6 @@ Ext.onReady(function() {
 						'Y/m/d')
 					}
 				});
-				eventTable.setTitle("Event Listing for UGC "+ tokens2[2]);
 			}
 		}
 
@@ -160,19 +159,40 @@ Ext.onReady(function() {
 			lon: $("#lon").val(),
 			lat: $("#lat").val(),
 			last: $('#last').is(":checked") ? '1': '0',
-			day: $("input[name='day']:checked").val()
+			day: $("input[name='day']:checked").val(),
+			cat: $("input[name='cat']:checked").val()
 		}});      
+		updateTableTitle();
     });
 	$('input[type=radio][name=day]').change(function() {
 		outlookStore.load({add: false, params: {
 			lon: $("#lon").val(),
 			lat: $("#lat").val(),
 			last: $('#last').is(":checked") ? '1': '0',
-			day: this.value
+			day: this.value,
+			cat: $("input[name='cat']:checked").val()
 		}});		
+		updateTableTitle();
+	});
+	$('input[type=radio][name=cat]').change(function() {
+		outlookStore.load({add: false, params: {
+			lon: $("#lon").val(),
+			lat: $("#lat").val(),
+			last: $('#last').is(":checked") ? '1': '0',
+			day: $("input[name='day']:checked").val(),
+			cat: this.value
+		}});
+		updateTableTitle();
 	});
 });
 
+function updateTableTitle(){
+	latLng = marker.getPosition();
+	outlookTable.setTitle( Ext.String.format("SPC Day {2} {3} Outlook Events for Lat: {0} Lon: {1}", 
+			latLng.lat().toFixed(4), latLng.lng().toFixed(4),
+			$("input[name='day']:checked").val(),
+			$("input[name='cat']:checked").val()));
+}
 
 function updateMarkerPosition(latLng) {
 	// callback on when the map marker is moved
@@ -180,12 +200,12 @@ function updateMarkerPosition(latLng) {
 		lon: latLng.lng(),
 		lat: latLng.lat(),
 		last: $('#last').is(":checked") ? '1': '0',
-		day: $("input[name='day']:checked").val()
+		day: $("input[name='day']:checked").val(),
+		cat: $("input[name='cat']:checked").val()
 	}});
 	$("#lat").val(latLng.lat().toFixed(4));
 	$("#lon").val(latLng.lng().toFixed(4));
-	outlookTable.setTitle( Ext.String.format("SPC Day 1 Outlook Events for Lat: {0} Lon: {1}", 
-		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
+	updateTableTitle();
 	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
 	map.setCenter(latLng);

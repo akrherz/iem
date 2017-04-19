@@ -301,7 +301,7 @@
   
   $services[] = Array(
   		"title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point",
-  		"url" => "/json/spcoutlook.py?lon={longitude}&amp;lat={latitude}&amp;last={last}&amp;day={day}",
+  		"url" => "/json/spcoutlook.py?lon={longitude}&amp;lat={latitude}&amp;last={last}&amp;day={day}&amp;cat={cat}",
   		"desc" => "Provides a listing of convective outlooks dating back to".
   		" March 2002.",
   		"vars" => Array(
@@ -309,12 +309,14 @@
   				"lon" => "Longitude in (degrees east)",
   				"last" => "(Optional) 1 or 0, include only the last outlook for each category",
   				"day" => "(Optional) Which outlook day to request, defaults to 1",
+  				"cat" => "(Optional) Which outlook category to request, defaults to CATEGORICAL",
   				),
   		"example" => Array(
   				"{latitude}" => "42.5",
   				"{longitude}" => "-95.0",
   				"{last}" => "0",
   				"{day}" => "1",
+  				"{cat}" => "CATEGORICAL",
   				)
   		);
 

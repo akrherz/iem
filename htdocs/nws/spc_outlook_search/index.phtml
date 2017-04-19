@@ -9,7 +9,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=2"></script>
+<script type="text/javascript" src="search.js?v=3"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -72,6 +72,13 @@ grid will update and provide a listing of the outlooks found.
 		<br />Select Outlook: <input type="radio" name="day" value="1" checked>Day 1 &nbsp;
 		<input type="radio" name="day" value="2">Day 2 &nbsp;
 		<input type="radio" name="day" value="3">Day 3
+
+		<br />Select Category:
+		<input type="radio" name="cat" value="categorical" checked>Categorical &nbsp;
+		<input type="radio" name="cat" value="hail">Hail &nbsp;
+		<input type="radio" name="cat" value="tornado">Tornado &nbsp;
+		<input type="radio" name="cat" value="wind">Wind
+
 		<br /><button class="btn btn-default" id="manualpt">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
