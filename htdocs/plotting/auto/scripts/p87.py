@@ -1,8 +1,10 @@
+"""METAR Code Climo"""
+import datetime
+
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 import numpy as np
 import pandas as pd
-import datetime
 from pyiem.util import get_autoplot_context
 
 PDICT = {'TS': 'Thunder (TS)',
@@ -15,14 +17,14 @@ PDICT = {'TS': 'Thunder (TS)',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Frequency plot partitioned by hour and week of the
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Frequency plot partitioned by hour and week of the
     year for a given METAR code to appear in the present weather. If your
     favorite METAR code is not available in the listing, please let us know!
     If multiple reports occurred within the same hour during one week, it would
     only count as one in this analysis."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:'),
         dict(type='select', name='code', default='TS', options=PDICT,
@@ -32,7 +34,7 @@ def get_description():
         dict(type='year', name='eyear', default=datetime.date.today().year,
              label='End Year of Analysis (inclusive):'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -65,8 +67,8 @@ def plotter(fdict):
     station = %s and presentwx LIKE '%%""" + code + """%%'
     and valid > %s and valid < %s)
 
-    SELECT distinct extract(week from v) as week,
-    extract(year from v) as year, extract(hour from v) as hour
+    SELECT distinct extract(week from v)::int as week,
+    extract(year from v)::int as year, extract(hour from v)::int as hour
     from data
     """, (nt.sts[station]['tzname'], station, sts, ets))
 
@@ -86,9 +88,9 @@ def plotter(fdict):
             rows.append(dict(hour=hour, week=(week+1), count=data[hour, week]))
     df = pd.DataFrame(rows)
     data.mask = np.where(data == 0, True, False)
-    fig = plt.Figure()
+    fig = plt.Figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.25, 0.7, 0.65])
-    cax = plt.axes([0.82, 0.02, 0.02, 0.17])
+    cax = plt.axes([0.82, 0.04, 0.02, 0.15])
 
     res = ax.imshow(data, aspect='auto', rasterized=True,
                     interpolation='nearest')
@@ -131,3 +133,7 @@ def plotter(fdict):
     rax.grid(True)
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
