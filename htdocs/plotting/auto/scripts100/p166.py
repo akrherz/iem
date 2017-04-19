@@ -1,7 +1,8 @@
-from pyiem import util
+"""Watches"""
+import datetime
 from pandas.io.sql import read_sql
 import psycopg2
-import datetime
+from pyiem import util
 from pyiem.reference import state_names
 
 MDICT = {'ytd': 'Limit Plot to Year to Date',
@@ -10,19 +11,19 @@ MDICT = {'ytd': 'Limit Plot to Year to Date',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents a summary of the number of year
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents a summary of the number of year
     to date watches issued by the Storm Prediction Center and the percentage
     of those watches that at least touched the given state.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='state', name='state', default='IA',
              label='Select State:'),
         dict(type='select', name='limit', default='ytd', options=MDICT,
              label='Time Limit of Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -30,6 +31,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
     pgconn = psycopg2.connect(dbname='postgis', host='iemdb', user='nobody')
     ctx = util.get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2].upper()
@@ -62,13 +64,13 @@ def plotter(fdict):
     df['state_percent'] = df['state_count'] / df['national_count'] * 100.
     df.fillna(0, inplace=True)
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True)
+    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 6))
 
     ax[0].bar(df.index.values, df['national_count'].values, align='center')
     for year, row in df.iterrows():
         ax[0].text(year, row['national_count'],
-                   "%.0f" % (row['national_count'],), ha='center',
-                   rotation=90, va='top', color='white')
+                   " %.0f" % (row['national_count'],), ha='center',
+                   rotation=90, va='bottom', color='k')
     ax[0].grid(True)
     ax[0].set_title(("Storm Prediction Center Issued Tornado / "
                      "Svr T'Storm Watches\n"
@@ -80,23 +82,24 @@ def plotter(fdict):
     ax[1].bar(df.index.values, df['state_count'].values, align='center')
     for year, row in df.iterrows():
         ax[1].text(year, row['state_count'],
-                   "%.0f" % (row['state_count'],), ha='center',
-                   rotation=90, va='top', color='white')
+                   " %.0f" % (row['state_count'],), ha='center',
+                   rotation=90, va='bottom', color='k')
     ax[1].grid(True)
     ax[1].set_ylabel("State Count")
 
     ax[2].bar(df.index.values, df['state_percent'].values, align='center')
     for year, row in df.iterrows():
         ax[2].text(year, row['state_percent'],
-                   "%.1f%%" % (row['state_percent'],), ha='center',
-                   rotation=90, va='top', color='white')
+                   " %.1f%%" % (row['state_percent'],), ha='center',
+                   rotation=90, va='bottom', color='k')
     ax[2].grid(True)
     ax[2].set_ylabel("% Touching State")
 
-    ax[0].set_xlim(df.index.values[0] - 0.5,
-                   df.index.values[-1] + 0.5)
-
+    ax[0].set_xlim(df.index.values[0] - 1,
+                   df.index.values[-1] + 1)
+    ax[0].xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

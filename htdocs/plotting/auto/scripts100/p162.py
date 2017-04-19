@@ -1,27 +1,29 @@
+"""Overcast 2-D Histogram"""
+import datetime
+
 import psycopg2
-import pandas as pd
 import numpy as np
 import numpy.ma as ma
-import datetime
-from pyiem.network import Table as NetworkTable
+import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents a 2-D histogram of overcast
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents a 2-D histogram of overcast
     conditions reported by the automated sensor.  Please note that the yaxis
     uses an irregular spacing.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -98,6 +100,7 @@ def plotter(fdict):
     b = fig.colorbar(c)
     b.set_label("Hourly Obs per week per year")
     return fig, resdf
+
 
 if __name__ == '__main__':
     plotter(dict(network='IA_ASOS', station='AMW'))

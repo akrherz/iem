@@ -1,7 +1,9 @@
-import psycopg2
-from pandas.io.sql import read_sql
+"""Hourly temperature averages"""
 import datetime
 from collections import OrderedDict
+
+import psycopg2
+from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 from scipy import stats
@@ -34,14 +36,14 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents an average hourly value for
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents an average hourly value for
     a given month or season over the years covering the period of record
     for the site.  For the year to plot, at least 80% data availability needs
     to be obtained.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='month', default='all',
@@ -51,7 +53,7 @@ def get_description():
         dict(type='select', name='var', options=PDICT, default='avg_tmpf',
              label='Which Variable to Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -140,6 +142,7 @@ def plotter(fdict):
                               MDICT[month]), ha='center')
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(month='08', network='IA_ASOS'))

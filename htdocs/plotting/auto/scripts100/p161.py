@@ -1,8 +1,10 @@
-import psycopg2
+"""Max Dewpoint"""
 import datetime
 from collections import OrderedDict
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
@@ -64,6 +66,7 @@ def get_description():
 
 
 def get_context(fdict):
+    """Do the processing work"""
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -114,6 +117,7 @@ def get_context(fdict):
 
 
 def highcharts(fdict):
+    """Highcharts output"""
     ctx = get_context(fdict)
     ctx['df'].reset_index(inplace=True)
     v = ctx['df'][['year', 'count']].to_json(orient='values')
@@ -158,6 +162,7 @@ def plotter(fdict):
     ax.axhline(avgv)
     ax.text(df.index.max() + 1, avgv, "%.1f" % (avgv,))
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(network='IA_ASOS', station='AMW'))

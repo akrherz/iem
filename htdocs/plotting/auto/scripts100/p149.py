@@ -1,17 +1,19 @@
+"""Arridity"""
+import datetime
+
 import psycopg2
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
-import datetime
-import numpy as np
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
+import numpy as np
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents a time series of Arridity Index.
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents a time series of Arridity Index.
     This index computes the standardized high temperature departure subtracted
     by the standardized precipitation departure.  For the purposes of this
     plot, this index is computed daily over a trailing period of days of your
@@ -28,7 +30,7 @@ def get_description():
     """
     today = datetime.date.today()
     sts = today - datetime.timedelta(days=180)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              network='IACLIMATE', label='Select Station:'),
         dict(type='int', name='days', default=91,
@@ -49,7 +51,7 @@ def get_description():
              label='End Date of Plot'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
