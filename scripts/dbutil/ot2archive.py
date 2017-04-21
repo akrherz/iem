@@ -11,7 +11,8 @@ OTHER = psycopg2.connect(database='other', host='iemdb')
 IEM = psycopg2.connect(database='iem', host='iemdb')
 
 
-def do(ts, ts2):
+def dowork(ts, ts2):
+    """Process between these two timestamps please"""
     # Delete any obs from yesterday
     ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -33,7 +34,7 @@ def do(ts, ts2):
         if alti is None and row['mslp'] is not None:
             alti = row['mslp'] * .03
         sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt, alti,
-             pday, gust, c1tmpf,srad) values
+             pday, gust, c1tmpf, srad) values
              ('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """ % (ts.year, row['id'], row['valid'], (row['tmpf'] or "Null"),
                (row['dwpf'] or "Null"), (row['drct'] or "Null"),
@@ -52,7 +53,7 @@ def main(argv):
     ts = ts.replace(hour=0, second=0, minute=0, microsecond=0,
                     tzinfo=pytz.timezone("UTC"))
     ts2 = ts + datetime.timedelta(hours=24)
-    do(ts, ts2)
+    dowork(ts, ts2)
 
 
 if __name__ == '__main__':

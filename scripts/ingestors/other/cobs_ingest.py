@@ -2,16 +2,17 @@
 
   Run from RUN_20_AFTER.sh
 """
+from __future__ import print_function
+import datetime
+import os
 import pandas as pd
 import psycopg2
 import pytz
-import datetime
-import os
 from pyiem.observation import Observation
 from pint import UnitRegistry
 
 UREG = UnitRegistry()
-Q_ = UREG.Quantity
+QUANTITY = UREG.Quantity
 SID = 'OT0012'
 DIRPATH = "/mnt/mesonet/home/mesonet/ot/ot0005/incoming/Pederson"
 
@@ -58,10 +59,13 @@ DAILYCONV = {'Batt_Volt_Min': None,
 
 
 def clean(key, value):
+    """"Clean the values"""
     if key.startswith('WS'):
-        return Q_(value, UREG.mph).to(UREG.knots).m
+        return QUANTITY(value, UREG.mph).to(UREG.knots).m
     if key.startswith('RH') and value > 100:
         return 100.
+    if pd.isnull(value):
+        return None
     return value
 
 
@@ -98,6 +102,7 @@ def database(lastob, ddf, hdf):
 
 
 def get_last():
+    """Get the last timestamp"""
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""SELECT valid at time zone 'UTC'
@@ -108,6 +113,7 @@ def get_last():
 
 
 def process(lastob):
+    """"Process the file for any timestamps after the lastob"""
     now = datetime.datetime.now()
     dailyfn = "%s/%s/Daily.dat" % (DIRPATH, now.year)
     hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, now.year)
@@ -133,8 +139,10 @@ def process(lastob):
 
 
 def main():
+    """Go for it!"""
     lastob = get_last()
     process(lastob)
+
 
 if __name__ == '__main__':
     main()
