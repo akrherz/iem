@@ -12,7 +12,7 @@ import psycopg2
 def get_timing(pidx):
     """Return an average plot generation time for this app"""
     pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody',
-                              timeout=5)
+                              connect_timeout=5)
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT avg(timing) from autoplot_timing where appid = %s
