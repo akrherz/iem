@@ -11,7 +11,8 @@
  include("../../../include/network.php");
  $nt = new NetworkTable("ISUSM");
  include("../../../include/forms.php");
-
+ include_once "boxinc.phtml";
+ 
  $yselect = yearSelect2(2013, date("Y"), "year1");
  $mselect = monthSelect(date("m"), "month1");
  $dselect= daySelect2(date("d"), "day1");
@@ -26,14 +27,14 @@ while( list($key,$val) = each($nt->table)){
 }
  
 $t->content = <<<EOF
-<h3 class="heading">Hourly Data Request Form:</h3>
+ <ol class="breadcrumb">
+  <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
+  <li class="active">Hourly Download</li>
+ </ol>
 
-<div class="alert alert-info">
-This download page is for the recently installed (2013) ISU Soil Moisture sites.  
-To download data from the legacy ISU AgClimate network, please visit 
-<a class="alert-link" href="hourlyRequest.php">this page</a>.
-</div>
+{$box}
 
+<h3>Hourly Data Request Form:</h3>
 
 <P><b>Information:</b>  This interface accesses the archive of daily and hourly weather
 data collected from the Iowa Agclimate Automated Weather stations.  Please

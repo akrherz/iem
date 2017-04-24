@@ -4,6 +4,7 @@
  include("../../../include/forms.php");
  define("IEM_APPID", 12);
  include("../../../include/myview.php");
+ include_once "boxinc.phtml";
  $t = new MyView();
  $t->title = "ISU AgClimate Legacy Daily Data Request";
  $t->thispage ="networks-agclimate";
@@ -21,13 +22,9 @@
   <li class="active">Legacy Network Daily Download</li>
  </ol>
 
-<h4>Daily Data Request Form</h4>
+{$box}
 
-<div class="alert alert-danger">
-This download page is for the legacy sites.  To download data from the new
-ISU Soil Moisture network, please visit 
-<a class="alert-link" href="daily.php">this page</a>.
-</div>
+<h4>Daily Data Request Form</h4>
 
 <p>This interface allows the download of daily summary data from the legacy
 ISU AgClimate Network sites.  Data for some of these sites exists back 
@@ -100,6 +97,25 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <h4 class="subtitle">Options:</h4>
 <div style="margin-left: 20px;">
 <input type="checkbox" name="qcflags" value="yes">Include quality control flags
+<table class="table table-striped">
+<thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
+<tr>
+  <th>M</th>
+  <td>the data is missing</td></tr>
+
+<tr>
+  <th>E</th>
+  <td>An instrument may be flagged until repaired</td></tr>
+
+<tr>
+  <th>R</th>
+  <td>Estimate based on weighted linear regression from surrounding stations</td></tr>
+
+<tr>
+  <th>e</th>
+  <td>We are not confident of the estimate</td></tr>
+
+</table>
 <br><input type="checkbox" name="todisk" value="yes">Download directly to disk
 <br>How should the values be separated?: 
 <select name="delim">
@@ -113,7 +129,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 </select>
 </div>
 
-<p><b><h4 class="subtitle">Submit your request:</h4></b>
+<p><b><h4>Submit your request:</h4></b>
 	<input type="submit" value="Get Data">
 	<input type="reset">
 

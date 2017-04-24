@@ -6,6 +6,7 @@
  include("../../../include/myview.php");
  include("../../../include/network.php");
  include("../../../include/forms.php");
+ include_once "boxinc.phtml";
  
  $t = new MyView();
  $t->title = "ISU Soil Moisture Daily Data Request";
@@ -38,13 +39,14 @@ while( list($key, $val) = each($levels)){
 }
 
 $t->content = <<<EOF
-<h3>Daily Data Request Form:</h3>
+ <ol class="breadcrumb">
+  <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
+  <li class="active">Daily Download</li>
+ </ol>
 
-<div class="alert alert-info">
-This download page is for the recently installed (2013) ISU Soil Moisture sites.  
-To download data from the legacy ISU AgClimate network, please visit 
-<a class="alert-link" href="dailyRequest.php">this page</a>.
-</div>
+{$box}
+
+<h3>Daily Data Request Form:</h3>
 
 <P><b>Information:</b> This interface accesses the archive of daily weather 
 data collected from 

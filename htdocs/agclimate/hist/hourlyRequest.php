@@ -3,6 +3,7 @@
  include("../../../config/settings.inc.php");
  include("../../../include/forms.php");
  define("IEM_APPID", 13);
+ include_once "boxinc.phtml";
  include("../../../include/myview.php");
  $t = new MyView();
  $t->title = "ISU AgClimate Legacy Hourly Data Request";
@@ -20,14 +21,9 @@
   <li><a href="/agclimate">ISU AgClimate</a></li>
   <li class="active">Legacy Network Hourly Download</li>
  </ol>
+{$box}
 
 <h4>Hourly Data Request Form</h4>
-
-<div class="alert alert-danger">
-This download page is for the legacy sites.  To download data from the new
-ISU Soil Moisture network, please visit 
-<a class="alert-link" href="hourly.php">this page</a>.
-</div>
 
 <p>This interface allows the download of hourly data from the legacy
 ISU AgClimate Network sites.  Data for some of these sites exists back 
@@ -88,6 +84,25 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 
 <p><b><h4 class="subtitle">Options:</h4></b>
 <input type="checkbox" name="qcflags" value="yes">Include QC Flags
+<table class="table table-striped">
+<thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
+<tr>
+  <th>M</th>
+  <td>the data is missing</td></tr>
+
+<tr>
+  <th>E</th>
+  <td>An instrument may be flagged until repaired</td></tr>
+
+<tr>
+  <th>R</th>
+  <td>Estimate based on weighted linear regression from surrounding stations</td></tr>
+
+<tr>
+  <th>e</th>
+  <td>We are not confident of the estimate</td></tr>
+
+</table>
 <br><input type="checkbox" name="todisk" value="yes">Download directly to disk
 <br>Delimination: <select name="delim">
   <option value="comma">Comma Delimited
