@@ -1,7 +1,9 @@
+"""Distrubution of daily high and low temperatures"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
 from scipy.stats import norm
-import datetime
 import pandas as pd
 from pyiem import reference
 from pyiem.util import get_autoplot_context
@@ -9,14 +11,14 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the distribution of observed
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the distribution of observed
     daily high and low temperatures for a given day and given state.  The
     dataset is fit with a simple normal distribution based on the simple
     population statistics.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='clstate', name='state', default='IA',
              label='Which state?'),
         dict(type='month', name='month', default='10',
@@ -24,7 +26,7 @@ def get_description():
         dict(type='day', name='day', default='7',
              label='Select Day:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -64,7 +66,7 @@ def plotter(fdict):
     p = norm.pdf(x, mu, std)
     ax.plot(x, p, 'r--', linewidth=2)
 
-    ax.text(0.8, 0.99, ("High Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f"
+    ax.text(0.8, 0.98, ("High Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f"
                         "\n$n$ = %s") % (mu, std, len(highs)),
             va='top', ha='left', color='r',
             transform=ax.transAxes, bbox=dict(color='white'))
@@ -85,15 +87,16 @@ def plotter(fdict):
     ax.set_title(("%s %s Temperature Distribution"
                   ) % (reference.state_names[state], ts.strftime("%d %B")))
 
-    ax.text(0.01, 0.99, ("Low Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f"
+    ax.text(0.02, 0.98, ("Low Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f"
                          "\n$n$ = %s") % (mu, std, len(lows)),
             va='top', ha='left', color='b',
             transform=ax.transAxes, bbox=dict(color='white'))
     ax.grid(True)
-    ax.set_xlabel("Temperature $^\circ$F")
+    ax.set_xlabel(r"Temperature $^\circ$F")
     ax.set_ylabel("Probability")
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
