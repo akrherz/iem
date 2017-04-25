@@ -55,6 +55,8 @@ STATIONS = {'CAMI4': 'Calumet',
             'CRFI4': 'Crawfordsville',
             'FRUI4': 'Muscatine',
             'CIRI4': 'CedarRapids',
+            # Temporary?
+            'REFI4': 'Adel',
             # Vineyward
             'AHTI4': 'AmesHort',
             'OSTI4': 'TasselRidge',
