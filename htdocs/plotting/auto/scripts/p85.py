@@ -1,9 +1,11 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+"""Hourly Temp Frequencies"""
 import calendar
-from pandas.io.sql import read_sql
 from collections import OrderedDict
+
+import psycopg2
+from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
     ('above', 'At or Above Temperature'),
@@ -13,12 +15,12 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Based on IEM archives of METAR reports, this
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Based on IEM archives of METAR reports, this
     application produces the hourly frequency of a temperature at or
     above or below a temperature thresold."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='month', name='month', default=7,
@@ -28,7 +30,7 @@ def get_description():
         dict(type='select', name='dir', default='above',
              label='Threshold Option:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -55,6 +57,7 @@ def plotter(fdict):
         and extract(month from valid) = %s and report_type = 2)
 
     SELECT extract(hour from v) as hour,
+    min(v) as min_valid, max(v) as max_valid,
     sum(case when tmpf::int < %s THEN 1 ELSE 0 END) as below,
     sum(case when tmpf::int >= %s THEN 1 ELSE 0 END) as above,
     count(*) from data
@@ -68,10 +71,10 @@ def plotter(fdict):
     freq = df[mydir+"_freq"].values
     hours = df.index.values
 
-    (fig, ax) = plt.subplots(1, 1)
-    bars = ax.bar(hours-0.4, freq, fc='blue')
-    for i, bar in enumerate(bars):
-        ax.text(i, bar.get_height()+3, "%.0f" % (bar.get_height(),),
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    bars = ax.bar(hours, freq, fc='blue', align='center')
+    for i, mybar in enumerate(bars):
+        ax.text(i, mybar.get_height() + 3, "%.0f" % (mybar.get_height(),),
                 ha='center', fontsize=10)
     ax.set_xticks(range(0, 25, 3))
     ax.set_xticklabels(['Mid', '3 AM', '6 AM', '9 AM', 'Noon', '3 PM',
@@ -82,9 +85,14 @@ def plotter(fdict):
     ax.set_ylabel("Frequency [%]")
     ax.set_xlabel("Hour Timezone: %s" % (tzname,))
     ax.set_xlim(-0.5, 23.5)
-    ax.set_title(("%s [%s]\nFrequency of %s Hour, %s: %s$^\circ$F"
-                  ) % (nt.sts[station]['name'], station,
+    ax.set_title(("(%s - %s) %s [%s]\nFrequency of %s Hour, %s: %s$^\circ$F"
+                  ) % (df['min_valid'].min().year, df['max_valid'].max().year,
+                       nt.sts[station]['name'], station,
                        calendar.month_name[month], PDICT[mydir],
                        thres))
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -1,10 +1,12 @@
-import psycopg2.extras
-from pyiem.network import Table as NetworkTable
+"""Calendar Plot of Automated Station Summaries"""
 import datetime
 from collections import OrderedDict
+
+import psycopg2.extras
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import speed
 
 PDICT = OrderedDict([
@@ -20,15 +22,15 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents a series of daily summary data
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents a series of daily summary data
     as a calendar.  The daily totals should be valid for the local day of the
     weather station.
     """
     today = datetime.date.today()
     m90 = today - datetime.timedelta(days=90)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
              network='IA_ASOS', label='Select Station'),
         dict(type='select', name='var', default='pday',
@@ -40,7 +42,7 @@ def get_description():
              default=today.strftime("%Y/%m/%d"),
              label='End Date:', min="2010/01/01"),
     ]
-    return d
+    return desc
 
 
 def safe(row, varname):
@@ -108,3 +110,7 @@ def plotter(fdict):
     fig = calendar_plot(sdate, edate, data,
                         title=title)
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
