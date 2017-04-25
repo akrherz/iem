@@ -47,6 +47,7 @@ def run(network):
 
 
 def main():
+    """Main Workflow"""
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()

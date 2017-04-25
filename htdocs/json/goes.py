@@ -13,18 +13,18 @@ BIRDS = ['EAST', 'WEST']
 PRODUCTS = ['WV', 'VIS', 'IR']
 
 
-def parse_time(s):
+def parse_time(text):
     """
     Convert ISO something into a mx.DateTime
     """
     try:
-        if len(s) == 17:
-            date = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%MZ')
-        elif len(s) == 20:
-            date = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+        if len(text) == 17:
+            date = datetime.datetime.strptime(text, '%Y-%m-%dT%H:%MZ')
+        elif len(text) == 20:
+            date = datetime.datetime.strptime(text, '%Y-%m-%dT%H:%M:%SZ')
         else:
             date = datetime.datetime.utcnow()
-    except:
+    except Exception as _:
         date = datetime.datetime.utcnow()
     return date
 
@@ -38,10 +38,10 @@ def find_scans(root, bird, product, start_gts, end_gts):
         mydir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/awips211")
         if os.path.isdir(mydir):
             os.chdir(mydir)
-            files = glob.glob("GOES_%s_%s_*.wld" % (bird, product))
-            files.sort()
-            for f in files:
-                ts = datetime.datetime.strptime(f[:-4].split("_")[3],
+            filenames = glob.glob("GOES_%s_%s_*.wld" % (bird, product))
+            filenames.sort()
+            for filename in filenames:
+                ts = datetime.datetime.strptime(filename[:-4].split("_")[3],
                                                 "%Y%m%d%H%M")
                 if ts >= start_gts and ts <= end_gts:
                     root['scans'].append(ts.strftime("%Y-%m-%dT%H:%M:00Z"))
@@ -85,6 +85,7 @@ def main():
         sys.stdout.write(json.dumps(list_files(form)))
     if callback is not None:
         sys.stdout.write(')')
+
 
 if __name__ == "__main__":
     main()

@@ -59,7 +59,7 @@ def main():
     if len(wfo) == 4:
         wfo = wfo[1:]
     year = int(form.getfirst("year", 2015))
-    cb = form.getfirst('callback', None)
+    cb = form.getfirst("callback", None)
 
     mckey = "/json/vtec_events/%s/%s" % (wfo, year)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)

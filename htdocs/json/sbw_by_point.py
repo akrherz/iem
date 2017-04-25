@@ -3,9 +3,10 @@
 Get storm based warnings by lat lon point
 """
 import cgi
-import psycopg2
 import json
 import sys
+
+import psycopg2
 
 
 def get_events(lon, lat):
@@ -41,6 +42,7 @@ def main():
     data = get_events(lon, lat)
     sys.stdout.write("Content-type: application/json\n\n")
     sys.stdout.write(json.dumps(data))
+
 
 if __name__ == '__main__':
     main()

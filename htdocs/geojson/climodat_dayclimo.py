@@ -2,9 +2,9 @@
 """Dump daily computed climatology direct from the database"""
 import cgi
 import sys
+import datetime
 import json
 import memcache
-import datetime
 from pyiem.network import Table as NetworkTable
 
 

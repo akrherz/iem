@@ -14,22 +14,23 @@
   {...}]
 }
 """
-import memcache
 import cgi
 import sys
 import datetime
+
 import pytz
+import memcache
 
 
 def safe(val):
-    ''' Be careful '''
+    """Be careful """
     if val is None:
         return None
     return float(val)
 
 
 def run(ts, sid):
-    ''' Actually do some work! '''
+    """ Actually do some work! """
     import psycopg2
     import json
     # http://stackoverflow.com/questions/1447287
@@ -67,6 +68,7 @@ def run(ts, sid):
 
 
 def main():
+    """Do Something"""
     sys.stdout.write("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
@@ -89,6 +91,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()

@@ -23,7 +23,7 @@ while (list($sid,$data) = each($nt->table))
 
 $json = json_encode($ar);
 
-# JSON if no callback
+// JSON if no callback
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 

@@ -2,11 +2,11 @@
 """
  Aggregate the RIDGE current files
 """
-import memcache
 import cgi
 import sys
+import memcache
 
-iso = "%Y-%m-%dT%H:%M:%SZ"
+ISO = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run(product):
@@ -15,7 +15,7 @@ def run(product):
     import datetime
     import glob
 
-    res = {'generation_time_utc': datetime.datetime.utcnow().strftime(iso),
+    res = {'generation_time_utc': datetime.datetime.utcnow().strftime(ISO),
            'product': product,
            'meta': []}
 
@@ -25,7 +25,7 @@ def run(product):
         try:
             j = json.load(open(fn))
             res['meta'].append(j['meta'])
-        except:
+        except Exception as _:
             pass
 
     return json.dumps(res)
@@ -50,6 +50,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()

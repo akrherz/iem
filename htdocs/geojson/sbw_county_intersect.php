@@ -1,7 +1,7 @@
 <?php
 header("Content-type: application/vnd.geo+json");
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+include_once "../../config/settings.inc.php";
+include_once "../../include/database.inc.php";
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;

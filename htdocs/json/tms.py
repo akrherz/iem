@@ -2,23 +2,23 @@
 """
  Tile Map service metadata
 """
-import memcache
 import sys
 import cgi
 import os
+import memcache
 
 
 def run():
     """ Generate json response """
     import json
     import datetime
-    ISO = "%Y-%m-%dT%H:%M:%SZ"
+    iso = "%Y-%m-%dT%H:%M:%SZ"
     res = {'generation_utc_time':
-           datetime.datetime.utcnow().strftime(ISO),
+           datetime.datetime.utcnow().strftime(iso),
            'services': []
            }
     j = json.load(open('/home/ldm/data/gis/images/4326/USCOMP/n0q_0.json'))
-    vt = datetime.datetime.strptime(j['meta']['valid'], ISO)
+    vt = datetime.datetime.strptime(j['meta']['valid'], iso)
     res['services'].append({
             'id': 'ridge_uscomp_n0q',
             'layername': 'ridge::USCOMP-N0Q-%s' % vt.strftime("%Y%m%d%H%M"),
@@ -26,7 +26,7 @@ def run():
             })
 
     j = json.load(open('/home/ldm/data/gis/images/4326/USCOMP/n0r_0.json'))
-    vt = datetime.datetime.strptime(j['meta']['valid'], ISO)
+    vt = datetime.datetime.strptime(j['meta']['valid'], iso)
     res['services'].append({
             'id': 'ridge_uscomp_n0r',
             'layername': 'ridge::USCOMP-N0R-%s' % vt.strftime("%Y%m%d%H%M"),
@@ -37,6 +37,7 @@ def run():
 
 
 def main():
+    """Go Main"""
     sys.stdout.write("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
@@ -57,6 +58,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()

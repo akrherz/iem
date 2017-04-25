@@ -8,7 +8,7 @@ include("../../include/database.inc.php");
 include("../../include/vtec.php");
 $postgis = iemdb("postgis");
 
-$rs = pg_query("SET TIME ZONE 'GMT'");
+$rs = pg_query("SET TIME ZONE 'UTC'");
 $rs = pg_prepare($postgis, "SELECT", "SELECT *, 
       ST_asGeoJson(geom) as geojson
       FROM sigmets_current WHERE sigmet_type = 'C' and expire > now() ");

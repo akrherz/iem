@@ -7,7 +7,8 @@ header('content-type: application/json; charset=utf-8');
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 $dbconn = iemdb('mesosite');
-$rs = pg_prepare($dbconn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat ".
+$rs = pg_prepare($dbconn, "SELECT",
+		"SELECT *, ST_x(geom) as lon, ST_y(geom) as lat ".
 		"from stations WHERE modified >= $1 LIMIT 1000");
 
 $date = isset($_REQUEST["date"]) ? $_REQUEST["date"] : date('Y-m-d');
@@ -22,7 +23,7 @@ for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
 
 $json = json_encode($ar);
 
-# JSON if no callback
+// JSON if no callback
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 

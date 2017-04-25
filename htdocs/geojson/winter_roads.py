@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of current storm based warnings """
-import memcache
 import sys
 import cgi
+import memcache
 
 
 def run():
@@ -41,8 +41,8 @@ def run():
     return json.dumps(res)
 
 
-if __name__ == '__main__':
-    # Go Main Go
+def main():
+    """Main Workflow"""
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
@@ -59,3 +59,7 @@ if __name__ == '__main__':
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
+
+if __name__ == '__main__':
+    main()

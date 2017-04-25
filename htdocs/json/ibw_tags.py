@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """ Service to dump out IBW tags for a WFO / Year"""
-import psycopg2
 import sys
-import memcache
 import cgi
 import json
 import datetime
+
+import psycopg2
+import memcache
 
 
 def ptime(val):
@@ -50,13 +51,14 @@ def run(wfo, year):
     res = dict(year=year, wfo=wfo, gentime=ptime(datetime.datetime.utcnow()),
                results=[])
     for row in cursor:
-        d = dict(eventid=row[0], locations=row[1],
-                 issue=ptime(row[2]), expire=ptime(row[3]),
-                 polygon_begin=ptime(row[4]), polygon_end=ptime(row[5]),
-                 status=row[6], windtag=row[7], hailtag=row[8],
-                 tornadotag=row[9], tml_sknt=row[10], tornadodamagetag=row[11],
-                 wfo=row[12], phenomena=row[13])
-        res['results'].append(d)
+        data = dict(eventid=row[0], locations=row[1],
+                    issue=ptime(row[2]), expire=ptime(row[3]),
+                    polygon_begin=ptime(row[4]), polygon_end=ptime(row[5]),
+                    status=row[6], windtag=row[7], hailtag=row[8],
+                    tornadotag=row[9], tml_sknt=row[10],
+                    tornadodamagetag=row[11],
+                    wfo=row[12], phenomena=row[13])
+        res['results'].append(data)
 
     return json.dumps(res)
 
@@ -80,6 +82,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()

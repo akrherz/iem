@@ -2,19 +2,18 @@
 """ Recent METARs containing some pattern """
 import cgi
 import sys
-import psycopg2.extras
 import datetime
 import json
-import memcache
 from json import encoder
+import memcache
+import psycopg2.extras
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
-
-PGCONN = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-cursor = PGCONN.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
 def get_data(q):
     """ Get the data for this query """
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
                     "properties": {"code": 4326,
@@ -75,6 +74,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()

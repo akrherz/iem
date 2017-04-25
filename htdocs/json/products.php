@@ -50,7 +50,7 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 
 $json = json_encode($ar);
 
-# JSON if no callback
+// JSON if no callback
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 

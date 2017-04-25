@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of 7 AM precip data """
-import memcache
 import sys
 import cgi
 import datetime
 import json
+import memcache
 import psycopg2.extras
 import pytz
 
@@ -101,8 +101,8 @@ def run(ts):
     return json.dumps(res)
 
 
-if __name__ == '__main__':
-    # Go Main Go
+def main():
+    """Do Workflow"""
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
@@ -123,3 +123,7 @@ if __name__ == '__main__':
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
+
+if __name__ == '__main__':
+    main()

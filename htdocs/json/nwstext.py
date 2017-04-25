@@ -10,11 +10,12 @@ import sys
 # extras
 import pytz
 import psycopg2
-AFOS = psycopg2.connect(database='afos', host='iemdb', user='nobody')
-acursor = AFOS.cursor()
 
 
 def main():
+    """Go Main"""
+    pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+    acursor = pgconn.cursor()
     form = cgi.FieldStorage()
     pid = form.getvalue('product_id', '201302241937-KSLC-NOUS45-PNSSLC')
     cb = form.getvalue('callback', None)
@@ -32,11 +33,12 @@ def main():
                                  'data': row[0]
                                  })
 
-    sys.stdout.write('Content-type: application/javascript\n\n')
+    sys.stdout.write("Content-type: application/javascript\n\n")
     if cb is None:
         sys.stdout.write(json.dumps(root))
     else:
         sys.stdout.write("%s(%s)" % (cb, json.dumps(root)))
+
 
 if __name__ == '__main__':
     main()

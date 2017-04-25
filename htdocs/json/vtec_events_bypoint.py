@@ -4,6 +4,7 @@ import cgi
 import sys
 import json
 import datetime
+import psycopg2
 
 
 def run(lon, lat, sdate, edate):
@@ -13,7 +14,6 @@ def run(lon, lat, sdate, edate):
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
-    import psycopg2
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
 
@@ -24,7 +24,7 @@ def run(lon, lat, sdate, edate):
     )
     SELECT
     to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
- to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
+  to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
     eventid, phenomena, significance, wfo
     from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
     issue > %s and issue < %s ORDER by issue ASC

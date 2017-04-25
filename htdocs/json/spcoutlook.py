@@ -6,11 +6,11 @@ import cgi
 import json
 import sys
 import memcache
+import psycopg2
 
 
-def do(lon, lat, last, day, cat):
+def dowork(lon, lat, last, day, cat):
     """ Actually do stuff"""
-    import psycopg2
     postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = postgis.cursor()
 
@@ -60,7 +60,7 @@ def main():
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey) if hostname != 'iem.local' else None
     if not res:
-        res = do(lon, lat, last, day, cat)
+        res = dowork(lon, lat, last, day, cat)
         mc.set(mckey, res, 3600)
 
     if cb is None:

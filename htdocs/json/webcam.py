@@ -2,19 +2,18 @@
 """
 JSON webservice providing timestamps of available webcam images
 """
-import cgi
-import psycopg2
 import json
 import sys
 import datetime
+import cgi
+import psycopg2
 import pytz
-
-dbconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
-cursor = dbconn.cursor()
 
 
 def dance(cid, start_ts, end_ts):
     """ Go get the dictionary of data we need and deserve """
+    dbconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    cursor = dbconn.cursor()
     data = {'images': []}
     cursor.execute("""
         SELECT valid at time zone 'UTC', drct from camera_log where
@@ -50,6 +49,7 @@ def main():
 
     sys.stdout.write("Content-type: application/json\n\n")
     sys.stdout.write(json.dumps(dance(cid, start_ts, end_ts)))
+
 
 if __name__ == '__main__':
     main()

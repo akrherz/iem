@@ -1,5 +1,5 @@
 <?php
-/* Giveme JSON data listing products */
+// Giveme JSON data listing products
 header("Content-type: application/vnd.geo+json");
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";

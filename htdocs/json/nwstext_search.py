@@ -2,12 +2,12 @@
 """
  Search for NWS Text, return JSON
 """
-import memcache
 import cgi
 import sys
-import datetime
-import pytz
 import json
+import datetime
+import memcache
+import pytz
 
 
 def run(sts, ets, awipsid):

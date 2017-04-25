@@ -3,8 +3,8 @@
 header("Content-type: application/vnd.geo+json");
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
+include_once "../../include/iemaccess.php";
+include_once "../../include/iemaccessob.php";
 $dbconn = iemdb("iem");
 
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,4): "KCCI";

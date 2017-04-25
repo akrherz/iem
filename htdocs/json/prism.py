@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """ JSON service providing PRISM data for a given point """
 
-import sys
-import os
-import cgi
-from pyiem import prism, datatypes
-import netCDF4
 import datetime
 import json
+import sys
+import cgi
+
+from pyiem import prism, datatypes
+import netCDF4
 import numpy as np
 import memcache
 
@@ -43,7 +43,7 @@ def compute_dates(dstring):
     return None
 
 
-def do(form):
+def dowork(form):
     """Do work!"""
     dates = compute_dates(form.getfirst('valid'))
     lat = float(form.getfirst("lat"))
@@ -103,7 +103,7 @@ def main():
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = do(form)
+        res = dowork(form)
         mc.set(mckey, res, 3600*12)
 
     if cb is None:

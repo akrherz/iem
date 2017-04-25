@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """Dump daily computed climatology direct from the database"""
+import datetime
 import cgi
 import sys
 import json
+
 import memcache
-import datetime
 
 
 def run(station, syear, eyear):

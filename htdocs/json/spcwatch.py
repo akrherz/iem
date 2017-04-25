@@ -3,15 +3,15 @@
  Return GeoJSON of valid watches for a provided timestamp or just now
 """
 import datetime
-import pytz
 import cgi
 import sys
-import memcache
 import json
+import memcache
+import pytz
 
 
-def do(ts):
-    ''' Actually do stuff '''
+def dowork(valid):
+    """Actually do stuff"""
     import psycopg2
     postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = postgis.cursor()
@@ -25,7 +25,7 @@ def do(ts):
     SELECT sel, issued at time zone 'UTC', expired at time zone 'UTC', type,
     ST_AsGeoJSON(geom), num from watches where issued <= %s and
     expired > %s
-    """, (ts, ts))
+    """, (valid, valid))
     for row in cursor:
         res['features'].append(
             dict(type='Feature', id=row[5],
@@ -42,6 +42,7 @@ def do(ts):
 
 
 def main():
+    """Main Workflow"""
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
@@ -58,13 +59,14 @@ def main():
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = do(ts)
+        res = dowork(ts)
         mc.set(mckey, res)
 
     if cb is None:
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of nexrad attributes"""
-import memcache
 import sys
 import cgi
+import memcache
 
 
 def run(ts):
@@ -97,6 +97,7 @@ def main():
         sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
+
 
 if __name__ == '__main__':
     main()
