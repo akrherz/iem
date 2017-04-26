@@ -4,16 +4,16 @@
  include("../../include/myview.php");
  include("../../include/mlib.php"); 
  include("../../include/network.php");
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include("../../include/station.php");
  include("../../include/iemaccess.php");
  include("../../include/iemaccessob.php");
   
   $t = new MyView();
  
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "peak";
- $metar = isset($_GET["metar"]) ? $_GET['metar'] : "no";
- $sorder = isset($_GET["sorder"]) ? $_GET["sorder"] : "desc";
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "peak";
+ $metar = isset($_GET["metar"]) ? xssafe($_GET['metar']) : "no";
+ $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "desc";
  $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
 
  $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">";

@@ -3,13 +3,14 @@ include("../../config/settings.inc.php");
 include_once "../../include/database.inc.php";
 $mesosite = iemdb('mesosite');
 include("../../include/myview.php");
+require_once "../../include/forms.php";
 $t = new MyView();
 $t->current_network = "RWIS Surface";
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
-$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
  $t->title = "RWIS Surface Currents";
  $t->refresh = "<meta http-equiv=\"refresh\" content=\"600;
- URL=currentSF.phtml?sortcol=$sortcol&network=$network\">";
+ URL=currentSF.phtml?sortcol=$sortcol&amp;network=$network\">";
  $t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script

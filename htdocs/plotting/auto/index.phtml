@@ -28,9 +28,9 @@ EOF;
 
 
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
-$network = isset($_GET["network"]) ? $_GET["network"]: "IACLIMATE";
-$state = isset($_GET["state"]) ? $_GET["state"]: "IA";
-$fmt = isset($_GET["_fmt"]) ? $_GET["_fmt"]: 'png';
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
+$state = isset($_GET["state"]) ? xssafe($_GET["state"]): "IA";
+$fmt = isset($_GET["_fmt"]) ? xssafe($_GET["_fmt"]): 'png';
 $lmw = isset($_GET['_l']) ? "$('#_l').click();\n": '';
 
 // Available Plots
@@ -121,7 +121,7 @@ EOF;
 	$form = "";
 	
 	while (list($k,$v) = each($jobj->arguments)){
-		$value = isset($_GET[$v->name]) ? $_GET[$v->name] : $v->default;
+		$value = isset($_GET[$v->name]) ? xssafe($_GET[$v->name]): $v->default;
 		$thisrow = null;
 		// BEGIN generation of interfaces based on types
 		if ($v->type == "zstation"){
@@ -142,7 +142,7 @@ EOF;
 				$networkcgi = "network";
 			}
 			$defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
-			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
+			$network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
@@ -165,7 +165,7 @@ EOF;
 				$networkcgi = "network";
 			}
 			$defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
-			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
+			$network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
@@ -201,7 +201,7 @@ EOF;
 				$networkcgi = "network";
 			}
 			$defaultnetwork = isset($v->network) ? $v->network : "IACLIMATE";
-			$network = isset($_GET[$networkcgi]) ? $_GET[$networkcgi]: $defaultnetwork;
+			$network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange",
 					"iemselect2");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
@@ -227,9 +227,9 @@ EOF;
 		elseif ($v->type == "vtec_ps"){
 			// Tricky here, we need name to represent the suffix to the name
 			$suffix = $v->name;
-			$value = isset($_GET["phenomena{$suffix}"]) ? $_GET["phenomena{$suffix}"] : '';
+			$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : '';
 			$netselect = vtecPhenoSelect($value, "phenomena{$suffix}");
-			$value = isset($_GET["significance{$suffix}"]) ? $_GET["significance{$suffix}"] : '';
+			$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : '';
 			$netselect2 = vtecSigSelect($value, "significance{$suffix}");
 			$thisrow = sprintf("%s &nbsp; %s", $netselect, $netselect2);
 		}
@@ -308,9 +308,9 @@ EOF;
 						$opton ? "block": 'none', $thisrow);
 				if ($opton){
 					if ($v->type == 'vtec_ps'){
-						$value = isset($_GET["phenomena{$suffix}"]) ? $_GET["phenomena{$suffix}"] : '';
+						$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : '';
 						$pltvars[] = sprintf("phenomena%s:%s", $v->name, $value);
-						$value = isset($_GET["significance{$suffix}"]) ? $_GET["significance{$suffix}"] : '';
+						$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : '';
 						$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
 					} else {
 						$pltvars[] = sprintf("%s:%s", $v->name, $value);
@@ -318,9 +318,9 @@ EOF;
 				}
 			} else{
 				if ($v->type == 'vtec_ps'){
-					$value = isset($_GET["phenomena{$suffix}"]) ? $_GET["phenomena{$suffix}"] : '';
+					$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : '';
 					$pltvars[] = sprintf("phenomena%s:%s", $v->name, $value);
-					$value = isset($_GET["significance{$suffix}"]) ? $_GET["significance{$suffix}"] : '';
+					$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : '';
 					$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
 				} else {
 					$pltvars[] = sprintf("%s:%s", $v->name, $value);

@@ -10,12 +10,12 @@ $t = new MyView();
 include("../../include/database.inc.php");
 include("../../include/network.php");
 $nt = new NetworkTable("WFO");
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
 
-$wfo = isset($_REQUEST['wfo']) ? $_REQUEST['wfo'] : 'DMX';
+$wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]): date("Y"); 
-$month = isset($_REQUEST["month"]) ? $_REQUEST["month"]: date("m"); 
+$month = isset($_REQUEST["month"]) ? xssafe($_REQUEST["month"]): date("m"); 
 
 $rs = pg_prepare($dbconn, "MYSELECT", "select id, name,
  count(*) as total, 

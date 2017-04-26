@@ -5,13 +5,13 @@
  date_default_timezone_set('UTC');
  include("../../include/myview.php");
  include("../../include/vtec.php"); 
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include("../../include/imagemaps.php");
   
  $t = new MyView();
  
  $year = isset($_REQUEST["year"])? intval($_REQUEST["year"]): date("Y");
- $wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"]: "DMX";
+ $wfo = isset($_REQUEST["wfo"])? xssafe($_REQUEST["wfo"]): "DMX";
  
  $jsonuri = sprintf("http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
  		$wfo, $year);

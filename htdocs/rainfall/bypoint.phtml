@@ -1,6 +1,7 @@
 <?php
  require_once "../../config/settings.inc.php";
  include_once "../../include/database.inc.php";
+ require_once "../../include/forms.php";
  /* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
@@ -12,10 +13,10 @@ $rs = pg_prepare($wepp, "SELECTRAIN", "select rainfall / 25.4 as inch,
 	valid from daily_rainfall
 	WHERE hrap_i = $1 and valid >= $2 and valid < $3 ORDER by valid ASC");
 
-$method = isset($_GET["method"]) ? $_GET["method"] : die('$method not specified');
+$method = isset($_GET["method"]) ? xssafe($_GET["method"]) : die('$method not specified');
 $syear = isset($_GET["syear"]) ? intval($_GET["syear"]) : die('$syear not specified');
 $eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]) : die('$eyear not specified');
-$view = isset($_GET["view"]) ? $_GET["view"] : "online";
+$view = isset($_GET["view"]) ? xssafe($_GET["view"]) : "online";
 
 $d = Array();
 $sts = mktime(0,0,0,1,1,$syear);
@@ -35,8 +36,8 @@ $data = "# IEM Rainfall https://mesonet.agron.iastate.edu/rainfall
 # Date Generated: ". date("r") ."\n";
 if ($method == "geocode")
 {
-	$s = isset($_GET["street"]) ? $_GET["street"] : "100 Main Street";
-	$c = $_GET["city"] .", IA";
+	$s = isset($_GET["street"]) ? xssafe($_GET["street"]) : "100 Main Street";
+	$c = xssafe($_GET["city"]) .", IA";
 	$data .= "# Request Method: Geocoded $s , $c\n";
 	$u = sprintf("http://iem.local/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
 	$res = trim( file_get_contents(str_replace(" ", "%20", $u)) );
@@ -54,7 +55,7 @@ if ($method == "geocode")
 else if ($method == "id")
 {
 	include("../../include/station.php");
-	$id = strtoupper($_GET["nwsli"]);
+	$id = strtoupper(xssafe($_GET["nwsli"]));
     $st = new StationData($id);
     $cities = $st->table;
 	$latitude = round($cities[$id]["lat"],4);

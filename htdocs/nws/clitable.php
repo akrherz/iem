@@ -3,17 +3,17 @@ include("../../config/settings.inc.php");
 define("IEM_APPID", 156);
 include_once "../../include/myview.php";
 include_once "../../include/database.inc.php";
-include_once "../../include/forms.php";
+require_once "../../include/forms.php";
 include_once "../../include/imagemaps.php";
 include_once "../../include/network.php";
 
 $nt = new NetworkTable("NWSCLI");
 
-$station = isset($_GET["station"]) ? $_GET["station"]: 'KDSM';
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]): 'KDSM';
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"]) ? intval($_GET["month"]): null;
 $day = isset($_GET["day"]) ? intval($_GET["day"]): null;
-$opt = isset($_GET["opt"]) ? $_GET["opt"]: "bystation";
+$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]): "bystation";
 
 $ys = yearSelect(2009, $year, "year");
 $ms = monthSelect($month, "month");
