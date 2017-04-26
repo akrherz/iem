@@ -1,30 +1,32 @@
 #!/usr/bin/env python
+"""The Autoplot frontend that does a complex number of things"""
 
-import cgi
-import memcache
 import sys
 import os
+import cgi
 import datetime
-import pandas as pd
 import tempfile
 import imp
-import pytz
 import traceback
 import json
 import cStringIO
+
+import memcache
+import pandas as pd
+import pytz
 
 
 def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting
     routine """
-    d = dict()
+    data = dict()
     for token in cgistr.split("::"):
         token2 = token.split(":")
         if len(token2) != 2:
             continue
-        d[token2[0]] = token2[1]
+        data[token2[0]] = token2[1]
 
-    return d
+    return data
 
 
 def send_content_type(fmt):
@@ -46,6 +48,8 @@ def send_content_type(fmt):
 
 
 def handle_error(exp, fmt):
+    """Handle an error and provide user something slightly bettter than
+    busted image"""
     sys.stdout.write("Status: 500\n")
     send_content_type(fmt)
     if fmt in ['png', 'svg', 'pdf']:
@@ -93,7 +97,7 @@ def get_res_by_fmt(p, fmt, fdict):
 
 
 def plot_metadata(plt, start_time, end_time, p):
-    # Place timestamp on the image
+    """Place timestamp on the image"""
     utcnow = datetime.datetime.utcnow(
                                     ).replace(tzinfo=pytz.timezone("UTC"))
     now = utcnow.astimezone(pytz.timezone("America/Chicago"))
@@ -163,7 +167,7 @@ def do(form, fmt):
             if fmt == 'txt' and report is not None:
                 res = report
 
-    sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s"
+    sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s\n"
                       ) % (p, (end_time - start_time).total_seconds(), mckey))
     try:
         mc.set(mckey, res, meta.get('cache', 43200))

@@ -1,32 +1,35 @@
-import numpy as np
+"""Generate monthly high/low climo plot"""
 import datetime
+import warnings
+
+import numpy as np
 import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
-import warnings
+
 warnings.simplefilter("ignore", UserWarning)
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 300
+    desc = dict()
+    desc['cache'] = 300
     today = datetime.date.today()
     mo = today.month
     yr = today.year
-    d['data'] = True
-    d['description'] = """Daily plot of observed high and low temperatures
+    desc['data'] = True
+    desc['description'] = """Daily plot of observed high and low temperatures
     along with the daily climatology for the nearest (sometimes same) location.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='station', default='AMW', network='IA_ASOS',
              label='Select Station:'),
         dict(type="month", name="month", default=mo, label="Select Month"),
         dict(type="year", name="year", default=yr, label="Select Year",
              minvalue=2000),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -133,7 +136,7 @@ def plotter(fdict):
     ax.set_xticks(range(1, days+1))
     ax.set_xticklabels(np.arange(1, days+1), fontsize=8)
     ax.set_xlabel(sts.strftime("%B %Y"))
-    ax.set_ylabel("Temperature $^\circ$F")
+    ax.set_ylabel(r"Temperature $^\circ$F")
 
     if nt.sts[station]['ncdc81'] is None:
         subtitle = "Daily climatology unavailable for site"
