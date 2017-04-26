@@ -24,42 +24,43 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
   $dy = ($ur_y - $ll_y) / floatval(480);
   $dx = ($ur_x - $ll_x) / floatval(640);
 
-  $_GET["lon0"] = ($_GET["img_x"] * $dx) + $ll_x ;
-  $_GET["lat0"] = $ur_y - ($_GET["img_y"] * $dy) ;
+  $_GET["lon0"] = (intval($_GET["img_x"]) * $dx) + $ll_x ;
+  $_GET["lat0"] = $ur_y - (intval($_GET["img_y"]) * $dy) ;
   /* $_GET["site"] = "user"; */
 }
 
-$layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "uscounties", "nexrad", "watches");
-$cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
+$layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings",
+		"uscounties", "nexrad", "watches");
+$cu = isset($_GET["cu"]) ? intval($_GET["cu"]): 0;
 $loop = isset($_GET["loop"]) ? intval($_GET["loop"]) : 0;
 if ($loop == 2) $loop = 1;
-$tz = isset($_GET["tz"]) ? $_GET["tz"] : "CDT";
+$tz = isset($_GET["tz"]) ? xssafe($_GET["tz"]): "CDT";
 $tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, 
 		"CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, 
 		"PST" => 28800);
 
 $tzoff = $tzdict[$tz];
-$autopilot = isset($_GET["autopilot"]) ? $_GET["autopilot"] : 0;
-$filter = isset($_GET["filter"]) ? $_GET["filter"]: 0;
-$lsrwindow = isset($_GET["lsrwindow"]) ? $_GET["lsrwindow"] : "0";
-$lsrlook = isset($_GET["lsrlook"]) ? $_GET["lsrlook"] : "+";
+$autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]): 0;
+$filter = isset($_GET["filter"]) ? intval($_GET["filter"]): 0;
+$lsrwindow = isset($_GET["lsrwindow"]) ? intval($_GET["lsrwindow"]): "0";
+$lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]): "+";
 $site = isset($_GET["site"]) ? substr($_GET["site"],0,3): "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"],0,3): "DMX";
-$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "issued";
-$sortdir = isset($_GET["sortdir"]) ? $_GET["sortdir"]: 0;
-$lon0 = isset($_GET["lon0"]) ? $_GET["lon0"]: 0;
-$lat0 = isset($_GET["lat0"]) ? $_GET["lat0"]: 0;
-$zoom = isset($_GET["zoom"]) ? $_GET["zoom"]: 250;
-$imgsize = isset($_GET["imgsize"]) ? $_GET["imgsize"] : "640x480";
-$interval = isset($_GET["interval"]) ? $_GET["interval"] : 5;
-$frames = isset($_GET["frames"]) ? $_GET["frames"] : 10;
-$warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "issued";
+$sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]): 0;
+$lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]): 0;
+$lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]): 0;
+$zoom = isset($_GET["zoom"]) ? intval($_GET["zoom"]): 250;
+$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]): "640x480";
+$interval = isset($_GET["interval"]) ? intval($_GET["interval"]): 5;
+$frames = isset($_GET["frames"]) ? intval($_GET["frames"]): 10;
+$warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]): "both";
 $ar = explode("x", $imgsize);
 $width = $ar[0];
 $height = $ar[1];
 
 $isarchive = (isset($_GET["archive"]) && $_GET["archive"] == "yes") ? 1 : 0;
-$archive = isset($_GET["archive"]) ? $_GET["archive"] : "";
+$archive = isset($_GET["archive"]) ? xssafe($_GET["archive"]): "";
 //if ($isarchive) { $loop = 0; }
 $a = time();
 if ($isarchive)
@@ -102,8 +103,15 @@ $nt = new NetworkTable("WFO");
 $nt->table["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , 
 		"name" => "National Hurricane Center");
 
-$uri = "$baseuri?frames=$frames&interval=$interval&site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
-$uri_nowfo = "$baseuri?frames=$frames&interval=$interval&archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
+$uri = "$baseuri?frames=$frames&amp;interval=$interval&amp;site=$site&amp;".
+	"cu=$cu&amp;archive=$archive&amp;year=$year&amp;month=$month&amp;".
+	"day=$day&amp;hour=$hour&amp;minute=$m&amp;loop=$loop&amp;".
+	"filter=$filter&amp;sortdir=$sortdir&amp;zoom=$zoom&amp;warngeo=$warngeo";
+$uri_nowfo = "$baseuri?frames=$frames&amp;interval=$interval&amp;".
+	"archive=$archive&amp;cu=$cu&amp;year=$year&amp;month=$month&amp;".
+	"day=$day&amp;hour=$hour&amp;minute=$m&amp;loop=$loop&amp;".
+	"filter=$filter&amp;sortdir=$sortdir&amp;zoom=$zoom&amp;warngeo=$warngeo";
+
 
 /*
  Okay, complicated location stuff here...
@@ -262,7 +270,7 @@ $pradio .= ">Show All";
 $pradio .= "<br /><input type=\"radio\" value=\"1\" name=\"cu\" ";
 if ($cu == 1) { $pradio .= "checked"; } $pradio .= ">Convective Only";
 
-$ar = Array("0"=>"DESC", "1"=>"ASC");
+$ar = Array(0 => "DESC", 1 => "ASC");
 $sdselect = make_select("sortdir", $sortdir, $ar);
 
 $yselect = yearSelect(2003, $year, "year");
@@ -408,7 +416,9 @@ if ($isarchive)
   $tsextra = "'". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."' and w.issue < '". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."'";
 }
 $cuextra = "";
-if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO','MA') ";
+if ($cu == 1) {
+	$cuextra = " and w.phenomena IN ('SV','TO','MA') ";
+}
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
   w.eventid as eventid, w.significance as significance, 
@@ -416,7 +426,7 @@ $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire,
   ST_ymax(u.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
-   and w.ugc = u.ugc $cuextra ORDER by $sortcol $sortdir";
+   and w.ugc = u.ugc $cuextra ORDER by ". pg_escape_string($sortcol) ." ". $sortdir;
 pg_exec($connection, "set time zone 'GMT'");
 $result = pg_exec($connection, $query);
 

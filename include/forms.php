@@ -2,6 +2,18 @@
 /**
  * Library for doing repetetive forms stuff
  */
+//xss mitigation functions
+//https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
+function xssafe($data, $encoding='UTF-8')
+{
+	return htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
+}
+function xecho($data)
+{
+	echo xssafe($data);
+}
+
+
 function make_select($name, $selected, $ar, $jscallback="", $cssclass=''){
         // Create a simple HTML select box
         reset($ar);
