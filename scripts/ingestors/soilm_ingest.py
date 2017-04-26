@@ -61,6 +61,7 @@ STATIONS = {'CAMI4': 'Calumet',
             'AHTI4': 'AmesHort',
             'OSTI4': 'TasselRidge',
             'BNKI4': 'Bankston',
+            'CSII4': 'Inwood',
             }
 
 
