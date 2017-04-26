@@ -1,10 +1,7 @@
 <?php
  include("../../../config/settings.inc.php");
- /** normals_wkr.php
-  *  - Download daily climate values
-  */
 include("../../../include/database.inc.php");
-include("../../../include/network.php");     
+include("../../../include/network.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 

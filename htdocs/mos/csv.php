@@ -3,7 +3,7 @@ putenv("TZ=GMT");
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 $mos = iemdb("mos");
-pg_exec($mos, "SET TIME ZONE 'GMT'");
+pg_exec($mos, "SET TIME ZONE 'UTC'");
 
 
 $station = isset($_GET["station"])? $_GET["station"]: "KAMW";

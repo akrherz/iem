@@ -4,20 +4,20 @@ define("IEM_APPID", 153);
 include("../../config/settings.inc.php");
 date_default_timezone_set('UTC');
 include("../../include/database.inc.php");
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 include("../../include/myview.php");
 $t = new MyView();
 include("lib.php");
 $mosdb = iemdb("mos");
-pg_exec($mosdb, "SET TIME ZONE 'GMT'");
+pg_exec($mosdb, "SET TIME ZONE 'UTC'");
 
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() + 86400);
-$month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() + 86400);
-$day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() + 86400);
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() + 86400);
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() + 86400);
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() + 86400);
 $hour =  0;
-$model = isset($_GET["model"]) ? strtoupper($_GET["model"]): "GFS";
-$station = isset($_GET["station"]) ? strtoupper($_GET["station"]): "KAMW";
-$vname = isset($_GET["vname"]) ? strtolower($_GET["vname"]): "tmp";
+$model = isset($_GET["model"]) ? strtoupper(xssafe($_GET["model"])): "GFS";
+$station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
+$vname = isset($_GET["vname"]) ? strtolower(xssafe($_GET["vname"])): "tmp";
 
 $now = strtotime("${year}-${month}-${day} ${hour}:00");
 if ($model == "NAM" && $now < mktime(12,0,0,12,9,2008)){ $model = "ETA"; }

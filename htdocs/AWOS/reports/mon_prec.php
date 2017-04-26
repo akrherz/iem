@@ -4,7 +4,7 @@ define("IEM_APPID", 38);
 include("../../../include/myview.php");
 include("../../../include/database.inc.php");
 include("../../../include/network.php");
-include("../../../include/forms.php");
+require_once "../../../include/forms.php";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 

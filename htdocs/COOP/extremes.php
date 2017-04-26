@@ -7,7 +7,7 @@
  $t = new MyView();
  
  define("IEM_APPID", 2);
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include("../../include/database.inc.php");
  include("../../include/network.php"); 
 
@@ -15,10 +15,10 @@
  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
  $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
  $valid = mktime(0,0,0,$month, $day, 2000);
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
  $network = isset($_GET['network']) ? substr($_GET['network'],0,9): 'IACLIMATE';
- $station = isset($_GET["station"]) ? $_GET["station"] : null;
- $sortdir = isset($_GET["sortdir"]) ? $_GET['sortdir'] : 'ASC';
+ $station = isset($_GET["station"]) ? xssafe($_GET["station"]): null;
+ $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET['sortdir']): 'ASC';
 
  $syear = 1800;
  $eyear = intval(date("Y")) + 1;
