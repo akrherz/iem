@@ -75,7 +75,7 @@ def get_data(ts):
              "id": sid,
              "properties": {"encrh_avg": ("%s%%" % safe(row['encrh_avg'], 1)
                                           if row['encrh_avg'] > 0 else "M"),
-                            "rh":  "%.0f%%" % (row["rh"],),
+                            "rh":  "%s%%" % (safe(row["rh"], 0),),
                             "hrprecip": (safe_p(row['rain_mm_tot'])
                                          if not q.get('precip', False)
                                          else 'M'),
