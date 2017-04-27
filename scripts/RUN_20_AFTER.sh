@@ -1,9 +1,6 @@
 # Run at :20 after the hour
 
-cd ingestors
-python soilm_ingest.py
-
-cd madis
+cd ingestors/madis
 python extract_hfmetar.py 0 &
 
 cd ../other
