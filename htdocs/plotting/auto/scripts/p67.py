@@ -1,21 +1,23 @@
-import matplotlib.patheffects as PathEffects
-import psycopg2.extras
+"""Wind Speed by Temperature"""
 import datetime
 import calendar
-from pyiem.network import Table as NetworkTable
+
+import matplotlib.patheffects as PathEffects
+import psycopg2.extras
 import pandas as pd
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the frequency of having a
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the frequency of having a
     reported wind speed be above a given threshold by reported temperature
     and by month."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='int', name='threshold', default=10,
@@ -23,7 +25,7 @@ def get_description():
         dict(type='month', name='month', default='3',
              label='Select Month:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -31,8 +33,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -88,7 +90,11 @@ def plotter(fdict):
     ax.set_ylabel("Frequency [%]")
     ax.set_ylim(0, 100)
     ax.set_xlim(min(tmpf)-3, max(tmpf)+3)
-    ax.set_xlabel("Air Temperature $^\circ$F")
+    ax.set_xlabel(r"Air Temperature $^\circ$F")
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

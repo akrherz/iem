@@ -1,6 +1,8 @@
-import psycopg2
+"""Overcast Freq"""
 import datetime
 import calendar
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -8,17 +10,17 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['description'] = """ Computes the frequency of having a day within
+    desc = dict()
+    desc['cache'] = 86400
+    desc['description'] = """ Computes the frequency of having a day within
     a month with an overcast sky reported at a given time of the day.  There
     are a number of caveats to this plot as sensors and observing techniques
     have changed over the years!  The algorithm specifically looks for the
     OVC condition to be reported in the METAR observation.
     """
-    d['data'] = True
+    desc['data'] = True
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='hour', name='hour', label='Select Hour of Day:',
@@ -30,7 +32,7 @@ def get_description():
              label='Select Month to Compare by Year:',
              default=today.month),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -112,6 +114,7 @@ def plotter(fdict):
     ax[1].set_ylabel("%s Frequency [%%]" % (calendar.month_abbr[month],))
     ax[1].set_xlim(obs['year'].min() - 2, obs['year'].max() + 2)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

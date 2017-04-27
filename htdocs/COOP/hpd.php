@@ -7,10 +7,10 @@ require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
-$station = isset($_GET["station"]) ? $_GET['station'] : null;
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
-$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$station = isset($_GET["station"]) ? xssafe($_GET['station']): null;
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 
 $yselect = yearSelect2(2008, $year, "year");
 $mselect = monthSelect2($month, "month");

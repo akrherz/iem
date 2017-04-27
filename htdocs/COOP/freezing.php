@@ -1,5 +1,7 @@
 <?php 
+define("IEM_APPID", 158);
 include("../../config/settings.inc.php");
+require_once "../../include/forms.php";
 include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Freezing Dates";
@@ -10,7 +12,7 @@ include("../../include/network.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
-$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
 	while (list($firstIndex, ) = each($multiArray))

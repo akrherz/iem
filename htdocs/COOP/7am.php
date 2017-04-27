@@ -1,5 +1,5 @@
 <?php
-$OL = "3.9.0";
+$OL = "4.1.0";
 include_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 include_once "../../include/myview.php";
@@ -22,7 +22,7 @@ $t->headextra = <<<EOF
 EOF;
 
 $t->jsextra = <<<EOF
-<script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
+<script src="/vendor/openlayers/{$OL}/ol-debug.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
 <script src='7am-app.js?v=8'></script>

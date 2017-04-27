@@ -1,21 +1,23 @@
+"""GDD Fun"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-import datetime
-from pyiem import network
 import pandas as pd
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents the period over which growing
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents the period over which growing
     degree days were accumulated between the two thresholds provided by
     the user.  The colors represent the number of days for the period shown."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
-             label='Select Station:'),
+             label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Select Year', min=1893),
         dict(type='int', name='gdd1', default='1135',
@@ -23,7 +25,7 @@ def get_description():
         dict(type='int', name='gdd2', default='1660',
              label='Growing Degree Day End'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -32,10 +34,9 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    import matplotlib.cm as cm
     import matplotlib.colors as mpcolors
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -102,7 +103,7 @@ def plotter(fdict):
     success = np.array(success)
     starts = np.array(starts)
 
-    cmap = cm.get_cmap('jet')
+    cmap = plt.get_cmap('jet')
     bmin = min(heights[success]) - 1
     bmax = max(heights[success]) + 1
     bins = np.arange(bmin, bmax+1.1)
@@ -110,9 +111,9 @@ def plotter(fdict):
 
     ax = plt.axes([0.125, 0.125, 0.75, 0.75])
     bars = ax.bar(days2, heights, bottom=starts, fc='#EEEEEE')
-    for i, bar in enumerate(bars):
+    for i, mybar in enumerate(bars):
         if success[i]:
-            bar.set_facecolor(cmap(norm([heights[i]])[0]))
+            mybar.set_facecolor(cmap(norm([heights[i]])[0]))
     ax.grid(True)
     ax.set_yticks(yticks)
     ax.set_yticklabels(yticklabels)
@@ -128,8 +129,8 @@ def plotter(fdict):
     ax2 = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
                    yticks=[], xticks=[])
     ax2.set_xlabel("Days")
-    for i in range(len(bins)):
-        ax2.text(0.52, i, "%g" % (bins[i],), ha='left', va='center',
+    for i, mybin in enumerate(bins):
+        ax2.text(0.52, i, "%g" % (mybin,), ha='left', va='center',
                           color='k')
         # txt.set_path_effects([PathEffects.withStroke(linewidth=2,
         #                                             foreground="k")])
@@ -139,6 +140,7 @@ def plotter(fdict):
     ax2.set_xlim(0, 1)
 
     return plt.gcf(), df
+
 
 if __name__ == '__main__':
     plotter(dict())

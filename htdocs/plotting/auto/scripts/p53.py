@@ -1,6 +1,8 @@
-import psycopg2.extras
+"""Binned"""
 import datetime
 import calendar
+
+import psycopg2.extras
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -11,15 +13,15 @@ PDICT = {'tmpf': 'Air Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['description'] = """This plot is a histogram of observed temperatures
+    desc = dict()
+    desc['cache'] = 86400
+    desc['description'] = """This plot is a histogram of observed temperatures
     placed into five range bins of your choice.  The plot attempts to answer
     the question of how often is the air temperature within a certain range
     during a certain time of the year.  The data for this plot is partitioned
     by week of the year."""
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', options=PDICT, default='tmpf', name='var',
@@ -35,7 +37,7 @@ def get_description():
         dict(type='int', name='t5', default=90,
              label='Temperature Threshold #5 (highest)'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -43,8 +45,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -136,3 +138,7 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=12)
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

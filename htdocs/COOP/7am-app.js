@@ -44,7 +44,7 @@ function makeVectorLayer(dt, title, group){
 			return [new ol.style.Style({
 				text: new ol.style.Text({
 					font: '14px Calibri,sans-serif',
-					text: txt,
+					text: txt.toString(),
 					stroke: new ol.style.Stroke({
 						color: '#fff',
 						width: 3

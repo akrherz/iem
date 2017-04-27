@@ -1,11 +1,13 @@
-import psycopg2
-import pyiem.nws.vtec as vtec
+"""WWA Frequency"""
+import calendar
 import datetime
+
+import psycopg2
 from pandas.io.sql import read_sql
+import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 from pyiem import reference
-import calendar
 
 OPT = {'state': 'Summarize by State',
        'wfo': 'Summarize by NWS Forecast Office'}
@@ -13,10 +15,10 @@ OPT = {'state': 'Summarize by State',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart shows the weekly frequency of having
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart shows the weekly frequency of having
     at least one watch/warning/advisory (WWA) issued by the Weather Forecast
     Office (top plot) and the overall number of WWA issued for
     that week of the year (bottom plot).  For example, if 10 Tornado Warnings
@@ -26,7 +28,7 @@ def get_description():
     certain WWA type and which week has seen the most WWAs issued.  The plot
     only considers issuance date. When plotting for a state, an event is
     defined on a per forecast office basis."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='opt', options=OPT, default='wfo',
              label='How to Spatially Group Statistics:'),
         dict(type='state', name='state',
@@ -38,7 +40,7 @@ def get_description():
         dict(type='significance', name='significance',
              default='W', label='Select Watch/Warning Significance Level:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -86,10 +88,10 @@ def plotter(fdict):
     # Top Panel: count
     gdf = df.groupby('week').count()
     ax[0].bar((gdf.index.values - 1) * 7, gdf['yr'], width=7)
-    ax[0].set_title("%s\n%s %s (%s.%s) Events - %i to %i" % (
-        title, vtec._phenDict[phenomena],
-        vtec._sigDict[significance], phenomena, significance,
-        df['yr'].min(), df['yr'].max()))
+    ax[0].set_title(("%s\n%s %s (%s.%s) Events - %i to %i"
+                     ) % (title, vtec._phenDict[phenomena],
+                          vtec._sigDict[significance], phenomena, significance,
+                          df['yr'].min(), df['yr'].max()))
     ax[0].grid()
     ax[0].set_ylabel("Years with 1+ Event")
 
@@ -104,6 +106,7 @@ def plotter(fdict):
     ax[1].set_xlim(0, 366)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
