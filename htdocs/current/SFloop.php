@@ -1,5 +1,6 @@
 <?php
- $product = isset($_GET["product"]) ? $_GET["product"] : "TW";
+require_once "../../include/forms.php";
+ $product = isset($_GET["product"]) ? xssafe($_GET["product"]): "TW";
 ?>
 <HTML><HEAD></HEAD>
 

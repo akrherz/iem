@@ -4,7 +4,8 @@
  * 'called' from all sorts of apps, so be careful!
  */
 include("../../config/settings.inc.php");
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
+require_once "../../include/forms.php";
+$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
 $multi = isset($_GET["multi"]);
 header("Content-type: application/javascript");
 $uri = sprintf("/geojson/network/%s.geojson", $network);
