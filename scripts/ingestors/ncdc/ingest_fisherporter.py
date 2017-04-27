@@ -1,10 +1,16 @@
-"""Ingest the Fisher/Porter rain gage data from NCDC"""
-import psycopg2
+"""Ingest the Fisher/Porter rain gage data from NCDC
+
+    Run from RUN_2AM.sh for 3, 6, and 12 months in the past
+    on the 15th each month
+"""
+from __future__ import print_function
 import sys
-import pandas as pd
 import datetime
-import urllib2
 import os
+import urllib2
+
+import psycopg2
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 
 
@@ -70,24 +76,26 @@ def process(tmpfn):
         pgconn.commit()
 
 
-def do(valid):
+def dowork(valid):
     """Process a month's worth of data"""
     uri = valid.strftime(("http://www1.ncdc.noaa.gov/pub/data/hpd/data/"
                           "hpd_%Y%m.csv"))
-    tmpfn = valid.strftime("/tmp/hpd_%Y%m.csv")
+    tmpfn = valid.strftime("/mesonet/tmp/hpd_%Y%m.csv")
     if not os.path.isfile(tmpfn):
         print('Downloading %s from NCDC' % (tmpfn,))
-        o = open(tmpfn, 'w')
-        o.write(urllib2.urlopen(uri).read())
-        o.close()
+        output = open(tmpfn, 'w')
+        output.write(urllib2.urlopen(uri).read())
+        output.close()
 
     process(tmpfn)
+    os.unlink(tmpfn)
 
 
 def main(argv):
     """Go Main Go"""
     valid = datetime.datetime(int(argv[1]), int(argv[2]), 1)
-    do(valid)
+    dowork(valid)
+
 
 if __name__ == '__main__':
     main(sys.argv)
