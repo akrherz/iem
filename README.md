@@ -22,7 +22,7 @@ hads-database | metvm4 | None | [check_hads_ingest.py](nagios/check_hads_ingest.
 iembot  | iem6    | iem12  | nagios checks for twistd processes running
 LDM | iem12 | None | None
 LoggerNet | iem12 | None | None
-mailman | iemfe | None | None
+mailman | iem12 | None | None
 nwningest | iem12 | None    | cron scripts checks SNET sites for being online
 openfire | iem12 | None     | None
 postgres | metvm6 | iem6  | None

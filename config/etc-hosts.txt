@@ -11,7 +11,6 @@
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
-192.168.0.4      iemfe         iemfe.local
 192.168.0.5      metvm2.local
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.7      iemvm2
