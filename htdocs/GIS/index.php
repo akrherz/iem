@@ -50,7 +50,6 @@ archive of presentations.</li>
   <br />Weather data integrated into Google Earth!</li>
  <li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
 	<br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
- <li><a href="/GIS/software.php">GIS Software</a></li>
  <li>Scott Shipley's <a href="http://geog.gmu.edu/projects/wxproject/nex2shp/nexrad.htm">NEXRAD to shapefile</a> converter.
  <li><a href="http://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
  <li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>

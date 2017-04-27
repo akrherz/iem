@@ -2,15 +2,17 @@
 """
  Return NWS Text
 """
-import psycopg2
 import cgi
 import sys
-import pytz
 import datetime
+
+import psycopg2
+import pytz
 import memcache
 
+
 def get_data(product):
-    """ Go get this product from the database 
+    """ Go get this product from the database
     201410071957-KDMX-FXUS63-AFDDMX
     """
     pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
@@ -24,12 +26,13 @@ def get_data(product):
 
     cursor.execute("""SELECT data from products where source = %s
     and pil = %s and entered = %s""", (source, pil, ts))
-    
+
     if cursor.rowcount == 0:
         return 'Not Found %s %s' % (source, pil)
-    
+
     row = cursor.fetchone()
     return row[0].replace("\r\r\n", "\n")
+
 
 def main():
     ''' Do Stuff '''
@@ -45,10 +48,10 @@ def main():
         res = get_data(product)
         mc.set(mckey, res, 1800)
     if cb is None:
-        sys.stdout.write( res )
+        sys.stdout.write(res)
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
 
-    
+
 if __name__ == '__main__':
     main()

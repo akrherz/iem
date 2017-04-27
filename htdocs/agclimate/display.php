@@ -6,8 +6,8 @@
  $t->thispage = "networks-agclimate";
  include "../../include/forms.php";
  $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
- $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
- $month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
+ $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
+ $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
  
 $old2new = Array(
  "/data/agclimate/air-temp-out.png" => 1,

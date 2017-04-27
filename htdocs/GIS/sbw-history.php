@@ -3,12 +3,13 @@
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/vtec.php");
+require_once "../../include/forms.php";
 
 $mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");
 
 /* Figure out what our VTEC is! */
-$vtec = isset($_GET["vtec"]) ? $_GET["vtec"]: '2008.KICT.SV.W.0345';
+$vtec = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]): '2008.KICT.SV.W.0345';
 
 list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $vtec);
 $eventid = intval($eventid);

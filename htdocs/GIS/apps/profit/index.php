@@ -3,7 +3,7 @@ include_once "../../../../config/settings.inc.php";
 
 include_once "../../../../include/myview.php";
 
-$OL = "3.13.1";
+$OL = "4.1.0";
 $t = new MyView();
 $t->title = "Profitability Map";
 $t->headextra = <<<EOF

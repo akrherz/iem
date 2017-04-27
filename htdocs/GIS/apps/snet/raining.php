@@ -1,11 +1,12 @@
 <?php
+define("IEM_APPID", 159);
  include("../../../../config/settings.inc.php");
  include("../../../../include/myview.php");
  $t = new MyView();
  
 include_once "../../../../include/iemmap.php";
 include("../../../../include/mlib.php");
-include("../../../../include/forms.php");
+require_once "../../../../include/forms.php";
 include("../../../../include/network.php");
 include("../../../../include/iemaccess.php");
 include("../../../../include/iemaccessob.php");
@@ -51,10 +52,10 @@ $wfos = Array("DMX" => "Des Moines",
 		"UDX" => "Rapid City");
 
 $pgconn = iemdb("access");
- $rad = isset($_GET['rad']) ? $_GET['rad'] : 'DMX';
+ $rad = isset($_GET['rad']) ? xssafe($_GET['rad']) : 'DMX';
  $tv = isset($_GET['rad']) ? strtoupper(substr($_GET['tv'],0,4)) : 'KCCI';
- $station = isset($_GET['station']) ? $_GET['station'] : '';
- $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'p15m';
+ $station = isset($_GET['station']) ? xssafe($_GET['station']) : '';
+ $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'p15m';
 
 $rs = pg_prepare($pgconn, "SELECT", "SELECT * from events WHERE network = $1
 	and valid > (now() - '15 minutes'::interval)");

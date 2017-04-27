@@ -9,7 +9,7 @@ $t->title = "NWS COOP Plotting";
 include_once "../../../../include/database.inc.php";
 include_once "../../../../include/iemmap.php";
 include("../../../../include/network.php");
-include("../../../../include/mlib.php");
+require_once "../../../../include/mlib.php";
 include("../../../../include/forms.php");
 include("../rview/lib.php");
 
@@ -17,10 +17,10 @@ $coopdb = iemdb("coop");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
-$plot = isset($_GET["plot"]) ? $_GET["plot"]: "high";
-$area = isset($_GET["area"]) ? $_GET["area"]: "all";
-$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
-$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$plot = isset($_GET["plot"]) ? xssafe($_GET["plot"]): "high";
+$area = isset($_GET["area"]) ? xssafe($_GET["area"]): "all";
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 
 
 $height = 350;
@@ -209,7 +209,7 @@ $t->content = <<<EOF
 </td></tr>
 
 <tr>
-  <td colspan=2 class="subtitle"><b>Select Parameter:</b>
+  <td colspan="2"><b>Select Parameter:</b>
   </td></tr>
 
 <tr><td colspan=2>
@@ -218,7 +218,7 @@ $t->content = <<<EOF
 </td></tr>
 
 <tr>
-  <td colspan=2 class="subtitle"><b>Select Date:</b>
+  <td colspan="2"><b>Select Date:</b>
   </td></tr>
 
 <tr>
@@ -239,22 +239,22 @@ $t->content = <<<EOF
   </td></tr>
 
 <tr>
-  <td colspan=2 class="subtitle"><b>Download Options:</b>
+  <td colspan="2"><b>Download Options:</b>
   </td></tr>
 
 <tr>
-  <td colspan=2>
+  <td colspan="2">
     <a href="request.php?month={$month}&day={$day}">
     <img src="/images/gisready.png" border="0"> shp, dbf, shx</a><br><br>
   </td></tr>
 
 
 <tr>
-  <td colspan=2 class="subtitle"><b>Map Information:</b>
+  <td colspan="2"><b>Map Information:</b>
   </td></tr>
 
 <tr>
-  <td colspan=2>
+  <td colspan="2">
   The black and red dots signify the climate record for the station.  Sites in 
   black date back till 1893 and sites in red to 1951.
 

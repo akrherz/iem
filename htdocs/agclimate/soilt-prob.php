@@ -7,9 +7,10 @@ $t = new MyView();
 include("../../include/database.inc.php");
 $t->thispage = "networks-agclimate";
 include("../../include/imagemaps.php");
+require_once "../../include/forms.php";
 
-$station = isset($_GET["station"]) ? $_GET['station']: "A130209";
-$tstr = isset($_GET["tstr"]) ? $_GET['tstr']: "50,45,40,35,32,28,23";
+$station = isset($_GET["station"]) ? xssafe($_GET['station']): "A130209";
+$tstr = isset($_GET["tstr"]) ? xssafe($_GET['tstr']): "50,45,40,35,32,28,23";
 
 $conn = iemdb("isuag");
 $rs = pg_prepare($conn, "spring", "SELECT extract(year from valid) as yr,

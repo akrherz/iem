@@ -6,12 +6,12 @@ $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
 $t->thispage = "networks-agclimate";
 
-include_once "../../include/forms.php"; 
+require_once "../../include/forms.php"; 
 include_once "../../include/imagemaps.php"; 
 
 $now = time();
 $d2 = time() - 5 * 86400;
-$station = isset($_GET["station"]) ? $_GET["station"] : "AEEI4";
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]): "AEEI4";
 $year1 = isset($_REQUEST['year1']) ? intval($_REQUEST['year1']): date("Y", $d2);
 $month1 = isset($_REQUEST['month1']) ? intval($_REQUEST['month1']): date("m", $d2);
 $day1 = isset($_REQUEST['day1']) ? intval($_REQUEST['day1']): date("d", $d2);
@@ -20,7 +20,7 @@ $year2 = isset($_REQUEST['year2']) ? intval($_REQUEST['year2']): date("Y", $now)
 $month2 = isset($_REQUEST['month2']) ? intval($_REQUEST['month2']): date("m", $now);
 $day2 = isset($_REQUEST['day2']) ? intval($_REQUEST['day2']): date("d", $now);
 $hour2 = isset($_REQUEST['hour2']) ? intval($_REQUEST['hour2']): date("H", $now);
-$opt = isset($_REQUEST['opt']) ? $_REQUEST['opt'] : '1';
+$opt = isset($_REQUEST['opt']) ? xssafe($_REQUEST['opt']): '1';
 
 $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ets = mktime($hour2, 0, 0, $month2, $day2, $year2);

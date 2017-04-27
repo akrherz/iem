@@ -14,9 +14,9 @@ function ss($v){
 	return intval($v);
 }
 
-$sdate = isset($_GET["sdate"]) ? $_GET["sdate"]: "04/01/2015";
-$network = isset($_GET["network"]) ? $_GET["network"] : "IACLIMATE";
-$edate = isset($_GET["edate"]) ? $_GET["edate"]: "12/31/2015";
+$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]): "04/01/2015";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
+$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]): "12/31/2015";
 $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
@@ -32,9 +32,9 @@ $hiddendates = <<<EOF
 EOF;
 $sdate = strtotime($sdate);
 $edate = strtotime($edate);
-$s = isset($_GET["s"]) ? $_GET["s"] : Array();
+$s = isset($_GET["s"]) ? xssafe($_GET["s"]): Array();
 if (isset($_GET['r'])){
-	$r = $_GET["r"];
+	$r = xssafe($_GET["r"]);
 	while(list($k,$v)=each($r)){
 		if(($key = array_search($v, $s)) !== false) {
 			unset($s[$key]);

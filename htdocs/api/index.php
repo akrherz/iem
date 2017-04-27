@@ -8,11 +8,8 @@ $t->content = <<< EOF
 
 <h3>IEM API</h3>
 		
-		<p>This is a lame and initial attempt at producing a usable API.</p>
+<p>This is a lame and initial attempt at producing a usable API.</p>
 		
-<pre>
-	/api/sql/database/dbname?sql=SELECT day from current WHERE
-</pre>
 
 EOF;
 
