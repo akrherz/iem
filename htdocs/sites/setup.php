@@ -6,9 +6,10 @@
  include_once("../../config/settings.inc.php");
  include_once("../../include/database.inc.php");
  include_once("../../include/station.php");
+ require_once "../../include/forms.php";
  /* Make sure all is well! */
- $station = isset($_GET["station"]) ? substr($_GET["station"], 0, 20) : "";
- $network = isset($_GET["network"]) ? $_GET["network"] : "";
+ $station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 20) : "";
+ $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "";
  
 if ($station == ""){
  	header("Location: locate.php");

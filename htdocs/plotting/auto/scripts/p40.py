@@ -1,3 +1,4 @@
+"""METAR cloudiness"""
 import psycopg2
 import numpy as np
 import datetime
@@ -9,10 +10,10 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 3600
-    d['description'] = """This chart is an attempted illustration of the amount
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 3600
+    desc['description'] = """This chart is an attempted illustration of the amount
     of cloudiness that existed at a METAR site for a given month.  The chart
     combines reports of cloud amount and level to provide a visual
     representation of the cloudiness.  Once the METAR site hits a cloud level
@@ -21,7 +22,7 @@ def get_description():
     that in reality.
     """
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='month', name='month', label='Select Month:',
@@ -29,7 +30,7 @@ def get_description():
         dict(type='year', name='year', label='Select Year:',
              default=today.year, min=1970),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -38,6 +39,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
+    from matplotlib.patches import Rectangle
     pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -65,7 +67,7 @@ def plotter(fdict):
     lookup = {'CLR': 0, 'FEW': 25, 'SCT': 50, 'BKN': 75, 'OVC': 100}
 
     if len(df.index) == 0:
-        return "No database entries found for station, sorry!"
+        raise Exception("No database entries found for station, sorry!")
 
     for _, row in df.iterrows():
         delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)
@@ -104,8 +106,7 @@ def plotter(fdict):
     ax.set_ylabel("Cloud Levels [1000s feet]")
     ax.set_xlabel("Day of %s (UTC Timezone)" % (sts.strftime("%b %Y"),))
 
-    from matplotlib.patches import Rectangle
-    r = Rectangle((0, 0), 1, 1, fc='skyblue')
+    r1 = Rectangle((0, 0), 1, 1, fc='skyblue')
     r2 = Rectangle((0, 0), 1, 1, fc='white')
     r3 = Rectangle((0, 0), 1, 1, fc='k')
     r4 = Rectangle((0, 0), 1, 1, fc='#EEEEEE')
@@ -116,12 +117,13 @@ def plotter(fdict):
     ax.set_position([box.x0, box.y0 + box.height * 0.1,
                      box.width, box.height * 0.9])
 
-    ax.legend([r, r4, r2, r3], ['Clear', 'Some', 'Unknown',
-                                'Obscured by Overcast'],
+    ax.legend([r1, r4, r2, r3], ['Clear', 'Some', 'Unknown',
+                                 'Obscured by Overcast'],
               loc='upper center', fontsize=14,
               bbox_to_anchor=(0.5, -0.09), fancybox=True, shadow=True, ncol=4)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(station='DSM', year=2016, month=9, network='IA_ASOS'))

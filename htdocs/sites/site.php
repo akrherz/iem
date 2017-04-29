@@ -2,6 +2,7 @@
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/myview.php");
+require_once "../../include/forms.php";
 
 include("setup.php");
 
@@ -19,8 +20,8 @@ if (isset($_GET["lat"]) &&
 		floatval($_GET["lon"]) != -1){
 	$newlat = floatval($_GET["lat"]);
 	$newlon = floatval($_GET["lon"]);
-	$email = isset($_GET["email"]) ? $_GET["email"]: 'n/a';
-	$name = isset($_GET["name"]) ? $_GET["name"]: "n/a";
+	$email = isset($_GET["email"]) ? xssafe($_GET["email"]): 'n/a';
+	$name = isset($_GET["name"]) ? xssafe($_GET["name"]): "n/a";
 	$msg = <<<EOF
 IEM Sites Move Request
 ======================

@@ -1,8 +1,10 @@
-import numpy as np
-from pyiem import iemre, util
+"""Precip estimates"""
 import datetime
-import netCDF4
 import os
+
+import numpy as np
+import netCDF4
+from pyiem import iemre, util
 from pyiem.datatypes import distance
 from collections import OrderedDict
 
@@ -28,16 +30,16 @@ SRCDICT = {'mrms': 'NOAA MRMS (since 1 Jan 2014)',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = False
-    d['description'] = """This application allows the plotting of precipitation
+    desc = dict()
+    desc['data'] = False
+    desc['description'] = """This application allows the plotting of precipitation
     estimates from either MRMS or PRISM.  Please note that the start and
     end dates are inclusive.  The PRISM data is credit:
     <a href='http://prism.oregonstate.edu'>PRISM Climate Group</a>,
     Oregon State University, created 4 Feb 2004.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='sector', default='IA',
              label='Select Sector:', options=PDICT),
         dict(type='select', name='src', default='mrms',
@@ -51,7 +53,7 @@ def get_description():
              default=today.strftime("%Y/%m/%d"),
              label='End Date:', min="1981/01/01"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -137,3 +139,7 @@ def plotter(fdict):
         m.drawcities()
 
     return m.fig
+
+
+if __name__ == '__main__':
+    plotter(dict())

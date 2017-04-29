@@ -3,10 +3,10 @@ include("../../config/settings.inc.php");
 define("IEM_APPID", 6);
 include("../../include/database.inc.php");
 include_once("../../include/myview.php");
-include_once("../../include/forms.php");
+require_once "../../include/forms.php";
 $pgconn = iemdb("mesosite");
 
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
+$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
 
 if ($network == '_ALL_'){
 	$sql = "SELECT *,
@@ -28,7 +28,7 @@ if ($network == '_ALL_'){
 $rs = pg_prepare($pgconn, "NTSELECT", $sql);
 include("../../include/imagemaps.php");
 
-$format = isset($_GET['format']) ? $_GET['format'] : 'html';
+$format = isset($_GET['format']) ? xssafe($_GET['format']): 'html';
 $nohtml = isset($_GET['nohtml']);
 
 $table = "";
@@ -155,7 +155,7 @@ if (! $nohtml || $format == 'shapefile') {
 		include("setup.php");
 		$page = 'sites.phtml';
 		$sextra = sprintf("<input type=\"hidden\" value=\"%s\" name=\"station\">",
-			$_REQUEST["station"]);
+			xssafe($_REQUEST["station"]));
 	}
 
 	$ar = Array(

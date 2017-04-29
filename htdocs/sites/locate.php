@@ -1,12 +1,13 @@
 <?php
-$OL = "3.18.2";
+$OL = "4.1.0";
 /*
  * Main landing page for the IEM Sites stuff
  */
+require_once "../../include/forms.php";
 if (isset($_GET["station"]) && isset($_GET["network"]))
 {
-	$uri = sprintf("site.php?station=%s&network=%s", $_REQUEST["station"],
-		$_REQUEST["network"]);
+	$uri = sprintf("site.php?station=%s&network=%s",
+			xssafe($_REQUEST["station"]), xssafe($_REQUEST["network"]));
   	header("Location: $uri");
   	exit();
 }
@@ -16,7 +17,7 @@ if (isset($_GET["station"]) && isset($_GET["network"]))
  include("../../include/imagemaps.php");
  include("../../include/myview.php");
 
-$network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IA_ASOS";
   
 $t = new MyView();
 $t->title = "Site Locator";

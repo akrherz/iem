@@ -1,25 +1,27 @@
+"""Precip sums"""
+import calendar
+
 import psycopg2.extras
 import pandas as pd
-import calendar
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Displays the number of times that a single day's
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Displays the number of times that a single day's
     precipitation was greater than some portion of the monthly total. The
     default settings provide the frequency of getting half of the month's
     precipitation within one 24 hour period."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:'),
         dict(type='text', name='threshold', default=50,
              label='Percentage of Monthly Precipitation on One Day'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -69,6 +71,7 @@ def plotter(fdict):
     ax.set_xticks(range(1, 13))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

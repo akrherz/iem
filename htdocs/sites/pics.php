@@ -3,13 +3,14 @@
  * My purpose in life is to produce pics
  */
 include("../../config/settings.inc.php");
+require_once "../../include/forms.php";
 include("../../include/database.inc.php");
 include("setup.php");
 
 include("../../include/myview.php");
 $t = new MyView();
 
-$dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
+$dir = isset($_GET["dir"]) ? xssafe($_GET["dir"]): "";
 
 $filename='/mesonet/share/pics/'.$station.'/'.$station.'.jpg'; 
 $puri='pics/'.$station.'/'.$station.'.jpg';

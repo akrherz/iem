@@ -30,7 +30,7 @@ function neighbors($station,$lat,$lon){
 
 $n = neighbors($station,$metadata["lat"],$metadata["lon"]);
 $t->content = <<<EOF
-<h3 class="subtitle">Neighboring Stations</h3>
+<h3>Neighboring Stations</h3>
 <p>The following is a list of IEM tracked stations within roughly 25 kilometers
 from the site. Click on the site name for more information.</p>
 

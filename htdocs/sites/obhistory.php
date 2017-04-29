@@ -60,9 +60,9 @@ function formatter($i, $row){
 include("setup.php");
 include_once "../../include/mlib.php";
 include_once "../../include/forms.php";
-$year = isset($_REQUEST["year"])? $_REQUEST["year"]: date("Y");
-$month = isset($_REQUEST["month"])? $_REQUEST["month"]: date("m");
-$day = isset($_REQUEST["day"])? $_REQUEST["day"]: date("d");
+$year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"])? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"])? intval($_GET["day"]): date("d");
 $date = mktime(0,0,0,$month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;
