@@ -6,18 +6,24 @@
 
  include("../../../include/database.inc.php");
  include("../../../include/imagemaps.php");
- include_once("../../../include/forms.php");
+ require_once "../../../include/forms.php";
 
- $station = isset($_GET["station"]) ? $_GET["station"]: "IA0200";
- $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
+ $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "IA0200";
+ $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IACLIMATE";
  $gddbase = isset($_REQUEST["gddbase"]) ? intval($_REQUEST["gddbase"]): 2600;
 
- $dcgi = "gddbase=$gddbase";
+ $imgurl = sprintf("/plotting/auto/plot/179/network:%s::station:%s".
+ 		"::gddbase:%s::dpi:100.png", $network, $station, $gddbase);
  
 $t->thispage = "networks-coop";
 $t->title = "Growing Degree Day Scenarios / Probabilities";
 $nselect = networkSelect($network, $station);
 $t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/COOP/">NWS COOP Network</a></li>
+ <li class="active">Growing Degree Day Probabilities</li>
+</ol>
+
 <h3>Growing Degree Day Probabilities</h3>
 
 <p>This application creates two 2-D histograms of GDD accumulation frequencies.
@@ -52,9 +58,9 @@ on record got to {$gddbase} by 1 October prior to a freeze.
 
 <form name="olselect" action="gddprobs.phtml" method="GET">
 <input type="hidden" name="network" value="{$network}" />
-<table style="padding: 3px; border: 0px; margin: 0px;">
+<table class="table table-condensed">
 <thead>
-<tr><th>Climate Site:</th><td>GDD Accumulation</td></tr>
+<tr><th>Climate Site:</th><th>GDD Accumulation</th></tr>
 </thead>
 <tbody>
 <tr>
@@ -66,8 +72,7 @@ on record got to {$gddbase} by 1 October prior to a freeze.
  <p><input type="submit" value="Make Plot">
 </form>
 
-<?php ob_flush(); ?>
-<p><img src="/cgi-bin/climate/gdd_probs.py?{$dcgi}&station={$station} ALT="GDD Probs">
+<p><img src="{$imgurl}" at="GDD Probs">
 
 <p>The image will appear above and may take a few seconds to generate.
 
