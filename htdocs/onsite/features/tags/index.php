@@ -5,6 +5,7 @@ $t = new MyView();
 define("IEM_APPID", 36);
 include("../../../../include/database.inc.php");
 include("../../../../include/feature.php");
+require_once "../../../../include/forms.php";
 $pgconn = iemdb('mesosite');
 
 
@@ -52,7 +53,7 @@ EOF;
   die();
 }
 
-$tag = isset($_GET["tag"]) ? $_GET["tag"] : "";
+$tag = isset($_GET["tag"]) ? xssafe($_GET["tag"]): "";
 $t->thispage = "iem-feature";
 $t->title = "Features Tagged: $tag";
 

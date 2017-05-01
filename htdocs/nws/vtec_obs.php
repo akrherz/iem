@@ -2,13 +2,13 @@
  include("../../config/settings.inc.php");
  define("IEM_APPID", 108);
  include("../../include/myview.php");
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include("../../include/mlib.php");
  include("../../include/network.php");
 
 $nt = new NetworkTable("WFO");
 $t = new MyView();
-$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
+$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]): 'DMX';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]): 2012;
 $sid = isset($_REQUEST["sid"]) ? intval($_REQUEST["sid"]): 1;
 $eid = isset($_REQUEST["eid"]) ? intval($_REQUEST["eid"]): 999;

@@ -1,9 +1,11 @@
+"""Plot IEMRE"""
+import datetime
+from collections import OrderedDict
+
 import numpy as np
+import netCDF4
 from pyiem import iemre
 from pyiem.datatypes import temperature, speed
-import datetime
-import netCDF4
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict((('p01d_12z', '24 Hour Precipitation at 12 UTC'),
@@ -23,12 +25,12 @@ PDICT2 = {'c': 'Contour Plot',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This map presents a daily IEM ReAnalysis variable
+    desc = dict()
+    desc['description'] = """This map presents a daily IEM ReAnalysis variable
     of your choice.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='var', default='rsds',
              label='Select Plot Variable:', options=PDICT),
         dict(type='select', name='ptype', default='c',
@@ -37,7 +39,7 @@ def get_description():
              default=today.strftime("%Y/%m/%d"),
              label='Date:', min="1893/01/01"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -104,6 +106,7 @@ def plotter(fdict):
         m.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
 
     return m.fig
+
 
 if __name__ == '__main__':
     plotter(dict(ptype='g', date='2016-01-03', var='high_tmpk_12z'))

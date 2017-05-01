@@ -5,11 +5,12 @@ define("FBEXTRA", True);
 include("../../../include/myview.php");
 include("../../../include/database.inc.php");
 include("../../../include/feature.php");
+require_once "../../../include/forms.php";
 
 $t = new MyView();
 
-$day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : null;
-$offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
+$day = isset($_GET["day"]) ? substr(xssafe($_GET["day"]),0,10) : null;
+$offset = isset($_GET["offset"]) ? intval($_GET["offset"]): 0;
 if ($day == null){
 	$day = Date("Y-m-d");
 	$offset = -1;

@@ -8,7 +8,7 @@ include "../../include/myview.php";
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
-$OL = '3.20.0';
+$OL = '4.1.0';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />

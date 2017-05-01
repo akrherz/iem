@@ -1,20 +1,22 @@
+"""Snow depth"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-import datetime
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This chart presents the daily snow depth reports
+    desc = dict()
+    desc['description'] = """This chart presents the daily snow depth reports
     as a image.  Each box represents an individual day's report with the
     color denoting the amount.  Values in light gray are missing in the
     database."""
     today = datetime.datetime.today()
     lyear = today.year if today.month > 8 else (today.year - 1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='syear', default=1893, min=1893,
@@ -22,7 +24,7 @@ def get_description():
         dict(type='year', name='eyear', default=lyear,
              min=1893, label='End Year (inclusive):'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -93,6 +95,7 @@ def plotter(fdict):
     ax.set_ylim(maxyear + 0.5, minyear - 0.5)
 
     return fig
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -8,7 +8,7 @@ include("../../../include/forms.php");
 include("../../../include/imagemaps.php");
 
 
-$startYear = isset($_GET['startYear']) ? $_GET['startYear']: 1951;
+$startYear = isset($_GET['startYear']) ? intval($_GET['startYear']): 1951;
 
 $cselect = networkSelect("IACLIMATE", "IA0200", Array(), "city");
 $mselect = monthSelect2("1", "month");
