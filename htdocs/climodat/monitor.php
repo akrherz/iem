@@ -32,9 +32,9 @@ $hiddendates = <<<EOF
 EOF;
 $sdate = strtotime($sdate);
 $edate = strtotime($edate);
-$s = isset($_GET["s"]) ? xssafe($_GET["s"]): Array();
+$s = isset($_GET["s"]) ? $_GET["s"]: Array();
 if (isset($_GET['r'])){
-	$r = xssafe($_GET["r"]);
+	$r = $_GET["r"];
 	while(list($k,$v)=each($r)){
 		if(($key = array_search($v, $s)) !== false) {
 			unset($s[$key]);
