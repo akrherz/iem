@@ -59,7 +59,7 @@ function formatter($i, $row){
 }
 include("setup.php");
 include_once "../../include/mlib.php";
-include_once "../../include/forms.php";
+require_once "../../include/forms.php";
 $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");

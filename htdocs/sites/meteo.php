@@ -1,7 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 include("setup.php");
 include("../../include/myview.php");
 $t = new MyView();

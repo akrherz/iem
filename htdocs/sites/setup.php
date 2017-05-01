@@ -3,9 +3,9 @@
  * I am sourced by all pages on the "sites" website except the 'locate' 
  * frontend.
  */
- include_once("../../config/settings.inc.php");
- include_once("../../include/database.inc.php");
- include_once("../../include/station.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/database.inc.php";
+ require_once "../../include/station.php";
  require_once "../../include/forms.php";
  /* Make sure all is well! */
  $station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 20) : "";
