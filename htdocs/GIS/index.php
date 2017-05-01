@@ -34,6 +34,9 @@ archive of presentations.</li>
   <li><a href="/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
   <li><a href="/my/current.php">Dynamic Plotting</a></li>
   <li><a href="/sites/locate.php">IEM Site Locator</a></li>
+	<li><a href="rad-by-year-fe.phtml">NEXRAD Composite by Year</a>
+<br />Displays NEXRAD composites for a user specified sector for the same time
+each year going back to 1995.</li>
 </ul>
 
 

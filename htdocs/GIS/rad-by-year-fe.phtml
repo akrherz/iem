@@ -2,7 +2,7 @@
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
 define("IEM_APPID", 53);
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time());
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time());
@@ -11,8 +11,8 @@ $minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : 0;
 $sz = isset($_GET["sz"]) ? floatval($_GET["sz"]) : 2.5;
 
 /* Do areal extents */
-$map_x = isset($_GET["map_x"]) ? $_GET["map_x"]: 0;
-$map_y = isset($_GET["map_y"]) ? $_GET["map_y"]: 0;
+$map_x = isset($_GET["map_x"]) ? intval($_GET["map_x"]): 0;
+$map_y = isset($_GET["map_y"]) ? intval($_GET["map_y"]): 0;
 $ul_x = -126.0;
 $ul_y = 50.0;
 $lr_y = 24.0;
@@ -63,6 +63,10 @@ $hrselect =  hourSelect($hour, "hour");
 $minselect = minuteSelect($minute, "minute", 5);
 
 $t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/GIS/">GIS Mainpage</a></li>
+ <li class="active">IEM NEXRAD Composite by Year</li>
+</ol>
 
 <h3>IEM NEXRAD Composite by Year</h3>
 

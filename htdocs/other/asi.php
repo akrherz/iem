@@ -1,6 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
-include ("../../include/forms.php");
+require_once "../../include/forms.php";
 include "../../include/database.inc.php";
 include "../../include/imagemaps.php";
 function download_data($sts, $ets){
@@ -27,15 +27,15 @@ function download_data($sts, $ets){
 	
 } // End of download_data
 
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time() - 86400);
-$eyear = isset($_GET["eyear"]) ? $_GET["eyear"] : date("Y", time() - 86400);
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", time());
-$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", time() );
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time()- 86400 );
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time() - 86400);
-$ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 0;
-$shour = isset($_GET["shour"]) ? $_GET["shour"] : 0;
-$station = isset($_REQUEST['station']) ? $_REQUEST['station']: 'ISU4003';
+$syear = isset($_GET["syear"]) ? intval($_GET["syear"]) : date("Y", time() - 86400);
+$eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]) : date("Y", time() - 86400);
+$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]) : date("m", time());
+$eday = isset($_GET["eday"]) ? intval($_GET["eday"]) : date("d", time() );
+$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]) : date("m", time()- 86400 );
+$sday = isset($_GET["sday"]) ? intval($_GET["sday"]) : date("d", time() - 86400);
+$ehour = isset($_GET["ehour"]) ? intval($_GET["ehour"]): 0;
+$shour = isset($_GET["shour"]) ? intval($_GET["shour"]): 0;
+$station = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']): 'ISU4003';
 
 $imguri = sprintf("asi_plot.py?station=%s&syear=%s&smonth=%s&sday=%s&shour=%s&eyear=%s&emonth=%s&eday=%s&ehour=%s",
 		$station, $syear, $smonth, $sday, $shour, $eyear, $emonth, $eday, $ehour);
@@ -87,7 +87,7 @@ $me = monthSelect($emonth, "emonth");
 $de = daySelect2($eday, "eday");
 $he = hourSelect($ehour, "ehour");
 $t->content = <<<EOF
-<h3 class="heading">Atmospheric Structure Data</h3>
+<h3>Atmospheric Structure Data</h3>
 
 <p>The IEM is collecting and providing data from an instrumentation project
 that outfitted two towers with wind and temperature sensors.  

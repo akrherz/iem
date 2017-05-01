@@ -39,14 +39,14 @@ $bar640t->draw($img2);
 /* Draw the title */
 $tlayer = $map2->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
-$point->setXY(80, 12);
+$point->setXY(80, 10);
 $d = date("d M h:i A", $ts);
 $point->draw($map2, $tlayer, $img2, 0,"NEXRAD by Year for Time: $d");
 
 
 /* Draw the subtitle */
 $point = ms_newpointobj();
-$point->setXY(80, 29);
+$point->setXY(80, 27);
 $d = date("d M Y h:i A T");
 $point->draw($map2, $tlayer, $img2, 1," map generated $d");
 
