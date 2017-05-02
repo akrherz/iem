@@ -116,6 +116,8 @@ def make_daily_rad_plot(ctx):
     dates = []
     vals = []
     tmax = []
+    if icursor.rowcount == 0:
+        raise Exception("No Data Found, sorry")
     for row in icursor:
         dates.append(row[0])
         vals.append(row[1])
@@ -352,12 +354,15 @@ def plot2(ctx):
                   ) % (ctx['nt'].sts[ctx['station']]['name'], ))
     ax.plot(valid, temperature(tsoil, 'C').value('F'), linewidth=2,
             color='brown', label='4 inch')
-    ax.plot(valid, temperature(d12t, 'C').value('F'), linewidth=2,
-            color='r', label='12 inch')
-    ax.plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
-            color='purple', label='24 inch')
-    ax.plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
-            color='black', label='50 inch')
+    if not d12t.isnull().any():
+        ax.plot(valid, temperature(d12t, 'C').value('F'), linewidth=2,
+                color='r', label='12 inch')
+    if not d24t.isnull().any():
+        ax.plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
+                color='purple', label='24 inch')
+    if not d50t.isnull().any():
+        ax.plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
+                color='black', label='50 inch')
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width,
                     box.height * 0.9])
@@ -418,11 +423,18 @@ def plot1(ctx):
     ax2.set_ylabel("Hourly Precipitation [inch]")
     b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=4)
 
-    l1, = ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=5)
-    l2, = ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple',
-                     zorder=5)
-    l3, = ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black',
-                     zorder=5)
+    l1 = None
+    l2 = None
+    l3 = None
+    if not d12sm.isnull().all():
+        l1, = ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r',
+                         zorder=5)
+    if not d24sm.isnull().all():
+        l2, = ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple',
+                         zorder=5)
+    if not d50sm.isnull().all():
+        l3, = ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black',
+                         zorder=5)
     ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
 
     days = (ctx['ets'] - ctx['sts']).days
@@ -450,18 +462,22 @@ def plot1(ctx):
     box = ax2.get_position()
     ax2.set_position([box.x0, box.y0 + box.height * 0.05, box.width,
                       box.height * 0.95])
-    ax[0].legend([l1, l2, l3, b1],
-                 ['12 inch', '24 inch', '50 inch', 'Hourly Precip'],
-                 bbox_to_anchor=(0.5, -0.15), ncol=4, loc='center',
-                 fontsize=12)
+    if None not in [l1, l2, l3]:
+        ax[0].legend([l1, l2, l3, b1],
+                     ['12 inch', '24 inch', '50 inch', 'Hourly Precip'],
+                     bbox_to_anchor=(0.5, -0.15), ncol=4, loc='center',
+                     fontsize=12)
 
     # ----------------------------------------
-    ax[1].plot(valid, temperature(d12t, 'C').value('F'), linewidth=2,
-               color='r', label='12in')
-    ax[1].plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
-               color='purple', label='24in')
-    ax[1].plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
-               color='black', label='50in')
+    if not d12t.isnull().all():
+        ax[1].plot(valid, temperature(d12t, 'C').value('F'), linewidth=2,
+                   color='r', label='12in')
+    if not d24t.isnull().all():
+        ax[1].plot(valid, temperature(d24t, 'C').value('F'), linewidth=2,
+                   color='purple', label='24in')
+    if not d50t.isnull().all():
+        ax[1].plot(valid, temperature(d50t, 'C').value('F'), linewidth=2,
+                   color='black', label='50in')
     ax[1].grid(True)
     ax[1].set_ylabel(r"Temperature $^\circ$F")
     box = ax[1].get_position()
