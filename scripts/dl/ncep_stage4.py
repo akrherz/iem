@@ -25,7 +25,7 @@ def download(now, offset):
     for hr in hours:
         url = "%s.%02ih.gz" % (now.strftime(("http://ftpprd.ncep.noaa.gov/"
                                              "data/nccf/com/pcpanl/prod/"
-                                             "pcpanal.%Y%m%d/"
+                                             "pcpanl.%Y%m%d/"
                                              "ST4.%Y%m%d%H")), hr)
         response = exponential_backoff(requests.get, url, timeout=60)
         if response is None or response.status_code != 200:
@@ -47,13 +47,13 @@ def download(now, offset):
         # Do stage2 ml now
         if hr == 1:
             url = "%s.Grb.gz" % (now.strftime(("http://ftpprd.ncep.noaa.gov"
-                                               "/data/nccf/com/hourly/prod/"
-                                               "nam_pcpn_anal.%Y%m%d/"
+                                               "/data/nccf/com/pcpanl/prod/"
+                                               "pcpanl.%Y%m%d/"
                                                "ST2ml%Y%m%d%H")), )
         else:
             url = "%s.%02ih.gz" % (now.strftime(("http://ftpprd.ncep.noaa.gov/"
-                                                 "data/nccf/com/hourly/prod/"
-                                                 "nam_pcpn_anal.%Y%m%d/"
+                                                 "data/nccf/com/pcpanl/prod/"
+                                                 "pcpanl.%Y%m%d/"
                                                  "ST2ml%Y%m%d%H")), hr)
         response = exponential_backoff(requests.get, url, timeout=60)
         if response is None or response.status_code != 200:
