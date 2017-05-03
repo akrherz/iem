@@ -2,6 +2,7 @@
  Script to download the NCEP stage4 data and then inject into LDM for
  sweet archival action
 """
+from __future__ import print_function
 import datetime
 import pytz
 import requests
@@ -23,8 +24,8 @@ def download(now, offset):
         hours.append(24)
     for hr in hours:
         url = "%s.%02ih.gz" % (now.strftime(("http://ftpprd.ncep.noaa.gov/"
-                                             "data/nccf/com/hourly/prod/"
-                                             "nam_pcpn_anal.%Y%m%d/"
+                                             "data/nccf/com/pcpanl/prod/"
+                                             "pcpanal.%Y%m%d/"
                                              "ST4.%Y%m%d%H")), hr)
         response = exponential_backoff(requests.get, url, timeout=60)
         if response is None or response.status_code != 200:
@@ -59,9 +60,9 @@ def download(now, offset):
             print('ncep_stage4.py: dl %s failed' % (url,))
             continue
         # Same temp file
-        o = open("tmp.grib.gz", 'wb')
-        o.write(response.content)
-        o.close()
+        output = open("tmp.grib.gz", 'wb')
+        output.write(response.content)
+        output.close()
         subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
         cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
@@ -80,6 +81,7 @@ def main():
     for offset in [33, 9, 3, 0]:
         now = utc - datetime.timedelta(hours=offset)
         download(now, offset)
+
 
 if __name__ == "__main__":
     main()
