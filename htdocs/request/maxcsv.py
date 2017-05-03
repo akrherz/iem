@@ -12,10 +12,10 @@ import pytz
 from pandas.io.sql import read_sql
 
 SSW = sys.stdout.write
-#>> *         DOT plows
-#>> *         RWIS sensor data
-#>> *         River gauges
-#>> *         Ag data (4" soil temps)
+# DOT plows
+# RWIS sensor data
+# River gauges
+# Ag data (4" soil temps)
 
 
 def do_iaroadcond():
@@ -43,7 +43,7 @@ def do_webcams(network):
     return df
 
 
-def do_iowa_azos(date):
+def do_iowa_azos(date, itoday=False):
     """Dump high and lows for Iowa ASOS + AWOS """
     table = "summary_%s" % (date.year,)
     pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
@@ -53,7 +53,23 @@ def do_iowa_azos(date):
     s.min_tmpf::int as low, pday as precip
     from stations n JOIN """ + table + """ s on (n.iemid = s.iemid)
     WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
-    """, pgconn, params=(date,))
+    """, pgconn, params=(date,), index_col='locationid')
+    if itoday:
+        # Additionally, piggy back 24, 48 and 72h rainfall totals
+        df2 = read_sql("""
+        SELECT station,
+        sum(phour) as precip72,
+        sum(case when valid >= (now() - '48 hours'::interval)
+            then phour else 0 end) as precip48,
+        sum(case when valid >= (now() - '24 hours'::interval)
+            then phour else 0 end) as precip24
+        from hourly where network in ('IA_ASOS', 'AWOS')
+        and valid >= now() - '72 hours'::interval
+        and phour >= 0.01 GROUP by station
+        """, pgconn, index_col='station')
+        for col in ['precip24', 'precip48', 'precip72']:
+            df[col] = df2[col]
+    df.reset_index(inplace=True)
     return df
 
 
@@ -200,27 +216,27 @@ def do_ahps_fx(nwsli):
     sys.exit(0)
 
 
-def router(q):
+def router(appname):
     """Process and return dataframe"""
-    if q.startswith("ahpsobs_"):
-        do_ahps_obs(q[8:].upper())  # we write ourselves and exit
-    elif q.startswith("ahpsfx_"):
-        do_ahps_fx(q[7:].upper())  # we write ourselves and exit
-    elif q == 'iaroadcond':
+    if appname.startswith("ahpsobs_"):
+        do_ahps_obs(appname[8:].upper())  # we write ourselves and exit
+    elif appname.startswith("ahpsfx_"):
+        do_ahps_fx(appname[7:].upper())  # we write ourselves and exit
+    elif appname == 'iaroadcond':
         df = do_iaroadcond()
-    elif q == 'iadotplows':
+    elif appname == 'iadotplows':
         df = do_iadotplows()
-    elif q == 'iarwis':
+    elif appname == 'iarwis':
         df = do_iarwis()
-    elif q == 'iariver':
+    elif appname == 'iariver':
         df = do_iariver()
-    elif q == 'isusm':
+    elif appname == 'isusm':
         df = do_isusm()
-    elif q == 'iowayesterday':
+    elif appname == 'iowayesterday':
         df = do_iowa_azos(datetime.date.today() - datetime.timedelta(days=1))
-    elif q == 'iowatoday':
-        df = do_iowa_azos(datetime.date.today())
-    elif q == 'kcrgcitycam':
+    elif appname == 'iowatoday':
+        df = do_iowa_azos(datetime.date.today(), True)
+    elif appname == 'kcrgcitycam':
         df = do_webcams('KCRG')
     else:
         sys.stdout.write("""ERROR, unknown report specified""")
@@ -231,11 +247,12 @@ def router(q):
 def main():
     """Do Something"""
     form = cgi.FieldStorage()
-    q = form.getfirst('q')
-    df = router(q)
+    appname = form.getfirst('q')
+    df = router(appname)
     SSW("Content-type: text/plain\n\n")
     SSW(df.to_csv(None, index=False))
     SSW("\n")
+
 
 if __name__ == '__main__':
     main()
