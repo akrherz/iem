@@ -53,7 +53,7 @@ def plotter(fdict):
     if station == '_ALL':
         wfo_limiter = ''
     doy_limiter = ''
-    title = "Enter Year"
+    title = "Entire Year"
     if limit.lower() == 'yes':
         title = "thru ~%s" % (datetime.date.today().strftime("%-d %b"),)
         doy_limiter = (" and extract(doy from issue) <= "
