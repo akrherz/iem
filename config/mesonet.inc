@@ -199,7 +199,7 @@
     AddHandler cgi-script .py
     Options +ExecCGI
 
-    RewriteRule ([0-9]{12})_([A-Z0-9]+).png$ text2png.py?e=$1&pil=$2
+    RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2
   </Directory>
 
 

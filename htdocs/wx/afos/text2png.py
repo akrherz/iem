@@ -5,11 +5,12 @@
     Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
 """
 import cgi
-import memcache
 import sys
+import memcache
 
 
 def pt2px(pt):
+    """Crude point to pixel work"""
     return int(round(pt * 96.0 / 72))
 
 
@@ -77,7 +78,7 @@ def make_image(e, pil):
 def main():
     form = cgi.FieldStorage()
     e = form.getfirst('e', '201612141916')[:12]
-    pil = form.getfirst('pil', 'ADMNFD')[:6]
+    pil = form.getfirst('pil', 'ADMNFD')[:6].replace(" ", "")
     key = "%s_%s.png" % (e, pil)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(key)
@@ -86,6 +87,7 @@ def main():
         mc.set(key, res, 3600)
     sys.stdout.write("Content-type: image/png\n\n")
     sys.stdout.write(res)
+
 
 if __name__ == '__main__':
     main()
