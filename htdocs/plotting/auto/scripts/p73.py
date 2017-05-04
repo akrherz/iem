@@ -56,7 +56,7 @@ def plotter(fdict):
     title = "Enter Year"
     if limit.lower() == 'yes':
         title = "thru ~%s" % (datetime.date.today().strftime("%-d %b"),)
-        doy_limiter = (" and extract(doy from issue) < "
+        doy_limiter = (" and extract(doy from issue) <= "
                        "extract(doy from 'TODAY'::date) ")
 
     df = read_sql("""
