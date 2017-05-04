@@ -1,3 +1,4 @@
+"""Period differences"""
 import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, centered_bins
@@ -15,11 +16,11 @@ PDICT3 = {'season': 'Number of Days in Growing Season',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This map produces an analysis of change in
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This map produces an analysis of change in
     the number of days for the growing season."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='sector', default='state',
              options=PDICT, label='Select Map Region'),
         dict(type='clstate', name='state', default='IA',
@@ -37,7 +38,7 @@ def get_description():
         dict(type='year', name='p2eyear', default=2010,
              label='End Year (inclusive) of Period Two:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

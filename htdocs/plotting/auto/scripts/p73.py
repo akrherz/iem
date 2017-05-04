@@ -1,9 +1,11 @@
-import psycopg2
+"""Simple plot of number of WAWA"""
 import datetime
+
+import psycopg2
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
          'no': 'Plot Entire Year'}
@@ -11,13 +13,13 @@ PDICT = {'yes': "Limit Plot to Year-to-Date",
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart displays the number of products issued
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart displays the number of products issued
     by a NWS Office by year for a given watch, warning, or advisory of your
     choice.  These numbers are based on IEM archives and are not official!"""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:', all=True),
         dict(type='select', name='limit', default='no',
@@ -28,7 +30,7 @@ def get_description():
              default='W', label='Select Watch/Warning Significance Level:'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -51,7 +53,9 @@ def plotter(fdict):
     if station == '_ALL':
         wfo_limiter = ''
     doy_limiter = ''
+    title = "Enter Year"
     if limit.lower() == 'yes':
+        title = "thru ~%s" % (datetime.date.today().strftime("%-d %b"),)
         doy_limiter = (" and extract(doy from issue) < "
                        "extract(doy from 'TODAY'::date) ")
 
@@ -72,11 +76,16 @@ def plotter(fdict):
     ax.set_xlim(df['yr'].min()-0.5, df['yr'].max()+0.5)
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
-    ax.set_title(("NWS %s\n%s %s (%s.%s) Count"
-                  ) % (nt.sts[station]['name'], vtec._phenDict[phenomena],
+    ax.set_title(("NWS %s [%s]\n%s %s (%s.%s) Count"
+                  ) % (nt.sts[station]['name'], title,
+                       vtec._phenDict[phenomena],
                        vtec._sigDict[significance], phenomena, significance))
     if limit == 'yes':
         ax.set_xlabel(("thru approximately %s"
                        ) % (datetime.date.today().strftime("%-d %b"), ))
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

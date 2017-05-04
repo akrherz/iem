@@ -1,10 +1,12 @@
-import numpy as np
+"""Radiation Plot"""
 import calendar
-import psycopg2
 import datetime
+from collections import OrderedDict
+
+import psycopg2
+import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
@@ -15,7 +17,7 @@ PDICT = OrderedDict([
 
 
 def smooth(x, window_len=11, window='hanning'):
-
+    """Smooth things out"""
     s = np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]
     if window == 'flat':  # moving average
         w = np.ones(window_len, 'd')
@@ -28,9 +30,9 @@ def smooth(x, window_len=11, window='hanning'):
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents yearly estimates of daily
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents yearly estimates of daily
     solar radiation for the 'climodat' stations tracked by the IEM.  These
     stations only report temperature, precipitation, and snowfall, but many
     users are interested in solar radiation data as well.  So estimates
@@ -38,7 +40,7 @@ def get_description():
     the numbers presented.  There are three sources of solar radiation made
     available for this plot.  The HRRR data is the only one in 'real-time',
     the MERRAv2 lags by about a month, and the NARR is no longer produced."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', options=PDICT, default='best', name='var',
@@ -46,7 +48,7 @@ def get_description():
         dict(type='year', name='year', default=datetime.date.today().year,
              min=1979, label='Select Year to Plot:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -81,6 +83,7 @@ def plotter(fdict):
     df['best'] = df['narr_srad'].fillna(
                                     df['merra_srad']).fillna(df['hrrr_srad'])
 
+    fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.6, 0.8])
 
     ax.fill_between(range(1, 367), 0, df['max_narr_smooth'], color='tan',
@@ -125,12 +128,13 @@ def plotter(fdict):
         ax3.set_ylim(0, maxv)
         ax3.set_xlim(0, maxv)
         ax3.plot([0, maxv], [0, maxv], color='k')
-        ax3.set_xlabel("%s $\mu$=%.1f" % (xlabel, df[combo[0]].mean()),
+        ax3.set_xlabel(r"%s $\mu$=%.1f" % (xlabel, df[combo[0]].mean()),
                        labelpad=0, fontsize=12)
-        ax3.set_ylabel("%s $\mu$=%.1f" % (ylabel, df[combo[1]].mean()),
+        ax3.set_ylabel(r"%s $\mu$=%.1f" % (ylabel, df[combo[1]].mean()),
                        fontsize=12)
 
-    return plt.gcf(), df
+    return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(year=2016))

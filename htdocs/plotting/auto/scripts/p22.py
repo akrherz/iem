@@ -1,6 +1,8 @@
-import psycopg2
+"""Close to average!"""
 import calendar
+
 import numpy as np
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -10,7 +12,7 @@ PDICT = {'high': 'High temperature',
 
 
 def smooth(x, window_len=11, window='hanning'):
-
+    """Smoother"""
     if window_len < 3:
         return x
 
@@ -26,12 +28,12 @@ def smooth(x, window_len=11, window='hanning'):
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the frequency of a daily high
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the frequency of a daily high
     or low temperature being within a certain bounds of the long term NCEI
     climatology for the location."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='min', default='-5',
@@ -39,7 +41,7 @@ def get_description():
         dict(type='int', name='max', default='5',
              label='Upper Bound (F) of Temperature Range'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -53,9 +55,9 @@ def plotter(fdict):
     minv = ctx['min']
     maxv = ctx['max']
     if minv > maxv:
-        t = minv
+        temp = minv
         minv = maxv
-        maxv = t
+        maxv = temp
     station = ctx['station']
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
