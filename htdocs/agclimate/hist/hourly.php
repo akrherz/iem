@@ -89,6 +89,19 @@ wish to change this to <a href="daily.php">daily data</a>.
 <br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
+
+<hr>
+<p><strong>Vineyard Station-only Variables</strong>
+<br />Sorry for the cryptic labels, this is a current work in progress.
+<br /><input type="checkbox" name="vars" value="lwmv_1">lwmv_1
+<br /><input type="checkbox" name="vars" value="lwmv_2">lwmv_2
+<br /><input type="checkbox" name="vars" value="lwmdry_1_tot">lwmdry_1_tot
+<br /><input type="checkbox" name="vars" value="lwmcon_1_tot">lwmcon_1_tot
+<br /><input type="checkbox" name="vars" value="lwmwet_1_tot">lwmwet_1_tot
+<br /><input type="checkbox" name="vars" value="lwmdry_2_tot">lwmdry_2_tot
+<br /><input type="checkbox" name="vars" value="lwmcon_2_tot">lwmcon_2_tot
+<br /><input type="checkbox" name="vars" value="lwmwet_2_tot">lwmwet_2_tot
+<br /><input type="checkbox" name="vars" value="bpres_avg">bpres_avg
  		
  		
 <p><input type="checkbox" name="todisk" value="yes">Download directly to disk

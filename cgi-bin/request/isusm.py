@@ -4,14 +4,12 @@
 """
 import cgi
 import datetime
-import psycopg2.extras
 import sys
 import os
-import pandas as pd
 import cStringIO
+import pandas as pd
+import psycopg2.extras
 from pyiem.datatypes import temperature, distance
-ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
-cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
 def get_stations(form):
@@ -63,6 +61,8 @@ def get_delimiter(form):
 
 def fetch_daily(form, cols):
     ''' Return a fetching of daily data '''
+    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     stations = get_stations(form)
     delim = get_delimiter(form)
@@ -98,7 +98,9 @@ def fetch_daily(form, cols):
       SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
       rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
       t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
-      ws_mps_s_wvt_qc, ws_mps_max_qc from sm_daily WHERE
+      ws_mps_s_wvt_qc, ws_mps_max_qc, lwmv_1_qc, lwmv_2_qc,
+      lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
+      lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc from sm_daily WHERE
       valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     )
     SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx, s.rh,
@@ -108,7 +110,9 @@ def fetch_daily(form, cols):
     rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
     t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
     ws_mps_s_wvt_qc, ws_mps_max_qc, round(gddxx(50, 86, c2f( tair_c_max_qc ),
-    c2f( tair_c_min_qc ))::numeric,1) as gdd50
+    c2f( tair_c_min_qc ))::numeric,1) as gdd50, lwmv_1_qc, lwmv_2_qc,
+    lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
+    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
     """ % (
@@ -201,13 +205,24 @@ def fetch_daily(form, cols):
                            soil24tn=soil24tn, soil24tx=soil24tx,
                            soil50tn=soil50tn, soil50tx=soil50tx,
                            soil12vwc=soil12vwc, soil24vwc=soil24vwc,
-                           soil50vwc=soil50vwc))
+                           soil50vwc=soil50vwc,
+                           lwmv_1=row['lwmv_1_qc'],
+                           lwmv_2=row['lwmv_2_qc'],
+                           lwmdry_1_tot=row['lwmdry_1_tot_qc'],
+                           lwmcon_1_tot=row['lwmcon_1_tot_qc'],
+                           lwmwet_1_tot=row['lwmwet_1_tot_qc'],
+                           lwmdry_2_tot=row['lwmdry_2_tot_qc'],
+                           lwmcon_2_tot=row['lwmcon_2_tot_qc'],
+                           lwmwet_2_tot=row['lwmwet_2_tot_qc'],
+                           bpres_avg=row['bpres_avg_qc']))
 
     return values, cols
 
 
 def fetch_hourly(form, cols):
     ''' Return a fetching of hourly data '''
+    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     stations = get_stations(form)
     delim = get_delimiter(form)
@@ -232,7 +247,9 @@ def fetch_hourly(form, cols):
     rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc, etalfalfa_qc,
     tsoil_c_avg_qc,
     t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
-    calc_vwc_24_avg_qc, calc_vwc_50_avg_qc
+    calc_vwc_24_avg_qc, calc_vwc_50_avg_qc, lwmv_1_qc, lwmv_2_qc,
+    lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
+    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc
     from sm_hourly
     WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     ORDER by valid ASC
@@ -284,11 +301,20 @@ def fetch_hourly(form, cols):
                            speed=speed, drct=drct, et=et,  soil04t=soil04t,
                            soil12t=soil12t, soil24t=soil24t, soil50t=soil50t,
                            soil12vwc=soil12vwc, soil24vwc=soil24vwc,
-                           soil50vwc=soil50vwc))
+                           soil50vwc=soil50vwc,
+                           lwmv_1=row['lwmv_1_qc'],
+                           lwmv_2=row['lwmv_2_qc'],
+                           lwmdry_1_tot=row['lwmdry_1_tot_qc'],
+                           lwmcon_1_tot=row['lwmcon_1_tot_qc'],
+                           lwmwet_1_tot=row['lwmwet_1_tot_qc'],
+                           lwmdry_2_tot=row['lwmdry_2_tot_qc'],
+                           lwmcon_2_tot=row['lwmcon_2_tot_qc'],
+                           lwmwet_2_tot=row['lwmwet_2_tot_qc'],
+                           bpres_avg=row['bpres_avg_qc']))
     return values, cols
 
 
-def main(argv):
+def main():
     """Do things"""
     form = cgi.FieldStorage()
     mode = form.getfirst('mode', 'hourly')
@@ -333,4 +359,4 @@ def main(argv):
 
 if __name__ == '__main__':
     # make stuff happen
-    main(sys.argv)
+    main()
