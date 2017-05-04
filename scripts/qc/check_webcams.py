@@ -1,39 +1,38 @@
 """
 Check to see if there are webcams offline, generate emails and such
 """
-
 import os
-import datetime
-import pytz
 import stat
+import datetime
+
+import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb')
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
-
-# Now lets check files
-mydir = "/home/ldm/data/camera/stills"
-files = os.listdir(mydir)
-
-threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
-threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
 
 
-def do(netname, pname):
+def workflow(netname, pname):
     """Do something please"""
-    mcursor = MESOSITE.cursor()
+    pgconn_iem = psycopg2.connect(database='iem', host='iemdb')
+    pgconn_mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+    pgconn_portfolio = psycopg2.connect(database='portfolio', host='iemdb')
+
+    # Now lets check files
+    mydir = "/home/ldm/data/camera/stills"
+
+    threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
+    threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
+    mcursor = pgconn_mesosite.cursor()
     mcursor.execute("""
         SELECT id, network, name from webcams where
         network = %s
         and online ORDER by id ASC
     """, (netname, ))
-    NT = NetworkTable(None)
+    nt = NetworkTable(None)
     obs = {}
     missing = 0
     for row in mcursor:
-        NT.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2],
+        nt.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2],
                               tzname='America/Chicago')
         fn = "%s/%s.jpg" % (mydir, row[0])
         if not os.path.isfile(fn):
@@ -50,12 +49,18 @@ def do(netname, pname):
     if len(obs) == 0:
         return
 
-    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
-    tracker.process_network(obs, pname, NT, threshold)
+    tracker = TrackerEngine(pgconn_iem.cursor(), pgconn_portfolio.cursor(), 10)
+    tracker.process_network(obs, pname, nt, threshold)
     tracker.send_emails()
-    IEM.commit()
-    PORTFOLIO.commit()
+    pgconn_iem.commit()
+    pgconn_portfolio.commit()
 
 
-for network in ['KCCI', 'KCRG', 'KELO', 'KCWI']:
-    do(network, "%ssnet" % (network.lower(), ))
+def main():
+    """Do something"""
+    for network in ['KCCI', 'KCRG', 'KELO', 'KCWI']:
+        workflow(network, "%ssnet" % (network.lower(), ))
+
+
+if __name__ == '__main__':
+    main()

@@ -27,18 +27,17 @@ python zones_update.py z_03de13a 2013 12 03
 python zones_update.py z_05fe14a 2014 02 05
 
 """
-from osgeo import ogr
-from osgeo import _ogr
-import psycopg2
+from __future__ import print_function
 import sys
 import os
 import datetime
-import pytz
 import urllib2
 import zipfile
 
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
-cursor = POSTGIS.cursor()
+from osgeo import ogr
+from osgeo import _ogr
+import psycopg2
+import pytz
 
 
 def Area(feat, *args):
@@ -47,147 +46,164 @@ def Area(feat, *args):
     """
     return _ogr.Geometry_GetArea(feat, *args)
 
-# Get the name of the file we wish to download
-if len(sys.argv) != 5:
-    print 'ERROR: You need to specify the file date to download and date'
-    print 'Example:  python zones_update.py z_01dec10 2010 12 01'
-    sys.exit(0)
 
-DATESTAMP = sys.argv[1]
-TS = datetime.datetime(int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
-TS = TS.replace(tzinfo=pytz.timezone("UTC"))
+def main(argv):
+    """Go Main Go"""
+    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    cursor = pgconn.cursor()
 
-# Change Directory to /tmp, so that we can rw
-os.chdir('/tmp')
+    # Get the name of the file we wish to download
+    if len(argv) != 5:
+        print('ERROR: You need to specify the file date to download and date')
+        print('Example:  python zones_update.py z_01dec10 2010 12 01')
+        sys.exit(0)
 
-zipfn = "%s.zip" % (DATESTAMP,)
-if not os.path.isfile(zipfn):
-    url = urllib2.Request(('http://www.weather.gov/geodata/catalog/wsom/'
-                           'data/%s') % (zipfn,))
-    print 'Downloading %s ...' % (zipfn,)
-    o = open(zipfn, 'wb')
-    o.write(urllib2.urlopen(url).read())
-    o.close()
+    DATESTAMP = argv[1]
+    TS = datetime.datetime(int(argv[2]), int(argv[3]), int(argv[4]))
+    TS = TS.replace(tzinfo=pytz.timezone("UTC"))
 
-print 'Unzipping'
-zipfp = zipfile.ZipFile(zipfn, 'r')
-shpfn = None
-for name in zipfp.namelist():
-    print '    Extracting %s' % (name,)
-    o = open(name, 'wb')
-    o.write(zipfp.read(name))
-    o.close()
-    if name[-3:] == 'shp':
-        shpfn = name
+    # Change Directory to /tmp, so that we can rw
+    os.chdir('/tmp')
 
-print 'Processing'
-# Now we are ready to dance!
-f = ogr.Open(shpfn)
-lyr = f.GetLayer(0)
+    zipfn = "%s.zip" % (DATESTAMP,)
+    if not os.path.isfile(zipfn):
+        url = urllib2.Request(('http://www.weather.gov/geodata/catalog/wsom/'
+                               'data/%s') % (zipfn,))
+        print('Downloading %s ...' % (zipfn,))
+        o = open(zipfn, 'wb')
+        o.write(urllib2.urlopen(url).read())
+        o.close()
 
-ugcs = {}
-GEO_TYP = 'Z'
-feat = lyr.GetNextFeature()
-countnoop = 0
-countnew = 0
-while feat is not None:
-    if zipfn[:2] in ('mz', 'oz', 'hz'):
-        state = ""
-        name = feat.GetField("NAME")
-        cwa = feat.GetField('WFO')
-        ugc = feat.GetField("ID")
-        zone = ugc[-3:]
-    else:
-        state = feat.GetField('STATE')
-        zone = feat.GetField('ZONE')
-        cwa = feat.GetField('CWA')
-        name = feat.GetField('NAME')
-        ugc = "%s%s%s" % (state, GEO_TYP, zone)
-    if state is None or zone is None:
-        print "Nulls: State [%s] Zone [%s] Name [%s]" % (state, zone, name)
-        feat = lyr.GetNextFeature()
-        continue
+    print('Unzipping')
+    zipfp = zipfile.ZipFile(zipfn, 'r')
+    shpfn = None
+    for name in zipfp.namelist():
+        print('    Extracting %s' % (name,))
+        o = open(name, 'wb')
+        o.write(zipfp.read(name))
+        o.close()
+        if name[-3:] == 'shp':
+            shpfn = name
 
-    geo = feat.GetGeometryRef()
-    if not geo:
-        feat = lyr.GetNextFeature()
-        continue
-    area = Area(geo)
+    print('Processing')
+    # Now we are ready to dance!
+    f = ogr.Open(shpfn)
+    lyr = f.GetLayer(0)
 
-    # This is tricky. We want to have our multipolygon have its biggest polygon
-    # first in the multipolygon.  This will allow some plotting simplification
-    # later as we will only consider the first polygon
-    thismaxa = 0
-    idx = []
-    for i in range(geo.GetGeometryCount()):
-        _g = geo.GetGeometryRef(i)
-        if Area(_g) > thismaxa:
-            thismaxa = Area(_g)
-            idx.insert(0, i)
+    ugcs = {}
+    GEO_TYP = 'Z'
+    feat = lyr.GetNextFeature()
+    countnoop = 0
+    countnew = 0
+    while feat is not None:
+        if zipfn[:2] in ('mz', 'oz', 'hz'):
+            state = ""
+            name = feat.GetField("NAME")
+            cwa = feat.GetField('WFO')
+            ugc = feat.GetField("ID")
+            zone = ugc[-3:]
         else:
-            idx.append(i)
-
-    newgeo = ogr.Geometry(ogr.wkbMultiPolygon)
-    for i in idx:
-        _g = geo.GetGeometryRef(i)
-        if _g.GetGeometryName() == "LINEARRING":
-            _n = ogr.Geometry(ogr.wkbPolygon)
-            _n.AddGeometry(_g)
-            _g = _n
-        newgeo.AddGeometry(_g)
-
-    wkt = newgeo.ExportToWkt()
-
-    if ugc in ugcs:
-        if area < ugcs[ugc]:
-            print ('Skipping %s [area: %.5f], since we had a previously '
-                   'bigger one') % (ugc, area)
+            state = feat.GetField('STATE')
+            zone = feat.GetField('ZONE')
+            cwa = feat.GetField('CWA')
+            name = feat.GetField('NAME')
+            ugc = "%s%s%s" % (state, GEO_TYP, zone)
+        if state is None or zone is None:
+            print(("Nulls: State [%s] Zone [%s] Name [%s]"
+                   ) % (state, zone, name))
             feat = lyr.GetNextFeature()
             continue
-    ugcs[ugc] = area
 
-    if wkt.find("EMPTY") > 0:
-        print 'UGC: %s resulted in empty multipolygon, listing polygons' % (
-                                                                        ugc,)
+        geo = feat.GetGeometryRef()
+        if not geo:
+            feat = lyr.GetNextFeature()
+            continue
+        area = Area(geo)
+
+        # This is tricky. We want to have our multipolygon have its
+        # biggest polygon first in the multipolygon.
+        # This will allow some plotting simplification
+        # later as we will only consider the first polygon
+        thismaxa = 0
+        idx = []
         for i in range(geo.GetGeometryCount()):
             _g = geo.GetGeometryRef(i)
-            print i, _g.GetGeometryName(), Area(_g)
-        sys.exit()
+            if Area(_g) > thismaxa:
+                thismaxa = Area(_g)
+                idx.insert(0, i)
+            else:
+                idx.append(i)
 
-    # OK, lets see if this UGC is new
-    cursor.execute("""SELECT ugc from ugcs where ugc = %s
-        and end_ts is null and name = %s and
-        geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)) and
-        wfo = %s
-        """, (ugc, name, wkt, cwa))
+        newgeo = ogr.Geometry(ogr.wkbMultiPolygon)
+        for i in idx:
+            _g = geo.GetGeometryRef(i)
+            if _g.GetGeometryName() == "LINEARRING":
+                _n = ogr.Geometry(ogr.wkbPolygon)
+                _n.AddGeometry(_g)
+                _g = _n
+            newgeo.AddGeometry(_g)
 
-    # NOOP
-    if cursor.rowcount == 1:
-        countnoop += 1
+        wkt = newgeo.ExportToWkt()
+
+        if ugc in ugcs:
+            if area < ugcs[ugc]:
+                print(('Skipping %s [area: %.5f], since we had a previously '
+                       'bigger one') % (ugc, area))
+                feat = lyr.GetNextFeature()
+                continue
+        ugcs[ugc] = area
+
+        if wkt.find("EMPTY") > 0:
+            print(('UGC: %s resulted in empty multipolygon, listing polygons'
+                   ) % (ugc,))
+            for i in range(geo.GetGeometryCount()):
+                _g = geo.GetGeometryRef(i)
+                print("%s %s %s" % (i, _g.GetGeometryName(), Area(_g)))
+            sys.exit()
+
+        # OK, lets see if this UGC is new
+        cursor.execute("""SELECT ugc from ugcs where ugc = %s
+            and end_ts is null and name = %s and
+            geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)) and
+            wfo = %s
+            """, (ugc, name, wkt, cwa))
+
+        # NOOP
+        if cursor.rowcount == 1:
+            countnoop += 1
+            feat = lyr.GetNextFeature()
+            continue
+
+        # Go find the previous geom and truncate the time
+        cursor.execute("""
+            UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null
+            """, (TS, ugc))
+
+        # Finally, insert the new geometry
+        cursor.execute("""
+        INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom)
+        VALUES (%s, %s, %s, %s, %s,
+        ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)))
+        """, (ugc, name, state, TS, cwa, wkt))
+        countnew += 1
         feat = lyr.GetNextFeature()
-        continue
 
-    # Go find the previous geom and truncate the time
+    print('NOOP: %s NEW: %s' % (countnoop, countnew))
+
+    cursor.execute("""UPDATE ugcs SET simple_geom = ST_Simplify(geom, 0.01)""")
+    cursor.execute("""UPDATE ugcs SET centroid = ST_Centroid(geom)""")
+
     cursor.execute("""
-        UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null
-        """, (TS, ugc))
+     update ugcs SET geom = st_makevalid(geom) where end_ts is null
+     and not st_isvalid(geom)
+    """)
+    print("    Fixed %s entries that were ST_Invalid()" % (cursor.rowcount, ))
 
-    # Finally, insert the new geometry
-    cursor.execute("""
-    INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom)
-    VALUES (%s, %s, %s, %s, %s,
-    ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)))
-    """, (ugc, name, state, TS, cwa, wkt))
-    countnew += 1
-    feat = lyr.GetNextFeature()
-
-print 'NOOP: %s NEW: %s' % (countnoop, countnew)
-
-cursor.execute("""UPDATE ugcs SET simple_geom = ST_Simplify(geom, 0.01)""")
-cursor.execute("""UPDATE ugcs SET centroid = ST_Centroid(geom)""")
+    cursor.close()
+    pgconn.commit()
+    pgconn.close()
+    print('Done!')
 
 
-cursor.close()
-POSTGIS.commit()
-POSTGIS.close()
-print 'Done!'
+if __name__ == '__main__':
+    main(sys.argv)
