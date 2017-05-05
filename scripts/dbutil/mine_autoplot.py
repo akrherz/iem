@@ -2,15 +2,18 @@
 
 Run from RUN_MIDNIGHT.sh
 """
-import psycopg2
+from __future__ import print_function
 import datetime
 import re
 
-LOGRE = re.compile("Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
+import psycopg2
+
+LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
 LOGFN = '/var/log/mesonet/error_log'
 
 
 def get_dbendts(cursor):
+    """Figure out when we have data until"""
     cursor.execute("""SELECT max(valid) from autoplot_timing""")
     ts = cursor.fetchone()[0]
     if ts is None:
@@ -21,8 +24,10 @@ def get_dbendts(cursor):
 
 
 def find_and_save(cursor, dbendts):
+    """Do work please"""
     now = datetime.datetime.now()
     thisyear = now.year
+    inserts = 0
     for line in open(LOGFN):
         tokens = LOGRE.findall(line)
         if len(tokens) != 1:
@@ -37,15 +42,20 @@ def find_and_save(cursor, dbendts):
         INSERT into autoplot_timing (appid, valid, timing, uri, hostname)
         VALUES (%s, %s, %s, %s, %s)
         """, (appid, valid, timing, uri, hostname))
+        inserts += 1
+    if inserts == 0:
+        print("mine_autoplot: WARNING, no entries found for databasing...")
 
 
 def main():
+    """Go Main Go!"""
     mesosite = psycopg2.connect(database='mesosite', host='iemdb')
     cursor = mesosite.cursor()
     dbendts = get_dbendts(cursor)
     find_and_save(cursor, dbendts)
     cursor.close()
     mesosite.commit()
+
 
 if __name__ == '__main__':
     main()
