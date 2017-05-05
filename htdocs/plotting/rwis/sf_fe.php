@@ -4,24 +4,25 @@ $OL = "3.20.0";
  include_once "../../../include/myview.php";
  $t = new MyView();
  include_once "../../../include/database.inc.php";
+ require_once "../../../include/forms.php";
 
 $network = 'IA_RWIS';
-$ostation = isset($_GET["ostation"]) ? $_GET["ostation"] : "";
-$station = isset($_GET['station']) ? $_GET["station"] : "";
-$mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
-$days = isset($_GET["days"]) ? $_GET["days"]: 2;
+$ostation = isset($_GET["ostation"]) ? xssafe($_GET["ostation"]) : "";
+$station = isset($_GET['station']) ? xssafe($_GET["station"]): "";
+$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "rt";
+$syear = isset($_GET["syear"]) ? xssafe($_GET["syear"]): date("Y");
+$smonth = isset($_GET["smonth"]) ? xssafe($_GET["smonth"]): date("m");
+$sday = isset($_GET["sday"]) ? xssafe($_GET["sday"]): date("d");
+$days = isset($_GET["days"]) ? intval($_GET["days"]): 2;
 
-$subc = isset($_GET["subc"]) ? $_GET["subc"] : false;
-$dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : false;
-$tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : false;
-$pcpn = isset($_GET["pcpn"]) ? $_GET["pcpn"] : false;
-$s0 = isset($_GET["s0"]) ? $_GET["s0"]: false;
-$s1 = isset($_GET["s1"]) ? $_GET["s1"]: false;
-$s2 = isset($_GET["s2"]) ? $_GET["s2"]: false;
-$s3 = isset($_GET["s3"]) ? $_GET["s3"]: false;
+$subc = isset($_GET["subc"]) ? xssafe($_GET["subc"]): false;
+$dwpf = isset($_GET["dwpf"]) ? xssafe($_GET["dwpf"]): false;
+$tmpf = isset($_GET["tmpf"]) ? xssafe($_GET["tmpf"]): false;
+$pcpn = isset($_GET["pcpn"]) ? xssafe($_GET["pcpn"]): false;
+$s0 = isset($_GET["s0"]) ? xssafe($_GET["s0"]): false;
+$s1 = isset($_GET["s1"]) ? xssafe($_GET["s1"]): false;
+$s2 = isset($_GET["s2"]) ? xssafe($_GET["s2"]): false;
+$s3 = isset($_GET["s3"]) ? xssafe($_GET["s3"]): false;
 
 if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
   $_GET["tmpf"] = "on";

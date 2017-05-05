@@ -1,18 +1,18 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("../../../include/imagemaps.php");     
-include_once "../../../include/forms.php";
+require_once "../../../include/forms.php";
 include_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "COOP Climate Plots";
 
-$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "IA0000";
-$station2 = isset($_GET["station2"]) ? $_GET["station2"] : null;
-$mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
+$station1 = isset($_GET["station1"]) ? xssafe($_GET["station1"]): "IA0000";
+$station2 = isset($_GET["station2"]) ? xssafe($_GET["station2"]): null;
+$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "";
 
 $t->thispage = "networks-coop";
 
-$imgurl = sprintf("/cgi-bin/climate/daily.py?p=daily&station1=%s", $station1);
+$imgurl = sprintf("/cgi-bin/climate/daily.py?p=daily&amp;station1=%s", $station1);
 if ($mode == 'c'){
 	$imgurl .= sprintf("&station2=%s", $station2);
 }
@@ -36,7 +36,7 @@ plot two stations at once for a visual comparison.</p>
 
 <form method="GET" action="climate_fe.php">
 
-<table cellpadding='3' border='1' cellspacing='0'>
+<table class="table table-striped">
 <tr>
   <th class="subtitle">Station 1</th>
   <th class="subtitle">Station 2</th>
@@ -52,7 +52,7 @@ plot two stations at once for a visual comparison.</p>
 </td>
 
 <td>
-<input type="SUBMIT" value="Make Plot">
+<input type="submit" value="Make Plot">
 
 </form>
 </td>

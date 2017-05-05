@@ -8,4 +8,3 @@ if ($station2){
 }
 header("Location: $url");
 ?>
-

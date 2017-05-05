@@ -2,13 +2,13 @@
 include("../../../config/settings.inc.php");
 include_once "../../../include/myview.php";
 include_once "../../../include/imagemaps.php";
-include_once "../../../include/forms.php";
+require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "COOP Extremes Plots";
 $t->thispage="networks-coop";
 
-$station = isset($_GET["station"]) ? $_GET["station"] : ""; 
-$var = isset($_GET["var"]) ? $_GET["var"]: "";
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]): ""; 
+$var = isset($_GET["var"]) ? xssafe($_GET["var"]): "";
 
 $nselect = networkSelect("IACLIMATE", $station);
 
@@ -17,13 +17,13 @@ $varselect = make_select("var", $var, $ar);
 
 $imgurl = "";
 if (strlen($station) > 0 ){
-	$imgurl = "<img src=\"extremes.php?var=". $var ."&station=". $station ."\">\n";
+	$imgurl = "<img src=\"extremes.php?var=". $var ."&amp;station=". $station ."\">\n";
 }
 
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-<li><a href="https://mesonet.agron.iastate.edu/">IEM</a></li>
+<li><a href="/">IEM</a></li>
 <li><a href="/climate/">Climatology</a></li>
 <li class="active">COOP Daily Extremes</li>
 </ol>
@@ -47,7 +47,7 @@ station of your choice.</p>
 <td>{$nselect}</td>
 <td>{$varselect}</td>
 <td>
-<input type="SUBMIT" value="Make Plot">
+<input type="submit" value="Make Plot">
 
 </form>
 </td>
