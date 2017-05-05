@@ -15,6 +15,8 @@ $ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
 // errorlog, so we now send to syslog, so that we get some denoted error logged
 // of 404s
 openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
-syslog(LOG_WARNING, "404 ". $_SERVER["REQUEST_URI"]. ' referer: '. $ref);
+syslog(LOG_WARNING, "404 ". $_SERVER["REQUEST_URI"] .
+		' remote: '. $_SERVER["REMOTE_ADDR"] .
+		' referer: '. $ref);
 closelog();
 ?>
