@@ -12,10 +12,11 @@ $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "";
 
 $t->thispage = "networks-coop";
 
-$imgurl = sprintf("/cgi-bin/climate/daily.py?p=daily&amp;station1=%s", $station1);
+$imgurl = sprintf("/plotting/auto/plot/180/network1:IACLIMATE::station1:%s", $station1);
 if ($mode == 'c'){
-	$imgurl .= sprintf("&station2=%s", $station2);
+	$imgurl .= sprintf("::station2:%s", $station2);
 }
+$imgurl .= ".png";
 
 $ar = Array("o" => "One Station", "c" => "Compare Two");
 $modeselect = make_select("mode", $mode, $ar);

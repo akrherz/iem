@@ -21,6 +21,8 @@ data = {'plots': [
          "label": "Bias of 24 Hour Precipitation Computation by Hour"},
         {'id': "82",
          'label': "Calendar of Daily Observations from Automated Stations"},
+        {'id': "180", 'label': "Daily Temperature Climatology",
+         'mw': True},
         {'id': "32", 'label': "Daily Temperature Departures for One Year",
          'mw': True},
         {'id': "21",
