@@ -5,8 +5,8 @@ include("$rootpath/include/database.inc.php");
 $mesosite = iemdb("mesosite");
 $access = iemdb("access");
 $asos = iemdb("asos");
-pg_exec($access, "SET TIME ZONE 'GMT'");
-pg_exec($asos, "SET TIME ZONE 'GMT'");
+pg_exec($access, "SET TIME ZONE 'UTC'");
+pg_exec($asos, "SET TIME ZONE 'UTC'");
 
 $stations = Array("AMW");
 

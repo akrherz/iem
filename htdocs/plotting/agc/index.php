@@ -5,10 +5,10 @@ $t = new MyView();
 $t->title = "ISU Ag Plotting";
 $t->thispage="networks-agclimate";
 
-include("../../../include/forms.php"); 
+require_once "../../../include/forms.php"; 
 include("../../../include/imagemaps.php"); 
-$plot = isset($_GET["plot"]) ? $_GET["plot"] : "solarRad";
-$station = isset($_GET["station"]) ? $_GET["station"] : "A130209";
+$plot = isset($_GET["plot"]) ? xssafe($_GET["plot"]): "solarRad";
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]): "A130209";
 
 $desc = Array(
   "solarRad" => "This plot shows hourly observations of solar radiation (red),

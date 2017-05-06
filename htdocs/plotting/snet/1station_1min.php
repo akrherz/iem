@@ -4,14 +4,14 @@ $OL = "3.18.2";
  include_once "../../../include/myview.php";
  $t = new MyView();
  
- include("../../../include/forms.php");
+require_once "../../../include/forms.php";
  include("../../../include/imagemaps.php"); 
- $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "KCCI";
+ $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "KCCI";
  
-$year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
-$month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
-$day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
-$station = isset($_GET['station'] ) ? $_GET['station'] : "";
+$year = isset( $_GET["year"] ) ? intval($_GET["year"]): date("Y");
+$month = isset( $_GET["month"] ) ? intval($_GET["month"]): date("m");
+$day = isset( $_GET["day"] ) ? intval($_GET["day"]): date("d");
+$station = isset($_GET['station'] ) ? xssafe($_GET['station']): "";
  
 if (! isset($_GET["station"])){
 $t->headextra = <<<EOF
@@ -42,9 +42,9 @@ $ds = daySelect($day);
 $content = "";
 if (strlen($station) > 0 ) {
 
-	$content .= sprintf("<p><img src=\"1min_T.php?station=%s&year=%s&month=%s&day=%s\" />", $station, $year, $month, $day);
-	$content .= sprintf("<p><img src=\"1min_V.php?station=%s&year=%s&month=%s&day=%s\" />", $station, $year, $month, $day);
-	$content .= sprintf("<p><img src=\"1min_P.php?station=%s&year=%s&month=%s&day=%s\" />", $station, $year, $month, $day);
+	$content .= sprintf("<p><img src=\"1min_T.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
+	$content .= sprintf("<p><img src=\"1min_V.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
+	$content .= sprintf("<p><img src=\"1min_P.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
 
 	$content .= "<p><b>Note:</b> The wind speeds are indicated every minute by the red line.  The blue dots represent wind direction and are shown every 10 minutes.</p>";
 

@@ -4,9 +4,9 @@
  * plotting it (via plot_1min.php) or displaying it for download
  */
 include("../../../config/settings.inc.php");
-include_once("$rootpath/include/database.inc.php");
+require_once "../../../include/database.inc.php";
+include_once "../../../include/network.php";
 
-include("$rootpath/include/network.php");
 $nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS","KS_ASOS",
 "ME_ASOS", "MD_ASOS", "NY_ASOS"));
 $cities = $nt->table;

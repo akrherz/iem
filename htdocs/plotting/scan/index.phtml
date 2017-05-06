@@ -1,7 +1,7 @@
 <?php
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 87);
-include("../../../include/forms.php");
+require_once "../../../include/forms.php";
 include("../../../include/myview.php");
 include("../../../include/imagemaps.php");
 
@@ -9,10 +9,10 @@ $t = new MyView();
 $t->thispage = "networks-scan";
 $t->title = "SCAN Plotting";
 
- $station = isset($_GET["station"]) ? $_GET["station"] : "S2031";
- $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 1*86400);
- $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 1*86400);
- $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 1*86400);
+ $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "S2031";
+ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 1*86400);
+ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 1*86400);
+ $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 1*86400);
  $plot = isset($_GET["plot"]) ? intval($_GET["plot"]) : 0;
 
 $u = Array("radn5temps.php", "radn5temps2.php", "smv.php", "winds.php", "precip.php");
@@ -23,7 +23,7 @@ $ulabel = Array("Soil Temps + Solar Rad",
 "Precipitation");
 $myu = $u[$plot];
 
- $ploturl = "$myu?station=$station&year=$year&month=$month&day=$day";
+ $ploturl = "$myu?station=$station&amp;year=$year&amp;month=$month&amp;day=$day";
  
  $sselect = networkSelect("SCAN", $station);
  $yselect = yearSelect(2004, $year, "year");

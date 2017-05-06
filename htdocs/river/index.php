@@ -1,10 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 71);
-include("../../include/database.inc.php");
-include("../../include/forms.php");
-include("../../include/imagemaps.php");
-include("../../include/myview.php");
+include_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+include_once "../../include/imagemaps.php";
+include_once "../../include/myview.php";
 
 $t = new MyView();
 $t->thispage = "severe-river";
@@ -119,7 +119,7 @@ Select by State:
 <input type='submit' value="Select by State">
 </form>
 
-<table border='1' cellpadding='2' cellspacing='0' style="margin: 5px;">
+<table class="table table-condensed table-bordered">
 <tr>
  <th>Key:</th>
  <td style="background: #ff0;">Near Flood Stage</td>
@@ -129,7 +129,7 @@ Select by State:
 </tr></table>
 EOF;
 
-$content .= "<p><table border='1' cellpadding='2' cellspacing='0'>";
+$content .= '<p><table class="table table-condensed table-bordered">';
 $rvs = array_keys($rivers);
 asort($rvs);
 

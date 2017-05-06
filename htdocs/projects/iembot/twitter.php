@@ -11,7 +11,7 @@ define("TWITTER_SECRET", get_iemprop('bot.twitter.consumersecret'));
 
 $pgconn = pg_connect('host=iemdb user=ldm dbname=mesosite');
 $screen_name = isset($_SESSION["screen_name"]) ? $_SESSION["screen_name"]: '';
-$channel = isset($_REQUEST["channel"]) ? strtoupper($_REQUEST["channel"]) : '';
+$channel = isset($_REQUEST["channel"]) ? strtoupper(xssafe($_REQUEST["channel"])) : '';
 $channel = trim($channel);
 
 $rs = pg_prepare($pgconn, "SAVEAUTH", "INSERT into

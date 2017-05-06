@@ -6,9 +6,9 @@ $t = new MyView();
 $t->title = "IEM NE Ames Time Series";
 $t->thispage = "networks-other";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
@@ -69,19 +69,19 @@ Today's Minimum Temperature: {$thisMin} F<br></font></div>
 Time of Maximum Wind Gust: {$gustTime}<br><br></font></div>
 
 <img src="1min.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<BR>
+<br />
 <img src="1min_inside.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<BR>
+<br />
 <img src="rh.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<BR>
+<br />
 <img src="baro.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<BR>
+<br />
 <img src="1min_V.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<BR>
+<br />
 <img src="dailyrain.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
 <br />
 <img src="temp_rh.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-<BR>
+<br />
 </td></tr></table>
 </div>
 EOF;
