@@ -76,8 +76,7 @@ Ext.define('My.grid.ExcelGridPanel', {
           dynamically create and anchor tag to force download with suggested filename 
           note: download attribute is Google Chrome specific
         */
- 
-        if (Ext.isChrome || Ext.isGecko) { // local download
+        if (location.length < 2000000 && (Ext.isChrome || Ext.isGecko)) { // local download
             var gridEl = this.getEl();
             var el = Ext.DomHelper.append(gridEl, {
                 tag: "a",
