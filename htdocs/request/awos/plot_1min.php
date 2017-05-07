@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include_once("$rootpath/include/database.inc.php");
+include_once("../../../include/database.inc.php");
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
@@ -14,7 +14,7 @@ $sqlStr .= " and station = '". $station ."' ORDER by valid ASC";
 
 $connection = iemdb("awos");
 
-$query1 = "SET TIME ZONE 'GMT'";
+$query1 = "SET TIME ZONE 'UTC'";
 
 $result = pg_exec($connection, $query1);
 $rs =  pg_exec($connection, $sqlStr);

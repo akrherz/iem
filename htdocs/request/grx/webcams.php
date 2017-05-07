@@ -1,9 +1,9 @@
 <?php
 /* Generate GR placefile of webcam stuff */
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/cameras.inc.php");
-include("$rootpath/include/iemprop.php");
+include("../../../include/database.inc.php");
+include("../../../include/cameras.inc.php");
+include("../../../include/iemprop.php");
 $camera_refresh = get_iemprop("webcam.interval");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 $overview = isset($_GET["overview"]);

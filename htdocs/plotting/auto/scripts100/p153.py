@@ -1,7 +1,9 @@
-import psycopg2
-from pandas.io.sql import read_sql
-import datetime
+"""Highest hourly values"""
 from collections import OrderedDict
+import datetime
+
+from pandas.io.sql import read_sql
+import psycopg2
 from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 
@@ -39,9 +41,9 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This table presents the extreme hourly value of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This table presents the extreme hourly value of
     some variable of your choice based on available observations maintained
     by the IEM.  Sadly, this app will likely point out some bad data points
     as such points tend to be obvious at extremes.  If you contact us to
@@ -50,7 +52,7 @@ def get_description():
     minutes into the future to place the near to top of the hour obs on
     that hour.  For example, a 9:53 AM observation becomes the ob for 10 AM.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='month', default='all',
@@ -58,7 +60,7 @@ def get_description():
         dict(type='select', name='var', options=PDICT, default='max_dwpf',
              label='Which Variable to Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -151,6 +153,7 @@ def plotter(fdict):
     ax.set_xlabel("%s %s, * denotes ties" % (PDICT[varname], UNITS[varname]))
 
     return plt.gcf(), df
+
 
 if __name__ == '__main__':
     plotter(dict(over='annual'))

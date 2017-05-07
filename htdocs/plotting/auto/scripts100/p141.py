@@ -1,7 +1,9 @@
+"""yieldfx plot"""
 import calendar
-import pandas as pd
-import datetime
 from collections import OrderedDict
+import datetime
+
+import pandas as pd
 from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context
@@ -24,10 +26,10 @@ PLOTS = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """ """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """ """
+    desc['arguments'] = [
         dict(type='select', name='location', default='ames',
              label='Select Location:', options=STATIONS),
         dict(type='select', name='ptype', default='gdd',
@@ -35,7 +37,7 @@ def get_description():
         dict(type='text', name='sdate', default='mar15',
              label='Start Date:')
     ]
-    return d
+    return desc
 
 
 def load(dirname, location, sdate):
@@ -127,7 +129,7 @@ def plotter(fdict):
         resdf[_ptype+'_max[F]'] = temperature(
             df.groupby('doy')[_ptype].max().values, 'C').value('F')
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     if ptype in ['gdd', 'rain']:
         ax.plot(thisyear.index.values, thisyear[ptype+'cum'], zorder=4,
                 color='b',
@@ -168,6 +170,7 @@ def plotter(fdict):
     ax.set_position([pos.x0, pos.y0 + 0.05, pos.width, pos.height * 0.95])
 
     return fig, resdf
+
 
 if __name__ == '__main__':
     plotter(dict())

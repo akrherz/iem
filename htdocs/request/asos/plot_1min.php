@@ -1,6 +1,6 @@
 <?php
 include_once "../../../config/settings.inc.php";
-include_once "$rootpath/include/database.inc.php";
+include_once "../../../include/database.inc.php";
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){

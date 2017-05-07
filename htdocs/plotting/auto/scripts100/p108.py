@@ -1,9 +1,11 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+"""departures"""
 import datetime
-import numpy as np
 from collections import OrderedDict
+
+from pandas.io.sql import read_sql
+import psycopg2
+import numpy as np
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('all', 'Show All Three Plots'),
@@ -14,9 +16,9 @@ PDICT = OrderedDict([('all', 'Show All Three Plots'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents accumulated totals and departures
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents accumulated totals and departures
     of growing degree days, precipitation and stress degree days. Leap days
     are not considered for this plot. The light blue area represents the
     range of accumulated values based on the observation history at the
@@ -26,7 +28,7 @@ def get_description():
         today = today.replace(year=today.year - 1, month=10, day=1)
     sts = today.replace(month=5, day=1)
 
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station'),
         dict(type='date', name='sdate',
@@ -48,7 +50,7 @@ def get_description():
         dict(type='select', name='which', default='all', options=PDICT,
              label='Which Charts to Show in Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -249,6 +251,7 @@ def plotter(fdict):
         ax4.set_xlim(0, xlen + 1)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

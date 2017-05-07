@@ -23,7 +23,7 @@ if (tokens.length == 2 && tokens[1].length == 3){
 EOF;
 $t->title = "Download NEXRAD Storm Attributes Shapefile";
 $content = <<<EOF
-<h3 class="heading">Archived NEXRAD Storm Attributes Shapefiles</h3>
+<h3>Archived NEXRAD Storm Attributes Shapefiles</h3>
 
 <p>The IEM attempts to process and archive the Storm Attribute Table that is
  produced by the RADARs that are a part of the NEXRAD network.  This page allows

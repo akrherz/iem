@@ -1,9 +1,11 @@
-import psycopg2
+"""Simple stats by year"""
 import datetime
+from collections import OrderedDict
+
+import psycopg2
 import numpy as np
 from pyiem import network, util
 from pandas.io.sql import read_sql
-from collections import OrderedDict
 
 PDICT = OrderedDict([
     ('max-high', 'Maximum High'),
@@ -27,13 +29,13 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This plot displays a metric for each year.
+    desc = dict()
+    desc['description'] = """This plot displays a metric for each year.
     In most cases, you can access the raw data for these plots
     <a href="/climodat/" class="alert-link">here.</a>"""
-    d['data'] = True
+    desc['data'] = True
     eyear = datetime.date.today().year
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              network='IACLIMATE', label='Select Station'),
         dict(type='select', name='type', default='max-high',
@@ -45,7 +47,7 @@ def get_description():
         dict(type='year', name='eyear', default=eyear,
              label='Start Year of Plot: (inclusive)'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -142,3 +144,7 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

@@ -1,10 +1,12 @@
-import psycopg2
+"""METAR frequency"""
 import calendar
 import datetime
+from collections import OrderedDict
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
-from collections import OrderedDict
 
 PDICT = OrderedDict([
         ('TS', 'Thunder (TS)'),
@@ -17,15 +19,15 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart totals the number of distinct calendar
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart totals the number of distinct calendar
     days per month that a given present weather condition is reported within
     the METAR data feed.  The calendar day is computed for the local time zone
     of the reporting station.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='year', name="year", label='Year to Highlight:',
@@ -33,7 +35,7 @@ def get_description():
         dict(type='select', name='var', default='FG',
              label='Present Weather Option:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -92,6 +94,7 @@ def plotter(fdict):
     ax.grid(True)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(zstation='ALO', year=2017, var='FG', network='IA_ASOS'))

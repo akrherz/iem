@@ -1,8 +1,8 @@
 <?php
 // TODO: deprecate this as we are going to /cgi-bin/request/rwis.py now
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../../include/database.inc.php");
+include("../../../include/network.php");
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 

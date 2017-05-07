@@ -12,10 +12,10 @@ Font: 1, 11, 1, "Courier New"
 
 ';
 include("../../../config/settings.inc.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/network.php");
+include("../../../include/iemaccess.php");
+include("../../../include/iemaccessob.php");
+include("../../../include/mlib.php");
+include("../../../include/network.php");
 $nt = new NetworkTable("AWOS");
 $cities = $nt->table;
 $iem = new IEMAccess();

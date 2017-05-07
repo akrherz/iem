@@ -4,7 +4,7 @@
  * $Id: $:
  */
 include("../../../config/settings.inc.php");
-include_once "$rootpath/include/database.inc.php";
+include_once "../../../include/database.inc.php";
 $plimit = isset($_GET["all"]) ? "('TO','SV')" : "('TO')";
 $title = isset($_GET["all"]) ? "SVR+TOR" : "TOR";
 $pgconn = iemdb('postgis');

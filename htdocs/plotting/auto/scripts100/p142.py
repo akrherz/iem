@@ -1,9 +1,11 @@
-import psycopg2
+"""Departures over trailing days"""
 import datetime
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
 from collections import OrderedDict
+
+import psycopg2
+from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
         ('precip', 'Precipitation [inch]'),
@@ -14,15 +16,15 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents the trailing X number of days
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents the trailing X number of days
     temperature or precipitation departure from long term average.
     """
     today = datetime.date.today()
     sts = today - datetime.timedelta(days=720)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='p1', default=31, label='First Period of Days'),
@@ -39,7 +41,7 @@ def get_description():
         dict(type='select', name='pvar', default='precip', options=PDICT,
              label='Which variable to plot?'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

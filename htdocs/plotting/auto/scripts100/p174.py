@@ -1,5 +1,7 @@
-import psycopg2
+"""comparison"""
 import datetime
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -7,15 +9,15 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This application generates a comparison of daily
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This application generates a comparison of daily
     high and low temperatures between two automated ASOS sites of your
     choosing."""
     edate = datetime.date.today()
     sdate = edate - datetime.timedelta(days=90)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation1', default='DSM',
              network='IA_ASOS', label='Select Station 1:'),
         dict(type='zstation', name='zstation2', default='IKV',
@@ -25,7 +27,7 @@ def get_description():
         dict(type='date', name='edate', default=edate.strftime("%Y/%m/%d"),
              label='End Date:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -105,6 +107,7 @@ def plotter(fdict):
         ax[i].set_ylim(y0 * 1.2, y1 * 1.2)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

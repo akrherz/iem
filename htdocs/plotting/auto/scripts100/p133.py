@@ -1,28 +1,30 @@
-import psycopg2
+"""snowfall totals around day"""
 import datetime
+
+import psycopg2
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the total reported snowfall for
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the total reported snowfall for
     a period prior to a given date and then after the date for the winter
     season.  When you select a date to split the winter season, the year
     shown in the date can be ignored.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='date', name='date', default='2015/12/25', min='2015/01/01',
              label='Split Season by Date: (ignore the year)'),
     ]
-    return d
+    return desc
 
 
 def get_data(fdict):
@@ -129,6 +131,7 @@ def plotter(fdict):
                label='After Avg: %.1f' % (df['after'].mean(),))
     ax.legend(ncol=2, fontsize=12)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

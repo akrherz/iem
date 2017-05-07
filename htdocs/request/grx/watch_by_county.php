@@ -3,7 +3,7 @@
  * Generate Watch by county placefile
  */
  include("../../../config/settings.inc.php");
- include("$rootpath/include/database.inc.php");
+ include("../../../include/database.inc.php");
  $dbconn = iemdb("postgis");
  
 header("Content-type: text/plain");

@@ -1,9 +1,11 @@
-import psycopg2
+"""Frequencies"""
 import datetime
 from collections import OrderedDict
+
+import psycopg2
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -37,14 +39,14 @@ DIRS = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """Based on available hourly observation reports
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """Based on available hourly observation reports
     by METAR stations, this application presents the frequency of number
     of hours for a given month or season at a given threshold.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='dwpf',
@@ -59,7 +61,7 @@ def get_description():
              label='Year to Highlight', name='year'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -115,7 +117,7 @@ def plotter(fdict):
     if len(df.index) == 0:
         return 'Error, no results returned!'
 
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
     ydf = df.groupby('year').sum()
     ax[0].set_title(("(%s) %s Hours %s %s\n"
                      "%s [%s]"
@@ -149,6 +151,7 @@ def plotter(fdict):
     ax[1].set_xlabel("Hour of Day (%s)" % (nt.sts[station]['tzname'],),
                      ha='right')
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(network='IA_ASOS', station='AMW'))

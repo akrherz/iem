@@ -1,9 +1,11 @@
-import psycopg2
+"""Top 10"""
 import datetime
 from collections import OrderedDict
+
+import psycopg2
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -32,14 +34,14 @@ METRICS = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """Based on available hourly observation reports
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """Based on available hourly observation reports
     by METAR stations, this application presents the top 10 events for a
     given metric of your choice.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='max_p01i',
@@ -48,7 +50,7 @@ def get_description():
              label='Month Limiter', options=MDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -120,6 +122,7 @@ def plotter(fdict):
         if len(ylabels) == 10:
             break
 
+    fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.5, 0.8])
     ax.barh(range(10, 0, -1), y, ec='green', fc='green', height=0.8,
             align='center')
@@ -132,7 +135,7 @@ def plotter(fdict):
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
     ax.set_xlabel(("Precipitation [inch]"
-                   if varname in ['max_p01i'] else 'Temperature $^\circ$F'
+                   if varname in ['max_p01i'] else r"Temperature $^\circ$F"
                    ))
     ax.set_title(("%s [%s] Top 10 Events\n"
                   "%s (%s) "
@@ -142,7 +145,11 @@ def plotter(fdict):
                        nt.sts[station]['archive_begin'].year,
                        datetime.datetime.now().year), size=12)
 
-    plt.gcf().text(0.98, 0.02, "Timezone: %s" % (nt.sts[station]['tzname'],),
-                   ha='right')
+    fig.text(0.98, 0.03, "Timezone: %s" % (nt.sts[station]['tzname'],),
+             ha='right')
 
-    return plt.gcf(), df
+    return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())
