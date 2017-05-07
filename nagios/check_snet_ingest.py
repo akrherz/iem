@@ -3,10 +3,12 @@
 """
 import sys
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor()
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main"""
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    icursor = pgconn.cursor()
     icursor.execute("""
     SELECT network,
     sum(case when valid > now() - '75 minutes'::interval then 1 else 0 end)
@@ -21,11 +23,11 @@ if __name__ == '__main__':
         counts[row[0]] = row[1]
         total += row[1]
 
-    if total > 20:
+    if total > 15:
         print(('OK - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(0)
-    elif total > 10:
+    elif total > 5:
         print(('WARNING - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(1)
@@ -33,3 +35,7 @@ if __name__ == '__main__':
         print(('CRITICAL - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(2)
+
+
+if __name__ == '__main__':
+    main()
