@@ -2,7 +2,7 @@ Summary: Iowa Environmental Mesonet Requirements Metarpm
 Name: iem-requirements
 Version: 1
 BuildArch: noarch
-Release: 39%{?dist}
+Release: 40%{?dist}
 License: distributable
 
 # straight forward OS requirements
@@ -14,7 +14,6 @@ Requires: php-pgsql
 Requires: php-ZendFramework
 Requires: proj-epsg
 Requires: ImageMagick
-Requires: gdal
 Requires: tcsh
 Requires: gifsicle
 Requires: bc
@@ -83,6 +82,9 @@ to make sure the IEM code runs on a system it is deployed on.
 
 
 %changelog
+* Mon May  8 2017 daryl herzmann <akrherz@iastate.edu>
+- GDAL is now coming from anaconda
+
 * Mon Mar 20 2017 daryl herzmann <akrherz@iastate.edu>
 - Dumped all pure-python stuff as we are now in the conda game
 
