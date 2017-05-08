@@ -4,10 +4,11 @@
 """
 from __future__ import print_function
 import datetime
-import pytz
-import requests
 import os
 import subprocess
+
+import pytz
+import requests
 from pyiem.util import exponential_backoff
 
 
@@ -33,9 +34,9 @@ def download(now, offset):
                 print('ncep_stage4.py: dl %s failed' % (url,))
             continue
         # Same temp file
-        o = open("tmp.grib.gz", 'wb')
-        o.write(response.content)
-        o.close()
+        output = open("tmp.grib.gz", 'wb')
+        output.write(response.content)
+        output.close()
         subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
         cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "

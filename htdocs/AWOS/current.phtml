@@ -1,9 +1,14 @@
 <?php 
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
+require_once "../../include/forms.php";
+include("../../include/mlib.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
+
 $t = new MyView();
 
-$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
 
 $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol\">";
 $t->title = "AWOS Network Current Conditions";
@@ -18,9 +23,6 @@ function new_window(url) {
 EOF;
 $t->current_network = "AWOS";
 $t->thispage = "current-sort";
-  include("../../include/mlib.php"); 
-  include("../../include/iemaccess.php");
-  include("../../include/iemaccessob.php");
 
   $iem = new IEMAccess();
   $awos = $iem->getNetwork("AWOS");

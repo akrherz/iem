@@ -1,9 +1,11 @@
+"""LSR map by WFO"""
+import datetime
+from collections import OrderedDict
+
 import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
-import datetime
 import pytz
-from collections import OrderedDict
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context
 
@@ -59,13 +61,13 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This application generates a map displaying the
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This application generates a map displaying the
     number of LSRs issued between a period of your choice by NWS Office."""
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='datetime', name='sdate',
              default=jan1.strftime("%Y/%m/%d 0000"),
              label='Start Date / Time (UTC, inclusive):',
@@ -77,7 +79,7 @@ def get_description():
         dict(type='select', name='filter', default='NONE', options=MDICT,
              label='Local Storm Report Type Filter'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -122,6 +124,7 @@ def plotter(fdict):
     p.fill_cwas(data, bins=bins, ilabel=True)
 
     return p.fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -1,8 +1,10 @@
-import numpy as np
+"""snow cover coverage"""
 import datetime
+
+import numpy as np
 import netCDF4
-from pyiem import iemre
 import pandas as pd
+from pyiem import iemre
 from pyiem.datatypes import distance
 from pyiem.util import get_autoplot_context
 from pyiem import reference
@@ -10,23 +12,23 @@ from pyiem import reference
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     today = datetime.date.today()
     year = today.year if today.month > 9 else today.year - 1
-    d['description'] = """This chart displays estimated areal coverage of
+    desc['description'] = """This chart displays estimated areal coverage of
     snow cover for a single state.  This estimate is based on a 0.25x0.25
     degree analysis of NWS COOP observations.  The date shown would represent
     snow depth reported approximately at 7 AM.
     """
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='year', name='year', default=year,
              label='Year of December for Winter Season'),
         dict(type='float', name='thres', default='1.0',
              label='Snow Cover Threshold [inch]'),
         dict(type='clstate', name='state', default='IA', label='For State'),
     ]
-    return d
+    return desc
 
 
 def f(st, snowd, metric, stpts):
@@ -94,6 +96,7 @@ def plotter(fdict):
     ax.grid(True)
 
     return fig, df
+
 
 if __name__ == '__main__':
     fig, df = plotter(dict())

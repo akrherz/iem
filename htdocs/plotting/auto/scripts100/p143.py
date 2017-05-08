@@ -1,8 +1,10 @@
-import pandas as pd
+"""xy point plot of arridity"""
 import datetime
-import psycopg2
-from pandas.io.sql import read_sql
 from collections import OrderedDict
+
+import psycopg2
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context
@@ -198,6 +200,7 @@ def plotter(fdict):
     ax.set_position([0.1, 0.1, 0.7, 0.8])
 
     return fig, resdf
+
 
 if __name__ == '__main__':
     plotter(dict())

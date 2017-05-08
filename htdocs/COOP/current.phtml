@@ -8,16 +8,16 @@ define("IEM_APPID", 41);
  $nt = new NetworkTable("WFO");
  include("../../include/myview.php");
  $t = new MyView();
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include_once("../../include/database.inc.php");
  $mesosite = iemdb("mesosite");
  include("../../include/iemaccess.php");
  include("../../include/iemaccessob.php");
  
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
-$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST['wfo'] : null;
-$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
-$sortdir = isset($_GET['sortdir']) ? $_GET['sortdir'] : 'desc';
+$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_COOP'; 
+$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST['wfo']): null;
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'ts';
+$sortdir = isset($_GET['sortdir']) ? xssafe($_GET['sortdir']): 'desc';
 if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
 function precip_formatter($val){

@@ -21,7 +21,7 @@ $d2 = daySelect2(date("d"), "day2");
 $h2 = hourSelect(0, "hour2");
 
 $t->content = <<<EOF
-<h3 class="heading">SchoolNet Data Download</h3>
+<h3>SchoolNet Data Download</h3>
 
 <p>With this form, you can download schoolnet data.  The 
 archive starts on <b>12 Feb 2002</b> for stations that were online at that
@@ -35,12 +35,12 @@ recent data is from yesterday.</p>
 
 <table>
 <tr>
-  <th class="subtitle">Select Station:</th>
+  <th>Select Station:</th>
   <td>{$nselect}</td>
 </tr>
 
 <tr>
-  <th class="subtitle">Select <a href="/schoolnet/dl/params.php">Parameters</a></th>
+  <th>Select <a href="/schoolnet/dl/params.php">Parameters</a></th>
   <td>
      <table>
      <tr>
@@ -68,7 +68,7 @@ recent data is from yesterday.</p>
 </tr>
 
 <tr>
-  <th class="subtitle">Time Interval:</th>
+  <th>Time Interval:</th>
   <td>
     <table>
      <tr>
@@ -97,7 +97,7 @@ recent data is from yesterday.</p>
 </tr>
 
 <tr>
-  <th class="subtitle">Data Sampling: [1]</th>
+  <th>Data Sampling: [1]</th>
   <td>
   <select name="sample">
     <option value="1min">Every Minute
@@ -110,7 +110,7 @@ recent data is from yesterday.</p>
 </tr>
 
 <tr>
-  <th class="subtitle">Download Options</th>
+  <th>Download Options</th>
   <td>
    <select name="dl_option">
     <option value="download">Download to disk
@@ -120,7 +120,7 @@ recent data is from yesterday.</p>
 </tr>
 
 <tr>
-  <th class="subtitle">Delimitation</th>
+  <th>Delimitation</th>
   <td>
    <select name="delim">
     <option value="comma">Comma

@@ -5,9 +5,11 @@ $t = new MyView();
 $t->title = "LDM Request HOWTO";
 
 $t->content = <<<EOF
-<h3 class="heading">Real-time IEM data feeds with LDM HOWTO</h3>
+<ol class="breadcrumb">
+  <li><a href="/info.php">IEM Information</a></li>
+  <li class="active">Real-time IEM data feeds with LDM HOWTO</li>
+</ol>
 
-<div class="text">
 <p>This page will show you all the steps necessary
 to set up a LDM data feed from the Iowa Environmental Mesonet [IEM].  Currently,
 we are offering the SchoolNet (KCCI-TV8) dataset and Roadway Weather Information System (RWIS) dataset via LDM.</p>
@@ -115,7 +117,8 @@ OK
 <p align="right">
 Daryl Herzmann 
 <br> (akrherz@iastate.edu)
-<br> Rev: 26 Dec 2002 </div>
+<br> Rev: 26 Dec 2002
+
 EOF;
 $t->render('single.phtml');
 ?>

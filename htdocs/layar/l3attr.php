@@ -6,8 +6,8 @@ $postgis = iemdb("postgis");
 
 
 /* Figure out what was requested */
-$center_lat = isset($_GET["lat"]) ? $_GET["lat"]: 58.1;
-$center_lng = isset($_GET["lon"]) ? $_GET["lon"]: -97.0;
+$center_lat = isset($_GET["lat"]) ? floatval($_GET["lat"]): 58.1;
+$center_lng = isset($_GET["lon"]) ? floatval($_GET["lon"]): -97.0;
 $radius = isset($_GET["radius"]) ? floatval($_GET["radius"]): 2000.0; # in meters
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as lat,

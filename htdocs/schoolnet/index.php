@@ -14,13 +14,13 @@ if ($network == 'KCCI'){
 <table width="100%" bgcolor="white" border=0>
 <tr><td valign="top" width="300">
 
-<p><h3 class="subtitle">Current Data</h3>
+<p><h3>Current Data</h3>
 <ul>
  <li><a href="current.phtml">Current Conditions</a> (sortable)</li>
  <li><a href="/GIS/apps/snet/raining.php">Where's it raining?</a></li>
 </ul>
 
-<p><h3 class="subtitle">Station Plots</h3>
+<p><h3>Station Plots</h3>
 <ul>
  <li><a href="/GIS/apps/mesoplot/plot.php">Rapid Update every Minute</a></li>
  <li><a href="/GIS/apps/mesoplot/plot.php?zoom=1">Zoomed in on Des Moines</a></li>
@@ -28,14 +28,14 @@ if ($network == 'KCCI'){
 
 </td><td valign="top" width="350">
 
-  <p><h3 class="subtitle">Historical Data</h3>
+  <p><h3>Historical Data</h3>
 <ul>
  <li><a href="/schoolnet/dl/">Download</a> from the archive!</a></li>
  <li><a href="/cgi-bin/precip/catSNET.py">Hourly Rainfall</a> tables</a></li>
  <li><a href="/schoolnet/rates/">Rainfall Rates</a></li>
 </ul>
 
-<p><h3 class="subtitle">QC Info</h3>
+<p><h3>QC Info</h3>
 <ul>
  <li><a href="/QC/offline.php">Stations Offline</a></li>
  <li><a href="/QC/madis/network.phtml?network=KCCI">MADIS QC Values</a></li>
@@ -47,7 +47,7 @@ if ($network == 'KCCI'){
   </li>
 </ul>
 
-<p><h3 class="subtitle">Plotting Time Series</h3>
+<p><h3>Plotting Time Series</h3>
 <ul>
  <li><a href="/plotting/snet/1station_1min.php">1 station</a> [1 minute data]</li>
  <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
@@ -68,25 +68,25 @@ else if ($network == 'KELO'){
 
 <tr><td valign="top" width="300">
 
-<p><h3 class="subtitle">Current Data</h3>
+<p><h3>Current Data</h3>
 <ul>
  <li><a href="current.phtml">Current Conditions</a> (sortable)</li>
  <li><a href="/GIS/apps/snet/raining.php">Where's it raining?</a></li>
 </ul>
 
-<p><h3 class="subtitle">Station Plots</h3>
+<p><h3>Station Plots</h3>
 <ul>
  <li><a href="/GIS/apps/mesoplot/plot.php?network=KELO">Rapid Update</a></li>
  <li><a href="/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pres">Barometer</a></li>
  <li><a href="/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pday">Today's Precip Accum</a></li>
 </ul>
 
-<p><h3 class="subtitle">Historical Data</h3><br><ul>
+<p><h3>Historical Data</h3><br><ul>
  <li><a href="/schoolnet/dl/">Download</a> from the archive!</a></li>
  <li><a href="/cgi-bin/precip/catSNET.py">Hourly Precipitation</a>
  tables</a></li></ul>
 
-<p><h3 class="subtitle">QC Info</h3>
+<p><h3>QC Info</h3>
 <ul>
  <li><a href="/QC/offline.php">Stations Offline</a></li>
  <li><a href="/QC/madis/network.phtml?network=KELO">MADIS QC Values</a></li>
@@ -101,7 +101,7 @@ else if ($network == 'KELO'){
 
 </td><td valign="top" width="350">
 
-<p><h3 class="subtitle">Plotting Time Series</h3>
+<p><h3>Plotting Time Series</h3>
 <ul>
  <li><a href="/plotting/snet/1station.php">1 station</a> [20 minute data]</li>
  <li><a href="/plotting/snet/1station_1min.php">1 station</a> [1 minute data]</li>

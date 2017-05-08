@@ -1,8 +1,9 @@
 """
 TODO: add table listing each forecast's peak and peak time...
 """
-import psycopg2
 import datetime
+
+import psycopg2
 import pandas as pd
 import numpy as np
 from pandas.io.sql import read_sql
@@ -14,18 +15,18 @@ MDICT = {'primary': 'Primary Field',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 3600
-    d['highcharts'] = True
-    d['description'] = """This page presents a sphagetti plot of river stage
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 3600
+    desc['highcharts'] = True
+    desc['description'] = """This page presents a sphagetti plot of river stage
     and forecasts.  The plot is roughly centered on the date of your choice
     with the plot showing any forecasts made three days prior to the date
     and for one day afterwards.  Sorry that you have to know the station ID
     prior to using this page (will fix at some point).
     """
     utc = datetime.datetime.utcnow()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='text', name='station', default='EKDI4',
              label='Enter 5 Char NWSLI Station Code (sorry):'),
         dict(type='datetime', name='dt', default=utc.strftime("%Y/%m/%d %H%M"),
@@ -34,7 +35,7 @@ def get_description():
         dict(type='select', name='var', options=MDICT,
              label='Which Variable to Plot:', default='primary'),
     ]
-    return d
+    return desc
 
 
 def get_context(fdict):
@@ -172,6 +173,7 @@ def plotter(fdict):
     ax.set_position([pos.x0, pos.y0, 0.6, 0.8])
     ax.legend(loc=(1.0, 0.0))
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

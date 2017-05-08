@@ -4,17 +4,17 @@
  
  include_once("../../include/myview.php");
  include_once("../../include/mlib.php");
- include_once("../../include/forms.php");
+ require_once "../../include/forms.php";
  include_once("../../include/network.php");
  include_once("../../include/iemaccess.php");
  include_once("../../include/iemaccessob.php");
  include_once "../../include/database.inc.php";
  
  $network = isset($_GET['network']) ? substr($_GET["network"],0,10) : 'IA_ASOS';
- $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
- $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
- $sorder = isset($_GET['sorder']) ? $_GET['sorder']: "desc";
- $format = isset($_REQUEST["format"]) ? $_REQUEST['format'] : 'html';
+ $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]): "no";
+ $sortcol = isset($_GET['sortcol'])  ? xssafe($_GET['sortcol']): "ts";
+ $sorder = isset($_GET['sorder']) ? xssafe($_GET['sorder']): "desc";
+ $format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']): 'html';
  if ($format == 'jsonp'){
  	header("Location: /geojson/network_obs.php?network=$network&callback=mycallback");
  	die();

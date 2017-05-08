@@ -1,8 +1,10 @@
+"""talltowers plot"""
+import datetime
+
 import psycopg2
-from pyiem.network import Table as NetworkTable
 import numpy as np
 from pandas.io.sql import read_sql
-import datetime
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'Above Threshold',
@@ -13,11 +15,11 @@ PDICT2 = {'max_rh': 'Daily Max RH',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['description'] = """ WORK-IN-PROGRESS! """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['description'] = """ WORK-IN-PROGRESS! """
+    desc['arguments'] = [
         dict(type='networkselect', name='station', default='ETTI4',
              label='Select Station', network='TALLTOWERS'),
         dict(type='datetime', name='dt', default="2016/09/15 2340",
@@ -25,7 +27,7 @@ def get_description():
         dict(type='int', name='minutes', default=10,
              label='Number of Minutes to Plot')
                       ]
-    return d
+    return desc
 
 
 def get_context(fdict):
@@ -338,3 +340,7 @@ def plotter(fdict):
     # remove timezone since excel no likely
     ctx['df'].index = ctx['df'].index.tz_localize(None)
     return fig, ctx['df']
+
+
+if __name__ == '__main__':
+    plotter(dict())

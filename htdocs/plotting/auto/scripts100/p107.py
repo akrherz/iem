@@ -1,9 +1,11 @@
-import psycopg2
-from pyiem import network
-import numpy as np
-from pandas.io.sql import read_sql
+"""COOP period stats"""
 import datetime
 from collections import OrderedDict
+
+import numpy as np
+from pandas.io.sql import read_sql
+import psycopg2
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
@@ -23,14 +25,14 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents statistics for a period of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents statistics for a period of
     days each year provided your start date and number of days after that
     date. If your period crosses a year bounds, the plotted year represents
     the year of the start date of the period."""
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month',
@@ -48,10 +50,11 @@ def get_description():
         dict(type='year', name='year', default=today.year,
              label="Year to Highlight in Chart:"),
     ]
-    return d
+    return desc
 
 
 def nice(val):
+    """nice printer"""
     if val == 'M':
         return 'M'
     if val < 0.01 and val > 0:

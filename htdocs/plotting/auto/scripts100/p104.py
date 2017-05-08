@@ -1,16 +1,18 @@
-import psycopg2
-from pyiem import network
-import numpy as np
+"""Weather cycling"""
 import datetime
+
+import psycopg2
+import numpy as np
 import pandas as pd
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents the time series of trailing X
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents the time series of trailing X
     number of day departures evaluated every Y days forward in time.  The
     departures are expressed in terms of standard deviation (sigma) by
     comparing the current period against the same period of dates back through
@@ -20,7 +22,7 @@ def get_description():
     comparable plot to this one is of suply vs demand.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='date', name='date1',
@@ -36,10 +38,11 @@ def get_description():
              label="Interval to Compute Trailing Statistics (Y)"),
 
     ]
-    return d
+    return desc
 
 
 def get_color(val, cat):
+    """get color fpr category and val"""
     if cat == 't':
         if val > 0:
             return 'r'
@@ -141,3 +144,7 @@ def plotter(fdict):
                 color=get_color(p, 'p'), ha='right')
         y -= 0.04
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

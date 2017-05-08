@@ -41,7 +41,7 @@ for( $i=0; $row  = @pg_fetch_array($rs,$i); $i++){
 <body>
 <h3>VTEC Browser for Mobile</h3>
 
-<img src="/GIS/radmap.php?layers[]=uscounties&layers[]=sbw&layers[]=nexrad&width=300&height=300&vtec=<?php echo str_replace('-', '.', $v); ?>" />
+<img src="/GIS/radmap.php?layers[]=uscounties&amp;layers[]=sbw&amp;layers[]=nexrad&amp;width=300&amp;height=300&amp;vtec=<?php echo str_replace('-', '.', $v); ?>" />
 
 <pre>
 <?php echo $txtdata; ?>

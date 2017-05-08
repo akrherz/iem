@@ -1,8 +1,10 @@
-import psycopg2
+"""Accumuldated days"""
 import datetime
 from collections import OrderedDict
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('high_above', 'High Temperature At or Above'),
@@ -15,14 +17,14 @@ PDICT2 = OrderedDict([('jan1', 'January 1'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['highcharts'] = True
-    d['description'] = """This plot displays the accumulated number of days
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['highcharts'] = True
+    desc['description'] = """This plot displays the accumulated number of days
     that the high or low temperature was above or below some threshold.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='high_above',
@@ -34,7 +36,7 @@ def get_description():
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Year to Highlight in Chart'),
     ]
-    return d
+    return desc
 
 
 def highcharts(fdict):
@@ -189,6 +191,7 @@ def plotter(fdict):
     ax.set_xlim(int(df.index.min()) - 1, int(df.index.max()) + 1)
     ax.set_ylabel("Accumulated Days")
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

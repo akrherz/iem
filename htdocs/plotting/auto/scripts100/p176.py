@@ -1,3 +1,4 @@
+"""Besting previous record"""
 from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 import psycopg2
@@ -6,17 +7,17 @@ import pandas as pd
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['highcharts'] = True
-    d['data'] = True
-    d['description'] = """This chart shows the margin by which new daily high
+    desc = dict()
+    desc['highcharts'] = True
+    desc['data'] = True
+    desc['description'] = """This chart shows the margin by which new daily high
     and low temperatures set are beaten by.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         ]
-    return d
+    return desc
 
 
 def get_context(fdict):
@@ -114,6 +115,7 @@ def plotter(fdict):
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
 
     return fig, ctx['df']
+
 
 if __name__ == '__main__':
     highcharts(dict())

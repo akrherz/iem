@@ -3,8 +3,9 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
+require_once "../../include/forms.php";
 
-$v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2012-O-NEW-KBMX-TO-W-0001";
+$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2012-O-NEW-KBMX-TO-W-0001";
 $tokens = preg_split('/-/', $v);
 $year = intval($tokens[0]);
 $operation = $tokens[1];
