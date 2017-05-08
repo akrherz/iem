@@ -1,4 +1,9 @@
-# Run at 12Z, but needs some manual crontab changing help
+# Ensure this is actually being run at 12z, since crontab is in CST/CDT
+HH=$(date -u +%H)
+if [ "$HH" -ne "12" ]
+	then
+		exit
+fi
 
 # DVN wants this to run at 12:10 UTC, so we start the cron script a bit late
 cd 12z

@@ -1,4 +1,9 @@
-# Jobs run at 00 UTC
+# Ensure this is actually being run at 00z, since crontab is in CST/CDT
+HH=$(date -u +%H)
+if [ "$HH" -ne "00" ]
+	then
+		exit
+fi
 
 cd util
 python make_archive_baseline.py
