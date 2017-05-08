@@ -3,7 +3,6 @@
 from __future__ import print_function
 import glob
 import datetime
-import sys
 import tarfile
 import subprocess
 import re
@@ -14,7 +13,7 @@ import pytz
 from pyiem.util import noaaport_text
 from pyiem.nws.product import TextProduct
 
-BAD_CHARS = "[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
+BAD_CHARS = r"[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 
 PGCONN = psycopg2.connect(database='afos', host='iemdb')
 
@@ -29,12 +28,12 @@ def process(order):
         tar = tarfile.open(tarfn[:-2], 'r')
         memory = []
         for member in tar.getmembers():
-            f = tar.extractfile(member)
-            if not f.name.startswith("TEXT_"):
+            fobj = tar.extractfile(member)
+            if not fobj.name.startswith("TEXT_"):
                 continue
             content = (re.sub(BAD_CHARS, "",
-                              f.read())).replace("\r\r", "")
-            parts = f.name.strip().split("_")
+                              fobj.read())).replace("\r\r", "")
+            parts = fobj.name.strip().split("_")
             ttaaii = parts[1]
             source = parts[2]
             delimiter = "%s %s" % (ttaaii, source)
@@ -42,7 +41,7 @@ def process(order):
             pos = content.find(delimiter)
             if pos == -1:
                 print(('Skipping can not find %s in product %s'
-                       ) % (delimiter, f.name))
+                       ) % (delimiter, fobj.name))
                 continue
             content = content[pos:]
             # Now we are getting closer, lets split by the delimter as we
@@ -53,9 +52,10 @@ def process(order):
                 bulletin = "000\n%s%s" % (delimiter, bulletin)
                 bulletin = noaaport_text(bulletin)
                 try:
-                    prod = TextProduct(bulletin, utcnow=ts)
+                    prod = TextProduct(bulletin, utcnow=ts,
+                                       parse_segments=False)
                 except Exception as exp:
-                    print('Parsing Failure %s\n%s' % (f.name, exp))
+                    print('Parsing Failure %s\n%s' % (fobj.name, exp))
                     continue
 
                 if prod.valid.year != ts.year:
