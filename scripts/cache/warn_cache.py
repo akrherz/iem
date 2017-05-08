@@ -5,9 +5,11 @@ pre-generate them and allow folks to download.
 
     This is a cron job from RUN_2AM.sh
 """
-import requests
+from __future__ import print_function
 import datetime
 import sys
+
+import requests
 
 FINAL = "/mesonet/share/pickup/wwa/"
 URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
@@ -21,24 +23,24 @@ def get_files(year):
 
     req = requests.get(myuri)
     if req.status_code != 200:
-        print("warn_cache[%s] failed with status: %s\n%s" % (req.status, myuri)
-              )
+        print(("warn_cache[%s] failed with status: %s\n%s"
+               ) % (req.status_code, myuri, req.content))
         return
     else:
-        o = open("%s/%s_all.zip" % (FINAL, year), 'wb')
-        o.write(req.content)
-        o.close()
+        output = open("%s/%s_all.zip" % (FINAL, year), 'wb')
+        output.write(req.content)
+        output.close()
 
     # Now do SBW variant
     myuri = "%s&limit0=yes" % (myuri,)
     req = requests.get(myuri)
     if req.status_code != 200:
-        print("warn_cache[%s] failed with status: %s\n%s" % (req.status, myuri)
-              )
+        print(("warn_cache[%s] failed with status: %s\n%s"
+               ) % (req.status_code, myuri, req.content))
     else:
-        o = open("%s/%s_tsmf.zip" % (FINAL, year), 'wb')
-        o.write(req.content)
-        o.close()
+        output = open("%s/%s_tsmf.zip" % (FINAL, year), 'wb')
+        output.write(req.content)
+        output.close()
 
     if year > 2001:
         # Do SBW
@@ -46,16 +48,22 @@ def get_files(year):
         req = requests.get(myuri)
         if req.status_code != 200:
             print(("warn_cache[%s] failed with status: %s\n%s"
-                   ) % (req.status, myuri))
+                   ) % (req.status, myuri, req.content))
         else:
-            o = open("%s/%s_tsmf_sbw.zip" % (FINAL, year), 'wb')
-            o.write(req.content)
-            o.close()
+            output = open("%s/%s_tsmf_sbw.zip" % (FINAL, year), 'wb')
+            output.write(req.content)
+            output.close()
 
-if __name__ == "__main__":
+
+def main(argv):
+    """Do Stuff"""
     # Lets go!
-    if len(sys.argv) == 2:
-        get_files(sys.argv[1])
+    if len(argv) == 2:
+        get_files(argv[1])
     else:
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
         get_files(yesterday.year)
+
+
+if __name__ == "__main__":
+    main(sys.argv)
