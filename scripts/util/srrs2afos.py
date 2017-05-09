@@ -20,10 +20,10 @@ ENDDELIM = "****0000000000****"
 PGCONN = psycopg2.connect(database='afos', host='iemdb')
 
 
-def process(order):
+def process():
     """ Process this timestamp """
-    cursor = PGCONN.cursor()
     for tarfn in glob.glob("9957*tar.Z"):
+        cursor = PGCONN.cursor()
         subprocess.call("uncompress %s" % (tarfn,), shell=True)
         ts = datetime.datetime.strptime(tarfn[9:17], '%Y%m%d')
         ts = ts.replace(hour=23, minute=59, tzinfo=pytz.utc)
@@ -68,8 +68,8 @@ def process(order):
             """, (bulletin, prod.afos, prod.valid, prod.source, prod.wmo))
         subprocess.call("compress %s" % (tarfn[:-2],), shell=True)
 
-    cursor.close()
-    PGCONN.commit()
+        cursor.close()
+        PGCONN.commit()
 
 
 def main():
@@ -77,7 +77,7 @@ def main():
     os.chdir("/mesonet/tmp/ncei")
     for order in glob.glob("HAS*"):
         os.chdir(order)
-        process(order)
+        process()
         os.chdir("..")
 
 
