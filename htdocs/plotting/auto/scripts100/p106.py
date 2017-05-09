@@ -1,7 +1,9 @@
-import psycopg2.extras
-from pyiem.network import Table as NetworkTable
+"""hourly histogram on days"""
 import datetime
 from collections import OrderedDict
+
+import psycopg2.extras
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = {'tmpf_above': 'Temperature At or Above Threshold (F)',
@@ -29,11 +31,11 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This plot displays hourly temperature distributions
+    desc = dict()
+    desc['description'] = """This plot displays hourly temperature distributions
     for a given time period and temperature threshold of your choice.  The
     temperature threshold is for one or more exceedences for the day."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='opt', default='tmpf_above',
@@ -43,7 +45,7 @@ def get_description():
         dict(type='int', name='threshold', default='80',
              label='Temperature Threshold (F):')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -51,8 +53,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -111,6 +113,7 @@ def plotter(fdict):
     ax.set_xticks(range(1, 25, 4))
     ax.set_xticklabels(['Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'])
     return fig
+
 
 if __name__ == '__main__':
     plotter(dict())

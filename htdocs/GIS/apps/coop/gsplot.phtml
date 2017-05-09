@@ -3,7 +3,7 @@ include("../../../../config/settings.inc.php");
 define("IEM_APPID", 32);
 include("../../../../include/database.inc.php");
 $coopdb = iemdb("coop");
-include("../../../../include/forms.php");
+require_once "../../../../include/forms.php";
 include("../../../../include/network.php");
 /** Need to use external date lib
  * http://php.weblogs.com/adodb_date_time_library
@@ -13,13 +13,13 @@ include_once "../../../../include/myview.php";
 
 $t = new MyView();
 
-$var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400);
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
-$sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m", time() - 86400);
-$eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d", time() - 86400);
-$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
+$var = isset($_GET["var"]) ? xssafe($_GET["var"]): "gdd50";
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 86400);
+$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): 5;
+$sday = isset($_GET["sday"]) ? intval($_GET["sday"]): 1;
+$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): date("m", time() - 86400);
+$eday = isset($_GET["eday"]) ? intval($_GET["eday"]): date("d", time() - 86400);
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IACLIMATE";
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;

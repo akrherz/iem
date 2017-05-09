@@ -2,7 +2,7 @@
 /* Front End to generate plots for a given day */
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 50);
-include("../../../../include/forms.php");
+require_once "../../../../include/forms.php";
   $pvar = isset($_GET["pvar"]) ? $_GET["pvar"]: "c11,c12";
   $ar = explode(",", $pvar);
   $_GET["var"] = $pvar;
@@ -15,7 +15,7 @@ include("../../../../include/forms.php");
   $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 86400 - (7 * 3600) );
   $date = $year ."-". $month ."-". $day;
   $ts = mktime(0,0,0, $month, $day, $year);
-  $network = isset($_REQUEST["network"]) ? strtoupper($_REQUEST["network"]): 'AUTO';
+  $network = isset($_REQUEST["network"]) ? strtoupper(xssafe($_REQUEST["network"])): 'AUTO';
   
   $networkopts = Array("AUTO", "ISUAG", "ISUSM");
   if (! in_array($network, $networkopts)){
@@ -29,7 +29,7 @@ include("../../../../include/forms.php");
   $networkform .= "</select>";
   
   
- $imgurl = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s&network=%s", $pvar, $year,
+ $imgurl = sprintf("plot.php?pvar=%s&amp;year=%s&amp;month=%s&amp;day=%s&amp;network=%s", $pvar, $year,
 	$month, $day, $network);
   
   $varDef = Array("c11" => "High Air Temperatures",

@@ -1,9 +1,11 @@
-import psycopg2
+"""Wind Chill Hours"""
 import datetime
-import pandas as pd
 from collections import OrderedDict
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
+import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([(0, 'Include calm observations'),
@@ -14,18 +16,18 @@ PDICT = OrderedDict([(0, 'Include calm observations'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the number of accumulated
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the number of accumulated
     hours below a given wind chill temperature threshold by season. The
     labeled season shown is for the year of January. So the season of 2016
     would be from July 2015 to June 2016.  Hours with no wind are included
     in this analysis with the wind chill temperature being the air temperature
     in those instances.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='year', name='season', default=datetime.datetime.now().year,
@@ -33,7 +35,7 @@ def get_description():
         dict(type='select', name='wind', default=0, options=PDICT,
              label='Include Calm Observations? (wind threshold)'),
     ]
-    return d
+    return desc
 
 
 def highcharts(fdict):

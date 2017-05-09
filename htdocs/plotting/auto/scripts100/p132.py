@@ -1,9 +1,11 @@
-import psycopg2
+"""Top 10"""
 import datetime
 import calendar
 from collections import OrderedDict
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 MDICT = OrderedDict([
@@ -34,10 +36,10 @@ METRICS = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the top ten events for a given
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the top ten events for a given
     site and period of your choice. Here is a description of the labels
     shown in the 'Which Metric to Summarize' option:
     <ul>
@@ -50,7 +52,7 @@ def get_description():
      be -12</li>
     </ul>
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='total_precip',
@@ -61,7 +63,7 @@ def get_description():
              label='Month Limiter', options=MDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -168,6 +170,7 @@ def plotter(fdict):
                        datetime.datetime.now().year), size=12)
 
     return plt.gcf(), df
+
 
 if __name__ == '__main__':
     plotter(dict())

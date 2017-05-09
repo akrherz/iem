@@ -5,11 +5,12 @@
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/network.php");
+require_once "../../include/forms.php";
 $nt = new NetworkTable('IA_DCP');
 $pgconn = iemdb("hads");
 
-$station = isset($_REQUEST['station']) ? $_REQUEST["station"] : die("No station");
-$varname = isset($_REQUEST['var']) ? $_REQUEST['var'] : die("No var");
+$station = isset($_REQUEST['station']) ? xssafe($_REQUEST["station"]): die("No station");
+$varname = isset($_REQUEST['var']) ? xssafe($_REQUEST['var']): die("No var");
 $sday = isset($_REQUEST['sday']) ? strtotime($_REQUEST['sday']) : die("No sday");
 $eday = isset($_REQUEST['eday']) ? strtotime($_REQUEST['eday']) : die("No eday");
 

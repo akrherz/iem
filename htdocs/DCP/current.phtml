@@ -4,12 +4,12 @@
  include("../../include/myview.php");
  $t = new MyView();
  include_once "../../include/database.inc.php";
- include_once "../../include/forms.php";
+ require_once "../../include/forms.php";
  $pgconn = iemdb('iem');
  $mesosite = iemdb('mesosite');
   
- $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : "valid";
- $network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
+ $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): "valid";
+ $network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
  $shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
 
  $t->title = "DCP/GOES Current Conditions";

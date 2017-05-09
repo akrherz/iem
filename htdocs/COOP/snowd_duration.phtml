@@ -5,12 +5,12 @@ include("../../include/myview.php");
 $t = new MyView();
 
 include("../../include/imagemaps.php");
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 include("../../include/database.inc.php");
 $coopdb = iemdb('coop');
-$station = isset($_GET["station"]) ? $_GET["station"] : 'IA0200';
-$month = isset($_GET["month"]) ? $_GET["month"] : 12;
-$day = isset($_GET["day"]) ? $_GET["day"] : 25;
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]): 'IA0200';
+$month = isset($_GET["month"]) ? intval($_GET["month"]): 12;
+$day = isset($_GET["day"]) ? intval($_GET["day"]): 25;
 
 $ts = strtotime("2000-${month}-${day}");
 $sday = date('md', $ts);
