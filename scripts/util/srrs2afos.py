@@ -6,6 +6,7 @@ import datetime
 import tarfile
 import subprocess
 import re
+import sys
 import os
 
 import psycopg2
@@ -13,8 +14,8 @@ import pytz
 from pyiem.util import noaaport_text
 from pyiem.nws.product import TextProduct
 
-BAD_CHARS = r"[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
-DELIMITER = re.compile(r"\*\*\*\*[0-9]{10}\*\*\*\*")
+BAD_CHARS = r"[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@#]"
+DELIMITER = re.compile(r"[\*#]{4}[0-9]{9,10}[\*#]{4}")
 ENDDELIM = "****0000000000****"
 
 PGCONN = psycopg2.connect(database='afos', host='iemdb')
@@ -33,21 +34,27 @@ def process():
             fobj = tar.extractfile(member)
             content = re.sub(BAD_CHARS, "", fobj.read()) + ENDDELIM
             pos = 0
+            good = 0
+            bad = 0
+            deleted = 0
             for match in re.finditer(DELIMITER, content):
                 pos1 = match.start()
                 bulletin = "000 \r\r" + content[pos:pos1]
                 pos = match.end()
                 if len(bulletin) < 20:
+                    bad += 1
                     continue
                 bulletin = noaaport_text(bulletin)
                 try:
                     prod = TextProduct(bulletin, utcnow=ts,
                                        parse_segments=False)
                 except Exception as exp:
+                    bad += 1
                     print('Parsing Failure %s\n%s' % (fobj.name, exp))
                     continue
 
                 if prod.valid.year != ts.year:
+                    bad += 1
                     print('Invalid timestamp, year mismatch')
                     continue
 
@@ -62,11 +69,18 @@ def process():
                     DELETE from """ + table + """ WHERE pil = %s and
                     entered = %s and source = %s
                     """, (prod.afos, prod.valid, prod.source))
+                    deleted += cursor.rowcount
                     memory.append(key)
                 cursor.execute("""INSERT into """+table+"""
             (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)
             """, (bulletin, prod.afos, prod.valid, prod.source, prod.wmo))
+                good += 1
         subprocess.call("compress %s" % (tarfn[:-2],), shell=True)
+        print(("Processed %s Good: %s Bad: %s Deleted: %s"
+               ) % (tarfn, good, bad, deleted))
+        if len(content) > 1000 and good < 5:
+            print("ABORT!")
+            sys.exit()
 
         cursor.close()
         PGCONN.commit()
