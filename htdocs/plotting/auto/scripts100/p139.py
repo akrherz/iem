@@ -1,9 +1,11 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+"""Top 10 largest"""
 import datetime
 from collections import OrderedDict
+
+from pandas.io.sql import read_sql
+import psycopg2
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 MDICT = OrderedDict([
         ('all', 'No Month/Time Limit'),
@@ -27,19 +29,19 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This table presents the 10 largest differences
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This table presents the 10 largest differences
     between the lowest and highest air temperature for a local calendar
     day."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -106,6 +108,7 @@ def plotter(fdict):
     fig.text(0.5, y, "* based on hourly temps, not daily summaries",
              ha='center')
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

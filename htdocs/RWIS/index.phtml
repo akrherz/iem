@@ -2,7 +2,8 @@
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
 include("../../include/cameras.inc.php");
-$camid = isset($_GET["camid"]) ? $_GET["camid"] : "IDOT-000";
+require_once "../../include/forms.php";
+$camid = isset($_GET["camid"]) ? xssafe($_GET["camid"]) : "IDOT-000";
 
 $cdict = Array();
 $selectform = "<select name=\"camid\">\n";

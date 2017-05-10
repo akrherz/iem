@@ -4,10 +4,11 @@ define("IEM_APPID", 68);
 include_once "../../../../include/myview.php";
 include("lib.php");
 include("../../../../include/network.php");
+require_once "../../../../include/forms.php";
 
 $t = new MyView();
 
-$county = isset($_GET['county']) ? $_GET["county"]: "";
+$county = isset($_GET['county']) ? xssafe($_GET["county"]): "";
 $cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"]: "";
 $ul_x = isset($_GET["ul_x"]) ? $_GET["ul_x"]: "";
 $ul_y = isset($_GET["ul_y"]) ? $_GET["ul_y"]: "";

@@ -1,28 +1,30 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+"""Temperature of rain"""
 import datetime
 import calendar
+
 import numpy as np
 from pandas.io.sql import read_sql
 import pandas as pd
+import psycopg2
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart displays the frequency of having
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart displays the frequency of having
     measurable precipitation reported by an ASOS site and the air temperature
     that was reported at the same time.  This chart makes an assumption
     about the two values being coincident, whereas in actuality they may not
     have been.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -87,9 +89,10 @@ def plotter(fdict):
                        nt.sts[station]['archive_begin'].year,
                        datetime.date.today().year))
     ax.grid(True)
-    ax.set_ylabel("Temperature [$^\circ$F]")
+    ax.set_ylabel(r"Temperature [$^\circ$F]")
 
     return fig, resdf
+
 
 if __name__ == '__main__':
     plotter(dict())

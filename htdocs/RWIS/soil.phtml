@@ -3,8 +3,9 @@ include("../../config/settings.inc.php");
 include("../../include/myview.php");
 $t = new MyView();
 include("../../include/database.inc.php");
+require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
-$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'valid';
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
 
 /* Query out the data */
 $rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
@@ -75,7 +76,7 @@ $rs = pg_execute($dbconn, "SELECT", Array());
  }
  
  $t->content = <<<EOF
-<h3 class="subtitle">Iowa RWIS Soil Probe Data</h3>
+<h3>Iowa RWIS Soil Probe Data</h3>
 
 <p>** This page will automatically refresh every 10 minutes.
 <br>Click on a column to sort it.</p>

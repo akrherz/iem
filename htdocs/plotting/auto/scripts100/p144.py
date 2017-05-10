@@ -1,7 +1,9 @@
-from pandas.io.sql import read_sql
-import psycopg2
+"""ISUAG"""
 import pytz
 import datetime
+
+import psycopg2
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 from pyiem.util import get_autoplot_context
@@ -28,13 +30,13 @@ XREF = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This plot uses hourly 4 inch depth soil
+    desc = dict()
+    desc['description'] = """This plot uses hourly 4 inch depth soil
     temperature observations from the ISU Soil Moisture Network.  It first
     plots the first period each year that the soil temperature was at or
     above 50 degrees for at least X number of hours.  It then plots any
     subsequent periods below 50 degrees for that year."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='ISUSM',
              default='BOOI4', label='Select Station:'),
         dict(type='int', name='hours1', default=48,
@@ -43,7 +45,7 @@ def get_description():
              label='Stretch of Hours Below Threshold'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -176,6 +178,7 @@ def plotter(fdict):
                      box.height * 0.9])
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

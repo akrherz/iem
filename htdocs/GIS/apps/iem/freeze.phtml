@@ -6,12 +6,12 @@ $t = new MyView();
 
 include_once "../../../../include/iemmap.php";
 include("../../../../include/database.inc.php");
-include("../../../../include/forms.php");
+require_once "../../../../include/forms.php";
 
-$state = isset($_GET['state']) ? $_GET['state'] : '' ;
-$radar = isset($_GET['radar']) ? $_GET['radar'] : 1;
-$refresh = isset($_GET['refresh']) ? $_GET['refresh'] : 0;
-$imgsize = isset($_GET["imgsize"]) ? $_GET["imgsize"] : "640x480";
+$state = isset($_GET['state']) ? xssafe($_GET['state']): '' ;
+$radar = isset($_GET['radar']) ? xssafe($_GET['radar']): 1;
+$refresh = isset($_GET['refresh']) ? xssafe($_GET['refresh']): 0;
+$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]): "640x480";
 $tokens = explode("x", $imgsize);
 $imgwidth = intval($tokens[0]);
 $imgheight = intval($tokens[1]);
@@ -57,8 +57,8 @@ else if ($state == "NW")
  if (isset($sextent))
    $oextents = $sextent;
  else 
-   $oextents = isset($_GET['extents']) ? $_GET['extents'] : "-105,36,-86,50";
- $zoom     = isset($_GET['zoom']) ? $_GET['zoom'] : 0;
+   $oextents = isset($_GET['extents']) ? xssafe($_GET['extents']): "-105,36,-86,50";
+ $zoom     = isset($_GET['zoom']) ? intval($_GET['zoom']): 0;
  /**
   * Something simple to enable click interface on a PHP mapcript
   * application

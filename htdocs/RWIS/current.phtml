@@ -2,12 +2,19 @@
  include("../../config/settings.inc.php");
  define("IEM_APPID", 83);
  include("../../include/myview.php");
+ include("../../include/mlib.php");
+ include("../../include/iemaccess.php");
+ include("../../include/iemaccessob.php");
+ include_once "../../include/database.inc.php";
+ require_once "../../include/forms.php";
+ 
  $t = new MyView();
  $t->current_network = 'RWIS';
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
- $network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "ts";
+ $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_RWIS';
  $t->title = "RWIS Sortable Currents";
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol&network=$network\">";
+ $t->refresh = "<meta http-equiv=\"refresh\" content=\"600; ".
+ 	"URL=current.phtml?sortcol=$sortcol&amp;network=$network\">";
  $t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -18,10 +25,6 @@ function new_window(url) {
 </script>
 EOF;
  $t->thispage= "current-sort";
-include("../../include/mlib.php"); 
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
-include_once "../../include/database.inc.php";
 $mesosite = iemdb('mesosite');
   
 $iem = new IEMAccess();

@@ -6,10 +6,11 @@
  $t->thispage = "iem-qc";
  $t->title = "Quality Control, MADIS Raw QC";
  include("../../../include/database.inc.php");
+ require_once "../../../include/forms.php";
  $dbconn = iemdb("access");
  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 
        network = $1");
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
  $baa = 'network.phtml?network='. $network;
 
