@@ -35,6 +35,7 @@ lons = []
 icursor.execute("""
     SELECT station, tsoil_c_avg_qc from sm_daily
     where valid = '%s' and tsoil_c_avg_qc > -40
+    and station not in ('AHTI4', 'FRUI4')
 """ % (ts.strftime("%Y-%m-%d"), ))
 for row in icursor:
     stid = row['station']
