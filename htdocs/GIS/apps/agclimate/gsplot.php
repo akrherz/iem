@@ -24,6 +24,7 @@ if ($year > 2013) {
 	$ISUAGcities["A130219"]["lon"] += 0.2;
 }
 
+$vineyard = Array('GNVI4', 'AHTI4', 'BNKI4', 'CSII4', 'OSTI4');
 
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
@@ -308,6 +309,7 @@ $tr .= "#-----------------------snip------------------\n";
 $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
   if ($key == "A133259") continue;
+  if (in_array($key, $vineyard)) continue;
 
   $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], round($value, $round[$var]) );

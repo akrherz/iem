@@ -25,7 +25,9 @@ if ($year > 2013) {
 	$ISUAGcities["A130219"]["lon"] += 0.2;
 }
 
-$imgurl = sprintf("gsplot.php?var=%s&year=%s&smonth=%s&emonth=%s&eday=%s&sday=%s&imgsz=%s", $var, $year, $smonth, $emonth, $eday, $sday, $imgsz);
+$imgurl = sprintf("gsplot.php?var=%s&amp;year=%s&amp;smonth=%s&amp;".
+		"emonth=%s&amp;eday=%s&amp;sday=%s&amp;imgsz=%s",
+		$var, $year, $smonth, $emonth, $eday, $sday, $imgsz);
 
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
