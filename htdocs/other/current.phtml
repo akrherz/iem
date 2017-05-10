@@ -5,11 +5,12 @@
  include("../../include/iemaccess.php");
  include("../../include/iemaccessob.php");
  include_once "../../include/database.inc.php";
+ require_once "../../include/forms.php";
  
  $t = new MyView();
  $t->current_network = "Other";
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "station";
- $network = isset($_GET["network"]) ? $_GET["network"] : 'OT';
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
+ $network = isset($_GET["network"]) ? xssafe($_GET["network"]): 'OT';
  
  $mesosite = iemdb('mesosite');
  pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");

@@ -4,11 +4,11 @@
  */
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 48);
-include("../../../include/forms.php");
+require_once "../../../include/forms.php";
 include("../../../include/database.inc.php");
 include("../../../include/imagemaps.php");
-$afos = iemdb("afos");
 include_once "../../../include/myview.php";
+$afos = iemdb("afos");
 $t = new MyView();
 $t->title = "NWS Text Product by Issuing Center by Date";
 $t->thispage ="archive-afos";
@@ -25,20 +25,20 @@ $(document).ready(function(){
 </script>
 EOF;
  
-$wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"] : null;
+$wfo = isset($_REQUEST["wfo"])? xssafe($_REQUEST["wfo"]): null;
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
 $dbsource = $source;
 if (strlen($source) == 3){ $dbsource = "K$source";}
 if ($wfo != null){ $source = $wfo; }
 
-$view = isset($_GET["view"])? $_GET["view"] : 'time';
+$view = isset($_GET["view"])? xssafe($_GET["view"]): 'time';
 $year = isset($_GET["year"])? intval($_GET["year"]) : date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]) : date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]) : date("d");
 $year2 = isset($_GET["year2"])? intval($_GET["year2"]) : date("Y");
 $month2 = isset($_GET["month2"])? intval($_GET["month2"]) : date("m");
 $day2 = isset($_GET["day2"])? intval($_GET["day2"]) : date("d");
-$order = isset($_GET["order"]) ? $_GET["order"]: "asc";
+$order = isset($_GET["order"]) ? xssafe($_GET["order"]): "asc";
 $ts = mktime(0,0,0, $month, $day, $year);
 $ts2 = $ts + 86400;
 $d2display = "none";

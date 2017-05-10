@@ -1,12 +1,12 @@
 <?php
  include("../../config/settings.inc.php");
  include("../../include/myview.php");
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  $t = new MyView();
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "peak";
- $metar = isset($_GET["metar"]) ? $_GET['metar'] : "no";
- $sorder = isset($_GET["sorder"]) ? $_GET["sorder"] : "desc";
- $state = isset($_REQUEST["state"])? $_REQUEST["state"]: "IA";
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "peak";
+ $metar = isset($_GET["metar"]) ? xssafe($_GET['metar']): "no";
+ $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]): "desc";
+ $state = isset($_REQUEST["state"])? xssafe($_REQUEST["state"]): "IA";
 
  $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">";
  $t->title = "$state Current Conditions";

@@ -3,9 +3,10 @@ $OL = "3.16.0";
 include("../../config/settings.inc.php");
 define("IEM_APPID", 95);
 include("../../include/myview.php");
+require_once "../../include/forms.php";
 $t = new MyView();
  include("../../include/cameras.inc.php"); 
- $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
+ $id = isset($_GET["id"]) ? xssafe($_GET["id"]): "KCCI-016";
 
  $camselect = "";
  $cnt = 0;

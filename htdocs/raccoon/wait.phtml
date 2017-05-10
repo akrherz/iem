@@ -6,7 +6,7 @@ include("../../include/forms.php");
 include("../../include/imagemaps.php");
 include_once "../../include/database.inc.php";
 
-$jobid = $_REQUEST["jobid"];
+$jobid = xssafe($_REQUEST["jobid"]);
 $status = "PROCESSING";
 if (isset($_REQUEST["jobid"])){
 	$mesosite = iemdb("mesosite");

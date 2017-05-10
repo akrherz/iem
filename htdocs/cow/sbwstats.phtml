@@ -6,24 +6,26 @@ $t = new MyView();
 $t->title = "Storm Based Warning Stats";
 $t->thispage = "severe-cow";
 
-include_once "../../include/forms.php";
+require_once "../../include/forms.php";
 include_once "../../include/database.inc.php";
 include_once "../../include/network.php";
 $nt = new NetworkTable("WFO");
 $postgis = iemdb("postgis");
 
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time()-86400);
-$eyear = isset($_GET["eyear"]) ? $_GET["eyear"] : date("Y", time()-86400);
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time()-86400);
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time()-86400);
-$shour = isset($_GET["shour"]) ? $_GET["shour"] : 0;
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m");
-$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d");
-$ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 0;
-$sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "wfo";
+$syear = isset($_GET["syear"]) ? intval($_GET["syear"]): date("Y", time()-86400);
+$eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]): date("Y", time()-86400);
+$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): date("m", time()-86400);
+$sday = isset($_GET["sday"]) ? intval($_GET["sday"]): date("d", time()-86400);
+$shour = isset($_GET["shour"]) ? intval($_GET["shour"]): 0;
+$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): date("m");
+$eday = isset($_GET["eday"]) ? intval($_GET["eday"]): date("d");
+$ehour = isset($_GET["ehour"]) ? intval($_GET["ehour"]): 0;
+$sortby = isset($_GET["sortby"]) ? xssafe($_GET["sortby"]): "wfo";
 $sts = mktime($shour,0,0,$smonth, $sday, $syear);
 $ets = mktime($ehour,0,0,$emonth, $eday, $eyear);
-$gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?limit1=yes&year1=%s&month1=%s&day1=%s&hour1=%s&minute1=0&year2=%s&month2=%s&day2=%s&hour2=%s&minute2=0",  
+$gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?limit1=yes&amp;".
+		"year1=%s&amp;month1=%s&amp;day1=%s&amp;hour1=%s&amp;minute1=0&amp;".
+		"year2=%s&amp;month2=%s&amp;day2=%s&amp;hour2=%s&amp;minute2=0",  
 		  date("Y", $sts), date("m", $sts),date("d", $sts), date("H", $sts), 
 		  date("Y", $ets), date("m", $ets), date("d", $ets), date("H", $ets) );
 

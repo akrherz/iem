@@ -2,13 +2,14 @@
  /* Download NSTL Data */
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
+require_once "../../include/forms.php";
 
-$eyear = isset($_GET["eyear"]) ? $_GET["eyear"] : date("Y", time() - 86400);
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", time() - 86400);
-$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", time() - 86400);
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time() );
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time() );
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time() - 86400);
+$eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]): date("Y", time() - 86400);
+$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): date("m", time() - 86400);
+$eday = isset($_GET["eday"]) ? intval($_GET["eday"]): date("d", time() - 86400);
+$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): date("m", time() );
+$sday = isset($_GET["sday"]) ? intval($_GET["sday"]): date("d", time() );
+$syear = isset($_GET["syear"]) ? intval($_GET["syear"]): date("Y", time() - 86400);
 
 $stations = $_GET["station"];
 $stationString = "(";

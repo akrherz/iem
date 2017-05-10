@@ -2,14 +2,14 @@
 include("../../../config/settings.inc.php");
 include_once "../../../include/myview.php";
 include("../../../include/mlib.php");
-include("../../../include/forms.php");
+require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Central Command Time Series";
 $t->thispage = "networks-other";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
 
 $titleDate = strftime("%b %d, %Y", $myTime);

@@ -1,20 +1,19 @@
 <?php 
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 24);
-
+include("../../../include/forms.php");
 include("../../../include/myview.php");
 $t = new MyView();
 $t->title = "ISU AMS Station #2 on Agronomy";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month, $day, $year);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0010.dat";
 
-include("../../../include/forms.php");   
 $station = "isumet";
 
 $ys = yearSelect2(2011, $year, "year");

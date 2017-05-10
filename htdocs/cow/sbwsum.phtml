@@ -2,12 +2,12 @@
 include("../../config/settings.inc.php");
 define("IEM_APPID", 152);
 include("../../include/myview.php");
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-3600);
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time()-3600);
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time()-3600);
-$sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "size";
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time()-3600);
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time()-3600);
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time()-3600);
+$sortby = isset($_GET["sortby"]) ? xssafe($_GET["sortby"]): "size";
 
 $d = Array("size" => "", "wfo" => "-wfo", "time" => "-time");
 
@@ -21,7 +21,11 @@ $imap = sprintf("/mesonet/ARCHIVE/data/%s/sbwsum-imap%s.txt",
 $imgurl = sprintf("/archive/data/%s/sbwsum%s.png",
 		date("Y/m/d", $ts), $d[$sortby]);
 
-$gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0&limit1=yes",  date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400), date("d", $ts + 86400) );
+$gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?year=%s&amp;".
+		"month1=%s&amp;day1=%s&amp;hour1=0&amp;minute1=0&amp;month2=%s&amp;".
+		"day2=%s&amp;hour2=0&amp;minute2=0&amp;limit1=yes",
+		date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400),
+		date("d", $ts + 86400));
 
 $t = new MyView();
 $t->title = "Storm Based Warning Daily Summaries";

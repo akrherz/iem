@@ -2,9 +2,13 @@
   include("../../config/settings.inc.php");
   define("IEM_APPID", 94);
 include("../../include/myview.php");
+include("../../include/mlib.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
+require_once "../../include/forms.php";
 $t = new MyView();
-  $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
-  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : "";
+  $network = isset($_GET['network']) ? xssafe($_GET['network']): 'KCCI';
+  $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): "";
 
   $t->title = "School Network";
   $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?network=$network&sortcol=$sortcol\">";
@@ -22,9 +26,6 @@ function new_window_big(url) {
 EOF;
   
  $t->thispage = "current-sort";
-  include("../../include/mlib.php"); 
-  include("../../include/iemaccess.php");
-  include("../../include/iemaccessob.php");
 
   $iem = new IEMAccess();
   $snet = $iem->getNetwork( strtoupper($network) );

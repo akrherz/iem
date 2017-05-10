@@ -2,17 +2,17 @@
 $OL = "3.18.2";
  include("../../../config/settings.inc.php");
  include_once "../../../include/myview.php";
+ include("../../../include/database.inc.php");
+ include("../../../include/imagemaps.php");
+ require_once "../../../include/forms.php";
  $t = new MyView();
 
- $station = isset($_GET['station']) ? $_GET["station"]: "";
- $network = isset($_GET["network"]) ? $_GET['network'] : "IA_ASOS";
- $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
- $month = isset($_GET['month']) ? $_GET['month'] : date("m");
+ $station = isset($_GET['station']) ? xssafe($_GET["station"]): "";
+ $network = isset($_GET["network"]) ? xssafe($_GET['network']): "IA_ASOS";
+ $year = isset($_GET['year']) ? intval($_GET['year']): date("Y");
+ $month = isset($_GET['month']) ? intval($_GET['month']): date("m");
 
 $t->thispage = "climatology-month";
-include("../../../include/database.inc.php");
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />

@@ -1,11 +1,16 @@
 <?php 
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
+include("../../include/network.php");
+require_once "../../include/forms.php";
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
+include_once("../../include/database.inc.php");
 $t = new MyView();
 
 define("IEM_APPID", 56);
-$network = isset($_GET['network']) ? $_GET['network'] : 'IACOCORAHS'; 
-$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IACOCORAHS'; 
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'ts';
 
 $t->title = "CoCoRaHS Last Observation";
 $t->headextra = <<<EOF
@@ -20,12 +25,7 @@ EOF;
  $t->thispage = "current-sort";
 $t->current_network = "CoCoRaHS";
 
-include("../../include/network.php");
  $nt = new NetworkTable($network);
- include("../../include/forms.php");
- include("../../include/iemaccess.php");
- include("../../include/iemaccessob.php");
- include_once("../../include/database.inc.php");
 
  /* Compute monthly rainfall totals! */
  $dbconn = iemdb("access");

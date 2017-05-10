@@ -5,10 +5,11 @@ include("../../include/mlib.php");
 include("../../include/network.php");
 include("../../include/iemaccess.php");
 include("../../include/iemaccessob.php");
+require_once "../../include/forms.php";
 $nt = new NetworkTable("SCAN");
 $cities = $nt->table;
 
-$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : 'station';
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): 'station';
 $t = new MyView();
 $t->title = "SCAN Sortable Currents";
 $t->refresh = "<meta http-equiv=\"refresh\" content=\"3600;\">";

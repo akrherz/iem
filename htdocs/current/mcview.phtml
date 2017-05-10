@@ -3,7 +3,7 @@
  include("../../include/myview.php");
  $t = new MyView();
  $uri = 'mcview.phtml';
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include("../../include/database.inc.php");
  $postgis = iemdb("postgis");
 
@@ -11,19 +11,19 @@
        WHERE issued <= $1 and expired >= $1 ORDER by sel ASC");
 
  /** Import our variables */
- $prod = isset($_GET["prod"]) ? $_GET["prod"] : "comprad";
- $java = isset($_GET["java"]) ? $_GET["java"] : "script";
- $mode = isset($_GET["mode"]) ? $_GET["mode"] : "realtime";
- $frames = isset($_GET["frames"]) ? $_GET["frames"] : 13;
- $interval = isset($_GET["interval"]) ? $_GET["interval"]: 5;
- $autopilot = isset($_GET["autopilot"]) ? $_GET["autopilot"]: "no";
+ $prod = isset($_GET["prod"]) ? xssafe($_GET["prod"]): "comprad";
+ $java = isset($_GET["java"]) ? xssafe($_GET["java"]): "script";
+ $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "realtime";
+ $frames = isset($_GET["frames"]) ? intval($_GET["frames"]): 13;
+ $interval = isset($_GET["interval"]) ? intval($_GET["interval"]): 5;
+ $autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]): "no";
 
 /* Lets see what the form is set to */
  $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
- $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
- $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
- $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("h");
- $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
+ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+ $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+ $hour = isset($_GET["hour"]) ? intval($_GET["hour"]): date("h");
+ $minute = isset($_GET["minute"]) ? intval($_GET["minute"]): date("i");
 
  // Used for the info presented below the plot on getting the raw data
  $gissource = ($year > 2014) ? 'n0q': 'n0r';

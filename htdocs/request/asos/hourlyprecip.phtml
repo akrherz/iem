@@ -12,7 +12,7 @@ $t = new MyView();
 $t->iemss = True;
 $t->title = "Download Hourly Precipitation Data";
 
-$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IA_ASOS";
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IA_ASOS";
 
 $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks WHERE

@@ -9,7 +9,7 @@ include("../../include/forms.php");
 $t = new MyView();
 $t->iemss = True;
 
-$network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
+$network = isset($_GET['network']) ? xssafe($_GET['network']): "IA_ASOS";
 $station = "";
 $t->title = "Download ASOS/AWOS/METAR Data";
 $t->thispage = "networks-asos";

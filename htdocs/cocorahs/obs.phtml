@@ -4,14 +4,14 @@
  include("../../include/database.inc.php");
  $access = iemdb("iem");
  include("../../include/myview.php");
- include("../../include/forms.php");
+ require_once "../../include/forms.php";
  include("../../include/network.php");
  
  $t = new MyView();
  $t->title = "CoCoRaHS Observations";
  
- $station = isset($_GET["station"])? $_GET["station"] : "";
- $network = isset($_GET["network"])? $_GET["network"] : "IACOCORAHS";
+ $station = isset($_GET["station"])? xssafe($_GET["station"]): "";
+ $network = isset($_GET["network"])? xssafe($_GET["network"]): "IACOCORAHS";
  $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : date("Y-m-d");
  $sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10): "pday";
  $year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4): date("Y");

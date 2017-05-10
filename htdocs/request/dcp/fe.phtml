@@ -1,8 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
+include("../../../include/imagemaps.php");
+require_once "../../../include/forms.php";
 
-$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
+$network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
 
 $t = new MyView();
 $t->iemss = True;
@@ -12,8 +14,6 @@ $mesosite = iemdb('mesosite');
  
 $t->title = "DCP/HADS Data Download";
 $t->thispage = "networks-dcp";
- include("../../../include/imagemaps.php");
- include("../../../include/forms.php"); 
 
  $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' 

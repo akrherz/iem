@@ -3,16 +3,16 @@
  include("../../include/iemprop.php");
  $camera_refresh = get_iemprop("webcam.interval");
  include("../../include/myview.php");
- include("../../include/forms.php"); 
+ require_once "../../include/forms.php"; 
  $t = new MyView();
 /* CGI GET Requests */
- $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
- $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
- $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
- $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("H");
- $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
+ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+ $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+ $hour = isset($_GET["hour"]) ? intval($_GET["hour"]): date("H");
+ $minute = isset($_GET["minute"]) ? intval($_GET["minute"]): date("i");
  $isarchive = isset($_GET["archive"]);
- $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI";
+ $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "KCCI";
 
  $ts = time();
  if ($isarchive){

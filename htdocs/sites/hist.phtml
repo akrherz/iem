@@ -17,8 +17,8 @@ if ($year > intval(gmdate("Y"))){
 }
 $month = isset($_GET['month']) ? intval($_GET['month']) : date("m", time() - 86400);
 $day = isset($_GET['day']) ? intval($_GET['day']) : 1;
-$mode = isset($_GET['mode']) ? $_GET['mode'] : 'monthly';
-$sortvar = isset($_GET['sortvar']) ? $_GET['sortvar'] : 'id';
+$mode = isset($_GET['mode']) ? xssafe($_GET['mode']): 'monthly';
+$sortvar = isset($_GET['sortvar']) ? xssafe($_GET['sortvar']): 'id';
 if ($sortvar == 'station'){ $sortvar = 'id'; }
 
 $ts = mktime(0,0,0, $month, $day, $year);

@@ -2,14 +2,15 @@
 $OL = "3.18.2";
  include("../../../config/settings.inc.php");
  include_once "../../../include/myview.php";
+ require_once "../../../include/forms.php";
  $t = new MyView();
  
 
- $network = isset($_REQUEST['network']) ? $_REQUEST['network'] : "IA_ASOS";
- $station1 = isset($_GET['station']) ? strtoupper($_GET['station']) : "";
- $station2 = isset($_GET['station1']) ? strtoupper($_GET['station1']) : "";
+ $network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : "IA_ASOS";
+ $station1 = isset($_GET['station']) ? strtoupper(xssafe($_GET['station'])) : "";
+ $station2 = isset($_GET['station1']) ? strtoupper(xssafe($_GET['station1'])) : "";
 
- $var = isset($_GET['var']) ? $_GET['var'] : "tmpf";
+ $var = isset($_GET['var']) ? xssafe($_GET['var']): "tmpf";
  include("../../../include/station.php");
  $st = new StationData(Array($station1, $station2));
  $cities = $st->table;

@@ -6,7 +6,7 @@ include("../../../include/imagemaps.php");
 include("../../../include/forms.php"); 
 
 $mesosite = iemdb('mesosite');
-$network = isset($_REQUEST['network']) ? $_REQUEST["network"] : 'IA_COOP';
+$network = isset($_REQUEST['network']) ? xssafe($_REQUEST["network"]): 'IA_COOP';
 
 define("IEM_APPID", 45);
 $t = new MyView();

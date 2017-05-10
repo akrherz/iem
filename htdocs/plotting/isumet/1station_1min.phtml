@@ -1,18 +1,18 @@
 <?php 
 include("../../../config/settings.inc.php");
 include_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "ISU AMS Station on Agronomy";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month, $day, $year);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0002.dat";
 
- include("../../../include/forms.php"); 
  
  $ys = yearSelect2(2003, $year, "year");
  $ms = monthSelect($month, "month");

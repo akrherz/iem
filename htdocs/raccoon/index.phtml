@@ -3,13 +3,13 @@ include("../../config/settings.inc.php");
 include("../../include/myview.php");
 $t = new MyView();
 define("IEM_APPID", 69);
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 include("../../include/imagemaps.php");
 include_once "../../include/database.inc.php";
 
-$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'OAX';
-$radar = isset($_REQUEST["radar"]) ? $_REQUEST["radar"] : 'OAX';
-$radar_product = isset($_REQUEST["product"]) ? $_REQUEST["product"] : 'N0Q';
+$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]): 'OAX';
+$radar = isset($_REQUEST["radar"]) ? xssafe($_REQUEST["radar"]): 'OAX';
+$radar_product = isset($_REQUEST["product"]) ? xssafe($_REQUEST["product"]): 'N0Q';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
 $month1 = isset($_REQUEST["month1"]) ? intval($_REQUEST["month1"]) : date("m");
 $day1= isset($_REQUEST["day1"]) ? intval($_REQUEST["day1"]) : date("d");

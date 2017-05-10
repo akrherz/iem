@@ -5,15 +5,15 @@ define("IEM_APPID", 93);
 session_start();
 
 include("../../include/mlib.php");
-include("../../include/forms.php");
+require_once "../../include/forms.php";
 include("../../include/iemaccess.php");
 include("../../include/iemaccessob.php");
 include("../../include/myview.php");
 
-$metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
-$refresh = isset($_REQUEST["refresh"]) ? strtolower($_REQUEST["refresh"]): 'yes';
-$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
-$sortdir = isset($_GET["sortdir"]) ? $_GET['sortdir'] : 'asc';
+$metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
+$refresh = isset($_REQUEST["refresh"]) ? strtolower(xssafe($_REQUEST["refresh"])): 'yes';
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "ts";
+$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET['sortdir']): 'asc';
 $rsortdir = ($sortdir == 'asc') ? 'desc' : 'asc';
 $expiry = 60*60*24*100; // 100 days
 

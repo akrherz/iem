@@ -38,7 +38,7 @@ if ($wfo == 'ALL'){
 	$wlimit = "and 'ALL' = $1";
 }
 
-pg_query($postgis, "SET TIME ZONE 'GMT'");
+pg_query($postgis, "SET TIME ZONE 'UTC'");
 $rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
 eventid, date(issue), phenomena, significance, wfo from sbw
 WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 

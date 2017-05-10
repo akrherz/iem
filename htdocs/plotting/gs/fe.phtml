@@ -1,19 +1,19 @@
 <?php
 $OL = "3.18.2";
 include("../../../config/settings.inc.php");
+include("../../../include/database.inc.php");
+include("../../../include/imagemaps.php");
+include_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
 define("IEM_APPID", 14);
- $station = isset($_GET['station']) ? $_GET['station']: "";
- $network = isset($_REQUEST["network"]) ? $_REQUEST['network'] : "IA_ASOS";
+ $station = isset($_GET['station']) ? xssafe($_GET['station']): "";
+ $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST['network']): "IA_ASOS";
  $year = isset($_GET['year']) ? intval($_GET['year']) : date("Y");
  $smonth = isset($_GET['smonth']) ? intval($_GET['smonth']) : 5;
  $emonth = isset($_GET['emonth']) ? intval($_GET['emonth']) : 10;
  $sday = isset($_GET['sday']) ? intval($_GET['sday']) : 1;
  $eday = isset($_GET['eday']) ? intval($_GET['eday']) : 1;
  
-include("../../../include/database.inc.php");
-include("../../../include/imagemaps.php");
-include_once "../../../include/myview.php";
-include_once("../../../include/forms.php");
 $t = new MyView();
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
