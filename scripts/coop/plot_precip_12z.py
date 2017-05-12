@@ -2,10 +2,12 @@
  Generate simple plots of 12z COOP preciptiation
 """
 import sys
-from pyiem.plot import MapPlot
 import datetime
+
 import psycopg2
+from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+
 st = NetworkTable(["IA_COOP", 'MO_COOP', 'KS_COOP', 'NE_COOP', 'SD_COOP',
                    'ND_ASOS', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'IN_COOP',
                    'OH_COOP', 'MI_COOP'])
@@ -53,6 +55,7 @@ def doit(now):
 
     pqstr = ("plot ac %s0000 iowa_coop_12z_precip.png "
              "iowa_coop_12z_precip.png png") % (now.strftime("%Y%m%d"),)
+    m.drawcounties()
     m.postprocess(pqstr=pqstr)
     m.close()
 
@@ -76,6 +79,7 @@ def main():
         ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                int(sys.argv[3]))
     doit(ts)
+
 
 if __name__ == '__main__':
     main()

@@ -7,7 +7,7 @@ php wxc_coop.php
 
 cd ../coop
 csh PREC.csh
-python 12z_precip.py
+python plot_precip_12z.py
 python year_precip.py
 python month_precip.py
 python day_precip.py
