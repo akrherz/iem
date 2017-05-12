@@ -8,6 +8,7 @@ require_once "../../../include/forms.php";
 include("../../../include/database.inc.php");
 include("../../../include/imagemaps.php");
 include_once "../../../include/myview.php";
+require_once "../../../include/network.php";
 $afos = iemdb("afos");
 $t = new MyView();
 $t->title = "NWS Text Product by Issuing Center by Date";
@@ -20,6 +21,7 @@ $t->jsextra = <<<EOF
 <script>
 $(document).ready(function(){
     //disabled for now due to accessible issues
+    //https://github.com/select2/select2/issues/3744
     //$(".iemselect2").select2();
 });
 </script>
@@ -106,8 +108,25 @@ if ($view == "prod"){
 }
 
 $drangecheck = (isset($_REQUEST["drange"]))? "checked='checked'" : "";
-$netselect = networkSelect(Array("WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"), 
- 		$source, Array(), "source");
+$groups = Array("WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO");
+$groupnames = Array("Weather Forecast Offices (WFO)",
+		"River Forecast Centers (RFC)",
+		"NWS Admin Organizations",
+		"NCEP Centers",
+		"Center Weather Service Units (CWSU)",
+		"Weather Service Offices (WSO)");
+$sources = Array();
+while (list($key, $s)=each($groups)){
+	$sources[$groupnames[$key]] = Array();
+	$nt = new NetworkTable($s);
+	while (list($sid, $tbl) = each($nt->table))
+	{
+		$sources[$groupnames[$key]][$sid] = sprintf("[%s] %s", $sid,
+				$tbl['name']);
+	}
+}
+$netselect = make_select("source", $source, $sources);
+
 $yselect = yearSelect(2001, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
