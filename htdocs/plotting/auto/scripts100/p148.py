@@ -13,6 +13,7 @@ PDICT = OrderedDict([
         ('easter', 'Easter (Western Church Dates)'),
         ('labor', 'Labor Day'),
         ('memorial', 'Memorial Day'),
+        ('mother', "Mothers Day"),
         ('exact', 'Same Date each Year'),
         ('thanksgiving', 'Thanksgiving'),
         ])
@@ -32,7 +33,8 @@ def get_description():
     desc['description'] = """This plot presents a daily observation for a site
     and year on a given date / holiday date each year.  A large caveat to this
     chart is that much of the long term daily climate data is for a 24 hour
-    period ending at around 7 AM.
+    period ending at around 7 AM.  This chart will also not plot for dates
+    prior to the holiday's inception.
     """
     desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
@@ -46,6 +48,15 @@ def get_description():
              label='Which variable to plot?', options=PDICT2)
     ]
     return desc
+
+
+def mothers_day():
+    """Mother's Day"""
+    days = []
+    for year in range(1914, datetime.date.today().year + 1):
+        may1 = datetime.date(year, 5, 1)
+        days.append(datetime.date(year, 5, (14 - may1.weekday())))
+    return days
 
 
 def easter():
@@ -116,6 +127,8 @@ def get_context(fdict):
             days = thanksgiving()
         elif date == 'easter':
             days = easter()
+        elif date == 'mother':
+            days = mothers_day()
         else:
             days = labor_days()
 
@@ -137,6 +150,8 @@ def highcharts(fdict):
     ctx = get_context(fdict)
     ctx['df'].reset_index(inplace=True)
     v2 = ctx['df'][['year', ctx['varname']]].to_json(orient='values')
+    avgval = ctx['df'][ctx['varname']].mean()
+    avgvallbl = "%.2f" % (avgval,)
     series = """{
         name: '""" + ctx['varname'] + """',
         data: """ + v2 + """,
@@ -150,7 +165,19 @@ def highcharts(fdict):
             type: 'column',
             zoomType: 'x'
         },
-        yAxis: {title: {text: '""" + PDICT2[ctx['varname']] + """'}},
+        yAxis: {
+            title: {text: '""" + PDICT2[ctx['varname']] + """'},
+            plotLines: [{
+                value: """ + str(avgval) + """,
+                color: 'green',
+                dashStyle: 'shortdash',
+                width: 2,
+                zIndex: 5,
+                label: {
+                    text: 'Average """ + avgvallbl + """'
+                }
+            }]
+        },
         title: {text: '""" + ctx['title'] + """'},
         subtitle: {text: 'On """ + ctx['subtitle'] + """'},
         series: [""" + series + """]
