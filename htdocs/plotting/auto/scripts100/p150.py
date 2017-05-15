@@ -1,10 +1,12 @@
-import psycopg2
+"""sounding stuff"""
 import calendar
-import pytz
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 import datetime
 from collections import OrderedDict
+
+import psycopg2
+import pytz
+from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
@@ -20,14 +22,14 @@ PDICT3 = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents percentiles of observations from
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents percentiles of observations from
     a given sounding profile against the long term record for the site.
     """
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='RAOB',
              default='_OAX', label='Select Station:'),
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
@@ -41,7 +43,7 @@ def get_description():
              label='Which Sounding Variable to Plot:'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -106,7 +108,7 @@ def plotter(fdict):
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
 
-    ax = plt.axes([0.1, 0.1, 0.65, 0.75])
+    ax = plt.axes([0.1, 0.12, 0.65, 0.75])
     bars = ax.barh(range(len(df.index)), df[varname+'_percentile'],
                    align='center')
     y2labels = []

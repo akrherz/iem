@@ -1,6 +1,8 @@
+"""MOS plot"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -13,16 +15,16 @@ PDICT = {'NAM': 'NAM (9 Dec 2008 - current)',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart displays the combination of
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart displays the combination of
     Model Output Statistics (MOS) forecasts and actual observations
     by the automated station the MOS forecast is for.  MOS is forecasting
     high and low temperatures over 12 hours periods, so these values are not
     actual calendar day high and low temperatures."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='month', name='month', label='Select Month:',
@@ -33,7 +35,7 @@ def get_description():
              label='Select MOS Model:', options=PDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -175,3 +177,7 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=4, scatterpoints=1, fontsize=12)
 
     return fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

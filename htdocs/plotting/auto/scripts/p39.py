@@ -1,15 +1,17 @@
-import psycopg2.extras
-import numpy as np
+"""scenarios"""
 import datetime
 import calendar
+
+import psycopg2.extras
+import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This plot compares the month to date average
+    desc = dict()
+    desc['description'] = """This plot compares the month to date average
     temperature of this month against any previous month of your choice.
     The plot then contains this month's to date average temperature along
     with the scenarios of the remaining days for this month from each of
@@ -17,7 +19,7 @@ def get_description():
     possible for the remainder of the month."""
     today = datetime.date.today()
     lastmonth = (today.replace(day=1)) - datetime.timedelta(days=25)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
         dict(type='year', name='year', default=lastmonth.year, min=1893,
@@ -27,7 +29,7 @@ def get_description():
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
              min="1893/01/01", label='Effective Date'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -130,6 +132,7 @@ def plotter(fdict):
     ax.legend(loc='best', fontsize=10)
 
     return fig
+
 
 if __name__ == '__main__':
     plotter(dict(date='2007-02-15', year=1988, month=5))

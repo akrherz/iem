@@ -1,9 +1,11 @@
+"""Period stats"""
+from collections import OrderedDict
+import datetime
+
 import psycopg2
-from pyiem.network import Table as NetworkTable
 import numpy as np
 from pandas.io.sql import read_sql
-import datetime
-from collections import OrderedDict
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
@@ -18,14 +20,14 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents statistics for a period of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents statistics for a period of
     days each year provided your start date and number of days after that
     date. If your period crosses a year bounds, the plotted year represents
     the year of the start date of the period."""
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
              label='Select Station', network='IA_ASOS'),
         dict(type='month', name='month',
@@ -41,7 +43,7 @@ def get_description():
         dict(type='year', name='year', default=today.year,
              label="Year to Highlight in Chart:"),
     ]
-    return d
+    return desc
 
 
 def nice(val):
@@ -137,6 +139,7 @@ def plotter(fdict):
     ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
                bbox=dict(facecolor='white', edgecolor='k'))
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -198,7 +198,7 @@ def plotter(fdict):
            fc='r', ec='r', align='center')
     mean = ctx['df'][ctx['varname']].mean()
     ax.axhline(mean)
-    ax.set_title("%s\non%s" % (ctx['title'], ctx['subtitle']))
+    ax.set_title("%s\non %s" % (ctx['title'], ctx['subtitle']))
     ax.text(ctx['df'].index.values[-1] + 1, mean, '%.2f' % (mean,), ha='left',
             va='center')
     ax.grid(True)

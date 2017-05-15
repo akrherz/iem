@@ -1,6 +1,8 @@
-import psycopg2
+"""Plot or Harvest Progress"""
 import calendar
+
 import numpy as np
+import psycopg2
 from collections import OrderedDict
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
@@ -14,11 +16,11 @@ PDICT2 = OrderedDict([('CORN', 'Corn'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['nass'] = True
-    d['description'] = """This chart presents harvest or planting progress."""
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['nass'] = True
+    desc['description'] = """This chart presents harvest or planting progress."""
+    desc['arguments'] = [
         dict(type='state', name='state', default='IA',
              label='Select State:'),
         dict(type='select', name='unit_desc', default='PCT HARVESTED',
@@ -26,7 +28,7 @@ def get_description():
         dict(type='select', name='commodity_desc', default='CORN',
              options=PDICT2, label='Which Crop?'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -112,6 +114,7 @@ def plotter(fdict):
                        PDICT.get(unit_desc)))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

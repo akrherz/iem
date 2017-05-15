@@ -1,9 +1,11 @@
-import psycopg2
+"""Two station temperature frequency"""
 import calendar
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
 from collections import OrderedDict
+
+import psycopg2
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([
         ('precip', 'Precipitation'),
@@ -14,13 +16,13 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents the daily frequency of the first
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents the daily frequency of the first
     station having a higher value than the second station.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station1', default='IA0200',
              label='Select Station #1:', network='IACLIMATE'),
         dict(type='station', name='station2', default='IA2203',
@@ -30,7 +32,7 @@ def get_description():
         dict(type='float', name='mag', default='1',
              label='By how much warmer [F] or wetter [inch]')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
