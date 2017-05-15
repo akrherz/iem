@@ -5,6 +5,7 @@ define("IEM_APPID", 102);
 include_once "../../../include/myview.php";
 require_once "../../../include/twitteroauth/twitteroauth.php";
 require_once "../../../include/iemprop.php";
+require_once "../../../include/forms.php";
 
 define("TWITTER_KEY", get_iemprop('bot.twitter.consumerkey'));
 define("TWITTER_SECRET", get_iemprop('bot.twitter.consumersecret'));
