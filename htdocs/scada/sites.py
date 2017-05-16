@@ -20,6 +20,7 @@ if __name__ == '__main__':
         data['features'].append({"type": "Feature", "id": i,
                                  "properties": {
                                     'id': row[7],
+                                    'wakes': -1,
                                     'farmname': row[2],
                                     'expansion': row[3],
                                     'unitnumber': row[4],
