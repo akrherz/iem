@@ -8,7 +8,6 @@ include("setup.php");
  $t = new MyView();
  $t->thispage="iem-sites";
  $t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
- $t->headextra = '<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>';
  
  $prod = isset($_GET["prod"]) ? xssafe($_GET["prod"]): 0;
  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");

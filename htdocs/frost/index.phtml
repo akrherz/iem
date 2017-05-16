@@ -1,11 +1,13 @@
 <?php 
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
+require_once "../../include/iemprop.php";
+$gmapskey = get_iemprop("google.maps.key");
 
 $t = new MyView();
 $t->title = "Frost Forecasting";
 $t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
 <style>
   #map {
     width: 100%;

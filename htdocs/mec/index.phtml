@@ -1,11 +1,13 @@
 <?php 
 include_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
+require_once "../../include/iemprop.php";
+$gmapskey = get_iemprop("google.maps.key");
 
 $t = new MyView();
 $t->title = "Confidential MEC Stuff";
 $t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
 <script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
 <script src="map.js"></script>
 EOF;
