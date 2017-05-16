@@ -1,10 +1,12 @@
-import psycopg2
-from pandas.io.sql import read_sql
-import datetime
-import numpy as np
-from pyiem.plot import MapPlot
+"""Maps of averages"""
 import calendar
 from collections import OrderedDict
+import datetime
+
+import numpy as np
+import psycopg2
+from pandas.io.sql import read_sql
+from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context
 
 PDICT = {'state': 'State Level Maps (select state)',
@@ -31,12 +33,12 @@ PDICT4 = {'monthly': 'Monthly Averages',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This application produces map analysis of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This application produces map analysis of
     climatological averages. These averages are solely derived from the
     published NCDC 1981-2010 Climatology."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='over', default='monthly',
              options=PDICT4, label='Show Monthly or Annual Averages'),
         dict(type='select', name='sector', default='state',
@@ -50,7 +52,7 @@ def get_description():
         dict(type='select', name='var', options=PDICT3, default='total_precip',
              label='Which Variable to Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
