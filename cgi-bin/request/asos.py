@@ -13,15 +13,13 @@ from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
 
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-acursor = ASOS.cursor('mystream',
-                      cursor_factory=psycopg2.extras.DictCursor)
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
-mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
 def check_load():
     """A crude check that aborts this script if there is too much
     demand at the moment"""
+    mcursor = MESOSITE.cursor()
     mcursor.execute("""
     select pid from pg_stat_activity where query ~* 'FETCH'
     and datname = 'asos'""")
@@ -83,9 +81,13 @@ def main():
     form = cgi.FieldStorage()
     try:
         tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
-    except:
+    except pytz.exceptions.UnknownTimeZoneError as exp:
+        sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Invalid Timezone (tz) provided")
+        sys.stderr.write("asos.py invalid tz: %s\n" % (exp, ))
         sys.exit()
+    acursor = ASOS.cursor('mystream',
+                          cursor_factory=psycopg2.extras.DictCursor)
 
     # Save direct to disk or view in browser
     direct = True if form.getfirst('direct', 'no') == 'yes' else False
@@ -137,12 +139,13 @@ def main():
     gisextra = False
     if form.getfirst("latlon", "no") == "yes":
         gisextra = True
+        mcursor = MESOSITE.cursor()
         mcursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat
              from stations WHERE id in %s
              and (network ~* 'AWOS' or network ~* 'ASOS')
         """, (tuple(dbstations),))
         for row in mcursor:
-            gtxt[row[0]] = "%.4f%s%.4f%s" % (row['lon'], rD, row['lat'], rD)
+            gtxt[row[0]] = "%.4f%s%.4f%s" % (row[1], rD, row[2], rD)
 
     rlimiter = ""
     if len(report_type) == 1:
@@ -226,6 +229,7 @@ def main():
             else:
                 r.append("%2.2f" % (row[data1], ))
         sys.stdout.write("%s\n" % (rD.join(r),))
+
 
 if __name__ == '__main__':
     main()

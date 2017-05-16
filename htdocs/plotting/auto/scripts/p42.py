@@ -26,13 +26,14 @@ agg3 as (
 SELECT a.rank, d.valid, d.val from agg3 a, data d WHERE
   d.valid <= a.valid and d.valid >= a.lag_valid ORDER by d.valid;
 """
-import psycopg2.extras
 import datetime
+from collections import OrderedDict
+
+import psycopg2.extras
 import pytz
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
-from collections import OrderedDict
 
 PDICT = {'above': 'At or Above Threshold...',
          'below': 'Below Threshold...'}
@@ -61,10 +62,10 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['data'] = True
-    d['description'] = """ Based on hourly METAR reports of temperature
+    desc = dict()
+    desc['cache'] = 86400
+    desc['data'] = True
+    desc['description'] = """ Based on hourly METAR reports of temperature
     or dew point, this
     plot displays the longest periods above or below a given temperature
     threshold.  There are plenty of caveats to this plot, including missing
@@ -72,7 +73,7 @@ def get_description():
     reports every three hours.  This plot also limits the number of lines
     drawn to 10, so if you hit the limit, please change the thresholds.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='m', default='all',
@@ -86,7 +87,7 @@ def get_description():
         dict(type='int', name='hours', default=36,
              label='Minimum Period to Plot (Hours):')
     ]
-    return d
+    return desc
 
 
 def plot(ax, interval, valid, tmpf, year, lines):
@@ -232,6 +233,7 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=5, fontsize=12,
               columnspacing=1)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(station='DSM', network='IA_ASOS', m='sep', threshold=70,

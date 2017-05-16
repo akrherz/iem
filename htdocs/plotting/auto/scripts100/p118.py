@@ -1,8 +1,9 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+"""precip days per month"""
 import datetime
+from pandas.io.sql import read_sql
+import psycopg2
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 PDICT = {'precip_days': 'Precipitation Days',
          'snow_days': 'Snowfall Days'}
@@ -10,17 +11,17 @@ PDICT = {'precip_days': 'Precipitation Days',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['report'] = True
-    d['description'] = """ """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['report'] = True
+    desc['description'] = """ """
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', options=PDICT, default='precip_days',
              label='Select Variable'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
