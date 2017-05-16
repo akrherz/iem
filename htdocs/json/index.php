@@ -18,7 +18,21 @@
 
 
   $services = array();
-
+  
+  $services[] = Array(
+  		"title" => "Single Station Last Observation",
+  		"url" => "/json/station.py?station={station}&amp;network={network}",
+  		"desc" => "The most recent observation for an IEM tracked site.",
+  		"vars" => Array(
+  				"station" => "Station Identifier",
+  				"network" => "Network Identifier",
+  				),
+  		"example" => Array(
+  				"{station}" => "AMW",
+  				"{network}" => "IA_ASOS",
+  				)
+  		);
+  
   $services[] = Array(
   		"title" => "Oregon State PRISM Grid Cell Daily Sample",
   		"url" => "/json/prism/{lon}/{lat}/{date_or_daterange}",
