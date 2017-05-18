@@ -1,11 +1,13 @@
-import psycopg2.extras
-import pyiem.nws.vtec as vtec
-import numpy as np
+"""UGC/Polygon WWA stats onimbus"""
 import datetime
+
+import psycopg2.extras
+import numpy as np
 import pytz
 from rasterstats import zonal_stats
 import pandas as pd
 from affine import Affine
+import pyiem.nws.vtec as vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -27,10 +29,10 @@ PDICT5 = {'yes': 'YES: Draw Counties/Parishes',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This application has a considerable and likely
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This application has a considerable and likely
     confusing amount of configuration options.  In general, it will produce
     a map of either a single NWS Weather Forecast Office (WFO) or for a
     specified state.  For warning types that are issued with polygons, you
@@ -49,7 +51,7 @@ def get_description():
     away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()
     jan1 = today.replace(day=1, month=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='t', default='state', options=PDICT,
              label='Select plot extent type:'),
         dict(type='select', name='v', default='lastyear', options=PDICT2,
@@ -64,13 +66,14 @@ def get_description():
              label='Select start year (where appropriate):'),
         dict(type='year', min=1986, name='year2', default=today.year,
              label='Select end year (inclusive, where appropriate):'),
-        dict(type='date', name='sdate',
-             default=jan1.strftime("%Y/%m/%d"),
-             label='Start Date (for "total" option):', min="1986/01/01"),
-        dict(type='date', name='edate',
-             default=today.strftime("%Y/%m/%d"),
-             label='End Date (not inclusive, for "total" option):',
-             min="1986/01/01"),
+        dict(type='datetime', name='sdate',
+             default=jan1.strftime("%Y/%m/%d 0000"),
+             label='Start DateTime UTC(for "total" option):',
+             min="1986/01/01 0000"),
+        dict(type='datetime', name='edate',
+             default=today.strftime("%Y/%m/%d 0000"),
+             label='End DateTime (for "total" option):',
+             min="1986/01/01 0000"),
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO: (ignored if plotting state)'),
         dict(type='state', name='state',
@@ -80,10 +83,11 @@ def get_description():
         dict(type='significance', name='significance',
              default='A', label='Select Watch/Warning Significance Level:'),
     ]
-    return d
+    return desc
 
 
 def do_polygon(ctx):
+    """polygon workflow"""
     pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     varname = ctx['v']
     station = ctx['station'][:4]
@@ -175,8 +179,10 @@ def do_polygon(ctx):
     elif varname == 'yearcount':
         ctx['title'] = "Count for %s" % (year,)
     elif varname == 'total':
-        ctx['title'] = "Total between %s and %s" % (sdate.strftime("%d %b %Y"),
-                                                    edate.strftime("%d %b %Y"))
+        ctx['title'] = "Total"
+        ctx['subtitle'] = (" between %s and %s UTC"
+                           ) % (sdate.strftime("%d %b %Y %H%M"),
+                                edate.strftime("%d %b %Y %H%M"))
     elif varname == 'yearavg':
         ctx['title'] = ("Yearly Avg: %s and %s"
                         ) % (minv.strftime("%d %b %Y"),
@@ -187,11 +193,14 @@ def do_polygon(ctx):
     minv = np.min(counts)
     maxv = np.max(counts)
     if varname != 'lastyear':
-        for delta in [500, 50, 5, 1, 0.5, 0.05]:
-            bins = np.arange(0, maxv * 1.05, delta)
-            if len(bins) > 8:
-                break
-        bins[0] = 0.01
+        if varname == 'total' and maxv < 8:
+            bins = np.arange(1, 8, 1)
+        else:
+            for delta in [500, 50, 5, 1, 0.5, 0.05]:
+                bins = np.arange(0, maxv * 1.05, delta)
+                if len(bins) > 8:
+                    break
+            bins[0] = 0.01
     ctx['bins'] = bins
     ctx['data'] = counts
     ctx['lats'] = lats
@@ -284,8 +293,10 @@ def do_ugc(ctx):
             rows.append(dict(count=row[1], year=year,
                              ugc=row[0], minissue=row[2], maxissue=row[3]))
             data[row[0]] = row[1]
-        ctx['title'] = "Total between %s and %s" % (sdate.strftime("%d %b %Y"),
-                                                    edate.strftime("%d %b %Y"))
+        ctx['title'] = "Total"
+        ctx['subtitle'] = (" between %s and %s UTC"
+                           ) % (sdate.strftime("%d %b %Y %H%M"),
+                                edate.strftime("%d %b %Y %H%M"))
         datavar = "count"
     elif varname == 'yearavg':
         table = "warnings"
@@ -353,6 +364,9 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
+    # Covert datetime to UTC
+    ctx['sdate'] = ctx['sdate'].replace(tzinfo=pytz.utc)
+    ctx['edate'] = ctx['edate'].replace(tzinfo=pytz.utc)
     state = ctx['state']
     phenomena = ctx['phenomena']
     significance = ctx['significance']
@@ -366,7 +380,7 @@ def plotter(fdict):
     elif geo == 'polygon':
         do_polygon(ctx)
 
-    subtitle = "based on IEM Archives of NWS WWA"
+    subtitle = "based on IEM Archives %s" % (ctx.get('subtitle', ''),)
     if t == 'cwa':
         subtitle = "Plotted for %s (%s), %s" % (nt.sts[station]['name'],
                                                 station, subtitle)
