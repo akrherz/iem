@@ -8,8 +8,6 @@ automat=0.5.0=py27_0
 backports.functools_lru_cache=1.3=py27_0
 backports.shutil_get_terminal_size=1.0.0=py27_1
 backports_abc=0.5=py27_0
-basemap=1.1.0=np112py27_0
-basemap-data-hires=1.0.8.dev0=2
 blas=1.1=openblas
 bleach=1.5.0=py27_0
 boto3=1.4.4=py27_0
