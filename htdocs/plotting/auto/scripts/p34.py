@@ -1,10 +1,12 @@
-import psycopg2.extras
-import numpy as np
+"""Consec days"""
 import datetime
 import calendar
+from collections import OrderedDict
+
+import psycopg2.extras
+import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('high_over', 'High Temperature At or Above'),
@@ -15,11 +17,11 @@ PDICT = OrderedDict([('high_over', 'High Temperature At or Above'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the maximum number of consec
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the maximum number of consec
     days above or below some threshold for high or low temperature."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:'),
         dict(type='select', name='var', default='high_under',
@@ -27,7 +29,7 @@ def get_description():
         dict(type="int", name='threshold', default=32,
              label="Temperature Threshold:")
     ]
-    return d
+    return desc
 
 
 def greater_than_or_equal(one, two):
@@ -96,6 +98,7 @@ def plotter(fdict):
     ax.set_xlim(0, 366)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

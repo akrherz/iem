@@ -1,21 +1,22 @@
+"""time of day frequency of WWA"""
 import psycopg2.extras
-import pyiem.nws.vtec as vtec
 import numpy as np
 import pandas as pd
+import pyiem.nws.vtec as vtec
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """For a given watch/warning/advisory type and forecast
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """For a given watch/warning/advisory type and forecast
     zone, what is the frequency by time of day that the product was valid.  The
     total number of events for the county/zone is used for the frequency. Due
     to how the NWS issues some products for counties and some products for
     zones, you may need to try twice to get the proper one selected."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='ugc', name='ugc',
              default='IAZ048', label='Select UGC Zone/County:'),
         dict(type='phenomena', name='phenomena',
@@ -23,7 +24,7 @@ def get_description():
         dict(type='significance', name='significance',
              default='W', label='Select Watch/Warning Significance Level:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -39,7 +40,7 @@ def plotter(fdict):
     phenomena = ctx['phenomena']
     significance = ctx['significance']
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     cursor.execute("""
     SELECT s.wfo, s.tzname, u.name from ugcs u
@@ -91,9 +92,11 @@ def plotter(fdict):
     df = pd.DataFrame(dict(minute=pd.Series(np.arange(1440)),
                            events=pd.Series(data)))
 
-    ax.bar(np.arange(1440), data / float(cnt) * 100., ec='b', fc='b')
-    ax.set_ylim(0, 100)
-    ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
+    vals = data / float(cnt) * 100.
+    ax.bar(np.arange(1440), vals, ec='b', fc='b')
+    if np.max(vals) > 50:
+        ax.set_ylim(0, 100)
+        ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax.grid()
     ax.set_xticks(range(0, 1440, 60))
     ax.set_xticklabels(["Mid", "", "", "3 AM", "", "", "6 AM", "", "", '9 AM',
@@ -109,6 +112,7 @@ def plotter(fdict):
                        ets.strftime("%Y-%m-%d %I:%M %p")))
     ax.set_xlim(0, 1441)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
