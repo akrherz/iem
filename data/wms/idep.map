@@ -74,10 +74,10 @@ LAYER
     DATA "the_geom from (select random() as oid, (coalesce(rainfall,0) / 25.4) as da, 
      h.the_geom from daily_rainfall_%year% d left join hrap_polygons h 
      using (hrap_i) WHERE d.valid = '%date%') as foo 
-     using unique oid using srid=26915"
+     using unique oid using srid=5070"
     NAME "precip-in"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -210,10 +210,10 @@ LAYER
    (vsm) as da, h.the_geom from 
    waterbalance_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
-   using unique oid using srid=26915"
+   using unique oid using srid=5070"
     NAME "vsm"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -343,10 +343,10 @@ LAYER
    (s10cm) as da, h.the_geom from 
    waterbalance_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
-   using unique oid using srid=26915"
+   using unique oid using srid=5070"
     NAME "sm10"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -476,10 +476,10 @@ LAYER
    (coalesce(avg_runoff,0) / 25.4) as da, h.the_geom from 
    results_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
-   using unique oid using srid=26915"
+   using unique oid using srid=5070"
     NAME "runoff"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -612,10 +612,10 @@ LAYER
    (coalesce(avg_loss,0) * 4.463) as da, h.the_geom from 
    results_by_twp d left join iatwp h using (model_twp) 
    WHERE d.valid = '%date%' ) as foo 
-   using unique oid using srid=26915"
+   using unique oid using srid=5070"
     NAME "loss"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -754,14 +754,14 @@ LAYER
     CONNECTIONTYPE POSTGIS
     DATA "geom from (
       SELECT h.huc_12 as oid, da, h.geom from
-      ia_huc12 h LEFT OUTER JOIN (
+      huc12 h LEFT OUTER JOIN (
         SELECT huc_12, coalesce(qc_precip,0) / 25.4 as da from results_by_huc12
         WHERE valid = '%date%' and scenario = %scenario% 
       ) as r USING (huc_12)
-    ) as foo USING unique oid USING srid=26915"
+    ) as foo USING unique oid USING srid=5070"
     NAME "precip-in2"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -892,12 +892,12 @@ LAYER
     CONNECTIONTYPE POSTGIS
     DATA "geom from (select d.huc_12 as oid, 
    (vsm) as da, h.geom from 
-   waterbalance_by_huc12 d left join ia_huc12 h using (huc_12) 
+   waterbalance_by_huc12 d left join huc12 h using (huc_12) 
    WHERE d.valid = '%date%' ) as foo 
-   using unique oid using srid=26915"
+   using unique oid using srid=5070"
     NAME "vsm2"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -1025,12 +1025,12 @@ LAYER
     CONNECTIONTYPE POSTGIS
     DATA "geom from (select d.huc_12 as oid, 
    (s10cm) as da, h.geom from 
-   waterbalance_by_huc12 d left join ia_huc12 h using (huc_12) 
+   waterbalance_by_huc12 d left join huc12 h using (huc_12) 
    WHERE d.valid = '%date%' ) as foo 
-   using unique oid using srid=26915"
+   using unique oid using srid=5070"
     NAME "sm102"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -1159,14 +1159,14 @@ LAYER
     CONNECTIONTYPE POSTGIS
     DATA "geom from (
       SELECT h.huc_12 as oid, da, h.geom from
-      ia_huc12 h LEFT OUTER JOIN (
+      huc12 h LEFT OUTER JOIN (
         SELECT huc_12, coalesce(avg_runoff,0) / 25.4 as da from results_by_huc12
         WHERE valid = '%date%' and scenario = %scenario% 
       ) as r USING (huc_12)
-    ) as foo USING unique oid USING srid=26915"
+    ) as foo USING unique oid USING srid=5070"
     NAME "runoff2"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -1298,14 +1298,14 @@ LAYER
     CONNECTIONTYPE POSTGIS
     DATA "geom from (
       SELECT h.huc_12 as oid, da, h.geom from
-      ia_huc12 h LEFT OUTER JOIN (
+      huc12 h LEFT OUTER JOIN (
         SELECT huc_12, coalesce(avg_loss,0) * 4.463 as da from results_by_huc12
         WHERE valid = '%date%' and scenario = %scenario% 
       ) as r USING (huc_12)
-    ) as foo USING unique oid USING srid=26915"
+    ) as foo USING unique oid USING srid=5070"
     NAME "loss2"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -1437,14 +1437,14 @@ LAYER
     CONNECTIONTYPE POSTGIS
     DATA "geom from (
       SELECT h.huc_12 as oid, da, h.geom from
-      ia_huc12 h LEFT OUTER JOIN (
+      huc12 h LEFT OUTER JOIN (
         SELECT huc_12, coalesce(avg_delivery,0) * 4.463 as da from results_by_huc12
         WHERE valid = '%date%' and scenario = %scenario% 
       ) as r USING (huc_12)
-    ) as foo USING unique oid USING srid=26915"
+    ) as foo USING unique oid USING srid=5070"
     NAME "delivery2"
     PROJECTION
-      "init=epsg:26915"
+      "init=epsg:5070"
     END # PROJECTION
     STATUS ON
     TILEITEM "location"
@@ -1588,9 +1588,9 @@ LAYER
   NAME "flowpaths"
   CONNECTION "user=nobody dbname=idep host=iemdb"
   CONNECTIONTYPE POSTGIS
-  DATA "geom from (select fid, geom, fpath from flowpaths WHERE fpath > 0 and scenario = 0) as foo using srid=26915 using unique fid"
+  DATA "geom from (select fid, geom, fpath from flowpaths WHERE fpath > 0 and scenario = 0) as foo using srid=5070 using unique fid"
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:5070"
   END # PROJECTION
   STATUS ON
   TYPE LINE
@@ -1619,9 +1619,9 @@ LAYER
   NAME "iahuc12"
   CONNECTION "user=nobody dbname=idep host=iemdb"
   CONNECTIONTYPE POSTGIS
-  DATA "geom from ia_huc12 using srid=26915"
+  DATA "geom from huc12 using srid=5070"
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:5070"
   END # PROJECTION
   STATUS ON
   TYPE LINE
