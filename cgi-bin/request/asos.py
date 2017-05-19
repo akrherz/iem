@@ -24,7 +24,7 @@ def check_load():
     select pid from pg_stat_activity where query ~* 'FETCH'
     and datname = 'asos'""")
     if mcursor.rowcount > 9:
-        sys.stderr.write(("/cgi-bin/request/asos.py over capacity: %s"
+        sys.stderr.write(("/cgi-bin/request/asos.py over capacity: %s\n"
                           ) % (mcursor.rowcount,))
         sys.stdout.write("Content-type: text/plain \n")
         sys.stdout.write('Status: 503 Service Unavailable\n\n')
