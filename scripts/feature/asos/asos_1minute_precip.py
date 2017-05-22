@@ -1,7 +1,9 @@
-import psycopg2
+"""One minute precip plot"""
 import datetime
+
 import numpy as np
 import pytz
+import psycopg2
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 
@@ -9,12 +11,12 @@ ASOS = psycopg2.connect(database='asos', host='localhost', user='nobody',
                         port=5555)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2017, 4, 2, 18, 0)
+sts = datetime.datetime(2017, 5, 20, 16, 0)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-ets = datetime.datetime(2017, 4, 3, 5, 1)
+ets = datetime.datetime(2017, 5, 21, 6, 1)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 tzname = 'America/Chicago'
-station = 'AEX'
+station = 'MGM'
 
 sz = int((ets - sts).days * 1440 + (ets - sts).seconds / 60.) + 1
 
@@ -108,12 +110,12 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels)
 ax.grid(True)
 ax.set_xlim(0, sz)
-ax.legend(loc=(0.7, 0.4), prop=prop, ncol=1)
+ax.legend(loc=(0.18, 0.68), prop=prop, ncol=1)
 ax.set_ylim(0, 10)
 ax.set_yticks(range(0, 11, 1))
-ax.set_xlabel("2 April 2017 (%s)" % (tzname,))
-ax.set_title(("2 April 2017 Alexandria, LA (KAEX)\n"
-              "One Minute Rainfall, %.2f inches total plotted, 9.10 Official"
+ax.set_xlabel("20 May 2017 (%s)" % (tzname,))
+ax.set_title(("20 May 2017 Montgomery, AL (KMGM)\n"
+              "One Minute Rainfall, %.2f inches total plotted"
               ) % (prec[-1],))
 
 
