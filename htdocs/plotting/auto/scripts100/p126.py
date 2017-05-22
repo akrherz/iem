@@ -1,7 +1,10 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+"""Daily humidity plot"""
+from __future__ import print_function
 import datetime
 import calendar
+
+import psycopg2
+from pyiem.network import Table as NetworkTable
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.meteorology import mixing_ratio, relh
@@ -14,10 +17,10 @@ PDICT = {'mixing_ratio': 'Mixing Ratio [g/kg]',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     today = datetime.date.today()
-    d['data'] = True
-    d['description'] = """This plot presents one of two metrics indicating
+    desc['data'] = True
+    desc['description'] = """This plot presents one of two metrics indicating
     daily humidity levels as reported by a surface weather station. The
     first being mixing ratio, which is a measure of the amount of water
     vapor in the air.  The second being vapor pressure deficit, which reports
@@ -29,7 +32,7 @@ def get_description():
     <br />On 22 June 2016, this plot was modified to display the range of
     daily averages and not the range of instantaneous observations.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='year', name='year', default=today.year,
@@ -37,7 +40,7 @@ def get_description():
         dict(type='select', name='var', default='mixing_ratio',
              label='Which Humidity Variable to Compute?', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -74,21 +77,24 @@ def plotter(fdict):
     dailymeans = dailymeans.reset_index()
 
     df2 = dailymeans[['doy', varname]].groupby('doy').describe()
-    df2 = df2.unstack(level=-1)
 
     dyear = df[df['year'] == year]
     df3 = dyear[['doy', varname]].groupby('doy').describe()
-    df3 = df3.unstack(level=-1)
-    df3['diff'] = df3[(varname, 'mean')] - df2[(varname, 'mean')]
+    df3[(varname, 'diff')] = df3[(varname, 'mean')] - df2[(varname, 'mean')]
 
-    (fig, ax) = plt.subplots(2, 1)
+    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
     multiplier = 1000. if varname == 'mixing_ratio' else 10.
-    ax[0].fill_between(df2.index.values, df2[(varname, 'min')] * multiplier,
-                       df2[(varname, 'max')] * multiplier, color='gray')
 
-    ax[0].plot(df2.index.values, df2[(varname, 'mean')] * multiplier,
+    ax[0].fill_between(df2[(varname, 'min')].index.values,
+                       df2[(varname, 'min')].values * multiplier,
+                       df2[(varname, 'max')].values * multiplier,
+                       color='gray')
+
+    ax[0].plot(df2[(varname, 'mean')].index.values,
+               df2[(varname, 'mean')].values * multiplier,
                label="Climatology")
-    ax[0].plot(df3.index.values, df3[(varname, 'mean')] * multiplier,
+    ax[0].plot(df3[(varname, 'mean')].index.values,
+               df3[(varname, 'mean')].values * multiplier,
                color='r', label="%s" % (year, ))
 
     ax[0].set_title(("%s [%s]\nDaily Mean Surface %s"
@@ -107,10 +113,11 @@ def plotter(fdict):
 
     cabove = 'b' if varname == 'mixing_ratio' else 'r'
     cbelow = 'r' if cabove == 'b' else 'b'
-    rects = ax[1].bar(df3.index.values, df3['diff'] * multiplier,
+    rects = ax[1].bar(df3[(varname, 'diff')].index.values,
+                      df3[(varname, 'diff')].values * multiplier,
                       facecolor=cabove, edgecolor=cabove)
     for rect in rects:
-        if rect.get_y() < 0.:
+        if rect.get_height() < 0.:
             rect.set_facecolor(cbelow)
             rect.set_edgecolor(cbelow)
 
@@ -125,4 +132,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter({'var': 'vpd'})
+    plotter({'var': 'mixing_ratio'})
