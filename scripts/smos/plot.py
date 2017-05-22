@@ -1,14 +1,15 @@
 """Create a plot of SMOS data for either 0 or 12z"""
-from pyiem.plot import MapPlot
-import psycopg2
+from __future__ import print_function
 import sys
-import numpy as np
 import datetime
+
+import psycopg2
+import numpy as np
 import pytz
 import matplotlib.cm as cm
 from pandas.io.sql import read_sql
+from pyiem.plot.geoplot import MapPlot
 SMOS = psycopg2.connect(database='smos', host='iemdb', user='nobody')
-scursor = SMOS.cursor()
 
 
 def makeplot(ts, routes='ac'):
@@ -27,6 +28,7 @@ def makeplot(ts, routes='ac'):
     from obs o JOIN grid g ON (o.grid_idx = g.idx)
     """, SMOS,  params=(ts - datetime.timedelta(hours=6),
                         ts + datetime.timedelta(hours=6)), index_col=None)
+
     if len(df.index) == 0:
         print(("Did not find SMOS data for: %s-%s"
                ) % (ts - datetime.timedelta(hours=6),
@@ -95,6 +97,7 @@ def main(argv):
                                int(sys.argv[3]), int(sys.argv[4]))
         ts = ts.replace(tzinfo=pytz.utc)
         makeplot(ts, 'a')
+
 
 if __name__ == '__main__':
     main(sys.argv)
