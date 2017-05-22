@@ -1,9 +1,11 @@
 """Create an analysis of LSR snowfall reports"""
+from __future__ import print_function
+import datetime
+import unittest
+
 import numpy as np
 from pyiem.plot import MapPlot, nwssnow
 import pyiem.reference as reference
-import datetime
-import unittest
 import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -48,11 +50,13 @@ def run(basets, endts, view):
                 title="Local Storm Report Snowfall Total Analysis",
                 subtitle=("Reports past 12 hours: %s"
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
-               cmap=cmap)
+    if cdf['val'].max() > 0:
+        m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
+                   rng, cmap=cmap)
     m.drawcounties()
-    m.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
-                  fmt='%.1f')
+    if len(tdf.index) > 0:
+        m.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
+                      fmt='%.1f')
     m.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
@@ -63,8 +67,9 @@ def run(basets, endts, view):
                 title="Local Storm Report Snowfall Total Analysis",
                 subtitle=("Reports valid over past 12 hours: %s"
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
-               cmap=cmap)
+    if cdf['val'].max() > 0:
+        m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
+                   rng, cmap=cmap)
     m.drawcounties()
     m.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall_nv.png bogus png"
@@ -75,8 +80,9 @@ def run(basets, endts, view):
                 title="Local Storm Report Snowfall Total Analysis",
                 subtitle=("Reports past 12 hours: %s"
                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values, rng,
-               cmap=cmap)
+    if cdf['val'].max() > 0:
+        m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
+                   rng, cmap=cmap)
     m.drawcities()
     pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
     m.postprocess(view=view, pqstr=pqstr)
@@ -88,6 +94,7 @@ def main():
     now = datetime.datetime.now()
     ts = now - datetime.timedelta(hours=12)
     run(ts, now, False)
+
 
 if __name__ == '__main__':
     main()
