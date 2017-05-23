@@ -1,4 +1,10 @@
 #!/usr/bin/python
+import copy
+import re
+import sys, cgi, time, os, traceback, email, ConfigParser
+import Cache, Caches
+import Layer, Layers
+import datetime
 
 # BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
@@ -10,11 +16,6 @@ class TileCacheLayerNotFoundException(Exception):
 class TileCacheFutureException(Exception):
     pass
 
-import re
-import sys, cgi, time, os, traceback, email, ConfigParser
-import Cache, Caches
-import Layer, Layers
-import datetime
 
 # Windows doesn't always do the 'working directory' check correctly.
 if sys.platform == 'win32':
@@ -40,7 +41,7 @@ class Request (object):
             scenario = lbl[4:]
             uri = ('date=%s&year=%s&month=%s&day=%s&scenario=%s'
                    ) % (date, date[:4], date[5:7], date[8:10], scenario)
-            layer = self.service.layers['idep']
+            layer = copy.copy(self.service.layers['idep'])
             layer.name = layername
             layer.layers = ltype
             layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
@@ -57,7 +58,7 @@ class Request (object):
             else:
                 mylayername = 'goes'
                 uri = ''
-            layer = self.service.layers[mylayername]
+            layer = copy.copy(self.service.layers[mylayername])
             layer.name = layername
             layer.url = "%sbird=%s&channel=%s&%s" % (
                 layer.metadata['baseurl'], bird, channel, uri)
@@ -94,7 +95,7 @@ class Request (object):
                 else:
                     mylayername = 'ridge-single'
                 uri = ''
-            layer = self.service.layers[mylayername]
+            layer = copy.copy(self.service.layers[mylayername])
             layer.name = layername
             layer.url = "%ssector=%s&prod=%s&%s" % (layer.metadata['baseurl'],
                                                     sector, prod, uri)
