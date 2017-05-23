@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 
 # Third party
+import requests
 import pytz
 import numpy as np
 from pyiem.observation import Observation
@@ -427,6 +428,17 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     os.remove(tmpfn)
 
 
+def dump_madis_csv():
+    """Inject the current MADIS NMP csv into LDM"""
+    uri = "http://iem.local/agclimate/isusm.csv"
+    req = requests.get(uri)
+    output = open('/tmp/isusm.csv', 'w')
+    output.write(req.content)
+    output.close()
+    subprocess.call("/home/ldm/bin/pqinsert -p 'isusm.csv' /tmp/isusm.csv",
+                    shell=True)
+
+
 def main():
     """ Go main Go """
     for nwsli in STATIONS:
@@ -442,6 +454,8 @@ def main():
         print("Calling fix_solar.py")
         os.chdir("../isuag")
         subprocess.call("python fix_solar.py", shell=True)
+
+    dump_madis_csv()
 
 
 if __name__ == '__main__':
