@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 """Generation of National Mesonet Project CSV File"""
 import sys
-from pyiem.network import Table as NetworkTable
 import psycopg2.extras
-from pyiem.datatypes import distance
+from pyiem.network import Table as NetworkTable
+from pyiem.datatypes import distance, temperature
 
 
 def p(val, prec, minv, maxv):
     if val is None or val < minv or val > maxv:
         return 'null'
     return round(val, prec)
+
+
+def p2(val, prec, minv, maxv):
+    if val is None or val < minv or val > maxv:
+        return 'null'
+    return round(temperature(val, 'C').value('K'), prec)
 
 
 def do_output():
@@ -22,8 +28,8 @@ def do_output():
     SELECT *, valid at time zone 'UTC' as utc_valid from data
     where rank = 1 ORDER by station ASC""")
 
-    sys.stdout.write(("station_id,LAT [deg N],LON [deg E],date_time,ELEV [m],"
-                      "depth [m]#SOILT [C],depth [m]#SOILM [kg/kg]"
+    sys.stdout.write(("station_id,LAT [degN],LON [degE],date_time,ELEV [m],"
+                      "depth [m]#SOILT [K],depth [m]#SOILM [kg/kg]"
                       "\n"))
 
     nt = NetworkTable("ISUSM")
@@ -32,7 +38,7 @@ def do_output():
         sys.stdout.write(
             ("%s,%.4f,%.4f,%s,%.1f,"
              "%.3f;%.3f;%.3f;%.3f#%s;%s;%s;%s,"
-             "%.3f;%.3f;%.3f#%s;%s;%s,"
+             "%.3f;%.3f;%.3f#%s;%s;%s"
              "\n"
              ) % (sid, nt.sts[sid]['lat'],
                   nt.sts[sid]['lon'],
@@ -40,10 +46,10 @@ def do_output():
                   nt.sts[sid]['elevation'],
                   distance(4, 'IN').value("M"), distance(12, 'IN').value("M"),
                   distance(24, 'IN').value("M"), distance(50, 'IN').value("M"),
-                  p(row['tsoil_c_avg'], 3, -90, 90),
-                  p(row['t12_c_avg'], 3, -90, 90),
-                  p(row['t24_c_avg'], 3, -90, 90),
-                  p(row['t50_c_avg'], 3, -90, 90),
+                  p2(row['tsoil_c_avg'], 3, -90, 90),
+                  p2(row['t12_c_avg'], 3, -90, 90),
+                  p2(row['t24_c_avg'], 3, -90, 90),
+                  p2(row['t50_c_avg'], 3, -90, 90),
                   distance(12, 'IN').value("M"),
                   distance(24, 'IN').value("M"), distance(50, 'IN').value("M"),
                   p(row['vwc_12_avg'], 1, 0, 100),
