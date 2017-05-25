@@ -4,19 +4,19 @@
  run from RUN_10_AFTER.sh
 
 """
-import numpy as np
 import datetime
-from PIL import Image
 import os
 import sys
 import tempfile
 import subprocess
-import pyiem.mrms as mrms
 import json
-import pygrib
 import gzip
 import unittest
-import requests
+
+import numpy as np
+from PIL import Image
+import pyiem.mrms as mrms
+import pygrib
 
 TMP = "/mesonet/tmp"
 PQI = "/home/ldm/bin/pqinsert"
@@ -49,7 +49,7 @@ def convert_to_image(data):
     imgdata = np.where(np.logical_and(data >= 0, data < 25),
                        data / 0.25, imgdata)
     # -3 is no coverage -> 255
-    # -1 is misisng, so zero
+    # -1 is missing, so zero
     # Index 255 is missing
     imgdata = np.where(data < 0, 0, imgdata)
     imgdata = np.where(data < -1, 255, imgdata)
@@ -57,6 +57,7 @@ def convert_to_image(data):
 
 
 def cleanup():
+    """Remove tmp downloaded files"""
     for fn in DOWNLOADED_FILES:
         if os.path.isfile(fn):
             os.unlink(fn)
@@ -65,7 +66,7 @@ def cleanup():
 def is_realtime(gts):
     """Is this timestamp a realtime product"""
     utcnow = datetime.datetime.utcnow()
-    return (utcnow.strftime("%Y%m%d%H") == gts.strftime("%Y%m%d%H"))
+    return utcnow.strftime("%Y%m%d%H") == gts.strftime("%Y%m%d%H")
 
 
 def doit(gts, hr):
@@ -87,25 +88,13 @@ def doit(gts, hr):
     total = None
     mproduct = "RadarOnly_QPE_24H" if hr >= 24 else "RadarOnly_QPE_01H"
     for now in times:
-        uri = now.strftime(("http://mtarchive.geol.iastate.edu/%Y/%m/%d/"
-                            "mrms/ncep/" + mproduct + "/" + mproduct +
-                            "_00.00_%Y%m%d-%H%M00.grib2.gz"))
-        gribfn = now.strftime((TMP + "/" + mproduct +
-                               "_00.00_%Y%m%d-%H%M00.grib2.gz"))
-        if not os.path.isfile(gribfn):
-            res = requests.get(uri, timeout=60)
-            if res.status_code != 200:
-                # Cut down on logged errors
-                if gribfn in MISSED_FILES:
-                    return
-                print(("make_mrms_rasters.py[%s] MISSING %s\n  %s\n  %s\n"
-                       ) % (hr, now.strftime("%Y-%m-%dT%H:%MZ"), uri, gribfn))
-                MISSED_FILES.append(gribfn)
-                return
-            o = open(gribfn, 'wb')
-            o.write(res.content)
-            o.close()
-            DOWNLOADED_FILES.append(gribfn)
+        gribfn = mrms.fetch(mproduct, now)
+        if gribfn is None:
+            print(("make_mrms_rasters.py[%s] MISSING %s\n  %s\n"
+                   ) % (hr, now.strftime("%Y-%m-%dT%H:%MZ"), gribfn))
+            MISSED_FILES.append(gribfn)
+            return
+        DOWNLOADED_FILES.append(gribfn)
         fp = gzip.GzipFile(gribfn, 'rb')
         (tmpfp, tmpfn) = tempfile.mkstemp()
         tmpfp = open(tmpfn, 'wb')
@@ -243,6 +232,7 @@ def main(argv):
     for hr in [1, 24, 48, 72]:
         doit(gts, hr)
     cleanup()
+
 
 if __name__ == "__main__":
     main(sys.argv)
