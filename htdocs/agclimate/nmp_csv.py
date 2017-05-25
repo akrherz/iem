@@ -29,7 +29,10 @@ def do_output():
     where rank = 1 ORDER by station ASC""")
 
     sys.stdout.write(("station_id,LAT [degN],LON [degE],date_time,ELEV [m],"
-                      "depth [m]#SOILT [K],depth [m]#SOILM [kg/kg]"
+                      "depth [m]#SOILT [K],depth [m]#SOILM [kg/kg],"
+                      "GSRD[1]H [W/m^2],height [m]#T [K]#RH [%],"
+                      "PCP[1]H [mm],"
+                      "height [m]#FF[1]H [m/s]#FFMAX[1]H [m/s]#DD[1]H [degN]"
                       "\n"))
 
     nt = NetworkTable("ISUSM")
@@ -38,7 +41,9 @@ def do_output():
         sys.stdout.write(
             ("%s,%.4f,%.4f,%s,%.1f,"
              "%.3f;%.3f;%.3f;%.3f#%s;%s;%s;%s,"
-             "%.3f;%.3f;%.3f#%s;%s;%s"
+             "%.3f;%.3f;%.3f#%s;%s;%s,"
+             "%s,2#%s#%s,%s,"
+             "3#%s#%s#%s"
              "\n"
              ) % (sid, nt.sts[sid]['lat'],
                   nt.sts[sid]['lon'],
@@ -46,15 +51,22 @@ def do_output():
                   nt.sts[sid]['elevation'],
                   distance(4, 'IN').value("M"), distance(12, 'IN').value("M"),
                   distance(24, 'IN').value("M"), distance(50, 'IN').value("M"),
-                  p2(row['tsoil_c_avg'], 3, -90, 90),
-                  p2(row['t12_c_avg'], 3, -90, 90),
-                  p2(row['t24_c_avg'], 3, -90, 90),
-                  p2(row['t50_c_avg'], 3, -90, 90),
+                  p2(row['tsoil_c_avg_qc'], 3, -90, 90),
+                  p2(row['t12_c_avg_qc'], 3, -90, 90),
+                  p2(row['t24_c_avg_qc'], 3, -90, 90),
+                  p2(row['t50_c_avg_qc'], 3, -90, 90),
                   distance(12, 'IN').value("M"),
                   distance(24, 'IN').value("M"), distance(50, 'IN').value("M"),
-                  p(row['vwc_12_avg'], 1, 0, 100),
-                  p(row['vwc_24_avg'], 1, 0, 100),
-                  p(row['vwc_50_avg'], 1, 0, 100),
+                  p(row['vwc_12_avg_qc'], 1, 0, 100),
+                  p(row['vwc_24_avg_qc'], 1, 0, 100),
+                  p(row['vwc_50_avg_qc'], 1, 0, 100),
+                  p(row['slrkw_avg_qc'], 1, 0, 1600),
+                  p2(row['tair_c_avg_qc'], 1, -90, 90),
+                  p(row['rh_qc'], 1, 0, 1600),
+                  p(row['rain_mm_tot_qc'], 2, 0, 100),
+                  p(row['ws_mps_s_wvt_qc'], 2, 0, 100),
+                  p(row['ws_mph_max_qc'], 2, 0, 100),
+                  p(row['winddir_d1_wvt_qc'], 2, 0, 360),
                   ))
     sys.stdout.write(".EOO\n")
 
