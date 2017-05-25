@@ -321,7 +321,7 @@
   		"vars" => Array(
   				"lat" => "Latitude in degrees",
   				"lon" => "Longitude in (degrees east)",
-  				"last" => "(Optional) 1 or 0, include only the last outlook for each category",
+  				"last" => "(Optional) Include only the last number of outlooks for each category, 0 is all",
   				"day" => "(Optional) Which outlook day to request, defaults to 1",
   				"cat" => "(Optional) Which outlook category to request, defaults to CATEGORICAL",
   				),

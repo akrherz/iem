@@ -9,7 +9,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=3"></script>
+<script type="text/javascript" src="search.js?v=4"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -68,7 +68,8 @@ grid will update and provide a listing of the outlooks found.
 		<p><strong>Either enter coordinates manually:</strong><br />
 		<i>Latitude (deg N):</i> <input size="8" id="lat"><br />
 		<i>Longitude (deg E):</i> <input size="8" id="lon">
-		<br /><input type="checkbox" id="last" name="last" value="1"> List Most Recent Event	
+		<br /><input type="checkbox" id="last" name="last" value="1">
+	List Most Recent <input id="events" type="text" name="events" size="3" value="1"> Event(s)	
 		<br />Select Outlook: <input type="radio" name="day" value="1" checked>Day 1 &nbsp;
 		<input type="radio" name="day" value="2">Day 2 &nbsp;
 		<input type="radio" name="day" value="3">Day 3

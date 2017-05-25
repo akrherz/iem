@@ -17,18 +17,26 @@ def dowork(lon, lat, last, day, cat):
     res = dict(outlooks=[])
 
     cursor.execute("""
-    SELECT issue at time zone 'UTC', expire at time zone 'UTC',
-    valid at time zone 'UTC',
-    threshold, category from spc_outlooks where
-    ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)')) and day = %s
-    and outlook_type = 'C' and category = %s
-    and threshold not in ('TSTM') ORDER by issue DESC
+    WITH data as (
+        SELECT issue at time zone 'UTC' as i,
+        expire at time zone 'UTC' as e,
+        valid at time zone 'UTC' as v,
+        threshold, category,
+        rank() OVER (PARTITION by expire ORDER by issue ASC)
+        from spc_outlooks where
+        ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+        and day = %s and outlook_type = 'C' and category = %s
+        and threshold not in ('TSTM') ORDER by issue DESC)
+    SELECT i, e, v, threshold, category from data where rank = 1
+    ORDER by e DESC
     """, (lon, lat, day, cat))
-    running = []
+    running = {}
     for row in cursor:
-        if last and row[3] in running:
-            continue
-        running.append(row[3])
+        if last > 0:
+            running.setdefault(row[3], 0)
+            running[row[3]] += 1
+            if running[row[3]] > last:
+                continue
         res['outlooks'].append(
             dict(day=day,
                  utc_issue=row[0].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -49,7 +57,7 @@ def main():
     form = cgi.FieldStorage()
     lat = float(form.getfirst('lat', 42.0))
     lon = float(form.getfirst('lon', -95.0))
-    last = (form.getfirst('last', '0')[0] == '1')
+    last = int(form.getfirst('last', 0))
     day = int(form.getfirst('day', 1))
     cat = form.getfirst('cat', 'categorical').upper()
 

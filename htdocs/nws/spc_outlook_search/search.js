@@ -158,7 +158,17 @@ Ext.onReady(function() {
 		outlookStore.load({add: false, params: {
 			lon: $("#lon").val(),
 			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? '1': '0',
+			last: $('#last').is(":checked") ? $("#events").val(): '0',
+			day: $("input[name='day']:checked").val(),
+			cat: $("input[name='cat']:checked").val()
+		}});      
+		updateTableTitle();
+    });
+	$('#events').change(function() {
+		outlookStore.load({add: false, params: {
+			lon: $("#lon").val(),
+			lat: $("#lat").val(),
+			last: $('#last').is(":checked") ? $("#events").val(): '0',
 			day: $("input[name='day']:checked").val(),
 			cat: $("input[name='cat']:checked").val()
 		}});      
@@ -168,7 +178,7 @@ Ext.onReady(function() {
 		outlookStore.load({add: false, params: {
 			lon: $("#lon").val(),
 			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? '1': '0',
+			last: $('#last').is(":checked") ? $("#events").val(): '0',
 			day: this.value,
 			cat: $("input[name='cat']:checked").val()
 		}});		
@@ -178,7 +188,7 @@ Ext.onReady(function() {
 		outlookStore.load({add: false, params: {
 			lon: $("#lon").val(),
 			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? '1': '0',
+			last: $('#last').is(":checked") ? $("#events").val(): '0',
 			day: $("input[name='day']:checked").val(),
 			cat: this.value
 		}});
@@ -199,7 +209,7 @@ function updateMarkerPosition(latLng) {
 	outlookStore.load({add: false, params: {
 		lon: latLng.lng(),
 		lat: latLng.lat(),
-		last: $('#last').is(":checked") ? '1': '0',
+		last: $('#last').is(":checked") ? $("#events").val(): '0',
 		day: $("input[name='day']:checked").val(),
 		cat: $("input[name='cat']:checked").val()
 	}});
