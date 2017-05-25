@@ -1,24 +1,26 @@
+"""Hourly temp impacts from clouds"""
+import datetime
+
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
 import numpy as np
 import pandas as pd
-import datetime
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['desciption'] = """This plot attempts to show the impact of cloudiness
+    desc = dict()
+    desc['data'] = True
+    desc['desciption'] = """This plot attempts to show the impact of cloudiness
     on temperatures.  The plot shows a simple difference between the average
     temperature during cloudy/mostly cloudy conditions and the average
     temperature by hour and by week of the year."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -67,7 +69,7 @@ def plotter(fdict):
             rows.append(dict(hour=hour, week=(week+1), count=data[hour, week]))
     df = pd.DataFrame(rows)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     maxv = np.ceil(max([np.max(data), 0 - np.min(data)])) + 0.2
     cs = ax.imshow(data, aspect='auto', interpolation='nearest',

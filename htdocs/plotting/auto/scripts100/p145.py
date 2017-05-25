@@ -1,6 +1,8 @@
-import psycopg2
+"""4 inch soil temps"""
 import datetime
 import calendar
+
+import psycopg2
 from pyiem import util
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
@@ -27,17 +29,17 @@ XREF = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This chart presents daily timeseries of 4 inch
+    desc = dict()
+    desc['description'] = """This chart presents daily timeseries of 4 inch
     soil temperatures."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='ISUSM',
              default='BOOI4', label='Select Station:'),
         dict(type='year', default=today.year, min=1988, name='year',
              label='Year to Highlight')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

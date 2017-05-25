@@ -1,13 +1,15 @@
+"""hourly histogram"""
+import datetime
+from collections import OrderedDict
+
 import psycopg2
-from pyiem.network import Table as NetworkTable
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-import datetime
 from pyiem.datatypes import temperature, speed
 import pyiem.meteorology as pymet
 from pyiem.util import get_autoplot_context
-from collections import OrderedDict
+from pyiem.network import Table as NetworkTable
 
 
 PDICT = {'yes': 'Yes, Include only Year to Date period each year',
@@ -28,9 +30,9 @@ OPTDICT = {'no': 'No, only include times when heatindex/windchill is additive',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Caution: This plot takes a bit of time to
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Caution: This plot takes a bit of time to
     generate. This plot displays a histogram of hourly heat index
     values or temperature or dew point or wind chill.
     The connecting lines between the dots are to help readability. In the
@@ -42,7 +44,7 @@ def get_description():
     include observations where the wind chill temperature is colder than the
     air temperature or when the heat index temperature is warmer than the
     air temperature.</p>"""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='year', minvalue=1973, default=datetime.date.today().year,
@@ -55,7 +57,7 @@ def get_description():
              label=('Include cases where windchill or heatindex '
                     'is not additive')),
     ]
-    return d
+    return desc
 
 
 def get_doylimit(ytd, varname):
@@ -196,6 +198,7 @@ def plotter(fdict):
                        inctitle))
     ax.legend(loc='best', scatterpoints=1)
     return fig, rdf
+
 
 if __name__ == '__main__':
     plotter(dict(ytd='yes', network='IA_ASOS', zstation='AMW',
