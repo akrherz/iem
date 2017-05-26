@@ -7,20 +7,22 @@
  - For this year, replace day + 4 to Dec 31 with CFS :)
  - Upload the resulting file <site>_YYYYmmdd.met
 """
-import dropbox
-import requests
+from __future__ import print_function
 import sys
 import datetime
+import tempfile
+import os
+import subprocess
+
+import dropbox
+import requests
 import numpy as np
 import pandas as pd
-import tempfile
 from pandas.io.sql import read_sql
 from pyiem.datatypes import temperature, distance
 from pyiem.meteorology import gdd
-import psycopg2
-import os
-import subprocess
 from pyiem.util import get_properties
+import psycopg2
 
 XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
         'cobs': {'isusm': None, 'station': 'OT0012', 'climodat': 'IA0200'},
@@ -69,7 +71,7 @@ def upload_summary_plots():
                               remotefn),
                         mode=dropbox.files.WriteMode.overwrite)
                 except Exception as _:
-                    print 'dropbox fail'
+                    print('dropbox fail')
             os.unlink(tmpfn)
 
 
@@ -116,7 +118,7 @@ def write_and_upload(df, location):
                 "/YieldForecast/Daryl/%s" % (remotefn, ),
                 mode=dropbox.files.WriteMode.overwrite)
         except Exception as _:
-            print 'dropbox fail'
+            print('dropbox fail')
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0644)
     # os.rename fails here due to cross device link bug
@@ -243,7 +245,8 @@ def replace_obs_iem(df, location):
     cursor.execute("""
         select day, max_tmpf, min_tmpf, srad_mj, pday
         from """ + table + """ s JOIN stations t on (s.iemid = t.iemid)
-        WHERE t.id = %s and max_tmpf is not null ORDER by day ASC
+        WHERE t.id = %s and max_tmpf is not null
+        and day < 'TODAY' ORDER by day ASC
         """, (station,))
     rcols = ['maxt', 'mint', 'radn', 'gdd', 'rain']
     replaced = []
