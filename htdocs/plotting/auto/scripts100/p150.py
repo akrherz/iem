@@ -26,7 +26,15 @@ def get_description():
     desc['data'] = True
     desc['cache'] = 86400
     desc['description'] = """This plot presents percentiles of observations from
-    a given sounding profile against the long term record for the site.
+    a given sounding profile against the long term record for the site. These
+    percentiles are computed against all other soundings for the valid hour of
+    the profile of interest.  For example, a 00 UTC sounding is only compared
+    against other 00 UTC soundings for the given month or for the period of
+    record.
+
+    <br /><br />The 'Select Station' option provides some 'virtual' stations
+    that are spliced together archives of close by stations.  For some
+    locations, the place that the sounding is made has moved over the years.
     """
     today = datetime.date.today()
     desc['arguments'] = [

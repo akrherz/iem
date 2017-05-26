@@ -1,6 +1,8 @@
+"""Map of dates"""
+import datetime
+
 import numpy as np
 from pyiem.util import get_autoplot_context
-import datetime
 from pandas.io.sql import read_sql
 import psycopg2
 from collections import OrderedDict
@@ -32,14 +34,14 @@ SQLOPT = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This map presents the first fall date or last spring
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This map presents the first fall date or last spring
     date with a temperature at/above or below some threshold.  The year is
     split on 1 July for the purposes of this plotting app.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='sector', default='IA',
              label='Select Sector:', options=PDICT),
         dict(type='select', name='var', default='spring_below',
@@ -53,7 +55,7 @@ def get_description():
              default=32,
              label='Temperature Threshold (F):'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -90,7 +92,8 @@ def plotter(fdict):
 
     df['pdate'] = df['doy'].apply(f)
 
-    m = MapPlot(sector='state', state=sector, axisbg='white', nocaption=True,
+    m = MapPlot(sector='state', state=sector,
+                continental_color='white', nocaption=True,
                 title="%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold),
                 subtitle='based on NWS COOP and IEM Daily Estimates')
     levs = np.linspace(df['doy'].min() - 3, df['doy'].max() + 3, 7, dtype='i')

@@ -1,9 +1,11 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+"""RH climatology"""
 import calendar
-from pandas.io.sql import read_sql
 import datetime
+
+import psycopg2
+from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 PDICT = {'above': 'Above Threshold',
          'below': 'Below Threshold'}
@@ -13,9 +15,9 @@ PDICT2 = {'max_rh': 'Daily Max RH',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """The IEM computes a daily maximum and minimum
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """The IEM computes a daily maximum and minimum
     relative humidity value based on whatever observations were available
     for that calendar day.  This app presents these values along with
     a simple climatology computed by averaging the daily observations. You
@@ -23,7 +25,7 @@ def get_description():
     some threshold. This frequency is grouped by week of the year to
     provide some smoothing to the metric."""
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
              label='Select Station', network='IA_ASOS'),
         dict(type='year', name='year',
@@ -37,7 +39,7 @@ def get_description():
              default=95,
              label='Threshold [%] for Frequency'),
     ]
-    return d
+    return desc
 
 
 def nice(val):

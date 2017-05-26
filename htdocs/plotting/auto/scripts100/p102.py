@@ -1,5 +1,7 @@
-import psycopg2
+"""LSR ranks"""
 import datetime
+
+import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -10,16 +12,16 @@ MARKERS = ['8', '>', '<', 'v', 'o', 'h', '*']
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 3600
-    d['description'] = """The National Weather Service issues Local Storm
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 3600
+    desc['description'] = """The National Weather Service issues Local Storm
     Reports (LSRs) with a label associated with each report indicating the
     source of the report.  This plot summarizes the number of reports
     received each year by each source type.  The values are the ranks for
     that year with 1 indicating the largest."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:', all=True),
         dict(type="year", name="year", min=2006, default=2006,
@@ -27,7 +29,7 @@ def get_description():
         dict(type="year", name="eyear", min=2006, default=today.year,
              label="End Year (inclusive)"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -55,7 +57,7 @@ def plotter(fdict):
     """, pgconn)
     df['rank'] = df.groupby(['yr'])['count'].rank(ascending=False,
                                                   method='first')
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     # Do 2006 as left side
     dyear = df[df['yr'] == syear].sort_values(by=['rank'], ascending=True)
     i = 1

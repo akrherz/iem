@@ -1,8 +1,10 @@
-from pandas.io.sql import read_sql
-import psycopg2
-from pyiem import network
-import numpy as np
+"""Steps up and down"""
 import calendar
+
+import psycopg2
+import numpy as np
+from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'spring': '1 January - 30 June',
@@ -11,20 +13,20 @@ PDICT = {'spring': '1 January - 30 June',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot analyzes the number of steps down in
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot analyzes the number of steps down in
     low temperature during the fall season and the number of steps up in
     high temperature during the spring season.  These steps are simply having
     a newer colder low or warmer high for the season to date period.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', options=PDICT,
              label='Select which half of year', default='fall'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

@@ -1,24 +1,26 @@
-import psycopg2
-import pyiem.nws.vtec as vtec
+"""VTEC frequency"""
 import datetime
+
 import numpy as np
 import pandas as pd
+import psycopg2
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
+import pyiem.nws.vtec as vtec
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 3600
-    d['description'] = """This chart displays the relative frequency of
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 3600
+    desc['description'] = """This chart displays the relative frequency of
     VTEC products.  This is computed by taking the unique combination of
     events and UGC county/zones.  Restating and for example, a single
     Severe Thunderstorm Warning covering portions of two counties would
     count as two events in this summary. The values plotted are relative to the
     most frequent product."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:', all=True),
         dict(type="year", name="syear", default=2009,
@@ -26,7 +28,7 @@ def get_description():
         dict(type="year", name="eyear", default=datetime.date.today().year,
              label='End Year (inclusive):', min=2009),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
