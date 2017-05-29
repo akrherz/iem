@@ -1,5 +1,7 @@
-import psycopg2
+"""Wfo gaant chart"""
 import datetime
+
+import psycopg2
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -9,14 +11,14 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 600
-    d['data'] = True
-    d['description'] = """Gaant chart of watch, warning, and advisories issued
+    desc = dict()
+    desc['cache'] = 600
+    desc['data'] = True
+    desc['description'] = """Gaant chart of watch, warning, and advisories issued
     by an NWS Forecast Office for a start date and number of days of your
     choice. The duration of the individual alert is the maximum found between
     the earliest issuance and latest expiration."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
         dict(type='date', name='sdate', default='2015/01/01',
@@ -25,7 +27,7 @@ def get_description():
         dict(type='int', name='days', default=10,
              label='Number of Days in Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -131,6 +133,7 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=8)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

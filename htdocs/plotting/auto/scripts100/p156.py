@@ -1,22 +1,24 @@
-# -*- coding: utf-8 -*-
-import psycopg2
+""" Crop condition reports"""
 import datetime
 import calendar
+from collections import OrderedDict
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
 from pyiem.reference import state_names
-from collections import OrderedDict
+
 PDICT2 = OrderedDict([('CORN', 'Corn'),
                       ('SOYBEANS', 'Soybean')])
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['nass'] = True
-    d['description'] = """This chart presents crop condition reports."""
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['nass'] = True
+    desc['description'] = """This chart presents crop condition reports."""
+    desc['arguments'] = [
         dict(type='state', name='st1', default='IA',
              label='Select State #1:'),
         dict(type='state', name='st2', default='IL',
@@ -41,7 +43,7 @@ def get_description():
              options=PDICT2, label='Which Crop?'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

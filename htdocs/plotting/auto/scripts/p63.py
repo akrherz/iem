@@ -1,6 +1,8 @@
-import psycopg2.extras
-import numpy as np
+"""records by year"""
 import datetime
+
+import numpy as np
+import psycopg2.extras
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -8,16 +10,16 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart plots the number of daily maximum
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart plots the number of daily maximum
     high temperatures and daily minimum low temperatures set by year.  Ties
     are not included."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -107,6 +109,7 @@ def plotter(fdict):
     ax[1].text(eyear-50, 22, "Min Low Temperature")
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(station='IA6389', network='IACLIMATE'))

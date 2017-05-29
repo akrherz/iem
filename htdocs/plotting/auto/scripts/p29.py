@@ -1,24 +1,26 @@
-import psycopg2
-import pytz
-from pyiem.network import Table as NetworkTable
+"""Hourly temp ranges"""
 import datetime
 import calendar
+
+import psycopg2
+import pytz
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This plot presents the frequency of a given hourly
+    desc = dict()
+    desc['description'] = """This plot presents the frequency of a given hourly
     temperature being within the bounds of two temperature thresholds. The
     hour is specified in UTC (Coordinated Universal Time) and observations
     are rounded forward in time such that an observation at :54 after the
     hour is moved to the top of the hour.
     """
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='zhour', name='hour', default=20,
@@ -28,7 +30,7 @@ def get_description():
         dict(type='int', name='t2', default=79,
              label='Upper Temperature Bound (inclusive):'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -95,6 +97,7 @@ def plotter(fdict):
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0 + 0.07, pos.width, pos.height * 0.93])
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

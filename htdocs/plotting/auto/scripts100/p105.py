@@ -1,8 +1,10 @@
-import psycopg2
-from pyiem import network
-import numpy as np
+"""Precip metrics"""
 import calendar
+
+import psycopg2
+import numpy as np
 from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'yes': 'Yes, consider trace reports',
@@ -11,15 +13,15 @@ PDICT = {'yes': 'Yes, consider trace reports',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents three precipitation metrics for
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents three precipitation metrics for
     a site of your choice.  The upper plot displays the maximum period of days
     in between precip events of either greater than 0.01" (labelled no rain)
     and then of a threshold of your choice.  The bottom plot provides the
     maximum 24 hour period precip as reported by the once daily observatons.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type="float", name="thres", default="0.10",
@@ -27,7 +29,7 @@ def get_description():
         dict(type='select', name='trace', default='no',
              label='Include "trace" reports in the analysis?', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def get_color(val, cat):

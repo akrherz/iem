@@ -1,11 +1,13 @@
+"""monthly temp records"""
+import datetime
+import calendar
+from collections import OrderedDict
+
 import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
-import datetime
-import calendar
 from pyiem.network import Table as NetworkTable
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('avg_temp', 'Average Daily Temperature'),
@@ -18,12 +20,12 @@ PDICT2 = OrderedDict([('min', 'Minimum'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the record months for a
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the record months for a
     statistic of your choice.  The current month for the current day is not
     considered for the analysis."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', options=PDICT, name='varname', default='avg_temp',
@@ -31,7 +33,7 @@ def get_description():
         dict(type='select', options=PDICT2, name='agg', default='max',
              label='Aggregate Option')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -105,6 +107,7 @@ def plotter(fdict):
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.95])
 
     return fig, resdf
+
 
 if __name__ == '__main__':
     plotter(dict())
