@@ -60,8 +60,8 @@ DAILYCONV = {'Batt_Volt_Min': None,
              'T107_F_Avg': None}
 
 
-def compute_srad(hdf, date):
-    """Figure out the solar radiation based on the hourly data"""
+def sum_hourly(hdf, date, col):
+    """Figure out the sum based on the hourly data"""
     # 6z is good enough, no rad at night!
     sts = datetime.datetime(date.year, date.month, date.day, 6)
     sts = sts.replace(tzinfo=pytz.utc)
@@ -70,7 +70,7 @@ def compute_srad(hdf, date):
     if len(df2.index) == 0:
         print("No data found!?")
         return None
-    return df2['SlrMJ_Tot'].sum()
+    return df2[col].sum()
 
 
 def clean(key, value):
@@ -111,7 +111,9 @@ def database(lastob, ddf, hdf, force_currentlog):
                 ob.data[value] = clean(key, daily.iloc[0][key])
         # print("date: %s srad_mj: %s" % (localts.date(), ob.data['srad_mj']))
         if ob.data['srad_mj'] is None:
-            ob.data['srad_mj'] = compute_srad(hdf, localts.date())
+            ob.data['srad_mj'] = sum_hourly(hdf, localts.date(), 'SlrMJ_Tot')
+        if ob.data['pday'] is None:
+            ob.data['pday'] = sum_hourly(hdf, localts.date(), 'Rain_in_Tot')
             # print("  --> srad_mj: %s" % (ob.data['srad_mj'], ))
         for key, value in HOURLYCONV.items():
             if value is None:
@@ -165,7 +167,7 @@ def main(argv):
     """Go for it!"""
     if len(argv) > 1:
         print("Running special request")
-        for year in range(2011, 2018):
+        for year in range(2017, 2018):
             ddf, hdf = campbell2df(year)
             database(None, ddf, hdf, True)
     else:
