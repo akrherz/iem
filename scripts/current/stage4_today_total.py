@@ -1,13 +1,15 @@
 """
  Sum up the hourly precipitation from NCEP stage IV and produce maps
 """
-
-import pygrib
+from __future__ import print_function
 import datetime
-from pyiem.datatypes import distance
-from pyiem.plot import MapPlot, nwsprecip
 import os
 import sys
+
+import numpy as np
+import pygrib
+from pyiem.datatypes import distance
+from pyiem.plot import MapPlot, nwsprecip
 import pytz
 
 
@@ -55,20 +57,20 @@ def doday(ts, realtime):
                  ) % (routes,
                       ts.strftime("%Y%m%d%H"), sector, sector)
 
-        m = MapPlot(sector=sector,
-                    title="%s NCEP Stage IV Today's Precipitation" % (
-                                                    ts.strftime("%-d %b %Y"),),
-                    subtitle=subtitle)
+        mp = MapPlot(sector=sector,
+                     title=("%s NCEP Stage IV Today's Precipitation"
+                            ) % (ts.strftime("%-d %b %Y"), ),
+                     subtitle=subtitle)
 
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
-        m.pcolormesh(lons, lats, distance(total, 'MM').value('IN'), clevs,
-                     cmap=nwsprecip(), units='inch')
+        mp.pcolormesh(lons, lats, distance(total, 'MM').value('IN'), clevs,
+                      cmap=nwsprecip(), units='inch')
 
         # map.drawstates(zorder=2)
         if sector == 'iowa':
-            m.drawcounties()
-        m.postprocess(pqstr=pqstr)
-        m.close()
+            mp.drawcounties()
+        mp.postprocess(pqstr=pqstr)
+        mp.close()
 
 
 def main():
@@ -91,6 +93,7 @@ def main():
     date = date.replace(tzinfo=pytz.timezone("UTC"))
     date = date.astimezone(pytz.timezone("America/Chicago"))
     doday(date, realtime)
+
 
 if __name__ == "__main__":
     main()

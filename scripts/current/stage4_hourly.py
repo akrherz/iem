@@ -67,5 +67,6 @@ def main():
         doit(ts - datetime.timedelta(hours=24))
         doit(ts - datetime.timedelta(hours=48))
 
+
 if __name__ == '__main__':
     main()
