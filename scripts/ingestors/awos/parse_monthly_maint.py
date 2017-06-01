@@ -1,7 +1,7 @@
 """
  Parse the monthly maint file I get from the DOT
 
-  id         | integer | 
+  id         | integer |
  station    | character varying(10)    |
  portfolio  | character varying(10)    |
  valid      | timestamp with time zone |
@@ -11,6 +11,7 @@
  comments   | text                     |
 
 """
+from __future__ import print_function
 import sys
 import re
 import mx.DateTime
@@ -25,52 +26,62 @@ class bcolors(object):
     FAIL = '\033[91m'
     ENDC = '\033[0m'
 
-# Use SSH proxy
-PORTFOLIO = psycopg2.connect(dbname="portfolio", host="localhost",
-                             port=5555, user="nobody")
-pcursor = PORTFOLIO.cursor()
 
-CALINFO = re.compile((".* T/DP: AWOS:?\s*([0-9\-\.]+)/([0-9\-\.]+) "
-                      "Std:?\.? ([0-9\-\.]+)/([0-9\-\.]+)"))
+def main(argv):
+    """Go Main"""
+    # Use SSH proxy
+    pgconn = psycopg2.connect(dbname="portfolio", host="localhost",
+                              port=5555, user="nobody")
+    pcursor = pgconn.cursor()
 
-data = sys.stdin.read()
+    CALINFO = re.compile((r".* AWOS t/d:?\s*([0-9\-\.]+)/([0-9\-\.]+) "
+                          r"Std\s*t?/?d?:?\s*([0-9\-\.]+)/([0-9\-\.]+)"),
+                         re.IGNORECASE)
 
-for line in data.split("\n"):
-    tokens = line.split(",")
-    if len(tokens) != 6:
-        continue
-    faa = tokens[0]
-    if len(faa) != 3:
-        continue
-    date = mx.DateTime.strptime(tokens[1], '%d-%b-%y')
+    data = sys.stdin.read()
 
-    parts = re.findall(CALINFO, tokens[3])
-    if len(parts) == 0:
-        print bcolors.FAIL + tokens[3] + bcolors.ENDC
-        continue
+    for line in data.split("\n"):
+        tokens = line.split(",")
+        if len(tokens) != 6:
+            continue
+        faa = tokens[0]
+        if len(faa) != 3:
+            continue
+        date = mx.DateTime.strptime(tokens[1], '%d-%b-%y')
 
-    sql = """INSERT into iem_calibration(station, portfolio, valid, parameter,
-    adjustment, final, comments) values (%s, 'iaawos', %s, %s, %s, %s, %s)"""
-    tempadj = float(parts[0][2]) - float(parts[0][0])
-    args = (faa, date.strftime("%Y-%m-%d"), 'tmpf', tempadj,
-            parts[0][2], tokens[3].replace('"', ''))
-    if len(sys.argv) > 1:
-        pcursor.execute(sql, args)
+        parts = re.findall(CALINFO, tokens[3])
+        if len(parts) == 0:
+            print(bcolors.FAIL + tokens[3] + bcolors.ENDC)
+            continue
 
-    dewpadj = float(parts[0][3]) - float(parts[0][1])
-    args = (faa, date.strftime("%Y-%m-%d"), 'dwpf',
-            float(parts[0][3]) - float(parts[0][1]),
-            parts[0][3], tokens[3].replace('"', ''))
-    if len(sys.argv) > 1:
-        pcursor.execute(sql, args)
+        sql = """
+        INSERT into iem_calibration(station, portfolio, valid, parameter,
+        adjustment, final, comments) values (%s, 'iaawos', %s, %s, %s, %s, %s)
+        """
+        tempadj = float(parts[0][2]) - float(parts[0][0])
+        args = (faa, date.strftime("%Y-%m-%d"), 'tmpf', tempadj,
+                parts[0][2], tokens[3].replace('"', ''))
+        if len(sys.argv) > 1:
+            pcursor.execute(sql, args)
 
-    print(('--> %s [%s] TMPF: %s (%s) DWPF: %s (%s)'
-           ) % (faa, tokens[1], parts[0][2], tempadj,
-                parts[0][3], dewpadj))
+        dewpadj = float(parts[0][3]) - float(parts[0][1])
+        args = (faa, date.strftime("%Y-%m-%d"), 'dwpf',
+                float(parts[0][3]) - float(parts[0][1]),
+                parts[0][3], tokens[3].replace('"', ''))
+        if len(sys.argv) > 1:
+            pcursor.execute(sql, args)
 
-if len(sys.argv) == 1:
-    print 'WARNING: Disabled, call with arbitrary argument to enable'
-else:
-    pcursor.close()
-    PORTFOLIO.commit()
-    PORTFOLIO.close()
+        print(('--> %s [%s] TMPF: %s (%s) DWPF: %s (%s)'
+               ) % (faa, tokens[1], parts[0][2], tempadj,
+                    parts[0][3], dewpadj))
+
+    if len(argv) == 1:
+        print('WARNING: Disabled, call with arbitrary argument to enable')
+    else:
+        pcursor.close()
+        pgconn.commit()
+        pgconn.close()
+
+
+if __name__ == '__main__':
+    main(sys.argv)
