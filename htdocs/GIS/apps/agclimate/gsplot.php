@@ -24,7 +24,7 @@ if ($year > 2013) {
 	$ISUAGcities["A130219"]["lon"] += 0.2;
 }
 
-$vineyard = Array('GNVI4', 'AHTI4', 'BNKI4', 'CSII4', 'OSTI4');
+$vineyard = Array('GVNI4', 'AHTI4', 'BNKI4', 'CSII4', 'OSTI4');
 
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
