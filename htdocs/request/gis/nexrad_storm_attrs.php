@@ -43,7 +43,7 @@ $content = <<<EOF
  date restriction, but the download will be slow! 
 
 <p><a class="btn btn-default" href="#histograms" role="button">
-		<i class="glyphicon glyphicon-stats"></i> View Histograms</a>
+		<i class="fa fa-stats"></i> View Histograms</a>
  
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>

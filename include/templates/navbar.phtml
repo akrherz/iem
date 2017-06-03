@@ -143,7 +143,122 @@ $_pages = Array(
 	),
 );
 ?>
-<div class="container" id="iem-header">
+<header>
+<nav class="navbar-iastate">
+	<div class="container">
+		<!-- navbar-iastate-left -->
+		<ul class="nav navbar-nav navbar-iastate-left">
+			<li><a href='https://www.iastate.edu'>iastate.edu</a></li>
+			<li class="dropdown dropdown-hover isu-index">
+				<a href="https://www.iastate.edu/index/A" class="dropdown-toggle" data-toggle="" role="button" aria-haspopup="true" aria-expanded="false">Index</a>
+				<ul class="dropdown-menu isu-index-alpha">
+					<li><a href="https://www.iastate.edu/index/A/">A</a></li>
+					<li><a href="https://www.iastate.edu/index/B/">B</a></li>
+					<li><a href="https://www.iastate.edu/index/C/">C</a></li>
+					<li><a href="https://www.iastate.edu/index/D/">D</a></li>
+					<li><a href="https://www.iastate.edu/index/E/">E</a></li>
+					<li><a href="https://www.iastate.edu/index/F/">F</a></li>
+					<li><a href="https://www.iastate.edu/index/G/">G</a></li>
+					<li><a href="https://www.iastate.edu/index/H/">H</a></li>
+					<li><a href="https://www.iastate.edu/index/I/">I</a></li>
+					<li><a href="https://www.iastate.edu/index/J/">J</a></li>
+					<li><a href="https://www.iastate.edu/index/K/">K</a></li>
+					<li><a href="https://www.iastate.edu/index/L/">L</a></li>
+					<li><a href="https://www.iastate.edu/index/M/">M</a></li>
+					<li><a href="https://www.iastate.edu/index/N/">N</a></li>
+					<li><a href="https://www.iastate.edu/index/O/">O</a></li>
+					<li><a href="https://www.iastate.edu/index/P/">P</a></li>
+					<li><a href="https://www.iastate.edu/index/Q/">Q</a></li>
+					<li><a href="https://www.iastate.edu/index/R/">R</a></li>
+					<li><a href="https://www.iastate.edu/index/S/">S</a></li>
+					<li><a href="https://www.iastate.edu/index/T/">T</a></li>
+					<li><a href="https://www.iastate.edu/index/U/">U</a></li>
+					<li><a href="https://www.iastate.edu/index/V/">V</a></li>
+					<li><a href="https://www.iastate.edu/index/W/">W</a></li>
+					<li><a href="https://www.iastate.edu/index/X/">X</a></li>
+					<li><a href="https://www.iastate.edu/index/Y/">Y</a></li>
+					<li><a href="https://www.iastate.edu/index/Z/">Z</a></li>
+				</ul>
+			</li>
+		</ul>
+		<!-- /navbar-iastate-left -->
+
+		<!-- navbar-iastate-right -->
+		<ul class="nav navbar-nav navbar-right navbar-iastate-right">
+			<li><a href="https://info.iastate.edu/">Directory</a></li>
+			<li><a href="https://www.fpm.iastate.edu/maps/">Maps</a></li>
+			<li><a href="https://web.iastate.edu/safety/">Safety</a></li>
+			<li class="dropdown dropdown-hover">
+				<a href="//web.iastate.edu/signons/" class="dropdown-toggle" data-toggle="" role="button" aria-haspopup="true" aria-expanded="false">Sign Ons</a>
+				<ul class="dropdown-menu">
+					<li><a href="https://accessplus.iastate.edu/">AccessPlus</a></li>
+					<li><a href="https://bb.its.iastate.edu/">Blackboard</a></li>
+					<li><a href="https://iastate.box.com/">CyBox</a></li>
+					<li><a href="https://cymail.iastate.edu/">CyMail</a></li>
+					<li><a href="https://outlook.iastate.edu/">Outlook</a></li>
+					<li><a href="https://web.iastate.edu/signons/">More Sign Ons...</a></li>
+				</ul>
+			</li>
+		</ul>
+		<!-- /navbar-iastate-right -->
+
+	</div>
+</nav>
+<!-- /navbar-iastate -->
+
+<nav class="navbar-site">
+	<div class="container">
+
+		<div class="navbar-site-wordmark">
+			<a href="/" title="Home" class="wordmark-unit">
+				<span class="wordmark-isu">Iowa State University</span>
+				<span class="wordmark-unit-title">Iowa Environmental Mesonet</span>
+			</a>
+		</div>
+ 
+		<div class="navbar-header visible-xs visible-sm">
+			<button id="navbar-menu-button" type="button" class="navbar-toggle navbar-toggle-left collapsed" data-toggle="collapse" data-target="#navbar-menu-collapse, #navbar-site-links-collapse" aria-expanded="false">
+				<span class="navbar-toggle-icon menu-icon">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</span>
+				<span class="navbar-toggle-label">
+					Menu <span class="sr-only">Toggle</span>
+				</span>
+			</button>
+			<button id="navbar-search-button" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-site-search-collapse" aria-expanded="false">
+				<span class="navbar-toggle-icon search-icon"></span>
+				<span class="navbar-toggle-label">
+					Search <span class="sr-only">Toggle</span>
+				</span>
+			</button>
+		</div>
+
+		<div class="navbar-site-info collapse navbar-collapse" id="navbar-site-search-collapse">
+			<form action="https://www.google.com/search" class="navbar-site-search" method="GET" role="search">
+				<label for="search-input" class="sr-only">Search</label>
+				<input value="mesonet.agron.iastate.edu" name="sitesearch" type="hidden" />
+				<input name="q" id="search-input" aria-label="Text input for search" title="Search" placeholder="Search" tabindex="0" type="text" class="form-control">
+				<input class="hidden" title="Submit" type="submit" value="Search">
+				<span class="search-icon"></span>
+			</form>
+		</div>
+
+		<div class="navbar-site-info collapse navbar-collapse navbar-caps" id="navbar-site-links-collapse">
+			<ul class="nav navbar-nav navbar-right">
+				<!-- Site-wide links. Customized for your site -->
+				<li><a href="/info/contacts.php">contact us</a></li>
+				<li><a href="/disclaimer.php">disclaimer</a></li>
+				<li><a href="/apps.php">apps</a></li>
+			</ul>
+		</div>
+
+	</div>
+</nav>
+</header>
+
+<div class="container">
 <div class="navbar navbar-default">
     <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -151,13 +266,13 @@ $_pages = Array(
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/" style="padding:0px 5px 0px 0px;"><img alt="IEM" style="height: 50px;" class="img-responsive pull-left" src="/images/logo_small.png" /></a>
 	</div>
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
+        <a href="/"><img style="height: 50px;" alt="IEM" class="img-responsive pull-left" src="/images/logo_small.png" /></a>
         
 <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" 
-	href="#"> <span class="glyphicon glyphicon-home"></span> </a>
+	href="#"> <span class="fa fa-home"></span> </a>
 	<ul class="dropdown-menu">
 		<li><a href="https://mesonet.agron.iastate.edu">Iowa Environmental Mesonet</a></li>
 	    <li><a href="http://iowa.cocorahs.org">Iowa CoCoRaHS</a></li>
@@ -170,12 +285,12 @@ $_pages = Array(
 <?php 
 $ar = preg_split('/-/', $THISPAGE);
 function get_title($page){
-	if (array_key_exists("icon", $page)){
-		return sprintf("<div class=\"hidden-sm\">%s<b class=\"caret\"></b></div>"
-				."<span class=\"glyphicon glyphicon-%s visible-sm\"></span>",
-			$page["title"], $page["icon"] );
-	}
-	return sprintf("%s<span class=\"caret\"></span>", $page["title"]);
+	/*if (array_key_exists("icon", $page)){
+		return sprintf("<span class=\"fa fa-%s visible-sm\"></span>"
+				."<div class=\"hidden-sm\">%s</div>",
+				$page["icon"], $page["title"]);
+	}*/
+	return sprintf("%s", $page["title"]);
 }
 
 while( list($idx, $page) = each($_pages) )
@@ -203,8 +318,8 @@ if (defined('IEM_APPID')){
 		and appid != $1) ORDER by name ASC");
 	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
 	if (pg_numrows($_rs) > 0){
-		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\"><div class=\"hidden-sm\">Related<b class=\"caret\"></b></div>"
-				."<span class=\"glyphicon glyphicon-plus visible-sm\"></span></a>\n";
+		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\"><div class=\"hidden-sm\">Related</div>"
+				."<span class=\"fa fa-plus visible-sm\"></span></a>\n";
 		echo "<ul class=\"dropdown-menu\">\n";
 		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
 			$url =  $_row["url"];
@@ -224,3 +339,4 @@ if (defined('IEM_APPID')){
         </div>
       </div>
     </div>
+</div>

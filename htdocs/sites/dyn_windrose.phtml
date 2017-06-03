@@ -235,7 +235,7 @@ $content .= '
 
 if (isset($rose_uri)){
   $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
-  $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='glyphicon glyphicon-list'></i> View raw data for chart</a><br />";
+  $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data for chart</a><br />";
   if ($fmt == 'pdf'){
   	$content .= <<<EOF
 <object id="windrose-plot" src="{$rose_uri}" width="700px" height="700px">

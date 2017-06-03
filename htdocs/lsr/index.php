@@ -52,6 +52,9 @@ EOF;
 $t->title = "Local Storm Report App";
 $t->thispage ="severe-lsr";
 $t->content = <<<EOF
+<div id="iem-header">
+<a href="/">IEM Homepage</a> &gt; <a href="/current/severe.phtml">Severe Weather Mainpage</a>
+</div>
 
 <div id="help" style="padding:5px;">
 <h3>Local Storm Report App Help</h3>
@@ -92,5 +95,5 @@ generate links to it.  Currently, there are two calling modes:</p>
 <br />
 </div>
 EOF;
-$t->render('single.phtml');
+$t->render('app.phtml');
 ?>

@@ -17,6 +17,10 @@ $t->content = <<<EOF
 <style type="text/css">
  .x-grid3-cell-inner, .x-grid3-hd-inner { white-space:normal !important; }
 </style>
+<div id="iem-header">
+<a href="/">IEM Homepage</a> &gt; <a href="/ASOS/">ASOS Mainpage</a>
+</div>
+<div id="iem-footer"></div>
 
 <div id="sidebarinfo" style="padding: 5px;">
 <p>This application attempts to compute accumulated precip values over
@@ -28,4 +32,4 @@ is updated at the top of the hour for the previous hour.</p>
 </div>
 
 EOF;
-$t->render('single.phtml');
+$t->render('app.phtml');

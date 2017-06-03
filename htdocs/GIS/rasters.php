@@ -92,7 +92,7 @@ table below.</p>
 
 <div class="alert alert-info">Would it help you to have the information below
 in a different format?  Please <a class="alert-link" 
-href="/info/contacts.php">contact us <i class="glyphicon glyphicon-comment"></i></a> 
+href="/info/contacts.php">contact us <i class="fa fa-comment"></i></a> 
 if so!</div>
 
 <table class="table table-condensed table-striped">

@@ -104,13 +104,13 @@ function trace($val){
 }
 function new_record($actual, $record){
 	if ($actual == null || $record == null) return "";
-	if ($actual == $record) return "<i class=\"glyphicon glyphicon-star-empty\"></i>";
-	if ($actual > $record) return "<i class=\"glyphicon glyphicon-star\"></i>";
+	if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
+	if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
 }
 function new_record2($actual, $record){
 	if ($actual == null || $record == null) return "";
-	if ($actual == $record) return "<i class=\"glyphicon glyphicon-star-empty\"></i>";
-	if ($actual < $record) return "<i class=\"glyphicon glyphicon-star\"></i>";
+	if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
+	if ($actual < $record) return "<i class=\"fa fa-star\"></i>";
 }
 for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 	$uri = sprintf("/p.php?pid=%s", $row["product"]);
@@ -125,7 +125,7 @@ for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 				date("m", $ts), date("d", $ts));
 		$col1 = sprintf("<a href=\"%s\">%s</a>", $link, date("Md,y", $ts));
 	}
-	$table .= sprintf("<tr><td nowrap><a href=\"%s\"><i class=\"glyphicon glyphicon-list-alt\" alt=\"View Text\"></i></a>
+	$table .= sprintf("<tr><td nowrap><a href=\"%s\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
 			%s</td>
 			<td>%s%s</td><td nowrap>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
@@ -215,8 +215,8 @@ $t->content = <<<EOF
 </div>
 
 <p><strong>Key:</strong> &nbsp; &nbsp;
-			<i class="glyphicon glyphicon-star-empty"></i> Record Tied,
-			<i class="glyphicon glyphicon-star"></i> Record Set.</p>
+			<i class="fa fa-star-empty"></i> Record Tied,
+			<i class="fa fa-star"></i> Record Set.</p>
 
 EOF;
 $t->headextra = <<<EOF

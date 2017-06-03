@@ -69,7 +69,7 @@ $t->content = <<<EOF
 <tr><th>Time Zone:</th><td>{$cities[$station]["tzname"]}</td></tr>
 </table>
 
-<a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary"><span class="glyphicon glyphicon-menu-hamburger"></span> View {$network} Network Table</a>
+<a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary"><span class="fa fa-menu-hamburger"></span> View {$network} Network Table</a>
 
 </div>
 <div class="col-md-8">

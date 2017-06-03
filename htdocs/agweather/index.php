@@ -20,9 +20,9 @@ need.  Please do <a href="/info/contacts.php">contact us</a> with your
 questions!</p>
 
 <p>IEM's most popular applications:
-<a role="button" class="btn btn-success" href="/plotting/auto/"><i class="glyphicon glyphicon-signal"></i> Automated Data Plotting</a>
-<a role="button" class="btn btn-success" href="/climodat/"><i class="glyphicon glyphicon-list-alt"></i> Climodat</a>
-<a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="glyphicon glyphicon-object-align-bottom"></i> Single Site Graphs</a>
+<a role="button" class="btn btn-success" href="/plotting/auto/"><i class="fa fa-signal"></i> Automated Data Plotting</a>
+<a role="button" class="btn btn-success" href="/climodat/"><i class="fa fa-list-alt"></i> Climodat</a>
+<a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="fa fa-object-align-bottom"></i> Single Site Graphs</a>
 </p>
 
 

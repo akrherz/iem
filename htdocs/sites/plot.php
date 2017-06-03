@@ -46,14 +46,14 @@ if ($prod == 1 or $prod == 2) {
  <h3>Select month and year:</h3>
  <div class="row">
  <div class="col-sm-3">
- <a href="{$llink}" class="btn btn-default">{$ltext} <i class="glyphicon glyphicon-arrow-left"></i></a>
+ <a href="{$llink}" class="btn btn-default">{$ltext} <i class="fa fa-arrow-left"></i></a>
 	</div>
 	<div class="col-sm-6">
   {$ms} {$ys}
  <input type="submit" value="Generate Plot">
  </div>
  <div class="col-sm-3">
- <a href="{$nlink}" class="btn btn-default"><i class="glyphicon glyphicon-arrow-right"></i> {$ntext}</a>
+ <a href="{$nlink}" class="btn btn-default"><i class="fa fa-arrow-right"></i> {$ntext}</a>
 </div>
 </div>
 </form>

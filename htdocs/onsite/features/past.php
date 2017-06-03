@@ -38,11 +38,11 @@ $num = pg_numrows($rs);
 $linkbar = <<<EOF
 <div class="row well">
 	<div class="col-md-4 col-sm-4">
-<a href="{$plink}" class="btn btn-default btn-lg"><i class="glyphicon glyphicon-arrow-left"></i> Previous Month</a> 
+<a href="{$plink}" class="btn btn-default btn-lg"><i class="fa fa-arrow-left"></i> Previous Month</a> 
 	</div>
 	<div class="col-md-4 col-sm-4"><h4>Features for {$mstr}</h4></div>
 	<div class="col-md-4 col-sm-4">
-  <a href="{$nlink}" class="btn btn-default btn-lg">Next Month  <i class="glyphicon glyphicon-arrow-right"></i></a> 
+  <a href="{$nlink}" class="btn btn-default btn-lg">Next Month  <i class="fa fa-arrow-right"></i></a> 
 	</div>
 </div>
 EOF;
@@ -56,7 +56,7 @@ for ($i = 0; $i < $num; $i++){
 	$d = date("Y-m-d", $valid);
     $linktext = "";
     if ($row["appurl"] != ""){
-        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
     }
 	
 	$table .= <<<EOF

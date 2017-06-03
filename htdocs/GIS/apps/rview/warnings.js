@@ -24,13 +24,13 @@ function reverseLayer(lyr) {
 }
 
 function handsOff2( ) {
-  reverseLayer("iem-header");
-  reverseLayer("iem-footer");
+  //reverseLayer("iem-header");
+  //reverseLayer("iem-footer");
 }
 
 function handsOff( ) {
-  reverseLayer("iem-header");
-  reverseLayer("iem-footer");
+  //reverseLayer("iem-header");
+  //reverseLayer("iem-footer");
   if (document.myform.autopilot.value == 1){
     document.myform.autopilot.value = 0;
   } else {

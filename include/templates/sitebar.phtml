@@ -85,17 +85,17 @@ while (list($key,$val) = each($o))
   	$uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
   	$active = ($this->sites_current == $key) ? " active": "";
   	echo sprintf("<a href=\"%s\" class=\"btn btn-default%s\">".
-  			"<span class=\"glyphicon glyphicon-%s\"></span> %s</a>",
+  			"<span class=\"fa fa-%s\"></span> %s</a>",
   			$uri, $active, $val["icon"], $val["name"]);
 }
 
 if (preg_match('/ASOS|AWOS/', $network) > 0){
 	$uri = sprintf("/request/download.phtml?network=%s", $network);
-	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-download\"></span> Download</a>", 
+	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
 			$uri);
 }elseif (preg_match('/DCP/', $network) > 0){
 	$uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
-	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-download\"></span> Download</a>", 
+	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
 			$uri);
 	
 }

@@ -44,28 +44,28 @@ to select a product of your choice from the archive.</p>
 <div class="row">
 	<div class="col-sm-2 col-xs-3" style="margin-bottom: 15px;"><button class="btn btn-default" id="realtime">Show Latest</button></div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button data-offset="-1" data-unit="year" class="btn btn-default" id="pyear"><i class="glyphicon glyphicon-arrow-left"></i> Year</button>
+		<button data-offset="-1" data-unit="year" class="btn btn-default" id="pyear"><i class="fa fa-arrow-left"></i> Year</button>
 	</div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button data-offset="-1" data-unit="day" class="btn btn-default" id="pday"><i class="glyphicon glyphicon-arrow-left"></i> Day</button>
+		<button data-offset="-1" data-unit="day" class="btn btn-default" id="pday"><i class="fa fa-arrow-left"></i> Day</button>
 	</div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button data-offset="-1" data-unit="hour" class="btn btn-default" id="phour"><i class="glyphicon glyphicon-arrow-left"></i> Hour</button>
+		<button data-offset="-1" data-unit="hour" class="btn btn-default" id="phour"><i class="fa fa-arrow-left"></i> Hour</button>
 	</div>
 	<div class="col-sm-2 col-xs-2" style="margin-bottom: 15px;">
-		<button class="btn btn-default" id="prev"><i class="glyphicon glyphicon-arrow-left"></i> Previous</button>
+		<button class="btn btn-default" id="prev"><i class="fa fa-arrow-left"></i> Previous</button>
 	</div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button class="btn btn-default" id="next">Next <i class="glyphicon glyphicon-arrow-right"></i></button>
+		<button class="btn btn-default" id="next">Next <i class="fa fa-arrow-right"></i></button>
 	</div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button data-offset="1" data-unit="hour" class="btn btn-default" id="nhour">Hour <i class="glyphicon glyphicon-arrow-right"></i></button>
+		<button data-offset="1" data-unit="hour" class="btn btn-default" id="nhour">Hour <i class="fa fa-arrow-right"></i></button>
 	</div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button data-offset="1" data-unit="day" class="btn btn-default" id="nday">Day <i class="glyphicon glyphicon-arrow-right"></i></button>
+		<button data-offset="1" data-unit="day" class="btn btn-default" id="nday">Day <i class="fa fa-arrow-right"></i></button>
 	</div>
 	<div class="col-sm-1 col-xs-2" style="margin-bottom: 15px;">
-		<button data-offset="1" data-unit="year" class="btn btn-default" id="nyear">Year <i class="glyphicon glyphicon-arrow-right"></i></button>
+		<button data-offset="1" data-unit="year" class="btn btn-default" id="nyear">Year <i class="fa fa-arrow-right"></i></button>
 	</div>
 </div>
 

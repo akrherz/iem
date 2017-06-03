@@ -1,9 +1,23 @@
-<?php include 'header.phtml'; ?>
+<?php 
+$title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
+$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $title; ?></title>
+    <meta name="description" content="Iowa State University, Iowa Environmental Mesonet">
+    <meta name="author" content="daryl herzmann akrherz@iastate.edu">
+	<?php echo $headextra; ?>
 <style>
 html,body{
 height:100%;
 }
 </style>
+    </head>
 <?php 
 $jsextra = array_key_exists('jsextra', $this->vars)? $this->jsextra : '';
 if (array_key_exists('iemss', $this->vars)){

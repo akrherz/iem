@@ -355,7 +355,7 @@ EOF;
 			if ($timing_secs < 1) $timing_secs = 5;
 			$image = <<<EOF
 <div id="willload" style="height: 200px;">
-	<p><span class="glyphicon glyphicon-arrow-down"></span> 
+	<p><span class="fa fa-arrow-down"></span> 
 	Based on a sampling of recent timings for this application, plot generation
  time has averaged {$timing_secs} seconds. Hold on for the plot is generating now!</p>
 	<div class="progress progress-striped active">
@@ -421,7 +421,7 @@ function onNetworkChange(newnetwork){
 	$('form#myForm').submit();
 }
 </script>
-	<h4><span class="glyphicon glyphicon-arrow-right"></span> Second, select specific chart options::</h4>
+	<h4><span class="fa fa-arrow-right"></span> Second, select specific chart options::</h4>
 	<form method="GET" name="s" id="myForm">
 	<input type="hidden" name="_wait" value="no" id="_wait">
 	<input type="hidden" name="q" value="{$q}">
@@ -442,8 +442,8 @@ if ($description != null){
 $dataextra= "";
 if (isset($jobj->data) && $jobj->data){
 	$dataextra = <<<EOF
-<p><a href="{$imguri}.csv" class="btn btn-default"><i class="glyphicon glyphicon-pencil"></i> View Data (as csv)</a>
-<a href="{$imguri}.xlsx" class="btn btn-default"><i class="glyphicon glyphicon-pencil"></i> Download as Excel</a>
+<p><a href="{$imguri}.csv" class="btn btn-default"><i class="fa fa-pencil"></i> View Data (as csv)</a>
+<a href="{$imguri}.xlsx" class="btn btn-default"><i class="fa fa-pencil"></i> Download as Excel</a>
 </p>
 EOF;
 }
@@ -457,7 +457,7 @@ feel free to use these generated graphics in whatever way you wish.</p>
 
 <br /><form method="GET" name="t">
 <div class="form-group">
-<h4><span class="glyphicon glyphicon-arrow-right"></span> First, select a chart type::</h4>
+<h4><span class="fa fa-arrow-right"></span> First, select a chart type::</h4>
  <input type="checkbox" name="_l" id="_l">Only show options that also work outside Midwest US<br />
 {$pselect}
 <input type="submit" value="Select Plot Type" />
@@ -480,7 +480,7 @@ $image
 
 $dataextra
 		
-<div><span class="glyphicon glyphicon-info-sign"></span>
+<div><span class="fa fa-info-sign"></span>
 		If you notice plotting issues with the image above, please 
 		do <a class="alert-link" href="/info/contacts.php">let us know</a>
 		by providing the 

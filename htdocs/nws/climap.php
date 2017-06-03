@@ -47,9 +47,9 @@ $t->content = <<<EOF
 <div class="col-md-12">
 		
 <div class="pull-right">
-<i class="glyphicon glyphicon-text-size"></i>
-<button id="fminus" class="btn btn-default"><i class="glyphicon glyphicon-minus"></i></button>
-<button id="fplus" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i></button>
+<i class="fa fa-text-size"></i>
+<button id="fminus" class="btn btn-default"><i class="fa fa-minus"></i></button>
+<button id="fplus" class="btn btn-default"><i class="fa fa-plus"></i></button>
 </div>
 
 		<form name='bah'><p><strong>Select Variable to Plot:</strong> 

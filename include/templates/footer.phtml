@@ -8,33 +8,68 @@ EOF;
 }
 
 ?>
-<div class="container" id="iem-footer">
-<hr />
+<!-- footer -->
+<footer role="contentinfo">
+	<div class="container" id="iem-footer">
+		<div class="row">
 
- <div class="pull-right">
- <form method="get" action="https://www.google.com/search" name="gsearch" 
- class="inline-form">
- <input value="mesonet.agron.iastate.edu" name="sitesearch" type="hidden" />
- 
- <div class="form-group">
-    <label for="inputsearch">Search Site with Google</label>
-    <input type="text" class="form-control" name="q" id="inputsearch" placeholder="Enter search term">
-  </div>
- </form>
- </div>
+			<!-- footer-associates -->
+			<section class="footer-associates col-sm-12 col-md-3">
+				<ul>
+					<li><a href="https://iastate.edu"><img src="https://cdn.theme.iastate.edu/img/isu-stacked.svg" class="wordmark-isu" alt="Iowa State University"></a></li>
+					<li><a href="https://www.ag.iastate.edu">College of Ag</a></li>
+					<li><a href="https://www.agron.iastate.edu">Department of Agronomy</a></li>
+				</ul>
+			</section>
 
-Copyright &copy; 2001-<?php echo date("Y"); ?>, Iowa State University of Science and Technology.
-<br />
- <i class="glyphicon glyphicon-earphone"></i> <a href="/info/contacts.php">contact us</a>
- <i class="glyphicon glyphicon-wrench"></i> <a href="https://github.com/akrherz/iem">development</a>
- <i class="glyphicon glyphicon-warning-sign"></i> <a href="/disclaimer.php">disclaimer</a>
- <i class="glyphicon glyphicon-list"></i> <a href="/apps.php">list apps</a>
- 
-</div><!-- /.iem-footer -->
+			<!-- footer-contact -->
+			<section class="footer-contact col-sm-12 col-md-3">
+				<p>
+					<strong>Department of Agronomy</strong><br>
+					<a href="https://maps.google.com/?q=716+Farm+House+Ln+Ames,+IA+50011">716 Farm House Ln<br>
+					Ames, IA 50011</a>
+				</p>
+				<a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a><br>
+				<a href="tel:515-294-5978">515-294-5978 phone</a> 
+			</section>	
+
+			<!-- footer-social -->
+			<section class="footer-social col-sm-12 col-md-3">
+				<ul class=" labeled">
+				<li><a href="http://facebook.com/IowaStateU/"><span class="fa fa-external-link-square" aria-label="hidden"></span>Facebook</a></li>
+				<li><a href="http://twitter.com/akrherz"><span class="fa fa-external-link-square" aria-label="hidden"></span>Twitter</a></li>
+				<li><a href="https://github.com/akrherz/iem"><span class="fa fa-external-link-square" aria-label="hidden"></span>Github</a></li>
+				<li><a href="https://youtube.com/user/akrherz"><span class="fa fa-external-link-square" aria-label="hidden"></span>YouTube</a></li>
+				<li><a href="/rss.php"><span class="fa fa-external-link-square" aria-label="hidden"></span>RSS</a></li>
+				</ul>
+			</section>	
+
+			<!-- footer-legal -->
+			<section class="footer-legal col-sm-12 col-md-3">
+				<p>Copyright &copy; 2001-<?php echo date("Y"); ?><br>
+								Iowa State University<br>
+								of Science and Technology<br>
+								All rights reserved.</p>
+				<ul>
+					<li><a href="https://www.policy.iastate.edu/policy/discrimination">Non-discrimination Policy</a></li>
+					<li><a href="https://www.policy.iastate.edu/electronicprivacy">Privacy Policy</a></li>
+					<li><a href="https://digitalaccess.iastate.edu">Digital Access &amp; Accessibility</a></li>
+				</ul>
+			</section>
+
+		</div>
+	</div>
+</footer>
+<!-- /footer -->
+
+
 
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
     <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/vendor/iastate-v2.0.0/js/vendor/bootstrap-submenu.min.js"></script>
+    <script src="/vendor/iastate-v2.0.0/js/iastate.js"></script>
+
     <?php echo $jsextra; ?>
 <script type="text/javascript">
 var _gaq = _gaq || [];

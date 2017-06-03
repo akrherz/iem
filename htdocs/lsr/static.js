@@ -884,14 +884,10 @@ new Ext.Viewport({
     layout:'border',
     items:[{
         region      : 'north',
-        title       : 'Local Storm Report Application',
+        title       : 'IEM Local Storm Report (LSR) Application',
         collapsible : true,
-        collapsed   : true,
+        collapsed   : false,
         contentEl   : 'iem-header'
-    },{
-        region:'south',
-        height: 10,
-        contentEl: 'iem-footer'
     },{
         xtype       : 'panel',
         region      : 'west',

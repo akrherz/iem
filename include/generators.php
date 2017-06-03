@@ -118,7 +118,7 @@ function gen_feature($t){
 	
 	$linktext = "";
 	if ($row["appurl"] != ""){
-		$linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+		$linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
 	}
 	
 	$tagtext = "";
@@ -237,7 +237,7 @@ function onFeatureData(data){
   	$("#feature_bad_votes").html(data.bad);
   	$("#feature_abstain_votes").html(data.abstain);
   	if (! data.can_vote){
-  		$("#feature_msg").html("<i class=\"glyphicon glyphicon-ok\"></i> Thanks for voting!");
+  		$("#feature_msg").html("<i class=\"fa fa-ok\"></i> Thanks for voting!");
   		$("button.feature_btn").prop("disabled",true);
   	}
 }

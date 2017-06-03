@@ -85,7 +85,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   <a href="$big"><img src="$big" class="img img-responsive"></a>
 EOF;
 	if ($row["appurl"] != ""){
-		$content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+		$content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
 	}
 	$content .= "<br />". $row["caption"] ;
 	$content .= "</div><div class=\"col-md-7\">";
@@ -112,7 +112,7 @@ if (pg_num_rows($rs) == 0)
 
 $t->content = <<<EOF
 <h3>Past IEM Features tagged: {$tag}</h3>
-<p><a href="index.php" class="btn btn-default"><i class="glyphicon glyphicon-th-list"></i> List all tags</a></p>
+<p><a href="index.php" class="btn btn-default"><i class="fa fa-th-list"></i> List all tags</a></p>
 
 {$content}
 

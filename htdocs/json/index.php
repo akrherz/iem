@@ -573,7 +573,7 @@ for a given network that collects webcams and a UTC timestamp.",
   while (list($key, $ws) = each($services)){
   	$url = $ws['url'];
   	$uriadd = (strpos($url, "?") === FALSE) ? "?": "&amp;";
-  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"glyphicon glyphicon-bookmark\"></i></a><a name=\"%s\">%s</a></strong>
+  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"fa fa-bookmark\"></i></a><a name=\"%s\">%s</a></strong>
 	<br /><strong>URI:</strong> %s%s%scallback=gotData
 	<br /><strong>Description:</strong> %s
 	<br /><strong>Method GET Parameters:</strong>

@@ -53,7 +53,7 @@ $big = sprintf("/onsite/features/%s.%s", $row["imageref"], $fmt);
 
 $linktext = "";
 if ($row["appurl"] != ""){
-	$linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"glyphicon glyphicon-signal\"></i> Generate This Chart on Website</a>";
+	$linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
 }
 
 $t->title = "$day Feature - ". $row["title"]; 
@@ -66,7 +66,7 @@ $content = <<<EOF
 	<div class="col-md-4">
 
 <button type="button" class="btn btn-default btn-lg">
-  <span class="glyphicon glyphicon-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1">Previous Feature by Date</a> 
+  <span class="fa fa-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1">Previous Feature by Date</a> 
 </button>
 	</div>
 	<div class="col-md-4">
@@ -75,7 +75,7 @@ $content = <<<EOF
 	<div class="col-md-4">
 <button type="button" class="btn btn-default btn-lg">
   <a href="cat.php?day={$day}&offset=1">Next Feature by Date</a> 
-  <span class="glyphicon glyphicon-arrow-right"></span> 
+  <span class="fa fa-arrow-right"></span> 
 </button>
 	</div>
 </div>

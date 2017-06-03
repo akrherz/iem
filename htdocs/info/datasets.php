@@ -54,7 +54,7 @@ while (list($k,$page) = each($pages)){
 	$tags .= sprintf("<a href=\"#%s\" class=\"btn btn-default\">%s</a>", $page, $page);
 }
 if ($tags == ''){
-	$tags = "<a href=\"/info/datasets/\" class=\"btn btn-default\"><i class=\"glyphicon glyphicon-th-list\"></i> List All Datasets</a>";
+	$tags = "<a href=\"/info/datasets/\" class=\"btn btn-default\"><i class=\"fa fa-th-list\"></i> List All Datasets</a>";
 } else {
 	$tags = "<strong>Documented Datasets:</strong> :". $tags;
 }

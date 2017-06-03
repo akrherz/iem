@@ -80,7 +80,7 @@ Received: <strong>{$dstamp} UTC</strong>
 <div class="row">
 <div class="col-sm-2">
 <a rel="nofollow" class="btn btn-primary" 
-	href="p.php?dir=prev&pil=$pil&e=$newe"><i class="glyphicon glyphicon-arrow-left"></i> 
+	href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 
 	Previous in Time</a>
 </div>
 <div class="col-sm-4">
@@ -89,7 +89,7 @@ Received: <strong>{$dstamp} UTC</strong>
 </div>
 <div class="col-sm-2">
 	<a rel="nofollow" class="btn btn-primary" 
-	href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="glyphicon glyphicon-arrow-right"></i></a>
+	href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="fa fa-arrow-right"></i></a>
 </div>
 <div class="col-sm-4">
 	<a rel="nofollow" class="btn btn-primary" 

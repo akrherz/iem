@@ -7,7 +7,7 @@ $connection = iemdb("mesosite", TRUE, TRUE);
 ?>
 <?php include 'header.phtml'; ?>
 <?php include 'navbar.phtml'; ?>
-
+<main role="main" id="main-content">
     <div class="container">
       <div class="row">
 
@@ -108,7 +108,7 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
 
 ?>
 
-<p><b class='glyphicon-envelope'></b>
+<p><b class='fa fa-envelope'></b>
 <a href="/mailman/listinfo/dailyb">Sign up</a> for the 
 <a href="/data/iemdb.html">Daily Bulletin</a></p>
 
@@ -171,5 +171,5 @@ src="/images/agronomy.png" alt="ISU Agronomy" class="img img-responsive"></a>
 </div>
 
 </div><!--/.container-->
-
+</main>
 <?php include 'footer.phtml'; ?>

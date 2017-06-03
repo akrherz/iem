@@ -29,14 +29,6 @@ if (isset($_GET["dvn"])){
  'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 
  'JOSI2', 'MLII2','GENI2')";
  $content .= "<style>
-#iem-header {
-  display: none;
-  visibility: hidden;
-}
-#iem-footer {
-  display: none;
-  visibility: hidden;
-}
 body {
   background: #fff;
   font-size: smaller;

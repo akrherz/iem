@@ -239,15 +239,14 @@ var tp = new Ext.Panel({
 var viewport = new Ext.Viewport({
     layout:'border',
     items:[
-         new Ext.BoxComponent({ // raw
+         new Ext.BoxComponent({
              region:'north',
              el: 'iem-header',
-             height:60
+             title: 'IEM Hourly Precipitation Accumulator'
          }),
-         new Ext.BoxComponent({ // raw
+         new Ext.BoxComponent({
              region:'south',
-             el: 'iem-footer',
-             height:32
+             el: 'iem-footer'
          }),
           { 
              region:'west',

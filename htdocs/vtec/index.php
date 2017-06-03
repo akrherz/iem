@@ -72,6 +72,11 @@ EOF;
 $t->headextra = $headextra;
 $t->title = "Valid Time Extent Code (VTEC) App";
 $t->content = <<<EOF
+<div id="iem-header">
+<a href="/">IEM Homepage</a> &gt; <a href="/current/severe.phtml">Severe Weather Mainpage</a>
+</div>
+<div id="iem-footer">
+</div>
 <div id="help">
  <h2>IEM VTEC Product Browser 3.0</h2>
 
@@ -135,5 +140,5 @@ Ext.onReady(function(){
 });
 </script>
 EOF;
-$t->render('single.phtml');
+$t->render('app.phtml');
 ?>

@@ -44,6 +44,10 @@ $t->thispage = "webcam-stills";
 $t->content = <<<EOF
 <div id="main">
 </div>
+<div id="iem-header">
+<a href="/">IEM Homepage</a>
+</div>
+<div id="iem-footer"></div>
 <div id="help" class="x-hidden">
 <h3 style="margin: 10px;">Web Camera Interactive Viewer</h3>
 
@@ -67,5 +71,5 @@ and the application will automatically update to show you the images. The IEM ha
 
 </div>
 EOF;
-$t->render('full.phtml');
+$t->render('app.phtml');
 ?>

@@ -816,7 +816,7 @@ var viewport = new Ext.Viewport({
     layout:'border',
     items:[{ 
              region:'north',
-             height: 70,
+             title: 'IEM Valid Time Extent Code (VTEC) App',
              contentEl: cfg.header
          },{ 
              region:'south',

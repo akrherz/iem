@@ -1,3 +1,13 @@
+/* slim down the top red bar */
+.navbar-site .wordmark-unit {
+	margin: 10px 0 10px;
+}
+.navbar-site .navbar-site-search .form-control {
+	margin: 10px 0 10px;
+}
+.navbar-site .navbar-site-search .search-icon {
+	top: 20px;
+}
 @media print {
   a[href]:after {
     content: "";
