@@ -1,9 +1,11 @@
+"""daily ranges"""
+import calendar
+from collections import OrderedDict
+
 import psycopg2
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem import network
-import calendar
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict(
@@ -20,18 +22,18 @@ PDICT = OrderedDict(
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the dates with the monthly
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the dates with the monthly
     record of your choice displayed. In the case of ties, only the most
     recent occurence is shown."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='min_range',
              label='Select Variable', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -109,6 +111,7 @@ def plotter(fdict):
     ax2.set_ylim(0, 13)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter({'var': 'max_snow'})

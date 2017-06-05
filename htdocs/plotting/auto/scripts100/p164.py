@@ -1,8 +1,10 @@
-import psycopg2
+"""NWSLI stations over/under"""
 import datetime
+from collections import OrderedDict
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
-from collections import OrderedDict
 
 MDICT = OrderedDict([('high', 'High Temperature'),
                      ('low', 'Low Temperature'),
@@ -12,10 +14,10 @@ MDICT = OrderedDict([('high', 'High Temperature'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart presents a simple accounting of the
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart presents a simple accounting of the
     percentage of first order NWS climate sites that are either above or
     below average or reporting precipitation / snow each day.  Note that no
     spatial weighting is done, so one should not interpret this as an areal
@@ -24,7 +26,7 @@ def get_description():
     """
     sts = datetime.date.today() - datetime.timedelta(days=45)
     ets = datetime.date.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='date', name='sts', default=sts.strftime("%Y/%m/%d"),
              label='Select Start Date (inclusive)', min='2007/01/09'),
         dict(type='date', name='ets', default=ets.strftime("%Y/%m/%d"),
@@ -32,7 +34,7 @@ def get_description():
         dict(type='select', name='var', default='high', options=MDICT,
              label='Which Metric to Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

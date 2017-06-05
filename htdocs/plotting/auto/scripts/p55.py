@@ -1,7 +1,9 @@
-import psycopg2.extras
-import numpy as np
+"""Climatologies comparison"""
 import datetime
 import calendar
+
+import psycopg2.extras
+import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -9,21 +11,21 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays a comparison of various daily
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays a comparison of various daily
     temperature climatologies.  The National Center for Environmental
     Information (NCEI) releases a 30 year climatology every ten years.  This
     data is smoothed to remove day to day variability.  The raw daily averages
     are shown computed from the daily observation archive maintained by the
     IEM."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              network='IACLIMATE', label='Select Station:'),
         dict(type='month', name='month', default='12',
              label='Select Month:')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -113,14 +115,14 @@ def plotter(fdict):
     ax[0].plot(days, c81_avgh, lw=2, zorder=2, color='g')
     ax[0].plot(days, c71_avgh, lw=2, zorder=2, color='r')
     ax[0].grid(True)
-    ax[0].set_ylabel("High Temp $^\circ$F")
+    ax[0].set_ylabel(r"High Temp $^\circ$F")
     ax[0].set_ylim(bottom=min([min(o_avgh), min(c71_avgh), min(c81_avgh)])-2)
 
     ax[1].bar(days, o_avgl, width=0.8, fc='tan', align='center')
     ax[1].plot(days, c81_avgl, lw=2, zorder=2, color='g')
     ax[1].plot(days, c71_avgl, lw=2, zorder=2, color='r')
     ax[1].grid(True)
-    ax[1].set_ylabel("Low Temp $^\circ$F")
+    ax[1].set_ylabel(r"Low Temp $^\circ$F")
     ax[1].set_ylim(bottom=min([min(o_avgl), min(c71_avgl), min(c81_avgl)])-2)
 
     ax[2].bar(days, o_avgt, width=0.8, fc='tan', align='center',
@@ -134,12 +136,13 @@ def plotter(fdict):
                  fancybox=True, shadow=True, ncol=3, scatterpoints=1,
                  fontsize=10)
 
-    ax[2].set_ylabel("Average Temp $^\circ$F")
+    ax[2].set_ylabel(r"Average Temp $^\circ$F")
     ax[2].set_ylim(bottom=min([min(o_avgt), min(c71_avgt), min(c81_avgt)])-2)
     ax[2].set_xlabel("Day of %s" % (calendar.month_name[month],))
     ax[2].set_xlim(0.5, len(days)+0.5)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

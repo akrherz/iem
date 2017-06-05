@@ -1,9 +1,11 @@
-import psycopg2
-from pyiem import network
-import matplotlib.patheffects as PathEffects
-from pandas.io.sql import read_sql
+"""temperature above average frequency by year"""
 from collections import OrderedDict
 import datetime
+
+import psycopg2
+import matplotlib.patheffects as PathEffects
+from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High Temperature',
@@ -31,13 +33,13 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """The frequency of days per year that the temperature
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """The frequency of days per year that the temperature
     was above average.  Data is shown for the current year as well, so you
     should consider the representativity of that value when compared with
     other years with a full year's worth of data."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', options=PDICT, name='var', default='high',
@@ -45,7 +47,7 @@ def get_description():
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -133,6 +135,7 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

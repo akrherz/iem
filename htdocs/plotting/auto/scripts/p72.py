@@ -1,19 +1,21 @@
+"""histogram of issuance time"""
+
 import psycopg2.extras
-import pyiem.nws.vtec as vtec
 import numpy as np
-from pyiem.network import Table as NetworkTable
 import pandas as pd
+import pyiem.nws.vtec as vtec
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['data'] = True
-    d['description'] = """This chart presents a histogram of issuance times
+    desc = dict()
+    desc['cache'] = 86400
+    desc['data'] = True
+    desc['description'] = """This chart presents a histogram of issuance times
     for a given watch, warning, or advisory type for a given office."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
         dict(type='phenomena', name='phenomena',
@@ -21,7 +23,7 @@ def get_description():
         dict(type='significance', name='significance',
              default='W', label='Select Watch/Warning Significance Level:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -77,6 +79,7 @@ def plotter(fdict):
                        vtec._sigDict[significance], phenomena, significance))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
