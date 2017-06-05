@@ -333,7 +333,28 @@
   				"{cat}" => "CATEGORICAL",
   				)
   		);
-
+  $services[] = Array(
+  		"title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point by Time",
+  		"url" => "/json/spcoutlook.py?lon={longitude}&amp;lat={latitude}&amp;time={time}&amp;day={day}&amp;cat={cat}",
+  		"desc" => "Provides a listing of convective outlooks dating back to".
+  		" March 2002 for a given timestamp.",
+  		"vars" => Array(
+  				"lat" => "Latitude in degrees",
+  				"lon" => "Longitude in (degrees east)",
+  				"time" => "Return the outlook valid at that time.  This time can be a generic".
+  				" 'now' or some ISO-ish timestamp in the format YYYY-mm-ddTHH:MMZ.",
+  				"day" => "(Optional) Which outlook day to request, defaults to 1",
+  				"cat" => "(Optional) Which outlook category to request, defaults to CATEGORICAL",
+  				),
+  		"example" => Array(
+  				"{latitude}" => "42.5",
+  				"{longitude}" => "-95.0",
+  				"{time}" => "2014-06-29T14:00Z",
+  				"{day}" => "1",
+  				"{cat}" => "CATEGORICAL",
+  				)
+  		);
+  
   $services[] = Array(
   		"title" => "Current Polygons from Special Weather Statements (SPS)",
   		"url" => "/geojson/sps.geojson",

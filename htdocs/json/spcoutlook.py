@@ -1,18 +1,84 @@
 #!/usr/bin/env python
 """SPC Outlook JSON service
 """
+import datetime
 import os
 import cgi
 import json
 import sys
+
 import memcache
 import psycopg2
+import pytz
+from pandas.io.sql import read_sql
+from pyiem.nws.products.spcpts import THRESHOLD_ORDER
+
+ISO9660 = '%Y-%m-%dT%H:%MZ'
+
+
+def get_order(threshold):
+    """Lookup a threshold and get its rank, higher is more extreme"""
+    if threshold not in THRESHOLD_ORDER:
+        return -1
+    return THRESHOLD_ORDER.index(threshold)
+
+
+def get_dbcursor():
+    """Do as I say"""
+    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    return postgis.cursor()
+
+
+def dotime(time, lon, lat, day, cat):
+    """Query for Outlook based on some timestamp"""
+    if time in ['', 'current', 'now']:
+        ts = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        if day > 1:
+            ts += datetime.timedelta(days=(day - 1))
+    else:
+        # ISO formatting
+        ts = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%MZ')
+        ts = ts.replace(tzinfo=pytz.utc)
+    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    df = read_sql("""
+    SELECT issue at time zone 'UTC' as i,
+    expire at time zone 'UTC' as e,
+    valid at time zone 'UTC' as v,
+    threshold, category from spc_outlooks where
+    valid = (
+        select valid from spc_outlooks where
+        issue <= %s and expire > %s and day = %s
+        and outlook_type = 'C' ORDER by valid DESC LIMIT 1)
+    and ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+    and day = %s and outlook_type = 'C' and category = %s
+    """, pgconn, params=(ts, ts, day, lon, lat, day, cat), index_col=None)
+    res = {
+        'generation_time': datetime.datetime.utcnow().strftime(ISO9660),
+        'query_params': {
+            'time': ts.strftime(ISO9660),
+            'lon': lon,
+            'lat': lat,
+            'cat': cat,
+            'day': day
+            },
+        'outlook': {}
+        }
+    if len(df.index) == 0:
+        return json.dumps(res)
+    df['threshold_rank'] = df['threshold'].apply(get_order)
+    df.sort_values('threshold_rank', ascending=False, inplace=True)
+    res['outlook'] = {
+        'threshold': df.iloc[0]['threshold'],
+        'utc_valid': df.iloc[0]['v'].strftime(ISO9660),
+        'utc_issue': df.iloc[0]['i'].strftime(ISO9660),
+        'utc_expire': df.iloc[0]['e'].strftime(ISO9660),
+        }
+    return json.dumps(res)
 
 
 def dowork(lon, lat, last, day, cat):
     """ Actually do stuff"""
-    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    cursor = postgis.cursor()
+    cursor = get_dbcursor()
 
     res = dict(outlooks=[])
 
@@ -45,8 +111,6 @@ def dowork(lon, lat, last, day, cat):
                  threshold=row[3],
                  category=row[4]))
 
-    postgis.close()
-
     return json.dumps(res)
 
 
@@ -57,6 +121,7 @@ def main():
     form = cgi.FieldStorage()
     lat = float(form.getfirst('lat', 42.0))
     lon = float(form.getfirst('lon', -95.0))
+    time = form.getfirst('time')
     last = int(form.getfirst('last', 0))
     day = int(form.getfirst('day', 1))
     cat = form.getfirst('cat', 'categorical').upper()
@@ -64,11 +129,15 @@ def main():
     cb = form.getfirst('callback', None)
 
     hostname = os.environ.get("SERVER_NAME", "")
-    mckey = "/json/spcoutlook/%.4f/%.4f/%s/%s/%s" % (lon, lat, last, day, cat)
+    mckey = ("/json/spcoutlook/%.4f/%.4f/%s/%s/%s/%s"
+             ) % (lon, lat, last, day, cat, time)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey) if hostname != 'iem.local' else None
     if not res:
-        res = dowork(lon, lat, last, day, cat)
+        if time is not None:
+            res = dotime(time, lon, lat, day, cat)
+        else:
+            res = dowork(lon, lat, last, day, cat)
         mc.set(mckey, res, 3600)
 
     if cb is None:
