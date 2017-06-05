@@ -198,6 +198,9 @@ data = {'plots': [
         {'id': "74", 'mw': True,
          'label': ("Days per year by season or year with temperature "
                    "above/below threshold")},
+        {'id': "181", 'mw': True,
+         'label': ("Days per year with temp/precip/snowfall "
+                   "within ranges")},
         {'id': "13", 'mw': True,
          'label': "End/Start Date of Summer (warmest 91 day period) per Year"},
         {'id': "27", 'mw': True,
