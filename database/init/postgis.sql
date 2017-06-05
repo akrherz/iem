@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (19, now());
+INSERT into iem_schema_manager_version values (20, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -211,7 +211,8 @@ CREATE TABLE ugcs(
 	tzname varchar(32),
 	wfo varchar(9),
 	begin_ts timestamptz NOT NULL,
-	end_ts timestamptz
+	end_ts timestamptz,
+	area2163 real
 );
 SELECT AddGeometryColumn('ugcs', 'geom', 4326, 'MULTIPOLYGON', 2);
 SELECT AddGeometryColumn('ugcs', 'simple_geom', 4326, 'MULTIPOLYGON', 2);

@@ -116,6 +116,10 @@ while feat is not None:
 
 cursor.execute("""UPDATE ugcs SET simple_geom = ST_Simplify(geom, 0.01)""")
 cursor.execute("""UPDATE ugcs SET centroid = ST_Centroid(geom)""")
+cursor.execute("""
+    UPDATE ugcs
+    SET area2163 = ST_area( ST_transform(geom, 2163) ) / 1000000.0
+    """)
 
 mydb.commit()
 cursor.close()
