@@ -12,6 +12,7 @@ $(document).ready(function(){
 EOF;
 include 'header.phtml'; 
 include 'navbar.phtml';
+echo "<main role=\"main\" id=\"main-content\">";
 echo "<div class=\"container\">";
 
 include 'sitebar.phtml';
@@ -40,5 +41,6 @@ if (array_key_exists('south', $this->vars)){
 	echo "</div></div>\n";
 }
 echo "</div><!--/.container-->";
+echo "</main>";
 include 'footer.phtml';
 ?>
