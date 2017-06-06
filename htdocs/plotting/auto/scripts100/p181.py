@@ -37,7 +37,7 @@ def get_description():
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type="date", name="date", default=today.strftime("%Y/%m/%d"),
-             label="Select Date:"),
+             label="Select Year-to-Date End Date (inclusive):"),
         dict(type="year", name="year", default=(today.year - 1),
              label="Additional Year to Compare:"),
         dict(type="select", name="var", options=PDICT, default='high',
@@ -79,7 +79,7 @@ def plotter(fdict):
     df = read_sql("""
         SELECT year, day, high, low, precip, snow,
         (high + low) / 2. as avgt from """ + table + """ WHERE
-        station = %s and extract(doy from day) < extract(doy from %s::date)
+        station = %s and extract(doy from day) <= extract(doy from %s::date)
      """, dbconn, params=(station, date), index_col=None)
     for i, rng in enumerate([r1, r2, r3, r4, r5]):
         df['cnt%s' % (i + 1,)] = 0
