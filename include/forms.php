@@ -57,7 +57,7 @@ function stateSelect($selected, $jscallback='', $name='state', $size = 1, $multi
         "KS" => "Kansas",
         "KY" => "Kentucky",
         "LA" => "Louisana",
-        "MN" => "Maine",
+        "ME" => "Maine",
         "MD" => "Maryland",
         "MA" => "Massachusetts",
         "MI" => "Michigan",
