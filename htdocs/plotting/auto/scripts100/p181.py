@@ -1,4 +1,4 @@
-"""Temperature Ranges"""
+"""Temperature/Precip/Snow Ranges"""
 import datetime
 from collections import OrderedDict
 
@@ -27,7 +27,10 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['description'] = """This application plots frequencies of a variable
-    of your choice for five bins of your choice.
+    of your choice for five bins of your choice.  These five bins represent
+    inclusive ranges and may overlap, if so desired.  The range entries below
+    are in units of inches or Fahrenheit where appropriate.  The date selection
+    sets the year-to-date period used for each year.
     """
     today = datetime.date.today()
     desc['arguments'] = [
@@ -58,8 +61,6 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
-    import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     nt = NetworkTable(ctx['network'])
