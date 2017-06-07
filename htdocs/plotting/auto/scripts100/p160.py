@@ -57,7 +57,7 @@ def get_context(fdict):
         row = cursor.fetchone()
         ctx['name'] = row[0]
 
-    ctx['df'] = read_sql("""with fx as (
+    ctx['fdf'] = read_sql("""with fx as (
         select id, issued, primaryname, primaryunits, secondaryname,
         secondaryunits from hml_forecast where station = %s
         and generationtime between %s and %s)
@@ -68,15 +68,15 @@ def get_context(fdict):
     on (d.hml_forecast_id = f.id) ORDER by f.id ASC, d.valid ASC
     """, pgconn, params=(station, dt - datetime.timedelta(days=3),
                          dt + datetime.timedelta(days=1)), index_col=None)
-    if len(ctx['df'].index) > 0:
-        ctx['primary'] = "%s[%s]" % (ctx['df'].iloc[0]['primaryname'],
-                                     ctx['df'].iloc[0]['primaryunits'])
-        ctx['secondary'] = "%s[%s]" % (ctx['df'].iloc[0]['secondaryname'],
-                                       ctx['df'].iloc[0]['secondaryunits'])
+    if len(ctx['fdf'].index) > 0:
+        ctx['primary'] = "%s[%s]" % (ctx['fdf'].iloc[0]['primaryname'],
+                                     ctx['fdf'].iloc[0]['primaryunits'])
+        ctx['secondary'] = "%s[%s]" % (ctx['fdf'].iloc[0]['secondaryname'],
+                                       ctx['fdf'].iloc[0]['secondaryunits'])
 
         # get obs
-        mints = ctx['df']['valid'].min()
-        maxts = ctx['df']['valid'].max()
+        mints = ctx['fdf']['valid'].min()
+        maxts = ctx['fdf']['valid'].max()
     else:
         mints = dt - datetime.timedelta(days=3)
         maxts = dt + datetime.timedelta(days=3)
@@ -87,11 +87,9 @@ def get_context(fdict):
     WHERE station = %s and valid between %s and %s ORDER by valid
     """, pgconn, params=(station, mints, maxts), index_col=None)
     ctx['odf'] = df.pivot('valid', 'label', 'value')
-    if len(ctx['df'].index) > 0:
-        ctx['df'] = pd.merge(ctx['df'], ctx['odf'], left_on='valid',
+    if len(ctx['fdf'].index) > 0:
+        ctx['df'] = pd.merge(ctx['fdf'], ctx['odf'], left_on='valid',
                              right_index=True, how='left', sort=False)
-        # valid dtype is lost in the merge above
-        ctx['df']['valid'] = pd.to_datetime(ctx['df']['valid'])
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
     ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
     if len(ctx['df'].index) == 0 and len(ctx['odf'].index) > 0:
