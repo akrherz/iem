@@ -58,7 +58,8 @@ def download(now, offset):
                                                  "ST2ml%Y%m%d%H")), hr)
         response = exponential_backoff(requests.get, url, timeout=60)
         if response is None or response.status_code != 200:
-            print('ncep_stage4.py: dl %s failed' % (url,))
+            if offset > 23:
+                print('ncep_stage4.py: dl %s failed' % (url,))
             continue
         # Same temp file
         output = open("tmp.grib.gz", 'wb')
