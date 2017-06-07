@@ -4,8 +4,8 @@ TODO: add table listing each forecast's peak and peak time...
 import datetime
 
 import psycopg2
-import pandas as pd
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
 
@@ -90,6 +90,8 @@ def get_context(fdict):
     if len(ctx['df'].index) > 0:
         ctx['df'] = pd.merge(ctx['df'], ctx['odf'], left_on='valid',
                              right_index=True, how='left', sort=False)
+        # valid dtype is lost in the merge above
+        ctx['df']['valid'] = pd.to_datetime(ctx['df']['valid'])
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
     ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
     if len(ctx['df'].index) == 0 and len(ctx['odf'].index) > 0:
@@ -176,4 +178,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    highcharts(dict(station='CIDI4', dt='2016-08-20 0220'))
