@@ -274,7 +274,12 @@ EOF;
 	{
 		// Start a new row
 		if ($i % 2 == 0){ $s .= "\n<div class=\"row\">"; }
-		$s .= "\n<div class=\"col-xs-6\">". $row["yr"] .": <a href=\"onsite/features/cat.php?day=". substr($row["valid"], 0, 10) ."\">". $row["title"] ."</a></div>";
+		$s .= sprintf("\n<div class=\"col-xs-6\">%s: %s".
+				"<a href=\"onsite/features/cat.php?day=%s\">".
+				"%s</a></div>",
+				$row["yr"],
+				$row["appurl"] ? "<i class=\"fa fa-signal\"></i> ": "",
+				substr($row["valid"], 0, 10), $row["title"]);
 		// End the row
 		if ($i % 2 != 0){ $s .= "\n</div>\n"; }
 	}
