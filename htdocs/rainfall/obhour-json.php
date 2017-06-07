@@ -55,7 +55,7 @@ while( list($key,$interval) = each($intervals))
   $rs = pg_exec($connect, $sql);
   for( $i=0; $z = @pg_fetch_array($rs,$i); $i++)
   {
-     $data[ $z["station"] ]["p$interval"]  = $z["p1"];
+     $data[ $z["station"] ]["p$interval"]  = floatval($z["p1"]);
   }
 }
 
