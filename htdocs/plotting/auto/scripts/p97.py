@@ -1,8 +1,10 @@
-import numpy as np
+"""map of climodat departures"""
 import datetime
+from collections import OrderedDict
+
+import numpy as np
 import psycopg2
 from pandas.io.sql import read_sql
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
@@ -18,7 +20,7 @@ PDICT = OrderedDict([
     ('OH', 'Ohio'),
     ('SD', 'South Dakota'),
     ('WI', 'Wisconsin'),
-    ('midwest', 'Mid West US')])
+    ('midwest', 'Midwest US')])
 
 PDICT2 = OrderedDict([
     ('avg_temp_depart', 'Average Temperature Departure'),
@@ -41,14 +43,14 @@ UNITS = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This application plots an analysis of station
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This application plots an analysis of station
     data for a period of your choice.  Spatially aggregated values like those
     for climate districts and statewide averages are not included.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='sector', default='IA',
              label='Plot Sector:', options=PDICT),
         dict(type='select', name='var', default='precip_depart',
@@ -61,7 +63,7 @@ def get_description():
              default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):', min="1893/01/01"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -108,6 +110,7 @@ def plotter(fdict):
     from agg d JOIN stations t on (d.station = t.id)
     WHERE t.network ~* 'CLIMATE'
     """, pgconn, params=(date1, date2), index_col='station')
+    df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
     sector2 = "state" if sector != 'midwest' else 'midwest'
     m = MapPlot(sector=sector2, state=sector, axisbg='white',
@@ -139,6 +142,7 @@ def plotter(fdict):
         m.drawcounties()
 
     return m.fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

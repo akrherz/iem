@@ -1,7 +1,9 @@
-import psycopg2.extras
-import numpy as np
+"""x-hour temperature change"""
 import datetime
 import calendar
+
+import psycopg2.extras
+import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
@@ -17,11 +19,11 @@ def compute_bins(interval):
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['description'] = """This plot presents a histogram of the change
+    desc = dict()
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents a histogram of the change
     in temperature over a given number of hours."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='int', name='hours', default=24,
@@ -29,7 +31,7 @@ def get_description():
         dict(type='float', name='interval', default=1,
              label="Histogram Binning Width (deg F)"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -75,15 +77,15 @@ def plotter(fdict):
     # We want bins centered on zero
     bins = compute_bins(interval)
 
-    H, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
+    hist, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
     years = float(
         datetime.datetime.now().year - nt.sts[station]['archive_begin'].year
         )
-    H = np.ma.array(H / years / 7.0)
-    H.mask = np.where(H < (1./years), True, False)
+    hist = np.ma.array(hist / years / 7.0)
+    hist.mask = np.where(hist < (1./years), True, False)
 
     (fig, ax) = plt.subplots(1, 1)
-    res = ax.pcolormesh((xedges - 1) * 7, yedges, H.transpose(),
+    res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose(),
                         cmap=plt.get_cmap('spectral'))
     fig.colorbar(res, label="Hours per Day")
     ax.grid(True)

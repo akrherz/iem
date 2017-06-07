@@ -1,24 +1,26 @@
-import psycopg2.extras
+"""Min wind chill frequency"""
 import datetime
+
+import psycopg2.extras
 import numpy as np
-from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents the frequency of observed
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents the frequency of observed
     minimum wind chill for a winter season each year over the period of
     record for the observation site."""
-    d['cache'] = 86400
-    d['arguments'] = [
+    desc['cache'] = 86400
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -63,7 +65,7 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
-    ax[0].barh(ys-0.4, freq, ec='b', fc='b')
+    ax[0].barh(ys - 0.4, freq, ec='b', fc='b')
     ax[0].set_ylim(-60.5, 0.5)
     ax[0].set_ylabel("Minimum Wind Chill $^\circ$F")
     ax[0].set_xlabel("Winter Season Frequency [%]")
@@ -80,6 +82,7 @@ def plotter(fdict):
     ax[1].set_xlabel("Year label for spring portion of season")
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

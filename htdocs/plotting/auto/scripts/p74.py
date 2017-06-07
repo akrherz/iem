@@ -1,7 +1,9 @@
+"""Days below threshold"""
+
 import psycopg2
-from pyiem import network
 from scipy import stats
 from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'At or Above Threshold',
@@ -18,11 +20,11 @@ PDICT3 = {'high': 'High Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """The number of days for a given season that are
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """The number of days for a given season that are
     either above or below some temperature threshold."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', default='winter',
@@ -37,7 +39,7 @@ def get_description():
              label="Start Year of Plot"),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -115,6 +117,7 @@ def plotter(fdict):
     ax.legend(ncol=1)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
