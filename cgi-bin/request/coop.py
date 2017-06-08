@@ -3,20 +3,19 @@
  Download interface for the data stored in coop database (alldata)
 
  This is called from /request/coop/fe.phtml
-
 """
-
-import psycopg2.extras
 import cgi
 import os
 import sys
 import datetime
 import zipfile
-import pandas as pd
-from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import temperature, distance
 import StringIO
 import unittest
+
+import pandas as pd
+import psycopg2.extras
+from pyiem.network import Table as NetworkTable
+from pyiem.datatypes import temperature, distance
 
 
 def get_scenario_period(ctx):
@@ -111,17 +110,20 @@ def do_apsim(ctx):
     if ctx['scenario'] == 'yes':
         sts = datetime.datetime(int(ctx['scenario_year']), 1, 1)
         ets = datetime.datetime(int(ctx['scenario_year']), 12, 31)
+        febtest = datetime.date(thisyear, 3, 1) - datetime.timedelta(days=1)
+        sdaylimit = ''
+        if febtest.day == 28:
+            sdaylimit = " and sday != '0229'"
         cursor.execute("""
             SELECT day, high, low, precip, 1 as doy,
             coalesce(narr_srad, merra_srad, hrrr_srad) as srad
             from """ + table + """ WHERE station = %s
-            and day >= %s and day <= %s
+            and day >= %s and day <= %s """ + sdaylimit + """
             """, (ctx['stations'][0], sts, ets))
         for row in cursor:
             ts = row[0].replace(year=thisyear)
             extra[ts] = row
             extra[ts]['doy'] = int(ts.strftime("%j"))
-        febtest = datetime.date(thisyear, 3, 1) - datetime.timedelta(days=1)
         if febtest not in extra:
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
@@ -321,15 +323,18 @@ def do_daycent(ctx):
     if ctx['scenario'] == 'yes':
         sts = datetime.datetime(int(ctx['scenario_year']), 1, 1)
         ets = datetime.datetime(int(ctx['scenario_year']), 12, 31)
+        febtest = datetime.date(thisyear, 3, 1) - datetime.timedelta(days=1)
+        sdaylimit = ''
+        if febtest.day == 28:
+            sdaylimit = " and sday != '0229'"
         cursor.execute("""
             SELECT day, high, low, precip
             from """ + table + """ WHERE station = %s
-            and day >= %s and day <= %s
+            and day >= %s and day <= %s """ + sdaylimit + """
             """, (ctx['stations'][0], sts, ets))
         for row in cursor:
             ts = row[0].replace(year=thisyear)
             extra[ts] = row
-        febtest = datetime.date(thisyear, 3, 1) - datetime.timedelta(days=1)
         if febtest not in extra:
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
@@ -664,6 +669,7 @@ def main():
         do_salus(ctx)
     else:
         do_simple(ctx)
+
 
 if __name__ == '__main__':
     main()
