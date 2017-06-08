@@ -88,7 +88,8 @@ def dowork(lon, lat, last, day, cat):
         expire at time zone 'UTC' as e,
         valid at time zone 'UTC' as v,
         o.threshold, category, h.priority,
-        rank() OVER (PARTITION by o.threshold, expire ORDER by issue ASC)
+        rank() OVER (PARTITION by o.threshold, expire
+            ORDER by priority DESC, issue ASC)
         from spc_outlooks o JOIN spc_outlook_thresholds h on
         (o.threshold = h.threshold) where
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
