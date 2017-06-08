@@ -87,12 +87,13 @@ def dowork(lon, lat, last, day, cat):
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
         valid at time zone 'UTC' as v,
-        threshold, category,
-        rank() OVER (PARTITION by expire ORDER by issue ASC)
-        from spc_outlooks where
+        o.threshold, category, h.priority,
+        rank() OVER (PARTITION by o.threshold, expire ORDER by issue ASC)
+        from spc_outlooks o JOIN spc_outlook_thresholds h on
+        (o.threshold = h.threshold) where
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
         and day = %s and outlook_type = 'C' and category = %s
-        and threshold not in ('TSTM') ORDER by issue DESC)
+        and o.threshold not in ('TSTM') ORDER by issue DESC)
     SELECT i, e, v, threshold, category from data where rank = 1
     ORDER by e DESC
     """, (lon, lat, day, cat))
