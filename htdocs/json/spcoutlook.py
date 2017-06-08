@@ -88,7 +88,7 @@ def dowork(lon, lat, last, day, cat):
         expire at time zone 'UTC' as e,
         valid at time zone 'UTC' as v,
         o.threshold, category, h.priority,
-        rank() OVER (PARTITION by o.threshold, expire
+        rank() OVER (PARTITION by expire
             ORDER by priority DESC, issue ASC)
         from spc_outlooks o JOIN spc_outlook_thresholds h on
         (o.threshold = h.threshold) where
