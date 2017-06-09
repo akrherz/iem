@@ -89,13 +89,16 @@ def dowork(lon, lat, last, day, cat):
         valid at time zone 'UTC' as v,
         o.threshold, category, h.priority,
         rank() OVER (PARTITION by expire
-            ORDER by priority DESC, issue ASC)
-        from spc_outlooks o JOIN spc_outlook_thresholds h on
+            ORDER by priority DESC, issue ASC),
+        case when o.threshold = 'SIGN' then rank() OVER (PARTITION by expire
+            ORDER by valid ASC) else 2 end as sign_rank
+        from spc_outlooks o LEFT JOIN spc_outlook_thresholds h on
         (o.threshold = h.threshold) where
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
         and day = %s and outlook_type = 'C' and category = %s
         and o.threshold not in ('TSTM') ORDER by issue DESC)
-    SELECT i, e, v, threshold, category from data where rank = 1
+    SELECT i, e, v, threshold, category from data
+    where (rank = 1 or sign_rank = 1)
     ORDER by e DESC
     """, (lon, lat, day, cat))
     running = {}
