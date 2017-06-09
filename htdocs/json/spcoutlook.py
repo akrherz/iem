@@ -89,7 +89,7 @@ def dowork(lon, lat, last, day, cat):
         valid at time zone 'UTC' as v,
         o.threshold, category, h.priority,
         rank() OVER (PARTITION by expire
-            ORDER by priority DESC, issue ASC),
+            ORDER by priority DESC NULLS last, issue ASC),
         case when o.threshold = 'SIGN' then rank() OVER (PARTITION by expire
             ORDER by valid ASC) else 2 end as sign_rank
         from spc_outlooks o LEFT JOIN spc_outlook_thresholds h on
