@@ -1,6 +1,9 @@
 <?php
 include("../../../config/settings.inc.php");
 //  1 minute data plotter 
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 function dwpf($tmpf, $relh){
   $tmpk = 273.15 + (5.00/9.00 * ($tmpf - 32.00));
@@ -28,6 +31,7 @@ $parts = array();
 $tmpf = array();
 $dwpf = array();
 $xlabel = array();
+$times = array();
 
 $start = intval( $myTime );
 $i = 0;
@@ -43,17 +47,8 @@ $prev_Tmpf = 0.0;
 while (list ($line_num, $line) = each ($fcontents)) {
 
 	$parts = split (" ", $line);
-	if ($myTime < $formatFloor){
-		$month = $parts[0];
-		$day = $parts[1];
-		$year = $parts[2];
-		$hour = $parts[3];
-		$min = $parts[4];
-		$timestamp = mktime($hour,$min,0,$month,$day,$year);
-	} else {
-		$timestamp = strtotime(sprintf("%s %s %s %s", $parts[0], $parts[1],
-				$parts[2], $parts[3]));
-	}
+	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
+			$parts[2], $parts[3], $parts[4]));
   $thisTmpf = $parts[17];
   $thisrh = $parts[18];
   $thisDwpf = dwpf($thisTmpf,$thisrh);
@@ -79,40 +74,18 @@ while (list ($line_num, $line) = each ($fcontents)) {
   }
 
 
-    $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $i++;
+    $tmpf[] = $thisTmpf;
+    $dwpf[] = $thisDwpf;
  
 } // End of while
 
-$xpre = array(0 => '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
-        '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon',
-        '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM',
-        '8 PM', '9 PM', '10 PM', '11 PM', '12 AM');
-
-
-for ($j=0; $j<25; $j++){
-  $xlabel[$j*60] = $xpre[$j];
-}
-
-
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
-$graph->SetScale("textlin", $min_yaxis - 2, $max_yaxis + 2);
-if ($min_yaxis ==  ""){
-  $graph->SetScale("textlin");
-}else { 
-  $graph->SetScale("textlin", $min_yaxis - 2, $max_yaxis + 2);
-}
+$graph->SetScale("datelin");
 
 $graph->img->SetMargin(65,40,45,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
-$graph->xaxis->SetTextTickInterval(60);
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(2,1);
@@ -123,45 +96,27 @@ $graph->subtitle->Set($titleDate );
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.075);
 
-//[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
-//[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
-
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
-//$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($tmpf);
+$lineplot=new LinePlot($tmpf, $times);
 $lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
 
 // Create the linear plot
-$lineplot2=new LinePlot($dwpf);
+$lineplot2=new LinePlot($dwpf, $times);
 $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("blue");
 
-// Create the linear plot
-
-// Box for error notations
-//[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-//[DMF]$t1->SetPos(0.4,0.95);
-//[DMF]$t1->SetOrientation("h");
-//[DMF]$t1->SetFont(FF_FONT1,FS_BOLD);
-//$t1->SetBox("white","black",true);
-//[DMF]$t1->SetColor("black");
-//[DMF]$graph->AddText($t1);
-
 $graph->Add($lineplot2);
 $graph->Add($lineplot);
-//[DMF]$graph->AddY2($lineplot3);
 
 $graph->Stroke();
 
