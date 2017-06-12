@@ -88,8 +88,8 @@ def dowork(lon, lat, last, day, cat):
         expire at time zone 'UTC' as e,
         valid at time zone 'UTC' as v,
         o.threshold, category, h.priority,
-        rank() OVER (PARTITION by expire
-            ORDER by priority DESC NULLS last, issue ASC),
+        row_number() OVER (PARTITION by expire
+            ORDER by priority DESC NULLS last, issue ASC) as rank,
         case when o.threshold = 'SIGN' then rank()
             OVER (PARTITION by o.threshold, expire
             ORDER by valid ASC) else 2 end as sign_rank
