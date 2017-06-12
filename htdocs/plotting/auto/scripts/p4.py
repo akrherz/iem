@@ -1,23 +1,25 @@
-import numpy as np
+"""IEMRE trailing"""
 import datetime
+
+import numpy as np
 import netCDF4
-from pyiem import iemre
 import pandas as pd
+from pyiem import iemre
 from pyiem.util import get_autoplot_context
 from pyiem import reference
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Using the gridded IEM ReAnalysis of daily
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Using the gridded IEM ReAnalysis of daily
     precipitation.  This chart presents the areal coverage of some trailing
     number of days precipitation for a state of your choice.  This application
     does not properly account for the trailing period of precipitation during
     the first few days of January."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='year', name='year', default=today.year,
              label='Select Year', min=1893),
         dict(type='float', name='threshold', default='1.0',
@@ -27,7 +29,7 @@ def get_description():
         dict(type='clstate', name='state', default='IA',
              label='For State'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -76,6 +78,7 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax.grid(True)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -1,11 +1,13 @@
-import psycopg2
-import pyiem.nws.vtec as vtec
-import numpy as np
-import datetime
-from pyiem.network import Table as NetworkTable
+"""period between first and last watch"""
 import calendar
-from pyiem import reference
+import datetime
+
 from pandas.io.sql import read_sql
+import psycopg2
+import numpy as np
+from pyiem.network import Table as NetworkTable
+from pyiem import reference
+import pyiem.nws.vtec as vtec
 from pyiem.util import get_autoplot_context
 
 PDICT = {'jan1': 'January 1',
@@ -16,17 +18,17 @@ PDICT2 = {'wfo': 'View by Single NWS Forecast Office',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart shows the period between the first
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart shows the period between the first
     and last watch, warning, advisory (WWA) issued by an office per year. The
     right hand chart displays the number of unique WWA events issued for
     that year.  The number of events is <strong>not</strong> the combination of
     a WWA product and alerted counties/zones, but an attempt at counting
     distinct WWA. For VTEC, this is the number of unique event ids.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='opt', default='wfo',
              options=PDICT2, label='View by WFO or State?'),
         dict(type='networkselect', name='station', network='WFO',
@@ -40,7 +42,7 @@ def get_description():
         dict(type='select', options=PDICT, label='Split the year on date:',
              default='jan1', name='split'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -154,6 +156,7 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(xloc)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -1,18 +1,20 @@
-import numpy as np
+"""iemre stuff"""
 import datetime
+
+import numpy as np
 import matplotlib.dates as mdates
 import netCDF4
-from pyiem import iemre
 import pandas as pd
+from pyiem import iemre
 from pyiem.util import get_autoplot_context
 from pyiem import reference
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     today = datetime.date.today()
-    d['description'] = """This is a complex plot to describe!  For each
+    desc['description'] = """This is a complex plot to describe!  For each
     24 hour period (roughly ending 7 AM), the IEM computes a gridded
     precipitation estimate.  This chart displays the daily coverage of a
     specified intensity for that day.  The chart also compares this coverage
@@ -20,8 +22,8 @@ def get_description():
     over X number of days.  This provides some insight into if the
     precipitation fell over locations that needed it.
     """
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='year', name='year', default=today.year,
              label='Select Year (1893-)'),
         dict(type='float', name='daythres', default='0.50',
@@ -32,7 +34,7 @@ def get_description():
              label='Trailing Day Precipitation Threshold [inch]'),
         dict(type='clstate', name='state', default='IA', label='For State'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -120,6 +122,7 @@ def plotter(fdict):
                      ) % (trailthres, period, daythres),
                     fontsize=12)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

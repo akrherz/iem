@@ -1,8 +1,10 @@
+"""Distribution of obs"""
+import calendar
+import datetime
+
 import psycopg2
 from pandas.io.sql import read_sql
 from matplotlib import mlab
-import calendar
-import datetime
 import numpy as np
 from pyiem.util import get_autoplot_context
 from pyiem import reference
@@ -16,14 +18,14 @@ PDICT = {'sum-precip': 'Total Precipitation [inch]',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     today = datetime.date.today()
-    d['description'] = """This application plots out the distribution of
+    desc['description'] = """This application plots out the distribution of
     some monthly metric for single month for all tracked sites within one
     state.  The plot presents the distribution and normalized frequency
     for a specific year and for all years combined for the given month."""
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='clstate', name='state', default='IA',
              label='Select State:'),
         dict(type='year', name='year', default=today.year,
@@ -33,7 +35,7 @@ def get_description():
         dict(type='select', name='type', default='sum-precip',
              label='Which metric to plot?', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -123,6 +125,7 @@ def plotter(fdict):
         ax.set_xlim(left=0)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter({'type': 'avg-low', 'year': 2014, 'month': 12})

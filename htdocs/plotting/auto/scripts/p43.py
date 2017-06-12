@@ -1,9 +1,11 @@
+"""Ob timeseries"""
+
 import psycopg2.extras
-import matplotlib.dates as mdates
 import pytz
-from pyiem.network import Table as NetworkTable
 import pyiem.datatypes as dt
+import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
@@ -19,16 +21,16 @@ def tsfmt(x, pos):
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 360
-    d['description'] = """This plot presents a recent time series of
+    desc = dict()
+    desc['cache'] = 360
+    desc['description'] = """This plot presents a recent time series of
     observations.  Please note the colors and axes labels used to denote
     which variable is which in the combination plots."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='sid', label='Select IEM Tracked Station',
              name='station', default='AMW', network='IA_ASOS'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -143,3 +145,7 @@ def plotter(fdict):
         ax[2].set_ylim(0, 14)
 
     return fig
+
+
+if __name__ == '__main__':
+    plotter(dict())

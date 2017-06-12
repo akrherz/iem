@@ -1,34 +1,38 @@
 """
  Monthly precip reliability
 """
+import calendar
+import datetime
+
 import psycopg2.extras
 import numpy as np
-from pyiem import network
-import calendar
 import pandas as pd
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['arguments'] = [
+    desc = dict()
+    y2 = datetime.date.today().year
+    y1 = y2 - 20
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
-        dict(type='year', name='syear', default='1993',
+        dict(type='year', name='syear', default=y1,
              label='Enter Start Year:'),
-        dict(type='year', name='eyear', default='2013',
+        dict(type='year', name='eyear', default=y2,
              label='Enter End Year (inclusive):'),
         dict(type='int', name='threshold', default='80',
              label='Threshold Percentage [%]:'),
     ]
-    d['data'] = True
-    d['description'] = """This plot presents the frequency of having
+    desc['data'] = True
+    desc['description'] = """This plot presents the frequency of having
     a month's preciptation at or above some threshold.  This threshold
     is compared against the long term climatology for the site and month. This
     plot is designed to answer the question about reliability of monthly
     precipitation for a period of your choice. """
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -69,7 +73,7 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.bar(np.arange(1, 13)-0.4, vals)
+    ax.bar(np.arange(1, 13), vals, align='center')
     ax.set_xticks(np.arange(1, 13))
     ax.set_ylim(0, 100)
     ax.set_yticks(np.arange(0, 101, 10))
@@ -83,6 +87,7 @@ def plotter(fdict):
                        eyear, threshold))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
