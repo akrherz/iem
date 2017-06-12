@@ -1,9 +1,11 @@
-import psycopg2
+"""x-hour temp change"""
 import datetime
+from collections import OrderedDict
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
-from collections import OrderedDict
 
 MDICT = {'warm': 'Temperature Rise',
          'cool': 'Temperature Drop'}
@@ -29,15 +31,15 @@ MDICT2 = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart presents the largest changes in
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart presents the largest changes in
     temperature over a given number of hours.  This is based on available
     hourly temperature reports.  It also requires an exact match in time of
     day between two observations.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='int', name='hours', label='Number of Hours:',
@@ -47,7 +49,7 @@ def get_description():
         dict(type='select', name='dir', default='warm',
              label='Direction:', options=MDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

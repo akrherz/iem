@@ -1,22 +1,24 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+"""climodat"""
 import datetime
+
+import psycopg2
+from pandas.io.sql import read_sql
 import numpy as np
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['report'] = True
-    d['description'] = """ """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['report'] = True
+    desc['description'] = """ """
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

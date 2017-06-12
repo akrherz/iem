@@ -1,9 +1,11 @@
+"""Period deltas"""
+import datetime
+from collections import OrderedDict
+
 import psycopg2
 from pandas.io.sql import read_sql
-import datetime
 import numpy as np
 from pyiem.plot import MapPlot, centered_bins
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = {'state': 'State Level Maps (select state)',
@@ -58,14 +60,14 @@ OPT1 = {'diff': 'Plot Difference',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This map produces an analysis yearly averages. You
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This map produces an analysis yearly averages. You
     can either plot the difference between two period of years or simply the
     years between the first period.  This app is meant to address the question
     about changes in climate or just to produce a simple plot of yearly
     averages over some period of years."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='month', default='all',
              options=MDICT, label='Show Monthly or Annual Averages'),
         dict(type='select', name='sector', default='state',
@@ -89,7 +91,7 @@ def get_description():
         dict(type='year', name='p2eyear', default=2010,
              label='End Year (inclusive) of Period Two:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
