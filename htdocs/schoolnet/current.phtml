@@ -159,8 +159,8 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"fa fa-picture\"></i></a>"
-			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"fa fa-info-sign\"></i></a></td>";
+	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"fa fa-picture-o\"></i></a>"
+			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"fa fa-info\"></i></a></td>";
 
 
 	$table .= "<td ";
@@ -195,8 +195,8 @@ while (list ($key, $val) = each ($skippedStations) ) {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"fa fa-picture\"></i></a>"
-			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"fa fa-info-sign\"></i></a></td>";
+	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"fa fa-picture-o\"></i></a>"
+			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"fa fa-info\"></i></a></td>";
 	
 	$table .= "<td colspan=\"11\">Site offline since: ". strftime("%d %b %Y %I:%M %p", $parts['ts']) ."</td>";
 

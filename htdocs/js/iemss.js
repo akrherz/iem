@@ -1,7 +1,7 @@
 var htmlInterface = ['<div class="panel panel-default">',
   '<div class="panel-heading">',
     '<a class="btn btn-default pull-right" href="/" id="iemss-metadata-link" target="_new">',
-    '<i class="fa fa-info-sign"></i> Station Metadata</a>',
+    '<i class="fa fa-info"></i> Station Metadata</a>',
     '<h3 class="panel-title">Select Widget for <span id="iemss-network"></span> Network</h3> ',
     '<br class="clearfix" />',
   '</div>',
