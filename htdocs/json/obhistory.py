@@ -77,7 +77,7 @@ def main():
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey) if hostname != 'iem.local' else None
     if not res:
-        res = workflow(station, network, date)
+        res = workflow(station, network, date).replace("NaN", "null")
         mc.set(mckey, res, 3600)
 
     if cb is None:
