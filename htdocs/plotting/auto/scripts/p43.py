@@ -10,6 +10,7 @@ from pyiem.util import get_autoplot_context
 
 
 def tsfmt(x, pos):
+    """Timestamp formatter"""
     dt = mdates._from_ordinalf(x)
     dt = dt.astimezone(mytz)
     if dt.hour == 0:
@@ -89,10 +90,10 @@ def plotter(fdict):
         if 'OVC' in c:
             pos = c.index('OVC')
             ceil['v'].append(v)
-            l = [row['skyl1'], row['skyl2'], row['skyl3'], row['skyl4']]
-            ceil['d'].append(l[pos] / 1000.)
+            larr = [row['skyl1'], row['skyl2'], row['skyl3'], row['skyl4']]
+            ceil['d'].append(larr[pos] / 1000.)
 
-    (fig, ax) = plt.subplots(3, 1, figsize=(8, 10), sharex=True)
+    (fig, ax) = plt.subplots(3, 1, figsize=(8, 9), sharex=True)
 
     # ____________PLOT 1___________________________
     if len(tmpf['v']) > 1:
@@ -102,11 +103,12 @@ def plotter(fdict):
         ax[0].plot(dwpf['v'], dwpf['d'], label='Dew Point', lw=2, color='g',
                    zorder=1)
 
-    ax[0].legend(loc='best', ncol=2, fontsize=10)
+    ax[0].legend(loc=3, ncol=2, fontsize=10)
     ax[0].set_title("[%s] %s\nRecent Time Series" % (
         station, nt.sts[station]['name']))
     ax[0].grid(True)
     ax[0].set_ylabel("Temperature [F]")
+    ax[0].set_ylim(bottom=(min(dwpf['d']) - 10))
     plt.setp(ax[0].get_xticklabels(), visible=True)
 
     # _____________PLOT 2____________________________
@@ -124,7 +126,7 @@ def plotter(fdict):
     ax[1].grid(True)
     ax[1].set_xlabel("Plot Time Zone: %s" % (nt.sts[station]['tzname'],))
 
-    # _____________PLOT 3___________________________
+    #  _____________PLOT 3___________________________
     global mytz
     mytz = pytz.timezone(nt.sts[station]['tzname'])
     ax[2].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 25, 6),
