@@ -308,9 +308,9 @@ EOF;
 						$opton ? "block": 'none', $thisrow);
 				if ($opton){
 					if ($v->type == 'vtec_ps'){
-						$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : '';
+						$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : 'SV';
 						$pltvars[] = sprintf("phenomena%s:%s", $v->name, $value);
-						$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : '';
+						$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : 'W';
 						$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
 					} else {
 						$pltvars[] = sprintf("%s:%s", $v->name, $value);
@@ -318,9 +318,9 @@ EOF;
 				}
 			} else{
 				if ($v->type == 'vtec_ps'){
-					$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : '';
+					$value = isset($_GET["phenomena{$suffix}"]) ? xssafe($_GET["phenomena{$suffix}"]) : 'SV';
 					$pltvars[] = sprintf("phenomena%s:%s", $v->name, $value);
-					$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : '';
+					$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : 'W';
 					$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
 				} else {
 					$pltvars[] = sprintf("%s:%s", $v->name, $value);

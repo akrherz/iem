@@ -1,8 +1,10 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+"""WFO VTEC counts in a map"""
 import datetime
+
+import psycopg2
+from pandas.io.sql import read_sql
 import pytz
+from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context
@@ -10,9 +12,9 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This application generates a map of the number of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This application generates a map of the number of
     VTEC encoded Watch, Warning,
      and Advisory (WWA) events by NWS Forecast Office for a time period of
      your choice. The archive of products goes back to October 2005.
@@ -21,7 +23,7 @@ def get_description():
      types."""
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='datetime', name='sdate',
              default=jan1.strftime("%Y/%m/%d 0000"),
              label='Start Date / Time (UTC, inclusive):',
@@ -38,7 +40,7 @@ def get_description():
         dict(type='vtec_ps', name='v4', default='UNUSED', optional=True,
              label='VTEC Phenomena and Significance 4'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
