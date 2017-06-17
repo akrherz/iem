@@ -6,15 +6,16 @@ $t = new MyView();
 include("../../include/forms.php");
 include("../../include/database.inc.php");
 include("../../include/network.php");
+require_once "../../include/imagemaps.php";
 
 $nt = new NetworkTable("WFO");
 $nt->table["ALL"] = Array("name" => " --- All ---- ");
 include "../../include/vtec.php";
 $postgis = iemdb('postgis');
 
-$wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'ALL';
-$limit = isset($_GET["limit"])? $_GET["limit"] : 'TOSV';
-$tlimit = isset($_GET["tlimit"])? $_GET["tlimit"] : '2007';
+$wfo = isset($_GET["wfo"])? xssafe($_GET["wfo"]): 'ALL';
+$limit = isset($_GET["limit"])? xssafe($_GET["limit"]): 'TOSV';
+$tlimit = isset($_GET["tlimit"])? xssafe($_GET["tlimit"]): '2007';
 $lstring = "'SV','TO'";
 if ($limit == "TO"){
 	$lstring = "'TO'";
@@ -51,10 +52,8 @@ significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
 $t->title = "NWS SVR/TOR Storm Based Warnings by Size";
 $t->thispage ="severe-cow";
 
-$sselect = "";
-while( list($key, $value) = each($nt->table) ){
-	$sselect .= "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
-}
+$extra = Array("ALL" => Array("name" => "--- ALL Forecast Offices ---"));
+$sselect = networkSelect("WFO", $wfo, $extra, "wfo");
 
 $ar = Array("TOSV" => "Tornado + Severe Thunderstorm",
 	"TO" => "Tornado Only",
@@ -98,13 +97,16 @@ $t->content = <<<EOF
  <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
  <li class="active">Top 10 Warnings by size</li>
 </ol>
+
 <h3>Top 10 NWS WFO Storm Based Warnings by Size</h3>
+
 <p>This application prints out a listing of the top 10 largest and smallest
 storm based warnings by Weather Forecast Office (WFO). You can click the 
 Event ID to get more information on that warning. This page defaults to show the
 largest and smallest warnings from any WFO.  Storm Based Warnings did not become
 operational until 1 Oct 2007, so warning polygons prior to that date were only
-experimental at best.</p>
+experimental at best.  The areas shown are computed using
+<a href="https://epsg.io/2163">EPSG:2163</a> (US National Atlas Equal Area).</p>
 
 <div class="alert alert-info">Please be patient for page to load...</div>
 
@@ -121,10 +123,8 @@ experimental at best.</p>
 </head>
 <tbody>
 <tr><td>
-<select name="wfo">
- <option value="ALL">All Available</option>
 {$sselect}
-</select></td>
+</td>
 
  <td>{$lselect}</td>
    <td>{$tselect}</td>
