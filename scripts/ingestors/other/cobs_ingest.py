@@ -68,7 +68,7 @@ def sum_hourly(hdf, date, col):
     ets = sts + datetime.timedelta(hours=24)
     df2 = hdf[(hdf['valid'] > sts) & (hdf['valid'] < ets)]
     if len(df2.index) == 0:
-        print("No data found!?")
+        print("ingest_cobs found no hourly data for date: %s" % (date,))
         return None
     return df2[col].sum()
 
