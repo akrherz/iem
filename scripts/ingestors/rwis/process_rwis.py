@@ -359,10 +359,11 @@ def fetch_files():
 def ldm_insert_metars(fn1, fn2):
     """ Insert into LDM please """
     for fn in [fn1, fn2]:
-        p = subprocess.Popen("/home/ldm/bin/pqinsert -p '%s' %s" % (fn, fn),
-                             shell=True, stderr=subprocess.PIPE,
-                             stdout=subprocess.PIPE)
-        os.waitpid(p.pid, 0)
+        proc = subprocess.Popen(("/home/ldm/bin/pqinsert -p '%s' %s"
+                                 ) % (fn.replace("/tmp/", ""), fn),
+                                shell=True, stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        os.waitpid(proc.pid, 0)
         os.unlink(fn)
 
 
@@ -386,6 +387,7 @@ def main():
     # Discontinued rwis.csv generation, does not appear to be used, I hope
 
     update_iemaccess(obs)
+
 
 if __name__ == '__main__':
     main()
