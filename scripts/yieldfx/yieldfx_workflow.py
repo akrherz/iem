@@ -271,7 +271,7 @@ def replace_obs_iem(df, location):
                 temperature(row[2], 'F').value('C'), row[3],
                 _gdd, distance(row[4], 'in').value('mm'))
     if len(replaced) > 0:
-        print(("  used IEM Access %s from %s-%s"
+        print(("  used IEM Access %s from %s->%s"
                ) % (station, replaced[0], replaced[-1]))
 
 
