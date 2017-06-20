@@ -4,9 +4,6 @@
 cd smos
 python plot.py 0
 
-cd ../prism
-python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d') &
-
 cd ../iemre
 python daily_analysis.py
 
@@ -25,3 +22,9 @@ python daily_estimator.py NE
 python daily_estimator.py KS
 python daily_estimator.py MO
 python compute_0000.py
+
+cd ../prism
+python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d')
+
+cd ../iemre
+python prism_adjust_stage4.py $(date --date '3 days ago' +'%Y %m %d')
