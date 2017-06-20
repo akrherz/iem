@@ -71,5 +71,6 @@ def main(argv):
 
     do_cleanup(valid)
 
+
 if __name__ == '__main__':
     main(sys.argv)

@@ -62,18 +62,20 @@ BEARING: Bearing from the ground point for this level
 RANGE:   Range (nautical miles) from the ground point for this level.
 
 """
+from __future__ import print_function
 import datetime
-import pytz
 import sys
-from pyiem.util import exponential_backoff
+
+import pytz
 import requests
 import psycopg2
+from pyiem.util import exponential_backoff
 from pyiem.network import Table as NetworkTable
-nt = NetworkTable("RAOB")
+NT = NetworkTable("RAOB")
 
 
 class RAOB:
-    ''' Simple class representing a RAOB profile '''
+    """Simple class representing a RAOB profile"""
 
     def __init__(self):
         ''' constructor'''
@@ -209,11 +211,11 @@ def parse(raw, sid):
 
 def main(valid):
     """Run for the given valid time!"""
-    DBCONN = psycopg2.connect(database='postgis', host='iemdb')
+    dbconn = psycopg2.connect(database='postgis', host='iemdb')
 
     v12 = valid - datetime.timedelta(hours=13)
 
-    for sid in nt.sts.keys():
+    for sid in NT.sts:
         # skip virtual sites
         if sid.startswith("_") or sid in ['KHKS', ]:
             continue
@@ -227,34 +229,36 @@ def main(valid):
         uri += ("hydrometeors=false&startSecs=%s&endSecs=%s"
                 ) % (v12.strftime("%s"), valid.strftime("%s"))
 
-        cursor = DBCONN.cursor()
-        r = exponential_backoff(requests.get, uri, timeout=30)
-        if r is None:
+        cursor = dbconn.cursor()
+        req = exponential_backoff(requests.get, uri, timeout=30)
+        if req is None:
             print("ingest_from_rucsoundings failed %s for %s" % (sid, valid))
             continue
         try:
-            for rob in parse(r.content, sid):
-                nt.sts[sid]['count'] = len(rob.profile)
+            for rob in parse(req.content, sid):
+                NT.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
-        except Exception, exp:
-            print 'RAOB FAIL %s %s %s, check /tmp for data' % (sid, valid, exp)
-            o = open("/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")),
-                     'w')
-            o.write(r.content)
-            o.close()
+        except Exception as exp:
+            print(('RAOB FAIL %s %s %s, check /tmp for data'
+                   ) % (sid, valid, exp))
+            output = open("/tmp/%s_%s_fail" % (sid,
+                                               valid.strftime("%Y%m%d%H%M")),
+                          'w')
+            output.write(req.content)
+            output.close()
         finally:
             cursor.close()
-            DBCONN.commit()
+            dbconn.commit()
 
     # Loop thru and see which stations we were missing data from
     missing = []
-    for sid in nt.sts.keys():
-        if nt.sts[sid]['online']:
-            if nt.sts[sid].get('count', 0) == 0:
+    for sid in NT.sts:
+        if NT.sts[sid]['online']:
+            if NT.sts[sid].get('count', 0) == 0:
                 missing.append(sid)
 
     if len(missing) > 40:
-        cursor = DBCONN.cursor()
+        cursor = dbconn.cursor()
         for sid in missing:
             # Go find the last ob we have for the site
             cursor.execute("""SELECT max(valid) from raob_flights where
@@ -265,7 +269,7 @@ def main(valid):
                    ) % (valid.strftime("%Y-%m-%d %H"), sid,
                         lastts.strftime("%Y-%m-%d %H")))
 
-    DBCONN.close()
+    dbconn.close()
 
 
 def frontend():
@@ -274,8 +278,8 @@ def frontend():
                               int(sys.argv[3]), int(sys.argv[4]))
     valid = valid.replace(tzinfo=pytz.timezone("UTC"))
     main(valid)
-    DBCONN = psycopg2.connect(database='postgis', host='iemdb')
-    cursor = DBCONN.cursor()
+    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    cursor = pgconn.cursor()
     for days in [3, 14, 365]:
         ts = valid - datetime.timedelta(days=days)
         cursor.execute("""SELECT count(*) from raob_flights where
@@ -285,6 +289,7 @@ def frontend():
             print(('rucsoundings reprocess: %s due to count of: %s'
                    ) % (ts, cnt))
             main(ts)
+
 
 if __name__ == '__main__':
     frontend()

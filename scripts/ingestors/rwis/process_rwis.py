@@ -1,16 +1,18 @@
 """Process the IDOT RWIS Data files"""
-import pandas as pd
+from __future__ import print_function
 import datetime
-import pytz
 import os
 import sys
-import numpy as np
 import smtplib
-import psycopg2
 import time
 import urllib2
 import subprocess
 from email.mime.text import MIMEText
+
+import pandas as pd
+import pytz
+import numpy as np
+import psycopg2
 from pyiem.tracker import TrackerEngine
 from pyiem.datatypes import temperature, speed
 from pyiem.network import Table as NetworkTable
@@ -313,7 +315,7 @@ def get_file(uri):
     attempts = 3
     while (data is None or data == "") and attempts > 0:
         try:
-            data = urllib2.urlopen(uri).read()
+            data = urllib2.urlopen(uri, timeout=30).read()
         except:
             time.sleep(4)
         attempts -= 1
