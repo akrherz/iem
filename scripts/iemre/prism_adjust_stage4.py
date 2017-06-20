@@ -16,6 +16,9 @@ from scipy.interpolate import NearestNDInterpolator
 
 def workflow(valid):
     """Our workflow"""
+    if valid.month == 1 and valid.day == 1:
+        print("prism_adjust_stage4, sorry Jan 1 processing is a TODO!")
+        return
     # read prism
     tidx = daily_offset(valid)
     nc = netCDF4.Dataset("/mesonet/data/prism/%s_daily.nc" % (valid.year, ),
