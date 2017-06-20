@@ -29,7 +29,7 @@ def workflow(valid):
     (lons, lats) = np.meshgrid(lons, lats)
 
     # Interpolate this onto the stage4 grid
-    nc = netCDF4.Dataset(("/mesonet/data/iemre/%s_stage4_hourly.nc"
+    nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
                           ) % (valid.year, ),
                          'a')
     nc.set_auto_scale(False)

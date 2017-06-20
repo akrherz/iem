@@ -1,4 +1,5 @@
 """Attempt to manage the disaster that is IEM symlinking"""
+from __future__ import print_function
 import sys
 import os
 
@@ -31,6 +32,7 @@ PAIRS = [
          ['/mesonet/data/nccf', '/mnt/mesonet2/data/nccf'],
          ['/mesonet/data/nexrad', '/mnt/nexrad3/nexrad'],
          ['/mesonet/data/smos', '/mnt/mesonet2/data/smos'],
+         ['/mesonet/data/stage4', '/mnt/mesonet2/data/stage4'],
          ['/mesonet/data/text', '/mnt/mesonet2/data/text'],
          ['/mesonet/share/cases', '/mnt/mesonet/share/cases'],
          ['/mesonet/share/climodat', '/mnt/mesonet2/share/climodat'],
@@ -48,7 +50,7 @@ PAIRS = [
          ]
 
 
-def do(link, target):
+def workflow(link, target):
     """Do things"""
     if not os.path.isdir(target):
         print('ERROR: link target: %s is not found' % (target,))
@@ -68,7 +70,7 @@ def do(link, target):
 def main(argv):
     """Go Main"""
     for (link, target) in PAIRS:
-        do(link, target)
+        workflow(link, target)
 
 
 if __name__ == '__main__':

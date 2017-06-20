@@ -21,7 +21,7 @@ def init_year(ts):
     # grid shape is y, x
     lats, lons = grb.latlons()
 
-    fp = "/mesonet/data/iemre/%s_stage4_hourly.nc" % (ts.year, )
+    fp = "/mesonet/data/stage4/%s_stage4_hourly.nc" % (ts.year, )
     nc = netCDF4.Dataset(fp, 'w')
     nc.title = "IEM Packaged NOAA Stage IV for %s" % (ts.year,)
     nc.platform = "Grided Estimates"

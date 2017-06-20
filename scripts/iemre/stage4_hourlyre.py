@@ -27,7 +27,7 @@ def to_netcdf(valid):
     # values over 10 inches are bad
     val = np.where(val > 250., 0, val)
 
-    nc = netCDF4.Dataset(("/mesonet/data/iemre/%s_stage4_hourly.nc"
+    nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
                           ) % (valid.year, ), 'a')
     tidx = iemre.hourly_offset(valid)
     if nc.variables['p01m_status'][tidx] > 1:
@@ -49,7 +49,7 @@ def merge(valid):
     """
     Process an hour's worth of stage4 data into the hourly RE
     """
-    nc = netCDF4.Dataset(("/mesonet/data/iemre/%s_stage4_hourly.nc"
+    nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
                           ) % (valid.year, ), 'r')
     tidx = iemre.hourly_offset(valid)
     val = nc.variables['p01m'][tidx, :, :]
