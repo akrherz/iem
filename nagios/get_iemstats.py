@@ -2,16 +2,18 @@
 """
 Dump some stats useful for website geeks
 """
-import rrdtool
 import json
 import datetime
 import sys
+
+import rrdtool
 
 j = {'stats': {}, 'valid': datetime.datetime.utcnow().strftime(
                                                     "%Y-%m-%dT%H:%M:%SZ")}
 
 
 def get_reqs():
+    """Get requests"""
     count = 0
     for i in range(100, 109):
         fn = "/var/lib/pnp4nagios/iemvs%03i/Apache_Stats_II.rrd" % (i,)
@@ -27,15 +29,29 @@ def get_reqs():
 
 
 def get_bandwidth():
-    fn = "/var/lib/pnp4nagios/mesonet/eth0.rrd"
+    """get bandwith"""
+    fn = "/var/lib/pnp4nagios/iem-director0/eth0.rrd"
 
     ts = rrdtool.last(fn)
     data = rrdtool.fetch(fn,
                          "AVERAGE", "-s", str(ts - 300), "-e", str(ts))
     samples = data[2]
-    j['stats']['bandwidth'] = samples[-2][2]
 
-get_reqs()
-get_bandwidth()
-sys.stdout.write("Content-type: text/plain\n\n")
-sys.stdout.write(json.dumps(j))
+    fn = "/var/lib/pnp4nagios/iem-director1/eth0.rrd"
+    ts = rrdtool.last(fn)
+    data = rrdtool.fetch(fn,
+                         "AVERAGE", "-s", str(ts - 300), "-e", str(ts))
+    samples2 = data[2]
+    j['stats']['bandwidth'] = samples[-2][2] + samples2[-2][2]
+
+
+def main():
+    """Go Main Go"""
+    get_reqs()
+    get_bandwidth()
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write(json.dumps(j))
+
+
+if __name__ == '__main__':
+    main()
