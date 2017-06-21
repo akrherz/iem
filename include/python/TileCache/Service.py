@@ -444,8 +444,8 @@ def wsgiHandler(environ, start_response, service):
         #                      "missing file %s Referrer: %s\n"
         #                      ) % (environ.get("REMOTE_ADDR"), path_info,
         #                           missfn, environ.get("HTTP_REFERER")))
-        msg = ("An error occurred: %s\n%s\n"
-               ) % (E, "".join(traceback.format_tb(sys.exc_traceback)))
+        msg = ("An error occurred: %s\n"
+               ) % (E, )
 
     start_response(status, [('Content-Type', 'text/plain')])
     return [msg]
