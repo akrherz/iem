@@ -1,5 +1,8 @@
-import psycopg2
+"""Q/Q Plot"""
+from __future__ import print_function
 from collections import OrderedDict
+
+import psycopg2
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -37,9 +40,9 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot compares the distribution of daily
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot compares the distribution of daily
     temperatures for two months or periods for a single station of your choice.
     The left hand plot depicts a quantile - quantile plot, which simply plots
     the montly percentile values against each other.  You could think of this
@@ -61,14 +64,14 @@ def get_description():
     <br />Clever combinations of the above allow for assessment of strength
     and duration of stretches of hot or cold weather.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='month1', default='12', options=MDICT,
              label='Select Month for x-axis:'),
         dict(type='text', default='1893-1950', name='p1', optional=True,
              label='Inclusive Period of Years for x-axis (Optional)'),
-        dict(type='select', name='month2', default='07', options=MDICT,
+        dict(type='select', name='month2', default='7', options=MDICT,
              label='Select Month for y-axis:'),
         dict(type='text', default='1950-2017', name='p2', optional=True,
              label='Inclusive Period of Years for y-axis (Optional)'),
@@ -81,10 +84,11 @@ def get_description():
         dict(type='select', name='opt', options=ODICT, default='max',
              label='When evaluation over multiple days, how to compute:'),
     ]
-    return d
+    return desc
 
 
 def get_data(pgconn, table, station, month, period, varname, days, opt):
+    """Get Data please"""
     doffset = "0 days"
     if len(month) < 3:
         mlimiter = " and month = %s " % (int(month), )
@@ -110,7 +114,8 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
             SELECT
             extract(year from day + '"""+doffset+"""'::interval)::int as myyear,
             high, low, (high+low)/2. as avg from """ + table + """
-            WHERE station = %s """ + mlimiter + """)
+            WHERE station = %s and high is not null
+            and low is not null """ + mlimiter + """)
         SELECT * from data """ + ylimiter + """
         """, pgconn, params=(station, ), index_col=None)
     else:
@@ -121,7 +126,7 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
             SELECT
             extract(year from day + '"""+doffset+"""'::interval)::int as myyear,
             high, low, (high+low)/2. as avg, day, month from """ + table + """
-            WHERE station = %s),
+            WHERE station = %s and high is not null and low is not null),
         agg1 as (
             SELECT myyear, month, """ + res + """ as """ + varname + """
             from data WHERE 1 = 1 """ + mlimiter + """)
@@ -257,4 +262,7 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    fig, df = plotter(dict(station='IA7708', network='IACLIMATE', month1='6',
+                           month2='1', var='low', highlight=44, days=1,
+                           opt='max'))
+    fig.savefig('/tmp/bah.png')
