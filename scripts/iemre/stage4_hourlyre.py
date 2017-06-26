@@ -51,8 +51,11 @@ def merge(valid):
     """
     nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
                           ) % (valid.year, ), 'r')
+    # Careful of the issues reading ushort data
+    nc.set_auto_scale(False)
     tidx = iemre.hourly_offset(valid)
-    val = nc.variables['p01m'][tidx, :, :]
+    val = nc.variables['p01m'][tidx, :, :] / nc.variables['p01m'].scale_factor
+    # print("stage4 mean: %.2f max: %.2f" % (np.mean(val), np.max(val)))
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
 
@@ -67,11 +70,15 @@ def merge(valid):
     # Lets clip bad data
     # 10 inches per hour is bad data
     res = np.where(np.logical_or(res < 0, res > 250), 0., res)
+    # print("Resulting mean: %.2f max: %.2f" % (np.mean(res), np.max(res)))
 
     # Open up our RE file
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (valid.year,),
                          'a')
     nc.variables["p01m"][tidx, :, :] = res
+    # print(("Readback mean: %.2f max: %.2f"
+    #       ) % (np.mean(nc.variables["p01m"][tidx, :, :]),
+    #            np.max(nc.variables["p01m"][tidx, :, :])))
     nc.close()
 
 
