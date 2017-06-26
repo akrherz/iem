@@ -74,7 +74,7 @@ def init_year(ts):
 
     p01m = nc.createVariable('p01m', np.ushort, ('time', 'y', 'x'),
                              fill_value=65536)
-    p01m.scale_factor = 100.
+    p01m.scale_factor = 0.01
     p01m.add_offset = 0.
     p01m.units = 'mm'
     p01m.long_name = 'Precipitation'

@@ -35,7 +35,6 @@ def workflow(valid):
     nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
                           ) % (valid.year, ),
                          'a')
-    nc.set_auto_scale(False)
     p01m = nc.variables['p01m']
     p01m_status = nc.variables['p01m_status']
     s4lons = nc.variables['lon'][:]
@@ -43,9 +42,7 @@ def workflow(valid):
     # Values are in the hourly arrears, so start at -23 and thru current hour
     sts_tidx = hourly_offset(valid - datetime.timedelta(hours=23))
     ets_tidx = hourly_offset(valid + datetime.timedelta(hours=1))
-    # Have to apply scale_factor manually
-    s4total = (np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0) /
-               nc.variables['p01m'].scale_factor)
+    s4total = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
     # make sure the s4total does not have zeros
     s4total = np.where(s4total < 0.001, 0.001, s4total)
 
@@ -56,7 +53,7 @@ def workflow(valid):
     # Do the work now, we should not have to worry about the scale factor
     for tidx in range(sts_tidx, ets_tidx):
         newval = p01m[tidx, :, :] * multiplier
-        p01m[tidx, :, :] = newval.astype(np.ushort)
+        p01m[tidx, :, :] = newval
         # make sure have data
         if np.ma.max(newval) > 0:
             p01m_status[tidx] = 2
@@ -67,8 +64,7 @@ def workflow(valid):
                          ).strftime("%Y-%m-%dT%H"), tidx))
 
     """
-    s4total_v2 = (np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0) /
-                  nc.variables['p01m'].scale_factor)
+    s4total_v2 = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
 
     from pyiem.plot.geoplot import MapPlot
     import matplotlib.pyplot as plt

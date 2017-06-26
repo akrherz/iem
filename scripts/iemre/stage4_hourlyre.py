@@ -34,11 +34,8 @@ def to_netcdf(valid):
         print("Skipping stage4_hourlyre write as variable status is >1")
         nc.close()
         return True
-    # account for apparent bug with python-netcdf, we do the auto-scaling
-    # below
-    nc.set_auto_scale(False)
     p01m = nc.variables['p01m']
-    p01m[tidx, :, :] = (val * 100.).astype(np.ushort)
+    p01m[tidx, :, :] = val
     nc.variables['p01m_status'][tidx] = 1
     nc.close()
 
@@ -51,10 +48,8 @@ def merge(valid):
     """
     nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
                           ) % (valid.year, ), 'r')
-    # Careful of the issues reading ushort data
-    nc.set_auto_scale(False)
     tidx = iemre.hourly_offset(valid)
-    val = nc.variables['p01m'][tidx, :, :] / nc.variables['p01m'].scale_factor
+    val = nc.variables['p01m'][tidx, :, :]
     # print("stage4 mean: %.2f max: %.2f" % (np.mean(val), np.max(val)))
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
