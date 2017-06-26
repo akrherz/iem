@@ -1,18 +1,18 @@
-"""
-Merge the 0.01x0.01 Q3 24 hour precip data estimates
-"""
+"""Merge the 0.01x0.01 Q3 24 hour precip data estimates"""
+from __future__ import print_function
 import datetime
-import pytz
 import sys
-import pyiem.mrms as mrms
 import os
+import gzip
+import tempfile
+
+import pytz
 import netCDF4
 import numpy as np
+import pyiem.mrms as mrms
 from pyiem import iemre
 import pygrib
-import gzip
 import requests
-import tempfile
 
 TMP = "/mesonet/tmp"
 
@@ -42,15 +42,16 @@ def run(ts):
         for prefix in ['GaugeCorr', 'RadarOnly']:
             fn = gmtts.strftime((prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
                                  ".grib2.gz"))
-            res = requests.get(gmtts.strftime(
+            url = gmtts.strftime(
                     ("http://mtarchive.geol.iastate.edu/%Y/%m/%d/mrms/ncep/" +
-                     prefix + "_QPE_01H/" + fn)), timeout=30)
+                     prefix + "_QPE_01H/" + fn))
+            res = requests.get(url, timeout=30)
             if res.status_code != 200:
                 continue
-            o = open(TMP + "/" + fn, 'wb')
-            o.write(res.content)
-            o.close()
             gribfn = "%s/%s" % (TMP, fn)
+            output = open(gribfn, 'wb')
+            output.write(res.content)
+            output.close()
             break
         if gribfn is None:
             if gmtts < utcnow:
@@ -106,6 +107,7 @@ def main():
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)
+
 
 if __name__ == '__main__':
     main()
