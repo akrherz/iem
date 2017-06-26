@@ -1,9 +1,11 @@
+"""First or Last Date with temp"""
+import datetime
+from collections import OrderedDict
+
 import psycopg2
 from pandas.io.sql import read_sql
 import numpy as np
-import datetime
 from pyiem.network import Table as NetworkTable
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
@@ -24,9 +26,9 @@ PDICT2 = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents the yearly first or last date
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents the yearly first or last date
     of a given high or low temperature along with the number of days that
     year above/below the threshold along with the cumulative distribution
     function for the first date!  When you select a low temperature option,
@@ -35,7 +37,7 @@ def get_description():
     would represent the period of 1 July 2016 to 30 Jun 2017.
     """
     thisyear = datetime.date.today().year
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='threshold', default='90',
@@ -47,7 +49,7 @@ def get_description():
         dict(type='year', name='year', default=thisyear,
              max=(thisyear + 1), label='Year to Highlight in Chart:'),
     ]
-    return d
+    return desc
 
 
 def do_labels(ax, extrenum, varname, direction, threshold, station, network,

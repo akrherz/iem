@@ -1,12 +1,14 @@
-import psycopg2.extras
+"""Average dew point by wind direction"""
 import datetime
+from collections import OrderedDict
+
+import psycopg2.extras
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, dewpoint_from_pq
 from pyiem.datatypes import temperature, pressure, mixingratio
-import pandas as pd
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
+import pandas as pd
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -30,22 +32,22 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the average dew point at
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the average dew point at
     a given wind direction.  The average dew point is computed by taking the
     observations of mixing ratio, averaging those, and then back computing
     the dew point temperature.  With that averaged dew point temperature a
     relative humidity value is computed."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -53,8 +55,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -126,6 +128,7 @@ def plotter(fdict):
     ax.set_xlabel("Wind Direction")
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

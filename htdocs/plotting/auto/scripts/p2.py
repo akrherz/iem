@@ -1,18 +1,20 @@
-import psycopg2
-from scipy import stats
-from pyiem import network
+"""GDD vs precip departures"""
 import datetime
 import calendar
+
+import psycopg2
+from scipy import stats
 from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     today = datetime.datetime.now()
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=today.month,
@@ -20,7 +22,7 @@ def get_description():
         dict(type='year', name='year', default=today.year,
              label='Year to Highlight'),
     ]
-    d['description'] = """This plot compares the growing degree day vs
+    desc['description'] = """This plot compares the growing degree day vs
     precipitation
     departure for a given month and station.  The departure is expressed in
     units of standard deviation.  So a value of one would represent an one
@@ -30,7 +32,7 @@ def get_description():
     of your choosing.  The dots greater than 2.5 sigma from center are
     labelled with the year they represent.
     """
-    return d
+    return desc
 
 
 def plotter(fdict):

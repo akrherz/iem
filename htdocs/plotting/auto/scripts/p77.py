@@ -1,26 +1,28 @@
+"""first and last date stuff"""
+import datetime
+import calendar
+
 import psycopg2
 import numpy as np
 from pyiem import network
-import datetime
-from pandas.io.sql import read_sql
-import calendar
 from pyiem.util import get_autoplot_context
+from pandas.io.sql import read_sql
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """For each year, the average first and last date of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """For each year, the average first and last date of
     a given temperature is computed.  The values are then averaged and plotted
     to represent the period between these occurences and also the number of
     days represented by the period.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -85,6 +87,7 @@ def plotter(fdict):
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

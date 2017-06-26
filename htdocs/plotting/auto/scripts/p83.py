@@ -1,9 +1,11 @@
+"""period averages around a date"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-from pyiem import network
-import datetime
 import pandas as pd
 from scipy import stats
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'Average High Temperature',
@@ -16,13 +18,13 @@ UNITS = {'high': '$^\circ$F',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents simple yearly statistics for
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents simple yearly statistics for
     a given day period around a given date.  For example, you can compare
     the previous 45 days to the next 45 days around 15 July.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='high',
@@ -35,7 +37,7 @@ def get_description():
              label='Select Day:'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -158,6 +160,7 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=12)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -1,7 +1,9 @@
+"""Windows"""
+
 import psycopg2.extras
 import numpy as np
-from pyiem import network
 import pandas as pd
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'precip': 'Precipitation',
@@ -15,22 +17,22 @@ UNITS = {'precip': 'inch',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot produces statistics on min, max, and
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot produces statistics on min, max, and
     average values of a variable over a window of days.  The labels get
     a bit confusing, but we are looking for previous periods of time with
     temperature
     above or below a given threshold.  For precipitation, it is only a period
     with each day above a given threshold and the average over that period.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='precip',
              label='Which Variable:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -38,8 +40,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     varname = ctx['var']
@@ -105,6 +107,7 @@ def plotter(fdict):
               fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=12)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

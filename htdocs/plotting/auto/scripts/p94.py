@@ -1,16 +1,18 @@
+"""Bias computing hi/lo"""
+import datetime
+
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
 import numpy as np
 import pandas as pd
-import datetime
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['desciption'] = """This plot looks at the effect of splitting a 24
+    desc = dict()
+    desc['data'] = True
+    desc['desciption'] = """This plot looks at the effect of splitting a 24
     hour period at different hours of the day.  Using the hourly temperature
     record, we can look at the bias of computing the daily high and low
     temperature.  Confusing?  Assuming that the 'truth' is a daily high and
@@ -18,11 +20,11 @@ def get_description():
     computed for each hour of the day. This plot is one of the main reasons
     that comparing climate data for a station that changed hour of day
     observation over the years is problematic."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -30,8 +32,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']

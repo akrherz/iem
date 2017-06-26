@@ -1,12 +1,12 @@
 """Precip estimates"""
 import datetime
 import os
+from collections import OrderedDict
 
 import numpy as np
 import netCDF4
 from pyiem import iemre, util
 from pyiem.datatypes import distance
-from collections import OrderedDict
 
 PDICT = OrderedDict([
     ('IA', 'Iowa'),
