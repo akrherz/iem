@@ -1,6 +1,8 @@
-import psycopg2
+"""monthly temperature range"""
 import calendar
 import datetime
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -8,15 +10,15 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents the range between the warmest
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents the range between the warmest
     high temperature and the coldest low temperature for a given month for
     each year.  The bottom panel displays the range between those two values.
     The black lines represent the simple averages of the data.
     """
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default=today.month,
@@ -24,7 +26,7 @@ def get_description():
         dict(type='year', name='year', default=today.year,
              label='Year to Highlight:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -86,6 +88,7 @@ def plotter(fdict):
     ax[1].grid(True)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

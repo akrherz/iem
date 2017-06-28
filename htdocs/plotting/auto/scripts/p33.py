@@ -1,3 +1,5 @@
+"""Temp drops in the fall"""
+
 import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -6,9 +8,9 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot presents the largest drop in low
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents the largest drop in low
     temperature during a fall season.  The drop compares the lowest
     low previous to the date with the low for that date.  For example,
     if your coldest low to date was 40, you would not expect to see a
@@ -16,13 +18,13 @@ def get_description():
     daily low temperatures. See also
     <a class="alert-link" href="/plotting/auto/?q=103">this autoplot</a>
     for more details."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=2015,
              label='Year to Highlight'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -66,6 +68,7 @@ def plotter(fdict):
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

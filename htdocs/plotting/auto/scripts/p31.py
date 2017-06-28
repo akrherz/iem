@@ -1,7 +1,9 @@
-import psycopg2.extras
-import numpy as np
+"""jumps in temperature"""
 import datetime
 import calendar
+
+import psycopg2.extras
+import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -9,20 +11,20 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the maximum and minimum change
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the maximum and minimum change
     in high temperature between a given day and a given number of days prior
     to that date.  The red bars are the largest difference between a maximum
     high over a period of days and the given day.  The blue bars are the
     opposite."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='days', default='4',
              label='Number of Trailing Days:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -95,6 +97,7 @@ def plotter(fdict):
             color='blue', va='center', ha='center', bbox=dict(color='white'))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

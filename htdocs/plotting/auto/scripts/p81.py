@@ -1,7 +1,9 @@
-import psycopg2
-from pyiem import network
-from pandas.io.sql import read_sql
+"""Stddev of temperatures"""
 import calendar
+
+import psycopg2
+from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'high': 'High Temperature',
@@ -10,21 +12,21 @@ PDICT = {'high': 'High Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents two measures of temperature
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents two measures of temperature
     variability.  The first is the standard deviation of the period of
     record for a given day of the year.  The second is the standard deviation
     of the day to day changes in temperature.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='high',
              label='Which Daily Variable:', options=PDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -84,6 +86,7 @@ def plotter(fdict):
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].set_xlim(0, 366)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
