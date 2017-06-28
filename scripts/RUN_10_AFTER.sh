@@ -17,6 +17,12 @@ else
 fi
 python merge_ifc.py
 
+if [ $LHH -eq "05" ]
+then
+	cd ../coop
+	python cfs_extract.py &
+fi
+
 cd ../rtma
 python wind_power.py &
 
