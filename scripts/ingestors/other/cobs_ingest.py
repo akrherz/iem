@@ -62,13 +62,13 @@ DAILYCONV = {'Batt_Volt_Min': None,
 
 def sum_hourly(hdf, date, col):
     """Figure out the sum based on the hourly data"""
-    # 6z is good enough, no rad at night!
+    # TODO 6z is a quasi bug here as we also total precip
     sts = datetime.datetime(date.year, date.month, date.day, 6)
     sts = sts.replace(tzinfo=pytz.utc)
     ets = sts + datetime.timedelta(hours=24)
     df2 = hdf[(hdf['valid'] > sts) & (hdf['valid'] < ets)]
     if len(df2.index) == 0:
-        print("ingest_cobs found no hourly data for date: %s" % (date,))
+        # print("ingest_cobs found no hourly data for date: %s" % (date,))
         return None
     return df2[col].sum()
 
