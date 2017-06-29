@@ -94,7 +94,7 @@ $().ready(function(){
 			format: new ol.format.GeoJSON()
 		}),
 		style: function(feature, resolution){
-			mystyle.getText().setText(feature.get(varname));
+			mystyle.getText().setText(feature.get(varname).toString());
 			return [mystyle];
 		}
 	});
@@ -172,7 +172,7 @@ $().ready(function(){
 				   currentdt = (new Date(Date.parse(tokens2[1])));
 				   timeChanged = true;
 			   }
-			   gj.redraw();
+			   gj.setStyle(gj.getStyle());
 		   }
 	   } catch(err) {
 		   varname = 'tmpf';
