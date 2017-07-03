@@ -5,21 +5,23 @@ which is 5 mm.  So if we want to store 5mm in 250 bins, we have a resolution
 of 0.02 mm per index.
 
 """
+from __future__ import print_function
 import datetime
-import pytz
-import numpy as np
 import os
 import tempfile
-from PIL import Image
 import subprocess
 import json
 import sys
-import pyiem.mrms as mrms
-import pygrib
 import gzip
 
+import pytz
+import numpy as np
+from PIL import Image
+import pyiem.mrms as mrms
+import pygrib
 
-def do(now, realtime, delta):
+
+def workflow(now, realtime):
     """ Generate for this timestep! """
     szx = 7000
     szy = 3500
@@ -115,21 +117,22 @@ def main():
                                    int(sys.argv[3]), int(sys.argv[4]),
                                    int(sys.argv[5])
                                    ).replace(tzinfo=pytz.timezone("UTC"))
-        do(utcnow, False, 0)
+        workflow(utcnow, False)
     else:
         # If our time is an odd time, run 5 minutes ago
         utcnow = utcnow.replace(second=0, microsecond=0)
         if utcnow.minute % 2 != 1:
             return
         utcnow = utcnow - datetime.timedelta(minutes=5)
-        do(utcnow, True, 0)
+        workflow(utcnow, True)
         # Also check old dates
         for delta in [30, 90, 1440, 2880]:
             ts = utcnow - datetime.timedelta(minutes=delta)
             fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
                               "GIS/mrms/a2m_%Y%m%d%H%M.png"))
             if not os.path.isfile(fn):
-                do(ts, False, delta)
+                workflow(ts, False)
+
 
 if __name__ == '__main__':
     main()

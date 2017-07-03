@@ -3,8 +3,6 @@
  COOP data included...
 """
 import sys
-import psycopg2.extras
-from pyiem.network import Table as NetworkTable
 import cStringIO
 import datetime
 import smtplib
@@ -12,9 +10,9 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
-nt = NetworkTable("IA_COOP")
+import psycopg2.extras
 
-districts = [
+DISTRICTS = [
              'North West',
              'North Central',
              'North East',
@@ -25,78 +23,69 @@ districts = [
              'South Central',
              'South East',
             ]
-stids = [
-[
- 'Rock Rapids    RKRI4',
- 'Sheldon    SHDI4',
- 'Sibley    SIBI4',
- 'Sioux Center    SIXI4',
- 'Spirit Lake    VICI4',
- 'Storm Lake    SLBI4',
-],
-[
- 'Algona    ALGI4',
- 'Charles City    CIYI4',
- 'Dakota City    DAKI4',
- 'Hampton    HPTI4',
- 'Mason City    MCWI4',
- 'Osage    OSAI4',
-],
-[
- 'Cresco    CRCI4',
- 'Decorah    DCRI4',
- 'Dubuque    DLDI4',
- 'Fayette    FYTI4',
- 'Manchester    MHRI4',
- 'Tripoli    TRPI4',
-],
-[
- 'Audubon    AUDI4',
- 'Carroll    CINI4',
- 'Jefferson    JFFI4',
- 'Logan    LOGI4',
- 'Mapleton    MPTI4',
- 'Rockwell City    RKWI4',
-],
-[
- 'Boone    BNWI4',
- 'Grinnell    GRII4',
- 'Grundy Center    GNDI4',
- 'Iowa Falls    IWAI4',
- 'Marshalltown    MSHI4',
- 'Webster City    WEBI4',
-],
-[
- 'Anamosa    AMOI4',
- 'Cedar Rapids    CRPI4',
- 'Clinton    CLNI4',
- 'Lowden    LWDI4',
- 'Maquoketa    MKTI4',
- 'Vinton    VNTI4',
-],
-[
- 'Atlantic    ATLI4',
- 'Clarinda    CLDI4',
- 'Glenwood    GLNI4',
- 'Oakland    OAKI4',
- 'Red Oak    ROKI4',
- 'Sidney    SIDI4',
-],
-[
- 'Allerton    ALRI4',
- 'Beaconsfield    BCNI4',
- 'Centerville    CNTI4',
- 'Indianola    IDAI4',
- 'Lamoni    3OI',
- 'Osceola    OSEI4',
-],
-[
- 'Bloomfield    BLMI4',
- 'Donnellson    DNNI4',
- 'Fairfield    FRFI4',
- 'Keosauqua    KEQI4',
- 'Washington    WSHI4',
-]
+STIDS = [
+    ['Rock Rapids    RKRI4',
+     'Sheldon    SHDI4',
+     'Sibley    SIBI4',
+     'Sioux Center    SIXI4',
+     'Spirit Lake    VICI4',
+     'Storm Lake    SLBI4',
+     ],
+    ['Algona    ALGI4',
+     'Charles City    CIYI4',
+     'Dakota City    DAKI4',
+     'Hampton    HPTI4',
+     'Mason City    MCWI4',
+     'Osage    OSAI4',
+     ],
+    ['Cresco    CRCI4',
+     'Decorah    DCRI4',
+     'Dubuque    DLDI4',
+     'Fayette    FYTI4',
+     'Manchester    MHRI4',
+     'Tripoli    TRPI4',
+     ],
+    ['Audubon    AUDI4',
+     'Carroll    CINI4',
+     'Jefferson    JFFI4',
+     'Logan    LOGI4',
+     'Mapleton    MPTI4',
+     'Rockwell City    RKWI4',
+     ],
+    ['Boone    BNWI4',
+     'Grinnell    GRII4',
+     'Grundy Center    GNDI4',
+     'Iowa Falls    IWAI4',
+     'Marshalltown    MSHI4',
+     'Webster City    WEBI4',
+     ],
+    ['Anamosa    AMOI4',
+     'Cedar Rapids    CRPI4',
+     'Clinton    CLNI4',
+     'Lowden    LWDI4',
+     'Maquoketa    MKTI4',
+     'Vinton    VNTI4',
+     ],
+    ['Atlantic    ATLI4',
+     'Clarinda    CLDI4',
+     'Glenwood    GLNI4',
+     'Oakland    OAKI4',
+     'Red Oak    ROKI4',
+     'Sidney    SIDI4',
+     ],
+    ['Allerton    ALRI4',
+     'Beaconsfield    BCNI4',
+     'Centerville    CNTI4',
+     'Indianola    IDAI4',
+     'Lamoni    3OI',
+     'Osceola    OSEI4',
+     ],
+    ['Bloomfield    BLMI4',
+     'Donnellson    DNNI4',
+     'Fairfield    FRFI4',
+     'Keosauqua    KEQI4',
+     'Washington    WSHI4',
+     ]
 ]
 
 
@@ -171,7 +160,7 @@ def compute_weekly(fp, sts, ets):
     for row in cursor:
         data[row['station']] = row
 
-    for district, sector in zip(districts, stids):
+    for district, sector in zip(DISTRICTS, STIDS):
         fp.write("%s District\n" % (district,))
         for sid in sector:
             nwsli = sid[-5:].strip()
@@ -251,7 +240,7 @@ def compute_monthly(fp, year, month):
     for row in cursor:
         data[row['station']] = row
 
-    for district, sector in zip(districts, stids):
+    for district, sector in zip(DISTRICTS, STIDS):
         fp.write("%s District\n" % (district,))
         for sid in sector:
             nwsli = sid[-5:].strip()
@@ -313,8 +302,7 @@ def email_report(report, subject):
     msg['Subject'] = subject
     msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
     msg['Cc'] = 'akrherz@iastate.edu'
-    msg['To'] = 'NASSRFOUMR@nass.usda.gov'
-    # msg['To'] = 'akrherz@localhost'
+    msg['To'] = 'akrherz@localhost'
     msg.preamble = 'Report'
 
     fn = "iem.txt"
@@ -332,7 +320,8 @@ def email_report(report, subject):
     s.quit()
 
 
-if __name__ == '__main__':
+def main():
+    """Go Main"""
     # If we are in Nov,Dec,Jan,Feb,Mar -> do monthly report
     # otherwise, do the weekly
     # This script is run each Monday or the first of the month
@@ -375,3 +364,7 @@ if __name__ == '__main__':
             weekly_header(report, sts, ets)
             compute_weekly(report, sts, ets)
             email_report(report, "IEM Weekly Data Report")
+
+
+if __name__ == '__main__':
+    main()
