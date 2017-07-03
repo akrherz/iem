@@ -1,10 +1,12 @@
+"""Totals"""
+import datetime
+from collections import OrderedDict
+
 import psycopg2.extras
 import numpy as np
-from pyiem import network
-import datetime
 from scipy import stats
 import pandas as pd
-from collections import OrderedDict
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT2 = OrderedDict([
@@ -17,11 +19,11 @@ PDICT2 = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Simple plot of seasonal/yearly precipitation totals.
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Simple plot of seasonal/yearly precipitation totals.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', default='winter',
@@ -29,7 +31,7 @@ def get_description():
         dict(type="year", name="year", default=1893,
              label="Start Year of Plot"),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -37,8 +39,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     season = ctx['season']
@@ -82,10 +84,10 @@ def plotter(fdict):
     colorabove = 'seagreen'
     colorbelow = 'lightsalmon'
     bars = ax.bar(years, data, fc=colorabove, ec=colorabove, align='center')
-    for i, bar in enumerate(bars):
+    for i, mybar in enumerate(bars):
         if data[i] < avgv:
-            bar.set_facecolor(colorbelow)
-            bar.set_edgecolor(colorbelow)
+            mybar.set_facecolor(colorbelow)
+            mybar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color='k', zorder=2, label='Average')
     h_slope, intercept, r_value, _, _ = stats.linregress(years, data)
     ax.plot(years, h_slope * np.array(years) + intercept, '--',
@@ -107,6 +109,7 @@ def plotter(fdict):
     ax.legend(ncol=2, fontsize=10)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

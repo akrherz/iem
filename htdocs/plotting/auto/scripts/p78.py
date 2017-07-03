@@ -1,12 +1,14 @@
-import psycopg2.extras
+"""Avg dew point at temperature"""
+from collections import OrderedDict
 import datetime
+
+import psycopg2.extras
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
 from pyiem.datatypes import temperature, pressure, mixingratio
-import pandas as pd
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context
+import pandas as pd
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -30,22 +32,22 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays the average dew point at
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays the average dew point at
     a given air temperature.  The average dew point is computed by taking the
     observations of mixing ratio, averaging those, and then back computing
     the dew point temperature.  With that averaged dew point temperature a
     relative humidity value is computed."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -128,6 +130,7 @@ def plotter(fdict):
     ax.set_xlabel("Air Temperature $^\circ$F")
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
