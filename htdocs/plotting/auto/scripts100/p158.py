@@ -1,16 +1,12 @@
 """talltowers plot"""
 import datetime
 
+import pytz
 import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
-
-PDICT = {'above': 'Above Threshold',
-         'below': 'Below Threshold'}
-PDICT2 = {'max_rh': 'Daily Max RH',
-          'min_rh': 'Daily Min RH'}
 
 
 def get_description():
@@ -18,7 +14,11 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['highcharts'] = True
-    desc['description'] = """ WORK-IN-PROGRESS! """
+    desc['description'] = """This plot presents one second data from the
+    Iowa Atmospheric Observatory Tall-Towers sites overseen by Dr Gene Takle.
+    The plot limits the number of times plotted to approximately 1,000 so to
+    prevent web browser crashes.  If you select a time period greater than
+    20 minutes, you will get strided results."""
     desc['arguments'] = [
         dict(type='networkselect', name='station', default='ETTI4',
              label='Select Station', network='TALLTOWERS'),
@@ -31,25 +31,36 @@ def get_description():
 
 
 def get_context(fdict):
+    """Get plot context"""
     pgconn = psycopg2.connect(database='talltowers',
                               host='talltowers-db.local', user='tt_web')
     ctx = get_autoplot_context(fdict, get_description())
     dt = ctx['dt']
     station = ctx['station']
     minutes = ctx['minutes']
+    # We can't deal with thousands of datapoints on the plot, so we stride
+    # appropriately with hopes of limiting to 1000 x points
+    size = minutes * 60.
+    stride = 1 if size < 1000 else int(((size / 1000) + 1))
+
     nt = NetworkTable("TALLTOWERS")
     towerid = nt.sts[station]['remote_id']
+    ctx['title'] = "Tall Tower %s" % (nt.sts[station]['name'], )
 
     ctx['df'] = read_sql("""
-    SELECT * from data_analog where tower = %s and
-    valid between %s and %s ORDER by valid ASC
+    WITH data as (
+        SELECT *, row_number() OVER (ORDER by valid ASC)
+        from data_analog where tower = %s and
+        valid between %s and %s ORDER by valid ASC)
+    select * from data where row_number %% %s = 0
     """, pgconn, params=(towerid, dt,
-                         dt + datetime.timedelta(minutes=minutes)),
+                         dt + datetime.timedelta(minutes=minutes), stride),
                          index_col='valid')
     return ctx
 
 
 def highcharts(fdict):
+    """Do highcharts variant"""
     ctx = get_context(fdict)
     df = ctx['df']
     df['ticks'] = df.index.values.astype(np.int64) // 10 ** 6
@@ -60,44 +71,44 @@ def highcharts(fdict):
     for col in ['ws_5m_s', 'ws_5m_nw', "ws_10m_s", "ws_10m_nwht",
                 "ws_20m_s", "ws_20m_nw", "ws_40m_s", "ws_40m_nwht",
                 "ws_80m_s", "ws_80m_nw", "ws_120m_s", "ws_120m_nwht"]:
-        v = df[['ticks', col]].to_json(orient='values')
+        vals = df[['ticks', col]].to_json(orient='values')
         lines.append("""{
             name: '""" + col + """',
             type: 'line',
             tooltip: {valueDecimal: 1},
-            data: """+v+"""
+            data: """ + vals + """
             }
         """)
     for col in ['airtc_5m', 'airtc_10m', 'airtc_20m', 'airtc_40m',
                 'airtc_80m', 'airtc_120m_1', 'airtc_120m_2']:
-        v = df[['ticks', col]].to_json(orient='values')
+        vals = df[['ticks', col]].to_json(orient='values')
         lines2.append("""{
             name: '""" + col + """',
             type: 'line',
             tooltip: {valueDecimal: 1},
-            data: """+v+"""
+            data: """ + vals + """
             }
         """)
     for col in ['rh_5m', 'rh_10m', 'rh_20m', 'rh_40m',
                 'rh_80m', 'rh_120m_1', 'rh_120m_2']:
-        v = df[['ticks', col]].to_json(orient='values')
+        vals = df[['ticks', col]].to_json(orient='values')
         lines3.append("""{
             name: '""" + col + """',
             type: 'line',
             tooltip: {valueDecimal: 1},
-            data: """+v+"""
+            data: """ + vals + """
             }
         """)
     for col in ['winddir_5m_s', 'winddir_5m_nw', 'winddir_10m_s',
                 'winddir_10m_nw', 'winddir_20m_s', 'winddir_20m_nw',
                 'winddir_40m_s', 'winddir_40m_nw', 'winddir_80m_s',
                 'winddir_80m_nw', 'winddir_120m_s', 'winddir_120m_nw']:
-        v = df[['ticks', col]].to_json(orient='values')
+        vals = df[['ticks', col]].to_json(orient='values')
         lines4.append("""{
             name: '""" + col + """',
             type: 'line',
             tooltip: {valueDecimal: 1},
-            data: """+v+"""
+            data: """ + vals + """
             }
         """)
 
@@ -327,16 +338,37 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
     ctx = get_context(fdict)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, [ax1, ax2, ax3, ax4]) = plt.subplots(4, 1, figsize=(12, 10),
+                                               sharex=True)
     for height in [5, 10, 20, 40, 80, 120]:
         x = "_1" if height == 120 else ''
-        ax.plot(ctx['df'].index.values,
-                ctx['df']['airtc_%sm%s' % (height, x)].values, lw=2,
-                label='%sm' % (height,))
-    ax.legend(loc='best')
-    ax.grid(True)
+        ax1.plot(ctx['df'].index.values,
+                 ctx['df']['airtc_%sm%s' % (height, x)].values, lw=2,
+                 label='%sm' % (height,))
+        ax2.plot(ctx['df'].index.values,
+                 ctx['df']['rh_%sm%s' % (height, x)].values, lw=2,
+                 label='%sm' % (height,))
+        ax3.plot(ctx['df'].index.values,
+                 ctx['df']['ws_%sm_s' % (height,)].values, lw=2,
+                 label='%sm' % (height,))
+        ax4.plot(ctx['df'].index.values,
+                 ctx['df']['winddir_%sm_s' % (height,)].values, lw=2,
+                 label='%sm' % (height,))
+    ax1.legend(loc=(0., -0.15), ncol=6)
+    ax1.grid(True)
+    ax1.set_ylabel("Air Temp C")
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter(
+        "%-I %p\n%-d %b", tz=pytz.timezone("America/Chicago")))
+    ax1.set_title(ctx['title'])
+    ax2.grid(True)
+    ax2.set_ylabel("RH %")
+    ax3.grid(True)
+    ax3.set_ylabel("Wind Speed mps")
+    ax4.grid(True)
+    ax4.set_ylabel("Wind Dir deg")
     # remove timezone since excel no likely
     ctx['df'].index = ctx['df'].index.tz_localize(None)
     return fig, ctx['df']
