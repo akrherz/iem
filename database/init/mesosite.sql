@@ -137,7 +137,7 @@ CREATE TABLE racoon_jobs(
   radar varchar(3),
   processed boolean default false,
   nexrad_product char(3),
-  wtypes varchar(32)
+  wtype varchar(32)
 );
 GRANT all on racoon_jobs to apache,nobody;
 

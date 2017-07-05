@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 """Generate a Powerpoint file for an event.  This script looks for queued jobs
 within the database and runs them sequentially each minute"""
+from __future__ import print_function
+
 import sys
 import shutil
 import datetime
 import subprocess
 import random
+import os
+
 import psycopg2.extras
 from odf.opendocument import OpenDocumentPresentation
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.text import P
 from odf.draw import Page, Frame, TextBox, Image
-import os
 os.putenv("DISPLAY", "localhost:1")
 
 __REV__ = "11Feb2013"
@@ -20,9 +23,7 @@ SUPER_RES = datetime.datetime(2010, 3, 1)
 
 
 def test_job():
-    """
-    For command line testing, lets provide a dummy job
-    """
+    """For command line testing, lets provide a dummy job"""
     jobs = []
     jobs.append({'wfo': 'FSD', 'radar': 'FSD', 'wtype': 'SV,TO',
                  'sts': datetime.datetime(2003, 6, 24, 2),
@@ -32,14 +33,25 @@ def test_job():
     return jobs
 
 
+def add_job(row):
+    """Add back a job"""
+    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    print("setting racoon jobid: %s back to unprocessed" % (row['jobid'], ))
+    mcursor.execute("""
+        UPDATE racoon_jobs SET processed = False
+        WHERE jobid = %s
+    """, (row['jobid'], ))
+    mcursor.close()
+    pgconn.commit()
+
+
 def check_for_work():
-    """
-    See if we have any requests to process!
-    """
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb',
-                                user='nobody')
-    mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    mcursor2 = MESOSITE.cursor()
+    """See if we have any requests to process!"""
+    pgconn = psycopg2.connect(database='mesosite', host='iemdb',
+                              user='nobody')
+    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    mcursor2 = pgconn.cursor()
     mcursor.execute("""SELECT jobid, wfo, radar,
         sts at time zone 'UTC' as sts,
         ets at time zone 'UTC' as ets, nexrad_product, wtype
@@ -49,20 +61,18 @@ def check_for_work():
         jobs.append(row)
         mcursor2.execute("""UPDATE racoon_jobs SET processed = True
         WHERE jobid = %s""", (row[0],))
-    MESOSITE.commit()
-    MESOSITE.close()
+    pgconn.commit()
+    pgconn.close()
     return jobs
 
 
 def get_warnings(sts, ets, wfo, wtypes):
-    """
-    Retreive an array of warnings for this time period and WFO
-    """
+    """Retreive an array of warnings for this time period and WFO"""
     tokens = wtypes.split(",")
     tokens.append("ZZZ")
     phenomenas = str(tuple(tokens))
-    POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,
@@ -93,12 +103,12 @@ def get_warnings(sts, ets, wfo, wtypes):
     res = []
     for row in pcursor:
         res.append(row)
-    POSTGIS.close()
+    pgconn.close()
     return res
 
 
 def do_job(job):
-
+    """Do something"""
     warnings = get_warnings(job['sts'], job['ets'], job['wfo'], job['wtype'])
 
     os.makedirs("/tmp/%s" % (job['jobid'],))
@@ -278,13 +288,18 @@ def do_job(job):
     cmd = "unoconv -f ppt %s" % (outputfile,)
     subprocess.call(cmd, shell=True)
     pptfn = "%s.ppt" % (basefn,)
-    print "Generated %s with %s slides" % (pptfn, i)
+    print("Generated %s with %s slides" % (pptfn, i))
     if os.path.isfile(pptfn):
-        print '...copied to webfolder'
+        print('...copied to webfolder')
         shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
+    else:
+        print("Uh oh, no output file, lets kill soffice.bin")
+        subprocess.call("pkill --signal 9 soffice.bin", shell=True)
+        add_job(job)
 
 
-if __name__ == "__main__":
+def main():
+    """Do main"""
     if len(sys.argv) == 2:
         jobs = test_job()
     else:
@@ -293,3 +308,7 @@ if __name__ == "__main__":
         sys.exit()
     for job in jobs:
         do_job(job)
+
+
+if __name__ == "__main__":
+    main()
