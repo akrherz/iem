@@ -1,33 +1,43 @@
 """
 Check the production of N0Q data!
 """
+from __future__ import print_function
 import json
 import datetime
 import sys
 
-prod = sys.argv[1]
 
-j = json.load(open('/home/ldm/data/gis/images/4326/USCOMP/%s_0.json' % (prod,
-                                                                        )))
-prodtime = datetime.datetime.strptime(j['meta']['valid'], '%Y-%m-%dT%H:%M:%SZ')
-radarson = int(j['meta']['radar_quorum'].split("/")[0])
-gentime = j['meta']['processing_time_secs']
+def main(argv):
+    """Do Great Things"""
+    prod = argv[1]
 
-utcnow = datetime.datetime.utcnow()
-latency = (utcnow - prodtime).total_seconds()
+    j = json.load(
+        open('/home/ldm/data/gis/images/4326/USCOMP/%s_0.json' % (prod, )))
+    prodtime = datetime.datetime.strptime(j['meta']['valid'],
+                                          '%Y-%m-%dT%H:%M:%SZ')
+    radarson = int(j['meta']['radar_quorum'].split("/")[0])
+    gentime = j['meta']['processing_time_secs']
 
-stats = "gentime=%s;180;240;300 radarson=%s;100;75;50" % (gentime, radarson)
+    utcnow = datetime.datetime.utcnow()
+    latency = (utcnow - prodtime).total_seconds()
 
-if gentime < 300 and radarson > 50 and latency < 60*10:
-    print 'OK |%s' % (stats)
-    sys.exit(0)
-if gentime > 300:
-    print 'CRITICAL - gentime %s|%s' % (gentime, stats)
-    sys.exit(2)
-if latency > 600:
-    print('CRITICAL - radtime:%s latency:%ss|%s' % (prodtime, latency,
-                                                    stats))
-    sys.exit(2)
-if radarson < 50:
-    print 'CRITICAL - radarson %s|%s' % (radarson, stats)
-    sys.exit(2)
+    stats = "gentime=%s;180;240;300 radarson=%s;100;75;50" % (gentime,
+                                                              radarson)
+
+    if gentime < 300 and radarson > 50 and latency < 60*10:
+        print('OK |%s' % (stats))
+        sys.exit(0)
+    if gentime > 300:
+        print('CRITICAL - gentime %s|%s' % (gentime, stats))
+        sys.exit(2)
+    if latency > 600:
+        print('CRITICAL - radtime:%s latency:%ss|%s' % (prodtime, latency,
+                                                        stats))
+        sys.exit(2)
+    if radarson < 50:
+        print('CRITICAL - radarson %s|%s' % (radarson, stats))
+        sys.exit(2)
+
+
+if __name__ == '__main__':
+    main(sys.argv)
