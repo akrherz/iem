@@ -3,16 +3,16 @@ Generate an animated GIF of HRRR forecasted 1km reflectivity
 
 Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 """
+import datetime
+import subprocess
+import os
+import sys
 
 import pygrib
 from pyiem.plot import MapPlot
 import pyiem.reference as ref
 import numpy as np
-import datetime
 import pytz
-import subprocess
-import os
-import sys
 
 
 def compute_bounds(lons, lats):
@@ -26,8 +26,8 @@ def compute_bounds(lons, lats):
 
 def run(utc, routes):
     ''' Generate the plot for the given UTC time '''
-
-    fn = "/tmp/ncep_hrrr_%s.grib2" % (utc.strftime("%Y%m%d%H"),)
+    fn = utc.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+                       "hrrr.t%Hz.refd.grib2"))
     if not os.path.isfile(fn):
         subprocess.call(("python dl_hrrrref.py %s"
                          ) % (utc.strftime("%Y %m %d %H"),), shell=True)
@@ -57,16 +57,16 @@ def run(utc, routes):
 
         ref = g['values'][x1:x2, y1:y2]
 
-        m = MapPlot(sector='midwest', axisbg='tan',
-                    title=('%s UTC NCEP HRRR 1 km AGL Reflectivity'
-                           ) % (utc.strftime("%-d %b %Y %H"),),
-                    subtitle=('valid: %s'
-                              ) % (now.strftime("%-d %b %Y %I:%M %p %Z"),))
+        mp = MapPlot(sector='midwest', axisbg='tan',
+                     title=('%s UTC NCEP HRRR 1 km AGL Reflectivity'
+                            ) % (utc.strftime("%-d %b %Y %H"),),
+                     subtitle=('valid: %s'
+                               ) % (now.strftime("%-d %b %Y %I:%M %p %Z"),))
 
-        m.pcolormesh(lons, lats, ref, np.arange(0, 75, 5), units='dBZ',
-                     clip_on=False)
-        m.postprocess(filename='/tmp/hrrr_ref_%03i.png' % (i,))
-        m.close()
+        mp.pcolormesh(lons, lats, ref, np.arange(0, 75, 5), units='dBZ',
+                      clip_on=False)
+        mp.postprocess(filename='/tmp/hrrr_ref_%03i.png' % (i,))
+        mp.close()
 
         subprocess.call(("convert /tmp/hrrr_ref_%03i.png "
                          "/tmp/hrrr_ref_%03i.gif") % (i, i), shell=True)
@@ -90,6 +90,7 @@ def run(utc, routes):
 
 
 def main():
+    """Go Main"""
     utcnow = datetime.datetime.utcnow()
     if len(sys.argv) == 5:
         utcnow = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),

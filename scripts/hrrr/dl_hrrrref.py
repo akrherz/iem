@@ -1,15 +1,40 @@
-"""
-Download 1000 ft reflectivity from the NCEP HRRR
-"""
+"""Download and archive 1000 ft reflectivity from the NCEP HRRR"""
+from __future__ import print_function
 import sys
+import os
 import datetime
 import urllib2
+
+import pytz
+import pygrib
+
+# 18 hours of output + analysis
+COMPLETE_GRIB_MESSAGES = 18 * 4 + 1
+
+
+def upstream_has_data(valid):
+    """Does data exist upstream to even attempt a download"""
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    # NCEP should have at least 24 hours of data
+    return (utcnow - datetime.timedelta(hours=24)) < valid
 
 
 def run(valid):
     """ run for this valid time! """
-    output = open("/tmp/ncep_hrrr_%s.grib2" % (valid.strftime("%Y%m%d%H"),),
-                  'wb')
+    if not upstream_has_data(valid):
+        return
+    gribfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+                             "hrrr.t%Hz.refd.grib2"))
+    if os.path.isfile(gribfn):
+        # See how many grib messages we have
+        try:
+            grbs = pygrib.open(gribfn)
+            if grbs.messages == COMPLETE_GRIB_MESSAGES:
+                return
+            del grbs
+        except Exception as exp:
+            pass
+    output = open(gribfn, 'wb')
     for hr in range(0, 19):
         shr = "%02i" % (hr,)
         uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
@@ -46,18 +71,18 @@ def run(valid):
                    ) % (valid.strftime("%Y%m%d%H"), hr, offsets))
         for pr in offsets:
             req.headers['Range'] = 'bytes=%s-%s' % (pr[0], pr[1])
-            f = None
+            fp = None
             attempt = 0
-            while f is None and attempt < 10:
+            while fp is None and attempt < 10:
                 try:
-                    f = urllib2.urlopen(req)
+                    fp = urllib2.urlopen(req)
                 except Exception as exp:
                     print("dl_hrrrref FAIL %s %s %s %s" % (valid, hr, exp,
                                                            req))
                 attempt += 1
-            if f is None:
+            if fp is None:
                 continue
-            output.write(f.read())
+            output.write(fp.read())
 
     output.close()
 
@@ -66,7 +91,10 @@ def main():
     """ Go Main Go """
     valid = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                               int(sys.argv[3]), int(sys.argv[4]))
+    valid = valid.replace(tzinfo=pytz.utc)
     run(valid)
+    # in case we missed some old data, re-download
+    run(valid - datetime.timedelta(hours=12))
 
 
 if __name__ == '__main__':
