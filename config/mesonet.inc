@@ -245,7 +245,6 @@
     RewriteRule raob/([0-9]{12})/([A-Z0-9]{3,4})$ raob.py?ts=$1&station=$2 [QSA]
     RewriteRule prism/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ prism.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
-    RewriteRule network.php network.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/kml">
