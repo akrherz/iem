@@ -52,12 +52,15 @@ def plotter(fdict):
     nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_daily.nc' % (year, ))
     precip = nc.variables['p01d']
 
-    now = datetime.datetime(year, 1, 1)
+    now = datetime.date(year, 1, 1)
     now += datetime.timedelta(days=(period-1))
-    ets = datetime.datetime(year, 12, 31)
+    ets = datetime.date(year, 12, 31)
+    today = datetime.date.today()
+    if ets > today:
+        ets = today
     days = []
     coverage = []
-    while now < ets:
+    while now <= ets:
         idx = iemre.daily_offset(now)
         sevenday = np.sum(precip[(idx-period):idx, :, :], 0)
         pday = np.where(iowa > 0, sevenday[:, :], -1)
@@ -76,6 +79,7 @@ def plotter(fdict):
                   ) % (reference.state_names[state], threshold, period))
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
+    ax.set_yticks(range(0, 101, 25))
     ax.grid(True)
     return fig, df
 
