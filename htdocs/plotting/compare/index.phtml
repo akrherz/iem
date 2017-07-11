@@ -1,8 +1,9 @@
 <?php
 $OL = "3.18.2";
- include("../../../config/settings.inc.php");
- include_once "../../../include/myview.php";
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/myview.php";
  require_once "../../../include/forms.php";
+ require_once "../../../include/imagemaps.php";
  $t = new MyView();
  
 
@@ -35,8 +36,6 @@ $OL = "3.18.2";
  	$cities[""]["network"] = "";
  }
 
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
