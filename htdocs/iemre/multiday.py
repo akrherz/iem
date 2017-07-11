@@ -13,6 +13,7 @@ import numpy as np
 
 warnings.simplefilter("ignore", UserWarning)
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+encoder.c_make_encoder = None
 
 
 def clean(val):
@@ -40,7 +41,7 @@ def main():
         send_error("multi-year query not supported yet...")
     # Make sure we aren't in the future
     tsend = datetime.date.today()
-    if ts2.date() >= tsend:
+    if ts2.date() > tsend:
         ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
 
     lat = float(form["lat"][0])
