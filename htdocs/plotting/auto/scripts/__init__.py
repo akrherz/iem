@@ -84,6 +84,8 @@ data = {'plots': [
         {'id': "107", 'mw': True,
          'label': ("Period Statistics of Temp/Precip for a date period "
                    "each year [COOP/Climate Sites]")},
+        {'id': "182", 'mw': True,
+         'label': "Precipitation (MRMS) Coverage Efficiency by State"},
         {'id': "43",
          'label': "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
         {'id': "157",
