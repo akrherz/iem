@@ -7,6 +7,7 @@ import netCDF4
 from pyiem import iemre
 import numpy as np
 import psycopg2
+from tqdm import tqdm
 
 POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='iemdb')
 
@@ -90,20 +91,21 @@ def do_mask(fn):
 def do_weighting(fn):
     """ Do the magic """
     pcursor = POSTGIS.cursor()
-    nc = netCDF4.Dataset(fn, 'a')
+    # thr MI
     for state in ['IA', 'ND', 'SD', 'KS', 'NE', 'MO', 'IN', 'IL', 'OH', 'MI',
                   'WI', 'MN', 'KY']:
+        nc = netCDF4.Dataset(fn, 'a')
         pcursor.execute("""SELECT ST_xmin(the_geom), ST_xmax(the_geom),
         ST_ymin(the_geom), ST_ymax(the_geom) from states WHERE
         state_abbr = '%s' """ % (state,))
         row = pcursor.fetchone()
-        xmin = row[0] - 0.5
-        xmax = row[1] + 0.5
-        ymin = row[2] - 0.5
-        ymax = row[3] + 0.5
+        xmin = row[0] - 0.1
+        xmax = row[1] + 0.1
+        ymin = row[2] - 0.1
+        ymax = row[3] + 0.1
         print('Processing State: %s' % (state,))
         data = np.zeros(np.shape(nc.variables[state][:]))
-        for i, lon in enumerate(nc.variables['lon'][:]):
+        for i, lon in enumerate(tqdm(nc.variables['lon'][:])):
             for j, lat in enumerate(nc.variables['lat'][:]):
                 # Don't compute 0s, if we don't have to
                 if lon < xmin or lon > xmax or lat < ymin or lat > ymax:
@@ -127,7 +129,7 @@ def do_weighting(fn):
                 row = pcursor.fetchone()
                 data[j, i] = row[0] / row[1]
         nc.variables[state][:] = data
-    nc.close()
+        nc.close()
 
 
 def main():
