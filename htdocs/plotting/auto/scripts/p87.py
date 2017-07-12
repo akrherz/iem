@@ -3,9 +3,9 @@ import datetime
 
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
-import numpy as np
-import pandas as pd
 from pyiem.util import get_autoplot_context
+import numpy as np
+from pandas.io.sql import read_sql
 
 PDICT = {'TS': 'Thunder (TS)',
          '-SN': 'Light Snow (-SN)',
@@ -42,8 +42,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -60,36 +60,34 @@ def plotter(fdict):
 
     data = np.ma.zeros((24, 52), 'f')
 
-    cursor.execute("""
+    df = read_sql("""
     WITH data as (
-    SELECT valid at time zone %s + '10 minutes'::interval as v
-    from alldata where
-    station = %s and presentwx LIKE '%%""" + code + """%%'
-    and valid > %s and valid < %s)
+        SELECT valid at time zone %s + '10 minutes'::interval as v
+        from alldata where
+        station = %s and presentwx LIKE '%%""" + code + """%%'
+        and valid > %s and valid < %s),
+    agg as (
+        SELECT distinct extract(week from v)::int as week,
+        extract(doy from v)::int as doy,
+        extract(year from v)::int as year,
+        extract(hour from v)::int as hour
+        from data)
+    SELECT week, year, hour, count(*) from agg
+    WHERE week < 53
+    GROUP by week, year, hour
+    """, pgconn, params=(nt.sts[station]['tzname'], station, sts, ets),
+                  index_col=None)
+    if len(df.index) == 0:
+        return "No data was found, sorry!"
 
-    SELECT distinct extract(week from v)::int as week,
-    extract(year from v)::int as year, extract(hour from v)::int as hour
-    from data
-    """, (nt.sts[station]['tzname'], station, sts, ets))
+    minyear = df['year'].min()
+    maxyear = df['year'].max()
+    for _, row in df.iterrows():
+        data[row['hour'], row['week']-1] += 1
 
-    minyear = 2099
-    maxyear = 1800
-    for row in cursor:
-        if row[0] > 52:
-            continue
-        data[row[2], row[0]-1] += 1
-        minyear = min([minyear, row[1]])
-        maxyear = max([maxyear, row[1]])
-    if cursor.rowcount == 0:
-        raise Exception("No Data Found!")
-    rows = []
-    for week in range(52):
-        for hour in range(24):
-            rows.append(dict(hour=hour, week=(week+1), count=data[hour, week]))
-    df = pd.DataFrame(rows)
     data.mask = np.where(data == 0, True, False)
     fig = plt.Figure(figsize=(8, 6))
-    ax = plt.axes([0.1, 0.25, 0.7, 0.65])
+    ax = plt.axes([0.11, 0.25, 0.7, 0.65])
     cax = plt.axes([0.82, 0.04, 0.02, 0.15])
 
     res = ax.imshow(data, aspect='auto', rasterized=True,
@@ -111,7 +109,7 @@ def plotter(fdict):
     plt.setp(ax.get_xticklabels(), visible=False)
 
     # Bottom grid
-    lax = plt.axes([0.1, 0.1, 0.7, 0.15])
+    lax = plt.axes([0.11, 0.1, 0.7, 0.15])
     lax.bar(np.arange(0, 52), np.ma.sum(data, 0), facecolor='tan')
     lax.set_xlim(-0.5, 51.5)
     lax.grid(True)
@@ -123,7 +121,7 @@ def plotter(fdict):
     lax.yaxis.get_major_ticks()[-1].label1.set_visible(False)
 
     # Right grid
-    rax = plt.axes([0.8, 0.25, 0.15, 0.65])
+    rax = plt.axes([0.81, 0.25, 0.15, 0.65])
     rax.barh(np.arange(0, 24)-0.4, np.ma.sum(data, 1), facecolor='tan')
     rax.set_ylim(-0.5, 23.5)
     rax.set_yticks([])
