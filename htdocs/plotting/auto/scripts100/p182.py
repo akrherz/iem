@@ -1,6 +1,7 @@
 """Precip estimates"""
 import datetime
 import os
+import sys
 from collections import OrderedDict
 
 import numpy as np
@@ -113,6 +114,8 @@ def plotter(fdict):
     # we actually don't care about weights at this fine of scale
     cells = np.sum(np.where(weights > 0, 1, 0))
     departure = p01d - c_p01d
+    # Update departure and today to values unconsidered below when out of state
+    departure = np.where(weights > 0, departure, -9999)
     today = np.where(weights > 0, today, 0)
     ranges = [[-99, -3], [-3, -2], [-2, -1], [-1, 0],
               [0, 1], [1, 2], [2, 3], [3, 99]]
@@ -140,7 +143,7 @@ def plotter(fdict):
         ax.text(i + 0.2, _x2 + 1, "%.1f" % (_x2, ), ha='center')
     ax.set_xticks(np.arange(8))
     ax.set_xticklabels(labels)
-    ax.set_xlabel("Precipitation Departure [inch]")
+    ax.set_xlabel("Trailing %s Day Precip Departure [in]" % (days,))
     ax.set_position([0.1, 0.2, 0.8, 0.7])
     ax.legend(loc=(0., -0.2), ncol=2)
     ax.set_ylabel("Areal Coverage of %s [%%]" % (PDICT[sector], ))
