@@ -238,6 +238,22 @@ var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iasta
      }
 });
 
+var states = new OpenLayers.Layer.WMS("States", "https://mesonet.agron.iastate.edu/c/c.py/",
+	    {layers      : 's-900913',
+	     format      : 'image/png',
+	     transparent : 'true'},{
+	     opacity     : 1.0,
+	     singleTile  : false,
+	     isBaseLayer : false,
+	     visibility  : false,
+	     buffer      : 0,
+	     eventListeners: {
+	      'visibilitychanged': function(){
+	         updateURL();
+	      }
+	     }
+	});
+
 
 map = new OpenLayers.Map(options);
 ls = new OpenLayers.Control.LayerSwitcher();
@@ -879,6 +895,25 @@ myForm = {
    ]
 }
 
+var osmgray = new OpenLayers.Layer.OSM('Open Street Map (gray)', null, {
+	visible: false,
+    eventListeners: {
+        tileloaded: function(evt) {
+            var ctx = evt.tile.getCanvasContext();
+            if (ctx) {
+                var imgd = ctx.getImageData(0, 0, evt.tile.size.w, evt.tile.size.h);
+                var pix = imgd.data;
+                for (var i = 0, n = pix.length; i < n; i += 4) {
+                    pix[i] = pix[i + 1] = pix[i + 2] = (3 * pix[i] + 4 * pix[i + 1] + pix[i + 2]) / 8;
+                }
+                ctx.putImageData(imgd, 0, 0);
+                evt.tile.imgDiv.removeAttribute("crossorigin");
+                evt.tile.imgDiv.src = ctx.canvas.toDataURL();
+            }
+        }
+    }
+});
+
 /* Construct the viewport */
 new Ext.Viewport({
     layout:'border',
@@ -953,7 +988,11 @@ new Ext.Viewport({
         xtype    : "gx_mappanel",
         map      : map,
         layers   : [new OpenLayers.Layer.OSM("Open Street Map"),
-                    nexradWMS, lsrLayer, sbwLayer, counties],
+        			new OpenLayers.Layer("Blank",{
+        				isBaseLayer: true,
+        				visible: false
+        			}), osmgray,
+                    nexradWMS, states, counties, lsrLayer, sbwLayer],
         extent   : new OpenLayers.Bounds(-20037508, -20037508,
                                              20037508, 20037508.34),
         split    : true

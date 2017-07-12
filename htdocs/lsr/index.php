@@ -12,7 +12,7 @@ $t->jsextra = <<<EOF
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="static.js?v=20"></script>
+<script type="text/javascript" src="static.js?v=21"></script>
 <script>
 Ext.onReady(function(){
   var tokens = window.location.href.split('#');
