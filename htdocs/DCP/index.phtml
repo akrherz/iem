@@ -1,6 +1,6 @@
 <?php 
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
  $t = new MyView();
  $t->thispage = "networks-dcp";
  $t->title = "GOES/HADS/DCP";
@@ -13,11 +13,11 @@
 data collection points.  The DCPs are a collection of networks owned and operated 
 by a host of entities. [<b>1</b>]  The IEM receives this dataset from our 
 <a href="http://www.unidata.ucar.edu">Unidata</a> 
-feed, which contains the products produced by the Office of Hydrological Development
+feed, which contains the products produced by the Office of Dissemination
 of the National Weather Service.<p>
 
 <p>The NWS has a fantastic 
-<a href="http://www.nws.noaa.gov/oh/hads/">website</a> if you are curious 
+<a href="https://hads.ncep.noaa.gov">website</a> if you are curious 
 about this dataset.</p>
 
 
@@ -47,8 +47,8 @@ about this dataset.</p>
 
 <b>References:</b><br>
 <b>1</b> <a
-href="http://www.nws.noaa.gov/oh/hads/dcp_operators.html">http://www.nws.noaa.gov/oh/hads/dcp_operators.html</a>
-, viewed 25 Feb 2002
+href="https://hads.ncep.noaa.gov/dcp_operators.shtml">https://hads.ncep.noaa.gov/dcp_operators.shtml</a>
+, viewed 12 Jul 2017
 <br><a href="http://water.usgs.gov/pubs/circ/circ1123/">http://water.usgs.gov/pubs/circ/circ1123/</a>
  , viewed: 21 Jun 2003
 
