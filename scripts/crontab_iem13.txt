@@ -1,8 +1,10 @@
 # Only EDIT on github!
 #
-PATH=/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
+PATH=/opt/miniconda2/bin:/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
 PYTHONPATH=/opt/iem/scripts/lib
 S=/opt/iem/scripts
 
 # webalizer
 0 0 * * * cd $S/webalizer; sh processlogs.sh
+
+40 * * * * cd $S; sh RUN_40_AFTER_2.sh

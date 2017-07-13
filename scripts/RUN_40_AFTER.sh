@@ -4,10 +4,7 @@ MM6=$(date -u --date '6 hours ago' +'%m')
 DD6=$(date -u --date '6 hours ago' +'%d')
 HH6=$(date -u --date '6 hours ago' +'%H')
 
-cd hrrr
-python plot_ref.py &
-
-cd ../dl
+cd dl
 python download_hrrr.py &
 
 cd ../sbw

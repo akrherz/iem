@@ -23,6 +23,9 @@ def run(valid):
     """ run for this valid time! """
     if not upstream_has_data(valid):
         return
+    mydir = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H")
+    if not os.path.isdir(mydir):
+        os.makedirs(mydir)
     gribfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                              "hrrr.t%Hz.refd.grib2"))
     if os.path.isfile(gribfn):
