@@ -111,8 +111,10 @@ def do_job(job):
     """Do something"""
     warnings = get_warnings(job['sts'], job['ets'], job['wfo'], job['wtype'])
 
-    os.makedirs("/tmp/%s" % (job['jobid'],))
-    os.chdir("/tmp/%s" % (job['jobid'],))
+    mydir = "/tmp/%s" % (job['jobid'],)
+    if not os.path.isdir(mydir):
+        os.makedirs(mydir)
+    os.chdir(mydir)
 
     basefn = "%s-%s-%s-%s-%s" % (job['wfo'], job['wtype'].replace(",", "_"),
                                  job['radar'], job['sts'].strftime("%Y%m%d%H"),
