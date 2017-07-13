@@ -85,8 +85,7 @@ def run(utc, routes):
                                                             pqstr,),
                     shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
-    # os.remove("/tmp/hrrr_ref.gif")
-    os.remove(fn)
+    os.remove("/tmp/hrrr_ref.gif")
 
 
 def main():
