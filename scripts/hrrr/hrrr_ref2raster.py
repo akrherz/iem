@@ -1,11 +1,4 @@
-"""Convert HRRR Grib Reflectivity to RASTERS matching IEM N0Q
-
-Won't be archiving these ATTM, for "realtime"
-  data/gis/images/4326/hrrr/refd_fMMMM.png  where MMMM is 4 char minutes
-
-
-
-"""
+"""Convert HRRR Grib Reflectivity to RASTERS matching ramp used with N0Q"""
 from __future__ import print_function
 import sys
 import os
@@ -50,9 +43,10 @@ def do_grb(grib, valid):
     png = Image.fromarray(raster)
     png.putpalette(PALETTE)
     png.save(pngtemp)
-    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
-           "refd_%04i.png bogus png' %s"
-           ) % (valid.strftime("%Y%m%d%H%M"), fxminutes, pngtemp.name)
+    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/hrrr/"
+           "refd_%04i.png GIS/hrrr/%02i/refd_%04i.png png' %s"
+           ) % (valid.strftime("%Y%m%d%H%M"), fxminutes,
+                valid.hour, fxminutes, pngtemp.name,)
     subprocess.call(cmd, shell=True)
     # Do world file variant
     wldtmp = tempfile.NamedTemporaryFile(delete=False)
@@ -63,9 +57,10 @@ def do_grb(grib, valid):
 -126.0
 50.0""")
     wldtmp.close()
-    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
-           "refd_%04i.wld bogus wld' %s"
-           ) % (valid.strftime("%Y%m%d%H%M"), fxminutes, wldtmp.name)
+    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/hrrr/"
+           "refd_%04i.wld GIS/hrrr/%02i/refd_%04i.wld wld' %s"
+           ) % (valid.strftime("%Y%m%d%H%M"), fxminutes,
+                valid.hour, fxminutes, wldtmp.name)
     subprocess.call(cmd, shell=True)
     # Do json metadata
     jsontmp = tempfile.NamedTemporaryFile(delete=False)
@@ -74,6 +69,7 @@ def do_grb(grib, valid):
              'model_forecast_utc': fxvalid.strftime("%Y-%m-%dT%H:%M:%SZ")}
     json.dump(jdict, jsontmp)
     jsontmp.close()
+    # No need to archive this JSON file, it provides nothing new
     cmd = ("/home/ldm/bin/pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
            "refd_%04i.json bogus json' %s"
            ) % (valid.strftime("%Y%m%d%H%M"), fxminutes, jsontmp.name)
