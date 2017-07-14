@@ -1,0 +1,84 @@
+<?php 
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
+
+define("IEM_APPID", 67);
+$t->thispage = "gis-ridge";
+$t->title = "HRRR Reflectivity Information";
+
+$d = date("Y/m/d");
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="radview.phtml">IEM RadView Mainpage</a></li>
+ <li class="active">HRRR Reflectivity</li>
+</ol>
+
+<h3>IEM Provided NCEP HRRR Forecated Simulated Reflectivity</h3>
+
+<div style="width: 310px; float: right; border: 1px solid #000; padding: 5px; margin: 5px;">
+<a href="/data/gis/images/4326/hrrr/refd_0060.png">
+<img width="300" src="https://mesonet.agron.iastate.edu/data/gis/images/4326/hrrr/refd_0060.png">
+</a>
+<br />Latest HRRR 1 Hour Forecast
+</div>
+
+
+<p>Since 2003, the IEM has been providing GIS web services providing NEXRAD composite and
+single site products. A common feature request made is for forecasted reflectivity to be 
+made as well.  Thanks to some simulated reflectivity products from the NCEP HRRR Model, this
+is now possible.</p>
+
+<h3>Quick Overview</h3>
+<ul>
+ <li><strong>Archive Begins:</strong> 14 Jul 2017 00 UTC</li>
+ <li><strong>Imagery Resolution:</strong> 0.02x0.02 degree lat/lon</li>
+ <li><strong>Current raw RASTERs:</strong> <a href="/data/gis/images/4326/hrrr/">here</a>, JSON metadata files are available for each file there</li>
+ <li><strong>Archived raw RASTERs:</strong> <a href="/archive/data/2017/07/14/GIS/hrrr/00/">here</a> based on UTC timestamps</li>
+</ul>
+
+<h3>Tile Map Service (TMS)</h3>
+
+<p>You can call the TMS with either model initialization time explicit set or latest run
+processed by the IEM.  For the explicit time set, the URL form looks like so:
+<code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFD-F0000-201707140100/6/15/24.png</code>
+<br />
+The important parts here are <i>hrrr::REFD-F0000-201707140100</i> which equates to HRRR model reflectivity
+for forecast <strong>minute</strong> 0000 (needs to be 4 characters) for model initialization on 14 July 2017
+at 00 UTC.  Whew, that's a mouthful!  HRRR forecasts are available every 15 minutes between initialization
+and forecast hour 18.  <strong>Again, this F**** value is in minutes, not hours!</strong></p>
+
+<p>You can also specify <i>0</i> as the model initialization time, of which the last run processed by the
+IEM will be picked.  For example:
+<code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFD-F0000-0/6/15/24.png</code></p>
+
+<h3>Web Map Service (WMS)</h3>
+
+<p>There is also a standard WMS located at:
+<code>https://mesonet.agron.iastate.edu/cgi-bin/wms/hrrr/refd.cgi</code>
+<br />The individual forecast hours have individual LAYERS defined like so
+<code>refd_0000</code> where 0000 is the forecast time in <strong>minutes</strong></p>
+
+<h3>FAQ</h3>
+
+<ol>
+<li>How soon is the latest run made available?
+<br />At :40 minutes after the hour, a process starts that looks for the HRRR run initialized for
+the previous hour.  This processing takes about 10 minutes, so at for example 01:50 UTC, the 00 UTC
+run should be available.</li>
+
+<li>What color index to reflectivity value scale is used for the RASTERS?
+<br />These images should match the <a href="/GIS/rasters.php?rid=2">IEM N0Q Composites</a>.</li>
+
+<li>What exact dataset is being shown here?
+<br />This is the production NCEP HRRR "REFD" variable, "1000 m above ground" simulated RADAR
+reflectivity.</li> 
+
+<li>Am I free to use this service for lucrative commercial interests?
+<br />You betcha, but don't sue us and also send us <a href="/info/contacts.php">feedback</a> on how
+things can be improved for better usage.</li>
+</ol>
+
+EOF;
+$t->render('single.phtml');
+?>

@@ -36,6 +36,7 @@ class Request (object):
         self.service = service
 
     def getLayer(self, layername):
+        """implements some custom logic here for the provided layername"""
         if layername.startswith('idep'):
             (lbl, ltype, date) = layername.split("::", 3)
             scenario = lbl[4:]
@@ -62,6 +63,24 @@ class Request (object):
             layer.name = layername
             layer.url = "%sbird=%s&channel=%s&%s" % (
                 layer.metadata['baseurl'], bird, channel, uri)
+        elif layername.startswith('hrrr::'):
+            (prod, ftime, tstring) = (layername.split("::")[1]).split('-')
+            if len(tstring) == 12:
+                mylayername = 'hrrr-refd-t'
+                mslayer = 'refd-t'
+                year = tstring[:4]
+                month = tstring[4:6]
+                day = tstring[6:8]
+                hour = tstring[8:10]
+                uri = ("year=%s&month=%s&day=%s&hour=%s&f=%s"
+                       ) % (year, month, day, hour, ftime[1:])
+            else:
+                mylayername = 'hrrr-refd'
+                mslayer = 'refd_%s' % (ftime[1:], )
+                uri = ''
+            layer = copy.copy(self.service.layers[mylayername])
+            layer.name = mslayer
+            layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
         elif layername.find("::") > 0:
             (sector, prod, tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
