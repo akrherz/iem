@@ -34,7 +34,7 @@ def do_grb(grib, valid):
     gribtemp.close()
     # Regrid this to match N0Q
     cmd = ("wgrib2 %s -set_grib_type same -new_grid_winds earth "
-           "-new_grid latlon -126:12200:0.005 23.01:5400:0.005 %s"
+           "-new_grid latlon -126:3050:0.02 23.01:1340:0.02 %s"
            ) % (gribtemp.name, newgribtemp.name)
     subprocess.call(cmd, shell=True, stdout=subprocess.PIPE)
     # Rasterize
@@ -56,10 +56,10 @@ def do_grb(grib, valid):
     subprocess.call(cmd, shell=True)
     # Do world file variant
     wldtmp = tempfile.NamedTemporaryFile(delete=False)
-    wldtmp.write("""0.005
+    wldtmp.write("""0.02
 0.0
 0.0
--0.005
+-0.02
 -126.0
 50.0""")
     wldtmp.close()
