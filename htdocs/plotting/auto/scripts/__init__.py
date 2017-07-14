@@ -265,6 +265,8 @@ data = {'plots': [
          'label': ("River Guage Obs and Forecasts from HML Products")},
         {'id': "178",
          'label': ("NWS RFC Flash Flood Guidance Plots")},
+        {'id': "183",
+         'label': ("US Drought Monitor Areal Coverage by State")},
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
         {'id': "78",
