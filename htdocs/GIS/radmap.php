@@ -5,9 +5,9 @@
  * 
  */
 
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $postgis = iemdb("postgis");
 
 $plotmeta = Array("title" => Array(),
@@ -667,10 +667,12 @@ if (isset($_GET["title"])){
   $title = "NEXRAD Base Reflectivity";
 } else if (in_array("n0q_tc", $layers)){
   $title = "IEM NEXRAD Daily N0Q Max Composite Reflectivity";
-  $d = gmdate("d M Y", $ts) ." UTC";
+  $d = sprintf("Valid between %s 00:00 and 23:59 UTC",
+      gmdate("d M Y", $ts));
 } else if (in_array("nexrad_tc", $layers)){
   $title = "IEM NEXRAD Daily N0R Max Composite Reflectivity";
-  $d = gmdate("d M Y", $ts) ." UTC";
+  $d = sprintf("Valid between %s 00:00 and 23:59 UTC",
+      gmdate("d M Y", $ts));
 } else {
   $title = "IEM Plot";
   if ($plotmeta["subtitle"] != ""){
