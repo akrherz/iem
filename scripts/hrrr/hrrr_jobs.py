@@ -11,7 +11,7 @@ def main(argv):
     tstring = valid.strftime("%Y %m %d %H")
     cmds = ["python dl_hrrrref.py %s" % (tstring, ),
             "python plot_ref.py %s" % (tstring, ),
-            "python hrrr_ref2raster.py %s" % (tstring, )
+            # "python hrrr_ref2raster.py %s" % (tstring, )
             ]
     for cmd in cmds:
         subprocess.call(cmd, shell=True)
