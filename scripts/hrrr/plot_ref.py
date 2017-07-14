@@ -28,9 +28,6 @@ def run(utc, routes):
     ''' Generate the plot for the given UTC time '''
     fn = utc.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                        "hrrr.t%Hz.refd.grib2"))
-    if not os.path.isfile(fn):
-        subprocess.call(("python dl_hrrrref.py %s"
-                         ) % (utc.strftime("%Y %m %d %H"),), shell=True)
 
     grbs = pygrib.open(fn)
 
@@ -88,23 +85,18 @@ def run(utc, routes):
     os.remove("/tmp/hrrr_ref.gif")
 
 
-def main():
+def main(argv):
     """Go Main"""
-    utcnow = datetime.datetime.utcnow()
-    if len(sys.argv) == 5:
-        utcnow = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                                   int(sys.argv[3]), int(sys.argv[4]))
-        routes = 'a'
-    else:
-        # Two hours ago
-        utcnow = utcnow - datetime.timedelta(hours=1)
+    valid = datetime.datetime(int(argv[1]), int(argv[2]),
+                              int(argv[3]), int(argv[4]))
+    routes = 'a'
+    if (datetime.datetime.utcnow() - valid) < datetime.timedelta(hours=2):
         routes = 'ac'
-    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"), minute=0, second=0,
-                            microsecond=0)
+    valid = valid.replace(tzinfo=pytz.utc)
 
-    run(utcnow, routes)
+    run(valid, routes)
 
 
 if __name__ == '__main__':
     # go go gadget
-    main()
+    main(sys.argv)
