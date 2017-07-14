@@ -1,8 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
-include("../../include/database.inc.php");
-include("../../include/network.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 
@@ -54,11 +54,11 @@ putenv("TZ=UTC");
  $d2 = daySelect2($eday, "eday");
  $h2 = gmtHourSelect($ehour, "ehour");
  
- $wselect = "<select name=\"wfo\">";
+ $wselect = "<select name=\"wfo\" class=\"iemselect2\">";
  while( list($key, $value) = each($nt->table) ){
  	$wselect .= "<option value=\"$key\" ";
  	if ($wfo == $key) $wselect .= "SELECTED";
- 	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+ 	$wselect .= ">". $nt->table[$key]["name"] ." [".$key."]</option>\n";
 }
  $wselect .= "</select>";
 
@@ -252,7 +252,18 @@ coverage of impacted areas.  The area of the buffered LSRs is then compared
 with the area of the storm based warning to yield a percentage.</li>
 </ul>
 EOF;
-} 
+}
+$t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+EOF;
+$t->jsextra = <<<EOF
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+        $(".iemselect2").select2();
+});
+</script>
+EOF;
 $t->content = $content;
 $t->render('full.phtml');
 ?>
