@@ -67,10 +67,10 @@ def process(tmpfn):
             (station, valid, counter, tmpc, battery, calc_precip)
             VALUES ('%s', '%s-06', %s, %s, %s, %s)
             """ % (sid, row['cst'].strftime("%Y-%m-%d %H:%M:%S"),
-                   row['counter'],
+                   'null' if row['counter'] == 'NaN' else row['counter'],
                    'null' if row['tmpc'] == '' else row['tmpc'],
                    'null' if row['battery'] == '' else row['battery'],
-                   precip))
+                   'null' if pd.isnull(precip) else precip))
         print(' + inserted %s rows for sid: %s' % (len(df2), sid))
         cursor.close()
         pgconn.commit()
