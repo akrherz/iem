@@ -45,9 +45,9 @@ python redo_day.py IA
 cd ../ncdc
 if [ $DD -eq "15" ]
 	then
-	python ingest_fisherporter.py $(date --date '90 days ago' +'%y %m')
-	python ingest_fisherporter.py $(date --date '180 days ago' +'%y %m')
-	python ingest_fisherporter.py $(date --date '360 days ago' +'%y %m')
+	python ingest_fisherporter.py $(date --date '90 days ago' +'%Y %m')
+	python ingest_fisherporter.py $(date --date '180 days ago' +'%Y %m')
+	python ingest_fisherporter.py $(date --date '360 days ago' +'%Y %m')
 fi
 
 
