@@ -46,12 +46,15 @@ def get_description():
 
 
 def safe(row, varname):
+    """Safe conversion of value for printing as a string"""
     val = row[varname]
     if val is None:
         return 'M'
     if varname == 'pday':
         if val == 0.0001:
             return 'T'
+        if val == 0:
+            return '0'
         return "%.2f" % (val,)
     return '%.0f' % (val,)
 
