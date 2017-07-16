@@ -6,6 +6,7 @@ import shutil
 import cgi
 import sys
 import datetime
+from collections import OrderedDict
 
 import pytz
 import psycopg2
@@ -185,7 +186,21 @@ def main():
 
     # Capitolize columns please
     df.columns = [s.upper() if s != 'geo' else s for s in df.columns.values]
-    df.to_file(fn + ".shp")
+    schema = {'geometry': 'Polygon',
+              'properties': OrderedDict(
+                  [(u'WFO', 'str:3'),
+                   (u'ISSUED', 'str:12'),
+                   (u'EXPIRED', 'str:12'),
+                   (u'INIT_ISS', 'str:12'),
+                   (u'INIT_EXP', 'str:12'),
+                   (u'PHENOM', 'str:2'),
+                   (u'GTYPE', 'str:1'),
+                   (u'SIG', 'str:1'),
+                   (u'ETN', 'str:4'),
+                   (u'STATUS', 'str:3'),
+                   (u'NWS_UGC', 'str:6'),
+                   (u'AREA_KM2', 'float:24.15')])}
+    df.to_file(fn + ".shp", schema=schema)
 
     shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", fn + ".prj")
 
