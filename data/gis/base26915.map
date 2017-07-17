@@ -415,13 +415,13 @@ LAYER
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
-      SIZE    3
+      SIZE    4
       SYMBOL  'circle'
     END
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 255 0 0
-      SIZE    1
+      SIZE    2
       SYMBOL  'circle'
     END
   END
@@ -431,13 +431,13 @@ LAYER
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
-      SIZE    3
+      SIZE    4
       SYMBOL  'circle'
     END
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 255 255 0
-      SIZE    1
+      SIZE    2
       SYMBOL  'circle'
     END
   END
@@ -447,13 +447,13 @@ LAYER
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
-      SIZE    3
+      SIZE    4
       SYMBOL  'circle'
     END
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 255
-      SIZE    1
+      SIZE    2
       SYMBOL  'circle'
     END
   END
@@ -463,13 +463,13 @@ LAYER
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
-      SIZE    3
+      SIZE    4
       SYMBOL  'circle'
     END
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 0 255 0
-      SIZE    1
+      SIZE    2
       SYMBOL  'circle'
     END
   END
@@ -479,13 +479,13 @@ LAYER
     STYLE
       COLOR -1 -1 -1 
       OUTLINECOLOR 255 255 255
-      SIZE    3
+      SIZE    4
       SYMBOL  'circle'
     END
     STYLE
       COLOR -1 -1 -1 
       OUTLINECOLOR 0 0 0
-      SIZE    1
+      SIZE    2
       SYMBOL  'circle'
     END
   END
