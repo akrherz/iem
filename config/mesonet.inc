@@ -56,6 +56,12 @@
     Require all granted
   </Directory>
 
+  <Directory "/mesonet/data">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+
   <Directory "/mesonet/share">
     Options Indexes FollowSymLinks
     AllowOverride All
@@ -103,7 +109,9 @@
     
   Alias "/onsite/lapses" "/mesonet/share/lapses"
   Alias "/onsite/windrose" "/mesonet/share/windrose"
-  Alias "/onsite/iemre" "/mesonet/share/iemre"
+  Alias "/onsite/iemre" "/mesonet/data/iemre"
+  Alias "/onsite/prism" "/mesonet/data/prism"
+  Alias "/onsite/stage4" "/mesonet/data/stage4"
   Alias "/present" "/mesonet/share/present"
   Alias "/cases" "/mesonet/share/cases"
   Alias "/GIS/data/gis" "/mesonet/data/gis"

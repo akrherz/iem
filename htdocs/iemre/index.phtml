@@ -1,6 +1,6 @@
 <?php 
- include("../../config/settings.inc.php");
- include_once "../../include/myview.php";
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
  $t = new MyView();
  $t->thispage = 'archive-iemre'; 
  $t->title = "Reanalysis Data";
@@ -134,9 +134,16 @@ Form: https://mesonet.agron.iastate.edu/iemre/daily/{YYYY-MM-DD}/{LAT}/{LON}/jso
 Example: https://mesonet.agron.iastate.edu/iemre/daily/2010-05-01/42.54/-96.40/json
 </pre>
  				
+<h4>Raw Data Access</h4>
  				
- <p>IEMRE data is stored on the server as netCDF files.  You can directly 
- 	download these files from <a href="/onsite/iemre/">here</a>.
+<p>The IEM makes extensive use of the <a href="https://www.unidata.ucar.edu/software/netcdf/">NetCDF</a>
+file format to store these gridded datasets.  You can find individual web directories for various
+IEMRE related datasets: 
+<ul>
+  <li><a href="/onsite/iemre/">IEMRE Files</a></li>
+  <li><a href="/onsite/stage4/">NCEP Stage IV Hourly Data</a></li>
+  <li><a href="/onsite/prism/">Oregon State PRISM Daily Data</a></li>
+</ul>
 
 EOF;
 $t->render('single.phtml');
