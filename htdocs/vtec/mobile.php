@@ -1,6 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
+require_once "../../include/myview.php";
 $conn = iemdb("postgis");
 
 $v = isset($_GET["vtec"]) ? substr($_GET["vtec"],0,25) : "2008-O-NEW-KJAX-TO-W-0048";
@@ -14,7 +16,9 @@ $phenomena = $tokens[4];
 $significance = $tokens[5];
 $eventid = intval( $tokens[6] );
 
-/* Get the product text */
+$title = sprintf("%s %s %s #%s", $wfo, $vtec_phenomena[$phenomena],
+    $vtec_significance[$significance], $eventid);
+// Get the product text
 $rs = pg_prepare($conn, "SELECT" , "SELECT replace(report,'\001','') as report,
         replace(svs,'\001','') as svs
         from warnings_$year w WHERE w.wfo = $1 and 
@@ -25,26 +29,31 @@ $rs = pg_execute($conn, "SELECT", Array($wfo, $phenomena, $eventid, $significanc
 $txtdata = "";
 for( $i=0; $row  = @pg_fetch_array($rs,$i); $i++){
   $tokens = @explode('__', $row["svs"]);
+  $tokens = array_reverse($tokens);
   while (list($key,$val) = each($tokens))
   {
     if ($val == "") continue;
-    $txtdata .= $val ."<hr />";
+    $txtdata .= sprintf("<pre>%s</pre><br />", $val);
   }
-  $txtdata .= $row["report"];
+  $txtdata .= sprintf("<h4>Issuance Report:</h4><pre>%s</pre><br />",
+      $row["report"]);
 }
 
+$imgurl = sprintf("/GIS/radmap.php?layers[]=uscounties&amp;layers[]=sbw".
+    "&amp;layers[]=nexrad&amp;width=640&amp;height=480&amp;vtec=%s",
+    str_replace('-', '.', $v));
+
+$t = new MyView();
+$t->title = $title;
+$t->content = <<<EOF
+<h3>{$title}</h3>
+
+<img src="{$imgurl}" class="img img-responsive" alt="VTEC Image"/>
+
+<h3>NWS Text Data</h3>
+
+{$txtdata}
+EOF;
+
+$t->render('single.phtml');
 ?>
-<html>
-<head>
- <title>VTEC Browser for Mobile</title>
-</head>
-<body>
-<h3>VTEC Browser for Mobile</h3>
-
-<img src="/GIS/radmap.php?layers[]=uscounties&amp;layers[]=sbw&amp;layers[]=nexrad&amp;width=300&amp;height=300&amp;vtec=<?php echo str_replace('-', '.', $v); ?>" />
-
-<pre>
-<?php echo $txtdata; ?>
-</pre>
-</body>
-</html>

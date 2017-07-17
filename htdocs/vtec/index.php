@@ -1,21 +1,28 @@
 <?php
-include("../../config/settings.inc.php");
-include_once "../../include/Mobile_Detect.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/Mobile_Detect.php";
 
-/* Mobile business logic */
+// Mobile business logic
 $detect = new Mobile_Detect;
 if ($detect->isMobile()){
-  echo "<html><head><script>
+  echo <<<EOF
+<html>
+<head>
+<script>
   var tokens = window.location.href.split('#');
   if (tokens.length == 2){
     window.location = 'mobile.php?vtec='+ tokens[1];
   } else {
     window.location = 'mobile.php?vtec=2008-O-NEW-KJAX-TO-W-0048';
   }
-  </script></head><body>";
+  </script>
+</head>
+<body></body>
+</html>
+EOF;
   exit;
 }
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->thispage = "severe-vtec";
 
