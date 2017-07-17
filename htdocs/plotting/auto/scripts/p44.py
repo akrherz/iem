@@ -1,11 +1,13 @@
-import psycopg2.extras
+"""Office accumulated warnings"""
 import datetime
-import numpy as np
 import math
+import calendar
+
+import psycopg2.extras
+import numpy as np
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
-import calendar
-import pandas as pd
 from pyiem.util import get_autoplot_context
 from pyiem import reference
 
@@ -19,16 +21,16 @@ PDICT3 = {'wfo': 'Plot for Single/All WFO',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['data'] = True
-    d['description'] = """This plot displays an accumulated total of
+    desc = dict()
+    desc['cache'] = 86400
+    desc['data'] = True
+    desc['description'] = """This plot displays an accumulated total of
     office issued watch, warning, advisories.  These totals are not official
     and based on IEM processing of NWS text warning data.  The totals are for
     individual warnings and not some combination of counties + warnings. The
     archive begin date varies depending on which phenomena you are interested
     in."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='opt', options=PDICT3, default='wfo',
              label='Plot for a WFO or a State?'),
         dict(type='networkselect', name='station', network='WFO',
@@ -46,7 +48,7 @@ def get_description():
 
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -125,14 +127,14 @@ def plotter(fdict):
     for yr in range(1986, datetime.datetime.now().year + 1):
         if len(data[yr]['doy']) < 2:
             continue
-        l = ax.plot(data[yr]['doy'], data[yr]['counts'], lw=2,
-                    label="%s (%s)" % (str(yr), data[yr]['counts'][-1]),
-                    drawstyle='steps-post')
+        lp = ax.plot(data[yr]['doy'], data[yr]['counts'], lw=2,
+                     label="%s (%s)" % (str(yr), data[yr]['counts'][-1]),
+                     drawstyle='steps-post')
         ann.append(
             ax.text(data[yr]['doy'][-1]+1, data[yr]['counts'][-1],
                     "%s" % (yr,), color='w', va='center',
-                    fontsize=10, bbox=dict(facecolor=l[0].get_color(),
-                                           edgecolor=l[0].get_color()))
+                    fontsize=10, bbox=dict(facecolor=lp[0].get_color(),
+                                           edgecolor=lp[0].get_color()))
             )
 
     mask = np.zeros(fig.canvas.get_width_height(), bool)
@@ -180,6 +182,7 @@ def plotter(fdict):
                        ) % (datetime.date.today().strftime("%-d %B"), ))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

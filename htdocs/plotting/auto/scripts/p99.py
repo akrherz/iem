@@ -1,7 +1,9 @@
-import psycopg2
-from pyiem import network
+"""Daily high/low against climo"""
 import datetime
+
+import psycopg2
 from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'abs': 'Departure in degrees',
@@ -10,12 +12,12 @@ PDICT = {'abs': 'Departure in degrees',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """This plot produces a timeseries difference between
+    desc = dict()
+    desc['description'] = """This plot produces a timeseries difference between
     daily high and low temperatures against climatology.
     """
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.date.today().year,
@@ -23,7 +25,7 @@ def get_description():
         dict(type='select', name='delta', options=PDICT,
              label='How to present the daily departures', default='abs'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -108,6 +110,7 @@ def plotter(fdict):
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

@@ -1,9 +1,11 @@
-import psycopg2
-import numpy as np
+"""Consec days"""
 import datetime
 import calendar
-from pyiem.network import Table as NetworkTable
+
+import psycopg2
+import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'Temperature At or Above (AOA) Threshold',
@@ -14,11 +16,11 @@ PDICT2 = {'high': 'High Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart plots the frequency of having a streak
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart plots the frequency of having a streak
     of days above or below a given high or low temperature threshold."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='high', options=PDICT2,
@@ -30,7 +32,7 @@ def get_description():
         dict(type='int', name='days', default='7',
              label='Number of Days:')
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -87,6 +89,7 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 53)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

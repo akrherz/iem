@@ -1,18 +1,19 @@
+"""VTEC product duration"""
 import psycopg2.extras
-import pyiem.nws.vtec as vtec
 import numpy as np
 import pandas as pd
+import pyiem.nws.vtec as vtec
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents the accumulated frequency of
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents the accumulated frequency of
     duration for a given NWS VTEC Watch, Warning, Advisory product."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='ugc', name='ugc',
              default='IAC153', label='Select UGC Zone/County:'),
         dict(type='phenomena', name='phenomena',
@@ -20,7 +21,7 @@ def get_description():
         dict(type='significance', name='significance',
              default='A', label='Select Watch/Warning Significance Level:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -111,6 +112,7 @@ def plotter(fdict):
                        max(df['issue']).strftime("%-d %b %Y")))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

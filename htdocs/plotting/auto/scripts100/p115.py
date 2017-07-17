@@ -1,7 +1,9 @@
+"""Monthly precip in text format"""
+import datetime
+
 import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
-import datetime
 
 PDICT = {'precip': 'Total Precipitation',
          'avg_high': 'Average High Temperature',
@@ -17,20 +19,21 @@ LABELS = {'precip': 'Monthly Liquid Precip Totals [inches] (snow is melted)',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['report'] = True
-    d['description'] = """ """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['report'] = True
+    desc['description'] = """ """
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type="select", name="var", default="precip",
              label="Select variable:", options=PDICT),
     ]
-    return d
+    return desc
 
 
 def p(df, year, month, varname, precision):
+    """Lazy request of data"""
     try:
         val = df.at[(year, month), varname]
     except Exception as _:
@@ -50,7 +53,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    TODAY = datetime.date.today().replace(day=1)
+    today = datetime.date.today().replace(day=1)
 
     df = read_sql("""
     SELECT year, month,
@@ -58,7 +61,7 @@ def plotter(fdict):
     avg(high) as avg_high, avg(low) as avg_low,
     avg((high+low)/2.) as avg_temp from """+table+""" WHERE
     station = %s and day < %s GROUP by year, month ORDER by year ASC, month ASC
-    """, pgconn, params=(station, TODAY), index_col=None)
+    """, pgconn, params=(station, today), index_col=None)
 
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/

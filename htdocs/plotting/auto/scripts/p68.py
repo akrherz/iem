@@ -1,15 +1,16 @@
+"""VTEC combos"""
 import psycopg2
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart shows the number of VTEC phenomena and
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart shows the number of VTEC phenomena and
     significance combinations issued by a NWS Forecast Office for a given year.
     Please note that not all current-day VTEC products were started in 2005,
     some came a few years later.  So numbers in 2005 are not directly
@@ -17,11 +18,11 @@ def get_description():
 <a href="http://www.nws.noaa.gov/os/vtec/pdfs/VTEC_explanation6.pdf">handy
  chart</a> with more details on VTEC and codes used in this graphic.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:', all=True)
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -92,6 +93,7 @@ def plotter(fdict):
     ax[1].set_xlim(gdf.index.values.min() - 0.5,
                    gdf.index.values.max() + 0.5)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

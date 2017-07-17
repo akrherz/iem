@@ -1,20 +1,22 @@
-import psycopg2
-import numpy as np
-from pyiem import network
+"""GDD climo"""
 import calendar
 import datetime
+
+import psycopg2
+import numpy as np
 from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart produces the daily climatology of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart produces the daily climatology of
     Growing Degree Days for a location of your choice. Please note that
     Feb 29 is not considered for this analysis."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default='2015', min=1893,
@@ -24,7 +26,7 @@ def get_description():
         dict(type='int', name='ceiling', default='86',
              label='Enter GDD Ceiling (F):'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -85,6 +87,7 @@ def plotter(fdict):
     # collapse the multiindex for columns
     df2.columns = ['_'.join(col).strip() for col in df2.columns.values]
     return fig, df2
+
 
 if __name__ == '__main__':
     plotter(dict())
