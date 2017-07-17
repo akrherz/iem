@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Generate a shapefile of warnings based on the CGI request"""
-import subprocess
+import zipfile
 import os
 import shutil
 import cgi
@@ -204,12 +204,12 @@ def main():
 
     shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", fn + ".prj")
 
-    # python2.7 zipfile usage here does not use very good compression, whereas
-    # system zip generates 10x smaller files.  We can go back to zipfile when
-    # on python3.3+
-    cmd = ("zip -9 %(f)s.zip %(f)s.shp %(f)s.shx %(f)s.dbf %(f)s.prj"
-           ) % dict(f=fn)
-    subprocess.call(cmd, shell=True, stdout=subprocess.PIPE)
+    zf = zipfile.ZipFile(fn + ".zip", 'w', zipfile.ZIP_DEFLATED)
+    zf.write(fn + ".shp")
+    zf.write(fn + ".shx")
+    zf.write(fn + ".dbf")
+    zf.write(fn + ".prj")
+    zf.close()
 
     sys.stdout.write("Content-type: application/octet-stream\n")
     sys.stdout.write(
