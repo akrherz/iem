@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (21, now());
+INSERT into iem_schema_manager_version values (22, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -2853,5 +2853,13 @@ CREATE INDEX ffg_2017_valid_idx on ffg_2017(valid);
 GRANT ALL on ffg_2017 to ldm,mesonet;
 GRANT SELECT on ffg_2017 to nobody,apache;
 
-    
+-- Storage of USDM
+CREATE TABLE usdm(
+  valid date,
+  dm smallint);
+select addgeometrycolumn('', 'usdm', 'geom', 4326, 'MULTIPOLYGON', 2);
+CREATE INDEX usdm_valid_idx on usdm(valid);
+GRANT SELECT on usdm to nobody,apache;
+GRANT ALL on usdm to mesonet,ldm;
+
 
