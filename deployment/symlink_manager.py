@@ -19,7 +19,6 @@ PAIRS = [
          ['/mesonet/ARCHIVE/rer', '/mnt/mesonet/ARCHIVE/rer'],
          ['/mesonet/ARCHIVE/wunder', '/mnt/mesonet2/ARCHIVE/wunder'],
          ['/mesonet/data/alerts', '/mnt/mesonet2/data/alerts'],
-         ['/mesonet/data/dm', '/mnt/mesonet2/data/dm'],
          ['/mesonet/data/dotcams', '/mnt/mesonet2/data/dotcams'],
          ['/mesonet/data/gempak', '/mnt/mesonet2/data/gempak'],
          ['/mesonet/data/harry', '/mnt/mesonet/ARCHIVE/raw/harry'],
