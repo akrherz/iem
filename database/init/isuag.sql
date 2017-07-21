@@ -4,7 +4,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (3, now());
+INSERT into iem_schema_manager_version values (4, now());
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -161,7 +161,10 @@ CREATE TABLE sm_daily (
     lwmwet_2_tot_f character(1),
     bpres_avg real,
     bpres_avg_qc real,
-    bpres_avg_f character(1)
+    bpres_avg_f character(1),
+    rain_mm_2_tot real,
+    rain_mm_2_tot_qc real,
+    rain_mm_2_tot_f character(1)
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
 GRANT SELECT on sm_daily to nobody;
@@ -346,7 +349,10 @@ CREATE TABLE sm_hourly (
     lwmwet_2_tot_f character(1),
     bpres_avg real,
     bpres_avg_qc real,
-    bpres_avg_f character(1)
+    bpres_avg_f character(1),
+    rain_mm_2_tot real,
+    rain_mm_2_tot_qc real,
+    rain_mm_2_tot_f character(1)
     
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
@@ -569,7 +575,10 @@ battv_min_qc real,
     lwmwet_2_tot_f character(1),
     bpres_avg real,
     bpres_avg_qc real,
-    bpres_avg_f character(1)
+    bpres_avg_f character(1),
+    rain_mm_2_tot real,
+    rain_mm_2_tot_qc real,
+    rain_mm_2_tot_f character(1)
 );
 
 CREATE UNIQUE index sm_15minute_idx on sm_hourly(station, valid);
