@@ -5,14 +5,16 @@ URIs look like so:
     /current/live.py?id=KCRG-006
     /current/live/KCRG-006.jpg
 """
-from PIL import Image, ImageDraw
 import io
 import cgi
 import StringIO
 import sys
-import memcache
+import traceback
 import datetime
+
+import memcache
 import psycopg2
+from PIL import Image, ImageDraw
 import requests
 from requests.auth import HTTPDigestAuth
 from pyiem.util import get_properties
@@ -68,7 +70,6 @@ def workflow(cid):
     try:
         res = fetch(cid)
     except Exception as exp:
-        sys.stderr.write(str(exp))
         return None
     if res is not None:
         # Set for 15 seconds
@@ -93,5 +94,9 @@ def main():
     sys.stdout.write("Content-type: image/jpeg\n\n")
     sys.stdout.write(imagedata)
 
+
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as exp:
+        traceback.print_exc()
