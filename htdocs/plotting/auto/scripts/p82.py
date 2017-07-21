@@ -37,10 +37,10 @@ def get_description():
              label='Which Daily Variable:', options=PDICT),
         dict(type='date', name='sdate',
              default=m90.strftime("%Y/%m/%d"),
-             label='Start Date:', min="2010/01/01"),
+             label='Start Date:', min="1929/01/01"),
         dict(type='date', name='edate',
              default=today.strftime("%Y/%m/%d"),
-             label='End Date:', min="2010/01/01"),
+             label='End Date:', min="1929/01/01"),
     ]
     return desc
 
