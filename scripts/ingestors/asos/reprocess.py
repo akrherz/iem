@@ -9,23 +9,27 @@ Arguments
     python reprocess.py --monthdate=200003
 
 """
+from __future__ import print_function
 import traceback
-import pandas as pd
 import datetime
 import time
 import sys
 import os
+import re
 import subprocess
+from optparse import OptionParser
+
 import pytz
 import requests
+import pandas as pd
 from pyiem.datatypes import pressure
-from optparse import OptionParser
-from metar.metar import Metar
-from metar.metar import ParserError as MetarParserError
+from metar.Metar import Metar
+from metar.Metar import ParserError as MetarParserError
 import psycopg2
 ASOS = psycopg2.connect(database='asos', host='iemdb')
 
 SLP = 'Sea Level PressureIn'
+ERROR_RE = re.compile("Unparsed groups in body '(?P<msg>.*)' while processing")
 
 
 class OB(object):
@@ -195,7 +199,7 @@ def process_rawtext(yyyymm):
                 else:
                     try:
                         out = open(fn, 'w')
-                    except:
+                    except Exception as exp:
                         continue
                     out.write("FullMetar,\n")
             if out is not None and not out.closed:
@@ -269,7 +273,7 @@ def read_legacy(fn):
                 if value not in ['-', '']:
                     try:
                         pres = float(value)
-                    except:
+                    except Exception as exp:
                         print(("Failed to parse SLP: %s %s"
                                ) % (repr(headers[SLP]), fn))
             rows.append({'FullMetar': mstr,
@@ -306,7 +310,7 @@ def get_df(station, now, jar):
     except ValueError:
         print("ValueError %s %s" % (station, now))
         return None
-    except:
+    except Exception as exp:
         print("Failure %s %s" % (station, now))
         traceback.print_exc()
         return None
@@ -341,10 +345,10 @@ def doit(jar, station, days):
                         oldval = ob.mslp
                         ob.mslp = "%.1f" % (pres.value("MB"),)
                         ob.alti = row['Sea Level PressureIn'].value
-                        print 'SETTING PRESSURE %s old: %s new: %s' % (
-                                ob.valid.strftime("%Y/%m/%d %H%M"),
-                                oldval, ob.mslp)
-                except:
+                        print(('SETTING PRESSURE %s old: %s new: %s'
+                               ) % (ob.valid.strftime("%Y/%m/%d %H%M"),
+                                    oldval, ob.mslp))
+                except Exception as exp:
                     pass
 
             sql = """
@@ -359,7 +363,7 @@ def doit(jar, station, days):
             try:
                 cmtr = ob.metar.decode('utf-8', 'replace').encode('ascii',
                                                                   'replace')
-            except:
+            except Exception as exp:
                 print("Non-ASCII METAR? %s" % (repr(ob.metar),))
                 continue
             args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
@@ -389,17 +393,22 @@ def process_metar(mstr, now):
     mtr = None
     while mtr is None:
         try:
-            mtr = Metar(mstr, now.month, now.year, allexceptions=True)
-        except MetarParserError, exp:
+            mtr = Metar(mstr, now.month, now.year)
+        except MetarParserError as exp:
             try:
                 msg = str(exp)
-            except:
+            except Exception as exp:
                 return None
-            if msg.startswith("Unparsed groups:"):
-                badpart = msg.strip().split()[2]
-                mstr = mstr.replace(badpart.replace("'", ''), "")
+            tokens = ERROR_RE.findall(str(exp))
+            orig_mstr = mstr
+            if tokens:
+                for token in tokens[0].split():
+                    mstr = mstr.replace(" %s" % (token, ), "")
+                if orig_mstr == mstr:
+                    print("Can't fix badly formatted metar: " + mstr)
+                    return None
             else:
-                print("MetarParserError:"+msg)
+                print("MetarParserError: "+msg)
                 return None
         except Exception, exp:
             print("Double Fail: %s %s" % (mstr, exp))
@@ -479,8 +488,8 @@ def process_metar(mstr, now):
 
 
 if __name__ == "__main__":
-    print 'Starting up...'
+    print('Starting up...')
     workflow()
     ASOS.commit()
     ASOS.close()
-    print 'Done!'
+    print('Done!')
