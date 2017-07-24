@@ -51,7 +51,7 @@ def main():
         sys.stdout.write("Content-type: text/plain\n\n")
     elif fmt == 'html':
         sys.stdout.write("Content-type: text/html\n\n")
-    if pils:
+    if not pils:
         sys.stdout.write("ERROR: No pil specified...")
         return
     centerlimit = '' if center == '' else (" and source = '%s' " % (center, ))
