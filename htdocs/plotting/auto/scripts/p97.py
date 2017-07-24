@@ -30,7 +30,8 @@ PDICT2 = OrderedDict([
     ('gdd_depart', 'Growing Degree Days (50/86) Departure'),
     ('precip_depart', 'Precipitation Departure'),
     ])
-
+PDICT4 = {'yes': 'Yes, overlay Drought Monitor',
+          'no': 'No, do not overlay Drought Monitor'}
 UNITS = {
     'precip_depart': 'inch',
     'min_low_temp': 'F',
@@ -59,6 +60,8 @@ def get_description():
              default=(today -
                       datetime.timedelta(days=30)).strftime("%Y/%m/%d"),
              label='Start Date:', min="1893/01/01"),
+        dict(type='select', name='usdm', default='no',
+             label='Overlay Drought Monitor', options=PDICT4),
         dict(type='date', name='date2',
              default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):', min="1893/01/01"),
@@ -79,6 +82,7 @@ def plotter(fdict):
     date1 = ctx['date1']
     date2 = ctx['date2']
     varname = ctx['var']
+    usdm = ctx['usdm']
 
     table = "alldata_%s" % (sector, ) if sector != 'midwest' else "alldata"
     df = read_sql("""
@@ -113,14 +117,14 @@ def plotter(fdict):
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
     sector2 = "state" if sector != 'midwest' else 'midwest'
-    m = MapPlot(sector=sector2, state=sector, axisbg='white',
-                title=('%s - %s %s [%s]'
-                       ) % (date1.strftime("%d %b %Y"),
-                            date2.strftime("%d %b %Y"), PDICT2.get(varname),
-                            UNITS.get(varname)),
-                subtitle=('%s is compared with 1951-%s Climatology'
-                          ' to compute departures'
-                          ) % (date1.year, datetime.date.today().year - 1))
+    mp = MapPlot(sector=sector2, state=sector, axisbg='white',
+                 title=('%s - %s %s [%s]'
+                        ) % (date1.strftime("%d %b %Y"),
+                             date2.strftime("%d %b %Y"), PDICT2.get(varname),
+                             UNITS.get(varname)),
+                 subtitle=('%s is compared with 1951-%s Climatology'
+                           ' to compute departures'
+                           ) % (date1.year, datetime.date.today().year - 1))
     if varname in ['precip_depart', 'avg_temp_depart']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
         clevels = np.linspace(0 - rng, rng, 7)
@@ -133,15 +137,17 @@ def plotter(fdict):
     clevlabels = [fmt % x for x in clevels]
     cmap = cm.get_cmap('RdYlBu' if varname == 'precip_depart' else 'RdYlBu_r')
     cmap.set_bad('white')
-    m.contourf(df['lon'].values, df['lat'].values,
-               df[varname].values, clevels, clevlabels=clevlabels,
-               cmap=cmap, units=UNITS.get(varname))
-    m.plot_values(df['lon'].values, df['lat'].values,
-                  df[varname].values, fmt=fmt, labelbuffer=10)
+    mp.contourf(df['lon'].values, df['lat'].values,
+                df[varname].values, clevels, clevlabels=clevlabels,
+                cmap=cmap, units=UNITS.get(varname))
+    mp.plot_values(df['lon'].values, df['lat'].values,
+                   df[varname].values, fmt=fmt, labelbuffer=10)
     if sector == 'IA':
-        m.drawcounties()
+        mp.drawcounties()
+    if usdm == 'yes':
+        mp.draw_usdm(date2, filled=False)
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':
