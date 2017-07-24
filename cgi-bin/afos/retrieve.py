@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-
-import psycopg2
+"""give me some AFOS data please"""
+from __future__ import print_function
 import cgi
 import sys
 import unittest
+
+import psycopg2
 
 
 def pil_logic(s):
@@ -49,7 +51,7 @@ def main():
         sys.stdout.write("Content-type: text/plain\n\n")
     elif fmt == 'html':
         sys.stdout.write("Content-type: text/html\n\n")
-    if len(pils) == 0:
+    if pils:
         sys.stdout.write("ERROR: No pil specified...")
         return
     centerlimit = '' if center == '' else (" and source = '%s' " % (center, ))
@@ -84,8 +86,8 @@ def main():
 
     try:
         mydb = psycopg2.connect(database='afos', host='iemdb', user='nobody')
-    except:
-        print 'Error Connecting to Database, please try again!'
+    except Exception as exp:
+        print('Error Connecting to Database, please try again!')
         return
 
     cursor = mydb.cursor()
@@ -132,7 +134,8 @@ if __name__ == '__main__':
     main()
 
 
-class tester(unittest.TestCase):
+class TestRetrieve(unittest.TestCase):
+    """some tests"""
 
     def test_pil_logic(self):
         """Make sure our pil logic works! """
