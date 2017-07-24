@@ -3,36 +3,22 @@
 Run from RUN_10MIN.sh
 Run from RUN_40_AFTER.sh for two hours ago
 """
-import psycopg2
+from __future__ import print_function
 import os
 import sys
-import pytz
-import netCDF4
 import re
 import datetime
+import warnings
+
+import psycopg2
+import pytz
+import netCDF4
 from pyiem.datatypes import temperature, distance, pressure, speed
 from pyiem.observation import Observation
 import numpy as np
 from metar import Metar
-import warnings
+
 warnings.simplefilter('ignore', RuntimeWarning)
-
-LOC2TZ = {}
-TIMEZONES = {None: pytz.timezone('UTC')}
-
-pgconn = psycopg2.connect(dbname='iem', host='iemdb', user='nobody')
-txn = pgconn.cursor()
-txn.execute("""SELECT id, tzname from stations
-    where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
-    """)
-news = 0
-for row in txn:
-    LOC2TZ[row[0]] = row[1]
-    if row[1] not in TIMEZONES:
-        try:
-            TIMEZONES[row[1]] = pytz.timezone(row[1])
-        except:
-            TIMEZONES[row[1]] = pytz.timezone("UTC")
 
 
 def vsbyfmt(val):
@@ -59,13 +45,14 @@ def vsbyfmt(val):
 
 
 def tostring(val):
+    """Save tostring"""
     return re.sub('\x00', '', val.tostring()).strip()
 
 
 def process(ncfn):
     """Process this file """
-    IEM = psycopg2.connect(database='iem', host='iemdb')
-    icursor = IEM.cursor()
+    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    icursor = pgconn.cursor()
     xref = {}
     icursor.execute("""SELECT id, network from stations where
     network ~* 'ASOS' or network = 'AWOS' and country = 'US'""")
@@ -108,8 +95,7 @@ def process(ncfn):
 
         mtr = "%s %sZ AUTO " % (sid, ts.strftime("%d%H%M"))
         network = xref.get(sid3, 'ASOS')
-        iem = Observation(sid3, network,
-                          ts.astimezone(TIMEZONES[LOC2TZ.get(sid3, None)]))
+        iem = Observation(sid3, network, ts)
         #  06019G23KT
         if (data['windDirQCR'][i] == 0 and
                 data['windDir'][i] is not np.ma.masked):
@@ -199,23 +185,23 @@ def process(ncfn):
         mtr += "MADISHF"
         # Eat our own dogfood
         try:
-            Metar(mtr)
+            Metar.Metar(mtr)
             iem.data['raw'] = mtr
-        except:
+        except Exception as exp:
             pass
 
-        icursor = IEM.cursor()
+        icursor = pgconn.cursor()
         if not iem.save(icursor, force_current_log=True,
                         skip_current=True):
             print(("extract_hfmetar: unknown station? %s %s %s\n%s"
                    ) % (sid3, network, ts, mtr))
-            pass
 
         icursor.close()
-        IEM.commit()
+        pgconn.commit()
 
 
 def find_fn(argv):
+    """Figure out which file to run for"""
     if len(argv) == 5:
         utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]),
                                    int(argv[4]))
@@ -235,6 +221,7 @@ def main(argv):
     """Do Something"""
     fn = find_fn(argv)
     process(fn)
+
 
 if __name__ == '__main__':
     main(sys.argv)
