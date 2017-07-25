@@ -179,7 +179,7 @@ def plotter(fdict):
         mp.drawcounties()
         mp.drawcities()
     if usdm == 'yes':
-        mp.draw_usdm(edate, filled=False)
+        mp.draw_usdm(edate, filled=False, hatched=True)
 
     return mp.fig
 

@@ -145,7 +145,7 @@ def plotter(fdict):
     if sector == 'IA':
         mp.drawcounties()
     if usdm == 'yes':
-        mp.draw_usdm(date2, filled=False)
+        mp.draw_usdm(date2, filled=False, hatched=True)
 
     return mp.fig, df
 
