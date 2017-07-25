@@ -95,10 +95,11 @@ def plotter(fdict):
     ax.bar(thisyear['doy'].values, thisyear['max_rh'] - thisyear['min_rh'],
            bottom=thisyear['min_rh'].values, ec='lightblue', fc='lightblue',
            label='%s Obs' % (year,))
-    ax.legend(ncol=4, loc=(0.35, -0.12), fontsize=12)
+    ax.legend(ncol=4, loc=(0.05, -0.2), fontsize=12)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
                    305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
+    ax.set_position([0.1, 0.2, 0.75, 0.7])
     ax.set_xlim(1, 365)
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
@@ -112,6 +113,7 @@ def plotter(fdict):
                                                         threshold),
                    color='r')
     ax2.set_ylim(0, 100)
+    ax2.set_position([0.1, 0.2, 0.75, 0.7])
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     return fig, df
 
