@@ -1,11 +1,13 @@
 """
  Script to take current SHEF obs and generate a METAR summary
 """
+from __future__ import print_function
 import datetime
-import pytz
 import subprocess
 import tempfile
 import os
+
+import pytz
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
@@ -14,7 +16,7 @@ import psycopg2
 SCRIPT_TIME = datetime.datetime.utcnow()
 SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
 SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
-NT = NetworkTable(("KCCI", "KELO", "KIMT"))
+NT = NetworkTable(("KCCI", "KIMT"))
 IEM = psycopg2.connect(database="iem", host='iemdb')
 PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
 
@@ -25,18 +27,14 @@ os.close(tmpfp)
 os.unlink(tmpfname)
 saofn = "%s.sao" % (tmpfname,)
 csvfn = "%s.csv" % (tmpfname,)
-kelocsvfn = "%s_kelo.csv" % (tmpfname,)
 rr5fn = "%s_RR5.dat" % (tmpfname,)
 locdsmfn = "%s_LOCDSM.dat" % (tmpfname,)
-fsdrr5fn = "%s_FSD.dat" % (tmpfname,)
 kimtrr5fn = "%s_kimt.dat" % (tmpfname,)
 
 SAOFILE = open(saofn, 'w')
 CSVFILE = open(csvfn, 'w')
-KELOCSVFILE = open(kelocsvfn, 'w')
 DMXRR5 = open(rr5fn, 'w')
 LOCDSMRR5 = open(locdsmfn, 'w')
-FSDRR5 = open(fsdrr5fn, 'w')
 BADRR5 = open(kimtrr5fn, 'w')
 
 ###
@@ -101,8 +99,8 @@ def metar(ob):
     # Pday
     pday = "" if ob.get('pday') is None else " 7%04i" % (ob.get('pday'), )
     return "%s %s %s %s RMK %s %s %s%s=\015\015\012" % (mid, mtrts, mwind,
-                                                         mtmp, malti, tgroup,
-                                                         phour, pday)
+                                                        mtmp, malti, tgroup,
+                                                        phour, pday)
 
 
 def writeHeader():
@@ -126,11 +124,6 @@ def writeHeader():
     LOCDSMRR5.write("\n\n\n.B DMX "+sDate+" C DH"+hour+"/TA/PCIRP\n")
     LOCDSMRR5.write(":Location ID   TempF / pcirp ...\n")
     LOCDSMRR5.write(":Iowa Environmental Mesonet - KCCI SchoolNet8\n")
-
-    FSDRR5.write("\n\n\n.B FSD "+sDate+" C DH"+hour+"/TA/PPH/PPT/PPQ/PCIRP\n")
-    FSDRR5.write(":Location ID   TempF / 1h prec / 3h prec / ...\n")
-    FSDRR5.write(":                6h prec / pcirp\n")
-    FSDRR5.write(":Iowa Environmental Mesonet - KELO WeatherNet\n")
 
 
 def loadCounters():
@@ -317,34 +310,30 @@ def doNetwork(_network, shef_fp, thres, qdict):
                               pretty_precip(pcounter),
                               ob.get('sname', 'Unknown')))
         if _network == 'KCCI':
-                LOCDSMRR5.write("%s      %3s / %5s\n" % (nwsli,
-                                pretty_tmpf(ob), pretty_precip(pcounter)))
+            LOCDSMRR5.write(("%s      %3s / %5s\n"
+                             ) % (nwsli,
+                                  pretty_tmpf(ob), pretty_precip(pcounter)))
         # CSV FILE!
-        for fp in [CSVFILE, KELOCSVFILE]:
-            if _network != 'KELO' and fp == KELOCSVFILE:
-                continue
-            utc = ob['valid'].astimezone(pytz.timezone("UTC"))
-            fp.write(("%s,%s,%s,%s,%i,%s,%s,%s,%s\n"
-                      "") % (nwsli, utc.strftime("%Y/%m/%d %H:%M:%S"),
-                             getm_c(ob, 'tmpf'), getm_c(ob, 'dwpf'),
-                             ob['sknt'], ob['drct'], phour or 'M',
-                             pday or 'M', ob['pres']))
+        utc = ob['valid'].astimezone(pytz.timezone("UTC"))
+        CSVFILE.write(("%s,%s,%s,%s,%i,%s,%s,%s,%s\n"
+                       ) % (nwsli, utc.strftime("%Y/%m/%d %H:%M:%S"),
+                            getm_c(ob, 'tmpf'), getm_c(ob, 'dwpf'),
+                            ob['sknt'], ob['drct'], phour or 'M',
+                            pday or 'M', ob['pres']))
 
         if _network != 'KIMT':
             SAOFILE.write(metar(obs[nwsli]))
 
 
 def closeFiles():
+    """close"""
     SAOFILE.write("\015\015\012\003")
     SAOFILE.close()
     DMXRR5.write(".END\n")
     DMXRR5.close()
     LOCDSMRR5.write(".END\n")
     LOCDSMRR5.close()
-    FSDRR5.write(".END\n")
-    FSDRR5.close()
     CSVFILE.close()
-    KELOCSVFILE.close()
 
 
 def post_process():
@@ -361,12 +350,6 @@ def post_process():
     subprocess.call(cmd, shell=True)
     os.unlink(csvfn)
 
-    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('kelo.csv', kelocsvfn)
-    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
-                         stdout=subprocess.PIPE)
-    p.stdout.read()
-    os.unlink(kelocsvfn)
-
     if SCRIPT_TIME.minute in [15, 35]:
         cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('LOCDSMRR5DMX.dat',
                                                      locdsmfn)
@@ -375,16 +358,8 @@ def post_process():
         cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUADSMRR5DMX.dat',
                                                      rr5fn)
         subprocess.call(cmd, shell=True)
-        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUAFSDRR5FSD.dat',
-                                                     fsdrr5fn)
-        subprocess.call(cmd, shell=True)
-    # print locdsmfn
-    # print rr5fn
-    # print fsdrr5fn
-    # print kimtrr5fn
     os.unlink(locdsmfn)
     os.unlink(rr5fn)
-    os.unlink(fsdrr5fn)
     os.unlink(kimtrr5fn)
 
 
@@ -397,7 +372,7 @@ def loadQC():
 
     pcursor.execute("""
     select s_mid, sensor, status from tt_base WHERE sensor is not null
-    and status != 'CLOSED' and portfolio in ('kccisnet','kelosnet','kimtsnet')
+    and status != 'CLOSED' and portfolio in ('kccisnet', 'kimtsnet')
     """)
     for row in pcursor:
         if row[0] not in qdict:
@@ -420,8 +395,6 @@ def main():
               qdict)
     doNetwork('KIMT', BADRR5, now - datetime.timedelta(minutes=180),
               qdict)
-    doNetwork('KELO', FSDRR5, now - datetime.timedelta(minutes=300),
-              qdict)
 
     writeCounters()
     closeFiles()
@@ -431,6 +404,7 @@ def main():
     PORTFOLIO.close()
     IEM.commit()
     IEM.close()
+
 
 if __name__ == '__main__':
     main()
