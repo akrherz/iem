@@ -23,7 +23,7 @@ now = utc.astimezone(pytz.timezone("America/Chicago"))
 IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-st = NetworkTable(['KCCI', 'KELO', 'KIMT'])
+st = NetworkTable(['KCCI', 'KIMT'])
 
 st.sts["SMAI4"]["plot_name"] = "M-town"
 st.sts["SBZI4"]["plot_name"] = "Zoo"
@@ -131,14 +131,11 @@ def get_network(network):
 
 def main():
     kcci = get_network("KCCI")
-    kelo = get_network("KELO")
     kimt = get_network("KIMT")
 
     get_precip_totals(kcci, 'KCCI')
-    get_precip_totals(kelo, 'KELO')
     get_precip_totals(kimt, 'KIMT')
     computeOthers(kcci)
-    computeOthers(kelo)
     computeOthers(kimt)
 
     tmpfp = tempfile.mktemp()
@@ -268,7 +265,7 @@ def main():
                                           formatter(v.get('max_srad'), 0),
                                           v.get('online'))
             of.write(s.replace("'", ""))
-        except:
+        except Exception as exp:
             print kimt[sid]
             print sys.excepthook(sys.exc_info()[0],
                                  sys.exc_info()[1], sys.exc_info()[2])
@@ -336,7 +333,7 @@ def main():
                 kcci[sid].get('p3day', 0), kcci[sid].get('p7day', 0),
                 kcci[sid].get('p14day', 0)))
 
-        except:
+        except Exception as exp:
             print kcci[sid]
             print sys.excepthook(sys.exc_info()[0],
                                  sys.exc_info()[1], sys.exc_info()[2])
@@ -346,6 +343,7 @@ def main():
     subprocess.call(("/home/ldm/bin/pqinsert -p '%s' "
                      "/tmp/wxc_snet8.txt") % (pqstr, ), shell=True)
     os.remove("/tmp/wxc_snet8.txt")
+
 
 if __name__ == '__main__':
     main()
