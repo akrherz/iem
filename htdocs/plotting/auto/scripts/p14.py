@@ -1,6 +1,8 @@
+"""Precip bins"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -8,20 +10,20 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """Using long term data, five precipitation bins are
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """Using long term data, five precipitation bins are
     constructed such that each bin contributes 20% to the annual precipitation
     total.  Using these 5 bins, an individual year's worth of data is
     compared.  With this comparison, you can say that one's years worth of
     departures can be explained by these differences in precipitation bins."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
              label='Year to Highlight:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -29,8 +31,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    IEM = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     today = datetime.datetime.now()
@@ -60,14 +62,16 @@ def plotter(fdict):
         if i == 0:
             minyear = row['minyear']
             total = row['tsum']
-            onefith = total / 5.0
-            base = onefith
+            onefifth = total / 5.0
+            base = onefifth
         if row['rsum'] > base:
             bins.append(row['precip'])
-            base += onefith
+            base += onefifth
 
     normal = total / float(endyear - minyear - 1)
-    bins.append(row['precip'])
+    # A rounding edge case
+    if row['precip'] != bins[-1]:
+        bins.append(row['precip'])
 
     df = pd.DataFrame({'bin': range(1, 6),
                        'lower': bins[0:-1],
@@ -154,4 +158,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(station='IA7708', year=2017, network='IACLIMATE'))
