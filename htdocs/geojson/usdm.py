@@ -15,7 +15,9 @@ def run(ts):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if ts == '':
-        ts = datetime.date.today()
+        # Go get the latest USDM stored in the database!
+        cursor.execute("""SELECT max(valid) from usdm""")
+        ts = cursor.fetchone()[0]
     else:
         ts = datetime.datetime.strptime(ts, '%Y-%m-%d').date()
     offset = (ts.weekday() - 1) % 7
