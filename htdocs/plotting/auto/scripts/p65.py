@@ -1,6 +1,8 @@
-import psycopg2
-import datetime
+"""Day freq of month"""
 import calendar
+import datetime
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -11,13 +13,13 @@ PDICT = {'cold': 'Coldest Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the frequency of a given day
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the frequency of a given day
     in the month having the coldest high or low temperature of that month for
     a year."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default=today.month,
@@ -25,7 +27,7 @@ def get_description():
         dict(type="select", name='dir', default='cold',
              label='Select variable to plot:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -87,6 +89,7 @@ def plotter(fdict):
     ax[1].set_xlim(0.5, days + 0.5)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

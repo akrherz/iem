@@ -1,8 +1,10 @@
+"""Day of month freq"""
+import calendar
+
 import psycopg2
 import numpy as np
-from pyiem import network
 from pandas.io.sql import read_sql
-import calendar
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'precip': 'Daily Precipitation',
@@ -15,12 +17,12 @@ PDICT2 = {'above': 'At or Above Threshold',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot produces the daily frequency of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot produces the daily frequency of
     a given criterion being meet for a station and month of your choice.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=9,
@@ -32,7 +34,7 @@ def get_description():
         dict(type='select', name='dir', default='above',
              label='Threshold Direction:', options=PDICT2),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -40,7 +42,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     varname = ctx['var']
@@ -62,13 +64,13 @@ def plotter(fdict):
         count(*) as total
         from """+table+""" WHERE station = %s and month = %s
         GROUP by sday ORDER by sday ASC
-        """, COOP, params=(threshold, station, month), index_col='sday')
+        """, pgconn, params=(threshold, station, month), index_col='sday')
     df['freq'] = df['hit'] / df['total'] * 100.
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
     bars = ax.bar(np.arange(1, len(df.index)+1), df['freq'])
-    for i, bar in enumerate(bars):
-        ax.text(i+1, bar.get_height() + 0.3, '%s' % (df['hit'][i],),
+    for i, mybar in enumerate(bars):
+        ax.text(i+1, mybar.get_height() + 0.3, '%s' % (df['hit'][i],),
                 ha='center')
     msg = ("[%s] %s %s %s %s during %s (Avg: %.2f days/year)"
            ) % (station, nt.sts[station]['name'], PDICT.get(varname),
@@ -85,6 +87,7 @@ def plotter(fdict):
     ax.set_ylim(0, df['freq'].max() + 5)
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(month=9, dir='below', thres=65, station='IA2724',

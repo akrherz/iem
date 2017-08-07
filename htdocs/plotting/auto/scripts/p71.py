@@ -1,11 +1,13 @@
-import psycopg2.extras
+"""Daily avg wind speeds"""
 import datetime
+
+import psycopg2.extras
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import drct2text
 from pyiem.datatypes import speed
-import pandas as pd
 from pyiem.util import get_autoplot_context
+import pandas as pd
 
 PDICT = {'KT': 'knots',
          'MPH': 'miles per hour',
@@ -15,10 +17,10 @@ PDICT = {'KT': 'knots',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot displays daily average wind speeds for
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot displays daily average wind speeds for
     a given year and month of your choice.  These values are computed by the
     IEM using available observations.  Some observation sites explicitly
     produce an average wind speed, but that is not considered for this plot.
@@ -27,7 +29,7 @@ def get_description():
     The average wind direction
     is computed by vector averaging of the wind speed and direction reports.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
@@ -38,10 +40,11 @@ def get_description():
              label='Wind Speed Units:', options=PDICT),
 
     ]
-    return d
+    return desc
 
 
 def draw_line(plt, x, y, angle):
+    """Draw a line"""
     r = 0.25
     plt.arrow(x, y, r * np.cos(angle), r * np.sin(angle),
               head_width=0.35, head_length=0.5, fc='k', ec='k')
@@ -79,7 +82,7 @@ def plotter(fdict):
         days.append(row[0].day)
         drct.append(row[2])
         sknt.append(row[1])
-    if len(sknt) == 0:
+    if not sknt:
         return "ERROR: No Data Found"
     df = pd.DataFrame(dict(day=pd.Series(days),
                            drct=pd.Series(drct),
@@ -98,13 +101,14 @@ def plotter(fdict):
     ax.set_title(("%s [%s]\n%s Daily Average Wind Speed and Direction"
                   ) % (nt.sts[station]['name'], station,
                        sts.strftime("%b %Y")))
-    ax.set_xlim(0.5, max(days)+0.5)
-    ax.set_xticks(range(1, max(days)+1, 5))
+    ax.set_xlim(0.5, 31.5)
+    ax.set_xticks(range(1, 31, 5))
     ax.set_ylim(top=max(sknt)+2)
 
     ax.set_ylabel("Average Wind Speed [%s]" % (PDICT.get(units),))
 
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())

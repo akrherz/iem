@@ -1,10 +1,13 @@
+"""First and Last Date"""
+from __future__ import print_function
+import calendar
+import datetime
+
 import psycopg2.extras
 import numpy as np
-from pyiem import network
 from scipy import stats
-import calendar
 import pandas as pd
-import datetime
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'above': 'First Spring/Last Fall Temperature Above Threshold',
@@ -16,9 +19,14 @@ PDICT2 = {'low': 'Low Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot presents the period between the first
+    or last date for spring and fall season that the temperature was above or
+    below some threshold.  The year is split into two seasons on 1 July. A
+    simple linear trend line is placed on both dates.
+    """
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='direction', default='below',
@@ -30,7 +38,7 @@ def get_description():
         dict(type='year', name='year', default=1893,
              label='Start Year of Plot'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -38,8 +46,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     threshold = ctx['threshold']
@@ -154,10 +162,11 @@ def plotter(fdict):
     ax.legend(ncol=2, fontsize=14, labelspacing=2)
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_yticklabels(calendar.month_abbr[1:])
-    ax.set_ylim(min(spring) - 5, max(fall) + 40)
+    ax.set_ylim(min(spring) - 5, max(fall) + 30)
     ax.set_xlim(min(years)-1, max(years)+1)
     return fig, df, res
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(station='IA7844', network='IACLIMATE', direction='below',
+                 varname='low', threshold=50))

@@ -1,8 +1,10 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+"""Streaks from CLI sites"""
 import datetime
-from pandas.io.sql import read_sql
 from collections import OrderedDict
+
+import psycopg2
+from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
@@ -16,15 +18,15 @@ SECTORS = OrderedDict([('conus', 'CONUS'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 3600
-    d['description'] = """This plot presents the current streak of days with
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 3600
+    desc['description'] = """This plot presents the current streak of days with
     a high or low temperature above or at/below the daily average temperature.
     You can also plot the number of days since last measurable precipitation
     event (trace events are counted as dry).
     This plot is based off of NWS CLI sites."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='var', default='high',
              label='Which parameter:', options=PDICT),
         dict(type='date', name='sdate',
@@ -38,7 +40,7 @@ def get_description():
              default='IA', label='Select State: (used when plotting state)'),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -116,19 +118,20 @@ def plotter(fdict):
              'above(+)/below(-) Average') % (varname.capitalize(),)
     if varname == 'precip':
         title = 'Days Since Last Measurable Precipitation'
-    m = MapPlot(sector=sector,
-                state=state,
-                cwa=(wfo if len(wfo) == 3 else wfo[1:]),
-                axisbg='tan', statecolor='#EEEEEE',
-                title=title,
-                subtitle=('based on NWS CLI Sites, map approximately '
-                          'valid for %s') % (today.strftime("%-d %b %Y"), ))
-    m.plot_values(lons, lats, vals, color=colors, labels=labels,
-                  labeltextsize=(8 if sector != 'state' else 12),
-                  textsize=(12 if sector != 'state' else 16),
-                  labelbuffer=10)
+    mp = MapPlot(sector=sector,
+                 state=state,
+                 cwa=(wfo if len(wfo) == 3 else wfo[1:]),
+                 axisbg='tan', statecolor='#EEEEEE',
+                 title=title,
+                 subtitle=('based on NWS CLI Sites, map approximately '
+                           'valid for %s') % (today.strftime("%-d %b %Y"), ))
+    mp.plot_values(lons, lats, vals, color=colors, labels=labels,
+                   labeltextsize=(8 if sector != 'state' else 12),
+                   textsize=(12 if sector != 'state' else 16),
+                   labelbuffer=10)
 
-    return m.fig, df
+    return mp.fig, df
+
 
 if __name__ == '__main__':
     plotter(dict(var='precip'))

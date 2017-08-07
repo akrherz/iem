@@ -1,8 +1,7 @@
-"""
-  Fall Minimum by Date
-"""
-import psycopg2
+"""Fall Minimum by Date"""
 import calendar
+
+import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -10,15 +9,15 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart displays the combination of liquid
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart displays the combination of liquid
     precipitation with snowfall totals for a given month.  The liquid totals
     include the melted snow.  So this plot does <strong>not</strong> show
     the combination of non-frozen vs frozen precipitation. For a given winter
     month, not all precipitation falls as snow, so you can not assume that
     the liquid equivalent did not include some liquid rainfall."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default='12',
@@ -26,7 +25,7 @@ def get_description():
         dict(type='year', name='year', default='2014',
              label='Select Year to Highlight:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -76,6 +75,7 @@ def plotter(fdict):
     ax.set_xlabel("Precipitation Total (liquid + melted) [inch]")
     ax.legend(loc=2, scatterpoints=1)
     return fig, df
+
 
 if __name__ == '__main__':
     plotter(dict())
