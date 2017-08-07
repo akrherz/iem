@@ -96,6 +96,7 @@ def plotter(fdict):
         gdd50 from climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
+        o.precip as precip, c.precip as cprecip,
         o.high, o.low, o.gdd50, c.gdd50 as cgdd50,
         o.gdd50 - c.gdd50 as gdd50_diff,
         (o.high + o.low)/2. - (c.high + c.low)/2. as temp_diff
@@ -103,12 +104,15 @@ def plotter(fdict):
         (o.station = c.station and o.sday = c.sday)),
     agg as (
         SELECT station, sum(precip_diff) as precip_depart,
+        sum(precip) as precip, sum(cprecip) as cprecip,
         min(low) as min_low_temp, sum(gdd50_diff) as gdd_depart,
         avg(temp_diff) as avg_temp_depart, sum(gdd50) as gdd_sum,
         sum(cgdd50) as cgdd_sum
         from combo GROUP by station)
 
-    SELECT d.station, d.precip_depart, d.min_low_temp, d.avg_temp_depart,
+    SELECT d.station, t.name,
+    d.precip as precip_sum, d.cprecip as cprecip_sum,
+    d.precip_depart, d.min_low_temp, d.avg_temp_depart,
     d.gdd_depart, d.gdd_sum, d.cgdd_sum,
     ST_x(t.geom) as lon, ST_y(t.geom) as lat
     from agg d JOIN stations t on (d.station = t.id)
