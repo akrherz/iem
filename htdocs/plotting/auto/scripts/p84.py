@@ -28,7 +28,8 @@ PDICT2 = {'c': 'Contour Plot',
 SRCDICT = {'mrms': 'NOAA MRMS (since 1 Jan 2014)',
            'prism': 'OSU PRISM (since 1 Jan 1981)'}
 PDICT3 = {'acc': 'Accumulation',
-          'dep': 'Departure from Avg'}
+          'dep': 'Departure from Average [inch]',
+          'per': 'Departure from Average [%]'}
 PDICT4 = {'yes': 'Yes, overlay Drought Monitor',
           'no': 'No, do not overlay Drought Monitor'}
 
@@ -115,7 +116,7 @@ def plotter(fdict):
 
     mp = MapPlot(sector=sector, state=state, axisbg='white', nocaption=True,
                  title='%s:: %s Precip %s' % (source, title, PDICT3[opt]),
-                 subtitle='Data from %s' % (subtitle,)
+                 subtitle='Data from %s' % (subtitle,), titlefontsize=14
                  )
 
     idx0 = iemre.daily_offset(sdate)
@@ -148,6 +149,7 @@ def plotter(fdict):
     nc.close()
     if np.ma.is_masked(np.max(p01d)):
         return 'Data Unavailable'
+    units = 'inches'
     if opt == 'dep':
         # Do departure work now
         nc = netCDF4.Dataset(clncfn)
@@ -157,6 +159,16 @@ def plotter(fdict):
         cmap = plt.get_cmap('RdBu')
         [maxv] = np.percentile(np.abs(p01d), [99, ])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
+    elif opt == 'per':
+        nc = netCDF4.Dataset(clncfn)
+        climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
+                                0), 'MM').value('IN')
+        p01d = p01d - climo
+        cmap = plt.get_cmap('RdBu')
+        cmap.set_under('white')
+        cmap.set_over('black')
+        clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]
+        units = 'percent'
     else:
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
         if days > 6:
@@ -170,10 +182,10 @@ def plotter(fdict):
 
     x2d, y2d = np.meshgrid(lons, lats)
     if ptype == 'c':
-        mp.contourf(x2d, y2d, p01d, clevs, cmap=cmap, label='inches',
+        mp.contourf(x2d, y2d, p01d, clevs, cmap=cmap, units=units,
                     iline=False)
     else:
-        res = mp.pcolormesh(x2d, y2d, p01d, clevs, cmap=cmap, label='inches')
+        res = mp.pcolormesh(x2d, y2d, p01d, clevs, cmap=cmap, units=units)
         res.set_rasterized(True)
     if sector != 'midwest':
         mp.drawcounties()
