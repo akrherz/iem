@@ -163,7 +163,7 @@ def plotter(fdict):
         nc = netCDF4.Dataset(clncfn)
         climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
                                 0), 'MM').value('IN')
-        p01d = (p01d - climo) / climo * 100.
+        p01d = p01d / climo * 100.
         cmap = plt.get_cmap('RdBu')
         cmap.set_under('white')
         cmap.set_over('black')
