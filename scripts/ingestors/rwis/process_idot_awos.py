@@ -39,7 +39,8 @@ def main():
 
     fd, path = tempfile.mkstemp()
     os.write(fd, "\001\r\r\n")
-    os.write(fd, "SAUS00 KISU 000000\r\r\n")
+    os.write(fd, ("SAUS00 KISU %s\r\r\n"
+                  ) % (datetime.datetime.utcnow().strftime("%d%H%M"), ))
     os.write(fd, "METAR\r\r\n")
     for sid in data.keys():
         os.write(fd, '%s=\r\r\n' % (data[sid].strip().replace("METAR ", ""), ))
