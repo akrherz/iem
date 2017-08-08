@@ -38,8 +38,12 @@ def main():
         data[d['id']] = line
 
     fd, path = tempfile.mkstemp()
+    os.write(fd, "\001\r\n")
+    os.write(fd, "SAUS00 KISU 000000\r\n")
+    os.write(fd, "METAR\r\n")
     for sid in data.keys():
         os.write(fd, '%s=\r\n' % (data[sid].strip().replace("METAR ", ""), ))
+    os.write(fd, "\003")
     os.close(fd)
     p = subprocess.Popen(("/home/ldm/bin/pqinsert -i -p 'data c %s "
                           "LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s"
