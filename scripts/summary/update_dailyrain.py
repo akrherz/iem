@@ -42,7 +42,10 @@ def main():
                round(precip::numeric, 2) else precip end as pday
              from agg
          )
-        UPDATE summary_"""+str(yyyy)+""" s SET pday = a.pday FROM agg2 a
+        UPDATE summary_"""+str(yyyy)+""" s
+        SET pday =
+        case when a.pday < 0.01 and a.pday > 0 then 0.0001 else a.pday end
+        FROM agg2 a
         WHERE s.iemid = a.iemid and s.day = a.d and
         (s.pday is null or s.pday != a.pday)
       """)
