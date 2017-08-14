@@ -1,11 +1,20 @@
 """trailing day precip"""
 import datetime
+from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
+
+PDICT = OrderedDict([
+    ('dep', 'Departure [inch]'),
+    ('per', 'Percent of Average [%]'),
+    ('ptile', 'Percentile (1=wettest)'),
+    ('rank', 'Rank (1=wettest)'),
+    ('spi', 'Standardized Precip Index [sigma]')
+    ])
 
 
 def get_description():
@@ -14,17 +23,35 @@ def get_description():
     today = datetime.date.today()
     desc['data'] = True
     desc['highcharts'] = True
-    desc['description'] = """This plot presents three metrics for to date
-    precipitation accumulation over a given number of trailing days.  The
-    lines represent the actual and maximum accumulations for the period.
-    The blue bars represent the rank with 1 being the wettest on record."""
+    desc['description'] = """This plot presents trailing day precipitation
+    metrics.  Each point on the x-axis represents a period from that date to
+    the right-most date on the plot.  There are five options for units to
+    display the chart in, more specifically, the right hand axis.
+    <br />
+    <ul>
+      <li><strong>Departure [inch]</strong>: the absolute amount of precip
+      above or below long term average.</li>
+      <li><strong>Percent of Average [%]</strong>: the departure from average
+      expressed in percent of average.</li>
+      <li><strong>Percentile (1=wettest)</strong>: The percentile rank for
+      this period's total versus all totals from the same period of days
+      over the period of record for the station.</li>
+      <li><strong>Rank (1=wettest)</strong>: The overall rank over the other
+      years for the period of record for the location.</li>
+      <li><strong>Standardized Precip Index [sigma]</strong>: This expresses
+      the precipitation departure in terms of standard deviations from
+      average.  The standard deviations and averages are based on period of
+      record data.</li>
+    </ul>
+    """
     desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
+        dict(type='select', name='opt', default='rank',
+             options=PDICT, label='Chart Display Units'),
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
              label='To Date:',
              min="1894/01/01"),  # Comes back to python as yyyy-mm-dd
-
     ]
     return desc
 
@@ -36,6 +63,7 @@ def get_ctx(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     date = ctx['date']
+    opt = ctx['opt']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
@@ -70,9 +98,13 @@ def get_ctx(fdict):
             xticks.append(i)
             xticklabels.append(ts.strftime("%b"))
     ranks = []
+    departures = []
+    percentages = []
     totals = []
     maxes = []
     avgs = []
+    spi = []
+    ptile = []
     myyear = date.year - baseyear - 1
     for days in range(1, 366):
         idx0 = _doy + 366 - days
@@ -80,28 +112,47 @@ def get_ctx(fdict):
         sums = np.sum(data[:, idx0:idx1], 1)
         thisyear = sums[myyear]
         sums = np.sort(sums)
-        a = np.digitize([thisyear, ], sums)
-        rank = years - a[0] + 1
+        arr = np.digitize([thisyear, ], sums)
+        rank = years - arr[0] + 1
         ranks.append(rank)
+        ptile.append(rank / float(len(sums)) * 100.)
         totals.append(thisyear)
         maxes.append(sums[-1])
         avgs.append(np.nanmean(sums))
+        departures.append(thisyear - avgs[-1])
+        percentages.append(thisyear / avgs[-1] * 100)
+        spi.append((thisyear - avgs[-1]) / np.nanstd(sums))
 
     ctx['sdate'] = date - datetime.timedelta(days=360)
     ctx['title'] = "%s %s" % (station,
                               nt.sts[station]['name'])
-    ctx['subtitle'] = ("Trailing Days Precipitation Rank [%s-%s] to %s"
-                       ) % (baseyear+2,
+    ctx['subtitle'] = ("Trailing Days Precip %s [%s-%s] to %s"
+                       ) % (PDICT[opt], baseyear+2,
                             datetime.datetime.now().year,
                             date.strftime("%-d %b %Y"))
 
     ctx['ranks'] = ranks
+    ctx['departures'] = departures
+    ctx['percentages'] = percentages
+    ctx['spi'] = spi
+    ctx['percentiles'] = ptile
+    if opt == 'per':
+        ctx['y2'] = ctx['percentages']
+    elif opt == 'dep':
+        ctx['y2'] = ctx['departures']
+    elif opt == 'spi':
+        ctx['y2'] = ctx['spi']
+    elif opt == 'ptile':
+        ctx['y2'] = ctx['percentiles']
+    else:
+        ctx['y2'] = ctx['ranks']
     ctx['totals'] = totals
     ctx['maxes'] = maxes
     ctx['avgs'] = avgs
     ctx['xticks'] = xticks
     ctx['xticklabels'] = xticklabels
     ctx['station'] = station
+    ctx['y2label'] = PDICT[opt]
     return ctx
 
 
@@ -123,9 +174,16 @@ $("#ap_container").highcharts({
                 text: 'Precipitation [inch]'
             }
         }, {
-            min: 0,
             title: {
-                text: 'Rank [1 is wettest]'
+                text: '""" + ctx['y2label'] + """',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
             },
             opposite: true
     }],
@@ -134,12 +192,13 @@ $("#ap_container").highcharts({
         xDateFormat: '%Y-%m-%d'
     },
     series : [{
-        name: 'Rank',
+        name: '""" + ctx['y2label'] + """ (right axis)',
+        tooltip: {valueDecimals: 2},
         pointStart: """ + dstart + """,
         pointInterval: 24 * 3600 * 1000, // one day
         zIndex: 5,
         shadow: true,
-        data: """ + str(ctx['ranks'][::-1]) + """,
+        data: """ + str(ctx['y2'][::-1]) + """,
         yAxis: 1
     },{
         name: 'This Period',
@@ -180,14 +239,16 @@ def plotter(fdict):
     ctx = get_ctx(fdict)
 
     (fig, ax) = plt.subplots(1, 1)
+    ax.set_position([0.1, 0.1, 0.75, 0.75])
     y2 = ax.twinx()
+    y2.set_position([0.1, 0.1, 0.75, 0.75])
 
-    y2.bar(np.arange(-365, 0), ctx['ranks'][::-1], fc='b', ec='b')
+    y2.bar(np.arange(-365, 0), ctx['y2'][::-1], fc='b', ec='b')
     ax.grid(True)
     ax.set_xticks(ctx['xticks'])
     ax.set_xticklabels(ctx['xticklabels'])
-    ax.set_title(("%s\n%s") % (ctx['title'], ctx['subtitle']))
-    y2.set_ylabel("Rank [1=wettest] (bars)", color='b')
+    ax.set_title(("%s\n%s") % (ctx['title'], ctx['subtitle']), fontsize=10)
+    y2.set_ylabel("%s (bars)" % (ctx['y2label'], ), color='b')
     ax.set_xlim(-367, 0.5)
 
     ax.plot(np.arange(-365, 0), ctx['totals'][::-1], color='r', lw=2,
@@ -195,12 +256,16 @@ def plotter(fdict):
     ax.plot(np.arange(-365, 0), ctx['maxes'][::-1], color='g', lw=2,
             label='Maximum')
     ax.set_ylabel("Precipitation [inch]")
-
-    ax.legend()
+    ax.set_zorder(y2.get_zorder()+1)
+    ax.patch.set_visible(False)
+    ax.legend(loc='best')
     df = pd.DataFrame(dict(day=np.arange(-365, 0),
                            maxaccum=ctx['maxes'][::-1],
                            accum=ctx['totals'][::-1],
-                           rank=ctx['ranks'][::-1]))
+                           rank=ctx['ranks'][::-1],
+                           spi=ctx['spi'][::-1],
+                           percentages=ctx['percentages'][::-1],
+                           departures=ctx['departures'][::-1]))
 
     return fig, df
 
