@@ -293,7 +293,8 @@ def make_daily_water_change_plot(ctx):
     df['depth'] = df['v12'] * l1 + df['v24'] * l2 + df['v50'] * l3
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
-    ax[0].plot(df['valid'].values, df['depth'], color='b', lw=2)
+    if not df['depth'].isnull().all():
+        ax[0].plot(df['valid'].values, df['depth'], color='b', lw=2)
     for level in [0.15, 0.25, 0.35, 0.45]:
         ax[0].axhline((l1+l2+l3) * level, c='k')
         ax[0].text(df['valid'].values[-1], (l1+l2+l3) * level,
