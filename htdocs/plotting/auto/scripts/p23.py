@@ -1,11 +1,13 @@
-import psycopg2.extras
-from pandas.io.sql import read_sql
-import numpy as np
-from pyiem.network import Table as NetworkTable
+"""Monthly departures and elnino"""
 import datetime
-import pandas as pd
 from collections import OrderedDict
+
+import psycopg2.extras
+import numpy as np
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
             ('avg_high', 'Average High Temperature [F]'),
@@ -17,12 +19,12 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     year = datetime.date.today().year - 7
-    d['data'] = True
-    d['description'] = """This plot presents the combination of monthly
+    desc['data'] = True
+    desc['description'] = """This plot presents the combination of monthly
     temperature or precipitation departures and El Nino index values."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='syear', default=year,
@@ -32,7 +34,7 @@ def get_description():
         dict(type='select', name='var', default='avg_temp',
              label='Which Monthly Variable to plot?', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -125,10 +127,10 @@ def plotter(fdict):
         _b = 'r'
     bars = ax.bar(df['date'].values, df[varname].values,
                   fc=_a, ec=_a, width=30, align='center')
-    for bar in bars:
-        if bar.get_xy()[1] < 0:
-            bar.set_facecolor(_b)
-            bar.set_edgecolor(_b)
+    for mybar in bars:
+        if mybar.get_height() < 0:
+            mybar.set_facecolor(_b)
+            mybar.set_edgecolor(_b)
 
     ax2 = ax.twinx()
 
