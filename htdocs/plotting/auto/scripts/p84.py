@@ -29,7 +29,7 @@ SRCDICT = {'mrms': 'NOAA MRMS (since 1 Jan 2014)',
            'prism': 'OSU PRISM (since 1 Jan 1981)'}
 PDICT3 = {'acc': 'Accumulation',
           'dep': 'Departure from Average [inch]',
-          'per': 'Departure from Average [%]'}
+          'per': 'Percent of Average [%]'}
 PDICT4 = {'yes': 'Yes, overlay Drought Monitor',
           'no': 'No, do not overlay Drought Monitor'}
 
