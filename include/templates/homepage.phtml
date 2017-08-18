@@ -64,6 +64,17 @@ while ($rancam == "" && $loop < 20)
 }
 if ($rancam == ""){ $rancam = "KCCI-016";}
 ?>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Current NWS Sky Coverage Forecast</div>
+  <div class="panel-body">
+<a href="/pickup/eclipse_midwest.png"><img src="/pickup/eclipse_midwest.png?<?php echo time(); ?>" border="0" alt="NDFD" class="img-responsive"/></a>
+
+<br /><a href="http://www.weather.gov/source/crh/eclipse.html">NWS Eclipse Website</a>  
+  </div>
+</div>
+
+
 <div class="panel panel-default">
   <div class="panel-heading"><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</div>
   <div class="panel-body">
