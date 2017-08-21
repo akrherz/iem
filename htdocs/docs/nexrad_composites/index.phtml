@@ -158,7 +158,6 @@ NODATA
  <li><a href="/vtec/">VTEC Product Browser</a></li>
  <li><a href="/data/summary/max_n0r_0z0z_usrad.png">Max Reflectivity Composites</a></li>
  <li><a href="/GIS/rad-by-year-fe.phtml">NEXRAD Composites by Year</a></li>
-
 </ul>
 
 <p>Since 2003, the IEM has been generating and archiving nationwide composites 
@@ -201,8 +200,9 @@ issue was <a href="https://github.com/Unidata/gempak/pull/11">hopefully fixed wi
 not impact any processing of the file.  The conversion of color index and
 RGB colors to dBZ was OK.  There just was not any data at those 0.5 dBZ, non-int
 values.</li>
-<li><strong>8 Nov 2016</strong>: The NWS intends on <a href="http://www.nws.noaa.gov/os/notification/tin09-41_88d_aac.htm">shutting down the N0R</a>
-product on 2 October 2017.  When this happens, the IEM will stop producing the
+<li><strong>21 Aug 2017</strong>: The NWS intends on
+<a href="http://www.nws.noaa.gov/os/notification/tin09-41_88d_aad.htm">shutting down the N0R</a>
+product on 31 December 2017.  When this happens, the IEM will stop producing the
 composite.  You should consider using the n0q product as its replacement.</li>
 </ul>
 
@@ -216,9 +216,8 @@ This feed includes the Base Reflectivity (N0R) and Net Echo Top (NET) products
 which are saved to disk for later processing.  Every 5 minutes, a script runs
 a <a href="http://www.unidata.ucar.edu/software/gempak/">GEMPAK</a> program 
 called <a href="http://www.unidata.ucar.edu/cgi-bin/gempak/manual/programs_index?nex2img">nex2img</a>.  nex2img searches the on-disk data for current (within
-15 minutes of runtime) products and then composites them into a large image.
-During the summertime, only RADARs in precipitation mode are considered for
-compositing.
+15 minutes of runtime) products and then composites them into a large image.</p>
+
 
 <p>The result of the nex2img process is a simple raster image with size of 6000
 pixels in width by 2600 pixels in height.  This raster image is then compared
