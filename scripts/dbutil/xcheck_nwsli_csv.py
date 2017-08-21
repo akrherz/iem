@@ -1,9 +1,10 @@
-"""See if we have metadata in a local CSV file"""
+"""See if we have metadata in a local CSV file
+
+NOTE: I had to manually edit the .csv file to remove the first row
+"""
 from __future__ import print_function
 
-import requests
 import psycopg2
-from pyiem.reference import nwsli2country, nwsli2state
 import pandas as pd
 
 
