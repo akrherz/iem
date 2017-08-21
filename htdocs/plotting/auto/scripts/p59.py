@@ -1,10 +1,12 @@
-from pyiem.datatypes import speed
-import psycopg2
-import numpy as np
+"""u and v wind climatology"""
 import datetime
 import calendar
+
+import psycopg2
+import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.datatypes import speed
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
@@ -37,22 +39,22 @@ def uv(sped, drct):
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This plot presents a climatology of wind
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents a climatology of wind
     observations.  The top panel presents the u (east/west) and v (north/south)
     components.  The bottom panel is the simple average of the wind speed
     magnitude.  The plotted information contains a seven day smoother.  If you
     download the raw data, it will not contain this smoothing."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='units', default='mph',
              label='Wind Speed Units:', options=PDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

@@ -1,7 +1,9 @@
-import psycopg2
-import numpy as np
+"""ASOS comparisons"""
 import datetime
 import calendar
+
+import psycopg2
+import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -12,17 +14,17 @@ PDICT = {'low': 'Morning Low (midnight to 8 AM)',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This application plots the difference in morning
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This application plots the difference in morning
     low or afternoon high temperature between two sites of your choice.
     The morning is
     defined as the period between midnight and 8 AM local time.  The afternoon
     high is defined as the period between noon and 8 PM.  If any difference
     is greater than 25 degrees, it is omitted from this analysis.  This app
     may take a while to generate a plot, so please be patient!"""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation1', default='ALO',
              network='IA_ASOS', label='Select Station 1:'),
         dict(type='zstation', name='zstation2', default='OLZ',
@@ -30,7 +32,7 @@ def get_description():
         dict(type='select', name='varname', default='low', options=PDICT,
              label='Select Comparison'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

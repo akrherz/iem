@@ -1,22 +1,21 @@
-"""
-  Fall Minimum by Date
-"""
+"""Fall Minimum by Date"""
+import datetime
+
 import psycopg2
 from pandas.io.sql import read_sql
 import numpy as np
-import datetime
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents the date of the first fall
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents the date of the first fall
     (date after 1 July) temperature below threshold 1 and then the number of
     days after that date until threshold 2 was reached."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='t1', default=32,
@@ -24,7 +23,7 @@ def get_description():
         dict(type='int', name='t2', default=29,
              label='Temperature Threshold 2:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

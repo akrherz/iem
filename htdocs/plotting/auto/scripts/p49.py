@@ -1,3 +1,4 @@
+"""Some CSCAP Stuff"""
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
@@ -18,11 +19,11 @@ PDICT = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['description'] = """Number of days per year that the two day precipitation
+    desc = dict()
+    desc['cache'] = 86400
+    desc['description'] = """Number of days per year that the two day precipitation
     total is over some threshold."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='CSCAP',
              default='ISUAG', label='Select CSCAP Site:'),
         dict(type='select', name='model', default='echo=a1b',
@@ -30,7 +31,7 @@ def get_description():
         dict(type='float', name='threshold', default='50',
              label='Precipitation Threshold (mm):'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -73,6 +74,7 @@ def plotter(fdict):
             station, nt.sts[station]['name'], model,
             scenario, threshold))
     return fig
+
 
 if __name__ == '__main__':
     plotter(dict())

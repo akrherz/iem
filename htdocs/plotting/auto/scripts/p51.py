@@ -1,3 +1,4 @@
+"""CSCAP Days per year with measurable precip"""
 import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -19,11 +20,11 @@ PDICT = {
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """Days per year with measurable precipitation. """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """Days per year with measurable precipitation. """
+    desc['arguments'] = [
         dict(type='networkselect', name='station', network='CSCAP',
              default='ISUAG', label='Select CSCAP Site:'),
         dict(type='select', name='model', default='echo=a1b',
@@ -31,7 +32,7 @@ def get_description():
         dict(type='int', name='days', default=7,
              label='Number of Days'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

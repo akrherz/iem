@@ -1,10 +1,12 @@
-import psycopg2
-import numpy as np
-from pyiem import network
+"""Plot monthly data over all years"""
 import calendar
 import datetime
-from pandas.io.sql import read_sql
 from collections import OrderedDict
+
+import psycopg2
+import numpy as np
+from pandas.io.sql import read_sql
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([
@@ -50,17 +52,17 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['description'] = """This plot displays a single month's worth of data
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['description'] = """This plot displays a single month's worth of data
     over all of the years in the period of record.  In most cases, you can
     access the raw data for these plots
     <a href="/climodat/" class="link link-info">here.</a>  For the variables
     comparing the daily temperatures against average, the average is taken
     from the NCEI current 1981-2010 climatology."""
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='month', default=today.month,
@@ -70,7 +72,7 @@ def get_description():
         dict(type='float', name='threshold', default='-99',
              label='Threshold (optional, specify when appropriate):'),
     ]
-    return d
+    return desc
 
 
 def highcharts(fdict):
@@ -130,13 +132,13 @@ def get_context(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    l = "0 days"
+    lag = "0 days"
     if month == 'fall':
         months = [9, 10, 11]
         label = "Fall (SON)"
     elif month == 'winter':
         months = [12, 1, 2]
-        l = "31 days"
+        lag = "31 days"
         label = "Winter (DJF)"
     elif month == 'spring':
         months = [3, 4, 5]
@@ -153,7 +155,7 @@ def get_context(fdict):
     high, low from ncdc_climate81 WHERE
     station = %s)
 
-    SELECT extract(year from day + '"""+l+"""'::interval)::int as myyear,
+    SELECT extract(year from day + '""" + lag + """'::interval)::int as myyear,
     max(o.high) as "max-high",
     min(o.high) as "min-high",
     avg(o.high) as "avg-high",
@@ -258,6 +260,7 @@ def plotter(fdict):
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
 
     return fig, ctx['df']
+
 
 if __name__ == '__main__':
     plotter(dict(station='IA8706', network='IACLIMATE',

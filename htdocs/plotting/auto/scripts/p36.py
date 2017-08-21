@@ -1,24 +1,26 @@
-import psycopg2.extras
-import numpy as np
+"""One month being warmer than the other"""
 import datetime
 import calendar
+
+import psycopg2.extras
+import numpy as np
 import matplotlib.patheffects as PathEffects
 from pyiem.network import Table as NetworkTable
-import pandas as pd
 from pyiem.util import get_autoplot_context
+import pandas as pd
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot summarizes the frequency of one month
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot summarizes the frequency of one month
     being warmer than another month for that calendar year."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

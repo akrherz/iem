@@ -1,9 +1,11 @@
+"""Climodat"""
+import datetime
+
 import psycopg2
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
-import datetime
 
-cweek = {1: '3/1-->3/7   ',
+CWEEK = {1: '3/1-->3/7   ',
          2: '3/8-->3/14  ',
          3: '3/15-->3/21 ',
          4: '3/22-->3/28 ',
@@ -60,15 +62,15 @@ cweek = {1: '3/1-->3/7   ',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['report'] = True
-    d['description'] = """ """
-    d['arguments'] = [
+    desc = dict()
+    desc['data'] = True
+    desc['report'] = True
+    desc['description'] = """ """
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -104,7 +106,7 @@ def plotter(fdict):
     ORDER by e.climoweek ASC
     """, pgconn, params=(station,), index_col=None)
 
-    res = ("""\
+    res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
@@ -116,7 +118,7 @@ def plotter(fdict):
  WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS
 """ % (datetime.date.today().strftime("%d %b %Y"),
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name']))
+       nt.sts[station]['name'])
 
     annEvents = 0
     cat1t = 0
@@ -153,7 +155,7 @@ def plotter(fdict):
 
         res += ("%3s %-13s %5.2f %i   %4.2f %4i(%2i) %4i(%2i) "
                 "%4i(%2i) %4i(%2i) %4i(%2i)   %4i\n"
-                ) % (cw, cweek[cw],
+                ) % (cw, CWEEK[cw],
                      maxval, row['year'], meanval,
                      cat1, round((float(cat1) / float(totEvents)) * 100.0),
                      cat2, round((float(cat2) / float(totEvents)) * 100.0),

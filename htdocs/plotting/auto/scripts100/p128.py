@@ -1,3 +1,5 @@
+"""compares yearly summaries"""
+
 import psycopg2
 from pandas.io.sql import read_sql
 from collections import OrderedDict
@@ -16,11 +18,11 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart compares yearly summaries between two
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart compares yearly summaries between two
     long term climate sites."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', options=PDICT, name='var',
              label='Select Variable to Plot', default='avg_temp'),
         dict(type='station', name='station1', default='IA2203',
@@ -28,7 +30,7 @@ def get_description():
         dict(type='station', name='station2', default='IA0200',
              label='Select Secont Station:', network='IACLIMATE'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

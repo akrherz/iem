@@ -1,19 +1,21 @@
+"""Frequency of first fall low"""
+import datetime
+
 import psycopg2
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import pandas as pd
-import datetime
 from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['report'] = True
-    d['description'] = """This chart presents the accumulated frequency of
+    desc = dict()
+    desc['data'] = True
+    desc['report'] = True
+    desc['description'] = """This chart presents the accumulated frequency of
     having the first fall temperature at or below a given threshold."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='int', name='t1', default=32,
@@ -25,7 +27,7 @@ def get_description():
         dict(type='int', name='t4', default=22,
              label='Fourth Threshold (F)'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

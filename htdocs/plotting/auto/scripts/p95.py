@@ -1,9 +1,11 @@
+"""Average T and precip"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-from pyiem import network
-import datetime
 import pandas as pd
 from scipy import stats
+from pyiem import network
 from pyiem.util import get_autoplot_context
 
 PDICT = {'none': 'Show all values',
@@ -12,9 +14,9 @@ PDICT = {'none': 'Show all values',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart displays the combination of average
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart displays the combination of average
     temperature and total precipitation for one or more months of your choice.
     The dots are colorized based on the Southern Oscillation Index (SOI) value
     for a month of your choice.  Many times, users want to compare the SOI
@@ -22,7 +24,7 @@ def get_description():
     the SOI value.  The thought is that there is some lag time for the impacts
     of a given SOI to be felt in the midwestern US.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=9,
@@ -36,7 +38,7 @@ def get_description():
         dict(type='text', default=datetime.date.today().year, name='year',
              label='Year(s) to Highlight in Chart (comma delimited)'),
     ]
-    return d
+    return desc
 
 
 def title(wanted):
