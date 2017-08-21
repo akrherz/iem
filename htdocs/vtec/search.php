@@ -1,7 +1,7 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 154);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $gmapskey = get_iemprop("google.maps.key");
 $t = new MyView();
@@ -14,14 +14,17 @@ EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
-		  <style>
+<style>
   .map {
     width: 100%;
     height: 400px;
     float: left;
   }
-		#warntable { float: right; }
-		</style>
+#warntable { float: right; }
+.x-grid-cell-inner {
+    padding: 0px !important;
+}
+</style>
 EOF;
 $t->thispage ="severe-search";
 $t->title = "NWS Warning Search by Point or County/Zone";
@@ -66,7 +69,9 @@ grid will update and provide a listing of storm based warnings found.
 		<p><strong>Or drag marker to select coordinate:</strong><br />
 		<div id="map" class="map"></div>
 	</div>
-		<div class="col-md-8"><div id="warntable" style="width: 100%"></div></div>
+	<div class="col-md-8">
+        <div id="warntable" style="width: 100%"></div>
+    </div>
 </div>
 
 <br clear="all" />

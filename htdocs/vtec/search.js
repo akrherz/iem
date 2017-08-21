@@ -403,14 +403,14 @@ Ext.onReady(function() {
 							sortable : true,
 							dataIndex : 'sig_string'
 						}, {
-	header : 'VTEC Phenomena',
-	hidden : true,
-	dataIndex : 'phenomena'
-},{
-	header : 'VTEC Significance',
-	hidden : true,
-	dataIndex : 'significance'
-},{
+							header : 'VTEC Phenomena',
+							hidden : true,
+							dataIndex : 'phenomena'
+						}, {
+							header : 'VTEC Significance',
+							hidden : true,
+							dataIndex : 'significance'
+						}, {
 							'header' : 'Issued',
 							sortable : true,
 							dataIndex : 'issue',
