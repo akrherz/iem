@@ -52,6 +52,7 @@ $vtec_phenomena = Array(
   'SI' => 'Small Craft for Winds',
   'SM' => 'Dense Smoke',
   'SN' => 'Snow',
+  'SQ' => 'Snow Squall',
   'SR' => 'Storm',
   'SU' => 'High Surf',
   'SW' => 'Small Craft for Hazardous Seas',
