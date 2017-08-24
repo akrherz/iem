@@ -30,7 +30,17 @@ The primary data source for this dataset is the National Weather Service COOP ob
 
 The merging of these four datasets creates a bit of a nightmare to manage.
 
+Snowfall and snowdepth data is always problematic.  First, lets clarify what the terms mean.  "Snowfall" is the amount of snow that fell from the sky over the previous 24 hour period.  "Snowdepth" is the amount of snow measured to be on the ground due to previous snowfalls.  These numbers may sometimes contradict with snowfall amounts being larger than snowdepth due to melting and/or compaction.  Care should be used when analyzing the snowfall and snowdepth reports.
+
 ### <a name="faq"></a> Frequently Asked Questions
+
+1. This data contains 'Statewide' and 'Climate District' observations, where do they come from?
+
+    The IEM produces gridded analyses of observed variables.  A GIS-style weighted spatial sampling is done from this grid to derive averaged values over geographies like states and climate districts.  Of course, when you average something like precipitation over a large area, you end up with rates that are lower than peak station rates and also with more precipitation events than individual stations within the region.
+
+1. The download provides only a date, what time period does this represent?
+
+    Almost always, this date *does not* represent a local calendar date's worth of data.  This date represents the date on which the observation was taken.  Typically, this observation is taken at about 7 AM and so represents a 24 hour period prior to 7 AM.  Explicitly providing the time of observation is a future and necessary enhancement to this dataset, but just tricky to do.  Some observation locations have switched times over the years and some even observe 24 hour precipitation totals at a different time than the temperature values.  Nothing is ever easy with this dataset...
 
 1. Where does the radiation data come from?
 

@@ -634,6 +634,9 @@ def main():
     ctx['stations'] = get_cgi_stations(form)
     ctx['sts'], ctx['ets'] = get_cgi_dates(form)
     ctx['myvars'] = form.getlist("vars[]")
+    # Model specification trumps vars[]
+    if form.getfirst('model') is not None:
+        ctx['myvars'] = [form.getfirst('model')]
     ctx['what'] = form.getfirst('what', 'view')
     ctx['delim'] = form.getfirst('delim', 'comma')
     ctx['inclatlon'] = form.getfirst('gis', 'no')
@@ -653,8 +656,8 @@ def main():
             ssw("Content-type: application/octet-stream\n")
             ssw(("Content-Disposition: attachment; "
                  "filename=changeme.txt\n\n"))
-        else:
-            ssw("Content-type: text/plain\n\n")
+    else:
+        ssw("Content-type: text/plain\n\n")
 
     # OK, now we fret
     if "daycent" in ctx['myvars']:
@@ -675,7 +678,8 @@ if __name__ == '__main__':
     main()
 
 
-class tests(unittest.TestCase):
+class Tests(unittest.TestCase):
+    """We have some local tests"""
 
     def test_sane_date(self):
         """ Test our sane_date() method"""

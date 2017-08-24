@@ -1,10 +1,10 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 3);
-include("../../../include/myview.php");
-include("../../../include/iemprop.php");
-include("../../../include/network.php");
-include("../../../include/forms.php");
+require_once "../../../include/myview.php";
+require_once "../../../include/iemprop.php";
+require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 
@@ -14,70 +14,36 @@ $t->title = "COOP Quality Controlled and Estimated Data Download";
 $t->thispage = "networks-coop";
 
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
-$nt = new NetworkTable($network);
-$cities = $nt->table;
 
 $enddate = date('d M Y', $coop_archive_end);
 
-$sselect = "";
-while (list($key,$val) = each($cities)){
-	$sselect .= "<option value=\"$key\">[$key] ". $cities[$key]['name'] ." -- ".
-			substr($cities[$key]["archive_begin"],0,10) ."</option>\n";
-}
 $y1 = yearSelect2(1870, 1893, "year1");
 $sy_select = yearSelect2(1893, 2013, "scenario_year");
 $m1 = monthSelect2(1, "month1");
 $d1 = daySelect2(1, "day1");
 $y2 = yearSelect2(1870, date("Y"), "year2");
-$m2 = monthSelect2(1, "month2");
-$d2 = daySelect2(1, "day2");
+$m2 = monthSelect2(date("m"), "month2");
+$d2 = daySelect2(date("d"), "day2");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
 <li><a href="/COOP/">NWS COOP Network</a></li>
-<li class="active">Download QC and Estimated Data</li>
+<li class="active">Download Quality Controlled and Estimated Data</li>
 </ol>
 
-<p>This page allows you to download observed, sometimes quality controlled, 
- and sometimes estimated once daily reports from the NWS COOP network.  Please be
- sure to understand these caveats before using the data:
-<ul>
-	<li>In general, the snowfall data is mostly there.  
-	Some years are missing data.  Estimating snowfall is very difficult and
-	even the reports of snowfall are questionable.  The same applies for
-	snow depth.</li>
-	<li>If you are looking to download the entire dataset, please check 
-	out <a href="/pickup/coop_data/">this directory!</a></li>
-	<li>If you find errors in the dataset, please let us know!  There are 
- numerous folks working on the data quality of this important dataset 
- and we are always interested in feedback.</li>
-    <li>The dates presented are the day on which the observation was reported.
-    The values represent a 24 hour period prior to that observation.  Unfortunately,
-    presenting the time of the observation is not supported yet.  To complicate 
-    things, some of the data is actually on the local calendar day.</li>
-    <li>On this page, you will also find 'stations' called "Average" or 
-    "Climate Division".  These virtual stations represent an areal average over
-    a given state or standard climate district.</li>
-    <li>You will find download options for daily solar radiation data.  Of course,
-    this variable is not observed by this network but is included as a convience.
-    These values were derived from various modelling efforts. This data 
-    represents a local calendar day.  Only the 
-    <a href="http://ruc.noaa.gov/hrrr/">HRRR</a> estimates have data for
-    recent days, it takes a few months for 
-    <a href="http://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/">MERRA-2</a> and 
-    <a href="http://www.esrl.noaa.gov/psd/data/gridded/data.narr.html">NARR</a>
-    estimates to appear.
-    These values are obtained by simple grid point sampling.  You can find
-    an evaluation of these estimates <a href="/plotting/auto/?q=38">here.</a></li>
-</ul></p>
+<p>If you are looking for actual NWS COOP observations with no estimating and very little
+ quality control done, check out <a href="obs-fe.phtml">this page</a>. If you are looking to
+download the entire dataset, please check out <a href="/pickup/coop_data/">this directory!</a></p>
 
-<p>If you are looking for actual observations with no estimating and very little
- quality control done, check out <a href="obs-fe.phtml">this page</a>.
+<p>This page allows you to download observed, sometimes quality controlled, 
+ and sometimes estimated once daily reports from the NWS COOP network.  More detailed
+ <a href="/info/datasets/climodat.html">documentation exists here</a> and should be 
+ consulted before using the data.</p>
 
 <p>The quality controlled data <strong>for Iowa</strong> is currently updated 
  to {$enddate}.  While data is available for dates up 
  until yesterday, the values are estimated by the IEM.  The quality controlled
- data is provided to us by the Iowa State Climatology.  News items are posted
+ data is provided to us by the Iowa State Climatologist.  News items are posted
  to the <a href="/">homepage</a> when a month's worth of data is sent to us.</p>
 
 <p>Data is also available from the following states: 
@@ -107,7 +73,7 @@ side effect is that data changes as new information becomes available.
  until yesterday.  Unfortunately, these
  values are not on a local calendar day, so please be very careful before
  use.  Unfortunately, long term observations that are on local calendar 
- days does not exist!</div>
+ days does not exist for many locations!</div>
  
 <form method="GET" action="/cgi-bin/request/coop.py" name="iemss">
 <input type="hidden" name="network" value="{$network}" />
@@ -145,15 +111,8 @@ start and end times to the same value.</i>
 </table>
 
 <p><h4>3. Select Variables / Model Input Format:</h4>
-<i>Select either one or more data variables or a predefined format that 
-should work within the specified Model input format.  Please <a href="/info/contact.php">contact us</a>
-to have your format added to the list!</i>
-<select size=5 name="vars[]" MULTIPLE>
-  <option value="apsim">Model: APSIM MET File</option> 
-  <option value="century">Model: Century (Monthly Format)</option> 
-  <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
-  <option value="dndc">Model: DNDC</option> 
-  <option value="salus">Model: SALUS</option> 
+<i>Select either one or more data variables</i>
+<select size="5" name="vars[]" MULTIPLE>
   <option value="gdd_50_86">Computed: Growing Degree Days (base=50,max=86) [F]</option>
   <option value="gdd_40_86">Computed: Growing Degree Days (base=40,max=86) [F]</option>
   <option value="high">Variable: High Temperature [F]</option>
@@ -169,15 +128,29 @@ to have your format added to the list!</i>
   <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
 </select>
 
+<p><h4>4. Specialized Data/Model Formats</h4>
+<i>When you select a given data format, it will override any selected variables
+above and formats below.  These are specialized formats typically used for modelling and
+their choice dictates the variables to be included. Please <a href="/info/contact.php">contact us</a>
+to have your format added to the list!</i>
 
-<p><h4>4. How to view?</h4>
+<select size="5" name="model">
+  <option value="apsim">Model: APSIM MET File</option> 
+  <option value="century">Model: Century (Monthly Format)</option> 
+  <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
+  <option value="dndc">Model: DNDC</option> 
+  <option value="salus">Model: SALUS</option> 
+</select></p>
+
+
+<p><h4>5. How to view?</h4>
 <select name="what">
   <option value="excel">Excel File</option>
   <option value="download">Download to Disk
   <option value="view">View on-line
 </select>
 
-<p><h4>5. Data Delimitation:</h4>
+<p><h4>6. Data Delimitation:</h4>
 This option is only relevant if you did not select "Excel File" from #4 above.
 <br><select name="delim">
     <option value="comma">Comma
@@ -186,14 +159,14 @@ This option is only relevant if you did not select "Excel File" from #4 above.
    </select>
 
 
-<p><h4>6. Include Latitude and Longitude in output?</h4>
+<p><h4>7. Include Latitude and Longitude in output?</h4>
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
  </select>
 
 
-<p><h4>7. Repeat previous year's data for the future?</h4>
+<p><h4>8. Repeat previous year's data for the future?</h4>
 <i>This download only provides data up until today, some users may wish to 
 include future data that simply repeats the past. So the data for the
 rest of this year will simply replay a previous year.  If data for Feb 29 is
@@ -202,7 +175,7 @@ needed and not available from past year, Feb 28 data is simply repeated.</i>
 <input type="checkbox" name="scenario" value="yes"> Yes, include this year:
 {$sy_select}
     		
-<p><h4>8. Submit Form:</h4>
+<p><h4>9. Submit Form:</h4>
 <i>Please be patient and only submit this form once.  It may take 10-20
 seconds to get a response.</i><br />
 <input type="submit" value="Process Data Request">
