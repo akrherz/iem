@@ -18,10 +18,7 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <?php 
-    echo $refresh; 
-    echo $headextra; 
-    ?>
+    <?php echo $refresh; ?>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,6 +36,8 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
       <script src="/js/html5shiv.js"></script>
       <script src="/js/respond.min.js"></script>
     <![endif]-->
+	<!-- Any page specific headextra content here -->
+	<?php echo $headextra; ?>
 
 	<!-- Essential Social Tags -->
 	<meta property="og:title" content="<?php echo $title; ?>">
