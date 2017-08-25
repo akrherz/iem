@@ -140,8 +140,14 @@ function update(){
 	updateUITimestamp();
 }
 function updateUITimestamp(){
-	$('#utctime').html(dt.utc().format('MMM Do YYYY, HH:mm'));
-	$('#localtime').html(dt.local().format('MMM Do YYYY, h:mm a'));
+	var opt = getSelectedOption();
+	if (opt.attr('data-interval') >= 1440){
+		$('#utctime').html(dt.utc().format('MMM Do YYYY'));
+		$('#localtime').html(dt.utc().format('MMM Do YYYY'));		
+	} else {
+		$('#utctime').html(dt.utc().format('MMM Do YYYY, HH:mm'));
+		$('#localtime').html(dt.local().format('MMM Do YYYY, h:mm a'));
+	}
 }
 function getSelectedOption(){
 	return $('#products :selected');
@@ -184,7 +190,17 @@ function buildUI(){
 		    update();
 		    irealtime = false;
 		}
-	}).slider("pips").slider("float");
+	}).slider("pips", {
+		rest: 'label',
+		last: 'pip',
+		formatLabel: function(val){
+			return moment(dt.format("YYYY")+"0101", "YYYYMMDD").add(val - 1, 'days').format("MMM D");
+		}
+	}).slider("float", {
+		formatLabel: function(val){
+			return moment(dt.format("YYYY")+"0101", "YYYYMMDD").add(val - 1, 'days').format("MMM D");
+		}
+	});
 
 	
 	// Listen for click
