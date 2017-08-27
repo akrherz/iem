@@ -13,6 +13,7 @@ import StringIO
 import unittest
 
 import pandas as pd
+from pandas.io.sql import read_sql
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature, distance
@@ -627,6 +628,74 @@ def do_dndc(ctx):
     ssw(sio.read())
 
 
+def do_swat(ctx):
+    """ SWAT
+
+    Two files, one for precip [mm] and one for hi and low temperature [C]
+    """
+    dbconn = get_database()
+
+    table = get_tablename(ctx['stations'])
+
+    nt = get_stationtable(ctx['stations'])
+
+    if len(ctx['stations']) == 1:
+        ctx['stations'].append('X')
+
+    scenario_year = 2030
+    asts = datetime.date(2030, 1, 1)
+    if ctx['scenario'] == 'yes':
+        # Tricky!
+        scenario_year = ctx['scenario_year']
+        today = datetime.date.today()
+        asts = datetime.date(scenario_year, today.month, today.day)
+
+    thisyear = datetime.datetime.now().year
+    df = read_sql("""
+        WITH scenario as (
+            SELECT
+    ('"""+str(thisyear)+"""-'||month||'-'||extract(day from day))::date as day,
+            high, low, precip, station from """+table+"""
+            WHERE station IN """ + str(tuple(ctx['stations'])) + """ and
+            day >= %s and year = %s),
+        obs as (
+            SELECT day, high, low, precip, station from """ + table + """
+            WHERE station IN """ + str(tuple(ctx['stations'])) + """ and
+            day >= %s and day <= %s),
+        total as (
+            SELECT *, extract(doy from day) as doy from obs UNION
+            SELECT *, extract(doy from day) as doy from scenario
+        )
+
+        SELECT * from total ORDER by day ASC
+    """, dbconn, params=(asts, scenario_year, ctx['sts'], ctx['ets']),
+                  index_col=None)
+    df['tmax'] = temperature(df['high'], 'F').value('C')
+    df['tmin'] = temperature(df['low'], 'F').value('C')
+    df['pcpn'] = distance(df['precip'], 'IN').value('MM')
+    zipfiles = {}
+    for station, df2 in df.groupby(by='station'):
+        pcpfn = "swatfiles/%s.pcp" % (station,)
+        tmpfn = "swatfiles/%s.tmp" % (station,)
+        zipfiles[pcpfn] = "IEM COOP %s\n\n\n\n" % (station, )
+        zipfiles[tmpfn] = "IEM COOP %s\n\n\n\n" % (station, )
+        for _i, row in df2.iterrows():
+            zipfiles[pcpfn] += "%s%03i%5.1f\n" % (row['day'].year, row['doy'],
+                                                  row['pcpn'])
+            zipfiles[tmpfn] += ("%s%03i%5.1f%5.1f\n"
+                                ) % (row['day'].year, row['doy'], row['tmax'],
+                                     row['tmin'])
+    sio = StringIO.StringIO()
+    zipfn = zipfile.ZipFile(sio, 'a')
+    for fn in zipfiles:
+        zipfn.writestr(fn, zipfiles[fn])
+    zipfn.close()
+    ssw("Content-type: application/octet-stream\n")
+    ssw("Content-Disposition: attachment; filename=swatfiles.zip\n\n")
+    sio.seek(0)
+    ssw(sio.read())
+
+
 def main():
     """ go main go """
     form = cgi.FieldStorage()
@@ -649,6 +718,7 @@ def main():
         ctx['scenario_year'] = 2099
     ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period(ctx)
 
+    # TODO: this code stinks and is likely buggy
     if "apsim" in ctx['myvars']:
         ssw("Content-type: text/plain\n\n")
     elif "dndc" not in ctx['myvars'] and ctx['what'] != 'excel':
@@ -656,8 +726,8 @@ def main():
             ssw("Content-type: application/octet-stream\n")
             ssw(("Content-Disposition: attachment; "
                  "filename=changeme.txt\n\n"))
-    else:
-        ssw("Content-type: text/plain\n\n")
+        else:
+            ssw("Content-type: text/plain\n\n")
 
     # OK, now we fret
     if "daycent" in ctx['myvars']:
@@ -670,6 +740,8 @@ def main():
         do_dndc(ctx)
     elif "salus" in ctx['myvars']:
         do_salus(ctx)
+    elif "swat" in ctx['myvars']:
+        do_swat(ctx)
     else:
         do_simple(ctx)
 
