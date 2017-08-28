@@ -18,7 +18,7 @@ def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    lts = datetime.datetime.utcnow().replace(
+    lts = datetime.datetime(ts.year, ts.month, ts.day, 12).replace(
                 tzinfo=pytz.timezone("UTC"))
     lts = lts.astimezone(pytz.timezone("America/Chicago"))
     # make assumptions about the last valid MRMS data
