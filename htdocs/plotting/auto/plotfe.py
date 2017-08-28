@@ -120,8 +120,8 @@ def do(form, fmt):
 
     mckey = ("/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)).replace(" ", "")
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
-    hostname = os.environ.get("SERVER_NAME", "")
-    res = mc.get(mckey) if hostname != 'iem.local' else None
+    # Don't fetch memcache when we have _cb set for an inbound CGI
+    res = mc.get(mckey) if fdict.get('_cb') is None else None
     if res:
         send_content_type(fmt)
         sys.stdout.write(res)
@@ -172,7 +172,7 @@ def do(form, fmt):
     try:
         mc.set(mckey, res, meta.get('cache', 43200))
     except Exception as _:
-        sys.stderr.write("Exception while writting key: %s" % (mckey, ))
+        sys.stderr.write("Exception while writting key: %s\n" % (mckey, ))
     send_content_type(fmt)
     sys.stdout.write(res)
 

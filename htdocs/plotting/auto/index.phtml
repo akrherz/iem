@@ -329,6 +329,9 @@ EOF;
 			$form .= "<tr><td>{$v->label}</td><td>{$thisrow}</td></tr>";
 		}
 	}
+	if (isset($_GET["_cb"]) && $_GET["_cb"] == "1"){
+	    $pltvars[] = "_cb:1";
+	}
 	$imguri .= str_replace('/', '-', implode($pltvars, "::"));
 	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
 		$image = "";
@@ -345,9 +348,9 @@ EOF;
 			$image = ($_SERVER['SERVER_NAME'] == 'iem.local') ? "<pre>iem.local: ${imguri}.js</pre>": ""; 
 			$image .= '<div id="ap_container" style="width:100%s;height:400px;"></div>';
 			$extrascripts .= <<<EOF
-<script src="/vendor/highcharts/${HC}/highcharts.js"></script>		
-<script src="/vendor/highcharts/${HC}/highcharts-more.js"></script>		
-<script src="/vendor/highcharts/${HC}/modules/exporting.js"></script>		
+<script src="/vendor/highcharts/{$HC}/highcharts.js"></script>		
+<script src="/vendor/highcharts/{$HC}/highcharts-more.js"></script>		
+<script src="/vendor/highcharts/{$HC}/modules/exporting.js"></script>		
 <script src="${imguri}.js"></script>		
 EOF;
 		} elseif ($fmt == 'png' || $fmt == 'svg') {
@@ -430,7 +433,8 @@ function onNetworkChange(newnetwork){
 		<thead><tr><th>Description</th><th>Value</th></tr></thead>
 	$form
 	</table>		
-	<input type="submit" value="Make Plot with Options" />
+	<button type="submit">Make Plot with Options</button>
+	<button type="submit" name="_cb" value="1">Force Updated Plot (no caching)</button>
 </form>
 EOF;
 }
