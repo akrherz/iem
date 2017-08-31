@@ -48,7 +48,8 @@ while( list($key,$interval) = each($intervals))
   } else {
     $ts0 = $ts - ($interval * 3600);
   }
-  $sql = sprintf("select station, sum(phour) as p1 from hourly_%s
+  $sql = sprintf("select station,
+    sum(case when phour < 0.01 then 0 else phour end) as p1 from hourly_%s
           WHERE valid >= '%s+00' and valid < '%s+00' and network IN (%s) 
           GROUP by station", strftime("%Y", $ts), strftime("%Y-%m-%d %H:%M", $ts0), 
           strftime("%Y-%m-%d %H:%M", $ts), $networks);
