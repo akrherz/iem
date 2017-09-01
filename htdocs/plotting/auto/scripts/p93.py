@@ -22,7 +22,7 @@ VDICT = OrderedDict([
             ])
 LEVELS = {'tmpf': np.arange(85, 115),
           'dwpf': np.arange(60, 85),
-          'heatindex': np.arange(90, 121),
+          'heatindex': np.arange(80, 121),
           'windchill': np.arange(-50, 1)}
 OPTDICT = {'no': 'No, only include times when heatindex/windchill is additive',
            'yes': 'Yes, include all observations'}
@@ -125,9 +125,8 @@ def plotter(fdict):
             inctitle = " [Only Additive]"
         else:
             df2 = df
-        maxval = int(df2['heatindex'].describe(
-            percentiles=[0.999])['99.9%'] + 1)
-        LEVELS[varname] = np.arange(max([maxval - 31, 80]), maxval)
+        maxval = int(df2['heatindex'].max() + 1)
+        LEVELS[varname] = np.arange(80, maxval)
     elif varname == 'windchill':
         compop = np.less
         df['year'] = df['d'].apply(
