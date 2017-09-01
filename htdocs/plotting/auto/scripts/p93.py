@@ -43,7 +43,14 @@ def get_description():
     to only include cases that are additive.  What this means is to only
     include observations where the wind chill temperature is colder than the
     air temperature or when the heat index temperature is warmer than the
-    air temperature.</p>"""
+    air temperature.</p>
+
+    <p>This application only considers one observation per hour.  In the case
+    of multiple observations within an hour, a simple average of the found
+    values is used.  In the future, the hope is to limit the considered data
+    to the "synoptic" observation at the top of the hour, but we are not there
+    yet.</p>
+    """
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
@@ -61,6 +68,7 @@ def get_description():
 
 
 def get_doylimit(ytd, varname):
+    """Get the SQL limiter"""
     if ytd == 'no':
         return ''
     if varname != 'windchill':
@@ -78,7 +86,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -100,7 +108,7 @@ def plotter(fdict):
     from alldata WHERE station = %s """ + tmpflimit + """
     and dwpf <= tmpf and valid > '1973-01-01'
     and report_type = 2 """ + doylimiter + """ GROUP by d
-    """, ASOS, params=(station, ), index_col=None)
+    """, pgconn, params=(station, ), index_col=None)
     df['year'] = df['d'].apply(lambda x: int(x[:4]))
 
     df2 = df
@@ -117,7 +125,7 @@ def plotter(fdict):
             inctitle = " [Only Additive]"
         else:
             df2 = df
-        maxval = int(df2['heatindex'].max() + 1)
+        maxval = int(df2['heatindex'].describe(percentiles=[0.99])['99%'] + 1)
         LEVELS[varname] = np.arange(maxval - 31, maxval)
     elif varname == 'windchill':
         compop = np.less
@@ -187,7 +195,7 @@ def plotter(fdict):
     ax2.set_yticklabels(["%.0f" % (s,) for s in np.arange(0, ymax, dy) / 24])
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
-    ax.set_xlabel("%s $^\circ$F" % (VDICT[varname],))
+    ax.set_xlabel(r"%s $^\circ$F" % (VDICT[varname],))
     title = 'till %s' % (datetime.date.today().strftime("%-d %b"),)
     title = "Entire Year" if ytd == 'no' else title
     ax.set_title(("[%s] %s %s-%s\n"
