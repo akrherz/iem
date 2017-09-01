@@ -125,8 +125,9 @@ def plotter(fdict):
             inctitle = " [Only Additive]"
         else:
             df2 = df
-        maxval = int(df2['heatindex'].describe(percentiles=[0.99])['99%'] + 1)
-        LEVELS[varname] = np.arange(maxval - 31, maxval)
+        maxval = int(df2['heatindex'].describe(
+            percentiles=[0.999])['99.9%'] + 1)
+        LEVELS[varname] = np.arange(max([maxval - 31, 80]), maxval)
     elif varname == 'windchill':
         compop = np.less
         df['year'] = df['d'].apply(
