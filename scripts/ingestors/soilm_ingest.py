@@ -197,7 +197,6 @@ def hourly_process(nwsli, maxts):
             dbvals += "%s," % (formatter(v),)
         for v in tokens[2:]:
             dbvals += "%s," % (formatter(v),)
-        print(dbvals)
         sql = "INSERT into sm_hourly (%s) values (%s)" % (dbcols, dbvals[:-1])
         icursor.execute(sql)
 
