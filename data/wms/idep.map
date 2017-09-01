@@ -1577,9 +1577,9 @@ LAYER
   TYPE LINE
   CLASS
     STYLE
-      SYMBOL 0
-      SIZE 2.5
-      COLOR 110 110 110
+      WIDTH 3
+      SIZE 3
+      COLOR 0 0 0
     END # STYLE
   END # CLASS
 END # LAYER
@@ -1607,8 +1607,8 @@ LAYER
       OFFSET 3 3
     END
     STYLE
-      SYMBOL 0
       SIZE 1.5
+      WIDTH 1.5
       COLOR 255 0 0
     END # STYLE
   END # CLASS
@@ -1628,8 +1628,8 @@ LAYER
   UNITS METERS
   CLASS
     STYLE
-      SYMBOL 0
       SIZE 1.5
+      WIDTH 1.5
       COLOR 180 180 180
     END # STYLE
   END # CLASS
