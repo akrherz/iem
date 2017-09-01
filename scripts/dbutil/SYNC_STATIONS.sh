@@ -1,5 +1,5 @@
 #!/bin/sh
-# Need to sync all our station metadata, when we add new sites!
+# Manually run workflow that syncs station metadata
 set -x
 
 python set_elevation.py
