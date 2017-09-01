@@ -9,6 +9,7 @@ import datetime
 import os
 import subprocess
 import tempfile
+import unittest
 
 # Third party
 import requests
@@ -196,6 +197,7 @@ def hourly_process(nwsli, maxts):
             dbvals += "%s," % (formatter(v),)
         for v in tokens[2:]:
             dbvals += "%s," % (formatter(v),)
+        print(dbvals)
         sql = "INSERT into sm_hourly (%s) values (%s)" % (dbcols, dbvals[:-1])
         icursor.execute(sql)
 
@@ -462,3 +464,12 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+class Tests(unittest.TestCase):
+    """Check some things"""
+
+    def test_make_tstamp(self):
+        """Do we do the right thing with timestamps"""
+        res = make_time("2017-08-31 19:00:00")
+        self.assertEquals(res.strftime("%H"), "19")

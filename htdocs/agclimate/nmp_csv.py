@@ -24,7 +24,8 @@ def do_output():
     cursor.execute("""
     with data as (
         select rank() OVER (ORDER by valid DESC), * from sm_hourly
-        where valid > now() - '48 hours'::interval)
+        where valid > now() - '48 hours'::interval
+        and valid < now())
     SELECT *, valid at time zone 'UTC' as utc_valid from data
     where rank = 1 ORDER by station ASC""")
 
