@@ -3,7 +3,7 @@
 # Called from RUN_MIDNIGHT.sh
 
 ts=$(date +'%Y%m%d_%H')
-dirbase=$(date +'%Y_%m')
+basedir=$(date +'%Y_%m')
 mydir="/mesonet/ARCHIVE/raw/snet_feed/$basedir" 
 
 cd /mesonet/data/logs
