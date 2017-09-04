@@ -25,6 +25,7 @@ def run(date):
 
 
 def main(argv):
+    """Go Main Go"""
     if len(argv) == 2:
         now = datetime.date(int(argv[1]), 1, 1)
         ets = datetime.date(int(argv[1]) + 1, 1, 1)
@@ -37,6 +38,7 @@ def main(argv):
     else:
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
         run(yesterday)
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -1,10 +1,12 @@
 """Need to fix some corrupted n0r NEXRAD color tables!"""
+from __future__ import print_function
 import datetime
+import subprocess
+import os
+
 import osgeo.gdal as gdal
 from osgeo import gdalconst
-import subprocess
 import psycopg2
-import os
 
 PGCONN = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 CURSOR = PGCONN.cursor()
@@ -40,7 +42,7 @@ def do(ts):
     if not os.path.isfile(fn):
         print("Missing %s" % (fn,))
         return
-    print ts.strftime("%Y%m%d %H%M")
+    print(ts.strftime("%Y%m%d %H%M"))
     n0r = gdal.Open(fn)
     n0rd = n0r.ReadAsArray()
 
@@ -58,10 +60,17 @@ def do(ts):
     os.unlink("tmp.tiff")
     subprocess.call("mv tmp.png %s" % (fn,), shell=True)
 
-sts = datetime.datetime(2010, 11, 13, 16, 25)
-ets = datetime.datetime(2012, 10,  1, 0, 0)
-interval = datetime.timedelta(minutes=5)
-now = sts
-while now < ets:
-    do(now)
-    now += interval
+
+def main():
+    """Go Main"""
+    sts = datetime.datetime(2010, 11, 13, 16, 25)
+    ets = datetime.datetime(2012, 10,  1, 0, 0)
+    interval = datetime.timedelta(minutes=5)
+    now = sts
+    while now < ets:
+        do(now)
+        now += interval
+
+
+if __name__ == '__main__':
+    main()

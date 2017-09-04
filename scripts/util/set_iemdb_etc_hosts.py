@@ -4,12 +4,14 @@
 #127.0.0.1 iemdb iemdb2
 
 """
+from __future__ import print_function
 import sys
 import tempfile
 import os
 
 
 def main():
+    """Go Main Go"""
     if len(sys.argv) == 1:
         print('Usage: python set_iemdb_etc_hosts.py <local|remote>')
         return
