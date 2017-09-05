@@ -14,19 +14,11 @@ class IEMAccessOb {
       $this->db["gust_ts"] = strtotime(substr($row["max_gust_ts"],0,16));
       $this->db["lgust_ts"] = strtotime(substr($row["lmax_gust_ts"],0,16));
     } else{
-    	$this->db["gust_ts"] = "";
-    	$this->db["lgust_ts"] = "";
+      $this->db["gust_ts"] = "";
+      $this->db["lgust_ts"] = "";
     }
     $this->db["obtime"] = strftime("%d %b %I:%M %p", $this->db["ts"]);
-    if ($this->db["max_tmpf"] == -99){
-    	$this->db["max_tmpf"] = null;
-    }
-  	if ($this->db["min_tmpf"] == 99){
-    	$this->db["min_tmpf"] = null;
-    }
   }
-  
 
 }
-
 ?>
