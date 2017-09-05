@@ -46,7 +46,7 @@ def main():
             if network.replace("_COOP", "_DCP") in networks:
                 print("Deleting COOP variant for sid: %s" % (sid, ))
                 cmd = ("python delete_station.py %s %s"
-                       ) % (network.replace("_COOP", "_DCP"), sid)
+                       ) % (network, sid)
                 subprocess.call(cmd, shell=True)
 
     ipgconn.commit()
