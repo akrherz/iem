@@ -1,6 +1,7 @@
 """
  Check how much SNET data we have
 """
+from __future__ import print_function
 import sys
 import psycopg2
 
@@ -23,7 +24,7 @@ def main():
         counts[row[0]] = row[1]
         total += row[1]
 
-    if total > 15:
+    if total > 10:
         print(('OK - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         sys.exit(0)
