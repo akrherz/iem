@@ -1,5 +1,4 @@
 # Super Script to backup data to some location, run from RUN_12Z
-# Not really used by all that much, but need to do that schoolnet portion
 
 set YYYY_mm=`date --date "1 day ago" +"%Y_%m"`
 set yymmdd=`date --date "1 day ago" +"%y%m%d"`

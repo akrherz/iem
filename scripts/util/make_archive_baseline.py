@@ -6,12 +6,13 @@
 Since we have web scrapers, we need to have empty folders to keep the Server
 from having lots of 404s
 """
+import datetime
 import os
 import sys
 import grp
 import subprocess
+
 from pyiem.network import Table as NetworkTable
-import datetime
 
 PRODS = {'NEXRAD': ['N0Q', 'N0S', 'N0U', 'N0Z', 'NET'],
          'TWDR': ['NET', 'TR0', 'TV0']}
@@ -20,13 +21,13 @@ PILS = ("LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS"
 
 
 def chgrp(filepath, gid):
-    # https://gist.github.com/jmahmood/2505741
+    """https://gist.github.com/jmahmood/2505741"""
     uid = os.stat(filepath).st_uid
     os.chown(filepath, uid, gid)
 
 
 def supermakedirs(path, mode, group):
-    # http://stackoverflow.com/questions/5231901
+    """"http://stackoverflow.com/questions/5231901"""
     if not path or os.path.exists(path):
         return []
     (head, _) = os.path.split(path)
@@ -63,6 +64,7 @@ def main(argv):
             subprocess.call("touch %s" % (fn,), shell=True)
             os.chmod(fn, 0664)
             chgrp(fn, grp.getgrnam('ldm')[2])
+
 
 if __name__ == '__main__':
     main(sys.argv)

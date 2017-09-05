@@ -1,8 +1,10 @@
 """Dump what I have stored in the AFOS database to flat files
 """
-import psycopg2
+from __future__ import print_function
 import datetime
 import subprocess
+
+import psycopg2
 
 pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
 cursor = pgconn.cursor()
@@ -28,7 +30,7 @@ def sanitize(data):
     return "\001" + ("\r\r\n".join(lines)) + "\003"
 
 
-def do(date):
+def workflow(date):
     """ Process a given UTC date """
     table = "products_%s_%s" % (date.year,
                                 "0712" if date.month > 6 else '0106')
@@ -43,10 +45,10 @@ def do(date):
         if cursor.rowcount == 0:
             continue
         print('%s %s %s' % (date, pil, cursor.rowcount))
-        o = open('/tmp/afos.tmp', 'w')
+        output = open('/tmp/afos.tmp', 'w')
         for row in cursor:
-            o.write(sanitize(row[0]))
-        o.close()
+            output.write(sanitize(row[0]))
+        output.close()
 
         cmd = "data a %s0000 bogus text/noaaport/%s_%s.txt txt" % (
                     date.strftime("%Y%m%d"), pil, date.strftime("%Y%m%d"))
@@ -55,13 +57,15 @@ def do(date):
 
 
 def main():
+    """Go Main"""
     sts = datetime.datetime(2000, 1, 1)
     ets = datetime.datetime(2006, 8, 4)
     interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
-        do(now)
+        workflow(now)
         now += interval
+
 
 if __name__ == '__main__':
     # go
