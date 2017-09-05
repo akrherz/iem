@@ -1,10 +1,12 @@
+"""monthly comparisons"""
+import datetime
+import calendar
+
 import psycopg2
 import numpy as np
 from scipy import stats
 from pyiem import network, util
 from pandas.io.sql import read_sql
-import datetime
-import calendar
 import pandas as pd
 
 PDICT = {'total_precip': 'Total Precipitation',
@@ -22,18 +24,18 @@ UNITS = {'total_precip': 'inch',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
+    desc = dict()
+    desc['data'] = True
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=60)
-    d['description'] = """This app allows the arbitrary comparison of months
+    desc['description'] = """This app allows the arbitrary comparison of months
     against other months.  When the period of months wraps around a new
     year, the app attempts to keep this situation straight with Dec and Jan
     following each other.  The periods are combined together based on the
     year of the beginning month of each period. If there is a metric you
     wished to see added to this analysis, please
     <a href="/info/contacts.php">let us know</a>!"""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
              label='Select Station', network='IACLIMATE'),
         dict(type='int', name='threshold', default='93',
@@ -51,7 +53,7 @@ def get_description():
         dict(type='select', options=PDICT, default='avg_temp', name='var2',
              label='Comparison 2 Variable'),
     ]
-    return d
+    return desc
 
 
 def compute_months_and_offsets(start, count):

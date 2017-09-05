@@ -1,27 +1,29 @@
+"""precip bias by hour"""
+import datetime
+
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context
 import numpy as np
 import pandas as pd
-import datetime
 import pytz
-from pyiem.util import get_autoplot_context
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot looks at the bias associated with computing
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot looks at the bias associated with computing
     24 hour precipitation totals using a given hour of the day as the
     delimiter. This plot will take a number of seconds to generate, so please
     be patient.  This chart attempts to address the question of if computing
     24 hour precip totals at midnight or 7 AM biases the totals.  Such biases
     are commmon when computing this metric for high or low temperature."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -63,13 +65,13 @@ def plotter(fdict):
     rows = []
     for hr in range(24):
         ts = lts.replace(hour=hr)
-        z = ts.astimezone(pytz.timezone("UTC")).hour
-        a = np.reshape(data[z:(0 - 24 + z)], (days-1, 24))
-        tots = np.sum(a, 1)
+        zhour = ts.astimezone(pytz.timezone("UTC")).hour
+        arr = np.reshape(data[zhour:(0 - 24 + zhour)], (days-1, 24))
+        tots = np.sum(arr, 1)
         cnts[hr] = np.sum(np.where(tots > 0, 1, 0))
         avgv[hr] = np.average(tots[tots > 0])
         rows.append(dict(average_precip=avgv[hr], events=cnts[hr],
-                         zhour=z, localhour=hr))
+                         zhour=zhour, localhour=hr))
 
     df = pd.DataFrame(rows)
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))

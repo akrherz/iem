@@ -1,8 +1,10 @@
+"""daily dewpoint ranges"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-import datetime
-from pyiem.network import Table as NetworkTable
 import pandas as pd
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 PDICT = {'touches': 'Daily Range Touches Emphasis',
@@ -11,12 +13,12 @@ PDICT = {'touches': 'Daily Range Touches Emphasis',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     today = datetime.datetime.now()
-    d['data'] = True
-    d['description'] = """This plot presents the daily range of dew points
+    desc['data'] = True
+    desc['description'] = """This plot presents the daily range of dew points
     as calculated by the IEM based on available observations."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='year', name='year',
@@ -26,7 +28,7 @@ def get_description():
         dict(type='select', name='opt', label='Option for Highlighting',
              default='touches', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -62,7 +64,7 @@ def plotter(fdict):
             continue
         rows.append(dict(day=row['day'], min_dwpf=row['min-dwpf'],
                          max_dwpf=row['max-dwpf']))
-    if len(rows) == 0:
+    if not rows:
         raise Exception("No Data Found!")
     df = pd.DataFrame(rows)
     days = np.array(df['day'])
@@ -74,19 +76,19 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     hits = []
     if emphasis > -99:
-        for i, bar in enumerate(bars):
-            y = bar.get_y() + bar.get_height()
+        for i, mybar in enumerate(bars):
+            y = mybar.get_y() + mybar.get_height()
             if ((y >= emphasis and opt == 'touches') or
-                    (bar.get_y() >= emphasis and opt == 'above')):
-                bar.set_facecolor('r')
-                bar.set_edgecolor('r')
+                    (mybar.get_y() >= emphasis and opt == 'above')):
+                mybar.set_facecolor('r')
+                mybar.set_edgecolor('r')
                 hits.append(df.loc[i, 'day'])
         ax.axhline(emphasis, lw=2, color='k')
         ax.text(days[-1] + datetime.timedelta(days=2),
                 emphasis, "%s" % (emphasis,), ha='left',
                 va='center')
     ax.grid(True)
-    ax.set_ylabel("Dew Point Temperature $^\circ$F")
+    ax.set_ylabel(r"Dew Point Temperature $^\circ$F")
     ax.set_title("%s [%s] %s Daily Min/Max Dew Point\nPeriod: %s to %s" % (
                 nt.sts[station]['name'], station, year,
                 min(days).strftime("%-d %b"), max(days).strftime("%-d %b")))
@@ -96,8 +98,8 @@ def plotter(fdict):
                      box.width, box.height * 0.95])
     ax.set_xlabel(("Days meeting emphasis: %s, first: %s last: %s"
                    ) % (len(hits),
-                        hits[0].strftime("%B %d") if len(hits) > 0 else 'None',
-                        hits[-1].strftime("%B %d") if len(hits) > 0 else 'None'
+                        hits[0].strftime("%B %d") if hits else 'None',
+                        hits[-1].strftime("%B %d") if hits else 'None'
                         ))
 
     return fig, df

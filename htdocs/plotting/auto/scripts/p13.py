@@ -1,6 +1,8 @@
+"""warmest 91 days"""
+import datetime
+
 import psycopg2.extras
 import numpy as np
-import datetime
 import pandas as pd
 from scipy import stats
 from pyiem.network import Table as NetworkTable
@@ -12,18 +14,18 @@ PDICT = {'end_summer': 'End of Summer', 'start_summer': 'Start of Summer'}
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents the start or end date of the
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents the start or end date of the
     warmest 91 day period each year.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='which', default='end_summer',
              label='Which value to plot:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
