@@ -1,6 +1,8 @@
+"""Flight category by hour"""
+import datetime
+
 import psycopg2
 import numpy as np
-import datetime
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -9,10 +11,10 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart summarizes Flight Category by hour
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart summarizes Flight Category by hour
     and day of a given month.  In the case of multiple observations for a
     given hour, the worst category is plotted.
 
@@ -35,7 +37,7 @@ Ceiling >3000' AGL and visibility >5 statutes miles (green)</td></tr>
 </table>
     """
     today = datetime.date.today()
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
         dict(type='month', name='month', label='Select Month:',
@@ -43,7 +45,7 @@ Ceiling >3000' AGL and visibility >5 statutes miles (green)</td></tr>
         dict(type='year', name='year', label='Select Year:',
              default=today.year, min=1970),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

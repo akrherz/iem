@@ -1,9 +1,11 @@
+"""Distinct VTEC"""
+import calendar
+
 import psycopg2
 import numpy as np
-import pyiem.nws.vtec as vtec
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
-import calendar
+from pyiem.network import Table as NetworkTable
+import pyiem.nws.vtec as vtec
 from pyiem import reference
 from pyiem.util import get_autoplot_context
 
@@ -13,10 +15,10 @@ PDICT = {'wfo': 'Select by NWS Forecast Office',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This chart displays the monthly number of distinct
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This chart displays the monthly number of distinct
     NWS Office issued watch / warning / advisory product. For example, a
     single watch for a dozen counties would only count 1 in this chart. These
     values are based on unofficial archives maintained by the IEM.
@@ -26,7 +28,7 @@ def get_description():
     one event in this listing.  Sorry, tough issue to get around.  In the case
     of warnings and advisories, the totals should be good.</p>
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='opt', default='wfo',
              options=PDICT, label='Summarize by WFO or State?'),
         dict(type='networkselect', name='station', network='WFO',
@@ -38,7 +40,7 @@ def get_description():
         dict(type='significance', name='significance',
              default='W', label='Select Watch/Warning Significance Level:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):

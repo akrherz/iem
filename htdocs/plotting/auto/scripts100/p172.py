@@ -1,23 +1,25 @@
+"""YTD precip"""
 import calendar
-from pyiem.util import get_autoplot_context
 import datetime
+
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 import psycopg2
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents year to date accumulated
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents year to date accumulated
     precipitation for a station of your choice.  The year with the highest and
     lowest accumulation is shown along with the envelop of observations and
     long term average.  You can optionally plot up to three additional years
     of your choice.
     """
     thisyear = datetime.date.today().year
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year1', default=thisyear,
@@ -27,7 +29,7 @@ def get_description():
         dict(type='year', name='year3', optional=True, default=(thisyear - 2),
              label='Additional Year to Plot: (optional)'),
         ]
-    return d
+    return desc
 
 
 def plotter(fdict):

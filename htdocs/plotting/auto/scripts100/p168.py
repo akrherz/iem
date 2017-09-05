@@ -1,17 +1,19 @@
+"""First fall or last spring"""
 import calendar
-from pyiem import util
 import datetime
-from pandas.io.sql import read_sql
+
+from pyiem import util
 from pyiem.network import Table as NetworkTable
+from pandas.io.sql import read_sql
 import psycopg2
 import numpy as np
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart presents the last date of fall or first
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart presents the last date of fall or first
     date of spring that a given temperature threshold was last or first
     reached.  Note that leap day creates some ambiguity with an analysis like
     this, so for example, the 15th of November is considered equal for each
@@ -20,11 +22,11 @@ def get_description():
     above the given threshold as the latest date.  The downloaded file simply
     provides the latest date at a given temperature.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE')
         ]
-    return d
+    return desc
 
 
 def plotter(fdict):

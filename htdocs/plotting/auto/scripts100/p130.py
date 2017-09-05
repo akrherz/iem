@@ -1,4 +1,6 @@
+"""temps vs high and low"""
 import psycopg2
+
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -7,17 +9,17 @@ from pyiem.util import get_autoplot_context
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart displays the average high and low
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart displays the average high and low
     temperature by month for days with or without snowcover reported.  There
     are a number of caveats due to the timing of the daily temperature and
     snow cover report.  Also with the quality of the snow cover data."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -38,7 +40,7 @@ def plotter(fdict):
     avg(case when snowd = 0 then high else null end) as avg_high_nosnow,
     avg(case when snowd = 0 then low else null end) as avg_low_nosnow,
     sum(case when snowd > 0 then 1 else 0 end) as coverdays
-    from """+table+"""
+    from """ + table + """
     WHERE station = %s
     GROUP by year, month
     """, pgconn, params=(station, ), index_col=None)
@@ -78,8 +80,8 @@ def plotter(fdict):
     ax[0].set_title(("%s [%s]\nSnow Cover Impact on Average Temp [%s-%s]"
                      ) % (nt.sts[station]['name'], station,
                           df2['year'].min(), df2['year'].max()))
-    ax[0].set_ylabel("Avg High Temp $^\circ$F")
-    ax[1].set_ylabel("Avg Low Temp $^\circ$F")
+    ax[0].set_ylabel(r"Avg High Temp $^\circ$F")
+    ax[1].set_ylabel(r"Avg Low Temp $^\circ$F")
 
     return fig, df
 
