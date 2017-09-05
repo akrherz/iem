@@ -3,6 +3,8 @@
  and so are likely DCP
 """
 from __future__ import print_function
+import subprocess
+
 import psycopg2
 
 
@@ -28,16 +30,24 @@ def main():
         if row[2] < 5:
             continue
         # Look for how many entries are in mesosite
-        mcursor.execute("""SELECT count(*) from stations where id = %s
+        mcursor.execute("""SELECT network from stations where id = %s
           """, (sid,))
-        row = mcursor.fetchone()
-        if row[0] == 1:
+        if mcursor.rowcount == 1:
             newnetwork = network.replace("_COOP", "_DCP")
             print('We shall switch %s from %s to %s' % (sid, network,
                                                         newnetwork))
             mcursor2.execute("""
                 UPDATE stations SET network = '%s' WHERE id = '%s'
             """ % (newnetwork, sid))
+        if mcursor.rowcount == 2:
+            networks = []
+            for row2 in mcursor:
+                networks.append(row2[0])
+            if network.replace("_COOP", "_DCP") in networks:
+                print("Deleting COOP variant for sid: %s" % (sid, ))
+                cmd = ("python delete_station.py %s %s"
+                       ) % (network.replace("_COOP", "_DCP"), sid)
+                subprocess.call(cmd, shell=True)
 
     ipgconn.commit()
     icursor2.close()
