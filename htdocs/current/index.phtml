@@ -2,126 +2,533 @@
 require '../../config/settings.inc.php';
 include_once '../../include/myview.php';
 
+$daylink = sprintf("%s0000", date("Ymd"));
+$mhourlink = gmdate("YmdH", time() -3600) ."00";
+
+$cfg = Array();
+
+$cfg["air_temperature"] = Array(
+    "name" => "Air Temperature",
+    "prods" => Array(
+        "2m_air_temperature" => Array(
+            "label" => "2m Air Temperature",
+            "timemachine" => "#115.0",
+            "img" => "/data/iowa_tmpf.png",
+            "desc" => "Description to be written..."
+            ),
+        "12z_low" => Array(
+            "label" => "12 UTC Low Temperature",
+            "timemachine" => "#63.0",
+            "img" => "/data/summary/iowa_asos_12z_low.png",
+            "desc" => "Description to be written..."
+            ),
+        "today_high" => Array(
+            "label" => "Today's High Temperature",
+            "timemachine" => "#116.0",
+            "img" => "/data/summary/iowa_asos_high.png",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_heat_index" => Array(
+            "label" => "Heat Index",
+            "timemachine" => "#10.0",
+            "img" => "/data/heat.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_wc_index" => Array(
+            "label" => "Wind Chill Index",
+            "timemachine" => "#25.0",
+            "img" => "/data/wcht.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_tw" => Array(
+            "label" => "Surface Temps &amp; Winds",
+            "timemachine" => "#23.0",
+            "img" => "/data/surfaceTW0.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_te" => Array(
+            "label" => "Surface Theta E &amp; Winds",
+            "timemachine" => "#22.0",
+            "img" => "/data/surfaceTE0.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_divergence" => Array(
+            "label" => "Surface Divergence",
+            "timemachine" => "#18.0",
+            "img" => "/data/surfaceDIV0.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_annual" => Array(
+            "label" => "Annual Average Temperature",
+            "timemachine" => null,
+            "link" => "/plotting/coop/climate_fe.php",
+            "desc" => "Description to be written..."
+            ),
+        "coop_freezing" => Array(
+            "label" => "COOP Freezing Statistics",
+            "timemachine" => null,
+            "link" => "/COOP/freezing.php",
+            "desc" => "Description to be written..."
+            ),
+        "gdd48_jan1" => Array(
+            "label" => "Accumulated Growing Degree Days (base=48)",
+            "timemachine" => null,
+            "img" => "/data/summary/gdd48_jan1.png",
+            "desc" => "Description to be written..."
+            ),
+        "gdd50_jan1" => Array(
+            "label" => "Accumulated Growing Degree Days (base=50)",
+            "timemachine" => null,
+            "img" => "/data/summary/gdd_jan1.png",
+            "desc" => "Description to be written..."
+            ),
+        "gdd52_jan1" => Array(
+            "label" => "Accumulated Growing Degree Days (base=52)",
+            "timemachine" => null,
+            "img" => "/data/summary/gdd52_jan1.png",
+            "desc" => "Description to be written..."
+            ),
+        "daily_departures" => Array(
+            "label" => "Yearly Departures from Average",
+            "timemachine" => null,
+            "link" => "/plotting/auto/?q=99",
+            "img" => "/plotting/auto/plot/99/img.png",
+            "desc" => "Description to be written..."
+            ),
+        "monthly_mean_t" => Array(
+            "label" => "Monthly Average Temperature",
+            "timemachine" => null,
+            "img" => "/data/summary/mon_mean_T.png",
+            "desc" => "Description to be written..."
+            ),
+        "monthly_sdd" => Array(
+            "label" => "Accumulated Stress Degree Days (base=86)",
+            "timemachine" => null,
+            "img" => "/data/summary/sdd_mon.png",
+            "desc" => "Description to be written..."
+            ),
+        "monthly_gdd" => Array(
+            "label" => "Accumulated Growing Degree Days (base=50)",
+            "timemachine" => null,
+            "img" => "/data/summary/gdd_mon.png",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$cfg["humidity"] = Array(
+    "name" => "Air Humidity",
+    "prods" => Array(
+        "relative_humidity" => Array(
+            "label" => "Relative Humidity",
+            "timemachine" => null,
+            "img" => "/data/relh.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_md" => Array(
+            "label" => "Surface Moisture Divergence &amp; Winds",
+            "timemachine" => "#21.0",
+            "img" => "/data/surfaceMD0.gif",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_dw" => Array(
+            "label" => "Surface Dew Points &amp; Winds",
+            "timemachine" => "#19.0",
+            "img" => "/data/surfaceDW0.gif",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$cfg["precipitation"] = Array(
+    "name" => "Precipitation",
+    "prods" => Array(
+        "today_mrms_iowa" => Array(
+            "label" => "MRMS Q3 Today's Precip",
+            "timemachine" => "#45.{$daylink}",
+            "img" => "/data/iowa_q2_1d.png",
+            "desc" => "Description to be written..."
+            ),
+        "hour_mrms_iowa" => Array(
+            "label" => "MRMS Q3 Hourly Precip",
+            "timemachine" => "#46.{$daylink}",
+            "img" => "/data/iowa_q2_1h.png",
+            "desc" => "Description to be written..."
+                ),
+        "3hour_mrms_iowa" => Array(
+            "label" => "MRMS Q3 Three Hourly Precip",
+            "timemachine" => "#47.{$daylink}",
+            "img" => "/data/iowa_q2_3h.png",
+            "desc" => "Description to be written..."
+                ),
+        "6hour_mrms_iowa" => Array(
+            "label" => "MRMS Q3 Six Hourly Precip",
+            "timemachine" => "#48.{$daylink}",
+            "img" => "/data/iowa_q2_6h.png",
+            "desc" => "Description to be written..."
+                ),
+        "today_asos_iowa" => Array(
+            "label" => "Iowa ASOS/AWOS Today's Precip",
+            "timemachine" => null,
+            "img" => "/data/summary/today_prec.png",
+            "desc" => "Description to be written..."
+                ),
+        "today_stage4_us" => Array(
+            "label" => "Stage IV Today's Precip",
+            "timemachine" => "#43.{$daylink}",
+            "img" => "/data/conus_stage4_1d.png",
+            "desc" => "Description to be written..."
+                ),
+        "today_stage4_midwest" => Array(
+            "label" => "Stage IV Today's Precip",
+            "timemachine" => "#42.{$daylink}",
+            "img" => "/data/midwest_stage4_1d.png",
+            "desc" => "Description to be written..."
+                ),
+        "today_stage4_iowa" => Array(
+            "label" => "Stage IV Today's Precip",
+            "timemachine" => "#41.{$daylink}",
+            "img" => "/data/iowa_stage4_1d.png",
+            "desc" => "Description to be written..."
+                ),
+        "hour_stage4_midwest" => Array(
+            "label" => "Stage IV Hourly Precip",
+            "timemachine" => "#40.{$mhourlink}",
+            "img" => "/data/midwest_stage4_1h.png",
+            "desc" => "Description to be written..."
+                ),
+        "today_stage4_iowa" => Array(
+            "label" => "Stage IV Hourly Precip",
+            "timemachine" => "#39.{$mhourlink}",
+            "img" => "/data/iowa_stage4_1h.png",
+            "desc" => "Description to be written..."
+                ),
+        "midwest_coop_contour" => Array(
+            "label" => "COOP Precipitation Analysis",
+            "timemachine" => "#38.0",
+            "img" => "/data/midwest_coop_12z_precip.png",
+            "desc" => "Description to be written..."
+                ),
+        "iowa_coop_contour" => Array(
+            "label" => "COOP Precipitation Analysis",
+            "timemachine" => "#37.0",
+            "img" => "/data/iowa_coop_12z_precip.png",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_flood_center" => Array(
+            "label" => "Iowa Flood Center",
+            "timemachine" => "#82.0",
+            "img" => "/data/iowa_ifc_1d.png",
+            "desc" => "Description to be written..."
+            ),
+        "mrms_intensity" => Array(
+            "label" => "MRMS Precipitation Intensity",
+            "timemachine" => "#44.{$mhourlink}",
+            "img" => "/data/iowa_ifc_1d.png",
+            "desc" => "Description to be written..."
+            ),
+        "year_departure" => Array(
+            "label" => "Departure from Normal",
+            "timemachine" => null,
+            "img" => "/data/summary/year/diff.png",
+            "desc" => "Description to be written..."
+                ),
+        "year_stage4" => Array(
+            "label" => "Stage IV Yearly Total",
+            "timemachine" => null,
+            "img" => "/data/summary/year/stage4obs.png",
+            "desc" => "Description to be written..."
+            ),
+        "year_average" => Array(
+            "label" => "Yearly Average Total",
+            "timemachine" => null,
+            "img" => "/data/summary/year/normals.png",
+            "desc" => "Description to be written..."
+            ),
+        "4mon_accum" => Array(
+            "label" => "4 Month Estimated accumulation",
+            "timemachine" => null,
+            "img" => "/data/summary/4mon_stage4obs.png",
+            "desc" => "Description to be written..."
+            ),
+        "4mon_climate" => Array(
+            "label" => "4 Month Climatology",
+            "timemachine" => null,
+            "img" => "/data/summary/4mon_normals.png",
+            "desc" => "Description to be written..."
+            ),
+        "4mon_diff" => Array(
+            "label" => "4 Month Departures",
+            "timemachine" => null,
+            "img" => "/data/summary/4mon_diff.png",
+            "desc" => "Description to be written..."
+            ),
+        "asos_month_accum" => Array(
+            "label" => "Monthly Accumulation [ASOS/AWOS]",
+            "timemachine" => null,
+            "img" => "/data/summary/month_prec.png",
+            "desc" => ""
+            ),
+        "coop_month_accum" => Array(
+            "label" => "Monthly Accumulation [COOP]",
+            "timemachine" => null,
+            "img" => "/data/coopMonthPlot.png",
+            "desc" => ""
+            ),
+    )
+        );
+
+$cfg["pressure"] = Array(
+    "name" => "Pressure",
+    "prods" => Array(
+        "iowa_altimeter" => Array(
+            "label" => "Iowa Altimeter",
+            "timemachine" => null,
+            "img" => "/data/mesonet_altm.gif",
+            "desc" => "Description to be written..."
+            ),
+     )
+    );
+
+$cfg["snow"] = Array(
+    "name" => "Snow",
+    "prods" => Array(
+        "seasonal_snowfall" => Array(
+            "label" => "Seasonal Snowfall",
+            "timemachine" => null,
+            "img" => "/data/summary/mw_season_snowfall.png",
+            "desc" => "Description to be written..."
+            ),
+        "monthly_snowfall" => Array(
+            "label" => "Monthly Snowfall",
+            "timemachine" => null,
+            "img" => "/data/coopMonthSPlot.gif",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$cfg["soil_temperature"] = Array(
+    "name" => "Soil Temperature",
+    "prods" => Array(
+        "day1" => Array(
+            "label" => "Yesterday Average",
+            "timemachine" => "#57.0",
+            "img" => "/data/soilt_day1.png",
+            "desc" => "Description to be written..."
+            ),
+        "day2" => Array(
+            "label" => "Day 2 Average",
+            "timemachine" => "#57.0",
+            "img" => "/data/soilt_day2.png",
+            "desc" => "Description to be written..."
+            ),
+        "day3" => Array(
+            "label" => "Day 3 Average",
+            "timemachine" => "#57.0",
+            "img" => "/data/soilt_day3.png",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$cfg["station_plot"] = Array(
+    "name" => "Station Plot",
+    "prods" => Array(
+        "iem" => Array(
+            "label" => "IEM Mesoplot",
+            "timemachine" => "#1.0",
+            "img" => "/data/mesonet.gif",
+            "desc" => "Description to be written..."
+            ),
+        "mw" => Array(
+            "label" => "Midwest Mesoplot",
+            "timemachine" => "#4.0",
+            "img" => "/data/MWmesonet.gif",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$cfg["sounding"] = Array(
+    "name" => "Sounding",
+    "prods" => Array(
+        "slater" => Array(
+            "label" => "Slater Wind Profiler",
+            "timemachine" => null,
+            "img" => "http://www.rap.ucar.edu/weather/upper/sla_wp.gif",
+            "desc" => "Description to be written..."
+            ),
+        "dvn" => Array(
+            "label" => "Daveport RAOB",
+            "timemachine" => null,
+            "img" => "http://www.rap.ucar.edu/weather/upper/dvn.gif",
+            "desc" => "Description to be written..."
+            ),
+        "oax" => Array(
+            "label" => "Omaha RAOB",
+            "timemachine" => null,
+            "img" => "http://www.rap.ucar.edu/weather/upper/oax.gif",
+            "desc" => "Description to be written..."
+            ),
+        "mpx" => Array(
+            "label" => "Minneapolis RAOB",
+            "timemachine" => null,
+            "img" => "http://www.rap.ucar.edu/weather/upper/mpx.gif",
+            "desc" => "Description to be written..."
+            ),
+        "top" => Array(
+            "label" => "Topeka RAOB",
+            "timemachine" => null,
+            "img" => "http://www.rap.ucar.edu/weather/upper/top.gif",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$cfg["wind_speed"] = Array(
+    "name" => "Wind",
+    "prods" => Array(
+        "10m_gust" => Array(
+            "label" => "10m Today's Peak Wind Gust",
+            "timemachine" => "#16.{$daylink}",
+            "img" => "/data/summary/today_gust.png",
+            "desc" => "Description to be written..."
+            ),
+         "wind_power" => Array(
+            "label" => "Wind Power Potential",
+            "timemachine" => "#60.{$mhourlink}",
+            "img" => "/data/midwest/rtma_wind_power.png",
+            "desc" => "Description to be written..."
+            ),
+        "iowa_frontogenesis" => Array(
+            "label" => "Surface Frontogenesis &amp; Winds",
+            "timemachine" => "#18.0",
+            "img" => "/data/surfaceFRNT0.gif",
+            "desc" => "Description to be written..."
+            ),
+        "windroses" => Array(
+            "label" => "Wind Roses",
+            "timemachine" => null,
+            "link" => "/sites/windrose.phtml?station=DSM&network=IA_ASOS",
+            "img" => "/onsite/windrose/climate/yearly/DSM_yearly.png",
+            "desc" => "Description to be written..."
+            ),
+    )
+    );
+
+$cfg["visibility"] = Array(
+    "name" => "Visibility",
+    "prods" => Array(
+        "iowa_vsby" => Array(
+            "label" => "Iowa Visibility",
+            "timemachine" => "#24.0",
+            "img" => "/data/iowa_vsby.png",
+            "desc" => "Description to be written..."
+            ),
+        )
+    );
+
+$pathinfo = isset($_SERVER["PATH_INFO"]) ? $_SERVER["PATH_INFO"]: null;
+$maincontent = "";
+$showmenu = TRUE;
+$sectionlabel = "";
+if ($pathinfo){
+    $arr = explode("/", $pathinfo);
+    if (sizeof($arr) == 2){
+        $showmenu = FALSE;
+        $sectionlabel = $arr[1];
+        $section = $cfg[$arr[1]];
+        $maincontent .= sprintf("<p><a href=\"/current/index.phtml\"".
+            " class=\"btn btn-default\">Back to Current Weather</a></p>");            
+        $maincontent .= "<div class=\"row\">\n";
+        $i = 0;
+        while (list($path, $product) = each($section["prods"])){
+            if ($i > 0 && $i % 3 == 0){
+                $maincontent .= "</div>\n<div class=\"row\">\n";
+            }
+            if (array_key_exists("link", $product)){
+                $maincontent .= sprintf("<div class=\"col-md-4\">".
+                    "<a href=\"%s\">".
+                    "<h4><i class=\"fa fa-link\"></i> %s</h4>".
+                    "%s".
+                    "</a></div>", $product["link"],
+                    $product["label"],
+                    (array_key_exists("img", $product)) ? sprintf("<img src=\"%s\" class=\"img img-responsive\">", $product["img"]): ""
+                    );
+            } else {
+                $maincontent .= sprintf("<div class=\"col-md-4\">".
+                    "<a href=\"/current/index.phtml/%s/%s\">".
+                    "<h4>%s</h4>".
+                    "<img src=\"%s\" class=\"img img-responsive\">".
+                    "</a></div>", $arr[1], $path,
+                    $product["label"], $product["img"]);
+            }
+            $i += 1;
+        }
+        $maincontent .= "</div>\n";
+    }
+    else if (sizeof($arr) == 3){
+        $showmenu = FALSE;
+        $sectionlabel = $arr[1];
+        $section = $cfg[$arr[1]];
+        $maincontent .= sprintf("<p><a href=\"/current/index.phtml/%s\"".
+            " class=\"btn btn-default\">Back to %s</a></p>",
+            $arr[1], $section["name"]);
+        $product = $section["prods"][$arr[2]];
+        $tm = "";
+        if ($product["timemachine"]){
+            $tm = sprintf("<p>An archive of this image is in the <a href=\"/timemachine/%s\" ".
+                "class=\"btn btn-default\"><i class=\"fa fa-clock-o\"></i> IEM Time Machine</a></p>",
+                $product["timemachine"]);
+        }
+        $maincontent .= sprintf(
+            "<h4>%s</h4>".
+            "<img src=\"%s\" class=\"img img-responsive\">".
+            "%s".
+            "<br /><p>%s</p>",
+            $product["label"], $product["img"], $tm, $product["desc"]);
+    }
+    
+}
+// Build left hand menu
+reset($cfg);
+$menuhidden = ($showmenu) ? "": " hidden-xs hidden-sm";
+$menu = "";
+while (list($path, $section) = each($cfg)){
+    $menu .= sprintf("<li><a href=\"/current/index.phtml/%s\"".
+        " class=\"btn btn-default btn-block%s\">%s</a></li>",
+        $path,
+        ($path == $sectionlabel) ? " btn-primary": "",
+        $section["name"]);
+}
+
 $t = new MyView();
 $t->thispage = "current-products";
 $t->title = "Current Products";
 
-$daylink = sprintf("%s0000", date("Ymd"));
-$mhourlink = gmdate("YmdH", time() -3600) ."00";
+
 $t->content = <<<EOF
 
 <div class="row">
-<div class="col-md-4">
+ <div class="col-md-3{$menuhidden}">
 
-<h4>IEM Station Plot</h4>
-<a href="/timemachine/#1.0"><img class="img-responsive" src="/data/mesonet.gif" /></a>
-
-<h3>Mesonet Plots</h3>
-<ul>
- <li><a href="/timemachine/#1.0">Iowa Mesonet Plot</a>
- 	[<a href="loop.phtml?prod=mesonet">Loop</a>]</li>
- <li><a href="/timemachine/#4.0">Upper Mid-West</a>
- 	[<a href="loop.phtml?prod=mwmesonet">Loop</a>]</li>
- <li><a href="http://www.rap.ucar.edu/weather/surface/">RAP Surface Page</a>
-  <br />Excellent website with surface plots</li>
- 	
-</ul>
-
-<h3>Temperature</h3>
-<ul>
- <li><a href="/timemachine/#63.0">12Z Low Temperature</a></li>
- <li><a href="/timemachine/#116.0">Today High Temperature</a></li>
- <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
-</ul>
-
-<h3>MRMS Q3 Precipitation Plots</h3>
-<p>These plots are from the
- <a href="http://www.nssl.noaa.gov/projects/mrms/">National Mosaic QPE</a>
-project providing precipitation estimates at a 2 minute and 1 km interval.
-<ul>
-  <li><a href="/timemachine/#44.{$mhourlink}">Current Precip Intensity</a></li>
-  <li><a href="/timemachine/#45.{$mhourlink}">Today's Precip</a></li>
-  <li>1 Hour Total (<a href="/data/iowa_q2_1h.png">Current</a> or <a href="../timemachine/#46.0">Archive</a> )</li>
-  <li>3 Hour Total (<a href="/data/iowa_q2_3h.png">Current</a> or <a href="../timemachine/#47.0">Archive</a> )</li>
-  <li>6 Hour Total (<a href="/data/iowa_q2_6h.png">Current</a> or <a href="../timemachine/#48.0">Archive</a> )</li>
-</ul>
-
-</div><div class="col-md-4">
-
-<h4>Current Temperatures</h4>
-<a href="/timemachine/#115.0"><img src="/data/iowa_tmpf.png" class="img-responsive"/></a>
-<br />
-		
-
-<h3>Single Variable Plots</h3>
-<ul>  <li><a href="/data/mesonet_altm.gif">Altimeter</a></li>
-  <li><a href="/data/ceil.gif">Ceiling</a></li>
-  <li><a href="/data/heat.gif">Heat Index</a></li>
-  <li><a href="/data/relh.gif">Relative Humidity</a></li>
-  <li><a href="/timemachine/#24.0">Visibility</a></li>
-
-</ul>
-
-<h3>Precipitation</h3>
-<ul>
-  <li><a href="/timemachine/#82.0">Iowa Flood Center RADAR Estimates</a></li>
-  <li><a href="/timemachine/#37.0">Iowa Precipitation Contour [COOP]</a></li>
-  <li><a href="/timemachine/#38.0">Midwest Precipitation Contour [COOP]</a></li>
-  <li><a href="/timemachine/#39.{$mhourlink}">Iowa StageIV Hourly Estimate</a></li>
-  <li><a href="/timemachine/#40.{$mhourlink}">Midwest StageIV Hourly Estimate</a></li>
-  <li><a href="/timemachine/#41.{$daylink}">Iowa StageIV Daily Estimate</a></li>
-  <li><a href="/timemachine/#42.{$daylink}">Midwest Daily Estimate</a></li>
-  <li><a href="/timemachine/#43.{$daylink}">US StageIV Daily Estimate</a></li>
-  <li><a href="/data/summary/today_prec.png">ASOS + AWOS (Today)</a></li>
-</ul>
-
-</div><div class="col-md-4">
-
-<h4>Rainfall Today</h4>
-<a href="/timemachine/#45.{$daylink}"><img src="/data/iowa_q2_1d.png" class="img-responsive"/></a>
-<br />
-		
-<h3>Wind Plots</h3>
-<ul>
-  <li><a href="/timemachine/#60.{$mhourlink}">Wind Power Potential</a></li>
-  <li><a href="/timemachine/#16.{$daylink}">Wind Gust Today</a></li>
-</ul>
-
-
-<h3>Gridded Surface Plots:</h3>
-<table>
-<tr><td>
-  <br><a href="/data/surfaceTW0.gif">Temps & Winds</a></td><td>
-         <br><a href="SFloop.php?product=TW">Loop</a></td></tr>
-<tr><td>
-  <a href="/data/surfaceDW0.gif">Dew Points & Winds</a></td><td>
-         <a href="SFloop.php?product=DW">Loop</a></td></tr>
-<tr><td>
-  <a href="/data/surfaceTE0.gif">Theta E & Winds</a></td><td>
-         <a href="SFloop.php?product=TE">Loop</a></td></tr>
-<tr><td>
-  <a href="/data/surfaceMD0.gif">Moisture Divergence</a></td><td>
-         <a href="SFloop.php?product=MD">Loop</a></td></tr>
-<tr><td>
-  <a href="/data/surfaceFRNT0.gif">Frontogensis</a></td><td>
-         <a href="SFloop.php?product=FRNT">Loop</a></td></tr>
-<tr><td>
-  <a href="/data/surfaceDIV0.gif">Divergence</a></td><td>
-         <a href="SFloop.php?product=DIV">Loop</a></td></tr>
-</table>
-
-
-<h3>Soundings:</h3>
-<ul>
-<li><a href="http://www.rap.ucar.edu/weather/upper/sla_wp.gif">Slater Profiler</a></li>
-<li><a href="http://www.rap.ucar.edu/weather/upper/dvn.gif">Davenport</a></li>
-<li><a href="http://www.rap.ucar.edu/weather/upper/oax.gif">Omaha</a></li>
-<li><a href="http://www.rap.ucar.edu/weather/upper/mpx.gif">Minneapolis</a></li>
-<li><a href="http://www.rap.ucar.edu/weather/upper/top.gif">Topeka</a></li>
-<li><a href="http://www.uni.edu/storm/wximages/skewt.html">Profiling Radiometer @UNI</a></li>
-</ul>
-		</div>
+<div class="panel panel-default">
+  <div class="panel-heading">Current Weather</div>
+  <div class="panel-body">
+    <ul class="list-unstyled">
+     {$menu}
+    </ul>
+  </div>
 </div>
+
+</div><!-- ./col-md-3 -->
+
+ <div class="col-md-9">
+    {$maincontent}
+ </div><!-- ./col-md-9 -->
+</div><!-- ./row -->
+
 EOF;
 $t->render('single.phtml');
  ?>
