@@ -1,48 +1,61 @@
-"""
- Generate analysis of precipitation
-"""
-
-import random
-from pyiem.plot import MapPlot
-
+"""Plot 7 Day Precipitation Totals"""
 import datetime
-now = datetime.datetime.now()
+import sys
 
 import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor()
+from pandas.io.sql import read_sql
+from pyiem.plot import MapPlot
 
-# Compute normal from the climate database
-sql = """
-select s.id, 
-  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
-  sum(pday) as rainfall
- from summary_%s c, stations s
- WHERE day > ('TODAY'::date - '7 days'::interval) 
- and s.network in ('AWOS', 'IA_ASOS')
- and pday >= 0 and pday < 30 and 
- s.iemid = c.iemid
- GROUP by s.id, lon, lat
-""" % (now.year,)
 
-lats = []
-lons = []
-vals = []
-valmask = []
-icursor.execute(sql)
-for row in icursor:
-    lats.append( row[2] )
-    lons.append( row[1] + (random.random() * 0.01))
-    vals.append( row[3] )
-    valmask.append( True )
+def fmter(val):
+    """Make pretty text"""
+    if val is None:
+        return 0
+    if val > 0 and val < 0.01:
+        return 'T'
+    return "%.2f" % (val, )
 
-m = MapPlot(
-        title='Iowa Past Seven Days Precipitation',
-        subtitle="%s - %s inclusive" % (
-            (now - datetime.timedelta(days=6)).strftime("%d %b %Y"), 
-            now.strftime("%d %b %Y") )
-        )
-m.plot_values(lons, lats, vals, '%.2f')
-m.drawcounties()
-pqstr = "plot c 000000000000 summary/7day/ia_precip.png bogus png"
-m.postprocess(pqstr=pqstr)
+
+def main(days, argv):
+    """Go!"""
+    today = datetime.date.today()
+    routes = "ac"
+    if len(argv) == 4:
+        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        routes = "a"
+    sixago = today - datetime.timedelta(days=(days - 1))
+
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+
+    # Compute normal from the climate database
+    df = read_sql("""
+        select s.id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
+        sum(pday) as rainfall
+        from summary c JOIN stations s on (c.iemid = s.iemid)
+        WHERE day >= %s and day <= %s
+        and s.network in ('AWOS', 'IA_ASOS')
+        and pday >= 0 and pday < 30
+        GROUP by s.id, lon, lat
+    """, pgconn, params=(sixago, today), index_col='id')
+    df['label'] = df['rainfall'].apply(fmter)
+
+    mp = MapPlot(title=('Iowa %s Day Precipitation Total [inch] (ASOS/AWOS)'
+                        ) % (days, ),
+                 subtitle=("%s - %s inclusive"
+                           ) % (sixago.strftime("%d %b %Y"),
+                                today.strftime("%d %b %Y")),
+                 continentalcolor='white')
+    mp.plot_values(df['lon'].values, df['lat'].values,
+                   df['label'].values,
+                   '%s', labels=df.index.values, labelbuffer=5)
+    mp.drawcounties()
+    pqstr = ("plot %s %s0000 summary/%sday/ia_precip.png "
+             "summary/%sday/ia_precip.png png"
+             ) % (routes, today.strftime("%Y%m%d"), days, days)
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
+
+
+if __name__ == '__main__':
+    for _days in [7, 31, 91]:
+        main(_days, sys.argv)
