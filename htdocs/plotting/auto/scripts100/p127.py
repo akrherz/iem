@@ -1,14 +1,15 @@
 """Plot or Harvest Progress"""
 import calendar
+from collections import OrderedDict
 
 import numpy as np
 import psycopg2
-from collections import OrderedDict
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
                      ('PCT EMERGED', 'Emerged'),
+                     ('PCT DENTED', 'Percent Dented'),
                      ('PCT HARVESTED', 'Harvest (Grain)')])
 PDICT2 = OrderedDict([('CORN', 'Corn'),
                       ('SOYBEANS', 'Soybean')])
@@ -19,7 +20,10 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['nass'] = True
-    desc['description'] = """This chart presents harvest or planting progress."""
+    desc['description'] = """This chart presents the crop progress by year.
+    The most recent value for the current year is denoted on each of the
+    previous years on record.
+    """
     desc['arguments'] = [
         dict(type='state', name='state', default='IA',
              label='Select State:'),
@@ -102,7 +106,7 @@ def plotter(fdict):
     # We need to compute the domain of this plot
     maxv = np.max(data, 0)
     minv = np.min(data, 0)
-    ax.set_xlim(np.argmin(maxv > 0) - 7, np.argmax(minv > 99) + 7)
+    ax.set_xlim(np.argmax(maxv > 0) - 7, np.argmax(minv > 99) + 7)
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
     ax.grid(True)
     lastweek = df['week_ending'].max()
@@ -117,4 +121,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(unit_desc='PCT DENTED'))
