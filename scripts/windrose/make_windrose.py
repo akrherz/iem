@@ -29,16 +29,16 @@ def main():
         database = 'hads'
 
     fn = "/mesonet/share/windrose/climate/yearly/%s_yearly.png" % (sid,)
-    print("%4s %-20.20s -- YR" % (sid, nt.sts[sid]['name'])),
+    print("%4s %-20.20s -- YR" % (sid, nt.sts[sid]['name']), end='')
     res = windrose(sid, database=database, sname=nt.sts[sid]['name'])
     res.savefig(fn)
     plt.close()
-    for m in range(1, 13):
+    for month in range(1, 13):
         fn = ("/mesonet/share/windrose/climate/monthly/%02i/%s_%s.png"
-              ) % (m, sid,
-                   datetime.datetime(2000, m, 1).strftime("%b").lower())
-        print("%s" % (m,)),
-        res = windrose(sid, months=(m,), database=database,
+              ) % (month, sid,
+                   datetime.datetime(2000, month, 1).strftime("%b").lower())
+        print(" %s" % (month,), end='')
+        res = windrose(sid, months=(month,), database=database,
                        sname=nt.sts[sid]['name'])
         res.savefig(fn)
         plt.close()
