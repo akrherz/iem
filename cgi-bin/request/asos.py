@@ -118,7 +118,7 @@ def main():
     dataVars = form.getlist("data")
     sts, ets = get_time_bounds(form, tzinfo)
 
-    delim = form.getfirst("format")
+    delim = form.getfirst("format", "onlycomma")
 
     if "all" in dataVars:
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
@@ -137,7 +137,7 @@ def main():
         dataVars = str(dataVars)[1:-2]
         queryCols = re.sub("'", " ", dataVars)
 
-    if delim == "tdf":
+    if delim in ["tdf", "onlytdf"]:
         rD = "\t"
         queryCols = re.sub(",", "\t", queryCols)
     else:
@@ -167,12 +167,13 @@ def main():
       WHERE valid >= %s and valid < %s and station in %s """+rlimiter+"""
       ORDER by valid ASC""", (sts, ets, tuple(dbstations)))
 
-    sys.stdout.write("#DEBUG: Format Typ    -> %s\n" % (delim,))
-    sys.stdout.write("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
-    sys.stdout.write("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
-    sys.stdout.write(("#DEBUG: Data Contact   -> daryl herzmann "
-                      "akrherz@iastate.edu 515-294-5978\n"))
-    sys.stdout.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
+    if delim not in ['onlytdf', 'onlycomma']:
+        sys.stdout.write("#DEBUG: Format Typ    -> %s\n" % (delim,))
+        sys.stdout.write("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
+        sys.stdout.write("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
+        sys.stdout.write(("#DEBUG: Data Contact   -> daryl herzmann "
+                          "akrherz@iastate.edu 515-294-5978\n"))
+        sys.stdout.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
     sys.stdout.write("station"+rD+"valid"+rD)
     if gisextra:
         sys.stdout.write("lon"+rD+"lat"+rD)
