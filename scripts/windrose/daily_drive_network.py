@@ -2,11 +2,12 @@
 
 Called from RUN_2AM.sh script
 """
-import psycopg2
 import os
 import subprocess
 import stat
 import datetime
+
+import psycopg2
 
 MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 CACHEDIR = "/mesonet/share/windrose/climate/yearly"

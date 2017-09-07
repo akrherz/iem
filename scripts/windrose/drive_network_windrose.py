@@ -1,9 +1,19 @@
-"""Generate a windrose for each site in the ASOS network, me thinks...
+"""Generate a windrose for each site in the specified network...
 """
-from pyiem.network import Table as NetworkTable
 import sys
 import subprocess
-net = sys.argv[1]
-nt = NetworkTable(net)
-for sid in nt.sts.keys():
-    subprocess.call("python make_windrose.py %s %s" % (net, sid), shell=True)
+
+from pyiem.network import Table as NetworkTable
+
+
+def main(argv):
+    """Go Main"""
+    net = argv[1]
+    nt = NetworkTable(net)
+    for sid in nt.sts:
+        subprocess.call("python make_windrose.py %s %s" % (net, sid),
+                        shell=True)
+
+
+if __name__ == '__main__':
+    main(sys.argv)
