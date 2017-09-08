@@ -1,10 +1,12 @@
 """
  Some of our solar radiation data is not good!
 """
-import psycopg2
+from __future__ import print_function
 import datetime
-import requests
 import json
+
+import psycopg2
+import requests
 from pyiem.network import Table as NetworkTable
 ISUAG = psycopg2.connect(database='isuag', host='iemdb')
 cursor = ISUAG.cursor()

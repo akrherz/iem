@@ -23,7 +23,7 @@ ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
 
 ACCESS = psycopg2.connect(database='iem', host='iemdb')
 
-EVENTS = {'reprocess_solar': False}
+EVENTS = {'reprocess_solar': False, 'days': []}
 VARCONV = {
            'vwc06_avg': 'vwc_06_avg',
            'vwc12_avg': 'vwc_12_avg',
@@ -307,6 +307,8 @@ def daily_process(nwsli, maxts):
                     float(tokens[headers.index('tair_c_min')]), 'C').value('F')
         ob.data['pday'] = round(distance(
             float(tokens[headers.index('rain_mm_tot')]), 'MM').value('IN'), 2)
+        if valid not in EVENTS['days']:
+            EVENTS['days'].append(valid)
         ob.data['et_inch'] = distance(
             float(tokens[headers.index('dailyet')]), 'MM').value('IN')
         ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
@@ -455,8 +457,10 @@ def main():
 
     if EVENTS['reprocess_solar']:
         print("Calling fix_solar.py")
-        os.chdir("../isuag")
-        subprocess.call("python fix_solar.py", shell=True)
+        subprocess.call("python ../isuag/fix_solar.py", shell=True)
+    for day in EVENTS['days']:
+        subprocess.call(("python ../isuag/fix_precip.py %s %s %s"
+                         ) % (day.year, day.month, day.day), shell=True)
 
     dump_madis_csv()
 
