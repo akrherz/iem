@@ -68,6 +68,24 @@
   				)
   		);
   
+  $services[] = Array(
+      "title" => "NCEP Stage IV Hourly Precipitation",
+      "url" => "/json/stage4/{lon}/{lat}/{utc_date}",
+      "desc" => "This service provides a grid point sampling of the NCEP".
+      " Stage IV product.  The date provided the service is a UTC date. Note".
+      " that the hourly stage IV data does not receive the level of QC that".
+      " the 6, 12, and 24 hour summaries do.",
+      "vars" => Array(
+          "lat" => "Latitude (deg N)",
+          "lon" => "Longitude (deg E)",
+          "utc_date" => "YYYY-mm-dd",
+          ),
+      "example" => Array(
+          "{lat}" => "41.99",
+          "{lon}" => "-95.55",
+          "{utc_date}" => "2017-08-21"
+          )
+      );
   
   $services[] = Array(
   		"title" => "Local Storm Reports for One Storm Based Warning",
@@ -610,7 +628,7 @@ for a given network that collects webcams and a UTC timestamp.",
   while (list($key, $ws) = each($services)){
   	$url = $ws['url'];
   	$uriadd = (strpos($url, "?") === FALSE) ? "?": "&amp;";
-  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"fa fa-bookmark\"></i></a><a name=\"%s\">%s</a></strong>
+  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"fa fa-bookmark\"></i></a> <a name=\"%s\">%s</a></strong>
 	<br /><strong>URI:</strong> %s%s%scallback=gotData
 	<br /><strong>Description:</strong> %s
 	<br /><strong>Method GET Parameters:</strong>
