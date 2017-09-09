@@ -242,12 +242,6 @@ $cfg["precipitation"] = Array(
             "img" => "/data/iowa_ifc_1d.png",
             "desc" => "Description to be written..."
             ),
-        "mrms_intensity" => Array(
-            "label" => "MRMS Precipitation Intensity",
-            "timemachine" => "#44.{$mhourlink}",
-            "img" => "/data/iowa_ifc_1d.png",
-            "desc" => "Description to be written..."
-            ),
         "year_departure" => Array(
             "label" => "Departure from Normal",
             "timemachine" => null,
@@ -528,6 +522,13 @@ $t = new MyView();
 $t->thispage = "current-products";
 $t->title = "Current Products";
 
+if ($maincontent == ""){
+    $maincontent = <<<EOM
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>Please select from the available data types to view IEM products.</p>
+EOM;
+}
 
 $t->content = <<<EOF
 
