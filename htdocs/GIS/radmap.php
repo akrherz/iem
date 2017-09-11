@@ -699,7 +699,7 @@ $map->drawLabelCache($img);
 
 $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
-$point->setXY(40, 26);
+$point->setXY(42, 32);
 $point->draw($map, $layer, $img, 0);
 
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
