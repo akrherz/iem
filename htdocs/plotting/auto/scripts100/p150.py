@@ -120,6 +120,9 @@ def plotter(fdict):
                          ) % (ts.strftime("%Y-%m-%d %H:%M"),))
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
+        # manual hackery to get 0 and 100th percentile
+        df.loc[df[key] == df[key+'_max'], key+'_percentile'] = 100.
+        df.loc[df[key] == df[key+'_min'], key+'_percentile'] = 0.
 
     ax = plt.axes([0.1, 0.12, 0.65, 0.75])
     bars = ax.barh(range(len(df.index)), df[varname+'_percentile'],
