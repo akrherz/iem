@@ -12,7 +12,6 @@ import json
 import cStringIO
 
 import memcache
-import pandas as pd
 import pytz
 
 
@@ -156,6 +155,8 @@ def do(form, fmt):
                     res = df.to_csv(index=(df.index.name is not None))
                 elif fmt == 'xlsx':
                     (_, tmpfn) = tempfile.mkstemp()
+                    # Lazy import as this is expensive >1s
+                    import pandas as pd
                     writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter',
                                             options={'remove_timezone': True})
                     df.index.name = None
@@ -178,6 +179,7 @@ def do(form, fmt):
 
 
 def main():
+    """go main!"""
     form = cgi.FieldStorage()
     fmt = form.getfirst('fmt', 'png')[:4]
     try:
