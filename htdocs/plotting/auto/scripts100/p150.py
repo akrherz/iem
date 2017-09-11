@@ -35,6 +35,10 @@ def get_description():
     <br /><br />The 'Select Station' option provides some 'virtual' stations
     that are spliced together archives of close by stations.  For some
     locations, the place that the sounding is made has moved over the years.
+
+    <br /><br />A process runs at 3:10 and 15:10z each day to ingest the
+    current 0 and 12z soundings respectively.  You may not find the current
+    day's sounding if running this application prior to those ingest times.
     """
     today = datetime.date.today()
     desc['arguments'] = [
@@ -112,7 +116,8 @@ def plotter(fdict):
     """, pgconn, params=(tuple(stations), hour, ts),
                   index_col='pressure')
     if len(df.index) == 0:
-        raise Exception("No data found for query")
+        raise Exception(("Sounding for %s was not found!"
+                         ) % (ts.strftime("%Y-%m-%d %H:%M"),))
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
 
