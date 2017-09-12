@@ -197,6 +197,9 @@ data = {'plots': [
         {'id': "12", 'mw': True,
          'label': ("Days per year and first/latest date "
                    "above/below given threshold")},
+        {'id': "184", 'mw': True,
+         'label': ("Days per year with High Temperature "
+                   "above temperature thresholds")},
         {'id': "74", 'mw': True,
          'label': ("Days per year by season or year with temperature "
                    "above/below threshold")},
