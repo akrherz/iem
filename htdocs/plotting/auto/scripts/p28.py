@@ -74,9 +74,9 @@ def get_ctx(fdict):
     """, (station,))
 
     baseyear = nt.sts[station]['archive_begin'].year - 1
-    years = (datetime.datetime.now().year - baseyear) + 1
+    ctx['years'] = (datetime.datetime.now().year - baseyear) + 1
 
-    data = np.zeros((years, 367*2))
+    data = np.zeros((ctx['years'], 367*2))
     # 1892 1893
     # 1893 1894
     # 1894 1895
@@ -113,7 +113,10 @@ def get_ctx(fdict):
         thisyear = sums[myyear]
         sums = np.sort(sums)
         arr = np.digitize([thisyear, ], sums)
-        rank = years - arr[0] + 1
+        if thisyear == 0:
+            rank = ctx['years']
+        else:
+            rank = ctx['years'] - arr[0] + 1
         ranks.append(rank)
         ptile.append(rank / float(len(sums)) * 100.)
         totals.append(thisyear)
@@ -243,22 +246,28 @@ def plotter(fdict):
     y2 = ax.twinx()
     y2.set_position([0.1, 0.1, 0.75, 0.75])
 
-    y2.bar(np.arange(-365, 0), ctx['y2'][::-1], fc='b', ec='b')
+    y2.plot(np.arange(-365, 0), ctx['y2'][::-1], color='b', lw=2)
+    if ctx['opt'] == 'rank':
+        y2.axhline(ctx['years'], color='b', linestyle='-.')
+        y2.text(-180, ctx['years'] + 2, 'Total Years', ha='center')
+        y2.set_ylim(0, ctx['years'] + 30)
     ax.grid(True)
     ax.set_xticks(ctx['xticks'])
     ax.set_xticklabels(ctx['xticklabels'])
     ax.set_title(("%s\n%s") % (ctx['title'], ctx['subtitle']), fontsize=10)
-    y2.set_ylabel("%s (bars)" % (ctx['y2label'], ), color='b')
+    y2.set_ylabel("%s (blue line)" % (ctx['y2label'], ), color='b')
     ax.set_xlim(-367, 0.5)
 
     ax.plot(np.arange(-365, 0), ctx['totals'][::-1], color='r', lw=2,
             label='This Period')
+    ax.plot(np.arange(-365, 0), ctx['avgs'][::-1], color='purple', lw=2,
+            label='Average')
     ax.plot(np.arange(-365, 0), ctx['maxes'][::-1], color='g', lw=2,
             label='Maximum')
     ax.set_ylabel("Precipitation [inch]")
     ax.set_zorder(y2.get_zorder()+1)
     ax.patch.set_visible(False)
-    ax.legend(loc='best')
+    ax.legend(loc='best', ncol=3)
     df = pd.DataFrame(dict(day=np.arange(-365, 0),
                            maxaccum=ctx['maxes'][::-1],
                            accum=ctx['totals'][::-1],
