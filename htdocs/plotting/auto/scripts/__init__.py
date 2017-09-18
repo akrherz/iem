@@ -69,6 +69,9 @@ data = {'plots': [
         {'id': "84", 'mw': True,
          'label': ("MRMS Q3 / PRISM Estimated Precipitation "
                    "(multiday summaries/departures too)")},
+        {'id': "185", 'mw': True,
+         'label': ("Number of Days to Accumulate an Amount of Precipitation"
+                   " (MRMS)")},
         {'id': "164",
          'label': ("Percentage of NWS CLI Sites Reporting Daily Above/Below "
                    "Temps or Precip/Snow")},
