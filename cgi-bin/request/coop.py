@@ -69,9 +69,9 @@ def get_cgi_dates(form):
 def get_cgi_stations(form):
     """ Figure out which stations the user wants, return a list of them """
     reqlist = form.getlist("station[]")
-    if len(reqlist) == 0:
+    if not reqlist:
         reqlist = form.getlist('stations')
-    if len(reqlist) == 0:
+    if not reqlist:
         ssw("Content-type: text/plain\n\n")
         ssw("No stations or station[] specified, need at least one station!")
         sys.exit()
@@ -724,8 +724,11 @@ def main():
     elif "dndc" not in ctx['myvars'] and ctx['what'] != 'excel':
         if ctx['what'] == 'download':
             ssw("Content-type: application/octet-stream\n")
+            dlfn = "changeme.txt"
+            if len(ctx['stations']) < 10:
+                dlfn = "%s.txt" % ("_".join(ctx['stations']), )
             ssw(("Content-Disposition: attachment; "
-                 "filename=changeme.txt\n\n"))
+                 "filename=%s\n\n" % (dlfn, )))
         else:
             ssw("Content-type: text/plain\n\n")
 
