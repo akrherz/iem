@@ -40,7 +40,7 @@ def plotter(fdict):
         SELECT year, month, avg((high+low)/2.) from """+table+"""
         WHERE station = %s and day < %s and year > 1892
         GROUP by year, month ORDER by year ASC
-    """, (station, datetime.datetime.now().replace(day=1)))
+    """, (station, datetime.date.today().replace(day=1)))
 
     for rownum, row in enumerate(cursor):
         if rownum == 0:
