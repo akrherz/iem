@@ -7,14 +7,17 @@ from pyiem.util import get_autoplot_context
 from pyiem.network import Table as NetworkTable
 import psycopg2
 
+PDICT = {'full': 'Show Full Year Totals',
+         'ytd': 'Limit to Year to Date Period'}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """The generated plot presents a given's year total
-    and the maximum number of days at or above a given high temperature
-    threshold.
+    desc['description'] = """This plot shows the number of days with a high
+    temperature at or above a given threshold.  You can optionally generate
+    this plot for the year to date period.
     """
     today = datetime.date.today()
     desc['arguments'] = [
@@ -22,6 +25,8 @@ def get_description():
              label='Select Station:', network='IACLIMATE'),
         dict(type="year", name="year", default=today.year,
              label="Year to Compare:"),
+        dict(type='select', options=PDICT, default='full',
+             label='Day Period Limit:', name='limit'),
         ]
     return desc
 
@@ -35,13 +40,22 @@ def plotter(fdict):
     station = ctx['station']
     nt = NetworkTable(ctx['network'])
     year = ctx['year']
+    limit = ctx['limit']
+    limitsql = ""
+    limittitle = ""
+    today = datetime.date.today()
+    if limit == 'ytd':
+        limittitle = "(Jan 1 - %s)" % (today.strftime("%b %-d"),)
+        limitsql = " and extract(doy from day) <= %s" % (today.strftime("%j"),)
 
     dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 
     table = "alldata_%s" % (station[:2], )
     df = read_sql("""
         SELECT year, day, high from """ + table + """ WHERE
-        station = %s and high is not null ORDER by day ASC
+        station = %s and high is not null
+        """ + limitsql + """
+        ORDER by day ASC
      """, dbconn, params=(station,), index_col='day')
     res = []
     for level in range(70, 106):
@@ -71,13 +85,13 @@ def plotter(fdict):
     ax.legend(loc='best')
     ax.set_xlim(0, df['max'].max() * 1.2)
     ax.set_ylim(69, 106)
-    ax.set_title(("%s Maximum Days per Year\n"
+    ax.set_title(("%s Max Days per Year %s\n"
                   "at or above given high temperature threshold"
-                  ) % (nt.sts[station]['name'], ))
-    ax.set_ylabel(r"High Temperature $^\circ%F")
+                  ) % (nt.sts[station]['name'], limittitle))
+    ax.set_ylabel(r"High Temperature $^\circ$F")
     if year == datetime.date.today().year:
         ax.set_xlabel(("Days, %s data through %s"
-                       ) % (year, datetime.date.today()))
+                       ) % (year, today))
     else:
         ax.set_xlabel("Days")
 
