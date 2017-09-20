@@ -463,16 +463,16 @@ if ($pathinfo){
                 $maincontent .= "</div>\n<div class=\"row\">\n";
             }
             if (array_key_exists("link", $product)){
-                $maincontent .= sprintf("<div class=\"col-md-4\">".
+                $maincontent .= sprintf("<div class=\"col-md-4 well well-sm\">".
                     "<a href=\"%s\">".
                     "<h4><i class=\"fa fa-link\"></i> %s</h4>".
-                    "%s".
+                    "<img src=\"%s\" class=\"img img-responsive\">".
                     "</a></div>", $product["link"],
                     $product["label"],
-                    (array_key_exists("img", $product)) ? sprintf("<img src=\"%s\" class=\"img img-responsive\">", $product["img"]): ""
+                    (array_key_exists("img", $product)) ? $product["img"]: "/images/iem_logo.svg"
                     );
             } else {
-                $maincontent .= sprintf("<div class=\"col-md-4\">".
+                $maincontent .= sprintf("<div class=\"col-md-4 well well-sm\">".
                     "<a href=\"/current/index.phtml/%s/%s\">".
                     "<h4>%s</h4>".
                     "<img src=\"%s\" class=\"img img-responsive\">".
@@ -494,15 +494,15 @@ if ($pathinfo){
         $tm = "";
         if ($product["timemachine"]){
             $tm = sprintf("<p>An archive of this image is in the <a href=\"/timemachine/%s\" ".
-                "class=\"btn btn-default\"><i class=\"fa fa-clock-o\"></i> IEM Time Machine</a></p>",
+                "class=\"btn btn-success\"><i class=\"fa fa-clock-o\"></i> IEM Time Machine</a></p>",
                 $product["timemachine"]);
         }
         $maincontent .= sprintf(
             "<h4>%s</h4>".
-            "<img src=\"%s\" class=\"img img-responsive\">".
             "%s".
+            "<img src=\"%s\" class=\"img img-responsive\">".
             "<br /><p>%s</p>",
-            $product["label"], $product["img"], $tm, $product["desc"]);
+            $product["label"], $tm, $product["img"], $product["desc"]);
     }
     
 }
