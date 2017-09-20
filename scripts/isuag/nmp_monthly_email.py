@@ -35,16 +35,17 @@ Iowa Environmental Mesonet Data Delivery Report
   Dataset: ISU Soil Moisture Network
   Performance Period: %s thru %s
   Reported Performance: %.1f%%
+  Reporting Platforms: %.0f
 
 Additional Details
 ==================
-  Total Required Observations: %.0f (24 hourly obs x 17 stations x %.0f days)
+  Total Required Obs: %.0f (24 hourly obs x 17 platforms x %.0f days)
   Observations Delivered: %.0f
+  Report Generated: %s
 
-Report Generated: %s
 .END
 """ % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y"),
-       performance, totalobs, days, df['count'].sum(),
+       performance, len(df.index), totalobs, days, df['count'].sum(),
        datetime.datetime.now().strftime("%d %B %Y %H:%M %p"))
 
 
