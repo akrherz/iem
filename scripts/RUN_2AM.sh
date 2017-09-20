@@ -1,7 +1,12 @@
 #!/bin/sh
+DD=$(date +%d)
 
 cd isuag
 sh run_plots.sh
+if [ $DD -eq "17" ]
+	then
+		python nmp_monthly_email.py
+fi
 
 # Run the climodat estimator to get sites that are valid at midnight
 # only for Iowa at the moment as we have no other such sites outside of
@@ -14,7 +19,6 @@ sh run.sh &
 
 cd ../coop
 python hrrr_solarrad.py
-DD=$(date +%d)
 if [ $DD -eq "01" ]
 	then
 	python first_guess_for_harry.py
@@ -25,7 +29,6 @@ if [ $DD -eq "02" ]
 	then
 		sh monthly.sh $(date --date '3 days ago' +'%y %m')
 fi
-
 
 cd ../dl
 python download_cfs.py &
