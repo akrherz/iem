@@ -264,6 +264,9 @@ def main(valid):
             cursor.execute("""SELECT max(valid) from raob_flights where
             station = %s""", (sid,))
             row = cursor.fetchone()
+            if row[0] is None:
+                print("RAOB dl station: %s has null max(valid)?" % (sid, ))
+                continue
             lastts = row[0].astimezone(pytz.timezone("UTC"))
             print(('RAOB dl fail ts: %s sid: %s last: %s'
                    ) % (valid.strftime("%Y-%m-%d %H"), sid,
