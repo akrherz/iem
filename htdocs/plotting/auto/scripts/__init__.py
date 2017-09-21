@@ -273,6 +273,8 @@ data = {'plots': [
          'label': ("NWS RFC Flash Flood Guidance Plots")},
         {'id': "183",
          'label': ("US Drought Monitor Areal Coverage by State")},
+        {'id': "186",
+         'label': ("US Drought Monitor Change in Areal Coverage by State")},
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
         {'id': "78",
