@@ -93,7 +93,7 @@ def plotter(fdict):
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
 
-    ax.set_yticks(np.arange(ax.get_ylim()[0] - 1, ax.get_ylim()[-1] + 1, -1,
+    ax.set_yticks(np.arange(ax.get_ylim()[0] - 1, ax.get_ylim()[1], -1,
                             dtype='i'))
     fig.text(0.02, 0.04, "Blue areas are improving conditions", color='b')
     fig.text(0.4, 0.04, "Red areas are degrading conditions", color='r')
