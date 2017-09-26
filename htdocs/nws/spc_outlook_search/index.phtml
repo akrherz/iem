@@ -9,7 +9,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=4"></script>
+<script type="text/javascript" src="search.js?v=5"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -24,16 +24,17 @@ $t->headextra = <<<EOF
 		</style>
 EOF;
 $t->thispage ="severe-spcoutlook";
-$t->title = "SPC Convective Outlook Search by Point";
+$t->title = "SPC Convective Outlook / MCDs Search by Point";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
   <li><a href="/nws/">NWS Mainpage</a></li>
-  <li class="active">SPC Outlook Search by Point</li>
+  <li class="active">SPC Outlook / MCDs Search by Point</li>
 </ol>
 <p>This application allows you to search of Storm Prediction Center outlooks by
 point.  The data presented is based on unofficial processing and archving done
-by the IEM.</p>
+by the IEM.  There is an additional table below that is populated with
+Mesoscale Convective Discussions that were issued for the point.</p>
 
 <div class="alert alert-info"><strong>Troubles downloading Excel File?</strong>
 <br />It turns out that making an export to Excel option that works for all
@@ -50,13 +51,8 @@ by the IEM.</p>
 </ul>
 		</div>
 
-<div class="alert alert-warning"><strong>Beta Testing!!!</strong>
-<br />This application is in beta phase to get some friendly testing and feedback.
-There are likely some bugs and rough spots here, so please let <a href="/info/contacts.php">daryl know</a>
- your feedback. 
-		</div>
-	
-<h3><a name="bypoint">1.</a> Search for Outlooks by Point</h3>
+
+<h3>Search for Outlooks by Point</h3>
 
 <br />
 This section allows you to specify a point on the map below by dragging the 
@@ -88,6 +84,21 @@ grid will update and provide a listing of the outlooks found.
 		<div class="col-md-8"><div id="warntable" style="width: 100%"></div></div>
 </div>
 
+<div class="clearfix"></div>
+
+<h3>Mesoscale Convective Discussions for point <span id="mcdpt"></span></h3>
+
+<p>The entries in this table will update as you search via the above interface.
+This archive dates back until <strong>20 October 2008.</strong></p>
+
+<table id="mcds" class="table table-condensed table-bordered table-striped">
+<thead>
+<tr><th>Discussion Number</th><th>UTC Valid</th><th>UTC Expire</th></tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
 		
 EOF;
 $t->render('single.phtml');

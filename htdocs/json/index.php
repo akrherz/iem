@@ -346,6 +346,21 @@
   				"{edate}" => "2015/07/01",
   				)
   		);
+ 
+  $services[] = Array(
+      "title" => "Storm Prediction Center Mesoscale Convection Discussions by Lat/Lon Point",
+      "url" => "/json/spcmcd.py?lon={longitude}&amp;lat={latitude}",
+      "desc" => "Provides a listing of Mesoscale Convective Discussions (MCD)s dating back to".
+      " October 2008.",
+      "vars" => Array(
+          "lat" => "Latitude in degrees",
+          "lon" => "Longitude in (degrees east)",
+          ),
+      "example" => Array(
+          "{latitude}" => "42.5",
+          "{longitude}" => "-95.0",
+          )
+      );
   
   $services[] = Array(
   		"title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point",

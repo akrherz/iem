@@ -163,6 +163,7 @@ Ext.onReady(function() {
 			cat: $("input[name='cat']:checked").val()
 		}});      
 		updateTableTitle();
+		doMCD();
     });
 	$('#events').change(function() {
 		outlookStore.load({add: false, params: {
@@ -173,6 +174,7 @@ Ext.onReady(function() {
 			cat: $("input[name='cat']:checked").val()
 		}});      
 		updateTableTitle();
+		doMCD();
     });
 	$('input[type=radio][name=day]').change(function() {
 		outlookStore.load({add: false, params: {
@@ -183,6 +185,7 @@ Ext.onReady(function() {
 			cat: $("input[name='cat']:checked").val()
 		}});		
 		updateTableTitle();
+		doMCD();
 	});
 	$('input[type=radio][name=cat]').change(function() {
 		outlookStore.load({add: false, params: {
@@ -193,6 +196,7 @@ Ext.onReady(function() {
 			cat: this.value
 		}});
 		updateTableTitle();
+		doMCD();
 	});
 });
 
@@ -219,8 +223,28 @@ function updateMarkerPosition(latLng) {
 	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
 	map.setCenter(latLng);
+	doMCD();
 }
 
+function doMCD(){
+	var lon = $("#lon").val();
+	var lat = $("#lat").val();
+	$.ajax({
+		dataType: "json",
+		url: "/json/spcmcd.py?lon="+lon+"&lat="+lat,
+		success: function(data){
+			var tbody = $("#mcds tbody").empty();
+			$.each(data.mcds, function(index, mcd){
+				tbody.append("<tr><td><a href=\""+ mcd.spcurl + "\" target=\"_blank\">" + mcd.year + " " +
+						mcd.product_num +"</a></td>"+
+						"<td>" + mcd.utc_issue + "</td>" +
+						"<td>" + mcd.utc_expire + "</td>" +
+						"</tr>")
+			});
+			}
+	});
+	$("#mcdpt").html("Lon: "+ lon +" Lat: "+ lat);
+}
 
 function initialize() {
 	var latLng = new google.maps.LatLng(41.53, -93.653);

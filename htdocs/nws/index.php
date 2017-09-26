@@ -231,7 +231,7 @@ first guess at fields the NWS needs for their RTP product.</p>
 <ul>
  <li><a href="/GIS/apps/rview/watch.phtml">Convective Watches Information</a>
   <br />Lists out some simple details on each convective watch.</li>
- <li><a href="/nws/spc_outlook_search/"><i class="fa fa-search"></i> SPC Outlook search by point</a>
+ <li><a href="/nws/spc_outlook_search/"><i class="fa fa-search"></i> SPC Outlook / MCD search by point</a>
   <br />Allows answering of the question of when was a given point last under
 some convective outlook or the number of outlooks for a given point.</li>
 </ul>
