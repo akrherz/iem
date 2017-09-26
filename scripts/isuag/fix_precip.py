@@ -22,6 +22,19 @@ from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance
 
 
+def print_debugging(station):
+    """Add some more details to the output messages to help with ticket res"""
+    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    cursor = pgconn.cursor()
+    cursor.execute("""
+    SELECT valid, rain_mm_tot, rain_mm_tot_qc from sm_daily
+    WHERE station = %s and (rain_mm_tot > 0 or rain_mm_tot_qc > 0)
+    ORDER by valid DESC LIMIT 10
+    """, (station, ))
+    print("    Date    Obs    QC")
+    for row in cursor:
+        print("     %s   %5.1f  %5.1f" % row)
+
 
 def get_hdf(nt, date):
     """Fetch the hourly dataframe for this network"""
@@ -46,12 +59,13 @@ def get_hdf(nt, date):
     df.fillna(0, inplace=True)
     return df
 
+
 def update_precip(date, station, hdf):
     """Do the update work"""
     sts = datetime.datetime(date.year, date.month, date.day, 7)
     sts = sts.replace(tzinfo=pytz.utc)
     ets = sts + datetime.timedelta(hours=24)
-    ldf = hdf[(hdf['station']==station) &
+    ldf = hdf[(hdf['station'] == station) &
               (hdf['valid'] >= sts) &
               (hdf['valid'] < ets)]
 
@@ -118,7 +132,7 @@ def main(argv):
         sts = sts.replace(tzinfo=pytz.utc)
         ets = sts + datetime.timedelta(hours=24)
         # OK, get our data
-        ldf = hdf[(hdf['station']==station) &
+        ldf = hdf[(hdf['station'] == station) &
                   (hdf['valid'] >= sts) &
                   (hdf['valid'] < ets)]
         df.at[station, 'stage4'] = ldf['precip_in'].sum()
@@ -130,6 +144,7 @@ def main(argv):
     for station, row in df2.iterrows():
         print(("ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f"
                ) % (date, station, row['stage4'], row['obs']))
+        print_debugging(station)
         update_precip(date, station, hdf)
 
 
