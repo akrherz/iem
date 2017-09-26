@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (22, now());
+INSERT into iem_schema_manager_version values (23, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -803,16 +803,22 @@ GRANT select on vtec_missing_events to nobody,apache;
 --- Text Products
 ---
 CREATE TABLE text_products (
-    reads smallint DEFAULT 0,
     product text,
-    product_id character varying(32)
+    product_id character varying(32),
+    pil char(6),
+    issue timestamptz,
+    expire timestamptz
 );
 select addgeometrycolumn('','text_products','geom',4326,'MULTIPOLYGON',2);
 
 grant select on text_products to apache,nobody;
 
-create index text_products_idx 
-  on text_products(product_id);
+create index text_products_idx  on text_products(product_id);
+CREATE INDEX text_products_issue_idx on text_products(issue);
+CREATE INDEX text_products_expire_idx on text_products(expire);
+create index text_products_pil_idx  on text_products(pil);
+
+GRANT SELECT on text_products to nobody,apache;
 
 ---
 --- riverpro
@@ -2092,15 +2098,6 @@ CREATE TABLE pireps(
 );
 CREATE INDEX pireps_valid_idx on pireps(valid);
 GRANT SELECT on pireps to nobody,apache;
-
--- Storage of SPS issue and expire times
-ALTER TABLE text_products add issue timestamptz;
-ALTER TABLE text_products add expire timestamptz;
-
-CREATE INDEX text_products_issue_idx on text_products(issue);
-CREATE INDEX text_products_expire_idx on text_products(expire);
-
-GRANT SELECT on text_products to nobody,apache;
 
 CREATE table sbw_1986() inherits (sbw);
 create index sbw_1986_idx on sbw_1986(wfo,eventid,significance,phenomena);
