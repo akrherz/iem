@@ -55,7 +55,8 @@ def get_data(fdict):
     sum(precip) OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
     from """+table+""" WHERE station = %s),
     agg1 as (
-        SELECT season, day, avg_temp,
+        SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
+        sum_precip,
         rank() OVER (PARTITION by season ORDER by avg_temp ASC)
             as coldest_temp_rank,
         rank() OVER (PARTITION by season ORDER by avg_hitemp ASC)
@@ -74,7 +75,8 @@ def get_data(fdict):
         from data)
     SELECT season, day,
     extract(doy from day - '%s days'::interval)::int as doy,
-    avg_temp from agg1 where """+varname+"""_rank = 1 and count > 270
+    avg_temp, avg_hitemp, avg_lotemp,
+    sum_precip from agg1 where """+varname+"""_rank = 1 and count > 240
     """, pgconn, params=(offset, days - 1, days - 1, days - 1, days - 1,
                          station, days - 1),
                   index_col='season')
