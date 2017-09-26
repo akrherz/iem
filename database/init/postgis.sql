@@ -806,6 +806,7 @@ CREATE TABLE text_products (
     product text,
     product_id character varying(32),
     pil char(6),
+    product_num smallint,
     issue timestamptz,
     expire timestamptz
 );
