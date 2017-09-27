@@ -118,7 +118,7 @@ function refreshJSON(){
 	}));
 }
 function setCamera(cid){
-	document.getElementById("c"+cid).checked = true;
+	$("#c"+cid).prop('checked', true);
 	cameraID = cid;	
 	updateHREF();
 	updateCamera();
