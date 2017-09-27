@@ -433,7 +433,7 @@
   		)
   );
   $services[] = Array(
-  		"title" => "Storm Prediction Center Watches",
+  		"title" => "Storm Prediction Center Watches by Time",
   		"url" => "/json/spcwatch.py?ts={timestamp}",
   		"desc" => "Provides a geojson format of SPC watches valid at given time
 		or current time if no time specified.",
@@ -443,7 +443,22 @@
   		"example" => Array(
   				"{timestamp}" => "201104280000"
   		)
-  );
+      );
+  $services[] = Array(
+          "title" => "Storm Prediction Center Watches by Point",
+          "url" => "/json/spcwatch.py?lon={lon}&lat={lat}",
+          "desc" => "Provides a geojson format of SPC watches valid for a ".
+      "give latitude and longitude pair.  Note that these polygons are not ".
+      "the official watch boundaries.",
+          "vars" => Array(
+              "lat" => "Latitude in degrees",
+              "lon" => "Longitude in (degrees east)",
+              ),
+          "example" => Array(
+              "{lat}" => "42.5",
+              "{lon}" => "-95.0",
+              )
+          );
   $services[] = Array(
   		"title" => "RAOB Soundings",
   		"url" => "/json/raob.py?ts={timestamp}&station={station}",

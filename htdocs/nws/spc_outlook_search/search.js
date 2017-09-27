@@ -1,152 +1,48 @@
-Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
-
-function utcdate(v, record){
-	return (Ext.Date.parseDate(v, 'c')).toUTC();
-}
 
 var marker;
-var outlookStore;
-var outlookTable;
 var map;
 
-Ext.override(Date, {
-    toUTC : function() {
-                        // Convert the date to the UTC date
-        return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
-    },
-
-    fromUTC : function() {
-                        // Convert the date from the UTC date
-        return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
-    }
-});
-
-
-Ext.define('Outlook', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'threshold',  type: 'string'},
-        {name: 'day', type: 'int', mapping: 'day'},
-        {name: 'utc_issue', type: 'date', mapping: 'issue', convert: utcdate},
-        {name: 'utc_valid', type: 'date', mapping: 'valid', convert: utcdate},
-        {name: 'utc_expire', type: 'date', mapping: 'expire', convert: utcdate},
-    ]
-});
-
-function alinkUGC(){
-	window.location.href = Ext.String.format("#byugc/{0}/{1}/{2}/{3}", 
-			Ext.getCmp('stateselector').getValue(), 
-			Ext.getCmp('ugcselector').getValue(),
-			Ext.Date.format(Ext.getCmp('sdate').getValue(),'Ymd'),
-			Ext.Date.format(Ext.getCmp('edate').getValue(),'Ymd')
-			);
-}
-
-Ext.onReady(function() {
-
-	outlookStore = new Ext.data.Store({
-		autoLoad : false,
-		model : 'Outlook',
-		proxy : {
-			type : 'ajax',
-			url : '/json/spcoutlook.py',
-	        reader: {
-	            type: 'json',
-	            rootProperty: 'outlooks'
-	        }
-		}
-	});
-		
-	outlookTable = Ext.create('My.grid.ExcelGridPanel', {
-		height : 500,
-		title : 'Drag marker on map to load data...',
-		loadMask : {
-			msg : 'Loading Data...'
-		},
-		store : outlookStore,
-		tbar : [{
-			id : 'grid-excel-button22',
-			icon : '/lsr/icons/excel.png',
-			text : 'Export to Excel...',
-			handler : function(b, e) {
-				b.up('grid').downloadExcelXml();
-			}
-		}],
-		columns : [{
-			'header' : 'Day',
-			sortable : true,
-			dataIndex : 'day',
-			width : 50
-		},{
-			'header' : 'Threshold',
-			sortable : true,
-			dataIndex : 'threshold',
-			width : 100
-		},{
-			'header' : 'Outlook Issued At (UTC)',
-			sortable : true,
-			dataIndex : 'utc_valid',
-			width : 200,
-			renderer : function(value) {
-				return Ext.Date.format(value,
-						'M d, Y H:i');
-			}
-		},{
-			'header' : 'Outlook Begins (UTC)',
-			sortable : true,
-			dataIndex : 'utc_issue',
-			width : 200,
-			renderer : function(value) {
-				return Ext.Date.format(value,
-						'M d, Y H:i');
-			}
-		}, {
-			'header' : 'Outlook Ends (UTC)',
-			sortable : true,
-			dataIndex : 'utc_expire',
-			width : 200,
-			renderer : function(value) {
-				return Ext.Date.format(value,
-						'M d, Y H:i');
-			}
-		}]
-	});
-	outlookTable.render('warntable');
-	outlookTable.doLayout();
-
-	// Do the anchor tag linking, please
-	var tokens = window.location.href.split("#");
-	if (tokens.length == 2){
-		var tokens2 = tokens[1].split("/");
-		if (tokens2.length == 5){
-			if (tokens2[0] == 'byugc'){
-				sdate = tokens2[3].substr(0,4) +"/"+
-						tokens2[3].substr(4,2) +"/"+
-						tokens2[3].substr(6,2) ;
-				Ext.getCmp("sdate").setValue(new Date(sdate));
-				edate = tokens2[4].substr(0,4) +"/"+
-						tokens2[4].substr(4,2) +"/"+
-						tokens2[4].substr(6,2) ;
-				Ext.getCmp("edate").setValue(new Date(edate));
-				Ext.getCmp("stateselector").setValue(tokens2[1]);
-				Ext.getCmp("ugcselector").setValue(tokens2[2]);
-				eventStore.load({
-					add : false,
-					params : {
-						ugc : tokens2[2],
-						sdate : Ext.Date.format(
-								Ext.getCmp('sdate').getValue(),
-						'Y/m/d'),
-						edate : Ext.Date.format(
-								Ext.getCmp('edate').getValue(),
-						'Y/m/d')
-					}
-				});
-			}
-		}
-
+String.prototype.format = function() {
+	  var str = this;
+	  for (var i = 0; i < arguments.length; i++) {       
+	    var reg = new RegExp("\\{" + i + "\\}", "gm");             
+	    str = str.replace(reg, arguments[i]);
+	  }
+	  return str;
 	}
 
+// https://stackoverflow.com/questions/2044616
+function selectElementContents(elid) {
+	var el = document.getElementById(elid);
+	var body = document.body, range, sel;
+    if (document.createRange && window.getSelection) {
+        range = document.createRange();
+        sel = window.getSelection();
+        sel.removeAllRanges();
+        try {
+            range.selectNodeContents(el);
+            sel.addRange(range);
+        } catch (e) {
+            range.selectNode(el);
+            sel.addRange(range);
+        }
+        document.execCommand("copy");
+    } else if (body.createTextRange) {
+        range = body.createTextRange();
+        range.moveToElementText(el);
+        range.select();
+        range.execCommand("Copy");
+    }
+}
+
+function workflow(){
+	doOutlook();
+	doMCD();
+	doWatch();
+	updateTableTitle();
+}
+
+function buildUI(){
 	$("#manualpt").click(function(){
 		var la = $("#lat").val();
 		var lo = $("#lon").val();
@@ -155,85 +51,82 @@ Ext.onReady(function() {
 		updateMarkerPosition(latlng);
 	});
 	$('#last').change(function() {
-		outlookStore.load({add: false, params: {
-			lon: $("#lon").val(),
-			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? $("#events").val(): '0',
-			day: $("input[name='day']:checked").val(),
-			cat: $("input[name='cat']:checked").val()
-		}});      
-		updateTableTitle();
-		doMCD();
+		workflow();
     });
 	$('#events').change(function() {
-		outlookStore.load({add: false, params: {
-			lon: $("#lon").val(),
-			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? $("#events").val(): '0',
-			day: $("input[name='day']:checked").val(),
-			cat: $("input[name='cat']:checked").val()
-		}});      
-		updateTableTitle();
-		doMCD();
+		workflow();
+
     });
 	$('input[type=radio][name=day]').change(function() {
-		outlookStore.load({add: false, params: {
-			lon: $("#lon").val(),
-			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? $("#events").val(): '0',
-			day: this.value,
-			cat: $("input[name='cat']:checked").val()
-		}});		
-		updateTableTitle();
-		doMCD();
+		workflow();
+
 	});
 	$('input[type=radio][name=cat]').change(function() {
-		outlookStore.load({add: false, params: {
-			lon: $("#lon").val(),
-			lat: $("#lat").val(),
-			last: $('#last').is(":checked") ? $("#events").val(): '0',
-			day: $("input[name='day']:checked").val(),
-			cat: this.value
-		}});
-		updateTableTitle();
-		doMCD();
+		workflow();
+
 	});
-});
+}
 
 function updateTableTitle(){
-	latLng = marker.getPosition();
-	outlookTable.setTitle( Ext.String.format("SPC Day {2} {3} Outlook Events for Lat: {0} Lon: {1}", 
-			latLng.lat().toFixed(4), latLng.lng().toFixed(4),
-			$("input[name='day']:checked").val(),
-			$("input[name='cat']:checked").val()));
+	var lon = $("#lon").val();
+	var lat = $("#lat").val();
+	var text = "Lon: "+ lon +" Lat: "+ lat;
+	$('#watches').find("caption").text("Convective Watches for "+ text);
+	$('#outlooks').find("caption").text("Convective Outlooks for "+ text);
+	$('#mcds').find("caption").text("Mesoscale Convective Discussions for "+ text);
 }
 
 function updateMarkerPosition(latLng) {
-	// callback on when the map marker is moved
-	outlookStore.load({add: false, params: {
-		lon: latLng.lng(),
-		lat: latLng.lat(),
-		last: $('#last').is(":checked") ? $("#events").val(): '0',
-		day: $("input[name='day']:checked").val(),
-		cat: $("input[name='cat']:checked").val()
-	}});
 	$("#lat").val(latLng.lat().toFixed(4));
 	$("#lon").val(latLng.lng().toFixed(4));
-	updateTableTitle();
-	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
-			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
+	window.location.href = "#bypoint/{0}/{1}".format( 
+			latLng.lng().toFixed(4), latLng.lat().toFixed(4));
 	map.setCenter(latLng);
-	doMCD();
+	workflow();
 }
 
+function doOutlook(){
+	var lon = $("#lon").val();
+	var lat = $("#lat").val();
+	var last = $('#last').is(":checked") ? $("#events").val(): '0';
+	var day = $("input[name='day']:checked").val();
+	var cat = $("input[name='cat']:checked").val();
+	var tbody = $("#outlooks tbody").empty();
+	$("#outlook_spinner").show();
+	var jsonurl = "/json/spcoutlook.py?lon="+lon+"&lat="+lat+"&last="+last+
+	"&day="+day+"&cat="+cat;
+	$("#outlooks_link").attr('href', jsonurl);
+	$.ajax({
+		dataType: "json",
+		url: jsonurl,
+		success: function(data){
+			$("#outlook_spinner").hide();
+			$.each(data.outlooks, function(index, ol){
+				tbody.append("<tr><td>" + ol.day + "</td>"+
+						"<td>" + ol.threshold + "</td>" +
+						"<td>" + ol.utc_valid + "</td>" +
+						"<td>" + ol.utc_issue + "</td>" +
+						"<td>" + ol.utc_expire + "</td>" +
+						"</tr>")
+			});
+			if (data.outlooks.length == 0){
+				tbody.append("<tr><td colspan=\"5\">No Results Found!</td></tr>");
+			}
+			}
+	});
+}
 function doMCD(){
 	var lon = $("#lon").val();
 	var lat = $("#lat").val();
+	var tbody = $("#mcds tbody").empty();
+	$("#mcd_spinner").show();
+	var jsonurl = "/json/spcmcd.py?lon="+lon+"&lat="+lat;
+	$("#mcds_link").attr('href', jsonurl);
 	$.ajax({
 		dataType: "json",
-		url: "/json/spcmcd.py?lon="+lon+"&lat="+lat,
+		url: jsonurl,
 		success: function(data){
-			var tbody = $("#mcds tbody").empty();
+			$("#mcd_spinner").hide();
 			$.each(data.mcds, function(index, mcd){
 				tbody.append("<tr><td><a href=\""+ mcd.spcurl + "\" target=\"_blank\">" + mcd.year + " " +
 						mcd.product_num +"</a></td>"+
@@ -241,12 +134,42 @@ function doMCD(){
 						"<td>" + mcd.utc_expire + "</td>" +
 						"</tr>")
 			});
+			if (data.mcds.length == 0){
+				tbody.append("<tr><td colspan=\"3\">No Results Found!</td></tr>");
+			}
 			}
 	});
-	$("#mcdpt").html("Lon: "+ lon +" Lat: "+ lat);
 }
 
+function doWatch(){
+	var lon = $("#lon").val();
+	var lat = $("#lat").val();
+	var tbody = $("#watches tbody").empty();
+	$("#watch_spinner").show();
+	var jsonurl = "/json/spcwatch.py?lon="+lon+"&lat="+lat;
+	$("#watches_link").attr('href', jsonurl);
+	$.ajax({
+		dataType: "json",
+		url: jsonurl,
+		success: function(data){
+			$("#watch_spinner").hide();
+			$.each(data.features, function(index, feature){
+				var watch = feature.properties;
+				tbody.append("<tr><td><a href=\""+ watch.spcurl + "\" target=\"_blank\">" + watch.year + " " +
+						watch.number +"</a></td>"+
+						"<td>" + watch.type + "</td>" +
+						"<td>" + watch.issue + "</td>" +
+						"<td>" + watch.expire + "</td>" +
+						"</tr>")
+			});
+			if (data.features.length == 0){
+				tbody.append("<tr><td colspan=\"4\">No Results Found!</td></tr>");
+			}
+			}
+	});
+}
 function initialize() {
+	buildUI();
 	var latLng = new google.maps.LatLng(41.53, -93.653);
 	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 5,
@@ -273,11 +196,6 @@ function initialize() {
 				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
 				marker.setPosition(latlng);
 				updateMarkerPosition(latlng);
-			}
-			if (tokens2[0] == 'eventsbypoint'){
-				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
-				marker2.setPosition(latlng);
-				updateMarkerPosition2(latlng);
 			}
 		}
 	}
