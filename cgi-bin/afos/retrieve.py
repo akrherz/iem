@@ -47,10 +47,15 @@ def main():
     edate = form.getfirst('edate', '')[:10]
     fmt = form.getfirst('fmt', 'text')
     sys.stdout.write("X-Content-Type-Options: nosniff\n")
-    if fmt == 'text':
-        sys.stdout.write("Content-type: text/plain\n\n")
-    elif fmt == 'html':
-        sys.stdout.write("Content-type: text/html\n\n")
+    if form.getfirst('dl') == "1":
+        sys.stdout.write("Content-type: application/octet-stream\n")
+        sys.stdout.write(("Content-Disposition: "
+                          "attachment; filename=afos.txt\n\n"))
+    else:
+        if fmt == 'text':
+            sys.stdout.write("Content-type: text/plain\n\n")
+        elif fmt == 'html':
+            sys.stdout.write("Content-type: text/html\n\n")
     if not pils:
         sys.stdout.write("ERROR: No pil specified...")
         return

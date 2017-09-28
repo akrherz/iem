@@ -1,21 +1,23 @@
 <?php
 /* AJAX AFOS Retreiver */
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 59);
-include_once "../../../include/myview.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 
 $t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.1/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.1/build/ext-all.js"></script>
-<script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=9"></script>
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" href="static.css" />
 EOF;
+$t->jsextra = <<<EOM
+<script type="text/javascript" src="/vendor/js-cookie/2.1.4/js.cookie.min.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="static.js?v=10"></script>
+EOM;
 $t->title = "NWS Text Product Finder";
 $t->thispage ="current-afos";
-$t->content = <<<EOF
-<div id="main"></div>
-<div id="help">
+
+$helpdiv = <<<EOM
 <h3>IEM NWS Text Product Finder</h3>
 
 <p>Update 19 Jan 2012: Added the ability to limit a AFOS PIL by the issuing
@@ -80,10 +82,66 @@ All products should be used for educational purposes only.</p>
 <ul>
  <li><a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.html">NNN Categories</a></li>
 </ul>
-
 </p>
+EOM;
+$theform = <<<EOM
+<form name="control" id="myform">
 
-</div>
+<p><strong>Enter Selections</strong></p>
+
+<p><label for="pil">6 Character PIL</label>
+<br /><input placeholder="AFDDMX" type="text" name="pil" maxlength="6" size="10"></p>
+
+<p><label for="center">4 Character Center</label>
+<br /><input type="text" name="center" maxlength="4" size="6"></p>
+
+<p><label for="limit">Date Descending Entries</label>
+<br /><input type="text" name="limit" maxlength="4" size="6" value="1"></p>
+
+<p><label for="sdate">Start Date</label>
+<br /><input id="sdate" type="text" name="sdate" value="No Limit"></p>
+
+<p><label for="edate">End Date</label>
+<br /><input id="edate" type="text" name="edate" value="No Limit"></p>
+
+<p><button type="button" id="myform-submit" class="btn btn-default"><i class="fa fa-search"></i> Load Product</button></p>
+
+</form>
+EOM;
+$t->content = <<<EOF
+
+<div class="clearfix">&nbsp;</div>
+
+<div class="row">
+  <div class="col-md-3 well">
+    {$theform}
+  </div><!-- ./col-md-3 -->
+  <div class="col-md-9">
+
+<div class="panel with-nav-tabs panel-default" id="thetabs">
+    <div class="panel-heading">
+      <ul class="nav nav-tabs">
+         <li class="active"><a href="#help" data-toggle="tab">Help</a></li>
+      </ul>
+    </div><!-- ./panel-heading -->
+    <div class="panel-body">
+     <div class="tab-content clearfix">
+    <div id="thetabs-toolbar">
+        <button type="button" id="toolbar-refresh" class="btn btn-default"><i class="fa fa-refresh"></i> Refresh</button>
+        <button type="button" id="toolbar-download" class="btn btn-default"><i class="fa fa-download"></i> Download Text</button>
+        <button type="button" id="toolbar-print" class="btn btn-default"><i class="fa fa-print"></i> Send Text to Printer</button>
+        <button type="button" id="toolbar-close" class="btn btn-default"><i class="fa fa-close"></i> Close Tab</button>
+    </div>
+     <div class="clearfix"></div>
+
+       <div class="tab-pane active" id="help">
+        {$helpdiv}
+       </div><!-- ./help -->
+    </div><!-- ./tab-content -->
+    </div><!-- ./panel-body -->
+  </div><!-- ./col-md-9 -->
+</div><!-- ./row -->
+
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
