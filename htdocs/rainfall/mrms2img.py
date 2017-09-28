@@ -1,19 +1,20 @@
 #!/usr/bin/env python
-#
-# Create ERDAS Imagine file from a MRMS Raster
-#
-from osgeo import gdal
-from osgeo import osr
+"""
+Create ERDAS Imagine file from a MRMS Raster
+"""
 import cgi
 import os
-from scipy.misc import imread
-import numpy as np
 import datetime
 import sys
 import zipfile
 
+from osgeo import gdal
+from osgeo import osr
+from scipy.ndimage import imread
+import numpy as np
 
-def go(valid, period):
+
+def workflow(valid, period):
     """ Actually do the work! """
     fn = valid.strftime(('/mesonet/ARCHIVE/data/%Y/%m/%d/'
                          'GIS/mrms/p'+str(period)+'h_%Y%m%d%H%M.png'))
@@ -72,14 +73,14 @@ def go(valid, period):
     del ds
 
     zipfn = "mrms_%sh_%s.zip" % (period, valid.strftime("%Y%m%d%H%M"))
-    z = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
-    z.write(outfn)
-    z.write(outfn+".aux.xml")
-    z.close()
+    zfp = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
+    zfp.write(outfn)
+    zfp.write(outfn+".aux.xml")
+    zfp.close()
 
     # Send file back to client
     sys.stdout.write("Content-type: application/octet/stream\n")
-    sys.stdout.write('Content-Disposition: attachment; filename=%s\n\n' % (
+    sys.stdout.write("Content-Disposition: attachment; filename=%s\n\n" % (
                                                             zipfn,))
     sys.stdout.write(open(zipfn, 'rb').read())
 
@@ -103,7 +104,8 @@ def main():
 
     valid = datetime.datetime(year, month, day, hour, minute)
 
-    go(valid, period)
+    workflow(valid, period)
+
 
 if __name__ == '__main__':
     # Go Main Go
