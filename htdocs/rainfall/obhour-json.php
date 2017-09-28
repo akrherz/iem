@@ -1,5 +1,5 @@
 <?php
-/* Giveme JSON data for zones affected by warning */
+
 include('../../config/settings.inc.php');
 include("../../include/database.inc.php");
 
@@ -48,15 +48,24 @@ while( list($key,$interval) = each($intervals))
   } else {
     $ts0 = $ts - ($interval * 3600);
   }
-  $sql = sprintf("select station,
-    sum(case when phour < 0.01 then 0 else phour end) as p1 from hourly_%s
-          WHERE valid >= '%s+00' and valid < '%s+00' and network IN (%s) 
-          GROUP by station", strftime("%Y", $ts), strftime("%Y-%m-%d %H:%M", $ts0), 
+  $sql = sprintf("select station, sum(phour) as p1 from hourly_%s ".
+      "WHERE valid >= '%s+00' and valid < '%s+00' and network IN (%s) ".
+      "GROUP by station",
+      strftime("%Y", $ts), strftime("%Y-%m-%d %H:%M", $ts0), 
           strftime("%Y-%m-%d %H:%M", $ts), $networks);
   $rs = pg_exec($connect, $sql);
   for( $i=0; $z = @pg_fetch_array($rs,$i); $i++)
   {
-     $data[ $z["station"] ]["p$interval"]  = floatval($z["p1"]);
+      // hackery to account for trace values
+      $val = floatval($z["p1"]);
+      if ($val > 0.005){
+          $retval = sprintf("%.2f", $val);
+      } else if ($val > 0){
+          $retval = "T";
+      } else{
+          $retval = "0";
+      }
+     $data[ $z["station"] ]["p$interval"]  = $retval;
   }
 }
 
