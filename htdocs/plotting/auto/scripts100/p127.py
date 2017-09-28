@@ -94,7 +94,7 @@ def plotter(fdict):
     dlast = np.max(data[-1, :])
     for year in range(year0, lastyear):
         idx = np.digitize([dlast, ], data[year - year0, :])
-        ax.text(idx[0], year, "X", va='center', zorder=2)
+        ax.text(idx[0], year, "X", va='center', zorder=2, color='white')
 
     cmap = cm.get_cmap('jet')
     res = ax.imshow(data, extent=[1, 367, lastyear + 0.5, year0 - 0.5],
