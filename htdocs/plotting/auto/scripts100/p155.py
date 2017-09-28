@@ -39,7 +39,9 @@ def get_description():
     desc['cache'] = 86400
     desc['description'] = """Based on available hourly observation reports
     by METAR stations, this application presents the top 10 events for a
-    given metric of your choice.
+    given metric of your choice.  Please note that this application often
+    reveals bad data stored within the database.  Please do contact us when
+    you see suspicious reports and we'll clean up the database.
     """
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
@@ -106,10 +108,12 @@ def plotter(fdict):
     lastval = -99
     ranks = []
     currentrank = 0
-    for _, row in df.iterrows():
+    rows2keep = []
+    for idx, row in df.iterrows():
         key = row['valid'].strftime("%Y%m%d%H")
         if key in hours:
             continue
+        rows2keep.append(idx)
         hours.append(key)
         y.append(row[dbvar])
         lbl = fmt % (row[dbvar], )
@@ -148,7 +152,7 @@ def plotter(fdict):
     fig.text(0.98, 0.03, "Timezone: %s" % (nt.sts[station]['tzname'],),
              ha='right')
 
-    return fig, df
+    return fig, df.loc[rows2keep]
 
 
 if __name__ == '__main__':
