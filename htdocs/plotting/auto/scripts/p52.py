@@ -68,8 +68,7 @@ def plotter(fdict):
         events.append((row[3].replace(tzinfo=pytz.timezone("UTC")),
                        endts,
                        row[2]))
-        labels.append("%s %s" % (vtec._phenDict[row[0]],
-                                 vtec._sigDict[row[1]]))
+        labels.append(vtec.get_ps_string(row[0], row[1]))
         types.append("%s.%s" % (row[0], row[1]))
 
     # If we have lots of WWA, we need to expand vertically a bunch, lets

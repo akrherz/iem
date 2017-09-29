@@ -110,9 +110,9 @@ def plotter(fdict):
     if opt == 'state':
         title = ("NWS Issued for Counties/Zones for State of %s"
                  ) % (reference.state_names[state],)
-    title += ("\n%s %s (%s.%s) Issued by Year,Month"
-              ) % (vtec._phenDict[phenomena],
-                   vtec._sigDict[significance], phenomena, significance)
+    title += ("\n%s (%s.%s) Issued by Year,Month"
+              ) % (vtec.get_ps_string(phenomena, significance),
+                   phenomena, significance)
     ax.set_title(title)
 
     return fig, df

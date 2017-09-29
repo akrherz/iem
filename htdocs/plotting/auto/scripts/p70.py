@@ -129,10 +129,9 @@ def plotter(fdict):
     if opt == 'state':
         title = ("NWS Issued Alerts for State of %s"
                  ) % (reference.state_names[state],)
-    ax.set_title(("%s\nPeriod between First and Last %s %s"
+    ax.set_title(("%s\nPeriod between First and Last %s"
                   ) % (title,
-                       vtec._phenDict[phenomena],
-                       vtec._sigDict[significance]))
+                       vtec.get_ps_string(phenomena, significance)))
     ax.grid()
     days = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
             305, 335]

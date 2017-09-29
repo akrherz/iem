@@ -103,10 +103,9 @@ def plotter(fdict):
         ax.set_xticklabels(np.arange(0, (xmax+1)/60))
         ax.set_xlabel("Duration [hours]")
     ax.set_ylabel("Frequency [%%] out of %s Events" % (y[-1],))
-    ax.set_title(("[%s] %s :: %s %s (%s.%s)\n"
+    ax.set_title(("[%s] %s :: %s (%s.%s)\n"
                   "Distribution of Event Time Duration %s-%s"
-                  ) % (ugc, name, vtec._phenDict[phenomena],
-                       vtec._sigDict[significance],
+                  ) % (ugc, name, vtec.get_ps_string(phenomena, significance),
                        phenomena, significance,
                        min(df['issue']).strftime("%-d %b %Y"),
                        max(df['issue']).strftime("%-d %b %Y")))

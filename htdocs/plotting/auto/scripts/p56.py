@@ -88,9 +88,9 @@ def plotter(fdict):
     # Top Panel: count
     gdf = df.groupby('week').count()
     ax[0].bar((gdf.index.values - 1) * 7, gdf['yr'], width=7)
-    ax[0].set_title(("%s\n%s %s (%s.%s) Events - %i to %i"
-                     ) % (title, vtec._phenDict[phenomena],
-                          vtec._sigDict[significance], phenomena, significance,
+    ax[0].set_title(("%s\n%s (%s.%s) Events - %i to %i"
+                     ) % (title, vtec.get_ps_string(phenomena, significance),
+                          phenomena, significance,
                           df['yr'].min(), df['yr'].max()))
     ax[0].grid()
     ax[0].set_ylabel("Years with 1+ Event")

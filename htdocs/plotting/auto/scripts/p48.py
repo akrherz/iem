@@ -104,9 +104,8 @@ def plotter(fdict):
                         "", "", "9 PM", "", "", "Mid"])
     ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
     ax.set_ylabel("Frequency [%%] out of %s Events" % (cnt,))
-    ax.set_title(("[%s] %s :: %s %s (%s.%s)\n%s Events - %s to %s"
-                  ) % (ugc, name, vtec._phenDict[phenomena],
-                       vtec._sigDict[significance],
+    ax.set_title(("[%s] %s :: %s (%s.%s)\n%s Events - %s to %s"
+                  ) % (ugc, name, vtec.get_ps_string(phenomena, significance),
                        phenomena, significance, cnt,
                        sts.strftime("%Y-%m-%d %I:%M %p"),
                        ets.strftime("%Y-%m-%d %I:%M %p")))

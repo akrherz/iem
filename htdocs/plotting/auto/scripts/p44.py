@@ -167,7 +167,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel("Accumulated Count")
     ax.set_ylim(bottom=0)
-    title = "%s %s" % (vtec._phenDict[phenomena], vtec._sigDict[significance])
+    title = vtec.get_ps_string(phenomena, significance)
     if combo == 'svrtor':
         title = "Severe Thunderstorm + Tornado Warning"
     ptitle = "%s" % (nt.sts[station]['name'],)

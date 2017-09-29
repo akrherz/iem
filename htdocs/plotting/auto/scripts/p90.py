@@ -391,9 +391,9 @@ def plotter(fdict):
                 state=state,
                 cwa=(station if len(station) == 3 else station[1:]),
                 axisbg='white',
-                title=('%s %s %s (%s.%s)'
-                       ) % (ctx['title'], vtec._phenDict[phenomena],
-                            vtec._sigDict[significance],
+                title=('%s %s (%s.%s)'
+                       ) % (ctx['title'],
+                            vtec.get_ps_string(phenomena, significance),
                             phenomena, significance),
                 subtitle=subtitle, nocaption=True,
                 titlefontsize=16

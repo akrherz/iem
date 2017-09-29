@@ -74,9 +74,10 @@ def plotter(fdict):
                         "", "", "9 PM", "", "", "Mid"])
     ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
     ax.set_ylabel("Frequency [%%] out of %.0f Events" % (sum(data),))
-    ax.set_title(("[%s] %s :: Issuance Time Frequency\n%s %s (%s.%s)"
-                  ) % (wfo, nt.sts[wfo]['name'], vtec._phenDict[phenomena],
-                       vtec._sigDict[significance], phenomena, significance))
+    ax.set_title(("[%s] %s :: Issuance Time Frequency\n%s (%s.%s)"
+                  ) % (wfo, nt.sts[wfo]['name'],
+                       vtec.get_ps_string(phenomena, significance),
+                       phenomena, significance))
 
     return fig, df
 

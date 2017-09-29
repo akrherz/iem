@@ -53,9 +53,8 @@ def plotter(fdict):
      GROUP by wfo ORDER by m ASC
     """, (edate, significance, phenomena, edate))
     if cursor.rowcount == 0:
-        return ("No Events Found for %s %s (%s.%s)"
-                ) % (vtec._phenDict.get(phenomena, phenomena),
-                     vtec._sigDict.get(significance, significance),
+        return ("No Events Found for %s (%s.%s)"
+                ) % (vtec.get_ps_string(phenomena, significance),
                      phenomena, significance)
     data = {}
     rows = []
@@ -67,9 +66,8 @@ def plotter(fdict):
     df.set_index('wfo', inplace=True)
 
     m = MapPlot(sector='nws', axisbg='white', nocaption=True,
-                title='Days since Last %s %s by NWS Office' % (
-                        vtec._phenDict.get(phenomena, phenomena),
-                        vtec._sigDict.get(significance, significance)),
+                title='Days since Last %s by NWS Office' % (
+                        vtec.get_ps_string(phenomena, significance), ),
                 subtitle='Valid %s' % (edate.strftime("%d %b %Y %H%M UTC"),))
     m.fill_cwas(data, bins=bins, ilabel=True, units='Days',
                 lblformat='%.0f')

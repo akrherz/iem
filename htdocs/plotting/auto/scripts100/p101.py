@@ -61,9 +61,8 @@ def plotter(fdict):
     cnt = 1
     rows = []
     for row in pcursor:
-        label = "%s. %s %s (%s.%s)" % (
-            cnt, vtec._phenDict.get(row[0], row[0]),
-            vtec._sigDict[row[1]], row[0], row[1])
+        label = ("%s. %s (%s.%s)"
+                 ) % (cnt, vtec.get_ps_string(row[0], row[1]), row[0], row[1])
         if cnt < 26:
             labels.append(label)
             vals.append(row[3])

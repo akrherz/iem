@@ -76,10 +76,10 @@ def plotter(fdict):
     ax.set_xlim(df['yr'].min()-0.5, df['yr'].max()+0.5)
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
-    ax.set_title(("NWS %s [%s]\n%s %s (%s.%s) Count"
+    ax.set_title(("NWS %s [%s]\n%s (%s.%s) Count"
                   ) % (nt.sts[station]['name'], title,
-                       vtec._phenDict[phenomena],
-                       vtec._sigDict[significance], phenomena, significance))
+                       vtec.get_ps_string(phenomena, significance),
+                       phenomena, significance))
     if limit == 'yes':
         ax.set_xlabel(("thru approximately %s"
                        ) % (datetime.date.today().strftime("%-d %b"), ))

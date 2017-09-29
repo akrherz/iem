@@ -76,8 +76,7 @@ def plotter(fdict):
     for p, s in zip(phenomena, significance):
         pstr.append("(phenomena = '%s' and significance = '%s')" % (p, s))
         subtitle += "%s.%s " % (p, s)
-        title += "%s %s" % (vtec._phenDict.get(p, p),
-                            vtec._sigDict.get(s, s))
+        title += vtec.get_ps_string(p, s)
     if len(phenomena) > 1:
         title = "VTEC Unique Event"
     pstr = " or ".join(pstr)
