@@ -52,8 +52,9 @@ function get_website_stats(){
 	
 	$bandwidth = $jobj->stats->bandwidth / 1000000.0;
 	$bcolor = "success";
-	if ($bandwidth > 20) $bcolor = "warning";
-	if ($bandwidth > 50) $bcolor = "danger";
+	// grading of the bandwidth (MB/s)
+	if ($bandwidth > 35) $bcolor = "warning";
+	if ($bandwidth > 70) $bcolor = "danger";
 	
 	$label = sprintf("%.1f MB/s", $bandwidth);
 	$bpercent = intval( $bandwidth / 124.0  * 100.0 );
