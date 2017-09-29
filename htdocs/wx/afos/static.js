@@ -1,8 +1,6 @@
 /*
- * TODO functionality from previous app
- * [ ] basic tab printing support
- * [ ] cookies
- * 
+ * NWS Text Product Finder
+ *  - uses cookies and hashlinks to save info
  */
 var tabs;
 var NO_DATE_SET = 'No Limit';
