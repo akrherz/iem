@@ -9,19 +9,19 @@
  $t->thispage = "networks-agclimate";
  
 $t->jsextra = <<<EOF
-<script src='/vendor/openlayers/${OL}/ol.js'></script>
-<script src='/vendor/openlayers/${OL}/ol3-layerswitcher.js'></script>
+<script src="/vendor/openlayers/${OL}/ol.js"></script>
+<script src="/vendor/openlayers/${OL}/ol3-layerswitcher.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src='dataexplorer.js?v=7'></script>
-<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
-<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
+<script src="dataexplorer.js?v=7"></script>
+<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js"></script>
+<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
 EOF;
 
 $dt = date("Y/m/d H:00", time() - (20*60));
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/${OL}/ol.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/${OL}/ol3-layerswitcher.css"/ >
-<link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
+<link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css"/ >
 <script>
 	var defaultdt = "{$dt}";

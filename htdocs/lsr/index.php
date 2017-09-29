@@ -5,7 +5,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
-<script src="/assets/openlayers/2.13.1/OpenLayers.js"></script>
+<script src="/vendor/openlayers/2.13.1/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
 <script type="text/javascript" src="Printer-all.js"></script>

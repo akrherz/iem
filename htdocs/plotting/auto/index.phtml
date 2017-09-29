@@ -17,7 +17,7 @@ $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
- <link rel="stylesheet" type="text/css" href="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.css"/ >
+ <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css"/ >
  <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
   <style>
     .select2-results .select2-disabled,  .select2-results__option[aria-disabled=true] { 
@@ -495,8 +495,8 @@ $dataextra
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-timepicker-addon.min.js"></script>
-<script src="/assets/jquery-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
+<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js"></script>
+<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 {$extrascripts}
 <script>
