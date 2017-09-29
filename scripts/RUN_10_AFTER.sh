@@ -74,11 +74,11 @@ python q3_Xhour.py 1
 python q3_today_total.py 
 
 cd ../ua
-if [ $HH -eq "03" ]
+if [ $HH -eq "04" ]
 then
 	python ingest_from_rucsoundings.py $YYYY $MM $DD 00
 fi
-if [ $HH -eq "15" ]
+if [ $HH -eq "16" ]
 then
 	python ingest_from_rucsoundings.py $YYYY $MM $DD 12
 fi
