@@ -17,8 +17,9 @@ $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 
 $enddate = date('d M Y', $coop_archive_end);
 
+$thisyear = date('Y');
 $y1 = yearSelect2(1870, 1893, "year1");
-$sy_select = yearSelect2(1893, 2013, "scenario_year");
+$sy_select = yearSelect2(1893, intval($thisyear) - 1, "scenario_year");
 $m1 = monthSelect2(1, "month1");
 $d1 = daySelect2(1, "day1");
 $y2 = yearSelect2(1870, date("Y"), "year2");
@@ -167,14 +168,15 @@ This option is only relevant if you did not select "Excel File" from #4 above.
  </select>
 
 
-<p><h4>8. Repeat previous year's data for the future?</h4>
-<i>This download only provides data up until today, some users may wish to 
-include future data that simply repeats the past. So the data for the
-rest of this year will simply replay a previous year.  If data for Feb 29 is
+<p><h4>8. Supplement {$thisyear}'s data with scenario year</h4>
+<i>Optional!</i> For some purposes, you may wish to have a complete (Jan 1 -
+Dec 31) set of data for the current year.  Of course, this period is in the
+future and observations do not exist! This option allows you to fill
+out the current year with data from a previous year. If data for Feb 29 is
 needed and not available from past year, Feb 28 data is simply repeated.</i> 
 <br />
-<input type="checkbox" name="scenario" value="yes"> Yes, include this year:
-{$sy_select}
+<input type="checkbox" name="scenario" value="yes"> Yes, use this year
+for replacement: {$sy_select}
     		
 <p><h4>9. Submit Form:</h4>
 <i>Please be patient and only submit this form once.  It may take 10-20
