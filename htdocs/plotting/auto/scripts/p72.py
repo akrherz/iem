@@ -49,7 +49,7 @@ def plotter(fdict):
      SELECT extract(year from issue) as yr, eventid,
      min(issue at time zone %s) as minissue from warnings WHERE
      phenomena = %s and significance = %s
-     and wfo = %s and issue is not null GROUP by yr, eventid)
+     and wfo = %s GROUP by yr, eventid)
 
     SELECT extract(hour from minissue) as hr, count(*) from data GROUP by hr
     """, (tzname, phenomena, significance, wfo))

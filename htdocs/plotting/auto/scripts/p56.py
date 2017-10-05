@@ -77,7 +77,6 @@ def plotter(fdict):
         SELECT distinct extract(year from issue) as yr,
         extract(week from issue) as week, wfo, eventid from warnings WHERE
         """ + limiter + """ and phenomena = %s and significance = %s
-        and issue is not null
     )
     SELECT yr, week, count(*) from obs GROUP by yr, week ORDER by yr ASC
     """, pgconn, params=(phenomena, significance), index_col=None)

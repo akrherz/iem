@@ -19,7 +19,7 @@ def get_events(lon, lat):
   where status = 'NEW' and
   ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326))
   and phenomena in ('SV', 'TO', 'FF', 'FL', 'MA', 'FA') and
-  issue > '2005-10-01' and expire is not null
+  issue > '2005-10-01'
   ORDER by issue ASC
     """, (lon, lat))
     data = {'sbws': []}

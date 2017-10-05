@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (23, now());
+INSERT into iem_schema_manager_version values (24, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -844,9 +844,9 @@ CREATE RULE replace_riverpro AS ON INSERT TO riverpro WHERE (EXISTS (SELECT 1 FR
 --- VTEC Table
 ---
 CREATE TABLE warnings (
-    issue timestamp with time zone,
-    expire timestamp with time zone,
-    updated timestamp with time zone,
+    issue timestamp with time zone not null,
+    expire timestamp with time zone not null,
+    updated timestamp with time zone not null,
     wfo character(3),
     eventid smallint,
     status character(3),
@@ -858,8 +858,8 @@ CREATE TABLE warnings (
     significance character(1),
     hvtec_nwsli character(5),
     gid int references ugcs(gid),
-    init_expire timestamptz,
-    product_issue timestamptz
+    init_expire timestamp with time zone not null,
+    product_issue timestamp with time zone not null
 ) WITH OIDS;
 
 grant select on warnings to apache,nobody;
@@ -2246,17 +2246,12 @@ CREATE INDEX sbw_2015_gix ON sbw_2015 USING GIST (geom);
 -- Add some proper constraints to keep database cleaner
 alter table warnings_2015 ADD CONSTRAINT warnings_2015_gid_fkey
         FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2015 ALTER issue SET NOT NULL;
-alter table warnings_2015 ALTER expire SET NOT NULL;
-alter table warnings_2015 ALTER updated SET NOT NULL;
 alter table warnings_2015 ALTER WFO SET NOT NULL;
 alter table warnings_2015 ALTER eventid SET NOT NULL;
 alter table warnings_2015 ALTER status SET NOT NULL;
 alter table warnings_2015 ALTER ugc SET NOT NULL;
 alter table warnings_2015 ALTER phenomena SET NOT NULL;
 alter table warnings_2015 ALTER significance SET NOT NULL;
-alter table warnings_2015 ALTER init_expire SET NOT NULL;
-alter table warnings_2015 ALTER product_issue SET NOT NULL;
 
 -- Storage of Winter Road Conditions for 2015 - 2016
 CREATE TABLE roads_2015_2016_log(
@@ -2305,17 +2300,12 @@ CREATE INDEX warnings_2016_wfo_idx on warnings_2016(wfo);
 -- Add some proper constraints to keep database cleaner
 alter table warnings_2016 ADD CONSTRAINT warnings_2016_gid_fkey
         FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2016 ALTER issue SET NOT NULL;
-alter table warnings_2016 ALTER expire SET NOT NULL;
-alter table warnings_2016 ALTER updated SET NOT NULL;
 alter table warnings_2016 ALTER WFO SET NOT NULL;
 alter table warnings_2016 ALTER eventid SET NOT NULL;
 alter table warnings_2016 ALTER status SET NOT NULL;
 alter table warnings_2016 ALTER ugc SET NOT NULL;
 alter table warnings_2016 ALTER phenomena SET NOT NULL;
 alter table warnings_2016 ALTER significance SET NOT NULL;
-alter table warnings_2016 ALTER init_expire SET NOT NULL;
-alter table warnings_2016 ALTER product_issue SET NOT NULL;
 grant select on warnings_2016 to nobody,apache;
 
 CREATE table sbw_2016() inherits (sbw);
@@ -2623,17 +2613,12 @@ CREATE INDEX warnings_2017_gid_idx on warnings_2017(gid);
 -- Add some proper constraints to keep database cleaner
 alter table warnings_2017 ADD CONSTRAINT warnings_2017_gid_fkey
         FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2017 ALTER issue SET NOT NULL;
-alter table warnings_2017 ALTER expire SET NOT NULL;
-alter table warnings_2017 ALTER updated SET NOT NULL;
 alter table warnings_2017 ALTER WFO SET NOT NULL;
 alter table warnings_2017 ALTER eventid SET NOT NULL;
 alter table warnings_2017 ALTER status SET NOT NULL;
 alter table warnings_2017 ALTER ugc SET NOT NULL;
 alter table warnings_2017 ALTER phenomena SET NOT NULL;
 alter table warnings_2017 ALTER significance SET NOT NULL;
-alter table warnings_2017 ALTER init_expire SET NOT NULL;
-alter table warnings_2017 ALTER product_issue SET NOT NULL;
 grant select on warnings_2017 to nobody,apache;
 
 

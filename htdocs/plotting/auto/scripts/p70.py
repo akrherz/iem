@@ -73,7 +73,6 @@ def plotter(fdict):
         count(distinct wfo || eventid)
         from warnings where """ + wfolimiter + """
         and phenomena = %s and significance = %s
-        and issue is not null
         GROUP by year ORDER by year ASC"""
     else:
         sql = """SELECT
@@ -83,7 +82,6 @@ def plotter(fdict):
         count(distinct wfo || eventid)
         from warnings where """ + wfolimiter + """
         and phenomena = %s and significance = %s
-        and issue is not null
         GROUP by year ORDER by year ASC"""
     df = read_sql(sql, pgconn, params=(phenomena, significance),
                   index_col=None)

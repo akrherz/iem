@@ -48,14 +48,14 @@ def plotter(fdict):
             SELECT distinct extract(year from issue) as year,
                 phenomena, significance from warnings WHERE
                 phenomena is not null and significance is not null and
-                issue > '2005-01-01' and issue is not null
+                issue > '2005-01-01'
             """, pgconn, index_col=None)
     else:
         df = read_sql("""
             SELECT distinct extract(year from issue) as year,
             phenomena, significance from warnings WHERE
             wfo = %s and phenomena is not null and significance is not null
-            and issue > '2005-01-01' and issue is not null
+            and issue > '2005-01-01'
             """, pgconn, params=(station, ), index_col=None)
 
     df['wfo'] = station

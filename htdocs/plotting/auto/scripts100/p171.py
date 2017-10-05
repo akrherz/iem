@@ -73,7 +73,7 @@ def plotter(fdict):
             SELECT distinct extract(year from issue) as yr2,
             min(issue) as i, wfo, eventid
             from warnings where phenomena = %s and significance = %s
-            """ + wfo_limiter + """ and issue is not null
+            """ + wfo_limiter + """
             GROUP by yr2, wfo, eventid)
 
         SELECT extract(year from i) as yr, extract(month from i) as mo,
