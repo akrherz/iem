@@ -4,6 +4,9 @@ set tstamp="`date -u +'%y%m%d/%H%M'`"
 
 source /mesonet/nawips/Gemenviron
 
+# need to override default RAD
+setenv RAD /mnt/nexrad3/nexrad
+
 gddelt << EOF > /tmp/gddelt.out
  GDFILE        = /mesonet/data/gempak/radar.gem
  GDATTIM = ALL
