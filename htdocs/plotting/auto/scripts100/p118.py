@@ -49,12 +49,13 @@ def plotter(fdict):
 # Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# NUMBER OF DAYS WITH PRECIPITATION PER MONTH PER YEAR
+# NUMBER OF DAYS WITH %s PER MONTH PER YEAR
 # Days with a trace accumulation are not included
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 """ % (datetime.date.today().strftime("%d %b %Y"),
        nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       nt.sts[station]['name'],
+       "PRECIPITATION" if varname == 'precip_days' else "SNOW FALL")
 
     for year in df.index.levels[0]:
         res += "%4i  " % (year,)
@@ -64,7 +65,7 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
                 val = df.at[(year, month), varname]
                 total += val
                 res += " %3i" % (val, )
-            except:
+            except Exception as exp:
                 res += "    "
         res += " %3i\n" % (total, )
     return None, df, res
