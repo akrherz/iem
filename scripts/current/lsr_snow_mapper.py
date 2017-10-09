@@ -2,6 +2,7 @@
 from __future__ import print_function
 import datetime
 import unittest
+import warnings
 
 import numpy as np
 from pyiem.plot import MapPlot, nwssnow
@@ -10,6 +11,9 @@ import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+
+# Stop whining about missing data for contourf
+warnings.filterwarnings("ignore")
 
 
 def run(basets, endts, view):
@@ -46,47 +50,47 @@ def run(basets, endts, view):
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
     cmap = nwssnow()
-    m = MapPlot(sector='iowa', axisbg='white',
-                title="Local Storm Report Snowfall Total Analysis",
-                subtitle=("Reports past 12 hours: %s"
-                          "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
+    mp = MapPlot(sector='iowa', axisbg='white',
+                 title="Local Storm Report Snowfall Total Analysis",
+                 subtitle=("Reports past 12 hours: %s"
+                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
     if cdf['val'].max() > 0:
-        m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
-                   rng, cmap=cmap)
-    m.drawcounties()
+        mp.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
+                    rng, cmap=cmap)
+    mp.drawcounties()
     if len(tdf.index) > 0:
-        m.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
-                      fmt='%.1f')
-    m.drawcities()
+        mp.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
+                       fmt='%.1f')
+    mp.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
-    m.postprocess(view=view, pqstr=pqstr)
-    m.close()
+    mp.postprocess(view=view, pqstr=pqstr)
+    mp.close()
 
     # slightly different title to help uniqueness
-    m = MapPlot(sector='iowa', axisbg='white',
-                title="Local Storm Report Snowfall Total Analysis",
-                subtitle=("Reports valid over past 12 hours: %s"
-                          "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
+    mp = MapPlot(sector='iowa', axisbg='white',
+                 title="Local Storm Report Snowfall Total Analysis",
+                 subtitle=("Reports valid over past 12 hours: %s"
+                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
     if cdf['val'].max() > 0:
-        m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
-                   rng, cmap=cmap)
-    m.drawcounties()
-    m.drawcities()
+        mp.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
+                    rng, cmap=cmap)
+    mp.drawcounties()
+    mp.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall_nv.png bogus png"
-    m.postprocess(view=view, pqstr=pqstr)
-    m.close()
+    mp.postprocess(view=view, pqstr=pqstr)
+    mp.close()
 
-    m = MapPlot(sector='midwest', axisbg='white',
-                title="Local Storm Report Snowfall Total Analysis",
-                subtitle=("Reports past 12 hours: %s"
-                          "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
+    mp = MapPlot(sector='midwest', axisbg='white',
+                 title="Local Storm Report Snowfall Total Analysis",
+                 subtitle=("Reports past 12 hours: %s"
+                           "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
     if cdf['val'].max() > 0:
-        m.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
-                   rng, cmap=cmap)
-    m.drawcities()
+        mp.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
+                    rng, cmap=cmap)
+    mp.drawcities()
     pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
-    m.postprocess(view=view, pqstr=pqstr)
-    m.close()
+    mp.postprocess(view=view, pqstr=pqstr)
+    mp.close()
 
 
 def main():
