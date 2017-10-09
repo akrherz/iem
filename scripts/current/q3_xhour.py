@@ -1,18 +1,16 @@
-"""
-Create a plot of the X Hour interval precipitation
-"""
-
-import datetime
-import numpy as np
+"""Create a plot of the X Hour interval precipitation"""
+from __future__ import print_function
 import os
 import sys
-import pyiem.mrms as mrms
-import pytz
+import datetime
 import gzip
-import pygrib
 import tempfile
-import requests
+
+import numpy as np
+import pytz
+import pygrib
 from pyiem.datatypes import distance
+import pyiem.mrms as mrms
 from pyiem.plot import MapPlot, nwsprecip
 
 TMP = "/mesonet/tmp"
@@ -33,20 +31,12 @@ def doit(ts, hours):
         gmt = now.astimezone(pytz.timezone("UTC"))
         gribfn = None
         for prefix in ['GaugeCorr', 'RadarOnly']:
-            fn = gmt.strftime((prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
-                               ".grib2.gz"))
-            res = requests.get(gmt.strftime(
-                    ("http://mtarchive.geol.iastate.edu/%Y/%m/%d/mrms/ncep/" +
-                     prefix + "_QPE_01H/" + fn)), timeout=30)
-            if res.status_code != 200:
+            gribfn = mrms.fetch(prefix+"_QPE_01H", gmt)
+            if gribfn is None:
                 continue
-            o = open(TMP + "/" + fn, 'wb')
-            o.write(res.content)
-            o.close()
-            gribfn = "%s/%s" % (TMP, fn)
             break
         if gribfn is None:
-            print("q3_Xhour.py[%s] MISSING %s" % (hours, now))
+            print("q3_xhour.py[%s] MISSING %s" % (hours, now))
             now += interval
             continue
         fp = gzip.GzipFile(gribfn, 'rb')
@@ -69,7 +59,7 @@ def doit(ts, hours):
         os.unlink(gribfn)
 
     if total is None:
-        print("q3_Xhour.py no data ts: %s hours: %s" % (ts, hours))
+        print("q3_xhour.py no data ts: %s hours: %s" % (ts, hours))
         return
 
     # Scale factor is 10
@@ -82,18 +72,18 @@ def doit(ts, hours):
 
     lts = ts.astimezone(pytz.timezone("America/Chicago"))
     subtitle = 'Total up to %s' % (lts.strftime("%d %B %Y %I:%M %p %Z"),)
-    m = MapPlot(title=("NCEP MRMS Q3 (RADAR Only) %s Hour "
-                       "Precipitation [inch]") % (hours,),
-                subtitle=subtitle)
+    mp = MapPlot(title=("NCEP MRMS Q3 (RADAR Only) %s Hour "
+                        "Precipitation [inch]") % (hours,),
+                 subtitle=subtitle)
 
     clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
 
-    m.contourf(mrms.XAXIS, mrms.YAXIS,
-               distance(np.flipud(total), 'MM').value('IN'), clevs,
-               cmap=nwsprecip())
-    m.drawcounties()
-    m.postprocess(pqstr=pqstr, view=False)
-    m.close()
+    mp.contourf(mrms.XAXIS, mrms.YAXIS,
+                distance(np.flipud(total), 'MM').value('IN'), clevs,
+                cmap=nwsprecip())
+    mp.drawcounties()
+    mp.postprocess(pqstr=pqstr, view=False)
+    mp.close()
 
 
 def main():
