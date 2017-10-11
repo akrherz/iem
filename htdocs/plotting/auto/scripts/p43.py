@@ -2,21 +2,23 @@
 
 import psycopg2.extras
 import pytz
-import pyiem.datatypes as dt
 import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
+import pyiem.datatypes as dt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context
 
 
-def tsfmt(x, pos):
+def tsfmt(x, _pos):
     """Timestamp formatter"""
     dt = mdates._from_ordinalf(x)
     dt = dt.astimezone(mytz)
     if dt.hour == 0:
         fmt = "%-I %p\n%-d %b"
-    else:
+    elif dt.hour % 6 == 0:
         fmt = "%-I %p"
+    else:
+        return ""
     return dt.strftime(fmt)
 
 
@@ -46,7 +48,7 @@ def plotter(fdict):
     network = ctx['network']
 
     nt = NetworkTable(network)
-    if len(nt.sts) == 0:
+    if not nt.sts:
         raise Exception("Network Identifier %s is unknown to IEM" % (network,))
     if station not in nt.sts:
         raise Exception("Station %s does not exist in network %s" % (station,
@@ -65,7 +67,7 @@ def plotter(fdict):
     smph = {'v': [], 'd': []}
     drct = {'v': [], 'd': []}
     for row in cursor:
-        v = row['utc_valid'].replace(tzinfo=pytz.timezone("UTC"))
+        v = row['utc_valid'].replace(tzinfo=pytz.utc)
         t = row['tmpf']
         d = row['dwpf']
         v1 = row['vsby']
@@ -93,7 +95,7 @@ def plotter(fdict):
             larr = [row['skyl1'], row['skyl2'], row['skyl3'], row['skyl4']]
             ceil['d'].append(larr[pos] / 1000.)
 
-    (fig, ax) = plt.subplots(3, 1, figsize=(8, 9), sharex=True)
+    (fig, ax) = plt.subplots(3, 1, figsize=(9, 6), sharex=True)
 
     # ____________PLOT 1___________________________
     if len(tmpf['v']) > 1:
@@ -124,15 +126,10 @@ def plotter(fdict):
         ax3.set_yticklabels(['N', 'E', 'S', 'W', 'N'])
         ax3.scatter(drct['v'], drct['d'], s=40, color='g', marker='+')
     ax[1].grid(True)
-    ax[1].set_xlabel("Plot Time Zone: %s" % (nt.sts[station]['tzname'],))
 
     #  _____________PLOT 3___________________________
     global mytz
     mytz = pytz.timezone(nt.sts[station]['tzname'])
-    ax[2].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 25, 6),
-                                                     tz=mytz))
-    formatter = FuncFormatter(tsfmt)
-    ax[2].xaxis.set_major_formatter(formatter)
     ax[2].grid(True)
     ax[2].set_ylabel("Visibility [miles]", color='b')
     if len(ceil['v']) > 1:
@@ -145,6 +142,11 @@ def plotter(fdict):
         ax[2].scatter(vsby['v'], vsby['d'], label='Visibility', marker='*',
                       s=40, color='b')
         ax[2].set_ylim(0, 14)
+    ax[2].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 25, 6),
+                                                     tz=mytz))
+    formatter = FuncFormatter(tsfmt)
+    ax[2].xaxis.set_major_formatter(formatter)
+    ax[2].set_xlabel("Plot Time Zone: %s" % (nt.sts[station]['tzname'],))
 
     return fig
 
