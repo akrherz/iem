@@ -121,14 +121,19 @@ def plotter(fdict):
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
     sector2 = "state" if sector != 'midwest' else 'midwest'
+    datefmt = "%d %b %Y" if varname != 'cgdd_sum' else '%d %b'
+    subtitle = ("Climatology is based on data from 1951-%s"
+                ) % (datetime.date.today().year - 1, )
+    if varname != 'cgdd_sum':
+        subtitle = ('%s is compared with 1951-%s Climatology'
+                    ' to compute departures'
+                    ) % (date1.year, datetime.date.today().year - 1)
     mp = MapPlot(sector=sector2, state=sector, axisbg='white',
                  title=('%s - %s %s [%s]'
-                        ) % (date1.strftime("%d %b %Y"),
-                             date2.strftime("%d %b %Y"), PDICT2.get(varname),
+                        ) % (date1.strftime(datefmt),
+                             date2.strftime(datefmt), PDICT2.get(varname),
                              UNITS.get(varname)),
-                 subtitle=('%s is compared with 1951-%s Climatology'
-                           ' to compute departures'
-                           ) % (date1.year, datetime.date.today().year - 1))
+                 subtitle=subtitle)
     if varname in ['precip_depart', 'avg_temp_depart']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
         clevels = np.linspace(0 - rng, rng, 7)
