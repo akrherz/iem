@@ -188,11 +188,14 @@ def main():
         if cond == current[segid]:
             continue
         # Timestamps appear to be UTC now
+        if props['CARS_MSG_UPDATE_DATE'] is None:
+            # print(json.dumps(feat, indent=4))
+            continue
         valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
             seconds=props['CARS_MSG_UPDATE_DATE']/1000.)
         # Save to log
         cursor.execute("""
-            INSERT into roads_2015_2016_log(segid, valid, cond_code, raw)
+            INSERT into roads_2017_2018_log(segid, valid, cond_code, raw)
             VALUES (%s, %s, %s, %s)
         """, (segid, valid.strftime("%Y-%m-%d %H:%M+00"), cond, raw))
         # Update currents
