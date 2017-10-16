@@ -26,15 +26,3 @@ python wxc_azos_prec.py
 python wxc_iarwis_traffic.py
 python wxc_iemstage.py IA
 python wxc_iemstage.py MN
-
-cd kcci
-python wxc_top5.py
-python wxc_top5month.py
-python wxc_top5gusts.py
-python wxc_top5highs.py
-python wxc_top5lows.py
-
-python wxc_top5myrain.py 2
-python wxc_top5myrain.py 3
-python wxc_top5myrain.py 7
-python wxc_top5myrain.py 14
