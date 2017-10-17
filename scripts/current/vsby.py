@@ -1,11 +1,15 @@
 """Generate current plot of visibility"""
 from __future__ import print_function
 import datetime
+import warnings
 
 from pyiem.plot import MapPlot
 import psycopg2
 import numpy as np
 import matplotlib.cm as cm
+
+# Stop whining about missing data for contourf
+warnings.filterwarnings("ignore")
 
 
 def main():
