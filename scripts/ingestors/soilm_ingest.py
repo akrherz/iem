@@ -16,7 +16,7 @@ import requests
 import pytz
 import numpy as np
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, humidity, distance
+from pyiem.datatypes import temperature, humidity, distance, speed
 import pyiem.meteorology as met
 import psycopg2
 ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
@@ -316,10 +316,15 @@ def daily_process(nwsli, maxts):
             print(("soilm_ingest.py station: %s ts: %s has 0 solar"
                    ) % (nwsli, valid.strftime("%Y-%m-%d")))
             EVENTS['reprocess_solar'] = True
-        ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
+        ob.data['max_sknt'] = speed(float(tokens[headers.index('ws_mps_max')]),
+                                    'MPS').value('KT')
+        ob.data['avg_sknt'] = speed(
+            float(tokens[headers.index('ws_mps_s_wvt')]), 'MPS').value('KT')
+        # TODO: assumption this is done right by the campbell logger
+        ob.data['vector_avg_drct'] = float(
+            tokens[headers.index('winddir_d1_wvt')])
         ob.save(acursor)
-        # print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
-        #                                nwsli, valid.strftime("%Y-%m-%d"))
+
         processed += 1
     icursor.close()
     acursor.close()
