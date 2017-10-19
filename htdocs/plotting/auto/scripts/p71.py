@@ -30,7 +30,7 @@ def get_description():
     is computed by vector averaging of the wind speed and direction reports.
     """
     desc['arguments'] = [
-        dict(type='zstation', name='zstation', default='DSM',
+        dict(type='sid', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
              label='Select Year:'),

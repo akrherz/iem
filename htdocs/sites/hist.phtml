@@ -218,10 +218,25 @@ if ($mode == "monthly") {
  		"/sites/hist.phtml?network=$network&station=$station" ,
  		"/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
  
- $htmlout .= sprintf('<p><img src="month_hilo_plot.php?month=%s&year=%s&network=%s&station=%s"><br /><strong>Description:</strong> This chart of the monthly temperature data.  The bars are the observations and the dots are climatology.', $month, $year, $network, $station);
- $htmlout .= sprintf('<p><img src="/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.', 
- 		$network, $station, $month, $year);
+ $htmlout .= <<<EOM
+<h3>Daily High/Low Plot</h3>
+<img src="month_hilo_plot.php?month=${month}&year=${year}&network=${network}&station=${station}" class="img img-responsive">
+<br /><strong>Description:</strong> This chart of the monthly temperature data.
+The bars are the observations and the dots are climatology.
 
+<h3>Daily Rainfall</h3>
+<img src="/plotting/month/rainfall_plot.php?network=${network}&station=${station}&month=${month}&year=${year}" class="img img-responsive">
+<br /><strong>Description:</strong> This chart is of daily precipitation for the month. 
+The red line would be an average month while the blue line and bars are observations.
+
+<h3>Daily Average Wind Speeds</h3>
+<img src="/plotting/auto/plot/71/network:${network}::zstation:${station}::year:${year}::month:${month}::units:MPH::dpi:100.png" class="img img-responsive"></p>
+<br /><strong>Description:</strong> This chart is of the daily average wind speeds.
+EOM;
+ 
+ sprintf('<p><img src="/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.',
+     $network, $station, $month, $year);
+ 
 } else {
 	$t->title = sprintf("%s Network Summary for %s", $network, $nicedate);
 	// We want a table of obs for one day!
