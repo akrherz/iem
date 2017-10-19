@@ -53,6 +53,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels conda-forge
   - conda config --append channels cgat
+  - conda config --append channels HCC
   - hash -r
   - conda install --file conda_requirements.txt
   # Then do additional pip stuff
