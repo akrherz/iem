@@ -2,17 +2,22 @@
  Backfill information into the IEM summary table, so the website tools are
  happier
 """
+from __future__ import print_function
+
 import psycopg2
-from pyiem.datatypes import temperature, distance
+from pyiem.datatypes import temperature, distance, speed
 
-ISUAG = psycopg2.connect(database='isuag', host='iemdb')
-icursor = ISUAG.cursor()
+ISUAG = psycopg2.connect(database='isuag', host='localhost', port=5555,
+                         user='mesonet')
 
-IEM = psycopg2.connect(database='iem', host='iemdb')
-iemcursor = IEM.cursor()
+IEM = psycopg2.connect(database='iem', host='localhost', port=5555,
+                       user='mesonet')
 
 
 def two():
+    """option 2"""
+    icursor = ISUAG.cursor()
+    iemcursor = IEM.cursor()
     icursor.execute("""
     SELECT station, date(valid) as dt, min(rh), max(rh) from sm_hourly
     where rh >= 0 and rh <= 100 GROUP by station, dt
@@ -51,51 +56,38 @@ def two():
             iemid = (select iemid from stations WHERE network = 'ISUSM' and
             id = %s) and day = %s
             """, (min_rh, max_rh, station, valid))
+    iemcursor.close()
+    IEM.commit()
+    IEM.close()
 
 
 def one():
-    icursor.execute("""SELECT station, valid, rain_mm_tot, tair_c_max,
-        tair_c_min from sm_daily WHERE tair_c_max is not null""")
+    """option 1"""
+    icursor = ISUAG.cursor()
+    iemcursor = IEM.cursor()
+    icursor.execute("""
+        SELECT station, valid, ws_mps_s_wvt, winddir_d1_wvt
+        from sm_daily
+    """)
 
     for row in icursor:
-        high = temperature(row[3], 'C').value('F')
-        low = temperature(row[4], 'C').value('F')
-
+        avg_sknt = speed(row[2], 'MPS').value('KT')
+        avg_drct = row[3]
         iemcursor.execute("""
-        SELECT pday, max_tmpf, min_tmpf from summary s JOIN stations t on
-        (t.iemid = s.iemid)
-        WHERE day = %s and t.id = %s and t.network = 'ISUSM'
-        """, (row[1], row[0]))
-        if iemcursor.rowcount == 0:
-            print 'Adding summary_%s row %s %s' % (row[1].year, row[0], row[1])
-            iemcursor.execute("""
-            INSERT into summary_""" + str(row[1].year) + """
-            (iemid, day, pday, max_tmpf, min_tmpf) VALUES (
-                (SELECT iemid from stations where id = '%s' and
-                network = 'ISUSM'), '%s', %s, %s, %s)
-            """ % (row[0], row[1], distance(row[2], 'MM').value('IN'), high,
-                   low))
-        else:
-            row2 = iemcursor.fetchone()
-            if (row2[1] is None or row2[2] is None or
-                    round(row2[0], 2) != round((distance(row[2],
-                                                         'MM').value('IN')),
-                                               2) or
-                    round(high, 2) != round(row2[1], 2) or
-                    round(low, 2) != round(row2[2], 2)):
-                print(('Mismatch %s %s old: %s new: %s'
-                       ) % (row[0], row[1], row2[0],
-                            distance(row[2], 'MM').value('IN')))
+        UPDATE summary SET avg_sknt = %s, vector_avg_drct = %s
+        WHERE
+        iemid = (select iemid from stations WHERE network = 'ISUSM' and
+        id = %s) and day = %s
+        """, (avg_sknt, avg_drct, row[0], row[1]))
+    iemcursor.close()
+    IEM.commit()
+    IEM.close()
 
-                iemcursor.execute("""
-                UPDATE summary SET pday = %s, max_tmpf = %s,
-                min_tmpf = %s WHERE
-                iemid = (select iemid from stations WHERE network = 'ISUSM' and
-                id = %s) and day = %s
-                """, (distance(row[2], 'MM').value('IN'), high, low, row[0],
-                      row[1]))
 
-two()
-iemcursor.close()
-IEM.commit()
-IEM.close()
+def main():
+    """Go Main Go"""
+    one()
+
+
+if __name__ == '__main__':
+    main()
