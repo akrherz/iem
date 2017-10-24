@@ -61,9 +61,10 @@ def main():
         return
     centerlimit = '' if center == '' else (" and source = '%s' " % (center, ))
     timelimit = ''
-    if sdate != '' and edate != '':
-        timelimit = (" and entered >= '%s' and entered < '%s' "
-                     ) % (sdate, edate)
+    if sdate != '':
+        timelimit += " and entered >= '%s' " % (sdate, )
+    if edate != '':
+        timelimit += " and entered < '%s' " % (edate, )
 
     if pils[0][:3] == 'MTR':
         access = psycopg2.connect(database='iem', host='iemdb', user='nobody')
