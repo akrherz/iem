@@ -9,7 +9,7 @@ import subprocess
 import warnings
 import datetime
 
-from netCDF4 import Dataset, chartostring
+from netCDF4 import Dataset, chartostring  # @UnresolvedImport
 import numpy.ma
 from pyiem.datatypes import temperature
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
@@ -32,7 +32,7 @@ def main():
     fmt = ("STN,DATE,TIME,T,TD,WCI,RH,THI,DIR,SPD,GST,ALT,SLP,VIS,SKY,CEIL,"
            "CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,"
            "CLD,SKYSUM,PR6,PR24,WX,MINT6,MAXT6,MINT24,MAXT24,AUTO,PR1,PTMP1,"
-           "PTMP2,PTMP3,PTMP4,SUBS1,SUBS2,SUBS3,SUBS4,")
+           "PTMP2,PTMP3,PTMP4,SUBS1,SUBS2,SUBS3,SUBS4,LAT,LON,STATIONNAME,")
     format_tokens = fmt.split(",")
 
     utc = datetime.datetime.utcnow()
@@ -48,7 +48,7 @@ def main():
         try:
             nc = Dataset(fn, 'r')
             attempt = 3
-        except:
+        except Exception as _exp:
             time.sleep(10)
             attempt += 1
     if nc is None:
@@ -57,6 +57,7 @@ def main():
         sys.exit(0)
 
     stations = chartostring(nc.variables["stationId"][:])
+    stationname = chartostring(nc.variables["stationName"][:])
     tmpf = temperature(nc.variables["temperature"][:], 'K').value('F')
     dwpf = temperature(nc.variables["dewpoint"][:], 'K').value('F')
     drct = nc.variables["windDir"][:]
@@ -64,8 +65,8 @@ def main():
     alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2  # in hPa
     vsby = nc.variables["visibility"][:] * 0.000621371192  # in hPa
     # providers = nc.variables["dataProvider"][:]
-    # lat = nc.variables["latitude"][:]
-    # lon = nc.variables["longitude"][:]
+    lat = nc.variables["latitude"][:]
+    lon = nc.variables["longitude"][:]
     # ele = nc.variables["elevation"][:]
     p01m = nc.variables["precipAccum"][:] * 25.4
     ptmp1 = temperature(nc.variables["roadTemperature1"][:], 'K').value('F')
@@ -91,6 +92,9 @@ def main():
         ts = datetime.datetime.fromtimestamp(ot)
         db[station] = {
             'STN': station,
+            'LAT': lat[recnum],
+            'LON': lon[recnum],
+            'STATIONNAME': stationname[recnum].replace(",", " "),
             'DATE': ts.day,
             'TIME': ts.strftime("%H%M"),
             'T': sanity_check(tmpf[recnum], -100, 150, '%.0f', ''),
@@ -123,7 +127,7 @@ def main():
     pqstr = "data c %s fn/madis.csv bogus csv" % (utc.strftime("%Y%m%d%H%M"),)
     cmd = "/home/ldm/bin/pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
     subprocess.call(cmd, shell=True)
-    # os.remove("/tmp/madis.csv")
+    os.remove("/tmp/madis.csv")
 
 
 if __name__ == '__main__':
