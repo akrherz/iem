@@ -27,13 +27,13 @@ def print_debugging(station):
     pgconn = psycopg2.connect(database='isuag', host='iemdb')
     cursor = pgconn.cursor()
     cursor.execute("""
-    SELECT valid, rain_mm_tot, rain_mm_tot_qc from sm_daily
+    SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4 from sm_daily
     WHERE station = %s and (rain_mm_tot > 0 or rain_mm_tot_qc > 0)
     ORDER by valid DESC LIMIT 10
     """, (station, ))
-    print("    Date    Obs    QC")
+    print("     Date           Obs     QC")
     for row in cursor:
-        print("     %s   %5.1f  %5.1f" % row)
+        print("     %s   %5.2f  %5.2f" % row)
 
 
 def get_hdf(nt, date):
