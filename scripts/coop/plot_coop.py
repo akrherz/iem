@@ -1,7 +1,9 @@
 """Plot of Precip reports"""
+import datetime
+
+from pyiem.reference import TRACE_VALUE
 from pyiem.plot import MapPlot
 import psycopg2
-import datetime
 
 
 def pretty(val, precision=2):
@@ -13,7 +15,7 @@ def pretty(val, precision=2):
     """
     if val == 0:
         return "0"
-    if val == 0.0001:
+    if val == TRACE_VALUE:
         return "T"
     return ('%.'+str(precision)+'f') % (val,)
 
@@ -40,18 +42,18 @@ def plot_hilo(valid):
         data.append(dict(lat=row[4], lon=row[3], tmpf=row[0],
                          dwpf=row[1], id=row[2]))
 
-    m = MapPlot(title=('%s NWS COOP 24 Hour High/Low Temperature [$^\circ$F]'
-                       ) % (valid.strftime("%-d %b %Y"),),
-                subtitle='Reports valid between 6 and 9 AM',
-                axisbg='white', figsize=(10.24, 7.68))
-    m.plot_station(data)
-    m.drawcounties()
+    mp = MapPlot(title=(r'%s NWS COOP 24 Hour High/Low Temperature [$^\circ$F]'
+                        ) % (valid.strftime("%-d %b %Y"),),
+                 subtitle='Reports valid between 6 and 9 AM',
+                 axisbg='white', figsize=(10.24, 7.68))
+    mp.plot_station(data)
+    mp.drawcounties()
 
     pqstr = "plot ac %s0000 coopHighLow.gif coopHighLow.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
 
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     pgconn.close()
 
@@ -82,19 +84,19 @@ def plot_snowdepth(valid):
         lats.append(row[3])
         lons.append(row[2])
 
-    m = MapPlot(title='%s NWS COOP Snowfall Depth Reports [inch]' % (
-                                            valid.strftime("%-d %b %Y"),),
-                subtitle='Reports valid between 6 and 9 AM',
-                axisbg='white', figsize=(10.24, 7.68))
-    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
-                  labelcolor='tan')
-    m.drawcounties()
+    mp = MapPlot(title='%s NWS COOP Snowfall Depth Reports [inch]' % (
+                                             valid.strftime("%-d %b %Y"),),
+                 subtitle='Reports valid between 6 and 9 AM',
+                 axisbg='white', figsize=(10.24, 7.68))
+    mp.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                   labelcolor='tan')
+    mp.drawcounties()
 
     pqstr = "plot ac %s0000 coopSnowDepth.gif coopSnowDepth.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
 
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     pgconn.close()
 
@@ -125,19 +127,19 @@ def plot_snow(valid):
         lats.append(row[3])
         lons.append(row[2])
 
-    m = MapPlot(title='%s NWS COOP 24 Hour Snowfall Reports [inch]' % (
-                                            valid.strftime("%-d %b %Y"),),
-                subtitle='Reports valid between 6 and 9 AM',
-                axisbg='white', figsize=(10.24, 7.68))
-    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
-                  labelcolor='tan')
-    m.drawcounties()
+    mp = MapPlot(title='%s NWS COOP 24 Hour Snowfall Reports [inch]' % (
+                                             valid.strftime("%-d %b %Y"),),
+                 subtitle='Reports valid between 6 and 9 AM',
+                 axisbg='white', figsize=(10.24, 7.68))
+    mp.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                   labelcolor='tan')
+    mp.drawcounties()
 
     pqstr = "plot ac %s0000 coopSnowPlot.gif coopSnowPlot.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
 
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     pgconn.close()
 
@@ -173,19 +175,19 @@ def plot_snow_month(valid):
         lats.append(row[3])
         lons.append(row[2])
 
-    m = MapPlot(title='%s NWS COOP Month Snowfall Totals [inch]' % (
-                                            valid.strftime("%-d %b %Y"),),
-                subtitle='Reports valid between 6 and 9 AM',
-                axisbg='white', figsize=(10.24, 7.68))
-    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
-                  labelcolor='tan')
-    m.drawcounties()
+    mp = MapPlot(title='%s NWS COOP Month Snowfall Totals [inch]' % (
+                                             valid.strftime("%-d %b %Y"),),
+                 subtitle='Reports valid between 6 and 9 AM',
+                 axisbg='white', figsize=(10.24, 7.68))
+    mp.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                   labelcolor='tan')
+    mp.drawcounties()
 
     pqstr = "plot ac %s0000 coopMonthSPlot.gif coopMonthSPlot.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
 
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     pgconn.close()
 
@@ -221,19 +223,19 @@ def plot_precip_month(valid):
         lats.append(row[3])
         lons.append(row[2])
 
-    m = MapPlot(title='%s NWS COOP Month Precipitation Totals [inch]' % (
-                                            valid.strftime("%-d %b %Y"),),
-                subtitle='Reports valid between 6 and 9 AM',
-                axisbg='white', figsize=(10.24, 7.68))
-    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
-                  labelcolor='tan')
-    m.drawcounties()
+    mp = MapPlot(title='%s NWS COOP Month Precipitation Totals [inch]' % (
+                                             valid.strftime("%-d %b %Y"),),
+                 subtitle='Reports valid between 6 and 9 AM',
+                 axisbg='white', figsize=(10.24, 7.68))
+    mp.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                   labelcolor='tan')
+    mp.drawcounties()
 
     pqstr = "plot ac %s0000 coopMonthPlot.gif coopMonthPlot.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
 
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     pgconn.close()
 
@@ -264,21 +266,22 @@ def plot_precip(valid):
         lats.append(row[3])
         lons.append(row[2])
 
-    m = MapPlot(title='%s NWS COOP 24 Hour Precipitation Reports [inch]' % (
-                                            valid.strftime("%-d %b %Y"),),
-                subtitle='Reports valid between 6 and 9 AM',
-                axisbg='white', figsize=(10.24, 7.68))
-    m.plot_values(lons, lats, vals, fmt='%s', labels=labels,
-                  labelcolor='tan')
-    m.drawcounties()
+    mp = MapPlot(title='%s NWS COOP 24 Hour Precipitation Reports [inch]' % (
+                                             valid.strftime("%-d %b %Y"),),
+                 subtitle='Reports valid between 6 and 9 AM',
+                 axisbg='white', figsize=(10.24, 7.68))
+    mp.plot_values(lons, lats, vals, fmt='%s', labels=labels,
+                   labelcolor='tan')
+    mp.drawcounties()
 
     pqstr = "plot ac %s0000 coopPrecPlot.gif coopPrecPlot.gif gif" % (
                                                     valid.strftime("%Y%m%d"),)
 
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     pgconn.close()
+
 
 if __name__ == '__main__':
     plot_precip(datetime.datetime.now())
