@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (13, now());
+INSERT into iem_schema_manager_version values (14, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -370,7 +370,9 @@ CREATE TABLE iemrasters(
   archive_start timestamptz,
   archive_end   timestamptz,
   units varchar(12),
-  interval int
+  interval int,
+  filename_template varchar,
+  cf_long_name varchar
 );
 GRANT SELECT on iemrasters to nobody,apache;
 

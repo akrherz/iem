@@ -21,10 +21,14 @@ $rs = pg_query($mesosite, "SELECT * from iemrasters
 
 $rname = "";
 $runits = "";
+$urltemplate = "";
 for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	if ($rid == intval($row["id"])){
 		$rname = $row["name"];
 		$runits = $row["units"];
+		$urltemplate = str_replace("/mesonet/ARCHIVE",
+		  "https://mesonet.agron.iastate.edu/archive",
+		  $row["filename_template"]);
 		$t->title = sprintf("RASTER info for %s", $rname);
 	}
 	$table .= sprintf("<tr><td><a href=\"?rid=%s\">%s</a></td>"
@@ -69,10 +73,8 @@ if ($rid > 0){
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/GIS/">GIS Mainpage</a></li>
- <li class="active">IEM RASTER Lookup Tables</li>
+ <li class="active">IEM RASTER Information</li>
 </ol>
-
-<h3>IEM RASTER Lookup Tables</h3>
 
 <p>The IEM produces a number of RASTER images meant for GIS use. These RASTERs
 are typically provided on the IEM website as 8 bit PNG images.  This means there
@@ -87,6 +89,28 @@ table below.</p>
 {$table}
 </tbody>
 </table>
+
+<h3>Programatic Access to this RASTER source</h3>
+
+<p>The IEM generated RASTERs are stored in a programatic way that should allow
+for easy scripted download of the archive.  This section documents the URL
+format template used with the time shown in UTC.  The string format
+modifiers below are <a href="https://docs.python.org/2/library/time.html#time.strftime">pythonic strftime values</a>.</p>
+
+<pre>{$urltemplate}</pre>
+
+<p>A general web service also exists to convert these RASTERs to netCDF "on-the-fly".  The
+URL format is like so:</p>
+
+<pre>https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
+
+<p>Try the netCDF Conversion!
+<form method="GET" name="try" action="/cgi-bin/request/raster2netcdf.py">
+<input type="hidden" name="prod" value="{$rname}">
+<label for="ts">UTC Timestamp (%Y%m%d%H%M):</label>
+<input id="ts" type="text" name="dstr" value="201710250000">
+<input type="submit" value="Generate!">
+</form></p>
 
 <h3>Lookup Table for {$rname}</h3>
 
