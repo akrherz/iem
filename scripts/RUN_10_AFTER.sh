@@ -67,6 +67,9 @@ python ingest_smos.py
 cd ../qc
 python check_awos_online.py
 
+cd ../dbutil
+python mine_autoplot.py &
+
 cd ../current
 python q3_xhour.py 6
 python q3_xhour.py 3

@@ -11,7 +11,6 @@ python i5_2_cybox.py &
 
 cd ../dbutil
 sh save_snet_raw.sh
-python mine_autoplot.py
 python asos2archive.py
 
 # Need this done so that certain variables are there for DEP

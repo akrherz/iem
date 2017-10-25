@@ -1,6 +1,6 @@
 """Database found apache log entries of autoplot generation timing
 
-Run from RUN_MIDNIGHT.sh
+Run from RUN_10_AFTER.sh
 """
 from __future__ import print_function
 import datetime
