@@ -14,7 +14,7 @@ import tqdm
 
 def main(argv):
     """Go"""
-    pgconn = psycopg2.connect(database='asos')
+    pgconn = psycopg2.connect(database='asos', host='iemdb')
     airforce = int(argv[1])
     wban = int(argv[2])
     faa = argv[3]
