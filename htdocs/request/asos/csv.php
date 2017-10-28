@@ -14,7 +14,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
 {
   /* Figure out what station(s) fits the bill */
   $sql = sprintf("SELECT id, 
-      ST_distance_sphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
+      ST_DistanceSphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
       WHERE (network ~* 'ASOS' or network ~* 'AWOS') ORDER by dist ASC
       LIMIT 5", $_GET["lon"], $_GET["lat"]);
   $rs = pg_exec($mesosite, $sql);
