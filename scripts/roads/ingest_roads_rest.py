@@ -185,24 +185,29 @@ def main():
                         json.dumps(props, sort_keys=True,
                                    indent=4, separators=(',', ': '))))
             continue
-        if cond == current[segid]:
-            continue
         # Timestamps appear to be UTC now
-        if props['CARS_MSG_UPDATE_DATE'] is None:
+        if props['CARS_MSG_UPDATE_DATE'] is not None:
             # print(json.dumps(feat, indent=4))
-            continue
-        valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
-            seconds=props['CARS_MSG_UPDATE_DATE']/1000.)
-        # Save to log
-        cursor.execute("""
-            INSERT into roads_2017_2018_log(segid, valid, cond_code, raw)
-            VALUES (%s, %s, %s, %s)
-        """, (segid, valid.strftime("%Y-%m-%d %H:%M+00"), cond, raw))
+            valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
+                seconds=props['CARS_MSG_UPDATE_DATE']/1000.)
+        else:
+            valid = datetime.datetime.utcnow()
+        # Save to log, if difference
+        if cond != current[segid]:
+            cursor.execute("""
+                INSERT into roads_2017_2018_log(segid, valid, cond_code, raw)
+                VALUES (%s, %s, %s, %s)
+            """, (segid, valid.strftime("%Y-%m-%d %H:%M+00"), cond, raw))
+            dirty = True
         # Update currents
         cursor.execute("""
             UPDATE roads_current SET cond_code = %s, valid = %s,
             raw = %s WHERE segid = %s
         """, (cond, valid.strftime("%Y-%m-%d %H:%M+00"), raw, segid))
+
+    # Force a run each morning at about 3 AM
+    if (datetime.datetime.now().hour == 3 and
+            datetime.datetime.now().minute < 10):
         dirty = True
 
     if dirty:
