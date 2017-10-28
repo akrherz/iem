@@ -14,7 +14,7 @@ function neighbors($station,$lat,$lon){
    $rs = pg_prepare($con, "_SELECT", "SELECT *,
          ST_distance(ST_transform(geom,3857), 
                      ST_transform(ST_GeomFromEWKT('SRID=4326;POINT(".$lon." ".$lat.")'), 3857)) /1000.0 as dist from stations 
-         WHERE ST_point_inside_circle(geom, ".$lon.", ".$lat.", 0.25) 
+         WHERE ST_PointInsideCircle(geom, ".$lon.", ".$lat.", 0.25) 
          and id != $1 ORDER by dist ASC");
    $result = pg_execute($con, "_SELECT", Array($station) );
  
