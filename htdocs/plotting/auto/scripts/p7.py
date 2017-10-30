@@ -60,7 +60,7 @@ def plotter(fdict):
     yticks = []
     yticklabels = []
     jan1 = datetime.datetime(year, 1, 1)
-    for i in range(110, 270):
+    for i in range(110, 330):
         ts = jan1 + datetime.timedelta(days=i)
         if ts.day == 1 or ts.day % 12 == 1:
             yticks.append(i)
