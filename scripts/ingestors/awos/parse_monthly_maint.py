@@ -16,10 +16,10 @@ import sys
 import re
 import datetime
 
-import psycopg2
 import pandas as pd
+from pyiem.util import get_dbconn
 
-CALINFO = re.compile((r".* AWOS t/d:?\s*([0-9\-\.]+)/([0-9\-\.]+)\s+"
+CALINFO = re.compile((r"AWOS t/d:?\s*([0-9\-\.]+)/([0-9\-\.]+)\s+"
                       r"Std\.?\s*t?/?d?:?\s*([0-9\-\.]+)/([0-9\-\.]+)"),
                      re.IGNORECASE)
 HEADER = '\033[95m'
@@ -33,8 +33,7 @@ ENDC = '\033[0m'
 def main(argv):
     """Go Main"""
     # Use SSH proxy
-    pgconn = psycopg2.connect(dbname="portfolio", host="localhost",
-                              port=5555, user="nobody")
+    pgconn = get_dbconn("portfolio", user="mesonet")
     pcursor = pgconn.cursor()
 
     df = pd.read_csv(argv[1])
@@ -45,7 +44,7 @@ def main(argv):
         if row['Description'].startswith('site offline'):
             continue
         parts = re.findall(CALINFO, row['Description'])
-        if len(parts) == 0:
+        if not parts:
             print(FAIL + row['Description'] + ENDC)
             continue
         faa = row['FAA Code']
