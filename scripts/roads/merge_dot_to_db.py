@@ -65,9 +65,9 @@ roads base is
 """
 import sys
 import psycopg2
-conn = psycopg2.connect(database='postgis', host='iemdb')
-conn2 = psycopg2.connect(database='postgis', host='localhost', port=5555,
-                         user='mesonet')
+from pyiem.util import get_dbconn
+conn = get_dbconn('postgis', host='localhost')
+conn2 = get_dbconn('postgis', user='mesonet')
 cursor = conn.cursor()
 cursor2 = conn2.cursor()
 

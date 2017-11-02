@@ -1,11 +1,10 @@
 """Be able to merge a CSV file that IDOT provides"""
 import pandas as pd
-import psycopg2
 import sys
 import datetime
+from pyiem.util import get_dbconn
 
-pgconn = psycopg2.connect(database='postgis', host='localhost', user='mesonet',
-                          port=5555)
+pgconn = get_dbconn('postgis')
 cursor = pgconn.cursor()
 xref = {}
 cursor.execute("""SELECT idot_id, segid from roads_base""")

@@ -1,7 +1,7 @@
 import pytz
 import datetime
-import psycopg2
-pgconn = psycopg2.connect(host='127.0.0.1', port=5555, user='mesonet', database='mec')
+from pyiem.util import get_dbconn
+pgconn = get_dbconn('mec', user='mesonet')
 cursor = pgconn.cursor()
 
 dates = """06-02-2008 00z - 06-07-2008 06z

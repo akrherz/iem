@@ -2,11 +2,10 @@
 """
 import datetime
 import subprocess
-import psycopg2
 import os
+from pyiem.util import get_dbconn
 
-dbconn = psycopg2.connect(database='mec', host='127.0.0.1', port=5555,
-                          user='mesonet')
+dbconn = get_dbconn('mec', user='mesonet')
 cursor = dbconn.cursor()
 
 cursor.execute("""

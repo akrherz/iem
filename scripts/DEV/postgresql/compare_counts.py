@@ -5,14 +5,13 @@
 from __future__ import print_function
 import sys
 
-import psycopg2
+from pyiem.util import get_dbconn
 import tqdm
 
 
 def main(argv):
     """Go!"""
-    oldpg = psycopg2.connect(database='postgis', host='localhost', port=5555,
-                             user='mesonet')
+    oldpg = get_dbconn('postgis', user='mesonet')
 
     dbs = []
     if len(argv) == 2:
@@ -28,11 +27,10 @@ def main(argv):
 
     for db in dbs:
         print("running %s..." % (db,))
-        oldpg = psycopg2.connect(database=db, host='localhost', port=5555,
-                                 user='mesonet')
+        oldpg = get_dbconn(db, user='mesonet')
         ocursor = oldpg.cursor()
-        newpg = psycopg2.connect(database=db, host='localhost', port=5557,
-                                 user='mesonet')
+        # TODO bug
+        newpg = get_dbconn(db, port=5557, user='mesonet')
         ncursor = newpg.cursor()
 
         tables = []

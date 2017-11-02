@@ -3,16 +3,15 @@ from __future__ import print_function
 import json
 
 import requests
+from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
 
 
 def main():
     """Go Main Go"""
-    pgconn = psycopg2.connect(database='iem', host='localhost',
-                              port=5555, user='nobody')
+    pgconn = get_dbconn('iem')
 
     nt = NetworkTable("WI_ASOS")
 

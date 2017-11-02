@@ -1,8 +1,8 @@
-import pandas as pd
-import psycopg2
 
-pgconn = psycopg2.connect(database='postgis', host='iemdb', port=5555,
-                          user='mesonet')
+import pandas as pd
+from pyiem.util import get_dbconn
+
+pgconn = get_dbconn('postgis', user='mesonet')
 cursor = pgconn.cursor()
 
 df = pd.read_excel("/tmp/cars.xlsx")

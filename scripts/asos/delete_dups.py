@@ -4,9 +4,8 @@ A stop gap hack to remove some bad data from the database.  Sadly, gonna be
 tough to resolve how these obs appeared in the database to behind with :(
 """
 
-import psycopg2
-pgconn = psycopg2.connect(dbname='asos', host='localhost', port=5555,
-                          user='mesonet')
+from pyiem.util import get_dbconn
+pgconn = get_dbconn('asos', user='mesonet')
 
 
 def do_year(year):
@@ -29,6 +28,7 @@ def do_year(year):
            ) % (year, cursor1.rowcount, removed))
     cursor2.close()
     pgconn.commit()
+
 
 if __name__ == '__main__':
     for year in range(1928, 2017):

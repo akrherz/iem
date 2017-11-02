@@ -1,10 +1,10 @@
 """Use a simple zscore system to null out suspect data"""
 import sys
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 from pandas.io.sql import read_sql
-import psycopg2
-pgconn = psycopg2.connect(database='coop', host='localhost', port=5555,
-                          user='mesonet')
+
+pgconn = get_dbconn('coop', user='mesonet')
 
 
 def do(state, vname):

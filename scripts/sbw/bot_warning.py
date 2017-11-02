@@ -1,9 +1,9 @@
 import math
 import psycopg2.extras
 import pyproj
+from pyiem.util import get_dbconn
 P2163 = pyproj.Proj(init='epsg:2163')
-postgis = psycopg2.connect(database='postgis', host='localhost',
-                           port=5555, user='mesonet')
+postgis = get_dbconn('postgis', user='mesonet')
 pcursor = postgis.cursor(cursor_factory=psycopg2.extras.DictCursor)
 pcursor2 = postgis.cursor()
 

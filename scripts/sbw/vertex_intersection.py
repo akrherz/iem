@@ -1,8 +1,8 @@
-import psycopg2
+
+from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
 
-pgconn = psycopg2.connect(database='postgis', host='localhost', port=5555,
-                          user='nobody')
+pgconn = get_dbconn('postgis')
 cursor = pgconn.cursor()
 
 nt = NetworkTable("WFO")

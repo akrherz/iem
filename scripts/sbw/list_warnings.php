@@ -12,7 +12,7 @@ $lfp = fopen("lsrs.csv", "w");
 fwrite($lfp, "WFO,UTC_VALID,UTC_HOUR,WARNED,LON,LAT\n");
 
 while (list($key,$val) = each($nt->table)){
- $cow = new Cow(pg_connect("dbname=postgis host=localhost port=5555 user=nobody"));
+ $cow = new Cow(pg_connect("dbname=postgis host=iemdb"));
  $cow->setLimitTime( mktime(6,0,0,1,1,2008),  mktime(6,0,0,12,31,2010) );
  $cow->setHailSize(0.75);
  $cow->setLimitType( Array("TO") );

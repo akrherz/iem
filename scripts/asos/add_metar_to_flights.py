@@ -2,8 +2,8 @@
 import datetime
 import psycopg2.extras
 import pytz
-pgconn = psycopg2.connect(database='asos', host='localhost', port=5555,
-                          user='nobody')
+from pyiem.util import get_dbconn
+pgconn = get_dbconn('asos', user='nobody')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 

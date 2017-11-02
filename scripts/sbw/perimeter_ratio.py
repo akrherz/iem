@@ -1,7 +1,7 @@
 import sys
-import psycopg2
-pgconn = psycopg2.connect(database='postgis', host='localhost', port=5555,
-                          user='nobody')
+
+from pyiem.util import get_dbconn
+pgconn = get_dbconn('postgis')
 cursor = pgconn.cursor()
 cursor2 = pgconn.cursor()
 

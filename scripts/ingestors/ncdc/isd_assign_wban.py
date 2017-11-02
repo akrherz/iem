@@ -4,13 +4,12 @@
 """
 from __future__ import print_function
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go"""
-    pgconn = psycopg2.connect(database='mesosite', host='localhost',
-                              port=5555, user='mesonet')
+    pgconn = get_dbconn('mesosite', user='mesonet')
     cursor = pgconn.cursor()
     xref = {}
     for linenum, line in enumerate(open('isd-history.txt')):

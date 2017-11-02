@@ -1,18 +1,17 @@
 """Extraction as requested by IA Public Health"""
-import psycopg2
 import sys
+
+from pyiem.util import get_dbconn
 
 YEAR = int(sys.argv[1])
 
 
 def main(argv):
     """Do Something"""
-    pgconn = psycopg2.connect(database='postgis', host='localhost',
-                              port=5555, user='nobody')
+    pgconn = get_dbconn('postgis', user='nobody')
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
-    pgconn2 = psycopg2.connect(database='coop', host='localhost',
-                               port=5555, user='nobody')
+    pgconn2 = get_dbconn('coop', user='nobody')
     cursor3 = pgconn2.cursor()
     cursor.execute("""SELECT ugc, ST_X(centroid), ST_Y(centroid)
     from ugcs where state = 'IA' and substr(ugc,3,1) = 'C' and end_ts is null

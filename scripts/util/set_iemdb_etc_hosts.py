@@ -13,9 +13,13 @@ import os
 def main():
     """Go Main Go"""
     if len(sys.argv) == 1:
-        print('Usage: python set_iemdb_etc_hosts.py <local|remote>')
+        print('Usage: python set_iemdb_etc_hosts.py <local|remote|proxy>')
         return
-    ip = '127.0.0.1' if (sys.argv[1] == 'local') else '129.186.185.33'
+    ip = '127.0.0.1'
+    if sys.argv[1] == 'remote':
+        ip = '129.186.185.33'
+    elif sys.argv[1] == 'proxy':
+        ip = '172.16.172.1'
     data = open('/etc/hosts').read()
     result = []
     for line in data.split("\n"):

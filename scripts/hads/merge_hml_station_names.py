@@ -2,9 +2,10 @@
 
 HML files provide station names that are likely better than what I manually
 hacked into the database previously..."""
-import psycopg2
+from __future__ import print_function
 from pyiem.nws.products.hml import parser
 from pyiem.reference import nwsli2state
+from pyiem.util import get_dbconn
 import sys
 sys.path.insert(0, "../dbutil")
 from delete_station import delete_logic  # @UnresolvedImport
@@ -12,8 +13,7 @@ from delete_station import delete_logic  # @UnresolvedImport
 
 def build_stations():
     xref = {}
-    pgconn = psycopg2.connect(database='afos', host='localhost', user='nobody',
-                              port=5555)
+    pgconn = get_dbconn('afos')
     cursor = pgconn.cursor('streamer')
     cursor.execute("""SELECT data from products WHERE
     entered > 'YESTERDAY' and substr(pil, 1, 3) = 'HML'""")
@@ -71,10 +71,8 @@ def should_switch_2dcp(rwcursor, icursor, nwsli, iemid):
 
 def merge(xref):
     """ Do some logic here to clean things up!"""
-    pgconn = psycopg2.connect(database='mesosite', host='localhost',
-                              port=5555, user='mesonet')
-    ipgconn = psycopg2.connect(database='iem', host='localhost',
-                               port=5555, user='mesonet')
+    pgconn = get_dbconn('mesosite', user='mesonet')
+    ipgconn = get_dbconn('iem', user='mesonet')
     for nwsli, name in xref.iteritems():
         cursor = pgconn.cursor()
         rwcursor = pgconn.cursor()
@@ -121,6 +119,7 @@ def merge(xref):
 def main():
     xref = build_stations()
     merge(xref)
+
 
 if __name__ == '__main__':
     main()

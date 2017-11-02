@@ -1,18 +1,18 @@
 """
 Update the database with the new yaw values!
 """
-import psycopg2
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import warnings
+from pyiem.util import get_dbconn
 warnings.simplefilter("ignore", RuntimeWarning)
 
-PGCONN = psycopg2.connect("dbname=mec host=localhost port=5555 user=mesonet")
+PGCONN = get_dbconn("mec",  user="mesonet")
 cursor = PGCONN.cursor()
-PGCONN2 = psycopg2.connect("dbname=asos host=localhost port=5555 user=mesonet")
+PGCONN2 = get_dbconn("asos", user="mesonet")
 acursor = PGCONN2.cursor()
 
 def process(xedges, yedges, counts):

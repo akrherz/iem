@@ -4,14 +4,12 @@
 """
 from __future__ import print_function
 
-import psycopg2
-from pyiem.datatypes import temperature, distance, speed
+from pyiem.util import get_dbconn
+from pyiem.datatypes import speed
 
-ISUAG = psycopg2.connect(database='isuag', host='localhost', port=5555,
-                         user='mesonet')
+ISUAG = get_dbconn('isuag', user='mesonet')
 
-IEM = psycopg2.connect(database='iem', host='localhost', port=5555,
-                       user='mesonet')
+IEM = get_dbconn('iem', user='mesonet')
 
 
 def two():

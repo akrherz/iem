@@ -1,9 +1,8 @@
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
 
-pgconn = psycopg2.connect(database='postgis', host='localhost', port=5555,
-                          user='nobody')
+pgconn = get_dbconn('postgis')
 
 df = read_sql("""WITH data as (
     SELECT distinct wfo, eventid, extract(year from issue) as year,

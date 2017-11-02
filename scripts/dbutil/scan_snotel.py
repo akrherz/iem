@@ -1,9 +1,8 @@
 """Process an one-off of SCAN + SNOTEL metadata"""
 import pandas as pd
-import psycopg2
+from pyiem.util import get_dbconn
 
-pgconn = psycopg2.connect(database='mesosite', host='localhost', port=5555,
-                          user='mesonet')
+pgconn = get_dbconn('mesosite', user='mesonet')
 cursor = pgconn.cursor()
 
 df = pd.read_csv("/tmp/SNOTEL.SCAN.metadata.txt", sep="|")

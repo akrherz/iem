@@ -1,8 +1,10 @@
 """Use data provided by ACIS to replace climodat data"""
-import requests
+from __future__ import print_function
 import sys
-import psycopg2
 import datetime
+
+import requests
+from pyiem.util import get_dbconn
 
 SERVICE = "http://data.rcc-acis.org/StnData"
 
@@ -27,8 +29,7 @@ def main(station, acis_station):
                "elems": "maxt,mint,pcpn,snow,snwd"}
     req = requests.post(SERVICE, json=payload)
     j = req.json()
-    pgconn = psycopg2.connect(database='coop', host='localhost', port=5555,
-                              user='mesonet')
+    pgconn = get_dbconn('coop', user='mesonet')
     cursor = pgconn.cursor()
     for row in j['data']:
         date = row[0]
@@ -50,6 +51,7 @@ def main(station, acis_station):
                   date.year, date.month))
     cursor.close()
     pgconn.commit()
+
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])

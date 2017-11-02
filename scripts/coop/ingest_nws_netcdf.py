@@ -1,12 +1,11 @@
 """Ingest the NWS provided netcdf file of COOP data"""
 import netCDF4
-import psycopg2
 import sys
 import datetime
 import numpy as np
 from pandas.io.sql import read_sql
-COOP = psycopg2.connect(database='coop', host='localhost', port=5555,
-                        user='mesonet')
+from pyiem.util import get_dbconn
+COOP = get_dbconn('coop', user='mesonet')
 ccursor = COOP.cursor()
 
 fn = sys.argv[1]

@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 import calendar
 import pytz
 import os
@@ -15,8 +16,7 @@ cmap.set_over('black')
 today = datetime.datetime.now()
 today = today.replace(tzinfo=pytz.timezone("UTC"))
 
-POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='localhost',
-                           port=5555)
+POSTGIS = get_dbconn('postgis', user='nobody')
 
 
 def run(nexrad):

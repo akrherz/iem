@@ -1,9 +1,8 @@
 """ Get the time of ob set in Harry's file"""
 import sys
-import psycopg2
+from pyiem.util import get_dbconn
 
-pgconn = psycopg2.connect(database='mesosite', host='localhost', port=5555,
-                          user='mesonet')
+pgconn = get_dbconn('mesosite', user='mesonet')
 cursor = pgconn.cursor()
 
 year = sys.argv[1]
