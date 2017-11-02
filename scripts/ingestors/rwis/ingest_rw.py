@@ -1,22 +1,20 @@
-# Ingest the RWIS rainwise data
-import pandas as pd
-import urllib2
-import psycopg2
+"""Ingest the RWIS rainwise data"""
+from __future__ import print_function
 import datetime
+import urllib2
+
+import pandas as pd
+from pyiem.util import get_dbconn
 from pyiem.observation import Observation
 import pytz
 
-today = datetime.datetime.now()
-
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor()
 
 URI = ("http://www.rainwise.net/inview/api/stationdata-iowa.php?"
        "username=iowadot&sid=1f6075797434189912d55196d0be5bac&"
        "pid=d0fb9ae6b1352a03720abdedcdc16e80")
 # &sdate=2013-12-09&edate=2013-12-09&mac=0090C2E90575
 
-assoc = {
+ASSOC = {
          'RDTI4': '0090C2E90575',
          'RULI4': '0090C2E904B2',
          'RSNI4': '0090C2E9BC17',
@@ -25,9 +23,9 @@ assoc = {
          }
 
 
-def get_last_obs():
-    ''' Get the last obs we have for each of the sites '''
-    sids = assoc.keys()
+def get_last_obs(icursor):
+    """Get the last obs we have for each of the sites"""
+    sids = ASSOC.keys()
     data = {}
     icursor.execute("""
     SELECT id, valid from current_log c JOIN stations t on (t.iemid = c.iemid)
@@ -38,11 +36,11 @@ def get_last_obs():
     return data
 
 
-def process(nwsli, lastts):
-    ''' Process this NWSLI please '''
+def process(today, icursor, nwsli, lastts):
+    """Process this NWSLI please"""
     myuri = "%s&sdate=%s&edate=%s&mac=%s" % (URI, today.strftime("%Y-%m-%d"),
                                              today.strftime("%Y-%m-%d"),
-                                             assoc[nwsli])
+                                             ASSOC[nwsli])
     # print nwsli, myuri
     try:
         data = urllib2.urlopen(myuri, timeout=15)
@@ -50,10 +48,10 @@ def process(nwsli, lastts):
         # print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
         return
     try:
-        df = pd.DataFrame.from_csv(data)
+        df = pd.read_csv(data)
     except Exception, exp:
-        print "ingest_rw.py pandas fail for sid: %s\nreason: %s" % (
-                                        nwsli, exp)
+        print(("ingest_rw.py pandas fail for sid: %s\nreason: %s"
+               ) % (nwsli, exp))
         return
     # Index([u'utc', u'mac', u'serial', u'tia', u'til', u'tih', u'tdl',
     # u'tdh', u'ria', u'ril', u'rih', u'rdl', u'rdh', u'bia', u'bil',
@@ -109,10 +107,20 @@ def process(nwsli, lastts):
 
         iem.save(icursor)
 
-if __name__ == '__main__':
-    data = get_last_obs()
-    for nwsli in assoc:
-        process(nwsli, data.get(nwsli, None))
+
+def main():
+    """Go Main Go"""
+    today = datetime.datetime.now()
+
+    pgconn = get_dbconn('iem')
+    icursor = pgconn.cursor()
+    data = get_last_obs(icursor)
+    for nwsli in ASSOC:
+        process(today, icursor, nwsli, data.get(nwsli, None))
     icursor.close()
-    IEM.commit()
-    IEM.close()
+    pgconn.commit()
+    pgconn.close()
+
+
+if __name__ == '__main__':
+    main()
