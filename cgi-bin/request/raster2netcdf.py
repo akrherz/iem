@@ -85,7 +85,7 @@ def do_work(valid, prod):
     fn = valid.strftime(template)
     if not os.path.isfile(fn):
         send_error("ERROR: The IEM Archives do not have this file available")
-    raster = np.array(Image.open(fn))
+    raster = np.flipud(np.array(Image.open(fn)))
     (ypoints, xpoints) = raster.shape
     # build lat, lon arrays
     lons, lats = get_gridinfo(fn, xpoints, ypoints)
