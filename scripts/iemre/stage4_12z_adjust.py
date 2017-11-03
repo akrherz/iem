@@ -1,12 +1,13 @@
 """
 We need to use the QC'd 24h 12z total to fix the 1h problems :(
 """
+from __future__ import print_function
+import sys
+import datetime
 
 import pygrib
-import datetime
 import numpy as np
 from pyiem import iemre
-import sys
 import netCDF4
 import pytz
 from scipy.interpolate import NearestNDInterpolator
@@ -65,13 +66,19 @@ def merge(ts):
     nc.sync()
     nc.close()
 
-if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), 12)
+
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        ts = datetime.datetime(int(argv[1]), int(argv[2]),
+                               int(argv[3]), 12)
     else:
         ts = datetime.datetime.utcnow()
         ts = ts - datetime.timedelta(days=1)
         ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     merge(ts)
+
+
+if __name__ == "__main__":
+    main(sys.argv)

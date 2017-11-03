@@ -2,17 +2,18 @@
 Merge the 1km Q2 24 hour precip data estimates
 '''
 import datetime
-import pytz
 import sys
-import pyiem.mrms as mrms
+
+import pytz
 import netCDF4
 import numpy as np
 from PIL import Image
+import pyiem.mrms as mrms
 from pyiem import iemre
 
 
 def run(ts):
-    ''' Actually do the work, please '''
+    """Actually do the work, please"""
     nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_mrms_daily.nc' % (
                                                             ts.year,),
                          'a')
@@ -35,18 +36,20 @@ def run(ts):
     res = np.where(np.logical_and(data >= 180, data < 255),
                    125. + ((data - 180) * 5.), res)
 
-    y1 = (iemre.NORTH - mrms.SOUTH) * 100.0
-    y0 = (iemre.SOUTH - mrms.SOUTH) * 100.0
-    x0 = (iemre.WEST - mrms.WEST) * 100.0
-    x1 = (iemre.EAST - mrms.WEST) * 100.0
+    y1 = int((iemre.NORTH - mrms.SOUTH) * 100.0)
+    y0 = int((iemre.SOUTH - mrms.SOUTH) * 100.0)
+    x0 = int((iemre.WEST - mrms.WEST) * 100.0)
+    x1 = int((iemre.EAST - mrms.WEST) * 100.0)
     ncprecip[offset, :, :] = res[y0:y1, x0:x1]
     nc.close()
 
-if __name__ == '__main__':
-    if len(sys.argv) == 4:
+
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
         # 12 noon to prevent ugliness with timezones
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), 12, 0)
+        ts = datetime.datetime(int(argv[1]), int(argv[2]),
+                               int(argv[3]), 12, 0)
     else:
         ts = datetime.datetime.now() - datetime.timedelta(hours=24)
         ts = ts.replace(hour=12)
@@ -55,3 +58,7 @@ if __name__ == '__main__':
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)
+
+
+if __name__ == '__main__':
+    main(sys.argv)

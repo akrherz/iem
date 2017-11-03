@@ -1,10 +1,11 @@
-# Generate the IEMRE daily analysis file for a year
+"""Generate the IEMRE daily analysis file for a year"""
+from __future__ import print_function
+import datetime
+import sys
 
 from pyiem import iemre
 import netCDF4
-import datetime
 import numpy as np
-import sys
 
 
 def init_year(ts):
@@ -127,13 +128,13 @@ def init_year(ts):
     snowd.coordinates = "lon lat"
     snowd.description = "Snow depth at time of observation"
 
-    v = nc.createVariable('avg_dwpk', np.float, ('time', 'lat', 'lon'),
-                          fill_value=1.e20)
-    v.units = 'K'
-    v.long_name = '2m Average Dew Point Temperature'
-    v.standard_name = 'Dewpoint'
-    v.coordinates = "lon lat"
-    v.description = "Dew Point average computed by averaging mixing ratios"
+    v1 = nc.createVariable('avg_dwpk', np.float, ('time', 'lat', 'lon'),
+                           fill_value=1.e20)
+    v1.units = 'K'
+    v1.long_name = '2m Average Dew Point Temperature'
+    v1.standard_name = 'Dewpoint'
+    v1.coordinates = "lon lat"
+    v1.description = "Dew Point average computed by averaging mixing ratios"
 
     v2 = nc.createVariable('wind_speed', np.float, ('time', 'lat', 'lon'),
                            fill_value=1.e20)
@@ -144,6 +145,7 @@ def init_year(ts):
     v2.description = "Daily averaged wind speed magnitude"
 
     nc.close()
+
 
 if __name__ == '__main__':
     init_year(datetime.datetime(int(sys.argv[1]), 1, 1))

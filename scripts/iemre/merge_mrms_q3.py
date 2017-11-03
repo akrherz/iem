@@ -92,12 +92,12 @@ def run(ts):
     nc.close()
 
 
-def main():
+def main(argv):
     """ go main go """
-    if len(sys.argv) == 4:
+    if len(argv) == 4:
         # 12 noon to prevent ugliness with timezones
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), 12, 0)
+        ts = datetime.datetime(int(argv[1]), int(argv[2]),
+                               int(argv[3]), 12, 0)
     else:
         # default to noon today
         ts = datetime.datetime.now()
@@ -110,4 +110,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

@@ -1,11 +1,11 @@
-'''
- Generate the storage netcdf file for 0.01deg MRMS data over the Midwest
-'''
+"""Generate the storage netcdf file for 0.01deg MRMS data over the Midwest"""
+from __future__ import print_function
+import datetime
+import sys
+
 from pyiem import iemre
 import netCDF4
-import datetime
 import numpy as np
-import sys
 
 
 def init_year(ts):
@@ -79,4 +79,6 @@ def init_year(ts):
 
     nc.close()
 
-init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+
+if __name__ == '__main__':
+    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))

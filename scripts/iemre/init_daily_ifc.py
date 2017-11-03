@@ -1,10 +1,9 @@
-"""
- Generate the storage netcdf file for Iowa Flood Center Precip
-"""
-import netCDF4
+"""Generate the storage netcdf file for Iowa Flood Center Precip"""
 import datetime
-import numpy as np
 import sys
+
+import netCDF4
+import numpy as np
 
 
 def init_year(ts):
@@ -70,4 +69,6 @@ def init_year(ts):
 
     nc.close()
 
-init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+
+if __name__ == '__main__':
+    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))

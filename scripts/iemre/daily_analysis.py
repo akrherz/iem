@@ -6,23 +6,23 @@ this script twice per day:
     RUN_MIDNIGHT.sh for just the 'calendar day' variables yesterday
     RUN_NOON.sh for the 12z today vals and calendar day yesterday
 """
+from __future__ import print_function
 import os
 import sys
 import subprocess
+import datetime
+
 import netCDF4
 import numpy as np
 from pandas.io.sql import read_sql
-import datetime
-import psycopg2
 import pytz
 from scipy.stats import zscore
-from pyiem import iemre, datatypes
-from psycopg2.extras import DictCursor
 from scipy.interpolate import NearestNDInterpolator
+from pyiem import iemre, datatypes
+from pyiem.util import get_dbconn
 
-pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-coop_pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-cursor = pgconn.cursor(cursor_factory=DictCursor)
+PGCONN = get_dbconn('iem', user='nobody')
+COOP_PGCONN = get_dbconn('coop', user='nobody')
 
 
 def generic_gridder(df, idx):
@@ -145,6 +145,7 @@ def do_precip12(nc, ts):
 
 
 def plot(df):
+    """Diagnostic"""
     from pyiem.plot import MapPlot
     m = MapPlot(sector='midwest', continentalcolor='white')
     m.plot_values(df['lon'].values, df['lat'].values, df['highdata'].values,
@@ -154,8 +155,7 @@ def plot(df):
 
 
 def grid_day12(nc, ts):
-    """Use the COOP data for gridding
-    """
+    """Use the COOP data for gridding"""
     offset = iemre.daily_offset(ts)
     print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
     if ts.year > 2008:
@@ -175,7 +175,7 @@ def grid_day12(nc, ts):
             'OH_COOP', 'IN_COOP') and c.iemid = s.iemid and
             extract(hour from c.coop_valid) between 4 and 11
             """ % (ts.year, ts.strftime("%Y-%m-%d"))
-        df = read_sql(sql, pgconn)
+        df = read_sql(sql, PGCONN)
     else:
         df = read_sql("""
         WITH mystations as (
@@ -190,7 +190,7 @@ def grid_day12(nc, ts):
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, coop_pgconn, params=(ts,))
+        """, COOP_PGCONN, params=(ts,))
     # plot(df)
 
     if len(df.index) > 4:
@@ -214,8 +214,8 @@ def grid_day12(nc, ts):
         res = generic_gridder(df, 'snowddata')
         nc.variables['snowd_12z'][offset] = res * 25.4
     else:
-        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
-                                             len(df.index))
+        print(("%s has %02i entries, FAIL"
+               ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
 
 
 def grid_day(nc, ts):
@@ -242,7 +242,7 @@ def grid_day(nc, ts):
             'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
             'OH_ASOS', 'AWOS', 'IN_ASOS') and c.iemid = s.iemid
             """ % (ts.year, ts.strftime("%Y-%m-%d"))
-        df = read_sql(sql, pgconn)
+        df = read_sql(sql, PGCONN)
     else:
         df = read_sql("""
         WITH mystations as (
@@ -259,7 +259,7 @@ def grid_day(nc, ts):
         null as highdwpf, null as lowdwpf, null as avgsknt
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, coop_pgconn, params=(ts,))
+        """, COOP_PGCONN, params=(ts,))
     if len(df.index) > 4:
         res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk'][offset] = datatypes.temperature(
@@ -284,11 +284,12 @@ def grid_day(nc, ts):
             nc.variables['wind_speed'][offset] = datatypes.speed(
                                                 res, 'KT').value('MPS')
     else:
-        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"),
-                                             cursor.rowcount)
+        print(("%s has %02i entries, FAIL"
+               ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
 
 
-def main(ts, irealtime):
+def workflow(ts, irealtime):
+    """Do Work"""
     # Load up our netcdf file!
     ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
     if not os.path.isfile(ncfn):
@@ -313,11 +314,16 @@ def main(ts, irealtime):
     do_precip(nc, ts)
     nc.close()
 
-if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        ts = datetime.date(int(sys.argv[1]), int(sys.argv[2]),
-                           int(sys.argv[3]))
-        main(ts, False)
+
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        workflow(ts, False)
     else:
         ts = datetime.date.today()
-        main(ts, True)
+        workflow(ts, True)
+
+
+if __name__ == "__main__":
+    main(sys.argv)

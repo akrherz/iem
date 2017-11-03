@@ -1,25 +1,25 @@
-'''
-  I produce the hourly analysis used by IEMRE
-'''
-
+"""I produce the hourly analysis used by IEMRE"""
+from __future__ import print_function
 import sys
+import datetime
+
 import netCDF4
 import numpy as np
-import datetime
 from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 import psycopg2.extras
 import pytz
 from scipy.interpolate import NearestNDInterpolator
 
-nt = NetworkTable(('IA_ASOS', 'MO_ASOS', 'IL_ASOS', 'ND_ASOS',
+NT = NetworkTable(('IA_ASOS', 'MO_ASOS', 'IL_ASOS', 'ND_ASOS',
                    'WI_ASOS', 'MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS',
                    'AWOS', 'IN_ASOS', 'KY_ASOS', 'OH_ASOS', 'MI_ASOS'))
 
-ids = repr(nt.sts.keys())
-ids = "(%s)" % (ids[1:-1],)
+IDS = repr(NT.sts.keys())
+IDS = "(%s)" % (IDS[1:-1],)
 
 
 def grid_wind(rs):
@@ -39,13 +39,13 @@ def grid_wind(rs):
         (u, v) = meteorology.uv(dt.speed(row['sknt'], 'KT'),
                                 dt.direction(row['drct'], 'DEG'))
         if v is not None:
-            lats.append(nt.sts[row['station']]['lat'])
-            lons.append(nt.sts[row['station']]['lon'])
+            lats.append(NT.sts[row['station']]['lat'])
+            lons.append(NT.sts[row['station']]['lon'])
             vdata.append(v.value("MPS"))
             udata.append(u.value("MPS"))
 
     if len(vdata) < 4:
-        print "No wind data at all"
+        print("No wind data at all")
         return None
 
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
@@ -68,11 +68,11 @@ def grid_skyc(rs):
     for row in rs:
         v = max(row['max_skyc1'], row['max_skyc2'], row['max_skyc3'])
         if v is not None:
-            lats.append(nt.sts[row['station']]['lat'])
-            lons.append(nt.sts[row['station']]['lon'])
+            lats.append(NT.sts[row['station']]['lat'])
+            lons.append(NT.sts[row['station']]['lon'])
             vals.append(float(v))
     if len(vals) < 4:
-        print "No SKYC data at all"
+        print("No SKYC data at all")
         return None
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     nn = NearestNDInterpolator((lons, lats), np.array(vals))
@@ -94,12 +94,12 @@ def generic_gridder(rs, idx):
     vals = []
     for row in rs:
         if row[idx] is not None:
-            lats.append(nt.sts[row['station']]['lat'])
-            lons.append(nt.sts[row['station']]['lon'])
+            lats.append(NT.sts[row['station']]['lat'])
+            lons.append(NT.sts[row['station']]['lon'])
             vals.append(row[idx])
     if len(vals) < 4:
-        print "Only %s observations found for %s, won't grid" % (len(vals),
-                                                                 idx)
+        print(("Only %s observations found for %s, won't grid"
+               ) % (len(vals), idx))
         return None
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     nn = NearestNDInterpolator((lons, lats), np.array(vals))
@@ -124,7 +124,7 @@ def grid_hour(nc, ts):
 
     # If we are near realtime, look in IEMAccess instead of ASOS database
     if utcnow < ts:
-        dbconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+        dbconn = get_dbconn('iem', user='nobody')
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "current_log"
         pcolumn = "(phour * 25.4)"
@@ -140,9 +140,9 @@ def grid_hour(nc, ts):
  max(case when sknt >= 0 then drct else 0 end) as drct from %s s, stations t
  WHERE t.id in %s and t.iemid = s.iemid and
  valid >= '%s' and valid < '%s' GROUP by station
-         """ % (pcolumn, pcolumn, pcolumn, table, ids, ts0, ts1)
+         """ % (pcolumn, pcolumn, pcolumn, table, IDS, ts0, ts1)
     else:
-        dbconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+        dbconn = get_dbconn('asos', user='nobody')
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "t%s" % (ts.year,)
         pcolumn = "p01i"
@@ -158,7 +158,7 @@ def grid_hour(nc, ts):
  max(case when sknt >= 0 then drct else 0 end) as drct from %s
  WHERE station in %s and
  valid >= '%s' and valid < '%s' GROUP by station
-         """ % (pcolumn, pcolumn, pcolumn, table, ids, ts0, ts1)
+         """ % (pcolumn, pcolumn, pcolumn, table, IDS, ts0, ts1)
 
     pcursor.execute(sql)
 
@@ -179,8 +179,8 @@ def grid_hour(nc, ts):
         if res is not None:
             nc.variables['skyc'][offset] = res
     else:
-        print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d %H:%M"),
-                                             pcursor.rowcount)
+        print(("%s has %02i entries, FAIL"
+               ) % (ts.strftime("%Y-%m-%d %H:%M"), pcursor.rowcount))
 
 
 def main():
@@ -198,6 +198,7 @@ def main():
     grid_hour(nc, ts)
 
     nc.close()
+
 
 if __name__ == "__main__":
     main()

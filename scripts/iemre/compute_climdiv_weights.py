@@ -1,19 +1,20 @@
 """
 Figure out the grid weighting for each state we care about
 """
-import netCDF4
+from __future__ import print_function
 import os
 import datetime
+
+import netCDF4
 from pyiem import iemre
+from pyiem.util import get_dbconn
 import numpy
-import psycopg2
-POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='iemdb')
-pcursor = POSTGIS.cursor()
-pcursor2 = POSTGIS.cursor()
+POSTGIS = get_dbconn('postgis', user='nobody')
 
 
 def create_file(fn):
     """ Generate the file! """
+    pcursor = POSTGIS.cursor()
     nc = netCDF4.Dataset(fn, 'w')
     nc.title = "IEM Climdiv Weighting file"
     nc.platform = "Grided Observations"
@@ -68,6 +69,8 @@ def create_file(fn):
 
 def do_weighting(fn):
     """ Do the magic """
+    pcursor = POSTGIS.cursor()
+    pcursor2 = POSTGIS.cursor()
     nc = netCDF4.Dataset(fn, 'a')
     for state in ['IA', 'ND', 'SD', 'KS', 'NE', 'MO', 'IN', 'IL', 'OH', 'MI',
                   'WI', 'MN', 'KY']:
@@ -83,7 +86,7 @@ def do_weighting(fn):
             xmax = row[2] + 0.5
             ymin = row[3] - 0.5
             ymax = row[4] + 0.5
-            print 'Processing Climdiv: %s' % (stid,)
+            print('Processing Climdiv: %s' % (stid,))
             data = numpy.zeros(numpy.shape(nc.variables[stid][:]))
             for i, lon in enumerate(nc.variables['lon'][:]):
                 for j, lat in enumerate(nc.variables['lat'][:]):
@@ -112,8 +115,14 @@ def do_weighting(fn):
             nc.variables[stid][:] = data
     nc.close()
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go"""
     fn = "/mesonet/data/iemre/climdiv_weights.nc"
     if not os.path.isfile(fn):
         create_file(fn)
     do_weighting(fn)
+
+
+if __name__ == '__main__':
+    main()

@@ -2,16 +2,18 @@
 
 Called from RUN_MIDNIGHT.sh
 """
+from __future__ import print_function
+import datetime
+import os
+import sys
+
 import netCDF4
 import pygrib
 import pyproj
-import datetime
-import psycopg2
 import pytz
-import os
-import sys
 import numpy as np
 from pyiem import iemre
+from pyiem.util import get_dbconn
 from scipy.interpolate import NearestNDInterpolator
 
 
@@ -25,7 +27,7 @@ SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.timezone("UTC"))
 
 def do_coop(ts):
     """Use COOP solar radiation data"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop', user='nobody')
     cursor = pgconn.cursor()
 
     cursor.execute("""SELECT ST_x(geom), ST_y(geom),
@@ -75,10 +77,10 @@ def do_hrrr(ts):
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            print 'coop/hrrr_solarrad.py %s had no solar rad' % (fn,)
+            print('coop/hrrr_solarrad.py %s had no solar rad' % (fn,))
             continue
         if len(grb) == 0:
-            print 'Could not find SWDOWN in HRR %s' % (fn,)
+            print('Could not find SWDOWN in HRR %s' % (fn,))
             continue
         g = grb[0]
         if total is None:
@@ -96,8 +98,8 @@ def do_hrrr(ts):
             total += g.values
 
     if total is None:
-        print 'coop/hrrr_solarrad.py found no HRRR data for %s' % (
-                                                    ts.strftime("%d %b %Y"), )
+        print(('coop/hrrr_solarrad.py found no HRRR data for %s'
+               ) % (ts.strftime("%d %b %Y"), ))
         return
 
     # We wanna store as W m-2, so we just average out the data by hour
@@ -117,7 +119,9 @@ def do_hrrr(ts):
     nc.variables['rsds'][offset] = data
     nc.close()
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go"""
     if len(sys.argv) == 4:
         sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                                 int(sys.argv[3]), 12)
@@ -129,3 +133,7 @@ if __name__ == '__main__':
         do_hrrr(sts)
     else:
         do_coop(sts)
+
+
+if __name__ == '__main__':
+    main()
