@@ -33,7 +33,7 @@ def get_gridinfo(filename, xpoints, ypoints):
     west = float(lines[4])
     north = float(lines[5])
     south = north + dy * ypoints
-    lats = np.arange(0, ypoints) * dy + south
+    lats = np.arange(0, ypoints) * (0 - dy) + south
     lons = np.arange(0, xpoints) * dx + west
     return lons, lats
 
