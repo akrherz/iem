@@ -3,11 +3,12 @@
 # platform: linux-64
 affine=2.1.0=py_1
 alabaster=0.7.10=py27_1
+appdirs=1.4.3=py_0
 asn1crypto=0.22.0=py27_0
 astroid=1.5.3=py27_0
 attrs=17.2.0=py27_0
 automat=0.6.0=py27_0
-babel=2.4.0=py27_0
+babel=2.5.1=py27_0
 backports=1.0=py27_1
 backports.functools_lru_cache=1.4=py27_1
 backports.shutil_get_terminal_size=1.0.0=py_3
@@ -38,13 +39,13 @@ constantly=15.1.0=py_0
 cryptography=2.0.3=py27_0
 curl=7.54.1=0
 cycler=0.10.0=py27_0
-cython=0.27.1=py27_0
+cython=0.27.2=py27_0
 dbus=1.10.22=0
 decorator=4.1.2=py27_0
 descartes=1.1.0=py27_0
 distribute=0.6.45=py27_1
 docutils=0.14=py27_0
-dropbox=7.3.1=py27_0
+dropbox=8.4.0=py_0
 ecmwf_grib=1.23.1=0
 entrypoints=0.2.3=py27_1
 enum34=1.1.6=py27_1
@@ -53,7 +54,7 @@ esmf=7.0.0=6
 et_xmlfile=1.0.1=py27_0
 expat=2.1.0=3
 fftw=3.3.6=3
-fiona=1.7.9=py27_1
+fiona=1.7.10=py27_0
 fontconfig=2.12.1=4
 freetype=2.7=1
 freexl=1.0.2=2
@@ -102,7 +103,7 @@ jpeg=9b=1
 json-c=0.12.1=0
 jsonschema=2.6.0=py27_0
 jupyter_client=5.1.0=py27_0
-jupyter_core=4.3.0=py27_0
+jupyter_core=4.4.0=py_0
 kealib=1.4.7=3
 krb5=1.14.2=0
 lazy-object-proxy=1.3.1=py27_0
@@ -115,7 +116,7 @@ libgdal=2.1.4=3
 libgfortran=3.0.0=1
 libiconv=1.14=4
 libkml=1.3.0=1
-libnetcdf=4.4.1.1=6
+libnetcdf=4.4.1.1=7
 libpng=1.6.28=1
 libpq=9.6.3=0
 libsodium=1.0.10=0
@@ -134,7 +135,7 @@ markupsafe=1.0=py27_0
 matplotlib=2.1.0=py27_0
 mccabe=0.6.1=py27_0
 metpy=0.6.0=py27_0
-mistune=0.7.4=py27_0
+mistune=0.8=py27_0
 mkl=2018.0.0=hb491cac_4
 mock=2.0.0=py27_0
 mpich=3.2=5
@@ -153,12 +154,12 @@ oauth2client=4.1.2=py27_0
 olefile=0.44=py27_0
 openblas=0.2.19=2
 openjpeg=2.1.2=3
-openpyxl=2.5.0a3=py27_0
+openpyxl=2.5.0b1=py27_0
 openssl=1.0.2l=0
 owslib=0.15.0=py_0
 packaging=16.8=py27_0
 pandas=0.20.3=py27_1
-pandoc=1.19.2=0
+pandoc=2.0.0.1=0
 pandocfilters=1.4.1=py27_0
 pango=1.40.4=0
 paste=2.0.3=py27_0
@@ -177,10 +178,10 @@ poppler-data=0.4.7=0
 postgresql=9.6.3=2
 proj4=4.9.3=4
 prompt_toolkit=1.0.15=py27_0
-psutil=5.3.1=py27_0
+psutil=5.4.0=py27_0
 psycopg2=2.7.3.1=py27_0
 ptyprocess=0.5.2=py27_0
-pyasn1=0.3.6=py_0
+pyasn1=0.3.7=py_0
 pyasn1-modules=0.1.4=py_0
 pycairo=1.13.3=py27_0
 pycosat=0.6.2=py27_0
@@ -205,7 +206,7 @@ pytables=3.4.2=py27_5
 python=2.7.14=0
 python-dateutil=2.6.1=py27_0
 python-memcached=1.58=py27_0
-pytz=2017.2=py27_0
+pytz=2017.3=py_1
 pyzmq=16.0.2=py27_2
 qt=5.6.2=3
 rasterio=0.36.0=py27_0
@@ -222,7 +223,7 @@ scipy=0.19.1=py27_blas_openblas_202
 service_identity=17.0.0=py27_0
 setuptools=36.6.0=py27_1
 setuptools_scm=1.15.6=py27_0
-shapely=1.6.1=py27_1
+shapely=1.6.2=py27_0
 simplegeneric=0.8.1=py27_0
 simplejson=3.11.1=py27_0
 singledispatch=3.4.0.3=py27_0
@@ -230,7 +231,7 @@ sip=4.18=py27_1
 six=1.11.0=py27_1
 snowballstemmer=1.2.1=py27_0
 snuggs=1.4.1=py27_0
-sphinx=1.6.4=py27_0
+sphinx=1.6.5=py27_0
 sphinxcontrib-websupport=1.0.1=py27_0
 sqlalchemy=1.1.13=py27_0
 sqlite=3.13.0=1
@@ -240,11 +241,11 @@ terminado=0.6=py27_0
 testpath=0.3.1=py27_0
 tk=8.5.19=2
 tornado=4.5.2=py27_0
-tqdm=4.19.2=py_0
+tqdm=4.19.4=py_0
 traitlets=4.3.2=py27_0
-twisted=17.5.0=py27_0
+twisted=17.9.0=py27h7008fb7_0
 typing=3.6.2=py27_0
-udunits2=2.2.23=1
+udunits2=2.2.25=1
 unixodbc=2.3.4=1
 uritemplate=3.0.0=py27_0
 urllib3=1.22=py27_0
@@ -256,7 +257,7 @@ wordcloud=1.2.1=py27_0
 wrapt=1.10.11=py27_0
 xerces-c=3.1.4=3
 xlrd=1.0.0=py27_1
-xlsxwriter=0.9.8=py27_0
+xlsxwriter=1.0.2=py_0
 xlwt=1.3.0=py27_0
 xorg-libxau=1.0.8=3
 xorg-libxdmcp=1.1.2=3
@@ -265,4 +266,4 @@ yaml=0.1.6=0
 zeromq=4.2.1=1
 zlib=1.2.8=3
 zope=1.0=py27_0
-zope.interface=4.4.2=py27_0
+zope.interface=4.4.3=py27hb02d991_0
