@@ -97,7 +97,7 @@ def do_work(valid, prod):
                               fill_value=1.e20)
     ncvar.units = units
     ncvar.long_name = long_name
-    ncvar.coordinates = "lon lat"
+    ncvar.coordinates = "lat lon"
     # convert RASTER via lookup table
     ncvar[:] = xref[raster]
     nc.close()
