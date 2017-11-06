@@ -1,11 +1,12 @@
-import psycopg2
-import calendar
-import matplotlib.cm as cm
+"""Climate District ranks"""
 import datetime
+import calendar
+from collections import OrderedDict
+
+import matplotlib.cm as cm
 import numpy as np
 from pandas.io.sql import read_sql
-from collections import OrderedDict
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict((
     ('arridity', 'Arridity Index'),
@@ -62,7 +63,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
 
     year = ctx['year']
@@ -128,11 +129,11 @@ def plotter(fdict):
                      years, lastyear)
     if varname == 'arridity':
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
-    m = MapPlot(sector='midwest', axisbg='white',
-                title='%s %s %s %sby Climate District' % (
-                        year, label, PDICT[varname],
-                        'Ranks ' if varname != 'arridity' else ''),
-                subtitle=subtitle)
+    mp = MapPlot(sector='midwest', continentalcolor='white',
+                 title='%s %s %s %sby Climate District' % (
+                         year, label, PDICT[varname],
+                         'Ranks ' if varname != 'arridity' else ''),
+                 subtitle=subtitle)
     cmap = cm.get_cmap("BrBG_r" if varname in ['precip', 'arridity']
                        else 'BrBG')
     cmap.set_under('white')
@@ -144,11 +145,11 @@ def plotter(fdict):
         bins = np.arange(-4, 4.1, 1)
         pvar = varname
         fmt = '%.1f'
-    m.fill_climdiv(df[pvar], ilabel=True, plotmissing=False, lblformat=fmt,
-                   bins=bins,
-                   cmap=cmap)
+    mp.fill_climdiv(df[pvar], ilabel=True, plotmissing=False, lblformat=fmt,
+                    bins=bins,
+                    cmap=cmap)
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

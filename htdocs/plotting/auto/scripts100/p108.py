@@ -3,10 +3,9 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-import psycopg2
 import numpy as np
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([('all', 'Show All Three Plots'),
                      ('gdd', 'Show just Growing Degree Days'),
@@ -58,7 +57,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
@@ -106,7 +105,8 @@ def plotter(fdict):
     if whichplots == 'all':
         fig = plt.figure(figsize=(9, 12))
         ax1 = fig.add_axes([0.1, 0.7, 0.8, 0.2])
-        ax2 = fig.add_axes([0.1, 0.6, 0.8, 0.1], sharex=ax1, axisbg='#EEEEEE')
+        ax2 = fig.add_axes([0.1, 0.6, 0.8, 0.1], sharex=ax1,
+                           facecolor='#EEEEEE')
         ax3 = fig.add_axes([0.1, 0.35, 0.8, 0.2], sharex=ax1)
         ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1)
         title = ("GDD(base=%.0f,ceil=%.0f), Precip, & "
@@ -114,7 +114,8 @@ def plotter(fdict):
     elif whichplots == 'gdd':
         fig = plt.figure()
         ax1 = fig.add_axes([0.1, 0.3, 0.8, 0.5])
-        ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1, axisbg='#EEEEEE')
+        ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1,
+                           facecolor='#EEEEEE')
         title = ("GDD(base=%.0f,ceil=%.0f)") % (gddbase, gddceil)
     elif whichplots == 'precip':
         fig = plt.figure()
@@ -200,11 +201,11 @@ def plotter(fdict):
     xmax = np.nanmax(sacc, 0)
     if whichplots in ['all', 'sdd']:
         ax4.fill_between(range(len(xmin)), xmin, xmax, color='lightblue')
-        ax4.set_ylabel("SDD Base 86 $^{\circ}\mathrm{F}$", fontsize=16)
+        ax4.set_ylabel(r"SDD Base 86 $^{\circ}\mathrm{F}$", fontsize=16)
         ax4.grid(True)
 
     if whichplots in ['all', 'gdd']:
-        ax1.set_ylabel(("GDD Base %.0f Ceil %.0f $^{\circ}\mathrm{F}$"
+        ax1.set_ylabel((r"GDD Base %.0f Ceil %.0f $^{\circ}\mathrm{F}$"
                         ) % (gddbase, gddceil), fontsize=16)
 
         ax1.text(0.5, 0.9, "%s/%s - %s/%s" % (sdate.month, sdate.day,
