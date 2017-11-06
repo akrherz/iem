@@ -1,5 +1,4 @@
-"""Ingest the SRRS text files into the AFOS IEM database
-"""
+"""Ingest the SRRS text files into the AFOS IEM database"""
 from __future__ import print_function
 import glob
 import datetime
@@ -9,16 +8,15 @@ import re
 import sys
 import os
 
-import psycopg2
 import pytz
-from pyiem.util import noaaport_text
+from pyiem.util import noaaport_text, get_dbconn
 from pyiem.nws.product import TextProduct
 
 BAD_CHARS = r"[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@#]"
 DELIMITER = re.compile(r"[\*#]{4}[0-9]{9,10}[\*#]{4}")
 ENDDELIM = "****0000000000****"
 
-PGCONN = psycopg2.connect(database='afos', host='iemdb')
+PGCONN = get_dbconn('afos')
 
 
 def process():

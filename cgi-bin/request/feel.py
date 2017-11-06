@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-
-import pandas as pd
+"""FEEL data download"""
 import sys
 import cgi
 import datetime
-import psycopg2
 import os
-import pytz
+
+import pandas as pd
+from pyiem.util import get_dbconn
 
 
 def run(sts, ets):
     """ Get data! """
-    dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
+    dbconn = get_dbconn('other', user='nobody')
     sql = """SELECT * from feel_data_daily where
     valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
     df = pd.read_sql(sql, dbconn)
@@ -45,6 +45,7 @@ def main():
     ets = datetime.datetime(year2, month2, day2)
 
     run(sts, ets)
+
 
 if __name__ == '__main__':
     main()

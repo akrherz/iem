@@ -11,7 +11,7 @@ import json
 
 
 def main():
-    ''' Go main go '''
+    """Go main go"""
     form = cgi.FieldStorage()
     if 'address' in form:
         address = form["address"].value
@@ -25,16 +25,19 @@ def main():
     uri = ('http://maps.googleapis.com/maps/api/geocode/json'
            '?'+address+'&sensor=true')
     data = json.loads(urllib2.urlopen(uri).read())
-    if len(data['results']) > 0:
-        print "%s,%s" % (data['results'][0]['geometry']['location']['lat'],
-                         data['results'][0]['geometry']['location']['lng'])
+    if data['results']:
+        sys.stdout.write("%s,%s" % (
+            data['results'][0]['geometry']['location']['lat'],
+            data['results'][0]['geometry']['location']['lng']))
     else:
         sys.stderr.write(str(data))
-        print "ERROR"
+        sys.stdout.write("ERROR")
 
-sys.stdout.write('Content-type: text/plain \n\n')
-try:
-    main()
-except Exception, exp:
-    sys.stderr.write(str(exp))
-    print "ERROR"
+
+if __name__ == '__main__':
+    sys.stdout.write('Content-type: text/plain \n\n')
+    try:
+        main()
+    except Exception, exp:
+        sys.stderr.write(str(exp))
+        sys.stdout.write("ERROR\n")

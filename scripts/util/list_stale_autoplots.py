@@ -2,8 +2,8 @@
 from __future__ import print_function
 import re
 
-import psycopg2
 import pandas as pd
+from pyiem.util import get_dbconn
 
 QRE = re.compile("q=([0-9]+)")
 # Some autoplots will likely never see a feature, or are retired
@@ -13,7 +13,7 @@ NO_FEATURES = [17, 38, 49, 50, 51, 110, 111, 112, 113, 114, 115, 116, 117,
 
 def main():
     """DO Something"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    pgconn = get_dbconn('mesosite', user='nobody')
     cursor = pgconn.cursor()
 
     cursor.execute("""SELECT valid, appurl from feature WHERE appurl is not null
@@ -26,7 +26,7 @@ def main():
         if appurl.find("/plotting/auto/") != 0:
             continue
         tokens = QRE.findall(appurl)
-        if len(tokens) == 0:
+        if not tokens:
             print("appurl: %s valid: %s failed RE" % (appurl, valid))
             continue
         appid = int(tokens[0])

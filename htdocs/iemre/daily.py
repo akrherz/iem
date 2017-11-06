@@ -4,11 +4,12 @@
 import sys
 import os
 import cgi
-from pyiem import iemre, datatypes
-import netCDF4
 import datetime
 import json
+
+import netCDF4
 import numpy as np
+from pyiem import iemre, datatypes
 
 
 def myrounder(val, precision):
@@ -93,6 +94,7 @@ def main():
     cnc.close()
 
     sys.stdout.write(json.dumps(res))
+
 
 if __name__ == '__main__':
     main()

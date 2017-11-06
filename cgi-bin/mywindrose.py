@@ -6,14 +6,16 @@ Generate a PNG windrose based on the CGI parameters, called from
     htdocs/sites/windrose.phtml
 """
 import datetime
-import numpy
-from pyiem.windrose_utils import windrose
-from pyiem.network import Table as NetworkTable
 import cgi
 import sys
 
+import numpy
+from pyiem.windrose_utils import windrose
+from pyiem.network import Table as NetworkTable
+
 
 def send_error(form, msg):
+    """Abort, abort"""
     fmt = form.getfirst('fmt', 'png')
     if fmt == 'png':
         ct = "image/png"
@@ -33,6 +35,7 @@ def send_error(form, msg):
 
 
 def get_times(form):
+    """get the times of interest"""
     if ("year1" in form and "year2" in form and
             "month1" in form and "month2" in form and
             "day1" in form and "day2" in form and
@@ -56,7 +59,7 @@ def get_times(form):
 
 
 def main():
-    # Query out the CGI variables
+    """ Query out the CGI variables"""
     form = cgi.FieldStorage()
     try:
         sts, ets = get_times(form)

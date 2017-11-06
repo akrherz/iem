@@ -4,9 +4,10 @@ Download interface for data from 'other' network
 """
 import sys
 import cgi
-import mx.DateTime
+import datetime
+
+from pyiem.util import get_dbconn
 import psycopg2.extras
-OTHER = psycopg2.connect(database='other', host='iemdb', user='nobody')
 
 
 def fetcher(station, sts, ets):
@@ -16,7 +17,8 @@ def fetcher(station, sts, ets):
     cols = ['station', 'valid', 'tmpf', 'dwpf', 'drct', 'sknt', 'gust',
             'relh', 'alti', 'pcpncnt', 'pday', 'pmonth', 'srad', 'c1tmpf']
 
-    ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('other', user='nobody')
+    ocursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ocursor.execute("""
     SELECT * from alldata where station = %s and valid between %s and %s
     ORDER by valid ASC
@@ -50,8 +52,8 @@ def main():
     day1 = int(form["day1"][0])
     day2 = int(form["day2"][0])
 
-    sts = mx.DateTime.DateTime(year1, month1, day1)
-    ets = mx.DateTime.DateTime(year2, month2, day2)
+    sts = datetime.datetime(year1, month1, day1)
+    ets = datetime.datetime(year2, month2, day2)
     sys.stdout.write("Content-type: text/plain\n\n")
     fetcher(station, sts, ets)
 

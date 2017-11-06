@@ -13,15 +13,15 @@ Conductivity (micro-S)
 18.19    ch2_data_t
 48       ch1_data_c
 """
-
-import psycopg2
 import cgi
 import sys
 import datetime
-import pandas as pd
 import os
 
-lookup = {9100104: "SSP #6",
+import pandas as pd
+from pyiem.util import get_dbconn
+
+LOOKUP = {9100104: "SSP #6",
           9100135: "SSP #8",
           9100131: "SSP #1",
           9100156: "SSP #7"}
@@ -29,12 +29,12 @@ lookup = {9100104: "SSP #6",
 
 def gage_run(sts, ets, stations, excel):
     """ run() """
-    if len(stations) == 0:
-        stations = lookup.keys()
+    if not stations:
+        stations = LOOKUP.keys()
     if len(stations) == 1:
         stations.append(0)
 
-    dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
+    dbconn = get_dbconn('other', user='nobody')
     sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
     site_serial, ch1_data_p, ch2_data_p,
     ch1_data_t, ch2_data_t, ch1_data_c
@@ -59,7 +59,7 @@ def gage_run(sts, ets, stations, excel):
 
 def bubbler_run(sts, ets, excel):
     """ run() """
-    dbconn = psycopg2.connect(database='other', host='iemdb', user='nobody')
+    dbconn = get_dbconn('other', user='nobody')
     sql = """
     WITH one as (SELECT valid, value from ss_bubbler WHERE
     valid between '%s' and '%s' and field = 'Batt Voltage'),

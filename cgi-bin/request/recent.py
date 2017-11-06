@@ -2,16 +2,16 @@
 """
 Return a simple CSV of recent observations from the database
 """
-
-import psycopg2
 import cgi
 import sys
+
 import memcache
+from pyiem.util import get_dbconn
 
 
 def run(sid):
     """ run() """
-    dbconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    dbconn = get_dbconn('iem', user='nobody')
     cursor = dbconn.cursor()
     cursor.execute("""SELECT valid at time zone 'UTC', tmpf, dwpf, raw,
     ST_x(geom), ST_y(geom) , tmpf, dwpf, drct, sknt, phour, alti, mslp, vsby,
@@ -30,7 +30,9 @@ def run(sid):
 
     return res.replace("None", "M")
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go"""
     sys.stdout.write("Content-type: text/plain\n\n")
     form = cgi.FieldStorage()
     sid = form.getfirst('station', 'AMW')[:5]
@@ -44,3 +46,7 @@ if __name__ == '__main__':
         mc.set(mckey, res, 300)
     else:
         sys.stdout.write(res)
+
+
+if __name__ == '__main__':
+    main()

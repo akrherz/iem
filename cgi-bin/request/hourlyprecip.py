@@ -1,16 +1,18 @@
 #!/usr/bin/env python
+"""Hourly precip download"""
 import cgi
 import datetime
 import sys
+
 import pytz
-import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-cursor = IEM.cursor()
+from pyiem.util import get_dbconn
 
 
 def get_data(network, sts, ets, tzinfo, stations=[]):
-    ''' Go fetch data please '''
-    s = ("station,network,valid,precip_in\n")
+    """Go fetch data please"""
+    pgconn = get_dbconn('iem', user='nobody')
+    cursor = pgconn.cursor()
+    res = ("station,network,valid,precip_in\n")
     if len(stations) == 1:
         stations.append('ZZZZZ')
     cursor.execute("""SELECT station, network, valid, phour from
@@ -19,12 +21,12 @@ def get_data(network, sts, ets, tzinfo, stations=[]):
         ORDER by valid ASC
         """, (sts, ets, network, tuple(stations)))
     for row in cursor:
-        s += ("%s,%s,%s,%s\n"
-              ) % (row[0], row[1],
-                   (row[2].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M"),
-                   row[3])
+        res += ("%s,%s,%s,%s\n"
+                ) % (row[0], row[1],
+                     (row[2].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M"),
+                     row[3])
 
-    return s
+    return res
 
 
 def main():
@@ -39,16 +41,17 @@ def main():
         ets = datetime.date(int(form.getfirst('year2')),
                             int(form.getfirst('month2')),
                             int(form.getfirst('day2')))
-    except:
+    except Exception as exp:
         sys.stdout.write(("ERROR: Invalid date provided, please check "
                           "selected dates."))
         return
     stations = form.getlist('station')
-    if len(stations) == 0:
+    if not stations:
         sys.stdout.write(("ERROR: No stations specified for request."))
         return
     network = form.getfirst('network')[:12]
     sys.stdout.write(get_data(network, sts, ets, tzinfo, stations=stations))
+
 
 if __name__ == '__main__':
     # Go Main Go
