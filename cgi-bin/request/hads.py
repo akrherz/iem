@@ -5,13 +5,14 @@ Download Interface for HADS data
 import sys
 import cgi
 import datetime
-import pytz
 import os
+
+import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
-import psycopg2
-PGCONN = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
+from pyiem.util import get_dbconn
 
+PGCONN = get_dbconn('hads', user='nobody')
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 
 
@@ -90,7 +91,7 @@ def main():
     thresholdvar = form.getfirst('threshold-var', 'RG')
     sts, ets = get_time(form)
     stations = form.getlist('stations')
-    if len(stations) == 0:
+    if not stations:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Error, no stations specified for the query!")
         return
@@ -103,7 +104,7 @@ def main():
     WHERE station in %s and valid BETWEEN '%s' and '%s'
     and value > -999""" % (tuple(stations), sts, ets)
     df = read_sql(sql, PGCONN)
-    if len(df) == 0:
+    if len(df.index) == 0:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Sorry, no results found for query!")
         return

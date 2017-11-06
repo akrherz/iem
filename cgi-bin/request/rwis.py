@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-"""
-Download Interface for RWIS data
-"""
+"""Download Interface for RWIS data"""
 import sys
 import cgi
 import datetime
-import pytz
 import os
-from pyiem.network import Table as NetworkTable
+
+import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
-import psycopg2
-PGCONN = psycopg2.connect(database='rwis', host='iemdb', user='nobody')
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
+
+PGCONN = get_dbconn('rwis', user='nobody')
 
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 
@@ -56,7 +56,7 @@ def main():
     src = form.getfirst('src', 'atmos')
     sts, ets = get_time(form, tzname)
     stations = form.getlist('stations')
-    if len(stations) == 0:
+    if not stations:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Error, no stations specified for the query!")
         return
@@ -71,7 +71,7 @@ def main():
     WHERE station in %s and valid BETWEEN %s and %s ORDER by valid ASC
     """
     df = read_sql(sql, PGCONN, params=(tzname, tuple(stations), sts, ets))
-    if len(df) == 0:
+    if len(df.index) == 0:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Sorry, no results found for query!")
         return
@@ -112,6 +112,7 @@ def main():
     else:
         sys.stdout.write("Content-type: text/plain\n\n")
         df.to_csv(sys.stdout, sep=delimiter, columns=myvars)
+
 
 if __name__ == '__main__':
     main()

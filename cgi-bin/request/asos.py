@@ -16,6 +16,9 @@ from pyiem import meteorology
 
 def check_load():
     """Prevent automation from overwhelming the server"""
+    if os.environ['REQUEST_METHOD'] == 'OPTIONS':
+        sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
+        sys.exit()
     for i in range(5):
         pgconn = psycopg2.connect(database='mesosite', host='iemdb',
                                   user='nobody')
@@ -46,7 +49,7 @@ def get_stations(form):
         sys.stdout.write("ERROR: station must be specified!")
         sys.exit(0)
     stations = form.getlist("station")
-    if len(stations) == 0:
+    if not stations:
         sys.stdout.write("Content-type: text/plain \n\n")
         sys.stdout.write("ERROR: station must be specified!")
         sys.exit(0)
@@ -72,7 +75,7 @@ def get_time_bounds(form, tzinfo):
                           second=0, microsecond=0)
         ets = sts.replace(year=y2, month=m2, day=d2, hour=0, minute=0,
                           second=0, microsecond=0)
-    except:
+    except Exception as _exp:
         sys.stdout.write("ERROR: Malformed Date!")
         sys.exit()
 

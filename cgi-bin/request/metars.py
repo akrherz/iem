@@ -7,8 +7,9 @@
 import cgi
 import sys
 import datetime
+
 import pytz
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def check_load(cursor):
@@ -28,7 +29,7 @@ def check_load(cursor):
 
 def main():
     """Do Something"""
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos', user='nobody')
     check_load(pgconn.cursor())
     acursor = pgconn.cursor("streamer")
     sys.stdout.write("Content-type: text/plain\n\n")
@@ -45,6 +46,7 @@ def main():
     """, (valid, valid + datetime.timedelta(hours=1)))
     for row in acursor:
         sys.stdout.write("%s\n" % (row[0].replace("\n", " "),))
+
 
 if __name__ == '__main__':
     main()
