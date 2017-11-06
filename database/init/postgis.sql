@@ -797,6 +797,7 @@ CREATE TABLE vtec_missing_events(
   significance char(1),
   eventid int
 );
+GRANT ALL on vtec_missing_events to mesonet,ldm;
 GRANT select on vtec_missing_events to nobody,apache;
 
 ---
@@ -2631,6 +2632,7 @@ alter table warnings_2017 ALTER ugc SET NOT NULL;
 alter table warnings_2017 ALTER phenomena SET NOT NULL;
 alter table warnings_2017 ALTER significance SET NOT NULL;
 grant select on warnings_2017 to nobody,apache;
+GRANT ALL on warnings_2017 to mesonet,ldm;
 
 
 CREATE table sbw_2017() inherits (sbw);

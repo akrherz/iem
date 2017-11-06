@@ -27,7 +27,7 @@ python plot.py 12
 # Wait a bit before doing this
 sleep 600
 cd ../qc
-python correctGusts.py
+python correct_gusts.py
 python check_station_geom.py
 python check_vtec_eventids.py
 python check_afos_sources.py

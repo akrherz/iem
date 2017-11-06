@@ -284,7 +284,7 @@ CREATE TABLE stations(
 	precip24_hour smallint
 );
 -- no commas in name please
-alter table stations add constraint stations_nocommas check(strpos(name, ',') = 0)
+alter table stations add constraint stations_nocommas check(strpos(name, ',') = 0);
 CREATE UNIQUE index stations_idx on stations(id, network);
 create UNIQUE index stations_iemid_idx on stations(iemid);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
