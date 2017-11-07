@@ -3,20 +3,24 @@
 HML files provide station names that are likely better than what I manually
 hacked into the database previously..."""
 from __future__ import print_function
+import sys
+
 from pyiem.nws.products.hml import parser
 from pyiem.reference import nwsli2state
 from pyiem.util import get_dbconn
-import sys
 sys.path.insert(0, "../dbutil")
 from delete_station import delete_logic  # @UnresolvedImport
 
 
 def build_stations():
+    """Build the cross reference"""
     xref = {}
     pgconn = get_dbconn('afos')
     cursor = pgconn.cursor('streamer')
-    cursor.execute("""SELECT data from products WHERE
-    entered > 'YESTERDAY' and substr(pil, 1, 3) = 'HML'""")
+    cursor.execute("""
+        SELECT data from products WHERE
+        entered > 'YESTERDAY' and substr(pil, 1, 3) = 'HML'
+    """)
     for row in cursor:
         hml = parser(row[0])
         for _hml in hml.data:
@@ -117,6 +121,7 @@ def merge(xref):
 
 
 def main():
+    """Go Main Go"""
     xref = build_stations()
     merge(xref)
 

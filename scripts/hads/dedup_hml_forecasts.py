@@ -3,15 +3,17 @@
 Suspicion is that do to retrans, etc, there are lots of dups in the HML
 database.  So this attempts to de-dup them.
 """
+from __future__ import print_function
 import sys
 import datetime
-import psycopg2
+
 import pytz
+from pyiem.util import get_dbconn
 
 
-def do(ts):
+def workflow(ts):
     """Deduplicate this timestep"""
-    pgconn = psycopg2.connect(dbname='hads', host='iemdb-hads')
+    pgconn = get_dbconn('hads')
     cursor = pgconn.cursor()
     table = "hml_forecast_data_%s" % (ts.year, )
     cursor.execute("""
@@ -41,12 +43,14 @@ def do(ts):
 
 
 def main(argv):
+    """Go Main Go"""
     if len(argv) != 4:
         ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     else:
         ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
     ts = ts.replace(tzinfo=pytz.utc)
-    do(ts)
+    workflow(ts)
+
 
 if __name__ == '__main__':
     main(sys.argv)

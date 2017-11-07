@@ -1,20 +1,19 @@
 """Ingest SMOS data, please!"""
-
+from __future__ import print_function
 import glob
 import os
-import psycopg2
 import re
-import pytz
-import netCDF4
 import datetime
 import StringIO
 
+import pytz
+import netCDF4
+from pyiem.util import get_dbconn
+
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
-SMOS = psycopg2.connect(database='smos', host='iemdb')
-scursor = SMOS.cursor()
 
 
-def consume(fn, ts):
+def consume(scursor, fn, ts):
     """Actually process the filename at given timestamp
     """
     table = "data_%s" % (ts.strftime("%Y_%m"),)
@@ -51,7 +50,7 @@ def fn2datetime(fn):
     Example: SM_OPER_MIR_SMUDP2_20161014T002122_20161014T011435_620_001_1.nc
     """
     tokens = TSTAMP.findall(fn)
-    if len(tokens) == 0:
+    if not tokens:
         return None
     ts = datetime.datetime.strptime(tokens[0], '%Y%m%dT%H%M%S')
     return ts.replace(tzinfo=pytz.utc)
@@ -59,6 +58,8 @@ def fn2datetime(fn):
 
 def lookforfiles():
     """Look for any new data to ingest"""
+    pgconn = get_dbconn('smos')
+    scursor = pgconn.cursor()
     os.chdir("/mesonet/data/smos")
     files = glob.glob("*.nc")
     for fn in files:
@@ -72,11 +73,12 @@ def lookforfiles():
         row = scursor.fetchone()
         if row is None:
             # print "INGEST FILE!", file
-            consume(fn, ts)
+            consume(scursor, fn, ts)
             scursor.execute("""
             INSERT into obtimes(valid) values (%s)
             """, (ts,))
-            SMOS.commit()
+            pgconn.commit()
+
 
 if __name__ == "__main__":
     lookforfiles()

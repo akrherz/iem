@@ -8,7 +8,7 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'First Spring/Last Fall Temperature Above Threshold',
          'below': 'Last Spring/First Fall Temperature Below Threshold'}
@@ -46,7 +46,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -157,7 +157,7 @@ def plotter(fdict):
     title = PDICT.get(direction, '').replace('Temperature',
                                              PDICT2.get(varname))
     ax.set_title(("[%s] %s\n"
-                  "%s %s$^\circ$F"
+                  r"%s %s$^\circ$F"
                   ) % (station, nt.sts[station]['name'], title, threshold))
     ax.legend(ncol=2, fontsize=14, labelspacing=2)
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))

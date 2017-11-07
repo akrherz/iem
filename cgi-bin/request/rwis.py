@@ -11,7 +11,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-PGCONN = get_dbconn('rwis', user='nobody')
+PGCONN = get_dbconn('rwis')
 
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 
@@ -71,7 +71,7 @@ def main():
     WHERE station in %s and valid BETWEEN %s and %s ORDER by valid ASC
     """
     df = read_sql(sql, PGCONN, params=(tzname, tuple(stations), sts, ets))
-    if len(df.index) == 0:
+    if df.empty:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Sorry, no results found for query!")
         return

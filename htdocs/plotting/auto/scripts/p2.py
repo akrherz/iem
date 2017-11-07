@@ -2,11 +2,10 @@
 import datetime
 import calendar
 
-import psycopg2
 from scipy import stats
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -41,7 +40,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     month = ctx['month']
@@ -54,7 +53,7 @@ def plotter(fdict):
         sum(gdd50(high::numeric,low::numeric)) as gdd50 from """+table+"""
         WHERE station = %s and month = %s GROUP by year
     """, pgconn, params=(station, month), index_col='year')
-    if len(df.index) == 0:
+    if df.empty:
         return "ERROR: No Data Found"
 
     gstats = df.gdd50.describe()
@@ -87,8 +86,8 @@ def plotter(fdict):
     if year in df.index:
         c = Circle((0, 0), radius=df.loc[year].distance, facecolor='none')
         ax.add_patch(c)
-    ax.set_xlabel("Growing Degree Day Departure ($\sigma$)")
-    ax.set_ylabel("Precipitation Departure ($\sigma$)")
+    ax.set_xlabel(r"Growing Degree Day Departure ($\sigma$)")
+    ax.set_ylabel(r"Precipitation Departure ($\sigma$)")
     ax.grid(True)
     ax.set_title(("%s %s [%s]\n"
                   "Growing Degree Day (base=50) + Precipitation Departure"

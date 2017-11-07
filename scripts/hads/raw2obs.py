@@ -1,17 +1,18 @@
 """Convert the raw table data into something faster for website to use"""
-import psycopg2
+from __future__ import print_function
 import datetime
-import pytz
 import sys
 import StringIO
-import pandas as pd
-from pyiem.datatypes import speed
-from pandas.io.sql import read_sql
 
-pgconn = psycopg2.connect(database='hads', host='iemdb-hads')
+import pytz
+from pyiem.datatypes import speed
+from pyiem.util import get_dbconn
+import pandas as pd
+from pandas.io.sql import read_sql
 
 
 def v(val):
+    """lame"""
     if pd.isnull(val):
         return '\N'
     return val
@@ -19,6 +20,7 @@ def v(val):
 
 def do(ts):
     """ Do a UTC date's worth of data"""
+    pgconn = get_dbconn('hads')
     table = ts.strftime("raw%Y_%m")
     sts = datetime.datetime(ts.year, ts.month, ts.day).replace(tzinfo=pytz.utc)
     ets = sts + datetime.timedelta(hours=24)
@@ -29,7 +31,7 @@ def do(ts):
         substr(key, 1, 3) in ('USI', 'UDI', 'TAI', 'TDI')
         and value > -999
     """, pgconn, params=(sts, ets), index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         print("No data found for hads/raw2obs.py date: %s" % (ts,))
         return
 
@@ -57,10 +59,12 @@ def do(ts):
 
 
 def main(argv):
+    """Go Main Go"""
     ts = datetime.date.today() - datetime.timedelta(days=1)
     if len(argv) == 4:
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     do(ts)
+
 
 if __name__ == '__main__':
     main(sys.argv)

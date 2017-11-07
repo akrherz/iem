@@ -8,10 +8,10 @@ import json
 import sys
 
 import memcache
-import psycopg2
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
+from pyiem.util import get_dbconn
 
 ISO9660 = '%Y-%m-%dT%H:%MZ'
 
@@ -25,7 +25,7 @@ def get_order(threshold):
 
 def get_dbcursor():
     """Do as I say"""
-    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    postgis = get_dbconn('postgis')
     return postgis.cursor()
 
 
@@ -39,7 +39,7 @@ def dotime(time, lon, lat, day, cat):
         # ISO formatting
         ts = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%MZ')
         ts = ts.replace(tzinfo=pytz.utc)
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     df = read_sql("""
     SELECT issue at time zone 'UTC' as i,
     expire at time zone 'UTC' as e,
@@ -63,7 +63,7 @@ def dotime(time, lon, lat, day, cat):
             },
         'outlook': {}
         }
-    if len(df.index) == 0:
+    if df.empty:
         return json.dumps(res)
     df['threshold_rank'] = df['threshold'].apply(get_order)
     df.sort_values('threshold_rank', ascending=False, inplace=True)

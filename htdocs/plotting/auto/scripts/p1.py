@@ -2,7 +2,6 @@
 import datetime
 import calendar
 
-import psycopg2
 import numpy as np
 from scipy import stats
 from pyiem import network, util
@@ -103,7 +102,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = util.get_dbconn('coop')
 
     today = datetime.date.today()
     ctx = util.get_autoplot_context(fdict, get_description())

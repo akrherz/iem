@@ -1,17 +1,18 @@
 """Attempt at totalling up hourly DCP data """
-import psycopg2
+from __future__ import print_function
 import datetime
-import pytz
 import sys
+
+import pytz
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
 
 
 def do(date):
     """Do the necessary work for this date"""
-    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
-                              user='nobody')
-    iem_pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('hads', user='nobody')
+    iem_pgconn = get_dbconn('iem')
     icursor = iem_pgconn.cursor()
     # load up the current obs
     df = read_sql("""
@@ -29,7 +30,7 @@ def do(date):
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
         base = ts.astimezone(pytz.timezone(tzname))
         bases[tzname] = base.replace(hour=0)
-    # retreive data that is within 12 hours of our bounds
+    # retrieve data that is within 12 hours of our bounds
     sts = datetime.datetime(date.year, date.month,
                             date.day) - datetime.timedelta(hours=12)
     ets = sts + datetime.timedelta(hours=48)
@@ -38,6 +39,9 @@ def do(date):
     from raw"""+str(date.year)+""" WHERE valid between %s and %s and
     substr(key, 1, 3) = 'PPH' and value >= 0
     """, pgconn, params=(sts, ets), index_col=None)
+    if obsdf.empty:
+        print("compute_hads_pday for %s found no data" % (date, ))
+        return
     obsdf['utc_valid'] = obsdf['utc_valid'].dt.tz_localize('utc')
     precip = np.zeros((24*60))
     grouped = obsdf.groupby('station')
@@ -84,6 +88,7 @@ def main(argv):
     else:
         ts = datetime.date.today()
     do(ts)
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -12,20 +12,28 @@ x grid wrapping experimentation too, sigh
 
 This file was provided by Jason Patton
 """
-import psycopg2
-SMOS = psycopg2.connect(database='smos', host='iemdb')
-scursor = SMOS.cursor()
+from pyiem.util import get_dbconn
 
-for line in open('/tmp/smos_grid.txt').readlines()[1:]:
-    (sid, lon, lat) = line.split(",")
-    sid = int(sid)
-    gridy = (sid - 75) % 513
-    gridx = (sid - 75) / 513
-    if gridx > 9000:
-        gridx = gridx - 9236
-    scursor.execute("""
-    INSERT into grid(idx,gridx,gridy,geom) VALUES
-    (%s, %s, %s, 'SRID=4326;POINT(%s %s)')
-    """ % (sid, gridx, gridy, lon, lat))
 
-SMOS.commit()
+def main():
+    """Go Main Go"""
+    pgconn = get_dbconn('smos')
+    scursor = pgconn.cursor()
+
+    for line in open('/tmp/smos_grid.txt').readlines()[1:]:
+        (sid, lon, lat) = line.split(",")
+        sid = int(sid)
+        gridy = (sid - 75) % 513
+        gridx = (sid - 75) / 513
+        if gridx > 9000:
+            gridx = gridx - 9236
+        scursor.execute("""
+        INSERT into grid(idx,gridx,gridy,geom) VALUES
+        (%s, %s, %s, 'SRID=4326;POINT(%s %s)')
+        """ % (sid, gridx, gridy, lon, lat))
+
+    pgconn.commit()
+
+
+if __name__ == '__main__':
+    main()

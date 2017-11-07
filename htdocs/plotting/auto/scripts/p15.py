@@ -1,11 +1,12 @@
-import psycopg2
-import numpy as np
+"""day to day temp changes"""
 import calendar
 import datetime
+
+import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from collections import OrderedDict
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
         ('high', 'High Temperature'),
@@ -14,11 +15,11 @@ PDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This plot displays the directional frequency of
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This plot displays the directional frequency of
     day to day changes in high or low temperature summarized by month."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='varname', default='high',
@@ -26,7 +27,7 @@ def get_description():
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Year to Highlight', min=1893),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -35,7 +36,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.patheffects as PathEffects
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     varname = ctx['varname']

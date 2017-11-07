@@ -12,7 +12,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn
 
-PGCONN = get_dbconn('hads', user='nobody')
+PGCONN = get_dbconn('hads')
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 
 
@@ -104,7 +104,7 @@ def main():
     WHERE station in %s and valid BETWEEN '%s' and '%s'
     and value > -999""" % (tuple(stations), sts, ets)
     df = read_sql(sql, PGCONN)
-    if len(df.index) == 0:
+    if df.empty:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("Sorry, no results found for query!")
         return
