@@ -23,17 +23,17 @@ import pytz
 import requests
 import pandas as pd
 from pyiem.datatypes import pressure
+from pyiem.util import get_dbconn
 from metar.Metar import Metar
 from metar.Metar import ParserError as MetarParserError
-import psycopg2
-ASOS = psycopg2.connect(database='asos', host='iemdb')
+ASOS = get_dbconn('asos')
 
 SLP = 'Sea Level PressureIn'
 ERROR_RE = re.compile("Unparsed groups in body '(?P<msg>.*)' while processing")
 
 
 class OB(object):
-    ''' hacky representation of the database schema '''
+    """hacky representation of the database schema"""
     station = None
     valid = None
     tmpf = None
@@ -348,7 +348,7 @@ def doit(jar, station, days):
                         print(('SETTING PRESSURE %s old: %s new: %s'
                                ) % (ob.valid.strftime("%Y/%m/%d %H%M"),
                                     oldval, ob.mslp))
-                except Exception as exp:
+                except Exception as _exp:
                     pass
 
             sql = """
@@ -364,6 +364,7 @@ def doit(jar, station, days):
                 cmtr = ob.metar.decode('utf-8', 'replace').encode('ascii',
                                                                   'replace')
             except Exception as exp:
+                print(exp)
                 print("Non-ASCII METAR? %s" % (repr(ob.metar),))
                 continue
             args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
@@ -399,6 +400,9 @@ def process_metar(mstr, now):
                 msg = str(exp)
             except Exception as exp:
                 return None
+            if msg.find("day is out of range for month") > 0 and now.day == 1:
+                now -= datetime.timedelta(days=1)
+                continue
             tokens = ERROR_RE.findall(str(exp))
             orig_mstr = mstr
             if tokens:
@@ -409,6 +413,9 @@ def process_metar(mstr, now):
                     return None
             else:
                 print("MetarParserError: "+msg)
+                print("    --> now: %s month: %s, year: %s" % (now, now.month,
+                                                               now.year))
+                sys.exit()
                 return None
         except Exception, exp:
             print("Double Fail: %s %s" % (mstr, exp))
@@ -432,7 +439,7 @@ def process_metar(mstr, now):
 
     if mtr.temp:
         ob.tmpf = mtr.temp.value("F")
-    if (mtr.dewpt):
+    if mtr.dewpt:
         ob.dwpf = mtr.dewpt.value("F")
 
     if mtr.wind_speed:
@@ -487,9 +494,14 @@ def process_metar(mstr, now):
     return ob
 
 
-if __name__ == "__main__":
+def main():
+    """Go Main Go"""
     print('Starting up...')
     workflow()
     ASOS.commit()
     ASOS.close()
     print('Done!')
+
+
+if __name__ == "__main__":
+    main()
