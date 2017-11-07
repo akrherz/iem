@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
  Dump LSRs to a shapefile
 """
@@ -10,7 +10,7 @@ import cgi
 import StringIO
 
 import shapefile
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def send_error(msg):
@@ -57,7 +57,7 @@ def main():
         sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
         sys.exit()
 
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 
     # Get CGI vars

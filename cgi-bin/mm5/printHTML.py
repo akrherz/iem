@@ -1,5 +1,5 @@
-#!/usr/bin/python
-# This is a stupid printer that prints the top and bottom of the HTML page...
+"""This is a stupid printer that prints the top and bottom of the HTML page...
+"""
 
 def printTop():
 	print """

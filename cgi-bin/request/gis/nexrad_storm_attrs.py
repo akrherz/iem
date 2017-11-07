@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
     Dump storm attributes from the database to a shapefile for the users
 """
@@ -6,11 +6,11 @@ import datetime
 import zipfile
 import sys
 import cgi
+import StringIO
 # import cgitb
 import psycopg2
 import shapefile
 import pytz
-import cStringIO
 # cgitb.enable()
 
 
@@ -62,7 +62,7 @@ def run(ctx):
         ctx['radar'].append('XXX')
     radarlimit = ''
     if 'ALL' not in ctx['radar']:
-            radarlimit = " and nexrad in %s " % (str(tuple(ctx['radar'])), )
+        radarlimit = " and nexrad in %s " % (str(tuple(ctx['radar'])), )
     if len(ctx['radar']) > 2 and (ctx['ets'] - ctx['sts']).days > 6:
         ctx['ets'] = ctx['sts'] + datetime.timedelta(days=7)
 
@@ -137,14 +137,14 @@ L is for logical data which is stored in the shapefile's attribute table as a
 
     # sys.stderr.write("End LOOP...")
 
-    shp = cStringIO.StringIO()
-    shx = cStringIO.StringIO()
-    dbf = cStringIO.StringIO()
+    shp = StringIO.StringIO()
+    shx = StringIO.StringIO()
+    dbf = StringIO.StringIO()
 
     w.save(shp=shp, shx=shx, dbf=dbf)
     # sys.stderr.write("End of w.save()")
 
-    zio = cStringIO.StringIO()
+    zio = StringIO.StringIO()
     zf = zipfile.ZipFile(zio, mode='w',
                          compression=zipfile.ZIP_DEFLATED)
     zf.writestr(fn+'.prj',

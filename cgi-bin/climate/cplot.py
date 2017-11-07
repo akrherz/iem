@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Gonna try to make something that can plot most anything under the moon for the
 COOP data, watch me fail
@@ -26,10 +26,10 @@ META = {
  'rain_days': {
     'title': 'Station Average Number of Days of 1.25" Precipitation',
     'ylabel': 'Number of Days',
-    'xlabel': 'Year', 
+    'xlabel': 'Year',
     'func': '',
-    'month_bounds': '', 
-    'valid_offset': '',        
+    'month_bounds': '',
+    'valid_offset': '',
   }, 
  'annual_sum_precip': {
     'title': 'Annual Precipitation (rain + melted snow)',
@@ -93,23 +93,23 @@ META = {
     'xlabel': 'Year',   
     'func': 'avg(low)', 
     'month_bounds': 'and month in (6,7,8)',   
-    'valid_offset': " ",     
-  }, 
+    'valid_offset': " ",
+  },
  'spring_avg_temp': {
     'title': 'Spring [MAM] Average Temperature',
     'ylabel': 'Temperature [F]',
     'xlabel': 'Year',   
-    'func': 'avg((high+low)/2.)', 
-    'month_bounds': 'and month in (3,4,5)',   
-    'valid_offset': " ",     
+    'func': 'avg((high+low)/2.)',
+    'month_bounds': 'and month in (3,4,5)',
+    'valid_offset': " ",
   }, 
  'fall_avg_temp': {
     'title': 'Fall [SON] Average Temperature',
     'ylabel': 'Temperature [F]',
-    'xlabel': 'Year',   
-    'func': 'avg((high+low)/2.)', 
-    'month_bounds': 'and month in (9,10,11)',   
-    'valid_offset': " ",     
+    'xlabel': 'Year',
+    'func': 'avg((high+low)/2.)',
+    'month_bounds': 'and month in (9,10,11)',
+    'valid_offset': " ",
   },   
  'frost_free': {
     'title': 'Frost Free Days',
@@ -123,18 +123,18 @@ META = {
     'title': 'Growing Degree Days (1 May - 1 Oct) (base=50)',
     'ylabel': 'GDD Units [F]',
     'xlabel': 'Year',   
-    'func': 'sum(gdd50(high,low))',       
-    'month_bounds': 'and month in (5,6,7,8,9)',  
-    'valid_offset': '',  
+    'func': 'sum(gdd50(high,low))',
+    'month_bounds': 'and month in (5,6,7,8,9)',
+    'valid_offset': '',
   }, 
   'hdd65': {
     'title': 'Heating Degree Days (1 Oct - 1 May) (base=65)',
     'ylabel': 'HDD Units [F]',
-    'xlabel': 'Year',   
+    'xlabel': 'Year',
     'func': 'sum(hdd65(high,low))',
-    'month_bounds': 'and month in (10,11,12,1,2,3,4)',   
-    'valid_offset': " - '6 months'::interval ",        
-  },         
+    'month_bounds': 'and month in (10,11,12,1,2,3,4)',
+    'valid_offset': " - '6 months'::interval ",
+  },
 }
 
 def get_station_name(station):
@@ -148,10 +148,9 @@ def yearly_plot(ax, cfg):
     """
     Make a yearly plot of something
     """
-    
     COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
     ccursor = COOP.cursor()
-    
+
     if cfg['plot_type'] == 'frost_free':
         cfg['st'] = cfg['station'][:2]
         ccursor.execute("""
@@ -194,7 +193,7 @@ def yearly_plot(ax, cfg):
             y50.append( float(row[1]) )
         if row[0] > 2000 and row[0] < 2011:
             y00.append( float(row[1]) )
-            
+
     ydata = numpy.array( ydata )
     y50 = numpy.array( y50 )
     y00 = numpy.array( y00 )
@@ -214,7 +213,7 @@ def yearly_plot(ax, cfg):
     maxy = numpy.max(ydata)
     ax.set_ylim( miny - ((maxy-miny) / 10.), maxy + ((maxy-miny) / 10.))
     ax.grid(True)
-    
+
     if cfg['linregress']:
         slope, intercept, r_value, p_value, std_err = stats.linregress(xaxis, ydata)
         ax.plot(xaxis, slope * xaxis + intercept, color='#CC6633')
@@ -246,7 +245,7 @@ def dailyc_plot(ax, cfg):
 
     ax.bar( numpy.arange(len(chighs)), chighs-clows, bottom=clows, width=1.0, ec='#ff0000',
             fc='#ff0000')
-    
+
     COOP.close()
 
 
@@ -278,6 +277,7 @@ def process_cgi(form):
     elif fmt in ['png', ]:
         print "Content-Type: image/png\n"
     fig.savefig(sys.stdout, format=format)
+
 
 if __name__ == '__main__':
     form = cgi.FieldStorage()

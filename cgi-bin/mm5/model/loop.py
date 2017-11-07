@@ -1,5 +1,5 @@
-#!/usr/bin/python
-# Loops the Iowa ETA plots
+#!/usr/bin/env python
+"""Loops the Iowa ETA plots"""
 
 import cgi, re, time, printHTML, math, os, sys
 

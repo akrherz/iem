@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
     Dump PIREPs
 """
@@ -6,11 +6,11 @@ import datetime
 import zipfile
 import sys
 import cgi
+import StringIO
 # import cgitb
 import psycopg2
 import shapefile
 import pytz
-import cStringIO
 # cgitb.enable()
 
 
@@ -98,14 +98,14 @@ def run(ctx):
 
     # sys.stderr.write("End LOOP...")
 
-    shp = cStringIO.StringIO()
-    shx = cStringIO.StringIO()
-    dbf = cStringIO.StringIO()
+    shp = StringIO.StringIO()
+    shx = StringIO.StringIO()
+    dbf = StringIO.StringIO()
 
     w.save(shp=shp, shx=shx, dbf=dbf)
     # sys.stderr.write("End of w.save()")
 
-    zio = cStringIO.StringIO()
+    zio = StringIO.StringIO()
     zf = zipfile.ZipFile(zio, mode='w',
                          compression=zipfile.ZIP_DEFLATED)
     zf.writestr(fn+'.prj',
@@ -124,6 +124,7 @@ def main():
     """Do something fun!"""
     ctx = get_context()
     run(ctx)
+
 
 if __name__ == '__main__':
     # Go Main!

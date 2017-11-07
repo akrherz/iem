@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """Provide an UTC hour's worth of METARs
 
  Called from nowhere known at the moment

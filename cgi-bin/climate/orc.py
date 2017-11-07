@@ -1,17 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""A specialized report"""
 import datetime
-import psycopg2
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-ccursor = COOP.cursor()
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor()
-ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-acursor = ASOS.cursor()
-
-ADJUSTMENT = 0
-now = datetime.datetime.now()
-e = now.replace(day=17)
-s = (e - datetime.timedelta(days=31)).replace(day=18)
+from pyiem.util import get_dbconn
 
 
 def averageTemp(db, hi="high", lo="low"):
@@ -49,6 +39,17 @@ def cdd(db, hi="high", lo="low"):
 
 
 def main():
+    COOP = get_dbconn('coop')
+    ccursor = COOP.cursor()
+    IEM = get_dbconn('iem')
+    icursor = IEM.cursor()
+    ASOS = get_dbconn('asos')
+    acursor = ASOS.cursor()
+
+    ADJUSTMENT = 0
+    now = datetime.datetime.now()
+    e = now.replace(day=17)
+    s = (e - datetime.timedelta(days=31)).replace(day=18)
     db = {}
     now = s
     while now <= e:
@@ -119,4 +120,5 @@ Summary Information [%s - %s]
        awind)
 
 
-main()
+if __name__ == '__main__':
+    main()
