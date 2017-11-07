@@ -1,25 +1,34 @@
 """Ob timeseries"""
+import datetime
 
 import psycopg2.extras
 import pytz
 import matplotlib.dates as mdates
-from matplotlib.ticker import FuncFormatter
 import pyiem.datatypes as dt
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
-def tsfmt(x, _pos):
+def date_ticker(ax, mytz):
     """Timestamp formatter"""
-    dt = mdates._from_ordinalf(x)
-    dt = dt.astimezone(mytz)
-    if dt.hour == 0:
-        fmt = "%-I %p\n%-d %b"
-    elif dt.hour % 6 == 0:
-        fmt = "%-I %p"
-    else:
-        return ""
-    return dt.strftime(fmt)
+    (xmin, xmax) = ax.get_xlim()
+    xmin = mdates.num2date(xmin)
+    xmax = mdates.num2date(xmax)
+    xmin = xmin.replace(minute=0)
+    xmax = (xmax + datetime.timedelta(minutes=59)).replace(minute=0)
+    now = xmin
+    xticks = []
+    xticklabels = []
+    while now <= xmax:
+        lts = now.astimezone(mytz)
+        if lts.hour % 6 == 0:
+            fmt = "%-I %p\n%-d %b" if lts.hour == 0 else "%-I %p"
+            xticks.append(now)
+            xticklabels.append(lts.strftime(fmt))
+        now += datetime.timedelta(hours=1)
+
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
 
 
 def get_description():
@@ -41,7 +50,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -128,7 +137,6 @@ def plotter(fdict):
     ax[1].grid(True)
 
     #  _____________PLOT 3___________________________
-    global mytz
     mytz = pytz.timezone(nt.sts[station]['tzname'])
     ax[2].grid(True)
     ax[2].set_ylabel("Visibility [miles]", color='b')
@@ -142,10 +150,7 @@ def plotter(fdict):
         ax[2].scatter(vsby['v'], vsby['d'], label='Visibility', marker='*',
                       s=40, color='b')
         ax[2].set_ylim(0, 14)
-    ax[2].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 25, 6),
-                                                     tz=mytz))
-    formatter = FuncFormatter(tsfmt)
-    ax[2].xaxis.set_major_formatter(formatter)
+    date_ticker(ax[2], mytz)
     ax[2].set_xlabel("Plot Time Zone: %s" % (nt.sts[station]['tzname'],))
 
     return fig
