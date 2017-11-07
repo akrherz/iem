@@ -61,13 +61,14 @@ if (isset($err)){
 
 $ar = Array("FF" => "Flash Flood",
 "MA" => "Marine",
+    "SQ" => "Snow Squall",
 "SV" => "Severe Thunderstorm",
 "TO" => "Tornado");
 $wtselect = "";
 while (list($p,$n) = each($ar)){
 	$wtselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
-			value=\"%s\"%s>%s</input>\n", $p, 
-			in_array($p, $wtype) ? " CHECKED": "", $n);
+			value=\"%s\"%s>%s (%s.W)</input><br />", $p, 
+			in_array($p, $wtype) ? " CHECKED": "", $n, $p);
 }
 
 

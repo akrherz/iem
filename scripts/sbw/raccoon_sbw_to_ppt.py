@@ -16,6 +16,7 @@ from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.text import P
 from odf.draw import Page, Frame, TextBox, Image
+from pyiem.util import get_dbconn
 os.putenv("DISPLAY", "localhost:1")
 
 __REV__ = "11Feb2013"
@@ -35,7 +36,7 @@ def test_job():
 
 def add_job(row):
     """Add back a job"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    pgconn = get_dbconn('mesosite')
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     print("setting racoon jobid: %s back to unprocessed" % (row['jobid'], ))
     mcursor.execute("""
@@ -48,8 +49,7 @@ def add_job(row):
 
 def check_for_work():
     """See if we have any requests to process!"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb',
-                              user='nobody')
+    pgconn = get_dbconn('mesosite', user='nobody')
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mcursor2 = pgconn.cursor()
     mcursor.execute("""SELECT jobid, wfo, radar,
@@ -71,7 +71,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     tokens = wtypes.split(",")
     tokens.append("ZZZ")
     phenomenas = str(tuple(tokens))
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis', user='nobody')
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """
     WITH stormbased as (
@@ -306,7 +306,7 @@ def main():
         jobs = test_job()
     else:
         jobs = check_for_work()
-    if len(jobs) == 0:
+    if not jobs:
         sys.exit()
     for job in jobs:
         do_job(job)
