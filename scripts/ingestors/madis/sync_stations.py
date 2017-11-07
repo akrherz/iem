@@ -1,21 +1,11 @@
 """
 Extract station data from file and update any new stations we find, please
 """
-import netCDF4
-import psycopg2
+from __future__ import print_function
 import sys
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
-mcursor = MESOSITE.cursor()
 
-fn = sys.argv[1]
-nc = netCDF4.Dataset(fn)
-
-stations = nc.variables["stationId"][:]
-names = nc.variables["stationName"][:]
-providers = nc.variables["dataProvider"][:]
-latitudes = nc.variables["latitude"][:]
-longitudes = nc.variables["longitude"][:]
-elevations = nc.variables["elevation"][:]
+import netCDF4
+from pyiem.util import get_dbconn
 
 
 MY_PROVIDERS = [
@@ -37,40 +27,63 @@ def provider2network(p):
     print("Unsure how to convert %s into a network" % (p,))
     return None
 
-for recnum in range(len(providers)):
-    thisProvider = providers[recnum].tostring().replace('\x00', '')
-    if not thisProvider.endswith('DOT') and thisProvider not in MY_PROVIDERS:
-        continue
-    stid = stations[recnum].tostring().replace('\x00', '')
-    name = names[recnum].tostring().replace("'",
-                                            "").replace('\x00',
-                                                        '').replace('\xa0',
-                                                                    ' '
-                                                                    ).strip()
-    if thisProvider == 'MesoWest':
-        # get the network from the last portion of the name
-        network = name.split()[-1]
-        if network != 'VTWAC':
+
+def clean_string(val):
+    """hack"""
+    return val.replace("'", ""
+                       ).replace('\x00', '').replace('\xa0',  ' '
+                                                     ).replace(",", "").strip()
+
+
+def main(argv):
+    """Go Main Go"""
+    pgconn = get_dbconn('mesosite')
+    mcursor = pgconn.cursor()
+
+    fn = argv[1]
+    nc = netCDF4.Dataset(fn)
+
+    stations = nc.variables["stationId"][:]
+    names = nc.variables["stationName"][:]
+    providers = nc.variables["dataProvider"][:]
+    latitudes = nc.variables["latitude"][:]
+    longitudes = nc.variables["longitude"][:]
+    elevations = nc.variables["elevation"][:]
+    for recnum in range(len(providers)):
+        thisProvider = providers[recnum].tostring().replace('\x00', '')
+        if (not thisProvider.endswith('DOT') and
+                thisProvider not in MY_PROVIDERS):
             continue
-    else:
-        network = provider2network(thisProvider)
-    if network is None:
-        continue
-    mcursor.execute("""
-        SELECT * from stations where id = %s and network = %s
-    """, (stid, network))
-    if mcursor.rowcount > 0:
-        continue
-    print 'Adding network: %s station: %s %s' % (network, stid, name)
-    sql = """
-        INSERT into stations(id, network, synop, country, plot_name,
-        name, state, elevation, online, geom, metasite)
-        VALUES ('%s', '%s', 9999, 'US',
-        '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')
-    """ % (stid, network, name, name, network[:2], elevations[recnum],
-           longitudes[recnum], latitudes[recnum])
-    mcursor.execute(sql)
-nc.close()
-mcursor.close()
-MESOSITE.commit()
-MESOSITE.close()
+        stid = stations[recnum].tostring().replace('\x00', '')
+        name = clean_string(names[recnum].tostring())
+        if thisProvider == 'MesoWest':
+            # get the network from the last portion of the name
+            network = name.split()[-1]
+            if network != 'VTWAC':
+                continue
+        else:
+            network = provider2network(thisProvider)
+        if network is None:
+            continue
+        mcursor.execute("""
+            SELECT * from stations where id = %s and network = %s
+        """, (stid, network))
+        if mcursor.rowcount > 0:
+            continue
+        print('Adding network: %s station: %s %s' % (network, stid, name))
+        sql = """
+            INSERT into stations(id, network, synop, country, plot_name,
+            name, state, elevation, online, geom, metasite)
+            VALUES ('%s', '%s', 9999, 'US',
+            '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')
+        """ % (stid, network, name, name, network[:2], elevations[recnum],
+               longitudes[recnum], latitudes[recnum])
+        mcursor.execute(sql)
+    nc.close()
+    mcursor.close()
+    pgconn.commit()
+    pgconn.close()
+
+
+if __name__ == '__main__':
+    main(sys.argv)
