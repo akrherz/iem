@@ -10,7 +10,7 @@ import cgi
 import StringIO
 
 import shapefile
-from pyiem.util import get_dbconn
+import psycopg2
 
 
 def send_error(msg):
@@ -57,7 +57,7 @@ def main():
         sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
         sys.exit()
 
-    pgconn = get_dbconn('postgis', user='nobody')
+    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     cursor = pgconn.cursor()
 
     # Get CGI vars
