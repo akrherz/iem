@@ -3,8 +3,9 @@
 import sys
 import os
 import re
-import psycopg2
 import datetime
+
+from pyiem.util import get_dbconn
 
 PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
@@ -12,6 +13,7 @@ PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
 
 
 def send_content_type(val):
+    """Do as I say"""
     if val == 'text':
         sys.stdout.write("Content-type: text/plain\n\n")
     elif val in ['png', 'gif']:
@@ -21,9 +23,9 @@ def send_content_type(val):
 
 
 def dblog(yymmdd):
+    """Log this request"""
     try:
-        pgconn = psycopg2.connect(database="mesosite", host="iemdb",
-                                  user="nobody")
+        pgconn = get_dbconn("mesosite")
         cursor = pgconn.cursor()
         dt = datetime.date(2000 + int(yymmdd[:2]), int(yymmdd[2:4]),
                            int(yymmdd[4:6]))
@@ -45,12 +47,13 @@ def process(uri):
         send_content_type("text")
         sys.stdout.write("ERROR!")
         return
-    m = PATTERN.match(uri)
-    if m is None:
+    match = PATTERN.match(uri)
+    if match is None:
         send_content_type("text")
         sys.stdout.write("ERROR!")
+        sys.stderr.write("feature content failure: %s\n" % (repr(uri), ))
         return
-    data = m.groupdict()
+    data = match.groupdict()
     fn = ("/mesonet/share/features/%(yyyy)s/%(mm)s/"
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
     if os.path.isfile(fn):
@@ -76,6 +79,7 @@ def process(uri):
 def main():
     """Do Something"""
     process(os.environ.get('REQUEST_URI'))
+
 
 if __name__ == '__main__':
     main()
