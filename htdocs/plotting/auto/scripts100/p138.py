@@ -1,11 +1,10 @@
 """monthly wind speeds"""
 import calendar
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem import meteorology
 from pyiem.network import Table as NetworkTable
-from pyiem.util import drct2text, get_autoplot_context
+from pyiem.util import drct2text, get_autoplot_context, get_dbconn
 from pyiem.datatypes import direction, speed
 
 UNITS = {'mph': 'miles per hour',
@@ -34,7 +33,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']

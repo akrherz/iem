@@ -4,9 +4,9 @@ from collections import OrderedDict
 
 import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
-from pyiem.network import Table as NetworkTable
 from scipy import stats
+from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
         ('avg_tmpf', 'Average Temperature'),
@@ -66,7 +66,7 @@ def plotter(fdict):
     font0.set_family('monospace')
     font0.set_size(16)
 
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']
     month = ctx['month']

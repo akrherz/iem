@@ -2,11 +2,10 @@
 import datetime
 from collections import OrderedDict
 
-from pyiem.util import get_autoplot_context
-from pyiem.plot import MapPlot
-import psycopg2
 import pytz
 from pandas.io.sql import read_sql
+from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot import MapPlot
 
 HOURS = OrderedDict([
     ('1', 'One Hour'),
@@ -58,7 +57,7 @@ def plotter(fdict):
     hour = int(ctx['hour'])
     ilabel = (ctx['ilabel'] == 'yes')
     column = "hour%02i" % (hour,)
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     df = read_sql("""
     WITH data as (
         SELECT ugc, rank() OVER (PARTITION by ugc ORDER by valid DESC),

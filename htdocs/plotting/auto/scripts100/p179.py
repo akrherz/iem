@@ -3,9 +3,8 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
-import psycopg2
 
 
 def get_description():
@@ -45,7 +44,7 @@ def plotter(fdict):
     today = datetime.datetime.now()
     byear = nt.sts[station]['archive_begin'].year
     eyear = today.year + 1
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     table = "alldata_%s" % (station[:2],)
     cursor.execute("""SELECT year, extract(doy from day),

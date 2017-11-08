@@ -1,11 +1,10 @@
 """Arridity"""
 import datetime
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
 from pandas.io.sql import read_sql
 import numpy as np
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -74,7 +73,7 @@ def plotter(fdict):
     year2 = ctx.get('year2')  # could be null!
     year3 = ctx.get('year3')  # could be null!
     nt = NetworkTable(network)
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     table = "alldata_%s" % (station[:2], )
     df = read_sql("""

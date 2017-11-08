@@ -1,11 +1,11 @@
+"""autoplot ya'll"""
 import calendar
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.datatypes import speed
 
 UNITS = {'mph': 'miles per hour',
@@ -54,7 +54,8 @@ def get_description():
 
 
 def get_context(fdict):
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    """get context for both output types"""
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -140,6 +141,7 @@ def get_context(fdict):
 
 
 def highcharts(fdict):
+    """highcharts output"""
     ctx = get_context(fdict)
     lines = []
     for month, df2 in ctx['df'].groupby('month'):

@@ -2,10 +2,9 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -39,15 +38,15 @@ DIRS = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['cache'] = 86400
-    d['description'] = """This application plots the number of days for a
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This application plots the number of days for a
     given month or period of months that a given variable was above or below
     some threshold.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='max_dwpf',
@@ -62,12 +61,12 @@ def get_description():
              label='Year to Highlight', name='year'),
 
     ]
-    return d
+    return desc
 
 
 def get_context(fdict):
     """Do the processing work"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -120,7 +119,7 @@ def highcharts(fdict):
     """Highcharts output"""
     ctx = get_context(fdict)
     ctx['df'].reset_index(inplace=True)
-    v = ctx['df'][['year', 'count']].to_json(orient='values')
+    data = ctx['df'][['year', 'count']].to_json(orient='values')
 
     return """
     $("#ap_container").highcharts({
@@ -132,7 +131,7 @@ def highcharts(fdict):
         subtitle: {text: '""" + ctx['subtitle'] + """'},
         series: [{
             name: 'Days',
-            data: """ + v + """
+            data: """ + data + """
         }]
     });
     """
@@ -145,7 +144,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     ctx = get_context(fdict)
     df = ctx['df']
-    if len(df.index) == 0:
+    if df.empty:
         return 'Error, no results returned!'
 
     (fig, ax) = plt.subplots(1, 1)

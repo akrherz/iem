@@ -1,10 +1,9 @@
 """Duration of seasons"""
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 from scipy import stats
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'spring': 'Spring Season',
@@ -50,7 +49,7 @@ def plotter(fdict):
     nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
 
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     # Have to do a redundant query to get the running values
     obs = read_sql("""

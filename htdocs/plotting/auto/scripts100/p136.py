@@ -2,11 +2,10 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([(0, 'Include calm observations'),
                      (2, 'Include only non-calm observations >= 2kt'),
@@ -54,6 +53,14 @@ def highcharts(fdict):
                                             ctx['lines']['season']['y'])])+"""
 
         },"""
+    d25 = str([list(a) for a in zip(ctx['lines']['25%']['x'],
+                                    ctx['lines']['25%']['y'])])
+    dmean = str([list(a) for a in zip(ctx['lines']['mean']['x'],
+                                      ctx['lines']['mean']['y'])])
+    d75 = str([list(a) for a in zip(ctx['lines']['75%']['x'],
+                                    ctx['lines']['75%']['y'])])
+    dmax = str([list(a) for a in zip(ctx['lines']['max']['x'],
+                                     ctx['lines']['max']['y'])])
     return """
 $("#ap_container").highcharts({
     title: {text: '""" + ctx['title'] + """'},
@@ -63,19 +70,19 @@ $("#ap_container").highcharts({
         shared: true,
         valueDecimals: 2,
         valueSuffix: ' days',
-        headerFormat: '<span style="font-size: 10px">Wind Chill &lt;= {point.key} F</span><br/>'
+        headerFormat: '<span style="font-size: 10px">'+
+                      'Wind Chill &lt;= {point.key} F</span><br/>'
     },
     xAxis: {title: {text: 'Wind Chill Temperature (F)'}},
     yAxis: {title: {text: 'Total Time Hours [expressed in days]'}},
-    series: ["""+s+"""{
+    series: [""" + s + """{
         name: '25%',
         type: 'line',
         marker: {
             lineWidth: 2,
             lineColor: '"""+ctx['lines']['25%']['c']+"""'
         },
-        data: """+str([list(a) for a in zip(ctx['lines']['25%']['x'],
-                                            ctx['lines']['25%']['y'])])+"""
+        data: """ + d25 + """
         },{
         name: 'Avg',
         type: 'line',
@@ -83,8 +90,7 @@ $("#ap_container").highcharts({
             lineWidth: 2,
             lineColor: '"""+ctx['lines']['mean']['c']+"""'
         },
-        data: """+str([list(a) for a in zip(ctx['lines']['mean']['x'],
-                                            ctx['lines']['mean']['y'])])+"""
+        data: """ + dmean + """
         },{
         name: '75%',
         type: 'line',
@@ -92,8 +98,7 @@ $("#ap_container").highcharts({
             lineWidth: 2,
             lineColor: '"""+ctx['lines']['75%']['c']+"""'
         },
-        data: """+str([list(a) for a in zip(ctx['lines']['75%']['x'],
-                                            ctx['lines']['75%']['y'])])+"""
+        data: """ + d75 + """
         },{
         name: 'Max',
         type: 'line',
@@ -101,8 +106,7 @@ $("#ap_container").highcharts({
             lineWidth: 2,
             lineColor: '"""+ctx['lines']['max']['c']+"""'
         },
-        data: """+str([list(a) for a in zip(ctx['lines']['max']['x'],
-                                            ctx['lines']['max']['y'])])+"""
+        data: """ + dmax + """
         }]
 });
     """
@@ -110,7 +114,7 @@ $("#ap_container").highcharts({
 
 def get_context(fdict):
     """ Get the data"""
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -131,7 +135,6 @@ def get_context(fdict):
     for i in range(32, -51, -1):
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
-    df2.fillna(0, inplace=True)
     ctx['df'] = df2
     ctx['title'] = ("[%s] %s Wind Chill Hours"
                     ) % (station, nt.sts[station]['name'])
@@ -188,7 +191,7 @@ def plotter(fdict):
     ax.legend(loc=2)
     ax.grid(True)
     ax.set_xlim(-50, 32)
-    ax.set_xlabel("Wind Chill Temperature $^\circ$F")
+    ax.set_xlabel(r"Wind Chill Temperature $^\circ$F")
     ax.set_ylabel("Total Time Hours [expressed in days]")
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
     return fig, ctx['df']

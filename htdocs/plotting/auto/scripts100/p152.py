@@ -1,8 +1,8 @@
 """Period differences"""
-import psycopg2
+
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, centered_bins
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -46,7 +46,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2]
     sector = ctx['sector']
@@ -95,6 +95,8 @@ def plotter(fdict):
     """, pgconn, params=[p1syear, p1eyear,
                          p2syear, p2eyear],
                   index_col='station')
+    if df.empty:
+        return 'No Data Found'
     df['p1_season'] = df['p1_first_fall'] - df['p1_last_spring']
     df['p2_season'] = df['p2_first_fall'] - df['p2_last_spring']
     df['season_delta'] = df['p2_season'] - df['p1_season']
@@ -105,27 +107,27 @@ def plotter(fdict):
                                                 ascending=False).index)
 
     title = PDICT3[varname]
-    m = MapPlot(sector=sector, state=state, axisbg='white',
-                title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
-                       ) % (p2syear, p2eyear, p1syear, p1eyear, title),
-                subtitle=('based on IEM Archives'),
-                titlefontsize=14)
+    mp = MapPlot(sector=sector, state=state, axisbg='white',
+                 title=('%.0f-%.0f minus %.0f-%.0f %s Difference'
+                        ) % (p2syear, p2eyear, p1syear, p1eyear, title),
+                 subtitle=('based on IEM Archives'),
+                 titlefontsize=14)
     # Create 9 levels centered on zero
     abval = df[varname + '_delta'].abs().max()
     levels = centered_bins(abval)
     if opt in ['both', 'contour']:
-        m.contourf(df['lon'].values, df['lat'].values,
-                   df[varname + '_delta'].values, levels,
-                   cmap=plt.get_cmap('seismic'),
-                   units='days')
+        mp.contourf(df['lon'].values, df['lat'].values,
+                    df[varname + '_delta'].values, levels,
+                    cmap=plt.get_cmap('seismic'),
+                    units='days')
     if sector == 'state':
-        m.drawcounties()
+        mp.drawcounties()
     if opt in ['both', 'values']:
-        m.plot_values(df['lon'].values, df['lat'].values,
-                      df[varname + '_delta'].values,
-                      fmt='%.1f', labelbuffer=5)
+        mp.plot_values(df['lon'].values, df['lat'].values,
+                       df[varname + '_delta'].values,
+                       fmt='%.1f', labelbuffer=5)
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

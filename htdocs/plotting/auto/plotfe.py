@@ -56,8 +56,11 @@ def handle_error(exp, fmt):
         matplotlib.use('agg')
         import matplotlib.pyplot as plt
         _, ax = plt.subplots(1, 1)
-        ax.text(0.5, 0.5, str(exp), transform=ax.transAxes, ha='center')
+        msg = "IEM Autoplot generation resulted in an error\n%s" % (str(exp),)
+        ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center',
+                va='center')
         ram = cStringIO.StringIO()
+        plt.axis('off')
         plt.savefig(ram, format=fmt, dpi=100)
         ram.seek(0)
         sys.stdout.write(ram.read())

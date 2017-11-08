@@ -3,9 +3,8 @@ import calendar
 from collections import OrderedDict
 
 import numpy as np
-import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
                      ('PCT EMERGED', 'Emerged'),
@@ -41,7 +40,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2]
     unit_desc = ctx['unit_desc'].upper()
@@ -59,7 +58,7 @@ def plotter(fdict):
         ORDER by week_ending ASC
     """, pgconn, params=(commodity_desc, unit_desc, state, util_practice_desc),
                   index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         return "ERROR: No data found!"
     df['yeari'] = df['year'] - df['year'].min()
 
