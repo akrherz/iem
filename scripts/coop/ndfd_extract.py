@@ -8,17 +8,19 @@ Attempt to derive climodat data from the NDFD database, we will use the 00 UTC
 files.
 
 """
-import psycopg2
+from __future__ import print_function
 import sys
 import datetime
+import os
+import logging
+
 import pytz
 import pyproj
 import numpy as np
 import pygrib
-import os
-import logging
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -100,7 +102,7 @@ def bnds(val, lower, upper):
 
 def dbsave(ts, data):
     """Save the data! """
-    pgconn = psycopg2.connect(database='coop', host='iemdb')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
     cursor.execute("""SELECT id from forecast_inventory
@@ -121,7 +123,7 @@ def dbsave(ts, data):
         if (d['high'] is None or d['low'] is None or
                 d['precip'] is None):
             logger.debug("Missing data for date: %s" % (date,))
-            del(data['fx'][date])
+            del data['fx'][date]
 
     found_data = False
     for sid in nt.sts.keys():
@@ -138,9 +140,10 @@ def dbsave(ts, data):
             precip = bnds(float(d['precip'][j, i] / 25.4), 0, 30)
             if high is None or low is None or precip is None:
                 continue
-            cursor.execute("""INSERT into alldata_forecast(modelid,
-            station, day, high, low, precip)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            cursor.execute("""
+                INSERT into alldata_forecast(modelid,
+                station, day, high, low, precip)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """, (modelid, sid, date, high, low, round(precip, 2)))
             found_data = True
     cursor.close()
@@ -163,6 +166,7 @@ def main(argv):
         print("ERROR: ndfd_extract.py found no data!")
     else:
         dbsave(ts, data)
+
 
 if __name__ == '__main__':
     main(sys.argv)

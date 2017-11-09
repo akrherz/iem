@@ -14,7 +14,7 @@ for line in open('/tmp/SCIA1107.txt'):
 print `sites`
 sys.exit()
 """
-
+from __future__ import print_function
 import sys
 import os
 import smtplib
@@ -22,13 +22,14 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 import datetime
-import psycopg2
+
+from pyiem.util import get_dbconn
 from xlwt import Workbook
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+MESOSITE = get_dbconn('mesosite', user='nobody')
 mcursor = MESOSITE.cursor()
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+COOP = get_dbconn('coop', user='nobody')
 ccursor = COOP.cursor()
-HADS = psycopg2.connect(database='hads', host='iemdb-hads', user='nobody')
+HADS = get_dbconn('hads', user='nobody')
 hcursor = HADS.cursor()
 
 DATA = """IA0112,ALBI4,A
@@ -252,7 +253,7 @@ def get_site(year, month, iemre, nwsli):
             data[idx]['coop']['v'] += "%s/%s " % (key, row[2])
         elif key[:2] in ['PP', 'SD', 'SF', 'TA']:
             if key not in UNCONV_VARS:
-                print 'Unaccounted for %s %s %s' % (nwsli, valid, key)
+                print('Unaccounted for %s %s %s' % (nwsli, valid, key))
                 UNCONV_VARS.append(key)
 
     ccursor.execute("""

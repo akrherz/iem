@@ -1,12 +1,14 @@
 """Extract HRRR radiation data for storage with COOP data"""
-import psycopg2
-import pygrib
+from __future__ import print_function
 import datetime
-import pytz
 import os
 import sys
+
+import pygrib
+import pytz
 import pyproj
 import numpy as np
+from pyiem.util import get_dbconn
 
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
@@ -15,13 +17,12 @@ LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
 SWITCH_DATE = datetime.datetime(2014, 10, 10, 20)
 SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.timezone("UTC"))
 
-COOP = psycopg2.connect(database='coop', host='iemdb')
-cursor = COOP.cursor()
-cursor2 = COOP.cursor()
-
 
 def run(ts):
     """Process data for this timestamp"""
+    pgconn = get_dbconn('coop')
+    cursor = pgconn.cursor()
+    cursor2 = pgconn.cursor()
     total = None
     xaxis = None
     yaxis = None
@@ -39,10 +40,10 @@ def run(ts):
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
             if utc.hour != 3:
-                print 'coop/hrrr_solarrad.py %s had no solar rad' % (fn,)
+                print('coop/hrrr_solarrad.py %s had no solar rad' % (fn,))
             continue
         if len(grb) == 0:
-            print 'Could not find SWDOWN in HRR %s' % (fn,)
+            print('Could not find SWDOWN in HRR %s' % (fn,))
             continue
         g = grb[0]
         if total is None:
@@ -60,8 +61,8 @@ def run(ts):
             total += g.values
 
     if total is None:
-        print 'coop/hrrr_solarrad.py found no HRRR data for %s' % (
-                                                    ts.strftime("%d %b %Y"), )
+        print(('coop/hrrr_solarrad.py found no HRRR data for %s'
+               ) % (ts.strftime("%d %b %Y"), ))
         return
 
     # Total is the sum of the hourly values
@@ -81,12 +82,16 @@ def run(ts):
         rad_mj = float(total[j, i])
 
         if rad_mj < 0:
-            print 'WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0])
+            print('WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0]))
             continue
         cursor2.execute("""
         UPDATE alldata_""" + row[0][:2] + """ SET hrrr_srad = %s WHERE
         day = %s and station = %s
         """, (rad_mj, ts.strftime("%Y-%m-%d"), row[0]))
+    cursor.close()
+    cursor2.close()
+    pgconn.commit()
+    pgconn.close()
 
 
 def main():
@@ -119,10 +124,7 @@ def main():
         ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
         run(ts)
 
+
 if __name__ == '__main__':
     # run main() run
     main()
-    cursor.close()
-    cursor2.close()
-    COOP.commit()
-    COOP.close()

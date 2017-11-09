@@ -24,17 +24,16 @@ Review the following pdf file for details.
     http://rda.ucar.edu/datasets/ds608.0/docs/rr4.pdf
 
 """
-import netCDF4
-import pygrib
+from __future__ import print_function
 import datetime
-import pyproj
-import numpy as np
-import psycopg2
 import sys
 import os
-COOP = psycopg2.connect(database='coop', host='iemdb')
-ccursor = COOP.cursor()
-ccursor2 = COOP.cursor()
+
+import pyproj
+import pygrib
+import netCDF4
+import numpy as np
+from pyiem.util import get_dbconn
 
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-107.0 +y_0=0.0 +R=6367470.21484 +proj=lcc "
@@ -88,6 +87,9 @@ def do(date):
     """ Process for a given date
     6z file has 6z to 9z data
     """
+    pgconn = get_dbconn('coop')
+    ccursor = pgconn.cursor()
+    ccursor2 = pgconn.cursor()
     sts = date.replace(hour=6)  # 6z
     ets = sts + datetime.timedelta(days=1)
     now = sts
@@ -111,7 +113,7 @@ def do(date):
         fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/"
                            "rad_%Y%m%d%H00.nc"))
         if not os.path.isfile(fn):
-            print 'MISSING NARR: %s' % (fn,)
+            print('MISSING NARR: %s' % (fn,))
             sys.exit()
         nc = netCDF4.Dataset(fn)
         rad = nc.variables['Downward_shortwave_radiation_flux'][0, :, :]
@@ -148,7 +150,7 @@ def do(date):
                                     1./distances[2] + 1./distances[3]))
         rad_mj = float(val) / 1000000.0
         if rad_mj < 0:
-            print 'WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0])
+            print('WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0]))
             continue
         if np.isnan(rad_mj):
             print('NARR SRAD is NaN, station: %s' % (row[0], ))
@@ -158,21 +160,26 @@ def do(date):
         UPDATE alldata_""" + row[0][:2] + """ SET narr_srad = %s WHERE
         day = %s and station = %s
         """, (rad_mj, date.strftime("%Y-%m-%d"), row[0]))
+    ccursor2.close()
+    pgconn.commit()
+    pgconn.close()
 
 
-if __name__ == '__main__':
-    if len(sys.argv) == 4:
-        do(datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                             int(sys.argv[3])))
-    if len(sys.argv) == 3:
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        do(datetime.datetime(int(argv[1]), int(argv[2]),
+                             int(argv[3])))
+    if len(argv) == 3:
         # Run for a given month!
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
         ets = sts + datetime.timedelta(days=45)
         ets = ets.replace(day=1)
         now = sts
         while now < ets:
             do(now)
             now += datetime.timedelta(days=1)
-    ccursor2.close()
-    COOP.commit()
-    COOP.close()
+
+
+if __name__ == '__main__':
+    main(sys.argv)

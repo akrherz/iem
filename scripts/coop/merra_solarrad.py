@@ -8,15 +8,14 @@
 
  Dr Arritt wants MJ m-2 dy-1
 """
-import netCDF4
+from __future__ import print_function
 import datetime
-import numpy as np
-import psycopg2
 import sys
 import os
-COOP = psycopg2.connect(database='coop', host='iemdb')
-ccursor = COOP.cursor()
-ccursor2 = COOP.cursor()
+
+import netCDF4
+import numpy as np
+from pyiem.util import get_dbconn
 
 
 def get_gp(xc, yc, x, y):
@@ -43,6 +42,9 @@ def get_gp(xc, yc, x, y):
 def do(date):
     """ Process for a given date
     """
+    pgconn = get_dbconn('coop')
+    ccursor = pgconn.cursor()
+    ccursor2 = pgconn.cursor()
     sts = date.replace(hour=6)  # 6z
     ets = sts + datetime.timedelta(days=1)
 
@@ -106,7 +108,7 @@ def do(date):
         cs_rad_mj = float(cs_val) / 1000000.0
 
         if rad_mj < 0:
-            print 'WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0])
+            print('WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0]))
             continue
         # print "station: %s rad: %.1f" % (row[0], rad_mj)
         ccursor2.execute("""
@@ -114,15 +116,19 @@ def do(date):
         merra_srad_cs = %s WHERE
         day = %s and station = %s
         """, (rad_mj, cs_rad_mj, date.strftime("%Y-%m-%d"), row[0]))
+    ccursor2.close()
+    pgconn.commit()
+    pgconn.close()
 
 
-if __name__ == '__main__':
-    if len(sys.argv) == 4:
-        do(datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                             int(sys.argv[3])))
-    if len(sys.argv) == 3:
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        do(datetime.datetime(int(argv[1]), int(argv[2]),
+                             int(argv[3])))
+    if len(argv) == 3:
         # Run for a given month!
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
         # run for last date of previous month as well
         sts = sts - datetime.timedelta(days=1)
         ets = sts + datetime.timedelta(days=45)
@@ -131,6 +137,7 @@ if __name__ == '__main__':
         while now < ets:
             do(now)
             now += datetime.timedelta(days=1)
-    ccursor2.close()
-    COOP.commit()
-    COOP.close()
+
+
+if __name__ == '__main__':
+    main(sys.argv)

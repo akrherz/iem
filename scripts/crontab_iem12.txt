@@ -39,7 +39,7 @@ S=/opt/iem/scripts
 0 8 * * 4 cd /opt/iem/scripts/usdm; python process_usdm.py
 
 # Email Harry RR3 data
-14 14 * * 5 cd $S/coop; python email_RR3_to_harry.py
+14 14 * * 5 cd $S/coop; python email_rr3_to_harry.py
 
 # Get GIS Sat Data!
 27 * * * * cd $S/cache; sh nesdis_satellite.sh 45

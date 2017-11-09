@@ -1,10 +1,13 @@
 """Computes the Climatology and fills out the table!"""
+from __future__ import print_function
+import sys
 import datetime
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
-import sys
 from tqdm import tqdm
-COOP = psycopg2.connect(database='coop', host='iemdb')
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
+
+COOP = get_dbconn('coop')
 
 THISYEAR = datetime.date.today().year
 META = {
@@ -26,11 +29,11 @@ def daily_averages(table):
     for st in ['ND', 'SD', 'NE', 'KS', 'MO', 'IA', 'MN', 'WI', 'IL',
                'IN', 'OH', 'MI', 'KY']:
         nt = NetworkTable("%sCLIMATE" % (st,))
-        print 'Computing Daily Averages for state: %s' % (st,)
+        print('Computing Daily Averages for state: %s' % (st,))
         ccursor = COOP.cursor()
         ccursor.execute("""DELETE from %s WHERE substr(station,1,2) = '%s'
         """ % (table, st))
-        print '    removed %s rows from %s' % (ccursor.rowcount, table)
+        print('    removed %s rows from %s' % (ccursor.rowcount, table))
         sql = """
     INSERT into %s (station, valid, high, low,
         max_high, min_high,
@@ -54,7 +57,7 @@ def daily_averages(table):
         """ % (table, st, META[table]['sts'].strftime("%Y-%m-%d"),
                META[table]['ets'].strftime("%Y-%m-%d"), tuple(nt.sts.keys()))
         ccursor.execute(sql)
-        print '    added %s rows to %s' % (ccursor.rowcount, table)
+        print('    added %s rows to %s' % (ccursor.rowcount, table))
         ccursor.close()
         COOP.commit()
 
@@ -72,7 +75,7 @@ def do_date(ccursor2, table, row, col, agg_col):
     ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
     if row2 is None:
-        print 'None?', row, col, agg_col
+        print('None %s %s %s' % (row, col, agg_col))
         return 'null'
     return row2[0]
 
@@ -112,6 +115,7 @@ def set_daily_extremes(table):
     ccursor2.close()
     ccursor.close()
     COOP.commit()
+
 
 if __name__ == '__main__':
     daily_averages(sys.argv[1])

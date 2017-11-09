@@ -8,16 +8,18 @@ Attempt to derive climodat data from the CFS, we will use the 12 UTC
 files.
 
 """
-import psycopg2
+from __future__ import print_function
 import sys
 import datetime
-import pytz
 import logging
+import os
+
+import pytz
 import numpy as np
 import pygrib
-import os
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -96,7 +98,7 @@ def bnds(val, lower, upper):
 
 def dbsave(ts, data):
     """Save the data! """
-    pgconn = psycopg2.connect(database='coop', host='iemdb')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
     cursor.execute("""SELECT id from forecast_inventory
@@ -150,6 +152,7 @@ def main(argv):
                     microsecond=0)
     data = process(ts)
     dbsave(ts, data)
+
 
 if __name__ == '__main__':
     main(sys.argv)

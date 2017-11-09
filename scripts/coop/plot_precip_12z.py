@@ -3,25 +3,27 @@
 """
 import sys
 import datetime
+import warnings
 
-import psycopg2
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
-st = NetworkTable(["IA_COOP", 'MO_COOP', 'KS_COOP', 'NE_COOP', 'SD_COOP',
-                   'ND_ASOS', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'IN_COOP',
-                   'OH_COOP', 'MI_COOP'])
-
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-icursor = IEM.cursor()
-
-clevs = [0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 2, 3, 4, 5, 10]
+warnings.simplefilter('ignore', UserWarning)
 
 
 def doit(now):
     """
       Generate some plots for the COOP data!
     """
+    st = NetworkTable(["IA_COOP", 'MO_COOP', 'KS_COOP', 'NE_COOP', 'SD_COOP',
+                       'ND_ASOS', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'IN_COOP',
+                       'OH_COOP', 'MI_COOP'])
+
+    pgconn = get_dbconn('iem', user='nobody')
+    icursor = pgconn.cursor()
+
+    clevs = [0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 2, 3, 4, 5, 10]
     # We'll assume all COOP data is 12z, sigh for now
     sql = """SELECT id, pday, network
            from summary_%s s JOIN stations t ON (t.iemid = s.iemid)
@@ -46,30 +48,30 @@ def doit(now):
             iamax = row[1]
 
     # Plot Iowa
-    m = MapPlot(sector='iowa',
-                title='24 Hour NWS COOP Precipitation [inch]',
-                subtitle=('Ending %s at roughly 12Z'
-                          ) % (now.strftime("%d %B %Y"),))
+    mp = MapPlot(sector='iowa',
+                 title='24 Hour NWS COOP Precipitation [inch]',
+                 subtitle=('Ending %s at roughly 12Z'
+                           ) % (now.strftime("%d %B %Y"),))
 
-    m.contourf(lons, lats, vals, clevs, units='inch')
+    mp.contourf(lons, lats, vals, clevs, units='inch')
 
     pqstr = ("plot ac %s0000 iowa_coop_12z_precip.png "
              "iowa_coop_12z_precip.png png") % (now.strftime("%Y%m%d"),)
-    m.drawcounties()
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.drawcounties()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
-    m = MapPlot(sector='midwest',
-                title='24 Hour NWS COOP Precipitation [inch]',
-                subtitle=('Ending %s at roughly 12Z'
-                          ) % (now.strftime("%d %B %Y"),))
+    mp = MapPlot(sector='midwest',
+                 title='24 Hour NWS COOP Precipitation [inch]',
+                 subtitle=('Ending %s at roughly 12Z'
+                           ) % (now.strftime("%d %B %Y"),))
 
-    m.contourf(lons, lats, vals, clevs, units='inch')
+    mp.contourf(lons, lats, vals, clevs, units='inch')
 
     pqstr = ("plot ac %s0000 midwest_coop_12z_precip.png "
              "midwest_coop_12z_precip.png png") % (now.strftime("%Y%m%d"),)
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
 
 def main():
