@@ -1,11 +1,11 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-include("setup.php");
+require_once "setup.php";
+require_once "../../include/myview.php";
 
- include("../../include/myview.php");
- $t = new MyView();
+$t = new MyView();
  $t->thispage="iem-sites";
  $t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
  
@@ -37,7 +37,8 @@ if ($prod == 1 or $prod == 2) {
 	$ntext = date("M Y", $nmonth);
 	
 	$ms = monthSelect($month);
-	$ys = yearSelect(2004, $year);
+	$minyear = isset($metadata["archive_begin"]) ? intval(date("Y", $metadata["archive_begin"])): 1929;
+	$ys = yearSelect($minyear, $year);
   $form = <<<EOF
 <form method="GET" name="changemonth">
  <input type="hidden" name="station" value="{$station}">

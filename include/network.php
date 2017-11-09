@@ -1,5 +1,5 @@
 <?php
-/* Build Network station tables on demand! */
+// Build Network station tables on demand!
 
 include_once dirname(__FILE__) ."/database.inc.php";
 
@@ -8,6 +8,7 @@ class NetworkTable {
   function NetworkTable($a)
   {
     $this->table = Array();
+    // We force new here to prevent reused prepared statement names, hack
     $this->dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW);
     $rs = pg_prepare($this->dbconn, "SELECT", "SELECT *, ST_x(geom) as lon, 
     	ST_y(geom) as lat from stations WHERE network = $1 ORDER by name ASC");
@@ -26,6 +27,7 @@ class NetworkTable {
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
+      $this->do_conversions($row["id"]);
     }
   }
 
@@ -35,6 +37,7 @@ class NetworkTable {
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
+      $this->do_conversions($row["id"]);
     }
     if (pg_num_rows($rs) < 1){
     	return false;
@@ -42,6 +45,11 @@ class NetworkTable {
     return true;
   }
 
+  function do_conversions($id){
+      if ($this->table[$id]["archive_begin"] != null){
+          $this->table[$id]["archive_begin"] = strtotime($this->table[$id]["archive_begin"]);
+      }
+  }
 
   function get($id)
   {

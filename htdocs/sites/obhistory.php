@@ -70,9 +70,9 @@ if ($tomorrow > time()){
 	$tomorrow = null;
 }
 if ($metadata["archive_begin"]){
-	$startyear = intval(date("Y", strtotime($metadata["archive_begin"])));
-	if ($date < strtotime($metadata['archive_begin'])){
-		$date = strtotime($metadata['archive_begin']);
+	$startyear = intval(date("Y", $metadata["archive_begin"]));
+	if ($date < $metadata['archive_begin']){
+		$date = $metadata['archive_begin'];
 	}
 } else {
 	$startyear = 2010;

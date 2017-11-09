@@ -35,6 +35,7 @@ class StationData {
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
+      $this->do_conversions($row["id"]);
     }
     if (pg_num_rows($rs) < 1){
     	return false;
@@ -42,6 +43,12 @@ class StationData {
     return true;
   }
 
+  function do_conversions($id){
+      if ($this->table[$id]["archive_begin"] != null){
+          $this->table[$id]["archive_begin"] = strtotime($this->table[$id]["archive_begin"]);
+      }
+  }
+  
   function get($id)
   {
     return $this->table[$id];
