@@ -2,11 +2,10 @@
 import calendar
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
 
 OPT = {'state': 'Summarize by State',
@@ -48,7 +47,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
 
     opt = ctx['opt']
@@ -81,8 +80,8 @@ def plotter(fdict):
     SELECT yr, week, count(*) from obs GROUP by yr, week ORDER by yr ASC
     """, pgconn, params=(phenomena, significance), index_col=None)
 
-    if len(df.index) == 0:
-        raise Exception("ERROR: No Results Found!")
+    if df.empty:
+        return "ERROR: No Results Found!"
 
     # Top Panel: count
     gdf = df.groupby('week').count()

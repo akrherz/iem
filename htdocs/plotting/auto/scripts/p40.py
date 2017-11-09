@@ -1,11 +1,11 @@
 """METAR cloudiness"""
-import psycopg2
-import numpy as np
 import datetime
+
+import numpy as np
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -40,7 +40,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
     from matplotlib.patches import Rectangle
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -66,8 +66,8 @@ def plotter(fdict):
 
     lookup = {'CLR': 0, 'FEW': 25, 'SCT': 50, 'BKN': 75, 'OVC': 100}
 
-    if len(df.index) == 0:
-        raise Exception("No database entries found for station, sorry!")
+    if df.empty:
+        return "No database entries found for station, sorry!"
 
     for _, row in df.iterrows():
         delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)
@@ -75,13 +75,13 @@ def plotter(fdict):
         for i in range(1, 5):
             a = lookup.get(row['skyc%s' % (i,)], -1)
             if a >= 0:
-                l = row['skyl%s' % (i,)]
-                if l is not None and l > 0:
-                    l = int(l / 100)
-                    if l >= 250:
+                skyl = row['skyl%s' % (i,)]
+                if skyl is not None and skyl > 0:
+                    skyl = int(skyl / 100)
+                    if skyl >= 250:
                         continue
-                    data[l:l+4, delta] = a
-                    data[l+3:, delta] = min(a, 75)
+                    data[skyl:skyl+4, delta] = a
+                    data[skyl+3:, delta] = min(a, 75)
 
     data = np.ma.array(data, mask=np.where(data < 0, True, False))
 

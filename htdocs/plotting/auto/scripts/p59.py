@@ -2,13 +2,12 @@
 import datetime
 import calendar
 
-import psycopg2
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.datatypes import speed
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'mps': 'Meters per Second',
          'kt': 'Knots',
@@ -62,7 +61,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    asos = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    asos = get_dbconn('asos')
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']

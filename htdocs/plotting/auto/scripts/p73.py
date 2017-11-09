@@ -1,10 +1,9 @@
 """Simple plot of number of WAWA"""
 import datetime
 
-import psycopg2
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
@@ -38,7 +37,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     limit = ctx['limit']
@@ -68,8 +67,8 @@ def plotter(fdict):
         SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
       """, pgconn, params=(phenomena, significance))
 
-    if len(df.index) == 0:
-        raise Exception("Sorry, no data found!")
+    if df.empty:
+        return "Sorry, no data found!"
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(df['yr'], df['count'], align='center')

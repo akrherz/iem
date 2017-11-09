@@ -1,10 +1,9 @@
 """comparison"""
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -36,7 +35,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['zstation1']
     network1 = ctx['network1']

@@ -1,11 +1,11 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+"""wind rose"""
 import datetime
+from collections import OrderedDict
+
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import drct2text
-from collections import OrderedDict
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn, drct2text
+from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
          ('ts', 'Thunderstorm (TS) Reported'),
@@ -36,13 +36,13 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['description'] = """This application generates a wind rose for a given
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['description'] = """This application generates a wind rose for a given
     criterion being meet. A wind rose plot is a convenient way of summarizing
     wind speed and direction."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='opt', default='ts',
@@ -52,7 +52,7 @@ def get_description():
         dict(type='int', name='threshold', default='80',
              label='Threshold (when appropriate):')
     ]
-    return d
+    return desc
 
 
 def highcharts(fdict):
@@ -164,7 +164,7 @@ def highcharts(fdict):
 
 def get_context(fdict):
     """Do the agnostic stuff"""
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     ctx['station'] = ctx['zstation']
     ctx['nt'] = NetworkTable(ctx['network'])
@@ -188,17 +188,16 @@ def get_context(fdict):
     title = "Thunderstorm (TS) contained in METAR"
     if ctx['opt'] == 'tmpf_above':
         limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
-        title = "Air Temp at or above %s$^\circ$F" % (ctx['threshold'],)
+        title = r"Air Temp at or above %s$^\circ$F" % (ctx['threshold'],)
     elif ctx['opt'] == 'tmpf_below':
         limiter = "round(tmpf::numeric,0) < %s" % (ctx['threshold'],)
-        title = "Air Temp below %s$^\circ$F" % (ctx['threshold'],)
+        title = r"Air Temp below %s$^\circ$F" % (ctx['threshold'],)
     elif ctx['opt'] == 'dwpf_below':
         limiter = "round(dwpf::numeric,0) < %s" % (ctx['threshold'],)
-        title = "Dew Point below %s$^\circ$F" % (ctx['threshold'],)
+        title = r"Dew Point below %s$^\circ$F" % (ctx['threshold'],)
     elif ctx['opt'] == 'dwpf_above':
         limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
-        title = "Dew Point at or above %s$^\circ$F" % (
-                                                            ctx['threshold'],)
+        title = r"Dew Point at or above %s$^\circ$F" % (ctx['threshold'],)
 
     ctx['df'] = read_sql("""
      SELECT valid, drct, sknt * 1.15 as smph from alldata

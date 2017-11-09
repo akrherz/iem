@@ -1,29 +1,30 @@
-import psycopg2
-from pyiem.network import Table as NetworkTable
+
 import datetime
 import calendar
+
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
+    desc = dict()
     ts = datetime.date.today()
-    d['data'] = True
-    d['description'] = """This chart displays the number of hourly
+    desc['data'] = True
+    desc['description'] = """This chart displays the number of hourly
     observations each month that reported measurable precipitation.  Sites
     are able to report trace amounts, but those reports are not considered
     in hopes of making the long term climatology comparable.
     """
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
         dict(type='year', name='year', default=ts.year,
              label='Select Year:'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -31,7 +32,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -65,7 +66,7 @@ def plotter(fdict):
     agg2 a LEFT JOIN myyear m
     on (m.month = a.month) ORDER by a.month ASC
     """, pgconn, params=(station, year), index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         return "No Precipitation Data Found for Site"
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     monthly = df['avg'].values.tolist()

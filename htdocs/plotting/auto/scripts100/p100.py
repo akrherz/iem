@@ -2,7 +2,6 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import numpy as np
 from pyiem import network, util
 from pandas.io.sql import read_sql
@@ -55,7 +54,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = util.get_dbconn('coop')
 
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']

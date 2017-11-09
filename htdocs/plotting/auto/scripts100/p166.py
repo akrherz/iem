@@ -1,7 +1,7 @@
 """Watches"""
 import datetime
+
 from pandas.io.sql import read_sql
-import psycopg2
 from pyiem import util
 from pyiem.reference import state_names
 
@@ -32,7 +32,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
-    pgconn = psycopg2.connect(dbname='postgis', host='iemdb', user='nobody')
+    pgconn = util.get_dbconn('postgis')
     ctx = util.get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2].upper()
     limit = ctx['limit']

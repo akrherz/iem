@@ -1,10 +1,12 @@
-import psycopg2.extras
-import numpy as np
-from pyiem import network
+"""histogram"""
 import datetime
 from collections import OrderedDict
+
+import numpy as np
+import psycopg2.extras
 import pandas as pd
-from pyiem.util import get_autoplot_context
+from pyiem import network
+from pyiem.util import get_autoplot_context, get_dbconn
 
 # Use OrderedDict to keep webform select in this same order!
 MDICT = OrderedDict([('all', 'No Month/Season Limit'),
@@ -28,11 +30,11 @@ MDICT = OrderedDict([('all', 'No Month/Season Limit'),
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart displays a histogram of daily high
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart displays a histogram of daily high
     and low temperatures for a station of your choice."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='binsize', default='10',
@@ -40,7 +42,7 @@ def get_description():
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -48,8 +50,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('coop')
+    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     binsize = ctx['binsize']
@@ -103,8 +105,8 @@ def plotter(fdict):
     ax.set_title(("%s [%s]\n"
                   "Daily High vs Low Temp Histogram (month=%s)"
                   ) % (nt.sts[station]['name'], station, month.upper()))
-    ax.set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
-    ax.set_xlabel("Low Temperature $^{\circ}\mathrm{F}$")
+    ax.set_ylabel(r"High Temperature $^{\circ}\mathrm{F}$")
+    ax.set_xlabel(r"Low Temperature $^{\circ}\mathrm{F}$")
 
     x = ar[0][0]
     y = ar[0][1]
@@ -115,10 +117,10 @@ def plotter(fdict):
             ha='center', va='center', transform=ax.transAxes,
             bbox=dict(color='white'))
     ax.axhline(32, linestyle='-', lw=1, color='k')
-    ax.text(120, 32, "32$^\circ$F", va='center', ha='right', color='white',
+    ax.text(120, 32, r"32$^\circ$F", va='center', ha='right', color='white',
             bbox=dict(color='k'), fontsize=8)
     ax.axvline(32, linestyle='-', lw=1, color='k')
-    ax.text(32, 120, "32$^\circ$F", va='top', ha='center', color='white',
+    ax.text(32, 120, r"32$^\circ$F", va='top', ha='center', color='white',
             bbox=dict(facecolor='k', edgecolor='none'), fontsize=8)
 
     return fig, df
