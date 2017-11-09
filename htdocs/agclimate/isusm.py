@@ -2,11 +2,12 @@
 '''
  Generate various plots for ISUSM data
 '''
-import psycopg2
 import cgi
+
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 CTX = {'tmpf': {'title': '2m Air Temperature [F]'},
        'rh': {'title': '2m Air Humidity [%]'},
@@ -15,9 +16,9 @@ CTX = {'tmpf': {'title': '2m Air Temperature [F]'},
 
 def get_currents():
     ''' Return dict of current values '''
-    dbconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    dbconn = get_dbconn('iem')
     cursor = dbconn.cursor()
-    dbconn2 = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    dbconn2 = get_dbconn('isuag')
     cursor2 = dbconn2.cursor()
     data = {}
     cursor.execute("""
@@ -62,26 +63,32 @@ def plot(data, v):
         valid = data[sid]['valid']
 
     if valid is None:
-        m = MapPlot(sector='iowa', axisbg='white',
-                    title=('ISU Soil Moisture Network :: %s'
-                           '') % (CTX[v]['title'], ),
-                    figsize=(8.0, 6.4))
-        m.plot_values([-95, ], [41.99, ], ['No Data Found'], '%s', textsize=30)
-        m.postprocess(web=True)
+        mp = MapPlot(sector='iowa', axisbg='white',
+                     title=('ISU Soil Moisture Network :: %s'
+                            '') % (CTX[v]['title'], ),
+                     figsize=(8.0, 6.4))
+        mp.plot_values([-95, ], [41.99, ], ['No Data Found'], '%s',
+                       textsize=30)
+        mp.postprocess(web=True)
         return
 
-    m = MapPlot(sector='iowa', axisbg='white',
-                title='ISU Soil Moisture Network :: %s' % (CTX[v]['title'],),
-                subtitle='valid %s' % (valid.strftime("%-d %B %Y %I:%M %p"),),
-                figsize=(8.0, 6.4))
-    m.plot_values(lons, lats, vals, '%.1f')
-    m.drawcounties()
-    m.postprocess(web=True)
+    mp = MapPlot(sector='iowa', axisbg='white',
+                 title='ISU Soil Moisture Network :: %s' % (CTX[v]['title'],),
+                 subtitle='valid %s' % (valid.strftime("%-d %B %Y %I:%M %p"),),
+                 figsize=(8.0, 6.4))
+    mp.plot_values(lons, lats, vals, '%.1f')
+    mp.drawcounties()
+    mp.postprocess(web=True)
 
-if __name__ == '__main__':
-    ''' Do something '''
+
+def main():
+    """Go Main Go"""
     form = cgi.FieldStorage()
     v = form.getfirst('v', 'tmpf')
     t = form.getfirst('t', '0')
     data = get_currents()
     plot(data, v)
+
+
+if __name__ == '__main__':
+    main()

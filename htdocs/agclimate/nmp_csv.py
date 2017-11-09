@@ -1,25 +1,30 @@
 #!/usr/bin/env python
 """Generation of National Mesonet Project CSV File"""
 import sys
+
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance, temperature
+from pyiem.util import get_dbconn
 
 
 def p(val, prec, minv, maxv):
+    """rounder"""
     if val is None or val < minv or val > maxv:
         return 'null'
     return round(val, prec)
 
 
 def p2(val, prec, minv, maxv):
+    """rounder"""
     if val is None or val < minv or val > maxv:
         return 'null'
     return round(temperature(val, 'C').value('K'), prec)
 
 
 def do_output():
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    """Do as I say"""
+    pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""
     with data as (
