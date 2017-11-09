@@ -1,19 +1,29 @@
 """
  Generate the dailyb spam, run from RUN_12Z.sh
 """
+from __future__ import print_function
 import subprocess
 import smtplib
 import os
 import datetime
 import time
-import psycopg2.extras
-import json
-import urllib2
-import pytz
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-import wwa
+import psycopg2.extras
+import requests
+from pyiem.util import exponential_backoff, get_dbconn
+
+import pytz
+import wwa  # @UnresolvedImport
+
+IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
+
+
+def mywrap(text):
+    """Make text pretty, my friends"""
+    text = text.replace("\n\n", "\n").replace("\n", "\n    ").rstrip()
+    return text
 
 
 def get_github_commits():
@@ -27,42 +37,58 @@ def get_github_commits():
     yesterday = utcnow - datetime.timedelta(hours=24)
     yesterday = yesterday.replace(hour=12, minute=0, second=0)
     iso = yesterday.strftime("%Y-%m-%dT%H:%M:%SZ")
-    uri = "https://api.github.com/repos/akrherz/iem/commits?since=%s" % (iso,)
 
-    txt = "> IEM Code Development on Github\n\n"
-    html = "<h3>IEM Code Development on Github</h3><ul>\n"
+    txt = ["> IEM Code Pushes <to branch> on Github\n", ]
+    html = ["<h3>IEM Code Pushes &lt;to branch&gt; on Github</h3>", ]
 
-    try:
-        jdata = json.loads(urllib2.urlopen(uri).read())
-    except:
-        txt += "    An Error Occurred downloading changelog!\n"
-        html += "<li>An Error Occurred</li></ul>"
-        return txt, html
+    # get branches, master is first!
+    branches = ['master']
+    req = exponential_backoff(requests.get, IEM_BRANCHES, timeout=30)
+    for branch in req.json():
+        if branch['name'] == 'master':
+            continue
+        branches.append(branch['name'])
 
-    res = {}
-    for commit in jdata:
-        timestring = commit['commit']['author']['date']
-        utcvalid = datetime.datetime.strptime(timestring, '%Y-%m-%dT%H:%M:%SZ')
-        valid = (utcvalid.replace(tzinfo=pytz.timezone("UTC"))).astimezone(
+    hashes = []
+    links = []
+    for branch in branches:
+        uri = ("https://api.github.com/repos/akrherz/iem/commits?since=%s&"
+               "sha=%s") % (iso, branch)
+        req2 = exponential_backoff(requests.get, uri, timeout=30)
+        # commits are in reverse order
+        for commit in req2.json()[::-1]:
+            if commit['sha'] in hashes:
+                continue
+            hashes.append(commit['sha'])
+            timestring = commit['commit']['author']['date']
+            utcvalid = datetime.datetime.strptime(timestring,
+                                                  '%Y-%m-%dT%H:%M:%SZ')
+            valid = utcvalid.replace(tzinfo=pytz.utc).astimezone(
                                             pytz.timezone("America/Chicago"))
-        res[valid] = commit
+            data = {
+                'stamp': valid.strftime("%b %-d %-2I:%M %p"),
+                'msg': commit['commit']['message'],
+                'htmlmsg': commit['commit'][
+                    'message'].replace("\n\n", "\n").replace("\n", "<br />\n"),
+                'branch': branch,
+                'url': commit['html_url'][:-20],  # chomp to make shorter
+                'i': len(links) + 1,
+            }
+            links.append("[%(i)s] %(url)s" % data)
+            txt.append(
+                mywrap("  %(stamp)s[%(i)s] <%(branch)s> %(msg)s" % data))
+            html.append(("<li><a href=\"%(url)s\">%(stamp)s</a> "
+                        "&lt;%(branch)s&gt; %(htmlmsg)s</li>\n") % data)
 
-    keys = res.keys()
-    keys.sort()
-    for valid in keys:
-        commit = res[valid]
-        msg = commit['commit']['message']
-        txt += "    %s %s\n" % (valid.strftime("%-m/%-d %-2I:%M %p"),
-                              msg.split("\n")[0])
-        html += "<li><a href=\"%s\">%s</a> %s</li>\n" % (commit['html_url'],
-                                            valid.strftime("%-m/%-d %I:%M %p"), 
-                            msg.replace("\n\n","<br />"))
-    
-    if len(keys) == 0:
-        txt += "    No code commits found in previous 24 Hours\n"
-        html += "<li>No code commits found in previous 24 Hours</li>"
-    
-    return txt+"\n", html+"</ul>"
+    if len(txt) == 1:
+        txt = txt[0] + "    No code commits found in previous 24 Hours"
+        html = html[0] + ("<strong>No code commits found "
+                          "in previous 24 Hours</strong>")
+    else:
+        txt = "\n".join(txt) + "\n\n" + "\n".join(links)
+        html = html[0] + "<ul>" + "\n".join(html[1:]) + "</ul>"
+
+    return txt+"\n\n", html + "<br /><br />"
 
 
 def cowreport():
@@ -70,15 +96,14 @@ def cowreport():
     proc = subprocess.Popen('php cowreport.php', shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     data = proc.stdout.read()
-    html = "<h3>IEM Cow Report</h3><pre>"+ data +"</pre>"
-    txt = '> IEM Cow Report\n'+ data +'\n'
+    html = "<h3>IEM Cow Report</h3><pre>" + data + "</pre>"
+    txt = '> IEM Cow Report\n' + data + '\n'
     return txt, html
 
 
 def feature():
     """ Print the feature for yesterday """
-    mesosite = psycopg2.connect(database='mesosite', host='iemdb',
-                                user='nobody')
+    mesosite = get_dbconn('mesosite', user='nobody')
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     # Query
@@ -129,8 +154,7 @@ Bad: %(bad)s  Abstain: %(abstain)s
 
 def news():
     """ Print the news that is fit to print """
-    mesosite = psycopg2.connect(database='mesosite', host='iemdb',
-                                user='nobody')
+    mesosite = get_dbconn('mesosite', user='nobody')
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     # Last dailyb delivery
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
@@ -178,7 +202,7 @@ def news():
 def main():
     """ Go Main! """
     msg = MIMEMultipart('alternative')
-    now = datetime.datetime.now() 
+    now = datetime.datetime.now()
     msg['Subject'] = 'IEM Daily Bulletin for %s' % (now.strftime("%b %-d %Y"),)
     msg['From'] = 'daryl herzmann <akrherz@iastate.edu>'
     if os.environ['USER'] == 'akrherz':
@@ -195,9 +219,14 @@ def main():
     t, h = news()
     text += t
     html += h
-    t, h = get_github_commits()
-    text += t.encode('ascii', 'ignore')
-    html += "%s" % (h.encode('ascii', 'ignore'),)
+    try:
+        t, h = get_github_commits()
+        text += t.encode('ascii', 'ignore')
+        html += "%s" % (h.encode('ascii', 'ignore'),)
+    except Exception as exp:
+        print("get_github_commits failed with %s" % (exp, ))
+        text += "\n(script failure fetching github activity\n"
+        html += "<br />(script failure fetching github activity<br />"
     t, h = feature()
     text += t
     html += h
@@ -214,25 +243,39 @@ def main():
     msg.attach(part2)
 
     try:
-        s = smtplib.SMTP('mailhub.iastate.edu')
-    except:
+        smtp = smtplib.SMTP('mailhub.iastate.edu')
+    except Exception as exp:
+        print("spammer.py got exception to mailhub; %s" % (exp, ))
         time.sleep(57)
-        s = smtplib.SMTP('mailhub.iastate.edu')
-    s.sendmail(msg['From'], [msg['To']], msg.as_string())
-    s.quit()
+        smtp = smtplib.SMTP('mailhub.iastate.edu')
+    smtp.sendmail(msg['From'], [msg['To']], msg.as_string())
+    smtp.quit()
 
     # Send forth LDM
-    o = open("tmp.txt", 'w')
-    o.write(text)
-    o.close()
+    fp = open("tmp.txt", 'w')
+    fp.write(text)
+    fp.close()
     subprocess.call(('/home/ldm/bin/pqinsert -p "plot c 000000000000 '
                      'iemdb.txt bogus txt" tmp.txt'), shell=True)
-    o = open("tmp.txt", 'w')
-    o.write(html)
-    o.close()
+    fp = open("tmp.txt", 'w')
+    fp.write(html)
+    fp.close()
     subprocess.call(('/home/ldm/bin/pqinsert -p "plot c 000000000000 '
                      'iemdb.html bogus txt" tmp.txt'), shell=True)
     os.unlink("tmp.txt")
 
+
+def tests():
+    """Hacky means to test things"""
+    text, html = get_github_commits()
+    print("Text Variant")
+    print(text)
+    fp = open('/tmp/gh.html', 'w')
+    fp.write(html)
+    fp.close()
+    subprocess.call("xdg-open /tmp/gh.html >& /dev/null", shell=True)
+
+
 if __name__ == '__main__':
     main()
+    # tests()
