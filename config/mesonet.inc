@@ -41,7 +41,12 @@
   Redirect permanent /data/nexrd2/raw http://nomads.ncep.noaa.gov/pub/data/nccf/radar/nexrad_level2
   Redirect permanent /cscap https://datateam.agron.iastate.edu/cscap
 
-  ErrorDocument 404 /error404.php
+  ErrorDocument 404 /http_errors/error404.php
+
+  <Location "/http_errors/">
+    # https://bz.apache.org/bugzilla/show_bug.cgi?id=55415
+    ProxyErrorOverride Off
+  </Location>
 
   <Directory "/opt/iem/htdocs">
     # Need FollowSymLinks for mod_rewrite to work!

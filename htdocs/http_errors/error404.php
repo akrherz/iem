@@ -1,6 +1,6 @@
 <?php
-require '../config/settings.inc.php';
-include_once('../include/myview.php');
+require_once '../../config/settings.inc.php';
+require_once '../../include/myview.php';
 
 $t = new MyView();
 $t->title = "File Not Found (404)";
