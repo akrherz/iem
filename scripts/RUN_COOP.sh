@@ -3,7 +3,7 @@
 
 cd outgoing
 python wxc_azos_gdd.py
-php wxc_coop.php
+LD_PRELOAD=/opt/miniconda2/lib/libz.so php wxc_coop.php
 
 cd ../coop
 csh PREC.csh
