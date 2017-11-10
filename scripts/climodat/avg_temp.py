@@ -1,23 +1,23 @@
 """
  Generate maps of Average Temperatures
 """
-
 import sys
-from pyiem.plot import MapPlot
-
 import datetime
+
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
-
-now = datetime.datetime.now()
-nt = NetworkTable("IACLIMATE")
-nt.sts["IA0200"]["lon"] = -93.4
-nt.sts["IA5992"]["lat"] = 41.65
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 
 def runYear(year):
+    """Hack"""
+    now = datetime.datetime.now()
+    nt = NetworkTable("IACLIMATE")
+    nt.sts["IA0200"]["lon"] = -93.4
+    nt.sts["IA5992"]["lat"] = 41.65
+    pgconn = get_dbconn('coop', user='nobody')
+    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """SELECT station, avg(high) as avg_high, avg(low) as avg_low,
            avg( (high+low)/2 ) as avg_tmp, max(day)
            from alldata_ia WHERE year = %s and station != 'IA0000' and
@@ -40,15 +40,15 @@ def runYear(year):
         maxday = row['max']
 
     # ---------- Plot the points
-    m = MapPlot(title="Average Daily High Temperature [F] (%s)" % (year,),
-                subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
-                axisbg='white')
-    m.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
-                  labelcolor='tan', fmt='%.1f')
+    mp = MapPlot(title="Average Daily High Temperature [F] (%s)" % (year,),
+                 subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                 axisbg='white')
+    mp.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
+                   labelcolor='tan', fmt='%.1f')
     pqstr = "plot m %s bogus %s/summary/avg_high.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     # Plot Average Lows
     lats = []
@@ -66,15 +66,15 @@ def runYear(year):
         vals.append(row['avg_low'])
 
     # ---------- Plot the points
-    m = MapPlot(title="Average Daily Low Temperature [F] (%s)" % (year,),
-                subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
-                axisbg='white')
-    m.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
-                  labelcolor='tan', fmt='%.1f')
+    mp = MapPlot(title="Average Daily Low Temperature [F] (%s)" % (year,),
+                 subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                 axisbg='white')
+    mp.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
+                   labelcolor='tan', fmt='%.1f')
     pqstr = "plot m %s bogus %s/summary/avg_low.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
     # Plot Average Highs
     lats = []
@@ -92,15 +92,15 @@ def runYear(year):
         vals.append(row['avg_tmp'])
 
     # ---------- Plot the points
-    m = MapPlot(title="Average Daily Temperature [F] (%s)" % (year,),
-                subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
-                axisbg='white')
-    m.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
-                  labelcolor='tan', fmt='%.1f')
+    mp = MapPlot(title="Average Daily Temperature [F] (%s)" % (year,),
+                 subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                 axisbg='white')
+    mp.plot_values(lons, lats, vals, labels=labels, labeltextsize=8,
+                   labelcolor='tan', fmt='%.1f')
     pqstr = "plot m %s bogus %s/summary/avg_temp.png png" % (
                                         now.strftime("%Y%m%d%H%M"), year,)
-    m.postprocess(pqstr=pqstr)
-    m.close()
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
 
 if __name__ == '__main__':

@@ -5,13 +5,14 @@ reason.  The main data estimator is found at `../climodat/daily_estimator.py`.
 
 This script utilizes the IEMRE web service to provide data.
 """
+from __future__ import print_function
 import sys
-from pyiem.network import Table as NetworkTable
 import requests
-import psycopg2
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 # Database Connection
-COOP = psycopg2.connect(database='coop', host='iemdb')
+COOP = get_dbconn('coop')
 ccursor = COOP.cursor()
 ccursor2 = COOP.cursor()
 
@@ -47,8 +48,9 @@ def do_var(varname):
         req = requests.get(wsuri)
         try:
             estimated = req.json()['data'][0]
-        except:
-            print("\n%s Failure:%s\n%s" % (station, req.content, wsuri))
+        except Exception as exp:
+            print(("\n%s Failure:%s\n%s\nExp: %s"
+                   ) % (station, req.content, wsuri, exp))
             continue
         newvalue = estimated["%s%s%s" % (prefix, varname, units)]
         if newvalue is None:
@@ -67,11 +69,13 @@ def do_var(varname):
 
 
 def main():
+    """Go Main Go"""
     for varname in ['high', 'low', 'precip']:
         do_var(varname)
 
     ccursor2.close()
     COOP.commit()
+
 
 if __name__ == '__main__':
     main()

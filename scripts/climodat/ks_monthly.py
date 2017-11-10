@@ -6,11 +6,13 @@ import datetime
 import numpy as np
 import psycopg2
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
+
 nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
                    'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
                    'SDCLIMATE', 'NDCLIMATE', 'NECLIMATE', 'KSCLIMATE',
                    'MOCLIMATE'))
-pgconn = psycopg2.connect(database="coop", host="iemdb", user='nobody')
+pgconn = get_dbconn("coop", user='nobody')
 cursor = pgconn.cursor()
 
 
@@ -95,10 +97,11 @@ def process(sid, csv, yr):
 def main(yr):
     """ main ! """
     csv = setup_csv(yr)
-    for sid in nt.sts.keys():
+    for sid in nt.sts:
         # print "%s processing [%s] %s" % (yr, id, nt.sts[id]["name"])
         metadata(sid, csv)
         process(sid, csv, yr)
+
 
 if __name__ == "__main__":
     # For what year are we running!

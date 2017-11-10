@@ -5,15 +5,17 @@
 
  http://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
+from __future__ import print_function
 import re
 import os
 import subprocess
 import sys
 import datetime
-import pytz
 import urllib2
-import psycopg2
 import unittest
+
+import pytz
+from pyiem.util import get_dbconn
 
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
 
@@ -75,7 +77,7 @@ def p2_parser(ln):
     """
     m = P2_RE.match(ln.replace("]", "").replace("[", ""))
     if m is None:
-        print "P2_FAIL:|%s|" % (ln,)
+        print("P2_FAIL:|%s|" % (ln,))
         return None
     res = m.groupdict()
     res['ts'] = tstamp2dt(res['tstamp'])
@@ -101,7 +103,7 @@ def p1_parser(ln):
     """
     m = P1_RE.match(ln.replace("]", "").replace("[", ""))
     if m is None:
-        print "P1_FAIL:|%s|" % (ln,)
+        print("P1_FAIL:|%s|" % (ln,))
         return None
     res = m.groupdict()
     res['ts'] = tstamp2dt(res['tstamp'])
@@ -173,20 +175,20 @@ def runner(station, monthts):
             try:
                 download(station, monthts)
             except Exception, exp:
-                print 'download() error', exp
+                print('download() error %s' % (exp,))
             if not os.path.isfile(fn5) or not os.path.isfile(fn6):
                 print(("NCDC did not have %s station for %s"
                        ) % (station, monthts.strftime("%b %Y")))
                 return
     # We have two files to worry about
-    print "Processing 64050: %s" % (fn5,)
+    print("Processing 64050: %s" % (fn5,))
     for ln in open(fn5):
         d = p1_parser(ln)
         if d is None:
             continue
         data[d['ts']] = d
 
-    print "Processing 64060: %s" % (fn6,)
+    print("Processing 64060: %s" % (fn6,))
     for ln in open(fn6):
         d = p2_parser(ln)
         if d is None:
@@ -197,7 +199,7 @@ def runner(station, monthts):
             data[d['ts']][k] = d[k]
 
     if len(data) == 0:
-        print 'No data found for station: %s' % (station,)
+        print('No data found for station: %s' % (station,))
         return
 
     mints = None
@@ -224,7 +226,7 @@ def runner(station, monthts):
     flipped = False
     for ts in keys:
         if ts.year != monthts.year and not flipped:
-            print "  Flipped years from %s to %s" % (monthts.year, ts.year)
+            print("  Flipped years from %s to %s" % (monthts.year, ts.year))
             out.write("\.\n")
             out.write(("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n"
                        ) % (ts.year,))
@@ -257,16 +259,20 @@ def runner(station, monthts):
 
 
 def update_iemprops():
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    """db update"""
+    pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
     m1 = datetime.date.today().replace(day=1)
-    cursor.execute("""UPDATE properties SET propvalue = %s
-    WHERE propname = 'asos.1min.end'""", (m1.strftime("%Y-%m-%d"),))
+    cursor.execute("""
+        UPDATE properties SET propvalue = %s
+        WHERE propname = 'asos.1min.end'
+    """, (m1.strftime("%Y-%m-%d"),))
     cursor.close()
     pgconn.commit()
 
 
 def main(argv):
+    """Go Main Go"""
     if len(argv) == 3:
         for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
                         'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
@@ -274,12 +280,12 @@ def main(argv):
             runner(station,
                    datetime.datetime(int(argv[1]), int(argv[2]), 1))
     elif len(argv) == 4:
-            if int(argv[3]) != 0:
-                months = [int(argv[3]), ]
-            else:
-                months = range(1, 13)
-            for month in months:
-                runner(sys.argv[1], datetime.datetime(int(argv[2]), month, 1))
+        if int(argv[3]) != 0:
+            months = [int(argv[3]), ]
+        else:
+            months = range(1, 13)
+        for month in months:
+            runner(sys.argv[1], datetime.datetime(int(argv[2]), month, 1))
     else:
         # default to last month
         ts = datetime.date.today() - datetime.timedelta(days=19)
@@ -289,6 +295,7 @@ def main(argv):
             runner(station,
                    datetime.datetime(ts.year, ts.month, 1))
         update_iemprops()
+
 
 if __name__ == '__main__':
     main(sys.argv)

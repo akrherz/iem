@@ -6,10 +6,10 @@ from __future__ import print_function
 import sys
 import re
 import datetime
-import string
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
+from pyiem.reference import TRACE_VALUE
 
 # This is not good, but necessary.  We translate some sites into others, so to
 # maintain a long term record.
@@ -21,7 +21,7 @@ STCONV = {'IA6199': 'IA6200',  # Oelwein
           'IA2041': 'IA3980',  # Dakota City becomes Humboldt
           }
 FIELDS = ['high', 'low', 'precip', 'snow', 'snowd']
-PGCONN = psycopg2.connect(database='coop', host='iemdb')
+PGCONN = get_dbconn('coop')
 
 
 def get_current(year, month):
@@ -42,7 +42,7 @@ def safef(val):
     if val in ['M', 'C', '*', '?', '']:
         return None
     if val == 'T':
-        return 0.0001
+        return TRACE_VALUE
     return float(val)
 
 
@@ -114,7 +114,7 @@ def main(argv):
         if len(tokens) < 15 or len(tokens[2]) != 4:
             misses += 1
             continue
-        if len(tokens[0]) == 0 or tokens[2] == 'YR' or tokens[0] == 'YR':
+        if not tokens[0] or tokens[2] == 'YR' or tokens[0] == 'YR':
             continue
         stid = tokens[0]
         dbid = "%s%04.0f" % ("IA", int(stid))

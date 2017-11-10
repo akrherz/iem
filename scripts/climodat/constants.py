@@ -1,9 +1,9 @@
 """Hacky constants file used by other python scripts in this folder"""
 
-import pg
 import mx.DateTime
 from pyiem.network import Table as NetworkTable
-import psycopg2
+from pyiem.util import get_dbconn
+
 nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
                    'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
                    'SDCLIMATE', 'NDCLIMATE', 'NECLIMATE', 'KSCLIMATE',
@@ -15,9 +15,7 @@ _ENDYEAR = mx.DateTime.now().year + 1
 _ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 _ENDTS = mx.DateTime.DateTime(_ENDYEAR, 1, 1)
 
-mydb = pg.connect('coop', 'iemdb', user='nobody')
-
-mesosite = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+mesosite = get_dbconn('mesosite', user='nobody')
 mcursor = mesosite.cursor()
 mcursor.execute("""
     SELECT propvalue from properties where propname = 'iaclimate.end'
@@ -40,7 +38,7 @@ def yrcnt(sid):
     r = [0]*13
     for m in range(1, 13):
         ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(month=m, day=1)
-        if (ts > _ARCHIVEENDTS):
+        if ts > _ARCHIVEENDTS:
             r[m] = _ARCHIVEENDTS.year - sts.year
         else:
             r[m] = _ARCHIVEENDTS.year - sts.year + 1
@@ -49,7 +47,7 @@ def yrcnt(sid):
 
 
 def climatetable(sid):
-    if (startyear(sid) == 1951):
+    if startyear(sid) == 1951:
         return "climate51"
     return "climate"
 

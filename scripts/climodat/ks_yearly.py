@@ -1,13 +1,10 @@
 """Need something to generate a kitchen sink report of Climate Data"""
 import constants
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
-pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+from pyiem.util import get_dbconn
+
+pgconn = get_dbconn('coop')
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
-                   'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
-                   'SDCLIMATE', 'NDCLIMATE', 'NECLIMATE', 'KSCLIMATE',
-                   'MOCLIMATE'))
 
 
 def setupCSV():
@@ -21,8 +18,9 @@ def setupCSV():
 
 
 def metadata(sid, csv):
-    csv.write("%s,%s,%s,%s," % (sid, nt.sts[sid]["name"], nt.sts[sid]["lat"],
-                                nt.sts[sid]["lon"]))
+    csv.write("%s,%s,%s,%s," % (sid, constants.nt.sts[sid]["name"],
+                                constants.nt.sts[sid]["lat"],
+                                constants.nt.sts[sid]["lon"]))
 
 
 def process(sid, csv):
@@ -65,7 +63,7 @@ def process(sid, csv):
 
 def main():
     csv = setupCSV()
-    keys = nt.sts.keys()
+    keys = constants.nt.sts.keys()
     keys.sort()
     for sid in keys:
         metadata(sid, csv)

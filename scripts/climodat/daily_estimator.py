@@ -25,17 +25,21 @@ Steps:
  4) Initialize entries in the table
  5) Run estimate for Iowa Average Site (IA0000)
 """
+from __future__ import print_function
 import sys
+import datetime
+
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
-import datetime
+from pyiem.util import get_dbconn
+from pyiem.datatypes import temperature
 import netCDF4
 import numpy as np
-from pyiem.datatypes import temperature
 import psycopg2.extras
-COOP = psycopg2.connect(database='coop', host='iemdb')
+
+COOP = get_dbconn('coop')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-IEM = psycopg2.connect(database='iem', host='iemdb')
+IEM = get_dbconn('iem')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
@@ -87,7 +91,6 @@ HARDCODE = {
     # Indiana
     'IN0784': 'BMG',
     'IN2738': 'EVV',
-    'IN4259': 'EYE',
     'IN3037': 'FWA',
     'IN7999': 'GEZ',
     # IN0877       | KHUF | BOWLING GREEN 1 W           | TERRE HAUTE
@@ -229,17 +232,21 @@ HARDCODE = {
     'WI2428': 'EAU',
     'WI4961': 'MSN',
     'WI4370': 'LSE',
-    'WI2428': 'AUW',
+    'WI8968': 'AUW',
     }
 
 # Pre-compute the grid location of each climate site
 nt = NetworkTable("%sCLIMATE" % (state.upper(),))
-for sid in nt.sts.keys():
-    i, j = iemre.find_ij(nt.sts[sid]['lon'], nt.sts[sid]['lat'])
-    nt.sts[sid]['gridi'] = i
-    nt.sts[sid]['gridj'] = j
-    for key in ['high', 'low', 'precip', 'snow', 'snowd']:
-        nt.sts[sid][key] = None
+
+
+def load_table():
+    """Update the station table"""
+    for sid in nt.sts:
+        i, j = iemre.find_ij(nt.sts[sid]['lon'], nt.sts[sid]['lat'])
+        nt.sts[sid]['gridi'] = i
+        nt.sts[sid]['gridj'] = j
+        for key in ['high', 'low', 'precip', 'snow', 'snowd']:
+            nt.sts[sid][key] = None
 
 
 def estimate_precip(ts):
@@ -251,7 +258,7 @@ def estimate_precip(ts):
     grid00 = nc.variables['p01d'][idx, :, :] / 25.4
     nc.close()
 
-    for sid in nt.sts.keys():
+    for sid in nt.sts:
         if nt.sts[sid]['precip24_hour'] in [0, 22, 23]:
             precip = grid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         else:
@@ -300,7 +307,7 @@ def estimate_hilo(ts):
                             'K').value('F')
     nc.close()
 
-    for sid in nt.sts.keys():
+    for sid in nt.sts:
         if nt.sts[sid]['temp24_hour'] in [0, 22, 23]:
             val = highgrid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         else:
@@ -353,8 +360,11 @@ def commit(ts):
 
 def hardcode(ts):
     """Stations that are hard coded against an ASOS site"""
-    for sid in HARDCODE.keys():
+    for sid in HARDCODE:
         if sid not in nt.sts:
+            if sid[:2] == state:
+                print(("daily_estimator has sid %s configured, but no table?"
+                       ) % (sid, ))
             continue
         icursor.execute("""
         SELECT max_tmpf, min_tmpf, pday, snow from summary s JOIN stations t
@@ -375,6 +385,7 @@ def hardcode(ts):
 
 def main():
     """main()"""
+    load_table()
     dates = []
     today = datetime.date.today()
     if len(sys.argv) == 5:
@@ -390,6 +401,7 @@ def main():
         if ts != today:
             hardcode(ts)
         commit(ts)
+
 
 if __name__ == '__main__':
     # See how we are called

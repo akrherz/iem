@@ -1,7 +1,7 @@
 # Generate the reports, run from RUN_2AM.sh
 
-python ksYearly.py 
-python ksMonthly.py
+python ks_yearly.py 
+python ks_monthly.py
 python dump.py
 
 python avg_temp.py `date +%Y`

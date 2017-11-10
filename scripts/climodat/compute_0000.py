@@ -1,13 +1,15 @@
 """Compute the Statewide and Climate District Averages!"""
-import netCDF4
-import psycopg2
-import numpy as np
-from pyiem import iemre
-from pyiem.datatypes import temperature
+from __future__ import print_function
 import sys
 import datetime
 
-COOP = psycopg2.connect(database="coop", host='iemdb')
+import netCDF4
+import numpy as np
+from pyiem import iemre
+from pyiem.datatypes import temperature
+from pyiem.util import get_dbconn
+
+COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
 
 
@@ -97,12 +99,13 @@ def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid):
     update_database(stabbr+"0000", valid, high, low, precip)
 
 
-def main():
-    if len(sys.argv) == 4:
-        do_day(datetime.date(int(sys.argv[1]), int(sys.argv[2]),
-                             int(sys.argv[3])))
-    elif len(sys.argv) == 3:
-        sts = datetime.date(int(sys.argv[1]), int(sys.argv[2]), 1)
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        do_day(datetime.date(int(argv[1]), int(argv[2]),
+                             int(argv[3])))
+    elif len(argv) == 3:
+        sts = datetime.date(int(argv[1]), int(argv[2]), 1)
         ets = sts + datetime.timedelta(days=35)
         ets = ets.replace(day=1)
         now = sts
@@ -112,7 +115,8 @@ def main():
     else:
         do_day(datetime.date.today())
 
+
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
     ccursor.close()
     COOP.commit()

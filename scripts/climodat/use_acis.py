@@ -5,23 +5,30 @@ import datetime
 
 import requests
 from pyiem.util import get_dbconn
+from pyiem.reference import TRACE_VALUE
 
 SERVICE = "http://data.rcc-acis.org/StnData"
 
 
 def safe(val):
+    """Hack"""
     if val in ['M', 'S']:
         return None
     if val == 'T':
-        return 0.0001
+        return TRACE_VALUE
     try:
         return float(val)
-    except:
+    except Exception as _exp:
         print("failed to convert %s to float, using None" % (repr(val),))
-        return None
 
 
 def main(station, acis_station):
+    """Do the query and work
+
+    Args:
+      station (str): IEM Station identifier ie IA0200
+      acis_station (str): the ACIS identifier ie 130197
+    """
     table = "alldata_%s" % (station[:2],)
     payload = {"sid": acis_station,
                "sdate": "1850-01-01",
@@ -29,7 +36,7 @@ def main(station, acis_station):
                "elems": "maxt,mint,pcpn,snow,snwd"}
     req = requests.post(SERVICE, json=payload)
     j = req.json()
-    pgconn = get_dbconn('coop', user='mesonet')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     for row in j['data']:
         date = row[0]
@@ -44,9 +51,10 @@ def main(station, acis_station):
             date = datetime.datetime.strptime(date, '%Y-%m-%d')
             sday = "%02i%02i" % (date.month, date.day)
             print("Adding entry for %s" % (date,))
-            cursor.execute("""INSERT into """ + table + """ (station, day,
-            high, low, precip, snow, snowd, sday, year, month, estimated)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'f')
+            cursor.execute("""
+                INSERT into """ + table + """ (station, day,
+                high, low, precip, snow, snowd, sday, year, month, estimated)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'f')
             """, (station, date, high, low, precip, snow, snowd, sday,
                   date.year, date.month))
     cursor.close()

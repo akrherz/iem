@@ -1,15 +1,15 @@
 """Use a simple zscore system to null out suspect data"""
+from __future__ import print_function
 import sys
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
 
-pgconn = get_dbconn('coop', user='mesonet')
+PGCONN = get_dbconn('coop', user='nobody')
 
 
 def do(state, vname):
+    """do"""
     network = "%sCLIMATE" % (state,)
-    nt = NetworkTable(network)
     table = "alldata_%s" % (state,)
     df = read_sql("""
     WITH mystations as (
@@ -26,11 +26,12 @@ def do(state, vname):
     o.day = s.day and t.id = o.station)
 
     SELECT * from agg where zscore > 4 ORDER by day
-    """, pgconn, params=(network, ), index_col=None)
-    print df.groupby('day').count()
+    """, PGCONN, params=(network, ), index_col=None)
+    print(df.groupby('day').count())
 
 
 def main(argv):
+    """Go Main Go"""
     state = argv[1]
     for vname in ['high', 'low']:
         do(state, vname)

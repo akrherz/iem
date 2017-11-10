@@ -14,15 +14,18 @@
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
-import datetime
-import urllib2
-import subprocess
-import numpy as np
-import pyiem.mrms as mrms
-from PIL import Image
-from PIL import PngImagePlugin
+from __future__ import print_function
 import tempfile
 import os
+import datetime
+import subprocess
+
+import requests
+import numpy as np
+import pyiem.mrms as mrms
+from pyiem.util import exponential_backoff
+from PIL import Image
+from PIL import PngImagePlugin
 
 BASEURL = "http://rainproc.its.uiowa.edu/Products/IFC7ADV"
 
@@ -37,17 +40,18 @@ def get_file(now):
                            "_%H%M00")).upper()
         uri = "%s/%s.out" % (BASEURL, fn)
         try:
-            req = urllib2.Request(uri)
-            data = urllib2.urlopen(req, timeout=30).read()
-        except:
-            pass
+            req = exponential_backoff(requests.get, uri, timeout=5)
+            data = req.content
+        except Exception as exp:
+            if now.hour == 0:
+                print(exp)
 
     if data is None:
         return None
     tmpfn = tempfile.mktemp()
-    o = open(tmpfn, 'w')
-    o.write(data)
-    o.close()
+    fp = open(tmpfn, 'w')
+    fp.write(data)
+    fp.close()
     return tmpfn
 
 
@@ -70,47 +74,48 @@ def to_raster(tmpfn, now):
     png.save('%s.png' % (tmpfn,), pnginfo=meta)
     del png
     # Make worldfile
-    o = open("%s.wld" % (tmpfn, ), 'w')
-    o.write("""0.004167
+    fp = open("%s.wld" % (tmpfn, ), 'w')
+    fp.write("""0.004167
 0.00
 0.00
 -0.004167
 44.53785
 -89.89942""")
-    o.close()
+    fp.close()
 
 
-def ldm(tmpfn, now):
+def ldm(tmpfn, now, routes):
     """ Send stuff to ldm """
     pq = "/home/ldm/bin/pqinsert"
-    pqstr = ("%s -i -p 'plot ac %s gis/images/4326/ifc/p05m.wld "
+    pqstr = ("%s -i -p 'plot %s %s gis/images/4326/ifc/p05m.wld "
              "GIS/ifc/p05m_%s.wld wld' %s.wld"
-             "") % (pq, now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H%M"),
-                    tmpfn)
+             "") % (pq, routes, now.strftime("%Y%m%d%H%M"),
+                    now.strftime("%Y%m%d%H%M"), tmpfn)
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
-    pqstr = ("%s -i -p 'plot ac %s gis/images/4326/ifc/p05m.png "
+    pqstr = ("%s -i -p 'plot %s %s gis/images/4326/ifc/p05m.png "
              "GIS/ifc/p05m_%s.png png' %s.png"
-             "") % (pq, now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H%M"),
-                    tmpfn)
+             "") % (pq, routes, now.strftime("%Y%m%d%H%M"),
+                    now.strftime("%Y%m%d%H%M"), tmpfn)
     subprocess.call(pqstr, shell=True)
 
 
 def cleanup(tmpfn):
+    """Cleanup after ourselves"""
     os.remove(tmpfn)
     for suffix in ['png', 'wld']:
         os.remove("%s.%s" % (tmpfn, suffix))
 
 
-def do_time(now):
-    # Fetch file
+def do_time(now, routes='ac'):
+    """workflow"""
     tmpfn = get_file(now)
     if tmpfn is None:
         return
 
     to_raster(tmpfn, now)
 
-    ldm(tmpfn, now)
+    ldm(tmpfn, now, routes)
 
     cleanup(tmpfn)
 
@@ -129,7 +134,8 @@ def main():
     fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ifc/"
                        "p05m_%Y%m%d%H%M.png"))
     if not os.path.isfile(fn):
-        do_time(now)
+        do_time(now, routes='a')
+
 
 if __name__ == '__main__':
     main()

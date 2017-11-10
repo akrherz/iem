@@ -1,27 +1,28 @@
 """
 Reprocess cocorahs data
 """
-
+from __future__ import print_function
 import urllib2
 import datetime
 import sys
-import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor()
+from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn
 
 state = sys.argv[1]
 
 
 def safeP(v):
     v = v.strip()
-    if (v == "T"):
-        return 0.0001
-    if (v == "NA"):
+    if v == "T":
+        return TRACE_VALUE
+    if v == "NA":
         return -99
     return float(v)
 
 
 def runner(days):
+    pgconn = get_dbconn('iem')
+    icursor = pgconn.cursor()
     now = datetime.datetime.now() - datetime.timedelta(days=days)
 
     req = urllib2.Request(("http://data.cocorahs.org/Cocorahs/export/"
@@ -53,8 +54,8 @@ def runner(days):
             """ % (ts.year, sid, ts.strftime("%Y-%m-%d"))
         icursor.execute(sql)
         if icursor.rowcount == 0:
-            print "%s - add summary for date %s" % (sid,
-                                                    ts.strftime("%Y-%m-%d"))
+            print("%s - add summary for date %s" % (sid,
+                                                    ts.strftime("%Y-%m-%d")))
             sql = """
             INSERT into summary_%s(iemid, day, pday)
               VALUES ((select iemid from stations where id = '%s'),
@@ -80,7 +81,7 @@ def runner(days):
             """ % (ts.year, sid, ts.strftime("%Y-%m-%d"))
         icursor.execute(sql)
         if icursor.rowcount == 0:
-            print 'NEED entry for %s %s' % (sid, ts.strftime("%Y-%m-%d"))
+            print('NEED entry for %s %s' % (sid, ts.strftime("%Y-%m-%d")))
         else:
             row = icursor.fetchone()
             dbval = row[0]
@@ -93,10 +94,15 @@ def runner(days):
                     """ % (ts.year, val, sid, ts.strftime("%Y-%m-%d"))
                 icursor.execute(sql)
 
+    icursor.close()
+    pgconn.commit()
 
-for i in range(1, 15):
-    runner(i)
 
-icursor.close()
-IEM.commit()
-IEM.close()
+def main():
+    """Go Main Go"""
+    for i in range(1, 15):
+        runner(i)
+
+
+if __name__ == '__main__':
+    main()
