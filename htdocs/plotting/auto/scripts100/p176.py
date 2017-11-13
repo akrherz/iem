@@ -1,8 +1,8 @@
 """Besting previous record"""
-from pyiem.util import get_autoplot_context
-from pyiem.network import Table as NetworkTable
-import psycopg2
+
 import pandas as pd
+from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.network import Table as NetworkTable
 
 
 def get_description():
@@ -22,7 +22,7 @@ def get_description():
 
 def get_context(fdict):
     """ Make the pandas Data Frame please"""
-    pgconn = psycopg2.connect(dbname='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -111,7 +111,7 @@ def plotter(fdict):
     ax.scatter(df2['date'].values, df2['margin'].values, color='b')
     ax.set_ylim(-30, 30)
     ax.grid(True)
-    ax.set_ylabel("Temperature Beat Margin $^\circ$F")
+    ax.set_ylabel(r"Temperature Beat Margin $^\circ$F")
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
 
     return fig, ctx['df']

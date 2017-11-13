@@ -7,12 +7,12 @@ messages come and overwrite the trouble. Run from RUN_10MIN.sh
 from __future__ import print_function
 import datetime
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go!"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('iem')
     icursor = pgconn.cursor()
     icursor2 = pgconn.cursor()
 

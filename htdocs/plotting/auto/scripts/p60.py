@@ -1,10 +1,10 @@
-import psycopg2
-import numpy as np
 import datetime
 import calendar
+
+import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
@@ -14,14 +14,14 @@ PDICT2 = {'tmpf': "Air Temperature",
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['cache'] = 86400
-    d['description'] = """This plot presents the hourly frequency of having
+    desc = dict()
+    desc['cache'] = 86400
+    desc['description'] = """This plot presents the hourly frequency of having
     a certain temperature above or below a given threshold.  Values are
     partitioned by week of the year to smooth out some of the day to day
     variation."""
-    d['data'] = True
-    d['arguments'] = [
+    desc['data'] = True
+    desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='tmpf', options=PDICT2,
@@ -31,7 +31,7 @@ def get_description():
         dict(type='select', name='direction', default='below',
              label='Threshold direction:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -40,7 +40,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.colors as mpcolors
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -63,7 +63,7 @@ def plotter(fdict):
     SELECT week::int, hour::int,
     sum(case when d """+mydir+""" %s then 1 else 0 end),
     count(*) from data GROUP by week, hour
-    """, ASOS, params=(nt.sts[station]['tzname'], station, threshold),
+    """, pgconn, params=(nt.sts[station]['tzname'], station, threshold),
                   index_col=None)
     data = np.zeros((24, 53), 'f')
     df['freq[%]'] = df['sum'] / df['count'] * 100.

@@ -1,18 +1,19 @@
 """Create simple maximum dbz composites for a given UTC date
 """
-import time
-import osgeo.gdal as gdal
-from osgeo import gdalconst
-import numpy as np
 import datetime
 import os
 import urllib2
-import pytz
-import subprocess
-import psycopg2
+import time
 import sys
+import subprocess
 
-PGCONN = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+import osgeo.gdal as gdal
+from osgeo import gdalconst
+import numpy as np
+import pytz
+from pyiem.util import get_dbconn
+
+PGCONN = get_dbconn('mesosite', user='nobody')
 CURSOR = PGCONN.cursor()
 PQINSERT = "/home/ldm/bin/pqinsert"
 URLBASE = "http://iem.local/GIS/radmap.php?width=1280&height=720&"
@@ -122,9 +123,9 @@ def run(prod, sts):
     png = urllib2.urlopen("%slayers[]=uscounties&layers[]=%s&ts=%s" % (
         URLBASE, "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
         sts.strftime("%Y%m%d%H%M"),))
-    o = open('tmp.png', 'wb')
-    o.write(png.read())
-    o.close()
+    fp = open('tmp.png', 'wb')
+    fp.write(png.read())
+    fp.close()
     cmd = ("%s -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
            "comprad/max_%s_0z0z_%s.png png' tmp.png"
            ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod,
@@ -137,9 +138,9 @@ def run(prod, sts):
                            ) % (URLBASE,
                                 "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
                                 sts.strftime("%Y%m%d%H%M"),))
-    o = open('tmp.png', 'wb')
-    o.write(png.read())
-    o.close()
+    fp = open('tmp.png', 'wb')
+    fp.write(png.read())
+    fp.close()
     cmd = ("%s -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
            "usrad/max_%s_0z0z_%s.png png' tmp.png"
            ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod,
@@ -148,18 +149,19 @@ def run(prod, sts):
     os.remove("tmp.png")
 
 
-def main():
+def main(argv):
     """Run main()"""
     # Default is to run for yesterday
     ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
-    if len(sys.argv) == 4:
-        ts = ts.replace(year=int(sys.argv[1]), month=int(sys.argv[2]),
-                        day=int(sys.argv[3]))
+    if len(argv) == 4:
+        ts = ts.replace(year=int(argv[1]), month=int(argv[2]),
+                        day=int(argv[3]))
     for prod in ['n0r', 'n0q']:
         run(prod, ts)
 
+
 if __name__ == '__main__':
     # Do something
-    main()
+    main(sys.argv)

@@ -1,37 +1,37 @@
 """Process data from the mini and portables """
-
+from __future__ import print_function
 import datetime
+
 import pytz
 import psycopg2.extras
-IEM = psycopg2.connect(database='iem', host='iemdb')
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-from pyiem.tracker import TrackerEngine
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity
 import pyiem.meteorology as meteorology
-from pyiem.network import Table as NetworkTable
-nt = NetworkTable("IA_RWIS")
-
-lkp = {'miniExportM1.csv': 'RAII4',
-       'miniExportM2.csv': 'RMYI4',
-       'portableExportP1.csv': 'RSWI4',
-       'portableExportP2.csv': 'RAGI4',
-       'portableExportP3.csv': 'RLMI4',
-       # 'portableExportPT.csv': 'ROCI4',
-       'portableExportPT.csv': 'RRCI4',
-       'miniExportIFB.csv': 'RIFI4',
-       }
-
-thres = datetime.datetime.utcnow() - datetime.timedelta(minutes=180)
-thres = thres.replace(tzinfo=pytz.timezone("UTC"))
+from pyiem.util import get_dbconn
 
 
-def processfile( fp ):
-    o = open("/mesonet/data/incoming/rwis/%s" % (fp,), 'r').readlines()
-    if len(o) < 2:
+LOOKUP = {'miniExportM1.csv': 'RAII4',
+          'miniExportM2.csv': 'RMYI4',
+          'portableExportP1.csv': 'RSWI4',
+          'portableExportP2.csv': 'RAGI4',
+          'portableExportP3.csv': 'RLMI4',
+          # 'portableExportPT.csv': 'ROCI4',
+          'portableExportPT.csv': 'RRCI4',
+          'miniExportIFB.csv': 'RIFI4',
+          }
+
+THRESHOLD = datetime.datetime.utcnow() - datetime.timedelta(minutes=180)
+THRESHOLD = THRESHOLD.replace(tzinfo=pytz.timezone("UTC"))
+
+
+def processfile(icursor, filename):
+    """Process this file"""
+    lines = open("/mesonet/data/incoming/rwis/%s" % (filename,),
+                 'r').readlines()
+    if len(lines) < 2:
         return
-    heading = o[0].split(",")
-    cols = o[1].split(",")
+    heading = lines[0].split(",")
+    cols = lines[1].split(",")
     data = {}
     if len(cols) < len(heading):
         return
@@ -39,8 +39,8 @@ def processfile( fp ):
         if cols[i].strip() != "/":
             data[heading[i].strip()] = cols[i].strip()
 
-    nwsli = lkp[fp]
-    if fp in ['portableExportP1.csv', 'miniExportIFB.csv']:
+    nwsli = LOOKUP[filename]
+    if filename in ['portableExportP1.csv', 'miniExportIFB.csv']:
         ts = datetime.datetime.strptime(data['date_time'][:16],
                                         '%Y-%m-%d %H:%M')
     else:
@@ -50,7 +50,7 @@ def processfile( fp ):
     iem = Observation(nwsli, 'IA_RWIS', ts)
     if ts.year < 2010:
         print(("rwis/mini_portable.py file: %s bad timestamp: %s"
-               "") % (fp, data['date_time']))
+               "") % (filename, data['date_time']))
         return
     iem.load(icursor)
 
@@ -77,8 +77,16 @@ def processfile( fp ):
         iem.data['drct'] = float(data['wind_dir'])
     iem.save(icursor)
 
-for k in lkp.keys():
-    processfile(k)
+
+def main():
+    """Go main Go"""
+    pgconn = get_dbconn('iem')
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    for k in LOOKUP:
+        processfile(icursor, k)
+
+    pgconn.commit()
 
 
-IEM.commit()
+if __name__ == '__main__':
+    main()

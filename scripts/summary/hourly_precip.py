@@ -3,9 +3,10 @@ My purpose in life is to update the hourly_YYYY with observed or
 computed hourly precipitation
 """
 import datetime
-import psycopg2
 import sys
+
 import pytz
+from pyiem.util import get_dbconn
 
 
 def archive(ts):
@@ -13,9 +14,9 @@ def archive(ts):
 
     Currently, we only support the METAR database :(
     """
-    asos = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    asos = get_dbconn('asos', user='nobody')
     acursor = asos.cursor()
-    iem = psycopg2.connect(database='iem', host='iemdb')
+    iem = get_dbconn('iem')
     icursor = iem.cursor()
 
     table = "t%s" % (ts.year,)
@@ -40,8 +41,9 @@ def archive(ts):
 
 
 def realtime(ts):
-    IEM = psycopg2.connect(database='iem', host='iemdb')
-    icursor = IEM.cursor()
+    """realtime"""
+    pgconn = get_dbconn('iem')
+    icursor = pgconn.cursor()
     table = "hourly_%s" % (ts.year,)
     icursor.execute("""
     INSERT into """ + table + """
@@ -55,8 +57,8 @@ def realtime(ts):
             and t.network !~* 'DCP'
             GROUP by t,id, t.network, v, t.iemid)
             """, (ts, ts, ts + datetime.timedelta(minutes=60)))
-    IEM.commit()
-    IEM.close()
+    pgconn.commit()
+    pgconn.close()
 
 
 def main(argv):
@@ -73,6 +75,7 @@ def main(argv):
         ts = ts.replace(minute=0, second=0, microsecond=0,
                         tzinfo=pytz.utc)
         realtime(ts)
+
 
 if __name__ == '__main__':
     main(sys.argv)

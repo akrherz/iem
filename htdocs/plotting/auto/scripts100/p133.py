@@ -1,9 +1,8 @@
 """snowfall totals around day"""
 import datetime
 
-import psycopg2
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
 
 
@@ -29,7 +28,7 @@ def get_description():
 
 def get_data(fdict):
     """ Get the data"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     date = ctx['date']
@@ -110,7 +109,7 @@ def plotter(fdict):
     nt = NetworkTable(network)
     date = ctx['date']
     df = get_data(fdict)
-    if len(df.index) == 0:
+    if df.empty:
         return 'Error, no results returned!'
 
     (fig, ax) = plt.subplots(1, 1)

@@ -3,10 +3,9 @@ import calendar
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
         ('TS', 'Thunder (TS)'),
@@ -43,7 +42,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -67,7 +66,7 @@ def plotter(fdict):
     count(*) from data GROUP by year, month ORDER by year, month
     """, pgconn, params=(tzname, station), index_col=None)
 
-    if len(df.index) == 0:
+    if df.empty:
         return "No database entries found for station, sorry!"
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title(("[%s] %s %s Events\n"

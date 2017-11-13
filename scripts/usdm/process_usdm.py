@@ -1,6 +1,4 @@
-"""IEM Processing of the USDM Shapefiles
-
-"""
+"""IEM Processing of the USDM Shapefiles"""
 from __future__ import print_function
 import sys
 import datetime
@@ -12,8 +10,8 @@ import glob
 
 import requests
 import fiona
-import psycopg2
 from shapely.geometry import shape, MultiPolygon
+from pyiem.util import get_dbconn
 
 BASEURL = "http://droughtmonitor.unl.edu/data/shapefiles_m/"
 PQINSERT = "/home/ldm/bin/pqinsert"
@@ -21,7 +19,7 @@ PQINSERT = "/home/ldm/bin/pqinsert"
 
 def database_save(date, shpfn):
     """Save to our databasem please"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
     cursor.execute("""DELETE from usdm where valid = %s""", (date, ))
     if cursor.rowcount > 0:

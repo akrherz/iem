@@ -2,14 +2,13 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import numpy as np
 from scipy import stats
 import pandas as pd
 from pyiem import meteorology
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature, mixingratio, pressure
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -59,7 +58,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']

@@ -1,8 +1,10 @@
-# Process Traffic Data
+"""Process Traffic Data"""
+from __future__ import print_function
 import csv
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
-DBCONN = psycopg2.connect(database='iem', host='iemdb')
+DBCONN = get_dbconn('iem')
 
 
 def load_metadata():
@@ -24,8 +26,8 @@ def create_sensor(row):
     """
     Create a sensor in the database please
     """
-    print ("Adding RWIS Traffic Sensor: %s Lane: %s Name: %s"
-           "") % (row["site_id"], row["Lane_id"], row["Sensor_position_name"])
+    print(("Adding RWIS Traffic Sensor: %s Lane: %s Name: %s"
+           ) % (row["site_id"], row["Lane_id"], row["Sensor_position_name"]))
     cursor = DBCONN.cursor()
     cursor.execute("""INSERT into rwis_traffic_sensors(location_id,
      lane_id, name) VALUES (%s, %s, %s)
@@ -43,9 +45,10 @@ def create_traffic(key):
     cursor.close()
 
 
-def processfile(fp):
+def processfile(filename):
+    """Process file"""
     meta = load_metadata()
-    o = open("/mesonet/data/incoming/rwis/%s" % (fp,), 'r')
+    o = open("/mesonet/data/incoming/rwis/%s" % (filename,), 'r')
     data = []
     for row in csv.DictReader(o):
         if row['Lane_id'] is None:
@@ -68,7 +71,7 @@ def processfile(fp):
     o.close()
 
     cursor = DBCONN.cursor()
-    cursor.execute("SET TIME ZONE 'GMT'")
+    cursor.execute("SET TIME ZONE 'UTC'")
     cursor.executemany("""UPDATE rwis_traffic_data SET
       valid = %(obs_date_time)s, avg_speed = %(avg_speed)s,
       avg_headway = %(avg_headway)s, normal_vol = %(normal_vol)s,
@@ -77,6 +80,7 @@ def processfile(fp):
     cursor.close()
     DBCONN.commit()
     DBCONN.close()
+
 
 if __name__ == '__main__':
     processfile("TrafficFile.csv")

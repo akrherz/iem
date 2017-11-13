@@ -1,10 +1,12 @@
-import psycopg2.extras
-import numpy as np
+"""first and last snowfalls"""
 import calendar
 import datetime
+
+import psycopg2.extras
+import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'first': 'First Snowfall after 1 July',
          'last': 'Last Snowfall before 1 July'}
@@ -12,13 +14,13 @@ PDICT = {'first': 'First Snowfall after 1 July',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This chart displays either the first or last date
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This chart displays either the first or last date
     of the winter season with a snowfall of a given intensity.  The snowfall
     and snow depth data is not of great quality, so please be careful with
     this plot."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='text', name='threshold', default='1',
@@ -26,7 +28,7 @@ def get_description():
         dict(type="select", name='dir', default='last', options=PDICT,
              label='Which Variable to Plot?'),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -34,7 +36,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -135,7 +137,7 @@ def plotter(fdict):
     ax2.set_position([box.x0, box.y0 + box.height * 0.1, box.width,
                      box.height * 0.9])
     df.set_index('year', inplace=True)
-    del(df['color'])
+    del df['color']
     return fig, df
 
 

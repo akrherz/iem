@@ -4,9 +4,8 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
-import psycopg2
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
@@ -67,7 +66,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     days = ctx['days']
@@ -114,7 +113,7 @@ def plotter(fdict):
     ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
     ax[0].axhline(df[varname].mean(), lw=2,
                   label='Avg: %.2f' % (df[varname].mean(), ))
-    ylabel = "Temperature $^\circ$F"
+    ylabel = r"Temperature $^\circ$F"
     if varname in ['precip', ]:
         ylabel = "Precipitation [inch]"
     elif varname.find('days') > -1:

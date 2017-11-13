@@ -3,8 +3,7 @@ from collections import OrderedDict
 import datetime
 
 from pandas.io.sql import read_sql
-import psycopg2
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
@@ -73,7 +72,7 @@ def plotter(fdict):
     font0.set_family('monospace')
     font0.set_size(16)
 
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']
     varname2 = varname.split("_")[1]
@@ -142,7 +141,7 @@ def plotter(fdict):
     y = y0
     for hr in range(24):
         sdf = df[df['hr'] == hr]
-        if len(sdf.index) > 0:
+        if not sdf.empty:
             row = sdf.iloc[0]
             fig.text(0.7, y,
                      "%3.0f: %s%s" % (row[varname],

@@ -2,10 +2,9 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
         ('precip', 'Precipitation [inch]'),
@@ -62,7 +61,7 @@ def plotter(fdict):
     ets = ctx['edate']
     bts = sts - datetime.timedelta(days=max([p1, p2, p3]))
 
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     table = "alldata_%s" % (station[:2], )
     df = read_sql("""

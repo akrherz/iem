@@ -2,12 +2,11 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from scipy import stats
 
 STATIONS = OrderedDict([
@@ -31,7 +30,7 @@ PDICT = {'yes': 'Colorize Labels by Corn Yield Trend',
 
 def load_yields(location):
     """Loads up the county corn yields"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     df = read_sql("""select year, num_value as yield
     from nass_quickstats where
     county_ansi = %s and state_alpha = 'IA' and year >= 1980
@@ -47,9 +46,9 @@ def load_yields(location):
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['description'] = """ """
-    d['arguments'] = [
+    desc = dict()
+    desc['description'] = """ """
+    desc['arguments'] = [
         dict(type='select', name='location', default='ames',
              label='Select Location:', options=STATIONS),
         dict(type='select', name='s', default='jan1',
@@ -57,7 +56,7 @@ def get_description():
         dict(type='select', name='opt', default='no',
              label='Plot Corn Yield Trends:', options=PDICT),
     ]
-    return d
+    return desc
 
 
 def load(dirname, location, sdate):
@@ -186,7 +185,7 @@ def plotter(fdict):
                        sts.strftime("%-d %B"),
                        today.strftime("%-d %B"), 1980,
                        today.year))
-    ax.set_xlabel("Average Temperature [$^\circ$F]")
+    ax.set_xlabel(r"Average Temperature [$^\circ$F]")
     ax.set_ylabel("Accumulated Precipitation [inch]")
     ax.text(0.15, 0.95, "Cold & Wet", transform=ax.transAxes,
             fontsize=14, color='b', zorder=3, ha='center', va='center')

@@ -2,10 +2,9 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([('high_above', 'High Temperature At or Above'),
                      ('high_below', 'High Temperature Below'),
@@ -48,7 +47,8 @@ def highcharts(fdict):
     df = get_data(fdict, nt)
 
     j = dict()
-    j['tooltip'] = {'shared': True,
+    j['tooltip'] = {
+        'shared': True,
         'headerFormat':
             '<span style="font-size: 10px">{point.key: %b %e}</span><br/>'}
     j['title'] = {'text': '%s [%s] %s %sF' % (nt.sts[station]['name'],
@@ -112,7 +112,7 @@ def highcharts(fdict):
 
 def get_data(fdict, nt):
     """ Get the data"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     threshold = ctx['threshold']
@@ -166,7 +166,7 @@ def plotter(fdict):
     network = "%sCLIMATE" % (station[:2],)
     nt = NetworkTable(network)
     df = get_data(fdict, nt)
-    if len(df.index) == 0:
+    if df.empty:
         return 'Error, no results returned!'
 
     (fig, ax) = plt.subplots(1, 1)
@@ -174,7 +174,7 @@ def plotter(fdict):
     ax.plot(df.index.values, df['thisyear'], c='g', lw=2, label="%s" % (year,))
     ax.plot(df.index.values, df['max'], c='r', lw=2, label='Max')
     ax.plot(df.index.values, df['min'], c='b', lw=2, label='Min')
-    ax.set_title(("%s [%s]\n%s %.0f$^\circ$F"
+    ax.set_title((r"%s [%s]\n%s %.0f$^\circ$F"
                   ) % (nt.sts[station]['name'], station, PDICT[varname],
                        threshold))
     ax.legend(ncol=1, loc=2)

@@ -1,9 +1,10 @@
+import datetime
+
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-import datetime
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'fall': 'Minimum Temperature after 1 July',
          'spring': 'Maximum Temperature before 1 July'}
@@ -13,13 +14,13 @@ PDICT2 = {'high': 'High Temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['highcharts'] = True
-    d['description'] = """This plot presents the climatology and actual
+    desc = dict()
+    desc['data'] = True
+    desc['highcharts'] = True
+    desc['description'] = """This plot presents the climatology and actual
     year's progression of warmest to date or coldest to date temperature.
     The simple average is presented along with the percentile intervals."""
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
@@ -29,12 +30,12 @@ def get_description():
         dict(type='select', name='var', default='low',
              label='Variable to Plot:', options=PDICT2),
     ]
-    return d
+    return desc
 
 
 def get_context(fdict):
     """ Get the raw infromations we need"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     today = datetime.date.today()

@@ -2,12 +2,11 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 import pytz
 from pyiem.plot import MapPlot
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
  ('NONE', 'All LSR Types'),
@@ -86,7 +85,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx['sdate']
     sts = sts.replace(tzinfo=pytz.utc)
@@ -114,16 +113,16 @@ def plotter(fdict):
     maxv = df['count'].max()
     bins = np.linspace(0, maxv, 12, dtype='i')
     bins[-1] += 1
-    p = MapPlot(sector='nws', axisbg='white',
-                title='Local Storm Report Counts by NWS Office',
-                subtitlefontsize=10,
-                subtitle=('Valid %s - %s UTC, type limiter: %s'
-                          ) % (sts.strftime("%d %b %Y %H:%M"),
-                               ets.strftime("%d %b %Y %H:%M"),
-                               MDICT.get(myfilter)))
-    p.fill_cwas(data, bins=bins, ilabel=True)
+    mp = MapPlot(sector='nws', axisbg='white',
+                 title='Local Storm Report Counts by NWS Office',
+                 subtitlefontsize=10,
+                 subtitle=('Valid %s - %s UTC, type limiter: %s'
+                           ) % (sts.strftime("%d %b %Y %H:%M"),
+                                ets.strftime("%d %b %Y %H:%M"),
+                                MDICT.get(myfilter)))
+    mp.fill_cwas(data, bins=bins, ilabel=True)
 
-    return p.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

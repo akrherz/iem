@@ -1,8 +1,8 @@
-import psycopg2
 import datetime
+
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'high': 'High temperature',
          'low': 'Low Temperature'}
@@ -10,13 +10,13 @@ PDICT = {'high': 'High temperature',
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['description'] = """This map displays an analysis of the change in
+    desc = dict()
+    desc['data'] = True
+    desc['description'] = """This map displays an analysis of the change in
     average high or low temperature over a time period of your choice."""
     today = datetime.date.today()
     threeweeks = today - datetime.timedelta(days=21)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='date', name='date1',
              default=threeweeks.strftime("%Y/%m/%d"),
              label='From Date (ignore year):',
@@ -28,7 +28,7 @@ def get_description():
              label='Which metric to plot?', options=PDICT),
 
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -37,7 +37,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
     import matplotlib.cm as cm
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     date1 = ctx['date1']
     date2 = ctx['date2']
@@ -66,17 +66,17 @@ def plotter(fdict):
 
     days = int((date2 - date1).days)
     extent = int(df[varname].abs().max())
-    m = MapPlot(sector='conus',
-                title=('%s Day Change in %s NCDC 81 Climatology'
-                       ) % (days, PDICT[varname]),
-                subtitle='from %s to %s' % (date1.strftime("%-d %B"),
-                                            date2.strftime("%-d %B"))
-                )
+    mp = MapPlot(sector='conus',
+                 title=('%s Day Change in %s NCDC 81 Climatology'
+                        ) % (days, PDICT[varname]),
+                 subtitle='from %s to %s' % (date1.strftime("%-d %B"),
+                                             date2.strftime("%-d %B"))
+                 )
     cmap = cm.get_cmap("RdBu_r")
-    m.contourf(df['lon'].values, df['lat'].values, df[varname].values,
-               np.arange(0-extent, extent+1, 2), cmap=cmap, units='F')
+    mp.contourf(df['lon'].values, df['lat'].values, df[varname].values,
+                np.arange(0-extent, extent+1, 2), cmap=cmap, units='F')
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':
