@@ -122,14 +122,23 @@ def grid_hour(nc, ts):
                ) % (ts.strftime("%Y-%m-%d %H:%M"), ))
         return
     ures, vres = grid_wind(df)
-    nc.variables['uwnd'][offset] = ures
-    nc.variables['vwnd'][offset] = vres
+    if ures is None:
+        print("iemre.hourly_analysis failure for uwnd at %s" % (ts, ))
+    else:
+        nc.variables['uwnd'][offset] = ures
+        nc.variables['vwnd'][offset] = vres
 
     res = generic_gridder(df, 'max_tmpf')
-    nc.variables['tmpk'][offset] = dt.temperature(res, 'F').value('K')
+    if res is None:
+        print("iemre.hourly_analysis failure for tmpk at %s" % (ts, ))
+    else:
+        nc.variables['tmpk'][offset] = dt.temperature(res, 'F').value('K')
 
     res = grid_skyc(df)
-    nc.variables['skyc'][offset] = res
+    if res is None:
+        print("iemre.hourly_analysis failure for skyc at %s" % (ts, ))
+    else:
+        nc.variables['skyc'][offset] = res
 
 
 def main(argv):
