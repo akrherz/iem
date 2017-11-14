@@ -1,4 +1,9 @@
-"""Attempt at totalling up hourly DCP data """
+"""Attempt at totalling up hourly DCP data
+
+    Run from `RUN_12Z.sh` for previous day
+    Run from `RUN_20_AFTER.sh` for current day
+
+"""
 from __future__ import print_function
 import datetime
 import sys
@@ -9,7 +14,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn
 
 
-def do(date):
+def workflow(date):
     """Do the necessary work for this date"""
     pgconn = get_dbconn('hads', user='nobody')
     iem_pgconn = get_dbconn('iem')
@@ -21,7 +26,7 @@ def do(date):
     ), obs as (
         SELECT iemid, pday from summary_"""+str(date.year)+"""
         WHERE day = %s)
-    SELECT d.id, d.iemid, d.tzname, o.pday from
+    SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
     dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
     """, iem_pgconn, params=(date,), index_col='id')
     bases = {}
@@ -65,17 +70,20 @@ def do(date):
             continue
         # print("Updating %s old: %s new: %s" % (station, current_pday, pday))
         iemid = df.loc[station, 'iemid']
-        icursor.execute("""UPDATE summary_"""+str(date.year)+"""
-        SET pday = %s WHERE iemid = %s and day = %s
+        icursor.execute("""
+            UPDATE summary_"""+str(date.year)+"""
+            SET pday = %s WHERE iemid = %s and day = %s
         """, (pday, iemid, date))
         if icursor.rowcount == 0:
             print("Adding record %s[%s] for day %s" % (station, iemid, date))
-            icursor.execute("""INSERT into summary_"""+str(date.year)+"""
-            (iemid, day) VALUES (%s, %s)
+            icursor.execute("""
+                INSERT into summary_"""+str(date.year)+"""
+                (iemid, day) VALUES (%s, %s)
             """, (iemid, date))
-            icursor.execute("""UPDATE summary_"""+str(date.year)+"""
-            SET pday = %s WHERE iemid = %s and day = %s
-            and %s > coalesce(pday, 0)
+            icursor.execute("""
+                UPDATE summary_"""+str(date.year)+"""
+                SET pday = %s WHERE iemid = %s and day = %s
+                and %s > coalesce(pday, 0)
             """, (pday, iemid, date, pday))
     icursor.close()
     iem_pgconn.commit()
@@ -87,7 +95,7 @@ def main(argv):
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     else:
         ts = datetime.date.today()
-    do(ts)
+    workflow(ts)
 
 
 if __name__ == '__main__':
