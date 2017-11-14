@@ -109,14 +109,14 @@ def workflow(now, realtime):
     os.unlink(tmpfn)
 
 
-def main():
+def main(argv):
     """ Go Main Go """
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    if len(sys.argv) == 6:
-        utcnow = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                                   int(sys.argv[3]), int(sys.argv[4]),
-                                   int(sys.argv[5])
-                                   ).replace(tzinfo=pytz.timezone("UTC"))
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    if len(argv) == 6:
+        utcnow = datetime.datetime(int(argv[1]), int(argv[2]),
+                                   int(argv[3]), int(argv[4]),
+                                   int(argv[5])
+                                   ).replace(tzinfo=pytz.utc)
         workflow(utcnow, False)
     else:
         # If our time is an odd time, run 5 minutes ago
@@ -135,4 +135,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

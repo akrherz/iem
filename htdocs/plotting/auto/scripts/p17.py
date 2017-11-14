@@ -3,10 +3,9 @@ import datetime
 import warnings
 
 import numpy as np
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -39,9 +38,8 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.patheffects as PathEffects
     from matplotlib.patches import Rectangle
-    pgconn_iem = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-    pgconn_coop = psycopg2.connect(database='coop', host='iemdb',
-                                   user='nobody')
+    pgconn_iem = get_dbconn('iem')
+    pgconn_coop = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
@@ -82,7 +80,7 @@ def plotter(fdict):
     """, pgconn_coop, params=(nt.sts[station]['ncdc81'], month),
                    index_col='day_of_month')
 
-    if len(cdf.index) > 0:
+    if not cdf.empty:
         df = cdf.join(df)
         has_climo = True
     else:

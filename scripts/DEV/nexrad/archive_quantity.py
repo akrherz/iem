@@ -1,12 +1,13 @@
 """ Create a simple prinout of observation quanity in the database """
 import datetime
-now = datetime.datetime.utcnow()
 import numpy as np
+from pyiem.util import get_dbconn
+
+now = datetime.datetime.utcnow()
 years = now.year - 2000 + 1
 counts = np.zeros((years,12))
 
-import psycopg2
-pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+pgconn = get_dbconn('postgis', user='nobody')
 acursor = pgconn.cursor()
 
 import sys
@@ -20,7 +21,7 @@ class bcolors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'
 
-acursor.execute("""SELECT extract(year from valid) as year, 
+acursor.execute("""SELECT extract(year from valid) as year,
  extract(month from valid) as month, 
  count(*) from nexrad_attributes_log WHERE
  nexrad = %s GROUP by year, month""", (stid,))

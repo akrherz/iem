@@ -4,6 +4,7 @@
  run from RUN_10_AFTER.sh
 
 """
+from __future__ import print_function
 import datetime
 import os
 import sys
@@ -239,6 +240,7 @@ if __name__ == "__main__":
 
 
 class test(unittest.TestCase):
+    """What, test code, Shirely you jest"""
 
     def test_ramp(self):
         """ Check our work """

@@ -1,11 +1,13 @@
+"""Run to ingest gempak files from mtarchive"""
 import subprocess
 import datetime
-import pytz
 import urllib2
-from ingest_from_rucsoundings import RAOB
-import psycopg2
 
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
+import pytz
+from ingest_from_rucsoundings import RAOB
+from pyiem.util import get_dbconn
+
+POSTGIS = get_dbconn('postgis')
 
 def conv( raw):
     if float(raw) < -9998:

@@ -1,10 +1,11 @@
 """Generate a plot of GDD"""
-from pyiem.plot import MapPlot
 import datetime
 import numpy as np
-import psycopg2
+from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
-COOP = psycopg2.connect("dbname=coop host=iemdb user=nobody")
+from pyiem.util import get_dbconn
+
+COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
 
 nt = NetworkTable("IACLIMATE")
@@ -30,15 +31,15 @@ def run(base, ceil, now, fn):
         lons.append(nt.sts[row[0]]['lon'])
         gdd50.append(float(row[1]))
 
-    m = MapPlot(title=("Iowa 1 May - %s GDD Accumulation"
-                       ) % (now.strftime("%-d %B %Y"), ),
-                subtitle="base %s" % (base,))
+    mp = MapPlot(title=("Iowa 1 May - %s GDD Accumulation"
+                        ) % (now.strftime("%-d %B %Y"), ),
+                 subtitle="base %s" % (base,))
     bins = np.linspace(min(gdd50)-1, max(gdd50)+1, num=10, dtype=np.int)
-    m.contourf(lons, lats, gdd50, bins)
-    m.drawcounties()
+    mp.contourf(lons, lats, gdd50, bins)
+    mp.drawcounties()
 
     pqstr = "plot c 000000000000 summary/%s.png bogus png" % (fn,)
-    m.postprocess(pqstr=pqstr)
+    mp.postprocess(pqstr=pqstr)
 
 
 def main():
@@ -49,6 +50,7 @@ def main():
     run(50, 86, today, 'gdd_may1')
     run(60, 86, today, 'gdd_may1_6086')
     run(65, 86, today, 'gdd_may1_6586')
+
 
 if __name__ == '__main__':
     main()

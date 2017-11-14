@@ -1,17 +1,19 @@
 """
  Generate a composite of the MRMS Lowest Composite Reflectvity
 """
+from __future__ import print_function
 import datetime
-import pytz
-import numpy as np
 import os
 import tempfile
-from PIL import Image
-import subprocess
 import json
 import sys
-import pygrib
 import gzip
+import subprocess
+
+import pytz
+import numpy as np
+from PIL import Image
+import pygrib
 import pyiem.mrms as mrms
 
 
@@ -121,15 +123,15 @@ def do(now, realtime=False):
     os.unlink(tmpfn)
 
 
-def main():
+def main(argv):
     """ Go Main Go """
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    if len(sys.argv) == 6:
-        utcnow = datetime.datetime(int(sys.argv[1]),
-                                   int(sys.argv[2]),
-                                   int(sys.argv[3]),
-                                   int(sys.argv[4]),
-                                   int(sys.argv[5])
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    if len(argv) == 6:
+        utcnow = datetime.datetime(int(argv[1]),
+                                   int(argv[2]),
+                                   int(argv[3]),
+                                   int(argv[4]),
+                                   int(argv[5])
                                    ).replace(tzinfo=pytz.timezone("UTC"))
         do(utcnow)
     else:
@@ -138,6 +140,7 @@ def main():
         if utcnow.minute % 2 == 1:
             do(utcnow - datetime.timedelta(minutes=5), True)
 
+
 if __name__ == '__main__':
     # Lets do something
-    main()
+    main(sys.argv)

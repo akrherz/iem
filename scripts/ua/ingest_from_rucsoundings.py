@@ -68,8 +68,7 @@ import sys
 
 import pytz
 import requests
-import psycopg2
-from pyiem.util import exponential_backoff
+from pyiem.util import exponential_backoff, get_dbconn
 from pyiem.network import Table as NetworkTable
 NT = NetworkTable("RAOB")
 
@@ -211,7 +210,7 @@ def parse(raw, sid):
 
 def main(valid):
     """Run for the given valid time!"""
-    dbconn = psycopg2.connect(database='postgis', host='iemdb')
+    dbconn = get_dbconn('postgis')
 
     v12 = valid - datetime.timedelta(hours=13)
 
@@ -275,13 +274,13 @@ def main(valid):
     dbconn.close()
 
 
-def frontend():
+def frontend(argv):
     """Figure out what we need to do here! """
-    valid = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                              int(sys.argv[3]), int(sys.argv[4]))
-    valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+    valid = datetime.datetime(int(argv[1]), int(argv[2]),
+                              int(argv[3]), int(argv[4]))
+    valid = valid.replace(tzinfo=pytz.utc)
     main(valid)
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
     for days in [3, 14, 365]:
         ts = valid - datetime.timedelta(days=days)
@@ -295,4 +294,4 @@ def frontend():
 
 
 if __name__ == '__main__':
-    frontend()
+    frontend(sys.argv)

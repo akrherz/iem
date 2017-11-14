@@ -1,20 +1,23 @@
-import psycopg2
-import numpy as np
+"""Generates the nice histograms on the IEM website"""
+from __future__ import print_function
 import datetime
+import calendar
+import os
+
+import pytz
+import numpy as np
 import matplotlib.pyplot as plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-import calendar
-import pytz
-import os
 from pyiem.plot import maue
+
 cmap = maue()
 cmap.set_bad('white')
 cmap.set_under('white')
 cmap.set_over('black')
 
 today = datetime.datetime.now()
-today = today.replace(tzinfo=pytz.timezone("UTC"))
+today = today.replace(tzinfo=pytz.utc)
 
 POSTGIS = get_dbconn('postgis', user='nobody')
 
@@ -85,11 +88,12 @@ def run(nexrad):
 def main():
     """ See how we are called """
     nt = NetworkTable(["NEXRAD", "TWDR"])
-    for sid in nt.sts.keys():
+    for sid in nt.sts:
         if os.path.isfile("%s_histogram.png" % (sid,)):
             print("  Skipping %s" % (sid,))
             continue
         run(sid)
+
 
 if __name__ == '__main__':
     main()
