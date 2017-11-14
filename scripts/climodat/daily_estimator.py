@@ -55,16 +55,17 @@ with inn as (
 """
 
 HARDCODE = {
+    # TODO, the commented out Iowa sites are not long term tracked
     'IA1063': 'BRL',
-    'IA1314': 'CID',
-    'IA2070': 'DVN',
+    # 'IA1314': 'CID',
+    # 'IA2070': 'DVN',
     'IA2203': 'DSM',
-    'IA2367': 'DBQ',
-    'IA2723': 'EST',
-    'IA4106': 'IOW',
-    'IA4587': 'LWD',
-    'IA5199': 'MIW',
-    'IA5235': 'MCW',
+    # 'IA2367': 'DBQ',
+    # 'IA2723': 'EST',
+    # 'IA4106': 'IOW',
+    # 'IA4587': 'LWD',
+    # 'IA5199': 'MIW',
+    # 'IA5235': 'MCW',
     'IA6389': 'OTM',
     'IA7708': 'SUX',
     'IA7844': 'SPW',
