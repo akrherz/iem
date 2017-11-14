@@ -41,6 +41,8 @@ def get_file(now):
         uri = "%s/%s.out" % (BASEURL, fn)
         try:
             req = exponential_backoff(requests.get, uri, timeout=5)
+            if req is None or req.status_code != 200:
+                raise Exception("NoDATA")
             data = req.content
         except Exception as exp:
             if now.hour == 0:
