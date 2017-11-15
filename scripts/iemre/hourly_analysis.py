@@ -128,11 +128,15 @@ def grid_hour(nc, ts):
         nc.variables['uwnd'][offset] = ures
         nc.variables['vwnd'][offset] = vres
 
-    res = generic_gridder(df, 'max_tmpf')
-    if res is None:
+    tmpk = generic_gridder(df, 'max_tmpf')
+    if tmpk is None:
         print("iemre.hourly_analysis failure for tmpk at %s" % (ts, ))
     else:
-        nc.variables['tmpk'][offset] = dt.temperature(res, 'F').value('K')
+        dwpk = generic_gridder(df, 'max_dwpf')
+        # require that dwpk <= tmpk
+        dwpk = np.where(dwpk > tmpk, tmpk, dwpk)
+        nc.variables['tmpk'][offset] = dt.temperature(tmpk, 'F').value('K')
+        nc.variables['dwpk'][offset] = dt.temperature(dwpk, 'F').value('K')
 
     res = grid_skyc(df)
     if res is None:
