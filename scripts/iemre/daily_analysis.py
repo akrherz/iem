@@ -17,8 +17,8 @@ import numpy as np
 from pandas.io.sql import read_sql
 import pytz
 from scipy.stats import zscore
-from scipy.interpolate import NearestNDInterpolator
-from pyiem import iemre, datatypes
+from metpy.gridding.interpolation import inverse_distance
+from pyiem import iemre, datatypes, reference
 from pyiem.util import get_dbconn
 
 PGCONN = get_dbconn('iem', user='nobody')
@@ -54,13 +54,22 @@ def generic_gridder(df, idx):
     if len(good.index) < 4:
         print("Not enough data %s" % (idx,))
         return
-    nn = NearestNDInterpolator((np.array(good['lon']),
-                                np.array(good['lat'])),
-                               np.array(good[idx]))
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    grid = nn(xi, yi)
+    res = np.ones(xi.shape) * np.nan
+    for radius in np.arange(0.5, 10, 0.5):
+        grid = inverse_distance(good['lon'].values, good['lat'].values,
+                                good[idx].values, xi, yi, radius)
+        # replace nan values in res with whatever now is in grid
+        res[np.isnan(res)] = grid[np.isnan(res)]
+        isnan = np.isnan(res)
+        if isnan.any():
+            # print(("radius: %s idx: %s len(good): %s bad: %s"
+            #        ) % (radius, idx, len(good.index), np.sum(isnan)))
+            if radius > 9:
+                print("idx: %s failure at radius: %s" % (idx, radius))
+                return
 
-    return grid
+    return res
 
 
 def do_precip(nc, ts):
@@ -158,6 +167,7 @@ def grid_day12(nc, ts):
     """Use the COOP data for gridding"""
     offset = iemre.daily_offset(ts)
     print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
+    mybuf = 2.
     if ts.year > 2008:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
@@ -170,27 +180,40 @@ def grid_day12(nc, ts):
            (CASE WHEN min_tmpf > -50 and min_tmpf < 95
                then min_tmpf else null end) as lowdata
            from summary_%s c, stations s WHERE day = '%s' and
-           s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
-            'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-            'OH_COOP', 'IN_COOP') and c.iemid = s.iemid and
+           ST_Contains(
+  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
+  geom) and s.network ~* 'COOP' and c.iemid = s.iemid and
             extract(hour from c.coop_valid) between 4 and 11
-            """ % (ts.year, ts.strftime("%Y-%m-%d"))
+            """ % (ts.year, ts.strftime("%Y-%m-%d"),
+                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf,
+                   reference.MW_WEST - mybuf, reference.MW_NORTH + mybuf,
+                   reference.MW_EAST + mybuf, reference.MW_NORTH + mybuf,
+                   reference.MW_EAST + mybuf, reference.MW_SOUTH - mybuf,
+                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf)
         df = read_sql(sql, PGCONN)
     else:
         df = read_sql("""
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
-            from stations where network in ('IACLIMATE', 'MNCLIMATE',
-            'WICLIMATE', 'ILCLIMATE', 'MOCLIMATE', 'KSCLIMATE', 'NECLIMATE',
-            'SDCLIMATE', 'NDCLIMATE', 'KYCLIMATE', 'MICLIMATE', 'OHCLIMATE',
-            'INCLIMATE') and (temp24_hour is null or
+            from stations where ST_Contains(
+  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
+  geom) and network ~* 'CLIMATE' and (temp24_hour is null or
             temp24_hour between 4 and 10)
         )
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, COOP_PGCONN, params=(ts,))
+        """, COOP_PGCONN, params=(reference.MW_WEST - mybuf,
+                                  reference.MW_SOUTH - mybuf,
+                                  reference.MW_WEST - mybuf,
+                                  reference.MW_NORTH + mybuf,
+                                  reference.MW_EAST + mybuf,
+                                  reference.MW_NORTH + mybuf,
+                                  reference.MW_EAST + mybuf,
+                                  reference.MW_SOUTH - mybuf,
+                                  reference.MW_WEST - mybuf,
+                                  reference.MW_SOUTH - mybuf, ts))
     # plot(df)
 
     if len(df.index) > 4:
@@ -222,6 +245,7 @@ def grid_day(nc, ts):
     """
     """
     offset = iemre.daily_offset(ts)
+    mybuf = 2.
     if ts.year > 1927:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
@@ -238,19 +262,23 @@ def grid_day(nc, ts):
             (CASE WHEN avg_sknt >= 0 and avg_sknt < 100
              then avg_sknt else null end) as avgsknt
            from summary_%s c, stations s WHERE day = '%s' and
-           s.network in ('IA_ASOS', 'MN_ASOS', 'WI_ASOS', 'IL_ASOS', 'MO_ASOS',
-            'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-            'OH_ASOS', 'AWOS', 'IN_ASOS') and c.iemid = s.iemid
-            """ % (ts.year, ts.strftime("%Y-%m-%d"))
+           ST_Contains(
+  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
+  geom) and (s.network = 'AWOS' or s.network ~* 'ASOS') and c.iemid = s.iemid
+            """ % (ts.year, ts.strftime("%Y-%m-%d"),
+                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf,
+                   reference.MW_WEST - mybuf, reference.MW_NORTH + mybuf,
+                   reference.MW_EAST + mybuf, reference.MW_NORTH + mybuf,
+                   reference.MW_EAST + mybuf, reference.MW_SOUTH - mybuf,
+                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf)
         df = read_sql(sql, PGCONN)
     else:
         df = read_sql("""
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
-            from stations where network in ('IACLIMATE', 'MNCLIMATE',
-            'WICLIMATE', 'ILCLIMATE', 'MOCLIMATE', 'KSCLIMATE', 'NECLIMATE',
-            'SDCLIMATE', 'NDCLIMATE', 'KYCLIMATE', 'MICLIMATE', 'OHCLIMATE',
-            'INCLIMATE') and (temp24_hour is null or
+            from stations where ST_Contains(
+  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
+  geom) and network ~* 'CLIMATE' and (temp24_hour is null or
             temp24_hour between 4 and 10)
         )
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
@@ -259,7 +287,16 @@ def grid_day(nc, ts):
         null as highdwpf, null as lowdwpf, null as avgsknt
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, COOP_PGCONN, params=(ts,))
+        """, COOP_PGCONN, params=(reference.MW_WEST - mybuf,
+                                  reference.MW_SOUTH - mybuf,
+                                  reference.MW_WEST - mybuf,
+                                  reference.MW_NORTH + mybuf,
+                                  reference.MW_EAST + mybuf,
+                                  reference.MW_NORTH + mybuf,
+                                  reference.MW_EAST + mybuf,
+                                  reference.MW_SOUTH - mybuf,
+                                  reference.MW_WEST - mybuf,
+                                  reference.MW_SOUTH - mybuf, ts))
     if len(df.index) > 4:
         res = generic_gridder(df, 'highdata')
         nc.variables['high_tmpk'][offset] = datatypes.temperature(

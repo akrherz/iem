@@ -50,14 +50,18 @@ def generic_gridder(df, idx):
     """Generic gridding algorithm for easy variables"""
     df2 = df[pd.notnull(df[idx])]
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    res = np.ones(xi.shape) * np.nan
     for radius in np.arange(0.5, 10, 0.5):
         grid = inverse_distance(df2['lon'].values, df2['lat'].values,
                                 df2[idx].values, xi, yi, radius)
-        if np.isnan(grid).any():
+        # replace nan values in res with whatever now is in grid
+        res[np.isnan(res)] = grid[np.isnan(res)]
+        isnan = np.isnan(res)
+        if isnan.any():
             if radius > 9:
                 print("idx: %s failure at radius: %s" % (idx, radius))
-            continue
-        return grid
+                return
+    return res
 
 
 def grid_hour(nc, ts):
