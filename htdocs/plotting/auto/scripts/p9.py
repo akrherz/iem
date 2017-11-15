@@ -2,11 +2,10 @@
 import calendar
 import datetime
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -34,7 +33,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     thisyear = datetime.datetime.now().year
@@ -78,7 +77,7 @@ def plotter(fdict):
     ax.set_title("%s-%s %s [%s]\n%s Daily Growing Degree Days (%s/%s)" % (
                 syear, thisyear, nt.sts[station]['name'], station, year,
                 base, ceiling))
-    ax.set_ylabel("Daily Accumulation $^{\circ}\mathrm{F}$")
+    ax.set_ylabel(r"Daily Accumulation $^{\circ}\mathrm{F}$")
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
                    305, 335, 365))
     ax.legend(ncol=2)

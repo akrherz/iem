@@ -37,16 +37,16 @@ MDICT = OrderedDict([
 
 def get_description():
     """ Return a dict describing how to call this plotter """
-    d = dict()
-    d['data'] = True
-    d['cache'] = 86400
-    d['description'] = """This map presents IEM computed precipitation
+    desc = dict()
+    desc['data'] = True
+    desc['cache'] = 86400
+    desc['description'] = """This map presents IEM computed precipitation
     ranks for a month and year of your choice.  The map unit is climate
     districts for which the IEM generates spatially weighted daily averages
     for.  For seasonal totals, the year presented is the calendar year of
     the last month in the three month period."""
     today = datetime.date.today() - datetime.timedelta(days=28)
-    d['arguments'] = [
+    desc['arguments'] = [
         dict(type='select', name='var', default='precip',
              label='Select Variable', options=PDICT),
         dict(type='year', name='year', default=today.year,
@@ -55,7 +55,7 @@ def get_description():
         dict(type='select', name='month', default=today.month,
              label='Month Limiter', options=MDICT),
     ]
-    return d
+    return desc
 
 
 def plotter(fdict):
@@ -63,7 +63,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
-    pgconn = get_dbconn('coop', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
 
     year = ctx['year']

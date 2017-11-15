@@ -5,7 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'NAM': 'NAM (9 Dec 2008 - current)',
          'GFS': 'GFS (16 Dec 2003 - current)',
@@ -43,10 +43,10 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
-    mcursor = MOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    asos_pgconn = get_dbconn('asos')
+    acursor = asos_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    mos_pgconn = get_dbconn('mos')
+    mcursor = mos_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -158,7 +158,7 @@ def plotter(fdict):
     ax.scatter(days+0.1, hobs, zorder=2, s=40, c='red', label='Actual High')
     ax.scatter(days-0.1, lobs, zorder=2, s=40, c='blue', label='Actual Low')
 
-    ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
+    ax.set_ylabel(r"Temperature $^{\circ}\mathrm{F}$")
     ax.grid(True)
 
     next1 = ets.replace(day=1)

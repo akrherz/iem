@@ -3,9 +3,8 @@ import datetime
 from collections import OrderedDict
 
 import numpy as np
-import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
     ('IA', 'Iowa'),
@@ -76,7 +75,7 @@ def plotter(fdict):
     from pyiem.plot import MapPlot
     import matplotlib.cm as cm
 
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx['sector']
     date1 = ctx['date1']

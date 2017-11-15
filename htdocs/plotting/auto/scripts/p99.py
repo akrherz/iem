@@ -1,10 +1,9 @@
 """Daily high/low against climo"""
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'abs': 'Departure in degrees',
          'sigma': 'Depature in sigma'}
@@ -34,7 +33,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     delta = ctx['delta']

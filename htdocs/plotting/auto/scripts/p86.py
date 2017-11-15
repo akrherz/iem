@@ -89,23 +89,23 @@ def plotter(fdict):
     nc.close()
 
     title = date.strftime("%-d %B %Y")
-    m = MapPlot(sector='midwest', axisbg='white', nocaption=True,
-                title='IEM Reanalysis of %s for %s' % (PDICT.get(varname),
-                                                       title),
-                subtitle='Data derived from various NOAA datasets'
-                )
+    mp = MapPlot(sector='midwest', axisbg='white', nocaption=True,
+                 title='IEM Reanalysis of %s for %s' % (PDICT.get(varname),
+                                                        title),
+                 subtitle='Data derived from various NOAA datasets'
+                 )
     if np.ma.is_masked(np.max(data)):
         return 'Data Unavailable'
     x, y = np.meshgrid(lons, lats)
     if ptype == 'c':
         # in the case of contour, use the centroids on the grids
-        m.contourf(x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
-                   units=units, ilabel=True, labelfmt='%.0f')
+        mp.contourf(x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
+                    units=units, ilabel=True, labelfmt='%.0f')
     else:
         x, y = np.meshgrid(lons, lats)
-        m.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
+        mp.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
 
-    return m.fig
+    return mp.fig
 
 
 if __name__ == '__main__':
