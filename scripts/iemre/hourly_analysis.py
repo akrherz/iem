@@ -51,11 +51,11 @@ def generic_gridder(df, idx):
     df2 = df[pd.notnull(df[idx])]
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
-    for radius in np.arange(0.5, 10, 0.5):
+    for radius in [0.25, 0.5, 1, 2, 4, 9.5]:
         grid = inverse_distance(df2['lon'].values, df2['lat'].values,
                                 df2[idx].values, xi, yi, radius)
         # replace nan values in res with whatever now is in grid
-        res[np.isnan(res)] = grid[np.isnan(res)]
+        res = np.where(np.isnan(res), grid, res)
         isnan = np.isnan(res)
         if isnan.any():
             if radius > 9:

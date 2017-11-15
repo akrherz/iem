@@ -56,7 +56,7 @@ def generic_gridder(df, idx):
         return
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
-    for radius in np.arange(0.5, 10, 0.5):
+    for radius in [0.25, 0.5, 1, 2, 4, 9.5]:
         grid = inverse_distance(good['lon'].values, good['lat'].values,
                                 good[idx].values, xi, yi, radius)
         # replace nan values in res with whatever now is in grid
