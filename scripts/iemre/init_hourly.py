@@ -75,7 +75,7 @@ def init_year(ts):
     tmpk.standard_name = "2m Air Temperature"
     tmpk.coordinates = "lon lat"
 
-    dwpk = nc.createVariable('dwpf', np.float, ('time', 'lat', 'lon'),
+    dwpk = nc.createVariable('dwpk', np.float, ('time', 'lat', 'lon'),
                              fill_value=1.e20)
     dwpk.units = "K"
     dwpk.long_name = "2m Air Dew Point Temperature"
