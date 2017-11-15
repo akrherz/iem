@@ -25,7 +25,16 @@ PGCONN = get_dbconn('iem', user='nobody')
 COOP_PGCONN = get_dbconn('coop', user='nobody')
 
 
-def generic_gridder(df, idx):
+def get_domain():
+    """Return where we should be estimating"""
+    nc = netCDF4.Dataset('/mesonet/data/iemre/state_weights.nc')
+    nc.set_auto_mask(False)
+    domain = nc.variables['domain'][:]
+    nc.close()
+    return domain
+
+
+def generic_gridder(df, idx, domain):
     """
     Generic gridding algorithm for easy variables
     """
@@ -50,26 +59,28 @@ def generic_gridder(df, idx):
             # for _, row in bad.iterrows():
             #    print _, idx, row['station'], row['name'], row[idx]
 
-    good = df[df[idx].notnull()]
-    if len(good.index) < 4:
+    df2 = df[df[idx].notnull()]
+    if len(df2.index) < 4:
         print("Not enough data %s" % (idx,))
         return
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
-    for radius in [0.25, 0.5, 1, 2, 4, 9.5]:
-        grid = inverse_distance(good['lon'].values, good['lat'].values,
-                                good[idx].values, xi, yi, radius)
+    # set a sentinel of where we won't be estimating
+    res = np.where(domain > 0, res, -9999)
+    # do our gridding
+    grid = inverse_distance(df2['lon'].values, df2['lat'].values,
+                            df2[idx].values, xi, yi, 1.5)
+    # replace nan values in res with whatever now is in grid
+    res = np.where(np.isnan(res), grid, res)
+    # Do we still have missing values?
+    if np.isnan(res).any():
+        # very aggressive with search radius
+        grid = inverse_distance(df2['lon'].values, df2['lat'].values,
+                                df2[idx].values, xi, yi, 5.5)
         # replace nan values in res with whatever now is in grid
-        res[np.isnan(res)] = grid[np.isnan(res)]
-        isnan = np.isnan(res)
-        if isnan.any():
-            # print(("radius: %s idx: %s len(good): %s bad: %s"
-            #        ) % (radius, idx, len(good.index), np.sum(isnan)))
-            if radius > 9:
-                print("idx: %s failure at radius: %s" % (idx, radius))
-                return
-
-    return res
+        res = np.where(np.isnan(res), grid, res)
+    # replace sentinel back to np.nan
+    return np.where(res == -9999, np.nan, res)
 
 
 def do_precip(nc, ts):
@@ -163,7 +174,7 @@ def plot(df):
     m.close()
 
 
-def grid_day12(nc, ts):
+def grid_day12(nc, ts, domain):
     """Use the COOP data for gridding"""
     offset = iemre.daily_offset(ts)
     print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
@@ -217,31 +228,31 @@ def grid_day12(nc, ts):
     # plot(df)
 
     if len(df.index) > 4:
-        res = generic_gridder(df, 'highdata')
+        res = generic_gridder(df, 'highdata', domain)
         nc.variables['high_tmpk_12z'][offset] = datatypes.temperature(
                                                 res, 'F').value('K')
         print(("12z hi for %s [idx:%s] "
                "min: %5.1f max: %5.1f"
-               ) % (ts, offset, np.min(res), np.max(res)))
+               ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
 
-        res = generic_gridder(df, 'lowdata')
+        res = generic_gridder(df, 'lowdata', domain)
         nc.variables['low_tmpk_12z'][offset] = datatypes.temperature(
                                             res, 'F').value('K')
         print(("12z lo for %s [idx:%s] "
                "min: %5.1f max: %5.1f"
-               ) % (ts, offset, np.min(res), np.max(res)))
+               ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
 
-        res = generic_gridder(df, 'snowdata')
+        res = generic_gridder(df, 'snowdata', domain)
         nc.variables['snow_12z'][offset] = res * 25.4
 
-        res = generic_gridder(df, 'snowddata')
+        res = generic_gridder(df, 'snowddata', domain)
         nc.variables['snowd_12z'][offset] = res * 25.4
     else:
         print(("%s has %02i entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
 
 
-def grid_day(nc, ts):
+def grid_day(nc, ts, domain):
     """
     """
     offset = iemre.daily_offset(ts)
@@ -297,37 +308,40 @@ def grid_day(nc, ts):
                                   reference.MW_SOUTH - mybuf,
                                   reference.MW_WEST - mybuf,
                                   reference.MW_SOUTH - mybuf, ts))
-    if len(df.index) > 4:
-        res = generic_gridder(df, 'highdata')
-        nc.variables['high_tmpk'][offset] = datatypes.temperature(
-                                                res, 'F').value('K')
-        print(("cal hi for %s [idx:%s] "
-               "min: %5.1f max: %5.1f"
-               ) % (ts, offset, np.min(res), np.max(res)))
-        res = generic_gridder(df, 'lowdata')
-        nc.variables['low_tmpk'][offset] = datatypes.temperature(
-                                            res, 'F').value('K')
-        print(("cal lo for %s [idx:%s] "
-               "min: %5.1f max: %5.1f"
-               ) % (ts, offset, np.min(res), np.max(res)))
-        hres = generic_gridder(df, 'highdwpf')
-        lres = generic_gridder(df, 'lowdwpf')
-        if hres is not None and lres is not None:
-            nc.variables['avg_dwpk'][offset] = datatypes.temperature(
-                                            (hres + lres) / 2., 'F').value('K')
-        res = generic_gridder(df, 'avgsknt')
-        if res is not None:
-            res = np.where(res < 0, 0, res)
-            nc.variables['wind_speed'][offset] = datatypes.speed(
-                                                res, 'KT').value('MPS')
-    else:
+    if len(df.index) < 4:
         print(("%s has %02i entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
+        return
+    res = generic_gridder(df, 'highdata', domain)
+    nc.variables['high_tmpk'][offset] = datatypes.temperature(
+                                            res, 'F').value('K')
+    print(("cal hi for %s [idx:%s] min: %5.1f max: %5.1f"
+           ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
+    res = generic_gridder(df, 'lowdata', domain)
+    nc.variables['low_tmpk'][offset] = datatypes.temperature(
+                                        res, 'F').value('K')
+    print(("cal lo for %s [idx:%s] min: %5.1f max: %5.1f"
+           ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
+    hres = generic_gridder(df, 'highdwpf', domain)
+    lres = generic_gridder(df, 'lowdwpf', domain)
+    if hres is not None and lres is not None:
+        nc.variables['avg_dwpk'][offset] = datatypes.temperature(
+                                        (hres + lres) / 2., 'F').value('K')
+    res = generic_gridder(df, 'avgsknt', domain)
+    if res is not None:
+        mask = ~np.isnan(res)
+        mask[mask] &= res[mask] < 0
+        res = np.where(mask, 0, res)
+        print(("cal sknt min: %5.1f max: %5.1f"
+               ) % (np.nanmin(res), np.nanmax(res)))
+        nc.variables['wind_speed'][offset] = datatypes.speed(
+                                            res, 'KT').value('MPS')
 
 
 def workflow(ts, irealtime):
     """Do Work"""
     # Load up our netcdf file!
+    domain = get_domain()
     ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
     if not os.path.isfile(ncfn):
         print("will create %s" % (ncfn, ))
@@ -335,7 +349,7 @@ def workflow(ts, irealtime):
         subprocess.call(cmd, shell=True)
     nc = netCDF4.Dataset(ncfn, 'a')
     # For this date, the 12 UTC COOP obs will match the date
-    grid_day12(nc, ts)
+    grid_day12(nc, ts, domain)
     do_precip12(nc, ts)
     nc.close()
     # This is actually yesterday!
@@ -347,7 +361,7 @@ def workflow(ts, irealtime):
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
     nc = netCDF4.Dataset(ncfn, 'a')
-    grid_day(nc, ts)
+    grid_day(nc, ts, domain)
     do_precip(nc, ts)
     nc.close()
 

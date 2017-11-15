@@ -5,10 +5,10 @@ import datetime
 
 import netCDF4
 from pyiem import iemre
-import numpy
-import psycopg2
+from pyiem.util import get_dbconn
+import numpy as np
 
-POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='iemdb')
+POSTGIS = get_dbconn('postgis')
 
 
 def create_file(fn):
@@ -32,21 +32,21 @@ def create_file(fn):
     nc.createDimension('lon', iemre.NX)
 
     # Setup Coordinate Variables
-    lat = nc.createVariable('lat', numpy.float, ('lat',))
+    lat = nc.createVariable('lat', np.float, ('lat',))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = iemre.YAXIS
 
-    lon = nc.createVariable('lon', numpy.float, ('lon',))
+    lon = nc.createVariable('lon', np.float, ('lon',))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = iemre.XAXIS
 
-    mask = nc.createVariable('domain', numpy.float, ('lat', 'lon'),
+    mask = nc.createVariable('domain', np.float, ('lat', 'lon'),
                              fill_value=1.e20)
     mask.units = "1"
     mask.long_name = "domain weighting"
@@ -55,7 +55,7 @@ def create_file(fn):
 
     for state in ['IA', 'ND', 'SD', 'KS', 'NE', 'MO', 'IN', 'IL', 'OH', 'MI',
                   'WI', 'MN', 'KY']:
-        st = nc.createVariable(state, numpy.float, ('lat', 'lon'),
+        st = nc.createVariable(state, np.float, ('lat', 'lon'),
                                fill_value=1.e20)
         st.units = "1"
         st.long_name = "%s weighting" % (state,)
@@ -68,11 +68,11 @@ def create_file(fn):
 def do_mask(fn):
     """ Use the state masks to compute the overall mask """
     nc = netCDF4.Dataset(fn, 'a')
-    mask = nc.variables['domain']
+    mask = np.zeros(nc.variables['domain'][:].shape)
     for state in ['IA', 'ND', 'SD', 'KS', 'NE', 'MO', 'IN', 'IL', 'OH', 'MI',
                   'WI', 'MN', 'KY']:
-        mask[:] = numpy.where(nc.variables[state][:] > 0, 1, mask)
-
+        mask = np.where(nc.variables[state][:] > 0, 1, mask)
+    nc.variables['domain'][:] = mask
     nc.close()
 
 
@@ -91,7 +91,7 @@ def do_weighting(fn):
         ymin = row[2] - 0.5
         ymax = row[3] + 0.5
         print('Processing State: %s' % (state,))
-        data = numpy.zeros(numpy.shape(nc.variables[state][:]))
+        data = np.zeros(nc.variables[state][:].shape)
         for i, lon in enumerate(nc.variables['lon'][:]):
             for j, lat in enumerate(nc.variables['lat'][:]):
                 # Don't compute 0s, if we don't have to

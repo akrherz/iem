@@ -16,7 +16,16 @@ import pyiem.datatypes as dt
 from pyiem.util import get_dbconn
 
 
-def grid_wind(df):
+def get_domain():
+    """Return where we should be estimating"""
+    nc = netCDF4.Dataset('/mesonet/data/iemre/state_weights.nc')
+    nc.set_auto_mask(False)
+    domain = nc.variables['domain'][:]
+    nc.close()
+    return domain
+
+
+def grid_wind(df, domain):
     """
     Grid winds based on u and v components
     @return uwnd, vwnd
@@ -31,37 +40,42 @@ def grid_wind(df):
         v.append(_v.value("MPS"))
     df['u'] = u
     df['v'] = v
-    ugrid = generic_gridder(df, 'u')
-    vgrid = generic_gridder(df, 'v')
+    ugrid = generic_gridder(df, 'u', domain)
+    vgrid = generic_gridder(df, 'v', domain)
     return ugrid, vgrid
 
 
-def grid_skyc(df):
+def grid_skyc(df, domain):
     """Hmmmm"""
     v = []
     for _station, row in df.iterrows():
         _v = max(row['max_skyc1'], row['max_skyc2'], row['max_skyc3'])
         v.append(_v)
     df['skyc'] = v
-    return generic_gridder(df, 'skyc')
+    return generic_gridder(df, 'skyc', domain)
 
 
-def generic_gridder(df, idx):
+def generic_gridder(df, idx, domain):
     """Generic gridding algorithm for easy variables"""
     df2 = df[pd.notnull(df[idx])]
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
-    for radius in [0.25, 0.5, 1, 2, 4, 9.5]:
+    # set a sentinel of where we won't be estimating
+    res = np.where(domain > 0, res, -9999)
+    # do our gridding
+    grid = inverse_distance(df2['lon'].values, df2['lat'].values,
+                            df2[idx].values, xi, yi, 1.5)
+    # replace nan values in res with whatever now is in grid
+    res = np.where(np.isnan(res), grid, res)
+    # Do we still have missing values?
+    if np.isnan(res).any():
+        # very aggressive with search radius
         grid = inverse_distance(df2['lon'].values, df2['lat'].values,
-                                df2[idx].values, xi, yi, radius)
+                                df2[idx].values, xi, yi, 5.5)
         # replace nan values in res with whatever now is in grid
         res = np.where(np.isnan(res), grid, res)
-        isnan = np.isnan(res)
-        if isnan.any():
-            if radius > 9:
-                print("idx: %s failure at radius: %s" % (idx, radius))
-                return
-    return res
+    # replace sentinel back to np.nan
+    return np.where(res == -9999, np.nan, res)
 
 
 def grid_hour(nc, ts):
@@ -69,6 +83,7 @@ def grid_hour(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
+    domain = get_domain()
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
     offset = iemre.hourly_offset(ts)
@@ -125,24 +140,26 @@ def grid_hour(nc, ts):
         print(("%s has now entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d %H:%M"), ))
         return
-    ures, vres = grid_wind(df)
+    ures, vres = grid_wind(df, domain)
     if ures is None:
         print("iemre.hourly_analysis failure for uwnd at %s" % (ts, ))
     else:
         nc.variables['uwnd'][offset] = ures
         nc.variables['vwnd'][offset] = vres
 
-    tmpk = generic_gridder(df, 'max_tmpf')
+    tmpk = generic_gridder(df, 'max_tmpf', domain)
     if tmpk is None:
         print("iemre.hourly_analysis failure for tmpk at %s" % (ts, ))
     else:
-        dwpk = generic_gridder(df, 'max_dwpf')
+        dwpk = generic_gridder(df, 'max_dwpf', domain)
         # require that dwpk <= tmpk
-        dwpk = np.where(dwpk > tmpk, tmpk, dwpk)
+        mask = ~np.isnan(dwpk)
+        mask[mask] &= dwpk[mask] > tmpk[mask]
+        dwpk = np.where(mask, tmpk, dwpk)
         nc.variables['tmpk'][offset] = dt.temperature(tmpk, 'F').value('K')
         nc.variables['dwpk'][offset] = dt.temperature(dwpk, 'F').value('K')
 
-    res = grid_skyc(df)
+    res = grid_skyc(df, domain)
     if res is None:
         print("iemre.hourly_analysis failure for skyc at %s" % (ts, ))
     else:
