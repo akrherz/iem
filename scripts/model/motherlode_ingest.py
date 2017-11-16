@@ -3,16 +3,18 @@
  Use Unidata's motherlode server :)
 
 """
+from __future__ import print_function
 import sys
-from pyiem.network import Table as NetworkTable
-import psycopg2
 import csv
 import urllib2
 import datetime
-import pytz
 
-table = NetworkTable(['AWOS', 'IA_ASOS'])
-MOS = psycopg2.connect(database='mos', host='iemdb')
+import pytz
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
+
+NT = NetworkTable(['AWOS', 'IA_ASOS'])
+MOS = get_dbconn('mos')
 mcursor = MOS.cursor()
 
 BASE_URL = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
@@ -61,7 +63,8 @@ def run(model, station, lon, lat, ts):
     try:
         fp = urllib2.urlopen(url, timeout=120)
     except Exception, exp:
-        print exp, url
+        print(exp)
+        print(url)
         print(('FAIL ts: %s station: %s model: %s'
                ) % (ts.strftime("%Y-%m-%d %H"), station, model))
         return
@@ -105,32 +108,33 @@ def run(model, station, lon, lat, ts):
 
 
 def run_model(model, ts):
-    ''' Actually do a model and timestamp '''
-    for sid in table.sts.keys():
-        cnt = run(model, "K"+sid, table.sts[sid]['lon'],
-                  table.sts[sid]['lat'], ts)
+    """Actually do a model and timestamp"""
+    for sid in NT.sts:
+        cnt = run(model, "K"+sid, NT.sts[sid]['lon'], NT.sts[sid]['lat'], ts)
         if cnt == 0:
-            print 'No data', "K"+sid, ts, model
+            print('No data K%s %s %s' % (sid, ts, model))
 
 
 def check_and_run(model, ts):
     ''' Check the database for missing data '''
     table = "model_gridpoint_%s" % (ts.year,)
-    mcursor.execute("""SELECT * from """+table+""" WHERE
-    runtime = %s and model = %s""", (ts, model))
+    mcursor.execute("""
+        SELECT * from """+table+""" WHERE
+        runtime = %s and model = %s
+    """, (ts, model))
     if mcursor.rowcount < 10:
         print(('Rerunning %s [runtime=%s] due to rowcount %s'
                ) % (model, ts, mcursor.rowcount))
         run_model(model, ts)
 
 
-def main():
+def main(argv):
     """Do Something"""
     gts = datetime.datetime.utcnow()
-    if len(sys.argv) == 5:
-        gts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                                int(sys.argv[3]), int(sys.argv[4]))
-    gts = gts.replace(tzinfo=pytz.timezone("UTC"), minute=0, second=0,
+    if len(argv) == 5:
+        gts = datetime.datetime(int(argv[1]), int(argv[2]),
+                                int(argv[3]), int(argv[4]))
+    gts = gts.replace(tzinfo=pytz.utc, minute=0, second=0,
                       microsecond=0)
 
     if gts.hour % 6 == 0:
@@ -143,9 +147,10 @@ def main():
     run_model("RAP", ts)
     check_and_run('RAP', ts - datetime.timedelta(days=7))
 
+
 if __name__ == '__main__':
     # Go Go gadget
-    main()
+    main(sys.argv)
     mcursor.close()
     MOS.commit()
     MOS.close()

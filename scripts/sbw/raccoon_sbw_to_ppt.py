@@ -300,9 +300,9 @@ def do_job(job):
         add_job(job)
 
 
-def main():
+def main(argv):
     """Do main"""
-    if len(sys.argv) == 2:
+    if len(argv) == 2:
         jobs = test_job()
     else:
         jobs = check_for_work()
@@ -313,4 +313,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

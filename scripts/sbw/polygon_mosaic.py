@@ -13,6 +13,7 @@ from geopandas import read_postgis
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+from pyiem.util import get_dbconn
 
 FONT = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 12)
 FONT10 = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 10)
@@ -21,7 +22,7 @@ FONT2 = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 18)
 
 def main(argv):
     """Go Main Go"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     pcursor2 = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -33,7 +34,7 @@ def main(argv):
     if len(argv) == 5:
         sts = sts.replace(year=int(argv[1]), month=int(argv[2]),
                           day=int(argv[3]))
-        sortOpt = sys.argv[4]
+        sortOpt = argv[4]
 
     ets = sts + datetime.timedelta(hours=24)
 

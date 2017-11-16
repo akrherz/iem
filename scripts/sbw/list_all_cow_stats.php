@@ -1,9 +1,9 @@
 <?php
 date_default_timezone_set('UTC');
 
-include("../../include/wfoLocs.php");
-include("../../include/cow.php");
-include("../../include/database.inc.php");
+include "../../include/wfoLocs.php";
+include "../../include/cow.php";
+include "../../include/database.inc.php";
 
 $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg", "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd");
 

@@ -11,7 +11,7 @@ from pandas.io.sql import read_sql
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn('iem', user='nobody')
 
     nt = NetworkTable("WI_ASOS")
 
@@ -22,7 +22,7 @@ def main():
         ORDER by day ASC""", pgconn, index_col='day')
 
     uri = ("https://mesonet.agron.iastate.edu/iemre/multiday/2017-01-01/"
-           "2017-05-30/%.2f/%.2f/json"
+           "2017-11-14/%.2f/%.2f/json"
            ) % (nt.sts['MSN']['lat'], nt.sts['MSN']['lon'])
     req = requests.get(uri)
     j = json.loads(req.content)

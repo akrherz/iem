@@ -1,18 +1,19 @@
 """ Verify that a RASTER's colortable matches documentation
 """
-import sys
+from __future__ import print_function
+
 import numpy as np
-import psycopg2
 from pandas.io.sql import read_sql
 import requests
 from PIL import Image
-PGCONN = psycopg2.connect(database="mesosite", host='iemdb', user='nobody')
+from pyiem.util import get_dbconn
 
 
-def main(argv):
+def main():
     """Do something"""
     # Get the listing
-    cursor = PGCONN.cursor()
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor()
     cursor.execute("""
         SELECT id from iemrasters where name = 'composite_n0q'
     """)
@@ -20,13 +21,13 @@ def main(argv):
     df = read_sql("""
         SELECT * from iemrasters_lookup WHERE iemraster_id = %s
         ORDER by coloridx ASC
-        """, PGCONN, params=(rasterid,), index_col='coloridx')
+        """, pgconn, params=(rasterid,), index_col='coloridx')
     # Go get a raster
     req = requests.get(("https://mesonet.agron.iastate.edu/archive/data/"
                         "2012/09/01/GIS/uscomp/n0q_201209010000.png"))
-    o = open('/tmp/check_raster.png', 'wb')
-    o.write(req.content)
-    o.close()
+    fh = open('/tmp/check_raster.png', 'wb')
+    fh.write(req.content)
+    fh.close()
     # Read the color table
     img = Image.open('/tmp/check_raster.png')
     flat = np.array(img.getpalette())
@@ -38,5 +39,6 @@ def main(argv):
                    ) % (coloridx, rgb[0], rgb[1], rgb[2],
                         row['r'], row['g'], row['b']))
 
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

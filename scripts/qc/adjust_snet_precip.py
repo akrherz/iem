@@ -7,14 +7,16 @@
  Runs from: RUN_MIDNIGHT.sh
 
 """
-import psycopg2
+from __future__ import print_function
 import datetime
 import sys
 import os
+
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 nt = NetworkTable(["KCCI", "KIMT", "KELO"])
 
-IEM = psycopg2.connect(database='iem', host='iemdb')
+IEM = get_dbconn('iem')
 icursor = IEM.cursor()
 
 
@@ -33,7 +35,7 @@ def process(ts):
         for line in lines[-100:]:
             tokens = line.split(",")
             pDay = float(tokens[9][:-2])
-            if (pDay > maxPrecip):
+            if pDay > maxPrecip:
                 maxPrecip = pDay
 
         if maxPrecip < 0:

@@ -2,12 +2,14 @@
  Look at the sources saved to the AFOS database and then whine about
  sources we do not understand!
 """
-from pyiem.network import Table as NetworkTable
-import psycopg2
+from __future__ import print_function
 import datetime
-import pytz
 
-pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+import pytz
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
+
+pgconn = get_dbconn('afos')
 cursor = pgconn.cursor()
 cursor2 = pgconn.cursor()
 
@@ -33,15 +35,16 @@ def sample(source, ts):
 
 def look4(ts):
     """ Let us investigate """
-    cursor.execute("""SELECT source, count(*) from products
-    WHERE entered >= %s and entered < %s and source is not null
-    GROUP by source ORDER by count DESC""", (ts,
-                                             ts+datetime.timedelta(hours=24)))
+    cursor.execute("""
+        SELECT source, count(*) from products
+        WHERE entered >= %s and entered < %s and source is not null
+        GROUP by source ORDER by count DESC
+    """, (ts,  ts + datetime.timedelta(hours=24)))
     for row in cursor:
         source = row[0]
         lookup = source[1:] if source[0] == 'K' else source
         if lookup not in nt.sts:
-            print '%s %s' % (row[0], row[1])
+            print('%s %s' % (row[0], row[1]))
             sample(source, ts)
 
 
@@ -52,6 +55,7 @@ def main():
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
 
     look4(ts)
+
 
 if __name__ == '__main__':
     # go

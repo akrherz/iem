@@ -1,6 +1,7 @@
 """
 Check to see if there are webcams offline, generate emails and such
 """
+from __future__ import print_function
 import os
 import stat
 import datetime
@@ -8,14 +9,14 @@ import datetime
 import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def workflow(netname, pname):
     """Do something please"""
-    pgconn_iem = psycopg2.connect(database='iem', host='iemdb')
-    pgconn_mesosite = psycopg2.connect(database='mesosite', host='iemdb')
-    pgconn_portfolio = psycopg2.connect(database='portfolio', host='iemdb')
+    pgconn_iem = get_dbconn('iem')
+    pgconn_mesosite = get_dbconn('mesosite')
+    pgconn_portfolio = get_dbconn('portfolio')
 
     # Now lets check files
     mydir = "/home/ldm/data/camera/stills"
@@ -38,7 +39,7 @@ def workflow(netname, pname):
         if not os.path.isfile(fn):
             missing += 1
             if missing > 1:
-                print 'Missing webcam file: %s' % (fn,)
+                print('Missing webcam file: %s' % (fn,))
             continue
         ticks = os.stat(fn)[stat.ST_MTIME]
         valid = (datetime.datetime(1970, 1, 1) +
@@ -46,7 +47,7 @@ def workflow(netname, pname):
         valid = valid.replace(tzinfo=pytz.timezone("UTC"))
         obs[row[0]] = dict(valid=valid)
     # Abort out if no obs are found
-    if len(obs) == 0:
+    if not obs:
         return
 
     tracker = TrackerEngine(pgconn_iem.cursor(), pgconn_portfolio.cursor(), 10)
