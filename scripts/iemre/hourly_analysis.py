@@ -75,7 +75,9 @@ def generic_gridder(df, idx, domain):
         # replace nan values in res with whatever now is in grid
         res = np.where(np.isnan(res), grid, res)
     # replace sentinel back to np.nan
-    return np.where(res == -9999, np.nan, res)
+    # replace sentinel back to np.nan
+    res = np.where(res == -9999, np.nan, res)
+    return np.ma.array(res, mask=np.isnan(res))
 
 
 def grid_hour(nc, ts):
