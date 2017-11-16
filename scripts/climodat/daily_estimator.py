@@ -32,7 +32,7 @@ import datetime
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-from pyiem.datatypes import temperature
+from pyiem.datatypes import temperature, distance
 import netCDF4
 import numpy as np
 import psycopg2.extras
@@ -280,11 +280,13 @@ def estimate_snow(ts):
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
                          'r')
-    snowgrid12 = nc.variables['snow_12z'][idx, :, :] / 25.4
-    snowdgrid12 = nc.variables['snowd_12z'][idx, :, :] / 25.4
+    nc.set_auto_mask(True)
+    snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :], 'MM').value('IN')
+    snowdgrid12 = distance(nc.variables['snowd_12z'][idx, :, :],
+                           'MM').value('IN')
     nc.close()
 
-    for sid in nt.sts.keys():
+    for sid in nt.sts:
         val = snowgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         if val >= 0 and val < 100:
             nt.sts[sid]['snow'] = "%.1f" % (val, )
