@@ -3,7 +3,7 @@ import datetime
 
 from pyiem import meteorology
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 import psycopg2
 import numpy as np
@@ -75,7 +75,7 @@ def make_daily_pet_plot(ctx):
 
     df = pd.DataFrame(dict(dates=dates, dailyet=o_dailyet,
                            climo_dailyet=c_et))
-    if len(df.index) == 0:
+    if df.empty:
         raise Exception("No Data Found!")
 
     (fig, ax) = plt.subplots(1, 1)
@@ -511,8 +511,7 @@ def plot1(ctx):
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
-    ctx['pgconn'] = psycopg2.connect(database='isuag', host='iemdb',
-                                     user='nobody')
+    ctx['pgconn'] = get_dbconn('isuag')
     ctx['nt'] = NetworkTable("ISUSM")
 
     if ctx['opt'] == '1':

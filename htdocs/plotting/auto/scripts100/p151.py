@@ -2,11 +2,10 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.plot import MapPlot, centered_bins
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -99,7 +98,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
 
     state = ctx['state']
@@ -220,9 +219,9 @@ def plotter(fdict):
     # drop 5% most extreme events, too much?
     df2 = df.iloc[int(len(df.index) * 0.05):]
 
-    m = MapPlot(sector=sector, state=state, axisbg='white', title=title,
-                subtitle=('based on IEM Archives'),
-                titlefontsize=12)
+    mp = MapPlot(sector=sector, state=state, axisbg='white', title=title,
+                 subtitle=('based on IEM Archives'),
+                 titlefontsize=12)
     if opt1 == 'diff':
         # Create 9 levels centered on zero
         abval = df2[column].abs().max()
@@ -232,19 +231,19 @@ def plotter(fdict):
                   for v in np.percentile(df2[column].values, range(0, 101,
                                                                    10))]
     if opt in ['both', 'contour']:
-        m.contourf(df2['lon'].values, df2['lat'].values,
-                   df2[column].values, levels,
-                   cmap=plt.get_cmap(('seismic_r' if varname == 'total_precip'
-                                      else 'seismic')),
-                   units=UNITS[varname])
+        mp.contourf(df2['lon'].values, df2['lat'].values,
+                    df2[column].values, levels,
+                    cmap=plt.get_cmap(('seismic_r' if varname == 'total_precip'
+                                       else 'seismic')),
+                    units=UNITS[varname])
     if sector == 'state':
-        m.drawcounties()
+        mp.drawcounties()
     if opt in ['both', 'values']:
-        m.plot_values(df2['lon'].values, df2['lat'].values,
-                      df2[column].values,
-                      fmt='%%.%if' % (PRECISION[varname],), labelbuffer=5)
+        mp.plot_values(df2['lon'].values, df2['lat'].values,
+                       df2[column].values,
+                       fmt='%%.%if' % (PRECISION[varname],), labelbuffer=5)
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

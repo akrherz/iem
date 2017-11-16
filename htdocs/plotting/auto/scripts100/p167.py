@@ -1,12 +1,11 @@
 """Flight category by hour"""
 import datetime
 
-import psycopg2
 import numpy as np
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -55,7 +54,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.colors as mpcolors
     from matplotlib.patches import Rectangle
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -83,7 +82,7 @@ def plotter(fdict):
     ORDER by valid ASC
     """, pgconn, params=(tzname, station, sts, ets), index_col=None)
 
-    if len(df.index) == 0:
+    if df.empty:
         return "No database entries found for station, sorry!"
 
     # 0 Unknown

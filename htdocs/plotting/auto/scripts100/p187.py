@@ -3,9 +3,8 @@ import datetime
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
-import psycopg2
 
 
 def get_description():
@@ -34,7 +33,7 @@ def plotter(fdict):
     nt = NetworkTable(ctx['network'])
     year = ctx['year']
 
-    dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    dbconn = get_dbconn('coop')
 
     table = "alldata_%s" % (station[:2], )
     df = read_sql("""

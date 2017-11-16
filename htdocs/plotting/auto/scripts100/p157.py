@@ -2,9 +2,8 @@
 import calendar
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'above': 'Above Threshold',
@@ -55,7 +54,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']

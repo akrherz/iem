@@ -1,11 +1,10 @@
 """Map of dates"""
 import datetime
+from collections import OrderedDict
 
 import numpy as np
-from pyiem.util import get_autoplot_context
 from pandas.io.sql import read_sql
-import psycopg2
-from collections import OrderedDict
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
     ('IA', 'Iowa'),
@@ -63,7 +62,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     from pyiem.plot import MapPlot
-    pgconn = psycopg2.connect(dbname='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx['sector']
     varname = ctx['var']
@@ -83,7 +82,7 @@ def plotter(fdict):
     and substr(station, 3, 1) != 'C' and doy not in (0, 400) ORDER by doy
     """, pgconn, params=(threshold, year, '%sCLIMATE' % (sector,)),
                   index_col='station')
-    if len(df.index) == 0:
+    if df.empty:
         return "No data found!"
 
     def f(val):
@@ -92,18 +91,20 @@ def plotter(fdict):
 
     df['pdate'] = df['doy'].apply(f)
 
-    m = MapPlot(sector='state', state=sector,
-                continental_color='white', nocaption=True,
-                title="%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold),
-                subtitle='based on NWS COOP and IEM Daily Estimates')
+    mp = MapPlot(sector='state', state=sector,
+                 continental_color='white', nocaption=True,
+                 title="%s %s %s$^\circ$F" % (year, PDICT2[varname],
+                                              threshold),
+                 subtitle='based on NWS COOP and IEM Daily Estimates')
     levs = np.linspace(df['doy'].min() - 3, df['doy'].max() + 3, 7, dtype='i')
     levlables = map(f, levs)
     if popt == 'contour':
-        m.contourf(df['lon'], df['lat'], df['doy'], levs, clevlabels=levlables)
-    m.plot_values(df['lon'], df['lat'], df['pdate'], labelbuffer=5)
-    m.drawcounties()
+        mp.contourf(df['lon'], df['lat'], df['doy'], levs,
+                    clevlabels=levlables)
+    mp.plot_values(df['lon'], df['lat'], df['pdate'], labelbuffer=5)
+    mp.drawcounties()
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

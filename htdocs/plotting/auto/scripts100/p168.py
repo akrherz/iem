@@ -5,7 +5,6 @@ import datetime
 from pyiem import util
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
-import psycopg2
 import numpy as np
 
 
@@ -34,7 +33,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(dbname='coop', host='iemdb', user='nobody')
+    pgconn = util.get_dbconn('coop')
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
@@ -48,7 +47,7 @@ def plotter(fdict):
     SELECT day, year, high, rank from data WHERE rank = 1
     ORDER by high DESC, day DESC
     """, pgconn, params=(station, ), index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         return "No data found!"
 
     (fig, ax) = plt.subplots(1, 1, figsize=(6, 8))
@@ -86,7 +85,7 @@ def plotter(fdict):
                   ) % (station, nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,
                        datetime.date.today().year))
-    ax.set_ylabel("High Temperature $^\circ$F")
+    ax.set_ylabel(r"High Temperature $^\circ$F")
     ax.set_xlabel("** denotes ties")
 
     return fig, df

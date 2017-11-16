@@ -3,9 +3,8 @@ import datetime
 import calendar
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.reference import state_names
 
 PDICT2 = OrderedDict([('CORN', 'Corn'),
@@ -51,7 +50,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     st1 = ctx['st1'][:2]
     st2 = ctx['st2'][:2]
@@ -74,7 +73,7 @@ def plotter(fdict):
     and state_alpha in %s ORDER by week_ending ASC
     """, pgconn, params=(commodity_desc, tuple(states),),
                   index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         return "ERROR: No data found!"
 
     prop = matplotlib.font_manager.FontProperties(size=10)

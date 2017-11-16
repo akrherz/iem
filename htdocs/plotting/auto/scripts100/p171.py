@@ -1,13 +1,12 @@
 """Distinct VTEC"""
 import calendar
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 import pyiem.nws.vtec as vtec
 from pyiem import reference
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'wfo': 'Select by NWS Forecast Office',
          'state': 'Select by State'}
@@ -50,7 +49,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.colors as mpcolors
     import matplotlib.patheffects as PathEffects
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     phenomena = ctx['phenomena']
@@ -80,8 +79,8 @@ def plotter(fdict):
         count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
       """, pgconn, params=(phenomena, significance), index_col=None)
 
-    if len(df.index) == 0:
-        raise Exception("Sorry, no data found!")
+    if df.empty:
+        return "Sorry, no data found!"
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
 
     minyear = df['yr'].min()

@@ -2,9 +2,8 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
-import psycopg2
 
 
 def get_description():
@@ -29,7 +28,6 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
     import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['station1']
@@ -39,7 +37,7 @@ def plotter(fdict):
     if station2:
         nt2 = NetworkTable(ctx['network2'])
 
-    dbconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    dbconn = get_dbconn('coop')
 
     df = read_sql("""
         SELECT valid, station, high, low from climate51 WHERE

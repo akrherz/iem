@@ -3,11 +3,10 @@ TODO: add table listing each forecast's peak and peak time...
 """
 import datetime
 
-import psycopg2
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = {'primary': 'Primary Field',
          'secondary': 'Secondary Field'}
@@ -39,8 +38,7 @@ def get_description():
 
 
 def get_context(fdict):
-    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
-                              user='nobody')
+    pgconn = get_dbconn('hads')
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -68,7 +66,7 @@ def get_context(fdict):
     on (d.hml_forecast_id = f.id) ORDER by f.id ASC, d.valid ASC
     """, pgconn, params=(station, dt - datetime.timedelta(days=3),
                          dt + datetime.timedelta(days=1)), index_col=None)
-    if len(ctx['fdf'].index) > 0:
+    if not ctx['fdf'].empty:
         ctx['primary'] = "%s[%s]" % (ctx['fdf'].iloc[0]['primaryname'],
                                      ctx['fdf'].iloc[0]['primaryunits'])
         ctx['secondary'] = "%s[%s]" % (ctx['fdf'].iloc[0]['secondaryname'],
@@ -87,7 +85,7 @@ def get_context(fdict):
     WHERE station = %s and valid between %s and %s ORDER by valid
     """, pgconn, params=(station, mints, maxts), index_col=None)
     ctx['odf'] = df.pivot('valid', 'label', 'value')
-    if len(ctx['fdf'].index) > 0:
+    if not ctx['fdf'].empty:
         ctx['df'] = pd.merge(ctx['fdf'], ctx['odf'], left_on='valid',
                              right_index=True, how='left', sort=False)
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
@@ -152,7 +150,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     ctx = get_context(fdict)
-    if len(ctx['df'].index) == 0 and len(ctx['odf'].index) == 0:
+    if ctx['df'].empty and ctx['odf'].empty:
         return "No Data Found!"
     df = ctx['df']
     (fig, ax) = plt.subplots(1, 1, figsize=(10, 6))
@@ -162,7 +160,7 @@ def plotter(fdict):
         issued = df2.iloc[0]['issued'].strftime("%-m/%-d %Hz")
         ax.plot(df2['valid'], df2[ctx['var'] + '_value'], zorder=2,
                 label=issued)
-    if len(ctx['odf'].index) > 0:
+    if not ctx['odf'].empty:
         ax.plot(ctx['odf'].index.values, ctx['odf'][ctx[ctx['var']]], lw=2,
                 color='k', label='Obs', zorder=4)
         ax.set_ylabel(ctx[ctx['var']])

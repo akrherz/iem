@@ -3,11 +3,10 @@ import calendar
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
 PDICT2 = {
@@ -70,7 +69,7 @@ def plotter(fdict):
     ts = ctx['date']
     hour = int(ctx['hour'])
     ts = datetime.datetime(ts.year, ts.month, ts.day, hour)
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     which = ctx['which']
     vlimit = ''
     if which == 'month':
@@ -82,7 +81,7 @@ def plotter(fdict):
     if station.startswith("_"):
         name = nt.sts[station]['name'].split("--")[0]
         stations = nt.sts[station]['name'].split("--")[1].strip().split(",")
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
 
     df = read_sql("""
     with data as (

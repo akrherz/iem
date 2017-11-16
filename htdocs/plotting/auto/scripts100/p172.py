@@ -3,9 +3,8 @@ import calendar
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
-import psycopg2
 
 
 def get_description():
@@ -37,7 +36,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(dbname='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
@@ -54,7 +53,7 @@ def plotter(fdict):
     """ + table + """ WHERE station = %s and year in (select year from years)
     ORDER by day ASC
     """, pgconn, params=(station, station), index_col='day')
-    if len(df.index) == 0:
+    if df.empty:
         return "No data found!"
 
     (fig, ax) = plt.subplots(1, 1)

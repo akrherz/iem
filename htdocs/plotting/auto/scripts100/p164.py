@@ -2,9 +2,8 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([('high', 'High Temperature'),
                      ('low', 'Low Temperature'),
@@ -42,7 +41,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
 
     sts = ctx['sts']
@@ -69,7 +68,7 @@ def plotter(fdict):
     sum(case when snow = 0 then 1 else 0 end) as snow_below
     from data GROUP by valid ORDER by valid ASC
     """, pgconn, params=(sts, ets), index_col='valid')
-    if len(df.index) == 0:
+    if df.empty:
         return 'Error, no results returned!'
     for v in ['precip', 'snow']:
         if varname == v:
