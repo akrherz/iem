@@ -2,9 +2,8 @@
 import calendar
 from collections import OrderedDict
 
-import psycopg2
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([
@@ -49,7 +48,7 @@ def plotter(fdict):
     nt1 = NetworkTable(network1)
     nt2 = NetworkTable(network2)
     pvar = ctx['pvar']
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     table1 = "alldata_%s" % (station1[:2], )
     table2 = "alldata_%s" % (station2[:2], )

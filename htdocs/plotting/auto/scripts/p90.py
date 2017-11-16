@@ -10,7 +10,7 @@ from affine import Affine
 import pyiem.nws.vtec as vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from geopandas import read_postgis
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
@@ -88,7 +88,7 @@ def get_description():
 
 def do_polygon(ctx):
     """polygon workflow"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     varname = ctx['v']
     station = ctx['station'][:4]
     state = ctx['state']
@@ -208,7 +208,7 @@ def do_polygon(ctx):
 
 
 def do_ugc(ctx):
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     varname = ctx['v']
     station = ctx['station'][:4]

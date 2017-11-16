@@ -5,7 +5,7 @@ from collections import OrderedDict
 import psycopg2.extras
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import speed
 
@@ -64,7 +64,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     from pyiem.plot import calendar_plot
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     ctx = get_autoplot_context(fdict, get_description())

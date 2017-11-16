@@ -1,11 +1,10 @@
 """Precip metrics"""
 import calendar
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'yes': 'Yes, consider trace reports',
          'no': 'No, omit trace reports'}
@@ -47,7 +46,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     threshold = ctx['thres']

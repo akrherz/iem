@@ -2,9 +2,11 @@
 
 Called from RUN_12Z.sh for the previous date
 """
-import psycopg2
+from __future__ import print_function
 import sys
 import datetime
+
+from pyiem.util import get_dbconn
 from pyiem.datatypes import speed, direction, temperature
 from pyiem import meteorology
 
@@ -18,9 +20,9 @@ def clean_rh(val):
 
 def do(ts):
     """Process this date timestamp"""
-    asos = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    asos = get_dbconn('asos', user='nobody')
     cursor = asos.cursor()
-    iemaccess = psycopg2.connect(database='iem', host='iemdb')
+    iemaccess = get_dbconn('iem')
     icursor = iemaccess.cursor()
     cursor.execute("""
     select station, network, iemid, drct, sknt, valid at time zone tzname,
@@ -136,13 +138,12 @@ def do(ts):
     iemaccess.close()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
     ts = datetime.date.today() - datetime.timedelta(days=1)
-    if len(sys.argv) == 4:
-        ts = datetime.date(int(sys.argv[1]), int(sys.argv[2]),
-                           int(sys.argv[3]))
+    if len(argv) == 4:
+        ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     do(ts)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

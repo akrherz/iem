@@ -1,9 +1,9 @@
 """Climodat"""
 import datetime
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 PDICT = {'cdd': 'Cooling Degree Days',
          'hdd': 'Heating Degree Days'}
@@ -26,7 +26,7 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     station = fdict.get('station', 'IA0200')
     varname = fdict.get('var', 'cdd')

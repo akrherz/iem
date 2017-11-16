@@ -2,7 +2,6 @@
 import datetime
 import calendar
 
-import psycopg2
 from pyiem import util
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
@@ -47,7 +46,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    pgconn = util.get_dbconn('isuag')
     cursor = pgconn.cursor()
 
     today = datetime.date.today()

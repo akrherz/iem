@@ -1,11 +1,11 @@
 """Bias computing hi/lo"""
 import datetime
 
-import psycopg2.extras
 import numpy as np
 import pandas as pd
+import psycopg2.extras
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -32,7 +32,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -74,7 +74,7 @@ def plotter(fdict):
                   ) % (station, nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,
                        datetime.date.today().year))
-    ax.set_ylabel("Average Temperature Difference $^\circ$F")
+    ax.set_ylabel(r"Average Temperature Difference $^\circ$F")
     ax.set_xlim(0, 24)
     ax.set_xticks((0, 4, 8, 12, 16, 20, 24))
     ax.set_xticklabels(('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM', 'Mid'))

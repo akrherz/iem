@@ -2,11 +2,10 @@
 import pytz
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 XREF = {
     'AEEI4': 'A130209',
@@ -53,7 +52,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    pgconn = get_dbconn('isuag')
     ctx = get_autoplot_context(fdict, get_description())
     threshold = 50
     threshold_c = temperature(threshold, 'F').value('C')

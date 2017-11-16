@@ -4,10 +4,9 @@ from collections import OrderedDict
 import datetime
 
 import numpy as np
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -59,7 +58,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2]
     varname = ctx['var']
@@ -81,6 +80,8 @@ def plotter(fdict):
     t.state in ('IA', 'ND', 'SD', 'NE', 'KS', 'MO', 'IL', 'WI', 'MN', 'MI',
     'IN', 'OH', 'KY')
     """, pgconn, index_col=['station', 'month'])
+    if df.empty:
+        return "No data was found for query, sorry."
 
     if over == 'monthly':
         title = "%s %s" % (calendar.month_name[month], PDICT3[varname])
@@ -94,25 +95,25 @@ def plotter(fdict):
             df2 = df.mean(axis=0, level='station')
         df2['lat'] = df['lat'].mean(axis=0, level='station')
         df2['lon'] = df['lon'].mean(axis=0, level='station')
-    m = MapPlot(sector=sector, state=state, axisbg='white',
-                title=('NCEI 1981-2010 Climatology of %s'
-                       ) % (title,),
-                subtitle=('based on National Centers for '
-                          'Environmental Information (NCEI) 1981-2010'
-                          ' Climatology'))
+    mp = MapPlot(sector=sector, state=state, axisbg='white',
+                 title=('NCEI 1981-2010 Climatology of %s'
+                        ) % (title,),
+                 subtitle=('based on National Centers for '
+                           'Environmental Information (NCEI) 1981-2010'
+                           ' Climatology'))
     levels = np.linspace(df2[varname].min(), df2[varname].max(), 10)
     levels = [round(x, PRECISION[varname]) for x in levels]
     if opt in ['both', 'contour']:
-        m.contourf(df2['lon'].values, df2['lat'].values,
-                   df2[varname].values, levels, units=UNITS[varname])
+        mp.contourf(df2['lon'].values, df2['lat'].values,
+                    df2[varname].values, levels, units=UNITS[varname])
     if sector == 'state':
-        m.drawcounties()
+        mp.drawcounties()
     if opt in ['both', 'values']:
-        m.plot_values(df2['lon'].values, df2['lat'].values,
-                      df2[varname].values,
-                      fmt='%%.%if' % (PRECISION[varname],))
+        mp.plot_values(df2['lon'].values, df2['lat'].values,
+                       df2[varname].values,
+                       fmt='%%.%if' % (PRECISION[varname],))
 
-    return m.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

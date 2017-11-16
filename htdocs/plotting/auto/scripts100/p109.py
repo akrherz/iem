@@ -1,13 +1,12 @@
 """WFO VTEC counts in a map"""
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -47,7 +46,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx['sdate']
     sts = sts.replace(tzinfo=pytz.timezone("UTC"))
@@ -110,15 +109,15 @@ GROUP by wfo, phenomena, significance, year
         bins = [0, 1, 5, 10, 50, 100, 150, 200, 250,
                 500, 750, 1000, 1250, 1500, 2000]
 
-    p = MapPlot(sector='nws', axisbg='white',
-                title='%s Counts by NWS Office' % (title,),
-                subtitle=('Valid %s - %s UTC, based on VTEC: %s'
-                          ) % (sts.strftime("%d %b %Y %H:%M"),
-                               ets.strftime("%d %b %Y %H:%M"),
-                               subtitle))
-    p.fill_cwas(df2, bins=bins, ilabel=True)
+    mp = MapPlot(sector='nws', axisbg='white',
+                 title='%s Counts by NWS Office' % (title,),
+                 subtitle=('Valid %s - %s UTC, based on VTEC: %s'
+                           ) % (sts.strftime("%d %b %Y %H:%M"),
+                                ets.strftime("%d %b %Y %H:%M"),
+                                subtitle))
+    mp.fill_cwas(df2, bins=bins, ilabel=True)
 
-    return p.fig, df
+    return mp.fig, df
 
 
 if __name__ == '__main__':

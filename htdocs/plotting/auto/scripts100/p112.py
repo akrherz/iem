@@ -1,11 +1,10 @@
 """GDD by month and year"""
-import psycopg2
 import datetime
 
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -76,7 +75,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     gddbase = ctx['base']
@@ -126,9 +125,9 @@ def plotter(fdict):
     db = {}
     for i, row in df.iterrows():
         ts = datetime.date(int(row['year']), int(row['month']), 1)
-        db[ts] = {40: float(row["gdd40"]),
-                  48: float(row["gdd48"]),
-                  50: float(row["gdd50"]),
+        db[ts] = {'40': float(row["gdd40"]),
+                  '48': float(row["gdd48"]),
+                  '50': float(row["gdd50"]),
                   'XX': float(row[varname])}
         monthly[ts.month]['40'].append(float(row['gdd40']))
         monthly[ts.month]['48'].append(float(row['gdd48']))

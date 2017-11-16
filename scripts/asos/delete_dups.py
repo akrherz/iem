@@ -5,10 +5,11 @@ tough to resolve how these obs appeared in the database to behind with :(
 """
 
 from pyiem.util import get_dbconn
-pgconn = get_dbconn('asos', user='mesonet')
 
 
 def do_year(year):
+    """Process this year"""
+    pgconn = get_dbconn('asos')
     cursor1 = pgconn.cursor()
     cursor2 = pgconn.cursor()
     table = "t%s" % (year,)
@@ -30,6 +31,11 @@ def do_year(year):
     pgconn.commit()
 
 
-if __name__ == '__main__':
+def main():
+    """Go Main"""
     for year in range(1928, 2017):
         do_year(year)
+
+
+if __name__ == '__main__':
+    main()

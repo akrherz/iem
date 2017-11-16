@@ -9,7 +9,8 @@ import urllib2
 
 # Number of attempts to download data
 MAX_ATTEMPTS = 6
-SERVICE = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
+# HTTPS here can be problematic for installs that don't have Lets Encrypt CA
+SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
 
 
 def download_data(uri):
@@ -41,6 +42,7 @@ def download_data(uri):
 
 
 def main():
+    """Our main method"""
     # timestamps in UTC to request data for
     startts = datetime.datetime(2012, 8, 1)
     endts = datetime.datetime(2012, 9, 1)

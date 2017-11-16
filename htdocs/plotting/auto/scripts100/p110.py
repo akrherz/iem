@@ -1,9 +1,9 @@
 """Climodat"""
 import datetime
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 CWEEK = {1: '3/1-->3/7   ',
          2: '3/8-->3/14  ',
@@ -77,7 +77,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     station = fdict.get('station', 'IA0200')
 

@@ -2,10 +2,9 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import numpy as np
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
@@ -39,7 +38,7 @@ def get_description():
 
 def get_data(fdict):
     """ Get the data"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     days = ctx['days']
@@ -98,7 +97,7 @@ def plotter(fdict):
     varname = ctx['var']
     nt = NetworkTable(network)
     df = get_data(fdict)
-    if len(df.index) == 0:
+    if df.empty:
         return 'Error, no results returned!'
 
     ax = plt.axes([0.1, 0.3, 0.8, 0.6])

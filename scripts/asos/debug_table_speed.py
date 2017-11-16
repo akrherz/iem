@@ -1,16 +1,21 @@
 """Debug printout of partitioned table speed within ASOS database"""
-import psycopg2
+from __future__ import print_function
 import datetime
+
+from pyiem.util import get_dbconn
 
 
 def main():
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    """Go Main Go"""
+    pgconn = get_dbconn('asos')
     cursor = pgconn.cursor()
     maxt = 0
-    for yr in range(1930, datetime.datetime.now().year + 1):
+    for yr in range(1928, datetime.datetime.now().year + 1):
         sts = datetime.datetime.now()
-        cursor.execute("""SELECT count(*) from t"""+str(yr)+"""
-        WHERE station = %s""", ('DSM',))
+        cursor.execute("""
+            SELECT count(*) from t"""+str(yr)+"""
+            WHERE station = %s
+        """, ('DSM',))
         row = cursor.fetchone()
         ets = datetime.datetime.now()
         secs = (ets - sts).total_seconds()

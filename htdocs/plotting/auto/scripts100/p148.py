@@ -3,10 +3,9 @@ import datetime
 from collections import OrderedDict
 
 from dateutil.easter import easter as get_easter
-import psycopg2
 from pandas.io.sql import read_sql
 import mx.DateTime
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
@@ -109,7 +108,7 @@ def get_context(fdict):
     date = ctx['date']
 
     nt = NetworkTable(network)
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     table = "alldata_%s" % (station[:2], )
     if date == 'exact':

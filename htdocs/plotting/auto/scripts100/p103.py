@@ -1,11 +1,10 @@
 """Steps up and down"""
 import calendar
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'spring': '1 January - 30 June',
          'fall': '1 July - 31 December'}
@@ -34,7 +33,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -88,7 +87,7 @@ def plotter(fdict):
     ax[1].set_ylabel("Probability Density")
     ax[1].axvline(32, lw=2)
     ax[1].grid(True)
-    ax[1].set_xlabel("Temperature $^\circ$F, 32 degrees highlighted")
+    ax[1].set_xlabel(r"Temperature $^\circ$F, 32 degrees highlighted")
 
     ax[2].hist(np.array(df2['doy'], 'f'),
                bins=np.arange(df2['doy'].min(),

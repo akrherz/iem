@@ -2,19 +2,21 @@
 
 But be careful about not overwritting 'better' data gleaned from CLI/DSM
 """
-import psycopg2
+from __future__ import print_function
 import sys
 import datetime
-import numpy as np
 import warnings
+
+import numpy as np
+from pyiem.util import get_dbconn
 warnings.simplefilter("ignore", RuntimeWarning)
 
 
 def do(ts):
     """Process this date timestamp"""
-    asos = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    asos = get_dbconn('asos', user='nobody')
     cursor = asos.cursor()
-    iemaccess = psycopg2.connect(database='iem', host='iemdb')
+    iemaccess = get_dbconn('iem')
     icursor = iemaccess.cursor()
     cursor.execute("""
     select station, network, iemid, valid at time zone tzname,
@@ -88,7 +90,7 @@ def do(ts):
                 fmt = "%.2f" if vname == 'pday' else '%.0f'
                 tokens.append("%s = %s" % (vname, fmt % newval))
 
-        if len(tokens) == 0:
+        if not tokens:
             continue
 
         cols = ", ".join(tokens)
@@ -101,13 +103,13 @@ def do(ts):
     iemaccess.close()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
     ts = datetime.date.today() - datetime.timedelta(days=1)
-    if len(sys.argv) == 4:
-        ts = datetime.date(int(sys.argv[1]), int(sys.argv[2]),
-                           int(sys.argv[3]))
+    if len(argv) == 4:
+        ts = datetime.date(int(argv[1]), int(argv[2]),
+                           int(argv[3]))
     do(ts)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

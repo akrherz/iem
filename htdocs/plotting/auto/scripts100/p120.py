@@ -1,11 +1,10 @@
 """last spring temp"""
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -36,7 +35,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     thresholds = [ctx['t1'], ctx['t2'], ctx['t3'], ctx['t4']]

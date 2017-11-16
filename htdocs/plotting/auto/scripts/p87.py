@@ -1,9 +1,8 @@
 """METAR Code Climo"""
 import datetime
 
-import psycopg2.extras
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 import numpy as np
 from pandas.io.sql import read_sql
 
@@ -42,8 +41,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -77,7 +75,7 @@ def plotter(fdict):
     GROUP by week, year, hour
     """, pgconn, params=(nt.sts[station]['tzname'], station, sts, ets),
                   index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         return "No data was found, sorry!"
 
     minyear = df['year'].min()

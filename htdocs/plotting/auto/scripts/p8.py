@@ -1,6 +1,4 @@
-"""
- Monthly precip reliability
-"""
+""" Monthly precip reliability"""
 import calendar
 import datetime
 
@@ -8,7 +6,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -40,7 +38,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    coop = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    coop = get_dbconn('coop')
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -66,8 +64,8 @@ def plotter(fdict):
     years = float(1 + eyear - syear)
     for row in cursor:
         vals.append(row[1] / years * 100.)
-    if len(vals) == 0:
-        raise Exception("No Data Found!")
+    if not vals:
+        return "No Data Found!"
     df = pd.DataFrame(dict(freq=pd.Series(vals, index=range(1, 13))),
                       index=pd.Series(range(1, 13), name='month'))
 

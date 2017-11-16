@@ -1,9 +1,9 @@
 """Monthly precip in text format"""
 import datetime
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 PDICT = {'precip': 'Total Precipitation',
          'avg_high': 'Average High Temperature',
@@ -46,7 +46,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
 
     station = fdict.get('station', 'IA0200').upper()
     varname = fdict.get('var', 'precip')

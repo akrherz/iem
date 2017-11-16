@@ -3,10 +3,9 @@ import datetime
 import calendar
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -71,14 +70,14 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
     month = ctx['month']
     varname = ctx['var']
     if varname not in METRICS:
-        raise Exception('ERROR with var variable')
+        raise 'ERROR with var variable'
     days = ctx['days']
 
     nt = NetworkTable(network)
@@ -121,7 +120,7 @@ def plotter(fdict):
         """, pgconn, params=(days - 1, days - 1, days - 1, days - 1, days - 1,
                              station,  tuple(months), tuple(months), days),
                   index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         return 'Error, no results returned!'
     ylabels = []
     fmt = '%.2f' if varname in ['total_precip', ] else '%.0f'

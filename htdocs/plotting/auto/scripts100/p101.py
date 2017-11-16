@@ -3,9 +3,8 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 import pyiem.nws.vtec as vtec
 
 
@@ -36,7 +35,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     pcursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     syear = ctx['syear']

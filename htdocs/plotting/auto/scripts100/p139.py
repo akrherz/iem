@@ -3,8 +3,7 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-import psycopg2
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
 MDICT = OrderedDict([
@@ -53,7 +52,7 @@ def plotter(fdict):
     font0 = FontProperties()
     font0.set_family('monospace')
     font0.set_size(16)
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']

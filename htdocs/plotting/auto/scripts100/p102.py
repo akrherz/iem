@@ -1,7 +1,6 @@
 """LSR ranks"""
 import datetime
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
@@ -37,7 +36,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = util.get_dbconn('postgis')
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station'][:4]
     syear = ctx['year']

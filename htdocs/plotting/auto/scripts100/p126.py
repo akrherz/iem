@@ -3,13 +3,12 @@ from __future__ import print_function
 import datetime
 import calendar
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, relh
 from pyiem.datatypes import temperature
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'mixing_ratio': 'Mixing Ratio [g/kg]',
          'vpd': 'Vapor Pressure Deficit [hPa]'}
@@ -48,7 +47,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']

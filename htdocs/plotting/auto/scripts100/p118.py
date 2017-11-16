@@ -1,8 +1,7 @@
 """precip days per month"""
 import datetime
 from pandas.io.sql import read_sql
-import psycopg2
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
 PDICT = {'precip_days': 'Precipitation Days',
@@ -28,7 +27,7 @@ def plotter(fdict):
     """ Go """
     import matplotlib
     matplotlib.use('agg')
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station'].upper()
     varname = ctx['var']

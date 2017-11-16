@@ -1,10 +1,9 @@
 """Stddev of temperatures"""
 import calendar
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'high': 'High Temperature',
          'low': 'Low Temperature'}
@@ -34,7 +33,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     varname = ctx['var']
@@ -68,7 +67,7 @@ def plotter(fdict):
                label='Day to Day')
     ax[0].legend(loc='best', fontsize=10, ncol=2)
 
-    ax[0].set_ylabel("Temperature Std. Deviation $^\circ$F")
+    ax[0].set_ylabel(r"Temperature Std. Deviation $^\circ$F")
     ax[0].grid(True)
 
     msg = ("[%s] %s Daily %s Standard Deviations"
