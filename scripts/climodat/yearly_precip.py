@@ -40,8 +40,12 @@ def runYear(year):
         vals.append(row['total'])
         maxday = row['max']
 
+    # pre-1900 dates cause troubles
+    lastday = "31 December"
+    if now.year == maxday.year:
+        lastday = maxday.strftime("%d %B")
     mp = MapPlot(title="Total Precipitation [inch] (%s)" % (year,),
-                 subtitle='1 January - %s' % (maxday.strftime("%d %B"),),
+                 subtitle='1 January - %s' % (lastday,),
                  axisbg='white')
     mp.plot_values(lons, lats, vals, labels=labels, fmt='%.2f',
                    labeltextsize=8, labelcolor='tan')

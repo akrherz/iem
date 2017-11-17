@@ -79,7 +79,7 @@ def plotter(fdict):
     # Get Climatology
     cdf = read_sql("""SELECT to_char(valid, 'mmdd') as sday, high, low,
     precip from ncdc_climate81 WHERE station = %s
-    """, psycopg2.connect(database='coop', host='iemdb', user='nobody'),
+    """, get_dbconn('coop'),
                    params=(nt.sts[station]['ncdc81'],), index_col='sday')
 
     cursor.execute("""

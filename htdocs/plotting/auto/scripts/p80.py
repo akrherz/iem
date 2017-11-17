@@ -3,7 +3,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -29,7 +29,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     ugc = ctx['ugc']

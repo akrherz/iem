@@ -13,17 +13,16 @@ import traceback
 import datetime
 
 import memcache
-import psycopg2
 from PIL import Image, ImageDraw
 import requests
 from requests.auth import HTTPDigestAuth
-from pyiem.util import get_properties
+from pyiem.util import get_properties, get_dbconn
 
 
 def fetch(cid):
     """Do work to get the content"""
     # Get camera metadata
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT ip, online, name, port, is_vapix, scrape_url, network
