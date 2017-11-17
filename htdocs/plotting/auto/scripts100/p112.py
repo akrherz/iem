@@ -40,12 +40,12 @@ def modMonth(stationID, db, monthly, mo1, mo2, mt1, mt2, nt, gddbase, gddceil):
         m1 = now.replace(month=mo1)
         m2 = now.replace(month=mo2)
         if m1 >= e or m1 not in db:
-            db[m1] = {40: 'M', 48: 'M', 50: 'M', 'XX': 'M'}
+            db[m1] = {'40': 'M', '48': 'M', '50': 'M', 'XX': 'M'}
         if m2 >= e or m2 not in db:
-            db[m2] = {40: 'M', 48: 'M', 50: 'M', 'XX': 'M'}
+            db[m2] = {'40': 'M', '48': 'M', '50': 'M', 'XX': 'M'}
         res += ("%5i%7s%7s%7s%7s%7s%7s%7s%7s\n"
-                ) % (now.year, db[m1][40], db[m1][48], db[m1][50],
-                     db[m1]['XX'], db[m2][40], db[m2][48], db[m2][50],
+                ) % (now.year, db[m1]['40'], db[m1]['48'], db[m1]['50'],
+                     db[m1]['XX'], db[m2]['40'], db[m2]['48'], db[m2]['50'],
                      db[m2]['XX'])
 
     res += ("     ****************************  "
