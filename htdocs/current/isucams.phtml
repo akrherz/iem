@@ -1,0 +1,58 @@
+<?php
+ include "../../config/settings.inc.php";
+ define("IEM_APPID", 116);
+ include "../../include/myview.php";
+
+ $t = new MyView();
+ $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">";
+ $t->title = "Iowa State Webcams";
+ $t->thispage = "webcam-isu";
+
+ $cb = rand(0, 100000);
+
+	$t->content = <<<EOF
+<style>
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
+</style>
+
+<ol class="breadcrumb">
+  <li><a href="/projects/webcam.php">IEM Webcam Project</a></li>
+  <li class="active">ISU Webcams</li>
+</ol>
+
+<p>This page provides the most recently cached webcam image by the IEM.</p>
+
+<div class="row">
+  <div class="col-md-4">
+<h4>Agronomy Hall</h4>
+<img src="/data/camera/stills/KCCI-016.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4">
+<h4>AEA Farm</h4>
+<img src="/data/camera/stills/KCCI-027.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4">
+<h4>Memorial Union</h4>
+<img src="/data/camera/stills/ISUC-003.jpg?${cb}" class="img img-responsive"></div>
+</div>
+
+<h4>Curtis Hall</h4>
+
+<div class="row">
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-004.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-005.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-006.jpg?${cb}" class="img img-responsive"></div>
+</div>
+
+<h4>Design Building</h4>
+
+<div class="row">
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-007.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-008.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-009.jpg?${cb}" class="img img-responsive"></div>
+</div>
+
+EOF;
+$t->render('full.phtml');
+?>
