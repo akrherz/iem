@@ -47,7 +47,7 @@ see presented on this page<br />
 </form>
 
 <hr >
-		
+	<h3>Max VTEC ETN listing for {$year}</h3>
 <div id="thetable">
 {$table}
 </div>
