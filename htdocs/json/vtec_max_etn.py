@@ -22,7 +22,11 @@ def run(year, fmt):
 
     table = "warnings_%s" % (year,)
     cursor.execute("""
-    SELECT wfo, phenomena, significance, max(eventid) from
+    SELECT wfo, phenomena, significance, max(eventid),
+    '/vtec/#""" + str(year) + """-O-NEW-K'||
+    wfo||'-'||phenomena||'-'||significance||'-'||
+    LPAD(max(eventid)::text, 4, '0') as url
+     from
     """+table+""" WHERE wfo is not null and eventid is not null and
     phenomena is not null and significance is not null
     GROUP by wfo, phenomena, significance
@@ -34,7 +38,8 @@ def run(year, fmt):
                 {'name': 'wfo', 'type': 'str'},
                 {'name': 'phenomena', 'type': 'str'},
                 {'name': 'significance', 'type': 'str'},
-                {'name': 'max_eventid', 'type': 'int'}
+                {'name': 'max_eventid', 'type': 'int'},
+                {'name': 'url', 'type': 'str'}
                 ], 'table': cursor.fetchall()}
 
     if fmt == 'json':
@@ -44,13 +49,17 @@ def run(year, fmt):
     # Make a hacky table
     df = pd.DataFrame(res['table'],
                       columns=[c['name'] for c in res['columns']])
+    df['url'] = ('<a href="' + df['url'] + '">' +
+                 df['max_eventid'].apply(str) + '</a>')
+    df.drop('max_eventid', axis=1, inplace=True)
     df = df.pivot_table(index='wfo', columns=['phenomena', 'significance'],
-                        values='max_eventid')
+                        values='url', aggfunc=lambda x: ' '.join(x))
     df.fillna("", inplace=True)
 
+    cls = ' class="table-bordered table-condensed table-striped"'
     html = ("<p><strong>Table generated at: %s</strong></p>\n%s"
             ) % (res['generated_at'],
-                 df.style.set_table_attributes(' class="iemdt"').render())
+                 df.style.set_table_attributes(cls).render())
     return html
 
 
@@ -83,3 +92,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # print(run(2012, 'html'))

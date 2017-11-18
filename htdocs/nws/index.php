@@ -121,6 +121,12 @@ options listed.</p>
 		Tornado warnings by NWS Office by Year.</li>
    <li><a href="/vtec/yearly_counts.php">Number of VTEC Events by year</a>
   <br />Table of the number of VTEC events by year.</li>
+
+   <li><a href="/vtec/maxetn.php">Maximum VTEC EventID (ETN) by year</a>
+  <br />This diagnostic prints out the maximum issued VTEC eventid (ETN) by
+year.  A useful diagnostic for a NWS Office wishing to check their local VTEC
+eventd database.</li>
+
  <li><a href="/cow/sbwsum.phtml">Summary Images of Daily Storm Based Warnings</a>
   <br />Displays just the storm based warning geometries for one UTC day
 		at a time.</li>

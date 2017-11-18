@@ -230,6 +230,19 @@
   		)
   );
   
+  $services[] = Array(
+      "title" => "NWS VTEC Maximum Event ID by Year",
+      "url" => "/json/vtec_max_etn.py?year={year}",
+      "desc" => "Produces a listing of the maximum eventid used for each ".
+      "NWS Forecast Office, VTEC Phenomena and VTEC Significance.",
+      "vars" => Array(
+          "year" => "YYYY year"
+          ),
+      "example" => Array(
+          "{year}" => "2015"
+          )
+      );
+  
   
   $services[] = Array(
   		"title" => "NWS VTEC Event Listing by WFO by Year",
