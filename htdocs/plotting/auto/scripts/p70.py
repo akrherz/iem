@@ -3,12 +3,11 @@ import calendar
 import datetime
 
 from pandas.io.sql import read_sql
-import psycopg2
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem import reference
 import pyiem.nws.vtec as vtec
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'jan1': 'January 1',
          'jul1': 'July 1'}
@@ -52,7 +51,7 @@ def plotter(fdict):
     import matplotlib.pyplot as plt
     from matplotlib.ticker import FormatStrFormatter
 
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station'][:4]
     phenomena = ctx['phenomena']
@@ -85,6 +84,8 @@ def plotter(fdict):
         GROUP by year ORDER by year ASC"""
     df = read_sql(sql, pgconn, params=(phenomena, significance),
                   index_col=None)
+    if df.empty:
+        return "No data found for query"
 
     # Since many VTEC events start in 2005, we should not trust any
     # data that has its first year in 2005

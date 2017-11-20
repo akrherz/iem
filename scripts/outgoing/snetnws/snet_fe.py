@@ -7,18 +7,19 @@ import subprocess
 import tempfile
 import os
 
+import psycopg2.extras
 import pytz
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-import psycopg2
+from pyiem.util import get_dbconn
 
 SCRIPT_TIME = datetime.datetime.utcnow()
-SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.timezone("UTC"))
+SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.utc)
 SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
 NT = NetworkTable(("KCCI", "KIMT"))
-IEM = psycopg2.connect(database="iem", host='iemdb')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
+IEM = get_dbconn("iem")
+PORTFOLIO = get_dbconn('portfolio')
 
 # Files we write
 (tmpfp, tmpfname) = tempfile.mkstemp()

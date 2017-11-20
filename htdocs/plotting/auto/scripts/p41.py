@@ -2,13 +2,12 @@
 from __future__ import print_function
 from collections import OrderedDict
 
-import psycopg2
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 ODICT = OrderedDict([
     ('max', 'Maximum'),
@@ -146,7 +145,7 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     from matplotlib.font_manager import FontProperties
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']

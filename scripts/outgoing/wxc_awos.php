@@ -5,9 +5,9 @@
  * 2) We get a 5 minute datafed and use it to build more accurate daily totals
  *    not found in the METAR feed.
  */
-include("../../config/settings.inc.php");
-include("../../include/mlib.php");
-include("../../include/network.php");
+include "../../config/settings.inc.php";
+include "../../include/mlib.php";
+include "../../include/network.php";
 $nt = new NetworkTable("AWOS");
 $cities = $nt->table;
 
@@ -16,8 +16,8 @@ function fancy($v, $floor,$ceil, $p){
   return sprintf("%${p}.1f", $v);
 }
 
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
+include "../../include/iemaccess.php";
+include "../../include/iemaccessob.php";
 $iem = new IEMAccess();
 
 $mydata = $iem->getNetwork("AWOS");

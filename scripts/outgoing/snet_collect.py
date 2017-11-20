@@ -1,17 +1,19 @@
 """
 Collect up schoolnet data into files we have for outgoing...
 """
+from __future__ import print_function
 import sys
 import os
+import subprocess
+import tempfile
+import calendar
 import datetime
+
 from pyiem.network import Table as NetworkTable
 import pyiem.meteorology as meteorology
 from pyiem.datatypes import temperature, speed
 import pyiem.util as util
 import psycopg2.extras
-import subprocess
-import tempfile
-import calendar
 import pytz
 
 utc = datetime.datetime.utcnow()
@@ -20,7 +22,7 @@ tstr = utc.strftime("%Y%m%d%H%M")
 
 now = utc.astimezone(pytz.timezone("America/Chicago"))
 
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+IEM = util.get_dbconn('iem', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 st = NetworkTable(['KCCI', 'KIMT'])
@@ -170,10 +172,10 @@ def main():
                                     v.get('max_drctTxt'),
                                     formatter(v.get('max_srad'), 0, -99))
             of.write(s.replace("'", ""))
-        except:
-            print kcci[sid]
-            print sys.excepthook(sys.exc_info()[0],
-                                 sys.exc_info()[1], sys.exc_info()[2])
+        except Exception as _exp:
+            print(kcci[sid])
+            print(sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2]))
             sys.exc_traceback = None
 
     of.close()
@@ -218,10 +220,10 @@ def main():
                                           formatter(v.get('max_srad'), 0),
                                           v.get('online'))
             of.write(s.replace("'", ""))
-        except:
-            print kcci[sid]
-            print sys.excepthook(sys.exc_info()[0],
-                                 sys.exc_info()[1], sys.exc_info()[2])
+        except Exception as _exp:
+            print(kcci[sid])
+            print(sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2]))
             sys.exc_traceback = None
 
     of.close()
@@ -265,10 +267,10 @@ def main():
                                           formatter(v.get('max_srad'), 0),
                                           v.get('online'))
             of.write(s.replace("'", ""))
-        except Exception as exp:
-            print kimt[sid]
-            print sys.excepthook(sys.exc_info()[0],
-                                 sys.exc_info()[1], sys.exc_info()[2])
+        except Exception as _exp:
+            print(kimt[sid])
+            print(sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2]))
             sys.exc_traceback = None
 
     of.close()
@@ -333,10 +335,10 @@ def main():
                 kcci[sid].get('p3day', 0), kcci[sid].get('p7day', 0),
                 kcci[sid].get('p14day', 0)))
 
-        except Exception as exp:
-            print kcci[sid]
-            print sys.excepthook(sys.exc_info()[0],
-                                 sys.exc_info()[1], sys.exc_info()[2])
+        except Exception as _exp:
+            print(kcci[sid])
+            print(sys.excepthook(sys.exc_info()[0],
+                                 sys.exc_info()[1], sys.exc_info()[2]))
             sys.exc_traceback = None
     of.close()
     pqstr = 'data c 000000000000 wxc/wxc_snet8.txt bogus txt'

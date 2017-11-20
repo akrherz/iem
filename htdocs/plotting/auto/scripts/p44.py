@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
@@ -56,7 +56,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -115,7 +115,7 @@ def plotter(fdict):
             continue
         data[yr]['doy'].append(lastdoy)
         data[yr]['counts'].append(data[yr]['counts'][-1])
-    if len(data[datetime.datetime.now().year]['doy']) > 0:
+    if data[datetime.datetime.now().year]['doy']:
         data[datetime.datetime.now().year]['doy'].append(
             int(datetime.datetime.today().strftime("%j")) + 1)
         data[datetime.datetime.now().year]['counts'].append(
@@ -141,7 +141,7 @@ def plotter(fdict):
     fig.canvas.draw()
 
     attempts = 10
-    while len(ann) > 0 and attempts > 0:
+    while ann and attempts > 0:
         attempts -= 1
         removals = []
         for a in ann:

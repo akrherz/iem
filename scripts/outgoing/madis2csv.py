@@ -29,9 +29,9 @@ def main():
     """Go main"""
     # Wow, why did I do it this way... better not change it as I bet the
     # other end is ignoring the headers...
-    fmt = ("LAT,LONG,STN,DATE,TIME,T,TD,WCI,RH,THI,DIR,SPD,GST,ALT,SLP,VIS,SKY,"
-           "CEIL,CLD,SKYSUM,PR6,PR24,WX,MINT6,MAXT6,MINT24,MAXT24,AUTO,PR1,"
-           "PTMP1,PTMP2,PTMP3,PTMP4,SUBS1,SUBS2,SUBS3,SUBS4,STATIONNAME,")
+    fmt = ("LAT,LONG,STN,DATE,TIME,T,TD,WCI,RH,THI,DIR,SPD,GST,ALT,SLP,VIS,"
+           "SKY,CEIL,CLD,SKYSUM,PR6,PR24,WX,MINT6,MAXT6,MINT24,MAXT24,AUTO,"
+           "PR1,PTMP1,PTMP2,PTMP3,PTMP4,SUBS1,SUBS2,SUBS3,SUBS4,STATIONNAME,")
     format_tokens = fmt.split(",")
 
     utc = datetime.datetime.utcnow()

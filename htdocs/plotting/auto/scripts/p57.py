@@ -3,12 +3,11 @@ import datetime
 import calendar
 from collections import OrderedDict
 
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([('avg_temp', 'Average Daily Temperature'),
                      ('avg_high_temp', 'Average High Temperature'),
@@ -41,7 +40,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
@@ -95,7 +94,7 @@ def plotter(fdict):
                   ) % (station, nt.sts[station]['name'],
                        PDICT2[agg], PDICT[varname],
                        nt.sts[station]['archive_begin'].year, lastday.year))
-    ylabel = "Temperature $^\circ$F"
+    ylabel = r"Temperature $^\circ$F"
     if varname in ['total_precip']:
         ylabel = 'Precipitation [inch]'
     ax.set_ylabel(ylabel)

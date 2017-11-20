@@ -5,7 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -28,8 +28,8 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
-    cursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('asos')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -67,7 +67,7 @@ def plotter(fdict):
 
     ax[0].barh(ys - 0.4, freq, ec='b', fc='b')
     ax[0].set_ylim(-60.5, 0.5)
-    ax[0].set_ylabel("Minimum Wind Chill $^\circ$F")
+    ax[0].set_ylabel(r"Minimum Wind Chill $^\circ$F")
     ax[0].set_xlabel("Winter Season Frequency [%]")
     ax[0].set_title(("[%s] %s %s-%s\n"
                      "Season Frequency of Observed Wind Chill"
@@ -77,7 +77,7 @@ def plotter(fdict):
     ax[0].grid(True)
 
     ax[1].bar(years, mins, fc='b', ec='b')
-    ax[1].set_ylabel("Minimum Wind Chill $^\circ$F")
+    ax[1].set_ylabel(r"Minimum Wind Chill $^\circ$F")
     ax[1].grid(True)
     ax[1].set_xlabel("Year label for spring portion of season")
 

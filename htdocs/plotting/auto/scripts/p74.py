@@ -1,10 +1,9 @@
 """Days below threshold"""
 
-import psycopg2
 from scipy import stats
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
@@ -47,7 +46,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     season = ctx['season']
@@ -77,6 +76,8 @@ def plotter(fdict):
       GROUP by yr ORDER by yr ASC
     """, pgconn, params=(1 if season != 'all' else 0, station, startyear),
                   index_col='yr')
+    if df.empty:
+        return "No data found for query"
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = df[season].mean()

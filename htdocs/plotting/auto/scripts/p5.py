@@ -2,11 +2,10 @@
 import calendar
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict(
     [('min_range', 'Minimum Daily High to Low Temperature Range'),
@@ -41,7 +40,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']

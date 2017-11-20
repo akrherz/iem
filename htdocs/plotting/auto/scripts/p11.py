@@ -5,7 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'touches': 'Daily Range Touches Emphasis',
          'above': 'Daily Range At or Above Emphasis'}
@@ -37,8 +37,8 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-    cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('iem')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']

@@ -1,7 +1,7 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/mlib.php");
-include("../../include/network.php");
+include "../../config/settings.inc.php";
+include "../../include/mlib.php";
+include "../../include/network.php";
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
@@ -10,8 +10,8 @@ function fancy($v, $floor,$ceil, $p){
   return sprintf("%${p}.1f", $v);
 }
 
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
+include "../../include/iemaccess.php";
+include "../../include/iemaccessob.php";
 $iem = new IEMAccess();
 
 /* Lets also get the traffic data, please */

@@ -2,13 +2,13 @@
 /*
  * Dumps IA and IL CoCoRaHS data to a Weather Central formatted file
  */
-include("../../config/settings.inc.php");
-include("../../include/mlib.php");
+include "../../config/settings.inc.php";
+include "../../include/mlib.php";
 
-include("../../include/network.php");
+include "../../include/network.php";
 $nt = new NetworkTable("IACOCORAHS");
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
+include "../../include/iemaccess.php";
+include "../../include/iemaccessob.php";
 $iem = new IEMAccess();
 
 

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -31,7 +31,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -54,9 +54,7 @@ def plotter(fdict):
     SELECT extract(hour from minissue) as hr, count(*) from data GROUP by hr
     """, (tzname, phenomena, significance, wfo))
     if cursor.rowcount == 0:
-        ax.text(0.5, 0.5, "No Results Found",
-                transform=ax.transAxes, ha='center')
-        return fig
+        return "No Results Found"
 
     data = np.zeros((24,), 'f')
     for row in cursor:

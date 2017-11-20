@@ -1,11 +1,10 @@
 """Fall Minimum by Date"""
 import datetime
 
-import psycopg2
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -31,7 +30,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
@@ -79,8 +78,8 @@ def plotter(fdict):
 
     ax.set_title("[%s] %s\nFirst Fall Temperature Occurences" % (
                                             station, nt.sts[station]['name']))
-    ax.set_ylabel("Days until first sub %s$^{\circ}\mathrm{F}$" % (t2,))
-    ax.set_xlabel("First day of sub %s$^{\circ}\mathrm{F}$" % (t1,))
+    ax.set_ylabel(r"Days until first sub %s$^{\circ}\mathrm{F}$" % (t2,))
+    ax.set_xlabel(r"First day of sub %s$^{\circ}\mathrm{F}$" % (t1,))
 
     ax.grid(True)
 

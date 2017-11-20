@@ -3,11 +3,10 @@ import calendar
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
          ('max-high', 'Maximum High'),
@@ -122,7 +121,7 @@ $("#ap_container").highcharts({
 
 def get_context(fdict):
     """ Get the context"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     month = ctx['month']

@@ -4,25 +4,26 @@
 """
 import datetime
 import os
-import numpy as np
-import sys
-from scipy.interpolate import NearestNDInterpolator
-import psycopg2
 import subprocess
+import sys
+
+import numpy as np
+from scipy.interpolate import NearestNDInterpolator
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 nt = NetworkTable("ISUSM")
 
-ACCESS = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+ACCESS = get_dbconn('iem', user='nobody')
 acursor = ACCESS.cursor()
 
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+COOP = get_dbconn('coop', user='nobody')
 ccursor = COOP.cursor()
 
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+MESOSITE = get_dbconn('mesosite', user='nobody')
 mcursor = MESOSITE.cursor()
 
-ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+ISUAG = get_dbconn('isuag', user='nobody')
 icursor = ISUAG.cursor()
 
 
@@ -143,7 +144,7 @@ def main():
     load_soilt(data)
     cdata = compute_climate(sts, ets)
     xref = build_xref()
-    for sid in data.keys():
+    for sid in data:
         if data[sid]['missing'] > (days * 0.1):
             continue
         csite = xref[sid]

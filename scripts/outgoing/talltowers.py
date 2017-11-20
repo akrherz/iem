@@ -2,13 +2,15 @@
 
 Run from RUN_1MIN.sh
 """
-import psycopg2
-import pandas as pd
-from pandas.io.sql import read_sql
+from __future__ import print_function
 import smtplib
 import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+import psycopg2
+import pandas as pd
+from pandas.io.sql import read_sql
 
 TOWERS = {'ETTI4': 0, 'MCAI4': 1}
 RTOWERS = ['ETTI4', 'MCAI4']

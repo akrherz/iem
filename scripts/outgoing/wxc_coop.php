@@ -5,8 +5,8 @@
  * to process and I'd like to think I do a great job at it :)
  */
 
-include('../../config/settings.inc.php');
-include('../../include/network.php');
+include '../../config/settings.inc.php';
+include '../../include/network.php';
 $nt = new NetworkTable("IA_COOP");
 $cities = $nt->table;
 
