@@ -232,6 +232,9 @@ data = {'plots': [
         {'id': '64', 'mw': True,
          'label': 'Last or First Snowfall of Each Winter Season'},
         {'id': "33", 'mw': True, 'label': "Maximum Low Temperature Drop"},
+        {'id': "188", 'mw': True,
+         'label': ("Max/Min High/Low after first "
+                   "temperature exceedence of season")},
         {'id': "105", 'mw': True,
          'label': "Maximum Period between Precipitation Amounts"},
         {'id': "46", 'label': "Minimum Wind Chill Temperature"},
