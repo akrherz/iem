@@ -266,6 +266,7 @@
     Options +ExecCGI
 
     RewriteRule roadcond.kml roadcond.php
+    RewriteRule roadcond_v2.kml roadcond.php?linewidth=6&maxtype=2
   </Directory>
 
   <Directory "/opt/iem/htdocs/lsr">
