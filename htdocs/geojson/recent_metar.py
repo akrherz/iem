@@ -2,17 +2,17 @@
 """ Recent METARs containing some pattern """
 import cgi
 import sys
-import datetime
 import json
 from json import encoder
 import memcache
 import psycopg2.extras
+from pyiem.util import get_dbconn
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
 def get_data(q):
     """ Get the data for this query """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",

@@ -7,6 +7,8 @@ import json
 from json import encoder
 import memcache
 import psycopg2.extras
+from pyiem.util import get_dbconn
+from pyiem.reference import TRACE_VALUE
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
@@ -14,14 +16,14 @@ def sanitize(val):
     """ convert to Ms"""
     if val is None:
         return "M"
-    if val == 0.0001:
+    if val == TRACE_VALUE:
         return "T"
     return val
 
 
 def get_data(ts):
     """ Get the data for this timestamp """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
@@ -53,7 +55,7 @@ def get_data(ts):
 
 
 def main():
-    ''' see how we are called '''
+    """see how we are called"""
     field = cgi.FieldStorage()
     dt = field.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, '%Y-%m-%d')

@@ -6,12 +6,12 @@ import cgi
 import json
 import sys
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def get_events(lon, lat):
     """ Get Events """
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
     cursor.execute("""SET TIME ZONE 'UTC'""")
     cursor.execute("""

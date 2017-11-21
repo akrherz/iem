@@ -8,12 +8,12 @@ import sys
 import json
 import memcache
 import pytz
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def pointquery(lon, lat):
     """Do a query for stuff"""
-    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    postgis = get_dbconn('postgis')
     cursor = postgis.cursor()
 
     res = dict(type='FeatureCollection',
@@ -46,7 +46,7 @@ def pointquery(lon, lat):
 
 def dowork(valid):
     """Actually do stuff"""
-    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    postgis = get_dbconn('postgis')
     cursor = postgis.cursor()
 
     res = dict(type='FeatureCollection',
@@ -88,7 +88,7 @@ def main():
         ts = datetime.datetime.utcnow()
     else:
         ts = datetime.datetime.strptime(ts, '%Y%m%d%H%M')
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
 
     cb = form.getfirst('callback', None)
 

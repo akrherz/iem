@@ -2,16 +2,17 @@
 """ Generate a GeoJSON of current storm based warnings """
 import sys
 import cgi
+import json
+import datetime
+
 import memcache
+from pyiem.util import get_dbconn
 
 
 def run():
     """ Actually do the hard work of getting the current SBW in geojson """
-    import json
-    import psycopg2
-    import datetime
     utcnow = datetime.datetime.utcnow()
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 
     # Look for polygons into the future as well as we now have Flood products

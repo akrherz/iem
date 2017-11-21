@@ -7,20 +7,15 @@ import json
 import sys
 
 import memcache
-import psycopg2
+from pyiem.util import get_dbconn
 
 ISO9660 = '%Y-%m-%dT%H:%MZ'
 
 
-def get_dbcursor():
-    """Do as I say"""
-    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    return postgis.cursor()
-
-
 def dowork(lon, lat):
     """ Actually do stuff"""
-    cursor = get_dbcursor()
+    pgconn = get_dbconn('postgis')
+    cursor = pgconn.cursor()
 
     res = dict(mcds=[])
 

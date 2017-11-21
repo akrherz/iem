@@ -7,16 +7,16 @@ import os
 import datetime
 import cgi
 
-import psycopg2
 from pandas.io.sql import read_sql
 from dateutil.parser import parse
 import memcache
 from pyiem.reference import IEMVARS
+from pyiem.util import get_dbconn
 
 
 def do_today(table, station, network, date):
     """Our backend is current_log"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cols = ['local_valid', 'utc_valid', 'tmpf']
     table['fields'] = [IEMVARS[col] for col in cols]
     df = read_sql("""
@@ -34,7 +34,7 @@ def do_today(table, station, network, date):
 
 def do_asos(table, station, _network, date):
     """Our backend is ASOS"""
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     cols = ['local_valid', 'utc_valid', 'tmpf', 'sknt', 'gust', 'drct']
     table['fields'] = [IEMVARS[col] for col in cols]
     df = read_sql("""

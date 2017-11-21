@@ -9,12 +9,12 @@ import json
 import sys
 # extras
 import pytz
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go Main"""
-    pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('afos')
     acursor = pgconn.cursor()
     form = cgi.FieldStorage()
     pid = form.getvalue('product_id', '201302241937-KSLC-NOUS45-PNSSLC')

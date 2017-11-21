@@ -17,9 +17,14 @@
 import cgi
 import sys
 import datetime
+import json
+# http://stackoverflow.com/questions/1447287
+from json import encoder
 
 import pytz
 import memcache
+from pyiem.util import get_dbconn
+encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
 def safe(val):
@@ -31,13 +36,7 @@ def safe(val):
 
 def run(ts, sid):
     """ Actually do some work! """
-    import psycopg2
-    import json
-    # http://stackoverflow.com/questions/1447287
-    from json import encoder
-    encoder.FLOAT_REPR = lambda o: format(o, '.2f')
-
-    dbconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    dbconn = get_dbconn('postgis')
     cursor = dbconn.cursor()
 
     res = {'profiles': []}
@@ -83,7 +82,7 @@ def main():
     res = mc.get(mckey)
     if not res:
         ts = datetime.datetime.strptime(ts, '%Y%m%d%H%M')
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+        ts = ts.replace(tzinfo=pytz.utc)
         res = run(ts, sid)
         mc.set(mckey, res)
 

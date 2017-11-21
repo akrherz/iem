@@ -6,12 +6,12 @@ import sys
 import json
 
 import memcache
+from pyiem.util import get_dbconn
 
 
 def run(station, syear, eyear):
     """Do something"""
-    import psycopg2
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
 
     table = "alldata_%s" % (station[:2],)

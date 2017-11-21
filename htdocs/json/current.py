@@ -7,11 +7,12 @@ import datetime
 
 import memcache
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
 
 def run(network, station):
     """Get last ob!"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""
     WITH mystation as (SELECT * from stations where id = %s and network = %s),

@@ -7,13 +7,14 @@ import datetime
 
 import memcache
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     table = "warnings_%s" % (year,)

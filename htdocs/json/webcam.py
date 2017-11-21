@@ -6,13 +6,14 @@ import json
 import sys
 import datetime
 import cgi
-import psycopg2
+
 import pytz
+from pyiem.util import get_dbconn
 
 
 def dance(cid, start_ts, end_ts):
     """ Go get the dictionary of data we need and deserve """
-    dbconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    dbconn = get_dbconn('mesosite')
     cursor = dbconn.cursor()
     data = {'images': []}
     cursor.execute("""
@@ -43,9 +44,9 @@ def main():
         end_ts = start_ts + datetime.timedelta(days=1)
     else:
         start_ts = datetime.datetime.strptime(start_ts, '%Y%m%d%H%M')
-        start_ts = start_ts.replace(tzinfo=pytz.timezone("UTC"))
+        start_ts = start_ts.replace(tzinfo=pytz.utc)
         end_ts = datetime.datetime.strptime(end_ts, '%Y%m%d%H%M')
-        end_ts = end_ts.replace(tzinfo=pytz.timezone("UTC"))
+        end_ts = end_ts.replace(tzinfo=pytz.utc)
 
     sys.stdout.write("Content-type: application/json\n\n")
     sys.stdout.write(json.dumps(dance(cid, start_ts, end_ts)))

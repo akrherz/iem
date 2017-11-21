@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-''' Produce geojson of ISUSM data '''
+""" Produce geojson of ISUSM data """
 import cgi
 import sys
 import datetime
@@ -8,10 +8,10 @@ import psycopg2.extras
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text
+from pyiem.util import drct2text, get_dbconn
 import pytz
-ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+ISUAG = get_dbconn('isuag')
+IEM = get_dbconn('iem')
 
 
 def safe_t(val, units="C"):

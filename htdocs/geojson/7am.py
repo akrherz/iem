@@ -7,6 +7,7 @@ import json
 import memcache
 import psycopg2.extras
 import pytz
+from pyiem.util import get_dbconn
 
 
 def router(group, ts):
@@ -24,7 +25,7 @@ def router(group, ts):
 
 def run_azos(ts):
     """ Get the data please """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utcnow = datetime.datetime.utcnow()
@@ -67,7 +68,7 @@ def run_azos(ts):
 
 def run(ts):
     """ Actually do the hard work of getting the current SPS in geojson """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utcnow = datetime.datetime.utcnow()

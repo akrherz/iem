@@ -7,6 +7,8 @@ import json
 from json import encoder
 import memcache
 import psycopg2.extras
+from pyiem.util import get_dbconn
+from pyiem.reference import TRACE_VALUE
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
@@ -21,14 +23,14 @@ def sanitize(val):
     """ convert to Ms"""
     if val is None:
         return "M"
-    if val == 0.0001:
+    if val == TRACE_VALUE:
         return "T"
     return val
 
 
 def get_data(ts, fmt):
     """ Get the data for this timestamp """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
@@ -95,24 +97,23 @@ def get_data(ts, fmt):
         })
     if fmt == 'geojson':
         return json.dumps(data)
-    else:
-        cols = ("station,name,state,wfo,high,high_record,high_record_years,"
-                "high_normal,low,low_record,low_record_years,low_normal,"
-                "precip,precip_month,precip_jan1,precip_jan1_normal,"
-                "precip_jul1,precip_dec1,precip_dec1_normal,precip_record,"
-                "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
-                "snow_jul1_normal,snow_dec1_normal,"
-                "snow_month_normal,snow_jul1_depart")
-        res = cols+"\n"
-        for feat in data['features']:
-            for col in cols.split(","):
-                val = feat['properties'][col]
-                if isinstance(val, (list, tuple)):
-                    res += "%s," % (" ".join([str(s) for s in val]), )
-                else:
-                    res += "%s," % (val,)
-            res += "\n"
-        return res
+    cols = ("station,name,state,wfo,high,high_record,high_record_years,"
+            "high_normal,low,low_record,low_record_years,low_normal,"
+            "precip,precip_month,precip_jan1,precip_jan1_normal,"
+            "precip_jul1,precip_dec1,precip_dec1_normal,precip_record,"
+            "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
+            "snow_jul1_normal,snow_dec1_normal,"
+            "snow_month_normal,snow_jul1_depart")
+    res = cols+"\n"
+    for feat in data['features']:
+        for col in cols.split(","):
+            val = feat['properties'][col]
+            if isinstance(val, (list, tuple)):
+                res += "%s," % (" ".join([str(s) for s in val]), )
+            else:
+                res += "%s," % (val,)
+        res += "\n"
+    return res
 
 
 def main():

@@ -7,9 +7,9 @@ import cgi
 import json
 import datetime
 import os.path
-import psycopg2
 import glob
 
+from pyiem.util import get_dbconn
 NIDS = {
     'N0Q': 'Base Reflectivity (High Res)',
     'N0U': 'Base Radial Velocity (High Res)',
@@ -46,9 +46,8 @@ def available_radars(form):
     lat = form.getvalue('lat', None)
     lon = form.getvalue('lon', None)
     start_gts = parse_time(form.getvalue('start', '2012-01-27T00:00Z'))
-    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb',
-                                user='nobody')
-    mcursor = MESOSITE.cursor()
+    pgconn = get_dbconn('mesosite')
+    mcursor = pgconn.cursor()
     root = {'radars': []}
     if lat is None or lon is None:
         sql = """
@@ -76,7 +75,7 @@ def available_radars(form):
         root['radars'].append({'id': radar, 'name': row[1], 'lat': row[3],
                                'lon': row[2], 'type': row[4]})
     mcursor.close()
-    MESOSITE.close()
+    pgconn.close()
     return root
 
 

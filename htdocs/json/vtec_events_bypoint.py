@@ -4,7 +4,7 @@ import cgi
 import sys
 import json
 import datetime
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def run(lon, lat, sdate, edate):
@@ -14,7 +14,7 @@ def run(lon, lat, sdate, edate):
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 
     cursor.execute("""

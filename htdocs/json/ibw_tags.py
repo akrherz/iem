@@ -5,8 +5,8 @@ import cgi
 import json
 import datetime
 
-import psycopg2
 import memcache
+from pyiem.util import get_dbconn
 
 
 def ptime(val):
@@ -18,7 +18,7 @@ def ptime(val):
 
 def run(wfo, year):
     """ Actually generate output """
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
     cursor.execute("""
     WITH stormbased as (

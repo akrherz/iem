@@ -6,12 +6,12 @@ import datetime
 import json
 import memcache
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 
 def run(network, month, day, syear, eyear):
     """Do something"""
-    import psycopg2
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
 
     nt = NetworkTable(network)

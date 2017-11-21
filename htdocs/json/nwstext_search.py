@@ -8,13 +8,12 @@ import json
 import datetime
 import memcache
 import pytz
+from pyiem.util import get_dbconn
 
 
 def run(sts, ets, awipsid):
     """ Actually do some work! """
-    import psycopg2
-
-    dbconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+    dbconn = get_dbconn('afos')
     cursor = dbconn.cursor()
 
     res = {'results': []}
@@ -52,11 +51,11 @@ def main():
     res = mc.get(mckey)
     if not res:
         sts = datetime.datetime.strptime(sts, '%Y-%m-%dT%H:%MZ')
-        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+        sts = sts.replace(tzinfo=pytz.utc)
         ets = datetime.datetime.strptime(ets, '%Y-%m-%dT%H:%MZ')
-        ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+        ets = ets.replace(tzinfo=pytz.utc)
         now = datetime.datetime.utcnow()
-        now = now.replace(tzinfo=pytz.timezone("UTC"))
+        now = now.replace(tzinfo=pytz.utc)
         cacheexpire = 0 if ets < now else 120
 
         res = run(sts, ets, awipsid)

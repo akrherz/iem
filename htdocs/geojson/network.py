@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 """GeoJSON of a given IEM network code"""
-import memcache
 import sys
 import cgi
+import json
+import datetime
+
+import psycopg2.extras
+import memcache
+from pyiem.util import get_dbconn
 
 
 def run(network):
     """Generate a GeoJSON dump of the provided network"""
-    import json
-    import psycopg2.extras
-    import datetime
-
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     cursor.execute("""
