@@ -4,6 +4,7 @@
  */
 include("../../config/settings.inc.php");
 $linewidth = isset($_REQUEST['linewidth']) ? intval($_REQUEST["linewidth"]): 3;
+$maxtype = isset($_GET["maxtype"]) ? intval($_GET["maxtype"]): 3;
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
 
@@ -11,7 +12,7 @@ if (! isset($_GET["cachebust"])){
 // Try to get it from memcached
 $memcache = new Memcache;
 $memcache->connect('iem-memcached', 11211);
-$val = $memcache->get("/kml/roadcond.php|$linewidth");
+$val = $memcache->get("/kml/roadcond.php|$linewidth|$maxtype");
 if ($val){
 	die($val);
 }
@@ -34,9 +35,9 @@ $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 $tbl = "roads_current";
 if (isset($_GET["test"])){ $tbl = "roads_current_test"; }
 
-$sql = "SELECT ST_askml(ST_Simplify(simple_geom, 100)) as kml,
-      * from $tbl r, roads_base b, roads_conditions c WHERE
-  r.segid = b.segid and r.cond_code = c.code";
+$sql = "SELECT ST_askml(ST_Simplify(simple_geom, 100)) as kml, ".
+       "* from $tbl r, roads_base b, roads_conditions c WHERE ".
+       "r.segid = b.segid and r.cond_code = c.code and b.type <= $maxtype";
 
 $rs = pg_query($conn, $sql);
 
@@ -115,6 +116,6 @@ echo <<<EOF
 </kml>
 EOF;
 
-@$memcache->set("/kml/roadcond.php|$linewidth", ob_get_contents(), false, 300);
+@$memcache->set("/kml/roadcond.php|$linewidth|$maxtype", ob_get_contents(), false, 300);
 ob_end_flush();
 ?>
