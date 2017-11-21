@@ -3,10 +3,11 @@ Drive the reprocessing of the MWcomp plot.  We are doing this since our
 data archives have more data than the stuff I previously got from NSSL
 """
 import subprocess
-import psycopg2
 import datetime
 import os
-ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+from pyiem.util import get_dbconn
+
+ASOS = get_dbconn('asos')
 acursor = ASOS.cursor()
 
 min10 = datetime.timedelta(minutes=10)

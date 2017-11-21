@@ -3,7 +3,7 @@
  1) Ingest data into per station per day text files
  2) Send wind alerts
 """
-
+from __future__ import print_function
 # Python Imports
 import re
 import time
@@ -15,17 +15,18 @@ import traceback
 import logging
 import smtplib
 import StringIO
-from email.MIMEText import MIMEText
+from email.mime.text import MIMEText
 
 # 3rd Party
 import mx.DateTime
 
 # Local stuff
-import nwnOB  # @UnresolvedImport
+import nwnob  # @UnresolvedImport
 import secret  # @UnresolvedImport
 
 import psycopg2.extras
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
+from pyiem.util import get_dbconn
+MESOSITE = get_dbconn('mesosite')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 logging.basicConfig(filename='/mesonet/data/logs/nwn.log', filemode='a')
@@ -93,7 +94,7 @@ def makeConnect():
             tn.read_until("password> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubpass'],))
             notConnected = False
-        except:
+        except Exception as _exp:
             logger.exception("Error in makeConnect()")
             time.sleep(58)
 
@@ -110,15 +111,15 @@ def process(dataStr):
         if len(tokens) == 1:
             stationID = int(tokens[0][0])
             if stationID not in db:
-                db[stationID] = nwnOB.nwnOB(stationID)
+                db[stationID] = nwnob.nwnOB(stationID)
             db[stationID].valid = mx.DateTime.now()
             db[stationID].aDrctTxt.append(string.strip(tokens[0][3]))
             db[stationID].aDrct.append(txt2drct[string.strip(tokens[0][3])])
-            if (tokens[0][5] == "KTS"):
+            if tokens[0][5] == "KTS":
                 db[stationID].aSPED.append(int(tokens[0][4]) / .868976)
             else:
                 db[stationID].aSPED.append(int(tokens[0][4]))
-            if (tokens[0][7][:2] == "0-"):
+            if tokens[0][7][:2] == "0-":
                 db[stationID].tmpf = int(tokens[0][7][1:])
             else:
                 db[stationID].tmpf = int(tokens[0][7])
@@ -138,7 +139,7 @@ def process(dataStr):
         if len(tokens) == 1:
             stationID = int(tokens[0][0])
             if stationID not in db:
-                db[stationID] = nwnOB.nwnOB(stationID)
+                db[stationID] = nwnob.nwnOB(stationID)
             if (tokens[0][7][:2] == "0-"):
                 db[stationID].maxTMPF = int(tokens[0][7][1:])
             else:
@@ -160,7 +161,7 @@ def process(dataStr):
         if len(tokens) == 1:
             stationID = int(tokens[0][0])
             if stationID not in db:
-                db[stationID] = nwnOB.nwnOB(stationID)
+                db[stationID] = nwnob.nwnOB(stationID)
             if (tokens[0][7][:2] == "0-"):
                 db[stationID].minTMPF = int(tokens[0][7][1:])
             else:
@@ -176,6 +177,7 @@ def process(dataStr):
 
 
 def archiveWriter():
+    """archive writer"""
     for sid in db.keys():
         # No obs during this period
         if db[sid].valid is None:
@@ -224,7 +226,7 @@ def sendWindAlert(sid, alertSPED, alertDrctTxt, myThreshold):
     form["sheftime"] = db[sid].valid.strftime("%H%M")
     try:
         form["gustts"] = db[sid].maxSPED_ts.strftime("%I:%M %p")
-    except:
+    except Exception as _exp:
         form["gustts"] = "Unknown"
     form["tmpf"] = db[sid].tmpf
     form["dwpf"] = "None"
@@ -266,12 +268,12 @@ def sendWindAlert(sid, alertSPED, alertDrctTxt, myThreshold):
     for route in locs[sid]["routes"]:
         form["route"] = route
         fireLDM(report % form, route, sid)
-        if (len(route) == 3):
-            if (route == "DSM"):
-                form['route'] = "DMX"
+        if len(route) == 3 and route == "DSM":
+            form['route'] = "DMX"
 
 
 def fireLDM(report, route, sid):
+    """Fire LDM"""
     logger.info("Route! %s" % (route,))
     fname = "LOC%sSVRWX.dat" % (route,)
     fp = open("/tmp/"+fname, 'w')
@@ -282,7 +284,7 @@ def fireLDM(report, route, sid):
         # if (route != "KELO" and route != "KCCI"):
         os.system("/home/ldm/bin/pqinsert -p '%s' /tmp/%s" % (
                                         fname.replace('DMX', 'DSM'), fname))
-    except:
+    except Exception as _exp:
         logger.exception("Trouble inserting Alert!")
 
     # Save a copy of this alert!
@@ -342,22 +344,23 @@ def clearObs():
 
 
 def main():
+    """Go Main Go"""
     tn = makeConnect()
     counter = 1
     dryRun = 0
     dataStr = ""
 
     while counter > 0:
-        if (counter % 15 == 0):
+        if counter % 15 == 0:
             saveDB()
         dataStr = tn.read_very_eager()
         goodLines = process(dataStr)
-        if (len(goodLines) < 100):
+        if len(goodLines) < 100:
             dryRun += 1
             logger.info("dryRun Set to: %s" % (dryRun,))
         else:
             dryRun = 0
-        if (dryRun > 2):
+        if dryRun > 2:
             logger.info(" ABORT ABORT")
             raise Exception("ZZZZZZZ")
         averageWinds()
@@ -371,6 +374,7 @@ def main():
 
 
 def loadDB():
+    """load db"""
     if not os.path.isfile("db.p"):
         return
     import pickle
@@ -379,6 +383,7 @@ def loadDB():
 
 
 def saveDB():
+    """save db"""
     import pickle
     pickle.dump(db, open('db.p', 'w'))
 
@@ -390,7 +395,7 @@ def logData(goodLines):
         f.write(goodLines)
         f.write("||" + str(now) + "||\n")
         f.close()
-    except:
+    except Exception as _exp:
         logger.exception("\nCould not write Log\n")
 
 
@@ -406,7 +411,7 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             saveDB()
             running = False
-        except:
+        except Exception as _exp:
             logger.exception("Uh oh!")
 
             io = StringIO.StringIO()
@@ -417,7 +422,7 @@ if __name__ == "__main__":
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
             msg['To'] = "akrherz@iastate.edu"
 
-            if (MAXEMAILS > 0):
+            if MAXEMAILS > 0:
                 s = smtplib.SMTP()
                 s.connect()
                 s.sendmail(msg["From"], msg["To"], msg.as_string())

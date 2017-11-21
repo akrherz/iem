@@ -1,10 +1,10 @@
 """Plot of current RWIS surface temperatures"""
-import psycopg2
 import datetime
 import numpy as np
 from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+IEM = get_dbconn('iem', user='nobody')
 
 
 def cln(vals):
@@ -13,7 +13,7 @@ def cln(vals):
     for v in vals:
         if v is not None:
             a.append(v)
-    if len(a) == 0:
+    if not a:
         return None
     return np.average(a)
 
@@ -35,15 +35,16 @@ def main():
         data.append(d)
 
     now = datetime.datetime.now()
-    m = MapPlot(axisbg='white',
-                title='Iowa RWIS Average Pavement + Sub-Surface Temperature',
-                subtitle=("Valid: %s (pavement in red, sub-surface in blue)"
-                          "") % (now.strftime("%-d %b %Y %-I:%M %p"),))
-    m.plot_station(data)
-    m.drawcounties()
+    mp = MapPlot(axisbg='white',
+                 title='Iowa RWIS Average Pavement + Sub-Surface Temperature',
+                 subtitle=("Valid: %s (pavement in red, sub-surface in blue)"
+                           "") % (now.strftime("%-d %b %Y %-I:%M %p"),))
+    mp.plot_station(data)
+    mp.drawcounties()
     pqstr = ("plot c %s rwis_sf.png rwis_sf.png png"
              "") % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), )
-    m.postprocess(view=False, pqstr=pqstr)
+    mp.postprocess(view=False, pqstr=pqstr)
+
 
 if __name__ == '__main__':
     main()

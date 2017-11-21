@@ -1,9 +1,10 @@
 """Process that would continually monitor for interesting stuff!!"""
-from pyiem.network import Table as NetworkTable
-import psycopg2
+from __future__ import print_function
 import os
 import sys
 import time
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 nt = NetworkTable(("KCCI", "KIMT", "KELO"))
 
 # Write PID
@@ -17,7 +18,7 @@ for station in nt.sts.keys():
 
 
 def preload():
-    IEM = psycopg2.connect(database='iem', host='iemdb')
+    IEM = get_dbconn('iem')
     icursor = IEM.cursor()
     icursor.execute("""SELECT pday, t.id from current c, stations t WHERE
       t.network in ('KCCI','KELO','KIMT') and c.iemid = t.iemid
@@ -31,7 +32,7 @@ def preload():
 def process(tv):
     """Process a given network of stations"""
     try:
-        IEM = psycopg2.connect(database='iem', host='iemdb')
+        IEM = get_dbconn('iem')
         icursor = IEM.cursor()
         icursor2 = IEM.cursor()
     except Exception as exp:
@@ -77,16 +78,19 @@ def process(tv):
 
 
 def main():
+    """Go Main Go"""
     preload()
-    while (1):
+    while True:
         try:
             process('KCCI')
             process('KELO')
             process('KIMT')
-        except:
+        except Exception as _exp:
             v, i, o = sys.exc_info()
-            print "%s\n" % (sys.excepthook(v, i, o),)
+            print("%s\n" % (sys.excepthook(v, i, o),))
             sys.exit()
         time.sleep(60)
 
-main()
+
+if __name__ == '__main__':
+    main()

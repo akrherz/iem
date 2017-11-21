@@ -1,19 +1,19 @@
 """
  Application to save SNET data flow to the IEM Access database!
 """
-
+from __future__ import print_function
 from nwnserver import hubclient
 from twisted.internet import reactor
 from twisted.application import service, internet
 from twisted.enterprise import adbapi
 from twisted.internet.task import LoopingCall
 from twisted.python import log
+import re
+import datetime
 import sys
 import os
 sys.path.insert(0, os.getcwd())
 import secret
-import re
-import datetime
 import pyiem.nwnformat as nwnformat
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
@@ -117,7 +117,7 @@ def saveData(txn):
         val.updated = False
         updates += 1
         val.xsped = 0
-        del(iem)
+        del iem
 
     timer_end = datetime.datetime.now()
     print(("Time: %.2fs Updates: %s Skips: %s"
