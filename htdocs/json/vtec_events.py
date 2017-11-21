@@ -3,49 +3,76 @@
 import cgi
 import sys
 import json
+
 import memcache
+import psycopg2.extras
+from pyiem.util import get_dbconn
+
+ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def run(wfo, year):
+def run(wfo, year, phenomena, significance):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
-    import psycopg2
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
-    cursor = pgconn.cursor()
+    pgconn = get_dbconn('postgis')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     table = "warnings_%s" % (year,)
+    sbwtable = "sbw_%s" % (year, )
+    plimit = "phenomena is not null and significance is not null"
+    if phenomena is not None and significance is not None:
+        plimit = ("phenomena = '%s' and significance = '%s'"
+                  ) % (phenomena[:2], significance[0])
     cursor.execute("""
-    SELECT distinct phenomena, significance, eventid,
-    issue at time zone 'UTC' as utc_issue,
-    init_expire at time zone 'UTC' as utc_expire from
-    """+table+""" WHERE wfo = %s and eventid is not null and
-    phenomena is not null and significance is not null
-    ORDER by phenomena ASC, significance ASC, utc_issue ASC
-    """, (wfo,))
-    lastrow = [None]*5
+    WITH polyareas as (
+        SELECT phenomena, significance, eventid, round((ST_area(
+        ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
+        from """ + sbwtable + """ WHERE
+        wfo = %s and eventid is not null and
+        """ + plimit + """ and status = 'NEW'
+    ), ugcareas as (
+        SELECT
+        round(sum(ST_area(
+            ST_transform(u.geom,2163)) / 1000000.0)::numeric,0) as area,
+        string_agg(u.name || ' ['||u.state||']', ', ') as locations,
+        eventid, phenomena, significance,
+        min(issue) at time zone 'UTC' as utc_issue,
+        max(expire) at time zone 'UTC' as utc_expire,
+        min(product_issue) at time zone 'UTC' as utc_product_issue,
+        max(init_expire) at time zone 'UTC' as utc_init_expire,
+        max(hvtec_nwsli) as nwsli,
+        max(fcster) as fcster from
+        """+table+""" w JOIN ugcs u on (w.gid = u.gid)
+        WHERE w.wfo = %s and eventid is not null and
+        """ + plimit + """
+        GROUP by phenomena, significance, eventid)
+
+    SELECT u.*, coalesce(p.area, u.area) as myarea
+    from ugcareas u LEFT JOIN polyareas p on
+    (u.phenomena = p.phenomena and u.significance = p.significance
+     and u.eventid = p.eventid)
+        ORDER by u.phenomena ASC, u.significance ASC, u.utc_issue ASC
+    """, (wfo, wfo))
     res = {'wfo': wfo, 'year': year, 'events': []}
     for row in cursor:
-        if (row[0] == lastrow[0] and row[1] == lastrow[1] and
-                row[2] == lastrow[2] and
-                (row[3] == lastrow[3] or row[4] == lastrow[4])):
-            pass
-        else:
-            issue = None
-            expire = None
-            if row[3] is not None:
-                issue = row[3].strftime("%Y-%m-%dT%H:%M:%SZ")
-            if row[4] is not None:
-                expire = row[4].strftime("%Y-%m-%dT%H:%M:%SZ")
-            uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (year, wfo, row[0],
-                                                      row[1], row[2])
-            res['events'].append(dict(phenomena=row[0], significance=row[1],
-                                      eventid=row[2], issue=issue,
-                                      expire=expire, uri=uri))
-        lastrow = row
+        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (year, wfo, row['phenomena'],
+                                                  row['significance'],
+                                                  row['eventid'])
+        res['events'].append(
+            dict(phenomena=row['phenomena'],
+                 significance=row['significance'],
+                 eventid=row['eventid'],
+                 area=float(row['myarea']),
+                 locations=row['locations'],
+                 issue=row['utc_issue'].strftime(ISO9660),
+                 product_issue=row['utc_product_issue'].strftime(ISO9660),
+                 expire=row['utc_expire'].strftime(ISO9660),
+                 init_expire=row['utc_init_expire'].strftime(ISO9660),
+                 uri=uri))
 
     return json.dumps(res)
 
@@ -59,14 +86,20 @@ def main():
     if len(wfo) == 4:
         wfo = wfo[1:]
     year = int(form.getfirst("year", 2015))
+    phenomena = form.getfirst('phenomena')
+    significance = form.getfirst('significance')
     cb = form.getfirst("callback", None)
 
-    mckey = "/json/vtec_events/%s/%s" % (wfo, year)
+    mckey = "/json/vtec_events/%s/%s/%s/%s" % (wfo, year, phenomena,
+                                               significance)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = run(wfo, year)
+        res = run(wfo, year, phenomena, significance)
+        sys.stderr.write("Setting cache: %s\n" % (mckey, ))
         mc.set(mckey, res, 3600)
+    else:
+        sys.stderr.write("Using cache: %s\n" % (mckey, ))
 
     if cb is None:
         sys.stdout.write(res)

@@ -243,6 +243,52 @@
           )
       );
   
+
+  $services[] = Array(
+      "title" => "NWS VTEC Event Geometries",
+      "url" => "/geojson/vtec_event.py?wfo={wfo}&year={year}".
+      "&phenomena={phenomena}&etn={etn}&significance={significance}",
+      "desc" => "Produces GeoJSON for a given VTEC Event.",
+      "vars" => Array(
+          "wfo" => "3 or 4 character WFO identifier",
+          "year" => "YYYY year",
+          "etn" => "VTEC Event ID",
+          "phenomena" => "2 Character VTEC Phenomena Code",
+          "significance" => "1 Character VTEC Significance Code",
+          "sbw" => "1 or 0, flag to return Storm Based Polygon(1) or Counties",
+          "lsrs" => "1 or 0, flag to return local storm reports",
+          ),
+      "example" => Array(
+          "{wfo}" => "DMX",
+          "{year}" => "2015",
+          "{etn}" => "10",
+          "{significance}" => "W",
+          "{phenomena}" => "TO",
+          "{lsrs}" => '0',
+          "{sbw}" => '1',
+          )
+      );
+  
+  $services[] = Array(
+      "title" => "NWS VTEC Event Metadata",
+      "url" => "/json/vtec_event.py?wfo={wfo}&year={year}".
+        "&phenomena={phenomena}&etn={etn}&significance={significance}",
+      "desc" => "Produces metadata on a given VTEC Event.",
+      "vars" => Array(
+          "wfo" => "3 or 4 character WFO identifier",
+          "year" => "YYYY year",
+          "etn" => "VTEC Event ID",
+          "phenomena" => "2 Character VTEC Phenomena Code",
+          "significance" => "1 Character VTEC Significance Code",
+          ),
+      "example" => Array(
+          "{wfo}" => "DMX",
+          "{year}" => "2015",
+          "{etn}" => "10",
+          "{significance}" => "W",
+          "{phenomena}" => "TO",
+          )
+      );
   
   $services[] = Array(
   		"title" => "NWS VTEC Event Listing by WFO by Year",

@@ -5,6 +5,13 @@ require_once "../../include/vtec.php";
 require_once "../../include/myview.php";
 $conn = iemdb("postgis");
 
+$ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
+openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
+syslog(LOG_WARNING, "Deprecated ". $_SERVER["REQUEST_URI"] .
+    ' remote: '. $_SERVER["REMOTE_ADDR"] .
+    ' referer: '. $ref);
+closelog();
+
 $v = isset($_GET["vtec"]) ? substr($_GET["vtec"],0,25) : "2008-O-NEW-KJAX-TO-W-0048";
 $tokens = preg_split("/-/", $v);
 $year = $tokens[0];

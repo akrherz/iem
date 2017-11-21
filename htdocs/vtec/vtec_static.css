@@ -1,0 +1,16 @@
+.tab-pane {
+	width: 100%;
+}
+#map {
+	width: 100%;
+	height: 400px;
+}
+td.details-control {
+    text-align:center;
+    color:forestgreen;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    text-align:center; 
+    color:red;
+}

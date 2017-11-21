@@ -6,6 +6,13 @@ header("Content-type: application/json");
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'UTC'");
 
+$ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
+openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
+syslog(LOG_WARNING, "Deprecated ". $_SERVER["REQUEST_URI"] .
+    ' remote: '. $_SERVER["REMOTE_ADDR"] .
+    ' referer: '. $ref);
+closelog();
+
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
 if ($year < 1986 || $year > intval(gmdate("Y"))){
 	$ar = Array("error" => "Invalid year specified");
