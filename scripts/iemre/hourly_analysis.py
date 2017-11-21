@@ -139,7 +139,7 @@ def grid_hour(nc, ts):
 
     df = read_sql(sql, dbconn, params=params, index_col='station')
     if df.empty:
-        print(("%s has now entries, FAIL"
+        print(("%s has no entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d %H:%M"), ))
         return
     ures, vres = grid_wind(df, domain)
