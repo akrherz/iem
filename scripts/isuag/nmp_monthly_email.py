@@ -12,14 +12,13 @@ import datetime
 import smtplib
 from email.mime.text import MIMEText
 
-import psycopg2
 from pandas.io.sql import read_sql
-from pyiem.util import get_properties
+from pyiem.util import get_properties, get_dbconn
 
 
 def generate_report(start_date, end_date):
     """Generate the text report"""
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    pgconn = get_dbconn('isuag', user='nobody')
     days = (end_date - start_date).days + 1
     totalobs = days * 24 * 17
     df = read_sql("""
@@ -64,7 +63,7 @@ def main():
     msg.add_header('reply-to', 'akrherz@iastate.edu')
 
     # Send the email via our own SMTP server.
-    smtp = smtplib.SMTP('localhost')
+    smtp = smtplib.SMTP('mailhub.iastate.edu')
     smtp.sendmail(msg['From'], msg['To'], msg.as_string())
     smtp.quit()
 
