@@ -2,12 +2,14 @@
  Check how much METAR data we have
 """
 import sys
+
 import psycopg2
-IEM = psycopg2.connect(database='iem', host=sys.argv[1], user='nobody')
-icursor = IEM.cursor()
 
 
 def check():
+    """Do the check"""
+    pgconn = psycopg2.connect(database='iem', host=sys.argv[1], user='nobody')
+    icursor = pgconn.cursor()
     icursor.execute("""SELECT count(*) from current c JOIN stations s on
     (s.iemid = c.iemid)
     WHERE valid > now() - '75 minutes'::interval and network ~* 'ASOS'""")
@@ -15,7 +17,9 @@ def check():
 
     return row[0]
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main"""
     count = check()
     if count > 3000:
         print 'OK - %s count |count=%s;1000;5000;10000' % (count, count)
@@ -26,3 +30,7 @@ if __name__ == '__main__':
     else:
         print 'CRITICAL - %s count |count=%s;1000;5000;10000' % (count, count)
         sys.exit(2)
+
+
+if __name__ == '__main__':
+    main()
