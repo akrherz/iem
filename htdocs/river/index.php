@@ -56,8 +56,8 @@ WITH warns as (
     from warnings_{$thisyear} w JOIN hvtec_nwsli h
         on (w.hvtec_nwsli = h.nwsli) WHERE
     status NOT IN ('EXP','CAN') and phenomena = 'FL' and
-    significance = 'W' and  expire > now() $nwsli_limiter $state_limiter
-    $wfo_limiter
+    significance = 'W' and  expire > now() $nwsli_limiter $statelimiter
+    $wfolimiter
 ), names as (
     SELECT hvtec_nwsli, sumtxt(u.name || ', ') as counties
     from warns w, ugcs u WHERE w.gid = u.gid GROUP by hvtec_nwsli
