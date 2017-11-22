@@ -1,5 +1,5 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 71);
 include_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
@@ -25,7 +25,7 @@ $sevcol = Array(
 
 $nwsli_limiter = "";
 if (isset($_GET["dvn"])){
- $nwsli_limiter = "and r.nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 
+ $nwsli_limiter = "and hvtec_nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 
  'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 
  'JOSI2', 'MLII2','GENI2')";
  $content .= "<style>
@@ -36,46 +36,38 @@ body {
 </style>";
 }
 
+$thisyear = date("Y");
+$statelimiter = "";
+$wfolimiter = "";
 if (isset($_REQUEST["state"])){
- $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, 
- foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, 
- r.flood_text, r.forecast_text, sumtxt(c.name || ', ') as counties from hvtec_nwsli h, 
-   riverpro r, nws_ugc c, 
-  (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
-   status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
-   significance = 'W' and hvtec_nwsli IN (select nwsli from hvtec_nwsli WHERE state = $1 and
-   		 expire > now())) as foo
-   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter
-   and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
-   r.stage_text, r.flood_text, r.forecast_text");
- $rs = pg_execute($postgis, "SELECT", Array($state));
- $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
+    $statelimiter = sprintf(" and substr(ugc, 1, 2) = '%s' ", $state);
+    $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
 } else if (isset($_REQUEST["all"])){
- $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, 
- foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, 
- r.flood_text, r.forecast_text, sumtxt(c.name || ', ') as counties from hvtec_nwsli h, 
-   riverpro r, nws_ugc c, 
-  (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
-   status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
-   significance = 'W' and  expire > now()) as foo
-   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli 
-   and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
-   r.stage_text, r.flood_text, r.forecast_text");
- $rs = pg_execute($postgis, "SELECT", Array());
- $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
+    $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
 } else {
- $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, r.flood_text, r.forecast_text, 
-   sumtxt(c.name || ', ') as counties
-   from hvtec_nwsli h, riverpro r, nws_ugc c,
-  (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
-   status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
-   significance = 'W' and wfo = $1 and expire > now()) as foo
-   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter
-   and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
-   r.stage_text, r.flood_text, r.forecast_text");
- $rs = pg_execute($postgis, "SELECT", Array($wfo));
- $ptitle = "<h3>River Forecast Point Monitor by NWS WFO</h3>";
+    $wfolimiter = sprintf(" and wfo = '%s' ", $wfo);
+    $ptitle = "<h3>River Forecast Point Monitor by NWS WFO</h3>";
 }
+
+$sql = <<<EOM
+WITH warns as (
+    SELECT w.hvtec_nwsli, w.ugc, w.gid, w.eventid, w.phenomena, w.wfo,
+    h.name, h.river_name
+    from warnings_{$thisyear} w JOIN hvtec_nwsli h
+        on (w.hvtec_nwsli = h.nwsli) WHERE
+    status NOT IN ('EXP','CAN') and phenomena = 'FL' and
+    significance = 'W' and  expire > now() $nwsli_limiter $state_limiter
+    $wfo_limiter
+), names as (
+    SELECT hvtec_nwsli, sumtxt(u.name || ', ') as counties
+    from warns w, ugcs u WHERE w.gid = u.gid GROUP by hvtec_nwsli
+), agg as (
+    SELECT w.*, n.counties from warns w JOIN names n on (w.hvtec_nwsli = n.hvtec_nwsli)
+)
+SELECT r.*, a.* from riverpro r JOIN agg a on (r.nwsli = a.hvtec_nwsli)
+EOM;
+$rs = pg_query($postgis, $sql);
+
 
 
 $rivers = Array();
@@ -87,16 +79,19 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
         "W", $row["eventid"]);
 
 
-  @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s<br />%s</th><td><a href='%s'>%s</a></td></th><td>%s</td><td>%s</td><td>%s</td></tr>",$sevcol[$row["severity"]], $row["name"], 
-   $row["nwsli"], $uri, $row["counties"], $row["stage_text"], $row["flood_text"], 
-   $row["forecast_text"]);
+  @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s<br />".
+      "%s</th><td><a href='%s'>%s</a></td><td>%s</td>".
+      "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
+      $sevcol[$row["severity"]], $row["name"], 
+      $row["nwsli"], $uri, $row["counties"], $row["stage_text"],
+      $row["flood_text"], $row["forecast_text"], $row["impact_text"]);
 }
 $content .= $ptitle;
 $content .= <<<EOF
 <p>This page produces a summary listing for National Weather Service Flood 
 Forecast Points when the point is currently in a flood warning state.  The IEM
 processes the flood warning products and attempts to extract the important 
-details regarding flood state, severity, and forecasted stage.</p>
+details regarding flood state, severity, forecasted stage and impact.</p>
 <a href="?all">View All</a>
 <p><form method="GET" name="wfo">
 EOF;
@@ -127,16 +122,16 @@ asort($rvs);
 
 while (list($idx, $key) = each($rvs))
 {
-  $content .=  "<tr><th colspan='5' style='background: #eee; text-align: left;'>$key</th></tr>";
+  $content .=  "<tr><th colspan='6' style='background: #eee; text-align: left;'>$key</th></tr>";
   $content .=  $rivers[$key];
 
 }
 if (sizeof($rvs) == 0){
-	$content .= "<tr><td colspan='5'>No Entries Found</td></tr>";
+	$content .= "<tr><td colspan='6'>No Entries Found</td></tr>";
 }
 
 $content .=  "</table>";
 
 $t->content = $content;
-$t->render("single.phtml");
+$t->render("full.phtml");
 ?>

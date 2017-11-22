@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (25, now());
+INSERT into iem_schema_manager_version values (26, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -830,14 +830,22 @@ CREATE TABLE riverpro (
     stage_text text,
     flood_text text,
     forecast_text text,
-    severity character(1)
+    severity character(1),
+    impact_text text
 );
 
 grant select on riverpro to apache,nobody;
 
 CREATE UNIQUE INDEX riverpro_nwsli_idx ON riverpro USING btree (nwsli);
 
-CREATE RULE replace_riverpro AS ON INSERT TO riverpro WHERE (EXISTS (SELECT 1 FROM riverpro WHERE ((riverpro.nwsli)::text = (new.nwsli)::text))) DO INSTEAD UPDATE riverpro SET stage_text = new.stage_text, flood_text = new.flood_text, forecast_text = new.forecast_text, severity = new.severity WHERE ((riverpro.nwsli)::text = (new.nwsli)::text);
+CREATE RULE replace_riverpro
+ AS ON INSERT TO riverpro WHERE
+ (EXISTS (SELECT 1 FROM riverpro
+ WHERE ((riverpro.nwsli)::text = (new.nwsli)::text)))
+ DO INSTEAD UPDATE riverpro SET stage_text = new.stage_text,
+ flood_text = new.flood_text, forecast_text = new.forecast_text,
+ severity = new.severity, impact_text = new.impact_text
+ WHERE ((riverpro.nwsli)::text = (new.nwsli)::text);
 
 
 
