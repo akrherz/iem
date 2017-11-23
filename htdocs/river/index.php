@@ -39,12 +39,18 @@ body {
 $thisyear = date("Y");
 $statelimiter = "";
 $wfolimiter = "";
+$c1 = "";
+$c2 = "";
+$c3 = "";
 if (isset($_REQUEST["state"])){
+    $c2 = " well";
     $statelimiter = sprintf(" and substr(ugc, 1, 2) = '%s' ", $state);
     $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
 } else if (isset($_REQUEST["all"])){
+    $c3 = " well";
     $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
 } else {
+    $c1 = " well";
     $wfolimiter = sprintf(" and wfo = '%s' ", $wfo);
     $ptitle = "<h3>River Forecast Point Monitor by NWS WFO</h3>";
 }
@@ -87,24 +93,36 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
       $row["flood_text"], $row["forecast_text"], $row["impact_text"]);
 }
 $content .= $ptitle;
+$nselect = networkSelect("WFO", $wfo, Array(), 'wfo');
+$sselect = stateSelect($state);
 $content .= <<<EOF
 <p>This page produces a summary listing for National Weather Service Flood 
 Forecast Points when the point is currently in a flood warning state.  The IEM
 processes the flood warning products and attempts to extract the important 
 details regarding flood state, severity, forecasted stage and impact.</p>
-<a href="?all">View All</a>
-<p><form method="GET" name="wfo">
-EOF;
-$content .= 'Select by NWS Forecast Office:'. networkSelect("WFO", $wfo, Array(), 'wfo');
-$content .= "<input type='submit' value='Select by WFO'>";
-$content .= "</form>";
-$sselect = stateSelect($state);
-$content .= <<<EOF
-<p><form method='GET' name='state'>
-Select by State: 
-{$sselect}
-<input type='submit' value="Select by State">
+
+<h3>Three Ways to View Forecasts</h3>
+<div class="row">
+  <div class="col-md-4{$c1}">
+    <h4>1. By NWS Forecast Office</h4>
+<form method="GET" name="wfo">
+{$nselect} <input type="submit" value="Select by WFO">
 </form>
+  </div>
+  <div class="col-md-4{$c2}">
+    <h4>2. By State</h4>
+<form method='GET' name='state'>
+{$sselect} <input type="submit" value="Select by State">
+</form>
+  </div>
+  <div class="col-md-4{$c3}">
+    <h4>3. Show all Available</h4>
+    <a href="?all" class="btn btn-primary"><i class="fa fa-globe"></i> View All</a>
+
+  </div>
+</div>
+
+<p>
 
 <table class="table table-condensed table-bordered">
 <tr>
