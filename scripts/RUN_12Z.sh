@@ -10,12 +10,6 @@ cd 12z
 python awos_rtp.py
 python asos_low.py
 
-cd ../iemre
-python merge_mrms_q3.py	$(date --date '1 day ago' +'%Y %m %d')
-
-cd ../current
-python q3_today_total.py $(date --date '1 day ago' +'%Y %m %d')
-
 cd ../hads
 python compute_hads_pday.py $(date -u --date '1 days ago' +'%Y %m %d')
 

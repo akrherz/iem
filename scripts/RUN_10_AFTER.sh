@@ -17,6 +17,14 @@ else
 fi
 python merge_ifc.py
 
+if [ $HH -eq "12" ]
+then
+	python merge_mrms_q3.py	$(date --date '1 day ago' +'%Y %m %d')
+	cd ../current
+	python q3_today_total.py $(date --date '1 day ago' +'%Y %m %d')
+fi
+
+
 if [ $LHH -eq "05" ]
 then
 	cd ../coop
