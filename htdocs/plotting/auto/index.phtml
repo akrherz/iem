@@ -17,13 +17,14 @@ $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
 $t->headextra = <<<EOF
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
- <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css"/ >
+ <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.6.3/jquery-ui-timepicker-addon.min.css"/ >
  <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-  <style>
+<style>
     .select2-results .select2-disabled,  .select2-results__option[aria-disabled=true] { 
     display: none;
     }
-  </style>
+.ui-datepicker { width: 17em; padding: .2em .2em 0; z-index: 9999 !important; }
+</style>
 EOF;
 
 
@@ -266,13 +267,16 @@ EOF;
 		}
 		elseif ($v->type == 'datetime'){
 			$dpname = "timepicker_". $v->name;
+			$maxdate = isset($v->max) ? $v->max: Date("Y/m/d Hi", time() + (86000 * 2.));
 			$jsextra .= <<<EOF
 $( "#{$dpname}" ).datetimepicker({
+    controlType: 'select',
 	changeMonth: true,
 	changeYear: true,
 	dateFormat: "yy/mm/dd",
-	timeFormat: "HHmm", 
-	minDate    : new Date("{$v->min}")});
+	timeFormat: "HHmm",
+    maxDateTime: $.datepicker.parseDateTime('yy/mm/dd', 'HHmm', "{$maxdate}"),
+	minDateTime: $.datepicker.parseDateTime('yy/mm/dd', 'HHmm', "{$v->min}")});
 $("#{$dpname}").datetimepicker('setDate', $.datepicker.parseDateTime('yy/mm/dd', 'HHmm', '{$value}'));
 			
 EOF;
@@ -495,8 +499,7 @@ $dataextra
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js"></script>
-<script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
+<script src="/vendor/jquery-ui-timepicker/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 {$extrascripts}
 <script>
