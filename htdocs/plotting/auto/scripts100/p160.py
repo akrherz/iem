@@ -30,7 +30,7 @@ def get_description():
              label='Enter 5 Char NWSLI Station Code (sorry):'),
         dict(type='datetime', name='dt', default=utc.strftime("%Y/%m/%d %H%M"),
              label='Time to center plot at (UTC Time Zone):',
-             min="2014/01/01 0000"),
+             min="2013/01/01 0000"),
         dict(type='select', name='var', options=MDICT,
              label='Which Variable to Plot:', default='primary'),
     ]
