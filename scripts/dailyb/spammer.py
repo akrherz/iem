@@ -6,7 +6,6 @@ import subprocess
 import smtplib
 import os
 import datetime
-import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -175,17 +174,14 @@ def news():
 %(body)s
 
 """
-    htmlfmt = """
-<hr />
-<br /><strong>Title:</strong>
-<a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=%(id)s">%(title)s</a>
-<br /><strong>Date:</strong> %(nicedate)s
-<br /><strong>Author:</strong> %(author)s
-<br /><a href="%(url)s">link</a>
-
-<p>%(body)s
-
-"""
+    htmlfmt = ('<hr />\n'
+               '<br /><strong>Title:</strong>\n'
+               '<a href="https://mesonet.agron.iastate.edu/'
+               'onsite/news.phtml?id=%(id)s">%(title)s</a>\n'
+               '<br /><strong>Date:</strong> %(nicedate)s\n'
+               '<br /><strong>Author:</strong> %(author)s\n'
+               '<br /><a href="%(url)s">link</a>\n\n'
+               '<p>%(body)s\n')
     txt = "> News\n"
     html = "<h3>News</h3>"
 
@@ -242,14 +238,7 @@ def main():
     msg.attach(part1)
     msg.attach(part2)
 
-    try:
-        smtp = smtplib.SMTP('mailhub.iastate.edu')
-    except Exception as exp:
-        print("spammer.py got exception to mailhub; %s" % (exp, ))
-        time.sleep(57)
-        smtp = smtplib.SMTP('mailhub.iastate.edu')
-    smtp.sendmail(msg['From'], [msg['To']], msg.as_string())
-    smtp.quit()
+    exponential_backoff(send_email, msg)
 
     # Send forth LDM
     fp = open("tmp.txt", 'w')
@@ -263,6 +252,13 @@ def main():
     subprocess.call(('/home/ldm/bin/pqinsert -p "plot c 000000000000 '
                      'iemdb.html bogus txt" tmp.txt'), shell=True)
     os.unlink("tmp.txt")
+
+
+def send_email(msg):
+    """Send emails"""
+    smtp = smtplib.SMTP('mailhub.iastate.edu')
+    smtp.sendmail(msg['From'], [msg['To']], msg.as_string())
+    smtp.quit()
 
 
 def tests():
