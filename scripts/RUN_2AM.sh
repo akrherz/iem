@@ -32,6 +32,11 @@ fi
 
 cd ../dl
 python download_cfs.py &
+if [ $DD -eq "09" ]
+	then
+		 python download_narr.py $(date --date '13 days ago' +'%y %m') &
+fi
+
 
 cd ../cache
 python warn_cache.py &
