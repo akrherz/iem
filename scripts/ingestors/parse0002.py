@@ -1,40 +1,49 @@
 """Quick and Dirty to get the ISUMET station data into the DB"""
+from __future__ import print_function
 import datetime
 import re
 import os
 import sys
+
 import pytz
 from pyiem.datatypes import speed
 from pyiem.observation import Observation
-import psycopg2
-iemaccess = psycopg2.connect(database='iem', host='iemdb')
-cursor = iemaccess.cursor()
-valid = datetime.datetime.utcnow()
-valid = valid.replace(tzinfo=pytz.timezone("UTC"))
-valid = valid.astimezone(pytz.timezone("America/Chicago"))
-fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
-
-if not os.path.isfile(fn):
-    sys.exit(0)
+from pyiem.util import get_dbconn
 
 
-lines = open(fn, "r").readlines()
-lastLine = lines[-1]
-tokens = re.split("[\s+]+", lastLine)
+def main():
+    """Go Main Go"""
+    iemaccess = get_dbconn('iem')
+    cursor = iemaccess.cursor()
+    valid = datetime.datetime.utcnow()
+    valid = valid.replace(tzinfo=pytz.utc)
+    valid = valid.astimezone(pytz.timezone("America/Chicago"))
+    fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
 
-tparts = re.split(":", tokens[4])
-valid = valid.replace(hour=int(tparts[0]),
-                      minute=int(tparts[1]), second=int(tparts[2]))
+    if not os.path.isfile(fn):
+        sys.exit(0)
 
-iem = Observation("OT0002", "OT", valid)
+    lines = open(fn, "r").readlines()
+    lastline = lines[-1]
+    tokens = re.split(r"[\s+]+", lastline)
 
-sknt = speed(float(tokens[8]), 'MPH').value('KT')
+    tparts = re.split(":", tokens[4])
+    valid = valid.replace(hour=int(tparts[0]),
+                          minute=int(tparts[1]), second=int(tparts[2]))
 
-iem.data['sknt'] = sknt
-iem.data['drct'] = tokens[9]
-iem.data['tmpf'] = tokens[7]
+    iem = Observation("OT0002", "OT", valid)
 
-iem.save(cursor)
+    sknt = speed(float(tokens[8]), 'MPH').value('KT')
 
-cursor.close()
-iemaccess.commit()
+    iem.data['sknt'] = sknt
+    iem.data['drct'] = tokens[9]
+    iem.data['tmpf'] = tokens[7]
+
+    iem.save(cursor)
+
+    cursor.close()
+    iemaccess.commit()
+
+
+if __name__ == '__main__':
+    main()

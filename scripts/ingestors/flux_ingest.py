@@ -1,31 +1,23 @@
 """
 Ingest files provided by NLAE containing flux information
 """
-import pg
+from __future__ import print_function
 import os
-import mx.DateTime
 import traceback
-import psycopg2
-pgconn = psycopg2.connect(database='other', host='iemdb')
-cursor = pgconn.cursor()
-other = pg.DB('other', 'iemdb')
 
-# Figure out max valid times
-maxts = {}
-cursor.execute("""SELECT station, max(valid) from flux_data
-    WHERE valid > (now() - '1 year'::interval) GROUP by station""")
-for row in cursor:
-    maxts[row[0]] = row[1]
+import mx.DateTime
+import pg
+from pyiem.util import get_dbconn
 
 DIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata/"
-fp = {'Flux10_AF.dat': 'NSTL10',
+FP = {'Flux10_AF.dat': 'NSTL10',
       'Anc10_AF.dat': 'NSTL10',
       'Flux11_AF.dat': 'NSTL11',
       'Anc11_AF.dat': 'NSTL11',
       '30ft.dat': 'NSTL30FT',
       'NSP_Flux.dat': 'NSTLNSPR'}
 
-dbcols = ['fc_wpl',
+DBCOLS = ['fc_wpl',
           'le_wpl',
           'hs',
           'tau',
@@ -97,70 +89,92 @@ dbcols = ['fc_wpl',
           'terrestrial_lw_avg',
           'wfv1_avg']
 
-convert = {'Incoming_SW_Avg': 'incoming_sw',
+CONVERT = {'Incoming_SW_Avg': 'incoming_sw',
            'Outgoing_SW_Avg': 'outgoing_sw',
            'Incoming_LW_TCor_Avg': 'incoming_lw_tcor',
            'Terrest_LW_TCor_Avg': 'terrest_lw_tcor'}
 
 
 def c(v):
-    if (v == "NAN" or v == "-INF" or v == "INF"):
+    """convert"""
+    if v == "NAN" or v == "-INF" or v == "INF":
         return None
     return v
 
-data = {'NSTL10': {},
-        'NSTL11': {},
-        'NSTL30FT': {},
-        'NSTLNSPR': {},
-        }
 
-for fn in fp.keys():
-    station = fp[fn]
-    myfn = "%s%s" % (DIR, fn)
-    if not os.path.isfile(myfn):
-        print("flux_ingest.py missing file: %s" % (myfn,))
-        continue
-    lines = open(myfn, 'r').readlines()
-    if len(lines) < 2:
-        print 'flux_ingest.py file: %s has %s lines?' % (fn, len(lines))
-        continue
-    keys = lines[1].replace('"', '').replace("\r\n", '').split(",")
-    for linenum, obline in enumerate(lines[3:]):
-        tokens = obline.replace('"', '').split(",")
-        if len(tokens) != len(keys):
-            print(('%s line: %s has %s tokens, header has %s'
-                   ) % (fn, linenum, len(tokens), len(keys)))
+def main():
+    """Go Main Go"""
+    pgconn = get_dbconn('other')
+    cursor = pgconn.cursor()
+    other = pg.DB('other', 'iemdb')
+
+    # Figure out max valid times
+    maxts = {}
+    cursor.execute("""SELECT station, max(valid) from flux_data
+        WHERE valid > (now() - '1 year'::interval) GROUP by station""")
+    for row in cursor:
+        maxts[row[0]] = row[1]
+
+    data = {'NSTL10': {},
+            'NSTL11': {},
+            'NSTL30FT': {},
+            'NSTLNSPR': {},
+            }
+
+    for fn in FP:
+        station = FP[fn]
+        myfn = "%s%s" % (DIR, fn)
+        if not os.path.isfile(myfn):
+            print("flux_ingest.py missing file: %s" % (myfn,))
             continue
-        if tokens[0] == '':
+        lines = open(myfn, 'r').readlines()
+        if len(lines) < 2:
+            print(('flux_ingest.py file: %s has %s lines?'
+                   ) % (fn, len(lines)))
             continue
-        try:
-            ts = mx.DateTime.strptime(tokens[0][:16], '%Y-%m-%d %H:%M')
-        except:
-            print '%s line: %s has invalid time %s' % (fn, linenum, tokens[0])
-            continue
-        if ts < maxts.get(station, mx.DateTime.DateTime(2011, 1, 1)):
-            continue
-        if ts not in data[station]:
-            data[station][ts] = {'valid': tokens[0][:16], 'station': station}
-        for i in range(len(tokens)):
-            key = convert.get(keys[i], keys[i]).lower()
-            if key in ['record', 'timestamp']:
+        keys = lines[1].replace('"', '').replace("\r\n", '').split(",")
+        for linenum, obline in enumerate(lines[3:]):
+            tokens = obline.replace('"', '').split(",")
+            if len(tokens) != len(keys):
+                print(('%s line: %s has %s tokens, header has %s'
+                       ) % (fn, linenum, len(tokens), len(keys)))
                 continue
-            if key not in dbcols:
-                # print 'Missing', key
+            if tokens[0] == '':
                 continue
-            data[station][ts][key] = c(tokens[i])
+            try:
+                ts = mx.DateTime.strptime(tokens[0][:16], '%Y-%m-%d %H:%M')
+            except Exception as _exp:
+                print(('%s line: %s has invalid time %s'
+                       ) % (fn, linenum, tokens[0]))
+                continue
+            if ts < maxts.get(station, mx.DateTime.DateTime(2011, 1, 1)):
+                continue
+            if ts not in data[station]:
+                data[station][ts] = {'valid': tokens[0][:16],
+                                     'station': station}
+            for i in range(len(tokens)):
+                key = CONVERT.get(keys[i], keys[i]).lower()
+                if key in ['record', 'timestamp']:
+                    continue
+                if key not in DBCOLS:
+                    # print 'Missing', key
+                    continue
+                data[station][ts][key] = c(tokens[i])
 
-cnt = 0
-for station in data.keys():
-    for ts in data[station].keys():
-        gts = ts.gmtime()
-        try:
-            other.insert("flux%s" % (gts.year,), data[station][ts])
-            cnt += 1
-        except:
-            print station, ts, data[station][ts].keys()
-            print traceback.print_exc()
+    cnt = 0
+    for station in data.keys():
+        for ts in data[station].keys():
+            gts = ts.gmtime()
+            try:
+                other.insert("flux%s" % (gts.year,), data[station][ts])
+                cnt += 1
+            except Exception as _exp:
+                print("%s %s %s" % (station, ts, data[station][ts].keys()))
+                print(traceback.print_exc())
 
-if cnt == 0:
-    print "NLAE flux inget found no records"
+    if cnt == 0:
+        print("NLAE flux inget found no records")
+
+
+if __name__ == '__main__':
+    main()

@@ -7,12 +7,12 @@ import sys
 import datetime
 
 import pytz
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def zero_hourly(station, sts, ets):
     """Zero out the hourly data"""
-    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor()
     for table in ['sm_hourly', 'sm_15minute']:
         cursor.execute("""
@@ -27,7 +27,7 @@ def zero_hourly(station, sts, ets):
 
 def zero_daily(station, date):
     """Zero out the daily data"""
-    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor()
     cursor.execute("""
         UPDATE sm_daily
@@ -41,7 +41,7 @@ def zero_daily(station, date):
 
 def zero_iem(station, date):
     """Zero out the hourly data"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor()
     cursor.execute("""
         UPDATE summary s
@@ -67,6 +67,7 @@ def main(argv):
     zero_hourly(station, sts, ets)
     zero_daily(station, date)
     zero_iem(station, date)
+
 
 if __name__ == '__main__':
     main(sys.argv)

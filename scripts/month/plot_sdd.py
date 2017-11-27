@@ -1,40 +1,48 @@
-# Generate a plot of SDD
+"""Generate a plot of SDD"""
 import sys
+import datetime
+
+from pyiem.util import get_dbconn
 from pyiem.plot import MapPlot
-import mx.DateTime
-import psycopg2
 from pyiem.network import Table as NetworkTable
 
-now = mx.DateTime.now()
 
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-ccursor = COOP.cursor()
+def main():
+    """Go Main Go"""
+    now = datetime.datetime.now()
 
-nt = NetworkTable("IACLIMATE")
+    pgconn = get_dbconn('coop', user='nobody')
+    ccursor = pgconn.cursor()
 
-# Compute normal from the climate database
-sql = """SELECT station,
-   sum(sdd86(high, low)) as sdd
-   from alldata_ia WHERE year = %s and month = %s
-   GROUP by station""" % (now.year, now.month)
+    nt = NetworkTable("IACLIMATE")
 
-lats = []
-lons = []
-sdd86 = []
-valmask = []
-ccursor.execute(sql)
-for row in ccursor:
-    lats.append(nt.sts[row[0]]['lat'])
-    lons.append(nt.sts[row[0]]['lon'])
-    sdd86.append(float(row[1]))
-    valmask.append(True)
+    # Compute normal from the climate database
+    sql = """SELECT station,
+       sum(sdd86(high, low)) as sdd
+       from alldata_ia WHERE year = %s and month = %s
+       GROUP by station""" % (now.year, now.month)
 
-if len(sdd86) < 5 or max(sdd86) == 0:
-    sys.exit()
+    lats = []
+    lons = []
+    sdd86 = []
+    valmask = []
+    ccursor.execute(sql)
+    for row in ccursor:
+        lats.append(nt.sts[row[0]]['lat'])
+        lons.append(nt.sts[row[0]]['lon'])
+        sdd86.append(float(row[1]))
+        valmask.append(True)
 
-m = MapPlot(axisbg='white',
-            title="Iowa %s SDD Accumulation" % (now.strftime("%B %Y"), ))
-m.contourf(lons, lats, sdd86, range(int(min(sdd86)-1), int(max(sdd86)+1)))
-pqstr = "plot c 000000000000 summary/sdd_mon.png bogus png"
-m.postprocess(view=False, pqstr=pqstr)
-m.close()
+    if len(sdd86) < 5 or max(sdd86) == 0:
+        sys.exit()
+
+    mp = MapPlot(axisbg='white',
+                 title="Iowa %s SDD Accumulation" % (now.strftime("%B %Y"), ))
+    mp.contourf(lons, lats, sdd86, range(int(min(sdd86)-1), int(max(sdd86)+1)))
+    pqstr = "plot c 000000000000 summary/sdd_mon.png bogus png"
+    mp.postprocess(view=False, pqstr=pqstr)
+    mp.close()
+
+
+if __name__ == '__main__':
+    main()

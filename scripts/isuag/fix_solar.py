@@ -5,18 +5,18 @@ from __future__ import print_function
 import datetime
 import json
 
-import psycopg2
 import requests
 from pyiem.network import Table as NetworkTable
-ISUAG = psycopg2.connect(database='isuag', host='iemdb')
-cursor = ISUAG.cursor()
-cursor2 = ISUAG.cursor()
-
-nt = NetworkTable("ISUSM")
+from pyiem.util import get_dbconn
 
 
 def main():
     """ Go main go """
+    pgconn = get_dbconn('isuag')
+    cursor = pgconn.cursor()
+    cursor2 = pgconn.cursor()
+
+    nt = NetworkTable("ISUSM")
     cursor.execute("""
      SELECT station, valid from sm_daily where (slrmj_tot_qc is null or
      slrmj_tot_qc = 0) and valid > '2015-04-14' ORDER by valid ASC
@@ -48,7 +48,8 @@ def main():
         WHERE station = %s and valid = %s""", (row2[0], station, row[1]))
 
     cursor2.close()
-    ISUAG.commit()
+    pgconn.commit()
+
 
 if __name__ == '__main__':
     main()

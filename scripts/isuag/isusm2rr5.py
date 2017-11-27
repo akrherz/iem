@@ -3,14 +3,15 @@
 Run from RUN_20_AFTER.sh
 
 """
-from pyiem.tracker import loadqc
 import subprocess
 import datetime
 import os
-import psycopg2
-import numpy as np
 import unittest
 import tempfile
+
+import numpy as np
+from pyiem.util import get_dbconn
+from pyiem.tracker import loadqc
 
 
 def mt(prefix, tmpf, depth, q):
@@ -34,13 +35,15 @@ def generate_rr5():
             ": File generated %s UTC\n"
             ) % (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),)
 
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
-    cursor.execute("""SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
-    c2smv, c3smv, c4smv, phour
-    from current c JOIN stations t
-    on (t.iemid = c.iemid) WHERE t.network = 'ISUSM' and
-    valid > (now() - '90 minutes'::interval)""")
+    cursor.execute("""
+        SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
+        c2smv, c3smv, c4smv, phour
+        from current c JOIN stations t
+        on (t.iemid = c.iemid) WHERE t.network = 'ISUSM' and
+        valid > (now() - '90 minutes'::interval)
+    """)
     for row in cursor:
         q = qcdict.get(row[0], dict())
         if 'tmpf' in q or row[2] is None:
@@ -76,15 +79,16 @@ def main():
                      ) % (tmpfn,), shell=True)
     os.unlink(tmpfn)
 
+
 if __name__ == '__main__':
     main()
 
 
-# Test out our functions
 class MyTest(unittest.TestCase):
+    """Test out our functions"""
 
     def test_mt(self):
         """Conversion of values to SHEF encoded values"""
-        self.assertEquals(mt(4, 40, {}), "/TV 40.004")
-        self.assertEquals(mt(-4, 40, {}), "/TV -40.004")
-        self.assertEquals(mt(104, 40, {}), "/TV 40.104")
+        self.assertEquals(mt('TV', 4, 40, dict()), "/TV 40.004")
+        self.assertEquals(mt('TV', -4, 40, dict()), "/TV -40.004")
+        self.assertEquals(mt('TV', 104, 40, dict()), "/TV 40.104")

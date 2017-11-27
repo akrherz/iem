@@ -14,17 +14,17 @@ import json
 import sys
 
 import pytz
-import psycopg2
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance
+from pyiem.util import get_dbconn
 
 
 def print_debugging(station):
     """Add some more details to the output messages to help with ticket res"""
-    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor()
     cursor.execute("""
     SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4 from sm_daily
@@ -71,7 +71,7 @@ def update_precip(date, station, hdf):
 
     newpday = distance(ldf['precip_in'].sum(), 'IN')
     # update iemaccess
-    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('iem')
     cursor = pgconn.cursor()
     cursor.execute("""
     UPDATE summary s
@@ -83,7 +83,7 @@ def update_precip(date, station, hdf):
     cursor.close()
     pgconn.commit()
     # update isusm
-    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor()
     # daily
     cursor.execute("""
@@ -114,7 +114,7 @@ def update_precip(date, station, hdf):
 def main(argv):
     """ Go main go """
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    pgconn = psycopg2.connect(database='isuag', host='iemdb')
+    pgconn = get_dbconn('isuag')
     nt = NetworkTable("ISUSM")
 
     # Get our obs
