@@ -21,8 +21,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.datatypes import temperature, distance
 from pyiem.meteorology import gdd
-from pyiem.util import get_properties
-import psycopg2
+from pyiem.util import get_properties, get_dbconn
 
 XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
         'cobs': {'isusm': None, 'station': 'OT0012', 'climodat': 'IA0200'},
@@ -134,7 +133,7 @@ def qc(df):
 
 def load_baseline(location):
     """return a dataframe of this location's data"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop', user='nobody')
     df = read_sql("""
         SELECT *, extract(doy from valid) as doy,
         extract(year from valid) as year
@@ -160,7 +159,7 @@ def load_baseline(location):
 
 def replace_forecast(df, location):
     """Replace dataframe data with forecast for this location"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop', user='nobody')
     cursor = pgconn.cursor()
     today = datetime.date.today()
     nextjan1 = datetime.date(today.year + 1, 1, 1)
@@ -196,7 +195,7 @@ def replace_forecast(df, location):
 
 def replace_cfs(df, location):
     """Replace the CFS data for this year!"""
-    pgconn = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+    pgconn = get_dbconn('coop', user='nobody')
     cursor = pgconn.cursor()
     coop = XREF[location]['climodat']
     today = datetime.date.today() + datetime.timedelta(days=3)
@@ -208,6 +207,9 @@ def replace_cfs(df, location):
         and day <= %s ORDER by day ASC
     """, (coop, today, dec31))
     rcols = ['maxt', 'mint', 'rain', 'radn']
+    if cursor.rowcount == 0:
+        print("  replace_cfs found zero rows!")
+        return
     for row in cursor:
         maxt = temperature(row[1], 'F').value('C')
         mint = temperature(row[2], 'F').value('C')
@@ -233,7 +235,7 @@ def replace_obs_iem(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
     station = XREF[location]['station']
     today = datetime.date.today()
@@ -281,7 +283,7 @@ def replace_obs(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    pgconn = get_dbconn('isuag', user='nobody')
     cursor = pgconn.cursor()
     isusm = XREF[location]['isusm']
     today = datetime.date.today()
