@@ -17,12 +17,14 @@ SWGDNCLR    surface incoming shortwave flux assuming clear sky
 NOTE: we need to have a ~/.netrc file to make this script happy.
 
 """
+from __future__ import print_function
 import datetime
 import os
 import sys
-from pyiem.util import get_properties
 import logging
 import subprocess
+
+from pyiem.util import get_properties
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -70,15 +72,16 @@ def do_month(sts):
         now += interval
 
 
-def main():
+def main(argv):
     """ Run for last month month """
     now = datetime.datetime.now()
-    if len(sys.argv) == 3:
-        now = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+    if len(argv) == 3:
+        now = datetime.datetime(int(argv[1]), int(argv[2]), 1)
     else:
         now = now - datetime.timedelta(days=35)
         now = now.replace(day=1)
     do_month(now)
 
+
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

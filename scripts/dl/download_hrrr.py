@@ -5,6 +5,7 @@
 Run at 40 AFTER for the previous hour
 
 """
+from __future__ import print_function
 import urllib2
 import sys
 import datetime
@@ -84,7 +85,7 @@ def fetch(valid):
         while attempt < 10:
             try:
                 f = urllib2.urlopen(req, timeout=30)
-            except:
+            except Exception as _exp:
                 time.sleep(10)
                 attempt += 1
                 continue

@@ -7,6 +7,7 @@ tmin
 prate
 dswsfc
 """
+from __future__ import print_function
 import datetime
 import sys
 import os
@@ -29,9 +30,9 @@ def dl(now, varname):
         print('download_cfs.py: dl %s failed' % (uri,))
         return
     tmpfn = "/tmp/%s.cfs.grib" % (varname, )
-    o = open(tmpfn, 'wb')
-    o.write(response.content)
-    o.close()
+    fh = open(tmpfn, 'wb')
+    fh.write(response.content)
+    fh.close()
     # Check out this file to see how much data we actually have, it had
     # better be a big number
     grb = pygrib.open(tmpfn)
@@ -54,6 +55,7 @@ def main(argv):
     now = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     now = now.replace(hour=12, minute=0, second=0, microsecond=0)
     [dl(now, varname) for varname in ['tmax', 'tmin', 'prate', 'dswsfc']]
+
 
 if __name__ == '__main__':
     main(sys.argv)

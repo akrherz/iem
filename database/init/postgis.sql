@@ -2043,7 +2043,8 @@ CREATE TABLE watches_current (
     num smallint
 );
 select addgeometrycolumn('','watches_current','geom',4326,'MULTIPOLYGON',2);
-grant select on watches to apache,nobody;
+GRANT ALL on watches_current to mesonet,ldm;
+grant select on watches_current to apache,nobody;
 
 create table lsrs_2015( 
   CONSTRAINT __lsrs_2015_check 
