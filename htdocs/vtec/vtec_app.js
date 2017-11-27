@@ -6,12 +6,14 @@ var olmap;
 var productVectorCountyLayer;
 var productVectorPolygonLayer;
 var sbwIntersectionLayer;
+var lsrLayer;
 var radarTMSLayer;
 var radartimes = [];
 var eventTable;
 var ugcTable;
 var lsrTable;
 var sbwLsrTable;
+var element;
 
 Number.prototype.padLeft = function (n,str){
     return Array(n-String(this).length+1).join(str||'0')+this;
@@ -26,6 +28,51 @@ var sbwLookup = {
         "FL": 'green',
         "SV": 'yellow'
        };
+
+var lsrLookup = {
+ "0": "/lsr/icons/tropicalstorm.gif",
+ "1": "/lsr/icons/flood.png",
+ "2": "/lsr/icons/other.png",
+ "3": "/lsr/icons/other.png",
+ "4": "/lsr/icons/other.png",
+ "5": "/lsr/icons/ice.png",
+ "6": "/lsr/icons/cold.png",
+ "7": "/lsr/icons/cold.png",
+ "8": "/lsr/icons/fire.png",
+ "9": "/lsr/icons/other.png",
+ "a": "/lsr/icons/other.png",
+ "A": "/lsr/icons/wind.png",
+ "B": "/lsr/icons/downburst.png",
+ "C": "/lsr/icons/funnelcloud.png",
+ "D": "/lsr/icons/winddamage.png",
+ "E": "/lsr/icons/flood.png",
+ "F": "/lsr/icons/flood.png",
+ "v": "/lsr/icons/flood.png",
+ "G": "/lsr/icons/wind.png",
+ "H": "/lsr/icons/hail.png",
+ "I": "/lsr/icons/hot.png",
+ "J": "/lsr/icons/fog.png",
+ "K": "/lsr/icons/lightning.gif",
+ "L": "/lsr/icons/lightning.gif",
+ "M": "/lsr/icons/wind.png",
+ "N": "/lsr/icons/wind.png",
+ "O": "/lsr/icons/wind.png",
+ "P": "/lsr/icons/other.png",
+ "Q": "/lsr/icons/tropicalstorm.gif",
+ "R": "http://www.wrh.noaa.gov/sgx/data/kml/precip_icons/${magnitude}.png",
+ "s": "/lsr/icons/sleet.png",
+ "S": "http://www.wrh.noaa.gov/sgx/data/kml/snow_icons/${magnitude}.png",
+ "T": "/lsr/icons/tornado.png",
+ "U": "/lsr/icons/fire.png",
+ "V": "/lsr/icons/avalanche.gif",
+ "W": "/lsr/icons/waterspout.png",
+ "X": "/lsr/icons/funnelcloud.png",
+ "Z": "/lsr/icons/blizzard.png"
+ };
+
+var lsrStyle = new ol.style.Style({
+	image: new ol.style.Icon({src: lsrLookup['9']})
+});
 
 var sbwStyle = [new ol.style.Style({
 	stroke: new ol.style.Stroke({
@@ -163,6 +210,7 @@ function getRADARSource(){
 
 
 function buildMap(){
+	element = document.getElementById('popup');
 	// Build up the mapping
 	radarTMSLayer = new ol.layer.Tile({
         title: 'NEXRAD Base Reflectivity',
@@ -203,6 +251,24 @@ function buildMap(){
 		})
 	});
 
+	lsrLayer = new ol.layer.Vector({
+		title: 'Local Storm Reports',
+		style: function(feature, resolution){
+			var url = lsrLookup[feature.get('type')];
+			if (url){
+				url = url.replace("${magnitude}", feature.get('magnitude'));
+				var icon = new ol.style.Icon({
+					src: url
+				});
+				lsrStyle.setImage(icon);
+			}
+			return lsrStyle;
+		},
+		source: new ol.source.Vector({
+			format: new ol.format.GeoJSON()
+		})
+	});
+	
 	olmap = new ol.Map({
 		target: 'map',
 		view: new ol.View({
@@ -219,14 +285,60 @@ function buildMap(){
 			make_iem_tms('US States', 's-900913', true, ''),
 			sbwIntersectionLayer,
 			productVectorCountyLayer,
-			productVectorPolygonLayer]
+			productVectorPolygonLayer,
+			lsrLayer]
 	});
-    var layerSwitcher = new ol.control.LayerSwitcher();
+    var popup = new ol.Overlay({
+        element: element,
+        positioning: 'bottom-center',
+        stopEvent: false,
+        offset: [0, -5]
+      });
+    olmap.addOverlay(popup);
+	
+	var layerSwitcher = new ol.control.LayerSwitcher();
     olmap.addControl(layerSwitcher);
     
     olmap.on('moveend', function(){
     	// Someday, we will hashlink this too
     });
+    // display popup on click
+    // TODO support mobile
+    olmap.on('click', function(evt) {
+      var feature = olmap.forEachFeatureAtPixel(evt.pixel,
+          function(feature) {
+            return feature;
+          });
+      if (feature) {
+    	  if (feature.get('magnitude') === undefined) return;
+        var coordinates = feature.getGeometry().getCoordinates();
+        popup.setPosition(coordinates);
+        $(element).popover({
+          'placement': 'top',
+          'html': true,
+          'content': lsrFeatureHTML(feature)
+        });
+        $(element).popover('show');
+      } else {
+        $(element).popover('destroy');
+      }
+    });
+}
+function lsrFeatureHTML(feature){
+	// Make a pretty HTML feature
+	var html = ['<div class="panel panel-default">',
+	  '<div class="panel-heading">',
+	    '<h3 class="panel-title">Local Storm Report</h3>',
+	  '</div>',
+	  '<div class="panel-body">',
+	    '<strong>Event</strong>: '+ feature.get('event') +'<br />',
+	    '<strong>Location</strong>: '+ feature.get('city') +'<br />',
+	    '<strong>Time</strong>: '+ moment(feature.get('utc_valid')).format('MMM Do, h:mm a') +'<br />',
+	    '<strong>Magnitude</strong>: '+ feature.get('magnitude') +'<br />',
+	    '<strong>Remark</strong>: '+ feature.get('remark') +'<br />',
+	  '</div>',
+	'</div>'];
+	return html.join('\n');
 }
 function updateRADARTimeSlider(){
 	// operation=list&product=N0Q&radar=USCOMP&start=2012-01-23T08%3A10Z&end=2012-01-23T08%3A45Z
@@ -415,6 +527,13 @@ function getVTECGeometry(){
 		method: "GET",
 		dataType: "json",
 		success: function(geodata){
+			var format = new ol.format.GeoJSON({
+				featureProjection: "EPSG:3857"
+			});
+			var vectorSource = new ol.source.Vector({
+				features: format.readFeatures(geodata)
+			});
+			lsrLayer.setSource(vectorSource);
 			lsrTable.clear();
 			$.each(geodata.features, function(idx, feat){
 				prop = feat.properties;
@@ -643,6 +762,14 @@ function buildUI(){
 			  olmap.updateSize();
 		  }
 		});
+	$("#radaropacity").slider({
+		min: 0,
+		max: 100,
+		value: 100,
+        slide: function( event, ui ) {
+        	radarTMSLayer.setOpacity(parseInt(ui.value) / 100.);
+        }
+	});
 	$("#timeslider").slider({
 		min: 0,
 		max: 100,

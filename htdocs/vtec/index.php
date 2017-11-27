@@ -45,7 +45,7 @@ var CONFIG = {
   etn: {$etn}
 };
 </script>
-<script type="text/javascript" src="vtec_app.js"></script>
+<script type="text/javascript" src="vtec_app.js?v=2"></script>
 EOM;
 
 $theform = <<<EOM
@@ -248,13 +248,28 @@ $mapdiv = <<<EOM
 
 <div class="row">
   <div class="col-md-3">
-    <select id="radarsource" class="form-control"></select>
+    <div class="form-group">
+        <label for="radarsource">RADAR Source</label>
+        <select id="radarsource" class="form-control"></select>
+    </div>
   </div>
   <div class="col-md-3">
-    <select id="radarproduct" class="form-control"></select>
+    <div class="form-group">
+        <label for="radarproduct">RADAR Product</label>
+        <select id="radarproduct" class="form-control"></select>
+    </div>
   </div>
-  <div class="col-md-6">
-    <div id="timeslider" class="form-control"></div>
+  <div class="col-md-3">
+    <div class="form-group">
+        <label for="radaropacity">RADAR Opacity</label>
+        <div id="radaropacity" class="form-control"></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="form-group">
+        <label for="timeslider">Time Slider</label>
+        <div id="timeslider" class="form-control"></div>
+    </div>
   </div>
 </div>
 <div class="row">
@@ -265,7 +280,7 @@ $mapdiv = <<<EOM
 
 
 <div id="map"></div>
-
+<div id="popup" class="ol-popup"></div>
 EOM;
 
 $textdiv = <<<EOM

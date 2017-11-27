@@ -14,3 +14,6 @@ tr.shown td.details-control {
     text-align:center; 
     color:red;
 }
+.popover {
+  min-width: 400px;
+}
