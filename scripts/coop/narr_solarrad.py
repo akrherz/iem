@@ -171,8 +171,9 @@ def main(argv):
         do(datetime.datetime(int(argv[1]), int(argv[2]),
                              int(argv[3])))
     if len(argv) == 3:
-        # Run for a given month!
-        sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
+        # Run for a given month, but include the last day of the previous month
+        sts = (datetime.datetime(int(argv[1]), int(argv[2]), 1) -
+               datetime.timedelta(days=1))
         ets = sts + datetime.timedelta(days=45)
         ets = ets.replace(day=1)
         now = sts
