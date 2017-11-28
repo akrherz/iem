@@ -1,22 +1,24 @@
 """
  Assign a climate site to each site in the mesosite database, within reason
 """
+from __future__ import print_function
 
-import psycopg2
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
-mcursor = MESOSITE.cursor()
-mcursor2 = MESOSITE.cursor()
+from pyiem.util import get_dbconn
 
 
-def do(col):
-    # Query out all sites with a null climate_site
-    mcursor.execute("""SELECT id, geom, state, iemid, network from stations
+def workflow(col):
+    """Query out all sites with a null climate_site"""
+    pgconn = get_dbconn('mesosite')
+    mcursor = pgconn.cursor()
+    mcursor2 = pgconn.cursor()
+    mcursor.execute("""
+        SELECT id, geom, state, iemid, network from stations
         WHERE """+col+""" IS NULL and country = 'US' and state is not null
     """)
 
     for row in mcursor:
-        thisID = row[0]
-        thisGEOM = row[1]
+        sid = row[0]
+        geom = row[1]
         st = row[2]
         iemid = row[3]
         network = row[4]
@@ -27,25 +29,36 @@ def do(col):
             continue
         # Find the closest site
         if col == 'climate_site':
-            sql = """select id from stations WHERE network = '%sCLIMATE'
-                     and substr(id,3,4) != '0000' and substr(id,3,1) != 'C'
-             ORDER by ST_distance(geom, '%s') ASC LIMIT 1""" % (st, thisGEOM)
+            sql = """
+                select id from stations WHERE network = '%sCLIMATE'
+                and substr(id,3,4) != '0000' and substr(id,3,1) != 'C'
+                ORDER by ST_distance(geom, '%s') ASC LIMIT 1
+            """ % (st, geom)
         else:
-            sql = """select id from stations WHERE network = 'NCDC81'
-                 ORDER by ST_distance(geom, '%s') ASC LIMIT 1""" % (thisGEOM, )
+            sql = """
+                select id from stations WHERE network = 'NCDC81'
+                ORDER by ST_distance(geom, '%s') ASC LIMIT 1
+            """ % (geom, )
         mcursor2.execute(sql)
         row2 = mcursor2.fetchone()
         if row2 is None:
-            print 'Could not find %s site for: %s' % (col, thisID)
+            print('Could not find %s site for: %s' % (col, sid))
         else:
-            sql = """UPDATE stations SET %s = '%s' WHERE
-                 iemid = %s""" % (col, row2[0], iemid)
+            sql = """
+                UPDATE stations SET %s = '%s' WHERE iemid = %s
+            """ % (col, row2[0], iemid)
             mcursor2.execute(sql)
             print('Set %s: %s for ID: %s[%s]' % (
-                    col, row2[0], thisID, network))
+                    col, row2[0], sid, network))
+    mcursor2.close()
+    pgconn.commit()
 
-do("climate_site")
-do("ncdc81")
 
-mcursor2.close()
-MESOSITE.commit()
+def main():
+    """Go Main Go"""
+    workflow("climate_site")
+    workflow("ncdc81")
+
+
+if __name__ == '__main__':
+    main()

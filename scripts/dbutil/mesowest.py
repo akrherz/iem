@@ -1,26 +1,28 @@
 """Review mesowest station file for differences"""
-import pandas as pd
-import psycopg2
-import requests
+from __future__ import print_function
 import os
+import pandas as pd
+import requests
 
 
 def cache_file():
+    """Cache the upstream"""
     localfn = "/mesonet/tmp/mesowest_csv.tbl"
     if os.path.isfile(localfn):
         return
-    r = requests.get('http://mesowest.utah.edu/data/mesowest_csv.tbl')
-    o = open(localfn, 'w')
-    o.write(r.content)
-    o.close()
+    req = requests.get('http://mesowest.utah.edu/data/mesowest_csv.tbl')
+    fh = open(localfn, 'w')
+    fh.write(req.content)
+    fh.close()
 
 
 def main():
+    """Go Main Go"""
     cache_file()
-    OUTPUT = open('insert.sql', 'w')
+    fh = open('insert.sql', 'w')
     df = pd.read_csv('/mesonet/tmp/mesowest_csv.tbl')
     # copy paste from /DCP/tomb.phtml
-    for line in open('tomb.txt'):
+    for line in open('/tmp/tomb.txt'):
         nwsli = line.split()[0]
         if nwsli not in df['primary id'].values:
             continue
@@ -32,10 +34,11 @@ def main():
     """ % (nwsli, row['station name'], row['state'] + '_DCP', row['country'],
            row['state'], row['station name'], row['elevation'],
            row['longitude'], row['latitude'])
-        OUTPUT.write(sql)
-        print nwsli
+        fh.write(sql)
+        print(nwsli)
 
-    OUTPUT.close()
+    fh.close()
+
 
 if __name__ == '__main__':
     main()

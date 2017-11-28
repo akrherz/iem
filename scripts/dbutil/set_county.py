@@ -1,16 +1,14 @@
 """
   Need to set station metadata for county name for a given site...
 """
+from __future__ import print_function
 import sys
-import psycopg2
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
-mcursor = MESOSITE.cursor()
-mcursor2 = MESOSITE.cursor()
-pcursor = POSTGIS.cursor()
+
+from pyiem.util import get_dbconn
 
 
 class bcolors:
+    """Hack"""
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -20,6 +18,7 @@ class bcolors:
 
 
 def msg(text):
+    """format a message"""
     if not sys.stdout.isatty():
         return text
     if text == 'OK':
@@ -29,21 +28,24 @@ def msg(text):
     return text
 
 
-def set_county(iemid, ugc, ugcname):
+def set_county(mcursor2, iemid, ugc, ugcname):
+    """set the county"""
     mcursor2.execute("""
         UPDATE stations SET county = %s, ugc_county = %s
         WHERE iemid = %s
     """, (ugcname, ugc, iemid))
 
 
-def set_zone(iemid, ugc):
+def set_zone(mcursor2, iemid, ugc):
+    """set the zone"""
     mcursor2.execute("""
         UPDATE stations SET ugc_zone = %s
         WHERE iemid = %s
     """, (ugc, iemid))
 
 
-def logic(ugccode, iemid, station, name, network, lon, lat, state):
+def logic(pcursor, mcursor2, ugccode, iemid, station, network,
+          lon, lat, state):
     """Our logic"""
     pcursor.execute("""
         SELECT ugc, name from ugcs WHERE
@@ -69,13 +71,14 @@ def logic(ugccode, iemid, station, name, network, lon, lat, state):
                    ) % (msg('OK'), ugccode, station, network, state, ugc,
                         dist))
             if ugccode == 'C':
-                set_county(iemid, ugc, ugcname)
+                set_county(mcursor2, iemid, ugc, ugcname)
             else:
-                set_zone(iemid, ugc)
+                set_zone(mcursor2, iemid, ugc)
             result = True
         else:
             print(("%s set_county[%s] ID:%s Net:%s St:%s "
-                   "Lon:%.4f Lat:%.4f\nhttps://mesonet.agron.iastate.edu/sites/"
+                   "Lon:%.4f Lat:%.4f\n"
+                   "https://mesonet.agron.iastate.edu/sites/"
                    "site.php?station=%s&network=%s"
                    "") % (msg("FAIL"), ugccode, station, network, state,
                           lon, lat, station, network))
@@ -87,38 +90,53 @@ def logic(ugccode, iemid, station, name, network, lon, lat, state):
                ) % (msg("OK"), ugccode, iemid, station, network,
                     ugcname, ugc))
         if ugccode == 'C':
-            set_county(iemid, ugc, ugcname)
+            set_county(mcursor2, iemid, ugc, ugcname)
         else:
-            set_zone(iemid, ugc)
+            set_zone(mcursor2, iemid, ugc)
         result = True
     return result
 
-# Get listing of stations without a county set
-mcursor.execute("""SELECT iemid, id, name, network, ST_x(geom), ST_y(geom),
-    state from stations WHERE (county is null or ugc_county is null
-    or ugc_zone is null) and country = 'US' and state is not null
-    and state not in ('PR', 'DC', 'GU', 'PU', 'P1', 'P2', 'P3', 'P4', 'P5')
-    ORDER by modified DESC
-    """)
 
-FAILURES = 0
-for row in mcursor:
-    iemid = row[0]
-    station = row[1]
-    name = row[2]
-    network = row[3]
-    lon = row[4]
-    lat = row[5]
-    state = row[6]
-    if not logic("C", iemid, station, name, network, lon, lat, state):
-        FAILURES += 1
-    if not logic("Z", iemid, station, name, network, lon, lat, state):
-        FAILURES += 1
+def main():
+    """Go Main Go"""
+    # Get listing of stations without a county set
+    mesosite = get_dbconn('mesosite')
+    postgis = get_dbconn('postgis')
+    mcursor = mesosite.cursor()
+    mcursor2 = mesosite.cursor()
+    pcursor = postgis.cursor()
+    mcursor.execute("""
+        SELECT iemid, id, name, network, ST_x(geom), ST_y(geom),
+        state from stations WHERE (county is null or ugc_county is null
+        or ugc_zone is null) and country = 'US' and state is not null
+        and state not in ('PR', 'DC', 'GU', 'PU', 'P1', 'P2', 'P3', 'P4', 'P5')
+        ORDER by modified DESC
+        """)
 
-    if FAILURES > 10:
-        break
+    failures = 0
+    for row in mcursor:
+        iemid = row[0]
+        station = row[1]
+        # name = row[2]
+        network = row[3]
+        lon = row[4]
+        lat = row[5]
+        state = row[6]
+        if not logic(pcursor, mcursor2, "C", iemid, station, network,
+                     lon, lat, state):
+            failures += 1
+        if not logic(pcursor, mcursor2, "Z", iemid, station, network,
+                     lon, lat, state):
+            failures += 1
 
-mcursor.close()
-mcursor2.close()
-pcursor.close()
-MESOSITE.commit()
+        if failures > 10:
+            break
+
+    mcursor.close()
+    mcursor2.close()
+    pcursor.close()
+    mesosite.commit()
+
+
+if __name__ == '__main__':
+    main()

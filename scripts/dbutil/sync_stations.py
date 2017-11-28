@@ -2,44 +2,31 @@
  My purpose in life is to sync the mesosite stations table to other
 databases.  This will hopefully remove some hackery
 """
-
+from __future__ import print_function
 import datetime
 import sys
+
+from pyiem.util import get_dbconn
 import psycopg2.extras
-MESOSITE = psycopg2.connect(database="mesosite", host='iemdb')
-subscribers = ["iem", "coop", "hads", "asos", "postgis"]
-
-DO_DELETE = False
-if len(sys.argv) == 2:
-    print 'Running with delete option set, this will be slow'
-    DO_DELETE = True
-
-if len(sys.argv) == 3:
-    print 'Running laptop syncing from upstream, assume iemdb is localhost!'
-    MESOSITE = psycopg2.connect(database='mesosite',
-                                host='129.186.185.33',
-                                user='nobody')
-    subscribers.insert(0, 'mesosite')
 
 
-def sync(dbname):
+def sync(mesosite, dbname, do_delete):
     """
     Actually do the syncing, please
     """
     # connect to synced database
-    dbhost = "iemdb" if dbname != 'hads' else 'iemdb-hads'
-    dbconn = psycopg2.connect(database=dbname, host=dbhost)
+    dbconn = get_dbconn(dbname)
     dbcursor = dbconn.cursor()
     # Figure out our latest revision
     dbcursor.execute("""
     SELECT max(modified), max(iemid) from stations
     """)
     row = dbcursor.fetchone()
-    maxTS = (row[0] or datetime.datetime(1980, 1, 1))
-    maxID = (row[1] or -1)
-    cur = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    maxts = (row[0] or datetime.datetime(1980, 1, 1))
+    maxid = (row[1] or -1)
+    cur = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     todelete = []
-    if DO_DELETE:
+    if do_delete:
         # Generate massive listing of all NWSLIs
         cur.execute("""SELECT iemid from stations""")
         iemids = []
@@ -50,14 +37,14 @@ def sync(dbname):
         for row in dbcursor:
             if row[0] not in iemids:
                 todelete.append(row[0])
-        if len(todelete) > 0:
+        if todelete:
             dbcursor.execute("""DELETE from stations where iemid in %s
             """, (tuple(todelete), ))
     # figure out what has changed!
     cur.execute("""SELECT * from stations WHERE modified > %s or iemid > %s""",
-                (maxTS, maxID))
+                (maxts, maxid))
     for row in cur:
-        if row['iemid'] > maxID:
+        if row['iemid'] > maxid:
             dbcursor.execute("""INSERT into stations(iemid, network, id)
              VALUES(%s,%s,%s) """, (row['iemid'], row['network'], row['id']))
         # insert queried stations
@@ -78,19 +65,33 @@ def sync(dbname):
        ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s,
        temp24_hour = %(temp24_hour)s, precip24_hour = %(precip24_hour)s
        WHERE iemid = %(iemid)s""", row)
-    print ("DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s"
-           "") % (dbname, len(todelete), cur.rowcount,
-                  maxTS.strftime("%Y/%m/%d %H:%M"), maxID)
+    print(("DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s"
+           ) % (dbname, len(todelete), cur.rowcount,
+                maxts.strftime("%Y/%m/%d %H:%M"), maxid))
     # close connection
     dbcursor.close()
     dbconn.commit()
     dbconn.close()
 
 
-def main():
+def main(argv):
+    """Go Main Go"""
+    mesosite = get_dbconn("mesosite")
+    subscribers = ["iem", "coop", "hads", "asos", "postgis"]
+
+    do_delete = False
+    if len(argv) == 2:
+        print('Running with delete option set, this will be slow')
+        do_delete = True
+
+    if len(argv) == 3:
+        print(('Running laptop syncing from upstream, '
+               'assume iemdb is localhost!'))
+        mesosite = get_dbconn('mesosite', host='129.186.185.33', user='nobody')
+        subscribers.insert(0, 'mesosite')
     for sub in subscribers:
-        sync(sub)
-    MESOSITE.close()
+        sync(mesosite, sub, do_delete)
+
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

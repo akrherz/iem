@@ -6,7 +6,7 @@ from __future__ import print_function
 import datetime
 import re
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
 LOGFN = '/var/log/mesonet/error_log'
@@ -44,12 +44,14 @@ def find_and_save(cursor, dbendts):
         """, (appid, valid, timing, uri, hostname))
         inserts += 1
     if inserts == 0:
-        print("mine_autoplot: WARNING, no entries found for databasing...")
+        print(("mine_autoplot: no new entries found for databasing "
+               "since %s"
+               ) % (dbendts))
 
 
 def main():
     """Go Main Go!"""
-    mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+    mesosite = get_dbconn('mesosite')
     cursor = mesosite.cursor()
     dbendts = get_dbendts(cursor)
     find_and_save(cursor, dbendts)

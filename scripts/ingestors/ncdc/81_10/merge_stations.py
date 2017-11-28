@@ -1,16 +1,14 @@
 """
-  Create IEM station entries 
-  
+  Create IEM station entries
+
   network: NCDC81
-
 """
-import psycopg2
-import datetime
+from __future__ import print_function
 
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
-ccursor = MESOSITE.cursor()
+from pyiem.util import get_dbconn
 
-def compute_stations():
+
+def compute_stations(cursor):
     """ Logic to resolve, which stations we care about and add necessary
     station metadata about them! """
 
@@ -30,26 +28,26 @@ def compute_stations():
         state = line[38:40]
         name = line[41:71].strip()
 
-        ccursor.execute("""
+        cursor.execute("""
         INSERT into stations
         (id, network, geom, elevation, name, country,
         state, online, plot_name, archive_begin, archive_end, metasite)
         VALUES
         (%s, 'NCDC81', 'SRID=4326;POINT(%s %s)', %s, %s, %s,
         %s, 't', %s, '1981-01-01', '2010-12-31', 't')
-        """, (sid, lon, lat, elev, name, sid[:2],
-        state, name))
+        """, (sid, lon, lat, elev, name, sid[:2], state, name))
+
 
 def main():
     """ Go main Go """
-    compute_stations()
-    ccursor.close()
-    MESOSITE.commit()
-    MESOSITE.close()
+    pgconn = get_dbconn('mesosite')
+    cursor = pgconn.cursor()
+    compute_stations(cursor)
+    cursor.close()
+    pgconn.commit()
+    pgconn.close()
+
 
 if __name__ == '__main__':
     # Go
     main()
-
-
-

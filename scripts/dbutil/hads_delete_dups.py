@@ -3,32 +3,34 @@
 
  called from RUN_MIDNIGHT.sh
 """
+from __future__ import print_function
 import datetime
-import pytz
 import sys
-import psycopg2
-HADS = psycopg2.connect(database='hads', host='iemdb-hads')
+
+import pytz
+from pyiem.util import get_dbconn
 
 
-def query(sql, args=[]):
+def query(sql, args=None):
     """
     Do a query and make it atomic
     """
-    hcursor = HADS.cursor()
+    pgconn = get_dbconn('hads')
+    hcursor = pgconn.cursor()
     sts = datetime.datetime.now()
     hcursor.execute("set work_mem='16GB'")
-    hcursor.execute(sql, args)
+    hcursor.execute(sql, args if args is not None else [])
     ets = datetime.datetime.now()
     print("%7s [%8.4fs] %s" % (hcursor.rowcount, (ets - sts).total_seconds(),
                                sql))
     hcursor.close()
-    HADS.commit()
+    pgconn.commit()
 
 
-def do(ts):
+def workflow(valid):
     ''' Do the work for this date, which is set to 00 UTC '''
     # Delete schoolnet data, since we created it in the first place!
-    tbl = "raw%s" % (ts.strftime("%Y_%m"),)
+    tbl = "raw%s" % (valid.strftime("%Y_%m"),)
     sql = """DELETE from """ + tbl + """ WHERE station IN
               (SELECT id from stations WHERE network in ('KCCI','KELO','KIMT')
               )"""
@@ -37,7 +39,7 @@ def do(ts):
     # Extract unique obs to special table
     sql = """CREATE table tmp as select distinct * from """+tbl+"""
         WHERE valid BETWEEN %s and %s"""
-    args = (ts, ts + datetime.timedelta(hours=24))
+    args = (valid, valid + datetime.timedelta(hours=24))
     query(sql, args)
 
     # Delete them all!
@@ -67,14 +69,15 @@ def main(argv):
     if len(argv) == 4:
         utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
         utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
-        do(utcnow)
+        workflow(utcnow)
         return
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(hour=0, minute=0, second=0, microsecond=0,
-                            tzinfo=pytz.timezone("UTC"))
+                            tzinfo=pytz.utc)
     # Run for 'yesterday' and 35 days ago
     for day in [1, 35]:
-        do(utcnow - datetime.timedelta(days=day))
+        workflow(utcnow - datetime.timedelta(days=day))
+
 
 if __name__ == '__main__':
     # See how we are called

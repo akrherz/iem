@@ -1,15 +1,18 @@
 """Compute the archive start time of a HADS/DCP/COOP network"""
-from pyiem.network import Table as NetworkTable
+from __future__ import print_function
 import sys
-import psycopg2
 import datetime
 
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
+
 THISYEAR = datetime.datetime.now().year
-HADSDB = psycopg2.connect(database='hads', host='iemdb-hads')
-MESOSITEDB = psycopg2.connect(database='mesosite', host='iemdb')
+HADSDB = get_dbconn('hads')
+MESOSITEDB = get_dbconn('mesosite')
 
 
-def do(network, sid):
+def get_minvalid(sid):
+    """"Do sid"""
     cursor = HADSDB.cursor()
     for yr in range(2002, THISYEAR + 1):
         cursor.execute("""
@@ -22,18 +25,19 @@ def do(network, sid):
 
 
 def do_network(network):
+    """Do network"""
     nt = NetworkTable(network)
-    for sid in nt.sts.keys():
-        sts = do(network, sid)
+    for sid in nt.sts:
+        sts = get_minvalid(sid)
         if sts is None:
             continue
         if (nt.sts[sid]['archive_begin'] is None or
                 nt.sts[sid]['archive_begin'] != sts):
             osts = nt.sts[sid]['archive_begin']
-            f = "%Y-%m-%d %H:%M"
+            fmt = "%Y-%m-%d %H:%M"
             print(("%s [%s] new sts: %s OLD sts: %s"
-                   ) % (sid, network, sts.strftime(f),
-                        osts.strftime(f) if osts is not None else 'null'))
+                   ) % (sid, network, sts.strftime(fmt),
+                        osts.strftime(fmt) if osts is not None else 'null'))
             cursor = MESOSITEDB.cursor()
             cursor.execute("""UPDATE stations SET archive_begin = %s
             WHERE id = %s and network = %s""", (sts, sid, network))
@@ -59,6 +63,7 @@ def main(argv):
     else:
         network = argv[1]
     do_network(network)
+
 
 if __name__ == '__main__':
     main(sys.argv)
