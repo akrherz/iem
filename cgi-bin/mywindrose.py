@@ -65,6 +65,7 @@ def main():
         sts, ets = get_times(form)
     except Exception as _:
         send_error(form, "Invalid Times Selected, please try again")
+        return
 
     if "hour1" in form and "hourlimit" in form:
         hours = numpy.array((int(form["hour1"].value),))
