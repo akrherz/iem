@@ -7,6 +7,7 @@ iemdata.vtec_phenomena_dict = [
 ['AF','Volcanic Ashfall'],
 ['AS','Air Stagnation'],
 ['AV','Avalanche'],
+['BH','Beach Hazard'],
 ['BS','Blowing Snow'],
 ['BZ','Blizzard'],
 ['CF','Coastal Flood'],
