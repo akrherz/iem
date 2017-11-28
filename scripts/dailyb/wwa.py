@@ -1,9 +1,9 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
-import psycopg2
 import datetime
 import pytz
+from pyiem.util import get_dbconn
 
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+POSTGIS = get_dbconn('postgis', user='nobody')
 cursor = POSTGIS.cursor()
 
 textfmt = """
@@ -142,6 +142,7 @@ def main():
     txt, html = run(sts, ets)
     print txt
     print html
+
 
 if __name__ == '__main__':
     main()

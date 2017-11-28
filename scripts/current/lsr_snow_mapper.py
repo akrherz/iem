@@ -7,10 +7,9 @@ import warnings
 import numpy as np
 from pyiem.plot import MapPlot, nwssnow
 import pyiem.reference as reference
-import psycopg2
+from pyiem.util import get_dbconn
 import pandas as pd
 from pandas.io.sql import read_sql
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 
 # Stop whining about missing data for contourf
 warnings.filterwarnings("ignore")
@@ -18,12 +17,13 @@ warnings.filterwarnings("ignore")
 
 def run(basets, endts, view):
     """Generate this plot for the given basets"""
+    pgconn = get_dbconn('postgis', user='nobody')
 
     df = read_sql("""SELECT state,
         max(magnitude) as val, ST_x(geom) as lon, ST_y(geom) as lat
         from lsrs WHERE type in ('S') and magnitude >= 0 and
         valid > %s and valid < %s GROUP by state, lon, lat
-        """, POSTGIS, params=(basets, endts), index_col=None)
+        """, pgconn, params=(basets, endts), index_col=None)
     df['used'] = False
     df['textplot'] = True
     df.sort_values(by='val', ascending=False, inplace=True)
@@ -35,7 +35,7 @@ def run(basets, endts, view):
         for lon in np.arange(reference.MW_WEST, reference.MW_EAST, mybuffer):
             df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat+mybuffer)) &
                      (df['lon'] >= lon) & (df['lon'] < (lon+mybuffer))]
-            if len(df2.index) == 0:
+            if df2.empty:
                 newrows.append(dict(lon=(lon+mybuffer/2.),
                                     lat=(lat+mybuffer/2.),
                                     val=0, used=True, textplot=False))
