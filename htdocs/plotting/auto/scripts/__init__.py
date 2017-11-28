@@ -217,6 +217,8 @@ data = {'plots': [
          'label': "First Fall/Last Spring Temp Below Threshold [map]"},
         {'id': "119",
          'label': "Frequency of First Fall Low Temperature by Day of Year"},
+        {'id': "189", 'mw': True,
+         'label': ("General yearly totals with trend line fitted")},
         {'id': "179", 'mw': True,
          'label': ("Growing Degree Day Scenarios For This Year")},
         {'id': "152", 'mw': True,
