@@ -149,7 +149,10 @@ def workflow(argv, pgconn, cursor):
     for ugc, row in gdf.iterrows():
         if ugc in postgis.index:
             # Some very small number, good enough
-            if abs(row['area'] - postgis.at[ugc, 'geom'].area) < 0.00000001:
+            current = postgis.loc[ugc]
+            if (abs(row['area'] - current['geom'].area) < 0.00000001
+                    and row['NAME'] == current['name'] and
+                    row[wfocol] == current['wfo']):
                 countdups += 1
                 continue
 
