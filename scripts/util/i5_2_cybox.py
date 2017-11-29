@@ -5,12 +5,12 @@ import glob
 import logging
 import sys
 
-from pyiem import util
+from pyiem.ftpsession import send2box
 
 
-def main():
+def main(argv):
     """Go Main!"""
-    if len(sys.argv) > 1 and sys.argv[1] == 'debug':
+    if len(argv) > 1 and argv[1] == 'debug':
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         logging.debug("Setting logging to debug...")
@@ -38,12 +38,12 @@ def main():
 
     fs = None
     for rp in remote_filenames:
-        _ftps, ress = util.send2box(local_filenames[rp], rp,
-                                    remotenames=remote_filenames[rp], fs=fs)
+        _ftps, ress = send2box(local_filenames[rp], rp,
+                               remotenames=remote_filenames[rp], fs=fs)
         for fn, res in zip(local_filenames[rp], ress):
             if res is not False:
                 os.unlink(fn)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

@@ -8,7 +8,7 @@ import datetime
 import subprocess
 import os
 import sys
-from pyiem.util import send2box
+from pyiem.ftpsession import send2box
 
 
 def run(date):
