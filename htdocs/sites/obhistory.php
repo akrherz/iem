@@ -182,7 +182,7 @@ $content = <<<EOF
 }
 </style>
 
-<h3>{$dstr} Observation History, timezone: {$tzname}</h3>
+<h3>{$dstr} Observation History, [{$station}] {$metadata["name"]}, timezone: {$tzname}</h3>
 <form name="theform" method="GET">
 <strong>Select Date:</strong>
 <input type="hidden" value="{$station}" name="station" />
