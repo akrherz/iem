@@ -767,6 +767,20 @@ for a given network that collects webcams and a UTC timestamp.",
  gotData({"Name": "daryl", "Profession": "nerd", "Age": 99});
  </pre>
 
+<h3>But first, perhaps there are better alternatives</h3>
+
+<p>The following is a list of other web service providers.  They all do a better
+job than this website does.  Some of these are commercial and this listing should
+not be implied as an endorsement. Of course, you can just search google for
+<a href="https://www.google.com/search?q=weather+api">Weather API</a> :)</p>
+
+<ul>
+ <li><a href="https://www.aerisweather.com/develop/">Aeris Weather</a></li>
+ <li><a href="https://darksky.net/dev/">DarkSky</a></li>
+ <li><a href="https://realearth.ssec.wisc.edu/doc/api.php">SSEC RealEarth API</a></li>
+ <li><a href="https://www.wunderground.com/weather/api/">Wunderground API</a></li>
+</ul>
+
  <p>Okay, so you are all set for documentation on what services are available!
 {$table}
  
