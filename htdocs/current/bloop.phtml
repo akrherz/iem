@@ -1,11 +1,12 @@
 <?php
-include('../../config/settings.inc.php');
-include('../../include/myview.php');
-$t = new MyView();
-include("../../include/cameras.inc.php");
+require_once '../../config/settings.inc.php';
+include_once '../../include/myview.php';
+include_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php"; 
+define("IEM_APPID", 117);
+$t = new MyView();
 
-$java = isset($_GET["java"]) ? xssafe($_GET["java"]): 'applet';
+$java = isset($_GET["java"]) ? xssafe($_GET["java"]): 'script';
 $cid = isset($_GET['cid']) ? xssafe($_GET['cid']): 'KCCI-016';
 
 $t->thispage = "webcam-loop";
@@ -72,7 +73,6 @@ $hs = hourSelect($hour, "hour");
 $mi = minuteSelect($minute, "minute",5);
 
 $ar = Array(
-		"applet" => "Java Applet",
 		"script" => "Java Script",
 		"none" => "List Images",
 );
@@ -88,21 +88,7 @@ $ar = Array(
 );
 $intselect = make_select("interval", $interval, $ar);
 
-if ($java == "applet") { 
-	$w = $width + 60;
-	$h = $height + 80;
-	$control = <<<EOF
-<applet codebase="/current/class/" code="AniS.class" width="{$w}" 
-	height="{$h}" alt="You must enable Java in your browser to view the radar loop">
-        <param name="controls" value="startstop, looprock, step, speed, toggle,
-zoom">
-        <param name="rate" value="80">
- <param name="no_enh" value="true">
-        <param name="pause_percent" value="800">
-        <param name="filenames" value="{$files}">
-</applet>
-EOF;
-} else if ($java == "script") {
+if ($java == "script") {
 	$sz = sizeof($images); 
 	$mis = "";
 	$i = 0;
@@ -153,12 +139,11 @@ while ( list($key, $value) = each($images) ){
 }
 
 $t->content = <<<EOF
-<div id="justone">
 {$wmessage}
 
 <p>Still images are saved from the SchoolNet8 web cameras every 5 minutes.  
-This page gives you a tool to build animations from this archive of images.
-If your browser does not support java, please try the 'Java Script' loop tool.
+This page gives you a tool to build animations from this archive of images.</p>
+
 
 <form method="GET" action="bloop.phtml" name="imageform">
 
@@ -195,7 +180,7 @@ If your browser does not support java, please try the 'Java Script' loop tool.
 <ul>
 {$imglinks}
 </ul>
-</div>
+
 EOF;
 $t->render('single.phtml');
 ?>
