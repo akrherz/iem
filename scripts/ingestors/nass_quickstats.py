@@ -1,18 +1,20 @@
 """Dump NASS Quickstats to the IEM database"""
+from __future__ import print_function
+import sys
 import subprocess
 import datetime
 import os
-import pandas as pd
-import psycopg2
-import sys
 
-PGCONN = psycopg2.connect(database='coop', host='iemdb')
+import pandas as pd
+from pyiem.util import get_dbconn
+
+TMP = "/mesonet/tmp"
 
 
 def get_file():
     """Download and gunzip the file from the FTP site"""
     os.chdir("/mesonet/tmp")
-    if os.path.isfile("/mesonet/tmp/qstats.txt"):
+    if os.path.isfile("%s/qstats.txt" % (TMP, )):
         print('    skipping download as we already have the file')
         return
     for i in range(0, -7, -1):
@@ -26,16 +28,16 @@ def get_file():
         if os.path.isfile(fn):
             break
 
-    cmd = "cd /mesonet/tmp; mv %s qstats.txt.gz; gunzip qstats.txt.gz" % (fn,)
+    cmd = "cd %s; mv %s qstats.txt.gz; gunzip qstats.txt.gz" % (TMP, fn)
     # Popen is async, so we need to read from it!
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     proc.stdout.read()
 
 
-def database(df):
+def database(pgconn, df):
     """Save df to the database!"""
-    cursor = PGCONN.cursor()
+    cursor = pgconn.cursor()
     cursor.execute("""SET TIME ZONE 'UTC'""")
     df.columns = [x.lower() for x in df.columns]
     df = df.where((pd.notnull(df)), None)
@@ -44,31 +46,32 @@ def database(df):
     for _, row in df2.iterrows():
         try:
             # If we are not in addall mode, we have to be careful!
-            cursor.execute("""INSERT into nass_quickstats(source_desc, sector_desc,
-    group_desc,
-    commodity_desc,
-    class_desc,
-    prodn_practice_desc,
-    util_practice_desc,
-    statisticcat_desc,
-    unit_desc,
-    agg_level_desc,
-    state_alpha,
-    asd_code,
-    county_ansi,
-    zip_5,
-    watershed_code,
-    country_code,
-    year,
-    freq_desc,
-    begin_code,
-    end_code,
-    week_ending,
-    load_time,
-    value,
-    cv,
-    num_value) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            cursor.execute("""
+            INSERT into nass_quickstats(source_desc, sector_desc,
+            group_desc,
+            commodity_desc,
+            class_desc,
+            prodn_practice_desc,
+            util_practice_desc,
+            statisticcat_desc,
+            unit_desc,
+            agg_level_desc,
+            state_alpha,
+            asd_code,
+            county_ansi,
+            zip_5,
+            watershed_code,
+            country_code,
+            year,
+            freq_desc,
+            begin_code,
+            end_code,
+            week_ending,
+            load_time,
+            value,
+            cv,
+            num_value) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (row['source_desc'], row['sector_desc'], row['group_desc'],
                   row['commodity_desc'],
                   row['class_desc'],
@@ -93,60 +96,66 @@ def database(df):
                   row['cv_%'],
                   row['num_value']))
         except Exception, exp:
-            print exp
+            print(exp)
             for key in row.keys():
-                print key, row[key], len(str(row[key]))
+                print("%s %s %s" % (key, row[key], len(str(row[key]))))
             sys.exit()
     print('    processed %6s lines from %6s candidates' % (len(df2.index),
                                                            len(df.index)))
     cursor.close()
-    PGCONN.commit()
+    pgconn.commit()
 
 
-def process():
+def process(pgconn):
     """Do some work"""
     # The file is way too big (11+ GB) to be reliably read into pandas, so
     # we need to do some chunked processing.
-    cursor = PGCONN.cursor()
-    cursor.execute("""
-            truncate nass_quickstats
-    """)
+    cursor = pgconn.cursor()
+    cursor.execute("truncate nass_quickstats")
     cursor.close()
-    PGCONN.commit()
+    pgconn.commit()
     header = ""
     tmpfn = None
     accumlines = 0
-    for linenum, line in enumerate(open("/mesonet/tmp/qstats.txt")):
+    for linenum, line in enumerate(open("%s/qstats.txt" % (TMP, ))):
         if linenum == 0:
             header = line
         if tmpfn is None:
             tmpfn = '/mesonet/tmp/tempor.txt'
-            o = open(tmpfn, 'w')
-            o.write(header+"\n")
+            fh = open(tmpfn, 'w')
+            fh.write(header+"\n")
         if linenum > 0:
-            o.write(line+"\n")
+            fh.write(line+"\n")
             accumlines += 1
         if accumlines >= 600000:
-            o.close()
+            fh.close()
             df = pd.read_csv(tmpfn, sep='\t', low_memory=False)
-            database(df)
+            database(pgconn, df)
             tmpfn = None
             accumlines = 0
     if accumlines > 0:
-        o.close()
+        fh.close()
         df = pd.read_csv(tmpfn, sep='\t', low_memory=False)
-        database(df)
+        database(pgconn, df)
 
 
 def cleanup():
-    for fn in ['/mesonet/tmp/qstats.txt', '/mesonet/tmp/tempor.txt']:
+    """Cleanup after ourselves"""
+    for fn in ['%s/qstats.txt' % (TMP, ), '%s/tempor.txt' % (TMP, )]:
         print('    Deleted %s' % (fn, ))
         os.unlink(fn)
 
-if __name__ == '__main__':
+
+def main(argv):
+    """Go Main Go"""
+    pgconn = get_dbconn('coop')
     print("scripts/ingestors/nass_quickstats.py")
     get_file()
-    process()
-    if len(sys.argv) == 1:
+    process(pgconn)
+    if len(argv) == 1:
         cleanup()
     print("done...")
+
+
+if __name__ == '__main__':
+    main(sys.argv)

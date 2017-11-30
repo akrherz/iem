@@ -2,14 +2,15 @@
 
 Called from RUN_2AM.sh script
 """
+from __future__ import print_function
 import os
 import subprocess
 import stat
 import datetime
 
-import psycopg2
+from pyiem.util import get_dbconn
 
-MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+MESOSITE = get_dbconn('mesosite', user='nobody')
 CACHEDIR = "/mesonet/share/windrose/climate/yearly"
 
 
@@ -38,7 +39,7 @@ def main():
         network = row[1]
         testfn = "%s/%s_yearly.png" % (CACHEDIR, row[0])
         if not os.path.isfile(testfn):
-            print "Driving network %s because no file" % (network,)
+            print("Driving network %s because no file" % (network,))
             do_network(network)
             return
         else:
@@ -46,7 +47,7 @@ def main():
             age = float(now.strftime("%s")) - mtime
             # 250 days in seconds, enough to cover the number of networks
             if age > (250*24*60*60):
-                print "Driving network %s because of age!" % (network,)
+                print("Driving network %s because of age!" % (network,))
                 do_network(network)
                 return
 

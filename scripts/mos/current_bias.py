@@ -2,20 +2,20 @@
  Analysis of current MOS temperature bias
 """
 import sys
-import psycopg2
-from pyiem.plot import MapPlot
-import matplotlib.cm as cm
 import datetime
-import pytz
 
-MOS = psycopg2.connect(database='mos', host='iemdb', user='nobody')
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
-mcursor = MOS.cursor()
-icursor = IEM.cursor()
+import matplotlib.cm as cm
+import pytz
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 
 def doit(now, model):
     """ Figure out the model runtime we care about """
+    mos_pgconn = get_dbconn('mos', user='nobody')
+    iem_pgconn = get_dbconn('iem', user='nobody')
+    mcursor = mos_pgconn.cursor()
+    icursor = iem_pgconn.cursor()
     mcursor.execute("""
     SELECT max(runtime at time zone 'UTC') from alldata where station = 'KDSM'
     and ftime = %s and model = %s
@@ -68,44 +68,45 @@ def doit(now, model):
     cmap.set_over('black')
 
     localnow = now.astimezone(pytz.timezone("America/Chicago"))
-    m = MapPlot(sector='midwest',
-                title="%s MOS Temperature Bias " % (model,),
-                subtitle=('Model Run: %s Forecast Time: %s'
-                          ) % (runtime.strftime("%d %b %Y %H %Z"),
-                               localnow.strftime("%d %b %Y %-I %p %Z")))
-    m.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
+    mp = MapPlot(sector='midwest',
+                 title="%s MOS Temperature Bias " % (model,),
+                 subtitle=('Model Run: %s Forecast Time: %s'
+                           ) % (runtime.strftime("%d %b %Y %H %Z"),
+                                localnow.strftime("%d %b %Y %-I %p %Z")))
+    mp.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
 
     pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
-    m.postprocess(pqstr=pqstr, view=False)
-    m.close()
+    mp.postprocess(pqstr=pqstr, view=False)
+    mp.close()
 
-    m = MapPlot(sector='conus',
-                title="%s MOS Temperature Bias " % (model,),
-                subtitle=('Model Run: %s Forecast Time: %s'
-                          ) % (runtime.strftime("%d %b %Y %H %Z"),
-                               localnow.strftime("%d %b %Y %-I %p %Z")))
-    m.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
+    mp = MapPlot(sector='conus',
+                 title="%s MOS Temperature Bias " % (model,),
+                 subtitle=('Model Run: %s Forecast Time: %s'
+                           ) % (runtime.strftime("%d %b %Y %H %Z"),
+                                localnow.strftime("%d %b %Y %-I %p %Z")))
+    mp.contourf(lons, lats, vals, range(-10, 11, 2), units='F', cmap=cmap)
 
     pqstr = ("plot ac %s00 conus_%s_mos_T_bias.png "
              "conus_%s_mos_T_bias_%s.png png"
              ) % (now.strftime("%Y%m%d%H"), model.lower(),
                   model.lower(), now.strftime("%H"))
-    m.postprocess(pqstr=pqstr, view=False)
+    mp.postprocess(pqstr=pqstr, view=False)
 
 
-def main():
+def main(argv):
     """ Go main go"""
     ts = datetime.datetime.utcnow()
-    model = sys.argv[1]
-    if len(sys.argv) == 6:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), int(sys.argv[4]))
+    model = argv[1]
+    if len(argv) == 6:
+        ts = datetime.datetime(int(argv[1]), int(argv[2]),
+                               int(argv[3]), int(argv[4]))
         model = sys.argv[5]
     ts = ts.replace(minute=0, second=0, microsecond=0)
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     doit(ts, model)
 
+
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

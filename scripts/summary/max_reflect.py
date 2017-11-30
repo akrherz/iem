@@ -1,5 +1,6 @@
 """Create simple maximum dbz composites for a given UTC date
 """
+from __future__ import print_function
 import datetime
 import os
 import urllib2
@@ -58,7 +59,7 @@ def run(prod, sts):
         fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
                            "GIS/uscomp/"+prod+"_%Y%m%d%H%M.png"))
         if not os.path.isfile(fn):
-            print "MISSING:", fn
+            print("max_reflect MISSING: %s" % (fn, ))
             now += interval
             continue
         n0r = gdal.Open(fn, 0)
@@ -153,7 +154,7 @@ def main(argv):
     """Run main()"""
     # Default is to run for yesterday
     ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     if len(argv) == 4:
         ts = ts.replace(year=int(argv[1]), month=int(argv[2]),

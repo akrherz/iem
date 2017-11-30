@@ -1,13 +1,15 @@
 """attempt to rip out the METARs stored with the MTarchive files"""
+from __future__ import print_function
 import datetime
-import requests
 import subprocess
 import re
 import os
 import sys
+
+import requests
 import pytz
 import pandas as pd
-import psycopg2
+from pyiem.util import get_dbconn
 
 DUP = re.compile("[0-9]{3} SA..[0-9][0-9] [A-Z]{3,4}")
 PROD = re.compile("[A-Z0-9]{3,4} [0-3][0-9][0-2][0-9][0-5][0-9]Z ")
@@ -16,10 +18,10 @@ XREF = {}
 
 
 def load_stations():
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb',
-                              user='nobody')
+    pgconn = get_dbconn('mesosite', user='nobody')
     cursor = pgconn.cursor()
-    cursor.execute("""SELECT id, tzname from stations where network ~* 'ASOS'
+    cursor.execute("""
+    SELECT id, tzname from stations where network ~* 'ASOS'
     and tzname not in ('UTC+4', 'UTC-3', 'UTC-5')
     """)
     for row in cursor:
@@ -51,13 +53,13 @@ def write(ts, stid, obs):
                 try:
                     df = pd.read_csv(fn2)
                 except:
-                    print fn2
+                    print(fn2)
                     return
             else:
                 try:
                     df = pd.read_csv(fn2, skiprows=[0, ])
                 except:
-                    print fn2, 'r'
+                    print(fn2)
                     return
             df2 = pd.DataFrame({'FullMetar': obs})
             df = df.append(df2, ignore_index=True)
@@ -137,16 +139,16 @@ def workflow(ts):
     # 1. Get mtarchive file
     uri = ts.strftime(("http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/"
                        "surface/sao/%Y%m%d_sao.gem"))
-    r = requests.get(uri, timeout=30)
-    if r.status_code != 200:
-        print 'Whoa!', r.status, uri
+    req = requests.get(uri, timeout=30)
+    if req.status_code != 200:
+        print('Whoa! %s %s' % (req.status, uri))
         return
-    o = open("/mesonet/tmp/mtsf.gem", 'wb')
-    o.write(r.content)
-    o.close()
+    fh = open("/mesonet/tmp/mtsf.gem", 'wb')
+    fh.write(req.content)
+    fh.close()
     # 2. run sflist to extract all stations
-    o = open('fn', 'w')
-    o.write("""
+    fh = open('fn', 'w')
+    fh.write("""
 SFFILE = /mesonet/tmp/mtsf.gem
 AREA = ALL
 DATTIM = ALL
@@ -158,11 +160,11 @@ run
 
 exit
 """)
-    o.close()
-    p = subprocess.Popen("sflist < fn", stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, shell=True)
-    data = p.stdout.read()
+    fh.close()
+    proc = subprocess.Popen("sflist < fn", stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, shell=True)
+    data = proc.stdout.read()
     stations = {}
     for line in data.split("\n"):
         tokens = line.strip().split()
@@ -181,8 +183,10 @@ exit
 
 
 def main(argv):
+    """Go Main Go"""
     load_stations()
     workflow(datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
+
 
 if __name__ == '__main__':
     main(sys.argv)

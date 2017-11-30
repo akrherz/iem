@@ -9,8 +9,8 @@ sleep 30
 cd ../current
 python stage4_hourly.py
 python stage4_today_total.py
-python stage4_Xhour.py 24
-python stage4_Xhour.py 48
+python stage4_xhour.py 24
+python stage4_xhour.py 48
 
 cd ../iemre
 python stage4_hourlyre.py

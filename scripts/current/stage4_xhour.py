@@ -1,14 +1,15 @@
 """
 Create a variable X hour plot of stage IV estimates
 """
+from __future__ import print_function
+import datetime
+import os
+import sys
 
 import pygrib
-import datetime
 import pytz
 from pyiem.datatypes import distance
 from pyiem.plot import MapPlot
-import os
-import sys
 import matplotlib.cm as cm
 
 
@@ -41,7 +42,7 @@ def do(ts, hours):
         now += interval
 
     if lts is None and ts.hour > 1:
-        print 'Missing StageIV data!'
+        print('Missing StageIV data!')
     if lts is None:
         return
 
@@ -53,31 +54,33 @@ def do(ts, hours):
                                         pytz.timezone("America/Chicago"))
 
     for sector in ['iowa', 'midwest', 'conus']:
-        m = MapPlot(sector=sector,
-                    title='NCEP Stage IV %s Hour Precipitation' % (hours,),
-                    subtitle='Total up to %s' % (
-                                    localtime.strftime("%d %B %Y %I %p %Z"),))
-        m.pcolormesh(lons, lats, distance(total, 'MM').value('IN'), clevs,
-                     units='inch')
+        mp = MapPlot(sector=sector,
+                     title='NCEP Stage IV %s Hour Precipitation' % (hours,),
+                     subtitle='Total up to %s' % (
+                                     localtime.strftime("%d %B %Y %I %p %Z"),))
+        mp.pcolormesh(lons, lats, distance(total, 'MM').value('IN'), clevs,
+                      units='inch')
         pqstr = "plot %s %s00 %s_stage4_%sh.png %s_stage4_%sh_%s.png png" % (
                                 'ac', ts.strftime("%Y%m%d%H"), sector, hours,
                                 sector, hours, ts.strftime("%H"))
         if sector == 'iowa':
-            m.drawcounties()
-        m.postprocess(pqstr=pqstr)
-        m.close()
+            mp.drawcounties()
+        mp.postprocess(pqstr=pqstr)
+        mp.close()
 
 
-def main():
-    if len(sys.argv) == 4:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), int(sys.argv[4]))
-        hr = int(sys.argv[5])
+def main(argv):
+    """Go Main Go"""
+    if len(argv) == 4:
+        ts = datetime.datetime(int(argv[1]), int(argv[2]),
+                               int(argv[3]), int(argv[4]))
+        hr = int(argv[5])
     else:
         ts = datetime.datetime.utcnow()
         hr = int(sys.argv[1])
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     do(ts, hr)
 
+
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

@@ -31,8 +31,8 @@ cd ../scan
 python scan_ingest.py
 
 cd ../madis
-python extractMADIS.py
-python extractMetarQC.py
+python extract_madis.py
+python extract_metarqc.py
 python extract_hfmetar.py 0 &
 
 cd ../cocorahs

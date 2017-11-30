@@ -1,9 +1,10 @@
 """Generate the yearly PRISM file to hold our data """
-from pyiem import prism
-import netCDF4
 import datetime
-import numpy as np
 import sys
+
+import netCDF4
+import numpy as np
+from pyiem import prism
 
 
 def init_year(ts):
@@ -79,6 +80,7 @@ def init_year(ts):
     p01d.description = "Precipitation accumulation for the day"
 
     nc.close()
+
 
 if __name__ == '__main__':
     init_year(datetime.datetime(int(sys.argv[1]), 1, 1))

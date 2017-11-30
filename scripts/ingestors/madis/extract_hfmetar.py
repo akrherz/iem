@@ -10,13 +10,14 @@ import re
 import datetime
 import warnings
 
-import psycopg2
 import pytz
 import netCDF4
-from pyiem.datatypes import temperature, distance, pressure, speed
-from pyiem.observation import Observation
 import numpy as np
 from metar import Metar
+from pyiem.datatypes import temperature, distance, pressure, speed
+from pyiem.observation import Observation
+from pyiem.util import get_dbconn
+from pyiem.reference import TRACE_VALUE
 
 warnings.simplefilter('ignore', RuntimeWarning)
 
@@ -51,7 +52,7 @@ def tostring(val):
 
 def process(ncfn):
     """Process this file """
-    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('iem')
     icursor = pgconn.cursor()
     xref = {}
     icursor.execute("""SELECT id, network from stations where
@@ -174,7 +175,7 @@ def process(ncfn):
             elif data['precipAccum'][i] < 0.01 and data['precipAccum'][i] > 0:
                 # Trace
                 mtr += "P0000 "
-                iem.data['phour'] = 0.0001
+                iem.data['phour'] = TRACE_VALUE
 
         if tgroup != "T":
             mtr += "%s " % (tgroup, )

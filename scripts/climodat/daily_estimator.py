@@ -29,13 +29,14 @@ from __future__ import print_function
 import sys
 import datetime
 
+import netCDF4
+import numpy as np
+import psycopg2.extras
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 from pyiem.datatypes import temperature, distance
-import netCDF4
-import numpy as np
-import psycopg2.extras
+from pyiem.reference import TRACE_VALUE
 
 COOP = get_dbconn('coop')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -266,7 +267,7 @@ def estimate_precip(ts):
             precip = grid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
         # denote trace
         if precip > 0 and precip < 0.01:
-            nt.sts[sid]['precip'] = 0.0001
+            nt.sts[sid]['precip'] = TRACE_VALUE
         elif precip < 0:
             nt.sts[sid]['precip'] = 0
         elif np.isnan(precip) or np.ma.is_masked(precip):
@@ -281,7 +282,8 @@ def estimate_snow(ts):
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
                          'r')
     nc.set_auto_mask(True)
-    snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :], 'MM').value('IN')
+    snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :],
+                          'MM').value('IN')
     snowdgrid12 = distance(nc.variables['snowd_12z'][idx, :, :],
                            'MM').value('IN')
     nc.close()
