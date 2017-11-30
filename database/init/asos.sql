@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (4, now());
+INSERT into iem_schema_manager_version values (5, now());
 
 ---
 --- Store unknown stations
@@ -1138,3 +1138,221 @@ CREATE INDEX t2017_station_idx on t2017(station);
 CREATE INDEX t2017_valid_idx on t2017(valid);
 GRANT SELECT on t2017 to nobody,apache;
 GRANT ALL on t2017 to ldm,mesonet;
+
+create table t2018( 
+  CONSTRAINT __t2018_check 
+  CHECK(valid >= '2018-01-01 00:00+00'::timestamptz 
+        and valid < '2019-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2018_station_idx on t2018(station);
+CREATE INDEX t2018_valid_idx on t2018(valid);
+GRANT SELECT on t2018 to nobody,apache;
+GRANT ALL on t2018 to ldm,mesonet;
+
+---
+create table t2000_1minute( 
+  CONSTRAINT __t2000_1minute_check 
+  CHECK(valid >= '2000-01-01 00:00+00'::timestamptz 
+        and valid < '2001-01-01 00:00+00')) 
+  INHERITS (alldata_1minute);
+CREATE INDEX t2000_1minte_station_idx on t2000_1minute(station);
+CREATE INDEX t2000_1minute_valid_idx on t2000_1minute(valid);
+GRANT SELECT on t2000_1minute to nobody,apache;
+
+---
+create table t2001_1minute(
+  CONSTRAINT __t2001_1minute_check
+  CHECK(valid >= '2001-01-01 00:00+00'::timestamptz
+        and valid < '2002-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2001_1minte_station_idx on t2001_1minute(station);
+CREATE INDEX t2001_1minute_valid_idx on t2001_1minute(valid);
+GRANT SELECT on t2001_1minute to nobody,apache;
+    
+
+---
+create table t2002_1minute(
+  CONSTRAINT __t2002_1minute_check
+  CHECK(valid >= '2002-01-01 00:00+00'::timestamptz
+        and valid < '2003-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2002_1minte_station_idx on t2002_1minute(station);
+CREATE INDEX t2002_1minute_valid_idx on t2002_1minute(valid);
+GRANT SELECT on t2002_1minute to nobody,apache;
+    
+
+---
+create table t2003_1minute(
+  CONSTRAINT __t2003_1minute_check
+  CHECK(valid >= '2003-01-01 00:00+00'::timestamptz
+        and valid < '2004-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2003_1minte_station_idx on t2003_1minute(station);
+CREATE INDEX t2003_1minute_valid_idx on t2003_1minute(valid);
+GRANT SELECT on t2003_1minute to nobody,apache;
+    
+
+---
+create table t2004_1minute(
+  CONSTRAINT __t2004_1minute_check
+  CHECK(valid >= '2004-01-01 00:00+00'::timestamptz
+        and valid < '2005-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2004_1minte_station_idx on t2004_1minute(station);
+CREATE INDEX t2004_1minute_valid_idx on t2004_1minute(valid);
+GRANT SELECT on t2004_1minute to nobody,apache;
+    
+
+---
+create table t2005_1minute(
+  CONSTRAINT __t2005_1minute_check
+  CHECK(valid >= '2005-01-01 00:00+00'::timestamptz
+        and valid < '2006-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2005_1minte_station_idx on t2005_1minute(station);
+CREATE INDEX t2005_1minute_valid_idx on t2005_1minute(valid);
+GRANT SELECT on t2005_1minute to nobody,apache;
+    
+
+---
+create table t2006_1minute(
+  CONSTRAINT __t2006_1minute_check
+  CHECK(valid >= '2006-01-01 00:00+00'::timestamptz
+        and valid < '2007-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2006_1minte_station_idx on t2006_1minute(station);
+CREATE INDEX t2006_1minute_valid_idx on t2006_1minute(valid);
+GRANT SELECT on t2006_1minute to nobody,apache;
+    
+
+---
+create table t2007_1minute(
+  CONSTRAINT __t2007_1minute_check
+  CHECK(valid >= '2007-01-01 00:00+00'::timestamptz
+        and valid < '2008-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2007_1minte_station_idx on t2007_1minute(station);
+CREATE INDEX t2007_1minute_valid_idx on t2007_1minute(valid);
+GRANT SELECT on t2007_1minute to nobody,apache;
+    
+
+---
+create table t2008_1minute(
+  CONSTRAINT __t2008_1minute_check
+  CHECK(valid >= '2008-01-01 00:00+00'::timestamptz
+        and valid < '2009-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2008_1minte_station_idx on t2008_1minute(station);
+CREATE INDEX t2008_1minute_valid_idx on t2008_1minute(valid);
+GRANT SELECT on t2008_1minute to nobody,apache;
+    
+
+---
+create table t2009_1minute(
+  CONSTRAINT __t2009_1minute_check
+  CHECK(valid >= '2009-01-01 00:00+00'::timestamptz
+        and valid < '2010-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2009_1minte_station_idx on t2009_1minute(station);
+CREATE INDEX t2009_1minute_valid_idx on t2009_1minute(valid);
+GRANT SELECT on t2009_1minute to nobody,apache;
+    
+
+---
+create table t2010_1minute(
+  CONSTRAINT __t2010_1minute_check
+  CHECK(valid >= '2010-01-01 00:00+00'::timestamptz
+        and valid < '2011-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2010_1minte_station_idx on t2010_1minute(station);
+CREATE INDEX t2010_1minute_valid_idx on t2010_1minute(valid);
+GRANT SELECT on t2010_1minute to nobody,apache;
+    
+
+---
+create table t2011_1minute(
+  CONSTRAINT __t2011_1minute_check
+  CHECK(valid >= '2011-01-01 00:00+00'::timestamptz
+        and valid < '2012-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2011_1minte_station_idx on t2011_1minute(station);
+CREATE INDEX t2011_1minute_valid_idx on t2011_1minute(valid);
+GRANT SELECT on t2011_1minute to nobody,apache;
+    
+
+---
+create table t2012_1minute(
+  CONSTRAINT __t2012_1minute_check
+  CHECK(valid >= '2012-01-01 00:00+00'::timestamptz
+        and valid < '2013-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2012_1minte_station_idx on t2012_1minute(station);
+CREATE INDEX t2012_1minute_valid_idx on t2012_1minute(valid);
+GRANT SELECT on t2012_1minute to nobody,apache;
+    
+
+---
+create table t2013_1minute(
+  CONSTRAINT __t2013_1minute_check
+  CHECK(valid >= '2013-01-01 00:00+00'::timestamptz
+        and valid < '2014-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2013_1minte_station_idx on t2013_1minute(station);
+CREATE INDEX t2013_1minute_valid_idx on t2013_1minute(valid);
+GRANT SELECT on t2013_1minute to nobody,apache;
+    
+
+---
+create table t2014_1minute(
+  CONSTRAINT __t2014_1minute_check
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz
+        and valid < '2015-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2014_1minte_station_idx on t2014_1minute(station);
+CREATE INDEX t2014_1minute_valid_idx on t2014_1minute(valid);
+GRANT SELECT on t2014_1minute to nobody,apache;
+    
+
+---
+create table t2015_1minute(
+  CONSTRAINT __t2015_1minute_check
+  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
+        and valid < '2016-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2015_1minte_station_idx on t2015_1minute(station);
+CREATE INDEX t2015_1minute_valid_idx on t2015_1minute(valid);
+GRANT SELECT on t2015_1minute to nobody,apache;
+    
+
+---
+create table t2016_1minute(
+  CONSTRAINT __t2016_1minute_check
+  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz
+        and valid < '2017-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2016_1minte_station_idx on t2016_1minute(station);
+CREATE INDEX t2016_1minute_valid_idx on t2016_1minute(valid);
+GRANT SELECT on t2016_1minute to nobody,apache;
+    
+
+---
+create table t2017_1minute(
+  CONSTRAINT __t2017_1minute_check
+  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz
+        and valid < '2018-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2017_1minte_station_idx on t2017_1minute(station);
+CREATE INDEX t2017_1minute_valid_idx on t2017_1minute(valid);
+GRANT SELECT on t2017_1minute to nobody,apache;
+    
+
+---
+create table t2018_1minute(
+  CONSTRAINT __t2018_1minute_check
+  CHECK(valid >= '2018-01-01 00:00+00'::timestamptz
+        and valid < '2019-01-01 00:00+00'))
+  INHERITS (alldata_1minute);
+CREATE INDEX t2018_1minte_station_idx on t2018_1minute(station);
+CREATE INDEX t2018_1minute_valid_idx on t2018_1minute(valid);
+GRANT SELECT on t2018_1minute to nobody,apache;
+
