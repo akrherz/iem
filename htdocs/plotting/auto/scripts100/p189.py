@@ -11,14 +11,6 @@ BOOLS = {
     'no': 'No, do not plot regression'
     }
 META = {
-  'rain_days': {
-    'title': 'Station Average Number of Days of 1.25" Precipitation',
-    'ylabel': 'Number of Days',
-    'xlabel': 'Year',
-    'func': '',
-    'month_bounds': '',
-    'valid_offset': '',
-  },
   'annual_sum_precip': {
     'title': 'Annual Precipitation (rain + melted snow)',
     'ylabel': 'Precipitation [inches]',
@@ -146,22 +138,6 @@ def yearly_plot(ax, ctx):
            year <= %(last_year)s GROUP by year) as fall
          WHERE spring.year = fall.year ORDER by fall.year ASC
         """ % ctx, pgconn)
-    elif ctx['plot_type'] == 'rain_days':
-        ctx['st'] = ctx['station'][:2]
-        df = read_sql("""
-        select year as yr, avg(cnt) as data
-        from (
-            select station, year,
-            sum(case when precip >= 1.25 then 1 else 0 end) as cnt from
-        alldata_%(st)s WHERE
-        station in (select distinct station
-        from alldata_%(st)s where year = %(first_year)s
-        and precip > 0 and year >= %(first_year)s and
-        year <= %(last_year)s) and
-        station in (select id from stations where
-        network = '%(st)sCLIMATE' and climate_site = '%(station)s')
-        GROUP by station, year) as foo GROUP by yr ORDER by yr ASC
-        """ % ctx, pgconn)
     else:
         df = read_sql("""
         SELECT extract(year from (day %s)) as yr, %s as data
@@ -204,7 +180,13 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['description'] = """Create plots of yearly totals and optionally fit
-    a linear trendline.
+    a linear trendline.  Here is a brief description of some of the
+    available metrics.
+    <ul>
+     <li><strong>Frost Free Days</strong>: Number of days each year between
+     the last spring sub 32F temperature and first fall sub 32F temperature.
+     </li>
+    </ul>
     """
     pdict = dict()
     for varname in META:
@@ -213,7 +195,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
-        dict(type='select', options=pdict, default='rain_days',
+        dict(type='select', options=pdict, default='frost_free',
              label='Which metric to compute', name='plot_type'),
         dict(type='year', default=1951, name='first_year',
              label='First Year to Plot'),
