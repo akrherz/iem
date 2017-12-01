@@ -29,19 +29,19 @@ SFLAG31    269-269   Character
     TMAX = Maximum temperature (tenths of degrees C)
     TMIN = Minimum temperature (tenths of degrees C)
 """
-
+from __future__ import print_function
 import urllib2
 import os
 import datetime
 import numpy as np
-import psycopg2
 import sys
 import re
 import netCDF4
 from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
-COOP = psycopg2.connect(database='coop', host='iemdb')
+COOP = get_dbconn('coop')
 cursor = COOP.cursor()
 
 BASEDIR = "/mesonet/tmp"
@@ -109,18 +109,18 @@ def get_file(station):
                                                                         ncdc)
     localfn = "%s/USC00%s.dly" % (BASEDIR, ncdc)
     if not os.path.isfile(localfn):
-        print 'Downloading from NCDC station: %s...' % (ncdc, ),
+        print('Downloading from NCDC station: %s...' % (ncdc, ), end='')
         try:
             data = urllib2.urlopen(uri)
         except Exception, exp:
-            print exp
+            print(exp)
             return None
         o = open(localfn, 'w')
         o.write(data.read())
         o.close()
-        print 'done.'
+        print('done.')
     else:
-        print '%s is cached...' % (localfn,)
+        print('%s is cached...' % (localfn,))
     return open(localfn, 'r')
 
 
@@ -294,7 +294,7 @@ def process(station, metadata):
             """+table+""" where station = %s""", (station,))
     for row in cursor:
         obs[row[0]] = row[1:]
-    print 'loadvars'
+    print('loadvars')
     pr_mflag = nc.variables['pr_mflag'][:]
     pr_sflag = nc.variables['pr_sflag'][:]
     pr_qflag = nc.variables['pr_qflag'][:]
@@ -353,7 +353,7 @@ def process(station, metadata):
             tmin[offset] = temperature(data[d].get('TMIN'),
                                        'F').value('K')
         if row is None:
-            print 'No data for %s %s' % (station, d)
+            print('No data for %s %s' % (station, d))
             cursor.execute("""
                 INSERT into %s(station, day, sday,
                 year, month) VALUES ('%s', '%s', '%s', %s, %s)
@@ -364,32 +364,32 @@ def process(station, metadata):
         s = ""
         if (data[d].get('TMAX') is not None and
                 (row[0] is None or row[0] != data[d]['TMAX'])):
-            print 'Update %s High   %5s -> %5s' % (d, row[0],
-                                                   data[d]['TMAX'])
+            print(('Update %s High   %5s -> %5s'
+                   ) % (d, row[0], data[d]['TMAX']))
             s += "high = %.0f," % (data[d]['TMAX'],)
 
         if (data[d].get('TMIN') is not None and
                 (row[1] is None or row[1] != data[d]['TMIN'])):
-            print 'Update %s Low    %5s -> %5s' % (d, row[1],
-                                                   data[d]['TMIN'])
+            print(('Update %s Low    %5s -> %5s'
+                   ) % (d, row[1], data[d]['TMIN']))
             s += "low = %.0f," % (data[d]['TMIN'],)
 
         if (data[d].get('PRCP') is not None and
                 (row[2] is None or row[2] != data[d]['PRCP'])):
-            print 'Update %s Precip %5s -> %5s' % (d, row[2],
-                                                   data[d]['PRCP'])
+            print(('Update %s Precip %5s -> %5s'
+                   ) % (d, row[2], data[d]['PRCP']))
             s += "precip = %.2f," % (data[d]['PRCP'],)
 
         if (data[d].get('SNOW') is not None and
                 (row[3] is None or row[3] != data[d]['SNOW'])):
-            print 'Update %s Snow   %5s -> %5s' % (d, row[3],
-                                                   data[d]['SNOW'])
+            print(('Update %s Snow   %5s -> %5s'
+                   ) % (d, row[3], data[d]['SNOW']))
             s += "snow = %.1f," % (data[d]['SNOW'],)
 
         if (data[d].get('SNWD') is not None and
                 (row[4] is None or row[4] != data[d]['SNWD'])):
-            print 'Update %s Snowd  %5s -> %5s' % (d, row[4],
-                                                   data[d]['SNWD'])
+            print(('Update %s Snowd  %5s -> %5s'
+                   ) % (d, row[4], data[d]['SNWD']))
             s += "snowd = %.1f," % (data[d]['SNWD'],)
 
         if s != "":
@@ -436,31 +436,30 @@ def process(station, metadata):
     # print 'done'
 
 
-def main():
+def main(argv):
     """ go main go """
-    station = sys.argv[1]
+    station = argv[1]
     if len(station) == 2:
         # we have a state!
         nt = NetworkTable("%sCLIMATE" % (station,))
-        for sid in nt.sts.keys():
+        for sid in nt.sts:
             if sid[2:] == '0000' or sid[2] == 'C':
                 continue
             process(sid, nt.sts[sid])
     elif station == 'ALL':
-        for state in STCONV.keys():
+        for state in STCONV:
             nt = NetworkTable("%sCLIMATE" % (state,))
-            for sid in nt.sts.keys():
+            for sid in nt.sts:
                 if sid[2:] == '0000' or sid[2] == 'C':
                     continue
                 process(sid, nt.sts[sid])
     else:
-        station = sys.argv[1]
         nt = NetworkTable("%sCLIMATE" % (station[:2],))
         process(sys.argv[1], nt.sts[station])
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
     cursor.close()
     COOP.commit()
     COOP.close()

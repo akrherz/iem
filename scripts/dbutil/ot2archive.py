@@ -2,13 +2,14 @@
 Dump iem database of OT data to archive
 Runs at 00 and 12 UTC
 """
+from __future__ import print_function
 import datetime
 import sys
-import pytz
 import psycopg2.extras
+from pyiem.util import get_dbconn, utc
 
-OTHER = psycopg2.connect(database='other', host='iemdb')
-IEM = psycopg2.connect(database='iem', host='iemdb')
+OTHER = get_dbconn('other')
+IEM = get_dbconn('iem')
 
 
 def dowork(ts, ts2):
@@ -25,6 +26,8 @@ def dowork(ts, ts2):
         (t.iemid = c.iemid) WHERE valid >= '%s' and valid < '%s'
         and t.network = 'OT'""" % (ts, ts2)
     icursor.execute(sql)
+    if icursor.rowcount == 0:
+        print("ot2archive found no results for ts: %s ts2: %s" % (ts, ts2))
 
     for row in icursor:
         pday = 0
@@ -49,9 +52,7 @@ def dowork(ts, ts2):
 
 def main(argv):
     """Run for a given UTC date"""
-    ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-    ts = ts.replace(hour=0, second=0, minute=0, microsecond=0,
-                    tzinfo=pytz.timezone("UTC"))
+    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     ts2 = ts + datetime.timedelta(hours=24)
     dowork(ts, ts2)
 

@@ -1,18 +1,18 @@
 """The IEM summary table has a coop_valid column that tracks when the SHEF
 COOP report was valid.  This was not around in the database from day1, so we
 should backfill it"""
-import psycopg2
+from __future__ import print_function
 import sys
-from pandas.io.sql import read_sql
 import datetime
 
-IEM = psycopg2.connect(database='iem', host='iemdb',
-                       user='mesonet')
-HADS = psycopg2.connect(database='hads', host='iemdb-hads',
-                        user='mesonet')
+from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
+
+IEM = get_dbconn('iem')
+HADS = get_dbconn('hads')
 
 
-def do(iemid, row):
+def workflow(iemid, row):
     # 1. Figure out dates we need to process
     hcursor = HADS.cursor()
     icursor = IEM.cursor()
@@ -55,6 +55,7 @@ def do(iemid, row):
 
 
 def main(argv):
+    """Go Main Go"""
     network = argv[1]
     # 1. Find stations in 2016 that reported a coop_valid
     df = read_sql("""
@@ -67,7 +68,8 @@ def main(argv):
     for iemid, row in df.iterrows():
         if row['coop_valid_begin'] is None:
             continue
-        do(iemid, row)
+        workflow(iemid, row)
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -3,12 +3,13 @@
 called from RUN_2AM.sh
 """
 from __future__ import print_function
-import psycopg2
+
+from pyiem.util import get_dbconn
 
 
 def main():
     """Clean AFOS and friends"""
-    pgconn = psycopg2.connect(database='afos', host='iemdb')
+    pgconn = get_dbconn('afos')
     acursor = pgconn.cursor()
 
     acursor.execute("""
@@ -24,7 +25,7 @@ def main():
     pgconn.commit()
 
     # Clean Postgis
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 
     cursor.execute("""DELETE from text_products where geom is null""")

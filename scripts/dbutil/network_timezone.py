@@ -2,12 +2,12 @@
 Need something to set the time zone of networks
 """
 from __future__ import print_function
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go!"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    pgconn = get_dbconn('mesosite')
     mcursor = pgconn.cursor()
     mcursor2 = pgconn.cursor()
 
