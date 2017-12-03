@@ -7,6 +7,7 @@ define("IEM_APPID", 1);
 include_once '../include/myview.php';
 include_once '../include/generators.php';
 include_once '../include/iemprop.php';
+include_once '../include/cameras.inc.php';
 
 $t = new MyView();
 $t->headextra = <<<EOF
@@ -14,8 +15,175 @@ $t->headextra = <<<EOF
   title="IEM News + Notes Feed" 
   href="/rss.php" />
 EOF;
-$t->feature = gen_feature($t);
-$t->iemperf = get_website_stats();
-$t->lsr_snow = get_iemprop("homepage.lsrmap.on");
-$t->render('homepage.phtml');
+$feature = gen_feature($t);
+$iemperf = get_website_stats();
+$lsr_snow = get_iemprop("homepage.lsrmap.on");
+
+$rancam = "";
+$loop = 0;
+while ($rancam == "" && $loop < 20)
+{
+    srand ((float) microtime() * 10000000);
+    $cam = array_rand($cameras);
+    if (@filemtime("/home/ldm/data/camera/stills/${cam}.jpg") > (time() - 1200))
+    {
+        $rancam = $cam;
+    }
+    $loop += 1;
+}
+if ($rancam == ""){ $rancam = "KCCI-016";}
+
+$lsrsnow = "";
+$nunce = time();
+if ($lsr_snow == 'true'){
+    $lsrsnow =  <<<EOM
+<div class="panel panel-default">
+<div class="panel-heading">NWS Snowfall Reports:</div>
+  <div class="panel-body">
+<a href="/data/lsr_snowfall.png">
+<img src="/data/lsr_snowfall.png?{$nunce}" border="0" alt="LSR Snowfall" class="img img-responsive"/></a>
+  <a href="/lsr/#DMX,DVN,ARX,FSD,OAX/-43200">View Snowfall Reports on Map</a>
+  </div>
+</div>
+EOM;
+}
+
+$pgconn = iemdb("mesosite");
+$rs = pg_query($pgconn, "SELECT * from news ORDER by entered DESC LIMIT 5");
+
+$today = mktime(0,0,0, date("m"), date("d"), date("Y"));
+
+$news = "";
+for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
+    $ts = strtotime(substr($row["entered"],0,16));
+    if ($ts > $today) $sts = strftime("%I:%M %p", $ts);
+    $news .= $sts = strftime("%d %b %I:%M %p", $ts);
+    $news .= "<p><a href=\"/onsite/news.phtml?id=".$row["id"]."\">". $row["title"] ."</a><br /><i>Posted:</i> $sts</li>\n";
+}
+
+$t->content = <<<EOM
+      <div class="row">
+
+        <div class="col-sm-9">
+       
+ <p>The Iowa Environmental Mesonet (IEM) collects environmental data from 
+ cooperating members with observing networks. The data are stored and made 
+ available on this website.</p>
+
+ <div class="row">
+<div class="col-xs-12 col-sm-4">
+<a href="/agweather/" class="btn btn-default btn-block agweather">Ag Weather</a>
+</div>
+<div class="col-xs-12 col-sm-4">
+<a href="/nws/" class="btn btn-default btn-block nws">NWS Users</a>
+</div>
+<div class="col-xs-12 col-sm-4">
+<a href="/archive/" class="btn btn-default btn-block book">Researchers</a>
+</div>
+</div>
+	
+{$feature}		
+        </div><!--/col-sm-9-->
+        <div class="col-sm-3">
+
+{$lsrsnow}
+
+<div class="panel panel-default">
+  <div class="panel-heading">{$cameras[$rancam]["name"]}, {$cameras[$rancam]["state"]} Webcam:</div>
+  <div class="panel-body">
+<a href="/current/webcam.php#{$cameras[$rancam]["network"]}-0"><img src="/data/camera/stills/{$rancam}.jpg?{$nunce}" border="0" alt="Webcam" class="img-responsive"/></a>
+<a href="/current/webcam.php#{$cameras[$rancam]["network"]}-0">View other webcams</a>
+  
+  </div>
+</div>
+
+
+<div class="panel panel-default">
+  <div class="panel-heading">Most Popular (<a href="/apps.php">List Apps</a>)</div>
+  <div class="panel-body">
+<a href="/plotting/auto/">Automated Data Plotting</a>
+<br /><a href="/climodat/">Climodat Reports</a>
+<br /><a href="/timemachine/#1.0">Iowa Mesonet Plot</a>
+  [<a href="/current/loop.phtml?prod=mesonet">Loop</a>]
+<br /><a href="/current/mcview.phtml?prod=comprad&amp;java=none&amp;mode=realtime&amp;frames=1">Current NEXRAD</a> [<a href="/current/mcview.phtml">Loop</a>]
+<br /><a href="/rainfall/">IEM GIS Rainfall</a>
+<br /><a href="/my/current.phtml">Sortable Currents</a>
+<br /><a href="/lsr/#DMX,DVN,ARX,FSD,OAX/-43200">View Storm Reports on Map</a>
+<br /><a href="/onsite/features/tags/winter1617.html">Winter Storms of 2016-2017</a>
+
+    </div>
+</div>
+
+
+<div class="panel panel-default">
+  <div class="panel-heading">News Items &nbsp; <a href="/rss.php"><img src="/images/rss.gif" /></a></div>
+  <div class="panel-body">
+
+{$news}
+
+<p><b class='fa fa-envelope'></b>
+<a href="/mailman/listinfo/dailyb">Sign up</a> for the 
+<a href="/data/iemdb.html">Daily Bulletin</a></p>
+
+  </div>
+</div>
+
+{$iemperf}
+
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+<!-- Three columns highlighting stuff -->
+<div class="row">
+    <div class="col-sm-4">
+        <h3>RADAR Products</h3>
+        <a href="/timemachine/#2.0"><img src="/data/mwcomp.png" class="img-responsive" /></a>
+        <p>The IEM processes National Weather Service NEXRAD information
+        in real-time to produce and archive many products. This includes a 
+        generated <a href="/docs/nexrad_composites/">composite</a> produced
+        every five minutes dating back to 1995!</p>
+        <p><a class="btn" href="/current/radar.phtml">View more products &raquo;</a></p>
+    </div>
+    <div class="col-sm-4">
+        <h3>Precipitation</h3>
+        <a href="/timemachine/#82.0"><img src="/data/iowa_ifc_1d.png" class="img-responsive" /></a>
+        <p>Besides point observations of precipitation, the IEM also processes
+        gridded rainfall products made available by NOAA.  This information
+        is archived and made available in GIS ready formats.</p>
+        <p><a class="btn" href="/rainfall/">Download Precipitation for GIS &raquo;</a></p>
+    </div>
+    <div class="col-sm-4">
+        <h3>Current Data</h3>
+        <a href="/timemachine/#1.0"><img src="/data/mesonet.gif" class="img-responsive" /></a>
+        <p>The IEM combines data from participating networks into products
+        like maps shown above and web applications to analyze the data.</p>
+        <p><a class="btn" href="/current/">More current products &raquo;</a></p>
+    </div>
+</div><!--/row-->
+
+<div class="row clearfix well">
+<div class="col-sm-2"><h4>Partners:</h4></div>
+<div class='col-sm-4'>
+<a href="http://www.agron.iastate.edu/"><img
+src="/images/agronomy.png" alt="ISU Agronomy" class="img img-responsive"></a>
+</div>
+<div class='col-sm-2'>
+<a href="http://www.iihr.uiowa.edu"><img src="/images/iihrlogo.jpg"
+  alt="IIHR - University of Iowa" class="img img-responsive" /></a>
+</div>
+<div class='col-sm-3'>
+ <a href="http://www.iowadot.gov"><img src="/images/iowadot.png"
+ alt="DOT" class="img img-responsive" style="max-height: 50px;"/></a>
+</div>
+<div class='col-sm-1'>
+  <a href="http://www.weather.gov/dmx/"><img src="/images/nws.gif"
+  alt="NWS" class="img img-responsive" /></a>
+</div>
+
+</div>
+
+EOM;
+
+$t->render('full.phtml');
 ?>
