@@ -267,17 +267,11 @@ $mapdiv = <<<EOM
   </div>
   <div class="col-md-3">
     <div class="form-group">
-        <label for="timeslider">Time Slider</label>
+        <label for="timeslider">Time <span id="radartime"></span></label>
         <div id="timeslider" class="form-control"></div>
     </div>
   </div>
 </div>
-<div class="row">
-  <div class="col-md-12">
-    <strong>Currently Displaying:</strong> @ <span id="radartime"></span>
-  </div>
-</div>
-
 
 <div id="map"></div>
 <div id="popup" class="ol-popup"></div>

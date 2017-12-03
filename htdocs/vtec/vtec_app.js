@@ -778,7 +778,7 @@ function buildUI(){
         		return;
         	}
         	CONFIG.radarProductTime = radartimes[ui.value];
-        	$("#radartime").html(radartimes[ui.value].format());
+        	$("#radartime").html(radartimes[ui.value].format("D MMM YYYY h:m A"));
         	radarTMSLayer.setSource(getRADARSource());
     		updateHash();
         }
