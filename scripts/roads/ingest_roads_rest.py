@@ -41,7 +41,7 @@ import psycopg2.extras
 from shapely.wkb import loads
 import shapefile
 import requests
-from pyiem.util import exponential_backoff
+from pyiem.util import exponential_backoff, get_dbconn
 
 URI = ("https://iowadot.maps.arcgis.com/sharing/rest/content/items/"
        "5d6c7d6963e549539ead6e50d89bdd08/data")
@@ -140,7 +140,7 @@ def export_shapefile(txn, utc):
 
 def main():
     """Go something greatish"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     lookup = {}

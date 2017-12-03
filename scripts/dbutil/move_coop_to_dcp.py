@@ -5,15 +5,15 @@
 from __future__ import print_function
 import subprocess
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """GO!"""
-    ipgconn = psycopg2.connect(database='iem', host='iemdb')
+    ipgconn = get_dbconn('iem')
     icursor = ipgconn.cursor()
     icursor2 = ipgconn.cursor()
-    mpgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    mpgconn = get_dbconn('mesosite')
     mcursor = mpgconn.cursor()
     mcursor2 = mpgconn.cursor()
 

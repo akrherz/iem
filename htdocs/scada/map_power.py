@@ -2,20 +2,20 @@
 """
   Generate a simple scatter plot of power...
 """
-from pyiem.meteorology import uv
-from pyiem.datatypes import speed, direction
-import numpy as np
-import psycopg2
 import cgi
-import os
 import sys
 import datetime
+
+import numpy as np
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.colors as mpcolors  # NOPEP8
 import matplotlib.colorbar as mpcolorbar  # NOPEP8
 import matplotlib.patheffects as PathEffects  # NOPEP8
+from pyiem.meteorology import uv
+from pyiem.datatypes import speed, direction
+from pyiem.util import get_dbconn
 
 
 def make_colorbar(clevs, norm, cmap):
@@ -46,9 +46,8 @@ def make_colorbar(clevs, norm, cmap):
 
 def do(valid, yawsource):
     """ Generate plot for a given timestamp """
-    PGCONN = psycopg2.connect(database='scada', host='iemdb',
-                              user='nobody')
-    cursor = PGCONN.cursor()
+    pgconn = get_dbconn('scada')
+    cursor = pgconn.cursor()
 
     cursor.execute("""select turbine_id, power, lon, lat,
     yawangle, windspeed, alpha1

@@ -5,8 +5,9 @@
   lots of writes and autovac sometimes can not keep up.
 """
 import sys
-import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+from pyiem.util import get_dbconn
+
+IEM = get_dbconn('iem', user='nobody')
 icursor = IEM.cursor()
 
 
@@ -18,6 +19,7 @@ def check():
     row = icursor.fetchone()
 
     return row
+
 
 if __name__ == '__main__':
     dbname, count = check()

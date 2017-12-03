@@ -12,6 +12,7 @@ import pytz
 import psycopg2.extras
 from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
+from pyiem.util import get_dbconn
 
 
 def check_load():
@@ -20,8 +21,7 @@ def check_load():
         sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
         sys.exit()
     for i in range(5):
-        pgconn = psycopg2.connect(database='mesosite', host='iemdb',
-                                  user='nobody')
+        pgconn = get_dbconn('mesosite')
         mcursor = pgconn.cursor()
         mcursor.execute("""
         select pid from pg_stat_activity where query ~* 'FETCH'
@@ -67,7 +67,7 @@ def get_time_bounds(form, tzinfo):
     # Construct dt instances in the right timezone, this logic sucks, but is
     # valid, have to go to UTC first then back to the local timezone
     sts = datetime.datetime.utcnow()
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = sts.replace(tzinfo=pytz.utc)
     sts = sts.astimezone(tzinfo)
     ets = sts
     try:
@@ -96,7 +96,7 @@ def main():
         sys.stdout.write("Invalid Timezone (tz) provided")
         sys.stderr.write("asos.py invalid tz: %s\n" % (exp, ))
         sys.exit()
-    pgconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('asos')
     acursor = pgconn.cursor('mystream',
                             cursor_factory=psycopg2.extras.DictCursor)
 
@@ -150,9 +150,8 @@ def main():
     gisextra = False
     if form.getfirst("latlon", "no") == "yes":
         gisextra = True
-        MESOSITE = psycopg2.connect(database='mesosite', host='iemdb',
-                                    user='nobody')
-        mcursor = MESOSITE.cursor()
+        mesosite = get_dbconn('mesosite')
+        mcursor = mesosite.cursor()
         mcursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat
              from stations WHERE id in %s
              and (network ~* 'AWOS' or network ~* 'ASOS')

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Plot 2 day Timeseries from one Turbine"""
-import psycopg2
 import cgi
 import datetime
 import sys
@@ -10,13 +9,13 @@ import matplotlib
 matplotlib.use("agg")
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.dates as mdates  # NOPEP8
+from pyiem.util import get_dbconn  # NOPEP8
 
-PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
-                          user='mesonet')
+PGCONN = get_dbconn('mec', user='mesonet')
 cursor = PGCONN.cursor()
 
 
-def main(turbinename, ts):
+def workflow(turbinename, ts):
     """Go main()"""
     cursor.execute("""SELECT unitnumber from turbines
     where turbinename = %s""", (turbinename,))
@@ -83,10 +82,16 @@ def main(turbinename, ts):
                                     tz=pytz.timezone("America/Chicago")))
     plt.savefig(sys.stdout)
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go"""
     sys.stdout.write("Content-type: image/png\n\n")
     form = cgi.FieldStorage()
     turbinename = form.getfirst('turbinename', 'I 050-350')
     ts = datetime.datetime.strptime(form.getfirst('date', "20100401"),
                                     "%Y%m%d")
-    main(turbinename, ts)
+    workflow(turbinename, ts)
+
+
+if __name__ == '__main__':
+    main()

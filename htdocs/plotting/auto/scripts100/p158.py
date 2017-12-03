@@ -2,11 +2,10 @@
 import datetime
 
 import pytz
-import psycopg2
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -32,8 +31,8 @@ def get_description():
 
 def get_context(fdict):
     """Get plot context"""
-    pgconn = psycopg2.connect(database='talltowers',
-                              host='talltowers-db.local', user='tt_web')
+    pgconn = get_dbconn('talltowers',
+                        host='talltowers-db.local', user='tt_web')
     ctx = get_autoplot_context(fdict, get_description())
     dt = ctx['dt']
     station = ctx['station']

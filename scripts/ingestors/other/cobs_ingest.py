@@ -8,10 +8,10 @@ import os
 import sys
 
 import pandas as pd
-import psycopg2
 import pytz
-from pyiem.observation import Observation
 from pint import UnitRegistry
+from pyiem.observation import Observation
+from pyiem.util import get_dbconn
 
 UREG = UnitRegistry()
 QUANTITY = UREG.Quantity
@@ -92,7 +92,7 @@ def database(lastob, ddf, hdf, force_currentlog):
     if lastob is not None and maxts <= lastob:
         # print("maxts: %s lastob: %s" % (maxts, lastob))
         return
-    iemdb = psycopg2.connect(database='iem', host='iemdb')
+    iemdb = get_dbconn('iem')
     icursor = iemdb.cursor()
     if lastob is None:
         df2 = hdf
@@ -128,7 +128,7 @@ def database(lastob, ddf, hdf, force_currentlog):
 
 def get_last():
     """Get the last timestamp"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""SELECT valid at time zone 'UTC'
     from current c JOIN stations t

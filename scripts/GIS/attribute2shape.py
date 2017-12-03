@@ -12,6 +12,7 @@ import datetime
 import pytz
 import shapefile
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
 INFORMATION = """
    Iowa Environmental Mesonet
@@ -95,7 +96,7 @@ def shpschema():
 
 def main():
     """Go Main Go"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     os.chdir("/tmp")

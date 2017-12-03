@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-
+"""geojson"""
 import json
 import sys
-import psycopg2
 
-dbconn = psycopg2.connect(database='mec', host='iemdb', user='nobody')
-cursor = dbconn.cursor()
+from pyiem.util import get_dbconn
 
-if __name__ == '__main__':
+
+def main():
+    """GO Main"""
+    dbconn = get_dbconn('mec')
+    cursor = dbconn.cursor()
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
@@ -32,3 +34,7 @@ if __name__ == '__main__':
                                  })
 
     sys.stdout.write(json.dumps(data))
+
+
+if __name__ == '__main__':
+    main()

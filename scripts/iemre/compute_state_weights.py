@@ -4,9 +4,9 @@ import os
 import datetime
 
 import netCDF4
+import numpy as np
 from pyiem import iemre
 from pyiem.util import get_dbconn
-import numpy as np
 
 POSTGIS = get_dbconn('postgis')
 

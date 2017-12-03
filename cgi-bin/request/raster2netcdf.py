@@ -11,10 +11,10 @@ import datetime
 import tempfile
 
 import numpy as np
-import psycopg2
 import pytz
 import netCDF4
 from PIL import Image
+from pyiem.util import get_dbconn
 
 
 def send_error(msg):
@@ -40,8 +40,7 @@ def get_gridinfo(filename, xpoints, ypoints):
 
 def get_table(prod):
     """Return our lookup table"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb',
-                              user='nobody')
+    pgconn = get_dbconn('mesosite', user='nobody')
     cursor = pgconn.cursor()
     xref = [1.e20]*256
     cursor.execute("""

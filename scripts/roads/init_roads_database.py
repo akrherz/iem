@@ -7,8 +7,8 @@ import sys
 import json
 
 from shapely.geometry import LineString, MultiLineString
-import psycopg2
 import requests
+from pyiem.util import get_dbconn
 
 URI = ("https://iowadot.maps.arcgis.com/sharing/rest/content/items/"
        "5d6c7d6963e549539ead6e50d89bdd08/data")
@@ -16,7 +16,7 @@ URI = ("https://iowadot.maps.arcgis.com/sharing/rest/content/items/"
 
 def main():
     """Go Main, please"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
     cursor.execute("""
     DELETE from roads_current

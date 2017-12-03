@@ -8,9 +8,8 @@ import sys
 import cgi
 import StringIO
 # import cgitb
-import psycopg2
 import shapefile
-import pytz
+from pyiem.util import get_dbconn, utc
 # cgitb.enable()
 
 
@@ -32,12 +31,10 @@ def get_context():
     minute1 = form.getfirst('minute1')
     minute2 = form.getfirst('minute2')
 
-    sts = datetime.datetime(int(year1), int(month1), int(day1),
-                            int(hour1), int(minute1))
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-    ets = datetime.datetime(int(year2), int(month2), int(day2),
-                            int(hour2), int(minute2))
-    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    sts = utc(int(year1), int(month1), int(day1),
+              int(hour1), int(minute1))
+    ets = utc(int(year2), int(month2), int(day2),
+              int(hour2), int(minute2))
     if ets < sts:
         s = ets
         ets = sts
@@ -50,7 +47,7 @@ def get_context():
 
 
 def run(ctx):
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis', user='nobody')
     cursor = pgconn.cursor()
 
     """

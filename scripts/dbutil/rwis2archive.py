@@ -9,18 +9,16 @@ from __future__ import print_function
 import datetime
 import sys
 
-import pytz
 import psycopg2.extras
+from pyiem.util import get_dbconn, utc
 
 
 def main(argv):
     """Go main"""
-    iemdb = psycopg2.connect(database="iem", host='iemdb')
-    rwisdb = psycopg2.connect(database="rwis", host='iemdb')
+    iemdb = get_dbconn("iem")
+    rwisdb = get_dbconn("rwis")
 
-    ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-    ts = ts.replace(hour=0, second=0, minute=0, microsecond=0,
-                    tzinfo=pytz.timezone("UTC"))
+    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     ts2 = ts + datetime.timedelta(hours=24)
     rcursor = rwisdb.cursor()
     # Remove previous entries for this UTC date

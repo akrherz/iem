@@ -6,9 +6,9 @@ import os
 
 import osgeo.gdal as gdal
 from osgeo import gdalconst
-import psycopg2
+from pyiem.util import get_dbconn
 
-PGCONN = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+PGCONN = get_dbconn('mesosite', user='nobody')
 CURSOR = PGCONN.cursor()
 
 

@@ -2,20 +2,20 @@
 """
   Generate a simple scatter plot of power...
 """
-from pyiem.meteorology import uv
-from pyiem.datatypes import speed, direction
-import numpy as np
-import psycopg2
 import cgi
-import os
 import sys
 import datetime
+
+import numpy as np
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.colors as mpcolors  # NOPEP8
 import matplotlib.colorbar as mpcolorbar  # NOPEP8
 import matplotlib.patheffects as PathEffects  # NOPEP8
+from pyiem.meteorology import uv
+from pyiem.datatypes import speed, direction
+from pyiem.util import get_dbconn
 
 
 def make_colorbar(clevs, norm, cmap):
@@ -50,13 +50,8 @@ def do(valid, yawsource):
         return
     yawdict = {'yaw': 'Orginal', 'yaw2': 'daryl corrected',
                'yaw3': 'daryl v2'}
-    if os.environ.get("SERVER_NAME", "") == 'iem.local':
-        PGCONN = psycopg2.connect(database='mec', host='localhost',
-                                  port='5555', user='mesonet')
-    else:
-        PGCONN = psycopg2.connect(database='mec', host='iemdb', port='5432',
-                                  user='mesonet')
-    cursor = PGCONN.cursor()
+    pgconn = get_dbconn('mec')
+    cursor = pgconn.cursor()
 
     cursor.execute("""select turbineid, power, ST_x(geom), ST_y(geom),
     """+yawsource+""", windspeed, pitch
@@ -162,11 +157,15 @@ def do(valid, yawsource):
     plt.savefig(sys.stdout)
 
 
-if __name__ == '__main__':
-    # Go main Go
+def main():
+    """Go Main Go"""
     form = cgi.FieldStorage()
     ts = form.getfirst('ts', '200006302000')
     ts = datetime.datetime.strptime(ts, '%Y%m%d%H%M')
     yawsource = form.getfirst('yawsource', 'yaw')
     sys.stdout.write("Content-type: image/png\n\n")
     do(ts, yawsource)
+
+
+if __name__ == '__main__':
+    main()

@@ -6,20 +6,20 @@ import cgi
 import sys
 import datetime
 
-import psycopg2
 import pytz
 import memcache
+from pyiem.util import get_dbconn
 
 
 def get_data(product):
     """ Go get this product from the database
     201410071957-KDMX-FXUS63-AFDDMX
     """
-    pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+    pgconn = get_dbconn('afos')
     cursor = pgconn.cursor()
 
     ts = datetime.datetime.strptime(product[:12], "%Y%m%d%H%M")
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
 
     source = product[13:17]
     pil = product[25:]

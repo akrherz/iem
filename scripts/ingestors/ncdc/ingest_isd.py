@@ -4,17 +4,15 @@ from __future__ import print_function
 import sys
 import subprocess
 import os
-import datetime
 
-import pytz
-from pyiem.ncei import ds3505
-import psycopg2
 import tqdm
+from pyiem.ncei import ds3505
+from pyiem.util import get_dbconn, utc
 
 
 def main(argv):
     """Go"""
-    pgconn = psycopg2.connect(database='asos', host='iemdb')
+    pgconn = get_dbconn('asos')
     airforce = int(argv[1])
     wban = int(argv[2])
     faa = argv[3]
@@ -23,7 +21,7 @@ def main(argv):
     failedyears = []
     msgs = []
     for year in tqdm.tqdm(range(year, year2)):
-        sts = datetime.datetime(year, 1, 1).replace(tzinfo=pytz.utc)
+        sts = utc(year, 1, 1)
         ets = sts.replace(year=year+1)
         cursor = pgconn.cursor()
         lfn = "%06i-%05i-%s" % (airforce, wban, year)

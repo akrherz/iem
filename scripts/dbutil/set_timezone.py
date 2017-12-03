@@ -4,12 +4,13 @@ Set time zones of stations using the shapefile found here:
 http://efele.net/maps/tz/world/
 """
 from __future__ import print_function
-import psycopg2
+
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go Main"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    pgconn = get_dbconn('mesosite')
     mcursor = pgconn.cursor()
     mcursor2 = pgconn.cursor()
 

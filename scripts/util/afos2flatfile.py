@@ -4,9 +4,9 @@ from __future__ import print_function
 import datetime
 import subprocess
 
-import psycopg2
+from pyiem.util import get_dbconn
 
-pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+pgconn = get_dbconn('afos', user='nobody')
 cursor = pgconn.cursor()
 
 pils = ("LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|"

@@ -5,14 +5,15 @@ import datetime
 
 import netCDF4
 import numpy as np
-import psycopg2
+import psycopg2.extras
+from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre, datatypes
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from scipy.interpolate import NearestNDInterpolator
+from pyiem.util import get_dbconn
 
 NT = NetworkTable(["%sCLIMATE" % (abbr, ) for abbr in state_names])
-COOP = psycopg2.connect(database='coop', user='nobody', host='iemdb')
+COOP = get_dbconn('coop', user='nobody')
 
 
 def generic_gridder(nc, cursor, idx):

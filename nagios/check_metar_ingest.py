@@ -3,12 +3,12 @@
 """
 import sys
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def check():
     """Do the check"""
-    pgconn = psycopg2.connect(database='iem', host=sys.argv[1], user='nobody')
+    pgconn = get_dbconn('iem', host=sys.argv[1], user='nobody')
     icursor = pgconn.cursor()
     icursor.execute("""SELECT count(*) from current c JOIN stations s on
     (s.iemid = c.iemid)

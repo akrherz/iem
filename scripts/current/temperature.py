@@ -2,15 +2,14 @@
 from __future__ import print_function
 import datetime
 
-from pyiem.plot import MapPlot
-import pandas as pd
 from pandas.io.sql import read_sql
-import psycopg2
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 
 def get_df():
     """Get my data"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
 
     return read_sql("""
       SELECT s.id as station, s.network, tmpf, drct, sknt,

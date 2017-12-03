@@ -1,19 +1,19 @@
 """ Dump out obs from the database for use by other apps """
 import subprocess
 import os
+import datetime
 
-import mx.DateTime
 import shapefile
 import psycopg2.extras
-
-PGCONN = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go main!"""
-    icursor = PGCONN.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('iem', user='nobody')
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    now = mx.DateTime.now()
+    now = datetime.datetime.now()
     dateStr = now.strftime("%y%m%d/1200")
     ts = now.strftime('%Y%m%d')
     yyyy = now.strftime('%Y')
@@ -74,8 +74,9 @@ def main():
         cob[thisStation]["SMOI"] = round(float(thisSnow), 2)
 
     csv = open('coop.csv', 'w')
-    csv.write('nwsli,site_name,longitude,latitude,date,time,high_f,low_f,prec_in,')
-    csv.write('snow_in,snow_depth_in,prec_mon_in,snow_mon_in,elevation_m\n')
+    csv.write(('nwsli,site_name,longitude,latitude,date,time,high_f,low_f,'
+               'prec_in,snow_in,snow_depth_in,prec_mon_in,snow_mon_in,'
+               'elevation_m\n'))
 
     w = shapefile.Writer(shapefile.POINT)
     w.field("SID", 'C', 5, 0)
@@ -90,7 +91,7 @@ def main():
     w.field("SDEPTH", 'F', 10, 2)
     w.field("PMONTH", 'F', 10, 2)
     w.field("SMONTH", 'F', 10, 2)
-    for sid in cob.keys():
+    for sid in cob:
         w.point(cob[sid]["LON"], cob[sid]["LAT"])
         # print id, cob[sid]
         if cob[sid]["TMPX"] < 0:
@@ -116,8 +117,8 @@ def main():
         csv.write(("%s,%s,%.4f,%.4f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.1f\n"
                    ) % (sid, cob[sid]["NAME"].replace(",", " "),
                         cob[sid]['LON'], cob[sid]["LAT"],
-                        ts, cob[sid]['HHMM'], cob[sid]["TMPX"], cob[sid]["TMPN"],
-                        cob[sid]["P24I"],
+                        ts, cob[sid]['HHMM'], cob[sid]["TMPX"],
+                        cob[sid]["TMPN"], cob[sid]["P24I"],
                         cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"],
                         cob[sid]["SMOI"], cob[sid]['ELEV_M']))
 
@@ -125,8 +126,7 @@ def main():
 
     # Ship csv file
     csv.close()
-    pqstr = "plot c %s csv/coop.csv bogus csv" % (
-                                mx.DateTime.now().strftime("%Y%m%d%H%M"),)
+    pqstr = "plot c %s csv/coop.csv bogus csv" % (now.strftime("%Y%m%d%H%M"),)
     subprocess.call("/home/ldm/bin/pqinsert -p '%s' coop.csv" % (pqstr,),
                     shell=True)
     os.unlink('coop.csv')

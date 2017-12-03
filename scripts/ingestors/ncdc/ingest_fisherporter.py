@@ -9,14 +9,14 @@ import datetime
 import os
 import urllib2
 
-import psycopg2
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 
 def process(tmpfn):
     """Process a file of data"""
-    pgconn = psycopg2.connect(database='other', host='iemdb')
+    pgconn = get_dbconn('other')
     nt = NetworkTable("IA_HPD")
     data = []
     for line in open(tmpfn):

@@ -4,12 +4,12 @@ import os
 import datetime
 
 import netCDF4
-from pyiem import iemre
 import numpy as np
-import psycopg2
 from tqdm import tqdm
+from pyiem import iemre
+from pyiem.util import get_dbconn
 
-POSTGIS = psycopg2.connect(database='postgis', user='nobody', host='iemdb')
+POSTGIS = get_dbconn('postgis', user='nobody')
 
 
 def create_file(fn):

@@ -4,8 +4,8 @@ NOTE: I had to manually edit the .csv file to remove the first row
 """
 from __future__ import print_function
 
-import psycopg2
 import pandas as pd
+from pyiem.util import get_dbconn
 
 
 def dowork(df, nwsli):
@@ -26,8 +26,7 @@ def dowork(df, nwsli):
 
 def main():
     """Go Main Go!"""
-    pgconn = psycopg2.connect(database='hads', host='localhost', port=5556,
-                              user='nobody')
+    pgconn = get_dbconn('hads', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT distinct nwsli from unknown ORDER by nwsli

@@ -5,12 +5,12 @@ from __future__ import print_function
 import sys
 import datetime
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Do Great Things"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis', user='nobody')
     pcursor = pgconn.cursor()
 
     pcursor.execute("""

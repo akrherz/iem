@@ -8,9 +8,8 @@ import sys
 import datetime
 from collections import OrderedDict
 
-import pytz
-import psycopg2
 from geopandas import GeoDataFrame
+from pyiem.util import get_dbconn, utc
 
 
 def get_time_extent(form):
@@ -29,12 +28,10 @@ def get_time_extent(form):
     hour2 = form.getfirst('hour2')
     minute1 = form.getfirst('minute1')
     minute2 = form.getfirst('minute2')
-    sts = datetime.datetime(int(year1), int(month1), int(day1),
-                            int(hour1), int(minute1))
-    sts = sts.replace(tzinfo=pytz.timezone('UTC'))
-    ets = datetime.datetime(int(year2), int(month2), int(day2),
-                            int(hour2), int(minute2))
-    ets = ets.replace(tzinfo=pytz.timezone('UTC'))
+    sts = utc(int(year1), int(month1), int(day1),
+              int(hour1), int(minute1))
+    ets = utc(int(year2), int(month2), int(day2),
+              int(hour2), int(minute2))
     return sts, ets
 
 
@@ -85,7 +82,7 @@ def main():
         send_error('Unknown location_group (%s)' % (location_group, ))
 
     # Change to postgis db once we have the wfo list
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis', user='nobody')
     fn = "wwa_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
     timeopt = int(form.getfirst('timeopt', [1])[0])
     if timeopt == 2:
@@ -94,8 +91,7 @@ def main():
         day3 = int(form.getfirst('day3'))
         hour3 = int(form.getfirst('hour3'))
         minute3 = int(form.getfirst('minute3'))
-        sts = datetime.datetime(year3, month3, day3, hour3, minute3)
-        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+        sts = utc(year3, month3, day3, hour3, minute3)
         fn = "wwa_%s" % (sts.strftime("%Y%m%d%H%M"), )
 
     os.chdir("/tmp/")
@@ -179,7 +175,7 @@ def main():
     # o.close()
 
     df = GeoDataFrame.from_postgis(sql, pgconn, 'geo')
-    if len(df.index) == 0:
+    if df.empty:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write("ERROR: No results found for query, please try again")
         sys.exit()

@@ -3,9 +3,9 @@ from __future__ import print_function
 import sys
 import datetime
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
 import pytz
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 
 def main():
@@ -13,9 +13,9 @@ def main():
     basets = datetime.datetime.now()
     basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
 
-    rwis = psycopg2.connect(database='rwis', host='iemdb')
+    rwis = get_dbconn('rwis')
     rcursor = rwis.cursor()
-    mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+    mesosite = get_dbconn('mesosite')
     mcursor = mesosite.cursor()
 
     net = sys.argv[1]

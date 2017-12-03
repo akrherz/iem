@@ -5,16 +5,15 @@ import subprocess
 import os
 
 from pyiem.network import Table as NetworkTable
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go Main Go"""
     nt = NetworkTable("IA_COOP")
-    iem_pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    iem_pgconn = get_dbconn('iem', user='nobody')
     icursor = iem_pgconn.cursor()
-    coop_pgconn = psycopg2.connect(database='coop', host='iemdb',
-                                   user='nobody')
+    coop_pgconn = get_dbconn('coop', user='nobody')
     ccursor = coop_pgconn.cursor()
 
     fp = open('IEMNWSYPR.txt', 'w')

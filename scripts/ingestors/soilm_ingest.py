@@ -18,10 +18,11 @@ import numpy as np
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity, distance, speed
 import pyiem.meteorology as met
-import psycopg2
-ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
+from pyiem.util import get_dbconn
 
-ACCESS = psycopg2.connect(database='iem', host='iemdb')
+ISUAG = get_dbconn('isuag')
+
+ACCESS = get_dbconn('iem')
 
 EVENTS = {'reprocess_solar': False, 'days': []}
 VARCONV = {

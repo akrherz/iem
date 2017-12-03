@@ -7,10 +7,11 @@ import sys
 import subprocess
 
 import netCDF4
-from pyiem.observation import Observation
-from pyiem.datatypes import temperature, distance, speed
 import pytz
 import psycopg2.extras
+from pyiem.observation import Observation
+from pyiem.datatypes import temperature, distance, speed
+from pyiem.util import get_dbconn
 
 MY_PROVIDERS = ["KYTC-RWIS",
                 "KYMN",
@@ -56,7 +57,7 @@ def provider2network(provider):
 
 def main():
     """Do Something"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('iem')
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     fn = find_file()
     try:

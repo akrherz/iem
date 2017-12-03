@@ -7,9 +7,9 @@ ID,Station,Latitude,Longitude
 import cgi
 import datetime
 import sys
-import psycopg2
 import pytz
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
 
 SSW = sys.stdout.write
 # DOT plows
@@ -20,7 +20,7 @@ SSW = sys.stdout.write
 
 def do_iaroadcond():
     """Iowa DOT Road Conditions as dots"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     df = read_sql("""
     select b.idot_id as locationid,
     replace(b.longname, ',', ' ') as locationname,
@@ -33,7 +33,7 @@ def do_iaroadcond():
 
 def do_webcams(network):
     """direction arrows"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    pgconn = get_dbconn('mesosite')
     df = read_sql("""
     select cam as locationid, w.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, drct
@@ -46,7 +46,7 @@ def do_webcams(network):
 def do_iowa_azos(date, itoday=False):
     """Dump high and lows for Iowa ASOS + AWOS """
     table = "summary_%s" % (date.year,)
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     df = read_sql("""
     select id as locationid, n.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
@@ -75,7 +75,7 @@ def do_iowa_azos(date, itoday=False):
 
 def do_iarwis():
     """Dump RWIS data"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem')
     df = read_sql("""
     select id as locationid, n.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, tsf0 as pavetmp1, tsf1 as pavetmp2,
@@ -89,8 +89,7 @@ def do_iarwis():
 
 def do_ahps_obs(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
-                              user='nobody')
+    pgconn = get_dbconn('hads')
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""
@@ -153,8 +152,7 @@ def do_ahps_obs(nwsli):
 
 def do_ahps_fx(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
-                              user='nobody')
+    pgconn = get_dbconn('hads')
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""

@@ -10,6 +10,7 @@ import cStringIO
 import pandas as pd
 import psycopg2.extras
 from pyiem.datatypes import temperature, distance
+from pyiem.util import get_dbconn
 
 
 def get_stations(form):
@@ -61,7 +62,7 @@ def get_delimiter(form):
 
 def fetch_daily(form, cols):
     ''' Return a fetching of daily data '''
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    pgconn = get_dbconn('isuag', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     stations = get_stations(form)
@@ -221,7 +222,7 @@ def fetch_daily(form, cols):
 
 def fetch_hourly(form, cols):
     ''' Return a fetching of hourly data '''
-    pgconn = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+    pgconn = get_dbconn('isuag', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     stations = get_stations(form)
@@ -326,7 +327,7 @@ def main():
     else:
         values, cols = fetch_daily(form, cols)
 
-    if len(values) == 0:
+    if not values:
         sys.stdout.write("Content-type: text/plain\n\n")
         sys.stdout.write('Sorry, no data found for this query.')
         return

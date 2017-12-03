@@ -7,8 +7,9 @@
 """
 from __future__ import print_function
 import requests
-import psycopg2
+
 from pyiem.reference import nwsli2country, nwsli2state
+from pyiem.util import get_dbconn
 
 OUTPUT = open('insert.sql', 'w')
 
@@ -67,11 +68,12 @@ def dowork(nwsli):
 
 def main():
     """Go Main Go!"""
-    pgconn = psycopg2.connect(database='hads', host='iemdb-hads',
-                              user='nobody')
+    pgconn = get_dbconn('hads', user='nobody')
     cursor = pgconn.cursor()
-    cursor.execute("""SELECT distinct nwsli from unknown where
-    product ~* 'OSO' ORDER by nwsli""")
+    cursor.execute("""
+        SELECT distinct nwsli from unknown where
+        product ~* 'OSO' ORDER by nwsli
+    """)
     for row in cursor:
         dowork(row[0])
 

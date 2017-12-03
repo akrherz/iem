@@ -3,7 +3,7 @@ import datetime
 
 from pyiem.reference import TRACE_VALUE
 from pyiem.plot import MapPlot
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def pretty(val, precision=2):
@@ -26,7 +26,7 @@ def plot_hilo(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     cursor.execute("""SELECT max_tmpf, min_tmpf, id, st_x(geom), st_y(geom)
@@ -64,7 +64,7 @@ def plot_snowdepth(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     cursor.execute("""SELECT snowd, id, st_x(geom), st_y(geom)
@@ -107,7 +107,7 @@ def plot_snow(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     cursor.execute("""SELECT snow, id, st_x(geom), st_y(geom)
@@ -150,7 +150,7 @@ def plot_snow_month(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     d1 = valid.replace(day=1)
@@ -198,7 +198,7 @@ def plot_precip_month(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     d1 = valid.replace(day=1)
@@ -246,7 +246,7 @@ def plot_precip(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     cursor.execute("""SELECT pday, id, st_x(geom), st_y(geom)

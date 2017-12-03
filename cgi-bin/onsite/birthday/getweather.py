@@ -5,9 +5,10 @@ import cgi
 import mx.DateTime
 import sys
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 nt = NetworkTable("IACLIMATE")
 
-COOP = psycopg2.connect("dbname=coop user=nobody host=iemdb")
+COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
 
 def mk_header():

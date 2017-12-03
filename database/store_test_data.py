@@ -1,13 +1,13 @@
 """Provide some basic data to allow for better testing"""
-import psycopg2
 import requests
+from pyiem.util import get_dbconn
 
 NETWORKS = ['IA_ASOS', 'AWOS', 'IACLIMATE', 'IA_COOP']
 
 
 def fake_asos(station):
-    pgconn = psycopg2.connect(database='asos', host='iemdb',
-                              user='mesonet')
+    """hack"""
+    pgconn = get_dbconn('asos', user='mesonet')
     cursor = pgconn.cursor()
     for year in range(1995, 1997):
         cursor.execute("""
@@ -22,8 +22,8 @@ def fake_asos(station):
 
 
 def do_stations(network):
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb',
-                              user='mesonet')
+    """hack"""
+    pgconn = get_dbconn('mesosite', user='mesonet')
     cursor = pgconn.cursor()
     req = requests.get(("http://mesonet.agron.iastate.edu/geojson/network/"
                         "%s.geojson") % (network,))
@@ -58,8 +58,8 @@ def do_stations(network):
 
 def main():
     """Workflow"""
-    [do_stations(network) for network in NETWORKS]
-    [fake_asos(station) for station in ['AMW', 'DSM']]
+    _ = [do_stations(network) for network in NETWORKS]
+    _ = [fake_asos(station) for station in ['AMW', 'DSM']]
 
 
 if __name__ == '__main__':

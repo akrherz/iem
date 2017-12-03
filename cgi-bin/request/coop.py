@@ -17,6 +17,7 @@ from pandas.io.sql import read_sql
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature, distance
+from pyiem.util import get_dbconn
 
 
 def get_scenario_period(ctx):
@@ -36,7 +37,7 @@ def ssw(txt):
 
 def get_database():
     """ Get database """
-    return psycopg2.connect(database="coop", host="iemdb", user="nobody")
+    return get_dbconn("coop")
 
 
 def sane_date(year, month, day):

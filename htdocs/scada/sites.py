@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-
+"""geojson"""
 import json
 import sys
-import psycopg2
+from pyiem.util import get_dbconn
 
-dbconn = psycopg2.connect(database='scada', host='iemdb', user='nobody')
-cursor = dbconn.cursor()
 
-if __name__ == '__main__':
+def main():
+    """Go Main"""
+    dbconn = get_dbconn('scada')
+    cursor = dbconn.cursor()
+
     sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
@@ -28,8 +30,13 @@ if __name__ == '__main__':
                                     'turbinename': row[6]
                                  },
                                  "geometry": {"type": "Point",
-                                              "coordinates": [row[0], row[1]]
+                                              "coordinates": [row[0],
+                                                              row[1]]
                                               }
                                  })
 
     sys.stdout.write(json.dumps(data))
+
+
+if __name__ == '__main__':
+    main()

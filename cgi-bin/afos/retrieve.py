@@ -5,7 +5,7 @@ import cgi
 import sys
 import unittest
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def pil_logic(s):
@@ -67,7 +67,7 @@ def main():
         timelimit += " and entered < '%s' " % (edate, )
 
     if pils[0][:3] == 'MTR':
-        access = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+        access = get_dbconn('iem', user='nobody')
         cursor = access.cursor()
         sql = """
             SELECT raw from current_log c JOIN stations t
@@ -91,7 +91,7 @@ def main():
         return
 
     try:
-        mydb = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+        mydb = get_dbconn('afos', user='nobody')
     except Exception as exp:
         print('Error Connecting to Database, please try again!')
         return

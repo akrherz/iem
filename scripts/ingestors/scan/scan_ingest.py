@@ -1,20 +1,22 @@
 """Download and process the scan dataset"""
-import requests
+from __future__ import print_function
 import datetime
+
 import pytz
-import psycopg2
+import requests
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 # Stop the SSL cert warning :/
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 nt = NetworkTable("SCAN")
-SCAN = psycopg2.connect(database='scan', host='iemdb')
+SCAN = get_dbconn('scan')
 scursor = SCAN.cursor()
-ACCESS = psycopg2.connect(database='iem', host='iemdb')
+ACCESS = get_dbconn('iem')
 icursor = ACCESS.cursor()
 
 mapping = {'Site Id': {'iemvar': 'station', 'multiplier': 1},
@@ -180,15 +182,16 @@ def load_times():
 
 
 def main():
+    """Go Main Go"""
     maxts = load_times()
-    for sid in nt.sts.keys():
+    for sid in nt.sts:
         # iem uses S<id> and scan site uses just <id>
         postvars['sitenum'] = sid[1:]
         try:
             req = requests.get(URI, params=postvars, timeout=10, verify=False)
             response = req.content
         except Exception as exp:
-            print 'scan_ingest.py Failed to download: %s %s' % (sid, exp)
+            print('scan_ingest.py Failed to download: %s %s' % (sid, exp))
             continue
         lines = response.split("\n")
         cols = lines[2].split(",")
@@ -204,6 +207,7 @@ def main():
                 data[col.strip()] = token
             if 'Date' in data:
                 savedata(data, maxts)
+
 
 if __name__ == '__main__':
     main()

@@ -6,13 +6,12 @@ import sys
 import os
 import imp
 import json
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def get_timing(pidx):
     """Return an average plot generation time for this app"""
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody',
-                              connect_timeout=5)
+    pgconn = get_dbconn('mesosite', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT avg(timing) from autoplot_timing where appid = %s

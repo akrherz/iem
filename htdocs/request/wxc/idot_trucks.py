@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 ''' Generate a WXC formatted file of DOT Snowplow positions '''
 import sys
+import datetime
 import memcache
+
+from pyiem.util import get_dbconn
 
 
 def get_data():
     ''' Get the data we want and desire '''
-    import datetime
     data = """Weather Central 001d0300 IDOT Snow Plows TimeStamp=%s
    6
    20 Station
@@ -17,8 +19,7 @@ def get_data():
    3 SpeedMPH
 """ % (datetime.datetime.utcnow().strftime("%Y.%m.%d.%H%M"),)
 
-    import psycopg2
-    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    postgis = get_dbconn('postgis')
     cursor = postgis.cursor()
 
     cursor.execute("""
@@ -35,8 +36,9 @@ def get_data():
 
     return data
 
-if __name__ == '__main__':
-    ''' Go main Go '''
+
+def main():
+    """Go Main Go"""
     sys.stdout.write("Content-type: text/plain\n\n")
 
     mckey = '/request/wxc/idot_trucks.txt'
@@ -47,3 +49,7 @@ if __name__ == '__main__':
         mc.set(mckey, res, 300)
 
     sys.stdout.write(res)
+
+
+if __name__ == '__main__':
+    main()

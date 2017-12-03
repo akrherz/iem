@@ -6,7 +6,11 @@
 """
 import cgi
 import sys
+import datetime
+
 import memcache
+import pytz
+from pyiem.util import get_dbconn
 
 
 def pt2px(pt):
@@ -58,10 +62,8 @@ def text_image(content):
 
 
 def make_image(e, pil):
-    import psycopg2
-    import pytz
-    import datetime
-    pgconn = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+    """Do as I say"""
+    pgconn = get_dbconn('afos', user='nobody')
     cursor = pgconn.cursor()
     valid = datetime.datetime.strptime(e, '%Y%m%d%H%M')
     valid = valid.replace(tzinfo=pytz.utc)

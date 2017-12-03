@@ -2,18 +2,14 @@
 """Queue insertion for talltowers"""
 
 import cgi
-import re
 import sys
 import datetime
 import pytz
-import psycopg2.extras
-from pyiem.datatypes import temperature, speed
-from pyiem import meteorology
-
-pgconn = psycopg2.connect(database='mesosite', host='iemdb', user='apache')
+from pyiem.util import get_dbconn
 
 
 def send_error(msg):
+    """Send an error"""
     sys.stdout.write(msg)
     sys.exit(0)
 
@@ -23,7 +19,7 @@ def get_stations(form):
     if "station" not in form:
         send_error("ERROR: station must be specified!")
     stations = form.getlist("station")
-    if len(stations) == 0:
+    if not stations:
         send_error("ERROR: station must be specified!")
     return stations
 
@@ -41,7 +37,7 @@ def get_time_bounds(form, tzinfo):
     # Construct dt instances in the right timezone, this logic sucks, but is
     # valid, have to go to UTC first then back to the local timezone
     sts = datetime.datetime.utcnow()
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = sts.replace(tzinfo=pytz.utc)
     sts = sts.astimezone(tzinfo)
     ets = sts
     try:
@@ -60,6 +56,7 @@ def get_time_bounds(form, tzinfo):
 
 def main():
     """ Go main Go """
+    pgconn = get_dbconn('mesosite')
     form = cgi.FieldStorage()
     tzname = form.getfirst("tz", "Etc/UTC")
     try:

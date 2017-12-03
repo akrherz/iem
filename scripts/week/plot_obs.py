@@ -2,9 +2,9 @@
 import datetime
 import sys
 
-import psycopg2
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 
 def fmter(val):
@@ -25,7 +25,7 @@ def main(days, argv):
         routes = "a"
     sixago = today - datetime.timedelta(days=(days - 1))
 
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
 
     # Compute normal from the climate database
     df = read_sql("""

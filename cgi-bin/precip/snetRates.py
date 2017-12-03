@@ -5,6 +5,7 @@ import cgi
 import sys
 import psycopg2.extras
 import pytz
+from pyiem.util import get_dbconn
 
 
 def diff(nowVal, pastVal, mulli):
@@ -33,14 +34,14 @@ def main():
     print "SID  ,  DATE    ,TIME ,PCOUNT,P1MIN ,60min ,30min ,20min ,15min ,10min , 5min , 1min ,"
 
     if s.strftime("%Y%m%d") == datetime.datetime.now().strftime("%Y%m%d"):
-        IEM = psycopg2.connect("dbname=iem host=iemdb user=nobody")
+        IEM = get_dbconn("iem")
         cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute("""SELECT s.id as station, valid, pday from current_log c JOIN
         stations s on (s.iemid = c.iemid) WHERE 
             s.id = %s and valid >= %s and valid < %s ORDER by valid ASC""",
              ( station, s, e ) )
     else:
-        SNET = psycopg2.connect("dbname=snet host=iemdb user=nobody")
+        SNET = get_dbconn("snet")
         cursor = SNET.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cursor.execute("""SELECT station, valid, pday from t"""+
@@ -106,17 +107,18 @@ def main():
         else:
             print "%5s," % (" "),
 
-        if (i >= 5):
+        if i >= 5:
             print diff(pcpn[i], pcpn[i-5], 12),
         else:
             print "%5s," % (" "),
 
-        if (i >= 1):
+        if i >= 1:
             print diff(pcpn[i], pcpn[i-1], 60),
         else:
             print "%5s," % (" "),
 
         print
+
 
 if __name__ == '__main__':
     main()

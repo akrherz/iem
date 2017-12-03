@@ -2,9 +2,9 @@
 from __future__ import print_function
 import datetime
 
-import psycopg2
-from pyiem.network import Table as NetworkTable
 import pytz
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 
 def main():
@@ -12,9 +12,9 @@ def main():
     basets = datetime.datetime.now()
     basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
 
-    isuag = psycopg2.connect(database='isuag', host='iemdb')
+    isuag = get_dbconn('isuag')
     icursor = isuag.cursor()
-    mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+    mesosite = get_dbconn('mesosite')
     mcursor = mesosite.cursor()
 
     table = NetworkTable("ISUSM")

@@ -3,15 +3,16 @@
 
   /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
-import psycopg2
-import pytz
+from __future__ import print_function
 import datetime
 import subprocess
 import tempfile
 import os
+
+import pytz
 import requests
 import pyproj
-from pyiem.util import exponential_backoff
+from pyiem.util import exponential_backoff, get_dbconn
 
 P3857 = pyproj.Proj(init='EPSG:3857')
 URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
@@ -40,8 +41,8 @@ def workflow():
     data = req.json()
     featureset = data['layers'][0].get('featureSet', dict())
     features = featureset.get('features', [])
-    POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
-    cursor = POSTGIS.cursor()
+    pgconn = get_dbconn('postgis')
+    cursor = pgconn.cursor()
 
     cursor.execute("""SELECT label, idnum from idot_dashcam_current""")
     current = {}
@@ -96,8 +97,8 @@ def workflow():
         """, (label, valid, idnum, geom))
 
     cursor.close()
-    POSTGIS.commit()
-    POSTGIS.close()
+    pgconn.commit()
+    pgconn.close()
 
 
 if __name__ == '__main__':

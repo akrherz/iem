@@ -11,6 +11,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
 DISTRICTS = [
              'North West',
@@ -91,7 +92,7 @@ STIDS = [
 
 def compute_weekly(fp, sts, ets):
     ''' Compute the weekly stats we need '''
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Max daily high
@@ -183,7 +184,7 @@ def compute_weekly(fp, sts, ets):
 
 def compute_monthly(fp, year, month):
     ''' Compute the monthly data we need to compute '''
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Max daily high

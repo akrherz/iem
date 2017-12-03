@@ -8,7 +8,9 @@ from pyiem.network import Table as NetworkTable
 nt = NetworkTable(("AWOS", "IA_ASOS"))
 
 import psycopg2.extras
-IEM = psycopg2.connect("dbname=iem user=nobody host=iemdb")
+from pyiem.util import get_dbconn
+
+IEM = get_dbconn("iem")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 requireHrs = [0]*25

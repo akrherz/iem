@@ -8,14 +8,13 @@ import subprocess
 import re
 import os
 
-import psycopg2
 import pytz
-from pyiem.util import noaaport_text
+from pyiem.util import noaaport_text, get_dbconn
 from pyiem.nws.product import TextProduct
 
 BAD_CHARS = r"[^\na-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 
-PGCONN = psycopg2.connect(database='afos', host='iemdb')
+PGCONN = get_dbconn('afos')
 
 
 def process(order):

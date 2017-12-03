@@ -14,10 +14,13 @@
  RUN_MIDNIGHT.sh
 
 """
+from __future__ import print_function
 import datetime
 import sys
+
 import pytz
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
 
 def compute_time(is_hourly):
@@ -38,8 +41,8 @@ def compute_time(is_hourly):
 
 def main(argv):
     """Do Something Good"""
-    asospgconn = psycopg2.connect(database='asos', host='iemdb')
-    iempgconn = psycopg2.connect(database='iem', host='iemdb')
+    asospgconn = get_dbconn('asos')
+    iempgconn = get_dbconn('iem')
     acursor = asospgconn.cursor()
     icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     is_hourly = (len(argv) > 1)

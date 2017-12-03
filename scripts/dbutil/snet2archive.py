@@ -12,6 +12,7 @@ import subprocess
 
 import pytz
 import psycopg2.extras
+from pyiem.util import get_dbconn
 
 
 def formatter(val, precision):
@@ -23,11 +24,11 @@ def formatter(val, precision):
 
 def main():
     """Go Main"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb')
+    pgconn = get_dbconn('iem')
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+    utc = utc.replace(tzinfo=pytz.utc)
     # We want 0z today
     ets = utc.replace(hour=0, minute=0, second=0, microsecond=0)
     # 0z yesterday
@@ -58,7 +59,8 @@ def main():
                       row.get('pday'),
                       row.get('pmonth'), row.get('srad'), row.get('relh'),
                       row.get('pres'), formatter(row.get('gust'), 0))
-        except:
+        except Exception as exp:
+            print(exp)
             print('Fail %s' % (row, ))
         out.write(s)
         if i > 0 and i % 1000 == 0:

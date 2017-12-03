@@ -22,6 +22,7 @@ import pyproj
 import numpy as np
 import psycopg2.extras
 from pyiem.datatypes import speed
+from pyiem.util import get_dbconn
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj(init='epsg:3857')
 
@@ -279,7 +280,7 @@ def rabbit_tracks(row):
 
 def produce_content(nexrad):
     """Do Stuff"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     limiter = ''
     threshold = 999
@@ -306,9 +307,9 @@ def produce_content(nexrad):
                      row['utc_valid'].strftime("%H:%I"), row['drct'],
                      row['sknt'])
         icon = 9
-        if (row["tvs"] != "NONE" or row["meso"] != "NONE"):
+        if row["tvs"] != "NONE" or row["meso"] != "NONE":
             text += "TVS: %s MESO: %s\\n" % (row['tvs'], row['meso'])
-        if (row['poh'] > 0 or row['posh'] > 0):
+        if row['poh'] > 0 or row['posh'] > 0:
             text += "POH: %s POSH: %s MaxSize: %s\\n" % (row['poh'],
                                                          row['posh'],
                                                          row['max_size'])
@@ -351,6 +352,7 @@ def main():
         mc.set(mckey, res, 60)
     sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write(res)
+
 
 if __name__ == '__main__':
     main()

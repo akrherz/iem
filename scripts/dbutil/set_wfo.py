@@ -1,12 +1,13 @@
 """Assign a WFO to sites in the metadata tables that have no WFO set
 """
 from __future__ import print_function
-import psycopg2
+
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go Main"""
-    mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+    mesosite = get_dbconn('mesosite')
     mcursor = mesosite.cursor()
     mcursor2 = mesosite.cursor()
 

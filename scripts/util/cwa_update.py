@@ -10,8 +10,8 @@ import zipfile
 
 from osgeo import ogr
 from osgeo import _ogr
-import psycopg2
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
+from pyiem.util import get_dbconn
+POSTGIS = get_dbconn('postgis')
 
 
 def Area(feat, *args):

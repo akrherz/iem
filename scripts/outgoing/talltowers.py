@@ -8,9 +8,9 @@ import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-import psycopg2
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
 
 TOWERS = {'ETTI4': 0, 'MCAI4': 1}
 RTOWERS = ['ETTI4', 'MCAI4']
@@ -18,8 +18,8 @@ RTOWERS = ['ETTI4', 'MCAI4']
 
 def gen_df(row):
     """Make me a dataframe of this data!"""
-    pgconn = psycopg2.connect(database='talltowers',
-                              host='talltowers-db.local', user='tt_web')
+    pgconn = get_dbconn('talltowers',
+                        host='talltowers-db.local', user='tt_web')
     stations = row['stations'].split(",")
     towers = [TOWERS[station] for station in stations]
     df = read_sql("""
@@ -74,7 +74,8 @@ Thank you for requesting ISU Tall Towers data.  You can find your data here:
 
 
 def main():
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb')
+    """Go Main Go"""
+    pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
     df = read_sql("""
     SELECT * from talltowers_analog_queue

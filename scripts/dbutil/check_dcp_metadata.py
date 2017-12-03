@@ -1,12 +1,12 @@
 """Do some self diagnostics on NWSLI / DCP metadata"""
 from __future__ import print_function
 from pyiem.reference import nwsli2country, nwsli2state
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go Main"""
-    dbconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+    dbconn = get_dbconn('mesosite', user='nobody')
     cursor = dbconn.cursor()
 
     cursor.execute("""

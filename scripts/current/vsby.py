@@ -3,10 +3,10 @@ from __future__ import print_function
 import datetime
 import warnings
 
-from pyiem.plot import MapPlot
-import psycopg2
 import numpy as np
 import matplotlib.cm as cm
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 # Stop whining about missing data for contourf
 warnings.filterwarnings("ignore")
@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 
 def main():
     """GO"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
 
     # Compute normal from the climate database

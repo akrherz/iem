@@ -4,10 +4,10 @@
 
      python schema_manager.py
 """
-
-import psycopg2
+from __future__ import print_function
 import os
 import sys
+from pyiem.util import get_dbconn
 
 
 def check_management(cursor):
@@ -27,8 +27,7 @@ def check_management(cursor):
 
 def run_db(dbname):
     """ Lets do an actual database """
-    host = 'iemdb' if dbname != 'hads' else 'iemdb-hads'
-    dbconn = psycopg2.connect(database=dbname, host=host)
+    dbconn = get_dbconn(dbname)
     cursor = dbconn.cursor()
 
     check_management(cursor)
@@ -46,7 +45,7 @@ def run_db(dbname):
         fn = '%s/%s.sql' % (dbname, baseversion)
         if not os.path.isfile(fn):
             break
-        print '    -> Attempting schema upgrade #%s ...' % (baseversion,)
+        print('    -> Attempting schema upgrade #%s ...' % (baseversion,))
         cursor.execute(open(fn).read())
 
         cursor.execute("""
@@ -58,7 +57,7 @@ def run_db(dbname):
         cursor.close()
         dbconn.commit()
     else:
-        print '    + No changes made since argument provided'
+        print('    + No changes made since argument provided')
     dbconn.close()
 
 
@@ -67,6 +66,7 @@ def main():
     os.chdir('upgrade')
     for dbname in os.listdir('.'):
         run_db(dbname)
+
 
 if __name__ == '__main__':
     # main

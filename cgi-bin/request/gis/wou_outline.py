@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 """Generate a Watch Outline for a given SPC convective watch """
 
-import shapefile
 import zipfile
 import os
 import shutil
 import sys
 import cgi
-from pyiem import wellknowntext
+import shapefile
 import psycopg2.extras
+from pyiem import wellknowntext
+from pyiem.util import get_dbconn
 
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+POSTGIS = get_dbconn('postgis', user='nobody')
 
 
 def main(year, etn):
@@ -68,6 +69,7 @@ def cgiworkflow():
     etn = int(form.getfirst("etn"))
 
     main(year, etn)
+
 
 if __name__ == '__main__':
     cgiworkflow()

@@ -12,7 +12,6 @@ from email.mime.text import MIMEText
 import pandas as pd
 import pytz
 import numpy as np
-import psycopg2
 from pyiem.tracker import TrackerEngine
 from pyiem.datatypes import temperature, speed
 from pyiem.network import Table as NetworkTable
@@ -21,8 +20,8 @@ import pyiem.util as util
 
 GTS = sys.argv[1]
 NT = NetworkTable('IA_RWIS')
-IEM = psycopg2.connect(database='iem', host='iemdb')
-PORTFOLIO = psycopg2.connect(database='portfolio', host='iemdb')
+IEM = util.get_dbconn('iem')
+PORTFOLIO = util.get_dbconn('portfolio')
 INCOMING = "/mesonet/data/incoming/rwis"
 RWIS2METAR = {'00': 'XADA', '01': 'XALG', '02': 'XATN', '03': 'XALT',
               '04': 'XAME', '05': 'XANK', '06': 'XAVO', '07': 'XBUR',
@@ -316,7 +315,7 @@ def get_file(uri):
     while (data is None or data == "") and attempts > 0:
         try:
             data = urllib2.urlopen(uri, timeout=30).read()
-        except:
+        except Exception as _exp:
             time.sleep(4)
         attempts -= 1
     return data

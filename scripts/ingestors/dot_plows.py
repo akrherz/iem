@@ -1,9 +1,11 @@
 """Consume a REST service of DOT Snowplow locations and data"""
-import requests
+from __future__ import print_function
 import json
-import psycopg2
-import pytz
 import datetime
+
+import requests
+import pytz
+from pyiem.util import get_dbconn
 
 URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
        "8a3118f14fc24bfb93eb769e997597f9/data")
@@ -14,7 +16,7 @@ CEILING = CEILING.replace(tzinfo=pytz.timezone("UTC"))
 def workflow():
     ''' Do stuff '''
 
-    postgis = psycopg2.connect(database='postgis', host='iemdb')
+    postgis = get_dbconn('postgis')
     cursor = postgis.cursor()
 
     current = {}
@@ -23,7 +25,7 @@ def workflow():
         current[row[0]] = row[1]
 
     valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.timezone("UTC"), microsecond=0)
+    valid = valid.replace(tzinfo=pytz.utc, microsecond=0)
 
     try:
         req = requests.get(URI, timeout=30)
@@ -39,6 +41,7 @@ def workflow():
         logdt = feat['attributes']['MODIFIEDDT']
         if logdt is None:
             continue
+        # Unsure why I do it this way, but alas
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour, minute=ts.minute, second=ts.second)
@@ -131,6 +134,7 @@ def workflow():
 
     postgis.commit()
     postgis.close()
+
 
 if __name__ == '__main__':
     workflow()

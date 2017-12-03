@@ -1,9 +1,11 @@
 """
  Check how much HADS data we have
 """
+from __future__ import print_function
 import sys
-import psycopg2
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+
+from pyiem.util import get_dbconn
+IEM = get_dbconn('iem', user='nobody')
 icursor = IEM.cursor()
 
 
@@ -16,14 +18,15 @@ def check():
 
     return row[0]
 
+
 if __name__ == '__main__':
     count = check()
     if count > 10000:
-        print 'OK - %s count |count=%s;1000;5000;10000' % (count, count)
+        print('OK - %s count |count=%s;1000;5000;10000' % (count, count))
         sys.exit(0)
     elif count > 5000:
-        print 'WARNING - %s count |count=%s;1000;5000;10000' % (count, count)
+        print('WARNING - %s count |count=%s;1000;5000;10000' % (count, count))
         sys.exit(1)
     else:
-        print 'CRITICAL - %s count |count=%s;1000;5000;10000' % (count, count)
+        print('CRITICAL - %s count |count=%s;1000;5000;10000' % (count, count))
         sys.exit(2)

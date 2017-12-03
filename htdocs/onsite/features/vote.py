@@ -5,8 +5,9 @@ import cgi
 import os
 import Cookie
 import json
-import psycopg2
 import datetime
+
+from pyiem.util import get_dbconn
 
 
 def do(vote):
@@ -15,11 +16,12 @@ def do(vote):
     myoid = 0
     if 'foid' in cookie:
         myoid = int(cookie['foid'].value)
-    pgconn = psycopg2.connect(database='mesosite', host='iemdb',
-                              user='nobody')
+    pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
-    cursor.execute("""SELECT oid, good, bad, abstain from feature
-    ORDER by valid DESC LIMIT 1""")
+    cursor.execute("""
+        SELECT oid, good, bad, abstain from feature
+        ORDER by valid DESC LIMIT 1
+    """)
     row = cursor.fetchone()
     foid = row[0]
     d = {'good': row[1], 'bad': row[2], 'abstain': row[3],
@@ -56,6 +58,7 @@ def main():
     j = do(vote)
     sys.stdout.write("\n")  # Finalize headers
     sys.stdout.write(json.dumps(j))
+
 
 if __name__ == '__main__':
     main()

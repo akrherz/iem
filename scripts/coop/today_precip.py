@@ -2,9 +2,10 @@
 
 import datetime
 
+import psycopg2.extras
 from pyiem.reference import TRACE_VALUE
 from pyiem.plot import MapPlot
-import psycopg2.extras
+from pyiem.util import get_dbconn
 
 
 def n(val):
@@ -18,7 +19,7 @@ def n(val):
 
 def main():
     """Go Main Go"""
-    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    pgconn = get_dbconn('iem', user='nobody')
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     lats = []

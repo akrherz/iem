@@ -4,17 +4,18 @@ Looks at our archive for ASOS sites which we think are online, but have
 never reported data.  If so, set them offline!
 """
 from __future__ import print_function
-import psycopg2
+
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go"""
-    pgconn_asos = psycopg2.connect(database='asos', host='iemdb')
+    pgconn_asos = get_dbconn('asos')
     acursor = pgconn_asos.cursor()
-    pgconn_mesosite = psycopg2.connect(database='mesosite', host='iemdb')
+    pgconn_mesosite = get_dbconn('mesosite')
     mcursor = pgconn_mesosite.cursor()
     mcursor2 = pgconn_mesosite.cursor()
-    pgconn_iem = psycopg2.connect(database='iem', host='iemdb')
+    pgconn_iem = get_dbconn('iem')
     icursor = pgconn_iem.cursor()
 
     # Find blank start stations!

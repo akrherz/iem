@@ -4,16 +4,16 @@ from __future__ import print_function
 import datetime
 import sys
 
-import psycopg2
+from pyiem.util import get_dbconn
 
 
-def main():
+def main(argv):
     """Go Main!"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 
-    now = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                            int(sys.argv[3]), 0, 0)
+    now = datetime.datetime(int(argv[1]), int(argv[2]),
+                            int(argv[3]), 0, 0)
     ets = now + datetime.timedelta(days=1)
 
     product = sys.argv[4].lower()
@@ -42,4 +42,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
