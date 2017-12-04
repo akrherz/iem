@@ -71,6 +71,8 @@ def plotter(fdict):
     font0 = FontProperties()
     font0.set_family('monospace')
     font0.set_size(16)
+    font1 = FontProperties()
+    font1.set_size(16)
 
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
@@ -119,10 +121,10 @@ def plotter(fdict):
                   index_col=None)
 
     y0 = 0.1
-    yheight = 0.75
+    yheight = 0.8
     dy = (yheight / 24.)
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
-    ax.set_position([0.1, y0, 0.59, yheight])
+    ax.set_position([0.12, y0, 0.57, yheight])
     ax.barh(df['hr'], df[varname], align='center')
     ax.set_ylim(-0.5, 23.5)
     ax.set_yticks([0, 4, 8, 12, 16, 20])
@@ -130,26 +132,31 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlim([df[varname].min() - 5,
                  df[varname].max() + 5])
+    ax.set_ylabel("Local Time %s" % (nt.sts[station]['tzname'], ),
+                  fontproperties=font1)
 
-    fig.text(0.5, 0.9, ("%s [%s] %s-%s\n"
-                        "%s [%s]"
-                        ) % (nt.sts[station]['name'], station,
-                             nt.sts[station]['archive_begin'].year,
-                             datetime.date.today().year,
-                             PDICT[varname],
-                             MDICT[month]), ha='center')
-    y = y0
+    fig.text(0.5, 0.93, ("%s [%s] %s-%s\n"
+                         "%s [%s]"
+                         ) % (nt.sts[station]['name'], station,
+                              nt.sts[station]['archive_begin'].year,
+                              datetime.date.today().year,
+                              PDICT[varname],
+                              MDICT[month]),
+             ha='center', fontproperties=font1)
+    ypos = y0 + (dy / 2.)
     for hr in range(24):
         sdf = df[df['hr'] == hr]
-        if not sdf.empty:
-            row = sdf.iloc[0]
-            fig.text(0.7, y,
-                     "%3.0f: %s%s" % (row[varname],
-                                      row['ts'].strftime("%d %b %Y"),
-                                      ("*" if len(sdf.index) > 1 else '')),
-                     fontproperties=font0)
-        y += dy
-    ax.set_xlabel("%s %s, * denotes ties" % (PDICT[varname], UNITS[varname]))
+        if sdf.empty:
+            continue
+        row = sdf.iloc[0]
+        fig.text(0.7, ypos,
+                 "%3.0f: %s%s" % (row[varname],
+                                  row['ts'].strftime("%d %b %Y"),
+                                  ("*" if len(sdf.index) > 1 else '')),
+                 fontproperties=font0, va='center')
+        ypos += dy
+    ax.set_xlabel("%s %s, * denotes ties" % (PDICT[varname], UNITS[varname]),
+                  fontproperties=font1)
 
     return plt.gcf(), df
 
