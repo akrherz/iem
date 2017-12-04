@@ -3,6 +3,7 @@ import calendar
 import datetime
 
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -33,7 +34,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn('coop', user='nobody')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     thisyear = datetime.datetime.now().year
@@ -84,8 +85,8 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
 
     # collapse the multiindex for columns
-    df2.columns = ['_'.join(col).strip() for col in df2.columns.values]
-    return fig, df2
+    df = pd.DataFrame(df2)
+    return fig, df
 
 
 if __name__ == '__main__':
