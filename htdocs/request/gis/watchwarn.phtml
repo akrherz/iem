@@ -2,11 +2,11 @@
 /*
  * Front-end that allows the download of archived WWA metadata
  */
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 18);
-include("../../../include/forms.php");
-include("../../../include/myview.php");
-include("../../../include/network.php");
+require_once "../../../include/forms.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/network.php";
 
 $t = new MyView();
 $t->title = "NWS Watch Warning Archive Download";
@@ -220,7 +220,13 @@ function kmlsub(f, url){
 <tr><th>GTYPE    </th><td>Geographical type of polygon.  C == County, P == Polygon</td></tr>
 <tr><th>SIG      </th><td>VTEC significance. Ex) A == Watch, W == Warning</td></tr>
 <tr><th>ETN      </th><td>VTEC Event Tracking Number</td></tr>
-<tr><th>STATUS   </th><td>VTEC last value of status for the product.  Often EXP == Expire</td></tr>
+<tr>
+ <th>STATUS</th>
+ <td>The three character code for the VTEC status field.  ie EXP, CAN, NEW. For the case
+of polygons of <code>GTYPE='P'</code> (Storm Based Warnings), the STATUS code is always
+NEW.  For all other cases, this STATUS is the last status parsed for the associated
+WWA product.</td>
+</tr>
 <tr><th>NWS_UGC  </th><td>NWS code used for a zone of a county</td></tr>
 <tr><th>AREA_KM2 </th><td>Area of the geometry in sq kilometers (Projection: EPSG 2163)</td></tr>
 </table>
@@ -282,6 +288,6 @@ roughly 2 AM this morning.</p>
 </table>
 EOF;
 $t->content = $content;
-$t->render('single.phtml');
+$t->render('full.phtml');
 
 ?>
