@@ -7,10 +7,12 @@
 5. Cleanup
 
 """
+from __future__ import print_function
 import sys
 import datetime
 import os
 import subprocess
+
 import rasterio
 import numpy as np
 import netCDF4

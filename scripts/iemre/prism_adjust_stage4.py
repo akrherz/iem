@@ -9,9 +9,9 @@ import datetime
 
 import numpy as np
 import netCDF4
-import pytz
-from pyiem.iemre import daily_offset, hourly_offset
 from scipy.interpolate import NearestNDInterpolator
+from pyiem.iemre import daily_offset, hourly_offset
+from pyiem.util import utc
 
 
 def workflow(valid):
@@ -79,8 +79,7 @@ def workflow(valid):
 
 def main(argv):
     """Go Main"""
-    valid = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]), 12)
-    valid = valid.replace(tzinfo=pytz.utc)
+    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
     workflow(valid)
 
 

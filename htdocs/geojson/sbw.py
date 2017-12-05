@@ -17,12 +17,12 @@ def run(ts):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if ts == '':
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC")
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc
                                                     )
         t0 = utcnow + datetime.timedelta(days=7)
     else:
         utcnow = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%SZ').replace(
-                                                tzinfo=pytz.timezone("UTC"))
+                                                tzinfo=pytz.utc)
         t0 = utcnow
     sbwtable = "sbw_%s" % (utcnow.year,)
 

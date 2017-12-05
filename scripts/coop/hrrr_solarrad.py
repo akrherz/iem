@@ -8,14 +8,13 @@ import pygrib
 import pytz
 import pyproj
 import numpy as np
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
                    " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"))
 
-SWITCH_DATE = datetime.datetime(2014, 10, 10, 20)
-SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.timezone("UTC"))
+SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
 def run(ts):
@@ -27,7 +26,7 @@ def run(ts):
     xaxis = None
     yaxis = None
     for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
-        utc = ts.replace(hour=hr).astimezone(pytz.timezone("UTC"))
+        utc = ts.replace(hour=hr).astimezone(pytz.utc)
         fn = utc.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                            "hrrr.t%Hz.3kmf00.grib2"))
         if not os.path.isfile(fn):
@@ -94,20 +93,17 @@ def run(ts):
     pgconn.close()
 
 
-def main():
+def main(argv):
     """ DO Something"""
-    if len(sys.argv) == 4:
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                                int(sys.argv[3]), 12, 0)
-        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    if len(argv) == 4:
+        sts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
         sts = sts.astimezone(pytz.timezone("America/Chicago"))
         run(sts)
 
-    elif len(sys.argv) == 3:
+    elif len(argv) == 3:
         # Run for a given month!
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1, 12, 0)
+        sts = utc(int(argv[1]), int(argv[2]), 1, 12, 0)
         # run for last date of previous month as well
-        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
         sts = sts.astimezone(pytz.timezone("America/Chicago"))
         sts = sts - datetime.timedelta(days=1)
         ets = sts + datetime.timedelta(days=45)
@@ -118,7 +114,7 @@ def main():
             now += datetime.timedelta(days=1)
     else:
         ts = datetime.datetime.utcnow()
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+        ts = ts.replace(tzinfo=pytz.utc)
         ts = ts.astimezone(pytz.timezone("America/Chicago"))
         ts = ts - datetime.timedelta(days=1)
         ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -127,4 +123,4 @@ def main():
 
 if __name__ == '__main__':
     # run main() run
-    main()
+    main(sys.argv)

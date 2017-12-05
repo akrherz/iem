@@ -1,4 +1,5 @@
 """Dump baseline file as CSV, with GDD computed"""
+from __future__ import print_function
 import glob
 import os
 import datetime

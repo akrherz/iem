@@ -22,7 +22,7 @@ def workflow(netname, pname):
     mydir = "/home/ldm/data/camera/stills"
 
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
-    threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
+    threshold = threshold.replace(tzinfo=pytz.utc)
     mcursor = pgconn_mesosite.cursor()
     mcursor.execute("""
         SELECT id, network, name from webcams where

@@ -9,6 +9,7 @@ import pygrib
 
 # This exists on dev laptop :/
 TEMPLATE_FN = "/mesonet/ARCHIVE/data/2014/09/09/stage4/ST4.2014090900.01h.grib"
+BASEDIR = "/mesonet/data/stage4"
 
 
 def init_year(ts):
@@ -21,7 +22,7 @@ def init_year(ts):
     # grid shape is y, x
     lats, lons = grb.latlons()
 
-    fp = "/mesonet/data/stage4/%s_stage4_hourly.nc" % (ts.year, )
+    fp = "%s/%s_stage4_hourly.nc" % (BASEDIR, ts.year)
     nc = netCDF4.Dataset(fp, 'w')
     nc.title = "IEM Packaged NOAA Stage IV for %s" % (ts.year,)
     nc.platform = "Grided Estimates"

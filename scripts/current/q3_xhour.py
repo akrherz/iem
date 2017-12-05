@@ -12,6 +12,7 @@ import pygrib
 from pyiem.datatypes import distance
 import pyiem.mrms as mrms
 from pyiem.plot import MapPlot, nwsprecip
+from pyiem.util import utc
 
 TMP = "/mesonet/tmp"
 
@@ -25,10 +26,10 @@ def doit(ts, hours):
     now = ts - datetime.timedelta(hours=hours-1)
     interval = datetime.timedelta(hours=1)
     ets = datetime.datetime.utcnow()
-    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    ets = ets.replace(tzinfo=pytz.utc)
     total = None
     while now < ets:
-        gmt = now.astimezone(pytz.timezone("UTC"))
+        gmt = now.astimezone(pytz.utc)
         gribfn = None
         for prefix in ['GaugeCorr', 'RadarOnly']:
             gribfn = mrms.fetch(prefix+"_QPE_01H", gmt)
@@ -86,19 +87,17 @@ def doit(ts, hours):
     mp.close()
 
 
-def main():
+def main(argv):
     """Go main"""
-    if len(sys.argv) == 7:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]),
-                               int(sys.argv[4]), int(sys.argv[5]))
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    if len(argv) == 7:
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]),
+                 int(argv[5]))
         doit(ts, int(sys.argv[6]))
     else:
         ts = datetime.datetime.utcnow()
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-        doit(ts, int(sys.argv[1]))
+        ts = ts.replace(tzinfo=pytz.utc)
+        doit(ts, int(argv[1]))
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

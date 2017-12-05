@@ -19,7 +19,8 @@ def m(val):
 
 
 def fetcher(station, sts, ets):
-    dbconn = get_dbconn('postgis', user='nobody')
+    """Do fetching"""
+    dbconn = get_dbconn('postgis')
     cursor = dbconn.cursor()
     stations = [station, ]
     if station.startswith("_"):
@@ -48,10 +49,10 @@ def main():
     form = cgi.FieldStorage()
     sts = datetime.datetime.strptime(form.getfirst('sts', ''),
                                      '%m/%d/%Y %H:%M')
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = sts.replace(tzinfo=pytz.utc)
     ets = datetime.datetime.strptime(form.getfirst('ets', ''),
                                      '%m/%d/%Y %H:%M')
-    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    ets = ets.replace(tzinfo=pytz.utc)
     station = form.getfirst('station', 'KOAX')[:4]
     if form.getfirst('dl', None) is not None:
         sys.stdout.write('Content-type: application/octet-stream\n')

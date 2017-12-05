@@ -24,7 +24,7 @@ def doit(now, model):
     runtime = row[0]
     if runtime is None:
         sys.exit()
-    runtime = runtime.replace(tzinfo=pytz.timezone("UTC"))
+    runtime = runtime.replace(tzinfo=pytz.utc)
 
     # Load up the mos forecast for our given
     mcursor.execute("""

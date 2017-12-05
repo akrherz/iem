@@ -6,10 +6,11 @@ import sys
 
 import pygrib
 import numpy as np
-from pyiem import iemre
 import pytz
 import netCDF4
 from scipy.interpolate import NearestNDInterpolator
+from pyiem import iemre
+from pyiem.util import utc
 
 
 def to_netcdf(valid):
@@ -77,19 +78,18 @@ def merge(valid):
     nc.close()
 
 
-def main():
+def main(argv):
     """Go Main"""
-    if len(sys.argv) == 5:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]), int(sys.argv[4]))
+    if len(argv) == 5:
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     else:
         ts = datetime.datetime.utcnow()
         ts = ts.replace(minute=0, second=0, microsecond=0)
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
 
     if to_netcdf(ts):
         merge(ts)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

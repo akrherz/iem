@@ -8,7 +8,7 @@ import pytz
 import numpy as np
 import matplotlib.pyplot as plt
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 from pyiem.plot import maue
 
 cmap = maue()
@@ -26,8 +26,7 @@ def run(nexrad):
     drct = []
     sknt = []
     doy = []
-    minvalid = datetime.datetime(2016, 1, 1)
-    minvalid = minvalid.replace(tzinfo=pytz.timezone("UTC"))
+    minvalid = utc(2016, 1, 1)
     cursor = POSTGIS.cursor()
     cursor.execute("""
     SELECT drct, sknt, extract(doy from valid), valid

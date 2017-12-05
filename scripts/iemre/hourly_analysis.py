@@ -90,7 +90,7 @@ def grid_hour(nc, ts):
     ts1 = ts + datetime.timedelta(minutes=10)
     offset = iemre.hourly_offset(ts)
     utcnow = datetime.datetime.utcnow()
-    utcnow = (utcnow.replace(tzinfo=pytz.timezone("UTC")) -
+    utcnow = (utcnow.replace(tzinfo=pytz.utc) -
               datetime.timedelta(hours=36))
 
     # If we are near realtime, look in IEMAccess instead of ASOS database

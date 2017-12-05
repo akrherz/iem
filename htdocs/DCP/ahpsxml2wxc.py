@@ -60,5 +60,6 @@ def main():
     sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write(do(nwsli))
 
+
 if __name__ == '__main__':
     main()

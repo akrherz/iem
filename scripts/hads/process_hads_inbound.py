@@ -10,7 +10,6 @@ from pyiem.util import get_dbconn
 
 def main():
     """ Do things """
-    utc = pytz.timezone("UTC")
     pgconn = get_dbconn('hads')
     cursor2 = pgconn.cursor()
     cursor = pgconn.cursor()
@@ -29,7 +28,7 @@ def main():
     """)
     for row in cursor:
         table = "raw%s" % (row[1].strftime("%Y_%m"), )
-        ts = row[1].replace(tzinfo=utc)
+        ts = row[1].replace(tzinfo=pytz.utc)
         cursor2.execute("""
             INSERT into """ + table + """
             (station, valid, key, value) VALUES (%s, %s, %s, %s)

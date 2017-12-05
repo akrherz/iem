@@ -5,8 +5,6 @@ from __future__ import print_function
 import datetime
 import sys
 
-import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from pyiem.network import Table as NetworkTable
 from pyiem.windrose_utils import windrose

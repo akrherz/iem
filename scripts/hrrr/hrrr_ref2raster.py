@@ -9,8 +9,8 @@ import json
 
 import numpy as np
 import pygrib
-import pytz
 from PIL import Image
+from pyiem.util import utc
 
 PALETTE = Image.open(open("/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png")
                      ).getpalette()
@@ -93,8 +93,8 @@ def workflow(valid):
 
 def main(argv):
     """So Something great"""
-    valid = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]),
-                              int(argv[4])).replace(tzinfo=pytz.utc)
+    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]),
+                int(argv[4]))
     workflow(valid)
 
 

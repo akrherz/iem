@@ -11,7 +11,7 @@ import sys
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def workflow(date):
@@ -31,8 +31,7 @@ def workflow(date):
     """, iem_pgconn, params=(date,), index_col='id')
     bases = {}
     for tzname in df['tzname'].unique():
-        ts = datetime.datetime(date.year, date.month, date.day, 12)
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+        ts = utc(date.year, date.month, date.day, 12)
         base = ts.astimezone(pytz.timezone(tzname))
         bases[tzname] = base.replace(hour=0)
     # retrieve data that is within 12 hours of our bounds

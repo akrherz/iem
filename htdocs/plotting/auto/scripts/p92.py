@@ -46,7 +46,7 @@ def plotter(fdict):
     else:
         edate = datetime.datetime(edate.year, edate.month,
                                   edate.day, 0, 0)
-    edate = edate.replace(tzinfo=pytz.timezone("UTC"))
+    edate = edate.replace(tzinfo=pytz.utc)
 
     cursor.execute("""
      select wfo,  extract(days from (%s::date - max(issue))) as m

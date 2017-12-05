@@ -63,8 +63,8 @@ def plotter(fdict):
     types = []
     for i, row in df.iterrows():
         endts = max(row[4],
-                    row[5]).replace(tzinfo=pytz.timezone("UTC"))
-        events.append((row[3].replace(tzinfo=pytz.timezone("UTC")),
+                    row[5]).replace(tzinfo=pytz.utc)
+        events.append((row[3].replace(tzinfo=pytz.utc),
                        endts,
                        row[2]))
         labels.append(vtec.get_ps_string(row[0], row[1]))

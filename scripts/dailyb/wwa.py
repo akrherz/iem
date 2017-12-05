@@ -1,7 +1,8 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
+from __future__ import print_function
 import datetime
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 POSTGIS = get_dbconn('postgis', user='nobody')
 cursor = POSTGIS.cursor()
@@ -61,7 +62,7 @@ def run(sts=None, ets=None):
     # comprises yesterday!  Call it 00 UTC to 00 UTC
     if sts is None or ets is None:
         utc = datetime.datetime.utcnow()
-        utc = utc.replace(tzinfo=pytz.timezone("UTC"), second=0,
+        utc = utc.replace(tzinfo=pytz.utc, second=0,
                           microsecond=0, minute=0)
         ts = utc.astimezone(pytz.timezone("America/Chicago"))
         sts = ts - datetime.timedelta(hours=24)
@@ -134,14 +135,13 @@ def run(sts=None, ets=None):
 
 def main():
     """Lets actually do something """
-    sts = datetime.datetime(2015, 5, 4, 0)
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = utc(2015, 5, 4, 0)
     sts = sts.astimezone(pytz.timezone("America/Chicago"))
     sts = sts.replace(hour=0)
     ets = sts + datetime.timedelta(hours=24)
     txt, html = run(sts, ets)
-    print txt
-    print html
+    print(txt)
+    print(html)
 
 
 if __name__ == '__main__':

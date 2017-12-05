@@ -1,4 +1,5 @@
 """What we need to do with HRRR"""
+from __future__ import print_function
 import sys
 import datetime
 import subprocess

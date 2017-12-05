@@ -2,9 +2,11 @@
 from __future__ import print_function
 import datetime
 
-from pyiem import prism
 import netCDF4
 import numpy as np
+from pyiem import prism
+
+BASEDIR = "/mesonet/data/prism"
 
 
 def init_year(ts):
@@ -12,7 +14,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fn = "/mesonet/data/prism/prism_dailyc.nc"
+    fn = "%s/prism_dailyc.nc" % (BASEDIR, )
     nc = netCDF4.Dataset(fn, 'w')
     nc.title = "PRISM Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"

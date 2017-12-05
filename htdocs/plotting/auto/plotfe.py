@@ -101,7 +101,7 @@ def get_res_by_fmt(p, fmt, fdict):
 def plot_metadata(plt, start_time, end_time, p):
     """Place timestamp on the image"""
     utcnow = datetime.datetime.utcnow(
-                                    ).replace(tzinfo=pytz.timezone("UTC"))
+                                    ).replace(tzinfo=pytz.utc)
     now = utcnow.astimezone(pytz.timezone("America/Chicago"))
     plt.figtext(0.01, 0.005, ('Generated at %s in %.2fs'
                               ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),

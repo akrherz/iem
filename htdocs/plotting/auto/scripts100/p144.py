@@ -1,11 +1,9 @@
 """ISUAG"""
-import pytz
-import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 XREF = {
     'AEEI4': 'A130209',
@@ -91,6 +89,8 @@ def plotter(fdict):
     """, pgconn, params=(oldstation,
                          threshold, threshold, threshold, threshold, hours1),
                   index_col=None)
+    if df.empty:
+        return "No Data Found"
 
     df2 = read_sql("""
     with obs as (
@@ -124,11 +124,12 @@ def plotter(fdict):
                          threshold_c, threshold_c, threshold_c, threshold_c,
                          hours1),
                    index_col=None)
+    if df2.empty:
+        return "No Data Found"
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
-    d2000 = datetime.datetime(2000, 1, 1, 6)
-    d2000 = d2000.replace(tzinfo=pytz.timezone("UTC"))
+    d2000 = utc(2000, 1, 1, 6)
     for d in [df, df2]:
         for _, row in d.iterrows():
             if row['dlead'] is None:
@@ -141,9 +142,9 @@ def plotter(fdict):
                 continue
             ax.barh(row['fup'].year, (f1-f0), left=f0, facecolor='r',
                     align='center', edgecolor='r')
-            c = 'lightblue' if (d1 - d0) < (hours2 * 3600) else 'b'
-            ax.barh(row['fup'].year, (d1-d0), left=d0, facecolor=c,
-                    align='center', edgecolor=c)
+            color = 'lightblue' if (d1 - d0) < (hours2 * 3600) else 'b'
+            ax.barh(row['fup'].year, (d1-d0), left=d0, facecolor=color,
+                    align='center', edgecolor=color)
 
     xticks = []
     xticklabels = []

@@ -6,11 +6,11 @@ import json
 import sys
 import cgi
 
-import pytz
-from pyiem import iemre, datatypes
 import netCDF4
 import numpy as np
 import memcache
+from pyiem import iemre, datatypes
+from pyiem.util import utc
 
 
 def myrounder(val, precision):
@@ -28,8 +28,7 @@ def dowork(form):
 
     # We want data for the UTC date and timestamps are in the rears, so from
     # 1z through 1z
-    sts = datetime.datetime(date.year, date.month, date.day, 1)
-    sts = sts.replace(tzinfo=pytz.utc)
+    sts = utc(date.year, date.month, date.day, 1)
     ets = sts + datetime.timedelta(hours=24)
     sidx = iemre.hourly_offset(sts)
     eidx = iemre.hourly_offset(ets)

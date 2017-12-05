@@ -41,7 +41,7 @@ def plotter(fdict):
 
     jan1 = datetime.datetime.now().replace(hour=0, day=1, month=1, minute=0,
                                            second=0, microsecond=0,
-                                           tzinfo=pytz.timezone("UTC"))
+                                           tzinfo=pytz.utc)
     ts1973 = datetime.datetime(1973, 1, 1)
     today = datetime.datetime.now()
     cursor.execute("""
@@ -65,7 +65,7 @@ def plotter(fdict):
     rows = []
     for hr in range(24):
         ts = lts.replace(hour=hr)
-        zhour = ts.astimezone(pytz.timezone("UTC")).hour
+        zhour = ts.astimezone(pytz.utc).hour
         arr = np.reshape(data[zhour:(0 - 24 + zhour)], (days-1, 24))
         tots = np.sum(arr, 1)
         cnts[hr] = np.sum(np.where(tots > 0, 1, 0))

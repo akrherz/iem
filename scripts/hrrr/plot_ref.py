@@ -3,16 +3,18 @@ Generate an animated GIF of HRRR forecasted 1km reflectivity
 
 Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 """
+from __future__ import print_function
 import datetime
 import subprocess
 import os
 import sys
 
 import pygrib
-from pyiem.plot import MapPlot
-import pyiem.reference as ref
 import numpy as np
 import pytz
+from pyiem.plot import MapPlot
+import pyiem.reference as ref
+from pyiem.util import utc
 
 
 def compute_bounds(lons, lats):
@@ -45,14 +47,13 @@ def run(utc, routes):
             gs = grbs.select(level=1000, forecastTime=minute)
         except ValueError:
             continue
-        g = gs[0]
         if lats is None:
-            lats, lons = g.latlons()
+            lats, lons = gs[0].latlons()
             x1, x2, y1, y2 = compute_bounds(lons, lats)
             lats = lats[x1:x2, y1:y2]
             lons = lons[x1:x2, y1:y2]
 
-        ref = g['values'][x1:x2, y1:y2]
+        reflect = gs[0]['values'][x1:x2, y1:y2]
 
         mp = MapPlot(sector='midwest', axisbg='tan',
                      title=('%s UTC NCEP HRRR 1 km AGL Reflectivity'
@@ -60,7 +61,7 @@ def run(utc, routes):
                      subtitle=('valid: %s'
                                ) % (now.strftime("%-d %b %Y %I:%M %p %Z"),))
 
-        mp.pcolormesh(lons, lats, ref, np.arange(0, 75, 5), units='dBZ',
+        mp.pcolormesh(lons, lats, reflect, np.arange(0, 75, 5), units='dBZ',
                       clip_on=False)
         mp.postprocess(filename='/tmp/hrrr_ref_%03i.png' % (i,))
         mp.close()
@@ -87,12 +88,10 @@ def run(utc, routes):
 
 def main(argv):
     """Go Main"""
-    valid = datetime.datetime(int(argv[1]), int(argv[2]),
-                              int(argv[3]), int(argv[4]))
+    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     routes = 'a'
     if (datetime.datetime.utcnow() - valid) < datetime.timedelta(hours=2):
         routes = 'ac'
-    valid = valid.replace(tzinfo=pytz.utc)
 
     run(valid, routes)
 

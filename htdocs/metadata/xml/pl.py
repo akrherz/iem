@@ -89,5 +89,6 @@ gml:id="%(network)s_%(station)s">
     sys.stdout.write("Content-type: text/xml\n\n")
     sys.stdout.write(xs)
 
+
 if __name__ == '__main__':
     main()

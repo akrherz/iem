@@ -22,7 +22,7 @@ def do(cursor, wfo):
         meta += ("# based on IEM processing of RRM%s dated: %s UTC\n"
                  ) % (wfo,
                       row[1].astimezone(
-                          pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M"))
+                          pytz.utc).strftime("%Y-%m-%d %H:%M"))
         data = row[0].replace("\001", "")
         for line in data.split("\r\r\n"):
             if not line.startswith(".A"):

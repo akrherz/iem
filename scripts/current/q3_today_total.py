@@ -6,20 +6,18 @@ import sys
 
 import numpy as np
 import pyiem.iemre as iemre
-from pyiem.datatypes import distance
 import netCDF4
 import pytz
-import matplotlib
-matplotlib.use('agg')
+from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, nwsprecip
+from pyiem.util import utc
 
 
 def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    lts = datetime.datetime(ts.year, ts.month, ts.day, 12).replace(
-                tzinfo=pytz.timezone("UTC"))
+    lts = utc(ts.year, ts.month, ts.day, 12)
     lts = lts.astimezone(pytz.timezone("America/Chicago"))
     # make assumptions about the last valid MRMS data
     if realtime:

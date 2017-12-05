@@ -4,12 +4,13 @@ import cgi
 import sys
 import datetime
 import json
+
+import pytz
 import psycopg2.extras
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
 from pyiem.util import drct2text, get_dbconn
-import pytz
 ISUAG = get_dbconn('isuag')
 IEM = get_dbconn('iem')
 
@@ -131,7 +132,7 @@ def main():
     field = cgi.FieldStorage()
     dt = field.getfirst('dt')
     ts = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.000Z')
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     get_data(ts)
 
 

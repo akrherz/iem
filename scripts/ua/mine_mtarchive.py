@@ -72,7 +72,7 @@ exit
             myraob.station = (tokens[2] if len(tokens[2]) == 4
                               else 'K'+ tokens[2])
             valid = datetime.datetime.strptime("19"+tokens[-1], '%Y%m%d/%H%M')
-            myraob.valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+            myraob.valid = valid.replace(tzinfo=pytz.utc)
         if line.find(".") > 0 and line.find("=") == -1 and line.find("PRES") == -1:
             tokens = line.strip().split()
             if len(tokens) < 6:

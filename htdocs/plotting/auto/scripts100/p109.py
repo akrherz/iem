@@ -49,9 +49,9 @@ def plotter(fdict):
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx['sdate']
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = sts.replace(tzinfo=pytz.utc)
     ets = ctx['edate']
-    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    ets = ets.replace(tzinfo=pytz.utc)
     p1 = ctx['phenomenav1']
     p2 = ctx['phenomenav2']
     p3 = ctx['phenomenav3']

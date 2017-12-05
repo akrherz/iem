@@ -78,7 +78,7 @@ def main():
     """ Do something """
     # We want this hour GMT
     utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.timezone("UTC"), minute=0, second=0,
+    utc = utc.replace(tzinfo=pytz.utc, minute=0, second=0,
                       microsecond=0)
     for offset in [33, 9, 3, 0]:
         now = utc - datetime.timedelta(hours=offset)

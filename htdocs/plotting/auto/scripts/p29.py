@@ -1,12 +1,11 @@
 """Hourly temp ranges"""
-import datetime
 import calendar
 
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 
 def get_description():
@@ -84,12 +83,11 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_ylabel("Frequency [%]")
-    ut = datetime.datetime(2000, 1, 1, hour, 0)
-    ut = ut.replace(tzinfo=pytz.timezone("UTC"))
+    ut = utc(2000, 1, 1, hour, 0)
     localt = ut.astimezone(pytz.timezone(nt.sts[station]['tzname']))
     ax.set_xlim(0.5, 12.5)
     ax.set_title(("%s [%s]\nFrequency of %s UTC (%s LST) "
-                  "Temp between %s$^\circ$F and %s$^\circ$F"
+                  r"Temp between %s$^\circ$F and %s$^\circ$F"
                   ) % (nt.sts[station]['name'], station, hour,
                        localt.strftime("%-I %p"), t1, t2))
     ax.legend(loc=(0.05, -0.14), ncol=3, fontsize=14)

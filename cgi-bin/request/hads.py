@@ -4,13 +4,11 @@ Download Interface for HADS data
 """
 import sys
 import cgi
-import datetime
 import os
 
-import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 PGCONN = get_dbconn('hads')
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
@@ -18,7 +16,7 @@ DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 
 def get_time(form):
     """ Get timestamps """
-    y = int(form.getfirst('year'))
+    y1 = int(form.getfirst('year'))
     m1 = int(form.getfirst('month1'))
     m2 = int(form.getfirst('month2'))
     d1 = int(form.getfirst('day1'))
@@ -27,10 +25,8 @@ def get_time(form):
     h2 = int(form.getfirst('hour2'))
     mi1 = int(form.getfirst('minute1'))
     mi2 = int(form.getfirst('minute2'))
-    sts = datetime.datetime(y, m1, d1, h1, mi1)
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
-    ets = datetime.datetime(y, m2, d2, h2, mi2)
-    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    sts = utc(y1, m1, d1, h1, mi1)
+    ets = utc(y1, m2, d2, h2, mi2)
     return sts, ets
 
 

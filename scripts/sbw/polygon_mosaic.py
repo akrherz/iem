@@ -10,8 +10,6 @@ import psycopg2.extras
 from PIL import Image, ImageDraw, ImageFont
 import pytz
 from geopandas import read_postgis
-import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from pyiem.util import get_dbconn
 
@@ -29,7 +27,7 @@ def main(argv):
     # Preparation
     sortOpt = argv[1]
     ts = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    sts = ts.replace(tzinfo=pytz.timezone("UTC"), hour=0, minute=0, second=0,
+    sts = ts.replace(tzinfo=pytz.utc, hour=0, minute=0, second=0,
                      microsecond=0)
     if len(argv) == 5:
         sts = sts.replace(year=int(argv[1]), month=int(argv[2]),

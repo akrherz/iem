@@ -113,7 +113,7 @@ def main():
         db[this_station] = {}
         ticks = obtime[recnum]
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-        db[this_station]['ts'] = ts.replace(tzinfo=pytz.timezone('UTC'))
+        db[this_station]['ts'] = ts.replace(tzinfo=pytz.utc)
         db[this_station]['network'] = network
         db[this_station]['pres'] = sanity_check(pressure[recnum], 0, 1000000,
                                                 -99)

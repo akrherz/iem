@@ -2,10 +2,9 @@
 import datetime
 
 import numpy as np
-import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 
 def get_description():
@@ -51,8 +50,7 @@ def plotter(fdict):
 
     # Extract the range of forecasts for each day for approximately
     # the given month
-    sts = datetime.datetime(year, month, 1, 0, 0)
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = utc(year, month, 1, 0, 0)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     days = (ets-sts).days
     data = np.ones((250, days * 24)) * -1

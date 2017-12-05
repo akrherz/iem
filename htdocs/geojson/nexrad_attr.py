@@ -26,7 +26,7 @@ def run(ts):
         """)
     else:
         valid = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S')
-        valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+        valid = valid.replace(tzinfo=pytz.utc)
         tbl = "nexrad_attributes_%s" % (valid.year, )
         cursor.execute("""
         with vcps as (

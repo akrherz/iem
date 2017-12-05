@@ -7,6 +7,7 @@ import urllib2
 
 import pytz
 import pygrib
+from pyiem.util import utc
 
 # 18 hours of output + analysis
 COMPLETE_GRIB_MESSAGES = 18 * 4 + 1
@@ -90,11 +91,9 @@ def run(valid):
     output.close()
 
 
-def main():
+def main(argv):
     """ Go Main Go """
-    valid = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                              int(sys.argv[3]), int(sys.argv[4]))
-    valid = valid.replace(tzinfo=pytz.utc)
+    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     run(valid)
     # in case we missed some old data, re-download
     run(valid - datetime.timedelta(hours=12))
@@ -102,4 +101,4 @@ def main():
 
 if __name__ == '__main__':
     # do main
-    main()
+    main(sys.argv)

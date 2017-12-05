@@ -177,7 +177,7 @@ def parse(raw, sid):
             s = " ".join(tokens[1:])
             ts = datetime.datetime.strptime(s, "%H %d %b %Y")
             rob = RAOB()
-            rob.valid = ts.replace(tzinfo=pytz.timezone("UTC"))
+            rob.valid = ts.replace(tzinfo=pytz.utc)
             continue
         if tokens[0] == '1':
             fl_hhmm = line[44:].strip()
@@ -266,7 +266,7 @@ def main(valid):
             if row[0] is None:
                 print("RAOB dl station: %s has null max(valid)?" % (sid, ))
                 continue
-            lastts = row[0].astimezone(pytz.timezone("UTC"))
+            lastts = row[0].astimezone(pytz.utc)
             print(('RAOB dl fail ts: %s sid: %s last: %s'
                    ) % (valid.strftime("%Y-%m-%d %H"), sid,
                         lastts.strftime("%Y-%m-%d %H")))

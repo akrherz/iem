@@ -19,7 +19,7 @@ DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
 def get_time(form, tzname):
     """ Get timestamps """
     ts = datetime.datetime.utcnow()
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     ts = ts.astimezone(pytz.timezone(tzname))
     y1 = int(form.getfirst('year1'))
     y2 = int(form.getfirst('year2'))

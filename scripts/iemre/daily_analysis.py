@@ -15,11 +15,10 @@ import datetime
 import netCDF4
 import numpy as np
 from pandas.io.sql import read_sql
-import pytz
 from scipy.stats import zscore
 from metpy.gridding.interpolation import inverse_distance
 from pyiem import iemre, datatypes, reference
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 PGCONN = get_dbconn('iem', user='nobody')
 COOP_PGCONN = get_dbconn('coop', user='nobody')
@@ -90,8 +89,7 @@ def do_precip(nc, ts):
     We need to be careful here as the timestamp sent to this app is today,
     we are actually creating the analysis for yesterday
     """
-    sts = datetime.datetime(ts.year, ts.month, ts.day, 6)
-    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+    sts = utc(ts.year, ts.month, ts.day, 6)
     ets = sts + datetime.timedelta(hours=24)
     offset = iemre.daily_offset(ts)
     offset1 = iemre.hourly_offset(sts)
@@ -129,8 +127,7 @@ def do_precip(nc, ts):
 def do_precip12(nc, ts):
     """Compute the 24 Hour precip at 12 UTC, we do some more tricks though"""
     offset = iemre.daily_offset(ts)
-    ets = datetime.datetime(ts.year, ts.month, ts.day, 12)
-    ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    ets = utc(ts.year, ts.month, ts.day, 12)
     sts = ets - datetime.timedelta(hours=24)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)

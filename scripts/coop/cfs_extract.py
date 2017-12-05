@@ -32,7 +32,7 @@ nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
 
 
 def do_agg(dkey, fname, ts, data):
-
+    """Do aggregate"""
     fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/" +
                       fname + ".01.%Y%m%d%H.daily.grib2"))
     if not os.path.isfile(fn):
@@ -49,7 +49,7 @@ def do_agg(dkey, fname, ts, data):
         key = cst.strftime("%Y-%m-%d")
         d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None,
                                             srad=None))
-        logger.debug("Writting %s %s from ftime: %s" % (dkey, key, ftime))
+        logger.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
         if d[dkey] is None:
             d[dkey] = grib.values * 6 * 3600.
         else:
@@ -57,6 +57,7 @@ def do_agg(dkey, fname, ts, data):
 
 
 def do_temp(dkey, fname, func, ts, data):
+    """Do Temperatures"""
     fn = ts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/" +
                       fname + ".01.%Y%m%d%H.daily.grib2"))
     if not os.path.isfile(fn):
@@ -69,7 +70,7 @@ def do_temp(dkey, fname, func, ts, data):
         if key not in data['fx']:
             continue
         d = data['fx'][key]
-        logger.debug("Writting %s %s from ftime: %s" % (dkey, key, ftime))
+        logger.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
         if d[dkey] is None:
             d[dkey] = grib.values
         else:
@@ -144,15 +145,15 @@ def dbsave(ts, data):
     pgconn.commit()
 
 
-def main(argv):
+def main():
     """Go!"""
     # Extract 12 UTC Data
     ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"), hour=12, minute=0, second=0,
+    ts = ts.replace(tzinfo=pytz.utc, hour=12, minute=0, second=0,
                     microsecond=0)
     data = process(ts)
     dbsave(ts, data)
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

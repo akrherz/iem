@@ -33,10 +33,10 @@ nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
 
 
 def do_precip(gribs, ftime, data):
-    # Precip
+    """Precip"""
     try:
         sel = gribs.select(parameterName='Total precipitation')
-    except:
+    except Exception as _exp:
         return
     if data['x'] is None:
         data['proj'] = pyproj.Proj(sel[0].projparams)
@@ -60,9 +60,10 @@ def do_precip(gribs, ftime, data):
 
 
 def do_temp(name, dkey, gribs, ftime, data):
+    """Temp"""
     try:
         sel = gribs.select(parameterName=name)
-    except:
+    except Exception as _exp:
         return
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
@@ -112,7 +113,7 @@ def dbsave(ts, data):
         cursor.execute("""DELETE from alldata_forecast where
         modelid = %s""", (modelid,))
         if cursor.rowcount > 0:
-            logger.warn("Removed %s previous entries" % (cursor.rowcount,))
+            logger.warn("Removed %s previous entries", cursor.rowcount)
     else:
         cursor.execute("""INSERT into forecast_inventory(model, modelts)
         VALUES ('NDFD', %s) RETURNING id""", (ts,))
@@ -159,7 +160,7 @@ def main(argv):
         ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
     else:
         ts = datetime.datetime.utcnow()
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"), hour=0, minute=0, second=0,
+    ts = ts.replace(tzinfo=pytz.utc, hour=0, minute=0, second=0,
                     microsecond=0)
     data = process(ts)
     if data['proj'] is None:

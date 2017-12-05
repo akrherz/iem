@@ -8,7 +8,7 @@ import datetime
 import sys
 
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def query(sql, args=None):
@@ -67,8 +67,7 @@ def workflow(valid):
 def main(argv):
     """Go Main Go"""
     if len(argv) == 4:
-        utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-        utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
+        utcnow = utc(int(argv[1]), int(argv[2]), int(argv[3]))
         workflow(utcnow)
         return
     utcnow = datetime.datetime.utcnow()

@@ -15,6 +15,7 @@ import numpy as np
 from PIL import Image
 import pygrib
 import pyiem.mrms as mrms
+from pyiem.util import utc
 
 
 def make_colorramp():
@@ -127,12 +128,8 @@ def main(argv):
     """ Go Main Go """
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     if len(argv) == 6:
-        utcnow = datetime.datetime(int(argv[1]),
-                                   int(argv[2]),
-                                   int(argv[3]),
-                                   int(argv[4]),
-                                   int(argv[5])
-                                   ).replace(tzinfo=pytz.timezone("UTC"))
+        utcnow = utc(int(argv[1]), int(argv[2]), int(argv[3]),
+                     int(argv[4]), int(argv[5]))
         do(utcnow)
     else:
         # If our time is an odd time, run 3 minutes ago

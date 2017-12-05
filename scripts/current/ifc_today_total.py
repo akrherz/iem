@@ -1,16 +1,15 @@
 """
  Create a plot of today's IFC estimated precip
 """
-
+from __future__ import print_function
 import datetime
-import numpy as np
 import sys
-from pyiem.datatypes import distance
+
+import numpy as np
 import netCDF4
 from pyiem.iemre import daily_offset
-import matplotlib
-matplotlib.use('agg')
-from pyiem.plot import MapPlot, nwsprecip  # NOPEP8
+from pyiem.plot import MapPlot, nwsprecip
+from pyiem.datatypes import distance
 
 
 def doday(ts, realtime):
@@ -38,22 +37,23 @@ def doday(ts, realtime):
 
     pqstr = ("plot %s %s00 iowa_ifc_1d.png iowa_ifc_1d.png png"
              ) % (routes, ts.strftime("%Y%m%d%H"))
-    m = MapPlot(title=("%s Iowa Flood Center Today's Precipitation"
-                       ) % (ts.strftime("%-d %b %Y"),),
-                subtitle=subtitle, sector='custom',
-                west=xaxis[0], east=xaxis[-1],
-                south=yaxis[0], north=yaxis[-1])
+    mp = MapPlot(title=("%s Iowa Flood Center Today's Precipitation"
+                        ) % (ts.strftime("%-d %b %Y"),),
+                 subtitle=subtitle, sector='custom',
+                 west=xaxis[0], east=xaxis[-1],
+                 south=yaxis[0], north=yaxis[-1])
 
-    (x, y) = np.meshgrid(xaxis, yaxis)
+    (lons, lats) = np.meshgrid(xaxis, yaxis)
 
-    m.pcolormesh(x, y, distance(total, 'MM').value("IN"), clevs,
-                 cmap=nwsprecip(), units='inch')
-    m.drawcounties()
-    m.postprocess(pqstr=pqstr, view=False)
-    m.close()
+    mp.pcolormesh(lons, lats, distance(total, 'MM').value("IN"), clevs,
+                  cmap=nwsprecip(), units='inch')
+    mp.drawcounties()
+    mp.postprocess(pqstr=pqstr, view=False)
+    mp.close()
 
 
 def main(argv):
+    """Go Main Go"""
     if len(argv) == 4:
         date = datetime.date(int(argv[1]), int(argv[2]),
                              int(argv[3]))

@@ -111,7 +111,7 @@ def main():
     cb = form.getfirst('callback', None)
     dt = form.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, '%Y-%m-%d')
-    ts = ts.replace(hour=12, tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(hour=12, tzinfo=pytz.utc)
 
     mckey = "/geojson/7am/%s/%s" % (dt, group)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
