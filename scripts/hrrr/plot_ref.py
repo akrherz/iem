@@ -89,8 +89,9 @@ def run(utc, routes):
 def main(argv):
     """Go Main"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     routes = 'a'
-    if (datetime.datetime.utcnow() - valid) < datetime.timedelta(hours=2):
+    if (now - valid) < datetime.timedelta(hours=2):
         routes = 'ac'
 
     run(valid, routes)
