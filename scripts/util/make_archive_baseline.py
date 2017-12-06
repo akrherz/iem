@@ -44,8 +44,7 @@ def main(argv):
     if len(argv) == 1:
         ts = datetime.datetime.utcnow()
     else:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]))
+        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
     nt = NetworkTable(['NEXRAD', 'TWDR'])
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge")
     for sid in nt.sts:
