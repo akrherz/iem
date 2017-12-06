@@ -10,7 +10,10 @@ $connect = iemdb("postgis");
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
 if ($year < 2002) die("invalid year specified!");
 
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,4) : "MPX";
+if (strlen($wfo) > 3){
+    $wfo = substr($wfo, 1, 3);
+}
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
