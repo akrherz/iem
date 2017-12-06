@@ -1,9 +1,9 @@
 <?php 
  /* Daily Data download for the ISUAG Network */ 
- include("../../../config/settings.inc.php");
- include("../../../include/forms.php");
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/forms.php";
  define("IEM_APPID", 12);
- include("../../../include/myview.php");
+ require_once "../../../include/myview.php";
  include_once "boxinc.phtml";
  $t = new MyView();
  $t->title = "ISU AgClimate Legacy Daily Data Request";
@@ -35,14 +35,13 @@ Please see the
 for high quality daily precipitation data.  If you are looking for hourly 
 data from this network, see <a href="hourlyRequest.php">this page</a>.
 
-
 <form name="dl" method="GET" action="worker.php">
 <input type="hidden" name="timeType" value="daily">
 
-<table width="100%">
-<tr><td valign="top">
+<div class="row">
+ <div class="col-md-6">
 
-<h4 class="subtitle">Select station(s):</h4>
+<h4>Select station(s):</h4>
   <input type="checkbox" name="sts[]" value="A130209">Ames<BR>
   <input type="checkbox" name="sts[]" value="A131069">Calmar<BR>
   <input type="checkbox" name="sts[]" value="A131299">Castana<BR>
@@ -57,9 +56,7 @@ data from this network, see <a href="hourlyRequest.php">this page</a>.
   <input type="checkbox" name="sts[]" value="A136949">Rhodes<BR>
   <input type="checkbox" name="sts[]" value="A138019">Sutherland<BR>
 
-</td><td valign="top">
-
-<h4 class="subtitle">Select data:</h4>
+<h4>Select data:</h4>
   <input type="checkbox" name="vars[]" value="c11">High Temperature (F)<BR>
   <input type="checkbox" name="vars[]" value="c12">Low Temperature (F)<BR>
   <input type="checkbox" name="vars[]" value="c30l">Daily Low 4in Soil Temperature (F)<br />
@@ -73,29 +70,33 @@ data from this network, see <a href="hourlyRequest.php">this page</a>.
   <input type="checkbox" name="vars[]" value="c80">Solar Radiation (langley)<BR>
   <input type="checkbox" name="vars[]" value="c70"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [mm]<br />
 
-</td></tr></table>
+</div>
+<div class="col-md-6">
 
-<p><b><h4 class="subtitle">Select the time interval:</h4></b>
+<h4>Select the time interval:</h4>
+
 <i>
 When selecting the time interval, make sure you that choose <B> * valid * </B> dates.
 </i>
-<TABLE>
-  <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
-  <TR><TH>Starting On:</TH>
+<table>
+<thead>
+  <tr><th></th><th>Year:</th><th>Month:</th><th>Day:</th></tr>
+</thead>
+
+  <tr><th>Starting On:</th>
   <td>{$ys}</td>
   <td>{$ms}</td>
   <td>{$ds}</td>
  </tr>
-</TR>
-<TR><TH>Ending On:</TH>
+</tr>
+<tr><th>Ending On:</th>
   <td>{$ys2}</td>
   <td>{$ms2}</td>
   <td>{$ds2}</td>
- 		</TR>
-</TABLE>
+ 		</tr>
+</table>
 
-<h4 class="subtitle">Options:</h4>
-<div style="margin-left: 20px;">
+<h4>Options:</h4>
 <input type="checkbox" name="qcflags" value="yes">Include quality control flags
 <table class="table table-striped">
 <thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
@@ -117,24 +118,33 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 
 </table>
 <br><input type="checkbox" name="todisk" value="yes">Download directly to disk
-<br>How should the values be separated?: 
+
+<p>How should the values be separated?: 
 <select name="delim">
   <option value="comma">by commas
   <option value="tab">by tabs
 </select>
-<br />Text file format:
+
+<p>Text file format:
 <select name="lf">
-  <option value="dos">Windows/DOS
-  <option value="unix">UNIX/MacOSX
+  <option value="dos">Windows/DOS</option>
+  <option value="unix">UNIX/MacOSX</option>
 </select>
-</div>
+
+<div class="alert alert-success"><strong>Pro-Tip</strong>: The downloaded text
+files should be easily loaded into spreadsheet programs, like Microsoft Excel.
+From Microsoft Excel, to go File-&gt;Open and set the file type to "All Files"
+or something appropriate for delimited text.</div>
+
+</div></div>
 
 <p><b><h4>Submit your request:</h4></b>
 	<input type="submit" value="Get Data">
 	<input type="reset">
 
-<BR>
 </form>
+
+<br />
 EOF;
 $t->render('single.phtml');
 ?>
