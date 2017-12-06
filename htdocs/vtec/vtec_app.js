@@ -99,10 +99,10 @@ function urlencode(){
 	// Make our CONFIG object a URI
 	var uri = "?";
 	uri += "year=" + CONFIG.year;
-	uri += "phenomena=" + CONFIG.phenomena;
-	uri += "significance=" + CONFIG.significance;
-	uri += "eventid=" + CONFIG.etn;
-	uri += "wfo="+ CONFIG.wfo;
+	uri += "&phenomena=" + CONFIG.phenomena;
+	uri += "&significance=" + CONFIG.significance;
+	uri += "&eventid=" + CONFIG.etn;
+	uri += "&wfo="+ CONFIG.wfo;
 	return uri;
 }
 
@@ -796,16 +796,16 @@ function buildUI(){
     	updateHash();
 	});
 	$("#lsr_kml_button").click(function(){
-		window.location.href = "/kml/sbw_lsrs.php?" + urlencode();
+		window.location.href = "/kml/sbw_lsrs.php" + urlencode();
 	});
 	$("#warn_kml_button").click(function(){
-		window.location.href = "/kml/vtec.php?" + urlencode();
+		window.location.href = "/kml/vtec.php" + urlencode();
 	});
 	$("#ci_kml_button").click(function(){
-		window.location.href = "/kml/sbw_county_intersect.php?" + urlencode();
+		window.location.href = "/kml/sbw_county_intersect.php" + urlencode();
 	});
 	$("#gr_button").click(function(){
-		window.location.href = "/request/grx/vtec.php?" + urlencode();
+		window.location.href = "/request/grx/vtec.php" + urlencode();
 	});
 
     $("#toolbar-print").click(function(){
