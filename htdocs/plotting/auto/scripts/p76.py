@@ -110,7 +110,7 @@ def get_data(season, station, startyear):
     elif season == 'winter':
         deltadays = 33
         months = [12, 1, 2]
-        if today.month > 2 and today.month != 12:
+        if today.month > 2:
             lastyear += 1
     else:
         ts = datetime.datetime.strptime("2000-"+season+"-01", '%Y-%b-%d')
