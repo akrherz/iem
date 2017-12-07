@@ -2,10 +2,9 @@
 import datetime
 
 import psycopg2.extras
-import pytz
 import pandas as pd
 import pyiem.nws.vtec as vtec
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 
 def get_description():
@@ -41,19 +40,22 @@ def plotter(fdict):
     phenomena = ctx['phenomena']
     significance = ctx['significance']
     edate = ctx.get('edate')
-    if edate is None:
-        edate = datetime.datetime.utcnow()
+    if edate is not None:
+        edate = utc(edate.year, edate.month, edate.day, 0, 0)
+        cursor.execute("""
+         select wfo,  extract(days from (%s::date - max(issue))) as m
+         from warnings where significance = %s and phenomena = %s
+         and issue < %s
+         GROUP by wfo ORDER by m ASC
+        """, (edate, significance, phenomena, edate))
     else:
-        edate = datetime.datetime(edate.year, edate.month,
-                                  edate.day, 0, 0)
-    edate = edate.replace(tzinfo=pytz.utc)
+        cursor.execute("""
+         select wfo,  extract(days from ('TODAY'::date - max(issue))) as m
+         from warnings where significance = %s and phenomena = %s
+         GROUP by wfo ORDER by m ASC
+        """, (significance, phenomena))
+        edate = datetime.datetime.utcnow()
 
-    cursor.execute("""
-     select wfo,  extract(days from (%s::date - max(issue))) as m
-     from warnings where significance = %s and phenomena = %s
-     and issue < %s
-     GROUP by wfo ORDER by m ASC
-    """, (edate, significance, phenomena, edate))
     if cursor.rowcount == 0:
         return ("No Events Found for %s (%s.%s)"
                 ) % (vtec.get_ps_string(phenomena, significance),
