@@ -12,11 +12,15 @@
   ServerAdmin akrherz@iastate.edu
   DocumentRoot /opt/iem/htdocs
 
+  WSGIDaemonProcess ${iemwsgi}_tc processes=4 threads=15 display-name=%{GROUP}
   WSGIScriptAlias /cache/tile.py /opt/iem/htdocs/cache/tile.wsgi
   WSGIScriptAlias /cache/c.py /opt/iem/htdocs/cache/tile.wsgi
-
   WSGIScriptAlias /c/tile.py /opt/iem/htdocs/c/tile.wsgi
   WSGIScriptAlias /c/c.py /opt/iem/htdocs/c/tile.wsgi
+
+  WSGIDaemonProcess ${iemwsgi}_ap processes=2 threads=15 display-name=%{GROUP} maximum-requests=100
+  WSGIScriptAlias /plotting/auto/meta.py /opt/iem/htdocs/plotting/auto/meta.wsgi
+  WSGIScriptAlias /plotting/auto/autoplot.py /opt/iem/htdocs/plotting/auto/autoplot.wsgi
 
   # http://enable-cors.org/server_apache.html
   Header set Access-Control-Allow-Origin "*"
@@ -185,12 +189,14 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/c">
+    WSGIProcessGroup ${iemwsgi}_tc
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
     ExpiresDefault "access plus 14 days"
   </Directory>
   
   <Directory "/opt/iem/htdocs/cache">
+    WSGIProcessGroup ${iemwsgi}_tc
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
     ExpiresDefault "access plus 5 minutes"
@@ -325,17 +331,18 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/plotting/auto">
+    WSGIProcessGroup ${iemwsgi}_ap
     AddHandler cgi-script .py
     Options +ExecCGI
 
-    RewriteRule plot/([0-9]{1,12})/(.*).png$ plotfe.py?p=$1&q=$2&fmt=png
-    RewriteRule plot/([0-9]{1,12})/(.*).csv$ plotfe.py?p=$1&q=$2&fmt=csv
-    RewriteRule plot/([0-9]{1,12})/(.*).txt$ plotfe.py?p=$1&q=$2&fmt=txt
-    RewriteRule plot/([0-9]{1,12})/(.*).xlsx$ plotfe.py?p=$1&q=$2&fmt=xlsx
-    RewriteRule plot/([0-9]{1,12})/(.*).js$ plotfe.py?p=$1&q=$2&fmt=js
-    RewriteRule plot/([0-9]{1,12})/(.*).pdf$ plotfe.py?p=$1&q=$2&fmt=pdf
-    RewriteRule plot/([0-9]{1,12})/(.*).svg$ plotfe.py?p=$1&q=$2&fmt=svg
-    RewriteRule meta/([0-9]{1,12}).json$ plotmeta.py?p=$1
+    RewriteRule plot/([0-9]{1,12})/(.*).png$ autoplot.py?p=$1&q=$2&fmt=png
+    RewriteRule plot/([0-9]{1,12})/(.*).csv$ autoplot.py?p=$1&q=$2&fmt=csv
+    RewriteRule plot/([0-9]{1,12})/(.*).txt$ autoplot.py?p=$1&q=$2&fmt=txt
+    RewriteRule plot/([0-9]{1,12})/(.*).xlsx$ autoplot.py?p=$1&q=$2&fmt=xlsx
+    RewriteRule plot/([0-9]{1,12})/(.*).js$ autoplot.py?p=$1&q=$2&fmt=js
+    RewriteRule plot/([0-9]{1,12})/(.*).pdf$ autoplot.py?p=$1&q=$2&fmt=pdf
+    RewriteRule plot/([0-9]{1,12})/(.*).svg$ autoplot.py?p=$1&q=$2&fmt=svg
+    RewriteRule meta/([0-9]{1,12}).json$ meta.py?p=$1
   </Directory>
 
   <Directory "/opt/iem/htdocs/rainfall">
