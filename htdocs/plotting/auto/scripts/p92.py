@@ -57,9 +57,9 @@ def plotter(fdict):
         edate = datetime.datetime.utcnow()
 
     if cursor.rowcount == 0:
-        return ("No Events Found for %s (%s.%s)"
-                ) % (vtec.get_ps_string(phenomena, significance),
-                     phenomena, significance)
+        raise Exception(("No Events Found for %s (%s.%s)"
+                         ) % (vtec.get_ps_string(phenomena, significance),
+                              phenomena, significance))
     data = {}
     rows = []
     for row in cursor:

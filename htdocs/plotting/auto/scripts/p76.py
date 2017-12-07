@@ -191,4 +191,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(varname='vpd', season='winter'))
+    plotter(dict(varname='vpd', season='summer', station='AMW'))

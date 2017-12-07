@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """Returns the JSON metadata for a particular autoplot app, or all list all"""
-
 import cgi
 import sys
 import os
 import imp
 import json
+
 from pyiem.util import get_dbconn
 
 
 def get_timing(pidx):
     """Return an average plot generation time for this app"""
-    pgconn = get_dbconn('mesosite', user='nobody')
+    pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT avg(timing) from autoplot_timing where appid = %s
@@ -35,7 +35,7 @@ def main():
         else:
             name = 'scripts/p%s' % (pidx,)
         if not os.path.isfile('%s.py' % (name, )):
-            sys.stderr.write("autoplot/meta 404 %s" % (name, ))
+            sys.stderr.write("autoplot/meta 404 %s\n" % (name, ))
             sys.stdout.write("Status: 404\n")
             sys.stdout.write("Content-type: text/plain\n\n")
             return

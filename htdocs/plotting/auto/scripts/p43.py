@@ -25,6 +25,8 @@ def date_ticker(ax, mytz):
             fmt = "%-I %p\n%-d %b" if lts.hour == 0 else "%-I %p"
             xticks.append(now)
             xticklabels.append(lts.strftime(fmt))
+        if len(xticks) > 100:
+            break
         now += datetime.timedelta(hours=1)
 
     ax.set_xticks(xticks)

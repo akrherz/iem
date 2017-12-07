@@ -56,9 +56,7 @@ def plotter(fdict):
      and wfo = %s and expire > issue and init_expire > issue
     """, (ugc, phenomena, significance, wfo))
     if cursor.rowcount < 2:
-        ax.text(0.5, 0.5, "No Results Found, try flipping zone/county",
-                transform=ax.transAxes, ha='center')
-        return fig
+        raise Exception("No Results Found, try flipping zone/county")
 
     rows = []
     for row in cursor:

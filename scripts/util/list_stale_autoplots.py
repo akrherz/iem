@@ -36,6 +36,9 @@ def main():
         if res < valid:
             rows[appid] = valid
 
+    if not rows:
+        print("No data found")
+        return
     df = pd.DataFrame.from_dict(rows, orient='index')
     df.columns = ['valid']
     maxval = df.index.max()
