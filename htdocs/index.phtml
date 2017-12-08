@@ -57,8 +57,9 @@ $news = "";
 for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
     $ts = strtotime(substr($row["entered"],0,16));
     if ($ts > $today) $sts = strftime("%I:%M %p", $ts);
-    $news .= $sts = strftime("%d %b %I:%M %p", $ts);
-    $news .= "<p><a href=\"/onsite/news.phtml?id=".$row["id"]."\">". $row["title"] ."</a><br /><i>Posted:</i> $sts</li>\n";
+    $sts = strftime("%d %b %I:%M %p", $ts);
+    $news .= sprintf("<p><a href=\"/onsite/news.phtml?id=%s\">%s</a>".
+        "<br /><i>Posted:</i> %s</li>\n", $row["id"], $row["title"], $sts);
 }
 
 $t->content = <<<EOM
