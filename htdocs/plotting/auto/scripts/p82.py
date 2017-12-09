@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import speed
+from pyiem.reference import TRACE_VALUE
 
 PDICT = OrderedDict([
         ('avg_smph', 'Average Wind Speed [mph]'),
@@ -51,7 +52,7 @@ def safe(row, varname):
     if val is None:
         return 'M'
     if varname == 'pday':
-        if val == 0.0001:
+        if val == TRACE_VALUE:
             return 'T'
         if val == 0:
             return '0'

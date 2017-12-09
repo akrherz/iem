@@ -97,7 +97,7 @@ def plotter(fdict):
         now += datetime.timedelta(days=1)
 
     if True not in success:
-        return "No data, pick lower GDD values"
+        raise ValueError("No data, pick lower GDD values")
     df = pd.DataFrame(rows)
     heights = np.array(heights)
     success = np.array(success)

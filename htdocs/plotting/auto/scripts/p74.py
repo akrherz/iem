@@ -77,7 +77,7 @@ def plotter(fdict):
     """, pgconn, params=(1 if season != 'all' else 0, station, startyear),
                   index_col='yr')
     if df.empty:
-        return "No data found for query"
+        raise ValueError("No data found for query")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = df[season].mean()

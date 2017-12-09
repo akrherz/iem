@@ -81,7 +81,7 @@ def plotter(fdict):
     opt = ctx['opt']
     usdm = ctx['usdm']
     if sdate.year != edate.year:
-        raise Exception('Sorry, do not support multi-year plots yet!')
+        raise ValueError('Sorry, do not support multi-year plots yet!')
     days = (edate - sdate).days
     sector = ctx['sector']
 
@@ -122,7 +122,7 @@ def plotter(fdict):
     idx0 = iemre.daily_offset(sdate)
     idx1 = iemre.daily_offset(edate) + 1
     if not os.path.isfile(ncfn):
-        raise Exception("No data for that year, sorry.")
+        raise ValueError("No data for that year, sorry.")
     nc = netCDF4.Dataset(ncfn, 'r')
     if state is not None:
         x0, y0, x1, y1 = util.grid_bounds(nc.variables['lon'][:],
@@ -148,7 +148,7 @@ def plotter(fdict):
                     'MM').value('IN')
     nc.close()
     if np.ma.is_masked(np.max(p01d)):
-        return 'Data Unavailable'
+        raise ValueError("Data Unavailable")
     units = 'inches'
     if opt == 'dep':
         # Do departure work now

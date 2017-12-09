@@ -76,7 +76,7 @@ def make_daily_pet_plot(ctx):
     df = pd.DataFrame(dict(dates=dates, dailyet=o_dailyet,
                            climo_dailyet=c_et))
     if df.empty:
-        raise Exception("No Data Found!")
+        raise ValueError("No Data Found!")
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(dates, o_dailyet, fc='brown', ec='brown', zorder=1,
@@ -117,7 +117,7 @@ def make_daily_rad_plot(ctx):
     vals = []
     tmax = []
     if icursor.rowcount == 0:
-        raise Exception("No Data Found, sorry")
+        raise ValueError("No Data Found, sorry")
     for row in icursor:
         dates.append(row[0])
         vals.append(row[1])

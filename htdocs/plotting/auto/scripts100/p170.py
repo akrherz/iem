@@ -67,7 +67,7 @@ def plotter(fdict):
     """, pgconn, params=(tzname, station), index_col=None)
 
     if df.empty:
-        return "No database entries found for station, sorry!"
+        raise ValueError("No database entries found for station, sorry!")
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title(("[%s] %s %s Events\n"
                   "(%s-%s) Distinct Calendar Days with '%s' Reported"

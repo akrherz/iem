@@ -163,7 +163,7 @@ def do_polygon(ctx):
         else:
             counts[y0:y1, x0:x1] += np.where(raster.mask, 0, 1)
     if np.max(counts) == 0:
-        raise Exception("Sorry, no data found for query!")
+        raise ValueError("Sorry, no data found for query!")
     # construct the df
     ctx['df'] = pd.DataFrame({'lat': lats.ravel(),
                               'lon': lons.ravel(),
@@ -337,7 +337,7 @@ def do_ugc(ctx):
         datavar = "average"
 
     if len(rows) == 0:
-        raise Exception("Sorry, no data found for query!")
+        raise ValueError("Sorry, no data found for query!")
     df = pd.DataFrame(rows)
     if varname == 'yearavg':
         years = maxv.year - minv.year + 1

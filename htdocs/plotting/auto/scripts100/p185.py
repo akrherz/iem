@@ -60,14 +60,14 @@ def plotter(fdict):
     threshold_mm = distance(threshold, 'IN').value('MM')
     window_sts = date - datetime.timedelta(days=90)
     if window_sts.year != date.year:
-        raise Exception('Sorry, do not support multi-year plots yet!')
+        raise ValueError('Sorry, do not support multi-year plots yet!')
 
     idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
     ncfn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (date.year, )
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
-        raise Exception("No data for that year, sorry.")
+        raise ValueError("No data for that year, sorry.")
     nc = netCDF4.Dataset(ncfn, 'r')
 
     grid = np.zeros((len(nc.dimensions['lat']),

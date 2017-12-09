@@ -76,7 +76,7 @@ def plotter(fdict):
     """, pgconn, params=(nt.sts[station]['tzname'], station, sts, ets),
                   index_col=None)
     if df.empty:
-        return "No data was found, sorry!"
+        raise ValueError("No data was found, sorry!")
 
     minyear = df['year'].min()
     maxyear = df['year'].max()

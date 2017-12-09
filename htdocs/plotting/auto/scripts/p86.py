@@ -95,7 +95,7 @@ def plotter(fdict):
                  subtitle='Data derived from various NOAA datasets'
                  )
     if np.ma.is_masked(np.max(data)):
-        return 'Data Unavailable'
+        raise ValueError("Data Unavailable")
     x, y = np.meshgrid(lons, lats)
     if ptype == 'c':
         # in the case of contour, use the centroids on the grids

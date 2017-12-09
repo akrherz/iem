@@ -74,7 +74,7 @@ def plotter(fdict):
     """, pgconn, params=(commodity_desc, tuple(states),),
                   index_col=None)
     if df.empty:
-        return "ERROR: No data found!"
+        raise ValueError("ERROR: No data found!")
 
     prop = matplotlib.font_manager.FontProperties(size=10)
 

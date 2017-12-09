@@ -81,7 +81,7 @@ def plotter(fdict):
     'IN', 'OH', 'KY')
     """, pgconn, index_col=['station', 'month'])
     if df.empty:
-        return "No data was found for query, sorry."
+        raise ValueError("No data was found for query, sorry.")
 
     if over == 'monthly':
         title = "%s %s" % (calendar.month_name[month], PDICT3[varname])

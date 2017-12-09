@@ -83,7 +83,7 @@ def plotter(fdict):
     """, pgconn, params=(threshold, year, '%sCLIMATE' % (sector,)),
                   index_col='station')
     if df.empty:
-        return "No data found!"
+        raise ValueError("No data found!")
 
     def f(val):
         ts = datetime.date(year, 1, 1) + datetime.timedelta(days=(val - 1))

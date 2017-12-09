@@ -45,8 +45,6 @@ def plotter(fdict):
 
     station = ctx['station']
     varname = ctx['var']
-    if varname not in PDICT:
-        return "Invalid var specified..."
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 

@@ -85,7 +85,7 @@ def plotter(fdict):
     df = read_sql(sql, pgconn, params=(phenomena, significance),
                   index_col=None)
     if df.empty:
-        return "No data found for query"
+        raise ValueError("No data found for query")
 
     # Since many VTEC events start in 2005, we should not trust any
     # data that has its first year in 2005

@@ -68,7 +68,7 @@ def plotter(fdict):
       """, pgconn, params=(phenomena, significance))
 
     if df.empty:
-        return "Sorry, no data found!"
+        raise ValueError("Sorry, no data found!")
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(df['yr'], df['count'], align='center')

@@ -81,7 +81,7 @@ def plotter(fdict):
     """, pgconn, params=(phenomena, significance), index_col=None)
 
     if df.empty:
-        return "ERROR: No Results Found!"
+        raise ValueError("ERROR: No Results Found!")
 
     # Top Panel: count
     gdf = df.groupby('week').count()

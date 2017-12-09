@@ -48,7 +48,7 @@ def plotter(fdict):
     ORDER by high DESC, day DESC
     """, pgconn, params=(station, ), index_col=None)
     if df.empty:
-        return "No data found!"
+        raise ValueError("No data found!")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(6, 8))
     current = {'d2000': datetime.date(2000, 1, 1),

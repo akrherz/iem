@@ -80,7 +80,7 @@ def plotter(fdict):
       """, pgconn, params=(phenomena, significance), index_col=None)
 
     if df.empty:
-        return "Sorry, no data found!"
+        raise ValueError("Sorry, no data found!")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
 
     minyear = df['yr'].min()

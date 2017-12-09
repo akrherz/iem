@@ -54,7 +54,7 @@ def plotter(fdict):
         WHERE station = %s and month = %s GROUP by year
     """, pgconn, params=(station, month), index_col='year')
     if df.empty:
-        return "ERROR: No Data Found"
+        raise ValueError("ERROR: No Data Found")
 
     gstats = df.gdd50.describe()
     pstats = df.total_precip.describe()

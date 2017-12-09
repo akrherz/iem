@@ -149,7 +149,7 @@ def yearly_plot(ax, ctx):
                META[ctx['plot_type']]['month_bounds']), pgconn)
     df = df[(df['yr'] >= ctx['first_year']) & (df['yr'] <= ctx['last_year'])]
     if df.empty:
-        raise Exception("no data found, sorry")
+        raise ValueError("no data found, sorry")
 
     ax.plot(df['yr'].values, df['data'].values, 'bo-')
     ax.set_title(("%s (%s - %s)\nLocation Name: %s"

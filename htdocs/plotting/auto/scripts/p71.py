@@ -83,7 +83,7 @@ def plotter(fdict):
         drct.append(row[2])
         sknt.append(row[1])
     if not sknt:
-        return "ERROR: No Data Found"
+        raise ValueError("ERROR: No Data Found")
     df = pd.DataFrame(dict(day=pd.Series(days),
                            drct=pd.Series(drct),
                            sknt=pd.Series(sknt)))

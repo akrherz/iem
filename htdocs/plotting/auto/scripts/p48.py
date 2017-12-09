@@ -66,7 +66,7 @@ def plotter(fdict):
     sts = row[1]
     ets = row[2]
     if sts is None:
-        return "No Results Found, try flipping zone/county"
+        raise ValueError("No Results Found, try flipping zone/county")
 
     cursor.execute("""
      WITH coverage as (

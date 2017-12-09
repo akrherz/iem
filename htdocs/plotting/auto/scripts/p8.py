@@ -65,7 +65,7 @@ def plotter(fdict):
     for row in cursor:
         vals.append(row[1] / years * 100.)
     if not vals:
-        return "No Data Found!"
+        raise ValueError("No Data Found!")
     df = pd.DataFrame(dict(freq=pd.Series(vals, index=range(1, 13))),
                       index=pd.Series(range(1, 13), name='month'))
 

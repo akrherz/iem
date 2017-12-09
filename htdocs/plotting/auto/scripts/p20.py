@@ -67,7 +67,7 @@ def plotter(fdict):
     on (m.month = a.month) ORDER by a.month ASC
     """, pgconn, params=(station, year), index_col=None)
     if df.empty:
-        return "No Precipitation Data Found for Site"
+        raise ValueError("No Precipitation Data Found for Site")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     monthly = df['avg'].values.tolist()
     bars = ax.bar(df['month'] - 0.2, monthly, fc='red', ec='red',

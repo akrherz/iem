@@ -54,7 +54,7 @@ def plotter(fdict):
     SELECT extract(hour from minissue) as hr, count(*) from data GROUP by hr
     """, (tzname, phenomena, significance, wfo))
     if cursor.rowcount == 0:
-        return "No Results Found"
+        raise ValueError("No Results Found")
 
     data = np.zeros((24,), 'f')
     for row in cursor:

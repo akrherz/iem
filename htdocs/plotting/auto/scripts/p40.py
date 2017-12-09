@@ -65,7 +65,7 @@ def plotter(fdict):
     lookup = {'CLR': 0, 'FEW': 25, 'SCT': 50, 'BKN': 75, 'OVC': 100}
 
     if df.empty:
-        return "No database entries found for station, sorry!"
+        raise ValueError("No database entries found for station, sorry!")
 
     for _, row in df.iterrows():
         delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)

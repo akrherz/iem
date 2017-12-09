@@ -102,7 +102,7 @@ def plotter(fdict):
     df['diff'] = (df['tmpf1'] - df['tmpf2']).abs()
 
     if df.empty:
-        return "No database entries found for station, sorry!"
+        raise ValueError("No database entries found for station, sorry!")
 
     fig = plt.figure()
     ax = plt.axes([0.55, 0.1, 0.4, 0.8])

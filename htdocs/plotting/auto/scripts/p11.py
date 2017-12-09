@@ -65,7 +65,7 @@ def plotter(fdict):
         rows.append(dict(day=row['day'], min_dwpf=row['min-dwpf'],
                          max_dwpf=row['max-dwpf']))
     if not rows:
-        raise Exception("No Data Found!")
+        raise ValueError("No Data Found!")
     df = pd.DataFrame(rows)
     days = np.array(df['day'])
 

@@ -59,12 +59,17 @@ def get_response_headers(fmt):
     return res
 
 
-def handle_error(exp, fmt):
+def handle_error(exp, fmt, uri):
     """Handle an error and provide user something slightly bettter than
     busted image"""
     if isinstance(exp, Exception):
-        traceback.print_exc(file=sys.stderr)
+        if isinstance(exp, ValueError):
+            sys.stderr.write("[URI:%s] %s\n" % (uri, exp))
+        else:
+            sys.stderr.write("[URI:%s] Unanticipated Exception\n" % (uri, ))
+            traceback.print_exc(file=sys.stderr)
     if fmt in ['png', 'svg', 'pdf']:
+        plt.close()
         _, ax = plt.subplots(1, 1)
         msg = "IEM Autoplot generation resulted in an error\n%s" % (str(exp),)
         ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center',
@@ -107,18 +112,16 @@ def get_res_by_fmt(p, fmt, fdict):
     return res, meta
 
 
-def plot_metadata(plt, start_time, end_time, p):
+def plot_metadata(fig, start_time, end_time, p):
     """Place timestamp on the image"""
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     now = utcnow.astimezone(pytz.timezone("America/Chicago"))
-    plt.figtext(0.01, 0.005, ('Generated at %s in %.2fs'
-                              ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),
-                                   (end_time - start_time).total_seconds()
-                                   ),
-                va='bottom', ha='left', fontsize=8)
-    plt.figtext(0.99, 0.005, ('IEM Autoplot App #%s'
-                              ) % (p, ),
-                va='bottom', ha='right', fontsize=8)
+    fig.text(0.01, 0.005, ('Generated at %s in %.2fs'
+                           ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),
+                                (end_time - start_time).total_seconds()),
+             va='bottom', ha='left', fontsize=8)
+    fig.text(0.99, 0.005, ('IEM Autoplot App #%s') % (p, ),
+             va='bottom', ha='right', fontsize=8)
 
 
 def workflow(form, fmt):
@@ -147,8 +150,9 @@ def workflow(form, fmt):
         [fig, df, report] = res
         # If fig is a string, we hit an error!
         if isinstance(fig, str):
-            raise Exception(fig)
-        plot_metadata(plt, start_time, end_time, p)
+            raise ValueError(fig)
+        if fig is not None:
+            plot_metadata(fig, start_time, end_time, p)
         ram = StringIO.StringIO()
         if fmt in ['png', 'pdf', 'svg']:
             plt.savefig(ram, format=fmt, dpi=dpi)
@@ -199,6 +203,7 @@ def application(environ, start_response):
         output = workflow(fields, fmt)
     except Exception as exp:
         status = "500 Internal Server Error"
-        output = handle_error(exp, fmt)
+        output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
+    # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
     return [output]

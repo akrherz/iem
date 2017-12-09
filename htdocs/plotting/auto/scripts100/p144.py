@@ -90,7 +90,7 @@ def plotter(fdict):
                          threshold, threshold, threshold, threshold, hours1),
                   index_col=None)
     if df.empty:
-        return "No Data Found"
+        raise ValueError("No Data Found")
 
     df2 = read_sql("""
     with obs as (
@@ -125,7 +125,7 @@ def plotter(fdict):
                          hours1),
                    index_col=None)
     if df2.empty:
-        return "No Data Found"
+        raise ValueError("No Data Found")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 

@@ -47,7 +47,7 @@ def plotter(fdict):
     hours = ctx['hours']
     interval = ctx['interval']
     if interval > 10 or interval < 0.1:
-        return "Invalid interval provided, positive number less than 10"
+        raise ValueError("Invalid interval provided, positive number less than 10")
 
     nt = NetworkTable(network)
 

@@ -59,7 +59,7 @@ def plotter(fdict):
     """, pgconn, params=(commodity_desc, unit_desc, state, util_practice_desc),
                   index_col=None)
     if df.empty:
-        return "ERROR: No data found!"
+        raise ValueError("ERROR: No data found!")
     df['yeari'] = df['year'] - df['year'].min()
 
     (fig, ax) = plt.subplots(1, 1)

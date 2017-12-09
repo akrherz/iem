@@ -115,7 +115,7 @@ def plotter(fdict):
     """, pgconn, params=(tuple(stations), hour, ts),
                   index_col='pressure')
     if len(df.index) == 0:
-        raise Exception(("Sounding for %s was not found!"
+        raise ValueError(("Sounding for %s was not found!"
                          ) % (ts.strftime("%Y-%m-%d %H:%M"),))
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.

@@ -76,8 +76,6 @@ def plotter(fdict):
     network = ctx['network']
     month = ctx['month']
     varname = ctx['var']
-    if varname not in METRICS:
-        raise 'ERROR with var variable'
     days = ctx['days']
 
     nt = NetworkTable(network)

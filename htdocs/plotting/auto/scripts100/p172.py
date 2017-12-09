@@ -54,7 +54,7 @@ def plotter(fdict):
     ORDER by day ASC
     """, pgconn, params=(station, station), index_col='day')
     if df.empty:
-        return "No data found!"
+        raise ValueError("No data found!")
 
     (fig, ax) = plt.subplots(1, 1)
     # Average
