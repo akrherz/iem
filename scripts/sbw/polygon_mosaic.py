@@ -10,6 +10,8 @@ import psycopg2.extras
 from PIL import Image, ImageDraw, ImageFont
 import pytz
 from geopandas import read_postgis
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from pyiem.util import get_dbconn
 
