@@ -12,13 +12,11 @@
   ServerAdmin akrherz@iastate.edu
   DocumentRoot /opt/iem/htdocs
 
-  WSGIDaemonProcess ${iemwsgi}_tc processes=4 threads=15 display-name=%{GROUP}
   WSGIScriptAlias /cache/tile.py /opt/iem/htdocs/cache/tile.wsgi
   WSGIScriptAlias /cache/c.py /opt/iem/htdocs/cache/tile.wsgi
   WSGIScriptAlias /c/tile.py /opt/iem/htdocs/c/tile.wsgi
   WSGIScriptAlias /c/c.py /opt/iem/htdocs/c/tile.wsgi
 
-  WSGIDaemonProcess ${iemwsgi}_ap processes=2 threads=15 display-name=%{GROUP} maximum-requests=100
   WSGIScriptAlias /plotting/auto/meta.py /opt/iem/htdocs/plotting/auto/meta.wsgi
   WSGIScriptAlias /plotting/auto/autoplot.py /opt/iem/htdocs/plotting/auto/autoplot.wsgi
 
@@ -189,14 +187,14 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/c">
-    WSGIProcessGroup ${iemwsgi}_tc
+    WSGIProcessGroup iemwsgi_tc
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
     ExpiresDefault "access plus 14 days"
   </Directory>
   
   <Directory "/opt/iem/htdocs/cache">
-    WSGIProcessGroup ${iemwsgi}_tc
+    WSGIProcessGroup iemwsgi_tc
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
     ExpiresDefault "access plus 5 minutes"
@@ -331,7 +329,7 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/plotting/auto">
-    WSGIProcessGroup ${iemwsgi}_ap
+    WSGIProcessGroup iemwsgi_ap
     AddHandler cgi-script .py
     Options +ExecCGI
 
