@@ -23,6 +23,7 @@ def workflow(date):
     df = read_sql("""
     WITH dcp as (
         SELECT id, iemid, tzname from stations where network ~* 'DCP'
+        and tzname is not null
     ), obs as (
         SELECT iemid, pday from summary_"""+str(date.year)+"""
         WHERE day = %s)
@@ -30,8 +31,8 @@ def workflow(date):
     dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
     """, iem_pgconn, params=(date,), index_col='id')
     bases = {}
+    ts = utc(date.year, date.month, date.day, 12)
     for tzname in df['tzname'].unique():
-        ts = utc(date.year, date.month, date.day, 12)
         base = ts.astimezone(pytz.timezone(tzname))
         bases[tzname] = base.replace(hour=0)
     # retrieve data that is within 12 hours of our bounds
