@@ -128,8 +128,11 @@ def plotter(fdict):
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
     rng = df[varname].max() - df[varname].min()
-    ax[0].set_ylim(df[varname].min() - rng * .3,
-                   df[varname].max() + rng * .3)
+    if varname == 'precip' or varname.startswith('days'):
+        ax[0].set_ylim(-0.1, df[varname].max() + rng * .3)
+    else:
+        ax[0].set_ylim(df[varname].min() - rng * .3,
+                       df[varname].max() + rng * .3)
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + 0.02,
                         box.width, box.height * 0.98])

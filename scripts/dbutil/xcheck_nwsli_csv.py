@@ -26,7 +26,7 @@ def dowork(df, nwsli):
 
 def main():
     """Go Main Go!"""
-    pgconn = get_dbconn('hads', user='nobody')
+    pgconn = get_dbconn('hads', host="localhost", port=5556, user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""
         SELECT distinct nwsli from unknown ORDER by nwsli
