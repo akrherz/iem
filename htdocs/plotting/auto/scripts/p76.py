@@ -10,7 +10,7 @@ from metpy.units import units
 from pyiem import meteorology
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature, mixingratio, pressure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -46,6 +46,12 @@ def get_description():
     This was done due to the non-linear nature of dew point when expressed in
     units of temperature.  If you plot the 'winter' season, the year shown is
     of the Jan/Feb portion of the season.
+
+    <p>You can optionally restrict the local hours of the day to consider for
+    the plot.  These hours are expressed as a range of hours using a 24 hour
+    clock.  For example, '8-16' would indicate a period between 8 AM and 4 PM
+    inclusive.  If you want to plot one hour, just set the start and end hour
+    to the same value.
     """
     desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
@@ -56,6 +62,9 @@ def get_description():
              label='Metric to Plot:', options=PDICT),
         dict(type="year", name="year", default=1893,
              label="Start Year of Plot"),
+        dict(type='text', name='hours', optional=True, default='0-23',
+             label=("Inclusive Local Hours (24-hour clock) "
+                    "to Limit Analysis (optional)")),
     ]
     return desc
 
@@ -66,13 +75,13 @@ def run_calcs(df):
         temperature(df['dwpf'].values, 'F')).value('KG/KG')
     df['vapor_pressure'] = mcalc.vapor_pressure(
         1000. * units.mbar,
-        df['mixingratio'].values * units('kg/kg')).to(units.mbar)
+        df['mixingratio'].values * units('kg/kg')).to(units('kPa'))
     df['saturation_mixingratio'] = (
         meteorology.mixing_ratio(
             temperature(df['tmpf'].values, 'F')).value('KG/KG'))
     df['saturation_vapor_pressure'] = mcalc.vapor_pressure(
         1000. * units.mbar,
-        df['saturation_mixingratio'].values * units('kg/kg')).to(units.mbar)
+        df['saturation_mixingratio'].values * units('kg/kg')).to(units('kPa'))
     df['vpd'] = df['saturation_vapor_pressure'] - df['vapor_pressure']
     group = df.groupby('year')
     df = group.aggregate(np.average)
@@ -83,49 +92,69 @@ def run_calcs(df):
     return df
 
 
-def get_data(season, station, startyear):
+def get_data(ctx, startyear):
     """Get data"""
     pgconn = get_dbconn('asos')
     today = datetime.datetime.now()
     lastyear = today.year
     deltadays = 0
-    if season == 'all':
+    if ctx['season'] == 'all':
         months = range(1, 13)
-    elif season == 'spring':
+    elif ctx['season'] == 'spring':
         months = [3, 4, 5]
         if today.month > 5:
             lastyear += 1
-    elif season == 'spring2':
+    elif ctx['season'] == 'spring2':
         months = [4, 5, 6]
         if today.month > 6:
             lastyear += 1
-    elif season == 'fall':
+    elif ctx['season'] == 'fall':
         months = [9, 10, 11]
         if today.month > 11:
             lastyear += 1
-    elif season == 'summer':
+    elif ctx['season'] == 'summer':
         months = [6, 7, 8]
         if today.month > 8:
             lastyear += 1
-    elif season == 'winter':
+    elif ctx['season'] == 'winter':
         deltadays = 33
         months = [12, 1, 2]
         if today.month > 2:
             lastyear += 1
     else:
-        ts = datetime.datetime.strptime("2000-"+season+"-01", '%Y-%b-%d')
+        ts = datetime.datetime.strptime("2000-" + ctx['season'] + "-01",
+                                        '%Y-%b-%d')
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
         lastyear += 1
+    hours = range(24)
+    if ctx.get('hours'):
+        try:
+            tokens = [int(i.strip()) for i in ctx['hours'].split("-")]
+            hours = range(tokens[0], tokens[1] + 1)
+        except Exception as _exp:
+            raise Exception("malformed hour limiter, sorry.")
+        ctx['hour_limiter'] = "[%s-%s]" % (utc(2017, 1, 1, tokens[0]
+                                               ).strftime("%-I %p"),
+                                           utc(2017, 1, 1, tokens[1]
+                                               ).strftime("%-I %p"))
 
     df = read_sql("""
+        WITH obs as (
+            SELECT valid at time zone %s as valid, tmpf, dwpf
+            from alldata WHERE station = %s and dwpf > -90
+            and dwpf < 100 and tmpf >= dwpf and
+            extract(month from valid) in %s and
+            extract(hour from valid at time zone %s) in %s
+        )
       SELECT valid,
       extract(year from valid + '%s days'::interval)::int as year,
-      tmpf, dwpf from alldata
-      where station = %s and dwpf > -90 and
-      dwpf < 100 and extract(month from valid) in %s
-      and tmpf > -90 and tmpf < 150 and tmpf >= dwpf
-    """, pgconn, params=(deltadays, station,  tuple(months)), index_col=None)
+      tmpf, dwpf from obs
+    """, pgconn, params=(ctx['nt'].sts[ctx['station']]['tzname'],
+                         ctx['station'], tuple(months),
+                         ctx['nt'].sts[ctx['station']]['tzname'],
+                         tuple(hours), deltadays),
+                  index_col=None)
 
     df = df[(df['year'] >= startyear) & (df['year'] < lastyear)]
     return df
@@ -138,8 +167,6 @@ def make_plot(df, ctx):
     import matplotlib.pyplot as plt
     season = ctx['season']
     varname = ctx['varname']
-    network = ctx['network']
-    nt = NetworkTable(network)
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = df[varname].mean()
 
@@ -158,19 +185,19 @@ def make_plot(df, ctx):
             lw=2, color='k', label='Trend')
     ax.text(0.01, 0.98, "Avg: %.1f, slope: %.2f %s/century, R$^2$=%.2f" % (
             avgv, h_slope * 100.,
-            'F' if varname == 'dwpf' else 'hPa', r_value ** 2),
+            'F' if varname == 'dwpf' else 'kPa', r_value ** 2),
             transform=ax.transAxes, va='top', bbox=dict(color='white'))
     ax.set_xlabel("Year")
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax.set_ylim((df[varname].min() - 5) if varname == 'dwpf' else 0,
                 df[varname].max() + df[varname].max()/10.)
     ax.set_ylabel(("Average %s [%s]"
-                   ) % (PDICT[varname], 'F' if varname == 'dwpf' else 'hPa'))
+                   ) % (PDICT[varname], 'F' if varname == 'dwpf' else 'kPa'))
     ax.grid(True)
-    ax.set_title(("[%s] %s %.0f-%.0f\nAverage %s [%s] "
-                  ) % (ctx['station'], nt.sts[ctx['station']]['name'],
+    ax.set_title(("[%s] %s %.0f-%.0f\nAverage %s [%s] %s"
+                  ) % (ctx['station'], ctx['nt'].sts[ctx['station']]['name'],
                        df.index.min(), df.index.max(),  PDICT[varname],
-                       MDICT[season]))
+                       MDICT[season], ctx.get('hour_limiter', '')))
     ax.legend(ncol=1, loc=1)
     return fig
 
@@ -178,12 +205,10 @@ def make_plot(df, ctx):
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station']
-    season = ctx['season']
-    _ = MDICT[season]
+    ctx['nt'] = NetworkTable(ctx['network'])
     startyear = ctx['year']
 
-    df = get_data(season, station, startyear)
+    df = get_data(ctx, startyear)
     df = run_calcs(df)
     fig = make_plot(df, ctx)
 
