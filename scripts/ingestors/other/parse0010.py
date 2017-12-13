@@ -47,7 +47,7 @@ def main():
     iem.data['max_sknt'] = speed(float(tokens[10]), 'mph').value('KT')
     iem.data['alti'] = float(tokens[12])
     iem.data['pday'] = float(tokens[13])
-    iem.data['srad'] = float(tokens[18])
+    iem.data['srad'] = None if tokens[18] == 'n/a' else float(tokens[18])
 
     iem.save(cursor)
 
