@@ -2,6 +2,7 @@
 from __future__ import print_function
 import datetime
 import sys
+from multiprocessing import Pool
 
 import requests
 import pandas as pd
@@ -60,23 +61,34 @@ def run_plot(i, fmt):
     return True
 
 
+def workflow(entry):
+    """Run our queued entry of id and format"""
+    sts = datetime.datetime.now()
+    res = run_plot(*entry)
+    if not res:
+        return
+    ets = datetime.datetime.now()
+    return [entry[0], entry[1], (ets - sts).total_seconds()]
+
+
 def main():
     """Do Something"""
-    timing = []
     i = 0  # autoplot starts at app 1 and not 0
+    queue = []
     while True:
         i += 1
         fmts = get_formats(i)
         if not fmts:
             break
         for fmt in fmts:
-            sts = datetime.datetime.now()
-            res = run_plot(i, fmt)
-            if not res:
-                break
-            ets = datetime.datetime.now()
-            timing.append({'i': i, 'fmt': fmt,
-                           'secs': (ets - sts).total_seconds()})
+            queue.append([i, fmt])
+
+    timing = []
+    pool = Pool(4)
+    for res in pool.imap_unordered(workflow, queue):
+        if res is None:
+            continue
+        timing.append({'i': res[0], 'fmt': res[1], 'secs': res[2]})
     if not timing:
         print("WARNING: no timing results found!")
         return

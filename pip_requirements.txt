@@ -5,7 +5,7 @@ odfpy
 egenix-mx-base
 metar
 jenks
--e git+https://github.com/akrherz/twitty-twister.git@issue15#egg=twittytwister
+mod_wsgi
 -e git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38#egg=smartsheet-python-sdk
 -e git+https://github.com/akrherz/windrose.git@darylchanges#egg=windrose
 -e git+https://github.com/akrherz/nwnserver.git#egg=nwnserver
