@@ -1,10 +1,11 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 118);
 include_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "NWS COOP Daily Normals";
 $t->thispage = "climatology-today";
-include("../../../include/imagemaps.php"); 
+include_once "../../../include/imagemaps.php"; 
 require_once "../../../include/forms.php";
 
 $year = date("Y");
@@ -37,18 +38,32 @@ official data is the 30 year record from NCDC.</i>)
 
 <h3>2. Download Type:</h3>
 
-<input type="radio" name="mode" value="station" checked="CHECKED">Single Station, All Days</input>
-<input type="radio" name="mode" value="day">All Stations, One Day</input>
+<div class="row">
+  <div class="col-md-6">
+    <p><b>2a. Select Station:</b><br />
 
-<p><b>2a. Select Station:</b><br>{$nselect}
+    <input type="radio" name="mode" value="station" checked="CHECKED">Single Station, All Days</input>
 
-<p><b>2b. Select Month & Date:</b><br>
+    <br>{$nselect}
+  
+  </div>
+  <div class="col-md-6">
+    <p><b>2b. Select Month & Date:</b><br>
 
-Select Month: {$mselect}
-<br>Select Day: {$dselect}
-
+    <input type="radio" name="mode" value="day">All Stations, One Day</input>
+    
+    <br />Select Month: {$mselect}
+    <br />Select Day: {$dselect}
+ </div>
+</div>
 
 <h3>3. Download Options:</h3>
+<div class="alert alert-success">
+<strong>Wanting to load this data into Excel?</strong> Pick the 'Download to Disk' option
+and then from Excel, go to File -&gt; Open, set the file type to 'All Files' and attempt to
+open the comma delimited file.
+</div>
+
 <select name="dloption">
   <option value="online">View Online</option>
   <option value="cdf">Download to Disk [CDF]</option>
