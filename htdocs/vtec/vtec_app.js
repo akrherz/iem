@@ -59,7 +59,7 @@ var lsrLookup = {
  "O": "/lsr/icons/wind.png",
  "P": "/lsr/icons/other.png",
  "Q": "/lsr/icons/tropicalstorm.gif",
- "R": "/vendor/icons/lsr/precip/${magnitude}.png",
+ "R": "/vendor/icons/lsr/rain/${magnitude}.png",
  "s": "/lsr/icons/sleet.png",
  "S": "/vendor/icons/lsr/snow/${magnitude}.png",
  "T": "/lsr/icons/tornado.png",
