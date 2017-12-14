@@ -36,6 +36,27 @@
       );
   
   $services[] = Array(
+      "title" => "United States Drought Monitor by Point",
+      "url" => "/json/usdm_bypoint.py?sdate={sdate}&amp;edate={edate}&amp;".
+        "lon={lon}&amp;lat={lat}",
+      "desc" => "The US Drought Monitor query by latitude and longitude point.".
+      " The start and end dates are optional and default to period of record ".
+      "data. The archive begins on Jan 2000.",
+      "vars" => Array(
+          "sdate" => "Start Date (optional)",
+          "edate" => "End Date (optional)",
+          "lon" => "East Longitude (deg)",
+          "lat" => "North Latitude (deg)"
+          ),
+      "example" => Array(
+          "{sdate}" => "2014-01-01",
+          "{edate}" => "2016-01-01",
+          "{lon}" => -96.54,
+          "{lat}" => 43.21,
+          )
+      );
+  
+  $services[] = Array(
   		"title" => "Single Station Last Observation",
   		"url" => "/json/current.py?station={station}&amp;network={network}",
   		"desc" => "The most recent observation for an IEM tracked site.",
