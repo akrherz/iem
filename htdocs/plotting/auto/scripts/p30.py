@@ -48,15 +48,15 @@ def plotter(fdict):
     high is not null and low is not null GROUP by year
     ORDER by year ASC
     """, pgconn, params=(station, month), index_col='year')
-
     df['rng'] = df['max_high'] - df['min_low']
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
     bars = ax[0].bar(df.index.values, df['rng'], bottom=df['min_low'],
                      fc='b', ec='b')
-    idx = list(df.index.values.astype('i')).index(year)
-    bars[idx].set_facecolor('r')
-    bars[idx].set_edgecolor('r')
+    if year in df.index:
+        idx = list(df.index.values.astype('i')).index(year)
+        bars[idx].set_facecolor('r')
+        bars[idx].set_edgecolor('r')
     ax[0].axhline(df['max_high'].mean(), lw=2, color='k', zorder=2)
     ax[0].text(df.index.values[-1]+2, df['max_high'].mean(),
                "%.0f" % (df['max_high'].mean(),),
@@ -66,24 +66,26 @@ def plotter(fdict):
                "%.0f" % (df['min_low'].mean(),),
                ha='left', va='center')
     ax[0].grid(True)
-    ax[0].set_ylabel("Temperature $^\circ$F")
+    ax[0].set_ylabel(r"Temperature $^\circ$F")
     ax[0].set_xlim(df.index.min()-1.5, df.index.max()+1.5)
     ax[0].set_title(("%s %s\n%s Temperature Range (Max High - Min Low)"
                      ) % (station, nt.sts[station]['name'],
                           calendar.month_name[month]))
 
     bars = ax[1].bar(df.index.values, df['rng'], fc='b', ec='b', zorder=1)
-    bars[idx].set_facecolor('r')
-    bars[idx].set_edgecolor('r')
-    ax[1].set_title(("Year %s [Hi: %s Lo: %s Rng: %s] Highlighted"
-                     ) % (year, df.at[year, 'max_high'],
-                          df.at[year, 'min_low'], df.at[year, 'rng']),
-                    color='r')
+    if year in df.index:
+        idx = list(df.index.values.astype('i')).index(year)
+        bars[idx].set_facecolor('r')
+        bars[idx].set_edgecolor('r')
+        ax[1].set_title(("Year %s [Hi: %s Lo: %s Rng: %s] Highlighted"
+                         ) % (year, df.at[year, 'max_high'],
+                              df.at[year, 'min_low'], df.at[year, 'rng']),
+                        color='r')
     ax[1].axhline(df['rng'].mean(), lw=2, color='k', zorder=2)
     ax[1].text(df.index.max()+2, df['rng'].mean(),
                "%.0f" % (df['rng'].mean(),),
                ha='left', va='center')
-    ax[1].set_ylabel("Temperature Range $^\circ$F")
+    ax[1].set_ylabel(r"Temperature Range $^\circ$F")
     ax[1].grid(True)
 
     return fig, df
