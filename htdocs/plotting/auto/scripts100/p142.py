@@ -25,7 +25,15 @@ def get_description():
     desc['data'] = True
     desc['cache'] = 86400
     desc['description'] = """This plot presents the trailing X number of days
-    temperature or precipitation departure from long term average.
+    temperature or precipitation departure from long term average. You can
+    express this departure either in Absolute Departure or as a Standard
+    Deviation.  The Standard Deviation option along with precipitation is
+    typically called the "Standardized Precipitation Index".
+
+    <p>The plot also contains an underlay with the weekly US Drought Monitor
+    that is valid for the station location.  If you plot a climate district
+    station, you get the US Drought Monitor valid for the district centroid.
+    If you plot a statewide average, you get no USDM included.
     """
     today = datetime.date.today()
     sts = today - datetime.timedelta(days=720)
@@ -78,7 +86,7 @@ def underlay_usdm(axis, sts, ets, lon, lat):
         ts = datetime.datetime.strptime(row[0], '%Y-%m-%d')
         date = datetime.date(ts.year, ts.month, ts.day)
         axis.add_patch(Rectangle((date.toordinal(), -100), 7, 200,
-                                 color=COLORS[row[1]], zorder=4))
+                                 color=COLORS[row[1]], zorder=-3))
 
 
 def plotter(fdict):
@@ -202,11 +210,12 @@ def plotter(fdict):
     ax.text(1, -0.14, "%s to %s" % (sts.strftime("%-d %b %Y"),
                                     ets.strftime("%-d %b %Y")), va='bottom',
             ha='right', fontsize=12, transform=ax.transAxes)
-    try:
-        underlay_usdm(ax, sts, ets, nt.sts[station]['lon'],
-                      nt.sts[station]['lat'])
-    except Exception as exp:
-        sys.stderr.write(str(exp))
+    if station[2:] != "0000":
+        try:
+            underlay_usdm(ax, sts, ets, nt.sts[station]['lon'],
+                          nt.sts[station]['lat'])
+        except Exception as exp:
+            sys.stderr.write(str(exp))
     ax.set_xlim(df.index.min().toordinal() - 2,
                 df.index.max().toordinal() + 2)
 
