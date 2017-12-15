@@ -87,6 +87,7 @@
 192.168.0.242    iem-nwnserver
 #   VI10(60) iem12
 192.168.1.241    iem-ldm
+192.168.1.241    iem-json-services.local
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
 #   VI12(62) metvm7 <-> metvm0

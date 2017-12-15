@@ -36,8 +36,9 @@
       );
   
   $services[] = Array(
+      "table_schema" => TRUE,
       "title" => "United States Drought Monitor by Point",
-      "url" => "/json/usdm_bypoint.py?sdate={sdate}&amp;edate={edate}&amp;".
+      "url" => "/api/1/usdm_bypoint.json?sdate={sdate}&amp;edate={edate}&amp;".
         "lon={lon}&amp;lat={lat}",
       "desc" => "The US Drought Monitor query by latitude and longitude point.".
       " The start and end dates are optional and default to period of record ".
@@ -735,16 +736,24 @@ for a given network that collects webcams and a UTC timestamp.",
   		)
   );
   $table = "";
+  $TABLE_SCHEMA = <<<EOM
+<br /><span class="badge">Returns JSON Table Schema</span> This service
+uses <a href="https://frictionlessdata.io/specs/table-schema/">JSON Table Schema</a>
+for returned content.
+EOM;
   while (list($key, $ws) = each($services)){
   	$url = $ws['url'];
   	$uriadd = (strpos($url, "?") === FALSE) ? "?": "&amp;";
-  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\"><i class=\"fa fa-bookmark\"></i></a> <a name=\"%s\">%s</a></strong>
-	<br /><strong>URI:</strong> %s%s%scallback=gotData
-	<br /><strong>Description:</strong> %s
-	<br /><strong>Method GET Parameters:</strong>
-	<br /><table border='1' cellspacing='0' cellpadding='3'>",
+  	$ts = array_key_exists("table_schema", $ws) ? $TABLE_SCHEMA: "";
+  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\">".
+  	    "<i class=\"fa fa-bookmark\"></i></a> <a name=\"%s\">%s</a></strong>".
+    	"<br /><strong>URI:</strong> %s%s%scallback=gotData".
+	    "<br /><strong>Description:</strong> %s".
+  	    "%s".
+	    "<br /><strong>Method GET Parameters:</strong>".
+	    "<br /><table border='1' cellspacing='0' cellpadding='3'>",
   			urlencode($ws["title"]), urlencode($ws["title"]),
-  			$ws["title"], ROOTURL, $url, $uriadd, $ws["desc"]);
+  			$ws["title"], ROOTURL, $url, $uriadd, $ws["desc"], $ts);
   	while (list($key2, $vs) = each($ws['vars'])){
   		$table .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
   	}

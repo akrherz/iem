@@ -76,17 +76,17 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     legend = plt.legend(rects, ['D%s' % (cat, ) for cat in range(5)],
                         ncol=5, fontsize=11, loc=(0.3, 1.01))
     axis.add_artist(legend)
-    uri = ("http://iem.local/json/usdm_bypoint.py?sdate=%s&edate=%s&"
+    uri = ("http://iem.local/api/1/usdm_bypoint.json?sdate=%s&edate=%s&"
            "lon=%s&lat=%s") % (sts.strftime("%Y-%m-%d"),
                                ets.strftime("%Y-%m-%d"), lon, lat)
     data = requests.get(uri, timeout=30).json()
-    if data['count'] == 0:
+    if not data['data']:
         return
-    for row in data['table']:
-        ts = datetime.datetime.strptime(row[0], '%Y-%m-%d')
+    for row in data['data']:
+        ts = datetime.datetime.strptime(row['valid'], '%Y-%m-%d')
         date = datetime.date(ts.year, ts.month, ts.day)
         axis.add_patch(Rectangle((date.toordinal(), -100), 7, 200,
-                                 color=COLORS[row[1]], zorder=-3))
+                                 color=COLORS[row['category']], zorder=-3))
 
 
 def plotter(fdict):

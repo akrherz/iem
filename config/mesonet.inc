@@ -203,8 +203,7 @@
   <Directory "/opt/iem/htdocs/api">
     AddHandler cgi-script .py
     Options +ExecCGI
-
-    RewriteRule sql/database/([a-z]+)$ sql.py?database=$1 [QSA]
+    RewriteRule "^([0-9]+)/(.*).json$" "http://iem-json-services.local/service.wsgi?_version=$1&_service=$2" [P,QSA]
     RewriteRule nwstext/([0-9A-Z\-]{31}).txt$ nwstext.py?p=$1 [QSA]
   </Directory>
 
