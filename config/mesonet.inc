@@ -201,6 +201,7 @@
   </Directory>
 
   <LocationMatch "/api/.*\.json">
+    RequestHeader set "Host" "iem-json-services.local"
 	ProxyPass "http://iem-json-services.local"
   </LocationMatch>
   <Directory "/opt/iem/htdocs/api">
