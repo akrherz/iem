@@ -3,15 +3,15 @@ from __future__ import print_function
 import datetime
 
 import pytz
-import requests
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
+import requests
 # Stop the SSL cert warning :/
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 nt = NetworkTable("SCAN")
 SCAN = get_dbconn('scan')
@@ -110,7 +110,7 @@ def savedata(data, maxts):
         tstr = "%s %s" % (data['Date'], data['Time (CDT)'])
     ts = datetime.datetime.strptime(tstr, '%Y-%m-%d %H:%M')
     utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+    utc = utc.replace(tzinfo=pytz.utc)
     localts = utc.astimezone(pytz.timezone("America/Chicago"))
     ts = localts.replace(year=ts.year, month=ts.month, day=ts.day,
                          hour=ts.hour, minute=ts.minute, second=0,
@@ -175,10 +175,10 @@ def load_times():
     """
     icursor.execute("""SELECT t.id, valid from current c, stations t
         WHERE t.iemid = c.iemid and t.network = 'SCAN'""")
-    d = {}
+    data = {}
     for row in icursor:
-        d[row[0]] = row[1]
-    return d
+        data[row[0]] = row[1]
+    return data
 
 
 def main():
@@ -194,9 +194,9 @@ def main():
             print('scan_ingest.py Failed to download: %s %s' % (sid, exp))
             continue
         lines = response.split("\n")
-        cols = lines[2].split(",")
+        cols = lines[3].split(",")
         data = {}
-        for row in lines[3:]:
+        for row in lines[4:]:
             if row.strip() == "":
                 continue
             tokens = row.replace("'", '').split(",")
