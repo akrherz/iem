@@ -1,6 +1,7 @@
 """Download and process the scan dataset"""
 from __future__ import print_function
 import datetime
+import sys
 
 import pytz
 from pyiem.datatypes import temperature
@@ -98,7 +99,7 @@ postvars = {
 URI = 'https://www.wcc.nrcs.usda.gov/nwcc/view'
 
 
-def savedata(data, maxts):
+def savedata(reprocessing, data, maxts):
     """
     Save away our data into IEM Access
     """
@@ -117,13 +118,13 @@ def savedata(data, maxts):
                          microsecond=0)
     sid = "S%s" % (data['Site Id'],)
 
-    if sid in maxts and maxts[sid] >= ts:
+    if not reprocessing and sid in maxts and maxts[sid] >= ts:
         return
 
     iem = Observation(sid, 'SCAN', ts)
 
     iem.data['ts'] = ts
-    iem.data['year'] = ts.astimezone(pytz.timezone("UTC")).year
+    iem.data['year'] = ts.astimezone(pytz.utc).year
     for key in data.keys():
         if (key in mapping and mapping[key]['iemvar'] != "" and
                 key != 'Site Id'):
@@ -181,8 +182,16 @@ def load_times():
     return data
 
 
-def main():
+def main(argv):
     """Go Main Go"""
+    reprocessing = False
+    if len(argv) == 4:
+        postvars['intervalType'] = 'View Historic'
+        postvars['year'] = argv[1]
+        postvars['month'] = argv[2]
+        postvars['day'] = argv[3]
+        reprocessing = True
+
     maxts = load_times()
     for sid in nt.sts:
         # iem uses S<id> and scan site uses just <id>
@@ -195,6 +204,8 @@ def main():
             continue
         lines = response.split("\n")
         cols = lines[3].split(",")
+        if not cols:
+            print("scan_ingest.py for station: %s had no columns" % (sid, ))
         data = {}
         for row in lines[4:]:
             if row.strip() == "":
@@ -206,11 +217,11 @@ def main():
                 col = col.replace('  (loam)', '').replace('  (silt)', '')
                 data[col.strip()] = token
             if 'Date' in data:
-                savedata(data, maxts)
+                savedata(reprocessing, data, maxts)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
     icursor.close()
     scursor.close()
     ACCESS.commit()
