@@ -119,11 +119,6 @@ $(document).ready(function(){
    		    $('select[name="station"]').select2().val(feature.get('sid')).trigger('change');
   		} 
    });
-					
-   //geojson.events.register('loadend', geojson, function() {
-   //  var e = geojson.getDataExtent();
-   //  map.setCenter( e.getCenterLonLat(), geojson.getZoomForExtent(e,false));
-   //});
 
 });
 EOF;

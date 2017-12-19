@@ -1,5 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
+ $JQUERYUI = "1.12.1";
+
  include("../../include/myview.php");
  $t = new MyView();
  $uri = 'mcview.phtml';
@@ -156,7 +158,6 @@ $ar = Array("comprad" => "A1. Iowa (Default)",
 $prodselect = make_select("prod", $prod, $ar);
 
 $ar = Array(
-	"applet" => "Java Applet",
 	"script" => "Java Script",
 	"none" => "List Images",	
 );
@@ -229,34 +230,42 @@ $timeselect .= "</select>\n";
 $autoselected = ($autopilot == "yes") ? " checked=\"checked\"": ""; 
 $rtmessage = ($mode == "realtime")? " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes": "";
 
-if ($java == "applet") {
-	$control = <<<EOF
-<applet codebase="/current/class/" code="AniS.class" width="{$lwidth}" height="{$lheight}" alt="You must enable Java in your browser to view the radar loop">
-<param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
-<param name="rate" value="80">
-<PARAM name="no_enh" value="true">
-<param name="pause_percent" value="800">
-<param name="filenames" value="{$files}">
-</applet>
-EOF;
-} else if ($java == 'script'){
+
+$jsextra = "";
+$headextra = "";
+
+if ($java == 'script'){
 	$i = 0;
 	reset($images);
-	$myimages = implode("::", $images);
-	$control = <<<EOF
-<form name="jsani" id="jsani" action="#" style="width: {$lwidth}px; height: {$lheight}px;">
-    <input type="hidden" name="filenames" value="{$myimages}">
-    <input type="hidden" name="controls"
-           value="previous, stopplay, next, looprock, slowfast">
-    <input type="hidden" name="maxdwell" value="1400">
-    <input type="hidden" name="mindwell" value="100">
-    <input type="hidden" name="initdwell" value="300">
-    <input type="hidden" name="nsteps" value="8">
-    <input type="hidden" name="last_frame_pause" value="3">
-    <input type="hidden" name="first_frame_pause" value="2">
-    <input type="hidden" name="frame_pause" value="2:4,3:5">
-</form>
-EOF;
+	$jsurls = [];
+	while(list($key, $val)=each($images)){
+	    $jsurls[] = sprintf("'%s'", $val);
+	}
+	$myimages = implode(",", $jsurls);
+	$control = "<p><div id=\"myanimation\"></div></p>";
+	$headextra .= <<<EOM
+<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
+EOM;
+	$jsextra .= <<<EOM
+<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
+<script>
+ $(document).ready(function () {
+    var myanimation = $("#myanimation").jsani({
+        imageSrcs: [$myimages],
+        aniWidth: 640,
+        aniHeight: 480,
+        initdwell: 200,
+        controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
+        last_frame_pause: 8,
+        first_frame_pause: 1,
+        frame_pause: '0:5, 3:6'
+    });
+});
+</script>
+EOM;
 } else {
  	reset($images);
  	$control = "";
@@ -277,7 +286,7 @@ foreach ($radtimes as $value ){
 
 /* We finally start output */
 
-$headextra = <<<EOF
+$headextra .= <<<EOF
 <script type="text/javascript">
 //<!--
 function switchToArchiveMode()
@@ -287,11 +296,6 @@ function switchToArchiveMode()
 -->
 </script>
 EOF;
-if ($java == 'script'){
-	$headextra .= <<<EOF
-<script language="javascript" type="text/javascript" src="/js/jsani/jsani.loader.js"></script>
-EOF;
-}
 if ($autopilot == "yes"){
  	$headextra .= <<<EOF
 <style>
@@ -387,5 +391,6 @@ on these composites.</p>
 {$radlinks}
 </ul>
 EOF;
+$t->jsextra = $jsextra;
 $t->render('single.phtml');
 ?>

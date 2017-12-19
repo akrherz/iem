@@ -15,7 +15,7 @@ $valid = isset($_GET["valid"]) ? substr($_GET["valid"],0,16) : "";
 $t->thispage = "roads-history";
 $t->title = "Historical Iowa Winter Road Conditions";
 $t->jsextra = <<<EOF
-<script src="/js/jquery.table-filter.min.js"></script>
+<script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
 		<script>
 		$("#table1").filterTable({label: "Filter Table By: "});
 		</script>

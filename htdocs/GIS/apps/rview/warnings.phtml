@@ -1,6 +1,7 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 96);
+$JQUERYUI = "1.12.1";
 include("../../../../include/database.inc.php");
 include("../../../../include/vtec.php");
 include("../../../../include/network.php");
@@ -134,16 +135,22 @@ else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
 }
 
 $t->title = "RADAR &amp; NWS Warnings";
-$headextra = <<<EOF
+$jsextra = <<<EOM
 <script type="text/javascript" src="warnings.js?v=2"></script>
-<link rel="stylesheet" type="text/css" href="warnings.css" />
-<script language="javascript" type="text/javascript" src="/js/jsani/jsani.loader.js"></script>
+<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
 <script language="JavaScript1.2" type="text/javascript">
+EOM;
+$headextra = <<<EOF
+<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
+<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
+<link rel="stylesheet" type="text/css" href="warnings.css" />
 EOF;
 if (! $isarchive)
-  $headextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
+  $jsextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
 
-$headextra .= "</script>";
+$jsextra .= "</script>";
 $t->headextra = $headextra;
 
 if ($autopilot) $t->bodyextra = "onLoad=\"handsOff2();\"";
@@ -371,8 +378,9 @@ if (intval($loop) == 1 || intval($loop) == 2){
   	for ($i=0;$i<$frames;$i++){
    		$imgi = $frames - 1 - $i;
    		include("warnings_plot.php");
-   		$urls[] = $url;
+   		$urls[] = "'$url'";
   	}
+  	$jsurls = implode(", ", $urls);
   	// Save this animation to memcache for future potential use
   	$memcache = new Memcache;
   	$memcache->connect('iem-memcached', 11211);
@@ -381,9 +389,23 @@ if (intval($loop) == 1 || intval($loop) == 2){
   	
   	$content .= "</form>";
   	$content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
-  	include ("loop.php");
-  	$content .= printHTML($urls, $width, $height);
-  
+  	$content .= "<div id=\"myanimation\"></div>\n";
+    $jsextra .= <<<EOM
+<script>
+ $(document).ready(function () {
+    var myanimation = $("#myanimation").jsani({
+        imageSrcs: [$jsurls],
+        aniWidth: ${width},
+        aniHeight: ${height},
+        initdwell: 200,
+        controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
+        last_frame_pause: 8,
+        first_frame_pause: 1,
+        frame_pause: '0:5, 3:6'
+    });
+});
+</script>
+EOM;
 } else {
   $imgi = 0;
   include("warnings_plot.php");
@@ -393,6 +415,7 @@ if (intval($loop) == 1 || intval($loop) == 2){
 }
 $content .= <<<EOF
 <!-- Warnings Key! -->
+<br />
 <img src="static/warnings_legend.png">
 </div>
 EOF;
@@ -546,6 +569,7 @@ $content .= <<<EOF
 </font>
 </div>
 EOF;
+$t->jsextra = $jsextra;
 $t->content = $content;
 $t->render('single.phtml');
 ?>

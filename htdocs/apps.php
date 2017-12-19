@@ -9,7 +9,7 @@ $dbconn = iemdb("mesosite");
 $t->title = "Application Listing";
 $t->thispage = "iem-apps";
 $t->jsextra = <<<EOF
-<script src="/js/jquery.table-filter.min.js"></script>
+<script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
 <script>
    $("#table1").filterTable({label: "Filter Table Using Text: "});
 </script>
