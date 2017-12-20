@@ -271,18 +271,6 @@ var sbwStyleMap = new OpenLayers.StyleMap({
            strokeWidth: 5
        }
 });
-/* Create SBW styler */
-var lsrStyleMap = new OpenLayers.StyleMap({
-       'default': {
-           externalGraphic: 'icons/other.png',
-           fillOpacity: 1,
-           pointRadius: 10
-       },
-       'select': {
-           fillOpacity: 1,
-           pointRadius: 15
-       }
-});
 
 var sbwLookup = {
  "TO": {strokeColor: 'red'},
@@ -296,54 +284,86 @@ var sbwLookup = {
 
 // Lookup 'table' for styling
 var lsrLookup = {
- "0": {externalGraphic: "icons/tropicalstorm.gif"},
- "1": {externalGraphic: "icons/flood.png"},
- "2": {externalGraphic: "icons/other.png"},
- "3": {externalGraphic: "icons/other.png"},
- "4": {externalGraphic: "icons/other.png"},
- "5": {externalGraphic: "icons/ice.png"},
- "6": {externalGraphic: "icons/cold.png"},
- "7": {externalGraphic: "icons/cold.png"},
- "8": {externalGraphic: "icons/fire.png"},
- "9": {externalGraphic: "icons/other.png"},
- "a": {externalGraphic: "icons/other.png"},
- "A": {externalGraphic: "icons/wind.png"},
- "B": {externalGraphic: "icons/downburst.png"},
- "C": {externalGraphic: "icons/funnelcloud.png"},
- "D": {externalGraphic: "icons/winddamage.png"},
- "E": {externalGraphic: "icons/flood.png"},
- "F": {externalGraphic: "icons/flood.png"},
- "v": {externalGraphic: "icons/flood.png"},
- "G": {externalGraphic: "icons/wind.png"},
- "H": {externalGraphic: "icons/hail.png"},
- "I": {externalGraphic: "icons/hot.png"},
- "J": {externalGraphic: "icons/fog.png"},
- "K": {externalGraphic: "icons/lightning.gif"},
- "L": {externalGraphic: "icons/lightning.gif"},
- "M": {externalGraphic: "icons/wind.png"},
- "N": {externalGraphic: "icons/wind.png"},
- "O": {externalGraphic: "icons/wind.png"},
- "P": {externalGraphic: "icons/other.png"},
- "Q": {externalGraphic: "icons/tropicalstorm.gif"},
- "R": {externalGraphic: "/vendor/icons/lsr/rain/${magnitude}.png",
- 	graphicWidth: 40},
- "s": {externalGraphic: "icons/sleet.png"},
- "S": {externalGraphic: "/vendor/icons/lsr/snow/${magnitude}.png",
- 	graphicWidth: 40},
- "T": {externalGraphic: "icons/tornado.png"},
- "U": {externalGraphic: "icons/fire.png"},
- "V": {externalGraphic: "icons/avalanche.gif"},
- "W": {externalGraphic: "icons/waterspout.png"},
- "X": {externalGraphic: "icons/funnelcloud.png"},
- "Z": {externalGraphic: "icons/blizzard.png"}
-};
-lsrStyleMap.addUniqueValueRules('default', 'type', lsrLookup);
+ "0": "icons/tropicalstorm.gif",
+ "1": "icons/flood.png",
+ "2": "icons/other.png",
+ "3": "icons/other.png",
+ "4": "icons/other.png",
+ "5": "icons/ice.png",
+ "6": "icons/cold.png",
+ "7": "icons/cold.png",
+ "8": "icons/fire.png",
+ "9": "icons/other.png",
+ "a": "icons/other.png",
+ "A": "icons/wind.png",
+ "B": "icons/downburst.png",
+ "C": "icons/funnelcloud.png",
+ "D": "icons/winddamage.png",
+ "E": "icons/flood.png",
+ "F": "icons/flood.png",
+ "v": "icons/flood.png",
+ "G": "icons/wind.png",
+ "H": "icons/hail.png",
+ "I": "icons/hot.png",
+ "J": "icons/fog.png",
+ "K": "icons/lightning.gif",
+ "L": "icons/lightning.gif",
+ "M": "icons/wind.png",
+ "N": "icons/wind.png",
+ "O": "icons/wind.png",
+ "P": "icons/other.png",
+ "Q": "icons/tropicalstorm.gif",
+ "s": "icons/sleet.png",
+ "T": "icons/tornado.png",
+ "U": "icons/fire.png",
+ "V": "icons/avalanche.gif",
+ "W": "icons/waterspout.png",
+ "X": "icons/funnelcloud.png",
+ "Z": "icons/blizzard.png"};
 sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
 
 
+var lsr_context = {
+    getText: function(feature) {
+    	if (feature.attributes['type'] == 'S'){
+        	return feature.attributes["magnitude"];
+    	} else if (feature.attributes['type'] == 'R'){
+        	return feature.attributes["magnitude"];    		
+    	}
+    	return "";
+    },
+    getExternalGraphic: function(feature) {
+    	if (feature.attributes['type'] == 'S' ||
+    	    feature.attributes['type'] == 'R'){
+    		return "";
+    	} 
+        return lsrLookup[feature.attributes['type']];
+    }
+};
+var lsr_template = {
+	externalGraphic: "${getExternalGraphic}",
+	graphicWidth: 20,
+	graphicHeight: 20,
+	graphicOpacity: 1,
+    label: "${getText}",
+    strokeColor: "#FFFFFF",
+    strokeOpacity: 0,
+    //strokeWidth: 3,
+    fillColor: "#FFFFFF",
+    fillOpacity: 0,
+    pointRadius: 10,
+    //pointerEvents: "visiblePainted",    
+    fontColor: "#000",
+    fontSize: "14px",
+    fontFamily: "Courier New, monospace",
+    fontWeight: "bold",
+    labelOutlineColor: "white",
+    labelOutlineWidth: 3
+};
+var lsr_style = new OpenLayers.Style(lsr_template, {context: lsr_context});
 // create vector layer
 lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
-     styleMap  : lsrStyleMap,
+     styleMap  : new OpenLayers.StyleMap(lsr_style),
      sphericalMercator: true,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
      eventListeners: {

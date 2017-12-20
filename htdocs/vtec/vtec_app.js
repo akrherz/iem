@@ -95,6 +95,24 @@ var sbwIntersectionStyle = [new ol.style.Style({
 	})
 ];
 
+var textStyle = new ol.style.Style({
+		image: new ol.style.Circle({
+            radius: 10,
+            stroke: new ol.style.Stroke({
+              color: '#fff'
+            }),
+            fill: new ol.style.Fill({
+              color: '#3399CC'
+            })
+          }),
+    text: new ol.style.Text({
+        font: 'bold 11px "Open Sans", "Arial Unicode MS", "sans-serif"',
+        fill: new ol.style.Fill({
+          color: 'white'
+        })
+      })
+    });
+
 function urlencode(){
 	// Make our CONFIG object a URI
 	var uri = "?";
@@ -254,6 +272,10 @@ function buildMap(){
 	lsrLayer = new ol.layer.Vector({
 		title: 'Local Storm Reports',
 		style: function(feature, resolution){
+			if (feature.get('type') == 'S' || feature.get('type') == 'R'){
+				textStyle.getText().setText(feature.get('magnitude').toString());
+				return textStyle;
+			}
 			var url = lsrLookup[feature.get('type')];
 			if (url){
 				url = url.replace("${magnitude}", feature.get('magnitude'));
