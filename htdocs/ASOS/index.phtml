@@ -9,7 +9,7 @@ $t->thispage = 'networks-asos';
 $t->title = "ASOS/AWOS Network";
 
 
-$t->north = <<< EOF
+$t->content = <<< EOM
 <h3>ASOS Network</h3><p>
 
 <div class="well pull-right">
@@ -30,9 +30,8 @@ observations and generate basic weather reports.<font class="ref">[1]</font>
 for quality 24 hours per day.  Depending on the trouble, maintenance can
 be performed on the same day.</p>
 
-EOF;
-
-$t->west = <<< EOF
+<div class="row">
+<div class="col-md-6">
 
 <P><h3>Current ASOS Data:</h3>
 <UL>
@@ -62,8 +61,9 @@ available here for Iowa sites.
  <li><a href="precipnote.phtml">Note about ASOS Precipitation Timing</a></li>
  </ul>
 
-EOF;
-$t->east = <<< EOF
+</div>
+<div class="col-md-6">
+
 <p><h3>Historical Data:</h3>
 <ul>
  <li><a href="/request/download.phtml">Download</a> raw observations from the archive</li>
@@ -93,8 +93,8 @@ $t->east = <<< EOF
   <li><a href="/data/snet/P2compare.gif">Pressure vs SchoolNet Network (in)</a></li>
 </ul>
 
-EOF;
-$t->south = <<< EOF
+</div></div>
+
 <p><b>References:</b><br>
 <b>1</b> Adapted from the <a href="http://www.nws.noaa.gov/asos/pdfs/aum-toc.pdf">ASOS User's Guide</a>
 
@@ -103,6 +103,6 @@ $t->south = <<< EOF
 </ul>
 
 <br><br>
-EOF;
+EOM;
 $t->render('single.phtml');
 ?>

@@ -4,7 +4,11 @@ include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Contacts";
 
-$t->west = <<<EOF
+$t->content = <<<EOM
+
+<div class="row">
+<div class="col-md-6">
+
 <h3>IEM Contacts</h3>
 
 <p><div class="alert alert-info">We are very responsive to emails!  Please
@@ -32,14 +36,17 @@ $t->west = <<<EOF
 
 <p>If all those fail you, try <i>Daryl's Cell Phone!</i> 515.451.9249
 
-EOF;
+</div>
+<div class="col-md-6">
 
-$t->east = <<<EOF
 <a href="http://www.nsf.gov"><img src="/images/nsf.gif" border="0"></a>
 <br clear="all" />This website is based upon work supported by grants from the National Science
 Foundation. Opinions, findings, and conclusions or recommendations
 expressed in this material are those of the author(s) and do not necessarily
 reflect the views of the National Science Foundation.
-EOF;
+
+</div></div>
+
+EOM;
 $t->render('single.phtml');
 ?>

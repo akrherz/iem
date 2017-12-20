@@ -5,7 +5,7 @@ $t = new MyView();
 $t->title = "GIS Mainpage";
 $t->thispage = "gis-home";
 
-$t->west = <<<EOF
+$t->content = <<<EOM
 
 <h3>IEM GIS Information</h3>
 
@@ -13,6 +13,9 @@ $t->west = <<<EOF
 <p>Geographic Information System (GIS) is a system for manipulating spatially 
 referenced data.  Since the IEM contains many spatially referenced datasets, it would only seem
 natural to integrate IEM data into GIS applications.<p>
+
+<div class="row">
+<div class="col-md-6">
 
 <h3>Presentations & Docs:</h3>
 <ul>
@@ -61,8 +64,9 @@ each year going back to 1995.</li>
  <li><a href="http://map.nasa.gov/MAP06/">NASA MAP'06 program</a>
   <br />Has some GIS satellite data.</li>
 </ul>
-EOF;
-$t->east = <<<EOF
+
+</div>
+<div class="col-md-6">
 
 <img src="/images/gisready.png">You may have noticed this image appearing on
 IEM webpages.  It signifies that the data link is ready for most GIS systems.
@@ -115,6 +119,7 @@ This file is updated every minute.</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
 </ul>
 
-EOF;
+</div></div>
+EOM;
 $t->render("single.phtml");
 ?>

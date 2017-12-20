@@ -8,14 +8,14 @@ include "../../include/myview.php";
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
-$OL = '4.1.0';
+$OL = '4.6.4';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
-	height: 400px;
+	height: 75%;
 	width: 100%;
 	background-color: #D2B48C;
 }
@@ -85,19 +85,20 @@ $t->content = <<<EOF
 		<input type="text" id="datepicker" size="30">
 		
 </form>
+</div></div>
 
 		
 <div id="map" class="map">
-		<div id="popup"></div>
-		</div>
+<div id="popup"></div>
+</div>
 
-</div></div>
 		
-<h4>Click on map to show CLI text below</h4>
 <div class="row">
 <div class="col-md-12">
+    <h4>Click on map to show CLI text below</h4>
 	<div id="clireport"></div>
-</div></div>
+</div>
+</div>
 
 EOF;
 

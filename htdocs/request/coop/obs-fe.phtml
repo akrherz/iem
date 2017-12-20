@@ -13,7 +13,7 @@ $t = new MyView();
 $t->title = "NWS COOP Raw Observations Download"; 
 $t->thispage = "networks-coop";
 
-$t->north = <<<EOF
+$content = <<<EOF
 <ol class="breadcrumb">
 <li><a href="/COOP/">NWS COOP Network</a></li>
 <li class="active">Raw Data Download</li>
@@ -84,9 +84,8 @@ a local calendar day!.</p>
 </table>
 
 EOF;
-$t->west = $west;
-$t->east = <<<EOF
-<p><h3 class="subtitle">3. How to view?</h3><br>
+$east = <<<EOF
+<p><h3>3. How to view?</h3><br>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
@@ -118,6 +117,19 @@ snowd_inch  Snow Depth [inch] at observation
 </pre>
 
 EOF;
+$t->content = <<<EOM
+$content
+<div class="row">
+<div class="col-md-6">
+$west
+</div>
+<div class="col-md-6">
+$east
+</div>
+</div>
+
+
+EOM;
 
 $t->render('single.phtml');
 ?>

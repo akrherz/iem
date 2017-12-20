@@ -5,7 +5,7 @@ include("../../include/myview.php");
 $t = new MyView();
 $t->title = "AWOS Network";
 $t->thispage = "networks-awos";
-$t->north = <<<EOF
+$t->content = <<<EOM
 
 <div class="row">
  <div class="col-md-3">
@@ -40,8 +40,8 @@ federally operated by the FAA or
 some of them are locally maintained by state agencies.[1]</td>
 <td>
 
-EOF;
-$t->west = <<<EOF
+<div class="row">
+<div class="col-md-6">
 
 <h3>Docs:</h3>
 <ul>
@@ -88,8 +88,8 @@ for 5-10 minute interval data after 1 April 2011.
 <li><a href="/cgi-bin/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
 </ul>
 
-EOF;
-$t->east = <<<EOF
+</div>
+<div class="col-md-6">
 
 <h3>MADIS QC Mesages:</h3>
 <ul>
@@ -132,13 +132,14 @@ $t->east = <<<EOF
         <li><a href="/data/ARX_radar.gif">LaCrosse</a></li>
 </UL>
 
-EOF;
-$t->south = <<< EOF
+</div>
+</div>
+
 
 <b>References:</b><br>
 <b>1</b> <a href="http://www.faa.gov/asos/whatawos.htm">http://www.faa.gov/asos/whatawos.htm</a>
  , viewed: 21 Feb 2002
 
-EOF;
+EOM;
 $t->render('single.phtml');
 ?>
