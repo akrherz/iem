@@ -199,7 +199,11 @@ $().ready(function(){
 	});
 	
 	$('#dtpicker').datetimepicker({
-		defaultDate: new Date()
+		defaultDate: new Date(),
+		icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar"
+		}
 	});
 	$('#dtpicker').on('dp.change', function(){
 		if (!realtimeMode) {

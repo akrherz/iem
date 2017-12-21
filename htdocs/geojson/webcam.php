@@ -22,7 +22,7 @@ if ($ts > 0){
 				sprintf("SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
     			from camera_log c, webcams w
     			WHERE valid = '%s' and c.cam = w.id
-				and w.network in ('KCRG', 'KCCI', 'KELO')
+				and w.network in ('KCRG', 'KCCI', 'KELO', 'ISUC')
   				ORDER by name ASC",
 						date('Y-m-d H:i', $ts)));
 	}
@@ -30,7 +30,7 @@ if ($ts > 0){
 	$result = pg_exec($connect, "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
 			from camera_current c, webcams w
 			WHERE valid > (now() - '15 minutes'::interval)
-			and c.cam = w.id and w.network in ('KCCI','KELO','KCRG')
+			and c.cam = w.id and w.network in ('KCCI','KELO','KCRG', 'ISUC')
 			ORDER by name ASC");
 } else {
   $result = pg_exec($connect, "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
@@ -42,9 +42,6 @@ if ($ts > 0){
 
 
 $ar = Array("type"=>"FeatureCollection",
-      "crs" => Array("type"=>"EPSG",
-                     "properties" => Array("code"=>4326,
-                                  "coordinate_order" => Array(1,0))),
       "features" => Array()
 );
 
