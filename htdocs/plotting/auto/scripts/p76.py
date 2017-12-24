@@ -14,6 +14,7 @@ from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
+         ('water_year', 'Water Year'),
          ('spring', 'Spring (MAM)'),
          ('spring2', 'Spring (AMJ)'),
          ('fall', 'Fall (SON)'),
@@ -45,7 +46,8 @@ def get_description():
     the mixing ratios by year, and then converting that average to a dew point.
     This was done due to the non-linear nature of dew point when expressed in
     units of temperature.  If you plot the 'winter' season, the year shown is
-    of the Jan/Feb portion of the season.
+    of the Jan/Feb portion of the season. If you plot the 'Water Year', the
+    year shown is the September 30th of the period.
 
     <p>You can optionally restrict the local hours of the day to consider for
     the plot.  These hours are expressed as a range of hours using a 24 hour
@@ -99,6 +101,9 @@ def get_data(ctx, startyear):
     lastyear = today.year
     deltadays = 0
     if ctx['season'] == 'all':
+        months = range(1, 13)
+    elif ctx['season'] == 'water_year':
+        deltadays = 92
         months = range(1, 13)
     elif ctx['season'] == 'spring':
         months = [3, 4, 5]

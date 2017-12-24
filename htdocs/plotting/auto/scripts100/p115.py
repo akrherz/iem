@@ -1,6 +1,8 @@
 """Monthly precip in text format"""
 import datetime
+import calendar
 
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
@@ -57,10 +59,13 @@ def plotter(fdict):
 
     df = read_sql("""
     SELECT year, month,
+    case when month in (10, 11, 12) then year + 1 else year end as water_year,
     sum(precip) as precip,
     avg(high) as avg_high, avg(low) as avg_low,
     avg((high+low)/2.) as avg_temp from """+table+""" WHERE
-    station = %s and day < %s GROUP by year, month ORDER by year ASC, month ASC
+    station = %s and day < %s
+    GROUP by year, water_year, month
+    ORDER by year ASC, month ASC
     """, pgconn, params=(station, today), index_col=None)
 
     res = """\
@@ -74,20 +79,24 @@ def plotter(fdict):
        nt.sts[station]['name'])
     res += ("# %s\n"
             "YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   "
-            "OCT   NOV   DEC   ANN\n") % (LABELS[varname], )
+            "OCT   NOV   DEC   ANN WYEAR\n") % (LABELS[varname], )
 
     years = df['year'].unique()
     years.sort()
     grouped = df.set_index(['year', 'month'])
     yrsum = df.groupby('year')[varname].sum()
+    wyrsum = df.groupby('water_year')[varname].sum()
     yrmean = df.groupby('year')[varname].mean()
+    wyrmean = df.groupby('water_year')[varname].mean()
 
     prec = 2 if varname == 'precip' else 0
     for year in years:
         yrtot = yrsum[year]
+        wyrtot = wyrsum[year]
         if varname != 'precip':
             yrtot = yrmean[year]
-        res += ("%s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6.2f\n") % (
+            wyrtot = wyrmean[year]
+        res += ("%s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6.2f%6.2f\n") % (
                                    year,
                                    p(grouped, year, 1, varname, prec),
                                    p(grouped, year, 2, varname, prec),
@@ -100,10 +109,12 @@ def plotter(fdict):
                                    p(grouped, year, 9, varname, prec),
                                    p(grouped, year, 10, varname, prec),
                                    p(grouped, year, 11, varname, prec),
-                                   p(grouped, year, 12, varname, prec), yrtot)
+                                   p(grouped, year, 12, varname, prec),
+                                   yrtot, wyrtot)
     yrtot = yrmean.mean() if varname != 'precip' else yrsum.mean()
+    wyrtot = wyrmean.mean() if varname != 'precip' else wyrsum.mean()
     res += ("MEAN%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f"
-            "%6.2f%6.2f%6.2f\n") % (
+            "%6.2f%6.2f%6.2f%6.2f\n") % (
         df[df['month'] == 1][varname].mean(),
         df[df['month'] == 2][varname].mean(),
         df[df['month'] == 3][varname].mean(),
@@ -116,9 +127,20 @@ def plotter(fdict):
         df[df['month'] == 10][varname].mean(),
         df[df['month'] == 11][varname].mean(),
         df[df['month'] == 12][varname].mean(),
-        yrtot)
+        yrtot, wyrtot)
 
-    return None, df, res
+    # create a better resulting dataframe
+    resdf = pd.DataFrame(index=years)
+    resdf.index.name = 'YEAR'
+    for i, month_abbr in enumerate(calendar.month_abbr):
+        if i == 0:
+            continue
+        resdf[month_abbr.upper()] = df[df['month'] == i
+                                       ].set_index('year')[varname]
+    resdf['ANN'] = yrmean if varname != 'precip' else yrsum
+    resdf['WATER YEAR'] = wyrmean if varname != 'precip' else wyrsum
+
+    return None, resdf, res
 
 
 if __name__ == '__main__':
