@@ -60,7 +60,7 @@ def run(basets, endts, view):
     mp.drawcounties()
     if len(tdf.index) > 0:
         mp.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
-                       fmt='%.1f')
+                       fmt='%.1f', labelbuffer=5)
     mp.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
     mp.postprocess(view=view, pqstr=pqstr)
