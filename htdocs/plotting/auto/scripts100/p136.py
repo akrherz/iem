@@ -7,9 +7,9 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict([(0, 'Include calm observations'),
-                     (2, 'Include only non-calm observations >= 2kt'),
-                     (5, 'Include only non-calm observations >= 5kt'),
+PDICT = OrderedDict([("0", 'Include calm observations'),
+                     ("2", 'Include only non-calm observations >= 2kt'),
+                     ("5", 'Include only non-calm observations >= 5kt'),
                      ])
 
 
@@ -31,7 +31,7 @@ def get_description():
              label='Select Station:', network='IA_ASOS'),
         dict(type='year', name='season', default=datetime.datetime.now().year,
              label='Select Season to Highlight'),
-        dict(type='select', name='wind', default=0, options=PDICT,
+        dict(type='select', name='wind', default="0", options=PDICT,
              label='Include Calm Observations? (wind threshold)'),
     ]
     return desc
@@ -40,9 +40,9 @@ def get_description():
 def highcharts(fdict):
     """ Do highcharts """
     ctx = get_context(fdict)
-    s = ""
+    season = ""
     if 'season' in ctx['lines']:
-        s = """{
+        season = """{
         name: '"""+str(ctx['season'])+"""',
         type: 'line',
         marker: {
@@ -75,7 +75,7 @@ $("#ap_container").highcharts({
     },
     xAxis: {title: {text: 'Wind Chill Temperature (F)'}},
     yAxis: {title: {text: 'Total Time Hours [expressed in days]'}},
-    series: [""" + s + """{
+    series: [""" + season + """{
         name: '25%',
         type: 'line',
         marker: {
@@ -138,7 +138,7 @@ def get_context(fdict):
     ctx['df'] = df2
     ctx['title'] = ("[%s] %s Wind Chill Hours"
                     ) % (station, nt.sts[station]['name'])
-    ctx['subtitle'] = ("Hours below threshold by season (wind >= %.0f kts)"
+    ctx['subtitle'] = ("Hours below threshold by season (wind >= %s kts)"
                        ) % (sknt,)
     ctx['dfdescribe'] = df2.iloc[:-1].describe()
     ctx['season'] = int(fdict.get('season', datetime.datetime.now().year))
