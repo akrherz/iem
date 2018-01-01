@@ -51,6 +51,7 @@ LD_PRELOAD=/opt/miniconda2/lib/libz.so php wxc_cocorahs.php
 cd ../current
 python plot_hilo.py 0
 python ifc_today_total.py
+python today_min_windchill.py
 
 cd ../summary
 python hourly_precip.py
