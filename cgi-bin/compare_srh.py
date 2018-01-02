@@ -18,7 +18,7 @@ def main():
     srhdf = pd.read_html(SRH, header=0)[0]
     srhdf['wfo'] = srhdf['wfo'].str.slice(1, 4)
     iemdf = read_sql("""
-    SELECT wfo, phenomena, significance, eventid, count(*) from warnings_2017
+    SELECT wfo, phenomena, significance, eventid, count(*) from warnings
     where expire > now()
     GROUP by wfo, phenomena, significance, eventid
     """, get_dbconn('postgis', user='nobody'), index_col=['wfo', 'phenomena',
