@@ -30,7 +30,6 @@ if (strlen($days) > 0) {
   }
 }
 
-$tableName = "rwis_sf";
 $dbName = "iowa";
 //$station = 'RAME';
 
@@ -74,7 +73,6 @@ if ($mode == "rt"){
 } else {
  $c0 = iemdb('rwis');
  $c1 = $c0;
- $tableName = "t". $syear;
  $q0 = "SELECT
     valid, gvalid, max(tmpf) as tmpf, max(pcpn) as pcpn,
     max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,
@@ -99,7 +97,7 @@ if ($mode == "rt"){
       to_char(valid, 'YYYY-MM-DD HH24') as newd, 
       extract(minute from valid) as minute 
     FROM 
-      $tableName 
+      alldata
     WHERE 
       station = '$station' and 
       date(valid) IN ($dbDateString) 
