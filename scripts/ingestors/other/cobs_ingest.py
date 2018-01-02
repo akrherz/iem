@@ -67,7 +67,7 @@ def sum_hourly(hdf, date, col):
     sts = sts.replace(tzinfo=pytz.utc)
     ets = sts + datetime.timedelta(hours=24)
     df2 = hdf[(hdf['valid'] > sts) & (hdf['valid'] < ets)]
-    if len(df2.index) == 0:
+    if df2.empty:
         # print("ingest_cobs found no hourly data for date: %s" % (date,))
         return None
     return df2[col].sum()
@@ -143,10 +143,10 @@ def campbell2df(year):
     hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year)
     if not os.path.isfile(dailyfn):
         print("cobs_ingest.py missing %s" % (dailyfn,))
-        return
+        return None, None
     if not os.path.isfile(hourlyfn):
         print("cobs_ingest.py missing %s" % (hourlyfn,))
-        return
+        return None, None
 
     ddf = pd.read_csv(dailyfn, header=0, na_values=["7999", "NAN"],
                       skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
@@ -169,12 +169,14 @@ def main(argv):
         print("Running special request")
         for year in range(2017, 2018):
             ddf, hdf = campbell2df(year)
-            database(None, ddf, hdf, True)
+            if ddf:
+                database(None, ddf, hdf, True)
     else:
         lastob = get_last()
         now = datetime.datetime.now()
         ddf, hdf = campbell2df(now.year)
-        database(lastob, ddf, hdf, False)
+        if ddf:
+            database(lastob, ddf, hdf, False)
 
 
 if __name__ == '__main__':
