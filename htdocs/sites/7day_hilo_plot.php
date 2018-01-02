@@ -15,9 +15,10 @@ $cities = $st->table;
  /* Get high and low temps for the past 7 days */
 $rs = pg_prepare($db, "SELECT",
 		"SELECT day, max_tmpf, min_tmpf ".
-		"from summary_". date("Y") ." s, stations t ".
+		"from summary s, stations t ".
         "WHERE t.id = $1 and t.network = $2 and t.iemid = s.iemid and " .
-       	"day <= 'TODAY' ORDER by day DESC LIMIT 7");
+       	"day > now() - '8 days'::interval and ".
+        "day <= 'TODAY' ORDER by day DESC LIMIT 7");
 
 $rs = pg_execute($db, "SELECT", Array($station, $network));
 
