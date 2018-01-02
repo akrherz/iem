@@ -14,6 +14,7 @@ PDICT = OrderedDict([
     ('avg-low', 'Average Low'),
     ('min-low', 'Minimum Low'),
     ('max-precip', 'Maximum Daily Precip'),
+    ('range-hilo', 'Range between Min Low and Max High'),
     ('sum-precip', 'Total Precipitation'),
     ('avg-precip', 'Daily Average Precipitation'),
     ('avg-precip2', 'Daily Average Precipitation (on wet days)'),
@@ -88,6 +89,7 @@ def plotter(fdict):
     """, pgconn, params=(threshold, threshold, threshold, threshold, station,
                          syear, eyear),
                   index_col='year')
+    df['range-hilo'] = df['max-high'] - df['min-low']
 
     (fig, ax) = plt.subplots(1, 1)
     avgv = df[ptype].mean()
@@ -110,10 +112,10 @@ def plotter(fdict):
         colorbelow = 'tomato'
         precision = "%.2f"
     bars = ax.bar(np.array(years) - 0.4, data, fc=colorabove, ec=colorabove)
-    for i, bar in enumerate(bars):
+    for i, mybar in enumerate(bars):
         if data[i] < avgv:
-            bar.set_facecolor(colorbelow)
-            bar.set_edgecolor(colorbelow)
+            mybar.set_facecolor(colorbelow)
+            mybar.set_edgecolor(colorbelow)
     lbl = "Avg: "+precision % (avgv,)
     ax.axhline(avgv, lw=2, color='k', zorder=2, label=lbl)
     lbl = "1981-2010: "+precision % (a1981_2010,)
@@ -125,7 +127,7 @@ def plotter(fdict):
         ax.set_ylim(min(data) - 5, max(data) + 5)
 
     ax.set_xlabel("Year")
-    units = "$^\circ$F"
+    units = r"$^\circ$F"
     if ptype.find('days') > 0:
         units = "days"
     elif ptype.find('precip') > 0:
