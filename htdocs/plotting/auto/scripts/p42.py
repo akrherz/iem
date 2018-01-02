@@ -30,7 +30,6 @@ import datetime
 from collections import OrderedDict
 
 import psycopg2.extras
-import pytz
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -90,32 +89,59 @@ def get_description():
     return desc
 
 
-def plot(ax, interval, valid, tmpf, year, lines):
+def plot(ax, interval, valid, tmpf, lines, mydir, month):
     """ Our plotting function """
-    if len(valid) == 0:
+    if len(lines) > 10 or len(valid) < 2 or (valid[-1] - valid[0]) < interval:
         return lines
-    if (valid[-1] - valid[0]) > interval:
-        if len(lines) == 10:
-            ax.text(0.5, 0.9, "ERROR: Limit of 10 lines reached",
-                    transform=ax.transAxes)
-            return lines
-        if len(lines) > 10:
-            return lines
-        delta = ((valid[-1] - valid[0]).days * 86400. +
-                 (valid[-1] - valid[0]).seconds)
-        i = tmpf.index(min(tmpf))
-        mylbl = "%s\n%.1fd" % (year, delta / 86400.)
-        lines.append(ax.plot(valid, tmpf, lw=2,
-                             label=mylbl.replace("\n", " "))[0])
-        lines[-1].hours = round((valid[-1] - valid[0]).seconds / 3600., 2)
-        lines[-1].days = (valid[-1] - valid[0]).days
-        lines[-1].year = year
-        lines[-1].mylbl = mylbl
-        ax.text(valid[i], tmpf[i], mylbl,
-                ha='center', va='center',
-                bbox=dict(color=lines[-1].get_color()),
-                color='white')
+    if len(lines) == 10:
+        ax.text(0.5, 0.9, "ERROR: Limit of 10 lines reached",
+                transform=ax.transAxes)
+        return lines
+    delta = (valid[-1] - valid[0]).total_seconds()
+    i = tmpf.index(min(tmpf))
+    mylbl = "%s\n%id%.0fh" % (valid[0].year, delta / 86400,
+                              (delta % 86400) / 3600.)
+    x0 = valid[0].replace(month=1, day=1, hour=0, minute=0)
+    offset = 0
+    if mydir == 'below' and valid[0].month < 7 and month == 'all':
+        offset = 366. * 86400.
+    seconds = [((v - x0).total_seconds() + offset) for v in valid]
+    lines.append(ax.plot(seconds, tmpf, lw=2,
+                         label=mylbl.replace("\n", " "))[0])
+    lines[-1].hours = round((valid[-1] - valid[0]).seconds / 3600., 2)
+    lines[-1].days = (valid[-1] - valid[0]).days
+    lines[-1].mylbl = mylbl
+    lines[-1].period_start = valid[0]
+    lines[-1].period_end = valid[-1]
+    ax.text(seconds[i], tmpf[i], mylbl,
+            ha='center', va='center',
+            bbox=dict(color=lines[-1].get_color()),
+            color='white')
     return lines
+
+
+def compute_xlabels(ax):
+    """Figure out how to make pretty xaxis labels"""
+    # values are in seconds
+    xlim = ax.get_xlim()
+    x0 = datetime.datetime(2000, 1, 1) + datetime.timedelta(seconds=xlim[0])
+    x0 = x0.replace(hour=0, minute=0)
+    x1 = datetime.datetime(2000, 1, 1) + datetime.timedelta(seconds=xlim[1])
+    x1 = x1.replace(hour=0, minute=0) + datetime.timedelta(days=1)
+    xticks = []
+    xticklabels = []
+    # Pick a number of days so that we end up with 8 labels
+    delta = int((xlim[1] - xlim[0]) / 86400. / 7)
+    if delta == 0:
+        delta = 1
+    for x in range(int((x0 - datetime.datetime(2000, 1, 1)).total_seconds()),
+                   int((x1 - datetime.datetime(2000, 1, 1)).total_seconds()),
+                   86400 * delta):
+        xticks.append(x)
+        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(seconds=x)
+        xticklabels.append(ts.strftime("%-d\n%b"))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
 
 
 def plotter(fdict):
@@ -123,8 +149,7 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    pgconn = get_dbconn('asos')
+    pgconn = get_dbconn('asos', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     ctx = get_autoplot_context(fdict, get_description())
@@ -169,7 +194,7 @@ def plotter(fdict):
       ORDER by valid ASC
       """, (station, tuple(months)))
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = plt.subplots(1, 1, figsize=(9, 6))
     interval = datetime.timedelta(hours=hours)
 
     valid = []
@@ -177,58 +202,45 @@ def plotter(fdict):
     year = 0
     lines = []
     for row in cursor:
-        if year != row[0].year:
+        if month != 'all' and year != row[0].year:
             year = row[0].year
-            lines = plot(ax, interval, valid, tmpf, year, lines)
+            lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
             valid = []
             tmpf = []
         if ((mydir == 'above' and row[1] >= threshold) or
                 (mydir == 'below' and row[1] < threshold)):
-            valid.append(row[0].replace(year=2000))
+            valid.append(row[0])
             tmpf.append(row[1])
         if ((mydir == 'above' and row[1] < threshold) or
                 (mydir == 'below' and row[1] >= threshold)):
-            valid.append(row[0].replace(year=2000))
+            valid.append(row[0])
             tmpf.append(row[1])
-            lines = plot(ax, interval, valid, tmpf, year, lines)
+            lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
             valid = []
             tmpf = []
 
-    lines = plot(ax, interval, valid, tmpf, year, lines)
+    lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
+    compute_xlabels(ax)
     rows = []
-    x0 = []
-    x1 = []
     for line in lines:
-        xdata = line.get_xdata()
-        x0.append(xdata[0])
-        x1.append(xdata[-1])
-        rows.append(dict(start=xdata[0].replace(year=line.year),
-                         end=xdata[-1].replace(year=line.year),
+        rows.append(dict(start=line.period_start,
+                         end=line.period_end,
                          hours=line.hours, days=line.days))
     df = pd.DataFrame(rows)
 
-    if len(lines) > 0:
-        sts = min(x0)
-        ets = max(x1)
-    ax.set_xlim(sts, ets)
-    if (ets - sts).days > 10:
-        ax.xaxis.set_major_locator(
-            mdates.DayLocator(interval=((ets - sts).days / 10),
-                              tz=pytz.timezone(nt.sts[station]['tzname'])))
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     ax.grid(True)
-    ax.set_ylabel("%s $^\circ$F" % (PDICT2.get(varname),))
-    ax.set_xlabel("Timezone %s" % (nt.sts[station]['tzname'],))
-    ax.set_title(("%s-%s [%s] %s\n%s :: %.1f+ Day Streaks %s %s$^\circ$F"
+    ax.set_ylabel(r"%s $^\circ$F" % (PDICT2.get(varname),))
+    ax.set_title(("%s-%s [%s] %s\n"
+                  r"%s :: %.0fd%.0fh+ Streaks %s %s$^\circ$F"
                   ) % (nt.sts[station]['archive_begin'].year,
                        datetime.datetime.now().year, station,
                        nt.sts[station]['name'], MDICT.get(month),
-                       hours / 24.0, mydir, threshold))
+                       hours / 24, hours % 24, mydir, threshold))
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
     # ax.set_ylim(bottom=43)
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.15,
-                     box.width, box.height * 0.85])
+    ax.set_xlabel(("* Due to timezones and leapday, there is some ambiguity"
+                   " with the plotted dates"))
+    ax.set_position([0.1, 0.25, 0.85, 0.65])
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.165),
               fancybox=True, shadow=True, ncol=5, fontsize=12,
               columnspacing=1)
@@ -236,5 +248,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='DSM', network='IA_ASOS', m='sep', threshold=70,
-                 hours=36, var='dwpf', dir='above'))
+    plotter(dict(station='DSM', network='IA_ASOS', m='all', threshold=0,
+                 hours=67, var='tmpf', dir='below'))
