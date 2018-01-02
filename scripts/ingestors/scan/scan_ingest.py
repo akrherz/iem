@@ -132,7 +132,9 @@ def savedata(reprocessing, data, maxts):
 
     iem.data['valid'] = ts
     iem.data['tmpf'] = temperature(float(iem.data.get('tmpc')), 'C').value('F')
-    iem.data['dwpf'] = temperature(float(iem.data.get('dwpc')), 'C').value('F')
+    if iem.data.get('dwpc') is not None:
+        iem.data['dwpf'] = temperature(
+            float(iem.data.get('dwpc')), 'C').value('F')
     iem.data['c1tmpf'] = temperature(float(iem.data.get('c1tmpc')),
                                      'C').value('F')
     iem.data['c2tmpf'] = temperature(float(iem.data.get('c2tmpc')),
@@ -148,11 +150,16 @@ def savedata(reprocessing, data, maxts):
     iem.data['c3smv'] = float(iem.data.get('c3smv'))
     iem.data['c4smv'] = float(iem.data.get('c4smv'))
     iem.data['c5smv'] = float(iem.data.get('c5smv'))
-    iem.data['phour'] = float(iem.data.get('phour'))
+    if iem.data.get('phour') is not None:
+        iem.data['phour'] = float(iem.data.get('phour'))
     if not iem.save(icursor):
         print(('scan_ingest.py iemaccess for sid: %s ts: %s updated no rows'
                ) % (sid, ts))
 
+    if reprocessing:
+        scursor.execute("""DELETE from t%(year)s_hourly
+        WHERE station = '%(station)s' and valid = '%(valid)s'
+        """ % iem.data)
     sql = """INSERT into t%(year)s_hourly (station, valid, tmpf,
         dwpf, srad,
          sknt, drct, relh, pres, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
