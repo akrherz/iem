@@ -143,7 +143,7 @@ def plotter(fdict):
                          " by rain volume (%.2fin)") % (normal / 5.0, ),
             transform=ax.transAxes, va='top', ha='center')
     addl = ""
-    if jdaylimit < 377:
+    if jdaylimit < 367:
         addl = " thru %s" % (today.strftime("%-d %b"), )
     ax.set_title("%s [%s] [%s-%s]\nDaily Precipitation Contributions%s" % (
                 nt.sts[station]['name'], station, minyear, endyear-2, addl))
