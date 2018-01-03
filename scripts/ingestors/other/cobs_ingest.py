@@ -169,13 +169,13 @@ def main(argv):
         print("Running special request")
         for year in range(2017, 2018):
             ddf, hdf = campbell2df(year)
-            if ddf:
+            if ddf is not None:
                 database(None, ddf, hdf, True)
     else:
         lastob = get_last()
         now = datetime.datetime.now()
         ddf, hdf = campbell2df(now.year)
-        if ddf:
+        if ddf is not None:
             database(lastob, ddf, hdf, False)
 
 
