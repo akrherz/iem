@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (5, now());
+INSERT into iem_schema_manager_version values (6, now());
 
 ---
 --- Store unknown stations
@@ -145,7 +145,7 @@ CREATE TABLE alldata(
  min_tmpf_24hr  real,
  mslp           real,
  p01i           real,
- presentwx     character varying(24),
+ wxcodes        varchar(8)[],
   report_type smallint REFERENCES alldata_report_type(id)  
 );
 GRANT SELECT on alldata to nobody,apache;

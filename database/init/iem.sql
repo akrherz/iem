@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (12, now());
+INSERT into iem_schema_manager_version values (13, now());
 
 CREATE TABLE stations(
 	id varchar(20),
@@ -276,7 +276,7 @@ CREATE TABLE current_tmp(
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    presentwx varchar(24),
+    wxcodes varchar(8)[],
     battery real,
     water_tmpf real
 );
@@ -341,7 +341,7 @@ CREATE TABLE current (
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    presentwx varchar(24),
+    wxcodes varchar(8)[],
     battery real,
     water_tmpf real
 );
@@ -408,7 +408,7 @@ CREATE TABLE current_log (
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    presentwx varchar(24),
+    wxcodes varchar(8)[],
     battery real,
     water_tmpf real
 );
