@@ -35,8 +35,9 @@ def ingest(cursor):
         dstart = datetime.date(1980, 1, 1)
     if hstart is None:
         hstart = datetime.datetime(1980, 1, 1)
+    fn = "%s/%s/ISU_Feel_Daily.dat" % (BASE, datetime.date.today().year)
 
-    df = pd.read_csv('%s/ISU_Feel_Daily.dat' % (BASE,), header=0,
+    df = pd.read_csv(fn, header=0,
                      skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
 
     for _, row in df.iterrows():
@@ -52,7 +53,8 @@ def ingest(cursor):
               row['Rain_Tot'], row['Windspeed_Max'],
               row['SolarRad_MJ_Tot']))
 
-    df = pd.read_csv('%s/ISU_Feel_Hourly.dat' % (BASE,), header=0,
+    fn = "%s/%s/ISU_Feel_Hourly.dat" % (BASE, datetime.date.today().year)
+    df = pd.read_csv(fn, header=0,
                      skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
 
     for _, row in df.iterrows():
