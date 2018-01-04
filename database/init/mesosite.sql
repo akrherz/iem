@@ -183,10 +183,11 @@ GRANT SELECT on camera_log to apache,nobody;
 --- webcam currents
 ---
 CREATE TABLE camera_current(
-	cam varchar(11),
+	cam varchar(11) UNIQUE,
 	valid timestamp with time zone,
 	drct smallint);
 GRANT SELECT on camera_current to apache,nobody;
+GRANT ALL on camera_current to mesonet,ldm;
 
 ---
 --- Webcam scheduling

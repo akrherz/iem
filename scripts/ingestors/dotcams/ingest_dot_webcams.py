@@ -99,14 +99,15 @@ def process(tokens, cameras, mcursor):
     args = (cid, now, drct)
     mcursor.execute(sql, args)
 
-    sql = "DELETE from camera_current WHERE cam = '%s'" % (cid, )
-    mcursor.execute(sql)
-
-    sql = """
-        INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)
-    """
-    args = (cid, now, drct)
-    mcursor.execute(sql, args)
+    mcursor.execute("""
+        UPDATE camera_current SET valid = %s, drct = %s WHERE cam = %s
+    """, (now, drct, cid))
+    if mcursor.rowcount == 0:
+        print(("ingest_dot_webcams adding camera_current entry for cam: %s"
+               ) % (cid, ))
+        mcursor.execute("""
+            INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)
+        """, (cid, now, drct))
 
 
 def main():
@@ -134,8 +135,8 @@ def main():
 
     proc = subprocess.Popen(("wget --timeout=20 -m --ftp-user=rwis "
                              "--ftp-password=%s "
-                             "ftp://165.206.203.34/rwis_images/*%s-??.jpg"
-                             ) % (ftp_pass, utc.strftime("%d-%H")),
+                             "ftp://165.206.203.34/rwis_images/*.jpg"
+                             ) % (ftp_pass, ),
                             shell=True, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     _stdout, stderr = proc.communicate()
