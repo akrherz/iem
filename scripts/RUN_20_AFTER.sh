@@ -18,3 +18,6 @@ python asos2archive.py hourly
 
 cd ../hads
 python compute_hads_pday.py
+
+cd ../ingestors
+python uscrn_ingest.py
