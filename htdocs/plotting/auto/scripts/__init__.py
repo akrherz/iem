@@ -113,6 +113,8 @@ data = {'plots': [
          'label': "Trailing X Number of Days Temp/Precipitation Departures"},
         {'id': "132", 'mw': True,
          'label': "Top 10 Precip/Temperature Values by Month/Season"},
+        {'id': "190", 'mw': True,
+         'label': "Year of Daily High/Low Temperature Record"},
     ]},
     {'label': 'Monthly', 'options': [
         {'id': "130", 'mw': True,
