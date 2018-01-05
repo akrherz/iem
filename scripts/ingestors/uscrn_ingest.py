@@ -18,6 +18,22 @@ URI = "https://www1.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
 FTP = "ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
 
 
+def n2n(val):
+    """yawn"""
+    if pd.isnull(val):
+        return None
+    return val
+
+
+def is_within(val, floor, ceiling):
+    """Nulls"""
+    if val is None or pd.isnull(val):
+        return None
+    if val < floor or val >= ceiling:
+        return None
+    return val
+
+
 def init_year(year):
     """We need to do great things, for a great new year"""
     # We need FTP first, since that does proper wild card expansion
@@ -26,7 +42,7 @@ def init_year(year):
     """ % (FTP, year), shell=True)
 
 
-def process_file(icursor, ocursor, filename, size):
+def process_file(icursor, ocursor, year, filename, size, reprocess):
     """Ingest these files, please
    1    WBANNO                         XXXXX
    2    UTC_DATE                       YYYYMMDD
@@ -62,40 +78,56 @@ def process_file(icursor, ocursor, filename, size):
                             'ST_TYPE', 'ST_FLAG', 'RH', 'RH_FLAG', 'VSM5',
                             'SOILC5', 'WETNESS', 'WET_FLAG', 'SMPS',
                             'SMPS_FLAG'],
+                     na_values={'TMPC': "-9999", "PRECIP_MM": "-9999",
+                                'SRAD': "-99999", "SKINC": "-9999",
+                                "RH": "-9999", "VSM5": "-99",
+                                "SOILC5": "-9999", "WETNESS": "-9999",
+                                "SMPS": "-99"},
                      converters={'WBANNO': str, 'UTC_TIME': str})
+    if reprocess and not df.empty:
+        ocursor.execute("""
+        DELETE from uscrn_t"""+str(year)+"""
+        WHERE station = %s
+        """, (df.iloc[0]['WBANNO'], ))
+        print("Removed %s rows" % (ocursor.rowcount, ))
     for _, row in df.iterrows():
         valid = datetime.datetime.strptime("%s %s" % (row['UTC_DATE'],
                                                       row['UTC_TIME']),
                                            '%Y%m%d %H%M')
         valid = valid.replace(tzinfo=pytz.utc)
         ob = Observation(str(row['WBANNO']), 'USCRN', valid)
-        ob.data['tmpf'] = (float(row["TMPC"]) * units.degC
-                           ).to(units.degF).magnitude
-        ob.data['pcounter'] = (float(row['PRECIP_MM']) * units('mm')
-                               ).to(units.inch).magnitude
-        ob.data['srad'] = row['SRAD']
-        ob.data['tsf0'] = (float(row["SKINC"]) * units.degC
-                           ).to(units.degF).magnitude
-        ob.data['relh'] = row['RH']
-        ob.data['c1smv'] = row['VSM5']
-        ob.data['c1tmpf'] = (float(row["SOILC5"]) * units.degC
-                             ).to(units.degF).magnitude
-        ob.data['sknt'] = (float(row['SMPS']) * units('m/s')
-                           ).to(units('miles per hour')).magnitude
-        ob.save(icursor)
+        ob.data['tmpf'] = is_within((float(row["TMPC"]) * units.degC
+                                     ).to(units.degF).magnitude, -100, 150)
+        ob.data['pcounter'] = is_within((float(row['PRECIP_MM']) * units('mm')
+                                         ).to(units.inch).magnitude, 0, 900)
+        ob.data['srad'] = is_within(row['SRAD'], 0, 2000)
+        ob.data['tsf0'] = is_within((float(row["SKINC"]) * units.degC
+                                     ).to(units.degF).magnitude, -100, 200)
+        ob.data['relh'] = is_within(row['RH'], 0, 100.1)
+        ob.data['c1smv'] = is_within(row['VSM5'], 0, 1.01)
+        ob.data['c1tmpf'] = is_within((float(row["SOILC5"]) * units.degC
+                                       ).to(units.degF).magnitude, -100, 200)
+        ob.data['sknt'] = is_within((float(row['SMPS']) * units('m/s')
+                                     ).to(units('miles per hour')).magnitude,
+                                    0, 200)
+        ob.save(icursor, skip_current=reprocess)
         table = "uscrn_t%s" % (valid.year, )
-        ocursor.execute("""
-        DELETE from """ + table + """ WHERE station = %s and valid = %s
-        """, (row['WBANNO'], valid))
+        if not reprocess:
+            ocursor.execute("""
+            DELETE from """ + table + """ WHERE station = %s and valid = %s
+            """, (row['WBANNO'], valid))
         ocursor.execute("""
         INSERT into """+table+""" (station, valid, tmpc, precip_mm, srad,
         srad_flag, skinc, skinc_flag, skinc_type, rh, rh_flag, vsm5,
         soilc5, wetness, wetness_flag, wind_mps, wind_mps_flag) VALUES
         (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (str(row['WBANNO']), valid, row['TMPC'], row['PRECIP_MM'],
-              row['SRAD'], row['SR_FLAG'], row['SKINC'], row['ST_TYPE'],
-              row['ST_FLAG'], row['RH'], row['RH_FLAG'], row['VSM5'],
-              row['SOILC5'], row['WETNESS'], row['WET_FLAG'], row['SMPS'],
+        """, (str(row['WBANNO']), valid, n2n(row['TMPC']),
+              n2n(row['PRECIP_MM']),
+              n2n(row['SRAD']), row['SR_FLAG'], n2n(row['SKINC']),
+              row['ST_TYPE'],
+              row['ST_FLAG'], n2n(row['RH']), row['RH_FLAG'], n2n(row['VSM5']),
+              n2n(row['SOILC5']), n2n(row['WETNESS']), row['WET_FLAG'],
+              n2n(row['SMPS']),
               row['SMPS_FLAG']))
 
 
@@ -137,14 +169,16 @@ def main(argv):
     iem_pgconn = get_dbconn('iem')
     other_pgconn = get_dbconn('other')
     year = datetime.datetime.utcnow().year
+    reprocess = False
     if len(argv) == 2:
         # Process an entire year
         year = int(argv[1])
+        reprocess = True
     for [fn, size] in download(year, len(argv) == 2):
         icursor = iem_pgconn.cursor()
         ocursor = other_pgconn.cursor()
         try:
-            process_file(icursor, ocursor, fn, size)
+            process_file(icursor, ocursor, year, fn, size, reprocess)
         except Exception as exp:
             print("uscrn_ingest %s traceback: %s" % (fn, exp))
         icursor.close()
