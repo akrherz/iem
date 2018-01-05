@@ -2,6 +2,7 @@
 from __future__ import print_function
 import datetime
 import os
+import sys
 import glob
 import subprocess
 
@@ -52,7 +53,8 @@ def process_file(icursor, ocursor, filename, size):
    23   WIND_FLAG                      X
     """
     fp = open(filename, 'rb')
-    fp.seek(os.stat(filename).st_size - size)
+    if size > 0:
+        fp.seek(os.stat(filename).st_size - size)
     df = pd.read_csv(fp, sep=r"\s+",
                      names=['WBANNO', 'UTC_DATE', 'UTC_TIME', 'LST_DATE',
                             'LST_TIME', 'CRX_VN', 'LON', 'LAT', 'TMPC',
@@ -60,16 +62,17 @@ def process_file(icursor, ocursor, filename, size):
                             'ST_TYPE', 'ST_FLAG', 'RH', 'RH_FLAG', 'VSM5',
                             'SOILC5', 'WETNESS', 'WET_FLAG', 'SMPS',
                             'SMPS_FLAG'],
-                     converters={'WBANNO': str})
+                     converters={'WBANNO': str, 'UTC_TIME': str})
     for _, row in df.iterrows():
         valid = datetime.datetime.strptime("%s %s" % (row['UTC_DATE'],
                                                       row['UTC_TIME']),
                                            '%Y%m%d %H%M')
-        print(valid)
         valid = valid.replace(tzinfo=pytz.utc)
         ob = Observation(str(row['WBANNO']), 'USCRN', valid)
         ob.data['tmpf'] = (float(row["TMPC"]) * units.degC
                            ).to(units.degF).magnitude
+        ob.data['pcounter'] = (float(row['PRECIP_MM']) * units('mm')
+                               ).to(units.inch).magnitude
         ob.data['srad'] = row['SRAD']
         ob.data['tsf0'] = (float(row["SKINC"]) * units.degC
                            ).to(units.degF).magnitude
@@ -96,7 +99,7 @@ def process_file(icursor, ocursor, filename, size):
               row['SMPS_FLAG']))
 
 
-def download(year):
+def download(year, reprocess=False):
     """Go Great Things"""
     dirname = "%s/%s" % (BASE, year)
     if not os.path.isdir(dirname):
@@ -120,19 +123,24 @@ def download(year):
             fp = open(filename, 'a')
             fp.write(req.content)
             fp.close()
+        if req.status_code < 400 or reprocess:
             queue.append([filename, len(req.content)])
         else:
             print("Got status code %s %s" % (req.status_code, req.content))
-
+    if reprocess:
+        return [(fn, -1) for fn in files]
     return queue
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    year = datetime.datetime.utcnow().year
     iem_pgconn = get_dbconn('iem')
     other_pgconn = get_dbconn('other')
-    for [fn, size] in download(year):
+    year = datetime.datetime.utcnow().year
+    if len(argv) == 2:
+        # Process an entire year
+        year = int(argv[1])
+    for [fn, size] in download(year, len(argv) == 2):
         icursor = iem_pgconn.cursor()
         ocursor = other_pgconn.cursor()
         try:
@@ -146,4 +154,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
