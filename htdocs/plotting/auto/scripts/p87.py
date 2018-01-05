@@ -62,7 +62,8 @@ def plotter(fdict):
     WITH data as (
         SELECT valid at time zone %s + '10 minutes'::interval as v
         from alldata where
-        station = %s and presentwx LIKE '%%""" + code + """%%'
+        station = %s and
+        array_to_string(wxcodes, '') LIKE '%%""" + code + """%%'
         and valid > %s and valid < %s),
     agg as (
         SELECT distinct extract(week from v)::int as week,

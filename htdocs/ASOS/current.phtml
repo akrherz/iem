@@ -266,8 +266,9 @@ while (list ($key, $val) = each ($finalA))  {
   $pdwpf = ($parts["dwpf"] != null) ? round($parts["dwpf"],0): 'M';
   $pfeel = ($ptmpf == "M" || $pdwpf == "M") ? "M": round($parts["feel"],0);
   $prelh = ($ptmpf == "M" || $pdwpf == "M") ? "M": $parts["relh"];
-  $row .= ">". strftime($fmt, $asos[$key]->lts) ."</td><td align='center'>". $parts["presentwx"] ."</td>
-   <td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
+  $row .= ">". strftime($fmt, $asos[$key]->lts) ."</td>".
+      "<td align='center'>". str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) ."</td>".
+  "<td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
      <td>". $pdwpf ."</td>
      <td>". $pfeel ."</td>
 	    <td>". $prelh ."</td>

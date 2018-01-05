@@ -58,7 +58,8 @@ def plotter(fdict):
     df = read_sql("""
     WITH data as (
         SELECT distinct date(valid at time zone %s) from alldata
-        where station = %s and presentwx LIKE '%%""" + pweather + """%%'
+        where station = %s and
+        array_to_string(wxcodes, '') LIKE '%%""" + pweather + """%%'
         and valid > '1973-01-01' and report_type = 2)
 
     SELECT extract(year from date)::int as year,

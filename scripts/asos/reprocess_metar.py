@@ -52,7 +52,7 @@ def main():
                 pwx = []
                 for x in mtr.weather:
                     pwx.append(("").join([a for a in x if a is not None]))
-                sql += "presentwx = '%s'," % ((",".join(pwx))[:24], )
+                sql += "wxcodes = '{%s}'," % (",".join(pwx), )
             if sql == "update t%s SET " % (now.year,):
                 continue
             sql = "%s WHERE station = '%s' and valid = '%s'" % (sql[:-1],

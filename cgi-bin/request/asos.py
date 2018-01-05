@@ -126,7 +126,7 @@ def main():
     if "all" in dataVars:
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
                      "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
-                     "skyl2, skyl3, skyl4, presentwx, metar")
+                     "skyl2, skyl3, skyl4, wxcodes, metar")
         outCols = ['tmpf', 'dwpf', 'relh', 'drct', 'sknt', 'p01i', 'alti',
                    'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3',
                    'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4',
@@ -227,8 +227,8 @@ def main():
                 else:
                     r.append("M")
             elif data1 == 'presentwx':
-                if row['presentwx'] is not None:
-                    r.append("%s" % (row['presentwx'].replace(",", " "), ))
+                if row['wxcodes']:
+                    r.append(" ".join(row['wxcodes']))
                 else:
                     r.append("M")
             elif data1 in ["metar", "skyc1", "skyc2", "skyc3", "skyc4"]:

@@ -61,7 +61,7 @@ class OB(object):
     min_tmpf_24hr = None
     mslp = None
     p01i = None
-    presentwx = None
+    wxcodes = None
 
 
 def get_job_list():
@@ -355,7 +355,7 @@ def doit(jar, station, days):
                 INSERT into t""" + str(ob.valid.year) + """ (station, valid,
                 tmpf, dwpf, vsby, drct, sknt, gust, p01i, alti, skyc1, skyc2,
                 skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar, mslp,
-                presentwx, p03i, p06i, p24i, max_tmpf_6hr, max_tmpf_24hr,
+                wxcodes, p03i, p06i, p24i, max_tmpf_6hr, max_tmpf_24hr,
                 min_tmpf_6hr, min_tmpf_24hr, report_type)
                 values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, 2)
@@ -371,7 +371,7 @@ def doit(jar, station, days):
                     ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
                     ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
                     ob.skyl4, cmtr,
-                    ob.mslp, ob.presentwx, ob.p03i,
+                    ob.mslp, ob.wxcodes, ob.p03i,
                     ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
                     ob.min_tmpf_6hr, ob.min_tmpf_24hr)
 
@@ -489,7 +489,7 @@ def process_metar(mstr, now):
         pwx = []
         for x in mtr.weather:
             pwx.append(("").join([a for a in x if a is not None]))
-        ob.presentwx = (",".join(pwx))[:24]
+        ob.wxcodes = pwx
 
     return ob
 

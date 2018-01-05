@@ -195,7 +195,7 @@ while (list ($key, $val) = each ($finalA))  {
 		$format = "%I:%M %p";
 	}
 	$table .= ">". strftime($format, $parts["ts"]) ."</td>";
-	$table .= sprintf("<td>%s</td>\n", $parts["presentwx"]);
+	$table .= sprintf("<td>%s</td>\n", $parts["wxcodes"]);
 
 	$table .= "<td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) .")</td>
           <td align='center'>". round($parts["dwpf"],0) ."</td>

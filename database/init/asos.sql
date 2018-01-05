@@ -145,7 +145,7 @@ CREATE TABLE alldata(
  min_tmpf_24hr  real,
  mslp           real,
  p01i           real,
- wxcodes        varchar(8)[],
+ wxcodes        varchar(12)[],
   report_type smallint REFERENCES alldata_report_type(id)  
 );
 GRANT SELECT on alldata to nobody,apache;

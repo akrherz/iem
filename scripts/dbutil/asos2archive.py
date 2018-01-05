@@ -83,7 +83,7 @@ def main(argv):
         sql = """INSERT into t""" + repr(sts.year) + """ (station, valid, tmpf,
         dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
         skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
-        min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, presentwx,
+        min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
         report_type)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
@@ -101,7 +101,7 @@ def main(argv):
                 row['p06i'],
                 row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
                 row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
-                row['presentwx'], rtype)
+                row['wxcodes'], rtype)
 
         acursor.execute(sql, args)
 

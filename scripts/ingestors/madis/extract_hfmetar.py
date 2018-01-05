@@ -127,7 +127,7 @@ def process(ncfn):
         presentwx = tostring(data['presWx'][i])
         if presentwx != '':
             # database storage is comma delimited
-            iem.data['presentwx'] = presentwx.replace(" ", ",")[:24]
+            iem.data['wxcodes'] = presentwx.split(" ")
             mtr += "%s " % (presentwx,)
 
         for _i, (_c, _l) in enumerate(

@@ -26,10 +26,10 @@ def get_data(q):
         wheresql = "raw ~* ' 4/'"
     elif q == 'fc':
         datasql = "''"
-        wheresql = "presentwx ~* 'FC'"
+        wheresql = "'FC' = ANY(wxcodes)"
     elif q == 'gr':
         datasql = "''"
-        wheresql = "presentwx ~* 'GR'"
+        wheresql = "'GR' = ANY(wxcodes)"
     else:
         return json.dumps(data)
     cursor.execute("""

@@ -276,7 +276,7 @@ CREATE TABLE current_tmp(
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    wxcodes varchar(8)[],
+    wxcodes varchar(12)[],
     battery real,
     water_tmpf real
 );
@@ -341,7 +341,7 @@ CREATE TABLE current (
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    wxcodes varchar(8)[],
+    wxcodes varchar(12)[],
     battery real,
     water_tmpf real
 );
@@ -408,7 +408,7 @@ CREATE TABLE current_log (
     min_tmpf_6hr real,
     max_tmpf_24hr real,
     min_tmpf_24hr real,
-    wxcodes varchar(8)[],
+    wxcodes varchar(12)[],
     battery real,
     water_tmpf real
 );

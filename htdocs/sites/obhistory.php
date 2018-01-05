@@ -48,7 +48,7 @@ function formatter($i, $row){
 	<tr style=\"background: %s;\" class=\"metar\"><td colspan=\"15\">%s</td></tr>", 
 	($i % 2 == 0)? "#FFF": "#EEE", 
 	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
-	sky_formatter($row), $row["presentwx"], temp_formatter($row["tmpf"]), 
+	sky_formatter($row), $row["wxcodes"], temp_formatter($row["tmpf"]), 
 	temp_formatter($row["dwpf"]),
 	temp_formatter(feels_like($row["tmpf"], $relh, $row["sknt"] * 1.15)),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
@@ -92,7 +92,7 @@ if ($date >= $iemarchive){
 		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour,
 				null as relh, null as skyc1, null as skyl1, 
 				null as skyc2, null as skyl2, null as alti,
-				null as skyc3, null as skyl3, null as presentwx,
+				null as skyc3, null as skyl3, null as wxcodes,
 				null as skyc4, null as skyl4, null as max_tmpf_6hr,
 				null as p06i, null as min_tmpf_6hr, null as p03i
 		from alldata where 

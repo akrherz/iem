@@ -49,8 +49,8 @@ def run(network, station):
                           row['skyl4']]
     ob['visibility[mile]'] = row['vsby']
     ob['raw'] = row['raw']
-    ob['presentwx'] = ([] if row['presentwx'] is None
-                       else row['presentwx'].split(","))
+    ob['presentwx'] = ([] if row['wxcodes'] is None
+                       else row['wxcodes'])
     return json.dumps(data)
 
 

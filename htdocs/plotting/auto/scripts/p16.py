@@ -184,7 +184,7 @@ def get_context(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    limiter = "presentwx ~* 'TS'"
+    limiter = "array_to_string(wxcodes, '') ~* 'TS'"
     title = "Thunderstorm (TS) contained in METAR"
     if ctx['opt'] == 'tmpf_above':
         limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
