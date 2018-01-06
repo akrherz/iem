@@ -29,12 +29,12 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 $nselect .= "</select>";
 
 $ys = yearSelect(2002, date("Y"), "year");
-$ms1 = monthSelect("", "month1");
-$ds1 = daySelect2("", "day1");
-$hs1 = gmtHourSelect("", "hour1");
-$ms2 = monthSelect("", "month2");
-$ds2 = daySelect2("", "day2");
-$hs2 = gmtHourSelect("", "hour2");
+$ms1 = monthSelect("1", "month1");
+$ds1 = daySelect2("1", "day1");
+$hs1 = gmtHourSelect("0", "hour1");
+$ms2 = monthSelect(date("m"), "month2");
+$ds2 = daySelect2(date("d"), "day2");
+$hs2 = gmtHourSelect("0", "hour2");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -44,12 +44,12 @@ $t->content = <<<EOF
 <h3>DCP/HADS Data Download</h3>
 
 <p>This form allows you to download whatever data the IEM was able to collect from
-the GOES/DCP/HADS/AHPS (insert other accoynms here) data collection platforms.  This
+the GOES/DCP/HADS/AHPS (insert other acronyms here) data collection platforms.  This
 dataset is huge and the download may take a number of seconds to process.</p>
 
 <form method="GET" name="chstate">
 <p>Select from State/Country: {$nselect}
-<input type="submit" value="Change Group" />
+<input type="submit" value="Change Group">
 </form>
 
 
@@ -59,16 +59,20 @@ dataset is huge and the download may take a number of seconds to process.</p>
 <div class="row">
 <div class="col-sm-7">
 
+<h3>1. Select Station(s):</h3>
+
 <div id="iemss" data-network="{$network}"></div>
 
 </div>
 <div class="col-sm-5">
 
-<p><h3>2. Select Start/End Time:</h3><br>
-<div class="alert alert-info">
-Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.
-</div>
-<table>
+<h3>2. Select Start/End Time:</h3>
+
+<p>Times are specified in UTC. Archive starts in 2002 for Iowa and on
+9 Dec 2010 for all others.  You can only download data within one year at a
+time due to size/speed contraints.</p>
+
+<table class="table table-condensed">
   <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
@@ -95,23 +99,28 @@ Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.
   </tr>
 </table>
 
+<h3>3. How to download/view?</h3>
 
-<p><h3>3. How to view?</h3><br>
 <select name="what">
   <option value="txt">Download as Delimited Text File</option>
   <option value="excel">Download as Excel</option>
   <option value="html">View as HTML webpage</option>
 </select>
 
-<h3>4. Data Delimitation:</h3>
-<p>How shall the output values be seperated?
-<br /><select name="delim">
+<h3>3a. Data Delimitation:</h3>
+
+<p>If you selected 'Delimited Text File' above, how do you want the values
+separated in the downloaded file?</p>
+
+<select name="delim">
     <option value="comma">Comma
     <option value="space">Space
     <option value="tab">Tab
-   </select></p>
+</select>
 
+<div class="well">
 <h3>5. <i>Optional:</i> Search for Threshold Exceedance</h3>
+
 <p>For stations that report a stage value ("HG" SHEF variable group), you
  can optionally search for when the value exceeds this threshold.  The 
  print out will include:
@@ -122,7 +131,8 @@ Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.
  </ul>
  <br /><strong>You can only do this search for one station at a time!</strong>
  <br />Thresold: <input type="text" size="6" name="threshold" />
- <br />Type / Source Code: <select name="threshold-var">
+ <br />Type / Source Code:
+<select name="threshold-var">
     <option value="RG">GOES (RG)</option>
     <option value="RP">Phone ASCII (DARDC/LARC) (RP)</option>
     <option value="RR">Radio #1 (RR)</option>
@@ -131,15 +141,46 @@ Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.
     <option value="RZ">Nonspecific (RZ)</option>
     <option value="R2">Secondard Sensor (R2)</option>
     <option value="R3">Tertiary Sensor (R3)</option>
-   </select>
-    		</p>
+</select>
+
+</div>
   
-<h3>6. Submit Form:</h3><br>
+<h3>6. Submit Form:</h3>
+
 <input type="submit" value="Process Data Request">
 <input type="reset">
     		
-</div></div>
+</div>
+</div>
 
+<h3>Frequently Asked Questions:</h3>
+
+<h4><span class="badge">1</span> How do I make sense of the headings in the
+download file?</h4>
+
+<p>Great question!  This dataset is based on the IEM processing of SHEF-encoded
+products relayed by the NWS.  SHEF uses a series of identifiers to label various
+reported values.  These labels are explicitly stored within the database without
+any translation into more common terms.  Sadly, translating these labels into
+more usable terms is an operation left to the end-user.</p>
+
+<p>The magic decoder ring is the <a href="http://www.nws.noaa.gov/om/water/resources/SHEF_CodeManual_5July2012.pdf">SHEF Manual</a>,
+ which is 150 pages long!  Fear not, in general, you can scroll down to page 65
+and review Tables 1 and on.  The variable labels used in the downloaded file
+should be broken apart and used as lookups in the table.  For example, 
+<code>HGIRRZ</code> should be broken up as follows.</p>
+
+<table>
+<tr><th>HG</th><th>Table 1</th><th>HG Height, river stage (FT, M)</th></tr>
+<tr><th>I</th><th>Table 3</th><th>I Instantaneous (0000)</th></tr>
+<tr><th>RR</th><th>Table 4</th><th>RR Radio #1</th></tr>
+<tr><th>Z</th><th>Table 5</th><th>Z Null character (filler) or UTC Time</th></tr>
+</table>
+
+<p>Some codes may be longer than 6 characters, so good luck reading the manual!  In general,
+you can see why it is hard to provide this data with any simplier headings.  As always,
+feel free to contact us with questions. In general, the first three characters are the
+most important, which are the variable type and duration of observation.</p>
 
 </form>
 EOF;
