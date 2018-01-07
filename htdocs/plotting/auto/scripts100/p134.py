@@ -26,7 +26,7 @@ def get_description():
     first period of the season is used for the analysis.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='sid', name='station', default='IA2203',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', name='var', default='coldest_temp',
              label='Which Metric', options=PDICT),
@@ -36,23 +36,39 @@ def get_description():
     return desc
 
 
-def get_data(fdict):
+def get_data(ctx):
     """ Get the data"""
-    pgconn = get_dbconn('coop')
-    ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station']
     days = ctx['days']
     varname = ctx['var']
-    table = "alldata_%s" % (station[:2], )
     offset = 6 if varname.startswith('coldest') else 0
+    station = ctx['station']
+    if ctx['network'].endswith("CLIMATE"):
+        table = "alldata_%s" % (station[:2], )
+        pgconn = get_dbconn('coop')
+        highcol = "high"
+        lowcol = "low"
+        precipcol = "precip"
+        stationcol = "station"
+    else:
+        station = ctx['nt'].sts[station]['iemid']
+        pgconn = get_dbconn('iem')
+        highcol = "max_tmpf"
+        lowcol = "min_tmpf"
+        precipcol = "pday"
+        table = "summary"
+        stationcol = "iemid"
     df = read_sql("""
     WITH data as (
     SELECT day, extract(year from day + '%s months'::interval) as season,
-    avg((high+low)/2.) OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
-    avg(high) OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
-    avg(low) OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
-    sum(precip) OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
-    from """+table+""" WHERE station = %s),
+    avg((""" + highcol + """ + """ + lowcol + """)/2.)
+        OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
+    avg(""" + highcol + """)
+        OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
+    avg(""" + lowcol + """)
+        OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
+    sum(""" + precipcol + """)
+        OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
+    from """+table+""" WHERE """ + stationcol + """ = %s),
     agg1 as (
         SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
         sum_precip,
@@ -95,8 +111,8 @@ def plotter(fdict):
     network = ctx['network']
     days = ctx['days']
     varname = ctx['var']
-    nt = NetworkTable(network)
-    df = get_data(fdict)
+    ctx['nt'] = NetworkTable(network)
+    df = get_data(ctx)
     if df.empty:
         return 'Error, no results returned!'
 
@@ -106,7 +122,7 @@ def plotter(fdict):
     if days == 1:
         title = title.replace("Average ", "")
     ax.set_title(("%s [%s]\n%i Day Period with %s"
-                  ) % (nt.sts[station]['name'], station, days, title))
+                  ) % (ctx['nt'].sts[station]['name'], station, days, title))
     ax.barh(df.index.values, [days]*len(df.index), left=df['doy'].values,
             edgecolor='tan', facecolor='tan')
     ax.grid(True)
