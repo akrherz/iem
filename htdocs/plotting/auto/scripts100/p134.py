@@ -3,9 +3,9 @@ import datetime
 from collections import OrderedDict
 
 import numpy as np
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
-from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
                      ('coldest_hitemp', 'Coldest Average High Temperature'),
@@ -14,6 +14,14 @@ PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
                      ('warmest_hitemp', 'Warmest Average High Temperature'),
                      ('warmest_lotemp', 'Warmest Average Low Temperature'),
                      ('wettest', 'Highest Precipitation')])
+# How to get plot variable from dataframe
+XREF = {'coldest_temp': 'avg_temp',
+        'coldest_hitemp': 'avg_hitemp',
+        'coldest_lotemp': 'avg_lotemp',
+        'warmest_temp': 'avg_temp',
+        'warmest_hitemp': 'avg_hitemp',
+        'warmest_lotemp': 'avg_lotemp',
+        'wettest': 'sum_precip'}
 
 
 def get_description():
@@ -102,9 +110,10 @@ def get_data(ctx):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
+    import matplotlib as mpl
+    mpl.use('agg')
     import matplotlib.pyplot as plt
+    import matplotlib.colors as mpcolors
     from matplotlib.ticker import MaxNLocator
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -116,15 +125,27 @@ def plotter(fdict):
     if df.empty:
         return 'Error, no results returned!'
 
-    ax = plt.axes([0.1, 0.3, 0.8, 0.6])
-    lax = plt.axes([0.1, 0.1, 0.8, 0.2])
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_axes([0.1, 0.3, 0.75, 0.6])
+    lax = fig.add_axes([0.1, 0.1, 0.75, 0.2])
+    cax = fig.add_axes([0.87, 0.3, 0.03, 0.6])
     title = PDICT.get(varname)
     if days == 1:
         title = title.replace("Average ", "")
     ax.set_title(("%s [%s]\n%i Day Period with %s"
                   ) % (ctx['nt'].sts[station]['name'], station, days, title))
+    cmap = plt.get_cmap('jet')
+    minval = df[XREF[varname]].min() - 1.
+    if varname == 'wettest' and minval < 0:
+        minval = 0
+    maxval = df[XREF[varname]].max() + 1.
+    ramp = np.linspace(minval, maxval, min([int(maxval - minval), 10]),
+                       dtype='i')
+    norm = mpcolors.BoundaryNorm(ramp, cmap.N)
+    cb = mpl.colorbar.ColorbarBase(cax, norm=norm, cmap=cmap)
+    cb.set_label("inch" if varname == 'wettest' else r"$^\circ$F")
     ax.barh(df.index.values, [days]*len(df.index), left=df['doy'].values,
-            edgecolor='tan', facecolor='tan')
+            color=cmap(norm(df[XREF[varname]].values)))
     ax.grid(True)
     lax.grid(True)
     xticks = []
@@ -151,8 +172,9 @@ def plotter(fdict):
     ax.set_xlim(df['doy'].min() - 10, df['doy'].max() + 10)
     lax.set_xlim(df['doy'].min() - 10, df['doy'].max() + 10)
     ax.yaxis.set_major_locator(MaxNLocator(prune='lower'))
-    return plt.gcf(), df
+    return fig, df
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(station='IA0112', var='wettest', network='IACLIMATE',
+                 days=3))
