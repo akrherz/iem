@@ -176,8 +176,22 @@ sensor on 16 August 2016, <sup>‡</sup> sensor at A2 replaced previous sensor o
 
 
 <p><img src="figures/figure3.png" class="img img-responsive">
+<br /><strong>Figure 3:</strong> Diagram of boom orientation, length, and
+placement of sensors on each tower.  Image courtesy of S. Purdy,
+ D. Rajewski, and E. Takle.  Note: image not to scale.</p>
 
-<p><img src="figures/figure4.png" class="img img-responsive">
+<div class="row">
+<div class="col-md-6">
+<img src="figures/figure4a.png" class="img img-responsive">
+</div>
+<div class="col-md-6">
+<img src="figures/figure4b.png" class="img img-responsive">
+</div>
+</div>
+<p><strong>Figure 4:</strong> Orientation of sensors along booms at the A1 
+tower (a) looking south from tower base and b) looking up from tower base.  
+ Image courtesy of S. Purdy.</p>
+
 
 <div class="row">
 <div class="col-md-6">
@@ -192,8 +206,18 @@ from June 2016-May 2017. Image courtesy of: D. Rajewski
 </div>
 </div>
 
-<p><img src="figures/figure6.png" class="img img-responsive">
+<div class="row">
+<div class="col-md-6">
+<img src="figures/figure6a.png" class="img img-responsive">
+</div>
+<div class="col-md-6">
+<img src="figures/figure6b.png" class="img img-responsive">
+</div>
+</div>
 
+<p><strong>Figure 6:</strong> Site overview of tall tower and instrument shed
+at each tower site: A1 within the wind farm (a) and A2 outside of the wind
+farm (b).  Images courtesy of S. Purdy.</p>
 
 <h3>Tower Data</h3>
 
