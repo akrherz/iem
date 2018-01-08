@@ -8,7 +8,9 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
-        ('TS', 'Thunder (TS)'),
+        ('TS', 'All Thunder Reports (TS)'),
+        ('VCTS', 'Thunder in Vicinity (VCTS)'),
+        ('1', 'Thunder Reports (excluding VCTS)'),
         ('-SN', 'Light Snow (-SN)'),
         ('PSN', 'Heavy Snow (+SN)'),  # +SN causes CGI issues
         ('FZFG', 'Freezing Fog (FZFG)'),
@@ -25,6 +27,20 @@ def get_description():
     days per month that a given present weather condition is reported within
     the METAR data feed.  The calendar day is computed for the local time zone
     of the reporting station.
+
+    <p>The reporting of present weather codes within METARs has changed over
+    the years and there is some non-standard nomenclature used by some sites.
+    The thunder (TS) reports are delineated into three categories here to
+    hopefully allow more accurate statistics.
+    <ul>
+      <li><strong>All Thunder Reports (TS)</strong> includes any
+      <code>TS</code> mention in any present weather code</li>
+      <li><strong>Thunder in Vicinity (VCTS)</strong> includes any
+      <code>VCTS</code> mention in any present weather code, for example,
+      <code>VCTSRA</code> would match.</li>
+      <li><strong>Thunder Reports (excluding VCTS)</strong> includes most
+      <code>TS</code> mentions, but not any including <code>VC</code></li>
+    </ul>
     """
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
@@ -55,11 +71,17 @@ def plotter(fdict):
     nt = NetworkTable(network)
     tzname = nt.sts[station]['tzname']
     syear = max([1973, nt.sts[station]['archive_begin'].year])
+    limiter = "array_to_string(wxcodes, '') LIKE '%%" + pweather + "%%'"
+    if pweather == "1":
+        # Special in the case of non-VCTS
+        limiter = ("ARRAY['TS'::varchar, '-TSRA'::varchar, 'TSRA'::varchar, "
+                   "'-TS'::varchar, '+TSRA'::varchar, '+TSSN'::varchar,"
+                   "'-TSSN'::varchar, '-TSDZ'::varchar] && wxcodes")
     df = read_sql("""
     WITH data as (
         SELECT distinct date(valid at time zone %s) from alldata
         where station = %s and
-        array_to_string(wxcodes, '') LIKE '%%""" + pweather + """%%'
+        """ + limiter + """
         and valid > '1973-01-01' and report_type = 2)
 
     SELECT extract(year from date)::int as year,
@@ -73,9 +95,10 @@ def plotter(fdict):
     ax.set_title(("[%s] %s %s Events\n"
                   "(%s-%s) Distinct Calendar Days with '%s' Reported"
                   ) % (station, nt.sts[station]['name'], PDICT[pweather],
-                       syear, datetime.date.today().year, pweather))
+                       syear, datetime.date.today().year,
+                       pweather if pweather != '1' else 'TS'))
     df2 = df[df['year'] == year]
-    if len(df2.index) > 0:
+    if not df2.empty:
         ax.bar(df2['month'].values - 0.2, df2['count'].values,
                width=0.4, fc='r', ec='r', label='%s' % (year,))
     df2 = df.groupby('month').sum()
