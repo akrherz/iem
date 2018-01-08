@@ -104,32 +104,32 @@ and does not reflect actual setup of booms and instruments.</p>
 </thead>
 <tbody>
 <tr><td>
-Thies cup anemometerac<br />
-Thies cup anemometerbc<br />
-Thies cup anemometerbd
+Thies cup anemometer<sup>ac</sup><br />
+Thies cup anemometer<sup>bc</sup><br />
+Thies cup anemometer<sup>bd</sup>
 </td>
 <td>Thies GmbH &amp; Co. KG;<br /> 
 Coesfeld, Germany</td>
 <td>120, 40, 10<br />
 80, 20, 5<br />
-120†, 80, 40,<br />
-20*, 10‡, 5</td>
-<td>2.74 m§</td>
+120<sup>†</sup>, 80, 40,<br />
+20<sup>*</sup>, 10<sup>‡</sup>, 5</td>
+<td>2.74 m<sup>§</sup></td>
 <td>-50 to 80 °C</td>
-<td>±0.2 m s-1 from 0.3 to 50 m s-1 or 1%</td>
+<td>±0.2 m s<sup>-1</sup> from 0.3 to 50 m s<sup>-1</sup> or 1%</td>
 </tr>
 
 <tr>
-<td>NRG 200P wind vane</td>
+<td>NRG 200P wind vane<sup>ed</sup></td>
 <td>Renewable NRG Systems; Hinesburg, Vermont, USA</td>
-<td>120, 80, 40, 20, 10‡, 5</td>
-<td>1.83 m§ (0.91 m from cup anemometer)</td>
+<td>120, 80, 40, 20, 10<sup>‡</sup>, 5</td>
+<td>1.83 m<sup>§</sup> (0.91 m from cup anemometer)</td>
 <td>-55 to 60 °C</td>
 <td>±1%</td>
 </tr>
 
 <tr>
-<td>H2SC3 temperature/relative humidity probe</td>
+<td>H2SC3 temperature/relative humidity probe<sup>e</sup></td>
 <td>Campbell Scientific; 
 Logan, Utah, USA</td>
 <td>120, 80, 40, 20, 10, 5</td>
@@ -143,19 +143,19 @@ RH: 0.8% at 20°C, 1.3% at 0°C &amp; 40°C</td>
 </tr>
 
 <tr>
-<td>CSAT3B sonic anemometer</td>
+<td>CSAT3B sonic anemometer<sup>c</sup></td>
 <td>Campbell Scientific; Logan, Utah, USA</td>
-<td>120†, 80, 40, 20, 10‡, 5</td>
+<td>120<sup>†</sup>, 80, 40, 20, 10<sup>‡</sup>, 5</td>
 <td>2.74 m</td>
 <td>-30 to 50 °C</td>
-<td>u,v: 1 mm s-1 (rms)<br />
-w: 0.5 mm s-1 (rms)<br />
+<td>u,v: 1 mm s<sup>-1</sup> (rms)<br />
+w: 0.5 mm s<sup>-1</sup> (rms)<br />
 T:  ±0.002 °C (rms) at 25 °C<br />
-a: < 0.058° at u=v=1 m s-1</td>
+a: < 0.058° at u=v=1 m s<sup>-1</sup></td>
 </tr>
 
 <tr>
-<td>PTB 110 barometer</td>
+<td>PTB 110 barometer<sup>f</sup></td>
 <td>Vaisala Helsinki, Finland</td>
 <td>80, 10</td>
 <td>0 m (mounted on tower legs)</td>
@@ -170,7 +170,7 @@ a: < 0.058° at u=v=1 m s-1</td>
 operating range and measurement accuracy. <sup>a</sup> heated cup anemometer,
 <sup>b</sup> unheated cup anemometer, <sup>c</sup> NW boom, <sup>d</sup> S boom,
 <sup>e</sup> WSW boom, <sup>f</sup> N leg of tower, <sup>§</sup> vertical distance
-from midpoint of sensor to boom is 0.41m, <sup>‡</sup> sensor at A2 repalced previous
+from midpoint of sensor to boom is 0.41m, <sup>†</sup> sensor at A2 repalced previous
 sensor on 16 August 2016, <sup>‡</sup> sensor at A2 replaced previous sensor on
 16 February 2017, <sup>*</sup> rotor cup assembly at A2 replaced 23 May 2016.</p>
 
