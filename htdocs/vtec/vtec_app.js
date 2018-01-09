@@ -305,6 +305,7 @@ function buildMap(){
 				source : new ol.source.OSM()}),
 			radarTMSLayer,
 			make_iem_tms('US States', 's-900913', true, ''),
+			make_iem_tms('US Counties', 'c-900913', false, ''),
 			sbwIntersectionLayer,
 			productVectorCountyLayer,
 			productVectorPolygonLayer,
