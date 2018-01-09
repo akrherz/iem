@@ -131,25 +131,18 @@ def savedata(reprocessing, data, maxts):
             iem.data[mapping[key]['iemvar']] = float(data[key].strip())
 
     iem.data['valid'] = ts
-    iem.data['tmpf'] = temperature(float(iem.data.get('tmpc')), 'C').value('F')
+    if iem.data.get('tmpc') is not None:
+        iem.data['tmpf'] = temperature(
+            float(iem.data.get('tmpc')), 'C').value('F')
     if iem.data.get('dwpc') is not None:
         iem.data['dwpf'] = temperature(
             float(iem.data.get('dwpc')), 'C').value('F')
-    iem.data['c1tmpf'] = temperature(float(iem.data.get('c1tmpc')),
-                                     'C').value('F')
-    iem.data['c2tmpf'] = temperature(float(iem.data.get('c2tmpc')),
-                                     'C').value('F')
-    iem.data['c3tmpf'] = temperature(float(iem.data.get('c3tmpc')),
-                                     'C').value('F')
-    iem.data['c4tmpf'] = temperature(float(iem.data.get('c4tmpc')),
-                                     'C').value('F')
-    iem.data['c5tmpf'] = temperature(float(iem.data.get('c5tmpc')),
-                                     'C').value('F')
-    iem.data['c1smv'] = float(iem.data.get('c1smv'))
-    iem.data['c2smv'] = float(iem.data.get('c2smv'))
-    iem.data['c3smv'] = float(iem.data.get('c3smv'))
-    iem.data['c4smv'] = float(iem.data.get('c4smv'))
-    iem.data['c5smv'] = float(iem.data.get('c5smv'))
+    for i in range(1, 6):
+        if iem.data.get('c%stmpf' % (i, )) is not None:
+            iem.data['c%stmpf' % (i, )] = temperature(
+                float(iem.data.get('c%stmpc' % (i, ))), 'C').value('F')
+        if iem.data.get('c%ssmv' % (i, )) is not None:
+            iem.data['c%ssmv' % (i, )] = float(iem.data.get('c%ssmv' % (i, )))
     if iem.data.get('phour') is not None:
         iem.data['phour'] = float(iem.data.get('phour'))
     if not iem.save(icursor):
