@@ -43,12 +43,11 @@ def plotter(fdict):
     nt = NetworkTable(network)
 
     df = read_sql("""
-        select date_trunc('hour', valid) as ts, avg(sknt) as sknt,
-        max(drct) as drct from alldata
+        select date_trunc('hour', valid at time zone 'UTC') as ts,
+        avg(sknt) as sknt, max(drct) as drct from alldata
         WHERE station = %s and sknt is not null and drct is not null
         GROUP by ts
-        """, pgconn, params=(station, ), parse_dates=('ts',),
-                  index_col=None)
+        """, pgconn, params=(station, ), index_col=None)
     sknt = speed(df['sknt'].values, 'KT')
     drct = direction(df['drct'].values, 'DEG')
     df['u'], df['v'] = [x.value('MPS') for x in meteorology.uv(sknt, drct)]
