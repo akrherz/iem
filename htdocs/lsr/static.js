@@ -286,6 +286,7 @@ var sbwLookup = {
 var lsrLookup = {
  "0": "icons/tropicalstorm.gif",
  "1": "icons/flood.png",
+ "x": "icons/flood.png",
  "2": "icons/other.png",
  "3": "icons/other.png",
  "4": "icons/other.png",
