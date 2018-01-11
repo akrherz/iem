@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Generate some line charts from ISU Frost Model Output"""
 import sys
 import os
 import cgi
@@ -21,7 +22,8 @@ def get_latest_time(model):
     utc = utc.replace(hour=12, minute=0, second=0, microsecond=0)
     limit = 24
     while not os.path.isfile(
-            utc.strftime("/mesonet/share/frost/"+model+"/%Y%m%d%H%M_iaoutput.nc")):
+            utc.strftime(("/mesonet/share/frost/" +
+                          model + "/%Y%m%d%H%M_iaoutput.nc"))):
         utc -= datetime.timedelta(hours=12)
         limit -= 1
         if limit < 0:
@@ -48,6 +50,15 @@ def get_ij(lon, lat, nc):
     return np.unravel_index(np.argmin(dist), dist.shape)
 
 
+def add_labels(fig):
+    """Create a legend for the condition variable"""
+    fig.text(0.85, 0.8, "Frost", color='red')
+    fig.text(0.85, 0.75, "Ice/Snow", color='orange')
+    fig.text(0.85, 0.7, "Wet", color='green')
+    fig.text(0.85, 0.65, "Dew", color="brown")
+    fig.text(0.85, 0.6, "Frz Rain", color="purple")
+
+
 def get_icond_color(model, val):
     """ Get the color for this Model and icond
 
@@ -61,24 +72,26 @@ def get_icond_color(model, val):
                   'blue', 'orange', 'purple']
     else:
         colors = ['white', 'tan', 'orange', 'blue', 'purple', 'green']
-    if val > (len(colors) -1):
+    if val > (len(colors) - 1):
         return 'none'
     return colors[val]
 
 
 def get_ifrost_color(val):
+    """Which color to use"""
     if val is None or val == -1:
         return 'none'
     colors = ['#EEEEEE', 'r']
     try:
         return colors[val]
-    except:
+    except Exception as _exp:
         return 'none'
 
 
 def process(model, lon, lat):
     """ Generate a plot for this given combination """
-    (fig, ax) = plt.subplots(1, 1)
+    fig = plt.figure()
+    ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
     modelts = get_latest_time(model)
     if modelts is None:
         ax.text(0.5, 0.5, "No Data Found to Plot!", ha='center')
@@ -86,11 +99,13 @@ def process(model, lon, lat):
         fig.savefig(sys.stdout, format="png")
         return
     nc = netCDF4.Dataset(
-            modelts.strftime("/mesonet/share/frost/"+model+"/%Y%m%d%H%M_iaoutput.nc"),'r')
+            modelts.strftime(("/mesonet/share/frost/" +
+                              model + "/%Y%m%d%H%M_iaoutput.nc")), 'r')
     times = get_times(nc)
     i, j = get_ij(lon, lat, nc)
 
-    ax.plot(times, temperature(nc.variables['bdeckt'][:, i, j], 'K').value('F'),
+    ax.plot(times,
+            temperature(nc.variables['bdeckt'][:, i, j], 'K').value('F'),
             color='k',
             label='Bridge Deck Temp' if model == 'bridget' else 'Pavement')
     ax.plot(times, temperature(nc.variables['tmpk'][:, i, j], 'K').value("F"),
@@ -100,17 +115,15 @@ def process(model, lon, lat):
     # ax.set_ylim(-30,150)
     ax.set_title(("ISUMM5 %s Timeseries\n"
                   "i: %s j:%s lon: %.2f lat: %.2f Model Run: %s"
-                  ) % (model, i, j, nc.variables['lon'][i,j],
-                       nc.variables['lat'][i,j],
+                  ) % (model, i, j, nc.variables['lon'][i, j],
+                       nc.variables['lat'][i, j],
                        modelts.astimezone(pytz.timezone("America/Chicago")
                                           ).strftime("%-d %b %Y %-I:%M %p")))
 
     ax.xaxis.set_major_locator(
-                               mdates.DayLocator(interval=1,
-                                        tz=pytz.timezone("America/Chicago"))
-                               )
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y',
-                                        tz=pytz.timezone("America/Chicago")))
+        mdates.DayLocator(interval=1, tz=pytz.timezone("America/Chicago")))
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter('%d %b\n%Y', tz=pytz.timezone("America/Chicago")))
     ax.axhline(32, linestyle='-.')
     ax.grid(True)
     ax.set_ylabel(r"Temperature $^\circ$F")
@@ -129,7 +142,8 @@ def process(model, lon, lat):
     ax.set_position([box.x0, box.y0 + box.height * 0.1,
                     box.width, box.height * 0.9])
     ax.legend(loc='upper center',
-              bbox_to_anchor=(0.5, -0.08), fancybox=True, shadow=True, ncol=3)
+              bbox_to_anchor=(0.5, -0.12), fancybox=True, shadow=True, ncol=3)
+    add_labels(fig)
 
     sys.stdout.write("Content-Type: image/png\n\n")
     fig.savefig(sys.stdout, format="png")
@@ -138,7 +152,7 @@ def process(model, lon, lat):
 def main():
     """ Go Main Go """
     form = cgi.FieldStorage()
-    if form.has_key('lon') and form.has_key('lat'):
+    if 'lon' in form and 'lat' in form:
         process(form.getfirst('model'), float(form.getfirst('lon')),
                 float(form.getfirst('lat')))
 
