@@ -105,18 +105,18 @@ fi
 
 /home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west1V_0.tif bogus tif" GoesWest1V${tm}.tif
 /home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west1V_0.tfw bogus tfw" GoesWest1V${tm}.tfw
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east1V_0.tif bogus tif" GoesEast1V${tm}.tif
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east1V_0.tfw bogus tfw" GoesEast1V${tm}.tfw
+#/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east1V_0.tif bogus tif" GoesEast1V${tm}.tif
+#/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east1V_0.tfw bogus tfw" GoesEast1V${tm}.tfw
 
 /home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I4_0.tif bogus tif" GoesWest04I4${tm}.tif
 /home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I4_0.tfw bogus tfw" GoesWest04I4${tm}.tfw
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I4_0.tif bogus tif" GoesEast04I4${tm}.tif
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I4_0.tfw bogus tfw" GoesEast04I4${tm}.tfw
+#/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I4_0.tif bogus tif" GoesEast04I4${tm}.tif
+#/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I4_0.tfw bogus tfw" GoesEast04I4${tm}.tfw
  
 /home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I3_0.tif bogus tif" GoesWest04I3${tm}.tif
 /home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I3_0.tfw bogus tfw" GoesWest04I3${tm}.tfw
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I3_0.tif bogus tif" GoesEast04I3${tm}.tif
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I3_0.tfw bogus tfw" GoesEast04I3${tm}.tfw
+#/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I3_0.tif bogus tif" GoesEast04I3${tm}.tif
+#/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/east04I3_0.tfw bogus tfw" GoesEast04I3${tm}.tfw
 
 
 if [ -e vis_900913.tif ]
