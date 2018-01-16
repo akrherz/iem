@@ -50,7 +50,17 @@ agricultural landscape surrounding the A2 Tower (Figure 1) reveals the
 homogeneity of surface. The tower is located on a rectangular 
 crushed-rock area in the center of the image that is 
 connected by a crushed-rock private road to a grid of public roads.  
-The east-west roads at the top and bottom of the image are 1 mile apart.   </p>
+The east-west roads at the top and bottom of the image are 1 mile apart.</p>
+
+<h3>Tower Locations</h3>
+
+<p>Story County tower (A1)
+<br />E911: 67527 110th St, Zearing, IA 
+<br />Lat./Long: 42.19676N, 93.3572W</p>
+
+<p>Hamilton County tower (A2)
+<br />E911: 3052 Xircus Ave., Ellsworth, IA
+<br />Lat./Long.: 42.34575N, 93.51945W</p>
 
 </div>
 <div class="col-md-6">
