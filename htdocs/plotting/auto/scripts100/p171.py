@@ -22,7 +22,7 @@ def get_description():
     single watch for a dozen counties would only count 1 in this chart. These
     values are based on unofficial archives maintained by the IEM.
 
-    <p>If you select the state wide option, the totalling is a bit different. A
+    <p>If you select the state wide option, the totaling is a bit different. A
     single watch issued by multiple WFOs would potentially count as more than
     one event in this listing.  Sorry, tough issue to get around.  In the case
     of warnings and advisories, the totals should be good.</p>
@@ -67,16 +67,18 @@ def plotter(fdict):
     if opt == 'state':
         wfo_limiter = " and substr(ugc, 1, 2) = '%s'" % (state, )
 
+    # NB we added a hack here that may lead to some false positives when events
+    # cross over months, sigh, recall the 2017 eventid pain
     df = read_sql("""
         with data as (
-            SELECT distinct extract(year from issue) as yr2,
-            min(issue) as i, wfo, eventid
+            SELECT distinct
+            extract(year from issue) as yr,
+            extract(month from issue) as mo, wfo, eventid
             from warnings where phenomena = %s and significance = %s
             """ + wfo_limiter + """
-            GROUP by yr2, wfo, eventid)
+            GROUP by yr, mo, wfo, eventid)
 
-        SELECT extract(year from i) as yr, extract(month from i) as mo,
-        count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
+        SELECT yr, mo, count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
       """, pgconn, params=(phenomena, significance), index_col=None)
 
     if df.empty:
@@ -85,7 +87,7 @@ def plotter(fdict):
 
     minyear = df['yr'].min()
     maxyear = df['yr'].max()
-    data = np.zeros((int(maxyear - minyear + 1), 12))
+    data = np.zeros((int(maxyear - minyear + 1), 12), 'i')
     for _, row in df.iterrows():
         data[int(row['yr'] - minyear), int(row['mo'] - 1)] = row['count']
         txt = ax.text(row['mo'], row['yr'], "%.0f" % (row['count'],),
@@ -118,4 +120,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(wfo='MOB', network='WFO', phenomena='TO', significance='W'))
+    plotter(dict(wfo='OUN', network='WFO', phenomena='FG', significance='Y'))
