@@ -201,8 +201,8 @@
   </Directory>
 
   <LocationMatch "/api/.*\.json">
-    RequestHeader set "Host" "iem-json-services.local"
-	ProxyPass "http://iem-json-services.local"
+    RequestHeader set "Host" "iem-web-services.local"
+	ProxyPass "http://iem-web-services.local"
   </LocationMatch>
   <Directory "/opt/iem/htdocs/api">
     AddHandler cgi-script .py

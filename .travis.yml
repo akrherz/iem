@@ -17,7 +17,7 @@ addons:
     - iem.local
     - iem-memcached
     - talltowers-db.local
-    - iem-json-services.local
+    - iem-web-services.local
 language: python
 python:
   - "2.7"
