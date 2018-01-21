@@ -6,12 +6,12 @@ import numpy as np
 import pytz
 from rasterstats import zonal_stats
 import pandas as pd
+from geopandas import read_postgis
 from affine import Affine
 import pyiem.nws.vtec as vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
-from geopandas import read_postgis
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State'}
@@ -336,7 +336,7 @@ def do_ugc(ctx):
                              maxv.strftime("%d %b %Y"))
         datavar = "average"
 
-    if len(rows) == 0:
+    if not rows:
         raise ValueError("Sorry, no data found for query!")
     df = pd.DataFrame(rows)
     if varname == 'yearavg':
@@ -344,14 +344,21 @@ def do_ugc(ctx):
         df['average'] = df['count'] / years
         for key in data:
             data[key] = round(data[key] / float(years), 2)
-        bins = range(0, int(np.max(df[datavar][:]))+2, 1)
+        maxv = df[datavar].max()
+        for delta in [500, 50, 5, 1, 0.5, 0.05]:
+            bins = np.arange(0, maxv * 1.05, delta)
+            if len(bins) > 8:
+                break
+        if len(bins) > 8:
+            bins = bins[::int(len(bins) / 8.)]
+        bins[0] = 0.01
     else:
         bins = range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1)
-    if len(bins) < 3:
-        bins.append(bins[-1]+1)
-    if len(bins) > 8:
-        bins = np.linspace(np.min(df[datavar][:]), np.max(df[datavar][:])+2,
-                           8, dtype='i')
+        if len(bins) < 3:
+            bins.append(bins[-1]+1)
+        if len(bins) > 8:
+            bins = np.linspace(np.min(df[datavar][:]),
+                               np.max(df[datavar][:])+2, 8, dtype='i')
     ctx['bins'] = bins
     ctx['data'] = data
     ctx['df'] = df
