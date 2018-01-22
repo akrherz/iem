@@ -104,7 +104,6 @@ def plotter(fdict):
     for row in acursor:
         obs[row[0]] = {'min': row[1] if row[1] is not None else np.nan,
                        'max': row[2] if row[2] is not None else np.nan}
-
     htop = []
     hbottom = []
     ltop = []
@@ -130,7 +129,6 @@ def plotter(fdict):
                          high_min=hbottom[-1], high_max=htop[-1],
                          high=hobs[-1], low=lobs[-1]))
         now += datetime.timedelta(days=1)
-
     df = pd.DataFrame(rows)
     days = np.array(days)
 
@@ -147,13 +145,14 @@ def plotter(fdict):
 
     ax.set_title('[%s] %s Daily Temperatures\n%s Forecast MOS Range for %s' % (
         station, nt.sts[station]['name'], model, month1.strftime("%B %Y")))
-
-    ax.bar(days + 0.1, htop-hbottom, facecolor='pink', width=0.7,
-           bottom=hbottom, zorder=1, alpha=0.3, label='Daytime High',
+    arr = (df['high_max'] - df['high_min']).values
+    ax.bar(days + 0.1, arr, facecolor='pink', width=0.7,
+           bottom=hbottom, zorder=1, alpha=0.5, label='Daytime High',
            align='center')
-    ax.bar(days - 0.1, ltop-lbottom, facecolor='blue', width=0.7,
-           bottom=lbottom, zorder=1, alpha=0.3, label='Morning Low',
-           align='center')
+    arr = (df['low_max'] - df['low_min']).values
+    ax.bar(days - 0.1, arr, facecolor='blue', width=0.7,
+           bottom=df['low_min'].values, zorder=1, alpha=0.3,
+           label='Morning Low', align='center')
 
     ax.scatter(days+0.1, hobs, zorder=2, s=40, c='red', label='Actual High')
     ax.scatter(days-0.1, lobs, zorder=2, s=40, c='blue', label='Actual Low')
@@ -180,4 +179,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(network='TX_ASOS', zstation='AUS', month=1, year=2018))
