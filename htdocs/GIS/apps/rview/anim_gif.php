@@ -12,7 +12,9 @@ if (!$urls){
 chdir("/var/webtmp");
 $cmdstr = "gifsicle --colors 256 --loopcount=0 --delay=100 -o ${fts}_anim.gif ";
 while (list($k,$v)=each($urls)) {
-	$res = file_get_contents("http://iem.local{$v}");
+    // value is now single quoted, so remove those
+    $res = file_get_contents(sprintf("http://iem.local%s",
+        str_replace("'", "", $v)));
 	$fn = "{$fts}_{$k}.png";
 	$gfn = "{$fts}_{$k}.gif";
 	$f = fopen($fn, 'wb');
