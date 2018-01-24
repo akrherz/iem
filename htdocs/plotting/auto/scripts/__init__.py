@@ -341,6 +341,8 @@ data = {'plots': [
          'label': ("Crop Progress by Year")},
     ]},
     {'label': 'NWS Warning Plots', 'options': [
+        {'id': "191",
+         'label': "Calendar Plot of Watch/Warn/Adv Daily Counts by WFO"},
         {'id': "92",
          'label': "Days since Last Watch/Warning/Advisory by WFO"},
         {'id': "72",
