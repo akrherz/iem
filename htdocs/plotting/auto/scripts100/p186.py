@@ -67,6 +67,8 @@ def plotter(fdict):
             xs.append(int(row['Date'].strftime("%j")))
             ys.append(year + (0 - delta) / 100.)
             lastrow = row
+        if len(xs) < 4:
+            continue
         fcube = interp1d(xs, ys, kind='cubic')
         xnew = np.arange(xs[0], xs[-1])
         yval = np.ones(len(xnew)) * year
