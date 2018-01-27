@@ -7,13 +7,16 @@ extrapolate to 80 m, cubing that value, and multiplying it by 0.002641
 potential wind power generation in MW (without taking into account the
 capacity factor).
 
+RUN from RUN_10_AFTER.sh
+
 """
 from __future__ import print_function
 import datetime
 import os
 import sys
+import time
 
-import numpy
+import numpy as np
 import pygrib
 import pytz
 from pyiem.plot import MapPlot
@@ -37,7 +40,7 @@ def run(ts, routes):
     except Exception as _exp:
         print('Missing u/v wind for wind_power.py\nFN: %s' % (fn,))
         return
-    mag = (u['values']**2 + v['values']**2)**.5
+    mag = np.hypot(u['values'], v['values'])
 
     mag = (mag * 1.35)**3 * 0.002641
     # 0.002641
@@ -53,7 +56,7 @@ def run(ts, routes):
                  subtitle=('valid: %s based on NOAA Realtime '
                            'Mesoscale Analysis'
                            ) % (lts.strftime("%d %b %Y %I %p")))
-    mp.pcolormesh(lons, lats, mag, numpy.array(LEVELS), units='MW')
+    mp.pcolormesh(lons, lats, mag, np.array(LEVELS), units='MW')
 
     mp.postprocess(pqstr=pqstr)
     mp.close()
@@ -68,6 +71,9 @@ def main(argv):
     else:
         now = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
         routes = "ac"
+        # the 3z RTMA is always late, so we shall wait
+        if now.hour == 3:
+            time.sleep(60 * 10)
     now = now.replace(tzinfo=pytz.utc)
 
     run(now, routes)
