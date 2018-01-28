@@ -56,7 +56,7 @@ def get_data(ts, fmt):
                 "station": row["station"],
                 "state": row["state"],
                 "wfo": row["wfo"],
-                "link": "/api/nwstext/%s.txt" % (row['product'],),
+                "link": "/api/1/nwstext.txt?pid=%s" % (row['product'],),
                 "name": row["name"],
                 "high":  str(sanitize(row["high"])),
                 "high_record":  str(sanitize(row["high_record"])),

@@ -200,15 +200,10 @@
     ExpiresDefault "access plus 5 minutes"
   </Directory>
 
-  <LocationMatch "/api/.*\.json">
+  <LocationMatch "/api/.*\.(json|geojson|txt)">
     RequestHeader set "Host" "iem-web-services.local"
 	ProxyPass "http://iem-web-services.local"
   </LocationMatch>
-  <Directory "/opt/iem/htdocs/api">
-    AddHandler cgi-script .py
-    Options +ExecCGI
-    RewriteRule nwstext/([0-9A-Z\-]{31}).txt$ nwstext.py?p=$1 [QSA]
-  </Directory>
 
   <Directory "/opt/iem/htdocs/content">
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
