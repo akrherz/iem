@@ -7,20 +7,28 @@ $t = new MyView();
 $t->title = "Drought Monitoring Products";
 $t->thispage = "climatology-drought";
 
+$startyear = intval(date("Y"));
+if (intval(date("m")) < 10){
+    $startyear -= 1;
+}
+$departureplot = sprintf("/plotting/auto/plot/97/sector:IA::var:precip_depart".
+    "::date1:%s-10-01::usdm:no::date2:%s::dpi:100.png", $startyear,
+    date("Y-m-d"));
+
+
 $t->content = <<<EOF
 <h3>Drought Monitoring Products</h3>
-
-<p class="intro">Here is a listing of resources related to drought 
-monitoring.</p>
 
 <div class="row">
 <div class="col-md-6">
 
-<p><b>Drought Monitors:</b>
-<ul>
- <li><a href="http://droughtmonitor.unl.edu/">US Drought Monitor</a> [NDMC]</li>
- <li><a href="http://www.wrcc.dri.edu/spi/spi.html">Standardized Precipitation Index</a> [WRCC]</li>
-</ul>
+<p><b>Current Drought Monitor:</b>
+
+<img src="http://droughtmonitor.unl.edu/data/png/current/current_ia_trd.png" class="img img-responsive">
+
+<br />The <a href="http://droughtmonitor.unl.edu/">US Drought Monitor</a> website is a wonderful
+resource for drought information.</p>
+
 
 <p><b>IEM Relevant Autoplots Apps</b>
 <br />The "IEM Autoplot" applications are dynamically generated plots that also
@@ -41,13 +49,25 @@ offer the raw data behind the plot as well.
  <li><a href="http://www.cpc.ncep.noaa.gov/soilmst/img/curr.w.anom.daily.gif">Calculated Soil Moisture Anomaloy</a> [CPC]</li>
 </ul>
 
-</div>
-<div class="col-md-6">
-
 <p><b>Ground Water Status:</b>
 <ul>
  <li><a href="http://groundwaterwatch.usgs.gov/">USGS Ground Water Watch</a></li>
 </ul>
+
+</div>
+<div class="col-md-6">
+
+<p><strong>Water Year (October 1 - Today)</strong>
+
+<p>The "Water Year" is typically defined to start on October 1<sup>rst</sup> and represents the
+time when new water received goes to help the next year's growing season.</p>
+
+<p><b>Precipitation Departures:</b>
+
+<img src="{$departureplot}" class="img img-responsive"/>
+
+<br /><a href="/plotting/auto/?q=97" class="btn btn-default">Generate More Plots Like this</a></p>
+
 
 <p><b>Rainfall Status:</b>
 <ul>
@@ -56,6 +76,7 @@ offer the raw data behind the plot as well.
  <li><a href="http://climate.ncsu.edu/drought/map">Interactive Maps of Departures</a>
 <br /><span class="badge">Recommended</span> Excellent website providing summaries of precip
 and US Drought Monitor status.</li>
+ <li><a href="http://www.wrcc.dri.edu/spi/spi.html">Standardized Precipitation Index</a> [WRCC]</li>
 </ul>
 
 <p><b>Misc:</b>
