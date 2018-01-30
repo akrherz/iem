@@ -20,7 +20,11 @@ def get_description():
     accounting is based on the initial issuance date of a given VTEC phenomena
     and significance by event identifier.  So a single Winter Storm Watch
     for 40 zones, would only count as 1 event for this chart.  Dates are
-    computed in the local time zone of the issuance forecast office."""
+    computed in the local time zone of the issuance forecast office.
+
+    <p>You can also generate this plot considering "ALL" NWS Offices, when
+    doing so the time zone used to compute the calendar dates is US Central.
+    """
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     dec31 = today.replace(month=12, day=31)
@@ -33,7 +37,7 @@ def get_description():
              default=dec31.strftime("%Y/%m/%d"),
              label='End Date (inclusive):',
              min="1986/01/01"),
-        dict(type='networkselect', name='wfo', network='WFO',
+        dict(type='networkselect', name='wfo', network='WFO', all=True,
              default='DMX', label='Select WFO:'),
         dict(type='select', name='heatmap', options=PDICT, default='yes',
              label='Colorize calendar cells based on values?'),
@@ -86,30 +90,42 @@ def plotter(fdict):
     pstr = "(%s)" % (pstr,)
 
     nt = NetworkTable("WFO")
+    nt.sts['_ALL'] = {'name': 'All Offices', 'tzname': 'America/Chicago'}
+    wfo_limiter = (" and wfo = '%s' "
+                   ) % (wfo if len(wfo) == 3 else wfo[1:],)
+    if wfo == '_ALL':
+        wfo_limiter = ''
+
     df = read_sql("""
 with events as (
   select wfo, min(issue at time zone %s) as localissue,
+  extract(year from issue) as year,
   phenomena, significance, eventid from warnings
-  where """ + pstr + """ and wfo = %s and
-  issue >= %s and issue < %s GROUP by wfo, phenomena, significance,
+  where """ + pstr + """ """ + wfo_limiter + """ and
+  issue >= %s and issue < %s GROUP by wfo, year, phenomena, significance,
   eventid
 )
 
 SELECT date(localissue), count(*) from events GROUP by date(localissue)
     """, pgconn, params=(nt.sts[wfo]['tzname'],
-                         wfo, sts - datetime.timedelta(days=2),
+                         sts - datetime.timedelta(days=2),
                          ets + datetime.timedelta(days=2)), index_col='date')
-    if df.empty:
-        return "No Data Found, Sorry"
 
     data = {}
+    now = sts
+    while now <= ets:
+        data[now] = {'val': 0}
+        now += datetime.timedelta(days=1)
     for date, row in df.iterrows():
         data[date] = {'val': row['count']}
     fig = calendar_plot(sts, ets, data, heatmap=(ctx['heatmap'] == 'yes'))
+    title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
+    if wfo == '_ALL':
+        title2 = "All NWS Offices"
     fig.text(0.5, 0.95,
-             ("Number of VTEC Events for NWS %s [%s] by Local Calendar Date"
+             ("Number of VTEC Events for %s by Local Calendar Date"
               "\nValid %s - %s for %s"
-              ) % (nt.sts[wfo]['name'], wfo,
+              ) % (title2,
                    sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y"),
                    title),
              ha='center', va='center')
