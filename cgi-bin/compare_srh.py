@@ -3,6 +3,7 @@
 from __future__ import print_function
 import datetime
 import sys
+import urllib2
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -15,7 +16,11 @@ def main():
     """Go Main Go"""
     sys.stdout.write("Content-type: text/plain\n\n")
     sys.stdout.write("Report run at %s\n" % (datetime.datetime.utcnow(), ))
-    srhdf = pd.read_html(SRH, header=0)[0]
+    try:
+        srhdf = pd.read_html(SRH, header=0)[0]
+    except urllib2.HTTPError as _exp:
+        sys.stdout.write("Failure to download %s, comparison failed" % (SRH, ))
+        return
     srhdf['wfo'] = srhdf['wfo'].str.slice(1, 4)
     iemdf = read_sql("""
     SELECT wfo, phenomena, significance, eventid, count(*) from warnings
