@@ -6,11 +6,8 @@ $t = new MyView();
 $t->thispage = "gis-satellite";
 $t->title = "GOES GIS Products";
 $fpbase = "/home/ldm/data/gis/images/awips211";
-$east = json_decode(file_get_contents("$fpbase/GOES_EAST_IR.json"));
 $west = json_decode(file_get_contents("$fpbase/GOES_WEST_IR.json"));
 
-$embird = $east->{"meta"}->{"bird"};
-$emvalid =  $east->{"meta"}->{"valid"};
 $wmbird = $west->{"meta"}->{"bird"};
 $wmvalid = $west->{"meta"}->{"valid"};
 $adir = date("Y/m/d");
@@ -47,11 +44,13 @@ services.  This page details this dataset.
 <h4>Changes</h4>
 
 <ul>
+<li><strong>30 January 2018:</strong> GOES East products and services have been removed</li>
+
 <li><b>18 December 2017:</b> The GOES "East" satellite has been assigned now to
 the recently launched GOES R/16 satelitte. Sadly, due to format changes and the
 amount of CPU processing and disk storage needed, the IEM can likely no longer process
 these datasets.  The old GOES "East" continues to transmit until the first week or 
-so of January. Likely more to come on this topic.</li>
+so of January.</li>
 
 <li><b>24 November 2014:</b> The Infrared Imagery is now color enhanced by
 default.  The previous default grayscale was not very useful.  You can find
@@ -62,13 +61,6 @@ a color ramp <a href="legends/ir_ramp.png">here</a>.</li>
 
 <table class="table table-condensed table-bordered">
  <tr><th></th><th>Bird</th><th>Latest Imagery</th><th>JSON Metadata</th></tr>
- <tr><th>East</th>
- 	<td>{$embird}</td>
- 	<td>{$emvalid}</td>
- 	<td><a href="/data/gis/images/awips211/GOES_EAST_IR.json">IR</a> - 
- 	<a href="/data/gis/images/awips211/GOES_EAST_VIS.json">VIS</a> -
- 	<a href="/data/gis/images/awips211/GOES_EAST_WV.json">WV</a></td> 
- 	</tr>
  <tr><th>West</th>
  	<td>{$wmbird}</td>
  	<td>{$wmvalid}</td>
@@ -133,9 +125,6 @@ numbers into Proj4 strings.
 
 <hr />
 
-<p><strong>GOES East infrared imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_ir.cgi?</code>
-
 <p><strong>GOES West infrared imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_ir.cgi?</code>
 
@@ -147,8 +136,6 @@ numbers into Proj4 strings.
 
 <hr />
 
-<p><strong>GOES East visible imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_vis.cgi?</code>
 
 <p><strong>GOES West visible imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_vis.cgi?</code>
@@ -161,8 +148,6 @@ numbers into Proj4 strings.
 
 <hr>
 
-<p><strong>GOES East water vapor imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_wv.cgi?</code>
 
 <p><strong>GOES West water vapor imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_wv.cgi?</code>
