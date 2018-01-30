@@ -7,10 +7,12 @@ Run at 40 AFTER for the previous hour
 """
 from __future__ import print_function
 import urllib2
+import subprocess
 import sys
 import datetime
 import os
 import time
+
 import requests
 import pygrib
 
@@ -71,7 +73,8 @@ def fetch(valid):
                             "%H/hrrr.t%Hz.3kmf00.grib2"))
     outdir = os.path.dirname(outfn)
     if not os.path.isdir(outdir):
-        os.makedirs(outdir, mode=0775)  # make sure LDM can then write to dir
+        os.makedirs(outdir)  # make sure LDM can then write to dir
+        subprocess.call("chmod 775 %s" % (outdir, ), shell=True)
     output = open(outfn, 'ab', 0664)
 
     req = urllib2.Request(uri[:-4])
