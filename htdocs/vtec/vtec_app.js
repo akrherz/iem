@@ -670,6 +670,10 @@ function loadTabs(){
 		}
 	});
 	updateHash();
+	// Set the active tab to 'Event Info' if we are on the first tab
+	if ($("#thetabs .active > a").attr("href") == "#help"){
+		$("#event_tab").click();
+	}
 }
 function remarkformat(d){
     

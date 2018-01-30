@@ -45,7 +45,7 @@ var CONFIG = {
   etn: {$etn}
 };
 </script>
-<script type="text/javascript" src="vtec_app.js?v=6"></script>
+<script type="text/javascript" src="vtec_app.js?v=7"></script>
 EOM;
 
 $theform = <<<EOM
