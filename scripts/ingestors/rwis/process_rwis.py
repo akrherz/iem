@@ -12,6 +12,8 @@ from email.mime.text import MIMEText
 import pandas as pd
 import pytz
 import numpy as np
+from metpy.units import units
+import metpy.calc as mcalc
 from pyiem.tracker import TrackerEngine
 from pyiem.datatypes import temperature, speed
 from pyiem.network import Table as NetworkTable
@@ -94,6 +96,10 @@ def merge(atmos, surface):
         data[nwsli]['valid'] = ts.replace(tzinfo=pytz.timezone("UTC"))
         data[nwsli]['tmpf'] = get_temp(row['AirTemp'])
         data[nwsli]['dwpf'] = get_temp(row['Dewpoint'])
+        if data[nwsli]['tmpf'] is not None and data[nwsli]['dwpf'] is not None:
+            data[nwsli]['relh'] = mcalc.relative_humidity_from_dewpoint(
+                data[nwsli]['tmpf'] * units('degF'),
+                data[nwsli]['dwpf'] * units('degF')).magnitude * 100.
         # Rh is unused
         data[nwsli]['sknt'] = get_speed(row['SpdAvg'])
         data[nwsli]['gust'] = get_speed(row['SpdGust'])

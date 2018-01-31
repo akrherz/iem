@@ -9,6 +9,8 @@ import subprocess
 import netCDF4
 import pytz
 import psycopg2.extras
+import metpy.calc as mcalc
+from metpy.units import units
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, distance, speed
 from pyiem.util import get_dbconn
@@ -71,12 +73,15 @@ def main():
     providers = nc.variables["dataProvider"][:]
     names = nc.variables["stationName"][:]
     tmpk = nc.variables["temperature"][:]
+    dwpk = nc.variables["dewpoint"][:]
+    relh = mcalc.relative_humidity_from_dewpoint(tmpk * units.degK,
+                                                 dwpk * units.degK
+                                                 ).magnitude * 100.
     tmpk_dd = nc.variables["temperatureDD"][:]
     obtime = nc.variables["observationTime"][:]
     pressure = nc.variables["stationPressure"][:]
     # altimeter = nc.variables["altimeter"][:]
     # slp = nc.variables["seaLevelPressure"][:]
-    dwpk = nc.variables["dewpoint"][:]
     drct = nc.variables["windDir"][:]
     smps = nc.variables["windSpeed"][:]
     gmps = nc.variables["windGust"][:]
@@ -120,6 +125,7 @@ def main():
         db[this_station]['tmpk'] = sanity_check(tmpk[recnum], 0, 500, -99)
         db[this_station]['dwpk'] = sanity_check(dwpk[recnum], 0, 500, -99)
         db[this_station]['tmpk_dd'] = tmpk_dd[recnum]
+        db[this_station]['relh'] = relh[recnum]
         db[this_station]['drct'] = sanity_check(drct[recnum], -1, 361, -99)
         db[this_station]['smps'] = sanity_check(smps[recnum], -1, 200, -99)
         db[this_station]['gmps'] = sanity_check(gmps[recnum], -1, 200, -99)
@@ -143,6 +149,8 @@ def main():
         #    os.chdir("../ingestors/madis")
         iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
         iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
+        if db[sid]['relh'] >= 0:
+            iem.data['relh'] = float(db[sid]['relh'])
         if db[sid]['drct'] >= 0:
             iem.data['drct'] = db[sid]['drct']
         if db[sid]['smps'] >= 0:
