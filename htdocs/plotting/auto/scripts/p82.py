@@ -16,6 +16,8 @@ PDICT = OrderedDict([
         ('high_departure', 'High Temperature Departure'),
         ('min_tmpf', 'Low Temperature'),
         ('low_departure', 'Low Temperature Departure'),
+        ('avg_tmpf', 'Average Temperature'),
+        ('avg_departure', 'Average Temperature Departure'),
         ('max_dwpf', 'Highest Dew Point Temperature'),
         ('min_dwpf', 'Lowest Dew Point Temperature'),
         ('pday', 'Precipitation')])
@@ -79,12 +81,14 @@ def plotter(fdict):
 
     # Get Climatology
     cdf = read_sql("""SELECT to_char(valid, 'mmdd') as sday, high, low,
+    (high + low) / 2. as avg,
     precip from ncdc_climate81 WHERE station = %s
     """, get_dbconn('coop'),
                    params=(nt.sts[station]['ncdc81'],), index_col='sday')
 
     cursor.execute("""
     SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
+    (max_tmpf + min_tmpf) / 2. as avg_tmpf,
     pday, coalesce(avg_sknt, 0) as avg_sknt from summary s JOIN stations t
     on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
     t.id = %s and t.network = %s ORDER by day ASC
@@ -94,16 +98,20 @@ def plotter(fdict):
     for row in cursor:
         hd = row['max_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'high']
         ld = row['min_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'low']
+        ad = row['avg_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'avg']
         rows.append(dict(day=row['day'], max_tmpf=row['max_tmpf'],
                          avg_smph=speed(row['avg_sknt'], 'KT').value('MPH'),
                          min_dwpf=row['min_dwpf'], max_dwpf=row['max_dwpf'],
                          high_departure=hd, low_departure=ld,
+                         avg_departure=ad,
                          min_tmpf=row['min_tmpf'], pday=row['pday']))
         data[row[0]] = {'val': safe(rows[-1], varname)}
         if varname == 'high_departure':
             data[row[0]]['color'] = 'b' if hd < 0 else 'r'
         elif varname == 'low_departure':
             data[row[0]]['color'] = 'b' if ld < 0 else 'r'
+        elif varname == 'avg_departure':
+            data[row[0]]['color'] = 'b' if ad < 0 else 'r'
     df = pd.DataFrame(rows)
 
     title = ('[%s] %s Daily %s\n%s thru %s'
