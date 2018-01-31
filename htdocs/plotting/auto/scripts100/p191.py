@@ -27,14 +27,13 @@ def get_description():
     """
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
-    dec31 = today.replace(month=12, day=31)
     desc['arguments'] = [
         dict(type='date', name='sdate',
              default=jan1.strftime("%Y/%m/%d"),
              label='Start Date (inclusive):',
              min="1986/01/01"),
         dict(type='date', name='edate',
-             default=dec31.strftime("%Y/%m/%d"),
+             default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):',
              min="1986/01/01"),
         dict(type='networkselect', name='wfo', network='WFO', all=True,
