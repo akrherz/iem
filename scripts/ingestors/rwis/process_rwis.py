@@ -288,7 +288,7 @@ def update_iemaccess(obs):
         iemob = Observation(sid, "IA_RWIS", ob['valid'])
         for varname in ['tmpf', 'dwpf', 'drct', 'sknt', 'gust', 'vsby',
                         'pday', 'tsf0', 'tsf1', 'tsf2', 'tsf3', 'scond0',
-                        'scond1', 'scond2', 'scond3']:
+                        'scond1', 'scond2', 'scond3', 'relh']:
             # Don't insert NaN values into iemaccess
             thisval = ob.get(varname)
             if thisval is None:
