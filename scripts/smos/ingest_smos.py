@@ -26,7 +26,8 @@ def consume(scursor, fn, ts):
     good = 0
     data = StringIO.StringIO()
     for gpid, sm, od, chi2pd in zip(gpids, sms, optdepths, chi2pds):
-        if chi2pd > 0.05:
+        # changed 1 Feb 2018 as per guidance from Victoria
+        if chi2pd < 0.05:
             bad += 1
             od = None
             sm = None
