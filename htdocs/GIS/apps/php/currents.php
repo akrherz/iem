@@ -21,8 +21,6 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 include("../../../../include/mlib.php");
-include("../../../../include/iemaccess.php");
-include("../../../../include/iemaccessob.php");
 
 function skntChar($sknt){
   if ($sknt < 2)  return chr(0);
@@ -40,23 +38,9 @@ function skntChar($sknt){
   if ($sknt < 60)  return chr(238);
 }
 
-$iem = new IEMAccess();
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
-$sts = Array();
-
-if (isset($st) ){
-  foreach ($st as $key => $value) {
-    if (strlen($value) > 0 && $value != "ahack") {
-      $o = $iem->getSingleSite($value);
-      $sts[$value] = $o;      
-    }
-  }
-}
-
-
-if (strlen($network) > 0){
-  $sts = $iem->getNetwork($network);
-}
 
 $varDef = Array("tmpf" => "Temperatures",
   "tsf0" => "Pavement Temp #1",
@@ -90,9 +74,10 @@ $rnd = Array("alti" => 2, "phour" => 2, "vsby" => 1,"tmpf" => 0,"dwpf"=>0,
 $lats = Array();
 $lons = Array();
 
-foreach($sts as $key => $value){
-  $lats[$key] = $sts[$key]->db["y"];
-  $lons[$key] = $sts[$key]->db["x"];
+foreach($jobj["data"] as $bogus => $value){
+    $key = $value["station"];
+    $lats[$key] = $value["lat"];
+    $lons[$key] = $value["lon"];
 }
 
 $lat0 = min($lats);
@@ -114,9 +99,6 @@ $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
 $GOESBASE="/home/ldm/data/gis/images/4326/goes";
-$goes_east1V = $map->getlayerbyname("goes_east1V");
-$goes_east1V->set("data", "${GOESBASE}/east1V_0.tif");
-$goes_east1V->set("status", in_array("goes_east1V", $layers) );
 
 $goes_west1V = $map->getlayerbyname("goes_west1V");
 $goes_west1V->set("data", "${GOESBASE}/west1V_0.tif");
@@ -126,9 +108,6 @@ $goes_west04I4 = $map->getlayerbyname("goes_west04I4");
 $goes_west04I4->set("data", "${GOESBASE}/west04I4_0.tif");
 $goes_west04I4->set("status",in_array("goes_west04I4", $layers) );
 
-$goes_east04I4 = $map->getlayerbyname("goes_east04I4");
-$goes_east04I4->set("data", "${GOESBASE}/east04I4_0.tif");
-$goes_east04I4->set("status", in_array("goes_east04I4", $layers));
 
 
 $currents = $map->getlayerbyname("currents");
@@ -156,12 +135,8 @@ $img = $map->prepareImage();
 $namer->draw($img);
 $lakes->draw($img);
 
-$goes_east1V->draw($img);
 $goes_west1V->draw($img);
-$goes_east04I4->draw($img);
 $goes_west04I4->draw($img);
-
-
 
 $ly = ms_newlayerobj($map);
 $ly->set("status", MS_ON);
@@ -193,53 +168,53 @@ $barbs->set("status", MS_ON);
 $bclass = $barbs->getClass(0);
 
 $now = time();
-foreach($sts as $key => $value){
-  $bzz = $value;
-  $sped = $bzz->db["sknt"] * 1.15078;
-  $bzz->db["relh"] = relh(f2c($bzz->db["tmpf"]), 
-       f2c($bzz->db["dwpf"]) );
-  $bzz->db["feel"] = feels_like($bzz->db["tmpf"], 
-       $bzz->db["relh"], $sped);
-  $val = round(@$bzz->db[$var], @$rnd[$var]);
-  $mynetwork = $bzz->db["network"];
-  if ( (($now - $bzz->ts) < 3900 || (substr($mynetwork,3,4) == "COOP" || $mynetwork == "IACOCORAHS") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 
+foreach($jobj["data"] as $bogus => $value){
+    $bzz = $value;
+  $sped = $bzz["sknt"] * 1.15078;
+  $bzz["relh"] = relh(f2c($bzz["tmpf"]), 
+       f2c($bzz["dwpf"]) );
+  $bzz["feel"] = feels_like($bzz["tmpf"], 
+       $bzz["relh"], $sped);
+  $val = round(@$bzz[$var], @$rnd[$var]);
+  $mynetwork = $bzz["network"];
+  if ( (($now - strtotime($bzz["local_valid"])) < 3900 || (substr($mynetwork,3,4) == "COOP" || $mynetwork == "IACOCORAHS") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 
 
   if ( in_array('barbs', $layers) ){
     $pt = ms_newPointObj();
-    $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
-    $rotate =  0 - intval($bzz->db["drct"]);
+    $pt->setXY($bzz["lon"], $bzz["lat"], 0);
+    $rotate =  0 - intval($bzz["drct"]);
     $bclass->getLabel(0)->set("angle", doubleval($rotate));
-    $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
+    $pt->draw($map, $barbs, $img, 0, skntChar($bzz["sknt"]) );
 
   }
 
-   if ($var == "barb" && $bzz->db["sknt"] > -1) {
+   if ($var == "barb" && $bzz["sknt"] > -1) {
     $pt = ms_newPointObj();
-    $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
-    $rotate =  0 - intval($bzz->db["drct"]);
+    $pt->setXY($bzz["lon"], $bzz["lat"], 0);
+    $rotate =  0 - intval($bzz["drct"]);
     $bclass->getLabel(0)->set("angle", doubleval($rotate));
-    $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
+    $pt->draw($map, $barbs, $img, 0, skntChar($bzz["sknt"]) );
 
                                                                                 
     $pt = ms_newPointObj();
-    $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
-    $pt->draw($map, $currents, $img, 0, round($bzz->db['sknt'], @$rnd['sknt']) );
+    $pt->setXY($bzz["lon"], $bzz["lat"], 0);
+    $pt->draw($map, $currents, $img, 0, round($bzz['sknt'], @$rnd['sknt']) );
 
    } else if ($var != "barb" && $val > -99){
      $pt = ms_newPointObj();
-     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
+     $pt->setXY($bzz["lon"], $bzz["lat"], 0);
      $pt->draw($map, $currents, $img, 0, $val );
 
    }
    if (in_array('labels', $layers)) {
     if (strlen($network) == 0){
      $pt = ms_newPointObj();
-     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
-     $pt->draw($map, $sname, $img, 0, $bzz->db["sname"] );
+     $pt->setXY($bzz["lon"], $bzz["lat"], 0);
+     $pt->draw($map, $sname, $img, 0, $bzz["sname"] );
  
     } else {
      $pt = ms_newPointObj();
-     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
+     $pt->setXY($bzz["lon"], $bzz["lat"], 0);
      $pt->draw($map, $sname, $img, 0, $key );
    
     }

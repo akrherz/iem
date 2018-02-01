@@ -1,10 +1,8 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 include("../../include/myview.php");
 include("../../include/mlib.php");
 include("../../include/network.php");
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
 require_once "../../include/forms.php";
 $nt = new NetworkTable("SCAN");
 $cities = $nt->table;
@@ -13,19 +11,7 @@ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): 'station';
 $t = new MyView();
 $t->title = "SCAN Sortable Currents";
 $t->refresh = "<meta http-equiv=\"refresh\" content=\"3600;\">";
-$t->headextra = <<<EOF
-<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=650,height=500");
-} 
-//END Script-->
-</script>
-EOF;
 $t->thispage = "current-sort";
-
-$iem = new IEMAccess();
-$scan = $iem->getNetwork("SCAN");
 
 function make_link($sid){
 	return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);
@@ -44,26 +30,27 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
 $mydata = Array();
 
-while (list($key, $iemob) = each($scan) ){
-	$mydata[$key] = $iemob->db;
-	$mydata[$key]["ts"] = $iemob->ts;
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=SCAN");
+$jobj = json_decode($jdata, $assoc=TRUE);
+
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+    $mydata[$key] = $iemob;
+	$mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
 	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
 			f2c($mydata[$key]["dwpf"]) );
-	$mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
-			$mydata[$key]["relh"], $mydata[$key]["sped"]);
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
 	} else {
 		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-		if ($mydata[$key]["max_sknt_ts"] > 0){
-			$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+		if ($mydata[$key]["local_max_sknt_ts"]){
+			$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
 		}
 	}
 
 }
-
 
 $finalA = Array();
 $finalA = aSortBySecondIndex($mydata, $sortcol);
@@ -104,7 +91,7 @@ while (list ($key, $val) = each ($finalA))  {
   round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
   round($parts["min_tmpf"],0) ."</font>)</td>
  <td>". round($parts["dwpf"],0) ."</td>
- <td>". $parts["feel"] ."</td>
+ <td>". round($parts["feel"], 0) ."</td>
  <td>". $parts["relh"] ."</td>
  <td>". round($parts["sknt"],0) ;
 	if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
@@ -163,7 +150,6 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "max_tmpf" => "Today's High Temperature",
   "station" => "Station ID", "relh" => "Relative Humidity");
 
-$c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=SCAN&var=";
 
 $t->current_network = 'SCAN';
 $t->content = <<<EOF
@@ -202,20 +188,6 @@ a column to sort it.<br>
 <tbody>
 {$t1}
 </tbody>
-<tfoot>
-<tr>
- <td colspan=3>&nbsp;</td>
-<?php  ?>
- <td><a href="{$c}tmpf');">Plot</a>
-    (<a href="{$c}max_tmpf');">Plot</a> /
-     <a href="{$c}min_tmpf');">Plot</a>)</td>
- <td><a href="{$c}dwpf');">Plot</a></td>
- <td><a href="{$c}feel');">Plot</a></td>
- <td><a href="{$c}relh');">Plot</a></td>
- <td colspan=2><a href="{$c}barb');">Plot</a></td>
- <td><a href="{$c}max_sknt');">Plot</a></td>
- <td>&nbsp;</td>
-</tr></tfoot>
 </table>
 <input type="submit" value="Add to Favorites">
 <input type="reset" value="Reset">

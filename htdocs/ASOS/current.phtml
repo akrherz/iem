@@ -6,8 +6,6 @@
  include_once("../../include/mlib.php");
  require_once "../../include/forms.php";
  include_once("../../include/network.php");
- include_once("../../include/iemaccess.php");
- include_once("../../include/iemaccessob.php");
  include_once "../../include/database.inc.php";
  
  $network = isset($_GET['network']) ? substr($_GET["network"],0,10) : 'IA_ASOS';
@@ -85,32 +83,27 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
   return $sortedArray;
 }
 
-$iem = new IEMAccess($tzname);
-$asos = $iem->getNetwork($network);
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
 /* Final data array */
 $mydata = Array();
 
-while ( list($key, $iemob) = each($asos) ){
-    $mydata[$key] = $iemob->db;
-    $mydata[$key]["ts"] = $iemob->lts;
+while ( list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+    $mydata[$key] = $iemob;
+    $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
     $mydata[$key]["sname"] = $cities[$key]["name"];
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
        f2c($mydata[$key]["dwpf"]) );
-    if ($mydata[$key]["tmpf"] > -99 && $mydata[$key]["dwpf"] > -99){
-       $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-         $mydata[$key]["relh"], $mydata[$key]["sped"]);
-    } else {
-    	$mydata[$key]["feel"] = null;
-    }
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_gust_ts"],0,16) );
+      $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-      if ($mydata[$key]["max_sknt_ts"] > 0) {
-         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_sknt_ts"],0,16) );
+      if ($mydata[$key]["local_max_sknt_ts"]) {
+         $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
       }
     }
 } // End of while
@@ -162,7 +155,6 @@ $ar = Array(
 $fselect = make_select("format", $format, $ar);
 
 $uri = "current.phtml?sorder=$sorder&metar=$metar&network=$network&sortcol=";
-$uri2 = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
 
 $year = date("Y");
 $month = date("m");
@@ -240,14 +232,14 @@ while (list ($key, $val) = each ($finalA))  {
   if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";  
   $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
-  $tdiff = $now - $asos[$key]->ts;
+  $tdiff = $now - $parts["ts"];
   $url = sprintf("/sites/site.php?station=%s&network=%s", $key, $network);
   $row .= sprintf("<td><a href='%s'>%s</a></td>", $url, $key);
   $row .= "<td>". $cities[$key]["name"] . "</td>";
   $row .= "<td ";
   if ($tdiff > 10000){
     $fmt = "%d %b %I:%M %p";
-    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->lts) ."</td><td colspan=\"18\">Site Offline</td></tr>";
+    $row .= "bgcolor=\"red\">". strftime($fmt, $parts["ts"]) ."</td><td colspan=\"18\">Site Offline</td></tr>";
     $old .= $row;
     continue;
   } else if ($tdiff > 7200){
@@ -266,7 +258,7 @@ while (list ($key, $val) = each ($finalA))  {
   $pdwpf = ($parts["dwpf"] != null) ? round($parts["dwpf"],0): 'M';
   $pfeel = ($ptmpf == "M" || $pdwpf == "M") ? "M": round($parts["feel"],0);
   $prelh = ($ptmpf == "M" || $pdwpf == "M") ? "M": $parts["relh"];
-  $row .= ">". strftime($fmt, $asos[$key]->lts) ."</td>".
+  $row .= ">". strftime($fmt, $parts["ts"]) ."</td>".
       "<td align='center'>". str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) ."</td>".
   "<td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
      <td>". $pdwpf ."</td>
@@ -302,27 +294,7 @@ while (list ($key, $val) = each ($finalA))  {
 $table .= $old;
 $table .= <<<EOF
 </tbody>
-<tfoot>
-<tr>
- <td colspan="5">&nbsp;</td>
- <td><a href="{$uri2}&var=tmpf');">Plot</a></td>
- <td><a href="{$uri2}&var=max_tmpf');">Plot</a></td>
- <td><a href="{$uri2}&var=min_tmpf');">Plot</a></td>
- <td><a href="{$uri2}&var=dwpf');">Plot</a></td>
- <td><a href="{$uri2}&var=feel');">Plot</a></td>
- <td><a href="{$uri2}&var=relh');">Plot</a></td>
- <td><a href="{$uri2}&var=alti');">Plot</a></td>
- <td><a href="{$uri2}&var=vsby');">Plot</a></td>
- <td><a href="{$uri2}&var=sknt');">Plot</a></td>
- <td>&nbsp;</td>
- <td><a href="{$uri2}&var=max_gust');">Plot</a></td>
- <td><a href="{$uri2}&var=phour');">Plot</a></td>
- <td><a href="{$uri2}&var=pday');">Plot</a></td>
- <td></td>
- <td></td>
- <td></td>
- <td></td>
-</tr></tfoot>
+
 </table>
 
 <input type="submit" value="Add to Favorites">

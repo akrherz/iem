@@ -1,38 +1,30 @@
 <?php
 /* Generate a JSON file of network observations */
 header("Content-type: application/vnd.geo+json");
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 include("../../include/database.inc.php");
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
 include("../../include/network.php");
 include("../../include/mlib.php");
 
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "IA_ASOS"; 
 $callback = isset($_REQUEST["callback"]) ? $_REQUEST["callback"] : null; 
 
-$iem = new IEMAccess();
-$asos = $iem->getNetwork($network);
-
-$nt = new NetworkTable($network);
-$cities = $nt->table;
+// TODO: migrate this to explicit backend
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
 $mydata = Array();
 
-while ( list($key, $iemob) = each($asos) ){
-    $mydata[$key] = $iemob->db;
-    unset($mydata[$key]['geom']);
-    unset($mydata[$key]['max_sknt_ts']);
-    unset($mydata[$key]['max_gust_ts']);
+while ( list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+    $mydata[$key] = $iemob;
+    unset($mydata[$key]['local_max_sknt_ts']);
+    unset($mydata[$key]['local_max_gust_ts']);
     unset($mydata[$key]['day']);
-    $mydata[$key]["valid"] = gmstrftime('%Y-%m-%dT%H:%MZ', $iemob->ts);
-    $mydata[$key]["sname"] = $cities[$key]["name"];
-    $mydata[$key]["lat"] = $cities[$key]["lat"];
-    $mydata[$key]["lon"] = $cities[$key]["lon"];
+    $mydata[$key]["valid"] = $iemob["utc_valid"];
+    $mydata[$key]["sname"] = $iemob["name"];
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]) );
-    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]));
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
     } else {

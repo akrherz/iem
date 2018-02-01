@@ -6,9 +6,9 @@ $t = new MyView();
 $t->title = "Quality Control, Sites Offline";
 $t->thispage = "iem-qc";
 
-include("../../include/iemaccess.php");
-$iem = new IEMAccess();
-$rs = pg_prepare($iem->dbconn, "SELECT", "SELECT *,
+require_once "../../include/database.inc.php";
+$pgconn = iemdb("iem");
+$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
                  to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline
                  WHERE network = $1 ORDER by valid ASC");
 
@@ -26,11 +26,11 @@ include ("../../include/network.php");
 $nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {
-	global $iem, $nt;
+	global $pgconn, $nt;
 	$nt->load_network($network);
 	$cities = $nt->table;
 	$s = "";
-	$rs = pg_execute($iem->dbconn, "SELECT", Array($network) );
+	$rs = pg_execute($pgconn, "SELECT", Array($network) );
 
 	$q = 0;
 	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)

@@ -3,8 +3,6 @@ include("../../config/settings.inc.php");
 include("../../include/myview.php");
 include("../../include/network.php");
 require_once "../../include/forms.php";
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
 include_once("../../include/database.inc.php");
 $t = new MyView();
 
@@ -42,28 +40,29 @@ $t->current_network = "CoCoRaHS";
    $monthDict[ $row["id"] ] = Array("accum" => round($row["pmonth"],2), "missing" => $row["missing"] );
  }
 
- $iem = new IEMAccess();
- $net = $iem->getNetwork($network);
+ $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
+ $jobj = json_decode($jdata, $assoc=TRUE);
 
  $db = Array();
- while (list($site, $iemob) = each($net) ){
+ while (list($bogus, $iemob) = each($jobj["data"]) ){
+     $site = $iemob["station"];
   $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"", 'pmiss' => "");
-  $db[$site]['ts'] = $iemob->ts;
+  $db[$site]['ts'] = strtotime($iemob["local_valid"]);
   $db[$site]['sid'] = $site;
-  $db[$site]['sname'] = $iemob->db["sname"];
+  $db[$site]['sname'] = $iemob["name"];
   $db[$site]['county'] = $nt->table[$site]["county"];
-  if ( date("Ym") == date("Ym", $iemob->ts) ){
+  if ( date("Ym") == date("Ym", strtotime($iemob["local_valid"])) ){
     $db[$site]['pmonth'] = @$monthDict[$site]["accum"];
     $db[$site]['pmiss'] = @$monthDict[$site]["missing"];
   }
-  if ( date("Ymd") != date("Ymd", $iemob->ts) ){
+  if ( date("Ymd") != date("Ymd", strtotime($iemob["local_valid"])) ){
     continue;
   }
 
 
-  $db[$site]['pday'] = $iemob->db["ob_pday"];
-  $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
-  $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
+  $db[$site]['pday'] = $iemob["ob_pday"];
+  $db[$site]['snow'] = ($iemob["snow"] >= 0) ? $iemob["snow"] : " ";
+  $db[$site]['snowd'] = ($iemob["snowd"] >= 0) ? $iemob["snowd"] : " ";
   $db[$site]["ratio"] = -1;
   if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001)
    {
@@ -153,17 +152,8 @@ EOF;
     $content .= "<td>". $value["snowd"] ."</td>";
    $content .= "</tr>";
  }
-$c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var=";
 $content .= <<<EOF
-</tbody><tfoot>
-<tr>
- <td colspan=5>&nbsp;</td>
- <td><a href="{$c}pday');">Plot</a></td>
- <td></td>
- <td><a href="{$c}snow');">Plot</a></td>
- <td></td>
- <td><a href="{$c}snowd');">Plot</a></td>
-</tr></tfoot>
+</tbody>
 </table>
 <input type="submit" value="Add to Favorites">
  		</form>

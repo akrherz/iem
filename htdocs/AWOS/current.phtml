@@ -3,8 +3,6 @@ include("../../config/settings.inc.php");
 include("../../include/myview.php");
 require_once "../../include/forms.php";
 include("../../include/mlib.php");
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
 
 $t = new MyView();
 
@@ -12,20 +10,9 @@ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
 
 $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol\">";
 $t->title = "AWOS Network Current Conditions";
-$t->headextra = <<<EOF
-<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
-</script>
-EOF;
 $t->current_network = "AWOS";
 $t->thispage = "current-sort";
 
-  $iem = new IEMAccess();
-  $awos = $iem->getNetwork("AWOS");
 
   $vals = Array("station" => "Station ID", "ts" => "Ob Time",
   		"relh" => "Relative Humidity", "sname" => "Site Name",
@@ -95,9 +82,14 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 	return $sortedArray;
 }
 
-  while (list($key, $iemob) = each($awos) ){
-    $mydata[$key] = $iemob->db;
-    $mydata[$key]["ts"] = $iemob->ts;
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
+$jobj = json_decode($jdata, $assoc=TRUE);
+
+
+  while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+    $mydata[$key] = $iemob;
+    $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     if ($mydata[$key]["tmpf"] > -99) {
       $mydata[$key]["tmpf"] = round($mydata[$key]["tmpf"], 0);
@@ -115,11 +107,11 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
    $mydata[$key]["peak_ts"] = 0;
    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+      $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
       if ($mydata[$key]["max_sknt_ts"] > 0) {
-        $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
      }   
  }
 
@@ -140,7 +132,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
             value=\"".$key."\"></td>";
 
          $tdiff = $now - $parts["ts"];
-         $table .= sprintf("<td>%s (<a href=\"/sites/site.php?station=%s&network=AWOS\">%s</a>)</td>", $parts["sname"], $key, $key );
+         $table .= sprintf("<td>%s (<a href=\"/sites/site.php?station=%s&network=AWOS\">%s</a>)</td>", $parts["name"], $key, $key );
          $table .= "<td ";
          if ($tdiff > 10000){
            $format = "%d %b %I:%M %p";
@@ -173,25 +165,8 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
           <td>". $parts["phour"] ."</td>
           <td>". $parts["pday"] ."</td></tr>\n";
 }
-$c = "javascript:new_window('https://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=AWOS&var=";
 $table .= <<<EOF
-</tbody><tfoot>
-<tr>
- <td colspan=3></td>
- <td><a href="{$c}tmpf');">Plot</a>
-    (<a href="{$c}max_tmpf');">Plot</a> /
-     <a href="{$c}min_tmpf');">Plot</a>)</td>
- <td><a href="{$c}dwpf');">Plot</a></td>
- <td><a href="{$c}feel');">Plot</a></td>
- <td><a href="{$c}relh');">Plot</a></td>
- <td colspan=2><a href="{$c}barb');">Plot</a></td>
- <td><a href="{$c}max_sknt');">Plot</a></td>
- <td><a href="{$c}alti');">Plot</a></td>
- <td><a href="{$c}vsby');">Plot</a></td>
- <td><a href="{$c}phour');">Plot</a></td>
- <td><a href="{$c}pday');">Plot</a></td>
-</tr>
-</tfoot>
+</tbody>
 
 </table>
 

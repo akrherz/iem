@@ -11,8 +11,6 @@ define("IEM_APPID", 41);
  require_once "../../include/forms.php";
  include_once("../../include/database.inc.php");
  $mesosite = iemdb("mesosite");
- include("../../include/iemaccess.php");
- include("../../include/iemaccessob.php");
  
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_COOP'; 
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST['wfo']): null;
@@ -63,42 +61,44 @@ EOF;
 	return $s;
 }
 
-$iem = new IEMAccess();
 if ($wfo == null){
-	$net = $iem->getNetwork($network);
-	$baseurl = "current.phtml?network=$network";
+    $uri = "http://iem.local/api/1/currents.json?network=$network";
+    $baseurl = "current.phtml?network=$network";
 } else {
-	$net = $iem->getWFO_COOP($wfo);
-	$baseurl = "current.phtml?wfo=$wfo";
+    $uri = "http://iem.local/api/1/currents.json?networkclass=COOP&wfo=$wfo";
+    $baseurl = "current.phtml?wfo=$wfo";
 }
+$jdata = file_get_contents($uri);
+$jobj = json_decode($jdata, $assoc=TRUE);
 
 $db = Array();
-while (list($site, $iemob) = each($net) ){
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $site = $iemob["station"];
 	$db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
 			'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"", 'snoww'=>"");
-	$db[$site]['ts'] = $iemob->ts;
-	$db[$site]['lts'] = $iemob->lts;
+	$db[$site]['ts'] = strtotime($iemob["local_valid"]);
+	$db[$site]['lts'] = strtotime($iemob["local_valid"]);
 	$db[$site]['sid'] = $site;
-	$db[$site]['sname'] = $iemob->db["sname"];
-	$db[$site]['raw'] = $iemob->db["raw"];
-	$db[$site]['state'] = $iemob->db["state"];
-	$db[$site]['network'] = $iemob->db["network"];
-	$db[$site]['county'] = $iemob->db["county"];
-	if ($iemob->db["tmpf"] > -100) {
-		$db[$site]['tmpf'] = $iemob->db["tmpf"];
+	$db[$site]['sname'] = $iemob["name"];
+	$db[$site]['raw'] = $iemob["raw"];
+	$db[$site]['state'] = $iemob["state"];
+	$db[$site]['network'] = $iemob["network"];
+	$db[$site]['county'] = $iemob["county"];
+	if ($iemob["tmpf"] > -100) {
+		$db[$site]['tmpf'] = $iemob["tmpf"];
 	}
-	if ($iemob->db["max_tmpf"] > -100) {
-		$db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
-	}
-
-	if ($iemob->db["min_tmpf"] < 99) {
-		$db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
+	if ($iemob["max_tmpf"] > -100) {
+		$db[$site]['max_tmpf'] = $iemob["max_tmpf"];
 	}
 
-	$db[$site]['pday'] = $iemob->db["pday"];
-	$db[$site]['snoww'] = $iemob->db["snoww"];
-	$db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : "";
-	$db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : "";
+	if ($iemob["min_tmpf"] < 99) {
+		$db[$site]['min_tmpf'] = $iemob["min_tmpf"];
+	}
+
+	$db[$site]['pday'] = $iemob["pday"];
+	$db[$site]['snoww'] = $iemob["snoww"];
+	$db[$site]['snow'] = ($iemob["snow"] >= 0) ? $iemob["snow"] : "";
+	$db[$site]['snowd'] = ($iemob["snowd"] >= 0) ? $iemob["snowd"] : "";
 	$db[$site]["ratio"] = -1;
 	if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001)
 	{
@@ -244,21 +244,10 @@ again will reverse the sort.
 EOF;
 
 
- $c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var=";
 $content .= <<<EOF
 {$firstsection}
 {$lastsection}
-</tbody><tfoot>
-<tr>
- <td colspan=6>&nbsp;</td>
- <td><a href="{$c}max_tmpf');">Plot</a></td>
- <td><a href="{$c}min_tmpf');">Plot</a></td>
- <td><a href="{$c}pday');">Plot</a></td>
- <td><a href="{$c}snow');">Plot</a></td>
- <td></td>
- <td><a href="{$c}snowd');">Plot</a></td>
- <td><a href="{$c}snoww');">Plot</a></td>
-</tr></tfoot>
+</tbody>
 </table>
 <input type="submit" value="Add to Favorites">
 </form>

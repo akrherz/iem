@@ -4,8 +4,6 @@ include("../../../../config/settings.inc.php");
 //  - Replace GEMPAK mesoplots!!!
 include_once "../../../../include/iemmap.php";
 include("../../../../include/mlib.php");
-include("../../../../include/iemaccess.php");
-include("../../../../include/iemaccessob.php");
 include("../../../../include/network.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
@@ -15,8 +13,9 @@ $titles = Array("KCCI" => "KCCI SchoolNet8",
  "KELO" => "KELO WeatherNet",
  "KIMT" => "KIMT StormNet");
 
-$iem = new IEMAccess();
-$data = $iem->getNetwork($network);
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
+$jobj = json_decode($jdata, $assoc=TRUE);
+
 function skntChar($sknt){
   if ($sknt < 2)  return chr(0);
   if ($sknt < 5)  return chr(227);
@@ -125,11 +124,11 @@ $iards->draw($img);
 $mwradar->draw($img);
 $now = time();
 
-foreach($data as $key => $value){
-
+foreach($jobj["data"] as $bogus => $value){
+    $key = $value["station"];
   if ($Scities[$key]["online"] == false) continue;
-  $bzz = $value->db;
-  if (($now - $bzz["ts"]) < 3600){ 
+  $bzz = $value;
+  if (($now - strtotime($bzz["local_valid"])) < 3600){ 
      $pt = ms_newPointObj();
      $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
      $rotate =  0 - intval($bzz["drct"]);

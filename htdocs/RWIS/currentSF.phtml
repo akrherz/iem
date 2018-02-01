@@ -1,8 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 include_once "../../include/database.inc.php";
 $mesosite = iemdb('mesosite');
-include("../../include/myview.php");
+include_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 $t->current_network = "RWIS Surface";
@@ -11,22 +11,8 @@ $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
  $t->title = "RWIS Surface Currents";
  $t->refresh = "<meta http-equiv=\"refresh\" content=\"600;
  URL=currentSF.phtml?sortcol=$sortcol&amp;network=$network\">";
- $t->headextra = <<<EOF
- <script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
-</script>
-EOF;
  $t->thispage = "current-sort";
- include("../../include/mlib.php"); 
- include("../../include/iemaccess.php");
- include("../../include/iemaccessob.php");
-
-$iem = new IEMAccess();
-$rwis = $iem->getNetwork($network);
+ include_once "../../include/mlib.php";
 
 $vals = Array("tsf0" => "Sensor 1 - Temp [F]", 
   "tmpf" => "Air Temp [F]",
@@ -75,10 +61,13 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
 $mydata = Array();
 
-while (list($key, $iemob) = each($rwis) ){
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
-	$mydata[$key] = $iemob->db;
-	$mydata[$key]["ts"] = $iemob->ts;
+while (list($bogus, $ob) = each($jobj["data"])){
+    $key = $ob["station"];
+	$mydata[$key] = $ob;
+	$mydata[$key]["ts"] = strtotime($ob["local_valid"]);
 
 	if ($mydata[$key]['tmpf'] < -60){
 		$mydata[$key]['tmpf'] = "M";
@@ -86,7 +75,7 @@ while (list($key, $iemob) = each($rwis) ){
 	}
 
 	$t2 = Array($mydata[$key]['tsf0'], $mydata[$key]['tsf1'],
-			$mydata[$key]['tsf2'], $mydata[$key]['tsf3']);
+			    $mydata[$key]['tsf2'], $mydata[$key]['tsf3']);
 	arsort($t2);
 
 	while (min($t2) == -99){
@@ -101,8 +90,6 @@ while (list($key, $iemob) = each($rwis) ){
 	} else {
 		$mydata[$key]['pave_avg'] = -99.99;
 	}
-
-
 }
 
 $table = "";
@@ -124,7 +111,7 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= ">";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
             value=\"".$key."_SF\"></td>";
-	$table .= "<td>". $parts["sname"] . "</td>";
+	$table .= "<td>". $parts["name"] . "</td>";
 	$table .= "<td";
 	if ($tdiff > 11900){
 		$table .= ' bgcolor="red">'. strftime("%b-%d-%y %I:%M %p", $parts["ts"]) .'</td>';
@@ -178,7 +165,7 @@ $content = <<<EOF
 
 
 <form method="GET" action="/my/current.phtml">
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table class="table table-striped table-bordered table-condensed">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
@@ -200,24 +187,11 @@ $content = <<<EOF
   <th><a href="currentSF.phtml?network={$network}&sortcol=tsf2">Temp</a></th>
   <th><a href="currentSF.phtml?network={$network}&sortcol=tsf3">Temp</a></th>
   <th><a href="currentSF.phtml?network={$network}&sortcol=rwis_subf">Sub T</a></th>
-  <th><a href="currentSF.phtml?network=<?php echo $network;
-  ?>&sortcol=pave_avg">Ave Surface Temp</a> [<b>1</b>]</th>
+  <th><a href="currentSF.phtml?network={$network}&sortcol=pave_avg">Ave Surface Temp</a> [<b>1</b>]</th>
 </tr></thead>
 <tbody>
 {$table}
 </tbody>
-<tfoot>
-<tr>
- <td colspan=3>&nbsp;</td>
- <td><a href="{$c}tmpf');">Plot</a></td>
- <td><a href="{$c}dwpf');">Plot</a></td>
- <td><a href="{$c}tsf0');">Plot</a></td>
- <td><a href="{$c}tsf1');">Plot</a></td>
- <td><a href="{$c}tsf2');">Plot</a></td>
- <td><a href="{$c}tsf3');">Plot</a></td>
- <td><a href="{$c}rwis_subf');">Plot</a></td>
- <td>&nbsp;</td>
-</tr></tfoot>
 </table>
 <input type="submit" value="Add to Favorites">
 <input type="reset" value="Reset">

@@ -1,10 +1,8 @@
 <?php 
-  include("../../config/settings.inc.php");
+  require_once "../../config/settings.inc.php";
   define("IEM_APPID", 94);
 include("../../include/myview.php");
 include("../../include/mlib.php");
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
 require_once "../../include/forms.php";
 $t = new MyView();
   $network = isset($_GET['network']) ? xssafe($_GET['network']): 'KCCI';
@@ -12,23 +10,11 @@ $t = new MyView();
 
   $t->title = "School Network";
   $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?network=$network&sortcol=$sortcol\">";
-  $t->headextra = <<<EOF
-<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"Link","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=360,height=400");
-} 
-function new_window_big(url) {
- link = window.open(url,"Link","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
-</script>
-EOF;
   
  $t->thispage = "current-sort";
 
-  $iem = new IEMAccess();
-  $snet = $iem->getNetwork( strtoupper($network) );
+   $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
+   $jobj = json_decode($jdata, $assoc=TRUE);
 
 $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
 
@@ -101,16 +87,16 @@ function arSortBySecondIndex($multiArray, $secondIndex) {
 
 
 $mydata = Array();
-while (list($key, $iemob) = each($snet) ){
-	$mydata[$key] = $iemob->db;
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+	$mydata[$key] = $iemob;
+	$mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
+	$mydata[$key]["sname"] = $iemob["name"];
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
 	if ($mydata[$key]["max_tmpf"] > 150) {
 		$mydata[$key]["max_tmpf"] = "";
 	}
-	if ($mydata[$key]["tmpf"] < 150 && $mydata[$key]["tmpf"] > -50) {
-		$mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
-				$mydata[$key]["relh"], $mydata[$key]["sped"]);
-	} else {
+	if ($mydata[$key]["tmpf"] > 150 || $mydata[$key]["tmpf"] < -50) {
 		$mydata[$key]["tmpf"] = "";
 		$mydata[$key]["relh"] = "";
 		$mydata[$key]["feel"] = "";
@@ -125,11 +111,11 @@ while (list($key, $iemob) = each($snet) ){
 
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
 	} else {
 		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-		if ($mydata[$key]["max_sknt_ts"] > 0){
-			$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+		if ($mydata[$key]["local_max_sknt_ts"]){
+			$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
 		} else {
 			$mydata[$key]["peak_ts"] = 0;
 		}
@@ -159,8 +145,7 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"fa fa-picture-o\"></i></a>"
-			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"fa fa-info\"></i></a></td>";
+	$table .= "<th><a href=\"/sites/site.php?network={$network}&amp;station={$key}\">". $parts["sname"] . "</a></th>";
 
 
 	$table .= "<td ";
@@ -177,14 +162,14 @@ while (list ($key, $val) = each ($finalA))  {
 			round($parts["min_tmpf"],0) ."</font>)</td>
           <td>". $parts["dwpf"] ."</td>
           <td align='center'>". $parts["relh"] ."%</td>
-          <td>". $parts["feel"] ."</td>
+          <td>". round($parts["feel"],0) ."</td>
           <td>". $parts["pres"] ."</td>
           <td>". drct2txt($parts["drct"]) ."</td>
             <td>". round($parts["sknt"],0) ."</td>
             <td>". round($parts["peak"],0) ." @"
             		. strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
           <td>". $parts["pday"] ."</td>
-          <td>". $parts["pmonth"] ."</td>
+          <td>". $parts["s_pmonth"] ."</td>
           </tr>\n";
 }
 
@@ -195,13 +180,11 @@ while (list ($key, $val) = each ($skippedStations) ) {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th>". $parts["sname"] . " <a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\"><i class=\"fa fa-picture-o\"></i></a>"
-			."&nbsp;<a href=\"/sites/site.php?network={$network}&amp;station={$key}\"><i class=\"fa fa-info\"></i></a></td>";
+	$table .= "<td><a href=\"/sites/site.php?network={$network}&amp;station={$key}\">". $parts["sname"] ."</a></td>";
 	
 	$table .= "<td colspan=\"11\">Site offline since: ". strftime("%d %b %Y %I:%M %p", $parts['ts']) ."</td>";
 
 } 
-$c = "javascript:new_window_big('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=". strtoupper($network)."&var=";
 
 $content .= <<<EOF
 <p>Sorted by: <b>{$vals[$sortcol]}</b><br>
@@ -242,23 +225,6 @@ $content .= <<<EOF
 {$table}
 
 </tbody>
-<tfoot>
-<tr>
-<td colspan=3></td>
- <td><a href="{$c}tmpf');">Plot</a>
-    (<a href="{$c}max_tmpf');">Plot</a> /
-     <a href="{$c}min_tmpf');">Plot</a>)</td>
- <td><a href="{$c}dwpf');">Plot</a></td>
- <td><a href="{$c}relh');">Plot</a></td>
- <td><a href="{$c}feel');">Plot</a></td>
- <td><a href="{$c}pres');">Plot</a></td>
- <td colspan=2><a href="{$c}barb');">Plot</a></td>
- <td><a href="{$c}max_sknt');">Plot</a></td>
- <td><a href="{$c}pday');">Plot</a></td>
- <td><a href="{$c}pmonth');">Plot</a></td>
- 
-</tr>
-</tfoot>
 </table>
 
 <input type="submit" value="Add to Favorites">

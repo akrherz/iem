@@ -3,8 +3,6 @@
  define("IEM_APPID", 83);
  include("../../include/myview.php");
  include("../../include/mlib.php");
- include("../../include/iemaccess.php");
- include("../../include/iemaccessob.php");
  include_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  
@@ -27,8 +25,6 @@ EOF;
  $t->thispage= "current-sort";
 $mesosite = iemdb('mesosite');
   
-$iem = new IEMAccess();
-$rwis = $iem->getNetwork($network);
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
@@ -65,18 +61,20 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
 $mydata = Array();
 
-while (list($key, $iemob) = each($rwis) ){
-	$mydata[$key] = $iemob->db;
-	$mydata[$key]["ts"] = $iemob->ts;
-	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
-			f2c($mydata[$key]["dwpf"]) );
-	$mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
-			$mydata[$key]["relh"], $mydata[$key]["sknt"] * 1.15078);
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
+$jobj = json_decode($jdata, $assoc=TRUE);
+
+while (list($bogus, $ob) = each($jobj["data"]) ){
+    $key = $ob["station"];
+    $mydata[$key] = $ob;
+    $mydata[$key]["ts"] = strtotime($ob["local_valid"]);
+	$mydata[$key]["relh"] = $ob["relh"];
+	$mydata[$key]["feel"] = $ob["feel"];
 	if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]){
 		$mydata[$key]["feel"] = "";
 		$mydata[$key]["dwpf"] = "";
 	}
-	if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < -98 ){
+	if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < 0 ){
 		$mydata[$key]["feel"] = "";
 		$mydata[$key]["dwpf"] = "";
 		$mydata[$key]["relh"] = "";
@@ -97,11 +95,11 @@ while (list($key, $iemob) = each($rwis) ){
 	$mydata[$key]["peak_ts"] = 0;
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
 	} else {
 		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-		if ($mydata[$key]["max_sknt_ts"] > 0) {
-			$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+		if ($mydata[$key]["local_max_sknt_ts"]) {
+			$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
 		}
 	}
 
@@ -138,7 +136,7 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "<tr>";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-	$table .= "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["sname"] . "</a></td><td ";
+	$table .= "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["name"] . "</a></td><td ";
 	if ($tdiff > 11900){
 		$table .= 'bgcolor="red"';
 		$format = "%b-%d-%y %I:%M %p";
@@ -156,8 +154,8 @@ while (list ($key, $val) = each ($finalA))  {
   $parts["max_tmpf"] ."</font>/<font color=\"#0000ff\">".
   $parts["min_tmpf"] ."</font>)</td>
  <td>". $parts["dwpf"] ."</td>
- <td>". $parts["feel"] ."</td>
- <td>". $parts["relh"] ."</td>
+ <td>". round($parts["feel"], 0) ."</td>
+ <td>". round($parts["relh"], 0) ."</td>
  <td>". $parts["vsby"] ."</td>
  <td>". round($parts["sknt"],0) ;
 	if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
@@ -179,7 +177,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
 	$table .= "<tr>";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-	$table .= "<td>". $parts["sname"] . "</td><td ";
+	$table .= "<td>". $parts["name"] . "</td><td ";
 	$table .= 'bgcolor="red"';
 	$format = "%b-%d-%Y";
 	$table .= ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
@@ -230,21 +228,6 @@ $content = <<<EOF
 <tbody>
 {$table}
 </tbody>
-<tfoot>
-<tr>
- <td colspan=3>&nbsp;</td>
- <td><a href="{$c}tmpf');">Plot</a>
-    (<a href="{$c}max_tmpf');">Plot</a> /
-     <a href="{$c}min_tmpf');">Plot</a>)</td>
- <td><a href="{$c}dwpf');">Plot</a></td>
- <td><a href="{$c}feel');">Plot</a></td>
- <td><a href="{$c}vsby');">Plot</a></td>
- <td><a href="{$c}relh');">Plot</a></td>
- <td colspan=2><a href="{$c}barb');">Plot</a></td>
- <td><a href="{$c}max_sknt');">Plot</a></td>
- <td><a href="{$c}pday');">Plot</a></td>
-
-</tr></tfoot>
 </table>
 <input type="submit" value="Add to Favorites">
 <input type="reset" value="Reset">

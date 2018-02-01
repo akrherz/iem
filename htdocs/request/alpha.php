@@ -1,21 +1,20 @@
 <?php
  $station = isset($_GET['station']) ? substr($_GET['station'],0,5): 'SJEI4';
  include("../../config/settings.inc.php");
- include("../../include/iemaccess.php");
  include("../../include/mlib.php");
- include("../../include/iemaccessob.php");
- $iem = new IEMAccess();
- $ob = $iem->getSingleSite($station);
+   $jdata = file_get_contents("http://iem.local/api/1/currents.json?station=$station");
+   $jobj = json_decode($jdata, $assoc=TRUE);
+   $ob = $jobj["data"][0];
  header('Content-type: text/plain');
 
- echo $ob->db["tmpf"] ."\n";
- echo $ob->db["dwpf"] ."\n";
- echo $ob->db["sknt"] ."\n";
- echo drct2txt($ob->db["drct"]) ."\n";
- echo round($ob->db["gust"],0) ."\n";
- echo $ob->db["pday"] ."\n";
- echo $ob->db["relh"] ."\n";
- echo $ob->db["pres"] ."\n";
- echo feels_like($ob->db['tmpf'], $ob->db['relh'], $ob->db['sknt']) ."\n";
+ echo $ob["tmpf"] ."\n";
+ echo $ob["dwpf"] ."\n";
+ echo $ob["sknt"] ."\n";
+ echo drct2txt($ob["drct"]) ."\n";
+ echo round($ob["gust"],0) ."\n";
+ echo $ob["pday"] ."\n";
+ echo $ob["relh"] ."\n";
+ echo $ob["pres"] ."\n";
+ echo intval($ob["feel"]) ."\n";
 
 ?>

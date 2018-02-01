@@ -7,20 +7,14 @@
  */
 include "../../config/settings.inc.php";
 include "../../include/mlib.php";
-include "../../include/network.php";
-$nt = new NetworkTable("AWOS");
-$cities = $nt->table;
 
 function fancy($v, $floor,$ceil, $p){
   if ($v < $floor || $v > $ceil) return "";
   return sprintf("%${p}.1f", $v);
 }
 
-include "../../include/iemaccess.php";
-include "../../include/iemaccessob.php";
-$iem = new IEMAccess();
-
-$mydata = $iem->getNetwork("AWOS");
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
 $rwis = fopen('/tmp/wxc_ia_awos.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
@@ -43,18 +37,18 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data
 
 
 $now = time();
-while ( list($key, $val) = each($mydata) ) {
-  $tdiff = $now - $val->db["ts"];
+while ( list($bogus, $val) = each($jobj["data"]) ) {
+  $tdiff = $now - strtotime($val["local_valid"]);
   if ($tdiff > 3600){ continue; }
-  if ($val->db['pday'] < 0){ $val->db['pday'] = 0; }
+  if ($val['pday'] < 0){ $val['pday'] = 0; }
 
-  $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4s %5s\n", $key, 
-    $cities[$key]['name'], 'IA', round($cities[$key]['lat'],2), 
-     round($cities[$key]['lon'],2),
-     date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
-     $val->db['tmpf'], $val->db['dwpf'],
-     $val->db['drct'], drct2txt($val->db['drct']), $val->db['sknt'], 
-     $val->db['pday']); 
+  $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4s %5s\n", $val["station"], 
+    $val['name'], 'IA', round($val['lat'],2), 
+     round($val['lon'],2),
+      date('d', strtotime($val["local_valid"]) + (6*3600) ), date('H', strtotime($val["local_valid"]) + (6*3600)),
+     $val['tmpf'], $val['dwpf'],
+     $val['drct'], drct2txt($val['drct']), $val['sknt'], 
+     $val['pday']); 
   fwrite($rwis, $s);
 } // End of while
 

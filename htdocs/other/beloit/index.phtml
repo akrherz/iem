@@ -2,8 +2,6 @@
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
 require_once "../../../include/forms.php";
-include ("../../../include/iemaccess.php");
-include ("../../../include/iemaccessob.php");
 $t = new MyView();
 $t->title = "Beloit Weather Station";
 $t->thispage = "networks-other";
@@ -12,29 +10,6 @@ $year = isset( $_GET["year"] ) ? intval($_GET["year"]): date("Y");
 $month = isset( $_GET["month"] ) ? intval($_GET["month"]): date("m");
 $day = isset( $_GET["day"] ) ? intval($_GET["day"]): date("d");
 
-$iem = new IEMAccess();
-$iemob = $iem->getSingleSite("OT0009");
-$rs = $iemob->db;
-
-
- $vardict = Array("valid" => "Observation Time", "tmpf" => "Air Temperature [F]",
-   "dwpf" => "Dew Point [F]", "relh" => "Relative Humidity [%]",
-   "drct" => "Wind Direction", "sknt" => "Wind Speed [knots]",
-   "srad" => "Solar Radiation [W m{-2}]",
-   "mslp" => "Pressure [mb]", "phour" => "Hourly Precipitation [inches]",
-   "c1tmpf" => "Soil Temperature [F]", "pday" => "Daily Precipitation [inches]");
-
- $vselect = "";
- foreach ( $vardict as $key => $value ) {
- 	if ($rs[$key] != "") {
- 		if ($key == "valid") {
- 			$t2 = date("d M Y, g A", strtotime($rs[$key]));
- 			$vselect .= '<tr><td><b>'. $value .'</b></td><td>'. $t2 .'</td></tr>';
- 		} else {
- 			$vselect .= '<tr><td><b>'. $value .'</b></td><td>'. $rs[$key] .'</td></tr>';
- 		} // End if
- 	} // End if
- }
  $ys = yearSelect2(2010, $year, "year");
  $ms = monthSelect($month, "month");
  $ds = daySelect($day, "day");
@@ -42,7 +17,7 @@ $rs = $iemob->db;
  $table = "";
  $rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary s JOIN stations t
   ON (t.iemid = s.iemid)
-  WHERE t.id = 'OT0009' ORDER by day DESC");
+  WHERE t.id = 'OT0009' and max_tmpf > -99 ORDER by day DESC");
  for($i=0;$row=@pg_fetch_array($rs2,$i);$i++){
  	$table .= sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>",
  			$row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
@@ -61,10 +36,6 @@ two facilities on campus, including the new Anna J. Hull Treatment
 Center. This weather station is used by the students to help their 
 gardening activities.</p>
 
-<strong>Current Observation</strong><br />
-<table cellpadding="3" cellspacing="0" border="1">
-{$vselect}
-</table>
 
 <p><strong>Time Series Graph</strong><br />
 Select Date after 14 May 2010:

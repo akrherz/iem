@@ -14,8 +14,6 @@
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
  $baa = 'network.phtml?network='. $network;
 
-
- include("../../../include/iemaccess.php");
  include("../../../include/network.php");
  $nt = new NetworkTable($network);
  $cities = $nt->table;

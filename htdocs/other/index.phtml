@@ -6,11 +6,14 @@ $t = new MyView();
 include("../../include/forms.php");
 include("../../include/imagemaps.php");
 include("../../include/mlib.php");
-include("../../include/iemaccess.php");
-include("../../include/iemaccessob.php");
-$iem = new iemaccess();
-$rsai4 = $iem->getSingleSite('RSAI4');
-$rlri4 = $iem->getSingleSite('RLRI4');
+
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?station=RSAI4&station=RLRI4");
+$jobj = json_decode($jdata, $assoc=TRUE);
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $station = $iemob["station"];
+    if ($station == 'RSAI4') $rsai4 = $iemob;
+    else $rlri4 = $iemob;
+}
 
 $t->title = "Other Data Networks";
 $t->thispage = "networks-other";
@@ -27,15 +30,15 @@ $y13select = yearSelect2(2014, date("Y"), "year1");
 $y23select = yearSelect2(2014, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
 $table = sprintf("<tr><td>Saylorville Lake</td><td>%s</td><td>%.1f Gusts: %.1f</td>
-	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4->db['obtime'], $rsai4->db['sknt'] * 1.15,
-		$rsai4->db['gust'] * 1.15, $rsai4->db['max_gust'] * 1.15,
-		@strftime('%I:%M %p', $rsai4->db['gust_ts']),
-	drct2txt($rsai4->db['drct']) );
+	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4['local_valid'], $rsai4['sknt'] * 1.15,
+		$rsai4['gust'] * 1.15, $rsai4['max_gust'] * 1.15,
+		@strftime('%I:%M %p', strtotime($rsai4['local_max_gust_ts'])),
+	drct2txt($rsai4['drct']) );
 $table .= sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td>
-	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4->db['obtime'], $rlri4->db['sknt'] * 1.15,
-	$rlri4->db['gust'] * 1.15, $rlri4->db['max_gust'] * 1.15, 
-	@strftime('%I:%M %p', $rlri4->db['gust_ts']),
-	drct2txt($rlri4->db['drct']) );
+	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4['local_valid'], $rlri4['sknt'] * 1.15,
+	$rlri4['gust'] * 1.15, $rlri4['max_gust'] * 1.15, 
+	@strftime('%I:%M %p', strtotime($rlri4['local_max_gust_ts'])),
+	drct2txt($rlri4['drct']) );
 
 $t->content = <<<EOF
 <h3>Other Data Networks</h3>

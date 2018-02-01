@@ -1,13 +1,11 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 40);
  include("../../include/myview.php");
  include("../../include/mlib.php"); 
  include("../../include/network.php");
  require_once "../../include/forms.php";
  include("../../include/station.php");
- include("../../include/iemaccess.php");
- include("../../include/iemaccessob.php");
   
   $t = new MyView();
  
@@ -22,8 +20,8 @@
   $t->thispage = "current-sort";
   $nt = new NetworkTable("WFO");
  
-$iem = new IEMAccess();
-$asos = $iem->getWFO($wfo);
+ $jdata = file_get_contents("http://iem.local/api/1/currents.json?wfo=$wfo");
+ $jobj = json_decode($jdata, $assoc=TRUE);
 
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
@@ -64,8 +62,9 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 }
 
 $mydata = Array();
-while (list($key, $iemob) = each($asos) ){
-	$mydata[$key] = $iemob->db;
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+	$mydata[$key] = $iemob;
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
 	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]) );
 	if ($mydata[$key]["relh"] < 5)
@@ -102,18 +101,15 @@ while (list($key, $iemob) = each($asos) ){
 		}
 	}
 
-
-	$mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],  $mydata[$key]["relh"], $mydata[$key]["sped"]);
-
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_gust_ts"],0,16) );
+		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
 	} else {
 		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
 		$mydata[$key]["peak_ts"] = 0;
-		if ($mydata[$key]["max_sknt_ts"] > 0)
+		if ($mydata[$key]["local_max_sknt_ts"])
 		{
-			$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_sknt_ts"],0,16) );
+			$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
 		}
 	}
 
@@ -133,9 +129,9 @@ while (list ($key, $val) = each ($finalA))  {
 	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 	$table .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
-	$tdiff = $now - $parts["ts"];
+	$tdiff = $now - strtotime($parts["local_valid"]);
 	$moreinfo = sprintf("/sites/site.php?station=%s&network=%s", $key, $parts["network"]);
-	$table .= "<td>". $parts["sname"] . " (<a href=\"$moreinfo\">". $key ."</a>,". $parts["network"] .")</td>";
+	$table .= "<td>". $parts["name"] . " (<a href=\"$moreinfo\">". $key ."</a>,". $parts["network"] .")</td>";
 	$table .= "<td ";
 	if ($tdiff > 10000){
 		$fmt = "%d %b %I:%M %p";
@@ -150,7 +146,7 @@ while (list ($key, $val) = each ($finalA))  {
 		$fmt = "%I:%M %p";
 	}
 
-	$table .= ">". strftime($fmt, $asos[$key]->lts) ."</td>
+	$table .= ">". strftime($fmt, strtotime($parts["local_valid"])) ."</td>
      <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font>)</td>
      <td>". round($parts["dwpf"],0) ."</td>
      <td>". round($parts["feel"],0) ."</td>

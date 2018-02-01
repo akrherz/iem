@@ -9,7 +9,6 @@ $ts = mktime(0,0,0, $month, 1, $year);
 
 $today = time();
 
-include("../../../include/iemaccess.php");
 include("../../../include/station.php");
 $st = new StationData($station, $network);
 $cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);

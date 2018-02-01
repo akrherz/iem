@@ -12,14 +12,7 @@ Font: 1, 11, 1, "Courier New"
 
 ';
 include("../../../config/settings.inc.php");
-include("../../../include/iemaccess.php");
-include("../../../include/iemaccessob.php");
 include("../../../include/mlib.php");
-include("../../../include/network.php");
-$nt = new NetworkTable("KELO");
-$cities = $nt->table;
-$iem = new IEMAccess();
-$snet = $iem->getNetwork("KELO");
 
 function s2icon($s)
 {
@@ -50,23 +43,24 @@ function s2icon($s)
 }
 
 $now = time();
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=KELO");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
-while (list($key, $iemob) = each($snet) ){
-    $mydata = $iemob->db;
-    $meta = $cities[$key];
-    $tdiff = $now - $mydata["ts"];
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $mydata = $iemob;
+    $tdiff = $now - strtotime($mydata["local_valid"]);
     if ($tdiff > 3600) continue;
     if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
-
-echo "Object: ".$meta["lat"].",".$meta["lon"]."
-  Threshold: 999 
+    
+    echo "Object: ".$mydata["lat"].",".$mydata["lon"]."
+  Threshold: 999
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
-  Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
+  Icon: 0,0,000,2,13,\"".$mydata["name"]." @ ". strftime("%d %b %I:%M %p", strtotime($mydata['local_valid'])) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\"
   Threshold: 150
-  Text:  -17, 13, 1, \" ".$mydata["tmpf"]." \" 
-  Text:  -17, -13, 1, \" ".$mydata["dwpf"]." \" 
- End: 
-
+  Text:  -17, 13, 1, \" ".$mydata["tmpf"]." \"
+  Text:  -17, -13, 1, \" ".$mydata["dwpf"]." \"
+ End:
+      
 ";
 }
 

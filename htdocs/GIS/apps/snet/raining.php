@@ -8,8 +8,6 @@ include_once "../../../../include/iemmap.php";
 include("../../../../include/mlib.php");
 require_once "../../../../include/forms.php";
 include("../../../../include/network.php");
-include("../../../../include/iemaccess.php");
-include("../../../../include/iemaccessob.php");
 
 $projs = Array("KCC" => "init=epsg:26915",
 		"DMX" => "init=epsg:4326",
@@ -86,11 +84,13 @@ $radselect = make_select("rad", $rad, $ar);
 $nt = new NetworkTable($tv);
 $stbl = $nt->table;
 
-$iemdb = new IEMAccess();
-$iemdata = $iemdb->getNetwork($tv);
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$tv");
+$jobj = json_decode($jdata, $assoc=TRUE);
+
 $data = Array();
-while (list($key, $iemob) = each($iemdata) ){
-	$data[$key] = $iemob->db;
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    $key = $iemob["station"];
+    $data[$key] = $iemob;
 	$data[$key]["p15m"] = 0;
 }
 
@@ -166,7 +166,7 @@ foreach($stbl as $key => $value){
 	$pt = ms_newPointObj();
 	$pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
 	/** Data is old */
-	if ($now - $data[$key]["ts"] > 1800){
+	if ($now - strtotime($data[$key]["local_valid"]) > 1800){
 		$pt->draw($map, $site, $img, 0);
 	} else {
 		if (floatval($data[$key]["tmpf"]) < 32.1) {
@@ -235,7 +235,7 @@ $now = time();
 $table = "";
 foreach($finalA as $key => $value){
 	$pDay = round($data[$key]["pday"], 2);
-	if ( ($now - $data[$key]["ts"] < 1000) ){
+	if ( ($now - strtotime($data[$key]["local_valid"]) < 1000) ){
 		$table .= "<tr><th><a href=\"raining.php?sortcol=$sortcol&tv=$tv&rad=$rad&station=$key\">". $key ."</a></th><td>". $stbl[$key]["name"] ."</td>
      <td>". $data[$key]["p15m"] ."</td><td>". $data[$key]["phour"] ."</td><td>". $data[$key]["pday"] ."</td></tr>\n";
 	}

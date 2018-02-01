@@ -6,9 +6,6 @@
  */
 
 include '../../config/settings.inc.php';
-include '../../include/network.php';
-$nt = new NetworkTable("IA_COOP");
-$cities = $nt->table;
 
 $coop = fopen('/tmp/wxc_coop.txt', 'w');
 fwrite($coop, "Weather Central 001d0300 Surface Data
@@ -27,30 +24,27 @@ fwrite($coop, "Weather Central 001d0300 Surface Data
    6 Snowfall Depth
 ");
 
-include('../../include/iemaccess.php');
-include('../../include/iemaccessob.php');
-
-$iem = new IEMAccess();
-$net = $iem->getNetwork("IA_COOP");
+$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=IA_COOP");
+$jobj = json_decode($jdata, $assoc=TRUE);
 
 $now = time();
 
-while (list($key, $iemob) = each($net) ){
-    if ((float)$iemob->db["max_tmpf"] < -50) $iemob->db["max_tmpf"] = " ";
-    if ((float)$iemob->db["min_tmpf"] > 90) $iemob->db["min_tmpf"] = " ";
-    if ((float)$iemob->db["min_tmpf"] < -90) $iemob->db["min_tmpf"] = " ";
-    if ((float)$iemob->db["snow"] < 0) $iemob->db["snow"] = " ";
-    if ((float)$iemob->db["snow"] < 0) $iemob->db["snow"] = " ";
-    if ((float)$iemob->db["snowd"] < 0) $iemob->db["snowd"] = " ";
-    if ((float)$iemob->db["pday"] < 0) $iemob->db["pday"] = " ";
-    if ($now - $iemob->db["ts"] > 3600*10) continue;   
+while (list($bogus, $iemob) = each($jobj["data"]) ){
+    if ((float)$iemob["max_tmpf"] < -50) $iemob["max_tmpf"] = " ";
+    if ((float)$iemob["min_tmpf"] > 90) $iemob["min_tmpf"] = " ";
+    if ((float)$iemob["min_tmpf"] < -90) $iemob["min_tmpf"] = " ";
+    if ((float)$iemob["snow"] < 0) $iemob["snow"] = " ";
+    if ((float)$iemob["snow"] < 0) $iemob["snow"] = " ";
+    if ((float)$iemob["snowd"] < 0) $iemob["snowd"] = " ";
+    if ((float)$iemob["pday"] < 0) $iemob["pday"] = " ";
+    if ($now - strtotime($iemob["local_valid"]) > 3600*10) continue;   
     $s = sprintf("%5s %-52s %2s %7.4f %9.4f %2s %2s %4s %4s %6s %6s %6s\n",
-      $key, $cities[$key]['name'], "IA",
-      $cities[$key]['lat'], 
-      $cities[$key]['lon'],
-      date("d"), "12", $iemob->db["max_tmpf"], $iemob->db["min_tmpf"], 
-      $iemob->db["pday"], 
-      $iemob->db["snow"], $iemob->db["snowd"] );
+      $iemob["station"], $iemob['name'], "IA",
+      $iemob['lat'], 
+      $iemob['lon'],
+      date("d"), "12", $iemob["max_tmpf"], $iemob["min_tmpf"], 
+      $iemob["pday"], 
+      $iemob["snow"], $iemob["snowd"] );
     fwrite($coop, $s);
 }
 fclose($coop);

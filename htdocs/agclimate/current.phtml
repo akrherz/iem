@@ -5,13 +5,10 @@
  include "../../include/database.inc.php";
  include "../../include/network.php";
  include "../../include/mlib.php";
- include "../../include/iemaccess.php";
- include "../../include/iemaccessob.php";
  $nt = new NetworkTable("ISUSM");
- 
- $access = new IEMAccess();
- $obs = $access->getNetwork("ISUSM");
- 
+
+ $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=ISUSM");
+ $jobj = json_decode($jdata, $assoc=TRUE);
 
  $table = "<table class='table table-striped table-bordered table-condensed'>
  		<tr><th rowspan='2'>Location</th>
@@ -34,34 +31,36 @@
  		</tr>";
  $offline = Array();
  $threshold = time() - 86400;
- while (list($sid,$data)=each($obs)) {
+ while (list($bogus, $data)=each($jobj["data"])) {
+     $sid = $data["station"];
  	$uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
  	
- 	if ($data->ts < $threshold){
+ 	$ts = strtotime($data["local_valid"]);
+ 	if ($ts < $threshold){
  		$offline[] = sprintf("<a href=\"%s\">%s</a>", $uri,
 				 $nt->table[$sid]['name']);
  		continue;
  	}
  	
- 	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
+ 	$pday = ($data['pday'] < 0) ? 0 : $data['pday'];
  	$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
  			<td>%.1f</td><td>%.1f</td><td>%.1f</td>
  			<td>%s @ %.0f</td><td>%.0f</td><td>%.0f @ %s</td>
  			<td>%.2f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%s</td>
  			<td>%.1f</td><td>%s</td>
  			<td>%.1f</td><td>%s</td></tr>", $uri, $nt->table[$sid]['name'],
- 			date("g A", $data->ts), $data->db["tmpf"],
- 			$data->db["max_tmpf"], $data->db["min_tmpf"], 
- 			drct2txt($data->db["drct"]), $data->db["sknt"] * 1.15,
- 			$data->db['gust'] * 1.15, $data->db['max_gust'] * 1.15,
- 			date("g:i A", strtotime($data->db['max_gust_ts'])),
- 			$data->db['phour'], $pday, $data->db["c1tmpf"],
- 			$data->db["c2tmpf"], 
-			($data->db["c2smv"] < 0) ? "Frozen": round($data->db["c2smv"],1),
- 			 $data->db["c3tmpf"], 
- 			($data->db["c3smv"] < 0) ? "Frozen": round($data->db["c3smv"],1),
- 			$data->db["c4tmpf"], 
- 			($data->db["c4smv"] < 0) ? "Frozen": round($data->db["c4smv"],1) 
+ 			date("g A", $ts), $data["tmpf"],
+ 			$data["max_tmpf"], $data["min_tmpf"], 
+ 			drct2txt($data["drct"]), $data["sknt"] * 1.15,
+ 			$data['gust'] * 1.15, $data['max_gust'] * 1.15,
+ 			date("g:i A", strtotime($data['local_max_gust_ts'])),
+ 			$data['phour'], $pday, $data["c1tmpf"],
+ 			$data["c2tmpf"], 
+			($data["c2smv"] < 0) ? "Frozen": round($data["c2smv"],1),
+ 			 $data["c3tmpf"], 
+ 			($data["c3smv"] < 0) ? "Frozen": round($data["c3smv"],1),
+ 			$data["c4tmpf"], 
+ 			($data["c4smv"] < 0) ? "Frozen": round($data["c4smv"],1) 
  	);
  }
  

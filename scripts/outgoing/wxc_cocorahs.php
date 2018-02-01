@@ -5,13 +5,6 @@
 include "../../config/settings.inc.php";
 include "../../include/mlib.php";
 
-include "../../include/network.php";
-$nt = new NetworkTable("IACOCORAHS");
-include "../../include/iemaccess.php";
-include "../../include/iemaccessob.php";
-$iem = new IEMAccess();
-
-
 $rwis = fopen('/tmp/wxc_cocorahs.txt', 'w');
 fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
   10
@@ -32,23 +25,24 @@ reset($states);
 $now = time();
 while(list($k,$state) = each($states)){
 
-	$mydata = $iem->getNetwork("${state}COCORAHS");
+    $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${state}COCORAHS");
+    $jobj = json_decode($jdata, $assoc=TRUE);
 
-	while ( list($key, $val) = each($mydata) ) {
-  		$tdiff = $now - $val->db["ts"];
+	while ( list($bogus, $val) = each($jobj["data"]) ) {
+  		$tdiff = $now - strtotime($val["local_valid"]);
 		if ($tdiff > 86400) continue;
   		
-  		if ($val->db['pday'] < 0) $val->db["pday"] = " ";
-  		if ($val->db['pday'] == 0.0001) $val->db["pday"] = "T";
-  		if ($val->db['snowd'] < 0) $val->db["snowd"] = " ";
-  		if ($val->db['snow'] < 0) $val->db["snow"] = " ";
+  		if ($val['pday'] < 0) $val["pday"] = " ";
+  		if ($val['pday'] == 0.0001) $val["pday"] = "T";
+  		if ($val['snowd'] < 0) $val["snowd"] = " ";
+  		if ($val['snow'] < 0) $val["snow"] = " ";
 
-  		$s = sprintf("%-12s %-52s %2s %7s %8s %2s %4s %6s %6s %6s\n", $key, 
-    $nt->table[$key]['name'], $state, round($nt->table[$key]['lat'],2), 
-     round($nt->table[$key]['lon'],2),
-     date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
-     $val->db['pday'], $val->db['snow'],
-     $val->db['snowd']);
+  		$s = sprintf("%-12s %-52s %2s %7s %8s %2s %4s %6s %6s %6s\n", $val["station"], 
+    $val['name'], $state, round($val['lat'],2), 
+     round($val['lon'],2),
+  		    date('d', strtotime($val["local_valid"]) + (6*3600) ), date('H', strtotime($val["local_valid"]) + (6*3600)),
+     $val['pday'], $val['snow'],
+     $val['snowd']);
   		fwrite($rwis, $s);
   		
 	} // End of while
