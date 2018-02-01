@@ -39,7 +39,7 @@ def database_save(date, shpfn):
 
 def workflow(date, routes):
     """Do work for this date"""
-    print("process_usdm workflow for %s" % (date, ))
+    # print("process_usdm workflow for %s" % (date, ))
     # 1. get file from USDM website
     url = "%sUSDM_%s_M.zip" % (BASEURL, date.strftime("%Y%m%d"))
     req = requests.get(url, timeout=30)
@@ -53,7 +53,7 @@ def workflow(date, routes):
     zipfp = zipfile.ZipFile(tmp.name, 'r')
     shpfn = None
     for name in zipfp.namelist():
-        print("    extracting: %s" % (name, ))
+        # print("    extracting: %s" % (name, ))
         fp = open("/tmp/%s" % (name, ), 'wb')
         fp.write(zipfp.read(name))
         fp.close()
