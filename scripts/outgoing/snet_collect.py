@@ -9,6 +9,7 @@ import tempfile
 import calendar
 import datetime
 
+from metpy.units import units, masked_array
 from pyiem.network import Table as NetworkTable
 import pyiem.meteorology as meteorology
 from pyiem.datatypes import temperature, speed
@@ -63,10 +64,12 @@ def computeOthers(d):
 
         if (ob.get('tmpf') is not None and ob.get('dwpf') is not None and
                 ob.get('sped') is not None):
-            tmpf = temperature(ob['tmpf'], 'F')
-            dwpf = temperature(ob['dwpf'], 'F')
-            sknt = speed(ob['sped'], 'MPH')
-            ob["feel"] = meteorology.feelslike(tmpf, dwpf, sknt).value("F")
+            ob['feel'] = meteorology.mcalc_feelslike(
+                masked_array([ob['tmpf'], ], units('degF'), mask=[False, ]),
+                masked_array([ob['dwpf'], ],  units('degF'), mask=[False, ]),
+                masked_array([ob['sped'], ], units('mile per hour'),
+                             mask=[False, ])
+                ).to(units('degF')).magnitude[0]
         else:
             ob['feel'] = None
         if ob['feel'] == 'M':
