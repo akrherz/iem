@@ -201,8 +201,11 @@
   </Directory>
 
   <LocationMatch "/api/.*\.(json|geojson|txt)">
+    # Behold, great gnashing of teeth for this combination to somehow work
     RequestHeader set "Host" "iem-web-services.local"
-	ProxyPass "http://iem-web-services.local"
+    ProxyPreserveHost Off
+    ProxyPass "http://iem-web-services.local/"
+    ProxyPassReverse "http://iem-web-services.local/"
   </LocationMatch>
 
   <Directory "/opt/iem/htdocs/content">
