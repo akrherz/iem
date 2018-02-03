@@ -11,11 +11,17 @@ from pyiem.util import get_autoplot_context, get_dbconn
 PDICT = OrderedDict([
          ('max-high', 'Maximum High'),
          ('avg-high', 'Average High'),
+         ('std-high', 'Standard Deviation High'),
+         ('delta-high', 'Average Day to Day High Change'),
          ('min-high', 'Minimum High'),
          ('max-low', 'Maximum Low'),
          ('avg-low', 'Average Low'),
+         ('std-low', 'Standard Deviation Low'),
+         ('delta-low', 'Average Day to Day Low Change'),
          ('min-low', 'Minimum Low'),
          ('avg-temp', 'Average Temp'),
+         ('std-temp', 'Standard Deviation of Average Temp'),
+         ('delta-temp', 'Average Day to Day Avg Temp Change'),
          ('range-avghi-avglo', 'Range between Average High + Average Low'),
          ('max-precip', 'Maximum Daily Precip'),
          ('sum-precip', 'Total Precipitation'),
@@ -59,7 +65,22 @@ def get_description():
     access the raw data for these plots
     <a href="/climodat/" class="link link-info">here.</a>  For the variables
     comparing the daily temperatures against average, the average is taken
-    from the NCEI current 1981-2010 climatology."""
+    from the NCEI current 1981-2010 climatology.
+
+    <p>This page presents a number of statistical measures.  In general, these
+    can be summarized as:
+    <ul>
+     <li><strong>Average:</strong> simple arithmetic mean</li>
+     <li><strong>Maximum:</strong> the largest single day value</li>
+     <li><strong>Standard Deviation:</strong> measure indicating the spread
+     within the population of daily values for each grouped period.  Lower
+     values indicate less variability within the month or period.</li>
+     <li><strong>Average Day to Day:</strong> this is computed by sequentially
+     ordering the daily observations with time, computing the absolute value
+     between the current day and previous day and then averaging those values.
+     This is another measure of variability during the month.</li>
+     </ul></p>
+    """
     today = datetime.date.today()
     desc['arguments'] = [
         dict(type='station', name='station', default='IA0000',
@@ -84,7 +105,7 @@ $("#ap_container").highcharts({
     chart: {zoomType: 'x'},
     tooltip: {shared: true},
     xAxis: {title: {text: '""" + ctx['xlabel'] + """'}},
-    yAxis: {title: {text: '"""+ctx['ylabel'].replace("$^\circ$", "")+"""'}},
+yAxis: {title: {text: '""" + ctx['ylabel'].replace(r"$^\circ$", "") + """'}},
     series: [{
         name: '""" + ctx['ptype'] + """',
         type: 'column',
@@ -150,31 +171,50 @@ def get_context(fdict):
         label = calendar.month_name[int(month)]
 
     df = read_sql("""
-    WITH climo as (SELECT to_char(valid, 'mmdd') as sday,
-    high, low from ncdc_climate81 WHERE
-    station = %s)
-
-    SELECT extract(year from day + '""" + lag + """'::interval)::int as myyear,
-    max(o.high) as "max-high",
-    min(o.high) as "min-high",
-    avg(o.high) as "avg-high",
-    max(o.low) as "max-low",
-    min(o.low) as "min-low",
-    avg(o.low) as "avg-low",
-    avg((o.high + o.low)/2.) as "avg-temp",
-    max(o.precip) as "max-precip",
-    sum(o.precip) as "sum-precip",
-    avg(o.high) - avg(o.low) as "range-avghi-avglo",
-    sum(case when o.high >= %s then 1 else 0 end) as "days-high-above",
-    sum(case when o.high < %s then 1 else 0 end) as "days-high-below",
+    WITH climo as (
+        SELECT to_char(valid, 'mmdd') as sday,
+        high, low from ncdc_climate81 WHERE station = %s),
+    day2day as (
+        SELECT
+        extract(year from day + '""" + lag + """'::interval)::int as myyear,
+        month,
+        abs(high - lag(high) OVER (ORDER by day ASC)) as dhigh,
+        abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
+    abs((high+low)/2. - lag((high+low)/2.) OVER (ORDER by day ASC)) as dtemp
+        from """ + table + """ WHERE station = %s),
+    agg as (
+        SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
+        avg(dtemp) as dtemp from day2day WHERE month in %s GROUP by myyear),
+    agg2 as (
+        SELECT
+        extract(year from day + '""" + lag + """'::interval)::int as myyear,
+        max(o.high) as "max-high",
+        min(o.high) as "min-high",
+        avg(o.high) as "avg-high",
+        stddev(o.high) as "std-high",
+        max(o.low) as "max-low",
+        min(o.low) as "min-low",
+        avg(o.low) as "avg-low",
+        stddev(o.low) as "std-low",
+        avg((o.high + o.low)/2.) as "avg-temp",
+        stddev((o.high + o.low)/2.) as "std-temp",
+        max(o.precip) as "max-precip",
+        sum(o.precip) as "sum-precip",
+        avg(o.high) - avg(o.low) as "range-avghi-avglo",
+        sum(case when o.high >= %s then 1 else 0 end) as "days-high-above",
+        sum(case when o.high < %s then 1 else 0 end) as "days-high-below",
     sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
-    sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
+        sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
-    sum(case when o.low < %s then 1 else 0 end) as "days-lows-below"
-  from """+table+""" o JOIN climo c on (o.sday = c.sday)
-  where station = %s and month in %s
-  GROUP by myyear ORDER by myyear ASC
-    """, pgconn, params=(nt.sts[station]['ncdc81'], threshold, threshold,
+        sum(case when o.low < %s then 1 else 0 end) as "days-lows-below"
+        from """+table+""" o JOIN climo c on (o.sday = c.sday)
+      where station = %s and month in %s GROUP by myyear)
+
+    SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
+    a.dtemp as "delta_temp" from agg a JOIN agg2 b
+    on (a.myyear = b.myyear) ORDER by b.myyear ASC
+    """, pgconn, params=(nt.sts[station]['ncdc81'], station, tuple(months),
+                         threshold, threshold,
                          threshold, threshold, station, tuple(months)),
                   index_col='myyear')
 
@@ -209,7 +249,7 @@ def get_context(fdict):
     if ptype.find("days") == 0 and ptype.find('avg') == -1:
         ctx['subtitle'] += " (%s)" % (threshold,)
 
-    units = "$^\circ$F"
+    units = r"$^\circ$F"
     if ctx['ptype'].find('precip') > 0:
         units = "inches"
     elif ctx['ptype'].find('days') > 0:
@@ -236,10 +276,10 @@ def plotter(fdict):
         precision = "%.2f"
     bars = ax.bar(ctx['df'].index.values - 0.4, ctx['data'],
                   fc=colorabove, ec=colorabove)
-    for i, bar in enumerate(bars):
+    for i, mybar in enumerate(bars):
         if ctx['data'][i] < ctx['avgv']:
-            bar.set_facecolor(colorbelow)
-            bar.set_edgecolor(colorbelow)
+            mybar.set_facecolor(colorbelow)
+            mybar.set_edgecolor(colorbelow)
     lbl = "Avg: "+precision % (ctx['avgv'],)
     ax.axhline(ctx['avgv'], lw=2, color='k', zorder=2, label=lbl)
     lbl = "1981-2010: "+precision % (ctx['a1981_2010'],)
