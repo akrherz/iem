@@ -5,11 +5,12 @@ import unittest
 import warnings
 
 import numpy as np
+from metpy.gridding.interpolation import inverse_distance
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, nwssnow
 import pyiem.reference as reference
 from pyiem.util import get_dbconn
-import pandas as pd
-from pandas.io.sql import read_sql
 
 # Stop whining about missing data for contourf
 warnings.filterwarnings("ignore")
@@ -35,17 +36,17 @@ def run(basets, endts, view):
         for lon in np.arange(reference.MW_WEST, reference.MW_EAST, mybuffer):
             df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat+mybuffer)) &
                      (df['lon'] >= lon) & (df['lon'] < (lon+mybuffer))]
-            if df2.empty:
-                newrows.append(dict(lon=(lon+mybuffer/2.),
-                                    lat=(lat+mybuffer/2.),
-                                    val=0, used=True, textplot=False))
-                continue
-            maxval = df.at[df2.index[0], 'val']
-            df.loc[df2[df2['val'] > (maxval * 0.5)].index, 'used'] = True
-            df.loc[df2[df2['val'] < (maxval * 0.5)].index, 'textplot'] = False
-    dfnew = pd.DataFrame(newrows)
-    df = df.append(dfnew)
-    cdf = df[df['used']]
+            newrows.append(dict(lon=(lon+mybuffer/2.),
+                                lat=(lat+mybuffer/2.),
+                                val=0 if df2.empty else df2['val'].mean(),
+                                used=True, textplot=False))
+    analdf = pd.DataFrame(newrows)
+    xi = np.linspace(reference.MW_WEST, reference.MW_EAST, 100)
+    yi = np.linspace(reference.MW_SOUTH, reference.MW_NORTH, 100)
+    xi, yi = np.meshgrid(xi, yi)
+    vals = inverse_distance(analdf['lon'].values, analdf['lat'].values,
+                            analdf['val'].values, xi, yi, 0.25)
+    vals[np.isnan(vals)] = 0
     tdf = df[df['textplot']]
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
@@ -54,11 +55,10 @@ def run(basets, endts, view):
                  title="Local Storm Report Snowfall Total Analysis",
                  subtitle=("Reports past 12 hours: %s"
                            "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    if cdf['val'].max() > 0:
-        mp.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
-                    rng, cmap=cmap)
+    if analdf['val'].max() > 0:
+        mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcounties()
-    if len(tdf.index) > 0:
+    if not tdf.empty:
         mp.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
                        fmt='%.1f', labelbuffer=5)
     mp.drawcities()
@@ -71,9 +71,8 @@ def run(basets, endts, view):
                  title="Local Storm Report Snowfall Total Analysis",
                  subtitle=("Reports valid over past 12 hours: %s"
                            "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    if cdf['val'].max() > 0:
-        mp.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
-                    rng, cmap=cmap)
+    if analdf['val'].max() > 0:
+        mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcounties()
     mp.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall_nv.png bogus png"
@@ -84,9 +83,8 @@ def run(basets, endts, view):
                  title="Local Storm Report Snowfall Total Analysis",
                  subtitle=("Reports past 12 hours: %s"
                            "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    if cdf['val'].max() > 0:
-        mp.contourf(cdf['lon'].values, cdf['lat'].values, cdf['val'].values,
-                    rng, cmap=cmap)
+    if analdf['val'].max() > 0:
+        mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcities()
     pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
     mp.postprocess(view=view, pqstr=pqstr)
