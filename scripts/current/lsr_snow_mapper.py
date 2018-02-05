@@ -30,6 +30,7 @@ def run(basets, endts, view):
     df.sort_values(by='val', ascending=False, inplace=True)
 
     # Now, we need to add in zeros, lets say we are looking at a .25 degree box
+    """
     mybuffer = 0.75
     newrows = []
     for lat in np.arange(reference.MW_SOUTH, reference.MW_NORTH, mybuffer):
@@ -41,11 +42,13 @@ def run(basets, endts, view):
                                 val=0 if df2.empty else df2['val'].mean(),
                                 used=True, textplot=False))
     analdf = pd.DataFrame(newrows)
+    """
+    analdf = df
     xi = np.linspace(reference.MW_WEST, reference.MW_EAST, 100)
     yi = np.linspace(reference.MW_SOUTH, reference.MW_NORTH, 100)
     xi, yi = np.meshgrid(xi, yi)
     vals = inverse_distance(analdf['lon'].values, analdf['lat'].values,
-                            analdf['val'].values, xi, yi, 0.25)
+                            analdf['val'].values, xi, yi, 0.75)
     vals[np.isnan(vals)] = 0
     tdf = df[df['textplot']]
 
