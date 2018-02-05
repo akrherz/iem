@@ -8,22 +8,12 @@ $t->title = "Freezing Dates";
 $t->thispage = "climatology-year";
 
 include("../../include/database.inc.php"); 
-include("../../include/network.php"); 
+include("../../include/network.php");
+require_once "../../include/mlib.php";
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	asort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $connection = iemdb("coop");
 

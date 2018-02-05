@@ -2,7 +2,7 @@
  require_once "../../config/settings.inc.php";
  define("IEM_APPID", 40);
  include("../../include/myview.php");
- include("../../include/mlib.php"); 
+ require_once "../../include/mlib.php"; 
  include("../../include/network.php");
  require_once "../../include/forms.php";
  include("../../include/station.php");
@@ -43,23 +43,6 @@ while( list($key, $value) = each($nt->table) ){
   $wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
 }
 $wselect .= "</select>";
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	global $sorder;
-	while (list($firstIndex, $val) = each($multiArray)){
-		if ($val == 0) continue;
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	}
-	if ($sorder == "asc")
-		asort($indexMap);
-	else
-		arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $mydata = Array();
 while (list($bogus, $iemob) = each($jobj["data"]) ){
@@ -116,8 +99,7 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 }
 
 $table = "";
-$finalA = Array();
-$finalA = aSortBySecondIndex($mydata, $sortcol);
+$finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 while (list ($key, $val) = each ($finalA))  {

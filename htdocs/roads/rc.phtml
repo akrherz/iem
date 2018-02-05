@@ -4,6 +4,7 @@
  include "../../include/myview.php";
  include("../../include/database.inc.php");
  require_once "../../include/forms.php";
+ require_once "../../include/mlib.php";
  
  $t = new MyView();
 
@@ -48,19 +49,7 @@ $vals = Array("number" => "Route #", "type" => "Road Classification",
   "segid" => "Travel Path");
 
  $uri = "rc.phtml?sortcol="; 
-
- function aSortBySecondIndex($multiArray, $secondIndex) {
- 	while (list($firstIndex, ) = each($multiArray))
- 		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
- 	asort($indexMap);
- 	while (list($firstIndex, ) = each($indexMap))
- 	if (is_numeric($firstIndex))
- 		$sortedArray[] = $multiArray[$firstIndex];
- 	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
- 	return $sortedArray;
- }
  
- $finalA = Array();
  $finalA = aSortBySecondIndex($obs, $sortcol);
  $now = time();
  $i = 0;

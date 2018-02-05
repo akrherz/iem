@@ -1,7 +1,7 @@
 <?php 
  require_once "../../config/settings.inc.php";
  include("../../include/myview.php");
- include("../../include/mlib.php"); 
+ require_once "../../include/mlib.php"; 
  include_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  
@@ -44,17 +44,6 @@ $t->breadcrumbs = <<<EOF
 </ol>
 EOF;
 
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
-
 $mydata = Array();
 
 while (list($bogus, $iemob) = each($jobj["data"]) ){
@@ -81,8 +70,6 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 
 }
 
-
-$finalA = Array();
 $finalA = aSortBySecondIndex($mydata, $sortcol);
 $i = 0;
 $now = time();
@@ -104,8 +91,8 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
 	$table .= sprintf("<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
-				$key, $network, $key); 
-	$table .= "<td>". $parts["name"] . "</td><td ";
+	    $key, $network, $parts["name"]); 
+	$table .= "<td ";
 	if ($tdiff > 11900){
 		$table .= 'bgcolor="red"';
 		$format = "%b-%d-%y %I:%M %p";
@@ -159,14 +146,14 @@ a column to sort it.<br>
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2">ID:</th>
   <th rowspan="2">Station:</th>
   <th rowspan="2"><a href="current.phtml?sortcol=ts">Ob Time</a></th>
   <th colspan="3">Temps &deg;F</th>
   <th>&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
+</tr>
+
 <tr>
-  
   <th>
    <a href="current.phtml?network={$network}&amp;sortcol=tmpf">Air</a>
    (<a href="current.phtml?network={$network}&amp;sortcol=max_tmpf">Hi</a> /
@@ -179,7 +166,9 @@ a column to sort it.<br>
   <th><a href="current.phtml?network={$network}&amp;sortcol=drct">Direction</a></th>
   <th><a href="current.phtml?network={$network}&amp;sortcol=max_sknt">Gust</a>
     @<a href="current.phtml?network={$network}&amp;sortcol=gtim">Time</a></th>
-</tr></thead><tbody>
+</tr>
+</thead>
+<tbody>
 {$table}
 </tbody>
 </table>

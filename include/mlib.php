@@ -1,6 +1,23 @@
 <?php
 //   mlib.php
-// Library of MET functions
+// Library of functions
+
+//________________________________________________________
+function aSortBySecondIndex($multiArray, $secondIndex, $sorder="asc") {
+    reset($multiArray);
+    if (sizeof($multiArray) == 0){
+        return array();
+    }
+    while (list($firstIndex, ) = each($multiArray))
+        $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        if ($sorder == "asc")
+            asort($indexMap);
+            else
+                arsort($indexMap);
+                while (list($firstIndex, ) = each($indexMap))
+                    $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+                    return $sortedArray;
+}
 
 //_____________________________________________________________
 function c2f($myC){

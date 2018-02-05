@@ -1,7 +1,7 @@
 <?php 
 require_once "../../config/settings.inc.php";
 include("../../include/myview.php");
-include("../../include/mlib.php");
+require_once "../../include/mlib.php";
 include("../../include/network.php");
 require_once "../../include/forms.php";
 $nt = new NetworkTable("SCAN");
@@ -17,16 +17,6 @@ function make_link($sid){
 	return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);
 }
 
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $mydata = Array();
 
@@ -52,7 +42,6 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 
 }
 
-$finalA = Array();
 $finalA = aSortBySecondIndex($mydata, $sortcol);
 $i = 0;
 $now = time();

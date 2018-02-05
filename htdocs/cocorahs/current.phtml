@@ -4,6 +4,7 @@ include("../../include/myview.php");
 include("../../include/network.php");
 require_once "../../include/forms.php";
 include_once("../../include/database.inc.php");
+require_once "../../include/mlib.php";
 $t = new MyView();
 
 define("IEM_APPID", 56);
@@ -69,16 +70,6 @@ $t->current_network = "CoCoRaHS";
      $db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
    }
  }
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
-}
 
 $db = aSortBySecondIndex($db, $sortcol);
 

@@ -10,6 +10,7 @@
  require_once "../../include/forms.php";
  include("../../include/database.inc.php");
  include("../../include/network.php"); 
+ require_once "../../include/mlib.php";
 
  $tbl = isset($_GET["tbl"]) ? substr($_GET["tbl"],0,10) : "climate";
  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
@@ -37,25 +38,6 @@
  $t->title = "NWS COOP Daily Climatology";
  $t->thispage = "climatology-extremes";
 
- function aSortBySecondIndex($multiArray, $secondIndex) {
- 	while (list($firstIndex, ) = each($multiArray))
- 		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
- 	while (list($firstIndex, ) = each($indexMap))
- 		if (is_numeric($firstIndex))
- 			$sortedArray[] = $multiArray[$firstIndex];
- 		else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
- 		return $sortedArray;
- }
- function sortBySecondIndex($multiArray, $secondIndex) {
- 	while (list($firstIndex, ) = each($multiArray))
- 		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];        asort($indexMap);
- 	while (list($firstIndex, ) = each($indexMap))
- 		if (is_numeric($firstIndex))
- 			$sortedArray[] = $multiArray[$firstIndex];
- 		else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
- 		return $sortedArray;
- }
-
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
@@ -75,9 +57,9 @@ $cities = $nt->table;
  		$data[] = $val;
  	}
  	if ($sortdir == 'ASC'){
- 		$sorted_data = sortBySecondIndex($data, $sortcol);
+ 		$sorted_data = aSortBySecondIndex($data, $sortcol, "asc");
  	} else{
-	 	$sorted_data = aSortBySecondIndex($data, $sortcol);
+	 	$sorted_data = aSortBySecondIndex($data, $sortcol, "desc");
  	}
  	while(list($key,$val)=each($sorted_data)){
  		$link = sprintf("extremes.php?day=%s&amp;month=%s&amp;network=%s&amp;tbl=%s",
@@ -113,9 +95,9 @@ $cities = $nt->table;
  		$data[] = $val['properties'];
  	}
  	if ($sortdir == 'ASC'){
- 		$sorted_data = sortBySecondIndex($data, $sortcol);
+ 		$sorted_data = aSortBySecondIndex($data, $sortcol, "asc");
  	} else{
- 		$sorted_data = aSortBySecondIndex($data, $sortcol);
+ 		$sorted_data = aSortBySecondIndex($data, $sortcol, "desc");
  	}
  	while(list($key,$val)=each($sorted_data)){
  		$link = sprintf("extremes.php?station=%s&amp;network=%s&amp;tbl=%s",

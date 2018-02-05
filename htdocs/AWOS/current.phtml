@@ -2,7 +2,7 @@
 include("../../config/settings.inc.php");
 include("../../include/myview.php");
 require_once "../../include/forms.php";
-include("../../include/mlib.php");
+require_once "../../include/mlib.php";
 
 $t = new MyView();
 
@@ -71,17 +71,6 @@ Click on a column to sort it.<br>
 </thead><tbody>
 EOF;
 
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-		if (is_numeric($firstIndex))
-			$sortedArray[] = $multiArray[$firstIndex];
-		else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
-
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
 $jobj = json_decode($jdata, $assoc=TRUE);
 
@@ -110,7 +99,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
       $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-      if ($mydata[$key]["max_sknt_ts"] > 0) {
+      if ($mydata[$key]["local_max_sknt_ts"]) {
         $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
      }   
  }

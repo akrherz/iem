@@ -5,6 +5,7 @@
  $t = new MyView();
  include_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
+ require_once "../../include/mlib.php";
  $pgconn = iemdb('iem');
  $mesosite = iemdb('mesosite');
   
@@ -33,17 +34,6 @@ $cols = Array(
 		'VBIZ' => 'Battery Voltage',
 		'TWIZ' => 'Water Temperature',
 		);
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-		if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
-
 
  $rs = pg_prepare($pgconn, "SELECT", "select station, valid, value, 
  		physical_code, duration, source, extremum , name from 

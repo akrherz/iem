@@ -2,7 +2,7 @@
  include("../../config/settings.inc.php");
  define("IEM_APPID", 83);
  include("../../include/myview.php");
- include("../../include/mlib.php");
+ require_once "../../include/mlib.php";
  include_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  
@@ -47,17 +47,6 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 $nselect .= "</select>";
 
 $uri = "current.phtml?network=${network}&sortcol=";
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $mydata = Array();
 

@@ -2,7 +2,7 @@
   require_once "../../config/settings.inc.php";
   define("IEM_APPID", 94);
 include("../../include/myview.php");
-include("../../include/mlib.php");
+require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 $t = new MyView();
   $network = isset($_GET['network']) ? xssafe($_GET['network']): 'KCCI';
@@ -61,31 +61,6 @@ if (! isset($vals[$sortcol])){
 $sortcol = "tmpf";
 }
 
-// http://www.php.net/manual/en/function.asort.php
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	asort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
-function arSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
-
-
-
-
 $mydata = Array();
 while (list($bogus, $iemob) = each($jobj["data"]) ){
     $key = $iemob["station"];
@@ -127,9 +102,9 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 
 $finalA = Array();
 if ($sortcol == "sname"){
-	$finalA = aSortBySecondIndex($mydata, $sortcol);
+	$finalA = aSortBySecondIndex($mydata, $sortcol, "asc");
 } else {
-	$finalA = arSortBySecondIndex($mydata, $sortcol);
+	$finalA = aSortBySecondIndex($mydata, $sortcol, "desc");
 }
 $now = time();
 

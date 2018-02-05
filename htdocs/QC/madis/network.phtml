@@ -7,6 +7,7 @@
  $t->title = "Quality Control, MADIS Raw QC";
  include("../../../include/database.inc.php");
  require_once "../../../include/forms.php";
+ require_once "../../../include/mlib.php";
  $dbconn = iemdb("access");
  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 
        network = $1");
@@ -26,17 +27,7 @@
  	$data[ $row["station"] ] = $row;
  	$data[ $row["station"] ]["sname"] = $cities[ $row["station"] ]["name"];
  }
- 
- function aSortBySecondIndex($multiArray, $secondIndex) {
- 	while (list($firstIndex, ) = each($multiArray))
- 		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
- 	while (list($firstIndex, ) = each($indexMap))
- 	if (is_numeric($firstIndex))
- 		$sortedArray[] = $multiArray[$firstIndex];
- 	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
- 	return $sortedArray;
- }
- 
+  
  $finalA = Array();
  $finalA = aSortBySecondIndex($data, $sortcol);
  $ns_networks = Array(

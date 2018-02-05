@@ -7,22 +7,14 @@ $t->title = "Quality Control, Sites Offline";
 $t->thispage = "iem-qc";
 
 require_once "../../include/database.inc.php";
+include ("../../include/network.php");
+require_once "../../include/mlib.php";
 $pgconn = iemdb("iem");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT *,
                  to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline
                  WHERE network = $1 ORDER by valid ASC");
 
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        asort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
-include ("../../include/network.php");
 $nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {

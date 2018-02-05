@@ -1,9 +1,11 @@
 <?php
 require_once "../../config/settings.inc.php";
 include_once "../../include/database.inc.php";
-$mesosite = iemdb('mesosite');
 include_once "../../include/myview.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
+
+$mesosite = iemdb('mesosite');
 $t = new MyView();
 $t->current_network = "RWIS Surface";
 $network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
@@ -12,7 +14,6 @@ $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
  $t->refresh = "<meta http-equiv=\"refresh\" content=\"600;
  URL=currentSF.phtml?sortcol=$sortcol&amp;network=$network\">";
  $t->thispage = "current-sort";
- include_once "../../include/mlib.php";
 
 $vals = Array("tsf0" => "Sensor 1 - Temp [F]", 
   "tmpf" => "Air Temp [F]",
@@ -48,16 +49,6 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 }
 $nselect .= "</select>";
 
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $mydata = Array();
 

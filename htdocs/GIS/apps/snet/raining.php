@@ -5,7 +5,7 @@ define("IEM_APPID", 159);
  $t = new MyView();
  
 include_once "../../../../include/iemmap.php";
-include("../../../../include/mlib.php");
+require_once "../../../../include/mlib.php";
 require_once "../../../../include/forms.php";
 include("../../../../include/network.php");
 
@@ -216,17 +216,6 @@ iemmap_title($map, $img, "SNET 15min rain ending: ". $ts , "NEXRAD valid: $r");
 $url = $img->saveWebImage();
 
 $u = sprintf("<a href=\"raining.php?rad=%s&tv=%s&sortcol=", $rad, $tv);
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];
-	arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $finalA = Array();
 $finalA = aSortBySecondIndex($data, $sortcol);

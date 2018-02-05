@@ -3,7 +3,7 @@
  define("IEM_APPID", 7);
  
  include_once("../../include/myview.php");
- include_once("../../include/mlib.php");
+ require_once "../../include/mlib.php";
  require_once "../../include/forms.php";
  include_once("../../include/network.php");
  include_once "../../include/database.inc.php";
@@ -66,22 +66,6 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "skyl3" => "Cloud Level 3",
   "skyl4" => "Cloud Level 4",
   "pday" => "Today Rainfall [inch]", );
-
-function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
-	reset($multiArray);
-	if (sizeof($multiArray) == 0){
-		return array();
-	}
-  while (list($firstIndex, ) = each($multiArray))
-       $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-  if ($sorder == "asc")
-        asort($indexMap);
-  else 
-        arsort($indexMap);
-  while (list($firstIndex, ) = each($indexMap))
-      $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-  return $sortedArray;
-}
 
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
 $jobj = json_decode($jdata, $assoc=TRUE);

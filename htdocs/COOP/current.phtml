@@ -10,6 +10,7 @@ define("IEM_APPID", 41);
  $t = new MyView();
  require_once "../../include/forms.php";
  include_once("../../include/database.inc.php");
+ require_once "../../include/mlib.php";
  $mesosite = iemdb("mesosite");
  
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_COOP'; 
@@ -104,21 +105,6 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 	{
 		$db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
 	}
-}
-
-function aSortBySecondIndex($multiArray, $secondIndex, $sortDir) {
-	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	if ($sortDir == "desc"){
-		arsort($indexMap);
-	} else{
-		asort($indexMap);
-	}
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
 }
 
 $db = aSortBySecondIndex($db, $sortcol, $sortdir);

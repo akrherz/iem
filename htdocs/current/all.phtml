@@ -2,6 +2,8 @@
  require_once "../../config/settings.inc.php";
  require_once "../../include/myview.php";
  require_once "../../include/forms.php";
+ require_once "../../include/mlib.php";
+ 
  $t = new MyView();
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "peak";
  $metar = isset($_GET["metar"]) ? xssafe($_GET['metar']): "no";
@@ -12,7 +14,6 @@
  $t->title = "$state Current Conditions";
 
  $t->thispage = "current-sort";
- require_once "../../include/mlib.php";
 
  $jdata = file_get_contents("http://iem.local/api/1/currents.json?state=$state");
  $jobj = json_decode($jdata, $assoc=TRUE);
@@ -38,23 +39,6 @@ $ar = Array(
 $aselect = make_select("sorder", $sorder, $ar);
 
 $uri = "all.phtml?state=$state&metar=$metar&sorder=$sorder&sortcol=";
-
-function aSortBySecondIndex($multiArray, $secondIndex) {
-	global $sorder;
-	while (list($firstIndex, $val) = each($multiArray)){
-		if ($val == 0) continue;
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-	}
-	if ($sorder == "asc")
-		asort($indexMap);
-	else
-		arsort($indexMap);
-	while (list($firstIndex, ) = each($indexMap))
-	if (is_numeric($firstIndex))
-		$sortedArray[] = $multiArray[$firstIndex];
-	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-	return $sortedArray;
-}
 
 $mydata = Array();
 while (list($bogus, $iemob) = each($jobj["data"]) ){
@@ -111,7 +95,7 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 }
 
 $finalA = Array();
-$finalA = aSortBySecondIndex($mydata, $sortcol);
+$finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 $table = "";
