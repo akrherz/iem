@@ -4,7 +4,7 @@
  
  include "../../include/database.inc.php";
  include "../../include/network.php";
- include "../../include/mlib.php";
+ require_once "../../include/mlib.php";
  $nt = new NetworkTable("ISUSM");
 
  $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=ISUSM");
@@ -82,9 +82,7 @@
 EOF;
  $t->content = <<<EOF
  
-<p>We are in the process of deploying a network of automated sensors that will
-measure soil temperature and moisture.  Here is the most recent observation 
-collected:
+<p>Here is the most recent observation collected:
 <br />
 {$table}
 

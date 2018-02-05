@@ -43,7 +43,8 @@ Click on a column to sort it.<br>
 <thead>
 <tr>
   <th rowspan=2>Add</th>
-  <th rowspan=2><a href="current.phtml?sortcol=sname">Station:</a></th>
+  <th rowspan=2><a href="current.phtml?sortcol=station">ID:</a></th>
+  <th rowspan=2><a href="current.phtml?sortcol=sname">Name:</a></th>
   <th rowspan=2><a href="current.phtml?sortcol=ts">Ob Time</a></th>
   <th colspan=4>&nbsp;</th>
   <th colspan=3>Wind [knots]</th>
@@ -78,6 +79,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
   while (list($bogus, $iemob) = each($jobj["data"]) ){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
+    $mydata[$key]["sname"] = $iemob["name"];
     $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     if ($mydata[$key]["tmpf"] > -99) {
@@ -110,18 +112,14 @@ $jobj = json_decode($jdata, $assoc=TRUE);
  $finalA = Array();
  $finalA = aSortBySecondIndex($mydata, $sortcol);
  $now = time();
- $shade = 1;
  while (list ($key, $val) = each ($finalA))  { 
 	$parts = $finalA[$key];
-        $table .= "<tr ";
-        if ($shade) $table .= "bgcolor=\"#EEEEEE\"";
-        $shade = ! $shade;
-        $table .= ">\n 
-         <td><input type=\"checkbox\" name=\"st[]\" 
-            value=\"".$key."\"></td>";
+        $table .= "<tr>\n 
+         <td><input type=\"checkbox\" name=\"st[]\"  value=\"".$key."\"></td>";
 
          $tdiff = $now - $parts["ts"];
-         $table .= sprintf("<td>%s (<a href=\"/sites/site.php?station=%s&network=AWOS\">%s</a>)</td>", $parts["name"], $key, $key );
+         $table .= sprintf("<td><a href=\"/sites/site.php?station=%s&network=AWOS\">%s</a></td>", $key, $key );
+         $table .= sprintf("<td>%s</td>", $parts["name"]);
          $table .= "<td ";
          if ($tdiff > 10000){
            $format = "%d %b %I:%M %p";
