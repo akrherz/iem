@@ -3,11 +3,11 @@ import datetime
 from collections import OrderedDict
 
 import pandas as pd
+from scipy import stats
 from pandas.io.sql import read_sql
 from pyiem.meteorology import gdd
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
-from scipy import stats
 
 STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
@@ -136,6 +136,8 @@ def plotter(fdict):
     rows = []
     for year in range(1980, today.year + 1):
         if year == 1980 and sdate == 'nov1':
+            continue
+        if year not in gcdf.index:
             continue
         if year == today.year:
             avgt = gdf[year]
