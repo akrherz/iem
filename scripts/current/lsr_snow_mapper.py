@@ -5,8 +5,7 @@ import unittest
 import warnings
 
 import numpy as np
-from metpy.gridding.interpolation import inverse_distance
-import pandas as pd
+from scipy.interpolate import Rbf
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, nwssnow
 import pyiem.reference as reference
@@ -25,32 +24,30 @@ def run(basets, endts, view):
         from lsrs WHERE type in ('S') and magnitude >= 0 and
         valid > %s and valid < %s GROUP by state, lon, lat
         """, pgconn, params=(basets, endts), index_col=None)
-    df['used'] = False
-    df['textplot'] = True
     df.sort_values(by='val', ascending=False, inplace=True)
+    df['useme'] = False
+    # First, we need to filter down the in-bound values to get rid of small
+    cellsize = 0.25
+    for lat in np.arange(reference.MW_SOUTH, reference.MW_NORTH,
+                         cellsize * 3):
+        for lon in np.arange(reference.MW_WEST, reference.MW_EAST,
+                             cellsize * 3):
+            df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat + cellsize * 3)) &
+                     (df['lon'] >= lon) & (df['lon'] < (lon + cellsize * 3))]
+            if df2.empty:
+                continue
+            maxval = df.at[df2.index[0], 'val']
+            df.loc[df2[df2['val'] > (maxval * 0.8)].index, 'useme'] = True
 
-    # Now, we need to add in zeros, lets say we are looking at a .25 degree box
-    """
-    mybuffer = 0.75
-    newrows = []
-    for lat in np.arange(reference.MW_SOUTH, reference.MW_NORTH, mybuffer):
-        for lon in np.arange(reference.MW_WEST, reference.MW_EAST, mybuffer):
-            df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat+mybuffer)) &
-                     (df['lon'] >= lon) & (df['lon'] < (lon+mybuffer))]
-            newrows.append(dict(lon=(lon+mybuffer/2.),
-                                lat=(lat+mybuffer/2.),
-                                val=0 if df2.empty else df2['val'].mean(),
-                                used=True, textplot=False))
-    analdf = pd.DataFrame(newrows)
-    """
-    analdf = df
-    xi = np.linspace(reference.MW_WEST, reference.MW_EAST, 100)
-    yi = np.linspace(reference.MW_SOUTH, reference.MW_NORTH, 100)
+    df2 = df[df['useme']]
+    xi = np.arange(reference.MW_WEST, reference.MW_EAST, cellsize)
+    yi = np.arange(reference.MW_SOUTH, reference.MW_NORTH, cellsize)
     xi, yi = np.meshgrid(xi, yi)
-    vals = inverse_distance(analdf['lon'].values, analdf['lat'].values,
-                            analdf['val'].values, xi, yi, 0.75)
+    gridder = Rbf(df2['lon'].values, df2['lat'].values,
+                  df2['val'].values, function='thin_plate')
+    vals = gridder(xi, yi)
     vals[np.isnan(vals)] = 0
-    tdf = df[df['textplot']]
+    vals[vals < 0.1] = 0
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
     cmap = nwssnow()
@@ -58,11 +55,11 @@ def run(basets, endts, view):
                  title="Local Storm Report Snowfall Total Analysis",
                  subtitle=("Reports past 12 hours: %s"
                            "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    if analdf['val'].max() > 0:
+    if df['val'].max() > 0:
         mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcounties()
-    if not tdf.empty:
-        mp.plot_values(tdf['lon'].values, tdf['lat'].values, tdf['val'].values,
+    if not df.empty:
+        mp.plot_values(df2['lon'].values, df2['lat'].values, df2['val'].values,
                        fmt='%.1f', labelbuffer=5)
     mp.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
@@ -74,7 +71,7 @@ def run(basets, endts, view):
                  title="Local Storm Report Snowfall Total Analysis",
                  subtitle=("Reports valid over past 12 hours: %s"
                            "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    if analdf['val'].max() > 0:
+    if df['val'].max() > 0:
         mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcounties()
     mp.drawcities()
@@ -86,7 +83,7 @@ def run(basets, endts, view):
                  title="Local Storm Report Snowfall Total Analysis",
                  subtitle=("Reports past 12 hours: %s"
                            "" % (endts.strftime("%d %b %Y %I:%M %p"), )))
-    if analdf['val'].max() > 0:
+    if df['val'].max() > 0:
         mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcities()
     pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
