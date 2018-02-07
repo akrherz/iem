@@ -14,12 +14,17 @@ EOF;
 
 $t->thispage ="networks-dcp";
 $t->content = <<<EOF
-<h3>Historical DCP Plotting</h3>
+<ul class="breadcrumb">
+ <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
+ <li class="active">Historical DCP Plotting</li>
+</ul>
 
-<blockquote>This application allows you to plot historical DCP data for 
+<p>This application allows you to plot historical DCP data for 
 a station, time period, and variable of your choice.  Select a station first
 to reveal available variables for that station.  You may also wish to
-<a href="request/dcp/fe.phtml">download</a> the raw observations.</blockquote>
+<a href="/request/dcp/fe.phtml">download</a> the raw observations.</p>
+
+<br clear="all" />
 
 <div class="row">
 		<div class="col-md-6 col-sm-6">
@@ -27,7 +32,7 @@ to reveal available variables for that station.  You may also wish to
 </div>
 		<div class="col-md-6 col-sm-6">
 		<div id="msg"></div><br />
-<img src="" id="imagedisplay" />
+<img src="" id="imagedisplay" class="img img-responsive"/>
 </div>
 </div>
 EOF;
