@@ -20,6 +20,8 @@ REV_VTEC_PHENOMENA = dict((v, k) for k, v in VTEC_PHENOMENA.items())
 def get_phenomena(value):
     if value == 'Rip Current':
         return 'RP'
+    if value == 'Fire Weather':
+        return 'FW'
     return REV_VTEC_PHENOMENA.get(value, value)
 
 
@@ -72,7 +74,7 @@ def main():
                      (capdf['eventid'] == row['eventid']) &
                      (capdf['wfo'] == row['wfo']))]
         if df2.empty:
-            print(("CAP MISSING (%s %s %s %s)"
+            print(("CRH MISSING (%s %s %s %s)"
                    ) % (row['wfo'], row['phenomena'], row['significance'],
                         row['eventid']))
 
