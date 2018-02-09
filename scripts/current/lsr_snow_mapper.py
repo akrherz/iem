@@ -5,8 +5,10 @@ import unittest
 import warnings
 
 import numpy as np
-from scipy.interpolate import Rbf
+import pandas as pd
 from pandas.io.sql import read_sql
+from scipy.interpolate import Rbf
+from scipy.signal import convolve2d
 from pyiem.plot import MapPlot, nwssnow
 import pyiem.reference as reference
 from pyiem.util import get_dbconn
@@ -28,18 +30,30 @@ def run(basets, endts, view):
     df['useme'] = False
     # First, we need to filter down the in-bound values to get rid of small
     cellsize = 0.25
+    newrows = []
     for lat in np.arange(reference.MW_SOUTH, reference.MW_NORTH,
-                         cellsize * 3):
+                         cellsize * 2):
         for lon in np.arange(reference.MW_WEST, reference.MW_EAST,
-                             cellsize * 3):
-            df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat + cellsize * 3)) &
-                     (df['lon'] >= lon) & (df['lon'] < (lon + cellsize * 3))]
+                             cellsize * 2):
+            df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat + cellsize * 2)) &
+                     (df['lon'] >= lon) & (df['lon'] < (lon + cellsize * 2))]
             if df2.empty:
+                df3 = df[(df['lat'] >= lat) &
+                         (df['lat'] < (lat + cellsize * 4)) &
+                         (df['lon'] >= lon) &
+                         (df['lon'] < (lon + cellsize * 4))]
+                if df3.empty:
+                    newrows.append({'lon': lon + cellsize * 1.5,
+                                    'lat': lat + cellsize * 1.5,
+                                    'val': 0,
+                                    'useme': True,
+                                    'state': 'NA'})
                 continue
             maxval = df.at[df2.index[0], 'val']
             df.loc[df2[df2['val'] > (maxval * 0.8)].index, 'useme'] = True
 
-    df2 = df[df['useme']]
+    dfall = pd.concat([df, pd.DataFrame(newrows)], ignore_index=True)
+    df2 = dfall[dfall['useme']]
     xi = np.arange(reference.MW_WEST, reference.MW_EAST, cellsize)
     yi = np.arange(reference.MW_SOUTH, reference.MW_NORTH, cellsize)
     xi, yi = np.meshgrid(xi, yi)
@@ -47,6 +61,9 @@ def run(basets, endts, view):
                   df2['val'].values, function='thin_plate')
     vals = gridder(xi, yi)
     vals[np.isnan(vals)] = 0
+    window = np.ones((2, 2))
+    vals = convolve2d(vals, window / window.sum(), mode='same',
+                      boundary='symm')
     vals[vals < 0.1] = 0
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
@@ -59,8 +76,8 @@ def run(basets, endts, view):
         mp.contourf(xi, yi, vals, rng, cmap=cmap)
     mp.drawcounties()
     if not df.empty:
-        mp.plot_values(df2['lon'].values, df2['lat'].values, df2['val'].values,
-                       fmt='%.1f', labelbuffer=5)
+        mp.plot_values(df['lon'].values, df['lat'].values, df['val'].values,
+                       fmt='%.1f', labelbuffer=2)
     mp.drawcities()
     pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
     mp.postprocess(view=view, pqstr=pqstr)
