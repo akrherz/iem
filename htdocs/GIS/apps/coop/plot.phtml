@@ -111,7 +111,11 @@ if ($source == "qc")
 	$c = iemdb("access");
 	$cutstring1 = 0;
 	$cutstring2 = 5;
-	$sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, min_tmpf as low, pday as precip, snow, snowd from summary_%s s JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
+	$sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, ".
+	    "min_tmpf as low, pday as precip, snow, snowd from summary_%s s ".
+	    "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and ".
+	    "network = 'IA_COOP'",
+	    adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
 }
 
 $rs =  pg_exec($c, $sql);
@@ -128,11 +132,12 @@ $tr = "# ".$ndate." ". $varDef[$var] ."
 # Download Date: ". strftime("%d %b %Y") ."
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
-$tr .= sprintf("%10s,%20s,%10s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Date', 'Latitude', 'Longitude', $var);
+$tr .= sprintf("%10s,%20s,%10s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Date',
+    'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
 	$ukey = strtoupper($key);
 	if (! isset($cities[$ukey]) ) continue;
-	if (intval($value) == -99) continue;
+	if ($value == null) continue;
 
 	$tr .= sprintf("%10s,%-20s,%10s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['name'], $ndate,
 			$cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );
