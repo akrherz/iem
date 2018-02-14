@@ -186,7 +186,7 @@ $t->content = <<<EOF
 <tr><td>
 <div style="padding: 5px;">
   <a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a><br>
-  <a href="/plotting/agc/">Time Series Charts</a><br>
+  <a href="/plotting/auto/?q=177">Time Series Charts</a><br>
   <a href="soilt-prob.php">4in Soil Temperatures</a><br>
   <A HREF="/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
 </div>
