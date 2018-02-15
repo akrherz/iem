@@ -12,8 +12,10 @@ PDICT = {'abs': 'Departure in degrees',
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['description'] = """This plot produces a timeseries difference between
-    daily high and low temperatures against climatology.
+    desc['description'] = """This plot produces a time series difference
+    between daily high and low temperatures against climatology. For this
+    context, the climatology is the simple daily average based on period of
+    record data.
     """
     desc['data'] = True
     desc['arguments'] = [
@@ -107,6 +109,8 @@ def plotter(fdict):
                                mdates.MonthLocator(interval=1)
                                )
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
+    ax[0].set_xlim(df.index.min() - datetime.timedelta(days=3),
+                   df.index.max() + datetime.timedelta(days=3))
 
     return fig, df
 
