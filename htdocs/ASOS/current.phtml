@@ -1,12 +1,12 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 7);
  
- include_once("../../include/myview.php");
+ require_once "../../include/myview.php";
  require_once "../../include/mlib.php";
  require_once "../../include/forms.php";
- include_once("../../include/network.php");
- include_once "../../include/database.inc.php";
+ require_once "../../include/network.php";
+ require_once "../../include/database.inc.php";
  
  $network = isset($_GET['network']) ? substr($_GET["network"],0,10) : 'IA_ASOS';
  $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]): "no";
@@ -30,12 +30,6 @@ EOF;
 $(document).ready(function(){
     $(".iemselect2").select2();
 });
-  		
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
 </script>
 EOF;
  $t->thispage = "current-sort";
@@ -217,7 +211,7 @@ while (list ($key, $val) = each ($finalA))  {
   if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";  
   $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
-  $tdiff = $now - $parts["ts"];
+  $tdiff = $now - strtotime($parts["utc_valid"]);
   $url = sprintf("/sites/site.php?station=%s&network=%s", $key, $network);
   $row .= sprintf("<td><a href='%s'>%s</a></td>", $url, $key);
   $row .= "<td>". $cities[$key]["name"] . "</td>";
