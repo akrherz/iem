@@ -1,11 +1,11 @@
 <?php
-putenv("TZ=GMT");
+putenv("TZ=UTC");
 define("IEM_APPID", 153);
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 date_default_timezone_set('UTC');
-include("../../include/database.inc.php");
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 include("lib.php");
 $mosdb = iemdb("mos");
@@ -44,10 +44,10 @@ for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
 $table .= "</tr></thead><tbody>\n";
 $sqlSelector = substr($sqlSelector,0,-1) . ")";
 
-$rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, 
-      t12_1 ||'/'|| t12_2 as t12 from alldata WHERE 
-      runtime IN $sqlSelector
-      and station = $1 and model = $2");
+$rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, ".
+      "t12_1 ||'/'|| t12_2 as t12 from alldata WHERE ".
+      "runtime IN $sqlSelector ".
+      "and station = $1 and model = $2");
 $rs = pg_execute($mosdb, "SELECT", Array($station, $model));
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
@@ -56,12 +56,20 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 
 
 for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
- $table .= sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
+ $thisrow = sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
  reset($runtimes);
+ $allnulls = TRUE;
+ $lookup = date('Y-m-d H:i', $now);
  while (list($k,$s) = each($runtimes)){
-   $table .= @sprintf("<td>%s</td>", $data[$s][date('Y-m-d H:i', $now)]);
+   if (@$data[$s][$lookup] != null){
+     $allnulls = FALSE;
+   }
+   $thisrow .= sprintf("<td>%s</td>", @$data[$s][$lookup]);
  }
- $table .= "</tr>\n";
+ $thisrow .= "</tr>\n";
+ if (! $allnulls) {
+  $table .= $thisrow;
+ }
 }
 $table .= "</tbody></table>";
 
