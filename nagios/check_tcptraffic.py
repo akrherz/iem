@@ -21,7 +21,12 @@ def read_stats(device):
     if not os.path.isfile(fn):
         return
     fp = open(fn)
-    payload = json.load(fp)
+    try:
+        payload = json.load(fp)
+    except Exception as _exp:
+        # remove the file
+        os.unlink(fn)
+        return
     fp.close()
     payload['valid'] = datetime.datetime.strptime(payload['valid'],
                                                   '%Y-%m-%dT%H:%M:%SZ')
