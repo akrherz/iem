@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (14, now());
+INSERT into iem_schema_manager_version values (15, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -309,7 +309,9 @@ CREATE TRIGGER update_stations_modtime BEFORE UPDATE
 -- Storage of station attributes
 CREATE TABLE station_attributes(
 	iemid int REFERENCES stations(iemid),
-	attr varchar(128) NOT NULL);
+	attr varchar(128) NOT NULL,
+  value varchar NOT NULL);
+GRANT ALL on station_attributes to mesonet,ldm;
 CREATE UNIQUE index station_attributes_idx on station_attributes(iemid, attr);
 GRANT SELECT on station_attributes to nobody,apache;
 
