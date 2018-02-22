@@ -35,7 +35,8 @@ def do_var(varname):
     for row in ccursor:
         day = row[0]
         station = row[1]
-        if station not in nt.sts:
+        if (station not in nt.sts or station[2] == 'C' or
+                station.endswith('0000')):
             continue
         temp24hour = nt.sts[station]['temp24_hour']
         prefix = "12z_" if temp24hour != 0 else 'daily_'
