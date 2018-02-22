@@ -39,16 +39,20 @@ def get_file(now):
         fn = now.strftime(("H99999999_I000" + repr(i) + "_G_%d%b%Y"
                            "_%H%M00")).upper()
         uri = "%s/%s.out" % (BASEURL, fn)
-        try:
-            req = exponential_backoff(requests.get, uri, timeout=5)
-            if req is None or req.status_code != 200:
-                raise Exception("ingest_ifc_precip uri %s failed" % (uri, ))
-            data = req.content
-        except Exception as exp:
-            if now.hour == 0:
-                print(exp)
+        req = exponential_backoff(requests.get, uri, timeout=5)
+        if req is None:
+            continue
+        if req.status_code == 404:
+            continue
+        if req.status_code != 200:
+            print(("ingest_ifc_precip uri %s "
+                   "failed with status %s"
+                    ) % (uri, req.status_code))
+            continue
+        data = req.content
 
     if data is None:
+        print("ingest_ifc_precip missing data for %s" % (now, ))
         return None
     tmpfn = tempfile.mktemp()
     fp = open(tmpfn, 'w')
