@@ -121,7 +121,7 @@ def do_precip(nc, ts):
         hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
-    nc.variables['p01d'][offset] = phour
+    nc.variables['p01d'][offset] = np.where(phour < 0, 0, phour)
 
 
 def do_precip12(nc, ts):
@@ -159,7 +159,7 @@ def do_precip12(nc, ts):
         hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
-    nc.variables['p01d_12z'][offset] = phour
+    nc.variables['p01d_12z'][offset] = np.where(phour < 0, 0, phour)
 
 
 def plot(df):
