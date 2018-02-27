@@ -22,6 +22,7 @@ PDICT = OrderedDict([
     ('midwest', 'Midwest US')])
 
 PDICT2 = OrderedDict([
+    ('max_high_temp', 'Maximum High Temperature'),
     ('avg_temp_depart', 'Average Temperature Departure'),
     ('min_low_temp', 'Minimum Low Temperature'),
     ('gdd_sum', 'Growing Degree Days (50/86) Total'),
@@ -34,6 +35,7 @@ PDICT4 = {'yes': 'Yes, overlay Drought Monitor',
 UNITS = {
     'precip_depart': 'inch',
     'min_low_temp': 'F',
+    'max_high_temp': 'F',
     'gdd_depart': 'F',
     'gdd_sum': 'F',
     'cgdd_sum': 'F',
@@ -104,6 +106,7 @@ def plotter(fdict):
     agg as (
         SELECT station, sum(precip_diff) as precip_depart,
         sum(precip) as precip, sum(cprecip) as cprecip,
+        max(high) as max_high_temp,
         min(low) as min_low_temp, sum(gdd50_diff) as gdd_depart,
         avg(temp_diff) as avg_temp_depart, sum(gdd50) as gdd_sum,
         sum(cgdd50) as cgdd_sum
@@ -112,7 +115,7 @@ def plotter(fdict):
     SELECT d.station, t.name,
     d.precip as precip_sum, d.cprecip as cprecip_sum,
     d.precip_depart, d.min_low_temp, d.avg_temp_depart,
-    d.gdd_depart, d.gdd_sum, d.cgdd_sum,
+    d.gdd_depart, d.gdd_sum, d.cgdd_sum, d.max_high_temp,
     ST_x(t.geom) as lon, ST_y(t.geom) as lat
     from agg d JOIN stations t on (d.station = t.id)
     WHERE t.network ~* 'CLIMATE'
