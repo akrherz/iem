@@ -36,10 +36,6 @@ click
 click-plugins
 cligj
 commonmark
-conda
-conda-build
-conda-env
-conda-verify
 configparser
 constantly
 contextlib2
