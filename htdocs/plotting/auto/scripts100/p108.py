@@ -113,13 +113,13 @@ def plotter(fdict):
                  "SDD(base=86)") % (gddbase, gddceil)
     elif whichplots == 'gdd':
         fig = plt.figure()
-        ax1 = fig.add_axes([0.1, 0.3, 0.8, 0.5])
-        ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1,
+        ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.6])
+        ax2 = fig.add_axes([0.14, 0.11, 0.8, 0.2], sharex=ax1,
                            facecolor='#EEEEEE')
         title = ("GDD(base=%.0f,ceil=%.0f)") % (gddbase, gddceil)
     elif whichplots == 'precip':
         fig = plt.figure()
-        ax3 = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+        ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
         ax1 = ax3
         title = "Precipitation"
     elif whichplots == 'sdd':

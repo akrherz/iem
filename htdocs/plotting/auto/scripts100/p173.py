@@ -189,11 +189,11 @@ def plotter(fdict):
                 color=colors[month], linestyle=styles[month % 2])
     ax.set_ylabel(ctx['ylabel'])
     ax.grid(True)
-    ax.set_position([0.1, 0.23, 0.85, 0.7])
-    ax.legend(ncol=ctx['ncols'], bbox_to_anchor=(0.5, -0.2), fontsize=12,
+    ax.set_position([0.1, 0.25, 0.85, 0.65])
+    ax.legend(ncol=ctx['ncols'], bbox_to_anchor=(0.5, -0.22), fontsize=10,
               loc='center')
     ax.set_xlabel(ctx['xlabel'])
-    ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
+    ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']), fontsize=14)
     ax.set_xticks(range(0, 24, 4))
     ax.set_xticklabels(['Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'])
     ax.set_xlim(0, 23)

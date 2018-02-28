@@ -22,11 +22,19 @@ def get_description():
     provide current frequencies / probabilities of what could potentially
     happen this year.
     """
+    today = datetime.date.today()
     desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='gddbase', default=2300,
              label='Growing Degree Days to Accumulate:'),
+        dict(type="int", name="base", default="50",
+             label="Growing Degree Day Base (F)"),
+        dict(type="int", name="ceil", default="86",
+             label="Growing Degree Day Ceiling (F)"),
+        dict(type='date', name='date',
+             default=today.strftime("%Y/%m/%d"),
+             label='Retroactive Date:', min="1893/01/01"),
         ]
     return desc
 
@@ -40,17 +48,20 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     gddbase = ctx['gddbase']
+    base = ctx['base']
+    ceil = ctx['ceil']
     nt = NetworkTable(ctx['network'])
-    today = datetime.datetime.now()
+    today = ctx['date']
     byear = nt.sts[station]['archive_begin'].year
     eyear = today.year + 1
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     table = "alldata_%s" % (station[:2],)
     cursor.execute("""SELECT year, extract(doy from day),
-        gddxx(50, 86, high,low), low
+        gddxx(%s, %s, high,low), low
          from """+table+""" where station = %s and year > %s
-         """, (station, byear))
+         and day < %s
+         """, (base, ceil, station, byear, today))
 
     gdd = np.zeros((eyear-byear, 366), 'f')
     freezes = np.zeros((eyear-byear), 'f')
@@ -64,7 +75,7 @@ def plotter(fdict):
     for i, freeze in enumerate(freezes):
         gdd[i, int(freeze):] = 0.0
 
-    idx = int(datetime.datetime.now().strftime("%j")) - 1
+    idx = int(today.strftime("%j")) - 1
     apr1 = int(datetime.datetime(2000, 4, 1).strftime("%j")) - 1
     jun30 = int(datetime.datetime(2000, 6, 30).strftime("%j")) - 1
     sep1 = int(datetime.datetime(2000, 9, 1).strftime("%j")) - 1
@@ -119,8 +130,7 @@ def plotter(fdict):
                        interpolation='nearest', vmin=0, vmax=100, cmap=cmap,
                        norm=norm)
     ax[1].grid(True)
-    ax[1].set_title("%s Scenario to %s" % (today.year,
-                                           today.strftime("%-d %B")))
+    ax[1].set_title("Scenario after %s" % (today.strftime("%-d %B %Y"), ))
     ax[1].set_xticks((91, 106, 121, 136, 152, 167))
     ax[1].set_xticklabels(('Apr 1', '15', 'May 1', '15', 'Jun 1', '15'))
     ax[1].set_xlabel("Growing Season Begin Date")
@@ -131,9 +141,10 @@ def plotter(fdict):
 
     fig.text(0.5, 0.90,
              ("%s-%s %s GDDs\n"
-              "Frequency [%%] of reaching %.0f GDDs prior to first freeze"
+              "Frequency [%%] of reaching %.0f GDDs (%.0f/%.0f) "
+              "prior to first freeze"
               ) % (byear, eyear-1,
-                   nt.sts[station]['name'], gddbase), fontsize=16,
+                   nt.sts[station]['name'], gddbase, base, ceil), fontsize=14,
              ha='center')
 
     return fig, df
