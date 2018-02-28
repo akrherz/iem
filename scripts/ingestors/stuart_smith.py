@@ -56,6 +56,8 @@ def main():
     for row in mcursor:
         # Max standard time value
         maxts[row[1]] = row[0] - datetime.timedelta(hours=6)
+    # Don't accept data from the future, well, within some reason
+    ceiling = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
 
     for sid in [9100104, 9100135, 9100131, 9100156]:
         ts = maxts.get(sid, datetime.datetime(2000, 1, 1))
@@ -72,8 +74,10 @@ def main():
             tokens = line.split("\t")
             if len(tokens) < 13 or linenum < 2:
                 continue
-            site_serial = int(tokens[1])
+            # site_serial = int(tokens[1])
             ts = datetime.datetime.strptime(tokens[2], '%m/%d/%y %H:%M:%S')
+            if ts >= ceiling:
+                continue
             tokens[2] = ts.strftime("%Y-%m-%d %H:%M:%S-0600")
             mcursor.execute("""
                 INSERT into ss_logger_data values (%s, %s, %s, %s, %s,
