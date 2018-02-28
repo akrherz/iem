@@ -1,3 +1,4 @@
+setuptools-markdown
 --extra-index-url https://pypi.anaconda.org/pypi/simple
 rrdtool
 PyRSS2Gen
