@@ -27,8 +27,11 @@ ACCESS = get_dbconn('iem')
 EVENTS = {'reprocess_solar': False, 'days': []}
 VARCONV = {
            'vwc06_avg': 'vwc_06_avg',
+           "vwc_avg6in": 'vwc_06_avg',
            'vwc12_avg': 'vwc_12_avg',
+           "vwc_avg12in": 'vwc_12_avg',
            'vwc24_avg': 'vwc_24_avg',
+           "vwc_avg24in": 'vwc_24_avg',
            'vwc50_avg': 'vwc_50_avg',
            'calcvwc06_avg': 'calc_vwc_06_avg',
            'calcvwc12_avg': 'calc_vwc_12_avg',
@@ -37,7 +40,16 @@ VARCONV = {
            "outofrange06": "P06OutOfRange",
            "outofrange12": "P12OutOfRange",
            "outofrange24": "P24OutOfRange",
-           "outofrange50": "P50OutOfRange"
+           "outofrange50": "P50OutOfRange",
+           "ws_ms_s_wvt": "ws_mps_s_wvt",
+           "ec6in": "ec06",
+           "ec12in": "ec12",
+           "ec_24in": "ec24",
+           "ec24in": "ec24",
+           "temp_avg6in": "t06_c_avg",
+           "temp_avg12in": "t12_c_avg",
+           "temp_avg24in": "t24_c_avg",
+           "bp_mmhg_avg": "bpres_avg",
            }
 
 BASE = '/mnt/home/loggernet'
@@ -66,6 +78,7 @@ STATIONS = {'CAMI4': 'Calumet',
             'BNKI4': 'Bankston',
             'CSII4': 'Inwood',
             'GVNI4': 'Glenwood',
+            'TPOI4': 'Masonville',
             }
 
 
@@ -135,8 +148,10 @@ def m15_process(nwsli, maxts):
         ob.data['max_gust_ts'] = "%s-06" % (
             gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
         ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
-        ob.data['c1tmpf'] = temperature(
-                float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
+        if 'tsoil_c_avg' in headers:
+            ob.data['c1tmpf'] = temperature(
+                    float(tokens[headers.index('tsoil_c_avg')]),
+                    'C').value('F')
         ob.data['c2tmpf'] = temperature(
                 float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
         ob.data['c3tmpf'] = temperature(
@@ -144,10 +159,12 @@ def m15_process(nwsli, maxts):
         if 't50_c_avg' in headers:
             ob.data['c4tmpf'] = temperature(
                     float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
-        ob.data['c2smv'] = float(
-            tokens[headers.index('calc_vwc_12_avg')]) * 100.0
-        ob.data['c3smv'] = float(
-            tokens[headers.index('calc_vwc_24_avg')]) * 100.0
+        if 'calc_vwc_12_avg' in headers:
+            ob.data['c2smv'] = float(
+                tokens[headers.index('calc_vwc_12_avg')]) * 100.0
+        if 'calc_vwc_24_avg' in headers:
+            ob.data['c3smv'] = float(
+                tokens[headers.index('calc_vwc_24_avg')]) * 100.0
         if 'calc_vwc_50_avg' in headers:
             ob.data['c4smv'] = float(
                 tokens[headers.index('calc_vwc_50_avg')]) * 100.0
@@ -221,8 +238,10 @@ def hourly_process(nwsli, maxts):
         ob.data['max_gust_ts'] = "%s-06" % (
             gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
         ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
-        ob.data['c1tmpf'] = temperature(
-                float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
+        if 'tsoil_c_avg' in headers:
+            ob.data['c1tmpf'] = temperature(
+                    float(tokens[headers.index('tsoil_c_avg')]),
+                    'C').value('F')
         ob.data['c2tmpf'] = temperature(
                 float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
         ob.data['c3tmpf'] = temperature(
@@ -230,10 +249,12 @@ def hourly_process(nwsli, maxts):
         if 't50_c_avg' in headers:
             ob.data['c4tmpf'] = temperature(
                     float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
-        ob.data['c2smv'] = float(
-            tokens[headers.index('calc_vwc_12_avg')]) * 100.0
-        ob.data['c3smv'] = float(
-            tokens[headers.index('calc_vwc_24_avg')]) * 100.0
+        if 'calc_vwc_12_avg' in headers:
+            ob.data['c2smv'] = float(
+                tokens[headers.index('calc_vwc_12_avg')]) * 100.0
+        if 'calc_vwc_24_avg' in headers:
+            ob.data['c3smv'] = float(
+                tokens[headers.index('calc_vwc_24_avg')]) * 100.0
         if 'calc_vwc_50_avg' in headers:
             ob.data['c4smv'] = float(
                 tokens[headers.index('calc_vwc_50_avg')]) * 100.0
@@ -317,8 +338,9 @@ def daily_process(nwsli, maxts):
             print(("soilm_ingest.py station: %s ts: %s has 0 solar"
                    ) % (nwsli, valid.strftime("%Y-%m-%d")))
             EVENTS['reprocess_solar'] = True
-        ob.data['max_sknt'] = speed(float(tokens[headers.index('ws_mps_max')]),
-                                    'MPS').value('KT')
+        if 'ws_mps_max' in headers:
+            ob.data['max_sknt'] = speed(float(tokens[headers.index('ws_mps_max')]),
+                                        'MPS').value('KT')
         ob.data['avg_sknt'] = speed(
             float(tokens[headers.index('ws_mps_s_wvt')]), 'MPS').value('KT')
         # TODO: assumption this is done right by the campbell logger

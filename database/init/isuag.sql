@@ -4,7 +4,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (4, now());
+INSERT into iem_schema_manager_version values (5, now());
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -71,6 +71,9 @@ CREATE TABLE sm_daily (
     ws_mps_max_qc real,
     ws_mps_tmx_f character(1),
     ws_mps_tmx_qc timestamp with time zone,
+    WS_mph_TMx timestamp with time zone,
+    ws_mph_tmx_f character(1),
+    ws_mph_tmx_qc timestamp with time zone,
     dailyet_f character(1),
     dailyet_qc real,
     tsoil_c_avg_f character(1),
@@ -162,6 +165,18 @@ CREATE TABLE sm_daily (
     bpres_avg real,
     bpres_avg_qc real,
     bpres_avg_f character(1),
+    rh_avg real,
+    rh_avg_qc real,
+    rh_avg_f character(1),
+    ws_mph real,
+    ws_mph_qc real,
+    ws_mph_f character(1),
+    etapples real,
+    etapples_qc real,
+    etappls_f character(1),
+    ws_mph_max real,
+    ws_mph_max_qc real,
+    ws_mph_max_f character(1),
     rain_mm_2_tot real,
     rain_mm_2_tot_qc real,
     rain_mm_2_tot_f character(1)
@@ -182,6 +197,9 @@ CREATE TABLE sm_hourly (
   WindDir_D1_WVT real,
   WindDir_SD1_WVT real,
   ETAlfalfa real,
+  ETApples real,
+  ETApples_qc real,
+  ETApples_f char(1),
   SolarRadCalc real,
   TSoil_C_Avg real,
   VWC_12_Avg real,
