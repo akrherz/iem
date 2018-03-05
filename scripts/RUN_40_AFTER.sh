@@ -7,6 +7,9 @@ HH6=$(date -u --date '6 hours ago' +'%H')
 cd dl
 python download_hrrr.py &
 
+cd ../rtma
+python wind_power.py &
+
 cd ../sbw
 python polygon_mosaic.py S
 sleep 2

@@ -7,7 +7,7 @@ extrapolate to 80 m, cubing that value, and multiplying it by 0.002641
 potential wind power generation in MW (without taking into account the
 capacity factor).
 
-RUN from RUN_10_AFTER.sh
+RUN from RUN_40_AFTER.sh
 
 """
 from __future__ import print_function
@@ -37,8 +37,8 @@ def run(ts, routes):
     try:
         u = grb.select(name='10 metre U wind component')[0]
         v = grb.select(name='10 metre V wind component')[0]
-    except Exception as _exp:
-        print('Missing u/v wind for wind_power.py\nFN: %s' % (fn,))
+    except Exception as exp:
+        print('Missing u/v wind for wind_power.py\nFN: %s\n%s' % (fn, exp))
         return
     mag = np.hypot(u['values'], v['values'])
 

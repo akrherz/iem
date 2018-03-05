@@ -31,9 +31,6 @@ then
 	python cfs_extract.py &
 fi
 
-cd ../rtma
-python wind_power.py &
-
 cd ../hads
 python process_hads_inbound.py &
 
