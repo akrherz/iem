@@ -262,7 +262,14 @@ for easterly wind which we attribute to the flow interference from the
 dominant influence on the waked region.</p>
 
 <p><img src="figures/figure7.png" class="img img-responsive">
-<br /><strong>Figure 7:</strong> Image courtesy of: D. Rajewski</p>
+<br /><strong>Figure 7:</strong> Detection of tower wake at all tower levels
+from normalized wind
+speed ratios from the NW and S booms. Median ratios are represented with
+median absolute deviations as error bars and error bars are plotted every
+15°.  A2 80-m wind direction is taken from the wind vane on the NW
+boom.   Tower
+boom layout diagram denotes usable wind directions from No Wake sector. 
+Image courtesy of: D. Rajewski</p>
 
 
 <h3>Tower Data</h3>
