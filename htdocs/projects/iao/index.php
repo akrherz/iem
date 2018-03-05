@@ -229,6 +229,42 @@ from June 2016-May 2017. Image courtesy of: D. Rajewski
 at each tower site: A1 within the wind farm (a) and A2 outside of the wind
 farm (b).  Images courtesy of S. Purdy.</p>
 
+<h3>Topography and Tower Mast Influences on IAO Measurements</h3>
+
+<p>Terrain for both sites is flat with about 13-m higher elevation at A2 vs. 
+A1 (356.6 m vs. 343.8 m).  Both sites feature slopes radially away from of 
+tower of less than ±0.7% within a 4-km distance of each tower for each of 
+the following directions ([A1 vs A2] N: <0.1% vs. 0%; S: -0.3% vs. -0.2%; 
+E: <0.1% vs. <0.1%; W: <-0.1% vs. -0.2%).  Within 1 km of A1 the land slopes 
+gently upward (≤1.0%) to the west, north, northwest, southwest, and south 
+of the tower.  Surrounding A2 slopes within 1 km of the tower are ±0.1% to 
+the northwest, southwest, south, and west of the tower and -0.3% to the 
+north of the tower.  These topographical variations are significantly 
+lower than the requirements for site calibration of met towers near 
+wind turbines (e.g. <10% slope or height variations of ±4m from the 
+horizontal plane at a distance of 16 rotor diameters, D (D=82m) from a 
+turbine (IEC61400-12:1, 2005)).</p>
+
+<p>Influence of tower cross section of our measurements is shown in Figure 7 
+by taking the ratio of median wind speeds from the NW and S IAO Tower 
+booms for 80-m wind direction from the A2 reference tower.  From wind 
+directions approximately S (172.5°) to approximately NW (326.5°) we 
+expect less than 5% variation in anemometer speeds due to the tower 
+influence.  For easterly and northerly wind, the NW and S anemometer 
+speeds depart by 30-40% depending on the leeward or windward position of
+each anemometer.  We thereby omit analysis of tower data from these 
+directional sectors (0°-172.5° and 326.5°-359.9°).  Higher variability 
+of the normalized speed is indicated at the 10-m and 120-m levels due to 
+cup anemometer malfunction on the south boom before instrument repair in 
+August 2016.  We also observe a slight reduction in the tower wake at 5-m 
+for easterly wind which we attribute to the flow interference from the 
+2.5-m tall equipment shed.  At 20 m and above the tower shadow is the 
+dominant influence on the waked region.</p>
+
+<p><img src="figures/figure7.png" class="img img-responsive">
+<br /><strong>Figure 7:</strong> Image courtesy of: D. Rajewski</p>
+
+
 <h3>Tower Data</h3>
 
 <p>Two continuous data streams from the towers operate at different sampling 
