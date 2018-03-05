@@ -197,7 +197,7 @@ def do_polygon(ctx):
             bins = np.arange(1, 8, 1)
         else:
             for delta in [500, 50, 5, 1, 0.5, 0.05]:
-                bins = np.arange(0, maxv * 1.05, delta)
+                bins = np.arange(0, (maxv + 1.) * 1.05, delta)
                 if len(bins) > 8:
                     break
             bins[0] = 0.01
@@ -346,7 +346,7 @@ def do_ugc(ctx):
             data[key] = round(data[key] / float(years), 2)
         maxv = df[datavar].max()
         for delta in [500, 50, 5, 1, 0.5, 0.05]:
-            bins = np.arange(0, maxv * 1.05, delta)
+            bins = np.arange(0, (maxv + 1.) * 1.05, delta)
             if len(bins) > 8:
                 break
         if len(bins) > 8:
