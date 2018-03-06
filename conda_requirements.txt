@@ -101,9 +101,6 @@ ipykernel
 ipython
 ipython-notebook
 ipython_genutils
-iris
-iris-grib
-iris-sample-data
 isort
 jasper
 jbig
