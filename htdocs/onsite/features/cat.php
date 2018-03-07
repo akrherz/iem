@@ -40,8 +40,6 @@ if (pg_num_rows($result) == 0){ die("Feature Not Found"); }
 
 $row = pg_fetch_array($result,0);
 $valid = strtotime( $row["valid"] );
-$fmt = "gif";
-if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 
 if ($row["fbid"] == null){
 	$row["fbid"] = $valid;
@@ -49,7 +47,7 @@ if ($row["fbid"] == null){
 
 $day = $row["d"];
 $prettyday = date("l, d F Y", $valid);
-$big = sprintf("/onsite/features/%s.%s", $row["imageref"], $fmt);
+$big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
 
 $linktext = "";
 if ($row["appurl"] != ""){

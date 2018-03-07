@@ -54,13 +54,6 @@ function genFeature()
     pg_exec($connection, $isql);
   }
 
-
-  $fref = "/mesonet/share/features/". $row["imageref"] .".png";
-  $width = 320;
-  $height = 240;
-  if (is_file($fref)){
-	  list($width, $height, $type, $attr) = @getimagesize($fref);
-  }
   $s = "<span style=\"font-size: larger; font-weight: bold;\">". $row["title"] ."</span><br />\n";
   $s .= "<span style=\"font-size: smaller; float: left;\">Posted: " . $row["webdate"] ."</span>";
   $s .= printTags($tags);
@@ -72,9 +65,15 @@ $s .= "<a class=\"button middle\" href=\"/onsite/features/past.php\">Past Featur
 $s .= "<a class=\"button right\" href=\"/onsite/features/tags/\">Tags</a></div>";
   
   
- /* Feature Image! */
-  $s .= "<div style=\"margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px; width: ". ($width + 6) ."px;\"><a href=\"/onsite/features/". $row["imageref"] .".png\"><img src=\"/onsite/features/". $row["imageref"] .".png\" alt=\"Feature\" width=\"$width\" height=\"$height\"/></a><br /><span style=\"font-size: smaller;\">". $row["caption"] ."</span></div>";
-
+ // Feature Image!
+  $s .= <<<EOM
+  <div style="margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px;">
+  <a href="/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}">
+  <img src="/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}"
+    alt="Feature" class="img img-responsive">
+  </a>
+  <br /><span style="font-size: smaller;">{$row["caption"]}</span></div>
+EOM;
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 
 /* Rate Feature and Past ones too! */

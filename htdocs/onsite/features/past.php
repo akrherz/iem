@@ -51,8 +51,6 @@ for ($i = 0; $i < $num; $i++){
 	$row = @pg_fetch_assoc($rs,$i);
 	$valid = strtotime( substr($row["valid"],0,16) );
     $p = printTags( explode(",", $row["tags"]) );
-	$fmt = "gif";
-	if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 	$d = date("Y-m-d", $valid);
     $linktext = "";
     if ($row["appurl"] != ""){
@@ -66,8 +64,8 @@ for ($i = 0; $i < $num; $i++){
 
 <div class="row">
 	<div class="col-md-6">
-	<a href="/onsite/features/{$row["imageref"]}.{$fmt}">
-<img src="/onsite/features/{$row["imageref"]}.{$fmt}" alt="Feature" class="img img-responsive" /></a>
+	<a href="/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}">
+<img src="/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}" alt="Feature" class="img img-responsive" /></a>
 <br />{$row["caption"]}
 	</div>
 	<div class="col-md-6">

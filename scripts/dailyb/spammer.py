@@ -139,9 +139,10 @@ Bad: %(bad)s  Abstain: %(abstain)s
                         "cat.php?day=%s"
                         ) % (lastts.strftime("%Y-%m-%d"),)
         row2['imgurl'] = ("https://mesonet.agron.iastate.edu/onsite/features/"
-                          "%s/%02i/%s.png"
+                          "%s/%02i/%s.%s"
                           ) % (row['valid'].year, row['valid'].month,
-                               row['valid'].strftime("%y%m%d"))
+                               row['valid'].strftime("%y%m%d"),
+                               row['mediasuffix'])
         txt += textfmt % row2
         html += htmlfmt % row2
     if mcursor.rowcount == 0:

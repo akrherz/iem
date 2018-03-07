@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (15, now());
+INSERT into iem_schema_manager_version values (16, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -342,12 +342,14 @@ CREATE table feature(
   fbid bigint,
   appurl varchar(1024),
   javascripturl varchar(1024),
-  views int default 0
+  views int default 0,
+  mediasuffix varchar(8) DEFAULT 'png'
 );
 alter table feature SET WITH oids;
 CREATE unique index feature_title_check_idx on feature(title);
 CREATE index feature_valid_idx on feature(valid);
 GRANT all on feature to nobody,apache;
+GRANT all on feature to mesonet,ldm;
 
 CREATE table shef_physical_codes(
   code char(2),

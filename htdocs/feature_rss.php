@@ -33,7 +33,7 @@ EOF;
 		$appurl = "<p><a href=\"https://mesonet.agron.iastate.edu".$row["appurl"]."\">Generate This Chart on IEM Website</a></p>";
 	}
  	$cbody = <<<EOF
-<img src="https://mesonet.agron.iastate.edu/onsite/features/{$row["imageref"]}.png" 
+<img src="https://mesonet.agron.iastate.edu/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}" 
  alt="Feature" style="float: left; padding: 5px;" />
  <p>{$row["story"]}</p>
  {$appurl}

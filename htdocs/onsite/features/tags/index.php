@@ -74,10 +74,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 	}
 	if (!$found){ continue; }
 	$valid = strtotime( $row["valid"] );
-	$fmt = "gif";
-	if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
-	$thumb = sprintf("https://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
-	$big = sprintf("https://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["imageref"], $fmt);
+	$big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
 	$content .= <<<EOF
 <hr />
 <div class="row">

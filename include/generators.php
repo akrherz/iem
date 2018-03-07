@@ -108,14 +108,8 @@ function gen_feature($t){
 	$fburl = sprintf("https://www.facebook.com/permalink.php?".
 			"story_fbid=%s&id=157789644737", $fbid);
 	
-	$fref = "/mesonet/share/features/". $row["imageref"] .".png";
-	$width = 320;
-	$height = 240;
-	if (is_file($fref)){
-		list($width, $height, $type, $attr) = @getimagesize($fref);
-	}
-	$imghref = sprintf("/onsite/features/%s.png", $row["imageref"]);
-	$bigimghref = sprintf("/onsite/features/%s.png", $row["imageref"]);
+	$imghref = sprintf("/onsite/features/%s.%s", $row["imageref"],
+		$row["mediasuffix"]);
 	
 	$linktext = "";
 	if ($row["appurl"] != ""){
@@ -132,14 +126,14 @@ function gen_feature($t){
 		$tagtext .= "</small>";
 	}
 	$jsextra = "";
-	$imgiface = "<a href=\"$bigimghref\"><img src=\"$bigimghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
+	$imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
 	if ($row["javascripturl"]){
 		$imgiface = <<<EOF
 <div class="hidden-sm hidden-xs">
 <div id="ap_container" style="width:100%s;height:400px;"></div>
 </div>
 <div class="visible-sm visible-xs">
-<a href="$bigimghref"><img src="$bigimghref" alt="Feature" class="img img-responsive" /></a>
+<a href="$imghref"><img src="$imghref" alt="Feature" class="img img-responsive" /></a>
 </div>
 EOF;
 		$jsextra = <<<EOF

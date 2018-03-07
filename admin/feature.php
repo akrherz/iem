@@ -40,11 +40,13 @@ $caption = isset($_REQUEST["caption"]) ? $_REQUEST["caption"] : null;
 $tags = isset($_REQUEST["tags"]) ? $_REQUEST["tags"] : null;
 $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ?
           true : false;
+$mediasuffix = isset($_REQUEST["mediasuffix"]) ? $_REQUEST["mediasuffix"]: "png";
 
 $mesosite = iemdb("mesosite", TRUE, TRUE);
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature ".
-  "(title, story, caption, voting, tags, fbid, appurl, javascripturl) VALUES ".
-  "($1, $2, $3, $4, $5, $6, $7, $8)");
+  "(title, story, caption, voting, tags, fbid, appurl, javascripturl, ".
+  "mediasuffix) VALUES ".
+  "($1, $2, $3, $4, $5, $6, $7, $8, $9)");
 
 $app = "";
 if ($accessToken){
@@ -57,8 +59,8 @@ if ($accessToken){
 
 $rooturl = "https://mesonet.agron.iastate.edu";
 $permalink = sprintf('%s/onsite/features/cat.php?day=%s', $rooturl, date("Y-m-d") );
-$thumbnail = sprintf('%s/onsite/features/%s.png', $rooturl, 
-             date("Y/m/ymd") );
+$thumbnail = sprintf('%s/onsite/features/%s.%s', $rooturl, 
+             date("Y/m/ymd"), $mediasuffix);
 
 
 $action_links = [
@@ -93,7 +95,8 @@ if ($story != null && $title != null &&
     isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
-             $voting, $tags, $story_fbid, $appurl, $javascripturl) );
+			 $voting, $tags, $story_fbid, $appurl, $javascripturl,
+			 $mediasuffix) );
 }
 
 $t->content = <<<EOF
@@ -121,6 +124,9 @@ $t->content = <<<EOF
 
 <p>AppURL:
 <br /><input type="text" name="appurl" size="80" /></p>
+
+<p>Media Suffix:
+<br /><input type="text" name="mediasuffix" size="8" value="png" /></p>
 
 <p>Javascript URI:
 <br /><input type="text" name="javascripturl" size="80" /></p>
