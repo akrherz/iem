@@ -2,12 +2,13 @@
 from __future__ import print_function
 import sys
 import os
+import logging
 import datetime
-import urllib2
 
 import pytz
 import pygrib
-from pyiem.util import utc
+import requests
+from pyiem.util import utc, exponential_backoff
 
 # 18 hours of output + analysis
 COMPLETE_GRIB_MESSAGES = 18 * 4 + 1
@@ -34,9 +35,11 @@ def run(valid):
         try:
             grbs = pygrib.open(gribfn)
             if grbs.messages == COMPLETE_GRIB_MESSAGES:
+                # print("%s is complete!" % (gribfn, ))
                 return
             del grbs
         except Exception as exp:
+            logging.debug(exp)
             pass
     output = open(gribfn, 'wb')
     for hr in range(0, 19):
@@ -45,21 +48,18 @@ def run(valid):
                               "com/hrrr/prod/"
                               "hrrr.%Y%m%d/hrrr.t%Hz.wrfsubhf" + shr +
                               ".grib2.idx"))
-        attempt = 0
-        data = None
-        while data is None and attempt < 10:
-            try:
-                data = urllib2.urlopen(uri, timeout=30).readlines()
-            except Exception as exp:
-                print("dl_hrrrref FAIL %s %s %s %s" % (valid, hr, exp, uri))
-            attempt += 1
-        if data is None:
+        req = exponential_backoff(requests.get, uri, timeout=30)
+        if req is None or req.status_code != 200:
+            print("dl_hrrrref failed to fetch %s" % (uri, ))
             print("ABORT")
-            sys.exit()
+            return
+        data = req.content
 
         offsets = []
         neednext = False
-        for line in data:
+        for line in data.split("\n"):
+            if line.strip() == '':
+                continue
             tokens = line.split(":")
             if neednext:
                 offsets[-1].append(int(tokens[1]))
@@ -68,25 +68,17 @@ def run(valid):
                 offsets.append([int(tokens[1])])
                 neednext = True
 
-        req = urllib2.Request(uri[:-4])
-
         if hr > 0 and len(offsets) != 4:
             print(("dl_hrrrref[%s] hr: %s offsets: %s"
                    ) % (valid.strftime("%Y%m%d%H"), hr, offsets))
         for pr in offsets:
-            req.headers['Range'] = 'bytes=%s-%s' % (pr[0], pr[1])
-            fp = None
-            attempt = 0
-            while fp is None and attempt < 10:
-                try:
-                    fp = urllib2.urlopen(req)
-                except Exception as exp:
-                    print("dl_hrrrref FAIL %s %s %s %s" % (valid, hr, exp,
-                                                           req))
-                attempt += 1
-            if fp is None:
+            headers = {'Range': 'bytes=%s-%s' % (pr[0], pr[1])}
+            req = exponential_backoff(requests.get, uri[:-4],
+                                      headers=headers)
+            if req is None:
+                print("dl_hrrrref FAIL %s %s" % (uri[:-4], headers))
                 continue
-            output.write(fp.read())
+            output.write(req.content)
 
     output.close()
 
