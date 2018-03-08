@@ -4,11 +4,12 @@ rrdtool
 PyRSS2Gen
 odfpy
 egenix-mx-base
-metar
+git+https://github.com/akrherz/python-metar.git@snowdepth
 jenks
 mod_wsgi
--e git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38#egg=smartsheet-python-sdk
--e git+https://github.com/akrherz/windrose.git@darylchanges#egg=windrose
--e git+https://github.com/akrherz/nwnserver.git#egg=nwnserver
--e git+https://github.com/akrherz/pyLDM.git#egg=pyLDM
--e git+https://github.com/akrherz/pyIEM.git#egg=pyIEM
+git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
+git+https://github.com/akrherz/windrose.git@darylchanges
+git+https://github.com/akrherz/nwnserver.git
+git+https://github.com/akrherz/pyLDM.git
+git+https://github.com/akrherz/pyIEM.git
+Unidecode
