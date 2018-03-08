@@ -17,12 +17,15 @@ CAP = "https://api.weather.gov/alerts/active"
 def main():
     """Go Main Go"""
     sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write("Report run at %s\n" % (datetime.datetime.utcnow(), ))
+    sys.stdout.write("Report run at %s\n" % (
+        datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ", )))
+    sys.stdout.write("Comparison against %s\n" % (CAP, ))
     try:
         req = requests.get(CAP)
         jdata = req.json()
-    except urllib2.HTTPError as _exp:
-        sys.stdout.write("Failure to download %s, comparison failed" % (CAP, ))
+    except urllib2.HTTPError as exp:
+        sys.stdout.write(("Failure to download %s, comparison failed"
+                          "%s\n") % (CAP, exp))
         return
     rows = []
     for feature in jdata['features']:
@@ -61,7 +64,7 @@ def main():
                      (capdf['wfo'] == row['wfo']) &
                      (capdf['ugc'] == row['ugc']))]
         if df2.empty:
-            print(("CAP MISSING (%s %s %s %s %s)"
+            print(("NWS MISSING (%s %s %s %s %s)"
                    ) % (row['wfo'], row['phenomena'], row['significance'],
                         row['eventid'], row['ugc']))
 
