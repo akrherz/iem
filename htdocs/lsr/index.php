@@ -11,7 +11,7 @@ $t->jsextra = <<<EOF
 <script type="text/javascript" src="Printer-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
-<script type="text/javascript" src="Exporter-all.js"></script>
+<script type="text/javascript" src="Exporter-all.js?v=1"></script>
 <script type="text/javascript" src="static.js?v=24"></script>
 <script>
 Ext.onReady(function(){

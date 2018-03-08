@@ -204,6 +204,8 @@ Ext.override(Ext.grid.GridPanel, {
                 headerXml +
                 '</ss:Row>';
 
+        // fix bad chars that bust the resulting XML
+        var converter=$("<div>");
 		// Generate the data rows from the data in the Store
         for (var i = 0, it = this.store.data.items, l = it.length; i < l; i++) {
             t += '<ss:Row>';
@@ -218,7 +220,7 @@ Ext.override(Ext.grid.GridPanel, {
                     else if (cellType[k] == 'DateTime') {
                             t += v.format('Y-m-d\\TH:i:s');
                     } else {
-                            t += v;
+                            t += converter.text(v).html();
                     }
                     t +='</ss:Data></ss:Cell>';
                     k++;
