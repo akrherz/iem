@@ -5,7 +5,6 @@ PyRSS2Gen
 odfpy
 egenix-mx-base
 git+https://github.com/akrherz/python-metar.git@snowdepth
-jenks
 mod_wsgi
 git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
 git+https://github.com/akrherz/windrose.git@darylchanges
@@ -13,3 +12,4 @@ git+https://github.com/akrherz/nwnserver.git
 git+https://github.com/akrherz/pyLDM.git
 git+https://github.com/akrherz/pyIEM.git
 Unidecode
+git+https://github.com/perrygeo/jenks.git
