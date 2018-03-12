@@ -302,7 +302,7 @@ sonic anemometers starting November 2016.</p>
 <br /><a href="/plotting/auto/?_wait=no&q=158&station=ETTI4">here</a></p>
 
 <section id="cwex">
-<h3>Crop/Wind-entry Experiment (CWEX)</h3>
+<h3>Crop/Wind-energy Experiment (CWEX)</h3>
 </section>
 
 <p>A series of field experiments was conducted in advance of construction of 
