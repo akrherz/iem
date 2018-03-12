@@ -7,27 +7,11 @@ import sys
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.nws.vtec import VTEC_SIGNIFICANCE, VTEC_PHENOMENA
 from pyiem.util import get_dbconn
 
 # Akami has this cached, so we shall cache bust it, please
 NOUNCE = "?%s" % (datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
 URI = "https://www.weather.gov/source/crh/allhazard.geojson"
-
-REV_VTEC_SIGNIFIANCE = dict((v, k) for k, v in VTEC_SIGNIFICANCE.items())
-REV_VTEC_PHENOMENA = dict((v, k) for k, v in VTEC_PHENOMENA.items())
-
-
-def get_phenomena(value):
-    if value == 'Rip Current':
-        return 'RP'
-    if value == 'Fire Weather':
-        return 'FW'
-    return REV_VTEC_PHENOMENA.get(value, value)
-
-
-def get_significance(value):
-    return REV_VTEC_SIGNIFIANCE.get(value, value)
 
 
 def main():
@@ -49,9 +33,8 @@ def main():
         props = feature['properties']
         for ugc in props.get('ugc', ['UNKNOW']):
             rows.append(dict(wfo=props['office'][1:], ugc=ugc,
-                             phenomena=get_phenomena(props['phenomenon']),
-                             significance=get_significance(
-                                 props['significance']),
+                             phenomena=props['phenom'],
+                             significance=props['sig'],
                              eventid=int(props['etn'])))
     capdf = pd.DataFrame(rows)
 
