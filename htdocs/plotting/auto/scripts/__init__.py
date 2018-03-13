@@ -310,6 +310,8 @@ data = {'plots': [
                    "by month/season")},
         {'id': "93", 'label': ("Heat Index / Temperature / Dew Point / "
                                "Wind Chill Hourly Histogram")},
+        {'id': "192",
+         'label': "Hourly Analysis Maps of ASOS/AWOS/METAR Stations"},
         {'id': "153",
          'label': "Hourly Temp/Dew Point Extremes by Month/Season/Year"},
         {'id': "159",
