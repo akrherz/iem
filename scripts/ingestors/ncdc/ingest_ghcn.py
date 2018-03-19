@@ -33,16 +33,17 @@ from __future__ import print_function
 import urllib2
 import os
 import datetime
-import numpy as np
 import sys
 import re
+
+import numpy as np
 import netCDF4
 from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
 COOP = get_dbconn('coop')
-cursor = COOP.cursor()
+CURSOR = COOP.cursor()
 
 BASEDIR = "/mesonet/tmp"
 BASE = datetime.date(1850, 1, 1)
@@ -105,19 +106,19 @@ def get_file(station):
     # Convert IEM station into what NCDC uses, sigh
     ncdc = "%s%s" % (STCONV[station[:2]], station[2:])
     # IPv6, use 205.167.25.102 rather than www1.ncdc.noaa.gov
-    uri = "http://205.167.25.102/pub/data/ghcn/daily/all/USC00%s.dly" % (
-                                                                        ncdc)
+    uri = ("http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00%s.dly"
+           ) % (ncdc, )
     localfn = "%s/USC00%s.dly" % (BASEDIR, ncdc)
     if not os.path.isfile(localfn):
         print('Downloading from NCDC station: %s...' % (ncdc, ), end='')
         try:
-            data = urllib2.urlopen(uri)
-        except Exception, exp:
+            data = urllib2.urlopen(uri, timeout=30)
+        except Exception as exp:
             print(exp)
             return None
-        o = open(localfn, 'w')
-        o.write(data.read())
-        o.close()
+        fp = open(localfn, 'w')
+        fp.write(data.read())
+        fp.close()
         print('done.')
     else:
         print('%s is cached...' % (localfn,))
@@ -134,20 +135,20 @@ def get_days_for_month(day):
 def varconv(val, element):
     ''' Convert NCDC to something we use in the database '''
     if element in ['TMAX', 'TMIN']:
-        v = round(temperature(float(val) / 10.0, 'C').value('F'), 0)
-        if v < -100 or v > 150:
+        fv = round(temperature(float(val) / 10.0, 'C').value('F'), 0)
+        if fv < -100 or fv > 150:
             return None
-        return v
+        return fv
     if element in ['PRCP']:
-        v = round((float(val) / 10.0) / 25.4, 2)
-        if v < 0:
+        fv = round((float(val) / 10.0) / 25.4, 2)
+        if fv < 0:
             return None
-        return v
+        return fv
     if element in ['SNOW', 'SNWD']:
-        v = round(float(val) / 25.4, 1)
-        if v < 0:
+        fv = round(float(val) / 25.4, 1)
+        if fv < 0:
             return None
-        return v
+        return fv
     return None
 
 
@@ -290,9 +291,9 @@ def process(station, metadata):
     keys.sort()
 
     obs = {}
-    cursor.execute("""SELECT day, high, low, precip, snow, snowd from
+    CURSOR.execute("""SELECT day, high, low, precip, snow, snowd from
             """+table+""" where station = %s""", (station,))
-    for row in cursor:
+    for row in CURSOR:
         obs[row[0]] = row[1:]
     print('loadvars')
     pr_mflag = nc.variables['pr_mflag'][:]
@@ -354,7 +355,7 @@ def process(station, metadata):
                                        'F').value('K')
         if row is None:
             print('No data for %s %s' % (station, d))
-            cursor.execute("""
+            CURSOR.execute("""
                 INSERT into %s(station, day, sday,
                 year, month) VALUES ('%s', '%s', '%s', %s, %s)
             """ % (table, station, d,
@@ -397,7 +398,7 @@ def process(station, metadata):
             UPDATE %s SET %s WHERE day = '%s' and
             station = '%s'
             """ % (table, s[:-1], d, station)
-            cursor.execute(sql)
+            CURSOR.execute(sql)
 
     # print 'Write pr netcdf'
     nc.variables['pr'][:] = pr
@@ -456,10 +457,10 @@ def main(argv):
     else:
         nt = NetworkTable("%sCLIMATE" % (station[:2],))
         process(sys.argv[1], nt.sts[station])
+    CURSOR.close()
+    COOP.commit()
+    COOP.close()
 
 
 if __name__ == '__main__':
     main(sys.argv)
-    cursor.close()
-    COOP.commit()
-    COOP.close()
