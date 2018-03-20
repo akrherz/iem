@@ -159,13 +159,13 @@ function buildUI(){
 	});
 	$("#sdate").datepicker({
 		dateFormat:"yy-m-d",
-		minDate: new Date(2000, 10, 26),
+		minDate: new Date(1996, 0, 1),
 		maxDate: new Date(),
-		defaultDate: new Date(2000, 10, 26)
+		defaultDate: new Date(1996, 0, 1)
 	});
 	$("#edate").datepicker({
 		dateFormat:"yy-m-d",
-		minDate: new Date(2000, 10, 27),
+		minDate: new Date(1996, 0, 2),
 		maxDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
 		defaultDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000)		
 	});

@@ -2,13 +2,14 @@
 /*
  * Create lists of links to archived AFOS products based on what the user wants
  */
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 48);
 require_once "../../../include/forms.php";
-include("../../../include/database.inc.php");
-include("../../../include/imagemaps.php");
+require_once "../../../include/database.inc.php";
+require_once "../../../include/imagemaps.php";
 include_once "../../../include/myview.php";
 require_once "../../../include/network.php";
+
 $afos = iemdb("afos");
 $t = new MyView();
 $t->title = "NWS Text Product by Issuing Center by Date";
@@ -127,10 +128,10 @@ while (list($key, $s)=each($groups)){
 }
 $netselect = make_select("source", $source, $sources);
 
-$yselect = yearSelect(2001, $year);
+$yselect = yearSelect(1996, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
-$y2select = yearSelect2(2001, $year2, "year2");
+$y2select = yearSelect2(1996, $year2, "year2");
 $m2select = monthSelect($month2, "month2");
 $d2select = daySelect2($day2, "day2");
 
@@ -145,9 +146,20 @@ $t->content = <<<EOF
 <p>This application prints out a listing of IEM archived text products
 by issuing NWS Issuing Center and by date.  After about
 seven days, the IEM purges a lot of the frequently issued products like
-SHEF and METAR data. This archive exists back to 1 January 2001. The archive
-quality and completeness greatly increases for dates after the year 2008. Please be
-patient with this page if you select a range of dates.</p>
+SHEF and METAR data. Please be patient with this page if you select a 
+range of dates.</p>
+
+<p><strong>Archive Completeness:</strong>
+<ul>
+ <li><strong>1996 thru 2000</strong>: Very sparse and imcomplete, selectively
+ backfilled as archives have been found.  Also note that product source IDs
+ are likely different back then (prior to NWS Modernization)</li>
+ <li><strong>2001 thru 2007</strong>: More consistent archives, but still likely
+ missing things.  Much better coverage though.</li>
+ <li><strong>2008 thru now</strong>: Very good data coverage and higher fidelity
+ archiving.</li>
+ </ul>
+</p>
 <script type="text/javascript">
 function showHide(v){
 	var d2 = document.getElementById("d2");
