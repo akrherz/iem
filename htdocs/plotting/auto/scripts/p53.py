@@ -127,6 +127,7 @@ def plotter(fdict):
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 53)
+    ax.set_ylim(0, 100)
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
 
     # Shrink current axis's height by 10% on the bottom
