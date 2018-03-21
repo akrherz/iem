@@ -24,23 +24,29 @@ def process(tarfn):
     subprocess.call("tar -xf %s" % (tarfn, ), shell=True)
     for grbfn in glob.glob("merged_AWIP32*sfc"):
         grbs = pygrib.open(grbfn)
-        for grb in grbs.select(parameterName='204', stepType='avg'):
-            dt = grb['dataDate']
-            hr = int(grb['dataTime']) / 100
-            ts = datetime.datetime.strptime("%s %s" % (dt, hr),
-                                            "%Y%m%d %H")
-            fn = "rad_%s.grib" % (ts.strftime("%Y%m%d%H%M"), )
-            fh = open(fn, 'wb')
-            fh.write(grb.tostring())
-            fh.close()
+        for pnum, pname in zip(['204', '61'], ['rad', 'apcp']):
+            try:
+                argrbs = grbs.select(parameterName=pnum)
+            except ValueError:
+                print("download_narr Failed to find %s in %s" % (pname, grbfn))
+                continue
+            for grb in argrbs:
+                dt = grb['dataDate']
+                hr = int(grb['dataTime']) / 100
+                ts = datetime.datetime.strptime("%s %s" % (dt, hr),
+                                                "%Y%m%d %H")
+                fn = "%s_%s.grib" % (pname, ts.strftime("%Y%m%d%H%M"))
+                fh = open(fn, 'wb')
+                fh.write(grb.tostring())
+                fh.close()
 
-            cmd = ("/home/ldm/bin/pqinsert -p 'data a %s bogus "
-                   "model/NARR/rad_%s.grib grib' %s"
-                   ) % (ts.strftime("%Y%m%d%H%M"),
-                        ts.strftime("%Y%m%d%H%M"), fn)
-            subprocess.call(cmd, shell=True)
-            # print("grbfn: %s fn: %s" % (grbfn, fn))
-            os.remove(fn)
+                cmd = ("/home/ldm/bin/pqinsert -p 'data a %s bogus "
+                       "model/NARR/%s_%s.grib grib' %s"
+                       ) % (ts.strftime("%Y%m%d%H%M"), pname,
+                            ts.strftime("%Y%m%d%H%M"), fn)
+                subprocess.call(cmd, shell=True)
+                # print("grbfn: %s fn: %s" % (grbfn, fn))
+                os.remove(fn)
         os.remove(grbfn)
 
 
@@ -78,6 +84,7 @@ def fetch_rda(year, month):
     # Now call coop script
     subprocess.call(("python /opt/iem/scripts/coop/narr_solarrad.py %s %s"
                      ) % (year, month), shell=True)
+
 
 def main(argv):
     """Go Main Go"""
