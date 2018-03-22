@@ -6,8 +6,8 @@ header("Content-type: text/plain");
 echo 'Title: KIMT StormNet
 Refresh: 1 
 Color: 200 200 255
-IconFile: 1, 18, 32, 2, 31, "http://www.tornadocentral.com/grlevel3/windbarbs.png" 
-IconFile: 2, 15, 15, 8, 8, "http://www.tornadocentral.com/grlevel3/cloudcover.png" 
+IconFile: 1, 18, 32, 2, 31, "https://mesonet.agron.iastate.edu/request/grx/windbarbs.png" 
+IconFile: 2, 15, 15, 8, 8, "https://mesonet.agron.iastate.edu/request/grx/cloudcover.png" 
 Font: 1, 11, 1, "Courier New"
 
 ';
