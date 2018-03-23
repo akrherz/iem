@@ -68,7 +68,7 @@ data from this network, see <a href="hourlyRequest.php">this page</a>.
   <input type="checkbox" name="vars[]" value="c90">Daily Precipitation (inch)<BR>
   <input type="checkbox" name="vars[]" value="c20">Average Relative Humidity (%)<BR>
   <input type="checkbox" name="vars[]" value="c80">Solar Radiation (langley)<BR>
-  <input type="checkbox" name="vars[]" value="c70"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [mm]<br />
+  <input type="checkbox" name="vars[]" value="c70"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [inch]<br />
 
 </div>
 <div class="col-md-6">
