@@ -19,10 +19,6 @@ sh run.sh &
 
 cd ../coop
 python hrrr_solarrad.py
-if [ $DD -eq "01" ]
-	then
-	python first_guess_for_harry.py
-fi
 
 cd ../util
 if [ $DD -eq "02" ]
