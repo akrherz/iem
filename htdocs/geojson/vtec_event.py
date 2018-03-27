@@ -175,7 +175,6 @@ def main():
                 res = run_sbw(wfo, year, phenomena, significance, etn)
             else:
                 res = run(wfo, year, phenomena, significance, etn)
-        sys.stderr.write("Setting cache: %s\n" % (mckey, ))
         mc.set(mckey, res, 3600)
 
     if cb is None:
