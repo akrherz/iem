@@ -102,15 +102,13 @@ DATARE = re.compile(r"""
 
 
 def get_file(station):
-    ''' Download the file from NCDC, if necessary! '''
-    # Convert IEM station into what NCDC uses, sigh
-    ncdc = "%s%s" % (STCONV[station[:2]], station[2:])
+    ''' Download the file from NCEI, if necessary! '''
     # IPv6, use 205.167.25.102 rather than www1.ncdc.noaa.gov
-    uri = ("http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00%s.dly"
-           ) % (ncdc, )
-    localfn = "%s/USC00%s.dly" % (BASEDIR, ncdc)
+    uri = ("http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/%s.dly"
+           ) % (station, )
+    localfn = "%s/%s.dly" % (BASEDIR, station)
     if not os.path.isfile(localfn):
-        print('Downloading from NCDC station: %s...' % (ncdc, ), end='')
+        print('Downloading from NCEI station: %s...' % (station, ), end='')
         try:
             data = urllib2.urlopen(uri, timeout=30)
         except Exception as exp:
@@ -257,7 +255,8 @@ def process(station, metadata):
      'SX52', 'SX53', 'WT01', 'SN31', 'SN32', 'SN33', 'SX31', 'SX32', 'SX33']
 
     '''
-    fp = get_file(station)
+    # The GHCN station ID is based on what the database has for its 11 char
+    fp = get_file(metadata['ncdc81'])
     if fp is None:
         return
     nc = create_netcdf(station, metadata)
