@@ -58,7 +58,8 @@ def run(basets, endts, view):
     yi = np.arange(reference.MW_SOUTH, reference.MW_NORTH, cellsize)
     xi, yi = np.meshgrid(xi, yi)
     gridder = Rbf(df2['lon'].values, df2['lat'].values,
-                  df2['val'].values, function='thin_plate')
+                  pd.to_numeric(df2['val'].values, errors='ignore'),
+                  function='thin_plate')
     vals = gridder(xi, yi)
     vals[np.isnan(vals)] = 0
     window = np.ones((2, 2))
