@@ -211,7 +211,7 @@ def main():
         dirty = True
 
     if dirty:
-        export_shapefile(cursor, valid)
+        export_shapefile(cursor, datetime.datetime.utcnow())
 
     cursor.close()
     pgconn.commit()
