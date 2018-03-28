@@ -59,3 +59,20 @@ then
 	cd ../coop
 	python merra_solarrad.py $YYYY $MM
 fi
+
+# Process the GHCN dataset
+if [ $DD -eq "10" ]
+then
+	cd ../ingestors/ncdc
+	python ingest_ghcn.py ND
+	python ingest_ghcn.py SD
+	python ingest_ghcn.py NE
+	python ingest_ghcn.py MO
+	python ingest_ghcn.py IL
+	python ingest_ghcn.py WI
+	python ingest_ghcn.py MN
+	python ingest_ghcn.py MI
+	python ingest_ghcn.py IN
+	python ingest_ghcn.py OH
+	python ingest_ghcn.py KY
+fi

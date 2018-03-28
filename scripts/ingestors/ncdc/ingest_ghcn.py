@@ -120,7 +120,7 @@ def get_file(station):
         print('done.')
     else:
         print('%s is cached...' % (localfn,))
-    return open(localfn, 'r')
+    return localfn
 
 
 def get_days_for_month(day):
@@ -256,15 +256,15 @@ def process(station, metadata):
 
     '''
     # The GHCN station ID is based on what the database has for its 11 char
-    fp = get_file(metadata['ncdc81'])
-    if fp is None:
+    fn = get_file(metadata['ncdc81'])
+    if fn is None:
         return
     nc = create_netcdf(station, metadata)
     if nc is None:
         return
     data = {}
     # reclength = len(nc.dimensions['time'])
-    for line in fp:
+    for line in open(fn):
         m = DATARE.match(line)
         d = m.groupdict()
         if d['element'] not in ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']:
@@ -284,6 +284,7 @@ def process(station, metadata):
             v = varconv(d['value%s' % (i,)], d['element'])
             if v is not None:
                 data[day][d['element']] = v
+    os.unlink(fn)
 
     table = "alldata_%s" % (station[:2],)
     keys = data.keys()
