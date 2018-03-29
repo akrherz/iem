@@ -2,7 +2,7 @@
 
 import psycopg2.extras
 import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -13,8 +13,17 @@ def get_description():
     desc = dict()
     desc['cache'] = 86400
     desc['data'] = True
-    desc['description'] = """This chart presents a histogram of issuance times
-    for a given watch, warning, or advisory type for a given office."""
+    desc['description'] = """This chart presents a histogram of the Watch,
+    Warning, Advisory valid time.  This is the time period between the
+    issuance and final expiration time of a given event.  An individual event
+    is one Valid Time Event Code (VTEC) event identifier.  For example, a
+    Winter Storm Watch for 30 counties would only count as one event in this
+    analysis.
+
+    <p>If an individual event goes for more than 24 hours, the event is
+    capped at a 24 hour duration for the purposes of this analysis.  Events
+    like Flood Warnings are prime examples of this.
+    """
     desc['arguments'] = [
         dict(type='networkselect', name='station', network='WFO',
              default='DMX', label='Select WFO:'),
@@ -32,7 +41,6 @@ def plotter(fdict):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     pgconn = get_dbconn('postgis')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     wfo = ctx['station']
@@ -44,35 +52,41 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1)
 
     tzname = nt.sts[wfo]['tzname']
-    cursor.execute("""
+    df = read_sql("""
     WITH data as (
      SELECT extract(year from issue) as yr, eventid,
-     min(issue at time zone %s) as minissue from warnings WHERE
+     min(issue at time zone %s) as minissue,
+     max(expire at time zone %s) as maxexpire from warnings WHERE
      phenomena = %s and significance = %s
-     and wfo = %s GROUP by yr, eventid)
-
-    SELECT extract(hour from minissue) as hr, count(*) from data GROUP by hr
-    """, (tzname, phenomena, significance, wfo))
-    if cursor.rowcount == 0:
+     and wfo = %s GROUP by yr, eventid),
+    events as (select count(*) from data),
+    timedomain as (
+        SELECT generate_series(minissue,
+            least(maxexpire, minissue + '24 hours'::interval)
+            , '1 minute'::interval)
+        as ts from data
+    ),
+    data2 as (
+        SELECT extract(hour from ts)::int * 60 + extract(minute from ts)::int
+        as minute, count(*) from timedomain
+        GROUP by minute ORDER by minute ASC)
+    select d.minute, d.count, e.count as total from data2 d, events e
+    """, pgconn, params=(tzname, tzname, phenomena, significance, wfo),
+                  index_col='minute')
+    if df.empty:
         raise ValueError("No Results Found")
 
-    data = np.zeros((24,), 'f')
-    for row in cursor:
-        data[int(row[0])] = row[1]
-    df = pd.DataFrame(dict(hour=pd.Series(np.arange(24)),
-                           count=pd.Series(data)))
-
-    ax.bar(np.arange(24), data / float(sum(data)) * 100., ec='b', fc='b',
+    ax.bar(df.index.values, df['count'] / df['total'] * 100., ec='b', fc='b',
            align='center')
     ax.grid()
-    ax.set_xticks(range(0, 25, 1))
-    ax.set_xlim(-0.5, 23.5)
+    ax.set_xticks(range(0, 25 * 60, 60))
+    ax.set_xlim(-0.5, 24 * 60 + 1)
     ax.set_xticklabels(["Mid", "", "", "3 AM", "", "", "6 AM", "", "", '9 AM',
                         "", "", "Noon", "", "", "3 PM", "", "", "6 PM",
                         "", "", "9 PM", "", "", "Mid"])
     ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
-    ax.set_ylabel("Frequency [%%] out of %.0f Events" % (sum(data),))
-    ax.set_title(("[%s] %s :: Issuance Time Frequency\n%s (%s.%s)"
+    ax.set_ylabel("Percentage [%%] out of %.0f Events" % (df['total'].max(), ))
+    ax.set_title(("[%s] %s :: Time of Day Frequency\n%s (%s.%s)"
                   ) % (wfo, nt.sts[wfo]['name'],
                        vtec.get_ps_string(phenomena, significance),
                        phenomena, significance))

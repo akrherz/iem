@@ -348,7 +348,7 @@ data = {'plots': [
         {'id': "92",
          'label': "Days since Last Watch/Warning/Advisory by WFO"},
         {'id': "72",
-         'label': "Frequency of Issuance time for Watch/Warning/Advisories"},
+         'label': "Frequency of Watch/Warning/Advisories by Time of Day"},
         {'id': "52",
          'label': "Gaant Chart of WFO Issued Watch/Warning/Advisories"},
         {'id': "163",
