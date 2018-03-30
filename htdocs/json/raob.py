@@ -41,6 +41,9 @@ def run(ts, sid):
 
     res = {'profiles': []}
     table = 'raob_profile_%s' % (ts.year,)
+    if ts.year > datetime.datetime.utcnow().year:
+        return json.dumps(res)
+ 
     cursor.execute("""
         SELECT p.pressure, p.height,
         round(p.tmpc::numeric,1),
