@@ -36,7 +36,11 @@ def to_netcdf(valid):
         nc.close()
         return True
     p01m = nc.variables['p01m']
-    p01m[tidx, :, :] = val
+    # account for legacy grid prior to 2002
+    if val.shape == (880, 1160):
+        p01m[tidx, 1:, :] = val[:, 39:]
+    else:
+        p01m[tidx, :, :] = val
     nc.variables['p01m_status'][tidx] = 1
     nc.close()
 
