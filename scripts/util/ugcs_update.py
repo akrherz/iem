@@ -46,8 +46,8 @@ os.chdir('/tmp')
 def do_download(zipfn):
     """Do the download steps"""
     if not os.path.isfile(zipfn):
-        url = urllib2.Request(('http://www.weather.gov/geodata/catalog/wsom/'
-                               'data/%s') % (zipfn,))
+        url = urllib2.Request(('https://www.weather.gov/source/gis/Shapefiles/WSOM/'
+                               '%s') % (zipfn,))
         print('Downloading %s ...' % (zipfn,))
         fh = open(zipfn, 'wb')
         fh.write(urllib2.urlopen(url).read())
