@@ -198,6 +198,10 @@ def process(station, metadata):
     if obs is None:
         print("Failing to process %s as obs is None" % (station, ))
         return
+    for col in ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']:
+        if col not in obs.columns:
+            print("Obs missing for column: %s" % (col,))
+            obs[col] = None
 
     table = "alldata_%s" % (station[:2],)
     current = read_sql("""
