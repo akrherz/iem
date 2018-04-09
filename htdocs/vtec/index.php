@@ -30,7 +30,7 @@ $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
-<script type="text/javascript" src="vtec_static.js"></script>
+<script type="text/javascript" src="vtec_static.js?v=2"></script>
 <script>
 var CONFIG = {
   radar: null,
