@@ -7,9 +7,9 @@ import json
 from json import encoder
 import warnings
 
-from pyiem import iemre, datatypes
 import netCDF4
 import numpy as np
+from pyiem import iemre, datatypes
 
 warnings.simplefilter("ignore", UserWarning)
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
@@ -35,7 +35,7 @@ def main():
     form = cgi.FormContent()
     ts1 = datetime.datetime.strptime(form["date1"][0], "%Y-%m-%d")
     ts2 = datetime.datetime.strptime(form["date2"][0], "%Y-%m-%d")
-    if ts1 >= ts2:
+    if ts1 > ts2:
         send_error("date1 larger than date2")
     if ts1.year != ts2.year:
         send_error("multi-year query not supported yet...")
