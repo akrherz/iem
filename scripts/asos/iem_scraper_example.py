@@ -5,7 +5,11 @@ from __future__ import print_function
 import json
 import time
 import datetime
-import urllib2
+# Python 2 and 3: alternative 4
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 
 # Number of attempts to download data
 MAX_ATTEMPTS = 6
@@ -29,7 +33,7 @@ def download_data(uri):
     attempt = 0
     while attempt < MAX_ATTEMPTS:
         try:
-            data = urllib2.urlopen(uri, timeout=300).read()
+            data = urlopen(uri, timeout=300).read().decode('utf-8')
             if data is not None and not data.startswith('ERROR'):
                 return data
         except Exception as exp:
@@ -64,7 +68,7 @@ def main():
         # Get metadata
         uri = ("https://mesonet.agron.iastate.edu/"
                "geojson/network/%s.geojson") % (network,)
-        data = urllib2.urlopen(uri)
+        data = urlopen(uri)
         jdict = json.load(data)
         for site in jdict['features']:
             faaid = site['properties']['sid']
