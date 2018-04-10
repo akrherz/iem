@@ -1,10 +1,10 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 90);
-include("../../include/myview.php");
-include_once "../../include/database.inc.php";
-include("../../include/imagemaps.php");
-include("../../include/forms.php");
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/forms.php";
 
 $mesosite = iemdb('mesosite');
 
@@ -37,7 +37,9 @@ $t->content = <<<EOF
 <h3>IEM Computed Daily Summary of Observations</h3>
 		
 <p>This page allows you to download the IEM computed daily summary of whatever
-	observations the IEM collected for a given observation site.
+	observations the IEM collected for a given observation site. You can also
+	download data from COOP networks with this interface, in which case the
+	"daily" data are effectively the once-daily observations.</p.
 
 <p>Select network to download from:<br />
 <form name="network" action="daily.phtml">
@@ -47,6 +49,8 @@ $t->content = <<<EOF
 
 <form name="iemss" action="/cgi-bin/request/daily.py">
 <input type="hidden" value="{$network}" name="network" />
+
+<p>&nbsp;</p>
 
 <div class="row">
 <div class="col-md-6 col-sm-6">
@@ -74,6 +78,8 @@ $t->content = <<<EOF
     		</div>
     		<div class="col-md-6 col-sm-6">
 
+	<p><strong>Note</strong>: Values of 0.0001 inches are Trace Reports</p>
+
 <dl class="dl-horizontal">
  <dt>station</dt><dd>Common identifier for the station.</dd>
  <dt>day</dt><dd>Calendar date of the summary.</dd>
@@ -91,6 +97,8 @@ $t->content = <<<EOF
  <dt>climo_high_f</dt><dd>NCDC 1981-2010 Daily High Temperature Climatology [F]</dd>
  <dt>climo_low_f</dt><dd>NCDC 1981-2010 Daily Low Temperature Climatology [F]</dd>
  <dt>climo_precip_in</dt><dd>NCDC 1981-2010 Daily Precipitation Climatology [inch]</dd>
+ <dt>snow_in</dt><dd>Reported Snowfall [inch]</dd>
+ <dt>snowd_in</dt><dd>Reported Snow Depth [inch]</dd>
     		</dl>
     		 		
 		
