@@ -2,6 +2,8 @@
 import datetime
 import calendar
 
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem import util
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
@@ -29,8 +31,13 @@ XREF = {
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
+    desc['data'] = True
     desc['description'] = """This chart presents daily timeseries of 4 inch
-    soil temperatures."""
+    soil temperatures.  The dataset contains merged information from the
+    legacy Iowa State Ag Climate Network and present-day Iowa State Soil
+    Moisture Network.  Each year's data is represented by individual blue
+    lines, with the year to highlight in red and the overall average in
+    black."""
     today = datetime.date.today()
     desc['arguments'] = [
         dict(type='networkselect', name='station', network='ISUSM',
@@ -54,55 +61,41 @@ def plotter(fdict):
     oldnt = NetworkTable("ISUAG")
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    year = ctx['year']
-    _ = nt.sts[station]
+    highlightyear = ctx['year']
     oldstation = XREF.get(station, 'A130209')
+    df = read_sql("""
+    WITH legacy as (
+        SELECT valid, c30 as tsoil, 'L' as dtype from daily where station = %s
+        and c30 > 0 ORDER by valid ASC
+    ), present as (
+        SELECT valid, tsoil_c_avg_qc * 9./5. + 32. as tsoil,
+        'C' as dtype from sm_daily
+        where station = %s and tsoil_c_avg_qc is not null ORDER by valid ASC
+    )
+    SELECT * from legacy UNION ALL select * from present
+    """, pgconn, params=(oldstation, station), index_col=None)
+    df['valid'] = pd.to_datetime(df['valid'])
+    df['doy'] = pd.to_numeric(df['valid'].dt.strftime("%j"))
+    df['year'] = df['valid'].dt.year
 
     (fig, ax) = plt.subplots()
-    climo = []
-    cdays = []
-    cursor.execute("""
-        SELECT extract(doy from valid) as d, avg(c30)
-        from daily where station = %s GROUP by d ORDER by d ASC
-        """, (oldstation, ))
-    for row in cursor:
-        climo.append(row[1])
-        cdays.append(row[0])
+    for dtype in ['L', 'C']:
+        for year, df2 in df[df['dtype'] == dtype].groupby('year'):
+            if year in [1997, 1988]:
+                continue
+            ax.plot(df2['doy'].values, df2['tsoil'].values, color='skyblue',
+                    zorder=2)
+            if year == highlightyear:
+                ax.plot(df2['doy'].values, df2['tsoil'].values, color='red',
+                        zorder=5, label=str(year), lw=2.)
 
-    for yr in range(1988, today.year + 1):
-        if yr in [1988, 1997]:
-            continue
-        x = []
-        y = []
-        if yr < 2014:
-            units = 'F'
-            cursor.execute("""
-         select valid, c30
-         from daily WHERE station = '%s'
-         and valid >= '%s-01-01' and valid < '%s-01-01' ORDER by valid ASC
-          """ % (oldstation, yr, yr+1))
-        else:
-            units = 'C'
-            cursor.execute("""
-            SELECT valid, tsoil_c_avg_qc from sm_daily WHERE
-            station = '%s' and valid >='%s-01-01' and
-            valid < '%s-01-01' and tsoil_c_avg_qc is not null
-            ORDER by valid ASC""" % (station, yr, yr+1))
-        for row in cursor:
-            x.append(int(row[0].strftime("%j")) + 1)
-            y.append(temperature(row[1], units).value('F'))
-        color = 'skyblue'
-        if yr == year:
-            color = 'r'
-            ax.plot(x, y, color=color, label='%s' % (year,), lw=2, zorder=3)
-        else:
-            ax.plot(x, y, color=color, zorder=2)
+    gdf = df.groupby('doy').mean()
+    ax.plot(gdf.index.values, gdf['tsoil'].values, color='k', label='Average')
 
-    ax.plot(cdays, climo, color='k', label='Average')
-
-    ax.set_title(("ISU AgClimate [%s] %s \n"
+    ax.set_title(("ISU AgClimate [%s] %s [%s-]\n"
                   "Site 4 inch Soil Temperature Yearly Timeseries"
-                  ) % (station, nt.sts[station]['name']))
+                  ) % (station, nt.sts[station]['name'],
+                       df['valid'].min().year))
     ax.set_xlabel(("* pre-2014 data provided by [%s] %s"
                    ) % (oldstation, oldnt.sts[oldstation]['name']))
     ax.grid(True)
@@ -110,12 +103,12 @@ def plotter(fdict):
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 367)
-    ax.set_ylim(-10, 90)
+    ax.set_ylim(gdf['tsoil'].min() - 15, gdf['tsoil'].max() + 15)
     ax.axhline(32, lw=2, color='purple', zorder=4)
-    ax.set_yticks(range(-10, 90, 20))
+    # ax.set_yticks(range(-10, 90, 20))
     ax.legend(loc='best')
 
-    return fig
+    return fig, df
 
 
 if __name__ == '__main__':
