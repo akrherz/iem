@@ -232,7 +232,7 @@ def plotter(fdict):
 
     fig = plt.figure(figsize=(6, 7.2), facecolor='w', edgecolor='w')
     rect = [0.08, 0.1, 0.8, 0.8]
-    ax = WindroseAxes(fig, rect, axisbg='w')
+    ax = WindroseAxes(fig, rect, facecolor='w')
     fig.add_axes(ax)
     ax.bar(ctx['df']['drct'].values, ctx['df']['smph'].values,
            normed=True, bins=[0, 2, 5, 7, 10, 15, 20], opening=0.8,
