@@ -20,7 +20,8 @@ def run(sts, ets):
     valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
     df2 = pd.read_sql(sql, dbconn, index_col='valid', parse_dates='valid')
 
-    writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter',
+                            options={'remove_timezone': True})
     df.to_excel(writer, 'Daily Data', index=False)
     df2.to_excel(writer, 'Hourly Data', index=True)
     writer.save()
