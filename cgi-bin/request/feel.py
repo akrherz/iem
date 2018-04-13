@@ -18,7 +18,7 @@ def run(sts, ets):
 
     sql = """SELECT * from feel_data_hourly where
     valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
-    df2 = pd.read_sql(sql, dbconn, index_col='valid', parse_dates='valid')
+    df2 = pd.read_sql(sql, dbconn, index_col='valid')
 
     writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter',
                             options={'remove_timezone': True})
