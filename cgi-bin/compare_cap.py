@@ -5,6 +5,7 @@ import datetime
 import sys
 import urllib2
 
+import simplejson
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -21,11 +22,18 @@ def main():
         datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ", )))
     sys.stdout.write("Comparison against %s\n" % (CAP, ))
     try:
-        req = requests.get(CAP)
+        req = requests.get(CAP, headers={'Accept': 'application/geo+json'})
+        if req.status_code != 200:
+            sys.stdout.write(("Download failed with status_code %s"
+                              ) % (req.status_code, ))
         jdata = req.json()
     except urllib2.HTTPError as exp:
         sys.stdout.write(("Failure to download %s, comparison failed"
                           "%s\n") % (CAP, exp))
+        return
+    except simplejson.errors.JSONDecodeError as exp:
+        sys.stdout.write(("Download %s had bad JSON %s"
+                          "%s\n") % (CAP, req.content, exp))
         return
     rows = []
     for feature in jdata['features']:
