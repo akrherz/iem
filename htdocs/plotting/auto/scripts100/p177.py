@@ -418,8 +418,9 @@ def plot1(ctx):
     ax2 = ax[0].twinx()
     ax[0].set_zorder(ax2.get_zorder()+1)
     ax[0].patch.set_visible(False)
-    ax2.set_yticks(np.arange(-0.6, 0., 0.1))
-    ax2.set_yticklabels(0 - np.arange(-0.6, 0.01, 0.1))
+    # arange leads to funky values
+    ax2.set_yticks([-0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0])
+    ax2.set_yticklabels([0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0])
     ax2.set_ylim(-0.6, 0)
     ax2.set_ylabel("Hourly Precipitation [inch]")
     b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=4)

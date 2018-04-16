@@ -105,13 +105,13 @@ def get_data(ts):
                             "soil50t": (safe_t(row['t50_c_avg'])
                                         if not q.get('soil50', False)
                                         else 'M'),
-                            "soil12m": (safe_m(row['vwc_12_avg'])
+                            "soil12m": (safe_m(row['calc_vwc_12_avg'])
                                         if not q.get('soil12', False)
                                         else 'M'),
-                            "soil24m": (safe_m(row['vwc_24_avg'])
+                            "soil24m": (safe_m(row['calc_vwc_24_avg'])
                                         if not q.get('soil24', False)
                                         else 'M'),
-                            "soil50m": (safe_m(row['vwc_50_avg'])
+                            "soil50m": (safe_m(row['calc_vwc_50_avg'])
                                         if not q.get('soil50', False)
                                         else 'M'),
                             "gust": safe(row['ws_mph_max'], 1),
