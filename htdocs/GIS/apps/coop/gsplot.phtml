@@ -1,15 +1,16 @@
 <?php
-include("../../../../config/settings.inc.php");
 define("IEM_APPID", 32);
-include("../../../../include/database.inc.php");
+
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/database.inc.php";
 $coopdb = iemdb("coop");
 require_once "../../../../include/forms.php";
-include("../../../../include/network.php");
+require_once "../../../../include/network.php";
 /** Need to use external date lib
  * http://php.weblogs.com/adodb_date_time_library
  */
-include("../../../../include/adodb-time.inc.php");
-include_once "../../../../include/myview.php";
+require_once "../../../../include/adodb-time.inc.php";
+require_once "../../../../include/myview.php";
 
 $t = new MyView();
 
@@ -23,8 +24,6 @@ $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IACLIMAT
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
-
-
 
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
@@ -51,36 +50,46 @@ $tr .= "# Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.
 $state = substr($network,0,2);
 
 /* Query the obs */
-$rs = pg_prepare($coopdb, "SELECT", "SELECT foo.station, s_rainfall,
-		s_gdd50, s_sdd86, c_rainfall, c_gdd50, s_sdd86, s_mintemp,
-		s_maxtemp from (
-		SELECT station,
-		sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
-		sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
-		max(high) as s_maxtemp from alldata_${state}
-WHERE day >= $1 and day <= $2 GROUP by station) as foo,
-(SELECT station,
-sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
-sum(sdd86) as c_sdd86 from climate51
-WHERE valid >= $3 and valid <= $4 GROUP by station) as foo2
-WHERE foo2.station = foo.station ORDER by foo.station ASC");
-$rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
-		adodb_date("Y-m-d", $ets), "2000-". adodb_date('m-d', $sts),
-		"2000-". adodb_date('m-d', $ets)));
+$rs = pg_prepare($coopdb, "SELECT", "WITH data as (
+  SELECT station, year,
+  sum(precip) as s_rainfall,
+  sum(gdd50(high,low)) as s_gdd50,
+  sum(gddxx(48, 86, high, low)) as s_gdd48,
+  sum(sdd86(high,low)) as s_sdd86,
+  min(low) as s_mintemp,
+  max(high) as s_maxtemp from alldata_${state}
+  WHERE sday >= $1 and sday <= $2 GROUP by station, year
+), climo as (
+  SELECT station,
+  avg(s_rainfall) as c_rainfall,
+  avg(s_gdd50) as c_gdd50,
+  avg(s_gdd48) as c_gdd48,
+  avg(s_sdd86) as c_sdd86,
+  avg(s_mintemp) as c_mintemp,
+  avg(s_maxtemp) as c_maxtemp from data GROUP by station
+)
+SELECT d.*, c_rainfall, c_gdd50, c_gdd48, c_sdd86, c_mintemp, c_maxtemp
+from data d JOIN climo c on (d.station = c.station) WHERE d.year = $3
+");
+
+$rs = pg_execute($coopdb, "SELECT", Array(adodb_date("md", $sts),
+		adodb_date("md", $ets), $year));
 
 
-		$tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID',
- 'StationName', 'Latitude', 'Longitude', 'GDD50', 'SDD86', 'PRECIP',
- 'CLIM_GDD50', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP');
+    $tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,".
+                   "%10s,%10s,%10s,%10s,%10s\n", 'ID',
+ 'StationName', 'Latitude', 'Longitude', 'GDD50', 'GDD48', 'SDD86', 'PRECIP',
+ 'CLIM_GDD50', 'CLIM_GDD48', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP');
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
 $ukey = $row["station"];
 	if (! isset($cities[$ukey]) ) continue;
-	$tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey,
+  $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.0f,".
+                 "%10.2f,%10.0f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey,
   $cities[$ukey]['name'],
   $cities[$ukey]['lat'], $cities[$ukey]['lon'],
-  		$row["s_gdd50"], $row["s_sdd86"], $row["s_rainfall"],
-  $row["c_gdd50"], $row["c_rainfall"], $row["s_maxtemp"],
+  		$row["s_gdd50"], $row["s_gdd48"], $row["s_sdd86"], $row["s_rainfall"],
+  $row["c_gdd50"], $row["c_gdd48"], $row["c_rainfall"], $row["s_maxtemp"],
   $row["s_mintemp"] );
 }
 
@@ -96,6 +105,7 @@ $netselect .= "</select>";
 
 $ar = Array(
 	"gdd50" => "Growing Degree Days (base=50)",
+	"gdd48" => "Growing Degree Days (base=48)",
 	"prec" => "Precipitation",
 	"sdd86" => 	"Stress Degree Days (base=86)",
 	"mintemp" => "Minimum Temperature",

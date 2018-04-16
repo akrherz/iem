@@ -2,11 +2,11 @@
 /* Generate a plot based on a request from gsplot.phtml, no more tmp 
  * files please
  */
-include("../../../../config/settings.inc.php");
-include("../../../../include/database.inc.php");
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/database.inc.php";
 $coopdb = iemdb("coop");
-include("../../../../include/forms.php");
-include("../../../../include/network.php");
+require_once "../../../../include/forms.php";
+require_once "../../../../include/network.php";
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
@@ -54,6 +54,7 @@ function plotNoData($map, $img){
 }
 
 $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+  "gdd48" => "Growing Degree Days (base=48)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
@@ -65,6 +66,7 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
 
 
 $rnd = Array("gdd50" => 0,
+  "gdd48" => 0,
   "et" => 2,
   "prec" => 2,
   "sgdd50" => 0,
@@ -124,9 +126,12 @@ $bar640t->draw($img);
 
 $rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
 	sum(precip) as s_prec, sum(gdd50(high,low)) as s_gdd50,
+  sum(gddxx(48, 86, high, low)) as s_gdd48,
 	sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
 	max(high) as s_maxtemp from alldata 
-	WHERE day >= $1 and day <= $2 GROUP by station 
+	WHERE day >= $1 and day <= $2
+  and substr(station, 3, 4) != '0000' and substr(station, 3, 1) != 'C'
+  GROUP by station 
 	ORDER by station ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets)));
@@ -150,9 +155,6 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $snet, $img, 0,
      round($row["s_".$var], $rnd[$var]) );
-
-  
-  
 	}
 if ($i == 0)
    plotNoData($map, $img);
