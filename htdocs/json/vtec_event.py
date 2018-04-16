@@ -18,10 +18,11 @@ def run(wfo, year, phenomena, significance, etn):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     table = "warnings_%s" % (year,)
+    # This is really a BUG here and we need to rearch the database
     cursor.execute("""
     SELECT
-    first_value(report) OVER (ORDER by updated ASC) as report,
-    first_value(svs) OVER (ORDER by length(svs) DESC) as svs_updates,
+    first_value(report) OVER (ORDER by product_issue ASC) as report,
+    first_value(svs) OVER (ORDER by product_issue ASC) as svs_updates,
     first_value(issue at time zone 'UTC')
         OVER (ORDER by issue ASC NULLS LAST) as utc_issue,
     first_value(expire at time zone 'UTC')
