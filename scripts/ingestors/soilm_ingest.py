@@ -70,6 +70,7 @@ STATIONS = {'CAMI4': 'Calumet',
             'CRFI4': 'Crawfordsville',
             'FRUI4': 'Muscatine',
             'CIRI4': 'CedarRapids',
+            'MCSI4': 'Marcus',
             # Temporary?
             'REFI4': 'Adel',
             # Vineyward
@@ -203,7 +204,9 @@ def hourly_process(nwsli, maxts):
         valid = make_time(tokens[headers.index('timestamp')])
         if valid <= maxts:
             break
-        gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
+        gust_valid = None
+        if 'ws_mph_tmx' in headers:
+            gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
         # print valid, tokens[ headers.index('timestamp')]
         # We are ready for dbinserting, we duplicate the data for the _qc
         # column
@@ -234,9 +237,10 @@ def hourly_process(nwsli, maxts):
                      float(tokens[headers.index('rain_mm_tot')]),
                      'MM').value('IN'), 2)
         ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
-        ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
-        ob.data['max_gust_ts'] = "%s-06" % (
-            gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
+        if 'ws_mph_max' in headers:
+            ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
+            ob.data['max_gust_ts'] = "%s-06" % (
+                gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
         ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
         if 'tsoil_c_avg' in headers:
             ob.data['c1tmpf'] = temperature(
