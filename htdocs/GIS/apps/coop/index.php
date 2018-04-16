@@ -1,17 +1,17 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 52);
-include_once "../../../../include/myview.php";
+require_once "../../../../include/myview.php";
 $t = new MyView();
 $t->thispage = "networks-coop";
 $t->title = "NWS COOP Plotting";
 
-include_once "../../../../include/database.inc.php";
-include_once "../../../../include/iemmap.php";
-include("../../../../include/network.php");
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/iemmap.php";
+require_once "../../../../include/network.php";
 require_once "../../../../include/mlib.php";
-include("../../../../include/forms.php");
-include("../rview/lib.php");
+require_once "../../../../include/forms.php";
+require_once "../rview/lib.php";
 
 $coopdb = iemdb("coop");
 $nt = new NetworkTable("IACLIMATE");
@@ -173,8 +173,8 @@ $ar = Array("high" => "Average High Temperature",
     "max_low" 	 => "Record Maximum Low Temp");
 $pselect = make_select("plot", $plot, $ar);
 
-$mselect = monthSelect("month", $month);
-$dselect = daySelect("day", $day);
+$mselect = monthSelect($month, "month");
+$dselect = daySelect($day);
 
 $t->content = <<<EOF
 <h3>COOP Climate Data</h3>
