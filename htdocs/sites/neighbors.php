@@ -1,9 +1,9 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("setup.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "setup.php";
+require_once "../../include/myview.php";
 
-include("../../include/myview.php");
 $t = new MyView();
 $t->thispage="iem-sites";
 $t->title = "Site Neighbors";
