@@ -123,6 +123,9 @@ def main(argv):
      valid = %s ORDER by station ASC
     """, pgconn, params=(date, ), index_col='station')
     hdf = get_hdf(nt, date)
+    if hdf.empty:
+        print("hdf is empty, abort fix_precip for %s" % (date, ))
+        return
 
     # lets try some QC
     for station in df.index.values:

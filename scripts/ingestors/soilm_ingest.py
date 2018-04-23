@@ -7,14 +7,17 @@
 from __future__ import print_function
 import datetime
 import os
+import sys
 import subprocess
 import tempfile
 import unittest
+import io
 
 # Third party
 import requests
 import pytz
 import numpy as np
+import pandas as pd
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity, distance, speed
 import pyiem.meteorology as met
@@ -25,7 +28,7 @@ ISUAG = get_dbconn('isuag')
 ACCESS = get_dbconn('iem')
 
 EVENTS = {'reprocess_solar': False, 'days': []}
-VARCONV = {
+VARCONV = {'timestamp': 'valid',
            'vwc06_avg': 'vwc_06_avg',
            "vwc_avg6in": 'vwc_06_avg',
            'vwc12_avg': 'vwc_12_avg',
@@ -83,6 +86,15 @@ STATIONS = {'CAMI4': 'Calumet',
             }
 
 
+def qcval(df, colname, floor, ceiling):
+    """Make sure the value falls within some bounds"""
+    df.loc[df[colname] < floor, colname] = floor
+    df.loc[df[colname] > ceiling, colname] = ceiling
+    return np.where(np.logical_or(df[colname] == floor,
+                                  df[colname] == ceiling),
+                    'B', None)
+
+
 def make_time(string):
     """Convert a time in the file to a datetime"""
     tstamp = datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
@@ -90,272 +102,184 @@ def make_time(string):
     return tstamp
 
 
+def common_df_logic(filename, maxts, nwsli, tablename):
+    """Our commonality to reading"""
+    if not os.path.isfile(filename):
+        return
+
+    df = pd.read_csv(filename, skiprows=[0, 2, 3], na_values=['NAN', ])
+    # convert all columns to lowercase
+    df.columns = map(str.lower, df.columns)
+    # rename columns to rectify differences
+    df.rename(columns=VARCONV, inplace=True)
+    df['valid'] = df['valid'].apply(make_time)
+    if tablename == 'sm_daily':
+        # Rework the valid column into the appropriate date
+        df['valid'] = df['valid'].dt.date - datetime.timedelta(days=1)
+    df = df[df['valid'] > maxts].copy()
+    if df.empty:
+        return
+
+    df.drop('record', axis=1, inplace=True)
+    # Create _qc and _f columns
+    for colname in df.columns:
+        if colname == 'valid':
+            continue
+        df['%s_qc' % (colname, )] = df[colname]
+        if colname.startswith('calc_vwc'):
+            df['%s_f' % (colname, )] = qcval(df, '%s_qc' % (colname, ),
+                                             0.01, 0.7)
+        else:
+            df['%s_f' % (colname, )] = None
+
+    df['station'] = nwsli
+    if 'ws_mph_tmx' in df.columns:
+        df['ws_mph_tmx'] = df['ws_mph_tmx'].apply(make_time)
+    output = io.BytesIO()
+    df.to_csv(output, sep="\t", header=False, index=False)
+    output.seek(0)
+    icursor = ISUAG.cursor()
+    icursor.copy_from(output, tablename,
+                      columns=df.columns, null="")
+    icursor.close()
+    ISUAG.commit()
+    return df
+
+
 def m15_process(nwsli, maxts):
     """ Process the 15minute file """
-    icursor = ISUAG.cursor()
     acursor = ACCESS.cursor()
     fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
-    if not os.path.isfile(fn):
+    df = common_df_logic(fn, maxts, nwsli, "sm_15minute")
+    if df is None:
         return
-    lines = open(fn).readlines()
-    if len(lines) < 5:
-        return
-    # Read header....
-    headers = []
-    for col in lines[1].strip().replace('"', '').split(","):
-        headers.append(VARCONV.get(col.lower(), col.lower()))
-    # Read data
-    processed = 0
-    for i in range(len(lines)-1, 3, -1):
-        tokens = lines[i].strip().replace('"', '').split(",")
-        if len(tokens) != len(headers):
-            continue
-        valid = make_time(tokens[headers.index('timestamp')])
-        if valid <= maxts:
-            break
-        gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
-        # print valid, tokens[ headers.index('timestamp')]
-        # We are ready for dbinserting, we duplicate the data for the _qc
-        # column
-        dbcols = ("station,valid,%s,%s"
-                  ) % (",".join(headers[2:]),
-                       ",".join(["%s_qc" % (h,) for h in headers[2:]]))
-        dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
-        for v in tokens[2:]:
-            dbvals += "%s," % (formatter(v),)
-        for v in tokens[2:]:
-            dbvals += "%s," % (formatter(v),)
-        sql = "INSERT into sm_15minute (%s) values (%s)" % (dbcols,
-                                                            dbvals[:-1])
-        icursor.execute(sql)
 
-        # Update IEMAccess
-        # print nwsli, valid
-        ob = Observation(nwsli, 'ISUSM',
-                         valid.astimezone(pytz.timezone("America/Chicago")))
-        tmpc = temperature(float(tokens[headers.index('tair_c_avg')]), 'C')
+    # Update IEMAccess
+    processed = 0
+    for _i, row in df.iterrows():
+        ob = Observation(nwsli, 'ISUSM', row['valid'])
+        tmpc = temperature(row['tair_c_avg_qc'], 'C')
         if tmpc.value('F') > -50 and tmpc.value('F') < 140:
             ob.data['tmpf'] = tmpc.value('F')
-            relh = humidity(float(tokens[headers.index('rh')]), '%')
+            relh = humidity(row['rh_qc'], '%')
             ob.data['relh'] = relh.value('%')
             ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
-        ob.data['srad'] = tokens[headers.index('slrkw_avg')]
-        ob.data['phour'] = round(
-            distance(
-                     float(tokens[headers.index('rain_mm_tot')]),
-                     'MM').value('IN'), 2)
-        ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
-        ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
-        ob.data['max_gust_ts'] = "%s-06" % (
-            gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
-        ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
-        if 'tsoil_c_avg' in headers:
-            ob.data['c1tmpf'] = temperature(
-                    float(tokens[headers.index('tsoil_c_avg')]),
-                    'C').value('F')
-        ob.data['c2tmpf'] = temperature(
-                float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
-        ob.data['c3tmpf'] = temperature(
-                float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
-        if 't50_c_avg' in headers:
-            ob.data['c4tmpf'] = temperature(
-                    float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
-        if 'calc_vwc_12_avg' in headers:
-            ob.data['c2smv'] = float(
-                tokens[headers.index('calc_vwc_12_avg')]) * 100.0
-        if 'calc_vwc_24_avg' in headers:
-            ob.data['c3smv'] = float(
-                tokens[headers.index('calc_vwc_24_avg')]) * 100.0
-        if 'calc_vwc_50_avg' in headers:
-            ob.data['c4smv'] = float(
-                tokens[headers.index('calc_vwc_50_avg')]) * 100.0
+        ob.data['srad'] = row['slrkw_avg_qc']
+        ob.data['pcounter'] = round(
+            distance(row['rain_mm_tot_qc'], 'MM').value('IN'), 2)
+        ob.data['sknt'] = speed(row['ws_mps_s_wvt_qc'], 'MPS').value('KT')
+        ob.data['gust'] = speed(row['ws_mph_max_qc'], 'MPH').value('KT')
+        ob.data['max_gust_ts'] = row['ws_mph_tmx']
+        ob.data['drct'] = row['winddir_d1_wvt_qc']
+        if 'tsoil_c_avg' in df.columns:
+            ob.data['c1tmpf'] = temperature(row['tsoil_c_avg_qc'],
+                                            'C').value('F')
+        ob.data['c2tmpf'] = temperature(row['t12_c_avg_qc'], 'C').value('F')
+        ob.data['c3tmpf'] = temperature(row['t24_c_avg_qc'], 'C').value('F')
+        if 't50_c_avg' in df.columns:
+            ob.data['c4tmpf'] = temperature(row['t50_c_avg_qc'],
+                                            'C').value('F')
+        if 'calc_vwc_12_avg' in df.columns:
+            ob.data['c2smv'] = row['calc_vwc_12_avg_qc'] * 100.0
+        if 'calc_vwc_24_avg' in df.columns:
+            ob.data['c3smv'] = row['calc_vwc_24_avg_qc'] * 100.0
+        if 'calc_vwc_50_avg' in df.columns:
+            ob.data['c4smv'] = row['calc_vwc_50_avg_qc'] * 100.0
         ob.save(acursor, force_current_log=True)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
         processed += 1
     acursor.close()
-    icursor.close()
     ACCESS.commit()
-    ISUAG.commit()
     return processed
 
 
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
     # print '-------------- HOURLY PROCESS ---------------'
-    icursor = ISUAG.cursor()
     acursor = ACCESS.cursor()
     fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
-    if not os.path.isfile(fn):
+    df = common_df_logic(fn, maxts, nwsli, "sm_hourly")
+    if df is None:
         return
-    lines = open(fn).readlines()
-    if len(lines) < 5:
-        return
-    # Read header....
-    headers = []
-    for col in lines[1].strip().replace('"', '').split(","):
-        headers.append(VARCONV.get(col.lower(), col.lower()))
-    # Read data
     processed = 0
-    for i in range(len(lines)-1, 3, -1):
-        tokens = lines[i].strip().replace('"', '').split(",")
-        if len(tokens) != len(headers):
-            continue
-        valid = make_time(tokens[headers.index('timestamp')])
-        if valid <= maxts:
-            break
-        gust_valid = None
-        if 'ws_mph_tmx' in headers:
-            gust_valid = make_time(tokens[headers.index('ws_mph_tmx')])
-        # print valid, tokens[ headers.index('timestamp')]
-        # We are ready for dbinserting, we duplicate the data for the _qc
-        # column
-        dbcols = ("station,valid,%s,%s"
-                  ) % (",".join(headers[2:]),
-                       ",".join(["%s_qc" % (h,) for h in headers[2:]]))
-        dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
-        for v in tokens[2:]:
-            dbvals += "%s," % (formatter(v),)
-        for v in tokens[2:]:
-            dbvals += "%s," % (formatter(v),)
-        sql = "INSERT into sm_hourly (%s) values (%s)" % (dbcols, dbvals[:-1])
-        icursor.execute(sql)
-
+    for _i, row in df.iterrows():
         # Update IEMAccess
         # print nwsli, valid
-        ob = Observation(nwsli, 'ISUSM',
-                         valid.astimezone(pytz.timezone("America/Chicago")))
-        tmpc = temperature(float(tokens[headers.index('tair_c_avg')]), 'C')
+        ob = Observation(nwsli, 'ISUSM', row['valid'])
+        tmpc = temperature(row['tair_c_avg_qc'], 'C')
         if tmpc.value('F') > -50 and tmpc.value('F') < 140:
             ob.data['tmpf'] = tmpc.value('F')
-            relh = humidity(float(tokens[headers.index('rh')]), '%')
+            relh = humidity(row['rh_qc'], '%')
             ob.data['relh'] = relh.value('%')
             ob.data['dwpf'] = met.dewpoint(tmpc, relh).value('F')
-        ob.data['srad'] = tokens[headers.index('slrkw_avg')]
-        ob.data['phour'] = round(
-            distance(
-                     float(tokens[headers.index('rain_mm_tot')]),
-                     'MM').value('IN'), 2)
-        ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
-        if 'ws_mph_max' in headers:
-            ob.data['gust'] = float(tokens[headers.index('ws_mph_max')]) / 1.15
-            ob.data['max_gust_ts'] = "%s-06" % (
-                gust_valid.strftime("%Y-%m-%d %H:%M:%S"),)
-        ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
-        if 'tsoil_c_avg' in headers:
-            ob.data['c1tmpf'] = temperature(
-                    float(tokens[headers.index('tsoil_c_avg')]),
-                    'C').value('F')
-        ob.data['c2tmpf'] = temperature(
-                float(tokens[headers.index('t12_c_avg')]), 'C').value('F')
-        ob.data['c3tmpf'] = temperature(
-                float(tokens[headers.index('t24_c_avg')]), 'C').value('F')
-        if 't50_c_avg' in headers:
-            ob.data['c4tmpf'] = temperature(
-                    float(tokens[headers.index('t50_c_avg')]), 'C').value('F')
-        if 'calc_vwc_12_avg' in headers:
-            ob.data['c2smv'] = float(
-                tokens[headers.index('calc_vwc_12_avg')]) * 100.0
-        if 'calc_vwc_24_avg' in headers:
-            ob.data['c3smv'] = float(
-                tokens[headers.index('calc_vwc_24_avg')]) * 100.0
-        if 'calc_vwc_50_avg' in headers:
-            ob.data['c4smv'] = float(
-                tokens[headers.index('calc_vwc_50_avg')]) * 100.0
+        ob.data['srad'] = row['slrkw_avg_qc']
+        ob.data['phour'] = round(distance(row['rain_mm_tot_qc'],
+                                          'MM').value('IN'), 2)
+        ob.data['sknt'] = speed(row['ws_mps_s_wvt_qc'], 'MPS').value("KT")
+        if 'ws_mph_max' in df.columns:
+            ob.data['gust'] = speed(row['ws_mph_max_qc'], 'MPH').value('KT')
+            ob.data['max_gust_ts'] = row['ws_mph_tmx']
+        ob.data['drct'] = row['winddir_d1_wvt_qc']
+        if 'tsoil_c_avg' in df.columns:
+            ob.data['c1tmpf'] = temperature(row['tsoil_c_avg_qc'],
+                                            'C').value('F')
+        ob.data['c2tmpf'] = temperature(row['t12_c_avg_qc'], 'C').value('F')
+        ob.data['c3tmpf'] = temperature(row['t24_c_avg_qc'], 'C').value('F')
+        if 't50_c_avg' in df.columns:
+            ob.data['c4tmpf'] = temperature(row['t50_c_avg_qc'],
+                                            'C').value('F')
+        if 'calc_vwc_12_avg' in df.columns:
+            ob.data['c2smv'] = row['calc_vwc_12_avg_qc'] * 100.0
+        if 'calc_vwc_24_avg' in df.columns:
+            ob.data['c3smv'] = row['calc_vwc_24_avg_qc'] * 100.0
+        if 'calc_vwc_50_avg' in df.columns:
+            ob.data['c4smv'] = row['calc_vwc_50_avg_qc'] * 100.0
         ob.save(acursor)
         # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
         processed += 1
     acursor.close()
-    icursor.close()
     ACCESS.commit()
-    ISUAG.commit()
     return processed
-
-
-def formatter(v):
-    """ Something to format things nicely for SQL"""
-    if v.find("NAN") > -1:
-        return 'Null'
-    if v.find(" ") > -1:  # Timestamp
-        return "'%s-06'" % (v,)
-    return v
 
 
 def daily_process(nwsli, maxts):
     """ Process the daily file """
-    icursor = ISUAG.cursor()
     acursor = ACCESS.cursor()
     # print '-------------- DAILY PROCESS ----------------'
     fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
-    if not os.path.isfile(fn):
-        return 0
-    lines = open(fn).readlines()
-    if len(lines) < 5:
-        return 0
-    # Read header....
-    headers = []
-    for col in lines[1].strip().replace('"', '').split(","):
-        headers.append(VARCONV.get(col.lower(), col.lower()))
-    # Read data
-    processed = 0
-    for i in range(len(lines)-1, 3, -1):
-        tokens = lines[i].strip().replace('"', '').split(",")
-        if len(tokens) != len(headers):
-            continue
-        valid = datetime.datetime.strptime(
-            tokens[headers.index('timestamp')][:10], '%Y-%m-%d')
-        valid = valid.date() - datetime.timedelta(days=1)
-        if valid <= maxts:
-            break
-        # if valid == maxts:  # Reprocess
-        #    icursor.execute("""DELETE from sm_daily WHERE valid = '%s' and
-        #    station = '%s' """ % (valid.strftime("%Y-%m-%d"), nwsli))
-        # We are ready for dbinserting!
-        dbcols = ("station,valid,%s,%s"
-                  ) % (",".join(headers[2:]),
-                       ",".join(["%s_qc" % (h,) for h in headers[2:]]))
-        dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
-        for v in tokens[2:]:
-            dbvals += "%s," % (formatter(v),)
-        for v in tokens[2:]:
-            dbvals += "%s," % (formatter(v),)
-        sql = "INSERT into sm_daily (%s) values (%s)" % (dbcols, dbvals[:-1])
-        icursor.execute(sql)
+    df = common_df_logic(fn, maxts, nwsli, "sm_daily")
+    if df is None:
+        return
 
+    processed = 0
+    for _i, row in df.iterrows():
         # Need a timezone
-        valid = datetime.datetime(valid.year, valid.month, valid.day, 12, 0)
+        valid = datetime.datetime(row['valid'].year, row['valid'].month,
+                                  row['valid'].day, 12, 0)
         valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"))
         ob = Observation(nwsli, 'ISUSM', valid)
-        ob.data['max_tmpf'] = temperature(
-                    float(tokens[headers.index('tair_c_max')]), 'C').value('F')
-        ob.data['min_tmpf'] = temperature(
-                    float(tokens[headers.index('tair_c_min')]), 'C').value('F')
-        ob.data['pday'] = round(distance(
-            float(tokens[headers.index('rain_mm_tot')]), 'MM').value('IN'), 2)
+        ob.data['max_tmpf'] = temperature(row['tair_c_max_qc'], 'C').value('F')
+        ob.data['min_tmpf'] = temperature(row['tair_c_min_qc'], 'C').value('F')
+        ob.data['pday'] = round(distance(row['rain_mm_tot_qc'],
+                                         'MM').value('IN'), 2)
         if valid not in EVENTS['days']:
             EVENTS['days'].append(valid)
-        ob.data['et_inch'] = distance(
-            float(tokens[headers.index('dailyet')]), 'MM').value('IN')
-        ob.data['srad_mj'] = float(tokens[headers.index('slrmj_tot')])
+        ob.data['et_inch'] = distance(row['dailyet_qc'], 'MM').value('IN')
+        ob.data['srad_mj'] = row['slrmj_tot_qc']
         if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
             print(("soilm_ingest.py station: %s ts: %s has 0 solar"
                    ) % (nwsli, valid.strftime("%Y-%m-%d")))
             EVENTS['reprocess_solar'] = True
-        if 'ws_mps_max' in headers:
-            ob.data['max_sknt'] = speed(float(tokens[headers.index('ws_mps_max')]),
+        if 'ws_mps_max' in df.columns:
+            ob.data['max_sknt'] = speed(row['ws_mps_max_qc'],
                                         'MPS').value('KT')
-        ob.data['avg_sknt'] = speed(
-            float(tokens[headers.index('ws_mps_s_wvt')]), 'MPS').value('KT')
-        # TODO: assumption this is done right by the campbell logger
-        ob.data['vector_avg_drct'] = float(
-            tokens[headers.index('winddir_d1_wvt')])
+        ob.data['avg_sknt'] = speed(row['ws_mps_s_wvt_qc'], 'MPS').value('KT')
         ob.save(acursor)
 
         processed += 1
-    icursor.close()
     acursor.close()
-    ISUAG.commit()
     ACCESS.commit()
     return processed
 
@@ -476,15 +400,19 @@ def dump_madis_csv():
                     shell=True)
 
 
-def main():
+def main(argv):
     """ Go main Go """
-    for nwsli in STATIONS:
+    stations = STATIONS if len(argv) == 1 else [argv[1], ]
+    for nwsli in stations:
         maxobs = get_max_timestamps(nwsli)
-        _ = m15_process(nwsli, maxobs['15minute'])
+        m15processed = m15_process(nwsli, maxobs['15minute'])
         hrprocessed = hourly_process(nwsli, maxobs['hourly'])
         dyprocessed = daily_process(nwsli, maxobs['daily'])
         if hrprocessed > 0:
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
+        if len(argv) > 1:
+            print("%s 15min:%s hr:%s daily:%s" % (nwsli, m15processed,
+                                                  hrprocessed, dyprocessed))
     update_pday()
 
     if EVENTS['reprocess_solar']:
@@ -498,7 +426,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
 
 
 class Tests(unittest.TestCase):
