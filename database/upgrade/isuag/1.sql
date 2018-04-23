@@ -100,5 +100,5 @@ battv_min_f char,
 battv_min_qc real
 );
 
-CREATE UNIQUE index sm_15minute_idx on sm_hourly(station, valid);
+CREATE UNIQUE index sm_15minute_idx on sm_15minute(station, valid);
 GRANT SELECT on sm_15minute to nobody;

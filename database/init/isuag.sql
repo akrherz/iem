@@ -599,5 +599,5 @@ battv_min_qc real,
     rain_mm_2_tot_f character(1)
 );
 
-CREATE UNIQUE index sm_15minute_idx on sm_hourly(station, valid);
+CREATE UNIQUE index sm_15minute_idx on sm_15minute(station, valid);
 GRANT SELECT on sm_15minute to nobody;
