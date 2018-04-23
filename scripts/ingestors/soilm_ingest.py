@@ -152,7 +152,7 @@ def m15_process(nwsli, maxts):
     fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_15minute")
     if df is None:
-        return
+        return 0
 
     # Update IEMAccess
     processed = 0
@@ -201,7 +201,7 @@ def hourly_process(nwsli, maxts):
     fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_hourly")
     if df is None:
-        return
+        return 0
     processed = 0
     for _i, row in df.iterrows():
         # Update IEMAccess
@@ -251,7 +251,7 @@ def daily_process(nwsli, maxts):
     fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_daily")
     if df is None:
-        return
+        return 0
 
     processed = 0
     for _i, row in df.iterrows():
