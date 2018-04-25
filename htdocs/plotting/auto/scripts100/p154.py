@@ -104,7 +104,7 @@ def plotter(fdict):
         avg(idwpf) as avg_idwpf from obs
         WHERE extract(hour from ts) = %s GROUP by hts)
 
-    SELECT extract(year from hts) as year, avg(avg_itmpf) as avg_tmpf,
+    SELECT extract(year from hts)::int as year, avg(avg_itmpf) as avg_tmpf,
     count(*) as cnt
     from agg1 GROUP by year ORDER by year ASC
     """, pgconn, params=(nt.sts[station]['tzname'], station,
@@ -128,16 +128,16 @@ def plotter(fdict):
 
     ax.set_ylim([df2[varname].min() - 5,
                  df2[varname].max() + 5])
-    ax.set_xlim([df2.index.min() - 1,
-                 df2.index.max() + 1])
+    #ax.set_xlim([df2.index.min() - 1,
+    #             df2.index.max() + 1])
     ax.grid(True)
     lts = datetime.datetime(2000, 1, 1, int(hour), 0)
     fig.text(0.5, 0.91, ("%s [%s] %s Local %s-%s\n"
                          "%s [%s]"
                          ) % (nt.sts[station]['name'], station,
                               lts.strftime("%-I %p"),
-                              nt.sts[station]['archive_begin'].year,
-                              datetime.date.today().year,
+                              df2.index.min(),
+                              df2.index.max(),
                               PDICT[varname],
                               MDICT[month]), ha='center')
 
