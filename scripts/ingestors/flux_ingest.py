@@ -3,21 +3,27 @@ Ingest files provided by NLAE containing flux information
 """
 from __future__ import print_function
 import os
-import traceback
+# attempt some python2to3 portability
+try:
+    from StringIO import StringIO as myStringIO
+except ImportError as exp:
+    from io import StringIO as myStringIO
+import datetime
 
-import mx.DateTime
-import pg
+import pytz
+import pandas as pd
+from pyiem.observation import Observation
 from pyiem.util import get_dbconn
+from pyiem.datatypes import temperature, speed, pressure
 
 DIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata/"
-FP = {'Flux10_AF.dat': 'NSTL10',
-      'Anc10_AF.dat': 'NSTL10',
-      'Flux11_AF.dat': 'NSTL11',
-      'Anc11_AF.dat': 'NSTL11',
-      '30ft.dat': 'NSTL30FT',
-      'NSP_Flux.dat': 'NSTLNSPR'}
+FILENAMES = {'NSTL10': ['Flux10_AF.dat', 'Anc10_AF.dat'],
+             'NSTL11': ['Flux11_AF.dat', 'Anc11_AF.dat'],
+             'NSTL30FT': ['30ft.dat', ],
+             'NSTLNSPR': ['NSP_Flux.dat', ]}
 
-DBCOLS = ['fc_wpl',
+DBCOLS = ['station', 'valid',
+          'fc_wpl',
           'le_wpl',
           'hs',
           'tau',
@@ -87,12 +93,34 @@ DBCOLS = ['fc_wpl',
           'rn_total_tcor_avg',
           'incoming_lw_avg',
           'terrestrial_lw_avg',
-          'wfv1_avg']
+          'wfv1_avg',
+          'n_tot',
+          'csat_warnings',
+          'irga_warnings',
+          'del_t_f_tot',
+          'track_f_tot',
+          'amp_h_f_tot',
+          'amp_l_f_tot',
+          'chopper_f_tot',
+          'detector_f_tot',
+          'pll_f_tot',
+          'sync_f_tot',
+          'agc_avg',
+          'solarrad_mv_avg',
+          'solarrad_w_avg',
+          'par_mv_avg',
+          'par_den_avg',
+          'surftc_avg',
+          'temp_c1_avg',
+          'temp_k1_avg',
+          'irr_can_corr_avg',
+          'irr_body_avg']
 
-CONVERT = {'Incoming_SW_Avg': 'incoming_sw',
-           'Outgoing_SW_Avg': 'outgoing_sw',
-           'Incoming_LW_TCor_Avg': 'incoming_lw_tcor',
-           'Terrest_LW_TCor_Avg': 'terrest_lw_tcor'}
+CONVERT = {'timestamp': 'valid',
+           'incoming_sw_avg': 'incoming_sw',
+           'outgoing_sw_avg': 'outgoing_sw',
+           'incoming_lw_tcor_avg': 'incoming_lw_tcor',
+           'terrest_lw_tcor_avg': 'terrest_lw_tcor'}
 
 
 def c(v):
@@ -102,78 +130,107 @@ def c(v):
     return v
 
 
+def make_time(string):
+    """Convert a time in the file to a datetime"""
+    tstamp = datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
+    tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
+    return tstamp
+
+
 def main():
     """Go Main Go"""
     pgconn = get_dbconn('other')
+    ipgconn = get_dbconn('iem')
     cursor = pgconn.cursor()
-    other = pg.DB('other', 'iemdb')
 
     # Figure out max valid times
     maxts = {}
-    cursor.execute("""SELECT station, max(valid) from flux_data
-        WHERE valid > (now() - '1 year'::interval) GROUP by station""")
+    cursor.execute("""
+        SELECT station, max(valid) from flux_data
+        GROUP by station
+    """)
     for row in cursor:
         maxts[row[0]] = row[1]
 
-    data = {'NSTL10': {},
-            'NSTL11': {},
-            'NSTL30FT': {},
-            'NSTLNSPR': {},
-            }
-
-    for fn in FP:
-        station = FP[fn]
-        myfn = "%s%s" % (DIR, fn)
-        if not os.path.isfile(myfn):
-            print("flux_ingest.py missing file: %s" % (myfn,))
+    processed = 0
+    for station, fns in FILENAMES.items():
+        if station not in maxts:
+            print("flux_ingest %s has no prior db archive" % (station, ))
+            maxts[station] = datetime.datetime(1980, 1, 1).replace(
+                tzinfo=pytz.utc)
+        dfs = []
+        for fn in fns:
+            myfn = "%s%s" % (DIR, fn)
+            if not os.path.isfile(myfn):
+                print("flux_ingest.py missing file: %s" % (myfn,))
+                continue
+            df = pd.read_csv(myfn, skiprows=[0, 2, 3], index_col=0,
+                             na_values=['NAN', ])
+            df.drop('RECORD', axis=1, inplace=True)
+            if df.empty:
+                print(('flux_ingest.py file: %s has no data'
+                       ) % (fn, ))
+                continue
+            dfs.append(df)
+        if not dfs:
+            print("flux_ingest no data for: %s" % (station, ))
             continue
-        lines = open(myfn, 'r').readlines()
-        if len(lines) < 2:
-            print(('flux_ingest.py file: %s has %s lines?'
-                   ) % (fn, len(lines)))
+        df = dfs[0]
+        if len(dfs) > 1:
+            df = df.join(dfs[1]).copy()
+        # get index back into a column
+        df.reset_index(inplace=True)
+        # lowercase all column names
+        df.columns = [x.lower() for x in df.columns]
+        df['timestamp'] = df['timestamp'].apply(make_time)
+        df = df[df['timestamp'] > maxts[station]].copy()
+        if df.empty:
             continue
-        keys = lines[1].replace('"', '').replace("\r\n", '').split(",")
-        for linenum, obline in enumerate(lines[3:]):
-            tokens = obline.replace('"', '').split(",")
-            if len(tokens) != len(keys):
-                print(('%s line: %s has %s tokens, header has %s'
-                       ) % (fn, linenum, len(tokens), len(keys)))
-                continue
-            if tokens[0] == '':
-                continue
-            try:
-                ts = mx.DateTime.strptime(tokens[0][:16], '%Y-%m-%d %H:%M')
-            except Exception as _exp:
-                print(('%s line: %s has invalid time %s'
-                       ) % (fn, linenum, tokens[0]))
-                continue
-            if ts < maxts.get(station, mx.DateTime.DateTime(2011, 1, 1)):
-                continue
-            if ts not in data[station]:
-                data[station][ts] = {'valid': tokens[0][:16],
-                                     'station': station}
-            for i in range(len(tokens)):
-                key = CONVERT.get(keys[i], keys[i]).lower()
-                if key in ['record', 'timestamp']:
-                    continue
-                if key not in DBCOLS:
-                    # print 'Missing', key
-                    continue
-                data[station][ts][key] = c(tokens[i])
+        df.rename(columns=CONVERT, inplace=True)
+        # We need a UTC year to allow for the database insert below to work
+        df['utcyear'] = df['valid'].dt.tz_convert(pytz.utc).dt.year
+        df['station'] = station
+        for year, gdf in df.groupby('utcyear'):
+            exclude = []
+            for colname in gdf.columns:
+                if colname not in DBCOLS:
+                    exclude.append(colname)
+            if exclude != ['utcyear']:
+                print(("flux_ingest %s has additional cols: %s"
+                       ) % (station, exclude))
+            gdf2 = gdf[gdf.columns.difference(exclude)]
+            processed += len(gdf2.index)
+            output = myStringIO()
+            gdf2.to_csv(output, sep="\t", header=False, index=False)
 
-    cnt = 0
-    for station in data.keys():
-        for ts in data[station].keys():
-            gts = ts.gmtime()
-            try:
-                other.insert("flux%s" % (gts.year,), data[station][ts])
-                cnt += 1
-            except Exception as _exp:
-                print("%s %s %s" % (station, ts, data[station][ts].keys()))
-                print(traceback.print_exc())
-
-    if cnt == 0:
-        print("NLAE flux inget found no records")
+            cursor = pgconn.cursor()
+            output.seek(0)
+            cursor.copy_from(output, "flux%s" % (year, ),
+                             columns=gdf2.columns, null="")
+            cursor.close()
+            pgconn.commit()
+        icursor = ipgconn.cursor()
+        for _i, row in df.iterrows():
+            iemob = Observation(station, 'NSTLFLUX', row['valid'])
+            if 't_hmp_avg' in df.columns:
+                iemob.data['tmpf'] = temperature(row['t_hmp_avg'],
+                                                 'C').value('F')
+            if 'wnd_spd' in df.columns:
+                iemob.data['sknt'] = speed(row['wnd_spd'], 'MPS').value('KT')
+            if 'press_avg' in df.columns:
+                iemob.data['pres'] = pressure(row['press_avg'] * 1000.,
+                                              'PA').value('MB')
+            for cvar, ivar in zip(['solarrad_w_avg', 'rh_hmp_avg',
+                                   'wnd_dir_compass'],
+                                  ['srad', 'rh', 'drct']):
+                if cvar in df.columns:
+                    iemob.data[ivar] = row[cvar]
+            iemob.save(icursor)
+        icursor.close()
+        ipgconn.commit()
+        # print("Processed %s rows for %s" % (processed, station))
+    if processed == 0:
+        print("NLAE flux_ingest found no new records")
 
 
 if __name__ == '__main__':

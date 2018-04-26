@@ -11,5 +11,5 @@ create table flux2015(
   CHECK(valid >= '2015-01-01 00:00+00'::timestamptz 
         and valid < '2016-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2015_idx on flux2015(station, valid);
+CREATE UNIQUE INDEX flux2015_idx on flux2015(station, valid);
 GRANT SELECT on flux2015 to nobody,apache;

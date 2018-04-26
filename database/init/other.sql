@@ -3,7 +3,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (6, now());
+INSERT into iem_schema_manager_version values (7, now());
 
 -- Storage of USCRN sub-hourly data
 
@@ -458,7 +458,28 @@ station            character varying(10),
  rn_total_tcor_avg real,
  incoming_lw_avg   real,
  terrestrial_lw_avg real,
- wfv1_avg          real    
+ wfv1_avg          real,
+ n_tot real,
+ csat_warnings real,
+ irga_warnings real,
+ del_t_f_tot real,
+ track_f_tot real,
+ amp_h_f_tot real,
+ amp_l_f_tot real,
+ chopper_f_tot real,
+ detector_f_tot real,
+ pll_f_tot real,
+ sync_f_tot real, 
+ agc_avg real, 
+ solarrad_mv_avg real, 
+ solarrad_w_avg real, 
+ par_mv_avg real, 
+ par_den_avg real,
+ surftc_avg real, 
+ temp_c1_avg real,
+ temp_k1_avg real,
+ irr_can_corr_avg real,
+ irr_body_avg real
 );
 GRANT SELECT on flux_data to nobody,apache;
 
@@ -467,7 +488,7 @@ create table flux2002(
   CHECK(valid >= '2002-01-01 00:00+00'::timestamptz 
         and valid < '2003-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2002_idx on flux2002(station, valid);
+CREATE UNIQUE INDEX flux2002_idx on flux2002(station, valid);
 GRANT SELECT on flux2002 to nobody,apache;
     
 
@@ -476,7 +497,7 @@ create table flux2003(
   CHECK(valid >= '2003-01-01 00:00+00'::timestamptz 
         and valid < '2004-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2003_idx on flux2003(station, valid);
+CREATE UNIQUE INDEX flux2003_idx on flux2003(station, valid);
 GRANT SELECT on flux2003 to nobody,apache;
     
 
@@ -485,7 +506,7 @@ create table flux2004(
   CHECK(valid >= '2004-01-01 00:00+00'::timestamptz 
         and valid < '2005-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2004_idx on flux2004(station, valid);
+CREATE UNIQUE INDEX flux2004_idx on flux2004(station, valid);
 GRANT SELECT on flux2004 to nobody,apache;
     
 
@@ -494,7 +515,7 @@ create table flux2005(
   CHECK(valid >= '2005-01-01 00:00+00'::timestamptz 
         and valid < '2006-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2005_idx on flux2005(station, valid);
+CREATE UNIQUE INDEX flux2005_idx on flux2005(station, valid);
 GRANT SELECT on flux2005 to nobody,apache;
     
 
@@ -503,7 +524,7 @@ create table flux2006(
   CHECK(valid >= '2006-01-01 00:00+00'::timestamptz 
         and valid < '2007-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2006_idx on flux2006(station, valid);
+CREATE UNIQUE INDEX flux2006_idx on flux2006(station, valid);
 GRANT SELECT on flux2006 to nobody,apache;
     
 
@@ -512,7 +533,7 @@ create table flux2007(
   CHECK(valid >= '2007-01-01 00:00+00'::timestamptz 
         and valid < '2008-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2007_idx on flux2007(station, valid);
+CREATE UNIQUE INDEX flux2007_idx on flux2007(station, valid);
 GRANT SELECT on flux2007 to nobody,apache;
     
 
@@ -521,7 +542,7 @@ create table flux2008(
   CHECK(valid >= '2008-01-01 00:00+00'::timestamptz 
         and valid < '2009-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2008_idx on flux2008(station, valid);
+CREATE UNIQUE INDEX flux2008_idx on flux2008(station, valid);
 GRANT SELECT on flux2008 to nobody,apache;
     
 
@@ -530,7 +551,7 @@ create table flux2009(
   CHECK(valid >= '2009-01-01 00:00+00'::timestamptz 
         and valid < '2010-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2009_idx on flux2009(station, valid);
+CREATE UNIQUE INDEX flux2009_idx on flux2009(station, valid);
 GRANT SELECT on flux2009 to nobody,apache;
     
 
@@ -539,7 +560,7 @@ create table flux2010(
   CHECK(valid >= '2010-01-01 00:00+00'::timestamptz 
         and valid < '2011-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2010_idx on flux2010(station, valid);
+CREATE UNIQUE INDEX flux2010_idx on flux2010(station, valid);
 GRANT SELECT on flux2010 to nobody,apache;
     
 
@@ -548,7 +569,7 @@ create table flux2011(
   CHECK(valid >= '2011-01-01 00:00+00'::timestamptz 
         and valid < '2012-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2011_idx on flux2011(station, valid);
+CREATE UNIQUE INDEX flux2011_idx on flux2011(station, valid);
 GRANT SELECT on flux2011 to nobody,apache;
     
 
@@ -557,7 +578,7 @@ create table flux2012(
   CHECK(valid >= '2012-01-01 00:00+00'::timestamptz 
         and valid < '2013-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2012_idx on flux2012(station, valid);
+CREATE UNIQUE INDEX flux2012_idx on flux2012(station, valid);
 GRANT SELECT on flux2012 to nobody,apache;
     
 
@@ -566,7 +587,7 @@ create table flux2013(
   CHECK(valid >= '2013-01-01 00:00+00'::timestamptz 
         and valid < '2014-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2013_idx on flux2013(station, valid);
+CREATE UNIQUE INDEX flux2013_idx on flux2013(station, valid);
 GRANT SELECT on flux2013 to nobody,apache;
 
 
@@ -575,7 +596,7 @@ create table flux2014(
   CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
         and valid < '2015-01-01 00:00+00')) 
   INHERITS (flux_data);
-CREATE INDEX flux2014_idx on flux2014(station, valid);
+CREATE UNIQUE INDEX flux2014_idx on flux2014(station, valid);
 GRANT SELECT on flux2014 to nobody,apache;
 
 create table t2015(
@@ -583,7 +604,7 @@ create table t2015(
   CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
         and valid < '2016-01-01 00:00+00'))
   INHERITS (alldata);
-CREATE INDEX t2015_idx on t2015(station, valid);
+CREATE UNIQUE INDEX t2015_idx on t2015(station, valid);
 GRANT SELECT on t2015 to nobody,apache;
 
 create table flux2015(
@@ -591,7 +612,7 @@ create table flux2015(
   CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
         and valid < '2016-01-01 00:00+00'))
   INHERITS (flux_data);
-CREATE INDEX flux2015_idx on flux2015(station, valid);
+CREATE UNIQUE INDEX flux2015_idx on flux2015(station, valid);
 GRANT SELECT on flux2015 to nobody,apache;
 
 --
