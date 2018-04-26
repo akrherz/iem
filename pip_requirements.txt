@@ -3,7 +3,6 @@ setuptools-markdown
 rrdtool
 PyRSS2Gen
 odfpy
-egenix-mx-base
 git+https://github.com/akrherz/python-metar.git@snowdepth
 mod_wsgi
 git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
