@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 
+import numpy as np
 import netCDF4
 import pytz
 import psycopg2.extras
@@ -69,11 +70,15 @@ def main():
         time.sleep(20)
         nc = netCDF4.Dataset(fn)
 
+    nc.set_auto_mask(True)
     stations = nc.variables["stationId"][:]
     providers = nc.variables["dataProvider"][:]
     names = nc.variables["stationName"][:]
     tmpk = nc.variables["temperature"][:]
     dwpk = nc.variables["dewpoint"][:]
+    # Set some data bounds to keep mcalc from complaining
+    dwpk = np.ma.where(np.ma.logical_or(dwpk < 200, dwpk > 320), np.nan, dwpk)
+    tmpk = np.ma.where(np.ma.logical_or(tmpk < 200, tmpk > 320), np.nan, tmpk)
     relh = mcalc.relative_humidity_from_dewpoint(tmpk * units.degK,
                                                  dwpk * units.degK
                                                  ).magnitude * 100.
