@@ -1,5 +1,5 @@
 <?php
-$OL = "4.1.0";
+$OL = "4.6.4";
 /*
  * Main landing page for the IEM Sites stuff
  */
@@ -11,11 +11,11 @@ if (isset($_GET["station"]) && isset($_GET["network"]))
   	header("Location: $uri");
   	exit();
 }
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 5);
- include("../../include/database.inc.php");
- include("../../include/imagemaps.php");
- include("../../include/myview.php");
+ require_once "../../include/database.inc.php";
+ require_once "../../include/imagemaps.php";
+ require_once "../../include/myview.php";
 
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IA_ASOS";
   

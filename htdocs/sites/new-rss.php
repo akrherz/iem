@@ -2,9 +2,9 @@
 /* 
  * RSS Feed of new IEM added station tables, default to 25 long?
  */
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 37);
- include("../../include/database.inc.php");
+ require_once "../../include/database.inc.php";
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT s.*, ST_x(geom) as lon, ST_y(geom) as lat, ".
  		"t.name as netname from stations s JOIN networks t ".
@@ -30,7 +30,7 @@
 	$cbody .= "Lat    : ". $row["lat"] ."\n";
     $cbody .= "Lon    : ". $row["lon"] ."\n";
     $cbody .= "Ele [m]: ". $row["elevation"] ."\n";
-    $cbody .= "Network: ". $row["netname"] ."(". $row["network"] .")\n";
+    $cbody .= "Network: ". $row["netname"] ." (". $row["network"] .")\n";
  	$cbody .= "</pre>\n";
  	$cbody = ereg_replace("&","&amp;", $cbody);
     $cbody = ereg_replace(">","&gt;", $cbody);

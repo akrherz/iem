@@ -1,25 +1,28 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("setup.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "setup.php";
+require_once "../../include/myview.php";
 
-include("../../include/myview.php");
 $t = new MyView();
 $t->thispage = "iem-sites";
 $t->title = "Site Calibration";
 $t->sites_current = "cal"; 
 
-$portfolio = "";
-if ($network == "AWOS") $portfolio = "iaawos";
-if ($network == "KCCI") $portfolio = "kccisnet";
-if ($network == "KELO") $portfolio = "kelosnet";
-if ($network == "KIMT") $portfolio = "kimtsnet";
-if ($network == "IA_RWIS") $portfolio = "iarwis";
+$xref = Array("AWOS" => "iaawos",
+"KCCI" => "kccisnet",
+"KELO" => "kelosnet",
+"KIMIT" => "kimtsnet",
+"IA_RWIS" => "iarwis",
+"ISUAG" => "isuag",
+"ISUSM" => "isusm");
+
+$portfolio = array_key_exists($network, $xref) ? $xref[$network]: null;
 
 $varDict = Array("tmpf" => "Air Temperature [F]",
 		"dwpf" => "Dew Point [F]");
 $table = "";
-if ($portfolio != "")
+if ($portfolio != null)
 {
 	$conn = iemdb("portfolio");
 	$sql = "SELECT * from iem_calibration WHERE portfolio = '$portfolio' and station = '$station' ORDER by valid DESC";
@@ -48,7 +51,7 @@ if ($portfolio != "")
 	}
 
 } else {
-	$table .= "<tr><td colspan=6>Sorry no calibration information is collected for $network network</td></tr>";
+	$table .= "<tr><td colspan=\"6\">Sorry no calibration information is collected for $network network</td></tr>";
 }
 
 

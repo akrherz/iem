@@ -1,8 +1,9 @@
 <?php
- /* Make a nice simple plot of monthly  temperatures */
- include('../../config/settings.inc.php');
- include("../../include/database.inc.php");
- include('setup.php');
+ // 27 Apr 2018: We still need this around as hist.phtml called it, wait for
+ // search crawlers to stop hitting it
+ require_once '../../config/settings.inc.php';
+ require_once "../../include/database.inc.php";
+ require_once 'setup.php';
 
  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
  $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");

@@ -220,7 +220,7 @@ if ($mode == "monthly") {
  
  $htmlout .= <<<EOM
 <h3>Daily High/Low Plot</h3>
-<img src="month_hilo_plot.php?month=${month}&year=${year}&network=${network}&station=${station}" class="img img-responsive">
+<img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}.png" class="img img-responsive">
 <br /><strong>Description:</strong> This chart of the monthly temperature data.
 The bars are the observations and the dots are climatology.
 

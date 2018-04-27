@@ -5,9 +5,12 @@ require_once "../../include/database.inc.php";
 require_once "setup.php";
 require_once "../../include/myview.php";
 
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+
 $t = new MyView();
 $t->thispage="iem-sites";
-$t->title = "Site Neighbors";
+$t->title = "Monthly Summaries";
 $t->sites_current="monthsum"; 
 
 $pgconn = iemdb("iem");
@@ -103,7 +106,43 @@ $noclimo = Array();
 $rhtable = make_table($data, "avg_rh", $minyear, $maxyear, "%.1f%%",
       $noclimo);
 
+$timestamp = mktime(0,0,0, $month, 1, $year);
+$lmonth = $timestamp - 5*86400;
+$nmonth = $timestamp + 35*86400;
+$llink = sprintf("monthlysum.php?station=%s&amp;network=%s&amp;month=%s&amp;year=%s",
+            $station, $network, date("m", $lmonth), date("Y", $lmonth));
+$nlink = sprintf("monthlysum.php?station=%s&amp;network=%s&amp;month=%s&amp;year=%s",
+            $station, $network, date("m", $nmonth), date("Y", $nmonth));
+$ltext = date("M Y", $lmonth);
+$ntext = date("M Y", $nmonth);
+
+$ms = monthSelect($month);
+$minyear = isset($metadata["archive_begin"]) ? intval(date("Y", $metadata["archive_begin"])): 1929;
+$ys = yearSelect($minyear, $year);
+
+$plot1 = sprintf("/plotting/auto/plot/17/month:%s"
+      ."::year:%s::station:%s::network:%s::dpi:100.png", $month, 
+      $year, $station, $network);
+$plot2 = sprintf("/plotting/month/rainfall_plot.php?month=%s&amp;".
+      "year=%s&amp;network=%s&amp;station=%s", $month, $year, $network, $station);
+
+$jsextracaller = isset($_GET["year"]) ? "go();": "";
+$t->jsextra = <<<EOM
+<script>
+function go(){
+      document.getElementById("mycharts").scrollIntoView();
+}
+$(document).ready(function(){
+      $("#gogogo").click(function(){
+            go();
+      });
+      ${jsextracaller}
+});
+</script>
+EOM;
 $t->content = <<<EOF
+
+<p><button id="gogogo" role="button" class="btn btn-primary"><i class="fa fa-arrow-down"></i> View Monthly Charts</button></p>
 
 <p>The following tables present IEM computed monthly data summaries based on
 daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network=${network}">download interface</a>
@@ -137,6 +176,38 @@ highlight the table information with your mouse and then copy/paste into Excel.<
 by the duration between observations.</p>
 
 {$rhtable}
+
+<h3 id="mycharts">Monthly Plots</h3>
+
+<form method="GET" name="changemonth" action="monthlysum.php#plots">
+ <input type="hidden" name="station" value="{$station}">
+ <input type="hidden" name="network" value="{$network}">
+ <h3>Select month and year:</h3>
+ <div class="row">
+ <div class="col-sm-3">
+ <a href="{$llink}" class="btn btn-default">{$ltext} <i class="fa fa-arrow-left"></i></a>
+	</div>
+	<div class="col-sm-6">
+  {$ms} {$ys}
+ <input type="submit" value="Generate Plot">
+ </div>
+ <div class="col-sm-3">
+ <a href="{$nlink}" class="btn btn-default"><i class="fa fa-arrow-right"></i> {$ntext}</a>
+</div>
+</div>
+</form>
+
+<div class="row">
+<div class="col-md-12">
+<img src="{$plot1}" alt="Monthly Plot" class="img img-responsive">
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-12">
+<img src="{$plot2}" alt="Monthly Plot" class="img img-responsive">
+</div>
+</div>
 
 
 EOF;

@@ -38,25 +38,21 @@ if (isset($_REQUEST["day"])){
 <?php
 $o = Array(
   "base" => Array("name" => "Information", "uri" => "site.php?",
-  		"metaok" => TRUE, "icon" => "info-sign"),
+  		"metaok" => TRUE, "icon" => "info-circle"),
   "current" => Array("name" => "Last Ob", "uri" => "current.php?",
-  		"icon" => "dashboard"),
+  		"icon" => "clock"),
   "pics" => Array("name" => "Photographs", "uri" => "pics.php?",
   		"icon" => "camera"),
   "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
-  		"icon" => "calendar"),
+		  "icon" => "wrench",
+	"networks" => Array("AWOS", "KCCI", "KELO", "KIMIT", "IA_RWIS", "ISUAG", "ISUSM")
+),
   "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
-  		"icon" => "stats"),
+  		"icon" => "chart-area"),
   "tables" => Array("name" => "Network Table", "uri" => "networks.php?",
-  		"metaok" => TRUE, "icon" => "menu-hamburger"),
+  		"metaok" => TRUE, "icon" => "table"),
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?",
-  		"metaok" => TRUE, "icon" => "resize-full"),
-  "7dayhilo" => Array("name" => "7 Day High/Low Plot",
-  		"uri" => "plot.php?prod=0&amp;", "icon" => "chart-bar"),
-  "monthhilo" => Array("name" => "Month High/Low Plot",
-  		"uri" => "plot.php?prod=1&amp;", "icon" => "chart-bar"),
-  "monthrain" => Array("name" => "Month Rainfall Plot",
-  		"uri" => "plot.php?prod=2&amp;", "icon" => "chart-bar"),
+  		"metaok" => TRUE, "icon" => "users"),
   "monthsum" => Array("name" => "Monthly Summaries",
   		"uri" => "monthlysum.php?", "icon" => "table"),
   "obhistory" => Array("name" => "Observation History",
@@ -74,6 +70,9 @@ while (list($key,$val) = each($o))
 {
 	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS|ISUSM/', $network) <= 0) &&
 		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
+		continue;
+	}
+	if (array_key_exists("networks", $val) && !in_array($network, $val["networks"])){
 		continue;
 	}
 	// Do not display links to pages that only work for sites that produce

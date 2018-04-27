@@ -2,10 +2,10 @@
 /*
  * My purpose in life is to produce pics
  */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
-include("../../include/database.inc.php");
-include("setup.php");
+require_once "../../include/database.inc.php";
+require_once "setup.php";
 
 include("../../include/myview.php");
 $t = new MyView();

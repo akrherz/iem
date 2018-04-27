@@ -1,9 +1,11 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 6);
-include("../../include/database.inc.php");
-include_once("../../include/myview.php");
+require_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
+require_once "../../include/imagemaps.php";
+
 $pgconn = iemdb("mesosite");
 
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
@@ -26,7 +28,6 @@ if ($network == '_ALL_'){
 			network = $1 ORDER by name";
 }
 $rs = pg_prepare($pgconn, "NTSELECT", $sql);
-include("../../include/imagemaps.php");
 
 $format = isset($_GET['format']) ? xssafe($_GET['format']): 'html';
 $nohtml = isset($_GET['nohtml']);
