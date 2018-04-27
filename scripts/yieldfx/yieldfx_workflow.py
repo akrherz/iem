@@ -40,6 +40,7 @@ if not DO_UPLOAD:
 
 
 def p(val, prec):
+    """Use 99 for missing values, which Dr A says is wrong, sigh"""
     if val is None or np.isnan(val):
         return '99'
     _fmt = "%%.%sf" % (prec,)
@@ -123,7 +124,7 @@ def write_and_upload(df, location):
         except Exception as _:
             print('dropbox fail')
     # Save file for usage by web plotting...
-    os.chmod(tmpfn, 0644)
+    os.chmod(tmpfn, 0o644)
     # os.rename fails here due to cross device link bug
     subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.met"
                      ) % (tmpfn, location), shell=True)
@@ -269,14 +270,14 @@ def replace_obs_iem(df, location):
                 continue
             if dont_replace:
                 df.loc[valid.replace(year=year),
-                       rcols[3:-1]] = (_gdd,
-                                       distance(row[4], 'in').value('mm'))
+                       rcols[3:]] = (_gdd,
+                                     distance(row[4], 'in').value('mm'))
                 continue
             df.loc[valid.replace(year=year), rcols] = (
                 temperature(row[1], 'F').value('C'),
                 temperature(row[2], 'F').value('C'), row[3],
                 _gdd, distance(row[4], 'in').value('mm'))
-    if len(replaced) > 0:
+    if replaced:
         print(("  used IEM Access %s from %s->%s"
                ) % (station, replaced[0], replaced[-1]))
 
@@ -328,7 +329,7 @@ def replace_obs(df, location):
                                                        row[6], row[7], row[8],
                                                        row[9], row[10], row[11]
                                                        )
-    if len(replaced) > 0:
+    if replaced:
         print(("  replaced with obs from %s for %s->%s"
                ) % (isusm, replaced[0], replaced[-1]))
 
@@ -370,6 +371,9 @@ def do(location):
 
 def main(argv):
     """Do Something"""
+    if len(argv) == 2:
+        do(argv[1])
+        return
     for location in XREF:
         do(location)
 
