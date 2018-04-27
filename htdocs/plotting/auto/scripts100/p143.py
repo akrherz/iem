@@ -13,7 +13,10 @@ STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
         ('cobs', 'Central (COBS)'),
         ('crawfordsville', 'Southeast (Crawfordsville)'),
+        ('kanawha', 'Northern (Kanawha)'),
         ('lewis', 'Southwest (Lewis)'),
+        ('mcnay', 'Southern (Chariton/McNay)'),
+        ('muscatine', 'Southeast (Muscatine)'),
         ('nashua', 'Northeast (Nashua)'),
         ('sutherland', 'Northwest (Sutherland)')])
 
@@ -23,7 +26,9 @@ SDATES = OrderedDict([
         ('mar15', 'March 15'),
                      ])
 COUNTY = {'ames': 169, 'cobs': 169, 'crawfordsville': 183, 'lewis': 155,
-          'nashua': 67, 'sutherland': 141}
+          'nashua': 67, 'sutherland': 141,
+          'mcnay': 117, 'kanawha': 81, 'muscatine': 139
+          }
 PDICT = {'yes': 'Colorize Labels by Corn Yield Trend',
          'no': 'No Colorize'}
 

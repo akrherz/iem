@@ -12,7 +12,10 @@ STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
         ('cobs', 'Central (COBS)'),
         ('crawfordsville', 'Southeast (Crawfordsville)'),
+        ('kanawha', 'Northern (Kanawha)'),
         ('lewis', 'Southwest (Lewis)'),
+        ('mcnay', 'Southern (Chariton/McNay)'),
+        ('muscatine', 'Southeast (Muscatine)'),
         ('nashua', 'Northeast (Nashua)'),
         ('sutherland', 'Northwest (Sutherland)')])
 
