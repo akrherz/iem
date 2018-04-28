@@ -1,6 +1,5 @@
 """Attempt to manage the disaster that is IEM symlinking"""
 from __future__ import print_function
-import sys
 import os
 
 # LINK , TARGET
@@ -22,7 +21,7 @@ PAIRS = [
          ['/mesonet/data/dotcams', '/mnt/mesonet2/data/dotcams'],
          ['/mesonet/data/gempak', '/mnt/mesonet2/data/gempak'],
          ['/mesonet/data/harry', '/mnt/mesonet/ARCHIVE/raw/harry'],
-         ['/mesonet/data/iemre', '/mnt/mesonet/data/iemre'],
+         ['/mesonet/data/iemre', '/mnt/mesonet2/data/iemre'],
          ['/mesonet/data/prism', '/mnt/mesonet2/data/prism'],
          ['/mesonet/data/incoming', '/mnt/mesonet2/data/incoming'],
          ['/mesonet/data/logs', '/mnt/mesonet2/data/logs'],
@@ -66,11 +65,11 @@ def workflow(link, target):
     os.symlink(target, link)
 
 
-def main(argv):
+def main():
     """Go Main"""
     for (link, target) in PAIRS:
         workflow(link, target)
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
