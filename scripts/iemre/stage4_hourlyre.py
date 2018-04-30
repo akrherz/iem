@@ -4,11 +4,11 @@ import datetime
 import os
 import sys
 
-import pygrib
 import numpy as np
 import pytz
 import netCDF4
 from scipy.interpolate import NearestNDInterpolator
+import pygrib
 from pyiem import iemre
 from pyiem.util import utc
 
@@ -73,8 +73,7 @@ def merge(valid):
     # print("Resulting mean: %.2f max: %.2f" % (np.mean(res), np.max(res)))
 
     # Open up our RE file
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (valid.year,),
-                         'a')
+    nc = netCDF4.Dataset(iemre.get_hourly_ncname(valid.year), 'a')
     nc.variables["p01m"][tidx, :, :] = res
     # print(("Readback mean: %.2f max: %.2f"
     #       ) % (np.mean(nc.variables["p01m"][tidx, :, :]),

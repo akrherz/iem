@@ -254,8 +254,7 @@ def load_table():
 def estimate_precip(ts):
     """Estimate precipitation based on IEMRE"""
     idx = iemre.daily_offset(ts)
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
-                         'r')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
     grid12 = nc.variables['p01d_12z'][idx, :, :] / 25.4
     grid00 = nc.variables['p01d'][idx, :, :] / 25.4
     nc.close()
@@ -279,8 +278,7 @@ def estimate_precip(ts):
 def estimate_snow(ts):
     """Estimate the Snow based on COOP reports"""
     idx = iemre.daily_offset(ts)
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
-                         'r')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
     nc.set_auto_mask(True)
     snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :],
                           'MM').value('IN')
@@ -300,8 +298,7 @@ def estimate_snow(ts):
 def estimate_hilo(ts):
     """Estimate the High and Low Temperature based on gridded data"""
     idx = iemre.daily_offset(ts)
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, ),
-                         'r')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
     highgrid12 = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
                              'K').value('F')
     lowgrid12 = temperature(nc.variables['low_tmpk_12z'][idx, :, :],

@@ -53,8 +53,7 @@ def plotter(fdict):
     varname = ctx['var']
 
     idx0 = iemre.daily_offset(date)
-    nc = netCDF4.Dataset(("/mesonet/data/iemre/%s_mw_daily.nc"
-                          ) % (date.year, ), 'r')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(date.year), 'r')
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
     if varname == 'rsds':

@@ -34,7 +34,7 @@ def main():
     offset0 = iemre.daily_offset(ts0)
     offset1 = iemre.daily_offset(ts1)
 
-    ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,)
+    ncfn = iemre.get_daily_ncname(ts0.year)
     nc = netCDF4.Dataset(ncfn, 'r')
 
     # 2-D precipitation, inches
@@ -108,7 +108,7 @@ def main():
             ("Content-Disposition: attachment; filename=%s.zip\n\n"
              ) % (basefn, ))
 
-        sys.stdout.write(file(basefn+".zip", 'r').read())
+        sys.stdout.write(open(basefn+".zip", 'r').read())
 
         for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
             os.unlink("%s.%s" % (basefn, suffix))

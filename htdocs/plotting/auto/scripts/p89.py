@@ -5,9 +5,11 @@ import numpy as np
 import matplotlib.dates as mdates
 import netCDF4
 import pandas as pd
+import geopandas as gpd
 from metpy.units import units
 from pyiem import iemre
-from pyiem.util import get_autoplot_context
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
 
 
@@ -59,14 +61,28 @@ def do_date(ctx, now, precip, daythres, trailthres):
 
 def get_data(ctx):
     """Do the processing work, please"""
-    nc = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
-    ctx['iowa'] = nc.variables[ctx['state']][:]
-    ctx['iowapts'] = float(np.sum(np.where(ctx['iowa'] > 0, 1, 0)))
-    nc.close()
+    pgconn = get_dbconn('postgis')
+    states = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom, state_abbr from states where state_abbr = %s
+    """, pgconn, params=(ctx['state'], ), index_col='state_abbr',
+                                           geom_col='the_geom')
 
-    nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_daily.nc' % (ctx['year'],
-                                                                 ))
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ctx['year']))
+
     precip = nc.variables['p01d']
+    czs = CachingZonalStats(iemre.AFFINE)
+    hasdata = np.zeros((nc.dimensions['lat'].size,
+                        nc.dimensions['lon'].size))
+    czs.gen_stats(hasdata, states['the_geom'])
+    for nav in czs.gridnav:
+        grid = np.ones((nav.ysz, nav.xsz))
+        grid[nav.mask] = 0.
+        hasdata[nav.y0:(nav.y0 + nav.ysz),
+                nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
+                                                      hasdata[nav.y0:(nav.y0 + nav.ysz),
+                                                              nav.x0:(nav.x0 + nav.xsz)])
+    ctx['iowa'] = np.flipud(hasdata)
+    ctx['iowapts'] = np.sum(np.where(hasdata > 0, 1, 0))
 
     now = datetime.datetime(ctx['year'], 1, 1)
     now += datetime.timedelta(days=(ctx['period']-1))

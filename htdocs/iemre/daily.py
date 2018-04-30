@@ -36,7 +36,7 @@ def main():
 
     res = {'data': [], }
 
-    fn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
+    fn = iemre.get_daily_ncname(ts.year)
 
     sys.stdout.write('Content-type: application/json\n\n')
     if not os.path.isfile(fn):
@@ -53,7 +53,7 @@ def main():
     c2000 = ts.replace(year=2000)
     coffset = iemre.daily_offset(c2000)
 
-    cnc = netCDF4.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'r')
+    cnc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'r')
 
     res['data'].append({
         'daily_high_f': myrounder(

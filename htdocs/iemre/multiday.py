@@ -59,7 +59,7 @@ def main():
     offset2 = iemre.daily_offset(ts2) + 1
 
     # Get our netCDF vars
-    fp = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts1.year,)
+    fp = iemre.get_daily_ncname(ts1.year)
     nc = netCDF4.Dataset(fp, 'r')
     hightemp = datatypes.temperature(nc.variables['high_tmpk'][offset1:offset2,
                                                                j, i],
@@ -75,7 +75,7 @@ def main():
     coffset1 = iemre.daily_offset(c2000)
     c2000 = ts2.replace(year=2000)
     coffset2 = iemre.daily_offset(c2000) + 1
-    cnc = netCDF4.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'r')
+    cnc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'r')
     chigh = datatypes.temperature(cnc.variables['high_tmpk'][coffset1:coffset2,
                                                              j, i],
                                   'K').value("F")

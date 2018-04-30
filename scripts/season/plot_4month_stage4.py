@@ -1,11 +1,11 @@
-'''
+"""
  Generate a number of plots showing:
   1) Last 4 month's precipitation
   2) Normal for past 4 months
   3) Departure for this period
 
   We care about 4 months as it is used in drought analysis
-'''
+"""
 from __future__ import print_function
 import datetime
 
@@ -22,7 +22,7 @@ def main():
     sts = ets - datetime.timedelta(days=121)
 
     # Get the normal accumm
-    cnc = netCDF4.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'r')
+    cnc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'r')
     lons = cnc.variables['lon'][:]
     lats = cnc.variables['lat'][:]
     index0 = iemre.daily_offset(sts)
@@ -36,16 +36,14 @@ def main():
 
     # Get the observed precip
     if sts.year != ets.year:  # spanner, darn
-        onc = netCDF4.Dataset(
-            "/mesonet/data/iemre/%s_mw_daily.nc" % (sts.year,))
+        onc = netCDF4.Dataset(iemre.get_daily_ncname(sts.year))
         obprecip = np.sum(onc.variables['p01d'][index0:, :, :], 0)
         onc.close()
-        onc = netCDF4.Dataset(
-            "/mesonet/data/iemre/%s_mw_daily.nc" % (ets.year,))
+        onc = netCDF4.Dataset(iemre.get_daily_ncname(ets.year))
         obprecip = obprecip + np.sum(onc.variables['p01d'][:index1, :, :], 0)
         onc.close()
     else:
-        ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (sts.year,)
+        ncfn = iemre.get_daily_ncname(sts.year)
         onc = netCDF4.Dataset(ncfn, 'r')
         obprecip = np.sum(onc.variables['p01d'][index0:index1, :, :], 0)
         onc.close()

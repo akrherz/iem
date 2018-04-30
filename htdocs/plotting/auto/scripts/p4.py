@@ -3,9 +3,11 @@ import datetime
 
 import numpy as np
 import netCDF4
+import geopandas as gpd
 import pandas as pd
 from pyiem import iemre
-from pyiem.util import get_autoplot_context
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
 
 
@@ -26,7 +28,7 @@ def get_description():
              label='Precipitation Threshold [inch]'),
         dict(type='int', name='period', default='7',
              label='Over Period of Days'),
-        dict(type='clstate', name='state', default='IA',
+        dict(type='state', name='state', default='IA',
              label='For State'),
     ]
     return desc
@@ -44,13 +46,27 @@ def plotter(fdict):
     period = ctx['period']
     state = ctx['state']
 
-    nc2 = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
-    iowa = nc2.variables[state][:]
-    iowapts = np.sum(np.where(iowa > 0, 1, 0))
-    nc2.close()
+    pgconn = get_dbconn('postgis')
+    states = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom, state_abbr from states where state_abbr = %s
+    """, pgconn, params=(state, ), index_col='state_abbr',
+                                           geom_col='the_geom')
 
-    nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_daily.nc' % (year, ))
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(year))
     precip = nc.variables['p01d']
+    czs = CachingZonalStats(iemre.AFFINE)
+    hasdata = np.zeros((nc.dimensions['lat'].size,
+                        nc.dimensions['lon'].size))
+    czs.gen_stats(hasdata, states['the_geom'])
+    for nav in czs.gridnav:
+        grid = np.ones((nav.ysz, nav.xsz))
+        grid[nav.mask] = 0.
+        hasdata[nav.y0:(nav.y0 + nav.ysz),
+                nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
+                                                      hasdata[nav.y0:(nav.y0 + nav.ysz),
+                                                              nav.x0:(nav.x0 + nav.xsz)])
+    hasdata = np.flipud(hasdata)
+    datapts = np.sum(np.where(hasdata > 0, 1, 0))
 
     now = datetime.date(year, 1, 1)
     now += datetime.timedelta(days=(period-1))
@@ -63,10 +79,10 @@ def plotter(fdict):
     while now <= ets:
         idx = iemre.daily_offset(now)
         sevenday = np.sum(precip[(idx-period):idx, :, :], 0)
-        pday = np.where(iowa > 0, sevenday[:, :], -1)
+        pday = np.where(hasdata > 0, sevenday[:, :], -1)
         tots = np.sum(np.where(pday >= (threshold * 25.4), 1, 0))
         days.append(now)
-        coverage.append(tots / float(iowapts) * 100.0)
+        coverage.append(tots / float(datapts) * 100.0)
 
         now += datetime.timedelta(days=1)
     df = pd.DataFrame(dict(day=pd.Series(days),

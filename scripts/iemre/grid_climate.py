@@ -83,10 +83,10 @@ def grid_day(nc, ts):
 
 
 def workflow(ts):
-    # Load up a station table we are interested in
+    """Do Work"""
 
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'a')
+    nc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'a')
     grid_day(nc, ts)
     nc.close()
 

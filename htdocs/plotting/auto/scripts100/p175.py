@@ -4,9 +4,11 @@ import datetime
 import numpy as np
 import netCDF4
 import pandas as pd
+import geopandas as gpd
 from pyiem import iemre
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
 
 
@@ -51,17 +53,32 @@ def plotter(fdict):
     metric = distance(thres, 'IN').value('MM')
     state = ctx['state'][:2]
 
-    nc2 = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
-    st = nc2.variables[state][:]
-    stpts = np.sum(np.where(st > 0, 1, 0))
-    nc2.close()
-
     sts = datetime.datetime(year, 10, 1)
     ets = datetime.datetime(year + 1, 5, 1)
     rows = []
 
+    pgconn = get_dbconn('postgis')
+    states = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom, state_abbr from states where state_abbr = %s
+    """, pgconn, params=(state, ), index_col='state_abbr',
+                                           geom_col='the_geom')
+
     sidx = iemre.daily_offset(sts)
-    nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_daily.nc' % (sts.year, ))
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(sts.year))
+    czs = CachingZonalStats(iemre.AFFINE)
+    hasdata = np.zeros((nc.dimensions['lat'].size,
+                        nc.dimensions['lon'].size))
+    czs.gen_stats(hasdata, states['the_geom'])
+    for nav in czs.gridnav:
+        grid = np.ones((nav.ysz, nav.xsz))
+        grid[nav.mask] = 0.
+        hasdata[nav.y0:(nav.y0 + nav.ysz),
+                nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
+                                                      hasdata[nav.y0:(nav.y0 + nav.ysz),
+                                                              nav.x0:(nav.x0 + nav.xsz)])
+    st = np.flipud(hasdata)
+    stpts = np.sum(np.where(hasdata > 0, 1, 0))
+
     snowd = nc.variables['snowd_12z'][sidx:, :, :]
     nc.close()
     for i in range(snowd.shape[0]):
@@ -71,7 +88,7 @@ def plotter(fdict):
                      })
 
     eidx = iemre.daily_offset(ets)
-    nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_daily.nc' % (ets.year, ))
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ets.year))
     snowd = nc.variables['snowd_12z'][:eidx, :, :]
     nc.close()
     for i in range(snowd.shape[0]):

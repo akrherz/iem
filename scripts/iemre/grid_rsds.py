@@ -8,13 +8,13 @@ import os
 import sys
 
 import netCDF4
-import pygrib
 import pyproj
 import pytz
 import numpy as np
+from scipy.interpolate import NearestNDInterpolator
+import pygrib
 from pyiem import iemre
 from pyiem.util import get_dbconn
-from scipy.interpolate import NearestNDInterpolator
 
 
 P4326 = pyproj.Proj(init="epsg:4326")
@@ -22,7 +22,7 @@ LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
                    " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"))
 
 SWITCH_DATE = datetime.datetime(2014, 10, 10, 20)
-SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.timezone("UTC"))
+SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.utc)
 
 
 def do_coop(ts):
@@ -50,8 +50,7 @@ def do_coop(ts):
                                np.array(vals))
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
 
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),
-                         'a')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'a')
     offset = iemre.daily_offset(ts)
     # Data above is MJ / d / m-2, we want W / m-2
     nc.variables['rsds'][offset, :, :] = nn(xi, yi) * 1000000. / 86400.
@@ -79,7 +78,7 @@ def do_hrrr(ts):
         except ValueError:
             print('coop/hrrr_solarrad.py %s had no solar rad' % (fn,))
             continue
-        if len(grb) == 0:
+        if not grb:
             print('Could not find SWDOWN in HRR %s' % (fn,))
             continue
         g = grb[0]
@@ -105,12 +104,15 @@ def do_hrrr(ts):
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),
-                         'a')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'a')
+    nc.set_auto_scale(True)
     offset = iemre.daily_offset(ts)
+    hasdata = nc.variables['hasdata'][:, :]
     data = nc.variables['rsds'][offset, :, :]
     for i, lon in enumerate(iemre.XAXIS):
         for j, lat in enumerate(iemre.YAXIS):
+            if hasdata[j, i] < 1:
+                continue
             (x, y) = LCC(lon, lat)
             i2 = np.digitize([x], xaxis)[0]
             j2 = np.digitize([y], yaxis)[0]

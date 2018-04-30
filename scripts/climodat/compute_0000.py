@@ -5,7 +5,9 @@ import datetime
 
 import netCDF4
 import numpy as np
+import geopandas as gpd
 from pyiem import iemre
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_dbconn
 
@@ -41,8 +43,7 @@ def update_database(stid, valid, high, low, precip, snow, snowd):
 def do_day(valid):
     """ Process a day please """
     idx = iemre.daily_offset(valid)
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year, ),
-                         'r')
+    nc = netCDF4.Dataset(iemre.get_daily_ncname(valid.year), 'r')
     high = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
                        'K').value('F')
     low = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
@@ -51,62 +52,39 @@ def do_day(valid):
     snow = distance(nc.variables['snow_12z'][idx, :, :], 'MM').value("IN")
     snowd = distance(nc.variables['snowd_12z'][idx, :, :], 'MM').value("IN")
     nc.close()
-    for state in ('IA', 'NE', 'MN', 'WI', 'MI', 'OH', 'IN', 'IL', 'MO',
-                  'KS', 'KY', 'ND', 'SD'):
-        do_state_day(state, valid, high, low, precip, snow, snowd)
-        do_climdiv_day(state, valid, high, low, precip, snow, snowd)
 
+    # build out the state mappers
+    pgconn = get_dbconn('postgis')
+    states = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom, state_abbr from states
+    where state_abbr not in ('AK', 'HI')
+    """, pgconn, index_col='state_abbr', geom_col='the_geom')
+    czs = CachingZonalStats(iemre.AFFINE)
+    sthigh = czs.gen_stats(np.flipud(high), states['the_geom'])
+    stlow = czs.gen_stats(np.flipud(low), states['the_geom'])
+    stprecip = czs.gen_stats(np.flipud(precip), states['the_geom'])
+    stsnow = czs.gen_stats(np.flipud(snow), states['the_geom'])
+    stsnowd = czs.gen_stats(np.flipud(snowd), states['the_geom'])
 
-def do_climdiv_day(stabbr, valid, highgrid, lowgrid, precipgrid,
-                   snowgrid, snowdgrid):
-    """
-    Compute the virtual climate division data as well
-    """
-    sw_nc = netCDF4.Dataset("/mesonet/data/iemre/climdiv_weights.nc")
-    for varname in sw_nc.variables.keys():
-        if varname in ['lat', 'lon', 'time']:
-            continue
-        if varname[:2] != stabbr:
-            continue
-        stid = varname
-        sw = sw_nc.variables[stid][:]
+    for i, state in enumerate(states.index.values):
+        update_database(state+"0000", valid, sthigh[i], stlow[i],
+                        stprecip[i], stsnow[i], stsnowd[i])
 
-        high = np.average(highgrid[sw > 0])
-        low = np.average(lowgrid[sw > 0])
-        precip = np.average(precipgrid[sw > 0])
-        snow = np.average(snowgrid[sw > 0])
-        snowd = np.average(snowdgrid[sw > 0])
+    # build out climate division mappers
+    climdiv = gpd.GeoDataFrame.from_postgis("""
+    SELECT geom, iemid from climdiv
+    where st_abbr not in ('AK', 'HI')
+    """, pgconn, index_col='iemid', geom_col='geom')
+    czs = CachingZonalStats(iemre.AFFINE)
+    sthigh = czs.gen_stats(np.flipud(high), climdiv['the_geom'])
+    stlow = czs.gen_stats(np.flipud(low), climdiv['the_geom'])
+    stprecip = czs.gen_stats(np.flipud(precip), climdiv['the_geom'])
+    stsnow = czs.gen_stats(np.flipud(snow), climdiv['the_geom'])
+    stsnowd = czs.gen_stats(np.flipud(snowd), climdiv['the_geom'])
 
-        print(('%s %s-%s-%s High: %5.1f Low: %5.1f Precip: %4.2f'
-               ) % (stid, valid.year, valid.month,
-                    valid.day, high, low, precip))
-        update_database(stid, valid, high, low, precip, snow, snowd)
-
-    sw_nc.close()
-
-
-def do_state_day(stabbr, valid, highgrid, lowgrid, precipgrid,
-                 snowgrid, snowdgrid):
-    """
-    Create the statewide average value based on averages of the IEMRE
-    """
-
-    # get state weights
-    sw_nc = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
-    sw = sw_nc.variables[stabbr][:]
-    sw_nc.close()
-
-    high = np.average(highgrid[sw > 0])
-    low = np.average(lowgrid[sw > 0])
-    precip = np.average(precipgrid[sw > 0])
-    snow = np.average(snowgrid[sw > 0])
-    snowd = np.average(snowdgrid[sw > 0])
-
-    print(('%s %s-%s-%s NEW High: %5.1f Low: %5.1f Precip: %4.2f'
-           ) % (stabbr, valid.year, valid.month,
-                valid.day, high, low, precip))
-
-    update_database(stabbr+"0000", valid, high, low, precip, snow, snowd)
+    for i, iemid in enumerate(climdiv.index.values):
+        update_database(iemid, valid, sthigh[i], stlow[i],
+                        stprecip[i], stsnow[i], stsnowd[i])
 
 
 def main(argv):

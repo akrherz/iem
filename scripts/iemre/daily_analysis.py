@@ -1,4 +1,4 @@
-"""Grid the daily data onto a midwest grid for IEMRE
+"""Grid the daily data onto a grid for IEMRE
 
 This is tricky as some variables we can compute sooner than others.  We run
 this script twice per day:
@@ -22,15 +22,6 @@ from pyiem.util import get_dbconn, utc
 
 PGCONN = get_dbconn('iem', user='nobody')
 COOP_PGCONN = get_dbconn('coop', user='nobody')
-
-
-def get_domain():
-    """Return where we should be estimating"""
-    nc = netCDF4.Dataset('/mesonet/data/iemre/state_weights.nc')
-    nc.set_auto_mask(False)
-    domain = nc.variables['domain'][:]
-    nc.close()
-    return domain
 
 
 def generic_gridder(df, idx, domain):
@@ -98,15 +89,14 @@ def do_precip(nc, ts):
         print(("p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
                ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                     ets.strftime("%Y%m%d%H"), offset2))
-        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ets.year,)
+        ncfn = iemre.get_hourly_ncname(ets.year)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
         hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
-        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
-            sts.year,))
+        hnc = netCDF4.Dataset(iemre.get_hourly_ncname(sts.year))
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
@@ -114,7 +104,7 @@ def do_precip(nc, ts):
             print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
                    ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                         ets.strftime("%Y%m%d%H"), offset2))
-        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (sts.year,)
+        ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
@@ -136,15 +126,14 @@ def do_precip12(nc, ts):
             print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
                    ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                         ets.strftime("%Y%m%d%H"), offset2))
-        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ets.year,)
+        ncfn = iemre.get_hourly_ncname(ets.year)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
         hnc = netCDF4.Dataset(ncfn)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
-        hnc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
-            sts.year,))
+        hnc = netCDF4.Dataset(iemre.get_hourly_ncname(sts.year))
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
@@ -152,7 +141,7 @@ def do_precip12(nc, ts):
             print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
                    ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
                         ets.strftime("%Y%m%d%H"), offset2))
-        ncfn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,)
+        ncfn = iemre.get_hourly_ncname(ts.year)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
@@ -194,11 +183,11 @@ def grid_day12(nc, ts, domain):
   geom) and s.network ~* 'COOP' and c.iemid = s.iemid and
             extract(hour from c.coop_valid) between 4 and 11
             """ % (ts.year, ts.strftime("%Y-%m-%d"),
-                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf,
-                   reference.MW_WEST - mybuf, reference.MW_NORTH + mybuf,
-                   reference.MW_EAST + mybuf, reference.MW_NORTH + mybuf,
-                   reference.MW_EAST + mybuf, reference.MW_SOUTH - mybuf,
-                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf)
+                   iemre.WEST - mybuf, iemre.SOUTH - mybuf,
+                   iemre.WEST - mybuf, iemre.NORTH + mybuf,
+                   iemre.EAST + mybuf, iemre.NORTH + mybuf,
+                   iemre.EAST + mybuf, iemre.SOUTH - mybuf,
+                   iemre.WEST - mybuf, iemre.SOUTH - mybuf)
         df = read_sql(sql, PGCONN)
     else:
         df = read_sql("""
@@ -213,16 +202,16 @@ def grid_day12(nc, ts, domain):
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, COOP_PGCONN, params=(reference.MW_WEST - mybuf,
-                                  reference.MW_SOUTH - mybuf,
-                                  reference.MW_WEST - mybuf,
-                                  reference.MW_NORTH + mybuf,
-                                  reference.MW_EAST + mybuf,
-                                  reference.MW_NORTH + mybuf,
-                                  reference.MW_EAST + mybuf,
-                                  reference.MW_SOUTH - mybuf,
-                                  reference.MW_WEST - mybuf,
-                                  reference.MW_SOUTH - mybuf, ts))
+        """, COOP_PGCONN, params=(iemre.WEST - mybuf,
+                                  iemre.SOUTH - mybuf,
+                                  iemre.WEST - mybuf,
+                                  iemre.NORTH + mybuf,
+                                  iemre.EAST + mybuf,
+                                  iemre.NORTH + mybuf,
+                                  iemre.EAST + mybuf,
+                                  iemre.SOUTH - mybuf,
+                                  iemre.WEST - mybuf,
+                                  iemre.SOUTH - mybuf, ts))
     # plot(df)
 
     if len(df.index) > 4:
@@ -275,11 +264,11 @@ def grid_day(nc, ts, domain):
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and (s.network = 'AWOS' or s.network ~* 'ASOS') and c.iemid = s.iemid
             """ % (ts.year, ts.strftime("%Y-%m-%d"),
-                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf,
-                   reference.MW_WEST - mybuf, reference.MW_NORTH + mybuf,
-                   reference.MW_EAST + mybuf, reference.MW_NORTH + mybuf,
-                   reference.MW_EAST + mybuf, reference.MW_SOUTH - mybuf,
-                   reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf)
+                   iemre.WEST - mybuf, iemre.SOUTH - mybuf,
+                   iemre.WEST - mybuf, iemre.NORTH + mybuf,
+                   iemre.EAST + mybuf, iemre.NORTH + mybuf,
+                   iemre.EAST + mybuf, iemre.SOUTH - mybuf,
+                   iemre.WEST - mybuf, iemre.SOUTH - mybuf)
         df = read_sql(sql, PGCONN)
     else:
         df = read_sql("""
@@ -296,16 +285,16 @@ def grid_day(nc, ts, domain):
         null as highdwpf, null as lowdwpf, null as avgsknt
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, COOP_PGCONN, params=(reference.MW_WEST - mybuf,
-                                  reference.MW_SOUTH - mybuf,
-                                  reference.MW_WEST - mybuf,
-                                  reference.MW_NORTH + mybuf,
-                                  reference.MW_EAST + mybuf,
-                                  reference.MW_NORTH + mybuf,
-                                  reference.MW_EAST + mybuf,
-                                  reference.MW_SOUTH - mybuf,
-                                  reference.MW_WEST - mybuf,
-                                  reference.MW_SOUTH - mybuf, ts))
+        """, COOP_PGCONN, params=(iemre.WEST - mybuf,
+                                  iemre.SOUTH - mybuf,
+                                  iemre.WEST - mybuf,
+                                  iemre.NORTH + mybuf,
+                                  iemre.EAST + mybuf,
+                                  iemre.NORTH + mybuf,
+                                  iemre.EAST + mybuf,
+                                  iemre.SOUTH - mybuf,
+                                  iemre.WEST - mybuf,
+                                  iemre.SOUTH - mybuf, ts))
     if len(df.index) < 4:
         print(("%s has %02i entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
@@ -339,13 +328,13 @@ def grid_day(nc, ts, domain):
 def workflow(ts, irealtime):
     """Do Work"""
     # Load up our netcdf file!
-    domain = get_domain()
-    ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
+    ncfn = iemre.get_daily_ncname(ts.year)
     if not os.path.isfile(ncfn):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
     nc = netCDF4.Dataset(ncfn, 'a')
+    domain = nc.variables['hasdata'][:, :]
     # For this date, the 12 UTC COOP obs will match the date
     grid_day12(nc, ts, domain)
     do_precip12(nc, ts)
@@ -353,7 +342,7 @@ def workflow(ts, irealtime):
     # This is actually yesterday!
     if irealtime:
         ts -= datetime.timedelta(days=1)
-    ncfn = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
+    ncfn = iemre.get_daily_ncname(ts.year)
     if not os.path.isfile(ncfn):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)

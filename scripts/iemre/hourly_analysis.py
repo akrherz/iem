@@ -8,21 +8,12 @@ import numpy as np
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
+from metpy.units import masked_array
 from metpy.gridding.interpolation import inverse_distance
 from pyiem import iemre
 from pyiem import meteorology
-from pyiem import reference
 import pyiem.datatypes as dt
 from pyiem.util import get_dbconn
-
-
-def get_domain():
-    """Return where we should be estimating"""
-    nc = netCDF4.Dataset('/mesonet/data/iemre/state_weights.nc')
-    nc.set_auto_mask(False)
-    domain = nc.variables['domain'][:]
-    nc.close()
-    return domain
 
 
 def grid_wind(df, domain):
@@ -85,7 +76,7 @@ def grid_hour(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    domain = get_domain()
+    domain = nc.variables['hasdata'][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
     offset = iemre.hourly_offset(ts)
@@ -95,11 +86,11 @@ def grid_hour(nc, ts):
 
     # If we are near realtime, look in IEMAccess instead of ASOS database
     mybuf = 2.
-    params = (reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf,
-              reference.MW_WEST - mybuf, reference.MW_NORTH + mybuf,
-              reference.MW_EAST + mybuf, reference.MW_NORTH + mybuf,
-              reference.MW_EAST + mybuf, reference.MW_SOUTH - mybuf,
-              reference.MW_WEST - mybuf, reference.MW_SOUTH - mybuf,
+    params = (iemre.WEST - mybuf, iemre.SOUTH - mybuf,
+              iemre.WEST - mybuf, iemre.NORTH + mybuf,
+              iemre.EAST + mybuf, iemre.NORTH + mybuf,
+              iemre.EAST + mybuf, iemre.SOUTH - mybuf,
+              iemre.WEST - mybuf, iemre.SOUTH - mybuf,
               ts0, ts1)
     if utcnow < ts:
         dbconn = get_dbconn('iem', user='nobody')
@@ -149,17 +140,19 @@ def grid_hour(nc, ts):
         nc.variables['uwnd'][offset] = ures
         nc.variables['vwnd'][offset] = vres
 
-    tmpk = generic_gridder(df, 'max_tmpf', domain)
-    if tmpk is None:
+    tmpf = generic_gridder(df, 'max_tmpf', domain)
+    if tmpf is None:
         print("iemre.hourly_analysis failure for tmpk at %s" % (ts, ))
     else:
-        dwpk = generic_gridder(df, 'max_dwpf', domain)
+        dwpf = generic_gridder(df, 'max_dwpf', domain)
         # require that dwpk <= tmpk
-        mask = ~np.isnan(dwpk)
-        mask[mask] &= dwpk[mask] > tmpk[mask]
-        dwpk = np.where(mask, tmpk, dwpk)
-        nc.variables['tmpk'][offset] = dt.temperature(tmpk, 'F').value('K')
-        nc.variables['dwpk'][offset] = dt.temperature(dwpk, 'F').value('K')
+        mask = ~np.isnan(dwpf)
+        mask[mask] &= dwpf[mask] > tmpf[mask]
+        dwpf = np.where(mask, tmpf, dwpf)
+        nc.variables['tmpk'][offset] = masked_array(
+            tmpf, data_units='degF').to('degK')
+        nc.variables['dwpk'][offset] = masked_array(
+            dwpf, data_units='degF').to('degK')
 
     res = grid_skyc(df, domain)
     if res is None:
@@ -178,8 +171,8 @@ def main(argv):
         ts = ts.replace(second=0, minute=0)
     ts = ts.replace(tzinfo=pytz.utc)
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),
-                         'a')
+    nc = netCDF4.Dataset(iemre.get_hourly_ncname(ts.year), 'a')
+    nc.set_auto_scale(True)
     grid_hour(nc, ts)
     nc.close()
 

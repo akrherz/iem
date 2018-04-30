@@ -5,12 +5,12 @@ from __future__ import print_function
 import sys
 import datetime
 
-import pygrib
 import numpy as np
-from pyiem import iemre
 import netCDF4
 import pytz
 from scipy.interpolate import NearestNDInterpolator
+import pygrib
+from pyiem import iemre
 
 
 def merge(ts):
@@ -40,8 +40,7 @@ def merge(ts):
     stage4 = np.where(stage4 < 0., 0., stage4)
 
     # Open up our RE file
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),
-                         'a')
+    nc = netCDF4.Dataset(iemre.get_hourly_ncname(ts.year), 'a')
     ts0 = ts - datetime.timedelta(days=1)
     offset0 = iemre.hourly_offset(ts0)
     offset1 = iemre.hourly_offset(ts)
@@ -76,7 +75,7 @@ def main(argv):
         ts = datetime.datetime.utcnow()
         ts = ts - datetime.timedelta(days=1)
         ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     merge(ts)
 
 

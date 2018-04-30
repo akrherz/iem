@@ -1,10 +1,10 @@
 """Special Days each year"""
 import datetime
+import calendar
 from collections import OrderedDict
 
 from dateutil.easter import easter as get_easter
 from pandas.io.sql import read_sql
-import mx.DateTime
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
@@ -80,10 +80,12 @@ def labor_days():
     """Labor Day Please"""
     days = []
     for year in range(1893, datetime.date.today().year + 1):
-        sep7 = mx.DateTime.DateTime(year, 9, 7)
-        labor = sep7 + mx.DateTime.RelativeDateTime(
-                                        weekday=(mx.DateTime.Monday, 0))
-        days.append(datetime.date(year, 9, labor.day))
+        mycal = calendar.Calendar(0)
+        cal = mycal.monthdatescalendar(year, 9)
+        if cal[0][0].month == 9:
+            days.append(cal[0][0])
+        else:
+            days.append(cal[1][0])
     return days
 
 
@@ -91,10 +93,12 @@ def memorial_days():
     """Memorial Day Please"""
     days = []
     for year in range(1971, datetime.date.today().year + 1):
-        may31 = mx.DateTime.DateTime(year, 5, 31)
-        memorial = may31 + mx.DateTime.RelativeDateTime(
-                                        weekday=(mx.DateTime.Monday, -1))
-        days.append(datetime.date(year, 5, memorial.day))
+        mycal = calendar.Calendar(0)
+        cal = mycal.monthdatescalendar(year, 5)
+        if cal[-1][0].month == 5:
+            days.append(cal[-1][0])
+        else:
+            days.append(cal[-2][0])
     return days
 
 
