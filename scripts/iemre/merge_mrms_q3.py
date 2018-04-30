@@ -26,6 +26,7 @@ def run(ts):
     """
     nc = netCDF4.Dataset(('/mesonet/data/iemre/%s_mw_mrms_daily.nc'
                           '') % (ts.year,), 'a')
+    nc.set_auto_scale(True)
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 
@@ -85,7 +86,7 @@ def run(ts):
     y0 = int((lats[0, 0] - 49.0) * 100.0)
     y1 = int((lats[0, 0] - 36.0) * 100.0)
     x0 = int((-104.0 - mrms.WEST) * 100.0)
-    x1 = int((80.5 - mrms.WEST) * 100.0)
+    x1 = int((-80.5 - mrms.WEST) * 100.0)
     # print 'y0:%s y1:%s x0:%s x1:%s lat0:%s offset:%s ' % (y0, y1, x0, x1,
     #                                                      lats[0, 0], offset)
     ncprecip[offset, :, :] = np.flipud(total[y0:y1, x0:x1])
