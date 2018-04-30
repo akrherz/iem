@@ -14,13 +14,11 @@ from pyiem import iemre
 
 def run(ts):
     """Actually do the work, please"""
-    nc = netCDF4.Dataset('/mesonet/data/iemre/%s_mw_mrms_daily.nc' % (
-                                                            ts.year,),
-                         'a')
+    nc = netCDF4.Dataset(iemre.get_daily_mrms_ncname(ts.year), 'a')
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
     ts += datetime.timedelta(hours=24)
-    gmtts = ts.astimezone(pytz.timezone("UTC"))
+    gmtts = ts.astimezone(pytz.utc)
 
     fn = gmtts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/"
                         "p24h_%Y%m%d%H00.png"))
@@ -54,7 +52,7 @@ def main(argv):
         ts = datetime.datetime.now() - datetime.timedelta(hours=24)
         ts = ts.replace(hour=12)
 
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)

@@ -5,6 +5,7 @@ import sys
 
 import netCDF4
 import numpy as np
+from pyiem import iemre
 
 
 def init_year(ts):
@@ -12,11 +13,11 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (ts.year, )
+    fp = iemre.get_daily_mrms_ncname(ts.year)
     nc = netCDF4.Dataset(fp, 'w')
     nc.title = "MRMS Daily Precipitation %s" % (ts.year,)
     nc.platform = "Grided Estimates"
-    nc.description = "Midwest MRMS 0.01 degree grid"
+    nc.description = "MRMS 0.01 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
     nc.source = "Iowa Environmental Mesonet"
     nc.project_id = "IEM"
@@ -28,8 +29,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension('lat', (49.0 - 36.0) * 100.0)
-    nc.createDimension('lon', (-80.5 - -104.) * 100.0)
+    nc.createDimension('lat', (iemre.NORTH - iemre.SOUTH) * 100.0)
+    nc.createDimension('lon', (iemre.EAST - iemre.WEST) * 100.0)
     days = ((ts.replace(year=ts.year+1)) - ts).days
     nc.createDimension('time', int(days))
     nc.createDimension('nv', 2)
@@ -42,11 +43,11 @@ def init_year(ts):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = np.arange(36.0 + 0.005, 49.0, 0.01)
+    lat[:] = np.arange(iemre.SOUTH + 0.005, iemre.NORTH, 0.01)
 
     lat_bnds = nc.createVariable('lat_bnds', np.float, ('lat', 'nv'))
-    lat_bnds[:, 0] = np.arange(36.0, 49.0, 0.01)
-    lat_bnds[:, 1] = np.arange(36.0 + 0.01, 49.0 + 0.01, 0.01)
+    lat_bnds[:, 0] = np.arange(iemre.SOUTH, iemre.NORTH, 0.01)
+    lat_bnds[:, 1] = np.arange(iemre.SOUTH + 0.01, iemre.NORTH + 0.01, 0.01)
 
     lon = nc.createVariable('lon', np.float, ('lon',))
     lon.units = "degrees_east"
@@ -54,11 +55,11 @@ def init_year(ts):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = np.arange(-104., -80.5, 0.01)
+    lon[:] = np.arange(iemre.WEST, iemre.EAST, 0.01)
 
     lon_bnds = nc.createVariable('lon_bnds', np.float, ('lon', 'nv'))
-    lon_bnds[:, 0] = np.arange(-104., -80.5, 0.01)
-    lon_bnds[:, 1] = np.arange(-104. + 0.01, -80.5 + 0.01, 0.01)
+    lon_bnds[:, 0] = np.arange(iemre.WEST, iemre.EAST, 0.01)
+    lon_bnds[:, 1] = np.arange(iemre.WEST + 0.01, iemre.EAST + 0.01, 0.01)
 
     tm = nc.createVariable('time', np.float, ('time',))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
