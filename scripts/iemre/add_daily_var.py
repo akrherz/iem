@@ -4,12 +4,13 @@ import os
 
 import netCDF4
 import numpy as np
+from pyiem import iemre
 
 
 def main():
     """go Main go"""
     for yr in range(1893, 2016):
-        fn = "/mesonet/data/iemre/%s_mw_daily.nc" % (yr, )
+        fn = iemre.get_daily_ncname(yr)
         if not os.path.isfile(fn):
             print("Miss %s" % (fn, ))
             continue

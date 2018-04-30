@@ -2,23 +2,23 @@
 from __future__ import print_function
 import datetime
 
+import geopandas as gpd
 import netCDF4
 import numpy as np
 from pyiem import iemre
-
-BASEDIR = "/mesonet/data/iemre"
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.util import get_dbconn
 
 
 def init_year(ts):
     """
     Create a new NetCDF file for a year of our specification!
     """
-
-    fp = "%s/mw_dailyc.nc" % (BASEDIR, )
+    fp = iemre.get_dailyc_ncname()
     nc = netCDF4.Dataset(fp, 'w')
     nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"
-    nc.description = "IEM daily analysis on a 0.25 degree grid"
+    nc.description = "IEM daily analysis on a 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
     nc.source = "Iowa Environmental Mesonet"
     nc.project_id = "IEM"
@@ -60,6 +60,12 @@ def init_year(ts):
     tm[:] = np.arange(0, int(days))
 
     # Tracked variables
+    hasdata = nc.createVariable('hasdata', np.int8, ('lat', 'lon'))
+    hasdata.units = '1'
+    hasdata.long_name = 'Analysis Available for Grid Cell'
+    hasdata.coordinates = "lon lat"
+    hasdata[:] = 0
+
     high = nc.createVariable('high_tmpk', np.float, ('time', 'lat', 'lon'),
                              fill_value=1.e20)
     high.units = "K"
@@ -85,9 +91,32 @@ def init_year(ts):
     nc.close()
 
 
+def compute_hasdata():
+    """Compute the has_data grid"""
+    nc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'a')
+    czs = CachingZonalStats(iemre.AFFINE)
+    pgconn = get_dbconn('postgis')
+    states = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom, state_abbr from states
+    where state_abbr not in ('AK', 'HI')
+    """, pgconn, index_col='state_abbr', geom_col='the_geom')
+    data = np.flipud(nc.variables['hasdata'][:, :])
+    czs.gen_stats(data, states['the_geom'])
+    for nav in czs.gridnav:
+        grid = np.ones((nav.ysz, nav.xsz))
+        grid[nav.mask] = 0.
+        yslice = slice(nav.y0, nav.y0 + nav.ysz)
+        xslice = slice(nav.x0, nav.x0 + nav.xsz)
+        data[yslice, xslice] = np.where(grid > 0, 1,
+                                        data[yslice, xslice])
+    nc.variables['hasdata'][:, :] = np.flipud(data)
+    nc.close()
+
+
 def main():
     """Go Main"""
     init_year(datetime.datetime(2000, 1, 1))
+    compute_hasdata()
 
 
 if __name__ == '__main__':

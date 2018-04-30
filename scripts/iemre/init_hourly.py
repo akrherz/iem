@@ -3,9 +3,12 @@ from __future__ import print_function
 import datetime
 import sys
 
-from pyiem import iemre
+import geopandas as gpd
 import netCDF4
 import numpy as np
+from pyiem import iemre
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.util import get_dbconn
 
 
 def init_year(ts):
@@ -13,11 +16,11 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year, )
+    fp = iemre.get_hourly_ncname(ts.year)
     nc = netCDF4.Dataset(fp, 'w')
     nc.title = "IEM Hourly Reanalysis %s" % (ts.year,)
     nc.platform = "Grided Observations"
-    nc.description = "IEM hourly analysis on a ~25 km grid"
+    nc.description = "IEM hourly analysis on a 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
     nc.source = "Iowa Environmental Mesonet"
     nc.project_id = "IEM"
@@ -60,45 +63,62 @@ def init_year(ts):
     tm[:] = np.arange(0, int(days) * 24)
 
     # Tracked variables
-    skyc = nc.createVariable('skyc', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    hasdata = nc.createVariable('hasdata', np.int8, ('lat', 'lon'))
+    hasdata.units = '1'
+    hasdata.long_name = 'Analysis Available for Grid Cell'
+    hasdata.coordinates = "lon lat"
+    hasdata[:] = 0
+
+    # can storage -128->127 actual values are 0 to 100
+    skyc = nc.createVariable('skyc', np.int8, ('time', 'lat', 'lon'),
+                             fill_value=-128)
     skyc.long_name = "ASOS Sky Coverage"
     skyc.stanard_name = "ASOS Sky Coverage"
     skyc.units = "%"
     skyc.valid_range = [0, 100]
     skyc.coordinates = "lon lat"
 
-    tmpk = nc.createVariable('tmpk', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    # 0->65535
+    tmpk = nc.createVariable('tmpk', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     tmpk.units = "K"
+    tmpk.scale_factor = 0.01
     tmpk.long_name = "2m Air Temperature"
     tmpk.standard_name = "2m Air Temperature"
     tmpk.coordinates = "lon lat"
 
-    dwpk = nc.createVariable('dwpk', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    # 0->65535  0 to 655.35
+    dwpk = nc.createVariable('dwpk', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65335)
     dwpk.units = "K"
+    dwpk.scale_factor = 0.01
     dwpk.long_name = "2m Air Dew Point Temperature"
     dwpk.standard_name = "2m Air Dew Point Temperature"
     dwpk.coordinates = "lon lat"
 
-    uwnd = nc.createVariable('uwnd', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    # 0->65535 0 to 65.535
+    uwnd = nc.createVariable('uwnd', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65335)
     uwnd.units = "meters per second"
+    uwnd.scale_factor = 0.001
     uwnd.long_name = "U component of the wind"
     uwnd.standard_name = "U component of the wind"
     uwnd.coordinates = "lon lat"
 
-    vwnd = nc.createVariable('vwnd', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    # 0->65535 0 to 65.535
+    vwnd = nc.createVariable('vwnd', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     vwnd.units = "meters per second"
+    vwnd.scale_factor = 0.001
     vwnd.long_name = "V component of the wind"
     vwnd.standard_name = "V component of the wind"
     vwnd.coordinates = "lon lat"
 
-    p01m = nc.createVariable('p01m', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    # 0->65535  0 to 655.35
+    p01m = nc.createVariable('p01m', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     p01m.units = 'mm'
+    p01m.scale_factor = 0.01
     p01m.long_name = 'Precipitation'
     p01m.standard_name = 'Precipitation'
     p01m.coordinates = "lon lat"
@@ -107,5 +127,33 @@ def init_year(ts):
     nc.close()
 
 
+def compute_hasdata(year):
+    """Compute the has_data grid"""
+    nc = netCDF4.Dataset(iemre.get_hourly_ncname(year), 'a')
+    czs = CachingZonalStats(iemre.AFFINE)
+    pgconn = get_dbconn('postgis')
+    states = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom, state_abbr from states where state_abbr not in ('AK', 'HI')
+    """, pgconn, index_col='state_abbr', geom_col='the_geom')
+    data = np.flipud(nc.variables['hasdata'][:, :])
+    _ = czs.gen_stats(data, states['the_geom'])
+    for nav in czs.gridnav:
+        grid = np.ones((nav.ysz, nav.xsz))
+        grid[nav.mask] = 0.
+        data[nav.y0:(nav.y0 + nav.ysz),
+             nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
+                                                   data[nav.y0:(nav.y0 + nav.ysz),
+                                                        nav.x0:(nav.x0 + nav.xsz)])
+    nc.variables['hasdata'][:, :] = np.flipud(data)
+    nc.close()
+
+
+def main(argv):
+    """Go Main Go"""
+    year = int(argv[1])
+    init_year(datetime.datetime(year, 1, 1))
+    compute_hasdata(year)
+
+
 if __name__ == '__main__':
-    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+    main(sys.argv)
