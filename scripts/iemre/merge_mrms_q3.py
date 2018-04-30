@@ -9,10 +9,10 @@ import tempfile
 import pytz
 import netCDF4
 import numpy as np
+import requests
+import pygrib
 import pyiem.mrms as mrms
 from pyiem import iemre
-import pygrib
-import requests
 
 TMP = "/mesonet/tmp"
 
@@ -29,10 +29,10 @@ def run(ts):
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 
-    gmtts = ts.astimezone(pytz.timezone("UTC"))
+    gmtts = ts.astimezone(pytz.utc)
     utcnow = datetime.datetime.utcnow().replace(minute=0, second=0,
                                                 microsecond=0)
-    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
+    utcnow = utcnow.replace(tzinfo=pytz.utc)
 
     total = None
     lats = None
@@ -82,10 +82,10 @@ def run(ts):
 
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
-    y0 = int((lats[0, 0] - iemre.NORTH) * 100.0)
-    y1 = int((lats[0, 0] - iemre.SOUTH) * 100.0)
-    x0 = int((iemre.WEST - mrms.WEST) * 100.0)
-    x1 = int((iemre.EAST - mrms.WEST) * 100.0)
+    y0 = int((lats[0, 0] - 49.0) * 100.0)
+    y1 = int((lats[0, 0] - 36.0) * 100.0)
+    x0 = int((-104.0 - mrms.WEST) * 100.0)
+    x1 = int((80.5 - mrms.WEST) * 100.0)
     # print 'y0:%s y1:%s x0:%s x1:%s lat0:%s offset:%s ' % (y0, y1, x0, x1,
     #                                                      lats[0, 0], offset)
     ncprecip[offset, :, :] = np.flipud(total[y0:y1, x0:x1])
@@ -103,7 +103,7 @@ def main(argv):
         ts = datetime.datetime.now()
         ts = ts.replace(hour=12)
 
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.utc)
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)
