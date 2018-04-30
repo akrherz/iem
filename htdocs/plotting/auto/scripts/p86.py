@@ -10,6 +10,9 @@ from pyiem.util import get_autoplot_context
 
 PDICT = OrderedDict((('p01d_12z', '24 Hour Precipitation at 12 UTC'),
                      ('p01d', 'Calendar Day Precipitation'),
+                     ('range_tmpk', 'Range between Min and Max Temp'),
+                     ('range_tmpk_12z',
+                      'Range between Min and Max Temp at 12 UTC'),
                      ('low_tmpk', 'Minimum Temperature'),
                      ('low_tmpk_12z', 'Minimum Temperature at 12 UTC'),
                      ('high_tmpk', 'Maximum Temperature'),
@@ -84,6 +87,18 @@ def plotter(fdict):
         data = temperature(nc.variables[varname][idx0, :, :], 'K').value('F')
         units = 'F'
         clevs = np.arange(-30, 120, 5)
+        clevstride = 2
+    elif varname in ['range_tmpk', 'range_tmpk_12z']:
+        vname1 = 'high_tmpk%s' % ('_12z'
+                                  if varname == 'range_tmpk_12z' else '', )
+        vname2 = 'low_tmpk%s' % ('_12z'
+                                 if varname == 'range_tmpk_12z' else '', )
+        d1 = nc.variables[vname1][idx0, :, :]
+        d2 = nc.variables[vname2][idx0, :, :]
+        data = temperature(d1, 'K').value('F') - temperature(d2,
+                                                             'K').value('F')
+        units = 'F'
+        clevs = np.arange(0, 61, 5)
         clevstride = 2
     nc.close()
 
