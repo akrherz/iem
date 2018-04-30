@@ -73,14 +73,14 @@ def do_day(valid):
     # build out climate division mappers
     climdiv = gpd.GeoDataFrame.from_postgis("""
     SELECT geom, iemid from climdiv
-    where st_abbr not in ('AK', 'HI')
+    where st_abbrv not in ('AK', 'HI')
     """, pgconn, index_col='iemid', geom_col='geom')
     czs = CachingZonalStats(iemre.AFFINE)
-    sthigh = czs.gen_stats(np.flipud(high), climdiv['the_geom'])
-    stlow = czs.gen_stats(np.flipud(low), climdiv['the_geom'])
-    stprecip = czs.gen_stats(np.flipud(precip), climdiv['the_geom'])
-    stsnow = czs.gen_stats(np.flipud(snow), climdiv['the_geom'])
-    stsnowd = czs.gen_stats(np.flipud(snowd), climdiv['the_geom'])
+    sthigh = czs.gen_stats(np.flipud(high), climdiv['geom'])
+    stlow = czs.gen_stats(np.flipud(low), climdiv['geom'])
+    stprecip = czs.gen_stats(np.flipud(precip), climdiv['geom'])
+    stsnow = czs.gen_stats(np.flipud(snow), climdiv['geom'])
+    stsnowd = czs.gen_stats(np.flipud(snowd), climdiv['geom'])
 
     for i, iemid in enumerate(climdiv.index.values):
         update_database(iemid, valid, sthigh[i], stlow[i],
