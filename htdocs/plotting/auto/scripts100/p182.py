@@ -1,12 +1,13 @@
 """Precip estimates"""
 import datetime
 import os
-import sys
 from collections import OrderedDict
 
 import numpy as np
 import netCDF4
+import geopandas as gpd
 from pyiem import iemre, util
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
 
 PDICT = OrderedDict([
@@ -73,50 +74,72 @@ def plotter(fdict):
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
     nc = netCDF4.Dataset(ncfn, 'r')
-    today = distance(nc.variables[ncvar][idx1, :, :], 'MM').value('IN')
+    # Get the state weight
+    df = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom from states where state_abbr = %s
+    """, util.get_dbconn('postgis'), params=(sector, ), index_col=None,
+                                       geom_col='the_geom')
+    czs = CachingZonalStats(iemre.MRMS_AFFINE)
+    czs.gen_stats(np.zeros((nc.variables['lat'].size,
+                            nc.variables['lon'].size)), df['the_geom'])
+    hasdata = None
+    jslice = None
+    islice = None
+    for nav in czs.gridnav:
+        hasdata = np.ones((nav.ysz, nav.xsz))
+        hasdata[nav.mask] = 0.
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+    hasdata = np.flipud(hasdata)
+
+    today = distance(nc.variables[ncvar][idx1, jslice, islice],
+                     'MM').value('IN')
     if (idx1 - idx0) < 32:
-        p01d = distance(np.sum(nc.variables[ncvar][idx0:idx1, :, :], 0),
+        p01d = distance(np.sum(
+            nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
                         'MM').value('IN')
     else:
         # Too much data can overwhelm this app, need to chunk it
         for i in range(idx0, idx1, 10):
             i2 = min([i+10, idx1])
             if idx0 == i:
-                p01d = distance(np.sum(nc.variables[ncvar][i:i2, :, :], 0),
+                p01d = distance(np.sum(
+                    nc.variables[ncvar][i:i2, jslice, islice], 0),
                                 'MM').value('IN')
             else:
-                p01d += distance(np.sum(nc.variables[ncvar][i:i2, :, :], 0),
+                p01d += distance(np.sum(
+                    nc.variables[ncvar][i:i2, jslice, islice], 0),
                                  'MM').value('IN')
     nc.close()
 
     # Get climatology
-    nc = netCDF4.Dataset("/mesonet/data/iemre/iemre_mrms_dailyc.nc")
+    nc = netCDF4.Dataset(iemre.get_dailyc_mrms_ncname())
     if (idx1 - idx0) < 32:
-        c_p01d = distance(np.sum(nc.variables[ncvar][idx0:idx1, :, :], 0),
+        c_p01d = distance(np.sum(
+            nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
                           'MM').value('IN')
     else:
         # Too much data can overwhelm this app, need to chunk it
         for i in range(idx0, idx1, 10):
             i2 = min([i+10, idx1])
             if idx0 == i:
-                c_p01d = distance(np.sum(nc.variables[ncvar][i:i2, :, :], 0),
+                c_p01d = distance(
+                    np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
                                   'MM').value('IN')
             else:
-                c_p01d += distance(np.sum(nc.variables[ncvar][i:i2, :, :], 0),
+                c_p01d += distance(
+                    np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
                                    'MM').value('IN')
+
     nc.close()
 
-    # Get the state weight
-    nc = netCDF4.Dataset('/mesonet/data/iemre/BUGstate_weights_mrms.nc')
-    weights = nc.variables[sector][:]
-    nc.close()
 
     # we actually don't care about weights at this fine of scale
-    cells = np.sum(np.where(weights > 0, 1, 0))
+    cells = np.sum(np.where(hasdata > 0, 1, 0))
     departure = p01d - c_p01d
     # Update departure and today to values unconsidered below when out of state
-    departure = np.where(weights > 0, departure, -9999)
-    today = np.where(weights > 0, today, 0)
+    departure = np.where(hasdata > 0, departure, -9999)
+    today = np.where(hasdata > 0, today, 0)
     ranges = [[-99, -3], [-3, -2], [-2, -1], [-1, 0],
               [0, 1], [1, 2], [2, 3], [3, 99]]
     x = []

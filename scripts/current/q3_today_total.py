@@ -28,7 +28,7 @@ def doday(ts, realtime):
                           hour=23, minute=59)
 
     idx = iemre.daily_offset(ts)
-    ncfn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (ts.year,)
+    ncfn = iemre.get_daily_mrms_ncname(ts.year)
     nc = netCDF4.Dataset(ncfn)
     precip = nc.variables['p01d'][idx, :, :]
     lats = nc.variables['lat'][:]

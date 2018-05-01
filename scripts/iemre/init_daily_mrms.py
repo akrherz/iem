@@ -13,8 +13,8 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = iemre.get_daily_mrms_ncname(ts.year)
-    nc = netCDF4.Dataset(fp, 'w')
+    fn = iemre.get_daily_mrms_ncname(ts.year)
+    nc = netCDF4.Dataset(fn, 'w')
     nc.title = "MRMS Daily Precipitation %s" % (ts.year,)
     nc.platform = "Grided Estimates"
     nc.description = "MRMS 0.01 degree grid"

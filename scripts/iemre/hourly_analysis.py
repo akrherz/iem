@@ -14,6 +14,8 @@ from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt
 from pyiem.util import get_dbconn
+# stop RuntimeWarning: invalid value encountered in greater
+np.warnings.filterwarnings('ignore')
 
 
 def grid_wind(df, domain):

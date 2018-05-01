@@ -16,8 +16,8 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = iemre.get_hourly_ncname(ts.year)
-    nc = netCDF4.Dataset(fp, 'w')
+    fn = iemre.get_hourly_ncname(ts.year)
+    nc = netCDF4.Dataset(fn, 'w')
     nc.title = "IEM Hourly Reanalysis %s" % (ts.year,)
     nc.platform = "Grided Observations"
     nc.description = "IEM hourly analysis on a 0.125 degree grid"
