@@ -101,8 +101,8 @@ def plotter(fdict):
         sector = 'state'
 
     if src == 'mrms':
-        ncfn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (sdate.year, )
-        clncfn = "/mesonet/data/iemre/mw_mrms_dailyc.nc"
+        ncfn = iemre.get_daily_mrms_ncname(sdate.year)
+        clncfn = "/mesonet/data/iemre/iemre_mrms_dailyc.nc"
         ncvar = 'p01d'
         source = 'MRMS Q3'
         subtitle = 'NOAA MRMS Project, GaugeCorr and RadarOnly'

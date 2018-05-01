@@ -14,7 +14,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "%s/mw_mrms_dailyc.nc" % (BASEDIR, )
+    fp = "%s/iemre_mrms_dailyc.nc" % (BASEDIR, )
     nc = netCDF4.Dataset(fp, 'w')
     nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"
@@ -71,9 +71,10 @@ def init_year(ts):
     tm.calendar = "gregorian"
     tm[:] = np.arange(0, int(days))
 
-    p01d = nc.createVariable('p01d', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1.e20)
+    p01d = nc.createVariable('p01d', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     p01d.units = 'mm'
+    p01d.scale_factor = 0.01
     p01d.long_name = 'Precipitation'
     p01d.standard_name = 'Precipitation'
     p01d.coordinates = "lon lat"

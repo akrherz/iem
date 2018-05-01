@@ -64,7 +64,7 @@ def plotter(fdict):
 
     idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
-    ncfn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (date.year, )
+    ncfn = iemre.get_daily_mrms_ncname(date.year)
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")

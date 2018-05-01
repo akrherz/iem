@@ -5,9 +5,9 @@
 import datetime
 import sys
 
-from pyiem import iemre
 import netCDF4
 import numpy as np
+from pyiem import iemre
 
 
 def init_year(ts):
@@ -15,7 +15,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (ts.year, )
+    fp = iemre.get_daily_mrms_ncname(ts.year)
     nc = netCDF4.Dataset(fp, 'a')
 
     nc.createDimension('nv', 2)

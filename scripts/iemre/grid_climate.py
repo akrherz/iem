@@ -70,10 +70,12 @@ def workflow(ts):
 
     # Load up our netcdf file!
     nc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'a')
+    nc.set_auto_scale(True)
     grid_day(nc, ts)
     nc.close()
 
-    nc = netCDF4.Dataset("/mesonet/data/iemre/mw_mrms_dailyc.nc", 'a')
+    nc = netCDF4.Dataset("/mesonet/data/iemre/iemre_mrms_dailyc.nc", 'a')
+    nc.set_auto_scale(True)
     grid_day(nc, ts)
     nc.close()
 

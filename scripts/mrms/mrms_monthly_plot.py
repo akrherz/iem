@@ -23,8 +23,7 @@ def do_month(year, month, routes):
     idx0 = iemre.daily_offset(sts)
     idx1 = iemre.daily_offset(ets)
 
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (year,),
-                         'r')
+    nc = netCDF4.Dataset(iemre.get_daily_mrms_ncname(year), 'r')
 
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]

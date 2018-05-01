@@ -68,7 +68,7 @@ def plotter(fdict):
 
     idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
-    ncfn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (date.year, )
+    ncfn = iemre.get_daily_mrms_ncname(date.year)
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
@@ -90,7 +90,7 @@ def plotter(fdict):
     nc.close()
 
     # Get climatology
-    nc = netCDF4.Dataset("/mesonet/data/iemre/mw_mrms_dailyc.nc")
+    nc = netCDF4.Dataset("/mesonet/data/iemre/iemre_mrms_dailyc.nc")
     if (idx1 - idx0) < 32:
         c_p01d = distance(np.sum(nc.variables[ncvar][idx0:idx1, :, :], 0),
                           'MM').value('IN')
@@ -107,7 +107,7 @@ def plotter(fdict):
     nc.close()
 
     # Get the state weight
-    nc = netCDF4.Dataset('/mesonet/data/iemre/state_weights_mrms.nc')
+    nc = netCDF4.Dataset('/mesonet/data/iemre/BUGstate_weights_mrms.nc')
     weights = nc.variables[sector][:]
     nc.close()
 
