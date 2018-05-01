@@ -133,17 +133,17 @@ def compute_hasdata(year):
     czs = CachingZonalStats(iemre.AFFINE)
     pgconn = get_dbconn('postgis')
     states = gpd.GeoDataFrame.from_postgis("""
-    SELECT the_geom, state_abbr from states where state_abbr not in ('AK', 'HI')
+    SELECT the_geom, state_abbr from states
+    where state_abbr not in ('AK', 'HI')
     """, pgconn, index_col='state_abbr', geom_col='the_geom')
     data = np.flipud(nc.variables['hasdata'][:, :])
-    _ = czs.gen_stats(data, states['the_geom'])
+    czs.gen_stats(data, states['the_geom'])
     for nav in czs.gridnav:
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
-        data[nav.y0:(nav.y0 + nav.ysz),
-             nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
-                                                   data[nav.y0:(nav.y0 + nav.ysz),
-                                                        nav.x0:(nav.x0 + nav.xsz)])
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+        data[jslice, islice] = np.where(grid > 0, 1, data[jslice, islice])
     nc.variables['hasdata'][:, :] = np.flipud(data)
     nc.close()
 

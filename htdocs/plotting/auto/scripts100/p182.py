@@ -88,7 +88,9 @@ def plotter(fdict):
     for nav in czs.gridnav:
         hasdata = np.ones((nav.ysz, nav.xsz))
         hasdata[nav.mask] = 0.
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        # careful here as y is flipped in this context
+        jslice = slice(nc.variables['lat'].size - (nav.y0 + nav.ysz),
+                       nc.variables['lat'].size - nav.y0)
         islice = slice(nav.x0, nav.x0 + nav.xsz)
     hasdata = np.flipud(hasdata)
 
@@ -132,7 +134,6 @@ def plotter(fdict):
                                    'MM').value('IN')
 
     nc.close()
-
 
     # we actually don't care about weights at this fine of scale
     cells = np.sum(np.where(hasdata > 0, 1, 0))
