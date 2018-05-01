@@ -17,7 +17,7 @@ from pyiem.util import get_dbconn
 def do_today(table, station, network, date):
     """Our backend is current_log"""
     pgconn = get_dbconn('iem')
-    cols = ['local_valid', 'utc_valid', 'tmpf']
+    cols = ['local_valid', 'utc_valid', 'tmpf', 'sknt', 'gust', 'drct']
     table['fields'] = [IEMVARS[col] for col in cols]
     df = read_sql("""
         select
