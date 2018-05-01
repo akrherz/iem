@@ -120,7 +120,10 @@ def plotter(fdict):
     SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
     as arridity from ranks
-    where year = %s """, pgconn, params=(tuple(months), year),
+    where year = %s and
+    substr(station, 1, 2) in ('ND', 'SD', 'NE', 'KS', 'MO', 'IA', 'MN', 'WI',
+    'IL', 'IN', 'KY', 'OH', 'MI')
+    """, pgconn, params=(tuple(months), year),
                   index_col='station')
 
     subtitle = ('Based on IEM Estimates, '
