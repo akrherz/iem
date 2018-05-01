@@ -86,10 +86,10 @@ def main():
     cnc.close()
 
     if ts1.year > 2010:
-        fn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (ts1.year,)
+        fn = iemre.get_daily_mrms_ncname(ts1.year)
         nc = netCDF4.Dataset(fn, 'r')
-        j2 = int((lat - 36.0) * 100.0)
-        i2 = int((lon - -104.0) * 100.0)
+        j2 = int((lat - iemre.SOUTH) * 100.0)
+        i2 = int((lon - iemre.WEST) * 100.0)
         mrms_precip = nc.variables['p01d'][offset1:offset2, j2, i2] / 25.4
         nc.close()
     else:

@@ -15,6 +15,7 @@ from pyiem import iemre
 def run(ts):
     """Actually do the work, please"""
     nc = netCDF4.Dataset(iemre.get_daily_mrms_ncname(ts.year), 'a')
+    nc.set_auto_mask(True)
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
     ts += datetime.timedelta(hours=24)

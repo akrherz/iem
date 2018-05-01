@@ -5,42 +5,23 @@ import datetime
 
 import netCDF4
 import numpy as np
-import psycopg2.extras
+from pandas.io.sql import read_sql
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre, datatypes
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-NT = NetworkTable(['IACLIMATE', 'MNCLIMATE', 'NDCLIMATE',
-                   'SDCLIMATE', 'NECLIMATE', 'KSCLIMATE', 'MOCLIMATE',
-                   'ILCLIMATE', 'WICLIMATE', 'MICLIMATE', 'INCLIMATE',
-                   'OHCLIMATE', 'KYCLIMATE'])
 
-COOP = get_dbconn('coop', user='nobody')
-
-
-def generic_gridder(nc, cursor, idx):
+def generic_gridder(nc, df, idx):
     """
     Generic gridding algorithm for easy variables
     """
-    lats = []
-    lons = []
-    vals = []
-    for row in cursor:
-        if row[idx] is not None and row['station'] in NT.sts:
-            lats.append(NT.sts[row['station']]['lat'])
-            lons.append(NT.sts[row['station']]['lon'])
-            vals.append(row[idx])
-    if len(vals) < 4:
-        print(("Only %s observations found for %s, won't grid"
-               ) % (len(vals), idx))
-        return None
-
     xi, yi = np.meshgrid(nc.variables['lon'][:], nc.variables['lat'][:])
-    nn = NearestNDInterpolator((lons, lats), np.array(vals))
+    nn = NearestNDInterpolator((df['lon'].values,
+                                df['lat'].values),
+                               df[idx].values)
     grid = nn(xi, yi)
     print(("%s %s %.3f %.3f"
-           ) % (cursor.rowcount, idx, np.max(grid), np.min(grid)))
+           ) % (len(df.index), idx, np.max(grid), np.min(grid)))
     if grid is not None:
         return grid
     return None
@@ -49,37 +30,39 @@ def generic_gridder(nc, cursor, idx):
 def grid_day(nc, ts):
     """
     I proctor the gridding of data on an hourly basis
+
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    cursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = get_dbconn('coop')
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
         ts = datetime.datetime(2000, 3, 1)
 
-    sql = """SELECT * from ncdc_climate71 WHERE valid = '%s' and
-             substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
-             """ % (ts.strftime("%Y-%m-%d"), )
-    cursor.execute(sql)
-    if cursor.rowcount > 4:
+    df = read_sql("""
+        SELECT c.*, st_x(t.geom) as lon, st_y(t.geom) as lat
+        from ncdc_climate71 c JOIN stations t ON (c.station = t.id)
+        WHERE valid = %s and
+        substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
+    """, pgconn, params=(ts, ), index_col='station')
+    if len(df.index) > 4:
         if 'high_tmpk' in nc.variables:
-            res = generic_gridder(nc, cursor, 'high')
+            res = generic_gridder(nc, df, 'high')
             if res is not None:
                 nc.variables['high_tmpk'][offset] = datatypes.temperature(
                                                             res,
                                                             'F').value('K')
-            cursor.scroll(0, mode='absolute')
-            res = generic_gridder(nc, cursor, 'low')
+            res = generic_gridder(nc, df, 'low')
             if res is not None:
                 nc.variables['low_tmpk'][offset] = datatypes.temperature(
                                                             res,
                                                             'F').value('K')
-            cursor.scroll(0, mode='absolute')
-        res = generic_gridder(nc, cursor, 'precip')
+        res = generic_gridder(nc, df, 'precip')
         if res is not None:
-            nc.variables['p01d'][offset] = res * 25.4
+            nc.variables['p01d'][offset] = datatypes.distance(
+                res, 'IN').value('MM')
     else:
         print(("%s has %02i entries, FAIL"
-               ) % (ts.strftime("%Y-%m-%d"), cursor.rowcount))
+               ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
 
 
 def workflow(ts):
