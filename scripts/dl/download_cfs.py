@@ -9,9 +9,9 @@ dswsfc
 """
 from __future__ import print_function
 import datetime
-import sys
 import os
 import subprocess
+
 import requests
 import pygrib
 from pyiem.util import exponential_backoff
@@ -50,7 +50,7 @@ def dl(now, varname):
     os.remove(tmpfn)
 
 
-def main(argv):
+def main():
     """Do main"""
     now = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     now = now.replace(hour=12, minute=0, second=0, microsecond=0)
@@ -58,4 +58,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
