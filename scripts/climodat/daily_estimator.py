@@ -369,13 +369,13 @@ def hardcode(nt, state, ts):
         """, (HARDCODE[sid], ts, state + "_ASOS"))
         if icursor.rowcount == 1:
             row = icursor.fetchone()
-            if row[0] is not None:
+            if row['max_tmpf'] is not None:
                 nt.sts[sid]['high'] = row[0]
-            if row[1] is not None:
+            if row['min_tmpf'] is not None:
                 nt.sts[sid]['low'] = row[1]
-            if row[2] is not None:
+            if row['pday'] is not None:
                 nt.sts[sid]['precip'] = row[2]
-            if row[3] is not None:
+            if row['snow'] is not None:
                 nt.sts[sid]['snow'] = row[3]
 
 
