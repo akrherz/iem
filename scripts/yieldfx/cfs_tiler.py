@@ -21,6 +21,7 @@ def make_netcdf(fullpath, valid, west, south):
     # Coordinate Dimensions
     time = nc.createVariable('time', np.int, ('time', ))
     time.units = "days since 1980-01-01 00:00:00"
+    time[:] = np.arange(0, totaldays)
 
     lat = nc.createVariable('lat', np.float, ('lat'))
     lat.units = 'degrees_north'
