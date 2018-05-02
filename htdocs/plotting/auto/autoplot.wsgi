@@ -82,10 +82,7 @@ def handle_error(exp, fmt, uri):
         return ram.read()
     if isinstance(exp, str):
         return exp
-    fh = StringIO()
-    traceback.print_exc(file=fh)
-    fh.seek(0)
-    return fh.read()
+    return str(exp)
 
 
 def get_res_by_fmt(p, fmt, fdict):
