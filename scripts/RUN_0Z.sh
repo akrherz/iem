@@ -27,9 +27,6 @@ python rwis2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
 python ot2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
 python snet2archive.py
 
-cd ../iemre
-python stage4_12z_adjust.py
-
 cd ../dl
 # at 0z, -6 days is available, hopefully!
 #python download_narr.py $(date -u --date '6 days ago' +'%Y %m %d')
@@ -38,3 +35,8 @@ cd ../dl
 
 cd ../qc
 python check_n0q.py
+
+cd ../iemre
+# wait some more so to not collide with other IEMRE processes
+sleep 600
+python stage4_12z_adjust.py
