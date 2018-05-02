@@ -65,6 +65,7 @@ install:
   - conda config --append channels conda-forge
   - conda config --append channels cgat
   - conda config --append channels HCC
+  - . $HOME/miniconda$MINICONDA/etc/profile.d/conda.sh
   - conda activate prod
   - hash -r
   - conda install --file conda_requirements.txt
