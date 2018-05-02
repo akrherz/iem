@@ -26,10 +26,7 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.WARNING)
 
-nt = NetworkTable(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE', 'OHCLIMATE',
-                   'MICLIMATE', 'KYCLIMATE', 'WICLIMATE', 'MNCLIMATE',
-                   'SDCLIMATE', 'NDCLIMATE', 'NECLIMATE', 'KSCLIMATE',
-                   'MOCLIMATE'))
+nt = NetworkTable('IACLIMATE')
 
 
 def do_precip(gribs, ftime, data):

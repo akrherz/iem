@@ -24,6 +24,13 @@ Steps:
  3) Look for snow obs
  4) Initialize entries in the table
  5) Run estimate for Iowa Average Site (IA0000)
+
+with inn as (
+ select climate_site, id, name from stations where network = 'NWSCLI'
+ and state = 'OH' ORDER by id)
+
+ SELECT i.climate_site, i.id, s.name, i.name from
+ inn i JOIN stations s on (i.climate_site = s.id);
 """
 from __future__ import print_function
 import sys
@@ -36,25 +43,10 @@ from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 from pyiem.datatypes import temperature, distance
-from pyiem.reference import TRACE_VALUE
+from pyiem.reference import TRACE_VALUE, state_names
 
 COOP = get_dbconn('coop')
-ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 IEM = get_dbconn('iem')
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-state = sys.argv[1]
-TABLE = "alldata_%s" % (state, )
-
-"""
-with inn as (
- select climate_site, id, name from stations where network = 'NWSCLI'
- and state = 'OH' ORDER by id)
-
- SELECT i.climate_site, i.id, s.name, i.name from
- inn i JOIN stations s on (i.climate_site = s.id);
-"""
-
 HARDCODE = {
     # TODO, the commented out Iowa sites are not long term tracked
     'IA1063': 'BRL',
@@ -237,26 +229,26 @@ HARDCODE = {
     'WI8968': 'AUW',
     }
 
-# Pre-compute the grid location of each climate site
-nt = NetworkTable("%sCLIMATE" % (state.upper(),))
 
-
-def load_table():
+def load_table(state):
     """Update the station table"""
+    nt = NetworkTable("%sCLIMATE" % (state, ))
     for sid in nt.sts:
         i, j = iemre.find_ij(nt.sts[sid]['lon'], nt.sts[sid]['lat'])
         nt.sts[sid]['gridi'] = i
         nt.sts[sid]['gridj'] = j
         for key in ['high', 'low', 'precip', 'snow', 'snowd']:
             nt.sts[sid][key] = None
+    return nt
 
 
-def estimate_precip(ts):
+def estimate_precip(ts, nt):
     """Estimate precipitation based on IEMRE"""
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
-    grid12 = nc.variables['p01d_12z'][idx, :, :] / 25.4
-    grid00 = nc.variables['p01d'][idx, :, :] / 25.4
+    nc.set_auto_mask(True)
+    grid12 = distance(nc.variables['p01d_12z'][idx, :, :], 'MM').value("IN")
+    grid00 = distance(nc.variables['p01d'][idx, :, :], "MM").value("IN")
     nc.close()
 
     for sid in nt.sts:
@@ -275,7 +267,7 @@ def estimate_precip(ts):
             nt.sts[sid]['precip'] = "%.2f" % (precip,)
 
 
-def estimate_snow(ts):
+def estimate_snow(ts, nt):
     """Estimate the Snow based on COOP reports"""
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
@@ -295,10 +287,11 @@ def estimate_snow(ts):
             nt.sts[sid]['snowd'] = "%.1f" % (val, )
 
 
-def estimate_hilo(ts):
+def estimate_hilo(ts, nt):
     """Estimate the High and Low Temperature based on gridded data"""
     idx = iemre.daily_offset(ts)
     nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
+    nc.set_auto_mask(True)
     highgrid12 = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
                              'K').value('F')
     lowgrid12 = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
@@ -325,7 +318,7 @@ def estimate_hilo(ts):
             nt.sts[sid]['low'] = "%.0f" % (val, )
 
 
-def commit(ts):
+def commit(ccursor, table, nt, ts):
     """
     Inject into the database!
     """
@@ -338,16 +331,16 @@ def commit(ts):
             continue
         # See if we currently have data
         ccursor.execute("""
-            SELECT day from """ + TABLE + """
+            SELECT day from """ + table + """
             WHERE station = %s and day = %s
             """, (sid, ts))
         if ccursor.rowcount == 0:
-            ccursor.execute("""INSERT INTO """ + TABLE + """
+            ccursor.execute("""INSERT INTO """ + table + """
             (station, day, sday, year, month)
             VALUES (%s, %s, %s, %s, %s)
             """, (sid, ts, ts.strftime("%m%d"), ts.year, ts.month))
         sql = """
-            UPDATE """ + TABLE + """ SET high = %s, low = %s,
+            UPDATE """ + table + """ SET high = %s, low = %s,
             precip = %s, snow = %s, snowd = %s, estimated = 't'
             WHERE day = %s and station = %s
             """
@@ -357,11 +350,12 @@ def commit(ts):
         ccursor.execute(sql, args)
         if ccursor.rowcount != 1:
             print(("ERROR: %s update of %s %s resulted in %s rows"
-                   ) % (TABLE, sid, ts, ccursor.rowcount))
+                   ) % (table, sid, ts, ccursor.rowcount))
 
 
-def hardcode(ts):
+def hardcode(nt, state, ts):
     """Stations that are hard coded against an ASOS site"""
+    icursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     for sid in HARDCODE:
         if sid not in nt.sts:
             if sid[:2] == state:
@@ -385,29 +379,35 @@ def hardcode(ts):
                 nt.sts[sid]['snow'] = row[3]
 
 
-def main():
+def main(argv):
     """main()"""
-    load_table()
     dates = []
     today = datetime.date.today()
-    if len(sys.argv) == 5:
-        dates.append(datetime.date(int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4])))
+    if len(argv) == 4:
+        dates.append(datetime.date(int(argv[2]), int(argv[3]),
+                                   int(argv[4])))
     else:
         dates.append(today)
         dates.append(datetime.date.today() - datetime.timedelta(days=1))
-    for ts in dates:
-        estimate_precip(ts)
-        estimate_snow(ts)
-        estimate_hilo(ts)
-        if ts != today:
-            hardcode(ts)
-        commit(ts)
+    for state in state_names:
+        if state in ['AK', 'HI']:
+            continue
+        table = "alldata_%s" % (state, )
+        ccursor = COOP.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        nt = load_table(state)
+        for ts in dates:
+            estimate_precip(ts, nt)
+            estimate_snow(ts, nt)
+            estimate_hilo(ts, nt)
+            if ts != today:
+                hardcode(nt, state, ts)
+            commit(ccursor, table, nt, ts)
+        ccursor.close()
+        COOP.commit()
+    IEM.close()
+    COOP.close()
 
 
 if __name__ == '__main__':
     # See how we are called
-    main()
-    ccursor.close()
-    COOP.commit()
-    COOP.close()
+    main(sys.argv)

@@ -30,9 +30,9 @@ import sys
 import os
 
 import pyproj
-import pygrib
 import netCDF4
 import numpy as np
+import pygrib
 from pyiem.util import get_dbconn
 
 P4326 = pyproj.Proj(init="epsg:4326")

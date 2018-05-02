@@ -4,10 +4,10 @@ import datetime
 import os
 import sys
 
-import pygrib
 import pytz
 import pyproj
 import numpy as np
+import pygrib
 from pyiem.util import get_dbconn, utc
 
 P4326 = pyproj.Proj(init="epsg:4326")
