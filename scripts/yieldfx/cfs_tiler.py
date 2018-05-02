@@ -11,6 +11,8 @@ from pyiem.util import utc
 
 def make_netcdf(fullpath, valid, west, south):
     """Make our netcdf"""
+    if os.path.isfile(fullpath):
+        return netCDF4.Dataset(fullpath, 'a'), False
     nc = netCDF4.Dataset(fullpath, 'w')
     # Dimensions
     totaldays = (valid.replace(month=12, day=31) -
@@ -33,37 +35,41 @@ def make_netcdf(fullpath, valid, west, south):
     lon.long_name = 'longitude'
     lon[:] = np.arange(west + 0.125/2., west + 2., 0.125)
 
-    prcp = nc.createVariable('prcp', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1e20)
+    prcp = nc.createVariable('prcp', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     prcp.units = "mm/day"
+    prcp.scale_factor = 0.01
     prcp.long_name = "daily total precipitation"
 
-    tmax = nc.createVariable('tmax', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1e20)
+    tmax = nc.createVariable('tmax', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     tmax.units = "degrees C"
+    tmax.scale_factor = 0.01
     tmax.long_name = "daily maximum temperature"
 
-    tmin = nc.createVariable('tmin', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1e20)
+    tmin = nc.createVariable('tmin', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     tmin.units = "degrees C"
+    tmin.scale_factor = 0.01
     tmin.long_name = "daily minimum temperature"
 
-    srad = nc.createVariable('srad', np.float, ('time', 'lat', 'lon'),
-                             fill_value=1e20)
+    srad = nc.createVariable('srad', np.uint16, ('time', 'lat', 'lon'),
+                             fill_value=65535)
     srad.units = "W/m2"
+    srad.scale_factor = 0.1
     srad.long_name = "daylight average incident shortwave radiation"
 
     # did not do vp or cropland
     nc.close()
-    return netCDF4.Dataset(fullpath, 'a')
+    return netCDF4.Dataset(fullpath, 'a'), True
 
 
-def tile_extraction(nc, valid, west, south):
+def tile_extraction(nc, valid, west, south, isnewfile):
     """Do our tile extraction"""
     i, j = iemre.find_ij(west, south)
     islice = slice(i, i+16)
     jslice = slice(j, j+16)
-    for year in range(1980, valid.year + 1):
+    for year in range(1980 if isnewfile else valid.year, valid.year + 1):
         tidx0 = (datetime.date(year, 1, 1) -
                  datetime.date(1980, 1, 1)).days
         tidx1 = (datetime.date(year + 1, 1, 1) -
@@ -106,12 +112,11 @@ def tile_extraction(nc, valid, west, south):
 
 def workflow(valid, ncfn, west, south):
     """Make the magic happen"""
-    basedir = "/mesonet/share/pickup/yieldfx/cfs.%s" % (
-        valid.strftime("%Y%m%d%H"), )
+    basedir = "/mesonet/share/pickup/yieldfx/cfs"
     if not os.path.isdir(basedir):
         os.makedirs(basedir)
-    nc = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
-    tile_extraction(nc, valid, west, south)
+    nc, isnewfile = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
+    tile_extraction(nc, valid, west, south, isnewfile)
     nc.close()
 
 

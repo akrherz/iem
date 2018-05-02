@@ -54,7 +54,8 @@ def main():
     """Do main"""
     now = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     now = now.replace(hour=12, minute=0, second=0, microsecond=0)
-    [dl(now, varname) for varname in ['tmax', 'tmin', 'prate', 'dswsfc']]
+    for varname in ['tmax', 'tmin', 'prate', 'dswsfc']:
+        dl(now, varname)
 
 
 if __name__ == '__main__':
