@@ -62,9 +62,11 @@ def application(environ, start_response):
                                       label='Image Resolution (DPI)'))
     output = json.dumps(data)
 
-    response_headers = [('Content-type', 'application/json'),
-                        ('Content-Length', str(len(output)))]
+    response_headers = [('Content-type', 'application/json'), ]
 
     start_response(status, response_headers)
+    # json.dumps returns str, we need bytes here
+    return [output.encode()]
 
-    return [output]
+# from paste.exceptions.errormiddleware import ErrorMiddleware
+# application = ErrorMiddleware(application, debug=True)

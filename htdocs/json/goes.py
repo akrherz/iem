@@ -15,7 +15,7 @@ PRODUCTS = ['WV', 'VIS', 'IR']
 
 def parse_time(text):
     """
-    Convert ISO something into a mx.DateTime
+    Convert ISO something into a datetime
     """
     try:
         if len(text) == 17:

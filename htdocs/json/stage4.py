@@ -5,6 +5,7 @@ import datetime
 import json
 import sys
 import cgi
+import os
 
 import netCDF4
 import numpy as np
@@ -34,12 +35,16 @@ def dowork(form):
     eidx = iemre.hourly_offset(ets)
 
     ncfn = "/mesonet/data/stage4/%s_stage4_hourly.nc" % (date.year, )
+    res = {'gridi': -1, 'gridj': -1, 'data': []}
+    if not os.path.isfile(ncfn):
+        return json.dumps(res)
     nc = netCDF4.Dataset(ncfn, 'r')
 
     dist = ((nc.variables['lon'][:] - lon)**2 +
             (nc.variables['lat'][:] - lat)**2)**0.5
     (j, i) = np.unravel_index(dist.argmin(), dist.shape)
-    res = {'gridi': i, 'gridj': j, 'data': []}
+    res['gridi'] = i
+    res['gridj'] = j
 
     ppt = nc.variables['p01m'][sidx:eidx, j, i]
     nc.close()

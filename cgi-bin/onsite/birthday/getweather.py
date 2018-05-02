@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import psycopg2
 import cgi
-import mx.DateTime
+import datetime
 import sys
+
+import psycopg2
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 nt = NetworkTable("IACLIMATE")
@@ -163,11 +164,11 @@ def Main():
 		sys.exit(0)	
 
 	cityName = nt.sts[city]['name']
-	now = mx.DateTime.DateTime( int(year), int(month), int(day) )
-	nowM2 = now + mx.DateTime.RelativeDateTime(days=-2)
-	nowM1 = now + mx.DateTime.RelativeDateTime(days=-1)
-	nowP1 = now + mx.DateTime.RelativeDateTime(days=+1)
-	nowP2 = now + mx.DateTime.RelativeDateTime(days=+2)
+	now = datetime.datetime(int(year), int(month), int(day))
+	nowM2 = now + datetime.timedelta(days=-2)
+	nowM1 = now + datetime.timedelta(days=-1)
+	nowP1 = now + datetime.timedelta(days=1)
+	nowP2 = now + datetime.timedelta(days=2)
 	
 
 	print '<BR><h4>Data valid for station: '+cityName+', Iowa</h4><BR>'

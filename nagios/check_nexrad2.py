@@ -1,6 +1,7 @@
 """
  Make sure our nexrad files are current!
 """
+from __future__ import print_function
 import os
 import sys
 import stat
@@ -9,6 +10,7 @@ SAMPLES = ['KDMX', 'KAMA', 'KLWX', 'KFFC', 'KBMX', 'KBGM', 'KCLE']
 
 
 def check():
+    """Check things please"""
     now = datetime.datetime.now()
     count = []
     for nexrad in SAMPLES:
@@ -20,16 +22,22 @@ def check():
             count.append(nexrad)
     return count
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go"""
     badcount = check()
     msg = '%s/%s outage %s' % (len(badcount), len(SAMPLES),
                                ','.join(badcount))
     if len(badcount) < 3:
-        print 'OK - %s' % (msg,)
+        print('OK - %s' % (msg,))
         sys.exit(0)
     elif len(badcount) < 4:
-        print 'WARNING - %s' % (msg,)
+        print('WARNING - %s' % (msg,))
         sys.exit(1)
     else:
-        print 'CRITICAL - %s' % (msg,)
+        print('CRITICAL - %s' % (msg,))
         sys.exit(2)
+
+
+if __name__ == '__main__':
+    main()

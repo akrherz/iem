@@ -1,8 +1,8 @@
 #!/usr/local/python/bin/python
 import time
 import os
+import datetime
 
-import mx.DateTime
 os.environ['TZ'] = 'CST6CDT'
 
 
@@ -22,9 +22,9 @@ def main():
             try:
                 data[int(t[0])] = t[1]
             except:
-                print l
+                print(l)
         if len(data) > 3:
-            now = mx.DateTime.now()
+            now = datetime.datetime.now()
             fp = "ot0003_%s.dat" % (now.strftime("%Y%m%d%H%M"), )
             o = open(fp, 'w')
             o.write(("104,%s,%s, %s, %s, %s,11.34\n"

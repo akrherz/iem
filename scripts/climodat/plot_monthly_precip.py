@@ -2,8 +2,9 @@
  Create a contour plot of monthly precip from the climodat data (iemre)
 """
 import sys
+import datetime
+
 import psycopg2.extras
-import mx.DateTime
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
@@ -52,11 +53,11 @@ def do_month(ts, routes='m'):
 def main(argv):
     """Do Something"""
     if len(argv) == 3:
-        now = mx.DateTime.DateTime(int(argv[1]), int(argv[2]))
+        now = datetime.datetime(int(argv[1]), int(argv[2]), 1)
         do_month(now, 'm')
     else:
-        now = (mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1) +
-               mx.DateTime.RelativeDateTime(day=1))
+        now = datetime.datetime.now() - datetime.timedelta(days=1)
+        now = now.replace(day=1)
         do_month(now, 'cm')
 
 

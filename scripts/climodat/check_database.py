@@ -4,8 +4,8 @@
 """
 from __future__ import print_function
 import sys
+import datetime
 
-import mx.DateTime
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 import constants
@@ -15,13 +15,13 @@ nt = NetworkTable("%sCLIMATE" % (state,))
 COOP = get_dbconn('coop')
 ccursor = COOP.cursor()
 
-today = mx.DateTime.now()
+today = datetime.datetime.now()
 
 
 def fix_year(station, year):
-    sts = mx.DateTime.DateTime(year, 1, 1)
-    ets = mx.DateTime.DateTime(year+1, 1, 1)
-    interval = mx.DateTime.RelativeDateTime(days=1)
+    sts = datetime.datetime(year, 1, 1)
+    ets = datetime.datetime(year+1, 1, 1)
+    interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
         ccursor.execute("""SELECT count(*) from alldata_%s where
@@ -41,27 +41,24 @@ def fix_year(station, year):
 def main():
     """Go Main"""
     for station in nt.sts:
-        sts = mx.DateTime.DateTime(constants.startyear(station), 1, 1)
-        ets = constants._ENDTS
-
-        # Check for obs total
-        now = sts
-        interval = mx.DateTime.RelativeDateTime(years=1)
-        while now < (ets - interval):
-            days = int(((now + interval) - now).days)
-            ccursor.execute("""SELECT count(*) from alldata_%s WHERE
-            year = %s and station = '%s'""" % (state, now.year, station))
+        for year in range(constants.startyear(station), constants._ENDTS):
+            jan1 = datetime.datetime(year, 1, 1)
+            njan1 = (jan1 + datetime.timedelta(days=370)).replace(day=1)
+            days = (njan1 - jan1).days
+            ccursor.execute("""
+                SELECT count(*) from alldata_%s WHERE
+                year = %s and station = '%s'
+            """ % (state, year, station))
             row = ccursor.fetchone()
             if row[0] != days:
-                print ('Mismatch station: %s year: %s count: %s days: %s'
-                       '') % (station, now.year, row[0], days)
-                fix_year(station, now.year)
-            now += interval
+                print(('Mismatch station: %s year: %s count: %s days: %s'
+                       ) % (station, year, row[0], days))
+                fix_year(station, year)
 
         # Check records database...
-        sts = mx.DateTime.DateTime(2000, 1, 1)
-        ets = mx.DateTime.DateTime(2001, 1, 1)
-        interval = mx.DateTime.RelativeDateTime(days=1)
+        sts = datetime.datetime(2000, 1, 1)
+        ets = datetime.datetime(2001, 1, 1)
+        interval = datetime.timedelta(days=1)
         for table in ['climate', 'climate51', 'climate71', 'climate81']:
             ccursor.execute("""SELECT count(*) from %s WHERE
                 station = '%s'""" % (table, station))

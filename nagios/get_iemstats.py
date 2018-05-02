@@ -15,7 +15,7 @@ j = {'stats': {}, 'valid': datetime.datetime.utcnow().strftime(
 def get_reqs():
     """Get requests"""
     count = 0
-    for i in range(100, 109):
+    for i in range(100, 110):
         fn = "/var/lib/pnp4nagios/iemvs%03i/Apache_Stats_II.rrd" % (i,)
         ts = rrdtool.last(fn)
         data = rrdtool.fetch(fn,

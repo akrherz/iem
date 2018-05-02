@@ -7,6 +7,9 @@ import datetime
 
 from pyiem.util import get_dbconn
 
+# https://stackoverflow.com/questions/23932332
+SSW = getattr(sys.stdout, 'buffer', sys.stdout).write
+
 PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
                       "(?P<suffix>png|gif|xls|pdf|gnumeric)$"))
@@ -15,11 +18,11 @@ PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
 def send_content_type(val):
     """Do as I say"""
     if val == 'text':
-        sys.stdout.write("Content-type: text/plain\n\n")
+        SSW(b"Content-type: text/plain\n\n")
     elif val in ['png', 'gif']:
-        sys.stdout.write("Content-type: image/%s\n\n" % (val,))
+        SSW(("Content-type: image/%s\n\n" % (val,)).encode('utf-8'))
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
+        SSW(b"Content-type: text/plain\n\n")
 
 
 def dblog(yymmdd):
@@ -45,12 +48,12 @@ def process(uri):
     """
     if uri is None:
         send_content_type("text")
-        sys.stdout.write("ERROR!")
+        SSW(b"ERROR!")
         return
     match = PATTERN.match(uri)
     if match is None:
         send_content_type("text")
-        sys.stdout.write("ERROR!")
+        SSW(b"ERROR!")
         sys.stderr.write("feature content failure: %s\n" % (repr(uri), ))
         return
     data = match.groupdict()
@@ -58,11 +61,11 @@ def process(uri):
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
     if os.path.isfile(fn):
         send_content_type(data['suffix'])
-        sys.stdout.write(open(fn, 'rb').read())
+        SSW(open(fn, 'rb').read())
         dblog(data['yymmdd'])
     else:
         send_content_type('png')
-        import cStringIO
+        from io import BytesIO
         import matplotlib
         matplotlib.use('agg')
         import matplotlib.pyplot as plt
@@ -70,10 +73,10 @@ def process(uri):
         ax.text(0.5, 0.5, "Feature Image was not Found!",
                 transform=ax.transAxes, ha='center')
         plt.axis('off')
-        ram = cStringIO.StringIO()
+        ram = BytesIO()
         plt.savefig(ram, format='png')
         ram.seek(0)
-        sys.stdout.write(ram.read())
+        SSW(ram.read())
 
 
 def main():

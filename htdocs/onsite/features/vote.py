@@ -3,7 +3,7 @@
 import sys
 import cgi
 import os
-import Cookie
+from http.cookies import SimpleCookie
 import json
 import datetime
 
@@ -12,7 +12,7 @@ from pyiem.util import get_dbconn
 
 def do(vote):
     """ Do Something, yes do something """
-    cookie = Cookie.SimpleCookie(os.environ.get("HTTP_COOKIE", ''))
+    cookie = SimpleCookie(os.environ.get("HTTP_COOKIE", ''))
     myoid = 0
     if 'foid' in cookie:
         myoid = int(cookie['foid'].value)
@@ -37,7 +37,7 @@ def do(vote):
         """, (foid,))
         # Now we set a cookie
         expiration = datetime.datetime.now() + datetime.timedelta(days=4)
-        cookie = Cookie.SimpleCookie()
+        cookie = SimpleCookie()
         cookie["foid"] = foid
         cookie["foid"]["path"] = "/onsite/features/"
         cookie["foid"]["expires"] = expiration.strftime(

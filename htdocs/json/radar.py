@@ -25,7 +25,7 @@ NIDS = {
 
 def parse_time(s):
     """
-    Convert ISO something into a mx.DateTime
+    Convert ISO something into a datetime
     """
     try:
         if len(s) == 17:
@@ -144,7 +144,7 @@ def list_files(form):
         end_gts = start_gts + datetime.timedelta(days=10)
     root = {'scans': []}
     find_scans(root, radar, product, start_gts, end_gts)
-    if len(root['scans']) == 0 and is_realtime(start_gts):
+    if not root['scans'] and is_realtime(start_gts):
         now = start_gts - datetime.timedelta(minutes=10)
         find_scans(root, radar, product, now, end_gts)
 

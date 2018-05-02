@@ -14,13 +14,11 @@ import os
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-nt = NetworkTable(["KCCI", "KIMT", "KELO"])
-
-IEM = get_dbconn('iem')
-icursor = IEM.cursor()
 
 
-def process(ts):
+def process(icursor, ts):
+    """process this timestamp"""
+    nt = NetworkTable(["KCCI", "KIMT", "KELO"])
     for nwsli in nt.sts.keys():
         nwnid = nt.sts[nwsli]['nwn_id']
         #
@@ -47,20 +45,19 @@ def process(ts):
                                   ts.strftime("%Y-%m-%d"))
         icursor.execute(sql)
 
-ts = datetime.datetime.now() - datetime.timedelta(days=1)
-if (len(sys.argv) == 4):
-    ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                           int(sys.argv[3]))
-process(ts)
-"""
-sts = mx.DateTime.DateTime(2004,1,1)
-ets = mx.DateTime.DateTime(2005,7,25)
-interval = mx.DateTime.RelativeDateTime(days=1)
-now = sts
-while now < ets:
-    print now
-    process(now)
-    now += interval
-"""
-icursor.close()
-IEM.commit()
+
+def main(argv):
+    """Go Main Go"""
+    pgconn = get_dbconn('iem')
+    icursor = pgconn.cursor()
+    ts = datetime.datetime.now() - datetime.timedelta(days=1)
+    if len(argv) == 4:
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+                               int(sys.argv[3]))
+    process(icursor, ts)
+    icursor.close()
+    pgconn.commit()
+
+
+if __name__ == '__main__':
+    main(sys.argv)

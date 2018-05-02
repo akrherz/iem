@@ -6,7 +6,7 @@ import tempfile
 import imp
 import traceback
 import json
-import StringIO
+from io import BytesIO, StringIO
 
 import numpy as np
 import memcache
@@ -74,7 +74,7 @@ def handle_error(exp, fmt, uri):
         msg = "IEM Autoplot generation resulted in an error\n%s" % (str(exp),)
         ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center',
                 va='center')
-        ram = StringIO.StringIO()
+        ram = BytesIO()
         plt.axis('off')
         plt.savefig(ram, format=fmt, dpi=100)
         ram.seek(0)
@@ -82,7 +82,7 @@ def handle_error(exp, fmt, uri):
         return ram.read()
     if isinstance(exp, str):
         return exp
-    fh = StringIO.StringIO()
+    fh = StringIO()
     traceback.print_exc(file=fh)
     fh.seek(0)
     return fh.read()
@@ -153,7 +153,7 @@ def workflow(form, fmt):
             raise ValueError(fig)
         if fig is not None:
             plot_metadata(fig, start_time, end_time, p)
-        ram = StringIO.StringIO()
+        ram = BytesIO()
         if fmt in ['png', 'pdf', 'svg']:
             plt.savefig(ram, format=fmt, dpi=dpi)
             ram.seek(0)
@@ -206,4 +206,10 @@ def application(environ, start_response):
         output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
     # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
+    if isinstance(output, str):
+        output = output.encode('UTF-8')
     return [output]
+
+
+from paste.exceptions.errormiddleware import ErrorMiddleware
+application = ErrorMiddleware(application, debug=True)

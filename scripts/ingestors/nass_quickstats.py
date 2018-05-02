@@ -95,7 +95,7 @@ def database(pgconn, df):
                   row['value'],
                   row['cv_%'],
                   row['num_value']))
-        except Exception, exp:
+        except Exception as exp:
             print(exp)
             for key in row.keys():
                 print("%s %s %s" % (key, row[key], len(str(row[key]))))

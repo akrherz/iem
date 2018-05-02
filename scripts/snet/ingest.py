@@ -1,31 +1,29 @@
-"""
- This legacy code has these purposes
- 1) Ingest data into per station per day text files
- 2) Send wind alerts
+"""Ingest the SchoolNet data coming via the NWN socket feed
+
+    1) Ingest data into per station per day text files
+    2) Send wind alerts
 """
 from __future__ import print_function
 # Python Imports
 import re
 import time
+import datetime
 import telnetlib
-import string
 import os
 import shutil
 import traceback
 import logging
 import smtplib
-import StringIO
+from io import StringIO
 from email.mime.text import MIMEText
 
-# 3rd Party
-import mx.DateTime
+import psycopg2.extras
+from pyiem.util import get_dbconn
 
 # Local stuff
 import nwnob  # @UnresolvedImport
 import secret  # @UnresolvedImport
 
-import psycopg2.extras
-from pyiem.util import get_dbconn
 MESOSITE = get_dbconn('mesosite')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -39,7 +37,7 @@ locs = {}
 mcursor.execute("""
     SELECT nwn_id, id, ST_x(geom) as lon, ST_y(geom) as lat, name,
     network, wfo, county from stations
-    WHERE network in ('KCCI', 'KELO', 'KIMT')
+    WHERE network in ('KCCI', 'KELO', 'KIMT') and nwn_id is not null
     """)
 for row in mcursor:
     locs[int(row['nwn_id'])] = {
@@ -89,9 +87,9 @@ def makeConnect():
     while notConnected:
         try:
             tn = telnetlib.Telnet('iem-nwnserver', 14996)
-            tn.read_until("login> ", 10)
+            tn.read_until(b"login> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubuser'],))
-            tn.read_until("password> ", 10)
+            tn.read_until(b"password> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubpass'],))
             notConnected = False
         except Exception as _exp:
@@ -112,9 +110,9 @@ def process(dataStr):
             stationID = int(tokens[0][0])
             if stationID not in db:
                 db[stationID] = nwnob.nwnOB(stationID)
-            db[stationID].valid = mx.DateTime.now()
-            db[stationID].aDrctTxt.append(string.strip(tokens[0][3]))
-            db[stationID].aDrct.append(txt2drct[string.strip(tokens[0][3])])
+            db[stationID].valid = datetime.datetime.now()
+            db[stationID].aDrctTxt.append(tokens[0][3].strip())
+            db[stationID].aDrct.append(txt2drct[tokens[0][3].strip()])
             if tokens[0][5] == "KTS":
                 db[stationID].aSPED.append(int(tokens[0][4]) / .868976)
             else:
@@ -187,7 +185,7 @@ def archiveWriter():
             db[sid].maxSPED = 0
         mydir = "%s/%s" % (_ARCHIVE_BASE, db[sid].valid.strftime("%Y_%m/%d"))
         if not os.path.isdir(mydir):
-            os.makedirs(mydir, 0775)
+            os.makedirs(mydir, 0o775)
         fp = "%s/%s.dat" % (mydir, sid)
         out = open(fp, 'a')
         out.write(("%s,%s,%02iMPH,%03iK,460F,%03iF,%03i%s,%5.2f"
@@ -289,7 +287,7 @@ def fireLDM(report, route, sid):
 
     # Save a copy of this alert!
     shutil.copy("/tmp/"+fname, "/mesonet/data/alerts/%s_%s_%s" % (
-        mx.DateTime.now().strftime("%Y%m%d%H%M%S"), sid, fname))
+        datetime.datetime.now().strftime("%Y%m%d%H%M%S"), sid, fname))
 
 
 def windGustAlert():
@@ -390,7 +388,7 @@ def saveDB():
 
 def logData(goodLines):
     try:
-        now = mx.DateTime.now()
+        now = datetime.datetime.now()
         f = open("/mesonet/data/logs/snet.log", 'a')
         f.write(goodLines)
         f.write("||" + str(now) + "||\n")
@@ -414,7 +412,7 @@ if __name__ == "__main__":
         except Exception as _exp:
             logger.exception("Uh oh!")
 
-            io = StringIO.StringIO()
+            io = StringIO()
             traceback.print_exc(file=io)
 
             msg = MIMEText("%s" % (io.getvalue(),))

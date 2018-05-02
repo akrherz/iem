@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """ JSON service providing PRISM data for a given point """
-
+import os
 import datetime
 import json
 import sys
 import cgi
 
-from pyiem import prism, datatypes
 import netCDF4
 import numpy as np
 import memcache
+from pyiem import prism, datatypes
 
 
 def myrounder(val, precision):
@@ -51,7 +51,7 @@ def dowork(form):
 
     i, j = prism.find_ij(lon, lat)
 
-    res = {'gridi': i, 'gridj': j, 'data': [],
+    res = {'gridi': int(i), 'gridj': int(j), 'data': [],
            'disclaimer': ("PRISM Climate Group, Oregon State University, "
                           "http://prism.oregonstate.edu, created 4 Feb 2004.")}
 
@@ -67,6 +67,8 @@ def dowork(form):
         eidx = prism.daily_offset(ets) + 1
 
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sts.year, )
+        if not os.path.isfile(ncfn):
+            continue
         nc = netCDF4.Dataset(ncfn, 'r')
 
         tmax = nc.variables['tmax'][sidx:eidx, j, i]
@@ -86,6 +88,7 @@ def dowork(form):
                             datatypes.distance(pt, 'MM').value('IN'), 2)
                 })
 
+    sys.stderr.buffer.write(repr(res).encode('utf-8'))
     return json.dumps(res)
 
 

@@ -1,7 +1,8 @@
 """
 Populate the hourly precip table with snet data
 """
-import mx.DateTime
+import datetime
+
 from pyiem.util import get_dbconn
 
 
@@ -10,6 +11,8 @@ def compute(ts):
     pgconn = get_dbconn('iem')
     icursor = pgconn.cursor()
     icursor2 = pgconn.cursor()
+    tsm2 = ts - datetime.timedelta(hours=2)
+    tsm1 = ts - datetime.timedelta(hours=1)
     sql = """select f2.id, f2.network, n, x from
    (SELECT id, network, min(pday) as n from
    current_log c, stations t
@@ -23,14 +26,14 @@ def compute(ts):
    and t.iemid = c.iemid GROUP by id, network) as f2
    WHERE f1.id = f2.id and f1.network = f2.network
     """ % (
-       ts + mx.DateTime.RelativeDateTime(hours=-2, minute=56),
-       ts + mx.DateTime.RelativeDateTime(hours=-2, minute=57),
-       ts + mx.DateTime.RelativeDateTime(hours=-2, minute=58),
-       ts + mx.DateTime.RelativeDateTime(hours=-2, minute=59),
-       ts + mx.DateTime.RelativeDateTime(hours=-1, minute=56),
-       ts + mx.DateTime.RelativeDateTime(hours=-1, minute=57),
-       ts + mx.DateTime.RelativeDateTime(hours=-1, minute=58),
-       ts + mx.DateTime.RelativeDateTime(hours=-1, minute=59))
+       tsm2.replace(minute=56),
+       tsm2.replace(minute=57),
+       tsm2.replace(minute=58),
+       tsm2.replace(minute=59),
+       tsm1.replace(minute=56),
+       tsm1.replace(minute=57),
+       tsm1.replace(minute=58),
+       tsm1.replace(minute=59))
     icursor.execute(sql)
     for row in icursor:
         x = row[3]
@@ -40,7 +43,6 @@ def compute(ts):
         phour = x - n
         if phour < 0:
             phour = x
-        # print "station: %s MinV: %s MaxV: %s Phour: %s" % (station,n,x,phour)
         sql = """
         INSERT into hourly_%s values ('%s','%s','%s','%s')
         """ % (ts.year, station, row[1], ts.strftime("%Y-%m-%d %H:%M"), phour)
@@ -52,8 +54,7 @@ def compute(ts):
 
 def main():
     """Go Main Go"""
-    compute(mx.DateTime.now() +
-            mx.DateTime.RelativeDateTime(minute=0, second=0))
+    compute(datetime.datetime.now().replace(minute=0, second=0))
 
 
 if __name__ == '__main__':
