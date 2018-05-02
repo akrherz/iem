@@ -35,26 +35,26 @@ def make_netcdf(fullpath, valid, west, south):
     lon.long_name = 'longitude'
     lon[:] = np.arange(west + 0.125/2., west + 2., 0.125)
 
-    prcp = nc.createVariable('prcp', np.uint16, ('time', 'lat', 'lon'),
-                             fill_value=65535)
+    prcp = nc.createVariable('prcp', np.float, ('time', 'lat', 'lon'),
+                             fill_value=1e20)
     prcp.units = "mm/day"
     prcp.scale_factor = 0.01
     prcp.long_name = "daily total precipitation"
 
-    tmax = nc.createVariable('tmax', np.uint16, ('time', 'lat', 'lon'),
-                             fill_value=65535)
+    tmax = nc.createVariable('tmax', np.float, ('time', 'lat', 'lon'),
+                             fill_value=1e20)
     tmax.units = "degrees C"
     tmax.scale_factor = 0.01
     tmax.long_name = "daily maximum temperature"
 
-    tmin = nc.createVariable('tmin', np.uint16, ('time', 'lat', 'lon'),
-                             fill_value=65535)
+    tmin = nc.createVariable('tmin', np.float, ('time', 'lat', 'lon'),
+                             fill_value=1e20)
     tmin.units = "degrees C"
     tmin.scale_factor = 0.01
     tmin.long_name = "daily minimum temperature"
 
-    srad = nc.createVariable('srad', np.uint16, ('time', 'lat', 'lon'),
-                             fill_value=65535)
+    srad = nc.createVariable('srad', np.float, ('time', 'lat', 'lon'),
+                             fill_value=1e20)
     srad.units = "W/m2"
     srad.scale_factor = 0.1
     srad.long_name = "daylight average incident shortwave radiation"
