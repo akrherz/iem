@@ -74,7 +74,7 @@ def main():
     Do something fun and educational
     """
     form = cgi.FieldStorage()
-    operation = form.getvalue('operation', None)
+    operation = form.getvalue('operation', 'list')
     callback = form.getvalue('callback', None)
     if callback is not None:
         sys.stdout.write("Content-type: application/javascript\n\n")

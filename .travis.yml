@@ -47,11 +47,12 @@ before_install:
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   # Setup PATH so that miniconda gets in the front
-  - echo 'export PATH=/home/travis/miniconda$MINICONDA/envs/prod/bin:$PATH' | sudo tee -a /etc/apache2/envvars > /dev/null
-  - echo 'export LD_PRELOAD=/home/travis/miniconda$MINICONDA/envs/prod/lib/libz.so' | sudo tee -a /etc/apache2/envvars > /dev/null
+  - echo "export PATH=/home/travis/miniconda$MINICONDA/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
+  - echo "export LD_PRELOAD=/home/travis/miniconda$MINICONDA/envs/prod/lib/libz.so" | sudo tee -a /etc/apache2/envvars > /dev/null
   # use conda provided mod_wsgi
   - echo "LoadModule wsgi_module $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server/$MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
-install:
+  - echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
+  install:
   - if [[ ! -f $HOME/miniconda$MINICONDA/envs/prod/bin/python ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
@@ -65,6 +66,7 @@ install:
   - conda config --append channels conda-forge
   - conda config --append channels cgat
   - conda config --append channels HCC
+  - . $HOME/miniconda$MINICONDA/etc/profile.d/conda.sh
   - conda activate prod
   - hash -r
   - conda install --file conda_requirements.txt

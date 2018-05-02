@@ -82,10 +82,7 @@ def handle_error(exp, fmt, uri):
         return ram.read()
     if isinstance(exp, str):
         return exp
-    fh = StringIO()
-    traceback.print_exc(file=fh)
-    fh.seek(0)
-    return fh.read()
+    return str(exp)
 
 
 def get_res_by_fmt(p, fmt, fdict):
@@ -202,14 +199,20 @@ def application(environ, start_response):
         status = "200 OK"
         output = workflow(fields, fmt)
     except Exception as exp:
-        status = "500 Internal Server Error"
-        output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
+        # Lets reserve 500 errors for some unknown server failure
+        status = "400 Bad Request"
+        try:
+            output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
+            del exp
+        except Exception as exp:
+            del exp
+            output = handle_error('Unknown', fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
     # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
-    if isinstance(output, str):
+    if sys.version_info[0] > 2 and isinstance(output, str):
         output = output.encode('UTF-8')
     return [output]
 
 
-from paste.exceptions.errormiddleware import ErrorMiddleware
-application = ErrorMiddleware(application, debug=True)
+# from paste.exceptions.errormiddleware import ErrorMiddleware
+# application = ErrorMiddleware(application, debug=True)

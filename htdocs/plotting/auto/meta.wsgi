@@ -47,7 +47,7 @@ def application(environ, start_response):
 
             start_response(status, response_headers)
 
-            return [output]
+            return [output.encode()]
         try:
             timing = get_timing(pidx)
         except Exception as _:

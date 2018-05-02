@@ -217,9 +217,13 @@ def get_context(fdict):
                          threshold, threshold,
                          threshold, threshold, station, tuple(months)),
                   index_col='myyear')
+    if df.empty:
+        raise ValueError("No data was found for query")
 
     # Figure out the max min values to add to the row
     df2 = df[df[ptype] == df[ptype].max()]
+    if df2.empty:
+        raise ValueError("No data was found for query")
     xlabel = "Year, Max: %.2f %s%s" % (df[ptype].max(), df2.index.values[0],
                                        '+' if len(df2.index) > 1 else '')
     df2 = df[df[ptype] == df[ptype].min()]

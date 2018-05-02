@@ -17,12 +17,12 @@ def get_formats(i):
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
         sys.exit(1)
     if res.status_code == 404:
-        print("%s resulted in 404, exiting..." % (i, ))
+        print("scanning metadata got 404 at i=%s, proceeding" % (i, ))
         return False
     if res.status_code != 200:
         print("%s. %s -> HTTP: %s" % (i, uri, res.status_code))
         print(res.text)
-        return
+        sys.exit(1)
     try:
         json = res.json()
     except Exception as exp:
@@ -47,16 +47,19 @@ def run_plot(i, fmt):
     except requests.exceptions.ReadTimeout:
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
         sys.exit(1)
-    if res.status_code != 200 or len(res.content) == 0:
+    # Known failures likely due to missing data
+    if res.status_code == 400:
+        return
+    if res.status_code == 504:
+        print("%s. %s -> HTTP: %s (timeout)" % (i, uri, res.status_code))
+        return
+    if res.status_code != 200 or res.content == "":
         print("%s. %s -> HTTP: %s len(content): %s" % (i, uri[16:],
                                                        res.status_code,
                                                        len(res.content)))
         if len(res.content) > 0 and fmt not in ['svg', 'png', 'pdf']:
             print(res.text)
         return False
-    if res.status_code == 504:
-        print("%s. %s -> HTTP: %s (timeout)" % (i, uri, res.status_code))
-        return
 
     return True
 
@@ -66,7 +69,7 @@ def workflow(entry):
     sts = datetime.datetime.now()
     res = run_plot(*entry)
     if not res:
-        return
+        return res
     ets = datetime.datetime.now()
     return [entry[0], entry[1], (ets - sts).total_seconds()]
 
@@ -88,6 +91,8 @@ def main():
     for res in pool.imap_unordered(workflow, queue):
         if res is None:
             continue
+        if not res:
+            sys.exit(9)
         timing.append({'i': res[0], 'fmt': res[1], 'secs': res[2]})
     if not timing:
         print("WARNING: no timing results found!")
