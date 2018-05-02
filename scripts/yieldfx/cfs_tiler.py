@@ -61,11 +61,15 @@ def make_netcdf(fullpath, valid, west, south):
 
     # did not do vp or cropland
     nc.close()
-    return netCDF4.Dataset(fullpath, 'a'), True
+    nc = netCDF4.Dataset(fullpath, 'a')
+    nc.set_auto_scale(True)
+    return nc, True
 
 
 def tile_extraction(nc, valid, west, south, isnewfile):
     """Do our tile extraction"""
+    # update model metadata
+    nc.valid = "CFS model: %s" % (valid.strftime("%Y-%m-%dT%H:%M:%SZ"), )
     i, j = iemre.find_ij(west, south)
     islice = slice(i, i+16)
     jslice = slice(j, j+16)
