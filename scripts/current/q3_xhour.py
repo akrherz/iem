@@ -96,7 +96,11 @@ def main(argv):
     else:
         ts = datetime.datetime.utcnow()
         ts = ts.replace(tzinfo=pytz.utc)
-        doit(ts, int(argv[1]))
+        try:
+            doit(ts, int(argv[1]))
+        except Exception as exp:
+            print("q3_xhour failure ts: %s argv: %s" % (ts, argv[1]))
+            print(exp)
 
 
 if __name__ == "__main__":
