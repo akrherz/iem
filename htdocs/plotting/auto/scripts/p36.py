@@ -41,6 +41,8 @@ def plotter(fdict):
         WHERE station = %s and day < %s and year > 1892
         GROUP by year, month ORDER by year ASC
     """, (station, datetime.date.today().replace(day=1)))
+    if cursor.rowcount == 0:
+        raise ValueError("No results found for query")
 
     for rownum, row in enumerate(cursor):
         if rownum == 0:

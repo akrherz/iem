@@ -207,7 +207,7 @@ def application(environ, start_response):
         output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
     # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
-    if isinstance(output, str):
+    if sys.version_info[0] > 2 and isinstance(output, str):
         output = output.encode('UTF-8')
     return [output]
 
