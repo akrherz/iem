@@ -370,13 +370,13 @@ def hardcode(nt, state, ts):
         if icursor.rowcount == 1:
             row = icursor.fetchone()
             if row['max_tmpf'] is not None:
-                nt.sts[sid]['high'] = row[0]
+                nt.sts[sid]['high'] = row['max_tmpf']
             if row['min_tmpf'] is not None:
-                nt.sts[sid]['low'] = row[1]
+                nt.sts[sid]['low'] = row['min_tmpf']
             if row['pday'] is not None:
-                nt.sts[sid]['precip'] = row[2]
+                nt.sts[sid]['precip'] = row['pday']
             if row['snow'] is not None:
-                nt.sts[sid]['snow'] = row[3]
+                nt.sts[sid]['snow'] = row['snow']
 
 
 def main(argv):
