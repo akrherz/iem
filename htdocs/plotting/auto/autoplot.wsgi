@@ -201,7 +201,12 @@ def application(environ, start_response):
     except Exception as exp:
         # Lets reserve 500 errors for some unknown server failure
         status = "400 Bad Request"
-        output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
+        try:
+            output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
+            del exp
+        except Exception as exp:
+            del exp
+            output = handle_error('Unknown', fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
     # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
     if sys.version_info[0] > 2 and isinstance(output, str):
