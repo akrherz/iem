@@ -1,4 +1,5 @@
 """x-hour temperature change"""
+from __future__ import print_function
 import datetime
 import calendar
 
@@ -105,4 +106,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    print compute_bins(2)
+    print(compute_bins(2))

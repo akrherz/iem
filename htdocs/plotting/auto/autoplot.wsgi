@@ -202,7 +202,8 @@ def application(environ, start_response):
         status = "200 OK"
         output = workflow(fields, fmt)
     except Exception as exp:
-        status = "500 Internal Server Error"
+        # Lets reserve 500 errors for some unknown server failure
+        status = "400 Bad Request"
         output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
     # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
@@ -211,5 +212,5 @@ def application(environ, start_response):
     return [output]
 
 
-from paste.exceptions.errormiddleware import ErrorMiddleware
-application = ErrorMiddleware(application, debug=True)
+# from paste.exceptions.errormiddleware import ErrorMiddleware
+# application = ErrorMiddleware(application, debug=True)
