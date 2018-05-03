@@ -4,7 +4,6 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-import netCDF4
 from pyiem import iemre, util
 from pyiem.datatypes import distance
 from pyiem.reference import state_bounds
@@ -123,7 +122,7 @@ def plotter(fdict):
     idx1 = iemre.daily_offset(edate) + 1
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
-    nc = netCDF4.Dataset(ncfn, 'r')
+    nc = util.ncopen(ncfn)
     if state is not None:
         x0, y0, x1, y1 = util.grid_bounds(nc.variables['lon'][:],
                                           nc.variables['lat'][:],
@@ -152,7 +151,7 @@ def plotter(fdict):
     units = 'inches'
     if opt == 'dep':
         # Do departure work now
-        nc = netCDF4.Dataset(clncfn)
+        nc = util.ncopen(clncfn)
         climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
                                 0), 'MM').value('IN')
         p01d = p01d - climo
@@ -160,7 +159,7 @@ def plotter(fdict):
         [maxv] = np.percentile(np.abs(p01d), [99, ])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
     elif opt == 'per':
-        nc = netCDF4.Dataset(clncfn)
+        nc = util.ncopen(clncfn)
         climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
                                 0), 'MM').value('IN')
         p01d = p01d / climo * 100.

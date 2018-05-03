@@ -5,10 +5,9 @@ import os
 import warnings
 
 import pytz
-import netCDF4
 import numpy as np
 from pyiem.datatypes import temperature
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 warnings.simplefilter("ignore", UserWarning)
 
 
@@ -53,7 +52,7 @@ def main():
         print('extract_madis.py found no files? last: %s' % (fn, ))
         return
 
-    nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn)
     providers = nc.variables["dataProvider"][:]
     nc_tmpk = nc.variables["temperature"][:]
     nc_dwpk = nc.variables["dewpoint"][:]

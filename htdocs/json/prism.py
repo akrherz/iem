@@ -6,10 +6,10 @@ import json
 import sys
 import cgi
 
-import netCDF4
 import numpy as np
 import memcache
 from pyiem import prism, datatypes
+from pyiem.util import ncopen
 
 
 def myrounder(val, precision):
@@ -69,7 +69,7 @@ def dowork(form):
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sts.year, )
         if not os.path.isfile(ncfn):
             continue
-        nc = netCDF4.Dataset(ncfn, 'r')
+        nc = ncopen(ncfn)
 
         tmax = nc.variables['tmax'][sidx:eidx, j, i]
         tmin = nc.variables['tmin'][sidx:eidx, j, i]

@@ -12,9 +12,8 @@ import tempfile
 
 import numpy as np
 import pytz
-import netCDF4
 from PIL import Image
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def send_error(msg):
@@ -61,7 +60,7 @@ def get_table(prod):
 def make_netcdf(xpoints, ypoints, lons, lats):
     """generate the netcdf file"""
     tmpobj = tempfile.NamedTemporaryFile(suffix='.nc', delete=False)
-    nc = netCDF4.Dataset(tmpobj.name, 'w')
+    nc = ncopen(tmpobj.name, 'w')
     nc.Conventions = 'CF-1.6'
     nc.createDimension('lat', ypoints)
     nc.createDimension('lon', xpoints)

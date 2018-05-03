@@ -7,11 +7,10 @@ import sys
 import cgi
 import os
 
-import netCDF4
 import numpy as np
 import memcache
 from pyiem import iemre, datatypes
-from pyiem.util import utc
+from pyiem.util import utc, ncopen
 
 
 def myrounder(val, precision):
@@ -38,7 +37,7 @@ def dowork(form):
     res = {'gridi': -1, 'gridj': -1, 'data': []}
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    nc = netCDF4.Dataset(ncfn, 'r')
+    nc = ncopen(ncfn)
 
     dist = ((nc.variables['lon'][:] - lon)**2 +
             (nc.variables['lat'][:] - lat)**2)**0.5

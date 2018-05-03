@@ -36,12 +36,11 @@ from __future__ import print_function
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 import psycopg2.extras
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 from pyiem.datatypes import temperature, distance
 from pyiem.reference import TRACE_VALUE, state_names
 
@@ -245,8 +244,7 @@ def load_table(state):
 def estimate_precip(ts, nt):
     """Estimate precipitation based on IEMRE"""
     idx = iemre.daily_offset(ts)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
-    nc.set_auto_mask(True)
+    nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
     grid12 = distance(nc.variables['p01d_12z'][idx, :, :], 'MM').value("IN")
     grid00 = distance(nc.variables['p01d'][idx, :, :], "MM").value("IN")
     nc.close()
@@ -270,7 +268,7 @@ def estimate_precip(ts, nt):
 def estimate_snow(ts, nt):
     """Estimate the Snow based on COOP reports"""
     idx = iemre.daily_offset(ts)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
+    nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
     nc.set_auto_mask(True)
     snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :],
                           'MM').value('IN')
@@ -290,7 +288,7 @@ def estimate_snow(ts, nt):
 def estimate_hilo(ts, nt):
     """Estimate the High and Low Temperature based on gridded data"""
     idx = iemre.daily_offset(ts)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'r')
+    nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
     nc.set_auto_mask(True)
     highgrid12 = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
                              'K').value('F')

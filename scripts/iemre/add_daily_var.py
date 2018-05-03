@@ -2,9 +2,9 @@
 from __future__ import print_function
 import os
 
-import netCDF4
 import numpy as np
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def main():
@@ -15,7 +15,7 @@ def main():
             print("Miss %s" % (fn, ))
             continue
         print(fn)
-        nc = netCDF4.Dataset(fn, 'a')
+        nc = ncopen(fn, 'a', timeout=300)
         v1 = nc.createVariable('avg_dwpk', np.float, ('time', 'lat', 'lon'),
                                fill_value=1.e20)
         v1.units = 'K'

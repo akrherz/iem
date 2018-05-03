@@ -2,12 +2,11 @@
 import datetime
 
 import numpy as np
-import netCDF4
 import geopandas as gpd
 import pandas as pd
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, ncopen
 from pyiem import reference
 
 
@@ -52,7 +51,7 @@ def plotter(fdict):
     """, pgconn, params=(state, ), index_col='state_abbr',
                                            geom_col='the_geom')
 
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(year))
+    nc = ncopen(iemre.get_daily_ncname(year))
     precip = nc.variables['p01d']
     czs = CachingZonalStats(iemre.AFFINE)
     hasdata = np.zeros((nc.dimensions['lat'].size,
@@ -61,10 +60,10 @@ def plotter(fdict):
     for nav in czs.gridnav:
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
-        hasdata[nav.y0:(nav.y0 + nav.ysz),
-                nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
-                                                      hasdata[nav.y0:(nav.y0 + nav.ysz),
-                                                              nav.x0:(nav.x0 + nav.xsz)])
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.yx, nav.x0 + nav.xsz)
+        hasdata[jslice, islice] = np.where(grid > 0, 1,
+                                           hasdata[jslice, islice])
     hasdata = np.flipud(hasdata)
     datapts = np.sum(np.where(hasdata > 0, 1, 0))
 

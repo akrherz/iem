@@ -2,8 +2,8 @@
 import datetime
 import sys
 
-import netCDF4
 import numpy as np
+from pyiem.util import ncopen
 
 
 def init_year(ts):
@@ -12,7 +12,7 @@ def init_year(ts):
     """
 
     fp = "/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year, )
-    nc = netCDF4.Dataset(fp, 'w')
+    nc = ncopen(fp, 'w')
     nc.title = "IFC Daily Precipitation %s" % (ts.year,)
     nc.platform = "Grided Estimates"
     nc.description = "Iowa Flood Center ~0.004 degree grid"

@@ -2,18 +2,17 @@
 import datetime
 import os
 
-import netCDF4
 import numpy as np
 from pyiem import iemre
 from pyiem.datatypes import temperature
-from pyiem.util import utc
+from pyiem.util import utc, ncopen
 
 
 def make_netcdf(fullpath, valid, west, south):
     """Make our netcdf"""
     if os.path.isfile(fullpath):
-        return netCDF4.Dataset(fullpath, 'a'), False
-    nc = netCDF4.Dataset(fullpath, 'w')
+        return ncopen(fullpath, 'a'), False
+    nc = ncopen(fullpath, 'w')
     # Dimensions
     totaldays = (valid.replace(month=12, day=31) -
                  valid.replace(year=1980, month=1, day=1)).days + 1
@@ -61,8 +60,7 @@ def make_netcdf(fullpath, valid, west, south):
 
     # did not do vp or cropland
     nc.close()
-    nc = netCDF4.Dataset(fullpath, 'a')
-    nc.set_auto_scale(True)
+    nc = ncopen(fullpath, 'a')
     return nc, True
 
 
@@ -82,8 +80,7 @@ def tile_extraction(nc, valid, west, south, isnewfile):
         ncfn = iemre.get_daily_ncname(year)
         if not os.path.isfile(ncfn):
             continue
-        renc = netCDF4.Dataset(ncfn)
-        renc.set_auto_scale(True)
+        renc = ncopen(ncfn)
         # print("tslice: %s jslice: %s islice: %s" % (tslice, jslice, islice))
         nc.variables['tmax'][tslice, :, :] = temperature(
             renc.variables['high_tmpk'][:, jslice, islice], 'K').value('C')
@@ -98,9 +95,7 @@ def tile_extraction(nc, valid, west, south, isnewfile):
         if year != valid.year:
             continue
         # replace CFS!
-        renc = netCDF4.Dataset(
-            valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d.nc"))
-        renc.set_auto_scale(True)
+        renc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d.nc"))
         tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
         tslice = slice(tidx0 + tidx, tidx1)
         nc.variables['srad'][tslice, :, :] = (

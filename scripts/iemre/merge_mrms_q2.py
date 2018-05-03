@@ -5,17 +5,16 @@ import datetime
 import sys
 
 import pytz
-import netCDF4
 import numpy as np
 from PIL import Image
 import pyiem.mrms as mrms
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def run(ts):
     """Actually do the work, please"""
-    nc = netCDF4.Dataset(iemre.get_daily_mrms_ncname(ts.year), 'a')
-    nc.set_auto_mask(True)
+    nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), 'a', timeout=300)
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
     ts += datetime.timedelta(hours=24)

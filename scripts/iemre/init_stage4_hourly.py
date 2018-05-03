@@ -3,9 +3,9 @@ from __future__ import print_function
 import datetime
 import sys
 
-import netCDF4
 import numpy as np
 import pygrib
+from pyiem.util import ncopen
 
 # This exists on dev laptop :/
 TEMPLATE_FN = "/mesonet/ARCHIVE/data/2014/09/09/stage4/ST4.2014090900.01h.grib"
@@ -23,7 +23,7 @@ def init_year(ts):
     lats, lons = grb.latlons()
 
     fp = "%s/%s_stage4_hourly.nc" % (BASEDIR, ts.year)
-    nc = netCDF4.Dataset(fp, 'w')
+    nc = ncopen(fp, 'w')
     nc.title = "IEM Packaged NOAA Stage IV for %s" % (ts.year,)
     nc.platform = "Grided Estimates"
     nc.description = "NOAA Stage IV on HRAP Grid"

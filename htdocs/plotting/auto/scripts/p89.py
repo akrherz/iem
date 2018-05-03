@@ -3,13 +3,12 @@ import datetime
 
 import numpy as np
 import matplotlib.dates as mdates
-import netCDF4
 import pandas as pd
 import geopandas as gpd
 from metpy.units import units
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, ncopen
 from pyiem import reference
 
 
@@ -67,7 +66,7 @@ def get_data(ctx):
     """, pgconn, params=(ctx['state'], ), index_col='state_abbr',
                                            geom_col='the_geom')
 
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ctx['year']))
+    nc = ncopen(iemre.get_daily_ncname(ctx['year']))
 
     precip = nc.variables['p01d']
     czs = CachingZonalStats(iemre.AFFINE)

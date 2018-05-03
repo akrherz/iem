@@ -4,8 +4,7 @@ Extract station data from file and update any new stations we find, please
 from __future__ import print_function
 import sys
 
-import netCDF4
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 MY_PROVIDERS = [
@@ -41,7 +40,7 @@ def main(argv):
     mcursor = pgconn.cursor()
 
     fn = argv[1]
-    nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn)
 
     stations = nc.variables["stationId"][:]
     names = nc.variables["stationName"][:]

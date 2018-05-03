@@ -13,9 +13,8 @@ import datetime
 import sys
 import os
 
-import netCDF4
 import numpy as np
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def get_gp(xc, yc, x, y):
@@ -54,7 +53,7 @@ def do(date):
         print(("merra_solarrad %s miss[%s] -> fail"
                ) % (sts.strftime("%Y%m%d"), fn))
         return
-    nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn, timeout=300)
     rad = nc.variables['SWGDN'][7:, :, :]
     cs_rad = nc.variables['SWGDNCLR'][7:, :, :]
     xc = nc.variables['lon'][:]
@@ -67,7 +66,7 @@ def do(date):
         rad2 = 0
         cs_rad2 = 0
     else:
-        nc = netCDF4.Dataset(fn2)
+        nc = ncopen(fn2, timeout=300)
         rad2 = nc.variables['SWGDN'][:7, :, :]
         cs_rad2 = nc.variables['SWGDNCLR'][:7, :, :]
         nc.close()

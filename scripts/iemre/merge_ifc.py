@@ -4,11 +4,11 @@ import datetime
 import sys
 import os
 
-from pyiem import iemre
-import netCDF4
 import pytz
 from osgeo import gdal
 import numpy as np
+from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def run(ts):
@@ -17,11 +17,11 @@ def run(ts):
     ets = now + datetime.timedelta(hours=24)
     interval = datetime.timedelta(minutes=5)
     currenttime = datetime.datetime.utcnow()
-    currenttime = currenttime.replace(tzinfo=pytz.timezone("UTC"))
+    currenttime = currenttime.replace(tzinfo=pytz.utc)
 
     total = None
     while now <= ets:
-        gmt = now.astimezone(pytz.timezone("UTC"))
+        gmt = now.astimezone(pytz.utc)
         if gmt > currenttime:
             break
         fn = gmt.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
@@ -43,8 +43,8 @@ def run(ts):
                ) % (now.strftime("%d %B %Y"),))
         return
 
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,),
-                         "a")
+    nc = ncopen("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,),
+                "a", timeout=300)
     idx = iemre.daily_offset(ts)
     nc.variables['p01d'][idx, :, :] = np.flipud(total)
     nc.close()
@@ -60,7 +60,7 @@ def main(argv):
         date = date - datetime.timedelta(minutes=60)
         date = date.replace(hour=12, minute=0, second=0, microsecond=0)
     # Stupid pytz timezone dance
-    date = date.replace(tzinfo=pytz.timezone("UTC"))
+    date = date.replace(tzinfo=pytz.utc)
     date = date.astimezone(pytz.timezone("America/Chicago"))
     run(date)
 

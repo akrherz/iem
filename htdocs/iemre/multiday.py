@@ -7,9 +7,9 @@ import json
 from json import encoder
 import warnings
 
-import netCDF4
 import numpy as np
 from pyiem import iemre, datatypes
+from pyiem.util import ncopen
 
 warnings.simplefilter("ignore", UserWarning)
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
@@ -59,8 +59,7 @@ def main():
     offset2 = iemre.daily_offset(ts2) + 1
 
     # Get our netCDF vars
-    fp = iemre.get_daily_ncname(ts1.year)
-    nc = netCDF4.Dataset(fp, 'r')
+    nc = ncopen(iemre.get_daily_ncname(ts1.year))
     hightemp = datatypes.temperature(nc.variables['high_tmpk'][offset1:offset2,
                                                                j, i],
                                      'K').value("F")
@@ -75,7 +74,7 @@ def main():
     coffset1 = iemre.daily_offset(c2000)
     c2000 = ts2.replace(year=2000)
     coffset2 = iemre.daily_offset(c2000) + 1
-    cnc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'r')
+    cnc = ncopen(iemre.get_dailyc_ncname())
     chigh = datatypes.temperature(cnc.variables['high_tmpk'][coffset1:coffset2,
                                                              j, i],
                                   'K').value("F")
@@ -86,8 +85,7 @@ def main():
     cnc.close()
 
     if ts1.year > 2010:
-        fn = iemre.get_daily_mrms_ncname(ts1.year)
-        nc = netCDF4.Dataset(fn, 'r')
+        nc = ncopen(iemre.get_daily_mrms_ncname(ts1.year))
         j2 = int((lat - iemre.SOUTH) * 100.0)
         i2 = int((lon - iemre.WEST) * 100.0)
         mrms_precip = nc.variables['p01d'][offset1:offset2, j2, i2] / 25.4

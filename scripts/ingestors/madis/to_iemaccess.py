@@ -1,20 +1,18 @@
 """Suck in MADIS data into the iemdb"""
 from __future__ import print_function
-import time
 import datetime
 import os
 import sys
 import subprocess
 
 import numpy as np
-import netCDF4
 import pytz
 import psycopg2.extras
 import metpy.calc as mcalc
 from metpy.units import units
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, distance, speed
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 MY_PROVIDERS = ["KYTC-RWIS",
                 "KYMN",
@@ -63,14 +61,8 @@ def main():
     pgconn = get_dbconn('iem')
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     fn = find_file()
-    try:
-        nc = netCDF4.Dataset(fn)
-    except Exception as _:
-        # File may be in progress of being read, wait a little bit
-        time.sleep(20)
-        nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn, timeout=300)
 
-    nc.set_auto_mask(True)
     stations = nc.variables["stationId"][:]
     providers = nc.variables["dataProvider"][:]
     names = nc.variables["stationName"][:]
@@ -107,8 +99,8 @@ def main():
                 this_provider not in MY_PROVIDERS):
             continue
         name = names[recnum].tostring(
-            ).replace("'",  "").replace('\x00', '').replace('\xa0',
-                                                            ' ').strip()
+            ).replace("'", "").replace('\x00', '').replace('\xa0',
+                                                           ' ').strip()
         if name == '':
             continue
         if this_provider == 'MesoWest':

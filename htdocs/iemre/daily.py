@@ -7,9 +7,9 @@ import cgi
 import datetime
 import json
 
-import netCDF4
 import numpy as np
 from pyiem import iemre, datatypes
+from pyiem.util import ncopen
 
 
 def myrounder(val, precision):
@@ -48,12 +48,12 @@ def main():
                                     ))
         return
 
-    nc = netCDF4.Dataset(fn, 'r')
+    nc = ncopen(fn)
 
     c2000 = ts.replace(year=2000)
     coffset = iemre.daily_offset(c2000)
 
-    cnc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'r')
+    cnc = ncopen(iemre.get_dailyc_ncname())
 
     res['data'].append({
         'daily_high_f': myrounder(

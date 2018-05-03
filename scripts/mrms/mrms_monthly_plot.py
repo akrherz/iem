@@ -3,9 +3,9 @@ import datetime
 import sys
 
 import numpy as np
-import netCDF4
 from pyiem.datatypes import distance
 from pyiem.plot import MapPlot
+from pyiem.util import ncopen
 from pyiem import iemre
 
 
@@ -23,7 +23,7 @@ def do_month(year, month, routes):
     idx0 = iemre.daily_offset(sts)
     idx1 = iemre.daily_offset(ets)
 
-    nc = netCDF4.Dataset(iemre.get_daily_mrms_ncname(year), 'r')
+    nc = ncopen(iemre.get_daily_mrms_ncname(year), 'r')
 
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]

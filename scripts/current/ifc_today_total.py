@@ -6,17 +6,18 @@ import datetime
 import sys
 
 import numpy as np
-import netCDF4
 from pyiem.iemre import daily_offset
 from pyiem.plot import MapPlot, nwsprecip
 from pyiem.datatypes import distance
+from pyiem.util import ncopen
 
 
 def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,))
+    nc = ncopen("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,),
+                timeout=300)
     idx = daily_offset(ts)
     xaxis = nc.variables['lon'][:]
     yaxis = nc.variables['lat'][:]

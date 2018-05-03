@@ -4,16 +4,11 @@
 import datetime
 import sys
 
-import numpy as np
-import pyiem.iemre as iemre
-import netCDF4
-import pytz
 from pandas.io.sql import read_sql
 from metpy.units import units
 from metpy.calc import windchill
-from pyiem.datatypes import distance
-from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc, get_dbconn
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
 
 

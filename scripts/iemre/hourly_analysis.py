@@ -3,7 +3,6 @@ from __future__ import print_function
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 import pytz
 import pandas as pd
@@ -13,7 +12,7 @@ from metpy.gridding.interpolation import inverse_distance
 from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 # stop RuntimeWarning: invalid value encountered in greater
 np.warnings.filterwarnings('ignore')
 
@@ -173,8 +172,7 @@ def main(argv):
         ts = ts.replace(second=0, minute=0)
     ts = ts.replace(tzinfo=pytz.utc)
     # Load up our netcdf file!
-    nc = netCDF4.Dataset(iemre.get_hourly_ncname(ts.year), 'a')
-    nc.set_auto_scale(True)
+    nc = ncopen(iemre.get_hourly_ncname(ts.year), 'a', timeout=300)
     grid_hour(nc, ts)
     nc.close()
 

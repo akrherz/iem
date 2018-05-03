@@ -7,10 +7,10 @@ import os
 import sys
 import subprocess
 
-import netCDF4
 import pytz
 from pyiem.datatypes import temperature, speed
 import pyiem.meteorology as meteorology
+from pyiem.util import ncopen
 
 
 def s(val):
@@ -71,7 +71,7 @@ def main(argv):
     BOGUS = datetime.datetime(2000, 1, 1)
     BOGUS = BOGUS.replace(tzinfo=pytz.utc)
 
-    nc = netCDF4.Dataset(fn, 'r')
+    nc = ncopen(fn)
 
     for i, provider in enumerate(nc.variables["dataProvider"][:]):
         if provider.tostring().replace('\x00', '') != network:

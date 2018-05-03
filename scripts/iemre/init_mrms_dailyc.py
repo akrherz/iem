@@ -2,9 +2,9 @@
 from __future__ import print_function
 import datetime
 
-import netCDF4
 import numpy as np
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def init_year(ts):
@@ -12,7 +12,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     fn = iemre.get_dailyc_mrms_ncname()
-    nc = netCDF4.Dataset(fn, 'w')
+    nc = ncopen(fn, 'w')
     nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"
     nc.description = "IEM daily analysis on a 0.01 degree grid"

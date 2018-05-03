@@ -3,10 +3,9 @@ from __future__ import print_function
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 from pyiem.reference import TRACE_VALUE
 
 
@@ -26,7 +25,7 @@ def main():
 
     fn = sys.argv[1]
     station = sys.argv[2]
-    nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn)
 
     byear = nc.variables['byear'][:]
     maxt = nc.variables['maxt'][:]

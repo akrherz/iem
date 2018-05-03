@@ -4,13 +4,13 @@
 from __future__ import print_function
 import os
 import sys
-import time
 import subprocess
 import warnings
 import datetime
 
-from netCDF4 import Dataset, chartostring  # @UnresolvedImport
+from netCDF4 import chartostring  # @UnresolvedImport
 import numpy.ma
+from pyiem.util import ncopen
 from pyiem.datatypes import temperature
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -40,16 +40,7 @@ def main():
         if utc.minute > 30:
             print('madis2csv %s does not exist' % (fn,))
         sys.exit()
-    attempt = 0
-    nc = None
-    # Loop in case the file is being written while we attempt to open it
-    while attempt < 3:
-        try:
-            nc = Dataset(fn, 'r')
-            attempt = 3
-        except Exception as _exp:
-            time.sleep(10)
-            attempt += 1
+    nc = ncopen(fn, 'r', timeout=300)
     if nc is None:
         print(("madis2csv Numerous attempts to open MADIS netcdf %s failed!"
                ) % (fn,))

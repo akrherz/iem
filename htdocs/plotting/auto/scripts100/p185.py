@@ -4,7 +4,6 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-import netCDF4
 from pyiem import iemre, util
 from pyiem.datatypes import distance
 
@@ -68,7 +67,7 @@ def plotter(fdict):
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
-    nc = netCDF4.Dataset(ncfn, 'r')
+    nc = util.ncopen(ncfn)
 
     grid = np.zeros((len(nc.dimensions['lat']),
                      len(nc.dimensions['lon'])))

@@ -8,10 +8,9 @@ import sys
 import datetime
 
 import numpy as np
-import netCDF4
 from scipy.interpolate import NearestNDInterpolator
 from pyiem.iemre import daily_offset, hourly_offset
-from pyiem.util import utc
+from pyiem.util import utc, ncopen
 
 
 def workflow(valid):
@@ -21,8 +20,7 @@ def workflow(valid):
         return
     # read prism
     tidx = daily_offset(valid)
-    nc = netCDF4.Dataset("/mesonet/data/prism/%s_daily.nc" % (valid.year, ),
-                         'r')
+    nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year, ), 'r')
     ppt = nc.variables['ppt'][tidx, :, :]
     # missing as zero
     ppt = np.where(ppt.mask, 0, ppt)
@@ -32,9 +30,8 @@ def workflow(valid):
     (lons, lats) = np.meshgrid(lons, lats)
 
     # Interpolate this onto the stage4 grid
-    nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
-                          ) % (valid.year, ),
-                         'a')
+    nc = ncopen(("/mesonet/data/stage4/%s_stage4_hourly.nc"
+                 ) % (valid.year, ), 'a', timeout=300)
     p01m = nc.variables['p01m']
     p01m_status = nc.variables['p01m_status']
     s4lons = nc.variables['lon'][:]

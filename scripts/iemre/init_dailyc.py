@@ -3,11 +3,10 @@ from __future__ import print_function
 import datetime
 
 import geopandas as gpd
-import netCDF4
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def init_year(ts):
@@ -15,7 +14,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     fp = iemre.get_dailyc_ncname()
-    nc = netCDF4.Dataset(fp, 'w')
+    nc = ncopen(fp, 'w')
     nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"
     nc.description = "IEM daily analysis on a 0.125 degree grid"
@@ -93,7 +92,7 @@ def init_year(ts):
 
 def compute_hasdata():
     """Compute the has_data grid"""
-    nc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'a')
+    nc = ncopen(iemre.get_dailyc_ncname(), 'a', timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
     pgconn = get_dbconn('postgis')
     states = gpd.GeoDataFrame.from_postgis("""

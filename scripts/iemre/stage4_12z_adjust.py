@@ -6,11 +6,11 @@ import sys
 import datetime
 
 import numpy as np
-import netCDF4
 import pytz
 from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def merge(ts):
@@ -40,7 +40,7 @@ def merge(ts):
     stage4 = np.where(stage4 < 0., 0., stage4)
 
     # Open up our RE file
-    nc = netCDF4.Dataset(iemre.get_hourly_ncname(ts.year), 'a')
+    nc = ncopen(iemre.get_hourly_ncname(ts.year), 'a', timeout=300)
     ts0 = ts - datetime.timedelta(days=1)
     offset0 = iemre.hourly_offset(ts0)
     offset1 = iemre.hourly_offset(ts)

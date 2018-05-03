@@ -7,11 +7,11 @@ import datetime
 
 import numpy as np
 import pytz
-import netCDF4
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from pyiem.util import ncopen
 from pyiem.datatypes import temperature
 
 
@@ -98,9 +98,9 @@ def process(model, lon, lat):
         sys.stdout.write("Content-Type: image/png\n\n")
         fig.savefig(sys.stdout, format="png")
         return
-    nc = netCDF4.Dataset(
+    nc = ncopen(
             modelts.strftime(("/mesonet/share/frost/" +
-                              model + "/%Y%m%d%H%M_iaoutput.nc")), 'r')
+                              model + "/%Y%m%d%H%M_iaoutput.nc")))
     times = get_times(nc)
     i, j = get_ij(lon, lat, nc)
 

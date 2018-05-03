@@ -3,12 +3,11 @@ from __future__ import print_function
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def generic_gridder(nc, df, idx):
@@ -69,13 +68,11 @@ def workflow(ts):
     """Do Work"""
 
     # Load up our netcdf file!
-    nc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'a')
-    nc.set_auto_scale(True)
+    nc = ncopen(iemre.get_dailyc_ncname(), 'a', timeout=300)
     grid_day(nc, ts)
     nc.close()
 
-    nc = netCDF4.Dataset(iemre.get_dailyc_mrms_ncname(), 'a')
-    nc.set_auto_scale(True)
+    nc = ncopen(iemre.get_dailyc_mrms_ncname(), 'a', timeout=300)
     grid_day(nc, ts)
     nc.close()
 

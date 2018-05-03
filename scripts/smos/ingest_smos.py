@@ -7,8 +7,7 @@ import datetime
 import StringIO
 
 import pytz
-import netCDF4
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
 
@@ -17,7 +16,7 @@ def consume(scursor, fn, ts):
     """Actually process the filename at given timestamp
     """
     table = "data_%s" % (ts.strftime("%Y_%m"),)
-    nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn)
     gpids = nc.variables['Grid_Point_ID'][:]
     sms = nc.variables['Soil_Moisture'][:].tolist()
     optdepths = nc.variables['Optical_Thickness_Nad'][:].tolist()

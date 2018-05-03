@@ -5,12 +5,11 @@ import datetime
 import sys
 
 import numpy as np
-import pyiem.iemre as iemre
-import netCDF4
 import pytz
 from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc
+from pyiem.util import utc, ncopen
+import pyiem.iemre as iemre
 
 
 def doday(ts, realtime):
@@ -29,7 +28,7 @@ def doday(ts, realtime):
 
     idx = iemre.daily_offset(ts)
     ncfn = iemre.get_daily_mrms_ncname(ts.year)
-    nc = netCDF4.Dataset(ncfn)
+    nc = ncopen(ncfn, timeout=300)
     precip = nc.variables['p01d'][idx, :, :]
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]

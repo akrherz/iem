@@ -3,9 +3,9 @@ from __future__ import print_function
 import datetime
 import sys
 
-import netCDF4
 import numpy as np
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def init_year(ts):
@@ -14,7 +14,7 @@ def init_year(ts):
     """
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
-    nc = netCDF4.Dataset(fn, 'w')
+    nc = ncopen(fn, 'w')
     nc.title = "MRMS Daily Precipitation %s" % (ts.year,)
     nc.platform = "Grided Estimates"
     nc.description = "MRMS 0.01 degree grid"

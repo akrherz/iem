@@ -7,11 +7,10 @@ import sys
 import datetime
 
 import numpy as np
-import netCDF4
 from scipy.interpolate import NearestNDInterpolator
 from tqdm import tqdm
 import pygrib
-from pyiem.util import utc
+from pyiem.util import utc, ncopen
 from pyiem import iemre
 
 DEFAULTS = {'srad': 0, 'high_tmpk': 100, 'low_tmpk': 400, 'p01d': 0}
@@ -55,7 +54,7 @@ def merge(nc, valid, gribname, vname):
 def create_netcdf(valid):
     """Create and return the netcdf file"""
     ncfn = "/mesonet/data/iemre/cfs_%s.nc" % (valid.strftime("%Y%m%d"), )
-    nc = netCDF4.Dataset(ncfn, 'w')
+    nc = ncopen(ncfn, 'w')
     nc.title = "IEM Regridded CFS Member 1 Forecast %s" % (valid.year,)
     nc.platform = "Grided Forecast"
     nc.description = "IEM Regridded CFS on 0.125 degree grid"
@@ -133,8 +132,7 @@ def create_netcdf(valid):
     rsds.description = "Global Shortwave Irradiance"
 
     nc.close()
-    nc = netCDF4.Dataset(ncfn, 'a')
-    nc.set_auto_mask(True)
+    nc = ncopen(ncfn, 'a')
     return nc
 
 

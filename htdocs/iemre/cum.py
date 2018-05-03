@@ -8,11 +8,10 @@ import datetime
 import json
 import shutil
 
-import netCDF4
 import numpy as np
 import shapefile
 from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def main():
@@ -34,8 +33,7 @@ def main():
     offset0 = iemre.daily_offset(ts0)
     offset1 = iemre.daily_offset(ts1)
 
-    ncfn = iemre.get_daily_ncname(ts0.year)
-    nc = netCDF4.Dataset(ncfn, 'r')
+    nc = ncopen(iemre.get_daily_ncname(ts0.year))
 
     # 2-D precipitation, inches
     precip = np.sum(nc.variables['p01d'][offset0:offset1, :, :] / 25.4, axis=0)

@@ -3,14 +3,13 @@ from __future__ import print_function
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 import psycopg2.extras
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre, datatypes
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 NT = NetworkTable(["%sCLIMATE" % (abbr, ) for abbr in state_names])
 COOP = get_dbconn('coop', user='nobody')
@@ -80,10 +79,11 @@ def grid_day(nc, ts):
 
 
 def workflow(ts):
+    """our workflow"""
     # Load up a station table we are interested in
 
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mesonet/data/prism/prism_dailyc.nc", 'a')
+    nc = ncopen("/mesonet/data/prism/prism_dailyc.nc", 'a')
     grid_day(nc, ts)
     nc.close()
 

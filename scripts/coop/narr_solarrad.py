@@ -30,10 +30,9 @@ import sys
 import os
 
 import pyproj
-import netCDF4
 import numpy as np
 import pygrib
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-107.0 +y_0=0.0 +R=6367470.21484 +proj=lcc "
@@ -115,7 +114,7 @@ def do(date):
         if not os.path.isfile(fn):
             print('MISSING NARR: %s' % (fn,))
             sys.exit()
-        nc = netCDF4.Dataset(fn)
+        nc = ncopen(fn, timeout=300)
         rad = nc.variables['Downward_shortwave_radiation_flux'][0, :, :]
         if now == sts:
             xc = nc.variables['x'][:] * 1000.0  # convert to meters

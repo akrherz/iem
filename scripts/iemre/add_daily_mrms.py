@@ -5,9 +5,9 @@
 import datetime
 import sys
 
-import netCDF4
 import numpy as np
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def init_year(ts):
@@ -16,7 +16,7 @@ def init_year(ts):
     """
 
     fp = iemre.get_daily_mrms_ncname(ts.year)
-    nc = netCDF4.Dataset(fp, 'a')
+    nc = ncopen(fp, 'a', timeout=300)
 
     nc.createDimension('nv', 2)
 

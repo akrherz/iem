@@ -4,7 +4,6 @@ import os
 from collections import OrderedDict
 
 import numpy as np
-import netCDF4
 import geopandas as gpd
 from pyiem import iemre, util
 from pyiem.grid.zs import CachingZonalStats
@@ -73,7 +72,7 @@ def plotter(fdict):
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
-    nc = netCDF4.Dataset(ncfn, 'r')
+    nc = util.ncopen(ncfn)
     # Get the state weight
     df = gpd.GeoDataFrame.from_postgis("""
     SELECT the_geom from states where state_abbr = %s
@@ -115,7 +114,7 @@ def plotter(fdict):
     nc.close()
 
     # Get climatology
-    nc = netCDF4.Dataset(iemre.get_dailyc_mrms_ncname())
+    nc = util.ncopen(iemre.get_dailyc_mrms_ncname())
     if (idx1 - idx0) < 32:
         c_p01d = distance(np.sum(
             nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
@@ -127,11 +126,11 @@ def plotter(fdict):
             if idx0 == i:
                 c_p01d = distance(
                     np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                                  'MM').value('IN')
+                    'MM').value('IN')
             else:
                 c_p01d += distance(
                     np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                                   'MM').value('IN')
+                    'MM').value('IN')
 
     nc.close()
 

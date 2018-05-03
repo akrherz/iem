@@ -2,9 +2,9 @@
 import datetime
 import sys
 
-import netCDF4
 import numpy as np
 from pyiem import prism
+from pyiem.util import ncopen
 
 
 def init_year(ts):
@@ -13,7 +13,7 @@ def init_year(ts):
     """
 
     fn = "/mesonet/data/prism/%s_daily.nc" % (ts.year, )
-    nc = netCDF4.Dataset(fn, 'w')
+    nc = ncopen(fn, 'w')
     nc.title = "PRISM Daily Data for %s" % (ts.year,)
     nc.platform = "Grided Observations"
     nc.description = "PRISM Data on a 0.04 degree grid"

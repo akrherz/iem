@@ -6,11 +6,10 @@ import sys
 
 import numpy as np
 import pytz
-import netCDF4
 from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import utc
+from pyiem.util import utc, ncopen
 
 
 def to_netcdf(valid):
@@ -28,8 +27,8 @@ def to_netcdf(valid):
     # values over 10 inches are bad
     val = np.where(val > 250., 0, val)
 
-    nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
-                          ) % (valid.year, ), 'a')
+    nc = ncopen(("/mesonet/data/stage4/%s_stage4_hourly.nc"
+                 ) % (valid.year, ), 'a', timeout=300)
     tidx = iemre.hourly_offset(valid)
     if nc.variables['p01m_status'][tidx] > 1:
         print("Skipping stage4_hourlyre write as variable status is >1")
@@ -51,8 +50,8 @@ def merge(valid):
     """
     Process an hour's worth of stage4 data into the hourly RE
     """
-    nc = netCDF4.Dataset(("/mesonet/data/stage4/%s_stage4_hourly.nc"
-                          ) % (valid.year, ), 'r')
+    nc = ncopen(("/mesonet/data/stage4/%s_stage4_hourly.nc"
+                 ) % (valid.year, ), 'r')
     tidx = iemre.hourly_offset(valid)
     val = nc.variables['p01m'][tidx, :, :]
     # print("stage4 mean: %.2f max: %.2f" % (np.mean(val), np.max(val)))
@@ -73,7 +72,7 @@ def merge(valid):
     # print("Resulting mean: %.2f max: %.2f" % (np.mean(res), np.max(res)))
 
     # Open up our RE file
-    nc = netCDF4.Dataset(iemre.get_hourly_ncname(valid.year), 'a')
+    nc = ncopen(iemre.get_hourly_ncname(valid.year), 'a', timeout=300)
     nc.variables["p01m"][tidx, :, :] = res
     # print(("Readback mean: %.2f max: %.2f"
     #       ) % (np.mean(nc.variables["p01m"][tidx, :, :]),

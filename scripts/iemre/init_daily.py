@@ -4,11 +4,10 @@ import datetime
 import sys
 
 import geopandas as gpd
-import netCDF4
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def init_year(ts):
@@ -17,7 +16,7 @@ def init_year(ts):
     """
 
     fn = iemre.get_daily_ncname(ts.year)
-    nc = netCDF4.Dataset(fn, 'w')
+    nc = ncopen(fn, 'w')
     nc.title = "IEM Daily Reanalysis %s" % (ts.year,)
     nc.platform = "Grided Observations"
     nc.description = "IEM daily analysis on a 0.125 degree grid"
@@ -171,7 +170,7 @@ def init_year(ts):
 
 def compute_hasdata(year):
     """Compute the has_data grid"""
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(year), 'a')
+    nc = ncopen(iemre.get_daily_ncname(year), 'a', timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
     pgconn = get_dbconn('postgis')
     states = gpd.GeoDataFrame.from_postgis("""
@@ -179,14 +178,13 @@ def compute_hasdata(year):
     where state_abbr not in ('AK', 'HI')
     """, pgconn, index_col='state_abbr', geom_col='the_geom')
     data = np.flipud(nc.variables['hasdata'][:, :])
-    _ = czs.gen_stats(data, states['the_geom'])
+    czs.gen_stats(data, states['the_geom'])
     for nav in czs.gridnav:
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
-        data[nav.y0:(nav.y0 + nav.ysz),
-             nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
-                                                   data[nav.y0:(nav.y0 + nav.ysz),
-                                                        nav.x0:(nav.x0 + nav.xsz)])
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.yx, nav.x0 + nav.xsz)
+        data[jslice, islice] = np.where(grid > 0, 1, data[jslice, islice])
     nc.variables['hasdata'][:, :] = np.flipud(data)
     nc.close()
 

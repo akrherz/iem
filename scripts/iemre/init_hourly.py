@@ -4,11 +4,10 @@ import datetime
 import sys
 
 import geopandas as gpd
-import netCDF4
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def init_year(ts):
@@ -17,7 +16,7 @@ def init_year(ts):
     """
 
     fn = iemre.get_hourly_ncname(ts.year)
-    nc = netCDF4.Dataset(fn, 'w')
+    nc = ncopen(fn, 'w')
     nc.title = "IEM Hourly Reanalysis %s" % (ts.year,)
     nc.platform = "Grided Observations"
     nc.description = "IEM hourly analysis on a 0.125 degree grid"
@@ -129,7 +128,7 @@ def init_year(ts):
 
 def compute_hasdata(year):
     """Compute the has_data grid"""
-    nc = netCDF4.Dataset(iemre.get_hourly_ncname(year), 'a')
+    nc = ncopen(iemre.get_hourly_ncname(year), 'a', timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
     pgconn = get_dbconn('postgis')
     states = gpd.GeoDataFrame.from_postgis("""

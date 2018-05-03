@@ -7,22 +7,20 @@ import datetime
 import os
 import sys
 
-import netCDF4
 import pyproj
 import pytz
 import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc, ncopen
 
 
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
                    " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"))
 
-SWITCH_DATE = datetime.datetime(2014, 10, 10, 20)
-SWITCH_DATE = SWITCH_DATE.replace(tzinfo=pytz.utc)
+SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
 def do_coop(ts):
@@ -50,7 +48,7 @@ def do_coop(ts):
                                np.array(vals))
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
 
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'a')
+    nc = ncopen(iemre.get_daily_ncname(ts.year), 'a', timeout=300)
     offset = iemre.daily_offset(ts)
     # Data above is MJ / d / m-2, we want W / m-2
     nc.variables['rsds'][offset, :, :] = nn(xi, yi) * 1000000. / 86400.
@@ -63,15 +61,15 @@ def do_hrrr(ts):
     xaxis = None
     yaxis = None
     for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
-        utc = ts.replace(hour=hr).astimezone(pytz.timezone("UTC"))
-        fn = utc.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                           "hrrr.t%Hz.3kmf00.grib2"))
+        utcnow = ts.replace(hour=hr).astimezone(pytz.utc)
+        fn = utcnow.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+                              "hrrr.t%Hz.3kmf00.grib2"))
         if not os.path.isfile(fn):
             # print 'HRRR file %s missing' % (fn,)
             continue
         grbs = pygrib.open(fn)
         try:
-            if utc >= SWITCH_DATE:
+            if utcnow >= SWITCH_DATE:
                 grb = grbs.select(name='Downward short-wave radiation flux')
             else:
                 grb = grbs.select(parameterNumber=192)
@@ -104,8 +102,7 @@ def do_hrrr(ts):
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ts.year), 'a')
-    nc.set_auto_scale(True)
+    nc = ncopen(iemre.get_daily_ncname(ts.year), 'a', timeout=300)
     offset = iemre.daily_offset(ts)
     hasdata = nc.variables['hasdata'][:, :]
     data = nc.variables['rsds'][offset, :, :]

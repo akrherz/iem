@@ -10,9 +10,9 @@ from __future__ import print_function
 import datetime
 
 import numpy as np
-import netCDF4
 from pyiem.plot import MapPlot
 from pyiem import iemre
+from pyiem.util import ncopen
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
     sts = ets - datetime.timedelta(days=121)
 
     # Get the normal accumm
-    cnc = netCDF4.Dataset(iemre.get_dailyc_ncname(), 'r')
+    cnc = ncopen(iemre.get_dailyc_ncname(), 'r')
     lons = cnc.variables['lon'][:]
     lats = cnc.variables['lat'][:]
     index0 = iemre.daily_offset(sts)
@@ -36,15 +36,15 @@ def main():
 
     # Get the observed precip
     if sts.year != ets.year:  # spanner, darn
-        onc = netCDF4.Dataset(iemre.get_daily_ncname(sts.year))
+        onc = ncopen(iemre.get_daily_ncname(sts.year))
         obprecip = np.sum(onc.variables['p01d'][index0:, :, :], 0)
         onc.close()
-        onc = netCDF4.Dataset(iemre.get_daily_ncname(ets.year))
+        onc = ncopen(iemre.get_daily_ncname(ets.year))
         obprecip = obprecip + np.sum(onc.variables['p01d'][:index1, :, :], 0)
         onc.close()
     else:
         ncfn = iemre.get_daily_ncname(sts.year)
-        onc = netCDF4.Dataset(ncfn, 'r')
+        onc = ncopen(ncfn, 'r')
         obprecip = np.sum(onc.variables['p01d'][index0:index1, :, :], 0)
         onc.close()
 

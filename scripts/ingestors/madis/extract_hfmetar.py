@@ -11,12 +11,11 @@ import datetime
 import warnings
 
 import pytz
-import netCDF4
 import numpy as np
 from metar import Metar
 from pyiem.datatypes import temperature, distance, pressure, speed
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 from pyiem.reference import TRACE_VALUE
 
 warnings.simplefilter('ignore', RuntimeWarning)
@@ -60,7 +59,7 @@ def process(ncfn):
     for row in icursor:
         xref[row[0]] = row[1]
     icursor.close()
-    nc = netCDF4.Dataset(ncfn)
+    nc = ncopen(ncfn)
     data = {}
     for vname in ['stationId', 'observationTime', 'temperature', 'dewpoint',
                   'altimeter',  # Pa

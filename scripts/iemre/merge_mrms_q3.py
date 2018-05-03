@@ -7,12 +7,12 @@ import gzip
 import tempfile
 
 import pytz
-import netCDF4
 import numpy as np
 import requests
 import pygrib
 import pyiem.mrms as mrms
 from pyiem import iemre
+from pyiem.util import ncopen
 
 TMP = "/mesonet/tmp"
 
@@ -24,8 +24,7 @@ def run(ts):
       ts (datetime): timestamptz at midnight central time and we are running
         forward in time
     """
-    nc = netCDF4.Dataset(iemre.get_daily_mrms_ncname(ts.year), 'a')
-    nc.set_auto_scale(True)
+    nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), 'a', timeout=300)
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 

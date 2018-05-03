@@ -12,13 +12,12 @@ import sys
 import subprocess
 import datetime
 
-import netCDF4
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.stats import zscore
 from metpy.gridding.interpolation import inverse_distance
-from pyiem import iemre, datatypes, reference
-from pyiem.util import get_dbconn, utc
+from pyiem import iemre, datatypes
+from pyiem.util import get_dbconn, utc, ncopen
 
 PGCONN = get_dbconn('iem', user='nobody')
 COOP_PGCONN = get_dbconn('coop', user='nobody')
@@ -93,10 +92,10 @@ def do_precip(nc, ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = netCDF4.Dataset(ncfn)
+        hnc = ncopen(ncfn, timeout=300)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
-        hnc = netCDF4.Dataset(iemre.get_hourly_ncname(sts.year))
+        hnc = ncopen(iemre.get_hourly_ncname(sts.year), timeout=300)
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
@@ -108,7 +107,7 @@ def do_precip(nc, ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = netCDF4.Dataset(ncfn)
+        hnc = ncopen(ncfn, timeout=300)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     nc.variables['p01d'][offset] = np.where(phour < 0, 0, phour)
@@ -130,10 +129,10 @@ def do_precip12(nc, ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = netCDF4.Dataset(ncfn)
+        hnc = ncopen(ncfn)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
-        hnc = netCDF4.Dataset(iemre.get_hourly_ncname(sts.year))
+        hnc = ncopen(iemre.get_hourly_ncname(sts.year))
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
@@ -145,7 +144,7 @@ def do_precip12(nc, ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = netCDF4.Dataset(ncfn)
+        hnc = ncopen(ncfn)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     nc.variables['p01d_12z'][offset] = np.where(phour < 0, 0, phour)
@@ -240,8 +239,7 @@ def grid_day12(nc, ts, domain):
 
 
 def grid_day(nc, ts, domain):
-    """
-    """
+    """Do our gridding"""
     offset = iemre.daily_offset(ts)
     mybuf = 2.
     if ts.year > 1927:
@@ -333,7 +331,7 @@ def workflow(ts, irealtime):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
-    nc = netCDF4.Dataset(ncfn, 'a')
+    nc = ncopen(ncfn, 'a')
     domain = nc.variables['hasdata'][:, :]
     # For this date, the 12 UTC COOP obs will match the date
     grid_day12(nc, ts, domain)
@@ -347,7 +345,7 @@ def workflow(ts, irealtime):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
-    nc = netCDF4.Dataset(ncfn, 'a')
+    nc = ncopen(ncfn, 'a', timeout=300)
     grid_day(nc, ts, domain)
     do_precip(nc, ts)
     nc.close()

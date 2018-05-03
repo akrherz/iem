@@ -3,10 +3,9 @@ import datetime
 from collections import OrderedDict
 
 import numpy as np
-import netCDF4
 from pyiem import iemre
 from pyiem.datatypes import temperature, speed
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, ncopen
 
 PDICT = OrderedDict((('p01d_12z', '24 Hour Precipitation at 12 UTC'),
                      ('p01d', 'Calendar Day Precipitation'),
@@ -56,7 +55,7 @@ def plotter(fdict):
     varname = ctx['var']
 
     idx0 = iemre.daily_offset(date)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(date.year), 'r')
+    nc = ncopen(iemre.get_daily_ncname(date.year))
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
     if varname == 'rsds':

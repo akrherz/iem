@@ -3,13 +3,12 @@ from __future__ import print_function
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 import geopandas as gpd
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
@@ -43,7 +42,7 @@ def update_database(stid, valid, high, low, precip, snow, snowd):
 def do_day(valid):
     """ Process a day please """
     idx = iemre.daily_offset(valid)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(valid.year), 'r')
+    nc = ncopen(iemre.get_daily_ncname(valid.year), 'r', timeout=300)
     high = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
                        'K').value('F')
     low = temperature(nc.variables['low_tmpk_12z'][idx, :, :],

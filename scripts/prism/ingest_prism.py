@@ -15,8 +15,8 @@ import subprocess
 
 import rasterio
 import numpy as np
-import netCDF4
 from pyiem.iemre import daily_offset
+from pyiem.util import ncopen
 
 
 def do_process(valid, fn):
@@ -24,8 +24,7 @@ def do_process(valid, fn):
     # shape of data is (1, 621, 1405)
     data = rasterio.open(fn).read()
     varname = fn.split("_")[1]
-    nc = netCDF4.Dataset("/mesonet/data/prism/%s_daily.nc" % (valid.year,),
-                         'a')
+    nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year,), 'a')
     idx = daily_offset(valid)
     nc.variables[varname][idx] = np.flipud(data[0])
     nc.close()

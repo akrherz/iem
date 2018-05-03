@@ -2,13 +2,12 @@
 import datetime
 
 import numpy as np
-import netCDF4
 import pandas as pd
 import geopandas as gpd
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, ncopen
 from pyiem import reference
 
 
@@ -64,7 +63,7 @@ def plotter(fdict):
                                            geom_col='the_geom')
 
     sidx = iemre.daily_offset(sts)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(sts.year))
+    nc = ncopen(iemre.get_daily_ncname(sts.year))
     czs = CachingZonalStats(iemre.AFFINE)
     hasdata = np.zeros((nc.dimensions['lat'].size,
                         nc.dimensions['lon'].size))
@@ -72,10 +71,10 @@ def plotter(fdict):
     for nav in czs.gridnav:
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
-        hasdata[nav.y0:(nav.y0 + nav.ysz),
-                nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
-                                                      hasdata[nav.y0:(nav.y0 + nav.ysz),
-                                                              nav.x0:(nav.x0 + nav.xsz)])
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+        hasdata[jslice, islice] = np.where(grid > 0, 1,
+                                           hasdata[jslice, islice])
     st = np.flipud(hasdata)
     stpts = np.sum(np.where(hasdata > 0, 1, 0))
 
@@ -88,7 +87,7 @@ def plotter(fdict):
                      })
 
     eidx = iemre.daily_offset(ets)
-    nc = netCDF4.Dataset(iemre.get_daily_ncname(ets.year))
+    nc = ncopen(iemre.get_daily_ncname(ets.year))
     snowd = nc.variables['snowd_12z'][:eidx, :, :]
     nc.close()
     for i in range(snowd.shape[0]):

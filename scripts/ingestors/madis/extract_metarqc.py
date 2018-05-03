@@ -7,11 +7,10 @@ import re
 import sys
 import datetime
 
-import netCDF4
 import numpy as np
 import pytz
 from pyiem.datatypes import temperature
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ncopen
 
 
 def figure(val, qcval):
@@ -47,7 +46,7 @@ def main():
     if not os.path.isfile(fn):
         sys.exit()
 
-    nc = netCDF4.Dataset(fn)
+    nc = ncopen(fn)
 
     ids = nc.variables["stationName"]
     nc_tmpk = nc.variables["temperature"]
@@ -66,7 +65,7 @@ def main():
         if sid[0] == "K":
             ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
                                     seconds=nc.variables["timeObs"][j])
-            ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+            ts = ts.replace(tzinfo=pytz.utc)
             (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
             (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
             (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
