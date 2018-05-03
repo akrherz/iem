@@ -119,7 +119,7 @@ def plotter(fdict):
                              station,  tuple(months), tuple(months), days),
                   index_col=None)
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
     ylabels = []
     fmt = '%.2f' if varname in ['total_precip', ] else '%.0f'
     for _, row in df.iterrows():

@@ -1,25 +1,11 @@
 """Precip days to accumulate"""
 import datetime
-import os
-from collections import OrderedDict
 
 import numpy as np
+import geopandas as gpd
 from pyiem import iemre, util
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
-
-PDICT = OrderedDict([
-    ('IA', 'Iowa'),
-    ('IL', 'Illinois'),
-    ('KS', 'Kansas'),
-    ('KY', 'Kentucky'),
-    ('MI', 'Michigan'),
-    ('MN', 'Minnesota'),
-    ('MO', 'Missouri'),
-    ('NE', 'Nebraska'),
-    ('ND', 'North Dakota'),
-    ('OH', 'Ohio'),
-    ('SD', 'South Dakota'),
-    ('WI', 'Wisconsin')])
 
 
 def get_description():
@@ -34,8 +20,8 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='select', name='sector', default='IA',
-             label='Select Sector:', options=PDICT),
+        dict(type='state', name='sector', default='IA',
+             label='Select State:'),
         dict(type='date', name='date',
              default=today.strftime("%Y/%m/%d"),
              label='Date:', min="2011/01/01"),
@@ -61,24 +47,40 @@ def plotter(fdict):
     if window_sts.year != date.year:
         raise ValueError('Sorry, do not support multi-year plots yet!')
 
-    idx0 = iemre.daily_offset(window_sts)
+    # idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
     ncfn = iemre.get_daily_mrms_ncname(date.year)
     ncvar = 'p01d'
-    if not os.path.isfile(ncfn):
-        raise ValueError("No data for that year, sorry.")
     nc = util.ncopen(ncfn)
+    if nc is None:
+        raise ValueError("No data for that year, sorry.")
 
-    grid = np.zeros((len(nc.dimensions['lat']),
-                     len(nc.dimensions['lon'])))
-    total = np.zeros((len(nc.dimensions['lat']),
-                      len(nc.dimensions['lon'])))
+    # Get the state weight
+    df = gpd.GeoDataFrame.from_postgis("""
+    SELECT the_geom from states where state_abbr = %s
+    """, util.get_dbconn('postgis'), params=(sector, ), index_col=None,
+                                       geom_col='the_geom')
+    czs = CachingZonalStats(iemre.MRMS_AFFINE)
+    czs.gen_stats(np.zeros((nc.variables['lat'].size,
+                            nc.variables['lon'].size)), df['the_geom'])
+    jslice = None
+    islice = None
+    for nav in czs.gridnav:
+        # careful here as y is flipped in this context
+        jslice = slice(nc.variables['lat'].size - (nav.y0 + nav.ysz),
+                       nc.variables['lat'].size - nav.y0)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+
+    grid = np.zeros((jslice.stop - jslice.start,
+                     islice.stop - islice.start))
+    total = np.zeros((jslice.stop - jslice.start,
+                      islice.stop - islice.start))
     for i, idx in enumerate(range(idx1, idx1-90, -1)):
-        total += nc.variables[ncvar][idx, :, :]
+        total += nc.variables[ncvar][idx, jslice, islice]
         grid = np.where(np.logical_and(grid == 0,
                                        total > threshold_mm), i, grid)
-    lon = np.append(nc.variables['lon'][:], [-80.5])
-    lat = np.append(nc.variables['lat'][:], [49.])
+    lon = nc.variables['lon'][islice]
+    lat = nc.variables['lat'][jslice]
     nc.close()
 
     mp = MapPlot(sector='state', state=sector, titlefontsize=14,

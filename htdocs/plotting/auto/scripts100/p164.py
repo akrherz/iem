@@ -69,7 +69,7 @@ def plotter(fdict):
     from data GROUP by valid ORDER by valid ASC
     """, pgconn, params=(sts, ets), index_col='valid')
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
     for v in ['precip', 'snow']:
         if varname == v:
             xlabel = "<-- No %s %%   |     %s   %% -->" % (v.capitalize(),

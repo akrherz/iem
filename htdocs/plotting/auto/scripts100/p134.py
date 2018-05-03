@@ -123,7 +123,7 @@ def plotter(fdict):
     ctx['nt'] = NetworkTable(network)
     df = get_data(ctx)
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
 
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_axes([0.1, 0.3, 0.75, 0.6])

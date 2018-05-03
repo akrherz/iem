@@ -110,7 +110,7 @@ def plotter(fdict):
     date = ctx['date']
     df = get_data(fdict)
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
 
     (fig, ax) = plt.subplots(1, 1)
     ax.scatter(df['before'].values, df['after'].values)

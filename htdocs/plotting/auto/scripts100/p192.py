@@ -105,7 +105,7 @@ def plotter(fdict):
         title = "NWS CWA %s [%s]" % (nt.sts[ctx['wfo']]['name'], ctx['wfo'])
     df, valid = get_df(ctx, bnds)
     if df.empty:
-        return "No data was found for your query"
+        raise ValueError("No data was found for your query")
     mp = MapPlot(sector=('state' if ctx['t'] == 'state' else 'cwa'),
                  state=ctx['state'],
                  cwa=(ctx['wfo'] if len(ctx['wfo']) == 3 else ctx['wfo'][1:]),

@@ -114,7 +114,7 @@ def plotter(fdict):
                              tuple(months)),
                   index_col=None)
     if len(df.index) == 0:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
     ydf = df.groupby('year').sum()

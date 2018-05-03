@@ -145,7 +145,7 @@ def plotter(fdict):
     ctx = get_context(fdict)
     df = ctx['df']
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
 
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))

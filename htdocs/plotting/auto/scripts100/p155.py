@@ -2,9 +2,9 @@
 import datetime
 from collections import OrderedDict
 
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
-from pandas.io.sql import read_sql
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -99,7 +99,7 @@ def plotter(fdict):
                              tuple(months)),
                   index_col=None)
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
     ylabels = []
     fmt = '%.2f' if varname in ['max_p01i', ] else '%.0f'
     hours = []

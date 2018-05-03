@@ -167,7 +167,7 @@ def plotter(fdict):
     nt = NetworkTable(network)
     df = get_data(fdict, nt)
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
 
     (fig, ax) = plt.subplots(1, 1)
     ax.plot(df.index.values, df['avg'], c='k', lw=2, label='Average')

@@ -4,8 +4,8 @@ import os
 import datetime
 import tempfile
 import imp
-import traceback
 import json
+import traceback
 from io import BytesIO
 
 import numpy as np
@@ -19,6 +19,9 @@ import matplotlib.pyplot as plt
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all='ignore')
 
+
+HTTP200 = "200 OK"
+HTTP400 = "400 Bad Request"
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 if BASEDIR not in sys.path:
     sys.path.insert(0, BASEDIR)
@@ -59,29 +62,32 @@ def get_response_headers(fmt):
     return res
 
 
+def error_image(message, fmt):
+    """Create an error image"""
+    plt.close()
+    _, ax = plt.subplots(1, 1)
+    msg = "IEM Autoplot generation resulted in an error\n%s" % (message, )
+    ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center',
+            va='center')
+    ram = BytesIO()
+    plt.axis('off')
+    plt.savefig(ram, format=fmt, dpi=100)
+    ram.seek(0)
+    plt.close()
+    return ram.read()
+
+
 def handle_error(exp, fmt, uri):
-    """Handle an error and provide user something slightly bettter than
-    busted image"""
-    if isinstance(exp, Exception):
-        if isinstance(exp, ValueError):
-            sys.stderr.write("[URI:%s] %s\n" % (uri, exp))
-        else:
-            sys.stderr.write("[URI:%s] Unanticipated Exception\n" % (uri, ))
-            traceback.print_exc(file=sys.stderr)
+    """Handle errors"""
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    tb = traceback.extract_tb(exc_traceback)[-1]
+    sys.stderr.write(("URI:%s %s method:%s lineno:%s %s\n"
+                      ) % (uri, exp.__class__.__name__, tb[2], tb[1], exp))
+    del(exc_type, exc_value, exc_traceback, tb)
     if fmt in ['png', 'svg', 'pdf']:
-        plt.close()
-        _, ax = plt.subplots(1, 1)
-        msg = "IEM Autoplot generation resulted in an error\n%s" % (str(exp),)
-        ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center',
-                va='center')
-        ram = BytesIO()
-        plt.axis('off')
-        plt.savefig(ram, format=fmt, dpi=100)
-        ram.seek(0)
-        plt.close()
-        return ram.read()
-    if isinstance(exp, str):
-        return exp
+        return error_image(str(exp), fmt)
+    elif fmt == 'js':
+        return "alert('%s');" % (str(exp), )
     return str(exp)
 
 
@@ -99,12 +105,11 @@ def get_res_by_fmt(p, fmt, fdict):
         res = a.highcharts(fdict)
     else:
         res = a.plotter(fdict)
-        # res should be either a 2 or 3 length tuple, rectify this otherwise
-        if not isinstance(res, tuple):
-            res = [res, None, None]
-        else:
-            if len(res) == 2:
-                res = [res[0], res[1], None]
+    # res should be either a 2 or 3 length tuple, rectify this otherwise
+    if not isinstance(res, tuple):
+        res = [res, None, None]
+    if len(res) == 2:
+        res = [res[0], res[1], None]
 
     return res, meta
 
@@ -121,98 +126,109 @@ def plot_metadata(fig, start_time, end_time, p):
              va='bottom', ha='right', fontsize=8)
 
 
-def workflow(form, fmt):
-    """See how we are called"""
+def workflow(environ, form, fmt):
+    """we need to return a status and content"""
+    # q is the full query string that was rewritten to use by apache
     q = form.get('q', "")
     fdict = parser(q)
-    p = int(form.get('p', 0))
+    # p=number is the python backend code called by this framework
+    scriptnum = int(form.get('p', 0))
     dpi = int(fdict.get('dpi', 100))
 
-    mckey = ("/plotting/auto/plot/%s/%s.%s" % (p, q, fmt)).replace(" ", "")
+    # memcache keys can not have spaces
+    mckey = (("/plotting/auto/plot/%s/%s.%s"
+              ) % (scriptnum, q, fmt)).replace(" ", "")
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     # Don't fetch memcache when we have _cb set for an inbound CGI
     res = mc.get(mckey) if fdict.get('_cb') is None else None
     if res:
-        return res
-    # do the call please
+        return HTTP200, res
+    # memcache failed to save us work, so work we do!
     start_time = datetime.datetime.utcnow()
-    res, meta = get_res_by_fmt(p, fmt, fdict)
-    end_time = datetime.datetime.utcnow()
-    if fmt == 'js':
-        # Legacy support of when the js option returns a dictionary, which
-        # we then want to serialize to JSON
-        if isinstance(res, dict):
-            res = '$("#ap_container").highcharts(%s);' % (json.dumps(res),)
-    else:
-        [fig, df, report] = res
-        # If fig is a string, we hit an error!
-        if isinstance(fig, str):
-            raise ValueError(fig)
-        if fig is not None:
-            plot_metadata(fig, start_time, end_time, p)
-        ram = BytesIO()
-        if fmt in ['png', 'pdf', 'svg']:
-            plt.savefig(ram, format=fmt, dpi=dpi)
-            ram.seek(0)
-            res = ram.read()
-        if fmt in ['csv', 'txt', 'xlsx']:
-            if df is not None:
-                if fmt == 'csv':
-                    res = df.to_csv(index=(df.index.name is not None))
-                elif fmt == 'xlsx':
-                    (_, tmpfn) = tempfile.mkstemp()
-                    writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter',
-                                            options={'remove_timezone': True})
-                    df.index.name = None
-                    df.to_excel(writer,
-                                encoding='latin-1', sheet_name='Sheet1')
-                    writer.close()
-                    del writer
-                    res = open(tmpfn, 'rb').read()
-                    os.unlink(tmpfn)
-                del df
-            if fmt == 'txt' and report is not None:
-                res = report
-        plt.close()
-
-    sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s\n"
-                      ) % (p, (end_time - start_time).total_seconds(), mckey))
+    # res should be a 3 length tuple
     try:
-        if not isinstance(res, list):
-            mc.set(mckey, res, meta.get('cache', 43200))
+        res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
+    except (ImportError, SyntaxError, IndentationError, SystemError,
+            RuntimeWarning) as exp:
+        # Some errors we don't want to handle and let failures happen
+        # ie travis-ci testing
+        raise exp
+    except Exception as exp:
+        return HTTP400, handle_error(exp, fmt, environ.get('REQUEST_URI'))
+    end_time = datetime.datetime.utcnow()
+    sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s\n"
+                      ) % (scriptnum, (end_time - start_time).total_seconds(),
+                           mckey))
+
+    [mixedobj, df, report] = res
+    # Our output content
+    content = ""
+    if fmt == 'js' and isinstance(mixedobj, dict):
+        content = ('$("#ap_container").highcharts(%s);'
+                   ) % (json.dumps(mixedobj),)
+    elif fmt == 'js':
+        content = mixedobj
+    elif fmt in ['svg', 'png', 'pdf'] and isinstance(mixedobj, plt.Figure):
+        # if our content is a figure, then add some fancy metadata to plot
+        plot_metadata(mixedobj, start_time, end_time, scriptnum)
+        ram = BytesIO()
+        plt.savefig(ram, format=fmt, dpi=dpi)
+        plt.close()
+        ram.seek(0)
+        content = ram.read()
+        del ram
+    elif fmt in ['svg', 'png', 'pdf'] and mixedobj is None:
+        return HTTP400, error_image(("plot requested but backend "
+                                     "does not support plots"), fmt)
+    elif fmt == 'txt' and report is not None:
+        content = report
+    elif fmt in ['csv', 'xlsx'] and df is not None:
+        if fmt == 'csv':
+            content = df.to_csv(index=(df.index.name is not None))
+        elif fmt == 'xlsx':
+            # Can't write to ram buffer yet, unimplmented upstream
+            (_, tmpfn) = tempfile.mkstemp()
+            writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter',
+                                    options={'remove_timezone': True})
+            df.index.name = None
+            df.to_excel(writer,
+                        encoding='latin-1', sheet_name='Sheet1')
+            writer.close()
+            del writer
+            content = open(tmpfn, 'rb').read()
+            os.unlink(tmpfn)
+        del df
+    else:
+        sys.stderr.write(("Undefined edge case: fmt: %s uri: %s\n"
+                          ) % (fmt, environ.get('REQUEST_URI')))
+        raise Exception("Undefined autoplot action")
+
+    try:
+        mc.set(mckey, content, meta.get('cache', 43200))
     except Exception as exp:
         sys.stderr.write("Exception while writting key: %s\n%s\n" % (mckey,
                                                                      exp))
-    return res
+    if isinstance(mixedobj, plt.Figure):
+        plt.close()
+    return HTTP200, content
 
 
 def application(environ, start_response):
     """Our Application!"""
-    # sys.stderr.write(
-    # 'wsgi.multithread = %s\n' % repr(environ['wsgi.multithread']))
-    # sys.stderr.write(
-    # 'wsgi.progress_group = %s\n' % repr(environ['mod_wsgi.process_group']))
+    # Parse the request that was sent our way
     fields = parse_formvars(environ)
+    # Figure out the format that was requested from us, default to png
     fmt = fields.get('fmt', 'png')[:4]
+    # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
-    try:
-        status = "200 OK"
-        output = workflow(fields, fmt)
-    except Exception as exp:
-        # Lets reserve 500 errors for some unknown server failure
-        status = "400 Bad Request"
-        try:
-            output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
-            del exp
-        except Exception as exp:
-            del exp
-            output = handle_error('Unknown', fmt, environ.get('REQUEST_URI'))
+    # do the work!
+    status, output = workflow(environ, fields, fmt)
     start_response(status, response_headers)
-    # sys.stderr.write("OUT: get_fignums() %s\n" % (repr(plt.get_fignums(), )))
+    # python3 mod-wsgi requires returning bytes, so we encode strings
     if sys.version_info[0] > 2 and isinstance(output, str):
         output = output.encode('UTF-8')
     return [output]
 
 
-from paste.exceptions.errormiddleware import ErrorMiddleware
-application = ErrorMiddleware(application, debug=True)
+# from paste.exceptions.errormiddleware import ErrorMiddleware
+# application = ErrorMiddleware(application, debug=True)

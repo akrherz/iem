@@ -47,7 +47,7 @@ def plotter(fdict):
         extract(minute from valid) > 50) and report_type = 2
     """, pgconn, params=(station,), index_col=None)
     if df.empty:
-        return 'Error, no results returned!'
+        raise ValueError('Error, no results returned!')
 
     w = np.arange(1, 366, 7)
     z = np.array([100, 200,   300,   400,   500,   600,   700,   800, 900,

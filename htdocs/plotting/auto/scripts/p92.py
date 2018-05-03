@@ -58,8 +58,8 @@ def plotter(fdict):
 
     if cursor.rowcount == 0:
         raise ValueError(("No Events Found for %s (%s.%s)"
-                         ) % (vtec.get_ps_string(phenomena, significance),
-                              phenomena, significance))
+                          ) % (vtec.get_ps_string(phenomena, significance),
+                               phenomena, significance))
     data = {}
     rows = []
     for row in cursor:

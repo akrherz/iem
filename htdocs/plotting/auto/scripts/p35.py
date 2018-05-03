@@ -86,8 +86,7 @@ def plotter(fdict):
     hist.mask = np.where(hist < (1./years), True, False)
 
     (fig, ax) = plt.subplots(1, 1)
-    res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose(),
-                        cmap=plt.get_cmap('spectral'))
+    res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose())
     fig.colorbar(res, label="Hours per Day")
     ax.grid(True)
     ax.set_title(("%s [%s]\nHistogram (bin=%s$^\circ$F) "

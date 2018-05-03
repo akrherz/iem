@@ -96,7 +96,7 @@ def plotter(fdict):
                          p2syear, p2eyear],
                   index_col='station')
     if df.empty:
-        return 'No Data Found'
+        raise ValueError('No Data Found')
     df['p1_season'] = df['p1_first_fall'] - df['p1_last_spring']
     df['p2_season'] = df['p2_first_fall'] - df['p2_last_spring']
     df['season_delta'] = df['p2_season'] - df['p1_season']

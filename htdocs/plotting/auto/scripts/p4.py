@@ -61,7 +61,7 @@ def plotter(fdict):
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
         jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.yx, nav.x0 + nav.xsz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
         hasdata[jslice, islice] = np.where(grid > 0, 1,
                                            hasdata[jslice, islice])
     hasdata = np.flipud(hasdata)
