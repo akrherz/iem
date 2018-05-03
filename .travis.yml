@@ -42,7 +42,7 @@ before_install:
   - sudo a2enmod headers rewrite proxy cgi expires authz_groupfile
   # we do things the old fashioned way, we earn it
   - sudo a2dissite 000-default.conf
-  - sudo cp config/mesonetdir.conf deployment/apache_configs/mod_wsgi.conf /etc/apache2/sites-enabled/
+  - sudo cp deployment/apache_configs/mod_wsgi.conf /etc/apache2/sites-enabled/
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
@@ -69,11 +69,11 @@ install:
   - . $HOME/miniconda$MINICONDA/etc/profile.d/conda.sh
   - conda activate prod
   - hash -r
-  - conda install --file conda_requirements.txt
+  - conda install -q --file conda_requirements.txt
   # Remove packages to save space
-  - conda clean --packages
+  - conda clean -q --packages
   # Then do additional pip stuff
-  - pip install -r pip_requirements.txt
+  - pip install --upgrade -r pip_requirements.txt
   # now delete out some cache stuff, so that our travis-ci cache is still valid
   - rm -f $HOME/miniconda$MINICONDA/pkgs/cache/*
 before_script:
