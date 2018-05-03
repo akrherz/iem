@@ -52,7 +52,7 @@ before_install:
   # use conda provided mod_wsgi
   - echo "LoadModule wsgi_module $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server/$MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
   - echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
-  install:
+install:
   - if [[ ! -f $HOME/miniconda$MINICONDA/envs/prod/bin/python ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
