@@ -6,7 +6,7 @@ import tempfile
 import imp
 import traceback
 import json
-from io import BytesIO, StringIO
+from io import BytesIO
 
 import numpy as np
 import memcache
@@ -52,7 +52,7 @@ def get_response_headers(fmt):
         ctype = 'text/plain'
     else:
         ctype = "application/vnd.ms-excel"
-        extra = [("Content-Disposition",  "attachment;Filename=iem.xlsx")]
+        extra = [("Content-Disposition", "attachment;Filename=iem.xlsx")]
     res = [('Content-type', ctype)]
     if extra:
         res.extend(extra)
@@ -214,5 +214,5 @@ def application(environ, start_response):
     return [output]
 
 
-# from paste.exceptions.errormiddleware import ErrorMiddleware
-# application = ErrorMiddleware(application, debug=True)
+from paste.exceptions.errormiddleware import ErrorMiddleware
+application = ErrorMiddleware(application, debug=True)
