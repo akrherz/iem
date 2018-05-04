@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys
 import datetime
+import warnings
 
 import numpy as np
 import geopandas as gpd
@@ -10,12 +11,16 @@ from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_dbconn, ncopen
 
+warnings.filterwarnings('ignore', category=FutureWarning)
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
 
 
 def update_database(stid, valid, high, low, precip, snow, snowd):
     """Update the database with these newly computed values!"""
+    # print(("stid: %s valid: %s high: %s low: %s precip: %s snow: %s
+    #        "snowd: %s"
+    #       ) % (stid, valid, high, low, precip, snow, snowd))
     table = "alldata_%s" % (stid[:2], )
     # See if we need to add an entry
     ccursor.execute("""SELECT day from """ + table + """ WHERE day = %s
@@ -25,14 +30,17 @@ def update_database(stid, valid, high, low, precip, snow, snowd):
         high, low, precip, snow, snowd, estimated, year, month, sday) VALUES
         (%s, %s, %s, %s, %s, %s, %s, 't', %s, %s, %s)
         """, (stid, valid, high, low, round(precip, 2),
-              round(snow, 1), round(snowd, 1), valid.year,
-              valid.month, valid.strftime("%m%d")))
+              round(snow if snow is not np.ma.masked else 0, 1),
+              round(snowd if snowd is not np.ma.masked else 0, 1),
+              valid.year, valid.month, valid.strftime("%m%d")))
     # Now we update
     ccursor.execute("""
         UPDATE """ + table + """
         SET high = %s, low = %s, precip = %s, snow = %s, snowd = %s
         WHERE station = %s and day = %s
-    """, (high, low, round(precip, 2), round(snow, 1), round(snowd, 1),
+    """, (high, low, round(precip, 2),
+          round(snow if snow is not np.ma.masked else 0, 1),
+          round(snowd if snowd is not np.ma.masked else 0, 1),
           stid, valid))
     if ccursor.rowcount != 1:
         print('compute_0000:update_database updated %s row for %s %s' % (
