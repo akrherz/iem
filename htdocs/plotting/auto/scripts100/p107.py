@@ -11,14 +11,15 @@ PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
         ('avg_low_temp', 'Average Low Temperature'),
         ('avg_temp', 'Average Temperature'),
-        ('max_low', 'Maximum High Temperature'),
-        ('min_low', 'Minimum Low Temperature'),
+        ('gdd', 'Growing Degree Days'),
         ('days-high-above',
          'Days with High Temp Greater Than or Equal To (threshold)'),
         ('days-high-below', 'Days with High Temp Below (threshold)'),
         ('days-lows-above',
          'Days with Low Temp Greater Than or Equal To (threshold)'),
         ('days-lows-below', 'Days with Low Temp Below (threshold)'),
+        ('max_low', 'Maximum High Temperature'),
+        ('min_low', 'Minimum Low Temperature'),
         ('precip', 'Total Precipitation')])
 
 
@@ -46,6 +47,10 @@ def get_description():
              label='Variable to Compute:', options=PDICT),
         dict(type='float', name='thres', default=-99,
              label='Threshold (when appropriate):'),
+        dict(type='int', name='base', default=50,
+             label='Growing Degree Day Base (F)'),
+        dict(type='int', name='ceil', default=86,
+             label='Growing Degree Day Ceiling (F)'),
         dict(type='year', name='year', default=today.year,
              label="Year to Highlight in Chart:"),
     ]
@@ -70,8 +75,9 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     days = ctx['days']
-    sts = datetime.date(2012, ctx['month'],
-                        ctx['day'])
+    gddbase = ctx['base']
+    gddceil = ctx['ceil']
+    sts = datetime.date(2012, ctx['month'], ctx['day'])
     ets = sts + datetime.timedelta(days=(days - 1))
     varname = ctx['varname']
     year = ctx['year']
@@ -87,6 +93,7 @@ def plotter(fdict):
     df = read_sql("""
     SELECT extract(year from day - '"""+str(doff)+""" days'::interval) as yr,
     avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
+    sum(gddxx(%s, %s, high, low)) as gdd,
     avg(low) as avg_low_temp,
     sum(precip) as precip,
     min(low) as min_low,
@@ -94,21 +101,25 @@ def plotter(fdict):
     sum(case when high >= %s then 1 else 0 end) as "days-high-above",
     sum(case when high < %s then 1 else 0 end) as "days-high-below",
     sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
-    sum(case when low < %s then 1 else 0 end) as "days-lows-below"
+    sum(case when low < %s then 1 else 0 end) as "days-lows-below",
+    count(*)
     from """ + table + """
     WHERE station = %s and sday in %s
     GROUP by yr ORDER by yr ASC
-    """, pgconn, params=(threshold, threshold, threshold, threshold,
+    """, pgconn, params=(gddbase, gddceil,
+                         threshold, threshold, threshold, threshold,
                          station, tuple(sdays)))
+    # require at least 90% coverage
+    df = df[df['count'] >= (days * 0.9)]
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
     bars = ax[0].bar(df['yr'], df[varname], facecolor='r', edgecolor='r')
     thisvalue = "M"
-    for bar, x, y in zip(bars, df['yr'], df[varname]):
+    for mybar, x, y in zip(bars, df['yr'], df[varname]):
         if x == year:
-            bar.set_facecolor('g')
-            bar.set_edgecolor('g')
+            mybar.set_facecolor('g')
+            mybar.set_edgecolor('g')
             thisvalue = y
     ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
     ax[0].axhline(df[varname].mean(), lw=2,
@@ -118,6 +129,8 @@ def plotter(fdict):
         ylabel = "Precipitation [inch]"
     elif varname.find('days') > -1:
         ylabel = "Days"
+    elif varname == 'gdd':
+        ylabel = r"Growing Degree Days (%s,%s) $^\circ$F" % (gddbase, gddceil)
     ax[0].set_ylabel(ylabel)
     title = PDICT.get(varname).replace("(threshold)", str(threshold))
     ax[0].set_title(("[%s] %s\n%s from %s through %s"
@@ -147,6 +160,8 @@ def plotter(fdict):
     ax[1].set_ylabel("Observed Frequency [%]")
     ax[1].grid(True)
     ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
+    if thisvalue != "M":
+        ax[1].axvline(thisvalue, color='g')
     mysort = df.sort_values(by=varname, ascending=True)
     info = ("Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
             "Max: %.2f %.0f"
