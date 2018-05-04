@@ -71,12 +71,12 @@ def main():
     year = int(form.getfirst('year', 2015))
     cb = form.getfirst('callback', None)
 
-    mckey = "/json/ibw_tags/%s/%s" % (wfo, year)
+    mckey = "/json/ibw_tags/v2/%s/%s" % (wfo, year)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
         res = run(wfo, year)
-        mc.set(mckey, res, 86400)
+        mc.set(mckey, res, 3600)
 
     if cb is None:
         sys.stdout.write(res)

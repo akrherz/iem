@@ -1,12 +1,12 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 77);
  putenv("TZ=UTC");
  date_default_timezone_set('UTC');
- include("../../include/myview.php");
- include("../../include/vtec.php"); 
+ require_once "../../include/myview.php";
+ require_once "../../include/vtec.php"; 
  require_once "../../include/forms.php";
- include("../../include/imagemaps.php");
+ require_once "../../include/imagemaps.php";
   
  $t = new MyView();
  
@@ -20,9 +20,9 @@
  
  $t->title = "NWS $wfo issued SVR+TOR Warning Tags for $year";
  $t->headextra = '
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/TableGrid.js"></script>
 <script>
 Ext.onReady(function(){
@@ -117,7 +117,8 @@ $tortable .= "</tbody></table>";
 
 $yselect = yearSelect2(2002, $year, 'year');
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
- 
+$gentime = $json["gentime"]; 
+
  $t->content = <<<EOF
  <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
@@ -150,6 +151,9 @@ $wselect = networkSelect("WFO", $wfo, array(), "wfo");
  that provides the data found in this table.  The direct URL is:<br />
  <code>{$publicjsonuri}</code></div>
  
+ <p><strong>This table is based on data generated at: ${gentime}</strong>.  There is about
+ an hour worth of caching involved with this page, so please check back later for updated
+ values.</p>
  
  <h3>Tornado Warnings</h3>
  <button id="create-grid2" class="btn btn-info" type="button">Make Table Sortable</button>
