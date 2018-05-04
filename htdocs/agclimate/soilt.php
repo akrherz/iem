@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include_once "../../include/myview.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->thispage = "networks-agclimate";
 $nounce = time();
@@ -11,8 +11,10 @@ $t->content = <<<EOF
  <li class="active">Recent 4 inch Soil Temperatures</li>
 </ol>
 
-<p>The following images are an interpolated analysis of county-by-county
-average soil temperature at a four inch depth.</p>
+<p>The following maps are analyses of four inch depth soil temperatures.  These maps
+are based on National Weather Service North American Mesoscale (NAM) forecast model
+analyses and short term forecasts.  Iowa State Soil Moisture Network observations
+are used to bias correct the model output after some quality control checks are made.</p>
 
 <p><strong>Links:</strong> <a class="btn btn-default" href="/timemachine/#57.0">Archive of This Map</a>
 <a class="btn btn-default" href="/agclimate/hist/daily.php">Observation Download</a></p>

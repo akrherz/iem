@@ -61,7 +61,7 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
     $news .= sprintf("<p><a href=\"/onsite/news.phtml?id=%s\">%s</a>".
         "<br /><i>Posted:</i> %s</li>\n", $row["id"], $row["title"], $sts);
 }
-
+$nounce = time();
 $t->content = <<<EOM
       <div class="row">
 
@@ -138,13 +138,12 @@ $t->content = <<<EOM
 <!-- Three columns highlighting stuff -->
 <div class="row">
     <div class="col-sm-4">
-        <h3>RADAR Products</h3>
-        <a href="/timemachine/#2.0"><img src="/data/mwcomp.png" class="img-responsive" /></a>
-        <p>The IEM processes National Weather Service NEXRAD information
-        in real-time to produce and archive many products. This includes a 
-        generated <a href="/docs/nexrad_composites/">composite</a> produced
-        every five minutes dating back to 1995!</p>
-        <p><a class="btn" href="/current/radar.phtml">View more products &raquo;</a></p>
+        <h3>Soil Temperatures</h3>
+        <a href="/agclimate/soilt.php"><img src="/data/soilt_day1.png?{$nounce}" class="img-responsive" /></a>
+        <p>Data from the <a href="/agclimate">Iowa State Soil Moisture Network</a>
+        is found on this website
+        and daily soil temperature averages are used to produce the highlighted
+        analysis.</p>
     </div>
     <div class="col-sm-4">
         <h3>Precipitation</h3>
@@ -152,14 +151,14 @@ $t->content = <<<EOM
         <p>Besides point observations of precipitation, the IEM also processes
         gridded rainfall products made available by NOAA.  This information
         is archived and made available in GIS ready formats.</p>
-        <p><a class="btn" href="/rainfall/">Download Precipitation for GIS &raquo;</a></p>
+        <p><a href="/rainfall/">Download Precipitation for GIS &raquo;</a></p>
     </div>
     <div class="col-sm-4">
         <h3>Current Data</h3>
         <a href="/timemachine/#1.0"><img src="/data/mesonet.gif" class="img-responsive" /></a>
         <p>The IEM combines data from participating networks into products
         like maps shown above and web applications to analyze the data.</p>
-        <p><a class="btn" href="/current/">More current products &raquo;</a></p>
+        <p><a href="/current/">More current products &raquo;</a></p>
     </div>
 </div><!--/row-->
 

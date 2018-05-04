@@ -6,15 +6,14 @@ Run at 40 AFTER for the previous hour
 
 """
 from __future__ import print_function
-import urllib2
 import subprocess
 import sys
 import datetime
 import os
-import time
 
 import requests
 import pygrib
+from pyiem.util import exponential_backoff
 
 
 def need_to_run(valid):
@@ -30,8 +29,7 @@ def need_to_run(valid):
             grbs.select(name=name)
         # print("%s had everything we desired!" % (gribfn, ))
         return False
-    except Exception, _:
-        # print gribfn, _
+    except Exception as exp:
         return True
     return True
 
@@ -51,7 +49,7 @@ def fetch(valid):
 
     offsets = []
     neednext = False
-    for line in req.content.split("\n"):
+    for line in req.content.decode('utf-8').split("\n"):
         tokens = line.split(":")
         if len(tokens) < 3:
             continue
@@ -64,8 +62,10 @@ def fetch(valid):
         # Save soil temp and water at surface, 10cm and 40cm
         if tokens[3] in ['TSOIL', 'SOILW']:
             if tokens[4] in ['0-0 m below ground',
-                             '0.01-0.01 m below ground',
-                             '0.04-0.04 m below ground']:
+                             '0.1-0.1 m below ground',
+                             '0.3-0.3 m below ground',
+                             '0.6-0.6 m below ground',
+                             '1-1 m below ground']:
                 offsets.append([int(tokens[1]), ])
                 neednext = True
 
@@ -75,28 +75,19 @@ def fetch(valid):
     if not os.path.isdir(outdir):
         os.makedirs(outdir)  # make sure LDM can then write to dir
         subprocess.call("chmod 775 %s" % (outdir, ), shell=True)
-    output = open(outfn, 'ab', 0664)
+    output = open(outfn, 'ab', 0o664)
 
-    req = urllib2.Request(uri[:-4])
-    if len(offsets) != 9:
+    if len(offsets) != 13:
         print("download_hrrr_rad warning, found %s gribs for %s" % (
                                                     len(offsets), valid))
     for pr in offsets:
-        req.headers['Range'] = 'bytes=%s-%s' % (pr[0], pr[1])
-        attempt = 0
-        f = None
-        while attempt < 10:
-            try:
-                f = urllib2.urlopen(req, timeout=30)
-            except Exception as _exp:
-                time.sleep(10)
-                attempt += 1
-                continue
-            attempt = 10
-        if f is None:
+        headers = {'Range': 'bytes=%s-%s' % (pr[0], pr[1])}
+        req = exponential_backoff(requests.get, uri[:-4],
+                                  headers=headers, timeout=30)
+        if req is None:
             print("download_hrrr.py failure for uri: %s" % (uri,))
         else:
-            output.write(f.read())
+            output.write(req.content)
 
     output.close()
 
@@ -118,5 +109,5 @@ def main():
 
 
 if __name__ == '__main__':
-    os.umask(0002)
+    os.umask(0o002)
     main()
