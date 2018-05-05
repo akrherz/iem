@@ -2,12 +2,12 @@
 YYYY6=$(date -u --date '6 hours ago' +'%Y')
 MM6=$(date -u --date '6 hours ago' +'%m')
 DD6=$(date -u --date '6 hours ago' +'%d')
-DD3=$(date -u --date '3 hours ago' +'%d')
+HH3=$(date -u --date '3 hours ago' +'%H')
 HH6=$(date -u --date '6 hours ago' +'%H')
 
 cd dl
 python download_hrrr.py &
-if [ $DD3 -eq "06" ] || [ $DD3 -eq "12" ] || [ $DD3 -eq "12" ] || [ $DD3 -eq "00" ]
+if [ $HH3 -eq "06" ] || [ $HH3 -eq "12" ] || [ $HH3 -eq "12" ] || [ $HH3 -eq "00" ]
 then
     python download_nam.py $(date -u --date '3 hours ago' +'%Y %m %d %H')
 fi
