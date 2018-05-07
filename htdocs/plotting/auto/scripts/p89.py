@@ -34,7 +34,7 @@ def get_description():
              label='Over Period of Trailing Days'),
         dict(type='float', name='trailthres', default='0.50',
              label='Trailing Day Precipitation Threshold [inch]'),
-        dict(type='clstate', name='state', default='IA', label='For State'),
+        dict(type='state', name='state', default='IA', label='For State'),
     ]
     return desc
 
@@ -76,12 +76,12 @@ def get_data(ctx):
     for nav in czs.gridnav:
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
-        hasdata[nav.y0:(nav.y0 + nav.ysz),
-                nav.x0:(nav.x0 + nav.xsz)] = np.where(grid > 0, 1,
-                                                      hasdata[nav.y0:(nav.y0 + nav.ysz),
-                                                              nav.x0:(nav.x0 + nav.xsz)])
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+        hasdata[jslice, islice] = np.where(
+            grid > 0, 1, hasdata[jslice, islice])
     ctx['iowa'] = np.flipud(hasdata)
-    ctx['iowapts'] = np.sum(np.where(hasdata > 0, 1, 0))
+    ctx['iowapts'] = float(np.sum(np.where(hasdata > 0, 1, 0)))
 
     now = datetime.datetime(ctx['year'], 1, 1)
     now += datetime.timedelta(days=(ctx['period']-1))
@@ -113,7 +113,7 @@ def plotter(fdict):
     df = get_data(ctx)
 
     (fig, ax) = plt.subplots(2, 1, sharex=True, figsize=(10, 7))
-    ax[0].bar(ctx['days'], df['coverage'], fc='tan', ec='tan', zorder=1,
+    ax[0].bar(ctx['days'], df['coverage'], fc='g', ec='g', zorder=1,
               label='Daily %.2fin' % (daythres, ))
     ax[0].bar(ctx['days'], df['hits'], fc='b', ec='b', zorder=2,
               label='Over "Dry" Areas')
@@ -127,7 +127,7 @@ def plotter(fdict):
 
     ax[1].bar(ctx['days'], df['needed'], fc='tan', ec='tan', zorder=1)
     ax[1].bar(ctx['days'], df['efficiency'], fc='b', ec='b', zorder=2)
-    ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
+    ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
     ax[1].grid(True)
     ax[1].set_ylabel("Areal Coverage [%]")
     ax[1].set_title(("Percentage of Dry Area (tan) below (%.2fin over %s days)"
