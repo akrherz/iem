@@ -10,6 +10,7 @@ import pytz
 import psycopg2.extras
 import metpy.calc as mcalc
 from metpy.units import units
+from netCDF4 import chartostring
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, distance, speed
 from pyiem.util import get_dbconn, ncopen
@@ -35,11 +36,11 @@ def find_file():
     return fn
 
 
-def sanity_check(val, lower, upper, defaultval):
+def sanity_check(val, lower, upper):
     """Simple bounds check"""
     if val > lower and val < upper:
         return float(val)
-    return defaultval
+    return None
 
 
 def provider2network(provider):
@@ -63,9 +64,9 @@ def main():
     fn = find_file()
     nc = ncopen(fn, timeout=300)
 
-    stations = nc.variables["stationId"][:]
-    providers = nc.variables["dataProvider"][:]
-    names = nc.variables["stationName"][:]
+    stations = chartostring(nc.variables["stationId"][:])
+    providers = chartostring(nc.variables["dataProvider"][:])
+    names = chartostring(nc.variables["stationName"][:])
     tmpk = nc.variables["temperature"][:]
     dwpk = nc.variables["dewpoint"][:]
     # Set some data bounds to keep mcalc from complaining
@@ -93,23 +94,22 @@ def main():
     db = {}
 
     for recnum, provider in enumerate(providers):
-        this_provider = provider.tostring().replace('\x00', '')
-        this_station = stations[recnum].tostring().replace('\x00', '')
-        if (not this_provider.endswith('DOT') and
-                this_provider not in MY_PROVIDERS):
+        this_station = stations[recnum]
+        if this_station != 'MC058':
             continue
-        name = names[recnum].tostring(
-            ).replace("'", "").replace('\x00', '').replace('\xa0',
-                                                           ' ').strip()
+        if (not provider.endswith('DOT') and
+                provider not in MY_PROVIDERS):
+            continue
+        name = names[recnum]
         if name == '':
             continue
-        if this_provider == 'MesoWest':
+        if provider == 'MesoWest':
             # get the network from the last portion of the name
             network = name.split()[-1]
             if network != 'VTWAC':
                 continue
         else:
-            network = provider2network(this_provider)
+            network = provider2network(provider)
         if network is None:
             continue
         db[this_station] = {}
@@ -117,21 +117,20 @@ def main():
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
         db[this_station]['ts'] = ts.replace(tzinfo=pytz.utc)
         db[this_station]['network'] = network
-        db[this_station]['pres'] = sanity_check(pressure[recnum], 0, 1000000,
-                                                -99)
-        db[this_station]['tmpk'] = sanity_check(tmpk[recnum], 0, 500, -99)
-        db[this_station]['dwpk'] = sanity_check(dwpk[recnum], 0, 500, -99)
+        db[this_station]['pres'] = sanity_check(pressure[recnum], 0, 1000000)
+        db[this_station]['tmpk'] = sanity_check(tmpk[recnum], 200, 330)
+        db[this_station]['dwpk'] = sanity_check(dwpk[recnum], 200, 330)
         db[this_station]['tmpk_dd'] = tmpk_dd[recnum]
         db[this_station]['relh'] = relh[recnum]
-        db[this_station]['drct'] = sanity_check(drct[recnum], -1, 361, -99)
-        db[this_station]['smps'] = sanity_check(smps[recnum], -1, 200, -99)
-        db[this_station]['gmps'] = sanity_check(gmps[recnum], -1, 200, -99)
-        db[this_station]['rtk1'] = sanity_check(rtk1[recnum], 0, 500, -99)
-        db[this_station]['rtk2'] = sanity_check(rtk2[recnum], 0, 500, -99)
-        db[this_station]['rtk3'] = sanity_check(rtk3[recnum], 0, 500, -99)
-        db[this_station]['rtk4'] = sanity_check(rtk4[recnum], 0, 500, -99)
-        db[this_station]['subk'] = sanity_check(subk1[recnum], 0, 500, -99)
-        db[this_station]['pday'] = sanity_check(pcpn[recnum], -1, 5000, -99)
+        db[this_station]['drct'] = sanity_check(drct[recnum], -1, 361)
+        db[this_station]['smps'] = sanity_check(smps[recnum], -1, 200)
+        db[this_station]['gmps'] = sanity_check(gmps[recnum], -1, 200)
+        db[this_station]['rtk1'] = sanity_check(rtk1[recnum], 0, 500)
+        db[this_station]['rtk2'] = sanity_check(rtk2[recnum], 0, 500)
+        db[this_station]['rtk3'] = sanity_check(rtk3[recnum], 0, 500)
+        db[this_station]['rtk4'] = sanity_check(rtk4[recnum], 0, 500)
+        db[this_station]['subk'] = sanity_check(subk1[recnum], 0, 500)
+        db[this_station]['pday'] = sanity_check(pcpn[recnum], -1, 5000)
 
     for sid in db:
         # print("Processing %s[%s]" % (sid, db[sid]['network']))
@@ -144,30 +143,32 @@ def main():
         #    os.chdir("../../dbutil")
         #    subprocess.call("sh SYNC_STATIONS.sh", shell=True)
         #    os.chdir("../ingestors/madis")
-        iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
-        iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
-        if db[sid]['relh'] >= 0:
+        if db[sid]['tmpk'] is not None:
+            iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
+        if db[sid]['dwpk'] is not None:
+            iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
+        if db[sid]['relh'] is not None:
             iem.data['relh'] = float(db[sid]['relh'])
-        if db[sid]['drct'] >= 0:
+        if db[sid]['drct'] is not None:
             iem.data['drct'] = db[sid]['drct']
-        if db[sid]['smps'] >= 0:
+        if db[sid]['smps'] is not None:
             iem.data['sknt'] = speed(db[sid]['smps'], 'MPS').value('KT')
-        if db[sid]['gmps'] >= 0:
+        if db[sid]['gmps'] is not None:
             iem.data['gust'] = speed(db[sid]['gmps'], 'MPS').value('KT')
-        if db[sid]['pres'] > 0:
+        if db[sid]['pres'] is not None:
             iem.data['pres'] = (float(db[sid]['pres']) / 100.00) * 0.02952
-        if db[sid]['rtk1'] > 0:
+        if db[sid]['rtk1'] is not None:
             iem.data['tsf0'] = temperature(db[sid]['rtk1'], 'K').value('F')
-        if db[sid]['rtk2'] > 0:
+        if db[sid]['rtk2'] is not None:
             iem.data['tsf1'] = temperature(db[sid]['rtk2'], 'K').value('F')
-        if db[sid]['rtk3'] > 0:
+        if db[sid]['rtk3'] is not None:
             iem.data['tsf2'] = temperature(db[sid]['rtk3'], 'K').value('F')
-        if db[sid]['rtk4'] > 0:
+        if db[sid]['rtk4'] is not None:
             iem.data['tsf3'] = temperature(db[sid]['rtk4'], 'K').value('F')
-        if db[sid]['subk'] > 0:
+        if db[sid]['subk'] is not None:
             iem.data['rwis_subf'] = temperature(db[sid]['subk'],
                                                 'K').value('F')
-        if db[sid]['pday'] >= 0:
+        if db[sid]['pday'] is not None:
             iem.data['pday'] = round(distance(db[sid]['pday'],
                                               'MM').value("IN"),
                                      2)
