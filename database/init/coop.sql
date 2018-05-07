@@ -206,6 +206,235 @@ GRANT select on alldata to nobody,apache;
  CREATE TABLE alldata_wy() inherits (alldata); 
  GRANT SELECT on alldata_wy to nobody,apache;
 
+CREATE UNIQUE index alldata_AK_idx on alldata_AK(station, day);
+    CREATE INDEX alldata_AK_day_idx on alldata_AK(day);
+    CREATE INDEX alldata_AK_sday_idx on alldata_AK(sday);
+    CREATE INDEX alldata_AK_stationid_idx on alldata_AK(station);
+    CREATE INDEX alldata_AK_year_idx on alldata_AK(year);
+  
+CREATE UNIQUE index alldata_AL_idx on alldata_AL(station, day);
+    CREATE INDEX alldata_AL_day_idx on alldata_AL(day);
+    CREATE INDEX alldata_AL_sday_idx on alldata_AL(sday);
+    CREATE INDEX alldata_AL_stationid_idx on alldata_AL(station);
+    CREATE INDEX alldata_AL_year_idx on alldata_AL(year);
+  
+CREATE UNIQUE index alldata_AR_idx on alldata_AR(station, day);
+    CREATE INDEX alldata_AR_day_idx on alldata_AR(day);
+    CREATE INDEX alldata_AR_sday_idx on alldata_AR(sday);
+    CREATE INDEX alldata_AR_stationid_idx on alldata_AR(station);
+    CREATE INDEX alldata_AR_year_idx on alldata_AR(year);
+  
+CREATE UNIQUE index alldata_AZ_idx on alldata_AZ(station, day);
+    CREATE INDEX alldata_AZ_day_idx on alldata_AZ(day);
+    CREATE INDEX alldata_AZ_sday_idx on alldata_AZ(sday);
+    CREATE INDEX alldata_AZ_stationid_idx on alldata_AZ(station);
+    CREATE INDEX alldata_AZ_year_idx on alldata_AZ(year);
+  
+CREATE UNIQUE index alldata_CA_idx on alldata_CA(station, day);
+    CREATE INDEX alldata_CA_day_idx on alldata_CA(day);
+    CREATE INDEX alldata_CA_sday_idx on alldata_CA(sday);
+    CREATE INDEX alldata_CA_stationid_idx on alldata_CA(station);
+    CREATE INDEX alldata_CA_year_idx on alldata_CA(year);
+  
+CREATE UNIQUE index alldata_CO_idx on alldata_CO(station, day);
+    CREATE INDEX alldata_CO_day_idx on alldata_CO(day);
+    CREATE INDEX alldata_CO_sday_idx on alldata_CO(sday);
+    CREATE INDEX alldata_CO_stationid_idx on alldata_CO(station);
+    CREATE INDEX alldata_CO_year_idx on alldata_CO(year);
+  
+CREATE UNIQUE index alldata_CT_idx on alldata_CT(station, day);
+    CREATE INDEX alldata_CT_day_idx on alldata_CT(day);
+    CREATE INDEX alldata_CT_sday_idx on alldata_CT(sday);
+    CREATE INDEX alldata_CT_stationid_idx on alldata_CT(station);
+    CREATE INDEX alldata_CT_year_idx on alldata_CT(year);
+  
+CREATE UNIQUE index alldata_DC_idx on alldata_DC(station, day);
+    CREATE INDEX alldata_DC_day_idx on alldata_DC(day);
+    CREATE INDEX alldata_DC_sday_idx on alldata_DC(sday);
+    CREATE INDEX alldata_DC_stationid_idx on alldata_DC(station);
+    CREATE INDEX alldata_DC_year_idx on alldata_DC(year);
+  
+CREATE UNIQUE index alldata_DE_idx on alldata_DE(station, day);
+    CREATE INDEX alldata_DE_day_idx on alldata_DE(day);
+    CREATE INDEX alldata_DE_sday_idx on alldata_DE(sday);
+    CREATE INDEX alldata_DE_stationid_idx on alldata_DE(station);
+    CREATE INDEX alldata_DE_year_idx on alldata_DE(year);
+  
+CREATE UNIQUE index alldata_FL_idx on alldata_FL(station, day);
+    CREATE INDEX alldata_FL_day_idx on alldata_FL(day);
+    CREATE INDEX alldata_FL_sday_idx on alldata_FL(sday);
+    CREATE INDEX alldata_FL_stationid_idx on alldata_FL(station);
+    CREATE INDEX alldata_FL_year_idx on alldata_FL(year);
+  
+CREATE UNIQUE index alldata_GA_idx on alldata_GA(station, day);
+    CREATE INDEX alldata_GA_day_idx on alldata_GA(day);
+    CREATE INDEX alldata_GA_sday_idx on alldata_GA(sday);
+    CREATE INDEX alldata_GA_stationid_idx on alldata_GA(station);
+    CREATE INDEX alldata_GA_year_idx on alldata_GA(year);
+  
+CREATE UNIQUE index alldata_HI_idx on alldata_HI(station, day);
+    CREATE INDEX alldata_HI_day_idx on alldata_HI(day);
+    CREATE INDEX alldata_HI_sday_idx on alldata_HI(sday);
+    CREATE INDEX alldata_HI_stationid_idx on alldata_HI(station);
+    CREATE INDEX alldata_HI_year_idx on alldata_HI(year);
+  
+CREATE UNIQUE index alldata_ID_idx on alldata_ID(station, day);
+    CREATE INDEX alldata_ID_day_idx on alldata_ID(day);
+    CREATE INDEX alldata_ID_sday_idx on alldata_ID(sday);
+    CREATE INDEX alldata_ID_stationid_idx on alldata_ID(station);
+    CREATE INDEX alldata_ID_year_idx on alldata_ID(year);
+  
+CREATE UNIQUE index alldata_LA_idx on alldata_LA(station, day);
+    CREATE INDEX alldata_LA_day_idx on alldata_LA(day);
+    CREATE INDEX alldata_LA_sday_idx on alldata_LA(sday);
+    CREATE INDEX alldata_LA_stationid_idx on alldata_LA(station);
+    CREATE INDEX alldata_LA_year_idx on alldata_LA(year);
+  
+CREATE UNIQUE index alldata_MA_idx on alldata_MA(station, day);
+    CREATE INDEX alldata_MA_day_idx on alldata_MA(day);
+    CREATE INDEX alldata_MA_sday_idx on alldata_MA(sday);
+    CREATE INDEX alldata_MA_stationid_idx on alldata_MA(station);
+    CREATE INDEX alldata_MA_year_idx on alldata_MA(year);
+  
+CREATE UNIQUE index alldata_MD_idx on alldata_MD(station, day);
+    CREATE INDEX alldata_MD_day_idx on alldata_MD(day);
+    CREATE INDEX alldata_MD_sday_idx on alldata_MD(sday);
+    CREATE INDEX alldata_MD_stationid_idx on alldata_MD(station);
+    CREATE INDEX alldata_MD_year_idx on alldata_MD(year);
+  
+CREATE UNIQUE index alldata_ME_idx on alldata_ME(station, day);
+    CREATE INDEX alldata_ME_day_idx on alldata_ME(day);
+    CREATE INDEX alldata_ME_sday_idx on alldata_ME(sday);
+    CREATE INDEX alldata_ME_stationid_idx on alldata_ME(station);
+    CREATE INDEX alldata_ME_year_idx on alldata_ME(year);
+  
+CREATE UNIQUE index alldata_MS_idx on alldata_MS(station, day);
+    CREATE INDEX alldata_MS_day_idx on alldata_MS(day);
+    CREATE INDEX alldata_MS_sday_idx on alldata_MS(sday);
+    CREATE INDEX alldata_MS_stationid_idx on alldata_MS(station);
+    CREATE INDEX alldata_MS_year_idx on alldata_MS(year);
+  
+CREATE UNIQUE index alldata_MT_idx on alldata_MT(station, day);
+    CREATE INDEX alldata_MT_day_idx on alldata_MT(day);
+    CREATE INDEX alldata_MT_sday_idx on alldata_MT(sday);
+    CREATE INDEX alldata_MT_stationid_idx on alldata_MT(station);
+    CREATE INDEX alldata_MT_year_idx on alldata_MT(year);
+  
+CREATE UNIQUE index alldata_NC_idx on alldata_NC(station, day);
+    CREATE INDEX alldata_NC_day_idx on alldata_NC(day);
+    CREATE INDEX alldata_NC_sday_idx on alldata_NC(sday);
+    CREATE INDEX alldata_NC_stationid_idx on alldata_NC(station);
+    CREATE INDEX alldata_NC_year_idx on alldata_NC(year);
+  
+CREATE UNIQUE index alldata_NH_idx on alldata_NH(station, day);
+    CREATE INDEX alldata_NH_day_idx on alldata_NH(day);
+    CREATE INDEX alldata_NH_sday_idx on alldata_NH(sday);
+    CREATE INDEX alldata_NH_stationid_idx on alldata_NH(station);
+    CREATE INDEX alldata_NH_year_idx on alldata_NH(year);
+  
+CREATE UNIQUE index alldata_NJ_idx on alldata_NJ(station, day);
+    CREATE INDEX alldata_NJ_day_idx on alldata_NJ(day);
+    CREATE INDEX alldata_NJ_sday_idx on alldata_NJ(sday);
+    CREATE INDEX alldata_NJ_stationid_idx on alldata_NJ(station);
+    CREATE INDEX alldata_NJ_year_idx on alldata_NJ(year);
+  
+CREATE UNIQUE index alldata_NM_idx on alldata_NM(station, day);
+    CREATE INDEX alldata_NM_day_idx on alldata_NM(day);
+    CREATE INDEX alldata_NM_sday_idx on alldata_NM(sday);
+    CREATE INDEX alldata_NM_stationid_idx on alldata_NM(station);
+    CREATE INDEX alldata_NM_year_idx on alldata_NM(year);
+  
+CREATE UNIQUE index alldata_NV_idx on alldata_NV(station, day);
+    CREATE INDEX alldata_NV_day_idx on alldata_NV(day);
+    CREATE INDEX alldata_NV_sday_idx on alldata_NV(sday);
+    CREATE INDEX alldata_NV_stationid_idx on alldata_NV(station);
+    CREATE INDEX alldata_NV_year_idx on alldata_NV(year);
+  
+CREATE UNIQUE index alldata_NY_idx on alldata_NY(station, day);
+    CREATE INDEX alldata_NY_day_idx on alldata_NY(day);
+    CREATE INDEX alldata_NY_sday_idx on alldata_NY(sday);
+    CREATE INDEX alldata_NY_stationid_idx on alldata_NY(station);
+    CREATE INDEX alldata_NY_year_idx on alldata_NY(year);
+  
+CREATE UNIQUE index alldata_OK_idx on alldata_OK(station, day);
+    CREATE INDEX alldata_OK_day_idx on alldata_OK(day);
+    CREATE INDEX alldata_OK_sday_idx on alldata_OK(sday);
+    CREATE INDEX alldata_OK_stationid_idx on alldata_OK(station);
+    CREATE INDEX alldata_OK_year_idx on alldata_OK(year);
+  
+CREATE UNIQUE index alldata_OR_idx on alldata_OR(station, day);
+    CREATE INDEX alldata_OR_day_idx on alldata_OR(day);
+    CREATE INDEX alldata_OR_sday_idx on alldata_OR(sday);
+    CREATE INDEX alldata_OR_stationid_idx on alldata_OR(station);
+    CREATE INDEX alldata_OR_year_idx on alldata_OR(year);
+  
+CREATE UNIQUE index alldata_PA_idx on alldata_PA(station, day);
+    CREATE INDEX alldata_PA_day_idx on alldata_PA(day);
+    CREATE INDEX alldata_PA_sday_idx on alldata_PA(sday);
+    CREATE INDEX alldata_PA_stationid_idx on alldata_PA(station);
+    CREATE INDEX alldata_PA_year_idx on alldata_PA(year);
+  
+CREATE UNIQUE index alldata_RI_idx on alldata_RI(station, day);
+    CREATE INDEX alldata_RI_day_idx on alldata_RI(day);
+    CREATE INDEX alldata_RI_sday_idx on alldata_RI(sday);
+    CREATE INDEX alldata_RI_stationid_idx on alldata_RI(station);
+    CREATE INDEX alldata_RI_year_idx on alldata_RI(year);
+  
+CREATE UNIQUE index alldata_SC_idx on alldata_SC(station, day);
+    CREATE INDEX alldata_SC_day_idx on alldata_SC(day);
+    CREATE INDEX alldata_SC_sday_idx on alldata_SC(sday);
+    CREATE INDEX alldata_SC_stationid_idx on alldata_SC(station);
+    CREATE INDEX alldata_SC_year_idx on alldata_SC(year);
+  
+CREATE UNIQUE index alldata_TN_idx on alldata_TN(station, day);
+    CREATE INDEX alldata_TN_day_idx on alldata_TN(day);
+    CREATE INDEX alldata_TN_sday_idx on alldata_TN(sday);
+    CREATE INDEX alldata_TN_stationid_idx on alldata_TN(station);
+    CREATE INDEX alldata_TN_year_idx on alldata_TN(year);
+  
+CREATE UNIQUE index alldata_TX_idx on alldata_TX(station, day);
+    CREATE INDEX alldata_TX_day_idx on alldata_TX(day);
+    CREATE INDEX alldata_TX_sday_idx on alldata_TX(sday);
+    CREATE INDEX alldata_TX_stationid_idx on alldata_TX(station);
+    CREATE INDEX alldata_TX_year_idx on alldata_TX(year);
+  
+CREATE UNIQUE index alldata_UT_idx on alldata_UT(station, day);
+    CREATE INDEX alldata_UT_day_idx on alldata_UT(day);
+    CREATE INDEX alldata_UT_sday_idx on alldata_UT(sday);
+    CREATE INDEX alldata_UT_stationid_idx on alldata_UT(station);
+    CREATE INDEX alldata_UT_year_idx on alldata_UT(year);
+  
+CREATE UNIQUE index alldata_VA_idx on alldata_VA(station, day);
+    CREATE INDEX alldata_VA_day_idx on alldata_VA(day);
+    CREATE INDEX alldata_VA_sday_idx on alldata_VA(sday);
+    CREATE INDEX alldata_VA_stationid_idx on alldata_VA(station);
+    CREATE INDEX alldata_VA_year_idx on alldata_VA(year);
+  
+CREATE UNIQUE index alldata_VT_idx on alldata_VT(station, day);
+    CREATE INDEX alldata_VT_day_idx on alldata_VT(day);
+    CREATE INDEX alldata_VT_sday_idx on alldata_VT(sday);
+    CREATE INDEX alldata_VT_stationid_idx on alldata_VT(station);
+    CREATE INDEX alldata_VT_year_idx on alldata_VT(year);
+  
+CREATE UNIQUE index alldata_WA_idx on alldata_WA(station, day);
+    CREATE INDEX alldata_WA_day_idx on alldata_WA(day);
+    CREATE INDEX alldata_WA_sday_idx on alldata_WA(sday);
+    CREATE INDEX alldata_WA_stationid_idx on alldata_WA(station);
+    CREATE INDEX alldata_WA_year_idx on alldata_WA(year);
+  
+CREATE UNIQUE index alldata_WV_idx on alldata_WV(station, day);
+    CREATE INDEX alldata_WV_day_idx on alldata_WV(day);
+    CREATE INDEX alldata_WV_sday_idx on alldata_WV(sday);
+    CREATE INDEX alldata_WV_stationid_idx on alldata_WV(station);
+    CREATE INDEX alldata_WV_year_idx on alldata_WV(year);
+  
+CREATE UNIQUE index alldata_WY_idx on alldata_WY(station, day);
+    CREATE INDEX alldata_WY_day_idx on alldata_WY(day);
+    CREATE INDEX alldata_WY_sday_idx on alldata_WY(sday);
+    CREATE INDEX alldata_WY_stationid_idx on alldata_WY(station);
+    CREATE INDEX alldata_WY_year_idx on alldata_WY(year);
+
+
 
 CREATE TABLE alldata_estimates(
   station char(6),
