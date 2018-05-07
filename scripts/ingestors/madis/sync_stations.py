@@ -4,6 +4,7 @@ Extract station data from file and update any new stations we find, please
 from __future__ import print_function
 import sys
 
+from netCDF4 import chartostring
 from pyiem.util import get_dbconn, ncopen
 
 
@@ -27,13 +28,6 @@ def provider2network(p):
     return None
 
 
-def clean_string(val):
-    """hack"""
-    return val.replace("'", ""
-                       ).replace('\x00', '').replace('\xa0',  ' '
-                                                     ).replace(",", "").strip()
-
-
 def main(argv):
     """Go Main Go"""
     pgconn = get_dbconn('mesosite')
@@ -42,26 +36,25 @@ def main(argv):
     fn = argv[1]
     nc = ncopen(fn)
 
-    stations = nc.variables["stationId"][:]
-    names = nc.variables["stationName"][:]
-    providers = nc.variables["dataProvider"][:]
+    stations = chartostring(nc.variables["stationId"][:])
+    names = chartostring(nc.variables["stationName"][:])
+    providers = chartostring(nc.variables["dataProvider"][:])
     latitudes = nc.variables["latitude"][:]
     longitudes = nc.variables["longitude"][:]
     elevations = nc.variables["elevation"][:]
-    for recnum in range(len(providers)):
-        thisProvider = providers[recnum].tostring().replace('\x00', '')
-        if (not thisProvider.endswith('DOT') and
-                thisProvider not in MY_PROVIDERS):
+    for recnum, provider in enumerate(providers):
+        if (not provider.endswith('DOT') and
+                provider not in MY_PROVIDERS):
             continue
-        stid = stations[recnum].tostring().replace('\x00', '')
-        name = clean_string(names[recnum].tostring())
-        if thisProvider == 'MesoWest':
+        stid = stations[recnum]
+        name = names[recnum]
+        if provider == 'MesoWest':
             # get the network from the last portion of the name
             network = name.split()[-1]
             if network != 'VTWAC':
                 continue
         else:
-            network = provider2network(thisProvider)
+            network = provider2network(provider)
         if network is None:
             continue
         mcursor.execute("""

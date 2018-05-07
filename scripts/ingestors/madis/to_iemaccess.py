@@ -67,15 +67,16 @@ def main():
     stations = chartostring(nc.variables["stationId"][:])
     providers = chartostring(nc.variables["dataProvider"][:])
     names = chartostring(nc.variables["stationName"][:])
+
     tmpk = nc.variables["temperature"][:]
     dwpk = nc.variables["dewpoint"][:]
+
     # Set some data bounds to keep mcalc from complaining
     dwpk = np.ma.where(np.ma.logical_or(dwpk < 200, dwpk > 320), np.nan, dwpk)
     tmpk = np.ma.where(np.ma.logical_or(tmpk < 200, tmpk > 320), np.nan, tmpk)
     relh = mcalc.relative_humidity_from_dewpoint(tmpk * units.degK,
                                                  dwpk * units.degK
                                                  ).magnitude * 100.
-    tmpk_dd = nc.variables["temperatureDD"][:]
     obtime = nc.variables["observationTime"][:]
     pressure = nc.variables["stationPressure"][:]
     # altimeter = nc.variables["altimeter"][:]
@@ -90,13 +91,12 @@ def main():
     rtk3 = nc.variables["roadTemperature3"][:]
     rtk4 = nc.variables["roadTemperature4"][:]
     subk1 = nc.variables["roadSubsurfaceTemp1"][:]
+    nc.close()
 
     db = {}
 
     for recnum, provider in enumerate(providers):
         this_station = stations[recnum]
-        if this_station != 'MC058':
-            continue
         if (not provider.endswith('DOT') and
                 provider not in MY_PROVIDERS):
             continue
@@ -120,7 +120,6 @@ def main():
         db[this_station]['pres'] = sanity_check(pressure[recnum], 0, 1000000)
         db[this_station]['tmpk'] = sanity_check(tmpk[recnum], 200, 330)
         db[this_station]['dwpk'] = sanity_check(dwpk[recnum], 200, 330)
-        db[this_station]['tmpk_dd'] = tmpk_dd[recnum]
         db[this_station]['relh'] = relh[recnum]
         db[this_station]['drct'] = sanity_check(drct[recnum], -1, 361)
         db[this_station]['smps'] = sanity_check(smps[recnum], -1, 200)
@@ -135,19 +134,11 @@ def main():
     for sid in db:
         # print("Processing %s[%s]" % (sid, db[sid]['network']))
         iem = Observation(sid, db[sid]['network'], db[sid]['ts'])
-        # if not iem.load(icursor):
-        #    print 'Missing fp: %s network: %s station: %s' % (fp,
-        #                                                      db[sid]['network'],
-        #                                                      sid)
-        #    subprocess.call("python sync_stations.py %s" % (fp,), shell=True)
-        #    os.chdir("../../dbutil")
-        #    subprocess.call("sh SYNC_STATIONS.sh", shell=True)
-        #    os.chdir("../ingestors/madis")
         if db[sid]['tmpk'] is not None:
             iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
         if db[sid]['dwpk'] is not None:
             iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
-        if db[sid]['relh'] is not None:
+        if db[sid]['relh'] is not None and not np.isnan(db[sid]['relh']):
             iem.data['relh'] = float(db[sid]['relh'])
         if db[sid]['drct'] is not None:
             iem.data['drct'] = db[sid]['drct']
@@ -181,7 +172,6 @@ def main():
             os.chdir("../ingestors/madis")
             print("...done with sync.")
         del iem
-    nc.close()
     icursor.close()
     pgconn.commit()
     pgconn.close()
