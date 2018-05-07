@@ -86,6 +86,9 @@ def main():
     """ Go Main Go"""
     ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
                            int(sys.argv[3]), int(sys.argv[4]))
+    # script is called every hour, just short circuit the un-needed hours
+    if ts.hour % 6 != 0:
+        return
     times = [ts]
     times.append(ts - datetime.timedelta(hours=6))
     times.append(ts - datetime.timedelta(hours=24))
