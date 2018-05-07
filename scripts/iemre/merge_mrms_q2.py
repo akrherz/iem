@@ -1,8 +1,7 @@
-'''
-Merge the 1km Q2 24 hour precip data estimates
-'''
+"""Merge the 1km Q2 24 hour precip data estimates"""
 import datetime
 import sys
+import os
 
 import pytz
 import numpy as np
@@ -12,6 +11,16 @@ from pyiem import iemre
 from pyiem.util import ncopen
 
 
+def findfile(ts):
+    """See if we can find a file to use"""
+    for hr in [0, -1, 1, -2, 2, -3, 3]:
+        ts2 = ts + datetime.timedelta(hours=hr)
+        fn = ts2.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/"
+                           "p24h_%Y%m%d%H00.png"))
+        if os.path.isfile(fn):
+            return fn
+
+
 def run(ts):
     """Actually do the work, please"""
     nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), 'a', timeout=300)
@@ -19,9 +28,10 @@ def run(ts):
     ncprecip = nc.variables['p01d']
     ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone(pytz.utc)
-
-    fn = gmtts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/"
-                        "p24h_%Y%m%d%H00.png"))
+    fn = findfile(gmtts)
+    if fn is None:
+        print("merge_mrms_q2 failed to find file for time: %s" % (gmtts, ))
+        return
     img = Image.open(fn)
     data = np.asarray(img)
     # data is 3500,7000 , starting at upper L
