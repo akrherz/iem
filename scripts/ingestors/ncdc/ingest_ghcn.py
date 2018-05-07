@@ -30,19 +30,19 @@ SFLAG31    269-269   Character
     TMIN = Minimum temperature (tenths of degrees C)
 """
 from __future__ import print_function
-import urllib2
 import os
 import datetime
 import sys
 import re
 
+import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.reference import TRACE_VALUE
 from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, exponential_backoff
 
 PGCONN = get_dbconn('coop')
 
@@ -110,13 +110,12 @@ def get_file(station):
     localfn = "%s/%s.dly" % (BASEDIR, station)
     if not os.path.isfile(localfn):
         print('Downloading from NCEI station: %s...' % (station, ), end='')
-        try:
-            data = urllib2.urlopen(uri, timeout=30)
-        except Exception as exp:
-            print(exp)
+        req = exponential_backoff(requests.get, uri, timeout=30)
+        if req is None:
+            print("ingest_ghcn download failed for %s" % (uri, ))
             return None
-        fp = open(localfn, 'w')
-        fp.write(data.read())
+        fp = open(localfn, 'wb')
+        fp.write(req.content)
         fp.close()
         print('done.')
     else:
