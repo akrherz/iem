@@ -138,7 +138,7 @@ def main():
             iem.data['tmpf'] = temperature(db[sid]['tmpk'], 'K').value('F')
         if db[sid]['dwpk'] is not None:
             iem.data['dwpf'] = temperature(db[sid]['dwpk'], 'K').value('F')
-        if db[sid]['relh'] is not None and not np.isnan(db[sid]['relh']):
+        if db[sid]['relh'] is not None and db[sid]['relh'] is not np.ma.masked:
             iem.data['relh'] = float(db[sid]['relh'])
         if db[sid]['drct'] is not None:
             iem.data['drct'] = db[sid]['drct']
