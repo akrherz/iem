@@ -24,10 +24,10 @@ def get_idx(lons, lats, lon, lat):
 
 
 def get_grib(now, fhour):
-    """ """
+    """Find the desired grib within the grib messages"""
     gribfn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
-                            "%H/nam.t%Hz.conusnest.hiresf0"+str(fhour) +
-                            ".tm00.grib2"))
+                           "%H/nam.t%Hz.conusnest.hiresf0"+str(fhour) +
+                           ".tm00.grib2"))
     if not os.path.isfile(gribfn):
         return
     grbs = pygrib.open(gribfn)
@@ -53,6 +53,9 @@ def do_nam(valid):
             if lats is None:
                 lats, lons = grib.latlons()
                 data = np.zeros(np.shape(lats))
+    if lats is None:
+        print("fancy_4inch failed to find NAM data for %s" % (valid, ))
+        return
     data += grib.values
     count += 1
     return lons, lats, data / float(count)
@@ -102,7 +105,7 @@ def main(argv):
         r.max as hourly_max_c, r.min as hourly_min_c, r.count
          from sm_daily d JOIN ranges r on (d.station = r.station)
         where valid = %s and tsoil_c_avg_qc > -40 and r.count > 19
-    """, idbconn,  params=(ts, ts + datetime.timedelta(days=1), ts),
+    """, idbconn, params=(ts, ts + datetime.timedelta(days=1), ts),
                   index_col='station')
     for col, newcol in zip(['tsoil_c_avg_qc', 'hourly_min_c', 'hourly_max_c'],
                            ['ob', 'min', 'max']):
@@ -116,12 +119,13 @@ def main(argv):
         df.at[stid, 'lat'] = nt.sts[stid]['lat']
         df.at[stid, 'lon'] = nt.sts[stid]['lon']
     df['diff'] = df['ob'] - df['nam']
-    df = df[df['ticket'] == False]
-    # we are going to require data be within 1 SD of sampled
-    std = df['nam'].std()
+    # ticket is an object type from above
+    df = df[~df['ticket'].astype('bool')]
+    # we are going to require data be within 1 SD of sampled or 5 deg
+    std = 5. if df['nam'].std() < 5. else df['nam'].std()
     for station in df[df['diff'].abs() > std].index.values:
-        print(("fancy_4inch QC'd %s out std: %.2f, ob:%.1f nam:%.1f"
-               ) % (station, std, df.at[station, 'ob'],
+        print(("fancy_4inch %s QC'd %s out std: %.2f, ob:%.1f nam:%.1f"
+               ) % (ts.strftime("%Y%m%d"), station, std, df.at[station, 'ob'],
                     df.at[station, 'nam']))
         df.drop(station, inplace=True)
 
