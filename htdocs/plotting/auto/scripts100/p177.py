@@ -1,15 +1,14 @@
 """ISU Soil Moisture Network Time Series"""
 import datetime
 
+import psycopg2
+import pytz
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem import meteorology
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
-import psycopg2
-import numpy as np
-import pytz
-import pandas as pd
-from pandas.io.sql import read_sql
 
 PLOTTYPES = {
     "1": "3 Panel Plot",
@@ -89,7 +88,7 @@ def make_daily_pet_plot(ctx):
                   "Climatology from Ames 1986-2014"
                   ) % (ctx['nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = len(dates) / 7 + 1
+    interval = int(len(dates) / 7 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=1, fontsize=10)
     return fig, df
@@ -134,7 +133,7 @@ def make_daily_rad_plot(ctx):
     ax.plot(dates, tmax, label=r"Modelled Max $\tau$ =0.75", color='k', lw=1.5)
     ax.grid(True)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = len(dates) / 7 + 1
+    interval = int(len(dates) / 7 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
@@ -150,32 +149,26 @@ def make_daily_plot(ctx):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
-    icursor = ctx['pgconn'].cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor.execute("""SELECT date(valid), min(tsoil_c_avg_qc),
-    max(tsoil_c_avg_qc), avg(tsoil_c_avg_qc) from sm_hourly
-    where station = '%s' and valid >= '%s 00:00' and valid < '%s 23:56'
-    and tsoil_c_avg is not null GROUP by date ORDER by date ASC
-    """ % (ctx['station'], ctx['sts'].strftime("%Y-%m-%d"),
-           ctx['ets'].strftime("%Y-%m-%d")))
-    dates = []
-    mins = []
-    maxs = []
-    avgs = []
-    for row in icursor:
-        dates.append(row[0])
-        mins.append(row[1])
-        maxs.append(row[2])
-        avgs.append(row[3])
+    df = read_sql("""
+        SELECT date(valid), min(tsoil_c_avg_qc),
+        max(tsoil_c_avg_qc), avg(tsoil_c_avg_qc) from sm_hourly
+        where station = %s and valid >= %s and valid < %s
+        and tsoil_c_avg is not null GROUP by date ORDER by date ASC
+    """, ctx['pgconn'], params=(ctx['station'],
+                                ctx['sts'].strftime("%Y-%m-%d 00:00"),
+                                ctx['ets'].strftime("%Y-%m-%d 23:59")),
+                  index_col='date')
+    if df.empty:
+        raise ValueError("No Data Found for Query")
 
-    mins = temperature(np.array(mins), 'C').value('F')
-    maxs = temperature(np.array(maxs), 'C').value('F')
-    avgs = temperature(np.array(avgs), 'C').value('F')
-    df = pd.DataFrame(dict(mins=mins, maxs=maxs, avgs=avgs, dates=dates))
+    mins = temperature(df['min'].values, 'C').value('F')
+    maxs = temperature(df['max'].values, 'C').value('F')
+    avgs = temperature(df['avg'].values, 'C').value('F')
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(dates, maxs - mins, bottom=mins, fc='tan', ec='brown', zorder=2,
-           align='center', label='Max/Min')
-    ax.scatter(dates, avgs, marker='*', s=30, zorder=3, color='brown',
-               label='Hourly Avg')
+    ax.bar(df.index.values, maxs - mins, bottom=mins, fc='tan', ec='brown',
+           zorder=2, align='center', label='Max/Min')
+    ax.scatter(df.index.values, avgs, marker='*', s=30, zorder=3,
+               color='brown', label='Hourly Avg')
     ax.axhline(50, lw=1.5, c='k')
     ax.grid(True)
     ax.set_ylabel(r"4 inch Soil Temperature $^\circ$F")
@@ -183,7 +176,7 @@ def make_daily_plot(ctx):
                   "Daily Max/Min/Avg 4 inch Soil Temperatures"
                   ) % (ctx['nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = len(dates) / 7 + 1
+    interval = int(len(df.index) / 7 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=2, fontsize=10)
     return fig, df
@@ -307,13 +300,13 @@ def make_daily_water_change_plot(ctx):
                           ctx['sts'].strftime("%-d %b %Y"),
                           ctx['ets'].strftime("%-d %b %Y")))
     bars = ax[1].bar(df['valid'].values, df['change'].values, fc='b', ec='b')
-    for bar in bars:
-        if bar.get_y() < 0:
-            bar.set_facecolor('r')
-            bar.set_edgecolor('r')
+    for mybar in bars:
+        if mybar.get_y() < 0:
+            mybar.set_facecolor('r')
+            mybar.set_edgecolor('r')
     ax[1].set_ylabel("Soil Water Change [inch]")
     ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = len(df.index) / 7 + 1
+    interval = int(len(df.index) / 7 + 1)
     ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax[1].grid(True)
 
@@ -331,13 +324,14 @@ def make_daily_water_change_plot(ctx):
 
 
 def plot2(ctx):
+    """Just soil temps"""
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     df = read_sql("""SELECT * from sm_hourly WHERE
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
-        """, ctx['pgconn'],  params=(ctx['station'], ctx['sts'], ctx['ets']),
+        """, ctx['pgconn'], params=(ctx['station'], ctx['sts'], ctx['ets']),
                   index_col='valid')
     d12t = df['t12_c_avg_qc']
     d24t = df['t24_c_avg_qc']
@@ -536,5 +530,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(opt='5', station='BOOI4', sts='2017-04-10 0000',
-                 ets='2017-04-12 0800'))
+    plotter(dict(opt='3', station='OKLI4', sts='2016-01-01 0000',
+                 ets='2016-12-31 0800'))
