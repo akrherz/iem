@@ -68,11 +68,11 @@ def init_year(ts):
     tm.standard_name = "time"
     tm.axis = "T"
     tm.calendar = "gregorian"
-    tm[:] = np.arange(0, int(days) * 8)
+    tm[:] = np.arange(0, int(days) * 8) * 3
 
     tmb = nc.createVariable('time_bnds', 'd', ('time', 'bnds'))
-    tmb[:, 0] = np.arange(0, int(days) * 8) - 1
-    tmb[:, 1] = np.arange(0, int(days) * 8)
+    tmb[:, 0] = np.arange(0, int(days) * 8) * 3 - 1
+    tmb[:, 1] = np.arange(0, int(days) * 8) * 3
 
     # 3 hour accum, 0 to 655.35
     apcp = nc.createVariable('apcp', np.ushort, ('time', 'y', 'x'),
