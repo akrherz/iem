@@ -11,6 +11,7 @@ PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
         ('avg_low_temp', 'Average Low Temperature'),
         ('avg_temp', 'Average Temperature'),
+        ('avg_dewp', 'Average Dew Point Temp'),
         ('avg_wind_speed', 'Average Wind Speed'),
         ('max_high', 'Maximum High Temperature'),
         ('min_low', 'Minimum Low Temperature'),
@@ -24,7 +25,9 @@ def get_description():
     desc['description'] = """This plot presents statistics for a period of
     days each year provided your start date and number of days after that
     date. If your period crosses a year bounds, the plotted year represents
-    the year of the start date of the period."""
+    the year of the start date of the period. <strong>Average Dew Point Temp
+    </strong> is computed by averaging the daily max and min dew point values.
+    """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
@@ -81,7 +84,8 @@ def plotter(fdict):
     sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,
     min(min_tmpf) as min_low,
     max(min_tmpf) as max_low,
-    max(max_tmpf) as max_high
+    max(max_tmpf) as max_high,
+    avg((max_dwpf + min_dwpf)/2.) as avg_dewp
     from summary s JOIN stations t on (s.iemid = t.iemid)
     WHERE t.network = %s and t.id = %s and to_char(day, 'mmdd') in %s
     GROUP by yr ORDER by yr ASC
@@ -92,15 +96,15 @@ def plotter(fdict):
     bars = ax[0].bar(df['yr'], df[varname], facecolor='r', edgecolor='r',
                      align='center')
     thisvalue = "M"
-    for bar, x, y in zip(bars, df['yr'], df[varname]):
+    for mybar, x, y in zip(bars, df['yr'], df[varname]):
         if x == year:
-            bar.set_facecolor('g')
-            bar.set_edgecolor('g')
+            mybar.set_facecolor('g')
+            mybar.set_edgecolor('g')
             thisvalue = y
     ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
     ax[0].axhline(df[varname].mean(), lw=2,
                   label='Avg: %.2f' % (df[varname].mean(), ))
-    ylabel = "Temperature $^\circ$F"
+    ylabel = r"Temperature $^\circ$F"
     if varname in ['precip', ]:
         ylabel = "Precipitation [inch]"
     elif varname in ['avg_wind_speed', ]:
