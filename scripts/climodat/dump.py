@@ -1,8 +1,7 @@
 """Dump!"""
-import constants
+import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-import psycopg2.extras
 
 BASEDIR = "/mesonet/share/pickup/coop_data"
 
@@ -18,8 +17,8 @@ def main():
         out = open(fn, 'w')
         out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
         sql = """
-            SELECT * from %s WHERE station = '%s' ORDER by day ASC
-        """ % (constants.get_table(sid), sid)
+            SELECT * from alldata_ia WHERE station = %s ORDER by day ASC
+        """, (sid, )
         ccursor.execute(sql)
 
         for row in ccursor:
