@@ -117,8 +117,6 @@ GRANT select on alldata to nobody,apache;
  GRANT SELECT on alldata_co to nobody,apache;
  CREATE TABLE alldata_ct() inherits (alldata); 
  GRANT SELECT on alldata_ct to nobody,apache;
- CREATE TABLE alldata_dc() inherits (alldata); 
- GRANT SELECT on alldata_dc to nobody,apache;
  CREATE TABLE alldata_de() inherits (alldata); 
  GRANT SELECT on alldata_de to nobody,apache;
  CREATE TABLE alldata_fl() inherits (alldata); 
@@ -247,12 +245,6 @@ CREATE UNIQUE index alldata_CT_idx on alldata_CT(station, day);
     CREATE INDEX alldata_CT_sday_idx on alldata_CT(sday);
     CREATE INDEX alldata_CT_stationid_idx on alldata_CT(station);
     CREATE INDEX alldata_CT_year_idx on alldata_CT(year);
-  
-CREATE UNIQUE index alldata_DC_idx on alldata_DC(station, day);
-    CREATE INDEX alldata_DC_day_idx on alldata_DC(day);
-    CREATE INDEX alldata_DC_sday_idx on alldata_DC(sday);
-    CREATE INDEX alldata_DC_stationid_idx on alldata_DC(station);
-    CREATE INDEX alldata_DC_year_idx on alldata_DC(year);
   
 CREATE UNIQUE index alldata_DE_idx on alldata_DE(station, day);
     CREATE INDEX alldata_DE_day_idx on alldata_DE(day);
