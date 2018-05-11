@@ -73,7 +73,7 @@ def generic_gridder(df, idx, domain):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def do_precip(nc, ts):
+def do_precip(ts):
     """Compute the 6 UTC to 6 UTC precip
 
     We need to be careful here as the timestamp sent to this app is today,
@@ -99,10 +99,6 @@ def do_precip(nc, ts):
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
-        if sts.year >= 1900:
-            print(("p01d      for %s [idx:%s] %s(%s)->%s(%s)"
-                   ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                        ets.strftime("%Y%m%d%H"), offset2))
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
@@ -110,10 +106,10 @@ def do_precip(nc, ts):
         hnc = ncopen(ncfn, timeout=300)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
-    nc.variables['p01d'][offset] = np.where(phour < 0, 0, phour)
+    write_grid(ts, 'p01d', np.where(phour < 0, 0, phour))
 
 
-def do_precip12(nc, ts):
+def do_precip12(ts):
     """Compute the 24 Hour precip at 12 UTC, we do some more tricks though"""
     offset = iemre.daily_offset(ts)
     ets = utc(ts.year, ts.month, ts.day, 12)
@@ -136,10 +132,6 @@ def do_precip12(nc, ts):
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
-        if sts.year >= 1900:
-            print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s)"
-                   ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                        ets.strftime("%Y%m%d%H"), offset2))
         ncfn = iemre.get_hourly_ncname(ts.year)
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
@@ -147,7 +139,7 @@ def do_precip12(nc, ts):
         hnc = ncopen(ncfn)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
-    nc.variables['p01d_12z'][offset] = np.where(phour < 0, 0, phour)
+    write_grid(ts, 'p01d_12z', np.where(phour < 0, 0, phour))
 
 
 def plot(df):
@@ -160,10 +152,9 @@ def plot(df):
     m.close()
 
 
-def grid_day12(nc, ts, domain):
+def grid_day12(ts, domain):
     """Use the COOP data for gridding"""
-    offset = iemre.daily_offset(ts)
-    print(('12z hi/lo for %s [idx:%s]') % (ts, offset))
+    print(('12z hi/lo for %s') % (ts, ))
     mybuf = 2.
     if ts.year > 2008:
         sql = """
@@ -215,32 +206,41 @@ def grid_day12(nc, ts, domain):
 
     if len(df.index) > 4:
         res = generic_gridder(df, 'highdata', domain)
-        nc.variables['high_tmpk_12z'][offset] = datatypes.temperature(
-                                                res, 'F').value('K')
-        print(("12z hi for %s [idx:%s] "
-               "min: %5.1f max: %5.1f"
-               ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
+        write_grid(ts, 'high_tmpk_12z', datatypes.temperature(
+            res, 'F').value('K'))
 
         res = generic_gridder(df, 'lowdata', domain)
-        nc.variables['low_tmpk_12z'][offset] = datatypes.temperature(
-                                            res, 'F').value('K')
-        print(("12z lo for %s [idx:%s] "
-               "min: %5.1f max: %5.1f"
-               ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
+        write_grid(ts, 'low_tmpk_12z', datatypes.temperature(
+            res, 'F').value('K'))
 
         res = generic_gridder(df, 'snowdata', domain)
-        nc.variables['snow_12z'][offset] = res * 25.4
+        write_grid(ts, 'snow_12z', datatypes.distance(
+            res, 'IN').value('MM'))
 
         res = generic_gridder(df, 'snowddata', domain)
-        nc.variables['snowd_12z'][offset] = res * 25.4
+        write_grid(ts, 'snowd_12z', datatypes.distance(
+            res, 'IN').value('MM'))
     else:
         print(("%s has %02i entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
 
 
-def grid_day(nc, ts, domain):
+def write_grid(valid, vname, grid):
+    """Write data to backend netcdf"""
+    offset = iemre.daily_offset(valid)
+    nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=300)
+    if nc is None:
+        print("daily_analysis#write_grid first open attempt failed, try #2")
+        nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=600)
+    print(("%12s [idx:%s] min: %6.2f max: %6.2f [%s]"
+           ) % (vname, offset, np.nanmin(grid), np.nanmax(grid),
+                nc.variables[vname].units))
+    nc.variables[vname][offset] = grid
+    nc.close()
+
+
+def grid_day(ts, domain):
     """Do our gridding"""
-    offset = iemre.daily_offset(ts)
     mybuf = 2.
     if ts.year > 1927:
         sql = """
@@ -298,29 +298,20 @@ def grid_day(nc, ts, domain):
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
         return
     res = generic_gridder(df, 'highdata', domain)
-    nc.variables['high_tmpk'][offset] = datatypes.temperature(
-                                            res, 'F').value('K')
-    print(("cal hi for %s [idx:%s] min: %5.1f max: %5.1f"
-           ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
+    write_grid(ts, 'high_tmpk', datatypes.temperature(res, 'F').value('K'))
     res = generic_gridder(df, 'lowdata', domain)
-    nc.variables['low_tmpk'][offset] = datatypes.temperature(
-                                        res, 'F').value('K')
-    print(("cal lo for %s [idx:%s] min: %5.1f max: %5.1f"
-           ) % (ts, offset, np.nanmin(res), np.nanmax(res)))
+    write_grid(ts, 'low_tmpk', datatypes.temperature(res, 'F').value('K'))
     hres = generic_gridder(df, 'highdwpf', domain)
     lres = generic_gridder(df, 'lowdwpf', domain)
     if hres is not None and lres is not None:
-        nc.variables['avg_dwpk'][offset] = datatypes.temperature(
-                                        (hres + lres) / 2., 'F').value('K')
+        write_grid(ts, 'avg_dwpk', datatypes.temperature((hres + lres) / 2.,
+                                                         'F').value('K'))
     res = generic_gridder(df, 'avgsknt', domain)
     if res is not None:
         mask = ~np.isnan(res)
         mask[mask] &= res[mask] < 0
         res = np.where(mask, 0, res)
-        print(("cal sknt min: %5.1f max: %5.1f"
-               ) % (np.nanmin(res), np.nanmax(res)))
-        nc.variables['wind_speed'][offset] = datatypes.speed(
-                                            res, 'KT').value('MPS')
+        write_grid(ts, 'wind_speed', datatypes.speed(res, 'KT').value('MPS'))
 
 
 def workflow(ts, irealtime):
@@ -333,10 +324,10 @@ def workflow(ts, irealtime):
         subprocess.call(cmd, shell=True)
     nc = ncopen(ncfn, 'a')
     domain = nc.variables['hasdata'][:, :]
-    # For this date, the 12 UTC COOP obs will match the date
-    grid_day12(nc, ts, domain)
-    do_precip12(nc, ts)
     nc.close()
+    # For this date, the 12 UTC COOP obs will match the date
+    grid_day12(ts, domain)
+    do_precip12(ts)
     # This is actually yesterday!
     if irealtime:
         ts -= datetime.timedelta(days=1)
@@ -345,10 +336,8 @@ def workflow(ts, irealtime):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
-    nc = ncopen(ncfn, 'a', timeout=300)
-    grid_day(nc, ts, domain)
-    do_precip(nc, ts)
-    nc.close()
+    grid_day(ts, domain)
+    do_precip(ts)
 
 
 def main(argv):
