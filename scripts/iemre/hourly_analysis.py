@@ -16,6 +16,17 @@ from pyiem.util import get_dbconn, ncopen
 # stop RuntimeWarning: invalid value encountered in greater
 np.warnings.filterwarnings('ignore')
 
+MEMORY = {'ts': datetime.datetime.now()}
+
+
+def pprint(msg):
+    """A debug print statement"""
+    if not sys.stdout.isatty():
+        return
+    delta = (datetime.datetime.now() - MEMORY['ts']).total_seconds()
+    MEMORY['ts'] = datetime.datetime.now()
+    print("%6.3f %s" % (delta, msg))
+
 
 def grid_wind(df, domain):
     """
@@ -72,15 +83,17 @@ def generic_gridder(df, idx, domain):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def grid_hour(nc, ts):
+def grid_hour(ts):
     """
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
+    pprint("grid_hour called...")
+    nc = ncopen(iemre.get_hourly_ncname(ts.year), 'a', timeout=300)
     domain = nc.variables['hasdata'][:, :]
+    nc.close()
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
-    offset = iemre.hourly_offset(ts)
     utcnow = datetime.datetime.utcnow()
     utcnow = (utcnow.replace(tzinfo=pytz.utc) -
               datetime.timedelta(hours=36))
@@ -130,36 +143,53 @@ def grid_hour(nc, ts):
  valid >= %s and valid < %s GROUP by station, lon, lat"""
 
     df = read_sql(sql, dbconn, params=params, index_col='station')
+    pprint("got database results")
     if df.empty:
         print(("%s has no entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d %H:%M"), ))
         return
     ures, vres = grid_wind(df, domain)
+    pprint("grid_wind is done")
     if ures is None:
         print("iemre.hourly_analysis failure for uwnd at %s" % (ts, ))
     else:
-        nc.variables['uwnd'][offset] = ures
-        nc.variables['vwnd'][offset] = vres
+        write_grid(ts, 'uwnd', ures)
+        write_grid(ts, 'vwnd', vres)
 
     tmpf = generic_gridder(df, 'max_tmpf', domain)
+    pprint("grid tmpf is done")
     if tmpf is None:
         print("iemre.hourly_analysis failure for tmpk at %s" % (ts, ))
     else:
         dwpf = generic_gridder(df, 'max_dwpf', domain)
+        pprint("grid dwpf is done")
         # require that dwpk <= tmpk
         mask = ~np.isnan(dwpf)
         mask[mask] &= dwpf[mask] > tmpf[mask]
         dwpf = np.where(mask, tmpf, dwpf)
-        nc.variables['tmpk'][offset] = masked_array(
-            tmpf, data_units='degF').to('degK')
-        nc.variables['dwpk'][offset] = masked_array(
-            dwpf, data_units='degF').to('degK')
+        write_grid(ts, 'tmpk', masked_array(tmpf,
+                                            data_units='degF').to('degK'))
+        write_grid(ts, 'dwpk', masked_array(dwpf,
+                                            data_units='degF').to('degK'))
 
     res = grid_skyc(df, domain)
+    pprint("grid skyc is done")
     if res is None:
         print("iemre.hourly_analysis failure for skyc at %s" % (ts, ))
     else:
-        nc.variables['skyc'][offset] = res
+        write_grid(ts, 'skyc', res)
+
+
+def write_grid(valid, vname, grid):
+    """Atomic write of data to our netcdf storage
+
+    This is isolated so that we don't 'lock' up our file while intensive
+    work is done
+    """
+    nc = ncopen(iemre.get_hourly_ncname(valid.year), 'a', timeout=300)
+    offset = iemre.hourly_offset(valid)
+    nc.variables[vname][offset] = grid
+    nc.close()
 
 
 def main(argv):
@@ -171,10 +201,7 @@ def main(argv):
         ts = datetime.datetime.utcnow()
         ts = ts.replace(second=0, minute=0)
     ts = ts.replace(tzinfo=pytz.utc)
-    # Load up our netcdf file!
-    nc = ncopen(iemre.get_hourly_ncname(ts.year), 'a', timeout=300)
-    grid_hour(nc, ts)
-    nc.close()
+    grid_hour(ts)
 
 
 if __name__ == "__main__":
