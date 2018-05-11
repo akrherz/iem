@@ -84,6 +84,7 @@ udunits2
 unixodbc
 uritemplate
 wordcloud
+xesmf
 xlrd
 xlsxwriter
 xlwt

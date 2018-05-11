@@ -58,10 +58,11 @@ def merge(valid):
     lats = nc.variables['lat'][:]
     lons = nc.variables['lon'][:]
 
-    # Rough subsample, since the whole enchillata is too much
-    lats = np.ravel(lats[200:-100:5, 300:900:5])
-    lons = np.ravel(lons[200:-100:5, 300:900:5])
-    vals = np.ravel(val[200:-100:5, 300:900:5])
+    # Our data is 4km, iemre is 0.125deg, so we stride some to cut down on mem
+    stride = slice(None, None, 3)
+    lats = np.ravel(lats[stride, stride])
+    lons = np.ravel(lons[stride, stride])
+    vals = np.ravel(val[stride, stride])
     nn = NearestNDInterpolator((lons, lats), vals)
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = nn(xi, yi)
@@ -75,8 +76,8 @@ def merge(valid):
     nc = ncopen(iemre.get_hourly_ncname(valid.year), 'a', timeout=300)
     nc.variables["p01m"][tidx, :, :] = res
     # print(("Readback mean: %.2f max: %.2f"
-    #       ) % (np.mean(nc.variables["p01m"][tidx, :, :]),
-    #            np.max(nc.variables["p01m"][tidx, :, :])))
+    #      ) % (np.mean(nc.variables["p01m"][tidx, :, :]),
+    #           np.max(nc.variables["p01m"][tidx, :, :])))
     nc.close()
 
 
@@ -89,7 +90,7 @@ def main(argv):
         ts = ts.replace(minute=0, second=0, microsecond=0)
     ts = ts.replace(tzinfo=pytz.utc)
 
-    if to_netcdf(ts):
+    if to_netcdf(ts) or len(argv) == 5:
         merge(ts)
 
 

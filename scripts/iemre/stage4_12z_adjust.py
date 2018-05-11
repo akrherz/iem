@@ -26,10 +26,11 @@ def merge(ts):
     grb = grbs[1]
     val = grb.values
     lats, lons = grb.latlons()
-    # Rough subsample, since the whole enchillata is too much
-    lats = np.ravel(lats[200:-100:5, 300:900:5])
-    lons = np.ravel(lons[200:-100:5, 300:900:5])
-    vals = np.ravel(val[200:-100:5, 300:900:5])
+    # can save a bit of memory as we don't need all data
+    stride = slice(None, None, 3)
+    lats = np.ravel(lats[stride, stride])
+    lons = np.ravel(lons[stride, stride])
+    vals = np.ravel(val[stride, stride])
     # Clip large values
     vals = np.where(vals > 250., 0, vals)
     nn = NearestNDInterpolator((lons, lats), vals)
