@@ -16,10 +16,9 @@ def main():
         fn = "%s/%s.csv" % (BASEDIR, nt.sts[sid]['name'].replace(" ", "_"))
         out = open(fn, 'w')
         out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
-        sql = """
+        ccursor.execute("""
             SELECT * from alldata_ia WHERE station = %s ORDER by day ASC
-        """, (sid, )
-        ccursor.execute(sql)
+        """, (sid, ))
 
         for row in ccursor:
             out.write(("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n"
