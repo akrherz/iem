@@ -282,6 +282,9 @@ data = {'plots': [
          'label': ("US Drought Monitor Areal Coverage by State")},
         {'id': "186",
          'label': ("US Drought Monitor Change in Areal Coverage by State")},
+        {'id': "193",
+         'label': ("US Drought Monitor + Weather Prediction Center "
+                   "Forecasted Rain")},
     ]},
     {'label': 'METAR ASOS Special Plots', 'options': [
         {'id': "78",
