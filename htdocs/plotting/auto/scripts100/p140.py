@@ -49,6 +49,7 @@ def get_description():
 
 
 def nice(val):
+    """pretty print"""
     if val == 'M':
         return 'M'
     if val < 0.01 and val > 0:

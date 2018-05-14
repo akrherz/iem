@@ -30,8 +30,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
+    res = """# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
 # Climate Record: %s -> %s
 # Site Information: [%s] %s
@@ -57,7 +56,7 @@ def plotter(fdict):
        sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
        from """+table+""" WHERE station = %s
        GROUP by year ORDER by year ASC
-    """, pgconn,  params=(station,), index_col=None)
+    """, pgconn,  params=(station, ), index_col=None)
 
     for _, row in df.iterrows():
         res += ("%(year)4i %(m20)4i %(m10)4i %(m0)4i %(m32)4i %(e50)4i "

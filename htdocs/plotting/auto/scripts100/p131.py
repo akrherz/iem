@@ -81,7 +81,7 @@ def plotter(fdict):
         from alldata where station = %s
         and tmpf is not null and extract(month from valid) in %s
         GROUP by t ORDER by t ASC
-        """, pgconn, params=(station,  tuple(months)), index_col=None)
+        """, pgconn, params=(station, tuple(months)), index_col=None)
     df['freq'] = df['hits'] / df['count'] * 100.
     df2 = df[df['count'] > 2]
     avg = df['hits'].sum() / float(df['count'].sum()) * 100.
