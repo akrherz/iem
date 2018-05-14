@@ -55,6 +55,8 @@ VARCONV = {'timestamp': 'valid',
            "bp_mmhg_avg": "bpres_avg",
            }
 
+TSOIL_COLS = ['tsoil_c_avg', 't06_c_avg', 't12_c_avg', 't24_c_avg',
+              't50_c_avg']
 BASE = '/mnt/home/loggernet'
 STATIONS = {'CAMI4': 'Calumet',
             'BOOI4': 'AEAFarm',
@@ -95,6 +97,13 @@ def qcval(df, colname, floor, ceiling):
                     'B', None)
 
 
+def qcval2(df, colname, floor, ceiling):
+    """Make sure the value falls within some bounds, Null if not"""
+    df.loc[df[colname] < floor, colname] = np.nan
+    df.loc[df[colname] > ceiling, colname] = np.nan
+    return np.where(pd.isnull(df[colname]), 'B', None)
+
+
 def make_time(string):
     """Convert a time in the file to a datetime"""
     tstamp = datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
@@ -129,6 +138,9 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         if colname.startswith('calc_vwc'):
             df['%s_f' % (colname, )] = qcval(df, '%s_qc' % (colname, ),
                                              0.01, 0.7)
+        elif colname in TSOIL_COLS:
+            df['%s_f' % (colname, )] = qcval2(df, '%s_qc' % (colname, ),
+                                              -20., 37.)
         else:
             df['%s_f' % (colname, )] = None
 
