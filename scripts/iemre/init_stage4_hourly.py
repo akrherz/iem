@@ -68,6 +68,7 @@ def init_year(ts):
     tm.axis = "T"
     tm.calendar = "gregorian"
     tm[:] = np.arange(0, int(days) * 24)
+    tm.bounds = 'time_bnds'
 
     tmb = nc.createVariable('time_bnds', 'd', ('time', 'bnds'))
     tmb[:, 0] = np.arange(0, int(days) * 24) - 1
@@ -82,7 +83,6 @@ def init_year(ts):
     p01m.standard_name = 'Precipitation'
     p01m.coordinates = "lon lat"
     p01m.description = "Precipitation accumulation for the previous hour"
-    p01m.bounds = 'time_bnds'
 
     # Track variable status to prevent double writes of data, prior to bias
     # correction making some changes

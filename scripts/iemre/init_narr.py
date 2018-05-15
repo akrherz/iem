@@ -68,8 +68,9 @@ def init_year(ts):
     tm.standard_name = "time"
     tm.axis = "T"
     tm.calendar = "gregorian"
+    tm.bounds = 'time_bnds'
     tm[:] = np.arange(0, int(days) * 8) * 3
-
+ 
     tmb = nc.createVariable('time_bnds', 'd', ('time', 'bnds'))
     tmb[:, 0] = np.arange(0, int(days) * 8) * 3 - 1
     tmb[:, 1] = np.arange(0, int(days) * 8) * 3
@@ -84,7 +85,6 @@ def init_year(ts):
     apcp.standard_name = 'Precipitation'
     apcp.coordinates = "lon lat"
     apcp.description = "Precipitation accumulation for the previous 3 hours"
-    apcp.bounds = 'time_bnds'
 
     nc.close()
 
