@@ -76,7 +76,7 @@ def init_year(ts):
 
     # 3 hour accum, 0 to 655.35
     apcp = nc.createVariable('apcp', np.ushort, ('time', 'y', 'x'),
-                             fill_value=65536)
+                             fill_value=65535)
     apcp.scale_factor = 0.01
     apcp.add_offset = 0.
     apcp.units = 'mm'
