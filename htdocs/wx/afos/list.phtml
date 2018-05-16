@@ -31,7 +31,9 @@ EOF;
 $wfo = isset($_REQUEST["wfo"])? xssafe($_REQUEST["wfo"]): null;
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
 $dbsource = $source;
+$sesource = $source;
 if (strlen($source) == 3){ $dbsource = "K$source";}
+if ((strlen($source) == 4) && (substr($source, 0, 1) == 'K')) { $sesource = substr($source, 1, 3); }
 if ($wfo != null){ $source = $wfo; }
 
 $view = isset($_GET["view"])? xssafe($_GET["view"]): 'time';
@@ -126,7 +128,7 @@ while (list($key, $s)=each($groups)){
 				$tbl['name']);
 	}
 }
-$netselect = make_select("source", $source, $sources);
+$netselect = make_select("source", $sesource, $sources);
 
 $yselect = yearSelect(1996, $year);
 $mselect = monthSelect($month);

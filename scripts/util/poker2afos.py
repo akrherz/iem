@@ -13,7 +13,8 @@ from pyiem.nws.product import TextProduct
 BAD_CHARS = r"[^\n\r\001\003a-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 DEBUG = False
 PGCONN = get_dbconn('afos')
-XREF_SOURCE = {'KDSM': 'KDMX'}
+XREF_SOURCE = {'KDSM': 'KDMX',
+               'KOKC': 'KOUN'}
 
 
 def process(order):
