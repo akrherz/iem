@@ -4,21 +4,35 @@ import calendar
 
 import numpy as np
 from scipy import stats
-from pyiem import network, util
 from pandas.io.sql import read_sql
 import pandas as pd
+from pyiem import network, util
 
 PDICT = {'total_precip': 'Total Precipitation',
          'avg_temp': 'Average Temperature',
          'max_high': 'Maximum High Temperature',
          'days_high_aoa': 'Days with High At or Above',
-         'gdd50': 'Growing Degree Days (base 50)'}
+         'gdd32': 'Growing Degree Days (base 32)',
+         'gdd41': 'Growing Degree Days (base 41)',
+         'gdd46': 'Growing Degree Days (base 46)',
+         'gdd48': 'Growing Degree Days (base 48)',
+         'gdd50': 'Growing Degree Days (base 50)',
+         'gdd51': 'Growing Degree Days (base 51)',
+         'gdd52': 'Growing Degree Days (base 52)',
+         }
 
 UNITS = {'total_precip': 'inch',
          'avg_temp': 'F',
          'max_high': 'F',
          'days_high_aoa': 'days',
-         'gdd50': 'F'}
+         'gdd32': 'F',
+         'gdd41': 'F',
+         'gdd46': 'F',
+         'gdd48': 'F',
+         'gdd50': 'F',
+         'gdd51': 'F',
+         'gdd52': 'F',
+         }
 
 
 def get_description():
@@ -72,6 +86,7 @@ def compute_months_and_offsets(start, count):
 
 
 def combine(df, months, offsets):
+    """combine"""
     # To allow for periods that cross years! We create a second dataframe with
     # the year shifted back one!
     df_shift = df.copy()
@@ -87,7 +102,8 @@ def combine(df, months, offsets):
         else:
             thisdf = df[df['month'] == month]
         # Do our combinations, we divide out later when necessary
-        for v in ['avg_temp', 'total_precip', 'gdd50', 'days_high_aoa']:
+        for v in ['avg_temp', 'total_precip', 'gdd32', 'gdd41', 'gdd46',
+                  'gdd48', 'gdd50', 'gdd51', 'gdd52', 'days_high_aoa']:
             xdf[v] = xdf[v] + thisdf[v]
         tmpdf = pd.DataFrame({'a': xdf['max_high'], 'b': thisdf['max_high']})
         xdf['max_high'] = tmpdf.max(axis=1)
@@ -123,7 +139,13 @@ def plotter(fdict):
     SELECT year, month, avg((high+low)/2.) as avg_temp,
     sum(precip) as total_precip, max(high) as max_high,
     sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
-    sum(gddxx(50, 86, high, low)) as gdd50
+    sum(gddxx(32, 86, high, low)) as gdd32,
+    sum(gddxx(41, 86, high, low)) as gdd41,
+    sum(gddxx(46, 86, high, low)) as gdd46,
+    sum(gddxx(48, 86, high, low)) as gdd48,
+    sum(gddxx(50, 86, high, low)) as gdd50,
+    sum(gddxx(51, 86, high, low)) as gdd51,
+    sum(gddxx(52, 86, high, low)) as gdd52
     from """+table+"""
     WHERE station = %s and day < %s GROUP by year, month
     """, pgconn, params=(threshold, station, today.replace(day=1)),

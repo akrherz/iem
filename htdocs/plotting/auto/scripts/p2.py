@@ -20,6 +20,10 @@ def get_description():
              label='Month'),
         dict(type='year', name='year', default=today.year,
              label='Year to Highlight'),
+        dict(type='int', default=50, name='gddbase',
+             label="Growing Degree Day base (F)"),
+        dict(type='int', default=86, name='gddceil',
+             label="Growing Degree Day ceiling (F)"),
     ]
     desc['description'] = """This plot compares the growing degree day vs
     precipitation
@@ -50,20 +54,22 @@ def plotter(fdict):
 
     df = read_sql("""
         SELECT year, sum(precip) as total_precip,
-        sum(gdd50(high::numeric,low::numeric)) as gdd50 from """+table+"""
+        sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd from
+        """+table+"""
         WHERE station = %s and month = %s GROUP by year
-    """, pgconn, params=(station, month), index_col='year')
+    """, pgconn, params=(ctx['gddbase'], ctx['gddceil'], station, month),
+                  index_col='year')
     if df.empty:
         raise ValueError("ERROR: No Data Found")
 
-    gstats = df.gdd50.describe()
+    gstats = df.gdd.describe()
     pstats = df.total_precip.describe()
 
     df['precip_sigma'] = (df.total_precip - pstats['mean']) / pstats['std']
-    df['gdd50_sigma'] = (df.gdd50 - gstats['mean']) / gstats['std']
-    df['distance'] = (df.precip_sigma ** 2 + df.gdd50_sigma ** 2) ** 0.5
+    df['gdd_sigma'] = (df.gdd - gstats['mean']) / gstats['std']
+    df['distance'] = (df.precip_sigma ** 2 + df.gdd_sigma ** 2) ** 0.5
 
-    h_slope, intercept, r_value, _, _ = stats.linregress(df['gdd50_sigma'],
+    h_slope, intercept, r_value, _, _ = stats.linregress(df['gdd_sigma'],
                                                          df['precip_sigma'])
 
     y1 = -4.0 * h_slope + intercept
@@ -71,29 +77,31 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.set_position([0.1, 0.12, 0.8, 0.78])
 
-    ax.scatter(df['gdd50_sigma'], df['precip_sigma'], label=None)
+    ax.scatter(df['gdd_sigma'], df['precip_sigma'], label=None)
     ax.plot([-4, 4], [y1, y2], label="Slope=%.2f R$^2$=%.2f" % (h_slope,
                                                                 r_value ** 2))
-    xmax = df.gdd50_sigma.abs().max() + 0.25
+    xmax = df.gdd_sigma.abs().max() + 0.25
     ymax = df.precip_sigma.abs().max() + 0.25
     ax.set_xlim(0 - xmax, xmax)
     ax.set_ylim(0 - ymax, ymax)
     events = df.query("distance > 2.5 or year == %.0f" % (year, ))
     for _year, row in events.iterrows():
-        ax.text(row['gdd50_sigma'], row['precip_sigma'],
+        ax.text(row['gdd_sigma'], row['precip_sigma'],
                 ' %.0f' % (_year,), va='center')
 
     if year in df.index:
         c = Circle((0, 0), radius=df.loc[year].distance, facecolor='none')
         ax.add_patch(c)
-    ax.set_xlabel(r"Growing Degree Day Departure ($\sigma$)")
+    ax.set_xlabel(("Growing Degree Day (base=%s, ceil=%s) "
+                   r"Departure ($\sigma$)") % (ctx['gddbase'], ctx['gddceil']))
     ax.set_ylabel(r"Precipitation Departure ($\sigma$)")
     ax.grid(True)
     ax.set_title(("%s %s [%s]\n"
-                  "Growing Degree Day (base=50) + Precipitation Departure"
-                  ) % (
-        calendar.month_name[month], nt.sts[station]['name'], station))
-    ax.legend(loc='upper right', bbox_to_anchor=(1.05, -0.04),
+                  "Growing Degree Day (base=%s, ceil=%s) "
+                  "+ Precipitation Departure"
+                  ) % (calendar.month_name[month], nt.sts[station]['name'],
+                       station, ctx['gddbase'], ctx['gddceil']))
+    ax.legend(loc='lower right', bbox_to_anchor=(1.05, 0.01),
               ncol=2, fontsize=10)
 
     return fig, df

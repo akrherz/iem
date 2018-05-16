@@ -53,8 +53,14 @@ function plotNoData($map, $img){
 
 }
 
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+$varDef = Array(
+  "gdd32" => "Growing Degree Days (base=32)",
+  "gdd41" => "Growing Degree Days (base=41)",
+  "gdd46" => "Growing Degree Days (base=46)",
   "gdd48" => "Growing Degree Days (base=48)",
+  "gdd50" => "Growing Degree Days (base=50)",
+  "gdd51" => "Growing Degree Days (base=51)",
+  "gdd52" => "Growing Degree Days (base=52)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
@@ -63,10 +69,14 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
   "maxtemp" => "Maximum Temperature [F]",
 );
 
-
-
-$rnd = Array("gdd50" => 0,
+$rnd = Array(
+  "gdd32" => 0,
+  "gdd41" => 0,
+  "gdd46" => 0,
   "gdd48" => 0,
+  "gdd50" => 0,
+  "gdd51" => 0,
+  "gdd52" => 0,
   "et" => 2,
   "prec" => 2,
   "sgdd50" => 0,
@@ -125,8 +135,14 @@ $iards->draw($img);
 $bar640t->draw($img);
 
 $rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
-	sum(precip) as s_prec, sum(gdd50(high,low)) as s_gdd50,
-  sum(gddxx(48, 86, high, low)) as s_gdd48,
+	sum(precip) as s_prec,
+  sum(gddxx(32, 86, high, low)) as s_gdd32,
+	sum(gddxx(41, 86, high, low)) as s_gdd41,
+	sum(gddxx(46, 86, high, low)) as s_gdd46,
+	sum(gddxx(48, 86, high, low)) as s_gdd48,
+	sum(gddxx(50, 86, high, low)) as s_gdd50,
+  sum(gddxx(51, 86, high, low)) as s_gdd51,
+	sum(gddxx(52, 86, high, low)) as s_gdd52,
 	sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
 	max(high) as s_maxtemp from alldata 
 	WHERE day >= $1 and day <= $2

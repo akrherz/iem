@@ -1,9 +1,10 @@
 """Computes the Climatology and fills out the table!"""
 from __future__ import print_function
-import sys
 import datetime
 import psycopg2.extras
+
 from tqdm import tqdm
+from pyiem.reference import state_names
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
@@ -26,12 +27,13 @@ def daily_averages(table):
     """
     Compute and Save the simple daily averages
     """
-    for st in ['ND', 'SD', 'NE', 'KS', 'MO', 'IA', 'MN', 'WI', 'IL',
-               'IN', 'OH', 'MI', 'KY']:
+    for st in state_names:
+        if st in ['DC', 'AK', 'HI']:
+            continue
         nt = NetworkTable("%sCLIMATE" % (st,))
         print('Computing Daily Averages for state: %s' % (st,))
         ccursor = COOP.cursor()
-        ccursor.execute("""DELETE from %s WHERE substr(station,1,2) = '%s'
+        ccursor.execute("""DELETE from %s WHERE substr(station, 1, 2) = '%s'
         """ % (table, st))
         print('    removed %s rows from %s' % (ccursor.rowcount, table))
         sql = """
@@ -39,7 +41,9 @@ def daily_averages(table):
         max_high, min_high,
         max_low, min_low,
         max_precip, precip,
-        snow, years, gdd50, sdd86, hdd65, max_range,
+        snow, years,
+        gdd32, gdd41, gdd46, gdd48, gdd50, gdd51, gdd52,
+        sdd86, hdd65, max_range,
         min_range)
     (SELECT station, ('2000-'|| to_char(day, 'MM-DD'))::date as d,
     avg(high) as avg_high, avg(low) as avg_low,
@@ -47,7 +51,14 @@ def daily_averages(table):
     max(low) as max_low, min(low) as min_low,
     max(precip) as max_precip, avg(precip) as precip,
     avg(snow) as snow, count(*) as years,
-    avg( gddxx(50,86,high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
+    avg(gddxx(32, 86, high, low)) as gdd32,
+    avg(gddxx(41, 86, high, low)) as gdd41,
+    avg(gddxx(46, 86, high, low)) as gdd46,
+    avg(gddxx(48, 86, high, low)) as gdd48,
+    avg(gddxx(50, 86, high, low)) as gdd50,
+    avg(gddxx(51, 86, high, low)) as gdd51,
+    avg(gddxx(52, 86, high, low)) as gdd52,
+    avg( sdd86(high,low) ) as sdd86,
     avg( hdd65(high,low) ) as hdd65,
     max( high - low) as max_range, min(high - low) as min_range
     from alldata_%s WHERE day >= '%s' and day < '%s' and
@@ -63,6 +74,7 @@ def daily_averages(table):
 
 
 def do_date(ccursor2, table, row, col, agg_col):
+    """Process date"""
     sql = """
     SELECT year from alldata_%s where station = '%s' and %s = %s
     and sday = '%s'
@@ -81,6 +93,7 @@ def do_date(ccursor2, table, row, col, agg_col):
 
 
 def set_daily_extremes(table):
+    """Set the extremes on a given table"""
     sql = """
     SELECT * from %s WHERE max_high_yr is null and max_high is not null
     and min_high_yr is null and min_high is not null
@@ -100,13 +113,14 @@ def set_daily_extremes(table):
         data['min_low_yr'] = do_date(ccursor2, table, row, 'low', 'min_low')
         data['max_precip_yr'] = do_date(ccursor2, table, row,
                                         'precip', 'max_precip')
-        ccursor2.execute("""UPDATE %s SET max_high_yr = %s, min_high_yr = %s,
-        max_low_yr = %s, min_low_yr = %s, max_precip_yr = %s
-        WHERE station = '%s' and valid = '%s'""" % (
-                                    table, data['max_high_yr'],
-                                    data['min_high_yr'], data['max_low_yr'],
-                                    data['min_low_yr'], data['max_precip_yr'],
-                                    row['station'], row['valid']))
+        ccursor2.execute("""
+            UPDATE %s SET max_high_yr = %s, min_high_yr = %s,
+            max_low_yr = %s, min_low_yr = %s, max_precip_yr = %s
+            WHERE station = '%s' and valid = '%s'
+        """ % (table, data['max_high_yr'],
+               data['min_high_yr'], data['max_low_yr'],
+               data['min_low_yr'], data['max_precip_yr'],
+               row['station'], row['valid']))
         cnt += 1
         if cnt % 1000 == 0:
             ccursor2.close()
@@ -117,6 +131,12 @@ def set_daily_extremes(table):
     COOP.commit()
 
 
+def main():
+    """Go Main Go"""
+    for table in META:
+        daily_averages(table)
+        set_daily_extremes(table)
+
+
 if __name__ == '__main__':
-    daily_averages(sys.argv[1])
-    set_daily_extremes(sys.argv[1])
+    main()

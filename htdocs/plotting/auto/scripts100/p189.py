@@ -103,7 +103,7 @@ META = {
     'title': 'Growing Degree Days (1 May - 1 Oct) (base=50)',
     'ylabel': 'GDD Units [F]',
     'xlabel': 'Year',
-    'func': 'sum(gdd50(high,low))',
+    'func': 'sum(gddxx(50, 86, high, low))',
     'month_bounds': 'and month in (5,6,7,8,9)',
     'valid_offset': '',
   },

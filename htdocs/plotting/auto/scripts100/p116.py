@@ -43,11 +43,7 @@ def plotter(fdict):
     sum(hdd(high,low,60)) as hdd60,
     sum(hdd(high,low,65)) as hdd65,
     sum(case when precip >= 0.01 then 1 else 0 end) as rain_days,
-    sum(case when snow >= 0.1 then 1 else 0 end) as snow_days,
-    sum(gddxx(40,86,high,low)) as gdd40,
-    sum(gddxx(48,86,high,low)) as gdd48,
-    sum(gddxx(50,86,high,low)) as gdd50,
-    sum(gddxx(52,86,high,low)) as gdd52
+    sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
      from """+table+""" WHERE station = %s GROUP by year, month
     """, pgconn, params=(station,), index_col=None)
     df['monthdate'] = df[['year', 'month']].apply(lambda x: datetime.date(x[0],

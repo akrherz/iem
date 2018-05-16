@@ -1,9 +1,10 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 51);
 require_once "../../../../include/forms.php";
-include("../../../../include/database.inc.php");
-include("../../../../include/network.php");
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/network.php";
+require_once "../../../../include/myview.php";
 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
@@ -33,6 +34,7 @@ $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
 
 $round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, 
+"gdd41" => 0, "gdd46" => 0, "gdd51" => 0, "gdd52" => 0, "gdd48" => 0,
 "sgdd50" => 0, "sgdd52" => 0, "sdd86" => 0, "srad" => 0);
 
 $today = time();
@@ -51,8 +53,14 @@ $cEnd = "2000". strftime("-%m-%d", $gs_end);
 $sstr_txt = strftime("%b %d", $gs_start);
 $estr_txt = strftime("%b %d", $gs_end);
 
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+$varDef = Array(
   "gdd32" => "Growing Degree Days (base=32)",
+  "gdd41" => "Growing Degree Days (base=41)",
+  "gdd46" => "Growing Degree Days (base=46)",
+  "gdd48" => "Growing Degree Days (base=48)",
+  "gdd50" => "Growing Degree Days (base=50)",
+  "gdd51" => "Growing Degree Days (base=51)",
+  "gdd52" => "Growing Degree Days (base=52)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
   "srad" => "Solar Radiation (langleys)",
@@ -63,8 +71,14 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
 
 
 
-$rnd = Array("gdd50" => 0,
+$rnd = Array(
   "gdd32" => 0,
+  "gdd41" => 0,
+  "gdd46" => 0,
+  "gdd48" => 0,
+  "gdd50" => 0,
+  "gdd51" => 0,
+  "gdd52" => 0,
   "et" => 2, "c11" => 2,
   "prec" => 2,
   "srad" => 0,
@@ -89,21 +103,28 @@ $climate = Array();
 reset($ISUAGcities);
 while( list($key,$val) = each($ISUAGcities) ) {
   $csite = strtolower($ISUAGcities[$key]["climate_site"]);
-  $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0,'sdd86'=>0,'prec'=>0);
+  $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0, 'sdd86'=>0, 'prec'=>0,
+    'gdd41' => 0, 'gdd46' => 0, 'gdd48' => 0, 'gdd51' => 0, 'gdd52' => 0);
 
   $sql = sprintf("SELECT * from climate51 WHERE station = '%s' and
     valid BETWEEN '%s' and '%s'", $csite, $cStart, $cEnd);
   $rs =  pg_exec($climatedb, $sql);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $climate[$key]['gdd32'] += gdd($row["high"],$row["low"],86,32);
-    $climate[$key]['gdd50'] += gdd($row["high"],$row["low"],86,50);
+    $climate[$key]['gdd32'] += $row["gdd32"];
+    $climate[$key]['gdd41'] += $row["gdd41"];
+    $climate[$key]['gdd46'] += $row["gdd46"];
+    $climate[$key]['gdd48'] += $row["gdd48"];
+    $climate[$key]['gdd50'] += $row["gdd50"];
+    $climate[$key]['gdd51'] += $row["gdd51"];
+    $climate[$key]['gdd52'] += $row["gdd52"];
     $climate[$key]['prec'] += $row["precip"];
  
   }
 }
 
-/* ------------------------------------------------------- */
-if ($var == 'gdd32') {
+// sigh
+if (substr($var, 0, 3) == 'gdd') {
+  $level = intval(substr($var, 3, 2));
 	if ($year > 2013){
 		$q = <<<EOF
   SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
@@ -122,40 +143,15 @@ EOF;
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
-    $tgdd = gdd($high, $low, 86, 32);
+    $tgdd = gdd($high, $low, 86, $level);
 
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
 } 
-/* ------------------------------------------------------- */
-if ($var == 'gdd50') {
-	if ($year > 2013){
-		$q = <<<EOF
-  SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
-EOF;
-	} else {
-  		$q = <<<EOF
-  SELECT station, c11, c12 from daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
-EOF;
-	}
 
-  $gdds = Array();
-  $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = $row['station'];
-    $high = (float)$row['c11'];
-    $low  = (float)$row['c12'];
-    $tgdd = gdd($high, $low, 86, 50);
 
-    if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
-    $gdds[$stid] = $gdds[$stid] + $tgdd;
-  }
-  $vals = $gdds;
-}  
 /* ------------------------------------------------------- */
 if ($var == 'sdd86') {
 	if ($year > 2013){
@@ -275,16 +271,17 @@ else if ($var == 'prec') {
 
 $tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")\n";
 $tr .= "#-----------------------snip------------------\n";
-$tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
+$tr .= sprintf("%s,%-40s,%10s,%10s,%10s\n", 'ID', 'StationName',
+               'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
   if ($key == "A133259") continue;
 
-  $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
+  $tr .= sprintf("%s,%-40.40s,%.4f,%.4f,%10s\n", $key,
+      $ISUAGcities[$key]['name'],
   		$ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], 
   		round($value, $round[$var]) );
 }
 
-include "../../../../include/myview.php";
 $t = new MyView();
 $t->thispage = "networks-agclimate";
 $t->title = "ISUAG Growing Season Data";
@@ -300,36 +297,7 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
 </script>
 EOF;
 
-$ar = Array("gdd50" => "Growing Degree Days (base=50,cap=86)",
-    "gdd32" => "Growing Degree Days (base=32,cap=86)",
-    "et" => "Potential Evapotranspiration",
-    "sgdd50" => "Soil Growing Degree Days (base=50)",
-    "sgdd52" => "Soil Growing Degree Days (base=52)",
-    "srad" => "Solar Radiation (langleys)",
-    "sdd86" => "Stress Degree Days (base=86)",
-);
-
-$vselect = make_select("var", $var, $ar);
-
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
-		"gdd32" => "Growing Degree Days (base=32)",
-		"et" => "Potential Evapotranspiration",
-		"prec" => "Precipitation",
-		"srad" => "Solar Radiation (langleys)",
-		"sgdd50" => "Soil Growing Degree Days (base=50)",
-		"sgdd52" => "Soil Growing Degree Days (base=52)",
-		"sdd86" => "Stress Degree Days (base=86)"
-);
-
-
-$rnd = Array("gdd50" => 0,
-		"gdd32" => 0,
-		"et" => 2, "c11" => 2,
-		"prec" => 2,
-		"srad" => 0,
-		"sgdd50" => 0,
-		"sgdd52" => 0,
-		"sdd86" => 0);
+$vselect = make_select("var", $var, $varDef);
 
 $h3 = "";
 if ($var == "gdd32" || $var == "gdd50" || $var == "prec")

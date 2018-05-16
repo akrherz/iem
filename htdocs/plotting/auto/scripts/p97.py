@@ -6,21 +6,6 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict([
-    ('IA', 'Iowa'),
-    ('IL', 'Illinois'),
-    ('KS', 'Kansas'),
-    ('KY', 'Kentucky'),
-    ('MI', 'Michigan'),
-    ('MN', 'Minnesota'),
-    ('MO', 'Missouri'),
-    ('NE', 'Nebraska'),
-    ('ND', 'North Dakota'),
-    ('OH', 'Ohio'),
-    ('SD', 'South Dakota'),
-    ('WI', 'Wisconsin'),
-    ('midwest', 'Midwest US')])
-
 PDICT2 = OrderedDict([
     ('max_high_temp', 'Maximum High Temperature'),
     ('avg_high_temp', 'Average High Temperature'),
@@ -28,12 +13,14 @@ PDICT2 = OrderedDict([
     ('avg_temp', 'Average Temperature'),
     ('min_low_temp', 'Minimum Low Temperature'),
     ('avg_low_temp', 'Average Low Temperature'),
-    ('gdd_sum', 'Growing Degree Days (50/86) Total'),
-    ('cgdd_sum', 'Growing Degree Days Climatology (50/86)'),
-    ('gdd_depart', 'Growing Degree Days (50/86) Departure'),
+    ('gdd_sum', 'Growing Degree Days ($base/86) Total'),
+    ('cgdd_sum', 'Growing Degree Days Climatology ($base/86)'),
+    ('gdd_depart', 'Growing Degree Days ($base/86) Departure'),
     ('precip_depart', 'Precipitation Departure'),
     ('precip_sum', 'Precipitation Total'),
     ])
+BASES = OrderedDict([('32', 32), ('41', 41), ('46', 46), ('48', 48),
+                     ('50', 50), ('51', 51), ('52', 52)])
 PDICT4 = {'yes': 'Yes, overlay Drought Monitor',
           'no': 'No, do not overlay Drought Monitor'}
 UNITS = {
@@ -60,10 +47,12 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='select', name='sector', default='IA',
-             label='Plot Sector:', options=PDICT),
+        dict(type='csector', name='sector', default='IA',
+             label='Plot Sector:'),
         dict(type='select', name='var', default='precip_depart',
              label='Which Variable to Plot:', options=PDICT2),
+        dict(type='select', options=BASES, default=50, name='gddbase',
+             label='Available Growing Degree Day bases (F)'),
         dict(type='date', name='date1',
              default=(today -
                       datetime.timedelta(days=30)).strftime("%Y/%m/%d"),
@@ -95,7 +84,7 @@ def plotter(fdict):
     table = "alldata_%s" % (sector, ) if sector != 'midwest' else "alldata"
     df = read_sql("""
     WITH obs as (
-        SELECT station, gddxx(50, 86, high, low) as gdd50,
+        SELECT station, gddxx(%s, 86, high, low) as gdd,
         sday, high, low, precip,
         (high + low)/2. as avg_temp
         from """ + table + """ WHERE
@@ -103,13 +92,13 @@ def plotter(fdict):
         substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'),
     climo as (
         SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
-        gdd50 from climate51),
+        gdd""" + str(ctx['gddbase']) + """ as gdd from climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
         o.precip as precip, c.precip as cprecip,
         o.avg_temp,
-        o.high, o.low, o.gdd50, c.gdd50 as cgdd50,
-        o.gdd50 - c.gdd50 as gdd50_diff,
+        o.high, o.low, o.gdd, c.gdd as cgdd,
+        o.gdd - c.gdd as gdd_diff,
         o.avg_temp - (c.high + c.low)/2. as temp_diff
         from obs o JOIN climo c ON
         (o.station = c.station and o.sday = c.sday)),
@@ -121,9 +110,9 @@ def plotter(fdict):
         avg(high) as avg_high_temp,
         avg(low) as avg_low_temp,
         max(high) as max_high_temp,
-        min(low) as min_low_temp, sum(gdd50_diff) as gdd_depart,
-        avg(temp_diff) as avg_temp_depart, sum(gdd50) as gdd_sum,
-        sum(cgdd50) as cgdd_sum
+        min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
+        avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
+        sum(cgdd) as cgdd_sum
         from combo GROUP by station)
 
     SELECT d.station, t.name,
@@ -142,7 +131,7 @@ def plotter(fdict):
     ST_x(t.geom) as lon, ST_y(t.geom) as lat
     from agg d JOIN stations t on (d.station = t.id)
     WHERE t.network ~* 'CLIMATE'
-    """, pgconn, params=(date1, date2), index_col='station')
+    """, pgconn, params=(ctx['gddbase'], date1, date2), index_col='station')
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
     sector2 = "state" if sector != 'midwest' else 'midwest'
@@ -158,7 +147,9 @@ def plotter(fdict):
     mp = MapPlot(sector=sector2, state=sector, axisbg='white',
                  title=('%s - %s %s [%s]'
                         ) % (date1.strftime(datefmt),
-                             date2.strftime(datefmt), PDICT2.get(varname),
+                             date2.strftime(datefmt),
+                             PDICT2.get(varname).replace("$base",
+                                                         str(ctx['gddbase'])),
                              UNITS.get(varname)),
                  subtitle=subtitle)
     fmt = '%.2f'

@@ -1,15 +1,15 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 49);
-include_once "../../../../include/myview.php";
-include("../../../../include/database.inc.php");
-include_once "../../../../include/iemmap.php";
+require_once "../../../../include/myview.php";
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/iemmap.php";
 /** Need to use external date lib *
  * http://php.weblogs.com/adodb_date_time_library
  */
-include("../../../../include/adodb-time.inc.php");
+require_once "../../../../include/adodb-time.inc.php";
 require_once "../../../../include/forms.php";
-include("../../../../include/network.php");
+require_once "../../../../include/network.php";
 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]): "high";
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
@@ -62,12 +62,10 @@ $varDef = Array("low" => "Low Temperature",
 
 
 
-$rnd = Array("gdd50" => 0,
+$rnd = Array(
 		"et" => 2,
 		"prec" => 2,
-		"snow" => 0,
-		"sgdd50" => 0,
-		"sdd86" => 0);
+		"snow" => 0);
 
 
 $myStations = $cities;

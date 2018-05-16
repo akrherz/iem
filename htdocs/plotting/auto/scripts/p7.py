@@ -24,7 +24,11 @@ def get_description():
              label='Growing Degree Day Start'),
         dict(type='int', name='gdd2', default='1660',
              label='Growing Degree Day End'),
-    ]
+        dict(type='int', default=50, name='gddbase',
+             label="Growing Degree Day base (F)"),
+        dict(type='int', default=86, name='gddceil',
+             label="Growing Degree Day ceiling (F)"),
+        ]
     return desc
 
 
@@ -47,10 +51,10 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     ccursor.execute("""
-    SELECT day, gdd50(high,low) as gdd
+    SELECT day, gddxx(%s, %s, high, low) as gdd
     from """+table+""" WHERE year = %s and station = %s
     ORDER by day ASC
-    """, (year, station))
+    """, (ctx['gddbase'], ctx['gddceil'], year, station))
     days = []
     gdds = []
     for row in ccursor:
@@ -122,9 +126,10 @@ def plotter(fdict):
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
     ax.set_xlabel("Planting Date")
-    ax.set_title(("%s [%s] %s GDD [base=50,ceil=86]\n"
+    ax.set_title(("%s [%s] %s GDD [base=%s,ceil=%s]\n"
                   "Period between GDD %s and %s, gray bars incomplete"
-                  ) % (nt.sts[station]['name'], station, year, gdd1, gdd2))
+                  ) % (nt.sts[station]['name'], station, year, ctx['gddbase'],
+                       ctx['gddceil'], gdd1, gdd2))
 
     ax2 = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
                    yticks=[], xticks=[])

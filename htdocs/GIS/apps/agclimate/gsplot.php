@@ -1,8 +1,8 @@
 <?php
-include("../../../../config/settings.inc.php");
-include_once "../../../../include/iemmap.php";
-include("../../../../include/database.inc.php");
-include("../../../../include/network.php");
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/iemmap.php";
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/network.php";
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -40,8 +40,14 @@ $eday = strftime("%d", $gs_end);
 $smonth = strftime("%m", $gs_start);
 $sday = strftime("%d", $gs_start);
 
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+$varDef = Array(
   "gdd32" => "Growing Degree Days (base=32)",
+  "gdd41" => "Growing Degree Days (base=41)",
+  "gdd46" => "Growing Degree Days (base=46)",
+  "gdd48" => "Growing Degree Days (base=48)",
+  "gdd50" => "Growing Degree Days (base=50)",
+  "gdd51" => "Growing Degree Days (base=51)",
+  "gdd52" => "Growing Degree Days (base=52)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
   "srad" => "Solar Radiation (langleys)",
@@ -52,14 +58,20 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
 
 
 
-$rnd = Array("gdd50" => 0, 
+$rnd = Array(
   "gdd32" => 0,
+  "gdd41" => 0,
+  "gdd46" => 0,
+  "gdd48" => 0,
+  "gdd50" => 0,
+  "gdd51" => 0,
+  "gdd52" => 0,
   "et" => 2, "c11" => 2,
   "prec" => 2,
   "srad" => 0,
-  "sgdd50" => 0, "sgdd52" => 0,
+  "sgdd50" => 0,
+  "sgdd52" => 0,
   "sdd86" => 0);
-
 
 $myStations = $ISUAGcities;
 $height = $height;
@@ -121,22 +133,29 @@ function gdd($high, $low, $ceiling, $floor)
 $climate = Array();
 reset($ISUAGcities);
 while( list($key,$val) = each($ISUAGcities) ) {
-  $csite = $ISUAGcities[$key]["climate_site"];
-  $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0,'sdd86'=>0,'prec'=>0);
+  $csite = strtolower($ISUAGcities[$key]["climate_site"]);
+  $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0, 'sdd86'=>0, 'prec'=>0,
+    'gdd41' => 0, 'gdd46' => 0, 'gdd48' => 0, 'gdd51' => 0, 'gdd52' => 0);
 
   $sql = sprintf("SELECT * from climate51 WHERE station = '%s' and
     valid BETWEEN '%s' and '%s'", $csite, $cStart, $cEnd);
   $rs =  pg_exec($climatedb, $sql);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $climate[$key]['gdd32'] += gdd($row["high"],$row["low"],86,32);
-    $climate[$key]['gdd50'] += gdd($row["high"],$row["low"],86,50);
+    $climate[$key]['gdd32'] += $row["gdd32"];
+    $climate[$key]['gdd41'] += $row["gdd41"];
+    $climate[$key]['gdd46'] += $row["gdd46"];
+    $climate[$key]['gdd48'] += $row["gdd48"];
+    $climate[$key]['gdd50'] += $row["gdd50"];
+    $climate[$key]['gdd51'] += $row["gdd51"];
+    $climate[$key]['gdd52'] += $row["gdd52"];
     $climate[$key]['prec'] += $row["precip"];
  
   }
 }
 
-/* ------------------------------------------------------- */
-if ($var == 'gdd32') {
+// sigh
+if (substr($var, 0, 3) == 'gdd') {
+  $level = intval(substr($var, 3, 2));
 	if ($year > 2013){
 		$q = <<<EOF
   SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
@@ -148,46 +167,20 @@ EOF;
   WHERE valid >= '{$sstr}' and valid < '{$estr}'
 EOF;
 	}
+  
   $gdds = Array();
   $rs =  pg_exec($c, $q);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
-    $tgdd = gdd($high, $low, 86, 32);
+    $tgdd = gdd($high, $low, 86, $level);
 
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
 } 
-/* ------------------------------------------------------- */
-if ($var == 'gdd50') {
-	if ($year > 2013){
-		$q = <<<EOF
-  SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
-EOF;
-	} else {
-  		$q = <<<EOF
-  SELECT station, c11, c12 from daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
-EOF;
-	}
-
-  $gdds = Array();
-  $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = $row['station'];
-    $high = (float)$row['c11'];
-    $low  = (float)$row['c12'];
-    $tgdd = gdd($high, $low, 86, 50);
-
-    if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
-    $gdds[$stid] = $gdds[$stid] + $tgdd;
-  }
-  $vals = $gdds;
-}  
 /* ------------------------------------------------------- */
 if ($var == 'sdd86') {
 	if ($year > 2013){
@@ -303,16 +296,10 @@ else if ($var == 'prec') {
 }  
 /* ------------------------------------------------------- */
 
-
-$tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")\n";
-$tr .= "#-----------------------snip------------------\n";
-$tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
   if ($key == "A133259") continue;
   if (in_array($key, $vineyard)) continue;
 
-  $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
-  $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], round($value, $round[$var]) );
 
   // Red Dot... 
   $pt = ms_newPointObj();
@@ -325,7 +312,7 @@ foreach($vals as $key => $value){
   $pt->draw($map, $snet, $img, 1, round($value, $rnd[$var]) );
 
   // Climate
-  if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
+  if (substr($var, 0, 3) == "gdd" || $var == "prec")
   {
     $pt = ms_newPointObj();
     $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
@@ -349,10 +336,11 @@ foreach($vals as $key => $value){
   // City Name
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  $ar = explode("-", $ISUAGcities[$key]['name']);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0,  $ar[0]);
   } else {
-    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ar[0] );
   }
 }
 

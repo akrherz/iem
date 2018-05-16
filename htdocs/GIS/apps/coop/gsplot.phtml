@@ -53,8 +53,13 @@ $state = substr($network,0,2);
 $rs = pg_prepare($coopdb, "SELECT", "WITH data as (
   SELECT station, year,
   sum(precip) as s_rainfall,
-  sum(gdd50(high,low)) as s_gdd50,
-  sum(gddxx(48, 86, high, low)) as s_gdd48,
+  sum(gddxx(32, 86, high, low)) as s_gdd32,
+	sum(gddxx(41, 86, high, low)) as s_gdd41,
+	sum(gddxx(46, 86, high, low)) as s_gdd46,
+	sum(gddxx(48, 86, high, low)) as s_gdd48,
+	sum(gddxx(50, 86, high, low)) as s_gdd50,
+  sum(gddxx(51, 86, high, low)) as s_gdd51,
+	sum(gddxx(52, 86, high, low)) as s_gdd52,
   sum(sdd86(high,low)) as s_sdd86,
   min(low) as s_mintemp,
   max(high) as s_maxtemp from alldata_${state}
@@ -62,13 +67,19 @@ $rs = pg_prepare($coopdb, "SELECT", "WITH data as (
 ), climo as (
   SELECT station,
   avg(s_rainfall) as c_rainfall,
-  avg(s_gdd50) as c_gdd50,
+  avg(s_gdd32) as c_gdd32,
+  avg(s_gdd41) as c_gdd41,
+  avg(s_gdd46) as c_gdd46,
   avg(s_gdd48) as c_gdd48,
+  avg(s_gdd50) as c_gdd50,
+  avg(s_gdd51) as c_gdd51,
+  avg(s_gdd52) as c_gdd52,
   avg(s_sdd86) as c_sdd86,
   avg(s_mintemp) as c_mintemp,
   avg(s_maxtemp) as c_maxtemp from data GROUP by station
 )
-SELECT d.*, c_rainfall, c_gdd50, c_gdd48, c_sdd86, c_mintemp, c_maxtemp
+SELECT d.*, c_rainfall, c_gdd32, c_gdd41, c_gdd46, c_gdd48, c_gdd50,
+c_gdd51, c_gdd52, c_sdd86, c_mintemp, c_maxtemp
 from data d JOIN climo c on (d.station = c.station) WHERE d.year = $3
 ");
 
@@ -104,8 +115,13 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 $netselect .= "</select>";
 
 $ar = Array(
-	"gdd50" => "Growing Degree Days (base=50)",
-	"gdd48" => "Growing Degree Days (base=48)",
+  "gdd32" => "Growing Degree Days (base=32)",
+  "gdd41" => "Growing Degree Days (base=41)",
+  "gdd46" => "Growing Degree Days (base=46)",
+  "gdd48" => "Growing Degree Days (base=48)",
+  "gdd50" => "Growing Degree Days (base=50)",
+  "gdd51" => "Growing Degree Days (base=51)",
+  "gdd52" => "Growing Degree Days (base=52)",
 	"prec" => "Precipitation",
 	"sdd86" => 	"Stress Degree Days (base=86)",
 	"mintemp" => "Minimum Temperature",
@@ -178,5 +194,5 @@ text editor and save the data file on your machine.  Most GIS systems can
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
