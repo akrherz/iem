@@ -80,7 +80,7 @@ def plotter(fdict):
     stations = [station, ]
     if station.startswith("_"):
         name = nt.sts[station]['name'].split("--")[0]
-        stations = nt.sts[station]['name'].split("--")[1].strip().split(",")
+        stations = nt.sts[station]['name'].split("--")[1].strip().split(" ")
     pgconn = get_dbconn('postgis')
 
     df = read_sql("""
