@@ -11,7 +11,7 @@ import pandas as pd
 import requests
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, exponential_backoff
 
 BASE = "/mesonet/tmp/uscrn"
 URI = "https://www1.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
@@ -144,10 +144,10 @@ def download(year, reprocess=False):
     queue = []
     for filename in files:
         size = os.stat(filename).st_size
-        req = requests.get("%s/%s/%s" % (URI, year, filename),
-                           headers={'Range':
-                                    'bytes=%s-%s' % (size, size + 16000000)},
-                           timeout=30)
+        req = exponential_backoff(
+            requests.get, "%s/%s/%s" % (URI, year, filename),
+            headers={'Range': 'bytes=%s-%s' % (size, size + 16000000)},
+            timeout=30)
         # No new data
         if req.status_code == 416:
             continue
