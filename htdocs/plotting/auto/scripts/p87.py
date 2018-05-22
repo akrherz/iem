@@ -1,10 +1,10 @@
 """METAR Code Climo"""
 import datetime
 
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'TS': 'Thunder (TS)',
          '-SN': 'Light Snow (-SN)',
@@ -85,7 +85,7 @@ def plotter(fdict):
         data[row['hour'], row['week']-1] += 1
 
     data.mask = np.where(data == 0, True, False)
-    fig = plt.Figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.11, 0.25, 0.7, 0.65])
     cax = plt.axes([0.82, 0.04, 0.02, 0.15])
 
