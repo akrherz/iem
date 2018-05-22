@@ -9,27 +9,27 @@ import subprocess
 import os
 import sys
 
-import pygrib
 import numpy as np
 import pytz
+import pygrib
 from pyiem.plot import MapPlot
 import pyiem.reference as ref
 from pyiem.util import utc
 
 
 def compute_bounds(lons, lats):
-    ''' figure out a minimum box to extract data from, save CPU '''
+    """figure out a minimum box to extract data from, save CPU"""
     dist = ((lats - ref.MW_NORTH)**2 + (lons - ref.MW_WEST)**2)**0.5
     x2, y1 = np.unravel_index(dist.argmin(), dist.shape)
     dist = ((lats - ref.MW_SOUTH)**2 + (lons - ref.MW_EAST)**2)**0.5
     x1, y2 = np.unravel_index(dist.argmin(), dist.shape)
-    return x1 - 50, x2 + 40, y1 - 50, y2 + 40
+    return x1 - 100, x2 + 100, y1 - 100, y2 + 100
 
 
-def run(utc, routes):
+def run(valid, routes):
     ''' Generate the plot for the given UTC time '''
-    fn = utc.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                       "hrrr.t%Hz.refd.grib2"))
+    fn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+                         "hrrr.t%Hz.refd.grib2"))
 
     grbs = pygrib.open(fn)
 
@@ -40,7 +40,7 @@ def run(utc, routes):
     lons = None
     i = 0
     for minute in range(0, 18 * 60 + 1, 15):
-        now = utc + datetime.timedelta(minutes=minute)
+        now = valid + datetime.timedelta(minutes=minute)
         now = now.astimezone(pytz.timezone("America/Chicago"))
         grbs.seek(0)
         try:
@@ -57,7 +57,7 @@ def run(utc, routes):
 
         mp = MapPlot(sector='midwest', axisbg='tan',
                      title=('%s UTC NCEP HRRR 1 km AGL Reflectivity'
-                            ) % (utc.strftime("%-d %b %Y %H"),),
+                            ) % (valid.strftime("%-d %b %Y %H"),),
                      subtitle=('valid: %s'
                                ) % (now.strftime("%-d %b %Y %I:%M %p %Z"),))
 
@@ -78,7 +78,7 @@ def run(utc, routes):
 
     pqstr = ("plot %s %s model/hrrr/hrrr_1km_ref.gif "
              "model/hrrr/hrrr_1km_ref_%02i.gif gif"
-             ) % (routes, utc.strftime("%Y%m%d%H%M"), utc.hour)
+             ) % (routes, valid.strftime("%Y%m%d%H%M"), valid.hour)
     subprocess.call("/home/ldm/bin/pqinsert -p '%s' /tmp/hrrr_ref.gif" % (
                                                             pqstr,),
                     shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)

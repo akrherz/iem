@@ -6,8 +6,8 @@ import logging
 import datetime
 
 import pytz
-import pygrib
 import requests
+import pygrib
 from pyiem.util import utc, exponential_backoff
 
 # 18 hours of output + analysis
@@ -40,7 +40,6 @@ def run(valid):
             del grbs
         except Exception as exp:
             logging.debug(exp)
-            pass
     output = open(gribfn, 'wb')
     for hr in range(0, 19):
         shr = "%02i" % (hr,)
@@ -53,7 +52,7 @@ def run(valid):
             print("dl_hrrrref failed to fetch %s" % (uri, ))
             print("ABORT")
             return
-        data = req.content
+        data = req.text
 
         offsets = []
         neednext = False
