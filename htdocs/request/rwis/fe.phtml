@@ -1,8 +1,8 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/forms.php";
 
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,7): "IA_RWIS";
 
@@ -125,6 +125,7 @@ but it mostly in tack outside of those dates.</p>
   <option value="subf">Subsurface Temperature [F]
 </select>
 
+<br /><strong>See below for discussion on "Pavement Sensor* Condition"</strong></p>
 
 <p><h4>4. How to view?</h4>
 <select name="what">
@@ -158,6 +159,108 @@ How shall the output values be seperated?
 <input type="reset">
 
 </div></div>
+
+<hr />
+
+<h3>Pavement Sensor Condition Explaination</h3>
+
+<p>The following applies to most of the Iowa RWIS sensors and is passed along by
+the Iowa RWIS Coordinator.</p>
+
+<p>The data is taken from the <a href="https://my.vaisala.net/en/roads/products/roadweathersensors/Pages/FP2000.aspx">Vaisala FP2000</a>.
+These readings can be lumped into four general categories:  wet, dry, snow/ice, error.
+The sensor gives quite a few more, especially in the snow/ice realm but functionally
+it is difficult to distinguish clear differences between them.</p>
+
+<p>From the glossary:</p>
+
+<table class="table table-bordered">
+<thead><tr><th>Status</th><th>Description</th></tr></thead>
+<tbody>
+
+<tr><th>Snow/Ice Warning</th>
+
+<td>Continuous film of ice and water mixture at or below freezing (32°F / 0°C) with insufficient chemical to keep the mixture from freezing.
+This status can only be reported at Vaisala ESP and SP sites when precipitation occurs.
+</td></tr>
+<tr><th>Ice Warning</th>
+
+<td>Continuous film of ice and water mixture at or below freezing (32°F / 0°C) with insufficient chemical to keep the mixture from freezing. 
+This status can only be reported at NTCIP sites.
+</td></tr>
+<tr><th>Snow Warning</th>
+
+<td>This status can be reported at NTCIP sites, but will not be reported by Vaisala NTCIP sites.
+</td></tr>
+<tr><th>Wet Below Freezing</th>
+
+<td>Moisture on pavement sensor with a surface temperature below freezing (32°F / 0°C). 
+This status will only be reported at Vaisala SCAN Detector sites.
+</td></tr>
+<tr><th>Ice Watch</th>
+
+<td>Thin or spotty film of moisture at or below freezing (32°F / 0°C). 
+This status can only be reported at NTCIP sites when precipitation is not occurring.
+</td></tr>
+<tr><th>Snow/IceWatch</th>
+
+<td>Thin or spotty film of moisture at or below freezing (32°F / 0°C). 
+This status can only be reported at Vaisala ESP and SP sites when precipitation is not occurring.
+</td></tr>
+<tr><th>Snow Watch</th>
+
+<td>This status can be reported at NTCIP sites, but is not detected at Vaisala NTCIP sites.
+</td></tr>
+<tr><th>Frost</th>
+
+<td>Moisture on pavement at or below freezing (32°F / 0°C) with a pavement temperature at or below the dew point temperature. 
+This status can only be reported by Vaisala ESP, SP, and NTCIP sites when precipitation is not occurring.
+</td></tr>
+<tr><th>Chemical Wet</th>
+
+<td>Continuous film of water and ice mixture at or below freezing (32°F or 0°C) with enough chemical to keep the mixture from freezing. 
+This status can only be reported by Vaisala ESP, SP, and NTCIP sites when precipitation occurs.
+</td></tr>
+<tr><th>Wet</th>
+
+<td>Continuous film of moisture on the pavement sensor with a surface temperature above freezing (32°F or 0°C). 
+This status can be reported by Vaisala ESP, SP, SCAN Detector, and NTCIP sites when precipitation has occurred.
+</td></tr>
+<tr><th>Damp</th>
+
+<td>Thin or spotty film of moisture above freezing (32°F or 0°C). 
+This status can only be reported by Vaisala ESP, and SP sites when precipitation is not occurring.
+</td></tr>
+<tr><th>Trace Moisture</th>
+
+<td>Thin or spotty film of moisture above freezing (32°F or 0°C). Surface moisture occurred without precipitation being detected.
+This status will only be reported at NTCIP sites when precipitation is not occurring.
+</td></tr>
+<tr><th>Absorption at Dew Point, Absorption, & Dew</th>
+
+<td>These statuses can be reported at NTCIP sites, but are not currently detected at Vaisala NTCIP sites.
+</td></tr>
+<tr><th>Dry</th>
+
+<td>Absence of moisture on the surface sensor. 
+This status can be reported by Vaisala ESP, SP, SCAN Dectector, and NTCIP sites.
+</td></tr>
+<tr><th>Other</th>
+
+<td>Other is the standard NTCIP ESS surface condition code to handle conditions not explicitly included in this table. This status will only be reported NTCIP by sensors installed at NTCIP ESS sites.
+</td></tr>
+<tr><th>No Report</th>
+
+<td>The surface sensor is not operating properly and requires maintenance. 
+This status will only be reported by Vaisala ESP and SP sites.</td></tr>
+
+<tr><th>Error</th>
+
+<td>The surface sensor is not operating properly and requires maintenance. 
+This status will only be reported by NTCIP sites.</td></tr>
+
+</tbody>
+</table>
 
 
 </form>
