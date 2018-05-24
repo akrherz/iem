@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Links";
 $t->thispage = "iem-links";
@@ -21,7 +21,6 @@ $t->content = <<<EOF
  <li><a href="http://nysmesonet.org/">New York Mesonet</a></li>
  <li><a href="http://www.mesonet.ou.edu">Oklahoma Mesonet</a></li>
  <li><a href="http://chiliweb.southalabama.edu/">South Alabama Mesonet</a></li>
- <li><a href="http://mesonet.tamu.edu/">Texas Mesonet</a></li>
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
  <li><a href="http://agwx.soils.wisc.edu/uwex_agwx/awon">Wisconsin Extension AgWeather</a></li>
 </ul>
