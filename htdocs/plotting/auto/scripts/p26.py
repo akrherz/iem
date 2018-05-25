@@ -1,3 +1,4 @@
+"""max temp before jul 1 or min after"""
 import datetime
 
 import psycopg2.extras
@@ -29,6 +30,8 @@ def get_description():
              label='Option to Plot:', options=PDICT),
         dict(type='select', name='var', default='low',
              label='Variable to Plot:', options=PDICT2),
+        dict(type='int', name='t', label='Highlight Temperature',
+             default=32),
     ]
     return desc
 
@@ -219,9 +222,11 @@ def plotter(fdict):
         ax.text(220, 32.4, r'32$^\circ$F', ha='left')
     else:
         ax.set_xlim(0, 181)
-    ax.set_ylabel("%s $^\circ$F" % (ctx['ylabel'], ))
+    ax.set_ylabel(r"%s $^\circ$F" % (ctx['ylabel'], ))
     ax.set_title(ctx['title'])
-    ax.axhline(32, linestyle='--', lw=1, color='k', zorder=6)
+    ax.axhline(ctx['t'], linestyle='--', lw=1, color='k', zorder=6)
+    ax.text(ax.get_xlim()[1], ctx['t'], r"%.0f$^\circ$F" % (ctx['t'], ),
+            va='center')
     ax.grid(True)
 
     from matplotlib.patches import Rectangle
