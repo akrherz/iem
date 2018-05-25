@@ -42,7 +42,7 @@ RWIS2METAR = {'00': 'XADA', '01': 'XALG', '02': 'XATN', '03': 'XALT',
               '56': 'XDYI', '57': 'XTMI', '58': 'XPFI', '59': 'XCTI',
               '60': 'XDNI', '61': 'XQCI', '62': 'XSMI', '63': 'XRWI',
               '64': 'XETI', '65': 'XCCI', '66': 'XKSI', '67': 'XKNI',
-              '68': 'XCMI', '69': 'XRGI', '70': 'XKYI'}
+              '68': 'XCMI', '69': 'XRGI', '70': 'XKYI', '72': 'XCTI'}
 
 KNOWN_UNKNOWNS = []
 
