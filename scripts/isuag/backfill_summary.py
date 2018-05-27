@@ -5,7 +5,7 @@
 from __future__ import print_function
 
 from pyiem.util import get_dbconn
-from pyiem.datatypes import speed
+from pyiem.datatypes import speed, distance, temperature
 
 ISUAG = get_dbconn('isuag', user='mesonet')
 
@@ -64,19 +64,24 @@ def one():
     icursor = ISUAG.cursor()
     iemcursor = IEM.cursor()
     icursor.execute("""
-        SELECT station, valid, ws_mps_s_wvt, winddir_d1_wvt
+        SELECT station, valid, ws_mps_s_wvt, winddir_d1_wvt, rain_mm_tot,
+        tair_c_max, tair_c_min
         from sm_daily
     """)
 
     for row in icursor:
         avg_sknt = speed(row[2], 'MPS').value('KT')
         avg_drct = row[3]
+        pday = distance(row[4], 'MM').value('IN')
+        high = temperature(row[5], 'C').value('F')
+        low = temperature(row[6], 'C').value('F')
         iemcursor.execute("""
-        UPDATE summary SET avg_sknt = %s, vector_avg_drct = %s
+        UPDATE summary SET avg_sknt = %s, vector_avg_drct = %s, pday = %s,
+        max_tmpf = %s, min_tmpf = %s
         WHERE
         iemid = (select iemid from stations WHERE network = 'ISUSM' and
         id = %s) and day = %s
-        """, (avg_sknt, avg_drct, row[0], row[1]))
+        """, (avg_sknt, avg_drct, pday, high, low, row[0], row[1]))
     iemcursor.close()
     IEM.commit()
     IEM.close()
@@ -84,7 +89,8 @@ def one():
 
 def main():
     """Go Main Go"""
-    one()
+    # one()
+    two()
 
 
 if __name__ == '__main__':
