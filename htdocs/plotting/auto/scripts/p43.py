@@ -60,10 +60,11 @@ def plotter(fdict):
 
     nt = NetworkTable(network)
     if not nt.sts:
-        raise ValueError("Network Identifier %s is unknown to IEM" % (network,))
+        raise ValueError(("Network Identifier %s is unknown to IEM"
+                          ) % (network,))
     if station not in nt.sts:
-        raise ValueError("Station %s does not exist in network %s" % (station,
-                                                                     network))
+        raise ValueError(("Station %s does not exist in network %s"
+                          ) % (station, network))
 
     cursor.execute("""
         SELECT *, valid at time zone 'UTC' as utc_valid
@@ -84,19 +85,19 @@ def plotter(fdict):
         v1 = row['vsby']
         s = row['sknt']
         d1 = row['drct']
-        if d1 >= 0 and d1 <= 360:
+        if d1 is not None and d1 >= 0 and d1 <= 360:
             drct['v'].append(v)
             drct['d'].append(d1)
-        if s >= 0 and s < 200:
+        if s is not None and s >= 0 and s < 200:
             smph['v'].append(v)
             smph['d'].append(dt.speed(s, 'KT').value('MPH'))
-        if t >= -90 and t < 190:
+        if t is not None and t >= -90 and t < 190:
             tmpf['v'].append(v)
             tmpf['d'].append(t)
-        if d >= -90 and d < 190:
+        if d is not None and d >= -90 and d < 190:
             dwpf['v'].append(v)
             dwpf['d'].append(d)
-        if v1 >= 0 and v1 < 30:
+        if v1 is not None and v1 >= 0 and v1 < 30:
             vsby['v'].append(v)
             vsby['d'].append(v1)
         c = [row['skyc1'], row['skyc2'], row['skyc3'], row['skyc4']]

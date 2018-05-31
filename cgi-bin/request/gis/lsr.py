@@ -112,15 +112,17 @@ def main():
     w.field('LAT', 'F', 7, 4)
     w.field('LON', 'F', 9, 4)
     for row in cursor:
+        row = list(row)
         w.point(row[-2], row[-3])
+        if row[9] is not None:
+            row[9] = row[9].encode('utf-8').decode(
+                               'ascii', 'ignore').replace(",", "_")
         w.record(*row[:-1])
         csv.write(("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
                    ) % (row[0], row[12], row[-3], row[-2], row[1], row[2],
                         row[3],
                         row[4], row[5], row[6], row[7], row[8],
-                        row[9].encode('utf-8').decode(
-                            'ascii', 'ignore').replace(",", "_")
-                        if row[9] is not None else ''))
+                        row[9] if row[9] is not None else ''))
 
     csv.close()
 
