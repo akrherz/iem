@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-''' Generate a WXC formatted file of DOT Snowplow positions '''
-import sys
+"""Generate a WXC formatted file of DOT Snowplow positions"""
 import datetime
 import memcache
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def get_data():
@@ -39,7 +38,7 @@ def get_data():
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: text/plain\n\n")
+    ssw("Content-type: text/plain\n\n")
 
     mckey = '/request/wxc/idot_trucks.txt'
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
@@ -48,7 +47,7 @@ def main():
         res = get_data()
         mc.set(mckey, res, 300)
 
-    sys.stdout.write(res)
+    ssw(res)
 
 
 if __name__ == '__main__':

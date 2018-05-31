@@ -3,10 +3,9 @@
 Return a simple CSV of recent observations from the database
 """
 import cgi
-import sys
 
 import memcache
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(sid):
@@ -33,7 +32,7 @@ def run(sid):
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: text/plain\n\n")
+    ssw("Content-type: text/plain\n\n")
     form = cgi.FieldStorage()
     sid = form.getfirst('station', 'AMW')[:5]
 
@@ -42,10 +41,10 @@ def main():
     res = mc.get(mckey)
     if not res:
         res = run(sid)
-        sys.stdout.write(res)
+        ssw(res)
         mc.set(mckey, res, 300)
     else:
-        sys.stdout.write(res)
+        ssw(res)
 
 
 if __name__ == '__main__':

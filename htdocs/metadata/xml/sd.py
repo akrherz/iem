@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """Generate the Starfish Fungis XML"""
 import cgi
-import sys
+
 from pyiem.network import Table as NetworkTable
+from pyiem.util import ssw
 
 IEM = "https://mesonet.agron.iastate.edu/metadata/xml"
 
@@ -131,8 +132,8 @@ gml:id="sd_%(network)s_%(station)s">
            lon=nt.sts[station]['lon'],
            sts=nt.sts[station]['archive_begin'].strftime("%Y-%m-%dT%H:%M:%SZ"))
 
-    sys.stdout.write("Content-type: text/xml\n\n")
-    sys.stdout.write(xs)
+    ssw("Content-type: text/xml\n\n")
+    ssw(xs)
 
 
 if __name__ == '__main__':

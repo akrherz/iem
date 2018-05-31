@@ -4,9 +4,8 @@ Get storm based warnings by lat lon point
 """
 import cgi
 import json
-import sys
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def get_events(lon, lat):
@@ -40,8 +39,8 @@ def main():
     lon = float(form.getfirst("lon"))
 
     data = get_events(lon, lat)
-    sys.stdout.write("Content-type: application/json\n\n")
-    sys.stdout.write(json.dumps(data))
+    ssw("Content-type: application/json\n\n")
+    ssw(json.dumps(data))
 
 
 if __name__ == '__main__':

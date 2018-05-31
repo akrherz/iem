@@ -6,11 +6,12 @@ import cgi
 import datetime
 import sys
 import os
-import cStringIO
+from io import StringIO
+
 import pandas as pd
 import psycopg2.extras
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def get_stations(form):
@@ -35,12 +36,12 @@ def get_dates(form):
     try:
         sts = datetime.datetime(int(year1), int(month1), int(day1))
         ets = datetime.datetime(int(year2), int(month2), int(day2))
-    except Exception as _:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write(("ERROR: Failed to parse specified start and end "
-                          "dates.  Please go back and ensure that you have "
-                          "specified valid dates.  For example, 31 November "
-                          "does not exist."))
+    except Exception as _exp:
+        ssw("Content-type: text/plain\n\n")
+        ssw(("ERROR: Failed to parse specified start and end "
+             "dates.  Please go back and ensure that you have "
+             "specified valid dates.  For example, 31 November "
+             "does not exist."))
         sys.exit()
 
     if sts > ets:
@@ -328,8 +329,8 @@ def main():
         values, cols = fetch_daily(form, cols)
 
     if not values:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write('Sorry, no data found for this query.')
+        ssw("Content-type: text/plain\n\n")
+        ssw('Sorry, no data found for this query.')
         return
 
     df = pd.DataFrame(values)
@@ -337,25 +338,23 @@ def main():
         writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter')
         df.to_excel(writer, 'Data', columns=cols, index=False)
         writer.save()
-        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write(("Content-Disposition: attachment;"
-                          "Filename=isusm.xlsx\n\n"))
-        sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+        ssw("Content-type: application/vnd.ms-excel\n")
+        ssw("Content-Disposition: attachment; Filename=isusm.xlsx\n\n")
+        ssw(open('/tmp/ss.xlsx', 'rb').read())
         os.unlink('/tmp/ss.xlsx')
         return
 
     delim = "," if fmt == 'comma' else '\t'
-    buf = cStringIO.StringIO()
+    buf = StringIO()
     df.to_csv(buf, index=False, columns=cols, sep=delim)
     buf.seek(0)
 
     if todisk == 'yes':
-        sys.stdout.write("Content-type: text/plain\n")
-        sys.stdout.write(("Content-Disposition: attachment; "
-                          "filename=isusm.txt\n\n"))
+        ssw("Content-type: text/plain\n")
+        ssw("Content-Disposition: attachment; filename=isusm.txt\n\n")
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(buf.read())
+        ssw("Content-type: text/plain\n\n")
+    ssw(buf.read())
 
 
 if __name__ == '__main__':

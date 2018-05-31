@@ -8,17 +8,18 @@ import re
 import os
 import sys
 import datetime
+
 import pytz
 import psycopg2.extras
 from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def check_load():
     """Prevent automation from overwhelming the server"""
     if os.environ['REQUEST_METHOD'] == 'OPTIONS':
-        sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
+        ssw("Allow: GET,POST,OPTIONS\n\n")
         sys.exit()
     for i in range(5):
         pgconn = get_dbconn('mesosite')
@@ -36,22 +37,22 @@ def check_load():
                                    mcursor.rowcount))
         else:
             time.sleep(3)
-    sys.stdout.write("Content-type: text/plain \n")
-    sys.stdout.write('Status: 503 Service Unavailable\n\n')
-    sys.stdout.write("ERROR: server over capacity, please try later")
+    ssw("Content-type: text/plain \n")
+    ssw('Status: 503 Service Unavailable\n\n')
+    ssw("ERROR: server over capacity, please try later")
     sys.exit(0)
 
 
 def get_stations(form):
     """ Figure out the requested station """
     if "station" not in form:
-        sys.stdout.write("Content-type: text/plain \n\n")
-        sys.stdout.write("ERROR: station must be specified!")
+        ssw("Content-type: text/plain \n\n")
+        ssw("ERROR: station must be specified!")
         sys.exit(0)
     stations = form.getlist("station")
     if not stations:
-        sys.stdout.write("Content-type: text/plain \n\n")
-        sys.stdout.write("ERROR: station must be specified!")
+        ssw("Content-type: text/plain \n\n")
+        ssw("ERROR: station must be specified!")
         sys.exit(0)
     return stations
 
@@ -76,7 +77,7 @@ def get_time_bounds(form, tzinfo):
         ets = sts.replace(year=y2, month=m2, day=d2, hour=0, minute=0,
                           second=0, microsecond=0)
     except Exception as _exp:
-        sys.stdout.write("ERROR: Malformed Date!")
+        ssw("ERROR: Malformed Date!")
         sys.exit()
 
     if sts == ets:
@@ -92,8 +93,8 @@ def main():
     try:
         tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
     except pytz.exceptions.UnknownTimeZoneError as exp:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("Invalid Timezone (tz) provided")
+        ssw("Content-type: text/plain\n\n")
+        ssw("Invalid Timezone (tz) provided")
         sys.stderr.write("asos.py invalid tz: %s\n" % (exp, ))
         sys.exit()
     pgconn = get_dbconn('asos')
@@ -105,14 +106,14 @@ def main():
     report_type = form.getlist('report_type')
     stations = get_stations(form)
     if direct:
-        sys.stdout.write('Content-type: application/octet-stream\n')
+        ssw('Content-type: application/octet-stream\n')
         fn = "%s.txt" % (stations[0],)
         if len(stations) > 1:
             fn = "asos.txt"
-        sys.stdout.write('Content-Disposition: attachment; filename=%s\n\n' % (
+        ssw('Content-Disposition: attachment; filename=%s\n\n' % (
                          fn,))
     else:
-        sys.stdout.write("Content-type: text/plain \n\n")
+        ssw("Content-type: text/plain \n\n")
 
     dbstations = stations
     if len(dbstations) == 1:
@@ -170,23 +171,23 @@ def main():
       ORDER by valid ASC""", (sts, ets, tuple(dbstations)))
 
     if delim not in ['onlytdf', 'onlycomma']:
-        sys.stdout.write("#DEBUG: Format Typ    -> %s\n" % (delim,))
-        sys.stdout.write("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
-        sys.stdout.write("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
-        sys.stdout.write(("#DEBUG: Data Contact   -> daryl herzmann "
-                          "akrherz@iastate.edu 515-294-5978\n"))
-        sys.stdout.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
-    sys.stdout.write("station"+rD+"valid"+rD)
+        ssw("#DEBUG: Format Typ    -> %s\n" % (delim,))
+        ssw("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
+        ssw("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
+        ssw(("#DEBUG: Data Contact   -> daryl herzmann "
+             "akrherz@iastate.edu 515-294-5978\n"))
+        ssw("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
+    ssw("station"+rD+"valid"+rD)
     if gisextra:
-        sys.stdout.write("lon"+rD+"lat"+rD)
-    sys.stdout.write(queryCols+"\n")
+        ssw("lon"+rD+"lat"+rD)
+    ssw(queryCols+"\n")
 
     for row in acursor:
-        sys.stdout.write(row["station"] + rD)
-        sys.stdout.write(
+        ssw(row["station"] + rD)
+        ssw(
             (row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
         if gisextra:
-            sys.stdout.write(gtxt.get(row['station'], "M%sM%s" % (rD, rD)))
+            ssw(gtxt.get(row['station'], "M%sM%s" % (rD, rD)))
         r = []
         for data1 in outCols:
             if data1 == 'relh':
@@ -241,7 +242,7 @@ def main():
                 r.append("M")
             else:
                 r.append("%2.2f" % (row[data1], ))
-        sys.stdout.write("%s\n" % (rD.join(r),))
+        ssw("%s\n" % (rD.join(r),))
 
 
 if __name__ == '__main__':

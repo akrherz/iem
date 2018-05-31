@@ -9,7 +9,7 @@ import cgi
 import numpy as np
 import memcache
 from pyiem import prism, datatypes
-from pyiem.util import ncopen
+from pyiem.util import ncopen, ssw
 
 
 def myrounder(val, precision):
@@ -56,8 +56,7 @@ def dowork(form):
                           "http://prism.oregonstate.edu, created 4 Feb 2004.")}
 
     if i is None or j is None:
-        sys.stdout.write(json.dumps({'error': 'Coordinates outside of domain'}
-                                    ))
+        ssw(json.dumps({'error': 'Coordinates outside of domain'}))
         return
 
     for dpair in dates:
@@ -94,7 +93,7 @@ def dowork(form):
 
 def main():
     """Do Something Fun!"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     lat = float(form.getfirst('lat'))
@@ -110,9 +109,9 @@ def main():
         mc.set(mckey, res, 3600*12)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

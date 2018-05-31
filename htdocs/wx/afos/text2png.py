@@ -5,12 +5,11 @@
     Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
 """
 import cgi
-import sys
 import datetime
 
 import memcache
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def pt2px(pt):
@@ -25,7 +24,7 @@ def text_image(content):
     import PIL.ImageFont
     import PIL.ImageDraw
     import PIL.ImageOps
-    import cStringIO
+    from io import BytesIO
     grayscale = 'L'
     content = content.replace("\r\r\n", "\n").replace("\001", "")
     lines = content.split("\n")
@@ -56,7 +55,7 @@ def text_image(content):
     # crop the text
     c_box = PIL.ImageOps.invert(image).getbbox()
     image = image.crop(c_box)
-    buf = cStringIO.StringIO()
+    buf = BytesIO()
     image.save(buf, format='PNG')
     return buf.getvalue()
 
@@ -78,6 +77,7 @@ def make_image(e, pil):
 
 
 def main():
+    """Go Main Go"""
     form = cgi.FieldStorage()
     e = form.getfirst('e', '201612141916')[:12]
     pil = form.getfirst('pil', 'ADMNFD')[:6].replace(" ", "")
@@ -87,8 +87,8 @@ def main():
     if not res:
         res = make_image(e, pil)
         mc.set(key, res, 3600)
-    sys.stdout.write("Content-type: image/png\n\n")
-    sys.stdout.write(res)
+    ssw("Content-type: image/png\n\n")
+    ssw(res)
 
 
 if __name__ == '__main__':

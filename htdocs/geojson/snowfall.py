@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """ Produce geojson of Snowfall data """
 import cgi
-import sys
 import datetime
 import json
 from json import encoder
+
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 from pyiem.reference import TRACE_VALUE
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
@@ -60,7 +60,7 @@ def main():
     dt = field.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, '%Y-%m-%d')
     cb = field.getfirst('callback', None)
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
 
     mckey = "/geojson/snowfall/%s?callback=%s" % (ts.strftime("%Y%m%d"),
                                                   cb)
@@ -70,9 +70,9 @@ def main():
         res = get_data(ts)
         mc.set(mckey, res, 300)
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

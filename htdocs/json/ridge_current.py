@@ -3,8 +3,9 @@
  Aggregate the RIDGE current files
 """
 import cgi
-import sys
+
 import memcache
+from pyiem.util import ssw
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -33,7 +34,7 @@ def run(product):
 
 def main():
     ''' See how we are called '''
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     product = form.getfirst('product', 'N0Q')[:3].upper()
@@ -47,9 +48,9 @@ def main():
         mc.set(mckey, res, 30)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

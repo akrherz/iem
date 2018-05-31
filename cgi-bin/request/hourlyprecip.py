@@ -2,13 +2,12 @@
 """Hourly precip download"""
 import cgi
 import datetime
-import sys
 
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
-def get_data(network, sts, ets, tzinfo, stations=[]):
+def get_data(network, sts, ets, tzinfo, stations):
     """Go fetch data please"""
     pgconn = get_dbconn('iem', user='nobody')
     cursor = pgconn.cursor()
@@ -31,7 +30,7 @@ def get_data(network, sts, ets, tzinfo, stations=[]):
 
 def main():
     """ run rabbit run """
-    sys.stdout.write('Content-type: text/plain\n\n')
+    ssw('Content-type: text/plain\n\n')
     form = cgi.FieldStorage()
     tzinfo = pytz.timezone(form.getfirst("tz", "America/Chicago"))
     try:
@@ -41,16 +40,15 @@ def main():
         ets = datetime.date(int(form.getfirst('year2')),
                             int(form.getfirst('month2')),
                             int(form.getfirst('day2')))
-    except Exception as exp:
-        sys.stdout.write(("ERROR: Invalid date provided, please check "
-                          "selected dates."))
+    except Exception as _exp:
+        ssw(("ERROR: Invalid date provided, please check selected dates."))
         return
     stations = form.getlist('station')
     if not stations:
-        sys.stdout.write(("ERROR: No stations specified for request."))
+        ssw(("ERROR: No stations specified for request."))
         return
     network = form.getfirst('network')[:12]
-    sys.stdout.write(get_data(network, sts, ets, tzinfo, stations=stations))
+    ssw(get_data(network, sts, ets, tzinfo, stations=stations))
 
 
 if __name__ == '__main__':

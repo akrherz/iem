@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of 7 AM precip data """
-import sys
 import cgi
 import datetime
 import json
+
 import memcache
 import psycopg2.extras
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def router(group, ts):
@@ -104,7 +104,7 @@ def run(ts):
 
 def main():
     """Do Workflow"""
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
     group = form.getfirst('group', 'coop')
@@ -121,9 +121,9 @@ def main():
         mc.set(mckey, res, 15)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

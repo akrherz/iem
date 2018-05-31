@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """ JSON service providing IEMRE data for a given point """
-
 import sys
 import os
 import cgi
@@ -9,7 +8,7 @@ import json
 
 import numpy as np
 from pyiem import iemre, datatypes
-from pyiem.util import ncopen
+from pyiem.util import ncopen, ssw
 
 
 def myrounder(val, precision):
@@ -27,8 +26,8 @@ def main():
     lon = float(form["lon"][0])
     fmt = form["format"][0]
     if fmt != 'json':
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("ERROR: Service only emits json at this time")
+        ssw("Content-type: text/plain\n\n")
+        ssw("ERROR: Service only emits json at this time")
         return
 
     i, j = iemre.find_ij(lon, lat)
@@ -38,14 +37,13 @@ def main():
 
     fn = iemre.get_daily_ncname(ts.year)
 
-    sys.stdout.write('Content-type: application/json\n\n')
+    ssw('Content-type: application/json\n\n')
     if not os.path.isfile(fn):
-        sys.stdout.write(json.dumps(res))
+        ssw(json.dumps(res))
         sys.exit()
 
     if i is None or j is None:
-        sys.stdout.write(json.dumps({'error': 'Coordinates outside of domain'}
-                                    ))
+        ssw(json.dumps({'error': 'Coordinates outside of domain'}))
         return
 
     nc = ncopen(fn)
@@ -93,7 +91,7 @@ def main():
     nc.close()
     cnc.close()
 
-    sys.stdout.write(json.dumps(res))
+    ssw(json.dumps(res))
 
 
 if __name__ == '__main__':

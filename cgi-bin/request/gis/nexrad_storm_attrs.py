@@ -4,12 +4,11 @@
 """
 import datetime
 import zipfile
-import sys
 import cgi
-import StringIO
+from io import BytesIO
 # import cgitb
 import shapefile
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, ssw
 # cgitb.enable()
 
 
@@ -47,6 +46,7 @@ def get_context():
 
 
 def run(ctx):
+    """Do something!"""
     pgconn = get_dbconn('postgis', user='nobody')
     cursor = pgconn.cursor()
 
@@ -79,8 +79,8 @@ def run(ctx):
     # sys.stderr.write("Begin SQL...")
     cursor.execute(sql)
     if cursor.rowcount == 0:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("ERROR: no results found for your query")
+        ssw("Content-type: text/plain\n\n")
+        ssw("ERROR: no results found for your query")
         return
 
     fn = "stormattr_%s_%s" % (ctx['sts'].strftime("%Y%m%d%H%M"),
@@ -88,14 +88,13 @@ def run(ctx):
 
     # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
     if ctx['fmt'] == 'csv':
-        sys.stdout.write("Content-type: application/octet-stream\n")
-        sys.stdout.write(("Content-Disposition: attachment; "
-                          "filename=%s.csv\n\n") % (fn,))
-        sys.stdout.write(("VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
-                          "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,"
-                          "LAT,LON\n"))
+        ssw("Content-type: application/octet-stream\n")
+        ssw(("Content-Disposition: attachment; "
+             "filename=%s.csv\n\n") % (fn,))
+        ssw(("VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
+             "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,LAT,LON\n"))
         for row in cursor:
-            sys.stdout.write(",".join([str(s) for s in row])+"\n")
+            ssw(",".join([str(s) for s in row])+"\n")
         return
 
     w = shapefile.Writer(shapeType=shapefile.POINT)
@@ -134,14 +133,14 @@ L is for logical data which is stored in the shapefile's attribute table as a
 
     # sys.stderr.write("End LOOP...")
 
-    shp = StringIO.StringIO()
-    shx = StringIO.StringIO()
-    dbf = StringIO.StringIO()
+    shp = BytesIO()
+    shx = BytesIO()
+    dbf = BytesIO()
 
     w.save(shp=shp, shx=shx, dbf=dbf)
     # sys.stderr.write("End of w.save()")
 
-    zio = StringIO.StringIO()
+    zio = BytesIO()
     zf = zipfile.ZipFile(zio, mode='w',
                          compression=zipfile.ZIP_DEFLATED)
     zf.writestr(fn+'.prj',
@@ -151,9 +150,8 @@ L is for logical data which is stored in the shapefile's attribute table as a
     zf.writestr(fn+'.shx', shx.getvalue())
     zf.writestr(fn+'.dbf', dbf.getvalue())
     zf.close()
-    sys.stdout.write(("Content-Disposition: attachment; "
-                      "filename=%s.zip\n\n") % (fn,))
-    sys.stdout.write(zio.getvalue())
+    ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (fn,))
+    ssw(zio.getvalue())
 
 
 def main():

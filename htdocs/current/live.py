@@ -5,10 +5,8 @@ URIs look like so:
     /current/live.py?id=KCRG-006
     /current/live/KCRG-006.jpg
 """
-import io
 import cgi
-import StringIO
-import sys
+from io import BytesIO
 import traceback
 import datetime
 
@@ -16,7 +14,7 @@ import memcache
 from PIL import Image, ImageDraw
 import requests
 from requests.auth import HTTPDigestAuth
-from pyiem.util import get_properties, get_dbconn
+from pyiem.util import get_properties, get_dbconn, ssw
 
 
 def fetch(cid):
@@ -46,7 +44,7 @@ def fetch(cid):
     req = requests.get(uri, auth=HTTPDigestAuth(user, passwd), timeout=15)
     if req.status_code != 200:
         return
-    image = Image.open(io.BytesIO(req.content))
+    image = Image.open(BytesIO(req.content))
     (width, height) = image.size
     # Draw black box
     draw = ImageDraw.Draw(image)
@@ -54,7 +52,7 @@ def fetch(cid):
     stamp = datetime.datetime.now().strftime("%d %b %Y %I:%M:%S %P")
     title = "%s - %s Webcam Live Image at %s" % (name, network, stamp)
     draw.text((5, height - 12), title)
-    buf = StringIO.StringIO()
+    buf = BytesIO()
     image.save(buf, format='JPEG')
     return buf.getvalue()
 
@@ -68,7 +66,7 @@ def workflow(cid):
         return res
     try:
         res = fetch(cid)
-    except Exception as exp:
+    except Exception as _exp:
         return None
     if res is not None:
         # Set for 15 seconds
@@ -86,12 +84,12 @@ def main():
         image = Image.new('RGB', (640, 480))
         draw = ImageDraw.Draw(image)
         draw.text((320, 240), 'Sorry, failed to generate image :(')
-        buf = StringIO.StringIO()
+        buf = BytesIO()
         image.save(buf, format='JPEG')
         imagedata = buf.getvalue()
 
-    sys.stdout.write("Content-type: image/jpeg\n\n")
-    sys.stdout.write(imagedata)
+    ssw("Content-type: image/jpeg\n\n")
+    ssw(imagedata)
 
 
 if __name__ == '__main__':

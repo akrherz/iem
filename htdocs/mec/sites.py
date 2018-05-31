@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 """geojson"""
 import json
-import sys
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def main():
     """GO Main"""
     dbconn = get_dbconn('mec')
     cursor = dbconn.cursor()
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
     data = {"type": "FeatureCollection",
             "crs": {"type": "EPSG",
                     "properties": {"code": 4326,
@@ -33,7 +32,7 @@ def main():
                                               }
                                  })
 
-    sys.stdout.write(json.dumps(data))
+    ssw(json.dumps(data))
 
 
 if __name__ == '__main__':

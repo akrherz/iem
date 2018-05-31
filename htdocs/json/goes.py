@@ -2,12 +2,13 @@
 """
 Return JSON metadata for GOES Imagery
 """
-import sys
 import cgi
 import json
 import os
 import glob
 import datetime
+
+from pyiem.util import ssw
 
 BIRDS = ['EAST', 'WEST']
 PRODUCTS = ['WV', 'VIS', 'IR']
@@ -77,14 +78,14 @@ def main():
     operation = form.getvalue('operation', 'list')
     callback = form.getvalue('callback', None)
     if callback is not None:
-        sys.stdout.write("Content-type: application/javascript\n\n")
-        sys.stdout.write("%s(" % (callback,))
+        ssw("Content-type: application/javascript\n\n")
+        ssw("%s(" % (callback,))
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
+        ssw("Content-type: text/plain\n\n")
     if operation == "list":
-        sys.stdout.write(json.dumps(list_files(form)))
+        ssw(json.dumps(list_files(form)))
     if callback is not None:
-        sys.stdout.write(')')
+        ssw(')')
 
 
 if __name__ == "__main__":

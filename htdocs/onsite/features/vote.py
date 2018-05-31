@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """ Feature Voting"""
-import sys
 import cgi
 import os
 from http.cookies import SimpleCookie
 import json
 import datetime
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def do(vote):
@@ -42,7 +41,7 @@ def do(vote):
         cookie["foid"]["path"] = "/onsite/features/"
         cookie["foid"]["expires"] = expiration.strftime(
                                                 "%a, %d-%b-%Y %H:%M:%S CST")
-        sys.stdout.write(cookie.output() + "\n")
+        ssw(cookie.output() + "\n")
         cursor.close()
         pgconn.commit()
         d['can_vote'] = False
@@ -54,10 +53,10 @@ def main():
     """Do Something"""
     form = cgi.FieldStorage()
     vote = form.getfirst('vote', 'missing')
-    sys.stdout.write("Content-type: application/json\n")
+    ssw("Content-type: application/json\n")
     j = do(vote)
-    sys.stdout.write("\n")  # Finalize headers
-    sys.stdout.write(json.dumps(j))
+    ssw("\n")  # Finalize headers
+    ssw(json.dumps(j))
 
 
 if __name__ == '__main__':

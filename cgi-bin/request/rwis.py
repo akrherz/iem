@@ -9,7 +9,7 @@ import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 PGCONN = get_dbconn('rwis')
 
@@ -38,8 +38,8 @@ def get_time(form, tzname):
 
 def error(msg):
     """ send back an error """
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(msg)
+    ssw("Content-type: text/plain\n\n")
+    ssw(msg)
     sys.exit(0)
 
 
@@ -57,8 +57,8 @@ def main():
     sts, ets = get_time(form, tzname)
     stations = form.getlist('stations')
     if not stations:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("Error, no stations specified for the query!")
+        ssw("Content-type: text/plain\n\n")
+        ssw("Error, no stations specified for the query!")
         return
     if len(stations) == 1:
         stations.append('XXXXXXX')
@@ -72,8 +72,8 @@ def main():
     """
     df = read_sql(sql, PGCONN, params=(tzname, tuple(stations), sts, ets))
     if df.empty:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("Sorry, no results found for query!")
+        ssw("Content-type: text/plain\n\n")
+        ssw("Sorry, no results found for query!")
         return
     if include_latlon:
         network = form.getfirst('network')
@@ -82,35 +82,35 @@ def main():
         myvars.insert(3, 'latitude')
 
         def get_lat(station):
+            """hack"""
             return nt.sts[station]['lat']
 
         def get_lon(station):
+            """hack"""
             return nt.sts[station]['lon']
 
         df['latitude'] = [get_lat(x) for x in df['station']]
         df['longitude'] = [get_lon(x) for x in df['station']]
 
     if what == 'txt':
-        sys.stdout.write('Content-type: application/octet-stream\n')
-        sys.stdout.write(('Content-Disposition: attachment; '
-                          'filename=rwis.txt\n\n'))
+        ssw('Content-type: application/octet-stream\n')
+        ssw(('Content-Disposition: attachment; filename=rwis.txt\n\n'))
         df.to_csv(sys.stdout, index=False, sep=delimiter, columns=myvars)
     elif what == 'html':
-        sys.stdout.write("Content-type: text/html\n\n")
+        ssw("Content-type: text/html\n\n")
         df.to_html(sys.stdout, columns=myvars)
     elif what == 'excel':
         writer = pd.ExcelWriter('/tmp/ss.xlsx')
         df.to_excel(writer, 'Data', index=False, columns=myvars)
         writer.save()
 
-        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write(("Content-Disposition: attachment;"
-                          "Filename=rwis.xlsx\n\n"))
-        sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+        ssw("Content-type: application/vnd.ms-excel\n")
+        ssw(("Content-Disposition: attachment; Filename=rwis.xlsx\n\n"))
+        ssw(open('/tmp/ss.xlsx', 'rb').read())
         os.unlink('/tmp/ss.xlsx')
 
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
+        ssw("Content-type: text/plain\n\n")
         df.to_csv(sys.stdout, sep=delimiter, columns=myvars)
 
 

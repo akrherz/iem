@@ -3,13 +3,14 @@
 import cgi
 import datetime
 import sys
+
 import pytz
 from pandas.io.sql import read_sql
 import matplotlib
 matplotlib.use("agg")
 import matplotlib.pyplot as plt  # NOPEP8
 import matplotlib.dates as mdates  # NOPEP8
-from pyiem.util import get_dbconn  # NOPEP8
+from pyiem.util import get_dbconn, ssw  # NOPEP8
 
 PGCONN = get_dbconn('mec', user='mesonet')
 cursor = PGCONN.cursor()
@@ -80,12 +81,12 @@ def workflow(turbinename, ts):
     ax[3].set_ylim(bottom=0)
     ax[3].xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%-d/%b',
                                     tz=pytz.timezone("America/Chicago")))
-    plt.savefig(sys.stdout)
+    plt.savefig(getattr(sys.stdout, 'buffer', sys.stdout))
 
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: image/png\n\n")
+    ssw("Content-type: image/png\n\n")
     form = cgi.FieldStorage()
     turbinename = form.getfirst('turbinename', 'I 050-350')
     ts = datetime.datetime.strptime(form.getfirst('date', "20100401"),

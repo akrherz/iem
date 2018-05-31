@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """Dump daily computed climatology direct from the database"""
 import cgi
-import sys
 import datetime
 import json
+
 import memcache
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(network, month, day, syear, eyear):
@@ -96,7 +96,7 @@ def run(network, month, day, syear, eyear):
 
 def main():
     """Main()"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     network = form.getfirst("network", "IACLIMATE").upper()
@@ -115,9 +115,9 @@ def main():
         mc.set(mckey, res, 86400)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

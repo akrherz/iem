@@ -6,10 +6,9 @@ Provide nws text in JSON format
 import cgi
 import datetime
 import json
-import sys
 # extras
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def main():
@@ -33,11 +32,11 @@ def main():
                                  'data': row[0]
                                  })
 
-    sys.stdout.write("Content-type: application/javascript\n\n")
+    ssw("Content-type: application/javascript\n\n")
     if cb is None:
-        sys.stdout.write(json.dumps(root))
+        ssw(json.dumps(root))
     else:
-        sys.stdout.write("%s(%s)" % (cb, json.dumps(root)))
+        ssw("%s(%s)" % (cb, json.dumps(root)))
 
 
 if __name__ == '__main__':

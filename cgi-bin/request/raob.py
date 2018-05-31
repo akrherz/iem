@@ -3,11 +3,10 @@
 Download interface for data from RAOB network
 """
 import cgi
-import sys
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 from pyiem.network import Table as NetworkTable
 
 
@@ -34,14 +33,14 @@ def fetcher(station, sts, ets):
     raob_profile p JOIN raob_flights f on
     (f.fid = p.fid) WHERE f.station in %s and valid >= %s and valid < %s
     """, (tuple(stations), sts, ets))
-    sys.stdout.write(("station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
-                      "dwpc,drct,speed_kts,bearing,range_sm\n"))
+    ssw(("station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
+         "dwpc,drct,speed_kts,bearing,range_sm\n"))
     for row in cursor:
-        sys.stdout.write(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
-                          ) % (row[10], m(row[0]),
-                               m(row[1]), m(row[2]), m(row[3]), m(row[4]),
-                               m(row[5]), m(row[6]), m(row[7]),
-                               m(row[8]), m(row[9])))
+        ssw(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+             ) % (row[10], m(row[0]),
+                  m(row[1]), m(row[2]), m(row[3]), m(row[4]),
+                  m(row[5]), m(row[6]), m(row[7]),
+                  m(row[8]), m(row[9])))
 
 
 def main():
@@ -55,13 +54,12 @@ def main():
     ets = ets.replace(tzinfo=pytz.utc)
     station = form.getfirst('station', 'KOAX')[:4]
     if form.getfirst('dl', None) is not None:
-        sys.stdout.write('Content-type: application/octet-stream\n')
-        sys.stdout.write(("Content-Disposition: attachment; "
-                          "filename=%s_%s_%s.txt\n\n"
-                          ) % (station, sts.strftime("%Y%m%d%H"),
-                               ets.strftime("%Y%m%d%H")))
+        ssw('Content-type: application/octet-stream\n')
+        ssw(("Content-Disposition: attachment; filename=%s_%s_%s.txt\n\n"
+             ) % (station, sts.strftime("%Y%m%d%H"),
+                  ets.strftime("%Y%m%d%H")))
     else:
-        sys.stdout.write('Content-type: text/plain\n\n')
+        ssw('Content-type: text/plain\n\n')
     fetcher(station, sts, ets)
 
 

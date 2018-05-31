@@ -2,11 +2,10 @@
 """Dump daily computed climatology direct from the database"""
 import datetime
 import cgi
-import sys
 import json
 
 import memcache
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(station, syear, eyear):
@@ -79,7 +78,7 @@ def run(station, syear, eyear):
 
 def main():
     """Main()"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     station = form.getfirst("station", "IA0200").upper()
@@ -95,9 +94,9 @@ def main():
         mc.set(mckey, res, 86400)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

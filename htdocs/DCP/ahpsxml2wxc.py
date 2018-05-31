@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 """Convert the AHPS XML into WXC format"""
 import cgi
-import sys
-import urllib2
 import datetime
+
 from twisted.words.xish import domish, xpath
+import requests
+from pyiem.util import ssw
 
 
 def do(nwsli):
+    """work"""
     res = ""
-    xml = urllib2.urlopen(('http://water.weather.gov/ahps2/'
-                           'hydrograph_to_xml.php?gage=%s&output=xml'
-                           ) % (nwsli,)).read()
+    xml = requests.get(('http://water.weather.gov/ahps2/'
+                        'hydrograph_to_xml.php?gage=%s&output=xml'
+                        ) % (nwsli,)).content
     elementStream = domish.elementStream()
     roots = []
     results = []
@@ -57,8 +59,8 @@ def main():
     """Do Fun Things"""
     fields = cgi.FieldStorage()
     nwsli = fields.getfirst('nwsli', 'MROI4')[:5]
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(do(nwsli))
+    ssw("Content-type: text/plain\n\n")
+    ssw(do(nwsli))
 
 
 if __name__ == '__main__':

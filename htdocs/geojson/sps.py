@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of current SPS Polygons """
-import sys
 import cgi
 import json
 import datetime
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run():
@@ -52,7 +51,7 @@ def run():
 
 def main():
     """Do Main"""
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
     cb = form.getfirst('callback', None)
@@ -65,9 +64,9 @@ def main():
         mc.set(mckey, res, 15)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ import sys
 import numpy
 from pyiem.windrose_utils import windrose
 from pyiem.network import Table as NetworkTable
+from pyiem.util import ssw
 
 
 def send_error(form, msg):
@@ -24,14 +25,14 @@ def send_error(form, msg):
     elif fmt == 'svg':
         ct = "image/svg+xml"
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write(msg)
+        ssw("Content-type: text/plain\n\n")
+        ssw(msg)
         sys.exit(0)
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(1, 1)
     ax.text(0.5, 0.5, msg, ha='center')
-    sys.stdout.write("Content-type: %s\n\n" % (ct,))
-    fig.savefig(sys.stdout, format=fmt)
+    ssw("Content-type: %s\n\n" % (ct,))
+    fig.savefig(getattr(sys.stdout, 'buffer', sys.stdout), format=fmt)
 
 
 def get_times(form):
@@ -123,8 +124,8 @@ def main():
                    level=form.getfirst('level', None), bins=bins)
     if 'justdata' in form:
         # We want text
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write(res)
+        ssw("Content-type: text/plain\n\n")
+        ssw(res)
     else:
         fmt = form.getfirst('fmt', 'png')
         if fmt == 'png':
@@ -134,11 +135,11 @@ def main():
         elif fmt == 'svg':
             ct = "image/svg+xml"
         else:
-            sys.stdout.write("Content-type: text/plain\n\n")
-            sys.stdout.write("Invalid fmt set")
+            ssw("Content-type: text/plain\n\n")
+            ssw("Invalid fmt set")
             sys.exit(0)
-        sys.stdout.write("Content-type: %s\n\n" % (ct,))
-        res.savefig(sys.stdout, format=fmt)
+        ssw("Content-type: %s\n\n" % (ct,))
+        res.savefig(getattr(sys.stdout, 'buffer', sys.stdout), format=fmt)
 
 
 if __name__ == '__main__':

@@ -3,12 +3,12 @@
  Search for NWS Text, return JSON
 """
 import cgi
-import sys
 import json
 import datetime
+
 import memcache
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(sts, ets, awipsid):
@@ -37,7 +37,7 @@ def run(sts, ets, awipsid):
 
 def main():
     """ Do Stuff """
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     awipsid = form.getfirst('awipsid')[:6]
@@ -62,9 +62,9 @@ def main():
         mc.set(mckey, res, cacheexpire)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

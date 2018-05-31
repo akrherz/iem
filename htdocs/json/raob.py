@@ -15,7 +15,6 @@
 }
 """
 import cgi
-import sys
 import datetime
 import json
 # http://stackoverflow.com/questions/1447287
@@ -23,7 +22,7 @@ from json import encoder
 
 import pytz
 import memcache
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
@@ -71,7 +70,7 @@ def run(ts, sid):
 
 def main():
     """Do Something"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     sid = form.getfirst('station', 'KOAX')[:4]
@@ -90,9 +89,9 @@ def main():
         mc.set(mckey, res)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

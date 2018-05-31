@@ -3,12 +3,11 @@
 JSON webservice providing timestamps of available webcam images
 """
 import json
-import sys
 import datetime
 import cgi
 
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def dance(cid, start_ts, end_ts):
@@ -48,8 +47,8 @@ def main():
         end_ts = datetime.datetime.strptime(end_ts, '%Y%m%d%H%M')
         end_ts = end_ts.replace(tzinfo=pytz.utc)
 
-    sys.stdout.write("Content-type: application/json\n\n")
-    sys.stdout.write(json.dumps(dance(cid, start_ts, end_ts)))
+    ssw("Content-type: application/json\n\n")
+    ssw(json.dumps(dance(cid, start_ts, end_ts)))
 
 
 if __name__ == '__main__':

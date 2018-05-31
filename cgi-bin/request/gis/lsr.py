@@ -7,16 +7,16 @@ import zipfile
 import os
 import sys
 import cgi
-import StringIO
+from io import BytesIO
 
 import shapefile
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def send_error(msg):
     """Please send an error"""
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(msg)
+    ssw("Content-type: text/plain\n\n")
+    ssw(msg)
     sys.exit()
 
 
@@ -54,7 +54,7 @@ def get_time_domain(form):
 def main():
     """Go Main Go"""
     if os.environ['REQUEST_METHOD'] == 'OPTIONS':
-        sys.stdout.write("Allow: GET,POST,OPTIONS\n\n")
+        ssw("Allow: GET,POST,OPTIONS\n\n")
         sys.exit()
 
     pgconn = get_dbconn('postgis')
@@ -123,13 +123,13 @@ def main():
 
     csv.close()
 
-    shp = StringIO.StringIO()
-    shx = StringIO.StringIO()
-    dbf = StringIO.StringIO()
+    shp = BytesIO()
+    shx = BytesIO()
+    dbf = BytesIO()
 
     w.save(shp=shp, shx=shx, dbf=dbf)
 
-    zio = StringIO.StringIO()
+    zio = BytesIO()
     zf = zipfile.ZipFile(zio, mode='w',
                          compression=zipfile.ZIP_DEFLATED)
     zf.writestr(fn+'.prj',
@@ -142,16 +142,15 @@ def main():
     zf.close()
 
     if "justcsv" in form:
-        sys.stdout.write("Content-type: application/octet-stream\n")
-        sys.stdout.write(("Content-Disposition: "
-                          "attachment; filename=%s.csv\n\n"
-                          ) % (fn,))
-        sys.stdout.write(open(fn+".csv", 'r').read())
+        ssw("Content-type: application/octet-stream\n")
+        ssw(("Content-Disposition: "
+             "attachment; filename=%s.csv\n\n") % (fn,))
+        ssw(open(fn+".csv", 'r').read())
 
     else:
-        sys.stdout.write(("Content-Disposition: attachment; "
-                          "filename=%s.zip\n\n") % (fn,))
-        sys.stdout.write(zio.getvalue())
+        ssw(("Content-Disposition: attachment; "
+             "filename=%s.zip\n\n") % (fn,))
+        ssw(zio.getvalue())
 
     os.remove(fn+".csv")
 

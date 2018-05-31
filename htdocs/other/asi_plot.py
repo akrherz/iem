@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 cgitb.enable()
 
@@ -113,8 +113,8 @@ def main():
     ax[1].set_ylabel("Air Temperature [C]")
     ax[1].legend(loc='best')
 
-    sys.stdout.write("Content-Type: image/png\n\n")
-    fig.savefig(sys.stdout, format='png')
+    ssw("Content-Type: image/png\n\n")
+    fig.savefig(getattr(sys.stdout, 'buffer', sys.stdout), format='png')
 
 
 if __name__ == '__main__':

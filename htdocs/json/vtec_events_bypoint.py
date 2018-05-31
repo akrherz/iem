@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """ Find VTEC events by a given Lat / Lon pair """
 import cgi
-import sys
 import json
 import datetime
-from pyiem.util import get_dbconn
+
+from pyiem.util import get_dbconn, ssw
 
 
 def run(lon, lat, sdate, edate):
@@ -44,7 +44,7 @@ def run(lon, lat, sdate, edate):
 
 def main():
     """Main()"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     lat = float(form.getfirst("lat", 42.5))
@@ -57,9 +57,9 @@ def main():
 
     res = run(lon, lat, sdate, edate)
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

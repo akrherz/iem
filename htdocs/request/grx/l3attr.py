@@ -15,14 +15,14 @@ Add storm tracks.
 
 """
 import cgi
-import sys
 import math
+
 import memcache
 import pyproj
 import numpy as np
 import psycopg2.extras
 from pyiem.datatypes import speed
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj(init='epsg:3857')
 
@@ -232,12 +232,13 @@ kriw,-108.477"""
 
 
 def rotate(x, y, rad):
+    """rotate"""
     return [(x * math.cos(-rad) - y * math.sin(-rad)),
             (x * math.sin(-rad) + y * math.cos(-rad))]
 
 
 def dir2ccwrot(mydir):
-    # Convert to CCW
+    """Convert to CCW"""
     if mydir >= 270 and mydir <= 360:
         return 0 - (mydir - 270)
     if mydir >= 180 and mydir < 270:
@@ -350,8 +351,8 @@ def main():
     if not res:
         res = produce_content(nexrad)
         mc.set(mckey, res, 60)
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(res)
+    ssw("Content-type: text/plain\n\n")
+    ssw(res)
 
 
 if __name__ == '__main__':

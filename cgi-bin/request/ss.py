@@ -14,12 +14,11 @@ Conductivity (micro-S)
 48       ch1_data_c
 """
 import cgi
-import sys
 import datetime
 import os
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 LOOKUP = {9100104: "SSP #6",
           9100135: "SSP #8",
@@ -46,15 +45,14 @@ def gage_run(sts, ets, stations, excel):
                'Barologger Air Temp (C)', 'Conductivity (micro-S)']
 
     if excel == 'yes':
-        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write(("Content-Disposition: attachment;"
-                          "Filename=stuartsmith.xls\n\n"))
+        ssw("Content-type: application/vnd.ms-excel\n")
+        ssw(("Content-Disposition: attachment; Filename=stuartsmith.xls\n\n"))
         df.to_excel('/tmp/ss.xls', header=headers, index=False)
-        sys.stdout.write(open('/tmp/ss.xls', 'rb').read())
+        ssw(open('/tmp/ss.xls', 'rb').read())
         os.unlink('/tmp/ss.xls')
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write(df.to_csv(None, header=headers, index=False))
+        ssw("Content-type: text/plain\n\n")
+        ssw(df.to_csv(None, header=headers, index=False))
 
 
 def bubbler_run(sts, ets, excel):
@@ -79,15 +77,14 @@ def bubbler_run(sts, ets, excel):
     headers = ['date', 'time', 'batt voltage', 'stage', 'water temp']
 
     if excel == 'yes':
-        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write(("Content-Disposition: attachment;"
-                          "Filename=bubbler.xls\n\n"))
+        ssw("Content-type: application/vnd.ms-excel\n")
+        ssw(("Content-Disposition: attachment; Filename=bubbler.xls\n\n"))
         df.to_excel('/tmp/ss.xls', header=headers, index=False)
-        sys.stdout.write(open('/tmp/ss.xls', 'rb').read())
+        ssw(open('/tmp/ss.xls', 'rb').read())
         os.unlink('/tmp/ss.xls')
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write(df.to_csv(None, header=headers, index=False))
+        ssw("Content-type: text/plain\n\n")
+        ssw(df.to_csv(None, header=headers, index=False))
 
 
 def main():

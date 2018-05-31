@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """ Recent METARs containing some pattern """
 import cgi
-import sys
 import json
 from json import encoder
+
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 
@@ -61,7 +61,7 @@ def main():
     q = field.getfirst('q', 'snowdepth')[:10]
     cb = field.getfirst('callback', None)
 
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
 
     mckey = ("/geojson/recent_metar?callback=%s&q=%s"
              ) % (cb, q)
@@ -71,9 +71,9 @@ def main():
         res = get_data(q)
         mc.set(mckey, res, 300)
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

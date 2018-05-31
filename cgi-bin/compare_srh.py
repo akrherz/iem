@@ -2,24 +2,22 @@
 """Do a comparison with what's on SRH"""
 from __future__ import print_function
 import datetime
-import sys
-import urllib2
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 SRH = "http://www.srh.noaa.gov/ridge2/shapefiles/psql_currenthazards.html"
 
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write("Report run at %s\n" % (datetime.datetime.utcnow(), ))
+    ssw("Content-type: text/plain\n\n")
+    ssw("Report run at %s\n" % (datetime.datetime.utcnow(), ))
     try:
         srhdf = pd.read_html(SRH, header=0)[0]
-    except urllib2.HTTPError as _exp:
-        sys.stdout.write("Failure to download %s, comparison failed" % (SRH, ))
+    except Exception as _exp:
+        ssw("Failure to download %s, comparison failed" % (SRH, ))
         return
     srhdf['wfo'] = srhdf['wfo'].str.slice(1, 4)
     iemdf = read_sql("""
@@ -31,12 +29,11 @@ def main():
                                                           'eventid'])
     for idx, g_srhdf in srhdf.groupby(['wfo', 'phenom', 'sig', 'event']):
         if idx not in iemdf.index:
-            sys.stdout.write("IEM Missing %s\n" % (repr(idx),))
+            ssw("IEM Missing %s\n" % (repr(idx),))
             continue
         if len(g_srhdf.index) != iemdf.at[idx, 'count']:
-            sys.stdout.write(("%s Count Mismatch IEM: %s SRH: %s\n"
-                              ) % (repr(idx), iemdf.at[idx, 'count'],
-                                   len(g_srhdf.index)))
+            ssw(("%s Count Mismatch IEM: %s SRH: %s\n"
+                 ) % (repr(idx), iemdf.at[idx, 'count'], len(g_srhdf.index)))
     for idx, _row in iemdf.iterrows():
         (wfo, phenomena, significance, eventid) = idx
         df2 = srhdf[((srhdf['phenom'] == phenomena) &
@@ -44,8 +41,8 @@ def main():
                      (srhdf['event'] == eventid) &
                      (srhdf['wfo'] == wfo))]
         if df2.empty:
-            sys.stdout.write("SRH MISSING %s\n" % (repr(idx), ))
-    sys.stdout.write("DONE...\n")
+            ssw("SRH MISSING %s\n" % (repr(idx), ))
+    ssw("DONE...\n")
 
 
 if __name__ == '__main__':

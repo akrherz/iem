@@ -2,7 +2,6 @@
 """JSON service emitting observation history for a given date"""
 from __future__ import print_function
 import json
-import sys
 import os
 import datetime
 import cgi
@@ -11,7 +10,7 @@ from pandas.io.sql import read_sql
 from dateutil.parser import parse
 import memcache
 from pyiem.reference import IEMVARS
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def do_today(table, station, network, date):
@@ -64,7 +63,7 @@ def workflow(station, network, date):
 
 def main():
     """ Do something, one time """
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     station = form.getfirst("station", 'AMW')
@@ -81,9 +80,9 @@ def main():
         mc.set(mckey, res, 3600)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

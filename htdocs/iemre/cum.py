@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Fun"""
-import sys
 import os
 import cgi
 import zipfile
@@ -11,24 +10,24 @@ import shutil
 import numpy as np
 import shapefile
 from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, ssw
 
 
 def main():
     """Go main go"""
     os.chdir("/tmp")
 
-    form = cgi.FormContent()
-    ts0 = datetime.datetime.strptime(form["date0"][0], "%Y-%m-%d")
-    ts1 = datetime.datetime.strptime(form["date1"][0], "%Y-%m-%d")
-    base = int(form["base"][0])
-    ceil = int(form["ceil"][0])
+    form = cgi.FieldStorage()
+    ts0 = datetime.datetime.strptime(form.getfirst("date0"), "%Y-%m-%d")
+    ts1 = datetime.datetime.strptime(form.getfirst("date1"), "%Y-%m-%d")
+    base = int(form.getfirst("base"))
+    ceil = int(form.getfirst("ceil"))
     # Make sure we aren't in the future
     tsend = datetime.date.today()
     if ts1.date() >= tsend:
         ts1 = tsend - datetime.timedelta(days=1)
         ts1 = datetime.datetime(ts1.year, ts1.month, ts1.day)
-    fmt = form["format"][0]
+    fmt = form.getfirst("format")
 
     offset0 = iemre.daily_offset(ts0)
     offset1 = iemre.daily_offset(ts1)
@@ -52,7 +51,7 @@ def main():
 
     if fmt == 'json':
         # For example: 19013
-        ugc = "IAC" + form["county"][0][2:]
+        ugc = "IAC" + form.getfirst("county")[2:]
         # Go figure out where this is!
         postgis = get_dbconn('postgis')
         pcursor = postgis.cursor()
@@ -73,8 +72,8 @@ def main():
                     'latitude': "%.4f" % (lat,),
                     'longitude': "%.4f" % (lon,)
            })
-        sys.stdout.write('Content-type: application/json\n\n')
-        sys.stdout.write(json.dumps(res))
+        ssw('Content-type: application/json\n\n')
+        ssw(json.dumps(res))
 
     if fmt == 'shp':
         # Time to create the shapefiles
@@ -101,12 +100,12 @@ def main():
             z.write("%s.%s" % (basefn, suffix))
         z.close()
 
-        sys.stdout.write("Content-type: application/octet-stream\n")
-        sys.stdout.write(
+        ssw("Content-type: application/octet-stream\n")
+        ssw(
             ("Content-Disposition: attachment; filename=%s.zip\n\n"
              ) % (basefn, ))
 
-        sys.stdout.write(open(basefn+".zip", 'r').read())
+        ssw(open(basefn+".zip", 'rb').read())
 
         for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
             os.unlink("%s.%s" % (basefn, suffix))

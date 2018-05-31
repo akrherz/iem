@@ -6,7 +6,7 @@ import json
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -79,7 +79,7 @@ def run(wfo, year, phenomena, significance):
 
 def main():
     """Main()"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     wfo = form.getfirst("wfo", "MPX")
@@ -102,9 +102,9 @@ def main():
         sys.stderr.write("Using cache: %s\n" % (mckey, ))
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

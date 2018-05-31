@@ -7,11 +7,11 @@ ID,Station,Latitude,Longitude
 import cgi
 import datetime
 import sys
+
 import pytz
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
-SSW = sys.stdout.write
 # DOT plows
 # RWIS sensor data
 # River gauges
@@ -109,8 +109,8 @@ def do_ahps_obs(nwsli):
     SELECT k.id, k.label from hml_observed_keys k JOIN obs o on (k.id = o.key)
     """, (nwsli,))
     if cursor.rowcount == 0:
-        SSW('Content-type: text/plain\n\n')
-        SSW("NO DATA")
+        ssw('Content-type: text/plain\n\n')
+        ssw("NO DATA")
         sys.exit()
     plabel = cursor.fetchone()[1]
     slabel = cursor.fetchone()[1]
@@ -140,12 +140,12 @@ def do_ahps_obs(nwsli):
     df[plabel] = df['primary_value']
     df[slabel] = df['secondary_value']
     # we have to do the writing from here
-    SSW("Content-type: text/plain\n\n")
-    SSW("Observed Data:,,\n")
-    SSW("|Date|,|Stage|,|--Flow-|\n")
+    ssw("Content-type: text/plain\n\n")
+    ssw("Observed Data:,,\n")
+    ssw("|Date|,|Stage|,|--Flow-|\n")
     odf = df[df['type'] == 'O']
     for _, row in odf.iterrows():
-        SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
+        ssw("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
                                       row['Flow[kcfs]']))
     sys.exit(0)
 
@@ -202,13 +202,13 @@ def do_ahps_fx(nwsli):
     df[plabel] = df['primary_value']
     df[slabel] = df['secondary_value']
     # we have to do the writing from here
-    SSW("Content-type: text/plain\n\n")
-    SSW("Forecast Data (Issued %s UTC):,\n" % (
+    ssw("Content-type: text/plain\n\n")
+    ssw("Forecast Data (Issued %s UTC):,\n" % (
         generationtime.strftime("%m-%d-%Y %H:%M:%S"),))
-    SSW("|Date|,|Stage|,|--Flow-|\n")
+    ssw("|Date|,|Stage|,|--Flow-|\n")
     odf = df[df['type'] == 'F']
     for _, row in odf.iterrows():
-        SSW("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
+        ssw("%s,%.2fft,%.1fkcfs\n" % (row['Time'], row['Stage[ft]'],
                                       row['Flow[kcfs]']))
 
     sys.exit(0)
@@ -216,20 +216,20 @@ def do_ahps_fx(nwsli):
 
 def router(appname):
     """Process and return dataframe"""
+    # elif appname == 'iadotplows':
+    #    df = do_iadotplows()
+    # elif appname == 'iariver':
+    #    df = do_iariver()
+    # elif appname == 'isusm':
+    #    df = do_isusm()
     if appname.startswith("ahpsobs_"):
         do_ahps_obs(appname[8:].upper())  # we write ourselves and exit
     elif appname.startswith("ahpsfx_"):
         do_ahps_fx(appname[7:].upper())  # we write ourselves and exit
     elif appname == 'iaroadcond':
         df = do_iaroadcond()
-    elif appname == 'iadotplows':
-        df = do_iadotplows()
     elif appname == 'iarwis':
         df = do_iarwis()
-    elif appname == 'iariver':
-        df = do_iariver()
-    elif appname == 'isusm':
-        df = do_isusm()
     elif appname == 'iowayesterday':
         df = do_iowa_azos(datetime.date.today() - datetime.timedelta(days=1))
     elif appname == 'iowatoday':
@@ -247,9 +247,9 @@ def main():
     form = cgi.FieldStorage()
     appname = form.getfirst('q')
     df = router(appname)
-    SSW("Content-type: text/plain\n\n")
-    SSW(df.to_csv(None, index=False))
-    SSW("\n")
+    ssw("Content-type: text/plain\n\n")
+    ssw(df.to_csv(None, index=False))
+    ssw("\n")
 
 
 if __name__ == '__main__':

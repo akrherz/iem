@@ -2,14 +2,13 @@
 """
 Return JSON metadata for nexrad information
 """
-import sys
 import cgi
 import json
 import datetime
 import os.path
 import glob
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 NIDS = {
     'N0Q': 'Base Reflectivity (High Res)',
     'N0U': 'Base Radial Velocity (High Res)',
@@ -34,7 +33,7 @@ def parse_time(s):
             date = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
         else:
             date = datetime.datetime.utcnow()
-    except:
+    except Exception as _exp:
         date = datetime.datetime.utcnow()
     return date
 
@@ -181,24 +180,24 @@ def main():
     """Do awesome things"""
     form = cgi.FieldStorage()
     if os.environ['REQUEST_METHOD'] not in ['GET', 'POST']:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("HTTP METHOD NOT ALLOWED")
+        ssw("Content-type: text/plain\n\n")
+        ssw("HTTP METHOD NOT ALLOWED")
         return
     operation = form.getvalue('operation', None)
     callback = form.getvalue('callback', None)
     if callback is not None:
-        sys.stdout.write("Content-type: application/javascript\n\n")
-        sys.stdout.write("%s(" % (callback,))
+        ssw("Content-type: application/javascript\n\n")
+        ssw("%s(" % (callback,))
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
+        ssw("Content-type: text/plain\n\n")
     if operation == "list":
-        sys.stdout.write(json.dumps(list_files(form)))
+        ssw(json.dumps(list_files(form)))
     elif operation == "available":
-        sys.stdout.write(json.dumps(available_radars(form)))
+        ssw(json.dumps(available_radars(form)))
     elif operation == "products":
-        sys.stdout.write(json.dumps(list_products(form)))
+        ssw(json.dumps(list_products(form)))
     if callback is not None:
-        sys.stdout.write(')')
+        ssw(')')
 
 
 if __name__ == "__main__":

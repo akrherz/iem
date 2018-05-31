@@ -9,7 +9,7 @@ import datetime
 from collections import OrderedDict
 
 from geopandas import GeoDataFrame
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, ssw
 
 
 def get_time_extent(form):
@@ -54,8 +54,8 @@ def parse_wfo_location_group(form):
 
 def send_error(msg):
     """Error out please!"""
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write("ERROR: %s" % (msg, ))
+    ssw("Content-type: text/plain\n\n")
+    ssw("ERROR: %s" % (msg, ))
     sys.exit()
 
 
@@ -176,8 +176,8 @@ def main():
 
     df = GeoDataFrame.from_postgis(sql, pgconn, 'geo')
     if df.empty:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("ERROR: No results found for query, please try again")
+        ssw("Content-type: text/plain\n\n")
+        ssw("ERROR: No results found for query, please try again")
         sys.exit()
 
     # Capitolize columns please
@@ -207,10 +207,10 @@ def main():
     zf.write(fn + ".prj")
     zf.close()
 
-    sys.stdout.write("Content-type: application/octet-stream\n")
-    sys.stdout.write(
+    ssw("Content-type: application/octet-stream\n")
+    ssw(
         "Content-Disposition: attachment; filename=%s.zip\n\n" % (fn, ))
-    sys.stdout.write(file(fn + ".zip", 'r').read())
+    ssw(open(fn + ".zip", 'rb').read())
 
     for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
         os.remove("%s.%s" % (fn, suffix))

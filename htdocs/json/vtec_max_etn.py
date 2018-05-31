@@ -2,12 +2,11 @@
 """Show Max ETNs by wfo, phenomena, sig, by year"""
 import cgi
 import datetime
-import sys
 import json
 
 import memcache
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(year, fmt):
@@ -73,9 +72,9 @@ def main():
         return
     cb = form.getfirst("callback", None)
     if fmt == 'json':
-        sys.stdout.write("Content-type: application/json\n\n")
+        ssw("Content-type: application/json\n\n")
     else:
-        sys.stdout.write("Content-type: text/html\n\n")
+        ssw("Content-type: text/html\n\n")
 
     mckey = "/json/vtec_max_etn/%s/%s" % (year, fmt)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
@@ -85,9 +84,9 @@ def main():
         mc.set(mckey, res, 3600)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

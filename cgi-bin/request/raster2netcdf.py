@@ -13,13 +13,13 @@ import tempfile
 import numpy as np
 import pytz
 from PIL import Image
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, ssw
 
 
 def send_error(msg):
     """something bad happened, so let the user know"""
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(msg)
+    ssw("Content-type: text/plain\n\n")
+    ssw(msg)
     sys.exit()
 
 
@@ -100,9 +100,9 @@ def do_work(valid, prod):
     ncvar[:] = xref[raster]
     nc.close()
     # send data to user
-    sys.stdout.write("Content-type: application/octet-stream\n")
-    sys.stdout.write("Content-Disposition: attachment; filename=res.nc\n\n")
-    sys.stdout.write(open(tmpobj.name, 'rb').read())
+    ssw("Content-type: application/octet-stream\n")
+    ssw("Content-Disposition: attachment; filename=res.nc\n\n")
+    ssw(open(tmpobj.name, 'rb').read())
     # remove tmp netcdf file
     os.unlink(tmpobj.name)
 

@@ -4,13 +4,14 @@
 import cgi
 import sys
 import datetime
+
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def send_error(msg):
     """Send an error"""
-    sys.stdout.write(msg)
+    ssw(msg)
     sys.exit(0)
 
 
@@ -84,7 +85,7 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.stdout.write("Content-type: text/plain\n\n")
+    ssw("Content-type: text/plain\n\n")
     main()
-    sys.stdout.write(("Thank you, request received, please check your "
-                      "email in a few minutes."))
+    ssw(("Thank you, request received, please check your "
+         "email in a few minutes."))

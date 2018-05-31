@@ -3,9 +3,9 @@
  Placefile for DOT trucks and webcam images
 """
 import datetime
-import sys
+
 import memcache
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 URLBASE = "https://mesonet.agron.iastate.edu/data/camera/idot_trucks"
 ARROWS = "https://mesonet.agron.iastate.edu/request/grx/arrows.png"
@@ -49,7 +49,7 @@ Font: 1, 11, 1, "Courier New"
 
 def main():
     """ Go Main Go """
-    sys.stdout.write("Content-type: text/plain\n\n")
+    ssw("Content-type: text/plain\n\n")
 
     mckey = "/request/grx/iadot_trucks.txt"
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
@@ -57,7 +57,7 @@ def main():
     if not res:
         res = produce_content()
         mc.set(mckey, res, 300)
-    sys.stdout.write(res)
+    ssw(res)
 
 
 if __name__ == '__main__':

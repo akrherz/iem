@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """Current Observation for a station and network"""
-import sys
 import cgi
 import json
 import datetime
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(network, station):
@@ -56,7 +55,7 @@ def run(network, station):
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     network = form.getfirst('network', 'IA_ASOS')[:10].upper()
@@ -71,9 +70,9 @@ def main():
         mc.set(mckey, res, 60)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

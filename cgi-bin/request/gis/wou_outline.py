@@ -6,15 +6,17 @@ import os
 import shutil
 import sys
 import cgi
+
 import shapefile
 import psycopg2.extras
 from pyiem import wellknowntext
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 POSTGIS = get_dbconn('postgis', user='nobody')
 
 
 def main(year, etn):
+    """Go Main Go"""
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     basefn = "watch_%s_%s" % (year, etn)
@@ -53,17 +55,17 @@ def main(year, etn):
         z.write("%s.%s" % (basefn, suffix))
     z.close()
 
-    sys.stdout.write("Content-type: application/octet-stream\n")
-    sys.stdout.write(("Content-Disposition: attachment; filename=%s.zip\n\n"
-                      ) % (basefn, ))
+    ssw("Content-type: application/octet-stream\n")
+    ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (basefn, ))
 
-    sys.stdout.write(file("%s.zip" % (basefn, ), 'r').read())
+    ssw(open("%s.zip" % (basefn, ), 'rb').read())
 
     for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
         os.remove("%s.%s" % (basefn, suffix))
 
 
 def cgiworkflow():
+    """Yawn"""
     form = cgi.FieldStorage()
     year = int(form.getfirst("year"))
     etn = int(form.getfirst("etn"))

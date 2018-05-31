@@ -15,7 +15,7 @@ import matplotlib.colorbar as mpcolorbar  # NOPEP8
 import matplotlib.patheffects as PathEffects  # NOPEP8
 from pyiem.meteorology import uv
 from pyiem.datatypes import speed, direction
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def make_colorbar(clevs, norm, cmap):
@@ -75,7 +75,7 @@ def do(valid, yawsource):
     pitch = np.array(pitch)
     vals = np.array(vals)
     avgv = np.average(vals)
-    vals2 = vals - avgv
+    # vals2 = vals - avgv
     fig = plt.figure(figsize=(12.8, 7.2))
     ax = fig.add_axes([0.14, 0.1, 0.52, 0.8])
 
@@ -151,7 +151,7 @@ def do(valid, yawsource):
     ax5.text(-0.1, 0.5, "Wind Speed $ms^{-1}$", transform=ax5.transAxes,
              ha='center', va='center', rotation=90)
 
-    plt.savefig(sys.stdout)
+    plt.savefig(getattr(sys.stdout, 'buffer', sys.stdout))
 
 
 if __name__ == '__main__':
@@ -160,5 +160,5 @@ if __name__ == '__main__':
     ts = form.getfirst('ts', '200006302000')
     ts = datetime.datetime.strptime(ts, '%Y%m%d%H%M')
     yawsource = form.getfirst('yawsource', 'yaw')
-    sys.stdout.write("Content-type: image/png\n\n")
+    ssw("Content-type: image/png\n\n")
     do(ts, yawsource)

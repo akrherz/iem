@@ -9,7 +9,7 @@ import sys
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def check_load(cursor):
@@ -21,9 +21,9 @@ def check_load(cursor):
     if cursor.rowcount > 9:
         sys.stderr.write(("/cgi-bin/request/metars.py over capacity: %s"
                           ) % (cursor.rowcount,))
-        sys.stdout.write("Content-type: text/plain\n")
-        sys.stdout.write('Status: 503 Service Unavailable\n\n')
-        sys.stdout.write("ERROR: server over capacity, please try later")
+        ssw("Content-type: text/plain\n")
+        ssw('Status: 503 Service Unavailable\n\n')
+        ssw("ERROR: server over capacity, please try later")
         sys.exit(0)
 
 
@@ -32,7 +32,7 @@ def main():
     pgconn = get_dbconn('asos', user='nobody')
     check_load(pgconn.cursor())
     acursor = pgconn.cursor("streamer")
-    sys.stdout.write("Content-type: text/plain\n\n")
+    ssw("Content-type: text/plain\n\n")
     form = cgi.FieldStorage()
     valid = datetime.datetime.strptime(form.getfirst('valid',
                                                      '2016010100')[:10],
@@ -45,7 +45,7 @@ def main():
         ORDER by valid ASC
     """, (valid, valid + datetime.timedelta(hours=1)))
     for row in acursor:
-        sys.stdout.write("%s\n" % (row[0].replace("\n", " "),))
+        ssw("%s\n" % (row[0].replace("\n", " "),))
 
 
 if __name__ == '__main__':

@@ -2,10 +2,9 @@
 """give me some AFOS data please"""
 from __future__ import print_function
 import cgi
-import sys
 import unittest
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def pil_logic(s):
@@ -46,18 +45,17 @@ def main():
     sdate = form.getfirst('sdate', '')[:10]
     edate = form.getfirst('edate', '')[:10]
     fmt = form.getfirst('fmt', 'text')
-    sys.stdout.write("X-Content-Type-Options: nosniff\n")
+    ssw("X-Content-Type-Options: nosniff\n")
     if form.getfirst('dl') == "1":
-        sys.stdout.write("Content-type: application/octet-stream\n")
-        sys.stdout.write(("Content-Disposition: "
-                          "attachment; filename=afos.txt\n\n"))
+        ssw("Content-type: application/octet-stream\n")
+        ssw("Content-Disposition: attachment; filename=afos.txt\n\n")
     else:
         if fmt == 'text':
-            sys.stdout.write("Content-type: text/plain\n\n")
+            ssw("Content-type: text/plain\n\n")
         elif fmt == 'html':
-            sys.stdout.write("Content-type: text/html\n\n")
+            ssw("Content-type: text/html\n\n")
     if not pils:
-        sys.stdout.write("ERROR: No pil specified...")
+        ssw("ERROR: No pil specified...")
         return
     centerlimit = '' if center == '' else (" and source = '%s' " % (center, ))
     timelimit = ''
@@ -77,23 +75,23 @@ def main():
         cursor.execute(sql)
         for row in cursor:
             if fmt == 'html':
-                sys.stdout.write("<pre>\n")
+                ssw("<pre>\n")
             else:
-                sys.stdout.write("\001\n")
-            sys.stdout.write(row[0].replace("\r\r\n", "\n"))
+                ssw("\001\n")
+            ssw(row[0].replace("\r\r\n", "\n"))
             if fmt == 'html':
-                sys.stdout.write("</pre>\n")
+                ssw("</pre>\n")
             else:
-                sys.stdout.write("\003\n")
+                ssw("\003\n")
         if cursor.rowcount == 0:
-            sys.stdout.write("ERROR: METAR lookup for %s failed" % (
+            ssw("ERROR: METAR lookup for %s failed" % (
                                                 pils[0][3:].strip(), ))
         return
 
     try:
         mydb = get_dbconn('afos', user='nobody')
-    except Exception as exp:
-        print('Error Connecting to Database, please try again!')
+    except Exception as _exp:
+        ssw('Error Connecting to Database, please try again!\n')
         return
 
     cursor = mydb.cursor()
@@ -120,17 +118,17 @@ def main():
 
     for row in cursor:
         if fmt == 'html':
-            sys.stdout.write("<pre>\n")
+            ssw("<pre>\n")
         else:
-            sys.stdout.write("\001\n")
+            ssw("\001\n")
         # Remove control characters from the product as we are including
         # them manually here...
-        sys.stdout.write((row[0]).replace(
+        ssw((row[0]).replace(
             "\003", "").replace("\001\r\r\n", "").replace("\r\r\n", "\n"))
         if fmt == 'html':
-            sys.stdout.write("</pre>\n")
+            ssw("</pre>\n")
         else:
-            sys.stdout.write("\n\003\n")
+            ssw("\n\003\n")
 
     if cursor.rowcount == 0:
         print("ERROR: Could not Find: %s" % (",".join(pils), ))
@@ -146,10 +144,10 @@ class TestRetrieve(unittest.TestCase):
     def test_pil_logic(self):
         """Make sure our pil logic works! """
         res = pil_logic("AFDDMX")
-        self.assertEquals(len(res), 1)
-        self.assertEquals(res[0], 'AFDDMX')
+        assert len(res) == 1
+        assert res[0] == 'AFDDMX'
         res = pil_logic("WAREWX")
-        self.assertEquals(len(res), 12)
+        assert len(res) == 12
         res = pil_logic("STOIA,AFDDMX")
-        self.assertEquals(res[0], 'STOIA ')
-        self.assertEquals(res[1], 'AFDDMX')
+        assert res[0] == 'STOIA '
+        assert res[1] == 'AFDDMX'

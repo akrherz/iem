@@ -2,10 +2,11 @@
 """
  Tile Map service metadata
 """
-import sys
 import cgi
 import os
+
 import memcache
+from pyiem.util import ssw
 
 
 def run():
@@ -38,12 +39,12 @@ def run():
 
 def main():
     """Go Main"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     if os.environ['REQUEST_METHOD'] not in ['GET', 'POST']:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("HTTP METHOD NOT ALLOWED")
+        ssw("Content-type: text/plain\n\n")
+        ssw("HTTP METHOD NOT ALLOWED")
         return
     cb = form.getfirst('callback', None)
 
@@ -55,9 +56,9 @@ def main():
         mc.set(mckey, res, 15)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

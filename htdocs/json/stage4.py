@@ -3,14 +3,13 @@
 
 import datetime
 import json
-import sys
 import cgi
 import os
 
 import numpy as np
 import memcache
 from pyiem import iemre, datatypes
-from pyiem.util import utc, ncopen
+from pyiem.util import utc, ncopen, ssw
 
 
 def myrounder(val, precision):
@@ -61,7 +60,7 @@ def dowork(form):
 
 def main():
     """Do Something Fun!"""
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
     lat = float(form.getfirst('lat'))
@@ -77,9 +76,9 @@ def main():
         mc.set(mckey, res, 3600*12)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

@@ -4,11 +4,11 @@
 """
 import datetime
 import cgi
-import sys
 import json
+
 import memcache
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def pointquery(lon, lat):
@@ -78,7 +78,7 @@ def dowork(valid):
 
 def main():
     """Main Workflow"""
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
     ts = form.getfirst('ts', None)
@@ -107,9 +107,9 @@ def main():
         mc.set(mckey, res)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

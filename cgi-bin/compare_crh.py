@@ -2,12 +2,11 @@
 """Do a comparison with what's on CRH CAP"""
 from __future__ import print_function
 import datetime
-import sys
 
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 # Akami has this cached, so we shall cache bust it, please
 NOUNCE = "?%s" % (datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
@@ -16,18 +15,17 @@ URI = "https://www.weather.gov/source/crh/allhazard.geojson"
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write("Report run at %s\n" % (datetime.datetime.utcnow(), ))
-    sys.stdout.write("Comparing %s\n" % (URI, ))
+    ssw("Content-type: text/plain\n\n")
+    ssw("Report run at %s\n" % (datetime.datetime.utcnow(), ))
+    ssw("Comparing %s\n" % (URI, ))
     try:
         req = requests.get(URI + NOUNCE)
         jdata = req.json()
     except Exception as exp:
-        sys.stdout.write(("Failure to download %s, comparison failed\n"
-                          "%s") % (URI, exp))
+        ssw(("Failure to download %s, comparison failed\n"
+             "%s") % (URI, exp))
         return
-    sys.stdout.write(("geojson generation_time: %s\n"
-                      ) % (jdata.get('generation_time'), ))
+    ssw("geojson generation_time: %s\n" % (jdata.get('generation_time'), ))
     rows = []
     for feature in jdata['features']:
         props = feature['properties']
@@ -69,7 +67,7 @@ def main():
                    ) % (row['wfo'], row['phenomena'], row['significance'],
                         row['eventid'], row['ugc']))
 
-    sys.stdout.write("DONE...\n")
+    ssw("DONE...\n")
 
 
 if __name__ == '__main__':

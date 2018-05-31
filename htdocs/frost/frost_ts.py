@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from pyiem.util import ncopen
+from pyiem.util import ncopen, ssw
 from pyiem.datatypes import temperature
 
 
@@ -95,7 +95,7 @@ def process(model, lon, lat):
     modelts = get_latest_time(model)
     if modelts is None:
         ax.text(0.5, 0.5, "No Data Found to Plot!", ha='center')
-        sys.stdout.write("Content-Type: image/png\n\n")
+        ssw("Content-Type: image/png\n\n")
         fig.savefig(sys.stdout, format="png")
         return
     nc = ncopen(
@@ -145,8 +145,8 @@ def process(model, lon, lat):
               bbox_to_anchor=(0.5, -0.12), fancybox=True, shadow=True, ncol=3)
     add_labels(fig)
 
-    sys.stdout.write("Content-Type: image/png\n\n")
-    fig.savefig(sys.stdout, format="png")
+    ssw("Content-Type: image/png\n\n")
+    fig.savefig(getattr(sys.stdout, 'buffer', sys.stdout), format="png")
 
 
 def main():

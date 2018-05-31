@@ -5,13 +5,12 @@ import datetime
 import os
 import cgi
 import json
-import sys
 
 import memcache
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 ISO9660 = '%Y-%m-%dT%H:%MZ'
 
@@ -122,7 +121,7 @@ def dowork(lon, lat, last, day, cat):
 
 def main():
     """Do Main Stuff"""
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
     lat = float(form.getfirst('lat', 42.0))
@@ -147,9 +146,9 @@ def main():
         mc.set(mckey, res, 3600)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

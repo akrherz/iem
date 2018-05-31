@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 """ Service to dump out IBW tags for a WFO / Year"""
-import sys
 import cgi
 import json
 import datetime
 
 import memcache
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def ptime(val):
@@ -65,7 +64,7 @@ def run(wfo, year):
 
 def main():
     """ Go Main Go """
-    sys.stdout.write("Content-type: application/json\n\n")
+    ssw("Content-type: application/json\n\n")
     form = cgi.FieldStorage()
     wfo = form.getfirst('wfo', 'DMX')[:4]
     year = int(form.getfirst('year', 2015))
@@ -79,9 +78,9 @@ def main():
         mc.set(mckey, res, 3600)
 
     if cb is None:
-        sys.stdout.write(res)
+        ssw(res)
     else:
-        sys.stdout.write("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cb, res))
 
 
 if __name__ == '__main__':

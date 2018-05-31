@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """Download IEM summary data!"""
 import cgi
-import sys
 import datetime
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 from pyiem.network import Table as NetworkTable
 
 
@@ -12,7 +11,7 @@ def get_climate(network, stations):
     """Fetch the climatology for these stations"""
     nt = NetworkTable(network)
     if not nt.sts:
-        sys.stdout.write("ERROR: Invalid network specified")
+        ssw("ERROR: Invalid network specified")
         return
     data = dict()
     clisites = []
@@ -90,15 +89,15 @@ def main():
                         int(form.getfirst('month2')),
                         int(form.getfirst('day2')))
 
-    sys.stdout.write('Content-type: text/plain\n\n')
+    ssw('Content-type: text/plain\n\n')
     stations = form.getlist('stations')
     if not stations:
         stations = form.getlist('station')
     if not stations:
-        sys.stdout.write("ERROR: No stations specified for request")
+        ssw("ERROR: No stations specified for request")
         return
     network = form.getfirst('network')[:12]
-    sys.stdout.write(get_data(network, sts, ets, stations))
+    ssw(get_data(network, sts, ets, stations))
 
 
 if __name__ == '__main__':

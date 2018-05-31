@@ -5,13 +5,13 @@ Create ERDAS Imagine file from a MRMS Raster
 import cgi
 import os
 import datetime
-import sys
 import zipfile
 
 from osgeo import gdal
 from osgeo import osr
 from scipy.ndimage import imread
 import numpy as np
+from pyiem.util import ssw
 
 
 def workflow(valid, period):
@@ -19,8 +19,8 @@ def workflow(valid, period):
     fn = valid.strftime(('/mesonet/ARCHIVE/data/%Y/%m/%d/'
                          'GIS/mrms/p'+str(period)+'h_%Y%m%d%H%M.png'))
     if not os.path.isfile(fn):
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("ERROR: Data File Not Found!")
+        ssw("Content-type: text/plain\n\n")
+        ssw("ERROR: Data File Not Found!")
         return
     img = imread(fn, mode='P')
     size = np.shape(img)
@@ -79,10 +79,10 @@ def workflow(valid, period):
     zfp.close()
 
     # Send file back to client
-    sys.stdout.write("Content-type: application/octet/stream\n")
-    sys.stdout.write("Content-Disposition: attachment; filename=%s\n\n" % (
+    ssw("Content-type: application/octet/stream\n")
+    ssw("Content-Disposition: attachment; filename=%s\n\n" % (
                                                             zipfn,))
-    sys.stdout.write(open(zipfn, 'rb').read())
+    ssw(open(zipfn, 'rb').read())
 
     os.unlink(outfn)
     os.unlink(zipfn)

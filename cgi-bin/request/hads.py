@@ -8,7 +8,7 @@ import os
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, ssw
 
 PGCONN = get_dbconn('hads')
 DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
@@ -72,8 +72,8 @@ def threshold_search(table, threshold, thresholdvar, delimiter):
 
 def error(msg):
     """ send back an error """
-    sys.stdout.write("Content-type: text/plain\n\n")
-    sys.stdout.write(msg)
+    ssw("Content-type: text/plain\n\n")
+    ssw(msg)
     sys.exit(0)
 
 
@@ -88,8 +88,8 @@ def main():
     sts, ets = get_time(form)
     stations = form.getlist('stations')
     if not stations:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("Error, no stations specified for the query!")
+        ssw("Content-type: text/plain\n\n")
+        ssw("Error, no stations specified for the query!")
         return
     if len(stations) == 1:
         stations.append('XXXXXXX')
@@ -101,8 +101,8 @@ def main():
     and value > -999""" % (tuple(stations), sts, ets)
     df = read_sql(sql, PGCONN)
     if df.empty:
-        sys.stdout.write("Content-type: text/plain\n\n")
-        sys.stdout.write("Sorry, no results found for query!")
+        ssw("Content-type: text/plain\n\n")
+        ssw("Sorry, no results found for query!")
         return
     table = df.pivot_table(values='value', columns=['key'], index=['station',
                                                                    'utc_valid']
@@ -114,26 +114,24 @@ def main():
         table = threshold_search(table, threshold, thresholdvar, delimiter)
 
     if what == 'txt':
-        sys.stdout.write('Content-type: application/octet-stream\n')
-        sys.stdout.write(('Content-Disposition: attachment; '
-                          'filename=hads.txt\n\n'))
+        ssw('Content-type: application/octet-stream\n')
+        ssw(('Content-Disposition: attachment; filename=hads.txt\n\n'))
         table.to_csv(sys.stdout, sep=delimiter)
     elif what == 'html':
-        sys.stdout.write("Content-type: text/html\n\n")
+        ssw("Content-type: text/html\n\n")
         table.to_html(sys.stdout)
     elif what == 'excel':
         writer = pd.ExcelWriter('/tmp/ss.xlsx')
         table.to_excel(writer, 'Data', index=True)
         writer.save()
 
-        sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-        sys.stdout.write(("Content-Disposition: attachment;"
-                          "Filename=hads.xlsx\n\n"))
-        sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+        ssw("Content-type: application/vnd.ms-excel\n")
+        ssw(("Content-Disposition: attachment; Filename=hads.xlsx\n\n"))
+        ssw(open('/tmp/ss.xlsx', 'rb').read())
         os.unlink('/tmp/ss.xlsx')
 
     else:
-        sys.stdout.write("Content-type: text/plain\n\n")
+        ssw("Content-type: text/plain\n\n")
         table.to_csv(sys.stdout, sep=delimiter)
 
 

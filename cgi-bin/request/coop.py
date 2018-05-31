@@ -9,7 +9,7 @@ import os
 import sys
 import datetime
 import zipfile
-import StringIO
+from io import BytesIO
 import unittest
 
 import pandas as pd
@@ -17,7 +17,7 @@ from pandas.io.sql import read_sql
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def get_scenario_period(ctx):
@@ -28,11 +28,6 @@ def get_scenario_period(ctx):
     sts = datetime.date(ctx['scenario_year'], ctx['sts'].month, ctx['sts'].day)
     ets = datetime.date(ctx['scenario_year'], 12, 31)
     return sts, ets
-
-
-def ssw(txt):
-    """ shortcut """
-    sys.stdout.write(txt)
 
 
 def get_database():
@@ -196,7 +191,7 @@ def do_apsim(ctx):
                   temperature(row["low"], 'F').value('C'),
                   row["precip"] * 25.4))
 
-    if len(extra) > 0:
+    if extra:
         dec31 = datetime.date(thisyear, 12, 31)
         now = row['day']
         while now <= dec31:
@@ -363,14 +358,14 @@ def do_daycent(ctx):
                   row["day"].month, row["day"].year, int(row["doy"]),
                   f2c(row["high"]), f2c(row["low"]),
                   distance(row["precip"], 'IN').value('CM')))
-    if len(extra) > 0:
+    if extra:
         dec31 = datetime.date(thisyear, 12, 31)
         now = row['day']
         while now <= dec31:
             row = extra[now]
             ssw(("%s %s %s %s %.2f %.2f %.2f\n"
                  ) % (now.day,
-                      now.month,  now.year, int(now.strftime("%j")),
+                      now.month, now.year, int(now.strftime("%j")),
                       f2c(row["high"]), f2c(row["low"]),
                       distance(row["precip"], 'IN').value('CM')))
             now += datetime.timedelta(days=1)
@@ -618,9 +613,9 @@ def do_dndc(ctx):
                               temperature(row["low"], 'F').value('C'),
                               row["precip"] * 2.54)
 
-    sio = StringIO.StringIO()
+    sio = BytesIO()
     z = zipfile.ZipFile(sio, 'a')
-    for fn in zipfiles.keys():
+    for fn in zipfiles:
         z.writestr(fn, zipfiles[fn])
     z.close()
     ssw("Content-type: application/octet-stream\n")
@@ -637,8 +632,6 @@ def do_swat(ctx):
     dbconn = get_database()
 
     table = get_tablename(ctx['stations'])
-
-    nt = get_stationtable(ctx['stations'])
 
     if len(ctx['stations']) == 1:
         ctx['stations'].append('X')
@@ -686,7 +679,7 @@ def do_swat(ctx):
             zipfiles[tmpfn] += ("%s%03i%5.1f%5.1f\n"
                                 ) % (row['day'].year, row['doy'], row['tmax'],
                                      row['tmin'])
-    sio = StringIO.StringIO()
+    sio = BytesIO()
     zipfn = zipfile.ZipFile(sio, 'a')
     for fn in zipfiles:
         zipfn.writestr(fn, zipfiles[fn])
@@ -759,6 +752,6 @@ class Tests(unittest.TestCase):
 
     def test_sane_date(self):
         """ Test our sane_date() method"""
-        self.assertEquals(sane_date(2000, 9, 31), datetime.date(2000, 9, 30))
-        self.assertEquals(sane_date(2000, 2, 31), datetime.date(2000, 2, 29))
-        self.assertEquals(sane_date(2000, 1, 15), datetime.date(2000, 1, 15))
+        assert sane_date(2000, 9, 31) == datetime.date(2000, 9, 30)
+        assert sane_date(2000, 2, 31) == datetime.date(2000, 2, 29)
+        assert sane_date(2000, 1, 15) == datetime.date(2000, 1, 15)

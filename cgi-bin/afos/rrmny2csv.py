@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """ One off conversion of RRMBUF to CSV """
-import sys
-import pytz
 
-from pyiem.util import get_dbconn
+import pytz
+from pyiem.util import get_dbconn, ssw
 
 
 def do(cursor, wfo):
@@ -32,7 +31,7 @@ def do(cursor, wfo):
             dv = "%s %s" % (tokens[2], tokens[4][2:6])
             val = tokens[5].split('"')[0]
             tokens2 = " ".join(tokens[5:]).split()
-            # sys.stdout.write(line+"\n")
+            # ssw(line+"\n")
             lbl = line.split('"')[1]
             src = ""
             if lbl.find("  ") > 0:
@@ -50,7 +49,7 @@ def run():
     """ Do Stuff """
     pgconn = get_dbconn('afos', user='nobody')
     cursor = pgconn.cursor()
-    sys.stdout.write("Content-type:text/plain\n\n")
+    ssw("Content-type:text/plain\n\n")
     m1 = ""
     m2 = ""
     for wfo in ['OKX', 'ALY', 'BTV', 'BUF', 'BGM']:
@@ -58,9 +57,9 @@ def run():
         m1 += meta
         m2 += meat
 
-    sys.stdout.write(m1)
-    sys.stdout.write("id,timestamp,value,lat,lon,name,source\n")
-    sys.stdout.write(m2)
+    ssw(m1)
+    ssw("id,timestamp,value,lat,lon,name,source\n")
+    ssw(m2)
 
 
 if __name__ == '__main__':

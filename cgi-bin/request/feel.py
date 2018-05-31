@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 """FEEL data download"""
-import sys
 import cgi
 import datetime
 import os
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def run(sts, ets):
@@ -26,9 +25,9 @@ def run(sts, ets):
     df2.to_excel(writer, 'Hourly Data', index=True)
     writer.save()
 
-    sys.stdout.write("Content-type: application/vnd.ms-excel\n")
-    sys.stdout.write("Content-Disposition: attachment;Filename=feel.xls\n\n")
-    sys.stdout.write(open('/tmp/ss.xlsx', 'rb').read())
+    ssw("Content-type: application/vnd.ms-excel\n")
+    ssw("Content-Disposition: attachment;Filename=feel.xls\n\n")
+    ssw(open('/tmp/ss.xlsx', 'rb').read())
     os.unlink('/tmp/ss.xlsx')
 
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """ Produce geojson of ISUSM data """
 import cgi
-import sys
 import datetime
 import json
 
@@ -10,7 +9,7 @@ import psycopg2.extras
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text, get_dbconn
+from pyiem.util import drct2text, get_dbconn, ssw
 ISUAG = get_dbconn('isuag')
 IEM = get_dbconn('iem')
 
@@ -123,12 +122,12 @@ def get_data(ts):
              "geometry": {"type": "Point",
                           "coordinates": [lon, lat]}
              })
-    sys.stdout.write(json.dumps(data))
+    ssw(json.dumps(data))
 
 
 def main():
     """Go Main Go"""
-    sys.stdout.write("Content-type: application/vnd.geo+json\n\n")
+    ssw("Content-type: application/vnd.geo+json\n\n")
     field = cgi.FieldStorage()
     dt = field.getfirst('dt')
     ts = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.000Z')

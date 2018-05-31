@@ -2,20 +2,20 @@
 """
   Generate a simple scatter plot of power...
 """
-import cgi
 import sys
+import cgi
 import datetime
 
 import numpy as np
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt  # NOPEP8
-import matplotlib.colors as mpcolors  # NOPEP8
-import matplotlib.colorbar as mpcolorbar  # NOPEP8
-import matplotlib.patheffects as PathEffects  # NOPEP8
+import matplotlib.pyplot as plt
+import matplotlib.colors as mpcolors
+import matplotlib.colorbar as mpcolorbar
+import matplotlib.patheffects as PathEffects
 from pyiem.meteorology import uv
 from pyiem.datatypes import speed, direction
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def make_colorbar(clevs, norm, cmap):
@@ -154,7 +154,7 @@ def do(valid, yawsource):
     ax5.text(-0.1, 0.5, "Wind Speed $ms^{-1}$", transform=ax5.transAxes,
              ha='center', va='center', rotation=90)
 
-    plt.savefig(sys.stdout)
+    plt.savefig(getattr(sys.stdout, 'buffer', sys.stdout))
 
 
 def main():
@@ -163,7 +163,7 @@ def main():
     ts = form.getfirst('ts', '200006302000')
     ts = datetime.datetime.strptime(ts, '%Y%m%d%H%M')
     yawsource = form.getfirst('yawsource', 'yaw')
-    sys.stdout.write("Content-type: image/png\n\n")
+    ssw("Content-type: image/png\n\n")
     do(ts, yawsource)
 
 

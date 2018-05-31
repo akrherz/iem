@@ -9,7 +9,7 @@ import warnings
 
 import numpy as np
 from pyiem import iemre, datatypes
-from pyiem.util import ncopen
+from pyiem.util import ncopen, ssw
 
 warnings.simplefilter("ignore", UserWarning)
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
@@ -25,16 +25,16 @@ def clean(val):
 
 def send_error(msg):
     """ Send an error when something bad happens(tm)"""
-    sys.stdout.write('Content-type: application/json\n\n')
-    sys.stdout.write(json.dumps({'error': msg}))
+    ssw('Content-type: application/json\n\n')
+    ssw(json.dumps({'error': msg}))
     sys.exit()
 
 
 def main():
     """Go Main Go"""
-    form = cgi.FormContent()
-    ts1 = datetime.datetime.strptime(form["date1"][0], "%Y-%m-%d")
-    ts2 = datetime.datetime.strptime(form["date2"][0], "%Y-%m-%d")
+    form = cgi.FieldStorage()
+    ts1 = datetime.datetime.strptime(form.getfirst("date1"), "%Y-%m-%d")
+    ts2 = datetime.datetime.strptime(form.getfirst("date2"), "%Y-%m-%d")
     if ts1 > ts2:
         send_error("date1 larger than date2")
     if ts1.year != ts2.year:
@@ -44,8 +44,8 @@ def main():
     if ts2.date() > tsend:
         ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
 
-    lat = float(form["lat"][0])
-    lon = float(form["lon"][0])
+    lat = float(form.getfirst("lat"))
+    lon = float(form.getfirst("lon"))
     if lon < iemre.WEST or lon > iemre.EAST:
         send_error("lon value outside of bounds: %s to %s" % (iemre.WEST,
                                                               iemre.EAST))
@@ -107,8 +107,8 @@ def main():
                             'climate_daily_precip_in': clean(cprecip[i])
                             })
 
-    sys.stdout.write('Content-type: application/json\n\n')
-    sys.stdout.write(json.dumps(res))
+    ssw('Content-type: application/json\n\n')
+    ssw(json.dumps(res))
 
 
 if __name__ == '__main__':
