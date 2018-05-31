@@ -118,7 +118,8 @@ def main():
                    ) % (row[0], row[12], row[-3], row[-2], row[1], row[2],
                         row[3],
                         row[4], row[5], row[6], row[7], row[8],
-                        row[9].replace(",", "_")
+                        row[9].encode('utf-8').decode(
+                            'ascii', 'ignore').replace(",", "_")
                         if row[9] is not None else ''))
 
     csv.close()

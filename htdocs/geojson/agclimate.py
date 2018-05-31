@@ -74,7 +74,8 @@ def get_data(ts):
             {"type": "Feature",
              "id": sid,
              "properties": {"encrh_avg": ("%s%%" % safe(row['encrh_avg'], 1)
-                                          if row['encrh_avg'] > 0 else "M"),
+                                          if row['encrh_avg'] is not None
+                                          and row['encrh_avg'] > 0 else "M"),
                             "rh":  "%s%%" % (safe(row["rh"], 0),),
                             "hrprecip": (safe_p(row['rain_mm_tot'])
                                          if not q.get('precip', False)
