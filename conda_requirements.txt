@@ -39,6 +39,7 @@ jdcal
 jpeg
 json-c
 jsonschema
+kealib
 krb5
 lxml
 lzo

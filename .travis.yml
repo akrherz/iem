@@ -84,7 +84,6 @@ before_script:
   # Add some test data to the database
   - python database/store_test_data.py
   - python scripts/dbutil/sync_stations.py
-  - python -c 'import paste.request'
 script:
   # restart apache
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
