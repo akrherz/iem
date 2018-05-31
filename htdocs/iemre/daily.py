@@ -20,11 +20,11 @@ def myrounder(val, precision):
 
 def main():
     """Do Something Fun!"""
-    form = cgi.FormContent()
-    ts = datetime.datetime.strptime(form["date"][0], "%Y-%m-%d")
-    lat = float(form["lat"][0])
-    lon = float(form["lon"][0])
-    fmt = form["format"][0]
+    form = cgi.FieldStorage()
+    ts = datetime.datetime.strptime(form.getfirst("date"), "%Y-%m-%d")
+    lat = float(form.getfirst("lat"))
+    lon = float(form.getfirst("lon"))
+    fmt = form.getfirst("format")
     if fmt != 'json':
         ssw("Content-type: text/plain\n\n")
         ssw("ERROR: Service only emits json at this time")
