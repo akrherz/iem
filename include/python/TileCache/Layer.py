@@ -1,23 +1,25 @@
-# BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
+"""BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors"""
+from __future__ import print_function
+import sys
 
-import os, sys
-from warnings import warn
-from Client import WMS
-from Service import TileCacheException
+from six import string_types
+from TileCache.base import TileCacheException
 
-DEBUG = True
+DEBUG = False
 
-class Tile (object):
+
+class Tile(object):
     """
     >>> l = Layer("name", maxresolution=0.019914, size="256,256")
     >>> t = Tile(l, 18, 20, 0)
     """
-    __slots__ = ( "layer", "x", "y", "z", "data" )
-    def __init__ (self, layer, x, y, z):
+    __slots__ = ("layer", "x", "y", "z", "data")
+
+    def __init__(self, layer, x, y, z):
         """
         >>> l = Layer("name", maxresolution=0.019914, size="256,256")
         >>> t = Tile(l, 18, 20, 0)
-        >>> t.x 
+        >>> t.x
         18
         >>> t.y
         20
@@ -32,7 +34,7 @@ class Tile (object):
         self.z = z
         self.data = None
 
-    def size (self):
+    def size(self):
         """
         >>> l = Layer("name", maxresolution=0.019914, size="256,256")
         >>> t = Tile(l, 18, 20, 0)
@@ -41,21 +43,21 @@ class Tile (object):
         """
         return self.layer.size
 
-    def bounds (self):
+    def bounds(self):
         """
         >>> l = Layer("name", maxresolution=0.019914)
         >>> t = Tile(l, 18, 20, 0)
         >>> t.bounds()
-        (-88.236288000000002, 11.959680000000006, -83.138303999999991, 17.057664000000003)
+        (-88.23, 11.959, -83.138303999999991, 17.057664000000003)
         """
-        res  = self.layer.resolutions[self.z]
+        res = self.layer.resolutions[self.z]
         minx = self.layer.bbox[0] + (res * self.x * self.layer.size[0])
         miny = self.layer.bbox[1] + (res * self.y * self.layer.size[1])
         maxx = self.layer.bbox[0] + (res * (self.x + 1) * self.layer.size[0])
         maxy = self.layer.bbox[1] + (res * (self.y + 1) * self.layer.size[1])
         return (minx, miny, maxx, maxy)
 
-    def bbox (self):
+    def bbox(self):
         """
         >>> l = Layer("name", maxresolution=0.019914)
         >>> t = Tile(l, 18, 20, 0)
@@ -64,8 +66,11 @@ class Tile (object):
         """
         return ",".join(map(str, self.bounds()))
 
-class MetaTile (Tile):
-    def actualSize (self):
+
+class MetaTile(Tile):
+    """Class"""
+
+    def actualSize(self):
         """
         >>> l = MetaLayer("name")
         >>> t = MetaTile(l, 0,0,0)
@@ -76,12 +81,12 @@ class MetaTile (Tile):
         return ( self.layer.size[0] * metaCols,
                  self.layer.size[1] * metaRows )
 
-    def size (self):
+    def size(self):
         actual = self.actualSize()
         return ( actual[0] + self.layer.metaBuffer[0] * 2, 
                  actual[1] + self.layer.metaBuffer[1] * 2 )
 
-    def bounds (self):
+    def bounds(self):
         tilesize   = self.actualSize()
         res        = self.layer.resolutions[self.z]
         buffer     = (res * self.layer.metaBuffer[0], res * self.layer.metaBuffer[1])
@@ -93,7 +98,9 @@ class MetaTile (Tile):
         maxy = miny + metaHeight + 2 * buffer[1]
         return (minx, miny, maxx, maxy)
 
-class Layer (object):
+
+class Layer(object):
+    """Our Layer Object"""
     __slots__ = ( "name", "layers", "bbox", "data_extent", 
                   "size", "resolutions", "extension", "srs",
                   "cache", "debug", "description", 
@@ -132,7 +139,7 @@ class Layer (object):
         156543.0
         """
         
-        self.name   = name
+        self.name = name
         self.description = description
         self.layers = layers or name
         self.paletted = False
@@ -146,15 +153,15 @@ class Layer (object):
             units = "meters"
 
         if isinstance(bbox, str): 
-            bbox = map(float, bbox.split(","))
+            bbox = list(map(float, bbox.split(",")))
         self.bbox = bbox
         
         if isinstance(data_extent, str): 
-            data_extent = map(float, data_extent.split(","))
+            data_extent = list(map(float, data_extent.split(",")))
         self.data_extent = data_extent or bbox
         
         if isinstance(size, str): 
-            size = map(int, size.split(","))
+            size = list(map(int, size.split(",")))
         self.size = size
         
         self.units = units
@@ -167,9 +174,9 @@ class Layer (object):
             extension = 'png'
             self.paletted = True
         self.extension = extension.lower()
-        self.mime_type = mime_type or self.format() 
+        self.mime_type = mime_type or self.fmt() 
         
-        if isinstance(debug, str):
+        if isinstance(debug, string_types):
             debug = debug.lower() not in ("false", "off", "no", "0")
         self.debug = debug
         
@@ -179,7 +186,7 @@ class Layer (object):
         
         if resolutions:
             if isinstance(resolutions, str):
-                resolutions = map(float,resolutions.split(","))
+                resolutions = list(map(float,resolutions.split(",")))
             self.resolutions = resolutions
         else:
             maxRes = None
@@ -209,12 +216,13 @@ class Layer (object):
                 
                 
 
-    def getResolution (self, (minx, miny, maxx, maxy)):
+    def getResolution (self, arr):
         """
         >>> l = Layer("name")
         >>> l.getResolution((-180,-90,0,90))
         0.703125
         """
+        (minx, miny, maxx, maxy) = arr
         return max( float(maxx - minx) / self.size[0],
                     float(maxy - miny) / self.size[1] )
 
@@ -245,7 +253,7 @@ class Layer (object):
             raise TileCacheException("can't find resolution index for %f. Available resolutions are: \n%s" % (res, self.resolutions))
         return z
 
-    def getCell (self, (minx, miny, maxx, maxy), exact = True):
+    def getCell (self, arr, exact = True):
         """
         Returns x, y, z
 
@@ -259,6 +267,7 @@ class Layer (object):
         >>> l.getCell((-45.,-45.,0.,0.))
         (3, 1, 2)
         """
+        (minx, miny, maxx, maxy) = arr
         res = self.getResolution((minx, miny, maxx, maxy))
         x = y = None
 
@@ -291,12 +300,13 @@ class Layer (object):
         
         return (x, y, z)
 
-    def getClosestCell (self, z, (minx, miny)):
+    def getClosestCell (self, z, arr):
         """
         >>> l = Layer("name")
         >>> l.getClosestCell(2, (84, 17))
         (6, 2, 2)
         """
+        (minx, miny) = arr
         res = self.resolutions[z]
         maxx = minx + self.size[0] * res
         maxy = miny + self.size[1] * res
@@ -313,7 +323,7 @@ class Layer (object):
         if not coord: return None
         return Tile(self, *coord)
 
-    def contains (self, (x, y), res = 0):
+    def contains (self, arr, res = 0):
         """
         >>> l = Layer("name")
         >>> l.contains((0,0))
@@ -321,6 +331,7 @@ class Layer (object):
         >>> l.contains((185, 94))
         False
         """
+        (x, y) = arr
         diff_x1 = abs(x - self.bbox[0])
         diff_x2 = abs(x - self.bbox[2])
         diff_y1 = abs(y - self.bbox[1]) 
@@ -340,10 +351,10 @@ class Layer (object):
         height = (self.bbox[3] - self.bbox[1]) / (self.resolutions[z] * self.size[1])
         return (width, height)
 
-    def format (self):
+    def fmt(self):
         """
         >>> l = Layer("name")
-        >>> l.format()
+        >>> l.fmt()
         'image/png'
         """
         return "image/" + self.extension
@@ -371,9 +382,9 @@ class MetaLayer (Layer):
         Layer.__init__(self, name, **kwargs)
         self.metaTile    = metatile.lower() in ("true", "yes", "1")
         if isinstance(metasize, str):
-            metasize = map(int,metasize.split(","))
+            metasize = list(map(int,metasize.split(",")))
         if isinstance(metabuffer, str):
-            metabuffer = map(int, metabuffer.split(","))
+            metabuffer = list(map(int, metabuffer.split(",")))
             if len(metabuffer) == 1:
                 metabuffer = (metabuffer[0], metabuffer[0])
         self.metaSize    = metasize
@@ -467,7 +478,3 @@ class MetaLayer (Layer):
             watermarkedImage.save(buffer, self.extension)
         buffer.seek(0)
         return buffer.read()
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

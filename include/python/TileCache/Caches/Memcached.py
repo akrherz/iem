@@ -3,8 +3,9 @@ BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 """
 import time
 
-from TileCache.Cache import Cache
+from six import string_types
 import memcache
+from TileCache.Cache import Cache
 
 
 class Memcached(Cache):
@@ -13,7 +14,7 @@ class Memcached(Cache):
     def __init__(self, servers='127.0.0.1:11211', **kwargs):
         """Constructor"""
         Cache.__init__(self, **kwargs)
-        if isinstance(servers, str):
+        if isinstance(servers, string_types):
             servers = [s.strip() for s in servers.split(",")]
         self.cache = memcache.Client(servers, debug=0)
         self.timeout = int(kwargs.get('timeout', 0))
