@@ -6,6 +6,7 @@ import os
 import email
 import configparser
 
+from six import string_types
 from TileCache.base import (
     TileCacheException, TileCacheLayerNotFoundException,
     TileCacheFutureException)
@@ -224,8 +225,10 @@ def wsgiHandler(environ, start_response, service):
         #                      "missing file %s Referrer: %s\n"
         #                      ) % (environ.get("REMOTE_ADDR"), path_info,
         #                           missfn, environ.get("HTTP_REFERER")))
-        msg = (("An error occurred: %s\n"
-                ) % (exp, )).encode('utf-8')
+        msg = ("An error occurred: %s\n"
+               ) % (exp, )
 
     start_response(status, [('Content-Type', 'text/plain')])
+    if isinstance(msg, string_types):
+        msg = msg.encode('utf-8')
     return [msg]

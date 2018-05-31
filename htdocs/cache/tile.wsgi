@@ -18,7 +18,7 @@ def wsgiApp (environ, start_response):
         theService = Service.load(cfgs)
     return wsgiHandler(environ, start_response, theService)
 
-# application = wsgiApp
+application = wsgiApp
 
-from paste.exceptions.errormiddleware import ErrorMiddleware
-application = ErrorMiddleware(wsgiApp, debug=True)
+#from paste.exceptions.errormiddleware import ErrorMiddleware
+#application = ErrorMiddleware(wsgiApp, debug=True)
