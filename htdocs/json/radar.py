@@ -115,7 +115,7 @@ def find_scans(root, radar, product, sts, ets):
             now += datetime.timedelta(minutes=1)
     if len(times) > 500:
         # Do some filtering
-        interval = (len(times) / 500) + 1
+        interval = int((len(times) / 500) + 1)
         times = times[::interval]
 
     root['scans'] = times

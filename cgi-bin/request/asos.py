@@ -199,19 +199,19 @@ def main():
                 else:
                     r.append("M")
             elif data1 == 'sped':
-                if row['sknt'] >= 0:
+                if row['sknt'] is not None and row['sknt'] >= 0:
                     r.append("%.1f" % (speed(row['sknt'],
                                              'KT').value('MPH'), ))
                 else:
                     r.append("M")
             elif data1 == 'gust_mph':
-                if row['gust'] >= 0:
+                if row['gust'] is not None and row['gust'] >= 0:
                     r.append("%.1f" % (speed(row['gust'],
                                              'KT').value('MPH'), ))
                 else:
                     r.append("M")
             elif data1 == 'p01m':
-                if row['p01i'] >= 0:
+                if row['p01i'] is not None and row['p01i'] >= 0:
                     r.append("%.2f" % (row['p01i'] * 25.4, ))
                 else:
                     r.append("M")
