@@ -29,6 +29,7 @@ def import_module(name):
 
 
 class Service(object):
+    """Our Service Object"""
     __slots__ = ("layers", "cache", "metadata", "tilecache_options", "config",
                  "files")
 
@@ -161,6 +162,8 @@ class Service(object):
 
         # circular ref here, sigh
         tile = TMS(self).parse(params, path_info, host)
+        if not hasattr(tile, 'layer'):
+            return 'text/xml', tile.data.encode('utf-8')
         return self.renderTile(tile, 'FORCE' in params)
 
 
@@ -225,8 +228,7 @@ def wsgiHandler(environ, start_response, service):
         #                      "missing file %s Referrer: %s\n"
         #                      ) % (environ.get("REMOTE_ADDR"), path_info,
         #                           missfn, environ.get("HTTP_REFERER")))
-        msg = ("An error occurred: %s\n"
-               ) % (exp, )
+        msg = "An error occurred: %s\n" % (exp, )
 
     start_response(status, [('Content-Type', 'text/plain')])
     if isinstance(msg, string_types):
