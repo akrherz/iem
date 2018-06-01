@@ -44,7 +44,7 @@ def main():
     msg['Subject'] = 'NWS RR3 Data for %s - %s' % (sts.strftime("%d %b %Y"),
                                                    now.strftime("%d %b %Y"))
     msg['From'] = 'akrherz@iastate.edu'
-    msg['To'] = 'Harry.Hillaker@iowaagriculture.gov'
+    msg['To'] = 'justin.glisan@iowaagriculture.gov'
     # msg['To'] = 'akrherz@localhost'
     msg.preamble = 'RR3 Report'
 

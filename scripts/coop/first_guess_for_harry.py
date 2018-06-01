@@ -23,8 +23,9 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 import datetime
 
-from pyiem.util import get_dbconn
 from xlwt import Workbook
+from pyiem.util import get_dbconn
+
 MESOSITE = get_dbconn('mesosite', user='nobody')
 mcursor = MESOSITE.cursor()
 COOP = get_dbconn('coop', user='nobody')
@@ -364,7 +365,7 @@ def main():
                           ) % (lastmonth.strftime("%b %Y"),)
         msg['From'] = 'akrherz@iastate.edu'
         # msg['To'] = 'akrherz@localhost'
-        msg['To'] = 'Harry.Hillaker@iowaagriculture.gov'
+        msg['To'] = 'justin.glisan@iowaagriculture.gov'
         msg.preamble = 'COOP Report'
 
         fp = open(fn, 'rb')
