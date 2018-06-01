@@ -41,8 +41,8 @@ def dowork(form):
     dist = ((nc.variables['lon'][:] - lon)**2 +
             (nc.variables['lat'][:] - lat)**2)**0.5
     (j, i) = np.unravel_index(dist.argmin(), dist.shape)
-    res['gridi'] = i
-    res['gridj'] = j
+    res['gridi'] = int(i)
+    res['gridj'] = int(j)
 
     ppt = nc.variables['p01m'][sidx:eidx, j, i]
     nc.close()
