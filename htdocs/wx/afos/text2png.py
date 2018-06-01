@@ -28,6 +28,10 @@ def text_image(content):
     grayscale = 'L'
     content = content.replace("\r\r\n", "\n").replace("\001", "")
     lines = content.split("\n")
+    if len(lines) > 100:
+        msg = "...truncated %s lines..." % (len(lines) - 100, )
+        lines = lines[:100]
+        lines.append(msg)
 
     large_font = 20
     font_path = "/usr/share/fonts/liberation/LiberationMono-Regular.ttf"
