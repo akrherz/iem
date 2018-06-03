@@ -13,6 +13,7 @@ from TileCache.base import (
 import TileCache.Cache as Cache
 import TileCache.Layer as Layer
 from TileCache.Services.TMS import TMS
+from TileCache.Services.WMS import WMS
 
 
 cfgfiles = ("/etc/tilecache.cfg", os.path.join("..", "tilecache.cfg"),
@@ -160,8 +161,11 @@ class Service(object):
         if path_info.find("crossdomain.xml") != -1:
             return self.generate_crossdomain_xml()
 
-        # circular ref here, sigh
-        tile = TMS(self).parse(params, path_info, host)
+        # We currently are just supporting TMS or WMS REquests
+        if not params:
+            tile = TMS(self).parse(params, path_info, host)
+        else:
+            tile = WMS(self).parse(params, path_info, host)
         if not hasattr(tile, 'layer'):
             return 'text/xml', tile.data.encode('utf-8')
         return self.renderTile(tile, 'FORCE' in params)
