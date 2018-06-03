@@ -162,10 +162,12 @@ class Service(object):
             return self.generate_crossdomain_xml()
 
         # We currently are just supporting TMS or WMS REquests
-        if not params:
-            tile = TMS(self).parse(params, path_info, host)
-        else:
+        if ("service" in params or "SERVICE" in params or
+                "REQUEST" in params and params['REQUEST'] == "GetMap" or
+                "request" in params and params['request'] == "GetMap"):
             tile = WMS(self).parse(params, path_info, host)
+        else:
+            tile = TMS(self).parse(params, path_info, host)
         if not hasattr(tile, 'layer'):
             return 'text/xml', tile.data.encode('utf-8')
         return self.renderTile(tile, 'FORCE' in params)
