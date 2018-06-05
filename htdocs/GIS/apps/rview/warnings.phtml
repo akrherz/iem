@@ -1,14 +1,14 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 96);
 $JQUERYUI = "1.12.1";
-include("../../../../include/database.inc.php");
-include("../../../../include/vtec.php");
-include("../../../../include/network.php");
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/vtec.php";
+require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
-include("../../../../include/myview.php");
+require_once "../../../../include/myview.php";
 $t = new MyView();
-include('lib.php');
+require_once 'lib.php';
 $baseuri = "warnings.phtml";
 putenv("TZ=UTC");
 date_default_timezone_set('UTC');
@@ -321,7 +321,9 @@ $content .= <<<EOF
 
 <p><strong>Archive Options</strong><br />
 <input type="checkbox" value="yes" name="archive"{$achecked}>Set Archive Mode</td>
-<table cellpadding="2" cellspacing="0" border="0">
+<br />If you are producing an animation, this date specifies the end date of
+the loop.</p>
+<table class="table table-condensed">
 <tr><th>Year:</th><td>{$yselect}</td></tr>
 <tr><th>Month:</th><td>{$mselect}</td></tr>
 <tr><th>Day:</th><td>{$dselect}</td></tr>
@@ -375,11 +377,11 @@ $maptitle = "IEM NEXRAD Composite Base Reflectivity";
 if (intval($loop) == 1 || intval($loop) == 2){
 	// Alternative 1, we want javascript looper!
   	$urls = Array();  	
-  	for ($i=0;$i<$frames;$i++){
+  	for ($i=0; $i<$frames; $i++){
    		$imgi = $frames - 1 - $i;
-   		include("warnings_plot.php");
+       include "warnings_plot.php";
    		$urls[] = "'$url'";
-  	}
+    }
   	$jsurls = implode(", ", $urls);
   	// Save this animation to memcache for future potential use
   	$memcache = new Memcache;
