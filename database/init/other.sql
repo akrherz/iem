@@ -3,7 +3,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (7, now());
+INSERT into iem_schema_manager_version values (8, now());
 
 -- Storage of USCRN sub-hourly data
 
@@ -479,7 +479,13 @@ station            character varying(10),
  temp_c1_avg real,
  temp_k1_avg real,
  irr_can_corr_avg real,
- irr_body_avg real
+ irr_body_avg real,
+ vwc real,
+ ec real,
+ t real,
+ p real,
+ pa real,
+ vr real
 );
 GRANT SELECT on flux_data to nobody,apache;
 

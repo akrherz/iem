@@ -3,11 +3,7 @@ Ingest files provided by NLAE containing flux information
 """
 from __future__ import print_function
 import os
-# attempt some python2to3 portability
-try:
-    from StringIO import StringIO as myStringIO
-except ImportError as exp:
-    from io import StringIO as myStringIO
+from io import StringIO
 import datetime
 
 import pytz
@@ -114,7 +110,8 @@ DBCOLS = ['station', 'valid',
           'temp_c1_avg',
           'temp_k1_avg',
           'irr_can_corr_avg',
-          'irr_body_avg']
+          'irr_body_avg',
+          'vwc', 'ec', 't', 'p', 'pa', 'vr']
 
 CONVERT = {'timestamp': 'valid',
            'incoming_sw_avg': 'incoming_sw',
@@ -200,7 +197,7 @@ def main():
                        ) % (station, exclude))
             gdf2 = gdf[gdf.columns.difference(exclude)]
             processed += len(gdf2.index)
-            output = myStringIO()
+            output = StringIO()
             gdf2.to_csv(output, sep="\t", header=False, index=False)
 
             cursor = pgconn.cursor()
