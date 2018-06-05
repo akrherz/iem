@@ -137,7 +137,8 @@ def fetch_daily(form, cols):
         precip = (distance(row['rain_mm_tot_qc'], 'MM').value('IN')
                   if row['rain_mm_tot_qc'] > 0 else 0)
         et = (distance(row['dailyet_qc'], 'MM').value('IN')
-              if row['dailyet_qc'] > 0 else 0)
+              if row['dailyet_qc'] is not None and
+              row['dailyet_qc'] > 0 else 0)
 
         soil04t = temperature(row['tsoil_c_avg_qc'],
                               'C').value(
