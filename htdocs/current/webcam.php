@@ -3,11 +3,11 @@
  * This is an Extjs application that allows historical and current viewing of
  * webcam images.
  */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 9);
 require_once "../../include/myview.php";
 $t = new MyView();
- include("../../include/iemprop.php");
+ require_once "../../include/iemprop.php";
  $camera_refresh = get_iemprop("webcam.interval");
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>

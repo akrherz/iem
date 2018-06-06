@@ -1,9 +1,9 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 38);
-include("../../../include/myview.php");
-include("../../../include/database.inc.php");
-include("../../../include/network.php");
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
@@ -39,9 +39,9 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
   $data[$row["id"]][intval($row["month"])-1] = $row["precip"];
 }
 $t->headextra = '
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/TableGrid.js"></script>
 <script>
 Ext.onReady(function(){

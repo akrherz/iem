@@ -1,10 +1,10 @@
 <?php
-include("../../config/settings.inc.php");
-include_once "../../include/myview.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->jsextra = <<<EOF
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1//adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script src="/vendor/openlayers/2.13.1/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
@@ -46,7 +46,7 @@ Ext.onReady(function(){
 </script>
 EOF;
 $t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
+<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <link rel="stylesheet" type="text/css" href="superboxselect.css" />
 EOF;
 $t->title = "Local Storm Report App";

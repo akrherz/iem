@@ -1,11 +1,11 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
-$t->headextra = '<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/3.4.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/3.4.1.1/ext-all.js"></script>
+$t->headextra = '<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/StatusBar.js"></script>
 <script type="text/javascript" src="obhour-static.js"></script>
 ';
