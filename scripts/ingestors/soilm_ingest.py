@@ -27,7 +27,7 @@ ISUAG = get_dbconn('isuag')
 
 ACCESS = get_dbconn('iem')
 
-EVENTS = {'reprocess_solar': False, 'days': []}
+EVENTS = {'reprocess_solar': False, 'days': [], 'reprocess_temps': False}
 VARCONV = {'timestamp': 'valid',
            'vwc06_avg': 'vwc_06_avg',
            "vwc_avg6in": 'vwc_06_avg',
@@ -280,6 +280,8 @@ def daily_process(nwsli, maxts):
             EVENTS['days'].append(valid)
         ob.data['et_inch'] = distance(row['dailyet_qc'], 'MM').value('IN')
         ob.data['srad_mj'] = row['slrmj_tot_qc']
+        if ob.data['max_tmpf'] is None:
+            EVENTS['reprocess_temps'] = True
         if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
             print(("soilm_ingest.py station: %s ts: %s has 0 solar"
                    ) % (nwsli, valid.strftime("%Y-%m-%d")))
@@ -430,6 +432,9 @@ def main(argv):
     if EVENTS['reprocess_solar']:
         print("Calling fix_solar.py")
         subprocess.call("python ../isuag/fix_solar.py", shell=True)
+    if EVENTS['reprocess_temps']:
+        print("Calling fix_temps.py")
+        subprocess.call("python ../isuag/fix_temps.py", shell=True)
     for day in EVENTS['days']:
         subprocess.call(("python ../isuag/fix_precip.py %s %s %s"
                          ) % (day.year, day.month, day.day), shell=True)
