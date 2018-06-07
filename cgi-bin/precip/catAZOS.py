@@ -4,12 +4,11 @@ IEM_APPID = 79
 """
 import cgi
 import datetime
-from pyiem.network import Table as NetworkTable
-nt = NetworkTable(("AWOS", "IA_ASOS"))
-
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn, ssw
 
+nt = NetworkTable(("AWOS", "IA_ASOS"))
 IEM = get_dbconn("iem")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -19,8 +18,8 @@ totp = {}
 
 
 def doHeader():
-    print 'Content-type: text/html \n\n'
-    print """
+    ssw('Content-type: text/html \n\n')
+    ssw("""
 <html>
 <head>
   <title>IEM | Hourly Precip Grid</title>
@@ -30,35 +29,35 @@ def doHeader():
 <a href="/climate/">Climatology</a> &gt;
 Hourly Precipitation [ASOS/AWOS]
 
-"""
-    print '<h3 align="center">Hourly Precip [inches] Grid</h3>'
-    form = cgi.FormContent()
+""")
+    ssw('<h3 align="center">Hourly Precip [inches] Grid</h3>')
+    form = cgi.FieldStorage()
     try:
-        postDate = form["date"][0]
+        postDate = form.getfirst("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
-    except:
+    except Exception as _exp:
         myTime = datetime.datetime.now()
 
-    print '<table border=1><tr>'
-    print '<td>Back: <a href="catAZOS.py?date='+ (myTime - datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
-    '+ (myTime -  datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>'
+    ssw('<table border=1><tr>')
+    ssw('<td>Back: <a href="catAZOS.py?date='+ (myTime - datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
+    '+ (myTime -  datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>')
  
-    print '<td>Shown: '+ myTime.strftime("%d %B %Y") +'</td>'
+    ssw('<td>Shown: '+ myTime.strftime("%d %B %Y") +'</td>')
 
-    print '<td>Forward: <a href="catAZOS.py?date='+ (myTime + datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
-    '+ (myTime +  datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>'
+    ssw('<td>Forward: <a href="catAZOS.py?date='+ (myTime + datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
+    '+ (myTime +  datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>')
 
-    print """
+    ssw("""
 <td>Pick: (yyyy-mm-dd)  
 <form method="GET" action="catAZOS.py">
 <input type="text" size="8" name="date">
 <input type="submit" value="Submit Date">
 </form></td></tr></table>
-"""
+""")
     return myTime
 
 def setupTable():
-    print """
+    ssw("""
 <style language="css">
 td.style1{
   background-color: #EEEEEE;
@@ -101,50 +100,55 @@ table.main{
   <td class="style1">9</td> <td class="style2">10</td> <td class="style0">11</td> 
   <th>Tot:</th>
 </tr>
-"""
+""")
+
 
 def loadstations():
-    for station in nt.sts.keys():
+    """load stations"""
+    for station in nt.sts:
         stData[station] = ["M"]*24
         totp[station] = 0
 
-def Main():
+
+def main():
+    """Go Main Go"""
     ts = doHeader()
     loadstations()
     setupTable()
 
     sqlDate = ts.strftime("%Y-%m-%d")
     td = ts.strftime("%Y-%m-%d")
-    tm = (ts +  datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
     ##
     #  Hack, since postgres won't index date(valid)
 
-    sqlStr = """SELECT extract('hour' from valid) as vhour, 
-    station, valid, phour from hourly_%s WHERE 
-    valid >= '%s 00:00' and valid < '%s 00:00'
-    and network in ('AWOS','IA_ASOS')""" % (ts.year, td, tm)
+    sql = """
+        SELECT extract('hour' from valid) as vhour, 
+        station, valid, phour from hourly_%s WHERE 
+        valid >= '%s 00:00' and valid < '%s 00:00'
+        and network in ('AWOS','IA_ASOS')
+    """ % (ts.year, td, tm)
 
-
-    icursor.execute(sqlStr)  
+    icursor.execute(sql)
     for row in icursor:
         p01i = float(row["phour"])
         vhour = int(row["vhour"])
-        if (p01i > 0):  # We should require this timestep
-            requireHrs[ vhour ] = 1
+        if p01i > 0:  # We should require this timestep
+            requireHrs[vhour] = 1
             try:
-                stData[ row["station"] ][ vhour ]  = round(p01i,2)
+                stData[row["station"]][vhour] = round(p01i, 2)
             except KeyError:
                 continue
         else:
             try:
-                stData[ row["station"] ][ vhour ]  = "&nbsp;"
+                stData[row["station"]][vhour] = "&nbsp;"
             except KeyError:
                 continue
 
-    if (ts < datetime.datetime(2006,6,1)):
+    if ts < datetime.datetime(2006, 6, 1):
         stData['MXO'] = ["M"]*24
-    if (ts < datetime.datetime(2007,6,1)):
+    if ts < datetime.datetime(2007, 6, 1):
         stData['IIB'] = ["M"]*24
         stData['VTI'] = ["M"]*24
         stData['MPZ'] = ["M"]*24
@@ -153,28 +157,30 @@ def Main():
         stData['TVK'] = ["M"]*24
 
     j = 0
-    ids = nt.sts.keys()
+    ids = list(nt.sts.keys())
     ids.sort()
     for station in ids:
         j += 1
-        print "<tr class=\"row"+ str(j % 5) +"\">",
-        print "%s%s%s" % ("<td>", station, "</td>") ,
+        ssw("<tr class=\"row" + str(j % 5) + "\">")
+        ssw("%s%s%s" % ("<td>", station, "</td>"))
         for i in range(24):
-            print "<td class=\"style"+ str((i+1) % 3) +"\">",
-            print "%s%s " % ( stData[station][i], "</td>") ,
+            ssw("<td class=\"style" + str((i+1) % 3) + "\">")
+            ssw("%s%s " % (stData[station][i], "</td>"))
             try:
                 totp[station] = totp[station] + stData[station][i]
-            except:
+            except Exception as _exp:
                 continue
-        print "%s%s%s" % ("<td>", totp[station], "</td>") ,
-        print "%s%s%s" % ("<td>", station, "</td>") ,
-        print "</tr>"
+        ssw("%s%s%s" % ("<td>", totp[station], "</td>"))
+        ssw("%s%s%s" % ("<td>", station, "</td>"))
+        ssw("</tr>")
 
-    print """
+    ssw("""
 </table>
 
 <p>Precipitation values are shown for the hour in which they are valid.  For
-example, the value in the 1AM column is precipitation accumulation from 1 AM 
+example, the value in the 1AM column is precipitation accumulation from 1 AM
 till 2 AM.
-"""
-Main()
+""")
+
+if __name__ == '__main__':
+    main()
