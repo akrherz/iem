@@ -273,7 +273,7 @@ data = {'plots': [
         {'id': "14", 'mw': True,
          'label': "Yearly Precipitation Contributions by Daily Totals"},
     ]},
-    {'label': 'Hydrology Plots', 'options': [
+    {'label': 'Hydrology / Drought Monitor Plots', 'options': [
         {'id': "160",
          'label': ("River Guage Obs and Forecasts from HML Products")},
         {'id': "178",
@@ -282,6 +282,8 @@ data = {'plots': [
          'label': ("US Drought Monitor Areal Coverage by State")},
         {'id': "186",
          'label': ("US Drought Monitor Change in Areal Coverage by State")},
+        {'id': "194",
+         'label': ("US Drought Monitor Time Duration over Period Maps")},
         {'id': "193",
          'label': ("US Drought Monitor + Weather Prediction Center "
                    "Forecasted Rain")},
