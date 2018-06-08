@@ -39,7 +39,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='csector', name='csector', default='IA',
              label='Select state/sector to plot'),
-        dict(type='date', name='sdate', default="2000/01/01",
+        dict(type='date', name='sdate', default="%s/01/01" % (today.year, ),
              label='Start Date:', min="2000/01/04",
              max=today.strftime("%Y/%m/%d")),
         dict(type='date', name='edate', default=today.strftime("%Y/%m/%d"),
