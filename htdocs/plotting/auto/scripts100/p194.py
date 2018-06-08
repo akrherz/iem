@@ -124,7 +124,9 @@ def plotter(fdict):
         ramp = np.arange(0, 101, 10)
         ramp[0] = 1.
         ramp[-1] = 100.1
-        raster = raster / ((edate - sdate).days / 7.) * 100.
+        # we add one since we are rectified to tuesdays, so we have an extra
+        # week in there
+        raster = raster / ((edate - sdate).days / 7. + 1.) * 100.
     # plot
     cmap = plt.get_cmap('plasma')
     cmap.set_under('white')
