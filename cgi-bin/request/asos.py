@@ -227,7 +227,7 @@ def main():
                     r.append("%.2f" % (val, ))
                 else:
                     r.append("M")
-            elif data1 == 'presentwx':
+            elif data1 in ['presentwx', 'wxcodes']:
                 if row['wxcodes']:
                     r.append(" ".join(row['wxcodes']))
                 else:

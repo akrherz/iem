@@ -1,10 +1,10 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 8);
-include("../../include/myview.php");
-include("../../include/database.inc.php");
-include("../../include/imagemaps.php");
-include("../../include/forms.php");
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/forms.php";
 
 $t = new MyView();
 $t->iemss = True;
@@ -114,7 +114,7 @@ for all observations, the IEM continues to backfill this information.</p>
 	<option value="skyl1">Cloud Height Level 1 [ft]
 	<option value="skyl2">Cloud Height Level 2 [ft]
 	<option value="skyl3">Cloud Height Level 3 [ft]
-	<option value="presentwx">Present Weather Code(s)</option>
+	<option value="wxcodes">Present Weather Code(s)</option>
 	<option value="metar">Raw METAR</option>
 </SELECT>
 
@@ -233,7 +233,7 @@ by site. Values are in inches. This value may or may not contain frozen
 <dd>Sky Level 3 Altitude in feet</dd>
 <dt>skyl4:</dt>
 <dd>Sky Level 4 Altitude in feet</dd>
-<dt>presentwx:</dt>
+<dt>wxcodes:</dt>
 <dd>Present Weather Codes (space seperated)</dd>
 <dt>metar:</dt>
 <dd>unprocessed reported observation in METAR format</dd>
