@@ -2,11 +2,11 @@
 import datetime
 
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
 import numpy as np
 import pandas as pd
 import pytz
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

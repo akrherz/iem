@@ -232,7 +232,7 @@ def write_grid(valid, vname, grid):
     if nc is None:
         print("daily_analysis#write_grid first open attempt failed, try #2")
         nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=600)
-    print(("%12s [idx:%s] min: %6.2f max: %6.2f [%s]"
+    print(("%13s [idx:%s] min: %6.2f max: %6.2f [%s]"
            ) % (vname, offset, np.nanmin(grid), np.nanmax(grid),
                 nc.variables[vname].units))
     nc.variables[vname][offset] = grid

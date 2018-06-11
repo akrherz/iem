@@ -6,7 +6,6 @@ Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 from __future__ import print_function
 import datetime
 import subprocess
-import os
 import sys
 
 import numpy as np
@@ -32,9 +31,6 @@ def run(valid, routes):
                          "hrrr.t%Hz.refd.grib2"))
 
     grbs = pygrib.open(fn)
-
-    subprocess.call("rm /tmp/hrrr_ref_???.gif", shell=True,
-                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
     lats = None
     lons = None
@@ -63,27 +59,31 @@ def run(valid, routes):
 
         mp.pcolormesh(lons, lats, reflect, np.arange(0, 75, 5), units='dBZ',
                       clip_on=False)
-        mp.postprocess(filename='/tmp/hrrr_ref_%03i.png' % (i,))
+        pngfn = '/tmp/hrrr_ref_%s_%03i.png' % (valid.strftime("%Y%m%d%H"), i)
+        mp.postprocess(filename=pngfn)
         mp.close()
 
-        subprocess.call(("convert /tmp/hrrr_ref_%03i.png "
-                         "/tmp/hrrr_ref_%03i.gif") % (i, i), shell=True)
+        subprocess.call(("convert %s "
+                         "%s.gif") % (pngfn, pngfn[:-4]), shell=True)
 
         i += 1
 
     # Generate anim GIF
     subprocess.call(("gifsicle --loopcount=0 --delay=50 "
-                     "/tmp/hrrr_ref_???.gif > /tmp/hrrr_ref.gif"),
+                     "/tmp/hrrr_ref_%s_???.gif > /tmp/hrrr_ref_%s.gif"
+                     ) % (valid.strftime("%Y%m%d%H"),
+                          valid.strftime("%Y%m%d%H")),
                     shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
     pqstr = ("plot %s %s model/hrrr/hrrr_1km_ref.gif "
              "model/hrrr/hrrr_1km_ref_%02i.gif gif"
              ) % (routes, valid.strftime("%Y%m%d%H%M"), valid.hour)
-    subprocess.call("/home/ldm/bin/pqinsert -p '%s' /tmp/hrrr_ref.gif" % (
-                                                            pqstr,),
+    subprocess.call(("/home/ldm/bin/pqinsert -p '%s' /tmp/hrrr_ref_%s.gif"
+                     ) % (pqstr, valid.strftime("%Y%m%d%H")),
                     shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
-    os.remove("/tmp/hrrr_ref.gif")
+    subprocess.call("rm -f /tmp/hrrr_ref_%s*" % (valid.strftime("%Y%m%d%H"), ),
+                    shell=True)
 
 
 def main(argv):
