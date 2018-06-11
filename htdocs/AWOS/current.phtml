@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 
@@ -110,7 +110,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
   }
 
  $finalA = Array();
- $finalA = aSortBySecondIndex($mydata, $sortcol);
+ $finalA = aSortBySecondIndex($mydata, $sortcol, "desc");
  $now = time();
  while (list ($key, $val) = each ($finalA))  { 
 	$parts = $finalA[$key];

@@ -1,9 +1,9 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
-include("../../include/network.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/network.php";
 require_once "../../include/forms.php";
-include_once("../../include/database.inc.php");
+require_once "../../include/database.inc.php";
 require_once "../../include/mlib.php";
 $t = new MyView();
 
@@ -71,7 +71,7 @@ $t->current_network = "CoCoRaHS";
    }
  }
 
-$db = aSortBySecondIndex($db, $sortcol);
+$db = aSortBySecondIndex($db, $sortcol, "desc");
 
 $cols = Array("ts" => "Valid", "county" => "County",
   "sid" => "Site ID", "sname" => "Station Name",

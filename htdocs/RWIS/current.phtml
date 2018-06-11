@@ -1,9 +1,9 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 83);
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  require_once "../../include/mlib.php";
- include_once "../../include/database.inc.php";
+ require_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  
  $t = new MyView();
@@ -101,7 +101,7 @@ while (list($bogus, $ob) = each($jobj["data"]) ){
 
 
 $finalA = Array();
-$finalA = aSortBySecondIndex($mydata, $sortcol);
+$finalA = aSortBySecondIndex($mydata, $sortcol, "desc");
 $i = 0;
 $now = time();
 $skippedStations = Array();
