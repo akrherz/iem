@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys
 import os
+import subprocess
 import logging
 import datetime
 
@@ -25,9 +26,6 @@ def run(valid):
     """ run for this valid time! """
     if not upstream_has_data(valid):
         return
-    mydir = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H")
-    if not os.path.isdir(mydir):
-        os.makedirs(mydir)
     gribfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                              "hrrr.t%Hz.refd.grib2"))
     if os.path.isfile(gribfn):
@@ -40,7 +38,8 @@ def run(valid):
             del grbs
         except Exception as exp:
             logging.debug(exp)
-    output = open(gribfn, 'wb')
+    tmpfn = '/tmp/%s.grib2' % (valid.strftime("%Y%m%d%H"), )
+    output = open(tmpfn, 'wb')
     for hr in range(0, 19):
         shr = "%02i" % (hr,)
         uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
@@ -80,6 +79,13 @@ def run(valid):
             output.write(req.content)
 
     output.close()
+    # insert into LDM Please
+    pqstr = ("data a %s bogus "
+             "model/hrrr/%02i/hrrr.t%02iz.refd.grib2 grib2"
+             ) % (valid.strftime("%Y%m%d%H%M"), valid.hour, valid.hour)
+    subprocess.call("/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, tmpfn),
+                    shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    os.unlink(tmpfn)
 
 
 def main(argv):

@@ -1,6 +1,7 @@
 """What we need to do with HRRR"""
 from __future__ import print_function
 import sys
+import time
 import datetime
 import subprocess
 
@@ -16,6 +17,8 @@ def main(argv):
             ]
     for cmd in cmds:
         subprocess.call(cmd, shell=True)
+        # allow for some time for LDM to move data
+        time.sleep(60)
 
 
 if __name__ == '__main__':
