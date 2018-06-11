@@ -1,8 +1,8 @@
 """Run to ingest gempak files from mtarchive"""
 import subprocess
 import datetime
-import urllib2
 
+import requests
 import pytz
 from ingest_from_rucsoundings import RAOB
 from pyiem.util import get_dbconn
@@ -28,9 +28,11 @@ while now < ets:
     print now
     uri = now.strftime("http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/upperair/%Y%m%d_upa.gem")
     try:
-        data = urllib2.urlopen(uri).read()
+        req = requests.get(uri, timeout=30)
+        if req.status_code != 200:
+            raise Exception(uri)
         o = open('data.gem', 'wb')
-        o.write(data)
+        o.write(req.content)
         o.close()
     except Exception, exp:
         print exp

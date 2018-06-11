@@ -110,6 +110,7 @@ putenv("TZ=UTC");
  $tagselect .= (($useWindHailTag == 'Y') ? " CHECKED": "");
  $tagselect .= <<<EOF
 >When possible, verify SVR warnings against issuance WIND...HAIL tag
+ <a href="/nws/list_tags.php" target="_new"><i class="fa fa-link"></i> App listing per-WFO tags</a>
 <br /><input name="limitwarns" type="checkbox" value="Y" 
 EOF;
 	$tagselect .= (($limitwarns == 'Y')? " CHECKED": "");

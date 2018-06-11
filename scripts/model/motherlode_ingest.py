@@ -5,11 +5,12 @@
 """
 from __future__ import print_function
 import sys
-import csv
-import urllib2
+from io import StringIO
 import datetime
 
+import requests
 import pytz
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
@@ -69,8 +70,9 @@ def run(mcursor, model, station, lon, lat, ts):
            "&accept=csv&point=true") % (BASE_URL, ts.strftime(URLS[model]),
                                         vstring, lat, lon)
     try:
-        fp = urllib2.urlopen(url, timeout=120)
-    except Exception, exp:
+        fp = requests.get(url, timeout=120)
+        sio = StringIO(fp.text)
+    except Exception as exp:
         print(exp)
         print(url)
         print(('FAIL ts: %s station: %s model: %s'
@@ -89,8 +91,9 @@ def run(mcursor, model, station, lon, lat, ts):
                         mcursor.rowcount, ts, station, model))
 
     count = 0
-    csvfp = csv.DictReader(fp)
-    for row in csvfp:
+    sio.seek(0)
+    df = pd.read_csv(sio)
+    for _, row in df.iterrows():
         for k in row.keys():
             row[k[:k.find("[")]] = row[k]
         sbcape = xref(row, 'sbcape', model)

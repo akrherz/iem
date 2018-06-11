@@ -4,8 +4,7 @@ import datetime
 import os
 import sys
 import smtplib
-import time
-import urllib2
+import ftplib
 import subprocess
 from email.mime.text import MIMEText
 
@@ -197,7 +196,7 @@ def do_windalerts(obs):
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities """
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-    threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
+    threshold = threshold.replace(tzinfo=pytz.utc)
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor())
     tracker.process_network(obs, 'iarwis', NT, threshold)
@@ -226,7 +225,7 @@ def METARtemp(val):
 
 
 def METARwind(sknt, drct, gust):
-    """ """
+    """convert to METAR"""
     s = ""
     d5 = drct
     if str(d5)[-1] == "5":
@@ -249,7 +248,7 @@ def gen_metars(obs, filename, convids=False):
     """
     mtime = datetime.datetime.utcnow().strftime("%d%H%M")
     thres = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-    thres = thres.replace(tzinfo=pytz.timezone("UTC"))
+    thres = thres.replace(tzinfo=pytz.utc)
     fp = open(filename, 'w')
     fp.write("\001\015\015\012001\n")
     fp.write("SAUS43 KDMX %s\015\015\012METAR\015\015\012" % (mtime, ))
@@ -308,39 +307,14 @@ def update_iemaccess(obs):
     IEM.commit()
 
 
-def get_file(uri):
-    """Utility to make an honest attempt at getting a file
-
-    Args:
-      uri (str): The URI to fetch
-
-    Returns:
-      data fetched from remote site
-    """
-    data = ""
-    attempts = 3
-    while (data is None or data == "") and attempts > 0:
-        try:
-            data = urllib2.urlopen(uri, timeout=30).read()
-        except Exception as _exp:
-            time.sleep(4)
-        attempts -= 1
-    return data
-
-
 def fetch_files():
     """Download the files we need"""
     props = util.get_properties()
     # get atmosfn
     atmosfn = "%s/rwis.txt" % (INCOMING, )
-    data = get_file(("ftp://rwis:%s@165.206.203.34/ExpApAirData.txt"
-                    "") % (props['rwis_ftp_password'],))
-    if data is None or data == "":
-        print('RWIS Download of ExpApAirData.txt failed, aborting')
-        sys.exit()
-    fp = open(atmosfn, 'w')
-    fp.write(data)
-    fp.close()
+    ftp = ftplib.FTP('165.206.203.34')
+    ftp.login('rwis', props['rwis_ftp_password'])
+    ftp.retrbinary('RETR ExpApAirData.txt', open(atmosfn, 'wb').write)
     # Insert into LDM
     pqstr = "plot ac %s rwis.txt raw/rwis/%sat.txt txt" % (GTS, GTS)
     subprocess.call(("/home/ldm/bin/pqinsert -i -p '%s' %s "
@@ -348,14 +322,8 @@ def fetch_files():
 
     # get sfcfn
     sfcfn = "%s/rwis_sf.txt" % (INCOMING, )
-    data = get_file(("ftp://rwis:%s@165.206.203.34/ExpSfData.txt"
-                     "") % (props['rwis_ftp_password'],))
-    if data is None or data == "":
-        print('RWIS Download of ExpSfData.txt failed, aborting')
-        sys.exit()
-    fp = open(sfcfn, 'w')
-    fp.write(data)
-    fp.close()
+    ftp.retrbinary('RETR ExpSfData.txt', open(sfcfn, 'wb').write)
+    ftp.close()
     # Insert into LDM
     pqstr = "plot ac %s rwis_sf.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
     subprocess.call(("/home/ldm/bin/pqinsert -i -p '%s' %s "

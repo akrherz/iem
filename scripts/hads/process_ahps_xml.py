@@ -1,15 +1,16 @@
 """Ingest the rich metadata found within the AHPS2 website!
 """
 from __future__ import print_function
-import urllib2
 import sys
 
+import requests
+from twisted.words.xish import xpath, domish
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-from twisted.words.xish import xpath, domish
 
 
 def process_site(mcursor, nwsli, network):
+    """Do our processing work"""
 
     url = ("http://water.weather.gov/ahps2/hydrograph_to_xml.php?"
            "gage=%s&output=xml") % (nwsli,)
@@ -21,7 +22,8 @@ def process_site(mcursor, nwsli, network):
     elementStream.ElementEvent = lambda elem: roots[0].addChild(elem)
     elementStream.DocumentEndEvent = lambda: results.append(roots[0])
     try:
-        xml = urllib2.urlopen(url).read()
+        req = requests.get(url, timeout=30)
+        xml = req.content
         if xml.strip() == 'No results found for this gage.':
             print('No results for %s' % (nwsli,))
             return

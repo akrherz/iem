@@ -3,11 +3,11 @@
 from __future__ import print_function
 import datetime
 import os
-import urllib2
 import time
 import sys
 import subprocess
 
+import requests
 import osgeo.gdal as gdal
 from osgeo import gdalconst
 import numpy as np
@@ -121,11 +121,11 @@ def run(prod, sts):
     time.sleep(60)
 
     # Iowa
-    png = urllib2.urlopen("%slayers[]=uscounties&layers[]=%s&ts=%s" % (
+    png = requests.get("%slayers[]=uscounties&layers[]=%s&ts=%s" % (
         URLBASE, "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
         sts.strftime("%Y%m%d%H%M"),))
     fp = open('tmp.png', 'wb')
-    fp.write(png.read())
+    fp.write(png.content)
     fp.close()
     cmd = ("%s -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
            "comprad/max_%s_0z0z_%s.png png' tmp.png"
@@ -134,13 +134,13 @@ def run(prod, sts):
     subprocess.call(cmd, shell=True)
 
     # US
-    png = urllib2.urlopen(("%ssector=conus&layers[]=uscounties&"
-                           "layers[]=%s&ts=%s"
-                           ) % (URLBASE,
-                                "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
-                                sts.strftime("%Y%m%d%H%M"),))
+    png = requests.get(("%ssector=conus&layers[]=uscounties&"
+                        "layers[]=%s&ts=%s"
+                        ) % (URLBASE,
+                             "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
+                             sts.strftime("%Y%m%d%H%M"),))
     fp = open('tmp.png', 'wb')
-    fp.write(png.read())
+    fp.write(png.content)
     fp.close()
     cmd = ("%s -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
            "usrad/max_%s_0z0z_%s.png png' tmp.png"

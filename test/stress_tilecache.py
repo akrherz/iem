@@ -3,8 +3,9 @@ Generate some sequential load to watch what happens to IEM's backend processing
 """
 from __future__ import print_function
 import datetime
-import urllib2
 import random
+
+import requests
 
 
 def main():
@@ -24,7 +25,7 @@ def main():
                                 "%Y%m%d%H%M/"+str(random.randint(0, 10)) +
                                 "/"+str(random.randint(0, 10))+"/" +
                                 str(random.randint(0, 10))+".png"))
-            _ = urllib2.urlopen(uri).read()
+            requests.get(uri)
             cnt += 1
             if cnt % 100 == 0:
                 delta = datetime.datetime.now() - start

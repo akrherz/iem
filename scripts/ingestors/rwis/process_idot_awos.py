@@ -1,10 +1,9 @@
 """Process AWOS METAR file"""
 from __future__ import print_function
 import re
-import tempfile
 import os
 import datetime
-import urllib2
+import ftplib
 import subprocess
 
 import pyiem.util as util
@@ -17,12 +16,10 @@ def fetch_files():
     props = util.get_properties()
 
     fn = "%s/iaawos_metar.txt" % (INCOMING, )
-    data = urllib2.urlopen(("ftp://rwis:%s@165.206.203.34/METAR.txt"
-                            "") % (props['rwis_ftp_password'],),
-                           timeout=30).read()
-    fp = open(fn, 'w')
-    fp.write(data)
-    fp.close()
+    ftp = ftplib.FTP('165.206.203.34')
+    ftp.login('rwis', props['rwis_ftp_password'])
+    ftp.retrbinary('RETR METAR.txt', open(fn, 'wb').write)
+    ftp.close()
 
     return fn
 
@@ -39,22 +36,21 @@ def main():
         gd = match.groupdict()
         data[gd['id']] = line
 
-    fd, path = tempfile.mkstemp()
-    os.write(fd, "\001\r\r\n")
-    os.write(fd, ("SAUS00 KISU %s\r\r\n"
-                  ) % (datetime.datetime.utcnow().strftime("%d%H%M"), ))
-    os.write(fd, "METAR\r\r\n")
+    fd = open('/tmp/awwwsosss', 'w')
+    fd.write("\001\r\r\n")
+    fd.write(("SAUS00 KISU %s\r\r\n"
+              ) % (datetime.datetime.utcnow().strftime("%d%H%M"), ))
+    fd.write("METAR\r\r\n")
     for sid in data:
-        os.write(fd, '%s=\r\r\n' % (data[sid].strip().replace("METAR ", ""), ))
-    os.write(fd, "\003")
-    os.close(fd)
+        fd.write('%s=\r\r\n' % (data[sid].strip().replace("METAR ", ""), ))
+    fd.write("\003")
+    fd.close()
     proc = subprocess.Popen(("/home/ldm/bin/pqinsert -i -p 'data c %s "
                              "LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s"
-                             ) % (utc, path), shell=True,
+                             ) % (utc, '/tmp/awwwsosss'), shell=True,
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     os.waitpid(proc.pid, 0)
-    os.remove(path)
 
 
 if __name__ == '__main__':

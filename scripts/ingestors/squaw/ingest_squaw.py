@@ -1,8 +1,8 @@
 """Process the Flow data provided by the USGS website"""
 from __future__ import print_function
 import re
-import urllib2
 
+import requests
 from pyiem.util import get_dbconn
 
 
@@ -14,7 +14,7 @@ def main():
     uri = ("http://waterdata.usgs.gov/ia/nwis/uv?dd_cd=01&format=rdb&"
            "period=2&site_no=05470500")
 
-    data = urllib2.urlopen(uri, timeout=30).read()
+    data = requests.get(uri, timeout=30).text
 
     tokens = re.findall(
         "USGS\t([0-9]*)\t(....-..-.. ..:..)\t([CSDT]+)\t([0-9]*)", data)

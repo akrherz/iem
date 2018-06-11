@@ -1,8 +1,8 @@
 """Ingest the El Nino"""
 from __future__ import print_function
 import datetime
-import urllib2
 
+import requests
 from pyiem.util import get_dbconn
 
 
@@ -18,11 +18,12 @@ def main():
         current[row[0]] = dict(anom_34=row[1], soi_3m=row[2])
 
     url = "http://www.cpc.ncep.noaa.gov/data/indices/sstoi.indices"
-    req = urllib2.Request(url)
-    data = urllib2.urlopen(req).readlines()
+    data = requests.get(url, timeout=30).content.decode('ascii').split("\n")
 
     for line in data[1:]:
         tokens = line.split()
+        if len(tokens) < 3:
+            continue
         anom34 = float(tokens[-1])
         date = datetime.date(int(tokens[0]), int(tokens[1]), 1)
         val = current.get(date, {}).get('anom_34', None)
@@ -38,10 +39,11 @@ def main():
             """, (anom34, date))
 
     url = "http://www.cpc.ncep.noaa.gov/data/indices/soi.3m.txt"
-    req = urllib2.Request(url)
-    data = urllib2.urlopen(req).readlines()
+    data = requests.get(url, timeout=30).content.decode('ascii').split("\n")
 
     for line in data[1:]:
+        if len(line) < 3:
+            continue
         year = int(line[:4])
         pos = 4
         for month in range(1, 13):

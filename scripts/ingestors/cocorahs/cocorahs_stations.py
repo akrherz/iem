@@ -3,8 +3,9 @@ Hit cocorah's website API for a listing of stations and add entries for
 anything new found
 """
 from __future__ import print_function
-import urllib2
 import sys
+
+import requests
 from pyiem.util import get_dbconn
 
 
@@ -15,10 +16,10 @@ def main():
 
     state = sys.argv[1]
 
-    req = urllib2.Request(("http://data.cocorahs.org/cocorahs/export/"
-                           "exportstations.aspx?State=%s&Format=CSV"
-                           "&country=usa") % (state,))
-    data = urllib2.urlopen(req, timeout=30).readlines()
+    url = ("http://data.cocorahs.org/cocorahs/export/"
+           "exportstations.aspx?State=%s&Format=CSV"
+           "&country=usa") % (state,)
+    data = requests.get(url, timeout=30).content.decode('ascii').split("\r\n")
 
     # Find current stations
     stations = []
@@ -32,14 +33,16 @@ def main():
     # Process Header
     header = {}
     h = data[0].split(",")
-    for i in range(len(h)):
-        header[h[i]] = i
+    for i, _h in enumerate(h):
+        header[_h] = i
 
     if 'StationNumber' not in header:
         sys.exit(0)
 
     for row in data[1:]:
         cols = row.split(", ")
+        if len(cols) < 4:
+            continue
         sid = cols[header["StationNumber"]]
         if sid in stations:
             continue

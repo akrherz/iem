@@ -1,13 +1,13 @@
 """
  Cache NEXRAD composites for the website
 """
-import urllib2
 import os
 import subprocess
 import datetime
-import time
 import sys
-from pyiem.util import get_dbconn
+
+import requests
+from pyiem.util import get_dbconn, exponential_backoff
 
 
 TMPFN = '/tmp/radar_composite_tmp.png'
@@ -15,7 +15,6 @@ TMPFN = '/tmp/radar_composite_tmp.png'
 
 def save(sectorName, file_name, dir_name, tstamp, bbox=None, routes='ac'):
     ''' Get an image and write it back to LDM for archiving '''
-    opener = urllib2.build_opener()
     layers = ("layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&"
               "layers[]=uscounties")
     if sectorName == 'conus':
@@ -25,14 +24,13 @@ def save(sectorName, file_name, dir_name, tstamp, bbox=None, routes='ac'):
     if bbox is not None:
         uri = ("http://iem.local/GIS/radmap.php?bbox=%s&ts=%s&%s"
                ) % (bbox, tstamp, layers)
-    try:
-        f = opener.open(uri)
-    except Exception as _exp:
-        time.sleep(5)
-        f = opener.open(uri)
+    req = exponential_backoff(requests.get, uri, timeout=40)
+    if req.status_code != 200:
+        print("radar_composite %s returned %s" % (uri, req.status_code))
+        return
 
-    fh = open(TMPFN, 'w')
-    fh.write(f.read())
+    fh = open(TMPFN, 'wb')
+    fh.write(req.content)
     fh.close()
 
     cmd = ("/home/ldm/bin/pqinsert -p 'plot %s %s %s %s/n0r_%s_%s.png "

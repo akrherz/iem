@@ -2,9 +2,10 @@
 Reprocess cocorahs data
 """
 from __future__ import print_function
-import urllib2
 import datetime
 import sys
+
+import requests
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconn
 
@@ -25,13 +26,12 @@ def runner(days):
     icursor = pgconn.cursor()
     now = datetime.datetime.now() - datetime.timedelta(days=days)
 
-    req = urllib2.Request(("http://data.cocorahs.org/Cocorahs/export/"
-                           "exportreports.aspx?ReportType=Daily&dtf=1&"
-                           "Format=CSV&State=%s&ReportDateType=Daily&"
-                           "Date=%s&TimesInGMT=False"
-                           "") % (state,
-                                  now.strftime("%m/%d/%Y%%20%H:00%%20%P")))
-    data = urllib2.urlopen(req).readlines()
+    url = ("http://data.cocorahs.org/Cocorahs/export/"
+           "exportreports.aspx?ReportType=Daily&dtf=1&"
+           "Format=CSV&State=%s&ReportDateType=Daily&"
+           "Date=%s&TimesInGMT=False"
+           ) % (state, now.strftime("%m/%d/%Y%%20%H:00%%20%P"))
+    data = requests.get(url, timeout=30).content.decode('ascii').split("\r\n")
 
     # Process Header
     header = {}
@@ -41,6 +41,8 @@ def runner(days):
 
     for row in data[1:]:
         cols = row.split(",")
+        if len(cols) < 4:
+            continue
         sid = cols[header["StationNumber"]].strip()
 
         t = "%s %s" % (cols[header["ObservationDate"]],

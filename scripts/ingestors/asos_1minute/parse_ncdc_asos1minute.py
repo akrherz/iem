@@ -3,7 +3,7 @@
 
  NCDC provides monthly tar files for nearly up to the current day here:
 
- http://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
+ https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
 from __future__ import print_function
 import re
@@ -11,10 +11,10 @@ import os
 import subprocess
 import sys
 import datetime
-import urllib2
 import unittest
 
 import pytz
+import requests
 from pyiem.util import get_dbconn
 
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
@@ -81,19 +81,6 @@ def p2_parser(ln):
         return None
     res = m.groupdict()
     res['ts'] = tstamp2dt(res['tstamp'])
-    """
-    for v in ['tmpf', 'dwpf']:
-        if d['%s_miss' % (v,)]:
-            ret[v] = "Null"
-        else:
-            ret[v] = int( d[v] )
-
-    for v in ['pres1', 'pres2', 'pres3', 'precip']:
-        if d['%s_miss' % (v,)]:
-            ret[v] = "Null"
-        else:
-            ret[v] = float( d[v] )
-    """
     return res
 
 
@@ -107,27 +94,6 @@ def p1_parser(ln):
         return None
     res = m.groupdict()
     res['ts'] = tstamp2dt(res['tstamp'])
-    """
-    if d['vis1_coef_miss']:
-        ret['vis1_coef'] = "Null"
-    else:
-        ret['vis1_coef'] = float( d['vis1_coef'] )
-
-    ret['vis1_nd'] = d['vis1_nd']
-
-    if d['vis2_coef_miss']:
-        ret['vis2_coef'] = "Null"
-    else:
-        ret['vis2_coef'] = float( d['vis2_coef'] )
-
-    ret['vis2_nd'] = d['vis2_nd']
-
-    for v in ['sknt', 'drct', 'gust_drct', 'gust_sknt']:
-        if d['%s_miss' % (v,)]:
-            ret[v] = "Null"
-        else:
-            ret[v] = int( d[v] )
-    """
     return res
 
 
@@ -135,7 +101,7 @@ def download(station, monthts):
     """
     Download a month file from NCDC
     """
-    baseuri = "ftp://ftp.ncdc.noaa.gov/pub/data/asos-onemin/"
+    baseuri = "http://www1.ncdc.noaa.gov/pub/data/asos-onemin/"
     datadir = "%s/data/%s" % (BASEDIR, station)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
@@ -143,13 +109,11 @@ def download(station, monthts):
         uri = baseuri + "640%s-%s/640%s0K%s%s.dat" % (page, monthts.year, page,
                                                       station,
                                                       monthts.strftime("%Y%m"))
-        url = urllib2.Request(uri)
-        fp = urllib2.urlopen(url)
-        data = fp.read()
+        req = requests.get(uri)
         o = open("%s/640%s0K%s%s.dat" % (datadir, page,
                                          station, monthts.strftime("%Y%m")),
-                 'w')
-        o.write(data)
+                 'wb')
+        o.write(req.content)
         o.close()
 
 
@@ -174,7 +138,7 @@ def runner(station, monthts):
         if not os.path.isfile(fn5):
             try:
                 download(station, monthts)
-            except Exception, exp:
+            except Exception as exp:
                 print('download() error %s' % (exp,))
             if not os.path.isfile(fn5) or not os.path.isfile(fn6):
                 print(("NCDC did not have %s station for %s"
@@ -198,13 +162,13 @@ def runner(station, monthts):
         for k in d.keys():
             data[d['ts']][k] = d[k]
 
-    if len(data) == 0:
+    if not data:
         print('No data found for station: %s' % (station,))
         return
 
     mints = None
     maxts = None
-    for ts in data.keys():
+    for ts in data:
         if mints is None or maxts is None:
             mints = ts
             maxts = ts
@@ -302,6 +266,7 @@ if __name__ == '__main__':
 
 
 class test(unittest.TestCase):
+    """Some tests"""
 
     def test_parser(self):
         for ex in p1_examples:

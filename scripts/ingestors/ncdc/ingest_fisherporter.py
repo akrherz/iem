@@ -7,8 +7,8 @@ from __future__ import print_function
 import sys
 import datetime
 import os
-import urllib2
 
+import requests
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
@@ -83,8 +83,12 @@ def dowork(valid):
     tmpfn = valid.strftime("/mesonet/tmp/hpd_%Y%m.csv")
     if not os.path.isfile(tmpfn):
         print('Downloading %s from NCDC' % (tmpfn,))
-        output = open(tmpfn, 'w')
-        output.write(urllib2.urlopen(uri).read())
+        req = requests.get(uri)
+        if req.status_code != 200:
+            print('dlerror')
+            return
+        output = open(tmpfn, 'wb')
+        output.write(req.content)
         output.close()
 
     process(tmpfn)

@@ -1,12 +1,13 @@
 """Ingest the RWIS rainwise data"""
 from __future__ import print_function
 import datetime
-import urllib2
+from io import StringIO
 
+import requests
 import pandas as pd
+import pytz
 from pyiem.util import get_dbconn
 from pyiem.observation import Observation
-import pytz
 
 
 URI = ("http://www.rainwise.net/inview/api/stationdata-iowa.php?"
@@ -43,13 +44,14 @@ def process(today, icursor, nwsli, lastts):
                                              ASSOC[nwsli])
     # print nwsli, myuri
     try:
-        data = urllib2.urlopen(myuri, timeout=15)
-    except Exception, exp:
-        # print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
+        sio = StringIO()
+        sio.write(requests.get(myuri, timeout=15).text)
+    except Exception as exp:
         return
     try:
-        df = pd.read_csv(data)
-    except Exception, exp:
+        sio.seek(0)
+        df = pd.read_csv(sio)
+    except Exception as exp:
         print(("ingest_rw.py pandas fail for sid: %s\nreason: %s"
                ) % (nwsli, exp))
         return
@@ -76,7 +78,7 @@ def process(today, icursor, nwsli, lastts):
             'tsf0': 'tsf0',
             'tsf1': 'tsf1',
             }
-    if 'dewpoint' not in df:
+    if df.empty or 'dewpoint' not in df.columns:
         # print 'RW download for: %s had columns: %s' % (nwsli, df.columns)
         return
     df['dwpf'] = df['dewpoint'] / 10.0

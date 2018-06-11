@@ -5,9 +5,9 @@ It is unclear that this script is even needed anymore.
 from __future__ import print_function
 import sys
 import os
-import urllib2
 import zipfile
 
+import requests
 from osgeo import ogr
 from osgeo import _ogr
 from pyiem.util import get_dbconn
@@ -38,11 +38,14 @@ def main():
 
     zipfn = "%s.zip" % (DATESTAMP,)
     if not os.path.isfile(zipfn):
-        url = urllib2.Request(('http://www.weather.gov/geodata/catalog/wsom/'
-                               'data/%s') % (zipfn,))
+        req = requests.get(('http://www.weather.gov/source/gis/Shapefiles/'
+                            'WSOM/%s') % (zipfn,))
+        if req.status_code != 200:
+            print('dlfailed')
+            return
         print('Downloading %s ...' % (zipfn,))
         o = open(zipfn, 'wb')
-        o.write(urllib2.urlopen(url).read())
+        o.write(req.content)
         o.close()
 
     print('Unzipping')

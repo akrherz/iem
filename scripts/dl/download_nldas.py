@@ -3,10 +3,11 @@ Run at 00 UTC and get the files from 4 days ago!
 """
 from __future__ import print_function
 import datetime
-import urllib2
 import subprocess
 import tempfile
 import os
+
+import requests
 
 
 def do(ts):
@@ -19,14 +20,15 @@ def do(ts):
                            ) + "%02i" % (hr, )
 
         try:
-            req = urllib2.Request(uri)
-            data = urllib2.urlopen(req, timeout=60).read()
+            req = requests.get(uri, timeout=60)
+            if req.status_code != 200:
+                raise Exception("status code is %s" % (req.status_code, ))
         except Exception as _exp:
             print('NLDAS Download failed for: %s' % (uri,))
             continue
         tmpfn = tempfile.mktemp()
-        fh = open(tmpfn, 'w')
-        fh.write(data)
+        fh = open(tmpfn, 'wb')
+        fh.write(req.content)
         fh.close()
 
         cmd = ("/home/ldm/bin/pqinsert -p 'data a %s bogus "

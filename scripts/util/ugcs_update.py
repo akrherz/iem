@@ -31,13 +31,13 @@ from __future__ import print_function
 import sys
 import os
 import datetime
-import urllib2
 import zipfile
 
 import pytz
+import requests
 import geopandas as pd
 from shapely.geometry import MultiPolygon
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 # Change Directory to /tmp, so that we can rw
 os.chdir('/tmp')
@@ -46,11 +46,12 @@ os.chdir('/tmp')
 def do_download(zipfn):
     """Do the download steps"""
     if not os.path.isfile(zipfn):
-        url = urllib2.Request(('https://www.weather.gov/source/gis/Shapefiles/WSOM/'
-                               '%s') % (zipfn,))
+        req = requests.get(
+            ('https://www.weather.gov/source/gis/Shapefiles/%s/'
+             '%s') % ('County' if zipfn.startswith('c_') else 'WSOM', zipfn,))
         print('Downloading %s ...' % (zipfn,))
         fh = open(zipfn, 'wb')
-        fh.write(urllib2.urlopen(url).read())
+        fh.write(req.content)
         fh.close()
 
     print('Unzipping')
@@ -107,8 +108,7 @@ def db_fixes(cursor, valid):
 
 def workflow(argv, pgconn, cursor):
     """Go Main Go"""
-    valid = datetime.datetime(int(argv[2]), int(argv[3]), int(argv[4]))
-    valid = valid.replace(tzinfo=pytz.utc)
+    valid = utc(int(argv[2]), int(argv[3]), int(argv[4]))
     zipfn = "%s.zip" % (argv[1],)
     shpfn = do_download(zipfn)
 
@@ -150,8 +150,8 @@ def workflow(argv, pgconn, cursor):
         if ugc in postgis.index:
             # Some very small number, good enough
             current = postgis.loc[ugc]
-            if (abs(row['area'] - current['geom'].area) < 0.00000001
-                    and row['NAME'] == current['name'] and
+            if (abs(row['area'] - current['geom'].area) < 0.00000001 and
+                    row['NAME'] == current['name'] and
                     row[wfocol] == current['wfo']):
                 countdups += 1
                 continue

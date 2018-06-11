@@ -7,7 +7,8 @@
 from __future__ import print_function
 import datetime
 import sys
-import urllib2
+from io import BytesIO
+import ftplib
 import subprocess
 
 import pytz
@@ -27,18 +28,21 @@ def main():
     icursor = pgconn.cursor()
 
     csv = open('/tmp/ctre.txt', 'w')
-
+    bio = BytesIO()
     # Get Saylorville
     try:
-        req = urllib2.Request(("ftp://%s:%s@129.186.224.167/Saylorville_"
-                               "Table3Min_current.dat"
-                               "") % (props['ctre_ftpuser'],
-                                      props['ctre_ftppass']))
-        data = urllib2.urlopen(req, timeout=30).readlines()
+        ftp = ftplib.FTP('129.186.224.167')
+        ftp.login(props['ctre_ftpuser'], props['ctre_ftppass'])
+        ftp.retrbinary('RETR Saylorville_Table3Min_current.dat',
+                       bio.write)
+        ftp.close()
     except Exception as exp:
         if now.minute % 15 == 0:
             print('Download CTRE Bridge Data Failed!!!\n%s' % (exp, ))
         return
+    bio.seek(0)
+    data = bio.getvalue().decode('ascii').split("\n")
+    bio.truncate()
     if len(data) < 2:
         return
     keys = data[0].strip().replace('"', '').split(',')
@@ -46,11 +50,10 @@ def main():
     d = {}
     for i in range(len(vals)):
         d[keys[i]] = vals[i]
-
     # Ob times are always CDT
     ts1 = datetime.datetime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
     gts1 = ts1 + datetime.timedelta(hours=5)
-    gts1 = gts1.replace(tzinfo=pytz.timezone("UTC"))
+    gts1 = gts1.replace(tzinfo=pytz.utc)
     lts = gts1.astimezone(pytz.timezone("America/Chicago"))
 
     iem = Observation('RSAI4', "OT", lts)
@@ -68,15 +71,18 @@ def main():
 
     # Red Rock
     try:
-        req = urllib2.Request(("ftp://%s:%s@129.186.224.167/Red Rock_Table3"
-                               "Min_current.dat") % (props['ctre_ftpuser'],
-                                                     props['ctre_ftppass']))
-        data = urllib2.urlopen(req, timeout=30).readlines()
+        ftp = ftplib.FTP('129.186.224.167')
+        ftp.login(props['ctre_ftpuser'], props['ctre_ftppass'])
+        ftp.retrbinary('RETR Red Rock_Table3Min_current.dat',
+                       bio.write)
+        ftp.close()
     except Exception as exp:
         if now.minute % 15 == 0:
             print('Download CTRE Bridge Data Failed!!!\n%s' % (exp, ))
         return
-
+    bio.seek(0)
+    data = bio.getvalue().decode('ascii').split("\n")
+    bio.truncate()
     if len(data) < 2:
         return
 
