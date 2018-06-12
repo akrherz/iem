@@ -107,7 +107,7 @@ def plotter(fdict):
             larr = [row['skyl1'], row['skyl2'], row['skyl3'], row['skyl4']]
             ceil['d'].append(larr[pos] / 1000.)
 
-    (fig, ax) = plt.subplots(3, 1, figsize=(9, 6), sharex=True)
+    (fig, ax) = plt.subplots(3, 1, figsize=(9, 9), sharex=True)
 
     # ____________PLOT 1___________________________
     if len(tmpf['v']) > 1:
