@@ -5,10 +5,13 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
+from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'yes': 'Colorize Cells in Chart',
          'no': 'Just plot values please'}
+PDICT2 = {'wfo': 'Summarize by Selected WFO',
+          'state': 'Summarize by Selected State'}
 
 
 def get_description():
@@ -20,7 +23,9 @@ def get_description():
     accounting is based on the initial issuance date of a given VTEC phenomena
     and significance by event identifier.  So a single Winter Storm Watch
     for 40 zones, would only count as 1 event for this chart.  Dates are
-    computed in the local time zone of the issuance forecast office.
+    computed in the local time zone of the issuance forecast office in the
+    case of a single office and in Central Time for the case of all offices of
+    plotting a given state.
 
     <p>You can also generate this plot considering "ALL" NWS Offices, when
     doing so the time zone used to compute the calendar dates is US Central.
@@ -36,8 +41,12 @@ def get_description():
              default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):',
              min="1986/01/01"),
+        dict(type='select', name='w', options=PDICT2, default='wfo',
+             label='How to summarize data:'),
         dict(type='networkselect', name='wfo', network='WFO', all=True,
-             default='DMX', label='Select WFO:'),
+             default='DMX', label='Select WFO (when appropriate):'),
+        dict(type='state', name='state',
+             default='IA', label='Select State (when appropriate):'),
         dict(type='select', name='heatmap', options=PDICT, default='yes',
              label='Colorize calendar cells based on values?'),
         dict(type='vtec_ps', name='v1', default='UNUSED',
@@ -88,12 +97,17 @@ def plotter(fdict):
     pstr = " or ".join(pstr)
     pstr = "(%s)" % (pstr,)
 
-    nt = NetworkTable("WFO")
-    nt.sts['_ALL'] = {'name': 'All Offices', 'tzname': 'America/Chicago'}
-    wfo_limiter = (" and wfo = '%s' "
-                   ) % (wfo if len(wfo) == 3 else wfo[1:],)
-    if wfo == '_ALL':
-        wfo_limiter = ''
+    if ctx['w'] == 'wfo':
+        nt = NetworkTable("WFO")
+        nt.sts['_ALL'] = {'name': 'All Offices', 'tzname': 'America/Chicago'}
+        wfo_limiter = (" and wfo = '%s' "
+                       ) % (wfo if len(wfo) == 3 else wfo[1:],)
+        if wfo == '_ALL':
+            wfo_limiter = ''
+        tzname = nt.sts[wfo]['tzname']
+    else:
+        wfo_limiter = " and substr(ugc, 1, 2) = '%s' " % (ctx['state'], )
+        tzname = 'America/Chicago'
 
     df = read_sql("""
 with events as (
@@ -106,7 +120,7 @@ with events as (
 )
 
 SELECT date(localissue), count(*) from events GROUP by date(localissue)
-    """, pgconn, params=(nt.sts[wfo]['tzname'],
+    """, pgconn, params=(tzname,
                          sts - datetime.timedelta(days=2),
                          ets + datetime.timedelta(days=2)), index_col='date')
 
@@ -118,9 +132,12 @@ SELECT date(localissue), count(*) from events GROUP by date(localissue)
     for date, row in df.iterrows():
         data[date] = {'val': row['count']}
     fig = calendar_plot(sts, ets, data, heatmap=(ctx['heatmap'] == 'yes'))
-    title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
-    if wfo == '_ALL':
-        title2 = "All NWS Offices"
+    if ctx['w'] == 'wfo':
+        title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
+        if wfo == '_ALL':
+            title2 = "All NWS Offices"
+    else:
+        title2 = state_names[ctx['state']]
     fig.text(0.5, 0.95,
              ("Number of VTEC Events for %s by Local Calendar Date"
               "\nValid %s - %s for %s"
