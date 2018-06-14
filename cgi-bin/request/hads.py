@@ -5,6 +5,7 @@ Download Interface for HADS data
 import sys
 import cgi
 import os
+from io import StringIO
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -113,13 +114,14 @@ def main():
             return
         table = threshold_search(table, threshold, thresholdvar, delimiter)
 
+    bio = StringIO()
     if what == 'txt':
         ssw('Content-type: application/octet-stream\n')
         ssw(('Content-Disposition: attachment; filename=hads.txt\n\n'))
-        table.to_csv(sys.stdout, sep=delimiter)
+        table.to_csv(bio, sep=delimiter)
     elif what == 'html':
         ssw("Content-type: text/html\n\n")
-        table.to_html(sys.stdout)
+        table.to_html(bio)
     elif what == 'excel':
         writer = pd.ExcelWriter('/tmp/ss.xlsx')
         table.to_excel(writer, 'Data', index=True)
@@ -129,10 +131,12 @@ def main():
         ssw(("Content-Disposition: attachment; Filename=hads.xlsx\n\n"))
         ssw(open('/tmp/ss.xlsx', 'rb').read())
         os.unlink('/tmp/ss.xlsx')
-
+        return
     else:
         ssw("Content-type: text/plain\n\n")
-        table.to_csv(getattr(sys.stdout, 'buffer', sys.stdout), sep=delimiter)
+        table.to_csv(bio, sep=delimiter)
+    bio.seek(0)
+    ssw(bio.getvalue())
 
 
 if __name__ == '__main__':
