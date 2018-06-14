@@ -35,6 +35,8 @@ UNITS = {
     'avg_temp': 'F',
     'precip_sum': 'inch',
     }
+PDICT3 = {'contour': 'Contour the data',
+          'text': 'Plot just values without contours'}
 
 
 def get_description():
@@ -62,6 +64,8 @@ def get_description():
         dict(type='date', name='date2',
              default=today.strftime("%Y/%m/%d"),
              label='End Date (inclusive):', min="1893/01/01"),
+        dict(type='select', name='p', default='contour',
+             label='Data Presentation Options', options=PDICT3),
     ]
     return desc
 
@@ -79,7 +83,6 @@ def plotter(fdict):
     date1 = ctx['date1']
     date2 = ctx['date2']
     varname = ctx['var']
-    usdm = ctx['usdm']
 
     table = "alldata_%s" % (sector, ) if sector != 'midwest' else "alldata"
     df = read_sql("""
@@ -172,14 +175,15 @@ def plotter(fdict):
         cmap = cm.get_cmap('RdYlBu_r')
     clevlabels = [fmt % x for x in clevels]
     cmap.set_bad('white')
-    mp.contourf(df['lon'].values, df['lat'].values,
-                df[varname].values, clevels, clevlabels=clevlabels,
-                cmap=cmap, units=UNITS.get(varname))
+    if ctx['p'] == 'contour':
+        mp.contourf(df['lon'].values, df['lat'].values,
+                    df[varname].values, clevels, clevlabels=clevlabels,
+                    cmap=cmap, units=UNITS.get(varname))
     mp.plot_values(df['lon'].values, df['lat'].values,
-                   df[varname].values, fmt=fmt, labelbuffer=10)
-    if sector == 'IA':
+                   df[varname].values, fmt=fmt, labelbuffer=5)
+    if len(sector) == 2:
         mp.drawcounties()
-    if usdm == 'yes':
+    if ctx['usdm'] == 'yes':
         mp.draw_usdm(date2, filled=False, hatched=True)
 
     return mp.fig, df
