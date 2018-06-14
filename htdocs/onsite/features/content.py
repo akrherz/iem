@@ -5,10 +5,7 @@ import os
 import re
 import datetime
 
-from pyiem.util import get_dbconn
-
-# https://stackoverflow.com/questions/23932332
-SSW = getattr(sys.stdout, 'buffer', sys.stdout).write
+from pyiem.util import get_dbconn, ssw
 
 PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
@@ -18,11 +15,11 @@ PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
 def send_content_type(val):
     """Do as I say"""
     if val == 'text':
-        SSW(b"Content-type: text/plain\n\n")
+        ssw("Content-type: text/plain\n\n")
     elif val in ['png', 'gif']:
-        SSW(("Content-type: image/%s\n\n" % (val,)).encode('utf-8'))
+        ssw("Content-type: image/%s\n\n" % (val, ))
     else:
-        SSW(b"Content-type: text/plain\n\n")
+        ssw("Content-type: text/plain\n\n")
 
 
 def dblog(yymmdd):
@@ -48,12 +45,12 @@ def process(uri):
     """
     if uri is None:
         send_content_type("text")
-        SSW(b"ERROR!")
+        ssw("ERROR!")
         return
     match = PATTERN.match(uri)
     if match is None:
         send_content_type("text")
-        SSW(b"ERROR!")
+        ssw("ERROR!")
         sys.stderr.write("feature content failure: %s\n" % (repr(uri), ))
         return
     data = match.groupdict()
@@ -61,7 +58,7 @@ def process(uri):
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
     if os.path.isfile(fn):
         send_content_type(data['suffix'])
-        SSW(open(fn, 'rb').read())
+        ssw(open(fn, 'rb').read())
         dblog(data['yymmdd'])
     else:
         send_content_type('png')
@@ -76,7 +73,7 @@ def process(uri):
         ram = BytesIO()
         plt.savefig(ram, format='png')
         ram.seek(0)
-        SSW(ram.read())
+        ssw(ram.read())
 
 
 def main():

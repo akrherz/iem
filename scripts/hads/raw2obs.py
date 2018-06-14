@@ -2,19 +2,19 @@
 from __future__ import print_function
 import datetime
 import sys
-import StringIO
+from io import StringIO
 
 import pytz
-from pyiem.datatypes import speed
-from pyiem.util import get_dbconn
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.datatypes import speed
+from pyiem.util import get_dbconn
 
 
 def v(val):
     """lame"""
     if pd.isnull(val):
-        return '\N'
+        return 'null'
     return val
 
 
@@ -41,7 +41,7 @@ def do(ts):
         pdf['sknt'] = speed(pdf['USI'].values, 'MPH').value('KT')
 
     table = ts.strftime("t%Y")
-    data = StringIO.StringIO()
+    data = StringIO()
     for (station, valid), row in pdf.iterrows():
         data.write(("%s\t%s\t%s\t%s\t%s\t%s\n"
                     ) % (station, valid.strftime("%Y-%m-%d %H:%M:%S+00"),
@@ -53,7 +53,7 @@ def do(ts):
     and %s""", (sts, ets))
     data.seek(0)
     cursor.copy_from(data, table, columns=('station, valid', 'tmpf', 'dwpf',
-                                           'drct', 'sknt'))
+                                           'drct', 'sknt'), null='null')
     cursor.close()
     pgconn.commit()
 

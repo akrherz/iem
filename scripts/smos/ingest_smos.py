@@ -4,7 +4,7 @@ import glob
 import os
 import re
 import datetime
-import StringIO
+from io import StringIO
 
 import pytz
 from pyiem.util import get_dbconn, ncopen
@@ -23,25 +23,26 @@ def consume(scursor, fn, ts):
     chi2pds = nc.variables['Chi_2_P'][:].tolist()
     bad = 0
     good = 0
-    data = StringIO.StringIO()
+    data = StringIO()
     for gpid, sm, od, chi2pd in zip(gpids, sms, optdepths, chi2pds):
         # changed 1 Feb 2018 as per guidance from Victoria
-        if chi2pd < 0.05:
+        if chi2pd is not None and chi2pd < 0.05:
             bad += 1
             od = None
             sm = None
-        if sm <= 0 or sm >= 0.7:
+        if sm is None or sm <= 0 or sm >= 0.7:
             sm = None
-        if od <= 0 or od > 1:
+        if od is None or od <= 0 or od > 1:
             od = None
         data.write(("%s\t%s\t%s\t%s\n"
                     ) % (int(gpid), ts.strftime("%Y-%m-%d %H:%M:%S+00"),
-                         sm or '\N', od or '\N'))
+                         sm or 'null', od or 'null'))
         good += 1
 
     data.seek(0)
     scursor.copy_from(data, table, columns=('grid_idx', 'valid',
-                                            'soil_moisture', 'optical_depth'))
+                                            'soil_moisture', 'optical_depth'),
+                      null='null')
 
 
 def fn2datetime(fn):
