@@ -1,31 +1,23 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Contacts";
 
 $t->content = <<<EOM
 
-<div class="row">
-<div class="col-md-6">
-
 <h3>IEM Contacts</h3>
 
 <p><div class="alert alert-info">We are very responsive to emails!  Please
  consider emailing us before calling!</div>
-		
-<p><h3>IEM Coordinator:</h3><br>
-		
-<p>Dr Raymond Arritt
-<br>3010 Agronomy Hall
-<br>Iowa State University
-<br>Ames, IA 50011
-<br><i>Email:</i> <a href="mailto:rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu">rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu</a>
 
-<h3>IEM Systems Analyst:</h3><br>
-		
-<p>Daryl Herzmann
-<br>3010 Agronomy Hall
+<div class="row">
+<div class="col-md-5 well">
+<h3>For Data &amp; Technical Issues:</h3>
+
+<h4>IEM Systems Analyst: Daryl Herzmann</h4>
+
+<br>716 Farm House Ln
 <br>Iowa State University
 <br>Ames, IA 50011
 <br><i>Email:</i> <a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a>
@@ -37,15 +29,27 @@ $t->content = <<<EOM
 <p>If all those fail you, try <i>Daryl's Cell Phone!</i> 515.451.9249
 
 </div>
-<div class="col-md-6">
+<div class="col-md-2">&nbsp;</div>
+<div class="col-md-5 well">
+
+<h3>For Administrative Questions:</h3>
+
+<h4>IEM Coordinator: Dr Raymond Arritt</h4>
+		
+<br>716 Farm House Ln
+<br>Iowa State University
+<br>Ames, IA 50011
+<br><i>Email:</i> <a href="mailto:rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu">rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu</a>
+
+
+</div>
+</div>
 
 <a href="http://www.nsf.gov"><img src="/images/nsf.gif" border="0"></a>
 <br clear="all" />This website is based upon work supported by grants from the National Science
 Foundation. Opinions, findings, and conclusions or recommendations
 expressed in this material are those of the author(s) and do not necessarily
 reflect the views of the National Science Foundation.
-
-</div></div>
 
 EOM;
 $t->render('single.phtml');

@@ -9,31 +9,45 @@ import psycopg2.extras
 from pyiem.util import get_dbconn, ssw
 
 
+def rectify_date(tstamp):
+    """Convert this tstamp into something we can actually use
+
+    if '', use max valid from database
+    if between tuesday and thursday at 8 AM, go back to last week
+    back to tuesday
+    """
+    if tstamp == '':
+        pgconn = get_dbconn('postgis')
+        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Go get the latest USDM stored in the database!
+        cursor.execute("""SELECT max(valid) from usdm""")
+        return cursor.fetchone()[0]
+
+    ts = datetime.datetime.strptime(tstamp, '%Y-%m-%d').date()
+    offset = (ts.weekday() - 1) % 7
+    return ts - datetime.timedelta(days=offset)
+
+
 def run(ts):
     """ Actually do the hard work of getting the USDM in geojson """
     pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    if ts == '':
-        # Go get the latest USDM stored in the database!
-        cursor.execute("""SELECT max(valid) from usdm""")
-        ts = cursor.fetchone()[0]
-    else:
-        ts = datetime.datetime.strptime(ts, '%Y-%m-%d').date()
-    offset = (ts.weekday() - 1) % 7
-    tuesday = ts - datetime.timedelta(days=offset)
 
     # Look for polygons into the future as well as we now have Flood products
     # with a start time in the future
     cursor.execute("""
         SELECT ST_asGeoJson(geom) as geojson, dm, valid
         from usdm WHERE valid = %s ORDER by dm ASC
-    """, (tuesday, ))
+    """, (ts, ))
+    if cursor.rowcount == 0:
+        # go back one week
+        cursor.execute("""
+            SELECT ST_asGeoJson(geom) as geojson, dm, valid
+            from usdm WHERE valid = %s ORDER by dm ASC
+        """, (ts - datetime.timedelta(days=7), ))
 
     utcnow = datetime.datetime.utcnow()
     res = {'type': 'FeatureCollection',
-           'crs': {'type': 'EPSG',
-                   'properties': {'code': 4326, 'coordinate_order': [1, 0]}},
            'features': [],
            'generation_time': utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
            'count': cursor.rowcount}
@@ -55,7 +69,7 @@ def main():
 
     form = cgi.FieldStorage()
     cb = form.getfirst('callback', None)
-    ts = form.getfirst('date', '')
+    ts = rectify_date(form.getfirst('date', ''))
 
     mckey = "/geojson/usdm.geojson|%s" % (ts,)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
