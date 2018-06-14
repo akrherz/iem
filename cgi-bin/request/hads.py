@@ -132,7 +132,7 @@ def main():
 
     else:
         ssw("Content-type: text/plain\n\n")
-        table.to_csv(sys.stdout, sep=delimiter)
+        table.to_csv(getattr(sys.stdout, 'buffer', sys.stdout), sep=delimiter)
 
 
 if __name__ == '__main__':
