@@ -4,6 +4,7 @@ import sys
 import cgi
 import datetime
 import os
+from io import StringIO
 
 import pytz
 import pandas as pd
@@ -92,13 +93,14 @@ def main():
         df['latitude'] = [get_lat(x) for x in df['station']]
         df['longitude'] = [get_lon(x) for x in df['station']]
 
+    sio = StringIO()
     if what == 'txt':
         ssw('Content-type: application/octet-stream\n')
         ssw(('Content-Disposition: attachment; filename=rwis.txt\n\n'))
-        df.to_csv(sys.stdout, index=False, sep=delimiter, columns=myvars)
+        df.to_csv(sio, index=False, sep=delimiter, columns=myvars)
     elif what == 'html':
         ssw("Content-type: text/html\n\n")
-        df.to_html(sys.stdout, columns=myvars)
+        df.to_html(sio, columns=myvars)
     elif what == 'excel':
         writer = pd.ExcelWriter('/tmp/ss.xlsx')
         df.to_excel(writer, 'Data', index=False, columns=myvars)
@@ -108,10 +110,12 @@ def main():
         ssw(("Content-Disposition: attachment; Filename=rwis.xlsx\n\n"))
         ssw(open('/tmp/ss.xlsx', 'rb').read())
         os.unlink('/tmp/ss.xlsx')
-
+        return
     else:
         ssw("Content-type: text/plain\n\n")
-        df.to_csv(sys.stdout, sep=delimiter, columns=myvars)
+        df.to_csv(sio, sep=delimiter, columns=myvars)
+    sio.seek(0)
+    ssw(sio.getvalue())
 
 
 if __name__ == '__main__':
