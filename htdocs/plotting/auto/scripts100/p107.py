@@ -18,8 +18,10 @@ PDICT = OrderedDict([
         ('days-lows-above',
          'Days with Low Temp Greater Than or Equal To (threshold)'),
         ('days-lows-below', 'Days with Low Temp Below (threshold)'),
-        ('max_low', 'Maximum High Temperature'),
+        ('max_high', 'Maximum High Temperature'),
+        ('min_high', 'Minimum High Temperature'),
         ('min_low', 'Minimum Low Temperature'),
+        ('max_low', 'Maximum Low Temperature'),
         ('precip', 'Total Precipitation')])
 
 
@@ -97,7 +99,9 @@ def plotter(fdict):
     avg(low) as avg_low_temp,
     sum(precip) as precip,
     min(low) as min_low,
+    max(low) as max_low,
     max(high) as max_high,
+    min(high) as min_high,
     sum(case when high >= %s then 1 else 0 end) as "days-high-above",
     sum(case when high < %s then 1 else 0 end) as "days-high-below",
     sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
