@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """A specialized report"""
 import datetime
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, ssw
 
 
 def averageTemp(db, hi="high", lo="low"):
+    """Average Temp"""
     highSum, lowSum = 0, 0
     for day in db.keys():
         highSum += db[day][hi]
@@ -17,28 +18,31 @@ def averageTemp(db, hi="high", lo="low"):
 
 
 def hdd(db, hi="high", lo="low"):
+    """Compute heating degree days"""
     dd = 0
-    for day in db.keys():
+    for day in db:
         h = db[day][hi]
-        l = db[day][lo]
-        a = (h+l) / 2.00
+        low = db[day][lo]
+        a = (h + low) / 2.00
         if a < 65:
             dd += (65.0 - a)
     return dd
 
 
 def cdd(db, hi="high", lo="low"):
+    """Cooling Degree Days"""
     dd = 0
-    for day in db.keys():
+    for day in db:
         h = db[day][hi]
-        l = db[day][lo]
-        a = (h+l) / 2.00
+        low = db[day][lo]
+        a = (h + low) / 2.00
         if a > 65:
             dd += (a - 65.0)
     return dd
 
 
 def main():
+    """Go Main Go"""
     COOP = get_dbconn('coop')
     ccursor = COOP.cursor()
     IEM = get_dbconn('iem')
@@ -84,20 +88,20 @@ def main():
     row = acursor.fetchone()
     awind = row[1]
 
-    print 'Content-type: text/plain\n\n'
-    print '  Orange City Climate Summary\n'
-    print '%15s %6s %6s' % ("DATE", "HIGH", "LOW")
+    ssw('Content-type: text/plain\n\n')
+    ssw('  Orange City Climate Summary\n')
+    ssw('%15s %6s %6s' % ("DATE", "HIGH", "LOW"))
     now = s
     while now <= e:
-        print(("%15s %6i %6i %6i %6i"
-               ) % (now.strftime("%Y-%m-%d"),
-                    db[now.strftime("%m%d")]['high'],
-                    db[now.strftime("%m%d")]['low'],
-                    db[now.strftime("%m%d")]['avg_high'],
-                    db[now.strftime("%m%d")]['avg_low']))
+        ssw(("%15s %6i %6i %6i %6i\n"
+             ) % (now.strftime("%Y-%m-%d"),
+                  db[now.strftime("%m%d")]['high'],
+                  db[now.strftime("%m%d")]['low'],
+                  db[now.strftime("%m%d")]['avg_high'],
+                  db[now.strftime("%m%d")]['avg_low']))
         now += datetime.timedelta(days=1)
 
-    h, l = averageTemp(db)
+    h, low = averageTemp(db)
     ch, cl = averageTemp(db, "avg_high", "avg_low")
 
     l_hdd = hdd(db)
@@ -106,7 +110,7 @@ def main():
     l_cdd = cdd(db)
     c_cdd = cdd(db, "avg_high", "avg_low")
 
-    print """
+    ssw("""
 Summary Information [%s - %s]
 -------------------
               Observed     |  Climate  |  Diff
@@ -115,9 +119,9 @@ Summary Information [%s - %s]
  HDD(base65)    %4.0f           %4.0f       %4.0f
  CDD(base65)    %4.0f           %4.0f       %4.0f
  Wind[MPH]      %4.1f             M          M
-""" % (s.strftime("%d %B %Y"), e.strftime("%d %B %Y"), h, ch, h - ch, l, cl,
-       l - cl, l_hdd, c_hdd, l_hdd - c_hdd, l_cdd, c_cdd, l_cdd - c_cdd,
-       awind)
+""" % (s.strftime("%d %B %Y"), e.strftime("%d %B %Y"), h, ch, h - ch, low, cl,
+       low - cl, l_hdd, c_hdd, l_hdd - c_hdd, l_cdd, c_cdd, l_cdd - c_cdd,
+       awind))
 
 
 if __name__ == '__main__':
