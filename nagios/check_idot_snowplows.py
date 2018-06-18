@@ -23,7 +23,11 @@ def main():
     count = row[0]
     daycount = row[1]
 
-    if daycount > 2:
+    if datetime.date.today().month in (5, 6, 7, 8, 9, 10):
+        print(('OK - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0'
+               ) % (count, daycount, count, daycount))
+        sys.exit(0)
+    elif daycount > 2:
         print(('OK - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0'
                ) % (count, daycount, count, daycount))
         sys.exit(0)
@@ -31,13 +35,9 @@ def main():
         print(('OK - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0'
                ) % (count, daycount, count, daycount))
         sys.exit(1)
-    else:
-        print(('CRITICAL - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0'
-               ) % (count, daycount, count, daycount))
-        # Don't error in the summer
-        retcode = (2 if datetime.date.today().month not in (5, 6, 7, 8, 9, 10)
-                   else 0)
-        sys.exit(retcode)
+    print(('CRITICAL - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0'
+           ) % (count, daycount, count, daycount))
+    sys.exit(2)
 
 
 if __name__ == '__main__':
