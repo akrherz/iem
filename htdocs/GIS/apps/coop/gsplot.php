@@ -61,6 +61,8 @@ $varDef = Array(
   "gdd50" => "Growing Degree Days (base=50)",
   "gdd51" => "Growing Degree Days (base=51)",
   "gdd52" => "Growing Degree Days (base=52)",
+  "cdd65" => "Cooling Degree Days (base=65)",
+  "hdd65" => "Heating Degree Days (base=65)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
@@ -81,6 +83,8 @@ $rnd = Array(
   "prec" => 2,
   "sgdd50" => 0,
   "sdd86" => 0,
+  "cdd65" => 0,
+  "hdd65" => 0,
   "mintemp" => 0,
   "maxtemp" => 0);
 $myStations = $cities;
@@ -143,6 +147,8 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT station,
 	sum(gddxx(50, 86, high, low)) as s_gdd50,
   sum(gddxx(51, 86, high, low)) as s_gdd51,
 	sum(gddxx(52, 86, high, low)) as s_gdd52,
+  sum(cdd(high, low, 65)) as s_cdd65,
+  sum(hdd(high, low, 65)) as s_hdd65,
 	sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
 	max(high) as s_maxtemp from alldata 
 	WHERE day >= $1 and day <= $2

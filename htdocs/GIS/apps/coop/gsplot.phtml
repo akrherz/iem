@@ -59,7 +59,9 @@ $rs = pg_prepare($coopdb, "SELECT", "WITH data as (
 	sum(gddxx(48, 86, high, low)) as s_gdd48,
 	sum(gddxx(50, 86, high, low)) as s_gdd50,
   sum(gddxx(51, 86, high, low)) as s_gdd51,
-	sum(gddxx(52, 86, high, low)) as s_gdd52,
+  sum(gddxx(52, 86, high, low)) as s_gdd52,
+  sum(cdd(high, low, 65)) as s_cdd65,
+  sum(hdd(high, low, 65)) as s_hdd65,
   sum(sdd86(high,low)) as s_sdd86,
   min(low) as s_mintemp,
   max(high) as s_maxtemp from alldata_${state}
@@ -75,11 +77,13 @@ $rs = pg_prepare($coopdb, "SELECT", "WITH data as (
   avg(s_gdd51) as c_gdd51,
   avg(s_gdd52) as c_gdd52,
   avg(s_sdd86) as c_sdd86,
+  avg(s_cdd65) as c_cdd65,
+  avg(s_hdd65) as c_hdd65,
   avg(s_mintemp) as c_mintemp,
   avg(s_maxtemp) as c_maxtemp from data GROUP by station
 )
 SELECT d.*, c_rainfall, c_gdd32, c_gdd41, c_gdd46, c_gdd48, c_gdd50,
-c_gdd51, c_gdd52, c_sdd86, c_mintemp, c_maxtemp
+c_gdd51, c_gdd52, c_sdd86, c_mintemp, c_maxtemp, c_cdd65, c_hdd65
 from data d JOIN climo c on (d.station = c.station) WHERE d.year = $3
 ");
 
@@ -88,20 +92,23 @@ $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("md", $sts),
 
 
     $tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,".
-                   "%10s,%10s,%10s,%10s,%10s\n", 'ID',
+                   "%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID',
  'StationName', 'Latitude', 'Longitude', 'GDD50', 'GDD48', 'SDD86', 'PRECIP',
- 'CLIM_GDD50', 'CLIM_GDD48', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP');
+ 'CLIM_GDD50', 'CLIM_GDD48', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP',
+ 'CDD65', 'HDD65', 'CLIM_CDD65', 'CLIM_HDD65');
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
 $ukey = $row["station"];
 	if (! isset($cities[$ukey]) ) continue;
   $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.0f,".
-                 "%10.2f,%10.0f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey,
+                 "%10.2f,%10.0f,%10.0f,%10.2f,%10.0f,%10.0f,%10.2f,%10.2f".
+                 ",%10.2f,%10.2f\n", $ukey,
   $cities[$ukey]['name'],
   $cities[$ukey]['lat'], $cities[$ukey]['lon'],
   		$row["s_gdd50"], $row["s_gdd48"], $row["s_sdd86"], $row["s_rainfall"],
   $row["c_gdd50"], $row["c_gdd48"], $row["c_rainfall"], $row["s_maxtemp"],
-  $row["s_mintemp"] );
+  $row["s_mintemp"], $row["s_cdd65"], $row["s_hdd65"], $row["c_cdd65"],
+  $row["s_hdd65"]);
 }
 
 $netselect = "<select name=\"network\">";
@@ -122,6 +129,8 @@ $ar = Array(
   "gdd50" => "Growing Degree Days (base=50)",
   "gdd51" => "Growing Degree Days (base=51)",
   "gdd52" => "Growing Degree Days (base=52)",
+  "cdd65" => "Cooling Degree Days (base=65)",
+  "hdd65" => "Heating Degree Days (base=65)",
 	"prec" => "Precipitation",
 	"sdd86" => 	"Stress Degree Days (base=86)",
 	"mintemp" => "Minimum Temperature",
