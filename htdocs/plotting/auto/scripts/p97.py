@@ -16,6 +16,10 @@ PDICT2 = OrderedDict([
     ('gdd_sum', 'Growing Degree Days ($base/86) Total'),
     ('cgdd_sum', 'Growing Degree Days Climatology ($base/86)'),
     ('gdd_depart', 'Growing Degree Days ($base/86) Departure'),
+    ('cdd65_sum', 'Cooling Degree Days (base 65)'),
+    ('cdd65_depart', 'Cooling Degree Days Departure (base 65)'),
+    ('hdd65_sum', 'Heating Degree Days (base 65)'),
+    ('hdd65_depart', 'Heating Degree Days Departure (base 65)'),
     ('precip_depart', 'Precipitation Departure'),
     ('precip_sum', 'Precipitation Total'),
     ])
@@ -30,6 +34,10 @@ UNITS = {
     'avg_high_temp': 'F',
     'gdd_depart': 'F',
     'gdd_sum': 'F',
+    'cdd_sum': 'F',
+    'hdd_sum': 'F',
+    'cdd_depart': 'F',
+    'hdd_depart': 'F',
     'cgdd_sum': 'F',
     'avg_temp_depart': 'F',
     'avg_temp': 'F',
@@ -45,7 +53,9 @@ def get_description():
     desc['data'] = True
     desc['description'] = """This application plots an analysis of station
     data for a period of your choice.  Spatially aggregated values like those
-    for climate districts and statewide averages are not included.
+    for climate districts and statewide averages are not included.  For this
+    application, climatology is based on averaged observations between 1951
+    till the present day.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
@@ -88,6 +98,7 @@ def plotter(fdict):
     df = read_sql("""
     WITH obs as (
         SELECT station, gddxx(%s, 86, high, low) as gdd,
+        cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
         sday, high, low, precip,
         (high + low)/2. as avg_temp
         from """ + table + """ WHERE
@@ -95,13 +106,16 @@ def plotter(fdict):
         substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'),
     climo as (
         SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
-        gdd""" + str(ctx['gddbase']) + """ as gdd from climate51),
+        gdd""" + str(ctx['gddbase']) + """ as gdd, cdd65, hdd65
+        from climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
         o.precip as precip, c.precip as cprecip,
-        o.avg_temp,
+        o.avg_temp, o.cdd65, o.hdd65,
         o.high, o.low, o.gdd, c.gdd as cgdd,
         o.gdd - c.gdd as gdd_diff,
+        o.cdd65 - c.cdd65 as cdd_diff,
+        o.hdd65 - c.hdd65 as hdd_diff,
         o.avg_temp - (c.high + c.low)/2. as temp_diff
         from obs o JOIN climo c ON
         (o.station = c.station and o.sday = c.sday)),
@@ -115,7 +129,11 @@ def plotter(fdict):
         max(high) as max_high_temp,
         min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
         avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
-        sum(cgdd) as cgdd_sum
+        sum(cgdd) as cgdd_sum,
+        sum(cdd65) as cdd_sum,
+        sum(hdd65) as hdd_sum,
+        sum(cdd_diff) as cdd_depart,
+        sum(hdd_diff) as hdd_depart
         from combo GROUP by station)
 
     SELECT d.station, t.name,
@@ -131,6 +149,7 @@ def plotter(fdict):
     max_high_temp,
     avg_high_temp,
     avg_low_temp,
+    cdd_sum, hdd_sum, cdd_depart, hdd_depart,
     ST_x(t.geom) as lon, ST_y(t.geom) as lat
     from agg d JOIN stations t on (d.station = t.id)
     WHERE t.network ~* 'CLIMATE'

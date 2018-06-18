@@ -12,6 +12,8 @@ PDICT = {'total_precip': 'Total Precipitation',
          'avg_temp': 'Average Temperature',
          'max_high': 'Maximum High Temperature',
          'days_high_aoa': 'Days with High At or Above',
+         'cdd65': 'Cooling Degree Days (base 65)',
+         'hdd65': 'Heating Degree Days (base 65)',
          'gdd32': 'Growing Degree Days (base 32)',
          'gdd41': 'Growing Degree Days (base 41)',
          'gdd46': 'Growing Degree Days (base 46)',
@@ -25,6 +27,8 @@ UNITS = {'total_precip': 'inch',
          'avg_temp': 'F',
          'max_high': 'F',
          'days_high_aoa': 'days',
+         'cdd65': 'F',
+         'hdd65': 'F',
          'gdd32': 'F',
          'gdd41': 'F',
          'gdd46': 'F',
@@ -102,7 +106,8 @@ def combine(df, months, offsets):
         else:
             thisdf = df[df['month'] == month]
         # Do our combinations, we divide out later when necessary
-        for v in ['avg_temp', 'total_precip', 'gdd32', 'gdd41', 'gdd46',
+        for v in ['avg_temp', 'total_precip', 'cdd65', 'hdd65',
+                  'gdd32', 'gdd41', 'gdd46',
                   'gdd48', 'gdd50', 'gdd51', 'gdd52', 'days_high_aoa']:
             xdf[v] = xdf[v] + thisdf[v]
         tmpdf = pd.DataFrame({'a': xdf['max_high'], 'b': thisdf['max_high']})
@@ -139,6 +144,8 @@ def plotter(fdict):
     SELECT year, month, avg((high+low)/2.) as avg_temp,
     sum(precip) as total_precip, max(high) as max_high,
     sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
+    sum(cdd(high, low, 65)) as cdd65,
+    sum(hdd(high, low, 65)) as hdd65,
     sum(gddxx(32, 86, high, low)) as gdd32,
     sum(gddxx(41, 86, high, low)) as gdd41,
     sum(gddxx(46, 86, high, low)) as gdd46,
