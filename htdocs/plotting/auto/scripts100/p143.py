@@ -24,6 +24,12 @@ SDATES = OrderedDict([
         ('nov1', 'November 1'),
         ('jan1', 'January 1'),
         ('mar15', 'March 15'),
+        ('apr25', 'Apr 25'),
+        ('apr30', 'Apr 30'),
+        ('may8', 'May 8'),
+        ('may11', 'May 11'),
+        ('may17', 'May 17'),
+        ('may18', 'May 18'),
                      ])
 COUNTY = {'ames': 169, 'cobs': 169, 'crawfordsville': 183, 'lewis': 155,
           'nashua': 67, 'sutherland': 141,
