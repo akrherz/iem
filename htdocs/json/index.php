@@ -34,7 +34,14 @@
           "{date}" => "2017-07-18"
           )
       );
-  
+
+  $services[] = Array(
+	"title" => "IEM Cow (NWS Storm Based Warning Verification) API",
+	"url" => "/api/1/cow.json",
+	"desc" => "This API is documented <a href=\"cow/#api\">here</a>.",
+	"vars" => Array(),
+	"example" => Array()
+);
   $services[] = Array(
       "table_schema" => TRUE,
       "title" => "United States Drought Monitor by Point",

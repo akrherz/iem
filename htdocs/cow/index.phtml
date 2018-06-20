@@ -199,6 +199,8 @@ $content .= <<<EOF
 
 <h3>IEM Cow (NWS Storm Based Warning Verification)</h3>
 
+<p><a href="#api" class="btn btn-primary"><i class="fa fa-download"></i> IEM Cow API Access</a></p>
+
 <p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
 educational purposes only.  This application allows you to view warnings
 and storm reports issued by a Weather Forecast Office (WFO) for a period
@@ -208,13 +210,11 @@ verification numbers for the warnings issued.
 <p>This application works for dates after 8 June 2005.
 
 <h3>Storm Based Warnings</h3>
-<p><img src="http://www.weather.gov/sbwarnings/images/SBW-main.jpg" align="left" style="margin:5px;"><img src="http://www.weather.gov/sbwarnings/images/SBW-main2.jpg" align="left" style="margin: 5px;"> On the first of October 2007, the National Weather
+<p>On the first of October 2007, the National Weather
 Service began issuing warnings for tornados, severe weather, floods, and 
 marine hazards on a storm by storm basis.  Previously, the warnings
 were issued for an entire county. This application attempts to provide 
 verification statistics for these storm based warnings.
-
-<p>The images shown are taken from the <a href="http://www.weather.gov/sbwarnings/">NWS Storm Based Warnings</a> website.
 
 <p>Related links:
 <ul>
@@ -252,6 +252,155 @@ Reports are buffered out in a circular fashion and combined to create a
 coverage of impacted areas.  The area of the buffered LSRs is then compared
 with the area of the storm based warning to yield a percentage.</li>
 </ul>
+
+<h3><a name="api"></a> API for IEM Cow Data</h3>
+
+<p><strong>20 June 2018</strong>:  The IEM is pleased to announce availability
+of an API for programatic access to IEM Cow data and statistics.  At this time,
+the API is not considered stable and JSON schema should not be considered stable
+either.  Hopefully in a week or two, with some friendly testing and feedback, both
+will stablize for an API level "1" that should not change going forward. <strong>The
+generated output statistics have not been fully tested yet either!</strong> This
+will be stabilzed as well in the coming days.</p>
+
+<p>The JSON emitting service endpoint is:
+<br /><code>https://mesonet.agron.iastate.edu/api/1/cow.json</code></p>
+
+<p>This endpoint accepts a large number of CGI parameters via HTTP GET. None of
+the parameters are required.</p>
+
+<table class="table table-striped">
+<thead>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+
+<tr>
+ <td>callback=func</td>
+ <td>not used</td>
+ <td>This supports JSON-P style requests with the resulting JSON data begin
+ encapsulated by a javascript function call. i.e. <code>callback=gotdata</code></td>
+ </tr>
+
+<tr>
+ <td>wfo=XXX</td>
+ <td>All WFOs considered</td>
+ <td>This specifies the three character WFO identifier that you wish to get
+ statistics for.  If none are specified, then you get the entire NWS.  You can
+ provide this parameter one or more times, i.e. <code>wfo=XXX&amp;wfo=YYY</code></td>
+ </tr>
+<tr><th colspan="3">Time Specification Option 1</th></tr>
+<tr>
+ <td>begints=ISO9660<br />endts=ISO9660</td>
+ <td>Last 4 Hour Period</td>
+ <td>This start time and end time sets the window to look for NWS Storm Based
+ Warnings and Local Storm Reports.  For the case of warnings, the warning must
+ have been issued after the start time and have an expiration prior to the end 
+ time.  The tricky issue issue is when warnings cross either the start or end
+ time, this can lead to incomplete statistics (ie a storm report was actually
+ covered by a warning, but that warning was outside your time domain. <strong>These
+ timestamps are in UTC.</strong>, i.e. <code>begints=2018-06-18T12:00Z&amp;endts=2018-06-19T12:00Z</code>
+</td></tr>
+
+<tr><th colspan="3">Time Specification Option 2</th></tr>
+<tr>
+<td>syear=YYYY smonth=MM sday=DD shour=HH24
+<br />&nbsp;<br />eyear=YYYY emonth=MM eday=DD ehour=HH24
+</td>
+<td>Last 4 Hour Period</td>
+<td>Same time details above as with Option 1, but here you are just specifying manually
+each part of the date, i.e. <code>syear=2018&amp;smonth=6&amp;sday=18&amp;shour=12&amp;eyear=2018&amp;emonth=6&amp;eday=19&amp;ehour=12&amp;</code></td>
+</tr>
+
+<tr>
+<td>phenomena=XX</td>
+<td>All TO, SV, FF, MA</td>
+<td>These are the VTEC phenomena codes that you want the data and stats for.  These
+are two character and the currently supported Storm Based Warning types are 
+Tornado (TO), Severe Thunderstorm (SV), Flash Flood (FF), and Marine (MA). You can
+specify more than one phenomena, i.e. <code>phenomena=TO&amp;phenomena=SV</code>
+</td></tr>
+
+<tr>
+<td>lsrtype=XX</td>
+<td>All TO, SV, FF, MA</td>
+<td>So like in the case of phenomena above, here you are specifying which
+category of Local Storm Reports to consider.  This gets to be a bit difficult
+to fully explain. In general, the codes reflect with Local Storm Report types
+should be used that can potentially verify the warning. i.e. <code>lsrtype=TO&amp;lsrtype=SV</code>
+</td></tr>
+
+<tr>
+<td>hailsize=SIZE_IN_INCHES</td>
+<td>1.00 inches</td>
+<td>What hail size in inches should be considered when verifying the warnings.  The
+present day standard is one inch, but previously it was 0.75 inches.  This parameter
+only considers one value, i.e. <code>hailsize=1.50</code></td></tr>
+
+<tr>
+<td>lsrbuffer=DIST_IN_KM</td>
+<td>15 km</td>
+<td>IEM Cow attempts to provide an areal verification percentage within the polygons,
+this areal value is computed by buffering out the point LSR reports by the given radius
+in kilometers.  The GIS operation is done in USGS Albers (EPSG:2163).
+example, <code>lsrbuffer=15</code></td></tr>
+
+<tr>
+<td>warningbuffer=DIST_IN_KM</td>
+<td>1 km</td>
+<td>So this is kind of a bug-a-boo and dirty little secret, but the NWS Storm Based
+Warnings are not necessarily exact in latitude/longitude space.  The basic data
+provides polygon points with two places of decimal precision.  Given political boundaries
+and other lame limitations, there are places in the country that would never receive
+a warning if not for allowing the polygons to buffer out slightly for folks implementing
+workflows with this data.  So we default to buffer out the warning 1km, which is used
+in verification, but not in size calculations.  example, <code>warningbuffer=1</code></td>
+</tr>
+
+<tr>
+<td>wind=SPEED_IN_MPH</td>
+<td>58 MPH</td>
+<td>For wind Local Storm Reports, what minimum speed should be considered for
+verifying a warning.  This value is not used in the case of Marine Warnings.
+example, <code>wind=58</code></td></tr>
+
+<tr>
+<td>windhailtag=N_or_Y</td>
+<td>No</td>
+<td><strong>NOT IMPLEMENTED YET, TODO</strong></td></tr>
+
+<tr>
+<td>limitwarns=N_or_Y</td>
+<td>No</td>
+<td><strong>NOT IMPLEMENTED YET, TODO</strong></td></tr>
+
+<tr>
+<td>fcster=string</td>
+<td>Not considered</td>
+<td><strong>With this enabled, resulting stats should not be used</strong> This
+will limit considered warnings to those signed by the exact string provided. This
+creates a problematic situation with all storm reports considered, but only a subset
+of warnings provided for verification.  The actual verification of individual warnings
+will be accurate, but the bulk stats are not correct.
+example, <code>fcster=forecaster10</code></td></tr>
+
+</tbody>
+</table>
+
+<h4>Resulting JSON Schema.</h4>
+
+<p><strong>This is very much a work-in-progress, with feedback needed and will
+change until this stablizes.</strong></p>
+
+<pre>
+{"generated_at": "ISO9660",
+ "params": {dictionary of how API was called},
+ "stats": {dictionary of generated statistics},
+ "events": GeoJSON-style object of warnings,
+ "stormreports": GeoJSON-style object on LSRS
+}
+</pre>
+
 EOF;
 }
 $t->headextra = <<<EOF
