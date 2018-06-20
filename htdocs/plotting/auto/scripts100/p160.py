@@ -86,8 +86,9 @@ def get_context(fdict):
     """, pgconn, params=(station, mints, maxts), index_col=None)
     ctx['odf'] = df.pivot('valid', 'label', 'value')
     if not ctx['fdf'].empty:
+        ctx['fdf'].reset_index(inplace=True)
         ctx['df'] = pd.merge(ctx['fdf'], ctx['odf'], left_on='valid',
-                             right_index=True, how='left', sort=False)
+                             right_on='valid', how='left', sort=False)
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
     ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
     if len(ctx['df'].index) == 0 and len(ctx['odf'].index) > 0:
@@ -174,4 +175,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    highcharts(dict(station='CIDI4', dt='2016-08-20 0220'))
+    highcharts(dict(station='AESI4', dt='2018-06-20 2000'))
