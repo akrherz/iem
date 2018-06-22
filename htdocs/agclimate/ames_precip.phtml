@@ -1,0 +1,28 @@
+<?php
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
+ $t = new MyView();
+ 
+ $t->title = "ISUSM - Ames Second Tipping Bucket Printout";
+ $t->thispage = "networks-agclimate";
+
+ $table = file_get_contents("http://iem.local/agclimate/ames_precip.py");
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+		<li class="active">Network Metadata</li>
+</ol>
+
+<h3>Ames ISU Ag Farm Dual Tipping Bucket</h3>
+
+<p>During the fall of 2017, a second tipping bucket was installed at the Ames
+ISU Ag Farm location.  Here's a diagnostic printout of the observations. The
+COOP total shown is a 24-hour value at 4 PM, not hourly like the buckets at
+4 PM.</p>
+
+${table}
+
+EOF;
+$t->render('single.phtml');
+?>
