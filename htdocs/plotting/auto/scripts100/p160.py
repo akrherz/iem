@@ -38,6 +38,7 @@ def get_description():
 
 
 def get_context(fdict):
+    """Do the common work"""
     pgconn = get_dbconn('hads')
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
@@ -91,13 +92,14 @@ def get_context(fdict):
                              right_on='valid', how='left', sort=False)
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
     ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
-    if len(ctx['df'].index) == 0 and len(ctx['odf'].index) > 0:
+    if ctx['df'].empty and not ctx['odf'].empty:
         ctx['primary'] = ctx['odf'].columns[0]
         ctx['secondary'] = ctx['odf'].columns[1]
     return ctx
 
 
 def highcharts(fdict):
+    """generate highcharts"""
     ctx = get_context(fdict)
     df = ctx['df']
     df['ticks'] = df['valid'].astype(np.int64) // 10 ** 6

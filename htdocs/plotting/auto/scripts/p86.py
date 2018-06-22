@@ -3,8 +3,9 @@ import datetime
 from collections import OrderedDict
 
 import numpy as np
+import cartopy.crs as ccrs
 from pyiem import iemre
-from pyiem.datatypes import temperature, speed
+from pyiem.datatypes import distance, temperature, speed
 from pyiem.util import get_autoplot_context, ncopen
 
 PDICT = OrderedDict((('p01d_12z', '24 Hour Precipitation at 12 UTC'),
@@ -53,27 +54,40 @@ def plotter(fdict):
     ptype = ctx['ptype']
     date = ctx['date']
     varname = ctx['var']
+    title = date.strftime("%-d %B %Y")
+    mp = MapPlot(sector='midwest', axisbg='white', nocaption=True,
+                 title='IEM Reanalysis of %s for %s' % (PDICT.get(varname),
+                                                        title),
+                 subtitle='Data derived from various NOAA datasets'
+                 )
+    (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
+    i0, j0 = iemre.find_ij(west, south)
+    i1, j1 = iemre.find_ij(east, north)
+    jslice = slice(j0, j1)
+    islice = slice(i0, i1)
 
     idx0 = iemre.daily_offset(date)
     nc = ncopen(iemre.get_daily_ncname(date.year))
-    lats = nc.variables['lat'][:]
-    lons = nc.variables['lon'][:]
+    lats = nc.variables['lat'][jslice]
+    lons = nc.variables['lon'][islice]
     if varname == 'rsds':
         # Value is in W m**-2, we want MJ
-        data = nc.variables[varname][idx0, :, :] * 86400. / 1000000.
+        data = nc.variables[varname][idx0, jslice, islice] * 86400. / 1000000.
         units = 'MJ d-1'
         clevs = np.arange(0, 37, 3.)
         clevs[0] = 0.01
         clevstride = 1
     elif varname in ['wind_speed', ]:
-        data = speed(nc.variables[varname][idx0, :, :], 'MPS').value('MPH')
+        data = speed(nc.variables[varname][idx0, jslice, islice],
+                     'MPS').value('MPH')
         units = 'mph'
         clevs = np.arange(0, 41, 2)
         clevs[0] = 0.01
         clevstride = 2
     elif varname in ['p01d', 'p01d_12z']:
         # Value is in W m**-2, we want MJ
-        data = nc.variables[varname][idx0, :, :] / 25.4
+        data = distance(nc.variables[varname][idx0, jslice, islice],
+                        'MM').value('IN')
         units = 'inch'
         clevs = np.arange(0, 0.25, 0.05)
         clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
@@ -83,7 +97,8 @@ def plotter(fdict):
     elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
                      'avg_dwpk']:
         # Value is in W m**-2, we want MJ
-        data = temperature(nc.variables[varname][idx0, :, :], 'K').value('F')
+        data = temperature(nc.variables[varname][idx0, jslice, islice],
+                           'K').value('F')
         units = 'F'
         clevs = np.arange(-30, 120, 5)
         clevstride = 2
@@ -92,8 +107,8 @@ def plotter(fdict):
                                   if varname == 'range_tmpk_12z' else '', )
         vname2 = 'low_tmpk%s' % ('_12z'
                                  if varname == 'range_tmpk_12z' else '', )
-        d1 = nc.variables[vname1][idx0, :, :]
-        d2 = nc.variables[vname2][idx0, :, :]
+        d1 = nc.variables[vname1][idx0, jslice, islice]
+        d2 = nc.variables[vname2][idx0, jslice, islice]
         data = temperature(d1, 'K').value('F') - temperature(d2,
                                                              'K').value('F')
         units = 'F'
@@ -101,12 +116,6 @@ def plotter(fdict):
         clevstride = 2
     nc.close()
 
-    title = date.strftime("%-d %B %Y")
-    mp = MapPlot(sector='midwest', axisbg='white', nocaption=True,
-                 title='IEM Reanalysis of %s for %s' % (PDICT.get(varname),
-                                                        title),
-                 subtitle='Data derived from various NOAA datasets'
-                 )
     if np.ma.is_masked(np.max(data)):
         raise ValueError("Data Unavailable")
     x, y = np.meshgrid(lons, lats)

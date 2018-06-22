@@ -51,12 +51,15 @@ def plotter(fdict):
     wfo = ctx['wfo']
     nt = NetworkTable("WFO")
     pgconn = get_dbconn('postgis')
+    ps = [phenomena]
+    if phenomena == '_A':
+        ps = ['TO', 'SV']
     df = read_sql("""
         SELECT issue at time zone 'UTC' as issue,
         tml_direction, tml_sknt from sbw
-        WHERE phenomena = %s and wfo = %s and status = 'NEW' and
+        WHERE phenomena in %s and wfo = %s and status = 'NEW' and
         tml_direction is not null and tml_sknt is not null ORDER by issue
-    """, pgconn, params=(phenomena, wfo))
+    """, pgconn, params=(tuple(ps), wfo))
 
     g = sns.jointplot(df['tml_direction'],
                       speed(df['tml_sknt'], 'KT').value('MPH'), s=40,
