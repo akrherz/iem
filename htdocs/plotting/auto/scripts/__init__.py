@@ -371,6 +371,8 @@ data = {'plots': [
                    "per Year per Month")},
         {'id': "70",
          'label': "Period between First and Last VTEC Product Each Year"},
+        {'id': "195",
+         'label': "Storm Motion distribution based on NWS Warnings"},
         {'id': "166",
          'label': "Storm Prediction Center Watches per Year for a State"},
         {'id': "48", 'label': "Time of Day Frequency for Given Warning / UGC"},
