@@ -120,7 +120,7 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
-    ax.set_axis_bgcolor('skyblue')
+    ax.set_facecolor('skyblue')
 
     ax.set_title(('[%s] %s %s Flight Category\n'
                   'based on Hourly METAR Cloud Amount/Level'
