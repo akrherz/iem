@@ -1,11 +1,11 @@
 """day to day temp changes"""
 import calendar
 import datetime
+from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from collections import OrderedDict
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
@@ -87,10 +87,10 @@ def plotter(fdict):
            bottom=(decrease2/total2 * 100.0), fc='lightgreen',
            width=0.4, label="%s ''" % (year, ), align='center')
     ax.bar(total.index.values - 0.2, increase / total * 100.0,
-           bottom=(decrease+nochange)/total * 100.0,  fc='r', width=0.4,
+           bottom=(decrease+nochange)/total * 100.0, fc='r', width=0.4,
            label="Increase", align='center')
     ax.bar(total2.index.values + 0.2, increase2 / total2 * 100.0,
-           bottom=(decrease2+nochange2)/total2 * 100.0,  fc='pink',
+           bottom=(decrease2+nochange2)/total2 * 100.0, fc='pink',
            width=0.4, label="%s ''" % (year, ), align='center')
 
     offset = -0.2

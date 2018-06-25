@@ -3,7 +3,6 @@
 import os
 import datetime
 import json
-import sys
 import cgi
 
 import numpy as np
@@ -87,7 +86,6 @@ def dowork(form):
                             datatypes.distance(pt, 'MM').value('IN'), 2)
                 })
 
-    sys.stderr.buffer.write(repr(res).encode('utf-8'))
     return json.dumps(res)
 
 

@@ -1,12 +1,18 @@
 """Ob timeseries"""
 import datetime
+from collections import OrderedDict
 
-import psycopg2.extras
 import pytz
 import matplotlib.dates as mdates
+from pandas.io.sql import read_sql
 import pyiem.datatypes as dt
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
+
+PDICT = OrderedDict((
+    ('default', 'Temperatures | Winds | Clouds + Vis'),
+    ('two', 'Temperatures | Winds | Pressure'),
+))
 
 
 def date_ticker(ax, mytz):
@@ -36,15 +42,50 @@ def date_ticker(ax, mytz):
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
+    desc['data'] = True
     desc['cache'] = 360
-    desc['description'] = """This plot presents a recent time series of
+    desc['description'] = """This plot presents a time series of
     observations.  Please note the colors and axes labels used to denote
     which variable is which in the combination plots."""
+    d3 = datetime.date.today() - datetime.timedelta(days=2)
     desc['arguments'] = [
         dict(type='sid', label='Select IEM Tracked Station',
              name='station', default='AMW', network='IA_ASOS'),
+        dict(type='date', default=d3.strftime("%Y/%m/%d"), name='sdate',
+             label='Start Date of Plot: (optional)', optional=True),
+        dict(type='select', options=PDICT, default='default',
+             label='Plot Type', name='p'),
     ]
     return desc
+
+
+def get_data(network, station, tzname, sdate):
+    """retrieve the data frame we want"""
+    if sdate is None:
+        pgconn = get_dbconn('iem')
+        return read_sql("""
+            SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3, skyc4,
+            skyl1, skyl2, skyl3, skyl4, vsby, alti,
+            valid at time zone 'UTC' as utc_valid
+            from current_log c JOIN stations t ON (t.iemid = c.iemid)
+            WHERE t.network = %s and t.id = %s ORDER by valid ASC
+        """, pgconn, params=(network, station), index_col='utc_valid')
+
+    sts = utc(2018)
+    sts = sts.astimezone(pytz.timezone(tzname))
+    sts = sts.replace(year=sdate.year, month=sdate.month, day=sdate.day,
+                      hour=0, minute=0)
+    ets = sts + datetime.timedelta(hours=72)
+    if network == 'AWOS' or network.endswith('ASOS'):
+        pgconn = get_dbconn('asos')
+        df = read_sql("""
+            SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3, skyc4,
+            skyl1, skyl2, skyl3, skyl4, vsby, alti,
+            valid at time zone 'UTC' as utc_valid
+            from alldata WHERE station = %s and valid >= %s and valid < %s
+            ORDER by valid ASC
+        """, pgconn, params=(station, sts, ets), index_col='utc_valid')
+    return df
 
 
 def plotter(fdict):
@@ -52,11 +93,11 @@ def plotter(fdict):
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-    pgconn = get_dbconn('iem')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
+    sdate = ctx.get('sdate')
+    plot_type = ctx['p']
 
     nt = NetworkTable(network)
     if not nt.sts:
@@ -65,98 +106,98 @@ def plotter(fdict):
     if station not in nt.sts:
         raise ValueError(("Station %s does not exist in network %s"
                           ) % (station, network))
+    tzname = nt.sts[station]['tzname']
 
-    cursor.execute("""
-        SELECT *, valid at time zone 'UTC' as utc_valid
-        from current_log c JOIN stations t ON (t.iemid = c.iemid)
-        WHERE t.network = %s and t.id = %s ORDER by valid ASC
-      """, (network, station))
+    df = get_data(network, station, tzname, sdate)
+    # if d1 is not None and d1 >= 0 and d1 <= 360:
+    # if s is not None and s >= 0 and s < 200:
+    # if t is not None and t >= -90 and t < 190:
+    # if d is not None and d >= -90 and d < 190:
+    # if v1 is not None and v1 >= 0 and v1 < 30:
 
-    tmpf = {'v': [], 'd': []}
-    dwpf = {'v': [], 'd': []}
-    vsby = {'v': [], 'd': []}
-    ceil = {'v': [], 'd': []}
-    smph = {'v': [], 'd': []}
-    drct = {'v': [], 'd': []}
-    for row in cursor:
-        v = row['utc_valid'].replace(tzinfo=pytz.utc)
-        t = row['tmpf']
-        d = row['dwpf']
-        v1 = row['vsby']
-        s = row['sknt']
-        d1 = row['drct']
-        if d1 is not None and d1 >= 0 and d1 <= 360:
-            drct['v'].append(v)
-            drct['d'].append(d1)
-        if s is not None and s >= 0 and s < 200:
-            smph['v'].append(v)
-            smph['d'].append(dt.speed(s, 'KT').value('MPH'))
-        if t is not None and t >= -90 and t < 190:
-            tmpf['v'].append(v)
-            tmpf['d'].append(t)
-        if d is not None and d >= -90 and d < 190:
-            dwpf['v'].append(v)
-            dwpf['d'].append(d)
-        if v1 is not None and v1 >= 0 and v1 < 30:
-            vsby['v'].append(v)
-            vsby['d'].append(v1)
+    def ceilingfunc(row):
+        """Our logic to compute a ceiling"""
         c = [row['skyc1'], row['skyc2'], row['skyc3'], row['skyc4']]
         if 'OVC' in c:
             pos = c.index('OVC')
-            ceil['v'].append(v)
             larr = [row['skyl1'], row['skyl2'], row['skyl3'], row['skyl4']]
-            ceil['d'].append(larr[pos] / 1000.)
+            return larr[pos] / 1000.
 
-    (fig, ax) = plt.subplots(3, 1, figsize=(9, 9), sharex=True)
+    df['ceiling'] = df.apply(ceilingfunc, axis=1)
 
+    fig = plt.figure(figsize=(9, 9))
+    xalign = 0.1
+    xwidth = 0.8
+    ax = fig.add_axes([xalign, 0.7, xwidth, 0.25])
+
+    xmin = df.index.min()
+    xmax = df.index.max()
     # ____________PLOT 1___________________________
-    if len(tmpf['v']) > 1:
-        ax[0].plot(tmpf['v'], tmpf['d'], label='Air Temp', lw=2, color='r',
-                   zorder=2)
-    if len(dwpf['v']) > 1:
-        ax[0].plot(dwpf['v'], dwpf['d'], label='Dew Point', lw=2, color='g',
-                   zorder=1)
+    df2 = df[df['tmpf'].notnull()]
+    ax.plot(df2.index.values, df2['tmpf'], lw=2, label='Air Temp',
+            color='#db6065', zorder=2)
+    df2 = df[df['dwpf'].notnull()]
+    ax.plot(df2.index.values, df2['dwpf'], lw=2, label='Dew Point',
+            color='#346633', zorder=3)
 
-    ax[0].legend(loc=3, ncol=2, fontsize=10)
-    ax[0].set_title("[%s] %s\nRecent Time Series" % (
+    ax.set_title("[%s] %s\nRecent Time Series" % (
         station, nt.sts[station]['name']))
-    ax[0].grid(True)
-    ax[0].set_ylabel("Temperature [F]")
-    ax[0].set_ylim(bottom=(min(dwpf['d']) - 10))
-    plt.setp(ax[0].get_xticklabels(), visible=True)
+    ax.grid(True)
+    ax.text(-0.1, 0, "Air Temperature [F]", color='#db6065', rotation=90,
+            transform=ax.transAxes, verticalalignment='bottom')
+    ax.set_ylim(bottom=(df['dwpf'].min() - 3))
+    plt.setp(ax.get_xticklabels(), visible=True)
+    date_ticker(ax, pytz.timezone(tzname))
+    ax.set_xlim(xmin, xmax)
 
     # _____________PLOT 2____________________________
-    if len(smph['v']) > 1:
-        ax[1].plot(smph['v'], smph['d'], color='b')
-        ax[1].set_ylabel("Wind Speed [MPH]", color='b')
-        ax[1].set_ylim(bottom=0)
-    if len(drct['v']) > 1:
-        ax3 = ax[1].twinx()
-        ax3.set_ylabel("Wind Direction", color='g')
-        ax3.set_ylim(0, 360)
-        ax3.set_yticks([0, 90, 180, 270, 360])
-        ax3.set_yticklabels(['N', 'E', 'S', 'W', 'N'])
-        ax3.scatter(drct['v'], drct['d'], s=40, color='g', marker='+')
-    ax[1].grid(True)
+    ax = fig.add_axes([xalign, 0.4, xwidth, 0.25])
+    df2 = df[df['drct'].notnull()]
 
-    #  _____________PLOT 3___________________________
-    mytz = pytz.timezone(nt.sts[station]['tzname'])
-    ax[2].grid(True)
-    ax[2].set_ylabel("Visibility [miles]", color='b')
-    if len(ceil['v']) > 1:
-        ax2 = ax[2].twinx()
-        ax2.scatter(ceil['v'], ceil['d'], label='Visibility', marker='o',
-                    s=40, color='g')
+    ax2 = ax.twinx()
+    df2 = df[df['gust'].notnull()]
+    ax2.fill_between(df2.index.values, 0,
+                     dt.speed(df2['gust'], 'KT').value('MPH'),
+                     color='#9898ff', zorder=2)
+    df2 = df[df['sknt'].notnull()]
+    ax2.fill_between(df2.index.values, 0,
+                     dt.speed(df2['sknt'], 'KT').value('MPH'),
+                     color='#373698', zorder=3)
+    ax2.set_ylim(bottom=0)
+    ax.set_yticks(range(0, 361, 45))
+    ax.set_yticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', "N"])
+    ax.set_ylim(0, 360.1)
+    date_ticker(ax, pytz.timezone(tzname))
+    ax.scatter(df2.index.values, df2['drct'], facecolor='None',
+               edgecolor='#b8bc74', zorder=4)
+    ax.set_zorder(ax2.get_zorder()+1)
+    ax.patch.set_visible(False)
+    ax.set_xlim(xmin, xmax)
+
+    # _________ PLOT 3 ____
+    ax = fig.add_axes([xalign, 0.1, xwidth, 0.25])
+    if plot_type == 'default':
+        ax2 = ax.twinx()
+        ax2.scatter(df.index.values, df['ceiling'], label='Visibility',
+                    marker='o', s=40, color='g')
         ax2.set_ylabel("Overcast Ceiling [k ft]", color='g')
         ax2.set_ylim(bottom=0)
-    if len(vsby['v']) > 1:
-        ax[2].scatter(vsby['v'], vsby['d'], label='Visibility', marker='*',
-                      s=40, color='b')
-        ax[2].set_ylim(0, 14)
-    date_ticker(ax[2], mytz)
-    ax[2].set_xlabel("Plot Time Zone: %s" % (nt.sts[station]['tzname'],))
+        ax.scatter(df.index.values, df['vsby'], label='Visibility', marker='*',
+                   s=40, color='b')
+        ax.set_ylim(0, 14)
+    elif plot_type == 'two':
+        df2 = df[(df['alti'] > 20.) & (df['alti'] < 40.)]
+        ax.grid(True)
+        vals = dt.pressure(df2['alti'], 'IN').value('MB')
+        ax.fill_between(df2.index.values, 0, vals, color='#a16334')
+        ax.set_ylim(bottom=(vals.min() - 1), top=(vals.max() + 1))
+        ax.set_ylabel("Pressure [mb]")
 
-    return fig
+    date_ticker(ax, pytz.timezone(tzname))
+    ax.set_xlabel("Plot Time Zone: %s" % (tzname,))
+    ax.set_xlim(xmin, xmax)
+
+    return fig, df
 
 
 if __name__ == '__main__':

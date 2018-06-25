@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
+"""-*- coding: utf-8 -*-"""
 import datetime
+from collections import OrderedDict
 
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
-from collections import OrderedDict
 
 MDICT = OrderedDict([
     ('tmpf', 'Air Temperature'),
@@ -68,8 +68,8 @@ def highcharts(fdict):
     j['plotOptions'] = {'line': {'turboThreshold': 0}}
     j['series'] = [
         {'name': MDICT[ctx['var']],
-         'data': zip(ctx['df'].ticks.values.tolist(),
-                     ctx['df'].datum.values.tolist()),
+         'data': list(zip(ctx['df'].ticks.values.tolist(),
+                          ctx['df'].datum.values.tolist())),
          'zIndex': 1,
          'color': '#FF0000',
          'lineWidth': 2,
