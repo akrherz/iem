@@ -28,9 +28,9 @@ def main():
         fp = "watch_by_county"
 
     if "etn" in form:
-        etnLimiter = "and eventid = %s" % (int(form["etn"][0]), )
+        etnLimiter = "and eventid = %s" % (int(form.getfirst("etn")), )
         fp = "watch_by_county_%s_%s" % (ts.strftime("%Y%m%d%H%M"),
-                                        int(form["etn"][0]))
+                                        int(form.getfirst("etn")))
     else:
         etnLimiter = ""
 

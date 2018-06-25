@@ -113,7 +113,7 @@ def plotter(fdict):
                  "SDD(base=86)") % (gddbase, gddceil)
     elif whichplots == 'gdd':
         fig = plt.figure()
-        ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.6])
+        ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.57])
         ax2 = fig.add_axes([0.14, 0.11, 0.8, 0.2], sharex=ax1,
                            facecolor='#EEEEEE')
         title = ("GDD(base=%.0f,ceil=%.0f)") % (gddbase, gddceil)
@@ -130,7 +130,7 @@ def plotter(fdict):
 
     ax1.set_title(("Accumulated %s\n%s %s"
                    ) % (title, station, nt.sts[station]['name']),
-                  fontsize=18)
+                  fontsize=18 if whichplots == 'all' else 14)
 
     for year in range(nt.sts[station]['archive_begin'].year,
                       datetime.datetime.now().year + 1):
