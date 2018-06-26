@@ -69,7 +69,7 @@ def workflow(date):
             #                              pday))
             continue
         # print("Updating %s old: %s new: %s" % (station, current_pday, pday))
-        iemid = df.loc[station, 'iemid']
+        iemid = int(df.loc[station, 'iemid'])
         icursor.execute("""
             UPDATE summary_"""+str(date.year)+"""
             SET pday = %s WHERE iemid = %s and day = %s

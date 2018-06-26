@@ -1,5 +1,7 @@
 """Deleteme please"""
 import math
+from functools import reduce
+
 from pyiem import util
 
 

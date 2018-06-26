@@ -60,9 +60,12 @@ def generate_rr5():
                       row[1].strftime("%H%M"), tmpf,
                       mt('TV', row[3], '4', q), mt('TV', row[4], '12', q),
                       mt('TV', row[5], '24', q), mt('TV', row[6], '50', q),
-                      mt('MW', max([0, row[7]]), '12', q),
-                      mt('MW', max([0, row[8]]), '24', q),
-                      mt('MW', max([0, row[9]]), '50', q),
+                      mt('MW', max([0, 0 if row[7] is None else row[7]]),
+                         '12', q),
+                      mt('MW', max([0, 0 if row[8] is None else row[8]]),
+                         '24', q),
+                      mt('MW', max([0, 0 if row[9] is None else row[9]]),
+                         '50', q),
                       precip
                       )
     return data
@@ -73,7 +76,7 @@ def main():
     rr5data = generate_rr5()
     # print rr5data
     (tmpfd, tmpfn) = tempfile.mkstemp()
-    os.write(tmpfd, rr5data)
+    os.write(tmpfd, rr5data.encode('utf-8'))
     os.close(tmpfd)
     subprocess.call(("/home/ldm/bin/pqinsert -p 'SUADSMRR5DMX.dat' %s"
                      ) % (tmpfn,), shell=True)

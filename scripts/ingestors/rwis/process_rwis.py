@@ -159,7 +159,7 @@ def do_windalerts(obs):
             continue
         ob = obs[sid]
         # screening
-        if ob.get('gust') is not None and ob['gust'] < 40:
+        if ob.get('gust') is None or ob['gust'] < 40:
             continue
         if np.isnan(ob['gust']):
             continue

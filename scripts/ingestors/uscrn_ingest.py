@@ -153,7 +153,7 @@ def download(year, reprocess=False):
             continue
         if req.status_code < 400:
             fp = open(filename, 'a')
-            fp.write(req.content)
+            fp.write(req.content.decode('utf-8'))
             fp.close()
         if req.status_code < 400 or reprocess:
             queue.append([filename, len(req.content)])

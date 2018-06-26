@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 
+from netCDF4 import chartostring
 import pytz
 from pyiem.datatypes import temperature, speed
 import pyiem.meteorology as meteorology
@@ -73,12 +74,15 @@ def main(argv):
 
     nc = ncopen(fn)
 
-    for i, provider in enumerate(nc.variables["dataProvider"][:]):
-        if provider.tostring().replace('\x00', '') != network:
+    providers = chartostring(nc.variables["dataProvider"][:])
+    stations = chartostring(nc.variables["stationId"][:])
+    names = chartostring(nc.variables["stationName"][:])
+    for i, provider in enumerate(providers):
+        if provider != network:
             continue
-        sid = nc.variables["stationId"][i].tostring().replace('\x00', '')
+        sid = stations[i]
         # We have an ob!
-        ticks = nc.variables["observationTime"][i]
+        ticks = int(nc.variables["observationTime"][i])
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
         ts = ts.replace(tzinfo=pytz.timezone("UTC"))
 
@@ -87,7 +91,7 @@ def main(argv):
 
     for sid in indices:
         idx = indices[sid]['idx']
-        name = nc.variables["stationName"][idx].tostring().replace('\x00', '')
+        name = names[idx]
         latitude = nc.variables['latitude'][idx]
         longitude = nc.variables['longitude'][idx]
         tmpf = s(nc.variables['temperature'][idx])

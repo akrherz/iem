@@ -88,9 +88,9 @@ def makeConnect():
         try:
             tn = telnetlib.Telnet('iem-nwnserver', 14996)
             tn.read_until(b"login> ", 10)
-            tn.write("%s\r\n" % (secret.cfg['hubuser'],))
+            tn.write(("%s\r\n" % (secret.cfg['hubuser'],)).encode('utf-8'))
             tn.read_until(b"password> ", 10)
-            tn.write("%s\r\n" % (secret.cfg['hubpass'],))
+            tn.write(("%s\r\n" % (secret.cfg['hubpass'],)).encode('utf-8'))
             notConnected = False
         except Exception as _exp:
             logger.exception("Error in makeConnect()")
@@ -352,7 +352,7 @@ def main():
         if counter % 15 == 0:
             saveDB()
         dataStr = tn.read_very_eager()
-        goodLines = process(dataStr)
+        goodLines = process(dataStr.decode('utf-8'))
         if len(goodLines) < 100:
             dryRun += 1
             logger.info("dryRun Set to: %s" % (dryRun,))
@@ -377,13 +377,13 @@ def loadDB():
         return
     import pickle
     global db
-    db = pickle.load(open('db.p'))
+    db = pickle.load(open('db.p', 'rb'))
 
 
 def saveDB():
     """save db"""
     import pickle
-    pickle.dump(db, open('db.p', 'w'))
+    pickle.dump(db, open('db.p', 'wb'))
 
 
 def logData(goodLines):
