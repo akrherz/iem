@@ -6,6 +6,7 @@ import warnings
 
 import pytz
 import numpy as np
+from netCDF4 import chartostring
 from pyiem.datatypes import temperature
 from pyiem.util import get_dbconn, ncopen
 warnings.simplefilter("ignore", UserWarning)
@@ -21,7 +22,7 @@ def figure(val, qcval):
                        'K').value('F') - temperature(val, 'K').value('F')
 
 
-def figure_alti(val, qcval):
+def figure_alti(qcval):
     """hack"""
     if qcval > 100000.:
         return None
@@ -53,7 +54,8 @@ def main():
         return
 
     nc = ncopen(fn)
-    providers = nc.variables["dataProvider"][:]
+    providers = chartostring(nc.variables["dataProvider"][:])
+    stations = chartostring(nc.variables['stationId'][:])
     nc_tmpk = nc.variables["temperature"][:]
     nc_dwpk = nc.variables["dewpoint"][:]
     nc_alti = nc.variables["altimeter"][:]
@@ -63,9 +65,9 @@ def main():
 
     for p in range(providers.shape[0]):
         provider = providers[p]
-        if provider.tostring().replace('\x00', '') not in ['IEM', 'IADOT']:
+        if provider not in ['IEM', 'IADOT']:
             continue
-        ticks = nc.variables["observationTime"][p]
+        ticks = int(nc.variables["observationTime"][p])
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
         ts = ts.replace(tzinfo=pytz.utc)
 
@@ -83,15 +85,15 @@ def main():
             dwpf_qc_sc = figure(nc_dwpk[p], dwpkqcd[p, 6])
         if not np.ma.is_masked(nc_alti[p]):
             alti = check((nc_alti[p] / 100.0) * 0.0295298)
-            alti_qc_av = figure_alti(alti, altiqcd[p, 0] * 0.0295298)
-            alti_qc_sc = figure_alti(alti, altiqcd[p, 6] * 0.0295298)
+            alti_qc_av = figure_alti(altiqcd[p, 0] * 0.0295298)
+            alti_qc_sc = figure_alti(altiqcd[p, 6] * 0.0295298)
         sql = """UPDATE current_qc SET tmpf = %s, tmpf_qc_av = %s,
          tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
          dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
          alti_qc_sc = %s, valid = %s WHERE station = %s """
         args = (tmpf, tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av,
                 dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc,
-                ts, (nc.variables["stationId"][p]).tostring()[:5])
+                ts, stations[p])
         icursor.execute(sql, args)
 
     nc.close()

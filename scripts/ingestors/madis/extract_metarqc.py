@@ -3,12 +3,12 @@
 """
 from __future__ import print_function
 import os
-import re
 import sys
 import datetime
 
 import numpy as np
 import pytz
+from netCDF4 import chartostring
 from pyiem.datatypes import temperature
 from pyiem.util import get_dbconn, ncopen
 
@@ -48,7 +48,7 @@ def main():
 
     nc = ncopen(fn)
 
-    ids = nc.variables["stationName"]
+    ids = chartostring(nc.variables["stationName"][:])
     nc_tmpk = nc.variables["temperature"]
     nc_dwpk = nc.variables["dewpoint"]
     nc_alti = nc.variables["altimeter"]
@@ -56,15 +56,13 @@ def main():
     dwpkqcd = nc.variables["dewpointQCD"]
     altiqcd = nc.variables["altimeterQCD"]
 
-    found = 0
     for j in range(ids.shape[0]):
         sid = ids[j]
-        sid = re.sub('\x00', '', sid.tostring())
         if len(sid) < 4:
             continue
         if sid[0] == "K":
             ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
-                                    seconds=nc.variables["timeObs"][j])
+                                    seconds=int(nc.variables["timeObs"][j]))
             ts = ts.replace(tzinfo=pytz.utc)
             (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
             (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
@@ -98,7 +96,8 @@ def main():
             sql = sql.replace("--", "Null").replace("nan", "Null")
             try:
                 icursor.execute(sql)
-            except:
+            except Exception as exp:
+                print(exp)
                 print(sql)
 
     nc.close()

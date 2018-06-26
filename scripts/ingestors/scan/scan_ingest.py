@@ -4,13 +4,13 @@ import datetime
 import sys
 
 import pytz
+import requests
+# Stop the SSL cert warning :/
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-import requests
-# Stop the SSL cert warning :/
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
@@ -198,7 +198,7 @@ def main(argv):
         postvars['sitenum'] = sid[1:]
         try:
             req = requests.get(URI, params=postvars, timeout=10, verify=False)
-            response = req.content
+            response = req.content.decode('utf-8', 'ignore')
         except Exception as exp:
             print('scan_ingest.py Failed to download: %s %s' % (sid, exp))
             continue
