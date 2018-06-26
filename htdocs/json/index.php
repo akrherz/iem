@@ -550,8 +550,10 @@
   $services[] = Array(
   		"title" => "RAOB Soundings",
   		"url" => "/json/raob.py?ts={timestamp}&station={station}",
-  		"desc" => "Provides a single sounding profile for the given station,
-		either a 3 or 4 character site ID and a UTC timestamp.  Realtime data
+		  "desc" => "When provided a station and timestamp, returns a single
+		  RAOB profile.  When provided no station and a timestamp, returns
+		  all profiles in the database for that timestamp.  When provided a
+		  pressure [mb], returns just that pressure level's data.  Realtime data
 		from this service is typically available within 2 hours of observation
 		time.",
   		"vars" => Array(
