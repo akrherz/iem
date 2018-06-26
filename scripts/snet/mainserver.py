@@ -82,7 +82,8 @@ hubServer.setServiceParent(serviceCollection)
 # 2b.  Watches local wx32 files for changes...
 wxpath = '/home/ldm/data/kelo/incoming/'
 wxfilespec = 'nwn_%03i.txt'
-wxids = [0,1,3,4,5,6,7,8,9,11,13,15,25,49] + range(500,520) + range(900, 950)
+wxids = [0, 1, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 25,
+         49] + list(range(500, 520)) + list(range(900, 950))
 wx32 = filewatcher.WX32FileWatcher(wxpath, wxfilespec, wxids, hubServerFactory)
 
 

@@ -1,6 +1,6 @@
 # Only EDIT on github!
 #
-PATH=/opt/miniconda2/bin:/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
+PATH=/opt/miniconda3/envs/prod/bin:/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
 S=/opt/iem/scripts
 
 # Datateam additions
