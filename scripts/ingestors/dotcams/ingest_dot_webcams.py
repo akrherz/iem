@@ -140,6 +140,7 @@ def main():
                             shell=True, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     _stdout, stderr = proc.communicate()
+    stderr = stderr.decode('utf-8')
     lines = stderr.split("\n")
     for line in lines:
         # Look for RETR (.*)

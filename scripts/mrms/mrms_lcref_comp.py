@@ -29,8 +29,8 @@ def make_colorramp():
     # Black to remove, eventually
     c[0, :] = [0, 0, 0]
     i = 2
-    for line in open('gr2ae.txt'):
-        c[i, :] = map(int, line.split()[-3:])
+    for line in open('gr2ae.txt').readlines():
+        c[i, :] = list(map(int, line.split()[-3:]))
         i += 1
     return tuple(c.ravel())
 

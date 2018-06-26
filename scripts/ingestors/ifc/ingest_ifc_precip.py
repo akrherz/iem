@@ -55,7 +55,7 @@ def get_file(now):
         print("ingest_ifc_precip missing data for %s" % (now, ))
         return None
     tmpfn = tempfile.mktemp()
-    fp = open(tmpfn, 'w')
+    fp = open(tmpfn, 'wb')
     fp.write(data)
     fp.close()
     return tmpfn

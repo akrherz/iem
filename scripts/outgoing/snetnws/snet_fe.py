@@ -268,7 +268,7 @@ def doNetwork(_network, shef_fp, thres, qdict):
     tracker.process_network(obs, '%ssnet' % (_network.lower(), ), mynet, thres)
     tracker.send_emails()
 
-    keys = obs.keys()
+    keys = list(obs.keys())
     keys.sort()
     for nwsli in keys:
         ob = obs[nwsli]

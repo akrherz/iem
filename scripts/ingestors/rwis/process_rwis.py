@@ -159,7 +159,7 @@ def do_windalerts(obs):
             continue
         ob = obs[sid]
         # screening
-        if ob.get('gust', 0) < 40:
+        if ob.get('gust') is not None and ob['gust'] < 40:
             continue
         if np.isnan(ob['gust']):
             continue
@@ -206,7 +206,7 @@ def do_iemtracker(obs):
 
 
 def METARtemp(val):
-    """ """
+    """convert temp to METAR"""
     f_temp = float(val)
     i_temp = int(round(f_temp, 0))
     f1_temp = int(round(f_temp * 10., 0))
