@@ -15,8 +15,6 @@ def main():
     pgconn = get_dbconn('other')
     mcursor = pgconn.cursor()
 
-    now = datetime.datetime.now()
-
     # Do the bubbler file
     mcursor.execute("""SELECT max(valid) from ss_bubbler""")
     row = mcursor.fetchone()
@@ -69,7 +67,7 @@ def main():
                                 shell=True, stderr=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
 
-        data = proc.stdout.read()
+        data = proc.stdout.read().decode('utf-8')
         for linenum, line in enumerate(data.split("\n")):
             tokens = line.split("\t")
             if len(tokens) < 13 or linenum < 2:

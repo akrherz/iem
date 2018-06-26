@@ -147,7 +147,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df['station'] = nwsli
     if 'ws_mph_tmx' in df.columns:
         df['ws_mph_tmx'] = df['ws_mph_tmx'].apply(make_time)
-    output = io.BytesIO()
+    output = io.StringIO()
     df.to_csv(output, sep="\t", header=False, index=False)
     output.seek(0)
     icursor = ISUAG.cursor()

@@ -28,7 +28,8 @@ def find_and_save(cursor, dbendts):
     now = datetime.datetime.now()
     thisyear = now.year
     inserts = 0
-    for line in open(LOGFN):
+    for line in open(LOGFN, 'rb'):
+        line = line.decode('utf-8', 'ignore')
         tokens = LOGRE.findall(line)
         if len(tokens) != 1:
             continue
