@@ -49,7 +49,7 @@ def main():
     for row in icursor:
         thisStation = row[0]
         thisPrec = row[1]
-        if nt.sts.has_key(thisStation):
+        if thisStation in nt.sts:
             d[thisStation] = {'prectot': thisPrec }
             d[thisStation]["name"] = nt.sts[thisStation]['name']
             d[thisStation]["crain"] = mrain[ nt.sts[thisStation]['climate_site'] ]
