@@ -83,7 +83,7 @@ def write_and_upload(df, location):
     """ We are done, whew!"""
     props = get_properties()
     dbx = dropbox.Dropbox(props.get('dropbox.token'))
-    (tmpfd, tmpfn) = tempfile.mkstemp()
+    (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
     for line in open("baseline/%s.met" % (location, )):
         if line.startswith("year"):
             break

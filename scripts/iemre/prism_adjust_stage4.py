@@ -43,7 +43,7 @@ def workflow(valid):
     # make sure the s4total does not have zeros
     s4total = np.where(s4total < 0.001, 0.001, s4total)
 
-    nn = NearestNDInterpolator((lons.flat, lats.flat), ppt.flat)
+    nn = NearestNDInterpolator((lons.flatten(), lats.flatten()), ppt.flat)
     prism_on_s4grid = nn(s4lons, s4lats)
     multiplier = prism_on_s4grid / s4total
 

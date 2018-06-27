@@ -11,9 +11,8 @@ from email.mime.multipart import MIMEMultipart
 
 import psycopg2.extras
 import requests
-from pyiem.util import exponential_backoff, get_dbconn
-
 import pytz
+from pyiem.util import exponential_backoff, get_dbconn
 import wwa  # @UnresolvedImport
 
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
@@ -94,7 +93,7 @@ def cowreport():
     """ Generate something from the Cow, moooo! """
     proc = subprocess.Popen('php cowreport.php', shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    data = proc.stdout.read()
+    data = proc.stdout.read().decode('utf-8')
     html = "<h3>IEM Cow Report</h3><pre>" + data + "</pre>"
     txt = '> IEM Cow Report\n' + data + '\n'
     return txt, html
@@ -218,8 +217,8 @@ def main():
     html += h
     try:
         t, h = get_github_commits()
-        text += t.encode('ascii', 'ignore')
-        html += "%s" % (h.encode('ascii', 'ignore'),)
+        text += t
+        html += h
     except Exception as exp:
         print("get_github_commits failed with %s" % (exp, ))
         text += "\n(script failure fetching github activity\n"
