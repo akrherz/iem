@@ -407,7 +407,7 @@ def dump_madis_csv():
     """Inject the current MADIS NMP csv into LDM"""
     uri = "http://iem.local/agclimate/isusm.csv"
     req = requests.get(uri)
-    output = open('/tmp/isusm.csv', 'w')
+    output = open('/tmp/isusm.csv', 'wb')
     output.write(req.content)
     output.close()
     subprocess.call("/home/ldm/bin/pqinsert -p 'isusm.csv' /tmp/isusm.csv",

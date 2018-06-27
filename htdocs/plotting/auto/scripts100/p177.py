@@ -288,9 +288,10 @@ def make_daily_water_change_plot(ctx):
     (fig, ax) = plt.subplots(2, 1, sharex=True)
     if not df['depth'].isnull().all():
         ax[0].plot(df['valid'].values, df['depth'], color='b', lw=2)
+    oneday = datetime.timedelta(days=1)
     for level in [0.15, 0.25, 0.35, 0.45]:
         ax[0].axhline((l1+l2+l3) * level, c='k')
-        ax[0].text(df['valid'].values[-1], (l1+l2+l3) * level,
+        ax[0].text(df['valid'].values[-1] + oneday, (l1+l2+l3) * level,
                    "  %.0f%%" % (level * 100.,), va='center')
     ax[0].grid(True)
     ax[0].set_ylabel("Water Depth [inch]")
@@ -320,6 +321,7 @@ def make_daily_water_change_plot(ctx):
                            va='bottom', color='b')
         ax[1].text(-0.01, 1.05, "Rain ->", ha='right',
                    transform=ax[1].transAxes, color='b')
+    ax[0].set_xlim(df['valid'].min() - oneday, df['valid'].max() + oneday)
     return fig, df
 
 

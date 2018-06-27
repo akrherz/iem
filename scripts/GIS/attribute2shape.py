@@ -173,7 +173,7 @@ def main():
 
     zfp.writestr("current_nexattr.txt", INFORMATION)
     zinfo = zfp.getinfo('current_nexattr.txt')
-    zinfo.external_attr = 0x664 << 16
+    zinfo.external_attr = 0o664
     zfp.close()
 
     cmd = ("/home/ldm/bin/pqinsert -i -p \"zip c %s "

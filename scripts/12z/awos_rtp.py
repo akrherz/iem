@@ -94,7 +94,7 @@ def main():
             continue
         lows[row[0]] = row[1]
 
-    ids = nt.sts.keys()
+    ids = list(nt.sts.keys())
     ids.sort()
     for myid in ids:
         out.write(fmt % (myid, nt.sts[myid]["name"], highs.get(myid, 'M'),

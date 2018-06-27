@@ -81,7 +81,7 @@ def main():
             continue
         lows[row[0]] = row[1]
 
-    ids = nt.sts.keys()
+    ids = list(nt.sts.keys())
     ids.sort()
     for sid in ids:
         myP = pcpn.get(sid, "M")

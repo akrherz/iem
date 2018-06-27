@@ -52,16 +52,16 @@ def main(argv):
             mydir = "%s/%s/%s" % (basedir, sid, prod)
             if os.path.isdir(mydir):
                 continue
-            supermakedirs(mydir, 0775, grp.getgrnam('ldm')[2])
+            supermakedirs(mydir, 0o775, grp.getgrnam('ldm')[2])
     # Do noaaport text
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/noaaport")
-    supermakedirs(basedir, 0775, grp.getgrnam('ldm')[2])
+    supermakedirs(basedir, 0o775, grp.getgrnam('ldm')[2])
     os.chdir(basedir)
     for pil in PILS:
         fn = "%s_%s.txt" % (pil, ts.strftime("%Y%m%d"))
         if not os.path.isfile(fn):
             subprocess.call("touch %s" % (fn,), shell=True)
-            os.chmod(fn, 0664)
+            os.chmod(fn, 0o664)
             chgrp(fn, grp.getgrnam('ldm')[2])
 
 
