@@ -102,7 +102,7 @@ def export_shapefile(txn, utc):
          and valid is not null and b.geom is not null
     """)
     for row in txn:
-        multiline = loads(row["geom"].decode('hex'))
+        multiline = loads(row["geom"], hex=True)
         shp.line(parts=[zip(*multiline.geoms[0].xy)])
         shp.record(row["segid"],
                    row["major"],

@@ -51,7 +51,7 @@ def load_soilt(data):
         lats.append(nt.sts[stid]['lat'])
         lons.append(nt.sts[stid]['lon'])
     if len(lons) < 4:
-        print 'outgoing/wxc_azos_gdd.py:: No ISUAG Data for %s' % (valid,)
+        print('outgoing/wxc_azos_gdd.py:: No ISUAG Data for %s' % (valid,))
         sys.exit()
     numxout = 40
     numyout = 40

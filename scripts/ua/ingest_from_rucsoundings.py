@@ -234,7 +234,7 @@ def main(valid):
             print("ingest_from_rucsoundings failed %s for %s" % (sid, valid))
             continue
         try:
-            for rob in parse(req.content, sid):
+            for rob in parse(req.content.decode('utf-8'), sid):
                 NT.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception as exp:

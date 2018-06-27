@@ -62,7 +62,7 @@ def main():
             d[thisStation]["name"] = nt.sts[thisStation]['name']
             d[thisStation]["crain"] = mrain[ nt.sts[thisStation]['climate_site'] ]
 
-    keys = d.keys()
+    keys = list(d.keys())
     keys.sort()
 
     for k in keys:
