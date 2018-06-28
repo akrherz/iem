@@ -79,7 +79,7 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
             now += datetime.timedelta(days=1)
         fh.close()
         try:
-            dbx.files_upload(open(fn).read(),
+            dbx.files_upload(open(fn, 'rb').read(),
                              "/Hybrid-Maize-Metfiles/%s" % (fn, ),
                              mode=dropbox.files.WriteMode.overwrite)
             subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.wth"

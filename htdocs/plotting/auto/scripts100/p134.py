@@ -151,7 +151,7 @@ def plotter(fdict):
     xticks = []
     xticklabels = []
     for i in np.arange(df['doy'].min() - 5, df['doy'].max() + 5, 1):
-        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=i)
+        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=int(i))
         if ts.day == 1:
             xticks.append(i)
             xticklabels.append(ts.strftime("%-d %b"))

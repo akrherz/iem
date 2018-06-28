@@ -11,6 +11,7 @@ from __future__ import print_function
 import sys
 import datetime
 import tempfile
+from io import StringIO
 import os
 import subprocess
 
@@ -69,7 +70,7 @@ def upload_summary_plots():
             if DO_UPLOAD:
                 try:
                     dbx.files_upload(
-                        open(tmpfn).read(),
+                        open(tmpfn, 'rb').read(),
                         ("/YieldForecast/Daryl/%s vs other years plots%s/%s"
                          ) % (year, ' with yields' if opt == 'yes' else '',
                               remotefn),
@@ -84,33 +85,35 @@ def write_and_upload(df, location):
     props = get_properties()
     dbx = dropbox.Dropbox(props.get('dropbox.token'))
     (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
+    sio = StringIO()
     for line in open("baseline/%s.met" % (location, )):
         if line.startswith("year"):
             break
-        os.write(tmpfd, line.strip()+"\r\n")
-    os.write(tmpfd, ('! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n'
-                     ) % (datetime.datetime.utcnow().isoformat(),))
+        sio.write(line.strip()+"\r\n")
+    sio.write(('! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n'
+               ) % (datetime.datetime.utcnow().isoformat(),))
     fmt = ("%-10s%-10s%-10s%-10s%-10s%-10s"
            "%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n")
-    os.write(tmpfd, fmt % ('year', 'day', 'radn', 'maxt', 'mint', 'rain',
-                           'gdd', 'st4', 'st12', 'st24', 'st50',
-                           'sm12', 'sm24', 'sm50'))
-    os.write(tmpfd, fmt % ('()', '()', '(MJ/m^2)', '(oC)', '(oC)', '(mm)',
-                           '(oF)', '(oC)', '(oC)', '(oC)', '(oC)',
-                           '(mm/mm)', '(mm/mm)', '(mm/mm)'))
+    sio.write(fmt % ('year', 'day', 'radn', 'maxt', 'mint', 'rain',
+                     'gdd', 'st4', 'st12', 'st24', 'st50',
+                     'sm12', 'sm24', 'sm50'))
+    sio.write(fmt % ('()', '()', '(MJ/m^2)', '(oC)', '(oC)', '(mm)',
+                     '(oF)', '(oC)', '(oC)', '(oC)', '(oC)',
+                     '(mm/mm)', '(mm/mm)', '(mm/mm)'))
     fmt = (" %-9i%-10i%-10s%-10s%-10s%-10s%-10s"
            "%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n")
     for valid, row in df.iterrows():
-        os.write(tmpfd, fmt % (valid.year,
-                               int(valid.strftime("%j")),
-                               p(row['radn'], 3),
-                               p(row['maxt'], 1), p(row['mint'], 1),
-                               p(row['rain'], 2),
-                               p(row['gdd'], 1), p(row['st4'], 2),
-                               p(row['st12'], 2),
-                               p(row['st24'], 2), p(row['st50'], 2),
-                               p(row['sm12'], 2),
-                               p(row['sm24'], 2), p(row['sm50'], 2)))
+        sio.write(fmt % (valid.year,
+                         int(valid.strftime("%j")),
+                         p(row['radn'], 3),
+                         p(row['maxt'], 1), p(row['mint'], 1),
+                         p(row['rain'], 2),
+                         p(row['gdd'], 1), p(row['st4'], 2),
+                         p(row['st12'], 2),
+                         p(row['st24'], 2), p(row['st50'], 2),
+                         p(row['sm12'], 2),
+                         p(row['sm24'], 2), p(row['sm50'], 2)))
+    os.write(tmpfd, sio.getvalue().decode('utf-8'))
     os.close(tmpfd)
 
     today = datetime.date.today()
@@ -118,7 +121,7 @@ def write_and_upload(df, location):
     if DO_UPLOAD:
         try:
             dbx.files_upload(
-                open(tmpfn).read(),
+                open(tmpfn, 'rb').read(),
                 "/YieldForecast/Daryl/%s" % (remotefn, ),
                 mode=dropbox.files.WriteMode.overwrite)
         except Exception as _:
