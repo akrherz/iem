@@ -93,12 +93,12 @@ class nwnOB:
 #            print "Site %s HAS INIT maxSPED: %s" % (self.stationID, newGust)
 #            self.maxSPED = newGust
 #            self.maxSPED_ts = self.valid
-        if newGust > self.maxSPED:
+        if self.maxSPED is not None and newGust > self.maxSPED:
             # print "Site %s NEW maxSPED: %s" % (self.stationID, newGust)
             self.maxSPED = newGust
             self.maxSPED_ts = self.valid
         # Value is RESET for the next day!
-        if newGust < self.maxSPED:
+        if self.maxSPED is not None and newGust < self.maxSPED:
             # print "Site %s RESET maxSPED: %s" % (self.stationID, newGust)
             self.maxSPED = newGust
             self.maxSPED_ts = self.valid

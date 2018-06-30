@@ -22,7 +22,7 @@ def main(network):
     mcursor = mesosite.cursor()
 
     table = NetworkTable(network)
-    keys = table.sts.keys()
+    keys = list(table.sts.keys())
     if len(keys) > 1:
         ids = repr(tuple(keys))
     else:
