@@ -113,7 +113,7 @@ def write_and_upload(df, location):
                          p(row['st24'], 2), p(row['st50'], 2),
                          p(row['sm12'], 2),
                          p(row['sm24'], 2), p(row['sm50'], 2)))
-    os.write(tmpfd, sio.getvalue().decode('utf-8'))
+    os.write(tmpfd, sio.getvalue().encode('utf-8'))
     os.close(tmpfd)
 
     today = datetime.date.today()
