@@ -54,6 +54,10 @@ def get_stations(form):
         ssw("Content-type: text/plain \n\n")
         ssw("ERROR: station must be specified!")
         sys.exit(0)
+    # allow folks to specify the ICAO codes for K*** sites
+    for i, station in enumerate(stations):
+        if len(station) == 4 and station[0] == 'K':
+            stations[i] = station[1:]
     return stations
 
 
