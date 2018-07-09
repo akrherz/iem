@@ -5,26 +5,25 @@ from __future__ import print_function
 import datetime
 
 from metar.Metar import Metar
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def main():
     """Go Main Go"""
     pgconn = get_dbconn("asos")
     icursor = pgconn.cursor()
-    icursor.execute("SET TIME ZONE 'UTC'")
     icursor2 = pgconn.cursor()
 
-    sts = datetime.datetime(2011, 1, 1)
-    ets = datetime.datetime(2012, 1, 1)
+    sts = utc(2011, 8, 1)
+    ets = utc(2011, 12, 1)
     interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
         icursor.execute("""
-      select valid, station, metar from t%s
-      where metar is not null and valid >= '%s' and valid < '%s'
-        """ % (now.year, now.strftime("%Y-%m-%d"),
-               (now+interval).strftime("%Y-%m-%d")))
+      select valid, station, metar from t""" + str(now.year) + """
+      where metar is not null and valid >= %s and valid < %s
+      and wxcodes is null
+        """, (now, now + interval))
         total = 0
         for row in icursor:
             try:
@@ -58,7 +57,7 @@ def main():
             sql = "%s WHERE station = '%s' and valid = '%s'" % (sql[:-1],
                                                                 row[1],
                                                                 row[0])
-            # print sql
+            # print(sql)
             icursor2.execute(sql)
             total += 1
             if total % 1000 == 0:
