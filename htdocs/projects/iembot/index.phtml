@@ -1,8 +1,8 @@
 <?php
- include("../../../config/settings.inc.php");
- include("../../../include/network.php");
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/network.php";
  $nt = new NetworkTable("WFO"); 
- include("../../../include/myview.php");
+ require_once "../../../include/myview.php";
  $t = new MyView();
  $t->title = "IEMBot Project";
  $t->thispage = "severe-iembot";
@@ -56,17 +56,17 @@ warnings by their chat partners.
 <script>
 function urlChanger(){
  var myid =  document.myForm.wfo.value.toLowerCase();
- document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"https://weather.im/iembot-rss/wfo/k"+ myid +".xml\">https://mesonet.agron.iastate.edu/iembot-rss/wfo/k"+ myid +".xml</a>";
+ document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"https://weather.im/iembot-rss/room/"+ myid +"chat.xml\">https://mesonet.agron.iastate.edu/iembot-rss/room/"+ myid +"chat.xml</a>";
 }
 </script>
 <form name="myForm">
-<p><img src="/images/rss.gif"> Experimental RSS feed of <i>iembot</i> messages per NWS Forecast Office:
+<p><img src="/images/rss.gif"> RSS feed of <i>iembot</i> messages per NWS Forecast Office:
 <br /><b>WFO:</b>{$wselect}
 
-<br /><div id="wfolink" style="float: left;"><b>URL: </b><a href="https://weather.im/iembot-rss/wfo/kabq.xml">https://weather.im/iembot-rss/wfo/kabq.xml</a></div>
+<br /><div id="wfolink" style="float: left;"><b>URL: </b><a href="https://weather.im/iembot-rss/room/abqchat.xml">https://weather.im/iembot-rss/room/abqchat.xml</a></div>
 
 <br />
-<p>All iembot messages are here: <a href="https://weather.im/iembot-rss/wfo/botstalk.xml">https:/weather.im/iembot-rss/wfo/botstalk.xml</a>
+<p>All iembot messages are here: <a href="https://weather.im/iembot-rss/room/botstalk.xml">https:/weather.im/iembot-rss/room/botstalk.xml</a>
 </form>
 
 <h3>How does <i>iembot</i> work?</h3>
@@ -102,6 +102,9 @@ mean.</p>
 <dl class="dl-horizontal">
  <dt>&lt;afos_pil&gt;</dt><dd>The 4-6 character 'AWIPS ID' or 'AFOS PIL' used
  within the products WMO header.</dd>
+ <dt>&lt;afos_pil_prefix&gt;...</dt><dd>The first three characters of the
+ 'AWIPS ID' or 'AFOS PIL' used within the products WMO header.  The dots here
+ are literal, so the channel to get all Record Event Reports would be "RER..."</dd>
  <dt>&lt;vtec_phenomena&gt;</dt><dd>2 character VTEC Phenomena</dd>
  <dt>&lt;vtec_significance&gt;</dt><dd>2 character VTEC Significance</dd>
  <dt>&lt;vtec_significance&gt;</dt><dd>2 character VTEC Significance</dd>
