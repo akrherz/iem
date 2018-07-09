@@ -11,11 +11,19 @@ PDICT = OrderedDict([
         ('min_dwpf', 'Lowest Dew Point Temperature'),
         ('max_tmpf', 'Highest Air Temperature'),
         ('min_tmpf', 'Lowest Air Temperature'),
+        ('max_mslp', 'Maximum Sea Level Pressure'),
+        ('min_mslp', 'Minimum Sea Level Pressure'),
+        ('max_alti', 'Maximum Pressure Altimeter'),
+        ('min_alti', 'Minimum Pressure Altimeter'),
         ])
 UNITS = {'max_dwpf': 'F',
          'max_tmpf': 'F',
          'min_dwpf': 'F',
          'min_tmpf': 'F',
+         'max_mslp': 'mb',
+         'min_mslp': 'mb',
+         'max_alti': 'in',
+         'min_alti': 'in',
          }
 MDICT = OrderedDict([
          ('all', 'No Month Limit'),
@@ -78,6 +86,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']
     varname2 = varname.split("_")[1]
+    if varname2 in ['dwpf', 'tmpf']:
+        varname2 = "i" + varname2
     month = ctx['month']
     network = ctx['network']
     station = ctx['zstation']
@@ -103,18 +113,24 @@ def plotter(fdict):
     df = read_sql("""
     WITH obs as (
         SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
-        tmpf::int as itmpf, dwpf::int as idwpf from alldata
-        where station = %s and tmpf is not null
-        and dwpf is not null and
+        tmpf::int as itmpf, dwpf::int as idwpf, mslp, alti from alldata
+        where station = %s and
         extract(month from valid at time zone %s) in %s),
     agg1 as (
-        SELECT extract(hour from ts) as hr, max(idwpf) as max_dwpf,
-        max(itmpf) as max_tmpf, min(idwpf) as min_dwpf,
-        min(itmpf) as min_tmpf from obs GROUP by hr)
+        SELECT extract(hour from ts) as hr,
+        max(idwpf) as max_dwpf,
+        max(itmpf) as max_tmpf,
+        min(idwpf) as min_dwpf,
+        min(itmpf) as min_tmpf,
+        max(alti) as max_alti,
+        min(alti) as min_alti,
+        max(mslp) as max_mslp,
+        min(mslp) as min_mslp
+        from obs GROUP by hr)
     SELECT o.ts, a.hr::int as hr,
         a.""" + varname + """ from agg1 a JOIN obs o on
         (a.hr = extract(hour from o.ts)
-        and a.""" + varname + """ = o.i""" + varname2 + """)
+        and a.""" + varname + """ = o.""" + varname2 + """)
         ORDER by a.hr ASC, o.ts DESC
     """, pgconn, params=(nt.sts[station]['tzname'], station,
                          nt.sts[station]['tzname'], tuple(months)),
