@@ -30,7 +30,8 @@ def process(order):
     filesparsed = 0
     bad = 0
     for fn in glob.glob("%s[0-2][0-9].*" % (order[:6], )):
-        content = re.sub(BAD_CHARS, "", open(fn).read())
+        content = re.sub(BAD_CHARS, "",
+                         open(fn, 'rb').read().decode('ascii', 'ignore'))
         # Now we are getting closer, lets split by the delimter as we
         # may have multiple products in one file!
         for bulletin in content.split("\001"):
