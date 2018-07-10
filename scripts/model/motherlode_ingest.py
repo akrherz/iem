@@ -71,6 +71,9 @@ def run(mcursor, model, station, lon, lat, ts):
                                         vstring, lat, lon)
     try:
         fp = requests.get(url, timeout=120)
+        if fp.status_code == 404:
+            print("motherlode_ingest grid %s %s missing" % (model, ts))
+            return 0
         sio = StringIO(fp.text)
     except Exception as exp:
         print(exp)

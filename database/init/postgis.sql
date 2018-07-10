@@ -224,7 +224,7 @@ create index ugcs_gix on ugcs USING GIST(geom);
 ---
 --- Helper function to find a GID for a given UGC code and date!
 ---
-CREATE OR REPLACE FUNCTION get_gid(text, timestamptz)
+CREATE OR REPLACE FUNCTION get_gid(varchar, timestamptz)
 RETURNS int
 LANGUAGE sql
 AS $_$
