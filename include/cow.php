@@ -322,7 +322,7 @@ function loadWarnings(){
 		ST_perimeter(ST_transform(geom,2163)) as perimeter,
 		ST_xmax(geom) as lon0, ST_ymax(geom) as lat0,
 		extract(year from issue at time zone 'UTC') as year
-			from sbw w WHERE status = 'NEW' and %s and
+			from sbw w WHERE status = 'NEW' and %s and significance = 'W' and
 			issue >= '%s' and issue < '%s' and expire < '%s'
 			and %s %s
                 
@@ -337,7 +337,7 @@ function loadWarnings(){
 		max(expire) as mexpire,
 		extract(year from issue at time zone 'UTC') as year, w.fcster
 		from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE           
-        w.gid is not null and %s and
+        w.gid is not null and %s and significance = 'W' and
 		issue >= '%s' and issue < '%s' and expire < '%s' 
 		and %s %s %s
 		GROUP by w.wfo, phenomena, eventid, significance, year, fcster
