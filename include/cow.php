@@ -101,6 +101,7 @@ function sqlLSRTypeBuilder(){
         else if ($v == "SV"){ $l[] = "H"; $l[] = "G"; $l[] = "D"; }
         else if ($v == "MA"){ $l[] = "M"; $l[] = "W"; }
         else if ($v == "FF"){ $l[] = "F"; $l[] = 'x';}
+        else if ($v == "DS"){ $l[] = "2"; }
         else{ $l[] = $v; }
     }   
     $sql = "type IN ('". implode(",", $l) ."')";
@@ -406,7 +407,7 @@ function loadLSRs() {
         	ST_astext(ST_buffer( ST_transform(geom,2163), %s000)) as buffered
         	from lsrs w WHERE %s and 
         	valid >= '%s' and valid < '%s' and %s and
-        	((type = 'M' and magnitude >= 34) or 
+        	((type = 'M' and magnitude >= 34) or type = '2' or
          	(type = 'H' and magnitude >= %s) or type = 'W' or
          	type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
          	or type = 'F' or type = 'x') ORDER by valid ASC", 
@@ -492,7 +493,7 @@ function sbwVerify() {
          ST_contains(ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326), %s), geom) 
          and %s and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
-         (type = 'H' and magnitude >= %s) or type = 'W' or
+         (type = 'H' and magnitude >= %s) or type = 'W' or type = '2' or
          type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
          or type = 'F' or type = 'x')
          and valid >= '%s+00' and valid <= '%s+00' 
@@ -516,6 +517,9 @@ function sbwVerify() {
             else if ($v["phenomena"] == "TO"){
                 if ($row["type"] == "T") { $verify = True; }
                 else { $this->lsrs[$key]["tdq"] = True; }
+            }
+            else if ($v["phenomena"] == "DS"){
+                if ($row["type"] == "2") { $verify = True; }
             }
             else if ($v["phenomena"] == "MA"){
                 if ($row["type"] == "W") { $verify = True; }

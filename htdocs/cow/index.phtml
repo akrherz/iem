@@ -40,6 +40,14 @@ putenv("TZ=UTC");
    $ltype = array_diff( $ltype, array("FF") );
  }
 
+ if ( in_array("DS", $wtype) && $syear < 2018){ 
+	$wtype = array_diff( $wtype, array("FF") );
+  }
+  if ( in_array("DS", $ltype) && $syear < 2018){ 
+	$ltype = array_diff( $ltype, array("DS") );
+  }
+ 
+
  $t->title = "Cow (Storm Based Warning Verification)";
  $t->thispage = "severe-cow";
  $nt = new NetworkTable("WFO");
@@ -65,7 +73,8 @@ putenv("TZ=UTC");
  $ar = Array("TO"=> "Tornado",
  	"SV" => "Svr T'storm",
  	"MA" => "Marine",
- 	"FF" => "Flash Flood (2008+)");
+	 "FF" => "Flash Flood (2008+)",
+     "DS" => "Dust Storm (2018+)");
  $tselect = "";
  while (list($k,$v)=each($ar)){
  	$tselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
@@ -78,7 +87,8 @@ putenv("TZ=UTC");
  "H" => "Hail",
  "G" => "Wind Gust",
  "MA" => "Marine",
- "FF" => "Flash Flood (2008+)");
+ "FF" => "Flash Flood (2008+)",
+ "DS" => "Dust Storm (2018+)");
  $ltselect = "";
  while (list($k,$v)=each($ar)){
  	if ($k == "MA2") $ltselect .= "<br />";
@@ -157,6 +167,7 @@ function wtypeSelect()
 	document.getElementById("SV").checked = true;
 	document.getElementById("MA").checked = true;
 	document.getElementById("FF").checked = true;
+	document.getElementById("DS").checked = true;
 	return false;
 }
 </script>
@@ -173,6 +184,7 @@ function ltypeSelect()
 	document.getElementById("G").checked = true;
 	document.getElementById("FF2").checked = true;
 	document.getElementById("MA2").checked = true;
+	document.getElementById("DS2").checked = true;
 	return false;
 }
 </script>
@@ -314,16 +326,17 @@ each part of the date, i.e. <code>syear=2018&amp;smonth=6&amp;sday=18&amp;shour=
 
 <tr>
 <td>phenomena=XX</td>
-<td>All TO, SV, FF, MA</td>
+<td>All TO, SV, FF, MA, DS</td>
 <td>These are the VTEC phenomena codes that you want the data and stats for.  These
 are two character and the currently supported Storm Based Warning types are 
-Tornado (TO), Severe Thunderstorm (SV), Flash Flood (FF), and Marine (MA). You can
+Tornado (TO), Severe Thunderstorm (SV), Flash Flood (FF), Marine (MA), and
+Dust Storm (DS). You can
 specify more than one phenomena, i.e. <code>phenomena=TO&amp;phenomena=SV</code>
 </td></tr>
 
 <tr>
 <td>lsrtype=XX</td>
-<td>All TO, SV, FF, MA</td>
+<td>All TO, SV, FF, MA, DS</td>
 <td>So like in the case of phenomena above, here you are specifying which
 category of Local Storm Reports to consider.  This gets to be a bit difficult
 to fully explain. In general, the codes reflect with Local Storm Report types

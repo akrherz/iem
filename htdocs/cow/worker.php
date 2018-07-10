@@ -8,7 +8,9 @@ if (substr($_SERVER["REMOTE_ADDR"],0,6) == "66.249") die();
 
 function printLSR($lsr)
 {
-  $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg", "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd");
+  $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
+  "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd",
+"2" => "Dust Storm");
   $background = "#0f0";
   if ($lsr["warned"] == False) $background = "#f00";
   if ($lsr["leadtime"] == "NA") { $background = "#eee"; $leadtime = "NA"; }
@@ -18,7 +20,9 @@ function printLSR($lsr)
   $uri = sprintf("../lsr/#%s/%s/%s", $lsr["wfo"], gmdate("YmdHi", $lsr["ts"]),
          gmdate("YmdHi", $lsr["ts"]) );
   return sprintf("<tr style=\"background: #eee;\"><td></td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"5\">%s</td></tr>", 
-    $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"], $lsr["remark"]);
+	$uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime,
+	$lsr["county"], $lsr["state"], $uri, $lsr["city"],
+	$lt[strval($lsr["type"])], $lsr["magnitude"], $lsr["remark"]);
 }
 function clean_area_verify($buffered, $parea){
 	if ($buffered === null) return 'invalid warning geometry';
