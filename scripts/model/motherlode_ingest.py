@@ -16,7 +16,7 @@ from pyiem.util import get_dbconn
 
 NT = NetworkTable(['AWOS', 'IA_ASOS'])
 
-BASE_URL = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
+BASE_URL = "http://thredds-jetstream.unidata.ucar.edu/thredds/ncss/grib/NCEP/"
 URLS = {'NAM': ("NAM/CONUS_12km/conduit/"
                 "NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"),
         'GFS': "GFS/Global_0p5deg/GFS_Global_0p5deg_%Y%m%d_%H00.grib2/GC",
