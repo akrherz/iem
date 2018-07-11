@@ -114,12 +114,12 @@ if ($mode == "monthly"){
 				null as min_tmpf_qc, snow, snowd,
 				null as min_rh, null as max_rh,
 				null as max_dwpf, null as min_dwpf,
+				null as min_feel, null as avg_feel, null as max_feel,
 				null as cv from $table WHERE
 				month = $month and year = $year and
 				station = '".$station."' ORDER by day ASC";
 	} else {
-		$sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
-				min_rh, max_rh, max_dwpf, min_dwpf, avg_sknt, vector_avg_drct,
+		$sql = "SELECT s.*, to_char(day, 'YYYYMMDD') as dvalid,
 			to_char(coop_valid at time zone t.tzname, 'HH PM') as cv,
 		    max_gust_ts at time zone t.tzname as lmax_gust_ts
 		    from summary_". $year ." s, stations t
@@ -140,12 +140,12 @@ if ($mode == "monthly"){
 			Null as max_tmpf_qc, Null as max_gust,
 			null as min_rh, null as max_rh,
 			null as max_dwpf, null as min_dwpf,
+			null as min_feel, null as avg_feel, null as max_feel,
 			null as min_tmpf_qc, station as id, snow, snowd,
 			null as cv from $table WHERE
 			day = '".$dateStr."' ORDER by $sortvar $sortorder NULLS LAST";
 	} else {
 		$sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
-				min_rh, max_rh, max_dwpf, min_dwpf,
 			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 			max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.iemid = s.iemid 
@@ -210,7 +210,11 @@ if ($mode == "monthly") {
   	$str .= sprintf("<br />RH%% Rng: %.0f-%.0f", $row["min_rh"],
   			$row["max_rh"]);
   }
-  $db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
+  if ($row["min_feel"] != null){
+	$str .= sprintf("<br />Feel Rng: %.0f-%.0f", $row["min_feel"],
+			$row["max_feel"]);
+}
+$db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
 
  } /* End of for */
  
@@ -258,8 +262,10 @@ summary information.</p>
 <th><a href="{$uri}station">Location:</a></th>
 <th><a href="{$uri}max_tmpf">High:</a></th>
 <th><a href="{$uri}min_tmpf">Low:</a></th>
-<th><a href="{$uri}max_dwpf">Max Dew Point [F]:</a></th>
+<th><a href="{$uri}min_feel">Min Feels Like[F]:</a></th>
+<th><a href="{$uri}max_feel">Max Feels Like [F]:</a></th>
 <th><a href="{$uri}min_dwpf">Min Dew Point [F]:</a></th>
+<th><a href="{$uri}max_dwpf">Max Dew Point [F]:</a></th>
 <th><a href="{$uri}pday">Rainfall</a></th>
 <th><a href="{$uri}max_gust">Peak Gust:</a></th>
 <th><a href="{$uri}max_gust_ts">Time of Gust</a></th>
@@ -282,20 +288,15 @@ EOF;
   		$htmlout .= "<tr><td>". $row['id'] ."</td>
   		<td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=". $row["id"] ."\">{$label}</a></td>";
 
-  		if (strstr($qc, 'H') || $row["max_tmpf"] == -99 )
-    		$htmlout .= "<td><strike>". $row["max_tmpf"] ."</strike></td>" ;
-  		else
-    		$htmlout .= "<td>". $row["max_tmpf"] ."</td>";
+    	$htmlout .= "<td>". $row["max_tmpf"] ."</td>";
 
 	  	$qc = $row["min_tmpf_qc"];
-	  	if (strstr($qc, 'L') || $row["min_tmpf"] == 99 )
-	    	$htmlout .= "<td><strike>". $row["min_tmpf"] ."</strike></td>";
-	  	else
-	    	$htmlout .= "<td>". $row["min_tmpf"] ."</td>";
+	  	$htmlout .= "<td>". $row["min_tmpf"] ."</td>";
+		$htmlout .= "<td>". $row["min_feel"] ."</td>";
+		$htmlout .= "<td>". $row["max_feel"] ."</td>";
 
-	    $htmlout .= "<td>". $row["max_dwpf"] ."</td>";
-	    $htmlout .= "<td>". $row["min_dwpf"] ."</td>";
-	     
+		$htmlout .= "<td>". $row["min_dwpf"] ."</td>";
+		$htmlout .= "<td>". $row["max_dwpf"] ."</td>";
 	    	
 	  	if ($row["pday"] < 0)
 	    	$htmlout .= "<td>M</td>";

@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (13, now());
+INSERT into iem_schema_manager_version values (14, now());
 
 CREATE TABLE stations(
 	id varchar(20),
@@ -461,7 +461,10 @@ CREATE TABLE summary (
     min_rh real,
     max_rh real,
     max_water_tmpf real,
-    min_water_tmpf real
+    min_water_tmpf real,
+    max_feel real,
+    avg_feel real,
+    min_feel real
 );
 GRANT SELECT on summary to nobody,apache;
 

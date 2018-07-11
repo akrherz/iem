@@ -6,131 +6,110 @@ from __future__ import print_function
 import sys
 import datetime
 
+import numpy as np
+import pandas as pd
+from pandas.io.sql import read_sql
+import metpy.calc as mcalc
+from metpy.units import units as munits
 from pyiem.util import get_dbconn
-from pyiem.datatypes import speed, direction, temperature
-from pyiem import meteorology
 
 
-def clean_rh(val):
+def clean(val, floor, ceiling):
     """Make sure RH values are always sane"""
-    if val > 100. or val < 1:
+    if val > ceiling or val < floor or pd.isna(val):
         return None
-    return val
+    if isinstance(val, munits.Quantity):
+        return float(val.magnitude)
+    return float(val)
 
 
 def do(ts):
     """Process this date timestamp"""
     asos = get_dbconn('asos', user='nobody')
-    cursor = asos.cursor()
     iemaccess = get_dbconn('iem')
     icursor = iemaccess.cursor()
-    cursor.execute("""
-    select station, network, iemid, drct, sknt, valid at time zone tzname,
+    df = read_sql("""
+    select station, network, iemid, drct, sknt,
+    valid at time zone tzname as localvalid,
     tmpf, dwpf from
     alldata d JOIN stations t on (t.id = d.station)
     where (network ~* 'ASOS' or network = 'AWOS')
     and valid between %s and %s and t.tzname is not null
+    and date(valid at time zone tzname) = %s
     ORDER by valid ASC
-    """, (ts - datetime.timedelta(days=2), ts + datetime.timedelta(days=2)))
-    wdata = dict()
-    rhdata = dict()
-    for row in cursor:
-        if row[5].strftime("%m%d") != ts.strftime("%m%d"):
-            continue
-        station = "%s|%s|%s" % (row[0], row[1], row[2])
-        if row[6] is not None and row[7] is not None:
-            tmpf = temperature(row[6], 'F')
-            dwpf = temperature(row[7], 'F')
-            rh = meteorology.relh(tmpf, dwpf)
-            if station not in rhdata:
-                rhdata[station] = dict(valid=[], rh=[])
-            rhdata[station]['valid'].append(row[5])
-            rhdata[station]['rh'].append(rh.value('%'))
-        if row[4] is not None and row[3] is not None:
-            sknt = speed(row[4], 'KT')
-            drct = direction(row[3], 'DEG')
-            (u, v) = meteorology.uv(sknt, drct)
-            if station not in wdata:
-                wdata[station] = {'valid': [], 'sknt': [], 'u': [], 'v': []}
-            wdata[station]['valid'].append(row[5])
-            wdata[station]['sknt'].append(row[4])
-            wdata[station]['u'].append(u.value('KT'))
-            wdata[station]['v'].append(v.value('KT'))
+    """, asos, params=(ts - datetime.timedelta(days=2),
+                       ts + datetime.timedelta(days=2),
+                       ts.strftime("%Y-%m-%d")), index_col=None)
+    # derive some parameters
+    df['relh'] = mcalc.relative_humidity_from_dewpoint(
+        df['tmpf'].values * munits.degF,
+        df['dwpf'].values * munits.degF).to(munits.percent)
+    df['feel'] = mcalc.apparent_temperature(
+        df['tmpf'].values * munits.degF,
+        df['relh'].values * munits.percent,
+        df['sknt'].values * munits.knots
+    )
+    df['u'], df['v'] = mcalc.get_wind_components(
+        df['sknt'].values * munits.knots,
+        df['drct'].values * munits.deg
+    )
+    df['localvalid_lag'] = df.groupby('iemid')['localvalid'].shift(1)
+    df['timedelta'] = df['localvalid'] - df['localvalid_lag']
+    ndf = df[pd.isna(df['timedelta'])]
+    df.loc[ndf.index.values, 'timedelta'] = pd.to_timedelta(
+            ndf['localvalid'].dt.hour * 3600. +
+            ndf['localvalid'].dt.minute * 60., unit='s'
+    )
+    df['timedelta'] = df['timedelta'] / np.timedelta64(1, 's')
 
     table = "summary_%s" % (ts.year,)
-    for stid in rhdata:
-        # Not enough data
-        if len(rhdata[stid]['valid']) < 6:
+    for iemid, gdf in df.groupby('iemid'):
+        if len(gdf.index) < 6:
+            print(" Quorum not meet for %s" % (gdf.iloc[0]['station'], ))
             continue
-        station, network, iemid = stid.split("|")
-        now = datetime.datetime(ts.year, ts.month, ts.day)
-        runningrh = 0
-        runningtime = 0
-        for i, valid in enumerate(rhdata[stid]['valid']):
-            delta = (valid - now).seconds
-            runningtime += delta
-            runningrh += (delta * rhdata[stid]['rh'][i])
-            now = valid
+        ldf = gdf.copy()
+        ldf.interpolate(inplace=True)
+        totsecs = ldf['timedelta'].sum()
+        avg_rh = clean((ldf['relh'] * ldf['timedelta']).sum() / totsecs, 1,
+                       100)
+        min_rh = clean(ldf['relh'].min(), 1, 100)
+        max_rh = clean(ldf['relh'].max(), 1, 100)
 
-        if runningtime == 0:
-            print(("compute_daily %s has time domain %s %s"
-                   ) % (stid, rhdata[stid]['valid'][0],
-                        rhdata[stid]['valid'][-1]))
-            continue
-        avg_rh = clean_rh(runningrh / runningtime)
-        min_rh = clean_rh(min(rhdata[stid]['rh']))
-        max_rh = clean_rh(max(rhdata[stid]['rh']))
+        uavg = (ldf['u'] * ldf['timedelta']).sum() / totsecs
+        vavg = (ldf['u'] * ldf['timedelta']).sum() / totsecs
+        drct = clean(
+            mcalc.get_wind_dir(uavg * munits.knots, vavg * munits.knots),
+            0, 360)
+        avg_sknt = clean(
+            (ldf['sknt'] * ldf['timedelta']).sum() / totsecs, 0, 150  # arb
+        )
+        max_feel = clean(ldf['feel'].max(), -150, 200)
+        avg_feel = clean(
+            (ldf['feel'] * ldf['timedelta']).sum() / totsecs, -150, 200
+        )
+        min_feel = clean(ldf['feel'].min(), -150, 200)
 
         def do_update():
-            icursor.execute("""UPDATE """ + table + """
-            SET avg_rh = %s, min_rh = %s, max_rh = %s WHERE
-            iemid = %s and day = %s""", (avg_rh, min_rh, max_rh, iemid, ts))
+            """Inline updating"""
+            icursor.execute("""
+            UPDATE """ + table + """
+            SET avg_rh = %s, min_rh = %s, max_rh = %s,
+            avg_sknt = %s, vector_avg_drct = %s,
+            min_feel = %s, avg_feel = %s, max_feel = %s
+            WHERE
+            iemid = %s and day = %s
+            """, (avg_rh, min_rh, max_rh, avg_sknt, drct,
+                  min_feel, avg_feel, max_feel,
+                  iemid, ts))
         do_update()
         if icursor.rowcount == 0:
             print(('compute_daily Adding %s for %s %s %s'
-                   ) % (table, station, network, ts))
-            icursor.execute("""INSERT into """ + table + """
-            (iemid, day) values (%s, %s)""", (iemid, ts))
-            do_update()
-
-    for stid in wdata:
-        # Not enough data
-        if len(wdata[stid]['valid']) < 6:
-            continue
-        station, network, iemid = stid.split("|")
-        now = datetime.datetime(ts.year, ts.month, ts.day)
-        runningsknt = 0
-        runningtime = 0
-        runningu = 0
-        runningv = 0
-        for i, valid in enumerate(wdata[stid]['valid']):
-            delta = (valid - now).seconds
-            runningtime += delta
-            runningsknt += (delta * wdata[stid]['sknt'][i])
-            runningu += (delta * wdata[stid]['u'][i])
-            runningv += (delta * wdata[stid]['v'][i])
-            now = valid
-
-        if runningtime == 0:
-            print(("compute_daily %s has time domain %s %s"
-                   ) % (stid, wdata[stid]['valid'][0],
-                        wdata[stid]['valid'][-1]))
-            continue
-        sknt = runningsknt / runningtime
-        u = speed(runningu / runningtime, 'KT')
-        v = speed(runningv / runningtime, 'KT')
-        drct = meteorology.drct(u, v).value("DEG")
-
-        def do_update():
-            icursor.execute("""UPDATE """ + table + """
-            SET avg_sknt = %s, vector_avg_drct = %s WHERE
-            iemid = %s and day = %s""", (sknt, drct, iemid, ts))
-        do_update()
-        if icursor.rowcount == 0:
-            print(('compute_daily Adding %s for %s %s %s'
-                   ) % (table, station, network, ts))
-            icursor.execute("""INSERT into """ + table + """
-            (iemid, day) values (%s, %s)""", (iemid, ts))
+                   ) % (table, gdf.iloc[0]['station'], gdf.iloc[0]['network'],
+                        ts))
+            icursor.execute("""
+                INSERT into """ + table + """
+                (iemid, day) values (%s, %s)
+            """, (iemid, ts))
             do_update()
 
     icursor.close()
@@ -144,6 +123,7 @@ def main(argv):
     if len(argv) == 4:
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     do(ts)
+
 
 if __name__ == '__main__':
     main(sys.argv)
