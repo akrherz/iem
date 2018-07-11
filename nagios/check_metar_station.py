@@ -24,7 +24,7 @@ def check(network, station, minute):
     """, (station, network, res['rt_valid']))
     if icursor.rowcount > 0:
         row = icursor.fetchone()
-        res['rt_temp'] = int(row[0])
+        res['rt_temp'] = "NaN" if row[0] is None else int(row[0])
     # Do ASOS
     now = datetime.datetime.now() - datetime.timedelta(minutes=135)
     res['arch_valid'] = now.replace(minute=minute, second=0, microsecond=0)
@@ -35,7 +35,7 @@ def check(network, station, minute):
     """, (station, res['arch_valid']))
     if icursor.rowcount > 0:
         row = icursor.fetchone()
-        res['arch_temp'] = int(row[0])
+        res['arch_temp'] = "NaN" if row[0] is None else int(row[0])
 
     return res
 
