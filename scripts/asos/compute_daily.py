@@ -5,6 +5,7 @@ Called from RUN_12Z.sh for the previous date
 from __future__ import print_function
 import sys
 import datetime
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,9 @@ from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units as munits
 from pyiem.util import get_dbconn
+
+# bad values into mcalc
+warnings.simplefilter("ignore", RuntimeWarning)
 
 
 def clean(val, floor, ceiling):
@@ -65,7 +69,7 @@ def do(ts):
     table = "summary_%s" % (ts.year,)
     for iemid, gdf in df.groupby('iemid'):
         if len(gdf.index) < 6:
-            print(" Quorum not meet for %s" % (gdf.iloc[0]['station'], ))
+            # print(" Quorum not meet for %s" % (gdf.iloc[0]['station'], ))
             continue
         ldf = gdf.copy()
         ldf.interpolate(inplace=True)
