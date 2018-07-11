@@ -68,7 +68,7 @@ def get_data(network, sts, ets, stations):
         s.day >= %s and s.day < %s and t.network = %s and t.id in %s
         ORDER by day ASC""", (sts, ets, network, tuple(stations)))
     for row in cursor:
-        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
                 ) % (row[0], row[1], row[2], row[3], row[4], row[5], row[6],
                      row[7], row[8], row[9], row[10], row[11],
                      climate[row[0]][row[1].strftime("%m%d")]['high'],
