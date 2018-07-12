@@ -60,7 +60,11 @@ def run(valid, routes):
             lats = lats[x1:x2, y1:y2]
             lons = lons[x1:x2, y1:y2]
 
-        reflect = gs[0]['values'][x1:x2, y1:y2]
+        # HACK..............
+        if len(gs) > 1 and minute > (18*60):
+            reflect = gs[-1]['values'][x1:x2, y1:y2]
+        else:
+            reflect = gs[0]['values'][x1:x2, y1:y2]
 
         mp = MapPlot(sector='midwest', axisbg='tan',
                      title=('%s UTC NCEP HRRR 1 km AGL Reflectivity'

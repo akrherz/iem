@@ -76,7 +76,7 @@ def run(valid):
                 offsets.append([int(tokens[1])])
                 neednext = True
 
-        if hr < 19 and len(offsets) != 4:
+        if hr > 0 and hr < 19 and len(offsets) != 4:
             print(("dl_hrrrref[%s] hr: %s offsets: %s"
                    ) % (valid.strftime("%Y%m%d%H"), hr, offsets))
         for pr in offsets:
