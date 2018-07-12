@@ -1,7 +1,7 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
-include("../../../include/imagemaps.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 
 $network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
@@ -9,7 +9,7 @@ $network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
 $t = new MyView();
 $t->iemss = True;
 define("IEM_APPID", 44);
-include_once "../../../include/database.inc.php";
+require_once "../../../include/database.inc.php";
 $mesosite = iemdb('mesosite');
  
 $t->title = "DCP/HADS Data Download";
@@ -53,7 +53,7 @@ dataset is huge and the download may take a number of seconds to process.</p>
 </form>
 
 
-<form method="GET" action="/cgi-bin/request/hads.py" name="iemss">
+<form target="_blank" method="GET" action="/cgi-bin/request/hads.py" name="iemss">
 <input type='hidden' name='network' value="{$network}" />
 
 <div class="row">

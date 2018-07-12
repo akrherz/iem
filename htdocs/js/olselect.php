@@ -3,7 +3,7 @@
  * Emit some javascript that drives our selector widget, this code is
  * 'called' from all sorts of apps, so be careful!
  */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
 $multi = isset($_GET["multi"]);

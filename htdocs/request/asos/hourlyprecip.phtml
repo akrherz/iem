@@ -1,10 +1,10 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 155);
-include("../../../include/myview.php");
-include_once "../../../include/database.inc.php";
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/forms.php";
 
 $mesosite = iemdb('mesosite');
 
@@ -70,7 +70,7 @@ data prior to 2010 for missing hours.</div>
 <input type="submit" value="Switch Network">
 		</form>
 
-<form name="dl" action="/cgi-bin/request/hourlyprecip.py">
+<form target="_blank" name="dl" action="/cgi-bin/request/hourlyprecip.py">
 <input type="hidden" value="{$network}" name="network" />
 
 <div class="row">
