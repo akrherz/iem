@@ -15,10 +15,10 @@ from pyiem.plot import MapPlot
 import pyiem.reference as ref
 from pyiem.util import utc
 HOURS = [
-    36, 18, 18, 39, 18, 18,
-    36, 18, 18, 39, 18, 18,
-    36, 18, 18, 39, 18, 18,
-    36, 18, 18, 39, 18, 18
+    36, 18, 18, 18, 18, 18,
+    36, 18, 18, 18, 18, 18,
+    36, 18, 18, 18, 18, 18,
+    36, 18, 18, 18, 18, 18
 ]
 
 

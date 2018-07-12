@@ -13,10 +13,10 @@ from pyiem.util import utc, exponential_backoff
 
 # HRRR model hours available
 HOURS = [
-    36, 18, 18, 39, 18, 18,
-    36, 18, 18, 39, 18, 18,
-    36, 18, 18, 39, 18, 18,
-    36, 18, 18, 39, 18, 18
+    36, 18, 18, 18, 18, 18,
+    36, 18, 18, 18, 18, 18,
+    36, 18, 18, 18, 18, 18,
+    36, 18, 18, 18, 18, 18
 ]
 BASE = "http://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
 
