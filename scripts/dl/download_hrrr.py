@@ -40,7 +40,7 @@ def fetch(valid):
     81:56146124:d=2014101002:DSWRF:surface:anl:
     """
     uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
-                          "com/hrrr/prod/hrrr.%Y%m%d/hrrr.t%Hz."
+                          "com/hrrr/prod/hrrr.%Y%m%d/conus/hrrr.t%Hz."
                           "wrfprsf00.grib2.idx"))
     req = requests.get(uri, timeout=30)
     if req.status_code != 200:

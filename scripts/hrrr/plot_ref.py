@@ -14,6 +14,12 @@ import pygrib
 from pyiem.plot import MapPlot
 import pyiem.reference as ref
 from pyiem.util import utc
+HOURS = [
+    36, 18, 18, 39, 18, 18,
+    36, 18, 18, 39, 18, 18,
+    36, 18, 18, 39, 18, 18,
+    36, 18, 18, 39, 18, 18
+]
 
 
 def compute_bounds(lons, lats):
@@ -35,12 +41,17 @@ def run(valid, routes):
     lats = None
     lons = None
     i = 0
-    for minute in range(0, 18 * 60 + 1, 15):
+    for minute in range(0, HOURS[valid.hour] * 60 + 1, 15):
+        if minute > (18 * 60) and minute % 60 != 0:
+            continue
         now = valid + datetime.timedelta(minutes=minute)
         now = now.astimezone(pytz.timezone("America/Chicago"))
         grbs.seek(0)
         try:
-            gs = grbs.select(level=1000, forecastTime=minute)
+            gs = grbs.select(level=1000,
+                             forecastTime=(minute
+                                           if minute <= (18 * 60)
+                                           else int(minute / 60)))
         except ValueError:
             continue
         if lats is None:

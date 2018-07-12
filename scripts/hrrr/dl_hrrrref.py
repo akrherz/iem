@@ -11,8 +11,14 @@ import requests
 import pygrib
 from pyiem.util import utc, exponential_backoff
 
-# 18 hours of output + analysis
-COMPLETE_GRIB_MESSAGES = 18 * 4 + 1
+# HRRR model hours available
+HOURS = [
+    36, 18, 18, 39, 18, 18,
+    36, 18, 18, 39, 18, 18,
+    36, 18, 18, 39, 18, 18,
+    36, 18, 18, 39, 18, 18
+]
+BASE = "http://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
 
 
 def upstream_has_data(valid):
@@ -32,7 +38,7 @@ def run(valid):
         # See how many grib messages we have
         try:
             grbs = pygrib.open(gribfn)
-            if grbs.messages == COMPLETE_GRIB_MESSAGES:
+            if grbs.messages == (18 * 4 + (HOURS[valid.hour] - 18) + 1):
                 # print("%s is complete!" % (gribfn, ))
                 return
             del grbs
@@ -40,12 +46,16 @@ def run(valid):
             logging.debug(exp)
     tmpfn = '/tmp/%s.grib2' % (valid.strftime("%Y%m%d%H"), )
     output = open(tmpfn, 'wb')
-    for hr in range(0, 19):
+    for hr in range(0, min([39, HOURS[valid.hour]]) + 1):
         shr = "%02i" % (hr,)
-        uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
-                              "com/hrrr/prod/"
-                              "hrrr.%Y%m%d/hrrr.t%Hz.wrfsubhf" + shr +
-                              ".grib2.idx"))
+        if hr <= 18:
+            uri = valid.strftime((BASE +
+                                  "hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf" +
+                                  shr + ".grib2.idx"))
+        else:
+            uri = valid.strftime((BASE +
+                                  "hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf" +
+                                  shr + ".grib2.idx"))
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
             print("dl_hrrrref failed to fetch %s" % (uri, ))
@@ -66,7 +76,7 @@ def run(valid):
                 offsets.append([int(tokens[1])])
                 neednext = True
 
-        if hr > 0 and len(offsets) != 4:
+        if hr < 19 and len(offsets) != 4:
             print(("dl_hrrrref[%s] hr: %s offsets: %s"
                    ) % (valid.strftime("%Y%m%d%H"), hr, offsets))
         for pr in offsets:
