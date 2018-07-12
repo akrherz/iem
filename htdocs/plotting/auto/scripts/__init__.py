@@ -348,6 +348,8 @@ data = {'plots': [
          'label': ("Crop Progress by Year")},
     ]},
     {'label': 'NWS Warning Plots', 'options': [
+        {'id': "196",
+         'label': "ASOS/METAR Heat Index Frequencies by NWS Alert Headline"},
         {'id': "191",
          'label': "Calendar Plot of Watch/Warn/Adv Daily Counts by WFO"},
         {'id': "92",
