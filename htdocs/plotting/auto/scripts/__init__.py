@@ -346,6 +346,8 @@ data = {'plots': [
          'label': ("Crop Condition by Year for Six States")},
         {'id': "127",
          'label': ("Crop Progress by Year")},
+        {'id': "197",
+         'label': ("Crop Progress State Average Map")},
     ]},
     {'label': 'NWS Warning Plots', 'options': [
         {'id': "196",
