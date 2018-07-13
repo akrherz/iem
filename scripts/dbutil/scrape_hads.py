@@ -81,8 +81,8 @@ def main():
             plot_name, elevation, online, metasite, geom)
             VALUES (%s, %s, %s, %s, %s, %s, %s, 't', 'f',
             'SRID=4326;POINT(%s %s)');
-            """, (nwsli, row['location'].strip(), network, country,
-                  state, row['location'].strip(), -999,
+            """, (nwsli, row['location'].strip()[:64], network, country,
+                  state, row['location'].strip()[:64], -999,
                   float(lon), float(lat)))
     mcursor.close()
     mesosite_pgconn.commit()

@@ -61,8 +61,8 @@ def dowork(nwsli):
     sql = """INSERT into stations(id, name, network, country, state,
     plot_name, elevation, online, metasite, geom) VALUES ('%s', '%s', '%s',
     '%s', '%s', '%s', %s, 't', 'f', 'SRID=4326;POINT(%s %s)');
-    """ % (nwsli, name, network, country, state, name, meta['elevation'], lon,
-           lat)
+    """ % (nwsli, name[:64], network, country, state, name[:64],
+           meta['elevation'], lon, lat)
     OUTPUT.write(sql)
 
 
