@@ -39,8 +39,7 @@ VLOOKUP = {
                'GFS':
                'Convective_precipitation_surface_Mixed_intervals_Accumulation',
                },
- 'precip': {'RAP': ('Large-scale_precipitation_non-'
-                    'convective_surface_1_Hour_Accumulation'),
+ 'precip': {'RAP': 'Total_precipitation_surface_1_Hour_Accumulation',
             'NAM': 'Total_precipitation_surface_3_Hour_Accumulation',
             'GFS': 'Total_precipitation_surface_Mixed_intervals_Accumulation',
             }

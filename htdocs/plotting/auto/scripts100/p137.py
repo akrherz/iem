@@ -1,8 +1,10 @@
 """Duration of seasons"""
 import datetime
 
+import matplotlib.dates as mdates
 from pandas.io.sql import read_sql
 from scipy import stats
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
@@ -37,10 +39,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
