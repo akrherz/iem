@@ -2,6 +2,7 @@
 """
 Download interface for data from RAOB network
 """
+import sys
 import cgi
 import datetime
 
@@ -20,7 +21,7 @@ def m(val):
 def fetcher(station, sts, ets):
     """Do fetching"""
     dbconn = get_dbconn('postgis')
-    cursor = dbconn.cursor()
+    cursor = dbconn.cursor('raobstreamer')
     stations = [station, ]
     if station.startswith("_"):
         nt = NetworkTable("RAOB")
@@ -43,15 +44,31 @@ def fetcher(station, sts, ets):
                   m(row[8]), m(row[9])))
 
 
+def friendly_date(form, key):
+    """More forgiving date conversion"""
+    val = form.getfirst(key)
+    try:
+        val = val.strip()
+        if len(val.split()) == 1:
+            dt = datetime.datetime.strptime(val, '%m/%d/%Y')
+        else:
+            dt = datetime.datetime.strptime(val, '%m/%d/%Y %H:%M')
+        dt = dt.replace(tzinfo=pytz.UTC)
+    except Exception as _exp:
+        ssw('Content-type: text/plain\n\n')
+        ssw(('Invalid %s date provided, should be "%%m/%%d/%%Y %%H:%%M"'
+             ' in UTC timezone'
+             ) % (key, ))
+        sys.exit()
+    return dt
+
+
 def main():
     """Go Main Go"""
     form = cgi.FieldStorage()
-    sts = datetime.datetime.strptime(form.getfirst('sts', ''),
-                                     '%m/%d/%Y %H:%M')
-    sts = sts.replace(tzinfo=pytz.utc)
-    ets = datetime.datetime.strptime(form.getfirst('ets', ''),
-                                     '%m/%d/%Y %H:%M')
-    ets = ets.replace(tzinfo=pytz.utc)
+    sts = friendly_date(form, 'sts')
+    ets = friendly_date(form, 'ets')
+
     station = form.getfirst('station', 'KOAX')[:4]
     if form.getfirst('dl', None) is not None:
         ssw('Content-type: application/octet-stream\n')
