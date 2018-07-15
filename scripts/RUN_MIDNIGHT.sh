@@ -8,6 +8,8 @@ python adjust_snet_precip.py
 
 cd ../util
 python i5_2_cybox.py &
+sleep 30
+python autolapses2box.py &
 
 cd ../dbutil
 sh save_snet_raw.sh
