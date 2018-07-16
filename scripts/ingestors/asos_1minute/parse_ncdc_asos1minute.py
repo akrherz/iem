@@ -190,7 +190,7 @@ def runner(station, monthts):
     for ts in keys:
         if ts.year != monthts.year and not flipped:
             print("  Flipped years from %s to %s" % (monthts.year, ts.year))
-            out.write(r"\.\n")
+            out.write("\.\n")
             out.write(("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n"
                        ) % (ts.year,))
             flipped = True
@@ -202,7 +202,7 @@ def runner(station, monthts):
                     'tmpf', 'dwpf']:
             ln += "%s\t" % (data[ts].get(col) or 'Null',)
         out.write(ln[:-1]+"\n")
-    out.write(r"\.\n")
+    out.write("\.\n")
     out.close()
 
     proc = subprocess.Popen("psql -f %s -h iemdb asos" % (tmpfn,), shell=True,
