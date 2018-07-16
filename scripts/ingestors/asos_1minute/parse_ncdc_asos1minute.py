@@ -11,7 +11,6 @@ import os
 import subprocess
 import sys
 import datetime
-import unittest
 
 import pytz
 import requests
@@ -185,13 +184,13 @@ def runner(station, monthts):
          monthts.year,))
 
     # Loop over the data we got please
-    keys = data.keys()
+    keys = list(data.keys())
     keys.sort()
     flipped = False
     for ts in keys:
         if ts.year != monthts.year and not flipped:
             print("  Flipped years from %s to %s" % (monthts.year, ts.year))
-            out.write("\.\n")
+            out.write(r"\.\n")
             out.write(("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n"
                        ) % (ts.year,))
             flipped = True
@@ -203,13 +202,13 @@ def runner(station, monthts):
                     'tmpf', 'dwpf']:
             ln += "%s\t" % (data[ts].get(col) or 'Null',)
         out.write(ln[:-1]+"\n")
-    out.write("\.\n")
+    out.write(r"\.\n")
     out.close()
 
     proc = subprocess.Popen("psql -f %s -h iemdb asos" % (tmpfn,), shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout = proc.stdout.read()
-    stderr = proc.stderr.read()
+    stdout = proc.stdout.read().decode('utf-8')
+    stderr = proc.stderr.read().decode('utf-8')
 
     print(("%s %s processed %s entries [%s to %s UTC]\n"
            "STDOUT: %s\nSTDERR: %s"
@@ -265,13 +264,10 @@ if __name__ == '__main__':
     main(sys.argv)
 
 
-class test(unittest.TestCase):
-    """Some tests"""
+def test_parser():
+    """test things"""
+    for ex in p1_examples:
+        p1_parser(ex)
 
-    def test_parser(self):
-        for ex in p1_examples:
-            p1_parser(ex)
-
-        for ex in p2_examples:
-            p2_parser(ex)
-        self.assertEquals(1, 1)
+    for ex in p2_examples:
+        p2_parser(ex)
