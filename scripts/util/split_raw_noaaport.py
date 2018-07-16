@@ -4,18 +4,16 @@ import os
 import datetime
 import subprocess
 
-import pytz
 import tqdm
+from pyiem.util import utc
 from pyiem.nws.product import TextProduct
 
 
 def main():
     """Go"""
     os.chdir("/mesonet/tmp/noaaport")
-    sts = datetime.datetime(2017, 10, 10)
-    sts = sts.replace(tzinfo=pytz.utc)
-    ets = datetime.datetime(2017, 11, 3)
-    ets = ets.replace(tzinfo=pytz.utc)
+    sts = utc(2018, 4, 24)
+    ets = utc(2018, 6, 28)
     interval = datetime.timedelta(days=1)
 
     now = sts
@@ -28,8 +26,9 @@ def main():
             if not os.path.isfile(fn):
                 print('Missing %s' % (fn,))
                 continue
-            fp = open(fn).read()
-            prods = fp.split("\003")
+            # careful here to keep bad bytes from causing issues
+            fp = open(fn, 'rb').read()
+            prods = fp.decode('utf-8', 'ignore').split("\003")
             for prod in prods:
                 if prod.find("RRSTAR") == -1:
                     continue
@@ -37,7 +36,7 @@ def main():
                     tp = TextProduct(prod, utcnow=now)
                 except Exception as _exp:
                     continue
-                if tp.afos == 'RRSTAR' and tp.source == 'KWOH':
+                if tp.afos == 'RRSTAR':
                     out.write(prod + "\003")
             os.unlink(fn)
         out.close()

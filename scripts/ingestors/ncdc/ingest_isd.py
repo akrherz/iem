@@ -46,10 +46,12 @@ def main(argv):
                 bad += 1
                 continue
             if added == 0:
+                dbid = faa if len(faa) == 4 and faa[0] != 'K' else faa[1:]
                 cursor.execute("""
                     DELETE from alldata where station = %s
                     and valid >= %s and valid < %s
-                """, (faa, sts, ets))
+                """, (dbid, sts, ets))
+                print("deleted %s rows for %s" % (cursor.rowcount, dbid))
                 removed = cursor.rowcount
             res = ds3505.sql(cursor, faa, data)
             if res is None:
