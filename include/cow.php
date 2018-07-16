@@ -280,7 +280,7 @@ function computeSharedBorder(){
     	where wfo = '{$v["wfo"]}' 
 		and eventid = {$v["eventid"]} and significance = '{$v["significance"]}' 
 		and phenomena = '{$v["phenomena"]}' and status = 'NEW'), 
-	countybased as (SELECT ST_Union(u.geom) as geom from 
+	countybased as (SELECT ST_Union(ST_Buffer(u.simple_geom, 0)) as geom from 
 		warnings_{$v["year"]} w JOIN ugcs u on (u.gid = w.gid) 
 		WHERE w.wfo = '{$v["wfo"]}' and eventid = {$v["eventid"]} and 
 		significance = '{$v["significance"]}' and phenomena = '{$v["phenomena"]}') 
