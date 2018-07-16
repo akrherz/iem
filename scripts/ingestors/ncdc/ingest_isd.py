@@ -39,7 +39,8 @@ def main(argv):
         bad = 0
         removed = 0
         skipped = 0
-        for line in open(lfn):
+        # ignore any bad bytes, sigh
+        for line in open(lfn, errors='ignore'):
             data = ds3505.parser(line.strip(), faa, add_metar=True)
             if data is None:
                 bad += 1

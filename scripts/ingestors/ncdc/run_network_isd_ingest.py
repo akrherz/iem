@@ -1,6 +1,6 @@
 """Process a network's worth of ISD data, please
 
-    python run_network_isd_ingest.py <network> <startyear> <endyear_exclusive>
+    python run_network_isd_ingest.py <network>
     ftp://ftp.ncdc.noaa.gov/pub/data/noaa
 """
 from __future__ import print_function
@@ -34,25 +34,23 @@ def build_xref():
 def main(argv):
     """Go Main Go"""
     network = argv[1]
-    syear = int(argv[2])
-    eyear = int(argv[3])
     xref = build_xref()
     nt = NetworkTable(network)
     for station in nt.sts:
         if nt.sts[station]['archive_begin'] is None:
             print("skipping %s as archive_begin is None" % (station, ))
             continue
-        if nt.sts[station]['archive_begin'].year < eyear:
-            print("Skipping %s as archive_begin is before period" % (station,))
-            continue
+        eyear = nt.sts[station]['archive_begin'].year
         for option in xref.get(station, []):
-            if option[2].year > eyear or option[3].year < syear:
-                print(("    skipping %s as option=%s->%s"
-                       ) % (station, option[2], option[3]))
+            if option[2].year > eyear:
+                print(("    skipping %s as data starts %s after station sts %s"
+                       ) % (station, option[2].year, eyear))
+                continue
+            if option[2].year == eyear:
                 continue
             stid = station if len(station) == 4 else 'K'+station
             cmd = ("python ingest_isd.py %s %s %s %s %s"
-                   ) % (option[0], option[1], stid, syear, eyear)
+                   ) % (option[0], option[1], stid, option[2].year, eyear)
             print(cmd)
             subprocess.call(cmd, shell=True)
 
