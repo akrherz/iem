@@ -19,8 +19,8 @@ import datetime
 import pandas as pd
 from pyiem.util import get_dbconn
 
-CALINFO = re.compile((r"AWOS t/d:?\s*([0-9\-\.]+)/([0-9\-\.]+)\s+"
-                      r"Std\.?\s*t?/?d?:?\s*([0-9\-\.]+)/([0-9\-\.]+)"),
+CALINFO = re.compile((r".*AWOS.*\s+([0-9\-\.]+)/([0-9\-\.]+)\s+"
+                      r".*AWOS.*\s+([0-9\-\.]+)/([0-9\-\.]+)"),
                      re.IGNORECASE)
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
@@ -52,13 +52,13 @@ def main(argv):
         INSERT into iem_calibration(station, portfolio, valid, parameter,
         adjustment, final, comments) values (%s, 'iaawos', %s, %s, %s, %s, %s)
         """
-        tempadj = float(parts[0][2]) - float(parts[0][0])
+        tempadj = float(parts[0][1]) - float(parts[0][0])
         args = (faa, date.strftime("%Y-%m-%d"), 'tmpf', tempadj,
                 parts[0][2], row['Description'].replace('"', ''))
         if len(sys.argv) > 1:
             pcursor.execute(sql, args)
 
-        dewpadj = float(parts[0][3]) - float(parts[0][1])
+        dewpadj = float(parts[0][3]) - float(parts[0][2])
         args = (faa, date.strftime("%Y-%m-%d"), 'dwpf',
                 float(parts[0][3]) - float(parts[0][1]),
                 parts[0][3], row['Description'].replace('"', ''))

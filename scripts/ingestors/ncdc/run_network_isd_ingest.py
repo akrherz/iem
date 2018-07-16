@@ -1,6 +1,7 @@
 """Process a network's worth of ISD data, please
 
     python run_network_isd_ingest.py <network> <startyear> <endyear_exclusive>
+    ftp://ftp.ncdc.noaa.gov/pub/data/noaa
 """
 from __future__ import print_function
 import sys

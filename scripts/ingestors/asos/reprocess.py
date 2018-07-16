@@ -10,7 +10,6 @@ Arguments
 
 """
 from __future__ import print_function
-import traceback
 import datetime
 import time
 import sys
@@ -23,9 +22,9 @@ import pytz
 import requests
 import pandas as pd
 from pyiem.datatypes import pressure
-from pyiem.util import get_dbconn
 from metar.Metar import Metar
 from metar.Metar import ParserError as MetarParserError
+from pyiem.util import get_dbconn
 ASOS = get_dbconn('asos')
 
 SLP = 'Sea Level PressureIn'
@@ -231,9 +230,10 @@ def clear_data(station, tzname, sts, ets):
 
 def to_df(html):
     """Make a dataframe from this html"""
-    if html.find('obsTable') == -1:
+    if html.find('history-observation-table') == -1:
+        print("no obsTable found?")
         return None
-    df = pd.read_html(html, attrs=dict(id='obsTable'))[0]
+    df = pd.read_html(html, attrs=dict(id='history-observation-table'))[0]
     # OK, we should have a round number of rows with the METAR coming below
     # the observation line
     if len(df.index) % 2 != 0:
@@ -244,6 +244,7 @@ def to_df(html):
         'Sea Level PressureIn': df.iloc[::2, :]['Pressure'].values})
     resdf['Sea Level PressureIn'] = resdf['Sea Level PressureIn'].str.replace(
                                         '\xa0in', '')
+    print(resdf)
     return resdf
 
 
@@ -301,7 +302,7 @@ def get_df(station, now, jar):
         if res.status_code != 200:
             time.sleep(5)  # allow for transient server errors to subside?
             raise Exception("%s -> %s" % (url, res.status_code))
-        df = to_df(res.content)
+        df = to_df(res.content.decode('ascii', 'ignore'))
         if df is None:
             return None
         df.to_csv(fn, index=False, encoding='utf-8')
@@ -312,7 +313,7 @@ def get_df(station, now, jar):
         return None
     except Exception as exp:
         print("Failure %s %s" % (station, now))
-        traceback.print_exc()
+        print(exp)
         return None
     return df
 
@@ -417,7 +418,7 @@ def process_metar(mstr, now):
                                                                now.year))
                 sys.exit()
                 return None
-        except Exception, exp:
+        except Exception as exp:
             print("Double Fail: %s %s" % (mstr, exp))
             return None
     if mtr is None or mtr.time is None:
