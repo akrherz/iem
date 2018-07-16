@@ -8,18 +8,24 @@ import subprocess
 import json
 
 import numpy as np
-import pygrib
 from PIL import Image
+import pygrib
 from pyiem.util import utc
 
-PALETTE = Image.open(open("/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png")
-                     ).getpalette()
+PALETTE = Image.open(
+    open("/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png", 'rb')
+).getpalette()
 
 
 def do_grb(grib, valid):
     """Process this grib object"""
-    fxminutes = grib.forecastTime
-    fxvalid = valid + datetime.timedelta(minutes=fxminutes)
+    fxdelta = grib.forecastTime
+    if grib.fcstimeunits == 'mins':
+        fxvalid = valid + datetime.timedelta(minutes=fxdelta)
+        fxminutes = fxdelta
+    else:
+        fxvalid = valid + datetime.timedelta(hours=fxdelta)
+        fxminutes = int(fxdelta * 60.)
     gribtemp = tempfile.NamedTemporaryFile(suffix=".grib2", delete=False)
     newgribtemp = tempfile.NamedTemporaryFile(suffix=".grib2")
     pngtemp = tempfile.NamedTemporaryFile(suffix='.png')
@@ -49,7 +55,7 @@ def do_grb(grib, valid):
                 valid.hour, fxminutes, pngtemp.name,)
     subprocess.call(cmd, shell=True)
     # Do world file variant
-    wldtmp = tempfile.NamedTemporaryFile(delete=False)
+    wldtmp = tempfile.NamedTemporaryFile(delete=False, mode='w')
     wldtmp.write("""0.02
 0.0
 0.0
@@ -63,7 +69,7 @@ def do_grb(grib, valid):
                 valid.hour, fxminutes, wldtmp.name)
     subprocess.call(cmd, shell=True)
     # Do json metadata
-    jsontmp = tempfile.NamedTemporaryFile(delete=False)
+    jsontmp = tempfile.NamedTemporaryFile(delete=False, mode='w')
     jdict = {'model_init_utc': valid.strftime("%Y-%m-%dT%H:%M:%SZ"),
              'forecast_minute': fxminutes,
              'model_forecast_utc': fxvalid.strftime("%Y-%m-%dT%H:%M:%SZ")}
