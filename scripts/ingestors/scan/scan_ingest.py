@@ -6,12 +6,12 @@ import sys
 import pytz
 import requests
 # Stop the SSL cert warning :/
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import urllib3
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 nt = NetworkTable("SCAN")
@@ -202,12 +202,14 @@ def main(argv):
         except Exception as exp:
             print('scan_ingest.py Failed to download: %s %s' % (sid, exp))
             continue
-        lines = response.split("\n")
-        cols = lines[3].split(",")
+        linesin = response.split("\n")
+        # trim blank lines
+        lines = [l for l in linesin if l.strip() != ""]
+        cols = lines[1].split(",")
         if not cols:
             print("scan_ingest.py for station: %s had no columns" % (sid, ))
         data = {}
-        for row in lines[4:]:
+        for row in lines[2:]:
             if row.strip() == "":
                 continue
             tokens = row.replace("'", '').split(",")
