@@ -404,6 +404,9 @@ data = {'plots': [
          'label': "1 Second Interval Time Series "},
     ]},
     {'label': 'Upper Air / RAOB Sounding Plots', 'options': [
+        {'id': "198",
+         'label': ("Monthly Max/Min/Avgs for Sounding Variable at Given Level"
+                   )},
         {'id': "150",
          'label': ("Single Sounding Mandatory Level Percentile Ranks")},
     ]},
