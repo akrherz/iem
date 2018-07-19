@@ -90,7 +90,7 @@ def main():
 
     ssw('Content-type: text/plain\n\n')
     ssw('  Orange City Climate Summary\n')
-    ssw('%15s %6s %6s' % ("DATE", "HIGH", "LOW"))
+    ssw('%15s %6s %6s\n' % ("DATE", "HIGH", "LOW"))
     now = s
     while now <= e:
         ssw(("%15s %6i %6i %6i %6i\n"

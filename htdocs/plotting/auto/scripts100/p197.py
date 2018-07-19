@@ -57,7 +57,8 @@ def get_df(ctx):
     """Figure out what data we need to fetch here"""
     date = ctx['date']
     # Rectify to Sunday
-    date = date - datetime.timedelta(days=date.isoweekday())
+    if date.isoweekday() < 7:
+        date = date - datetime.timedelta(days=date.isoweekday())
     varname = ctx['var']
     pgconn = get_dbconn('coop')
     params = LOOKUP[varname]
