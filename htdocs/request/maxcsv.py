@@ -9,6 +9,7 @@ import datetime
 import sys
 
 import pytz
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, ssw
 
@@ -214,6 +215,112 @@ def do_ahps_fx(nwsli):
     sys.exit(0)
 
 
+def feet(val, suffix="'"):
+    """Make feet indicator"""
+    if pd.isnull(val) or val == '':
+        return ''
+    return "%.1f%s" % (val, suffix)
+
+
+def do_ahps(nwsli):
+    """Create a dataframe with AHPS river stage and CFS information"""
+    pgconn = get_dbconn('hads')
+    cursor = pgconn.cursor()
+    # Get metadata
+    cursor.execute("""
+        SELECT name, st_x(geom), st_y(geom), tzname from stations
+        where id = %s and network ~* 'DCP'
+    """, (nwsli,))
+    row = cursor.fetchone()
+    latitude = row[2]
+    longitude = row[1]
+    stationname = row[0].replace(",", " ")
+    tzinfo = pytz.timezone(row[3])
+    # Get the last forecast
+    cursor.execute("""
+        select id, forecast_sts at time zone 'UTC',
+        generationtime at time zone 'UTC', primaryname, primaryunits,
+        secondaryname, secondaryunits
+        from hml_forecast where station = %s
+        and generationtime > now() - '7 days'::interval
+        ORDER by issued DESC LIMIT 1
+    """, (nwsli,))
+    if cursor.rowcount == 0:
+        ssw('Content-type: text/plain\n\n')
+        ssw("NO DATA")
+        sys.exit()
+    row = cursor.fetchone()
+    generationtime = row[2]
+    y = "{}".format(generationtime.year)
+    # Figure out which keys we have
+    cursor.execute("""
+    with obs as (
+        select distinct key from hml_observed_data where station = %s
+        and valid > now() - '1 days'::interval)
+    SELECT k.id, k.label from hml_observed_keys k JOIN obs o on (k.id = o.key)
+    """, (nwsli,))
+    if cursor.rowcount == 0:
+        ssw('Content-type: text/plain\n\n')
+        ssw("NO DATA")
+        sys.exit()
+    plabel = cursor.fetchone()[1]
+    slabel = cursor.fetchone()[1]
+    label = slabel if slabel.find("[ft]") > 0 else plabel
+
+    # get observations
+    odf = read_sql("""
+    SELECT valid, value from hml_observed_data WHERE station = %s
+    and key = get_hml_observed_key(%s) and valid > now() - '3 day'::interval
+    ORDER by valid DESC
+    """, pgconn, params=(nwsli, label),
+                   index_col=None)
+    odf['obtime'] = odf['valid'].dt.tz_convert(
+        tzinfo).dt.strftime("%a. %-I %p")
+    # Get the latest forecast
+    df = read_sql("""
+    SELECT valid, primary_value, secondary_value, 'F' as type from
+    hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
+    ORDER by valid ASC
+    """, pgconn, params=(row[0],), index_col=None)
+    # Get the obs
+    # plabel = "{}[{}]".format(primaryname, primaryunits)
+    # slabel = "{}[{}]".format(secondaryname, secondaryunits)
+
+    df['obtime'] = odf['obtime']
+    df['obstage'] = odf['value']
+    df['forecasttime'] = df['valid'].dt.tz_convert(
+        tzinfo).dt.strftime("%a. %-I %p")
+    df['forecaststage'] = df['primary_value']
+    df.fillna('', inplace=True)
+    # df[slabel] = df['secondary_value']
+    # we have to do the writing from here
+    ssw("Content-type: text/plain\n\n")
+    ssw(("locationid,locationname,latitude,longitude,obtime,obstage,"
+         "obstage2,obstagetext,forecasttime,forecaststage,forecaststage1,"
+         "forecaststage2,forecaststage3,highestvalue,highestvalue2,"
+         "highestvaluedate\n"))
+    ssw(",,,,,,,,,,,,,,,\n,,,,,,,,,,,,,,,\n")
+
+    maxrow = df.sort_values('forecaststage', ascending=False).iloc[0]
+    for idx, row in df.iterrows():
+        ssw(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+             ) % (nwsli if idx == 0 else '',
+                  stationname if idx == 0 else '',
+                  latitude if idx == 0 else '',
+                  longitude if idx == 0 else '',
+                  row['obtime'], row['obstage'], feet(row['obstage']),
+                  'Unknown' if idx == 0 else '',
+                  row['forecasttime'],
+                  feet(row['forecaststage'], 'ft'),
+                  row['forecaststage'],
+                  feet(row['forecaststage']), row['forecaststage'],
+                  '' if idx > 0 else maxrow['forecaststage'],
+                  '' if idx > 0 else feet(maxrow['forecaststage']),
+                  '' if idx > 0 else maxrow['forecasttime']))
+
+    sys.exit(0)
+
+
 def router(appname):
     """Process and return dataframe"""
     # elif appname == 'iadotplows':
@@ -226,6 +333,8 @@ def router(appname):
         do_ahps_obs(appname[8:].upper())  # we write ourselves and exit
     elif appname.startswith("ahpsfx_"):
         do_ahps_fx(appname[7:].upper())  # we write ourselves and exit
+    elif appname.startswith("ahps_"):
+        do_ahps(appname[5:].upper())  # we write ourselves and exit
     elif appname == 'iaroadcond':
         df = do_iaroadcond()
     elif appname == 'iarwis':
@@ -250,6 +359,11 @@ def main():
     ssw("Content-type: text/plain\n\n")
     ssw(df.to_csv(None, index=False))
     ssw("\n")
+
+
+def test_hml():
+    """Can we do it?"""
+    do_ahps('DBQI4')
 
 
 if __name__ == '__main__':
