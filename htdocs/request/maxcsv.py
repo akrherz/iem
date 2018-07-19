@@ -271,6 +271,7 @@ def do_ahps(nwsli):
     odf = read_sql("""
     SELECT valid, value from hml_observed_data WHERE station = %s
     and key = get_hml_observed_key(%s) and valid > now() - '3 day'::interval
+    and extract(minute from valid) = 0
     ORDER by valid DESC
     """, pgconn, params=(nwsli, label),
                    index_col=None)
