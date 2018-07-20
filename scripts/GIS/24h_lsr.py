@@ -53,7 +53,8 @@ def main():
                  row['city'],
                  row['county'],
                  row['source'],
-                 row['remark'][:200]
+                 row['remark'].encode(
+                     'utf-8', 'ignore').decode('ascii', 'ignore')[:200]
                  )
     w.save("lsr_24hour.shp")
     zfh = zipfile.ZipFile("lsr_24hour.zip", 'w', zipfile.ZIP_DEFLATED)
