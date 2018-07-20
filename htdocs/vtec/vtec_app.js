@@ -1,4 +1,3 @@
-// Functionality to replicate
 // var CONFIG is set in the base HTML page
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
@@ -124,7 +123,7 @@ function urlencode(){
 	return uri;
 }
 
-//https://stackoverflow.com/questions/2044616
+// https://stackoverflow.com/questions/2044616
 function selectElementContents(elid) {
         var el = document.getElementById(elid);
         var body = document.body, range, sel;
@@ -363,6 +362,7 @@ function lsrFeatureHTML(feature){
 	'</div>'];
 	return html.join('\n');
 }
+
 function updateRADARTimeSlider(){
 	// operation=list&product=N0Q&radar=USCOMP&start=2012-01-23T08%3A10Z&end=2012-01-23T08%3A45Z
 	$.ajax({
@@ -396,6 +396,7 @@ function updateRADARTimeSlider(){
 	});
 	
 }
+
 function updateRADARProducts(){
 	// operation=products&radar=USCOMP&start=2012-01-23T08%3A10Z
 	$.ajax({
@@ -423,6 +424,7 @@ function updateRADARProducts(){
 		}
 	});
 }
+
 function updateRADARSources(){
 	// Use these x, y coordinates to drive our RADAR availablility work
 	var center = ol.proj.transform(olmap.getView().getCenter(),
@@ -453,6 +455,7 @@ function updateRADARSources(){
 		}
 	});	
 }
+
 function getVTECGeometry(){
 	// After the initial metadata is fetched, we get the geometry
 	$.ajax({

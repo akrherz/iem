@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Listing of VTEC events for a WFO and year"""
 import cgi
-import sys
 import json
 
 import memcache
@@ -96,10 +95,7 @@ def main():
     res = mc.get(mckey)
     if not res:
         res = run(wfo, year, phenomena, significance)
-        sys.stderr.write("Setting cache: %s\n" % (mckey, ))
-        mc.set(mckey, res, 3600)
-    else:
-        sys.stderr.write("Using cache: %s\n" % (mckey, ))
+        mc.set(mckey, res, 60)
 
     if cb is None:
         ssw(res)
