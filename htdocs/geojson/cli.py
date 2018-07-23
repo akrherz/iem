@@ -69,6 +69,8 @@ def get_data(ts, fmt):
                 "low_depart": departure(row['low'], row['low_normal']),
                 "precip":  str(sanitize(row["precip"])),
                 "precip_month":  str(sanitize(row["precip_month"])),
+                "precip_month_normal":  str(
+                    sanitize(row["precip_month_normal"])),
                 "precip_jan1":  str(sanitize(row["precip_jan1"])),
                 "precip_jan1_normal": str(sanitize(row["precip_jan1_normal"])),
                 "precip_jun1":  str(sanitize(row["precip_jun1"])),
