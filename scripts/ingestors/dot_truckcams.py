@@ -44,7 +44,7 @@ def workflow():
     pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 
-    cursor.execute("""SELECT label, idnum from idot_dashcam_current""")
+    cursor.execute("SELECT label, idnum from idot_dashcam_current")
     current = {}
     for row in cursor:
         current[row[0]] = row[1]
@@ -54,15 +54,12 @@ def workflow():
         if logdt is None:
             continue
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
-        valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
-                              hour=ts.hour, minute=ts.minute,
-                              second=ts.second)
+        valid = ts.replace(tzinfo=pytz.UTC)
         label = feat['attributes']['PHOTO_ANUMBER']
         idnum = feat['attributes']['PHOTO_UID']
         if idnum <= current.get(label, 0):
             continue
 
-        utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
         # print label, utc, feat['attributes']['PHOTO_URL']
         req = exponential_backoff(requests.get,
@@ -76,10 +73,10 @@ def workflow():
         tmp.write(req.content)
         tmp.close()
         cmd = ("/home/ldm/bin/pqinsert -p 'plot ac %s %s %s jpg' %s"
-               ) % (utc.strftime("%Y%m%d%H%M"), get_current_fn(label),
-                    get_archive_fn(label, utc), tmp.name)
+               ) % (valid.strftime("%Y%m%d%H%M"), get_current_fn(label),
+                    get_archive_fn(label, valid), tmp.name)
         proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
-        _ = proc.stderr.read()
+        proc.stderr.read()
         # if output != "":
         #    print '-------------------------'
         #    print '  dot_truckcams.py pqinsert stderr result:'
@@ -91,6 +88,7 @@ def workflow():
 
         pt = P3857(feat['geometry']['x'], feat['geometry']['y'], inverse=True)
         geom = 'SRID=4326;POINT(%s %s)' % (pt[0], pt[1])
+        # This table has an insert trigger that logs the entry as well
         cursor.execute("""
             INSERT into idot_dashcam_current(label, valid, idnum,
             geom) VALUES (%s, %s, %s, %s)
