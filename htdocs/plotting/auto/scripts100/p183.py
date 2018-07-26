@@ -3,7 +3,9 @@ import datetime
 
 import requests
 import pandas as pd
+import matplotlib.dates as mdates
 from pyiem import util
+from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 
 SERVICE = "http://droughtmonitor.unl.edu/Ajax.aspx/ReturnTabularDM"
@@ -36,10 +38,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = util.get_autoplot_context(fdict, get_description())
     sdate = ctx['sdate']
     edate = ctx['edate']
@@ -53,9 +51,12 @@ def plotter(fdict):
     jdata = req.json()
     df = pd.DataFrame(jdata['d'])
     df['Date'] = pd.to_datetime(df['Date'])
+    df = df[(df['Date'] >= pd.Timestamp(sdate)) &
+            (df['Date'] <= pd.Timestamp(edate))]
     df.sort_values('Date', ascending=True, inplace=True)
     df['x'] = df['Date'] + datetime.timedelta(hours=(3.5*24))
     df.set_index('Date', inplace=True)
+    df.index.name = 'Date'
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -78,26 +79,24 @@ def plotter(fdict):
     ax.bar(xs, df['D4'],
            width=7, fc=COLORS[4], ec='None',
            label='D4 Exceptional')
-    # Duplicate last row
-    new_index = df.index[-1] + datetime.timedelta(days=7)
-    df = df.append(pd.DataFrame(index=[new_index],
-                                data=df.tail(1).values,
-                                columns=df.columns))
 
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 10, 30, 50, 70, 90, 100])
     ax.set_ylabel("Percentage of Iowa Area [%]")
+    df.reset_index(inplace=True)
     ax.set_title(("Areal coverage of Drought in %s\n"
                   "from US Drought Monitor %s - %s"
-                  ) % (state_names[state], sdate.strftime("%-d %B %Y"),
-                       edate.strftime("%-d %B %Y")))
+                  ) % (state_names[state],
+                       df['Date'].min().strftime("%-d %B %Y"),
+                       df['Date'].max().strftime("%-d %B %Y")))
     ax.grid(True)
-    ax.set_xlim(sdate, edate)
+    ax.set_xlim(df['Date'].min(),
+                df['Date'].max() + datetime.timedelta(days=7))
     ax.legend(loc=(0.1, -0.3), ncol=3)
     ax.set_position([0.1, 0.25, 0.8, 0.65])
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
 
-    return fig, df[['None', 'D0', 'D1', 'D2', 'D3', 'D4']]
+    return fig, df[['Date', 'None', 'D0', 'D1', 'D2', 'D3', 'D4']]
 
 
 if __name__ == '__main__':
