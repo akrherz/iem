@@ -95,9 +95,11 @@ def do_precip(ts):
         hnc = ncopen(ncfn, timeout=300)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
-        hnc = ncopen(iemre.get_hourly_ncname(sts.year), timeout=300)
-        phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
-        hnc.close()
+        ncfn = iemre.get_hourly_ncname(sts.year)
+        if os.path.isfile(ncfn):
+            hnc = ncopen(ncfn, timeout=300)
+            phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
+            hnc.close()
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):

@@ -15,10 +15,25 @@ The basic storage unit of IEMRE are yearly netCDF files. You can find most of th
 | ${YEAR}_iemre_daily.nc | 12z and calendar day totals |
 | ${YEAR}_iemre_hourly.nc | Hourly analyses |
 
-Data Flow
----------
+Daily Analysis Variable Sourcing
+--------------------------------
 
-So the confusing part is how this data gets bootstrapped and the realtime data flow into these files.
+### high_tmpk_12z low_tmpk_12z snow_12z snowd_12z
 
-## realtime flow
+This is done by `daily_analysis.py`. If the year is 2009+, we look to see what COOP data the IEM has archived for the date and so a simple griding of it.  Otherwise, we look to see what all observations we already have in the COOP database and grid those out.
 
+### p01d_12z
+
+`daily_analysis.py` sums up the hourly iemre precipitation data.  **TODO** what are we doing for pre-1997 dates when this hourly information is unavailable.
+
+### high_tmpk low_tmpk avg_dwpk wind_speed
+
+If the year is greater than 1927, `daily_analysis.py` looks at the IEM Access database and grids out whatever observations it can find.
+
+### p01d
+
+`daily_analysis.py` looks at the hourly grids and constructs a midnight CST/CDT analysis.
+
+### rsds
+
+`grid_rsds.py` uses HRRR for 2014+ dates and grids out sampled COOP data points that can from a script in `../coop/narr_solarrad.py` and `../coop/merra_solarrad.py`.  The COOP database storage never uses this variable to drive its "daily" values, but uses the grid sampling done by the above scripts.

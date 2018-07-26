@@ -51,7 +51,8 @@ def main(argv):
                     DELETE from alldata where station = %s
                     and valid >= %s and valid < %s
                 """, (dbid, sts, ets))
-                print("deleted %s rows for %s" % (cursor.rowcount, dbid))
+                if cursor.rowcount > 0:
+                    print("deleted %s rows for %s" % (cursor.rowcount, dbid))
                 removed = cursor.rowcount
             res = ds3505.sql(cursor, faa, data)
             if res is None:
