@@ -5,6 +5,8 @@ from collections import OrderedDict
 import numpy as np
 import cartopy.crs as ccrs
 from pyiem import iemre
+from pyiem.plot import MapPlot
+from pyiem.plot.colormaps import stretch_cmap
 from pyiem.datatypes import distance, temperature, speed
 from pyiem.util import get_autoplot_context, ncopen
 
@@ -34,6 +36,8 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
+        dict(type='csector', name='csector', default='midwest',
+             label='Select state/sector to plot'),
         dict(type='select', name='var', default='rsds',
              label='Select Plot Variable:', options=PDICT),
         dict(type='select', name='ptype', default='c',
@@ -47,19 +51,18 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
     ptype = ctx['ptype']
     date = ctx['date']
     varname = ctx['var']
+    csector = ctx['csector']
     title = date.strftime("%-d %B %Y")
-    mp = MapPlot(sector='midwest', axisbg='white', nocaption=True,
-                 title='IEM Reanalysis of %s for %s' % (PDICT.get(varname),
-                                                        title),
-                 subtitle='Data derived from various NOAA datasets'
-                 )
+    mp = MapPlot(
+        sector=('state' if len(csector) == 2 else csector),
+        state=ctx['csector'], axisbg='white', nocaption=True,
+        title='IEM Reanalysis of %s for %s' % (PDICT.get(varname), title),
+        subtitle='Data derived from various NOAA datasets'
+    )
     (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
     i0, j0 = iemre.find_ij(west, south)
     i1, j1 = iemre.find_ij(east, north)
@@ -70,6 +73,7 @@ def plotter(fdict):
     nc = ncopen(iemre.get_daily_ncname(date.year))
     lats = nc.variables['lat'][jslice]
     lons = nc.variables['lon'][islice]
+    cmap = None
     if varname == 'rsds':
         # Value is in W m**-2, we want MJ
         data = nc.variables[varname][idx0, jslice, islice] * 86400. / 1000000.
@@ -94,6 +98,7 @@ def plotter(fdict):
         clevs = np.append(clevs, np.arange(3., 10.0, 1))
         clevs[0] = 0.01
         clevstride = 1
+        cmap = stretch_cmap('terrain_r', clevs)
     elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
                      'avg_dwpk']:
         # Value is in W m**-2, we want MJ
@@ -122,10 +127,11 @@ def plotter(fdict):
     if ptype == 'c':
         # in the case of contour, use the centroids on the grids
         mp.contourf(x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
-                    units=units, ilabel=True, labelfmt='%.0f')
+                    units=units, ilabel=True, labelfmt='%.0f', cmap=cmap)
     else:
         x, y = np.meshgrid(lons, lats)
-        mp.pcolormesh(x, y, data, clevs, clevstride=clevstride, units=units)
+        mp.pcolormesh(x, y, data, clevs, clevstride=clevstride, cmap=cmap,
+                      units=units)
 
     return mp.fig
 

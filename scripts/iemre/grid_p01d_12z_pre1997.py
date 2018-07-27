@@ -5,7 +5,7 @@ import datetime
 import numpy as np
 from metpy.units import units as mpunits
 from metpy.units import masked_array
-from metpy.gridding.interpolation import inverse_distance
+from metpy.gridding import interpolate
 from pandas.io.sql import read_sql
 from pyiem.iemre import get_daily_ncname, daily_offset
 from pyiem.util import ncopen, get_dbconn
@@ -15,18 +15,17 @@ def generic_gridder(day, nc, df, idx):
     """
     Generic gridding algorithm for easy variables
     """
-    domain = nc.variables['hasdata'][:, :]
-    xi, yi = np.meshgrid(nc.variables['lon'][:], nc.variables['lat'][:])
-    res = np.ones(xi.shape) * np.nan
-    # set a sentinel of where we won't be estimating
-    res = np.where(domain > 0, res, -9999)
+    bounds = dict(
+        west=nc.variables['lon'][0],
+        east=nc.variables['lon'][-1] + 0.125,
+        south=nc.variables['lat'][0],
+        north=nc.variables['lat'][-1] + 0.125,
+    )
     # do our gridding
-    grid = inverse_distance(df['lon'].values, df['lat'].values,
-                            df[idx].values, xi, yi, 0.5)
-    # replace nan values in res with whatever now is in grid
-    res = np.where(np.isnan(res), grid, res)
-    # replace sentinel back to np.nan
-    res = np.where(res == -9999, np.nan, res)
+    _gx, _gy, res = interpolate(
+        df['lon'].values, df['lat'].values,
+        df[idx].values, hres=0.125, boundary_coords=bounds
+    )
     print(("%s %s rows for %s column min:%.3f max:%.3f"
            ) % (day, len(df.index), idx, np.nanmin(res), np.nanmax(res)))
     return masked_array(np.ma.array(res, mask=np.isnan(res)), mpunits('inch'))
