@@ -224,7 +224,7 @@ def feet(val, suffix="'"):
 
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn('hads')
+    pgconn = get_dbconn('hads', port=5556)
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""
@@ -256,7 +256,7 @@ def do_ahps(nwsli):
     cursor.execute("""
     with obs as (
         select distinct key from hml_observed_data where station = %s
-        and valid > now() - '1 days'::interval)
+        and valid > now() - '3 days'::interval)
     SELECT k.id, k.label from hml_observed_keys k JOIN obs o on (k.id = o.key)
     """, (nwsli,))
     if cursor.rowcount == 0:
@@ -286,13 +286,11 @@ def do_ahps(nwsli):
     # Get the obs
     # plabel = "{}[{}]".format(primaryname, primaryunits)
     # slabel = "{}[{}]".format(secondaryname, secondaryunits)
-
-    df['obtime'] = odf['obtime']
-    df['obstage'] = odf['value']
+    odf.rename({'value': 'obstage'}, axis=1, inplace=True)
+    df = df.join(odf[['obtime', 'obstage']], how='outer')
     df['forecasttime'] = df['valid'].dt.tz_convert(
         tzinfo).dt.strftime("%a. %-I %p")
     df['forecaststage'] = df['primary_value']
-    df.fillna('', inplace=True)
     # df[slabel] = df['secondary_value']
     # we have to do the writing from here
     ssw("Content-type: text/plain\n\n")
@@ -304,6 +302,10 @@ def do_ahps(nwsli):
 
     maxrow = df.sort_values('forecaststage', ascending=False).iloc[0]
     for idx, row in df.iterrows():
+        fs = (
+            row['forecaststage']
+            if not pd.isnull(row['forecaststage']) else ''
+        )
         ssw(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
              ) % (nwsli if idx == 0 else '',
                   stationname if idx == 0 else '',
@@ -311,10 +313,11 @@ def do_ahps(nwsli):
                   longitude if idx == 0 else '',
                   row['obtime'], row['obstage'], feet(row['obstage']),
                   'Unknown' if idx == 0 else '',
-                  row['forecasttime'],
+                  (row['forecasttime']
+                   if row['forecasttime'] != 'NaT' else ''),
                   feet(row['forecaststage'], 'ft'),
-                  row['forecaststage'],
-                  feet(row['forecaststage']), row['forecaststage'],
+                  fs,
+                  feet(row['forecaststage']), fs,
                   '' if idx > 0 else maxrow['forecaststage'],
                   '' if idx > 0 else feet(maxrow['forecaststage']),
                   '' if idx > 0 else maxrow['forecasttime']))
