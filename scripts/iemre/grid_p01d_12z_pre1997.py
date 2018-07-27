@@ -25,13 +25,6 @@ def generic_gridder(day, nc, df, idx):
                             df[idx].values, xi, yi, 1.5)
     # replace nan values in res with whatever now is in grid
     res = np.where(np.isnan(res), grid, res)
-    # Do we still have missing values?
-    if np.isnan(res).any():
-        # very aggressive with search radius
-        grid = inverse_distance(df['lon'].values, df['lat'].values,
-                                df[idx].values, xi, yi, 5.5)
-        # replace nan values in res with whatever now is in grid
-        res = np.where(np.isnan(res), grid, res)
     # replace sentinel back to np.nan
     res = np.where(res == -9999, np.nan, res)
     print(("%s %s rows for %s column min:%.3f max:%.3f"
