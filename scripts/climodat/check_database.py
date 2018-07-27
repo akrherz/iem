@@ -1,8 +1,7 @@
-"""
- Check over the database and make sure we have what we need there to
- make the climodat reports happy...
-"""
+"""Rectify climodat database entries."""
 from __future__ import print_function
+from io import StringIO
+import subprocess
 import sys
 
 import pandas as pd
@@ -16,7 +15,6 @@ def main(argv):
     state = argv[1]
     nt = NetworkTable("%sCLIMATE" % (state,))
     pgconn = get_dbconn('coop')
-    cursor = pgconn.cursor()
     df = read_sql("""
         SELECT station, year, day from alldata_""" + state + """
         ORDER by station, day
@@ -27,21 +25,42 @@ def main(argv):
             print("station: %s is unknown to %sCLIMATE network" % (station,
                                                                    state))
             continue
-        days = pd.date_range(gdf['day'].min(), gdf['day'].max())
+        # Make sure that our data archive starts on the first of a month
+        minday = gdf['day'].min().replace(day=1)
+        days = pd.date_range(minday, gdf['day'].max())
         missing = [x for x in days.values if x not in gdf['day'].values]
         print(("station: %s has %s rows between: %s and %s, missing %s/%s days"
                ) % (station, len(gdf.index), gdf['day'].min(),
                     gdf['day'].max(), len(missing), len(days.values)))
+        coverage = len(missing) / float(len(days.values))
+        if coverage > 0.33:
+            cmd = ("python ../dbutil/delete_station.py %sCLIMATE %s"
+                   ) % (state, station)
+            print(cmd)
+            subprocess.call(cmd, shell=True)
+            cursor = pgconn.cursor()
+            cursor.execute("""
+            DELETE from alldata_""" + state + """ WHERE station = %s
+            """, (station, ))
+            print("Removed %s database entries" % (cursor.rowcount, ))
+            cursor.close()
+            pgconn.commit()
+            continue
+        sio = StringIO()
         for day in missing:
             now = pd.Timestamp(day).to_pydatetime()
-            cursor.execute("""
-                INSERT into alldata_""" + state + """ (station, day, sday,
-                year, month) VALUES (%s, %s, %s, %s, %s)
-            """, (station, now,
-                  "%02i%02i" % (now.month, now.day), now.year, now.month))
-
-    cursor.close()
-    pgconn.commit()
+            sio.write(("%s,%s,%s,%s,%s\n"
+                       ) % (station, now, "%02i%02i" % (now.month, now.day),
+                            now.year, now.month))
+        sio.seek(0)
+        cursor = pgconn.cursor()
+        cursor.copy_from(
+            sio, "alldata_%s" % (state, ),
+            columns=('station', 'day', 'sday', 'year', 'month'), sep=','
+        )
+        del sio
+        cursor.close()
+        pgconn.commit()
 
 
 if __name__ == '__main__':
