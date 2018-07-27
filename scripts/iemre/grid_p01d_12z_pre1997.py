@@ -4,7 +4,8 @@ import datetime
 
 import numpy as np
 from metpy.units import units as mpunits
-from scipy.interpolate import NearestNDInterpolator
+from metpy.units import masked_array
+from metpy.gridding.interpolation import inverse_distance
 from pandas.io.sql import read_sql
 from pyiem.iemre import get_daily_ncname, daily_offset
 from pyiem.util import ncopen, get_dbconn
@@ -14,16 +15,28 @@ def generic_gridder(day, nc, df, idx):
     """
     Generic gridding algorithm for easy variables
     """
+    domain = nc.variables['hasdata'][:, :]
     xi, yi = np.meshgrid(nc.variables['lon'][:], nc.variables['lat'][:])
-    nn = NearestNDInterpolator((df['lon'].values,
-                                df['lat'].values),
-                               df[idx].values)
-    grid = nn(xi, yi)
+    res = np.ones(xi.shape) * np.nan
+    # set a sentinel of where we won't be estimating
+    res = np.where(domain > 0, res, -9999)
+    # do our gridding
+    grid = inverse_distance(df['lon'].values, df['lat'].values,
+                            df[idx].values, xi, yi, 1.5)
+    # replace nan values in res with whatever now is in grid
+    res = np.where(np.isnan(res), grid, res)
+    # Do we still have missing values?
+    if np.isnan(res).any():
+        # very aggressive with search radius
+        grid = inverse_distance(df['lon'].values, df['lat'].values,
+                                df[idx].values, xi, yi, 5.5)
+        # replace nan values in res with whatever now is in grid
+        res = np.where(np.isnan(res), grid, res)
+    # replace sentinel back to np.nan
+    res = np.where(res == -9999, np.nan, res)
     print(("%s %s rows for %s column min:%.3f max:%.3f"
-           ) % (day, len(df.index), idx, np.min(grid), np.max(grid)))
-    if grid is not None:
-        return grid
-    return None
+           ) % (day, len(df.index), idx, np.nanmin(res), np.nanmax(res)))
+    return masked_array(np.ma.array(res, mask=np.isnan(res)), mpunits('inch'))
 
 
 def main(argv):
@@ -41,8 +54,7 @@ def main(argv):
     res = generic_gridder(day, nc, df, 'precip')
     if res is not None:
         offset = daily_offset(day)
-        nc.variables['p01d_12z'][offset] = (
-            res * mpunits['inch']).to(mpunits['mm']).magnitude
+        nc.variables['p01d_12z'][offset] = res.to(mpunits('mm')).magnitude
     nc.close()
 
 
