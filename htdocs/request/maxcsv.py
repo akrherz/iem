@@ -224,7 +224,7 @@ def feet(val, suffix="'"):
 
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn('hads', port=5556)
+    pgconn = get_dbconn('hads')
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""

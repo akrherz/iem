@@ -22,7 +22,7 @@ def generic_gridder(day, nc, df, idx):
     res = np.where(domain > 0, res, -9999)
     # do our gridding
     grid = inverse_distance(df['lon'].values, df['lat'].values,
-                            df[idx].values, xi, yi, 1.5)
+                            df[idx].values, xi, yi, 0.5)
     # replace nan values in res with whatever now is in grid
     res = np.where(np.isnan(res), grid, res)
     # replace sentinel back to np.nan

@@ -10,6 +10,17 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
 
+def delete_data(pgconn, station, state):
+    """Remove whatever data we have for this station."""
+    cursor = pgconn.cursor()
+    cursor.execute("""
+    DELETE from alldata_""" + state + """ WHERE station = %s
+    """, (station, ))
+    print("Removed %s database entries" % (cursor.rowcount, ))
+    cursor.close()
+    pgconn.commit()
+
+
 def main(argv):
     """Go Main"""
     state = argv[1]
@@ -24,6 +35,7 @@ def main(argv):
         if station not in nt.sts:
             print("station: %s is unknown to %sCLIMATE network" % (station,
                                                                    state))
+            delete_data(pgconn, station, state)
             continue
         # Make sure that our data archive starts on the first of a month
         minday = gdf['day'].min().replace(day=1)
@@ -38,13 +50,7 @@ def main(argv):
                    ) % (state, station)
             print(cmd)
             subprocess.call(cmd, shell=True)
-            cursor = pgconn.cursor()
-            cursor.execute("""
-            DELETE from alldata_""" + state + """ WHERE station = %s
-            """, (station, ))
-            print("Removed %s database entries" % (cursor.rowcount, ))
-            cursor.close()
-            pgconn.commit()
+            delete_data(pgconn, station, state)
             continue
         sio = StringIO()
         for day in missing:
