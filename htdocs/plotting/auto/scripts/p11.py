@@ -83,7 +83,7 @@ def plotter(fdict):
                     (mybar.get_y() >= emphasis and opt == 'above')):
                 mybar.set_facecolor('r')
                 mybar.set_edgecolor('r')
-                hits.append(df.loc[i, 'day'])
+                hits.append(df.index.values[i])
         ax.axhline(emphasis, lw=2, color='k')
         ax.text(df.index.values[-1] + datetime.timedelta(days=2),
                 emphasis, "%s" % (emphasis,), ha='left',
