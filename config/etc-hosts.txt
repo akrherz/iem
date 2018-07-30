@@ -16,7 +16,8 @@
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.7      iemvm2
 192.168.0.8      metvm1.local
-192.168.0.9      metfs1.local       iem-idd0      iem-idd0.local  
+192.168.0.9      metfs2.local  
+192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.12     iem12 iem12.local lesync.local
 192.168.0.13     iem13         iem13.local
@@ -43,6 +44,7 @@
 192.168.0.109    iemvs109      iemvs109.local
 # somebodies DRAC
 192.168.0.121
+192.168.0.139    metvm9.local
 192.168.0.150    iemvs100-ssl.local
 192.168.0.151    iemvs101-ssl.local
 192.168.0.152    iemvs102-ssl.local
