@@ -14,7 +14,9 @@ data = {'plots': [
          "label": "Accumulated Year to Date Precipitation"},
         {'id': "149", 'mw': True,
          "label": "Arridity Index (High Temperature minus Precip Departures)"},
-        {'id': "11", 'label': "ASOS/AWOS Daily Min/Max Dew Point for a Year"},
+        {'id': "11",
+         'label': ("ASOS/AWOS Daily Min/Max Dew Point/Temp/Feels Like/RH "
+                   "for a Year")},
         {'id': "94",
          "label": "Bias of 24 Hour High+Low Computation by Hour"},
         {'id': "96",
