@@ -21,7 +21,7 @@ def need_to_run(valid, hr):
         grbs = pygrib.open(gribfn)
         if grbs.messages < 5:
             return True
-    except:
+    except Exception as _exp:
         return True
     return False
 
@@ -32,8 +32,8 @@ def fetch(valid, hr):
     uri = valid.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/"
                           "com/nam/prod/nam.%Y%m%d/nam.t%Hz.conusnest."
                           "hiresf0" + str(hr) + ".tm00.grib2.idx"))
-    req = requests.get(uri, timeout=30)
-    if req.status_code != 200:
+    req = exponential_backoff(requests.get, uri, timeout=30)
+    if req is None or req.status_code != 200:
         print("download_hrrr failed to get idx\n%s" % (uri,))
         return
 
@@ -60,7 +60,7 @@ def fetch(valid, hr):
 
     outfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
                             "%H/nam.t%Hz.conusnest.hiresf0" + str(hr) +
-                             ".tm00.grib2"))
+                            ".tm00.grib2"))
     outdir = os.path.dirname(outfn)
     if not os.path.isdir(outdir):
         os.makedirs(outdir)  # make sure LDM can then write to dir
