@@ -149,7 +149,10 @@ def download(year, reprocess=False):
             headers={'Range': 'bytes=%s-%s' % (size, size + 16000000)},
             timeout=30)
         # No new data
-        if req.status_code == 416:
+        if req is None or req.status_code == 416:
+            continue
+        if req.status_code == 404:
+            print("uscrn_ingest %s is 404" % (filename, ))
             continue
         if req.status_code < 400:
             fp = open(filename, 'a')

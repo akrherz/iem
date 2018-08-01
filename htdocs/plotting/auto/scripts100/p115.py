@@ -34,11 +34,21 @@ def get_description():
     return desc
 
 
+def myformat(val, precision):
+    """Nice"""
+    if val is None:
+        return ' ****'
+    fmt = "%%5.%sf" % (precision, )
+    return fmt % val
+
+
 def p(df, year, month, varname, precision):
     """Lazy request of data"""
     try:
         val = df.at[(year, month), varname]
     except Exception as _:
+        return ' ****'
+    if pd.isna(val):
         return ' ****'
     fmt = "%%5.%sf" % (precision, )
     return fmt % val
@@ -94,11 +104,11 @@ def plotter(fdict):
     prec = 2 if varname == 'precip' else 0
     for year in years:
         yrtot = yrsum[year]
-        wyrtot = wyrsum[year]
+        wyrtot = wyrsum.get(year, 0)
         if varname != 'precip':
             yrtot = yrmean[year]
-            wyrtot = wyrmean[year]
-        res += ("%s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6.2f%6.2f\n") % (
+            wyrtot = wyrmean.get(year, 0)
+        res += ("%s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s\n") % (
                                    year,
                                    p(grouped, year, 1, varname, prec),
                                    p(grouped, year, 2, varname, prec),
@@ -112,7 +122,7 @@ def plotter(fdict):
                                    p(grouped, year, 10, varname, prec),
                                    p(grouped, year, 11, varname, prec),
                                    p(grouped, year, 12, varname, prec),
-                                   yrtot, wyrtot)
+                                   myformat(yrtot, 2), myformat(wyrtot, 2))
     yrtot = yrmean.mean() if varname != 'precip' else yrsum.mean()
     wyrtot = wyrmean.mean() if varname != 'precip' else wyrsum.mean()
     res += ("MEAN%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f"
