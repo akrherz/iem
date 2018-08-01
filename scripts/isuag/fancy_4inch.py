@@ -29,6 +29,7 @@ def get_grib(now, fhour):
                            "%H/nam.t%Hz.conusnest.hiresf0"+str(fhour) +
                            ".tm00.grib2"))
     if not os.path.isfile(gribfn):
+        print("fancy_4inch NAM missing: %s" % (gribfn, ))
         return
     grbs = pygrib.open(gribfn)
     gs = grbs.select(shortName='st')
@@ -38,12 +39,13 @@ def get_grib(now, fhour):
 
 
 def do_nam(valid):
-    """Compute county level estimates based on HRRR data"""
+    """Compute county level estimates based on NAM data"""
     # run 6z to 6z, close enough
     now = datetime.datetime(valid.year, valid.month, valid.day, 6)
     lats = None
     lons = None
     count = 0
+    grib = None
     for offset in [0, 6, 12, 18]:
         runtime = now + datetime.timedelta(hours=offset)
         for fhour in range(6):
@@ -53,7 +55,7 @@ def do_nam(valid):
             if lats is None:
                 lats, lons = grib.latlons()
                 data = np.zeros(np.shape(lats))
-    if lats is None:
+    if grib is None or lats is None:
         print("fancy_4inch failed to find NAM data for %s" % (valid, ))
         return
     data += grib.values
@@ -118,9 +120,15 @@ def main(argv):
         df.at[stid, 'nam'] = nam[x, y]
         df.at[stid, 'lat'] = nt.sts[stid]['lat']
         df.at[stid, 'lon'] = nt.sts[stid]['lon']
-    df['diff'] = df['ob'] - df['nam']
     # ticket is an object type from above
     df = df[~df['ticket'].astype('bool')]
+    df['diff'] = df['ob'] - df['nam']
+    bias = df['diff'].mean()
+    nam = nam + bias
+    print("fancy_4inch NAM bias correction of: %.2fF applied" % (bias, ))
+    # apply nam bias to sampled data
+    df['nam'] += bias
+    df['diff'] = df['ob'] - df['nam']
     # we are going to require data be within 1 SD of sampled or 5 deg
     std = 5. if df['nam'].std() < 5. else df['nam'].std()
     for station in df[df['diff'].abs() > std].index.values:
@@ -128,10 +136,6 @@ def main(argv):
                ) % (ts.strftime("%Y%m%d"), station, std, df.at[station, 'ob'],
                     df.at[station, 'nam']))
         df.drop(station, inplace=True)
-
-    bias = (df['ob'] - df['nam']).mean()
-    print("fancy_4inch NAM bias correction of: %.2fF applied" % (bias, ))
-    nam = nam + bias
 
     # Query out centroids of counties...
     cdf = read_sql("""SELECT ST_x(ST_centroid(the_geom)) as lon,
