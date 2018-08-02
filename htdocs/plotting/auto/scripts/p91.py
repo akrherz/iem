@@ -4,6 +4,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'precip': 'Precipitation',
@@ -37,9 +38,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -91,7 +89,7 @@ def plotter(fdict):
     msg = ("[%s] %s Statistics of %s over 1-31 Consecutive Days"
            ) % (station, nt.sts[station]['name'], PDICT.get(varname))
     tokens = msg.split()
-    sz = len(tokens) / 2
+    sz = int(len(tokens) / 2)
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
     ax.set_ylabel("%s (%s)" % (PDICT.get(varname), UNITS.get(varname)))
     ax.set_xlabel("Consecutive Days")

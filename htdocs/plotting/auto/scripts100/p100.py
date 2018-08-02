@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 from pyiem import network, util
+from pyiem.plot.use_agg import plt
 from pandas.io.sql import read_sql
 
 PDICT = OrderedDict([
@@ -52,9 +53,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = util.get_dbconn('coop')
 
     ctx = util.get_autoplot_context(fdict, get_description())
@@ -141,7 +139,7 @@ def plotter(fdict):
     if ptype.find("days") == 0:
         msg += " (%s)" % (threshold,)
     tokens = msg.split()
-    sz = len(tokens) / 2
+    sz = int(len(tokens) / 2)
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df

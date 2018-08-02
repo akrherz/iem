@@ -4,6 +4,7 @@ import calendar
 
 import numpy as np
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
 
@@ -26,9 +27,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -82,7 +80,7 @@ def plotter(fdict):
            "First High Temperature of Year"
            ) % (station, nt.sts[station]['name'])
     tokens = msg.split()
-    sz = len(tokens) / 2
+    sz = int(len(tokens) / 2)
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
