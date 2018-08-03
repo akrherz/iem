@@ -22,7 +22,7 @@ if ($ts > 0){
 				sprintf("SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
     			from camera_log c, webcams w
     			WHERE valid = '%s' and c.cam = w.id
-				and w.network in ('KCRG', 'KCCI', 'KELO', 'ISUC')
+				and w.network in ('KCRG', 'KCCI', 'KELO', 'ISUC', 'MCFC')
   				ORDER by name ASC",
 						date('Y-m-d H:i', $ts)));
 	}

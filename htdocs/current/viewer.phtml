@@ -1,11 +1,11 @@
 <?php
 $OL = "4.6.4";
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 95);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
- include("../../include/cameras.inc.php"); 
+ require_once "../../include/cameras.inc.php"; 
  $id = isset($_GET["id"]) ? xssafe($_GET["id"]): "KCCI-016";
 
  $camselect = "";
