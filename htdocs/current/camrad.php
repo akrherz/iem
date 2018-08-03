@@ -2,9 +2,9 @@
 /* 
  * Generate a RADAR image with webcams overlain for some *UTC* timestamp!
  */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/cameras.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/cameras.inc.php";
 $conn = iemdb("mesosite");
 
 /* First, we need some GET vars */

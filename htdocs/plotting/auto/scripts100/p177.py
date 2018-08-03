@@ -5,7 +5,9 @@ import psycopg2
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
 from pyiem import meteorology
+from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -47,10 +49,6 @@ def get_description():
 
 def make_daily_pet_plot(ctx):
     """Generate a daily PET plot"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     icursor = ctx['pgconn'].cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute("""WITH climo as (
         select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
@@ -96,10 +94,6 @@ def make_daily_pet_plot(ctx):
 
 def make_daily_rad_plot(ctx):
     """Generate a daily radiation plot"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     # Get clear sky theory
     theory = meteorology.clearsky_shortwave_irradiance_year(
                 ctx['nt'].sts[ctx['station']]['lat'],
@@ -145,10 +139,6 @@ def make_daily_rad_plot(ctx):
 
 def make_daily_plot(ctx):
     """Generate a daily plot of max/min 4 inch soil temps"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     df = read_sql("""
         SELECT date(valid), min(tsoil_c_avg_qc),
         max(tsoil_c_avg_qc), avg(tsoil_c_avg_qc) from sm_hourly
@@ -184,10 +174,6 @@ def make_daily_plot(ctx):
 
 def make_battery_plot(ctx):
     """Generate a plot of battery"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     icursor = ctx['pgconn'].cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute("""SELECT valid, battv_min_qc from sm_hourly
     where station = '%s' and valid >= '%s 00:00' and valid < '%s 23:56'
@@ -217,9 +203,6 @@ def make_battery_plot(ctx):
 
 def make_vsm_histogram_plot(ctx):
     """Option 6"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     df = read_sql("""
         SELECT
     CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end as v12,
@@ -250,10 +233,6 @@ def make_vsm_histogram_plot(ctx):
 
 def make_daily_water_change_plot(ctx):
     """Option 7"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     # Get daily precip
     pdf = read_sql("""
     SELECT valid, rain_mm_tot_qc from sm_daily where station = %s
@@ -327,10 +306,6 @@ def make_daily_water_change_plot(ctx):
 
 def plot2(ctx):
     """Just soil temps"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     df = read_sql("""SELECT * from sm_hourly WHERE
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
         """, ctx['pgconn'], params=(ctx['station'], ctx['sts'], ctx['ets']),
@@ -389,14 +364,11 @@ def plot2(ctx):
 
 def plot1(ctx):
     """Do main plotting logic"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    df = read_sql("""SELECT * from sm_hourly WHERE
+    df = read_sql("""
+        SELECT * from sm_hourly WHERE
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
-        """, ctx['pgconn'],  params=(ctx['station'], ctx['sts'],
-                                     ctx['ets']), index_col='valid')
+    """, ctx['pgconn'], params=(ctx['station'], ctx['sts'],
+                                ctx['ets']), index_col='valid')
     slrkw = df['slrkw_avg_qc']
     d12sm = df['calc_vwc_12_avg_qc']
     d12t = df['t12_c_avg_qc']
@@ -501,7 +473,8 @@ def plot1(ctx):
     ax[2].set_zorder(ax2.get_zorder()+1)
     ax[2].patch.set_visible(False)
     # Wow, strange bugs if I did not put this last
-    ax[0].set_xlim(min(valid), max(valid))
+    if valid:
+        ax[0].set_xlim(min(valid), max(valid))
     return fig, df
 
 

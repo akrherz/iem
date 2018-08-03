@@ -221,7 +221,8 @@ Ext.create('Ext.Panel', {
                 data : [['IDOT', 'Iowa DOT RWIS'],
                         ['KCCI', 'KCCI-TV Des Moines'],
                         ['KCRG', 'KCRG-TV Cedar Rapids'],
-                        ['KELO', 'KELO-TV Sioux Falls']]
+                        ['KELO', 'KELO-TV Sioux Falls'],
+                        ['MCFC', 'McLaughlin Family of Companies']]
             }),
             listeners: {
                 'select': function(sb){

@@ -1,8 +1,8 @@
 <?php 
- include("../../config/settings.inc.php");
- include("../../include/iemprop.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/iemprop.php";
  $camera_refresh = get_iemprop("webcam.interval");
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  require_once "../../include/forms.php"; 
  $t = new MyView();
 /* CGI GET Requests */
@@ -72,7 +72,8 @@ EOF;
 if (! $isarchive)
 	$t->refresh = "<meta http-equiv=\"refresh\" content=\"${camera_refresh};\">";
 
-$selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff");
+$selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff",
+                 "MCFC" => "#fff");
 $selback[$network] = "#ffcc99";
 
 $isarchived = ($isarchive) ? " CHECKED=CHECKED": "" ;

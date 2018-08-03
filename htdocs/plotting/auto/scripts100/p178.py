@@ -5,6 +5,7 @@ from collections import OrderedDict
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
 
 HOURS = OrderedDict([
@@ -51,7 +52,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     ts = ctx['ts'].replace(tzinfo=pytz.utc)
     hour = int(ctx['hour'])
