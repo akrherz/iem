@@ -1,13 +1,20 @@
-"""4 inch soil temps"""
+"""4 inch soil temps or moisture"""
 import datetime
 import calendar
+from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem import util
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import temperature
 
+VARS = OrderedDict((
+    ('tsoil', '4 inch Soil Temperature'),
+    ('vwc12', '12 inch Volumetric Water Content'),
+    ('vwc24', '24 inch Volumetric Water Content'),
+    ('vwc50', '50 inch Volumetric Water Content'),
+))
 XREF = {
     'AEEI4': 'A130209',
     'BOOI4': 'A130209',
@@ -32,16 +39,18 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This chart presents daily timeseries of 4 inch
-    soil temperatures.  The dataset contains merged information from the
-    legacy Iowa State Ag Climate Network and present-day Iowa State Soil
-    Moisture Network.  Each year's data is represented by individual blue
+    desc['description'] = """This chart presents daily timeseries of
+    soil temperature or moisture.  The dataset contains merged information
+    from the legacy Iowa State Ag Climate Network and present-day Iowa State
+    Soil Moisture Network.  Each year's data is represented by individual blue
     lines, with the year to highlight in red and the overall average in
     black."""
     today = datetime.date.today()
     desc['arguments'] = [
         dict(type='networkselect', name='station', network='ISUSM',
              default='BOOI4', label='Select Station:'),
+        dict(type='select', options=VARS, default='soil4', name='var',
+             label='Which variable to plot:'),
         dict(type='year', default=today.year, min=1988, name='year',
              label='Year to Highlight')
     ]
@@ -50,29 +59,30 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = util.get_dbconn('isuag')
-    cursor = pgconn.cursor()
-
-    today = datetime.date.today()
     nt = NetworkTable("ISUSM")
     oldnt = NetworkTable("ISUAG")
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']
     highlightyear = ctx['year']
+    varname = ctx['var']
     oldstation = XREF.get(station, 'A130209')
     df = read_sql("""
     WITH legacy as (
-        SELECT valid, c30 as tsoil, 'L' as dtype from daily where station = %s
+        SELECT valid, c30 as tsoil, 'L' as dtype
+        from daily where station = %s
         and c30 > 0 ORDER by valid ASC
     ), present as (
         SELECT valid, tsoil_c_avg_qc * 9./5. + 32. as tsoil,
-        'C' as dtype from sm_daily
+        'C' as dtype,
+        vwc_12_avg_qc as vwc12,
+        vwc_24_avg_qc as vwc24,
+        vwc_50_avg_qc as vwc50
+        from sm_daily
         where station = %s and tsoil_c_avg_qc is not null ORDER by valid ASC
     )
-    SELECT * from legacy UNION ALL select * from present
+    SELECT valid, tsoil, dtype, null as vwc12, null as vwc24, null as vwc50
+    from legacy UNION ALL select * from present
     """, pgconn, params=(oldstation, station), index_col=None)
     df['valid'] = pd.to_datetime(df['valid'])
     df['doy'] = pd.to_numeric(df['valid'].dt.strftime("%j"))
@@ -83,27 +93,34 @@ def plotter(fdict):
         for year, df2 in df[df['dtype'] == dtype].groupby('year'):
             if year in [1997, 1988]:
                 continue
-            ax.plot(df2['doy'].values, df2['tsoil'].values, color='skyblue',
+            ax.plot(df2['doy'].values, df2[varname].values, color='skyblue',
                     zorder=2)
             if year == highlightyear:
-                ax.plot(df2['doy'].values, df2['tsoil'].values, color='red',
+                ax.plot(df2['doy'].values, df2[varname].values, color='red',
                         zorder=5, label=str(year), lw=2.)
 
     gdf = df.groupby('doy').mean()
-    ax.plot(gdf.index.values, gdf['tsoil'].values, color='k', label='Average')
+    ax.plot(gdf.index.values, gdf[varname].values, color='k', label='Average')
 
     ax.set_title(("ISU AgClimate [%s] %s [%s-]\n"
-                  "Site 4 inch Soil Temperature Yearly Timeseries"
+                  "Site %s Yearly Timeseries"
                   ) % (station, nt.sts[station]['name'],
-                       df['valid'].min().year))
-    ax.set_xlabel(("* pre-2014 data provided by [%s] %s"
-                   ) % (oldstation, oldnt.sts[oldstation]['name']))
+                       df['valid'].min().year, VARS[varname]))
+
     ax.grid(True)
-    ax.set_ylabel('Daily Avg Temp $^{\circ}\mathrm{F}$')
+    if varname == 'tsoil':
+        ax.set_ylabel('Daily Avg Temp $^{\circ}\mathrm{F}$')
+        ax.set_xlabel(("* pre-2014 data provided by [%s] %s"
+                       ) % (oldstation, oldnt.sts[oldstation]['name']))
+    else:
+        ax.set_ylabel('Daily Avg Volumetric Water Content [kg/kg]')
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 367)
-    ax.set_ylim(gdf['tsoil'].min() - 15, gdf['tsoil'].max() + 15)
+    if varname == 'tsoil':
+        ax.set_ylim(gdf['tsoil'].min() - 15, gdf['tsoil'].max() + 15)
+    else:
+        ax.set_ylim(0, 1)
     ax.axhline(32, lw=2, color='purple', zorder=4)
     # ax.set_yticks(range(-10, 90, 20))
     ax.legend(loc='best')
