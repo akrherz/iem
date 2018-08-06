@@ -4,7 +4,10 @@ import warnings
 
 import numpy as np
 from pandas.io.sql import read_sql
+import matplotlib.patheffects as PathEffects
+from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 warnings.simplefilter("ignore", UserWarning)
@@ -20,6 +23,7 @@ def get_description():
     desc['data'] = True
     desc['description'] = """Daily plot of observed high and low temperatures
     along with the daily climatology for the nearest (sometimes same) location.
+    The vertical highlighted stripes on the plot are just the weekend dates.
     """
     desc['arguments'] = [
         dict(type='zstation', name='station', default='AMW', network='IA_ASOS',
@@ -33,11 +37,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.patheffects as PathEffects
-    from matplotlib.patches import Rectangle
     pgconn_iem = get_dbconn('iem')
     pgconn_coop = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())

@@ -1,7 +1,7 @@
 """Crude estimator of IEM Climate Stations
 
 This is only run for the exceptions, when data is marked as missing for some
-reason.  The main data estimator is found at `../climodat/daily_estimator.py`.
+reason.  The main data estimator is found at `daily_estimator.py`.
 
 This script utilizes the IEMRE web service to provide data.
 """
@@ -13,8 +13,6 @@ from pyiem.util import get_dbconn
 
 # Database Connection
 COOP = get_dbconn('coop')
-ccursor = COOP.cursor()
-ccursor2 = COOP.cursor()
 
 state = sys.argv[1]
 nt = NetworkTable("%sCLIMATE" % (state.upper(),))
@@ -25,6 +23,8 @@ URI = ("http://iem.local/iemre/daily/"
 
 def do_var(varname):
     """Run our estimator for a given variable"""
+    ccursor = COOP.cursor()
+    ccursor2 = COOP.cursor()
     sql = """
         select day, station from alldata_%s WHERE %s is null
         and day >= '1893-01-01' ORDER by day ASC
@@ -32,7 +32,7 @@ def do_var(varname):
     ccursor.execute(sql)
     dataformat = '%.0f' if varname in ['high', 'low'] else '%.2f'
 
-    for row in ccursor:
+    for i, row in enumerate(ccursor):
         day = row[0]
         station = row[1]
         if (station not in nt.sts or station[2] == 'C' or
@@ -67,15 +67,19 @@ def do_var(varname):
                    dataformat % (newvalue,), station, day)
         sql = sql.replace(' nan ', ' null ')
         ccursor2.execute(sql)
+        if i > 1000 and i % 1000 == 0:
+            ccursor2.close()
+            COOP.commit()
+            ccursor2 = COOP.cursor()
+
+    ccursor2.close()
+    COOP.commit()
 
 
 def main():
     """Go Main Go"""
     for varname in ['high', 'low', 'precip']:
         do_var(varname)
-
-    ccursor2.close()
-    COOP.commit()
 
 
 if __name__ == '__main__':

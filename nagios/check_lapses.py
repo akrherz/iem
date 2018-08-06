@@ -1,4 +1,5 @@
 """Make sure we are producing webcam lapses!"""
+from __future__ import print_function
 import os
 import sys
 import stat
@@ -7,6 +8,7 @@ BASEDIR = "/mesonet/share/lapses/auto"
 
 
 def check():
+    """Do the actual check"""
     good = 0
     now = datetime.datetime.now()
     for filename in os.listdir(BASEDIR):
@@ -18,12 +20,17 @@ def check():
             good += 1
     return good
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go."""
     good = check()
     msg = '%s good lapses' % (good, )
     if good > 30:
-        print 'OK - %s' % (msg,)
-        sys.exit(0)
-    else:
-        print 'CRITICAL - %s' % (msg,)
-        sys.exit(2)
+        print('OK - %s' % (msg,))
+        return 0
+    print('CRITICAL - %s' % (msg,))
+    return 2
+
+
+if __name__ == '__main__':
+    sys.exit(main())

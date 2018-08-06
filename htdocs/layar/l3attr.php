@@ -1,7 +1,7 @@
 <?php
 /* Generate JSON of l3 nexrad attributes! */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 $postgis = iemdb("postgis");
 
 

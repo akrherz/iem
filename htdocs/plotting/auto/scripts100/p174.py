@@ -2,7 +2,9 @@
 import datetime
 
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -31,10 +33,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['zstation1']
@@ -65,6 +63,8 @@ def plotter(fdict):
     """, pgconn, params=(station1, network1, sdate, edate,
                          station2, network2, sdate, edate),
                   index_col='day')
+    if df.empty:
+        raise ValueError("No data found for this comparison")
     df['high_diff'] = df['one_high'] - df['two_high']
     df['low_diff'] = df['one_low'] - df['two_low']
 
@@ -80,6 +80,8 @@ def plotter(fdict):
     for i, varname in enumerate(['high', 'low']):
         col = '%s_diff' % (varname,)
         df2 = df[df[col] > 0]
+        if df2.empty:
+            continue
         freq1 = len(df2.index) / float(len(df.index)) * 100.
         ax[i].bar(df2.index.values, df2[col].values, fc='r', ec='r')
         df2 = df[df[col] < 0]

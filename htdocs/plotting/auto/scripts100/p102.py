@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem import util
 
 MARKERS = ['8', '>', '<', 'v', 'o', 'h', '*']
@@ -33,9 +34,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = util.get_dbconn('postgis')
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station'][:4]

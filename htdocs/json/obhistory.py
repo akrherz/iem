@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """JSON service emitting observation history for a given date"""
-from __future__ import print_function
 import json
 import os
 import datetime
