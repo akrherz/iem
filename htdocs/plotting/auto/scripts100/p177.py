@@ -369,6 +369,8 @@ def plot1(ctx):
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
     """, ctx['pgconn'], params=(ctx['station'], ctx['sts'],
                                 ctx['ets']), index_col='valid')
+    if df.empty:
+        raise ValueError("No Data Found for This Plot.")
     slrkw = df['slrkw_avg_qc']
     d12sm = df['calc_vwc_12_avg_qc']
     d12t = df['t12_c_avg_qc']
@@ -472,9 +474,7 @@ def plot1(ctx):
 
     ax[2].set_zorder(ax2.get_zorder()+1)
     ax[2].patch.set_visible(False)
-    # Wow, strange bugs if I did not put this last
-    if valid:
-        ax[0].set_xlim(min(valid), max(valid))
+    ax[0].set_xlim(df.index.min(), df.index.max())
     return fig, df
 
 
@@ -505,5 +505,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(opt='3', station='OKLI4', sts='2016-01-01 0000',
-                 ets='2016-12-31 0800'))
+    plotter(dict(opt='1', station='REFI4', sts='2018-08-01 0000',
+                 ets='2018-08-31 0800'))
