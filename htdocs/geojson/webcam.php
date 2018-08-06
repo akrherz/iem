@@ -30,7 +30,8 @@ if ($ts > 0){
 	$result = pg_exec($connect, "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
 			from camera_current c, webcams w
 			WHERE valid > (now() - '15 minutes'::interval)
-			and c.cam = w.id and w.network in ('KCCI','KELO','KCRG', 'ISUC')
+			and c.cam = w.id and
+			w.network in ('KCCI','KELO','KCRG', 'ISUC', 'MCFC')
 			ORDER by name ASC");
 } else {
   $result = pg_exec($connect, "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat

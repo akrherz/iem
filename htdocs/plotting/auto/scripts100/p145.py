@@ -49,7 +49,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='networkselect', name='station', network='ISUSM',
              default='BOOI4', label='Select Station:'),
-        dict(type='select', options=VARS, default='soil4', name='var',
+        dict(type='select', options=VARS, default='tsoil', name='var',
              label='Which variable to plot:'),
         dict(type='year', default=today.year, min=1988, name='year',
              label='Year to Highlight')
