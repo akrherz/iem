@@ -9,6 +9,7 @@ import json
 import numpy as np
 from pyiem import iemre, datatypes
 from pyiem.util import ncopen, ssw
+import pyiem.prism as prismutil
 
 
 def myrounder(val, precision):
@@ -46,6 +47,23 @@ def main():
         ssw(json.dumps({'error': 'Coordinates outside of domain'}))
         return
 
+    if ts.year > 1980:
+        nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (ts.year, ))
+        i2, j2 = prismutil.find_ij(lon, lat)
+        prism_precip = nc.variables['ppt'][offset, j2, i2] / 25.4
+        nc.close()
+    else:
+        prism_precip = None
+
+    if ts.year > 2010:
+        nc = ncopen(iemre.get_daily_mrms_ncname(ts.year))
+        j2 = int((lat - iemre.SOUTH) * 100.0)
+        i2 = int((lon - iemre.WEST) * 100.0)
+        mrms_precip = nc.variables['p01d'][offset, j2, i2] / 25.4
+        nc.close()
+    else:
+        mrms_precip = None
+
     nc = ncopen(fn)
 
     c2000 = ts.replace(year=2000)
@@ -54,6 +72,8 @@ def main():
     cnc = ncopen(iemre.get_dailyc_ncname())
 
     res['data'].append({
+        'prism_precip_in': myrounder(prism_precip, 2),
+        'mrms_precip_in': myrounder(mrms_precip, 2),
         'daily_high_f': myrounder(
            datatypes.temperature(
                 nc.variables['high_tmpk'][offset, j, i], 'K').value('F'), 1),

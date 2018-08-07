@@ -10,6 +10,7 @@ import warnings
 import numpy as np
 from pyiem import iemre, datatypes
 from pyiem.util import ncopen, ssw
+import pyiem.prism as prismutil
 
 warnings.simplefilter("ignore", UserWarning)
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
@@ -84,6 +85,14 @@ def main():
     cprecip = cnc.variables['p01d'][coffset1:coffset2, j, i] / 25.4
     cnc.close()
 
+    if ts1.year > 1980:
+        nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (ts1.year, ))
+        i2, j2 = prismutil.find_ij(lon, lat)
+        prism_precip = nc.variables['ppt'][offset1:offset2, j2, i2] / 25.4
+        nc.close()
+    else:
+        prism_precip = [None]*(offset2-offset1)
+
     if ts1.year > 2010:
         nc = ncopen(iemre.get_daily_mrms_ncname(ts1.year))
         j2 = int((lat - iemre.SOUTH) * 100.0)
@@ -99,6 +108,7 @@ def main():
         now = ts1 + datetime.timedelta(days=i)
         res['data'].append({'date': now.strftime("%Y-%m-%d"),
                             'mrms_precip_in': clean(mrms_precip[i]),
+                            'prism_precip_in': clean(prism_precip[i]),
                             'daily_high_f': clean(hightemp[i]),
                             'climate_daily_high_f': clean(chigh[i]),
                             'daily_low_f': clean(lowtemp[i]),

@@ -54,6 +54,11 @@ def do_var(varname):
                    ) % (station, req.content, wsuri, exp))
             continue
         newvalue = estimated["%s%s%s" % (prefix, varname, units)]
+        # Prefer PRISM, if available
+        if prefix == '12z_' and varname == 'precip':
+            prism = estimated["prism_precip_in"]
+            if prism is not None:
+                newvalue = prism
         if newvalue is None:
             print("IEMRE Failure for day: %s" % (day,))
             continue
