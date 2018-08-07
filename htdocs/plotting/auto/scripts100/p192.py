@@ -5,6 +5,8 @@ import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import reference
+from pyiem.plot.use_agg import plt
+from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -75,7 +77,7 @@ def get_df(ctx, bnds, buf=2.25):
       current c JOIN stations s ON (s.iemid = c.iemid)
     WHERE
       (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
-      valid + '60 minutes'::interval > now() and
+      valid + '80 minutes'::interval > now() and
       vsby >= 0 and vsby <= 10 and
       ST_contains(ST_geomfromtext(
                         'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
@@ -90,10 +92,6 @@ def get_df(ctx, bnds, buf=2.25):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
 
     if ctx['t'] == 'state':
@@ -126,6 +124,8 @@ def plotter(fdict):
     mp.plot_values(df2['lon'].values, df2['lat'].values,
                    df2['vsby'].values, '%.1f')
     mp.drawcounties()
+    if ctx['t'] == 'cwa':
+        mp.draw_cwas()
 
     return mp.fig, df
 

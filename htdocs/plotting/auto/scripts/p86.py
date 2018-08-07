@@ -10,20 +10,22 @@ from pyiem.plot.colormaps import stretch_cmap
 from pyiem.datatypes import distance, temperature, speed
 from pyiem.util import get_autoplot_context, ncopen
 
-PDICT = OrderedDict((('p01d_12z', '24 Hour Precipitation at 12 UTC'),
-                     ('p01d', 'Calendar Day Precipitation'),
-                     ('range_tmpk', 'Range between Min and Max Temp'),
-                     ('range_tmpk_12z',
-                      'Range between Min and Max Temp at 12 UTC'),
-                     ('low_tmpk', 'Minimum Temperature'),
-                     ('low_tmpk_12z', 'Minimum Temperature at 12 UTC'),
-                     ('high_tmpk', 'Maximum Temperature'),
-                     ('high_tmpk_12z', 'Maximum Temperature at 12 UTC'),
-                     ('p01d', 'Calendar Day Precipitation'),
-                     ('rsds', 'Solar Radiation'),
-                     ('avg_dwpk', 'Average Dew Point'),
-                     ('wind_speed', 'Average Wind Speed'),
-                     ))
+PDICT = OrderedDict(
+    (('p01d_12z', '24 Hour Precipitation at 12 UTC'),
+     ('p01d', 'Calendar Day Precipitation'),
+     ('range_tmpk', 'Range between Min and Max Temp'),
+     ('range_tmpk_12z', 'Range between Min and Max Temp at 12 UTC'),
+     ('low_tmpk', 'Minimum Temperature'),
+     ('low_tmpk_12z', 'Minimum Temperature at 12 UTC'),
+     ('high_tmpk', 'Maximum Temperature'),
+     ('high_tmpk_12z', 'Maximum Temperature at 12 UTC'),
+     ('p01d', 'Calendar Day Precipitation'),
+     ('rsds', 'Solar Radiation'),
+     ('avg_dwpk', 'Average Dew Point'),
+     ('wind_speed', 'Average Wind Speed'),
+     ('snow_12z', 'Experimental 24-Hour Snowfall at 12 UTC'),
+     ('snowd_12z', 'Experimental 24-Hour Snow Depth at 12 UTC'))
+)
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
 
@@ -88,7 +90,7 @@ def plotter(fdict):
         clevs = np.arange(0, 41, 2)
         clevs[0] = 0.01
         clevstride = 2
-    elif varname in ['p01d', 'p01d_12z']:
+    elif varname in ['p01d', 'p01d_12z', 'snow_12z', 'snowd_12z']:
         # Value is in W m**-2, we want MJ
         data = distance(nc.variables[varname][idx0, jslice, islice],
                         'MM').value('IN')

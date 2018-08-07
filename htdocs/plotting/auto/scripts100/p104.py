@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -53,9 +54,6 @@ def get_color(val, cat):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
 
@@ -109,12 +107,12 @@ def plotter(fdict):
     ax.quiver(tsigma[:-1], psigma[:-1], tsigma[1:]-tsigma[:-1],
               psigma[1:]-psigma[:-1], scale_units='xy', angles='xy', scale=1,
               zorder=1, color='tan')
-    for l, t, p, a in zip(lbls, tsigma, psigma, aligns):
+    for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns):
         # Manual move label some for readiability
-        if l == '7/15':
+        if lbl == '7/15':
             t = float(t) + 0.1
             p = float(p) + -0.2
-        ax.text(t, p, l, va=a, zorder=2)
+        ax.text(t, p, lbl, va=a, zorder=2)
 
     tmax = max([abs(np.min(tsigma)), abs(np.max(tsigma))]) + 0.5
     ax.set_xlim(0 - tmax, tmax)

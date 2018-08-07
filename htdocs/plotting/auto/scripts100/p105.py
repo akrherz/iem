@@ -4,6 +4,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'yes': 'Yes, consider trace reports',
@@ -43,9 +44,6 @@ def get_color(val, cat):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
