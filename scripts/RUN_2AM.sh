@@ -9,10 +9,8 @@ if [ $DD -eq "17" ]
 fi
 
 # Run the climodat estimator to get sites that are valid at midnight
-# only for Iowa at the moment as we have no other such sites outside of
-# Iowa
 cd ../climodat
-python daily_estimator.py IA
+python daily_estimator.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../climodat
 sh run.sh &

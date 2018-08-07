@@ -1,51 +1,24 @@
-"""Climodat Daily Data Estimator
+"""Climodat Daily Data Estimator.
 
-TASK: Given that it takes the QC'd data many months to make the round trip,
-      we need to generate estimates so that the climodat reports are more
-      useful even if the estimated data has problems
+   python daily_estimator.py YYYY MM DD
 
-Columns to complete:
-
- stationid | character(6)     | OK
- day       | date             | OK
- high      | integer          | COOP obs
- low       | integer          | COOP obs
- precip    | double precision | COOP precip
- snow      | double precision | COOP snow
- sday      | character(4)     | OK
- year      | integer          | OK
- month     | smallint         | OK
- snowd     | real             | COOP snowd
- estimated | boolean          | true! :)
-
-Steps:
- 1) Compute high+low
- 2) Compute precip
- 3) Look for snow obs
- 4) Initialize entries in the table
- 5) Run estimate for Iowa Average Site (IA0000)
-
-with inn as (
- select climate_site, id, name from stations where network = 'NWSCLI'
- and state = 'OH' ORDER by id)
-
- SELECT i.climate_site, i.id, s.name, i.name from
- inn i JOIN stations s on (i.climate_site = s.id);
+RUN_NOON.sh - processes the current date, this skips any calendar day sites
+RUN_NOON.sh - processes yesterday, running all sites
+RUN_2AM.sh - processes yesterday, which should run all sites
 """
 from __future__ import print_function
 import sys
 import datetime
 
+import pandas as pd
+from pandas.io.sql import read_sql
 import numpy as np
-import psycopg2.extras
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, ncopen
 from pyiem.datatypes import temperature, distance
 from pyiem.reference import TRACE_VALUE, state_names
 
-COOP = get_dbconn('coop')
-IEM = get_dbconn('iem')
 HARDCODE = {
     # TODO, the commented out Iowa sites are not long term tracked
     'IA1063': 'BRL',
@@ -229,67 +202,86 @@ HARDCODE = {
     }
 
 
-def load_table(state):
+def load_table(state, date):
     """Update the station table"""
     nt = NetworkTable("%sCLIMATE" % (state, ))
+    rows = []
+    istoday = (date == datetime.date.today())
     for sid in nt.sts:
+        # handled by compute_0000
+        if sid[2:] == '0000' or sid[2] == 'C':
+            continue
+        if istoday and not nt.sts[sid]['temp24_hour'] in range(3, 12):
+            # print('skipping %s as is_today' % (sid, ))
+            continue
         i, j = iemre.find_ij(nt.sts[sid]['lon'], nt.sts[sid]['lat'])
         nt.sts[sid]['gridi'] = i
         nt.sts[sid]['gridj'] = j
-        for key in ['high', 'low', 'precip', 'snow', 'snowd']:
-            nt.sts[sid][key] = None
-    return nt
+        rows.append(
+            {'station': sid, 'gridi': i, 'gridj': j,
+             'temp24_hour': nt.sts[sid]['temp24_hour'],
+             'precip24_hour': nt.sts[sid]['precip24_hour'],
+             'tracks': nt.sts[sid]['attributes'].get(
+                 'TRACKS_STATION', '|').split("|")[0]}
+        )
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    df.set_index('station', inplace=True)
+    for key in ['high', 'low', 'precip', 'snow', 'snowd']:
+        df[key] = None
+    return df
 
 
-def estimate_precip(ts, nt):
+def estimate_precip(df, ts):
     """Estimate precipitation based on IEMRE"""
     idx = iemre.daily_offset(ts)
     nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
-    grid12 = distance(nc.variables['p01d_12z'][idx, :, :], 'MM').value("IN")
-    grid00 = distance(nc.variables['p01d'][idx, :, :], "MM").value("IN")
+    grid12 = distance(nc.variables['p01d_12z'][idx, :, :],
+                      'MM').value("IN").filled(0)
+    grid00 = distance(nc.variables['p01d'][idx, :, :],
+                      "MM").value("IN").filled(0)
     nc.close()
 
-    for sid in nt.sts:
-        if nt.sts[sid]['precip24_hour'] in [0, 22, 23]:
-            precip = grid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+    for sid, row in df.iterrows():
+        if not pd.isnull(row['precip']):
+            continue
+        if row['precip24_hour'] in [0, 22, 23]:
+            precip = grid00[row['gridj'], row['gridi']]
         else:
-            precip = grid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+            precip = grid12[row['gridj'], row['gridi']]
         # denote trace
         if precip > 0 and precip < 0.01:
-            nt.sts[sid]['precip'] = TRACE_VALUE
+            df.at[sid, 'precip'] = TRACE_VALUE
         elif precip < 0:
-            nt.sts[sid]['precip'] = 0
+            df.at[sid, 'precip'] = 0
         elif np.isnan(precip) or np.ma.is_masked(precip):
-            nt.sts[sid]['precip'] = None
+            df.at[sid, 'precip'] = 0
         else:
-            nt.sts[sid]['precip'] = "%.2f" % (precip,)
+            df.at[sid, 'precip'] = "%.2f" % (precip,)
 
 
-def estimate_snow(ts, nt):
+def estimate_snow(df, ts):
     """Estimate the Snow based on COOP reports"""
     idx = iemre.daily_offset(ts)
     nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
-    nc.set_auto_mask(True)
     snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :],
-                          'MM').value('IN')
+                          'MM').value('IN').filled(0)
     snowdgrid12 = distance(nc.variables['snowd_12z'][idx, :, :],
-                           'MM').value('IN')
+                           'MM').value('IN').filled(0)
     nc.close()
 
-    for sid in nt.sts:
-        val = snowgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        if val >= 0 and val < 100:
-            nt.sts[sid]['snow'] = "%.1f" % (val, )
-        val = snowdgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        if val >= 0 and val < 140:
-            nt.sts[sid]['snowd'] = "%.1f" % (val, )
+    for sid, row in df.iterrows():
+        if pd.isnull(row['snow']):
+            df.at[sid, 'snow'] = snowgrid12[row['gridj'], row['gridi']]
+        if pd.isnull(row['snowd']):
+            df.at[sid, 'snowd'] = snowdgrid12[row['gridj'], row['gridi']]
 
 
-def estimate_hilo(ts, nt):
+def estimate_hilo(df, ts):
     """Estimate the High and Low Temperature based on gridded data"""
     idx = iemre.daily_offset(ts)
     nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
-    nc.set_auto_mask(True)
     highgrid12 = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
                              'K').value('F')
     lowgrid12 = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
@@ -300,110 +292,92 @@ def estimate_hilo(ts, nt):
                             'K').value('F')
     nc.close()
 
-    for sid in nt.sts:
-        if nt.sts[sid]['temp24_hour'] in [0, 22, 23]:
-            val = highgrid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        else:
-            val = highgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        if val > -80 and val < 140:
-            nt.sts[sid]['high'] = "%.0f" % (val, )
+    for sid, row in df.iterrows():
+        if pd.isnull(row['high']):
+            if row['temp24_hour'] in [0, 22, 23]:
+                val = highgrid00[row['gridj'], row['gridi']]
+            else:
+                val = highgrid12[row['gridj'], row['gridi']]
+            if sid == 'IA1402':
+                print(row['temp24_hour'])
+            if not np.ma.is_masked(val):
+                df.at[sid, 'high'] = val
+        if pd.isnull(row['low']):
+            if row['temp24_hour'] in [0, 22, 23]:
+                val = lowgrid00[row['gridj'], row['gridi']]
+            else:
+                val = lowgrid12[row['gridj'], row['gridi']]
+            if not np.ma.is_masked(val):
+                df.at[sid, 'low'] = val
 
-        if nt.sts[sid]['temp24_hour'] in [0, 22, 23]:
-            val = lowgrid00[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        else:
-            val = lowgrid12[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
-        if val > -80 and val < 140:
-            nt.sts[sid]['low'] = "%.0f" % (val, )
 
-
-def commit(ccursor, table, nt, ts):
+def commit(cursor, table, df, ts):
     """
     Inject into the database!
     """
     # Inject!
-    for sid in nt.sts.keys():
-        if sid[2] == 'C' or sid[2:] == '0000':
+    for sid, row in df.iterrows():
+        if None in [row['high'], row['low'], row['precip']]:
+            print(
+                "daily_estimator cowardly refusing %s %s %s" % (sid, ts, row)
+            )
             continue
-        if nt.sts[sid]['precip'] is None and nt.sts[sid]['high'] is None:
-            # print("SID %s skipped due to no data!" % (sid,))
-            continue
-        # See if we currently have data
-        ccursor.execute("""
-            SELECT day from """ + table + """
-            WHERE station = %s and day = %s
-            """, (sid, ts))
-        if ccursor.rowcount == 0:
-            ccursor.execute("""INSERT INTO """ + table + """
+
+        def do_update():
+            """inline."""
+            sql = """
+                UPDATE """ + table + """ SET high = %s, low = %s,
+                precip = %s, snow = %s, snowd = %s, estimated = 't'
+                WHERE day = %s and station = %s
+                """
+            args = (row['high'], row['low'],
+                    row['precip'], row['snow'],
+                    row['snowd'], ts, sid)
+            cursor.execute(sql, args)
+        do_update()
+        if cursor.rowcount == 0:
+            cursor.execute("""
+            INSERT INTO """ + table + """
             (station, day, sday, year, month)
             VALUES (%s, %s, %s, %s, %s)
             """, (sid, ts, ts.strftime("%m%d"), ts.year, ts.month))
-        sql = """
-            UPDATE """ + table + """ SET high = %s, low = %s,
-            precip = %s, snow = %s, snowd = %s, estimated = 't'
-            WHERE day = %s and station = %s
-            """
-        args = (nt.sts[sid]['high'], nt.sts[sid]['low'],
-                nt.sts[sid]['precip'], nt.sts[sid]['snow'],
-                nt.sts[sid]['snowd'], ts, sid)
-        ccursor.execute(sql, args)
-        if ccursor.rowcount != 1:
-            print(("ERROR: %s update of %s %s resulted in %s rows"
-                   ) % (table, sid, ts, ccursor.rowcount))
+            do_update()
 
 
-def hardcode(nt, state, ts):
-    """Stations that are hard coded against an ASOS site"""
-    icursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    for sid in HARDCODE:
-        if sid not in nt.sts:
-            if sid[:2] == state:
-                print(("daily_estimator has sid %s configured, but no table?"
-                       ) % (sid, ))
-            continue
-        icursor.execute("""
-        SELECT max_tmpf, min_tmpf, pday, snow from summary s JOIN stations t
-        on (t.iemid = s.iemid) WHERE t.id = %s and s.day = %s and
-        t.network = %s
-        """, (HARDCODE[sid], ts, state + "_ASOS"))
-        if icursor.rowcount == 1:
-            row = icursor.fetchone()
-            if row['max_tmpf'] is not None:
-                nt.sts[sid]['high'] = row['max_tmpf']
-            if row['min_tmpf'] is not None:
-                nt.sts[sid]['low'] = row['min_tmpf']
-            if row['pday'] is not None:
-                nt.sts[sid]['precip'] = row['pday']
-            if row['snow'] is not None:
-                nt.sts[sid]['snow'] = row['snow']
+def merge_network_obs(df, network, ts):
+    """Merge data from observations."""
+    pgconn = get_dbconn('iem')
+    obs = read_sql("""
+        SELECT t.id as station,
+        max_tmpf as high, min_tmpf as low, pday as precip, snow, snowd
+        from summary s JOIN stations t
+        on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s
+    """, pgconn, params=(network, ts), index_col='station')
+    df = df.join(obs, how='left', on='tracks', rsuffix='b')
+    for col in ['high', 'low', 'precip', 'snow', 'snowd']:
+        df[col].update(df[col+"b"])
+        df.drop(col+"b", axis=1, inplace=True)
+    return df
 
 
 def main(argv):
     """main()"""
-    dates = []
-    today = datetime.date.today()
-    if len(argv) == 4:
-        dates.append(datetime.date(int(argv[2]), int(argv[3]),
-                                   int(argv[4])))
-    else:
-        dates.append(today)
-        dates.append(datetime.date.today() - datetime.timedelta(days=1))
+    date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    pgconn = get_dbconn('coop')
     for state in state_names:
-        if state in ['AK', 'HI']:
+        if state in ['AK', 'HI', 'DC']:
             continue
         table = "alldata_%s" % (state, )
-        ccursor = COOP.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        nt = load_table(state)
-        for ts in dates:
-            estimate_precip(ts, nt)
-            estimate_snow(ts, nt)
-            estimate_hilo(ts, nt)
-            if ts != today:
-                hardcode(nt, state, ts)
-            commit(ccursor, table, nt, ts)
-        ccursor.close()
-        COOP.commit()
-    IEM.close()
-    COOP.close()
+        cursor = pgconn.cursor()
+        df = load_table(state, date)
+        df = merge_network_obs(df, "%s_COOP" % (state, ), date)
+        df = merge_network_obs(df, "%s_ASOS" % (state, ), date)
+        estimate_hilo(df, date)
+        estimate_precip(df, date)
+        estimate_snow(df, date)
+        commit(cursor, table, df, date)
+        cursor.close()
+        pgconn.commit()
 
 
 if __name__ == '__main__':
