@@ -2,6 +2,7 @@
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -28,9 +29,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -47,9 +45,11 @@ def plotter(fdict):
         OVER (ORDER by day ASC ROWS between 121 PRECEDING and 1 PRECEDING) as p
         from """ + table + """ where station = %s)
 
-      SELECT myyear as year, max(p - low) as largest_change from data
+      SELECT myyear as year, max(p - low) as largest_change, count(*) from data
       GROUP by year ORDER by year ASC
     """, pgconn, params=(station,), index_col='year')
+    # remove in-progress years
+    df = df[df['count'] > 122]
 
     (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
     ax.bar(df.index.values, 0 - df['largest_change'], fc='b', ec='b', zorder=1)

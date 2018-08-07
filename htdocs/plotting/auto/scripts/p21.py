@@ -2,6 +2,8 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
+import matplotlib.cm as cm
+from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'high': 'High temperature',
@@ -33,10 +35,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    from pyiem.plot import MapPlot
-    import matplotlib.cm as cm
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     date1 = ctx['date1']

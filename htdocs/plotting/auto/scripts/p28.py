@@ -6,6 +6,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
@@ -236,9 +237,6 @@ $("#ap_container").highcharts({
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_ctx(fdict)
 
     (fig, ax) = plt.subplots(1, 1)
