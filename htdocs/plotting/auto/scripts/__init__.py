@@ -68,8 +68,8 @@ data = {'plots': [
         {'id': "126",
          'label': ("Mixing Ratio / Vapor Pressure Deficit Climatology "
                    "and Yearly Timeseries Plot")},
-        {'id': "84", 'mw': True,
-         'label': ("MRMS Q3 / PRISM Estimated Precipitation "
+        {'id': "84",
+         'label': ("MRMS Q3 / PRISM / IEM Reanalysis Estimated Precipitation "
                    "(multiday summaries/departures too)")},
         {'id': "185", 'mw': True,
          'label': ("Number of Days to Accumulate an Amount of Precipitation"

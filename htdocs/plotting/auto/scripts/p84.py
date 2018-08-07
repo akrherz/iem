@@ -6,26 +6,18 @@ from collections import OrderedDict
 import numpy as np
 from pyiem import iemre, util
 from pyiem.datatypes import distance
+from pyiem.plot.use_agg import plt
+from pyiem.plot.geoplot import MapPlot
+from pyiem.plot.colormaps import nwsprecip
 from pyiem.reference import state_bounds
 
-PDICT = OrderedDict([
-    ('IA', 'Iowa'),
-    ('IL', 'Illinois'),
-    ('KS', 'Kansas'),
-    ('KY', 'Kentucky'),
-    ('MI', 'Michigan'),
-    ('MN', 'Minnesota'),
-    ('MO', 'Missouri'),
-    ('NE', 'Nebraska'),
-    ('ND', 'North Dakota'),
-    ('OH', 'Ohio'),
-    ('SD', 'South Dakota'),
-    ('WI', 'Wisconsin'),
-    ('midwest', 'Mid West US')])
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
-SRCDICT = {'mrms': 'NOAA MRMS (since 1 Jan 2014)',
-           'prism': 'OSU PRISM (since 1 Jan 1981)'}
+SRCDICT = OrderedDict(
+    (('iemre', 'IEM Reanalysis (since 1 Jan 1893)'),
+     ('mrms', 'NOAA MRMS (since 1 Jan 2014)'),
+     ('prism', 'OSU PRISM (since 1 Jan 1981)'))
+)
 PDICT3 = {'acc': 'Accumulation',
           'dep': 'Departure from Average [inch]',
           'per': 'Percent of Average [%]'}
@@ -37,17 +29,25 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = False
-    desc['description'] = """This application allows the plotting of precipitation
-    estimates from either MRMS or PRISM.  Please note that the start and
-    end dates are inclusive.  There is a three day delay for the arrival of the
-    PRISM data. The PRISM data is credit:
-    <a href='http://prism.oregonstate.edu'>PRISM Climate Group</a>,
-    Oregon State University, created 4 Feb 2004.
+    desc['description'] = """This application generates maps of precipitation
+    daily or multi-day totals.  There are currently three backend data sources
+    made available to this plotting application:
+    <ul>
+      <li><a href="/iemre/">IEM Reanalysis</a>
+      <br />A crude gridding of available COOP data and long term climate data
+      processed by the IEM.</li>
+      <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
+      <br />A state of the art gridded analysis of RADAR data using
+      observations and model data to help in the processing.</li>
+      <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
+      <br />The PRISM data is credit Oregon State University,
+      created 4 Feb 2004.  This information arrives with a few day lag.</li>
+    </ul>
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='select', name='sector', default='IA',
-             label='Select Sector:', options=PDICT),
+        dict(type='csector', name='sector', default='IA',
+             label='Select Sector:'),
         dict(type='select', name='src', default='mrms',
              label='Select Source:', options=SRCDICT),
         dict(type='select', name='opt', default='acc',
@@ -58,20 +58,16 @@ def get_description():
              label='Select Plot Type:', options=PDICT2),
         dict(type='date', name='sdate',
              default=today.strftime("%Y/%m/%d"),
-             label='Start Date:', min="1981/01/01"),
+             label='Start Date:', min="1893/01/01"),
         dict(type='date', name='edate',
              default=today.strftime("%Y/%m/%d"),
-             label='End Date:', min="1981/01/01"),
+             label='End Date:', min="1893/01/01"),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from pyiem.plot import MapPlot, nwsprecip
     ctx = util.get_autoplot_context(fdict, get_description())
     ptype = ctx['ptype']
     sdate = ctx['sdate']
@@ -105,6 +101,12 @@ def plotter(fdict):
         ncvar = 'p01d'
         source = 'MRMS Q3'
         subtitle = 'NOAA MRMS Project, GaugeCorr and RadarOnly'
+    elif src == 'iemre':
+        ncfn = iemre.get_daily_ncname(sdate.year)
+        clncfn = iemre.get_dailyc_ncname()
+        ncvar = 'p01d_12z'
+        source = 'IEM Reanalysis'
+        subtitle = 'IEM Reanalysis is derived from various NOAA datasets'
     else:
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sdate.year,)
         clncfn = "/mesonet/data/prism/prism_dailyc.nc"
