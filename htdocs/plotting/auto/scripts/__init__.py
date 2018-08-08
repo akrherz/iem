@@ -255,7 +255,7 @@ data = {'plots': [
         {'id': "75", 'mw': True,
          'label': "Precipitation Totals by Season/Year"},
         {'id': "63", 'mw': True,
-         'label': "Records Set by Year (Max High / Min Low)"},
+         'label': "Records Set by Year (Max High / Min Low / Max Precip)"},
         {'id': "144", 'mw': True,
          'label': "Soil Temperature Periods Above/Below Threshold in Spring"},
         {'id': "145", 'mw': True,

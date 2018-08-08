@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
@@ -44,9 +45,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    from pyiem.plot import MapPlot
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']

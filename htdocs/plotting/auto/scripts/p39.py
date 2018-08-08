@@ -5,6 +5,7 @@ import calendar
 import psycopg2.extras
 import numpy as np
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -34,9 +35,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -98,7 +96,7 @@ def plotter(fdict):
     ax.plot(np.arange(1, effective_date.day),
             avgs[-1, :effective_date.day-1], zorder=3,
             lw=2, color='brown',
-            label="%s %s, %.2f$^\circ$F" % (
+            label=r"%s %s, %.2f$^\circ$F" % (
                 calendar.month_abbr[effective_date.month], effective_date.year,
                 avgs[-1, effective_date.day-1]))
     # For historical, we can additionally plot the month values
@@ -106,11 +104,11 @@ def plotter(fdict):
     if effective_date < today:
         ax.plot(np.arange(1, days+1), avgs[-1, :], lw=2, color='brown',
                 linestyle='-.', zorder=2,
-                label="%s %s Final, %.2f$^\circ$F" % (
+                label=r"%s %s Final, %.2f$^\circ$F" % (
                 calendar.month_abbr[effective_date.month], effective_date.year,
                 avgs[-1, -1]))
     ax.plot(np.arange(1, len(prevavg)+1), prevavg, lw=2, color='k', zorder=3,
-            label="%s %s, %.2f$^\circ$F" % (
+            label=r"%s %s, %.2f$^\circ$F" % (
                 calendar.month_abbr[oldmonth.month], oldmonth.year,
                 prevavg[-1]))
 
@@ -126,7 +124,7 @@ def plotter(fdict):
                        beats, np.shape(data)[0]-1,
                        beats / float(np.shape(data)[0]-1) * 100.))
     ax.set_xlim(1, days)
-    ax.set_ylabel("Month to Date Average Temp $^\circ$F")
+    ax.set_ylabel(r"Month to Date Average Temp $^\circ$F")
     ax.set_xlabel("Day of Month")
     ax.grid(True)
     ax.legend(loc='best', fontsize=10)
