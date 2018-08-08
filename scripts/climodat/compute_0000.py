@@ -16,35 +16,37 @@ COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
 
 
-def update_database(stid, valid, high, low, precip, snow, snowd):
+def zero(val):
+    """Make masked values a zero"""
+    if val is np.ma.masked:
+        return 0
+    return val
+
+
+def update_database(stid, valid, row):
     """Update the database with these newly computed values!"""
-    # print(("stid: %s valid: %s high: %s low: %s precip: %s snow: %s
-    #        "snowd: %s"
-    #       ) % (stid, valid, high, low, precip, snow, snowd))
     table = "alldata_%s" % (stid[:2], )
-    # See if we need to add an entry
-    ccursor.execute("""SELECT day from """ + table + """ WHERE day = %s
-    and station = %s""", (valid, stid))
-    if ccursor.rowcount != 1:
-        ccursor.execute("""INSERT into """ + table + """ (station, day,
-        high, low, precip, snow, snowd, estimated, year, month, sday) VALUES
-        (%s, %s, %s, %s, %s, %s, %s, 't', %s, %s, %s)
-        """, (stid, valid, high, low, round(precip, 2),
-              round(snow if snow is not np.ma.masked else 0, 1),
-              round(snowd if snowd is not np.ma.masked else 0, 1),
-              valid.year, valid.month, valid.strftime("%m%d")))
-    # Now we update
-    ccursor.execute("""
-        UPDATE """ + table + """
-        SET high = %s, low = %s, precip = %s, snow = %s, snowd = %s
-        WHERE station = %s and day = %s
-    """, (high, low, round(precip, 2),
-          round(snow if snow is not np.ma.masked else 0, 1),
-          round(snowd if snowd is not np.ma.masked else 0, 1),
-          stid, valid))
-    if ccursor.rowcount != 1:
-        print('compute_0000:update_database updated %s row for %s %s' % (
-            ccursor.rowcount, stid, valid))
+
+    def do_update(_row):
+        """Do the database work, please."""
+        ccursor.execute("""
+            UPDATE """ + table + """
+            SET high = %s, low = %s, precip = %s, snow = %s, snowd = %s
+            WHERE station = %s and day = %s
+        """, (_row['high'], _row['low'],
+              round(zero(_row['precip']), 2),
+              round(zero(_row['snow']), 1),
+              round(zero(_row['snowd']), 1),
+              stid, valid))
+        return ccursor.rowcount == 1
+
+    if not do_update(row):
+        ccursor.execute("""
+            INSERT into """ + table + """ (station, day,
+            estimated, year, month, sday) VALUES
+            (%s, %s, 't', %s, %s, %s)
+        """, (stid, valid, valid.year, valid.month, valid.strftime("%m%d")))
+        do_update(row)
 
 
 def do_day(valid):
@@ -73,9 +75,16 @@ def do_day(valid):
     stsnow = czs.gen_stats(np.flipud(snow), states['the_geom'])
     stsnowd = czs.gen_stats(np.flipud(snowd), states['the_geom'])
 
+    statedata = {}
     for i, state in enumerate(states.index.values):
-        update_database(state+"0000", valid, sthigh[i], stlow[i],
-                        stprecip[i], stsnow[i], stsnowd[i])
+        statedata[state] = dict(
+            high=sthigh[i],
+            low=stlow[i],
+            precip=stprecip[i],
+            snow=stsnow[i],
+            snowd=stsnowd[i]
+        )
+        update_database(state+"0000", valid, statedata[state])
 
     # build out climate division mappers
     climdiv = gpd.GeoDataFrame.from_postgis("""
@@ -90,8 +99,21 @@ def do_day(valid):
     stsnowd = czs.gen_stats(np.flipud(snowd), climdiv['geom'])
 
     for i, iemid in enumerate(climdiv.index.values):
-        update_database(iemid, valid, sthigh[i], stlow[i],
-                        stprecip[i], stsnow[i], stsnowd[i])
+        row = dict(
+            high=sthigh[i],
+            low=stlow[i],
+            precip=stprecip[i],
+            snow=stsnow[i],
+            snowd=stsnowd[i]
+        )
+        # we must have temperature data
+        if row['high'] is np.ma.masked or row['low'] is np.ma.masked:
+            print(
+                ("compute_0000 %s has missing temperature data, using state"
+                 ) % (iemid, )
+            )
+            row = statedata[iemid[:2]]
+        update_database(iemid, valid, row)
 
 
 def main(argv):

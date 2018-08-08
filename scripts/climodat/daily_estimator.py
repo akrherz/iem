@@ -19,188 +19,6 @@ from pyiem.util import get_dbconn, ncopen
 from pyiem.datatypes import temperature, distance
 from pyiem.reference import TRACE_VALUE, state_names
 
-HARDCODE = {
-    # TODO, the commented out Iowa sites are not long term tracked
-    'IA1063': 'BRL',
-    # 'IA1314': 'CID',
-    # 'IA2070': 'DVN',
-    'IA2203': 'DSM',
-    # 'IA2367': 'DBQ',
-    # 'IA2723': 'EST',
-    # 'IA4106': 'IOW',
-    # 'IA4587': 'LWD',
-    # 'IA5199': 'MIW',
-    # 'IA5235': 'MCW',
-    'IA6389': 'OTM',
-    'IA7708': 'SUX',
-    'IA7844': 'SPW',
-    'IA8706': 'ALO',
-
-    # Illinois
-    'IL0338': 'ARR',
-    'IL8740': 'CMI',
-    'IL2193': 'DEC',
-    'IL5079': 'ILX',
-    'IL1577': 'MDW',
-    'IL5751': 'MLI',
-    'IL5430': 'MTO',
-    'IL1549': 'ORD',
-    'IL6711': 'PIA',
-    'IL7382': 'RFD',
-    'IL8179': 'SPI',
-    'IL7072': 'UIN',
-    # KDPA | IL2736       | CHICAGO/DUPAGE
-    # KLOT | IL4530       | ROMEOVILLE/CHI
-    # KLWV | IL6558       | LAWRENCEVILLE
-    # KUGN | IL1549       | WAUKEGAN
-
-    # Indiana
-    'IN0784': 'BMG',
-    'IN2738': 'EVV',
-    'IN3037': 'FWA',
-    'IN7999': 'GEZ',
-    # IN0877       | KHUF | BOWLING GREEN 1 W           | TERRE HAUTE
-    'IN4259': 'IND',
-    # IN9430       | KLAF | WEST LAFAYETTE 6 NW         | LAFAYETTE
-    'IN6023': 'MIE',
-    'IN8187': 'SBN',
-    # IN4837       | KVPZ | LAPORTE                     | VALPARAISO
-
-    # Kansas
-    'KS8830': 'ICT',
-    'KS2164': 'DDC',
-    'KS3153': 'GLD',
-    'KS4559': 'LWC',
-    'KS4972': 'MHK',
-    'KS7160': 'SLN',
-    'KS8167': 'TOP',
-    'KS1767': 'CNK',
-    # KCNU | KS3984       | CHANUTE
-    # KEMP | KS4937       | EMPORIA
-    # KGCK | KS2980       | GARDEN_CITY
-    # KHLC | KS8498       | HILL_CITY
-    # KOJC | KS7809       | OLATHE (OJC)
-    # KP28 | KS6549       | MEDICINE_LODGE
-
-    # Kentucky
-    'KY0909': 'BWG',
-    'KY1855': 'CVG',
-    # KY4746       | KFFT | LEXINGTON BLUEGRASS AP     | CAPITAL CITY AIRPORT/F
-    'KY6110': 'JKL',
-    'KY4746': 'LEX',
-    # KY4954       | KLOU | LOUISVILLE INTL AP         | LOUISVILLE/BOWMAN
-    # KY0381       | KLOZ | BARBOURVILLE               | LONDON-CORBIN ARPT
-    'KY4202': 'PAH',
-    'KY4954': 'SDF',
-
-    # Michigan
-    'MI7366': 'ANJ',
-    'MI0164': 'APN',
-    # MI3504       | KAZO | GULL LK BIOLOGICAL STN        | KALAMAZOO
-    'MI3858': 'BIV',
-    'MI0552': 'BTL',
-    'MI2103': 'DTW',
-    'MI2846': 'FNT',
-    'MI3333': 'GRR',
-    'MI3932': 'HTL',
-    'MI4150': 'JXN',
-    'MI4641': 'LAN',
-    'MI7227': 'MBS',
-    'MI5712': 'MKG',
-    'MI5178': 'MQT',
-    # MI5097       | KTVC | MAPLE CITY 1E                 | TRAVERSE CIT
-
-    # Minnesota
-    'MN2248': 'DLH',
-    'MN4026': 'INL',
-    # MN4176       | KMPX | JORDAN 1SSW            | Minneapolis NWS
-    'MN5435': 'MSP',
-    'MN7004': 'RST',
-    'MN7294': 'STC',
-
-    # Missouri
-    # MO4226       | KCGI | JACKSON                  | CAPE GIRARDEAU
-    'MO1791': 'COU',
-    'MO7632': 'DMO',
-    'MO4544': 'IRK',
-    # MO8664       | KJLN | WACO 4N                  | Joplin
-    'MO4359': 'MCI',
-    'MO7976': 'SGF',
-    # MO6357       | KSTJ | OREGON                   | ST. JOSEPH
-    'MO7455': 'STL',
-    'MO8880': 'UNO',
-    # MO7263       | KVIH | ROLLA UNI OF MISSOURI    | VICHY/ROLLA
-
-    # Nebraska
-    'NE0130': 'AIA',
-    'NE1200': 'BBW',
-    'NE7665': 'BFF',
-    'NE1575': 'CDR',
-    'NE4335': 'EAR',
-    'NE3395': 'GRI',
-    'NE3660': 'HSI',
-    'NE4110': 'IML',
-    'NE6065': 'LBF',
-    # NE5105       | KLNK | MALCOLM                | LINCOLN
-    'NE5310': 'MCK',
-    # NE3050       | KOAX | FREMONT                | Omaha - Valley
-    # NE2770       | KODX | ERICSON 8 WNW          | ORD/SHARP FIELD
-    'NE5995': 'OFK',
-    'NE6255': 'OMA',
-    'NE7830': 'SNY',
-    'NE8760': 'VTN',
-
-    # North Dakota
-    'ND0819': 'BIS',
-    # ND2183       | KDIK | THEODORE ROOSEVELT AP     | DICKINSON
-    'ND2859': 'FAR',
-    # ND3621       | KFGF | GRAND FORKS UNIV NWS      | Grand Forks NWS
-    'ND3616': 'GFK',
-    # ND7450       | KHEI | REEDER                    | HETTINGER
-    'ND9425': 'ISN',
-    'ND4413': 'JMS',
-    'ND5988': 'MOT',
-    'ND3376': 'N60',
-
-    # Ohio
-    'OH0058': 'CAK',
-    'OH1657': 'CLE',
-    'OH1786': 'CMH',
-    'OH2075': 'DAY',
-    'OH4865': 'MFD',
-    # OH1905       | KPHD | COSHOCTON AG RSCH STN         | NEW PHILADELPHIA
-    'OH8357': 'TOL',
-    'OH9406': 'YNG',
-    'OH9417': 'ZZV',
-
-    # South Dakota
-    # SD5048       | K2WX | LUDLOW 3 SSE         | BUFFALO
-    'SD7742': '8D3',
-    'SD0020': 'ABR',
-    'SD8932': 'ATY',
-    'SD2087': 'CUT',
-    'SD2852': 'D07',
-    'SD7667': 'FSD',
-    'SD4127': 'HON',
-    'SD9367': 'ICR',
-    # SD6212       | KIEN | OELRICHS             | PINE RIDGE
-    'SD5691': 'MBG',
-    'SD6936': 'MHE',
-    # SD1972       | KPHP | COTTONWOOD 2 E       | PHILIP
-    'SD6597': 'PIR',
-    'SD6947': 'RAP',
-    # SD6947       | KUNR | RAPID CITY 4NW       | Rapid City
-
-    # Wisconsin
-    'WI5479': 'MKE',
-    'WI3269': 'GRB',
-    'WI7113': 'RHI',
-    'WI2428': 'EAU',
-    'WI4961': 'MSN',
-    'WI4370': 'LSE',
-    'WI8968': 'AUW',
-    }
-
 
 def load_table(state, date):
     """Update the station table"""
@@ -323,25 +141,25 @@ def commit(cursor, table, df, ts):
             )
             continue
 
-        def do_update():
+        def do_update(_sid, _row):
             """inline."""
             sql = """
                 UPDATE """ + table + """ SET high = %s, low = %s,
                 precip = %s, snow = %s, snowd = %s, estimated = 't'
                 WHERE day = %s and station = %s
                 """
-            args = (row['high'], row['low'],
-                    row['precip'], row['snow'],
-                    row['snowd'], ts, sid)
+            args = (_row['high'], _row['low'],
+                    _row['precip'], _row['snow'],
+                    _row['snowd'], ts, _sid)
             cursor.execute(sql, args)
-        do_update()
+        do_update(sid, row)
         if cursor.rowcount == 0:
             cursor.execute("""
             INSERT INTO """ + table + """
             (station, day, sday, year, month)
             VALUES (%s, %s, %s, %s, %s)
             """, (sid, ts, ts.strftime("%m%d"), ts.year, ts.month))
-            do_update()
+            do_update(sid, row)
 
 
 def merge_network_obs(df, network, ts):
