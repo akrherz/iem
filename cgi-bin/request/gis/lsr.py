@@ -86,7 +86,7 @@ def main():
         SELECT distinct
         to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
         magnitude, wfo, type, typetext,
-        city, county, state, source, substr(remark,0,100) as tremark,
+        city, county, state, source, substr(remark,0,200) as tremark,
         ST_y(geom), ST_x(geom),
         to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2
         from lsrs WHERE
@@ -108,20 +108,22 @@ def main():
     w.field('COUNTY', 'C', 40)
     w.field('STATE', 'C', 2)
     w.field('SOURCE', 'C', 40)
-    w.field('REMARK', 'C', 100)
+    w.field('REMARK', 'C', 200)
     w.field('LAT', 'F', 7, 4)
     w.field('LON', 'F', 9, 4)
     for row in cursor:
         row = list(row)
         w.point(row[-2], row[-3])
         if row[9] is not None:
-            row[9] = row[9].encode('utf-8').decode(
+            row[9] = row[9].encode('utf-8', 'ignore').decode(
                                'ascii', 'ignore').replace(",", "_")
         w.record(*row[:-1])
         csv.write(("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
                    ) % (row[0], row[12], row[-3], row[-2], row[1], row[2],
                         row[3],
-                        row[4], row[5], row[6], row[7], row[8],
+                        row[4], row[5].encode(
+                            'utf-8', 'ignore').decode('ascii', 'ignore'),
+                        row[6], row[7], row[8],
                         row[9] if row[9] is not None else ''))
 
     csv.close()
