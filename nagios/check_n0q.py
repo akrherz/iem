@@ -26,18 +26,19 @@ def main(argv):
 
     if gentime < 300 and radarson > 50 and latency < 60*10:
         print('OK |%s' % (stats))
-        sys.exit(0)
+        return 0
     if gentime > 300:
         print('CRITICAL - gentime %s|%s' % (gentime, stats))
-        sys.exit(2)
+        return 2
     if latency > 600:
         print('CRITICAL - radtime:%s latency:%ss|%s' % (prodtime, latency,
                                                         stats))
-        sys.exit(2)
+        return 2
     if radarson < 50:
         print('CRITICAL - radarson %s|%s' % (radarson, stats))
-        sys.exit(2)
+        return 2
+    return 2
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    sys.exit(main(sys.argv))

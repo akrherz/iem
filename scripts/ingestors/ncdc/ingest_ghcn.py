@@ -153,7 +153,10 @@ def get_obs(metadata):
         return
     rows = []
     for line in open(fn):
-        data = DATARE.match(line).groupdict()
+        m = DATARE.match(line)
+        if m is None:
+            continue
+        data = m.groupdict()
         if data['element'] not in ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']:
             continue
         day = datetime.date(int(data['year']), int(data['month']), 1)
@@ -224,7 +227,7 @@ def process(station, metadata):
                 msg.append("%s %s->%s" % (dbcol, row[dbcol], row[obcol]))
         if not msg:
             continue
-        print("%s %s" % (date, ", ".join(msg)))
+        # print("%s %s" % (date, ", ".join(msg)))
         cursor.execute("""
         UPDATE """ + table + """ SET """ + ",".join(work) + """
         WHERE station = %s and day = %s

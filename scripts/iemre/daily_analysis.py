@@ -92,12 +92,12 @@ def do_precip(ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = ncopen(ncfn, timeout=300)
+        hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
         ncfn = iemre.get_hourly_ncname(sts.year)
         if os.path.isfile(ncfn):
-            hnc = ncopen(ncfn, timeout=300)
+            hnc = ncopen(ncfn, timeout=600)
             phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
             hnc.close()
     else:
@@ -105,7 +105,7 @@ def do_precip(ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = ncopen(ncfn, timeout=300)
+        hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     write_grid(ts, 'p01d', np.where(phour < 0, 0, phour))
@@ -127,10 +127,10 @@ def do_precip12(ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = ncopen(ncfn)
+        hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         hnc.close()
-        hnc = ncopen(iemre.get_hourly_ncname(sts.year))
+        hnc = ncopen(iemre.get_hourly_ncname(sts.year), timeout=600)
         phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
         hnc.close()
     else:
@@ -138,7 +138,7 @@ def do_precip12(ts):
         if not os.path.isfile(ncfn):
             print("Missing %s" % (ncfn,))
             return
-        hnc = ncopen(ncfn)
+        hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     write_grid(ts, 'p01d_12z', np.where(phour < 0, 0, phour))
@@ -230,7 +230,7 @@ def grid_day12(ts, domain):
 def write_grid(valid, vname, grid):
     """Write data to backend netcdf"""
     offset = iemre.daily_offset(valid)
-    nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=300)
+    nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=600)
     if nc is None:
         print("daily_analysis#write_grid first open attempt failed, try #2")
         nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=600)
@@ -324,7 +324,7 @@ def workflow(ts, irealtime):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
-    nc = ncopen(ncfn, 'a')
+    nc = ncopen(ncfn, 'a', timeout=600)
     domain = nc.variables['hasdata'][:, :]
     nc.close()
     # For this date, the 12 UTC COOP obs will match the date

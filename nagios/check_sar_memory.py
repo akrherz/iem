@@ -1,4 +1,5 @@
 """Capture some stats from sar memory"""
+from __future__ import print_function
 import subprocess
 import sys
 
@@ -17,12 +18,12 @@ def process(res):
            ) % (tokens[1], tokens[1], tokens[2], tokens[3], tokens[4],
                 tokens[5], tokens[6], tokens[7], tokens[8], tokens[9],
                 tokens[10]))
+    status = 0
     if float(tokens[1]) < 150000:
-        sys.exit(2)
+        status = 2
     elif float(tokens[1]) < 200000:
-        sys.exit(1)
-    else:
-        sys.exit(0)
+        status = 1
+    return status
 
 
 def main():
@@ -31,7 +32,8 @@ def main():
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     stdout = proc.stdout.read()
-    process(stdout)
+    return process(stdout)
+
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

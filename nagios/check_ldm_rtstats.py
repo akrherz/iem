@@ -1,23 +1,24 @@
 """ Parse the files generated from LDM rtstats
 
 
-        snprintf(stats_data, sizeof(stats_data),
-                "%14.14s %14.14s %32.*s %7.10s %32.*s %12.0lf %12.0lf %.8g %10.2f %4.0f@%4.4s %20.20s\n",
-                s_time(buf, sizeof(buf), sb->recent.tv_sec),
-                s_time(buf_a, sizeof(buf_a), sb->recent_a.tv_sec),
-                (int)_POSIX_HOST_NAME_MAX,
-                myname,
-                s_feedtypet(sb->feedtype),
-                (int)HOSTNAMESIZE,
-                sb->origin,
-                sb->nprods,
-                sb->nbytes,
-                d_diff_timestamp(&sb->recent_a, &sb->recent),
-                sb->latency_sum/(sb->nprods == 0 ? 1: sb->nprods),
-                sb->max_latency,
-                s_time_abrv(sb->slowest_at),
-                PACKAGE_VERSION
-        );
+snprintf(stats_data, sizeof(stats_data),
+        "%14.14s %14.14s %32.*s %7.10s %32.*s %12.0lf %12.0lf %.8g
+        %10.2f %4.0f@%4.4s %20.20s\n",
+        s_time(buf, sizeof(buf), sb->recent.tv_sec),
+        s_time(buf_a, sizeof(buf_a), sb->recent_a.tv_sec),
+        (int)_POSIX_HOST_NAME_MAX,
+        myname,
+        s_feedtypet(sb->feedtype),
+        (int)HOSTNAMESIZE,
+        sb->origin,
+        sb->nprods,
+        sb->nbytes,
+        d_diff_timestamp(&sb->recent_a, &sb->recent),
+        sb->latency_sum/(sb->nprods == 0 ? 1: sb->nprods),
+        sb->max_latency,
+        s_time_abrv(sb->slowest_at),
+        PACKAGE_VERSION
+);
 
 
 20121029204759 20121029204759
@@ -29,9 +30,8 @@ chico.unidata.ucar.edu_v_metfs1.agron.iastate.edu
 982.48
 2207@0001
 6.10.1
-
-
 """
+from __future__ import print_function
 import sys
 import os
 import glob
@@ -92,8 +92,9 @@ def runner(hostname):
                 msg = 'OK'
         stats += " %s_age=%s;600;1200;0 " % (feedtype.replace("|", "_"),
                                              max(max_latencies[feedtype]))
-    print "%s - %s |%s" % (msg, idsmsg, stats)
-    sys.exit(exitcode)
+    print("%s - %s |%s" % (msg, idsmsg, stats))
+    return exitcode
+
 
 if __name__ == '__main__':
-    runner(sys.argv[1])
+    sys.exit(runner(sys.argv[1]))

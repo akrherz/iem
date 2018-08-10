@@ -1,13 +1,12 @@
-'''
- Check to make sure we have HRRR model data flowing to the IEM archives
-'''
+"""Check to make sure we have HRRR model data flowing to the IEM archives"""
+from __future__ import print_function
 import os
 import sys
 import datetime
 
 
 def check():
-    ''' Do the chec please '''
+    """Do the chec please"""
     now = datetime.datetime.utcnow()
     diff = None
     for hr in range(8):
@@ -21,15 +20,22 @@ def check():
 
     return diff, now
 
-if __name__ == '__main__':
+
+def main():
+    """Go Main Go"""
     diff, now = check()
     stats = "|age=%s;4;5;6" % (diff if diff is not None else -1,)
     if diff is not None and diff < 6:
-        print 'OK - %sz found %s' % (now.strftime("%H"), stats)
-        sys.exit(0)
+        print('OK - %sz found %s' % (now.strftime("%H"), stats))
+        status = 0
     elif diff is not None:
-        print 'WARNING - %sz found %s' % (now.strftime("%H"), stats)
-        sys.exit(1)
+        print('WARNING - %sz found %s' % (now.strftime("%H"), stats))
+        status = 1
     else:
-        print 'CRITICAL - no HRRR found %s' % (stats,)
-        sys.exit(2)
+        print('CRITICAL - no HRRR found %s' % (stats,))
+        status = 2
+    return status
+
+
+if __name__ == '__main__':
+    sys.exit(main())

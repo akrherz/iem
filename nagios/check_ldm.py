@@ -12,17 +12,19 @@ getTime(), getLoad(), getPortCount(), getPq(), getCpu()
 24137944e3 21514 $swapFree, $contextSwitches
 
 """
+from __future__ import print_function
 import subprocess
 import sys
 
 
 def main():
+    """Go Main Go."""
     proc = subprocess.Popen("/home/ldm/bin/ldmadmin printmetrics", shell=True,
                             stdout=subprocess.PIPE)
     data = proc.stdout.read()
     tokens = data.split()
     if len(tokens) != 18:
-        print 'CRITICAL - can not parse output %s ' % (data,)
+        print('CRITICAL - can not parse output %s ' % (data,))
         sys.exit(2)
 
     downstream = tokens[4]
@@ -41,7 +43,8 @@ def main():
            ) % (msg, downstream, upstream, data,
                 downstream, upstream, queue_age,
                 product_count, byte_count))
-    sys.exit(estatus)
+    return estatus
+
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

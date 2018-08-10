@@ -1,6 +1,4 @@
-"""
- Check how much SNET data we have
-"""
+"""Check how much SNET data we have."""
 from __future__ import print_function
 import sys
 
@@ -25,11 +23,11 @@ def main():
         counts[row[0]] = row[1]
         total += row[1]
 
-    if total > 10:
+    if total > 2:
         print(('OK - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         return 0
-    elif total > 5:
+    elif total > 1:
         print(('WARNING - %s count |kcci=%s;1;3;5 kelo=%s;1;3;5 kimt=%s;1;3;5'
                ) % (total, counts['KCCI'], counts['KELO'], counts['KIMT']))
         return 1
