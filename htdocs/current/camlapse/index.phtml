@@ -1,11 +1,12 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/cameras.inc.php";
+
 $t = new MyView();
-include("../../../include/cameras.inc.php");
 $t->title = "Webcam Lapse Player";
 $t->headextra = <<<EOF
-<link href="/vendor/flowplayer/6.0.2/skin/minimalist.css" rel="stylesheet">
+<link href="/vendor/flowplayer/7.2.6/skin/skin.css" rel="stylesheet">
 EOF;
 $t->thispage = "webcam-lapse";
 
@@ -27,7 +28,12 @@ note the timestamp on the lapses, some of them may be old.</p>
 
 
 <div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
-<div id="player"  style="display:block;width:640px;height:490px;"></div>
+<div class="flowplayer">
+<video>
+<source type="video/mp4" src="/onsite/lapses/auto/ames_sunrise.mp4">
+<source type="video/flv" src="/onsite/lapses/auto/ames_sunrise.flv">
+</video>
+</div>
 <form name="theform">
 <br /><strong>Select Camera:</strong>
 {$camselect}
@@ -43,53 +49,8 @@ note the timestamp on the lapses, some of them may be old.</p>
 </form>
 EOF;
 $t->jsextra = <<<EOF
-<script type="text/javascript" src="/vendor/flowplayer/6.0.2/flowplayer.min.js"></script>
-<script type="text/javascript">
-flowplayer.conf = {
-	engine: 'flash',
-	swf: '/vendor/flowplayer/6.0.2/flowplayer.swf'
-};
-		
-function myloader()
-{
-  	ts = new Date();
-  	var mycam = document.theform.mycam.value;
-  	var mylapse = document.theform.mylapse.value;
-	window.location.href = "#"+mycam+"_"+mylapse;
-  	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-  	url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
-	api = flowplayer();
-	api.load([{flash:url, mp4:url2}]);
-}
-		
-$(function () {
-	ts = new Date();
-	var container = document.getElementById("player");
-	flowplayer(container, {
-		clip : {
-			sources: [{type: 'video/mp4',
-					   src: '/onsite/lapses/auto/algona_sunrise.mp4?'+ ts.getTime()},
-					  {type: 'video/flv',
-					   src: '/onsite/lapses/auto/algona_sunrise.flv?'+ ts.getTime()}
-		
-		]}
-	});
-
-	var tokens = window.location.href.split('#');
-	if (tokens.length == 2){
-  		tokens2 = tokens[1].split('_');
-  		if (tokens2.length == 2){
-			mycam = tokens2[0];
-			document.getElementById('mycam').value = mycam;
-			mylapse = tokens2[1];
-			document.getElementById('mylapse').value = mylapse;
-			window.setTimeout(myloader, 1000);
-  		}
-	} 
-});
-
-
-</script>
+<script type="text/javascript" src="/vendor/flowplayer/7.2.6/flowplayer.min.js"></script>
+<script type="text/javascript" src="app.js"></script>
 EOF;
 
 $t->render('single.phtml');
