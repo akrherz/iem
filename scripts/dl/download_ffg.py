@@ -26,8 +26,8 @@ def do(ts):
     ftp.retrbinary('RETR ' + remotefn, fh.write)
     ftp.close()
     fh.close()
-    cmd = ("/home/ldm/bin/pqinsert -p 'data a %s bogus "
-           "model/ffg/%s.grib2' %s"
+    cmd = ("/home/ldm/bin/pqinsert -i -p 'data a %s bogus "
+           "model/ffg/%s.grib2 grib2' %s"
            ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
     subprocess.call(cmd, shell=True)
 
