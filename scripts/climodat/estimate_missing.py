@@ -7,85 +7,92 @@ This script utilizes the IEMRE web service to provide data.
 """
 from __future__ import print_function
 import sys
+
 import requests
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-# Database Connection
-COOP = get_dbconn('coop')
-
-state = sys.argv[1]
-nt = NetworkTable("%sCLIMATE" % (state.upper(),))
-
-URI = ("http://iem.local/iemre/daily/"
-       "%(date)s/%(lat)s/%(lon)s/json")
+URI = ("http://iem.local/iemre/multiday/"
+       "%(sdate)s/%(edate)s/%(lat)s/%(lon)s/json")
 
 
-def do_var(varname):
-    """Run our estimator for a given variable"""
-    ccursor = COOP.cursor()
-    ccursor2 = COOP.cursor()
-    sql = """
-        select day, station from alldata_%s WHERE %s is null
-        and day >= '1893-01-01' ORDER by day ASC
-        """ % (state.lower(), varname)
-    ccursor.execute(sql)
-    dataformat = '%.0f' if varname in ['high', 'low'] else '%.2f'
-
-    for i, row in enumerate(ccursor):
-        day = row[0]
-        station = row[1]
-        if (station not in nt.sts or station[2] == 'C' or
-                station.endswith('0000')):
-            continue
-        temp24hour = nt.sts[station]['temp24_hour']
-        prefix = "12z_" if temp24hour != 0 else 'daily_'
-        units = '_in' if varname == 'precip' else '_f'
-
-        # pre 1900 dates strftime fails for
-        wsuri = URI % {'date': "%s-%02i-%02i" % (day.year, day.month, day.day),
-                       'lon': nt.sts[station]['lon'],
-                       'lat': nt.sts[station]['lat']}
+def process(cursor, station, df, meta):
+    """do work for this station."""
+    prefix = 'daily' if meta['precip24_hour'] not in range(4, 11) else '12z'
+    for year, gdf in df.groupby('year'):
+        sdate = gdf['day'].min()
+        edate = gdf['day'].max()
+        wsuri = URI % {'sdate': "%s-%02i-%02i" % (
+            sdate.year, sdate.month, sdate.day),
+                       'edate': "%s-%02i-%02i" % (
+            edate.year, edate.month, edate.day),
+                       'lon': meta['lon'],
+                       'lat': meta['lat']}
         req = requests.get(wsuri)
+        if req.status_code != 200:
+            print("%s got status %s" % (wsuri, req.status_code))
+            continue
         try:
-            estimated = req.json()['data'][0]
+            estimated = pd.DataFrame(req.json()['data'])
         except Exception as exp:
             print(("\n%s Failure:%s\n%s\nExp: %s"
                    ) % (station, req.content, wsuri, exp))
             continue
-        newvalue = estimated["%s%s%s" % (prefix, varname, units)]
-        # Prefer PRISM, if available
-        if prefix == '12z_' and varname == 'precip':
-            prism = estimated["prism_precip_in"]
-            if prism is not None:
-                newvalue = prism
-        if newvalue is None:
-            print("IEMRE Failure for day: %s" % (day,))
-            continue
+        estimated['date'] = pd.to_datetime(estimated['date'])
+        estimated.set_index('date', inplace=True)
+        print(estimated.columns)
+        for _, row in gdf.iterrows():
+            newvals = row.to_dict()
+            for col in ['high', 'low', 'precip']:
+                units = "f" if col != 'precip' else 'in'
+                if not pd.isna(row[col]):
+                    continue
+                if (col == 'precip' and prefix == '12z' and
+                        not pd.isna(
+                            estimated.loc[row['day']]['prism_precip_in'])):
+                    newvals['precip'] = estimated.loc[
+                        row['day']]['prism_precip_in']
+                else:
+                    newvals[col] = estimated.loc[
+                        row['day']]["%s_%s_%s" % (prefix, col, units)]
 
-        print(('Set station: %s day: %s varname: %s value: %s'
-               ) % (station, day, varname, dataformat % (newvalue,)))
-        sql = """
-            UPDATE alldata_%s SET estimated = true, %s = %s WHERE
-            station = '%s' and day = '%s'
-            """ % (state.lower(), varname,
-                   dataformat % (newvalue,), station, day)
-        sql = sql.replace(' nan ', ' null ')
-        ccursor2.execute(sql)
-        if i > 1000 and i % 1000 == 0:
-            ccursor2.close()
-            COOP.commit()
-            ccursor2 = COOP.cursor()
-
-    ccursor2.close()
-    COOP.commit()
+            print(
+                ('Set station: %s day: %s high: %.0f low: %.0f precip: %.2f'
+                 ) % (station, row['day'], newvals['high'], newvals['low'],
+                      newvals['precip'])
+            )
+            sql = """
+                UPDATE alldata_%s SET estimated = true,
+                high = %.0f low = %.0f, precip = %.2f WHERE
+                station = '%s' and day = '%s'
+                """ % (station[:2], newvals['high'],
+                       newvals['low'], newvals['precip'], station, row['day'])
+            cursor.execute(sql)
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    for varname in ['high', 'low', 'precip']:
-        do_var(varname)
+    state = argv[1]
+    nt = NetworkTable("%sCLIMATE" % (state, ))
+    pgconn = get_dbconn('coop')
+    df = read_sql("""
+        SELECT station, year, day, high, low, precip
+        from alldata_""" + state + """
+        WHERE (high is null or low is null or precip is null) and year >= 1893
+        ORDER by station, day
+    """, pgconn, index_col=None)
+    print("Processing %s rows for %s" % (len(df.index), state))
+    for station, gdf in df.groupby('station'):
+        if station not in nt.sts:
+            print("station %s is unknown, skipping..." % (station, ))
+            continue
+        cursor = pgconn.cursor()
+        process(cursor, station, gdf, nt.sts[station])
+        cursor.close()
+        pgconn.commit()
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

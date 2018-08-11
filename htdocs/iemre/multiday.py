@@ -64,10 +64,19 @@ def main():
     hightemp = datatypes.temperature(nc.variables['high_tmpk'][offset1:offset2,
                                                                j, i],
                                      'K').value("F")
+    high12temp = datatypes.temperature(
+        nc.variables['high_tmpk_12z'][offset1:offset2, j, i],
+        'K'
+    ).value("F")
     lowtemp = datatypes.temperature(nc.variables['low_tmpk'][offset1:offset2,
                                                              j, i],
                                     'K').value("F")
+    low12temp = datatypes.temperature(
+        nc.variables['low_tmpk_12z'][offset1:offset2, j, i],
+        'K'
+    ).value("F")
     precip = nc.variables['p01d'][offset1:offset2, j, i] / 25.4
+    precip12 = nc.variables['p01d_12z'][offset1:offset2, j, i] / 25.4
     nc.close()
 
     # Get our climatology vars
@@ -110,10 +119,13 @@ def main():
                             'mrms_precip_in': clean(mrms_precip[i]),
                             'prism_precip_in': clean(prism_precip[i]),
                             'daily_high_f': clean(hightemp[i]),
+                            '12z_high_f': clean(high12temp[i]),
                             'climate_daily_high_f': clean(chigh[i]),
                             'daily_low_f': clean(lowtemp[i]),
+                            '12z_low_f': clean(low12temp[i]),
                             'climate_daily_low_f': clean(clow[i]),
                             'daily_precip_in': clean(precip[i]),
+                            '12z_precip_in': clean(precip12[i]),
                             'climate_daily_precip_in': clean(cprecip[i])
                             })
 
