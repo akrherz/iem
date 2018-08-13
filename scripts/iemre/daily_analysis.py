@@ -158,7 +158,7 @@ def grid_day12(ts, domain):
     """Use the COOP data for gridding"""
     print(('12z hi/lo for %s') % (ts, ))
     mybuf = 2.
-    if ts.year > 2008:
+    if ts.year > 2010:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.id as station, s.name as name,

@@ -55,7 +55,11 @@ def process(cursor, station, df, meta):
             else:
                 newvals[col] = estimated.loc[
                     row['day']]["%s_%s_%s" % (prefix, col, units)]
-
+        if None in newvals.values():
+            print(
+                "Skipping %s as there are missing values still" % (row['day'],)
+            )
+            continue
         print(
             ('Set station: %s day: %s high: %.0f low: %.0f precip: %.2f'
              ) % (station, row['day'], newvals['high'], newvals['low'],
