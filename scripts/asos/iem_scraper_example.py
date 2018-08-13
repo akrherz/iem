@@ -45,17 +45,20 @@ def download_data(uri):
     return ""
 
 
-def main():
-    """Our main method"""
-    # timestamps in UTC to request data for
-    startts = datetime.datetime(2012, 8, 1)
-    endts = datetime.datetime(2012, 9, 1)
+def get_stations_from_filelist(filename):
+    """Build a listing of stations from a simple file listing the stations.
 
-    service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
+    The file should simply have one station per line.
+    """
+    stations = []
+    for line in open(filename):
+        stations.append(line.strip())
+    return stations
 
-    service += startts.strftime('year1=%Y&month1=%m&day1=%d&')
-    service += endts.strftime('year2=%Y&month2=%m&day2=%d&')
 
+def get_stations_from_networks():
+    """Build a station list by using a bunch of IEM networks."""
+    stations = []
     states = """AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME
      MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
      WA WI WV WY"""
@@ -71,17 +74,33 @@ def main():
         data = urlopen(uri)
         jdict = json.load(data)
         for site in jdict['features']:
-            faaid = site['properties']['sid']
-            sitename = site['properties']['sname']
-            uri = '%s&station=%s' % (service, faaid)
-            print(('Network: %s Downloading: %s [%s]'
-                   ) % (network, sitename, faaid))
-            data = download_data(uri)
-            outfn = '%s_%s_%s.txt' % (faaid, startts.strftime("%Y%m%d%H%M"),
-                                      endts.strftime("%Y%m%d%H%M"))
-            out = open(outfn, 'w')
-            out.write(data)
-            out.close()
+            stations.append(site['properties']['sid'])
+    return stations
+
+
+def main():
+    """Our main method"""
+    # timestamps in UTC to request data for
+    startts = datetime.datetime(2012, 8, 1)
+    endts = datetime.datetime(2012, 9, 1)
+
+    service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
+
+    service += startts.strftime('year1=%Y&month1=%m&day1=%d&')
+    service += endts.strftime('year2=%Y&month2=%m&day2=%d&')
+
+    # Two examples of how to specify a list of stations
+    stations = get_stations_from_networks()
+    # stations = get_stations_from_filelist("mystations.txt")
+    for station in stations:
+        uri = '%s&station=%s' % (service, station)
+        print('Downloading: %s' % (station, ))
+        data = download_data(uri)
+        outfn = '%s_%s_%s.txt' % (station, startts.strftime("%Y%m%d%H%M"),
+                                  endts.strftime("%Y%m%d%H%M"))
+        out = open(outfn, 'w')
+        out.write(data)
+        out.close()
 
 
 if __name__ == '__main__':
