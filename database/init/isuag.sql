@@ -4,7 +4,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (5, now());
+INSERT into iem_schema_manager_version values (6, now());
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -596,7 +596,10 @@ battv_min_qc real,
     bpres_avg_f character(1),
     rain_mm_2_tot real,
     rain_mm_2_tot_qc real,
-    rain_mm_2_tot_f character(1)
+    rain_mm_2_tot_f character(1),
+    bp_mb real,
+    bp_mb_qc real,
+    bp_mb_f character(1)
 );
 
 CREATE UNIQUE index sm_15minute_idx on sm_15minute(station, valid);
