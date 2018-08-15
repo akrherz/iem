@@ -11,6 +11,8 @@ from affine import Affine
 import pyiem.nws.vtec as vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
+from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
@@ -353,7 +355,7 @@ def do_ugc(ctx):
             bins = bins[::int(len(bins) / 8.)]
         bins[0] = 0.01
     else:
-        bins = range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1)
+        bins = list(range(np.min(df[datavar][:]), np.max(df[datavar][:])+2, 1))
         if len(bins) < 3:
             bins.append(bins[-1]+1)
         if len(bins) > 8:
@@ -366,10 +368,6 @@ def do_ugc(ctx):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
     # Covert datetime to UTC
     ctx['sdate'] = ctx['sdate'].replace(tzinfo=pytz.utc)
