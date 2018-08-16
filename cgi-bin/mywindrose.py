@@ -139,7 +139,10 @@ def main():
             ssw("Invalid fmt set")
             sys.exit(0)
         ssw("Content-type: %s\n\n" % (ct,))
-        res.savefig(getattr(sys.stdout, 'buffer', sys.stdout), format=fmt)
+        res.savefig(
+            getattr(sys.stdout, 'buffer', sys.stdout), format=fmt,
+            dpi=int(form.getfirst('dpi', 100))
+        )
 
 
 if __name__ == '__main__':

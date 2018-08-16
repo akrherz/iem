@@ -3,9 +3,9 @@
 // this form and are basically translated into /cgi-bin/mywindrose.py, which
 // then translates into pyIEM.windrose_utils
 require_once "../../config/settings.inc.php";
-include_once "../../include/database.inc.php";
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";  
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 
 // Makes sure this page has proper context
 require_once "setup.php";
@@ -25,6 +25,7 @@ $units = isset($_GET["units"]) ? xssafe($_GET["units"]): "mph";
 $nsector = isset($_GET['nsector']) ? intval($_GET['nsector']): 36;
 $level = isset($_GET["level"]) ? floatval($_GET['level']): 1000;
 $fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]): 'png';
+$dpi = isset($_GET["dpi"]) ? intval($_GET["dpi"]): 100;
 $bins = Array(2, 5, 7, 10, 15, 20);
 for ($i=0; $i < sizeof($bins); $i++){
 	$bins[$i] = isset($_GET["bin{$i}"]) ? floatval($_GET["bin{$i}"]): $bins[$i];
@@ -37,7 +38,7 @@ if (isset($_GET["hour1"])){
 		"month1=$month1&amp;month2=$month2&amp;year1=$year1&amp;year2=".
 		"$year2&amp;hour1=$hour1&amp;".
 		"hour2=$hour2&amp;minute1=$minute1&amp;minute2=$minute2&amp;".
-		"units=$units&amp;fmt=$fmt";
+		"units=$units&amp;fmt=$fmt&amp;dpi=$dpi";
 	if (isset($_GET["setbins"])){
 		$rose_uri .= sprintf("&amp;bins=%s", implode(",", $bins));
 	}
@@ -192,6 +193,7 @@ $content .= '
 </select>
 
 <br />Image Format: '. $fselect .'
+<br />Image DPI: <input type="text" name="dpi" value="' . $dpi .'" size="4">
 <br /><input type="submit"></td>
   </tr>
 
