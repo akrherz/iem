@@ -32,7 +32,6 @@ $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
 $state = isset($_GET["state"]) ? xssafe($_GET["state"]): "IA";
 $fmt = isset($_GET["_fmt"]) ? xssafe($_GET["_fmt"]): 'png';
-$lmw = isset($_GET['_l']) ? "$('#_l').click();\n": '';
 
 // Available Plots
 $data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
@@ -41,10 +40,9 @@ $pselect = "<select name=\"q\" class=\"iemselect2\">";
 while (list($k,$v) = each($jobj->plots)){
 	$pselect .= sprintf("<optgroup label=\"%s\">", $v->label);
 	while (list($k2,$v2) = each($v->options)){
-		$mwonly = (isset($v2->mw)) ? ' data-mw="true"': '';
-		$pselect .= sprintf("<option value=\"%s\"%s%s>%s (#%s)</option>",
+		$pselect .= sprintf("<option value=\"%s\"%s>%s (#%s)</option>",
 				$v2->id,
-			($v2->id == $q) ? ' selected="selected"': '', $mwonly, $v2->label,
+			($v2->id == $q) ? ' selected="selected"': '', $v2->label,
 				$v2->id);
 	}
 	$pselect .= "</optgroup>";
@@ -438,7 +436,6 @@ EOF;
 	$thisi = make_select("_fmt", $fmt, $ar);
 	$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
 			$thisi);
-	$lmwoption = (isset($_GET['_l'])) ? '<input type="hidden" name="_l" value="on">': '';
 	$formhtml = <<<EOF
 <style>
 .optcontrol {
@@ -462,7 +459,6 @@ function onNetworkChange(newnetwork){
 	<form method="GET" name="s" id="myForm">
 	<input type="hidden" name="_wait" value="no" id="_wait">
 	<input type="hidden" name="q" value="{$q}">
-	{$lmwoption}
 	<table class="table table-striped">
 		<thead><tr><th>Description</th><th>Value</th></tr></thead>
 	$form
@@ -496,7 +492,6 @@ feel free to use these generated graphics in whatever way you wish.</p>
 <br /><form method="GET" name="t">
 <div class="form-group">
 <h4><span class="fa fa-arrow-right"></span> First, select a chart type::</h4>
- <input type="checkbox" name="_l" id="_l">Only show options that also work outside Midwest US<br />
 {$pselect}
 <input type="submit" value="Select Plot Type" />
 </div>
@@ -557,15 +552,6 @@ $(document).ready(function(){
 	if ($("#theimage").get(0) && $("#theimage").get(0).complete){
 		hideImageLoad();
 	}
-	$('#_l').change(function(){
-		if($(this).is(":checked")) {
-			$('select option[data-mw="true"]').prop('disabled', 'disabled');
-		} else {
-			$('select option[data-mw="true"]').prop('disabled', false);
-		}
-	    $('select[name="q"]').select2();
-	});
-		{$lmw}
     $(".iemselect2").select2();
 });
 </script>
