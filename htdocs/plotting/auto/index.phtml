@@ -216,20 +216,11 @@ EOF;
 		}
 		elseif ($v->type == "station"){
 			if (sizeof($networks) == 0){
-				$networks = Array("ILCLIMATE" => "Illinois",
-						"INCLIMATE" => "Indiana",
-						"IACLIMATE" => "Iowa",
-						"KSCLIMATE" => "Kansas",
-						"KYCLIMATE" => "Kentucky",
-						"MICLIMATE" => "Michigan",
-						"MNCLIMATE" => "Minnesota",
-						"MOCLIMATE" => "Missouri",
-						"NECLIMATE" => "Nebraska",
-						"NDCLIMATE" => "North Dakota",
-						"OHCLIMATE" => "Ohio",
-						"SDCLIMATE" => "South Dakota",
-						"WICLIMATE" => "Wisconsin"
-				);
+				$rs = pg_query($mesosite, "SELECT id, name from networks ". 
+					"where id ~* 'CLIMATE' ORDER by name ASC");
+				for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+					$networks[$row["id"]] = $row["name"];
+				}
 			}
 			// Assume if we have station, then we don't have multiple stations
 			if ($v->name == "station1"){
