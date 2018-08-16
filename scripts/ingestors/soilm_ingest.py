@@ -10,7 +10,6 @@ import os
 import sys
 import subprocess
 import tempfile
-import unittest
 import io
 
 # Third party
@@ -442,14 +441,11 @@ def main(argv):
     dump_madis_csv()
 
 
+def test_make_tstamp():
+    """Do we do the right thing with timestamps"""
+    res = make_time("2017-08-31 19:00:00")
+    assert res.strftime("%H") == "19"
+
+
 if __name__ == '__main__':
     main(sys.argv)
-
-
-class Tests(unittest.TestCase):
-    """Check some things"""
-
-    def test_make_tstamp(self):
-        """Do we do the right thing with timestamps"""
-        res = make_time("2017-08-31 19:00:00")
-        self.assertEquals(res.strftime("%H"), "19")
