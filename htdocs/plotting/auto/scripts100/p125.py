@@ -42,7 +42,7 @@ def get_description():
              options=PDICT4, label='Show Monthly or Annual Averages'),
         dict(type='select', name='sector', default='state',
              options=PDICT, label='Select Map Region'),
-        dict(type='clstate', name='state', default='IA',
+        dict(type='state', name='state', default='IA',
              label='Select State to Plot (when appropriate)'),
         dict(type='month', name='month', default=datetime.date.today().month,
              label='Select Month (when appropriate)'),
@@ -56,8 +56,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2]

@@ -20,7 +20,7 @@ def get_description():
     population statistics.
     """
     desc['arguments'] = [
-        dict(type='clstate', name='state', default='IA',
+        dict(type='state', name='state', default='IA',
              label='Which state?'),
         dict(type='month', name='month', default='10',
              label='Select Month:'),

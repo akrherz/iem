@@ -1,6 +1,7 @@
 """Period differences"""
 
 from pandas.io.sql import read_sql
+from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot, centered_bins
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -23,7 +24,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='select', name='sector', default='state',
              options=PDICT, label='Select Map Region'),
-        dict(type='clstate', name='state', default='IA',
+        dict(type='state', name='state', default='IA',
              label='Select State to Plot (when appropriate)'),
         dict(type='select', name='opt', options=PDICT2, default='both',
              label='Map Plot/Contour View Option'),
@@ -43,9 +44,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx['state'][:2]

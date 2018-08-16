@@ -1,10 +1,15 @@
-"""snow cover coverage"""
+"""snow cover coverage.
+
+TODO: the database has this now as the 0000 sites
+"""
 import datetime
 
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+import matplotlib.dates as mdates
 from pyiem import iemre
+from pyiem.plot.use_agg import plt
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
@@ -17,7 +22,7 @@ def get_description():
     today = datetime.date.today()
     year = today.year if today.month > 9 else today.year - 1
     desc['description'] = """This chart displays estimated areal coverage of
-    snow cover for a single state.  This estimate is based on a 0.25x0.25
+    snow cover for a single state.  This estimate is based on a 0.125x0.125
     degree analysis of NWS COOP observations.  The date shown would represent
     snow depth reported approximately at 7 AM.
     """
@@ -27,7 +32,7 @@ def get_description():
              label='Year of December for Winter Season'),
         dict(type='float', name='thres', default='1.0',
              label='Snow Cover Threshold [inch]'),
-        dict(type='clstate', name='state', default='IA', label='For State'),
+        dict(type='state', name='state', default='IA', label='For State'),
     ]
     return desc
 
@@ -42,10 +47,6 @@ def f(st, snowd, metric, stpts):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     year = ctx['year']
     thres = ctx['thres']

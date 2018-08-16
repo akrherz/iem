@@ -26,7 +26,7 @@ def get_description():
     for a specific year and for all years combined for the given month."""
     desc['data'] = True
     desc['arguments'] = [
-        dict(type='clstate', name='state', default='IA',
+        dict(type='state', name='state', default='IA',
              label='Select State:'),
         dict(type='year', name='year', default=today.year,
              label='Select Year'),
@@ -91,14 +91,14 @@ def plotter(fdict):
                          ec='lightblue', normed=1)
     y = mlab.normpdf(bins, df[ptype].mean(), df[ptype].std())
     ax.plot(bins, y, 'b--', lw=2,
-            label=("%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
+            label=(r"%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
                    ) % (year, df[ptype].std(), df[ptype].mean()))
 
     bins = np.linspace(climo_avg - (climo_std * 3.),
                        climo_avg + (climo_std * 3.), 30)
     y = mlab.normpdf(bins, climo_avg, climo_std)
     ax.plot(bins, y, 'g--', lw=2,
-            label=("Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
+            label=(r"Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
                    ) % (climo_std, climo_avg))
 
     if stateavg is not None:

@@ -103,20 +103,6 @@ $csectors = Array("AL" => "Alabama",
 "conus" => "Continental US (CONUS)",
 "midwest" => "Midwestern US",
 );
-$states = Array(
-	'IA' => 'Iowa',
-    'IL' => 'Illinois',
-    'KS' => 'Kansas',
-	'KY' => 'Kentucky',
-	'MI' => 'Michigan',
-    'MN' => 'Minnesota',
-    'MO' => 'Missouri',
-    'NE' => 'Nebraska',
-    'ND' => 'North Dakota',
-    'OH' => 'Ohio',
-    'SD' => 'South Dakota',
-    'WI' => 'Wisconsin',
-);
 
 $jsextra = "";
 $networks = Array();
@@ -293,10 +279,6 @@ EOF;
 		elseif ($v->type == 'csector'){
 			// CONUS plotting sectors
 			$netselect = make_select($v->name, $value, $csectors);
-			$thisrow = $netselect;
-		}
-		elseif ($v->type == "clstate"){
-			$netselect = make_select($v->name, $value, $states);
 			$thisrow = $netselect;
 		}
 		elseif ($v->type == "text" || $v->type == "int" || $v->type == 'float'){
