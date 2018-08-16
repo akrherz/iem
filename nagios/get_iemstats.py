@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-"""
-Dump some stats useful for website geeks
+"""Get nagios stats.
+
+NOTE: This needs to be exec for apache to use for CGI
 """
 import json
 import datetime
