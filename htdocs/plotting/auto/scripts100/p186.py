@@ -7,6 +7,7 @@ import requests
 import pandas as pd
 from scipy.interpolate import interp1d
 from pyiem import util
+from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 
 SERVICE = "http://droughtmonitor.unl.edu/Ajax.aspx/ReturnTabularDM"
@@ -25,20 +26,28 @@ def get_description():
     plot uses a JSON data service provided by the
     <a href="http://droughtmonitor.unl.edu">Drought Monitor</a> website.
     """
+    thisyear = datetime.date.today().year
     desc['arguments'] = [
         dict(type='state', name='state', default='IA',
              label='Select State:'),
+        dict(
+            type='year', name='syear', min=2000, default=2000,
+            label='Start year for plot'
+        ),
+        dict(
+            type='year', name='eyear', max=thisyear, default=thisyear,
+            label='End year (inclusive) for plot'
+        )
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = util.get_autoplot_context(fdict, get_description())
     state = ctx['state']
+    syear = ctx['syear']
+    eyear = ctx['eyear']
 
     payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (state, )
     headers = {}
@@ -54,6 +63,8 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(7, 9))
     lastrow = None
     for year, gdf in df.groupby(df.Date.dt.year):
+        if year < syear or year > eyear:
+            continue
         xs = []
         ys = []
         for _, row in gdf.iterrows():
@@ -78,8 +89,7 @@ def plotter(fdict):
         ax.fill_between(xnew, yval, ynew, where=(ynew >= yval),
                         facecolor='red', interpolate=True)
 
-    ax.set_ylim(df['Date'].max().year + 1,
-                df['Date'].min().year - 1)
+    ax.set_ylim(eyear + 1, syear - 1)
     ax.set_xlim(0, 366)
     ax.set_xlabel(("curve height of 1 year is 1 effective drought category "
                    "change over area of %s"
@@ -88,8 +98,7 @@ def plotter(fdict):
         df.Date.max().strftime("%d %b %Y"), ))
     ax.set_title(("%.0f-%.0f US Drought Monitor Weekly Change for %s\n"
                   "curve height represents change in intensity + coverage"
-                  ) % (df.Date.min().year, df.Date.max().year,
-                       state_names[state]))
+                  ) % (syear, eyear, state_names[state]))
 
     ax.grid(True)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
