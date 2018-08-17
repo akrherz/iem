@@ -173,7 +173,7 @@ def grid_day12(ts, domain):
            ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and s.network ~* 'COOP' and c.iemid = s.iemid and
-            extract(hour from c.coop_valid) between 4 and 11
+  extract(hour from c.coop_valid at time zone s.tzname) between 4 and 11
             """ % (ts.year, ts.strftime("%Y-%m-%d"),
                    iemre.WEST - mybuf, iemre.SOUTH - mybuf,
                    iemre.WEST - mybuf, iemre.NORTH + mybuf,
