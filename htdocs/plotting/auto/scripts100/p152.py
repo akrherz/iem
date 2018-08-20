@@ -86,9 +86,7 @@ def plotter(fdict):
 
     SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat,
     d.* from agg d JOIN stations t ON (d.station = t.id)
-    WHERE t.network in ('IACLIMATE', 'NDCLIMATE', 'SDCLIMATE', 'NECLIMATE',
-    'KSCLIMATE', 'MOCLIMATE', 'ILCLIMATE', 'WICLIMATE', 'MNCLIMATE',
-    'MICLIMATE', 'INCLIMATE', 'OHCLIMATE', 'KYCLIMATE')
+    WHERE t.network ~* 'CLIMATE'
     and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
     """, pgconn, params=[p1syear, p1eyear,
                          p2syear, p2eyear],

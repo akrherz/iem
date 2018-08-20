@@ -1,27 +1,14 @@
 """Precip estimates"""
 import datetime
 import os
-from collections import OrderedDict
 
 import numpy as np
 import geopandas as gpd
 from pyiem import iemre, util
+from pyiem.plot.use_agg import plt
+from pyiem.reference import state_names
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
-
-PDICT = OrderedDict([
-    ('IA', 'Iowa'),
-    ('IL', 'Illinois'),
-    ('KS', 'Kansas'),
-    ('KY', 'Kentucky'),
-    ('MI', 'Michigan'),
-    ('MN', 'Minnesota'),
-    ('MO', 'Missouri'),
-    ('NE', 'Nebraska'),
-    ('ND', 'North Dakota'),
-    ('OH', 'Ohio'),
-    ('SD', 'South Dakota'),
-    ('WI', 'Wisconsin')])
 
 
 def get_description():
@@ -39,8 +26,8 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='select', name='sector', default='IA',
-             label='Select Sector:', options=PDICT),
+        dict(type='csector', name='sector', default='IA',
+             label='Select Sector:'),
         dict(type='date', name='date',
              default=today.strftime("%Y/%m/%d"),
              label='Date:', min="2011/01/01"),
@@ -54,9 +41,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = util.get_autoplot_context(fdict, get_description())
     date = ctx['date']
     sector = ctx['sector']
@@ -65,6 +49,8 @@ def plotter(fdict):
     window_sts = date - datetime.timedelta(days=days)
     if window_sts.year != date.year:
         raise ValueError('Sorry, do not support multi-year plots yet!')
+    if len(sector) != 2:
+        raise ValueError("Sorry, this does not support multi-state plots yet.")
 
     idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
@@ -155,7 +141,8 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title(("%s NOAA MRMS %s %.2f inch Precip Coverage"
-                  ) % (PDICT[sector], date.strftime("%-d %b %Y"), threshold))
+                  ) % (state_names[sector], date.strftime("%-d %b %Y"),
+                       threshold))
     ax.bar(np.arange(8) - 0.2, x, align='center', width=0.4,
            label='Trailing %s Day Departure' % (days,))
     ax.bar(np.arange(8) + 0.2, x2, align='center', width=0.4,
@@ -169,7 +156,7 @@ def plotter(fdict):
     ax.set_xlabel("Trailing %s Day Precip Departure [in]" % (days,))
     ax.set_position([0.1, 0.2, 0.8, 0.7])
     ax.legend(loc=(0., -0.2), ncol=2)
-    ax.set_ylabel("Areal Coverage of %s [%%]" % (PDICT[sector], ))
+    ax.set_ylabel("Areal Coverage of %s [%%]" % (state_names[sector], ))
     ax.grid(True)
     ax.set_xlim(-0.5, 7.5)
     ax.set_ylim(0, max([max(x2), max(x)]) + 5)

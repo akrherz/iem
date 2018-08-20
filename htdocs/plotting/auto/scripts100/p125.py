@@ -74,9 +74,7 @@ def plotter(fdict):
 
     SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat, month,
     total_precip, avg_high, avg_low, avg_temp from data d JOIN stations t
-    ON (d.station = t.id) WHERE t.network = 'NCDC81' and
-    t.state in ('IA', 'ND', 'SD', 'NE', 'KS', 'MO', 'IL', 'WI', 'MN', 'MI',
-    'IN', 'OH', 'KY')
+    ON (d.station = t.id) WHERE t.network = 'NCDC81'
     """, pgconn, index_col=['station', 'month'])
     if df.empty:
         raise ValueError("No data was found for query, sorry.")

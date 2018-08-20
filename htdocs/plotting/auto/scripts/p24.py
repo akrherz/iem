@@ -3,9 +3,10 @@ import datetime
 import calendar
 from collections import OrderedDict
 
-import matplotlib.cm as cm
+from matplotlib import cm
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict((
@@ -61,6 +62,8 @@ def get_description():
     today = datetime.date.today()
     lmonth = today - datetime.timedelta(days=28)
     desc['arguments'] = [
+        dict(type='csector', name='csector', default='midwest',
+             label="Area to Plot:"),
         dict(type='select', name='var', default='precip',
              label='Select Variable', options=PDICT),
         dict(type='select', name='p', default='month',
@@ -99,6 +102,12 @@ def get_daily_data(ctx):
 
     ctx['label'] = "%s - %s" % (sdate.strftime("%-d %b %Y"),
                                 edate.strftime("%-d %b %Y"))
+    statelimiter = ""
+    table = "alldata"
+    if len(ctx['csector']) == 2:
+        statelimiter = (
+            " and substr(station, 1, 2) = '%s' ") % (ctx['csector'], )
+        table = "alldata_%s" % (ctx['csector'], )
 
     ctx['df'] = read_sql("""
     with monthly as (
@@ -108,8 +117,9 @@ def get_daily_data(ctx):
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,
         avg(high) as avghi
-        from alldata
+        from """ + table + """
         WHERE substr(station,3,1) = 'C' and ( """ + sday + """ )
+        """ + statelimiter + """
         GROUP by myyear, station),
     ranks as (
         SELECT station, myyear as year,
@@ -131,9 +141,7 @@ def get_daily_data(ctx):
     SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
     as arridity from ranks
-    where year = %s and
-    substr(station, 1, 2) in ('ND', 'SD', 'NE', 'KS', 'MO', 'IA', 'MN', 'WI',
-    'IL', 'IN', 'KY', 'OH', 'MI')
+    where year = %s
     """, pgconn, params=(edate.year, ),
                          index_col='station')
 
@@ -160,6 +168,12 @@ def get_monthly_data(ctx):
     else:
         months = [int(month), ]
         ctx['label'] = "%s %s" % (year, calendar.month_name[int(month)])
+    statelimiter = ""
+    table = "alldata"
+    if len(ctx['csector']) == 2:
+        statelimiter = (
+            " and substr(station, 1, 2) = '%s' ") % (ctx['csector'], )
+        table = "alldata_%s" % (ctx['csector'], )
 
     ctx['df'] = read_sql("""
     with monthly as (
@@ -168,8 +182,9 @@ def get_monthly_data(ctx):
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,
         avg(high) as avghi
-        from alldata
+        from """ + table + """
         WHERE substr(station,3,1) = 'C' and month in %s
+        """ + statelimiter + """
         GROUP by myyear, station),
     ranks as (
         SELECT station, myyear as year,
@@ -191,18 +206,13 @@ def get_monthly_data(ctx):
     SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
     as arridity from ranks
-    where year = %s and
-    substr(station, 1, 2) in ('ND', 'SD', 'NE', 'KS', 'MO', 'IA', 'MN', 'WI',
-    'IL', 'IN', 'KY', 'OH', 'MI')
+    where year = %s
     """, pgconn, params=(tuple(months), year),
                          index_col='station')
 
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
     if ctx['p'] == 'day':
         get_daily_data(ctx)
@@ -210,6 +220,7 @@ def plotter(fdict):
         get_monthly_data(ctx)
     ctx['lastyear'] = datetime.date.today().year
     ctx['years'] = ctx['lastyear'] - 1893 + 1
+    csector = ctx['csector']
 
     subtitle = ('Based on IEM Estimates, '
                 '1 is %s out of %s total years (1893-%s)'
@@ -217,7 +228,8 @@ def plotter(fdict):
                      ctx['years'], ctx['lastyear'])
     if ctx['var'] == 'arridity':
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
-    mp = MapPlot(sector='midwest', continentalcolor='white',
+    mp = MapPlot(sector=('state' if len(csector) == 2 else csector),
+                 state=ctx['csector'], continentalcolor='white',
                  title='%s %s %sby Climate District' % (
                          ctx['label'], PDICT[ctx['var']],
                          'Ranks ' if ctx['var'] != 'arridity' else ''),

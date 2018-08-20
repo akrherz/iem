@@ -4,11 +4,12 @@ from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
+import pandas as pd
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, dewpoint_from_pq
 from pyiem.datatypes import temperature, pressure, mixingratio
 from pyiem.util import get_autoplot_context, get_dbconn
-import pandas as pd
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -52,9 +53,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())

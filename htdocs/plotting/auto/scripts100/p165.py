@@ -1,25 +1,11 @@
 """Map of dates"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict([
-    ('IA', 'Iowa'),
-    ('IL', 'Illinois'),
-    ('KS', 'Kansas'),
-    ('KY', 'Kentucky'),
-    ('MI', 'Michigan'),
-    ('MN', 'Minnesota'),
-    ('MO', 'Missouri'),
-    ('NE', 'Nebraska'),
-    ('ND', 'North Dakota'),
-    ('OH', 'Ohio'),
-    ('SD', 'South Dakota'),
-    ('WI', 'Wisconsin'),
-    ('midwest', 'Mid West US')])
 PDICT3 = {'contour': 'Contour + Plot Values',
           'values': 'Plot Values Only'}
 PDICT2 = {'spring_below': 'Last Spring Date Below',
@@ -41,8 +27,8 @@ def get_description():
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='select', name='sector', default='IA',
-             label='Select Sector:', options=PDICT),
+        dict(type='csector', name='sector', default='IA',
+             label='Select Sector:'),
         dict(type='select', name='var', default='spring_below',
              label='Select Plot Type:', options=PDICT2),
         dict(type='select', name='popt', default='contour',
@@ -59,9 +45,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    from pyiem.plot import MapPlot
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx['sector']
@@ -86,15 +69,17 @@ def plotter(fdict):
         raise ValueError("No data found!")
 
     def f(val):
-        ts = datetime.date(year, 1, 1) + datetime.timedelta(days=(val - 1))
+        ts = datetime.date(year, 1, 1) + datetime.timedelta(
+            days=int(val - 1))
         return ts.strftime("%-m/%-d")
 
     df['pdate'] = df['doy'].apply(f)
 
-    mp = MapPlot(sector='state', state=sector,
+    mp = MapPlot(sector=('state' if len(sector) == 2 else sector),
+                 state=ctx['sector'],
                  continental_color='white', nocaption=True,
-                 title="%s %s %s$^\circ$F" % (year, PDICT2[varname],
-                                              threshold),
+                 title=r"%s %s %s$^\circ$F" % (year, PDICT2[varname],
+                                               threshold),
                  subtitle='based on NWS COOP and IEM Daily Estimates')
     levs = np.linspace(df['doy'].min() - 3, df['doy'].max() + 3, 7, dtype='i')
     levlables = map(f, levs)
