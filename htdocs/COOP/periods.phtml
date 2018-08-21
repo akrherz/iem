@@ -1,10 +1,10 @@
 <?php
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
  require_once "../../include/forms.php";
- include("../../include/database.inc.php");
- include("../../include/imagemaps.php");
- include("../../include/network.php");
+ require_once "../../include/database.inc.php";
+ require_once "../../include/imagemaps.php";
+ require_once "../../include/network.php";
  
  $t = new MyView();
  define("IEM_APPID", 31);
@@ -65,6 +65,7 @@ EOF;
  $emonthselect = monthSelect($emonth, "emonth");
  $edayselect = daySelect2($eday, "eday");
  $nselect = networkSelect($network, $station );
+$sselect = selectClimodatNetwork($network, "network");
  $t->content = <<<EOF
 <ol class="breadcrumb">
 	<li><a href="/COOP/">NWS COOP</a></li>
@@ -77,21 +78,11 @@ EOF;
 and by station.  Not all stations reported snowfall each year, so please be
 careful with that data.</p>
 
+<form name="ssswitch" method="GET">
 <p>Data is available from the following states:
-<a href="periods.phtml?network=ILCLIMATE">Illinois</a> ,
-<a href="periods.phtml?network=INCLIMATE">Indiana</a> ,
-<a href="periods.phtml?network=IACLIMATE">Iowa</a> ,
-<a href="periods.phtml?network=KSCLIMATE">Kansas</a>,
-<a href="periods.phtml?network=KYCLIMATE">Kentucky</a> ,
-<a href="periods.phtml?network=MICLIMATE">Michigan</a> ,
-<a href="periods.phtml?network=MNCLIMATE">Minnesota</a> ,
-<a href="periods.phtml?network=MOCLIMATE">Missouri</a> ,
-<a href="periods.phtml?network=NECLIMATE">Nebraska</a> ,
-<a href="periods.phtml?network=OHCLIMATE">Ohio</a> ,
-<a href="periods.phtml?network=NDCLIMATE">North Dakota</a> ,
-<a href="periods.phtml?network=SDCLIMATE">South Dakota</a> ,
-<a href="periods.phtml?network=WICLIMATE">Wisconsin</a>.
-
+{$sselect}
+<input type="submit" value="Select State">
+</form>
 
 <p><form name="switcher" method="GET">
 <input type="hidden" name="network" value="{$network}" />

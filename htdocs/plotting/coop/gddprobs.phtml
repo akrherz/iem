@@ -1,11 +1,11 @@
 <?php
- include("../../../config/settings.inc.php");
+ require_once "../../../config/settings.inc.php";
  define("IEM_APPID", 147);
- include_once "../../../include/myview.php";
+ require_once "../../../include/myview.php";
  $t = new MyView();
 
- include("../../../include/database.inc.php");
- include("../../../include/imagemaps.php");
+ require_once "../../../include/database.inc.php";
+ require_once "../../../include/imagemaps.php";
  require_once "../../../include/forms.php";
 
  $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "IA0200";
@@ -18,6 +18,7 @@
 $t->thispage = "networks-coop";
 $t->title = "Growing Degree Day Scenarios / Probabilities";
 $nselect = networkSelect($network, $station);
+$sselect = selectClimodatNetwork($network, "network");
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/COOP/">NWS COOP Network</a></li>
@@ -40,19 +41,11 @@ frequency that {$gddbase} GDDs units are accumulated by 1 October
 and <strong>without a freeze event</strong> are XX %.  Meaning XX % of years
 on record got to {$gddbase} by 1 October prior to a freeze.
 
-<p>Data is available from the following states: 
-<a href="gddprobs.phtml?network=ILCLIMATE">Illinois</a> ,
-<a href="gddprobs.phtml?network=INCLIMATE">Indiana</a> ,
-<a href="gddprobs.phtml?network=IACLIMATE">Iowa</a> ,
-<a href="gddprobs.phtml?network=KSCLIMATE">Kansas</a>,
-<a href="gddprobs.phtml?network=KYCLIMATE">Kentucky</a> ,
-<a href="gddprobs.phtml?network=MICLIMATE">Michigan</a> ,
-<a href="gddprobs.phtml?network=MNCLIMATE">Minnesota</a> ,
-<a href="gddprobs.phtml?network=NECLIMATE">Nebraska</a> ,
-<a href="gddprobs.phtml?network=OHCLIMATE">Ohio</a> ,
-<a href="gddprobs.phtml?network=NDCLIMATE">North Dakota</a> ,
-<a href="gddprobs.phtml?network=SDCLIMATE">South Dakota</a> ,
-<a href="gddprobs.phtml?network=WICLIMATE">Wisconsin</a>.
+<p>Data is available from the following states:
+<form method="GET" name="ssss">
+${sselect}
+<input type="submit" value="Select State">
+</form>
 
 <div class="text">
 

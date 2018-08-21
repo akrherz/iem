@@ -35,6 +35,26 @@ function selectAzosNetwork($network)
     return $s;
 } 
 
+// Our climodat tracked networks, sans AK and HI
+function selectClimodatNetwork($selected, $label="network")
+{
+    $selected = strtoupper($selected);
+    include_once dirname(__FILE__) ."/database.inc.php";
+    $dbconn = iemdb('mesosite');
+    $rs = pg_exec($dbconn, "SELECT * from networks ".
+        "WHERE id ~* 'CLIMATE' and ".
+        "id not in ('AKCLIMATE', 'HICLIMATE', 'DCCLIMATE') ".
+        "ORDER by name ASC");
+    $s = "<select class=\"iemselect2\" name=\"$label\">\n";
+    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+    {
+       $s .= "<option value=\"". $row["id"] ."\" ";
+       if ($row["id"] == $selected){ $s .= "SELECTED"; }
+       $s .= ">". $row["name"] ."</option>\n";
+    }     
+    return $s;
+}
+
 function selectNetwork($selected, $extra=Array())
 {
     $selected = strtoupper($selected);

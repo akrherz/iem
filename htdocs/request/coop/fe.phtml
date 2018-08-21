@@ -5,6 +5,7 @@ require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 
@@ -25,6 +26,7 @@ $d1 = daySelect2(1, "day1");
 $y2 = yearSelect2(1870, date("Y"), "year2");
 $m2 = monthSelect2(date("m"), "month2");
 $d2 = daySelect2(date("d"), "day2");
+$sselect = selectClimodatNetwork($network, "network");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -48,19 +50,12 @@ download the entire dataset, please check out <a href="/pickup/coop_data/">this 
  to the <a href="/">homepage</a> when a month's worth of data is sent to us.</p>
 
 <p>Data is also available from the following states: 
-<a href="fe.phtml?network=ILCLIMATE">Illinois</a> ,
-<a href="fe.phtml?network=INCLIMATE">Indiana</a> ,
-<a href="fe.phtml?network=IACLIMATE">Iowa</a> ,
-<a href="fe.phtml?network=KSCLIMATE">Kansas</a>,
-<a href="fe.phtml?network=KYCLIMATE">Kentucky</a> ,
-<a href="fe.phtml?network=MICLIMATE">Michigan</a> ,
-<a href="fe.phtml?network=MNCLIMATE">Minnesota</a> ,
-<a href="fe.phtml?network=MOCLIMATE">Missouri</a> ,
-<a href="fe.phtml?network=NECLIMATE">Nebraska</a> ,
-<a href="fe.phtml?network=OHCLIMATE">Ohio</a> ,
-<a href="fe.phtml?network=NDCLIMATE">North Dakota</a> ,
-<a href="fe.phtml?network=SDCLIMATE">South Dakota</a> ,
-<a href="fe.phtml?network=WICLIMATE">Wisconsin</a>.  This information is mostly
+<form method="GET" name="SSSS">
+{$sselect}
+<input type="submit" value="Select Network">
+</form>
+
+<p>This information is mostly
 estimated until <a href="http://www.ncdc.noaa.gov">NCDC</a> provides updated 
 GHCN datafiles, which the IEM then merges into this dataset.  The unfortunate
 side effect is that data changes as new information becomes available.

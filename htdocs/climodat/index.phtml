@@ -1,10 +1,10 @@
 <?php
 $OL = "4.6.4";
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 15);
- include("../../include/myview.php");
- include("../../include/iemprop.php");
- include("../../include/imagemaps.php");
+ require_once "../../include/myview.php";
+ require_once "../../include/iemprop.php";
+ require_once "../../include/imagemaps.php";
  require_once "../../include/forms.php";
  $report = isset($_REQUEST["report"])? substr($_REQUEST["report"],0,2): "01";
  $station = isset($_REQUEST["station"])? substr($_REQUEST["station"],0,6) : "";
@@ -140,6 +140,7 @@ $ar = Array(
 );
 
 $vselect = make_select("report", $report, $ar);
+$sselect = selectClimodatNetwork($network, "network");
 
 $content = <<<EOF
 <h3>IEM "Climodat" Reports</h3>
@@ -182,19 +183,10 @@ do <a href="/info/contacts.php">let us know</a>!</li>
 </ol>
 
 <p>Data is available from the following states: 
-<a href="index.phtml?network=ILCLIMATE">Illinois</a> ,
-<a href="index.phtml?network=INCLIMATE">Indiana</a> ,
-<a href="index.phtml?network=IACLIMATE">Iowa</a> ,
-<a href="index.phtml?network=KSCLIMATE">Kansas</a>,
-<a href="index.phtml?network=KYCLIMATE">Kentucky</a> ,
-<a href="index.phtml?network=MICLIMATE">Michigan</a> ,
-<a href="index.phtml?network=MNCLIMATE">Minnesota</a> ,
-<a href="index.phtml?network=MOCLIMATE">Missouri</a> ,
-<a href="index.phtml?network=NECLIMATE">Nebraska</a> ,
-<a href="index.phtml?network=OHCLIMATE">Ohio</a> ,
-<a href="index.phtml?network=NDCLIMATE">North Dakota</a> ,
-<a href="index.phtml?network=SDCLIMATE">South Dakota</a> ,
-<a href="index.phtml?network=WICLIMATE">Wisconsin</a>.
+<form name="sss" method="GET">
+{$sselect}
+<input type="submit" value="Select State">
+</form>
 
 
 <div id="iem-form2">

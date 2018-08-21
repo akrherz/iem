@@ -2,15 +2,16 @@
 /*
  * List out COOP extremes table
  */
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
  $t = new MyView();
  
  define("IEM_APPID", 2);
  require_once "../../include/forms.php";
- include("../../include/database.inc.php");
- include("../../include/network.php"); 
+ require_once "../../include/database.inc.php";
+ require_once "../../include/network.php"; 
  require_once "../../include/mlib.php";
+ require_once "../../include/imagemaps.php";
 
  $tbl = isset($_GET["tbl"]) ? substr($_GET["tbl"],0,10) : "climate";
  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
@@ -124,21 +125,7 @@ $cities = $nt->table;
  	
  }
 
- $ar = Array("ILCLIMATE" => "Illinois",
- 		"INCLIMATE" => "Indiana",
-   		"IACLIMATE" => "Iowa",
-   	"KSCLIMATE" => "Kansas",
-   	"KYCLIMATE" => "Kentucky",
-   	"MICLIMATE" => "Michigan",
-   	"MNCLIMATE" => "Minnesota",
-   	"MOCLIMATE" => "Missouri",
-   	"NECLIMATE" => "Nebraska",
-   	"NDCLIMATE" => "North Dakota",
-   	"OHCLIMATE" => "Ohio",
-   	"SDCLIMATE" => "South Dakota",
-   	"WICLIMATE" => "Wisconsin"
-);
-  $netselect = make_select("network", $network, $ar);
+ $netselect = selectClimodatNetwork($network, "network");
  $mselect = monthSelect($month, "month");
  $dselect = daySelect($day, "day");
  

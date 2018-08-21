@@ -21,11 +21,6 @@ $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
 
-$nt = new NetworkTable($network);
-$nt2 = new NetworkTable(Array("IACLIMATE", "NDCLIMATE", 'SDCLIMATE',
-		'NECLIMATE', 'KSCLIMATE', 'MOCLIMATE', 'MNCLIMATE', 'WICLIMATE',
-		'ILCLIMATE', 'KYCLIMATE', 'INCLIMATE', 'OHCLIMATE', 'MICLIMATE'));
-
 $hiddendates = <<<EOF
 <input type="hidden" name="sdate" value="{$sdate}">
 <input type="hidden" name="edate" value="{$edate}">
@@ -64,6 +59,12 @@ while (list($k,$v)=each($s)){
 	$stationgrps[$state][] = $v;
 	$hiddenstations .= "<input type=\"hidden\" name=\"s[]\" value=\"$v\">";
 }
+$networks = Array();
+reset($stationgrps);
+while (list($state, $v) = each($stationgrps)){
+	$networks[] = sprintf("%sCLIMATE", $state);
+}
+$nt2 = new NetworkTable($networks);
 
 $sdatestr = date("Y-m-d", $sdate);
 $edatestr = date("Y-m-d", $edate);
@@ -75,6 +76,7 @@ if ($gddfloor == '' || $gddceil == ''){
 $pgconn = iemdb('coop');
 
 // Loop over station groups
+reset($stationgrps);
 while (list($state, $stations)=each($stationgrps)){
 	$sstring = "('". implode(",", $stations) ."')";
 	$sstring = str_replace(",", "','", $sstring);
@@ -150,22 +152,7 @@ $(document).ready(function(){
 </script>
 EOF;
 
-$states = Array(
-		'IACLIMATE' => 'Iowa',
-		'ILCLIMATE' => 'Illinois',
-		'INCLIMATE' => 'Indiana',
-		'KSCLIMATE' => 'Kansas',
-		'KYCLIMATE' => 'Kentucky',
-		'MICLIMATE' => 'Michigan',
-		'MNCLIMATE' => 'Minnesota',
-		'MOCLIMATE' => 'Missouri',
-		'NECLIMATE' => 'Nebraska',
-		'NDCLIMATE' => 'North Dakota',
-		'OHCLIMATE' => 'Ohio',
-		'SDCLIMATE' => 'South Dakota',
-		'WICLIMATE' => 'Wisconsin',
-);
-$sselect = make_select('network', $network, $states);
+$sselect = selectClimodatNetwork($network, 'network');
 
 $snice = date("d M Y", $sdate);
 $today = ($edate > time()) ? time() : $edate;
