@@ -73,8 +73,6 @@ def modMonth(stationID, db, monthly, mo1, mo2, mt1, mt2, nt, gddbase, gddceil):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']

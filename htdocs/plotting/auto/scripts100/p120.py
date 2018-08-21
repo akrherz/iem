@@ -3,7 +3,9 @@ import datetime
 
 from pandas.io.sql import read_sql
 import pandas as pd
+import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -31,10 +33,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -105,7 +103,7 @@ def plotter(fdict):
     ax.set_xlim(mindate)
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 7, 14, 21]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
-    ax.set_title(("Frequency of First Fall Temperature\n"
+    ax.set_title(("Frequency of Last Spring Temperature\n"
                   "%s %s (%s-%s)"
                   ) % (station, nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,

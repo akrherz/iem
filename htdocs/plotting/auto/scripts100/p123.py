@@ -57,8 +57,6 @@ def contiguous_regions(condition):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())

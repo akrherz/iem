@@ -75,8 +75,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('coop')
 
     station = fdict.get('station', 'IA0200')
