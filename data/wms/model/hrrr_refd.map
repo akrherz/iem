@@ -1502,5 +1502,366 @@ LAYER
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
+LAYER
+  NAME "refd_1080"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1080.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1080"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1140"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1140.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1140"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1200"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1200.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1200"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1260"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1260.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1260"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1320"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1320.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1320"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1380"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1380.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1380"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1440"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1440.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1440"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1500"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1500.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1500"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1560"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1560.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1560"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1620"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1620.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1620"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1680"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1680.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1680"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1740"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1740.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1740"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1800"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1800.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1800"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1860"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1860.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1860"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1920"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1920.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1920"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_1980"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1980.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F1980"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_2040"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_2040.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F2040"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_2100"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_2100.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F2100"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "refd_2160"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_2160.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NCEP HRRR Reflectivity F2160"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
 
 END
