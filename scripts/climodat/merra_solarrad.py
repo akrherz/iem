@@ -110,9 +110,9 @@ def do(date):
             continue
         # if our station is 12z, then this day's data goes into 'tomorrow'
         # if our station is not, then this day is today
-        date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-        if row[3] is not None and row[3] > 12:
-            date2 = date.strftime("%Y-%m-%d")
+        date2 = date.strftime("%Y-%m-%d")
+        if row[3] in range(4, 13):
+            date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         ccursor2.execute("""
             UPDATE alldata_"""+row[0][:2]+""" SET merra_srad = %s,
             merra_srad_cs = %s WHERE

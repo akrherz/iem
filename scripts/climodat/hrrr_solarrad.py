@@ -85,13 +85,13 @@ def run(ts):
             continue
         # if our station is 12z, then this day's data goes into 'tomorrow'
         # if our station is not, then this day is today
-        date = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-        if row[3] is not None and row[3] > 12:
-            date = ts.strftime("%Y-%m-%d")
+        date2 = ts.strftime("%Y-%m-%d")
+        if row[3] in range(4, 13):
+            date2 = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         cursor2.execute("""
             UPDATE alldata_""" + row[0][:2] + """ SET hrrr_srad = %s WHERE
             day = %s and station = %s
-        """, (rad_mj, date, row[0]))
+        """, (rad_mj, date2, row[0]))
     cursor.close()
     cursor2.close()
     pgconn.commit()
