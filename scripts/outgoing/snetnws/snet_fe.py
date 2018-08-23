@@ -15,7 +15,7 @@ from pyiem.tracker import TrackerEngine
 from pyiem.util import get_dbconn
 
 SCRIPT_TIME = datetime.datetime.utcnow()
-SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.utc)
+SCRIPT_TIME = SCRIPT_TIME.replace(tzinfo=pytz.UTC)
 SCRIPT_TIME = SCRIPT_TIME.astimezone(pytz.timezone("America/Chicago"))
 NT = NetworkTable(("KCCI", "KIMT"))
 IEM = get_dbconn("iem")
@@ -81,7 +81,7 @@ def metar(ob):
     if len(mid) > 4:
         mid = 'Q%s' % (mid[1:4])
     # Metar Time
-    mtrts = ob['valid'].astimezone(pytz.timezone("UTC")).strftime("%d%H%MZ")
+    mtrts = ob['valid'].astimezone(pytz.UTC).strftime("%d%H%MZ")
     # Wind Direction
     mdir = ob.get('drct', 0)
     if mdir == 360:
@@ -105,7 +105,7 @@ def metar(ob):
 
 
 def writeHeader():
-    now = SCRIPT_TIME.astimezone(pytz.timezone("UTC"))
+    now = SCRIPT_TIME.astimezone(pytz.UTC)
     sDate = now.strftime("%d%H%M")
 
     SAOFILE.write("\001\015\015\012001\n")
@@ -315,7 +315,7 @@ def doNetwork(_network, shef_fp, thres, qdict):
                              ) % (nwsli,
                                   pretty_tmpf(ob), pretty_precip(pcounter)))
         # CSV FILE!
-        utc = ob['valid'].astimezone(pytz.timezone("UTC"))
+        utc = ob['valid'].astimezone(pytz.UTC)
         CSVFILE.write(("%s,%s,%s,%s,%i,%s,%s,%s,%s\n"
                        ) % (nwsli, utc.strftime("%Y/%m/%d %H:%M:%S"),
                             getm_c(ob, 'tmpf'), getm_c(ob, 'dwpf'),
@@ -341,7 +341,7 @@ def post_process():
     """
     Last actions after we are done generating all these files :)
     """
-    now = SCRIPT_TIME.astimezone(pytz.timezone("UTC"))
+    now = SCRIPT_TIME.astimezone(pytz.UTC)
     saoname = "IA.snet%s.sao" % (now.strftime("%d%H%M"),)
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (saoname, saofn)
     subprocess.call(cmd, shell=True)
@@ -391,7 +391,7 @@ def main():
     loadCounters()
     writeHeader()
     now = datetime.datetime.utcnow()
-    now = now.replace(tzinfo=pytz.timezone("UTC"))
+    now = now.replace(tzinfo=pytz.UTC)
     doNetwork('KCCI', DMXRR5, now - datetime.timedelta(minutes=60),
               qdict)
     doNetwork('KIMT', BADRR5, now - datetime.timedelta(minutes=180),

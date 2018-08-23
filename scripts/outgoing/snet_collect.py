@@ -10,15 +10,15 @@ import calendar
 import datetime
 
 from metpy.units import units, masked_array
-from pyiem.network import Table as NetworkTable
-import pyiem.meteorology as meteorology
-from pyiem.datatypes import temperature, speed
-import pyiem.util as util
 import psycopg2.extras
 import pytz
+from pyiem.network import Table as NetworkTable
+import pyiem.meteorology as meteorology
+from pyiem.datatypes import temperature
+import pyiem.util as util
 
 utc = datetime.datetime.utcnow()
-utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+utc = utc.replace(tzinfo=pytz.UTC)
 tstr = utc.strftime("%Y%m%d%H%M")
 
 now = utc.astimezone(pytz.timezone("America/Chicago"))
@@ -281,7 +281,7 @@ def main():
            "bogus dat' %s") % (tstr, tmpfp)
     p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-    _ = p.stdout.read()
+    p.stdout.read()
     os.remove(tmpfp)
 
     # Do KCCI stuff in WXC format

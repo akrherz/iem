@@ -6,9 +6,18 @@ import pandas as pd
 from pyiem.util import get_dbconn
 
 QRE = re.compile("q=([0-9]+)")
-# Some autoplots will likely never see a feature, or are retired
-NO_FEATURES = [17, 38, 49, 50, 51, 110, 111, 112, 113, 114, 115, 116, 117,
-               118, 119, 120, 121, 122, 123, 124, 143, 141, 152, 96, 94, 102]
+NO_FEATURES = [
+    17,  # is referenced by canonical page
+    38,  # radiation plot that is complex
+    49, 50, 51,   # cscap plots that should be removed
+    110, 111, 112, 113, 114, 115, 116, 117,
+    118, 119, 120, 121, 122, 123, 124,   # climodat text-only reports
+    143, 141,  # yieldfx plots
+    152,  # growing season differences, too noisey
+    96,  # one-off showing precip biases
+    94,  # one-off showing temp biases
+    102  # LSR report types
+]
 
 
 def main():

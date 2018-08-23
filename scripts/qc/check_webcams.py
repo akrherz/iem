@@ -22,7 +22,7 @@ def workflow(netname, pname):
     mydir = "/home/ldm/data/camera/stills"
 
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
-    threshold = threshold.replace(tzinfo=pytz.utc)
+    threshold = threshold.replace(tzinfo=pytz.UTC)
     mcursor = pgconn_mesosite.cursor()
     mcursor.execute("""
         SELECT id, network, name from webcams where
@@ -44,7 +44,7 @@ def workflow(netname, pname):
         ticks = os.stat(fn)[stat.ST_MTIME]
         valid = (datetime.datetime(1970, 1, 1) +
                  datetime.timedelta(seconds=ticks))
-        valid = valid.replace(tzinfo=pytz.timezone("UTC"))
+        valid = valid.replace(tzinfo=pytz.UTC)
         obs[row[0]] = dict(valid=valid)
     # Abort out if no obs are found
     if not obs:

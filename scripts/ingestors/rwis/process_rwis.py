@@ -17,7 +17,7 @@ from pyiem.tracker import TrackerEngine
 from pyiem.datatypes import temperature, speed
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-import pyiem.util as util
+from pyiem import util
 
 GTS = sys.argv[1]
 NT = NetworkTable('IA_RWIS')
@@ -92,7 +92,7 @@ def merge(atmos, surface):
             data[nwsli] = {}
         # Timestamp
         ts = datetime.datetime.strptime(row['DtTm'], '%m/%d/%y %H:%M')
-        data[nwsli]['valid'] = ts.replace(tzinfo=pytz.timezone("UTC"))
+        data[nwsli]['valid'] = ts.replace(tzinfo=pytz.UTC)
         data[nwsli]['tmpf'] = get_temp(row['AirTemp'])
         data[nwsli]['dwpf'] = get_temp(row['Dewpoint'])
         if data[nwsli]['tmpf'] is not None and data[nwsli]['dwpf'] is not None:
@@ -123,7 +123,7 @@ def merge(atmos, surface):
                        '') % (row['Rpuid'],))
             continue
         ts = datetime.datetime.strptime(row['DtTm'], '%m/%d/%y %H:%M')
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+        ts = ts.replace(tzinfo=pytz.UTC)
         if nwsli not in data:
             data[nwsli] = {'valid': ts}
         sensorid = int(row['Senid'])
@@ -196,7 +196,7 @@ def do_windalerts(obs):
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities """
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-    threshold = threshold.replace(tzinfo=pytz.utc)
+    threshold = threshold.replace(tzinfo=pytz.UTC)
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor())
     tracker.process_network(obs, 'iarwis', NT, threshold)
@@ -248,7 +248,7 @@ def gen_metars(obs, filename, convids=False):
     """
     mtime = datetime.datetime.utcnow().strftime("%d%H%M")
     thres = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-    thres = thres.replace(tzinfo=pytz.utc)
+    thres = thres.replace(tzinfo=pytz.UTC)
     fp = open(filename, 'w')
     fp.write("\001\015\015\012001\n")
     fp.write("SAUS43 KDMX %s\015\015\012METAR\015\015\012" % (mtime, ))

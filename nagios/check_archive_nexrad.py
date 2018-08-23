@@ -24,12 +24,11 @@ def main(argv):
 
     if not miss:
         print('OK')
-        sys.exit(0)
-    else:
-        print('CRITICAL - %s archive miss N0R %s' % (base.strftime("%d_%H%M"),
-                                                     ', '.join(miss),))
-        sys.exit(2)
+        return 0
+    print('CRITICAL - %s archive miss N0R %s' % (base.strftime("%d_%H%M"),
+                                                 ', '.join(miss),))
+    return 2
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    sys.exit(main(sys.argv))

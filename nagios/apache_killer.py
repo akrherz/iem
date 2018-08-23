@@ -1,4 +1,4 @@
-"""Script that kills apache processes that are likely in-error
+"""Script that kills apache processes that are likely in-error.
 
 This appears to be due to some proxy / mod-wsgi issue that I am not clever
 enough to fix.

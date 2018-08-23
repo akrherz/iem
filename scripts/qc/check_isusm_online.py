@@ -17,7 +17,7 @@ def main():
     PORTFOLIO = get_dbconn('portfolio')
 
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=12)
-    threshold = threshold.replace(tzinfo=pytz.timezone("UTC"))
+    threshold = threshold.replace(tzinfo=pytz.UTC)
 
     icursor = IEM.cursor()
     icursor.execute("""

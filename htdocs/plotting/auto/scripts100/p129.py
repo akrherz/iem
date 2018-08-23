@@ -6,6 +6,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
@@ -144,9 +145,6 @@ s += '<br /><b>Avg Days per Month:</b> '+ (1. / this.points[1].y).toFixed(2);
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_context(fdict)
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     df = ctx['df']

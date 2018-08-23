@@ -20,14 +20,15 @@ def main():
     msg = "L3 NEXRAD attr count %s" % (count, )
     if count > 2:
         print('OK - %s |count=%s;2;1;0' % (msg, count))
-        sys.exit(0)
+        retval = 0
     elif count > 1:
         print('OK - %s |count=%s;2;1;0' % (msg, count))
-        sys.exit(1)
+        retval = 1
     else:
         print('CRITICAL - %s |count=%s;2;1;0' % (msg, count))
-        sys.exit(2)
+        retval = 2
+    return retval
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

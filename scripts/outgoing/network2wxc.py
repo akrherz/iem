@@ -10,7 +10,7 @@ import subprocess
 from netCDF4 import chartostring
 import pytz
 from pyiem.datatypes import temperature, speed
-import pyiem.meteorology as meteorology
+from pyiem import meteorology
 from pyiem.util import ncopen
 
 
@@ -18,7 +18,7 @@ def s(val):
     try:
         if val.mask:
             return 'M'
-    except:
+    except Exception as exp:
         pass
     return "%5.1f" % (temperature(val, 'K').value('F'),)
 
@@ -27,7 +27,7 @@ def s2(val):
     try:
         if val.mask:
             return 'M'
-    except:
+    except Exception as exp:
         pass
     return "%5.1f" % (val,)
 
@@ -38,7 +38,7 @@ def main(argv):
     wxcfn = argv[2]
 
     utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+    utc = utc.replace(tzinfo=pytz.UTC)
 
     out = open(wxcfn, 'w')
     out.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
@@ -70,7 +70,7 @@ def main(argv):
 
     indices = {}
     BOGUS = datetime.datetime(2000, 1, 1)
-    BOGUS = BOGUS.replace(tzinfo=pytz.utc)
+    BOGUS = BOGUS.replace(tzinfo=pytz.UTC)
 
     nc = ncopen(fn)
 
@@ -84,7 +84,7 @@ def main(argv):
         # We have an ob!
         ticks = int(nc.variables["observationTime"][i])
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+        ts = ts.replace(tzinfo=pytz.UTC)
 
         if ts > indices.get(sid, {'ts': BOGUS})['ts']:
             indices[sid] = {'ts': ts, 'idx': i}
@@ -104,7 +104,7 @@ def main(argv):
         if tmpf != "M" and dwpf != "M":
             t = temperature(nc.variables['temperature'][idx], 'K')
             d = temperature(nc.variables['dewpoint'][idx], 'K')
-            relh = meteorology.relh(t, d).value("%")
+            # relh = meteorology.relh(t, d).value("%")
             heat = "%5.1f" % (meteorology.heatindex(t, d).value("F"),)
         drct = s2(nc.variables['windDir'][idx])
         smps = s2(nc.variables['windSpeed'][idx])

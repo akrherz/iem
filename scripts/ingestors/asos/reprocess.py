@@ -11,7 +11,6 @@ Arguments
 """
 from __future__ import print_function
 import datetime
-import time
 import sys
 import os
 import re
@@ -19,9 +18,7 @@ import subprocess
 from optparse import OptionParser
 
 import pytz
-import requests
 import pandas as pd
-from pyiem.datatypes import pressure
 from metar.Metar import Metar
 from metar.Metar import ParserError as MetarParserError
 from pyiem.util import get_dbconn
@@ -113,24 +110,6 @@ def get_job_list():
     return stations, tznames, days
 
 
-def workflow():
-    """ Do some work """
-    stations, tznames, days = get_job_list()
-
-    # Set the show metar option
-    jar = requests.cookies.RequestsCookieJar()
-    jar.set('Prefs', 'SHOWMETAR:1')
-
-    # Iterate
-    removed = 0
-    added = 0
-    for station, tzname in zip(stations, tznames):
-        removed += clear_data(station, tzname, days[0], days[-1])
-        added += doit(jar, station, days)
-    print(("Total stations: %s removed: %s added: %s"
-           ) % (len(stations), removed, added))
-
-
 def process_rawtext(yyyymm):
     """ Process the raw SAO files the IEM has """
     # skip 0z for now
@@ -176,7 +155,7 @@ def process_rawtext(yyyymm):
                         stdata[station][tm] = metar
         now += interval
 
-    for station in stdata.keys():
+    for station in stdata:
         if len(station) == 0:
             continue
         times = stdata[station].keys()
@@ -228,26 +207,6 @@ def clear_data(station, tzname, sts, ets):
     return cnt
 
 
-def to_df(html):
-    """Make a dataframe from this html"""
-    if html.find('history-observation-table') == -1:
-        print("no obsTable found?")
-        return None
-    df = pd.read_html(html, attrs=dict(id='history-observation-table'))[0]
-    # OK, we should have a round number of rows with the METAR coming below
-    # the observation line
-    if len(df.index) % 2 != 0:
-        raise Exception(("ERROR: dataframe has %s (odd) number of rows"
-                         ) % (len(df.index),))
-    resdf = pd.DataFrame({
-        'FullMetar': df.iloc[1::2, :]['Temp.'].values,
-        'Sea Level PressureIn': df.iloc[::2, :]['Pressure'].values})
-    resdf['Sea Level PressureIn'] = resdf['Sea Level PressureIn'].str.replace(
-                                        '\xa0in', '')
-    print(resdf)
-    return resdf
-
-
 def read_legacy(fn):
     data = open(fn).read()
     lines = data.split("\n")
@@ -280,114 +239,6 @@ def read_legacy(fn):
             rows.append({'FullMetar': mstr,
                          'Sea Level PressureIn': pres})
     return pd.DataFrame(rows)
-
-
-def get_df(station, now, jar):
-    """Return the dataframe for this station and date"""
-    mydir = "/mesonet/ARCHIVE/wunder/cache/%s/%s/" % (station, now.year)
-    if not os.path.isdir(mydir):
-        os.makedirs(mydir)
-    fn = "%s%s.txt" % (mydir, now.strftime("%Y%m%d"))
-    if os.path.isfile(fn) and len(open(fn).read()) > 140:
-        return read_legacy(fn)
-
-    faa = "K%s" % (station,) if len(station) == 3 else station
-    # Fetch it
-    url = ("https://www.wunderground.com/history/airport/%s/%s/%-i/%-i/"
-           "DailyHistory.html") % (faa, now.year, now.month,
-                                   now.day)
-    try:
-        res = requests.get(url, timeout=30, cookies=jar)
-        time.sleep(1)  # throttle
-        if res.status_code != 200:
-            time.sleep(5)  # allow for transient server errors to subside?
-            raise Exception("%s -> %s" % (url, res.status_code))
-        df = to_df(res.content.decode('ascii', 'ignore'))
-        if df is None:
-            return None
-        df.to_csv(fn, index=False, encoding='utf-8')
-    except KeyboardInterrupt:
-        sys.exit()
-    except ValueError:
-        print("ValueError %s %s" % (station, now))
-        return None
-    except Exception as exp:
-        print("Failure %s %s" % (station, now))
-        print(exp)
-        return None
-    return df
-
-
-def doit(jar, station, days):
-    """ Fetch! """
-    valids = []
-    inserts = 0
-    baddays = 0
-    acursor = ASOS.cursor()
-    for now in days:
-        if now.month == 1 and now.day == 1:
-            valids = []
-        df = get_df(station, now, jar)
-        if df is None:
-            baddays += 1
-            continue
-        for _, row in df.iterrows():
-            ob = process_metar(row['FullMetar'], now)
-            if ob is None or ob.valid in valids:
-                continue
-            valids.append(ob.valid)
-
-            # Account for SLP505 actually being 1050.5 and not 950.5 :(
-            if SLP in row:
-                try:
-                    pres = pressure(row['Sea Level PressureIn'].value, "IN")
-                    diff = pres.value("MB") - ob.mslp
-                    if abs(diff) > 25:
-                        oldval = ob.mslp
-                        ob.mslp = "%.1f" % (pres.value("MB"),)
-                        ob.alti = row['Sea Level PressureIn'].value
-                        print(('SETTING PRESSURE %s old: %s new: %s'
-                               ) % (ob.valid.strftime("%Y/%m/%d %H%M"),
-                                    oldval, ob.mslp))
-                except Exception as _exp:
-                    pass
-
-            sql = """
-                INSERT into t""" + str(ob.valid.year) + """ (station, valid,
-                tmpf, dwpf, vsby, drct, sknt, gust, p01i, alti, skyc1, skyc2,
-                skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar, mslp,
-                wxcodes, p03i, p06i, p24i, max_tmpf_6hr, max_tmpf_24hr,
-                min_tmpf_6hr, min_tmpf_24hr, report_type)
-                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, 2)
-            """
-            try:
-                cmtr = ob.metar.decode('utf-8', 'replace').encode('ascii',
-                                                                  'replace')
-            except Exception as exp:
-                print(exp)
-                print("Non-ASCII METAR? %s" % (repr(ob.metar),))
-                continue
-            args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
-                    ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
-                    ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
-                    ob.skyl4, cmtr,
-                    ob.mslp, ob.wxcodes, ob.p03i,
-                    ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
-                    ob.min_tmpf_6hr, ob.min_tmpf_24hr)
-
-            acursor.execute(sql, args)
-            inserts += 1
-            if inserts % 1000 == 0:
-                acursor.close()
-                ASOS.commit()
-                acursor = ASOS.cursor()
-    acursor.close()
-    ASOS.commit()
-    acursor = ASOS.cursor()
-    print("%s Days:%s/%s Inserts: %s" % (station, len(days) - baddays,
-                                         len(days), inserts))
-    return inserts
 
 
 def process_metar(mstr, now):
@@ -429,7 +280,7 @@ def process_metar(mstr, now):
 
     gts = datetime.datetime(mtr.time.year, mtr.time.month,
                             mtr.time.day, mtr.time.hour, mtr.time.minute)
-    gts = gts.replace(tzinfo=pytz.timezone("UTC"))
+    gts = gts.replace(tzinfo=pytz.UTC)
     # When processing data on the last day of the month, we get GMT times
     # for the first of this month
     if gts.day == 1 and now.day > 10:
@@ -498,7 +349,7 @@ def process_metar(mstr, now):
 def main():
     """Go Main Go"""
     print('Starting up...')
-    workflow()
+    # workflow()
     ASOS.commit()
     ASOS.close()
     print('Done!')

@@ -3,7 +3,9 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
+from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 MDICT = OrderedDict([
@@ -45,10 +47,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from matplotlib.font_manager import FontProperties
     font0 = FontProperties()
     font0.set_family('monospace')
     font0.set_size(16)

@@ -6,7 +6,7 @@ import pytz
 import psycopg2.extras
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity
-import pyiem.meteorology as meteorology
+from pyiem import meteorology
 from pyiem.util import get_dbconn
 
 
@@ -21,7 +21,7 @@ LOOKUP = {'miniExportM1.csv': 'RAII4',
           }
 
 THRESHOLD = datetime.datetime.utcnow() - datetime.timedelta(minutes=180)
-THRESHOLD = THRESHOLD.replace(tzinfo=pytz.timezone("UTC"))
+THRESHOLD = THRESHOLD.replace(tzinfo=pytz.UTC)
 
 
 def processfile(icursor, filename):
@@ -35,9 +35,9 @@ def processfile(icursor, filename):
     data = {}
     if len(cols) < len(heading):
         return
-    for i in range(len(heading)):
-        if cols[i].strip() != "/":
-            data[heading[i].strip()] = cols[i].strip()
+    for i, col in enumerate(cols):
+        if col.strip() != "/":
+            data[heading[i].strip()] = col.strip()
 
     nwsli = LOOKUP[filename]
     if filename in ['portableExportP1.csv', 'miniExportIFB.csv']:
@@ -46,7 +46,7 @@ def processfile(icursor, filename):
     else:
         ts = datetime.datetime.strptime(data['date_time'][:-6],
                                         '%Y-%m-%d %H:%M')
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.replace(tzinfo=pytz.UTC)
     iem = Observation(nwsli, 'IA_RWIS', ts)
     if ts.year < 2010:
         print(("rwis/mini_portable.py file: %s bad timestamp: %s"

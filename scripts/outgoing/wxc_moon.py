@@ -49,7 +49,7 @@ def mydate(d):
         return datetime.datetime(1989, 1, 1)
 
     gts = datetime.datetime.strptime(str(d), '%Y/%m/%d %H:%M:%S')
-    gts = gts.replace(tzinfo=pytz.timezone("UTC"))
+    gts = gts.replace(tzinfo=pytz.UTC)
     return gts.astimezone(pytz.timezone("America/Chicago"))
 
 

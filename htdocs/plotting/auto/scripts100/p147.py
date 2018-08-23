@@ -2,9 +2,10 @@
 import calendar
 from collections import OrderedDict
 
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
         ('precip', 'Precipitation'),
@@ -18,8 +19,8 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['description'] = """This plot presents the daily frequency of the first
-    station having a higher value than the second station.
+    desc['description'] = """This plot presents the daily frequency of the
+    first station having a higher value than the second station.
     """
     desc['arguments'] = [
         dict(type='station', name='station1', default='IA0200',
@@ -36,9 +37,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['station1']
     station2 = ctx['station2']
@@ -79,7 +77,7 @@ def plotter(fdict):
     ax.set_ylabel(("Percentage [%%], Ave: %.1f%%"
                    ) % (df[pvar + '_freq[%]'].mean(),))
     v = int(mag) if pvar != 'precip' else round(mag, 2)
-    units = " inch" if pvar == 'precip' else "$^\circ$F"
+    units = " inch" if pvar == 'precip' else r"$^\circ$F"
     ax.set_title(("%s [%s] Daily %s\n%s+%s %s Than %s [%s]"
                   ) % (nt1.sts[station1]['name'], station1, PDICT[pvar],
                        v, units, "Warmer" if pvar != 'precip' else 'Wetter',
