@@ -26,22 +26,22 @@ def run(ts):
     xaxis = None
     yaxis = None
     for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
-        utc = ts.replace(hour=hr).astimezone(pytz.utc)
-        fn = utc.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                           "hrrr.t%Hz.3kmf00.grib2"))
+        utcts = ts.replace(hour=hr).astimezone(pytz.UTC)
+        fn = utcts.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+                             "hrrr.t%Hz.3kmf00.grib2"))
         if not os.path.isfile(fn):
             continue
         grbs = pygrib.open(fn)
         try:
-            if utc >= SWITCH_DATE:
+            if utcts >= SWITCH_DATE:
                 grb = grbs.select(name='Downward short-wave radiation flux')
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            if utc.hour != 3:
-                print('coop/hrrr_solarrad.py %s had no solar rad' % (fn,))
+            if utcts.hour != 3:
+                print('hrrr_solarrad.py %s had no solar rad' % (fn,))
             continue
-        if len(grb) == 0:
+        if not grb:
             print('Could not find SWDOWN in HRR %s' % (fn,))
             continue
         g = grb[0]
@@ -60,7 +60,7 @@ def run(ts):
             total += g.values
 
     if total is None:
-        print(('coop/hrrr_solarrad.py found no HRRR data for %s'
+        print(('hrrr_solarrad.py found no HRRR data for %s'
                ) % (ts.strftime("%d %b %Y"), ))
         return
 
@@ -69,7 +69,7 @@ def run(ts):
     total = (total * 3600.0) / 1000000.0
 
     cursor.execute("""
-        SELECT station, ST_x(geom), ST_y(geom) from
+        SELECT station, ST_x(geom), ST_y(geom), temp24_hour from
         alldata a JOIN stations t on
         (a.station = t.id) where day = %s and network ~* 'CLIMATE'
         """, (ts.strftime("%Y-%m-%d"), ))
@@ -83,10 +83,15 @@ def run(ts):
         if rad_mj < 0:
             print('WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0]))
             continue
+        # if our station is 12z, then this day's data goes into 'tomorrow'
+        # if our station is not, then this day is today
+        date = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        if row[3] is not None and row[3] > 12:
+            date = ts.strftime("%Y-%m-%d")
         cursor2.execute("""
-        UPDATE alldata_""" + row[0][:2] + """ SET hrrr_srad = %s WHERE
-        day = %s and station = %s
-        """, (rad_mj, ts.strftime("%Y-%m-%d"), row[0]))
+            UPDATE alldata_""" + row[0][:2] + """ SET hrrr_srad = %s WHERE
+            day = %s and station = %s
+        """, (rad_mj, date, row[0]))
     cursor.close()
     cursor2.close()
     pgconn.commit()
@@ -94,7 +99,7 @@ def run(ts):
 
 
 def main(argv):
-    """ DO Something"""
+    """ Do Something"""
     if len(argv) == 4:
         sts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
         sts = sts.astimezone(pytz.timezone("America/Chicago"))

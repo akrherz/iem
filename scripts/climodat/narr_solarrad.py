@@ -127,7 +127,7 @@ def do(date):
         now += interval
 
     ccursor.execute("""
-        SELECT station, ST_x(geom), ST_y(geom) from
+        SELECT station, ST_x(geom), ST_y(geom), temp24_hour from
         alldata a JOIN stations t on
         (a.station = t.id) where day = %s
         """, (date.strftime("%Y-%m-%d"), ))
@@ -155,10 +155,15 @@ def do(date):
             print('NARR SRAD is NaN, station: %s' % (row[0], ))
             rad_mj = None
 
+        # if our station is 12z, then this day's data goes into 'tomorrow'
+        # if our station is not, then this day is today
+        date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        if row[3] is not None and row[3] > 12:
+            date2 = date.strftime("%Y-%m-%d")
         ccursor2.execute("""
-        UPDATE alldata_""" + row[0][:2] + """ SET narr_srad = %s WHERE
-        day = %s and station = %s
-        """, (rad_mj, date.strftime("%Y-%m-%d"), row[0]))
+            UPDATE alldata_""" + row[0][:2] + """ SET narr_srad = %s WHERE
+            day = %s and station = %s
+        """, (rad_mj, date2, row[0]))
     ccursor2.close()
     pgconn.commit()
     pgconn.close()

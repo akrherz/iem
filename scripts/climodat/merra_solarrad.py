@@ -39,8 +39,7 @@ def get_gp(xc, yc, x, y):
 
 
 def do(date):
-    """ Process for a given date
-    """
+    """ Process for a given date."""
     pgconn = get_dbconn('coop')
     ccursor = pgconn.cursor()
     ccursor2 = pgconn.cursor()
@@ -76,7 +75,7 @@ def do(date):
     cs_total = (np.sum(cs_rad, 0) + np.sum(cs_rad2, 0)) * 3600.0
 
     ccursor.execute("""
-        SELECT station, ST_x(geom), ST_y(geom)
+        SELECT station, ST_x(geom), ST_y(geom), temp24_hour
         from alldata a JOIN stations t on
         (a.station = t.id) where day = %s and network ~* 'CLIMATE'
         """, (date.strftime("%Y-%m-%d"), ))
@@ -109,12 +108,16 @@ def do(date):
         if rad_mj < 0:
             print('WHOA! Negative RAD: %.2f, station: %s' % (rad_mj, row[0]))
             continue
-        # print "station: %s rad: %.1f" % (row[0], rad_mj)
+        # if our station is 12z, then this day's data goes into 'tomorrow'
+        # if our station is not, then this day is today
+        date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        if row[3] is not None and row[3] > 12:
+            date2 = date.strftime("%Y-%m-%d")
         ccursor2.execute("""
-        UPDATE alldata_"""+row[0][:2]+""" SET merra_srad = %s,
-        merra_srad_cs = %s WHERE
-        day = %s and station = %s
-        """, (rad_mj, cs_rad_mj, date.strftime("%Y-%m-%d"), row[0]))
+            UPDATE alldata_"""+row[0][:2]+""" SET merra_srad = %s,
+            merra_srad_cs = %s WHERE
+            day = %s and station = %s
+        """, (rad_mj, cs_rad_mj, date2, row[0]))
     ccursor2.close()
     pgconn.commit()
     pgconn.close()

@@ -25,7 +25,7 @@ python extract_hfmetar.py 2 &
 HH=$(date +%H)
 if [ "$HH" -eq "22" ]
 	then
-		cd ../../coop
+		cd ../../climodat
 		python hrrr_solarrad.py $(date +'%Y %m %d')	
 fi
 

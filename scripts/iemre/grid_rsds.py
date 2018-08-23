@@ -74,7 +74,7 @@ def do_hrrr(ts):
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            print('coop/hrrr_solarrad.py %s had no solar rad' % (fn,))
+            print('iemre/grid_rsds.py %s had no solar rad' % (fn,))
             continue
         if not grb:
             print('Could not find SWDOWN in HRR %s' % (fn,))
@@ -95,7 +95,7 @@ def do_hrrr(ts):
             total += g.values
 
     if total is None:
-        print(('coop/hrrr_solarrad.py found no HRRR data for %s'
+        print(('iemre/grid_rsds.py found no HRRR data for %s'
                ) % (ts.strftime("%d %b %Y"), ))
         return
 

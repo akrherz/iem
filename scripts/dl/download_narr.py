@@ -82,7 +82,7 @@ def fetch_rda(year, month):
         os.unlink(tmpfn)
 
     # Now call coop script
-    subprocess.call(("python /opt/iem/scripts/coop/narr_solarrad.py %s %s"
+    subprocess.call(("python /opt/iem/scripts/climodat/narr_solarrad.py %s %s"
                      ) % (year, month), shell=True)
 
 

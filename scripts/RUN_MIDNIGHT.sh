@@ -58,7 +58,7 @@ then
 	python fetch_merra.py
 	MM=$(date -u --date '1 month ago' +'%m')
 	YYYY=$(date -u --date '1 month ago' +'%Y')
-	cd ../coop
+	cd ../climodat
 	python merra_solarrad.py $YYYY $MM
 fi
 
