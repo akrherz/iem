@@ -6,7 +6,7 @@ from __future__ import print_function
 import datetime
 import subprocess
 import tempfile
-from ftplib import FTP
+from ftplib import FTP, error_perm
 import os
 
 
@@ -23,7 +23,10 @@ def do(ts):
     ftp.cwd("workoff/ffg")
     tmpfn = tempfile.mktemp()
     fh = open(tmpfn, 'wb')
-    ftp.retrbinary('RETR ' + remotefn, fh.write)
+    try:
+        ftp.retrbinary('RETR ' + remotefn, fh.write)
+    except error_perm as err:
+        print("download_ffg failed to fetch: %s %s" % (remotefn, err))
     ftp.close()
     fh.close()
     cmd = ("/home/ldm/bin/pqinsert -i -p 'data a %s bogus "

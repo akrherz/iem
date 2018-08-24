@@ -35,9 +35,9 @@ def processfile(icursor, filename):
     data = {}
     if len(cols) < len(heading):
         return
-    for i, col in enumerate(cols):
-        if col.strip() != "/":
-            data[heading[i].strip()] = col.strip()
+    for i, h in enumerate(heading):
+        if cols[i].strip() != "/":
+            data[h.strip()] = cols[i].strip()
 
     nwsli = LOOKUP[filename]
     if filename in ['portableExportP1.csv', 'miniExportIFB.csv']:

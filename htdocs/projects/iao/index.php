@@ -298,8 +298,11 @@ sonic anemometers starting November 2016.</p>
 <br /><a href="http://talltowers.agron.iastate.edu/plots/">http://talltowers.agron.iastate.edu/plots/</a>
 </p>
 
-<p>A simple plotting tool is available to display and download data:
+<p>A simple plotting tool is available to display and download limited time periods of data:
 <br /><a href="/plotting/auto/?_wait=no&q=158&station=ETTI4">here</a></p>
+
+<p>To request more data, please complete <a href="iao_data_request_form.xlsx">this form</a>
+ and email it to us on the address found within the form.</p>
 
 <section id="cwex">
 <h3>Crop/Wind-energy Experiment (CWEX)</h3>
