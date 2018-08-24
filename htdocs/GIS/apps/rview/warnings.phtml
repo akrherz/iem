@@ -45,8 +45,9 @@ $autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]): 0;
 $filter = isset($_GET["filter"]) ? intval($_GET["filter"]): 0;
 $lsrwindow = isset($_GET["lsrwindow"]) ? intval($_GET["lsrwindow"]): "0";
 $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]): "+";
-$site = isset($_GET["site"]) ? substr($_GET["site"],0,3): "DMX";
-$osite = isset($_GET["osite"]) ? substr($_GET["osite"],0,3): "DMX";
+// careful here as we can have PXXX sites
+$site = isset($_GET["site"]) ? substr($_GET["site"],0,4): "DMX";
+$osite = isset($_GET["osite"]) ? substr($_GET["osite"],0,4): "DMX";
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "issued";
 $sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]): 0;
 $lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]): 0;

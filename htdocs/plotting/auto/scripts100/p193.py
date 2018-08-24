@@ -5,6 +5,8 @@ import os
 import numpy as np
 import pygrib
 from pyiem.datatypes import distance
+from pyiem.plot.use_agg import plt
+from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, utc
 
 PDICT = {'120': 'Five Day',
@@ -48,10 +50,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
     csector = ctx['csector']
     date = ctx['date']

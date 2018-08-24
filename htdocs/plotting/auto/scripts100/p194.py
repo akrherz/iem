@@ -6,6 +6,8 @@ import cartopy.crs as ccrs
 from affine import Affine
 import pandas as pd
 from geopandas import read_postgis
+from pyiem.plot import MapPlot
+from pyiem.plot.colormaps import stretch_cmap
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -61,10 +63,6 @@ def make_tuesday(date):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from pyiem.plot import MapPlot
     ctx = get_autoplot_context(fdict, get_description())
     csector = ctx['csector']
     sdate = make_tuesday(ctx['sdate'])
@@ -128,9 +126,8 @@ def plotter(fdict):
         # week in there
         raster = raster / ((edate - sdate).days / 7. + 1.) * 100.
     # plot
-    cmap = plt.get_cmap('plasma')
+    cmap = stretch_cmap('plasma', ramp)
     cmap.set_under('white')
-    cmap.set_over('red')
     cmap.set_bad('white')
     mp.pcolormesh(lons, lats, np.flipud(raster), ramp,
                   cmap=cmap,
@@ -148,5 +145,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    fig = plotter(dict(sdate="2000-01-01", edate="2018-06-07", d=0))
+    fig, _df = plotter(dict(sdate="2000-01-01", edate="2018-06-07", d=0))
     fig.savefig('/tmp/test.png')
