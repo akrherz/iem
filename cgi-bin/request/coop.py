@@ -456,6 +456,8 @@ def do_simple(ctx):
     if ctx['what'] == 'excel':
         # Do the excel logic
         df = pd.read_sql(sql, dbconn, params=args)
+        # Convert day into a python date type
+        df['day'] = pd.to_datetime(df['day']).dt.date
 
         def _gs(x, y):
             return nt.sts[x][y]
