@@ -437,6 +437,8 @@ def main(argv):
     for day in EVENTS['days']:
         subprocess.call(("python ../isuag/fix_precip.py %s %s %s"
                          ) % (day.year, day.month, day.day), shell=True)
+        subprocess.call(("python ../isuag/fix_solar.py %s %s %s"
+                         ) % (day.year, day.month, day.day), shell=True)
 
     dump_madis_csv()
 
