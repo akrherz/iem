@@ -5,6 +5,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 import pytz
+from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -83,8 +84,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx['sdate']
@@ -109,6 +108,8 @@ def plotter(fdict):
     """, pgconn, params=(sts, ets), index_col='wfo')
     data = {}
     for wfo, row in df.iterrows():
+        if wfo == 'JSJ':
+            wfo = 'SJU'
         data[wfo] = row['count']
     maxv = df['count'].max()
     bins = np.linspace(0, maxv, 12, dtype='i')
@@ -120,7 +121,7 @@ def plotter(fdict):
                            ) % (sts.strftime("%d %b %Y %H:%M"),
                                 ets.strftime("%d %b %Y %H:%M"),
                                 MDICT.get(myfilter)))
-    mp.fill_cwas(data, bins=bins, ilabel=True)
+    mp.fill_cwas(data, bins=bins, cmap=plt.get_cmap('plasma'), ilabel=True)
 
     return mp.fig, df
 

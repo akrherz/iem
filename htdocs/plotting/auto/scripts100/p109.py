@@ -44,14 +44,12 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx['sdate']
-    sts = sts.replace(tzinfo=pytz.utc)
+    sts = sts.replace(tzinfo=pytz.UTC)
     ets = ctx['edate']
-    ets = ets.replace(tzinfo=pytz.utc)
+    ets = ets.replace(tzinfo=pytz.UTC)
     p1 = ctx['phenomenav1']
     p2 = ctx['phenomenav2']
     p3 = ctx['phenomenav3']

@@ -16,7 +16,8 @@ NO_FEATURES = [
     152,  # growing season differences, too noisey
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
-    102  # LSR report types
+    102,  # LSR report types
+    187  # Unimplemented
 ]
 
 

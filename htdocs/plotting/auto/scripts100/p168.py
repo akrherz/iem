@@ -2,10 +2,11 @@
 import calendar
 import datetime
 
-from pyiem import util
-from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
 import numpy as np
+from pyiem import util
+from pyiem.plot.use_agg import plt
+from pyiem.network import Table as NetworkTable
 
 
 def get_description():
@@ -30,9 +31,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = util.get_dbconn('coop')
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']

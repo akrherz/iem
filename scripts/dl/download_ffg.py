@@ -23,16 +23,19 @@ def do(ts):
     ftp.cwd("workoff/ffg")
     tmpfn = tempfile.mktemp()
     fh = open(tmpfn, 'wb')
+    errored = False
     try:
         ftp.retrbinary('RETR ' + remotefn, fh.write)
     except error_perm as err:
         print("download_ffg failed to fetch: %s %s" % (remotefn, err))
+        errored = True
     ftp.close()
     fh.close()
     cmd = ("/home/ldm/bin/pqinsert -i -p 'data a %s bogus "
            "model/ffg/%s.grib2 grib2' %s"
            ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
-    subprocess.call(cmd, shell=True)
+    if not errored:
+        subprocess.call(cmd, shell=True)
 
     os.remove(tmpfn)
 

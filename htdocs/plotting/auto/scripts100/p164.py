@@ -3,6 +3,7 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([('high', 'High Temperature'),
@@ -38,9 +39,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
 

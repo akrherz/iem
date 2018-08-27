@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = {'warm': 'Temperature Rise',
@@ -53,9 +54,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -117,7 +115,7 @@ def plotter(fdict):
     labels = []
     for i in range(10):
         row = df.iloc[i]
-        ax.barh(i+1, row['diff'], align='center')
+        ax.barh(i+1, row['diff'], color='b', align='center')
         sts = row['valid1']
         ets = row['valid2']
         labels.append(("%.0f to %.0f -> %.0f\n%s - %s"

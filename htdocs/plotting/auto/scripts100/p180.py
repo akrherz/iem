@@ -2,7 +2,9 @@
 import datetime
 
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 
@@ -25,10 +27,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['station1']
     nt1 = NetworkTable(ctx['network1'])

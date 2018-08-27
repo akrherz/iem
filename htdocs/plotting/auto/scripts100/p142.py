@@ -5,7 +5,10 @@ from collections import OrderedDict
 
 import requests
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
+from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 UNITS = {'precip': 'inch', 'avgt': 'F', 'high': 'F', 'low': 'F'}
@@ -62,8 +65,6 @@ def get_description():
 
 def underlay_usdm(axis, sts, ets, lon, lat):
     """Underlay the USDM as pretty bars, somehow"""
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Rectangle
     if ets < datetime.date(2000, 1, 1):
         axis.text(0.0, 1.03, "No Drought Information Prior to 2000",
                   transform=axis.transAxes)
@@ -91,10 +92,6 @@ def underlay_usdm(axis, sts, ets, lon, lat):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']

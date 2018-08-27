@@ -3,7 +3,9 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
+import matplotlib.colors as mpcolors
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -22,7 +24,6 @@ def get_description():
 
 def magic(plt, ax, df, colname, title):
     """You can do magic"""
-    import matplotlib.colors as mpcolors
     df2 = df[df[colname] == 1]
 
     ax.text(0, 1.02, title, transform=ax.transAxes)
@@ -55,9 +56,6 @@ def magic(plt, ax, df, colname, title):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']

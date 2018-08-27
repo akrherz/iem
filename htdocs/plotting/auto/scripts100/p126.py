@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, relh
 from pyiem.datatypes import temperature
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'mixing_ratio': 'Mixing Ratio [g/kg]',
@@ -43,9 +44,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -53,7 +51,6 @@ def plotter(fdict):
     nt = NetworkTable(network)
     year = ctx['year']
     varname = ctx['var']
-    _ = PDICT[varname]
 
     df = read_sql("""
         SELECT extract(year from valid) as year,

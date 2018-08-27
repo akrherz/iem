@@ -4,7 +4,9 @@ import datetime
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -334,10 +336,6 @@ $('<div class="chart">')
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_context(fdict)
 
     (fig, [ax1, ax2, ax3, ax4]) = plt.subplots(4, 1, figsize=(12, 10),

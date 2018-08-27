@@ -4,7 +4,9 @@ import calendar
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
+from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 
 PDICT2 = OrderedDict([('CORN', 'Corn'),
@@ -47,9 +49,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     st1 = ctx['st1'][:2]
@@ -76,7 +75,7 @@ def plotter(fdict):
     if df.empty:
         raise ValueError("ERROR: No data found!")
 
-    prop = matplotlib.font_manager.FontProperties(size=10)
+    prop = FontProperties(size=10)
 
     fig, ax = plt.subplots(3, 2, sharex=True, sharey=True, figsize=(8, 6))
 
