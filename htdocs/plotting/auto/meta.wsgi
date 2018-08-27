@@ -51,7 +51,7 @@ def do_html(fields, pidx):
 
 def get_script_name(pidx):
     """Return where this script resides, so we can load it!"""
-    if pidx >= 100:
+    if pidx >= 200:
         name = 'scripts200/p%s' % (pidx, )
     elif pidx >= 100:
         name = 'scripts100/p%s' % (pidx, )
