@@ -339,7 +339,7 @@
     RewriteRule plot/([0-9]{1,12})/(.*).js$ autoplot.py?p=$1&q=$2&fmt=js
     RewriteRule plot/([0-9]{1,12})/(.*).pdf$ autoplot.py?p=$1&q=$2&fmt=pdf
     RewriteRule plot/([0-9]{1,12})/(.*).svg$ autoplot.py?p=$1&q=$2&fmt=svg
-    RewriteRule meta/([0-9]{1,12}).json$ meta.py?p=$1
+    RewriteRule meta/([0-9]{1,12}).(json|html) meta.py?p=$1&_fmt=$2 [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/rainfall">
