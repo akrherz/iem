@@ -1,9 +1,12 @@
+"""Hourly temperature frequencies."""
 import datetime
 import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
+import matplotlib.colors as mpcolors
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'At or Above Threshold',
@@ -36,10 +39,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
     pgconn = get_dbconn('asos')
 
     ctx = get_autoplot_context(fdict, get_description())
@@ -86,7 +85,7 @@ def plotter(fdict):
                     extent=[0, 53, 24, 0], cmap=cmap, norm=norm)
     fig.colorbar(res, label='%', extend='min')
     ax.grid(True, zorder=11)
-    ax.set_title("%s [%s]\nHourly %s %s %s$^\circ$F (%s-%s)" % (
+    ax.set_title(r"%s [%s]\nHourly %s %s %s$^\circ$F (%s-%s)" % (
                 nt.sts[station]['name'], station, PDICT2[varname],
                 PDICT[direction], threshold,
                 nt.sts[station]['archive_begin'].year,

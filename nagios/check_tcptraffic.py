@@ -71,7 +71,7 @@ def main(argv):
     # need to support rhel6 hosts, so no total_seconds()
     seconds = ((datetime.datetime.utcnow() - old['valid']).days * 86400 +
                (datetime.datetime.utcnow() - old['valid']).seconds)
-    if seconds < 1 or seconds > 600:
+    if seconds < 1 or seconds > 700:
         print("CRITICAL - seconds timer is too large %s" % (seconds, ))
         sys.exit(2)
     rxrate = compute_rate(old['rxbytes'], current['rxbytes'], seconds)

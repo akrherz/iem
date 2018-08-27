@@ -4,6 +4,7 @@
   the default postgresql setting from 200 mil to 180 mil as the database does
   lots of writes and autovac sometimes can not keep up.
 """
+from __future__ import print_function
 import sys
 from pyiem.util import get_dbconn
 
@@ -12,27 +13,34 @@ icursor = IEM.cursor()
 
 
 def check():
+    """Do the database check."""
     icursor.execute("""
-    SELECT datname, age(datfrozenxid) FROM pg_database
-    ORDER by age DESC LIMIT 1
+        SELECT datname, age(datfrozenxid) FROM pg_database
+        ORDER by age DESC LIMIT 1
     """)
     row = icursor.fetchone()
 
     return row
 
 
-if __name__ == '__main__':
+def main():
+    """Go Main Go."""
     dbname, count = check()
     if count < 191000000:
-        print 'OK - %s %s |count=%s;191000000;195000000;220000000' % (count,
+        print('OK - %s %s |count=%s;191000000;195000000;220000000' % (count,
                                                                       dbname,
-                                                                      count)
-        sys.exit(0)
+                                                                      count))
+        retval = 0
     elif count < 195000000:
         print(('WARNING - %s %s |count=%s;191000000;195000000;220000000'
                ) % (count, dbname, count))
-        sys.exit(1)
+        retval = 1
     else:
         print(('CRITICAL - %s %s |count=%s;191000000;195000000;220000000'
                ) % (count, dbname, count))
-        sys.exit(2)
+        retval = 2
+    return retval
+
+
+if __name__ == '__main__':
+    sys.exit(main())
