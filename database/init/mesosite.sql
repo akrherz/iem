@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (16, now());
+INSERT into iem_schema_manager_version values (17, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -88,13 +88,24 @@ GRANT ALL on news_id_seq to nobody,apache;
 ---
 --- IEMBOT Twitter Page subscriptions
 ---
+CREATE TABLE iembot_twitter_oauth(
+  user_id bigint NOT NULL UNIQUE,
+  screen_name text,
+  access_token text,
+  access_token_secret text
+);
+GRANT ALL on iembot_twitter_oauth to nobody,apache;
+
 CREATE TABLE iembot_twitter_subs(
+  user_id bigint REFERENCES iembot_twitter_oauth(user_id),
   screen_name varchar(128),
   channel varchar(64)
 );
 CREATE UNIQUE index iembot_twitter_subs_idx on 
  iembot_twitter_subs(screen_name, channel);
 GRANT ALL on iembot_twitter_subs to nobody,apache;
+
+
 
 ---
 --- IEMBot channels
@@ -141,14 +152,7 @@ CREATE TABLE racoon_jobs(
 );
 GRANT all on racoon_jobs to apache,nobody;
 
----
---- Oauth tokens
----
-CREATE TABLE iembot_twitter_oauth(
-  screen_name text,
-  access_token text,
-  access_token_secret text
-);
+
 
 ---
 --- IEM Apps Database!
