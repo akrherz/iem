@@ -8,7 +8,7 @@ from rasterstats import zonal_stats
 import pandas as pd
 from geopandas import read_postgis
 from affine import Affine
-import pyiem.nws.vtec as vtec
+from pyiem.nws import vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -195,8 +195,11 @@ def do_polygon(ctx):
     minv = np.min(counts)
     maxv = np.max(counts)
     if varname != 'lastyear':
-        if varname == 'total' and maxv < 8:
-            bins = np.arange(1, 8, 1)
+        if varname == 'total':
+            if maxv < 8:
+                bins = np.arange(1, 8, 1)
+            else:
+                bins = np.linspace(1, maxv + 3, 10, dtype='i')
         else:
             for delta in [500, 50, 5, 1, 0.5, 0.05]:
                 bins = np.arange(0, (maxv + 1.) * 1.05, delta)
@@ -210,6 +213,7 @@ def do_polygon(ctx):
 
 
 def do_ugc(ctx):
+    """Do UGC based logic."""
     pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     varname = ctx['v']
@@ -409,7 +413,7 @@ def plotter(fdict):
         cmap.set_over('white')
         m.fill_ugcs(ctx['data'], ctx['bins'], cmap=cmap, ilabel=ilabel)
     else:
-        cmap = plt.get_cmap('jet')
+        cmap = plt.get_cmap('gist_ncar')
         cmap.set_under('white')
         cmap.set_over('black')
         res = m.pcolormesh(ctx['lons'], ctx['lats'], ctx['data'],

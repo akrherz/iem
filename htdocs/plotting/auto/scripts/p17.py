@@ -87,6 +87,8 @@ def plotter(fdict):
         df['low'] = None
         has_climo = False
     (fig, ax) = plt.subplots(1, 1)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
 
     for day in weekends:
         rect = Rectangle([day-0.5, -100], 1, 300, facecolor='#EEEEEE',
@@ -95,16 +97,16 @@ def plotter(fdict):
 
     if has_climo:
         ax.plot(df.index.values, df['high'].values, zorder=3, marker='o',
-                color='pink')
+                color='pink', label='Climate High')
         ax.plot(df.index.values, df['low'].values, zorder=3, marker='o',
-                color='skyblue')
+                color='skyblue', label='Climate Low')
     if has_data:
         ax.bar(df.index.values - 0.3, df['max_tmpf'].values,
                fc='r', ec='k', width=0.3,
-               linewidth=0.6)
+               linewidth=0.6, label='Ob High')
         ax.bar(df.index.values, df['min_tmpf'].values,
                fc='b', ec='k', width=0.3,
-               linewidth=0.6)
+               linewidth=0.6, label='Ob Low')
     else:
         ax.text(0.5, 0.5, "No Data Found", transform=ax.transAxes,
                 ha='center')
@@ -141,10 +143,12 @@ def plotter(fdict):
         subtitle = ("NCDC 1981-2010 Climate Site: %s"
                     ) % (nt.sts[station]['ncdc81'],)
 
-    ax.text(0, 1.01, ("[%s] %s :: Hi/Lo Temps for %s\n%s"
-                      ) % (station, nt.sts[station]['name'],
-                           sts.strftime("%b %Y"), subtitle),
+    ax.text(0, 1.1, ("[%s] %s :: Hi/Lo Temps for %s\n%s"
+                     ) % (station, nt.sts[station]['name'],
+                          sts.strftime("%b %Y"), subtitle),
             transform=ax.transAxes, ha='left', va='bottom')
+    ax.legend(bbox_to_anchor=(0., 1.01, 1., .102), loc=3,
+              ncol=4, mode="expand", borderaxespad=0.)
 
     ax.yaxis.grid(linestyle='-')
 
