@@ -19,6 +19,7 @@ cp -f $APPS/vendor/conf/vendor.conf $CONFD
 cp -f $APPS/weppwebsite/etc/apache_vhost.conf $CONFD/wepp.conf
 cp -f $APPS/cocorahs/config/apache-vhost.conf $CONFD/cocorahs.conf
 cp -f $APPS/nwnwebsite/deployment/schoolnet8-vhost.conf $CONFD/iem-schoolnet8.conf
+cp -f $APPS/depbackend/config/apache-vhost.conf $CONFD/depbackend.conf
 echo "Header set X-IEM-ServerID $(hostname)" > $CONFD/iemvs.conf
 
 # Finally, reload httpd
