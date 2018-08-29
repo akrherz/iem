@@ -1,12 +1,14 @@
 """Process AWOS METAR file"""
 from __future__ import print_function
 import re
+import os
 import datetime
 import ftplib
 import subprocess
+import tempfile
 from io import StringIO
 
-import pyiem.util as util
+from pyiem import util
 
 INCOMING = "/mesonet/data/incoming"
 
@@ -47,12 +49,18 @@ def main():
         sio.write('%s=\r\r\n' % (data[sid].strip().replace("METAR ", ""), ))
     sio.write("\003")
     sio.seek(0)
+    (tmpfd, tmpname) = tempfile.mkstemp()
+    os.write(tmpfd, sio.getvalue().encode('utf-8'))
+    os.close(tmpfd)
     proc = subprocess.Popen(("/home/ldm/bin/pqinsert -i -p 'data c %s "
                              "LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s"
-                             ) % (utc, '/tmp/awwwsosss'), shell=True,
+                             ) % (utc, tmpname), shell=True,
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
-    proc.communicate(sio.getvalue().encode('utf-8'))
+    (stdout, stderr) = proc.communicate()
+    os.remove(tmpname)
+    if stdout != b"" or stderr is not None:
+        print("process_idot_awos\nstdout: %s\nstderr: %s" % (stdout, stderr))
 
 
 if __name__ == '__main__':
