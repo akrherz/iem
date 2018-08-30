@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
@@ -34,9 +35,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos', user='nobody')
 
     ctx = get_autoplot_context(fdict, get_description())
@@ -84,7 +82,8 @@ def plotter(fdict):
     ax.set_ylabel("Frequency [%]")
     ax.set_xlabel("Hour Timezone: %s" % (tzname,))
     ax.set_xlim(-0.5, 23.5)
-    ax.set_title(("(%s - %s) %s [%s]\nFrequency of %s Hour, %s: %s$^\circ$F"
+    ax.set_title(("(%s - %s) %s [%s]\n"
+                  r"Frequency of %s Hour, %s: %s$^\circ$F"
                   ) % (df['min_valid'].min().year, df['max_valid'].max().year,
                        nt.sts[station]['name'], station,
                        calendar.month_name[month], PDICT[mydir],

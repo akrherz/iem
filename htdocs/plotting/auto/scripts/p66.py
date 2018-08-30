@@ -4,6 +4,7 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'Temperature At or Above (AOA) Threshold',
@@ -35,9 +36,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -68,7 +66,7 @@ def plotter(fdict):
 
     label = "AOA" if mydir == 'above' else 'below'
     ax.set_title(("[%s] %s\nFrequency of %s Consec Days"
-                  " with %s %s %s$^\circ$F "
+                  r" with %s %s %s$^\circ$F "
                   ) % (station, nt.sts[station]['name'],
                        days, varname.capitalize(), label, threshold))
     ax.set_ylabel("Frequency of Days [%]")

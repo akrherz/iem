@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 from pandas.io.sql import read_sql
 import pyiem.datatypes as dt
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 PDICT = OrderedDict((
@@ -18,6 +19,8 @@ PDICT = OrderedDict((
 def date_ticker(ax, mytz):
     """Timestamp formatter"""
     (xmin, xmax) = ax.get_xlim()
+    if xmin < 1:
+        return
     xmin = mdates.num2date(xmin)
     xmax = mdates.num2date(xmax)
     xmin = xmin.replace(minute=0)
@@ -90,9 +93,6 @@ def get_data(network, station, tzname, sdate):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
@@ -143,12 +143,13 @@ def plotter(fdict):
     ax.set_title("[%s] %s\nRecent Time Series" % (
         station, nt.sts[station]['name']))
     ax.grid(True)
-    ax.text(-0.1, 0, "Air Temperature [F]", color='#db6065', rotation=90,
+    ax.text(-0.1, 0, "Temperature [F]", rotation=90,
             transform=ax.transAxes, verticalalignment='bottom')
     ax.set_ylim(bottom=(df['dwpf'].min() - 3))
     plt.setp(ax.get_xticklabels(), visible=True)
     date_ticker(ax, pytz.timezone(tzname))
     ax.set_xlim(xmin, xmax)
+    ax.legend(loc='best', ncol=2)
 
     # _____________PLOT 2____________________________
     ax = fig.add_axes([xalign, 0.4, xwidth, 0.25])
@@ -156,16 +157,20 @@ def plotter(fdict):
 
     ax2 = ax.twinx()
     df2 = df[df['gust'].notnull()]
-    ax2.fill_between(df2.index.values, 0,
-                     dt.speed(df2['gust'], 'KT').value('MPH'),
-                     color='#9898ff', zorder=2)
+    if not df2.empty:
+        ax2.fill_between(df2.index.values, 0,
+                         dt.speed(df2['gust'], 'KT').value('MPH'),
+                         color='#9898ff', zorder=2)
     df2 = df[df['sknt'].notnull()]
-    ax2.fill_between(df2.index.values, 0,
-                     dt.speed(df2['sknt'], 'KT').value('MPH'),
-                     color='#373698', zorder=3)
+    if not df2.empty:
+        ax2.fill_between(df2.index.values, 0,
+                         dt.speed(df2['sknt'], 'KT').value('MPH'),
+                         color='#373698', zorder=3)
     ax2.set_ylim(bottom=0)
     ax.set_yticks(range(0, 361, 45))
     ax.set_yticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', "N"])
+    ax.set_ylabel("Wind Direction")
+    ax2.set_ylabel("Wind Speed [mph]")
     ax.set_ylim(0, 360.1)
     date_ticker(ax, pytz.timezone(tzname))
     ax.scatter(df2.index.values, df2['drct'], facecolor='None',
@@ -184,6 +189,7 @@ def plotter(fdict):
         ax2.set_ylim(bottom=0)
         ax.scatter(df.index.values, df['vsby'], label='Visibility', marker='*',
                    s=40, color='b')
+        ax.set_ylabel("Visibility [miles]")
         ax.set_ylim(0, 14)
     elif plot_type == 'two':
         df2 = df[(df['alti'] > 20.) & (df['alti'] < 40.)]
@@ -193,12 +199,12 @@ def plotter(fdict):
         ax.set_ylim(bottom=(vals.min() - 1), top=(vals.max() + 1))
         ax.set_ylabel("Pressure [mb]")
 
+    ax.set_xlim(xmin, xmax)
     date_ticker(ax, pytz.timezone(tzname))
     ax.set_xlabel("Plot Time Zone: %s" % (tzname,))
-    ax.set_xlim(xmin, xmax)
 
     return fig, df
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(station='OT0013', network='OT'))

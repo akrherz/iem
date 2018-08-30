@@ -4,11 +4,12 @@ import datetime
 
 import psycopg2.extras
 import numpy as np
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
 from pyiem.datatypes import temperature, pressure, mixingratio
 from pyiem.util import get_autoplot_context, get_dbconn
-import pandas as pd
+from pyiem.plot.use_agg import plt
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -52,9 +53,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -84,7 +82,7 @@ def plotter(fdict):
         and tmpf is not null and dwpf is not null and dwpf <= tmpf
         and tmpf >= 0 and tmpf <= 140
         and extract(month from valid) in %s
-        """, (station,  tuple(months)))
+        """, (station, tuple(months)))
     sums = np.zeros((140,), 'f')
     counts = np.zeros((140,), 'f')
     for row in cursor:
@@ -127,7 +125,7 @@ def plotter(fdict):
     y2.set_ylim(0, 100)
     ax.set_ylim(0, max(tmpf)+2)
     ax.set_xlim(0, max(tmpf)+2)
-    ax.set_xlabel("Air Temperature $^\circ$F")
+    ax.set_xlabel(r"Air Temperature $^\circ$F")
 
     return fig, df
 
