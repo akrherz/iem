@@ -78,6 +78,7 @@ class Request(object):
                 mslayer = 'refd_%s' % (ftime[1:], )
                 uri = ''
             layer = copy.copy(self.service.layers[mylayername])
+            layer.name = layername
             layer.layers = mslayer
             layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
         elif layername.find("::") > 0:
