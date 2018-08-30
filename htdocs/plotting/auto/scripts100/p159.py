@@ -2,6 +2,7 @@
 import datetime
 from collections import OrderedDict
 
+from matplotlib.ticker import MaxNLocator
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -104,8 +105,8 @@ def plotter(fdict):
         valid > '1973-01-01' and report_type = 2 and
         """ + varname + """ """ + opp + """ %s GROUP by ts)
 
-        SELECT extract(year from """ + offset + """) as year,
-        extract(hour from ts) as hour, count(*) from hourly
+        SELECT extract(year from """ + offset + """)::int as year,
+        extract(hour from ts)::int as hour, count(*) from hourly
         WHERE extract(month from ts) in %s GROUP by year, hour
         """, pgconn, params=(nt.sts[station]['tzname'],
                              station, threshold,
@@ -128,7 +129,8 @@ def plotter(fdict):
                   ec='orange', zorder=5)
     ax[0].grid(True)
     ax[0].set_ylabel("Hours")
-    ax[0].set_xlim(ydf.index.min() - 1, ydf.index.max() + 1)
+    ax[0].set_xlim(ydf.index.min() - 0.5, ydf.index.max() + 0.5)
+    ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
 
     years = ydf.index.max() - ydf.index.min() + 1
     hdf = df.groupby('hour').sum() / years
@@ -151,4 +153,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(network='IA_ASOS', station='AMW'))
+    plotter(dict(network='CA_ASOS', zstation='CQT'))
