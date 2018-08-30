@@ -7,6 +7,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.datatypes import temperature, speed
 import pyiem.meteorology as pymet
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
@@ -49,6 +50,10 @@ def get_description():
     values is used.  In the future, the hope is to limit the considered data
     to the "synoptic" observation at the top of the hour, but we are not there
     yet.</p>
+
+    <p><strong>Change made 29 Aug 2018</strong>: The algorithm used here was
+    updated to use greater than or equal to the given threshold.  In the case
+    of wind chill, it is less than or equal to.</p>
     """
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
@@ -82,9 +87,6 @@ def get_doylimit(ytd, varname):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
 
     ctx = get_autoplot_context(fdict, get_description())
@@ -112,7 +114,7 @@ def plotter(fdict):
 
     df2 = df
     title2 = VDICT[varname]
-    compop = np.greater
+    compop = np.greater_equal
     inctitle = ''
     if varname == 'heatindex':
         df['heatindex'] = pymet.heatindex(
@@ -127,7 +129,7 @@ def plotter(fdict):
         maxval = int(df2['heatindex'].max() + 1)
         LEVELS[varname] = np.arange(80, maxval)
     elif varname == 'windchill':
-        compop = np.less
+        compop = np.less_equal
         df['year'] = df['d'].apply(
             lambda x: (int(x[:4]) - 1) if int(x[4:6]) < 7 else int(x[:4]))
         df['windchill'] = pymet.windchill(temperature(df['tmpf'].values, 'F'),

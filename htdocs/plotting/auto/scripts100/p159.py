@@ -2,9 +2,10 @@
 import datetime
 from collections import OrderedDict
 
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
-from pandas.io.sql import read_sql
+from pyiem.plot.use_agg import plt
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -65,9 +66,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -103,7 +101,7 @@ def plotter(fdict):
         SELECT date_trunc('hour', valid + '10 minutes'::interval)
         at time zone %s as ts,
         avg(""" + varname + """)::int as d from alldata where station = %s and
-        valid > '1973-01-01' and
+        valid > '1973-01-01' and report_type = 2 and
         """ + varname + """ """ + opp + """ %s GROUP by ts)
 
         SELECT extract(year from """ + offset + """) as year,
@@ -113,7 +111,7 @@ def plotter(fdict):
                              station, threshold,
                              tuple(months)),
                   index_col=None)
-    if len(df.index) == 0:
+    if df.empty:
         raise ValueError('Error, no results returned!')
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
@@ -137,7 +135,7 @@ def plotter(fdict):
     ax[1].bar(hdf.index.values, hdf['count'], align='center', fc='b',
               ec='b', label='Avg')
     thisyear = df[df['year'] == year]
-    if len(thisyear.index) > 0:
+    if not thisyear.empty:
         ax[1].bar(thisyear['hour'].values, thisyear['count'], align='center',
                   width=0.25, zorder=5, fc='orange', ec='orange',
                   label='%s' % (year,))
