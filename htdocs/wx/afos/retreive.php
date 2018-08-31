@@ -1,4 +1,5 @@
 <?php
+// Hopefully this is not used ...
 $pil = isset($_REQUEST["pil"]) ? strtoupper($_REQUEST["pil"]) : 'AFDDMX';
 $cnt = isset($_REQUEST["cnt"]) ? intval($_REQUEST["cnt"]): 1;
 $center = isset($_REQUEST["center"]) ? substr($_REQUEST["center"],0,4): "";

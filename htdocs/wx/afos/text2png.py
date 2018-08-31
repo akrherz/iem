@@ -60,16 +60,16 @@ def text_image(content):
     c_box = PIL.ImageOps.invert(image).getbbox()
     image = image.crop(c_box)
     buf = BytesIO()
-    image.save(buf, format='PNG')
+    PIL.ImageOps.expand(image, border=5, fill='white').save(buf, format='PNG')
     return buf.getvalue()
 
 
 def make_image(e, pil):
     """Do as I say"""
-    pgconn = get_dbconn('afos', user='nobody')
+    pgconn = get_dbconn('afos')
     cursor = pgconn.cursor()
     valid = datetime.datetime.strptime(e, '%Y%m%d%H%M')
-    valid = valid.replace(tzinfo=pytz.utc)
+    valid = valid.replace(tzinfo=pytz.UTC)
 
     cursor.execute("""
         SELECT data from products WHERE pil = %s and entered = %s

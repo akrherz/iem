@@ -1,7 +1,7 @@
 <?php
 /* Print last two days worth of some PIL */
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,3)) : "AFD";
 

@@ -17,10 +17,10 @@ body{
 
 <h3>NWS Text Product Finder</h3>
 
-<p>Using our local <a href="http://www.unidata.ucar.edu/projects/idd/index.html">UNIDATA IDD</a>
- data feed, a simple script archives <b>recent</b> NWS text products into a database.  The above form allows
-you to query this database for recent products.  You must know 
-the <a href="http://205.156.54.206/nwws/listings.htm">AFOS PIL</a> in order to 
+<p>Using our local <a href="http://www.unidata.ucar.edu/projects/idd/index.html">Unidata IDD</a>
+ data feed, a simple script archives NWS text products into a database.
+ The above form allows you to query this database for recent products.  You must know 
+the <a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">AFOS PIL</a> in order to 
 get the products you want.</p>
 
 <div style="float: left; margin: 5px; padding: 5px; border: 1px dashed; background: #eeeeee;">
@@ -67,10 +67,7 @@ with data processing, data reception and any other error possible with Internet 
 All products should be used for educational purposes only.</p>
 
 <ul>
- <li><a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.html">NNN Categories</a></li>
+ <li><a href="http://www.nws.noaa.gov/datamgmt/x_ref/xr04_X_ref_by_NNN.xlsx">NNN Categories</a></li>
 </ul>
-
-<p>21 Jan 2002 -- Daryl Herzmann (akrherz@iastate.edu)</p>
-
 </body>
 </html>

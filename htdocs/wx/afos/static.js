@@ -79,6 +79,10 @@ function refreshActiveTab(){
 }
 
 function addTab(pil, center, limit, sdate, edate, doCookieSave){
+	// Make sure the pil is something
+	if (pil == null || pil == "") {
+		return;
+	}
 	// Make sure this isn't a dup
 	if ($("#thetabs .nav-tabs li[data-pil='" + pil +"']").length > 0){
 		return;

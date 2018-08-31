@@ -1,13 +1,10 @@
-<?php
- include("../../../config/settings.inc.php");
-?>
 <html>
 <head>
  <title>Top</title>
 </head>
 <body bgcolor="white">
 
-<form method="GET" action="retreive.php" target="display">
+<form method="GET" action="/cgi-bin/afos/retrieve.py" target="display">
 
 <table border="0" width="100%">
 <tr>
@@ -15,7 +12,7 @@
   ex) <i>AFDDMX</i></th> 
   <td><input type="text" name="pil" size=20></td>
 
-  <td><SELECT name="cnt">
+  <td><SELECT name="limit">
 	<option value="1">Latest
 	<option value="2">Last 2
 	<option value="5">Last 5
