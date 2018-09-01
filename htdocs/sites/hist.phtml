@@ -329,7 +329,11 @@ EOF;
 <input type="hidden" name="station" value="{$station}">
 <input type="hidden" name="network" value="{$network}">
 EOF;
-$ys = yearSelect(2002, $year, "year");
+$startyear = 2002;
+if ($metadata["archive_begin"]){
+	$startyear = date("Y", $metadata["archive_begin"]);
+}
+$ys = yearSelect($startyear, $year, "year");
 $ms = monthSelect($month, "month");
 $ds = daySelect($day);
 if ($mode == "monthly"){
