@@ -4,8 +4,10 @@ import datetime
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
+import matplotlib.colors as mpcolors
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -27,10 +29,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -50,13 +48,13 @@ def plotter(fdict):
         raise ValueError('Error, no results returned!')
 
     w = np.arange(1, 366, 7)
-    z = np.array([100, 200,   300,   400,   500,   600,   700,   800, 900,
-                  1000,  1100,  1200,  1300,  1400,  1500,  1600,  1700,  1800,
-                  1900,  2000,  2100,  2200,  2300,  2400,  2500,  2600,  2700,
-                  2800,  2900,  3000,  3100,  3200,  3300,  3400,  3500,  3600,
-                  3700,  3800,  3900,  4000,  4100,  4200,  4300,  4400,  4500,
-                  4600,  4700,  4800,  4900,  5000,  5500,  6000,  6500,  7000,
-                  7500,  8000,  8500,  9000,  9500, 10000, 11000, 12000, 13000,
+    z = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900,
+                  1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800,
+                  1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700,
+                  2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600,
+                  3700, 3800, 3900, 4000, 4100, 4200, 4300, 4400, 4500,
+                  4600, 4700, 4800, 4900, 5000, 5500, 6000, 6500, 7000,
+                  7500, 8000, 8500, 9000, 9500, 10000, 11000, 12000, 13000,
                   14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000,
                   22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000,
                   30000, 31000])

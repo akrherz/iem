@@ -16,6 +16,7 @@ PDICT2 = {'0': '0z (7 PM CDT)',
 PDICT3 = {'both': 'Plot both USDM + WPC Forecast',
           'wpc': 'Plot just WPC Forecast'}
 PDICT4 = {'auto': 'Auto-scale',
+          '10': '10 inch max',
           '7': '7 inch max',
           '3.5': '3.5 inch max',
           }
@@ -88,6 +89,9 @@ def plotter(fdict):
     if scale == 'auto':
         levs = np.linspace(0, np.max(precip) * 1.1, 10)
         levs = [round(lev, 2) for lev in levs]
+        levs[0] = 0.01
+    elif scale == '10':
+        levs = np.arange(0, 10.1, 1.)
         levs[0] = 0.01
     elif scale == '7':
         levs = np.arange(0, 7.1, 0.5)

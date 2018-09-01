@@ -2,10 +2,11 @@
 import datetime
 from collections import OrderedDict
 
-import psycopg2
 from pandas.io.sql import read_sql
 from scipy import stats
+from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
@@ -58,10 +59,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from matplotlib.font_manager import FontProperties
     font0 = FontProperties()
     font0.set_family('monospace')
     font0.set_size(16)
@@ -128,8 +125,6 @@ def plotter(fdict):
 
     ax.set_ylim([df2[varname].min() - 5,
                  df2[varname].max() + 5])
-    #ax.set_xlim([df2.index.min() - 1,
-    #             df2.index.max() + 1])
     ax.grid(True)
     lts = datetime.datetime(2000, 1, 1, int(hour), 0)
     fig.text(0.5, 0.91, ("%s [%s] %s Local %s-%s\n"

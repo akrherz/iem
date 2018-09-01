@@ -5,6 +5,7 @@ import datetime
 
 import pandas as pd
 from pyiem.meteorology import gdd
+from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context
 
@@ -81,9 +82,6 @@ def load(dirname, location, sdate):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
 
     location = ctx['location']
