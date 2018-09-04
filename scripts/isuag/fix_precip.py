@@ -27,13 +27,14 @@ def print_debugging(station):
     pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor()
     cursor.execute("""
-    SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4 from sm_daily
+    SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4,
+    rain_mm_tot_f from sm_daily
     WHERE station = %s and (rain_mm_tot > 0 or rain_mm_tot_qc > 0)
     ORDER by valid DESC LIMIT 10
     """, (station, ))
-    print("     Date           Obs     QC")
+    print("     Date           Obs     QC  Flag")
     for row in cursor:
-        print("     %s   %5.2f  %5.2f" % row)
+        print("     %s   %5.2f  %5.2f %5s" % row)
 
 
 def get_hdf(nt, date):

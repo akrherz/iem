@@ -4,6 +4,8 @@ import datetime
 import numpy as np
 import geopandas as gpd
 from pyiem import iemre, util
+from pyiem.plot.use_agg import plt
+from pyiem.plot.geoplot import MapPlot
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
 
@@ -33,11 +35,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from pyiem.plot.geoplot import MapPlot
-
     ctx = util.get_autoplot_context(fdict, get_description())
     date = ctx['date']
     sector = ctx['sector']

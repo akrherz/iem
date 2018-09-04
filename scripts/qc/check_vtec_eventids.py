@@ -49,8 +49,8 @@ def main():
 
         # Skip these
         if (wfo in ('NHC') or
-                phenomena in ('TR', 'HU') or
-                (phenomena in ('TO', 'SV') and sig == 'A')):
+                phenomena in ('TR', 'HU', 'SS') or
+                (phenomena in ('TO', 'SV', 'SS') and sig == 'A')):
             continue
 
         for eid in range(eventid - gap + 1, eventid):

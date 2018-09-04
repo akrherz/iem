@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
@@ -67,9 +68,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -116,7 +114,7 @@ def plotter(fdict):
         extract(month from start_date) in %s and count = %s
         ORDER by """+varname+""" """+sorder+""" LIMIT 10
         """, pgconn, params=(days - 1, days - 1, days - 1, days - 1, days - 1,
-                             station,  tuple(months), tuple(months), days),
+                             station, tuple(months), tuple(months), days),
                   index_col=None)
     if df.empty:
         raise ValueError('Error, no results returned!')
@@ -156,7 +154,7 @@ def plotter(fdict):
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
     ax.set_xlabel(("Precipitation [inch]"
-                   if varname in ['total_precip'] else 'Temperature $^\circ$F'
+                   if varname in ['total_precip'] else r'Temperature $^\circ$F'
                    ))
     ax.set_title(("%s [%s] Top 10 Events\n"
                   "%s [days=%s] (%s) "

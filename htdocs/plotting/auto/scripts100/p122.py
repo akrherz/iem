@@ -21,8 +21,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -56,7 +54,7 @@ def plotter(fdict):
        sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
        from """+table+""" WHERE station = %s
        GROUP by year ORDER by year ASC
-    """, pgconn,  params=(station, ), index_col=None)
+    """, pgconn, params=(station, ), index_col=None)
 
     for _, row in df.iterrows():
         res += ("%(year)4i %(m20)4i %(m10)4i %(m0)4i %(m32)4i %(e50)4i "

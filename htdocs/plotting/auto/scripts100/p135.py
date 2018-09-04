@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([('high_above', 'High Temperature At or Above'),
@@ -155,9 +156,6 @@ def get_data(fdict, nt):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     threshold = ctx['threshold']

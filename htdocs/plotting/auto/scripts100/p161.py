@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
@@ -98,7 +99,8 @@ def get_context(fdict):
     opp = ">=" if mydir == 'aoa' else '<'
     ctx['df'] = read_sql("""
         SELECT extract(year from """ + offset + """)::int as year,
-        sum(case when """ + varname + """ """ + opp + """ %s then 1 else 0 end)
+        sum(case when """ + varname + """::int """ + opp + """ %s
+            then 1 else 0 end)
         as count
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and t.network = %s and extract(month from day) in %s
@@ -139,9 +141,6 @@ def highcharts(fdict):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_context(fdict)
     df = ctx['df']
     if df.empty:

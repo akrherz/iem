@@ -33,7 +33,7 @@ PROPS = get_properties()
 
 def trans(now):
     """ Hacky hack hack """
-    if now.year < 1993:
+    if now.year < 1992:
         return '100'
     if now.year < 2001:
         return '200'
@@ -68,7 +68,7 @@ def do_month(sts):
                "--url '%s' -o %s") % (uri, localfn)
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
                                 stderr=subprocess.PIPE)
-        _ = proc.stderr.read()
+        proc.stderr.read()
         now += interval
 
 

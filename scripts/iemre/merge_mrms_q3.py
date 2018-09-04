@@ -28,10 +28,10 @@ def run(ts):
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 
-    gmtts = ts.astimezone(pytz.utc)
+    gmtts = ts.astimezone(pytz.UTC)
     utcnow = datetime.datetime.utcnow().replace(minute=0, second=0,
                                                 microsecond=0)
-    utcnow = utcnow.replace(tzinfo=pytz.utc)
+    utcnow = utcnow.replace(tzinfo=pytz.UTC)
 
     total = None
     lats = None
@@ -79,6 +79,9 @@ def run(ts):
 
         os.unlink(gribfn)
 
+    if lats is None:
+        print("merge_mrms_q3 nodata for %s" % (ts.date(), ))
+        return
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
     y0 = int((lats[0, 0] - iemre.NORTH) * 100.0)
@@ -102,7 +105,7 @@ def main(argv):
         ts = datetime.datetime.now()
         ts = ts.replace(hour=12)
 
-    ts = ts.replace(tzinfo=pytz.utc)
+    ts = ts.replace(tzinfo=pytz.UTC)
     ts = ts.astimezone(pytz.timezone("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)
