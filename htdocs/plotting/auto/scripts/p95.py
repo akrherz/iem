@@ -5,7 +5,9 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from scipy import stats
+import matplotlib.colors as mpcolors
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'none': 'Show all values',
@@ -52,10 +54,6 @@ def title(wanted):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
     pgconn = get_dbconn('coop')
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -153,13 +151,13 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlim(left=-0.01)
     ax.set_xlabel("Total Precipitation [inch], Avg: %.2f" % (np.average(xs),))
-    ax.set_ylabel("Average Temperature $^\circ$F, Avg: %.1f" % (np.average(ys),
-                                                                ))
+    ax.set_ylabel((r"Average Temperature $^\circ$F, "
+                   "Avg: %.1f") % (np.average(ys), ))
     df = pd.DataFrame(rows)
     ax2 = plt.axes([0.67, 0.6, 0.28, 0.35])
     ax2.scatter(df['soi3m'].values, df['tmpf'].values)
     ax2.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
-    ax2.set_ylabel("Avg Temp $^\circ$F")
+    ax2.set_ylabel(r"Avg Temp $^\circ$F")
     slp, intercept, r_value, _, _ = stats.linregress(df['soi3m'].values,
                                                      df['tmpf'].values)
     y1 = -2.0 * slp + intercept
@@ -186,4 +184,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(year="2018"))

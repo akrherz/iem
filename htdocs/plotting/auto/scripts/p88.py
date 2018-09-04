@@ -5,6 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 
@@ -25,9 +26,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -75,7 +73,7 @@ def plotter(fdict):
     cs = ax.imshow(data, aspect='auto', interpolation='nearest',
                    vmin=(0 - maxv), vmax=maxv, cmap=plt.get_cmap('RdYlGn_r'))
     a = fig.colorbar(cs)
-    a.ax.set_ylabel('Temperature Departure $^{\circ}\mathrm{F}$')
+    a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
     ax.grid(True)
     ax.set_title(("[%s] %s %s-%s\nHourly Temp Departure "
                   "(skies were mostly cloudy vs all)"

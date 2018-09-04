@@ -1,3 +1,16 @@
+30 Aug 2018 Monsanto
+ Taylor, Todey, Arritt, Dohleman, Colman
+  - 10-11 Oct in St Louis is the ag-mesonets workshop
+  - Dicamba label says to not spray in an inversion
+  - when forecast probabilities are <10% or >90%, accuracy is 93%
+  - code for spraying app is in the public domain
+  - sprayer height is 24 inches above canopy
+  - spraying in the morning goes with the probabilities, not so in afternoon
+  - app has some spraying metadata management help
+  - does logging of the pin drops exist, likely not
+  - hours below temperature per year would be helpful
+  - wind speed does not fully descriminate inversion presence
+
 29 Mar 2016 Syngenta Discussion at Slater
  Joe Colleti, Bill Bevis, Kendall Lamkey, Joe Byrun, Greg Dudan, Homer Coden
  Josh Larson, Paul Travis, Danny Sign, Jim Reece, Tom Warner, Chad Geater

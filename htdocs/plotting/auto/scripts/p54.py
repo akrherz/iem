@@ -3,8 +3,10 @@ import datetime
 import calendar
 
 import numpy as np
+from matplotlib import cm
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'low': 'Morning Low (midnight to 8 AM)',
@@ -36,10 +38,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.cm as cm
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['zstation1']
@@ -118,7 +116,8 @@ def plotter(fdict):
     rng = min([max([df['delta'].max(), 0 - df['delta'].min()]), 12])
     ax[0].set_ylim(0-rng-2, rng+2)
     ax[0].grid(True)
-    ax[0].set_ylabel(("%s Temp Diff $^\circ$F"
+    ax[0].set_ylabel(("%s Temp Diff "
+                      r"$^\circ$F"
                       ) % ('Low' if varname == 'low' else 'High',))
     ax[0].text(-0.01, 1.02, "%s\nWarmer" % (station1,),
                transform=ax[0].transAxes, va='top', ha='right', fontsize=8)
@@ -148,7 +147,8 @@ def plotter(fdict):
     ax[1].grid(True)
     ax[1].set_xlim(left=-0.25)
     ax[1].set_xlabel("Average Wind Speed [kts] for %s" % (station1,))
-    ax[1].set_ylabel(("%s Temp Diff $^\circ$F"
+    ax[1].set_ylabel(("%s Temp Diff "
+                      r"$^\circ$F"
                       ) % ('Low' if varname == 'low' else 'High',))
     ax[1].text(-0.01, 1.02,
                "%s\nWarmer" % (station1,), transform=ax[1].transAxes,

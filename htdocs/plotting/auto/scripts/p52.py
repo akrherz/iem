@@ -3,8 +3,10 @@ import datetime
 
 import pytz
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -31,10 +33,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -57,6 +55,8 @@ def plotter(fdict):
      GROUP by phenomena, significance, eventid
      ORDER by minissue ASC
     """, pgconn, params=(station, sts, ets), index_col=None)
+    if df.empty:
+        raise ValueError("No events were found for WFO and time period.")
 
     events = []
     labels = []

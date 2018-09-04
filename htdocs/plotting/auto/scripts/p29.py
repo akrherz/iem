@@ -5,6 +5,7 @@ import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 
@@ -33,9 +34,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
@@ -70,12 +68,12 @@ def plotter(fdict):
                   label='%s - %s' % (t1, t2), zorder=2, align='center')
     ax.scatter(df.index.values, df['above_freq'], marker='s', s=40,
                label="Above %s" % (t2,), color='r', zorder=3)
-    for i, bar in enumerate(bars):
+    for i, _bar in enumerate(bars):
         value = df.loc[i+1, 'hits']
-        label = "%.1f%%" % (bar.get_height(),)
+        label = "%.1f%%" % (_bar.get_height(),)
         if value == 0:
             label = 'None'
-        ax.text(i+1, bar.get_height()+3, label, ha='center', fontsize=12,
+        ax.text(i+1, _bar.get_height()+3, label, ha='center', fontsize=12,
                 zorder=4)
     ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
