@@ -92,7 +92,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 
   @$rivers[$river] .= sprintf("<tr><td style='background: %s;'>&nbsp;&nbsp;</td>".
       "<th>%s<br />".
-      "<a href=\"/plotting/auto/?q=160&amp;nwsli=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>".
+      "<a href=\"/plotting/auto/?q=160&amp;station=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>".
       "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
       $sevcol[$row["severity"]], $row["name"], 
       $row["nwsli"], $row["nwsli"], $uri, $row["counties"], $row["stage_text"],
