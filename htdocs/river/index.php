@@ -1,10 +1,10 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 71);
-include_once "../../include/database.inc.php";
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-include_once "../../include/imagemaps.php";
-include_once "../../include/myview.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/myview.php";
 
 $t = new MyView();
 $t->thispage = "severe-river";
@@ -68,28 +68,34 @@ WITH warns as (
     SELECT hvtec_nwsli, sumtxt(u.name || ', ') as counties
     from warns w, ugcs u WHERE w.gid = u.gid GROUP by hvtec_nwsli
 ), agg as (
-    SELECT w.*, n.counties from warns w JOIN names n on (w.hvtec_nwsli = n.hvtec_nwsli)
+    SELECT w.*, n.counties
+    from warns w JOIN names n on (w.hvtec_nwsli = n.hvtec_nwsli)
 )
 SELECT r.*, a.* from riverpro r JOIN agg a on (r.nwsli = a.hvtec_nwsli)
+ORDER by a.name ASC
 EOM;
 $rs = pg_query($postgis, $sql);
 
-
-
 $rivers = Array();
+$used = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
+    if (in_array($row["nwsli"], $used)) {
+        continue;
+    }
+    $used[] = $row["nwsli"];
   $river = $row["river_name"];
   $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y"),
         "NEW", $row["wfo"], $row["phenomena"],
         "W", $row["eventid"]);
 
 
-  @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s<br />".
-      "%s</th><td><a href='%s'>%s</a></td><td>%s</td>".
+  @$rivers[$river] .= sprintf("<tr><td style='background: %s;'>&nbsp;&nbsp;</td>".
+      "<th>%s<br />".
+      "<a href=\"/plotting/auto/?q=160&amp;nwsli=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>".
       "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
       $sevcol[$row["severity"]], $row["name"], 
-      $row["nwsli"], $uri, $row["counties"], $row["stage_text"],
+      $row["nwsli"], $row["nwsli"], $uri, $row["counties"], $row["stage_text"],
       $row["flood_text"], $row["forecast_text"], $row["impact_text"]);
 }
 $content .= $ptitle;
@@ -99,7 +105,9 @@ $content .= <<<EOF
 <p>This page produces a summary listing for National Weather Service Flood 
 Forecast Points when the point is currently in a flood warning state.  The IEM
 processes the flood warning products and attempts to extract the important 
-details regarding flood state, severity, forecasted stage and impact.</p>
+details regarding flood state, severity, forecasted stage and impact. By clicking
+on the graph icon near the location identfier, you are taken to an IEM Autoplot
+which shows forecasted stage and observations.</p>
 
 <h3>Three Ways to View Forecasts</h3>
 <div class="row">
@@ -126,6 +134,7 @@ details regarding flood state, severity, forecasted stage and impact.</p>
 
 <table class="table table-condensed table-bordered">
 <tr>
+ <th>&nbsp; &nbsp;</th>
  <th>Key:</th>
  <td style="background: #ff0;">Near Flood Stage</td>
  <td style="background: #ff9900;">Minor Flooding</td>
@@ -140,12 +149,12 @@ asort($rvs);
 
 while (list($idx, $key) = each($rvs))
 {
-  $content .=  "<tr><th colspan='6' style='background: #eee; text-align: left;'>$key</th></tr>";
+  $content .=  "<tr><th colspan=\"7\" style='background: #eee; text-align: left;'>$key</th></tr>";
   $content .=  $rivers[$key];
 
 }
 if (sizeof($rvs) == 0){
-	$content .= "<tr><td colspan='6'>No Entries Found</td></tr>";
+	$content .= "<tr><td colspan=\"7\">No Entries Found</td></tr>";
 }
 
 $content .=  "</table>";
