@@ -40,6 +40,8 @@ iemdata.vtec_phenomena_dict = [
 ['LO','Low Water'],
 ['LS','Lakeshore Flood'],
 ['LW','Lake Wind'],
+['MF', 'Marine Dense Fog'],
+['MS', 'Marine Dense Smoke'],
 ['RB','Small Craft for Rough Bar'],
 ['RH','Radiological Hazard'],
 ['SB','Snow and Blowing Snow'],
