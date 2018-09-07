@@ -224,7 +224,7 @@ def feet(val, suffix="'"):
 
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn('hads')
+    pgconn = get_dbconn('hads', port=5556)
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute("""
@@ -263,17 +263,19 @@ def do_ahps(nwsli):
         ssw('Content-type: text/plain\n\n')
         ssw("NO DATA")
         sys.exit()
-    plabel = cursor.fetchone()[1]
-    slabel = cursor.fetchone()[1]
-    label = slabel if slabel.find("[ft]") > 0 else plabel
+    lookupkey = 14
+    for _row in cursor:
+        if _row[1].find("[ft]") > 0:
+            lookupkey = _row[0]
+            break
 
     # get observations
     odf = read_sql("""
     SELECT valid, value from hml_observed_data WHERE station = %s
-    and key = get_hml_observed_key(%s) and valid > now() - '3 day'::interval
+    and key = %s and valid > now() - '3 day'::interval
     and extract(minute from valid) = 0
     ORDER by valid DESC
-    """, pgconn, params=(nwsli, label),
+    """, pgconn, params=(nwsli, lookupkey),
                    index_col=None)
     odf['obtime'] = odf['valid'].dt.tz_convert(
         tzinfo).dt.strftime("%a. %-I %p")
