@@ -8,7 +8,7 @@ import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
 from metpy.units import masked_array
-from metpy.gridding.interpolation import inverse_distance
+from metpy.interpolate import inverse_distance
 from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt

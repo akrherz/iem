@@ -15,7 +15,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.stats import zscore
-from metpy.gridding.interpolation import inverse_distance
+from metpy.interpolate import inverse_distance
 from pyiem import iemre, datatypes
 from pyiem.util import get_dbconn, utc, ncopen
 
