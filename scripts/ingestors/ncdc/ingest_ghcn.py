@@ -261,7 +261,15 @@ def process(station, metadata):
 
 def main(argv):
     """ go main go """
-    station = argv[1]
+    if len(argv) == 1:
+        # Run for our linear random state
+        states = list(STCONV.keys())
+        states.sort()
+        doy = int(datetime.date.today().strftime("%j"))
+        station = states[doy % len(states)]
+    else:
+        station = argv[1]
+    # print("station is %s" % (station, ))
     if len(station) == 2:
         # we have a state!
         nt = NetworkTable("%sCLIMATE" % (station,))
