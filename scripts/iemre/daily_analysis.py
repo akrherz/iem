@@ -15,7 +15,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.stats import zscore
-from metpy.interpolate import inverse_distance
+from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre, datatypes
 from pyiem.util import get_dbconn, utc, ncopen
 
@@ -57,15 +57,19 @@ def generic_gridder(df, idx, domain):
     # set a sentinel of where we won't be estimating
     res = np.where(domain > 0, res, -9999)
     # do our gridding
-    grid = inverse_distance(df2['lon'].values, df2['lat'].values,
-                            df2[idx].values, xi, yi, 1.5)
+    grid = inverse_distance_to_grid(
+        df2['lon'].values, df2['lat'].values,
+        df2[idx].values, xi, yi, 1.5
+    )
     # replace nan values in res with whatever now is in grid
     res = np.where(np.isnan(res), grid, res)
     # Do we still have missing values?
     if np.isnan(res).any():
         # very aggressive with search radius
-        grid = inverse_distance(df2['lon'].values, df2['lat'].values,
-                                df2[idx].values, xi, yi, 5.5)
+        grid = inverse_distance_to_grid(
+            df2['lon'].values, df2['lat'].values,
+            df2[idx].values, xi, yi, 5.5
+        )
         # replace nan values in res with whatever now is in grid
         res = np.where(np.isnan(res), grid, res)
     # replace sentinel back to np.nan
