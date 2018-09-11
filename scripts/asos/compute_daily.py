@@ -53,7 +53,7 @@ def do(ts):
         df['relh'].values * munits.percent,
         df['sknt'].values * munits.knots
     )
-    df['u'], df['v'] = mcalc.get_wind_components(
+    df['u'], df['v'] = mcalc.wind_components(
         df['sknt'].values * munits.knots,
         df['drct'].values * munits.deg
     )
@@ -82,7 +82,7 @@ def do(ts):
         uavg = (ldf['u'] * ldf['timedelta']).sum() / totsecs
         vavg = (ldf['u'] * ldf['timedelta']).sum() / totsecs
         drct = clean(
-            mcalc.get_wind_dir(uavg * munits.knots, vavg * munits.knots),
+            mcalc.wind_direction(uavg * munits.knots, vavg * munits.knots),
             0, 360)
         avg_sknt = clean(
             (ldf['sknt'] * ldf['timedelta']).sum() / totsecs, 0, 150  # arb
