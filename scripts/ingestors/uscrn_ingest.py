@@ -103,8 +103,8 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
         ob.data['srad'] = is_within(row['SRAD'], 0, 2000)
         ob.data['tsf0'] = is_within((float(row["SKINC"]) * units.degC
                                      ).to(units.degF).magnitude, -100, 200)
-        ob.data['relh'] = is_within(row['RH'], 0, 100.1)
-        ob.data['c1smv'] = is_within(row['VSM5'], 0, 1.01)
+        ob.data['relh'] = is_within(row['RH'], 1, 100.1)
+        ob.data['c1smv'] = is_within(row['VSM5'], 0.01, 1.01)
         ob.data['c1tmpf'] = is_within((float(row["SOILC5"]) * units.degC
                                        ).to(units.degF).magnitude, -100, 200)
         ob.data['sknt'] = is_within((float(row['SMPS']) * units('m/s')
