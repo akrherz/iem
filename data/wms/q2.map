@@ -129,6 +129,11 @@ LAYER
     "wms_title" "MRMS Q3 24 Hour Precipitation"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
+    "wms_style_default_legendurl_format" "image/png"
+    "wms_style_default_legendurl_height" "30"
+    "wms_style_default_legendurl_width" "256"
+    "wms_style" "default"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -148,6 +153,11 @@ LAYER
     "wms_title" "MRMS Q3 24 Hour Precipitation"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
+    "wms_style_default_legendurl_format" "image/png"
+    "wms_style_default_legendurl_height" "30"
+    "wms_style_default_legendurl_width" "256"
+    "wms_style" "default"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -167,6 +177,11 @@ LAYER
     "wms_title" "MRMS Q3 48 Hour Precipitation"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
+    "wms_style_default_legendurl_format" "image/png"
+    "wms_style_default_legendurl_height" "30"
+    "wms_style_default_legendurl_width" "256"
+    "wms_style" "default"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -186,6 +201,11 @@ LAYER
     "wms_title" "MRMS Q3 48 Hour Precipitation"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
+    "wms_style_default_legendurl_format" "image/png"
+    "wms_style_default_legendurl_height" "30"
+    "wms_style_default_legendurl_width" "256"
+    "wms_style" "default"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -205,6 +225,11 @@ LAYER
     "wms_title" "MRMS Q3 72 Hour Precipitation"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
+    "wms_style_default_legendurl_format" "image/png"
+    "wms_style_default_legendurl_height" "30"
+    "wms_style_default_legendurl_width" "256"
+    "wms_style" "default"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -224,6 +249,11 @@ LAYER
     "wms_title" "MRMS Q3 72 Hour Precipitation"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
+    "wms_style_default_legendurl_format" "image/png"
+    "wms_style_default_legendurl_height" "30"
+    "wms_style_default_legendurl_width" "256"
+    "wms_style" "default"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
