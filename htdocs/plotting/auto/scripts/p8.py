@@ -6,6 +6,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -35,9 +36,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     coop = get_dbconn('coop')
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())

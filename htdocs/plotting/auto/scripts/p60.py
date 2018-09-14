@@ -85,11 +85,13 @@ def plotter(fdict):
                     extent=[0, 53, 24, 0], cmap=cmap, norm=norm)
     fig.colorbar(res, label='%', extend='min')
     ax.grid(True, zorder=11)
-    ax.set_title(r"%s [%s]\nHourly %s %s %s$^\circ$F (%s-%s)" % (
-                nt.sts[station]['name'], station, PDICT2[varname],
-                PDICT[direction], threshold,
-                nt.sts[station]['archive_begin'].year,
-                datetime.datetime.now().year), size=12)
+    ax.set_title(("%s [%s]\n"
+                  r"Hourly %s %s %s$^\circ$F (%s-%s)"
+                  ) % (
+                 nt.sts[station]['name'], station, PDICT2[varname],
+                 PDICT[direction], threshold,
+                 nt.sts[station]['archive_begin'].year,
+                 datetime.datetime.now().year), size=12)
 
     ax.set_xticks(xticks)
     ax.set_ylabel("%s Timezone" % (nt.sts[station]['tzname'],))
