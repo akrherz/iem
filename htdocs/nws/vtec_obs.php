@@ -1,10 +1,10 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 108);
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  require_once "../../include/forms.php";
- include("../../include/mlib.php");
- include("../../include/network.php");
+ require_once "../../include/mlib.php";
+ require_once "../../include/network.php";
 
 $nt = new NetworkTable("WFO");
 $t = new MyView();
@@ -166,7 +166,7 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
   	$rs2 = pg_query($asos, "SELECT station, valid, to_char(valid, 'ddHH24MI') as z,
   					tmpf, dwpf, sknt, gust, vsby, wcht(tmpf,sknt)  from alldata
   					WHERE valid BETWEEN '$issue' and '$expire' and 
-  					station in $stations
+  					station in $stations and report_type = 2
   					ORDER by station, valid ASC");
   	$table .= "<table class=\"table table-condensed\">";
   	$ostation = "";
