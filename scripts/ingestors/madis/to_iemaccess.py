@@ -72,8 +72,14 @@ def main():
     dwpk = nc.variables["dewpoint"][:]
 
     # Set some data bounds to keep mcalc from complaining
-    dwpk = np.ma.where(np.ma.logical_or(dwpk < 200, dwpk > 320), np.nan, dwpk)
-    tmpk = np.ma.where(np.ma.logical_or(tmpk < 200, tmpk > 320), np.nan, tmpk)
+    dwpk = np.ma.where(
+        np.ma.logical_or(
+            np.ma.less(dwpk, 200), np.ma.greater(dwpk, 320)
+        ), np.nan, dwpk)
+    tmpk = np.ma.where(
+        np.ma.logical_or(
+            np.ma.less(tmpk, 200), np.ma.greater(tmpk, 320)
+        ), np.nan, tmpk)
     relh = mcalc.relative_humidity_from_dewpoint(tmpk * units.degK,
                                                  dwpk * units.degK
                                                  ).magnitude * 100.
