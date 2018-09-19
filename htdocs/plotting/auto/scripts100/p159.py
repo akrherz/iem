@@ -46,6 +46,11 @@ def get_description():
     desc['description'] = """Based on available hourly observation reports
     by METAR stations, this application presents the frequency of number
     of hours for a given month or season at a given threshold.
+
+    <br /><br /><strong>Updated 18 Sep 2018:</strong>Plotting tool was updated
+    to consider dates prior to 1973 and to shade years that have more than
+    20% missing data.  The hourly averages are based on years with sufficient
+    data coverage.
     """
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
@@ -95,21 +100,23 @@ def plotter(fdict):
     else:
         ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
         # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
+        months = [ts.month, ]
 
     opp = ">=" if mydir == 'aoa' else '<'
     df = read_sql("""WITH hourly as (
         SELECT date_trunc('hour', valid + '10 minutes'::interval)
         at time zone %s as ts,
-        avg(""" + varname + """)::int as d from alldata where station = %s and
-        valid > '1973-01-01' and report_type = 2 and
-        """ + varname + """ """ + opp + """ %s GROUP by ts)
+        max(case when """ + varname + """::int """ + opp + """ %s
+            then 1 else 0 end) as hit
+        from alldata where station = %s and report_type = 2
+        GROUP by ts)
 
         SELECT extract(year from """ + offset + """)::int as year,
-        extract(hour from ts)::int as hour, count(*) from hourly
+        extract(hour from ts)::int as hour,
+        sum(hit) as hits, count(*) as obs from hourly
         WHERE extract(month from ts) in %s GROUP by year, hour
         """, pgconn, params=(nt.sts[station]['tzname'],
-                             station, threshold,
+                             threshold, station,
                              tuple(months)),
                   index_col=None)
     if df.empty:
@@ -118,27 +125,39 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
     ydf = df.groupby('year').sum()
     ax[0].set_title(("(%s) %s Hours %s %s\n"
-                     "%s [%s]"
+                     "%s [%s] (%.0f-%.0f)"
                      ) % (MDICT[month], METRICS[varname], DIRS[mydir],
-                          threshold, nt.sts[station]['name'], station))
-    ax[0].bar(ydf.index.values, ydf['count'], align='center', fc='green',
+                          threshold, nt.sts[station]['name'], station,
+                          ydf.index.min(), ydf.index.max()))
+    ax[0].bar(ydf.index.values, ydf['hits'], align='center', fc='green',
               ec='green')
+    # Loop over plot years and background highlight any years with less than
+    # 80% data coverage
+    obscount = len(months) * 30 * 24 * 0.8
+    for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
+        if (_year not in ydf.index or
+                ydf.at[_year, 'obs'] < obscount):
+            ax[0].axvspan(_year - 0.5, _year + 0.5, color='#cfebfd',
+                          zorder=-3)
     if year in ydf.index.values:
         val = ydf.loc[year]
-        ax[0].bar(year, val['count'], align='center', fc='orange',
+        ax[0].bar(year, val['hits'], align='center', fc='orange',
                   ec='orange', zorder=5)
     ax[0].grid(True)
     ax[0].set_ylabel("Hours")
     ax[0].set_xlim(ydf.index.min() - 0.5, ydf.index.max() + 0.5)
     ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax[0].set_xlabel("Years with blue shading have more than 20% missing data")
 
-    years = ydf.index.max() - ydf.index.min() + 1
-    hdf = df.groupby('hour').sum() / years
-    ax[1].bar(hdf.index.values, hdf['count'], align='center', fc='b',
+    df2 = ydf[ydf['obs'] > obscount]
+    years = len(df2.index)
+    df2 = df[df['year'].isin(df2.index.values)]
+    hdf = df2.groupby('hour').sum() / years
+    ax[1].bar(hdf.index.values, hdf['hits'], align='center', fc='b',
               ec='b', label='Avg')
     thisyear = df[df['year'] == year]
     if not thisyear.empty:
-        ax[1].bar(thisyear['hour'].values, thisyear['count'], align='center',
+        ax[1].bar(thisyear['hour'].values, thisyear['hits'], align='center',
                   width=0.25, zorder=5, fc='orange', ec='orange',
                   label='%s' % (year,))
     ax[1].set_xlim(-0.5, 23.5)
@@ -153,4 +172,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(network='CA_ASOS', zstation='CQT'))
+    plotter(dict(network='CT_ASOS', zstation='GON', var='dwpf', thres=60,
+                 month='sep'))
