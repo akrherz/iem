@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
- Download interface for ISU-SM data
-"""
+"""Download interface for ISU-SM data."""
 import cgi
 import datetime
 import sys
@@ -17,7 +15,7 @@ from pyiem.util import get_dbconn, ssw
 def get_stations(form):
     ''' Figure out which stations were requested '''
     stations = form.getlist('sts')
-    if len(stations) == 0:
+    if not stations:
         stations.append('XXXXX')
     if len(stations) == 1:
         stations.append('XXXXX')
@@ -75,7 +73,7 @@ def fetch_daily(form, cols):
     elif delim == 'space':
         delim = ' '
 
-    if len(cols) == 0:
+    if not cols:
         cols = ["station", "valid", "high", "low", "rh_min", "rh", "rh_max",
                 "gdd50", "solar",
                 "precip", "sped", "gust", "et", "soil04t", "soil12t",
@@ -236,7 +234,7 @@ def fetch_hourly(form, cols):
     elif delim == 'space':
         delim = ' '
 
-    if len(cols) == 0:
+    if not cols:
         cols = ["station", "valid", "tmpf", "relh", "solar", "precip",
                 "speed", "drct", "et", "soil04t", "soil12t", "soil24t",
                 "soil50t",
@@ -245,15 +243,23 @@ def fetch_hourly(form, cols):
         cols.insert(0, 'valid')
         cols.insert(0, 'station')
 
+    table = 'sm_hourly'
+    sqlextra = ', null as bp_mb_qc, etalfalfa_qc '
+    if form.getfirst('timeres') == '15minute':
+        table = 'sm_15minute'
+        sqlextra = ', bp_mb_qc, null as etalfalfa_qc'
+    else:
+        if "bp_mb" in cols:
+            cols.remove('bp_mb')
     cursor.execute("""SELECT station, valid, tair_c_avg_qc, rh_qc,
     slrkw_avg_qc,
-    rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc, etalfalfa_qc,
+    rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
     tsoil_c_avg_qc,
     t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
     calc_vwc_24_avg_qc, calc_vwc_50_avg_qc, lwmv_1_qc, lwmv_2_qc,
     lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
-    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc
-    from sm_hourly
+    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc """ + sqlextra + """
+    from """ + table + """
     WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     ORDER by valid ASC
     """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"),
@@ -297,11 +303,13 @@ def fetch_hourly(form, cols):
                      if row['calc_vwc_24_avg_qc'] is not None else -99)
         soil50vwc = (row['calc_vwc_50_avg_qc']
                      if row['calc_vwc_50_avg_qc'] is not None else -99)
+        bp_mb = (row['bp_mb_qc']
+                 if row['bp_mb_qc'] is not None else -99)
 
         values.append(dict(station=station,
                            valid=valid.strftime("%Y-%m-%d %H:%M"),
                            tmpf=tmpf, relh=relh, solar=solar, precip=precip,
-                           speed=speed, drct=drct, et=et,  soil04t=soil04t,
+                           speed=speed, drct=drct, et=et, soil04t=soil04t,
                            soil12t=soil12t, soil24t=soil24t, soil50t=soil50t,
                            soil12vwc=soil12vwc, soil24vwc=soil24vwc,
                            soil50vwc=soil50vwc,
@@ -313,7 +321,7 @@ def fetch_hourly(form, cols):
                            lwmdry_2_tot=row['lwmdry_2_tot_qc'],
                            lwmcon_2_tot=row['lwmcon_2_tot_qc'],
                            lwmwet_2_tot=row['lwmwet_2_tot_qc'],
-                           bpres_avg=row['bpres_avg_qc']))
+                           bpres_avg=row['bpres_avg_qc'], bp_mb=bp_mb))
     return values, cols
 
 

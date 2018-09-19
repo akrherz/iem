@@ -2,20 +2,20 @@
  /* 
   * Download front end for daily data from the ISUSM network
   */
- include("../../../config/settings.inc.php");
- include("../../../include/myview.php");
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/myview.php";
  $t = new MyView();
  $t->title = "ISU Soil Moisture Hourly Data Request";
  $t->thispage = "networks-agclimate";
  
- include("../../../include/network.php");
+ require_once "../../../include/network.php";
  $nt = new NetworkTable("ISUSM");
- include("../../../include/forms.php");
- include_once "boxinc.phtml";
+ require_once "../../../include/forms.php";
+ require_once "boxinc.phtml";
  
- $yselect = yearSelect2(2013, date("Y"), "year1");
- $mselect = monthSelect(date("m"), "month1");
- $dselect= daySelect2(date("d"), "day1");
+ $yselect = yearSelect2(2013, 2013, "year1");
+ $mselect = monthSelect(1, "month1");
+ $dselect= daySelect2(1, "day1");
  $yselect2 = yearSelect2(2013, date("Y"), "year2");
  $mselect2 = monthSelect(date("m"), "month2");
  $dselect2= daySelect2(date("d"), "day2");
@@ -50,6 +50,13 @@ wish to change this to <a href="daily.php">daily data</a>.
 
 <form name='dl' method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="hourly" />
+
+<h4>Select Time Resolution:</h4>
+
+<select name="timeres">
+  <option value="hourly">Hourly</option>
+  <option value="15minute">15 Minute</option>
+</select>
 
 <h4>Select station(s):</h4>
 <a href="/sites/networks.php?network=ISUSM&format=html">View station metadata</a><br />
@@ -89,6 +96,7 @@ wish to change this to <a href="daily.php">daily data</a>.
 <br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
 <br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
+<br /><input type="checkbox" name="vars" value="bp_mb">Atmospheric Pressure [mb] (only Ames ISU Hort Farm at 15 minute interval)
 
 <hr>
 <p><strong>Vineyard Station-only Variables</strong>
