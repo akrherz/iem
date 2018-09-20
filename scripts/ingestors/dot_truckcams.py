@@ -15,8 +15,21 @@ import pyproj
 from pyiem.util import exponential_backoff, get_dbconn
 
 P3857 = pyproj.Proj(init='EPSG:3857')
-URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
-       "71846cc4c673428ca35057d6849ee0c6/data")
+URI = (
+    "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
+    "AVL_Images_View/FeatureServer/0/query?where=1%3D1&objectIds=&time=&"
+    "geometry=&geometryType=esriGeometryEnvelope&inSR=&"
+    "spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&"
+    "units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&"
+    "returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset="
+    "&geometryPrecision=&outSR=&datumTransformation=&"
+    "applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&"
+    "returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&"
+    "orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&"
+    "resultOffset=&resultRecordCount=&returnZ=false&returnM=false&"
+    "returnExceededLimitFeatures=true&quantizationParameters=&"
+    "sqlFormat=none&f=pjson&token="
+)
 
 
 def get_current_fn(label):
@@ -39,8 +52,7 @@ def workflow():
     if req.status_code != 200:
         return
     data = req.json()
-    featureset = data['layers'][0].get('featureSet', dict())
-    features = featureset.get('features', [])
+    features = data.get('features', [])
     pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
 

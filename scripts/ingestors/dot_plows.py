@@ -5,12 +5,25 @@ import datetime
 
 import requests
 import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
-URI = ("http://iowadot.maps.arcgis.com/sharing/rest/content/items/"
-       "8a3118f14fc24bfb93eb769e997597f9/data")
+URI = (
+    "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
+    "AVL_Direct_View/FeatureServer/0/query?where=1%3D1&objectIds=&time=&"
+    "geometry=&geometryType=esriGeometryEnvelope&inSR=&"
+    "spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&"
+    "units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&"
+    "returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset="
+    "&geometryPrecision=&outSR=&datumTransformation=&"
+    "applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&"
+    "returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&"
+    "orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&"
+    "resultOffset=&resultRecordCount=&returnZ=false&returnM=false&"
+    "returnExceededLimitFeatures=true&quantizationParameters=&"
+    "sqlFormat=none&f=pjson&token="
+)
 CEILING = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
-CEILING = CEILING.replace(tzinfo=pytz.timezone("UTC"))
+CEILING = CEILING.replace(tzinfo=pytz.UTC)
 
 
 def workflow():
@@ -25,7 +38,7 @@ def workflow():
         current[row[0]] = row[1]
 
     valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.utc, microsecond=0)
+    valid = valid.replace(tzinfo=pytz.UTC, microsecond=0)
 
     try:
         req = requests.get(URI, timeout=30)
@@ -37,14 +50,14 @@ def workflow():
         return
     data = json.loads(req.content)
     newplows = {}
-    for feat in data['layers'][0].get('featureSet', {}).get('features', []):
+    for feat in data.get('features', []):
         logdt = feat['attributes']['MODIFIEDDT']
         if logdt is None:
             continue
         # Unsure why I do it this way, but alas
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
-        valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
-                              hour=ts.hour, minute=ts.minute, second=ts.second)
+        valid = utc(ts.year, ts.month, ts.day,
+                    ts.hour, ts.minute, ts.second)
         if valid > CEILING:
             # print json.dumps(feat, sort_keys=True,
             #                 indent=4, separators=(',', ': '))

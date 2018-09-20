@@ -43,8 +43,22 @@ import shapefile
 import requests
 from pyiem.util import exponential_backoff, get_dbconn
 
-URI = ("https://iowadot.maps.arcgis.com/sharing/rest/content/items/"
-       "5d6c7d6963e549539ead6e50d89bdd08/data")
+URI = (
+    "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
+    "511_IA_Road_Conditions_View/FeatureServer/0/query?"
+    "where=1%3D1&objectIds=&time=&"
+    "geometry=&geometryType=esriGeometryEnvelope&inSR=&"
+    "spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&"
+    "units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&"
+    "returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset="
+    "&geometryPrecision=&outSR=&datumTransformation=&"
+    "applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&"
+    "returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&"
+    "orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&"
+    "resultOffset=&resultRecordCount=&returnZ=false&returnM=false&"
+    "returnExceededLimitFeatures=true&quantizationParameters=&"
+    "sqlFormat=none&f=pjson&token="
+)
 
 EPSG26915 = ('PROJCS["NAD_1983_UTM_Zone_15N",GEOGCS["GCS_North_American_1983"'
              ',DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,'
@@ -158,16 +172,15 @@ def main():
         sys.exit()
     jobj = req.json()
 
-    if 'layers' not in jobj:
+    if 'features' not in jobj:
         print(('ingest_roads_rest got invalid RESULT:\n%s'
                ) % (json.dumps(jobj, sort_keys=True, indent=4,
                                separators=(',', ': '))
                     ))
         sys.exit()
 
-    featureset = jobj['layers'][0]['featureSet']
     dirty = False
-    for feat in featureset['features']:
+    for feat in jobj['features']:
         props = feat['attributes']
         segid = lookup.get(props['SEGMENT_ID'])
         if segid is None:
