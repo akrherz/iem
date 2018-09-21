@@ -2,6 +2,7 @@
 import datetime
 
 import matplotlib.dates as mdates
+import pandas as pd
 from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem.plot.use_agg import plt
@@ -98,9 +99,11 @@ def plotter(fdict):
     df['fall_length'].values[:-1] = ((df['winter_end_doy'].values[1:] + 365) -
                                      91 - df['summer_end_doy'].values[:-1])
 
+    df['fall_length'] = pd.to_numeric(df['fall_length'])
     (fig, ax) = plt.subplots(3, 1, figsize=(8, 9))
 
     ax[0].plot(obs.index.values, obs['avgt'].values)
+    ax[0].set_ylim(obs['avgt'].min() - 8, obs['avgt'].max() + 8)
     ax[0].set_title(("%s-%s [%s] %s\n91 Day Average Temperatures"
                      ) % (nt.sts[station]['archive_begin'].year,
                           year + 3, station, nt.sts[station]['name']))
@@ -115,15 +118,21 @@ def plotter(fdict):
         date = df.at[yr, 'winter_end']
         val = df.at[yr, 'winter']
         if date is not None:
-            ax[0].text(date, val - 5,
-                       r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
-                                              val), ha='center')
+            ax[0].text(
+                date, val - 1,
+                r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"), val),
+                ha='center', va='top',
+                bbox=dict(color='white', boxstyle='square,pad=0')
+            )
         date = df.at[yr, 'summer_end']
         val = df.at[yr, 'summer']
         if date is not None:
-            ax[0].text(date, val + 2,
-                       r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"),
-                                              val), ha='center')
+            ax[0].text(
+                date, val + 1,
+                r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"), val),
+                ha='center', va='bottom',
+                bbox=dict(color='white', boxstyle='square,pad=0')
+            )
 
     df2 = df.dropna()
     p2col = 'winter_end_doy' if season == 'spring' else 'summer_end_doy'
