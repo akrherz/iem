@@ -3,6 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
 
 PDICT = {'cdd': 'Cooling Degree Days',
@@ -14,18 +15,25 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['report'] = True
-    desc['description'] = """ """
+    desc['description'] = """This chart presents monthly cooling degree days
+    or heating degree days for a 20 year period of your choice.  The 20 year
+    limit is for plot usability only, the data download has all available
+    years contained."""
+    y20 = datetime.date.today().year - 19
     desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', options=PDICT, default='cdd', name='var',
              label='Select Variable'),
+        dict(type='year', name='syear', default=y20,
+             label='For plotting, year to start 20 years of plot'),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
+    import seaborn as sns
     pgconn = get_dbconn('coop')
 
     station = fdict.get('station', 'IA0200')
@@ -98,8 +106,27 @@ OCT    NOV    DEC
     second += "\n"
     res += second
 
-    return None, df, res
+    y1 = int(fdict.get('syear', 1990))
+
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    fig.text(0.5, 0.95, "[%s] %s (%s-%s)" % (station, nt.sts[station]['name'],
+                                             y1, y1 + 20), ha='center',
+             fontsize=16)
+    ax[0].set_title("%s base=65" % (PDICT[varname], ))
+    filtered = df[(df['year'] >= y1) & (df['year'] <= (y1 + 20))]
+    df2 = filtered[
+        ['month', 'year', varname + '65']
+        ].pivot('year', 'month', varname + '65')
+    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=.5, ax=ax[0])
+
+    ax[1].set_title("%s base=60" % (PDICT[varname], ))
+    df2 = filtered[
+        ['month', 'year', varname + '60']
+        ].pivot('year', 'month', varname + '60')
+    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=.5, ax=ax[1])
+
+    return fig, df, res
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(syear=1990))

@@ -10,7 +10,7 @@ NO_FEATURES = [
     17,  # is referenced by canonical page
     38,  # radiation plot that is complex
     49, 50, 51,   # cscap plots that should be removed
-    110, 111, 112, 113, 114, 115, 116, 117,
+    110, 111, 112, 113, 114, 115, 117,
     118, 119, 120, 121, 122, 123, 124,   # climodat text-only reports
     143, 141,  # yieldfx plots
     152,  # growing season differences, too noisey

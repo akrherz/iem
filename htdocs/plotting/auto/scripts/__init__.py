@@ -139,6 +139,9 @@ data = {'plots': [
          'label': "Frequency of Hourly Temperature within Range by Month"},
         {'id': "9", 'label': ("Growing Degree Day Climatology "
                               "and Daily Values for one Year")},
+        {'id': "116",
+         'label': ("Heating Degree Days and Cooling Degree Days, "
+                   "monthly totals")},
         {'id': "42",
          'label': ("Hourly Temperature/Dew Point "
                    "Streaks Above/Below Threshold")},
