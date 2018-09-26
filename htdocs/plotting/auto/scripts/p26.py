@@ -4,7 +4,9 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'fall': 'Minimum Temperature after 1 July',
@@ -193,9 +195,6 @@ $("#ap_container").highcharts({
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_context(fdict)
     df = ctx['df']
 
@@ -219,7 +218,6 @@ def plotter(fdict):
                         'Sep', 'Oct', 'Nov', 'Dec'))
     if ctx['half'] == 'fall':
         ax.set_xlim(200, 366)
-        ax.text(220, 32.4, r'32$^\circ$F', ha='left')
     else:
         ax.set_xlim(0, 181)
     ax.set_ylabel(r"%s $^\circ$F" % (ctx['ylabel'], ))
@@ -229,7 +227,6 @@ def plotter(fdict):
             va='center')
     ax.grid(True)
 
-    from matplotlib.patches import Rectangle
     r = Rectangle((0, 0), 1, 1, fc='pink')
     r2 = Rectangle((0, 0), 1, 1, fc='tan')
     r3 = Rectangle((0, 0), 1, 1, fc='gold')
