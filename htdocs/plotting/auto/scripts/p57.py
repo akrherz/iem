@@ -49,7 +49,10 @@ def plotter(fdict):
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     lastday = datetime.date.today()
-    lastday = lastday.replace(day=1)
+    if varname == 'total_precip' and agg == 'max':
+        lastday += datetime.timedelta(days=1)
+    else:
+        lastday = lastday.replace(day=1)
 
     df = read_sql("""SELECT year, month, avg((high+low)/2.) as avg_temp,
       avg(high) as avg_high_temp, avg(low) as avg_low_temp,
