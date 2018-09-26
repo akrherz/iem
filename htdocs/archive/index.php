@@ -1,7 +1,7 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
-include("../../include/generators.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/generators.php";
 
 define("IEM_APPID", 19);
 $t = new MyView();
@@ -180,8 +180,8 @@ surface plots and other plots.</li>
 
 <h3>US Daily Weather Maps</h3>
 <ul>
- <li><a href="http://www.hpc.ncep.noaa.gov/dailywxmap/pdffiles.html">Recent maps from NCEP</a></li>
- <li><a href="http://www.hpc.ncep.noaa.gov/dailywxmap/index.html">Daily maps</a></li>
+ <li><a href="https://www.wpc.ncep.noaa.gov/dailywxmap/pdffiles.html">Recent maps from NCEP</a></li>
+ <li><a href="https://www.wpc.ncep.noaa.gov/dailywxmap/index.html">Daily maps</a></li>
  <li><a href="http://docs.lib.noaa.gov/rescue/dwm/data_rescue_daily_weather_maps.html">Maps from 1872 to 2002</a></li>
  <li><a href="http://www7.ncdc.noaa.gov/IPS/">NCDC Image and Publications System</a></li>
 </ul>

@@ -6,6 +6,7 @@ from collections import OrderedDict
 import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
@@ -59,9 +60,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     varname = ctx['var']
@@ -114,9 +112,9 @@ def plotter(fdict):
     select * from data where valid = %s ORDER by pressure DESC
     """, pgconn, params=(tuple(stations), hour, ts),
                   index_col='pressure')
-    if len(df.index) == 0:
+    if df.empty:
         raise ValueError(("Sounding for %s was not found!"
-                         ) % (ts.strftime("%Y-%m-%d %H:%M"),))
+                          ) % (ts.strftime("%Y-%m-%d %H:%M"),))
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
         # manual hackery to get 0 and 100th percentile
@@ -128,8 +126,8 @@ def plotter(fdict):
                    align='center')
     y2labels = []
     fmt = '%.1f' if varname not in ['hght', ] else '%.0f'
-    for i, bar in enumerate(bars):
-        ax.text(bar.get_width() + 1, i, '%.1f' % (bar.get_width(),),
+    for i, mybar in enumerate(bars):
+        ax.text(mybar.get_width() + 1, i, '%.1f' % (mybar.get_width(),),
                 va='center', bbox=dict(color='white'))
         y2labels.append((fmt + ' (' + fmt + ' ' + fmt + ')'
                          ) % (df.iloc[i][varname],
