@@ -83,6 +83,7 @@ def plotter(fdict):
         clevs = np.arange(0, 37, 3.)
         clevs[0] = 0.01
         clevstride = 1
+        cmap = 'magma'
     elif varname in ['wind_speed', ]:
         data = speed(nc.variables[varname][idx0, jslice, islice],
                      'MPS').value('MPH')
