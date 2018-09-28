@@ -7,9 +7,8 @@ from scipy import stats
 from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units
-from pyiem import meteorology
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import temperature, mixingratio, pressure
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 MDICT = OrderedDict([
@@ -53,7 +52,7 @@ def get_description():
     the plot.  These hours are expressed as a range of hours using a 24 hour
     clock.  For example, '8-16' would indicate a period between 8 AM and 4 PM
     inclusive.  If you want to plot one hour, just set the start and end hour
-    to the same value.
+    to the same value.</p>
     """
     desc['arguments'] = [
         dict(type='zstation', name='station', default='DSM',
@@ -71,26 +70,42 @@ def get_description():
     return desc
 
 
-def run_calcs(df):
-    """Do our maths"""
-    df['mixingratio'] = meteorology.mixing_ratio(
-        temperature(df['dwpf'].values, 'F')).value('KG/KG')
+def run_calcs(df, ctx):
+    """Do our maths."""
+    # Convert sea level pressure to station pressure
+    df['pressure'] = mcalc.add_height_to_pressure(
+        df['slp'].values * units('millibars'),
+        ctx['nt'].sts[ctx['station']]['elevation'] * units('m')
+    ).to(units('millibar'))
+    # Compute the relative humidity
+    df['relh'] = mcalc.relative_humidity_from_dewpoint(
+        df['tmpf'].values * units('degF'),
+        df['dwpf'].values * units('degF')
+    )
+    # Compute the mixing ratio
+    df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
+        df['relh'].values,
+        df['tmpf'].values * units('degF'),
+        df['pressure'].values * units('millibars')
+    )
+    # Compute the saturation mixing ratio
+    df['saturation_mixingratio'] = mcalc.saturation_mixing_ratio(
+        df['pressure'].values * units('millibars'),
+        df['tmpf'].values * units('degF')
+    )
     df['vapor_pressure'] = mcalc.vapor_pressure(
-        1000. * units.mbar,
+        df['pressure'].values * units('millibars'),
         df['mixingratio'].values * units('kg/kg')).to(units('kPa'))
-    df['saturation_mixingratio'] = (
-        meteorology.mixing_ratio(
-            temperature(df['tmpf'].values, 'F')).value('KG/KG'))
     df['saturation_vapor_pressure'] = mcalc.vapor_pressure(
-        1000. * units.mbar,
+        df['pressure'].values * units('millibars'),
         df['saturation_mixingratio'].values * units('kg/kg')).to(units('kPa'))
     df['vpd'] = df['saturation_vapor_pressure'] - df['vapor_pressure']
     group = df.groupby('year')
     df = group.aggregate(np.average)
 
-    df['dwpf'] = meteorology.dewpoint_from_pq(
-        pressure(1000, 'MB'),
-        mixingratio(df['mixingratio'].values, 'KG/KG')).value('F')
+    df['dwpf'] = mcalc.dewpoint(
+        df['vapor_pressure'].values * units('kPa')
+    ).to(units('degF')).m
     return df
 
 
@@ -146,15 +161,17 @@ def get_data(ctx, startyear):
 
     df = read_sql("""
         WITH obs as (
-            SELECT valid at time zone %s as valid, tmpf, dwpf
+            SELECT valid at time zone %s as valid, tmpf, dwpf,
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp
             from alldata WHERE station = %s and dwpf > -90
             and dwpf < 100 and tmpf >= dwpf and
             extract(month from valid) in %s and
             extract(hour from valid at time zone %s) in %s
+            and report_type = 2
         )
       SELECT valid,
       extract(year from valid + '%s days'::interval)::int as year,
-      tmpf, dwpf from obs
+      tmpf, dwpf, slp from obs
     """, pgconn, params=(ctx['nt'].sts[ctx['station']]['tzname'],
                          ctx['station'], tuple(months),
                          ctx['nt'].sts[ctx['station']]['tzname'],
@@ -167,9 +184,6 @@ def get_data(ctx, startyear):
 
 def make_plot(df, ctx):
     """Do the plotting"""
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     season = ctx['season']
     varname = ctx['varname']
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
@@ -201,7 +215,7 @@ def make_plot(df, ctx):
     ax.grid(True)
     ax.set_title(("[%s] %s %.0f-%.0f\nAverage %s [%s] %s"
                   ) % (ctx['station'], ctx['nt'].sts[ctx['station']]['name'],
-                       df.index.min(), df.index.max(),  PDICT[varname],
+                       df.index.min(), df.index.max(), PDICT[varname],
                        MDICT[season], ctx.get('hour_limiter', '')))
     ax.legend(ncol=1, loc=1)
     return fig
@@ -214,7 +228,7 @@ def plotter(fdict):
     startyear = ctx['year']
 
     df = get_data(ctx, startyear)
-    df = run_calcs(df)
+    df = run_calcs(df, ctx)
     fig = make_plot(df, ctx)
 
     return fig, df

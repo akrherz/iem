@@ -1,14 +1,12 @@
-"""Average dew point by wind direction"""
+"""Average dew point by wind direction."""
 import datetime
 from collections import OrderedDict
 
-import psycopg2.extras
-import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
+from metpy.units import units
+import metpy.calc as mcalc
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
-from pyiem.meteorology import mixing_ratio, dewpoint_from_pq
-from pyiem.datatypes import temperature, pressure, mixingratio
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict([
@@ -54,7 +52,6 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('asos')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
@@ -78,38 +75,48 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    cursor.execute("""
-        SELECT drct::int as t, dwpf from alldata where station = %s
+    df = read_sql("""
+        SELECT drct::int as t, dwpf, tmpf,
+        coalesce(mslp, alti * 33.8639, 1013.25) as slp
+        from alldata where station = %s
         and drct is not null and dwpf is not null and dwpf <= tmpf
         and sknt > 3 and drct::int %% 10 = 0
         and extract(month from valid) in %s
-        """, (station,  tuple(months)))
-    sums = np.zeros((361,), 'f')
-    counts = np.zeros((361,), 'f')
-    for row in cursor:
-        r = mixing_ratio(temperature(row[1], 'F')).value('KG/KG')
-        sums[row[0]] += r
-        counts[row[0]] += 1
+        and report_type = 2
+    """, pgconn, params=(station, tuple(months)))
+    # Convert sea level pressure to station pressure
+    df['pressure'] = mcalc.add_height_to_pressure(
+        df['slp'].values * units('millibars'),
+        nt.sts[station]['elevation'] * units('m')
+    ).to(units('millibar'))
+    # compute RH
+    df['relh'] = mcalc.relative_humidity_from_dewpoint(
+        df['tmpf'].values * units('degF'),
+        df['dwpf'].values * units('degF')
+    )
+    # compute mixing ratio
+    df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
+        df['relh'].values,
+        df['tmpf'].values * units('degF'),
+        df['pressure'].values * units('millibars')
+    )
+    # compute pressure
+    df['vapor_pressure'] = mcalc.vapor_pressure(
+        df['pressure'].values * units('millibars'),
+        df['mixingratio'].values * units('kg/kg')
+    ).to(units('kPa'))
 
-    sums[0] = sums[360]
-    counts[0] = counts[360]
-
-    rows = []
-    for i in range(361):
-        if counts[i] < 3:
-            continue
-        r = sums[i] / float(counts[i])
-        d = dewpoint_from_pq(pressure(1000, 'MB'),
-                             mixingratio(r, 'KG/KG')
-                             ).value('F')
-        rows.append(dict(drct=i, dwpf=d))
-
-    df = pd.DataFrame(rows)
-    drct = df['drct']
-    dwpf = df['dwpf']
+    means = df.groupby('t').mean().copy()
+    # compute dewpoint now
+    means['dwpf'] = mcalc.dewpoint(
+        means['vapor_pressure'].values * units('kPa')
+    ).to(units('degF')).m
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(drct, dwpf, ec='green', fc='green', width=10, align='center')
+    ax.bar(
+        means.index.values, means['dwpf'].values, ec='green', fc='green',
+        width=10, align='center'
+    )
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\nAverage Dew Point by Wind Direction (month=%s) "
                   "(%s-%s)\n"
@@ -119,13 +126,13 @@ def plotter(fdict):
                        datetime.datetime.now().year), size=10)
 
     ax.set_ylabel("Dew Point [F]")
-    ax.set_ylim(min(dwpf)-5, max(dwpf)+5)
+    ax.set_ylim(means['dwpf'].min() - 5, means['dwpf'].max() + 5)
     ax.set_xlim(-5, 365)
     ax.set_xticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'])
     ax.set_xlabel("Wind Direction")
 
-    return fig, df
+    return fig, means['dwpf']
 
 
 if __name__ == '__main__':

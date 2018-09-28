@@ -2,11 +2,10 @@
 import datetime
 import calendar
 
-import numpy as np
 from pandas.io.sql import read_sql
+from metpy.units import units
+import metpy.calc as mcalc
 from pyiem.network import Table as NetworkTable
-from pyiem.meteorology import mixing_ratio, relh
-from pyiem.datatypes import temperature
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -54,19 +53,46 @@ def plotter(fdict):
 
     df = read_sql("""
         SELECT extract(year from valid) as year,
+        coalesce(mslp, alti * 33.8639, 1013.25) as slp,
         extract(doy from valid) as doy, tmpf, dwpf from alldata
         where station = %s and dwpf > -50 and dwpf < 90 and
         tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
         and report_type = 2
     """, pgconn, params=(station,), index_col=None)
-    df['relh'] = relh(temperature(df['tmpf'].values, 'F'),
-                      temperature(df['dwpf'].values, 'F')).value('%')
-    df['tmpc'] = temperature(df['tmpf'].values, 'F').value('C')
-    df['svp'] = 0.611 * np.exp(17.502 * df['tmpc'].values /
-                               (240.97 + df['tmpc'].values))
-    df['vpd'] = (1. - (df['relh'] / 100.)) * df['svp']
-    df['mixing_ratio'] = mixing_ratio(
-                            temperature(df['dwpf'].values, 'F')).value('KG/KG')
+    # compute RH
+    df['relh'] = mcalc.relative_humidity_from_dewpoint(
+        df['tmpf'].values * units('degF'),
+        df['dwpf'].values * units('degF')
+    )
+    # saturation vapor pressure
+    # Convert sea level pressure to station pressure
+    df['pressure'] = mcalc.add_height_to_pressure(
+        df['slp'].values * units('millibars'),
+        nt.sts[station]['elevation'] * units('m')
+    ).to(units('millibar'))
+    # Compute the relative humidity
+    df['relh'] = mcalc.relative_humidity_from_dewpoint(
+        df['tmpf'].values * units('degF'),
+        df['dwpf'].values * units('degF')
+    )
+    # Compute the mixing ratio
+    df['mixing_ratio'] = mcalc.mixing_ratio_from_relative_humidity(
+        df['relh'].values,
+        df['tmpf'].values * units('degF'),
+        df['pressure'].values * units('millibars')
+    )
+    # Compute the saturation mixing ratio
+    df['saturation_mixingratio'] = mcalc.saturation_mixing_ratio(
+        df['pressure'].values * units('millibars'),
+        df['tmpf'].values * units('degF')
+    )
+    df['vapor_pressure'] = mcalc.vapor_pressure(
+        df['pressure'].values * units('millibars'),
+        df['mixing_ratio'].values * units('kg/kg')).to(units('kPa'))
+    df['saturation_vapor_pressure'] = mcalc.vapor_pressure(
+        df['pressure'].values * units('millibars'),
+        df['saturation_mixingratio'].values * units('kg/kg')).to(units('kPa'))
+    df['vpd'] = df['saturation_vapor_pressure'] - df['vapor_pressure']
 
     dailymeans = df[['year', 'doy', varname]].groupby(['year', 'doy']).mean()
     dailymeans = dailymeans.reset_index()
@@ -116,8 +142,8 @@ def plotter(fdict):
             rect.set_facecolor(cbelow)
             rect.set_edgecolor(cbelow)
 
-    units = '$g/kg$' if varname == 'mixing_ratio' else 'hPa'
-    ax[1].set_ylabel("%.0f Departure (%s)" % (year, units))
+    plunits = '$g/kg$' if varname == 'mixing_ratio' else 'hPa'
+    ax[1].set_ylabel("%.0f Departure (%s)" % (year, plunits))
     ax[1].set_xlim(0, 366)
     ax[1].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335,
                       365))

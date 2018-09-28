@@ -1,13 +1,11 @@
-"""Avg dew point at temperature"""
+"""Avg dew point at temperature."""
 from collections import OrderedDict
 import datetime
 
-import psycopg2.extras
-import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
+from metpy.units import units
+import metpy.calc as mcalc
 from pyiem.network import Table as NetworkTable
-from pyiem.meteorology import mixing_ratio, dewpoint_from_pq, relh
-from pyiem.datatypes import temperature, pressure, mixingratio
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 
@@ -54,7 +52,6 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('asos')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -77,37 +74,54 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    cursor.execute("""
-        SELECT tmpf::int as t, dwpf from alldata where station = %s
-        and tmpf is not null and dwpf is not null and dwpf <= tmpf
-        and tmpf >= 0 and tmpf <= 140
+    df = read_sql("""
+        SELECT tmpf::int as tmpf, dwpf,
+        coalesce(mslp, alti * 33.8639, 1013.25) as slp
+        from alldata where station = %s
+        and drct is not null and dwpf is not null and dwpf <= tmpf
+        and sknt > 3 and drct::int %% 10 = 0
         and extract(month from valid) in %s
-        """, (station, tuple(months)))
-    sums = np.zeros((140,), 'f')
-    counts = np.zeros((140,), 'f')
-    for row in cursor:
-        r = mixing_ratio(temperature(row[1], 'F')).value('KG/KG')
-        sums[row[0]] += r
-        counts[row[0]] += 1
+        and report_type = 2
+    """, pgconn, params=(station, tuple(months)))
+    # Convert sea level pressure to station pressure
+    df['pressure'] = mcalc.add_height_to_pressure(
+        df['slp'].values * units('millibars'),
+        nt.sts[station]['elevation'] * units('m')
+    ).to(units('millibar'))
+    # compute RH
+    df['relh'] = mcalc.relative_humidity_from_dewpoint(
+        df['tmpf'].values * units('degF'),
+        df['dwpf'].values * units('degF')
+    )
+    # compute mixing ratio
+    df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
+        df['relh'].values,
+        df['tmpf'].values * units('degF'),
+        df['pressure'].values * units('millibars')
+    )
+    # compute pressure
+    df['vapor_pressure'] = mcalc.vapor_pressure(
+        df['pressure'].values * units('millibars'),
+        df['mixingratio'].values * units('kg/kg')
+    ).to(units('kPa'))
 
-    rows = []
-    for i in range(140):
-        if counts[i] < 3:
-            continue
-        r = sums[i] / float(counts[i])
-        d = dewpoint_from_pq(pressure(1000, 'MB'),
-                             mixingratio(r, 'KG/KG')
-                             ).value('F')
-        rh = relh(temperature(i, 'F'), temperature(d, 'F')).value('%')
-        rows.append(dict(tmpf=i, dwpf=d, rh=rh))
-
-    df = pd.DataFrame(rows)
-    tmpf = df['tmpf']
-    dwpf = df['dwpf']
-    rh = df['rh']
+    means = df.groupby('tmpf').mean().copy()
+    # compute dewpoint now
+    means['dwpf'] = mcalc.dewpoint(
+        means['vapor_pressure'].values * units('kPa')
+    ).to(units('degF')).m
+    means.reset_index(inplace=True)
+    # compute RH again
+    means['relh'] = mcalc.relative_humidity_from_dewpoint(
+        means['tmpf'].values * units('degF'),
+        means['dwpf'].values * units('degF')
+    ) * 100.
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    ax.bar(tmpf-0.5, dwpf, ec='green', fc='green', width=1)
+    ax.bar(
+        means['tmpf'].values - 0.5, means['dwpf'].values - 0.5,
+        ec='green', fc='green', width=1
+    )
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\nAverage Dew Point by Air Temperature (month=%s) "
                   "(%s-%s)\n"
@@ -119,15 +133,15 @@ def plotter(fdict):
     ax.plot([0, 140], [0, 140], color='b')
     ax.set_ylabel("Dew Point [F]")
     y2 = ax.twinx()
-    y2.plot(tmpf, rh, color='k')
+    y2.plot(means['tmpf'].values, means['relh'].values, color='k')
     y2.set_ylabel("Relative Humidity [%] (black line)")
     y2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     y2.set_ylim(0, 100)
-    ax.set_ylim(0, max(tmpf)+2)
-    ax.set_xlim(0, max(tmpf)+2)
+    ax.set_ylim(0, means['tmpf'].max() + 2)
+    ax.set_xlim(0, means['tmpf'].max() + 2)
     ax.set_xlabel(r"Air Temperature $^\circ$F")
 
-    return fig, df
+    return fig, means[['tmpf', 'dwpf', 'relh']]
 
 
 if __name__ == '__main__':
