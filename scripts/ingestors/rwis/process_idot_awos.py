@@ -1,6 +1,7 @@
 """Process AWOS METAR file"""
 from __future__ import print_function
 import re
+import sys
 import os
 import datetime
 import ftplib
@@ -18,7 +19,11 @@ def fetch_files():
     props = util.get_properties()
 
     fn = "%s/iaawos_metar.txt" % (INCOMING, )
-    ftp = ftplib.FTP('165.206.203.34')
+    try:
+        ftp = ftplib.FTP('165.206.203.34')
+    except TimeoutError as _exp:
+        print("process_idot_awos FTP server timeout error")
+        sys.exit()
     ftp.login('rwis', props['rwis_ftp_password'])
     ftp.retrbinary('RETR METAR.txt', open(fn, 'wb').write)
     ftp.close()

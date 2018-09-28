@@ -312,7 +312,11 @@ def fetch_files():
     props = util.get_properties()
     # get atmosfn
     atmosfn = "%s/rwis.txt" % (INCOMING, )
-    ftp = ftplib.FTP('165.206.203.34')
+    try:
+        ftp = ftplib.FTP('165.206.203.34')
+    except TimeoutError as _exp:
+        print("process_rwis FTP Server Timeout")
+        sys.exit()
     ftp.login('rwis', props['rwis_ftp_password'])
     ftp.retrbinary('RETR ExpApAirData.txt', open(atmosfn, 'wb').write)
     # Insert into LDM

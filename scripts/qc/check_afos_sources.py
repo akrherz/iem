@@ -43,7 +43,7 @@ def look4(ts):
     for row in cursor:
         source = row[0]
         lookup = source[1:] if source[0] == 'K' else source
-        if lookup not in nt.sts:
+        if lookup not in nt.sts and lookup[0] in ['K', 'P']:
             print('%s %s' % (row[0], row[1]))
             sample(source, ts)
 
