@@ -1,10 +1,13 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 24);
-include("../../../include/forms.php");
-include("../../../include/myview.php");
+require_once "../../../include/forms.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "ISU AMS Station #2 on Agronomy";
+if (! isset($_GET["year"])){
+    $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">\n";
+}
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");

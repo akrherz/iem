@@ -17,6 +17,7 @@ NO_FEATURES = [
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
     102,  # LSR report types
+    144,  # soil temp periods, too fragile of data to be useful
     187  # Unimplemented
 ]
 
