@@ -74,7 +74,7 @@ def do_json(pidx):
             output = ""
             response_headers = [('Content-type', 'application/json'),
                                 ('Content-Length', str(len(output)))]
-            return output.encode(), status, response_headers
+            return output, status, response_headers
         try:
             timing = get_timing(pidx)
         except Exception as _:
