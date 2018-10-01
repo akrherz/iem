@@ -2,18 +2,25 @@
 import datetime
 
 from pandas.io.sql import read_sql
+import numpy as np
 import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
+PDICT = {
+    'count': "Event Count",
+    'tpercent': "Percent of Time",
+}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This application generates a map of the number of
+    desc['description'] = """This application generates a map of the number
+    of or time coverage of
     VTEC encoded Watch, Warning,
      and Advisory (WWA) events by NWS Forecast Office for a time period of
      your choice. The archive of products goes back to October 2005.
@@ -30,6 +37,8 @@ def get_description():
         dict(type='datetime', name='edate',
              default=today.strftime("%Y/%m/%d 0000"),
              label='End Date / Time (UTC):', min="2005/01/01 0000"),
+        dict(type='select', name='var', default='count', options=PDICT,
+             label='Which metric to plot:'),
         dict(type='vtec_ps', name='v1', default='UNUSED',
              label='VTEC Phenomena and Significance 1'),
         dict(type='vtec_ps', name='v2', default='UNUSED', optional=True,
@@ -54,6 +63,7 @@ def plotter(fdict):
     p2 = ctx['phenomenav2']
     p3 = ctx['phenomenav3']
     p4 = ctx['phenomenav4']
+    varname = ctx['var']
     phenomena = []
     for p in [p1, p2, p3, p4]:
         if p is not None:
@@ -79,44 +89,67 @@ def plotter(fdict):
     pstr = " or ".join(pstr)
     pstr = "(%s)" % (pstr,)
 
-    df = read_sql("""
-with total as (
-  select distinct wfo, extract(year from issue at time zone 'UTC') as year,
-  phenomena, significance, eventid from warnings
-  where """ + pstr + """ and
-  issue >= %s and issue < %s
-)
+    if varname == 'count':
+        df = read_sql("""
+    with total as (
+    select distinct wfo, extract(year from issue at time zone 'UTC') as year,
+    phenomena, significance, eventid from warnings
+    where """ + pstr + """ and
+    issue >= %s and issue < %s
+    )
 
-SELECT wfo, phenomena, significance, year, count(*) from total
-GROUP by wfo, phenomena, significance, year
-    """, pgconn, params=(sts, ets))
+    SELECT wfo, phenomena, significance, year, count(*) from total
+    GROUP by wfo, phenomena, significance, year
+        """, pgconn, params=(sts, ets))
 
-    df2 = df.groupby('wfo')['count'].sum()
+        df2 = df.groupby('wfo')['count'].sum()
+        maxv = df2.max()
+        bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
+        if maxv > 200:
+            bins = [0, 1, 3, 5, 10, 20, 35, 50, 75, 100, 150, 200, 250,
+                    500, 750, 1000]
+        elif maxv > 1000:
+            bins = [0, 1, 5, 10, 50, 100, 150, 200, 250,
+                    500, 750, 1000, 1250, 1500, 2000]
+        units = 'Count'
+        lformat = '%.0f'
+    else:
+        total_minutes = (ets - sts).total_seconds() / 60.
+        df = read_sql("""
+        WITH data as (
+            SELECT distinct wfo, generate_series(greatest(issue, %s),
+            least(expire, %s), '1 minute'::interval) as ts from warnings
+            WHERE """ + pstr + """
+        )
+        select wfo, count(*) / %s * 100. as tpercent from data
+        GROUP by wfo ORDER by tpercent DESC
+        """, pgconn, params=(sts, ets, total_minutes), index_col='wfo')
+
+        df2 = df['tpercent']
+        bins = list(range(0, 101, 10))
+        if df2.max() < 5:
+            bins = np.arange(0, 5.1, 0.5)
+        elif df2.max() < 10:
+            bins = list(range(0, 11, 1))
+        units = 'Percent'
+        lformat = '%.1f'
 
     nt = NetworkTable("WFO")
     for sid in nt.sts:
         sid = sid[-3:]
         if sid not in df2:
             df2[sid] = 0
-    maxv = df2.max()
-    bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
-    if maxv > 200:
-        bins = [0, 1, 3, 5, 10, 20, 35, 50, 75, 100, 150, 200, 250,
-                500, 750, 1000]
-    elif maxv > 1000:
-        bins = [0, 1, 5, 10, 50, 100, 150, 200, 250,
-                500, 750, 1000, 1250, 1500, 2000]
 
     mp = MapPlot(sector='nws', axisbg='white',
-                 title='%s Counts by NWS Office' % (title,),
+                 title='%s %s by NWS Office' % (title, PDICT[varname]),
                  subtitle=('Valid %s - %s UTC, based on VTEC: %s'
                            ) % (sts.strftime("%d %b %Y %H:%M"),
                                 ets.strftime("%d %b %Y %H:%M"),
                                 subtitle))
-    mp.fill_cwas(df2, bins=bins, ilabel=True)
+    mp.fill_cwas(df2, bins=bins, ilabel=True, units=units, lblformat=lformat)
 
     return mp.fig, df
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter({'var': 'tpercent', 'phenomenav1': 'SV', 'significancev1': 'W'})
