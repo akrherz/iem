@@ -1,5 +1,11 @@
-"""
- Process the GHCN data
+"""Process the GHCN data.
+
+    $ python ingest_ghcn.py  # runs for a random state
+    $ python ingest_ghcn.py IA0200  # runs for a given station
+    $ python ingest_ghcn.py ALL  # runs over entire database
+    $ python ingest_ghcn.py IA  # runs for given state
+    $ python ingest_ghcn.py IA bogus  # allows inserts to happen
+
  http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00130200.dly
  http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt
 
@@ -187,7 +193,7 @@ def get_obs(metadata):
                                                   values='value')
 
 
-def process(station, metadata):
+def process(station, metadata, allow_inserts):
     """Lets process something, stat
 
     ['TMAX', 'TMIN', 'TOBS', 'PRCP', 'SNOW', 'SNWD', 'EVAP', 'MNPN', 'MXPN',
@@ -215,7 +221,7 @@ def process(station, metadata):
     # join the tables
     df = obs.join(current, how='left')
     # Loop over our result
-    cnts = {'updates': 0, 'adds': 0}
+    cnts = {'updates': 0, 'adds': 0, 'inserts_skipped': 0}
     for dt, row in df.iterrows():
         date = datetime.date(dt.year, dt.month, dt.day)
         work = []
@@ -235,6 +241,9 @@ def process(station, metadata):
         if cursor.rowcount == 1:
             cnts['updates'] += 1
             continue
+        if not allow_inserts:
+            cnts['inserts_skipped'] += 1
+            continue
         cnts['adds'] += 1
         # Adding a row
         cursor.execute("""
@@ -252,8 +261,10 @@ def process(station, metadata):
               None if pd.isna(row['SNWD']) else row['SNWD'],
               ))
 
-    print("%s adds: %s updates: %s" % (station, cnts['adds'],
-                                       cnts['updates']))
+    print(
+        ("%s adds: %s skipped: %s updates: %s"
+         ) % (station, cnts['adds'], cnts['inserts_skipped'], cnts['updates'])
+    )
     cursor.close()
     # print("database commit disabled")
     PGCONN.commit()
@@ -269,6 +280,7 @@ def main(argv):
         station = states[doy % len(states)]
     else:
         station = argv[1]
+    allow_inserts = (len(argv) == 3)
     # print("station is %s" % (station, ))
     if len(station) == 2:
         # we have a state!
@@ -276,17 +288,17 @@ def main(argv):
         for sid in nt.sts:
             if sid[2:] == '0000' or sid[2] == 'C':
                 continue
-            process(sid, nt.sts[sid])
+            process(sid, nt.sts[sid], allow_inserts)
     elif station == 'ALL':
         for state in STCONV:
             nt = NetworkTable("%sCLIMATE" % (state,))
             for sid in nt.sts:
                 if sid[2:] == '0000' or sid[2] == 'C':
                     continue
-                process(sid, nt.sts[sid])
+                process(sid, nt.sts[sid], allow_inserts)
     else:
         nt = NetworkTable("%sCLIMATE" % (station[:2],))
-        process(sys.argv[1], nt.sts[station])
+        process(sys.argv[1], nt.sts[station], allow_inserts)
 
 
 if __name__ == '__main__':
