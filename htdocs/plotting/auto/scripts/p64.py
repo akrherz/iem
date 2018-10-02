@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.reference import TRACE_VALUE
 
 PDICT = {'first': 'First Snowfall after 1 July',
@@ -82,7 +83,10 @@ def get_data(ctx):
         else:
             color = 'r'
         # print("year: %s idx: %s days: %s %s" % (year, idx, days, snowdepth))
-        dt = datetime.date(year, 1, 1) + datetime.timedelta(days=(idx+183))
+        dt = (
+            datetime.date(year, 1, 1) +
+            datetime.timedelta(days=(int(idx)+183))
+        )
         rows.append(dict(year=year, snow_date=dt, snow_doy=(idx+183),
                          color=color, days=days,
                          snowfree_doy=(sfree+183),
@@ -93,9 +97,6 @@ def get_data(ctx):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
 
@@ -137,7 +138,7 @@ def plotter(fdict):
         '3 - 10 [%s]' % (len(df[df['color'] == 'b'].index), ),
         '< 3 days [%s]' % (len(df[df['color'] == 'r'].index), )),
               ncol=4, fontsize=11, loc=(0., -0.15))
-    ax.set_xlim(df['snow_doy'].min()-5,  df['snowfree_doy'].max()+5)
+    ax.set_xlim(df['snow_doy'].min() - 5, df['snowfree_doy'].max() + 5)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width,

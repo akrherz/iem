@@ -3,9 +3,10 @@ import calendar
 import datetime
 
 from pandas.io.sql import read_sql
-import pyiem.nws.vtec as vtec
+from pyiem.nws import vtec
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem import reference
 
 OPT = {'state': 'Summarize by State',
@@ -44,9 +45,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
 

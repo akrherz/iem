@@ -5,6 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -28,9 +29,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -58,6 +56,7 @@ def plotter(fdict):
     base = None
     bins = [0.01, ]
     minyear = None
+    row = None
     for i, row in enumerate(cursor):
         if i == 0:
             minyear = row['minyear']
@@ -111,26 +110,27 @@ def plotter(fdict):
     df['precip_%s' % (year, )] = yearlytotals[year-minyear, :]
     df['normal_%s' % (year, )] = normal / 5.
 
-    ybuffer = (max([max(avgs), max(dlast)]) + 2) * 0.03
+    ybuffer = (max([max(avgs), max(dlast)]) + 2) * 0.05
 
     bars = ax.bar(np.arange(5) - 0.2, avgs, width=0.4, fc='b', align='center',
                   label='Average = %.2f"' % (normal,))
-    for i in range(len(bars)):
-        ax.text(bars[i].get_x()+0.2, avgs[i] + ybuffer, "%.1f" % (avgs[i],),
+    for i, _bar in enumerate(bars):
+        ax.text(_bar.get_x() + 0.2, avgs[i] + ybuffer, "%.1f" % (avgs[i],),
                 ha='center', zorder=2)
         delta = yearlytotals[year-minyear, i] / normal * 100.0 - 20.0
         ax.text(i, max(avgs[i], dlast[i]) + 2 * ybuffer,
                 "%s%.1f%%" % ("+" if delta > 0 else "", delta,),
                 ha='center', color='r',
-                bbox=dict(facecolor='white', edgecolor='white'),
-                zorder=1)
+                bbox=dict(pad=0, facecolor='white', edgecolor='white'))
 
     bars = ax.bar(np.arange(5) + 0.2, dlast, width=0.4, fc='r', align='center',
                   label='%s = %.2f"' % (year,
                                         np.sum(yearlytotals[year-minyear, :])))
-    for i in range(len(bars)):
-        ax.text(bars[i].get_x()+0.2, dlast[i] + ybuffer, "%.0f" % (dlast[i],),
-                ha='center')
+    for i, _bar in enumerate(bars):
+        ax.text(
+            _bar.get_x()+0.2, dlast[i] + ybuffer, "%.0f" % (dlast[i],),
+            ha='center'
+        )
 
     ax.text(0.7, 0.8, ("Red text represents %s bin total\nprecip "
                        "departure from average") % (year,),

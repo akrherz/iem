@@ -3,11 +3,13 @@ import datetime
 
 import psycopg2.extras
 import numpy as np
+import pandas as pd
+import matplotlib.patheffects as PathEffects
 from pyiem.network import Table as NetworkTable
 from pyiem.util import drct2text
 from pyiem.datatypes import speed
 from pyiem.util import get_autoplot_context, get_dbconn
-import pandas as pd
+from pyiem.plot.use_agg import plt
 
 PDICT = {'KT': 'knots',
          'MPH': 'miles per hour',
@@ -43,7 +45,7 @@ def get_description():
     return desc
 
 
-def draw_line(plt, x, y, angle):
+def draw_line(x, y, angle):
     """Draw a line"""
     r = 0.25
     plt.arrow(x, y, r * np.cos(angle), r * np.sin(angle),
@@ -52,10 +54,6 @@ def draw_line(plt, x, y, angle):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.patheffects as PathEffects
     pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -92,7 +90,7 @@ def plotter(fdict):
     ax.bar(np.array(days), sknt, ec='green', fc='green', align='center')
     pos = max([min(sknt) / 2.0, 0.5])
     for d, _, r in zip(days, sknt, drct):
-        draw_line(plt, d, max(sknt)+0.5, (270. - r) / 180. * np.pi)
+        draw_line(d, max(sknt)+0.5, (270. - r) / 180. * np.pi)
         txt = ax.text(d, pos, drct2text(r), ha='center', rotation=90,
                       color='white', va='center')
         txt.set_path_effects([PathEffects.withStroke(linewidth=2,
