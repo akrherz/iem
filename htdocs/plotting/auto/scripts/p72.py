@@ -1,10 +1,9 @@
 """histogram of issuance time"""
 
-import psycopg2.extras
-import numpy as np
 from pandas.io.sql import read_sql
-import pyiem.nws.vtec as vtec
+from pyiem.nws import vtec
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -37,9 +36,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -75,10 +71,12 @@ def plotter(fdict):
                   index_col='minute')
     if df.empty:
         raise ValueError("No Results Found")
-
-    ax.bar(df.index.values, df['count'] / df['total'] * 100., ec='b', fc='b',
+    df['frequency'] = df['count'] / df['total'] * 100.
+    ax.bar(df.index.values, df['frequency'].values, ec='b', fc='b',
            align='center')
     ax.grid()
+    if df['frequency'].max() > 70:
+        ax.set_ylim(0, 101)
     ax.set_xticks(range(0, 25 * 60, 60))
     ax.set_xlim(-0.5, 24 * 60 + 1)
     ax.set_xticklabels(["Mid", "", "", "3 AM", "", "", "6 AM", "", "", '9 AM',

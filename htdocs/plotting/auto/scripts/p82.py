@@ -9,6 +9,8 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import speed
 from pyiem.reference import TRACE_VALUE
+from pyiem.plot import calendar_plot
+
 
 PDICT = OrderedDict([
         ('avg_smph', 'Average Wind Speed [mph]'),
@@ -64,9 +66,6 @@ def safe(row, varname):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    from pyiem.plot import calendar_plot
     pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

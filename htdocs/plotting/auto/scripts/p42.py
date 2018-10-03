@@ -32,6 +32,7 @@ from collections import OrderedDict
 import psycopg2.extras
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'At or Above Threshold...',
@@ -146,9 +147,6 @@ def compute_xlabels(ax):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

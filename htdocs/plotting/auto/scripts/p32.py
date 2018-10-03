@@ -2,7 +2,9 @@
 import datetime
 
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'high': 'High Temperature',
@@ -35,10 +37,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -79,16 +77,16 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
     diff = df[varname+'_' + how]
-    bars = ax.bar(df['day'].values, diff,  fc='b', ec='b', align='center')
-    for i, bar in enumerate(bars):
+    bars = ax.bar(df['day'].values, diff, fc='b', ec='b', align='center')
+    for i, _bar in enumerate(bars):
         if diff[i] > 0:
-            bar.set_facecolor('r')
-            bar.set_edgecolor('r')
+            _bar.set_facecolor('r')
+            _bar.set_edgecolor('r')
     ax.grid(True)
     if how == 'diff':
-        ax.set_ylabel("Temperature Departure $^\circ$F")
+        ax.set_ylabel(r"Temperature Departure $^\circ$F")
     else:
-        ax.set_ylabel("Temperature Std Dev Departure ($\sigma$)")
+        ax.set_ylabel(r"Temperature Std Dev Departure ($\sigma$)")
     ax.set_title(("%s %s\nYear %s %s Departure"
                   ) % (station, nt.sts[station]['name'], year,
                        PDICT[varname]))

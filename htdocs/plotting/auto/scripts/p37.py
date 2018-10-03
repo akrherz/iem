@@ -5,6 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'NAM': 'NAM (9 Dec 2008 - current)',
@@ -40,9 +41,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     asos_pgconn = get_dbconn('asos')
     acursor = asos_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mos_pgconn = get_dbconn('mos')

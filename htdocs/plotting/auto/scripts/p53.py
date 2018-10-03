@@ -5,6 +5,7 @@ import calendar
 import psycopg2.extras
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'tmpf': 'Air Temperature',
@@ -42,9 +43,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -103,22 +101,22 @@ def plotter(fdict):
         xticks.append(float(ts.strftime("%j")) / 7.0)
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(weeks, d6,  width=1, fc='red', ec='None',
+    ax.bar(weeks, d6, width=1, fc='red', ec='None',
            label='%s & Above' % (t5,))
     ax.bar(weeks, d5, width=1, fc='tan', ec='None',
            label='%s-%s' % (t4, t5 - 1))
-    ax.bar(weeks, d4,  width=1, fc='yellow', ec='None',
+    ax.bar(weeks, d4, width=1, fc='yellow', ec='None',
            label='%s-%s' % (t3, t4 - 1))
-    ax.bar(weeks, d3,  width=1, fc='green', ec='None',
+    ax.bar(weeks, d3, width=1, fc='green', ec='None',
            label='%s-%s' % (t2, t3 - 1))
     ax.bar(weeks, d2, width=1, fc='blue', ec='None',
            label='%s-%s' % (t1, t2 - 1))
-    ax.bar(weeks, d1,  width=1, fc='purple', ec='None',
+    ax.bar(weeks, d1, width=1, fc='purple', ec='None',
            label='Below %s' % (t1))
 
     ax.grid(True, zorder=11)
     ax.set_title(("%s [%s]\n"
-                  "Hourly %s ($^\circ$F) Frequencies (%s-%s)"
+                  r"Hourly %s ($^\circ$F) Frequencies (%s-%s)"
                   ) % (nt.sts[station]['name'], station,
                        PDICT[v], nt.sts[station]['archive_begin'].year,
                        datetime.datetime.now().year))

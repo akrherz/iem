@@ -4,7 +4,11 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
+from windrose.windrose import histogram
+from windrose import WindroseAxes
+from matplotlib.patches import Rectangle
 from pyiem.util import get_autoplot_context, get_dbconn, drct2text
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
@@ -57,9 +61,6 @@ def get_description():
 
 def highcharts(fdict):
     """ Generate the highcharts variant"""
-    import matplotlib
-    matplotlib.use('agg')
-    from windrose.windrose import histogram
     ctx = get_context(fdict)
     dir_edges, _, table = histogram(ctx['df']['drct'].values,
                                     ctx['df']['smph'].values,
@@ -70,22 +71,22 @@ def highcharts(fdict):
     var arr = """+str(arr)+""";
     $("#ap_container").highcharts({
     series: [{name: '2 - 5',
-                    data: """+str(zip(arr, table[1]))+""",
+                    data: """ + str(list(zip(arr, table[1]))) + """,
                     _colorIndex: 0},
                    {name: '5 - 7',
-                    data: """+str(zip(arr, table[2]))+""",
+                    data: """ + str(list(zip(arr, table[2]))) + """,
                     _colorIndex: 1},
                    {name: '7 - 10',
-                    data: """+str(zip(arr, table[3]))+""",
+                    data: """ + str(list(zip(arr, table[3]))) + """,
                     _colorIndex: 2},
                    {name: '10 - 15',
-                    data: """+str(zip(arr, table[4]))+""",
+                    data: """ + str(list(zip(arr, table[4]))) + """,
                     _colorIndex: 3},
                    {name: '15 - 20',
-                    data: """+str(zip(arr, table[5]))+""",
+                    data: """ + str(list(zip(arr, table[5]))) + """,
                     _colorIndex: 4},
                    {name: '20 +',
-                    data: """+str(zip(arr, table[6]))+""",
+                    data: """ + str(list(zip(arr, table[6]))) + """,
                     _colorIndex: 5}],
     chart: {
             polar: true,
@@ -217,17 +218,12 @@ def get_context(fdict):
     ctx['title'] = "%s-%s %s Wind Rose, month=%s" % (
         minvalid.year, maxvalid.year, ctx['station'], ctx['month'].upper())
     ctx['subtitle'] = "%s, %s" % (ctx['nt'].sts[ctx['station']]['name'],
-                                  title.replace("$^\circ$", ""))
+                                  title.replace(r"$^\circ$", ""))
     return ctx
 
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    from windrose import WindroseAxes
-    from matplotlib.patches import Rectangle
     ctx = get_context(fdict)
 
     fig = plt.figure(figsize=(6, 7.2), facecolor='w', edgecolor='w')
