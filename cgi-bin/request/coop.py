@@ -25,7 +25,7 @@ def get_scenario_period(ctx):
     Arguments:
         ctx dictionary context this app was called with
     """
-    sts = datetime.date(ctx['scenario_year'], ctx['sts'].month, ctx['sts'].day)
+    sts = datetime.date(ctx['scenario_year'], ctx['ets'].month, ctx['ets'].day)
     ets = datetime.date(ctx['scenario_year'], 12, 31)
     return sts, ets
 
@@ -708,10 +708,9 @@ def main():
     ctx['scenario'] = form.getfirst('scenario', 'no')
     ctx['hayhoe_scenario'] = form.getfirst('hayhoe_scenario')
     ctx['hayhoe_model'] = form.getfirst('hayhoe_model')
+    ctx['scenario_year'] = 2099
     if ctx['scenario'] == 'yes':
         ctx['scenario_year'] = int(form.getfirst('scenario_year', 2099))
-    else:
-        ctx['scenario_year'] = 2099
     ctx['scenario_sts'], ctx['scenario_ets'] = get_scenario_period(ctx)
 
     # TODO: this code stinks and is likely buggy
