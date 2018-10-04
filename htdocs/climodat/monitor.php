@@ -80,11 +80,13 @@ reset($stationgrps);
 while (list($state, $stations)=each($stationgrps)){
 	$sstring = "('". implode(",", $stations) ."')";
 	$sstring = str_replace(",", "','", $sstring);
+	// bulk radiation bias values applied below
 	$sql = <<<EOF
 	WITH climo as (
 	  SELECT station, sday, avg(precip) as avg_precip,
 	  avg(sdd86(high,low)) as avg_sdd,
-	  avg({$gddstr}) as avg_gdd
+	  avg({$gddstr}) as avg_gdd,
+	  avg(merra_srad) as avg_srad
 	  from alldata_{$state} WHERE station in {$sstring}
 	  and year > 1950 GROUP by station, sday)
 	  
@@ -92,9 +94,11 @@ while (list($state, $stations)=each($stationgrps)){
 	   sum({$gddstr}) as ogdd50,
 	   sum(o.precip) as oprecip,
 	   sum(c.avg_gdd) as cgdd50, sum(c.avg_precip) as cprecip,
+	   sum(c.avg_srad) as csrad,
 	   max(o.high) as maxtmpf, min(o.low) as mintmpf,
 	   avg( (o.high + o.low) / 2.0 ) as avgtmpf,
-	   sum(c.avg_sdd) as csdd86, sum(sdd86(o.high, o.low)) as osdd86
+	   sum(c.avg_sdd) as csdd86, sum(sdd86(o.high, o.low)) as osdd86,
+	   sum(coalesce(merra_srad, narr_srad / 1.14, hrrr_srad * 1.09)) as osrad
 	  from alldata_{$state} o, climo c WHERE
 	   o.station in {$sstring}
 	   and o.station = c.station
@@ -110,14 +114,17 @@ EOF;
 				."<td>%.2f</td><td>%.2f</td><td>%.2f</td>"
 				."<td>%.1f</td><td>%.1f</td><td>%.1f</td>"
 				."<td>%.1f</td><td>%.1f</td><td>%.1f</td>"
-				."<td>%s</td><td>%s</td><td>%.1f</td></tr>", 
+				."<td>%s</td><td>%s</td><td>%.1f</td>"
+				."<td>%.1f</td><td>%.1f %.1f%%</td></tr>", 
 				$row['station'], $row['station'], $nt2->table[$row['station']]['name'], $row["oprecip"],
 				$row["cprecip"], $row["oprecip"] - $row["cprecip"],
 				$row["ogdd50"],
 				$row["cgdd50"], $row["ogdd50"] - $row["cgdd50"],
 				$row["osdd86"],
 				$row["csdd86"], $row["osdd86"] - $row["csdd86"],
-				$row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);
+				$row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"],
+				$row['osrad'], $row['osrad'] - $row['csrad'],
+				($row['osrad'] - $row['csrad']) / $row['csrad'] * 100.);
 	}
 }
 $nselect = networkSelect($network, "IA0000", Array(), "s[]");
@@ -181,8 +188,10 @@ is a description of the three options.</p>
  entry to remove this calculation.</li>
 </ul>
 
-<p><strong>Updated 25 Jan 2017:</strong>  To reduce some ambiquity, the
-specified end date is now inclusive.</p>
+<p><strong>Updated 4 Oct 2018:</strong>  Model based solar radiation
+values are now included.  These values are based on the combination of
+NASA MERRA, NARR, and HRRR data. See <a href="/plotting/auto/?q=38">IEM Autoplot 38</a>
+for a bias assessment of these values.</p>
 
 <hr />
 <h4>Available States with Data</h4>
@@ -260,19 +269,23 @@ specified end date is now inclusive.</p>
 {$hiddenstations}
 {$hiddendates}
 <table class="table table-bordered table-striped table-condensed">
-<thead><tr><th rowspan="2">ID</th>
+<thead><tr>
+	<th rowspan="2">ID</th>
 	<th rowspan="2">Name</th>
 	<th colspan="3">Precipitation [inch]</th>
 	<th colspan="3">Growing Degree Days (base {$gddbase}, floor {$gddfloor}, ceil {$gddceil})</th>
 	<th colspan="3">Stress Degree Days (base 86)</th>
-	<th colspan="3">Daily Temperature [F]</th></tr>
+	<th colspan="3">Daily Temperature [F]</th>
+	<th colspan="2">Solar Rad [MJ]</th>
+</tr>
 <tr>
 	<th>Total</th><th>Climo</th><th>Departure</th>
 	<th>Total</th><th>Climo</th><th>Departure</th>
 	<th>Total</th><th>Climo</th><th>Departure</th>
 	<th>Max</th><th>Min</th><th>Avg</th>
-	</tr>
-	</thead>
+	<th>Total</th><th>Departure</th>
+</tr>
+</thead>
 <tbody>{$table}</tbody>
 </table>
 
@@ -280,5 +293,5 @@ specified end date is now inclusive.</p>
 </form>
 EOF;
 
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

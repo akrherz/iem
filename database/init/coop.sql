@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (6, now());
+INSERT into iem_schema_manager_version values (7, now());
 
 ---
 --- Storage of climoweek
@@ -526,7 +526,8 @@ CREATE TABLE climate(
   max_range     smallint,
   min_range smallint,
   hdd65 real,
-  cdd65 real
+  cdd65 real,
+  srad real
 );
 CREATE UNIQUE INDEX climate_idx on climate(station,valid);
 GRANT SELECT on climate to nobody,apache;
@@ -560,7 +561,8 @@ CREATE TABLE climate51(
   max_range     smallint,
   min_range smallint,
   hdd65 real,
-  cdd65 real
+  cdd65 real,
+  srad real
 );
 CREATE UNIQUE INDEX climate51_idx on climate51(station,valid);
 CREATE INDEX climate51_station_idx on climate51(station);
@@ -596,7 +598,8 @@ CREATE TABLE climate71(
   max_range     smallint,
   min_range smallint,
   hdd65 real,
-  cdd65 real
+  cdd65 real,
+  srad real
 );
 CREATE UNIQUE INDEX climate71_idx on climate71(station,valid);
 GRANT SELECT on climate71 to nobody,apache;
@@ -668,7 +671,8 @@ CREATE TABLE climate81(
   max_range     smallint,
   min_range smallint,
   hdd65 real,
-  cdd65 real
+  cdd65 real,
+  srad real
 );
 CREATE UNIQUE INDEX climate81_idx on climate81(station,valid);
 GRANT SELECT on climate81 to nobody,apache;

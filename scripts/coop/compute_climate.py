@@ -44,7 +44,7 @@ def daily_averages(table):
         snow, years,
         gdd32, gdd41, gdd46, gdd48, gdd50, gdd51, gdd52,
         sdd86, hdd65, cdd65, max_range,
-        min_range)
+        min_range, srad)
     (SELECT station, ('2000-'|| to_char(day, 'MM-DD'))::date as d,
     avg(high) as avg_high, avg(low) as avg_low,
     max(high) as max_high, min(high) as min_high,
@@ -61,7 +61,8 @@ def daily_averages(table):
     avg( sdd86(high,low) ) as sdd86,
     avg( hdd65(high,low) ) as hdd65,
     avg(cdd65(high,low)) as cdd65,
-    max( high - low) as max_range, min(high - low) as min_range
+    max( high - low) as max_range, min(high - low) as min_range,
+    avg(merra_srad) as srad
     from alldata_%s WHERE day >= '%s' and day < '%s' and
     precip is not null and high is not null and low is not null
     and station in %s

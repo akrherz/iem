@@ -65,6 +65,12 @@ CREATE FUNCTION gdd_onlybase(real, real, real) RETURNS numeric LANGUAGE sql
  	LANGUAGE sql
  	AS $_$select (case when (( $1 + $2 )/2.) > $3 then (( $1 + $2 )/2. - $3) else 0 end)::numeric$_$;
 
+--- CDDs base 65
+ CREATE OR REPLACE FUNCTION cdd65(real, real) RETURNS numeric
+ 	LANGUAGE sql
+ 	AS $_$select (case when (( 65 + $1 )/2.) > $2 then (( 65 + $1 )/2. - $2) else 0 end)::numeric$_$;
+
+
 --- Convert celsuis to fahrenheit
 CREATE FUNCTION c2f(real) RETURNS numeric
 	LANGUAGE sql
