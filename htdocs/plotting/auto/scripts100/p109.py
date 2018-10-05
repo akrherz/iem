@@ -1,4 +1,5 @@
 """WFO VTEC counts in a map"""
+from collections import OrderedDict
 import datetime
 
 from pandas.io.sql import read_sql
@@ -9,24 +10,34 @@ from pyiem.nws import vtec
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {
-    'count': "Event Count",
-    'tpercent': "Percent of Time",
-}
+PDICT = OrderedDict((
+    ('count', "Event Count"),
+    ('days', "Days with 1+ Events"),
+    ('tpercent', "Percent of Time"),
+))
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This application generates a map of the number
-    of or time coverage of
-    VTEC encoded Watch, Warning,
-     and Advisory (WWA) events by NWS Forecast Office for a time period of
-     your choice. The archive of products goes back to October 2005.
-     Note: Not all VTEC products go back to 2005.
-     You can optionally plot up to 4 different VTEC phenomena and significance
-     types."""
+    desc['description'] = """This application generates per WFO maps of VTEC
+    event counts.  The current three available metrics are:<br />
+    <ul>
+        <li><strong>Event Count</strong>: The number of distinct VTEC events.
+        A distinct event is simply the usage of one VTEC event identifier.</li>
+        <li><strong>Days with 1+ Events</strong>: This is the number of days
+        within the period of interest that had at least one VTEC event. A day
+        is defined within the US Central Time Zone.  If one event crosses
+        midnight, this would count as two days.</li>
+        <li><strong>Percent of Time</strong>: This is the temporal coverage
+        percentage within the period of interest.  Rewording, what percentage
+        of the time was at least one event active.</li>
+    </ul></p>
+
+    <p>Note that various VTEC events have differenting start periods of record.
+    Most products go back to October 2005.</p>
+    """
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     desc['arguments'] = [
@@ -113,17 +124,41 @@ def plotter(fdict):
                     500, 750, 1000, 1250, 1500, 2000]
         units = 'Count'
         lformat = '%.0f'
+    elif varname == 'days':
+        df = read_sql("""
+        WITH data as (
+            SELECT distinct wfo, generate_series(greatest(issue, %s),
+            least(expire, %s), '1 minute'::interval) as ts from warnings
+            WHERE issue > %s and expire < %s and """ + pstr + """
+        ), agg as (
+            SELECT distinct wfo, date(ts) from data
+        )
+        select wfo, count(*) as days from agg
+        GROUP by wfo ORDER by days DESC
+        """, pgconn, params=(sts, ets, sts - datetime.timedelta(days=90),
+                             ets + datetime.timedelta(days=90)
+                             ), index_col='wfo')
+
+        df2 = df['days']
+        if df2.max() < 10:
+            bins = list(range(0, 11, 1))
+        else:
+            bins = np.linspace(0, df['days'].max() + 10, 10, dtype='i')
+        units = 'Days'
+        lformat = '%.0f'
     else:
         total_minutes = (ets - sts).total_seconds() / 60.
         df = read_sql("""
         WITH data as (
             SELECT distinct wfo, generate_series(greatest(issue, %s),
             least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE """ + pstr + """
+            WHERE issue > %s and expire < %s and """ + pstr + """
         )
         select wfo, count(*) / %s * 100. as tpercent from data
         GROUP by wfo ORDER by tpercent DESC
-        """, pgconn, params=(sts, ets, total_minutes), index_col='wfo')
+        """, pgconn, params=(sts, ets, sts - datetime.timedelta(days=90),
+                             ets + datetime.timedelta(days=90),
+                             total_minutes), index_col='wfo')
 
         df2 = df['tpercent']
         bins = list(range(0, 101, 10))

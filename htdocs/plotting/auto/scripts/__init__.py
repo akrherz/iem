@@ -388,7 +388,7 @@ data = {'plots': [
          'label': "Top 25 Most Frequent VTEC Products by Office/NWS"},
         {'id': "56", 'label': "Weekly Frequency of a Watch/Warning/Advisory"},
         {'id': "109",
-         'label': ("WFO VTEC Event Counts/Time Coverage Percent "
+         'label': ("WFO VTEC Event Counts/Time Coverage Percent/Num Days "
                    "for a Given Period (map)")},
         {'id': "90",
          'label': ("UGC or Polygon SBW Statistics for "
