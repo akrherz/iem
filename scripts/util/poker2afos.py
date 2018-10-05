@@ -120,6 +120,9 @@ def process(order):
                 prod.source = XREF_SOURCE.get(prod.source, prod.source)
             except Exception as exp:
                 if DEBUG:
+                    o = open('/tmp/bad/%s.txt' % (bad, ), 'w')
+                    o.write(bulletin)
+                    o.close()
                     print('Parsing Failure %s' % (exp, ))
                 bad += 1
                 continue
@@ -148,6 +151,9 @@ def process(order):
            ) % (order, filesparsed, inserts, deletes, bad))
     cursor.close()
     PGCONN.commit()
+    # remove cruft
+    for fn in glob.glob("*.wmo"):
+        os.unlink(fn)
 
 
 def main():
