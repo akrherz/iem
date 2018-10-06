@@ -6,6 +6,7 @@ import calendar
 import psycopg2.extras
 import numpy as np
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -37,9 +38,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = get_dbconn('asos')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -48,7 +46,8 @@ def plotter(fdict):
     hours = ctx['hours']
     interval = ctx['interval']
     if interval > 10 or interval < 0.1:
-        raise ValueError("Invalid interval provided, positive number less than 10")
+        raise ValueError(
+            "Invalid interval provided, positive number less than 10")
 
     nt = NetworkTable(network)
 
@@ -89,10 +88,10 @@ def plotter(fdict):
     res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose())
     fig.colorbar(res, label="Hours per Day")
     ax.grid(True)
-    ax.set_title(("%s [%s]\nHistogram (bin=%s$^\circ$F) "
+    ax.set_title((r"%s [%s]\nHistogram (bin=%s$^\circ$F) "
                   "of %s Hour Temperature Change"
                   ) % (nt.sts[station]['name'], station, interval, hours))
-    ax.set_ylabel("Temperature Change $^{\circ}\mathrm{F}$")
+    ax.set_ylabel(r"Temperature Change $^{\circ}\mathrm{F}$")
 
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])

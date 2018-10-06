@@ -6,6 +6,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict([
@@ -264,9 +265,6 @@ def get_context(fdict):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_context(fdict)
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))

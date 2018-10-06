@@ -4,10 +4,11 @@ import datetime
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-from pyiem import iemre
+import matplotlib.dates as mdates
+from pyiem import iemre, reference
+from pyiem.plot.use_agg import plt
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
-from pyiem import reference
 
 
 def get_description():
@@ -35,10 +36,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_autoplot_context(fdict, get_description())
     year = ctx['year']
     threshold = ctx['threshold']

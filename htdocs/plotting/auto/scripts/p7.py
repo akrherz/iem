@@ -4,6 +4,9 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
+import matplotlib.dates as mdates
+import matplotlib.colors as mpcolors
+from pyiem.plot.use_agg import plt
 from pyiem import network
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -34,11 +37,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    import matplotlib.colors as mpcolors
     pgconn = get_dbconn('coop')
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

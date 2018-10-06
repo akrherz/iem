@@ -6,10 +6,10 @@ import matplotlib.dates as mdates
 import pandas as pd
 import geopandas as gpd
 from metpy.units import units
-from pyiem import iemre
+from pyiem import iemre, reference
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
-from pyiem import reference
+from pyiem.plot.use_agg import plt
 
 
 def get_description():
@@ -102,9 +102,6 @@ def get_data(ctx):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     daythres = ctx['daythres']
     trailthres = ctx['trailthres']
