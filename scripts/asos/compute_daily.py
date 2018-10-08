@@ -80,7 +80,7 @@ def do(ts):
         max_rh = clean(ldf['relh'].max(), 1, 100)
 
         uavg = (ldf['u'] * ldf['timedelta']).sum() / totsecs
-        vavg = (ldf['u'] * ldf['timedelta']).sum() / totsecs
+        vavg = (ldf['v'] * ldf['timedelta']).sum() / totsecs
         drct = clean(
             mcalc.wind_direction(uavg * munits.knots, vavg * munits.knots),
             0, 360)
