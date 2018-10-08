@@ -279,6 +279,8 @@ def daily_process(nwsli, maxts):
             EVENTS['days'].append(valid)
         ob.data['et_inch'] = distance(row['dailyet_qc'], 'MM').value('IN')
         ob.data['srad_mj'] = row['slrmj_tot_qc']
+        # Someday check if this is apples to apples here
+        ob.data['vector_avg_drct'] = row['winddir_d1_wvt_qc']
         if ob.data['max_tmpf'] is None:
             EVENTS['reprocess_temps'] = True
         if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
