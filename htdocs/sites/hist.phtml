@@ -201,10 +201,14 @@ if ($mode == "monthly") {
   
   if (strlen($row["max_gust"]) > 0 && strlen($row["lmax_gust_ts"]) > 0) {
     $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
-    $gs = date("h:i a", $gtim);
-    $g = round($row["max_gust"] * 1.15,0);
-    $str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
-         "<br>(". $gs .")";
+    $gs = date("g:i A", $gtim);
+	$g = round($row["max_gust"] * 1.15,0);
+	if ($row["max_drct"] == null){
+		$str .= "<br>Gust: ". $g . " (". $gs .")";
+	} else {
+		$str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
+			"<br>(". $gs .")";
+	}
   }
   if ($row["min_rh"] != null){
   	$str .= sprintf("<br />RH%% Rng: %.0f-%.0f", $row["min_rh"],
@@ -305,11 +309,15 @@ EOF;
 	
 	  	if (strlen($row["max_gust"]) > 0 && $row["lmax_gust_ts"] != "") {
 	    	$gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
-	    	$gs = date("h:i a", $gtim);
+	    	$gs = date("g:i A", $gtim);
 	    	$g = round($row["max_gust"] * 1.15,0);
 	
-	    	$htmlout .= "<td>". drct2txt($row["max_drct"]) ." @ ". $g .
-	        	 "</td><td>". $gs ."</td>";
+			if ($row["max_drct"] == null){
+				$htmlout .= "<td>". $g ."</td><td>". $gs ."</td>";
+			} else {
+				$htmlout .= "<td>". drct2txt($row["max_drct"]) ." @ ". $g .
+				"</td><td>". $gs ."</td>";
+			}
 	  	} else {
 	  		$htmlout .= "<td></td><td></td>";
 	  	}
