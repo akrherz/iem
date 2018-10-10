@@ -8,10 +8,8 @@ import json
 
 from shapely.geometry import LineString, MultiLineString
 import requests
+from ingest_roads_rest import URI
 from pyiem.util import get_dbconn
-
-URI = ("https://iowadot.maps.arcgis.com/sharing/rest/content/items/"
-       "5d6c7d6963e549539ead6e50d89bdd08/data")
 
 
 def main():
@@ -24,10 +22,9 @@ def main():
     print("removed %s rows from roads_current" % (cursor.rowcount, ))
     req = requests.get(URI, timeout=30)
     jobj = req.json()
-    featureset = jobj['layers'][0]['featureSet']
-    archive_begin = "2017-10-15 00:00"
-    print("adding %s rows to roads_base" % (len(featureset['features']), ))
-    for feat in featureset['features']:
+    archive_begin = "2018-10-09 00:00"
+    print("adding %s rows to roads_base" % (len(jobj['features']), ))
+    for feat in jobj['features']:
         props = feat['attributes']
         # Geometry is [[pt]] and we only have single segments
         path = MultiLineString([LineString(feat['geometry']['paths'][0])])
@@ -38,16 +35,19 @@ def main():
         int1 = num if typ == 'I' else None
         us1 = num if typ == 'US' else None
         st1 = num if typ == 'IA' else None
+        if major == 'Airline Highway':
+            typ = 'IA'
+            num = 0
         if typ not in ['I', 'US', 'IA']:
-            print("Totally unknown, abort")
-            print(json.dumps(jobj, indent=4))
+            print("Totally unknown type: %s, abort" % (typ, ))
+            print(json.dumps(feat, indent=4))
             sys.exit()
         sys_id = 1
         if typ == 'US':
             sys_id = 2
         elif typ == 'IA':
             sys_id = 3
-        longname = props['LONGNAME']
+        longname = props['LONG_NAME']
         geom = ("ST_Transform(ST_SetSrid(ST_GeomFromText('%s'), 3857), 26915)"
                 ) % (path.wkt)
         idot_id = props['SEGMENT_ID']
@@ -55,7 +55,7 @@ def main():
         INSERT into roads_base (major, minor, us1, st1, int1, type, longname,
         geom, idot_id, archive_begin) VALUES (%s, %s, %s, %s, %s, %s, %s,
         """ + geom + """, %s, %s) RETURNING segid
-        """, (major, minor, us1, st1, int1, sys_id, longname,
+        """, (major[:10], minor, us1, st1, int1, sys_id, longname,
               idot_id, archive_begin))
         segid = cursor.fetchone()[0]
         cursor.execute("""

@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (27, now());
+INSERT into iem_schema_manager_version values (28, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -1693,7 +1693,7 @@ create index nexrad_n0q_tindex_date_trunc on nexrad_n0q_tindex( date_trunc('minu
 ---
 CREATE table roads_base(
 	segid SERIAL unique,
-	major varchar(10),
+	major varchar(32),
 	minor varchar(128),
 	us1 smallint,
 	st1 smallint,
@@ -1725,27 +1725,6 @@ CREATE TABLE roads_current(
   limited_vis boolean,
   raw varchar);
 GRANT SELECT on roads_current to nobody,apache;
-
-
-
-CREATE view roads_view as 
-SELECT b.segid,
-    b.major,
-    b.minor,
-    b.us1,
-    b.st1,
-    b.int1,
-    b.type,
-    b.geom::geometry(MultiLineString,26915) AS geom,
-    b.longname,
-    c.valid,
-    c.towing_prohibited,
-    c.cond_code,
-    d.label
-   FROM roads_base b,
-    roads_current c,
-    roads_conditions d
-  WHERE c.segid = b.segid AND c.cond_code = d.code AND (b.segid <> ALL (ARRAY[2404, 2990]));
 
 CREATE TABLE roads_2011_2012_log(
   segid int REFERENCES roads_base(segid),
@@ -2283,6 +2262,17 @@ CREATE TABLE roads_2017_2018_log(
 
 GRANT ALL on roads_2017_2018_log to mesonet,ldm;
 GRANT SELECT on roads_2017_2018_log to apache,nobody;
+
+CREATE TABLE roads_2018_2019_log(
+  segid INT references roads_base(segid),
+  valid timestamptz,
+  cond_code smallint references roads_conditions(code),
+  towing_prohibited bool,
+  limited_vis bool,
+  raw varchar);
+
+GRANT ALL on roads_2018_2019_log to mesonet,ldm;
+GRANT SELECT on roads_2018_2019_log to apache,nobody;
 
 create table lsrs_2016( 
   CONSTRAINT __lsrs_2016_check 
