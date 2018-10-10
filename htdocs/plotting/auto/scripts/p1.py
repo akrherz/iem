@@ -1,27 +1,30 @@
 """monthly comparisons"""
 import datetime
 import calendar
+from collections import OrderedDict
 
 import numpy as np
 from scipy import stats
 from pandas.io.sql import read_sql
 import pandas as pd
+from pyiem.plot.use_agg import plt
 from pyiem import network, util
 
-PDICT = {'total_precip': 'Total Precipitation',
-         'avg_temp': 'Average Temperature',
-         'max_high': 'Maximum High Temperature',
-         'days_high_aoa': 'Days with High At or Above',
-         'cdd65': 'Cooling Degree Days (base 65)',
-         'hdd65': 'Heating Degree Days (base 65)',
-         'gdd32': 'Growing Degree Days (base 32)',
-         'gdd41': 'Growing Degree Days (base 41)',
-         'gdd46': 'Growing Degree Days (base 46)',
-         'gdd48': 'Growing Degree Days (base 48)',
-         'gdd50': 'Growing Degree Days (base 50)',
-         'gdd51': 'Growing Degree Days (base 51)',
-         'gdd52': 'Growing Degree Days (base 52)',
-         }
+PDICT = OrderedDict((
+    ('total_precip', 'Total Precipitation'),
+    ('avg_temp', 'Average Temperature'),
+    ('max_high', 'Maximum High Temperature'),
+    ('days_high_aoa', 'Days with High At or Above'),
+    ('cdd65', 'Cooling Degree Days (base 65)'),
+    ('hdd65', 'Heating Degree Days (base 65)'),
+    ('gdd32', 'Growing Degree Days (base 32)'),
+    ('gdd41', 'Growing Degree Days (base 41)'),
+    ('gdd46', 'Growing Degree Days (base 46)'),
+    ('gdd48', 'Growing Degree Days (base 48)'),
+    ('gdd50', 'Growing Degree Days (base 50)'),
+    ('gdd51', 'Growing Degree Days (base 51)'),
+    ('gdd52', 'Growing Degree Days (base 52)'))
+)
 
 UNITS = {'total_precip': 'inch',
          'avg_temp': 'F',
@@ -120,9 +123,6 @@ def combine(df, months, offsets):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     pgconn = util.get_dbconn('coop')
 
     today = datetime.date.today()

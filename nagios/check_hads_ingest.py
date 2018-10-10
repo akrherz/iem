@@ -19,14 +19,19 @@ def check():
     return row[0]
 
 
-if __name__ == '__main__':
+def main():
+    """Go Main."""
     count = check()
     if count > 10000:
         print('OK - %s count |count=%s;1000;5000;10000' % (count, count))
-        sys.exit(0)
+        return 0
     elif count > 5000:
         print('WARNING - %s count |count=%s;1000;5000;10000' % (count, count))
-        sys.exit(1)
+        return 1
     else:
         print('CRITICAL - %s count |count=%s;1000;5000;10000' % (count, count))
-        sys.exit(2)
+        return 2
+
+
+if __name__ == '__main__':
+    sys.exit(main())

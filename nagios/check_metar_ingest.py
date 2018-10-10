@@ -22,15 +22,15 @@ def main():
     """Go Main"""
     count = check()
     if count > 3000:
-        print 'OK - %s count |count=%s;1000;5000;10000' % (count, count)
-        sys.exit(0)
+        print('OK - %s count |count=%s;1000;5000;10000' % (count, count))
+        return 0
     elif count > 2000:
-        print 'WARNING - %s count |count=%s;1000;5000;10000' % (count, count)
-        sys.exit(1)
+        print('WARNING - %s count |count=%s;1000;5000;10000' % (count, count))
+        return 1
     else:
-        print 'CRITICAL - %s count |count=%s;1000;5000;10000' % (count, count)
-        sys.exit(2)
+        print('CRITICAL - %s count |count=%s;1000;5000;10000' % (count, count))
+        return 2
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
