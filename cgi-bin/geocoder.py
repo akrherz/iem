@@ -26,7 +26,6 @@ def main():
         SERVICE, params=dict(address=address, key=props['google.maps.key2'],
                              sensor='true'), timeout=10)
     data = req.json()
-    ssw(repr(data))
     if data['results']:
         ssw("%s,%s" % (
             data['results'][0]['geometry']['location']['lat'],
