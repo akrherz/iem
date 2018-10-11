@@ -4,6 +4,10 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
+import matplotlib.colors as mpcolors
+from matplotlib.colorbar import ColorbarBase
+from matplotlib.ticker import MaxNLocator
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -110,11 +114,6 @@ def get_data(ctx):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib as mpl
-    mpl.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
-    from matplotlib.ticker import MaxNLocator
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
@@ -142,7 +141,7 @@ def plotter(fdict):
     ramp = np.linspace(minval, maxval, min([int(maxval - minval), 10]),
                        dtype='i')
     norm = mpcolors.BoundaryNorm(ramp, cmap.N)
-    cb = mpl.colorbar.ColorbarBase(cax, norm=norm, cmap=cmap)
+    cb = ColorbarBase(cax, norm=norm, cmap=cmap)
     cb.set_label("inch" if varname == 'wettest' else r"$^\circ$F")
     ax.barh(df.index.values, [days]*len(df.index), left=df['doy'].values,
             color=cmap(norm(df[XREF[varname]].values)))

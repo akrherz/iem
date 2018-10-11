@@ -6,6 +6,8 @@ import datetime
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
+import matplotlib.dates as mdates
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = {'primary': 'Primary Field',
@@ -148,10 +150,6 @@ $("#ap_container").highcharts({
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
     ctx = get_context(fdict)
     if ctx['df'].empty and ctx['odf'].empty:
         raise ValueError("No Data Found!")

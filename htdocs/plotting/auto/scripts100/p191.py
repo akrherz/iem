@@ -63,8 +63,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx['sdate']

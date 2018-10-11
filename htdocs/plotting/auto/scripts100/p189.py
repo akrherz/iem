@@ -4,6 +4,7 @@ import datetime
 from scipy.stats import linregress
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
 BOOLS = {
@@ -209,9 +210,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
     ctx = get_autoplot_context(fdict, get_description())
     ctx['nt'] = NetworkTable(ctx['network'])
 

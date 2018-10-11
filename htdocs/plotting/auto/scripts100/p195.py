@@ -1,4 +1,4 @@
-"""USDM Heatmaps and friends"""
+"""Storm Motion 2D Histogram."""
 import datetime
 from collections import OrderedDict
 

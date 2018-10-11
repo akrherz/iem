@@ -4,7 +4,10 @@ import datetime
 import numpy as np
 import pytz
 from pandas.io.sql import read_sql
+import matplotlib.colors as mpcolors
+from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -49,11 +52,6 @@ Ceiling >3000' AGL and visibility >5 statutes miles (green)</td></tr>
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mpcolors
-    from matplotlib.patches import Rectangle
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
