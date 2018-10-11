@@ -6,9 +6,12 @@ import pandas as pd
 import matplotlib.dates as mdates
 from pyiem import util
 from pyiem.plot.use_agg import plt
-from pyiem.reference import state_names
+from pyiem.reference import state_names, state_fips
 
-SERVICE = "http://droughtmonitor.unl.edu/Ajax.aspx/ReturnTabularDM"
+SERVICE = (
+    "https://droughtmonitor.unl.edu"
+    "/Ajax2018.aspx/ReturnTabularDMAreaPercent_state"
+)
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 
@@ -43,14 +46,18 @@ def plotter(fdict):
     edate = ctx['edate']
     state = ctx['state']
 
-    payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (state, )
+    fips = ''
+    for key in state_fips:
+        if state_fips[key] == state:
+            fips = key
+    payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (fips, )
     headers = {}
     headers['Accept'] = "application/json, text/javascript, */*; q=0.01"
     headers['Content-Type'] = "application/json; charset=UTF-8"
     req = requests.post(SERVICE, payload, headers=headers)
     jdata = req.json()
     df = pd.DataFrame(jdata['d'])
-    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = pd.to_datetime(df['ReleaseDate'])
     df = df[(df['Date'] >= pd.Timestamp(sdate)) &
             (df['Date'] <= pd.Timestamp(edate))]
     df.sort_values('Date', ascending=True, inplace=True)
@@ -96,7 +103,7 @@ def plotter(fdict):
     ax.set_position([0.1, 0.25, 0.8, 0.65])
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
 
-    return fig, df[['Date', 'None', 'D0', 'D1', 'D2', 'D3', 'D4']]
+    return fig, df[['Date', 'NONE', 'D0', 'D1', 'D2', 'D3', 'D4']]
 
 
 if __name__ == '__main__':

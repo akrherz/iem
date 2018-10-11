@@ -8,9 +8,12 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from pyiem import util
 from pyiem.plot.use_agg import plt
-from pyiem.reference import state_names
+from pyiem.reference import state_names, state_fips
 
-SERVICE = "http://droughtmonitor.unl.edu/Ajax.aspx/ReturnTabularDM"
+SERVICE = (
+    "https://droughtmonitor.unl.edu"
+    "/Ajax2018.aspx/ReturnTabularDMAreaPercent_state"
+)
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 
@@ -49,14 +52,18 @@ def plotter(fdict):
     syear = ctx['syear']
     eyear = ctx['eyear']
 
-    payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (state, )
+    fips = ''
+    for key in state_fips:
+        if state_fips[key] == state:
+            fips = key
+    payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (fips, )
     headers = {}
     headers['Accept'] = "application/json, text/javascript, */*; q=0.01"
     headers['Content-Type'] = "application/json; charset=UTF-8"
     req = requests.post(SERVICE, payload, headers=headers)
     jdata = req.json()
     df = pd.DataFrame(jdata['d'])
-    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = pd.to_datetime(df['ReleaseDate'])
     df.sort_values('Date', ascending=True, inplace=True)
     df['x'] = df['Date'] + datetime.timedelta(hours=(3.5*24))
 
@@ -109,7 +116,7 @@ def plotter(fdict):
     fig.text(0.02, 0.04, "Blue areas are improving conditions", color='b')
     fig.text(0.4, 0.04, "Red areas are degrading conditions", color='r')
 
-    return fig, df[['Date', 'None', 'D0', 'D1', 'D2', 'D3', 'D4']]
+    return fig, df[['Date', 'NONE', 'D0', 'D1', 'D2', 'D3', 'D4']]
 
 
 if __name__ == '__main__':
