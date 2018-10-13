@@ -30,10 +30,8 @@ python ugcs_update.py z_05fe14a 2014 02 05
 from __future__ import print_function
 import sys
 import os
-import datetime
 import zipfile
 
-import pytz
 import requests
 import geopandas as pd
 from shapely.geometry import MultiPolygon
@@ -91,7 +89,15 @@ def new_poly(geo):
 def db_fixes(cursor, valid):
     """Fix some issues in the database"""
     cursor.execute("""
-        UPDATE ugcs SET simple_geom = ST_Simplify(geom, 0.01),
+     update ugcs SET geom = st_makevalid(geom) where end_ts is null
+     and not st_isvalid(geom) and begin_ts = %s
+    """, (valid, ))
+    print("    Fixed %s entries that were ST_Invalid()" % (cursor.rowcount, ))
+
+    cursor.execute("""
+        UPDATE ugcs SET simple_geom = ST_Multi(
+            ST_SimplifyPreserveTopology(geom, 0.01)
+        ),
         centroid = ST_Centroid(geom),
         area2163 = ST_area( ST_transform(geom, 2163) ) / 1000000.0
         WHERE begin_ts = %s
@@ -99,11 +105,28 @@ def db_fixes(cursor, valid):
     print(("    Updated simple_geom,centroid,area2163 for %s rows"
            ) % (cursor.rowcount, ))
 
-    cursor.execute("""
-     update ugcs SET geom = st_makevalid(geom) where end_ts is null
-     and not st_isvalid(geom) and begin_ts = %s
-    """, (valid, ))
-    print("    Fixed %s entries that were ST_Invalid()" % (cursor.rowcount, ))
+    # Check the last step that we don't have empty geoms, which happened once
+    def _check():
+        """Do the check."""
+        cursor.execute("""
+            SELECT end_ts from ugcs
+            where begin_ts = %s and ST_IsEmpty(simple_geom)
+        """, (valid, ))
+    _check()
+    if cursor.rowcount > 0:
+        print((
+            "    Found %s rows with empty simple_geom, decreasing tolerance"
+        ) % (cursor.rowcount, ))
+        cursor.execute("""
+            UPDATE ugcs
+            SET simple_geom = ST_SimplifyPreserveTopology(geom, 0.0001)
+            WHERE begin_ts = %s and ST_IsEmpty(simple_geom)
+        """, (valid, ))
+        _check()
+        if cursor.rowcount > 0:
+            print((
+                "    Found %s rows with empty simple_geom, FIXME SOMEHOW!"
+            ) % (cursor.rowcount, ))
 
 
 def workflow(argv, pgconn, cursor):
