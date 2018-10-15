@@ -10,9 +10,7 @@ import psycopg2.extras
 from PIL import Image, ImageDraw, ImageFont
 import pytz
 from geopandas import read_postgis
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
 
 FONT = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 12)

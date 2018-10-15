@@ -63,9 +63,7 @@ def process(uri):
     else:
         send_content_type('png')
         from io import BytesIO
-        import matplotlib
-        matplotlib.use('agg')
-        import matplotlib.pyplot as plt
+        from pyiem.plot.use_agg import plt
         (_, ax) = plt.subplots(1, 1)
         ax.text(0.5, 0.5, "Feature Image was not Found!",
                 transform=ax.transAxes, ha='center')

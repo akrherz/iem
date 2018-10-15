@@ -7,13 +7,11 @@ import cgi
 import datetime
 
 import numpy as np
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import matplotlib.colors as mpcolors
 import matplotlib.colorbar as mpcolorbar
 import matplotlib.patheffects as PathEffects
 from pyiem.meteorology import uv
+from pyiem.plot.use_agg import plt
 from pyiem.datatypes import speed, direction
 from pyiem.util import get_dbconn, ssw
 

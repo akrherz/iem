@@ -13,9 +13,7 @@ import memcache
 import pytz
 import pandas as pd
 from paste.request import parse_formvars
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
+from pyiem.plot.use_agg import plt
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all='ignore')
 

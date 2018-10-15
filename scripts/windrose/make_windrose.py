@@ -5,10 +5,7 @@ from __future__ import print_function
 import datetime
 import sys
 
-# we need this to make sure the AGG backend is used...
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.windrose_utils import windrose
 

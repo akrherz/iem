@@ -9,11 +9,9 @@ import cgi
 import psycopg2.extras
 import pytz
 import numpy as np
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
+from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, ssw
 

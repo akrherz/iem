@@ -6,11 +6,9 @@ import sys
 
 import pytz
 from pandas.io.sql import read_sql
-import matplotlib
-matplotlib.use("agg")
-import matplotlib.pyplot as plt  # NOPEP8
-import matplotlib.dates as mdates  # NOPEP8
-from pyiem.util import get_dbconn, ssw  # NOPEP8
+import matplotlib.dates as mdates
+from pyiem.plot.use_agg import plt
+from pyiem.util import get_dbconn, ssw
 
 PGCONN = get_dbconn('mec', user='mesonet')
 cursor = PGCONN.cursor()

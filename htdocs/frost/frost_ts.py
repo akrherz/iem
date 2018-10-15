@@ -7,18 +7,16 @@ import datetime
 
 import numpy as np
 import pytz
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pyiem.util import ncopen, ssw
+from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature
 
 
 def get_latest_time(model):
     ''' Figure out the latest model runtime '''
     utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.utc)
+    utc = utc.replace(tzinfo=pytz.UTC)
     utc = utc.replace(hour=12, minute=0, second=0, microsecond=0)
     limit = 24
     while not os.path.isfile(
@@ -96,7 +94,7 @@ def process(model, lon, lat):
     if modelts is None:
         ax.text(0.5, 0.5, "No Data Found to Plot!", ha='center')
         ssw("Content-Type: image/png\n\n")
-        fig.savefig(sys.stdout, format="png")
+        fig.savefig(getattr(sys.stdout, 'buffer', sys.stdout), format="png")
         return
     nc = ncopen(
             modelts.strftime(("/mesonet/share/frost/" +

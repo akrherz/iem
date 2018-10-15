@@ -27,7 +27,7 @@ def main():
         return
 
     remotepath = valid.strftime("/iemwebcams/auto/%Y/%m/%d")
-    res = sendfiles2box(remotepath, localfns)   
+    res = sendfiles2box(remotepath, localfns)
     for sid, fn in zip(res, localfns):
         if sid is None:
             print("failed to upload %s" % (fn, ))

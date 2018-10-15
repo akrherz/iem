@@ -56,8 +56,6 @@ def p(df, year, month, varname, precision):
 
 def plotter(fdict):
     """ Go """
-    import matplotlib
-    matplotlib.use('agg')
     pgconn = get_dbconn('coop')
 
     station = fdict.get('station', 'IA0200').upper()
