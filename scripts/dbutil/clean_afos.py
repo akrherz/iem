@@ -16,7 +16,7 @@ def main():
         delete from products WHERE
         entered < ('YESTERDAY'::date - '7 days'::interval) and
         entered > ('YESTERDAY'::date - '31 days'::interval) and
-        (pil ~* '^(RR[1-9SA]|ROB|MAV|MET|MTR|MEX|RWR|STO|HML)'
+        (pil ~* '^(RR[1-9SA]|ROB|MAV|MET|MTR|MEX|RWR|STO|HML|WRK)'
          or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA'))
         """)
     if acursor.rowcount == 0:
