@@ -10,14 +10,15 @@ NO_FEATURES = [
     17,  # is referenced by canonical page
     38,  # radiation plot that is complex
     49, 50, 51,   # cscap plots that should be removed
-    110, 111, 112, 113, 114, 115, 117,
-    118, 119, 120, 121, 122, 123, 124,   # climodat text-only reports
-    143, 141,  # yieldfx plots
-    152,  # growing season differences, too noisey
+    68,  # nws unique VTEC types per year
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
     102,  # LSR report types
+    110, 111, 112, 113, 114, 115, 117,
+    118, 119, 120, 121, 122, 123, 124,   # climodat text-only reports
+    143, 141,  # yieldfx plots
     144,  # soil temp periods, too fragile of data to be useful
+    152,  # growing season differences, too noisey
     187  # Unimplemented
 ]
 

@@ -5,8 +5,7 @@ import sys
 
 import pytz
 from pyiem.observation import Observation
-import pyiem.meteorology as meteorology
-from pyiem.datatypes import temperature, humidity, speed
+from pyiem.datatypes import speed
 from pyiem.util import get_dbconn
 
 
@@ -42,9 +41,6 @@ def main():
 
     iemob.data['tmpf'] = float(tokens[5])
     iemob.data['relh'] = float(tokens[8])
-    tmpf = temperature(iemob.data['tmpf'], 'F')
-    relh = humidity(iemob.data['relh'], '%')
-    iemob.data['dwpf'] = meteorology.dewpoint(tmpf, relh).value('F')
     iemob.data['sknt'] = speed(float(tokens[9]), 'MPH').value('KT')
     iemob.data['drct'] = tokens[10]
     iemob.data['alti'] = float(tokens[13])

@@ -5,12 +5,12 @@ import sys
 
 import pytz
 import requests
-# Stop the SSL cert warning :/
 import urllib3
 from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
+# Stop the SSL cert warning :/
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 

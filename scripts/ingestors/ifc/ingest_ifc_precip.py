@@ -22,15 +22,15 @@ import subprocess
 
 import requests
 import numpy as np
-import pyiem.mrms as mrms
-from pyiem.util import exponential_backoff
 from PIL import Image
 from PIL import PngImagePlugin
+import pyiem.mrms as mrms
+from pyiem.util import exponential_backoff
 
 BASEURL = "http://rainproc.its.uiowa.edu/Products/IFC7ADV"
 
 
-def get_file(now):
+def get_file(now, routes):
     """ Download the file, save to /tmp and return fn """
     data = None
     for i in [7, 6, 5]:
@@ -45,14 +45,16 @@ def get_file(now):
         if req.status_code == 404:
             continue
         if req.status_code != 200:
-            print(("ingest_ifc_precip uri %s "
-                   "failed with status %s"
-                    ) % (uri, req.status_code))
+            print(
+                ("ingest_ifc_precip uri %s failed with status %s"
+                 ) % (uri, req.status_code))
             continue
         data = req.content
 
     if data is None:
-        print("ingest_ifc_precip missing data for %s" % (now, ))
+        # only generate an annoy-o-gram if we are in archive mode
+        if routes == 'a':
+            print("ingest_ifc_precip missing data for %s" % (now, ))
         return None
     tmpfn = tempfile.mktemp()
     fp = open(tmpfn, 'wb')
@@ -115,7 +117,7 @@ def cleanup(tmpfn):
 
 def do_time(now, routes='ac'):
     """workflow"""
-    tmpfn = get_file(now)
+    tmpfn = get_file(now, routes)
     if tmpfn is None:
         return
 
