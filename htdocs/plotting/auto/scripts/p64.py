@@ -53,6 +53,9 @@ def get_data(ctx):
         where station = %s and year >= %s
     """, (station, syear))
     for row in cursor:
+        # On non-leap year, duplicate our snowdepth on 31 Dec
+        if row[0] == 365 and not calendar.isleap(row[1]):
+            snowd[row[1] - syear, int(row[0])] = row[3]
         snow[row[1] - syear, int(row[0] - 1)] = row[2]
         snowd[row[1] - syear, int(row[0] - 1)] = row[3]
     # reset any nan
@@ -153,4 +156,6 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(dir='first', station='IA5230', network='IACLIMATE'))
+    plotter(
+        dict(threshold=0.1, dir='first', station='IA2203', network='IACLIMATE')
+    )
