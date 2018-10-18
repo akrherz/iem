@@ -6,7 +6,7 @@ session_start();
 
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 
 $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
 $refresh = isset($_REQUEST["refresh"]) ? strtolower(xssafe($_REQUEST["refresh"])): 'yes';
@@ -117,7 +117,7 @@ foreach ($jobj["data"] as $bogus => $iemob){
 		$mydata[$value]["peak_ts"] = strtotime($mydata[$value]["local_max_gust_ts"]);
 	} else {
 		$mydata[$value]["peak"] = $mydata[$value]["max_sknt"];
-		if ($mydata[$value]["max_sknt_ts"] > 0) {
+		if ($mydata[$value]["local_max_sknt_ts"] > 0) {
 			$mydata[$value]["peak_ts"] = strtotime($mydata[$value]["local_max_sknt_ts"]);
 		}
 	}

@@ -5,8 +5,8 @@
 This document describes the once daily climate dataset that provides observations and estimates of high and low temperature, precipitation, snowfall, and snow depth.  Parts of this dataset have been curated over the years by a number of Iowa State employees including Dr Shaw, Dr Carlson, and Dr Todey.
 
 * __Download Interface__: [IEM On-Demand](https://mesonet.agron.iastate.edu/request/coop/fe.phtml)
-* __Spatial Domain__: Midwestern US
-* __Temporal Domain__: 1893-today
+* __Spatial Domain__: Continental US
+* __Temporal Domain__: (1893,1951,varies)-today
 * __Variables Provided__: Once daily high and low temperature, precipitation, snowfall, snow depth
 
 ### Justification for processing

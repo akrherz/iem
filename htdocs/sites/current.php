@@ -8,8 +8,16 @@
  
  $t->thispage = "iem-sites";
  $t->title = "Latest Observation";
- $t->sites_current = "current"; 
-
+ $t->sites_current = "current";
+ $SPECIAL = Array(
+	 'OT0013' => 'MCFC-001',
+	 'OT0014' => 'MCFC-002',
+	 'OT0015' => 'MCFC-003');
+$LOOKUP = Array(
+	'OT0013' => 'scranton',
+	'OT0014' => 'carroll',
+	'OT0015' => 'jefferson'
+);
 
  if (strpos($network, "_DCP") || strpos($network, "_COOP") ){
  	$table = '<p>This station reports observations in SHEF format.  The following
@@ -109,6 +117,7 @@
  		$table .= '<tr><td><b>'. $label .'</b></td><td>'. $t2 .'</td></tr>';
  	}
  	else {
+		 if ($json["last_ob"][$key] == null) continue;
  		$table .= '<tr><td><b>'. $label .'</b></td><td>'. $json["last_ob"][$key].'</td></tr>';
  	} // End if
  } // End if
@@ -117,7 +126,37 @@
  		"<a href=\"%s\">JSON(P) webservice</a>. You can find ".
  		"<a href=\"/json/\">more JSON services</a>.</p>", $exturi);
 }
- 
+$interface = $table;
+if (array_key_exists($station, $SPECIAL)){
+	$interface = <<<EOM
+<h4>New Way Weather Network</h4>
+
+<a class="btn btn-default" href="/sites/current.php?station=OT0013&network=OT">Scranton</a>
+&nbsp;
+<a class="btn btn-default" href="/sites/current.php?station=OT0014&network=OT">Carroll</a>
+&nbsp;
+<a class="btn btn-default" href="/sites/current.php?station=OT0015&network=OT">Jefferson</a>
+
+<div class="row">
+  <div class="col-md-6">
+	{$table}
+  </div>
+  <div class="col-md-6">
+	<h3>Latest Webcam Image</h3>
+	<img src="/data/camera/stills/{$SPECIAL[$station]}.jpg"
+	 class="img img-responsive">
+	<br />View Recent Time Lapses:<br />
+	<a href="/current/camlapse/#{$LOOKUP[$station]}_sunrise">Sunrise</a>,
+	<a href="/current/camlapse/#{$LOOKUP[$station]}_morning">Morning</a>,
+	<a href="/current/camlapse/#{$LOOKUP[$station]}_afternoon">Afternoon</a>,
+	<a href="/current/camlapse/#{$LOOKUP[$station]}_sunset">Sunset</a>, and
+	<a href="/current/camlapse/#{$LOOKUP[$station]}_day">All Day</a>
+  </div>
+</div>
+
+EOM;
+}
+
 $t->content = <<<EOF
 
 <h3>Most Recent Observation</h3>
@@ -126,7 +165,7 @@ $t->content = <<<EOF
  from this site. The time stamp is in 
  <strong>{$metadata["tzname"]}</strong> timezone.</p>
 
-{$table}
+{$interface}
 
 EOF;
 $t->render('sites.phtml');
