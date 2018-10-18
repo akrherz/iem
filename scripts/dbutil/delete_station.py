@@ -35,8 +35,13 @@ def delete_logic(icursor, mcursor, network, station):
                ) % (icursor.rowcount, table))
 
     mcursor.execute("""
-        DELETE from stations where id = '%s' and network = '%s'
-    """ % (station, network))
+        DELETE from station_attributes where iemid = (
+            SELECT iemid from stations where id = %s and network = %s
+        )
+    """, (station, network))
+    mcursor.execute("""
+        DELETE from stations where id = %s and network = %s
+    """, (station, network))
     print(('Deleted %s row(s) from mesosite database stations table'
            ) % (mcursor.rowcount, ))
 
