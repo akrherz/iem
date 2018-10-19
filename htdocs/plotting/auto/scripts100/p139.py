@@ -50,7 +50,7 @@ def plotter(fdict):
     font0 = FontProperties()
     font0.set_family('monospace')
     font0.set_size(16)
-    pgconn = get_dbconn('asos')
+    pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
@@ -73,16 +73,15 @@ def plotter(fdict):
 
     nt = NetworkTable(network)
 
-    df = read_sql("""WITH data as (
-        SELECT date(valid at time zone %s) as date, max(tmpf), min(tmpf)
-        from alldata where station = %s and tmpf between -100 and 150
-        and extract(month from valid at time zone %s) in %s
-        GROUP by date)
-
-    SELECT date, min, max, max - min as difference from data
-    ORDER by difference DESC, date DESC LIMIT 10
-        """, pgconn, params=(nt.sts[station]['tzname'], station,
-                             nt.sts[station]['tzname'], tuple(months)),
+    df = read_sql("""
+        SELECT day as date, max_tmpf as max, min_tmpf as min,
+        max_tmpf::int - min_tmpf::int as difference
+        from summary s JOIN stations t on (s.iemid = t.iemid)
+        where t.id = %s and t.network = %s
+        and extract(month from day) in %s
+        and max_tmpf is not null and min_tmpf is not null
+        ORDER by difference DESC, date DESC LIMIT 10
+    """, pgconn, params=(station, network, tuple(months)),
                   parse_dates=('date',), index_col=None)
     df['rank'] = df['difference'].rank(ascending=False, method='min')
     fig = plt.figure(figsize=(5.5, 4))
