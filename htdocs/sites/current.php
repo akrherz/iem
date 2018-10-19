@@ -18,6 +18,12 @@ $LOOKUP = Array(
 	'OT0014' => 'carroll',
 	'OT0015' => 'jefferson'
 );
+function fmt($val, $varname){
+	if ($varname == 'altimeter[in]'){
+		return sprintf("%.2f", $val); 
+	}
+	return $val;
+}
 
  if (strpos($network, "_DCP") || strpos($network, "_COOP") ){
  	$table = '<p>This station reports observations in SHEF format.  The following
@@ -118,7 +124,8 @@ $LOOKUP = Array(
  	}
  	else {
 		 if ($json["last_ob"][$key] == null) continue;
- 		$table .= '<tr><td><b>'. $label .'</b></td><td>'. $json["last_ob"][$key].'</td></tr>';
+		 $table .= '<tr><td><b>'. $label .'</b></td>'.
+		 '<td>'. fmt($json["last_ob"][$key], $key).'</td></tr>';
  	} // End if
  } // End if
  $table .= "</table>";

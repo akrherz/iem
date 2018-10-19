@@ -1,6 +1,6 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
@@ -15,7 +15,7 @@ $t->title = "AWOS 1 Minute Time Series";
 
 
 $nselect = networkSelect("AWOS", $station);
-$yselect = yearSelect(1995,2011, $year);
+$yselect = yearSelect(1995, 2011, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
 $content = <<<EOF
@@ -25,7 +25,8 @@ $content = <<<EOF
 </ol>
 
 <p><b>Note:</b>The archive currently contains data from 1 Jan 1995 
-till the end of the previous month.  Fort Dodge and Clinton were converted to ~ASOS, 
+till <strong>1 April 2011</strong>. 
+Fort Dodge and Clinton were converted to ~ASOS, 
 but are available for some times earlier in the archive.<p>
 
   <form method="GET" action="1station_1min.php">
