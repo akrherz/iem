@@ -14,7 +14,7 @@
  echo round($ob["gust"],0) ."\n";
  echo $ob["pday"] ."\n";
  echo $ob["relh"] ."\n";
- echo $ob["alti"] ."\n";
+ echo intval($ob["alti"] * 33.9) ."\n";
  echo intval($ob["feel"]) ."\n";
 
 ?>
