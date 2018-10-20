@@ -9,7 +9,7 @@
 
  echo intval($ob["tmpf"]) ."\n";
  echo intval($ob["dwpf"]) ."\n";
- echo $ob["sknt"] ."\n";
+ echo intval($ob["sknt"]) ."\n";
  echo drct2txt($ob["drct"]) ."\n";
  echo round($ob["gust"],0) ."\n";
  echo $ob["pday"] ."\n";
