@@ -7,14 +7,14 @@
    $ob = $jobj["data"][0];
  header('Content-type: text/plain');
 
- echo $ob["tmpf"] ."\n";
- echo $ob["dwpf"] ."\n";
+ echo intval($ob["tmpf"]) ."\n";
+ echo intval($ob["dwpf"]) ."\n";
  echo $ob["sknt"] ."\n";
  echo drct2txt($ob["drct"]) ."\n";
  echo round($ob["gust"],0) ."\n";
  echo $ob["pday"] ."\n";
  echo $ob["relh"] ."\n";
- echo intval($ob["alti"] * 33.9) ."\n";
+ echo $ob["alti"] ."\n";
  echo intval($ob["feel"]) ."\n";
 
 ?>
