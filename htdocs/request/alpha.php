@@ -1,7 +1,7 @@
 <?php
- $station = isset($_GET['station']) ? substr($_GET['station'],0,5): 'SJEI4';
- include("../../config/settings.inc.php");
- include("../../include/mlib.php");
+ $station = isset($_GET['station']) ? substr($_GET['station'],0,5): 'OT0015';
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/mlib.php";
    $jdata = file_get_contents("http://iem.local/api/1/currents.json?station=$station");
    $jobj = json_decode($jdata, $assoc=TRUE);
    $ob = $jobj["data"][0];
@@ -14,7 +14,7 @@
  echo round($ob["gust"],0) ."\n";
  echo $ob["pday"] ."\n";
  echo $ob["relh"] ."\n";
- echo $ob["pres"] ."\n";
+ echo $ob["alti"] ."\n";
  echo intval($ob["feel"]) ."\n";
 
 ?>
