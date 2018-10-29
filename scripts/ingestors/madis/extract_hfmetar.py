@@ -127,7 +127,7 @@ def process(ncfn):
             mtr += "//"
 
         val = decision(i, 'windGust', 10)
-        if val is not None:
+        if val is not None and val > 0:
             iem.data['gust'] = int(val)
             mtr += "G%02i" % (iem.data['gust'],)
         mtr += "KT "
@@ -201,7 +201,10 @@ def process(ncfn):
         try:
             Metar.Metar(mtr)
             iem.data['raw'] = mtr
-        except:
+        except Exception as exp:
+            print(
+                "dogfooding extract_hfmetar %s resulted in %s" % (mtr, exp)
+            )
             pass
 
         for key in iem.data:
