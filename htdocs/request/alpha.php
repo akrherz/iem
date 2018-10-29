@@ -11,7 +11,7 @@
  echo intval($ob["dwpf"]) ."\n";
  echo intval($ob["sknt"]) ."\n";
  echo drct2txt($ob["drct"]) ."\n";
- echo round($ob["gust"],0) ."\n";
+ echo round(max($ob["gust"], $ob["sknt"]),0) ."\n";
  echo $ob["pday"] ."\n";
  echo $ob["relh"] ."\n";
  echo $ob["alti"] ."\n";
