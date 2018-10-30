@@ -70,7 +70,7 @@ grid will update and provide a listing of storm based warnings found.
 		<div id="map" class="map"></div>
 	</div>
 	<div class="col-md-8">
-        <div id="warntable" style="width: 100%"></div>
+        <div id="warntable"></div>
     </div>
 </div>
 
@@ -116,9 +116,9 @@ an office that did not exist at the time.
 		<p><strong>Or drag marker to select coordinate:</strong><br />
 		<div id="map2" class="map"></div>
 		</div>
-		<div class="col-md-8"><div id="mytable" style="width:100%"></div></div>
+		<div class="col-md-8"><div id="mytable"></div></div>
 </div>
 		
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

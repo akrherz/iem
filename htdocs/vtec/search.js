@@ -184,7 +184,7 @@ function alinkUGC(){
 			);
 }
 
-Ext.onReady(function() {
+function setupUI() {
 
 	pDict = new Ext.data.SimpleStore({
 				idIndex : 0,
@@ -561,7 +561,7 @@ Ext.onReady(function() {
 		marker2.setPosition(latlng);
 		updateMarkerPosition2(latlng);
 	});
-});
+};
 
 
 function updateMarkerPosition(latLng) {
@@ -598,6 +598,8 @@ function updateMarkerPosition2(latLng) {
 }
 
 function initialize() {
+	// build the EXT components
+	setupUI();
 	var latLng = new google.maps.LatLng(41.53, -93.653);
 	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 5,
