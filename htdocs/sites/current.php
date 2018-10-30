@@ -3,6 +3,7 @@
  require_once "../../include/database.inc.php";
  require_once "setup.php";
  require_once "../../include/myview.php";
+ require_once "../../include/mlib.php";
 
  $t = new MyView();
  
@@ -122,7 +123,11 @@ function fmt($val, $varname){
  		$t2 = date("d M Y, g:i A", strtotime($json["last_ob"][$key]));
  		$table .= '<tr><td><b>'. $label .'</b></td><td>'. $t2 .'</td></tr>';
  	}
- 	else {
+ 	else if ($key == "winddirection[deg]") {
+		$table .= sprintf("<tr><td><b>%s</b></td><td>%s (%.0f degrees)</td></tr>",
+			$label, drct2txt($json["last_ob"][$key]), $json["last_ob"][$key]);
+	}
+	else {
 		 if ($json["last_ob"][$key] == null) continue;
 		 $table .= '<tr><td><b>'. $label .'</b></td>'.
 		 '<td>'. fmt($json["last_ob"][$key], $key).'</td></tr>';
