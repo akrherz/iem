@@ -123,7 +123,7 @@ def main():
     out = open('/tmp/madis.csv', 'w')
     out.write("%s\n" % (fmt,))
     for stid in db:
-        if db[stid]['PROVIDER'] in ['IADOT', 'MNDOT']:
+        if db[stid]['PROVIDER'] in ['IADOT', 'NEDOR']:
             for key in format_tokens:
                 if key in db[stid]:
                     out.write("%s" % (db[stid][key],))
