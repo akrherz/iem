@@ -54,7 +54,7 @@ def main():
     smps = nc.variables["windSpeed"][:] * 1.94384449
     alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2  # in hPa
     vsby = nc.variables["visibility"][:] * 0.000621371192  # in hPa
-    # providers = nc.variables["dataProvider"][:]
+    providers = chartostring(nc.variables["dataProvider"][:])
     lat = nc.variables["latitude"][:]
     lon = nc.variables["longitude"][:]
     # ele = nc.variables["elevation"][:]
@@ -82,6 +82,7 @@ def main():
         ts = datetime.datetime.fromtimestamp(ot)
         db[station] = {
             'STN': station,
+            'PROVIDER': providers[recnum],
             'LAT': lat[recnum],
             'LONG': lon[recnum],
             'STATIONNAME': stationname[recnum].replace(",", " "),
@@ -115,6 +116,23 @@ def main():
     out.close()
 
     pqstr = "data c %s fn/madis.csv bogus csv" % (utc.strftime("%Y%m%d%H%M"),)
+    cmd = "/home/ldm/bin/pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
+    subprocess.call(cmd, shell=True)
+    os.remove("/tmp/madis.csv")
+
+    out = open('/tmp/madis.csv', 'w')
+    out.write("%s\n" % (fmt,))
+    for stid in db:
+        if db[stid]['PROVIDER'] in ['IADOT', 'MNDOT']:
+            for key in format_tokens:
+                if key in db[stid]:
+                    out.write("%s" % (db[stid][key],))
+                out.write(",")
+            out.write("\n")
+    out.close()
+
+    pqstr = "data c %s fn/madis_iamn.csv bogus csv" % (
+        utc.strftime("%Y%m%d%H%M"),)
     cmd = "/home/ldm/bin/pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/madis.csv")
