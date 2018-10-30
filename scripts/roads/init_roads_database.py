@@ -3,8 +3,6 @@
  * JSON data is in Google 3857
 """
 from __future__ import print_function
-import sys
-import json
 
 from shapely.geometry import LineString, MultiLineString
 import requests
@@ -38,15 +36,7 @@ def main():
         if major == 'Airline Highway':
             typ = 'IA'
             num = 0
-        if typ not in ['I', 'US', 'IA']:
-            print("Totally unknown type: %s, abort" % (typ, ))
-            print(json.dumps(feat, indent=4))
-            sys.exit()
-        sys_id = 1
-        if typ == 'US':
-            sys_id = 2
-        elif typ == 'IA':
-            sys_id = 3
+        sys_id = props['ROUTE_RANK']
         longname = props['LONG_NAME']
         geom = ("ST_Transform(ST_SetSrid(ST_GeomFromText('%s'), 3857), 26915)"
                 ) % (path.wkt)
