@@ -281,16 +281,17 @@ def do_ahps(nwsli):
         tzinfo).dt.strftime("%a. %-I %p")
     # Get the latest forecast
     df = read_sql("""
-    SELECT valid, primary_value, secondary_value, 'F' as type from
-    hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
-    ORDER by valid ASC
+        SELECT valid at time zone 'UTC' as valid,
+        primary_value, secondary_value, 'F' as type from
+        hml_forecast_data_"""+y+""" WHERE hml_forecast_id = %s
+        ORDER by valid ASC
     """, pgconn, params=(row[0],), index_col=None)
     # Get the obs
     # plabel = "{}[{}]".format(primaryname, primaryunits)
     # slabel = "{}[{}]".format(secondaryname, secondaryunits)
     odf.rename({'value': 'obstage'}, axis=1, inplace=True)
     df = df.join(odf[['obtime', 'obstage']], how='outer')
-    df['forecasttime'] = df['valid'].dt.tz_convert(
+    df['forecasttime'] = df['valid'].dt.tz_localize(pytz.UTC).dt.tz_convert(
         tzinfo).dt.strftime("%a. %-I %p")
     df['forecaststage'] = df['primary_value']
     # df[slabel] = df['secondary_value']
