@@ -8,6 +8,7 @@
  $t = new MyView();
  
  $t->thispage = "iem-sites";
+ $t->refresh = 60;
  $t->title = "Latest Observation";
  $t->sites_current = "current";
  $SPECIAL = Array(

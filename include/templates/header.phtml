@@ -1,6 +1,11 @@
 <?php 
 $title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
-$refresh = array_key_exists('refresh', $this->vars)? $this->refresh : '';
+// Page should refresh
+$refresh = "";
+if (array_key_exists('refresh', $this->vars)){
+  $refresh = sprintf("<meta http-equiv=\"refresh\" content=\"%s;\">",
+    $this->refresh);
+}
 $headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
 if (array_key_exists('iemss', $this->vars)){
   $headextra .= <<<EOF

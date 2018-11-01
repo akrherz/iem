@@ -8,7 +8,7 @@
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "state";
  $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]): "asc";
 
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">";
+ $t->refresh = 60;
  $t->title = "US Climate Reference Network Latest Reports";
 
  $t->thispage = "current-sort";

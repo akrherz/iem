@@ -12,7 +12,7 @@
 
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "segid";
  $t->thispage = "roads-sort"; 
- $t->refresh = '<meta http-equiv="refresh" content="600">';
+ $t->refresh = 600;
 
 
 $sql = "SELECT * from roads_current r, roads_base b, roads_conditions c ".

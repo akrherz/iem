@@ -8,7 +8,7 @@ $t = new MyView();
 
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
 
-$t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol\">";
+$t->refresh = 60;
 $t->title = "AWOS Network Current Conditions";
 $t->current_network = "AWOS";
 $t->thispage = "current-sort";

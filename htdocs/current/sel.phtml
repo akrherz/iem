@@ -6,7 +6,7 @@
  include("../../include/database.inc.php");
  $conn = iemdb("postgis");
  $sel = isset($_GET["sel"]) ? intval($_GET["sel"]) : -1;
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"300;\">";
+ $t->refresh = 300;
  $t->title = "SPC Watches Overview";
  $t->thispage = "current-radar";
  

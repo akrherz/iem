@@ -14,8 +14,7 @@ $rs = pg_prepare($dbconn, "SELECT", "select t.*, s.name as sname from rwis_traff
 $rs = pg_execute($dbconn, "SELECT", Array() );
 
  $t->title = "RWIS Current Traffic Data";
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"600;
- URL=traffic.phtml?sortcol=$sortcol\">";
+ $t->refresh = 600;
  $t->thispage = "current-sort";
 
 

@@ -11,8 +11,7 @@ $t->current_network = "RWIS Surface";
 $network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
  $t->title = "RWIS Surface Currents";
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"600;
- URL=currentSF.phtml?sortcol=$sortcol&amp;network=$network\">";
+ $t->refresh = 600;
  $t->thispage = "current-sort";
 
 $vals = Array("tsf0" => "Sensor 1 - Temp [F]", 

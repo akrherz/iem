@@ -11,8 +11,7 @@
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "ts";
  $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_RWIS';
  $t->title = "RWIS Sortable Currents";
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"600; ".
- 	"URL=current.phtml?sortcol=$sortcol&amp;network=$network\">";
+ $t->refresh = 600;
  $t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script

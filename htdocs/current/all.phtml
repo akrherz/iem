@@ -10,7 +10,7 @@
  $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]): "desc";
  $state = isset($_REQUEST["state"])? xssafe($_REQUEST["state"]): "IA";
 
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">";
+ $t->refresh = 60;
  $t->title = "$state Current Conditions";
 
  $t->thispage = "current-sort";

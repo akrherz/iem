@@ -9,8 +9,7 @@ $t = new MyView();
   $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): "";
 
   $t->title = "School Network";
-  $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?network=$network&sortcol=$sortcol\">";
-  
+  $t->refresh = 60;
  $t->thispage = "current-sort";
 
    $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");

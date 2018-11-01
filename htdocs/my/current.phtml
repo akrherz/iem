@@ -48,7 +48,7 @@ setcookie("stations", implode(",", $_SESSION['stations']), time() + $expiry, "/m
  
 $t->title = "My IEM Current Conditions";
 if ($refresh == 'yes'){
-	$t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol&metar=$metar\">";
+	$t->refresh = 60;
 }
 $t->thispage = "current-sort";
 $t->current_network = "My Favorites";

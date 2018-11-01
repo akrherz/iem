@@ -58,7 +58,7 @@ $pgconn = iemdb("access");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT * from events WHERE network = $1
 	and valid > (now() - '15 minutes'::interval)");
 
-$t->refresh = "<meta http-equiv=\"refresh\" content=\"60\">";
+$t->refresh = 60;
 $t->title = "SchoolNet - Where's it raining?";
 $t->thispage = "networks-schoolnet";
 

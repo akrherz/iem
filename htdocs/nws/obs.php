@@ -14,7 +14,7 @@
  $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "desc";
  $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
 
- $t->refresh = "<meta http-equiv=\"refresh\" content=\"60;\">";
+ $t->refresh = 60;
  $t->title = "Obs by NWS Forecast Office";
 
   $t->thispage = "current-sort";

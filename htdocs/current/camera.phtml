@@ -70,7 +70,7 @@ function switchToArchiveMode()
 EOF;
 
 if (! $isarchive)
-	$t->refresh = "<meta http-equiv=\"refresh\" content=\"${camera_refresh};\">";
+	$t->refresh = $camera_refresh;
 
 $selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff",
                  "MCFC" => "#fff");
