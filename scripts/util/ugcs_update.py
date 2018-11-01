@@ -96,7 +96,7 @@ def db_fixes(cursor, valid):
 
     cursor.execute("""
         UPDATE ugcs SET simple_geom = ST_Multi(
-            ST_SimplifyPreserveTopology(geom, 0.01)
+            ST_Buffer(ST_SnapToGrid(geom, 0.01), 0)
         ),
         centroid = ST_Centroid(geom),
         area2163 = ST_area( ST_transform(geom, 2163) ) / 1000000.0
@@ -119,7 +119,9 @@ def db_fixes(cursor, valid):
         ) % (cursor.rowcount, ))
         cursor.execute("""
             UPDATE ugcs
-            SET simple_geom = ST_SimplifyPreserveTopology(geom, 0.0001)
+            SET simple_geom = ST_Multi(
+                ST_Buffer(ST_SnapToGrid(geom, 0.0001), 0)
+            )
             WHERE begin_ts = %s and ST_IsEmpty(simple_geom)
         """, (valid, ))
         _check()
