@@ -1,6 +1,4 @@
-"""
- Cache NEXRAD composites for the website
-"""
+"""Cache NEXRAD composites for the website."""
 import os
 import subprocess
 import datetime
@@ -24,8 +22,8 @@ def save(sectorName, file_name, dir_name, tstamp, bbox=None, routes='ac'):
     if bbox is not None:
         uri = ("http://iem.local/GIS/radmap.php?bbox=%s&ts=%s&%s"
                ) % (bbox, tstamp, layers)
-    req = exponential_backoff(requests.get, uri, timeout=40)
-    if req.status_code != 200:
+    req = exponential_backoff(requests.get, uri, timeout=60)
+    if req is None or req.status_code != 200:
         print("radar_composite %s returned %s" % (uri, req.status_code))
         return
 
