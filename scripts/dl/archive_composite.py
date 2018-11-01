@@ -2,7 +2,7 @@
 from __future__ import print_function
 import datetime
 import sys
-from radar_composite import save
+import subprocess
 
 
 def main(argv):
@@ -15,11 +15,8 @@ def main(argv):
     now = sts
     while now < ets:
         print(now)
-        text = now.strftime("%Y%m%d%H%M")
-        save('conus', 'uscomp.png', 'usrad', text, routes='a')
-        save('iem', 'mwcomp.png', 'comprad', text, routes='a')
-        for i in ['lot', 'ict', 'sd', 'hun']:
-            save(i, '%scomp.png' % (i, ), '%srad' % (i,), text, routes='a')
+        cmd = now.strftime("python radar_composite.py %Y %m %d %H %M")
+        subprocess.call(cmd, shell=True)
         now += interval
 
 
