@@ -205,7 +205,7 @@ def process(ncfn):
             print(
                 "dogfooding extract_hfmetar %s resulted in %s" % (mtr, exp)
             )
-            pass
+            continue
 
         for key in iem.data:
             if isinstance(iem.data[key], np.float32):

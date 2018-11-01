@@ -15,19 +15,21 @@ from pyiem.util import ncopen
 
 
 def s(val):
+    """Convert to string."""
     try:
         if val.mask:
             return 'M'
-    except Exception as exp:
+    except Exception as _exp:
         pass
     return "%5.1f" % (temperature(val, 'K').value('F'),)
 
 
 def s2(val):
+    """Convert to string."""
     try:
         if val.mask:
             return 'M'
-    except Exception as exp:
+    except Exception as _exp:
         pass
     return "%5.1f" % (val,)
 

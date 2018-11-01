@@ -10,6 +10,7 @@ import datetime
 
 from netCDF4 import chartostring  # @UnresolvedImport
 import numpy.ma
+import pytz
 from pyiem.util import ncopen
 from pyiem.datatypes import temperature
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
@@ -20,7 +21,7 @@ warnings.simplefilter("ignore", UserWarning)
 
 def sanity_check(val, lower, upper, goodfmt, default):
     """Simple formatter"""
-    if val > lower and val < upper:
+    if lower < val < upper:
         return goodfmt % (val,)
     return default
 
@@ -79,7 +80,8 @@ def main():
         ot = times[recnum]
         if numpy.ma.is_masked(ot) or ot > 2141347600:
             continue
-        ts = datetime.datetime.fromtimestamp(ot)
+        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ot)
+        ts = ts.replace(tzinfo=pytz.UTC)
         db[station] = {
             'STN': station,
             'PROVIDER': providers[recnum],
