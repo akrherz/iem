@@ -24,7 +24,7 @@ from pyiem.util import get_dbconn
 
 logging.basicConfig()
 logger = logging.getLogger()
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG if os.isatty() else logging.WARNING)
 
 nt = NetworkTable('IACLIMATE')
 
@@ -49,7 +49,7 @@ def do_precip(gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None))
-    logger.debug("Writting precip %s from ftime: %s" % (key, ftime))
+    logger.debug("Writting precip %s from ftime: %s", key, ftime)
     if d['precip'] is None:
         d['precip'] = sel[0].values
     else:
@@ -78,9 +78,9 @@ def process(ts):
               "ndfd.t%02iz.awp2p5f%03i.grib2"
               ) % (ts.year, ts.month, ts.day, ts.hour, ts.hour, fhour)
         if not os.path.isfile(fn):
-            logger.debug("ndfd_extract missing: %s" % (fn,))
+            logger.debug("ndfd_extract missing: %s", fn)
             continue
-        logger.debug("-> " + fn)
+        logger.debug("-> %s", fn)
         gribs = pygrib.open(fn)
         do_precip(gribs, ftime, data)
         do_temp('Maximum temperature', 'high', gribs, ftime, data)
@@ -110,7 +110,7 @@ def dbsave(ts, data):
         cursor.execute("""DELETE from alldata_forecast where
         modelid = %s""", (modelid,))
         if cursor.rowcount > 0:
-            logger.warn("Removed %s previous entries", cursor.rowcount)
+            logger.warning("Removed %s previous entries", cursor.rowcount)
     else:
         cursor.execute("""INSERT into forecast_inventory(model, modelts)
         VALUES ('NDFD', %s) RETURNING id""", (ts,))
@@ -120,7 +120,7 @@ def dbsave(ts, data):
         d = data['fx'][date]
         if (d['high'] is None or d['low'] is None or
                 d['precip'] is None):
-            logger.debug("Missing data for date: %s" % (date,))
+            logger.debug("Missing data for date: %s", date)
             del data['fx'][date]
 
     found_data = False
