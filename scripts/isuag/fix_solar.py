@@ -30,6 +30,9 @@ def check_date(date):
         res = requests.get(uri)
         j = json.loads(res.content)
         estimate = j['data'][0]['srad_mj']
+        if estimate is None:
+            print("fix_solar %s %s estimate is missing" % (station, date))
+            continue
         # Never pull data down
         if ob > estimate:
             continue

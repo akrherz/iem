@@ -63,6 +63,12 @@ cd ../iemplot
 cd ../iemre
 python hourly_analysis.py
 python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
+# Grid solar so that we have values by midnight
+if [ $LHH -eq "23" ]
+then
+	python grid_rsds.py	$(date +'%Y %m %d') &
+fi
+
 
 cd ../mrms
 python make_mrms_rasters.py $YYYY $MM $DD $HH
