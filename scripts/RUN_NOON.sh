@@ -17,3 +17,7 @@ python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d')
 
 cd ../iemre
 python prism_adjust_stage4.py $(date --date '3 days ago' +'%Y %m %d')
+
+# Since we have now adjusted the 12z precip 3 days ago, we should rerun
+# iemre for four days ago
+python daily_analysis.py $(date --date '4 days ago' +'%Y %m %d')

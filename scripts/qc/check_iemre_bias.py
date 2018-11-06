@@ -3,27 +3,28 @@ from __future__ import print_function
 import json
 
 import requests
-from pyiem.util import get_dbconn
-from pyiem.network import Table as NetworkTable
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn
+from pyiem.network import Table as NetworkTable
+
+COLS = ['ob_pday', 'daily_precip_in', 'precip_delta', 'prism_precip_in']
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn('coop')
 
-    nt = NetworkTable("WI_ASOS")
+    nt = NetworkTable("IACLIMATE")
 
     df = read_sql("""
-        SELECT day, max_tmpf, min_tmpf, pday
-        from summary_2017 s JOIN stations t
-        ON (s.iemid = t.iemid) WHERE t.network = 'WI_ASOS' and t.id = 'MSN'
+        SELECT day, precip, high, low from alldata_ia
+        WHERE station = 'IATDSM' and year = 1997
         ORDER by day ASC""", pgconn, index_col='day')
 
-    uri = ("https://mesonet.agron.iastate.edu/iemre/multiday/2017-01-01/"
-           "2017-11-14/%.2f/%.2f/json"
-           ) % (nt.sts['MSN']['lat'], nt.sts['MSN']['lon'])
+    uri = ("https://mesonet.agron.iastate.edu/iemre/multiday/1997-01-01/"
+           "1997-12-31/%.2f/%.2f/json"
+           ) % (nt.sts['IATDSM']['lat'], nt.sts['IATDSM']['lon'])
     req = requests.get(uri)
     j = json.loads(req.content)
 
@@ -31,9 +32,9 @@ def main():
     idf['day'] = pd.to_datetime(idf['date'])
     idf.set_index('day', inplace=True)
 
-    idf['ob_high'] = df['max_tmpf']
-    idf['ob_low'] = df['min_tmpf']
-    idf['ob_pday'] = df['pday']
+    idf['ob_high'] = df['high']
+    idf['ob_low'] = df['low']
+    idf['ob_pday'] = df['precip']
 
     idf['high_delta'] = idf['ob_high'] - idf['daily_high_f']
     idf['low_delta'] = idf['ob_low'] - idf['daily_low_f']
@@ -41,11 +42,17 @@ def main():
     idf.sort_values('precip_delta', inplace=True, ascending=True)
 
     print("IEMRE greater than Obs")
-    print(idf[['ob_pday', 'daily_precip_in', 'precip_delta']].head())
+    print(idf[COLS].head())
     print("Obs greater than IEMRE")
-    print(idf[['ob_pday', 'daily_precip_in', 'precip_delta']].tail())
+    print(idf[COLS].tail())
+    print("Largest Obs with IEMRE < 0.01")
+    idf2 = idf[idf['daily_precip_in'] < 0.01]
+    print(idf2[['ob_pday', 'daily_precip_in', 'precip_delta']].tail())
+
+    print("Monthly Totals")
+    print(idf[COLS].groupby(pd.Grouper(freq='M')).sum())
     print("sum")
-    print(idf[['ob_pday', 'daily_precip_in']].sum())
+    print(idf[COLS].sum())
 
 
 if __name__ == '__main__':

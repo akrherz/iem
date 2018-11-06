@@ -49,7 +49,10 @@ def workflow(valid):
 
     # Do the work now, we should not have to worry about the scale factor
     for tidx in range(sts_tidx, ets_tidx):
-        newval = p01m[tidx, :, :] * multiplier
+        oldval = p01m[tidx, :, :]
+        # we threshold the s4total to at least 0.001, so we divide by 24 here
+        # and denote that if the multiplier is zero, then we net zero
+        newval = np.where(oldval < 0.001, 0.00004, oldval) * multiplier
         p01m[tidx, :, :] = newval
         # make sure have data
         if np.ma.max(newval) > 0:
