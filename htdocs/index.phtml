@@ -4,10 +4,10 @@
  */
 require_once '../config/settings.inc.php';
 define("IEM_APPID", 1);
-include_once '../include/myview.php';
-include_once '../include/generators.php';
-include_once '../include/iemprop.php';
-include_once '../include/cameras.inc.php';
+require_once '../include/myview.php';
+require_once '../include/generators.php';
+require_once '../include/iemprop.php';
+require_once '../include/cameras.inc.php';
 
 $t = new MyView();
 $t->headextra = <<<EOF
@@ -110,7 +110,7 @@ $t->content = <<<EOM
 <br /><a href="/rainfall/">IEM GIS Rainfall</a>
 <br /><a href="/my/current.phtml">Sortable Currents</a>
 <br /><a href="/lsr/#DMX,DVN,ARX,FSD,OAX/-43200">View Storm Reports on Map</a>
-<br /><a href="/onsite/features/tags/winter1718.html">Winter Storms of 2017-2018</a>
+<br /><a href="/onsite/features/tags/winter1819.html">Winter Storms of 2018-2019</a>
 
     </div>
 </div>

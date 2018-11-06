@@ -1,10 +1,10 @@
 <?php
-include("../../../../config/settings.inc.php");
-include("../../../../include/myview.php");
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 36);
-include("../../../../include/database.inc.php");
-include("../../../../include/feature.php");
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/feature.php";
 require_once "../../../../include/forms.php";
 $pgconn = iemdb('mesosite');
 
@@ -56,6 +56,27 @@ EOF;
 $tag = isset($_GET["tag"]) ? xssafe($_GET["tag"]): "";
 $t->thispage = "iem-feature";
 $t->title = "Features Tagged: $tag";
+
+$winterextra = "";
+if (strpos($tag, "winter") === 0){
+	$winterextra = <<<EOM
+<p>The IEM generates per winter storm analyses of snowfall reports over
+Iowa and tags them by the winter season.  Here are the tags used for the
+previous winter seasons that these maps are available for:
+<ul>
+	<li><a href="winter1011.html">Winter 2010-2011</a></li>
+	<li><a href="winter1112.html">Winter 2011-2012</a></li>
+	<li><a href="winter1213.html">Winter 2012-2013</a></li>
+	<li><a href="winter1314.html">Winter 2013-2014</a></li>
+	<li><a href="winter1415.html">Winter 2014-2015</a></li>
+	<li><a href="winter1516.html">Winter 2015-2016</a></li>
+	<li><a href="winter1617.html">Winter 2016-2017</a></li>
+	<li><a href="winter1718.html">Winter 2017-2018</a></li>
+	<li><a href="winter1819.html">Winter 2018-2019</a></li>
+</ul></p>
+
+EOM;
+}
 
 $rs = pg_prepare($pgconn, "__SELECT", "SELECT oid, *, 
       to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
@@ -110,6 +131,8 @@ if (pg_num_rows($rs) == 0)
 $t->content = <<<EOF
 <h3>Past IEM Features tagged: {$tag}</h3>
 <p><a href="index.php" class="btn btn-default"><i class="fa fa-th-list"></i> List all tags</a></p>
+
+{$winterextra}
 
 {$content}
 
