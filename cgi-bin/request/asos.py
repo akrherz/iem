@@ -69,24 +69,16 @@ def get_time_bounds(form, tzinfo):
     m2 = int(form.getfirst('month2'))
     d1 = int(form.getfirst('day1'))
     d2 = int(form.getfirst('day2'))
-    # Construct dt instances in the right timezone, this logic sucks, but is
-    # valid, have to go to UTC first then back to the local timezone
-    sts = datetime.datetime.utcnow()
-    sts = sts.replace(tzinfo=pytz.utc)
-    sts = sts.astimezone(tzinfo)
-    ets = sts
+    # Here lie dragons, so tricky to get a proper timestamp
     try:
-        sts = sts.replace(year=y1, month=m1, day=d1, hour=0, minute=0,
-                          second=0, microsecond=0)
-        ets = sts.replace(year=y2, month=m2, day=d2, hour=0, minute=0,
-                          second=0, microsecond=0)
+        sts = tzinfo.localize(datetime.datetime(y1, m1, d1))
+        ets = tzinfo.localize(datetime.datetime(y2, m2, d2))
     except Exception as _exp:
         ssw("ERROR: Malformed Date!")
         sys.exit()
 
     if sts == ets:
         ets += datetime.timedelta(days=1)
-
     return sts, ets
 
 
