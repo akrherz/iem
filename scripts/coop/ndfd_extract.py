@@ -24,7 +24,7 @@ from pyiem.util import get_dbconn
 
 logging.basicConfig()
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG if os.isatty() else logging.WARNING)
+logger.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
 
 nt = NetworkTable('IACLIMATE')
 
@@ -65,7 +65,7 @@ def do_temp(name, dkey, gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None))
-    logger.debug("Writting %s %s from ftime: %s" % (name, key, ftime))
+    logger.debug("Writting %s %s from ftime: %s", name, key, ftime)
     d[dkey] = temperature(sel[0].values, 'K').value('F')
 
 
