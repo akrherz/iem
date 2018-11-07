@@ -81,25 +81,20 @@ def run(ctx):
             ssw(",".join([str(s) for s in row])+"\n")
         return
 
-    w = shapefile.Writer(shapeType=shapefile.POINT)
-    w.field('VALID', 'C', 12)
-    w.field('URGENT', 'C', 1)
-    w.field('AIRCRAFT', 'C', 40)
-    w.field('REPORT', 'C', 255)  # Max field size is 255
-    w.field('LAT', 'F', 7, 4)
-    w.field('LON', 'F', 9, 4)
-    for row in cursor:
-        w.point(row[-1], row[-2])
-        w.record(*row)
+    shpio = BytesIO()
+    shxio = BytesIO()
+    dbfio = BytesIO()
 
-    # sys.stderr.write("End LOOP...")
-
-    shp = BytesIO()
-    shx = BytesIO()
-    dbf = BytesIO()
-
-    w.save(shp=shp, shx=shx, dbf=dbf)
-    # sys.stderr.write("End of w.save()")
+    with shapefile.Writer(shx=shxio, dbf=dbfio, shp=shpio) as shp:
+        shp.field('VALID', 'C', 12)
+        shp.field('URGENT', 'C', 1)
+        shp.field('AIRCRAFT', 'C', 40)
+        shp.field('REPORT', 'C', 255)  # Max field size is 255
+        shp.field('LAT', 'F', 7, 4)
+        shp.field('LON', 'F', 9, 4)
+        for row in cursor:
+            shp.point(row[-1], row[-2])
+            shp.record(*row)
 
     zio = BytesIO()
     zf = zipfile.ZipFile(zio, mode='w',
@@ -107,9 +102,9 @@ def run(ctx):
     zf.writestr(fn+'.prj',
                 open(('/opt/iem/data/gis/meta/4326.prj'
                       )).read())
-    zf.writestr(fn+".shp", shp.getvalue())
-    zf.writestr(fn+'.shx', shx.getvalue())
-    zf.writestr(fn+'.dbf', dbf.getvalue())
+    zf.writestr(fn+".shp", shpio.getvalue())
+    zf.writestr(fn+'.shx', shxio.getvalue())
+    zf.writestr(fn+'.dbf', dbfio.getvalue())
     zf.close()
     ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (fn,))
     ssw(zio.getvalue())

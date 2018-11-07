@@ -72,7 +72,7 @@ def shpschema():
         The values it can receive are 1, 0, y, n, Y, N, T, F
         or the python builtins True and False
     """
-    shp = shapefile.Writer(shapefile.POINT)
+    shp = shapefile.Writer('current_nexattr')
     shp.field("VALID", 'C', 12, 0)
     shp.field("STORM_ID", 'C', 2, 0)
     shp.field("NEXRAD", 'C', 3, 0)
@@ -163,7 +163,7 @@ def main():
                    0,
                    0)
 
-    shp.save('current_nexattr')
+    shp.close()
     shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_nexattr.prj")
     zfp = zipfile.ZipFile("current_nexattr.zip", 'w', zipfile.ZIP_DEFLATED)
     zfp.write("current_nexattr.shp")

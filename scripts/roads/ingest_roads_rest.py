@@ -96,7 +96,7 @@ ROADCOND = {
 def export_shapefile(txn, utc):
     """Export a Shapefile of Road Conditions"""
     os.chdir("/tmp")
-    shp = shapefile.Writer(shapefile.POLYLINE)
+    shp = shapefile.Writer('iaroad_cond')
     shp.field("SEGID", 'N', 6, 0)
     shp.field("MAJOR", 'S', 10, 0)
     shp.field("MINOR", 'S', 128, 0)
@@ -117,7 +117,7 @@ def export_shapefile(txn, utc):
     """)
     for row in txn:
         multiline = loads(row["geom"], hex=True)
-        shp.line(parts=[zip(*multiline.geoms[0].xy)])
+        shp.line([zip(*multiline.geoms[0].xy)])
         shp.record(row["segid"],
                    row["major"],
                    row["minor"],
@@ -131,7 +131,7 @@ def export_shapefile(txn, utc):
                    str(row["towing_prohibited"])[0],
                    str(row["limited_vis"])[0])
 
-    shp.save('iaroad_cond')
+    shp.close()
     zfp = zipfile.ZipFile("iaroad_cond.zip", 'w')
     zfp.write("iaroad_cond.shp")
     zfp.write("iaroad_cond.shx")

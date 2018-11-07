@@ -98,41 +98,40 @@ def main():
     if cursor.rowcount == 0:
         send_error("ERROR: No results found for query.")
 
-    w = shapefile.Writer(shapeType=shapefile.POINT)
-    w.field('VALID', 'C', 12)
-    w.field('MAG', 'F', 5, 2)
-    w.field('WFO', 'C', 3)
-    w.field('TYPECODE', 'C', 1)
-    w.field('TYPETEXT', 'C', 40)
-    w.field('CITY', 'C', 40)
-    w.field('COUNTY', 'C', 40)
-    w.field('STATE', 'C', 2)
-    w.field('SOURCE', 'C', 40)
-    w.field('REMARK', 'C', 200)
-    w.field('LAT', 'F', 7, 4)
-    w.field('LON', 'F', 9, 4)
-    for row in cursor:
-        row = list(row)
-        w.point(row[-2], row[-3])
-        if row[9] is not None:
-            row[9] = row[9].encode('utf-8', 'ignore').decode(
-                               'ascii', 'ignore').replace(",", "_")
-        w.record(*row[:-1])
-        csv.write(("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
-                   ) % (row[0], row[12], row[-3], row[-2], row[1], row[2],
-                        row[3],
-                        row[4], row[5].encode(
-                            'utf-8', 'ignore').decode('ascii', 'ignore'),
-                        row[6], row[7], row[8],
-                        row[9] if row[9] is not None else ''))
+    shpio = BytesIO()
+    shxio = BytesIO()
+    dbfio = BytesIO()
+
+    with shapefile.Writer(shp=shpio, shx=shxio, dbf=dbfio) as shp:
+        shp.field('VALID', 'C', 12)
+        shp.field('MAG', 'F', 5, 2)
+        shp.field('WFO', 'C', 3)
+        shp.field('TYPECODE', 'C', 1)
+        shp.field('TYPETEXT', 'C', 40)
+        shp.field('CITY', 'C', 40)
+        shp.field('COUNTY', 'C', 40)
+        shp.field('STATE', 'C', 2)
+        shp.field('SOURCE', 'C', 40)
+        shp.field('REMARK', 'C', 200)
+        shp.field('LAT', 'F', 7, 4)
+        shp.field('LON', 'F', 9, 4)
+        for row in cursor:
+            row = list(row)
+            shp.point(row[-2], row[-3])
+            if row[9] is not None:
+                row[9] = row[9].encode('utf-8', 'ignore').decode(
+                                'ascii', 'ignore').replace(",", "_")
+            shp.record(*row[:-1])
+            csv.write(
+                ("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+                 ) % (row[0], row[12], row[-3], row[-2], row[1], row[2],
+                      row[3],
+                      row[4], row[5].encode(
+                        'utf-8', 'ignore').decode('ascii', 'ignore'),
+                      row[6], row[7], row[8],
+                      row[9] if row[9] is not None else ''))
 
     csv.close()
-
-    shp = BytesIO()
-    shx = BytesIO()
-    dbf = BytesIO()
-
-    w.save(shp=shp, shx=shx, dbf=dbf)
 
     zio = BytesIO()
     zf = zipfile.ZipFile(zio, mode='w',
@@ -140,9 +139,9 @@ def main():
     zf.writestr(fn+'.prj',
                 open(('/opt/iem/data/gis/meta/4326.prj'
                       )).read())
-    zf.writestr(fn+".shp", shp.getvalue())
-    zf.writestr(fn+'.shx', shx.getvalue())
-    zf.writestr(fn+'.dbf', dbf.getvalue())
+    zf.writestr(fn+".shp", shpio.getvalue())
+    zf.writestr(fn+'.shx', shxio.getvalue())
+    zf.writestr(fn+'.dbf', dbfio.getvalue())
     zf.writestr(fn+'.csv', open(fn+'.csv', 'r').read())
     zf.close()
 

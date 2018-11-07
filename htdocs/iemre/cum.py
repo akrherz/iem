@@ -20,8 +20,8 @@ def main():
     form = cgi.FieldStorage()
     ts0 = datetime.datetime.strptime(form.getfirst("date0"), "%Y-%m-%d")
     ts1 = datetime.datetime.strptime(form.getfirst("date1"), "%Y-%m-%d")
-    base = int(form.getfirst("base"))
-    ceil = int(form.getfirst("ceil"))
+    base = int(form.getfirst("base", 50))
+    ceil = int(form.getfirst("ceil", 86))
     # Make sure we aren't in the future
     tsend = datetime.date.today()
     if ts1.date() >= tsend:
@@ -78,20 +78,20 @@ def main():
     if fmt == 'shp':
         # Time to create the shapefiles
         basefn = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
-        w = shapefile.Writer(shapefile.POLYGON)
+        w = shapefile.Writer(basefn)
         w.field('GDD', 'F', 10, 2)
         w.field('PREC_IN', 'F', 10, 2)
 
         for x in iemre.XAXIS:
             for y in iemre.YAXIS:
-                w.poly(parts=[[(x, y), (x, y+iemre.DY),
-                               (x+iemre.DX, y+iemre.DY),
-                               (x+iemre.DX, y), (x, y)]])
+                w.poly([[(x, y), (x, y+iemre.DY),
+                         (x+iemre.DX, y+iemre.DY),
+                         (x+iemre.DX, y), (x, y)]])
 
         for i in range(len(iemre.XAXIS)):
             for j in range(len(iemre.YAXIS)):
                 w.record(gdd[j, i], precip[j, i])
-        w.save(basefn)
+        w.close()
         # Create zip file, send it back to the clients
         shutil.copyfile(
             "/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn, ))

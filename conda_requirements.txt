@@ -68,7 +68,7 @@ pygrib
 pylint
 pyparsing
 pyproj
-pyshp
+pyshp>=2
 python-memcached
 pytz
 rasterio

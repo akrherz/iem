@@ -3,9 +3,9 @@
 
 import zipfile
 import os
-import shutil
 import sys
 import cgi
+from io import BytesIO
 
 import shapefile
 import psycopg2.extras
@@ -23,10 +23,6 @@ def main(year, etn):
 
     os.chdir("/tmp/")
 
-    w = shapefile.Writer(shapefile.POLYGON)
-    w.field('SIG', 'C', '1')
-    w.field('ETN', 'I', '4')
-
     sql = """select
         ST_astext(ST_multi(ST_union(ST_SnapToGrid(u.geom,0.0001)))) as tgeom
         from warnings_%s w JOIN ugcs u on (u.gid = w.gid)
@@ -37,38 +33,41 @@ def main(year, etn):
         and extract(year from issued) = %s LIMIT 1) + '60 minutes'::interval)
     """ % (year, etn, etn, year)
     pcursor.execute(sql)
-
     if pcursor.rowcount == 0:
         sys.exit()
 
-    row = pcursor.fetchone()
-    s = row["tgeom"]
-    f = wellknowntext.convert_well_known_text(s)
-    w.poly(parts=f)
-    w.record('A', etn)
-    w.save(basefn)
+    shpio = BytesIO()
+    shxio = BytesIO()
+    dbfio = BytesIO()
+    with shapefile.Writer(shx=shxio, shp=shpio, dbf=dbfio) as shp:
+        shp.field('SIG', 'C', '1')
+        shp.field('ETN', 'I', '4')
 
-    # Create zip file, send it back to the clients
-    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn, ))
-    z = zipfile.ZipFile(basefn+".zip", 'w', zipfile.ZIP_DEFLATED)
-    for suffix in ['shp', 'shx', 'dbf', 'prj']:
-        z.write("%s.%s" % (basefn, suffix))
-    z.close()
+        row = pcursor.fetchone()
+        s = row["tgeom"]
+        f = wellknowntext.convert_well_known_text(s)
+        shp.poly(f)
+        shp.record('A', etn)
 
-    ssw("Content-type: application/octet-stream\n")
-    ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (basefn, ))
-
-    ssw(open("%s.zip" % (basefn, ), 'rb').read())
-
-    for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
-        os.remove("%s.%s" % (basefn, suffix))
+    zio = BytesIO()
+    zf = zipfile.ZipFile(zio, mode='w',
+                         compression=zipfile.ZIP_DEFLATED)
+    zf.writestr(basefn+'.prj',
+                open(('/opt/iem/data/gis/meta/4326.prj'
+                      )).read())
+    zf.writestr(basefn+".shp", shpio.getvalue())
+    zf.writestr(basefn+'.shx', shxio.getvalue())
+    zf.writestr(basefn+'.dbf', dbfio.getvalue())
+    zf.close()
+    ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (basefn,))
+    ssw(zio.getvalue())
 
 
 def cgiworkflow():
     """Yawn"""
     form = cgi.FieldStorage()
-    year = int(form.getfirst("year"))
-    etn = int(form.getfirst("etn"))
+    year = int(form.getfirst("year", 2018))
+    etn = int(form.getfirst("etn", 1))
 
     main(year, etn)
 

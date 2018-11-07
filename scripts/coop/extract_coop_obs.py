@@ -14,7 +14,6 @@ def main():
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     now = datetime.datetime.now()
-    dateStr = now.strftime("%y%m%d/1200")
     ts = now.strftime('%Y%m%d')
     yyyy = now.strftime('%Y')
 
@@ -78,7 +77,7 @@ def main():
                'prec_in,snow_in,snow_depth_in,prec_mon_in,snow_mon_in,'
                'elevation_m\n'))
 
-    w = shapefile.Writer(shapefile.POINT)
+    w = shapefile.Writer("coop_%s" % (ts, ))
     w.field("SID", 'C', 5, 0)
     w.field("SITE_NAME", 'C', 64, 0)
     w.field("ELEV_M", 'F', 10, 2)
@@ -122,7 +121,7 @@ def main():
                         cob[sid]["SNOW"], cob[sid]["SNOD"], cob[sid]["PMOI"],
                         cob[sid]["SMOI"], cob[sid]['ELEV_M']))
 
-    w.save("coop_%s" % (ts, ))
+    w.close()
 
     # Ship csv file
     csv.close()

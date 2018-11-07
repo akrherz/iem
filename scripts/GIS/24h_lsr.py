@@ -23,7 +23,7 @@ def main():
     # out of the shapefile
     ets = datetime.datetime.utcnow() + datetime.timedelta(minutes=+1)
 
-    w = shapefile.Writer(shapefile.POINT)
+    w = shapefile.Writer("lsr_24hour")
     w.field("VALID", 'C', 12, 0)
     w.field("MAG", 'F', 10, 2)
     w.field("WFO", 'C', 3, 0)
@@ -56,7 +56,7 @@ def main():
                  row['remark'].encode(
                      'utf-8', 'ignore').decode('ascii', 'ignore')[:200]
                  )
-    w.save("lsr_24hour.shp")
+    w.close()
     zfh = zipfile.ZipFile("lsr_24hour.zip", 'w', zipfile.ZIP_DEFLATED)
     zfh.write("lsr_24hour.shp")
     zfh.write("lsr_24hour.shx")

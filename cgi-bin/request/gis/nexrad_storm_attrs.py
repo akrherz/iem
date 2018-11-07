@@ -97,8 +97,12 @@ def run(ctx):
             ssw(",".join([str(s) for s in row])+"\n")
         return
 
-    w = shapefile.Writer(shapeType=shapefile.POINT)
-    """
+    shpio = BytesIO()
+    shxio = BytesIO()
+    dbfio = BytesIO()
+
+    with shapefile.Writer(shp=shpio, shx=shxio, dbf=dbfio) as shp:
+        """
 C is ASCII characters
 N is a double precision integer limited to around 18 characters in length
 D is for dates in the YYYYMMDD format,
@@ -108,37 +112,28 @@ L is for logical data which is stored in the shapefile's attribute table as a
     short integer as a 1 (true) or a 0 (false).
     The values it can receive are 1, 0, y, n, Y, N, T, F
     or the python builtins True and False
-    """
-    w.field('VALID', 'C', 12)
-    w.field('STORM_ID', 'C', 2)
-    w.field('NEXRAD', 'C', 3)
-    w.field('AZIMUTH', 'N', 3, 0)
-    w.field('RANGE', 'N', 3, 0)
-    w.field('TVS', 'C', 10)
-    w.field('MESO', 'C', 10)
-    w.field('POSH', 'N', 3, 0)
-    w.field('POH', 'N', 3, 0)
-    w.field('MAX_SIZE', 'F', 5, 2)
-    w.field('VIL', 'N', 3, 0)
-    w.field('MAX_DBZ', 'N', 3, 0)
-    w.field('MAX_DBZ_H', 'F', 5, 2)
-    w.field('TOP', 'F', 9, 2)
-    w.field('DRCT', 'N', 3, 0)
-    w.field('SKNT', 'N', 3, 0)
-    w.field('LAT', 'F', 10, 4)
-    w.field('LON', 'F', 10, 4)
-    for row in cursor:
-        w.point(row[-1], row[-2])
-        w.record(*row)
-
-    # sys.stderr.write("End LOOP...")
-
-    shp = BytesIO()
-    shx = BytesIO()
-    dbf = BytesIO()
-
-    w.save(shp=shp, shx=shx, dbf=dbf)
-    # sys.stderr.write("End of w.save()")
+        """
+        shp.field('VALID', 'C', 12)
+        shp.field('STORM_ID', 'C', 2)
+        shp.field('NEXRAD', 'C', 3)
+        shp.field('AZIMUTH', 'N', 3, 0)
+        shp.field('RANGE', 'N', 3, 0)
+        shp.field('TVS', 'C', 10)
+        shp.field('MESO', 'C', 10)
+        shp.field('POSH', 'N', 3, 0)
+        shp.field('POH', 'N', 3, 0)
+        shp.field('MAX_SIZE', 'F', 5, 2)
+        shp.field('VIL', 'N', 3, 0)
+        shp.field('MAX_DBZ', 'N', 3, 0)
+        shp.field('MAX_DBZ_H', 'F', 5, 2)
+        shp.field('TOP', 'F', 9, 2)
+        shp.field('DRCT', 'N', 3, 0)
+        shp.field('SKNT', 'N', 3, 0)
+        shp.field('LAT', 'F', 10, 4)
+        shp.field('LON', 'F', 10, 4)
+        for row in cursor:
+            shp.point(row[-1], row[-2])
+            shp.record(*row)
 
     zio = BytesIO()
     zf = zipfile.ZipFile(zio, mode='w',
@@ -146,9 +141,9 @@ L is for logical data which is stored in the shapefile's attribute table as a
     zf.writestr(fn+'.prj',
                 open(('/opt/iem/data/gis/meta/4326.prj'
                       )).read())
-    zf.writestr(fn+".shp", shp.getvalue())
-    zf.writestr(fn+'.shx', shx.getvalue())
-    zf.writestr(fn+'.dbf', dbf.getvalue())
+    zf.writestr(fn+".shp", shpio.getvalue())
+    zf.writestr(fn+'.shx', shxio.getvalue())
+    zf.writestr(fn+'.dbf', dbfio.getvalue())
     zf.close()
     ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (fn,))
     ssw(zio.getvalue())
