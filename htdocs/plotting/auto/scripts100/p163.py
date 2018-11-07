@@ -57,6 +57,10 @@ MDICT = OrderedDict([
  ("WALL CLOUD", "WALL CLOUD"),
  ("WATER SPOUT", "WATER SPOUT"),
  ("WILDFIRE", "WILDFIRE")])
+PDICT = OrderedDict([
+    ("wfo", "By NWS Forecast Office"),
+    ("state", "By State"),
+])
 
 
 def get_description():
@@ -64,8 +68,9 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['description'] = """This application generates a map displaying the
-    number of LSRs issued between a period of your choice by NWS Office."""
-    today = datetime.date.today()
+    number of LSRs issued between a period of your choice by NWS Office. These
+    are the preliminary reports and not official totals of events."""
+    today = datetime.date.today() + datetime.timedelta(days=1)
     jan1 = today.replace(month=1, day=1)
     desc['arguments'] = [
         dict(type='datetime', name='sdate',
@@ -78,6 +83,8 @@ def get_description():
              min="2006/01/01 0000"),
         dict(type='select', name='filter', default='NONE', options=MDICT,
              label='Local Storm Report Type Filter'),
+        dict(type='select', name='by', default='wfo',
+             label='Aggregate Option:', options=PDICT),
     ]
     return desc
 
@@ -89,6 +96,7 @@ def plotter(fdict):
     sts = ctx['sdate']
     sts = sts.replace(tzinfo=pytz.utc)
     ets = ctx['edate']
+    by = ctx['by']
     ets = ets.replace(tzinfo=pytz.utc)
     myfilter = ctx['filter']
     if myfilter == 'NONE':
@@ -102,26 +110,35 @@ def plotter(fdict):
         tlimiter = " and typetext = '%s' " % (myfilter,)
 
     df = read_sql("""
-    SELECT wfo, count(*) from lsrs
-    WHERE valid >= %s and valid < %s """ + tlimiter + """
-    GROUP by wfo ORDER by wfo ASC
-    """, pgconn, params=(sts, ets), index_col='wfo')
+    WITH data as (
+        SELECT distinct wfo, state, valid, type, magnitude, geom from lsrs
+        where valid >= %s and valid < %s """ + tlimiter + """
+    )
+    SELECT """ + by + """, count(*) from data GROUP by """ + by + """
+    """, pgconn, params=(sts, ets), index_col=by)
     data = {}
-    for wfo, row in df.iterrows():
-        if wfo == 'JSJ':
-            wfo = 'SJU'
-        data[wfo] = row['count']
+    for idx, row in df.iterrows():
+        if idx == 'JSJ':
+            idx = 'SJU'
+        data[idx] = row['count']
     maxv = df['count'].max()
-    bins = np.linspace(0, maxv, 12, dtype='i')
+    bins = np.linspace(1, maxv, 12, dtype='i')
     bins[-1] += 1
-    mp = MapPlot(sector='nws', axisbg='white',
-                 title='Local Storm Report Counts by NWS Office',
-                 subtitlefontsize=10,
-                 subtitle=('Valid %s - %s UTC, type limiter: %s'
-                           ) % (sts.strftime("%d %b %Y %H:%M"),
-                                ets.strftime("%d %b %Y %H:%M"),
-                                MDICT.get(myfilter)))
-    mp.fill_cwas(data, bins=bins, cmap=plt.get_cmap('plasma'), ilabel=True)
+    mp = MapPlot(
+        sector='nws', axisbg='white',
+        title=(
+            'Preliminary/Unfiltered Local Storm Report Counts %s'
+        ) % (PDICT[by],),
+        subtitlefontsize=10,
+        subtitle=('Valid %s - %s UTC, type limiter: %s'
+                  ) % (sts.strftime("%d %b %Y %H:%M"),
+                       ets.strftime("%d %b %Y %H:%M"),
+                       MDICT.get(myfilter)))
+    if by == 'wfo':
+        mp.fill_cwas(data, bins=bins, cmap=plt.get_cmap('plasma'), ilabel=True)
+    else:
+        mp.fill_states(
+            data, bins=bins, cmap=plt.get_cmap('plasma'), ilabel=True)
 
     return mp.fig, df
 

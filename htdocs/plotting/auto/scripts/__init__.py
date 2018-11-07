@@ -363,7 +363,7 @@ data = {'plots': [
         {'id': "52",
          'label': "Gaant Chart of WFO Issued Watch/Warning/Advisories"},
         {'id': "163",
-         'label': "Local Storm Reports Issued by WFO [map]"},
+         'label': "Local Storm Reports Issued by WFO/State [map]"},
         {'id': "102",
          'label': "Local Storm Report Source Type Ranks by Year"},
         {'id': "44",
