@@ -3,7 +3,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (4, now());
+INSERT into iem_schema_manager_version values (5, now());
 
 CREATE TABLE alldata(
 	station varchar(5),
@@ -363,3 +363,11 @@ create table t2018_hourly(
   INHERITS (alldata);
 CREATE INDEX t2018_hourly_idx on t2018_hourly(station, valid);
 GRANT SELECT on t2018_hourly to nobody,apache;
+
+create table t2019_hourly( 
+  CONSTRAINT __t2019_hourly_check 
+  CHECK(valid >= '2019-01-01 00:00+00'::timestamptz 
+        and valid < '2020-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2019_hourly_idx on t2019_hourly(station, valid);
+GRANT SELECT on t2019_hourly to nobody,apache;
