@@ -362,6 +362,9 @@ data = {'plots': [
          'label': "Days since Last Watch/Warning/Advisory by WFO"},
         {'id': "72",
          'label': "Frequency of Watch/Warning/Advisories by Time of Day"},
+        {'id': "50",
+         'label': ("Frequency of Hail/Wind Tags used in "
+                   "Severe TStorm Warnings")},
         {'id': "52",
          'label': "Gaant Chart of WFO Issued Watch/Warning/Advisories"},
         {'id': "163",
