@@ -9,7 +9,7 @@ QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
     17,  # is referenced by canonical page
     38,  # radiation plot that is complex
-    49, 50, 51,   # cscap plots that should be removed
+    50, 51,   # cscap plots that should be removed
     68,  # nws unique VTEC types per year
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases

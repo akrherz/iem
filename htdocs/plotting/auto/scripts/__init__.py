@@ -34,6 +34,8 @@ data = {'plots': [
         {'id': "66",
          "label": ("Consecutative Days with High/Low Temp "
                    "Above/Below Threshold")},
+        {'id': "49",
+         'label': "Daily Frequency of Some Threshold (snow, precip, temps)"},
         {'id': "176",
          'label': "Daily Records Beat Margin"},
         {'id': "5",
@@ -393,14 +395,6 @@ data = {'plots': [
         {'id': "90",
          'label': ("UGC or Polygon SBW Statistics for "
                    "Watch/Warning/Advisory by state/wfo")},
-    ]},
-    {'label': 'Sustainable Corn Project Plots', 'options': [
-        {'id': "49",
-         'label': "Two Day Precipitation Total Frequencies"},
-        {'id': "50",
-         'label': "Frequency of Measurable Daily Precipitation"},
-        {'id': "51",
-         'label': "Frequency of No Daily Precipitation over 7 Days"},
     ]},
     {'label': 'Tall Towers Plots', 'options': [
         {'id': "158",
