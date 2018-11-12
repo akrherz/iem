@@ -155,7 +155,7 @@ def do_windalerts(obs):
         # Problem sites with lightning issues
         if sid in ['RBFI4', 'RTMI4', 'RWII4', 'RCAI4', 'RDYI4',
                    'RDNI4', 'RCDI4', 'RCII4', 'RCLI4', 'VCTI4',
-                   'RGAI4']:
+                   'RGAI4', 'RAVI4']:
             continue
         ob = obs[sid]
         # screening
