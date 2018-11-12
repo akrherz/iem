@@ -2252,6 +2252,15 @@ CREATE TABLE roads_2015_2016_log(
         raw varchar);
 GRANT SELECT on roads_2015_2016_log to nobody;
 
+CREATE TABLE roads_2016_2017_log(
+        segid int REFERENCES roads_base(segid),
+        valid timestamptz,
+        cond_code smallint REFERENCES roads_conditions(code),
+        towing_prohibited boolean,
+        limited_vis boolean,
+        raw varchar);
+GRANT SELECT on roads_2016_2017_log to nobody;
+
 CREATE TABLE roads_2017_2018_log(
   segid INT references roads_base(segid),
   valid timestamptz,
