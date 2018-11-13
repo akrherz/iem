@@ -1,7 +1,7 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
 
 $t = new MyView();
 define("IEM_APPID", 145);
@@ -40,21 +40,31 @@ select a time, use the up/down keyboard arrow to create a quasi-timelapse.</p>
 <p>Archiving started back on 19 Dec 2009.  The start date of invidual webcams
 is shown in the select menu.
 
-<div style="border: 3px solid #EEE; width: 900px;">
-<div style="background: #eee; border-bottom: 4px solid #ccc;">
- <span style="font-weight: bold;">1. Select Webcam View:</span>{$sform}
- <span style="font-weight: bold;">2. Date:</span> <input type="text" id="datepicker" />
- <input type="hidden" id="realdate" />
+<input type="hidden" id="realdate" />
+
+<div class="row">
+  <div class="col-md-8 col-sm-12">
+  <span style="font-weight: bold;">1. Select Webcam View:</span>{$sform}
+  </div>
+  <div class="col-md-4 col-sm-12">
+  <span style="font-weight: bold;">2. Date:</span> <input type="text" id="datepicker" />
+
+  </div>
 </div>
-<div style="float: left; min-width: 100px; border-right: 4px solid #ccc; padding: 3px; background: #eee;">
- <span style="font-weight: bold;">3. Select Time:</span><br />
- <select size="30" name="times">
- </select>
+
+<div class="row">
+  <div class="col-md-2 col-sm-12">
+  <strong>3. Select Time:</sstrong>
+  <br />
+  <select size="30" name="times">
+  </select> 
+  </div>
+  <div class="col-md-8 col-sm-12">
+  <img id="theimage" src="camera_instructions.png" class="img img-responsive">
+  </div>
 </div>
-<img id="theimage" src="camera_instructions.png" style="float: left; margin: 5px;"/>
 
 <br clear="all" />
-</div>
 EOF;
-$t->render("single.phtml");
+$t->render("full.phtml");
 ?>
