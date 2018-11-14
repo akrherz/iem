@@ -320,7 +320,7 @@ def grid_day(ts, domain):
         write_grid(ts, 'wind_speed', datatypes.speed(res, 'KT').value('MPS'))
 
 
-def workflow(ts, irealtime):
+def workflow(ts, irealtime, justprecip):
     """Do Work"""
     # Load up our netcdf file!
     ncfn = iemre.get_daily_ncname(ts.year)
@@ -332,7 +332,8 @@ def workflow(ts, irealtime):
     domain = nc.variables['hasdata'][:, :]
     nc.close()
     # For this date, the 12 UTC COOP obs will match the date
-    grid_day12(ts, domain)
+    if not justprecip:
+        grid_day12(ts, domain)
     do_precip12(ts)
     # This is actually yesterday!
     if irealtime:
@@ -342,18 +343,20 @@ def workflow(ts, irealtime):
         print("will create %s" % (ncfn, ))
         cmd = "python init_daily.py %s" % (ts.year,)
         subprocess.call(cmd, shell=True)
-    grid_day(ts, domain)
+    if not justprecip:
+        grid_day(ts, domain)
     do_precip(ts)
 
 
 def main(argv):
     """Go Main Go"""
-    if len(argv) == 4:
+    if len(argv) >= 4:
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-        workflow(ts, False)
+        # specify any fifth argument to turn off non-precip gridding
+        workflow(ts, False, len(argv) == 5)
     else:
         ts = datetime.date.today()
-        workflow(ts, True)
+        workflow(ts, True, False)
 
 
 if __name__ == "__main__":
