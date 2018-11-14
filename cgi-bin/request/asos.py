@@ -16,6 +16,11 @@ from pyiem import meteorology
 from pyiem.util import get_dbconn, ssw
 
 
+def dance(val):
+    """Force the val to ASCII."""
+    return val.encode('ascii', 'ignore').decode('ascii')
+
+
 def check_load():
     """Prevent automation from overwhelming the server"""
     if os.environ['REQUEST_METHOD'] == 'OPTIONS':
@@ -234,7 +239,9 @@ def main():
                 else:
                     r.append(
                         "%s" % (
-                            row[data1].replace(",", " ").replace("\n", " "), )
+                            dance(
+                                row[data1]
+                        ).replace(",", " ").replace("\n", " "), )
                     )
             elif (row.get(data1) is None or row[data1] <= -99.0 or
                   row[data1] == "M"):
