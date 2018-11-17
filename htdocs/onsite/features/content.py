@@ -9,14 +9,14 @@ from pyiem.util import get_dbconn, ssw
 
 PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
-                      "(?P<suffix>png|gif|xls|pdf|gnumeric)$"))
+                      "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric)$"))
 
 
 def send_content_type(val):
     """Do as I say"""
     if val == 'text':
         ssw("Content-type: text/plain\n\n")
-    elif val in ['png', 'gif']:
+    elif val in ['png', 'gif', 'jpg']:
         ssw("Content-type: image/%s\n\n" % (val, ))
     else:
         ssw("Content-type: text/plain\n\n")
