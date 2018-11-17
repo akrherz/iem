@@ -13,9 +13,9 @@ python stage4_xhour.py 24
 python stage4_xhour.py 48
 
 cd ../iemre
-python stage4_hourlyre.py
-python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
-python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
+python stage4_ingest.py `date -u +'%Y %m %d %H'`
+python stage4_ingest.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
+python stage4_ingest.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
 cd ../ingestors/madis
 python extract_hfmetar.py 2 &
