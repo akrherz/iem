@@ -32,6 +32,11 @@ $t->content = <<<EOM
 <div class="col-md-2">&nbsp;</div>
 <div class="col-md-5 well">
 
+After the death of <a href="/onsite/news.phtml?id=1378">Dr Ray Arritt</a>, a
+new project coordinator has yet to be named.  Please address all questions to
+daryl.
+
+<!--
 <h3>For Administrative Questions:</h3>
 
 <h4>IEM Coordinator: Dr Raymond Arritt</h4>
@@ -40,7 +45,7 @@ $t->content = <<<EOM
 <br>Iowa State University
 <br>Ames, IA 50011
 <br><i>Email:</i> <a href="mailto:rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu">rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu</a>
-
+-->
 
 </div>
 </div>
