@@ -1,4 +1,4 @@
-"""Climodat"""
+"""Monthly HDD/CDD Totals."""
 import datetime
 
 from pandas.io.sql import read_sql
@@ -108,22 +108,16 @@ OCT    NOV    DEC
 
     y1 = int(fdict.get('syear', 1990))
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    fig, ax = plt.subplots(1, 1, figsize=(8., 6.))
     fig.text(0.5, 0.95, "[%s] %s (%s-%s)" % (station, nt.sts[station]['name'],
                                              y1, y1 + 20), ha='center',
              fontsize=16)
-    ax[0].set_title("%s base=65" % (PDICT[varname], ))
+    ax.set_title(r"%s base=60$^\circ$F" % (PDICT[varname], ))
     filtered = df[(df['year'] >= y1) & (df['year'] <= (y1 + 20))]
-    df2 = filtered[
-        ['month', 'year', varname + '65']
-        ].pivot('year', 'month', varname + '65')
-    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=.5, ax=ax[0])
-
-    ax[1].set_title("%s base=60" % (PDICT[varname], ))
     df2 = filtered[
         ['month', 'year', varname + '60']
         ].pivot('year', 'month', varname + '60')
-    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=.5, ax=ax[1])
+    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=.5, ax=ax)
 
     return fig, df, res
 
