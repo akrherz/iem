@@ -1,5 +1,6 @@
 <?php
- $station = isset($_GET['station']) ? substr($_GET['station'],0,5): 'OT0015';
+ //$station = isset($_GET['station']) ? substr($_GET['station'],0,5): 'OT0015';
+ $station = 'OT0015';
  require_once "../../config/settings.inc.php";
  require_once "../../include/mlib.php";
    $jdata = file_get_contents("http://iem.local/api/1/currents.json?station=$station");
