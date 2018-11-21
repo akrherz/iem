@@ -34,6 +34,8 @@ data = {'plots': [
         {'id': "66",
          "label": ("Consecutative Days with High/Low Temp "
                    "Above/Below Threshold")},
+        {'id': "9", 'label': ("Cooling/Growing/Heating Degree Day "
+                              "Daily Values and Climatology")},
         {'id': "49",
          'label': "Daily Frequency of Some Threshold (snow, precip, temps)"},
         {'id': "176",
@@ -139,11 +141,8 @@ data = {'plots': [
          'label': 'Days per month/season above/below some threshold'},
         {'id': "29",
          'label': "Frequency of Hourly Temperature within Range by Month"},
-        {'id': "9", 'label': ("Growing Degree Day Climatology "
-                              "and Daily Values for one Year")},
         {'id': "116",
-         'label': ("Heating Degree Days and Cooling Degree Days, "
-                   "monthly totals")},
+         'label': ("Cooling/Heating Degree Days monthly totals")},
         {'id': "42",
          'label': ("Hourly Temperature/Dew Point "
                    "Streaks Above/Below Threshold")},

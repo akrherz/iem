@@ -1,6 +1,7 @@
 """GDD climo"""
 import calendar
 import datetime
+from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -9,21 +10,30 @@ from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
+PDICT = OrderedDict((
+     ('cdd', 'Cooling Degree Days'),
+     ('gdd', 'Growing Degree Days'),
+     ('hdd', 'Heating Degree Days'),
+))
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
     desc['description'] = """This chart produces the daily climatology of
-    Growing Degree Days for a location of your choice. Please note that
+    Degree Days for a location of your choice. Please note that
     Feb 29 is not considered for this analysis."""
+    thisyear = datetime.date.today().year
     desc['arguments'] = [
         dict(type='station', name='station', default='IA0200',
              label='Select Station:', network='IACLIMATE'),
-        dict(type='year', name='year', default='2015', min=1893,
+        dict(type='year', name='year', default=thisyear, min=1893,
              label='Select Year:'),
+        dict(type='select', options=PDICT, default='gdd', name='var',
+             label='Which variable to plot:'),
         dict(type='int', name='base', default='50',
-             label='Enter GDD Base (F):'),
+             label='Enter CDD/GDD/HDD Base (F):'),
         dict(type='int', name='ceiling', default='86',
              label='Enter GDD Ceiling (F):'),
     ]
@@ -39,15 +49,21 @@ def plotter(fdict):
     year = ctx['year']
     base = ctx['base']
     ceiling = ctx['ceiling']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
     syear = max(nt.sts[station]['archive_begin'].year, 1893)
 
-    glabel = "gdd%s%s" % (base, ceiling)
+    glabel = "%s%s%s" % (varname, base, ceiling)
+    gfunc = "gddxx(%s, %s, high, low)" % (base, ceiling)
+    title = "base=%s/ceil=%s" % (base, ceiling)
+    if varname in ['hdd', 'cdd']:
+        gfunc = "%s(high, low, %s)" % (varname, base)
+        title = "base=%s" % (base, )
     df = read_sql("""
     SELECT year, sday,
-    gddxx("""+str(base)+""", """+str(ceiling)+""", high, low) as """+glabel+"""
+    """ + gfunc + """ as """+glabel+"""
     from """+table+""" WHERE station = %s and year > 1892 and sday != '0229'
     """, pgconn, params=(station, ))
 
@@ -70,12 +86,13 @@ def plotter(fdict):
            bottom=df2[(glabel, '25%')],
            ec='lightblue',
            fc='lightblue', zorder=1, label='25-75 Percentile')
-    ax.set_xlim(1, 367)
-    ax.set_ylim(-0.25, 40)
+    ax.set_xlim(0, 367)
+    if varname == 'gdd':
+        ax.set_ylim(-0.25, 40)
     ax.grid(True)
-    ax.set_title("%s-%s %s [%s]\n%s Daily Growing Degree Days (%s/%s)" % (
+    ax.set_title("%s-%s %s [%s]\n%s %s (%s)" % (
                 syear, thisyear, nt.sts[station]['name'], station, year,
-                base, ceiling))
+                PDICT[varname], title))
     ax.set_ylabel(r"Daily Accumulation $^{\circ}\mathrm{F}$")
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
                    305, 335, 365))
