@@ -103,7 +103,7 @@ def workflow(valid):
     """Our stage IV workflow."""
     # Figure out what the current status is
     p01m_status = get_p01m_status(valid)
-    if p01m_status < 2:
+    if np.ma.is_masked(p01m_status) or p01m_status < 2:
         # merge in the raw hourly data
         p01m_status = ingest_hourly_grib(valid)
 
