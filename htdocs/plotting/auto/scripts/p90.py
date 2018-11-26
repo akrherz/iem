@@ -409,9 +409,13 @@ def plotter(fdict):
                 )
     if geo == 'ugc':
         cmap = plt.get_cmap('Paired')
+        cmap.set_under('white')
+        cmap.set_over('white')
         m.fill_ugcs(ctx['data'], ctx['bins'], cmap=cmap, ilabel=ilabel)
     else:
-        cmap = plt.get_cmap('gist_ncar')
+        cmap = plt.get_cmap('jet')
+        cmap.set_under('white')
+        cmap.set_over('black')
         res = m.pcolormesh(ctx['lons'], ctx['lats'], ctx['data'],
                            ctx['bins'], cmap=cmap, units='count')
         # Cut down on SVG et al size
