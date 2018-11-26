@@ -8,9 +8,8 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from scipy.interpolate import Rbf
-from scipy.signal import convolve2d
 from pyiem.plot import MapPlot, nwssnow
-import pyiem.reference as reference
+from pyiem import reference
 from pyiem.util import get_dbconn
 
 # Stop whining about missing data for contourf
@@ -29,22 +28,27 @@ def run(basets, endts, view):
     df.sort_values(by='val', ascending=False, inplace=True)
     df['useme'] = False
     # First, we need to filter down the in-bound values to get rid of small
-    cellsize = 0.25
+    cellsize = 0.33
     newrows = []
     for lat in np.arange(reference.MW_SOUTH, reference.MW_NORTH,
-                         cellsize * 2):
+                         cellsize):
         for lon in np.arange(reference.MW_WEST, reference.MW_EAST,
-                             cellsize * 2):
-            df2 = df[(df['lat'] >= lat) & (df['lat'] < (lat + cellsize * 2)) &
-                     (df['lon'] >= lon) & (df['lon'] < (lon + cellsize * 2))]
+                             cellsize):
+            # Look around this box at 1x
+            df2 = df[(df['lat'] >= (lat - cellsize)) &
+                     (df['lat'] < (lat + cellsize)) &
+                     (df['lon'] >= (lon - cellsize)) &
+                     (df['lon'] < (lon + cellsize))]
             if df2.empty:
-                df3 = df[(df['lat'] >= lat) &
-                         (df['lat'] < (lat + cellsize * 4)) &
-                         (df['lon'] >= lon) &
-                         (df['lon'] < (lon + cellsize * 4))]
+                # If nothing was found, check 2x
+                df3 = df[(df['lat'] >= (lat - cellsize * 2.)) &
+                         (df['lat'] < (lat + cellsize * 2.)) &
+                         (df['lon'] >= (lon - cellsize * 2.)) &
+                         (df['lon'] < (lon + cellsize * 2.))]
                 if df3.empty:
-                    newrows.append({'lon': lon + cellsize * 1.5,
-                                    'lat': lat + cellsize * 1.5,
+                    # If nothing found, place a zero here
+                    newrows.append({'lon': lon,
+                                    'lat': lat,
                                     'val': 0,
                                     'useme': True,
                                     'state': 'NA'})
@@ -62,10 +66,6 @@ def run(basets, endts, view):
                   function='thin_plate')
     vals = gridder(xi, yi)
     vals[np.isnan(vals)] = 0
-    window = np.ones((2, 2))
-    vals = convolve2d(vals, window / window.sum(), mode='same',
-                      boundary='symm')
-    vals[vals < 0.1] = 0
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
     cmap = nwssnow()
@@ -121,6 +121,7 @@ if __name__ == '__main__':
 
 
 class PlotTest(unittest.TestCase):
+    """A runable test."""
 
     def test_plot(self):
         """ Test a plot"""
