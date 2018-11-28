@@ -2,13 +2,15 @@
 """Generate a shapefile of warnings based on the CGI request"""
 import zipfile
 import os
-import shutil
 import cgi
 import sys
 import datetime
-from collections import OrderedDict
 
-from geopandas import GeoDataFrame
+from psycopg2.extras import DictCursor
+import fiona
+from fiona.crs import from_epsg
+from shapely.geometry import mapping
+from shapely.wkb import loads
 from pyiem.util import get_dbconn, utc, ssw
 
 
@@ -110,20 +112,14 @@ def main():
     sbw_table = "sbw"
     if sts.year == ets.year:
         warnings_table = "warnings_%s" % (sts.year,)
-        if sts.year > 2001:
-            sbw_table = "sbw_%s" % (sts.year,)
-        else:
-            sbw_table = 'sbw_2014'
+        sbw_table = "sbw_%s" % (sts.year,)
 
     geomcol = "geom"
     if form.getfirst('simple', 'no') == 'yes':
         geomcol = "simple_geom"
 
-    cols = """geo, wfo, utc_issue as issued, utc_expire as expired,
-     utc_prodissue as init_iss, utc_init_expire as init_exp,
-     phenomena as phenom,
-     gtype, significance as sig, eventid as etn,  status, ugc as nws_ugc,
-     area2d as area_km2"""
+    cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
+        phenomena, gtype, significance, eventid,  status, ugc, area2d"""
 
     timelimit = "issue >= '%s' and issue < '%s'" % (sts, ets)
     if timeopt == 2:
@@ -174,31 +170,49 @@ def main():
     # o.write(sql)
     # o.close()
 
-    df = GeoDataFrame.from_postgis(sql, pgconn, 'geo')
-    if df.empty:
+    cursor = pgconn.cursor(cursor_factory=DictCursor)
+    cursor.execute(sql)
+    if cursor.rowcount == 0:
         ssw("Content-type: text/plain\n\n")
         ssw("ERROR: No results found for query, please try again")
         sys.exit()
 
-    # Capitolize columns please
-    df.columns = [s.upper() if s != 'geo' else s for s in df.columns.values]
-    schema = {'geometry': 'Polygon',
-              'properties': OrderedDict(
-                  [(u'WFO', 'str:3'),
-                   (u'ISSUED', 'str:12'),
-                   (u'EXPIRED', 'str:12'),
-                   (u'INIT_ISS', 'str:12'),
-                   (u'INIT_EXP', 'str:12'),
-                   (u'PHENOM', 'str:2'),
-                   (u'GTYPE', 'str:1'),
-                   (u'SIG', 'str:1'),
-                   (u'ETN', 'str:4'),
-                   (u'STATUS', 'str:3'),
-                   (u'NWS_UGC', 'str:6'),
-                   (u'AREA_KM2', 'float:24.15')])}
-    df.to_file(fn + ".shp", schema=schema)
-
-    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", fn + ".prj")
+    with fiona.open(
+        "%s.shp" % (fn, ), 'w', crs=from_epsg(4326), driver='ESRI Shapefile',
+        schema={
+            'geometry': 'MultiPolygon',
+            'properties': {
+                'WFO': 'str:3',
+                'ISSUED': 'str:12',
+                'EXPIRED': 'str:12',
+                'INIT_ISS': 'str:12',
+                'INIT_EXP': 'str:12',
+                'PHENOM': 'str:2',
+                'GTYPE': 'str:1',
+                'SIG': 'str:1',
+                'ETN': 'str:4',
+                'STATUS': 'str:3',
+                'NWS_UGC': 'str:6',
+                'AREA_KM2': 'float',
+                }}) as output:
+        for row in cursor:
+            mp = loads(row['geo'], hex=True)
+            output.write(
+                {'properties': {
+                    'WFO': row['wfo'],
+                    'ISSUED': row['utc_issue'],
+                    'EXPIRED': row['utc_expire'],
+                    'INIT_ISS': row['utc_prodissue'],
+                    'INIT_EXP': row['utc_init_expire'],
+                    'PHENOM': row['phenomena'],
+                    'GTYPE': row['gtype'],
+                    'SIG': row['significance'],
+                    'ETN': row['eventid'],
+                    'STATUS': row['status'],
+                    'NWS_UGC': row['ugc'],
+                    'AREA_KM2': row['area2d']},
+                 'geometry': mapping(mp)}
+            )
 
     zf = zipfile.ZipFile(fn + ".zip", 'w', zipfile.ZIP_DEFLATED)
     zf.write(fn + ".shp")
