@@ -1,4 +1,4 @@
-"""WFO VTEC counts in a map"""
+"""WFO VTEC counts on a map."""
 from collections import OrderedDict
 import datetime
 
@@ -116,12 +116,15 @@ def plotter(fdict):
         df2 = df.groupby('wfo')['count'].sum()
         maxv = df2.max()
         bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
-        if maxv > 200:
-            bins = [0, 1, 3, 5, 10, 20, 35, 50, 75, 100, 150, 200, 250,
-                    500, 750, 1000]
+        if maxv > 5000:
+            bins = [0, 5, 10, 50, 100, 250,
+                    500, 750, 1000, 1500, 2000, 3000, 5000, 7500, 10000]
         elif maxv > 1000:
             bins = [0, 1, 5, 10, 50, 100, 150, 200, 250,
                     500, 750, 1000, 1250, 1500, 2000]
+        elif maxv > 200:
+            bins = [0, 1, 3, 5, 10, 20, 35, 50, 75, 100, 150, 200, 250,
+                    500, 750, 1000]
         units = 'Count'
         lformat = '%.0f'
     elif varname == 'days':
