@@ -177,6 +177,11 @@ def main():
         ssw("ERROR: No results found for query, please try again")
         sys.exit()
 
+    csv = open("%s.csv" % (fn, ), 'w')
+    csv.write((
+        "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
+        "STATUS,NWS_UGC,AREA_KM2\n"
+    ))
     with fiona.open(
         "%s.shp" % (fn, ), 'w', crs=from_epsg(4326), driver='ESRI Shapefile',
         schema={
@@ -197,6 +202,12 @@ def main():
                 }}) as output:
         for row in cursor:
             mp = loads(row['geo'], hex=True)
+            csv.write((
+                "%(wfo)s,%(utc_issue)s,%(utc_expire)s,%(utc_prodissue)s,"
+                "%(utc_init_expire)s,%(phenomena)s,%(gtype)s,"
+                "%(significance)s,%(eventid)s,%(status)s,%(ugc)s,"
+                "%(area2d).2f\n"
+                ) % row)
             output.write(
                 {'properties': {
                     'WFO': row['wfo'],
@@ -213,12 +224,14 @@ def main():
                     'AREA_KM2': row['area2d']},
                  'geometry': mapping(mp)}
             )
+    csv.close()
 
     zf = zipfile.ZipFile(fn + ".zip", 'w', zipfile.ZIP_DEFLATED)
     zf.write(fn + ".shp")
     zf.write(fn + ".shx")
     zf.write(fn + ".dbf")
     zf.write(fn + ".prj")
+    zf.write(fn + ".csv")
     zf.close()
 
     ssw("Content-type: application/octet-stream\n")
@@ -226,7 +239,7 @@ def main():
         "Content-Disposition: attachment; filename=%s.zip\n\n" % (fn, ))
     ssw(open(fn + ".zip", 'rb').read())
 
-    for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj']:
+    for suffix in ['zip', 'shp', 'shx', 'dbf', 'prj', 'csv']:
         os.remove("%s.%s" % (fn, suffix))
 
 
