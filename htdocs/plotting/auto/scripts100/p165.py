@@ -23,7 +23,8 @@ def get_description():
     desc['data'] = True
     desc['description'] = """This map presents the first fall date or last spring
     date with a temperature at/above or below some threshold.  The year is
-    split on 1 July for the purposes of this plotting app.
+    split on 1 July for the purposes of this plotting app.  Sorry, this app
+    does not support multi-state plots at this time.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
@@ -48,6 +49,8 @@ def plotter(fdict):
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx['sector']
+    if len(sector) != 2:
+        raise ValueError("Sorry, this app does not support multi-state plots.")
     varname = ctx['var']
     year = ctx['year']
     popt = ctx['popt']
