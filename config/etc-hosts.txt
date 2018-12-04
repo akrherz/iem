@@ -57,10 +57,10 @@
 192.168.0.158    iemvs108-ssl.local
 192.168.0.159    iemvs109-ssl.local
 192.168.0.200    metvm0.local
-192.168.0.204    stanley.local
+192.168.0.210    metvm10.local
 192.168.0.232    updraft.local
 192.168.0.233    metvm3.local
-192.168.0.234    metvm4.local   iemdb-hads
+192.168.0.234    metvm4.local
 192.168.0.235    metvm5.local
 192.168.0.236    metvm6.local
 192.168.0.237    metvm7.local
@@ -96,3 +96,5 @@
 192.168.0.240    iem-openfire openfire-bosh
 #   VI12(62) metvm7 <-> metvm0
 192.168.1.239    iem-memcached3
+#   VI13(63) metvm4
+192.168.1.251    iemdb-hads iemdb-hads.local
