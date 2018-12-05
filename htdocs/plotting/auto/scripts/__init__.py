@@ -312,7 +312,7 @@ data = {'plots': [
                    "hourly for one month")},
         {'id': "87",
          'label': ("Frequency of METAR Code (Thunder, etc) "
-                   "by week by hour")},
+                   "by week or day by hour")},
         {'id': "131",
          'label': ("Frequency of Overcast Clouds / Clear Skies "
                    "by Air Temperature by month/season")},
