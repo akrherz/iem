@@ -36,6 +36,8 @@ def workflow(valid):
               )"""
     query(sql)
 
+    # make sure our tmp table does not exist
+    query("DROP TABLE IF EXISTS tmp")
     # Extract unique obs to special table
     sql = """CREATE table tmp as select distinct * from """+tbl+"""
         WHERE valid BETWEEN %s and %s"""
@@ -46,9 +48,9 @@ def workflow(valid):
     sql = """delete from """+tbl+""" WHERE valid BETWEEN %s and %s"""
     query(sql, args)
 
-    sql = "DROP index "+tbl+"_idx"
+    sql = "DROP index IF EXISTS "+tbl+"_idx"
     query(sql)
-    sql = "DROP index "+tbl+"_valid_idx"
+    sql = "DROP index IF EXISTS "+tbl+"_valid_idx"
     query(sql)
 
     # Insert from special table
@@ -60,7 +62,7 @@ def workflow(valid):
     sql = "CREATE index %s_valid_idx on %s(valid)" % (tbl, tbl)
     query(sql)
 
-    sql = "DROP TABLE tmp"
+    sql = "DROP TABLE IF EXISTS tmp"
     query(sql)
 
 
