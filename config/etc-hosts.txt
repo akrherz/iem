@@ -14,7 +14,6 @@
 192.168.0.3      nagios.local
 192.168.0.5      metvm2.local
 192.168.0.6      iem6   iem6.local ridge.local
-192.168.0.7      iemvm2
 192.168.0.8      metvm1.local
 192.168.0.9      metfs2.local  
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
@@ -28,10 +27,18 @@
 192.168.0.34     meteor.local
 192.168.0.35     cyclone.local
 192.168.0.40     nrel.local
-192.168.0.50     iem50         iem50.local 
+192.168.0.50     iemvm0 iemvm0.local 
+192.168.0.51     iemvm1 iemvm1.local 
+192.168.0.52     iemvm2 iemvm2.local 
+192.168.0.53     iemvm3 iemvm3.local
+192.168.0.54     iemvm4 iemvm3.local
+192.168.0.55     iemvm5 iemvm3.local
+192.168.0.56     iemvm6 iemvm3.local
+192.168.0.57     iemvm7 iemvm3.local
+192.168.0.58     iemvm8 iemvm3.local
+192.168.0.59     iemvm9 iemvm3.local
 192.168.0.60     iem60         iem60.local
 192.168.0.70     iem70         iem70.local
-192.168.0.80     howard.local
 192.168.0.90     comet.local
 192.168.0.100    iemvs100      iemvs100.local
 192.168.0.101    iemvs101      iemvs101.local
@@ -57,6 +64,7 @@
 192.168.0.158    iemvs108-ssl.local
 192.168.0.159    iemvs109-ssl.local
 192.168.0.200    metvm0.local
+192.168.0.201    metvm1.local
 192.168.0.210    metvm10.local
 192.168.0.232    updraft.local
 192.168.0.233    metvm3.local
