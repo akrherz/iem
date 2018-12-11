@@ -8,8 +8,8 @@ from pyiem.util import get_dbconn
 QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
     17,  # is referenced by canonical page
+    31,  # temp change over x-days, too pidgeon holed
     38,  # radiation plot that is complex
-    51,   # cscap plots that should be removed
     68,  # nws unique VTEC types per year
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
@@ -19,6 +19,7 @@ NO_FEATURES = [
     143, 141,  # yieldfx plots
     144,  # soil temp periods, too fragile of data to be useful
     152,  # growing season differences, too noisey
+    158,  # Tall towers plot
     187  # Unimplemented
 ]
 

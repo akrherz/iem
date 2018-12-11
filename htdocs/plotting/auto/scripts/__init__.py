@@ -8,8 +8,12 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 # Association of plots
 data = {'plots': [
     {'label': 'Daily', 'options': [
+        {'id': "51",
+         "label": ("Accumulated Station Departures of Precip/GDD/SDD "
+                   "(Automated Stations)")},
         {'id': "108",
-         "label": "Accumulated Station Departures of Precipitation/GDD/SDD"},
+         "label": ("Accumulated Station Departures of Precip/GDD/SDD "
+                   "(Long Term Climate)")},
         {'id': "172",
          "label": "Accumulated Year to Date Precipitation"},
         {'id': "149",
