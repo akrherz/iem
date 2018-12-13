@@ -3,6 +3,7 @@ from collections import OrderedDict
 import datetime
 
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -122,9 +123,10 @@ def plotter(fdict):
                         box.width, box.height * 0.98])
 
     # Plot 2: CDF
-    X2 = np.sort(df[varname])
-    ptile = np.percentile(df[varname], [0, 5, 50, 95, 100])
-    N = len(df[varname])
+    vals = df[pd.notnull(df[varname])][varname]
+    X2 = np.sort(vals)
+    ptile = np.percentile(vals, [0, 5, 50, 95, 100])
+    N = len(vals)
     F2 = np.array(range(N))/float(N) * 100.
     ax[1].plot(X2, 100. - F2)
     ax[1].set_xlabel("based on summarized hourly reports, %s" % (ylabel, ))
@@ -135,9 +137,10 @@ def plotter(fdict):
     info = ("Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
             "Max: %.2f %.0f"
             ) % (df[varname].min(), df['yr'][mysort.index[0]], ptile[1],
-                 np.average(df[varname]), np.std(df[varname]),
+                 df[varname].mean(), df[varname].std(),
                  ptile[3], df[varname].max(),
                  df['yr'][mysort.index[-1]])
+    ax[1].axvline(thisvalue, lw=2, color='g')
     ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
                bbox=dict(facecolor='white', edgecolor='k'))
     return fig, df
