@@ -44,7 +44,8 @@ def find_and_save(cursor, dbendts):
         VALUES (%s, %s, %s, %s, %s)
         """, (appid, valid, timing, uri, hostname))
         inserts += 1
-    if inserts == 0:
+    # Don't complain during the early morning hours
+    if inserts == 0 and now.hour > 5:
         print(("mine_autoplot: no new entries found for databasing "
                "since %s"
                ) % (dbendts))

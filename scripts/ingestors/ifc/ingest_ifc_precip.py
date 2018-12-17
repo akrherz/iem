@@ -33,7 +33,7 @@ BASEURL = "http://rainproc.its.uiowa.edu/Products/IFC7ADV"
 def get_file(now, routes):
     """ Download the file, save to /tmp and return fn """
     data = None
-    for i in [7, 6, 5]:
+    for i in [7, 6, 5, 4]:
         if data is not None:
             break
         fn = now.strftime(("H99999999_I000" + repr(i) + "_G_%d%b%Y"

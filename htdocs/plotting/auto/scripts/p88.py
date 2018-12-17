@@ -86,7 +86,7 @@ def plotter(fdict):
     ax.set_title(("[%s] %s %s-%s\nHourly Temp Departure "
                   "(skies were %s vs all)"
                   ) % (station, nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
+                       max([nt.sts[station]['archive_begin'].year, 1973]),
                        datetime.date.today().year, PDICT[ctx['which']]))
     ax.set_ylim(-0.5, 23.5)
     ax.set_ylabel("Local Hour of Day, %s" % (nt.sts[station]['tzname'],))
