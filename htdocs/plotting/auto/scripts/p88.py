@@ -1,12 +1,17 @@
 """Hourly temp impacts from clouds"""
 import datetime
+from collections import OrderedDict
 
-import psycopg2.extras
 import numpy as np
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+
+PDICT = OrderedDict((
+    ['clear', 'clear'],
+    ['cloudy', 'mostly cloudy'],
+))
 
 
 def get_description():
@@ -16,10 +21,14 @@ def get_description():
     desc['desciption'] = """This plot attempts to show the impact of cloudiness
     on temperatures.  The plot shows a simple difference between the average
     temperature during cloudy/mostly cloudy conditions and the average
-    temperature by hour and by week of the year."""
+    temperature by hour and by week of the year.  The input data for this
+    chart is limited to post 1973 as cloud cover data since then is more
+    reliable/comparable."""
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              label='Select Station:', network='IA_ASOS'),
+        dict(type='select', name='which', default='cloudy', options=PDICT,
+             label='Compute differences based on:'),
     ]
     return desc
 
@@ -27,18 +36,20 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('asos')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
     network = ctx['network']
+    which = ctx['which']
     nt = NetworkTable(network)
 
     data = np.zeros((24, 52), 'f')
 
-    cursor.execute("""
+    sql = "in ('BKN','OVC')" if which == 'cloudy' else "= 'CLR'"
+    df = read_sql("""
     WITH data as (
      SELECT valid at time zone %s + '10 minutes'::interval as v,
-     tmpf, skyc1, skyc2, skyc3 from alldata WHERE station = %s
+     tmpf, skyc1, skyc2, skyc3, skyc4 from alldata WHERE station = %s
+     and valid > '1973-01-01'
      and tmpf is not null and tmpf > -99 and tmpf < 150),
 
 
@@ -50,22 +61,19 @@ def plotter(fdict):
     cloudy as (
      select extract(week from v) as w,
      extract(hour from v) as hr,
-     avg(tmpf) from data WHERE (skyc1 in ('BKN','OVC') or
-     skyc2 in ('BKN','OVC') or skyc3 in ('BKN','OVC')) GROUP by w, hr)
+     avg(tmpf) from data WHERE skyc1 """ + sql + """ or
+     skyc2 """ + sql + """ or skyc3 """ + sql + """ or skyc4 """ + sql + """
+     GROUP by w, hr)
 
-    SELECT l.w, l.hr, l.avg - c.avg from cloudy l JOIN climo c on
+    SELECT l.w as week, l.hr as hour, l.avg - c.avg as difference
+    from cloudy l JOIN climo c on
     (l.w = c.w and l.hr = c.hr)
-    """, (nt.sts[station]['tzname'], station))
+    """, pgconn, params=(nt.sts[station]['tzname'], station))
 
-    for row in cursor:
+    for _, row in df.iterrows():
         if row[0] > 52:
             continue
-        data[int(row[1]), int(row[0]) - 1] = row[2]
-    rows = []
-    for week in range(52):
-        for hour in range(24):
-            rows.append(dict(hour=hour, week=(week+1), count=data[hour, week]))
-    df = pd.DataFrame(rows)
+        data[int(row['hour']), int(row['week']) - 1] = row['difference']
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
@@ -76,10 +84,10 @@ def plotter(fdict):
     a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
     ax.grid(True)
     ax.set_title(("[%s] %s %s-%s\nHourly Temp Departure "
-                  "(skies were mostly cloudy vs all)"
+                  "(skies were %s vs all)"
                   ) % (station, nt.sts[station]['name'],
                        nt.sts[station]['archive_begin'].year,
-                       datetime.date.today().year))
+                       datetime.date.today().year, PDICT[ctx['which']]))
     ax.set_ylim(-0.5, 23.5)
     ax.set_ylabel("Local Hour of Day, %s" % (nt.sts[station]['tzname'],))
     ax.set_yticks((0, 4, 8, 12, 16, 20))
