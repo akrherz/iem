@@ -11,9 +11,9 @@ import glob
 import requests
 import fiona
 from shapely.geometry import shape, MultiPolygon
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, exponential_backoff
 
-BASEURL = "http://droughtmonitor.unl.edu/data/shapefiles_m/"
+BASEURL = "https://droughtmonitor.unl.edu/data/shapefiles_m/"
 PQINSERT = "/home/ldm/bin/pqinsert"
 
 
@@ -42,7 +42,10 @@ def workflow(date, routes):
     # print("process_usdm workflow for %s" % (date, ))
     # 1. get file from USDM website
     url = "%sUSDM_%s_M.zip" % (BASEURL, date.strftime("%Y%m%d"))
-    req = requests.get(url, timeout=30)
+    req = exponential_backoff(requests.get, url, timeout=30)
+    if req is None:
+        print("process_usdm download full fail: %s" % (url, ))
+        return
     if req.status_code != 200:
         print(("process_usdm download failed for: %s code: %s"
                ) % (url, req.status_code))
