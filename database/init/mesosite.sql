@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (17, now());
+INSERT into iem_schema_manager_version values (18, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -92,7 +92,9 @@ CREATE TABLE iembot_twitter_oauth(
   user_id bigint NOT NULL UNIQUE,
   screen_name text,
   access_token text,
-  access_token_secret text
+  access_token_secret text,
+  created timestamptz DEFAULT now(),
+  updated timestamptz DEFAULT now()
 );
 GRANT ALL on iembot_twitter_oauth to nobody,apache;
 

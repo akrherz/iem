@@ -20,8 +20,9 @@ $rs = pg_prepare($pgconn, "SAVEAUTH", "INSERT into ".
   "iembot_twitter_oauth ".
   "(user_id, screen_name, access_token, access_token_secret) ".
   "VALUES ($1,$2,$3,$4)");
-$rs = pg_prepare($pgconn, "DELETEAUTH", "DELETE from ".
-  "iembot_twitter_oauth WHERE user_id = $1");
+$rs = pg_prepare($pgconn, "UPDATEAUTH", "UPDATE iembot_twitter_oauth ".
+  "SET access_token = $1, access_token_secret = $2, updated = now() ".
+  "WHERE user_id = $3 RETURNING screen_name");
 $rs = pg_prepare($pgconn, "SELECTSUBS", "SELECT * from ".
   "iembot_twitter_subs  WHERE user_id = $1 ORDER by channel ASC");
 $rs = pg_prepare($pgconn, "ADDSUB", "INSERT into ".
@@ -62,9 +63,12 @@ if (isset($_REQUEST['cb'])){
 	if ($screen_name != ''){
 		$_SESSION['user_id'] = $user_id;
 		$_SESSION['screen_name'] = $screen_name;
-		pg_execute($pgconn, "DELETEAUTH", Array($user_id));
-		pg_execute($pgconn, "SAVEAUTH", Array($user_id, strtolower($screen_name),
-			$access_token, $access_token_secret));
+		$rs = pg_execute($pgconn, "UPDATEAUTH",
+			Array($access_token, $access_token_secret, $user_id));
+		if (pg_num_rows($rs) == 0) {
+			pg_execute($pgconn, "SAVEAUTH", Array($user_id, strtolower($screen_name),
+				$access_token, $access_token_secret));
+		}
 		reloadbot();
 	}
 	$msg[] = sprintf("Saved authorization for user %s", $screen_name);
