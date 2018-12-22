@@ -85,6 +85,10 @@ def do_iarwis():
     WHERE n.network in ('IA_RWIS', 'WI_RWIS', 'IL_RWIS') and
     s.valid > (now() - '2 hours'::interval)
     """, pgconn)
+    # Compute simple average in whole degree F
+    df['paveavg'] = df[
+        ['pavetmp1', 'pavetmp2', 'pavetmp3', 'pavetmp4']].mean(
+            axis=1).map(lambda x: '%.0f' % x if not pd.isna(x) else '')
     return df
 
 
