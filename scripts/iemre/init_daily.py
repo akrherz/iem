@@ -183,7 +183,7 @@ def compute_hasdata(year):
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.
         jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.yx, nav.x0 + nav.xsz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
         data[jslice, islice] = np.where(grid > 0, 1, data[jslice, islice])
     nc.variables['hasdata'][:, :] = np.flipud(data)
     nc.close()
