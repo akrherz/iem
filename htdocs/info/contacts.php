@@ -26,7 +26,7 @@ $t->content = <<<EOM
 <br /><i>Google Talk</i> akrherz@gmail.com
 <br /><i>Twitter</i> <a href="https://twitter.com/akrherz">@akrherz</a> 
 
-<p>If all those fail you, try <i>Daryl's Cell Phone!</i> 515.451.9249
+<p>If all those fail you, try <i>Daryl's Cell Phone!</i> 515.639.0164
 
 </div>
 <div class="col-md-2">&nbsp;</div>
