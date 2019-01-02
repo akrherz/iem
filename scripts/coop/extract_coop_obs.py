@@ -22,7 +22,7 @@ def main():
     icursor.execute("""SELECT s.id, coalesce(c.pday, 0) as pday,
         coalesce(c.snow,-99) as snow, coalesce(c.snowd,-99) as snowd,
         coalesce(c.max_tmpf, -99) as max_tmpf,
-        case when c.min_tmpf < 99 THEN c.min_tmpf ELSE -99 END as min_tmpf,
+        coalesce(c.min_tmpf, -99) as min_tmpf,
         ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.name,
         c2.valid at time zone 'UTC' as vvv, s.elevation
         from summary_%s c, current c2, stations s WHERE
