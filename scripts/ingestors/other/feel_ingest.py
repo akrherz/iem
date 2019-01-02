@@ -1,8 +1,7 @@
-"""
-Ingest the ISU FEEL Farm data
-"""
+"""Ingest the ISU FEEL Farm data."""
 from __future__ import print_function
 import datetime
+import os
 
 import pandas as pd
 from pyiem.util import get_dbconn
@@ -36,6 +35,13 @@ def ingest(cursor):
     if hstart is None:
         hstart = datetime.datetime(1980, 1, 1)
     fn = "%s/%s/ISU_Feel_Daily.dat" % (BASE, datetime.date.today().year)
+    # If this file does not exist, try the previous year's file
+    if not os.path.isfile(fn):
+        fn = "%s/%s/ISU_Feel_Daily.dat" % (
+            BASE, datetime.date.today().year - 1)
+        if not os.path.isfile(fn):
+            print("feel_ingest.py double failure to find %s" % (fn, ))
+            return
 
     df = pd.read_csv(fn, header=0,
                      skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
@@ -54,6 +60,13 @@ def ingest(cursor):
               row['SolarRad_MJ_Tot']))
 
     fn = "%s/%s/ISU_Feel_Hourly.dat" % (BASE, datetime.date.today().year)
+    # If this file does not exist, try the previous year's file
+    if not os.path.isfile(fn):
+        fn = "%s/%s/ISU_Feel_Hourly.dat" % (
+            BASE, datetime.date.today().year - 1)
+        if not os.path.isfile(fn):
+            print("feel_ingest.py double failure to find %s" % (fn, ))
+            return
     df = pd.read_csv(fn, header=0,
                      skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
 

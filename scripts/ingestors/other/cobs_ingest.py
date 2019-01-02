@@ -142,11 +142,15 @@ def campbell2df(year):
     dailyfn = "%s/%s/Daily.dat" % (DIRPATH, year)
     hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year)
     if not os.path.isfile(dailyfn):
-        print("cobs_ingest.py missing %s" % (dailyfn,))
-        return None, None
+        dailyfn = "%s/%s/Daily.dat" % (DIRPATH, year - 1)
+        if not os.path.isfile(dailyfn):
+            print("cobs_ingest.py missing %s" % (dailyfn,))
+            return None, None
     if not os.path.isfile(hourlyfn):
-        print("cobs_ingest.py missing %s" % (hourlyfn,))
-        return None, None
+        hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year - 1)
+        if not os.path.isfile(hourlyfn):
+            print("cobs_ingest.py missing %s" % (hourlyfn,))
+            return None, None
 
     ddf = pd.read_csv(dailyfn, header=0, na_values=["7999", "NAN"],
                       skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
