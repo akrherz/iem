@@ -93,10 +93,6 @@ def main():
     for sid in cob:
         w.point(cob[sid]["LON"], cob[sid]["LAT"])
         # print id, cob[sid]
-        if cob[sid]["TMPX"] < 0:
-            cob[sid]["TMPX"] = -99
-        if cob[sid]["TMPN"] < 0:
-            cob[sid]["TMPN"] = -99
         if cob[sid]["P24I"] < 0:
             cob[sid]["P24I"] = -99.
         if cob[sid]["SNOW"] < 0:
