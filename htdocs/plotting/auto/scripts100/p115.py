@@ -24,7 +24,11 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['report'] = True
-    desc['description'] = """ """
+    desc['description'] = """This reports presents simple monthy and yearly
+    summary statistics.  The <i>WYEAR</i> column denotes the 'Water Year'
+    total, which is defined for the period between 1 Oct and 30 Sep. For
+    example, the 2009 <i>WYEAR</i> value represents the period between
+    1 Oct 2008 and 30 Sep 2009, the 2009 water year."""
     desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station', network='IACLIMATE'),
@@ -79,7 +83,8 @@ def plotter(fdict):
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         "# Report Generated: %s\n"
-        "# Climate Record: %s -> %s\n"
+        "# Climate Record: %s -> %s, "
+        "WYEAR column is Water Year Oct 1 - Sep 30\n"
         "# Site Information: [%s] %s\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
