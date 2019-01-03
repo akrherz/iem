@@ -1,9 +1,9 @@
 <?php
 /* Webcam Scheduler!!!! */
-include("../../../config/settings.inc.php");
-include("$rootpath/include/cameras.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/forms.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/cameras.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
 $conn = iemdb("mesosite", TRUE, TRUE);
 
 $id = isset($_GET["id"]) ? $_GET["id"] : "";

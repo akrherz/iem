@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 $connection = iemdb("coop");
 $station = isset($_GET["station"]) ? strtoupper($_GET["station"]) : die();
 $var = isset($_GET["var"]) ? $_GET["var"]: die();
@@ -43,10 +43,10 @@ $xlabel[365] = "Dec 31"; //366
 
 pg_close($connection);
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
-include("$rootpath/include/network.php");     
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_plotline.php";
+require_once "../../../include/network.php";     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
@@ -103,15 +103,8 @@ $graph->AddLine(new PlotLine(VERTICAL,305,"tan",1));
 $graph->AddLine(new PlotLine(VERTICAL,335,"tan",1));
 $graph->AddLine(new PlotLine(HORIZONTAL,32,"blue",2));
 
-
-
 // Add the plot to the graph
-
-
-
-
 
 // Display the graph
 $graph->Stroke();
 ?>
-

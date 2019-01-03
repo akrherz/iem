@@ -1,7 +1,7 @@
 <?php
-include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../..include/network.php";
 $nt = new NetworkTable("SCAN");
 $cities = $nt->table;
 
@@ -87,8 +87,8 @@ if ($what == "download"){
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=changeme.txt");
 } else if ($what == "plot"){
- include ("../../plotting/jpgraph/jpgraph.php");
-include ("../../plotting/jpgraph/jpgraph_line.php");
+  require_once "../../../include/jpgraph/jpgraph.php";
+  require_once "../../../include/jpgraph/jpgraph_line.php";
  if ($selectAll){
   foreach ($Rcities as $key => $value){
    $station = $key;

@@ -1,7 +1,7 @@
 <?php
-include("../../../config/settings.inc.php");
-include_once("../../../include/database.inc.php");
-include("../../../include/network.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
 $nt = new NetworkTable("AWOS");
 
 $skycover = Array(
@@ -103,9 +103,9 @@ if ($what == "download"){
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=changeme.txt");
 } else if ($what == "plot"){
- include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+  require_once "../../../include/jpgraph/jpgraph.php";
+  require_once "../../../include/jpgraph/jpgraph_line.php";
+  require_once "../../../include/jpgraph/jpgraph_date.php";
  if ($selectAll){
   foreach ($nt->table as $key => $value){
    $station = $key;

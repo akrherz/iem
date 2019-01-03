@@ -3,9 +3,9 @@
  * This thing does the work of getting the data from the database and either
  * plotting it (via plot_1min.php) or displaying it for download
  */
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
-include_once "../../../include/network.php";
+require_once "../../../include/network.php";
 
 $nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS","KS_ASOS",
 "ME_ASOS", "MD_ASOS", "NY_ASOS"));
@@ -107,9 +107,9 @@ if ($what == "download"){
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=changeme.txt");
 } else if ($what == "plot"){
- include ("$rootpath/include/jpgraph/jpgraph.php");
- include ("$rootpath/include/jpgraph/jpgraph_line.php");
- include ("$rootpath/include/jpgraph/jpgraph_date.php");
+  require_once "../../../include/jpgraph/jpgraph.php";
+  require_once "../../../include/jpgraph/jpgraph_line.php";
+  require_once "../../../include/jpgraph/jpgraph_date.php";
    foreach ($stations as $key => $value){
      $station = $value;
 

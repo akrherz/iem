@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 $conn = iemdb("coop");
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : 'IA0200';
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : '';
@@ -54,10 +54,10 @@ if ($station2 != "")
 
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
-include("$rootpath/include/network.php");     
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_plotline.php";
+require_once "../../../include/network.php";     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 

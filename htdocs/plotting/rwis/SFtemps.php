@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 
 /** We need these vars to make this work */
 $subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
@@ -157,12 +157,12 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 pg_close($c0);
 //pg_close($c1);
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_bar.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
-include ("../../../include/network.php");
+require_once "../../../include/network.php";
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
@@ -259,7 +259,7 @@ $tx2 = new Text("Time series showing temperatures
 $tx2->SetPos(0.01,0.11, 'left', 'top');
 $tx2->SetFont(FF_FONT1, FS_NORMAL, 10);
 
-include ("$rootpath/include/mlib.php");
+require_once "../../../include/mlib.php";
 $mySOb = Array();
 
 
