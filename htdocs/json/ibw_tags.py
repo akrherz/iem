@@ -28,7 +28,7 @@ def run(wfo, year):
      status, windtag, hailtag, tornadotag, tml_sknt, tornadodamagetag, wfo
      from sbw_""" + str(year) + """ WHERE wfo = %s
      and phenomena in ('SV', 'TO')
-     and significance = 'W'    and status != 'EXP' and status != 'CAN'
+     and significance = 'W' and status != 'EXP' and status != 'CAN'
  ),
 
  countybased as (
@@ -50,12 +50,15 @@ def run(wfo, year):
     res = dict(year=year, wfo=wfo, gentime=ptime(datetime.datetime.utcnow()),
                results=[])
     for row in cursor:
+        # TODO the wfo here is a bug without it being 4 char
+        href = "/vtec/#%s-O-%s-K%s-%s-W-%04i" % (
+            year, row[6], row[12], row[13], row[0])
         data = dict(eventid=row[0], locations=row[1],
                     issue=ptime(row[2]), expire=ptime(row[3]),
                     polygon_begin=ptime(row[4]), polygon_end=ptime(row[5]),
                     status=row[6], windtag=row[7], hailtag=row[8],
                     tornadotag=row[9], tml_sknt=row[10],
-                    tornadodamagetag=row[11],
+                    tornadodamagetag=row[11], href=href,
                     wfo=row[12], phenomena=row[13])
         res['results'].append(data)
 

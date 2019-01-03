@@ -57,16 +57,11 @@ Ext.onReady(function(){
 ';
  
 
-function do_col1($row){
-	$ts = strtotime($row["issue"]);
-	$uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y", $ts),
-			'NEW', $row["wfo"], $row["phenomena"],
-			'W', $row["eventid"]);
-	
+function do_col1($row){	
 	if ($row["status"] == 'NEW'){
-		return sprintf("<a href=\"%s\">%s</a>", $uri, $row["eventid"]);
+		return sprintf("<a href=\"%s\">%s</a>", $row['href'], $row["eventid"]);
 	}
-	return sprintf("<a href=\"%s\">%s</a>", $uri, 'SVS');
+	return sprintf("<a href=\"%s\">%s</a>", $row['href'], 'SVS');
 	
 }
 function do_col2($row){
