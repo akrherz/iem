@@ -98,8 +98,12 @@ foreach ($_SESSION['stations'] as $key => $value){
     }
     $reqstations .= sprintf("station=%s&", $value);
 }
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?$reqstations");
-$jobj = json_decode($jdata, $assoc=TRUE);
+if ($reqstations != ""){
+  $jdata = file_get_contents("http://iem.local/api/1/currents.json?$reqstations");
+  $jobj = json_decode($jdata, $assoc=TRUE);
+} else {
+  $jobj = Array("data" => Array());
+}
 
 $mydata = Array();
 foreach ($jobj["data"] as $bogus => $iemob){
