@@ -20,7 +20,6 @@ NO_FEATURES = [
     144,  # soil temp periods, too fragile of data to be useful
     152,  # growing season differences, too noisey
     158,  # Tall towers plot
-    187  # Unimplemented
 ]
 
 

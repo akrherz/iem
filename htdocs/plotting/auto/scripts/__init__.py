@@ -203,6 +203,8 @@ data = {'plots': [
         {'id': "151",
          'label': ("Difference between two periods or "
                    "single period of years [map]")},
+        {'id': "187",
+         'label': "Compare one station yearly summary vs entire state"},
         {'id': "128",
          'label': "Comparison of Yearly Summaries between two stations"},
         {'id': "99", 'label': "Daily High + Low Temperatures with Departures"},
