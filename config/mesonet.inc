@@ -368,29 +368,6 @@
     RewriteRule kwwl.jpg kwwl.php?v2
   </Directory>
 
-  <Directory "/opt/iem/htdocs/squaw/scenario">
-    AuthUserFile /home/akrherz/projects/squaw/security/htpasswd
-    AuthGroupFile /dev/null
-    AuthName Administrative
-    AuthType Basic
-
-    <LIMIT GET>
-      require user ames
-   </LIMIT>
-  </Directory>
-
-  <Directory "/opt/iem/htdocs/squaw/storm">
-    AuthUserFile /opt/iem/config/admin.users
-    AuthGroupFile /dev/null
-    AuthName Administrative
-    AuthType Basic
-
-    <LIMIT GET>
-      require user ames
-      require user iowastate
-    </LIMIT>
-  </Directory>
-
   <Directory "/opt/iem/htdocs/vtec">
     RewriteRule ([^\.]+)\.html index.php?vtec=$1 [L]
     RewriteRule f/(.*)$ f.php?vtec=$1 [L]
