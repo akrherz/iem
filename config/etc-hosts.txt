@@ -13,6 +13,7 @@
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
 192.168.0.4      thumper-ah.local
+192.168.0.5      updraft.local
 192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.9      metfs2.local  
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
@@ -30,12 +31,12 @@
 192.168.0.51     iemvm1 iemvm1.local 
 192.168.0.52     iemvm2 iemvm2.local 
 192.168.0.53     iemvm3 iemvm3.local
-192.168.0.54     iemvm4 iemvm3.local
-192.168.0.55     iemvm5 iemvm3.local
-192.168.0.56     iemvm6 iemvm3.local
-192.168.0.57     iemvm7 iemvm3.local
-192.168.0.58     iemvm8 iemvm3.local
-192.168.0.59     iemvm9 iemvm3.local
+192.168.0.54     iemvm4 iemvm4.local
+192.168.0.55     iemvm5 iemvm5.local
+192.168.0.56     iemvm6 iemvm6.local
+192.168.0.57     iemvm7 iemvm7.local
+192.168.0.58     iemvm8 iemvm8.local
+192.168.0.59     iemvm9 iemvm9.local
 
 # webfarm nodes
 192.168.0.100    iemvs100      iemvs100.local
@@ -53,15 +54,14 @@
 192.168.0.200    metvm0.local
 192.168.0.201    metvm1.local
 192.168.0.202    metvm2.local
+192.168.0.206    metvm6.local
+192.168.0.207    metvm7.local
+192.168.0.208    metvm9.local
 192.168.0.209    metvm9.local
 192.168.0.210    metvm10.local
 
-192.168.0.232    updraft.local
 192.168.0.233    metvm3.local
 192.168.0.234    metvm4.local
-192.168.0.235    metvm5.local
-192.168.0.236    metvm6.local
-192.168.0.237    metvm7.local
 10.27.19.214     talltowers-db.local
 
 #
@@ -80,9 +80,9 @@
 192.168.1.247    iem-memcached2
 #   VI_5(55) iem6
 192.168.1.246    iembot
-#   VI_6(56) metvm4 <-> iem6
+#   VI_6(56) metvm6 <-> iem14
 192.168.1.245    iemdb
-#   VI_7(57) iem6 <-> metvm4
+#   VI_7(57) iem14 <-> metvm6
 192.168.1.244    iemdb2 postgresread
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
