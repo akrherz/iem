@@ -1,19 +1,8 @@
 <?php 
-  include_once "../../config/settings.inc.php";
-  include_once "../../include/myview.php";
+  require_once "../../config/settings.inc.php";
+  require_once "../../include/myview.php";
   $t = new MyView();
   $t->thispage = "current-jsonp";
-  $t->headextra = "<style>
-  .sect {
-	border-top: 1px solid #ccc; 
-	background: #EEFFCC; 
-	border-bottom: 1px solid #ccc; 
-	margin-left: 25px;
-  		padding-left: 5px;
-  		line-height: 1.3em;
-  		margin-bottom: 10px;
-  	}
-  		</style>";
   $t->title = "JSON(P) Web Services";
 
 
@@ -754,26 +743,35 @@ EOM;
   	$url = $ws['url'];
   	$uriadd = (strpos($url, "?") === FALSE) ? "?": "&amp;";
   	$ts = array_key_exists("table_schema", $ws) ? $TABLE_SCHEMA: "";
-  	$table .= sprintf("<div class='sect'><strong><a href=\"#%s\">".
-  	    "<i class=\"fa fa-bookmark\"></i></a> <a name=\"%s\">%s</a></strong>".
-    	"<br /><strong>URI:</strong> %s%s%scallback=gotData".
-	    "<br /><strong>Description:</strong> %s".
-  	    "%s".
-	    "<br /><strong>Method GET Parameters:</strong>".
-	    "<br /><table border='1' cellspacing='0' cellpadding='3'>",
-  			urlencode($ws["title"]), urlencode($ws["title"]),
-  			$ws["title"], ROOTURL, $url, $uriadd, $ws["desc"], $ts);
-  	while (list($key2, $vs) = each($ws['vars'])){
-  		$table .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
-  	}
-  	$table .= "</table>";
-  	while (list($key2, $vs) = each($ws['example'])){
-  		$url = str_replace($key2, $vs, $url);
-  	}
-  	$table .= sprintf("<br /><a href=\"%s%s\">Example JSON</a>
-     	&nbsp; <a href=\"%s%s&callback=gotData\">Example JSONP</a>",
-  			ROOTURL, $url, ROOTURL, $url);
-  	$table .= "</div>\n";
+	  $tc = '';
+	  while (list($key2, $vs) = each($ws['vars'])){
+		$tc .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
+	  }
+  	  while (list($key2, $vs) = each($ws['example'])){
+		$url = str_replace($key2, $vs, $url);
+	  }
+	$td = sprintf("<a class=\"btn btn-default\" href=\"%s%s\">Example JSON</a>".
+	   "&nbsp; <a class=\"btn btn-default\" ".
+	   "href=\"%s%s%scallback=gotData\">Example JSONP</a>",
+			ROOTURL, $url, ROOTURL, $url, $uriadd);
+	$table .= sprintf('<div class="panel panel-default">'.
+	  	'<div class="panel-heading">'.
+		'<h3 class="panel-title"><strong><a href="#%s">'.
+		'<i class="fa fa-bookmark"></i></a> <a name="%s">%s</a></strong></h3>'.
+	  	'</div>'.
+	  	'<div class="panel-body">'.
+		  '%s'.
+		  '<br /><strong>URI Pattern:</strong><code>%s%s%scallback=gotData</code>'.
+		  '<br /><strong>Description:</strong> %s'.
+		   '%s'.
+		  '<br /><strong>Method GET Parameters:</strong>'.
+		  '<br /><table class="table table-condensed table-bordered">'.
+		  '%s'.
+		  '</table>'.
+		'</div>'.
+		'</div>', urlencode($ws["title"]), urlencode($ws["title"]),
+			  $ws["title"], $td,
+			  ROOTURL, $ws["url"], $uriadd, $ws["desc"], $ts, $tc);
   }
   
   $t->content = <<<EOF
