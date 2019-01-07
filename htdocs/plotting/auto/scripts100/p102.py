@@ -70,6 +70,8 @@ def plotter(fdict):
         """ + typetext_limiter + """
         GROUP by yr, src
     """, pgconn)
+    if df.empty:
+        raise ValueError("No data found")
     # pivot the table so that we can fill out zeros
     df = df.pivot(index='yr', columns='src', values='count')
     df = df.fillna(0).reset_index()
@@ -78,7 +80,12 @@ def plotter(fdict):
                                                   method='first')
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     # Do syear as left side
-    dyear = df[df['yr'] == syear].sort_values(by=['rank'], ascending=True)
+    for year in range(syear, eyear):
+        dyear = df[df['yr'] == year].sort_values(by=['rank'], ascending=True)
+        if not dyear.empty:
+            break
+        year += 1
+    syear = year
     i = 1
     ylabels = []
     leftsrcs = []
@@ -142,4 +149,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(ltype=['TORNADO']))
+    plotter(dict(ltype=['SNOW'], station='PBZ'))
