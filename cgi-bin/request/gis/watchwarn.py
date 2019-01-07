@@ -132,7 +132,7 @@ def main():
 
     sql = """
     WITH stormbased as (
-     SELECT w.geom as geo, 'P'::text as gtype, significance, wfo,
+     SELECT distinct w.geom as geo, 'P'::text as gtype, significance, wfo,
      status, eventid, ''::text as ugc,
      phenomena,
      ST_area( ST_transform(w.geom,2163) ) / 1000000.0 as area2d,
