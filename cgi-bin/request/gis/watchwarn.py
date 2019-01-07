@@ -66,14 +66,18 @@ def main():
     form = cgi.FieldStorage()
     sts, ets = get_time_extent(form)
 
+    table_extra = ""
     location_group = form.getfirst('location_group', 'wfo')
     if location_group == 'states':
         if 'states[]' in form:
             states = form.getlist('states[]')
             states.append('XX')  # Hack for 1 length
-            wfo_limiter = ''
+            wfo_limiter = (
+                " and ST_Overlaps(s.the_geom, w.geom) and s.state_abbr in %s "
+            ) % (tuple(states), )
             wfo_limiter2 = (" and substr(w.ugc, 1, 2) in %s "
                             ) % (str(tuple(states)),)
+            table_extra = " , states s "
         else:
             send_error('No state specified')
     elif location_group == 'wfo':
@@ -128,7 +132,7 @@ def main():
 
     sql = """
     WITH stormbased as (
-     SELECT geom as geo, 'P'::text as gtype, significance, wfo,
+     SELECT w.geom as geo, 'P'::text as gtype, significance, wfo,
      status, eventid, ''::text as ugc,
      phenomena,
      ST_area( ST_transform(w.geom,2163) ) / 1000000.0 as area2d,
@@ -137,7 +141,8 @@ def main():
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
      to_char(init_expire at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_init_expire
-     from %(sbw_table)s w WHERE status = 'NEW' and %(timelimit)s
+     from %(sbw_table)s w %(table_extra)s
+     WHERE status = 'NEW' and %(timelimit)s
      %(wfo_limiter)s %(limiter)s
     ),
     countybased as (
@@ -162,6 +167,7 @@ def main():
                limiter=limiter,
                geomcol=geomcol,
                warnings_table=warnings_table,
+               table_extra=table_extra,
                wfo_limiter2=wfo_limiter2,
                cols=cols,
                sbwlimiter=sbwlimiter)
