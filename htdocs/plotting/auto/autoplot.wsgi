@@ -13,6 +13,7 @@ import memcache
 import pytz
 import pandas as pd
 from paste.request import parse_formvars
+from six import string_types
 from pyiem.plot.use_agg import plt
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all='ignore')
@@ -33,7 +34,12 @@ def parser(cgistr):
         token2 = token.split(":")
         if len(token2) != 2:
             continue
-        data[token2[0]] = token2[1]
+        if token2[0] in data:
+            if isinstance(data[token2[0]], string_types):
+                data[token2[0]] = [data[token2[0]], ]
+            data[token2[0]].append(token2[1])
+        else:
+            data[token2[0]] = token2[1]
 
     return data
 

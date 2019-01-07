@@ -6,6 +6,9 @@
 //https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
 function xssafe($data, $encoding='UTF-8')
 {
+  if (is_array($data)){
+    return $data;
+  }
 	return htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
 }
 function xecho($data)
@@ -14,23 +17,31 @@ function xecho($data)
 }
 
 
-function make_select($name, $selected, $ar, $jscallback="", $cssclass=''){
+function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
+                     $multiple=FALSE){
         // Create a simple HTML select box
+        // If multiple, then we arb append [] onto the $name
+        $myselected = $selected;
+        if (!is_array($selected)){
+          $myselected = Array($selected);
+        }
         reset($ar);
-        $s = sprintf("<select name=\"%s\"%s%s>\n", $name, 
-                        ($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "",
-                        ($cssclass != "")? " class=\"$cssclass\"" : "");
+        $s = sprintf("<select name=\"%s%s\"%s%s%s>\n", $name,
+          ($multiple === FALSE) ? '': '[]',
+           ($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "",
+           ($cssclass != "")? " class=\"$cssclass\"" : "",
+           ($multiple === FALSE) ? '': ' MULTIPLE');
         while( list($key,$val) = each($ar)){
                 if (is_array($val)){
                         $s .= "<optgroup label=\"$key\">\n";
                         while( list($k2,$v2) = each($val)){
                                 $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $k2,
-                                                ($selected == $k2)? " SELECTED": "", $v2);
+                                                in_array($k2, $myselected)? " SELECTED": "", $v2);
                         }
                         $s .= "</optgroup>";
                 } else {
                         $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $key,
-                                ($selected == $key)? " SELECTED": "", $val);
+                                in_array($key, $myselected)? " SELECTED": "", $val);
                 }
         }
         $s .= "</select>\n";

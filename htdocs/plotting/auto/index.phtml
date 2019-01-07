@@ -156,7 +156,6 @@ EOF;
 	$imguri = "/plotting/auto/plot/$q/";
 	$pltvars = Array();
 	$form = "";
-	
 	while (list($k,$v) = each($jobj->arguments)){
 		$value = isset($_GET[$v->name]) ? xssafe($_GET[$v->name]): $v->default;
 		$thisrow = null;
@@ -290,7 +289,9 @@ EOF;
 					$v->name, '', isset($v->max) ? $v->max: date("Y"));
 		}
 		elseif ($v->type == "select"){
-			$netselect = make_select($v->name, $value, $v->options);
+			$netselect = make_select(
+				$v->name, $value, $v->options, '', '',
+				isset($v->multiple) && $v->multiple === TRUE);
 			$thisrow = $netselect;
 		}
 		elseif ($v->type == 'datetime'){
@@ -345,7 +346,14 @@ EOF;
 						$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : 'W';
 						$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
 					} else {
-						$pltvars[] = sprintf("%s:%s", $v->name, $value);
+						if (is_array($value)){
+							reset($value);
+							while (list($kk, $vv) = each($value)){
+								$pltvars[] = sprintf("%s:%s", $v->name, $vv);
+							}
+						} else {
+							$pltvars[] = sprintf("%s:%s", $v->name, $value);
+						}
 					}
 				}
 			} else{
@@ -355,7 +363,14 @@ EOF;
 					$value = isset($_GET["significance{$suffix}"]) ? xssafe($_GET["significance{$suffix}"]) : 'W';
 					$pltvars[] = sprintf("significance%s:%s", $v->name, $value);
 				} else {
-					$pltvars[] = sprintf("%s:%s", $v->name, $value);
+					if (is_array($value)){
+						reset($value);
+						while (list($kk, $vv) = each($value)){
+							$pltvars[] = sprintf("%s:%s", $v->name, $vv);
+						}
+					} else {
+						$pltvars[] = sprintf("%s:%s", $v->name, $value);
+					}
 				}
 			}
 			$form .= "<tr><td>{$v->label}</td><td>{$thisrow}</td></tr>";
