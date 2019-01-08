@@ -2,6 +2,7 @@
 import datetime
 
 from pandas.io.sql import read_sql
+from matplotlib.ticker import MaxNLocator
 import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -58,13 +59,12 @@ def plotter(fdict):
 
     df = read_sql("""
         with data as (
-            SELECT distinct extract(year from issue) as yr, wfo, eventid
+            SELECT distinct extract(year from issue)::int as yr, wfo, eventid
             from warnings where phenomena = %s and significance = %s
             """ + wfo_limiter + doy_limiter + """)
 
         SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
       """, pgconn, params=(phenomena, significance))
-
     if df.empty:
         raise ValueError("Sorry, no data found!")
 
@@ -80,9 +80,9 @@ def plotter(fdict):
     if limit == 'yes':
         ax.set_xlabel(("thru approximately %s"
                        ) % (datetime.date.today().strftime("%-d %b"), ))
-
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(station='DMX', phenomena='WI', significance='Y', limit='no'))
