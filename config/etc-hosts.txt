@@ -56,7 +56,7 @@
 192.168.0.202    metvm2.local
 192.168.0.206    metvm6.local
 192.168.0.207    metvm7.local
-192.168.0.208    metvm9.local
+192.168.0.208    metvm8.local
 192.168.0.209    metvm9.local
 192.168.0.210    metvm10.local
 
