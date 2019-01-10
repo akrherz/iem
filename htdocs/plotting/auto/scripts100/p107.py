@@ -23,7 +23,8 @@ PDICT = OrderedDict([
         ('min_high', 'Minimum High Temperature'),
         ('min_low', 'Minimum Low Temperature'),
         ('max_low', 'Maximum Low Temperature'),
-        ('precip', 'Total Precipitation')])
+        ('precip', 'Total Precipitation'),
+        ('snow', 'Total Snowfall')])
 
 
 def get_description():
@@ -96,6 +97,7 @@ def plotter(fdict):
     sum(gddxx(%s, %s, high, low)) as gdd,
     avg(low) as avg_low_temp,
     sum(precip) as precip,
+    sum(snow) as snow,
     min(low) as min_low,
     max(low) as max_low,
     max(high) as max_high,
@@ -129,6 +131,8 @@ def plotter(fdict):
     ylabel = r"Temperature $^\circ$F"
     if varname in ['precip', ]:
         ylabel = "Precipitation [inch]"
+    elif varname in ['snow', ]:
+        ylabel = "Snowfall [inch]"
     elif varname.find('days') > -1:
         ylabel = "Days"
     elif varname == 'gdd':
@@ -143,7 +147,7 @@ def plotter(fdict):
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df['yr'].min()-1, df['yr'].max()+1)
     rng = df[varname].max() - df[varname].min()
-    if varname == 'precip' or varname.startswith('days'):
+    if varname in ['snow', 'precip'] or varname.startswith('days'):
         ax[0].set_ylim(-0.1, df[varname].max() + rng * .3)
     else:
         ax[0].set_ylim(df[varname].min() - rng * .3,
@@ -153,9 +157,10 @@ def plotter(fdict):
                         box.width, box.height * 0.98])
 
     # Plot 2: CDF
-    X2 = np.sort(df[varname])
-    ptile = np.percentile(df[varname], [0, 5, 50, 95, 100])
-    N = len(df[varname])
+    df2 = df[df[varname].notnull()]
+    X2 = np.sort(df2[varname])
+    ptile = np.percentile(df2[varname], [0, 5, 50, 95, 100])
+    N = len(df2[varname])
     F2 = np.array(range(N))/float(N) * 100.
     ax[1].plot(X2, 100. - F2)
     ax[1].set_xlabel(ylabel)
@@ -167,9 +172,9 @@ def plotter(fdict):
     mysort = df.sort_values(by=varname, ascending=True)
     info = ("Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
             "Max: %.2f %.0f"
-            ) % (df[varname].min(), df['yr'][mysort.index[0]], ptile[1],
-                 np.average(df[varname]), np.std(df[varname]),
-                 ptile[3], df[varname].max(),
+            ) % (df2[varname].min(), df['yr'][mysort.index[0]], ptile[1],
+                 np.average(df2[varname]), np.std(df2[varname]),
+                 ptile[3], df2[varname].max(),
                  df['yr'][mysort.index[-1]])
     ax[1].text(0.8, 0.95, info, transform=ax[1].transAxes, va='top',
                bbox=dict(facecolor='white', edgecolor='k'))
