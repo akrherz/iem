@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (15, now());
+INSERT into iem_schema_manager_version values (16, now());
 
 CREATE TABLE stations(
 	id varchar(20),
@@ -279,7 +279,10 @@ CREATE TABLE current_tmp(
     wxcodes varchar(12)[],
     battery real,
     water_tmpf real,
-    feel real
+    feel real,
+    ice_accretion_1hr real,
+    ice_accretion_3hr real,
+    ice_accretion_6hr real
 );
 
 CREATE TABLE current (
@@ -345,7 +348,10 @@ CREATE TABLE current (
     wxcodes varchar(12)[],
     battery real,
     water_tmpf real,
-    feel real
+    feel real,
+    ice_accretion_1hr real,
+    ice_accretion_3hr real,
+    ice_accretion_6hr real
 );
 CREATE UNIQUE index current_iemid_idx on current(iemid);
 GRANT SELECT on current to apache,nobody;
@@ -413,7 +419,10 @@ CREATE TABLE current_log (
     wxcodes varchar(12)[],
     battery real,
     water_tmpf real,
-    feel real
+    feel real,
+    ice_accretion_1hr real,
+    ice_accretion_3hr real,
+    ice_accretion_6hr real
 );
 ALTER TABLE current_log SET WITH oids;
 
