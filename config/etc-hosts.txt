@@ -72,7 +72,7 @@
 
 #   VI13(63) metvm4
 192.168.1.251    iemdb-hads iemdb-hads.local
-#   VI_2(52) metvm5 <-> iem30
+#   VI_2(52) metvm9 <-> iem30
 192.168.1.249    iem-memcached
 #   VI_3(53) metvm4 <-> iem12
 192.168.1.248    iem-memcached1
