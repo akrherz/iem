@@ -324,7 +324,6 @@
     Options +ExecCGI
 
     RewriteRule kymn.phtml current.phtml?network=KYMN
-    RewriteRule wtm.phtml current.phtml?network=WTM
   </Directory>
 
   <Directory "/opt/iem/htdocs/plotting/auto">
