@@ -5,7 +5,7 @@ import datetime
 
 import requests
 import pytz
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, exponential_backoff
 
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
@@ -40,9 +40,8 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.UTC, microsecond=0)
 
-    try:
-        req = requests.get(URI, timeout=30)
-    except requests.exceptions.ReadTimeout:
+    req = exponential_backoff(requests.get, URI, timeout=30)
+    if req is None:
         return
     if req.status_code != 200:
         print(("dot_plows got non-200 status_code: %s\n"

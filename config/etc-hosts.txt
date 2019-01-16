@@ -59,6 +59,7 @@
 192.168.0.208    metvm8.local
 192.168.0.209    metvm9.local
 192.168.0.210    metvm10.local
+192.168.0.211    metvm11.local
 
 192.168.0.233    metvm3.local
 192.168.0.234    metvm4.local
@@ -74,7 +75,7 @@
 192.168.1.251    iemdb-hads iemdb-hads.local
 #   VI_2(52) metvm9 <-> iem30
 192.168.1.249    iem-memcached
-#   VI_3(53) metvm4 <-> iem12
+#   VI_3(53) metvm4 <-> metvm11
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm8 <-> metvm3
 192.168.1.247    iem-memcached2

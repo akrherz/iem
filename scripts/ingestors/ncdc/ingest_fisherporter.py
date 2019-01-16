@@ -11,7 +11,7 @@ import os
 import requests
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, exponential_backoff
 
 
 def process(tmpfn):
@@ -83,8 +83,8 @@ def dowork(valid):
     tmpfn = valid.strftime("/mesonet/tmp/hpd_%Y%m.csv")
     if not os.path.isfile(tmpfn):
         print('Downloading %s from NCDC' % (tmpfn,))
-        req = requests.get(uri)
-        if req.status_code != 200:
+        req = exponential_backoff(requests.get, uri, timeout=60)
+        if req is None or req.status_code != 200:
             print('dlerror')
             return
         output = open(tmpfn, 'wb')
