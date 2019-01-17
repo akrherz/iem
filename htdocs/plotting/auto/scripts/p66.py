@@ -17,8 +17,9 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This chart plots the frequency of having a streak
-    of days above or below a given high or low temperature threshold."""
+    desc['description'] = """This chart presents the daily frequency of the
+    given date having the prescribed number of previous days above or below
+    some provided treshold."""
     desc['arguments'] = [
         dict(type='station', name='station', default='IA2203',
              label='Select Station:', network='IACLIMATE'),
@@ -56,11 +57,11 @@ def plotter(fdict):
         and CURRENT ROW) as agg from """ + table + """
         where station = %s)
 
-    select extract(week from day) as week,
+    select extract(doy from day) as doy,
     sum(case when agg """+op+""" %s then 1 else 0 end)
         / count(*)::float * 100. as freq
-    from data GROUP by week ORDER by week asc
-    """, pgconn, params=(days - 1, station, threshold), index_col=None)
+    from data GROUP by doy ORDER by doy asc
+    """, pgconn, params=(days - 1, station, threshold), index_col='doy')
 
     fig, ax = plt.subplots(1, 1, sharex=True)
 
@@ -73,17 +74,12 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
-    ax.bar(df['week'][:-1], df['freq'][:-1])
+    ax.bar(df.index.values, df['freq'], width=1)
 
-    sts = datetime.datetime(2012, 1, 1)
-    xticks = []
-    for i in range(1, 13):
-        ts = sts.replace(month=i)
-        xticks.append(float(ts.strftime("%j")) / 7.0)
-
-    ax.set_xticks(xticks)
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
+                   305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_xlim(0, 53)
+    ax.set_xlim(0, 366)
     return fig, df
 
 
