@@ -1,8 +1,9 @@
 """ This is a stupid printer that prints the top and bottom of the HTML page...
 """
 
+
 def printTop():
-	print """
+   print("""
 <HTML>
 	<HEAD>
 		<BASE HREF="https://mesonet.agron.iastate.edu/~mm5/">
@@ -26,11 +27,11 @@ def printTop():
 
 //********* SET UP THESE VARIABLES - MUST BE CORRECT!!!*********************
  
-"""
+""")
 
 
 def printBot():
-	print """
+	print("""
 
 //=== global variables ====
 theImages = new Array();      //holds the images
@@ -60,10 +61,11 @@ if (first_image > last_image)
    first_image = help;
 }
 
-"""
+""")
+
 
 def printBot15():
-	print """
+	print("""
 //==============================================================
 //== All previous statements are performed as the page loads. ==
 //== The following functions are also defined at this time.   ==
@@ -268,10 +270,11 @@ function change_mode(mode)
 function launch()
 {
 
-"""
+""")
+
 
 def printBot2():
-	print """
+	print("""
    // this needs to be done to set the right mode when the page is manually reloaded
    change_mode (1);
    fwd();
@@ -319,43 +322,43 @@ function animation()
                    
 	<TD BGCOLOR="#AAAAAA" NOWRAP ALIGN=CENTER VALIGN=MIDDLE>
 	<FONT SIZE=-1 COLOR="#3300CC"> Loop Mode:</FONT><BR>
-                      <A HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/icons/nrm_button.gif" ALT="Normal"></A>
-                      <A HREF="JavaScript: func()" onClick="sweep()"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/icons/swp_button.gif" ALT="Sweep"></A><BR> 
+                      <A HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/images/nrm_button.gif" ALT="Normal"></A>
+                      <A HREF="JavaScript: func()" onClick="sweep()"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/images/swp_button.gif" ALT="Sweep"></A><BR> 
 	<HR WIDTH="70%" SIZE=2>
                       
 	<FONT SIZE=-1 COLOR="#3300CC">Animate Frames:</FONT><BR>
-                      <A HREF="JavaScript: func()" onClick="change_mode(1);rev()"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/rev_button.gif" ALT="REV"></A>
-                      <A HREF="JavaScript: func()" onClick="stop()"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/stp_button.gif" ALT="STOP"></A>
-                      <A HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/fwd_button.gif" ALT="FWD"></A><BR> 
+                      <A HREF="JavaScript: func()" onClick="change_mode(1);rev()"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/rev_button.gif" ALT="REV"></A>
+                      <A HREF="JavaScript: func()" onClick="stop()"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/stp_button.gif" ALT="STOP"></A>
+                      <A HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/fwd_button.gif" ALT="FWD"></A><BR> 
 	<HR WIDTH="70%" SIZE=2>
 
 	<FONT SIZE=-1 COLOR="#3300CC"> Dwell First:</FONT><BR>
-                      <A HREF="JavaScript: func()" onClick="change_start_dwell(-dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/icons/dw1_minus.gif" ALT="dec"></A>
-                      <A HREF="JavaScript: func()" onClick="change_start_dwell(dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/icons/dw1_plus.gif" ALT="inc"></A><BR>
+                      <A HREF="JavaScript: func()" onClick="change_start_dwell(-dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/images/dw1_minus.gif" ALT="dec"></A>
+                      <A HREF="JavaScript: func()" onClick="change_start_dwell(dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/images/dw1_plus.gif" ALT="inc"></A><BR>
 
 	<FONT SIZE=-1 COLOR="#3300CC"> Dwell Last:</FONT><BR>
-                      <A HREF="JavaScript: func()" onClick="change_end_dwell(-dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/icons/dw2_minus.gif" ALT="dec"></A>
-                      <A HREF="JavaScript: func()" onClick="change_end_dwell(dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/icons/dw2_plus.gif" ALT="inc"></A><BR> 
+                      <A HREF="JavaScript: func()" onClick="change_end_dwell(-dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/images/dw2_minus.gif" ALT="dec"></A>
+                      <A HREF="JavaScript: func()" onClick="change_end_dwell(dwell_step)"><IMG BORDER=0 WIDTH=29 HEIGHT=24 SRC="/images/dw2_plus.gif" ALT="inc"></A><BR> 
 	<HR WIDTH="70%" SIZE=2>
                       
 	<FONT SIZE=-1 COLOR="#3300CC">Adjust Speed:</FONT><BR>
-                      <A HREF="JavaScript: func()" onClick="change_speed(delay_step)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/slw_button.gif" ALT="--"></A>
-                      <A HREF="JavaScript: func()" onClick="change_speed(-delay_step)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/fst_button.gif" ALT="++"></A><BR> 
+                      <A HREF="JavaScript: func()" onClick="change_speed(delay_step)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/slw_button.gif" ALT="--"></A>
+                      <A HREF="JavaScript: func()" onClick="change_speed(-delay_step)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/fst_button.gif" ALT="++"></A><BR> 
 	<HR WIDTH="70%" SIZE=2>
                       
 	<FONT SIZE=-1 COLOR="#3300CC">Advance One:</FONT><BR>
-                      <A HREF="JavaScript: func()" onClick="decrementImage(--current_image)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/mns_button.gif" ALT="-1"></A>
-                      <A HREF="JavaScript: func()" onClick="incrementImage(++current_image)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/icons/pls_button.gif" ALT="+1"></A>
+                      <A HREF="JavaScript: func()" onClick="decrementImage(--current_image)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/mns_button.gif" ALT="-1"></A>
+                      <A HREF="JavaScript: func()" onClick="incrementImage(++current_image)"><IMG BORDER=0 WIDTH=35 HEIGHT=35 SRC="/images/pls_button.gif" ALT="+1"></A>
 
 	<HR WIDTH="70%" SIZE=2>
                       
                    </TD>
                    <TD BGCOLOR="#AAAAAA" ALIGN=CENTER VALIGN=MIDDLE>
                       <IMG NAME="animation" BORDER=0
-"""
+""")
 
 def printBot3():
-	print """
+	print("""
                        ALT="satellite image">
                    </TD>
                </TR>
@@ -363,5 +366,4 @@ def printBot3():
 
 </BODY>
 </HTML>
-"""
-
+""")

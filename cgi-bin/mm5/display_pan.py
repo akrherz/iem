@@ -5,19 +5,20 @@ import cgi
 
 
 def main():
+    """Go Main Go."""
     htmlBase = "https://mesonet.agron.iastate.edu/~mm5/Endow/Images/"
-    print 'Content-type: text/html \n\n'
-    form = cgi.FormContent()
+    print('Content-type: text/html \n\n')
+    form = cgi.FieldStorage()
 
-    fdom0 = form["fdom"][0]
-    fdata0 = form["fdata"][0]
-    fweek0 = form["fweek"][0]
+    fdom0 = form.getfrist("fdom")
+    fdata0 = form.getfirst("fdata")
+    fweek0 = form.getfirst("fweek")
     if fdata0 == "1":
         img0ref = htmlBase+fdom0+"_"+fdata0+"_"+fweek0+".gif"
     else:
         img0ref = htmlBase+fdom0+"_"+fdata0+"_"+fweek0+".gif"
 
-    print '<img src="'+img0ref+'">'
+    print('<img src="'+img0ref+'">')
 
 
 if __name__ == '__main__':
