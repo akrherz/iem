@@ -84,9 +84,10 @@ def main(argv):
         dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
         skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
         min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
+        ice_accretion_1hr, ice_accretion_3hr, ice_accretion_6hr,
         report_type)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
         # see @akrherz/iem#104 as an enhancement to differentiate rtype
         rtype = (1
@@ -101,7 +102,9 @@ def main(argv):
                 row['p06i'],
                 row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
                 row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
-                row['wxcodes'], rtype)
+                row['wxcodes'],
+                row['ice_accretion_1hr'], row['ice_accretion_3hr'],
+                row['ice_accretion_6hr'], rtype)
 
         acursor.execute(sql, args)
 
