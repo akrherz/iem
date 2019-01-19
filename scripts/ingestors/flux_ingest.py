@@ -226,8 +226,8 @@ def main():
         icursor.close()
         ipgconn.commit()
         # print("Processed %s rows for %s" % (processed, station))
-    if processed == 0:
-        print("NLAE flux_ingest found no new records")
+    # if processed == 0:
+    #    print("NLAE flux_ingest found no new records")
 
 
 if __name__ == '__main__':
