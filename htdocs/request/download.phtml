@@ -88,10 +88,8 @@ of seconds to process your request and provide the result.</div>
 <div class="col-sm-5">
 
 <h4>2) Select From Available Data:</h4>
-<p><strong>Note:</strong> Cloud information and raw METAR data is not available 
-for all observations, the IEM continues to backfill this information.</p>
 
-<SELECT name="data" size="5" MULTIPLE>
+<select name="data" size="10" MULTIPLE>
 	<option value="all" SELECTED>All Available
 	<option value="tmpf">Air Temperature [F]
 	<option value="tmpc">Air Temperature [C]
@@ -115,8 +113,11 @@ for all observations, the IEM continues to backfill this information.</p>
 	<option value="skyl2">Cloud Height Level 2 [ft]
 	<option value="skyl3">Cloud Height Level 3 [ft]
 	<option value="wxcodes">Present Weather Code(s)</option>
-	<option value="metar">Raw METAR</option>
-</SELECT>
+	<option value="ice_accretion_1hr">Ice Accretion 1 Hour</option>
+	<option value="ice_accretion_3hr">Ice Accretion 3 Hour</option>
+	<option value="ice_accretion_6hr">Ice Accretion 6 Hour</option>
+    <option value="metar">Raw METAR</option>
+</select>
 
 
 <br><br>

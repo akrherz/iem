@@ -128,11 +128,13 @@ def main():
     if "all" in dataVars:
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
                      "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
-                     "skyl2, skyl3, skyl4, wxcodes, metar")
+                     "skyl2, skyl3, skyl4, wxcodes, ice_accretion_1hr, "
+                     "ice_accretion_3hr, ice_accretion_6hr, metar")
         outCols = ['tmpf', 'dwpf', 'relh', 'drct', 'sknt', 'p01i', 'alti',
                    'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3',
                    'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4',
-                   'presentwx', 'metar']
+                   'presentwx', 'ice_accretion_1hr', 'ice_accretion_3hr',
+                   'ice_accretion_6hr', 'metar']
     else:
         for _colname in ['station', 'valid']:
             if _colname in dataVars:
