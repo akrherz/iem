@@ -59,7 +59,8 @@ pango
 paste
 pika
 pillow
-pint
+# busted pint on python27
+pint<0.9
 pip
 postgresql
 proj4
