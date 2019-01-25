@@ -1,13 +1,13 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
-include("../../../include/database.inc.php");
-include("../../../include/feature.php");
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 23);
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/feature.php";
 
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
 $month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
 
-define("IEM_APPID", 23);
 $t = new MyView();
 $t->title = "Past Features";
 $t->thispage = "iem-feature";
@@ -55,8 +55,21 @@ for ($i = 0; $i < $num; $i++){
     $linktext = "";
     if ($row["appurl"] != ""){
         $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
-    }
-	
+	}
+	$big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
+	if ($row["mediasuffix"] == 'mp4'){
+		$media = <<<EOM
+		<video class="img img-responsive" controls>
+		  <source src="${big}" type="video/mp4">
+		  Your browser does not support the video tag.
+	  </video>
+EOM;
+	  } else {
+		$media = <<<EOM
+	  <a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
+	  <br /><a href="{$big}">View larger image</a>
+EOM;
+	  }
 	$table .= <<<EOF
 <div class="row">
   <div class="col-md-12 well well-sm">{$row["calhead"]}</large></div>
@@ -64,8 +77,7 @@ for ($i = 0; $i < $num; $i++){
 
 <div class="row">
 	<div class="col-md-6">
-	<a href="/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}">
-<img src="/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}" alt="Feature" class="img img-responsive" /></a>
+	{$media}
 <br />{$row["caption"]}
 	</div>
 	<div class="col-md-6">

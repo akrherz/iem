@@ -1,5 +1,5 @@
 <?php
- include("../config/settings.inc.php");
+ require_once "../config/settings.inc.php";
  define("IEM_APPID", 62);
  header("Content-type: text/xml; charset=UTF-8");
  
@@ -12,7 +12,7 @@
  // Need to buffer the output so that we can save it to memcached later
  ob_start();
  
- include("../include/database.inc.php");
+ require_once "../include/database.inc.php";
  $d = date('D, d M Y H:i:s O');
  echo <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -32,12 +32,25 @@ EOF;
  	if ($row["appurl"] != ""){
 		$appurl = "<p><a href=\"https://mesonet.agron.iastate.edu".$row["appurl"]."\">Generate This Chart on IEM Website</a></p>";
 	}
- 	$cbody = <<<EOF
-<img src="https://mesonet.agron.iastate.edu/onsite/features/{$row["imageref"]}.{$row["mediasuffix"]}" 
+	$mediaurl = sprintf("https://mesonet.agron.iastate.edu/onsite/features/%s.%s",
+		$row["imageref"], $row["mediasuffix"]);
+	if ($row["mediasuffix"] == 'mp4'){
+		$cbody = <<<EOM
+<video controls>
+		<source src="${mediaurl}" type="video/mp4">
+		Your browser does not support the video tag.
+</video>
+EOM;
+	} else {
+		$cbody = <<<EOM
+<img src="${mediaurl}" 
  alt="Feature" style="float: left; padding: 5px;" />
- <p>{$row["story"]}</p>
+EOM;
+	}
+$cbody .= <<<EOM
+<p>{$row["story"]}</p>
  {$appurl}
-EOF;
+EOM;
   $t = $row["title"];
   $v = substr($row["valid"],0,10);
   echo <<<EOF

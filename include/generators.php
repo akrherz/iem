@@ -126,7 +126,16 @@ function gen_feature($t){
 		$tagtext .= "</small>";
 	}
 	$jsextra = "";
-	$imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
+	if ($row["mediasuffix"] == 'mp4'){
+		$imgiface = <<<EOM
+<video class="img img-responsive" controls>
+	<source src="${imghref}" type="video/mp4">
+	Your browser does not support the video tag.
+</video>
+EOM;
+	} else {
+		$imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
+	}
 	if ($row["javascripturl"]){
 		$imgiface = <<<EOF
 <div class="hidden-sm hidden-xs">

@@ -96,11 +96,24 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 	if (!$found){ continue; }
 	$valid = strtotime( $row["valid"] );
 	$big = sprintf("/onsite/features/%s.%s", $row["imageref"], $row["mediasuffix"]);
+	if ($row["mediasuffix"] == 'mp4'){
+		$media = <<<EOM
+		<video class="img img-responsive" controls>
+		  <source src="${big}" type="video/mp4">
+		  Your browser does not support the video tag.
+	  </video>
+EOM;
+	  } else {
+		$media = <<<EOM
+	  <a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
+	  <br /><a href="{$big}">View larger image</a>
+EOM;
+	  }
 	$content .= <<<EOF
 <hr />
 <div class="row">
 <div class="col-md-5">	
-  <a href="$big"><img src="$big" class="img img-responsive"></a>
+	  {$media}
 EOF;
 	if ($row["appurl"] != ""){
 		$content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";

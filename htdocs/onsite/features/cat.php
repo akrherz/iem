@@ -1,10 +1,10 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 55);
 define("FBEXTRA", True); 
-include("../../../include/myview.php");
-include("../../../include/database.inc.php");
-include("../../../include/feature.php");
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/feature.php";
 require_once "../../../include/forms.php";
 
 $t = new MyView();
@@ -57,6 +57,19 @@ if ($row["appurl"] != ""){
 $t->title = "$day Feature - ". $row["title"]; 
 $t->thispage = "iem-feature";
 $t->twitter_image = $big;
+if ($row["mediasuffix"] == 'mp4'){
+  $media = <<<EOM
+  <video class="img img-responsive" controls>
+	<source src="${big}" type="video/mp4">
+	Your browser does not support the video tag.
+</video>
+EOM;
+} else {
+  $media = <<<EOM
+<a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
+<br /><a href="{$big}">View larger image</a>
+EOM;
+}
 
 $content = <<<EOF
 
@@ -86,8 +99,7 @@ $content = <<<EOF
 
 <div class="row">
 <div class="col-md-6">
-<a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
-<br /><a href="{$big}">View larger image</a>
+{$media}
 <br />{$row["caption"]}
 {$linktext}
 </div>
