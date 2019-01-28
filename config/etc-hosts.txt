@@ -54,6 +54,7 @@
 192.168.0.200    metvm0.local
 192.168.0.201    metvm1.local
 192.168.0.202    metvm2.local
+192.168.0.204    metvm4.local
 192.168.0.206    metvm6.local
 192.168.0.207    metvm7.local
 192.168.0.208    metvm8.local
@@ -62,7 +63,6 @@
 192.168.0.211    metvm11.local
 
 192.168.0.233    metvm3.local
-192.168.0.234    metvm4.local
 10.27.19.214     talltowers-db.local
 
 #
