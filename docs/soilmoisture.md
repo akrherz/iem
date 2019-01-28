@@ -1,3 +1,11 @@
+ 23 Jan 2018
+  Hornbuckle, Flory, Ethan, Vanloocke
+  - Discussion on budgeting the $36K we have to spend on the sensors
+  - 1) need to replace the modems
+  - 2) need to buy some parts for Ethan
+  - 3) Inversion stations with target of 5K per station
+  - [ ] daryl writes up the proposal and gives options needed.
+
  20 Mar 2017
   Archontoulis, Goode, Ethan, KenP(Nashua), VanLoocke, Berns, Taylor, Flory
   - Mark Honeyman was unable to attend
