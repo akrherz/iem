@@ -211,11 +211,11 @@ if ($mode == "monthly") {
 	}
   }
   if ($row["min_rh"] != null){
-  	$str .= sprintf("<br />RH%% Rng: %.0f-%.0f", $row["min_rh"],
+  	$str .= sprintf("<br />RH%% Min/Max: %.0f-%.0f", $row["min_rh"],
   			$row["max_rh"]);
   }
   if ($row["min_feel"] != null){
-	$str .= sprintf("<br />Feel Rng: %.0f-%.0f", $row["min_feel"],
+	$str .= sprintf("<br />Feel Min/Max: %.0f to %.0f", $row["min_feel"],
 			$row["max_feel"]);
 }
 $db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
