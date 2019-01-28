@@ -73,11 +73,14 @@ def get_description():
     reports every three hours.  This plot also limits the number of lines
     drawn to 10, so if you hit the limit, please change the thresholds.
     """
+    year_range = "1928-%s" % (datetime.date.today().year, )
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='DSM',
              network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='m', default='all',
              label='Month Limiter', options=MDICT),
+        dict(type='text', name='yrange', default=year_range, optional=True,
+             label='Inclusive Range of Years to Include (optional)'),
         dict(type='select', name='dir', default='above',
              label='Threshold Direction:', options=PDICT),
         dict(type='select', name='var', default='tmpf',
@@ -160,6 +163,13 @@ def plotter(fdict):
     month = ctx['m'] if fdict.get('month') is None else fdict.get('month')
     nt = NetworkTable(network)
 
+    year_limiter = ""
+    y1, y2 = None, None
+    if 'yrange' in ctx:
+        y1, y2 = ctx['yrange'].split("-")
+        year_limiter = (
+            " and valid >= '%s-01-01' and valid < '%s-01-01' "
+        ) % (int(y1), int(y2))
     if month == 'all':
         months = range(1, 13)
         sts = datetime.datetime(2000, 1, 1)
@@ -186,7 +196,7 @@ def plotter(fdict):
 
     cursor.execute("""
       SELECT valid, round(""" + varname + """::numeric,0)
-      from alldata where station = %s
+      from alldata where station = %s """ + year_limiter + """
       and """ + varname + """ is not null and
       extract(month from valid) in %s
       ORDER by valid ASC
@@ -228,12 +238,13 @@ def plotter(fdict):
 
     ax.grid(True)
     ax.set_ylabel(r"%s $^\circ$F" % (PDICT2.get(varname),))
-    ax.set_title(("%s-%s [%s] %s\n"
-                  r"%s :: %.0fd%.0fh+ Streaks %s %s$^\circ$F"
-                  ) % (nt.sts[station]['archive_begin'].year,
-                       datetime.datetime.now().year, station,
-                       nt.sts[station]['name'], MDICT.get(month),
-                       hours / 24, hours % 24, mydir, threshold))
+    ax.set_title(
+        ("%s-%s [%s] %s\n"
+         r"%s :: %.0fd%.0fh+ Streaks %s %s$^\circ$F"
+         ) % (y1 if y1 is not None else nt.sts[station]['archive_begin'].year,
+              y2 if y2 is not None else datetime.datetime.now().year, station,
+              nt.sts[station]['name'], MDICT.get(month),
+              hours / 24, hours % 24, mydir, threshold))
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
     # ax.set_ylim(bottom=43)
     ax.set_xlabel(("* Due to timezones and leapday, there is some ambiguity"
