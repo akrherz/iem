@@ -22,3 +22,5 @@ CREATE TABLE hpd_2019(
         INHERITS (hpd_alldata);
 GRANT SELECT on hpd_2019 to nobody,apache;
 CREATE INDEX hpd_2019_station_idx on hpd_2019(station);
+
+-- Don't forget about USCRN 2019 table
