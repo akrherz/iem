@@ -9,7 +9,7 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=15"></script>
+<script type="text/javascript" src="search.js?v=16"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -20,7 +20,6 @@ $t->headextra = <<<EOF
     height: 400px;
     float: left;
   }
-#warntable { float: right; }
 .x-grid-cell-inner {
     padding: 0px !important;
 }
@@ -105,7 +104,8 @@ an office that did not exist at the time.
 <br />
 
 <div class="row">
-		<div class="col-md-4"><div id="myform" style="width:100%"></div>
+	<div class="col-md-4">
+		<div id="myform" style="width:100%"></div>
 		
 		<p><strong>You can otherwise search by lat/lon point. The start and
 		end date set above are used with this option as well:</strong><br />
@@ -115,8 +115,10 @@ an office that did not exist at the time.
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
 		<div id="map2" class="map"></div>
-		</div>
-		<div class="col-md-8"><div id="mytable"></div></div>
+	</div>
+	<div class="col-md-8">
+		<div id="mytable"></div>
+	</div>
 </div>
 		
 EOF;

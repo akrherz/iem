@@ -602,12 +602,12 @@ function initialize() {
 	setupUI();
 	var latLng = new google.maps.LatLng(41.53, -93.653);
 	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 5,
+		zoom: 3,
 		center: latLng,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	});
 	map2 = new google.maps.Map(document.getElementById('map2'), {
-		zoom: 5,
+		zoom: 3,
 		center: latLng,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	});
@@ -628,7 +628,7 @@ function initialize() {
 		updateMarkerPosition(marker.getPosition());
 	});
 	google.maps.event.addListener(marker2, 'dragend', function() {
-		updateMarkerPosition2(marker.getPosition());
+		updateMarkerPosition2(marker2.getPosition());
 	});
 
 	// Do the anchor tag linking, please
