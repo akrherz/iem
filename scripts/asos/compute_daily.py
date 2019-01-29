@@ -44,6 +44,9 @@ def do(ts):
     """, asos, params=(ts - datetime.timedelta(days=2),
                        ts + datetime.timedelta(days=2),
                        ts.strftime("%Y-%m-%d")), index_col=None)
+    if df.empty:
+        print("compute_daily no ASOS database entries for %s" % (ts, ))
+        return
     # derive some parameters
     df['relh'] = mcalc.relative_humidity_from_dewpoint(
         df['tmpf'].values * munits.degF,
