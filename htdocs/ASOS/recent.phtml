@@ -1,7 +1,7 @@
 <?php 
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 104);
- include_once "../../include/myview.php";
+ require_once "../../include/myview.php";
  $t = new MyView();
  $t->thispage = 'networks-asos'; 
  $t->title = "Recent Interesting METAR Reports";
@@ -22,6 +22,9 @@
  		<option value="snowdepth">Snow Depth Reports (4/xxx)</option>
  		<option value="fc">Funnel Cloud / Tornado / Waterspouts Reports (FC/+FC)</option>
  		<option value="gr">Hail Reports (GR)</option>
+ 		<option value="i1">Ice Accretion 1 Hour (I1nnn)</option>
+ 		<option value="i3">Ice Accretion 3 Hours (I3nnn)</option>
+ 		<option value="i6">Ice Accretion 6 Hours (I6nnn)</option>
  	</select>
  </form></o>
 

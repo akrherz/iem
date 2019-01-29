@@ -7,7 +7,15 @@ from json import encoder
 import memcache
 import psycopg2.extras
 from pyiem.util import get_dbconn, ssw
+from pyiem.reference import TRACE_VALUE
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+
+
+def trace(val):
+    """Nice Print"""
+    if val == TRACE_VALUE:
+        return 'T'
+    return val
 
 
 def get_data(q):
@@ -24,6 +32,15 @@ def get_data(q):
     if q == 'snowdepth':
         datasql = "substring(raw, ' 4/([0-9]{3})')::int"
         wheresql = "raw ~* ' 4/'"
+    elif q == 'i1':
+        datasql = "ice_accretion_1hr"
+        wheresql = "ice_accretion_1hr >= 0"
+    elif q == 'i3':
+        datasql = "ice_accretion_3hr"
+        wheresql = "ice_accretion_3hr >= 0"
+    elif q == 'i6':
+        datasql = "ice_accretion_6hr"
+        wheresql = "ice_accretion_6hr >= 0"
     elif q == 'fc':
         datasql = "''"
         wheresql = "'FC' = ANY(wxcodes)"
@@ -44,7 +61,7 @@ def get_data(q):
                 "station": row["id"],
                 "network": row["network"],
                 "name": row["name"],
-                "value":  row['data'],
+                "value":  trace(row['data']),
                 "metar": row['raw'],
                 "valid":  row['utc_valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
             },
