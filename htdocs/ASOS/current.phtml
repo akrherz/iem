@@ -73,8 +73,6 @@ while ( list($bogus, $iemob) = each($jobj["data"]) ){
     $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
     $mydata[$key]["sname"] = $cities[$key]["name"];
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
-       f2c($mydata[$key]["dwpf"]) );
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
       $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
@@ -233,10 +231,10 @@ while (list ($key, $val) = each ($finalA))  {
   $phour = ($parts["phour"] != 0.0001) ? $parts["phour"] : 'T';
   $pday = ($parts["pday"] != 0.0001) ? $parts["pday"] : 'T';
   
-  $ptmpf = ($parts["tmpf"] != null) ? round($parts["tmpf"],0): 'M';
-  $pdwpf = ($parts["dwpf"] != null) ? round($parts["dwpf"],0): 'M';
-  $pfeel = ($ptmpf == "M" || $pdwpf == "M") ? "M": round($parts["feel"],0);
-  $prelh = ($ptmpf == "M" || $pdwpf == "M") ? "M": $parts["relh"];
+  $ptmpf = ($parts["tmpf"] !== null) ? round($parts["tmpf"],0): 'M';
+  $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"],0): 'M';
+  $pfeel = ($ptmpf === "M" || $pdwpf === "M") ? "M": round($parts["feel"], 0);
+  $prelh = ($ptmpf === "M" || $pdwpf === "M") ? "M": $parts["relh"];
   $row .= ">". strftime($fmt, $parts["ts"]) ."</td>".
       "<td align='center'>". str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) ."</td>".
   "<td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
