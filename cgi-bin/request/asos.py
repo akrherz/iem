@@ -32,7 +32,7 @@ def check_load():
         mcursor.execute("""
         select pid from pg_stat_activity where query ~* 'FETCH'
         and datname = 'asos'""")
-        if mcursor.rowcount < 10:
+        if mcursor.rowcount < 30:
             return
         pgconn.close()
         if i == 4:
