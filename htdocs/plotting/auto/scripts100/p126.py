@@ -54,30 +54,20 @@ def plotter(fdict):
     df = read_sql("""
         SELECT extract(year from valid) as year,
         coalesce(mslp, alti * 33.8639, 1013.25) as slp,
-        extract(doy from valid) as doy, tmpf, dwpf from alldata
+        extract(doy from valid) as doy, tmpf, dwpf, relh from alldata
         where station = %s and dwpf > -50 and dwpf < 90 and
         tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
         and report_type = 2
     """, pgconn, params=(station,), index_col=None)
-    # compute RH
-    df['relh'] = mcalc.relative_humidity_from_dewpoint(
-        df['tmpf'].values * units('degF'),
-        df['dwpf'].values * units('degF')
-    )
     # saturation vapor pressure
     # Convert sea level pressure to station pressure
     df['pressure'] = mcalc.add_height_to_pressure(
         df['slp'].values * units('millibars'),
         nt.sts[station]['elevation'] * units('m')
     ).to(units('millibar'))
-    # Compute the relative humidity
-    df['relh'] = mcalc.relative_humidity_from_dewpoint(
-        df['tmpf'].values * units('degF'),
-        df['dwpf'].values * units('degF')
-    )
     # Compute the mixing ratio
     df['mixing_ratio'] = mcalc.mixing_ratio_from_relative_humidity(
-        df['relh'].values,
+        df['relh'].values * units('percent'),
         df['tmpf'].values * units('degF'),
         df['pressure'].values * units('millibars')
     )

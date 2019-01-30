@@ -12,7 +12,6 @@ import datetime
 import pytz
 import psycopg2.extras
 from pyiem.datatypes import temperature, speed
-from pyiem import meteorology
 from pyiem.util import get_dbconn, ssw
 
 
@@ -129,12 +128,12 @@ def main():
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
                      "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
                      "skyl2, skyl3, skyl4, wxcodes, ice_accretion_1hr, "
-                     "ice_accretion_3hr, ice_accretion_6hr, metar")
+                     "ice_accretion_3hr, ice_accretion_6hr, feel, metar")
         outCols = ['tmpf', 'dwpf', 'relh', 'drct', 'sknt', 'p01i', 'alti',
                    'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3',
                    'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4',
                    'presentwx', 'ice_accretion_1hr', 'ice_accretion_3hr',
-                   'ice_accretion_6hr', 'metar']
+                   'ice_accretion_6hr', 'feel', 'metar']
     else:
         for _colname in ['station', 'valid']:
             if _colname in dataVars:
@@ -194,11 +193,8 @@ def main():
         r = []
         for data1 in outCols:
             if data1 == 'relh':
-                if row['tmpf'] is not None and row['dwpf'] is not None:
-                    tmpf = temperature(row['tmpf'], 'F')
-                    dwpf = temperature(row['dwpf'], 'F')
-                    val = meteorology.relh(tmpf, dwpf)
-                    r.append("%.2f" % (val.value("%"),))
+                if row['relh'] is not None:
+                    r.append("%.2f" % (row['relh'],))
                 else:
                     r.append("M")
             elif data1 == 'sped':
@@ -243,7 +239,7 @@ def main():
                         "%s" % (
                             dance(
                                 row[data1]
-                        ).replace(",", " ").replace("\n", " "), )
+                            ).replace(",", " ").replace("\n", " "), )
                     )
             elif (row.get(data1) is None or row[data1] <= -99.0 or
                   row[data1] == "M"):

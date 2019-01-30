@@ -148,8 +148,7 @@ data = {'plots': [
         {'id': "116",
          'label': ("Cooling/Heating Degree Days monthly totals")},
         {'id': "42",
-         'label': ("Hourly Temperature/Dew Point "
-                   "Streaks Above/Below Threshold")},
+         'label': ("Hourly Temperature Streaks Above/Below Threshold")},
         {'id': "154",
          'label': "Hourly Temperature Averages by Month"},
         {'id': "85",
@@ -327,7 +326,7 @@ data = {'plots': [
         {'id': "192",
          'label': "Hourly Analysis Maps of ASOS/AWOS/METAR Stations"},
         {'id': "153",
-         'label': "Hourly Temp/Dew Point Extremes by Month/Season/Year"},
+         'label': "Hourly Temperature Extremes by Month/Season/Year"},
         {'id': "159",
          'label': "Hourly Temp/Dew Point Frequency by-year by-hour-of-day"},
         {'id': "106",

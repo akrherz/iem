@@ -35,7 +35,7 @@ def do(ts):
     df = read_sql("""
     select station, network, iemid, drct, sknt,
     valid at time zone tzname as localvalid,
-    tmpf, dwpf from
+    tmpf, dwpf, relh, feel from
     alldata d JOIN stations t on (t.id = d.station)
     where (network ~* 'ASOS' or network = 'AWOS')
     and valid between %s and %s and t.tzname is not null
@@ -48,14 +48,6 @@ def do(ts):
         print("compute_daily no ASOS database entries for %s" % (ts, ))
         return
     # derive some parameters
-    df['relh'] = mcalc.relative_humidity_from_dewpoint(
-        df['tmpf'].values * munits.degF,
-        df['dwpf'].values * munits.degF).to(munits.percent)
-    df['feel'] = mcalc.apparent_temperature(
-        df['tmpf'].values * munits.degF,
-        df['relh'].values * munits.percent,
-        df['sknt'].values * munits.knots
-    )
     df['u'], df['v'] = mcalc.wind_components(
         df['sknt'].values * munits.knots,
         df['drct'].values * munits.deg

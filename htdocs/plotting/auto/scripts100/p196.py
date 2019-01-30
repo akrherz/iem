@@ -50,7 +50,7 @@ def get_df(ctx):
         raise ValueError("No Alerts were found for UGC: %s" % (ctx['ugc'], ))
     pgconn = get_dbconn('asos')
     obs = read_sql("""
-        SELECT valid, tmpf::int as tmpf, dwpf::int as dwpf
+        SELECT valid, tmpf::int as tmpf, dwpf::int as dwpf, feel
         from alldata where station = %s
         and valid > %s and tmpf > 70 and dwpf > -20 ORDER by valid
     """, pgconn, params=(ctx['station'],
@@ -62,14 +62,6 @@ def get_df(ctx):
     ) % (nt.sts[ctx['station']]['name'], ctx['station'],
          str(events.index.values[0])[:10], str(obs.index.values[-1])[:10],
          ctx['ugc'])
-    relh = mcalc.relative_humidity_from_dewpoint(
-        obs['tmpf'].values * munits.degF,
-        obs['dwpf'].values * munits.degF
-    )
-    obs['feel'] = mcalc.heat_index(
-        obs['tmpf'].values * munits.degF,
-        relh
-    ).magnitude
     if ctx['opt'] == 'yes':
         obs = obs[obs['feel'] > obs['tmpf']]
     obs['feel'] = obs['feel'].round(0)

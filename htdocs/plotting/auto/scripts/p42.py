@@ -38,6 +38,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 PDICT = {'above': 'At or Above Threshold...',
          'below': 'Below Threshold...'}
 PDICT2 = {'tmpf': 'Air Temperature',
+          'feel': 'Feels Like Temperature',
           'dwpf': 'Dew Point Temperature'}
 MDICT = OrderedDict([
          ('all', 'Entire Year'),

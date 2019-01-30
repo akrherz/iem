@@ -76,7 +76,7 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     df = read_sql("""
-        SELECT drct::int as t, dwpf, tmpf,
+        SELECT drct::int as t, dwpf, tmpf, relh,
         coalesce(mslp, alti * 33.8639, 1013.25) as slp
         from alldata where station = %s
         and drct is not null and dwpf is not null and dwpf <= tmpf
@@ -89,14 +89,9 @@ def plotter(fdict):
         df['slp'].values * units('millibars'),
         nt.sts[station]['elevation'] * units('m')
     ).to(units('millibar'))
-    # compute RH
-    df['relh'] = mcalc.relative_humidity_from_dewpoint(
-        df['tmpf'].values * units('degF'),
-        df['dwpf'].values * units('degF')
-    )
     # compute mixing ratio
     df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
-        df['relh'].values,
+        df['relh'].values * units('percent'),
         df['tmpf'].values * units('degF'),
         df['pressure'].values * units('millibars')
     )

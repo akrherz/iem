@@ -13,6 +13,8 @@ PDICT = OrderedDict([
         ('min_dwpf', 'Lowest Dew Point Temperature'),
         ('max_tmpf', 'Highest Air Temperature'),
         ('min_tmpf', 'Lowest Air Temperature'),
+        ('max_feel', 'Highest Feels Like Temperature'),
+        ('min_feel', 'Lowest Feels Like Temperature'),
         ('max_mslp', 'Maximum Sea Level Pressure'),
         ('min_mslp', 'Minimum Sea Level Pressure'),
         ('max_alti', 'Maximum Pressure Altimeter'),
@@ -22,6 +24,8 @@ UNITS = {'max_dwpf': 'F',
          'max_tmpf': 'F',
          'min_dwpf': 'F',
          'min_tmpf': 'F',
+         'min_feel': 'F',
+         'max_feel': 'F',
          'max_mslp': 'mb',
          'min_mslp': 'mb',
          'max_alti': 'in',
@@ -84,7 +88,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']
     varname2 = varname.split("_")[1]
-    if varname2 in ['dwpf', 'tmpf']:
+    if varname2 in ['dwpf', 'tmpf', 'feel']:
         varname2 = "i" + varname2
     month = ctx['month']
     network = ctx['network']
@@ -111,7 +115,8 @@ def plotter(fdict):
     df = read_sql("""
     WITH obs as (
         SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
-        tmpf::int as itmpf, dwpf::int as idwpf, mslp, alti from alldata
+        tmpf::int as itmpf, dwpf::int as idwpf,
+        feel::int as ifeel, mslp, alti from alldata
         where station = %s and
         extract(month from valid at time zone %s) in %s),
     agg1 as (
@@ -120,6 +125,8 @@ def plotter(fdict):
         max(itmpf) as max_tmpf,
         min(idwpf) as min_dwpf,
         min(itmpf) as min_tmpf,
+        min(ifeel) as min_feel,
+        max(ifeel) as max_feel,
         max(alti) as max_alti,
         min(alti) as min_alti,
         max(mslp) as max_mslp,

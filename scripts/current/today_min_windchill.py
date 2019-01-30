@@ -5,8 +5,6 @@ import datetime
 import sys
 
 from pandas.io.sql import read_sql
-from metpy.units import units
-from metpy.calc import windchill
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -19,15 +17,11 @@ def doday(ts, realtime):
     nt = NetworkTable(['AWOS', 'IA_ASOS'])
     pgconn = get_dbconn('iem', user='nobody')
     df = read_sql("""
-    SELECT id as station, tmpf, sknt from current_log c JOIN stations t
+    SELECT id as station, min(feel) as wcht from current_log c JOIN stations t
     on (c.iemid = t.iemid) WHERE t.network in ('IA_ASOS', 'AWOS')
     and valid >= %s and valid < %s + '24 hours'::interval
-    and tmpf is not null and sknt > 0
-    """, pgconn, params=(ts, ts), index_col=None)
-    df['wcht'] = windchill(df['tmpf'].values * units.degF,
-                           df['sknt'].values * units.knots
-                           ).to(units.degF).magnitude
-    gdf = df.groupby('station').min()
+    and feel is not null and sknt > 0 GROUP by id
+    """, pgconn, params=(ts, ts), index_col='station')
     routes = 'ac'
     if not realtime:
         routes = 'a'
@@ -35,7 +29,7 @@ def doday(ts, realtime):
     lats = []
     vals = []
     labels = []
-    for station, row in gdf.iterrows():
+    for station, row in df.iterrows():
         lons.append(nt.sts[station]['lon'])
         lats.append(nt.sts[station]['lat'])
         vals.append(row['wcht'])

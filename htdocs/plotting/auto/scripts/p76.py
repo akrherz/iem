@@ -77,14 +77,9 @@ def run_calcs(df, ctx):
         df['slp'].values * units('millibars'),
         ctx['nt'].sts[ctx['station']]['elevation'] * units('m')
     ).to(units('millibar'))
-    # Compute the relative humidity
-    df['relh'] = mcalc.relative_humidity_from_dewpoint(
-        df['tmpf'].values * units('degF'),
-        df['dwpf'].values * units('degF')
-    )
     # Compute the mixing ratio
     df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
-        df['relh'].values,
+        df['relh'].values * units('percent'),
         df['tmpf'].values * units('degF'),
         df['pressure'].values * units('millibars')
     )
@@ -161,7 +156,7 @@ def get_data(ctx, startyear):
 
     df = read_sql("""
         WITH obs as (
-            SELECT valid at time zone %s as valid, tmpf, dwpf,
+            SELECT valid at time zone %s as valid, tmpf, dwpf, relh,
             coalesce(mslp, alti * 33.8639, 1013.25) as slp
             from alldata WHERE station = %s and dwpf > -90
             and dwpf < 100 and tmpf >= dwpf and
@@ -171,7 +166,7 @@ def get_data(ctx, startyear):
         )
       SELECT valid,
       extract(year from valid + '%s days'::interval)::int as year,
-      tmpf, dwpf, slp from obs
+      tmpf, dwpf, slp, relh from obs
     """, pgconn, params=(ctx['nt'].sts[ctx['station']]['tzname'],
                          ctx['station'], tuple(months),
                          ctx['nt'].sts[ctx['station']]['tzname'],
