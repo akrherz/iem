@@ -7,7 +7,7 @@ import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
 PDICT2 = {
@@ -40,12 +40,12 @@ def get_description():
     current 0 and 12z soundings respectively.  You may not find the current
     day's sounding if running this application prior to those ingest times.
     """
-    today = datetime.date.today()
+    today = utc()
     desc['arguments'] = [
         dict(type='networkselect', name='station', network='RAOB',
              default='_OAX', label='Select Station:'),
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
-             min='1946/01/01',
+             min='1946/01/01', max=today.strftime("%Y/%m/%d"),
              label='Date of the Sounding:'),
         dict(type='select', name='hour', default='00', options=PDICT,
              label='Which Sounding from Above Date:'),
@@ -140,14 +140,14 @@ def plotter(fdict):
     ax.set_ylabel("Mandatory Pressure Level (hPa)")
     plt.gcf().text(0.5, 0.9,
                    ("%s %s %s Sounding\n"
-                    "(%s-%s) Percentile Ranks (%s) for %s"
+                    "(%s-%s) Percentile Ranks (%s) for %s at %sz"
                     ) % (station, name,
                          ts.strftime("%Y/%m/%d %H UTC"),
                          df.iloc[0]['min_valid'].year,
                          df.iloc[0]['max_valid'].year,
                          ("All Year" if which == 'none'
                           else calendar.month_name[ts.month]),
-                         PDICT3[varname]),
+                         PDICT3[varname], hour),
                    ha='center', va='bottom')
     ax.grid(True)
     ax.set_xticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
