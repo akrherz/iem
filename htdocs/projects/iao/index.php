@@ -30,7 +30,11 @@ Iowa EPSCoR grant (Grant # 1101284).  This distributed observing facility
 is anchored by its two tall (120-m) towers, separated by 22 km, operating 
 continuously since June 2016 in central Iowa.  Tower A1 is located within 
 a 200-turbine utility-scale wind farm, and Tower A2 is located in similar 
-terrain and landscape but outside the same wind farm.  Associated short-term 
+terrain and landscape but outside the same wind farm.  Collocated at tower A2 
+since May 1, 2018, is a sodar wind profiler unit. In addition to the sodar, 
+a surface meteorological station was also added to the A2 site on 
+November 29, 2018. Various guest/collaboration sensors have been 
+located at the sites as well. Associated short-term 
 field research and teaching activities and their associated field observing 
 facilities are deployed for specific short term intensive observing periods 
 (IOPs) or longer term studies.  Remote sensing instruments also have been 
@@ -93,7 +97,7 @@ and booms on the towers are shown in Figures 4a and 4b. Redundant wind
 speed and direction sensors at each level provide measurements with 
 minimal tower interference for flow from prevailing wind directions at 
 these sites, which are shown by the 10-m (Figure 5a) and 80-m (Figure 5b) 
-windroses from Tower A2.  Orientation of booms and sensor locations 
+wind roses from Tower A2.  Orientation of booms and sensor locations 
 along each boom are shown in Figure 5.   
 Site photos (Figure 6) show the climate-controlled concrete sheds 
 housing data acquisition and communication facilities at the base of 
@@ -187,9 +191,9 @@ a: < 0.058° at u=v=1 m s<sup>-1</sup></td>
 
 <p><strong>Table 1</strong> Instruments deployed at A1 and A2 with sensor
 operating range and measurement accuracy. <sup>a</sup> heated cup anemometer,
-<sup>b</sup> unheated cup anemometer, <sup>c</sup> NW boom, <sup>d</sup> S boom,
+<sup>b</sup> unheated cup anemometer, <sup>c</sup> WNW boom, <sup>d</sup> S boom,
 <sup>e</sup> WSW boom, <sup>f</sup> N leg of tower, <sup>§</sup> vertical distance
-from midpoint of sensor to boom is 0.41m, <sup>†</sup> sensor at A2 repalced previous
+from midpoint of sensor to boom is 0.41m, <sup>†</sup> sensor at A2 replaced previous
 sensor on 16 August 2016, <sup>‡</sup> sensor at A2 replaced previous sensor on
 16 February 2017, <sup>*</sup> rotor cup assembly at A2 replaced 23 May 2016.</p>
 
@@ -242,29 +246,28 @@ farm (b).  Images courtesy of S. Purdy.</p>
 <h3>Topography and Tower Mast Influences on IAO Measurements</h3>
 </section>
 
-<p>Terrain for both sites is flat with about 13-m higher elevation at A2 vs. 
-A1 (356.6 m vs. 343.8 m).  Both sites feature slopes radially away from of 
-tower of less than ±0.7% within a 4-km distance of each tower for each of 
-the following directions ([A1 vs A2] N: <0.1% vs. 0%; S: -0.3% vs. -0.2%; 
-E: <0.1% vs. <0.1%; W: <-0.1% vs. -0.2%).  Within 1 km of A1 the land slopes 
-gently upward (≤1.0%) to the west, north, northwest, southwest, and south 
-of the tower.  Surrounding A2 slopes within 1 km of the tower are ±0.1% to 
-the northwest, southwest, south, and west of the tower and -0.3% to the 
-north of the tower.  These topographical variations are significantly 
-lower than the requirements for site calibration of met towers near 
-wind turbines (e.g. <10% slope or height variations of ±4m from the 
-horizontal plane at a distance of 16 rotor diameters, D (D=82m) from a 
-turbine (IEC61400-12:1, 2005)).</p>
+<p>Terrain for both sites is flat with about 13m higher elevation at A2 vs. 
+A1 (356.6 m vs. 343.8 m). Within 1 km of A1 the land slopes gently upward 
+(≤1.0%) to the south, southwest, west, northwest, and north of the tower. 
+Surrounding A2 slopes within 1 km of the tower are ±0.1% to the south, 
+southwest, west, and northwest of the tower and -0.3% to the north of the 
+tower. Both sites feature slopes that vary radially away from the tower at 
+rates of less than ±0.7% within a 4-km distance of each tower for each of 
+the following directions [A1 vs A2] S: -0.3% vs. -0.2%; W: <-0.1% vs. -0.2%.; 
+N: <0.1% vs. 0%; E: <0.1% vs. <0.1%. These topographical variations are 
+significantly lower than the requirements for site calibration of met 
+towers near wind turbines (e.g. <10% slope or height variations of ±4m 
+from the horizontal plane at a distance of 16 rotor diameters, D (D=82m) 
+from a turbine (IEC61400-12:1, 2005)).</p>
 
-<p>Influence of tower cross section of our measurements is shown in Figure 7 
-by taking the ratio of median wind speeds from the NW and S IAO Tower 
+<p>Influence of tower cross section on our measurements is shown in Figure 7 
+by taking the ratio of median wind speeds from the WNW and S IAO Tower 
 booms for 80-m wind direction from the A2 reference tower.  From wind 
 directions approximately S (172.5°) to approximately NW (326.5°) we 
 expect less than 5% variation in anemometer speeds due to the tower 
-influence.  For easterly and northerly wind, the NW and S anemometer 
+influence.  For easterly and northerly wind, the WNW and S anemometer 
 speeds depart by 30-40% depending on the leeward or windward position of
-each anemometer.  We thereby omit analysis of tower data from these 
-directional sectors (0°-172.5° and 326.5°-359.9°).  Higher variability 
+each anemometer.  Higher variability 
 of the normalized speed is indicated at the 10-m and 120-m levels due to 
 cup anemometer malfunction on the south boom before instrument repair in 
 August 2016.  We also observe a slight reduction in the tower wake at 5-m 
@@ -275,12 +278,42 @@ dominant influence on the waked region.</p>
 <p><img src="figures/figure7.png" class="img img-responsive">
 <br /><strong>Figure 7:</strong> Detection of tower wake at all tower levels
 from normalized wind
-speed ratios from the NW and S booms. Median ratios are represented with
+speed ratios from the WNW and S booms. Median ratios are represented with
 median absolute deviations as error bars and error bars are plotted every
-15°.  A2 80-m wind direction is taken from the wind vane on the NW
+15°.  A2 80-m wind direction is taken from the wind vane on the WNW
 boom.   Tower
 boom layout diagram denotes usable wind directions from No Wake sector. 
 Image courtesy of: D. Rajewski</p>
+
+<section id="remote">
+<h3>Remote sensors and surface met station</h3>
+</section>
+
+<p>Measurements from wind profiling systems complement understanding of 
+low-level stability and turbulence measurements from the tall towers. 
+A sodar was installed 140 m northeast of A2 May 1, 2018 (Figures 8a and 8b). 
+A lidar was also positioned near the base of the A2 tower in May 2018. 
+Horizontal and vertical wind speed, wind direction, turbulence intensity, 
+and data quality are monitored at ten heights from 40 m to 200 m every ten 
+minutes from both the lidar and sodar.</p>
+
+<p>A hyperspectral and infrared camera were installed on the A2 tower at 80 m 
+during the 2018 growing season to monitor field-scale variations in 
+crop water use and plant photosynthetic activity. A surface met station 
+(Figure 9) was installed 10 m southwest of the A2 tower base in September 
+2018 and consists of a tripod mast with sensors for 2 m air temperature and 
+relative humidity, 2 m wind speed and wind direction, 2 m pressure, 
+incoming solar radiation, and precipitation.</p>
+
+<p><img src="figures/figure8.png" class="img img-responsive">
+<br /><strong>Figure 8:</strong> Sodar wind profiler in the vicinity of the A2 
+tower during the 2018 growing season (a) and after harvest (b). 
+Images courtesy of S. Purdy.</p>
+
+<p><img src="figures/figure9.png" class="img img-responsive">
+<br /><strong>Figure 9:</strong> Surface meteorology station near the A2 
+tower base after the 2018 growing season. Image courtesy of S. Purdy.</p>
+
 
 <section id="data">
 <h3>Tower Data</h3>
@@ -446,6 +479,7 @@ Boulder CO. [<a href="/pickup/iao/nrel_wake_tools.pdf">Available PDF</a>]</p>
  <li><a href="#locations">Tower Locations</a></li>
  <li><a href="#instruments">Instruments</a></li>
  <li><a href="#topography">Topography</a></li>
+ <li><a href="#remote">Remote Sensors</a></li>
  <li><a href="#data">Tower Data</a></li>
  <li><a href="#cwex">CWEX</a></li>
  <li><a href="#contact">Contacts</a></li>
