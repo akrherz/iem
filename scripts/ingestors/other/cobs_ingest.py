@@ -70,7 +70,7 @@ def sum_hourly(hdf, date, col):
     if df2.empty:
         # print("ingest_cobs found no hourly data for date: %s" % (date,))
         return None
-    return df2[col].sum()
+    return float(df2[col].sum())
 
 
 def clean(key, value):
@@ -81,7 +81,7 @@ def clean(key, value):
         return 100.
     if pd.isnull(value):
         return None
-    return value
+    return float(value)
 
 
 def database(lastob, ddf, hdf, force_currentlog):
@@ -114,7 +114,6 @@ def database(lastob, ddf, hdf, force_currentlog):
             ob.data['srad_mj'] = sum_hourly(hdf, localts.date(), 'SlrMJ_Tot')
         if ob.data['pday'] is None:
             ob.data['pday'] = sum_hourly(hdf, localts.date(), 'Rain_in_Tot')
-            # print("  --> srad_mj: %s" % (ob.data['srad_mj'], ))
         for key, value in HOURLYCONV.items():
             if value is None:
                 continue
