@@ -14,6 +14,12 @@ import psycopg2.extras
 from pyiem.datatypes import temperature, speed
 from pyiem.util import get_dbconn, ssw
 
+NULLS = {
+    "M": "M",
+    "null": "null",
+    "empty": ""
+}
+
 
 def dance(val):
     """Force the val to ASCII."""
@@ -123,6 +129,8 @@ def main():
     sts, ets = get_time_bounds(form, tzinfo)
 
     delim = form.getfirst("format", "onlycomma")
+    # How should null values be represented
+    missing = NULLS.get(form.getfirst('missing'), "M")
 
     if "all" in dataVars:
         queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
@@ -184,56 +192,56 @@ def main():
         ssw("lon"+rD+"lat"+rD)
     ssw(queryCols+"\n")
 
+    gismiss = "%s%s%s%s" % (missing, rD, missing, rD)
     for row in acursor:
         ssw(row["station"] + rD)
-        ssw(
-            (row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
+        ssw((row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
         if gisextra:
-            ssw(gtxt.get(row['station'], "M%sM%s" % (rD, rD)))
+            ssw(gtxt.get(row['station'], gismiss))
         r = []
         for data1 in outCols:
             if data1 == 'relh':
                 if row['relh'] is not None:
                     r.append("%.2f" % (row['relh'],))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 == 'sped':
                 if row['sknt'] is not None and row['sknt'] >= 0:
                     r.append("%.1f" % (speed(row['sknt'],
                                              'KT').value('MPH'), ))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 == 'gust_mph':
                 if row['gust'] is not None and row['gust'] >= 0:
                     r.append("%.1f" % (speed(row['gust'],
                                              'KT').value('MPH'), ))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 == 'p01m':
                 if row['p01i'] is not None and row['p01i'] >= 0:
                     r.append("%.2f" % (row['p01i'] * 25.4, ))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 == 'tmpc':
                 if row['tmpf'] is not None:
                     val = temperature(row['tmpf'], 'F').value('C')
                     r.append("%.2f" % (val, ))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 == 'dwpc':
                 if row['dwpf'] is not None:
                     val = temperature(row['dwpf'], 'F').value('C')
                     r.append("%.2f" % (val, ))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 in ['presentwx', 'wxcodes']:
                 if row['wxcodes']:
                     r.append(" ".join(row['wxcodes']))
                 else:
-                    r.append("M")
+                    r.append(missing)
             elif data1 in ["metar", "skyc1", "skyc2", "skyc3", "skyc4"]:
                 if row[data1] is None:
-                    r.append("M")
+                    r.append(missing)
                 else:
                     r.append(
                         "%s" % (
@@ -243,7 +251,7 @@ def main():
                     )
             elif (row.get(data1) is None or row[data1] <= -99.0 or
                   row[data1] == "M"):
-                r.append("M")
+                r.append(missing)
             else:
                 r.append("%2.2f" % (row[data1], ))
         ssw("%s\n" % (rD.join(r),))
