@@ -9,7 +9,6 @@ import sys
 import datetime
 
 import pytz
-from metpy.units import units
 from pyiem.util import get_dbconn, ssw
 
 NULLS = {
@@ -57,8 +56,6 @@ CONV_COLS = {
     'sped': 'sknt * 1.15 as sped',
     'gust_mph': 'gust * 1.15 as gust_mph',
 }
-DEGC = units('degC')
-DEGF = units('degF')
 
 
 def fmt_trace(val, missing, trace):
@@ -238,7 +235,7 @@ def main():
     # How should null values be represented
     missing = NULLS.get(form.getfirst('missing'), "M")
     # How should trace values be represented
-    trace = TRACE_OPTS.get(form.getfirst('trace'), "T")
+    trace = TRACE_OPTS.get(form.getfirst('trace'), "0.0001")
 
     querycols = build_querycols(form)
 
