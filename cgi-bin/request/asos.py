@@ -17,6 +17,12 @@ NULLS = {
     "null": "null",
     "empty": ""
 }
+TRACE_OPTS = {
+    "T": "T",
+    "null": "null",
+    "empty": "",
+    "0.0001": '0.0001'
+}
 AVAILABLE = [
     'tmpf',
     'dwpf',
@@ -55,21 +61,31 @@ DEGC = units('degC')
 DEGF = units('degF')
 
 
-def fmt_simple(val, missing):
+def fmt_trace(val, missing, trace):
+    """Format precip."""
+    if val is None:
+        return missing
+    # careful with this comparison
+    if val < 0.009999 and val > 0:
+        return trace
+    return "%.2f" % (val, )
+
+
+def fmt_simple(val, missing, _trace):
     """Format simplely."""
     if val is None:
         return missing
     return dance(val).replace(",", " ").replace("\n", " ")
 
 
-def fmt_wxcodes(val, missing):
+def fmt_wxcodes(val, missing, _trace):
     """Format weather codes."""
     if val is None:
         return missing
     return " ".join(val)
 
 
-def fmt_f2(val, missing):
+def fmt_f2(val, missing, _trace):
     """Simple 2 place formatter."""
     if val is None:
         return missing
@@ -221,6 +237,8 @@ def main():
     delim = form.getfirst("format", "onlycomma")
     # How should null values be represented
     missing = NULLS.get(form.getfirst('missing'), "M")
+    # How should trace values be represented
+    trace = TRACE_OPTS.get(form.getfirst('trace'), "T")
 
     querycols = build_querycols(form)
 
@@ -264,7 +282,12 @@ def main():
         'skyc1': fmt_simple,
         'skyc2': fmt_simple,
         'skyc3': fmt_simple,
-        'skyc4': fmt_simple
+        'skyc4': fmt_simple,
+        'p01i': fmt_trace,
+        'p01i * 25.4 as p01m': fmt_trace,
+        'ice_accretion_1hr': fmt_trace,
+        'ice_accretion_3hr': fmt_trace,
+        'ice_accretion_6hr': fmt_trace,
     }
     # The default is the %.2f formatter
     formatters = [ff.get(col, fmt_f2) for col in querycols]
@@ -276,7 +299,7 @@ def main():
         if gisextra:
             ssw(gtxt.get(row[0], gismiss))
         ssw(rD.join(
-            [func(val, missing)
+            [func(val, missing, trace)
              for func, val in zip(formatters, row[2:])]) + "\n")
 
 
