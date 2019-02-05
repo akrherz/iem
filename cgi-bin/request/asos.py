@@ -4,14 +4,12 @@ Download interface for ASOS/AWOS data from the asos database
 """
 import time
 import cgi
-import re
 import os
 import sys
 import datetime
 
 import pytz
-import psycopg2.extras
-from pyiem.datatypes import temperature, speed
+from metpy.units import units
 from pyiem.util import get_dbconn, ssw
 
 NULLS = {
@@ -19,6 +17,63 @@ NULLS = {
     "null": "null",
     "empty": ""
 }
+AVAILABLE = [
+    'tmpf',
+    'dwpf',
+    'relh',
+    'drct',
+    'sknt',
+    'p01i',
+    'alti',
+    'mslp',
+    'vsby',
+    'gust',
+    'skyc1',
+    'skyc2',
+    'skyc3',
+    'skyc4',
+    'skyl1',
+    'skyl2',
+    'skyl3',
+    'skyl4',
+    'wxcodes',
+    'ice_accretion_1hr',
+    'ice_accretion_3hr',
+    'ice_accretion_6hr',
+    'feel',
+    'metar',
+]
+# inline is so much faster!
+CONV_COLS = {
+    'tmpc': 'f2c(tmpf) as tmpc',
+    'dwpc': 'f2c(dwpf) as dwpc',
+    'p01m': 'p01i * 25.4 as p01m',
+    'sped': 'sknt * 1.15 as sped',
+    'gust_mph': 'gust * 1.15 as gust_mph',
+}
+DEGC = units('degC')
+DEGF = units('degF')
+
+
+def fmt_simple(val, missing):
+    """Format simplely."""
+    if val is None:
+        return missing
+    return dance(val).replace(",", " ").replace("\n", " ")
+
+
+def fmt_wxcodes(val, missing):
+    """Format weather codes."""
+    if val is None:
+        return missing
+    return " ".join(val)
+
+
+def fmt_f2(val, missing):
+    """Simple 2 place formatter."""
+    if val is None:
+        return missing
+    return "%.2f" % (val, )
 
 
 def dance(val):
@@ -83,13 +138,50 @@ def get_time_bounds(form, tzinfo):
     try:
         sts = tzinfo.localize(datetime.datetime(y1, m1, d1))
         ets = tzinfo.localize(datetime.datetime(y2, m2, d2))
-    except Exception as _exp:
+    except Exception as exp:
+        sys.stderr.write("asos.py malformed date: %s\n" % (exp, ))
         ssw("ERROR: Malformed Date!")
         sys.exit()
 
     if sts == ets:
         ets += datetime.timedelta(days=1)
     return sts, ets
+
+
+def build_querycols(form):
+    """Which database columns correspond to our query."""
+    req = form.getlist("data")
+    if not req or 'all' in req:
+        return AVAILABLE
+    res = []
+    for col in req:
+        if col == 'presentwx':
+            res.append('wxcodes')
+        elif col in AVAILABLE:
+            res.append(col)
+        elif col in CONV_COLS:
+            res.append(CONV_COLS[col])
+    if not res:
+        res.append('tmpf')
+    return res
+
+
+def build_gisextra(form, dbstations, rD):
+    """Build lookup table."""
+    if form.getfirst("latlon", "no") != "yes":
+        return {}
+    res = {}
+    mesosite = get_dbconn('mesosite')
+    mcursor = mesosite.cursor()
+    mcursor.execute("""
+        SELECT id, ST_x(geom) as lon, ST_y(geom) as lat
+        from stations WHERE id in %s
+        and (network ~* 'AWOS' or network ~* 'ASOS')
+    """, (tuple(dbstations),))
+    for row in mcursor:
+        res[row[0]] = "%.4f%s%.4f%s" % (row[1], rD, row[2], rD)
+    mesosite.close()
+    return res
 
 
 def main():
@@ -104,11 +196,10 @@ def main():
         sys.stderr.write("asos.py invalid tz: %s\n" % (exp, ))
         sys.exit()
     pgconn = get_dbconn('asos')
-    acursor = pgconn.cursor('mystream',
-                            cursor_factory=psycopg2.extras.DictCursor)
+    acursor = pgconn.cursor('mystream')
 
     # Save direct to disk or view in browser
-    direct = True if form.getfirst('direct', 'no') == 'yes' else False
+    direct = (form.getfirst('direct', 'no') == 'yes')
     report_type = form.getlist('report_type')
     stations = get_stations(form)
     if direct:
@@ -125,50 +216,21 @@ def main():
     if len(dbstations) == 1:
         dbstations.append('XYZXYZ')
 
-    dataVars = form.getlist("data")
     sts, ets = get_time_bounds(form, tzinfo)
 
     delim = form.getfirst("format", "onlycomma")
     # How should null values be represented
     missing = NULLS.get(form.getfirst('missing'), "M")
 
-    if "all" in dataVars:
-        queryCols = ("tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
-                     "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, "
-                     "skyl2, skyl3, skyl4, wxcodes, ice_accretion_1hr, "
-                     "ice_accretion_3hr, ice_accretion_6hr, feel, metar")
-        outCols = ['tmpf', 'dwpf', 'relh', 'drct', 'sknt', 'p01i', 'alti',
-                   'mslp', 'vsby', 'gust', 'skyc1', 'skyc2', 'skyc3',
-                   'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4',
-                   'presentwx', 'ice_accretion_1hr', 'ice_accretion_3hr',
-                   'ice_accretion_6hr', 'feel', 'metar']
-    else:
-        for _colname in ['station', 'valid']:
-            if _colname in dataVars:
-                dataVars.remove(_colname)
-        dataVars = tuple(dataVars)
-        outCols = dataVars
-        dataVars = str(dataVars)[1:-2]
-        queryCols = re.sub("'", " ", dataVars)
+    querycols = build_querycols(form)
 
     if delim in ["tdf", "onlytdf"]:
         rD = "\t"
-        queryCols = re.sub(",", "\t", queryCols)
     else:
         rD = ","
 
-    gtxt = {}
-    gisextra = False
-    if form.getfirst("latlon", "no") == "yes":
-        gisextra = True
-        mesosite = get_dbconn('mesosite')
-        mcursor = mesosite.cursor()
-        mcursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat
-             from stations WHERE id in %s
-             and (network ~* 'AWOS' or network ~* 'ASOS')
-        """, (tuple(dbstations),))
-        for row in mcursor:
-            gtxt[row[0]] = "%.4f%s%.4f%s" % (row[1], rD, row[2], rD)
+    gtxt = build_gisextra(form, dbstations, rD)
+    gisextra = (form.getfirst("latlon", "no") == "yes")
 
     rlimiter = ""
     if len(report_type) == 1:
@@ -176,9 +238,12 @@ def main():
     elif len(report_type) > 1:
         rlimiter = (" and report_type in %s"
                     ) % (tuple([int(a) for a in report_type]), )
-    acursor.execute("""SELECT * from alldata
-      WHERE valid >= %s and valid < %s and station in %s """+rlimiter+"""
-      ORDER by valid ASC""", (sts, ets, tuple(dbstations)))
+    sqlcols = ",".join(querycols)
+    acursor.execute("""
+        SELECT station, valid, """ + sqlcols + """ from alldata
+        WHERE valid >= %s and valid < %s and station in %s """+rlimiter+"""
+        ORDER by valid ASC
+    """, (sts, ets, tuple(dbstations)))
 
     if delim not in ['onlytdf', 'onlycomma']:
         ssw("#DEBUG: Format Typ    -> %s\n" % (delim,))
@@ -189,72 +254,30 @@ def main():
         ssw("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
     ssw("station"+rD+"valid"+rD)
     if gisextra:
-        ssw("lon"+rD+"lat"+rD)
-    ssw(queryCols+"\n")
+        ssw("lon%slat%s" % (rD, rD))
+    # hack to convert tmpf as tmpc to tmpc
+    ssw("%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]), ))
+
+    ff = {
+        'wxcodes': fmt_wxcodes,
+        'metar': fmt_simple,
+        'skyc1': fmt_simple,
+        'skyc2': fmt_simple,
+        'skyc3': fmt_simple,
+        'skyc4': fmt_simple
+    }
+    # The default is the %.2f formatter
+    formatters = [ff.get(col, fmt_f2) for col in querycols]
 
     gismiss = "%s%s%s%s" % (missing, rD, missing, rD)
     for row in acursor:
-        ssw(row["station"] + rD)
-        ssw((row["valid"].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
+        ssw(row[0] + rD)
+        ssw((row[1].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
         if gisextra:
-            ssw(gtxt.get(row['station'], gismiss))
-        r = []
-        for data1 in outCols:
-            if data1 == 'relh':
-                if row['relh'] is not None:
-                    r.append("%.2f" % (row['relh'],))
-                else:
-                    r.append(missing)
-            elif data1 == 'sped':
-                if row['sknt'] is not None and row['sknt'] >= 0:
-                    r.append("%.1f" % (speed(row['sknt'],
-                                             'KT').value('MPH'), ))
-                else:
-                    r.append(missing)
-            elif data1 == 'gust_mph':
-                if row['gust'] is not None and row['gust'] >= 0:
-                    r.append("%.1f" % (speed(row['gust'],
-                                             'KT').value('MPH'), ))
-                else:
-                    r.append(missing)
-            elif data1 == 'p01m':
-                if row['p01i'] is not None and row['p01i'] >= 0:
-                    r.append("%.2f" % (row['p01i'] * 25.4, ))
-                else:
-                    r.append(missing)
-            elif data1 == 'tmpc':
-                if row['tmpf'] is not None:
-                    val = temperature(row['tmpf'], 'F').value('C')
-                    r.append("%.2f" % (val, ))
-                else:
-                    r.append(missing)
-            elif data1 == 'dwpc':
-                if row['dwpf'] is not None:
-                    val = temperature(row['dwpf'], 'F').value('C')
-                    r.append("%.2f" % (val, ))
-                else:
-                    r.append(missing)
-            elif data1 in ['presentwx', 'wxcodes']:
-                if row['wxcodes']:
-                    r.append(" ".join(row['wxcodes']))
-                else:
-                    r.append(missing)
-            elif data1 in ["metar", "skyc1", "skyc2", "skyc3", "skyc4"]:
-                if row[data1] is None:
-                    r.append(missing)
-                else:
-                    r.append(
-                        "%s" % (
-                            dance(
-                                row[data1]
-                            ).replace(",", " ").replace("\n", " "), )
-                    )
-            elif (row.get(data1) is None or row[data1] <= -99.0 or
-                  row[data1] == "M"):
-                r.append(missing)
-            else:
-                r.append("%2.2f" % (row[data1], ))
-        ssw("%s\n" % (rD.join(r),))
+            ssw(gtxt.get(row[0], gismiss))
+        ssw(rD.join(
+            [func(val, missing)
+             for func, val in zip(formatters, row[2:])]) + "\n")
 
 
 if __name__ == '__main__':
