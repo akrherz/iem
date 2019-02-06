@@ -57,7 +57,7 @@ install:
       wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
       $HOME/miniconda$MINICONDA/bin/conda config --set quiet True --set always_yes yes --set changeps1 no;
-      $HOME/miniconda$MINICONDA/bin/conda config --append channels conda-forge;
+      $HOME/miniconda$MINICONDA/bin/conda config --prepend channels conda-forge;
       $HOME/miniconda$MINICONDA/bin/conda update conda;
       $HOME/miniconda$MINICONDA/bin/conda create -n prod python=$PYTHON_VERSION;
     fi
@@ -73,6 +73,8 @@ install:
   - conda install -q --file conda_requirements.txt
   # Remove packages to save space
   - conda clean -q --packages
+  # Debug printout
+  - conda list
   # Then do additional pip stuff
   - pip install --upgrade -r pip_requirements.txt
   # now delete out some cache stuff, so that our travis-ci cache is still valid
