@@ -197,10 +197,9 @@ def build_gisextra(form, dbstations, rD):
     return res
 
 
-def main():
+def main(form):
     """ Go main Go """
     check_load()
-    form = cgi.FieldStorage()
     try:
         tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
     except pytz.exceptions.UnknownTimeZoneError as exp:
@@ -301,4 +300,20 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(cgi.FieldStorage())
+
+
+def test_basic(capfd):
+    """Can we do things."""
+    headers = os.environ
+    headers.setdefault(
+        'QUERY_STRING',
+        ('data=all&station=DSM&year1=2018&year2=2019&month1=1&month2=1'
+         '&day1=1&day2=1')
+    )
+    headers.setdefault('REQUEST_METHOD', 'GET')
+    fs = cgi.FieldStorage(environ=headers)
+    main(fs)
+    out, err = capfd.readouterr()
+    assert err == ''
+    assert "tmpf" in out

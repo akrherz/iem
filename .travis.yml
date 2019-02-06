@@ -88,4 +88,5 @@ script:
   # restart apache
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
   - python test/run_autoplots.py
+  - pytest cgi-bin/request/asos.py
   - sudo cat /var/log/apache2/error.log
