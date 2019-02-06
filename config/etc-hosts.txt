@@ -81,9 +81,9 @@
 192.168.1.247    iem-memcached2
 #   VI_5(55) iem6
 192.168.1.246    iembot
-#   VI_6(56) metvm6 <-> iem14
+#   VI_6(56) metvm6 <-> metvm9
 192.168.1.245    iemdb
-#   VI_7(57) iem14 <-> metvm6
+#   VI_7(57) metvm9 <-> metvm6
 192.168.1.244    iemdb2 postgresread
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
