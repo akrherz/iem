@@ -70,6 +70,7 @@ pylint
 pyparsing
 pyproj
 pyshp>=2
+pytest
 python-memcached
 pytz
 rasterio
