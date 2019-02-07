@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Download IEM summary data!"""
 import cgi
+import os
 import datetime
 
 from pyiem.util import get_dbconn, ssw
@@ -17,6 +18,10 @@ def get_climate(network, stations):
     clisites = []
     cldata = dict()
     for station in stations:
+        if station not in nt.sts:
+            ssw("ERROR: station: %s not found in network: %s" % (
+                station, network))
+            return
         cldata[nt.sts[station]['ncdc81']] = dict()
         clisites.append(nt.sts[station]['ncdc81'])
     if not clisites:
@@ -79,9 +84,8 @@ def get_data(network, sts, ets, stations):
     return res
 
 
-def main():
+def main(form):
     """See how we are called"""
-    form = cgi.FieldStorage()
     sts = datetime.date(int(form.getfirst('year1')),
                         int(form.getfirst('month1')),
                         int(form.getfirst('day1')))
@@ -102,4 +106,12 @@ def main():
 
 if __name__ == '__main__':
     # Go
-    main()
+    main(cgi.FieldStorage())
+
+
+def test_simple():
+    """Can we do simple things."""
+    os.environ['QUERY_STRING'] = (
+        "year1=2019&month1=1&day1=1&year2=2019&month2=2&day2=1"
+    )
+    main(cgi.FieldStorage(environ=os.environ))
