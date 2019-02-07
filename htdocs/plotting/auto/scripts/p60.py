@@ -1,6 +1,7 @@
 """Hourly temperature frequencies."""
 import datetime
 import calendar
+from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -11,8 +12,12 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
-PDICT2 = {'tmpf': "Air Temperature",
-          'dwpf': "Dew Point Temp"}
+PDICT2 = OrderedDict((
+     ('tmpf', "Air Temperature"),
+     ('dwpf', "Dew Point Temp"),
+     ('feel', "Feels Like Temp"),
+     ('relh', "Relative Humidity"),
+))
 
 
 def get_description():
@@ -30,7 +35,7 @@ def get_description():
         dict(type='select', name='var', default='tmpf', options=PDICT2,
              label='Which Variable:'),
         dict(type='int', name='threshold', default=32,
-             label='Temperature Threshold (F)'),
+             label='Threshold (Temperature in F, RH in %)'),
         dict(type='select', name='direction', default='below',
              label='Threshold direction:', options=PDICT),
     ]
@@ -85,11 +90,12 @@ def plotter(fdict):
                     extent=[0, 53, 24, 0], cmap=cmap, norm=norm)
     fig.colorbar(res, label='%', extend='min')
     ax.grid(True, zorder=11)
+    units = r"$^\circ$F" if varname != 'relh' else '%'
     ax.set_title(("%s [%s]\n"
-                  r"Hourly %s %s %s$^\circ$F (%s-%s)"
+                  "Hourly %s %s %s%s (%s-%s)"
                   ) % (
                  nt.sts[station]['name'], station, PDICT2[varname],
-                 PDICT[direction], threshold,
+                 PDICT[direction], threshold, units,
                  nt.sts[station]['archive_begin'].year,
                  datetime.datetime.now().year), size=12)
 

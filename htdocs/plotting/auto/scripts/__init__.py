@@ -58,7 +58,7 @@ data = {'plots': [
         {'id': "19",
          'label': "Histogram of Daily High/Low Temperatures"},
         {'id': "35", 'label': "Histogram of X Hour Temperature Changes"},
-        {'id': "60", 'label': ("Hourly Temperature/Dew Point Frequencies "
+        {'id': "60", 'label': ("Hourly Temperature/Dew Point/RH Frequencies "
                                "Above/Below Threshold")},
         {'id': "86", 'label': "IEM Daily Reanalysis Plots"},
         {'id': "139",
