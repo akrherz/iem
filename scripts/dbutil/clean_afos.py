@@ -16,8 +16,9 @@ def main():
         delete from products WHERE
         entered < ('YESTERDAY'::date - '7 days'::interval) and
         entered > ('YESTERDAY'::date - '31 days'::interval) and
-        (pil ~* '^(RR[1-9SA]|ROB|MAV|MET|MTR|MEX|RWR|STO|HML|WRK|OSO)'
-         or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA', 'LAVUSA'))
+        (pil ~* '^(RR[1-9SA]|ROB|MAV|MET|MTR|MEX|RWR|STO|HML|WRK|OSO|SCV)'
+         or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA', 'LAVUSA',
+            'XF03DY', 'XOBUS', 'ECMNC1', 'SYNBOU'))
         """)
     if acursor.rowcount == 0:
         print('clean_afos.py: Found no products to delete between 7-31 days')
