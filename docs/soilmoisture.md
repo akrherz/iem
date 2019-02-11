@@ -1,3 +1,11 @@
+  7 Feb 2018
+  Hornbuckle, Flory, Ethan, Vanloocke
+  - Add vineyard station modems to the quote
+  - Add cooperator stations modems to the quote
+  - place the 6 Dr Todey sensors on 3 towers to replicate current towers
+  - Maybe our inversion station is slightly over 5K
+  - Campbell will announce pricing soon on the SoilVue10
+
  23 Jan 2018
   Hornbuckle, Flory, Ethan, Vanloocke
   - Discussion on budgeting the $36K we have to spend on the sensors
