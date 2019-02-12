@@ -14,7 +14,7 @@ $_DATABASES = Array(
  'asos' => "dbname=asos host=iemdb user=nobody connect_timeout=5",
  'coop' => "dbname=coop host=iemdb user=nobody connect_timeout=5",
  'awos' => "dbname=awos host=iemdb user=nobody connect_timeout=5",
- 'mos' => "dbname=mos host=iemdb user=nobody connect_timeout=5",
+ 'mos' => "dbname=mos host=iemdb-mos user=nobody connect_timeout=5",
  'rwis' => "dbname=rwis host=iemdb user=nobody connect_timeout=5",
  'wepp' => "dbname=wepp host=iemdb user=nobody connect_timeout=5",
  'snet' => "dbname=snet host=iemdb user=nobody connect_timeout=5",
