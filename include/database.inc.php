@@ -42,6 +42,7 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 	if ($rw) $dbhost = "iemdb"; // rw master
 	if ($dbname == "access"){ $dbname = "iem"; }
 	if ($dbname == "hads") $dbhost = "iemdb-hads";
+	if ($dbname == "mos") $dbhost = "iemdb-mos";
 	
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);
