@@ -38,7 +38,8 @@ def run(ts):
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            if utcts.hour != 3:
+            # Don't complain about 10 PM file, which may not be complete yet
+            if utcts.hour not in [3, 4]:
                 print('hrrr_solarrad.py %s had no solar rad' % (fn,))
             continue
         if not grb:
