@@ -25,7 +25,7 @@ $t->content = <<<EOF
 </section>
 
 <p>The Iowa Atmospheric Observatory (IAO) was designed and constructed by 
-Iowa State University under funding from the National Science Foundation 
+Iowa State University under funding from the Iowa Power Fund and National Science Foundation 
 Iowa EPSCoR grant (Grant # 1101284).  This distributed observing facility 
 is anchored by its two tall (120-m) towers, separated by 22 km, operating 
 continuously since June 2016 in central Iowa.  Tower A1 is located within 
