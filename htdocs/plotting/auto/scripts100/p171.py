@@ -3,8 +3,6 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-import matplotlib.colors as mpcolors
-import matplotlib.patheffects as PathEffects
 from pyiem.network import Table as NetworkTable
 import pyiem.nws.vtec as vtec
 from pyiem import reference
@@ -47,6 +45,7 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
+    import seaborn as sns
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
@@ -70,8 +69,8 @@ def plotter(fdict):
     df = read_sql("""
         with data as (
             SELECT distinct
-            extract(year from issue) as yr,
-            extract(month from issue) as mo, wfo, eventid
+            extract(year from issue)::int as yr,
+            extract(month from issue)::int as mo, wfo, eventid
             from warnings where phenomena = %s and significance = %s
             """ + wfo_limiter + """
             GROUP by yr, mo, wfo, eventid)
@@ -83,27 +82,10 @@ def plotter(fdict):
         raise ValueError("Sorry, no data found!")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
 
-    minyear = df['yr'].min()
-    maxyear = df['yr'].max()
-    data = np.zeros((int(maxyear - minyear + 1), 12), 'i')
-    for _, row in df.iterrows():
-        data[int(row['yr'] - minyear), int(row['mo'] - 1)] = row['count']
-        txt = ax.text(row['mo'], row['yr'], "%.0f" % (row['count'],),
-                      va='center', ha='center', color='white')
-        txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                     foreground="k")])
-    cmap = plt.get_cmap('jet')
-    cmap.set_under('white')
-    maxval = max([df['count'].max(), 11])
-    bounds = np.linspace(1, maxval, 10, dtype='i')
-    norm = mpcolors.BoundaryNorm(bounds, cmap.N)
-    res = ax.imshow(data, extent=[0.5, 12.5, maxyear + 0.5, minyear - 0.5],
-                    interpolation='nearest', aspect='auto', norm=norm,
-                    cmap=cmap)
-    fig.colorbar(res, label='count')
-    ax.grid(True)
-    ax.set_xticks(range(1, 13))
-    ax.set_xticklabels(calendar.month_abbr[1:])
+    df2 = df.pivot('yr', 'mo', 'count')
+    df2 = df2.reindex(
+        index=range(df2.index.min(), df2.index.max() + 1),
+        columns=range(1, 13))
 
     title = "NWS %s" % (nt.sts[station]['name'], )
     if opt == 'state':
@@ -113,6 +95,11 @@ def plotter(fdict):
               ) % (vtec.get_ps_string(phenomena, significance),
                    phenomena, significance)
     ax.set_title(title)
+    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=.5, ax=ax, vmin=1)
+    ax.set_xticks(np.arange(12) + 0.5)
+    ax.set_xticklabels(calendar.month_abbr[1:])
+    ax.set_ylabel("Year")
+    ax.set_xlabel("Month")
 
     return fig, df
 

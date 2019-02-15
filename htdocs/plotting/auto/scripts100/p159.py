@@ -28,8 +28,10 @@ MDICT = OrderedDict([
          ('dec', 'December')])
 
 METRICS = OrderedDict([
-    ('dwpf', 'Dew Point Temp (F)'),
     ('tmpf', 'Air Temp (F)'),
+    ('dwpf', 'Dew Point Temp (F)'),
+    ('feel', 'Feels Like Temp (F)'),
+    ('relh', 'Relative Humidity (%)'),
     ])
 
 DIRS = OrderedDict([
@@ -60,7 +62,7 @@ def get_description():
         dict(type='select', name='dir', default='aoa',
              label='Threshold Direction:', options=DIRS),
         dict(type="int", name='thres', default=65,
-             label='Threshold'),
+             label='Threshold (F or %)'),
         dict(type='select', name='month', default='all',
              label='Month Limiter', options=MDICT),
         dict(type='year', min=1973, default=datetime.date.today().year,
@@ -124,10 +126,11 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
     ydf = df.groupby('year').sum()
-    ax[0].set_title(("(%s) %s Hours %s %s\n"
+    ax[0].set_title(("(%s) %s Hours %s %s%s\n"
                      "%s [%s] (%.0f-%.0f)"
                      ) % (MDICT[month], METRICS[varname], DIRS[mydir],
-                          threshold, nt.sts[station]['name'], station,
+                          threshold, "%" if varname == 'relh' else "F",
+                          nt.sts[station]['name'], station,
                           ydf.index.min(), ydf.index.max()))
     ax[0].bar(ydf.index.values, ydf['hits'], align='center', fc='green',
               ec='green')
