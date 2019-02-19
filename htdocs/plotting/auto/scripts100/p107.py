@@ -115,6 +115,8 @@ def plotter(fdict):
                          station, tuple(sdays)))
     # require at least 90% coverage
     df = df[df['count'] >= (days * 0.9)]
+    # require values , not nan
+    df = df[df[varname].notnull()]
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
