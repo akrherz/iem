@@ -328,7 +328,7 @@ direction, and pressure are reported and archived a 1-Hz, while
 sonic anemometers starting November 2016.</p>
 
 <p>One-minute average plots from select data streams for last 36 hours are available at:
-<br /><a href="http://talltowers.agron.iastate.edu/plots/">http://talltowers.agron.iastate.edu/plots/</a>
+<br /><a href="https://talltowers.agron.iastate.edu/plots/">https://talltowers.agron.iastate.edu/plots/</a>
 </p>
 
 <p>A simple plotting tool is available to display and download limited time periods of data:

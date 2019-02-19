@@ -63,7 +63,7 @@
 192.168.0.211    metvm11.local
 
 192.168.0.233    metvm3.local
-10.27.19.214     talltowers-db.local
+192.168.1.207     talltowers-db.local
 
 #
 # IPs that float thanks to the magic of pulse or keepalived
