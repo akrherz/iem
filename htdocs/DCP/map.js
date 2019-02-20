@@ -71,7 +71,7 @@ function makeVectorLayer(dt){
 		source: new ol.source.Vector({
 			format: new ol.format.GeoJSON(),
 		  	projection: ol.proj.get('EPSG:3857'),
-		    url: '/api/1/shef_currents.geojson?duration='+duration +'&pe=' + physical_code
+		    url: '/api/1/shef_currents.geojson?duration='+duration +'&pe=' + physical_code +"&days=" + days
 	  	}),
 	  	style: vectorStyleFunction
 	});

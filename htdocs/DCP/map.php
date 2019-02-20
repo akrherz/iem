@@ -28,7 +28,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
-<script src='map.js'></script>
+<script src='map.js?v=2'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -200,12 +200,12 @@ be wonderful.</p>
 <option value="XG">XG</option>
 <option value="XP">XP</option>
 <option value="XR">XR</option>
-<option value="XV">XV</option>
-<option value="XW">XW</option>
-<option value="YI">YI</option>
-<option value="YP">YP</option>
-<option value="YS">YS</option>
-<option value="YV">YV</option>
+<option value="XV">XV Weather Visibility</option>
+<option value="XW">XW Present Weather Synop Code</option>
+<option value="YI">YI SERFC Unique</option>
+<option value="YP">YP Reserved Code</option>
+<option value="YS">YS Sequence Number</option>
+<option value="YV">YV Secondary Battery Voltage</option>
 </select>	
 		
 &nbsp; &nbsp; <strong>Duration:</strong>
