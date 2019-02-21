@@ -1,11 +1,11 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 $pgconn = iemdb("hads");
 $mesosite = iemdb("mesosite");
 require_once "../../include/forms.php";
-include("../../include/network.php");
-include("../../include/myview.php");
+require_once "../../include/network.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
 $network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
@@ -27,7 +27,8 @@ $t->title = "GOES/DCP/HADS Display Observations";
 $dstr = date("d M Y h:i a", $ts);
 
 $nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
+$rs = pg_query($mesosite, "SELECT id, name from networks ".
+  "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
@@ -94,6 +95,11 @@ while ( list($k,$v) = each($stations)){
 $table .= "</table>";
 
 $t->content = <<<EOF
+<div class="breadcrumb">
+		<li><a href="/DCP/">DCP/HADS Mainpage</a></li>
+		<li class="active">View All Reports at One Time</li>
+	</div>
+
 <h3>DCP Data Report for time: {$dstr}</h3>
 
 <p>This application will display a table of observations valid at a given
@@ -135,5 +141,5 @@ choice.
 
 </table>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

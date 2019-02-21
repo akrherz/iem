@@ -1,12 +1,12 @@
 <?php
 $OL = "3.18.2";
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 110);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
-include("../../include/database.inc.php");
-include("../../include/forms.php");
-include("../../include/imagemaps.php");
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+require_once "../../include/imagemaps.php";
 
 $day = isset($_GET['day']) ? $_GET["day"] : date("d");
 $month = isset($_GET['month']) ? $_GET["month"] : date("m");
@@ -24,7 +24,7 @@ if ($station != null){
 	 * the app to do a yearlong query, which is expensive.
 	 */
 	$rs = pg_prepare($mesosite, "DUPSTATIONS", "SELECT network from stations
-			WHERE id = $1 and (network ~* 'DCP' or network ~* 'COOP')");
+			WHERE id = $1 and (network ~* '_DCP' or network ~* '_COOP')");
 	$rs = pg_execute($mesosite, "DUPSTATIONS", Array($station));
 	$alone = (pg_numrows($rs) == 1) ? TRUE: FALSE;
 	
@@ -74,7 +74,8 @@ EOF;
 }
 
 $nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
+$rs = pg_query($mesosite, "SELECT id, name from networks ". 
+	"where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
@@ -118,6 +119,10 @@ EOF;
 	$theader .= "</tr></thead>";
 	
 	$times = array_keys($data);
+	if (sizeof($times) == 0){
+		$extra .= $theader;
+		$extra .= "<tr><td colspan=\"2\">No Data Found</td></tr>";
+	}
 	$colorme = True;
 	$cnt = 0;
 	while(list($k,$ts) = each($times)){
@@ -187,5 +192,5 @@ $t->content = <<<EOF
 	
 $extra
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

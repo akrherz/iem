@@ -16,8 +16,8 @@ $t->title = "DCP/HADS Data Download";
 $t->thispage = "networks-dcp";
 
  $nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' 
-		ORDER by name ASC");
+$rs = pg_query($mesosite, "SELECT id, name from networks ".
+  "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
