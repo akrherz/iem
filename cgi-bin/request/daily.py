@@ -62,24 +62,27 @@ def get_data(network, sts, ets, stations):
     res = ("station,day,max_temp_f,min_temp_f,max_dewpoint_f,"
            "min_dewpoint_f,precip_in,avg_wind_speed_kts,avg_wind_drct,"
            "min_rh,avg_rh,max_rh,climo_high_f,climo_low_f,climo_precip_in,"
-           "snow_in,snowd_in,min_feel,avg_feel,max_feel\n")
+           "snow_in,snowd_in,min_feel,avg_feel,max_feel,max_wind_speed_kts,"
+           "max_wind_gust_kts\n")
     if len(stations) == 1:
         stations.append('ZZZZZ')
     cursor.execute("""SELECT id, day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
         pday, avg_sknt, vector_avg_drct, min_rh, avg_rh, max_rh, snow,
-        snowd, min_feel, avg_feel, max_feel
+        snowd, min_feel, avg_feel, max_feel, max_sknt, max_gust
         from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE
         s.day >= %s and s.day < %s and t.network = %s and t.id in %s
         ORDER by day ASC""", (sts, ets, network, tuple(stations)))
     for row in cursor:
-        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
+        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s\n"
                 ) % (row[0], row[1], row[2], row[3], row[4], row[5], row[6],
                      row[7], row[8], row[9], row[10], row[11],
                      climate[row[0]][row[1].strftime("%m%d")]['high'],
                      climate[row[0]][row[1].strftime("%m%d")]['low'],
                      climate[row[0]][row[1].strftime("%m%d")]['precip'],
-                     row[12], row[13], row[14], row[15], row[16])
+                     row[12], row[13], row[14], row[15], row[16], row[17],
+                     row[18])
 
     return res
 
