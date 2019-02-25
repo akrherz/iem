@@ -14,7 +14,8 @@ import numpy as np
 from tqdm import tqdm
 from metar import Metar
 from netCDF4 import chartostring
-from pyiem.datatypes import temperature, distance, pressure, speed
+from metpy.units import units, masked_array
+from pyiem.datatypes import temperature, distance, pressure
 from pyiem.observation import Observation
 from pyiem.util import get_dbconn, ncopen
 from pyiem.reference import TRACE_VALUE
@@ -61,7 +62,8 @@ def process(ncfn):
                   'altimeter',  # Pa
                   'windDir',
                   'windSpeed',  # mps
-                  'windGust', 'visibility',  # m
+                  'windGust',  # mps
+                  'visibility',  # m
                   'precipAccum', 'presWx', 'skyCvr',
                   'skyCovLayerBase', 'autoRemark', 'operatorRemark']:
         data[vname] = nc.variables[vname][:]
@@ -73,7 +75,9 @@ def process(ncfn):
         data[vname+"C"] = temperature(data[vname], 'K').value('C')
         data[vname] = temperature(data[vname], 'K').value('F')
     for vname in ['windSpeed', 'windGust']:
-        data[vname] = speed(data[vname], 'MPS').value('KT')
+        data[vname] = masked_array(
+            data[vname], units('meter / second')
+        ).to(units('knots')).magnitude
 
     data['altimeter'] = pressure(data['altimeter'], 'PA').value("IN")
     data['skyCovLayerBase'] = distance(data['skyCovLayerBase'],
@@ -105,7 +109,7 @@ def process(ncfn):
         sid3 = sid[1:] if sid[0] == 'K' else sid
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
                 seconds=data['observationTime'][i])
-        ts = ts.replace(tzinfo=pytz.utc)
+        ts = ts.replace(tzinfo=pytz.UTC)
 
         mtr = "%s %sZ AUTO " % (sid, ts.strftime("%d%H%M"))
         network = xref.get(sid3, 'ASOS')
@@ -222,7 +226,9 @@ def process(ncfn):
 
 def find_fn(argv):
     """Figure out which file to run for"""
-    if len(argv) == 5:
+    if len(argv) == 2:
+        return argv[1]
+    elif len(argv) == 5:
         utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]),
                                    int(argv[4]))
         return utcnow.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
