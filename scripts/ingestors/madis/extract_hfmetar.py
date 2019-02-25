@@ -226,9 +226,7 @@ def process(ncfn):
 
 def find_fn(argv):
     """Figure out which file to run for"""
-    if len(argv) == 2:
-        return argv[1]
-    elif len(argv) == 5:
+    if len(argv) == 5:
         utcnow = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]),
                                    int(argv[4]))
         return utcnow.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
