@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 $con = iemdb("postgis");
 
 $eightbit = isset($_GET["8bit"]);
@@ -56,6 +56,14 @@ if (! $eightbit)
   //$background->draw($img);
 }
 
+if (isset($_GET["nexrad"])){
+  $radarfn = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $ts);
+  $radar = $map->getlayerbyname("nexrad_n0q");
+  $radar->set("status", MS_ON );
+  $radar->set("data", $radarfn);
+  $radar->draw($img);
+
+}
 
 $counties = $map->getlayerbyname("counties");
 if ($metroview)
@@ -75,12 +83,33 @@ $visibility->draw($img);
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
 $dbvalid = date('Y-m-d H:i', $ts);
-if (isset($_GET['valid'])) $roads->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2008_log c WHERE b.segid = c.segid and b.type > 1 and c.valid = '$dbvalid' ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
+$dbvalid2 = date('Y-m-d H:i', $ts - 14 * 86400);
+if (isset($_GET['valid'])) {
+  $roads->set("data", "geom from (WITH data as ( ". 
+  "select b.type as rtype, b.int1, ". 
+  "b.oid as boid, b.segid, c.cond_code, b.geom, ". 
+  "row_number() OVER (PARTITION by b.oid ORDER by c.valid DESC) ". 
+  "from roads_base b, ". 
+  "roads_2018_2019_log c WHERE b.segid = c.segid and b.type > 1 and ". 
+  "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
+  "ORDER by b.segid DESC) select * from data WHERE row_number = 1) as foo ". 
+  "using UNIQUE boid using SRID=26915");
+}
 $roads->draw($img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
 $roads_int->set("status", MS_ON);
-if (isset($_GET['valid'])) $roads_int->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2008_log c WHERE b.segid = c.segid and b.type = 1 and c.valid = '$dbvalid' ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
+if (isset($_GET['valid'])) {
+  $roads_int->set("data", "geom from (WITH data as ( ". 
+  "select b.type as rtype, b.int1, ". 
+  "b.oid as boid, b.segid, c.cond_code, b.geom, ". 
+  "row_number() OVER (PARTITION by b.oid ORDER by c.valid DESC) ". 
+  "from roads_base b, ". 
+  "roads_2018_2019_log c WHERE b.segid = c.segid and b.type = 1 and ". 
+  "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
+  "ORDER by b.segid DESC) select * from data WHERE row_number = 1) as foo ". 
+  "using UNIQUE boid using SRID=26915");
+}
 $roads_int->draw($img);
 
 //$roads_lbl = $map->getlayerbyname("roads_label");
@@ -135,14 +164,14 @@ if ($thumbnail) {
  $point->setXY(85, 230);
  $c->label->set("size", MS_LARGE);
 } else {
- $point->setXY(500, 10);
+ $point->setXY(300, 10);
 }
 $point->draw($map, $layer, $img, 0, date('Y-m-d h:i A', $ts));
 
 
-$point = ms_newpointobj();
-$point->setXY(500, 22);
-$point->draw($map, $layer, $img, 1, "Limited Visibility");
+//$point = ms_newpointobj();
+//$point->setXY(500, 22);
+//$point->draw($map, $layer, $img, 1, "Limited Visibility");
 
 $map->drawLabelCache($img);
 

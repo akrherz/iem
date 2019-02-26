@@ -8,6 +8,7 @@ STATUS ON
 SIZE 640 480
 EXTENT 200000 4450000 710000 4950000
 UNITS METERS
+FONTSET "/opt/iem/data/gis/fonts.list"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG24
 #
@@ -151,6 +152,23 @@ QUERYMAP
   STYLE HILITE
   COLOR 255 0 0
 END
+
+LAYER
+  NAME nexrad_n0q
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0q_0.png
+  TYPE RASTER
+  STATUS OFF
+  METADATA
+    "wms_title" "Composite NEXRAD"
+  END
+  PROJECTION
+    "init=epsg:4326"
+  END
+  OFFSITE 0 0 0
+  TRANSPARENCY 70
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
 
 LAYER
  NAME kwwlback
@@ -1042,14 +1060,13 @@ LAYER
   CLASS
     NAME 'credits'
     LABEL
-      #STYLE # a shadow
-      #  GEOMTRANSFORM 'labelpoly'
-      #  COLOR 250 250 250
-      #END
-      COLOR 255 255 255
-      TYPE BITMAP
-      SIZE medium
-      POSITION CR
+     COLOR  255 255 255
+     OUTLINECOLOR 0 0 0
+     FONT "liberation-mono"
+     TYPE truetype
+     SIZE 20
+     POSITION CR
+     PARTIALS TRUE
     END
   END
   CLASS
