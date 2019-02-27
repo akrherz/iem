@@ -25,10 +25,10 @@ IEM Sites Move Request
 ======================
 > REMOTE_ADDR: {$_SERVER["REMOTE_ADDR"]}
 > ID:          {$station}
-> NAME:        {$name}
+> NAME:        {$name} OLD: {$cities[$station]["name"]}
 > NETWORK:     {$network}
-> LON:         {$newlon}
-> LAT:         {$newlat}
+> LON:         {$newlon} OLD: {$cities[$station]["lon"]}
+> LAT:         {$newlat} OLD: {$cities[$station]["lat"]}
 > EMAIL:       {$email}
 
 https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
