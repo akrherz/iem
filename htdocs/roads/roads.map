@@ -9,6 +9,7 @@ SIZE 640 480
 EXTENT 200000 4450000 710000 4950000
 UNITS METERS
 FONTSET "/opt/iem/data/gis/fonts.list"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG24
 #
@@ -682,6 +683,26 @@ LAYER
 #    END
 #  END
   TOLERANCE 50
+END
+
+# IDOT Trucks
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "trucks"
+  DUMP false
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select geom, random() as boid from idot_snowplow_2013_2014 WHERE valid > (now() - '10 minutes'::interval)) as foo using UNIQUE boid using SRID=4326"
+  STATUS OFF
+  TYPE POINT
+  PROJECTION
+   "init=epsg:4326"
+  END
+  LABELCACHE OFF
+  CLASS
+    COLOR 255 0 255
+    SYMBOL 'circle'
+    SIZE 8
+  END
 END
 
 #____________________

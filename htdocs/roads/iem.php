@@ -112,6 +112,18 @@ if (isset($_GET['valid'])) {
 }
 $roads_int->draw($img);
 
+if (isset($_GET["trucks"])){
+  // 10 minute window for trucks
+  $w1 = date('Y-m-d H:i', $ts - 300);
+  $w2 = date('Y-m-d H:i', $ts + 300);
+  $trucks = $map->getlayerbyname("trucks");
+  $trucks->set("status", MS_ON);
+  $trucks->set("data", "geom from (select geom, random() as boid from ".
+  "idot_snowplow_2013_2014 WHERE valid > '{$w1}' and valid < '{$w2}') as foo ".
+  "using UNIQUE boid using SRID=4326");
+  $trucks->draw($img);
+}
+
 //$roads_lbl = $map->getlayerbyname("roads_label");
 //$roads_lbl->draw($img);
 //$roads_lbl->set("connection", $_DATABASE);
