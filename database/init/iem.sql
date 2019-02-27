@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (16, now());
+INSERT into iem_schema_manager_version values (17, now());
 
 CREATE TABLE stations(
 	id varchar(20),
@@ -282,7 +282,10 @@ CREATE TABLE current_tmp(
     feel real,
     ice_accretion_1hr real,
     ice_accretion_3hr real,
-    ice_accretion_6hr real
+    ice_accretion_6hr real,
+    peak_wind_gust real,
+    peak_wind_drct real,
+    peak_wind_time timestamptz
 );
 
 CREATE TABLE current (
@@ -351,7 +354,10 @@ CREATE TABLE current (
     feel real,
     ice_accretion_1hr real,
     ice_accretion_3hr real,
-    ice_accretion_6hr real
+    ice_accretion_6hr real,
+    peak_wind_gust real,
+    peak_wind_drct real,
+    peak_wind_time timestamptz
 );
 CREATE UNIQUE index current_iemid_idx on current(iemid);
 GRANT SELECT on current to apache,nobody;
@@ -422,7 +428,10 @@ CREATE TABLE current_log (
     feel real,
     ice_accretion_1hr real,
     ice_accretion_3hr real,
-    ice_accretion_6hr real
+    ice_accretion_6hr real,
+    peak_wind_gust real,
+    peak_wind_drct real,
+    peak_wind_time timestamptz
 );
 ALTER TABLE current_log SET WITH oids;
 
