@@ -4,7 +4,8 @@ set FTPPASS="`python get_rwis_ftp_password.py`"
 set GTS="`date -u +'%Y%m%d%H%M'`"
 
 # Process AWOS METAR file
-python process_idot_awos.py
+# FILE ON SERVER IS BAD!
+# python process_idot_awos.py
 
 # Actually ingest the data
 python process_rwis.py $GTS
