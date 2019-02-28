@@ -19,7 +19,7 @@ def get_description():
     shown in the date can be ignored.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='date', name='date', default='2015/12/25', min='2015/01/01',
              label='Split Season by Date: (ignore the year)'),

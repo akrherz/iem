@@ -1,4 +1,5 @@
 """Windows"""
+from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
@@ -7,11 +8,15 @@ from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'precip': 'Precipitation',
-         'high': 'High Temperature',
-         'low': 'Low Temperature'}
+PDICT = OrderedDict((
+        ('high', 'High Temperature'),
+        ('low', 'Low Temperature'),
+        ('precip', 'Precipitation'),
+        ('snow', 'Snowfall'),
+        ('snowd', 'Snow Depth'),
+))
 
-UNITS = {'precip': 'inch',
+UNITS = {'precip': 'inch', 'snow': 'inch', 'snowd': 'inch',
          'high': 'F',
          'low': 'F'}
 
@@ -28,7 +33,7 @@ def get_description():
     with each day above a given threshold and the average over that period.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='precip',
              label='Which Variable:', options=PDICT),

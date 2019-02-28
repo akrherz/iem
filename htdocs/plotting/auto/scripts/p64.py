@@ -23,7 +23,7 @@ def get_description():
     and snow depth data is not of great quality, so please be careful with
     this plot."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='float', name='threshold', default='1',
              label='First Snowfall Threshold (T for trace)'),
@@ -157,5 +157,5 @@ def plotter(fdict):
 
 if __name__ == '__main__':
     plotter(
-        dict(threshold=0.1, dir='first', station='IA2203', network='IACLIMATE')
+        dict(threshold=0.1, dir='first', station='IATDSM', network='IACLIMATE')
     )

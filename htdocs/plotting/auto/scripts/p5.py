@@ -28,7 +28,7 @@ def get_description():
     record of your choice displayed. In the case of ties, only the most
     recent occurence is shown."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='min_range',
              label='Select Variable', options=PDICT),

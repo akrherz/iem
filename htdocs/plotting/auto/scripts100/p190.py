@@ -16,7 +16,7 @@ def get_description():
     desc['description'] = """This chart presents the year that the present
     day climatology record resides."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE')
     ]
     return desc

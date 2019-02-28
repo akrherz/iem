@@ -38,7 +38,7 @@ def get_description():
     """
     thisyear = datetime.date.today().year
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='int', name='threshold', default='90',
              label='Enter Threshold:'),

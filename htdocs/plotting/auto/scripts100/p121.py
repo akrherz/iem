@@ -15,7 +15,7 @@ def get_description():
     two temperature thresholds of your choice.  A cycle representing one
     round trip from below some threshold to above the second threshold."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type="text", name='thres1', default='26-38',
              label="Threshold 1 (lower-upper) (F)"),

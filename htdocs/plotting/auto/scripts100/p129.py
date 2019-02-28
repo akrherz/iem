@@ -36,7 +36,7 @@ def get_description():
              label='Direction of Percentile', default='above'),
         dict(type='float', name='level', default='2',
              label='Daily Variable Level (inch or degrees F):'),
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
     ]
     return desc

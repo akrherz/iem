@@ -95,7 +95,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel("%s %s" % (PDICT2[varname],
                              r"$^\circ$F" if varname != 'rh' else "%"))
-    ax.set_title("%s [%s] %s Daily Min/Max Dew %s\nPeriod: %s to %s" % (
+    ax.set_title("%s [%s] %s Daily Min/Max %s\nPeriod: %s to %s" % (
                 nt.sts[station]['name'], station, year, PDICT2[varname],
                 df.index.values[0].strftime("%-d %b"),
                 df.index.values[-1].strftime("%-d %b")))

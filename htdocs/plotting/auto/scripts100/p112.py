@@ -15,7 +15,7 @@ def get_description():
     desc['description'] = """This application totals growing degree days by
     month and year."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='int', name='base', default='52',
              label='Growing Degree Day Base (F)'),

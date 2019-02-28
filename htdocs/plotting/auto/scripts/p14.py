@@ -19,7 +19,7 @@ def get_description():
     compared.  With this comparison, you can say that one's years worth of
     departures can be explained by these differences in precipitation bins."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.datetime.now().year,
              label='Year to Highlight:'),

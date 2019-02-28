@@ -25,7 +25,7 @@ def get_description():
     desc['description'] = """Simple plot of seasonal/yearly precipitation totals.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', default='winter',
              label='Select Season:', options=PDICT2),

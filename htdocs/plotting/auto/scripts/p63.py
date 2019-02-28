@@ -21,7 +21,7 @@ def get_description():
     expect to set 365 records the first year, 183 the second, and so on...
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE')
     ]
     return desc

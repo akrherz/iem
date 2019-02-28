@@ -26,7 +26,7 @@ def get_description():
     statistic of your choice.  The current month for the current day is not
     considered for the analysis."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              network='IACLIMATE', label='Select Station:'),
         dict(type='select', options=PDICT, name='varname', default='avg_temp',
              label='Variable to Plot'),

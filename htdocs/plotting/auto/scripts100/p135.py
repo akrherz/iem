@@ -25,7 +25,7 @@ def get_description():
     that the high or low temperature was above or below some threshold.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='high_above',
              label='Which Metric', options=PDICT),
@@ -41,7 +41,7 @@ def get_description():
 
 def highcharts(fdict):
     """ Highcharts Output """
-    station = fdict.get('station', 'IA2203')
+    station = fdict.get('station', 'IATDSM')
     network = fdict.get('network', 'IACLIMATE')
     varname = fdict.get('var', 'high_above')
     nt = NetworkTable(network)

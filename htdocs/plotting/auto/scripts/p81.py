@@ -20,7 +20,7 @@ def get_description():
     of the day to day changes in temperature.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='var', default='high',
              label='Which Daily Variable:', options=PDICT),

@@ -19,7 +19,7 @@ def get_description():
     days represented by the period.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
     ]
     return desc

@@ -17,7 +17,7 @@ def get_description():
     default settings provide the frequency of getting half of the month's
     precipitation within one 24 hour period."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:'),
         dict(type='text', name='threshold', default=50,
              label='Percentage of Monthly Precipitation on One Day'),

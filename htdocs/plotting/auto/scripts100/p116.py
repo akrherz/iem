@@ -21,7 +21,7 @@ def get_description():
     years contained."""
     y20 = datetime.date.today().year - 19
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', options=PDICT, default='cdd', name='var',
              label='Select Variable'),

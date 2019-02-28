@@ -21,7 +21,7 @@ def get_description():
     given date having the prescribed number of previous days above or below
     some provided treshold."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='var', default='high', options=PDICT2,
              label='Select which daily variable'),

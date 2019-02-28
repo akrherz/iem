@@ -25,7 +25,7 @@ def get_description():
     desc['description'] = """The number of days for a given season that are
     either above or below some temperature threshold."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', default='winter',
              label='Select Season:', options=PDICT2),
@@ -87,10 +87,10 @@ def plotter(fdict):
         colorbelow = 'r'
     bars = ax.bar(df.index.values, df[season], fc=colorabove,
                   ec=colorabove, align='center')
-    for i, bar in enumerate(bars):
+    for i, mybar in enumerate(bars):
         if df[season].values[i] < avgv:
-            bar.set_facecolor(colorbelow)
-            bar.set_edgecolor(colorbelow)
+            mybar.set_facecolor(colorbelow)
+            mybar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color='k', zorder=2, label='Average')
     h_slope, intercept, r_value, _, _ = stats.linregress(df.index.values,
                                                          df[season])
@@ -107,9 +107,9 @@ def plotter(fdict):
     msg = ("[%s] %s %.0f-%.0f Number of Days [%s] "
            "with %s %s %g%s"
            ) % (station, nt.sts[station]['name'],
-                df.index.min(), df.index.max(),  PDICT2[season],
+                df.index.min(), df.index.max(), PDICT2[season],
                 PDICT3[varname], PDICT[direction],
-                threshold, "$^\circ$F" if varname != 'precip' else 'inch')
+                threshold, r"$^\circ$F" if varname != 'precip' else 'inch')
     tokens = msg.split()
     sz = int(len(tokens) / 2)
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))

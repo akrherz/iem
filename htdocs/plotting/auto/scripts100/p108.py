@@ -29,7 +29,7 @@ def get_description():
     sts = today.replace(month=5, day=1)
 
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station'),
         dict(type='date', name='sdate',
              default=sts.strftime("%Y/%m/%d"),

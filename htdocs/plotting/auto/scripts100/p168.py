@@ -23,7 +23,7 @@ def get_description():
     provides the latest date at a given temperature.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE')
         ]
     return desc

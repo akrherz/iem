@@ -18,7 +18,7 @@ def get_description():
     month, not all precipitation falls as snow, so you can not assume that
     the liquid equivalent did not include some liquid rainfall."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default='12',
              label='Select Month:'),

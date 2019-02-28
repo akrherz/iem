@@ -22,7 +22,7 @@ def get_description():
     maximum 24 hour period precip as reported by the once daily observatons.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type="float", name="thres", default="0.10",
              label="Precipitation Threshold (inch)"),

@@ -34,7 +34,7 @@ def get_description():
     """
     today = datetime.date.today()
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type="date", name="date", default=today.strftime("%Y/%m/%d"),
              label="Select Year-to-Date End Date (inclusive):"),

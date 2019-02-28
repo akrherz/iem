@@ -21,7 +21,7 @@ def get_description():
     """
     desc['data'] = True
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='year', name='year', default=datetime.date.today().year,
              label='Which Year:'),

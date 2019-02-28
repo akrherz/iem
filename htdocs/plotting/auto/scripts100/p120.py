@@ -17,7 +17,7 @@ def get_description():
     desc['description'] = """This chart presents the accumulated frequency of
     having the last spring temperature at or below a given threshold."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='int', name='t1', default=32,
              label='First Threshold (F)'),

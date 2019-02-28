@@ -16,7 +16,7 @@ def get_description():
     are a number of caveats due to the timing of the daily temperature and
     snow cover report.  Also with the quality of the snow cover data."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
     ]
     return desc

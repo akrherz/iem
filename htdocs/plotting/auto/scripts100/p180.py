@@ -16,9 +16,9 @@ def get_description():
     a location or two of your choice.
     """
     desc['arguments'] = [
-        dict(type='station', name='station1', default='IA2203',
+        dict(type='station', name='station1', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
-        dict(type='station', name='station2', default='IA2203',
+        dict(type='station', name='station2', default='IATDSM',
              optional=True,
              label='Select Second Station (Optional):', network='IACLIMATE'),
         ]

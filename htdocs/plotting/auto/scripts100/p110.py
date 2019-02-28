@@ -67,7 +67,7 @@ def get_description():
     desc['report'] = True
     desc['description'] = """ """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station'),
     ]
     return desc

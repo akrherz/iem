@@ -21,7 +21,7 @@ def get_description():
     a newer colder low or warmer high for the season to date period.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='select', name='season', options=PDICT,
              label='Select which half of year', default='fall'),

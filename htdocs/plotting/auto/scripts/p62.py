@@ -23,7 +23,7 @@ def get_description():
     today = datetime.datetime.today()
     lyear = today.year if today.month > 8 else (today.year - 1)
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='year', name='syear', default=1893, min=1893,
              label='Start Year (inclusive):'),

@@ -30,7 +30,7 @@ def get_description():
     example, the 2009 <i>WYEAR</i> value represents the period between
     1 Oct 2008 and 30 Sep 2009, the 2009 water year."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type="select", name="var", default="precip",
              label="Select variable:", options=PDICT),

@@ -22,7 +22,7 @@ def get_description():
     desc['description'] = """This plot displays the directional frequency of
     day to day changes in high or low temperature summarized by month."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='varname', default='high',
              label='Which metric to plot?', options=PDICT),

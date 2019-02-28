@@ -25,7 +25,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='select', options=PDICT, name='var',
              label='Select Variable to Plot', default='avg_temp'),
-        dict(type='station', name='station1', default='IA2203',
+        dict(type='station', name='station1', default='IATDSM',
              label='Select First Station:', network='IACLIMATE'),
         dict(type='station', name='station2', default='IA0200',
              label='Select Secont Station:', network='IACLIMATE'),

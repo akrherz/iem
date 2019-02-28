@@ -37,7 +37,7 @@ def get_description():
     the year of the start date of the period."""
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month',
              default=(today - datetime.timedelta(days=14)).month,

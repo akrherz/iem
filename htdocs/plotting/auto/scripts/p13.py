@@ -21,7 +21,7 @@ def get_description():
     warmest 91 day period each year.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='select', name='which', default='end_summer',
              label='Which value to plot:', options=PDICT),

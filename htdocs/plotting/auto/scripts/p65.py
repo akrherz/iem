@@ -20,7 +20,7 @@ def get_description():
     a year."""
     today = datetime.date.today()
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
         dict(type='month', name='month', default=today.month,
              label='Select Month:'),

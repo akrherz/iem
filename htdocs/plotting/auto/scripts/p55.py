@@ -21,7 +21,7 @@ def get_description():
     are shown computed from the daily observation archive maintained by the
     IEM."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              network='IACLIMATE', label='Select Station:'),
         dict(type='month', name='month', default='12',
              label='Select Month:')

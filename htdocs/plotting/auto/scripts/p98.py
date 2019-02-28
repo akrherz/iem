@@ -1,5 +1,6 @@
-"""Day of month freq"""
+"""Day of month frequency."""
 import calendar
+from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -7,9 +8,13 @@ from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'precip': 'Daily Precipitation',
-         'high': 'High Temperature',
-         'low': 'Low Temperature'}
+PDICT = OrderedDict((
+     ('precip', 'Daily Precipitation'),
+     ('snow', 'Daily Snowfall'),
+     ('snowd', 'Daily Snow Depth'),
+     ('high', 'High Temperature'),
+     ('low', 'Low Temperature')
+))
 
 PDICT2 = {'above': 'At or Above Threshold',
           'below': 'Below Threshold'}
@@ -23,7 +28,7 @@ def get_description():
     a given criterion being meet for a station and month of your choice.
     """
     desc['arguments'] = [
-        dict(type='station', name='station', default='IA2203',
+        dict(type='station', name='station', default='IATDSM',
              label='Select Station', network='IACLIMATE'),
         dict(type='month', name='month', default=9,
              label='Which Month:'),
