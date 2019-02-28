@@ -8,8 +8,11 @@ from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'touches': 'Daily Range Touches Emphasis',
-         'above': 'Daily Range At or Above Emphasis'}
+PDICT = OrderedDict((
+    ('below', 'Daily Range Below Emphasis'),
+    ('touches', 'Daily Range Touches Emphasis'),
+    ('above', 'Daily Range At or Above Emphasis')
+))
 PDICT2 = OrderedDict((
     ('tmpf', 'Air Temperature'),
     ('dwpf', 'Dew Point Temperature'),
@@ -80,7 +83,8 @@ def plotter(fdict):
         for i, mybar in enumerate(bars):
             y = mybar.get_y() + mybar.get_height()
             if ((y >= emphasis and opt == 'touches') or
-                    (mybar.get_y() >= emphasis and opt == 'above')):
+                    (mybar.get_y() >= emphasis and opt == 'above') or
+                    (y < emphasis and opt == 'below')):
                 mybar.set_facecolor('r')
                 mybar.set_edgecolor('r')
                 hits.append(df.index.values[i])
@@ -104,7 +108,8 @@ def plotter(fdict):
                         hits[0].strftime("%B %d") if hits else 'None',
                         hits[-1].strftime("%B %d") if hits else 'None'
                         ))
-
+    delta = datetime.timedelta(days=1)
+    ax.set_xlim(df.index.values[0] - delta, df.index.values[-1] + delta)
     return fig, df
 
 

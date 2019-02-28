@@ -36,7 +36,7 @@ S=/opt/iem/scripts
 * * * * * cd $S; sh RUN_1MIN.sh
 
 # Drought Monitor
-0 8 * * 4 cd /opt/iem/scripts/usdm; python process_usdm.py
+30 8 * * 4 cd /opt/iem/scripts/usdm; python process_usdm.py
 
 # Email Harry RR3 data
 14 14 * * 5 cd $S/coop; python email_rr3_to_harry.py
