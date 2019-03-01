@@ -45,6 +45,9 @@ AVAILABLE = [
     'ice_accretion_1hr',
     'ice_accretion_3hr',
     'ice_accretion_6hr',
+    'peak_wind_gust',
+    'peak_wind_drct',
+    'peak_wind_time',
     'feel',
     'metar',
 ]
@@ -55,10 +58,18 @@ CONV_COLS = {
     'p01m': 'p01i * 25.4 as p01m',
     'sped': 'sknt * 1.15 as sped',
     'gust_mph': 'gust * 1.15 as gust_mph',
+    'peak_wind_gust_mph': 'peak_wind_gust * 1.15 as peak_wind_gust_mph',
 }
 
 
-def fmt_trace(val, missing, trace):
+def fmt_time(val, missing, _trace, tzinfo):
+    """Format timestamp."""
+    if val is None:
+        return missing
+    return (val.astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M")
+
+
+def fmt_trace(val, missing, trace, _tzinfo):
     """Format precip."""
     if val is None:
         return missing
@@ -68,21 +79,21 @@ def fmt_trace(val, missing, trace):
     return "%.2f" % (val, )
 
 
-def fmt_simple(val, missing, _trace):
+def fmt_simple(val, missing, _trace, _tzinfo):
     """Format simplely."""
     if val is None:
         return missing
     return dance(val).replace(",", " ").replace("\n", " ")
 
 
-def fmt_wxcodes(val, missing, _trace):
+def fmt_wxcodes(val, missing, _trace, _tzinfo):
     """Format weather codes."""
     if val is None:
         return missing
     return " ".join(val)
 
 
-def fmt_f2(val, missing, _trace):
+def fmt_f2(val, missing, _trace, _tzinfo):
     """Simple 2 place formatter."""
     if val is None:
         return missing
@@ -284,6 +295,7 @@ def main(form):
         'ice_accretion_1hr': fmt_trace,
         'ice_accretion_3hr': fmt_trace,
         'ice_accretion_6hr': fmt_trace,
+        'peak_wind_time': fmt_time,
     }
     # The default is the %.2f formatter
     formatters = [ff.get(col, fmt_f2) for col in querycols]
@@ -295,7 +307,7 @@ def main(form):
         if gisextra:
             ssw(gtxt.get(row[0], gismiss))
         ssw(rD.join(
-            [func(val, missing, trace)
+            [func(val, missing, trace, tzinfo)
              for func, val in zip(formatters, row[2:])]) + "\n")
 
 
