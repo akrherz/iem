@@ -5,6 +5,11 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 
+PDICT = {
+    '0': 'Max Highs / Min Lows',
+    '1': 'Min Highs / Max Lows',
+}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -17,6 +22,8 @@ def get_description():
     desc['arguments'] = [
         dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
+        dict(type='select', name='opt', default='0', options=PDICT,
+             label='Which metric to plot'),
         ]
     return desc
 
@@ -28,6 +35,7 @@ def get_context(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     network = ctx['network']
+    opt = ctx['opt']
     nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
     cursor.execute("""
@@ -36,25 +44,43 @@ def get_context(fdict):
         ORDER by day ASC
     """, (station, ))
     dates = pd.date_range('2000/01/01', '2000/12/31').strftime("%m%d")
-    records = pd.DataFrame(dict(high=-9999, low=9999),
-                           index=dates)
-    rows = []
-    for row in cursor:
-        if row[2] > records.at[row[1], 'high']:
-            margin = row[2] - records.at[row[1], 'high']
-            records.at[row[1], 'high'] = row[2]
-            if margin < 1000:
-                rows.append(dict(margin=margin, date=row[0]))
-        if row[3] < records.at[row[1], 'low']:
-            margin = row[3] - records.at[row[1], 'low']
-            records.at[row[1], 'low'] = row[3]
-            if margin > -1000:
-                rows.append(dict(margin=margin, date=row[0]))
+    if opt == '0':
+        records = pd.DataFrame(dict(high=-9999, low=9999),
+                               index=dates)
+        rows = []
+        for row in cursor:
+            if row[2] > records.at[row[1], 'high']:
+                margin = row[2] - records.at[row[1], 'high']
+                records.at[row[1], 'high'] = row[2]
+                if margin < 1000:
+                    rows.append(dict(margin=margin, date=row[0]))
+            if row[3] < records.at[row[1], 'low']:
+                margin = row[3] - records.at[row[1], 'low']
+                records.at[row[1], 'low'] = row[3]
+                if margin > -1000:
+                    rows.append(dict(margin=margin, date=row[0]))
+    else:
+        records = pd.DataFrame(dict(high=9999, low=-9999),
+                               index=dates)
+        rows = []
+        for row in cursor:
+            if row[2] < records.at[row[1], 'high']:
+                margin = row[2] - records.at[row[1], 'high']
+                records.at[row[1], 'high'] = row[2]
+                if margin > -1000:
+                    rows.append(dict(margin=margin, date=row[0]))
+            if row[3] > records.at[row[1], 'low']:
+                margin = row[3] - records.at[row[1], 'low']
+                records.at[row[1], 'low'] = row[3]
+                if margin < 1000:
+                    rows.append(dict(margin=margin, date=row[0]))
 
     ctx['df'] = pd.DataFrame(rows)
     ctx['title'] = "[%s] %s Daily Record Margin" % (station,
                                                     nt.sts[station]['name'])
-    ctx['subtitle'] = "By how much did a new daily record beat the previous"
+    ctx['subtitle'] = (
+        "By how much did a new daily record beat the previous %s"
+    ) % (PDICT[opt], )
     return ctx
 
 
@@ -66,14 +92,16 @@ def highcharts(fdict):
     v = df2[['date', 'margin']].to_json(orient='values')
     df2 = ctx['df'][ctx['df']['margin'] < 0]
     v2 = df2[['date', 'margin']].to_json(orient='values')
+    a = "High" if ctx['opt'] == '0' else "Low"
+    b = "High" if ctx['opt'] == '1' else "Low"
     series = """{
         data: """ + v + """,
         color: '#ff0000',
-        name: 'High Temp Beat'
+        name: '""" + a + """ Temp Beat'
     },{
         data: """ + v2 + """,
         color: '#0000ff',
-        name: 'Low Temp Beat'
+        name: '""" + b + """ Temp Beat'
     }
     """
     return """
