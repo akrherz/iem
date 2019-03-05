@@ -66,14 +66,20 @@ var vectorStyleFunction = function(feature, resolution){
 }
 
 
-function makeVectorLayer(dt){
+function makeVectorLayer(){
+	var vs = new ol.source.Vector({
+		format: new ol.format.GeoJSON(),
+			projection: ol.proj.get('EPSG:3857'),
+			url: '/api/1/shef_currents.geojson?duration='+duration +'&pe=' + physical_code +"&days=" + days
+		});
+	vs.on('change', function(){
+		if (vs.getFeatures().length == 0){
+			alert("No Data Found!");
+		}
+	 });
 	return new ol.layer.Vector({
-		source: new ol.source.Vector({
-			format: new ol.format.GeoJSON(),
-		  	projection: ol.proj.get('EPSG:3857'),
-		    url: '/api/1/shef_currents.geojson?duration='+duration +'&pe=' + physical_code +"&days=" + days
-	  	}),
-	  	style: vectorStyleFunction
+		source: vs,
+	  style: vectorStyleFunction
 	});
 }
 
