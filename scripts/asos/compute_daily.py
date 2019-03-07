@@ -31,7 +31,7 @@ def compute_wind_gusts(gdf, currentrow, newdata):
     """Do wind gust logic."""
     dfmax = max([gdf['gust'].max(), gdf['peak_wind_gust'].max()])
     if (pd.isnull(dfmax) or (currentrow['max_gust'] is not None and
-            currentrow['max_gust'] >= dfmax)):
+                             currentrow['max_gust'] >= dfmax)):
         return
     newdata['max_gust'] = dfmax
     # need to figure out timestamp

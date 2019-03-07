@@ -20,6 +20,7 @@ from pyiem.util import get_dbconn
 os.putenv("DISPLAY", "localhost:1")
 
 __REV__ = "11Feb2013"
+TMPDIR = "/mesonet/tmp"
 SUPER_RES = datetime.datetime(2010, 3, 1)
 
 
@@ -111,7 +112,7 @@ def do_job(job):
     """Do something"""
     warnings = get_warnings(job['sts'], job['ets'], job['wfo'], job['wtype'])
 
-    mydir = "/tmp/%s" % (job['jobid'],)
+    mydir = "%s/%s" % (TMPDIR, job['jobid'])
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
     os.chdir(mydir)
@@ -294,6 +295,9 @@ def do_job(job):
     if os.path.isfile(pptfn):
         print('...copied to webfolder')
         shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
+        # Cleanup
+        os.chdir(TMPDIR)
+        subprocess.call("rm -rf %s" % (job['jobid'], ), shell=True)
     else:
         print("Uh oh, no output file, lets kill soffice.bin")
         subprocess.call("pkill --signal 9 soffice.bin", shell=True)
