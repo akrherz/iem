@@ -243,33 +243,6 @@ LAYER
 END
 
 LAYER
- NAME kcrg-dma
- DATA "images/26915/kcrg-dma.tif"
- PROJECTION
-  "init=epsg:26915"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
-END
-
-LAYER
- NAME kcrg-iowa
- DATA "images/4326/kcrg-iowa.tif"
- PROJECTION
-  "init=epsg:4326"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
-END
-
-
-LAYER
  NAME woi-metro
  DATA "images/26915/woi-metro.tif"
  PROCESSING "CLOSE_CONNECTION=NORMAL"
