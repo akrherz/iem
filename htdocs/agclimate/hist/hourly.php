@@ -139,7 +139,7 @@ wish to change this to <a href="daily.php">daily data</a>.
  <dt>relh</dt><dd>Relative Humidity [%]</dd>
  <dt>solar</dt><dd>Solar Radiation [W/m^2]</dd>
  <dt>precip</dt><dd>One Hour Precipitation [inch]</dd>
- <dt>speed</dt><dd>Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
+ <dt>sped</dt><dd>Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
  <dt>drct</dt><dd>Wind Direction [degrees North], 10 minute average, 10 ft above ground</dd>
  <dt>et</dt><dd>Potential Evapotranspiration (Alfalfa) [inch]</dd>
  <dt>soil04t</dt><dd>4 inch Depth Soil Temperature [F]</dd>

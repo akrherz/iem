@@ -151,7 +151,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <dt>gdd50</dt><dd>Growing Degree Days [F]</dd>
  <dt>solar</dt><dd>Solar Radiation [MJ/m^2]</dd>
  <dt>precip</dt><dd>Precipitation [inch]</dd>
- <dt>speed</dt><dd>Average Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
+ <dt>sped</dt><dd>Average Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
  <dt>gust</dt><dd>Peak Wind Gust [mph], 10 minute average, 10 ft above ground</dd>		
  <dt>et</dt><dd>Evapotranspiration [inch]</dd>
  <dt>soil04tn</dt><dd>Daily Low 4 inch Depth Soil Temperature [F]</dd>
