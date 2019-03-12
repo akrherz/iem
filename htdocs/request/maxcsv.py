@@ -275,13 +275,14 @@ def do_ahps(nwsli):
 
     # get observations
     odf = read_sql("""
-    SELECT valid, value from hml_observed_data WHERE station = %s
+    SELECT valid at time zone 'UTC' as valid,
+    value from hml_observed_data WHERE station = %s
     and key = %s and valid > now() - '3 day'::interval
     and extract(minute from valid) = 0
     ORDER by valid DESC
     """, pgconn, params=(nwsli, lookupkey),
                    index_col=None)
-    odf['obtime'] = odf['valid'].dt.tz_convert(
+    odf['obtime'] = odf['valid'].dt.tz_localize(pytz.UTC).dt.tz_convert(
         tzinfo).dt.strftime("%a. %-I %p")
     # Get the latest forecast
     df = read_sql("""
