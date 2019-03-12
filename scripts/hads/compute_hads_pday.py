@@ -47,7 +47,7 @@ def workflow(date):
     if obsdf.empty:
         print("compute_hads_pday for %s found no data" % (date, ))
         return
-    obsdf['utc_valid'] = obsdf['utc_valid'].dt.tz_localize('utc')
+    obsdf['utc_valid'] = obsdf['utc_valid'].dt.tz_localize(pytz.UTC)
     precip = np.zeros((24*60))
     grouped = obsdf.groupby('station')
     for station in obsdf['station'].unique():

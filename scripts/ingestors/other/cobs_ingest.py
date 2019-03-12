@@ -162,7 +162,7 @@ def campbell2df(year):
     hdf['SlrMJ_Tot'] = pd.to_numeric(hdf['SlrMJ_Tot'], errors='coerse')
     # Move all timestamps to UTC +6
     hdf['valid'] = (hdf['TIMESTAMP'] +
-                    datetime.timedelta(hours=6)).dt.tz_localize('UTC')
+                    datetime.timedelta(hours=6)).dt.tz_localize(pytz.UTC)
     return ddf, hdf
 
 
