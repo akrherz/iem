@@ -230,6 +230,8 @@ WWA product.</td>
 </tr>
 <tr><th>NWS_UGC  </th><td>NWS code used for a zone of a county</td></tr>
 <tr><th>AREA_KM2 </th><td>Area of the geometry in sq kilometers (Projection: EPSG 2163)</td></tr>
+<tr><th>UPDATED</th><td>String representing the most recent time in UTC that this
+ event was updated. YYYYMMDDHHMM</td></tr>
 </table>
 
 </div><div class="col-sm-6">
@@ -253,6 +255,9 @@ roughly 2 AM this morning.</p>
 
 <h4>Service changes:</h4>
 <ul>
+	<li><strong>12 Mar 2019</strong>: Added <code>UPDATED</code> column to the
+	dataset providing the timestamp of the most recent NWS Text Product for
+	the event.</li>
 	<li><strong>3 Feb 2016</strong>: This service used to allow the download
 	of the high-resolution AWIPS counties/zones shapes.  Sadly, the size
 	of these polygons would overwhelm the backend data service.  So now

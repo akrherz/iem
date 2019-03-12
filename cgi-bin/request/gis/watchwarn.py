@@ -123,7 +123,8 @@ def main():
         geomcol = "simple_geom"
 
     cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
-        phenomena, gtype, significance, eventid,  status, ugc, area2d"""
+        phenomena, gtype, significance, eventid,  status, ugc, area2d,
+        utc_updated """
 
     timelimit = "issue >= '%s' and issue < '%s'" % (sts, ets)
     if timeopt == 2:
@@ -140,7 +141,9 @@ def main():
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
      to_char(init_expire at time zone 'UTC',
-             'YYYYMMDDHH24MI') as utc_init_expire
+             'YYYYMMDDHH24MI') as utc_init_expire,
+     to_char(updated at time zone 'UTC',
+             'YYYYMMDDHH24MI') as utc_updated
      from %(sbw_table)s w %(table_extra)s
      WHERE status = 'NEW' and %(timelimit)s
      %(wfo_limiter)s %(limiter)s
@@ -155,7 +158,9 @@ def main():
      to_char(product_issue at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_prodissue,
      to_char(init_expire at time zone 'UTC',
-             'YYYYMMDDHH24MI') as utc_init_expire
+             'YYYYMMDDHH24MI') as utc_init_expire,
+     to_char(updated at time zone 'UTC',
+             'YYYYMMDDHH24MI') as utc_updated
      from %(warnings_table)s w JOIN ugcs u on (u.gid = w.gid) WHERE
      %(timelimit)s %(wfo_limiter2)s %(limiter)s
      )
@@ -186,7 +191,7 @@ def main():
     csv = open("%s.csv" % (fn, ), 'w')
     csv.write((
         "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
-        "STATUS,NWS_UGC,AREA_KM2\n"
+        "STATUS,NWS_UGC,AREA_KM2,UPDATED\n"
     ))
     with fiona.open(
         "%s.shp" % (fn, ), 'w', crs=from_epsg(4326), driver='ESRI Shapefile',
@@ -205,6 +210,7 @@ def main():
                 'STATUS': 'str:3',
                 'NWS_UGC': 'str:6',
                 'AREA_KM2': 'float',
+                'UPDATED': 'str:12'
                 }}) as output:
         for row in cursor:
             mp = loads(row['geo'], hex=True)
@@ -212,7 +218,7 @@ def main():
                 "%(wfo)s,%(utc_issue)s,%(utc_expire)s,%(utc_prodissue)s,"
                 "%(utc_init_expire)s,%(phenomena)s,%(gtype)s,"
                 "%(significance)s,%(eventid)s,%(status)s,%(ugc)s,"
-                "%(area2d).2f\n"
+                "%(area2d).2f,%(utc_updated)s\n"
                 ) % row)
             output.write(
                 {'properties': {
@@ -227,7 +233,8 @@ def main():
                     'ETN': row['eventid'],
                     'STATUS': row['status'],
                     'NWS_UGC': row['ugc'],
-                    'AREA_KM2': row['area2d']},
+                    'AREA_KM2': row['area2d'],
+                    'UPDATED': row['utc_updated']},
                  'geometry': mapping(mp)}
             )
     csv.close()
