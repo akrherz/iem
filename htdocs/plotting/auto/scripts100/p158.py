@@ -34,7 +34,7 @@ def get_description():
 def get_context(fdict):
     """Get plot context"""
     pgconn = get_dbconn('talltowers',
-                        host='talltowers-db.local', user='tt_web')
+                        host='iemdb-talltowers.local', user='tt_web')
     ctx = get_autoplot_context(fdict, get_description())
     dt = ctx['dt']
     station = ctx['station']

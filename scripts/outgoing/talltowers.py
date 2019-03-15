@@ -19,7 +19,7 @@ RTOWERS = ['ETTI4', 'MCAI4']
 def gen_df(row):
     """Make me a dataframe of this data!"""
     pgconn = get_dbconn('talltowers',
-                        host='talltowers-db.local', user='tt_web')
+                        host='iemdb-talltowers.local', user='tt_web')
     stations = row['stations'].split(",")
     towers = [TOWERS[station] for station in stations]
     df = read_sql("""

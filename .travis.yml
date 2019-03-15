@@ -17,7 +17,7 @@ addons:
     - iemdb-hads
     - iem.local
     - iem-memcached
-    - talltowers-db.local
+    - iemdb-talltowers.local
     - iem-web-services.local
 language: python
 env:
