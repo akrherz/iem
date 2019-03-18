@@ -6,19 +6,16 @@ Take the PRISM data, valid at 12z and bias correct the hourly stage IV data
 from __future__ import print_function
 import sys
 import datetime
-import logging
 
 import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 from pyiem.iemre import daily_offset, hourly_offset
 from pyiem import prism as prismutil
-from pyiem.util import utc, ncopen, find_ij
+from pyiem.util import utc, ncopen, find_ij, logger
 
 DEBUGLON = -93.89
 DEBUGLAT = 42.04
-logging.basicConfig()
-LOG = logging.getLogger()
-LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
+LOG = logger()
 
 
 def workflow(valid):
@@ -36,7 +33,7 @@ def workflow(valid):
     lats = nc.variables['lat'][:]
     nc.close()
     (lons, lats) = np.meshgrid(lons, lats)
-    i, j = prismutil.find_ij(DEBUGLON, DEBUGLAT)
+    (i, j) = prismutil.find_ij(DEBUGLON, DEBUGLAT)
     LOG.debug("prism debug point ppt: %.3f", ppt[j, i])
 
     # Interpolate this onto the stage4 grid
@@ -97,17 +94,16 @@ def workflow(valid):
                          datetime.timedelta(hours=tidx)
                          ).strftime("%Y-%m-%dT%H"), tidx))
     nc.close()
-    """
+
     # s4total_v2 = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
-    from pyiem.plot.geoplot import MapPlot
-    import matplotlib.pyplot as plt
-    mp = MapPlot(sector='conus')
-    mp.pcolormesh(s4lons, s4lats, prism_on_s4grid,
-                  np.arange(0, 25, 2), cmap=plt.get_cmap("jet"))
-    mp.drawcounties()
-    mp.postprocess(filename='test.png')
-    mp.close()
-    """
+    # from pyiem.plot.geoplot import MapPlot
+    # import matplotlib.pyplot as plt
+    # mp = MapPlot(sector='conus')
+    # mp.pcolormesh(s4lons, s4lats, prism_on_s4grid,
+    #              np.arange(0, 25, 2), cmap=plt.get_cmap("jet"))
+    # mp.drawcounties()
+    # mp.postprocess(filename='test.png')
+    # mp.close()
 
 
 def main(argv):

@@ -1,8 +1,7 @@
-"""
-We need to use the QC'd 24h 12z total to fix the 1h problems :(
-"""
+"""Use the QC'd 12z 24 Hour files to adjust hourly data."""
 from __future__ import print_function
 import sys
+import os
 import datetime
 
 import numpy as np
@@ -10,7 +9,8 @@ import pytz
 from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
+LOG = logger()
 
 
 def merge(ts):
@@ -21,6 +21,9 @@ def merge(ts):
     # Load up the 12z 24h total, this is what we base our deltas on
     fn = ("/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.24h.grib"
           ) % (ts.strftime("%Y/%m/%d"), ts.strftime("%Y%m%d%H"))
+    if not os.path.isfile(fn):
+        LOG.info("stage4_12z_adjust %s is missing", fn)
+        return False
 
     grbs = pygrib.open(fn)
     grb = grbs[1]
@@ -76,7 +79,7 @@ def main(argv):
         ts = datetime.datetime.utcnow()
         ts = ts - datetime.timedelta(days=1)
         ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
-    ts = ts.replace(tzinfo=pytz.utc)
+    ts = ts.replace(tzinfo=pytz.UTC)
     merge(ts)
 
 

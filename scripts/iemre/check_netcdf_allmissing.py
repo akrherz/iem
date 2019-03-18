@@ -5,9 +5,10 @@ import glob
 import datetime
 
 import numpy as np
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
 
 BASEDIR = "/mesonet/data/iemre"
+LOG = logger()
 
 
 def compute_time(nc):
@@ -36,7 +37,7 @@ def qc(ncfilename):
     if 'time' not in nc.variables:
         nc.close()
         return
-    print("check_netcdf_allmissing: %s" % (ncfilename, ))
+    LOG("check_netcdf_allmissing: %s", ncfilename)
     taxis = compute_time(nc)
     for vname in nc.variables:
         shape = nc.variables[vname].shape
@@ -50,11 +51,10 @@ def qc(ncfilename):
                 acc.append(taxis[tstep])
             else:
                 if acc:
-                    print(('   %-16s [%s -> %s] missing'
-                           ) % (vname, acc[0], acc[-1]))
+                    LOG('   %-16s [%s -> %s] missing', vname, acc[0], acc[-1])
                     acc = []
         if acc:
-            print('   %-16s [%s -> %s] missing' % (vname, acc[0], acc[-1]))
+            LOG('   %-16s [%s -> %s] missing', vname, acc[0], acc[-1])
     nc.close()
 
 

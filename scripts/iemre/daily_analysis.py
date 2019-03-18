@@ -17,10 +17,11 @@ from pandas.io.sql import read_sql
 from scipy.stats import zscore
 from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn, utc, ncopen
+from pyiem.util import get_dbconn, utc, ncopen, logger
 
 PGCONN = get_dbconn('iem', user='nobody')
 COOP_PGCONN = get_dbconn('coop', user='nobody')
+LOG = logger()
 
 
 def generic_gridder(df, idx, domain):
@@ -110,6 +111,11 @@ def do_precip(ts):
             print("Missing %s" % (ncfn,))
             return
         hnc = ncopen(ncfn, timeout=600)
+        # for offset in range(offset1, offset2):
+        #    LOG.info(
+        #        "offset: %s min: %s max: %s",
+        #        offset, np.ma.min(hnc.variables['p01m'][offset, :, :]),
+        #        np.max(hnc.variables['p01m'][offset, :, :]))
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
     write_grid(ts, 'p01d', np.where(phour < 0, 0, phour))
