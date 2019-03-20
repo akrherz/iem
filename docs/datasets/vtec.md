@@ -34,6 +34,34 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 
 ### <a name="faq"></a> Frequently Asked Questions
 
+1. Please fully describe the schema used within the downloaded shapefiles.
+
+    Grab some coffee and headache medicine as I am going to try to explain how the IEM processes these events into the database.  The first concept to understand is that when the NWS issues a Watch, Warning, Advisory (WaWA) event, this event undergoes a lifecycle.  The NWS can issue updates that modify the start and end times of the event and the spatial extent of the event.  They can also do upgrades on the event, for example moving from a watch into a warning.  The IEM database does not necessary fully document the event's lifecycle, but provides the metadata for the last known state of the event.
+
+    For the context of IEM provided shapefiles, here is a discussion of what each DBF column represents.  We will go into an example afterwards attempting to illustrate what each column means.
+
+    But first, the timestamps.  The presented timestamps are always in UTC timezone.  The timestamp is represented by a 12 character string in the form of year, month, day, 24-hour,minute.  To my knowledge, there is no timestamp data type in DBF, so this is the pain we have to live with.
+
+    | DBF Column  | Type | Description |
+| ------------- | ------------- | ----- |
+| WFO | 3 Char | This is the three character NWS Office/Center identifier.  For CONUS locations, this is the 4 character ID dropping the first `K`.  For non-CONUS sites, this is the identifier dropping the `P`. |
+| ISSUED  | 12 Char | This timestamp represents the start time of the event.  When an event's lifecycle begins, this issued value can be updated as the NWS issues updates.  The value presented represents the last known state of the event start time.|
+| EXPIRED  | 12 Char  | Similiar to the ISSUED column above, this represents the products event end time.  Again, this value is updated as the event lifecycle happens with updates made by the NWS. |
+| INIT_ISS | 12 Char | This is timestamp of the NWS Text Product that started the event.  This timestamp is important for products like Winter Storm Watch, which have a begin time a number of days/hours into the future, but are typically considered to be in effect at the time of the text product issuace.  Yeah, this is where the headaches start.  This timestamp can also be used to form a canonical URL back to the IEM to fetch the raw NWS Text for this event. It is **not** updated during the event's lifecycle. |
+| INIT_EXP | 12 Char | Similiar to `INIT_ISS` above, this is the expiration of the event denoted with the first issuance of the event.  It is **not** updated during the event's lifecycle. |
+| PHENOM or TYPE | 2 Char | This is the two character NWS identifier used to denote the VTEC event type.  For example, `TO` for Tornado and `SV` for Severe Thunderstorm.  A lookup table of these codes exists [here](https://github.com/akrherz/pyIEM/blob/master/pyiem/nws/vtec.py). |
+| SIG | 1 Char | This is the one character NWS identifier used to denote the VTEC significance.  The same link above for `PHENOM` has a lookup table for these. |
+| GTYPE | 1 Char | Either `P` for polygon or `C` for county/zone/parish.  The shapefiles you download could contain both so-called storm-based (polygon) events and traditional county/zone based events. |
+| ETN | Int | The VTEC event identifier.  A tracking number that should be unique for this event, but sometimes it is not.  Yes, more headaches. Note that the uniqueness is not based on the combination of a UGC code, but the issuance center and a continuous spatial region for the event. |
+| STATUS | 3 Char | The VTEC status code denoting the state the event is during its life cycle.  This is purely based on any updates the event got and not some logic on the IEM's end denoting if the event is in the past or not. |
+| NWS_UGC | 6 Char | For county,zone,parish warnings `GTYPE=C`, the Universal Geographic Code that the NWS uses.  Sadly, this is not exactly FIPS. |
+| AREA_KM2 | Number | The IEM computed area of this event, this area computation is done in Albers (EPSG:2163). |
+| UPDATED | 12 Char | The timestamp when this event's lifecycle was last updated by the NWS. |
+
+
+    Whew, so let us do a practical example to try to illustrate what the above schema is attempting to capture.  The NWS in Des Moines `wfo=DMX` issues a Winter Storm Watch `phenom=WS` `sig=A` for Story County (`nws_ugc=IAZ048`).  This product was issued at noon on 19 March 2019 `INIT_ISS=201903191700` and goes into effect at 6 PM on 20 March `ISSUE=201903202300` `INIT_ISS=201903202300` until 6 AM 21 March `EXPIRE=201903211100` `INIT_EXP=201903211100`.  At 7 PM on 19 March, DMX decides to upgrade the event to a Winter Storm Warning.  The Winter Storm Watch then gets updated with `EXPIRE=201903200000` `UPDATED=201903200000` `STATUS=UPG`.  So the confusing aspect here becomes that the database representation has an `EXPIRE` that is before the `ISSUE` column.  This is just tricky to resolve, so good luck.  It is a long standing annoyance of how NWS handles VTEC events like this with `ISSUE` times well into the future.  For all practical purposes, once a winter storm watch is issued, it is valid **now**, but the encoding does not follow this.
+
+
 1. How do Severe Thunderstorm, Flash Flood, or Tornado warnings have VTEC codes for dates prior to implementation?
 
     Good question!  A number of years ago, a kind NWS manager provided a database dump of their curated WWA archive for dates between 1986 and 2005.  While not perfect, this archive was the best/only source that was known at the time.  The IEM did some logic processing and attempted to back-compute VTEC ETNs for this archive of warnings.  The database was atomic to a local county/parish, so some logic was done to merge multiple counties when they spatially touched and had similiar issuance timestamps.  Again from the above, automated machine parsing of the raw text is next to impossible.  The ETNs were assigned as a convience so that various IEM apps and plots would present this data online.

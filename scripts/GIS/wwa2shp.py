@@ -1,21 +1,17 @@
-"""
-Something to dump current warnings to a shapefile
-"""
+"""Something to dump current warnings to a shapefile."""
 from __future__ import print_function
 import zipfile
 import os
-import datetime
 import shutil
 import subprocess
 
 from osgeo import ogr
-import pytz
+from pyiem.util import utc
 
 
 def main():
     """Go Main Go"""
-    utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.utc, second=0, microsecond=0)
+    utcnow = utc()
 
     os.chdir("/tmp")
     fp = "current_ww"
@@ -50,6 +46,10 @@ def main():
     out_layer.CreateField(fd)
 
     fd = ogr.FieldDefn('TYPE', ogr.OFTString)
+    fd.SetWidth(2)
+    out_layer.CreateField(fd)
+
+    fd = ogr.FieldDefn('PHENOM', ogr.OFTString)
     fd.SetWidth(2)
     out_layer.CreateField(fd)
 
@@ -101,7 +101,7 @@ def main():
      from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
      expire > '%s' and w.gid is not null
 
-    """ % (utc.year, utc, utc, utc.year, utc)
+    """ % (utcnow.year, utcnow, utcnow, utcnow.year, utcnow)
 
     data = source.ExecuteSQL(sql)
 
@@ -119,6 +119,7 @@ def main():
         featDef.SetGeometry(geom)
         featDef.SetField('GTYPE', feat.GetField("gtype"))
         featDef.SetField('TYPE', feat.GetField("phenomena"))
+        featDef.SetField('PHENOM', feat.GetField("phenomena"))
         featDef.SetField('ISSUED', feat.GetField("utcissue"))
         featDef.SetField('EXPIRED', feat.GetField("utcexpire"))
         featDef.SetField('UPDATED', feat.GetField("utcupdated"))
@@ -149,7 +150,7 @@ def main():
 
     cmd = ("/home/ldm/bin/pqinsert -p \"zip c %s "
            "gis/shape/4326/us/current_ww.zip bogus zip\" current_ww.zip"
-           ) % (utc.strftime("%Y%m%d%H%M"),)
+           ) % (utcnow.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
     for suffix in ['shp', 'shp.xml', 'shx', 'dbf', 'prj', 'zip']:
         os.remove('current_ww.%s' % (suffix,))

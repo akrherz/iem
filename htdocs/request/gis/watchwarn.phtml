@@ -205,34 +205,10 @@ function kmlsub(f, url){
 </div>
 
 <h4>Shapefile DBF schema:</h4>
-<table>
-<tr><th>WFO</th><td>Three letter ID for issuing Weather Forecast Office</td></tr>
-<tr><th>ISSUED   </th><td>String representing product initial valid UTC 
-	timestamp YYYYMMDDHHMM</td></tr>
-<tr><th>EXPIRED  </th><td>String representing product expiration, this is not the original 
-         product expiration, but the actual time the product was no longer
-         valid.  For example, the product could have been extended in time
-         or cancelled.</td></tr>
-<tr><th>INIT_ISS</th><td>String representing the issuance time of the product UTC 
-	timestamp YYYYMMDDHHMM</td></tr>
-<tr><th>INIT_EXP</th><td>String representing the initial time of the product expiration UTC 
-	timestamp YYYYMMDDHHMM</td></tr>
-<tr><th>PHENOM   </th><td>VTEC phenomena code.  Ex)  SV == Severe Thunderstorm , TO == Tornado</td></tr>
-<tr><th>GTYPE    </th><td>Geographical type of polygon.  C == County, P == Polygon</td></tr>
-<tr><th>SIG      </th><td>VTEC significance. Ex) A == Watch, W == Warning</td></tr>
-<tr><th>ETN      </th><td>VTEC Event Tracking Number</td></tr>
-<tr>
- <th>STATUS</th>
- <td>The three character code for the VTEC status field.  ie EXP, CAN, NEW. For the case
-of polygons of <code>GTYPE='P'</code> (Storm Based Warnings), the STATUS code is always
-NEW.  For all other cases, this STATUS is the last status parsed for the associated
-WWA product.</td>
-</tr>
-<tr><th>NWS_UGC  </th><td>NWS code used for a zone of a county</td></tr>
-<tr><th>AREA_KM2 </th><td>Area of the geometry in sq kilometers (Projection: EPSG 2163)</td></tr>
-<tr><th>UPDATED</th><td>String representing the most recent time in UTC that this
- event was updated. YYYYMMDDHHMM</td></tr>
-</table>
+
+<p>A discussion of the schema can be found on the <a href="/info/datasets/vtec.html">FAQ Page</a>
+for this dataset.</p>
+
 
 </div><div class="col-sm-6">
 <h4>Pre-generated zip files</h4>
@@ -284,7 +260,7 @@ roughly 2 AM this morning.</p>
 <tr>
  <td>All VTEC watch/warn</td>
  <td>12 Nov 2005</td>
- <td>Products other than TOR, SVR</td>
+ <td>Products other than Tornado and Severe Thunderstorm Warnings.</td>
 </tr>
 <tr>
  <td>SVR,TOR Watch by County</td>
