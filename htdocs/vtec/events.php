@@ -3,21 +3,30 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 85);
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
+$state = isset($_GET['state']) ? substr($_GET["state"], 0, 2): 'IA';
+$which = isset($_GET["which"]) ? $_GET["which"]: 'wfo';
 
 require_once "../../include/myview.php";
 require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$uri = sprintf("http://iem.local/json/vtec_events.py?wfo=%s&year=%s", 
-		$wfo, $year);
+if ($which == 'wfo'){
+	$service = "";
+	$uri = sprintf("http://iem.local/json/vtec_events.py?wfo=%s&year=%s", 
+	$wfo, $year);
+} else {
+	$service = "_bystate";
+	$uri = sprintf("http://iem.local/json/vtec_events_bystate.py?state=%s&year=%s", 
+	$state, $year);
+}
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc=TRUE);
 $table = "";
 while(list($key, $val)=each($json['events'])){
 	$table .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td>".
 			"<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
-			$wfo, $val["uri"], $val["eventid"],
+			$val["wfo"], $val["uri"], $val["eventid"],
 			$val["phenomena"], $val["significance"],
 			$vtec_phenomena[$val["phenomena"]],
 			$vtec_significance[$val["significance"]], 
@@ -39,7 +48,10 @@ $('#makefancy').click(function(){
 EOM;
 $yselect = yearSelect2(2005, $year, 'year');
 $wfoselect = networkSelect("WFO", $wfo, array(), "wfo");
+$stselect = stateSelect("state", $state);
 
+$wchecked = ($which == 'wfo') ? "CHECKED": "";
+$schecked = ($which == 'state') ? "CHECKED": "";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -49,7 +61,7 @@ $t->content = <<<EOF
 <h3>NWS VTEC Event ID Usage</h3>
 
 <div class="alert alert-info">This page provides a listing of VTEC events
-for a given forecast office and year.  There are a number of caveats to this
+for a given forecast office or state and year.  There are a number of caveats to this
 listing due to issues encountered processing NWS VTEC enabled products. Some
 events may appear listed twice due to quirks with how this information 
 is stored within the database.  Hopefully, you can copy/paste the table into
@@ -57,13 +69,30 @@ your favorite spreadsheet program for further usage!</div>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo={$wfo}&amp;year={$year}
+<br /><code>https://mesonet.agron.iastate.edu/json/vtec_events{$service}.py?wfo={$wfo}&amp;year={$year}
 </code></p>
 
 <form method="GET" action="events.php">
-		Select WFO: $wfoselect
-		Select Year: $yselect
-		<input type="submit" value="Generate Table">
+
+<table class="table table-bordered">
+<thead>
+<tr>
+ <th><input type="radio" name="which" value="wfo" $wchecked> By WFO</input></th>
+ <th><input type="radio" name="which" value="state" $schecked> By State</input></th>
+ <th>Year</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+ <td> $wfoselect </td>
+ <td> $stselect </td>
+ <td> $yselect </td>
+ <td><input type="submit" value="Generate Table"></td>
+</tr>
+</tbody>
+</table>
+
 </form>
 
 <p><button id="makefancy">Make Table Interactive</button></p>

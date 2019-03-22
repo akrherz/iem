@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Listing of VTEC events for a WFO and year"""
+"""Listing of VTEC events for state and year"""
 import cgi
 import json
 
@@ -10,7 +10,7 @@ from pyiem.util import get_dbconn, ssw
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def run(wfo, year, phenomena, significance):
+def run(state, year, phenomena, significance):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -28,13 +28,14 @@ def run(wfo, year, phenomena, significance):
                   ) % (phenomena[:2], significance[0])
     cursor.execute("""
     WITH polyareas as (
-        SELECT phenomena, significance, eventid, round((ST_area(
+        SELECT wfo, phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
-        from """ + sbwtable + """ WHERE
-        wfo = %s and eventid is not null and
+        from """ + sbwtable + """ s, states t WHERE
+        ST_Overlaps(s.geom, t.the_geom) and
+        t.state_abbr = %s and eventid is not null and
         """ + plimit + """ and status = 'NEW'
     ), ugcareas as (
-        SELECT
+        SELECT w.wfo,
         round(sum(ST_area(
             ST_transform(u.geom,2163)) / 1000000.0)::numeric,0) as area,
         string_agg(u.name || ' ['||u.state||']', ', ') as locations,
@@ -46,21 +47,21 @@ def run(wfo, year, phenomena, significance):
         max(hvtec_nwsli) as nwsli,
         max(fcster) as fcster from
         """+table+""" w JOIN ugcs u on (w.gid = u.gid)
-        WHERE w.wfo = %s and eventid is not null and
+        WHERE substr(u.ugc, 1, 2) = %s and eventid is not null and
         """ + plimit + """
-        GROUP by phenomena, significance, eventid)
+        GROUP by w.wfo, phenomena, significance, eventid)
 
     SELECT u.*, coalesce(p.area, u.area) as myarea
     from ugcareas u LEFT JOIN polyareas p on
     (u.phenomena = p.phenomena and u.significance = p.significance
-     and u.eventid = p.eventid)
+     and u.eventid = p.eventid and u.wfo = p.wfo)
         ORDER by u.phenomena ASC, u.significance ASC, u.utc_issue ASC
-    """, (wfo, wfo))
-    res = {'wfo': wfo, 'year': year, 'events': []}
+    """, (state, state))
+    res = {'state': state, 'year': year, 'events': []}
     for row in cursor:
-        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (year, wfo, row['phenomena'],
-                                                  row['significance'],
-                                                  row['eventid'])
+        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
+            year, row['wfo'], row['phenomena'], row['significance'],
+            row['eventid'])
         res['events'].append(
             dict(phenomena=row['phenomena'],
                  significance=row['significance'],
@@ -72,7 +73,7 @@ def run(wfo, year, phenomena, significance):
                  expire=row['utc_expire'].strftime(ISO9660),
                  init_expire=row['utc_init_expire'].strftime(ISO9660),
                  uri=uri,
-                 wfo=wfo))
+                 wfo=row['wfo']))
 
     return json.dumps(res)
 
@@ -82,20 +83,18 @@ def main():
     ssw("Content-type: application/json\n\n")
 
     form = cgi.FieldStorage()
-    wfo = form.getfirst("wfo", "MPX")
-    if len(wfo) == 4:
-        wfo = wfo[1:]
+    state = form.getfirst("state", "IA")[:2]
     year = int(form.getfirst("year", 2015))
     phenomena = form.getfirst('phenomena')
     significance = form.getfirst('significance')
     cb = form.getfirst("callback", None)
 
-    mckey = "/json/vtec_events/%s/%s/%s/%s" % (wfo, year, phenomena,
-                                               significance)
+    mckey = "/json/vtec_events_bystate/%s/%s/%s/%s" % (
+        state, year, phenomena, significance)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = run(wfo, year, phenomena, significance)
+        res = run(state, year, phenomena, significance)
         mc.set(mckey, res, 60)
 
     if cb is None:

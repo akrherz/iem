@@ -322,7 +322,22 @@
   				"{year}" => "2015"
   		)
   );
-  
+
+  $services[] = Array(
+	"title" => "NWS VTEC Event Listing by State by Year",
+	"url" => "/json/vtec_events_bystate.py?state={state}&year={year}",
+	"desc" => "Produces a listing of VTEC Events (watch, warning,
+	advisories) by year by state.",
+	"vars" => Array(
+			"state" => "2 character State identifier",
+			"year" => "YYYY year"
+	),
+	"example" => Array(
+			"{state}" => "IA",
+			"{year}" => "2015"
+	)
+);
+
   
   $services[] = Array(
   		"title" => "NWS Text Products by AWIPS ID and Time Period",
