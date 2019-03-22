@@ -1,6 +1,7 @@
 """Look to see if we have something systematic wrong with IEMRE"""
 from __future__ import print_function
 import json
+import sys
 
 import requests
 import pandas as pd
@@ -11,20 +12,23 @@ from pyiem.network import Table as NetworkTable
 COLS = ['ob_pday', 'daily_precip_in', 'precip_delta', 'prism_precip_in']
 
 
-def main():
+def main(argv):
     """Go Main Go"""
+    station = argv[1]
+    year = int(argv[2])
     pgconn = get_dbconn('coop')
 
     nt = NetworkTable("IACLIMATE")
 
     df = read_sql("""
         SELECT day, precip, high, low from alldata_ia
-        WHERE station = 'IATDSM' and year = 1997
-        ORDER by day ASC""", pgconn, index_col='day')
+        WHERE station = %s and year = %s
+        ORDER by day ASC
+    """, pgconn, params=(station, year), index_col='day')
 
-    uri = ("https://mesonet.agron.iastate.edu/iemre/multiday/1997-01-01/"
-           "1997-12-31/%.2f/%.2f/json"
-           ) % (nt.sts['IATDSM']['lat'], nt.sts['IATDSM']['lon'])
+    uri = ("https://mesonet.agron.iastate.edu/iemre/multiday/%s-01-01/"
+           "%s-12-31/%.2f/%.2f/json"
+           ) % (year, year, nt.sts[station]['lat'], nt.sts[station]['lon'])
     req = requests.get(uri)
     j = json.loads(req.content)
 
@@ -56,4 +60,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

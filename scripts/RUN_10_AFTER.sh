@@ -61,7 +61,7 @@ cd ../iemplot
 ./RUN.csh
 
 cd ../iemre
-python hourly_analysis.py
+python hourly_analysis.py `date -u +'%Y %m %d %H'`
 python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 # Grid solar so that we have values by midnight
 if [ $LHH -eq "23" ]

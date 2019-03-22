@@ -16,8 +16,16 @@ cd ../prism
 python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d')
 
 cd ../iemre
+# adjusts stage IV hourly file to PRISM reality
 python prism_adjust_stage4.py $(date --date '3 days ago' +'%Y %m %d')
+
+# Copies updated stage IV hourly into IEMRE hourly
+python precip_ingest.py $(date --date '3 days ago' +'%Y %m %d')
 
 # Since we have now adjusted the 12z precip 3 days ago, we should rerun
 # iemre for four days ago
 python daily_analysis.py $(date --date '4 days ago' +'%Y %m %d')
+
+# and now recompute climodat statewide/climate from four days ago
+cd ../climodat
+python compute_0000.py $(date --date '4 days ago' +'%Y %m %d')

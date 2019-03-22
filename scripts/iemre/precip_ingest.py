@@ -5,6 +5,7 @@
 """
 from __future__ import print_function
 import os
+import datetime
 import sys
 
 import numpy as np
@@ -112,8 +113,16 @@ def workflow(valid):
 
 def main(argv):
     """Go Main"""
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    workflow(ts)
+    if len(argv) == 5:
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+        workflow(ts)
+        return
+    # Otherwise we are running for an explicit 12z to 12z period, copy only
+    ets = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
+    now = ets - datetime.timedelta(hours=23)
+    while now <= ets:
+        copy_to_iemre(now)
+        now += datetime.timedelta(hours=1)
 
 
 if __name__ == "__main__":
