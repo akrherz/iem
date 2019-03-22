@@ -52,12 +52,13 @@ def plotter(fdict):
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     days = (ets-sts).days
     data = np.ones((250, days * 24)) * -1
+    vsby = np.ones((1, days * 24)) * -1
 
     df = read_sql("""
-    SELECT valid, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4
-    from alldata where station = %s and valid BETWEEN %s and %s
-    and report_type = 2
-    ORDER by valid ASC
+        SELECT valid, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
+        vsby from alldata where station = %s and valid BETWEEN %s and %s
+        and report_type = 2
+        ORDER by valid ASC
     """, pgconn, params=(station, sts, ets), index_col=None)
 
     lookup = {'CLR': 0, 'FEW': 25, 'SCT': 50, 'BKN': 75, 'OVC': 100}
@@ -68,6 +69,7 @@ def plotter(fdict):
     for _, row in df.iterrows():
         delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)
         data[:, delta] = 0
+        vsby[0, delta] = row['vsby']
         for i in range(1, 5):
             a = lookup.get(row['skyc%s' % (i,)], -1)
             if a >= 0:
@@ -80,17 +82,35 @@ def plotter(fdict):
                     data[skyl+3:, delta] = min(a, 75)
 
     data = np.ma.array(data, mask=np.where(data < 0, True, False))
+    vsby = np.ma.array(vsby, mask=np.where(vsby < 0, True, False))
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    fig = plt.figure(figsize=(8, 6))
+    # vsby plot
+    ax = plt.axes([0.1, 0.08, 0.8, 0.03])
+    ax.set_xticks(np.arange(0, days*24+1, 24))
+    ax.set_xticklabels(np.arange(1, days+1))
+    ax.set_yticks([])
+    cmap = cm.get_cmap('gray')
+    cmap.set_bad('white')
+    res = ax.imshow(
+        vsby, aspect='auto', extent=[0, days*24, 0, 1], vmin=0, cmap=cmap,
+        vmax=10)
+    cax = plt.axes([0.915, 0.08, 0.035, 0.2])
+    fig.colorbar(res, cax=cax)
+    fig.text(0.02, 0.09, "Visibility\n[miles]", va='center')
 
+    # clouds
+    ax = plt.axes([0.1, 0.16, 0.8, 0.7])
     ax.set_facecolor('skyblue')
     ax.set_xticks(np.arange(0, days*24+1, 24))
     ax.set_xticklabels(np.arange(1, days+1))
 
-    ax.set_title(('[%s] %s %s Clouds\nbased on ASOS METAR Cloud Amount '
-                  'and Level Reports'
-                  ) % (station, nt.sts[station]['name'],
-                       sts.strftime("%b %Y")))
+    fig.text(
+        0.5, 0.935,
+        ('[%s] %s %s Clouds & Visibility\nbased on ASOS METAR Cloud Amount '
+         '/Level and Visibility Reports'
+         ) % (station, nt.sts[station]['name'], sts.strftime("%b %Y")),
+        ha='center', fontsize=14)
 
     cmap = cm.get_cmap('gray_r')
     cmap.set_bad('white')
@@ -100,7 +120,7 @@ def plotter(fdict):
     ax.set_yticks(range(0, 260, 50))
     ax.set_yticklabels(range(0, 25, 5))
     ax.set_ylabel("Cloud Levels [1000s feet]")
-    ax.set_xlabel("Day of %s (UTC Timezone)" % (sts.strftime("%b %Y"),))
+    fig.text(0.45, 0.02, "Day of %s (UTC Timezone)" % (sts.strftime("%b %Y"),))
 
     r1 = Rectangle((0, 0), 1, 1, fc='skyblue')
     r2 = Rectangle((0, 0), 1, 1, fc='white')
@@ -108,15 +128,11 @@ def plotter(fdict):
     r4 = Rectangle((0, 0), 1, 1, fc='#EEEEEE')
 
     ax.grid(True)
-    # Shrink current axis's height by 10% on the bottom
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.1,
-                     box.width, box.height * 0.9])
 
-    ax.legend([r1, r4, r2, r3], ['Clear', 'Some', 'Unknown',
-                                 'Obscured by Overcast'],
-              loc='upper center', fontsize=14,
-              bbox_to_anchor=(0.5, -0.09), fancybox=True, shadow=True, ncol=4)
+    ax.legend(
+        [r1, r4, r2, r3], ['Clear', 'Some', 'Unknown', 'Obscured by Overcast'],
+        loc='lower center', fontsize=14,
+        bbox_to_anchor=(0.5, 0.99), fancybox=True, shadow=True, ncol=4)
 
     return fig, df
 
