@@ -49,10 +49,11 @@ def plotter(fdict):
      SELECT phenomena, significance, eventid,
      min(issue at time zone 'UTC') as minissue,
      max(expire at time zone 'UTC') as maxexpire,
-     max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire
+     max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire,
+     extract(year from product_issue) as year
      from warnings
      WHERE wfo = %s and issue > %s and issue < %s
-     GROUP by phenomena, significance, eventid
+     GROUP by phenomena, significance, eventid, year
      ORDER by minissue ASC
     """, pgconn, params=(station, sts, ets), index_col=None)
     if df.empty:
