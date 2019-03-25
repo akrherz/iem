@@ -305,7 +305,8 @@ data = {'plots': [
          'label': ("Average Dew Point by Wind Direction "
                    "by Month or Season or Year")},
         {'id': "40",
-         'label': "Cloud Amount and Level Timeseries for One Month"},
+         'label': ("Cloud Amount and Level Timeseries / Visibility "
+                   "for One Month")},
         {'id': "88",
          'label': "Cloudiness Impact on Hourly Temperatures"},
         {'id': "59",
