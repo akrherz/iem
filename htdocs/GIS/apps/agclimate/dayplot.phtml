@@ -1,6 +1,6 @@
 <?php 
 /* Front End to generate plots for a given day */
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 50);
 require_once "../../../../include/forms.php";
   $pvar = isset($_GET["pvar"]) ? $_GET["pvar"]: "c11,c12";

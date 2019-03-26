@@ -104,6 +104,8 @@ data = {'plots': [
          'label': "Relative Humidity Max/Min/Avg by Day of Year"},
         {'id': "62",
          'label': "Snow Depth"},
+        {'id': "199",
+         'label': "ISU Soil Moisture Network Daily Plots"},
         {'id': "38",
          'label': "Solar Radiation Estimates from NARR"},
         {'id': "25",

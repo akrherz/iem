@@ -1,10 +1,11 @@
 <?php 
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
+ require_once "../../include/forms.php";
+
  $t = new MyView();
  $t->title = "Ag Climate";
  $t->thispage = "networks-agclimate";
- include "../../include/forms.php";
  $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
  $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
@@ -20,7 +21,6 @@ $old2new = Array(
  "/data/agclimate/et-out.png" => 6,
  "/data/agclimate/pk-wind-out.png" => 7,
  "/data/agclimate/avewind-out.png" => 8,
- "/data/agclimate/dwpts.png" => 9,
  "/data/agclimate/mon-et-out.png" => 10,
  "/data/agclimate/mon-prec-out.png" => 11 );
 
@@ -71,10 +71,6 @@ often too low.",
  "mapurl" => "/data/agclimate/avewind-out.png",
  "desc" => "Average wind speed for the day as recorded by the data logger
             on the station.",
-),
-9 => Array(
- "mapurl" => "/data/agclimate/dwpts.png",
- "desc" => "High and low dew points for the day."
 ),
 10 => Array(
  "mapurl" => "/GIS/apps/agclimate/month.php?dvar=dailyet&direct=yes&year=$year&month=$month",
@@ -162,7 +158,6 @@ $t->content = <<<EOF
   <A HREF="display.php?prod=6">Potential E-T</A><br>
   <A HREF="display.php?prod=7">Peak Wind Gust (5 sec)</A><br>
   <A HREF="display.php?prod=8">Average Wind Speed</A><br>
-  <A HREF="display.php?prod=9">Max/Min Dew Points</A><br>
 </div>
   </td>
 </tr>
