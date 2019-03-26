@@ -1,14 +1,14 @@
 <?php
- include("../../config/settings.inc.php");
- include_once "../../include/myview.php";
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
  $t = new MyView();
  
- $t->title = "ISU Ag Climate Network Metadata";
+ $t->title = "ISUSM - Network Metadata";
  $t->thispage = "networks-agclimate";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-		<li><a href="/agclimate/">ISU Ag Climate</a></li>
+		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
 		<li class="active">Network Metadata</li>
 </ol>
 

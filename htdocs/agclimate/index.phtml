@@ -1,9 +1,10 @@
 <?php 
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php"; 
+ require_once "../../include/mlib.php";
+
  define("IEM_APPID", 10); 
  $OL = "4.2.0";
- include "../../include/myview.php"; 
- include "../../include/mlib.php";
  $t = new MyView();
  $t->title = "ISU Soil Moisture Network"; 
  $t->thispage = "networks-agclimate";
@@ -39,29 +40,40 @@ EOF;
  
  $t->content = <<<EOF
 
-<h3><span class="badge">New!</span> ISU Soil Moisture Network</h3>
- <div class="alert alert-info">
- Iowa State University is in the process of deploying a new network of 
- automated weather equipment with the standard suite of weather instruments 
- along with soil temperature and moisture sensors.  The soil moisture data is
- a work-in-progress as a calibration step is yet necessary at many of the sites.
- </div>
+<h3>ISU Soil Moisture Network</h3>
+
+<p>
+Iowa State University maintains a network of observation stations located primarily
+at the <a href="https://www.farms.ag.iastate.edu/">Research and Demonstration Farms</a>, but
+also at cooperating locations.  Data from this network dates back to 1986!  The stations
+comprising the network has changed over the years with a complete network replacement started
+during 2012.
+</p>
  
 <form name="mapper">
 <div class="row">
 	<div class="col-md-3 col-sm-5 well">
 
-<h4>Available Tools:</h4>
+<h4>Popular Tools:</h4>
 <div class="list-group">
-<a href="/agclimate/soilt.php" class="list-group-item"><i class="fa fa-picture-o"></i> County Soil Temp Map</a>
-<a href="hist/daily.php" class="list-group-item"><i class="fa fa-cloud-download"></i>  Daily Data Download</a>
-<a href="hist/hourly.php" class="list-group-item"><i class="fa fa-cloud-download"></i> Hourly Data Download</a>
-<a href="/sites/networks.php?network=ISUSM" class="list-group-item"><i class="fa fa-info"></i> Listing of Stations</a>
-<a href="smts.php" class="list-group-item"><i class="fa fa-signal"></i> Plot Time Series</a>
-<a href="info.phtml" class="list-group-item"><i class="fa fa-wrench"></i> Sensor Package</a>
-<a href="current.phtml" class="list-group-item"><i class="fa fa-refresh"></i> Sortable Currents</a>
-<a href="/sites/locate.php?network=ISUSM" class="list-group-item"><i class="fa fa-info"></i> Station Metadata</a>
-<a href="/agclimate/usage/" class="list-group-item"><i class="fa fa-signal"></i> Website Usage Stats</a>
+<a href="soilt.php" class="list-group-item">
+  <i class="fas fa-image"></i> County Soil Temp Map</a>
+<a href="hist/daily.php" class="list-group-item">
+  <i class="fas fa-cloud-download-alt"></i>  Daily Data Download</a>
+<a href="/GIS/apps/agclimate/gsplot.phtml" class="list-group-item">
+  <i class="fas fa-image"></i> Growing Season Maps</a>
+<a href="hist/hourly.php" class="list-group-item">
+  <i class="fas fa-cloud-download-alt"></i> Hourly Data Download</a>
+<a href="/sites/networks.php?network=ISUSM" class="list-group-item">
+  <i class="fas fa-info"></i> Listing of Stations</a>
+<a href="smts.php" class="list-group-item">
+  <i class="fas fa-signal"></i> Plot Time Series</a>
+<a href="info.phtml" class="list-group-item">
+  <i class="fas fa-wrench"></i> Sensor Package</a>
+<a href="current.phtml" class="list-group-item">
+  <i class="fas fa-sync-alt"></i> Sortable Currents</a>
+<a href="/sites/locate.php?network=ISUSM" class="list-group-item">
+  <i class="fas fa-info"></i> Station Metadata</a>
 </div>
 
 	</div>
@@ -109,67 +121,57 @@ EOF;
 </div>
 </form>
 
-<div class="alert alert-info">
- <h4>Rainfall Disclaimer:</h4>
-<p>The Soil Moisture Network uses a non-heated tipping bucket rain gage and is
-unable to measure snowfall. If you are interested in higher quality 
-precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
-of human observations.</div>
- 				
- 				
-<h3>Legacy ISU AgClimate Network</h3>
-
-<div class="alert alert-danger"><span class="badge">23 April 2014:</span> Data
- is no longer being collected from these stations.  You will want to 
- use the "Soil Moisture Network" above as your source for this type of data.
- </div> 
- 				
-<p>The Iowa State University "Ag Climate" network is one of the nation's 
-oldest automated weather observation networks with data dating back to 1986.
-These stations are scheduled to be removed during the spring of 2014.</p>
-
 <div class="row">
- 	<div class="col-md-4 col-sm-4">
- 		<h4>Available Tools:</h4>
+ 	<div class="col-md-6 col-sm-6">
+
+	 <h4>Rainfall Disclaimer:</h4>
+	 <p>The Soil Moisture Network uses a non-heated tipping bucket rain gage and is
+	 unable to measure snowfall. If you are interested in higher quality 
+	 precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
+	 of human observations.</p>
+	 
+	 <h4>Additional Tools/Apps:</h4>
 <ul>
- <li><a href="hist/hourlyRequest.php">Hourly Data Download</a></li>
-<li><a href="hist/dailyRequest.php">Daily Data Download</a></li>
-<li><a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season</a></li>
-<li><a href="soilt.php">4 inch Soil Temperatures</a></li>
-<li><a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a></li>
-<li><a href="/plotting/auto/?q=177">Time Series Charts</a></li>
 <li><a href="soilt-prob.php">4 inch Soil Temperature Probabilities</a></li>
 <li><a href="/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a></li>
 </ul>			
- 	</div>
- 	<div class="col-md-4 col-sm-4">
  	<h4>Information:</h4>
 <ul>
 <li><a href="/agclimate/info.phtml">Information</a> about network stations.</li>
 <li><a href="et.phtml">Information on Evapotranspiration</a> calculations</li>
+<li><a href="/agclimate/usage/">Website Usage Stats</a></li>
 </ul>		
- 	<h4>Accumulated values:</h4>
-<ul>
- 	<li><a href="display.php?prod=10">Monthly evapotranspiration</a></li>
-    <li><a href="display.php?prod=11">Monthly rainfall</a></li>
-    <li><a href="display.php?prod=12">Standard Chill Units since 1 Sept</a></li>
-</ul>	
+
  	</div>
- 	<div class="col-md-4 col-sm-4">
- <h4>Plots:</h4>
+ 	<div class="col-md-6 col-sm-6">
+
+<h4>Temperature Plots:</h4>
 <ul>
   <li><a href="display.php?prod=1">Max/Min Air Temps</a></li>
+	<li><a href="display.php?prod=12">Standard Chill Units since 1 Sept</a></li>
+</ul>
+
+<h4>Soil Plots:</h4>
+<ul>
   <li><a href="display.php?prod=2">Avg 4in Soil Temps</a></li>
   <li><a href="display.php?prod=3">Max/Min 4in Soil Temps</a></li>
-  <li><a href="/agclimate/soilt.php">County-based Soil Temps</a></li>
-  <li><a href="display.php?prod=4">Solar Radiation Values</a></li>
-  <li><a href="/GIS/apps/agclimate/dayplot.phtml?pvar=c90">Precipitation</a></li>
+</ul>
+
+<h4>Moisture Plots:</h4>
+<ul>
+  <li><a href="display.php?prod=10">Monthly evapotranspiration</a></li>
+  <li><a href="display.php?prod=11">Monthly rainfall</a></li>
   <li><a href="display.php?prod=6">Potential E-T</a></li>
+</ul>
+
+<h4>Solar/Wind</h4>
+<ul>
+  <li><a href="display.php?prod=4">Solar Radiation Values</a></li>
   <li><a href="display.php?prod=7">Peak Wind Gust (5 sec)</a></li>
   <li><a href="display.php?prod=8">Average Wind Speed</a></li>
-  <li><a href="display.php?prod=9">Max/Min Dew Points</a></li>				
 </ul>
- 	</div>
+
+</div>
 </div>
 
 EOF;

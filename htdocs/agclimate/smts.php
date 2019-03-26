@@ -1,13 +1,14 @@
 <?php 
-include("../../config/settings.inc.php");
 define("IEM_APPID", 114);
+require_once "../../config/settings.inc.php";
+require_once "../../include/forms.php"; 
+require_once "../../include/imagemaps.php"; 
 include_once "../../include/myview.php";
+
 $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
 $t->thispage = "networks-agclimate";
 
-require_once "../../include/forms.php"; 
-include_once "../../include/imagemaps.php"; 
 
 $now = time();
 $d2 = time() - 5 * 86400;
@@ -88,7 +89,7 @@ if ($errmsg != ""){
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
- <li><a href="/agclimate/">AgClimate Network</a></li>
+ <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
  <li class="active">Soil Moisture Plots</li>
 </ol>
 

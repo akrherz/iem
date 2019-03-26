@@ -1,12 +1,12 @@
 <?php
 /* Create a table of soil temperature probabilities based on obs? */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 88);
 include_once "../../include/myview.php";
 $t = new MyView();
-include("../../include/database.inc.php");
+require_once "../../include/database.inc.php";
 $t->thispage = "networks-agclimate";
-include("../../include/imagemaps.php");
+require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
 
 $station = isset($_GET["station"]) ? xssafe($_GET['station']): "A130209";
@@ -88,11 +88,11 @@ $fall .= "</table>";
 
 $sselect = isuagSelect($station);
 
-$t->title = "ISU Ag Climate Soil Temperature Probabilities";
+$t->title = "ISUSM - Soil Temperature Probabilities";
 $t->content = <<<EOF
 <ol class="breadcrumb">
-		<li><a href="/agclimate/">ISU Ag Climate</a></li>
-		<li class="active">Soil Temp Probs</li>
+		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+		<li class="active">Soil Temperature Probabilities</li>
 </ol>
 
 <h3>4 inch Soil Temperature Probabilities</h3>
