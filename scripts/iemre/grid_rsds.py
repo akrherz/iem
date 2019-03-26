@@ -61,7 +61,7 @@ def do_hrrr(ts):
     xaxis = None
     yaxis = None
     for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
-        utcnow = ts.replace(hour=hr).astimezone(pytz.utc)
+        utcnow = ts.replace(hour=hr).astimezone(pytz.UTC)
         fn = utcnow.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                               "hrrr.t%Hz.3kmf00.grib2"))
         if not os.path.isfile(fn):
@@ -74,7 +74,9 @@ def do_hrrr(ts):
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            print('iemre/grid_rsds.py %s had no solar rad' % (fn,))
+            # don't complain about late evening no-solar
+            if utcnow.hour > 10:
+                print('iemre/grid_rsds.py %s had no solar rad' % (fn,))
             continue
         if not grb:
             print('Could not find SWDOWN in HRR %s' % (fn,))
