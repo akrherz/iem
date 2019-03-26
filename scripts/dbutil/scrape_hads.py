@@ -10,7 +10,7 @@ from pyiem.reference import nwsli2state, nwsli2country
 
 def main():
     """Go Main Go"""
-    hads_pgconn = get_dbconn('hads', user='mesonet', port=5556)
+    hads_pgconn = get_dbconn('hads')
     mesosite_pgconn = get_dbconn('mesosite')
     mcursor = mesosite_pgconn.cursor()
     udf = read_sql("""
