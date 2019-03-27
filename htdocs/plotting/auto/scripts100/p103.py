@@ -7,8 +7,8 @@ from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'spring': '1 January - 30 June',
-         'fall': '1 July - 31 December'}
+PDICT = {'spring': '1 January - 31 December',
+         'fall': '1 July - 30 June'}
 
 
 def get_description():
@@ -39,33 +39,36 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
+    year = (
+        "case when month > 6 then year + 1 else year end"
+        if season == 'fall'
+        else 'year'
+    )
     df = read_sql("""
     WITH obs as (
-        SELECT day, year, month, high, low,
-        case when month > 6 then 'fall' else 'spring' end as season
+        SELECT day, month, high, low,
+        """ + year + """ as season
         from """ + table + """ WHERE station = %s),
     data as (
-        SELECT year, day, season,
-        max(high) OVER (PARTITION by year, season ORDER by day ASC
-                        ROWS BETWEEN 183 PRECEDING and CURRENT ROW) as mh,
-        min(low) OVER (PARTITION by year, season ORDER by day ASC
-                       ROWS BETWEEN 183 PRECEDING and CURRENT ROW) as ml
+        SELECT season, day,
+        max(high) OVER (PARTITION by season ORDER by day ASC
+                        ROWS BETWEEN 366 PRECEDING and CURRENT ROW) as mh,
+        min(low) OVER (PARTITION by season ORDER by day ASC
+                       ROWS BETWEEN 366 PRECEDING and CURRENT ROW) as ml
         from obs),
     lows as (
-        SELECT year, day, ml as level, season,
-        rank() OVER (PARTITION by year, ml ORDER by day ASC) from data
-        WHERE season = 'fall'),
+        SELECT season, day, ml as level,
+        rank() OVER (PARTITION by season, ml ORDER by day ASC) from data),
     highs as (
-        SELECT year, day, mh as level, season,
-        rank() OVER (PARTITION by year, mh ORDER by day ASC) from data
-        WHERE season = 'spring')
+        SELECT season, day, mh as level,
+        rank() OVER (PARTITION by season, mh ORDER by day ASC) from data)
 
-    (SELECT year, day, extract(doy from day) as doy,
-     level, season from lows WHERE rank = 1) UNION
-    (SELECT year, day, extract(doy from day) as doy,
-     level, season from highs WHERE rank = 1)
+    (SELECT season as year, day, extract(doy from day) as doy,
+     level, 'fall' as typ from lows WHERE rank = 1) UNION
+    (SELECT season as year, day, extract(doy from day) as doy,
+     level, 'spring' as typ from highs WHERE rank = 1)
     """, pgconn, params=[station])
-    df2 = df[df['season'] == season]
+    df2 = df[df['typ'] == season]
     (fig, ax) = plt.subplots(3, 1, figsize=(7, 10))
     dyear = df2.groupby(['year']).count()
     ax[0].bar(dyear.index, dyear['level'], facecolor='tan', edgecolor='tan')
