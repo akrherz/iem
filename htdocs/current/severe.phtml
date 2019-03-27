@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->thispage = "severe-main";
 $t->title = "Severe Weather Products";
@@ -59,13 +59,22 @@ $t->content = <<<EOF
   choice.</li>
 <li><a href="/cow/top10.phtml">Top 10 Polygon Sizes</a>
   <br />List top 10 largest and smallest storm based warnings by WFO.</li>
-<li><a href="/plotting/auto/?q=92">Days since VTEC WWA Product</a>
+
+  <li><a href="/plotting/auto/?q=92">Days since VTEC WWA Product</a>
   <br />Generates a map of the number of days since a VTEC WWA Product.</li>
+
+  <li><a href="/vtec/events.php">VTEC Events by WFO or State by Year</a>
+  <br />Simple table listing any VTEC events by a given WFO or state for
+  a given year.</li>
 
    <li><a href="/vtec/maxetn.php">Maximum VTEC EventID (ETN) by year</a>
   <br />This diagnostic prints out the maximum issued VTEC eventid (ETN) by
 year.  A useful diagnostic for a NWS Office wishing to check their local VTEC
 eventd database.</li>
+
+<li><a href="/vtec/emergencies.php">Tornado + Flash Flood Emergencies listing</a>
+<br />Simple table showing IEM indicated Tornado and Flash Flood Emergency 
+events.</li>
 
 <li><a href="/vtec/yearly_counts.php">Yearly counts of VTEC Products</a>
   <br />Generates a table of the number of VTEC products issued by year.</li>

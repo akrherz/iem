@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "NWS Related Information";
 $t->thispage = "iem-info";
@@ -122,10 +122,18 @@ options listed.</p>
    <li><a href="/vtec/yearly_counts.php">Number of VTEC Events by year</a>
   <br />Table of the number of VTEC events by year.</li>
 
+  <li><a href="/vtec/events.php">VTEC Events by WFO or State by Year</a>
+  <br />Simple table listing any VTEC events by a given WFO or state for
+  a given year.</li>
+
    <li><a href="/vtec/maxetn.php">Maximum VTEC EventID (ETN) by year</a>
   <br />This diagnostic prints out the maximum issued VTEC eventid (ETN) by
 year.  A useful diagnostic for a NWS Office wishing to check their local VTEC
 eventd database.</li>
+
+<li><a href="/vtec/emergencies.php">Tornado + Flash Flood Emergencies listing</a>
+<br />Simple table showing IEM indicated Tornado and Flash Flood Emergency 
+events.</li>
 
  <li><a href="/cow/sbwsum.phtml">Summary Images of Daily Storm Based Warnings</a>
   <br />Displays just the storm based warning geometries for one UTC day
