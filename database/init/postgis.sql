@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (29, now());
+INSERT into iem_schema_manager_version values (30, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -868,7 +868,8 @@ CREATE TABLE warnings (
     hvtec_nwsli character(5),
     gid int references ugcs(gid),
     init_expire timestamp with time zone not null,
-    product_issue timestamp with time zone not null
+    product_issue timestamp with time zone not null,
+    is_emergency boolean
 ) WITH OIDS;
 
 grant select on warnings to apache,nobody;
@@ -1185,7 +1186,8 @@ create table sbw(
   tml_valid timestamp with time zone,
   tml_direction smallint,
   tml_sknt smallint,
-  updated timestamptz
+  updated timestamptz,
+  is_emergency boolean
 ) WITH OIDS;
 select addgeometrycolumn('','sbw','geom',4326,'MULTIPOLYGON',2);
 select addGeometryColumn('sbw', 'tml_geom', 4326, 'POINT', 2);
