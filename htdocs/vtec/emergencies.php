@@ -53,6 +53,8 @@ may not immediately appear here.  You may wonder how events prior to the impleme
 of VTEC have eventids.  These were retroactively generated and assigned by the IEM.
 </div>
 
+<p>Link to <a href="https://en.wikipedia.org/wiki/List_of_United_States_tornado_emergencies">Wikipedia List of United States tornado emergencies</a>.</p>
+
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
 <br /><code>https://mesonet.agron.iastate.edu/json/vtec_emergencies.py
