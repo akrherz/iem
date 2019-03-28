@@ -6,6 +6,8 @@ from metpy.units import units
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.tracker import loadqc
+
 
 PLOTTYPES = {
     "1": "Daily Max/Min 4 Inch Soil Temps",
@@ -57,6 +59,8 @@ def plot1(ctx):
     data = []
     for station, row in df.iterrows():
         if station not in ctx['nt'].sts:
+            continue
+        if ctx['qc'].get(station, {}).get('soil4', False):
             continue
         data.append({
             'lon': ctx['nt'].sts[station]['lon'],
@@ -244,6 +248,7 @@ def plot8(ctx):
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
+    ctx['qc'] = loadqc(date=ctx['date'])
     ctx['pgconn'] = get_dbconn('isuag')
     ctx['nt'] = NetworkTable("ISUSM")
     # Adjust stations to make some room
