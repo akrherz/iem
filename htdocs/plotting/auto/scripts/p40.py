@@ -176,7 +176,8 @@ def plotter(fdict):
     for _, row in df.iterrows():
         delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)
         data[:, delta] = 0
-        vsby[0, delta] = row['vsby']
+        if not np.isnan(row['vsby']):
+            vsby[0, delta] = row['vsby']
         for i in range(1, 5):
             a = lookup.get(row['skyc%s' % (i,)], -1)
             if a >= 0:
@@ -202,6 +203,5 @@ def plotter(fdict):
 if __name__ == '__main__':
     plotter(
         dict(
-            station='DSM', year=2019, month=3, ptype='vsby',
-            network='IA_ASOS'))
-
+            zstation='RAS', year=2011, month=12, ptype='vsby',
+            network='TX_ASOS'))
