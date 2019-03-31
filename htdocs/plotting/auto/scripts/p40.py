@@ -163,10 +163,12 @@ def plotter(fdict):
 
     df = read_sql("""
         SELECT valid, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
-        vsby from alldata where station = %s and valid BETWEEN %s and %s
+        vsby,
+        extract(epoch from (valid - %s))/3600. as hours
+        from alldata where station = %s and valid BETWEEN %s and %s
         and report_type = 2
         ORDER by valid ASC
-    """, pgconn, params=(station, sts, ets), index_col=None)
+    """, pgconn, params=(sts, station, sts, ets), index_col=None)
 
     lookup = {'CLR': 0, 'FEW': 25, 'SCT': 50, 'BKN': 75, 'OVC': 100}
 
@@ -174,7 +176,7 @@ def plotter(fdict):
         raise ValueError("No database entries found for station, sorry!")
 
     for _, row in df.iterrows():
-        delta = int((row['valid'] - sts).total_seconds() / 3600 - 1)
+        delta = int(row['hours'] - 1)
         data[:, delta] = 0
         if not np.isnan(row['vsby']):
             vsby[0, delta] = row['vsby']
@@ -203,5 +205,5 @@ def plotter(fdict):
 if __name__ == '__main__':
     plotter(
         dict(
-            zstation='RAS', year=2011, month=12, ptype='vsby',
+            zstation='RAS', year=2012, month=3, ptype='vsby',
             network='TX_ASOS'))
