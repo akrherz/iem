@@ -49,7 +49,7 @@ def main(argv):
     """Do Stuff"""
     # Lets go!
     if len(argv) == 2:
-        get_files(argv[1])
+        get_files(int(argv[1]))
     else:
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
         get_files(yesterday.year)
