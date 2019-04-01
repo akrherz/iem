@@ -36,7 +36,7 @@ def main():
     if cb is None:
         ssw(json.dumps(root))
     else:
-        ssw("%s(%s)" % (cb, json.dumps(root)))
+        ssw("%s(%s)" % (cgi.escape(cb, quote=True), json.dumps(root)))
 
 
 if __name__ == '__main__':

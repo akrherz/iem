@@ -6,6 +6,8 @@
 header('content-type: application/json; charset=utf-8');
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+
 $dbconn = iemdb('mesosite');
 $rs = pg_prepare($dbconn, "SELECT",
 		"SELECT *, ST_x(geom) as lon, ST_y(geom) as lat ".
@@ -27,5 +29,6 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_REQUEST['callback']}($json)" );
+$cb = xssafe($_REQUEST["callback"]);
+exit( "{$cb}($json)" );
 ?>

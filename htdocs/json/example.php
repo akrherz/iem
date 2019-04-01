@@ -2,6 +2,7 @@
 /*
  * This is the example referenced on the /json/ webpage
  */
+require_once "../../include/forms.php";
 
 header('Content-type: application/json; charset=utf-8');
 
@@ -11,6 +12,7 @@ $json = '{"Name": "daryl", "Profession": "nerd", "Age": 99}';
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_REQUEST['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+echo "{$cb}($json)";
 
 ?>

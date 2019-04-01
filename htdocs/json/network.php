@@ -3,9 +3,11 @@
  * JSONP service for IEM Tracked network metadata
  */
 header('content-type: application/json; charset=utf-8');
-include_once "../../config/settings.inc.php";
-include_once "../../include/database.inc.php";
-include_once "../../include/network.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
+require_once "../../include/forms.php";
+
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "KCCI"; 
 $nt = new NetworkTable($network);
 
@@ -27,5 +29,7 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_REQUEST['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+echo "{$cb}($json)";
+
 ?>

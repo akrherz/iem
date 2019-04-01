@@ -6,6 +6,7 @@
 header('Content-type: application/json; charset=utf-8');
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
 $connect = iemdb("mesosite");
 
@@ -54,6 +55,7 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_REQUEST['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+echo "{$cb}($json)";
 
 ?>

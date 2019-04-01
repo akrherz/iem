@@ -2,9 +2,10 @@
 /* Generate a JSON file of network observations */
 header("Content-type: application/vnd.geo+json");
 require_once "../../config/settings.inc.php";
-include("../../include/database.inc.php");
-include("../../include/network.php");
-include("../../include/mlib.php");
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
+require_once "../../include/mlib.php";
+require_once "../../include/forms.php";
 
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "IA_ASOS"; 
 $callback = isset($_REQUEST["callback"]) ? $_REQUEST["callback"] : null; 
@@ -51,7 +52,7 @@ while (list($sid,$data) = each($mydata))
 }
 
 if ($callback != null){
-	echo sprintf("%s(%s);", $callback, json_encode($ar));
+	echo sprintf("%s(%s);", xssafe($callback), json_encode($ar));
 } else{
 	echo json_encode($ar);
 }

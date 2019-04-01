@@ -4,6 +4,8 @@
  */
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+
 $dbconn = iemdb('postgis');
 pg_query($dbconn, "SET TIME ZONE 'UTC'");
 $ugc = isset($_REQUEST["ugc"]) ? $_REQUEST["ugc"] : 'IAC001';
@@ -41,5 +43,6 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_GET['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+echo "{$cb}($json)";
 ?>

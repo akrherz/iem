@@ -187,7 +187,7 @@ def main():
     callback = form.getvalue('callback', None)
     if callback is not None:
         ssw("Content-type: application/javascript\n\n")
-        ssw("%s(" % (callback,))
+        ssw("%s(" % (cgi.escape(callback, quote=True),))
     else:
         ssw("Content-type: text/plain\n\n")
     if operation == "list":

@@ -4,6 +4,8 @@
  */
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+
 $dbconn = iemdb('postgis');
 $rs = pg_prepare($dbconn, "SELECT", "SELECT ugc, name " .
 		"from ugcs WHERE substr(ugc,1,2) = $1 and ugc is not null and
@@ -23,5 +25,6 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_REQUEST['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+echo "{$cb}($json)";
 ?>

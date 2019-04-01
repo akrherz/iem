@@ -58,7 +58,7 @@ def main():
     if cb is None:
         ssw(res)
     else:
-        ssw("%s(%s)" % (cb, res))
+        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
 
 
 if __name__ == '__main__':

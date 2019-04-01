@@ -5,8 +5,10 @@
  * Currently called by /DCP/plot.phtml
  */
 header('content-type: application/json; charset=utf-8');
-include_once "../../config/settings.inc.php";
-include_once "../../include/database.inc.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+
 $hads = iemdb('hads');
 $table = sprintf("raw%s_%s", date("Y"), date("m"));
 $rs = pg_prepare($hads, "SELECT", "SELECT distinct key from $table " .
@@ -31,5 +33,7 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_GET['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+echo "{$cb}($json)";
+
 ?>

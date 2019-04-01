@@ -5,6 +5,7 @@
 header('content-type: application/json; charset=utf-8');
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
 // This should be a UTC timestamp, gasp!
 $ts = isset($_REQUEST["ts"]) ? strtotime($_REQUEST["ts"]) : 0;
@@ -81,5 +82,6 @@ $json = json_encode($ar);
 if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_REQUEST['callback']}($json)" );
+$cb = xssafe($_REQUEST['callback']);
+exit( "{$cb}($json)" );
 ?>
