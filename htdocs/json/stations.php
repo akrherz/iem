@@ -3,7 +3,7 @@
  * JSON Service for station Table changes , limit the result to 1000 in order
  * to prevent memory overflows...
  */
-header('content-type: application/json; charset=utf-8');
+header('Content-type: application/json; charset=utf-8');
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";

@@ -1,4 +1,5 @@
-<?php header('content-type: application/json; charset=utf-8');
+<?php
+header('Content-type: application/json; charset=utf-8');
 /*
  * JSON Service for state UGC codes
  */

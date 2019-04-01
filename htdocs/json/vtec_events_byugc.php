@@ -2,6 +2,7 @@
 /*
  * JSON Service for VTEC events!
  */
+header('Content-type: application/json; charset=utf-8');
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
