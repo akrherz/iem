@@ -1,8 +1,8 @@
 <?php
 session_start();
 /* Web based feature publisher */
-include("../config/settings.inc.php");
-include("../include/database.inc.php");
+require_once "../config/settings.inc.php";
+require_once "../include/database.inc.php";
 require_once "../include/myview.php";
 require_once "../include/Facebook/autoload.php";
 
@@ -11,7 +11,7 @@ $t = new MyView();
 $fb = new \Facebook\Facebook([
   'app_id' => '148705700931',
   'app_secret' => $fb_feature_secret,
-  'default_graph_version' => 'v2.4'
+  'default_graph_version' => 'v2.10'
 ]);
 $helper = $fb->getRedirectLoginHelper();
 $permissions = ['publish_pages'];
