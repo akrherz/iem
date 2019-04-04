@@ -2,6 +2,14 @@
 //   mlib.php
 // Library of functions
 
+// Make sure a page is HTTPS when called
+function force_https(){
+  if (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] !== "on"){
+    header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+    exit();
+  }
+}
+
 //________________________________________________________
 function aSortBySecondIndex($multiArray, $secondIndex, $sorder="asc") {
     reset($multiArray);

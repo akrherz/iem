@@ -1,6 +1,8 @@
 <?php 
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 154);
+require_once "../../include/mlib.php";
+force_https();
 require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $gmapskey = get_iemprop("google.maps.key");
