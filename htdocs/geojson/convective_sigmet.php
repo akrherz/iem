@@ -16,11 +16,9 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT *,
 $rs = pg_execute($postgis, "SELECT", Array());
 
 
-$ar = Array("type"=>"FeatureCollection",
-      "crs" => Array("type"=>"EPSG", 
-                     "properties" => Array("code"=>4326,
-                                  "coordinate_order" => Array(1,0))),
-      "features" => Array()
+$ar = Array(
+  "type"=>"FeatureCollection",
+  "features" => Array()
 );
 
 $reps = Array();

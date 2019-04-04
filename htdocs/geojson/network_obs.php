@@ -35,9 +35,6 @@ while ( list($bogus, $iemob) = each($jobj["data"]) ){
 } // End of while
 
 $ar = Array("type"=>"FeatureCollection",
-      "crs" => Array("type"=>"EPSG", 
-                     "properties" => Array("code"=>4326,
-                                  "coordinate_order" => Array(1,0))),
       "features" => Array()
 );
 

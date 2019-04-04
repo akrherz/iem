@@ -26,9 +26,6 @@ def get_data(ts):
     pgconn = get_dbconn('iem')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection",
-            "crs": {"type": "EPSG",
-                    "properties": {"code": 4326,
-                                   "coordinate_order": [1, 0]}},
             "features": []}
     # Fetch the daily values
     cursor.execute("""

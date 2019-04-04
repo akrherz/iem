@@ -51,8 +51,6 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
         args = (wfo, etn, significance, phenomena, wfo)
     cursor.execute(sql, args)
     res = {'type': 'FeatureCollection',
-           'crs': {'type': 'EPSG',
-                   'properties': {'code': 4326, 'coordinate_order': [1, 0]}},
            'features': [],
            'generation_time': datetime.datetime.utcnow().strftime(
                "%Y-%m-%dT%H:%M:%SZ"),
@@ -90,8 +88,6 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     and status = 'NEW'
     """, (wfo, etn, phenomena, significance))
     res = {'type': 'FeatureCollection',
-           'crs': {'type': 'EPSG',
-                   'properties': {'code': 4326, 'coordinate_order': [1, 0]}},
            'features': [],
            'generation_time': datetime.datetime.utcnow().strftime(
                "%Y-%m-%dT%H:%M:%SZ"),
@@ -126,8 +122,6 @@ def run(wfo, year, phenomena, significance, etn):
     phenomena = %s and significance = %s
     """, (wfo, etn, phenomena, significance))
     res = {'type': 'FeatureCollection',
-           'crs': {'type': 'EPSG',
-                   'properties': {'code': 4326, 'coordinate_order': [1, 0]}},
            'features': [],
            'generation_time': datetime.datetime.utcnow().strftime(
                "%Y-%m-%dT%H:%M:%SZ"),

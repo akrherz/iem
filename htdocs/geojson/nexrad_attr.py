@@ -45,8 +45,6 @@ def run(ts):
               valid + datetime.timedelta(minutes=10), valid, valid))
 
     res = {'type': 'FeatureCollection',
-           'crs': {'type': 'EPSG',
-                   'properties': {'code': 4326, 'coordinate_order': [1, 0]}},
            'features': [],
            'generation_time': utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
            'count': cursor.rowcount}

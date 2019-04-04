@@ -49,9 +49,6 @@ def get_data(ts):
     qcdict = loadqc()
     nt = NetworkTable("ISUSM")
     data = {"type": "FeatureCollection",
-            "crs": {"type": "EPSG",
-                    "properties": {"code": 4326,
-                                   "coordinate_order": [1, 0]}},
             "features": []}
     # Fetch the daily values
     iemcursor.execute("""

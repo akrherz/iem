@@ -64,9 +64,6 @@ def run(network, month, day, syear, eyear):
     """, (sday, syear, eyear))
     data = {"type": "FeatureCollection",
             "month": month, "day": day, "network": network,
-            "crs": {"type": "EPSG",
-                    "properties": {"code": 4326,
-                                   "coordinate_order": [1, 0]}},
             "features": []}
 
     for i, row in enumerate(cursor):

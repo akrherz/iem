@@ -32,11 +32,9 @@ EOF;
 $rs = pg_exec($connect, $sql);
 
 
-$ar = Array("type"=>"FeatureCollection",
-      "crs" => Array("type"=>"EPSG", 
-                     "properties" => Array("code"=>4326,
-                                  "coordinate_order" => Array(1,0))),
-      "features" => Array()
+$ar = Array(
+  "type"=>"FeatureCollection",
+  "features" => Array()
 );
 $reps = Array();
 $subs = Array();

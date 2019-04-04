@@ -59,11 +59,9 @@ if (isset($_REQUEST["phenomena"])){
                                            date("Y-m-d H:i", $ets) ) );
 }
 
-$ar = Array("type"=>"FeatureCollection",
-      "crs" => Array("type"=>"EPSG", 
-                     "properties" => Array("code"=>4326,
-                                  "coordinate_order" => Array(1,0))),
-      "features" => Array()
+$ar = Array(
+   "type"=>"FeatureCollection",
+   "features" => Array()
 );
 
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
