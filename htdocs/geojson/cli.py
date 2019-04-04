@@ -45,8 +45,8 @@ def get_data(ts, fmt):
     precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
     snow_dec1, snow_record, snow_jul1_normal,
     snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal,
-    (case when snow_jul1 < 0.1 then 0 else snow_jul1 end)
-        - snow_jul1_normal as snow_jul1_depart
+    round(((case when snow_jul1 < 0.1 then 0 else snow_jul1 end)
+        - snow_jul1_normal)::numeric, 2) as snow_jul1_depart
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """, (ts.date(),))

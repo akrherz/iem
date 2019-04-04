@@ -1,14 +1,14 @@
 <?php
-$OL = "4.1.0";
-include_once "../../config/settings.inc.php";
+$OL = "5.3.0";
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "7 AM 24 Hour Precipitation Analysis";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
-<link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
         height: 400px;
@@ -22,9 +22,9 @@ $t->headextra = <<<EOF
 EOF;
 
 $t->jsextra = <<<EOF
-<script src="/vendor/openlayers/{$OL}/ol-debug.js" type="text/javascript"></script>
+<script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src='7am-app.js?v=8'></script>
 EOF;
 
@@ -78,6 +78,6 @@ $t->content = <<<EOF
 		
 
 EOF;
-$t->render("single.phtml");
+$t->render("full.phtml");
 
 ?>
