@@ -31,6 +31,7 @@ def plotter(fdict):
     df = read_sql("""
     with data as (
         select station, year, sum(precip) from """ + table + """
+        WHERE year >= 1893
         GROUP by station, year),
     stdata as (
         select year, sum from data where station = %s
@@ -47,7 +48,7 @@ def plotter(fdict):
     """, get_dbconn('coop'), params=(station, station), index_col='year')
 
     fig = plt.figure(figsize=(6, 7.5))
-    ax = fig.add_axes([0.1, 0.52, 0.8, 0.4])
+    ax = fig.add_axes([0.13, 0.52, 0.8, 0.4])
     meanval = df['percentile'].mean()
     bars = ax.bar(df.index.values, df['percentile'], color='b')
     for mybar in bars:
@@ -66,7 +67,7 @@ def plotter(fdict):
     )
 
     # second plot
-    ax = fig.add_axes([0.1, 0.07, 0.8, 0.4])
+    ax = fig.add_axes([0.13, 0.07, 0.8, 0.4])
     ax.bar(df.index.values, df['sum'] - df['avgval'])
     meanval = (df['sum'] - df['avgval']).mean()
     ax.axhline(meanval, color='green', lw=2, zorder=5)
