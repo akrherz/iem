@@ -29,13 +29,10 @@ if [ $DD -eq "02" ]
 fi
 
 cd ../dl
-python download_cfs.py &
-# (python download_cfs.py && cd ../yieldfx && python cfs2iemre_netcdf.py && python cfs_tiler.py) & 
 if [ $DD -eq "09" ]
 	then
 		 python download_narr.py $(date --date '13 days ago' +'%Y %m') &
 fi
-
 
 cd ../cache
 python warn_cache.py &

@@ -1,6 +1,6 @@
 """Download and archive the CFS data
 
-We'll do the 12 UTC run for yesterday run from RUN_2AM.sh
+Run from RUN_NOON.sh and we process the previous UTC day's data.
 
 tmax
 tmin
@@ -20,11 +20,14 @@ from pyiem.util import exponential_backoff
 REQUIRED_MSGS = 9 * 30 * 4
 
 
-def dl(now, varname):
+def dl(now, varname, scenario):
     """get the files"""
-    uri = now.strftime(("http://www.ftp.ncep.noaa.gov/data/nccf/com/cfs/prod/"
-                        "cfs/cfs.%Y%m%d/%H/time_grib_01/" +
-                        varname + ".01.%Y%m%d%H.daily.grb2"))
+    s2 = "%02i" % (scenario, )
+    uri = now.strftime(
+        ("https://www.ftp.ncep.noaa.gov/data/nccf/com/cfs/prod/"
+         "cfs/cfs.%Y%m%d/%H/time_grib_" + s2 + "/" + varname +
+         "." + s2 + ".%Y%m%d%H.daily.grb2")
+    )
     response = exponential_backoff(requests.get, uri, timeout=60)
     if response is None or response.status_code != 200:
         print('download_cfs.py: dl %s failed' % (uri,))
@@ -37,13 +40,13 @@ def dl(now, varname):
     # better be a big number
     grb = pygrib.open(tmpfn)
     if grb.messages < REQUIRED_MSGS:
-        print(("download_cfs %s %s has only %s messages, need %s+"
-               ) % (now, varname, grb.messages, REQUIRED_MSGS))
+        print(("download_cfs[%s] %s %s has only %s messages, need %s+"
+               ) % (scenario, now, varname, grb.messages, REQUIRED_MSGS))
     else:
         # Inject into LDM
         cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
-               "model/cfs/%02i/%s.01.%s.daily.grib2 grib' %s"
-               ) % (now.strftime("%Y%m%d%H%M"), now.hour, varname,
+               "model/cfs/%02i/%s.%s.%s.daily.grib2 grib' %s"
+               ) % (now.strftime("%Y%m%d%H%M"), now.hour, varname, s2,
                     now.strftime("%Y%m%d%H"), tmpfn)
         subprocess.call(cmd, shell=True)
 
@@ -53,9 +56,11 @@ def dl(now, varname):
 def main():
     """Do main"""
     now = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    now = now.replace(hour=12, minute=0, second=0, microsecond=0)
-    for varname in ['tmax', 'tmin', 'prate', 'dswsfc']:
-        dl(now, varname)
+    for hour in [0, 6, 12, 18]:
+        now = now.replace(hour=hour, minute=0, second=0, microsecond=0)
+        for varname in ['tmax', 'tmin', 'prate', 'dswsfc']:
+            # Control member 1 is the only one out 9 months
+            dl(now, varname, 1)
 
 
 if __name__ == '__main__':

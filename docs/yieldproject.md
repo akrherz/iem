@@ -1,3 +1,12 @@
+ 5 Apr 2019 Archontoulis, Angelos, Isaiah, one other
+ - The regional interest this year is IA, IL and IN
+ - [ ] investigate NASA Power and see how difference its radiation is
+ - There are three deliverables they want
+ - [ ] Static 1980-2018 PSIMs files, like I generated last year
+ - [ ] four routinely updated PSIMs files, one for each CFS 9 mon realization
+ - [ ] scenarios with all years substituted.  This may be too much data for
+       them, so lower priority for now.
+
  5 Jan 2017 Dr Archontoulis
  - Review Nov 1 to today plot, to ensure it is doing the right thing
  - [ ] remove the march 15 to today plot, not used

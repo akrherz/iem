@@ -1,4 +1,6 @@
-"""Generate PSIMs Tiles"""
+"""Generate PSIMs Tiles.
+
+Run from RUN_NOON.sh for the previous UTC date."""
 import datetime
 import os
 
@@ -95,23 +97,25 @@ def tile_extraction(nc, valid, west, south, isnewfile):
         if year != valid.year:
             continue
         # replace CFS!
-        renc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d.nc"))
+        cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
         tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
         tslice = slice(tidx0 + tidx, tidx1)
         nc.variables['srad'][tslice, :, :] = (
-            renc.variables['srad'][tidx:, jslice, islice] * 1000000. / 86400.)
+            cfsnc.variables['srad'][tidx:, jslice, islice] * 1000000. / 86400.)
         nc.variables['tmax'][tslice, :, :] = temperature(
-            renc.variables['high_tmpk'][tidx:, jslice, islice], 'K').value('C')
+            cfsnc.variables['high_tmpk'][tidx:, jslice, islice],
+            'K').value('C')
         nc.variables['tmin'][tslice, :, :] = temperature(
-            renc.variables['low_tmpk'][tidx:, jslice, islice], 'K').value('C')
+            cfsnc.variables['low_tmpk'][tidx:, jslice, islice],
+            'K').value('C')
         nc.variables['prcp'][tslice, :, :] = (
-            renc.variables['p01d'][tidx:, jslice, islice])
-        renc.close()
+            cfsnc.variables['p01d'][tidx:, jslice, islice])
+        cfsnc.close()
 
 
 def workflow(valid, ncfn, west, south):
     """Make the magic happen"""
-    basedir = "/mesonet/share/pickup/yieldfx/cfs"
+    basedir = "/mesonet/share/pickup/yieldfx/cfs%02i" % (valid.hour, )
     if not os.path.isdir(basedir):
         os.makedirs(basedir)
     nc, isnewfile = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
@@ -123,17 +127,19 @@ def main():
     """Go Main Go"""
     # Run for the 12z file yesterday
     today = datetime.date.today() - datetime.timedelta(days=1)
-    valid = utc(today.year, today.month, today.day, 12)
-    # Create tiles from -104 36 through -80 50
-    for west in np.arange(-104, -80, 2):
-        for south in np.arange(36, 50, 2):
-            # psims divides its data up into 2x2-degree tiles,
-            # with the first number in the file name being number
-            # of tiles since 90 degrees north, and the second number
-            # being number of tiles since -180 degrees eas
-            ncfn = "clim_%04i_%04i.tile.nc4" % ((90 - south) / 2,
-                                                (180 - (0 - west)) / 2 + 1)
-            workflow(valid, ncfn, west, south)
+    for hour in [0, 6, 12, 18]:
+        valid = utc(today.year, today.month, today.day, hour)
+        # Create tiles to cover IA, IL, IN
+        for west in np.arange(-98, -84, 2):
+            for south in np.arange(36, 54, 2):
+                # psims divides its data up into 2x2-degree tiles,
+                # with the first number in the file name being number
+                # of tiles since 90 degrees north, and the second number
+                # being number of tiles since -180 degrees eas
+                ncfn = "clim_%04i_%04i.tile.nc4" % (
+                    (90 - south) / 2, (180 - (0 - west)) / 2 + 1
+                )
+                workflow(valid, ncfn, west, south)
 
 
 if __name__ == '__main__':

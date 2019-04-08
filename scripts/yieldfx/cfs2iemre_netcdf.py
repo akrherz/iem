@@ -1,6 +1,6 @@
-"""Convert the CFS grib data into something mimicing IEMRE
+"""Convert the CFS grib data into something mimicing IEMRE.
 
-This will allow for downstream usage by PSIMS
+This will allow for downstream usage by PSIMS. Run from RUN_NOON.sh
 """
 import os
 import sys
@@ -20,8 +20,10 @@ AGGFUNC = {'srad': np.add, 'high_tmpk': np.maximum, 'low_tmpk': np.minimum,
 
 def merge(nc, valid, gribname, vname):
     """Merge in the grib data"""
-    fn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/" +
-                         gribname + ".01.%Y%m%d%H.daily.grib2"))
+    fn = valid.strftime(
+        ("/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/" + gribname +
+         ".01.%Y%m%d%H.daily.grib2")
+    )
     if not os.path.isfile(fn):
         print("cfs2iemre missing %s, abort" % (fn, ))
         sys.exit()
@@ -53,7 +55,7 @@ def merge(nc, valid, gribname, vname):
 
 def create_netcdf(valid):
     """Create and return the netcdf file"""
-    ncfn = "/mesonet/data/iemre/cfs_%s.nc" % (valid.strftime("%Y%m%d"), )
+    ncfn = "/mesonet/data/iemre/cfs_%s.nc" % (valid.strftime("%Y%m%d%H"), )
     nc = ncopen(ncfn, 'w')
     nc.title = "IEM Regridded CFS Member 1 Forecast %s" % (valid.year,)
     nc.platform = "Grided Forecast"
@@ -71,7 +73,7 @@ def create_netcdf(valid):
     # Setup Dimensions
     nc.createDimension('lat', iemre.NY)
     nc.createDimension('lon', iemre.NX)
-    days = ((valid.replace(year=valid.year+1)) - valid).days
+    days = iemre.daily_offset(valid.replace(month=12, day=31)) + 1
     nc.createDimension('time', int(days))
 
     # Setup Coordinate Variables
@@ -140,15 +142,16 @@ def main():
     """Go Main Go"""
     # Run for 12z yesterday
     today = datetime.date.today() - datetime.timedelta(days=1)
-    valid = utc(today.year, today.month, today.day, 12)
-    # Create netcdf file
-    nc = create_netcdf(valid)
-    # merge in the data
-    for gribname, vname in zip(['tmax', 'tmin', 'dswsfc', 'prate'],
-                               ['high_tmpk', 'low_tmpk', 'srad', 'p01d']):
-        merge(nc, valid, gribname, vname)
-    # profit
-    nc.close()
+    for hour in [0, 6, 12, 18]:
+        valid = utc(today.year, today.month, today.day, hour)
+        # Create netcdf file
+        nc = create_netcdf(valid)
+        # merge in the data
+        for gribname, vname in zip(['tmax', 'tmin', 'dswsfc', 'prate'],
+                                   ['high_tmpk', 'low_tmpk', 'srad', 'p01d']):
+            merge(nc, valid, gribname, vname)
+        # profit
+        nc.close()
 
 
 if __name__ == '__main__':
