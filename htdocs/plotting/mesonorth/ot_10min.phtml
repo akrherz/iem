@@ -1,7 +1,7 @@
 <?php 
-include("../../../config/settings.inc.php");
-include_once "../../../include/myview.php";
-include("../../../include/forms.php"); 
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php"; 
 
 $t = new MyView();
 $t->title = "B548 Agronomy Time Series";
@@ -83,6 +83,9 @@ cooled air departs the heat exchanger.</li>
   <br />Chilled water is turned off for an hour to check metering.</li>
  <li><a href="ot_10min.phtml?year=2016&month=8&day=9">9 Aug 2016</a> 
   <br />Fan bracket is repaired on heat exchanger.</li>
+  <li><a href="ot_10min.phtml?year=2019&month=4&day=10">10 Apr 2019</a> 
+  <br />Lightning strike knocks out chilled water and then power surge
+  knocks out a few servers.</li>
 </ul>
 
 EOF;
