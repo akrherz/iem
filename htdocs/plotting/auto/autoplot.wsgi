@@ -97,7 +97,9 @@ def handle_error(exp, fmt, uri):
 
 def get_res_by_fmt(p, fmt, fdict):
     """Do the work of actually calling things"""
-    if p >= 100:
+    if p >= 200:
+        name = "scripts200/p%s" % (p, )
+    elif p >= 100:
         name = "scripts100/p%s" % (p, )
     else:
         name = 'scripts/p%s' % (p,)
