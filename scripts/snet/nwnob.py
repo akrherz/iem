@@ -79,7 +79,7 @@ class nwnOB:
         """Duration"""
         if self.valid is None or self.lvalid is None:
             return 0
-        return int(self.valid - self.lvalid) / 60
+        return int((self.valid - self.lvalid).total_seconds()) / 60
 
     def setGust(self, newGust):
         # This is some logic to set the maximum wind speed.  A couple of

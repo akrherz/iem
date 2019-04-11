@@ -16,7 +16,7 @@ export yyyymmdd="`date --date '1 day ago' +'%Y%m%d'`"
 export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 export dd="`date --date '1 day ago' +'%d'`"
 
-PREFIXES="iem iemssl cocorahs datateam idep schoolnet8 sustainablecorn weatherim wepp"
+PREFIXES="iem iemssl cocorahs datateam idep schoolnet8 sustainablecorn weatherim wepp depbackend"
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108 iemvs109"
 CONFBASE="/opt/iem/scripts/webalizer"
 
