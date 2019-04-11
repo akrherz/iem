@@ -175,7 +175,7 @@ def plotter(fdict):
     SELECT * from data where rank = 1
     """, pgconn, params=(
         p.split(".")[1], p.split(".")[0],
-        level.split(".")[1], level.split(".")[0],
+        level.split(".", 1)[1], level.split(".")[0],
         GRIDWEST, GRIDSOUTH, GRIDWEST, GRIDNORTH, GRIDEAST,
         GRIDNORTH, GRIDEAST, GRIDSOUTH, GRIDWEST, GRIDSOUTH,
         tuple([hour - 1, hour, hour + 1])),
