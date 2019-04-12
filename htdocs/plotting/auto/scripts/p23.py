@@ -5,12 +5,10 @@ from collections import OrderedDict
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pandas.plotting import register_matplotlib_converters
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
-register_matplotlib_converters()
 
 PDICT = OrderedDict([
             ('avg_high', 'Average High Temperature [F]'),

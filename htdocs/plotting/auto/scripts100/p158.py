@@ -36,6 +36,7 @@ def get_context(fdict):
     pgconn = get_dbconn('talltowers',
                         host='iemdb-talltowers.local', user='tt_web')
     ctx = get_autoplot_context(fdict, get_description())
+    ctx['dt'] = ctx['dt'].replace(tzinfo=pytz.UTC)
     dt = ctx['dt']
     station = ctx['station']
     minutes = ctx['minutes']

@@ -3,7 +3,7 @@ import calendar
 import datetime
 
 from pandas.io.sql import read_sql
-from matplotlib import mlab
+from scipy.stats import norm
 import numpy as np
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
@@ -87,16 +87,17 @@ def plotter(fdict):
     stateavg = df.at["%s0000" % (state, ), ptype]
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    _, bins, _ = ax.hist(df[ptype].dropna(), 20, fc='lightblue',
-                         ec='lightblue', normed=1)
-    y = mlab.normpdf(bins, df[ptype].mean(), df[ptype].std())
+    _, bins, _ = ax.hist(
+        df[ptype].dropna(), 20, fc='lightblue', ec='lightblue', density=1
+    )
+    y = norm.pdf(bins, df[ptype].mean(), df[ptype].std())
     ax.plot(bins, y, 'b--', lw=2,
             label=(r"%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
                    ) % (year, df[ptype].std(), df[ptype].mean()))
 
     bins = np.linspace(climo_avg - (climo_std * 3.),
                        climo_avg + (climo_std * 3.), 30)
-    y = mlab.normpdf(bins, climo_avg, climo_std)
+    y = norm.pdf(bins, climo_avg, climo_std)
     ax.plot(bins, y, 'g--', lw=2,
             label=(r"Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
                    ) % (climo_std, climo_avg))

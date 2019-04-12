@@ -190,7 +190,8 @@ def workflow(environ, form, fmt):
         content = report
     elif fmt in ['csv', 'xlsx'] and df is not None:
         if fmt == 'csv':
-            content = df.to_csv(index=(df.index.name is not None))
+            content = df.to_csv(
+                index=(df.index.name is not None), header=True)
         elif fmt == 'xlsx':
             # Can't write to ram buffer yet, unimplmented upstream
             (_, tmpfn) = tempfile.mkstemp()

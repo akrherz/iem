@@ -50,13 +50,13 @@ def get_description():
              label='End Date / Time (UTC):', min="2005/01/01 0000"),
         dict(type='select', name='var', default='count', options=PDICT,
              label='Which metric to plot:'),
-        dict(type='vtec_ps', name='v1', default='UNUSED',
+        dict(type='vtec_ps', name='v1', default='SV.W',
              label='VTEC Phenomena and Significance 1'),
-        dict(type='vtec_ps', name='v2', default='UNUSED', optional=True,
+        dict(type='vtec_ps', name='v2', default='SV.W', optional=True,
              label='VTEC Phenomena and Significance 2'),
-        dict(type='vtec_ps', name='v3', default='UNUSED', optional=True,
+        dict(type='vtec_ps', name='v3', default='SV.W', optional=True,
              label='VTEC Phenomena and Significance 3'),
-        dict(type='vtec_ps', name='v4', default='UNUSED', optional=True,
+        dict(type='vtec_ps', name='v4', default='SV.W', optional=True,
              label='VTEC Phenomena and Significance 4'),
     ]
     return desc

@@ -85,7 +85,7 @@ def plotter(fdict):
                                                threshold),
                  subtitle='based on NWS COOP and IEM Daily Estimates')
     levs = np.linspace(df['doy'].min() - 3, df['doy'].max() + 3, 7, dtype='i')
-    levlables = map(f, levs)
+    levlables = list(map(f, levs))
     if popt == 'contour':
         mp.contourf(df['lon'], df['lat'], df['doy'], levs,
                     clevlabels=levlables)

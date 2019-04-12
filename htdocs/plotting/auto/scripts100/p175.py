@@ -2,6 +2,7 @@
 
 TODO: the database has this now as the 0000 sites
 """
+import os
 import datetime
 
 import numpy as np
@@ -38,6 +39,7 @@ def get_description():
 
 
 def f(st, snowd, metric, stpts):
+    """f is for Fancy."""
     v = np.ma.sum(
         np.ma.where(
             np.ma.logical_and(st > 0, snowd >= metric), 1, 0)
@@ -64,7 +66,10 @@ def plotter(fdict):
                                            geom_col='the_geom')
 
     sidx = iemre.daily_offset(sts)
-    nc = ncopen(iemre.get_daily_ncname(sts.year))
+    ncfn = iemre.get_daily_ncname(sts.year)
+    if not os.path.isfile(ncfn):
+        raise ValueError("Data for year %s not found" % (sts.year, ))
+    nc = ncopen(ncfn)
     czs = CachingZonalStats(iemre.AFFINE)
     hasdata = np.zeros((nc.dimensions['lat'].size,
                         nc.dimensions['lon'].size))
@@ -116,5 +121,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    fig, df = plotter(dict())
+    plotter(dict())
     # print df['coverage'].max()

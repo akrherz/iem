@@ -12,6 +12,7 @@ from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 
+
 PLOTTYPES = {
     "1": "3 Panel Plot",
     "2": "Just Soil Temps",
@@ -220,7 +221,7 @@ def make_vsm_histogram_plot(ctx):
                           ctx['sts'].strftime("%-d %b %Y"),
                           ctx['ets'].strftime("%-d %b %Y")))
     for i, col in enumerate(['v12', 'v24', 'v50']):
-        ax[i].hist(df[col] * 100., bins=50, range=(0, 50), normed=True)
+        ax[i].hist(df[col] * 100., bins=50, range=(0, 50), density=True)
         ax[i].set_ylabel("Frequency")
         ax[i].grid(True)
         ax[i].text(0.99, 0.99, "%s inches" % (col[1:],),

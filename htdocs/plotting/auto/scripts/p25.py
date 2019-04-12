@@ -54,9 +54,10 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
 
-    n, bins, _ = ax.hist(highs, bins=(np.max(highs)-np.min(highs)),
-                         histtype='step', normed=True,
-                         color='r',  zorder=1)
+    n, bins, _ = ax.hist(
+         highs, bins=(np.max(highs)-np.min(highs)), histtype='step',
+         density=True, color='r', zorder=1
+     )
     high_freq = pd.Series(n, index=bins[:-1])
     mu, std = norm.fit(highs)
     xmin, xmax = plt.xlim()
@@ -69,9 +70,10 @@ def plotter(fdict):
             va='top', ha='left', color='r',
             transform=ax.transAxes, bbox=dict(color='white'))
 
-    n, bins, _ = ax.hist(lows, bins=(np.max(lows)-np.min(lows)),
-                         histtype='step', normed=True,
-                         color='b',  zorder=1)
+    n, bins, _ = ax.hist(
+          lows, bins=(np.max(lows)-np.min(lows)), histtype='step',
+          density=True, color='b', zorder=1
+     )
     low_freq = pd.Series(n, index=bins[:-1])
     df = pd.DataFrame(dict(low_freq=low_freq, high_freq=high_freq))
     df.index.name = 'tmpf'

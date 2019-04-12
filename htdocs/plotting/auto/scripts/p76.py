@@ -1,4 +1,4 @@
-"""Seasonal averages of Humudity"""
+"""Seasonal averages of Humudity."""
 import datetime
 from collections import OrderedDict
 
@@ -147,7 +147,7 @@ def get_data(ctx, startyear):
         try:
             tokens = [int(i.strip()) for i in ctx['hours'].split("-")]
             hours = range(tokens[0], tokens[1] + 1)
-        except Exception as _exp:
+        except:
             raise Exception("malformed hour limiter, sorry.")
         ctx['hour_limiter'] = "[%s-%s]" % (utc(2017, 1, 1, tokens[0]
                                                ).strftime("%-I %p"),

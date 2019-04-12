@@ -81,19 +81,21 @@ def plotter(fdict):
                                                     station, title))
     ax[0].grid(True)
 
-    ax[1].hist(np.array(df2['level'], 'f'),
-               bins=np.arange(df2['level'].min(),
-                              df2['level'].max()+1, 2),
-               normed=True, facecolor='tan')
+    ax[1].hist(
+        np.array(df2['level'], 'f'),
+        bins=np.arange(df2['level'].min(), df2['level'].max()+1, 2),
+        density=True, facecolor='tan'
+    )
     ax[1].set_ylabel("Probability Density")
     ax[1].axvline(32, lw=2)
     ax[1].grid(True)
     ax[1].set_xlabel(r"Temperature $^\circ$F, 32 degrees highlighted")
 
-    ax[2].hist(np.array(df2['doy'], 'f'),
-               bins=np.arange(df2['doy'].min(),
-                              df2['doy'].max()+1, 3),
-               normed=True, facecolor='tan')
+    ax[2].hist(
+        np.array(df2['doy'], 'f'),
+        bins=np.arange(df2['doy'].min(), df2['doy'].max()+1, 3),
+        density=True, facecolor='tan'
+    )
     ax[2].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274,
                       305, 335, 365))
     ax[2].set_xticklabels(calendar.month_abbr[1:])
