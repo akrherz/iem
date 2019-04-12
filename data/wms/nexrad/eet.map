@@ -1064,7 +1064,6 @@ LAYER
   MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
-    "init=epsg:4326"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M10 MINS"
@@ -1083,7 +1082,6 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
     "init=epsg:4326"
   END
   METADATA
@@ -1104,7 +1102,6 @@ LAYER
   MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
-    "init=epsg:4326"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M10 MINS"
@@ -1123,7 +1120,6 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
     "init=epsg:4326"
   END
   METADATA
