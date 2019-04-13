@@ -13,8 +13,8 @@ import pygrib
 from pyiem.util import utc, ncopen
 from pyiem import iemre
 
-DEFAULTS = {'srad': 0, 'high_tmpk': 100, 'low_tmpk': 400, 'p01d': 0}
-AGGFUNC = {'srad': np.add, 'high_tmpk': np.maximum, 'low_tmpk': np.minimum,
+DEFAULTS = {'srad': 0., 'high_tmpk': 100., 'low_tmpk': 400., 'p01d': 0.}
+AGGFUNC = {'srad': np.maximum, 'high_tmpk': np.maximum, 'low_tmpk': np.minimum,
            'p01d': np.add}
 
 
@@ -28,9 +28,6 @@ def merge(nc, valid, gribname, vname):
         print("cfs2iemre missing %s, abort" % (fn, ))
         sys.exit()
     grbs = pygrib.open(fn)
-    multiplier = (6. * 3600.) if vname in ['p01d', 'srad'] else 1.
-    if vname == 'srad':
-        multiplier = multiplier / 1000000.
     lats = None
     lons = None
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
@@ -43,12 +40,12 @@ def merge(nc, valid, gribname, vname):
             continue
         if lats is None:
             lats, lons = grib.latlons()
-        vals = grib.values * multiplier
+        vals = grib.values
         nn = NearestNDInterpolator((lons.flat, lats.flat), vals.flat)
         vals = nn(xi, yi)
         tstep = iemre.daily_offset(cst.date())
         current = nc.variables[vname][tstep, :, :]
-        if np.isnan(current).all():
+        if current.mask.all():
             current[:, :] = DEFAULTS[vname]
         nc.variables[vname][tstep, :, :] = AGGFUNC[vname](current, vals)
 
@@ -126,7 +123,7 @@ def create_netcdf(valid):
 
     rsds = nc.createVariable('srad', np.uint16, ('time', 'lat', 'lon'),
                              fill_value=65535)
-    rsds.units = "MJ"
+    rsds.units = "W m-2"
     rsds.scale_factor = 0.01
     rsds.long_name = 'surface_downwelling_shortwave_flux_in_air'
     rsds.standard_name = 'surface_downwelling_shortwave_flux_in_air'
@@ -147,8 +144,8 @@ def main():
         # Create netcdf file
         nc = create_netcdf(valid)
         # merge in the data
-        for gribname, vname in zip(['tmax', 'tmin', 'dswsfc', 'prate'],
-                                   ['high_tmpk', 'low_tmpk', 'srad', 'p01d']):
+        for gribname, vname in zip(['dswsfc', 'tmax', 'tmin', 'prate'],
+                                   ['srad', 'high_tmpk', 'low_tmpk', 'p01d']):
             merge(nc, valid, gribname, vname)
         # profit
         nc.close()

@@ -39,25 +39,21 @@ def make_netcdf(fullpath, valid, west, south):
     prcp = nc.createVariable('prcp', np.float, ('time', 'lat', 'lon'),
                              fill_value=1e20)
     prcp.units = "mm/day"
-    prcp.scale_factor = 0.01
     prcp.long_name = "daily total precipitation"
 
     tmax = nc.createVariable('tmax', np.float, ('time', 'lat', 'lon'),
                              fill_value=1e20)
     tmax.units = "degrees C"
-    tmax.scale_factor = 0.01
     tmax.long_name = "daily maximum temperature"
 
     tmin = nc.createVariable('tmin', np.float, ('time', 'lat', 'lon'),
                              fill_value=1e20)
     tmin.units = "degrees C"
-    tmin.scale_factor = 0.01
     tmin.long_name = "daily minimum temperature"
 
     srad = nc.createVariable('srad', np.float, ('time', 'lat', 'lon'),
                              fill_value=1e20)
-    srad.units = "W/m2"
-    srad.scale_factor = 0.1
+    srad.units = "MJ"
     srad.long_name = "daylight average incident shortwave radiation"
 
     # did not do vp or cropland
@@ -90,9 +86,9 @@ def tile_extraction(nc, valid, west, south, isnewfile):
             renc.variables['low_tmpk'][:, jslice, islice], 'K').value('C')
         nc.variables['prcp'][tslice, :, :] = (
             renc.variables['p01d'][:, jslice, islice])
-        # MJ/d back to average W/m2
+        # IEMRE uses W m-2, we want MJ
         nc.variables['srad'][tslice, :, :] = (
-            renc.variables['rsds'][:, jslice, islice])
+            renc.variables['rsds'][:, jslice, islice]) * 86400. / 1000000.
         renc.close()
         if year != valid.year:
             continue
@@ -100,8 +96,10 @@ def tile_extraction(nc, valid, west, south, isnewfile):
         cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
         tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
         tslice = slice(tidx0 + tidx, tidx1)
+        # CFS is W m-2, we want MJ
         nc.variables['srad'][tslice, :, :] = (
-            cfsnc.variables['srad'][tidx:, jslice, islice] * 1000000. / 86400.)
+            cfsnc.variables['srad'][tidx:, jslice, islice] * 86400. / 1000000.
+        )
         nc.variables['tmax'][tslice, :, :] = temperature(
             cfsnc.variables['high_tmpk'][tidx:, jslice, islice],
             'K').value('C')
