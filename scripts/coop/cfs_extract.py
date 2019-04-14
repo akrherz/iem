@@ -9,7 +9,6 @@ files.
 
 """
 from __future__ import print_function
-import sys
 import datetime
 import logging
 import os
@@ -117,7 +116,7 @@ def dbsave(ts, data):
         if (d['high'] is None or d['low'] is None or
                 d['precip'] is None or d['srad'] is None):
             print("Missing data for date: %s" % (date,))
-            del(data['fx'][date])
+            del data['fx'][date]
 
     for sid in nt.sts.keys():
         # Skip virtual stations
@@ -145,7 +144,7 @@ def dbsave(ts, data):
 def main():
     """Go!"""
     # Extract 12 UTC Data
-    ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
+    ts = datetime.datetime.utcnow() - datetime.timedelta(days=2)
     ts = ts.replace(tzinfo=pytz.utc, hour=12, minute=0, second=0,
                     microsecond=0)
     data = process(ts)
