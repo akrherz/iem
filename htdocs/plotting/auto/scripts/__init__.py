@@ -392,6 +392,8 @@ data = {'plots': [
          'label': "Period between First and Last VTEC Product Each Year"},
         {'id': "195",
          'label': "Storm Motion distribution based on NWS Warnings"},
+        {'id': "201",
+         'label': "Storm Prediction Center Convective Outlook Calendar"},
         {'id': "200",
          'label': "Storm Prediction Center Convective Outlook Heatmap"},
         {'id': "166",
