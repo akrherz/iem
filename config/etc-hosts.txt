@@ -89,7 +89,7 @@
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
 #   VI10(60) iem12
-192.168.1.241    iem-ldm iem-web-services.local
+192.168.1.241    iem-ldm iem-ldm.local iem-web-services.local
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
 #   VI12(62) metvm7 <-> metvm0

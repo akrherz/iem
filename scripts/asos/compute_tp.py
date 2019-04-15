@@ -39,10 +39,12 @@ def do(ts):
     table = "summary_%s" % (ts.year,)
     # Load up current data
     current = {}
-    icursor.execute("""SELECT id, network, d.iemid, max_tmpf, min_tmpf,
-    max_dwpf, min_dwpf, pday from """ + table + """ d JOIN stations t
-    on (t.iemid = d.iemid) WHERE day = %s and
-    (network ~* 'ASOS' or network = 'AWOS')""", (ts,))
+    icursor.execute("""
+        SELECT id, network, d.iemid, max_tmpf, min_tmpf,
+        max_dwpf, min_dwpf, pday from """ + table + """ d JOIN stations t
+        on (t.iemid = d.iemid) WHERE day = %s and
+        (network ~* 'ASOS' or network = 'AWOS')
+    """, (ts,))
     for row in icursor:
         station = "%s|%s|%s" % (row[0], row[1], row[2])
         current[station] = dict(max_tmpf=row[3], min_tmpf=row[4],
@@ -75,8 +77,10 @@ def do(ts):
         if stid not in current:
             print(('compute_tp Adding %s for %s %s %s'
                    ) % (table, station, network, ts))
-            icursor.execute("""INSERT into """ + table + """
-                (iemid, day) values (%s, %s)""", (iemid, ts))
+            icursor.execute("""
+                INSERT into """ + table + """
+                (iemid, day) values (%s, %s)
+            """, (iemid, ts))
             current[stid] = dict()
 
         tokens = []
@@ -94,9 +98,11 @@ def do(ts):
             continue
 
         cols = ", ".join(tokens)
-        icursor.execute("""UPDATE """ + table + """
+        icursor.execute("""
+            UPDATE """ + table + """
             SET """ + cols + """ WHERE
-            iemid = %s and day = %s""", (iemid, ts))
+            iemid = %s and day = %s
+        """, (iemid, ts))
 
     icursor.close()
     iemaccess.commit()
@@ -110,6 +116,7 @@ def main(argv):
         ts = datetime.date(int(argv[1]), int(argv[2]),
                            int(argv[3]))
     do(ts)
+
 
 if __name__ == '__main__':
     main(sys.argv)

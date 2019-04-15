@@ -95,6 +95,8 @@ def run_calcs(df, ctx):
         df['pressure'].values * units('millibars'),
         df['saturation_mixingratio'].values * units('kg/kg')).to(units('kPa'))
     df['vpd'] = df['saturation_vapor_pressure'] - df['vapor_pressure']
+    # remove any NaN rows
+    df = df.dropna()
     group = df.groupby('year')
     df = group.aggregate(np.average)
 
@@ -230,4 +232,7 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(varname='vpd', season='summer', station='AMW'))
+    _fig, _df = plotter(
+        dict(varname='dwpf', season='winter', station='DSM',
+             network='IA_ASOS'))
+    print(_df)
