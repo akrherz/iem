@@ -60,6 +60,8 @@ then
 	YYYY=$(date -u --date '1 month ago' +'%Y')
 	cd ../climodat
 	python merra_solarrad.py $YYYY $MM
+	cd ../iemre
+	python grid_rsds.py $YYYY $MM
 fi
 
 # Process the GHCN dataset

@@ -17,8 +17,6 @@ from pyiem.util import get_dbconn, utc, ncopen
 
 
 P4326 = pyproj.Proj(init="epsg:4326")
-LCC = pyproj.Proj(("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
-                   " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"))
 
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
@@ -55,17 +53,64 @@ def do_coop(ts):
     nc.close()
 
 
+def try_merra(ts):
+    """Attempt to use MERRA data."""
+    # Our files are UTC date based :/
+    ncfn1 = ts.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+    ncfn2 = (
+        ts + datetime.timedelta(days=1)
+    ).strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+    if not os.path.isfile(ncfn1) or not os.path.isfile(ncfn2):
+        return False
+    nc = ncopen(ncfn1)
+    # Total up from 6z to end of file for today
+    total = np.sum(nc.variables['SWGDN'][5:, :, :], axis=0)
+    nc.close()
+    nc = ncopen(ncfn2)
+    lat1d = nc.variables['lat'][:]
+    lon1d = nc.variables['lon'][:]
+    # Total up to 6z
+    total += np.sum(nc.variables['SWGDN'][:6, :, :], axis=0)
+    nc.close()
+
+    # We wanna store as W m-2, so we just average out the data by hour
+    total = total / 24.0
+
+    lons, lats = np.meshgrid(lon1d, lat1d)
+    nn = NearestNDInterpolator(
+        (lons.flatten(), lats.flatten()), total.flatten()
+    )
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+
+    nc = ncopen(iemre.get_daily_ncname(ts.year), 'a', timeout=300)
+    offset = iemre.daily_offset(ts)
+    # Data above is W m-2
+    nc.variables['rsds'][offset, :, :] = nn(xi, yi)
+    nc.close()
+
+    return True
+
+
 def do_hrrr(ts):
     """Convert the hourly HRRR data to IEMRE grid"""
+    LCC = pyproj.Proj(
+        ("+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
+         " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5")
+    )
     total = None
     xaxis = None
     yaxis = None
-    for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
-        utcnow = ts.replace(hour=hr).astimezone(pytz.UTC)
-        fn = utcnow.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                              "hrrr.t%Hz.3kmf00.grib2"))
+    # So IEMRE is storing data from coast to coast, so we should be
+    # aggressive about running for an entire calendar date
+    now = ts.replace(hour=1)
+    for _ in range(24):
+        now += datetime.timedelta(hours=1)
+        utcnow = now.astimezone(pytz.UTC)
+        fn = utcnow.strftime(
+            ("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+             "hrrr.t%Hz.3kmf00.grib2")
+        )
         if not os.path.isfile(fn):
-            # print 'HRRR file %s missing' % (fn,)
             continue
         grbs = pygrib.open(fn)
         try:
@@ -75,7 +120,7 @@ def do_hrrr(ts):
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
             # don't complain about late evening no-solar
-            if utcnow.hour > 10:
+            if utcnow.hour > 10 and utcnow.hour < 24:
                 print('iemre/grid_rsds.py %s had no solar rad' % (fn,))
             continue
         if not grb:
@@ -121,20 +166,30 @@ def do_hrrr(ts):
     nc.close()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    if len(sys.argv) == 4:
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                                int(sys.argv[3]), 12)
+    queue = []
+    if len(sys.argv) == 3:
+        now = datetime.datetime(int(argv[1]), int(argv[2]), 1, 12)
+        while now.month == int(argv[2]):
+            queue.append(now)
+            now += datetime.timedelta(days=1)
+    elif len(sys.argv) == 4:
+        sts = datetime.datetime(
+            int(argv[1]), int(argv[2]), int(argv[3]), 12)
+        queue.append(sts)
     else:
         sts = datetime.datetime.now() - datetime.timedelta(days=1)
         sts = sts.replace(hour=12)
-    sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-    if sts.year >= 2014:
-        do_hrrr(sts)
-    else:
-        do_coop(sts)
+        queue.append(sts)
+    for sts in queue:
+        sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
+        if not try_merra(sts):
+            if sts.year >= 2014:
+                do_hrrr(sts)
+            else:
+                do_coop(sts)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
