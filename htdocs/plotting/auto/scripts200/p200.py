@@ -37,16 +37,6 @@ ISSUANCE = OrderedDict((
     ('7.C.8', 'Day 7 Convective @8z'),
     ('8.C.8', 'Day 8 Convective @8z'),
 ))
-DAYS = OrderedDict((
-  (1, 'Day 1'),
-  (2, 'Day 2'),
-  (3, 'Day 3'),
-  (4, 'Day 4'),
-  (5, 'Day 5'),
-  (6, 'Day 6'),
-  (7, 'Day 7'),
-  (8, 'Day 8'),
-))
 OUTLOOKS = OrderedDict((
     ('ANY SEVERE.0.02', 'Any Severe 2% (Day 3+)'),
     ('ANY SEVERE.0.05', 'Any Severe 5% (Day 3+)'),
