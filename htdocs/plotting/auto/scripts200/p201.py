@@ -12,11 +12,12 @@ PDICT = {
     'C': 'Convective',
     'F': 'Fire Weather',
 }
-PDICT2 = {
-    'wfo': 'Summarize by Selected WFO',
-    'state': 'Summarize by Selected State',
-    'all': 'Summarize for CONUS'
-}
+PDICT2 = OrderedDict((
+    ('all', 'Summarize for CONUS'),
+    ('ugc', 'Summarize by Selected County/Zone/Parish'),
+    ('state', 'Summarize by Selected State'),
+    ('wfo', 'Summarize by Selected WFO'),
+))
 COLORS = {
     'TSTM': "#c0e8c0",
     'MRGL': "#66c57d",
@@ -46,9 +47,10 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['description'] = """This application presents a calendar of Storm
-    Prediction Center outlooks by state or WFO.  The GIS spatial operation
+    Prediction Center outlooks by state, WFO, or county.
+    The GIS spatial operation
     done is a simple touches.  So an individual outlook that just barely
-    scrapes a state or CWA would count for this presentation.  Suggestions
+    scrapes the selected area would count for this presentation.  Suggestions
     would be welcome as to how this could be improved.
 
     <p>This app attempts to not double-count outlook days.  A SPC Outlook
@@ -76,8 +78,11 @@ def get_description():
              label='How to summarize data:'),
         dict(type='networkselect', name='wfo', network='WFO',
              default='DMX', label='Select WFO (when appropriate):'),
-        dict(type='state', name='state',
+        dict(type='state', name='mystate',
              default='IA', label='Select State (when appropriate):'),
+        dict(type='ugc', name='ugc',
+             default='IAZ048',
+             label='Select UGC Zone/County (when appropriate):'),
     ]
     return desc
 
@@ -91,7 +96,9 @@ def plotter(fdict):
     wfo = ctx['wfo']
     outlook_type = ctx['outlook_type']
     day = ctx['day']
+    ugc = ctx['ugc']
 
+    sqllimiter = ""
     if ctx['w'] == 'all':
         df = read_sql("""
         with data as (
@@ -119,22 +126,39 @@ def plotter(fdict):
             table = "cwa"
             abbrcol = "wfo"
             geoval = wfo
+            geomcol = "the_geom"
             nt = NetworkTable("WFO")
             title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
+        elif ctx['w'] == 'ugc':
+            table = "ugcs"
+            abbrcol = "ugc"
+            geomcol = "simple_geom"
+            geoval = ugc
+            sqllimiter = " and t.end_ts is null "
+            cursor = pgconn.cursor()
+            cursor.execute("""
+                SELECT name from ugcs where ugc = %s and end_ts is null
+            """, (ugc, ))
+            name = "Unknown"
+            if cursor.rowcount == 1:
+                name = cursor.fetchone()[0]
+            title2 = "%s [%s] %s" % (
+                "County" if ugc[2] == 'C' else 'Zone', ugc, name)
         else:
             table = "states"
+            geomcol = "the_geom"
             abbrcol = "state_abbr"
-            geoval = ctx['state']
-            title2 = state_names[ctx['state']]
+            geoval = ctx['mystate']
+            title2 = state_names[ctx['mystate']]
 
         df = read_sql("""
         with data as (
             select expire, o.threshold from spc_outlooks o,
             """ + table + """ t
             WHERE t.""" + abbrcol + """ = %s and category = %s
-            and ST_Overlaps(st_buffer(o.geom, 0), t.the_geom)
+            and ST_Intersects(st_buffer(o.geom, 0), t.""" + geomcol + """)
             and o.day = %s and o.outlook_type = %s and expire > %s
-            and expire < %s),
+            and expire < %s """ + sqllimiter + """),
         agg as (
             select date(expire - '1 day'::interval), d.threshold, priority,
             rank() OVER (PARTITION by date(expire - '1 day'::interval)
