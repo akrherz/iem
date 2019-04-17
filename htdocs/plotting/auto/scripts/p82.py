@@ -113,13 +113,13 @@ def plotter(fdict):
             data[row[0]]['color'] = 'b' if ad < 0 else 'r'
     df = pd.DataFrame(rows)
 
-    title = ('[%s] %s Daily %s\n%s thru %s'
-             ) % (station, nt.sts[station]['name'],
-                  PDICT.get(varname), sdate.strftime("%-d %b %Y"),
-                  edate.strftime("%-d %b %Y"))
+    title = '[%s] %s Daily %s' % (
+        station, nt.sts[station]['name'], PDICT.get(varname))
+    subtitle = '%s thru %s' % (
+        sdate.strftime("%-d %b %Y"), edate.strftime("%-d %b %Y"))
 
-    fig = calendar_plot(sdate, edate, data,
-                        title=title)
+    fig = calendar_plot(
+        sdate, edate, data, title=title, subtitle=subtitle)
     return fig, df
 
 

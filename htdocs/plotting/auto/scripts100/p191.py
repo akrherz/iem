@@ -129,21 +129,19 @@ SELECT date(localissue), count(*) from events GROUP by date(localissue)
         now += datetime.timedelta(days=1)
     for date, row in df.iterrows():
         data[date] = {'val': row['count']}
-    fig = calendar_plot(sts, ets, data, heatmap=(ctx['heatmap'] == 'yes'))
     if ctx['w'] == 'wfo':
         title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
         if wfo == '_ALL':
             title2 = "All NWS Offices"
     else:
         title2 = state_names[ctx['state']]
-    fig.text(0.5, 0.95,
-             ("Number of VTEC Events for %s by Local Calendar Date"
-              "\nValid %s - %s for %s"
-              ) % (title2,
-                   sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y"),
-                   title),
-             ha='center', va='center')
-
+    fig = calendar_plot(
+        sts, ets, data, heatmap=(ctx['heatmap'] == 'yes'),
+        title=("Number of VTEC Events for %s by Local Calendar Date"
+               ) % (title2, ),
+        subtitle="Valid %s - %s for %s" % (
+            sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y"),
+            title))
     return fig, df
 
 

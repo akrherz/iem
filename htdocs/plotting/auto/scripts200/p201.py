@@ -12,8 +12,11 @@ PDICT = {
     'C': 'Convective',
     'F': 'Fire Weather',
 }
-PDICT2 = {'wfo': 'Summarize by Selected WFO',
-          'state': 'Summarize by Selected State'}
+PDICT2 = {
+    'wfo': 'Summarize by Selected WFO',
+    'state': 'Summarize by Selected State',
+    'all': 'Summarize for CONUS'
+}
 COLORS = {
     'TSTM': "#c0e8c0",
     'MRGL': "#66c57d",
@@ -48,13 +51,11 @@ def get_description():
     scrapes a state or CWA would count for this presentation.  Suggestions
     would be welcome as to how this could be improved.
 
-    <p>This app attempts to not double-count outlook days by not considering
-    the midnight to 12z period that a given outlook could be valid for a given
-    date.  This likely sounds confusing.  For example, SPC issues a new Day
-    1 slight risk with their 8 PM update.  This new slight risk is technically
-    valid into the next day, but is only considered for the calendar day that
-    the 8 PM update was issued on.  This logic is what people want to see
-    presented here, but is not 100% accurate for outlooks per calendar day.</p>
+    <p>This app attempts to not double-count outlook days.  A SPC Outlook
+    technically crosses two calendar days ending at 12 UTC (~7 AM). This
+    application considers the midnight to ~7 AM period to be for the
+    previous day, which is technically not accurate but the logic that most
+    people expect to see.</p>
     """
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
@@ -91,35 +92,64 @@ def plotter(fdict):
     outlook_type = ctx['outlook_type']
     day = ctx['day']
 
-    if ctx['w'] == 'wfo':
-        table = "cwa"
-        abbrcol = "wfo"
-        geoval = wfo
+    if ctx['w'] == 'all':
+        df = read_sql("""
+        with data as (
+            select expire, o.threshold from spc_outlooks o
+            WHERE category = %s
+            and o.day = %s and o.outlook_type = %s and expire > %s
+            and expire < %s),
+        agg as (
+            select date(expire - '1 day'::interval), d.threshold, priority,
+            rank() OVER (PARTITION by date(expire - '1 day'::interval)
+            ORDER by priority DESC)
+            from data d JOIN spc_outlook_thresholds t
+            on (d.threshold = t.threshold))
+
+        SELECT distinct date, threshold from agg where rank = 1
+        ORDER by date ASC
+        """, pgconn, params=(
+            ('CATEGORICAL' if outlook_type == 'C'
+             else 'FIRE WEATHER CATEGORICAL'),
+            day, outlook_type, sts, ets + datetime.timedelta(days=2)),
+                    index_col='date')
+        title2 = "Continental US"
     else:
-        table = "states"
-        abbrcol = "state_abbr"
-        geoval = ctx['state']
+        if ctx['w'] == 'wfo':
+            table = "cwa"
+            abbrcol = "wfo"
+            geoval = wfo
+            nt = NetworkTable("WFO")
+            title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
+        else:
+            table = "states"
+            abbrcol = "state_abbr"
+            geoval = ctx['state']
+            title2 = state_names[ctx['state']]
 
-    df = read_sql("""
-    with data as (
-        select expire, o.threshold from spc_outlooks o, """ + table + """ t
-        WHERE t.""" + abbrcol + """ = %s and category = %s
-        and ST_Overlaps(st_buffer(o.geom, 0), t.the_geom)
-        and o.day = %s and o.outlook_type = %s and expire > %s
-        and expire < %s),
-    agg as (
-        select date(expire - '1 day'::interval), d.threshold, priority,
-        rank() OVER (PARTITION by date(expire - '1 day'::interval)
-        ORDER by priority DESC)
-        from data d JOIN spc_outlook_thresholds t
-        on (d.threshold = t.threshold))
+        df = read_sql("""
+        with data as (
+            select expire, o.threshold from spc_outlooks o,
+            """ + table + """ t
+            WHERE t.""" + abbrcol + """ = %s and category = %s
+            and ST_Overlaps(st_buffer(o.geom, 0), t.the_geom)
+            and o.day = %s and o.outlook_type = %s and expire > %s
+            and expire < %s),
+        agg as (
+            select date(expire - '1 day'::interval), d.threshold, priority,
+            rank() OVER (PARTITION by date(expire - '1 day'::interval)
+            ORDER by priority DESC)
+            from data d JOIN spc_outlook_thresholds t
+            on (d.threshold = t.threshold))
 
-    SELECT distinct date, threshold from agg where rank = 1 ORDER by date ASC
-    """, pgconn, params=(
-        geoval,
-        'CATEGORICAL' if outlook_type == 'C' else 'FIRE WEATHER CATEGORICAL',
-        day, outlook_type, sts, ets + datetime.timedelta(days=2)),
-                  index_col='date')
+        SELECT distinct date, threshold from agg where rank = 1
+        ORDER by date ASC
+        """, pgconn, params=(
+            geoval,
+            ('CATEGORICAL' if outlook_type == 'C'
+             else 'FIRE WEATHER CATEGORICAL'),
+            day, outlook_type, sts, ets + datetime.timedelta(days=2)),
+                    index_col='date')
 
     data = {}
     now = sts
@@ -131,19 +161,13 @@ def plotter(fdict):
             'val': row['threshold'],
             'cellcolor': COLORS.get(row['threshold'], '#EEEEEE')
         }
-    fig = calendar_plot(sts, ets, data)
-    if ctx['w'] == 'wfo':
-        nt = NetworkTable("WFO")
-        title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
-    else:
-        title2 = state_names[ctx['state']]
-    fig.text(0.5, 0.95,
-             ("SPC Day %s %s for %s by Calendar Date"
-              "\nValid %s - %s"
-              ) % (day, PDICT[outlook_type], title2,
-                   sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y")),
-             ha='center', va='center')
-
+    fig = calendar_plot(
+        sts, ets, data,
+        title="Highest SPC Day %s %s Outlook for %s" % (
+            day, PDICT[outlook_type], title2),
+        subtitle="Valid %s - %s" % (
+            sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y"))
+        )
     return fig, df
 
 
