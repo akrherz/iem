@@ -335,6 +335,8 @@ data = {'plots': [
          'label': "Hourly Temp/Dew Point Frequency by-year by-hour-of-day"},
         {'id': "106",
          'label': "Hourly temp distributions on days exceeding temperature"},
+        {'id': "202",
+         'label': "Hourly variable comparison between two hours on one day"},
         {'id': "169",
          'label': "Largest Rise/Drop in Temperature over X Hours"},
         {'id': "18", 'label': "Long term observation time series"},
