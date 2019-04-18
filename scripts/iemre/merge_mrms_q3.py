@@ -8,11 +8,10 @@ import tempfile
 
 import pytz
 import numpy as np
-import requests
 import pygrib
 import pyiem.mrms as mrms
 from pyiem import iemre
-from pyiem.util import ncopen
+from pyiem.util import ncopen, utc
 
 TMP = "/mesonet/tmp"
 
@@ -29,45 +28,34 @@ def run(ts):
     ncprecip = nc.variables['p01d']
 
     gmtts = ts.astimezone(pytz.UTC)
-    utcnow = datetime.datetime.utcnow().replace(minute=0, second=0,
-                                                microsecond=0)
-    utcnow = utcnow.replace(tzinfo=pytz.UTC)
-
+    utcnow = utc()
     total = None
     lats = None
     for _ in range(1, 25):
         gmtts += datetime.timedelta(hours=1)
+        if gmtts > utcnow:
+            continue
         gribfn = None
-        for prefix in ['GaugeCorr', 'RadarOnly']:
-            fn = gmtts.strftime((prefix + "_QPE_01H_00.00_%Y%m%d-%H%M00"
-                                 ".grib2.gz"))
-            url = gmtts.strftime(
-                    ("http://mtarchive.geol.iastate.edu/%Y/%m/%d/mrms/ncep/" +
-                     prefix + "_QPE_01H/" + fn))
-            res = requests.get(url, timeout=30)
-            if res.status_code != 200:
+        for prefix in ['GaugeCorr_QPE_01H', 'RadarOnly_QPE_01H']:
+            fn = mrms.fetch(prefix, gmtts)
+            if fn is None:
                 continue
-            gribfn = "%s/%s" % (TMP, fn)
-            output = open(gribfn, 'wb')
-            output.write(res.content)
-            output.close()
+            fp = gzip.GzipFile(fn, 'rb')
+            (_, gribfn) = tempfile.mkstemp()
+            tmpfp = open(gribfn, 'wb')
+            tmpfp.write(fp.read())
+            tmpfp.close()
+            os.unlink(fn)
             break
         if gribfn is None:
             if gmtts < utcnow:
                 print("merge_mrms_q3.py MISSING %s" % (gmtts, ))
             continue
-        # print("Using -> %s" % (gribfn,))
-        fp = gzip.GzipFile(gribfn, 'rb')
-
-        (_, tmpfn) = tempfile.mkstemp()
-        tmpfp = open(tmpfn, 'wb')
-        tmpfp.write(fp.read())
-        tmpfp.close()
-        grbs = pygrib.open(tmpfn)
+        grbs = pygrib.open(gribfn)
         grb = grbs[1]
         if lats is None:
             lats, _ = grb.latlons()
-        os.unlink(tmpfn)
+        os.unlink(gribfn)
 
         val = grb['values']
         # Anything less than zero, we set to zero
@@ -76,8 +64,6 @@ def run(ts):
             total = val
         else:
             total += val
-
-        os.unlink(gribfn)
 
     if lats is None:
         print("merge_mrms_q3 nodata for %s" % (ts.date(), ))
