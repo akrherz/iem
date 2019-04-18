@@ -53,7 +53,7 @@ def plotter(fdict):
     odf = read_sql("""
         select extract(year from issued)::int as year, count(*) as state_count
         from watches w, states s where w.geom && s.the_geom and
-        ST_Overlaps(w.geom, s.the_geom) and
+        ST_Intersects(w.geom, s.the_geom) and
         """ + sqllimit + """
         s.state_abbr = %s
         GROUP by year ORDER by year ASC

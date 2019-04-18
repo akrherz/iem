@@ -82,7 +82,7 @@ def plotter(fdict):
         min(issue) as min_issue, max(issue) as max_issue, count(*)
         from sbw w, states s
         WHERE issue >= '%s' and issue <= '%s' and
-        s.state_abbr = '%s' and ST_Overlaps(s.the_geom, w.geom) and
+        s.state_abbr = '%s' and ST_Intersects(s.the_geom, w.geom) and
         (windtag > 0 or hailtag > 0)
         and status = 'NEW' and phenomena = 'SV'
         GROUP by windtag, hailtag

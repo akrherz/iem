@@ -55,7 +55,8 @@ def plotter(fdict):
         ORDER by day ASC
      """, dbconn, params=(station,), index_col='day')
     res = []
-    for level in range(70, 106):
+    maxval2 = int(df['high'].max())
+    for level in range(maxval2 - 30, maxval2 + 2):
         gdf = df[df['high'] >= level].groupby('year').count()
         maxval = gdf.max()[0]
         label = ",".join([str(s) for s in
@@ -76,12 +77,12 @@ def plotter(fdict):
             label="%s" % (year,), zorder=3)
     for level, row in df.iterrows():
         ax.text(row['max'] + 1, level,
-                "%s - %s" % (row['max'], row['label']), va='center')
+                "%.0f - %s" % (row['max'], row['label']), va='center')
 
     ax.grid(True, color='#EEEEEE', linewidth=1)
     ax.legend(loc='best')
     ax.set_xlim(0, df['max'].max() * 1.2)
-    ax.set_ylim(69, 106)
+    ax.set_ylim(maxval2 - 31, maxval2 + 2)
     ax.set_title(("%s Max Days per Year %s\n"
                   "at or above given high temperature threshold"
                   ) % (nt.sts[station]['name'], limittitle))
