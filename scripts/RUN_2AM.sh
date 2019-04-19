@@ -14,7 +14,6 @@ python daily_estimator.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../climodat
 sh run.sh &
-python hrrr_solarrad.py
 
 cd ../coop
 if [ $DD -eq "01" ]

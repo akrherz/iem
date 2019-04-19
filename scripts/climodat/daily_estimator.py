@@ -79,6 +79,13 @@ def estimate_precip(df, ts):
             df.at[sid, 'precip'] = "%.2f" % (precip,)
 
 
+def snowval(val):
+    """Make sure our snow value makes database sense."""
+    if val is None:
+        return None
+    return round(float(val), 1)
+
+
 def estimate_snow(df, ts):
     """Estimate the Snow based on COOP reports"""
     idx = iemre.daily_offset(ts)

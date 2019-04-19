@@ -9,6 +9,7 @@ python daily_analysis.py
 
 cd ../climodat
 python daily_estimator.py $(date +'%Y %m %d')
+python hrrr_solarrad.py $(date --date '1 days ago'  +'%Y %m %d')
 python daily_estimator.py $(date --date '1 days ago'  +'%Y %m %d')
 python compute_0000.py
 

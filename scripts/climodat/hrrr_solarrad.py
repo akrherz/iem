@@ -1,4 +1,8 @@
-"""Extract HRRR radiation data for storage with COOP data"""
+"""Extract HRRR radiation data for storage with COOP data.
+
+Run once at 10 PM to snag calendar day stations. (RUN_50_AFTER.sh)
+Run again with RUN_NOON.sh when the regular estimator runs
+"""
 from __future__ import print_function
 import datetime
 import os
@@ -119,12 +123,7 @@ def main(argv):
             run(now)
             now += datetime.timedelta(days=1)
     else:
-        ts = datetime.datetime.utcnow()
-        ts = ts.replace(tzinfo=pytz.utc)
-        ts = ts.astimezone(pytz.timezone("America/Chicago"))
-        ts = ts - datetime.timedelta(days=1)
-        ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
-        run(ts)
+        print("ERROR: call with hrrr_solarrad.py <YYYY> <mm> <dd>")
 
 
 if __name__ == '__main__':
