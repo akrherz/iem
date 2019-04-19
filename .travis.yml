@@ -58,7 +58,7 @@ install:
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
       $HOME/miniconda$MINICONDA/bin/conda config --set quiet True --set always_yes yes --set changeps1 no;
       $HOME/miniconda$MINICONDA/bin/conda config --prepend channels conda-forge;
-      $HOME/miniconda$MINICONDA/bin/conda config --remove channels defaults;
+      $HOME/miniconda$MINICONDA/bin/conda config --set channel_priority strict;
       $HOME/miniconda$MINICONDA/bin/conda update conda;
       $HOME/miniconda$MINICONDA/bin/conda create -n prod python=$PYTHON_VERSION;
     fi
