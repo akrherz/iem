@@ -1,10 +1,34 @@
-"""histogram of issuance time"""
+"""histogram of issuance time."""
+from collections import OrderedDict
+import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.nws import vtec
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
+from pyiem.plot.util import fitbox
 from pyiem.util import get_autoplot_context, get_dbconn
+
+MDICT = OrderedDict([
+         ('all', 'No Month/Time Limit'),
+         ('water_year', 'Water Year'),
+         ('spring', 'Spring (MAM)'),
+         ('spring2', 'Spring (AMJ)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('jan', 'January'),
+         ('feb', 'February'),
+         ('mar', 'March'),
+         ('apr', 'April'),
+         ('may', 'May'),
+         ('jun', 'June'),
+         ('jul', 'July'),
+         ('aug', 'August'),
+         ('sep', 'September'),
+         ('oct', 'October'),
+         ('nov', 'November'),
+         ('dec', 'December')])
 
 
 def get_description():
@@ -30,6 +54,8 @@ def get_description():
              default='WC', label='Select Watch/Warning Phenomena Type:'),
         dict(type='significance', name='significance',
              default='W', label='Select Watch/Warning Significance Level:'),
+        dict(type='select', name='season', default='all',
+             label='Select Time Period:', options=MDICT),
     ]
     return desc
 
@@ -42,6 +68,25 @@ def plotter(fdict):
     wfo = ctx['station']
     phenomena = ctx['phenomena']
     significance = ctx['significance']
+    if ctx['season'] == 'all':
+        months = range(1, 13)
+    elif ctx['season'] == 'water_year':
+        months = range(1, 13)
+    elif ctx['season'] == 'spring':
+        months = [3, 4, 5]
+    elif ctx['season'] == 'spring2':
+        months = [4, 5, 6]
+    elif ctx['season'] == 'fall':
+        months = [9, 10, 11]
+    elif ctx['season'] == 'summer':
+        months = [6, 7, 8]
+    elif ctx['season'] == 'winter':
+        months = [12, 1, 2]
+    else:
+        ts = datetime.datetime.strptime("2000-" + ctx['season'] + "-01",
+                                        '%Y-%b-%d')
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month, 999]
 
     nt = NetworkTable("WFO")
 
@@ -50,12 +95,14 @@ def plotter(fdict):
     tzname = nt.sts[wfo]['tzname']
     df = read_sql("""
     WITH data as (
-     SELECT extract(year from issue) as yr, eventid,
-     min(issue at time zone %s) as minissue,
-     max(expire at time zone %s) as maxexpire from warnings WHERE
-     phenomena = %s and significance = %s
-     and wfo = %s GROUP by yr, eventid),
-    events as (select count(*) from data),
+        SELECT extract(year from issue) as yr, eventid,
+        min(issue at time zone %s) as minissue,
+        max(expire at time zone %s) as maxexpire from warnings WHERE
+        phenomena = %s and significance = %s
+        and wfo = %s and
+        extract(month from issue) in %s GROUP by yr, eventid),
+    events as (
+        select count(*) from data),
     timedomain as (
         SELECT generate_series(minissue,
             least(maxexpire, minissue + '24 hours'::interval)
@@ -67,7 +114,8 @@ def plotter(fdict):
         as minute, count(*) from timedomain
         GROUP by minute ORDER by minute ASC)
     select d.minute, d.count, e.count as total from data2 d, events e
-    """, pgconn, params=(tzname, tzname, phenomena, significance, wfo),
+    """, pgconn, params=(
+        tzname, tzname, phenomena, significance, wfo, tuple(months)),
                   index_col='minute')
     if df.empty:
         raise ValueError("No Results Found")
@@ -84,10 +132,13 @@ def plotter(fdict):
                         "", "", "9 PM", "", "", "Mid"])
     ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
     ax.set_ylabel("Percentage [%%] out of %.0f Events" % (df['total'].max(), ))
-    ax.set_title(("[%s] %s :: Time of Day Frequency\n%s (%s.%s)"
-                  ) % (wfo, nt.sts[wfo]['name'],
-                       vtec.get_ps_string(phenomena, significance),
-                       phenomena, significance))
+    title = "[%s] %s :: Time of Day Frequency" % (wfo, nt.sts[wfo]['name'])
+    subtitle = "%s (%s.%s) [%s]" % (
+        vtec.get_ps_string(phenomena, significance),
+        phenomena, significance, MDICT[ctx['season']]
+    )
+    fitbox(fig, title, 0.05, 0.95, 0.95, 0.99, ha='center')
+    fitbox(fig, subtitle, 0.05, 0.95, 0.91, 0.945, ha='center')
 
     return fig, df
 
