@@ -1,5 +1,6 @@
 #!/bin/sh
 DD=$(date +%d)
+DOW=$(date +%u)
 
 cd isuag
 sh run_plots.sh
@@ -31,6 +32,11 @@ cd ../dl
 if [ $DD -eq "09" ]
 	then
 		 python download_narr.py $(date --date '13 days ago' +'%Y %m') &
+fi
+# run every Monday
+if [ $DD -eq "1" ]
+	then
+		python fetch_power.py $(date --date '7 days ago' +'%Y')
 fi
 
 cd ../cache

@@ -20,6 +20,7 @@ PDICT = OrderedDict(
      ('high_tmpk', 'Maximum Temperature'),
      ('high_tmpk_12z', 'Maximum Temperature at 12 UTC'),
      ('p01d', 'Calendar Day Precipitation'),
+     ('power_swdn', 'NASA POWER :: Incident Shortwave Down'),
      ('rsds', 'Solar Radiation'),
      ('avg_dwpk', 'Average Dew Point'),
      ('wind_speed', 'Average Wind Speed'),
@@ -76,9 +77,10 @@ def plotter(fdict):
     lats = nc.variables['lat'][jslice]
     lons = nc.variables['lon'][islice]
     cmap = None
-    if varname == 'rsds':
+    if varname in ['rsds', 'power_swdn']:
         # Value is in W m**-2, we want MJ
-        data = nc.variables[varname][idx0, jslice, islice] * 86400. / 1000000.
+        multi = (86400. / 1000000.) if varname == 'rsds' else 1
+        data = nc.variables[varname][idx0, jslice, islice] * multi
         units = 'MJ d-1'
         clevs = np.arange(0, 37, 3.)
         clevs[0] = 0.01
