@@ -178,10 +178,10 @@ def plot5(ctx, col):
             'lon': ctx['nt'].sts[station]['lon'],
             'lat': ctx['nt'].sts[station]['lat'],
             'tmpf': row['data'],
+            'tmpf_format': "%.02f",
             'id': ctx['nt'].sts[station]['plot_name'],
             'id_color': 'k',
         })
-
     return data, df
 
 
@@ -307,4 +307,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(opt='1', date='2019-03-25'))
+    plotter(dict(opt='5', date='2019-04-21'))
