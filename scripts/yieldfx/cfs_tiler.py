@@ -8,6 +8,7 @@ import numpy as np
 from pyiem import iemre
 from pyiem.datatypes import temperature
 from pyiem.util import utc, ncopen
+from pyiem.meteorology import gdd
 
 
 def make_netcdf(fullpath, valid, west, south):
@@ -51,6 +52,12 @@ def make_netcdf(fullpath, valid, west, south):
     tmin.units = "degrees C"
     tmin.long_name = "daily minimum temperature"
 
+    gddf = nc.createVariable(
+        'gdd_f', np.float, ('time', 'lat', 'lon'), fill_value=1e20
+    )
+    gddf.units = "degrees F"
+    gddf.long_name = "Growing Degree Days F (base 50 ceiling 86)"
+
     srad = nc.createVariable('srad', np.float, ('time', 'lat', 'lon'),
                              fill_value=1e20)
     srad.units = "MJ"
@@ -80,15 +87,27 @@ def tile_extraction(nc, valid, west, south, isnewfile):
             continue
         renc = ncopen(ncfn)
         # print("tslice: %s jslice: %s islice: %s" % (tslice, jslice, islice))
-        nc.variables['tmax'][tslice, :, :] = temperature(
+        highc = temperature(
             renc.variables['high_tmpk'][:, jslice, islice], 'K').value('C')
-        nc.variables['tmin'][tslice, :, :] = temperature(
+        lowc = temperature(
             renc.variables['low_tmpk'][:, jslice, islice], 'K').value('C')
+        nc.variables['tmax'][tslice, :, :] = highc
+        nc.variables['tmin'][tslice, :, :] = lowc
+        nc.variables['gdd_f'][tslice, :, :] = gdd(
+            temperature(highc, "C"),
+            temperature(lowc, "C")
+        )
         nc.variables['prcp'][tslice, :, :] = (
             renc.variables['p01d'][:, jslice, islice])
-        # IEMRE uses W m-2, we want MJ
-        nc.variables['srad'][tslice, :, :] = (
-            renc.variables['rsds'][:, jslice, islice]) * 86400. / 1000000.
+        # IEMRE power_swdn is MJ, test to see if data exists
+        srad = renc.variables['power_swdn'][:, jslice, islice]
+        if srad.mask.all():
+            # IEMRE rsds uses W m-2, we want MJ
+            srad = (
+                renc.variables['rsds'][:, jslice, islice] * 86400. / 1000000.
+            )
+        nc.variables['srad'][tslice, :, :] = srad
+
         renc.close()
         if year != valid.year:
             continue
@@ -100,12 +119,18 @@ def tile_extraction(nc, valid, west, south, isnewfile):
         nc.variables['srad'][tslice, :, :] = (
             cfsnc.variables['srad'][tidx:, jslice, islice] * 86400. / 1000000.
         )
-        nc.variables['tmax'][tslice, :, :] = temperature(
+        highc = temperature(
             cfsnc.variables['high_tmpk'][tidx:, jslice, islice],
             'K').value('C')
-        nc.variables['tmin'][tslice, :, :] = temperature(
+        lowc = temperature(
             cfsnc.variables['low_tmpk'][tidx:, jslice, islice],
             'K').value('C')
+        nc.variables['tmax'][tslice, :, :] = highc
+        nc.variables['tmin'][tslice, :, :] = lowc
+        nc.variables['gdd_f'][tslice, :, :] = gdd(
+            temperature(highc, "C"),
+            temperature(lowc, "C")
+        )
         nc.variables['prcp'][tslice, :, :] = (
             cfsnc.variables['p01d'][tidx:, jslice, islice])
         cfsnc.close()
