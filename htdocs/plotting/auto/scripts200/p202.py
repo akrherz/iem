@@ -19,6 +19,10 @@ PDICT = OrderedDict([
     ('relh', 'Relative Humidity [%]'),
     ('q', 'Specific Humidity [g/kg]'),
     ])
+PDICT2 = OrderedDict([
+    ('no', 'Plot Daily Differences'),
+    ('yes', 'Accumulate the Daily Differences'),
+])
 
 
 def get_description():
@@ -53,6 +57,8 @@ def get_description():
              label='Additional Year to plot (optional)', optional=True),
         dict(type='select', name='v', default='tmpf',
              label='Variable to Compare:', options=PDICT),
+        dict(type='select', name='opt', default='no',
+             label='Accumulate the daily plot?', options=PDICT2),
         dict(type='int', name='smooth', default=14,
              label='Centered smooth of data over given days'),
     ]
@@ -117,22 +123,27 @@ def plotter(fdict):
     df['delta'] = df[h2] - df[h1]
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.set_xlabel(
-        "Plotted lines are smoothed over %.0f days" % (ctx['smooth'],))
-    ax.set_ylabel(PDICT[varname])
+    if ctx['opt'] == 'no':
+        ax.set_xlabel(
+            "Plotted lines are smoothed over %.0f days" % (ctx['smooth'],))
+    ax.set_ylabel("%s %s" % (
+        PDICT[varname], "Accumulated Sum" if ctx['opt'] == 'yes' else '')
+    )
 
-    # Histogram
-    H, xedges, yedges = np.histogram2d(
-        df['doy'].values, df['delta'].values, bins=(50, 50))
-    ax.pcolormesh(
-        xedges, yedges, H.transpose(), cmap=plt.get_cmap('binary'),
-        alpha=0.5)
+    if ctx['opt'] == 'no':
+        # Histogram
+        H, xedges, yedges = np.histogram2d(
+            df['doy'].values, df['delta'].values, bins=(50, 50))
+        ax.pcolormesh(
+            xedges, yedges, H.transpose(), cmap=plt.get_cmap('binary'),
+            alpha=0.5)
 
     # Plot an average line
     gdf = df.groupby('doy').mean().rolling(
         ctx['smooth'], min_periods=1, center=True).mean()
+    y = gdf['delta'] if ctx['opt'] == 'no' else gdf['delta'].cumsum()
     ax.plot(
-        gdf.index.values, gdf['delta'], label='Average', zorder=6,
+        gdf.index.values, y, label='Average', zorder=6,
         lw=2, color='k', linestyle='-.')
 
     # Plot selected year
@@ -144,8 +155,9 @@ def plotter(fdict):
         if not df2.empty:
             gdf = df2.groupby('doy').mean().rolling(
                 ctx['smooth'], min_periods=1, center=True).mean()
+            y = gdf['delta'] if ctx['opt'] == 'no' else gdf['delta'].cumsum()
             ax.plot(
-                gdf.index.values, gdf['delta'], label=str(year),
+                gdf.index.values, y, label=str(year),
                 lw=2, zorder=10)
 
     ax.set_xticks(
