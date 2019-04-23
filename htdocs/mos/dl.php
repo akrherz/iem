@@ -1,7 +1,7 @@
 <?php
 putenv("TZ=GMT");
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 $mos = iemdb("mos");
 pg_exec($mos, "SET TIME ZONE 'GMT'");
 
@@ -36,9 +36,11 @@ header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename=mosdata.csv");
 
 
-$ar = Array("station", "model", "runtime", "ftime", "n_x", "tmp", "dpt",
-            "cld", "wdr", "wsp", "p06", "p12", "q06", "q12","t06", "t12",
-             "snw", "cig", "vis", "obv", "poz", "pos", "typ");
+$ar = Array(
+  "station", "model", "runtime", "ftime", "n_x", "tmp", "dpt",
+  "cld", "wdr", "wsp", "p06", "p12", "q06", "q12","t06", "t12",
+  "snw", "cig", "vis", "obv", "poz", "pos", "typ", "sky", "swh", "lcb",
+  "i06", "slv", "s06", "pra", "ppl", "psn", "pzr", "t03", "gst");
 
 echo implode($ar, ",") ."\n";
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)

@@ -20,6 +20,19 @@ $mosvars = Array(
  "obv" => "Obstruction to Vision",
  "poz" => "Freezing Rain Probability [%]",
  "pos" => "Snowfall Probability [%]",
- "typ" => "Precipitation Type");
+ "typ" => "Precipitation Type",
+ "sky" => "Sky Coverage [%]",
+ "gst" => "Wind Gust [kts]",
+ "t03" => "T03",
+ "pzr" => "Probability of Freezing Rain [%]",
+ "psn" => "Probability of Snow [%]",
+ "ppl" => "Probability of PL [%]",
+ "pra" => "Probability of Rain [%]",
+ "s06" => "S06",
+ "slv" => "SLV",
+ "i06" => "I06",
+ "lcb" => "LCB",
+ "swh" => "SWH",
+);
 
 ?>

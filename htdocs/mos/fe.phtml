@@ -1,10 +1,10 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
-include("lib.php");
+require_once "lib.php";
 
 $year1 = isset($_GET["year1"]) ? intval($_GET["year1"]): date("Y");
 $year2 = isset($_GET["year2"]) ? intval($_GET["year2"]): date("Y");
@@ -39,6 +39,9 @@ $modselect .= ">AVN/GFS</option>\n";
 $modselect .= "<option value=\"NAM\" ";
 if ($model == "NAM" || $model == "ETA") $modselect .= " SELECTED";
 $modselect .= ">Eta/NAM</option>\n";
+$modselect .= "<option value=\"NBS\" ";
+if ($model == "NBS") $modselect .= " SELECTED";
+$modselect .= ">NBS</option>\n";
 $modselect .= "</select>";
 
 $t->content = <<<EOF

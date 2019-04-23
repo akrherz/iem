@@ -1,7 +1,7 @@
 <?php 
 define("IEM_APPID", 74);
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Model Output Statistics (MOS)";
 $t->thispage = "archive-mos"; 
@@ -26,6 +26,7 @@ local research and makes it available for others to use as well.</p>
 <tr><th>ETA</th><td>24 Feb 2002</td><td>9 Dec 2008</td></tr>
 <tr><th>GFS</th><td>16 Dec 2003</td><td>--Realtime--</td></tr>
 <tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
+<tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>--Realtime--</td></tr>
 </tbody>
 </table>
 <br />The MOS products are processed in realtime and immediately available from

@@ -25,7 +25,7 @@ if ($model == "GFS" && $now < mktime(12,0,0,12,16,2003)){ $model = "AVN"; }
 $sts = $now - (86400*3) - (3600*12);
 $ets = $now - 3600;
 
-$runsper = Array("GFS"=>6, "AVN"=>6, "NAM"=>12, "ETA"=>12);
+$runsper = Array("GFS"=>6, "AVN"=>6, "NAM"=>12, "ETA"=>12, "NBS" => 6);
 $sqlSelector = "(";
 $runtimes = Array();
 $data = Array();
@@ -110,7 +110,10 @@ $content .= ">AVN/GFS</option>\n";
 $content .= "<option value=\"NAM\" ";
 if ($model == "NAM" || $model == "ETA") $content .= " SELECTED";
   $content .= ">Eta/NAM</option>\n";
-$content .= "</select>";
+  $content .= "<option value=\"NBS\" ";
+  if ($model == "NBS") $content .= " SELECTED";
+    $content .= ">NBS</option>\n";
+  $content .= "</select>";
 
 $content .= yearSelect(2000,$year);
 $content .= monthSelect($month);
