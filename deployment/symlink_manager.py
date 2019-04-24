@@ -11,7 +11,7 @@ PAIRS = [
          ['/mesonet/TABLES', '/mnt/mesonet2/TABLES'],
          ['/mesonet/wepp', '/mnt/idep'],
          ['/mesonet/ARCHIVE/dailydata', '/mnt/mtarchive/longterm/dailydata'],
-         ['/mesonet/ARCHIVE/data', '/mnt/mesonet2/ARCHIVE/data'],
+         ['/mesonet/ARCHIVE/data', '/mnt/mtarchive/ARCHIVE/data'],
          ['/mesonet/ARCHIVE/gempak', '/mnt/mtarchive/longterm/gempak'],
          ['/mesonet/ARCHIVE/nexrad', '/mnt/mtarchive/longterm/nexrad3_iowa'],
          ['/mesonet/ARCHIVE/raw', '/mnt/mesonet2/ARCHIVE/raw'],

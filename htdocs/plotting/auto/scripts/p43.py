@@ -109,6 +109,8 @@ def plotter(fdict):
     tzname = nt.sts[station]['tzname']
 
     df = get_data(network, station, tzname, sdate)
+    if df.empty:
+        raise ValueError("No data was found!")
     # if d1 is not None and d1 >= 0 and d1 <= 360:
     # if s is not None and s >= 0 and s < 200:
     # if t is not None and t >= -90 and t < 190:
