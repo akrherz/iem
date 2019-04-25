@@ -5,17 +5,20 @@ import json
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn, ssw, utc
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def run(wfo, year, phenomena, significance):
+def run(wfo, year, phenomena, significance, combo):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
       wfo (str): 3 character WFO identifier
       year (int): year to run for
+      phenomena (str, optional): 2 character phenomena
+      significance (str, optional): 1 character VTEC significance
+      combo (int, optional): special one-offs
     """
     pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -23,9 +26,13 @@ def run(wfo, year, phenomena, significance):
     table = "warnings_%s" % (year,)
     sbwtable = "sbw_%s" % (year, )
     plimit = "phenomena is not null and significance is not null"
+    orderby = "u.phenomena ASC, u.significance ASC, u.utc_issue ASC"
     if phenomena is not None and significance is not None:
         plimit = ("phenomena = '%s' and significance = '%s'"
                   ) % (phenomena[:2], significance[0])
+    if combo == 1:
+        plimit = "phenomena in ('SV', 'TO', 'FF') and significance = 'W'"
+        orderby = "u.utc_issue ASC"
     cursor.execute("""
     WITH polyareas as (
         SELECT phenomena, significance, eventid, round((ST_area(
@@ -54,9 +61,13 @@ def run(wfo, year, phenomena, significance):
     from ugcareas u LEFT JOIN polyareas p on
     (u.phenomena = p.phenomena and u.significance = p.significance
      and u.eventid = p.eventid)
-        ORDER by u.phenomena ASC, u.significance ASC, u.utc_issue ASC
+        ORDER by """ + orderby + """
     """, (wfo, wfo))
-    res = {'wfo': wfo, 'year': year, 'events': []}
+    res = {
+        'wfo': wfo,
+        'generated_at': utc().strftime(ISO9660),
+        'year': year,
+        'events': []}
     for row in cursor:
         uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (year, wfo, row['phenomena'],
                                                   row['significance'],
@@ -89,13 +100,14 @@ def main():
     phenomena = form.getfirst('phenomena')
     significance = form.getfirst('significance')
     cb = form.getfirst("callback", None)
+    combo = int(form.getfirst('combo', 0))
 
-    mckey = "/json/vtec_events/%s/%s/%s/%s" % (wfo, year, phenomena,
-                                               significance)
+    mckey = "/json/vtec_events/%s/%s/%s/%s/%s" % (
+        wfo, year, phenomena, significance, combo)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = run(wfo, year, phenomena, significance)
+        res = run(wfo, year, phenomena, significance, combo)
         mc.set(mckey, res, 60)
 
     if cb is None:
