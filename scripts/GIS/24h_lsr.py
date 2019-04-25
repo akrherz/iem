@@ -31,6 +31,7 @@ def main():
     w.field("TYPETEXT", 'C', 40, 0)
     w.field("CITY", 'C', 40, 0)
     w.field("COUNTY", 'C', 40, 0)
+    w.field("STATE", 'C', 2, 0)
     w.field("SOURCE", 'C', 40, 0)
     w.field("REMARK", 'C', 200, 0)
 
@@ -52,6 +53,7 @@ def main():
                  row['typetext'],
                  row['city'],
                  row['county'],
+                 row['state'],
                  row['source'],
                  row['remark'].encode(
                      'utf-8', 'ignore').decode('ascii', 'ignore')[:200]
