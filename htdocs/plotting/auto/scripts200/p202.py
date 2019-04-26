@@ -126,7 +126,7 @@ def plotter(fdict):
     if ctx['opt'] == 'no':
         ax.set_xlabel(
             "Plotted lines are smoothed over %.0f days" % (ctx['smooth'],))
-    ax.set_ylabel("%s %s" % (
+    ax.set_ylabel("%s %s Difference" % (
         PDICT[varname], "Accumulated Sum" if ctx['opt'] == 'yes' else '')
     )
 
