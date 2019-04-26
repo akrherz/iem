@@ -25,7 +25,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='station', name='station', default='IATDSM',
              label='Select Station:', network='IACLIMATE'),
-        dict(type='float', name='threshold', default='1',
+        dict(type='text', name='threshold', default='1',
              label='First Snowfall Threshold (T for trace)'),
         dict(type="select", name='dir', default='last', options=PDICT,
              label='Which Variable to Plot?'),
@@ -129,7 +129,7 @@ def plotter(fdict):
         ('[%s] %s %s %s Snowfall\n(color is how long snow remained)'
          ) % (ctx['station'], ctx['nt'].sts[ctx['station']]['name'],
               'Last' if ctx['dir'] == 'last' else 'First',
-              ('Trace+' if ctx['threshold'] < 0.1
+              ('Trace+' if ctx['threshold'] == 'T'
                else "%.2f+ Inch" % (ctx['threshold'],))))
     p0 = plt.Rectangle((0, 0), 1, 1, fc="purple")
     p1 = plt.Rectangle((0, 0), 1, 1, fc="g")
@@ -157,5 +157,5 @@ def plotter(fdict):
 
 if __name__ == '__main__':
     plotter(
-        dict(threshold=0.1, dir='first', station='IATDSM', network='IACLIMATE')
+        dict(threshold='T', dir='first', station='IATDSM', network='IACLIMATE')
     )
