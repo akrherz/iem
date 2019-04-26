@@ -156,8 +156,13 @@ EOF;
   	$sector = "custom";
   	$sectors["custom"] = Array("epsg"=> 4326, "ext" => Array($x0,$y0,$x1,$y1));
 
+		// Now the concern here is what to do with the valid time of this plot
+		// If now() is less than event end, set the plot time to now
   	$dts = strtotime($row["v"]);
-  	$dts2 = strtotime($row["e"]);
+		$dts2 = strtotime($row["e"]);
+		if (time() < $dts2){
+			$dts = time();
+		}
 
   	$vtec_limiter = sprintf("and phenomena = '%s' and eventid = %s and 
     	significance = '%s' and w.wfo = '%s'", $phenomena, $eventid, 
