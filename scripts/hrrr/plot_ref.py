@@ -7,6 +7,7 @@ from __future__ import print_function
 import datetime
 import subprocess
 import sys
+import os
 
 import numpy as np
 import pytz
@@ -36,6 +37,9 @@ def run(valid, routes):
     fn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                          "hrrr.t%Hz.refd.grib2"))
 
+    if not os.path.isfile(fn):
+        print("hrrr/plot_ref missing %s" % (fn, ))
+        return
     grbs = pygrib.open(fn)
 
     lats = None
@@ -104,12 +108,17 @@ def run(valid, routes):
 def main(argv):
     """Go Main"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    now = utc()
     routes = 'a'
     if (now - valid) < datetime.timedelta(hours=2):
         routes = 'ac'
 
-    run(valid, routes)
+    # See if we already have output
+    fn = valid.strftime(
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/hrrr_1km_ref_%H.gif"
+    )
+    if not os.path.isfile(fn):
+        run(valid, routes)
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ PALETTE = Image.open(
 ).getpalette()
 
 
-def do_grb(grib, valid):
+def do_grb(grib, valid, routes):
     """Process this grib object"""
     fxdelta = grib.forecastTime
     if grib.fcstimeunits == 'mins':
@@ -49,9 +49,9 @@ def do_grb(grib, valid):
     png = Image.fromarray(raster)
     png.putpalette(PALETTE)
     png.save(pngtemp)
-    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/hrrr/"
+    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
            "refd_%04i.png GIS/hrrr/%02i/refd_%04i.png png' %s"
-           ) % (valid.strftime("%Y%m%d%H%M"), fxminutes,
+           ) % (routes, valid.strftime("%Y%m%d%H%M"), fxminutes,
                 valid.hour, fxminutes, pngtemp.name,)
     subprocess.call(cmd, shell=True)
     # Do world file variant
@@ -63,9 +63,9 @@ def do_grb(grib, valid):
 -126.0
 50.0""")
     wldtmp.close()
-    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot ac %s gis/images/4326/hrrr/"
+    cmd = ("/home/ldm/bin/pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
            "refd_%04i.wld GIS/hrrr/%02i/refd_%04i.wld wld' %s"
-           ) % (valid.strftime("%Y%m%d%H%M"), fxminutes,
+           ) % (routes, valid.strftime("%Y%m%d%H%M"), fxminutes,
                 valid.hour, fxminutes, wldtmp.name)
     subprocess.call(cmd, shell=True)
     # Do json metadata
@@ -79,13 +79,14 @@ def do_grb(grib, valid):
     cmd = ("/home/ldm/bin/pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
            "refd_%04i.json bogus json' %s"
            ) % (valid.strftime("%Y%m%d%H%M"), fxminutes, jsontmp.name)
-    subprocess.call(cmd, shell=True)
+    if routes == 'ac':
+        subprocess.call(cmd, shell=True)
     os.unlink(gribtemp.name)
     os.unlink(wldtmp.name)
     os.unlink(jsontmp.name)
 
 
-def workflow(valid):
+def workflow(valid, routes):
     """Process this time's data"""
     gribfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                              "hrrr.t%Hz.refd.grib2"))
@@ -94,14 +95,22 @@ def workflow(valid):
         return
     grbs = pygrib.open(gribfn)
     for i in range(grbs.messages):
-        do_grb(grbs[i + 1], valid)
+        do_grb(grbs[i + 1], valid, routes)
 
 
 def main(argv):
     """So Something great"""
-    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]),
-                int(argv[4]))
-    workflow(valid)
+    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+    now = utc()
+    routes = 'a'
+    if (now - valid) < datetime.timedelta(hours=2):
+        routes = 'ac'
+    # See if we already have output
+    fn = valid.strftime(
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/hrrr/%H/refd_0000.png"
+    )
+    if not os.path.isfile(fn):
+        workflow(valid, routes)
 
 
 if __name__ == '__main__':

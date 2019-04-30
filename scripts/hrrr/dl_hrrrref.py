@@ -102,8 +102,6 @@ def main(argv):
     """ Go Main Go """
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     run(valid)
-    # in case we missed some old data, re-download
-    run(valid - datetime.timedelta(hours=12))
 
 
 if __name__ == '__main__':
