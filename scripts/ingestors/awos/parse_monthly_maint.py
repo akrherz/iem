@@ -19,8 +19,8 @@ import datetime
 import pandas as pd
 from pyiem.util import get_dbconn
 
-CALINFO = re.compile((r".*AWOS.*\s+([0-9\-\.]+)/([0-9\-\.]+)\s+"
-                      r".*AWOS.*\s+([0-9\-\.]+)/([0-9\-\.]+)"),
+CALINFO = re.compile((r".*AWOS.*\s+([0-9\-\.]+)\s*/\s*([0-9\-\.]+)\s+"
+                      r".*AWOS.*\s+([0-9\-\.]+)\s*/\s*([0-9\-\.]+)"),
                      re.IGNORECASE)
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
