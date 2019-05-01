@@ -29,6 +29,7 @@ def get_description():
              label='Date:', min="2011/01/01"),
         dict(type='float', name='threshold', default=2.,
              label='Date Precipitation Threshold (inch)'),
+        dict(type='cmap', name='cmap', default='terrain', label='Color Ramp:'),
     ]
     return desc
 
@@ -90,7 +91,7 @@ def plotter(fdict):
                            "RadarOnly products"
                            ) % (date.strftime("%-d %b %Y"), ))
     x, y = np.meshgrid(lon, lat)
-    cmap = plt.get_cmap('terrain')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_over('k')
     cmap.set_under('white')
     mp.pcolormesh(x, y, grid,

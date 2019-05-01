@@ -90,6 +90,9 @@ def get_description():
              label='Start Year (inclusive) of Period Two:'),
         dict(type='year', name='p2eyear', default=2010,
              label='End Year (inclusive) of Period Two:'),
+        dict(
+            type='cmap', name='cmap', default='seismic_r',
+            label='Color Ramp:'),
     ]
     return desc
 
@@ -229,8 +232,7 @@ def plotter(fdict):
     if opt in ['both', 'contour']:
         mp.contourf(df2['lon'].values, df2['lat'].values,
                     df2[column].values, levels,
-                    cmap=plt.get_cmap(('seismic_r' if varname == 'total_precip'
-                                       else 'seismic')),
+                    cmap=plt.get_cmap(ctx['cmap']),
                     units=UNITS[varname])
     if sector == 'state':
         mp.drawcounties()

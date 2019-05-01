@@ -44,6 +44,7 @@ def get_description():
              label='Which Metric', options=PDICT),
         dict(type="int", name="days", default=7,
              label='Over How Many Days?'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -133,7 +134,7 @@ def plotter(fdict):
         title = title.replace("Average ", "")
     ax.set_title(("%s [%s]\n%i Day Period with %s"
                   ) % (ctx['nt'].sts[station]['name'], station, days, title))
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     minval = df[XREF[varname]].min() - 1.
     if varname == 'wettest' and minval < 0:
         minval = 0

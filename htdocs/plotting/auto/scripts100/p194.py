@@ -51,6 +51,7 @@ def get_description():
              label='Select Drought Classification (at and above counted):'),
         dict(type='select', name='w', default='percent', options=PDICT2,
              label='How to express time for plot:'),
+        dict(type='cmap', name='cmap', default='plasma', label='Color Ramp:'),
     ]
     return desc
 
@@ -126,7 +127,7 @@ def plotter(fdict):
         # week in there
         raster = raster / ((edate - sdate).days / 7. + 1.) * 100.
     # plot
-    cmap = stretch_cmap('plasma', ramp)
+    cmap = stretch_cmap(ctx['cmap'], ramp)
     cmap.set_under('white')
     cmap.set_bad('white')
     mp.pcolormesh(lons, lats, np.flipud(raster), ramp,

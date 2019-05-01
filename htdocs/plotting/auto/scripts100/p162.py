@@ -23,6 +23,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              network='IA_ASOS', label='Select Station:'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -74,13 +75,15 @@ def plotter(fdict):
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_under('#F9CCCC')
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
 
     syear = max([1973, nt.sts[station]['archive_begin'].year])
     years = (datetime.date.today().year - syear) + 1.
-    c = ax.imshow(H / years, aspect='auto', interpolation='nearest', norm=norm)
+    c = ax.imshow(
+        H / years, aspect='auto', interpolation='nearest', norm=norm,
+        cmap=cmap)
     ax.set_ylim(-0.5, len(z)-0.5)
     idx = [0, 4, 9, 19, 29, 39, 49, 54, 59, 64, 69, 74, 79]
     ax.set_yticks(idx)

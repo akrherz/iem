@@ -31,6 +31,7 @@ def get_description():
              label="Growing Degree Day base (F)"),
         dict(type='int', default=86, name='gddceil',
              label="Growing Degree Day ceiling (F)"),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
         ]
     return desc
 
@@ -105,7 +106,7 @@ def plotter(fdict):
     success = np.array(success)
     starts = np.array(starts)
 
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     bmin = min(heights[success]) - 1
     bmax = max(heights[success]) + 1
     bins = np.arange(bmin, bmax+1.1)

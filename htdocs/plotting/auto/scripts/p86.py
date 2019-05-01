@@ -48,6 +48,7 @@ def get_description():
         dict(type='date', name='date',
              default=today.strftime("%Y/%m/%d"),
              label='Date:', min="1893/01/01"),
+        dict(type='cmap', name='cmap', default='magma', label='Color Ramp:'),
     ]
     return desc
 
@@ -76,7 +77,7 @@ def plotter(fdict):
     nc = ncopen(iemre.get_daily_ncname(date.year))
     lats = nc.variables['lat'][jslice]
     lons = nc.variables['lon'][islice]
-    cmap = None
+    cmap = ctx['cmap']
     if varname in ['rsds', 'power_swdn']:
         # Value is in W m**-2, we want MJ
         multi = (86400. / 1000000.) if varname == 'rsds' else 1
@@ -85,7 +86,6 @@ def plotter(fdict):
         clevs = np.arange(0, 37, 3.)
         clevs[0] = 0.01
         clevstride = 1
-        cmap = 'magma'
     elif varname in ['wind_speed', ]:
         data = speed(nc.variables[varname][idx0, jslice, islice],
                      'MPS').value('MPH')
@@ -103,7 +103,7 @@ def plotter(fdict):
         clevs = np.append(clevs, np.arange(3., 10.0, 1))
         clevs[0] = 0.01
         clevstride = 1
-        cmap = stretch_cmap('terrain_r', clevs)
+        cmap = stretch_cmap(ctx['cmap'], clevs)
     elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
                      'avg_dwpk']:
         # Value is in W m**-2, we want MJ

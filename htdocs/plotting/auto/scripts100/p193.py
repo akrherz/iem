@@ -45,6 +45,9 @@ def get_description():
              label='Plotting Options:'),
         dict(type='select', name='scale', default='auto', options=PDICT4,
              label='WPC Plotting Max Value for Color Ramp:'),
+        dict(
+            type='cmap', name='cmap', default='gist_ncar',
+            label='Color Ramp:'),
     ]
     return desc
 
@@ -83,7 +86,7 @@ def plotter(fdict):
                  subtitle=subtitle,
                  continentalcolor='white',
                  titlefontsize=16)
-    cmap = plt.get_cmap('gist_ncar')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_under('#EEEEEE')
     cmap.set_over('black')
     if scale == 'auto':

@@ -59,6 +59,9 @@ here</a>.
         dict(type='datetime', name='ts',
              default=now.strftime("%Y/%m/%d %H%M"),
              label='Valid Time (UTC Timezone):', min="2003/01/01 0000"),
+        dict(
+            type='cmap', name='cmap', default='gist_rainbow_r',
+            label='Color Ramp:'),
         ]
     return desc
 
@@ -80,7 +83,7 @@ def plotter(fdict):
             "needed for non-urban Flash Flooding to commence"
         ) % (HOURS[ctx['hour']], )
     )
-    cmap = plt.get_cmap('gist_rainbow_r')
+    cmap = plt.get_cmap(ctx['cmap'])
     bins = [0.01, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.25, 2.5, 2.75, 3.,
             3.5, 4.0, 5.0]
     if ts.year < 2019:

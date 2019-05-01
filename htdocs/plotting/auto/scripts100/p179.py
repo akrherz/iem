@@ -37,6 +37,7 @@ def get_description():
         dict(type='date', name='date',
              default=today.strftime("%Y/%m/%d"),
              label='Retroactive Date:', min="1893/01/01"),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
         ]
     return desc
 
@@ -105,7 +106,7 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 2, sharey=True, figsize=(8, 6))
 
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_under('white')
     norm = mpcolors.BoundaryNorm(np.arange(0, 101, 5), cmap.N)
 

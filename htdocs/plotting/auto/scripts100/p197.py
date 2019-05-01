@@ -26,7 +26,6 @@ LOOKUP = {
         'ALL UTILIZATION PRACTICES'
     ],
 }
-FLIP_COLORS = ['corn_poor_verypoor', ]
 
 
 def get_description():
@@ -48,6 +47,7 @@ def get_description():
         dict(type='date', name='date', default=today.strftime("%Y/%m/%d"),
              label='Valid Date:', min="1981/01/01",
              max=today.strftime("%Y/%m/%d")),
+        dict(type='cmap', name='cmap', default='BrBG', label='Color Ramp:'),
 
     ]
     return desc
@@ -143,11 +143,7 @@ def plotter(fdict):
         sector='conus', title=ctx['title'], subtitle=ctx['subtitle']
     )
     levels = range(-40, 41, 10)
-    cmap = plt.get_cmap(
-        'BrBG%s' % ("_r" if ctx['var'] in FLIP_COLORS else '',)
-    )
-    cmap.set_over('#00ad33' if ctx['var'] not in FLIP_COLORS else '#ab320a')
-    cmap.set_under('#ab320a' if ctx['var'] not in FLIP_COLORS else '#00ad33')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_bad('white')
     mp.fill_states(data, ilabel=True, labels=labels, bins=levels,
                    cmap=cmap, units='Absolute %',
@@ -157,4 +153,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(date='2018-07-13', var='corn_poor_verypoor'))
+    plotter(dict())

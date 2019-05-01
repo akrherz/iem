@@ -36,6 +36,7 @@ def get_description():
              default=utcnow.strftime("%Y/%m/%d %H00"),
              label='Valid Analysis Time (UTC)', optional=True,
              min="1986/01/01 0000"),
+        dict(type='cmap', name='cmap', default='gray', label='Color Ramp:'),
     ]
     return desc
 
@@ -115,7 +116,7 @@ def plotter(fdict):
                  titlefontsize=16)
     mp.contourf(df['lon'].values, df['lat'].values, df['vsby'].values,
                 np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]),
-                units='miles', cmap=plt.get_cmap('gray'))
+                units='miles', cmap=plt.get_cmap(ctx['cmap']))
     if ctx['t'] == 'state':
         df2 = df[df['state'] == ctx['state']]
     else:

@@ -38,6 +38,7 @@ def get_description():
              label='Threshold (Temperature in F, RH in %)'),
         dict(type='select', name='direction', default='below',
              label='Threshold direction:', options=PDICT),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -81,7 +82,7 @@ def plotter(fdict):
         xticks.append(float(ts.strftime("%j")) / 7.0)
 
     (fig, ax) = plt.subplots(1, 1)
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_under('white')
     bins = np.arange(0, 101, 5)
     bins[0] = 1

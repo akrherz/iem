@@ -29,6 +29,8 @@ def get_description():
              label='Select Station:', network='IA_ASOS'),
         dict(type='select', name='which', default='cloudy', options=PDICT,
              label='Compute differences based on:'),
+        dict(
+            type='cmap', name='cmap', default='RdYlGn_r', label='Color Ramp:'),
     ]
     return desc
 
@@ -79,7 +81,7 @@ def plotter(fdict):
 
     maxv = np.ceil(max([np.max(data), 0 - np.min(data)])) + 0.2
     cs = ax.imshow(data, aspect='auto', interpolation='nearest',
-                   vmin=(0 - maxv), vmax=maxv, cmap=plt.get_cmap('RdYlGn_r'))
+                   vmin=(0 - maxv), vmax=maxv, cmap=plt.get_cmap(ctx['cmap']))
     a = fig.colorbar(cs)
     a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
     ax.grid(True)

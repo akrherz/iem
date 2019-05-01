@@ -61,6 +61,7 @@ def get_description():
              label='Accumulate the daily plot?', options=PDICT2),
         dict(type='int', name='smooth', default=14,
              label='Centered smooth of data over given days'),
+        dict(type='cmap', name='cmap', default='binary', label='Color Ramp:'),
     ]
     return desc
 
@@ -135,7 +136,7 @@ def plotter(fdict):
         H, xedges, yedges = np.histogram2d(
             df['doy'].values, df['delta'].values, bins=(50, 50))
         ax.pcolormesh(
-            xedges, yedges, H.transpose(), cmap=plt.get_cmap('binary'),
+            xedges, yedges, H.transpose(), cmap=plt.get_cmap(ctx['cmap']),
             alpha=0.5)
 
     # Plot an average line

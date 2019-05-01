@@ -32,6 +32,7 @@ def get_description():
              network='AWOS', label='Select Station 2:'),
         dict(type='select', name='varname', default='low', options=PDICT,
              label='Select Comparison'),
+        dict(type='cmap', name='cmap', default='Greens', label='Color Ramp:'),
     ]
     return desc
 
@@ -101,7 +102,7 @@ def plotter(fdict):
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
     ax[0].pcolormesh((xedges - 1) * 7, yedges, H.transpose(),
-                     cmap=cm.get_cmap("Greens"))
+                     cmap=cm.get_cmap(ctx['cmap']))
     ax[0].set_xticks(xticks)
     ax[0].set_xticklabels(calendar.month_abbr[1:])
     ax[0].set_xlim(0, 366)
@@ -130,7 +131,7 @@ def plotter(fdict):
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)
     ax[1].pcolormesh((xedges - 0.5), yedges, H.transpose(),
-                     cmap=cm.get_cmap('Greens'))
+                     cmap=cm.get_cmap(ctx['cmap']))
 
     y = []
     x = []

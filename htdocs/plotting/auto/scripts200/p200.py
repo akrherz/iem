@@ -130,6 +130,7 @@ def get_description():
              label='Select state/sector to plot'),
         dict(type='select', name='drawc', default='no', options=PDICT5,
              label='Plot County/Parish borders on maps?'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -236,7 +237,7 @@ def plotter(fdict):
     rng = [round(x, 2) for x in np.linspace(
         max([0.01, np.min(domain) - 0.5]), np.max(domain) + 0.5, 10)]
 
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_under('white')
     cmap.set_over('black')
     res = mp.pcolormesh(

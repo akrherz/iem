@@ -85,6 +85,7 @@ def get_description():
              label='Local Storm Report Type Filter'),
         dict(type='select', name='by', default='wfo',
              label='Aggregate Option:', options=PDICT),
+        dict(type='cmap', name='cmap', default='plasma', label='Color Ramp:'),
     ]
     return desc
 
@@ -134,11 +135,12 @@ def plotter(fdict):
                   ) % (sts.strftime("%d %b %Y %H:%M"),
                        ets.strftime("%d %b %Y %H:%M"),
                        MDICT.get(myfilter)))
+    cmap = plt.get_cmap(ctx['cmap'])
     if by == 'wfo':
-        mp.fill_cwas(data, bins=bins, cmap=plt.get_cmap('plasma'), ilabel=True)
+        mp.fill_cwas(data, bins=bins, cmap=cmap, ilabel=True)
     else:
         mp.fill_states(
-            data, bins=bins, cmap=plt.get_cmap('plasma'), ilabel=True)
+            data, bins=bins, cmap=cmap, ilabel=True)
 
     return mp.fig, df
 

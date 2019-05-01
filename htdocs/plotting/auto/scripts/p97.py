@@ -78,6 +78,7 @@ def get_description():
              label='End Date (inclusive):', min="1893/01/01"),
         dict(type='select', name='p', default='contour',
              label='Data Presentation Options', options=PDICT3),
+        dict(type='cmap', name='cmap', default='RdYlBu', label='Color Ramp:'),
     ]
     return desc
 
@@ -176,15 +177,13 @@ def plotter(fdict):
                              UNITS.get(varname)),
                  subtitle=subtitle)
     fmt = '%.2f'
+    cmap = cm.get_cmap(ctx['cmap'])
     if varname in ['precip_depart', 'avg_temp_depart']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
         clevels = np.linspace(0 - rng, rng, 7)
-        cmap = cm.get_cmap('RdYlBu'
-                           if varname == 'precip_depart' else 'RdYlBu_r')
     elif varname in ['precip_sum']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
         clevels = np.linspace(0, rng, 7)
-        cmap = cm.get_cmap('plasma_r')
         cmap.set_under('white')
         cmap.set_over('black')
     else:
@@ -192,7 +191,6 @@ def plotter(fdict):
         maxv = df[varname].max() + 5
         clevels = np.linspace(minv, maxv, 6, dtype='i')
         fmt = '%.0f'
-        cmap = cm.get_cmap('RdYlBu_r')
     clevlabels = [fmt % x for x in clevels]
     cmap.set_bad('white')
     if ctx['p'] == 'contour':

@@ -23,6 +23,7 @@ def get_description():
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -66,7 +67,7 @@ def plotter(fdict):
     H = np.ma.array(H) / float(years)
     H.mask = np.ma.where(H < 0.1, True, False)
     res = ax.pcolormesh((xedges - 1) * 7, yedges, H.transpose(),
-                        cmap=plt.get_cmap("jet"))
+                        cmap=plt.get_cmap(ctx['cmap']))
     fig.colorbar(res, label='Hours per week per year')
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])

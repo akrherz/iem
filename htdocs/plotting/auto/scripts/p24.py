@@ -77,6 +77,7 @@ def get_description():
              label='[Option 2] Start Date', min='1893/01/01'),
         dict(type='date', name='edate', default=today.strftime("%Y/%m/%d"),
              label='[Option 2] End Date (inclusive)', min='1893/01/01'),
+        dict(type='cmap', name='cmap', default='BrBG_r', label='Color Ramp:'),
     ]
     return desc
 
@@ -234,10 +235,7 @@ def plotter(fdict):
                          ctx['label'], PDICT[ctx['var']],
                          'Ranks ' if ctx['var'] != 'arridity' else ''),
                  subtitle=subtitle, titlefontsize=14)
-    cmap = cm.get_cmap("BrBG_r" if ctx['var'] in ['precip', 'arridity']
-                       else 'BrBG')
-    cmap.set_under('white')
-    cmap.set_over('black')
+    cmap = cm.get_cmap(ctx['cmap'])
     bins = [1, 5, 10, 25, 50, 75, 100, ctx['years'] - 10, ctx['years'] - 5,
             ctx['years']]
     pvar = ctx['var']+'_rank'

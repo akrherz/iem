@@ -32,6 +32,7 @@ def get_description():
              options=PDICT, label='Which Operation?'),
         dict(type='select', name='commodity_desc', default='CORN',
              options=PDICT2, label='Which Crop?'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -93,7 +94,7 @@ def plotter(fdict):
         idx = np.digitize([dlast, ], data[year - year0, :])
         ax.text(idx[0], year, "X", va='center', zorder=2, color='white')
 
-    cmap = cm.get_cmap('jet')
+    cmap = cm.get_cmap(ctx['cmap'])
     res = ax.imshow(data, extent=[1, 367, lastyear + 0.5, year0 - 0.5],
                     aspect='auto',
                     interpolation='none', cmap=cmap)

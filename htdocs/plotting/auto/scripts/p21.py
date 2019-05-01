@@ -1,3 +1,4 @@
+"""Change in NCEI climatology over some period."""
 import datetime
 
 import numpy as np
@@ -28,7 +29,7 @@ def get_description():
              min="2014/01/01"),  # Comes back to python as yyyy-mm-dd
         dict(type='select', name='varname', default='high',
              label='Which metric to plot?', options=PDICT),
-
+        dict(type='cmap', name='cmap', default='RdBu_r', label='Color Ramp:'),
     ]
     return desc
 
@@ -70,9 +71,10 @@ def plotter(fdict):
                  subtitle='from %s to %s' % (date1.strftime("%-d %B"),
                                              date2.strftime("%-d %B"))
                  )
-    cmap = cm.get_cmap("RdBu_r")
-    mp.contourf(df['lon'].values, df['lat'].values, df[varname].values,
-                np.arange(0-extent, extent+1, 2), cmap=cmap, units='F')
+    mp.contourf(
+        df['lon'].values, df['lat'].values, df[varname].values,
+        np.arange(0-extent, extent+1, 2),
+        cmap=cm.get_cmap(ctx['cmap']), units='F')
 
     return mp.fig, df
 

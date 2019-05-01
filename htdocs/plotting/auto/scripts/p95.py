@@ -39,6 +39,7 @@ def get_description():
              label='Hide/Show week SOI events -0.5 to 0.5'),
         dict(type='text', default=datetime.date.today().year, name='year',
              label='Year(s) to Highlight in Chart (comma delimited)'),
+        dict(type='cmap', name='cmap', default='RdYlGn', label='Color Ramp:'),
     ]
     return desc
 
@@ -116,7 +117,7 @@ def plotter(fdict):
                 datetime.date(2000, wantmonth, 1).strftime("%B"))
     ax.set_title(msg)
 
-    cmap = plt.get_cmap("RdYlGn")
+    cmap = plt.get_cmap(ctx['cmap'])
     zdata = np.arange(-2.0, 2.1, 0.5)
     norm = mpcolors.BoundaryNorm(zdata, cmap.N)
     rows = []

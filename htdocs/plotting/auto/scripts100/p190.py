@@ -17,12 +17,13 @@ def get_description():
     day climatology record resides."""
     desc['arguments'] = [
         dict(type='station', name='station', default='IATDSM',
-             label='Select Station:', network='IACLIMATE')
+             label='Select Station:', network='IACLIMATE'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
 
-def magic(plt, ax, df, colname, title):
+def magic(ax, df, colname, title, ctx):
     """You can do magic"""
     df2 = df[df[colname] == 1]
 
@@ -38,7 +39,7 @@ def magic(plt, ax, df, colname, title):
     ylim = [df['year'].min(), df['year'].max()]
     year0 = ylim[0] - (ylim[0] % 10)
     year1 = ylim[1] + (10 - ylim[1] % 10)
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap(ctx['cmap'])
     norm = mpcolors.BoundaryNorm(np.arange(year0, year1 + 1, 10), cmap.N)
     ax.scatter(df2['doy'], df2['year'], color=cmap(norm(df2['year'].values)))
     ax.set_yticks(np.arange(year0, year1, 20))
@@ -84,13 +85,13 @@ def plotter(fdict):
                          ) % (station, nt.sts[station]['name']),
              ha='center', fontsize=16)
     ax = plt.axes([0.04, 0.55, 0.35, 0.35])
-    magic(plt, ax, df, 'max_high_rank', 'Maximum High (warm)')
+    magic(ax, df, 'max_high_rank', 'Maximum High (warm)', ctx)
     ax = plt.axes([0.04, 0.1, 0.35, 0.35])
-    magic(plt, ax, df, 'min_high_rank', 'Minimum High (cold)')
+    magic(ax, df, 'min_high_rank', 'Minimum High (cold)', ctx)
     ax = plt.axes([0.54, 0.55, 0.35, 0.35])
-    magic(plt, ax, df, 'max_low_rank', 'Maximum Low (warm)')
+    magic(ax, df, 'max_low_rank', 'Maximum Low (warm)', ctx)
     ax = plt.axes([0.54, 0.1, 0.35, 0.35])
-    magic(plt, ax, df, 'min_low_rank', 'Minimum Low (cold)')
+    magic(ax, df, 'min_low_rank', 'Minimum Low (cold)', ctx)
 
     return plt.gcf(), df
 

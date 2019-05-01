@@ -8,7 +8,6 @@ from pyiem import iemre, util
 from pyiem.datatypes import distance
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
-from pyiem.plot.colormaps import nwsprecip
 from pyiem.reference import state_bounds
 
 PDICT2 = {'c': 'Contour Plot',
@@ -62,6 +61,7 @@ def get_description():
         dict(type='date', name='edate',
              default=today.strftime("%Y/%m/%d"),
              label='End Date:', min="1893/01/01"),
+        dict(type='cmap', name='cmap', default='RdBu', label='Color Ramp:'),
     ]
     return desc
 
@@ -151,13 +151,13 @@ def plotter(fdict):
     if np.ma.is_masked(np.max(p01d)):
         raise ValueError("Data Unavailable")
     units = 'inches'
+    cmap = plt.get_cmap(ctx['cmap'])
     if opt == 'dep':
         # Do departure work now
         nc = util.ncopen(clncfn)
         climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
                                 0), 'MM').value('IN')
         p01d = p01d - climo
-        cmap = plt.get_cmap('RdBu')
         [maxv] = np.percentile(np.abs(p01d), [99, ])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
     elif opt == 'per':
@@ -165,7 +165,6 @@ def plotter(fdict):
         climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
                                 0), 'MM').value('IN')
         p01d = p01d / climo * 100.
-        cmap = plt.get_cmap('RdBu')
         cmap.set_under('white')
         cmap.set_over('black')
         clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]
@@ -178,7 +177,6 @@ def plotter(fdict):
             clevs = [0.01, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35]
         if days > 90:
             clevs = [0.01, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35, 40]
-        cmap = nwsprecip()
         cmap.set_over('k')
 
     x2d, y2d = np.meshgrid(lons, lats)
