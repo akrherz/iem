@@ -67,3 +67,7 @@ fi
 # Process the GHCN dataset
 cd ../ingestors/ncdc
 python ingest_ghcn.py
+
+# Ingest Poker
+cd ../../util
+python poker2afos.py

@@ -136,13 +136,14 @@ def process(order):
                                         ("0712" if prod.valid.month > 6
                                          else "0106"))
             cursor.execute("""
-            DELETE from """ + table + """ WHERE pil = %s and
-            entered = %s and source = %s and data = %s
+                DELETE from """ + table + """ WHERE pil = %s and
+                entered = %s and source = %s and data = %s
             """, (prod.afos, prod.valid, prod.source, bulletin))
             deletes += cursor.rowcount
-            cursor.execute("""INSERT into """+table+"""
-        (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)
-        """, (bulletin, prod.afos, prod.valid, prod.source, prod.wmo))
+            cursor.execute("""
+                INSERT into """+table+"""
+                (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)
+            """, (bulletin, prod.afos, prod.valid, prod.source, prod.wmo))
             inserts += 1
 
         os.unlink(fn)
@@ -154,6 +155,7 @@ def process(order):
     # remove cruft
     for fn in glob.glob("*.wmo"):
         os.unlink(fn)
+    os.rename(order, "a" + order)
 
 
 def main():
