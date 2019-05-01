@@ -16,6 +16,16 @@ function xecho($data)
 	echo xssafe($data);
 }
 
+// https://stackoverflow.com/questions/834303/startswith-and-endswith-functions-in-php
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    if ($length == 0) {
+        return true;
+    }
+
+    return (substr($haystack, -$length) === $needle);
+}
 
 function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
                      $multiple=FALSE){
