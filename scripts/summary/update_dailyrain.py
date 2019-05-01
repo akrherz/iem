@@ -45,7 +45,7 @@ def main():
          )
         UPDATE summary_"""+str(yyyy)+""" s
         SET pday =
-        case when a.pday < 0.01 and a.pday > 0 then %s else a.pday end
+        case when a.pday < 0.009 and a.pday > 0 then %s else a.pday end
         FROM agg2 a
         WHERE s.iemid = a.iemid and s.day = a.d and
         (s.pday is null or s.pday != a.pday)
