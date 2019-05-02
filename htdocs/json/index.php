@@ -317,7 +317,7 @@ forecast office.  You can optionally pass a <code>phenomena=XX</code> and
 <code>significance=X</code> to the service to only return that VTEC event
 type for the given WFO and year.  Additionally, there is a one-off feature
 flag of <code>combo=1</code>, which has the service return and Tornado,
-Severe Thunderstorm, and Flash Flood Warnings in chronological order.
+Severe Thunderstorm, and Flash Flood Watches/Warnings in chronological order.
 EOM
 		 ,
   		"vars" => Array(

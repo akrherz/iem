@@ -31,7 +31,9 @@ def run(wfo, year, phenomena, significance, combo):
         plimit = ("phenomena = '%s' and significance = '%s'"
                   ) % (phenomena[:2], significance[0])
     if combo == 1:
-        plimit = "phenomena in ('SV', 'TO', 'FF') and significance = 'W'"
+        plimit = (
+            "phenomena in ('SV', 'TO', 'FF') and significance in ('W', 'A')"
+        )
         orderby = "u.utc_issue ASC"
     cursor.execute("""
     WITH polyareas as (
