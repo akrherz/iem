@@ -17,42 +17,81 @@ if ($pil == null || trim($pil) == ""){
 
 $conn = iemdb("afos");
 
-// Okay, lets see if we can find the product we are looking for!
-if ($e == null){
-	$rs = pg_prepare($conn, "_LSELECT", "SELECT data, "
+function locate_product($conn, $e, $pil, $dir){
+	// Attempt to locate this product and redirect to stable URI if so
+	$ts = gmmktime( substr($e,8,2), substr($e,10,2), 0,
+			substr($e,4,2), substr($e,6,2), substr($e,0,4) );
+	$sortdir = ($dir == 'next') ? "ASC" : "DESC";
+	$sign = ($dir == 'next') ? ">": "<";
+	$table = sprintf("products_%s_%s", date('Y', $ts),
+		(intval(date("m", $ts)) > 6)? "0712": "0106");
+	// first attempt shortcut
+	$rs = pg_prepare($conn, "_LSELECT", "SELECT ".
+		"entered at time zone 'UTC' as mytime from $table ".
+		"WHERE pil = $1 and entered $sign $2 ".
+		"ORDER by entered $sortdir LIMIT 1");
+	$rs = pg_execute($conn, "_LSELECT", Array($pil,
+			date("Y-m-d H:i", $ts)));
+	if (pg_numrows($rs) == 0){
+		// widen the net
+		$rs = pg_prepare($conn, "_LSELECT2", "SELECT ".
+			"entered at time zone 'UTC' as mytime from products ".
+			"WHERE pil = $1 and entered $sign $2 ".
+			"ORDER by entered $sortdir LIMIT 1");
+		$rs = pg_execute($conn, "_LSELECT2", Array($pil,
+			date("Y-m-d H:i", $ts)));
+	}
+	if (pg_numrows($rs) == 0) return $rs;
+
+	$row = pg_fetch_assoc($rs, 0);
+	$uri = sprintf("p.php?pil=%s&e=%s",
+		$pil, date("YmdHi", strtotime($row["mytime"])));
+	header("Location: $uri");
+	die();
+}
+function last_product($conn, $pil){
+	// Get the latest
+	$rs = pg_prepare($conn, "_LSELECT3", "SELECT data, "
 			." entered at time zone 'UTC' as mytime, source from products"
 			." WHERE pil = $1 and entered > (now() - '31 days'::interval)"
 			." ORDER by entered DESC LIMIT 1");
-	$rs = pg_execute($conn, "_LSELECT", array($pil));
-} else {
-	if ($dir == 'next'){
-		$sortdir = "ASC";
-		$offset0 = 60;
-		$offset1 = 5*86400;
-	} else if ($dir == 'prev'){
-		$sortdir = "DESC";
-		$offset0 = -5*86400;
-		$offset1 = -1;
-	} else {
-		$sortdir = "ASC";
-		$offset0 = 0;
-		$offset1 = 60;
+	$rs = pg_execute($conn, "_LSELECT3", array($pil));
+	if (pg_numrows($rs) == 1){
+		$row = pg_fetch_assoc($rs, 0);
+		$uri = sprintf("p.php?pil=%s&e=%s",
+			$pil, date("YmdHi", strtotime($row["mytime"])));
+		header("Location: $uri");
+		die();
 	}
+	return $rs;
+}
+
+// Okay, lets see if we can find the product we are looking for!
+if ($e == null){
+	// Option 1: We only pil= set and no time, find the last product
+	$rs = last_product($conn, $pil);
+}
+elseif ($e != null && $dir != null){
+	// Option 2: We have a time set and some directionality set
+	$rs	= locate_product($conn, $e, $pil, $dir);
+	// if the above fails, just go to last product
+	$rs = last_product($conn, $pil);
+}
+else {
+	// Option 3: Explicit request
 	$ts = gmmktime( substr($e,8,2), substr($e,10,2), 0,
 			substr($e,4,2), substr($e,6,2), substr($e,0,4) );
 	$rs = pg_prepare($conn, "_LSELECT", "SELECT data,
 			entered at time zone 'UTC' as mytime, source from products
-			WHERE pil = $1 and entered between $2 and $3
-			ORDER by entered $sortdir LIMIT 100");
+			WHERE pil = $1 and entered = $2");
 	$rs = pg_execute($conn, "_LSELECT", Array($pil,
-			date("Y-m-d H:i", $ts+$offset0),
-			date("Y-m-d H:i", $ts+$offset1)));
+			date("Y-m-d H:i", $ts)));
 }
 
 $t->title = sprintf("%s from NWS %s", substr($pil,0,3), substr($pil,3,3));
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
-if (pg_numrows($rs) < 1){
+if ($rs == null || pg_numrows($rs) < 1){
 	$content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
 for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
