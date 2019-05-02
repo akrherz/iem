@@ -8,7 +8,6 @@ PAIRS = [
          ['/mesonet/merra2', '/mnt/mtarchive/longterm/merra2'],
          ['/mesonet/nawips', '/mnt/mesonet2/gempak'],
          ['/mesonet/scripts', '/mnt/mesonet2/scripts'],
-         ['/mesonet/TABLES', '/mnt/mesonet2/TABLES'],
          ['/mesonet/wepp', '/mnt/idep'],
          ['/mesonet/ARCHIVE/dailydata', '/mnt/mtarchive/longterm/dailydata'],
          ['/mesonet/ARCHIVE/data', '/mnt/mtarchive/ARCHIVE/data'],

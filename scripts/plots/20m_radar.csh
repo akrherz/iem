@@ -110,7 +110,7 @@ $GEMEXE/sfmap << EOF > /dev/null
 	CINT	= 
 	FINT	=  
 	FLINE    = 24-12--1 
-	LUTFIL   = /mesonet/TABLES/radar.tbl
+	LUTFIL   = radar.tbl
 	STNPLT   =  
 	MAP     = 25//1 + 25//2
  	\$mapfil =HICNUS.NWS + hipowo.cia
