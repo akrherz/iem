@@ -21,7 +21,7 @@ PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'midwest': 'Midwestern US',
          'conus': 'Continental US',
          'state': 'Plot by State'}
-PDICT3 = {'yes': 'YES: Label Counties/Zones',
+PDICT3 = {'yes': 'YES: Label/Plot Counties/Zones',
           'no': 'NO: Do not Label Counties/Zones'}
 
 
@@ -55,7 +55,7 @@ here</a>.
         dict(type='select', name='hour', default='1', options=HOURS,
              label='Guidance Period:'),
         dict(type='select', name='ilabel', default='yes', options=PDICT3,
-             label='Overlay values on map?'),
+             label='Overlay values / plot counties on map?'),
         dict(type='datetime', name='ts',
              default=now.strftime("%Y/%m/%d %H%M"),
              label='Valid Time (UTC Timezone):', min="2003/01/01 0000"),
@@ -127,6 +127,8 @@ def plotter(fdict):
         data = masked_array(
             grb.values, data_units=units('mm')).to(units('inch')).m
         plot.pcolormesh(lons, lats, data, bins, cmap=cmap)
+        if ilabel:
+            plot.drawcounties()
         df = pd.DataFrame()
     return plot.fig, df
 
