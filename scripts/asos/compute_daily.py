@@ -116,7 +116,8 @@ def do(ts):
         currentrow = current.loc[iemid]
         compute_wind_gusts(gdf, currentrow, newdata)
         ldf = gdf.copy()
-        ldf.interpolate(method='bfill', inplace=True)
+        # take the nearest value
+        ldf = ldf.bfill().ffill()
         totsecs = ldf['timedelta'].sum()
         is_new(
             'avg_rh', clean(
