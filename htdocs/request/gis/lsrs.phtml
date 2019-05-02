@@ -35,8 +35,12 @@ $t->content = <<<EOF
 <p>This page allows you to generate a GIS shapefile of NWS issued Local Storm
 Reports for a time period of your choice.  Please be sure to read the
 archive status and dbf schema below. The IEM's archive is certainly not complete or official.  
-If you are looking for a real-time source of lsr shapefiles, you can find that 
-		<a href="/data/gis/shape/4326/us/lsr_24hour.zip">here.</a></p>
+
+<p>If you are looking for a real-time source of lsrs, you can find with the following 
+files generated every 5 minutes:  <a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 
+<a href="/data/gis/shape/4326/us/lsr_24hour.csv">Comma Delimited</a>,
+<a href="/data/gis/shape/4326/us/lsr_24hour.geojson">GeoJSON</a>.</p>
+
 
 <p><strong>Looking to automate the downloading of LSRs?</strong>
 <br />You can use the following URI form to get the most recent number of seconds

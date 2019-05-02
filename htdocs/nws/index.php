@@ -217,9 +217,16 @@ first guess at fields the NWS needs for their RTP product.</p>
 		labels</a>.</li>
 	<li><a href="/data/mw_lsr_snowfall.png">Snowfall Analysis [MidWest]</a>
 		of recent LSRs.</li>
-	<li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Past 24 hours of Storm Reports</a>
- <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.  The file is updated every 5 minutes.</li>
- <li><a href="/request/gis/lsrs.phtml">Archived Local Storm Reports</a>
+  
+    <li>Past 24 hours of Storm Reports
+    <br /><a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 
+    <a href="/data/gis/shape/4326/us/lsr_24hour.csv">Comma Delimited</a>,
+    <a href="/data/gis/shape/4326/us/lsr_24hour.geojson">GeoJSON</a>
+    <br />The IEM parses the realtime feed of NWS Local Storm Reports.  Every
+    5 minutes, a process collects up the last 24 hours worth of reports and
+    dumps them to the above files.</li>
+
+     <li><a href="/request/gis/lsrs.phtml">Archived Local Storm Reports</a>
  <br />Generate a shapefile of LSRs for a period of your choice dating back 
   to 2003!</li>
 		<li><a href="/lsr/">Local Storm Report App</a></li>
