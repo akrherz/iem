@@ -103,7 +103,7 @@ def main(argv):
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     now = utc()
     routes = 'a'
-    if (now - valid) < datetime.timedelta(hours=2):
+    if (now - valid) < datetime.timedelta(hours=3):
         routes = 'ac'
     # See if we already have output
     fn = valid.strftime(
