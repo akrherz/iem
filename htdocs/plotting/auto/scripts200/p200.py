@@ -114,7 +114,7 @@ def get_description():
     this app to total slight risks, the moderate risk would count toward the
     slight risk total.</p>
 
-    <p><i class="fas fa-info"></i> This autoplot likely has some rough
+    <p><i class="fa fa-info"></i> This autoplot likely has some rough
     edges yet, so please let us know of problems encountered.</p>
     """
     desc['arguments'] = [

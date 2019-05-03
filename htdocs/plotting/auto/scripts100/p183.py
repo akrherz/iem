@@ -10,9 +10,13 @@ from pyiem.reference import state_names, state_fips
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
-    "/Ajax2018.aspx/ReturnTabularDMAreaPercent_state"
+    "/Ajax2018.aspx/ReturnTabularDMAreaPercent_"
 )
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
+PDICT = {
+       'state': 'Plot Individual State',
+       'national': 'Plot CONUS',
+}
 
 
 def get_description():
@@ -27,6 +31,8 @@ def get_description():
     today = datetime.datetime.today()
     sts = today - datetime.timedelta(days=720)
     desc['arguments'] = [
+        dict(type='select', default='state', name='s', options=PDICT,
+             label='Plot for state or CONUS:'),
         dict(type='state', name='state', default='IA',
              label='Select State:'),
         dict(type='date', name='sdate',
@@ -50,11 +56,14 @@ def plotter(fdict):
     for key in state_fips:
         if state_fips[key] == state:
             fips = key
-    payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (fips, )
+    if ctx['s'] == 'state':
+        payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (fips, )
+    else:
+        payload = "{'area':'conus', 'statstype':'2'}"
     headers = {}
     headers['Accept'] = "application/json, text/javascript, */*; q=0.01"
     headers['Content-Type'] = "application/json; charset=UTF-8"
-    req = requests.post(SERVICE, payload, headers=headers)
+    req = requests.post(SERVICE + ctx['s'], payload, headers=headers)
     jdata = req.json()
     df = pd.DataFrame(jdata['d'])
     df['Date'] = pd.to_datetime(df['ReleaseDate'])
@@ -91,9 +100,9 @@ def plotter(fdict):
     ax.set_yticks([0, 10, 30, 50, 70, 90, 100])
     ax.set_ylabel("Percentage of Iowa Area [%]")
     df.reset_index(inplace=True)
-    ax.set_title(("Areal coverage of Drought in %s\n"
+    ax.set_title(("Areal coverage of Drought for %s\n"
                   "from US Drought Monitor %s - %s"
-                  ) % (state_names[state],
+                  ) % (state_names[state] if ctx['s'] == 'state' else 'CONUS',
                        df['Date'].min().strftime("%-d %B %Y"),
                        df['Date'].max().strftime("%-d %B %Y")))
     ax.grid(True)
