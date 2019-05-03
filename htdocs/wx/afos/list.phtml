@@ -75,8 +75,10 @@ $oselect = make_select("order", $order, $ar);
 $table = "";
 $atags = "";
 pg_query($afos, "SET TIME ZONE 'UTC'");
-$rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from products
-      WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered $order");
+$rs = pg_prepare($afos, "_SELECT",
+	"SELECT pil, entered from products ".
+	"WHERE source = $1 and entered BETWEEN $2 and $3 and ".
+	"pil is not null ORDER by entered $order");
 
 $rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
 		date("Y-m-d H:i", $ts2)."+00"));

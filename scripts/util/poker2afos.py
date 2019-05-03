@@ -90,6 +90,7 @@ XREF_SOURCE = {
     "KORH": "KBOX",
     "KSPS": "KOUN",
     "KSMX": "KLOX",
+    'KMKC': "KWNS",
 }
 
 
