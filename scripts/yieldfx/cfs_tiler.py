@@ -3,6 +3,7 @@
 Run from RUN_NOON.sh for the previous UTC date."""
 import datetime
 import os
+import sys
 
 import numpy as np
 from pyiem import iemre
@@ -13,8 +14,6 @@ from pyiem.meteorology import gdd
 
 def make_netcdf(fullpath, valid, west, south):
     """Make our netcdf"""
-    if os.path.isfile(fullpath):
-        return ncopen(fullpath, 'a'), False
     nc = ncopen(fullpath, 'w')
     # Dimensions
     totaldays = (valid.replace(month=12, day=31) -
@@ -66,74 +65,110 @@ def make_netcdf(fullpath, valid, west, south):
     # did not do vp or cropland
     nc.close()
     nc = ncopen(fullpath, 'a')
-    return nc, True
+    return nc
 
 
-def tile_extraction(nc, valid, west, south, isnewfile):
+def replace_cfs(nc, valid, islice, jslice):
+    """Copy CFS data into the given year."""
+    tidx0 = (valid - datetime.date(1980, 1, 1)).days
+    tidx1 = (datetime.date(valid.year, 12, 31) -
+             datetime.date(1980, 1, 1)).days
+    cfsnc = ncopen(
+        valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
+    tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
+    tslice = slice(tidx0 + 1, tidx1 + 1)
+    # print("replace_cfs filling %s from %s" % (tslice, tidx))
+    # CFS is W m-2, we want MJ
+    nc.variables['srad'][tslice, :, :] = (
+        cfsnc.variables['srad'][tidx:, jslice, islice] *
+        86400. / 1000000.
+    )
+    highc = temperature(
+        cfsnc.variables['high_tmpk'][tidx:, jslice, islice],
+        'K').value('C')
+    lowc = temperature(
+        cfsnc.variables['low_tmpk'][tidx:, jslice, islice],
+        'K').value('C')
+    nc.variables['tmax'][tslice, :, :] = highc
+    nc.variables['tmin'][tslice, :, :] = lowc
+    nc.variables['gdd_f'][tslice, :, :] = gdd(
+        temperature(highc, "C"),
+        temperature(lowc, "C")
+    )
+    nc.variables['prcp'][tslice, :, :] = (
+        cfsnc.variables['p01d'][tidx:, jslice, islice])
+    cfsnc.close()
+
+
+def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
+    """Copy IEMRE data from a given year to **inclusive** dates."""
+    rencfn = iemre.get_daily_ncname(fromyear)
+    if not os.path.isfile(rencfn):
+        print("reanalysis fn %s missing" % (rencfn, ))
+        return
+    renc = ncopen(rencfn)
+    tidx0 = (ncdate0 - datetime.date(1980, 1, 1)).days
+    tidx1 = (ncdate1 - datetime.date(1980, 1, 1)).days
+    tslice = slice(tidx0, tidx1 + 1)
+    # time steps to fill
+    tsteps = (tidx1 - tidx0) + 1
+    # figure out the slice
+    if ncdate0.strftime("%m%d") == "0101":
+        retslice = slice(0, tsteps)
+    else:
+        retslice = slice(0 - tsteps - 1, -1)
+    # print("copy_iemre from %s filling %s steps nc: %s iemre: %s" % (
+    #    fromyear, tsteps, tslice, retslice
+    # ))
+    highc = temperature(
+        renc.variables['high_tmpk'][retslice, jslice, islice], 'K'
+    ).value('C')
+    lowc = temperature(
+        renc.variables['low_tmpk'][retslice, jslice, islice], 'K'
+    ).value('C')
+    nc.variables['tmax'][tslice, :, :] = highc
+    nc.variables['tmin'][tslice, :, :] = lowc
+    nc.variables['gdd_f'][tslice, :, :] = gdd(
+        temperature(highc, "C"),
+        temperature(lowc, "C")
+    )
+    nc.variables['prcp'][tslice, :, :] = (
+        renc.variables['p01d'][retslice, jslice, islice])
+    # IEMRE power_swdn is MJ, test to see if data exists
+    srad = renc.variables['power_swdn'][retslice, jslice, islice]
+    if srad.mask.all():
+        # IEMRE rsds uses W m-2, we want MJ
+        srad = (
+            renc.variables['rsds'][retslice, jslice, islice] *
+            86400. / 1000000.
+        )
+    nc.variables['srad'][tslice, :, :] = srad
+    renc.close()
+
+
+def tile_extraction(nc, valid, west, south):
     """Do our tile extraction"""
     # update model metadata
     nc.valid = "CFS model: %s" % (valid.strftime("%Y-%m-%dT%H:%M:%SZ"), )
     i, j = iemre.find_ij(west, south)
     islice = slice(i, i+16)
     jslice = slice(j, j+16)
-    for year in range(1980 if isnewfile else valid.year, valid.year + 1):
-        tidx0 = (datetime.date(year, 1, 1) -
-                 datetime.date(1980, 1, 1)).days
-        tidx1 = (datetime.date(year + 1, 1, 1) -
-                 datetime.date(1980, 1, 1)).days
-        tslice = slice(tidx0, tidx1)
-        ncfn = iemre.get_daily_ncname(year)
-        if not os.path.isfile(ncfn):
-            continue
-        renc = ncopen(ncfn)
-        # print("tslice: %s jslice: %s islice: %s" % (tslice, jslice, islice))
-        highc = temperature(
-            renc.variables['high_tmpk'][:, jslice, islice], 'K').value('C')
-        lowc = temperature(
-            renc.variables['low_tmpk'][:, jslice, islice], 'K').value('C')
-        nc.variables['tmax'][tslice, :, :] = highc
-        nc.variables['tmin'][tslice, :, :] = lowc
-        nc.variables['gdd_f'][tslice, :, :] = gdd(
-            temperature(highc, "C"),
-            temperature(lowc, "C")
-        )
-        nc.variables['prcp'][tslice, :, :] = (
-            renc.variables['p01d'][:, jslice, islice])
-        # IEMRE power_swdn is MJ, test to see if data exists
-        srad = renc.variables['power_swdn'][:, jslice, islice]
-        if srad.mask.all():
-            # IEMRE rsds uses W m-2, we want MJ
-            srad = (
-                renc.variables['rsds'][:, jslice, islice] * 86400. / 1000000.
-            )
-        nc.variables['srad'][tslice, :, :] = srad
+    for year in range(1980, valid.year + 1):
+        # Current year IEMRE should be substituted for this year's data
+        today = datetime.date(year, valid.month, valid.day)
+        copy_iemre(
+            nc, valid.year, datetime.date(year, 1, 1), today,
+            islice, jslice)
 
-        renc.close()
-        if year != valid.year:
-            continue
         # replace CFS!
-        cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
-        tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
-        tslice = slice(tidx0 + tidx, tidx1)
-        # CFS is W m-2, we want MJ
-        nc.variables['srad'][tslice, :, :] = (
-            cfsnc.variables['srad'][tidx:, jslice, islice] * 86400. / 1000000.
-        )
-        highc = temperature(
-            cfsnc.variables['high_tmpk'][tidx:, jslice, islice],
-            'K').value('C')
-        lowc = temperature(
-            cfsnc.variables['low_tmpk'][tidx:, jslice, islice],
-            'K').value('C')
-        nc.variables['tmax'][tslice, :, :] = highc
-        nc.variables['tmin'][tslice, :, :] = lowc
-        nc.variables['gdd_f'][tslice, :, :] = gdd(
-            temperature(highc, "C"),
-            temperature(lowc, "C")
-        )
-        nc.variables['prcp'][tslice, :, :] = (
-            cfsnc.variables['p01d'][tidx:, jslice, islice])
-        cfsnc.close()
+        if year == valid.year:
+            replace_cfs(nc, valid.date(), islice, jslice)
+        else:
+            # replace rest of year with previous year
+            copy_iemre(
+                nc, year,
+                today + datetime.timedelta(days=1),
+                datetime.date(year, 12, 31), islice, jslice)
 
 
 def workflow(valid, ncfn, west, south):
@@ -141,15 +176,18 @@ def workflow(valid, ncfn, west, south):
     basedir = "/mesonet/share/pickup/yieldfx/cfs%02i" % (valid.hour, )
     if not os.path.isdir(basedir):
         os.makedirs(basedir)
-    nc, isnewfile = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
-    tile_extraction(nc, valid, west, south, isnewfile)
+    nc = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
+    tile_extraction(nc, valid, west, south)
     nc.close()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
     # Run for the 12z file yesterday
-    today = datetime.date.today() - datetime.timedelta(days=1)
+    if len(argv) == 4:
+        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    else:
+        today = datetime.date.today() - datetime.timedelta(days=1)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create tiles to cover IA, IL, IN
@@ -166,4 +204,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

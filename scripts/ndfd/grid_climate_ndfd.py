@@ -85,7 +85,7 @@ def workflow(ts):
 
 def main():
     """Go Main!"""
-    sts = datetime.datetime(2000, 5, 6)
+    sts = datetime.datetime(2000, 1, 1)
     ets = datetime.datetime(2001, 1, 1)
     interval = datetime.timedelta(days=1)
     now = sts
