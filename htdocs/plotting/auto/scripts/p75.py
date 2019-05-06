@@ -12,6 +12,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT2 = OrderedDict([
         ('winter', 'Winter (Dec, Jan, Feb)'),
+        ('fma', 'FMA (Feb, Mar, Apr)'),
         ('spring', 'Spring (Mar, Apr, May)'),
         ('summer', 'Summer (Jun, Jul, Aug)'),
         ('fall', 'Fall (Sep, Oct, Nov)'),
@@ -52,6 +53,8 @@ def plotter(fdict):
       SELECT extract(year from day + '%s month'::interval) as yr,
       sum(case when month in (12, 1, 2)
       then precip else 0 end) as winter,
+      sum(case when month in (2, 3, 4)
+      then precip else 0 end) as fma,
       sum(case when month in (3, 4, 5)
       then precip else 0 end) as spring,
       sum(case when month in (6, 7, 8)
@@ -100,7 +103,7 @@ def plotter(fdict):
     ax.grid(True)
     msg = ("[%s] %s %.0f-%.0f Precipitation [%s] "
            ) % (station, nt.sts[station]['name'],
-                min(years), max(years),  PDICT2[season])
+                min(years), max(years), PDICT2[season])
     tokens = msg.split()
     sz = int(len(tokens) / 2)
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))

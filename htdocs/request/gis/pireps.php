@@ -1,8 +1,8 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
-include("../../../include/forms.php");
-include("../../../include/imagemaps.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 define("IEM_APPID", 111);
 
 $t = new MyView();
@@ -16,6 +16,14 @@ processing is done via the <a href="https://github.com/akrherz/pyIEM/blob/master
 Sadly, there is not strict coherence to a format specification and so a 
 number of reports are simply unparsable.  This archive should not be
 considered 'complete'.</p>
+
+<div class="alert alert-info">
+ <i class="fa fa-warning"></i> The PIREP parsing library that decodes the location information into a latitude
+ and longitude is crude.  It does not properly account for magnetic north and may
+ also have errors with VOR baseline locations.  This download interface provides
+ the raw undecoded PIREP reports, so users that have more sophisticated location
+ calculators are encouraged to process them for yourself.
+</div>
 
 <p>Due to filesize and speed, you can only request up to 120 days of data
 at a time!</p>
