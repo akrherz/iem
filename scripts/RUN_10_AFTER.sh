@@ -105,5 +105,9 @@ python current_bias.py GFS
 if [ $HH -eq "01" ]
 then
 	cd ../coop
-	python ndfd_extract.py
+	python ndfd_extract.py &
+
+	cd ../ndfd
+	python ndfd2netcdf.py $(date -u +'%Y %m %d')
+	python plot_temps.py $(date -u +'%Y %m %d')
 fi

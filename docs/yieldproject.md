@@ -1,9 +1,18 @@
+ 2 May 2019 Archontoulis
+ - [ ] he wants CFS radiation capped at 31 MJ/d
+ - Plan is to push weekly update at 9 AM Wednesday, so runs made on Tuesday
+ - [ ] Deliver a WPC Map of forecasted 7 day precipitation
+ - [x] GDD departures over the coming week
+ - [x] next week daily max temperature and daily min temperature
+ - [ ] create a pyIEM zoom for the corn belt, IA->IN
+ - [ ] PSIMs yearly scenario substitions, like what is done for station data
+
  5 Apr 2019 Archontoulis, Angelos, Isaiah, one other
  - The regional interest this year is IA, IL and IN
  - [ ] investigate NASA Power and see how difference its radiation is
  - There are three deliverables they want
- - [ ] Static 1980-2018 PSIMs files, like I generated last year
- - [ ] four routinely updated PSIMs files, one for each CFS 9 mon realization
+ - [x] Static 1980-2018 PSIMs files, like I generated last year
+ - [x] four routinely updated PSIMs files, one for each CFS 9 mon realization
  - [ ] scenarios with all years substituted.  This may be too much data for
        them, so lower priority for now.
 
