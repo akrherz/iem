@@ -25,13 +25,13 @@ def plot_gdd(ts):
     cnc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc")
     offset = daily_offset(ts)
     avggdd = np.sum(cnc.variables['gdd50'][offset:offset+7], 0)
-    data = gddtot - avggdd
+    data = gddtot / np.where(avggdd < 1, 1, avggdd) * 100.
 
     subtitle = (
         "Based on National Digitial Forecast Database (NDFD) "
         "00 UTC Forecast made %s") % (ts.strftime("%-d %b %Y"),)
     mp = MapPlot(
-        title='NWS NDFD 7 Day (%s through %s) GDD50 Departure' % (
+        title='NWS NDFD 7 Day (%s through %s) GDD50 Percent of Average' % (
             ts.strftime("%-d %b"),
             (ts + datetime.timedelta(days=6)).strftime("%-d %b")),
         subtitle=subtitle,
@@ -39,8 +39,8 @@ def plot_gdd(ts):
     )
     mp.pcolormesh(
         nc.variables['lon'][:], nc.variables['lat'][:], data,
-        np.arange(-60, 61, 10), cmap=plt.get_cmap('RdBu_r'),
-        units=r"GDDs $\circ$F")
+        [1, 25, 50, 75, 100, 125, 150, 200, 300], cmap=plt.get_cmap('RdBu_r'),
+        units="% of Average", spacing='proportional')
     pqstr = (
         "data c %s summary/cb_ndfd_7day_gdd.png summary/cb_ndfd_7day_gdd.png "
         "png"
