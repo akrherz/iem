@@ -382,7 +382,26 @@ EOM
   				"{fmt}" => "geojson",
   		)
   );
-  
+
+  $services[] = Array(
+	"title" => "Yearly NWS Climate (CLI Product) Summaries for One Station",
+	"url" => "/json/cli.py?station={station}&year={year}&fmt={fmt}",
+	"desc" => "Provides a JSON response summarizing all of the atomic
+	processed data from the NWS issued CLI reports for a single station and
+	given year.  You can optionally set <code>fmt=csv</code> to get a CSV
+	response.",
+	"vars" => Array(
+			"year" => "YYYY desired",
+			"station" => "ICAO 4-character station identifier",
+			"fmt" => "Return format (optional) json (default) or csv",
+	),
+	"example" => Array(
+			"{year}" => "2019",
+			"{station}" => "KDSM",
+			"{fmt}" => "json",
+	)
+);
+
   $services[] = Array(
   		"title" => "IEM Tile Map Service Metadata",
   		"url" => "/json/tms.json",

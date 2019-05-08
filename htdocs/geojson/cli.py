@@ -2,8 +2,9 @@
 """ Produce geojson of CLI data """
 import cgi
 import datetime
-import json
-from json import encoder
+
+import simplejson as json
+from simplejson import encoder
 import memcache
 import psycopg2.extras
 from pyiem.util import get_dbconn, ssw
@@ -18,13 +19,31 @@ def departure(ob, climo):
     return ob - climo
 
 
-def sanitize(val):
+def int_sanitize(val):
     """ convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
         return "T"
-    return val
+    return int(val)
+
+
+def f1_sanitize(val):
+    """ convert to Ms"""
+    if val is None:
+        return "M"
+    if val == TRACE_VALUE:
+        return "T"
+    return round(val, 1)
+
+
+def f2_sanitize(val):
+    """ convert to Ms"""
+    if val is None:
+        return "M"
+    if val == TRACE_VALUE:
+        return "T"
+    return round(val, 2)
 
 
 def get_data(ts, fmt):
@@ -35,16 +54,18 @@ def get_data(ts, fmt):
             "features": []}
     # Fetch the daily values
     cursor.execute("""
-    select station, name, product, state, wfo,
+    select station, name, product, state, wfo, valid,
     round(st_x(geom)::numeric, 4)::float as st_x,
     round(st_y(geom)::numeric, 4)::float as st_y,
-    high, high_normal, high_record, high_record_years,
-    low, low_normal, low_record, low_record_years,
-    precip, precip_month, precip_jan1, precip_jan1_normal,
+    high, high_normal, high_record, high_record_years, high_time,
+    low, low_normal, low_record, low_record_years, low_time,
+    precip, precip_normal, precip_month, precip_jan1, precip_jan1_normal,
     precip_jul1, precip_dec1, precip_dec1_normal, precip_record,
+    precip_record_years,
     precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
     snow_dec1, snow_record, snow_jul1_normal,
-    snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal,
+    snow_dec1_normal, snow_month_normal, snow_record_years,
+    precip_jun1, precip_jun1_normal,
     round(((case when snow_jul1 < 0.1 then 0 else snow_jul1 end)
         - snow_jul1_normal)::numeric, 2) as snow_jul1_depart
     from cli_data c JOIN stations s on (c.station = s.id)
@@ -54,41 +75,46 @@ def get_data(ts, fmt):
         data['features'].append({"type": "Feature", "id": i, "properties": {
                 "station": row["station"],
                 "state": row["state"],
+                "valid": row["valid"].strftime("%Y-%m-%d"),
                 "wfo": row["wfo"],
                 "link": "/api/1/nwstext.txt?pid=%s" % (row['product'],),
                 "name": row["name"],
-                "high":  str(sanitize(row["high"])),
-                "high_record":  str(sanitize(row["high_record"])),
+                "high":  int_sanitize(row["high"]),
+                "high_record":  int_sanitize(row["high_record"]),
                 "high_record_years":  row["high_record_years"],
-                "high_normal":  str(sanitize(row["high_normal"])),
+                "high_normal":  int_sanitize(row["high_normal"]),
                 "high_depart": departure(row['high'], row['high_normal']),
-                "low":  str(sanitize(row["low"])),
-                "low_record":  str(sanitize(row["low_record"])),
+                "high_time": row["high_time"],
+                "low":  int_sanitize(row["low"]),
+                "low_record":  int_sanitize(row["low_record"]),
                 "low_record_years":  row["low_record_years"],
-                "low_normal":  str(sanitize(row["low_normal"])),
+                "low_normal":  int_sanitize(row["low_normal"]),
                 "low_depart": departure(row['low'], row['low_normal']),
-                "precip":  str(sanitize(row["precip"])),
-                "precip_month":  str(sanitize(row["precip_month"])),
-                "precip_month_normal":  str(
-                    sanitize(row["precip_month_normal"])),
-                "precip_jan1":  str(sanitize(row["precip_jan1"])),
-                "precip_jan1_normal": str(sanitize(row["precip_jan1_normal"])),
-                "precip_jun1":  str(sanitize(row["precip_jun1"])),
-                "precip_jun1_normal": str(sanitize(row["precip_jun1_normal"])),
-                "precip_jul1":  str(sanitize(row["precip_jul1"])),
-                "precip_dec1":  str(sanitize(row["precip_dec1"])),
-                "precip_dec1_normal": str(sanitize(row["precip_dec1_normal"])),
-                "precip_record":  str(sanitize(row["precip_record"])),
-                "snow":  str(sanitize(row["snow"])),
-                "snow_month":  str(sanitize(row["snow_month"])),
-                "snow_jun1":  str(sanitize(row["snow_jun1"])),
-                "snow_jul1":  str(sanitize(row["snow_jul1"])),
-                "snow_dec1":  str(sanitize(row["snow_dec1"])),
-                "snow_record":  str(sanitize(row["snow_record"])),
-                "snow_jul1_normal":  str(sanitize(row["snow_jul1_normal"])),
-                "snow_jul1_depart":  str(sanitize(row["snow_jul1_depart"])),
-                "snow_dec1_normal":  str(sanitize(row["snow_dec1_normal"])),
-                "snow_month_normal":  str(sanitize(row["snow_month_normal"])),
+                "low_time": row["low_time"],
+                "precip":  f2_sanitize(row["precip"]),
+                "precip_normal": f2_sanitize(row["precip_normal"]),
+                "precip_month": f2_sanitize(row["precip_month"]),
+                "precip_month_normal": f2_sanitize(row["precip_month_normal"]),
+                "precip_jan1":  f2_sanitize(row["precip_jan1"]),
+                "precip_jan1_normal": f2_sanitize(row["precip_jan1_normal"]),
+                "precip_jun1":  f2_sanitize(row["precip_jun1"]),
+                "precip_jun1_normal": f2_sanitize(row["precip_jun1_normal"]),
+                "precip_jul1":  f2_sanitize(row["precip_jul1"]),
+                "precip_dec1":  f2_sanitize(row["precip_dec1"]),
+                "precip_dec1_normal": f2_sanitize(row["precip_dec1_normal"]),
+                "precip_record":  f2_sanitize(row["precip_record"]),
+                "precip_record_years": row["precip_record_years"],
+                "snow":  f1_sanitize(row["snow"]),
+                "snow_month":  f1_sanitize(row["snow_month"]),
+                "snow_jun1":  f1_sanitize(row["snow_jun1"]),
+                "snow_jul1":  f1_sanitize(row["snow_jul1"]),
+                "snow_dec1":  f1_sanitize(row["snow_dec1"]),
+                "snow_record":  f1_sanitize(row["snow_record"]),
+                "snow_record_years": row["snow_record_years"],
+                "snow_jul1_normal":  f1_sanitize(row["snow_jul1_normal"]),
+                "snow_jul1_depart":  f1_sanitize(row["snow_jul1_depart"]),
+                "snow_dec1_normal":  f1_sanitize(row["snow_dec1_normal"]),
+                "snow_month_normal":  f1_sanitize(row["snow_month_normal"]),
             },
             "geometry": {"type": "Point",
                          "coordinates": [row['st_x'], row['st_y']]
@@ -96,12 +122,13 @@ def get_data(ts, fmt):
         })
     if fmt == 'geojson':
         return json.dumps(data)
-    cols = ("station,name,state,wfo,high,high_record,high_record_years,"
-            "high_normal,low,low_record,low_record_years,low_normal,"
-            "precip,precip_month,precip_jan1,precip_jan1_normal,"
-            "precip_jul1,precip_dec1,precip_dec1_normal,precip_record,"
+    cols = ("station,valid,name,state,wfo,high,high_record,high_record_years,"
+            "high_normal,high_time,low,low_record,low_record_years,low_normal,"
+            "low_time,precip,precip_normal,precip_month,precip_jan1,"
+            "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
+            "precip_record,precip_record_years",
             "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
-            "snow_jul1_normal,snow_dec1_normal,"
+            "snow_record_years,snow_jul1_normal,snow_dec1_normal,"
             "snow_month_normal,snow_jul1_depart")
     res = cols+"\n"
     for feat in data['features']:

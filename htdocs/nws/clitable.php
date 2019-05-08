@@ -1,11 +1,11 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 156);
-include_once "../../include/myview.php";
-include_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-include_once "../../include/imagemaps.php";
-include_once "../../include/network.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/network.php";
 
 $nt = new NetworkTable("NWSCLI");
 
@@ -19,34 +19,27 @@ $ys = yearSelect(2009, $year, "year");
 $ms = monthSelect($month, "month");
 $ds = daySelect($day, "day");
 
-$pgconn = iemdb("iem");
 $byday = false;
 if ($opt === "bystation"){
 	$title = sprintf("Station: %s for Year: %s", $station, $year);
 	$col1label = "Date";
-	$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
-			array_to_string(high_record_years, ' ') as hry,
-			array_to_string(low_record_years, ' ') as lry,
-			array_to_string(precip_record_years, ' ') as pry,
-			array_to_string(snow_record_years, ' ') as sry
-			from cli_data where
-			station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
-	$rs = pg_execute($pgconn, "SELECT", Array($station, "{$year}-01-01",
-		"{$year}-12-31"));
+	$uri = sprintf("http://iem.local/json/cli.py?station=%s&year=%s",
+		$station, $year);
+	$data = file_get_contents($uri);
+	$json = json_decode($data, $assoc=TRUE);
+	$arr = $json['results'];
 } else {
 	$col1label = "Station";
 	$byday = true;
 	$day = mktime(0,0,0, $month, $day, $year);
 	$title = sprintf("All Stations for Date: %s", date("d F Y", $day));
-	$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
-			array_to_string(high_record_years, ' ') as hry,
-			array_to_string(low_record_years, ' ') as lry,
-			array_to_string(precip_record_years, ' ') as pry,
-			array_to_string(snow_record_years, ' ') as sry
-			from cli_data where
-			valid = $1 ORDER by station ASC");
-	$rs = pg_execute($pgconn, "SELECT", Array(date("Y-m-d", $day)));
+	$uri = sprintf("http://iem.local/geojson/cli.py?dt=%s",
+		date("Y-m-d", $day));
+	$data = file_get_contents($uri);
+	$json = json_decode($data, $assoc=TRUE);
+	$arr = $json['features'];
 }
+$prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
 
 $table = <<<EOF
 <style>
@@ -112,8 +105,8 @@ function new_record2($actual, $record){
 	if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
 	if ($actual < $record) return "<i class=\"fa fa-star\"></i>";
 }
-for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
-	$uri = sprintf("/p.php?pid=%s", $row["product"]);
+foreach($arr as $entry){
+	$row = ($opt === "bystation") ? $entry: $entry["properties"];
 	$ts = strtotime($row["valid"]);
 	if ($byday){
 		$link = sprintf("clitable.php?station=%s&year=%s", $row["station"],
@@ -141,25 +134,27 @@ for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 			</tr>", $uri, $col1, 
 			$row["high"], new_record($row["high"], $row["high_record"]),
 			$row["high_time"], $row["high_record"],
-			$row["hry"], $row["high_normal"],
+			implode(" ", $row["high_record_years"]), $row["high_normal"],
 			departcolor($row["high"], $row["high_normal"]),
 			departure($row["high"], $row["high_normal"]),
 			
 			$row["low"], new_record2($row["low"], $row["low_record"]),
 			$row["low_time"], $row["low_record"],
-			$row["lry"], $row["low_normal"],
+			implode(" ", $row["low_record_years"]), $row["low_normal"],
 			departcolor($row["low"], $row["low_normal"]),
 			departure($row["low"], $row["low_normal"]),
 			
 			trace($row["precip"]),
 			new_record($row["precip"], $row["precip_record"]),
-			trace($row["precip_record"]), $row["pry"],
+			trace($row["precip_record"]),
+			implode(" ", $row["precip_record_years"]),
 			trace($row["precip_normal"]), trace($row["precip_month"]), 
 			trace($row["precip_month_normal"]),
 			
 			trace($row["snow"]),
 			new_record($row["snow"], $row["snow_record"]),
-			trace($row["snow_record"]), $row["sry"],
+			trace($row["snow_record"]),
+			implode(' ', $row["snow_record_years"]),
 			trace($row["snow_month"])
 				
 		);
@@ -208,7 +203,11 @@ $t->content = <<<EOF
 	
 	</div>
 </div>
-			
+
+<p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
+directly access it here:
+<br /><code>{$prettyurl}</code></p>
+
 
 <div class="table-responsive">
 	{$table}
