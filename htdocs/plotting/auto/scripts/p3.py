@@ -225,6 +225,7 @@ def get_context(fdict):
     df2 = df[df[ptype] == df[ptype].max()]
     if df2.empty:
         raise ValueError("No data was found for query")
+    df = df.dropna()
     xlabel = "Year, Max: %.2f %s%s" % (df[ptype].max(), df2.index.values[0],
                                        '+' if len(df2.index) > 1 else '')
     df2 = df[df[ptype] == df[ptype].min()]
