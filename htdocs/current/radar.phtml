@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->thispage = "current-radar";
 $t->title = "RADAR + Satellite Data";
@@ -69,9 +69,7 @@ information without much of the processing "Level III" products have.
 <tr>
 	<td>Satellite</td>
 	<td>
- 	<a href="/GIS/radmap.php?layers[]=goes&goes_sector=EAST&goes_product=VIS&width=800&height=600">Visible</a> &nbsp; | &nbsp;
-	<a href="/GIS/radmap.php?layers[]=goes&goes_sector=EAST&goes_product=IR&width=800&height=600">Infrared</a> &nbsp; | &nbsp;
-  <a href="http://climate.cod.edu/data/satellite/1km/Iowa/current/Iowa.vis.gif">Iowa 1km</a> (<a href="http://climate.cod.edu/analysis/loops/satmaster.pl?Iowa">Loop</a>)
+  <a href="https://weather.cod.edu/satrad/?parms=local-Iowa-02-24-0-100-1&checked=map&colorbar=undefined">Iowa 1km</a>
 	</td>
 </tr>
 
