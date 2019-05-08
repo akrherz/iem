@@ -88,6 +88,24 @@ OUTLOOKS = OrderedDict((
 ))
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State/Sector'}
+MDICT = OrderedDict([
+         ('all', 'No Month/Time Limit'),
+         ('spring', 'Spring (MAM)'),
+         ('fall', 'Fall (SON)'),
+         ('winter', 'Winter (DJF)'),
+         ('summer', 'Summer (JJA)'),
+         ('jan', 'January'),
+         ('feb', 'February'),
+         ('mar', 'March'),
+         ('apr', 'April'),
+         ('may', 'May'),
+         ('jun', 'June'),
+         ('jul', 'July'),
+         ('aug', 'August'),
+         ('sep', 'September'),
+         ('oct', 'October'),
+         ('nov', 'November'),
+         ('dec', 'December')])
 griddelta = 0.05
 GRIDWEST = -139.2
 GRIDEAST = -55.1
@@ -118,6 +136,8 @@ def get_description():
     edges yet, so please let us know of problems encountered.</p>
     """
     desc['arguments'] = [
+        dict(type='select', name='month', default='all',
+             label='Month Limiter', options=MDICT),
         dict(type='select', name='p', default='1.C.16', options=ISSUANCE,
              label='Select SPC Product Issuance'),
         dict(type='select', name='level', default='CATEGORICAL.SLGT',
@@ -142,6 +162,23 @@ def plotter(fdict):
     station = ctx['station'][:4]
     t = ctx['t']
     p = ctx['p']
+    month = ctx['month']
+
+    if month == 'all':
+        months = range(1, 13)
+    elif month == 'fall':
+        months = [9, 10, 11]
+    elif month == 'winter':
+        months = [12, 1, 2]
+    elif month == 'spring':
+        months = [3, 4, 5]
+    elif month == 'summer':
+        months = [6, 7, 8]
+    else:
+        ts = datetime.datetime.strptime("2000-"+month+"-01", '%Y-%b-%d')
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month, 999]
+
     nt = NetworkTable("WFO")
     ones = np.ones((int(YSZ), int(XSZ)))
     counts = np.zeros((int(YSZ), int(XSZ)))
@@ -161,6 +198,7 @@ def plotter(fdict):
         ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
         %s %s, %s %s, %s %s))'))
         and extract(hour from valid at time zone 'UTC') in %s
+        and extract(month from valid) in %s
     )
     SELECT * from data where rank = 1
     """, pgconn, params=(
@@ -168,7 +206,7 @@ def plotter(fdict):
         level.split(".", 1)[1], level.split(".")[0],
         GRIDWEST, GRIDSOUTH, GRIDWEST, GRIDNORTH, GRIDEAST,
         GRIDNORTH, GRIDEAST, GRIDSOUTH, GRIDWEST, GRIDSOUTH,
-        tuple([hour - 1, hour, hour + 1])),
+        tuple([hour - 1, hour, hour + 1]), tuple(months)),
                       geom_col='geom')
     if df.empty:
         raise ValueError("No results found for query")
@@ -210,8 +248,9 @@ def plotter(fdict):
         state=ctx['csector'],
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg='white',
-        title='SPC %s Outlook of at least %s' % (
-            ISSUANCE[p], OUTLOOKS[level].split("(")[0].strip(), ),
+        title='SPC %s Outlook [%s] of at least %s' % (
+            ISSUANCE[p], month.capitalize(),
+            OUTLOOKS[level].split("(")[0].strip(), ),
         subtitle=subtitle, nocaption=True,
         titlefontsize=16
     )
