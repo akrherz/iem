@@ -131,7 +131,7 @@ def get_data(station, year, fmt):
     res = cols+"\n"
     for feat in data['results']:
         for col in cols.split(","):
-            val = feat['properties'][col]
+            val = feat[col]
             if isinstance(val, (list, tuple)):
                 res += "%s," % (" ".join([str(s) for s in val]), )
             else:
