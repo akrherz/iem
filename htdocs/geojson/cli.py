@@ -126,7 +126,7 @@ def get_data(ts, fmt):
             "high_normal,high_time,low,low_record,low_record_years,low_normal,"
             "low_time,precip,precip_normal,precip_month,precip_jan1,"
             "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
-            "precip_record,precip_record_years",
+            "precip_record,precip_record_years,"
             "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
             "snow_record_years,snow_jul1_normal,snow_dec1_normal,"
             "snow_month_normal,snow_jul1_depart")
