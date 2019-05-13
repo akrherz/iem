@@ -64,7 +64,7 @@ def do(ts):
         computed['max_tmpf'] = np.nanmax(data[stid]['tmpf'])
         computed['min_tmpf'] = np.nanmin(data[stid]['tmpf'])
         computed['max_dwpf'] = np.nanmax(data[stid]['dwpf'])
-        computed['min_dwpf'] = np.nanmin(data[stid]['tmpf'])
+        computed['min_dwpf'] = np.nanmin(data[stid]['dwpf'])
         # BUG: obs that may spill over the top of the hour
         pday = [0]*24
         for i, valid in enumerate(data[stid]['valid']):
