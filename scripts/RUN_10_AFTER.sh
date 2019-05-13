@@ -52,7 +52,6 @@ python today_min_windchill.py
 
 cd ../summary
 python hourly_precip.py
-python update_snet_precip.py
 
 cd ../week
 python plot_obs.py

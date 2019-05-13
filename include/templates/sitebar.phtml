@@ -2,7 +2,7 @@
 global $metadata;
 global $station;
 global $network;
-include_once dirname(__FILE__)."/../imagemaps.php";
+require_once dirname(__FILE__)."/../imagemaps.php";
 ?>
 <div class="hidden-print">
 <form method="GET" name="automatic">
@@ -44,9 +44,8 @@ $o = Array(
   "pics" => Array("name" => "Photographs", "uri" => "pics.php?",
   		"icon" => "camera"),
   "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
-		  "icon" => "wrench",
-	"networks" => Array("AWOS", "KCCI", "KELO", "KIMIT", "IA_RWIS", "ISUAG", "ISUSM")
-),
+		"icon" => "wrench",
+		"networks" => Array("AWOS", "IA_RWIS", "ISUAG", "ISUSM")),
   "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
   		"icon" => "chart-area"),
   "tables" => Array("name" => "Network Table", "uri" => "networks.php?",

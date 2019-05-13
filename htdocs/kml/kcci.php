@@ -6,14 +6,6 @@ echo <<<EOF
 <Folder>
    <name>SchoolNet8 Currents</name>
    <NetworkLink>
-     <name>SchoolNet8 Currents</name>
-     <Link id="ID">
-       <href>https://mesonet.agron.iastate.edu/kml/sfnetwork.php?network=KCCI</href>
-       <refreshInterval>60</refreshInterval>
-       <refreshMode>onInterval</refreshMode>
-     </Link>
-   </NetworkLink>
-   <NetworkLink>
      <name>SchoolNet8 Webcams</name>
      <Link id="ID">
        <href>https://mesonet.agron.iastate.edu/kml/webcams.php?network=KCCI</href>

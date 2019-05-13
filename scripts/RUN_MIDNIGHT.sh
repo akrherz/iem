@@ -3,16 +3,12 @@ DD=$(date -u +'%d')
 MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
 
-cd qc
-python adjust_snet_precip.py
-
-cd ../util
+cd util
 python i5_2_cybox.py &
 sleep 30
 python autolapses2box.py &
 
 cd ../dbutil
-sh save_snet_raw.sh
 python asos2archive.py
 
 # Need this done so that certain variables are there for DEP
@@ -29,7 +25,6 @@ python plot.py 12
 # Wait a bit before doing this
 sleep 600
 cd ../qc
-python correct_gusts.py
 python check_station_geom.py
 python check_vtec_eventids.py
 python check_afos_sources.py

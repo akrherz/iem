@@ -1,8 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 100);
-include("../../include/myview.php");
-include("../../include/database.inc.php");
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
 $t = new MyView();
 $t->title = "Quality Control, Active Trouble Tickets";
 $t->thispage = "iem-qc";
@@ -88,25 +88,6 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
  {$ars["kccisnet"]}
 </table><br><br>
 
-<h3>KELO WeatherNet</h3>
-<table class="table table-striped">
-<thead>
-<tr>
- <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th></tr>
-</thead>
- {$ars["kelosnet"]}
-</table><br><br></div>
-
-<h3>KIMT WeatherNet</h3>
-<table class="table table-striped">
-<thead>
-<tr>
- <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th></tr>
-</thead>
- {$ars["kimtsnet"]}
-</table>
 EOF;
 $t->render('single.phtml');
 ?>

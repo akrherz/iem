@@ -9,11 +9,6 @@ S=/opt/iem/scripts
 15 0,4,9,12,17,20 * * * cd /opt/nwnwebsite/scripts; php -q driveFX.php
 
 #
-@reboot cd $S/snet; python data_monitor.py
-@reboot cd $S/snet; python ingest.py
-@reboot cd $S/snet; sh snet2access.sh
-@reboot cd $S/snet; sh mainserver.sh
-#
 0 18,19 * * * cd $S; sh RUN_0Z.sh
 0 0 * * * cd $S; sh RUN_MIDNIGHT.sh
 0 12 * * * cd $S; sh RUN_NOON.sh

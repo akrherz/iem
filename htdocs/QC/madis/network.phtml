@@ -1,11 +1,11 @@
 <?php
- include("../../../config/settings.inc.php");
+ require_once "../../../config/settings.inc.php";
  define("IEM_APPID", 97);
- include("../../../include/myview.php");
+ require_once "../../../include/myview.php";
  $t = new MyView();
  $t->thispage = "iem-qc";
  $t->title = "Quality Control, MADIS Raw QC";
- include("../../../include/database.inc.php");
+ require_once "../../../include/database.inc.php";
  require_once "../../../include/forms.php";
  require_once "../../../include/mlib.php";
  $dbconn = iemdb("access");
@@ -15,7 +15,7 @@
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
  $baa = 'network.phtml?network='. $network;
 
- include("../../../include/network.php");
+ require_once "../../../include/network.php";
  $nt = new NetworkTable($network);
  $cities = $nt->table;
  
@@ -33,9 +33,6 @@
  $ns_networks = Array(
  		"IA_ASOS" => "ASOS [Iowa]",
  		"AWOS"    => "AWOS [Iowa]",
- 		"KCCI"    => "KCCI-TV SchoolNet",
- 		"KELO"    => "KELO-TV WeatherNet",
- 		"KIMT"    => "KIMT-TV StormNet",
  		"MN_ASOS"    => "ASOS/AWOS [Minnesota]",
  		"WI_ASOS"    => "ASOS/AWOS [Wisconsin]",
  		"IL_ASOS"    => "ASOS/AWOS [Illinios]",
