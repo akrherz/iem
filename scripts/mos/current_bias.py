@@ -1,6 +1,4 @@
-"""
- Analysis of current MOS temperature bias
-"""
+"""Analysis of current MOS temperature bias."""
 import sys
 import datetime
 
@@ -17,8 +15,8 @@ def doit(now, model):
     mcursor = mos_pgconn.cursor()
     icursor = iem_pgconn.cursor()
     mcursor.execute("""
-    SELECT max(runtime at time zone 'UTC') from alldata where station = 'KDSM'
-    and ftime = %s and model = %s
+      SELECT max(runtime at time zone 'UTC') from alldata
+      where station = 'KDSM' and ftime = %s and model = %s
     """, (now, model))
     row = mcursor.fetchone()
     runtime = row[0]
@@ -28,8 +26,8 @@ def doit(now, model):
 
     # Load up the mos forecast for our given
     mcursor.execute("""
-      SELECT station, tmp FROM alldata
-    WHERE model = %s and runtime = %s and ftime = %s and tmp < 999
+        SELECT station, tmp FROM alldata
+        WHERE model = %s and runtime = %s and ftime = %s and tmp < 999
     """, (model, runtime, now))
     forecast = {}
     for row in mcursor:
@@ -38,15 +36,15 @@ def doit(now, model):
 
     # Load up the currents!
     icursor.execute("""
-    SELECT
-      s.id, s.network, tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
-    FROM
-      current c, stations s
-    WHERE
-      c.iemid = s.iemid and
-      (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
-      valid + '60 minutes'::interval > now() and
-      tmpf > -50
+        SELECT
+        s.id, s.network, tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
+        FROM
+        current c, stations s
+        WHERE
+        c.iemid = s.iemid and
+        (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
+        valid + '60 minutes'::interval > now() and
+        tmpf > -50
     """)
 
     lats = []

@@ -43,7 +43,7 @@ python flux_ingest.py
 python stuart_smith.py &
 
 cd ../outgoing
-LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_cocorahs.php
+LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libstdc++.so:/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_cocorahs.php
 
 cd ../current
 python plot_hilo.py 0

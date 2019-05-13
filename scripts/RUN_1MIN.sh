@@ -1,6 +1,6 @@
 # Run every minute!
 cd /opt/nwnwebsite/scripts
-LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php drive_lsd_generation.php &
+LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libstdc++.so:/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php drive_lsd_generation.php &
 
 cd /opt/iem/scripts/sbw
 python raccoon_sbw_to_ppt.py &

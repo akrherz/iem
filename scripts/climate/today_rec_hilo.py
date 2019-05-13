@@ -5,7 +5,6 @@ import datetime
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
-import psycopg2.extras
 
 
 def main():
@@ -23,15 +22,15 @@ def main():
     """ % (now.strftime("%m-%d"),)
 
     obs = []
-    cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = coop.cursor()
     cursor.execute(sql)
     for row in cursor:
-        sid = row['station']
+        sid = row[0]
         if sid[2] == 'C' or sid[2:] == '0000' or sid not in nt.sts:
             continue
-        obs.append(dict(id=sid[2:], lat=nt.sts[sid]['lat'],
-                        lon=nt.sts[sid]['lon'], tmpf=row['max_high'],
-                        dwpf=row['min_low']))
+        obs.append(
+            dict(id=sid[2:], lat=nt.sts[sid]['lat'], lon=nt.sts[sid]['lon'],
+                 tmpf=row[1], dwpf=row[2]))
 
     mp = MapPlot(title=("Record High + Low Temperature [F] (1893-%s)"
                         ) % (now.year,),

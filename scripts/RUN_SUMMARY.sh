@@ -1,5 +1,3 @@
-# Scripts to run for summary type plots
-# Run this only a couple of times per day, probably
 #set echo
 
 cd current

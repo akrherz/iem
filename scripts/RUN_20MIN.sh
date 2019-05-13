@@ -7,4 +7,4 @@ cd ../ingestors/madis
 python to_iemaccess.py
 
 cd ../../outgoing
-python network2wxc.py APRSWXNET bogus &
+python network2wxc.py APRSWXNET bogus
