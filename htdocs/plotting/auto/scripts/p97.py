@@ -18,6 +18,7 @@ PDICT2 = OrderedDict([
     ('gdd_sum', 'Growing Degree Days ($base/86) Total'),
     ('cgdd_sum', 'Growing Degree Days Climatology ($base/86)'),
     ('gdd_depart', 'Growing Degree Days ($base/86) Departure'),
+    ('gdd_percent', 'GDD ($base/86) Percent of Average'),
     ('cdd65_sum', 'Cooling Degree Days (base 65)'),
     ('cdd65_depart', 'Cooling Degree Days Departure (base 65)'),
     ('hdd65_sum', 'Heating Degree Days (base 65)'),
@@ -35,6 +36,7 @@ UNITS = {
     'avg_low_temp': 'F',
     'avg_high_temp': 'F',
     'gdd_depart': 'F',
+    'gdd_percet': '%',
     'gdd_sum': 'F',
     'cdd_sum': 'F',
     'hdd_sum': 'F',
@@ -47,6 +49,10 @@ UNITS = {
     }
 PDICT3 = {'contour': 'Contour the data',
           'text': 'Plot just values without contours'}
+PDICT5 = {
+    'yes': "Label Station Values",
+    'no': "Do Not Label Station Values"
+}
 
 
 def get_description():
@@ -79,6 +85,10 @@ def get_description():
         dict(type='select', name='p', default='contour',
              label='Data Presentation Options', options=PDICT3),
         dict(type='cmap', name='cmap', default='RdYlBu', label='Color Ramp:'),
+        dict(
+            type='select', options=PDICT5, default='yes', name='c',
+            label='Label Values?',
+        )
     ]
     return desc
 
@@ -130,6 +140,7 @@ def plotter(fdict):
         avg(low) as avg_low_temp,
         max(high) as max_high_temp,
         min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
+        sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
         avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
         sum(cgdd) as cgdd_sum,
         sum(cdd65) as cdd_sum,
@@ -147,6 +158,7 @@ def plotter(fdict):
     avg_temp_depart,
     gdd_depart,
     gdd_sum,
+    gdd_percent,
     cgdd_sum,
     max_high_temp,
     avg_high_temp,
@@ -186,6 +198,9 @@ def plotter(fdict):
         clevels = np.linspace(0, rng, 7)
         cmap.set_under('white')
         cmap.set_over('black')
+    elif varname.endswith("_percent"):
+        clevels = np.array([10, 25, 50, 75, 100, 125, 150, 175, 200])
+        fmt = '%.0f'
     else:
         minv = df[varname].min() - 5
         maxv = df[varname].max() + 5
@@ -197,8 +212,10 @@ def plotter(fdict):
         mp.contourf(df['lon'].values, df['lat'].values,
                     df[varname].values, clevels, clevlabels=clevlabels,
                     cmap=cmap, units=UNITS.get(varname))
-    mp.plot_values(df['lon'].values, df['lat'].values,
-                   df[varname].values, fmt=fmt, labelbuffer=5)
+    if ctx['c'] == 'yes':
+        mp.plot_values(
+            df['lon'].values, df['lat'].values,
+            df[varname].values, fmt=fmt, labelbuffer=5)
     if len(sector) == 2:
         mp.drawcounties()
     if ctx['usdm'] == 'yes':
