@@ -96,10 +96,17 @@ def plotter(fdict):
     ets = ctx['edate']
     wfo = ctx['wfo']
     outlook_type = ctx['outlook_type']
-    day = ctx['day']
+    day = int(ctx['day'])
     ugc = ctx['ugc']
 
     sqllimiter = ""
+    category = "CATEGORICAL"
+    if day >= 4 and outlook_type == 'C':
+        category = 'ANY SEVERE'
+    elif day >= 3 and outlook_type == 'F':
+        category = 'CRITICAL FIRE WEATHER AREA'
+    elif outlook_type == 'F':
+        category = 'FIRE WEATHER CATEGORICAL'
     if ctx['w'] == 'all':
         df = read_sql("""
         with data as (
@@ -117,10 +124,10 @@ def plotter(fdict):
         SELECT distinct date, threshold from agg where rank = 1
         ORDER by date ASC
         """, pgconn, params=(
-            ('CATEGORICAL' if outlook_type == 'C'
-             else 'FIRE WEATHER CATEGORICAL'),
-            day, outlook_type, sts, ets + datetime.timedelta(days=2)),
+            category, day, outlook_type, sts,
+            ets + datetime.timedelta(days=2)),
                     index_col='date')
+        print(df)
         title2 = "Continental US"
     else:
         if ctx['w'] == 'wfo':
@@ -170,9 +177,7 @@ def plotter(fdict):
         SELECT distinct date, threshold from agg where rank = 1
         ORDER by date ASC
         """, pgconn, params=(
-            geoval,
-            ('CATEGORICAL' if outlook_type == 'C'
-             else 'FIRE WEATHER CATEGORICAL'),
+            geoval, category,
             day, outlook_type, sts, ets + datetime.timedelta(days=2)),
                     index_col='date')
 
@@ -197,5 +202,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(state='IA', w='state', sdate='2019-01-01',
-                 edate='2019-04-15'))
+    plotter(dict(state='IA', w='all', sdate='2019-01-01', day="4",
+                 edate='2019-04-25'))
