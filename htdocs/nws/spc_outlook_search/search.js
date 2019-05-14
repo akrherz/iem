@@ -104,7 +104,7 @@ function doOutlook(){
 			$.each(data.outlooks, function(index, ol){
 				tbody.append("<tr><td>" + ol.day + "</td>"+
 						"<td>" + ol.threshold + "</td>" +
-						"<td>" + ol.utc_valid + "</td>" +
+						"<td>" + ol.utc_product_issue + "</td>" +
 						"<td>" + ol.utc_issue + "</td>" +
 						"<td>" + ol.utc_expire + "</td>" +
 						"</tr>")

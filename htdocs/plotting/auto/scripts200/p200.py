@@ -190,15 +190,15 @@ def plotter(fdict):
     hour = int(p.split(".")[2])
     df = read_postgis("""
     WITH data as (
-        select valid, issue, expire, geom,
-        rank() OVER (PARTITION by issue ORDER by valid DESC)
+        select product_issue, issue, expire, geom,
+        rank() OVER (PARTITION by issue ORDER by product_issue DESC)
         from spc_outlooks where
         outlook_type = %s and day = %s and threshold = %s and
         category = %s and
         ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
         %s %s, %s %s, %s %s))'))
-        and extract(hour from valid at time zone 'UTC') in %s
-        and extract(month from valid) in %s
+        and extract(hour from product_issue at time zone 'UTC') in %s
+        and extract(month from product_issue) in %s
     )
     SELECT * from data where rank = 1
     """, pgconn, params=(

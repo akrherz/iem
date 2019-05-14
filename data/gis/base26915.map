@@ -1158,8 +1158,6 @@ LAYER
 END
 
 INCLUDE "inc_lsrs.map"
-INCLUDE "inc_spc.map"
-
 
 LAYER
   NAME sites

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""SPC Outlook JSON service
-"""
+"""SPC Outlook JSON service."""
 import datetime
 import os
 import cgi
@@ -42,12 +41,12 @@ def dotime(time, lon, lat, day, cat):
     df = read_sql("""
     SELECT issue at time zone 'UTC' as i,
     expire at time zone 'UTC' as e,
-    valid at time zone 'UTC' as v,
+    product_issue at time zone 'UTC' as v,
     threshold, category from spc_outlooks where
-    valid = (
-        select valid from spc_outlooks where
+    product_issue = (
+        select product_issue from spc_outlooks where
         issue <= %s and expire > %s and day = %s
-        and outlook_type = 'C' ORDER by valid DESC LIMIT 1)
+        and outlook_type = 'C' ORDER by product_issue DESC LIMIT 1)
     and ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
     and day = %s and outlook_type = 'C' and category = %s
     """, pgconn, params=(ts, ts, day, lon, lat, day, cat), index_col=None)
@@ -68,7 +67,7 @@ def dotime(time, lon, lat, day, cat):
     df.sort_values('threshold_rank', ascending=False, inplace=True)
     res['outlook'] = {
         'threshold': df.iloc[0]['threshold'],
-        'utc_valid': df.iloc[0]['v'].strftime(ISO9660),
+        'utc_product_issue': df.iloc[0]['v'].strftime(ISO9660),
         'utc_issue': df.iloc[0]['i'].strftime(ISO9660),
         'utc_expire': df.iloc[0]['e'].strftime(ISO9660),
         }
@@ -85,13 +84,13 @@ def dowork(lon, lat, last, day, cat):
     WITH data as (
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
-        valid at time zone 'UTC' as v,
+        product_issue at time zone 'UTC' as v,
         o.threshold, category, h.priority,
         row_number() OVER (PARTITION by expire
             ORDER by priority DESC NULLS last, issue ASC) as rank,
         case when o.threshold = 'SIGN' then rank()
             OVER (PARTITION by o.threshold, expire
-            ORDER by valid ASC) else 2 end as sign_rank
+            ORDER by product_issue ASC) else 2 end as sign_rank
         from spc_outlooks o LEFT JOIN spc_outlook_thresholds h on
         (o.threshold = h.threshold) where
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
@@ -112,7 +111,7 @@ def dowork(lon, lat, last, day, cat):
             dict(day=day,
                  utc_issue=row[0].strftime("%Y-%m-%dT%H:%M:%SZ"),
                  utc_expire=row[1].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                 utc_valid=row[2].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                 utc_product_issue=row[2].strftime("%Y-%m-%dT%H:%M:%SZ"),
                  threshold=row[3],
                  category=row[4]))
 

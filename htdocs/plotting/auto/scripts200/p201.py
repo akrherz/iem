@@ -68,6 +68,7 @@ def get_description():
              min="2002/01/01"),
         dict(type='date', name='edate',
              default=today.strftime("%Y/%m/%d"),
+             max=(today + datetime.timedelta(days=8)).strftime("%Y/%m/%d"),
              label='End Date (inclusive):',
              min="2002/01/01"),
         dict(type='select', name='outlook_type', options=PDICT, default='C',
