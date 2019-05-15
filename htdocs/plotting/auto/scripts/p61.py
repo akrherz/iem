@@ -10,10 +10,12 @@ from pyiem.util import get_autoplot_context, get_dbconn
 PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
                      ('low', 'Low Temperature'),
                      ('high', 'High Temperature')])
-SECTORS = OrderedDict([('conus', 'CONUS'),
-                       ('midwest', 'Mid West'),
-                       ('state', 'Select a State'),
-                       ('cwa', 'Select a NWS Weather Forecast Office')])
+SECTORS = OrderedDict([
+    ('conus', 'CONUS'),
+    ('cornbelt', 'Corn Belt'),
+    ('midwest', 'Mid West'),
+    ('state', 'Select a State'),
+    ('cwa', 'Select a NWS Weather Forecast Office')])
 
 
 def get_description():

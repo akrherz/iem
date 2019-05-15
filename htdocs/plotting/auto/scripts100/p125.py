@@ -8,8 +8,10 @@ from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'state': 'State Level Maps (select state)',
-         'midwest': 'Midwest Map'}
+PDICT = {
+    'state': 'State Level Maps (select state)',
+    'cornbelt': 'Corn Belt',
+    'midwest': 'Midwest Map'}
 PDICT2 = {'both': 'Show both contour and values',
           'values': 'Show just the values',
           'contour': 'Show just the contour'}
@@ -91,17 +93,18 @@ def plotter(fdict):
             df2 = df.mean(axis=0, level='station')
         df2['lat'] = df['lat'].mean(axis=0, level='station')
         df2['lon'] = df['lon'].mean(axis=0, level='station')
-    mp = MapPlot(sector=sector, state=state, axisbg='white',
-                 title=('NCEI 1981-2010 Climatology of %s'
-                        ) % (title,),
-                 subtitle=('based on National Centers for '
-                           'Environmental Information (NCEI) 1981-2010'
-                           ' Climatology'))
+    mp = MapPlot(
+        sector=sector, state=state, axisbg='white',
+        title='NCEI 1981-2010 Climatology of %s' % (title,),
+        subtitle=('based on National Centers for '
+                  'Environmental Information (NCEI) 1981-2010'
+                  ' Climatology'))
     levels = np.linspace(df2[varname].min(), df2[varname].max(), 10)
     levels = [round(x, PRECISION[varname]) for x in levels]
     if opt in ['both', 'contour']:
-        mp.contourf(df2['lon'].values, df2['lat'].values,
-                    df2[varname].values, levels, units=UNITS[varname])
+        mp.contourf(
+            df2['lon'].values, df2['lat'].values,
+            df2[varname].values, levels, units=UNITS[varname], clip_on=False)
     if sector == 'state':
         mp.drawcounties()
     if opt in ['both', 'values']:

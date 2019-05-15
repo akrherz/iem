@@ -8,8 +8,10 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot, centered_bins
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'state': 'State Level Maps (select state)',
-         'midwest': 'Midwest Map'}
+PDICT = {
+    'state': 'State Level Maps (select state)',
+    'cornbelt': 'Corn Belt',
+    'midwest': 'Midwest Map'}
 PDICT2 = {'both': 'Show both contour and values',
           'values': 'Show just the values',
           'contour': 'Show just the contour'}

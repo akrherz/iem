@@ -103,10 +103,7 @@ def plotter(fdict):
     date2 = ctx['date2']
     varname = ctx['var']
 
-    table = (
-        "alldata_%s" % (sector, )
-        if sector not in ['midwest', 'conus'] else "alldata"
-    )
+    table = "alldata_%s" % (sector, ) if len(sector) == 2 else "alldata"
     df = read_sql("""
     WITH obs as (
         SELECT station, gddxx(%s, 86, high, low) as gdd,
@@ -170,7 +167,6 @@ def plotter(fdict):
     """, pgconn, params=(ctx['gddbase'], date1, date2), index_col='station')
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
-    sector2 = "state" if sector not in ['midwest', 'conus'] else sector
     datefmt = "%d %b %Y" if varname != 'cgdd_sum' else '%d %b'
     subtitle = ''
     if varname.find('depart') > -1:
@@ -180,14 +176,14 @@ def plotter(fdict):
     elif varname.startswith('c'):
         subtitle = ("Climatology is based on data from 1951-%s"
                     ) % (datetime.date.today().year - 1, )
-    mp = MapPlot(sector=sector2, state=sector, axisbg='white',
-                 title=('%s - %s %s [%s]'
-                        ) % (date1.strftime(datefmt),
-                             date2.strftime(datefmt),
-                             PDICT2.get(varname).replace("$base",
-                                                         str(ctx['gddbase'])),
-                             UNITS.get(varname)),
-                 subtitle=subtitle)
+    mp = MapPlot(
+        sector="state" if len(sector) == 2 else sector,
+        state=sector, axisbg='white',
+        title='%s - %s %s [%s]' % (
+            date1.strftime(datefmt), date2.strftime(datefmt),
+            PDICT2.get(varname).replace("$base", str(ctx['gddbase'])),
+            UNITS.get(varname)),
+        subtitle=subtitle)
     fmt = '%.2f'
     cmap = cm.get_cmap(ctx['cmap'])
     if varname in ['precip_depart', 'avg_temp_depart']:

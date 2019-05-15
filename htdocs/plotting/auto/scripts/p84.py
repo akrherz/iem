@@ -8,7 +8,7 @@ from pyiem import iemre, util
 from pyiem.datatypes import distance
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
-from pyiem.reference import state_bounds
+from pyiem.reference import state_bounds, SECTORS
 
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
@@ -89,9 +89,8 @@ def plotter(fdict):
     x1 = -1
     y0 = 0
     y1 = -1
-    if sector == 'midwest':
-        state = None
-    else:
+    state = None
+    if len(sector) == 2:
         state = sector
         sector = 'state'
 
@@ -129,6 +128,11 @@ def plotter(fdict):
         x0, y0, x1, y1 = util.grid_bounds(nc.variables['lon'][:],
                                           nc.variables['lat'][:],
                                           state_bounds[state])
+    elif sector in SECTORS:
+        bnds = SECTORS[sector]
+        x0, y0, x1, y1 = util.grid_bounds(
+            nc.variables['lon'][:], nc.variables['lat'][:],
+            [bnds[0], bnds[2], bnds[1], bnds[3]])
     lats = nc.variables['lat'][y0:y1]
     lons = nc.variables['lon'][x0:x1]
     if (idx1 - idx0) < 32:
@@ -152,6 +156,7 @@ def plotter(fdict):
         raise ValueError("Data Unavailable")
     units = 'inches'
     cmap = plt.get_cmap(ctx['cmap'])
+    cmap.set_bad('white')
     if opt == 'dep':
         # Do departure work now
         nc = util.ncopen(clncfn)
@@ -170,6 +175,8 @@ def plotter(fdict):
         clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]
         units = 'percent'
     else:
+        p01d = np.where(p01d < 0.001, np.nan, p01d)
+        cmap.set_under('white')
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
         if days > 6:
             clevs = [0.01, 0.3, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20]
@@ -177,7 +184,6 @@ def plotter(fdict):
             clevs = [0.01, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35]
         if days > 90:
             clevs = [0.01, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35, 40]
-        cmap.set_over('k')
 
     x2d, y2d = np.meshgrid(lons, lats)
     if ptype == 'c':

@@ -17,10 +17,12 @@ HOURS = OrderedDict([
     ('3', 'Three Hour'),
     ('6', 'Six Hour'),
     ('24', 'Twenty Four Hour')])
-PDICT = {'cwa': 'Plot by NWS Forecast Office',
-         'midwest': 'Midwestern US',
-         'conus': 'Continental US',
-         'state': 'Plot by State'}
+PDICT = {
+    'cwa': 'Plot by NWS Forecast Office',
+    'midwest': 'Midwestern US',
+    'cornbelt': 'Corn Belt',
+    'conus': 'Continental US',
+    'state': 'Plot by State'}
 PDICT3 = {'yes': 'YES: Label/Plot Counties/Zones',
           'no': 'NO: Do not Label Counties/Zones'}
 
