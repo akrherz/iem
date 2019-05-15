@@ -98,6 +98,8 @@ def main():
 
     if len(pils) == 1:
         pillimit = " pil = '%s' " % (pils[0], )
+        if len(pils[0].strip()) == 3:
+            pillimit = " substr(pil, 1, 3) = '%s' " % (pils[0].strip(), )
     else:
         pillimit = " pil in %s" % (tuple(pils), )
 

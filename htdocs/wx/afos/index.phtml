@@ -20,6 +20,9 @@ $t->thispage ="current-afos";
 $helpdiv = <<<EOM
 <h3>IEM NWS Text Product Finder</h3>
 
+<p>Update 15 May 2019: If you specify a three character PIL, you will get
+any PIL matches that start with those three characters.</p>
+
 <p>Update 19 Jan 2012: Added the ability to limit a AFOS PIL by the issuing
 center ID (4 character).  For example, the AFOS pil RWRTX is issued by a 
 number of centers in Texas.  To only get RWRTX from Fort Worth, enter KFWD
@@ -87,9 +90,8 @@ EOM;
 $theform = <<<EOM
 <form name="control" id="myform">
 
-<p><strong>Enter Selections</strong></p>
-
-<p><label for="pil">6 Character PIL</label>
+<p><label for="pil">3-6 Character PIL</label>
+<br /><i>Specify 4-6 characters for exact match</i> 
 <br /><input placeholder="AFDDMX" type="text" name="pil" maxlength="6" size="10"></p>
 
 <p><label for="center">4 Character Center</label>
