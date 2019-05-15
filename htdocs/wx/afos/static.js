@@ -15,7 +15,7 @@ function readAnchorTags(){
 		if (tokens.length == 1){
 			tokens.push(1);
 		}
-		addTab(tokens[0], "", tokens[1], NO_DATE_SET, NO_DATE_SET, false);
+		addTab(tokens[0], "", "", tokens[1], NO_DATE_SET, NO_DATE_SET, false);
 	});
 }
 function readCookies(){
@@ -28,7 +28,7 @@ function readCookies(){
 		if (tokens.length == 1){
 			tokens.push(1);
 		}
-		addTab(tokens[0], "", tokens[1], NO_DATE_SET, NO_DATE_SET, false);
+		addTab(tokens[0], "", "", tokens[1], NO_DATE_SET, NO_DATE_SET, false);
 	});
 }
 function saveCookies(){
