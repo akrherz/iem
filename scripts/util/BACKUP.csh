@@ -17,10 +17,6 @@ set BACKUP_DIR=/mesonet/tmp/${dd}_backup
 cd /mesonet/data/text/sao
 tar -czf ${BACKUP_DIR}/sao.tgz ${yymmdd}*sao
 
-#echo "Backup SNET"
-cd /mesonet/ARCHIVE/raw/snet/${YYYY_mm}/${dd}
-tar -czf ${BACKUP_DIR}/snet.tgz *.dat
-
 cd /mesonet/tmp
 #ls -l ${dd}_backup
 tar -cf ${yyyymmdd}.tar ${dd}_backup/

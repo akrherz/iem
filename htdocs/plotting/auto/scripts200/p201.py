@@ -127,7 +127,6 @@ def plotter(fdict):
             category, day, outlook_type, sts,
             ets + datetime.timedelta(days=2)),
                     index_col='date')
-        print(df)
         title2 = "Continental US"
     else:
         if ctx['w'] == 'wfo':
