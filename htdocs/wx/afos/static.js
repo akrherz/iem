@@ -46,14 +46,15 @@ function saveCookies(){
 	window.location.href = "#"+ afospils.join(",");
 };
 
-function loadTabContent(div, pil, center, limit, sdate, edate){
+function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate){
 	div.html('<img src="/images/wait24trans.gif"> Searching the database ...');
 	sdate = (sdate == NO_DATE_SET) ? "": sdate;
 	edate = (edate == NO_DATE_SET) ? "": edate;
 	$.ajax({
 		method: 'GET',
 		url: "/cgi-bin/afos/retrieve.py?fmt=html&pil="+pil+"&center="+
-			center +"&limit="+ limit +"&sdate="+ sdate +"&edate="+ edate,
+			center +"&limit="+ limit +"&sdate="+ sdate +"&edate="+
+			edate +"&ttaaii="+ ttaaii,
 		success: function(text){
 			div.html(text);
 		},
@@ -68,6 +69,7 @@ function refreshActiveTab(){
 	var pil = $(".nav-tabs li.active").data('pil');
 	var limit = $(".nav-tabs li.active").data('limit');
 	var center = $(".nav-tabs li.active").data('center');
+	var ttaaii = $(".nav-tabs li.active").data('ttaaii');
 	var sdate = $(".nav-tabs li.active").data('sdate');
 	var edate = $(".nav-tabs li.active").data('edate');
 	if (pil === undefined){
@@ -75,10 +77,10 @@ function refreshActiveTab(){
 	}
 	var tabid = $(".nav-tabs li.active a").attr('href');
 	var tabdiv = $(tabid);
-	loadTabContent(tabdiv, pil, center, limit, sdate, edate);	
+	loadTabContent(tabdiv, pil, center, ttaaii, limit, sdate, edate);	
 }
 
-function addTab(pil, center, limit, sdate, edate, doCookieSave){
+function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave){
 	// Make sure the pil is something
 	if (pil == null || pil == "") {
 		return;
@@ -90,12 +92,13 @@ function addTab(pil, center, limit, sdate, edate, doCookieSave){
 	var pos = $(".nav-tabs").children().length;
 	$("#thetabs .nav-tabs").append('<li data-center="'+center+'" '+
 			'data-sdate="'+sdate+'" data-edate="'+edate+'" '+
+			'data-ttaaii="' + ttaaii + '" ' +
 			'data-limit="'+limit+'" data-pil="'+pil+'">'+
 			'<a href="#tab'+pos+'" data-toggle="tab">'+pil+'</a></li>');
 	$('.tab-content').append('<div class="tab-pane" id="tab'+pos+'"></div>');
 	var newdiv = $("#tab"+pos);
 	$('.nav-tabs li:nth-child(' + (pos + 1) + ') a').click();
-	loadTabContent(newdiv, pil, center, limit, sdate, edate);
+	loadTabContent(newdiv, pil, center, ttaaii, limit, sdate, edate);
 	if (doCookieSave){
 		saveCookies();		
 	}
@@ -115,12 +118,14 @@ function buildUI(){
 		}
 		var limit = $(".nav-tabs li.active").data('limit');
 		var center = $(".nav-tabs li.active").data('center');
+		var ttaaii = $(".nav-tabs li.active").data('ttaaii');
 		var sdate = $(".nav-tabs li.active").data('sdate');
 		var edate = $(".nav-tabs li.active").data('edate');
 		sdate = (sdate == NO_DATE_SET) ? "": sdate;
 		edate = (edate == NO_DATE_SET) ? "": edate;
 		window.location = "/cgi-bin/afos/retrieve.py?dl=1&fmt=text&pil="+pil+"&center="+
-				center +"&limit="+ limit +"&sdate="+ sdate +"&edate="+ edate;
+				center +"&limit="+ limit +"&sdate="+ sdate +"&edate="+ edate +
+				"&ttaaii=" + ttaaii;
 		$(this).blur();
 	});
 	// Print!
@@ -155,10 +160,11 @@ function buildUI(){
 	$("#myform-submit").click(function(){
 		var pil = $("#myform input[name='pil']").val().toUpperCase();
 		var center = $("#myform input[name='center']").val().toUpperCase();
+		var ttaaii = $("#myform input[name='ttaaii']").val().toUpperCase();
 		var limit = parseInt($("#myform input[name='limit']").val());
 		var sdate = $("#sdate").val();
 		var edate = $("#edate").val();
-		addTab(pil, center, limit, sdate, edate, true);
+		addTab(pil, center, ttaaii, limit, sdate, edate, true);
 		$(this).blur();
 	});
 	$("#sdate").datepicker({

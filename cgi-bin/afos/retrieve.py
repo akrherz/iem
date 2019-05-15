@@ -40,10 +40,14 @@ def main():
     # Attempt to keep the file from downloading and just displaying in chrome
     form = cgi.FieldStorage()
     pils = pil_logic(form.getfirst('pil', ''))
-    limit = int(form.getfirst('limit', 1))
+    try:
+        limit = int(form.getfirst('limit', 1))
+    except ValueError:
+        limit = 1
     center = form.getfirst('center', '')[:4]
     sdate = form.getfirst('sdate', '')[:10]
     edate = form.getfirst('edate', '')[:10]
+    ttaaii = form.getfirst('ttaaii', '')[:6]
     fmt = form.getfirst('fmt', 'text')
     ssw("X-Content-Type-Options: nosniff\n")
     if form.getfirst('dl') == "1":
@@ -102,20 +106,23 @@ def main():
             pillimit = " substr(pil, 1, 3) = '%s' " % (pils[0].strip(), )
     else:
         pillimit = " pil in %s" % (tuple(pils), )
+    ttlimit = ''
+    if len(ttaaii) == 6:
+        ttlimit = " and wmo = '%s' " % (ttaaii, )
 
     # Do optimized query first, see if we can get our limit right away
     sql = """
         SELECT data from products WHERE %s
-        and entered > now() - '31 days'::interval %s %s
+        and entered > now() - '31 days'::interval %s %s %s
         ORDER by entered DESC LIMIT %s""" % (pillimit, centerlimit,
-                                             timelimit, limit)
+                                             timelimit, ttlimit, limit)
 
     cursor.execute(sql)
     if cursor.rowcount != limit:
         sql = """
-            SELECT data from products WHERE %s %s %s
+            SELECT data from products WHERE %s %s %s %s
             ORDER by entered DESC LIMIT %s """ % (pillimit, centerlimit,
-                                                  timelimit, limit)
+                                                  timelimit, ttlimit, limit)
         cursor.execute(sql)
 
     for row in cursor:

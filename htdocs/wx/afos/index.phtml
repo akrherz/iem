@@ -12,7 +12,7 @@ EOF;
 $t->jsextra = <<<EOM
 <script type="text/javascript" src="/vendor/js-cookie/2.1.4/js.cookie.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="static.js?v=11"></script>
+<script type="text/javascript" src="static.js?v=12"></script>
 EOM;
 $t->title = "NWS Text Product Finder";
 $t->thispage ="current-afos";
@@ -21,7 +21,8 @@ $helpdiv = <<<EOM
 <h3>IEM NWS Text Product Finder</h3>
 
 <p>Update 15 May 2019: If you specify a three character PIL, you will get
-any PIL matches that start with those three characters.</p>
+any PIL matches that start with those three characters.  You can optionally
+specify a WMO Header (TTAAII) to reduce PIL ambiguity.</p>
 
 <p>Update 19 Jan 2012: Added the ability to limit a AFOS PIL by the issuing
 center ID (4 character).  For example, the AFOS pil RWRTX is issued by a 
@@ -96,7 +97,11 @@ $theform = <<<EOM
 
 <p><label for="center">4 Character Center</label>
 <br /><i>Can be left blank</i>
-<br /><input type="text" name="center" maxlength="4" size="6"></p>
+<br /><input placeholder="KDMX" type="text" name="center" maxlength="4" size="6"></p>
+
+<p><label for="ttaaii">6 Char WMO Header</label>
+<br /><i>Can be left blank</i>
+<br /><input placeholder="FXUS63" type="text" name="ttaaii" maxlength="6" size="6"></p>
 
 <p><label for="limit">Date Descending Entries</label>
 <br /><input type="text" name="limit" maxlength="4" size="6" value="1"></p>
