@@ -104,6 +104,11 @@ def plotter(fdict):
     varname = ctx['var']
 
     table = "alldata_%s" % (sector, ) if len(sector) == 2 else "alldata"
+    state_limiter = ""
+    if sector == 'iailin':
+        state_limiter = (
+            " and network in ('IACLIMATE', 'ILCLIMATE', 'INCLIMATE') "
+        )
     df = read_sql("""
     WITH obs as (
         SELECT station, gddxx(%s, 86, high, low) as gdd,
@@ -163,7 +168,7 @@ def plotter(fdict):
     cdd_sum, hdd_sum, cdd_depart, hdd_depart,
     ST_x(t.geom) as lon, ST_y(t.geom) as lat
     from agg d JOIN stations t on (d.station = t.id)
-    WHERE t.network ~* 'CLIMATE'
+    WHERE t.network ~* 'CLIMATE' """ + state_limiter + """
     """, pgconn, params=(ctx['gddbase'], date1, date2), index_col='station')
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
