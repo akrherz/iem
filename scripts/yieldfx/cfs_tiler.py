@@ -116,7 +116,7 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
     if ncdate0.strftime("%m%d") == "0101":
         retslice = slice(0, tsteps)
     else:
-        retslice = slice(0 - tsteps - 1, -1)
+        retslice = slice(0 - tsteps, None)
     # print("copy_iemre from %s filling %s steps nc: %s iemre: %s" % (
     #    fromyear, tsteps, tslice, retslice
     # ))
@@ -134,15 +134,20 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
     )
     nc.variables['prcp'][tslice, :, :] = (
         renc.variables['p01d'][retslice, jslice, islice])
-    # IEMRE power_swdn is MJ, test to see if data exists
-    srad = renc.variables['power_swdn'][retslice, jslice, islice]
-    if srad.mask.all():
-        # IEMRE rsds uses W m-2, we want MJ
-        srad = (
-            renc.variables['rsds'][retslice, jslice, islice] *
-            86400. / 1000000.
-        )
-    nc.variables['srad'][tslice, :, :] = srad
+    for rt, nt in zip(
+            list(range(
+                retslice.start,
+                0 if retslice.stop is None else retslice.stop)),
+            list(range(tslice.start, tslice.stop)),):
+        # IEMRE power_swdn is MJ, test to see if data exists
+        srad = renc.variables['power_swdn'][rt, jslice, islice]
+        if srad.mask.all():
+            # IEMRE rsds uses W m-2, we want MJ
+            srad = (
+                renc.variables['rsds'][rt, jslice, islice] *
+                86400. / 1000000.
+            )
+        nc.variables['srad'][nt, :, :] = srad
     renc.close()
 
 
@@ -171,6 +176,17 @@ def tile_extraction(nc, valid, west, south):
                 datetime.date(year, 12, 31), islice, jslice)
 
 
+def qc(nc):
+    """Quick QC of the file."""
+    for i, time in enumerate(nc.variables['time'][:]):
+        ts = datetime.date(1980, 1, 1) + datetime.timedelta(days=int(time))
+        avgv = np.mean(nc.variables['srad'][i, :, :])
+        if avgv > 0:
+            continue
+        print("ts: %s avgv: %s" % (ts, avgv))
+    print("done...")
+
+
 def workflow(valid, ncfn, west, south):
     """Make the magic happen"""
     basedir = "/mesonet/share/pickup/yieldfx/cfs%02i" % (valid.hour, )
@@ -178,16 +194,19 @@ def workflow(valid, ncfn, west, south):
         os.makedirs(basedir)
     nc = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
     tile_extraction(nc, valid, west, south)
+    # qc(nc)
     nc.close()
 
 
 def main(argv):
     """Go Main Go"""
-    # Run for the 12z file yesterday
+    # Run for the 12z file **two days ago**, the issue is that for a year
+    # without a leap day, previous year filling will ask for one too many
+    # days that currently does not have data
     if len(argv) == 4:
         today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     else:
-        today = datetime.date.today() - datetime.timedelta(days=1)
+        today = datetime.date.today() - datetime.timedelta(days=2)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create tiles to cover IA, IL, IN

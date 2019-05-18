@@ -31,6 +31,7 @@ python daily_analysis.py $(date --date '4 days ago' +'%Y %m %d')
 cd ../climodat
 python compute_0000.py $(date --date '4 days ago' +'%Y %m %d')
 
-# CFS workflow, data hopefully exists for the previous date
+# CFS workflow, first two are for yesterday and we actually run for two
+# days ago
 cd ../dl
 python download_cfs.py && cd ../yieldfx && python cfs2iemre_netcdf.py && python cfs_tiler.py
