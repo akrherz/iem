@@ -165,6 +165,17 @@ def init_year(ts):
     v2.coordinates = "lon lat"
     v2.description = "Daily averaged wind speed magnitude"
 
+    v1 = nc.createVariable(
+        'power_swdn', np.float, ('time', 'lat', 'lon'),
+        fill_value=1.e20)
+    v1.units = 'MJ d-1'
+    v1.long_name = 'All Sky Insolation Incident on a Horizontal Surface'
+    v1.standard_name = (
+        'All Sky Insolation Incident on a Horizontal Surface'
+    )
+    v1.coordinates = "lon lat"
+    v1.description = "from NASA POWER"
+
     nc.close()
 
 

@@ -51,6 +51,9 @@ def main(argv):
             date = datetime.date(year, 1, 1) + datetime.timedelta(days=day)
             # kwh to MJ/d  3600 * 1000 / 1e6
             data = nc.variables['ALLSKY_SFC_SW_DWN'][day, :, :] * 3.6
+            # Sometimes there are missing values?
+            if np.ma.is_masked(data):
+                data[data.mask] = np.mean(data)
             i, j = iemre.find_ij(x0, y0)
             # resample data is 0.5, iemre is 0.125
             data = np.repeat(np.repeat(data, 4, axis=0), 4, axis=1)
