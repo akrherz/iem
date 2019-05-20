@@ -86,12 +86,11 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(days, coverage, fc='g', ec='g')
-    ax.set_title(("IEM Estimated Areal Coverage Percent of %s\n"
+    ax.set_title(("%s IEM Estimated Areal Coverage Percent of %s\n"
                   " receiving %.2f inches of rain over trailing %s day period"
-                  ) % (reference.state_names[state], threshold, period))
+                  ) % (year, reference.state_names[state], threshold, period))
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%-d'))
-    ax.set_xlabel("During %s" % (year, ))
     ax.set_yticks(range(0, 101, 25))
     ax.grid(True)
     return fig, df
