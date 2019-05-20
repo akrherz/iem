@@ -90,7 +90,8 @@ def plotter(fdict):
                   " receiving %.2f inches of rain over trailing %s day period"
                   ) % (reference.state_names[state], threshold, period))
     ax.set_ylabel("Areal Coverage [%]")
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%-d'))
+    ax.set_xlabel("During %s" % (year, ))
     ax.set_yticks(range(0, 101, 25))
     ax.grid(True)
     return fig, df
