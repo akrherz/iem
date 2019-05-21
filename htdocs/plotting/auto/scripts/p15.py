@@ -79,16 +79,16 @@ def plotter(fdict):
            fc='lightblue',
            width=0.4, label="%s ''" % (year, ), align='center')
     ax.bar(total.index.values - 0.2, nochange / total * 100.0,
-           bottom=(decrease/total * 100.0), fc='g', label="No Change",
+           bottom=(decrease/total * 100.0).values, fc='g', label="No Change",
            width=0.4, align='center')
     ax.bar(total2.index.values + 0.2, nochange2 / total2 * 100.0,
-           bottom=(decrease2/total2 * 100.0), fc='lightgreen',
+           bottom=(decrease2/total2 * 100.0).values, fc='lightgreen',
            width=0.4, label="%s ''" % (year, ), align='center')
     ax.bar(total.index.values - 0.2, increase / total * 100.0,
-           bottom=(decrease+nochange)/total * 100.0, fc='r', width=0.4,
-           label="Increase", align='center')
+           bottom=((decrease+nochange) / total).values * 100.0,
+           fc='r', width=0.4, label="Increase", align='center')
     ax.bar(total2.index.values + 0.2, increase2 / total2 * 100.0,
-           bottom=(decrease2+nochange2)/total2 * 100.0, fc='pink',
+           bottom=((decrease2+nochange2) / total2).values * 100.0, fc='pink',
            width=0.4, label="%s ''" % (year, ), align='center')
 
     offset = -0.2

@@ -130,7 +130,7 @@ def plotter(fdict):
          ) % (ctx['station'], ctx['nt'].sts[ctx['station']]['name'],
               'Last' if ctx['dir'] == 'last' else 'First',
               ('Trace+' if ctx['threshold'] == 'T'
-               else "%.2f+ Inch" % (ctx['threshold'],))))
+               else "%.2f+ Inch" % (float(ctx['threshold']),))))
     p0 = plt.Rectangle((0, 0), 1, 1, fc="purple")
     p1 = plt.Rectangle((0, 0), 1, 1, fc="g")
     p2 = plt.Rectangle((0, 0), 1, 1, fc="b")
