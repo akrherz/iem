@@ -35,3 +35,4 @@ python compute_0000.py $(date --date '4 days ago' +'%Y %m %d')
 # days ago
 cd ../dl
 python download_cfs.py && cd ../yieldfx && python cfs2iemre_netcdf.py && python cfs_tiler.py
+python cfs_tiler_2019.py
