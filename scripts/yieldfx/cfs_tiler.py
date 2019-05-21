@@ -141,7 +141,8 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
             list(range(tslice.start, tslice.stop)),):
         # IEMRE power_swdn is MJ, test to see if data exists
         srad = renc.variables['power_swdn'][rt, jslice, islice]
-        if srad.mask.all():
+        # All or nothing
+        if srad.mask.any():
             # IEMRE rsds uses W m-2, we want MJ
             srad = (
                 renc.variables['rsds'][rt, jslice, islice] *
