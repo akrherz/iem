@@ -66,10 +66,12 @@ def do_iowa_azos(date, itoday=False):
             then phour else 0 end) as precip24
         from hourly where network in ('IA_ASOS', 'AWOS')
         and valid >= now() - '72 hours'::interval
-        and phour >= 0.01 GROUP by station
+        and phour > 0.005 GROUP by station
         """, pgconn, index_col='station')
         for col in ['precip24', 'precip48', 'precip72']:
             df[col] = df2[col]
+            # make sure the new column is >= precip
+            df.loc[df[col] < df['precip'], col] = df['precip']
     df.reset_index(inplace=True)
     return df
 
