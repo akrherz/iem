@@ -94,7 +94,7 @@ def main():
 
     try:
         mydb = get_dbconn('afos', user='nobody')
-    except Exception as _exp:
+    except Exception as _exp:  # noqa
         ssw('Error Connecting to Database, please try again!\n')
         return
 
@@ -112,7 +112,9 @@ def main():
 
     # Do optimized query first, see if we can get our limit right away
     sql = """
-        SELECT data from products WHERE %s
+        SELECT data, pil,
+        to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts
+        from products WHERE %s
         and entered > now() - '31 days'::interval %s %s %s
         ORDER by entered DESC LIMIT %s""" % (pillimit, centerlimit,
                                              timelimit, ttlimit, limit)
@@ -120,14 +122,20 @@ def main():
     cursor.execute(sql)
     if cursor.rowcount != limit:
         sql = """
-            SELECT data from products WHERE %s %s %s %s
+            SELECT data, pil,
+            to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts
+            from products WHERE %s %s %s %s
             ORDER by entered DESC LIMIT %s """ % (pillimit, centerlimit,
                                                   timelimit, ttlimit, limit)
         cursor.execute(sql)
 
     for row in cursor:
         if fmt == 'html':
-            ssw("<pre>\n")
+            ssw((
+                "<a href=\"/wx/afos/p.php?pil=%s&e=%s\">Permalink</a> "
+                "for following product: "
+                ) % (row[1], row[2]))
+            ssw("<br /><pre>\n")
         else:
             ssw("\001\n")
         # Remove control characters from the product as we are including
@@ -135,7 +143,7 @@ def main():
         ssw((row[0]).replace(
             "\003", "").replace("\001\r\r\n", "").replace("\r\r\n", "\n"))
         if fmt == 'html':
-            ssw("</pre>\n")
+            ssw("</pre><hr>\n")
         else:
             ssw("\n\003\n")
 

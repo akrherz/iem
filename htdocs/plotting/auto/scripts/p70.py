@@ -64,22 +64,26 @@ def plotter(fdict):
         wfolimiter = " substr(ugc, 1, 2) = '%s' " % (state, )
 
     if split == 'jan1':
-        sql = """SELECT extract(year from issue)::int as year,
-        min(issue at time zone 'UTC') as min_issue,
-        max(issue at time zone 'UTC') as max_issue,
-        count(distinct wfo || eventid)
-        from warnings where """ + wfolimiter + """
-        and phenomena = %s and significance = %s
-        GROUP by year ORDER by year ASC"""
+        sql = """
+            SELECT extract(year from issue)::int as year,
+            min(issue at time zone 'UTC') as min_issue,
+            max(issue at time zone 'UTC') as max_issue,
+            count(distinct wfo || eventid)
+            from warnings where """ + wfolimiter + """
+            and phenomena = %s and significance = %s
+            GROUP by year ORDER by year ASC
+        """
     else:
-        sql = """SELECT
-        extract(year from issue - '6 months'::interval)::int as year,
-        min(issue at time zone 'UTC') as min_issue,
-        max(issue at time zone 'UTC') as max_issue,
-        count(distinct wfo || eventid)
-        from warnings where """ + wfolimiter + """
-        and phenomena = %s and significance = %s
-        GROUP by year ORDER by year ASC"""
+        sql = """
+            SELECT
+            extract(year from issue - '6 months'::interval)::int as year,
+            min(issue at time zone 'UTC') as min_issue,
+            max(issue at time zone 'UTC') as max_issue,
+            count(distinct wfo || eventid)
+            from warnings where """ + wfolimiter + """
+            and phenomena = %s and significance = %s
+            GROUP by year ORDER by year ASC
+        """
     df = read_sql(sql, pgconn, params=(phenomena, significance),
                   index_col=None)
     if df.empty:
@@ -103,6 +107,8 @@ def plotter(fdict):
     df['enddoy'] = df[['year', 'max_issue']].apply(myfunc, axis=1)
     df.set_index('year', inplace=True)
 
+    # allow for small bars when there is just one event
+    df.loc[df['enddoy'] == df['startdoy'], 'enddoy'] = df['enddoy'] + 1
     ends = df['enddoy'].values
     starts = df['startdoy'].values
     years = df.index.values
