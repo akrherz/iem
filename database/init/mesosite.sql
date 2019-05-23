@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (18, now());
+INSERT into iem_schema_manager_version values (19, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
@@ -248,7 +248,8 @@ CREATE TABLE webcams(
 	moviebase varchar,
 	scrape_url varchar,
 	is_vapix boolean,
-	fullres varchar(9) DEFAULT '640x480' NOT NULL
+	fullres varchar(9) DEFAULT '640x480' NOT NULL,
+  fqdn varchar
 	);
 SELECT AddGeometryColumn('webcams', 'geom', 4326, 'POINT', 2);
 GRANT all on webcams to mesonet,ldm;

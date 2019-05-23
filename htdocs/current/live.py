@@ -23,12 +23,13 @@ def fetch(cid):
     pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
     cursor.execute("""
-        SELECT ip, online, name, port, is_vapix, scrape_url, network
+        SELECT ip, fqdn, online, name, port, is_vapix, scrape_url, network
         from webcams WHERE id = %s
         """, (cid,))
     if cursor.rowcount != 1:
         return
-    (ip, online, name, port, is_vapix, scrape_url, network) = cursor.fetchone()
+    (ip, fqdn, online, name, port, is_vapix, scrape_url, network
+     ) = cursor.fetchone()
     pgconn.close()
     if scrape_url is not None or not online:
         return
@@ -40,7 +41,7 @@ def fetch(cid):
     uribase = "http://%s:%s/-wvhttp-01-/GetOneShot"
     if is_vapix:
         uribase = "http://%s:%s/axis-cgi/jpg/image.cgi"
-    uri = uribase % (ip, port)
+    uri = uribase % (ip if ip is not None else fqdn, port)
     req = requests.get(uri, auth=HTTPDigestAuth(user, passwd), timeout=15)
     if req.status_code != 200:
         return
@@ -66,7 +67,7 @@ def workflow(cid):
         return res
     try:
         res = fetch(cid)
-    except Exception as _exp:
+    except Exception as _exp:  # noqa
         return None
     if res is not None:
         # Set for 15 seconds
@@ -95,5 +96,5 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except Exception as exp:
+    except Exception as exp:  # noqa
         traceback.print_exc()
