@@ -9,11 +9,19 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict((
-    ('corn_silking', 'Percentage Corn Silking Acres'),
     ('corn_poor_verypoor', 'Percentage Corn Poor + Very Poor Condition'),
     ('corn_good_excellent', 'Percentage Corn Good + Excellent Condition'),
+    ('corn_planting', 'Percentage Corn Planted Acres'),
+    ('corn_silking', 'Percentage Corn Silking Acres'),
+    ('soybeans_planting', 'Percentage Soybean Planted Acres'),
 ))
 LOOKUP = {
+    'corn_planting': [
+        'CORN', 'PROGRESS', 'PCT PLANTED', 'ALL UTILIZATION PRACTICES'
+    ],
+    'soybeans_planting': [
+        'SOYBEANS', 'PROGRESS', 'PCT PLANTED', 'ALL UTILIZATION PRACTICES'
+    ],
     'corn_silking': [
         'CORN', 'PROGRESS', 'PCT SILKING', 'ALL UTILIZATION PRACTICES'
     ],
