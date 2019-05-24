@@ -104,7 +104,7 @@ def plotter(fdict):
         levs[0] = 0.01
     mp.pcolormesh(
         lons, lats, precip, levs, cmap=cmap, units='inch',
-        clip_on=(ctx['sector'] == 'iailin'))
+        clip_on=(ctx['csector'] == 'iailin'))
     if ctx['opt'] == 'both':
         mp.draw_usdm(valid=valid, filled=False, hatched=True)
 

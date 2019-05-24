@@ -1,3 +1,9 @@
+23 May 2019 Archontoulis Isaiah
+ - [ ] CFS may have some strange issues around cold days < 40F
+ - [x] Send Angelo new map addresses
+ - [x] Take location labels off the map
+ - [x] Plot Magnitude of GDD departure
+ 
  2 May 2019 Archontoulis
  - [ ] he wants CFS radiation capped at 31 MJ/d
  - Plan is to push weekly update at 9 AM Wednesday, so runs made on Tuesday

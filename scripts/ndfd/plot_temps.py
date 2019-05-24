@@ -40,7 +40,7 @@ def plot_gdd(ts):
     mp.pcolormesh(
         nc.variables['lon'][:], nc.variables['lat'][:], data,
         np.arange(-80, 81, 20), cmap=plt.get_cmap('RdBu_r'),
-        units="% of Average", spacing='proportional')
+        units=r"$^\circ$F", spacing='proportional')
     pqstr = (
         "data c %s summary/cb_ndfd_7day_gdd.png summary/cb_ndfd_7day_gdd.png "
         "png"
