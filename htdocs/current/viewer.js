@@ -131,10 +131,7 @@ function cb_siteOver(feature){
 var sbwLookup = {
 		 "TO": 'red',
 		 "MA": 'purple',
-		 "FF": 'green',
 		 "EW": 'green',
-		 "FA": 'green',
-		 "FL": 'green',
 		 "SV": 'yellow'
 		};
 
@@ -219,7 +216,9 @@ $().ready(function(){
 			format: new ol.format.GeoJSON()
 		}),
 		style: function(feature, resolution){
-			sbwStyle[1].getStroke().setColor(sbwLookup[feature.get('phenomena')]);
+			color = sbwLookup[feature.get('phenomena')];
+			if (color === undefined) return;
+			sbwStyle[1].getStroke().setColor(color);
 			return sbwStyle;
 		}
 	});
