@@ -25,21 +25,21 @@ def plot_gdd(ts):
     cnc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc")
     offset = daily_offset(ts)
     avggdd = np.sum(cnc.variables['gdd50'][offset:offset+7], 0)
-    data = gddtot / np.where(avggdd < 1, 1, avggdd) * 100.
+    data = gddtot - np.where(avggdd < 1, 1, avggdd)
 
     subtitle = (
         "Based on National Digitial Forecast Database (NDFD) "
         "00 UTC Forecast made %s") % (ts.strftime("%-d %b %Y"),)
     mp = MapPlot(
-        title='NWS NDFD 7 Day (%s through %s) GDD50 Percent of Average' % (
+        title='NWS NDFD 7 Day (%s through %s) GDD50 Departure from Avg' % (
             ts.strftime("%-d %b"),
             (ts + datetime.timedelta(days=6)).strftime("%-d %b")),
         subtitle=subtitle,
-        sector='custom', west=-99, north=44, south=38.5, east=-84
+        sector='iailin'
     )
     mp.pcolormesh(
         nc.variables['lon'][:], nc.variables['lat'][:], data,
-        [1, 25, 50, 75, 100, 125, 150, 200, 300], cmap=plt.get_cmap('RdBu_r'),
+        np.arange(-80, 81, 20), cmap=plt.get_cmap('RdBu_r'),
         units="% of Average", spacing='proportional')
     pqstr = (
         "data c %s summary/cb_ndfd_7day_gdd.png summary/cb_ndfd_7day_gdd.png "
@@ -68,11 +68,11 @@ def plot_maxmin(ts, field):
             (ts + datetime.timedelta(days=6)).strftime("%-d %b"),
             'Maximum' if field == 'high_tmpk' else 'Minimum', ),
         subtitle=subtitle,
-        sector='custom', west=-99, north=44, south=38.5, east=-84
+        sector='iailin'
     )
     mp.pcolormesh(
         nc.variables['lon'][:], nc.variables['lat'][:], data,
-        np.arange(-30, 121, 10), cmap=plt.get_cmap('gist_ncar'),
+        np.arange(10, 121, 10), cmap=plt.get_cmap('jet'),
         units='Degrees F')
     pqstr = (
         "data c %s summary/cb_ndfd_7day_%s.png summary/cb_ndfd_7day_%s.png "

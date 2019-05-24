@@ -191,9 +191,13 @@ def plotter(fdict):
         subtitle=subtitle)
     fmt = '%.2f'
     cmap = cm.get_cmap(ctx['cmap'])
-    if varname in ['precip_depart', 'avg_temp_depart']:
+    if varname in ['precip_depart', 'avg_temp_depart', 'gdd_depart']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
-        clevels = np.linspace(0 - rng, rng, 7)
+        clevels = np.linspace(
+            0 - rng, rng, 7,
+            dtype='i' if varname == 'gdd_depart' else 'f')
+        if varname == 'gdd_depart':
+            fmt = '%.0f'
     elif varname in ['precip_sum']:
         rng = df[varname].abs().describe(percentiles=[0.95])['95%']
         clevels = np.linspace(0, rng, 7)

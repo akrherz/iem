@@ -102,8 +102,9 @@ def plotter(fdict):
     elif scale == '3.5':
         levs = np.arange(0, 3.6, 0.25)
         levs[0] = 0.01
-    mp.pcolormesh(lons, lats, precip,
-                  levs, cmap=cmap, units='inch', clip_on=False)
+    mp.pcolormesh(
+        lons, lats, precip, levs, cmap=cmap, units='inch',
+        clip_on=(ctx['sector'] == 'iailin'))
     if ctx['opt'] == 'both':
         mp.draw_usdm(valid=valid, filled=False, hatched=True)
 
