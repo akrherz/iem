@@ -359,7 +359,7 @@ def main():
 
     ts = datetime.datetime.utcnow().strftime("%d%H%M")
     fn1 = "/tmp/IArwis%s.sao" % (ts, )
-    fn2 = "/tmp/IA.rwis%s.so" % (ts, )
+    fn2 = "/tmp/IA.rwis%s.sao" % (ts, )
     gen_metars(obs, fn1, False)
     gen_metars(obs, fn2, True)
     ldm_insert_metars(fn1, fn2)
