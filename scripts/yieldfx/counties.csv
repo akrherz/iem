@@ -1,0 +1,1177 @@
+State,County,lat,long
+illinois,adams,39.9787786,-91.2110065
+illinois,alexander,37.1801529,-89.3502834
+illinois,bond,38.8630331,-89.4391416
+illinois,boone,42.321246,-88.8235511
+illinois,brown,39.9498214,-90.7485656
+illinois,bureau,41.4016294,-89.5341179
+illinois,calhoun,39.1397507,-90.6506113
+illinois,carroll,42.0647352,-89.9556785
+illinois,cass,39.9682127,-90.250722
+illinois,champaign,40.1164205,-88.2433829
+illinois,christian,39.5212598,-89.2829783
+illinois,clark,39.3260541,-87.7838526
+illinois,clay,38.7340694,-88.4910693
+illinois,clinton,38.5896187,-89.420064
+illinois,coles,39.5266741,-88.2184999
+illinois,cook,41.8197385,-87.756525
+illinois,crawford,39.0131644,-87.7291001
+illinois,cumberland,39.2744299,-88.2423795
+illinois,de kalb,0.0,0.0
+illinois,de witt,40.1734773,-88.9003733
+illinois,douglas,39.7628415,-88.2170516
+illinois,du page,41.9868212,-88.1336506
+illinois,edgar,39.6714952,-87.7340364
+illinois,edwards,38.410254,-88.0584362
+illinois,effingham,39.1201433,-88.54348
+illinois,fayette,39.0001282,-89.0430211
+illinois,ford,40.4980955,-88.2552987
+illinois,franklin,37.9765409,-88.9335327
+illinois,fulton,40.4714305,-90.1845556
+illinois,gallatin,37.7509507,-88.2264519
+illinois,greene,39.3573664,-90.3898985
+illinois,grundy,41.2747363,-88.4119361
+illinois,hamilton,38.0619569,-88.5301136
+illinois,hancock,40.3941712,-91.1458063
+illinois,hardin,37.5137015,-88.2675733
+illinois,henderson,40.8156124,-90.9104547
+illinois,henry,41.3418549,-90.1177442
+illinois,iroquois,40.7351265,-87.8309209
+illinois,jackson,37.7668943,-89.3563845
+illinois,jasper,39.0082423,-88.1552371
+illinois,jefferson,38.3010487,-88.9344303
+illinois,jersey,39.0848464,-90.3303344
+illinois,jo daviess,42.3506664,-90.1743742
+illinois,johnson,37.4501818,-88.8844045
+illinois,kane,41.923434,-88.4248315
+illinois,kankakee,41.1200325,-87.8611531
+illinois,kendall,41.5853584,-88.4319488
+illinois,knox,40.920889,-90.2202325
+illinois,la salle,41.8906567,-87.632396
+illinois,lake,42.079167,-87.7365232
+illinois,lawrence,38.7108998,-87.7194375
+illinois,lee,41.7459056,-89.2888533
+illinois,livingston,40.8682487,-88.5631125
+illinois,logan,40.1075089,-89.3768539
+illinois,macon,39.8455208,-88.9602376
+illinois,macoupin,39.2420653,-89.925212
+illinois,madison,38.811063,-89.9017112
+illinois,marion,37.7306054,-88.9331256
+illinois,marshall,41.0324537,-89.2998456
+illinois,mason,40.2302271,-89.8660433
+illinois,massac,37.2177417,-88.7163312
+illinois,mcdonough,40.4376858,-90.6780272
+illinois,mchenry,42.3294391,-88.4605713
+illinois,mclean,40.4631789,-88.8196613
+illinois,menard,40.0166667,-89.7858065
+illinois,mercer,41.2019729,-90.7398717
+illinois,monroe,38.2722313,-90.1792484
+illinois,montgomery,39.2052633,-89.5057126
+illinois,morgan,39.7062265,-90.190335
+illinois,moultrie,39.6391442,-88.6087498
+illinois,ogle,42.0397014,-89.3138599
+illinois,peoria,40.6938609,-89.5891008
+illinois,perry,38.0772859,-89.3760499
+illinois,piatt,39.967291,-88.6072399
+illinois,pike,39.6108707,-90.8538306
+illinois,pope,37.3933531,-88.5904425
+illinois,pulaski,37.2314232,-89.1183427
+illinois,putnam,41.2025915,-89.2676414
+illinois,randolph,38.0472916,-89.8107962
+illinois,richland,38.7060457,-88.0949352
+illinois,rock island,41.5094771,-90.5787477
+illinois,saline,37.750075,-88.5302584
+illinois,sangamon,39.7623668,-89.6454905
+illinois,schuyler,40.1370869,-90.5697373
+illinois,scott,39.6333408,-90.4753685
+illinois,shelby,39.3665064,-88.7886278
+illinois,st clair,38.4616972,-89.9324347
+illinois,stark,41.0712135,-89.8066831
+illinois,stephenson,42.3503474,-89.6735637
+illinois,tazewell,40.5126429,-89.5442084
+illinois,union,37.4616454,-89.2504793
+illinois,vermilion,40.1749809,-87.7323857
+illinois,wabash,38.4615994,-87.8460903
+illinois,warren,40.8442828,-90.6168408
+illinois,washington,39.76697225,-86.1602671506985
+illinois,wayne,38.4251958,-88.4197678
+illinois,white,38.0632329,-88.1577725
+illinois,whiteside,41.7612332,-89.9214744
+illinois,will,41.4194058,-87.9994754
+illinois,williamson,37.7248502,-88.9143385
+illinois,winnebago,42.3255276,-89.1496574
+illinois,woodford,40.8145359,-89.2074215
+indiana,adams,40.7371667,-84.9347295
+indiana,allen,41.0975573,-85.0562084
+indiana,bartholomew,39.1914156,-85.8204601
+indiana,benton,40.6034281,-87.3235164
+indiana,blackford,40.4692826,-85.3305529
+indiana,boone,40.0459913,-86.4650842
+indiana,brown,39.1682855,-86.2297004
+indiana,carroll,40.5802239,-86.5693296
+indiana,cass,40.7808235,-86.3449159
+indiana,clark,38.4941217,-85.7169081
+indiana,clay,39.3864958,-87.1025862
+indiana,clinton,40.2992769,-86.4692735
+indiana,crawford,38.304425,-86.444022
+indiana,daviess,38.6776099,-87.0813484
+indiana,de kalb,0.0,0.0
+indiana,dearborn,39.1340338,-84.9820997
+indiana,decatur,39.2862128,-85.4943058
+indiana,delaware,40.2193275,-85.4040612
+indiana,dubois,38.3644324,-86.8870278
+indiana,elkhart,41.6819935,-85.9766671
+indiana,fayette,39.619235,-85.179378
+indiana,floyd,38.299,-85.8933233593055
+indiana,fountain,40.125252,-87.2497418
+indiana,franklin,39.4806056,-86.0549863
+indiana,fulton,41.0421416,-86.2875206
+indiana,gibson,38.3079744,-87.5775949
+indiana,grant,40.5114735,-85.6540606
+indiana,greene,39.0227107,-86.9958489
+indiana,hamilton,40.0749813,-86.0498885
+indiana,hancock,39.8127873,-85.7874738
+indiana,harrison,38.1816187,-86.1066917
+indiana,hendricks,39.7565309,-86.5173641
+indiana,henry,39.9297608,-85.4043542
+indiana,howard,40.4787061,-86.1350343
+indiana,huntington,40.8008286,-85.5018494
+indiana,jackson,38.9023184,-86.0650856
+indiana,jasper,41.0321808,-87.1066598
+indiana,jay,40.4370864,-85.0212356
+indiana,jefferson,38.8166724,-85.4299489
+indiana,jennings,38.9957749,-85.6359201
+indiana,johnson,39.4891804,-86.1079903
+indiana,knox,38.687009,-87.3811461
+indiana,kosciusko,41.2351957,-85.8529731
+indiana,la porte,41.6105983,-86.7225227
+indiana,lagrange,41.6372578,-85.4216948
+indiana,lake,41.4193829,-87.3692227
+indiana,lawrence,38.8400395,-86.4880717
+indiana,madison,38.7374222,-85.3829812
+indiana,marion,40.5583739,-85.6591442
+indiana,marshall,41.322843,-86.2809625
+indiana,martin,38.6705579,-86.8022436
+indiana,miami,40.6144919,-86.1059443
+indiana,monroe,39.1294237,-86.5187646
+indiana,montgomery,40.0361447,-86.9007083
+indiana,morgan,39.4665575,-86.4556794
+indiana,newton,40.939576,-87.3966953
+indiana,noble,41.3990708,-85.4193348
+indiana,ohio,38.9480496,-84.9581728
+indiana,orange,38.5421361,-86.4953216
+indiana,owen,39.2984518,-86.8508562
+indiana,parke,39.7686321,-87.2158436
+indiana,perry,38.0893386,-86.632911
+indiana,pike,38.4159433,-87.214144
+indiana,porter,41.4457032,-87.0724971
+indiana,posey,38.0145359,-87.8543645
+indiana,pulaski,41.031393,-86.6990692
+indiana,putnam,39.6666195,-86.8374032
+indiana,randolph,40.1560108,-85.011566
+indiana,ripley,39.0846316,-85.2691784
+indiana,rush,39.6220357,-85.4731911
+indiana,scott,38.6727039,-85.7444145
+indiana,shelby,39.493485,-85.8190596
+indiana,spencer,38.0288806,-86.9976446
+indiana,st. joseph,41.1052896,-85.1325566
+indiana,starke,41.2753164,-86.6457565
+indiana,steuben,41.6414101,-85.0023642
+indiana,sullivan,39.0492722,-87.4172644
+indiana,switzerland,38.8249258,-85.0373975
+indiana,tippecanoe,40.3916066,-86.8879689
+indiana,tipton,40.2899154,-86.058442
+indiana,union,39.6196086,-84.9292376
+indiana,vanderburgh,38.0461185,-87.5806553
+indiana,vermillion,39.8763626,-87.4635672
+indiana,vigo,39.4174652,-87.3974269
+indiana,wabash,40.8065352,-85.7833563
+indiana,warren,40.3424546,-87.3564255
+indiana,warrick,38.0906065,-87.2758933
+indiana,washington,38.6592152,-87.172789
+indiana,wayne,39.8638778,-85.0198586
+indiana,wells,40.7013353,-85.2116102
+indiana,white,40.7422434,-86.8713913
+indiana,whitley,41.1238216,-85.5035187
+iowa,adair,41.3127814,-94.4953303
+iowa,adams,41.0161621,-94.6850186
+iowa,allamakee,43.2961731,-91.3961856
+iowa,appanoose,40.7455904,-92.8649061
+iowa,audubon,41.670205,-94.9106526
+iowa,benton,42.0599693,-92.0776319
+iowa,black hawk,42.4607526,-92.3030235
+iowa,boone,42.0171798,-93.9254114
+iowa,bremer,42.7669649,-92.3099856
+iowa,buchanan,42.4634928,-91.8449198
+iowa,buena vista,42.7445814,-95.1127525
+iowa,butler,42.7336512,-92.7819493
+iowa,calhoun,42.3808184,-94.6332459
+iowa,carroll,42.0193628,-94.860335
+iowa,cass,41.3122834,-94.9215151
+iowa,cedar,41.7608608,-91.1263198
+iowa,cerro gordo,43.0742443,-93.2548746
+iowa,cherokee,42.7247968,-95.6249803
+iowa,chickasaw,43.05994,-92.316679
+iowa,clarke,41.0152092,-93.7842976
+iowa,clay,43.0809373,-95.1407762
+iowa,clayton,42.8547706,-91.3667151
+iowa,clinton,41.8444735,-90.1887379
+iowa,crawford,42.020579,-95.3811884
+iowa,dallas,41.6744179,-94.0394437
+iowa,davis,40.7474784,-92.3965311
+iowa,decatur,40.7418231,-93.7994193
+iowa,delaware,42.4663805,-91.3621282
+iowa,des moines,41.5910641,-93.6037149
+iowa,dickinson,43.3753018,-95.1654279
+iowa,dubuque,42.5006217,-90.6647967
+iowa,emmet,43.3707528,-94.6749933
+iowa,fayette,42.8420766,-91.850265
+iowa,floyd,43.0587894,-92.7830539
+iowa,franklin,42.7285907,-93.2513168
+iowa,fremont,40.7345943,-95.5924782
+iowa,greene,42.0182893,-94.4005864
+iowa,grundy,42.4132701,-92.7808666
+iowa,guthrie,41.6721976,-94.4985983
+iowa,hamilton,42.382945,-93.7083849
+iowa,hancock,43.0847702,-93.7363674
+iowa,hardin,42.3840463,-93.2293918
+iowa,harrison,41.6659155,-95.7976315
+iowa,henry,40.9778301,-91.5511282
+iowa,howard,43.3353641,-92.3230007
+iowa,humboldt,42.7756032,-94.1956133
+iowa,ida,42.3788371,-95.4949407
+iowa,iowa,41.683983,-92.0612268
+iowa,jackson,42.1420382,-90.5480067
+iowa,jasper,41.6791308,-93.0647786
+iowa,jefferson,41.0131342,-91.9718642
+iowa,johnson,41.825492,-91.833336
+iowa,jones,42.1081969,-91.1427196
+iowa,keokuk,41.510019,-92.200892
+iowa,kossuth,43.1825351,-94.209098
+iowa,lee,40.6524894,-91.507313
+iowa,linn,42.0631825,-91.6037932
+iowa,louisa,41.206668,-91.2683976
+iowa,lucas,41.0147422,-93.3427643
+iowa,lyon,43.3747071,-96.2081917
+iowa,madison,41.3133406,-94.0167968
+iowa,mahaska,41.314939,-92.6489935
+iowa,marion,42.0341658,-91.5976773
+iowa,marshall,42.0378125,-92.9915704
+iowa,mills,41.0171392,-95.6087477
+iowa,mitchell,43.342033,-92.7840209
+iowa,monona,42.0218737,-95.9356631
+iowa,monroe,41.0142519,-92.8792544
+iowa,montgomery,41.0166807,-95.1753285
+iowa,muscatine,41.424473,-91.0432051
+iowa,o brien,0.0,0.0
+iowa,osceola,43.3684613,-95.6299944
+iowa,page,40.736337,-95.1602396
+iowa,palo alto,43.0762829,-94.6625047
+iowa,plymouth,42.7369124,-96.2213607
+iowa,pocahontas,42.7262681,-94.6477383
+iowa,polk,41.6765808,-93.5921448
+iowa,pottawattamie,41.3115686,-95.5331269
+iowa,poweshiek,41.6816512,-92.5435034
+iowa,ringgold,40.7399875,-94.2547473
+iowa,sac,42.3797854,-95.0825306
+iowa,scott,41.6251843,-90.6164201
+iowa,shelby,41.668243,-95.3163623
+iowa,sioux,43.0574079,-96.1602368
+iowa,story,42.0161612,-93.489194
+iowa,tama,42.0568108,-92.5433918
+iowa,taylor,38.208544,-85.7732746
+iowa,union,41.015699,-94.2472694
+iowa,van buren,40.749202,-91.9689529
+iowa,wapello,41.0137597,-92.4140217
+iowa,warren,41.3138645,-93.5685324
+iowa,washington,41.3160082,-91.7340327
+iowa,wayne,40.7436612,-93.343458
+iowa,webster,42.4326072,-94.184316
+iowa,winnebago,43.3747879,-93.7316088
+iowa,winneshiek,43.2677179,-91.8563139
+iowa,woodbury,42.3775361,-96.0607187
+iowa,worth,43.3696764,-93.2658698
+iowa,wright,42.7404452,-93.7325849
+kansas,allen,37.8882168,-95.3170208
+kansas,anderson,38.198077,-95.3067461
+kansas,atchison,39.545816,-95.3326052
+kansas,barber,37.2113342,-98.7033263
+kansas,barton,38.4683432,-98.776234
+kansas,bourbon,37.8485797,-94.8679591
+kansas,brown,39.824223,-95.5819952
+kansas,butler,37.77924,-96.8456342
+kansas,chase,38.2928083,-96.6152916
+kansas,chautauqua,37.146335,-96.2656966
+kansas,cherokee,37.1718068,-94.8482069
+kansas,cheyenne,39.7955799,-101.7575491
+kansas,clark,37.2045719,-99.8133765
+kansas,clay,39.3615169,-97.1718432
+kansas,cloud,39.4850226,-97.6705137
+kansas,coffey,38.235413,-95.7498925
+kansas,comanche,37.1960944,-99.2958383
+kansas,cowley,37.2413155,-96.8675685
+kansas,crawford,37.503889,-94.8652466
+kansas,decatur,39.7940527,-100.472769
+kansas,dickinson,38.8790615,-97.1893341
+kansas,doniphan,39.7831556,-95.1776492
+kansas,douglas,38.8838392,-95.2874559
+kansas,edwards,37.8684743,-99.3245584
+kansas,elk,37.4619149,-96.2528451
+kansas,ellis,38.9206744,-99.3267086
+kansas,ellsworth,38.6942009,-98.2149289
+kansas,finney,38.0452481,-100.8199963
+kansas,ford,37.7072469,-99.8943146
+kansas,franklin,38.5720008,-95.3184483
+kansas,geary,38.9885445,-96.7619968
+kansas,gove,38.9030073,-100.5073968
+kansas,graham,39.34062,-99.8980624
+kansas,grant,37.553026,-101.3067042
+kansas,gray,37.7221896,-100.4373907
+kansas,greeley,38.4570355,-101.8185007
+kansas,greenwood,37.8709542,-96.2471338
+kansas,hamilton,38.0058948,-101.8141159
+kansas,harper,37.1922068,-98.0835849
+kansas,harvey,38.0352315,-97.4486267
+kansas,haskell,37.5611249,-100.8840421
+kansas,hodgeman,38.0875979,-99.900952
+kansas,jackson,39.4030917,-95.8159647
+kansas,jefferson,39.2405893,-95.391413
+kansas,jewell,39.795263,-98.2255146
+kansas,johnson,38.8837933,-94.8389141
+kansas,kearny,37.9960049,-101.3523356
+kansas,kingman,37.5420937,-98.122172
+kansas,kiowa,37.5529578,-99.296556
+kansas,labette,37.1899712,-95.3103729
+kansas,lane,38.4651663,-100.4776682
+kansas,leavenworth,39.3113257,-94.922759
+kansas,lincoln,39.0343606,-98.2155504
+kansas,linn,38.1965927,-94.8578272
+kansas,logan,38.9058216,-101.1552381
+kansas,lyon,38.4573987,-96.1683124
+kansas,marion,38.3734544,-97.1305937
+kansas,marshall,39.7865054,-96.5255661
+kansas,mcpherson,38.3659015,-97.6575171
+kansas,meade,37.2091116,-100.396302
+kansas,miami,38.5620514,-94.8557402
+kansas,mitchell,39.3863019,-98.2112629
+kansas,montgomery,37.1983948,-95.7628341
+kansas,morris,38.6908906,-96.6707526
+kansas,morton,37.1960735,-101.8099541
+kansas,nemaha,39.7880532,-96.0157844
+kansas,neosho,37.5566345,-95.33166
+kansas,ness,38.4713429,-99.9586896
+kansas,norton,39.7944702,-99.9100033
+kansas,osage,38.6736049,-95.7367738
+kansas,osborne,39.3351558,-98.7933509
+kansas,ottawa,39.1273653,-97.6568094
+kansas,pawnee,38.1858758,-99.240825
+kansas,phillips,39.7961542,-99.346586
+kansas,pottawatomie,39.3928203,-96.3414279
+kansas,pratt,37.6280602,-98.7485305
+kansas,rawlins,39.7904797,-101.0994722
+kansas,reno,37.930344,-98.1055753
+kansas,republic,39.8266503,-97.6580834
+kansas,rice,38.3266261,-98.2007179
+kansas,riley,39.3026347,-96.7709339
+kansas,rooks,39.3494127,-99.3216587
+kansas,rush,38.5047752,-99.309214
+kansas,russell,38.8970508,-98.7980433
+kansas,saline,38.7704462,-97.6669832
+kansas,scott,38.4584915,-100.9336244
+kansas,sedgwick,37.6448148,-97.4641388
+kansas,seward,37.1850331,-100.8928434
+kansas,shawnee,39.0416718,-94.7202376
+kansas,sheridan,39.3530598,-100.4576457
+kansas,sherman,39.3412127,-101.7492408
+kansas,smith,39.796749,-98.7935393
+kansas,stafford,38.0350094,-98.718816
+kansas,stanton,37.5691072,-101.7935648
+kansas,stevens,37.1929045,-101.3119354
+kansas,sumner,37.2435967,-97.4792142
+kansas,thomas,39.3529613,-101.0810229
+kansas,trego,38.9289979,-99.9130572
+kansas,wabaunsee,38.9468399,-96.1991241
+kansas,wallace,38.9073846,-101.7565099
+kansas,washington,39.7887478,-97.0917391
+kansas,wichita,37.6922361,-97.3375448
+kansas,wilson,37.5692118,-95.7452639
+kansas,woodson,37.8811369,-95.7517113
+kansas,wyandotte,39.1090458,-94.767624
+kentucky,adair,37.0954558,-85.289922
+kentucky,allen,36.7528961,-86.1924103
+kentucky,anderson,38.0096811,-84.9880147
+kentucky,ballard,37.0231521,-88.9888619
+kentucky,barren,36.9584649,-85.925817
+kentucky,bath,38.1245248,-83.7249243
+kentucky,bell,36.7370344,-83.6491695
+kentucky,boone,38.9589235,-84.7160121
+kentucky,bourbon,38.1944867,-84.2046611
+kentucky,boyd,38.3608934,-82.6945926
+kentucky,boyle,37.6240938,-84.8540572
+kentucky,bracken,38.686946,-84.0751461
+kentucky,breathitt,37.5248869,-83.2943551
+kentucky,breckinridge,37.7406389,-86.4109353
+kentucky,bullitt,37.9749498,-85.6742394
+kentucky,butler,37.240158,-86.673921
+kentucky,caldwell,37.1169666,-87.8391211
+kentucky,calloway,36.6257937,-88.271076
+kentucky,campbell,38.9339799,-84.3715286
+kentucky,carlisle,36.8432751,-88.9636817
+kentucky,carroll,38.65718,-85.1000246
+kentucky,carter,38.3199171,-83.0039034
+kentucky,casey,37.2911032,-84.9146294
+kentucky,christian,36.8778665,-87.5014545
+kentucky,clark,37.9713791,-84.1550145
+kentucky,clay,37.1540436,-83.723144
+kentucky,clinton,36.7190018,-85.1426047
+kentucky,crittenden,37.3600974,-88.0885106
+kentucky,cumberland,36.7934611,-85.3795095
+kentucky,daviess,37.6877924,-87.0818357
+kentucky,edmonson,37.1999181,-86.2206738
+kentucky,elliott,38.1178636,-83.0656398
+kentucky,estill,37.6896864,-83.9407279
+kentucky,fayette,38.0280648,-84.4722444
+kentucky,fleming,38.3663888,-83.6790737
+kentucky,floyd,37.5473459,-82.7645621
+kentucky,franklin,38.2520423,-84.8633812
+kentucky,fulton,36.5577082,-89.102082
+kentucky,gallatin,38.7531444,-84.8435828
+kentucky,garrard,37.6360342,-84.5408428
+kentucky,grant,38.6472221,-84.6162564
+kentucky,graves,36.7244966,-88.6569094
+kentucky,grayson,37.4537437,-86.3389464
+kentucky,green,37.2433976,-85.5346302
+kentucky,greenup,38.5108112,-82.9180186
+kentucky,hancock,37.8189002,-86.7532261
+kentucky,hardin,37.6645815,-85.9634901
+kentucky,harlan,36.8411336,-83.22678
+kentucky,harrison,38.4355948,-84.3216412
+kentucky,hart,37.2921203,-85.8845579
+kentucky,henderson,37.8367513,-87.5907631
+kentucky,henry,38.447983,-85.1191168
+kentucky,hickman,36.6903525,-88.9587214
+kentucky,hopkins,37.3006817,-87.5612458
+kentucky,jackson,37.4200233,-83.9913882
+kentucky,jefferson,38.1787175,-85.664528
+kentucky,jessamine,37.8652866,-84.576902
+kentucky,johnson,37.8397984,-82.8159642
+kentucky,kenton,38.9252546,-84.5331967
+kentucky,knott,37.3521946,-82.9314574
+kentucky,knox,36.8934427,-83.8545725
+kentucky,larue,37.5257936,-85.7027413
+kentucky,laurel,37.1000973,-84.1148273
+kentucky,lawrence,38.0601807,-82.7316588
+kentucky,lee,37.6001442,-83.7073043
+kentucky,leslie,37.082981,-83.3750732
+kentucky,letcher,37.1208843,-82.8451698
+kentucky,lewis,38.5192128,-83.3400338
+kentucky,lincoln,37.4657952,-84.6573677
+kentucky,livingston,37.1898627,-88.3343825
+kentucky,logan,36.823707,-86.8833607
+kentucky,lyon,36.9981232,-88.0658149
+kentucky,madison,37.7298081,-84.2974735
+kentucky,magoffin,37.6859873,-83.039044
+kentucky,marion,37.5413747,-85.2650391
+kentucky,marshall,36.8624306,-88.3264641
+kentucky,martin,37.8022242,-82.5077178
+kentucky,mason,38.5755445,-83.8118236
+kentucky,mccracken,37.0335839,-88.7107201
+kentucky,mccreary,36.735774,-84.4960095
+kentucky,mclean,37.5216272,-87.2594272
+kentucky,meade,37.9313371,-86.1902231
+kentucky,menifee,37.9357602,-83.6014187
+kentucky,mercer,37.8087581,-84.8760836
+kentucky,metcalfe,36.9767017,-85.6254484
+kentucky,monroe,36.699465,-85.7284653
+kentucky,montgomery,38.0372304,-83.9152368
+kentucky,morgan,37.9198759,-83.2097119
+kentucky,muhlenberg,37.1984359,-87.1417319
+kentucky,nelson,37.8078463,-85.4741595
+kentucky,nicholas,38.3287954,-84.0153581
+kentucky,ohio,37.4757698,-86.8560639
+kentucky,oldham,38.4975639,-85.4210695
+kentucky,owen,38.5303187,-84.819254
+kentucky,owsley,37.4082295,-83.681994
+kentucky,pendleton,38.6914606,-84.3689142
+kentucky,perry,37.2203608,-83.1640699
+kentucky,pike,37.4512431,-82.3855722
+kentucky,powell,37.8192526,-83.8239902
+kentucky,pulaski,37.1124781,-84.593893
+kentucky,robertson,38.513372,-84.0465647
+kentucky,rockcastle,37.3885959,-84.3254309
+kentucky,rowan,38.1822638,-83.4039128
+kentucky,russell,38.5173028,-82.6976631
+kentucky,scott,38.2776401,-84.5816131
+kentucky,shelby,38.2215625,-85.2111267
+kentucky,simpson,36.73518,-86.5780102
+kentucky,spencer,38.0237475,-85.3203899
+kentucky,taylor,37.3396409,-85.3096607
+kentucky,todd,36.8098474,-87.1728185
+kentucky,trigg,36.7949221,-87.8782433
+kentucky,trimble,38.5984202,-85.3221506
+kentucky,union,37.637247,-87.958036
+kentucky,warren,36.9812407,-86.4233533
+kentucky,washington,37.7310874,-85.1750475
+kentucky,wayne,36.7822106,-84.8250848
+kentucky,webster,37.5139929,-87.6650997
+kentucky,whitley,36.7324324,-84.1512134
+kentucky,wolfe,37.7430509,-83.4868591
+kentucky,woodford,38.0686424,-84.7404532
+michigan,alcona,44.6765986,-83.5908023
+michigan,alger,46.4047895,-86.5280993
+michigan,allegan,42.5867203,-85.8861492
+michigan,alpena,45.0616794,-83.4327528
+michigan,antrim,44.9947369,-85.1133189
+michigan,arenac,44.0608193,-83.8718694
+michigan,baraga,46.6354348,-88.3876368
+michigan,barry,42.5910739,-85.3242417
+michigan,bay,43.6957567,-83.9402747
+michigan,benzie,44.6408868,-85.9928452
+michigan,berrien,41.9838614,-86.3985714
+michigan,branch,41.916753,-85.0649374
+michigan,calhoun,42.2461339,-85.0229223
+michigan,cass,41.9090169,-85.9970051
+michigan,charlevoix,45.202075,-84.9676387
+michigan,cheboygan,45.4417481,-84.4768486
+michigan,chippewa,46.3111149,-84.6428564
+michigan,clare,43.9688673,-84.8505091
+michigan,clinton,42.9435238,-84.6125345
+michigan,crawford,44.6769346,-84.6237147
+michigan,delta,46.0236602,-86.8950252
+michigan,dickinson,45.9874631,-87.8864905
+michigan,eaton,42.5935964,-84.8443666
+michigan,emmet,45.5064041,-84.8567966
+michigan,genesee,43.0220032,-83.7274305
+michigan,gladwin,43.9747774,-84.3873235
+michigan,gogebic,46.403433,-89.6626791
+michigan,grand traverse,44.6409162,-85.5801336
+michigan,gratiot,43.2903117,-84.6098023
+michigan,hillsdale,41.8779105,-84.5984396
+michigan,houghton,46.8591287,-88.7774734
+michigan,huron,43.8385749,-83.0221987
+michigan,ingham,42.5860505,-84.3800841
+michigan,ionia,42.9469688,-85.0713945
+michigan,iosco,44.3501989,-83.6582168
+michigan,iron,46.2178577,-88.5463241
+michigan,isabella,43.6306545,-84.8468516
+michigan,jackson,42.2465036,-84.4016963
+michigan,kalamazoo,42.291707,-85.5872286
+michigan,kalkaska,44.6780512,-85.1002509
+michigan,kent,43.0024013,-85.5502718
+michigan,keweenaw,47.3876058,-88.0742387
+michigan,lake,43.85544805,-87.0819754408259
+michigan,lapeer,43.0904764,-83.2333705
+michigan,leelanau,44.8878795,-85.8119919
+michigan,lenawee,41.8735258,-84.0624323
+michigan,livingston,42.5924563,-83.9147925
+michigan,luce,46.4824144,-85.5556156
+michigan,mackinac,46.085237,-85.0336698
+michigan,macomb,42.6741189,-82.902901
+michigan,manistee,44.3308044,-86.0262043
+michigan,marquette,46.5434914,-87.396433
+michigan,mason,43.9778831,-86.246291
+michigan,mecosta,43.6375503,-85.3168199
+michigan,menominee,45.5785741,-87.562159
+michigan,midland,43.6155825,-84.2472117
+michigan,missaukee,44.295439,-85.096036377871
+michigan,monroe,41.9145037,-83.3968252
+michigan,montcalm,43.3055418,-85.112198
+michigan,montmorency,45.0192008,-84.1322903
+michigan,muskegon,43.2341813,-86.2483921
+michigan,newaygo,43.5121225,-85.7944976
+michigan,oakland,42.6618842,-83.3804439
+michigan,oceana,43.6200297,-86.277073
+michigan,ogemaw,44.3364914,-84.125549
+michigan,ontonagon,46.6471877,-89.3293792
+michigan,osceola,43.9654579,-85.3310847
+michigan,oscoda,44.6789109,-84.1467693
+michigan,otsego,45.0244123,-84.6136788
+michigan,ottawa,41.7672695,-83.5213235
+michigan,presque isle,45.3375258,-83.9567881
+michigan,roscommon,44.3326932,-84.6165164
+michigan,saginaw,43.4200387,-83.9490365
+michigan,sanilac,43.4150687,-82.8234745
+michigan,schoolcraft,46.1902943,-86.1833841
+michigan,shiawassee,42.9429488,-84.1458259
+michigan,st clair,42.9426715,-82.6283554
+michigan,st joseph,41.9031963,-85.5356726
+michigan,tuscola,43.4776781,-83.3951071
+michigan,van buren,42.2710763,-86.013973
+michigan,washtenaw,42.2582044,-83.8440853
+michigan,wayne,42.2819655,-83.3839595
+michigan,wexford,44.3353211,-85.5741088
+minnesota,aitkin,46.5714822,-93.3847595
+minnesota,anoka,45.2710195,-93.2827625
+minnesota,becker,46.9298236,-95.6761851
+minnesota,beltrami,47.9978537,-94.8799011
+minnesota,benton,45.7162129,-94.0481042
+minnesota,big stone,45.385266,-96.3557364
+minnesota,blue earth,44.0109722,-94.0560643
+minnesota,brown,44.2350232,-94.6955051
+minnesota,carlton,46.5799933,-92.7206334
+minnesota,carver,44.807118,-93.7871792
+minnesota,cass,47.0234117,-94.3454604
+minnesota,chippewa,45.027661,-95.5314914
+minnesota,chisago,45.4758877,-92.8849411
+minnesota,clay,46.8994904,-96.5088202
+minnesota,clearwater,47.5643825,-95.3747844
+minnesota,cook,47.9149076,-90.47301
+minnesota,cottonwood,44.019068,-95.1658845
+minnesota,crow wing,46.4665237,-94.1017044
+minnesota,dakota,44.666655,-93.044911
+minnesota,dodge,44.0175404,-92.8678406
+minnesota,douglas,45.9340479,-95.4627651
+minnesota,faribault,44.2949637,-93.268827
+minnesota,fillmore,43.6466588,-92.0636359
+minnesota,freeborn,43.6763617,-93.3501681
+minnesota,goodhue,44.396973,-92.7175627
+minnesota,grant,45.9358795,-96.0272071
+minnesota,hennepin,45.0257232,-93.4865052
+minnesota,houston,43.6624222,-91.4685617
+minnesota,hubbard,47.1138266,-94.9427679
+minnesota,isanti,45.5355919,-93.2868693
+minnesota,itasca,47.4968343,-93.6225663
+minnesota,jackson,43.670011,-95.1500626
+minnesota,kanabec,45.8979481,-93.2901944
+minnesota,kandiyohi,45.142373,-95.0025846
+minnesota,kittson,48.7709208,-96.8074141
+minnesota,koochiching,48.221596,-93.7684251
+minnesota,lac qui parle,44.986426,-96.2024907
+minnesota,lake of the woods,48.7032282,-94.8480091
+minnesota,lake,47.6348022,-91.4394994
+minnesota,le sueur,44.3771652,-93.711443
+minnesota,lincoln,44.4020631,-96.2627763
+minnesota,lyon,44.3880733,-95.8287296
+minnesota,mahnomen,47.3313602,-95.8142911
+minnesota,marshall,44.446929,-95.788351
+minnesota,martin,43.6564337,-94.5498419
+minnesota,mcleod,44.8169135,-94.2495251
+minnesota,meeker,45.1183643,-94.5175345
+minnesota,mille lacs,45.9311972,-93.640356
+minnesota,morrison,45.9926837,-94.2554658
+minnesota,mower,43.6832277,-92.753704
+minnesota,murray,44.017855,-95.7615205
+minnesota,nicollet,44.3380412,-94.2362169
+minnesota,nobles,43.6634212,-95.7527672
+minnesota,norman,47.3194344,-96.4625779
+minnesota,olmsted,43.999812,-92.3765614
+minnesota,otter tail,46.4184196,-95.713142
+minnesota,pennington,48.0513335,-96.0829271
+minnesota,pine,46.0820957,-92.7542126
+minnesota,pipestone,44.0270012,-96.2566582
+minnesota,polk,47.6554613,-96.4193484
+minnesota,pope,45.5850258,-95.4469471
+minnesota,ramsey,45.0165728,-93.0949501
+minnesota,red lake,47.8605178,-96.0988343
+minnesota,redwood,44.3788613,-95.2532373
+minnesota,renville,44.7242874,-94.9084771
+minnesota,rice,44.3413376,-93.2865484
+minnesota,rock,43.6733632,-96.2574328
+minnesota,roseau,48.7710371,-95.7697882
+minnesota,scott,44.6506998,-93.5025726
+minnesota,sherburne,45.4427088,-93.7459202
+minnesota,sibley,44.5603522,-94.2085682
+minnesota,st. louis,47.6201005,-92.4363343
+minnesota,stearns,45.535326,-94.6139422
+minnesota,steele,44.0137336,-93.2203671
+minnesota,stevens,45.5837016,-95.9946194
+minnesota,swift,45.2797223,-95.6898654
+minnesota,todd,46.0588428,-94.887283
+minnesota,traverse,45.7836323,-96.4215265
+minnesota,wabasha,44.2767596,-92.2018164
+minnesota,wadena,46.5850936,-94.9606684
+minnesota,waseca,44.0172242,-93.5885717
+minnesota,washington,45.0078591,-92.8743564
+minnesota,watonwan,43.9736055,-94.6370354
+minnesota,wilkin,46.3258354,-96.4586194
+minnesota,winona,44.0500054,-91.6392294
+minnesota,wright,45.1489061,-93.9639196
+minnesota,yellow medicine,44.7198536,-95.8533555
+missouri,adair,40.1769782,-92.6161167
+missouri,andrew,39.9845508,-94.8090258
+missouri,atchison,40.4144817,-95.4359392
+missouri,audrain,39.2226625,-91.8467268
+missouri,barry,36.7033624,-93.8229669
+missouri,barton,37.5040024,-94.3620755
+missouri,bates,38.2612027,-94.3503613
+missouri,benton,38.2930723,-93.3036786
+missouri,bollinger,37.3310468,-90.0296175
+missouri,boone,39.0153926,-92.3307534
+missouri,buchanan,39.6733203,-94.794829
+missouri,butler,36.7151346,-90.4146358
+missouri,caldwell,39.6558966,-93.9997281
+missouri,callaway,38.8491265,-91.9257607
+missouri,camden,38.0323133,-92.7638327
+missouri,cape girardeau,37.3058839,-89.5181476
+missouri,carroll,39.441912,-93.516971
+missouri,carter,36.9303011,-90.9598933
+missouri,cass,38.6585427,-94.3721539
+missouri,cedar,37.7084225,-93.861222
+missouri,chariton,39.5372927,-92.9524728
+missouri,christian,36.9586087,-93.1692896
+missouri,clark,40.3962004,-91.7362195
+missouri,clay,39.3187409,-94.4046405
+missouri,clinton,39.5975986,-94.4184896
+missouri,cole,38.5189519,-92.2956433
+missouri,cooper,38.8452595,-92.8249579
+missouri,crawford,37.9920098,-91.3156445
+missouri,dade,37.4323036,-93.8406302
+missouri,dallas,37.6832712,-93.0219376
+missouri,daviess,39.9587505,-93.9962662
+missouri,de kalb,39.5869398,-94.9252426
+missouri,dent,37.6211924,-91.5167381
+missouri,douglas,36.9433177,-92.5246813
+missouri,dunklin,36.2156534,-90.0591292
+missouri,franklin,38.4021095,-91.0841241
+missouri,gasconade,38.4575789,-91.5177499
+missouri,gentry,40.2044898,-94.4159527
+missouri,greene,37.2671929,-93.3465486
+missouri,grundy,40.1075648,-93.5737817
+missouri,harrison,40.337172,-93.9845199
+missouri,henry,38.3791027,-93.8066565
+missouri,hickory,37.959055,-93.3334746
+missouri,holt,40.0989571,-95.2134565
+missouri,howard,39.1321077,-92.7181732
+missouri,howell,36.766989,-91.9151975
+missouri,iron,37.575509,-90.6953467
+missouri,jackson,38.985812,-94.3616622
+missouri,jasper,37.176515,-94.3103412
+missouri,jefferson,38.267166,-90.5721889
+missouri,johnson,38.7295547,-93.8161034
+missouri,knox,40.122723,-92.1573551
+missouri,laclede,37.6475206,-92.6324187
+missouri,lafayette,39.0603689,-93.8151868
+missouri,lawrence,37.1036975,-93.8535681
+missouri,lewis,40.0902418,-91.7013355
+missouri,lincoln,39.0605477,-90.959359
+missouri,linn,39.8652349,-93.1104004
+missouri,livingston,39.7639036,-93.5573919
+missouri,macon,39.8416253,-92.5675118
+missouri,madison,37.4914691,-90.3567669
+missouri,maries,38.1683782,-91.928925
+missouri,marion,39.8080573,-91.6318781
+missouri,mcdonald,36.6259839,-94.3529462
+missouri,mercer,40.4095007,-93.5788706
+missouri,miller,38.2118765,-92.4343544
+missouri,mississippi,39.548248,-91.153628
+missouri,moniteau,38.6074608,-92.5851064
+missouri,monroe,39.494421,-91.9896892
+missouri,montgomery,38.9682313,-91.4821326
+missouri,morgan,38.4177341,-92.9183724
+missouri,new madrid,36.5749606,-89.6780945
+missouri,newton,36.9070237,-94.3424195
+missouri,nodaway,40.3483437,-94.8723663
+missouri,oregon,36.6909747,-91.4219804
+missouri,osage,38.4637283,-91.8708392
+missouri,ozark,36.6467816,-92.4575198
+missouri,pemiscot,36.2104949,-89.8351486
+missouri,perry,37.7107349,-89.8430248
+missouri,pettis,38.7346291,-93.2991713
+missouri,phelps,37.913292,-91.8168126
+missouri,pike,39.3683251,-91.1825617
+missouri,platte,39.3770348,-94.7716306
+missouri,polk,37.6200803,-93.4087994
+missouri,pulaski,37.8402606,-92.2248398
+missouri,putnam,40.4890407,-92.9709709
+missouri,ralls,39.552012,-91.547611
+missouri,randolph,39.4418988,-92.5009215
+missouri,ray,39.3661726,-93.9888262
+missouri,reynolds,37.3762658,-90.9659462
+missouri,ripley,36.6478735,-90.8887906
+missouri,saline,39.1256186,-93.2300648
+missouri,schuyler,40.4644896,-92.5152037
+missouri,scotland,40.4479304,-92.1527305
+missouri,scott,37.0516647,-89.5523071
+missouri,shannon,37.1498052,-91.4328245
+missouri,shelby,39.8004535,-92.071021
+missouri,st charles,38.7829598,-90.481424
+missouri,st clair,38.0592942,-93.7945456
+missouri,st francois,37.7763775,-90.5089041
+missouri,st louis,38.6268039,-90.1994097
+missouri,ste genevieve,37.88958,-90.1856637
+missouri,ste. genevieve,37.88958,-90.1856637
+missouri,stoddard,36.8556646,-89.9451636
+missouri,stone,36.7377156,-93.4555059
+missouri,sullivan,40.1993002,-93.1140993
+missouri,taney,36.6563729,-93.0665776
+missouri,texas,37.3354601,-91.9808332
+missouri,vernon,37.8639924,-94.3800151
+missouri,warren,38.7535106,-91.1453948
+missouri,washington,38.5610623,-91.0130208
+missouri,wayne,37.1129133,-90.4809149
+missouri,webster,37.2895151,-92.8792111
+missouri,worth,40.4684837,-94.4176406
+missouri,wright,37.2731008,-92.4765999
+nebraska,adams,40.5125798,-98.5148588
+nebraska,antelope,42.1864809,-98.0716943
+nebraska,arthur,41.5721288,-101.6974898
+nebraska,banner,41.5563636,-103.7384564
+nebraska,blaine,41.9195837,-99.979237
+nebraska,boone,41.7103804,-98.0544842
+nebraska,box butte,42.2130279,-103.0700157
+nebraska,boyd,42.916011,-98.7614212
+nebraska,brown,42.4068829,-99.9120353
+nebraska,buffalo,40.8421618,-99.0845816
+nebraska,burt,41.855662,-96.3357902
+nebraska,butler,41.2142454,-97.1384119
+nebraska,cass,40.9017313,-96.1922102
+nebraska,cedar,42.5947161,-97.2399373
+nebraska,chase,40.5217576,-101.6931758
+nebraska,cherry,42.5560174,-101.1503042
+nebraska,cheyenne,41.2053619,-102.9796713
+nebraska,clay,40.5020772,-98.0695257
+nebraska,colfax,41.5738643,-97.0828487
+nebraska,cuming,41.9233919,-96.7921475
+nebraska,custer,41.4022198,-99.7272241
+nebraska,dakota,42.4049316,-96.5677015
+nebraska,dawes,42.71723,-103.1216528
+nebraska,dawson,40.8776438,-99.8505693
+nebraska,deuel,41.1097054,-102.3261249
+nebraska,dixon,42.4351249,-96.8792569
+nebraska,dodge,41.58577,-96.6789773
+nebraska,douglas,41.2954112,-96.1415672
+nebraska,dundy,40.1849874,-101.6959427
+nebraska,fillmore,40.5292953,-97.599729
+nebraska,franklin,40.1715234,-98.9687585
+nebraska,frontier,40.5520473,-100.4230266
+nebraska,furnas,40.1791278,-99.8981009
+nebraska,gage,40.2469449,-96.7021336
+nebraska,garden,41.6440533,-102.3392806
+nebraska,garfield,41.895743,-99.0097985
+nebraska,gosper,40.5145053,-99.8185651
+nebraska,grant,41.9231444,-101.7354061
+nebraska,greeley,41.5595746,-98.5300914
+nebraska,hall,40.8627335,-98.5122907
+nebraska,hamilton,40.8569853,-98.0470062
+nebraska,harlan,40.1617382,-99.4349368
+nebraska,hayes,40.5335592,-101.0605971
+nebraska,hitchcock,40.1659573,-101.0387468
+nebraska,holt,42.4304452,-98.7540783
+nebraska,hooker,41.9078471,-101.1572302
+nebraska,howard,41.227424,-98.5174349
+nebraska,jefferson,40.185543,-97.1786805
+nebraska,johnson,40.3915587,-96.2796179
+nebraska,kearney,40.699478,-99.081858
+nebraska,keith,41.1973065,-101.6862537
+nebraska,keya paha,42.8866032,-99.6995454
+nebraska,kimball,41.1881305,-103.6997645
+nebraska,knox,42.6206698,-97.8901445
+nebraska,lancaster,40.7768326,-96.7111039
+nebraska,lincoln,40.8,-96.667821
+nebraska,logan,41.5590057,-100.5030548
+nebraska,loup,41.9075834,-99.4608177
+nebraska,madison,41.9064942,-97.5961512
+nebraska,mcpherson,41.5621689,-101.082432
+nebraska,merrick,41.1650536,-98.0531937
+nebraska,morrill,41.683432,-103.0100258
+nebraska,nance,41.3947359,-98.002421
+nebraska,nemaha,40.3837713,-95.8518344
+nebraska,nuckolls,40.1621285,-98.047997
+nebraska,otoe,40.6566851,-96.1444582
+nebraska,pawnee,40.1223248,-96.2629022
+nebraska,perkins,40.8501242,-101.6522162
+nebraska,phelps,40.5078647,-99.425665
+nebraska,pierce,42.2591262,-97.6036812
+nebraska,platte,41.5760383,-97.51149
+nebraska,polk,41.1893645,-97.570244
+nebraska,red willow,40.1686191,-100.4550901
+nebraska,richardson,40.1194651,-95.7607517
+nebraska,rock,42.4152603,-99.456071
+nebraska,saline,40.5079612,-97.175536
+nebraska,sarpy,41.1193462,-96.093081
+nebraska,saunders,41.2260007,-96.6520834
+nebraska,scotts bluff,41.8555787,-103.7088303
+nebraska,seward,40.8695533,-97.1706676
+nebraska,sheridan,42.4542885,-102.4089285
+nebraska,sherman,41.2206877,-98.99384
+nebraska,sioux,42.5055628,-103.7745337
+nebraska,stanton,41.9220687,-97.2141158
+nebraska,thayer,40.1682672,-97.6348188
+nebraska,thomas,41.9116541,-100.5558924
+nebraska,thurston,42.1837827,-96.5394986
+nebraska,valley,41.5595723,-98.9805484
+nebraska,washington,41.5407766,-96.246548
+nebraska,wayne,42.1941294,-97.169623
+nebraska,webster,40.1677552,-98.5260923
+nebraska,wheeler,41.8998069,-98.5309487
+nebraska,york,40.868095,-97.592026
+north dakota,adams,46.073286,-102.5315028
+north dakota,barnes,46.9310489,-98.0678849
+north dakota,benson,48.0191362,-99.403103
+north dakota,billings,47.0456305,-103.3943708
+north dakota,bottineau,48.82723,-100.445698
+north dakota,bowman,46.1830618,-103.3949061
+north dakota,burke,48.7882181,-102.5295867
+north dakota,burleigh,46.9498874,-100.5127667
+north dakota,cass,46.9241972,-97.220631
+north dakota,cavalier,48.7938814,-97.6223098
+north dakota,dickey,46.0952757,-98.5322728
+north dakota,divide,48.8189219,-103.5180387
+north dakota,dunn,47.30612,-102.6112348
+north dakota,eddy,47.7113958,-98.9087265
+north dakota,emmons,46.2575403,-100.2574942
+north dakota,foster,47.4642277,-98.8815333
+north dakota,golden valley,46.9317944,-103.8668414
+north dakota,grand forks,47.9078244,-97.0592028
+north dakota,grant,46.3441037,-101.6261837
+north dakota,griggs,47.4473179,-98.2616158
+north dakota,hettinger,46.0013946,-102.6368239
+north dakota,kidder,46.9636218,-99.7952675
+north dakota,la moure,48.8319389,-97.9298186
+north dakota,logan,46.4650338,-99.4501721
+north dakota,mchenry,48.1907427,-100.65378
+north dakota,mcintosh,46.1097938,-99.4243411
+north dakota,mckenzie,47.7702536,-103.4734684
+north dakota,mclean,47.6002156,-101.1719782
+north dakota,mercer,47.3347663,-101.8650031
+north dakota,morton,46.7244733,-101.1644543
+north dakota,mountrail,48.230321,-102.3603325
+north dakota,nelson,47.8852229,-98.1774434
+north dakota,oliver,47.1077709,-101.3524486
+north dakota,pembina,48.7530787,-97.5532833
+north dakota,pierce,48.1957108,-100.0625504
+north dakota,ramsey,48.2426199,-98.7062419
+north dakota,ransom,46.4519081,-97.6903091
+north dakota,renville,48.6579169,-101.7009103
+north dakota,richland,46.2247251,-96.9470748
+north dakota,rolette,48.7419695,-99.8380336
+north dakota,sargent,46.1101793,-97.6291809
+north dakota,sheridan,47.5321614,-100.367913
+north dakota,sioux,46.0654725,-100.978187
+north dakota,slope,46.4464651,-103.4507022
+north dakota,stark,46.7870161,-102.7338349
+north dakota,steele,47.4413054,-97.7450372
+north dakota,stutsman,46.9596318,-98.9742609
+north dakota,towner,48.6481504,-99.2322581
+north dakota,traill,47.4438504,-97.1797001
+north dakota,walsh,48.3693784,-97.7469943
+north dakota,ward,48.2488309,-101.6242607
+north dakota,wells,47.5664224,-99.6508819
+north dakota,williams,48.3629861,-103.4958386
+ohio,adams,38.8398935,-83.5051704
+ohio,allen,40.8077797,-84.0572225
+ohio,ashland,40.7887367,-82.2360391
+ohio,ashtabula,41.7167229,-80.74947
+ohio,athens,39.3289242,-82.1012479
+ohio,auglaize,40.5942186,-84.2641951
+ohio,belmont,40.0057737,-81.0097516
+ohio,brown,38.9092542,-83.8836555
+ohio,butler,39.4233043,-84.5936897
+ohio,carroll,40.5250362,-81.0927234
+ohio,champaign,40.1726987,-83.7701999
+ohio,clark,39.9229676,-83.7905959
+ohio,clermont,39.0678155,-84.1566341
+ohio,clinton,39.4259873,-83.8445792
+ohio,columbiana,40.7787016,-80.7648602
+ohio,coshocton,40.2905684,-81.9271441
+ohio,crawford,40.8705909,-82.9065596
+ohio,cuyahoga,41.4301347,-81.6905558
+ohio,darke,40.168765,-84.631372
+ohio,defiance,41.3203058,-84.5084835
+ohio,delaware,40.2317686,-82.9651045
+ohio,erie,41.3506462,-82.640448
+ohio,fairfield,39.7886111,-82.6418883
+ohio,fayette,39.5839889,-83.4401122
+ohio,franklin,40.0283162,-83.0076657
+ohio,fulton,41.6045817,-84.1141048
+ohio,gallia,38.7952465,-82.3556216
+ohio,geauga,41.4768249,-81.1850459
+ohio,greene,39.6908207,-83.9175037
+ohio,guernsey,40.0802222,-81.4859433
+ohio,hamilton,39.2085354,-84.5501874
+ohio,hancock,40.9939911,-83.6587588
+ohio,hardin,40.6880457,-83.6835337
+ohio,harrison,40.2694328,-81.1289112
+ohio,henry,41.2818109,-84.0581255
+ohio,highland,39.1802516,-83.6304344
+ohio,hocking,39.4644491,-82.5469722
+ohio,holmes,40.5840117,-81.9304045
+ohio,huron,41.1305303,-82.591828
+ohio,jackson,39.0131871,-82.6089043
+ohio,jefferson,40.3792938,-80.7847619
+ohio,knox,40.4467896,-82.4056302
+ohio,lake,41.7064789,-81.2380032
+ohio,lawrence,38.6065461,-82.5702511
+ohio,licking,40.1318041,-82.4627856
+ohio,logan,40.4430521,-83.7414465
+ohio,lorain,41.4673238,-82.1781904
+ohio,lucas,41.6508446,-83.621321
+ohio,madison,39.8868227,-83.3937233
+ohio,mahoning,40.9830133,-80.7826416
+ohio,marion,40.5885271,-83.1895249
+ohio,medina,41.1000764,-81.9382517
+ohio,meigs,39.1099292,-82.0420769
+ohio,mercer,40.4367866,-84.6109122
+ohio,miami,40.0580258,-84.2236524
+ohio,monroe,39.7157533,-81.1078783
+ohio,montgomery,39.6837328,-84.2854817
+ohio,morgan,39.5943953,-81.877978
+ohio,morrow,40.4574358,-82.7771661
+ohio,muskingum,40.0064162,-81.9984697
+ohio,noble,39.7517148,-81.4957347
+ohio,ottawa,41.5421375,-83.213342
+ohio,paulding,41.1628401,-84.5902954
+ohio,perry,39.6370289,-82.2044367
+ohio,pickaway,39.6725327,-83.0373284
+ohio,pike,39.1056387,-83.0611404
+ohio,portage,41.1496775,-81.2082
+ohio,preble,39.8125011,-84.6411162
+ohio,putnam,41.0677672,-84.1686932
+ohio,richland,40.776322,-82.5302254
+ohio,ross,39.3455507,-83.077359
+ohio,sandusky,41.4489397,-82.7079605
+ohio,scioto,38.823448,-83.017141
+ohio,seneca,41.1343702,-83.1194199
+ohio,shelby,40.3491604,-84.1593008
+ohio,stark,40.7214654,-81.4399734
+ohio,summit,41.1457902,-81.5333603
+ohio,trumbull,41.3068487,-80.7661017
+ohio,tuscarawas,40.3759469,-81.464888
+ohio,union,40.3255937,-83.3676859
+ohio,van wert,40.8014651,-84.600988
+ohio,vinton,39.2744355,-82.4740302
+ohio,warren,39.4203978,-84.180897
+ohio,washington,39.4782641,-81.5488945
+ohio,wayne,40.8615819,-81.9034617
+ohio,williams,41.5018224,-84.5923785
+ohio,wood,41.2776661,-83.6643025
+ohio,wyandot,40.865471,-83.2810539
+south dakota,aurora,43.6963371,-98.5722461
+south dakota,beadle,44.4157764,-98.2751583
+south dakota,bennett,43.1854085,-101.655263
+south dakota,bon homme,43.0067408,-97.8721324
+south dakota,brookings,44.311461,-96.79844
+south dakota,brown,45.5832968,-98.3674786
+south dakota,brule,43.6848301,-99.0538876
+south dakota,buffalo,44.0646363,-99.1707339
+south dakota,butte,44.9121731,-103.5267067
+south dakota,campbell,45.7560544,-100.0441548
+south dakota,charles mix,43.2257871,-98.6162758
+south dakota,clark,44.8684319,-97.7431382
+south dakota,clay,42.9190617,-96.9712933
+south dakota,codington,44.9695646,-97.1976513
+south dakota,corson,45.7135207,-101.1797766
+south dakota,custer,43.766651,-103.598806
+south dakota,davison,43.6660467,-98.1383168
+south dakota,day,45.3658879,-97.6152661
+south dakota,deuel,44.7554353,-96.671551
+south dakota,dewey,45.1788983,-100.8592127
+south dakota,douglas,43.3969325,-98.3406673
+south dakota,edmunds,45.4163408,-99.2220208
+south dakota,fall river,43.2264954,-103.5791473
+south dakota,faulk,45.0743643,-99.1739778
+south dakota,grant,45.1690114,-96.7057561
+south dakota,gregory,43.1713788,-99.1674843
+south dakota,haakon,44.2887741,-101.5756888
+south dakota,hamlin,44.6754502,-97.2005816
+south dakota,hand,44.5405047,-99.0053027
+south dakota,hanson,43.6615541,-97.7945361
+south dakota,harding,45.5509163,-103.4791412
+south dakota,hughes,44.4047339,-99.946102
+south dakota,hutchinson,43.3271413,-97.7396791
+south dakota,hyde,44.5103405,-99.4936719
+south dakota,jackson,43.668546,-101.6595883
+south dakota,jerauld,44.0797601,-98.6182042
+south dakota,jones,43.9667174,-100.6853793
+south dakota,kingsbury,44.3631469,-97.4882433
+south dakota,lake,44.0188394,-97.1267291
+south dakota,lawrence,44.3501591,-103.8248538
+south dakota,lincoln,43.2724187,-96.7387762
+south dakota,lyman,43.9176386,-99.8581638
+south dakota,marshall,45.7619018,-97.6300108
+south dakota,mccook,43.6719795,-97.37153
+south dakota,mcpherson,45.7350535,-99.2473056
+south dakota,meade,44.5263375,-102.6463435
+south dakota,mellette,43.561525,-100.7249944
+south dakota,miner,44.0129518,-97.6043451
+south dakota,minnehaha,43.6680284,-96.7837626
+south dakota,moody,43.998215,-96.6671385
+south dakota,oglala lakota,43.2977026,-102.5637516
+south dakota,pennington,43.9955746,-102.7854668
+south dakota,perkins,45.5288022,-102.5053545
+south dakota,potter,45.0764805,-99.9607952
+south dakota,roberts,45.6000291,-97.0000238
+south dakota,sanborn,44.0089691,-98.0834349
+south dakota,spink,44.9438314,-98.3730958
+south dakota,stanley,44.4189684,-100.802728
+south dakota,sully,44.7173891,-100.0690149
+south dakota,todd,43.184924,-100.7438395
+south dakota,tripp,43.3235158,-99.8941094
+south dakota,turner,43.3256378,-97.136978
+south dakota,union,42.8717888,-96.6772947
+south dakota,walworth,45.4043853,-100.0072972
+south dakota,washabaugh,43.569991,-101.660339
+south dakota,washington,30.528989,-98.357235
+south dakota,yankton,42.8712938,-97.3967011
+south dakota,ziebach,44.9241074,-101.7110445
+wisconsin,adams,43.9462246,-89.7836456
+wisconsin,ashland,46.5927574,-90.883917
+wisconsin,barron,45.423557,-91.8454099
+wisconsin,bayfield,46.4710241,-91.1983175
+wisconsin,brown,44.4383498,-88.0167093
+wisconsin,buffalo,44.4073658,-91.7547858
+wisconsin,burnett,45.8652437,-92.2673161
+wisconsin,calumet,44.0751086,-88.2144321
+wisconsin,chippewa,45.0740585,-91.2947258
+wisconsin,clark,44.7188146,-90.6214928
+wisconsin,columbia,43.4641929,-89.3478429
+wisconsin,crawford,43.2271639,-90.8938474
+wisconsin,dane,43.0709273,-89.4322174
+wisconsin,dodge,43.413614,-88.7177834
+wisconsin,door,44.7615925,-87.5329747
+wisconsin,douglas,46.4396038,-91.9059158
+wisconsin,dunn,44.9333564,-91.8994409
+wisconsin,eau claire,44.811349,-91.4984941
+wisconsin,florence,45.8379973,-88.3902943
+wisconsin,fond du lac,43.7748763,-88.4458033
+wisconsin,forest,45.625108,-88.806738
+wisconsin,grant,42.8855277,-90.6991696
+wisconsin,green lake,43.7971612,-89.0402508
+wisconsin,green,42.6791433,-89.6076428
+wisconsin,iowa,42.9732457,-90.1334393
+wisconsin,iron,46.2254778,-90.2125304
+wisconsin,jackson,44.3016847,-90.8085198
+wisconsin,jefferson,43.0224668,-88.7673031
+wisconsin,juneau,43.9532381,-90.1218405
+wisconsin,kenosha,42.5846773,-87.8212263
+wisconsin,kewaunee,44.521282,-87.6301086
+wisconsin,la crosse,43.8014053,-91.2395429
+wisconsin,lafayette,42.6632391,-90.1317754
+wisconsin,langlade,45.2728122,-89.067113
+wisconsin,lincoln,45.3265631,-89.7326216
+wisconsin,manitowoc,44.0886059,-87.6575841
+wisconsin,marathon,44.8914036,-89.7748098
+wisconsin,marinette,45.0999594,-87.6307265
+wisconsin,marquette,43.8122244,-89.3926785
+wisconsin,milwaukee,43.0349931,-87.922497
+wisconsin,monroe,43.9416755,-90.6397264
+wisconsin,oconto,44.9988053,-88.2480072
+wisconsin,oneida,44.2726847,-88.4058311
+wisconsin,outagamie,44.41603,-88.4602005
+wisconsin,ozaukee,43.3569041,-87.9579748
+wisconsin,pepin,44.6351571,-92.0101928
+wisconsin,pierce,44.7186568,-92.3786114
+wisconsin,polk,45.4318573,-92.407472
+wisconsin,portage,44.4604931,-89.5108818
+wisconsin,price,45.676627,-90.368792
+wisconsin,racine,42.7260523,-87.7825242
+wisconsin,richland,43.3662526,-90.4557081
+wisconsin,rock,42.6654418,-89.081772
+wisconsin,rusk,45.4589749,-91.1240967
+wisconsin,sauk,43.4401728,-89.9653841
+wisconsin,sawyer,45.8731634,-91.1468287
+wisconsin,shawano,44.7817214,-88.7118868
+wisconsin,sheboygan,43.7508284,-87.71453
+wisconsin,st croix,45.0312388,-92.4679305
+wisconsin,taylor,45.2057106,-90.4915874
+wisconsin,trempealeau,44.2782406,-91.3828806
+wisconsin,vernon,43.5811229,-90.8231247
+wisconsin,vilas,46.0382686,-89.4734462
+wisconsin,walworth,42.531099,-88.5995382
+wisconsin,washburn,45.8926321,-91.7971652
+wisconsin,washington,43.3734986,-88.2370888
+wisconsin,waukesha,43.0116784,-88.2314813
+wisconsin,waupaca,44.4927889,-88.9650419
+wisconsin,waushara,44.1103406,-89.2347222
+wisconsin,winnebago,44.0697014,-88.6516527
+wisconsin,wood,44.4517617,-90.0199618
