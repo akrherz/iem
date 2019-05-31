@@ -1,15 +1,15 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/station.php";
 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
 $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
-$month = isset($_GET['month']) ? $_GET['month']: date("m");
-$year = isset($_GET['year']) ? $_GET['year']: date("Y");
+$month = isset($_GET['month']) ? intval($_GET['month']): date("m");
+$year = isset($_GET['year']) ? intval($_GET['year']): date("Y");
 $ts = mktime(0,0,0, $month, 1, $year);
 
 $today = time();
 
-include("../../../include/station.php");
 $st = new StationData($station, $network);
 $cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
 $st->load_station( $st->table[$station]['climate_site'], $cnetwork );
