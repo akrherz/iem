@@ -73,7 +73,7 @@
 #   iem-director0 <-> iem-director1
 192.168.0.254    iem-gateway   iem-gateway.local
 
-#   VI13(63) metvm4
+#   VI_1(51) metvm4
 192.168.1.251    iemdb-hads iemdb-hads.local iemdb-mos iemdb-mos.local
 #   VI_2(52) metvm5 <-> metvm9
 192.168.1.249    iem-memcached
@@ -93,5 +93,7 @@
 192.168.1.241    iem-ldm iem-ldm.local iem-web-services.local
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
-#   VI12(62) metvm7 <-> metvm0
+# VI12(62) metvm7 <-> metvm0
 192.168.1.239    iem-memcached3
+# VI13(63) metvm4
+192.168.1.238    iem-rabbitmq.local

@@ -5,8 +5,6 @@ S=/opt/iem/scripts
 
 # Datateam additions
 0 6 * * * sh /opt/datateam/scripts/RUN_6AM.sh
-# nwnwebsite script
-15 0,4,9,12,17,20 * * * cd /opt/nwnwebsite/scripts; php -q driveFX.php
 
 #
 0 18,19 * * * cd $S; sh RUN_0Z.sh
