@@ -276,7 +276,7 @@ def gen_metars(obs, filename, convids=False):
                   "") % (metarid, ob['valid'].strftime("%d%H%MZ"),
                          windtxt, temptxt, t_temptxt, "="))
 
-    fp.write("\015\015\012")
+    fp.write("\015\015\012\003")
     fp.close()
 
 
