@@ -73,7 +73,7 @@ def plotter(fdict):
 
     title = ("Weather Prediction Center %s Quantitative "
              "Precipitation Forecast") % (PDICT[period])
-    subtitle = ("%sWPC Forcast %s UTC to %s UTC"
+    subtitle = ("%sWPC Forecast %s UTC to %s UTC"
                 ) % (("US Drought Monitor Overlaid, "
                       if ctx['opt'] == 'both' else ''),
                      valid.strftime("%d %b %Y %H"),
