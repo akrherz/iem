@@ -5,8 +5,10 @@
    $jdata = file_get_contents("http://iem.local/api/1/currents.json?station=$station");
    $jobj = json_decode($jdata, $assoc=TRUE);
    $ob = $jobj["data"][0];
- header('Content-type: text/xml');
 
+	 if (isset($_REQUEST['test'])){
+
+	 header('Content-type: text/xml');
  $tstamp = date("M j Y, j:i a T", strtotime($ob["local_valid"]));
  $tstamp2 = date("D, d M Y h:i:00 P", strtotime($ob["local_valid"]));
  $tmpc = f2c($ob["tmpf"]);
@@ -67,4 +69,17 @@ $pres = sprintf("%.2f", $ob['alti'] * 33.86);
 	<privacy_policy_url>http://weather.gov/notice.html</privacy_policy_url>
 </current_observation>
 EOM;
+die();
+}
+
+header('Content-type: text/plain');
+ echo intval($ob["tmpf"]) ."\n";
+ echo intval($ob["dwpf"]) ."\n";
+ echo intval($ob["sknt"]) ."\n";
+ echo drct2txt($ob["drct"]) ."\n";
+ echo round(max($ob["gust"], $ob["sknt"]),0) ."\n";
+ echo $ob["pday"] ."\n";
+ echo $ob["relh"] ."\n";
+ echo $ob["alti"] ."\n";
+ echo intval($ob["feel"]) ."\n";
 ?>
