@@ -95,5 +95,5 @@
 192.168.0.240    iem-openfire openfire-bosh
 # VI12(62) metvm7 <-> metvm0
 192.168.1.239    iem-memcached3
-# VI13(63) metvm4
+# VI_13(63) metvm4
 192.168.1.238    iem-rabbitmq.local

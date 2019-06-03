@@ -107,6 +107,8 @@ def plotter(fdict):
         clip_on=(ctx['csector'] == 'iailin'))
     if ctx['opt'] == 'both':
         mp.draw_usdm(valid=valid, filled=False, hatched=True)
+    if ctx['csector'] == 'iailin':
+        mp.drawcounties()
 
     return mp.fig
 

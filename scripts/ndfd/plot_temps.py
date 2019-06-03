@@ -41,6 +41,7 @@ def plot_gdd(ts):
         nc.variables['lon'][:], nc.variables['lat'][:], data,
         np.arange(-80, 81, 20), cmap=plt.get_cmap('RdBu_r'),
         units=r"$^\circ$F", spacing='proportional')
+    mp.drawcounties()
     pqstr = (
         "data c %s summary/cb_ndfd_7day_gdd.png summary/cb_ndfd_7day_gdd.png "
         "png"
@@ -74,6 +75,7 @@ def plot_maxmin(ts, field):
         nc.variables['lon'][:], nc.variables['lat'][:], data,
         np.arange(10, 121, 10), cmap=plt.get_cmap('jet'),
         units='Degrees F')
+    mp.drawcounties()
     pqstr = (
         "data c %s summary/cb_ndfd_7day_%s.png summary/cb_ndfd_7day_%s.png "
         "png"

@@ -221,7 +221,7 @@ def plotter(fdict):
         mp.plot_values(
             df['lon'].values, df['lat'].values,
             df[varname].values, fmt=fmt, labelbuffer=5)
-    if len(sector) == 2:
+    if len(sector) == 2 or sector == 'iailin':
         mp.drawcounties()
     if ctx['usdm'] == 'yes':
         mp.draw_usdm(date2, filled=False, hatched=True)
