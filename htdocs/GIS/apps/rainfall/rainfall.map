@@ -36,7 +36,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS Service"
    "wfs_title" "IEM WMS Service"
-   "wfs_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;"
+   "wfs_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/apps/rainfall/rainfall.map&amp;"
    "wfs_srs" "EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100 EPSG:4326"
    "wfs_abstract" "Ba Ba Ba"
    "wfs_fees" "None"

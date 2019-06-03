@@ -5,10 +5,8 @@ NAME "iemrainfall"
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
@@ -34,7 +32,7 @@ WEB
   LOG "/home/httpd/html/tmp/w0.log"
   METADATA
    "wfs_title" "IEM WFS Service"
-   "wfs_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;"
+   "wfs_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/opt/iem/htdocs/GIS/apps/rainfall/rainfall.map&amp;"
    "wfs_srs" "EPSG:26915"
    "wfs_abstract" "Ba Ba Ba"
    "wfs_fees" "None"

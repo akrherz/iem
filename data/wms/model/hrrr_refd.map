@@ -22,7 +22,6 @@ WEB
   MAXSCALE 465000000
   IMAGEPATH "/tmp/"
   IMAGEURL "/tmp/"
-  #LOG "/mesonet/www/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM HRRR Reflectivity WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/model/hrrr_refd.map&SERVICE=WMS&"

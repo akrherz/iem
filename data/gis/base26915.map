@@ -32,7 +32,6 @@ WEB
   MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  #LOG "/mesonet/www/html/tmp/sw.log"
 END
 
 INCLUDE "inc_iem.map"

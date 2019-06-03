@@ -35,7 +35,7 @@ WEB
   LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/html/GIS/apps/rainfall/wms.map&amp;"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/apps/rainfall/wms.map&amp;"
    "wms_srs" "EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100 EPSG:4326"
    "wms_abstract" "Ba Ba Ba"
 #   "wms_fees" "None"

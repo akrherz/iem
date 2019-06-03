@@ -6,11 +6,9 @@ NAME "nexrad_base_reflect"
 STATUS ON
 SIZE 800 600
 #SYMBOLSET symbols/symbol.sym
-#FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
 EXTENT -126 24 -66 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-#SYMBOLSET "/mesonet/www/html/GIS/data/symbols/wind.sym"
 IMAGECOLOR -1 -1 -1
 #CONFIG "ON_MISSING_DATA" "IGNORE"
 

@@ -22,7 +22,6 @@ WEB
   MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  #LOG "/mesonet/www/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM GOES IR WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/west_13.3.map&SERVICE=WMS"
