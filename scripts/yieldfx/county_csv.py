@@ -30,9 +30,10 @@ def process(df, ncfn, south, west):
         nc2019_tmin = nc2019.variables['tmin'][:, j, i]
         nc2019_srad = nc2019.variables['srad'][:, j, i]
 
-        fp = open('/mesonet/share/pickup/yieldfx/county/%s_%s.csv' % (
+        fp = open(
+            '/mesonet/share/pickup/yieldfx/county/%s_%s_%.4f_%.4f.csv' % (
             row['State'].replace(" ", "_"),
-            row['County'].replace(" ", "_")), 'w')
+            row['County'].replace(" ", "_"), 0 - row['long'], row['lat']), 'w')
         fp.write(
             "year,yday,prcp (mm/day),srad (W/m^2),tmax (deg c),tmin (deg c)\n")
         base = datetime.date(1980, 1, 1)

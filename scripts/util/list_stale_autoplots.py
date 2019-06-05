@@ -8,6 +8,7 @@ from pyiem.util import get_dbconn
 QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
     17,  # is referenced by canonical page
+    28,  # too complex and generally hated by the public
     31,  # temp change over x-days, too pidgeon holed
     38,  # radiation plot that is complex
     68,  # nws unique VTEC types per year
