@@ -18,7 +18,7 @@
  $publicjsonuri = sprintf("https://mesonet.agron.iastate.edu/json/ibw_tags.py?wfo=%s&amp;year=%s",
  		$wfo, $year);
  
- $t->title = "NWS $wfo issued SVR+TOR Warning Tags for $year";
+ $t->title = "NWS $wfo issued Impact Based Warning Tags for $year";
  $t->headextra = '
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
@@ -51,7 +51,34 @@ Ext.onReady(function(){
     }, false, {
         single: true
     }); // run once
- 		
+
+	var btn3 = Ext.get("create-grid3");
+    btn3.on("click", function(){
+        btn3.dom.disabled = true;
+ 
+        // create the grid
+        var grid = new Ext.ux.grid.TableGrid("ffw", {
+            stripeRows: true // stripe alternate rows
+        });
+        grid.render();
+    }, false, {
+        single: true
+    }); // run once
+
+	var btn4 = Ext.get("create-grid4");
+    btn4.on("click", function(){
+        btn4.dom.disabled = true;
+ 
+        // create the grid
+        var grid = new Ext.ux.grid.TableGrid("smw", {
+            stripeRows: true // stripe alternate rows
+        });
+        grid.render();
+    }, false, {
+        single: true
+    }); // run once
+
+
 });
 </script>
 ';
@@ -61,7 +88,10 @@ function do_col1($row){
 	if ($row["status"] == 'NEW'){
 		return sprintf("<a href=\"%s\">%s</a>", $row['href'], $row["eventid"]);
 	}
-	return sprintf("<a href=\"%s\">%s</a>", $row['href'], 'SVS');
+	$ptype = 'SVS';
+	if ($row["phenomena"] == 'MA') $ptype = "MWS";
+	elseif ($row["phenomena"] == 'FF') $ptype = "FFS";
+	return sprintf("<a href=\"%s\">%s</a>", $row['href'], $ptype);
 	
 }
 function do_col2($row){
@@ -83,6 +113,16 @@ function do_row($row){
  			$row["locations"], $row["windtag"], $row["hailtag"],
  			$row["tornadotag"], $row["tornadodamagetag"], $row["tml_sknt"]);
 }
+
+function do_row_ffw($row){
+	return sprintf("<tr><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
+			 ."<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>",
+			 do_col1($row), do_col2($row),
+ 			do_col3($row),
+			 $row["locations"], $row["floodtag_flashflood"],
+			 $row["floodtag_damage"],
+ 			$row["floodtag_heavyrain"], $row["floodtag_dam"], $row["floodtag_leeve"]);
+}
  
  $svrtable = <<<EOF
  <table id='svr' class="table table-condensed table-striped table-bordered">
@@ -93,6 +133,16 @@ function do_row($row){
  <tbody>
 EOF;
  $tortable = str_replace('svr', 'tor', $svrtable);
+ $smwtable = str_replace('svr', 'smw', $svrtable);
+ $ffwtable = <<<EOF
+ <table id='ffw' class="table table-condensed table-striped table-bordered">
+ <thead><tr><th>Eventid</th><th>Start (UTC)</th><th>End</th>
+ <th>Counties/Parishes</th>
+ <th>Flash Flood Tag</th><th>Damage Tag</th>
+ <th>Heavy Rain Tag</th><th>Dam Tag</th>
+ <th>Leeve Tag</th></tr></thead>
+ <tbody>
+EOF;
 
  $data = file_get_contents($jsonuri);
  $json = json_decode($data, $assoc=TRUE);
@@ -100,14 +150,20 @@ EOF;
  while(list($key, $val)=each($json['results'])){
  	if ($val["phenomena"] == 'SV'){
  		$svrtable .= do_row($val);
- 	} else {
- 		$tortable .= do_row($val);
+	} elseif ($val["phenomena"] == 'TO'){
+		$tortable .= do_row($val);
+	} elseif ($val["phenomena"] == 'MA'){
+		$smwtable .= do_row($val);
+	} else {
+ 		$ffwtable .= do_row_ffw($val);
  	}
  	
  }
 
 $svrtable .= "</tbody></table>";
 $tortable .= "</tbody></table>";
+$ffwtable .= "</tbody></table>";
+$smwtable .= "</tbody></table>";
 
 
 $yselect = yearSelect2(2002, $year, 'year');
@@ -157,7 +213,15 @@ $gentime = $json["gentime"];
  <h3>Severe Thunderstorm Warnings</h3>
 <button id="create-grid1" class="btn btn-info" type="button">Make Table Sortable</button>
  		{$svrtable}
- 
+
+<h3>Flash Flood Warnings</h3>
+<button id="create-grid3" class="btn btn-info" type="button">Make Table Sortable</button>
+		{$ffwtable}
+
+<h3>Marine Warnings</h3>
+<button id="create-grid4" class="btn btn-info" type="button">Make Table Sortable</button>
+		{$smwtable}
+
  
 EOF;
  $t->render('single.phtml');

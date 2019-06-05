@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (31, now());
+INSERT into iem_schema_manager_version values (32, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -1187,7 +1187,12 @@ create table sbw(
   tml_direction smallint,
   tml_sknt smallint,
   updated timestamptz,
-  is_emergency boolean
+  is_emergency boolean,
+  floodtag_heavyrain varchar(64),
+  floodtag_flashflood varchar(64),
+  floodtag_damage varchar(64),
+  floodtag_leeve varchar(64),
+  floodtag_dam varchar(64)
 ) WITH OIDS;
 select addgeometrycolumn('','sbw','geom',4326,'MULTIPOLYGON',2);
 select addGeometryColumn('sbw', 'tml_geom', 4326, 'POINT', 2);

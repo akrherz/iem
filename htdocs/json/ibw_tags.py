@@ -25,9 +25,11 @@ def run(wfo, year):
      expire at time zone 'UTC' as utc_expire,
      polygon_begin at time zone 'UTC' as utc_polygon_begin,
      polygon_end at time zone 'UTC' as utc_polygon_end,
-     status, windtag, hailtag, tornadotag, tml_sknt, tornadodamagetag, wfo
+     status, windtag, hailtag, tornadotag, tml_sknt, tornadodamagetag, wfo,
+     floodtag_flashflood, floodtag_damage, floodtag_heavyrain,
+     floodtag_dam, floodtag_leeve
      from sbw_""" + str(year) + """ WHERE wfo = %s
-     and phenomena in ('SV', 'TO')
+     and phenomena in ('SV', 'TO', 'FF', 'MA')
      and significance = 'W' and status != 'EXP' and status != 'CAN'
  ),
 
@@ -35,13 +37,15 @@ def run(wfo, year):
      select string_agg( u.name || ' ['||u.state||']', ', ') as locations,
      eventid, phenomena from warnings_""" + str(year) + """ w JOIN ugcs u
     ON (u.gid = w.gid) WHERE w.wfo = %s and
-    significance = 'W' and phenomena in ('SV', 'TO')
+    significance = 'W' and phenomena in ('SV', 'TO', 'FF', 'MA')
     and eventid is not null GROUP by eventid, phenomena
  )
 
  SELECT c.eventid, c.locations, s.utc_issue, s.utc_expire,
  s.utc_polygon_begin, s.utc_polygon_end, s.status, s.windtag, s.hailtag,
- s.tornadotag, s.tml_sknt, s.tornadodamagetag, s.wfo, s.phenomena
+ s.tornadotag, s.tml_sknt, s.tornadodamagetag, s.wfo, s.phenomena,
+ s.floodtag_flashflood, s.floodtag_damage, s.floodtag_heavyrain,
+ s.floodtag_dam, s.floodtag_leeve
  from countybased c, stormbased s WHERE c.eventid = s.eventid and
  c.phenomena = s.phenomena
  ORDER by eventid ASC, utc_polygon_begin ASC
@@ -59,7 +63,13 @@ def run(wfo, year):
                     status=row[6], windtag=row[7], hailtag=row[8],
                     tornadotag=row[9], tml_sknt=row[10],
                     tornadodamagetag=row[11], href=href,
-                    wfo=row[12], phenomena=row[13])
+                    wfo=row[12], phenomena=row[13],
+                    floodtag_flashflood=row[14],
+                    floodtag_damage=row[15],
+                    floodtag_heavyrain=row[16],
+                    floodtag_dam=row[17],
+                    floodtag_leeve=row[18]
+                    )
         res['results'].append(data)
 
     return json.dumps(res)
