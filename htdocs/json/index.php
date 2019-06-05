@@ -187,8 +187,9 @@
   $services[] = Array(
   		"title" => "NWS Impact Based Warnings Tags",
   		"url" => "/json/ibw_tags.py?year={year}&amp;wfo={wfo}",
-  		"desc" => "Produces a listing of Impact Warning Tags used in Severe
-  		Thunderstorm and Tornado warnings by NWS Forecast Office and Year.",
+  		"desc" => "Produces a listing of Impact Warning Tags used in Severe ".
+		  "Thunderstorm, Tornado, Marine, and Flash Flood Warnings ". 
+		  "warnings by NWS Forecast Office and Year.",
   		"vars" => Array(
   				"wfo" => "3 character NWS Office",
   				"year" => "Year of interest"

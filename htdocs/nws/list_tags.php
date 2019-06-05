@@ -176,9 +176,10 @@ $gentime = $json["gentime"];
  <li>List Warning Tags Issued</li>
  </ol>
  
- <p>This application lists out Severe Thunderstorm and Tornado Warnings
+ <p>This application lists out Flash Flood, Marine, Severe Thunderstorm,
+ and Tornado Warnings
  issued by a National Weather Service office for a given year.  The listing
- includes metadata tags included in the initial warning or SVS update. 
+ includes metadata tags included in the initial warning or followup statements. 
  <strong>IMPORTANT: Not all offices include these tags in their warnings!</strong>
  For convience, this application lists out warnings back to 2002 eventhough
  these tags did not start until recent years. You should be able to copy/paste
