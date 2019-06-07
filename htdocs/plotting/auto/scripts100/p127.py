@@ -50,7 +50,8 @@ def plotter(fdict):
                           else 'ALL UTILIZATION PRACTICES')
 
     df = read_sql("""
-        select year, week_ending, num_value from nass_quickstats
+        select year, week_ending, num_value,
+        extract(doy from week_ending)::int as day_of_year from nass_quickstats
         where commodity_desc = %s and statisticcat_desc = 'PROGRESS'
         and unit_desc = %s and state_alpha = %s and
         util_practice_desc = %s and num_value is not null
