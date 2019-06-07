@@ -12,10 +12,14 @@ PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"))
 
 
-def send_content_type(val, size=0):
+def send_content_type(val, size=0, totalsize=0):
     """Do as I say"""
+    ssw("Accept-Ranges: bytes\n")
     if size > 0:
         ssw("Content-Length: %.0f\n" % (size, ))
+    if totalsize > 0:
+        ssw("Content-Range: %s/%s\n" % (
+            os.environ.get("HTTP_RANGE", "").replace("=", " "), totalsize))
     if val == 'text':
         ssw("Content-type: text/plain\n\n")
     elif val in ['png', 'gif', 'jpg']:
@@ -42,11 +46,12 @@ def dblog(yymmdd):
         sys.stderr.write(str(exp))
 
 
-def process(uri):
+def process(env):
     """Process this request
 
     This should look something like "/onsite/features/2016/11/161125.png"
     """
+    uri = env.get('REQUEST_URI')
     if uri is None:
         send_content_type("text")
         ssw("ERROR!")
@@ -61,9 +66,14 @@ def process(uri):
     fn = ("/mesonet/share/features/%(yyyy)s/%(mm)s/"
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
     if os.path.isfile(fn):
+        rng = env.get("HTTP_RANGE", "bytes=0-N")
+        tokens = rng.replace("bytes=", "").split("-", 1)
+        stripe = slice(
+            int(tokens[0]),
+            (int(tokens[-1]) + 1) if tokens[-1] != 'N' else None)
         resdata = open(fn, 'rb').read()
-        send_content_type(data['suffix'], len(resdata))
-        ssw(resdata)
+        send_content_type(data['suffix'], len(resdata[stripe]), len(resdata))
+        ssw(resdata[stripe])
         dblog(data['yymmdd'])
     else:
         send_content_type('png')
@@ -81,7 +91,7 @@ def process(uri):
 
 def main():
     """Do Something"""
-    process(os.environ.get('REQUEST_URI'))
+    process(os.environ)
 
 
 if __name__ == '__main__':
