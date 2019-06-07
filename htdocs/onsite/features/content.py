@@ -12,8 +12,10 @@ PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"))
 
 
-def send_content_type(val):
+def send_content_type(val, size=0):
     """Do as I say"""
+    if size > 0:
+        ssw("Content-Length: %.0f\n" % (size, ))
     if val == 'text':
         ssw("Content-type: text/plain\n\n")
     elif val in ['png', 'gif', 'jpg']:
@@ -59,8 +61,9 @@ def process(uri):
     fn = ("/mesonet/share/features/%(yyyy)s/%(mm)s/"
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
     if os.path.isfile(fn):
-        send_content_type(data['suffix'])
-        ssw(open(fn, 'rb').read())
+        resdata = open(fn, 'rb').read()
+        send_content_type(data['suffix'], len(resdata))
+        ssw(resdata)
         dblog(data['yymmdd'])
     else:
         send_content_type('png')
