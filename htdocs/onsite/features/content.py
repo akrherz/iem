@@ -12,15 +12,21 @@ PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"))
 
 
-def send_content_type(val, size=0, totalsize=0):
+def send_content_type(val, totalsize=0, stripe=None):
     """Do as I say"""
-    # ssw("Accept-Ranges: bytes\n")
-    if size > 0:
-        ssw("Content-Length: %.0f\n" % (size, ))
-    #if (totalsize > 0 and os.environ.get("HTTP_RANGE") and
-    #        os.environ.get("HTTP_RANGE") != "bytes=0-"):
-    #    ssw("Content-Range: %s/%s\n" % (
-    #        os.environ.get("HTTP_RANGE", "").replace("=", " "), totalsize))
+    ssw("Accept-Ranges: bytes\n")
+    if totalsize != (stripe.stop - stripe.start):
+        ssw("Status: 206 Partial Content\n")
+    if stripe:
+        ssw("Content-Length: %.0f\n" % (stripe.stop - stripe.start, ))
+    if os.environ.get("HTTP_RANGE") and stripe is not None:
+        secondval = (
+            ""
+            if os.environ.get("HTTP_RANGE") == 'bytes=0-'
+            else (stripe.stop - 1)
+        )
+        ssw("Content-Range: bytes %s-%s/%s\n" % (
+            stripe.start, secondval, totalsize))
     if val == 'text':
         ssw("Content-type: text/plain\n\n")
     elif val in ['png', 'gif', 'jpg']:
@@ -67,15 +73,14 @@ def process(env):
     fn = ("/mesonet/share/features/%(yyyy)s/%(mm)s/"
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
     if os.path.isfile(fn):
-        #rng = env.get("HTTP_RANGE", "bytes=0-")
-        #tokens = rng.replace("bytes=", "").split("-", 1)
-        #stripe = slice(
-        #    int(tokens[0]),
-        #    (int(tokens[-1]) + 1) if tokens[-1] != '' else None)
-        #sys.stderr.write(str(stripe)+"\n")
-        stripe = slice(0, None)
+        rng = env.get("HTTP_RANGE", "bytes=0-")
+        tokens = rng.replace("bytes=", "").split("-", 1)
         resdata = open(fn, 'rb').read()
-        send_content_type(data['suffix'], len(resdata[stripe]), len(resdata))
+        totalsize = len(resdata)
+        stripe = slice(
+            int(tokens[0]),
+            totalsize if tokens[-1] == '' else (int(tokens[-1]) + 1))
+        send_content_type(data['suffix'], len(resdata), stripe)
         ssw(resdata[stripe])
         dblog(data['yymmdd'])
     else:
