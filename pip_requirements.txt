@@ -1,5 +1,6 @@
 setuptools-markdown
 --extra-index-url https://pypi.anaconda.org/pypi/simple
+inotify
 rrdtool
 PyRSS2Gen
 odfpy
