@@ -382,7 +382,9 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     filename = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(filename):
         return
-    lines = open(filename).readlines()
+    # Sometimes this file has corrupted characters?
+    fdata = open(filename, 'rb').read().decode('ascii', 'ignore')
+    lines = fdata.split("\n")
     if len(lines) < 5:
         return
 
