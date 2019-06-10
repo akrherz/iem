@@ -3,6 +3,7 @@ import os
 from io import StringIO
 import datetime
 import traceback
+import subprocess
 
 import inotify.adapters
 import pytz
@@ -168,6 +169,8 @@ def process(path, fn):
     if tabletype == 'DailySI':
         # Rework the valid column into the appropriate date
         df['valid'] = df['valid'].dt.date - datetime.timedelta(days=1)
+        df['rain_mm_tot'] = df['rain_in_tot'] * 25.4
+        df = df.drop('rain_in_tot', axis=1)
     if tabletype == 'HrlySI':
         df['slrmj_tot'] = df['slrkj_tot'] / 1000.
         df = df.drop('slrkj_tot', axis=1)
@@ -235,8 +238,9 @@ def main():
                     fp.write(str(exp) + "\n")
                     traceback.print_exc(file=fp)
             finally:
-                os.rename(
-                    "%s/%s" % (watch_path, fn), "%s/%s" % (STOREPATH, fn))
+                subprocess.call(
+                    "mv %s/%s %s/%s" % (watch_path, fn, STOREPATH, fn),
+                    shell=True)
     finally:
         inotif.remove_watch(DIRPATH)
 
