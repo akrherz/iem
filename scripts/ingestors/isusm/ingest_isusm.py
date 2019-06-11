@@ -1,5 +1,4 @@
 """ISUSM ingest."""
-import os
 from io import StringIO
 import datetime
 import traceback

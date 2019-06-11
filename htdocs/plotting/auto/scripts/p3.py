@@ -212,7 +212,7 @@ def get_context(fdict):
       where station = %s and month in %s GROUP by myyear)
 
     SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
-    a.dtemp as "delta_temp" from agg a JOIN agg2 b
+    a.dtemp as "delta-temp" from agg a JOIN agg2 b
     on (a.myyear = b.myyear) ORDER by b.myyear ASC
     """, pgconn, params=(nt.sts[station]['ncdc81'], station, tuple(months),
                          threshold, threshold,
@@ -305,5 +305,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IA8706', network='IACLIMATE',
-                 type='range-avghi-avglo', month=1))
+    plotter(dict(station='TN6402', network='TNCLIMATE',
+                 type='delta-temp', month="5", threshold=-99))
