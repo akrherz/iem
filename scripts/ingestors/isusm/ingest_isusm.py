@@ -170,13 +170,19 @@ def process(path, fn):
         df['valid'] = df['valid'].dt.date - datetime.timedelta(days=1)
         df['rain_mm_tot'] = df['rain_in_tot'] * 25.4
         df = df.drop('rain_in_tot', axis=1)
-    if tabletype == 'HrlySI':
-        df['slrmj_tot'] = df['slrkj_tot'] / 1000.
-        df = df.drop('slrkj_tot', axis=1)
+        df['slrmj_tot'] = df['slrkw_avg'] * 86400. / 1000.
+        df = df.drop('slrkw_avg', axis=1)
+    elif tabletype == 'HrlySI':
+        df['slrmj_tot'] = df['slrkw_avg'] * 3600. / 1000.
+        df = df.drop('slrkw_avg', axis=1)
         df['rain_mm_tot'] = df['rain_in_tot'] * 25.4
         df = df.drop('rain_in_tot', axis=1)
         df['ws_mps_s_wvt'] = df['ws_mph_s_wvt'] * 0.44704
         df = df.drop('ws_mph_s_wvt', axis=1)
+    elif tabletype == 'MinSI':
+        # Rework solar rad
+        df['slrkj_tot'] = df['slrkw_avg'] * 60.
+        df = df.drop('slrkw_avg', axis=1)
 
     df = df.drop('record', axis=1)
     # Create _qc and _f columns
