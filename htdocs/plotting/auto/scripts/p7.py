@@ -71,7 +71,7 @@ def plotter(fdict):
 
     gdds = np.array(gdds)
     sts = datetime.datetime(year, 4, 1)
-    ets = datetime.datetime(year, 6, 1)
+    ets = datetime.datetime(year, 6, 10)
     now = sts
     sz = len(gdds)
 

@@ -49,9 +49,6 @@ def plotter(fdict):
     idx1 = iemre.daily_offset(date)
     ncfn = iemre.get_daily_mrms_ncname(date.year)
     ncvar = 'p01d'
-    nc = util.ncopen(ncfn)
-    if nc is None:
-        raise ValueError("No data for that year, sorry.")
 
     # Get the state weight
     df = gpd.GeoDataFrame.from_postgis("""
@@ -59,27 +56,29 @@ def plotter(fdict):
     """, util.get_dbconn('postgis'), params=(sector, ), index_col=None,
                                        geom_col='the_geom')
     czs = CachingZonalStats(iemre.MRMS_AFFINE)
-    czs.gen_stats(np.zeros((nc.variables['lat'].size,
-                            nc.variables['lon'].size)), df['the_geom'])
-    jslice = None
-    islice = None
-    for nav in czs.gridnav:
-        # careful here as y is flipped in this context
-        jslice = slice(nc.variables['lat'].size - (nav.y0 + nav.ysz),
-                       nc.variables['lat'].size - nav.y0)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
+    with util.ncopen(ncfn) as nc:
+        czs.gen_stats(np.zeros((nc.variables['lat'].size,
+                                nc.variables['lon'].size)), df['the_geom'])
+        jslice = None
+        islice = None
+        for nav in czs.gridnav:
+            # careful here as y is flipped in this context
+            jslice = slice(
+                nc.variables['lat'].size - (nav.y0 + nav.ysz),
+                nc.variables['lat'].size - nav.y0)
+            islice = slice(nav.x0, nav.x0 + nav.xsz)
 
-    grid = np.zeros((jslice.stop - jslice.start,
-                     islice.stop - islice.start))
-    total = np.zeros((jslice.stop - jslice.start,
-                      islice.stop - islice.start))
-    for i, idx in enumerate(range(idx1, idx1-90, -1)):
-        total += nc.variables[ncvar][idx, jslice, islice]
-        grid = np.where(np.logical_and(grid == 0,
-                                       total > threshold_mm), i, grid)
-    lon = nc.variables['lon'][islice]
-    lat = nc.variables['lat'][jslice]
-    nc.close()
+        grid = np.zeros((jslice.stop - jslice.start,
+                         islice.stop - islice.start))
+        total = np.zeros((jslice.stop - jslice.start,
+                          islice.stop - islice.start))
+        for i, idx in enumerate(range(idx1, idx1-90, -1)):
+            total += nc.variables[ncvar][idx, jslice, islice]
+            grid = np.where(
+                np.logical_and(grid == 0, total > threshold_mm),
+                i, grid)
+        lon = nc.variables['lon'][islice]
+        lat = nc.variables['lat'][jslice]
 
     mp = MapPlot(sector='state', state=sector, titlefontsize=14,
                  subtitlefontsize=12,

@@ -123,35 +123,34 @@ def plotter(fdict):
     idx1 = iemre.daily_offset(edate) + 1
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
-    nc = util.ncopen(ncfn)
-    if state is not None:
-        x0, y0, x1, y1 = util.grid_bounds(nc.variables['lon'][:],
-                                          nc.variables['lat'][:],
-                                          state_bounds[state])
-    elif sector in SECTORS:
-        bnds = SECTORS[sector]
-        x0, y0, x1, y1 = util.grid_bounds(
-            nc.variables['lon'][:], nc.variables['lat'][:],
-            [bnds[0], bnds[2], bnds[1], bnds[3]])
-    lats = nc.variables['lat'][y0:y1]
-    lons = nc.variables['lon'][x0:x1]
-    if (idx1 - idx0) < 32:
-        p01d = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
-                               0),
+    with util.ncopen(ncfn) as nc:
+        if state is not None:
+            x0, y0, x1, y1 = util.grid_bounds(
+                nc.variables['lon'][:], nc.variables['lat'][:],
+                state_bounds[state])
+        elif sector in SECTORS:
+            bnds = SECTORS[sector]
+            x0, y0, x1, y1 = util.grid_bounds(
+                nc.variables['lon'][:], nc.variables['lat'][:],
+                [bnds[0], bnds[2], bnds[1], bnds[3]])
+        lats = nc.variables['lat'][y0:y1]
+        lons = nc.variables['lon'][x0:x1]
+        if (idx1 - idx0) < 32:
+            p01d = distance(
+                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
+                'MM').value('IN')
+        else:
+            # Too much data can overwhelm this app, need to chunk it
+            for i in range(idx0, idx1, 10):
+                i2 = min([i+10, idx1])
+                if idx0 == i:
+                    p01d = distance(
+                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0),
                         'MM').value('IN')
-    else:
-        # Too much data can overwhelm this app, need to chunk it
-        for i in range(idx0, idx1, 10):
-            i2 = min([i+10, idx1])
-            if idx0 == i:
-                p01d = distance(np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1],
-                                       0),
-                                'MM').value('IN')
-            else:
-                p01d += distance(
-                    np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0),
-                    'MM').value('IN')
-    nc.close()
+                else:
+                    p01d += distance(
+                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0),
+                        'MM').value('IN')
     if np.ma.is_masked(np.max(p01d)):
         raise ValueError("Data Unavailable")
     units = 'inches'
@@ -159,16 +158,18 @@ def plotter(fdict):
     cmap.set_bad('white')
     if opt == 'dep':
         # Do departure work now
-        nc = util.ncopen(clncfn)
-        climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
-                                0), 'MM').value('IN')
+        with util.ncopen(clncfn) as nc:
+            climo = distance(
+                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
+                'MM').value('IN')
         p01d = p01d - climo
         [maxv] = np.percentile(np.abs(p01d), [99, ])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
     elif opt == 'per':
-        nc = util.ncopen(clncfn)
-        climo = distance(np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1],
-                                0), 'MM').value('IN')
+        with util.ncopen(clncfn) as nc:
+            climo = distance(
+                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
+                'MM').value('IN')
         p01d = p01d / climo * 100.
         cmap.set_under('white')
         cmap.set_over('black')

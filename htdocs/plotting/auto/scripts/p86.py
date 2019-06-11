@@ -74,57 +74,61 @@ def plotter(fdict):
     islice = slice(i0, i1)
 
     idx0 = iemre.daily_offset(date)
-    nc = ncopen(iemre.get_daily_ncname(date.year))
-    lats = nc.variables['lat'][jslice]
-    lons = nc.variables['lon'][islice]
-    cmap = ctx['cmap']
-    if varname in ['rsds', 'power_swdn']:
-        # Value is in W m**-2, we want MJ
-        multi = (86400. / 1000000.) if varname == 'rsds' else 1
-        data = nc.variables[varname][idx0, jslice, islice] * multi
-        units = 'MJ d-1'
-        clevs = np.arange(0, 37, 3.)
-        clevs[0] = 0.01
-        clevstride = 1
-    elif varname in ['wind_speed', ]:
-        data = speed(nc.variables[varname][idx0, jslice, islice],
-                     'MPS').value('MPH')
-        units = 'mph'
-        clevs = np.arange(0, 41, 2)
-        clevs[0] = 0.01
-        clevstride = 2
-    elif varname in ['p01d', 'p01d_12z', 'snow_12z', 'snowd_12z']:
-        # Value is in W m**-2, we want MJ
-        data = distance(nc.variables[varname][idx0, jslice, islice],
-                        'MM').value('IN')
-        units = 'inch'
-        clevs = np.arange(0, 0.25, 0.05)
-        clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
-        clevs = np.append(clevs, np.arange(3., 10.0, 1))
-        clevs[0] = 0.01
-        clevstride = 1
-        cmap = stretch_cmap(ctx['cmap'], clevs)
-    elif varname in ['high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
-                     'avg_dwpk']:
-        # Value is in W m**-2, we want MJ
-        data = temperature(nc.variables[varname][idx0, jslice, islice],
-                           'K').value('F')
-        units = 'F'
-        clevs = np.arange(-30, 120, 5)
-        clevstride = 2
-    elif varname in ['range_tmpk', 'range_tmpk_12z']:
-        vname1 = 'high_tmpk%s' % ('_12z'
-                                  if varname == 'range_tmpk_12z' else '', )
-        vname2 = 'low_tmpk%s' % ('_12z'
-                                 if varname == 'range_tmpk_12z' else '', )
-        d1 = nc.variables[vname1][idx0, jslice, islice]
-        d2 = nc.variables[vname2][idx0, jslice, islice]
-        data = temperature(d1, 'K').value('F') - temperature(d2,
-                                                             'K').value('F')
-        units = 'F'
-        clevs = np.arange(0, 61, 5)
-        clevstride = 2
-    nc.close()
+    with ncopen(iemre.get_daily_ncname(date.year)) as nc:
+        lats = nc.variables['lat'][jslice]
+        lons = nc.variables['lon'][islice]
+        cmap = ctx['cmap']
+        if varname in ['rsds', 'power_swdn']:
+            # Value is in W m**-2, we want MJ
+            multi = (86400. / 1000000.) if varname == 'rsds' else 1
+            data = nc.variables[varname][idx0, jslice, islice] * multi
+            units = 'MJ d-1'
+            clevs = np.arange(0, 37, 3.)
+            clevs[0] = 0.01
+            clevstride = 1
+        elif varname in ['wind_speed', ]:
+            data = speed(
+                nc.variables[varname][idx0, jslice, islice],
+                'MPS').value('MPH')
+            units = 'mph'
+            clevs = np.arange(0, 41, 2)
+            clevs[0] = 0.01
+            clevstride = 2
+        elif varname in ['p01d', 'p01d_12z', 'snow_12z', 'snowd_12z']:
+            # Value is in W m**-2, we want MJ
+            data = distance(
+                nc.variables[varname][idx0, jslice, islice],
+                'MM').value('IN')
+            units = 'inch'
+            clevs = np.arange(0, 0.25, 0.05)
+            clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
+            clevs = np.append(clevs, np.arange(3., 10.0, 1))
+            clevs[0] = 0.01
+            clevstride = 1
+            cmap = stretch_cmap(ctx['cmap'], clevs)
+        elif varname in [
+                'high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
+                'avg_dwpk']:
+            # Value is in W m**-2, we want MJ
+            data = temperature(
+                nc.variables[varname][idx0, jslice, islice],
+                'K').value('F')
+            units = 'F'
+            clevs = np.arange(-30, 120, 5)
+            clevstride = 2
+        elif varname in ['range_tmpk', 'range_tmpk_12z']:
+            vname1 = 'high_tmpk%s' % ('_12z'
+                                      if varname == 'range_tmpk_12z' else '', )
+            vname2 = 'low_tmpk%s' % ('_12z'
+                                     if varname == 'range_tmpk_12z' else '', )
+            d1 = nc.variables[vname1][idx0, jslice, islice]
+            d2 = nc.variables[vname2][idx0, jslice, islice]
+            data = (
+                temperature(d1, 'K').value('F') -
+                temperature(d2, 'K').value('F'))
+            units = 'F'
+            clevs = np.arange(0, 61, 5)
+            clevstride = 2
 
     if np.ma.is_masked(np.max(data)):
         raise ValueError("Data Unavailable")

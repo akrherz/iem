@@ -58,67 +58,65 @@ def plotter(fdict):
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
         raise ValueError("No data for that year, sorry.")
-    nc = util.ncopen(ncfn)
     # Get the state weight
     df = gpd.GeoDataFrame.from_postgis("""
     SELECT the_geom from states where state_abbr = %s
     """, util.get_dbconn('postgis'), params=(sector, ), index_col=None,
                                        geom_col='the_geom')
     czs = CachingZonalStats(iemre.MRMS_AFFINE)
-    czs.gen_stats(np.zeros((nc.variables['lat'].size,
-                            nc.variables['lon'].size)), df['the_geom'])
-    hasdata = None
-    jslice = None
-    islice = None
-    for nav in czs.gridnav:
-        hasdata = np.ones((nav.ysz, nav.xsz))
-        hasdata[nav.mask] = 0.
-        # careful here as y is flipped in this context
-        jslice = slice(nc.variables['lat'].size - (nav.y0 + nav.ysz),
-                       nc.variables['lat'].size - nav.y0)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-    hasdata = np.flipud(hasdata)
+    with util.ncopen(ncfn) as nc:
+        czs.gen_stats(np.zeros((nc.variables['lat'].size,
+                                nc.variables['lon'].size)), df['the_geom'])
+        hasdata = None
+        jslice = None
+        islice = None
+        for nav in czs.gridnav:
+            hasdata = np.ones((nav.ysz, nav.xsz))
+            hasdata[nav.mask] = 0.
+            # careful here as y is flipped in this context
+            jslice = slice(nc.variables['lat'].size - (nav.y0 + nav.ysz),
+                           nc.variables['lat'].size - nav.y0)
+            islice = slice(nav.x0, nav.x0 + nav.xsz)
+        hasdata = np.flipud(hasdata)
 
-    today = distance(nc.variables[ncvar][idx1, jslice, islice],
-                     'MM').value('IN')
-    if (idx1 - idx0) < 32:
-        p01d = distance(np.sum(
-            nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
+        today = distance(
+            nc.variables[ncvar][idx1, jslice, islice],
+            'MM').value('IN')
+        if (idx1 - idx0) < 32:
+            p01d = distance(np.sum(
+                nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
+                'MM').value('IN')
+        else:
+            # Too much data can overwhelm this app, need to chunk it
+            for i in range(idx0, idx1, 10):
+                i2 = min([i+10, idx1])
+                if idx0 == i:
+                    p01d = distance(np.sum(
+                        nc.variables[ncvar][i:i2, jslice, islice], 0),
                         'MM').value('IN')
-    else:
-        # Too much data can overwhelm this app, need to chunk it
-        for i in range(idx0, idx1, 10):
-            i2 = min([i+10, idx1])
-            if idx0 == i:
-                p01d = distance(np.sum(
-                    nc.variables[ncvar][i:i2, jslice, islice], 0),
-                                'MM').value('IN')
-            else:
-                p01d += distance(np.sum(
-                    nc.variables[ncvar][i:i2, jslice, islice], 0),
-                                 'MM').value('IN')
-    nc.close()
+                else:
+                    p01d += distance(np.sum(
+                        nc.variables[ncvar][i:i2, jslice, islice], 0),
+                        'MM').value('IN')
 
     # Get climatology
-    nc = util.ncopen(iemre.get_dailyc_mrms_ncname())
-    if (idx1 - idx0) < 32:
-        c_p01d = distance(np.sum(
-            nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
-                          'MM').value('IN')
-    else:
-        # Too much data can overwhelm this app, need to chunk it
-        for i in range(idx0, idx1, 10):
-            i2 = min([i+10, idx1])
-            if idx0 == i:
-                c_p01d = distance(
-                    np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                    'MM').value('IN')
-            else:
-                c_p01d += distance(
-                    np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                    'MM').value('IN')
-
-    nc.close()
+    with util.ncopen(iemre.get_dailyc_mrms_ncname()) as nc:
+        if (idx1 - idx0) < 32:
+            c_p01d = distance(np.sum(
+                nc.variables[ncvar][idx0:idx1, jslice, islice], 0),
+                'MM').value('IN')
+        else:
+            # Too much data can overwhelm this app, need to chunk it
+            for i in range(idx0, idx1, 10):
+                i2 = min([i+10, idx1])
+                if idx0 == i:
+                    c_p01d = distance(
+                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
+                        'MM').value('IN')
+                else:
+                    c_p01d += distance(
+                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
+                        'MM').value('IN')
 
     # we actually don't care about weights at this fine of scale
     cells = np.sum(np.where(hasdata > 0, 1, 0))

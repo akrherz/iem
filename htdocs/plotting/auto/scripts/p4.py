@@ -1,5 +1,6 @@
 """IEMRE trailing"""
 import datetime
+import os
 
 import numpy as np
 import geopandas as gpd
@@ -48,39 +49,42 @@ def plotter(fdict):
     """, pgconn, params=(state, ), index_col='state_abbr',
                                            geom_col='the_geom')
 
-    nc = ncopen(iemre.get_daily_ncname(year))
-    precip = nc.variables['p01d']
-    czs = CachingZonalStats(iemre.AFFINE)
-    hasdata = np.zeros((nc.dimensions['lat'].size,
-                        nc.dimensions['lon'].size))
-    czs.gen_stats(hasdata, states['the_geom'])
-    for nav in czs.gridnav:
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-        hasdata[jslice, islice] = np.where(grid > 0, 1,
-                                           hasdata[jslice, islice])
-    hasdata = np.flipud(hasdata)
-    datapts = np.sum(np.where(hasdata > 0, 1, 0))
+    ncfn = iemre.get_daily_ncname(year)
+    if not os.path.isfile(ncfn):
+        raise ValueError("Data not available for year")
+    with ncopen(ncfn) as nc:
+        precip = nc.variables['p01d']
+        czs = CachingZonalStats(iemre.AFFINE)
+        hasdata = np.zeros((nc.dimensions['lat'].size,
+                            nc.dimensions['lon'].size))
+        czs.gen_stats(hasdata, states['the_geom'])
+        for nav in czs.gridnav:
+            grid = np.ones((nav.ysz, nav.xsz))
+            grid[nav.mask] = 0.
+            jslice = slice(nav.y0, nav.y0 + nav.ysz)
+            islice = slice(nav.x0, nav.x0 + nav.xsz)
+            hasdata[jslice, islice] = np.where(
+                grid > 0, 1, hasdata[jslice, islice])
+        hasdata = np.flipud(hasdata)
+        datapts = np.sum(np.where(hasdata > 0, 1, 0))
 
-    now = datetime.date(year, 1, 1)
-    now += datetime.timedelta(days=(period-1))
-    ets = datetime.date(year, 12, 31)
-    today = datetime.date.today()
-    if ets > today:
-        ets = today
-    days = []
-    coverage = []
-    while now <= ets:
-        idx = iemre.daily_offset(now)
-        sevenday = np.sum(precip[(idx-period):idx, :, :], 0)
-        pday = np.where(hasdata > 0, sevenday[:, :], -1)
-        tots = np.sum(np.where(pday >= (threshold * 25.4), 1, 0))
-        days.append(now)
-        coverage.append(tots / float(datapts) * 100.0)
+        now = datetime.date(year, 1, 1)
+        now += datetime.timedelta(days=(period-1))
+        ets = datetime.date(year, 12, 31)
+        today = datetime.date.today()
+        if ets > today:
+            ets = today
+        days = []
+        coverage = []
+        while now <= ets:
+            idx = iemre.daily_offset(now)
+            sevenday = np.sum(precip[(idx-period):idx, :, :], 0)
+            pday = np.where(hasdata > 0, sevenday[:, :], -1)
+            tots = np.sum(np.where(pday >= (threshold * 25.4), 1, 0))
+            days.append(now)
+            coverage.append(tots / float(datapts) * 100.0)
 
-        now += datetime.timedelta(days=1)
+            now += datetime.timedelta(days=1)
     df = pd.DataFrame(dict(day=pd.Series(days),
                            coverage=pd.Series(coverage)))
 

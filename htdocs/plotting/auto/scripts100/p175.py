@@ -69,23 +69,22 @@ def plotter(fdict):
     ncfn = iemre.get_daily_ncname(sts.year)
     if not os.path.isfile(ncfn):
         raise ValueError("Data for year %s not found" % (sts.year, ))
-    nc = ncopen(ncfn)
-    czs = CachingZonalStats(iemre.AFFINE)
-    hasdata = np.zeros((nc.dimensions['lat'].size,
-                        nc.dimensions['lon'].size))
-    czs.gen_stats(hasdata, states['the_geom'])
-    for nav in czs.gridnav:
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-        hasdata[jslice, islice] = np.where(grid > 0, 1,
-                                           hasdata[jslice, islice])
-    st = np.flipud(hasdata)
-    stpts = np.sum(np.where(hasdata > 0, 1, 0))
+    with ncopen(ncfn) as nc:
+        czs = CachingZonalStats(iemre.AFFINE)
+        hasdata = np.zeros((nc.dimensions['lat'].size,
+                            nc.dimensions['lon'].size))
+        czs.gen_stats(hasdata, states['the_geom'])
+        for nav in czs.gridnav:
+            grid = np.ones((nav.ysz, nav.xsz))
+            grid[nav.mask] = 0.
+            jslice = slice(nav.y0, nav.y0 + nav.ysz)
+            islice = slice(nav.x0, nav.x0 + nav.xsz)
+            hasdata[jslice, islice] = np.where(grid > 0, 1,
+                                               hasdata[jslice, islice])
+        st = np.flipud(hasdata)
+        stpts = np.sum(np.where(hasdata > 0, 1, 0))
 
-    snowd = nc.variables['snowd_12z'][sidx:, :, :]
-    nc.close()
+        snowd = nc.variables['snowd_12z'][sidx:, :, :]
     for i in range(snowd.shape[0]):
         rows.append({
             'valid': sts + datetime.timedelta(days=i),
@@ -93,9 +92,8 @@ def plotter(fdict):
                      })
 
     eidx = iemre.daily_offset(ets)
-    nc = ncopen(iemre.get_daily_ncname(ets.year))
-    snowd = nc.variables['snowd_12z'][:eidx, :, :]
-    nc.close()
+    with ncopen(iemre.get_daily_ncname(ets.year)) as nc:
+        snowd = nc.variables['snowd_12z'][:eidx, :, :]
     for i in range(snowd.shape[0]):
         rows.append({
          'valid': datetime.date(ets.year, 1, 1) + datetime.timedelta(days=i),

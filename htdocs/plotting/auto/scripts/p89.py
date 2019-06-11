@@ -66,37 +66,37 @@ def get_data(ctx):
     """, pgconn, params=(ctx['state'], ), index_col='state_abbr',
                                            geom_col='the_geom')
 
-    nc = ncopen(iemre.get_daily_ncname(ctx['year']))
+    with ncopen(iemre.get_daily_ncname(ctx['year'])) as nc:
+        precip = nc.variables['p01d']
+        czs = CachingZonalStats(iemre.AFFINE)
+        hasdata = np.zeros((nc.dimensions['lat'].size,
+                            nc.dimensions['lon'].size))
+        czs.gen_stats(hasdata, states['the_geom'])
+        for nav in czs.gridnav:
+            grid = np.ones((nav.ysz, nav.xsz))
+            grid[nav.mask] = 0.
+            jslice = slice(nav.y0, nav.y0 + nav.ysz)
+            islice = slice(nav.x0, nav.x0 + nav.xsz)
+            hasdata[jslice, islice] = np.where(
+                grid > 0, 1, hasdata[jslice, islice])
+        ctx['iowa'] = np.flipud(hasdata)
+        ctx['iowapts'] = float(np.sum(np.where(hasdata > 0, 1, 0)))
 
-    precip = nc.variables['p01d']
-    czs = CachingZonalStats(iemre.AFFINE)
-    hasdata = np.zeros((nc.dimensions['lat'].size,
-                        nc.dimensions['lon'].size))
-    czs.gen_stats(hasdata, states['the_geom'])
-    for nav in czs.gridnav:
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-        hasdata[jslice, islice] = np.where(
-            grid > 0, 1, hasdata[jslice, islice])
-    ctx['iowa'] = np.flipud(hasdata)
-    ctx['iowapts'] = float(np.sum(np.where(hasdata > 0, 1, 0)))
-
-    now = datetime.datetime(ctx['year'], 1, 1)
-    now += datetime.timedelta(days=(ctx['period']-1))
-    ets = datetime.datetime(ctx['year'], 12, 31)
-    today = datetime.datetime.now()
-    if ets > today:
-        ets = today - datetime.timedelta(days=1)
-    ctx['days'] = []
-    rows = []
-    trailthres = (ctx['trailthres'] * units('inch')).to(units('mm')).magnitude
-    daythres = (ctx['daythres'] * units('inch')).to(units('mm')).magnitude
-    while now < ets:
-        rows.append(do_date(ctx, now, precip, daythres, trailthres))
-        now += datetime.timedelta(days=1)
-    nc.close()
+        now = datetime.datetime(ctx['year'], 1, 1)
+        now += datetime.timedelta(days=(ctx['period']-1))
+        ets = datetime.datetime(ctx['year'], 12, 31)
+        today = datetime.datetime.now()
+        if ets > today:
+            ets = today - datetime.timedelta(days=1)
+        ctx['days'] = []
+        rows = []
+        trailthres = (
+            ctx['trailthres'] * units('inch')).to(units('mm')).magnitude
+        daythres = (
+            ctx['daythres'] * units('inch')).to(units('mm')).magnitude
+        while now < ets:
+            rows.append(do_date(ctx, now, precip, daythres, trailthres))
+            now += datetime.timedelta(days=1)
     return pd.DataFrame(rows)
 
 
