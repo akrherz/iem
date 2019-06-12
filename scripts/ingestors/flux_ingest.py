@@ -112,7 +112,7 @@ DBCOLS = ['station', 'valid',
           'irr_can_corr_avg',
           'irr_body_avg',
           'vwc', 'ec', 't', 'p', 'pa', 'vr']
-
+DROPCOLS = ['lithium_bv_avg', 'utcyear']
 CONVERT = {'timestamp': 'valid',
            'incoming_sw_avg': 'incoming_sw',
            'outgoing_sw_avg': 'outgoing_sw',
@@ -192,9 +192,9 @@ def main():
             for colname in gdf.columns:
                 if colname not in DBCOLS:
                     exclude.append(colname)
-            if exclude != ['utcyear']:
-                print(("flux_ingest %s has additional cols: %s"
-                       ) % (station, exclude))
+                    if colname not in DROPCOLS:
+                        print(("flux_ingest %s has additional cols: %s"
+                               ) % (station, exclude))
             gdf2 = gdf[gdf.columns.difference(exclude)]
             processed += len(gdf2.index)
             output = StringIO()
