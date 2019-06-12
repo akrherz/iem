@@ -85,6 +85,7 @@ STATIONS = {'CAMI4': 'Calumet',
             'CSII4': 'Inwood',
             'GVNI4': 'Glenwood',
             'TPOI4': 'Masonville',
+            'DOCI4': 'Jefferson',
             }
 
 
@@ -236,8 +237,12 @@ def hourly_process(nwsli, maxts):
         if 'tsoil_c_avg' in df.columns:
             ob.data['c1tmpf'] = temperature(row['tsoil_c_avg_qc'],
                                             'C').value('F')
-        ob.data['c2tmpf'] = temperature(row['t12_c_avg_qc'], 'C').value('F')
-        ob.data['c3tmpf'] = temperature(row['t24_c_avg_qc'], 'C').value('F')
+        if 't12_c_avg_qc' in df.columns:
+            ob.data['c2tmpf'] = temperature(
+                row['t12_c_avg_qc'], 'C').value('F')
+        if 't24_c_avg_qc' in df.columns:
+            ob.data['c3tmpf'] = temperature(
+                row['t24_c_avg_qc'], 'C').value('F')
         if 't50_c_avg' in df.columns:
             ob.data['c4tmpf'] = temperature(row['t50_c_avg_qc'],
                                             'C').value('F')
