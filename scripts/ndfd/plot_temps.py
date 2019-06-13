@@ -28,7 +28,7 @@ def plot_gdd(ts):
     data = gddtot - np.where(avggdd < 1, 1, avggdd)
 
     subtitle = (
-        "Based on National Digitial Forecast Database (NDFD) "
+        "Based on National Digital Forecast Database (NDFD) "
         "00 UTC Forecast made %s") % (ts.strftime("%-d %b %Y"),)
     mp = MapPlot(
         title='NWS NDFD 7 Day (%s through %s) GDD50 Departure from Avg' % (
@@ -61,7 +61,7 @@ def plot_maxmin(ts, field):
     data = masked_array(data, units.degK).to(units.degF).m
 
     subtitle = (
-        "Based on National Digitial Forecast Database (NDFD) "
+        "Based on National Digital Forecast Database (NDFD) "
         "00 UTC Forecast made %s") % (ts.strftime("%-d %b %Y"),)
     mp = MapPlot(
         title='NWS NDFD 7 Day (%s through %s) %s Temperature' % (

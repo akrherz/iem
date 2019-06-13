@@ -110,6 +110,9 @@ def plotter(fdict):
         ax.set_ylabel(r"%s Departure $^\circ$F" % (PDICT[varname], ))
     else:
         ax.set_ylabel(r"%s Std Dev Departure ($\sigma$)" % (PDICT[varname], ))
+    if varname == 'gdd':
+        ax.set_xlabel("Growing Degree Day Base: %s Ceiling: %s" % (
+            gddbase, gddceil))
     ax.set_title(("%s %s\nYear %s Daily %s Departure"
                   ) % (station, nt.sts[station]['name'], year,
                        PDICT[varname]))
