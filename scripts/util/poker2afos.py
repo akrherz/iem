@@ -47,6 +47,7 @@ XREF_SOURCE = {
     "KNYC": "KOKX",
     "KOMA": "KOAX",
     "KORD": "KLOT",
+    "KCHI": "KLOT",
     "KPDX": "KPQR",
     "KPHX": "KPSR",
     "KPIT": "KPBZ",
@@ -91,6 +92,18 @@ XREF_SOURCE = {
     "KSPS": "KOUN",
     "KSMX": "KLOX",
     'KMKC': "KWNS",
+    'KCRW': 'KRLX',
+    'KSDF': 'KLMK',
+    'KSEA': 'KSEW',
+    'KMKE': 'KMKX',
+    'KPHL': 'KPHI',
+    'KPWM': 'KGYX',
+    'KARB': 'KDTX',
+    'KFTW': 'KFWD',
+    'KFSM': 'KLZK',
+    'KLEX': 'KLMK',
+    'KEVV': 'KPAH',
+    'KACT': 'KFWD',
 }
 
 

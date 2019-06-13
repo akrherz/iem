@@ -1,5 +1,6 @@
 """Daily departures"""
 import datetime
+from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
@@ -7,9 +8,12 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = {'high': 'High Temperature',
-         'low': 'Low Temperature',
-         'avg': 'Daily Average Temperature'}
+PDICT = OrderedDict((
+    ('avg', 'Daily Average Temperature'),
+    ('gdd', 'Growing Degree Days'),
+    ('high', 'High Temperature'),
+    ('low', 'Low Temperature'),
+))
 OPTDICT = {'diff': 'Difference in Degrees F',
            'sigma': 'Difference in Standard Deviations'}
 
@@ -29,6 +33,14 @@ def get_description():
              label='Year to Plot:'),
         dict(type="select", name='var', default='high', options=PDICT,
              label='Select Variable to Plot'),
+        dict(
+            type='int', name='gddbase', default=50,
+            label='Growing Degree Day Base (F)'
+        ),
+        dict(
+            type='int', name='gddceil', default=86,
+            label='Growing Degree Day Ceiling (F)'
+        ),
         dict(type="select", name='how', default='diff', options=OPTDICT,
              label='How to express the difference'),
     ]
@@ -43,18 +55,23 @@ def plotter(fdict):
     year = ctx['year']
     varname = ctx['var']
     how = ctx['how']
+    gddbase = ctx['gddbase']
+    gddceil = ctx['gddceil']
 
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
     WITH data as (
-     select day, high, low, (high+low)/2. as temp, sday
+     select day, high, low, (high+low)/2. as temp, sday,
+     gddxx(%s, %s, high, low) as gdd
      from """+table+""" where station = %s and year = %s
     ), climo as (
      SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
      avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
-     stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp
+     stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
+     avg(gddxx(%s, %s, high, low)) as avg_gdd,
+     stddev(gddxx(%s, %s, high, low)) as stddev_gdd
      from """ + table + """ WHERE station = %s GROUP by sday
     )
     SELECT day,
@@ -64,15 +81,21 @@ def plotter(fdict):
     (d.low - c.avg_low) / c.stddev_low as low_sigma,
     d.temp - c.avg_temp as avg_diff,
     (d.temp - c.avg_temp) / c.stddev_temp as avg_sigma,
+    d.gdd - c.avg_gdd as gdd_diff,
+    (d.gdd - c.avg_gdd) / greatest(c.stddev_gdd, 0.1) as gdd_sigma,
     d.high,
     c.avg_high,
     d.low,
     c.avg_low,
     d.temp,
-    c.avg_temp from
+    c.avg_temp,
+    d.gdd,
+    c.avg_gdd from
     data d JOIN climo c on
     (c.sday = d.sday) ORDER by day ASC
-    """, pgconn, params=(station, year, station),
+    """, pgconn, params=(
+        gddbase, gddceil, station, year, gddbase, gddceil, gddbase, gddceil,
+        station),
                   index_col=None)
 
     (fig, ax) = plt.subplots(1, 1)
@@ -84,10 +107,10 @@ def plotter(fdict):
             _bar.set_edgecolor('r')
     ax.grid(True)
     if how == 'diff':
-        ax.set_ylabel(r"Temperature Departure $^\circ$F")
+        ax.set_ylabel(r"%s Departure $^\circ$F" % (PDICT[varname], ))
     else:
-        ax.set_ylabel(r"Temperature Std Dev Departure ($\sigma$)")
-    ax.set_title(("%s %s\nYear %s %s Departure"
+        ax.set_ylabel(r"%s Std Dev Departure ($\sigma$)" % (PDICT[varname], ))
+    ax.set_title(("%s %s\nYear %s Daily %s Departure"
                   ) % (station, nt.sts[station]['name'], year,
                        PDICT[varname]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
