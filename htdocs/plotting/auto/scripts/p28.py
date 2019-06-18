@@ -1,4 +1,4 @@
-"""trailing day precip"""
+"""trailing day precip."""
 import datetime
 from collections import OrderedDict
 
@@ -266,6 +266,7 @@ def plotter(fdict):
     ax.set_zorder(y2.get_zorder()+1)
     ax.patch.set_visible(False)
     ax.legend(loc='best', ncol=3)
+    ax.set_ylim(bottom=0)
     df = pd.DataFrame(dict(day=np.arange(-365, 0),
                            maxaccum=ctx['maxes'][::-1],
                            accum=ctx['totals'][::-1],

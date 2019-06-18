@@ -52,6 +52,7 @@ VARCONV = {'timestamp': 'valid',
            "temp_avg12in": "t12_c_avg",
            "temp_avg24in": "t24_c_avg",
            "bp_mmhg_avg": "bpres_avg",
+           "bp_mb_avg": "bpres_avg",
            }
 
 TSOIL_COLS = ['tsoil_c_avg', 't06_c_avg', 't12_c_avg', 't24_c_avg',
