@@ -16,18 +16,6 @@ PDICT = OrderedDict([
         ('hrrr_srad', 'Use HRRR (2013+)')])
 
 
-def smooth(x, window_len=11, window='hanning'):
-    """Smooth things out"""
-    s = np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]
-    if window == 'flat':  # moving average
-        w = np.ones(window_len, 'd')
-    else:
-        w = eval('np.'+window+'(window_len)')
-
-    y = np.convolve(w/w.sum(), s, mode='same')
-    return y[window_len-1:-window_len+1]
-
-
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
@@ -79,12 +67,16 @@ def plotter(fdict):
                                                    center=True).mean()
     df['best'] = df['narr_srad'].fillna(
                                     df['merra_srad']).fillna(df['hrrr_srad'])
+    # hack for leap day here
+    if df['best'].loc['0229'] is None:
+        df = df.drop('0229')
 
     fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.6, 0.8])
 
-    ax.fill_between(range(1, 367), 0, df['max_narr_smooth'], color='tan',
-                    label="Max")
+    ax.fill_between(
+        range(len(df.index)), 0, df['max_narr_smooth'], color='tan',
+        label="Max")
     if not np.isnan(df[varname].max()):
         ax.bar(range(len(df.index)), df[varname], fc='g',
                ec='g', label="%s" % (year,))
@@ -134,4 +126,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(year=2016))
+    plotter(dict(year=2010, network='TNCLIMATE', station='TN6402'))
