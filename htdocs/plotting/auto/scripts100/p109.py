@@ -7,6 +7,7 @@ import numpy as np
 import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
+from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -58,6 +59,7 @@ def get_description():
              label='VTEC Phenomena and Significance 3'),
         dict(type='vtec_ps', name='v4', default='SV.W', optional=True,
              label='VTEC Phenomena and Significance 4'),
+        dict(type='cmap', name='cmap', default='jet', label='Color Ramp:'),
     ]
     return desc
 
@@ -99,6 +101,7 @@ def plotter(fdict):
         title = "VTEC Unique Event"
     pstr = " or ".join(pstr)
     pstr = "(%s)" % (pstr,)
+    cmap = plt.get_cmap(ctx['cmap'])
 
     if varname == 'count':
         df = read_sql("""
@@ -144,11 +147,13 @@ def plotter(fdict):
 
         df2 = df['days']
         if df2.max() < 10:
-            bins = list(range(0, 11, 1))
+            bins = list(range(1, 11, 1))
         else:
-            bins = np.linspace(0, df['days'].max() + 10, 10, dtype='i')
+            bins = np.linspace(1, df['days'].max() + 11, 10, dtype='i')
         units = 'Days'
         lformat = '%.0f'
+        cmap.set_under('white')
+        cmap.set_over('#EEEEEE')
     else:
         total_minutes = (ets - sts).total_seconds() / 60.
         df = read_sql("""
@@ -184,7 +189,9 @@ def plotter(fdict):
                            ) % (sts.strftime("%d %b %Y %H:%M"),
                                 ets.strftime("%d %b %Y %H:%M"),
                                 subtitle))
-    mp.fill_cwas(df2, bins=bins, ilabel=True, units=units, lblformat=lformat)
+    mp.fill_cwas(
+        df2, bins=bins, ilabel=True, units=units, lblformat=lformat,
+        cmap=cmap)
 
     return mp.fig, df
 
