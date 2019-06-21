@@ -366,7 +366,8 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     filename = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(filename):
         return
-    lines = open(filename).readlines()
+    fdata = open(filename, 'rb').read().decode('ascii', 'ignore')
+    lines = fdata.split("\n")
     if len(lines) < 5:
         return
 
