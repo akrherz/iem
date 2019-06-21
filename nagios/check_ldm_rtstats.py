@@ -47,54 +47,45 @@ def get_fileage(fn):
     return (now - ts).total_seconds()
 
 
-def runner(hostname):
+def runner(hostname, feedtype):
     """ Do something! """
-    max_latencies = {}
-    host_latencies = {}
-    mydir = "/home/ldm/rtstats/%s" % (hostname,)
+    # workaround nagios/nrpe issues
+    mydir = "/home/ldm/rtstats/%s/%s" % (
+        hostname, feedtype if feedtype != 'IDS' else 'IDS|DDPLUS')
     os.chdir(mydir)
-    for subdir in glob.glob("[A-Z]*"):
-        os.chdir(subdir)
-        for fn in glob.glob("*_v_*"):
-            age = get_fileage(fn)
-            # Don't consider any files older than 15 minutes
-            if age > 15*60:
-                # print('Skipping %s due to age of %s' % (fn, age))
-                continue
-            line = open(fn).read()
+    min_latency = 1e6
+    tot_bytes = 0
+    tot_prods = 0
+    for fn in glob.glob("*_v_*"):
+        age = get_fileage(fn)
+        if age > (15 * 60):
+            continue
+        with open(fn) as fp:
+            line = fp.read()
             tokens = line.split()
-            if len(tokens) != 11:
-                continue
-            feedtype = tokens[3]
-            latency = float(tokens[7])
-            if feedtype not in max_latencies:
-                max_latencies[feedtype] = []
-                host_latencies[feedtype] = []
-            max_latencies[feedtype].append(latency)
-            host_latencies[feedtype].append(fn)
-        os.chdir("..")
+            tot_prods += float(tokens[5])
+            tot_bytes += float(tokens[6])
+            min_latency = min([float(tokens[7]), min_latency])
 
     exitcode = 2
-    stats = ""
-    msg = "LDM Unknown"
-    idsmsg = "IDS Latency Unknown"
-    for feedtype in max_latencies:
-        if feedtype == 'IDS|DDPLUS':
-            idx = max_latencies[feedtype].index(min(max_latencies[feedtype]))
-            idsmsg = ("IDS Latency %.0fs %s"
-                      ) % (min(max_latencies[feedtype]),
-                           host_latencies[feedtype][idx])
-            if min(max_latencies[feedtype]) > 600:
-                exitcode = 1
-                msg = 'ERROR'
-            else:
-                exitcode = 0
-                msg = 'OK'
-        stats += " %s_age=%s;600;1200;0 " % (feedtype.replace("|", "_"),
-                                             max(max_latencies[feedtype]))
-    print("%s - %s |%s" % (msg, idsmsg, stats))
+    msg = "LDM %s latency %.4fs" % (feedtype, min_latency)
+    if min_latency < 300:
+        exitcode = 0
+    elif min_latency < 1200:
+        exitcode = 1
+    stats = "prods=%.0f;;;0; bytes=%.0fB;;;; latency=%.4fs;;;;" % (
+        tot_prods, tot_bytes, min_latency)
+    print("%s | %s" % (msg, stats))
     return exitcode
 
 
+def main(argv):
+    """Run for a given hostname and feedtype."""
+    if len(argv) < 3:
+        print("Usage: python check_ldm_rtstats.py <hostname> <feedtype>")
+        return 3
+    runner(argv[1], argv[2])
+
+
 if __name__ == '__main__':
-    sys.exit(runner(sys.argv[1]))
+    sys.exit(main(sys.argv))
