@@ -13,6 +13,7 @@ import tempfile
 import io
 
 # Third party
+import psycopg2
 import requests
 import pytz
 import numpy as np
@@ -20,8 +21,9 @@ import pandas as pd
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity, distance, speed
 import pyiem.meteorology as met
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 ISUAG = get_dbconn('isuag')
 
 ACCESS = get_dbconn('iem')
@@ -94,9 +96,9 @@ def qcval(df, colname, floor, ceiling):
     """Make sure the value falls within some bounds"""
     df.loc[df[colname] < floor, colname] = floor
     df.loc[df[colname] > ceiling, colname] = ceiling
-    return np.where(np.logical_or(df[colname] == floor,
-                                  df[colname] == ceiling),
-                    'B', None)
+    return np.where(
+        np.logical_or(df[colname] == floor, df[colname] == ceiling),
+        'B', None)
 
 
 def qcval2(df, colname, floor, ceiling):
@@ -153,8 +155,13 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.to_csv(output, sep="\t", header=False, index=False)
     output.seek(0)
     icursor = ISUAG.cursor()
-    icursor.copy_from(output, tablename,
-                      columns=df.columns, null="")
+    try:
+        icursor.copy_from(
+            output, tablename, columns=df.columns, null="")
+    except psycopg2.errors.UniqueViolation as exp:  # pylint: disable=no-member
+        LOG.exception(exp)
+        icursor.close()
+        return
     icursor.close()
     ISUAG.commit()
     return df
@@ -162,7 +169,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
 
 def m15_process(nwsli, maxts):
     """ Process the 15minute file """
-    acursor = ACCESS.cursor()
     fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_15minute")
     if df is None:
@@ -170,6 +176,8 @@ def m15_process(nwsli, maxts):
 
     # Update IEMAccess
     processed = 0
+    LOG.debug("processing %s rows from %s", len(df.index), fn)
+    acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         ob = Observation(nwsli, 'ISUSM', row['valid'])
         tmpc = temperature(row['tair_c_avg_qc'], 'C')
@@ -214,13 +222,13 @@ def m15_process(nwsli, maxts):
 
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
-    # print '-------------- HOURLY PROCESS ---------------'
-    acursor = ACCESS.cursor()
     fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_hourly")
     if df is None:
         return 0
     processed = 0
+    LOG.debug("processing %s rows from %s", len(df.index), fn)
+    acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         # Update IEMAccess
         # print nwsli, valid
@@ -268,14 +276,14 @@ def hourly_process(nwsli, maxts):
 
 def daily_process(nwsli, maxts):
     """ Process the daily file """
-    acursor = ACCESS.cursor()
     # print '-------------- DAILY PROCESS ----------------'
     fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_daily")
     if df is None:
         return 0
-
+    LOG.debug("processing %s rows from %s", len(df.index), fn)
     processed = 0
+    acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         # Need a timezone
         valid = datetime.datetime(row['valid'].year, row['valid'].month,
@@ -295,8 +303,10 @@ def daily_process(nwsli, maxts):
         if ob.data['max_tmpf'] is None:
             EVENTS['reprocess_temps'] = True
         if ob.data['srad_mj'] == 0 or np.isnan(ob.data['srad_mj']):
-            print(("soilm_ingest.py station: %s ts: %s has 0 solar"
-                   ) % (nwsli, valid.strftime("%Y-%m-%d")))
+            LOG.info(
+                "soilm_ingest.py station: %s ts: %s has 0 solar",
+                nwsli, valid.strftime("%Y-%m-%d")
+            )
             EVENTS['reprocess_solar'] = True
         if 'ws_mps_max' in df.columns:
             ob.data['max_sknt'] = speed(row['ws_mps_max_qc'],
@@ -312,19 +322,22 @@ def daily_process(nwsli, maxts):
 
 def update_pday():
     ''' Compute today's precip from the current_log archive of data '''
+    LOG.debug("update_pday() called...")
     acursor = ACCESS.cursor()
     acursor.execute("""
-    SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from
-    current_log s JOIN stations t on (t.iemid = s.iemid)
-    WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by s.iemid
+        SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from
+        current_log s JOIN stations t on (t.iemid = s.iemid)
+        WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by s.iemid
     """)
     data = {}
     for row in acursor:
         data[row[0]] = row[1]
 
     for iemid in data:
-        acursor.execute("""UPDATE summary SET pday = %s
-        WHERE iemid = %s and day = 'TODAY'""", (data[iemid], iemid))
+        acursor.execute("""
+            UPDATE summary SET pday = %s
+            WHERE iemid = %s and day = 'TODAY'
+        """, (data[iemid], iemid))
     acursor.close()
     ACCESS.commit()
 
@@ -337,27 +350,32 @@ def get_max_timestamps(nwsli):
             '15minute': datetime.datetime(2012, 1, 1,
                                           tzinfo=pytz.FixedOffset(-360)),
             'daily': datetime.date(2012, 1, 1)}
-    icursor.execute("""SELECT max(valid) from sm_daily
-        WHERE station = '%s'""" % (nwsli, ))
+    icursor.execute("""
+        SELECT max(valid) from sm_daily
+        WHERE station = %s
+    """, (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
         data['daily'] = row[0]
 
     icursor.execute("""
-        SELECT max(valid) from sm_hourly
-        WHERE station = '%s'
-        """ % (nwsli, ))
+        SELECT max(valid) from sm_hourly WHERE station = %s
+    """, (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
         data['hourly'] = row[0]
 
     icursor.execute("""
         SELECT max(valid) from sm_15minute
-        WHERE station = '%s'
-        """ % (nwsli, ))
+        WHERE station = %s
+    """, (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
         data['15minute'] = row[0]
+    LOG.debug(
+        "%s max daily: %s hourly: %s 15minute: %s", nwsli,
+        data['daily'], data['hourly'], data['15minute']
+    )
     return data
 
 
@@ -433,24 +451,27 @@ def main(argv):
     """ Go main Go """
     stations = STATIONS if len(argv) == 1 else [argv[1], ]
     for nwsli in stations:
+        LOG.debug("starting workflow for: %s", nwsli)
         maxobs = get_max_timestamps(nwsli)
         m15processed = m15_process(nwsli, maxobs['15minute'])
         hrprocessed = hourly_process(nwsli, maxobs['hourly'])
         dyprocessed = daily_process(nwsli, maxobs['daily'])
         if hrprocessed > 0:
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
-        if len(argv) > 1:
-            print("%s 15min:%s hr:%s daily:%s" % (nwsli, m15processed,
-                                                  hrprocessed, dyprocessed))
+        LOG.debug(
+            "%s 15min:%s hr:%s daily:%s", nwsli, m15processed,
+            hrprocessed, dyprocessed
+        )
     update_pday()
 
     if EVENTS['reprocess_solar']:
-        print("Calling fix_solar.py")
+        LOG.info("Calling fix_solar.py with no args")
         subprocess.call("python ../isuag/fix_solar.py", shell=True)
     if EVENTS['reprocess_temps']:
-        print("Calling fix_temps.py")
+        LOG.info("Calling fix_temps.py with no args")
         subprocess.call("python ../isuag/fix_temps.py", shell=True)
     for day in EVENTS['days']:
+        LOG.info("Calling fix_{solar,precip}.py for %s", day)
         subprocess.call(("python ../isuag/fix_precip.py %s %s %s"
                          ) % (day.year, day.month, day.day), shell=True)
         subprocess.call(("python ../isuag/fix_solar.py %s %s %s"

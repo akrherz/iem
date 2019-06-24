@@ -48,19 +48,25 @@ def main():
         return
 
     if ts.year > 1980:
-        nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (ts.year, ))
-        i2, j2 = prismutil.find_ij(lon, lat)
-        prism_precip = nc.variables['ppt'][offset, j2, i2] / 25.4
-        nc.close()
+        ncfn = "/mesonet/data/prism/%s_daily.nc" % (ts.year, )
+        if not os.path.isfile(ncfn):
+            prism_precip = None
+        else:
+            i2, j2 = prismutil.find_ij(lon, lat)
+            with ncopen(ncfn) as nc:
+                prism_precip = nc.variables['ppt'][offset, j2, i2] / 25.4
     else:
         prism_precip = None
 
     if ts.year > 2010:
-        nc = ncopen(iemre.get_daily_mrms_ncname(ts.year))
-        j2 = int((lat - iemre.SOUTH) * 100.0)
-        i2 = int((lon - iemre.WEST) * 100.0)
-        mrms_precip = nc.variables['p01d'][offset, j2, i2] / 25.4
-        nc.close()
+        ncfn = iemre.get_daily_mrms_ncname(ts.year)
+        if not os.path.isfile(ncfn):
+            mrms_precip = None
+        else:
+            j2 = int((lat - iemre.SOUTH) * 100.0)
+            i2 = int((lon - iemre.WEST) * 100.0)
+            with ncopen(ncfn) as nc:
+                mrms_precip = nc.variables['p01d'][offset, j2, i2] / 25.4
     else:
         mrms_precip = None
 
