@@ -5,6 +5,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 from matplotlib import cm
+from matplotlib import ticker
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -107,6 +108,7 @@ def plotter(fdict):
     minv = np.min(data, 0)
     ax.set_xlim(np.argmax(maxv > 0) - 7, np.argmax(minv > 99) + 7)
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
+    ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.grid(True)
     lastweek = df['week_ending'].max()
     ax.set_xlabel("X denotes %s value of %.0f%%" % (
