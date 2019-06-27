@@ -55,6 +55,7 @@
 192.168.0.200    metvm0.local
 192.168.0.201    metvm1.local
 192.168.0.202    metvm2.local
+192.168.0.203    metvm3.local
 192.168.0.204    metvm4.local
 192.168.0.205    metvm5.local
 192.168.0.206    metvm6.local
@@ -63,9 +64,6 @@
 192.168.0.209    metvm9.local
 192.168.0.210    metvm10.local
 192.168.0.211    metvm11.local
-
-192.168.0.233    metvm3.local
-192.168.1.205    iemdb-talltowers.local
 
 #
 # IPs that float thanks to the magic of pulse or keepalived
@@ -86,7 +84,7 @@
 #   VI_6(56) metvm6 <-> metvm9
 192.168.1.245    iemdb
 #   VI_7(57) metvm9 <-> metvm6
-192.168.1.244    iemdb2 postgresread
+192.168.1.244    iemdb2 iemdb2.local postgresread
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
 #   VI10(60) iem12
@@ -97,3 +95,5 @@
 192.168.1.239    iem-memcached3
 # VI_13(63) metvm4
 192.168.1.238    iem-rabbitmq.local
+# VI_14(64) metvm5
+192.168.1.237    iemdb-talltowers.local
