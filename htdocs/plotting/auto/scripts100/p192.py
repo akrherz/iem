@@ -1,5 +1,6 @@
 """Generalized mapper of AZOS data"""
 import datetime
+from collections import OrderedDict
 
 import pytz
 import numpy as np
@@ -9,10 +10,15 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from metpy.units import units
+from metpy.calc import apparent_temperature
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State'}
-PDICT2 = {'vsby': 'Visibility'}
+PDICT2 = OrderedDict((
+    ('vsby', 'Visibility'),
+    ('feel', 'Feels Like Temperature')
+))
 
 
 def get_description():
@@ -55,7 +61,7 @@ def get_df(ctx, bnds, buf=2.25):
                 'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
                         '), geom)
         )
-        SELECT station, vsby, state, wfo, lat, lon,
+        SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
         abs(extract(epoch from (%s - valid))) as tdiff from
         alldata a JOIN mystation m on (a.station = m.id)
         WHERE a.valid between %s and %s ORDER by tdiff ASC
@@ -72,7 +78,7 @@ def get_df(ctx, bnds, buf=2.25):
         dbconn = get_dbconn('iem')
         valid = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         df = read_sql("""
-            SELECT state, wfo,
+            SELECT state, wfo, tmpf, dwpf, sknt, relh,
       id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
     FROM
       current c JOIN stations s ON (s.iemid = c.iemid)
@@ -94,6 +100,7 @@ def get_df(ctx, bnds, buf=2.25):
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
+    varname = ctx['v']
 
     if ctx['t'] == 'state':
         bnds = reference.state_bounds[ctx['state']]
@@ -114,16 +121,29 @@ def plotter(fdict):
                            ) % (valid.strftime("%d %b %Y %H:%M"),),
                  nocaption=True,
                  titlefontsize=16)
-    mp.contourf(df['lon'].values, df['lat'].values, df['vsby'].values,
-                np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]),
-                units='miles', cmap=plt.get_cmap(ctx['cmap']))
+    if varname == 'vsby':
+        ramp = np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9])
+        valunit = 'miles'
+    elif varname == 'feel':
+        valunit = 'F'
+        df['feel'] = apparent_temperature(
+            df['tmpf'].values * units('degF'),
+            df['relh'].values * units('percent'),
+            df['sknt'].values * units('knots')
+        ).to(units('degF')).m
+        ramp = np.linspace(
+            df['feel'].min() - 5, df['feel'].max() + 5, 10, dtype='i')
+    mp.contourf(
+        df['lon'].values, df['lat'].values, df[varname].values, ramp,
+        units=valunit, cmap=plt.get_cmap(ctx['cmap']))
     if ctx['t'] == 'state':
         df2 = df[df['state'] == ctx['state']]
     else:
         df2 = df[df['wfo'] == ctx['wfo']]
 
-    mp.plot_values(df2['lon'].values, df2['lat'].values,
-                   df2['vsby'].values, '%.1f')
+    mp.plot_values(
+        df2['lon'].values, df2['lat'].values,
+        df2[varname].values, '%.1f')
     mp.drawcounties()
     if ctx['t'] == 'cwa':
         mp.draw_cwas()
@@ -132,4 +152,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(v='feel'))
