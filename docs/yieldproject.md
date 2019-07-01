@@ -1,3 +1,12 @@
+26 Jun 2019 Archontoulis Angelos
+ - For next year, the PSIMs domain may expand to MN and NE
+ - [ ] akrherz/iem#199 can we move IEMRE to the database to make it faster
+ - [ ] would like to launch a crop dry down app by Aug 3
+ - Instead of providing average RH, I could just provide daily min/max
+ - [ ] produce a map showing RH computation bias by averaging method
+ - [ ] NASA POWER has a RH field I could potentially use
+ - [ ] daymet allow maybe has a RH field I could use
+
 23 May 2019 Archontoulis Isaiah
  - [ ] CFS may have some strange issues around cold days < 40F
  - [x] Send Angelo new map addresses
