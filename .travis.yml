@@ -8,9 +8,11 @@ cache:
     - $HOME/miniconda3
 addons:
   hosts:
-    - iemdb
-    - iemdb2
-    - iemdb-hads
+    - iemdb.local
+    - iemdb2.local
+    - iemdb-hads.local
+    - iemdb-iemre.local
+    - iemdb-mos.local
     - iem.local
     - iem-memcached
     - iemdb-talltowers.local
