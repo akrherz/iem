@@ -87,6 +87,7 @@ twisted
 udunits2
 unixodbc
 uritemplate
+xarray<0.12.2
 wordcloud
 xlrd
 xlsxwriter
