@@ -71,7 +71,7 @@
 #   iem-director0 <-> iem-director1
 192.168.0.254    iem-gateway   iem-gateway.local
 
-#   VI_1(51) metvm4
+#   VI_1(51) metvm5
 192.168.1.251    iemdb-hads iemdb-hads.local iemdb-mos iemdb-mos.local
 #   VI_2(52) metvm5 <-> metvm9
 192.168.1.249    iem-memcached
@@ -82,7 +82,7 @@
 #   VI_5(55) iem6
 192.168.1.246    iembot
 #   VI_6(56) metvm6 <-> metvm9
-192.168.1.245    iemdb
+192.168.1.245    iemdb iemdb.local
 #   VI_7(57) metvm9 <-> metvm6
 192.168.1.244    iemdb2 iemdb2.local postgresread
 #   VI_9(59) iem12
@@ -97,3 +97,5 @@
 192.168.1.238    iem-rabbitmq.local
 # VI_14(64) metvm5
 192.168.1.237    iemdb-talltowers.local
+# VI_15(65) metvm4
+192.168.1.236    iemdb-iemre.local
