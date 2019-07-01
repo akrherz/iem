@@ -17,21 +17,26 @@ def main():
         return
     ip = '127.0.0.1'
     hads_ip = '127.0.0.1'
+    iemre_ip = '127.0.0.1'
     if sys.argv[1] == 'proxy':
         ip = '172.16.172.1'
         hads_ip = '172.16.170.1'
+        iemre_ip = '172.16.173.1'
     data = open('/etc/hosts').read()
     result = []
     for line in data.split("\n"):
-        if line.find("iemdb iemdb2") > 0:
-            line = "%s iemdb iemdb2" % (ip, )
-            print("Setting iemdb to ip: %s" % (ip, ))
-        elif line.find("iemdb-hads") > 0:
-            line = "%s iemdb-hads" % (hads_ip, )
-            print("Setting iemdb-hads to ip: %s" % (hads_ip, ))
-        elif line.find("iemdb-mos") > 0:
-            line = "%s iemdb-mos" % (hads_ip, )
-            print("Setting iemdb-mos to ip: %s" % (hads_ip, ))
+        if line.find("iemdb.local iemdb2.local") > 0:
+            line = "%s iemdb.local iemdb2.local" % (ip, )
+            print("Setting iemdb.local to ip: %s" % (ip, ))
+        elif line.find("iemdb-hads.local") > 0:
+            line = "%s iemdb-hads.local" % (hads_ip, )
+            print("Setting iemdb-hads.local to ip: %s" % (hads_ip, ))
+        elif line.find("iemdb-mos.local") > 0:
+            line = "%s iemdb-mos.local" % (hads_ip, )
+            print("Setting iemdb-mos.local to ip: %s" % (hads_ip, ))
+        elif line.find("iemdb-iemre.local") > 0:
+            line = "%s iemdb-iemre.local" % (hads_ip, )
+            print("Setting iemdb-iemre.local to ip: %s" % (iemre_ip, ))
         result.append(line)
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, '\n'.join(result))
