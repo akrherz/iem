@@ -32,7 +32,7 @@ env:
       MINICONDA=3
 before_install:
   - sudo apt-get --yes remove postgresql-10
-  - sudo service postgresql restart 11
+  - sudo service postgresql restart 11 || sudo systemctl status postgresql.service
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /opt/iem
   - echo `pwd`
