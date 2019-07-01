@@ -28,6 +28,7 @@ before_install:
   # https://travis-ci.community/t/install-postgresql-11/3894/5
   - sudo apt-get install -yq --no-install-suggests --no-install-recommends postgresql-common
   - sudo service postgresql stop
+  - sudo apt-get --yes remove postgresql-10
   - sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-11 postgresql-client-11 postgresql-11-postgis-2.5
   - sudo service postgresql start 11
   - sudo mkdir -p /mesonet/www/logs
