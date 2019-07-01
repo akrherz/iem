@@ -9,10 +9,10 @@ cache:
 services:
   - postgresql
 addons:
-  postgresql: 10
+  postgresql: 11
   apt:
     packages:
-      - postgresql-10-postgis-2.4
+      - postgresql-11-postgis-2.5
   hosts:
     - iemdb
     - iemdb2
@@ -31,6 +31,8 @@ env:
       MOD_WSGI_SO=mod_wsgi-py36.cpython-36m-x86_64-linux-gnu.so;
       MINICONDA=3
 before_install:
+  - sudo apt-get --yes remove postgresql-10
+  - sudo service postgresql restart 11
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /opt/iem
   - echo `pwd`
@@ -80,6 +82,8 @@ install:
   # now delete out some cache stuff, so that our travis-ci cache is still valid
   - rm -f $HOME/miniconda$MINICONDA/pkgs/cache/*
 before_script:
+  # https://travis-ci.community/t/t/712/12
+  - export PATH="/usr/lib/postgresql/11/bin:$PATH"
   - cd database; sh bootstrap.sh
   - python schema_manager.py
   - cd ..
