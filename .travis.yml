@@ -6,13 +6,7 @@ cache:
     - $HOME/.cache/pip
     - $HOME/miniconda2
     - $HOME/miniconda3
-services:
-  - postgresql
 addons:
-  postgresql: 11
-  apt:
-    packages:
-      - postgresql-11-postgis-2.5
   hosts:
     - iemdb
     - iemdb2
@@ -31,8 +25,11 @@ env:
       MOD_WSGI_SO=mod_wsgi-py36.cpython-36m-x86_64-linux-gnu.so;
       MINICONDA=3
 before_install:
-  - sudo apt-get --yes remove postgresql-10
-  - sudo service postgresql restart 11 || sudo systemctl status postgresql.service -l
+  # https://travis-ci.community/t/install-postgresql-11/3894/5
+  - sudo apt-get install -yq --no-install-suggests --no-install-recommends postgresql-common
+  - sudo service postgresql stop
+  - sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-11 postgresql-client-11 postgresql-11-postgis-2.5
+  - sudo service postgresql start 11
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /opt/iem
   - echo `pwd`
