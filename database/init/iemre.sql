@@ -119,10 +119,11 @@ CREATE UNIQUE INDEX on iemre_dailyc(gid, valid);
 
 -- _______________________________________________________________________
 -- Storage of hourly analysis
+-- NOTE: we had troubles getting cute with variable types, just use real
 CREATE TABLE iemre_hourly(
     gid int REFERENCES iemre_grid(gid),
     valid timestamptz,
-    skyc smallint,
+    skyc real,
     tmpk real,
     dwpk real,
     uwnd real,
