@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: xenial
 cache:
   timeout: 1000
   directories:
@@ -7,14 +7,12 @@ cache:
     - $HOME/miniconda2
     - $HOME/miniconda3
 addons:
-  postgresql: "11"
-  apt:
-    packages:
-      - postgresql-11-postgis-2.5
   hosts:
-    - iemdb
-    - iemdb2
-    - iemdb-hads
+    - iemdb.local
+    - iemdb2.local
+    - iemdb-hads.local
+    - iemdb-iemre.local
+    - iemdb-mos.local
     - iem.local
     - iem-memcached
     - iemdb-talltowers.local
@@ -29,6 +27,15 @@ env:
       MOD_WSGI_SO=mod_wsgi-py36.cpython-36m-x86_64-linux-gnu.so;
       MINICONDA=3
 before_install:
+  # https://travis-ci.community/t/install-postgresql-11/3894/5
+  - sudo service postgresql stop
+  - sudo apt-get --yes remove postgresql-10-postgis-2.4
+  - sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-11-postgis-2.5-scripts postgresql-11 postgresql-client-11 postgresql-11-postgis-2.5
+  - sed -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf > postgresql.conf
+  - sudo chown postgres postgresql.conf
+  - sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
+  - sudo mv postgresql.conf /etc/postgresql/11/main
+  - sudo service postgresql restart 11
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /opt/iem
   - echo `pwd`
@@ -78,6 +85,9 @@ install:
   # now delete out some cache stuff, so that our travis-ci cache is still valid
   - rm -f $HOME/miniconda$MINICONDA/pkgs/cache/*
 before_script:
+  # https://travis-ci.community/t/t/712/12
+  - export PATH="/usr/lib/postgresql/11/bin:$PATH"
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
   - cd database; sh bootstrap.sh
   - python schema_manager.py
   - cd ..
