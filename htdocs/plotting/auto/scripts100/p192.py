@@ -38,6 +38,14 @@ def get_description():
              default='IA', label='Select State: (ignored if plotting wfo)'),
         dict(type='select', name='v', default='vsby', options=PDICT2,
              label='Select statistic to plot:'),
+        dict(
+            type='float', name='above', optional=True, default=9999,
+            label='Remove any plotted values above threshold:'
+        ),
+        dict(
+            type='float', name='below', optional=True, default=-9999,
+            label='Remove any plotted values below threshold:'
+        ),
         dict(type='datetime', name='valid',
              default=utcnow.strftime("%Y/%m/%d %H00"),
              label='Valid Analysis Time (UTC)', optional=True,
@@ -131,8 +139,16 @@ def plotter(fdict):
             df['relh'].values * units('percent'),
             df['sknt'].values * units('knots')
         ).to(units('degF')).m
+    # Data QC, cough
+    if ctx.get('above'):
+        df = df[df[varname] < ctx['above']]
+    if ctx.get('below'):
+        df = df[df[varname] > ctx['below']]
+    # with QC done, we compute ramps
+    if varname != 'vsby':
         ramp = np.linspace(
-            df['feel'].min() - 5, df['feel'].max() + 5, 10, dtype='i')
+            df[varname].min() - 5, df[varname].max() + 5, 10, dtype='i')
+
     mp.contourf(
         df['lon'].values, df['lat'].values, df[varname].values, ramp,
         units=valunit, cmap=plt.get_cmap(ctx['cmap']))
@@ -143,7 +159,8 @@ def plotter(fdict):
 
     mp.plot_values(
         df2['lon'].values, df2['lat'].values,
-        df2[varname].values, '%.1f')
+        df2[varname].values, '%.1f', labelbuffer=10
+    )
     mp.drawcounties()
     if ctx['t'] == 'cwa':
         mp.draw_cwas()
