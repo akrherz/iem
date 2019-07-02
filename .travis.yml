@@ -87,7 +87,7 @@ install:
 before_script:
   # https://travis-ci.community/t/t/712/12
   - export PATH="/usr/lib/postgresql/11/bin:$PATH"
-  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres || true
   - cd database; sh bootstrap.sh
   - python schema_manager.py
   - cd ..
