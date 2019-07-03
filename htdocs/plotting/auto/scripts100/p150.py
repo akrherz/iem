@@ -73,7 +73,7 @@ def plotter(fdict):
     if which == 'month':
         vlimit = (" and extract(month from f.valid) = %s "
                   ) % (ts.month,)
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
     name = nt.sts[station]['name']
     stations = [station, ]
     if station.startswith("_"):

@@ -7,24 +7,24 @@
 // reference this $_DATABASES array :(
 global $_DATABASES;
 $_DATABASES = Array(
- 'access' => "dbname=iem host=iemdb user=nobody connect_timeout=5",
- 'iem' => "dbname=iem host=iemdb user=nobody connect_timeout=5",
- 'afos' => "dbname=afos host=iemdb user=nobody connect_timeout=5",
- 'hads' => "dbname=hads host=iemdb-hads user=nobody connect_timeout=5",
- 'asos' => "dbname=asos host=iemdb user=nobody connect_timeout=5",
- 'coop' => "dbname=coop host=iemdb user=nobody connect_timeout=5",
- 'awos' => "dbname=awos host=iemdb user=nobody connect_timeout=5",
- 'mos' => "dbname=mos host=iemdb-mos user=nobody connect_timeout=5",
- 'rwis' => "dbname=rwis host=iemdb user=nobody connect_timeout=5",
- 'wepp' => "dbname=wepp host=iemdb user=nobody connect_timeout=5",
- 'snet' => "dbname=snet host=iemdb user=nobody connect_timeout=5",
- 'mesosite' => "dbname=mesosite host=iemdb user=nobody connect_timeout=5",
- 'isuag' => "dbname=isuag host=iemdb user=nobody connect_timeout=5",
- 'other' => "dbname=other host=iemdb user=nobody connect_timeout=5",
- 'postgis' => "dbname=postgis host=iemdb user=nobody connect_timeout=5",
- 'portfolio' => "dbname=portfolio host=iemdb user=nobody connect_timeout=5",
- 'scan' => "dbname=scan host=iemdb user=nobody connect_timeout=5",
- 'squaw' => "dbname=squaw host=iemdb user=nobody connect_timeout=5",
+ 'access' => "dbname=iem host=iemdb.local user=nobody connect_timeout=5",
+ 'iem' => "dbname=iem host=iemdb.local user=nobody connect_timeout=5",
+ 'afos' => "dbname=afos host=iemdb.local user=nobody connect_timeout=5",
+ 'hads' => "dbname=hads host=iemdb-hads.local user=nobody connect_timeout=5",
+ 'asos' => "dbname=asos host=iemdb.local user=nobody connect_timeout=5",
+ 'coop' => "dbname=coop host=iemdb.local user=nobody connect_timeout=5",
+ 'awos' => "dbname=awos host=iemdb.local user=nobody connect_timeout=5",
+ 'mos' => "dbname=mos host=iemdb-mos.local user=nobody connect_timeout=5",
+ 'rwis' => "dbname=rwis host=iemdb.local user=nobody connect_timeout=5",
+ 'wepp' => "dbname=wepp host=iemdb.local user=nobody connect_timeout=5",
+ 'snet' => "dbname=snet host=iemdb.local user=nobody connect_timeout=5",
+ 'mesosite' => "dbname=mesosite host=iemdb.local user=nobody connect_timeout=5",
+ 'isuag' => "dbname=isuag host=iemdb.local user=nobody connect_timeout=5",
+ 'other' => "dbname=other host=iemdb.local user=nobody connect_timeout=5",
+ 'postgis' => "dbname=postgis host=iemdb.local user=nobody connect_timeout=5",
+ 'portfolio' => "dbname=portfolio host=iemdb.local user=nobody connect_timeout=5",
+ 'scan' => "dbname=scan host=iemdb.local user=nobody connect_timeout=5",
+ 'squaw' => "dbname=squaw host=iemdb.local user=nobody connect_timeout=5",
 );
 
 function database_failure($DBKEY)
@@ -38,18 +38,18 @@ function database_failure($DBKEY)
 function iemdb($dbname, $force_new=0, $rw=FALSE)
 {
 	$dbuser = "nobody";
-	$dbhost = "iemdb"; // read-only host
-	if ($rw) $dbhost = "iemdb"; // rw master
+	$dbhost = "iemdb.local"; // read-only host
+	if ($rw) $dbhost = "iemdb.local"; // rw master
 	if ($dbname == "access"){ $dbname = "iem"; }
-	if ($dbname == "hads") $dbhost = "iemdb-hads";
-	if ($dbname == "mos") $dbhost = "iemdb-mos";
+	if ($dbname == "hads") $dbhost = "iemdb-hads.local";
+	if ($dbname == "mos") $dbhost = "iemdb-mos.local";
 	
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);
 	$db = pg_connect( $connstr , $force_new);
 	if (! $db ){
 		$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
-				$dbname, "iemdb2", $dbuser);
+				$dbname, "iemdb2.local", $dbuser);
 		$db = pg_connect( $connstr, $force_new);
 	}
 	if (! $db){

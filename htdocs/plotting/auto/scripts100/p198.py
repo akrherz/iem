@@ -98,7 +98,7 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
     name = nt.sts[station]['name']
     stations = [station, ]
     if station.startswith("_"):
