@@ -144,16 +144,21 @@ declare
 begin
     for year in 1980..2030
     loop
-        execute format($f$
-            create table iemre_hourly_%s partition of iemre_hourly
-            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
-        $f$, year, year, year + 1);
-        execute format($f$
-            GRANT ALL on iemre_hourly_%s to mesonet,ldm
-        $f$, year);
-        execute format($f$
-            GRANT SELECT on iemre_hourly_%s to nobody,apache
-        $f$, year);
+        for month in 1..12
+        loop
+            execute format($f$
+                create table iemre_hourly_%s%s partition of iemre_hourly
+                for values from ('%s-%s-01 00:00+00') to ('%s-%s-01 00:00+00')
+            $f$, year, lpad(month::text, 2, '0'), year, month,
+            case when month = 12 then year + 1 else year end,
+            case when month = 12 then 1 else month + 1 end);
+            execute format($f$
+                GRANT ALL on iemre_hourly_%s%s to mesonet,ldm
+            $f$, year, lpad(month::text, 2, '0'));
+            execute format($f$
+                GRANT SELECT on iemre_hourly_%s%s to nobody,apache
+            $f$, year, lpad(month::text, 2, '0'));
+        end loop;
     end loop;
 end;
 $do$;
