@@ -57,12 +57,6 @@ then, only base reflectivity was saved.</li>
 <li><a href="http://hurricane.ncdc.noaa.gov/pls/plhas/has.dsselect">NCDC ~Complete NEXRAD archive</a>
  <br />This is the one-stop place for historical Level II and Level III NEXRAD information.  A wonderful site!</li>
 
-<li><a href="http://mesonet.tamu.edu/products/RADAR/nexrad/CRAFT/">Texas Mesonet LEVEL II archive</a>
- <br />Past 30 days of Level II data for all NEXRAD sites.</li>
-
-<li><a href="http://mesonet.tamu.edu/products/RADAR/nexrad/NIDS/">Texas Mesonet LEVEL III archive</a>
-<br />Past 30 days of Level III data for all NEXRAD sites.</li>
-
  <li><a href="/archive/data/">GIS NEXRAD Composites</a>
   <br />Composites of NEXRAD base reflectivity.  The raw files are found
    in the general IEM archive in the sub-directory called 'GIS/uscomp/'.</li>
@@ -138,10 +132,10 @@ this data back to 2001.  The IEM's archives can be found:
 <li><a href="http://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
  <br />Excellent archive of the NWS DIFAX products.</li>
 
-<li><a href="http://www.crh.noaa.gov/unr/?n=pw">Precipitable Water Climatologies</a>
+<li><a href="https://www.weather.gov/unr/uac">Precipitable Water Climatologies</a>
  <br />Fascinating month-by-month plots of PWAT climatologies for the RAOB sites in the CONUS</li>
 
-<li><a href="http://locust.mmm.ucar.edu/case-selection/">UCAR plot archive</a>
+<li><a href="http://www2.mmm.ucar.edu/imagearchive/">UCAR plot archive</a>
   <br />Assorted RADAR, satellite, and model plots back to 1998.</li>
 
 <li><a href="/archive/data/">IEM Generated Plots</a>
