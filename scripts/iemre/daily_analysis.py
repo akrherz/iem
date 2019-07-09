@@ -252,7 +252,11 @@ def grid_day(ts, ds):
            (CASE WHEN min_dwpf > -50 and min_dwpf < 95
                then min_dwpf else null end) as lowdwpf,
             (CASE WHEN avg_sknt >= 0 and avg_sknt < 100
-             then avg_sknt else null end) as avgsknt
+             then avg_sknt else null end) as avgsknt,
+            (CASE WHEN min_rh > 0 and min_rh < 101
+             then min_rh else null end) as minrh,
+            (CASE WHEN max_rh > 0 and max_rh < 101
+             then max_rh else null end) as maxrh
            from summary_%s c, stations s WHERE day = '%s' and
            ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
@@ -277,6 +281,7 @@ def grid_day(ts, ds):
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata,
         null as highdwpf, null as lowdwpf, null as avgsknt
+        null as minrh, null as maxrh
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
         """, COOP_PGCONN, params=(iemre.WEST - mybuf,
@@ -307,6 +312,8 @@ def grid_day(ts, ds):
         mask[mask] &= res[mask] < 0
         res = np.where(mask, 0, res)
         ds['wind_speed'].values = datatypes.speed(res, 'KT').value('MPS')
+    ds['min_rh'].values = generic_gridder(df, 'minrh')
+    ds['max_rh'].values = generic_gridder(df, 'maxrh')
 
 
 def workflow(ts, irealtime, justprecip):

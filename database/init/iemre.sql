@@ -7,7 +7,7 @@ CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz
 );
-INSERT into iem_schema_manager_version values (-1, now());
+INSERT into iem_schema_manager_version values (0, now());
 
 -- Our baseline grid
 CREATE TABLE iemre_grid(
@@ -72,7 +72,9 @@ CREATE TABLE iemre_daily(
     snowd_12z real,
     avg_dwpk real,
     wind_speed real,
-    power_swdn real
+    power_swdn real,
+    min_rh real,
+    max_rh real
 ) PARTITION by RANGE (valid);
 GRANT ALL on iemre_daily to mesonet,ldm;
 GRANT SELECT on iemre_daily to nobody,apache;
