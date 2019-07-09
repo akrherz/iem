@@ -35,7 +35,7 @@ def main():
             line = "%s iemdb-mos.local" % (hads_ip, )
             print("Setting iemdb-mos.local to ip: %s" % (hads_ip, ))
         elif line.find("iemdb-iemre.local") > 0:
-            line = "%s iemdb-iemre.local" % (hads_ip, )
+            line = "%s iemdb-iemre.local" % (iemre_ip, )
             print("Setting iemdb-iemre.local to ip: %s" % (iemre_ip, ))
         result.append(line)
     (tmpfd, tmpfn) = tempfile.mkstemp()

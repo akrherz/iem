@@ -19,8 +19,8 @@ from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre, datatypes
 from pyiem.util import get_dbconn, utc, ncopen, logger
 
-PGCONN = get_dbconn('iem', user='nobody')
-COOP_PGCONN = get_dbconn('coop', user='nobody')
+PGCONN = get_dbconn('iem')
+COOP_PGCONN = get_dbconn('coop')
 LOG = logger()
 
 
@@ -31,7 +31,7 @@ def generic_gridder(df, idx):
     # print(("Processing generic_gridder for column: %s min:%.2f max:%.2f"
     #       ) % (idx, df[idx].min(), df[idx].max()))
     if df[idx].max() == 0 and df[idx].max() == 0:
-        return 0
+        return np.zeros((iemre.NY, iemre.NX))
     window = 2.0
     f1 = df[df[idx].notnull()]
     for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
@@ -189,6 +189,7 @@ def grid_day12(ts, ds):
                    iemre.EAST + mybuf, iemre.SOUTH - mybuf,
                    iemre.WEST - mybuf, iemre.SOUTH - mybuf)
         df = read_sql(sql, PGCONN)
+        LOG.debug("loaded %s rows from iemaccess database", len(df.index))
     else:
         df = read_sql("""
         WITH mystations as (
@@ -212,6 +213,7 @@ def grid_day12(ts, ds):
                                   iemre.SOUTH - mybuf,
                                   iemre.WEST - mybuf,
                                   iemre.SOUTH - mybuf, ts))
+        LOG.debug("loaded %s rows from climodat database", len(df.index))
     # plot(df)
 
     if len(df.index) > 4:
@@ -320,8 +322,10 @@ def workflow(ts, irealtime, justprecip):
     """Do Work"""
     # load up our current data
     ds = iemre.get_grids(ts)
+    LOG.debug("loaded %s variables from IEMRE database", len(ds))
     # For this date, the 12 UTC COOP obs will match the date
     if not justprecip:
+        LOG.debug("doing 12z logic for %s", ts)
         grid_day12(ts, ds)
     do_precip12(ts, ds)
     # This is actually yesterday!
@@ -333,6 +337,7 @@ def workflow(ts, irealtime, justprecip):
         ts -= datetime.timedelta(days=1)
         ds = iemre.get_grids(ts)
     if not justprecip:
+        LOG.debug("doing calendar day logic for %s", ts)
         grid_day(ts, ds)
     do_precip(ts, ds)
     iemre.set_grids(ts, ds)
