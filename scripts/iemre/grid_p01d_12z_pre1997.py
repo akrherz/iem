@@ -1,5 +1,6 @@
 """Make a gridded analysis of p01d_12z based on obs."""
 import sys
+import subprocess
 import datetime
 
 import numpy as np
@@ -8,21 +9,21 @@ import pyproj
 from metpy.units import units as mpunits
 from metpy.units import masked_array
 from pandas.io.sql import read_sql
-from pyiem.iemre import get_daily_ncname, daily_offset
-from pyiem.util import ncopen, get_dbconn
+from pyiem.iemre import get_grids, XAXIS, YAXIS
+from pyiem.util import get_dbconn
 
 
-def generic_gridder(day, nc, df, idx):
+def generic_gridder(day, df, idx):
     """
     Generic gridding algorithm for easy variables
     """
     data = df[idx].values
     coordinates = (df['lon'].values, df['lat'].values)
     region = [
-        nc.variables['lon'][0],
-        nc.variables['lon'][-1],
-        nc.variables['lat'][0],
-        nc.variables['lat'][-1],
+        XAXIS[0],
+        XAXIS[-1],
+        YAXIS[0],
+        YAXIS[-1],
     ]
     projection = pyproj.Proj(proj="merc", lat_ts=df['lat'].mean())
     spacing = 0.5
@@ -37,7 +38,7 @@ def generic_gridder(day, nc, df, idx):
     )
     chain.fit(*train)
     score = chain.score(*test)
-    shape = (nc.dimensions['lat'].size, nc.dimensions['lon'].size)
+    shape = (len(YAXIS), len(XAXIS))
     grid = chain.grid(
         region=region,
         shape=shape,
@@ -64,12 +65,12 @@ def main(argv):
         substr(a.station,3,4) != '0000' and substr(station,3,1) != 'C'
         and precip >= 0 and precip < 50
     """, pgconn, params=(day, ))
-    nc = ncopen(get_daily_ncname(day.year), 'a')
-    res = generic_gridder(day, nc, df, 'precip')
+    res = generic_gridder(day, df, 'precip')
     if res is not None:
-        offset = daily_offset(day)
-        nc.variables['p01d_12z'][offset] = res.to(mpunits('mm')).magnitude
-    nc.close()
+        ds = get_grids(day, varnames='p01d_12z')
+        ds['p01d_12z'].values = res.to(mpunits('mm')).magnitude[0, :, :]
+        subprocess.call("python db_to_netcdf.py %s" % (
+            day.strftime("%Y %m %d"), ), shell=True)
 
 
 if __name__ == '__main__':

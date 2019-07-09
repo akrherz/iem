@@ -32,22 +32,21 @@ def main():
     offset0 = iemre.daily_offset(ts0)
     offset1 = iemre.daily_offset(ts1)
 
-    nc = ncopen(iemre.get_daily_ncname(ts0.year))
+    with ncopen(iemre.get_daily_ncname(ts0.year)) as nc:
 
-    # 2-D precipitation, inches
-    precip = np.sum(nc.variables['p01d'][offset0:offset1, :, :] / 25.4, axis=0)
+        # 2-D precipitation, inches
+        precip = np.sum(
+            nc.variables['p01d'][offset0:offset1, :, :] / 25.4, axis=0)
 
-    # GDD
-    H = datatypes.temperature(nc.variables['high_tmpk'][offset0:offset1],
-                              'K').value("F")
-    H = np.where(H < base, base, H)
-    H = np.where(H > ceil, ceil, H)
-    L = datatypes.temperature(nc.variables['low_tmpk'][offset0:offset1],
-                              'K').value("F")
-    L = np.where(L < base, base, L)
-    gdd = np.sum((H+L)/2.0 - base, axis=0)
-
-    nc.close()
+        # GDD
+        H = datatypes.temperature(
+            nc.variables['high_tmpk'][offset0:offset1], 'K').value("F")
+        H = np.where(H < base, base, H)
+        H = np.where(H > ceil, ceil, H)
+        L = datatypes.temperature(
+            nc.variables['low_tmpk'][offset0:offset1], 'K').value("F")
+        L = np.where(L < base, base, L)
+        gdd = np.sum((H+L)/2.0 - base, axis=0)
 
     if fmt == 'json':
         # For example: 19013

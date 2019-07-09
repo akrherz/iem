@@ -24,7 +24,7 @@ COOP_PGCONN = get_dbconn('coop', user='nobody')
 LOG = logger()
 
 
-def generic_gridder(df, idx, domain):
+def generic_gridder(df, idx):
     """
     Generic gridding algorithm for easy variables
     """
@@ -55,8 +55,6 @@ def generic_gridder(df, idx, domain):
         return
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
-    # set a sentinel of where we won't be estimating
-    res = np.where(domain > 0, res, -9999)
     # do our gridding
     grid = inverse_distance_to_grid(
         df2['lon'].values, df2['lat'].values,
@@ -78,7 +76,7 @@ def generic_gridder(df, idx, domain):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def do_precip(ts):
+def do_precip(ts, ds):
     """Compute the 6 UTC to 6 UTC precip
 
     We need to be careful here as the timestamp sent to this app is today,
@@ -118,10 +116,10 @@ def do_precip(ts):
         #        np.max(hnc.variables['p01m'][offset, :, :]))
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
-    write_grid(ts, 'p01d', np.where(phour < 0, 0, phour))
+    ds['p01d'].values = np.where(phour < 0, 0, phour)
 
 
-def do_precip12(ts):
+def do_precip12(ts, ds):
     """Compute the 24 Hour precip at 12 UTC, we do some more tricks though"""
     offset = iemre.daily_offset(ts)
     ets = utc(ts.year, ts.month, ts.day, 12)
@@ -151,7 +149,7 @@ def do_precip12(ts):
         hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
         hnc.close()
-    write_grid(ts, 'p01d_12z', np.where(phour < 0, 0, phour))
+    ds['p01d_12z'].values = np.where(phour < 0, 0, phour)
 
 
 def plot(df):
@@ -164,7 +162,7 @@ def plot(df):
     m.close()
 
 
-def grid_day12(ts, domain):
+def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
     print(('12z hi/lo for %s') % (ts, ))
     mybuf = 2.
@@ -217,41 +215,27 @@ def grid_day12(ts, domain):
     # plot(df)
 
     if len(df.index) > 4:
-        res = generic_gridder(df, 'highdata', domain)
-        write_grid(ts, 'high_tmpk_12z', datatypes.temperature(
-            res, 'F').value('K'))
+        res = generic_gridder(df, 'highdata')
+        ds['high_tmpk_12z'].values = datatypes.temperature(
+            res, 'F').value('K')
 
-        res = generic_gridder(df, 'lowdata', domain)
-        write_grid(ts, 'low_tmpk_12z', datatypes.temperature(
-            res, 'F').value('K'))
+        res = generic_gridder(df, 'lowdata')
+        ds['low_tmpk_12z'].values = datatypes.temperature(
+            res, 'F').value('K')
 
-        res = generic_gridder(df, 'snowdata', domain)
-        write_grid(ts, 'snow_12z', datatypes.distance(
-            res, 'IN').value('MM'))
+        res = generic_gridder(df, 'snowdata')
+        ds['snow_12z'].values = datatypes.distance(
+            res, 'IN').value('MM')
 
-        res = generic_gridder(df, 'snowddata', domain)
-        write_grid(ts, 'snowd_12z', datatypes.distance(
-            res, 'IN').value('MM'))
+        res = generic_gridder(df, 'snowddata')
+        ds['snowd_12z'].values = datatypes.distance(
+            res, 'IN').value('MM')
     else:
         print(("%s has %02i entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
 
 
-def write_grid(valid, vname, grid):
-    """Write data to backend netcdf"""
-    offset = iemre.daily_offset(valid)
-    nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=600)
-    if nc is None:
-        print("daily_analysis#write_grid first open attempt failed, try #2")
-        nc = ncopen(iemre.get_daily_ncname(valid.year), 'a', timeout=600)
-    print(("%13s [idx:%s] min: %6.2f max: %6.2f [%s]"
-           ) % (vname, offset, np.nanmin(grid), np.nanmax(grid),
-                nc.variables[vname].units))
-    nc.variables[vname][offset] = grid
-    nc.close()
-
-
-def grid_day(ts, domain):
+def grid_day(ts, ds):
     """Do our gridding"""
     mybuf = 2.
     if ts.year > 1927:
@@ -309,49 +293,45 @@ def grid_day(ts, domain):
         print(("%s has %02i entries, FAIL"
                ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
         return
-    res = generic_gridder(df, 'highdata', domain)
-    write_grid(ts, 'high_tmpk', datatypes.temperature(res, 'F').value('K'))
-    res = generic_gridder(df, 'lowdata', domain)
-    write_grid(ts, 'low_tmpk', datatypes.temperature(res, 'F').value('K'))
-    hres = generic_gridder(df, 'highdwpf', domain)
-    lres = generic_gridder(df, 'lowdwpf', domain)
+    res = generic_gridder(df, 'highdata')
+    ds['high_tmpk'].values = datatypes.temperature(res, 'F').value('K')
+    res = generic_gridder(df, 'lowdata')
+    ds['low_tmpk'].values = datatypes.temperature(res, 'F').value('K')
+    hres = generic_gridder(df, 'highdwpf')
+    lres = generic_gridder(df, 'lowdwpf')
     if hres is not None and lres is not None:
-        write_grid(ts, 'avg_dwpk', datatypes.temperature((hres + lres) / 2.,
-                                                         'F').value('K'))
-    res = generic_gridder(df, 'avgsknt', domain)
+        ds['avg_dwpk'].values = datatypes.temperature(
+            (hres + lres) / 2., 'F').value('K')
     if res is not None:
         mask = ~np.isnan(res)
         mask[mask] &= res[mask] < 0
         res = np.where(mask, 0, res)
-        write_grid(ts, 'wind_speed', datatypes.speed(res, 'KT').value('MPS'))
+        ds['wind_speed'].values = datatypes.speed(res, 'KT').value('MPS')
 
 
 def workflow(ts, irealtime, justprecip):
     """Do Work"""
-    # Load up our netcdf file!
-    ncfn = iemre.get_daily_ncname(ts.year)
-    if not os.path.isfile(ncfn):
-        print("will create %s" % (ncfn, ))
-        cmd = "python init_daily.py %s" % (ts.year,)
-        subprocess.call(cmd, shell=True)
-    nc = ncopen(ncfn, 'a', timeout=600)
-    domain = nc.variables['hasdata'][:, :]
-    nc.close()
+    # load up our current data
+    ds = iemre.get_grids(ts)
     # For this date, the 12 UTC COOP obs will match the date
     if not justprecip:
-        grid_day12(ts, domain)
-    do_precip12(ts)
+        grid_day12(ts, ds)
+    do_precip12(ts, ds)
     # This is actually yesterday!
     if irealtime:
+        iemre.set_grids(ts, ds)
+        subprocess.call(
+            "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
+            shell=True)
         ts -= datetime.timedelta(days=1)
-    ncfn = iemre.get_daily_ncname(ts.year)
-    if not os.path.isfile(ncfn):
-        print("will create %s" % (ncfn, ))
-        cmd = "python init_daily.py %s" % (ts.year,)
-        subprocess.call(cmd, shell=True)
+        ds = iemre.get_grids(ts)
     if not justprecip:
-        grid_day(ts, domain)
-    do_precip(ts)
+        grid_day(ts, ds)
+    do_precip(ts, ds)
+    iemre.set_grids(ts, ds)
+    subprocess.call(
+        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
+        shell=True)
 
 
 def main(argv):

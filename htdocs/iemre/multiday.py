@@ -60,24 +60,21 @@ def main():
     offset2 = iemre.daily_offset(ts2) + 1
 
     # Get our netCDF vars
-    nc = ncopen(iemre.get_daily_ncname(ts1.year))
-    hightemp = datatypes.temperature(nc.variables['high_tmpk'][offset1:offset2,
-                                                               j, i],
-                                     'K').value("F")
-    high12temp = datatypes.temperature(
-        nc.variables['high_tmpk_12z'][offset1:offset2, j, i],
-        'K'
-    ).value("F")
-    lowtemp = datatypes.temperature(nc.variables['low_tmpk'][offset1:offset2,
-                                                             j, i],
-                                    'K').value("F")
-    low12temp = datatypes.temperature(
-        nc.variables['low_tmpk_12z'][offset1:offset2, j, i],
-        'K'
-    ).value("F")
-    precip = nc.variables['p01d'][offset1:offset2, j, i] / 25.4
-    precip12 = nc.variables['p01d_12z'][offset1:offset2, j, i] / 25.4
-    nc.close()
+    with ncopen(iemre.get_daily_ncname(ts1.year)) as nc:
+        hightemp = datatypes.temperature(
+            nc.variables['high_tmpk'][offset1:offset2, j, i], 'K').value("F")
+        high12temp = datatypes.temperature(
+            nc.variables['high_tmpk_12z'][offset1:offset2, j, i],
+            'K'
+        ).value("F")
+        lowtemp = datatypes.temperature(
+            nc.variables['low_tmpk'][offset1:offset2, j, i], 'K').value("F")
+        low12temp = datatypes.temperature(
+            nc.variables['low_tmpk_12z'][offset1:offset2, j, i],
+            'K'
+        ).value("F")
+        precip = nc.variables['p01d'][offset1:offset2, j, i] / 25.4
+        precip12 = nc.variables['p01d_12z'][offset1:offset2, j, i] / 25.4
 
     # Get our climatology vars
     c2000 = ts1.replace(year=2000)

@@ -5,6 +5,7 @@ Called from RUN_MIDNIGHT.sh
 from __future__ import print_function
 import datetime
 import os
+import subprocess
 import sys
 
 import pyproj
@@ -46,11 +47,12 @@ def do_coop(ts):
                                np.array(vals))
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
 
-    nc = ncopen(iemre.get_daily_ncname(ts.year), 'a', timeout=300)
-    offset = iemre.daily_offset(ts)
-    # Data above is MJ / d / m-2, we want W / m-2
-    nc.variables['rsds'][offset, :, :] = nn(xi, yi) * 1000000. / 86400.
-    nc.close()
+    ds = iemre.get_grids(ts.date(), varnames='rsds')
+    ds['rsds'].values = nn(xi, yi) * 1000000. / 86400.
+    iemre.set_grids(ts.date(), ds)
+    subprocess.call(
+        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
+        shell=True)
 
 
 def try_merra(ts):
@@ -82,11 +84,12 @@ def try_merra(ts):
     )
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
 
-    nc = ncopen(iemre.get_daily_ncname(ts.year), 'a', timeout=300)
-    offset = iemre.daily_offset(ts)
-    # Data above is W m-2
-    nc.variables['rsds'][offset, :, :] = nn(xi, yi)
-    nc.close()
+    ds = iemre.get_grids(ts.date(), varnames='rsds')
+    ds['rsds'].values = nn(xi, yi) * 1000000. / 86400.
+    iemre.set_grids(ts.date(), ds)
+    subprocess.call(
+        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
+        shell=True)
 
     return True
 
@@ -149,21 +152,21 @@ def do_hrrr(ts):
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
-    nc = ncopen(iemre.get_daily_ncname(ts.year), 'a', timeout=300)
-    offset = iemre.daily_offset(ts)
-    hasdata = nc.variables['hasdata'][:, :]
-    data = nc.variables['rsds'][offset, :, :]
+    ds = iemre.get_grids(ts.date(), varnames='rsds')
     for i, lon in enumerate(iemre.XAXIS):
         for j, lat in enumerate(iemre.YAXIS):
-            if hasdata[j, i] < 1:
-                continue
             (x, y) = LCC(lon, lat)
             i2 = np.digitize([x], xaxis)[0]
             j2 = np.digitize([y], yaxis)[0]
-            data[j, i] = total[j2, i2]
+            try:
+                ds['rsds'].values[j, i] = total[j2, i2]
+            except IndexError:
+                continue
 
-    nc.variables['rsds'][offset] = data
-    nc.close()
+    iemre.set_grids(ts.date(), ds)
+    subprocess.call(
+        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
+        shell=True)
 
 
 def main(argv):

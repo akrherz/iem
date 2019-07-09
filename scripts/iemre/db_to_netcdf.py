@@ -1,0 +1,38 @@
+"""Copy database grids to netcdf.
+
+    Example: python db_to_netcdf.py <year> <month> <day> <utchour>
+
+If hour and minute are omitted, this is a daily copy, otherwise hourly.
+
+see: akrherz/iem#199
+"""
+import sys
+import datetime
+
+from pyiem.util import utc, ncopen, logger
+from pyiem import iemre
+
+
+def main(argv):
+    """Go Main Go."""
+    log = logger()
+    if len(argv) == 6:
+        valid = utc(
+            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+        ncfn = iemre.get_hourly_ncname(valid.year)
+        idx = iemre.hourly_offset(valid)
+    else:
+        valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        ncfn = iemre.get_daily_ncname(valid.year)
+        idx = iemre.daily_offset(valid)
+    ds = iemre.get_grids(valid)
+    with ncopen(ncfn, 'a', timeout=600) as nc:
+        for vname in ds:
+            if vname not in nc.variables:
+                continue
+            log.debug("copying database var %s to netcdf", vname)
+            nc.variables[vname][idx, :, :] = ds[vname].values
+
+
+if __name__ == '__main__':
+    main(sys.argv)
