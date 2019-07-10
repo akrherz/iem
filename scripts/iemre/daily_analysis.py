@@ -6,7 +6,6 @@ this script twice per day:
     RUN_MIDNIGHT.sh for just the 'calendar day' variables yesterday
     RUN_NOON.sh for the 12z today vals and calendar day yesterday
 """
-from __future__ import print_function
 import os
 import sys
 import subprocess
@@ -15,6 +14,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.stats import zscore
+from metpy.units import units
 from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre, datatypes
 from pyiem.util import get_dbconn, utc, ncopen, logger
@@ -28,8 +28,6 @@ def generic_gridder(df, idx):
     """
     Generic gridding algorithm for easy variables
     """
-    # print(("Processing generic_gridder for column: %s min:%.2f max:%.2f"
-    #       ) % (idx, df[idx].min(), df[idx].max()))
     if df[idx].max() == 0 and df[idx].max() == 0:
         return np.zeros((iemre.NY, iemre.NX))
     window = 2.0
@@ -46,12 +44,10 @@ def generic_gridder(df, idx):
             # Compute where the standard dev is +/- 2std
             bad = box[z > 1.5]
             df.loc[bad.index, idx] = np.nan
-            # for _, row in bad.iterrows():
-            #    print _, idx, row['station'], row['name'], row[idx]
 
     df2 = df[df[idx].notnull()]
     if len(df2.index) < 4:
-        print("Not enough data %s" % (idx,))
+        LOG.info("Not enough data %s", idx)
         return
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
@@ -88,12 +84,14 @@ def do_precip(ts, ds):
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
     if ts.month == 12 and ts.day == 31:
-        print(("p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
-               ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                    ets.strftime("%Y%m%d%H"), offset2))
+        LOG.warning(
+            "p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL", ts, offset,
+            sts.strftime("%Y%m%d%H"), offset1, ets.strftime("%Y%m%d%H"),
+            offset2
+        )
         ncfn = iemre.get_hourly_ncname(ets.year)
         if not os.path.isfile(ncfn):
-            print("Missing %s" % (ncfn,))
+            LOG.warning("Missing %s", ncfn)
             return
         hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
@@ -106,7 +104,7 @@ def do_precip(ts, ds):
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
-            print("Missing %s" % (ncfn,))
+            LOG.warning("Missing %s", ncfn)
             return
         hnc = ncopen(ncfn, timeout=600)
         # for offset in range(offset1, offset2):
@@ -128,12 +126,13 @@ def do_precip12(ts, ds):
     offset2 = iemre.hourly_offset(ets)
     if ts.month == 1 and ts.day == 1:
         if sts.year >= 1900:
-            print(("p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL"
-                   ) % (ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                        ets.strftime("%Y%m%d%H"), offset2))
+            LOG.warning(
+                "p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
+                ts, offset, sts.strftime("%Y%m%d%H"), offset1,
+                ets.strftime("%Y%m%d%H"), offset2)
         ncfn = iemre.get_hourly_ncname(ets.year)
         if not os.path.isfile(ncfn):
-            print("Missing %s" % (ncfn,))
+            LOG.warning("Missing %s", ncfn)
             return
         hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
@@ -144,7 +143,7 @@ def do_precip12(ts, ds):
     else:
         ncfn = iemre.get_hourly_ncname(ts.year)
         if not os.path.isfile(ncfn):
-            print("Missing %s" % (ncfn,))
+            LOG.warning("Missing %s", ncfn)
             return
         hnc = ncopen(ncfn, timeout=600)
         phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
@@ -164,7 +163,7 @@ def plot(df):
 
 def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
-    print(('12z hi/lo for %s') % (ts, ))
+    LOG.info('12z hi/lo for %s', ts)
     mybuf = 2.
     if ts.year > 2010:
         sql = """
@@ -233,8 +232,10 @@ def grid_day12(ts, ds):
         ds['snowd_12z'].values = datatypes.distance(
             res, 'IN').value('MM')
     else:
-        print(("%s has %02i entries, FAIL"
-               ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
+        LOG.info(
+            "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"),
+            len(df.index)
+        )
 
 
 def grid_day(ts, ds):
@@ -297,8 +298,10 @@ def grid_day(ts, ds):
                                   iemre.WEST - mybuf,
                                   iemre.SOUTH - mybuf, ts))
     if len(df.index) < 4:
-        print(("%s has %02i entries, FAIL"
-               ) % (ts.strftime("%Y-%m-%d"), len(df.index)))
+        LOG.info(
+            "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"),
+            len(df.index)
+        )
         return
     res = generic_gridder(df, 'highdata')
     ds['high_tmpk'].values = datatypes.temperature(res, 'F').value('K')
@@ -309,11 +312,15 @@ def grid_day(ts, ds):
     if hres is not None and lres is not None:
         ds['avg_dwpk'].values = datatypes.temperature(
             (hres + lres) / 2., 'F').value('K')
+    res = generic_gridder(df, 'avgsknt')
     if res is not None:
-        mask = ~np.isnan(res)
-        mask[mask] &= res[mask] < 0
-        res = np.where(mask, 0, res)
-        ds['wind_speed'].values = datatypes.speed(res, 'KT').value('MPS')
+        ds['wind_speed'].values = (
+            res * units.knots).to(units.meters / units.second).m
+        LOG.debug(
+            "wind_speed min: %s max: %s",
+            np.nanmin(ds['wind_speed'].values),
+            np.nanmax(ds['wind_speed'].values)
+        )
     ds['min_rh'].values = generic_gridder(df, 'minrh')
     ds['max_rh'].values = generic_gridder(df, 'maxrh')
 
