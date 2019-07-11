@@ -56,19 +56,24 @@ def do_iowa_azos(date, itoday=False):
     WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
     """, pgconn, params=(date,), index_col='locationid')
     if itoday:
-        # Additionally, piggy back 24, 48 and 72h rainfall totals
+        # Additionally, piggy back rainfall totals
         df2 = read_sql("""
         SELECT station,
-        sum(phour) as precip72,
+        sum(phour) as precip720,
+        sum(case when valid >= (now() - '168 hours'::interval)
+            then phour else 0 end) as precip168,
+        sum(case when valid >= (now() - '72 hours'::interval)
+            then phour else 0 end) as precip72,
         sum(case when valid >= (now() - '48 hours'::interval)
             then phour else 0 end) as precip48,
         sum(case when valid >= (now() - '24 hours'::interval)
             then phour else 0 end) as precip24
         from hourly where network in ('IA_ASOS', 'AWOS')
-        and valid >= now() - '72 hours'::interval
+        and valid >= now() - '720 hours'::interval
         and phour > 0.005 GROUP by station
         """, pgconn, index_col='station')
-        for col in ['precip24', 'precip48', 'precip72']:
+        for col in [
+                'precip24', 'precip48', 'precip72', 'precip168', 'precip720']:
             df[col] = df2[col]
             # make sure the new column is >= precip
             df.loc[df[col] < df['precip'], col] = df['precip']
