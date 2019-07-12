@@ -13,11 +13,12 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
+from metpy.units import units
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ncopen
-from pyiem.datatypes import temperature, distance
+from pyiem.util import get_dbconn, logger
 from pyiem.reference import TRACE_VALUE, state_names
+LOG = logger()
 
 
 def load_table(state, date):
@@ -51,15 +52,10 @@ def load_table(state, date):
     return df
 
 
-def estimate_precip(df, ts):
+def estimate_precip(df, ds):
     """Estimate precipitation based on IEMRE"""
-    idx = iemre.daily_offset(ts)
-    nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
-    grid12 = distance(nc.variables['p01d_12z'][idx, :, :],
-                      'MM').value("IN").filled(0)
-    grid00 = distance(nc.variables['p01d'][idx, :, :],
-                      "MM").value("IN").filled(0)
-    nc.close()
+    grid12 = mm2in(ds['p01d_12z'].values)
+    grid00 = mm2in(ds['p01d'].values)
 
     for sid, row in df.iterrows():
         if not pd.isnull(row['precip']):
@@ -76,7 +72,7 @@ def estimate_precip(df, ts):
         elif np.isnan(precip) or np.ma.is_masked(precip):
             df.at[sid, 'precip'] = 0
         else:
-            df.at[sid, 'precip'] = "%.2f" % (precip,)
+            df.at[sid, 'precip'] = precip
 
 
 def snowval(val):
@@ -86,15 +82,15 @@ def snowval(val):
     return round(float(val), 1)
 
 
-def estimate_snow(df, ts):
+def mm2in(val):
+    """More special logic."""
+    return (val * units.mm).to(units.inch).m
+
+
+def estimate_snow(df, ds):
     """Estimate the Snow based on COOP reports"""
-    idx = iemre.daily_offset(ts)
-    nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
-    snowgrid12 = distance(nc.variables['snow_12z'][idx, :, :],
-                          'MM').value('IN').filled(0)
-    snowdgrid12 = distance(nc.variables['snowd_12z'][idx, :, :],
-                           'MM').value('IN').filled(0)
-    nc.close()
+    snowgrid12 = mm2in(ds['snow_12z'].values)
+    snowdgrid12 = mm2in(ds['snowd_12z'].values)
 
     for sid, row in df.iterrows():
         if pd.isnull(row['snow']):
@@ -103,19 +99,18 @@ def estimate_snow(df, ts):
             df.at[sid, 'snowd'] = snowdgrid12[row['gridj'], row['gridi']]
 
 
-def estimate_hilo(df, ts):
+def k2f(val):
+    """Converter."""
+    return (val * units.degK).to(units.degF).m
+
+
+def estimate_hilo(df, ds):
     """Estimate the High and Low Temperature based on gridded data"""
-    idx = iemre.daily_offset(ts)
-    nc = ncopen(iemre.get_daily_ncname(ts.year), 'r', timeout=300)
-    highgrid12 = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
-                             'K').value('F')
-    lowgrid12 = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
-                            'K').value('F')
-    highgrid00 = temperature(nc.variables['high_tmpk'][idx, :, :],
-                             'K').value('F')
-    lowgrid00 = temperature(nc.variables['low_tmpk'][idx, :, :],
-                            'K').value('F')
-    nc.close()
+
+    highgrid12 = k2f(ds['high_tmpk_12z'].values)
+    lowgrid12 = k2f(ds['low_tmpk_12z'].values)
+    highgrid00 = k2f(ds['high_tmpk'].values)
+    lowgrid00 = k2f(ds['low_tmpk'].values)
 
     for sid, row in df.iterrows():
         if pd.isnull(row['high']):
@@ -123,8 +118,6 @@ def estimate_hilo(df, ts):
                 val = highgrid00[row['gridj'], row['gridi']]
             else:
                 val = highgrid12[row['gridj'], row['gridi']]
-            if sid == 'IA1402':
-                print(row['temp24_hour'])
             if not np.ma.is_masked(val):
                 df.at[sid, 'high'] = val
         if pd.isnull(row['low']):
@@ -136,16 +129,31 @@ def estimate_hilo(df, ts):
                 df.at[sid, 'low'] = val
 
 
+def nonan(val, precision):
+    """Can't have NaN."""
+    if np.isnan(val):
+        return None
+    return np.round(val, precision)
+
+
 def commit(cursor, table, df, ts):
-    """
-    Inject into the database!
-    """
+    """Inject into the database!"""
     # Inject!
+    allowed_failures = 10
     for sid, row in df.iterrows():
-        if None in [row['high'], row['low'], row['precip']]:
-            print(
-                "daily_estimator cowardly refusing %s %s %s" % (sid, ts, row)
+        LOG.debug(
+            "sid: %s high: %s low: %s precip: %s snow: %s snowd: %s",
+            sid, row['high'], row['low'], row['precip'], row['snow'],
+            row['snowd']
+        )
+        if any(np.isnan(x) for x in [row['high'], row['low'], row['precip']]):
+            if allowed_failures < 0:
+                LOG.warning("aborting commit due too many failures")
+                return False
+            LOG.info(
+                "daily_estimator cowardly refusing %s %s\n%s", sid, ts, row
             )
+            allowed_failures -= 1
             continue
 
         def do_update(_sid, _row):
@@ -155,18 +163,19 @@ def commit(cursor, table, df, ts):
                 precip = %s, snow = %s, snowd = %s, estimated = 't'
                 WHERE day = %s and station = %s
                 """
-            args = (_row['high'], _row['low'],
-                    _row['precip'], _row['snow'],
-                    _row['snowd'], ts, _sid)
+            args = (nonan(_row['high'], 0), nonan(_row['low'], 0),
+                    nonan(_row['precip'], 2), nonan(_row['snow'], 1),
+                    nonan(_row['snowd'], 1), ts, _sid)
             cursor.execute(sql, args)
         do_update(sid, row)
         if cursor.rowcount == 0:
             cursor.execute("""
-            INSERT INTO """ + table + """
-            (station, day, sday, year, month)
-            VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO """ + table + """
+                (station, day, sday, year, month)
+                VALUES (%s, %s, %s, %s, %s)
             """, (sid, ts, ts.strftime("%m%d"), ts.year, ts.month))
             do_update(sid, row)
+    return True
 
 
 def merge_network_obs(df, network, ts):
@@ -178,6 +187,9 @@ def merge_network_obs(df, network, ts):
         from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s
     """, pgconn, params=(network, ts), index_col='station')
+    if obs.empty:
+        LOG.warning("loading obs for network %s yielded no data", network)
+        return df
     df = df.join(obs, how='left', on='tracks', rsuffix='b')
     for col in ['high', 'low', 'precip', 'snow', 'snowd']:
         df[col].update(df[col+"b"])
@@ -186,8 +198,9 @@ def merge_network_obs(df, network, ts):
 
 
 def main(argv):
-    """main()"""
+    """Go Main Go."""
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    ds = iemre.get_grids(date)
     pgconn = get_dbconn('coop')
     for state in state_names:
         if state in ['AK', 'HI', 'DC']:
@@ -197,10 +210,11 @@ def main(argv):
         df = load_table(state, date)
         df = merge_network_obs(df, "%s_COOP" % (state, ), date)
         df = merge_network_obs(df, "%s_ASOS" % (state, ), date)
-        estimate_hilo(df, date)
-        estimate_precip(df, date)
-        estimate_snow(df, date)
-        commit(cursor, table, df, date)
+        estimate_hilo(df, ds)
+        estimate_precip(df, ds)
+        estimate_snow(df, ds)
+        if not commit(cursor, table, df, date):
+            return
         cursor.close()
         pgconn.commit()
 
