@@ -78,8 +78,8 @@ function get_data2(){
 }
 
 /* see if memcache has our data */
-$memcache = new Memcache;
-$memcache->connect('iem-memcached', 11211);
+$memcache = new Memcached();
+$memcache->addServer('iem-memcached', 11211);
 if ($phenomena == null || $significance == null){
 	$data = $memcache->get("vtec_counts_data_$wfo");
 	$pcodes = $memcache->get("vtec_counts_pcodes_$wfo");
@@ -87,8 +87,8 @@ if ($phenomena == null || $significance == null){
 				within the past 24 hours and may not be up to the moment.</div>';
 	if ($clobber || !$data){
 		list($data, $pcodes) = get_data();
-		$memcache->set("vtec_counts_data_$wfo", $data, false, 86400);
-		$memcache->set("vtec_counts_pcodes_$wfo", $pcodes, false, 86400);
+		$memcache->set("vtec_counts_data_$wfo", $data, 86400);
+		$memcache->set("vtec_counts_pcodes_$wfo", $pcodes, 86400);
 		$cachedwarning = '';
 	}
 	
@@ -130,7 +130,7 @@ EOF;
 				within the past 24 hours and may not be up to the moment.</div>';
 	if ($clobber || !$data){
 		$data = get_data2();
-		$memcache->set($memkey, $data, false, 86400);
+		$memcache->set($memkey, $data, 86400);
 		$cachedwarning = '';
 	}
 	

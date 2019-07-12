@@ -7,8 +7,8 @@ header("Content-type: text/plain");
 include("../../../config/settings.inc.php");
 
 // Try to get it from memcached
-$memcache = new Memcache;
-$memcache->connect('iem-memcached', 11211);
+$memcache = new Memcached();
+$memcache->addServer('iem-memcached', 11211);
 $val = $memcache->get("/request/grx/roadcond.php");
 if ($val){
 	die($val);
@@ -83,6 +83,6 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
 
 }
 
-$memcache->set("/request/grx/roadcond.php", ob_get_contents(), false, 300);
+$memcache->set("/request/grx/roadcond.php", ob_get_contents(), 300);
 ob_end_flush();
 ?>

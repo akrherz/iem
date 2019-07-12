@@ -1,7 +1,7 @@
 <?php
 
-$memcache = new Memcache;
-$memcache->connect('iem-memcached', 11211);
+$memcache = new Memcached();
+$memcache->addServer('iem-memcached', 11211);
 $cameras = $memcache->get("php/cameras.inc.php");
 if ($cameras){
 	return;
@@ -33,5 +33,5 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 			"port"=>$row["port"],
 	);
 }
-$memcache->set("php/cameras.inc.php", $cameras, false, 43200);
+$memcache->set("php/cameras.inc.php", $cameras, 43200);
 ?>

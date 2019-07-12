@@ -40,13 +40,13 @@ function get_iemapps_tags($tagname){
 }
 
 function get_website_stats(){
-	$memcache = new Memcache;
-	$memcache->connect('iem-memcached', 11211);
+	$memcache = new Memcached();
+	$memcache->addServer('iem-memcached', 11211);
 	$val = $memcache->get("iemperf.json");
 	if (! $val){
 		// Fetch from nagios
 		$val = file_get_contents("http://nagios.local/cgi-bin/get_iemstats.py");
-		$memcache->set("iemperf.json", $val, false, 90);
+		$memcache->set("iemperf.json", $val, 90);
 	}
 	$jobj = json_decode($val);
 	

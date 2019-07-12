@@ -2,8 +2,8 @@
  include("../config/settings.inc.php");
  header("Content-type: text/xml; charset=UTF-8");
  
- $memcache = new Memcache;
- $memcache->connect('iem-memcached', 11211);
+ $memcache = new Memcached();
+ $memcache->addServer('iem-memcached', 11211);
  $val = $memcache->get("/rss.php");
  if ($val){
  	die($val);
@@ -41,7 +41,7 @@ EOF;
 echo "</channel>\n";
 echo "</rss>\n";
 
-$memcache->set("/rss.php", ob_get_contents(), false, 600); // ten minutes
+$memcache->set("/rss.php", ob_get_contents(), 600); // ten minutes
 ob_end_flush();
 
 ?>

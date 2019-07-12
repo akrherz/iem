@@ -3,8 +3,8 @@
  define("IEM_APPID", 62);
  header("Content-type: text/xml; charset=UTF-8");
  
- $memcache = new Memcache;
- $memcache->connect('iem-memcached', 11211);
+ $memcache = new Memcached();
+ $memcache->addServer('iem-memcached', 11211);
  $val = $memcache->get("/feature_rss.php");
  if ($val){
  	die($val);
@@ -66,7 +66,7 @@ EOF;
  echo "</channel>\n";
  echo "</rss>\n";
  
- $memcache->set("/feature_rss.php", ob_get_contents(), false, 3600); // one hour
+ $memcache->set("/feature_rss.php", ob_get_contents(), 3600); // one hour
  ob_end_flush();
  
 ?>

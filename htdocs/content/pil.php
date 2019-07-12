@@ -5,8 +5,8 @@
 $pil = isset($_REQUEST["pil"]) ? substr($_REQUEST["pil"],0,6): 'AFDDMX';
 
 // Try to get it from memcached
-$memcache = new Memcache;
-$memcache->connect('iem-memcached', 11211);
+$memcache = new Memcached();
+$memcache->addServer('iem-memcached', 11211);
 $val = $memcache->get("pil_${pil}.png");
 if ($val){
 	header("Content-type: image/png");
@@ -34,7 +34,7 @@ header("content-type: image/png");
 ImagePng($img);
 ImageDestroy($img);
 
-$memcache->set("pil_${pil}.png", ob_get_contents(), false, 0);
+$memcache->set("pil_${pil}.png", ob_get_contents(), 0);
 ob_end_flush();
 
 ?>

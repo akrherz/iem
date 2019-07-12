@@ -385,10 +385,10 @@ if (intval($loop) == 1 || intval($loop) == 2){
     }
   	$jsurls = implode(", ", $urls);
   	// Save this animation to memcache for future potential use
-  	$memcache = new Memcache;
-  	$memcache->connect('iem-memcached', 11211);
+  	$memcache = new Memcached();
+  	$memcache->addServer('iem-memcached', 11211);
   	$fts = time();
-  	$memcache->set("/GIS/apps/rview/warnings.phtml?fts=${fts}", $urls, false, 86400);
+  	$memcache->set("/GIS/apps/rview/warnings.phtml?fts=${fts}", $urls, 86400);
   	
   	$content .= "</form>";
   	$content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";

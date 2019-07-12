@@ -10,8 +10,8 @@ header("Content-Type: application/vnd.google-earth.kml+xml");
 
 if (! isset($_GET["cachebust"])){
 // Try to get it from memcached
-$memcache = new Memcache;
-$memcache->connect('iem-memcached', 11211);
+$memcache = new Memcached();
+$memcache->addServer('iem-memcached', 11211);
 $val = $memcache->get("/kml/roadcond.php|$linewidth|$maxtype");
 if ($val){
 	die($val);
@@ -116,6 +116,6 @@ echo <<<EOF
 </kml>
 EOF;
 
-@$memcache->set("/kml/roadcond.php|$linewidth|$maxtype", ob_get_contents(), false, 300);
+@$memcache->set("/kml/roadcond.php|$linewidth|$maxtype", ob_get_contents(), 300);
 ob_end_flush();
 ?>
