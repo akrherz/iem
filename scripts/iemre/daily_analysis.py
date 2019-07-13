@@ -163,7 +163,7 @@ def plot(df):
 
 def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
-    LOG.info('12z hi/lo for %s', ts)
+    LOG.debug('12z hi/lo for %s', ts)
     mybuf = 2.
     if ts.year > 2010:
         sql = """

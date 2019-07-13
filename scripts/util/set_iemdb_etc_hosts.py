@@ -39,7 +39,7 @@ def main():
             print("Setting iemdb-iemre.local to ip: %s" % (iemre_ip, ))
         result.append(line)
     (tmpfd, tmpfn) = tempfile.mkstemp()
-    os.write(tmpfd, '\n'.join(result))
+    os.write(tmpfd, ('\n'.join(result)).encode('ascii'))
     os.close(tmpfd)
     os.rename(tmpfn, '/etc/hosts')
     os.chmod('/etc/hosts', 0o644)
