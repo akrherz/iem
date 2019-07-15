@@ -15,7 +15,7 @@ IEM = get_dbconn('iem')
 
 
 def safe_t(val, units="C"):
-    ''' '''
+    """Safe value."""
     if val is None:
         return 'M'
     return '%.1f' % (temperature(val, units).value('F'),)
@@ -36,7 +36,7 @@ def safe(val, precision):
 
 
 def safe_m(val):
-    '''  '''
+    """Safe value."""
     if val is None or val < 0:
         return 'M'
     return round(val * 100., 0)
@@ -47,7 +47,7 @@ def get_data(ts):
     iemcursor = IEM.cursor()
     cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
     qcdict = loadqc()
-    nt = NetworkTable("ISUSM")
+    nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection",
             "features": []}
     # Fetch the daily values
@@ -64,6 +64,8 @@ def get_data(ts):
     """, (ts,))
     for row in cursor:
         sid = row['station']
+        if sid not in nt.sts:
+            continue
         lon = nt.sts[sid]['lon']
         lat = nt.sts[sid]['lat']
         q = qcdict.get(sid, {})
@@ -71,8 +73,8 @@ def get_data(ts):
             {"type": "Feature",
              "id": sid,
              "properties": {"encrh_avg": ("%s%%" % safe(row['encrh_avg'], 1)
-                                          if row['encrh_avg'] is not None
-                                          and row['encrh_avg'] > 0 else "M"),
+                                          if row['encrh_avg'] is not None and
+                                          row['encrh_avg'] > 0 else "M"),
                             "rh":  "%s%%" % (safe(row["rh"], 0),),
                             "hrprecip": (safe_p(row['rain_mm_tot'])
                                          if not q.get('precip', False)

@@ -94,11 +94,15 @@ def main():
     year = int(form.getfirst("year", 2015))
     phenomena = form.getfirst('phenomena', 'SV')[:2]
     significance = form.getfirst('significance', 'W')[:1]
-    etn = int(form.getfirst('etn', 1))
+    try:
+        etn = int(form.getfirst('etn', 1))
+    except ValueError:
+        ssw("ERROR")
+        return
     cb = form.getfirst("callback", None)
 
-    mckey = "/json/vtec_event/%s/%s/%s/%s/%s" % (wfo, year, phenomena,
-                                                 significance, etn)
+    mckey = "/json/vtec_event/%s/%s/%s/%s/%s" % (
+        wfo, year, phenomena, significance, etn)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     res = mc.get(mckey)
     if not res:

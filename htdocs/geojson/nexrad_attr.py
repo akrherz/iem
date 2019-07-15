@@ -24,8 +24,12 @@ def run(ts):
             nexrad_attributes WHERE valid > now() - '30 minutes'::interval
         """)
     else:
-        valid = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S')
-        valid = valid.replace(tzinfo=pytz.utc)
+        try:
+            valid = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S')
+        except ValueError:
+            ssw("ERROR")
+            return
+        valid = valid.replace(tzinfo=pytz.UTC)
         tbl = "nexrad_attributes_%s" % (valid.year, )
         cursor.execute("""
         with vcps as (

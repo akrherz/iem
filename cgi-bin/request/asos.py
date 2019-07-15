@@ -152,14 +152,14 @@ def get_stations(form):
 
 def get_time_bounds(form, tzinfo):
     """ Figure out the exact time bounds desired """
-    y1 = int(form.getfirst('year1'))
-    y2 = int(form.getfirst('year2'))
-    m1 = int(form.getfirst('month1'))
-    m2 = int(form.getfirst('month2'))
-    d1 = int(form.getfirst('day1'))
-    d2 = int(form.getfirst('day2'))
     # Here lie dragons, so tricky to get a proper timestamp
     try:
+        y1 = int(form.getfirst('year1'))
+        y2 = int(form.getfirst('year2'))
+        m1 = int(form.getfirst('month1'))
+        m2 = int(form.getfirst('month2'))
+        d1 = int(form.getfirst('day1'))
+        d2 = int(form.getfirst('day2'))
         sts = tzinfo.localize(datetime.datetime(y1, m1, d1))
         ets = tzinfo.localize(datetime.datetime(y2, m2, d2))
     except Exception as exp:

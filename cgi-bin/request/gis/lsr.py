@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-"""
- Dump LSRs to a shapefile
-"""
+"""Dumps Local Storm Reports on-demand for web requests."""
 import datetime
 import zipfile
 import os
 import sys
 import cgi
-from io import BytesIO
+from io import BytesIO, StringIO
 
 import shapefile
 from pyiem.util import get_dbconn, ssw
@@ -78,7 +76,7 @@ def main():
         if os.path.isfile("%s.%s" % (fn, suffix)):
             os.remove("%s.%s" % (fn, suffix))
 
-    csv = open("%s.csv" % (fn,), 'w')
+    csv = StringIO()
     csv.write(("VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
                "COUNTY,STATE,SOURCE,REMARK\n"))
 
@@ -131,8 +129,6 @@ def main():
                       row[6], row[7], row[8],
                       row[9] if row[9] is not None else ''))
 
-    csv.close()
-
     zio = BytesIO()
     zf = zipfile.ZipFile(zio, mode='w',
                          compression=zipfile.ZIP_DEFLATED)
@@ -142,7 +138,7 @@ def main():
     zf.writestr(fn+".shp", shpio.getvalue())
     zf.writestr(fn+'.shx', shxio.getvalue())
     zf.writestr(fn+'.dbf', dbfio.getvalue())
-    zf.writestr(fn+'.csv', open(fn+'.csv', 'r').read())
+    zf.writestr(fn+'.csv', csv.getvalue())
     zf.close()
 
     if "justcsv" in form:
