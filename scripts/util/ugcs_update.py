@@ -140,6 +140,8 @@ def workflow(argv, pgconn, cursor):
     print('Processing')
 
     df = pd.read_file(shpfn)
+    # make all columns upper
+    df.columns = [x.upper() if x != 'geometry' else x for x in df.columns]
     # Compute the ugc column
     if zipfn[:2] in ('mz', 'oz', 'hz'):
         geo_type = 'Z'
