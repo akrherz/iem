@@ -12,7 +12,6 @@ INSERT into iem_schema_manager_version values (32, now());
 ---   + cities
 ---   + climate_div
 ---   + counties
----   + cwa
 ---   + iacounties
 ---   + iowatorn
 ---   + placepoly

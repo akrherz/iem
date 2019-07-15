@@ -9,7 +9,6 @@ INSERT into iem_schema_manager_version values (19, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
---- cwas
 --- states
 --- tz_world  (scripts/dbutil/set_timezone.py)
 

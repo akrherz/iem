@@ -206,8 +206,9 @@ if ($sector == "wfo"){
 	$sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]): "DMX";
 	/* Fetch the bounds */
 	pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
-	    ."ST_xmin(geom) as xmin, ST_ymin(geom) as ymin from "
-	    ."(SELECT ST_Extent(the_geom) as geom from cwa WHERE wfo = $1) as foo");
+	    ." ST_xmin(geom) as xmin, ST_ymin(geom) as ymin from "
+		." (SELECT ST_Extent(geom) as geom from ugcs WHERE "
+		." wfo = $1 and end_ts is null) as foo");
 	$rs = pg_execute($postgis, "WFOBOUNDS", Array($sector_wfo));
 	if (pg_numrows($rs) > 0){
 		$row = pg_fetch_assoc($rs,0);
