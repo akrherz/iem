@@ -64,7 +64,7 @@ def do(ts):
 def main():
     """Go Main"""
     sts = datetime.datetime(2010, 11, 13, 16, 25)
-    ets = datetime.datetime(2012, 10,  1, 0, 0)
+    ets = datetime.datetime(2012, 10, 1, 0, 0)
     interval = datetime.timedelta(minutes=5)
     now = sts
     while now < ets:

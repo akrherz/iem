@@ -1,5 +1,4 @@
-"""Create WMS-T database entries as necessary
-"""
+"""Create WMS-T database entries as necessary."""
 from __future__ import print_function
 import datetime
 import sys

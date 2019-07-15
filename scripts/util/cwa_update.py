@@ -8,17 +8,9 @@ import os
 import zipfile
 
 import requests
-from osgeo import ogr
-from osgeo import _ogr
+import geopandas as gpd
 from pyiem.util import get_dbconn
 POSTGIS = get_dbconn('postgis')
-
-
-def Area(feat, *args):
-    """
-    Backport a feature from the future!
-    """
-    return _ogr.Geometry_GetArea(feat, *args)
 
 
 def main():
@@ -61,29 +53,20 @@ def main():
 
     print('Processing')
     # Now we are ready to dance!
-    f = ogr.Open(shpfn)
-    lyr = f.GetLayer(0)
-
-    wfos = {}
-    feat = lyr.GetNextFeature()
+    df = gpd.read_file(shpfn)
+    df['area'] = df['geometry'].area
     countnoop = 0
     countnew = 0
-    while feat is not None:
-        wfo = feat.GetField('WFO')
-        cwa = feat.GetField('CWA')
-
-        geo = feat.GetGeometryRef()
-        if not geo:
-            feat = lyr.GetNextFeature()
-            continue
-        area = Area(geo)
-        wkt = geo.ExportToWkt()
+    wfos = {}
+    for _, row in df.iterrows():
+        wfo = row['WFO']
+        cwa = row['CWA']
+        area = row['area']
 
         if wfo in wfos:
             if area < wfos[wfo]:
                 print(('Skipping %s [area: %s], since we had a '
                        'previously bigger one') % (wfo, area))
-                feat = lyr.GetNextFeature()
                 continue
         wfos[wfo] = area
 
@@ -91,12 +74,11 @@ def main():
         cursor.execute("""
             SELECT cwa from cwa where cwa = %s and
             the_geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326))
-            """, (cwa, wkt))
+            """, (cwa, row['geometry'].wkt))
 
         # NOOP
         if cursor.rowcount == 1:
             countnoop += 1
-            feat = lyr.GetNextFeature()
             continue
 
         # Finally, insert the new geometry
@@ -104,9 +86,8 @@ def main():
         UPDATE cwa
         SET the_geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326))
         WHERE cwa = %s
-        """, (wkt, cwa))
+        """, (row['geometry'].wkt, cwa))
         countnew += 1
-        feat = lyr.GetNextFeature()
 
     print('NOOP: %s UPDATED: %s' % (countnoop, countnew))
 
