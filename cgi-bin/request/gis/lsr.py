@@ -129,25 +129,24 @@ def main():
                       row[6], row[7], row[8],
                       row[9] if row[9] is not None else ''))
 
-    zio = BytesIO()
-    zf = zipfile.ZipFile(zio, mode='w',
-                         compression=zipfile.ZIP_DEFLATED)
-    zf.writestr(fn+'.prj',
-                open(('/opt/iem/data/gis/meta/4326.prj'
-                      )).read())
-    zf.writestr(fn+".shp", shpio.getvalue())
-    zf.writestr(fn+'.shx', shxio.getvalue())
-    zf.writestr(fn+'.dbf', dbfio.getvalue())
-    zf.writestr(fn+'.csv', csv.getvalue())
-    zf.close()
-
     if "justcsv" in form:
         ssw("Content-type: application/octet-stream\n")
         ssw(("Content-Disposition: "
              "attachment; filename=%s.csv\n\n") % (fn,))
-        ssw(open(fn+".csv", 'r').read())
+        ssw(csv.getvalue())
 
     else:
+        zio = BytesIO()
+        zf = zipfile.ZipFile(
+            zio, mode='w', compression=zipfile.ZIP_DEFLATED)
+        zf.writestr(
+            fn+'.prj', open(('/opt/iem/data/gis/meta/4326.prj')).read()
+        )
+        zf.writestr(fn+".shp", shpio.getvalue())
+        zf.writestr(fn+'.shx', shxio.getvalue())
+        zf.writestr(fn+'.dbf', dbfio.getvalue())
+        zf.writestr(fn+'.csv', csv.getvalue())
+        zf.close()
         ssw(("Content-Disposition: attachment; "
              "filename=%s.zip\n\n") % (fn,))
         ssw(zio.getvalue())
