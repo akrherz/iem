@@ -152,8 +152,6 @@ def main():
              "filename=%s.zip\n\n") % (fn,))
         ssw(zio.getvalue())
 
-    os.remove(fn+".csv")
-
 
 if __name__ == '__main__':
     main()
