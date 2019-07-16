@@ -14,16 +14,16 @@ if (isset($savevars)){
 	}
 }
 if (isset($_REQUEST["prod"])){
-	echo "<input type='hidden' name='prod' value='". $_REQUEST["prod"] ."'>\n";
+	echo "<input type='hidden' name='prod' value='". xssafe($_REQUEST["prod"]) ."'>\n";
 }
 if (isset($_REQUEST["month"])){
-	echo "<input type='hidden' name='month' value='". $_REQUEST["month"] ."'>\n";
+	echo "<input type='hidden' name='month' value='". xssafe($_REQUEST["month"]) ."'>\n";
 }
 if (isset($_REQUEST["year"])){
-	echo "<input type='hidden' name='year' value='". $_REQUEST["year"] ."'>\n";
+	echo "<input type='hidden' name='year' value='". xssafe($_REQUEST["year"]) ."'>\n";
 }
 if (isset($_REQUEST["day"])){
-	echo "<input type='hidden' name='day' value='". $_REQUEST["day"] ."'>\n";
+	echo "<input type='hidden' name='day' value='". xssafe($_REQUEST["day"]) ."'>\n";
 }
 ?>
 <input type="hidden" name="network" value="<?php echo $network; ?>">

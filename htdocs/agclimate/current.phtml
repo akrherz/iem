@@ -47,7 +47,7 @@
      $sid = $data["station"];
  	$uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
  	
- 	$ts = strtotime($data["local_valid"]);
+	 $ts = strtotime($data["local_valid"]);
  	if ($ts < $threshold){
  		$offline[] = sprintf("<a href=\"%s\">%s</a>", $uri,
 				 $nt->table[$sid]['name']);
@@ -62,7 +62,7 @@
  		 "<td>%s</td><td>%s</td>".
 		 "<td>%s</td><td>%s</td></tr>",
 		 $uri, $nt->table[$sid]['name'],
-			 date("g A", $ts),
+			 date("g:i A", $ts),
 			 pretty($data["tmpf"], '%.1f'),
 			 pretty($data["max_tmpf"], '%.1f'),
 			 pretty($data["min_tmpf"], '%.1f'), 
@@ -84,7 +84,7 @@
  
  $table .= "</table>";
  if (sizeof($offline) > 0){
- 	$table .= sprintf("<br />Sites Offline: %s", implode($offline, ","));
+ 	$table .= sprintf("<br />Sites Offline: %s", implode($offline, ", "));
  }
  $v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
  $t = new MyView();
