@@ -34,6 +34,7 @@ harfbuzz
 hdf4
 hdf5
 html5lib
+imageio
 jasper
 jdcal
 jpeg

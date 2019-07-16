@@ -9,7 +9,7 @@ import zipfile
 
 from osgeo import gdal
 from osgeo import osr
-from scipy.ndimage import imread
+from imageio import imread
 import numpy as np
 from pyiem.util import ssw
 
@@ -22,7 +22,7 @@ def workflow(valid, period):
         ssw("Content-type: text/plain\n\n")
         ssw("ERROR: Data File Not Found!")
         return
-    img = imread(fn, mode='P')
+    img = imread(fn, pilmode='P')
     size = np.shape(img)
     # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
     data = np.ones(size, np.uint16) * 65535
