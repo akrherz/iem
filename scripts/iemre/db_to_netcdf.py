@@ -9,6 +9,7 @@ see: akrherz/iem#199
 import sys
 import datetime
 
+import numpy as np
 from pyiem.util import utc, ncopen, logger
 from pyiem import iemre
 
@@ -31,7 +32,10 @@ def main(argv):
             if vname not in nc.variables:
                 continue
             log.debug("copying database var %s to netcdf", vname)
-            nc.variables[vname][idx, :, :] = ds[vname].values
+            # Careful here, ds could contain NaN values
+            nc.variables[vname][idx, :, :] = np.ma.array(
+                ds[vname].values, mask=np.isnan(ds[vname].values)
+            )
 
 
 if __name__ == '__main__':
