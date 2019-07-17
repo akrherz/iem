@@ -1,6 +1,6 @@
 <?php 
-require '../../config/settings.inc.php';
-include_once '../../include/myview.php';
+require_once '../../config/settings.inc.php';
+require_once '../../include/myview.php';
 
 $daylink = sprintf("%s0000", date("Ymd"));
 $mhourlink = gmdate("YmdH", time() -3600) ."00";
@@ -528,6 +528,7 @@ while (list($path, $section) = each($cfg)){
 $t = new MyView();
 $t->thispage = "current-products";
 $t->title = "Current Products";
+$t->headextra = "<meta http-equiv=\"refresh\" content=\"60\">";
 
 if ($maincontent == ""){
     $maincontent = <<<EOM

@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "GIS Mainpage";
 $t->thispage = "gis-home";
@@ -52,12 +52,15 @@ each year going back to 1995.</li>
  <li><a href="http://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
  <br />Archive of NCDC provided storm reports (1950-)!</li>
  <li><a href="https://gis.ncdc.noaa.gov/map/viewer/#app=cdo">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
+
+ <li>NCEI's <a href="https://www.ncdc.noaa.gov/data-access/radar-data/radar-display-tools">Display and Conversion Tools</a>.</li>
+
  <li><a href="http://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
   <br />Weather data integrated into Google Earth!</li>
  <li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
 	<br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
- <li>Scott Shipley's <a href="http://geog.gmu.edu/projects/wxproject/nex2shp/nexrad.htm">NEXRAD to shapefile</a> converter.
- <li><a href="http://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
+  
+  <li><a href="http://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
  <li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
  <li>NOAA's Ken Waters work with <a href="http://www.weather.gov/regsci/gis/">GIS and NWS warnings</a><br />They have some historical GIS datasets of warnings too.</li>
  <li><a href="http://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
