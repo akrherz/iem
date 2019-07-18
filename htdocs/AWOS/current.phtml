@@ -85,15 +85,9 @@ $jobj = json_decode($jdata, $assoc=TRUE);
     if ($mydata[$key]["tmpf"] > -99) {
       $mydata[$key]["tmpf"] = round($mydata[$key]["tmpf"], 0);
       $mydata[$key]["dwpf"] = round($mydata[$key]["dwpf"], 0);
-      $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
-       f2c($mydata[$key]["dwpf"]) );
-      $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
-       $mydata[$key]["relh"], $mydata[$key]["sped"]);
    } else {
       $mydata[$key]["tmpf"] = "M";
       $mydata[$key]["dwpf"] = "M";
-      $mydata[$key]["feel"] = "M";
-      $mydata[$key]["relh"] = "M";
    } 
    $mydata[$key]["peak_ts"] = 0;
    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
@@ -139,8 +133,8 @@ $jobj = json_decode($jdata, $assoc=TRUE);
  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
  round($parts["min_tmpf"],0) ."</font>)</td>
           <td>". $parts["dwpf"] ."</td>
-          <td>". $parts["feel"] ."</td>
-          <td>". $parts["relh"] ."</td>
+          <td>". round($parts["feel"], 1) ."</td>
+          <td>". round($parts["relh"], 0) ."</td>
           <td>". $parts["drct"] ."</td>
           <td>". $parts["sknt"] ;
           if (intval($parts["gust"]) > 0){

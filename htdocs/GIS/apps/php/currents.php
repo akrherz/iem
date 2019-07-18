@@ -1,5 +1,6 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/mlib.php";
 
 $layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
 $var    =  isset( $_GET['var']) ? $_GET['var'] : "tmpf";
@@ -20,7 +21,6 @@ function mktitle($map, $imgObj, $titlet) {
     $titlet);
 }
 
-include("../../../../include/mlib.php");
 
 function skntChar($sknt){
   if ($sknt < 2)  return chr(0);
@@ -171,10 +171,6 @@ $now = time();
 foreach($jobj["data"] as $bogus => $value){
     $bzz = $value;
   $sped = $bzz["sknt"] * 1.15078;
-  $bzz["relh"] = relh(f2c($bzz["tmpf"]), 
-       f2c($bzz["dwpf"]) );
-  $bzz["feel"] = feels_like($bzz["tmpf"], 
-       $bzz["relh"], $sped);
   $val = round(@$bzz[$var], @$rnd[$var]);
   $mynetwork = $bzz["network"];
   if ( (($now - strtotime($bzz["local_valid"])) < 3900 || (substr($mynetwork,3,4) == "COOP" || $mynetwork == "IACOCORAHS") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 

@@ -50,7 +50,7 @@ function formatter($i, $row){
 	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
 	sky_formatter($row), $row["wxcodes"], temp_formatter($row["tmpf"]), 
 	temp_formatter($row["dwpf"]),
-	temp_formatter(feels_like($row["tmpf"], $relh, $row["sknt"] * 1.15)),
+	temp_formatter($row["feel"]),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
 	$row["alti"], $row["pres"], $row["phour"], $row["p03i"], $row["p06i"],
@@ -94,13 +94,14 @@ if ($date >= $iemarchive){
 				null as skyc2, null as skyl2, null as alti,
 				null as skyc3, null as skyl3, null as wxcodes,
 				null as skyc4, null as skyl4, null as max_tmpf_6hr,
+				null as feel,
 				null as p06i, null as min_tmpf_6hr, null as p03i
 		from alldata where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
 	} else if (preg_match("/ISUSM/", $network)){
 		$db = "isuag";
-		$sql = sprintf("SELECT *, null as pres, null as raw
+		$sql = sprintf("SELECT *, null as pres, null as raw, null as feel
 		from alldata where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");

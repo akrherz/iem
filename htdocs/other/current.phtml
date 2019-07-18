@@ -1,6 +1,6 @@
 <?php 
  require_once "../../config/settings.inc.php";
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  require_once "../../include/mlib.php"; 
  include_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
@@ -51,12 +51,6 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
        f2c($mydata[$key]["dwpf"]) );
-    if ($mydata[$key]["tmpf"] > -99 && $mydata[$key]["dwpf"] > -99){
-       $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
-         $mydata[$key]["relh"], $mydata[$key]["sped"]);
-    } else {
-        $mydata[$key]["feel"] = null;
-    }
 	
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
@@ -108,7 +102,7 @@ while (list ($key, $val) = each ($finalA))  {
   round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
   round($parts["min_tmpf"],0) ."</font>)</td>
  <td>". round($parts["dwpf"],0) ."</td>
- <td>". $parts["feel"] ."</td>
+ <td>". round($parts["feel"], 1) ."</td>
  <td>". $parts["relh"] ."</td>
  <td>". round($parts["sknt"],0) ;
 	if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){

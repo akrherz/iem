@@ -63,60 +63,6 @@ function relh($tmpc, $dwpc){
   return round($relh,0);
 }
 
-//______________________________________________________________
-// /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prheat.f
-// http://www.hpc.ncep.noaa.gov/html/heatindex_equation.shtml
-function heat_idx($tmpf, $relh){
-  if ($tmpf > 140)  return " ";
-  if ($relh == 0) return " ";
-
-  $tmpf = round($tmpf, 2);
-  $relh = round($relh, 2);
-
-  $PR_HEAT =  61 + ( $tmpf - 68 ) * 1.2 + $relh * .094;
-  if ($PR_HEAT < 77){
-   return round($PR_HEAT,0);
-  } 
-
-  $t2 = pow($tmpf, 2);
-  $t3 = pow($tmpf, 3);
-  $r2 = pow($relh, 2);
-  $r3 = pow($relh, 3);
-
-  $PR_HEAT =  -42.379 
-  	+ 2.04901523* $tmpf 
-  	+ 10.14333127*$relh 
-  	- .22475541*$tmpf*$relh 
-  	- .00683783*$tmpf*$tmpf 
-  	- .05481717*$relh*$relh 
-  	+ .00122874*$tmpf*$tmpf*$relh 
-  	+ .00085282*$tmpf*$relh*$relh 
-  	- .00000199*$tmpf*$tmpf*$relh*$relh;
- 
-return round($PR_HEAT,0);
-} // End of heat_idx
-
-//______________________________________________________________
-// /home/nawips/nawips56.e.1/gempak/source/gemlib/pr/prwcht.f
-function wcht_idx($tmpf, $sped){
-  if ($sped < 3) return $tmpf;
-  $wci = pow($sped,0.16);
-  $PR_WCHT = 35.74 + .6215 * $tmpf - 35.75 * $wci +
-     + .4275 * $tmpf * $wci;
-
-  return round($PR_WCHT,0);
-}// End of wcht_idx
-
-//
-//  Feels like
-function feels_like($tmpf, $relh, $sped){
-	if ($tmpf == null || $relh == null || $sped == null) return null;
-  if ($tmpf > 50){
-    return heat_idx($tmpf, $relh);
-  } else {
-    return wcht_idx($tmpf, $sped);
-  }
-} // End of feels_like
 
 function drct2txt($dir)
 {
