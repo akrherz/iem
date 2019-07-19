@@ -33,6 +33,8 @@ def send_content_type(val, totalsize=0, stripe=None):
         ssw("Content-type: image/%s\n\n" % (val, ))
     elif val in ['mp4', ]:
         ssw("Content-type: video/%s\n\n" % (val, ))
+    elif val in ['pdf', ]:
+        ssw("Content-type: application/%s\n\n" % (val, ))
     else:
         ssw("Content-type: text/plain\n\n")
 
