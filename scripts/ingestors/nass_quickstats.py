@@ -41,7 +41,7 @@ def database(pgconn, df):
     cursor.execute("""SET TIME ZONE 'UTC'""")
     df.columns = [x.lower() for x in df.columns]
     df = df.where((pd.notnull(df)), None)
-    df['num_value'] = pd.to_numeric(df['value'], errors='coerse')
+    df['num_value'] = pd.to_numeric(df['value'], errors='coerce')
     df2 = df[df['commodity_desc'].isin(['CORN', 'SOYBEANS'])]
     for _, row in df2.iterrows():
         try:

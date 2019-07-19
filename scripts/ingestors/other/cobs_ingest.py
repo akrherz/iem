@@ -159,7 +159,7 @@ def campbell2df(year):
     hdf = pd.read_csv(hourlyfn, header=0, na_values=["7999", "NAN"],
                       skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True)
     hdf['TIMESTAMP'] = pd.to_datetime(hdf['TIMESTAMP'])
-    hdf['SlrMJ_Tot'] = pd.to_numeric(hdf['SlrMJ_Tot'], errors='coerse')
+    hdf['SlrMJ_Tot'] = pd.to_numeric(hdf['SlrMJ_Tot'], errors='coerce')
     # Move all timestamps to UTC +6
     hdf['valid'] = (hdf['TIMESTAMP'] +
                     datetime.timedelta(hours=6)).dt.tz_localize(pytz.UTC)
