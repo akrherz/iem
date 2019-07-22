@@ -1,5 +1,8 @@
-"""Time series plot."""
 # -*- coding: utf-8 -*-
+"""Time series plot.
+
+    The coding line above needs to be first for python2.7.
+"""
 import datetime
 from collections import OrderedDict
 
