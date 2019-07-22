@@ -24,8 +24,7 @@ if ($network == '_ALL_'){
 } else {
 	$sql = "SELECT *,
             ST_x(geom) as longitude, ST_y(geom) as latitude from stations
-            WHERE online = 'y' and
-			network = $1 ORDER by name";
+            WHERE network = $1 ORDER by name";
 }
 $rs = pg_prepare($pgconn, "NTSELECT", $sql);
 
@@ -38,8 +37,15 @@ if (strlen($network) > 0){
 	if ($format == "html"){
 		$table .= "<p><table class=\"table table-striped\">\n";
 		$table .= "<caption><b>". $network ." Network</b></caption>\n";
-		$table .= "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
-			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th><th>IEM Network</th></tr></thead>\n";
+		$table .= <<<EOM
+<thead>
+<tr>
+<th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
+<th>Longitude<sup>1</sup></th><th>Elevation [m]</th>
+<th>Archive Begins</th><th>Archive Ends</th><th>IEM Network</th>
+</tr>
+</thead>
+EOM;
 		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
 			$table .= "<tr>\n
 			  <td><a href=\"site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\">". $row["id"] ."</a></td>
@@ -48,6 +54,7 @@ if (strlen($network) > 0){
 			  <td>". round($row["longitude"],5) . "</td>
 			  <td>". $row["elevation"]. "</td>
 			  <td>". $row["archive_begin"]. "</td>
+			  <td>". $row["archive_end"]. "</td>
 			  <td><a href=\"locate.php?network=". $row["network"] ."\">". $row["network"]. "</a></td>
 			  </tr>";
 		}
@@ -149,7 +156,7 @@ if (! $nohtml || $format == 'shapefile') {
 	$t = new MyView();	
 	$t->title = "Network Station Tables";
 	$t->thispage = "iem-networks";
-	$page = 'single.phtml';
+	$page = 'full.phtml';
 	$sextra = "";
 	if (isset($_REQUEST['station'])){
 		$t->sites_current = "tables";
