@@ -1,3 +1,4 @@
+"""Time series plot."""
 # -*- coding: utf-8 -*-
 import datetime
 from collections import OrderedDict
@@ -12,9 +13,13 @@ from pyiem.util import get_autoplot_context, get_dbconn
 MDICT = OrderedDict([
     ('tmpf', 'Air Temperature'),
     ('dwpf', 'Dew Point Temperature'),
+    ('feel', 'Feels Like Temperature'),
     ('alti', 'Pressure Altimeter'),
+    ('relh', 'Relative Humidity'),
     ('mslp', 'Sea Level Pressure')])
-UNITS = {'tmpf': u'°F', 'dwpf': u'°F', 'alti': 'inch', 'mslp': 'mb'}
+UNITS = {
+    'tmpf': u'°F', 'dwpf': u'°F', 'alti': 'inch', 'mslp': 'mb',
+    'feel': u'°F', 'relh': '%'}
 
 
 def get_description():

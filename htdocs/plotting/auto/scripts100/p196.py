@@ -2,8 +2,6 @@
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from metpy.units import units as munits
-import metpy.calc as mcalc
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -50,9 +48,9 @@ def get_df(ctx):
         raise ValueError("No Alerts were found for UGC: %s" % (ctx['ugc'], ))
     pgconn = get_dbconn('asos')
     obs = read_sql("""
-        SELECT valid, tmpf::int as tmpf, dwpf::int as dwpf, feel
+        SELECT valid, tmpf::int as tmpf, feel
         from alldata where station = %s
-        and valid > %s and tmpf > 70 and dwpf > -20 ORDER by valid
+        and valid > %s and tmpf > 70 and feel is not null ORDER by valid
     """, pgconn, params=(ctx['station'],
                          str(events.index.values[0])),
                    index_col='valid')
@@ -92,11 +90,11 @@ def plotter(fdict):
     ax.bar(ctx['df'].index.values, hty, label='Heat Advisory',
            color=NWS_COLORS['HT.Y'])
     ehw = ctx['df']['EH.W%']
-    ax.bar(ctx['df'].index.values, ehw, bottom=hty,
+    ax.bar(ctx['df'].index.values, ehw.values, bottom=hty.values,
            label='Extreme Heat Warning',
            color=NWS_COLORS['EH.W'])
     non = ctx['df']['None%']
-    ax.bar(ctx['df'].index.values, non, bottom=(hty + ehw),
+    ax.bar(ctx['df'].index.values, non, bottom=(hty + ehw).values,
            label='No Headline',
            color='#EEEEEE')
     ax.legend(loc=(-0.03, -0.22), ncol=3)
