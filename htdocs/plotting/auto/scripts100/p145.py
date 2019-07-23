@@ -60,8 +60,8 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = util.get_dbconn('isuag')
-    nt = NetworkTable("ISUSM")
-    oldnt = NetworkTable("ISUAG")
+    nt = NetworkTable("ISUSM", only_online=False)
+    oldnt = NetworkTable("ISUAG", only_online=False)
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']
     highlightyear = ctx['year']

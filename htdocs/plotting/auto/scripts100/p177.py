@@ -483,7 +483,7 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     ctx['pgconn'] = get_dbconn('isuag')
-    ctx['nt'] = NetworkTable("ISUSM")
+    ctx['nt'] = NetworkTable("ISUSM", only_online=False)
 
     if ctx['opt'] == '1':
         fig, df = plot1(ctx)
@@ -502,6 +502,8 @@ def plotter(fdict):
     elif ctx['opt'] == '8':
         fig, df = make_battery_plot(ctx)
 
+    if 'valid' in df.columns:
+        df['valid'] = df['valid'].dt.strftime("%Y-%m-%d %H:%M")
     return fig, df
 
 

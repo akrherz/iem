@@ -1,4 +1,5 @@
 """Our mod_wsgi frontend to autoplot generation"""
+# pylint: disable=abstract-class-instantiated
 import sys
 import os
 import datetime
@@ -195,13 +196,11 @@ def workflow(environ, form, fmt):
         elif fmt == 'xlsx':
             # Can't write to ram buffer yet, unimplmented upstream
             (_, tmpfn) = tempfile.mkstemp()
-            writer = pd.ExcelWriter(tmpfn, engine='xlsxwriter',
-                                    options={'remove_timezone': True})
             df.index.name = None
-            df.to_excel(writer,
-                        encoding='latin-1', sheet_name='Sheet1')
-            writer.close()
-            del writer
+            # Need to set engine as xlsx/xls can't be inferred
+            with pd.ExcelWriter(tmpfn, engine='openpyxl') as writer:
+                df.to_excel(writer,
+                            encoding='latin-1', sheet_name='Sheet1')
             content = open(tmpfn, 'rb').read()
             os.unlink(tmpfn)
         del df

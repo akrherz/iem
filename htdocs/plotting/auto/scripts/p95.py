@@ -37,7 +37,7 @@ def get_description():
              label='Number of Months to Lag for SOI Value:'),
         dict(type="select", name='h', default='none', options=PDICT,
              label='Hide/Show week SOI events -0.5 to 0.5'),
-        dict(type='text', default=datetime.date.today().year, name='year',
+        dict(type='text', default=str(datetime.date.today().year), name='year',
              label='Year(s) to Highlight in Chart (comma delimited)'),
         dict(type='cmap', name='cmap', default='RdYlGn', label='Color Ramp:'),
     ]

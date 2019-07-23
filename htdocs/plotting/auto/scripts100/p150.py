@@ -1,9 +1,7 @@
 """sounding stuff"""
 import calendar
-import datetime
 from collections import OrderedDict
 
-import pytz
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -25,7 +23,8 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['description'] = """This plot presents percentiles of observations from
+    desc['description'] = """
+    This plot presents percentiles of observations from
     a given sounding profile against the long term record for the site. These
     percentiles are computed against all other soundings for the valid hour of
     the profile of interest.  For example, a 00 UTC sounding is only compared
@@ -66,8 +65,7 @@ def plotter(fdict):
     network = 'RAOB'
     ts = ctx['date']
     hour = int(ctx['hour'])
-    ts = datetime.datetime(ts.year, ts.month, ts.day, hour)
-    ts = ts.replace(tzinfo=pytz.utc)
+    ts = utc(ts.year, ts.month, ts.day, hour)
     which = ctx['which']
     vlimit = ''
     if which == 'month':
@@ -83,8 +81,10 @@ def plotter(fdict):
 
     df = read_sql("""
     with data as (
-        select f.valid, p.pressure, count(*) OVER (PARTITION by p.pressure),
-        min(valid) OVER () as min_valid, max(valid) OVER () as max_valid,
+        select f.valid,
+        p.pressure, count(*) OVER (PARTITION by p.pressure),
+        min(valid at time zone 'UTC') OVER () as min_valid,
+        max(valid at time zone 'UTC') OVER () as max_valid,
         p.tmpc,
         rank() OVER (PARTITION by p.pressure ORDER by p.tmpc ASC) as tmpc_rank,
         min(p.tmpc) OVER (PARTITION by p.pressure) as tmpc_min,
@@ -115,6 +115,7 @@ def plotter(fdict):
     if df.empty:
         raise ValueError(("Sounding for %s was not found!"
                           ) % (ts.strftime("%Y-%m-%d %H:%M"),))
+    df = df.drop('valid', axis=1)
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.
         # manual hackery to get 0 and 100th percentile

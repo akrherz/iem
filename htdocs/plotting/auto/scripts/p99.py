@@ -72,28 +72,30 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(2, 1, sharex=True, figsize=(8, 6))
 
-    ax[0].plot(df.index, df.avg_high, color='r', linestyle='-',
-               label='Climate High')
-    ax[0].plot(df.index, df.avg_low, color='b', label='Climate Low')
+    ax[0].plot(
+        df.index.values, df['avg_high'].values, color='r', linestyle='-',
+        label='Climate High')
+    ax[0].plot(
+        df.index.values, df['avg_low'].values, color='b', label='Climate Low')
     ax[0].set_ylabel(r"Temperature $^\circ\mathrm{F}$")
     ax[0].set_title("[%s] %s Climatology & %s Observations" % (
         station, nt.sts[station]['name'], year))
 
-    ax[0].plot(df.index, df.high, color='brown',
+    ax[0].plot(df.index.values, df['high'].values, color='brown',
                label='%s High' % (year,))
-    ax[0].plot(df.index, df.low, color='green',
+    ax[0].plot(df.index.values, df['low'].values, color='green',
                label='%s Low' % (year,))
 
     if delta == 'abs':
-        ax[1].plot(df.index, df.high - df.avg_high, color='r',
+        ax[1].plot(df.index.values, (df.high - df.avg_high).values, color='r',
                    label='High Diff %s - Climate' % (year))
-        ax[1].plot(df.index, df.low - df.avg_low, color='b',
+        ax[1].plot(df.index.values, (df.low - df.avg_low).values, color='b',
                    label='Low Diff')
         ax[1].set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
     else:
-        ax[1].plot(df.index, df.high_sigma, color='r',
+        ax[1].plot(df.index.values, df.high_sigma.values, color='r',
                    label='High Diff %s - Climate' % (year))
-        ax[1].plot(df.index, df.low_sigma, color='b',
+        ax[1].plot(df.index.values, df.low_sigma.values, color='b',
                    label='Low Diff')
         ax[1].set_ylabel(r"Temp Difference $\sigma$")
         ymax = max([df.high_sigma.abs().max(), df.low_sigma.abs().max()]) + 1

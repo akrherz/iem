@@ -94,7 +94,7 @@ def get_context(fdict):
                              right_on='valid', how='left', sort=False)
     ctx['title'] = "[%s] %s" % (ctx['station'], ctx['name'])
     ctx['subtitle'] = ctx['dt'].strftime("%d %b %Y %H:%M UTC")
-    if ctx['df'].empty and not ctx['odf'].empty:
+    if 'df' not in ctx or (ctx['df'].empty and not ctx['odf'].empty):
         ctx['primary'] = ctx['odf'].columns[0]
         ctx['secondary'] = ctx['odf'].columns[1]
     return ctx
@@ -151,7 +151,7 @@ $("#ap_container").highcharts({
 def plotter(fdict):
     """ Go """
     ctx = get_context(fdict)
-    if ctx['df'].empty and ctx['odf'].empty:
+    if 'df' not in ctx or (ctx['df'].empty and ctx['odf'].empty):
         raise ValueError("No Data Found!")
     df = ctx['df']
     (fig, ax) = plt.subplots(1, 1, figsize=(10, 6))
@@ -175,4 +175,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    highcharts(dict(station='AESI4', dt='2018-06-20 2000'))
+    plotter(dict())

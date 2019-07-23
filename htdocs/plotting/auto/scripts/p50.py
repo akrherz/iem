@@ -61,7 +61,8 @@ def plotter(fdict):
         wfo_limiter = ''
     sql = """
     select windtag, hailtag,
-    min(issue) as min_issue, max(issue) as max_issue, count(*)
+    min(issue at time zone 'UTC') as min_issue,
+    max(issue at time zone 'UTC') as max_issue, count(*)
     from sbw WHERE issue >= '%s' and issue <= '%s'
     %s
     and (windtag > 0 or hailtag > 0)
@@ -79,7 +80,8 @@ def plotter(fdict):
 
         sql = """
         SELECT windtag, hailtag,
-        min(issue) as min_issue, max(issue) as max_issue, count(*)
+        min(issue at time zone 'UTC') as min_issue,
+        max(issue at time zone 'UTC') as max_issue, count(*)
         from sbw w, states s
         WHERE issue >= '%s' and issue <= '%s' and
         s.state_abbr = '%s' and ST_Intersects(s.the_geom, w.geom) and

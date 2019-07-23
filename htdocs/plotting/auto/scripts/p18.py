@@ -6,6 +6,7 @@
 import datetime
 from collections import OrderedDict
 
+import pytz
 import psycopg2.extras
 import numpy as np
 from pandas.io.sql import read_sql
@@ -128,11 +129,11 @@ def get_data(fdict):
     col = "tmpf::int" if ctx['var'] == 'tmpf' else ctx['var']
     col = "dwpf::int" if ctx['var'] == 'dwpf' else col
     ctx['df'] = read_sql("""
-     SELECT valid,
-     extract(epoch from valid) * 1000 as ticks,
-     """ + col + """ as datum from alldata WHERE station = %s
-     and valid > %s and valid < %s and """ + ctx['var'] + """ is not null
-     and report_type = 2 ORDER by valid ASC
+        SELECT valid at time zone 'UTC' as valid,
+        extract(epoch from valid) * 1000 as ticks,
+        """ + col + """ as datum from alldata WHERE station = %s
+        and valid > %s and valid < %s and """ + ctx['var'] + """ is not null
+        and report_type = 2 ORDER by valid ASC
     """, asos_pgconn, params=(ctx['station'], sdate,
                               sdate + datetime.timedelta(days=days)),
                          index_col='valid')
@@ -178,7 +179,10 @@ def plotter(fdict):
         clows = np.array(clows)
         ax.bar(cdates, chighs - clows, bottom=clows, fc='lightblue',
                ec='lightblue', label="Daily Climatology")
-    ax.plot(ctx['df'].index.values, ctx['df']['datum'], color='r',
+    # Construct a local timezone x axis
+    x = ctx['df'].index.tz_localize(pytz.UTC).tz_convert(
+        ctx['nt'].sts[ctx['station']]['tzname']).tz_localize(None)
+    ax.plot(x.values, ctx['df']['datum'], color='r',
             label='Hourly Obs')
     ax.set_ylabel("%s %s" % (MDICT[ctx['var']], UNITS[ctx['var']]))
     ax.set_xticks(xticks)
@@ -193,7 +197,6 @@ def plotter(fdict):
                        MDICT[ctx['var']],
                        ctx['sdate'].strftime("%d %b %Y"),
                        ctx['edate'].strftime("%d %b %Y")))
-
     return fig, ctx['df']
 
 

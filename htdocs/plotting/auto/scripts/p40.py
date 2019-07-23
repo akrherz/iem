@@ -20,9 +20,9 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 3600
-    desc['description'] = """This chart is an attempted illustration of the amount
-    of cloudiness that existed at a METAR site for a given month.  The chart
-    combines reports of cloud amount and level to provide a visual
+    desc['description'] = """This chart is an attempted illustration of the
+    amount of cloudiness that existed at a METAR site for a given month.
+    The chart combines reports of cloud amount and level to provide a visual
     representation of the cloudiness.  Once the METAR site hits a cloud level
     of overcast, it can no longer sense clouds above that level.  So while the
     chart will indicate cloudiness up to the top, it may not have been like
@@ -162,7 +162,8 @@ def plotter(fdict):
     vsby = np.ones((1, days * 24)) * -1
 
     df = read_sql("""
-        SELECT valid, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
+        SELECT valid at time zone 'UTC' as valid,
+        skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
         vsby,
         extract(epoch from (valid - %s))/3600. as hours
         from alldata where station = %s and valid BETWEEN %s and %s

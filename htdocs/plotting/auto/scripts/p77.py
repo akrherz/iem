@@ -63,8 +63,9 @@ def plotter(fdict):
             bbox=dict(color='white'), ha='right')
     ax.set_ylim(32, df.index.values.max() + 5)
 
-    ax.barh(df.index.values - 0.5, height, left=df['max_jday'], ec='tan',
-            fc='tan', height=1.1)
+    ax.barh(
+        df.index.values - 0.5, height, left=df['max_jday'].values, ec='tan',
+        fc='tan', height=1.1)
     days = np.array([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305,
                      335])
     days = np.concatenate([days, days+365])

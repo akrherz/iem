@@ -55,6 +55,7 @@ netcdf4
 nose
 numexpr
 numpy
+openpyxl
 pandas
 pango
 paste

@@ -21,7 +21,8 @@ def get_description():
     are shown computed from the daily observation archive maintained by the
     IEM."""
     desc['arguments'] = [
-        dict(type='station', name='station', default='IATDSM',
+        # IATDSM has some troubles here
+        dict(type='station', name='station', default='IA2203',
              network='IACLIMATE', label='Select Station:'),
         dict(type='month', name='month', default='12',
              label='Select Month:')
@@ -114,14 +115,16 @@ def plotter(fdict):
     ax[0].plot(days, c71_avgh, lw=2, zorder=2, color='r')
     ax[0].grid(True)
     ax[0].set_ylabel(r"High Temp $^\circ$F")
-    ax[0].set_ylim(bottom=min([min(o_avgh), min(c71_avgh), min(c81_avgh)])-2)
+    ax[0].set_ylim(
+        bottom=min([min(o_avgh), min(c71_avgh), min(c81_avgh)])-2)
 
     ax[1].bar(days, o_avgl, width=0.8, fc='tan', align='center')
     ax[1].plot(days, c81_avgl, lw=2, zorder=2, color='g')
     ax[1].plot(days, c71_avgl, lw=2, zorder=2, color='r')
     ax[1].grid(True)
     ax[1].set_ylabel(r"Low Temp $^\circ$F")
-    ax[1].set_ylim(bottom=min([min(o_avgl), min(c71_avgl), min(c81_avgl)])-2)
+    ax[1].set_ylim(
+        bottom=min([min(o_avgl), min(c71_avgl), min(c81_avgl)])-2)
 
     ax[2].bar(days, o_avgt, width=0.8, fc='tan', align='center',
               label='IEM Observered Avg')

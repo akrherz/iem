@@ -232,8 +232,9 @@ def plotter(fdict):
     compute_xlabels(ax)
     rows = []
     for line in lines:
-        rows.append(dict(start=line.period_start,
-                         end=line.period_end,
+        # Ensure we don't send datetimes to pandas
+        rows.append(dict(start=line.period_start.strftime("%Y-%m-%d %H:%M"),
+                         end=line.period_end.strftime("%Y-%m-%d %H:%M"),
                          hours=line.hours, days=line.days))
     df = pd.DataFrame(rows)
 
@@ -258,5 +259,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='DSM', network='IA_ASOS', m='all', threshold=0,
-                 hours=67, var='tmpf', dir='below'))
+    plotter(dict())

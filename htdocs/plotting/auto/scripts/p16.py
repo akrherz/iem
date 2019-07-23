@@ -201,7 +201,8 @@ def get_context(fdict):
         title = r"Dew Point at or above %s$^\circ$F" % (ctx['threshold'],)
 
     ctx['df'] = read_sql("""
-     SELECT valid, drct, sknt * 1.15 as smph from alldata
+     SELECT valid at time zone 'UTC' as valid,
+     drct, sknt * 1.15 as smph from alldata
      where station = %s and
      """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
      and extract(month from valid) in %s
@@ -254,5 +255,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    highcharts(dict(station='AMW', month='jan', opt='tmpf_above',
-                    threshold=32))
+    plotter(dict(station='AMW', month='jan', opt='tmpf_above',
+                 threshold=32))
