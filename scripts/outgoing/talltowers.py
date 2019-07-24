@@ -2,6 +2,7 @@
 
 Run from RUN_1MIN.sh
 """
+# pylint: disable=abstract-class-instantiated
 from __future__ import print_function
 import smtplib
 import time
@@ -37,10 +38,13 @@ def do(row):
     filename = ("/mesonet/share/pickup/talltowers/%s."
                 ) % (row['valid'].strftime("%Y%m%d%H%M%S"), )
     if row['fmt'] == 'excel' and len(df.index) < 64000:
+
+        def fmt(val):
+            return val.strftime("%Y-%m-%d %H:%M")
+        df['valid'] = df['valid'].apply(fmt)
         filename += "xlsx"
-        writer = pd.ExcelWriter(filename, options={'remove_timezone': True})
-        df.to_excel(writer, 'Analog Data', index=False)
-        writer.save()
+        with pd.ExcelWriter(filename) as writer:
+            df.to_excel(writer, 'Analog Data', index=False)
     elif row['fmt'] == 'comma':
         filename += "csv"
         df.to_csv(filename, index=False)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """FEEL data download"""
+# pylint: disable=abstract-class-instantiated
 import cgi
 import datetime
 import os
@@ -17,13 +18,16 @@ def run(sts, ets):
 
     sql = """SELECT * from feel_data_hourly where
     valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
-    df2 = pd.read_sql(sql, dbconn, index_col='valid')
+    df2 = pd.read_sql(sql, dbconn)
 
-    writer = pd.ExcelWriter('/tmp/ss.xlsx', engine='xlsxwriter',
-                            options={'remove_timezone': True})
-    df.to_excel(writer, 'Daily Data', index=False)
-    df2.to_excel(writer, 'Hourly Data', index=True)
-    writer.save()
+    def fmt(val):
+        """Lovely hack."""
+        return val.strftime("%Y-%m-%d %H:%M")
+    df2['valid'] = df2['valid'].apply(fmt)
+
+    with pd.ExcelWriter('/tmp/ss.xlsx') as writer:
+        df.to_excel(writer, 'Daily Data', index=False)
+        df2.to_excel(writer, 'Hourly Data', index=False)
 
     ssw("Content-type: application/vnd.ms-excel\n")
     ssw("Content-Disposition: attachment;Filename=feel.xls\n\n")
