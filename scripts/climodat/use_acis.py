@@ -1,12 +1,12 @@
-"""Use data provided by ACIS to replace climodat data"""
-from __future__ import print_function
+"""Use data provided by ACIS to replace climodat data."""
 import sys
 import datetime
 
 import requests
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.reference import TRACE_VALUE
 
+LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"
 
 
@@ -18,8 +18,8 @@ def safe(val):
         return TRACE_VALUE
     try:
         return float(val)
-    except Exception as _exp:
-        print("failed to convert %s to float, using None" % (repr(val),))
+    except ValueError:
+        LOG.info("failed to convert %s to float, using None", repr(val))
 
 
 def main(station, acis_station):
@@ -32,7 +32,7 @@ def main(station, acis_station):
     table = "alldata_%s" % (station[:2],)
     payload = {"sid": acis_station,
                "sdate": "1850-01-01",
-               "edate": "2017-01-01",
+               "edate": datetime.date.today().strftime("%Y-%m-%d"),
                "elems": "maxt,mint,pcpn,snow,snwd"}
     req = requests.post(SERVICE, json=payload)
     j = req.json()
@@ -44,13 +44,13 @@ def main(station, acis_station):
         if all([a is None for a in (high, low, precip, snow, snowd)]):
             continue
         cursor.execute("""
-        UPDATE """ + table + """ SET high = %s, low = %s, precip = %s,
-        snow = %s, snowd = %s WHERE station = %s and day = %s
+            UPDATE """ + table + """ SET high = %s, low = %s, precip = %s,
+            snow = %s, snowd = %s WHERE station = %s and day = %s
         """, (high, low, precip, snow, snowd, station, date))
         if cursor.rowcount == 0:
             date = datetime.datetime.strptime(date, '%Y-%m-%d')
             sday = "%02i%02i" % (date.month, date.day)
-            print("Adding entry for %s" % (date,))
+            LOG.info("Adding entry for %s", date)
             cursor.execute("""
                 INSERT into """ + table + """ (station, day,
                 high, low, precip, snow, snowd, sday, year, month, estimated)

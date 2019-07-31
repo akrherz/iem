@@ -35,7 +35,6 @@ SFLAG31    269-269   Character
     TMAX = Maximum temperature (tenths of degrees C)
     TMIN = Minimum temperature (tenths of degrees C)
 """
-from __future__ import print_function
 import os
 import datetime
 import sys
@@ -48,8 +47,9 @@ import numpy as np
 from pyiem.reference import TRACE_VALUE
 from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, exponential_backoff
+from pyiem.util import get_dbconn, exponential_backoff, logger
 
+LOG = logger()
 PGCONN = get_dbconn('coop')
 
 BASEDIR = "/mesonet/tmp"
@@ -115,17 +115,15 @@ def get_file(station):
            ) % (station, )
     localfn = "%s/%s.dly" % (BASEDIR, station)
     if not os.path.isfile(localfn):
-        print('Downloading from NCEI station: %s...' % (station, ), end='')
+        LOG.info('dl from NCEI station: %s', station)
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None:
-            print("ingest_ghcn download failed for %s" % (uri, ))
+            LOG.info("ingest_ghcn download failed for %s", uri)
             return None
-        fp = open(localfn, 'wb')
-        fp.write(req.content)
-        fp.close()
-        print('done.')
+        with open(localfn, 'wb') as fp:
+            fp.write(req.content)
     else:
-        print('%s is cached...' % (localfn,))
+        LOG.info('%s is cached...', localfn)
     return localfn
 
 
@@ -178,7 +176,6 @@ def get_obs(metadata):
                          data['flag%s' % (i,)][0],
                          data['flag%s' % (i,)][1],
                          data['flag%s' % (i,)][2]])
-    # print("delete file disabled")
     os.unlink(fn)
     df = pd.DataFrame(rows, columns=['date', 'element', 'value', 'mflag',
                                      'qflag', 'sflag'])
@@ -204,11 +201,11 @@ def process(station, metadata, allow_inserts):
     cursor = PGCONN.cursor()
     obs = get_obs(metadata)
     if obs is None:
-        print("Failing to process %s as obs is None" % (station, ))
+        LOG.info("Failing to process %s as obs is None", station)
         return
     for col in ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']:
         if col not in obs.columns:
-            print("Obs missing for column: %s" % (col,))
+            LOG.info("Obs missing for column: %s", col)
             obs[col] = None
 
     table = "alldata_%s" % (station[:2],)
@@ -217,7 +214,7 @@ def process(station, metadata, allow_inserts):
         """+table+""" where station = %s ORDER by day ASC
     """, PGCONN, params=(station,), index_col=None)
     current['day'] = pd.to_datetime(current['day'])
-    current.set_index('day', inplace=True)
+    current = current.set_index('day')
     # join the tables
     df = obs.join(current, how='left')
     # Loop over our result
@@ -225,18 +222,27 @@ def process(station, metadata, allow_inserts):
     for dt, row in df.iterrows():
         date = datetime.date(dt.year, dt.month, dt.day)
         work = []
-        msg = []
         for dbcol, obcol in zip(['high', 'low', 'precip', 'snow', 'snowd'],
                                 ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']):
             if not pd.isna(row[obcol]) and row[obcol] != row[dbcol]:
                 work.append(" %s = %s " % (dbcol, row[obcol]))
-                msg.append("%s %s->%s" % (dbcol, row[dbcol], row[obcol]))
-        if not msg:
+                if (dbcol in ['high', 'low']
+                        and abs(row[dbcol] - row[obcol]) > 5):
+                    LOG.debug(
+                        "%5s %s large diff %s %s",
+                        dbcol, date, row[obcol], row[dbcol]
+                    )
+                if (dbcol == 'precip'
+                        and abs(row[dbcol] - row[obcol]) > 0.25):
+                    LOG.debug(
+                        "%5s %s large diff %s %s",
+                        dbcol, date, row[obcol], row[dbcol]
+                    )
+        if not work:
             continue
-        # print("%s %s" % (date, ", ".join(msg)))
         cursor.execute("""
-        UPDATE """ + table + """ SET """ + ",".join(work) + """
-        WHERE station = %s and day = %s
+            UPDATE """ + table + """ SET """ + ",".join(work) + """
+            WHERE station = %s and day = %s
         """, (station, date))
         if cursor.rowcount == 1:
             cnts['updates'] += 1
@@ -261,12 +267,11 @@ def process(station, metadata, allow_inserts):
               None if pd.isna(row['SNWD']) else row['SNWD'],
               ))
 
-    print(
-        ("%s adds: %s skipped: %s updates: %s"
-         ) % (station, cnts['adds'], cnts['inserts_skipped'], cnts['updates'])
+    LOG.info(
+        "%s adds: %s skipped: %s updates: %s",
+        station, cnts['adds'], cnts['inserts_skipped'], cnts['updates']
     )
     cursor.close()
-    # print("database commit disabled")
     PGCONN.commit()
 
 
@@ -281,7 +286,6 @@ def main(argv):
     else:
         station = argv[1]
     allow_inserts = (len(argv) == 3)
-    # print("station is %s" % (station, ))
     if len(station) == 2:
         # we have a state!
         nt = NetworkTable("%sCLIMATE" % (station,))

@@ -8,11 +8,11 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$day = isset($_GET['day']) ? $_GET["day"] : date("d");
-$month = isset($_GET['month']) ? $_GET["month"] : date("m");
-$year = isset($_GET['year']) ? $_GET["year"] : date("Y");
-$station = isset($_GET['station'])? $_GET['station']: null;
-$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
+$day = isset($_GET['day']) ? intval($_GET["day"]): date("d");
+$month = isset($_GET['month']) ? intval($_GET["month"]): date("m");
+$year = isset($_GET['year']) ? intval($_GET["year"]): date("Y");
+$station = isset($_GET['station'])? xssafe($_GET['station']): null;
+$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
 
 $ts = mktime(1, 0, 0, $month, $day, $year);
 

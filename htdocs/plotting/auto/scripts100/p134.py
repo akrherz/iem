@@ -38,8 +38,8 @@ def get_description():
     first period of the season is used for the analysis.
     """
     desc['arguments'] = [
-        dict(type='sid', name='station', default='IATDSM',
-             network='IACLIMATE', label='Select Station:'),
+        dict(type='sid', name='station', default='DSM',
+             network='IA_ASOS', label='Select Station:'),
         dict(type='select', name='var', default='coldest_temp',
              label='Which Metric', options=PDICT),
         dict(type="int", name="days", default=7,
