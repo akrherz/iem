@@ -1,4 +1,8 @@
 <?php 
+require_once "setup.php";
+require_once "../../include/mlib.php";
+require_once "../../include/forms.php";
+require_once "../../include/myview.php";
 /*
  * Rip off weather bureau website, but do it better
  */
@@ -39,14 +43,19 @@ function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
 	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
 	$relh = ($relh != null) ? intval($relh): "";
-	return sprintf("<tr style=\"background: %s;\"><td>%s</td><td>%s</td><td>%s</td>
+	$ismadis = (strpos($row["raw"], "MADISHF") > 0); 
+	return sprintf("<tr style=\"background: %s;\" class=\"%sob\" data-madis=\"%s\">" .
+	"</div><td>%s</td><td>%s</td><td>%s</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
 	<td><span class=\"high\">%s</span></td>
 	<td><span class=\"low\">%s</span></td>
 	<td>%s%%</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
-	<tr style=\"background: %s;\" class=\"metar\"><td colspan=\"15\">%s</td></tr>", 
-	($i % 2 == 0)? "#FFF": "#EEE", 
+	<tr style=\"background: %s;\" class=\"%smetar\">" .
+	"<td colspan=\"16\">%s</td></tr>", 
+	($i % 2 == 0)? "#FFF": "#EEE",
+	$ismadis ? "hf": "",
+	$ismadis ? "1": "0",
 	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
 	sky_formatter($row), $row["wxcodes"], temp_formatter($row["tmpf"]), 
 	temp_formatter($row["dwpf"]),
@@ -54,12 +63,10 @@ function formatter($i, $row){
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
 	$row["alti"], $row["pres"], $row["phour"], $row["p03i"], $row["p06i"],
-	($i % 2 == 0)? "#FFF": "#EEE", $row["raw"]
+	($i % 2 == 0)? "#FFF": "#EEE",
+	$ismadis ? " hf": "", $row["raw"]
 	);
 }
-include("setup.php");
-include_once "../../include/mlib.php";
-require_once "../../include/forms.php";
 $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
@@ -129,7 +136,6 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 }
 pg_close($dbconn);
 
-include("../../include/myview.php");
 $t = new MyView();
 
 $t->thispage = "iem-sites";
@@ -140,22 +146,39 @@ $savevars = Array("year"=>date("Y", $date),
  "month"=>date("m", $date), "day"=>date("d", $date)); 
 $t->jsextra = <<<EOF
 <script type="text/javascript">
-var hide = false;
-function hideMetars(){
-	var table = document.getElementById("datatable");
-	var len = table.rows.length;
-	var rowStyle = (hide)? "none":"table-row";
-	for(i=1 ; i< len; i++){
-		if (table.rows[i].className == 'metar'){
-	    	table.rows[i].style.display = rowStyle;
-		}
-	}
-	if (hide){
-		document.getElementById("metar_toggle").innerHTML = "Show METARs";
+var metar_show = false;
+var madis_show = false;
+function toggleMETAR(){
+	if (metar_show){
+		// Hide both METARs and HFMETARs
+		$(".metar").css("display", "none");
+		$(".hfmetar").css("display", "none");
+		$("#metar_toggle").html("<i class=\"fa fa-plus\"></i> Show METARs");
 	} else{
-		document.getElementById("metar_toggle").innerHTML = "Hide METARs";
+		// show
+		$(".metar").css("display", "table-row");
+		if (madis_show){
+			$(".hfmetar").css("display", "table-row");
+		}
+		$("#metar_toggle").html("<i class=\"fa fa-minus\"></i> Hide METARs");
 	}
-	hide = !hide;
+	metar_show = !metar_show;
+}
+function toggleMADIS(){
+	if (madis_show){
+		// Hide MADIS
+		$("tr[data-madis=1]").css("display", "none");
+		$(".hfmetar").css("display", "none");
+		$("#madis_toggle").html("<i class=\"fa fa-plus\"></i> Show High Frequency MADIS");
+	} else {
+		// Show
+		$("tr[data-madis=1]").css("display", "table-row");
+		if (metar_show){
+			$(".hfmetar").css("display", "table-row");
+		}
+		$("#madis_toggle").html("<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS");
+	}
+	madis_show = !madis_show;
 }
 </script>
 EOF;
@@ -167,7 +190,8 @@ $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
 $mbutton = (preg_match("/ASOS|AWOS/", $network)) ? 
-"<a onclick=\"javascript:hideMetars();\" class=\"btn btn-default\" id=\"metar_toggle\">Show Metars</a>"
+"<a onclick=\"javascript:toggleMETAR();\" class=\"btn btn-success\" id=\"metar_toggle\"><i class=\"fa fa-plus\"></i> Show METARs</a>" .
+" &nbsp; <a onclick=\"javascript:toggleMADIS();\" class=\"btn btn-success\" id=\"madis_toggle\"><i class=\"fa fa-plus\"></i> Show High Frequency MADIS</a>"
 : "";
 
 $content = <<<EOF
@@ -181,6 +205,12 @@ $content = <<<EOF
 .metar {
   display: none;
 }
+.hfob {
+	display: none;
+}
+.hfmetar {
+	display: none;
+}
 </style>
 
 <h3>{$dstr} Observation History, [{$station}] {$metadata["name"]}, timezone: {$tzname}</h3>
@@ -193,7 +223,7 @@ $content = <<<EOF
 {$ds}
 <input type="submit" value="Change Date" />
 </form>
-{$mbutton}
+<p>{$mbutton}</p>
 EOF;
 $content .= sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
   class=\"btn btn-default\">Previous Day</a>", $network, $station, date("Y", $yesterday),
@@ -207,6 +237,13 @@ if ($tomorrow){
 $notes = '';
 if ($network == "ISUSM"){
 	$notes .= "<li>Wind direction and wind speed are 10 minute averages at 10 feet above the ground.</li>";
+}
+if (preg_match("/ASOS|AWOS/", $network)){
+	$notes .= <<<EOM
+<li>For recent years, this page also optionally shows observations from the
+<a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS High Frequency METAR</a>
+dataset.  This dataset had a problem with temperatures detailed <a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290">here</a>.</li>
+EOM;
 }
 
 $content .= <<<EOF
