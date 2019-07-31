@@ -60,9 +60,10 @@ def runner(hostname, feedtype):
     min_latency = 1e6
     tot_bytes = 0
     tot_prods = 0
+    time_threshold = 120 if feedtype == 'CONDUIT' else 15
     for fn in glob.glob("*_v_*"):
         age = get_fileage(fn)
-        if age > (15 * 60):
+        if age > (time_threshold * 60):
             continue
         with open(fn) as fp:
             line = fp.read()
