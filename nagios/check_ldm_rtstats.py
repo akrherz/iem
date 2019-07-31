@@ -49,10 +49,14 @@ def get_fileage(fn):
 
 def runner(hostname, feedtype):
     """ Do something! """
-    # workaround nagios/nrpe issues
-    mydir = "/home/ldm/rtstats/%s/%s" % (
-        hostname, feedtype if feedtype != 'IDS' else 'IDS|DDPLUS')
-    os.chdir(mydir)
+    for username in ['ldm', 'meteor_ldm']:
+        mydir = "/home/%s/rtstats/%s/%s" % (
+            username, hostname,
+            # workaround nagios/nrpe issues
+            feedtype if feedtype != 'IDS' else 'IDS|DDPLUS')
+        if os.path.isdir(mydir):
+            os.chdir(mydir)
+            break
     min_latency = 1e6
     tot_bytes = 0
     tot_prods = 0
@@ -84,7 +88,7 @@ def main(argv):
     if len(argv) < 3:
         print("Usage: python check_ldm_rtstats.py <hostname> <feedtype>")
         return 3
-    runner(argv[1], argv[2])
+    return runner(argv[1], argv[2])
 
 
 if __name__ == '__main__':
