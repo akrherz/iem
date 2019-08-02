@@ -7,6 +7,7 @@ from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'mixing_ratio': 'Mixing Ratio [g/kg]',
          'vpd': 'Vapor Pressure Deficit [hPa]'}
@@ -56,6 +57,8 @@ def plotter(fdict):
         tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
         and report_type = 2
     """, pgconn, params=(station,), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data was found.")
     # saturation vapor pressure
     # Convert sea level pressure to station pressure
     df['pressure'] = mcalc.add_height_to_pressure(

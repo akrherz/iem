@@ -15,14 +15,12 @@ def get_formats(i):
         res = requests.get(uri, timeout=10)
     except requests.exceptions.ReadTimeout:
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
-        sys.exit(1)
     if res.status_code == 404:
         print("scanning metadata got 404 at i=%s, proceeding" % (i, ))
         return False
     if res.status_code != 200:
         print("%s. %s -> HTTP: %s" % (i, uri, res.status_code))
         print(res.text)
-        sys.exit(1)
     try:
         json = res.json()
     except Exception as exp:
@@ -46,7 +44,6 @@ def run_plot(i, fmt):
         res = requests.get(uri, timeout=600)
     except requests.exceptions.ReadTimeout:
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
-        sys.exit(1)
     # Known failures likely due to missing data
     if res.status_code == 400:
         return
@@ -89,10 +86,8 @@ def main(argv):
     timing = []
     pool = Pool(4)
     for res in pool.imap_unordered(workflow, queue):
-        if res is None:
+        if res is None or not res:
             continue
-        if not res:
-            sys.exit(9)
         timing.append({'i': res[0], 'fmt': res[1], 'secs': res[2]})
     if not timing:
         print("WARNING: no timing results found!")

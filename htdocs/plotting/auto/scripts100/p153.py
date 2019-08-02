@@ -138,7 +138,8 @@ def plotter(fdict):
     """, pgconn, params=(ctx['_nt'].sts[station]['tzname'], station,
                          ctx['_nt'].sts[station]['tzname'], tuple(months)),
                   index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No Data was found.")
     y0 = 0.1
     yheight = 0.8
     dy = (yheight / 24.)

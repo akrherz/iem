@@ -80,6 +80,8 @@ def plotter(fdict):
         and extract(month from valid) in %s
         and report_type = 2
     """, pgconn, params=(station, tuple(months)))
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     # Convert sea level pressure to station pressure
     df['pressure'] = mcalc.add_height_to_pressure(
         df['slp'].values * units('millibars'),

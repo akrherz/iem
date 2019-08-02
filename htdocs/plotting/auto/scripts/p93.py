@@ -108,6 +108,8 @@ def plotter(fdict):
     and dwpf <= tmpf and valid > '1973-01-01'
     and report_type = 2 """ + doylimiter + """ GROUP by d
     """, pgconn, params=(station, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['year'] = df['d'].apply(lambda x: int(x[:4]))
 
     df2 = df

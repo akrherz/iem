@@ -106,6 +106,8 @@ def plotter(fdict):
                                  station, tuple(months),
                                  ctx['_nt'].sts[station]['tzname'], hour),
                       index_col=None)
+    if df.empty:
+        raise NoDataFound("No data was found.")
     df['freq'] = df['hits'] / df['count'] * 100.
     df2 = df[df['count'] > 2]
     avg = df['hits'].sum() / float(df['count'].sum()) * 100.

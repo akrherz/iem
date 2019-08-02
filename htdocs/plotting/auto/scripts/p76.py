@@ -9,6 +9,7 @@ import metpy.calc as mcalc
 from metpy.units import units
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -173,7 +174,8 @@ def get_data(ctx, startyear):
                          ctx['_nt'].sts[ctx['station']]['tzname'],
                          tuple(hours), deltadays),
                   index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No data found.")
     df = df[(df['year'] >= startyear) & (df['year'] < lastyear)]
     return df
 

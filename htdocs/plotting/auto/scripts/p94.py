@@ -46,6 +46,8 @@ def plotter(fdict):
 
     SELECT series, avg(max), avg(min) from sums GROUP by series
     """, (ctx['_nt'].sts[station]['tzname'], station))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data found.")
 
     rows = []
     hrs = range(25)

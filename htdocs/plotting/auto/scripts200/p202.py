@@ -11,6 +11,7 @@ import metpy.calc as mcalc
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('tmpf', 'Air Temperature [F]'),
@@ -100,6 +101,8 @@ def plotter(fdict):
         tzname, tzname, station, tzname, h1, h2,
         h2 if h2 < h1 else -1),
                   index_col=None)
+    if df.empty:
+        raise NoDataFound("No data was found.")
     if varname == 'q':
         df['pressure'] = mcalc.add_height_to_pressure(
             df['slp'].values * units('millibars'),

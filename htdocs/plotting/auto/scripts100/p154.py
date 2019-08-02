@@ -7,6 +7,7 @@ from scipy import stats
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('avg_tmpf', 'Average Temperature'),
@@ -105,6 +106,8 @@ def plotter(fdict):
                          ctx['_nt'].sts[station]['tzname'], tuple(months),
                          hour),
                   index_col='year')
+    if df.empty:
+        raise NoDataFound("No data was found.")
     minfreq = len(months) * 30 * 0.8
     df2 = df[df['cnt'] > minfreq]
 

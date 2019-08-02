@@ -48,6 +48,8 @@ def plotter(fdict):
         SELECT t, sum(case when sknt >= %s then 1 else 0 end), count(*)
         from data GROUP by t ORDER by t ASC
     """, (station, month, threshold))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data was Found.")
     tmpf = []
     events = []
     total = []

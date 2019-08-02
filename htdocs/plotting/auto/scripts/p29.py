@@ -6,6 +6,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -55,6 +56,8 @@ def plotter(fdict):
     sum(case when tmp < %s then 1 else 0 end) as below,
     count(*) from obs GROUP by month ORDER by month ASC
     """, pgconn, params=(station, hour, t1, t2, t2, t1), index_col='month')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['freq'] = df['hits'] / df['count'] * 100.
     df['above_freq'] = df['above'] / df['count'] * 100.
     df['below_freq'] = df['below'] / df['count'] * 100.

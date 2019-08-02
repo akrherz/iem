@@ -7,6 +7,7 @@ from matplotlib import cm
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'low': 'Morning Low (midnight to 8 AM)',
          'high': 'Afternoon High (noon to 8 PM)'}
@@ -72,7 +73,8 @@ def plotter(fdict):
     """, pgconn, params=(station1, ctx['_nt1'].sts[station1]['tzname'],
                          station2, ctx['_nt2'].sts[station2]['tzname']),
                   index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
