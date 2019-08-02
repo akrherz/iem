@@ -7,7 +7,6 @@ import requests
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from matplotlib.patches import Rectangle
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -95,8 +94,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
-    nt = NetworkTable(network)
     p1 = ctx['p1']
     p2 = ctx['p2']
     p3 = ctx['p3']
@@ -197,7 +194,8 @@ def plotter(fdict):
     fig.text(0.5, 0.93, ("[%s] %s\n"
                          "Trailing %s, %s, %s Day Departures & "
                          "US Drought Monitor"
-                         ) % (station, nt.sts[station]['name'], p1, p2, p3),
+                         ) % (station, ctx['_nt'].sts[station]['name'],
+                              p1, p2, p3),
              ha='center', fontsize=14)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax.set_ylabel(("%s [%s] %s"
@@ -212,8 +210,8 @@ def plotter(fdict):
             ha='right', fontsize=12, transform=ax.transAxes)
     if station[2:] != "0000":
         try:
-            underlay_usdm(ax, sts, ets, nt.sts[station]['lon'],
-                          nt.sts[station]['lat'])
+            underlay_usdm(ax, sts, ets, ctx['_nt'].sts[station]['lon'],
+                          ctx['_nt'].sts[station]['lat'])
         except Exception as exp:
             sys.stderr.write(str(exp))
     ax.set_xlim(df.index.min().toordinal() - 2,

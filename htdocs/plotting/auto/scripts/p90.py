@@ -10,7 +10,6 @@ from geopandas import read_postgis
 from affine import Affine
 from pyiem.nws import vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -385,7 +384,6 @@ def plotter(fdict):
     t = ctx['t']
     ilabel = (ctx['ilabel'] == 'yes')
     geo = ctx['geo']
-    nt = NetworkTable("WFO")
     if geo == 'ugc':
         do_ugc(ctx)
     elif geo == 'polygon':
@@ -393,8 +391,8 @@ def plotter(fdict):
 
     subtitle = "based on IEM Archives %s" % (ctx.get('subtitle', ''),)
     if t == 'cwa':
-        subtitle = "Plotted for %s (%s), %s" % (nt.sts[station]['name'],
-                                                station, subtitle)
+        subtitle = "Plotted for %s (%s), %s" % (
+            ctx['_nt'].sts[station]['name'], station, subtitle)
     else:
         subtitle = "Plotted for %s, %s" % (state_names[state],
                                            subtitle)

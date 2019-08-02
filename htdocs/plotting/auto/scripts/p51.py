@@ -5,9 +5,9 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 import pandas as pd
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('all', 'Show All Three Plots'),
                      ('gdd', 'Show just Growing Degree Days'),
@@ -19,10 +19,12 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This plot presents accumulated totals and departures
+    desc['description'] = """
+    This plot presents accumulated totals and departures
     of growing degree days, precipitation and stress degree days. Leap days
     are not considered for this plot. The light blue area represents the
-    range of accumulated values based on the climatology for the site."""
+    range of accumulated values based on the climatology for the site.
+    """
     today = datetime.date.today()
     if today.month < 5:
         today = today.replace(year=today.year - 1, month=10, day=1)
@@ -59,7 +61,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
     sdate = ctx['sdate']
     edate = ctx['edate']
     year2 = ctx.get('year2', 0)
@@ -73,14 +74,14 @@ def plotter(fdict):
     glabel = "gdd%s%s" % (gddbase, gddceil)
 
     # build the climatology
-    table = "alldata_%s" % (nt.sts[station]['climate_site'][:2], )
+    table = "alldata_%s" % (ctx['_nt'].sts[station]['climate_site'][:2], )
     climo = read_sql("""
         SELECT sday, avg(gddxx(%s, %s, high, low)) as c"""+glabel+""",
         avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
         from """+table+"""
         WHERE station = %s GROUP by sday
-    """, get_dbconn('coop'), params=(gddbase, gddceil,
-                                     nt.sts[station]['climate_site'], ),
+    """, get_dbconn('coop'), params=(
+        gddbase, gddceil, ctx['_nt'].sts[station]['climate_site'], ),
                      index_col=None)
     # build the obs
     df = read_sql("""
@@ -101,8 +102,10 @@ def plotter(fdict):
     df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
 
     xlen = int((edate - sdate).days) + 1  # In case of leap day
-    years = (datetime.datetime.now().year -
-             nt.sts[station]['archive_begin'].year) + 1
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    years = (datetime.datetime.now().year - ab.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
     pacc = np.zeros((years, xlen))
@@ -136,10 +139,10 @@ def plotter(fdict):
         title = "Stress Degree Days (base=86)"
 
     ax1.set_title(("Accumulated %s\n%s %s"
-                   ) % (title, station, nt.sts[station]['name']),
+                   ) % (title, station, ctx['_nt'].sts[station]['name']),
                   fontsize=18 if whichplots == 'all' else 14)
 
-    for year in range(nt.sts[station]['archive_begin'].year,
+    for year in range(ab.year,
                       datetime.datetime.now().year + 1):
         sts = sdate.replace(year=year)
         ets = sts + datetime.timedelta(days=(xlen-1))

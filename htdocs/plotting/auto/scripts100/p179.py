@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.colors as mpcolors
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 
@@ -50,9 +49,8 @@ def plotter(fdict):
     gddbase = ctx['gddbase']
     base = ctx['base']
     ceil = ctx['ceil']
-    nt = NetworkTable(ctx['network'])
     today = ctx['date']
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
     byear = bs.year
@@ -60,11 +58,11 @@ def plotter(fdict):
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     table = "alldata_%s" % (station[:2],)
-    cursor.execute("""SELECT year, extract(doy from day),
-        gddxx(%s, %s, high,low), low
-         from """+table+""" where station = %s and year > %s
-         and day < %s
-         """, (base, ceil, station, byear, today))
+    cursor.execute("""
+        SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low
+        from """+table+""" where station = %s and year > %s
+        and day < %s
+    """, (base, ceil, station, byear, today))
 
     gdd = np.zeros((eyear-byear, 366), 'f')
     freezes = np.zeros((eyear-byear), 'f')
@@ -147,7 +145,8 @@ def plotter(fdict):
               "Frequency [%%] of reaching %.0f GDDs (%.0f/%.0f) "
               "prior to first freeze"
               ) % (byear, eyear-1,
-                   nt.sts[station]['name'], gddbase, base, ceil), fontsize=14,
+                   ctx['_nt'].sts[station]['name'], gddbase, base, ceil),
+             fontsize=14,
              ha='center')
 
     return fig, df

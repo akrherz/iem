@@ -3,7 +3,7 @@ import calendar
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
+from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
@@ -62,8 +62,9 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
+    if station not in ctx['_nt'].sts:  # This is needed.
+        raise NoDataFound("Unknown station metadata.")
     varname = ctx['var']
-    network = 'RAOB'
     ts = ctx['date']
     hour = int(ctx['hour'])
     ts = utc(ts.year, ts.month, ts.day, hour)
@@ -72,12 +73,12 @@ def plotter(fdict):
     if which == 'month':
         vlimit = (" and extract(month from f.valid) = %s "
                   ) % (ts.month,)
-    nt = NetworkTable(network, only_online=False)
-    name = nt.sts[station]['name']
+    name = ctx['_nt'].sts[station]['name']
     stations = [station, ]
     if station.startswith("_"):
-        name = nt.sts[station]['name'].split("--")[0]
-        stations = nt.sts[station]['name'].split("--")[1].strip().split(" ")
+        name = ctx['_nt'].sts[station]['name'].split("--")[0]
+        stations = ctx['_nt'].sts[station]['name'].split(
+            "--")[1].strip().split(" ")
     pgconn = get_dbconn('postgis')
 
     df = read_sql("""
@@ -115,7 +116,7 @@ def plotter(fdict):
                   index_col='pressure')
     if df.empty:
         raise NoDataFound(("Sounding for %s was not found!"
-                          ) % (ts.strftime("%Y-%m-%d %H:%M"),))
+                           ) % (ts.strftime("%Y-%m-%d %H:%M"),))
     df = df.drop('valid', axis=1)
     for key in PDICT3.keys():
         df[key+'_percentile'] = df[key+'_rank'] / df['count'] * 100.

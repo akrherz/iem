@@ -2,7 +2,6 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
@@ -97,15 +96,15 @@ def plotter(fdict):
     pstr = "(%s)" % (pstr,)
 
     if ctx['w'] == 'wfo':
-        nt = NetworkTable("WFO")
-        nt.sts['_ALL'] = {'name': 'All Offices', 'tzname': 'America/Chicago'}
-        if wfo not in nt.sts:
+        ctx['_nt'].sts['_ALL'] = {
+            'name': 'All Offices', 'tzname': 'America/Chicago'}
+        if wfo not in ctx['_nt'].sts:
             raise NoDataFound("No Data Found.")
         wfo_limiter = (" and wfo = '%s' "
                        ) % (wfo if len(wfo) == 3 else wfo[1:],)
         if wfo == '_ALL':
             wfo_limiter = ''
-        tzname = nt.sts[wfo]['tzname']
+        tzname = ctx['_nt'].sts[wfo]['tzname']
     else:
         wfo_limiter = " and substr(ugc, 1, 2) = '%s' " % (ctx['state'], )
         tzname = 'America/Chicago'
@@ -133,7 +132,7 @@ SELECT date(localissue), count(*) from events GROUP by date(localissue)
     for date, row in df.iterrows():
         data[date] = {'val': row['count']}
     if ctx['w'] == 'wfo':
-        title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
+        title2 = "NWS %s [%s]" % (ctx['_nt'].sts[wfo]['name'], wfo)
         if wfo == '_ALL':
             title2 = "All NWS Offices"
     else:

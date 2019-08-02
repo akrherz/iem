@@ -6,7 +6,6 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
@@ -61,7 +60,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
     r1 = parse_range(ctx['r1'])
     r2 = parse_range(ctx['r2'])
     r3 = parse_range(ctx['r3'])
@@ -117,7 +115,7 @@ def plotter(fdict):
     ax.set_title(("Jan 1 - %s %s Days\n"
                   "[%s] %s") % (date.strftime("%b %-d"),
                                 PDICT[varname], station,
-                                nt.sts[station]['name']))
+                                ctx['_nt'].sts[station]['name']))
 
     return fig, gdf
 

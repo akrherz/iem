@@ -8,7 +8,6 @@ import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -64,7 +63,7 @@ def get_data(ctx):
         precipcol = "precip"
         stationcol = "station"
     else:
-        station = ctx['nt'].sts[station]['iemid']
+        station = ctx['_nt'].sts[station]['iemid']
         pgconn = get_dbconn('iem')
         highcol = "max_tmpf"
         lowcol = "min_tmpf"
@@ -118,10 +117,8 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     days = ctx['days']
     varname = ctx['var']
-    ctx['nt'] = NetworkTable(network)
     df = get_data(ctx)
     if df.empty:
         raise NoDataFound('Error, no results returned!')
@@ -134,7 +131,7 @@ def plotter(fdict):
     if days == 1:
         title = title.replace("Average ", "")
     ax.set_title(("%s [%s]\n%i Day Period with %s"
-                  ) % (ctx['nt'].sts[station]['name'], station, days, title))
+                  ) % (ctx['_nt'].sts[station]['name'], station, days, title))
     cmap = plt.get_cmap(ctx['cmap'])
     minval = df[XREF[varname]].min() - 1.
     if varname == 'wettest' and minval < 0:

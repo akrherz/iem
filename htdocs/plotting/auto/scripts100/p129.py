@@ -5,7 +5,6 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -52,8 +51,7 @@ def get_context(fdict):
     level = ctx['level']
     mydir = ctx['dir']
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
     years = (datetime.date.today().year - bs.year + 1.0)
@@ -74,7 +72,6 @@ def get_context(fdict):
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     ctx['df'] = df
     ctx['station'] = station
-    ctx['nt'] = nt
     ctx['mydir'] = mydir
     ctx['level'] = level
     ctx['varname'] = varname
@@ -83,8 +80,8 @@ def get_context(fdict):
                     ) % (PDICT[varname], PDICT2[mydir], level, units)
     ctx['subtitle'] = ("for [%s] %s (%s-%s)"
                        ) % (station,
-                            nt.sts[station]['name'],
-                            nt.sts[station]['archive_begin'].year,
+                            ctx['_nt'].sts[station]['name'],
+                            bs.year,
                             datetime.date.today().year)
     return ctx
 

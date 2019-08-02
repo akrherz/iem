@@ -7,7 +7,6 @@ from dateutil.easter import easter as get_easter
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
@@ -108,20 +107,18 @@ def get_context(fdict):
     """Do the dirty work"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     ctx['varname'] = ctx['var']
     thedate = ctx['thedate']
     date = ctx['date']
 
-    nt = NetworkTable(network)
     pgconn = get_dbconn('coop')
 
     table = "alldata_%s" % (station[:2], )
     if date == 'exact':
         ctx['df'] = read_sql("""
-        SELECT year, high, day, precip from """ + table + """
-        WHERE station = %s
-        and sday = %s ORDER by year ASC
+            SELECT year, high, day, precip from """ + table + """
+            WHERE station = %s
+            and sday = %s ORDER by year ASC
         """, pgconn, params=(station, thedate.strftime("%m%d")),
                              index_col='year')
         ctx['subtitle'] = thedate.strftime("%B %-d")
@@ -146,9 +143,10 @@ def get_context(fdict):
         ctx['subtitle'] = PDICT[date]
     if ctx['df'].empty:
         raise NoDataFound("No Data Found.")
-    ctx['title'] = ("%s [%s] Daily %s"
-                    ) % (nt.sts[ctx['station']]['name'], ctx['station'],
-                         PDICT2[ctx['varname']])
+    ctx['title'] = (
+        "%s [%s] Daily %s"
+        ) % (ctx['_nt'].sts[ctx['station']]['name'], ctx['station'],
+             PDICT2[ctx['varname']])
     return ctx
 
 

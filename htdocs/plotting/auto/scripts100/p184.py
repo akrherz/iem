@@ -5,7 +5,6 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'full': 'Show Full Year Totals',
@@ -36,7 +35,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
     year = ctx['year']
     limit = ctx['limit']
     limitsql = ""
@@ -88,7 +86,7 @@ def plotter(fdict):
     ax.set_ylim(maxval2 - 31, maxval2 + 2)
     ax.set_title(("%s Max Days per Year %s\n"
                   "at or above given high temperature threshold"
-                  ) % (nt.sts[station]['name'], limittitle))
+                  ) % (ctx['_nt'].sts[station]['name'], limittitle))
     ax.set_ylabel(r"High Temperature $^\circ$F")
     if year == datetime.date.today().year:
         ax.set_xlabel(("Days, %s data through %s"

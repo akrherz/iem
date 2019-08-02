@@ -3,10 +3,10 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem import meteorology
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import drct2text, get_autoplot_context, get_dbconn
 from pyiem.datatypes import direction, speed
+from pyiem.exceptions import NoDataFound
 
 UNITS = {'mph': 'miles per hour',
          'kt': 'knots',
@@ -35,17 +35,15 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     units = ctx['units']
-
-    nt = NetworkTable(network)
-
     df = read_sql("""
         select date_trunc('hour', valid at time zone 'UTC') as ts,
         avg(sknt) as sknt, max(drct) as drct from alldata
         WHERE station = %s and sknt is not null and drct is not null
         GROUP by ts
-        """, pgconn, params=(station, ), index_col=None)
+    """, pgconn, params=(station, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     sknt = speed(df['sknt'].values, 'KT')
     drct = direction(df['drct'].values, 'DEG')
     df['u'], df['v'] = [x.value('MPS') for x in meteorology.uv(sknt, drct)]
@@ -77,7 +75,7 @@ def plotter(fdict):
     ax.set_ylim(12.5, 0.5)
     ax.set_title(("[%s] %s [%s-%s]\nMonthly Average Wind Speed and"
                   " Vector Average Direction"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        df['ts'].min().year,
                        df['ts'].max().year))
 

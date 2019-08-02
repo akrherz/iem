@@ -5,7 +5,6 @@ from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 
 
 def get_description():
@@ -29,11 +28,7 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['station1']
-    nt1 = NetworkTable(ctx['network1'])
     station2 = ctx.get('station2')
-    nt2 = None
-    if station2:
-        nt2 = NetworkTable(ctx['network2'])
 
     dbconn = get_dbconn('coop')
 
@@ -42,7 +37,7 @@ def plotter(fdict):
         station = %s ORDER by valid ASC
      """, dbconn, params=(station1,), index_col='valid')
     subtitle = " 1951-%s\n[%s] %s " % (datetime.datetime.now().year, station1,
-                                       nt1.sts[station1]['name'])
+                                       ctx['_nt1'].sts[station1]['name'])
     subplots = 1
     if station2:
         df2 = read_sql("""
@@ -52,7 +47,7 @@ def plotter(fdict):
         df['station2'] = station2
         df['high2'] = df2['high']
         df['low2'] = df2['low']
-        subtitle += " [%s] %s" % (station2, nt2.sts[station2]['name'])
+        subtitle += " [%s] %s" % (station2, ctx['_nt2'].sts[station2]['name'])
         subplots = 2
     (fig, ax) = plt.subplots(subplots, 1, sharex=True, figsize=(8, 6))
     if not station2:

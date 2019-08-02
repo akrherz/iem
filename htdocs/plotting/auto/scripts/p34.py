@@ -6,7 +6,6 @@ from collections import OrderedDict
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -34,11 +33,13 @@ def get_description():
 
 
 def greater_than_or_equal(one, two):
-    return (one >= two)
+    """Helper."""
+    return one >= two
 
 
 def less_than(one, two):
-    return (one < two)
+    """Helper."""
+    return one < two
 
 
 def plotter(fdict):
@@ -51,7 +52,6 @@ def plotter(fdict):
     varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     cursor.execute("""
         SELECT extract(doy from day)::int as d, high, low, day
@@ -85,12 +85,12 @@ def plotter(fdict):
                            maxperiod=pd.Series(maxperiod[1:]),
                            enddate=pd.Series(enddate[1:])))
     (fig, ax) = plt.subplots(1, 1, sharex=True)
-    ax.bar(np.arange(1, 367), maxperiod[1:],  fc='b', ec='b')
+    ax.bar(np.arange(1, 367), maxperiod[1:], fc='b', ec='b')
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")
     ax.set_title(("%s %s\nMaximum Straight Days with %s %s$^\circ$F"
-                  ) % (station, nt.sts[station]['name'], PDICT[varname],
-                       threshold))
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       PDICT[varname], threshold))
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 366)

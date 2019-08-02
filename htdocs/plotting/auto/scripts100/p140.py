@@ -5,7 +5,6 @@ import datetime
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -64,13 +63,11 @@ def plotter(fdict):
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     days = ctx['days']
     sts = datetime.date(2012, ctx['month'], ctx['day'])
     ets = sts + datetime.timedelta(days=(days - 1))
     varname = ctx['varname']
     year = ctx['year']
-    nt = NetworkTable(network)
     sdays = []
     for i in range(days):
         ts = sts + datetime.timedelta(days=i)
@@ -89,7 +86,7 @@ def plotter(fdict):
     from summary s JOIN stations t on (s.iemid = t.iemid)
     WHERE t.network = %s and t.id = %s and to_char(day, 'mmdd') in %s
     GROUP by yr ORDER by yr ASC
-    """, pgconn, params=(network, station, tuple(sdays)))
+    """, pgconn, params=(ctx['network'], station, tuple(sdays)))
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
@@ -111,7 +108,8 @@ def plotter(fdict):
         ylabel = "Wind Speed [MPH]"
     ax[0].set_ylabel(ylabel)
     ax[0].set_title(("[%s] %s\n%s from %s through %s"
-                     ) % (station, nt.sts[station]['name'], PDICT.get(varname),
+                     ) % (station, ctx['_nt'].sts[station]['name'],
+                          PDICT.get(varname),
                           sts.strftime("%d %b"), ets.strftime("%d %b")))
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)

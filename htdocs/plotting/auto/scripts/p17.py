@@ -6,7 +6,6 @@ import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -41,10 +40,8 @@ def plotter(fdict):
     pgconn_coop = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     year = ctx['year']
     month = ctx['month']
-    nt = NetworkTable(network)
 
     table = "summary_%s" % (year,)
 
@@ -66,7 +63,7 @@ def plotter(fdict):
     from """+table+""" s JOIN stations t
     on (t.iemid = s.iemid) WHERE id = %s and network = %s and
     day >= %s and day < %s ORDER by day ASC
-    """, pgconn_iem,  params=(station, network, sts, ets),
+    """, pgconn_iem, params=(station, ctx['network'], sts, ets),
                   index_col='day_of_month')
     has_data = (df['max_tmpf'].max() > -90)
 
@@ -76,7 +73,7 @@ def plotter(fdict):
     extract(day from valid) as day_of_month from
     ncdc_climate81 where station = %s
     and extract(month from valid) = %s ORDER by valid ASC
-    """, pgconn_coop, params=(nt.sts[station]['ncdc81'], month),
+    """, pgconn_coop, params=(ctx['_nt'].sts[station]['ncdc81'], month),
                    index_col='day_of_month')
 
     if not cdf.empty:
@@ -137,14 +134,14 @@ def plotter(fdict):
     ax.set_xlabel(sts.strftime("%B %Y"))
     ax.set_ylabel(r"Temperature $^\circ$F")
 
-    if nt.sts[station]['ncdc81'] is None:
+    if ctx['_nt'].sts[station]['ncdc81'] is None:
         subtitle = "Daily climatology unavailable for site"
     else:
         subtitle = ("NCDC 1981-2010 Climate Site: %s"
-                    ) % (nt.sts[station]['ncdc81'],)
+                    ) % (ctx['_nt'].sts[station]['ncdc81'],)
 
     ax.text(0, 1.1, ("[%s] %s :: Hi/Lo Temps for %s\n%s"
-                     ) % (station, nt.sts[station]['name'],
+                     ) % (station, ctx['_nt'].sts[station]['name'],
                           sts.strftime("%b %Y"), subtitle),
             transform=ax.transAxes, ha='left', va='bottom')
     ax.legend(bbox_to_anchor=(0., 1.01, 1., .102), loc=3,

@@ -9,7 +9,6 @@ from rasterstats import zonal_stats
 from geopandas import read_postgis
 from affine import Affine
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -180,7 +179,6 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    nt = NetworkTable("WFO")
     ones = np.ones((int(YSZ), int(XSZ)))
     counts = np.zeros((int(YSZ), int(XSZ)))
     # counts = np.load('counts.npy')
@@ -240,7 +238,7 @@ def plotter(fdict):
     if t == 'cwa':
         sector = 'cwa'
         subtitle = "Plotted for %s (%s). %s" % (
-            nt.sts[station]['name'], station, subtitle)
+            ctx['_nt'].sts[station]['name'], station, subtitle)
     else:
         sector = 'state' if len(ctx['csector']) == 2 else ctx['csector']
 

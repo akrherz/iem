@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -33,9 +32,11 @@ MDICT = OrderedDict([
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['description'] = """This plot displays hourly temperature distributions
+    desc['description'] = """
+    This plot displays hourly temperature distributions
     for a given time period and temperature threshold of your choice.  The
-    temperature threshold is for one or more exceedences for the day."""
+    temperature threshold is for one or more exceedences for the day.
+    """
     desc['arguments'] = [
         dict(type='zstation', name='zstation', default='AMW',
              label='Select Station:', network='IA_ASOS'),
@@ -55,11 +56,9 @@ def plotter(fdict):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     threshold = ctx['threshold']
     opt = ctx['opt']
     month = ctx['month']
-    nt = NetworkTable(network)
 
     if month == 'all':
         months = range(1, 13)
@@ -92,8 +91,9 @@ def plotter(fdict):
      SELECT valid at time zone %s + '10 minutes'::interval, tmpf
      from obs a JOIN events e on
      (date(a.valid at time zone %s) = e.date)
-    """, (station, tuple(months), nt.sts[station]['tzname'],
-          nt.sts[station]['tzname'], nt.sts[station]['tzname']))
+    """, (station, tuple(months), ctx['_nt'].sts[station]['tzname'],
+          ctx['_nt'].sts[station]['tzname'],
+          ctx['_nt'].sts[station]['tzname']))
     data = []
     for _ in range(24):
         data.append([])
@@ -104,10 +104,11 @@ def plotter(fdict):
     ax.boxplot(data)
     ax.grid(True)
     ax.set_title("%s [%s] Hourly Temps on\nDays (%s) with %s %.0f" % (
-        nt.sts[station]['name'], station, month.capitalize(), PDICT[opt],
-        threshold))
-    ax.set_ylabel("Temperature $^\circ$F")
-    ax.set_xlabel("Local Hour for Timezone: %s" % (nt.sts[station]['tzname'],))
+        ctx['_nt'].sts[station]['name'], station, month.capitalize(),
+        PDICT[opt], threshold))
+    ax.set_ylabel(r"Temperature $^\circ$F")
+    ax.set_xlabel("Local Hour for Timezone: %s" % (
+        ctx['_nt'].sts[station]['tzname'],))
     ax.set_xticks(range(1, 25, 4))
     ax.set_xticklabels(['Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'])
     return fig

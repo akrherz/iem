@@ -3,7 +3,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -28,8 +27,7 @@ def plotter(fdict):
     station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("No Data Found.")
     res = ("# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
@@ -40,11 +38,11 @@ def plotter(fdict):
            "akrherz@iastate.edu 515.294.5978\n"
            ) % (datetime.date.today().strftime("%d %b %Y"),
                 bs.date(), datetime.date.today(),
-                station, nt.sts[station]['name'])
+                station, ctx['_nt'].sts[station]['name'])
     res += ("# THESE ARE THE HEAT STRESS VARIABLES FOR STATION #  %s\n"
             ) % (station,)
 
-    s = nt.sts[station]['archive_begin']
+    s = ctx['_nt'].sts[station]['archive_begin']
     e = datetime.date.today().year + 1
 
     df = read_sql("""

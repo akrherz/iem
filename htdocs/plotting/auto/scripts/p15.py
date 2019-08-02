@@ -7,7 +7,6 @@ import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -40,8 +39,6 @@ def plotter(fdict):
     station = ctx['station']
     varname = ctx['varname']
     year = ctx['year']
-    network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network)
 
     table = "alldata_%s" % (station[:2],)
 
@@ -132,7 +129,8 @@ def plotter(fdict):
     ax.set_xlabel(("Dark Shades are long term averages, lighter are %s "
                    "actuals") % (year,))
     ax.set_title(("%s [%s]\nDay to Day %s Temperature Change"
-                  ) % (nt.sts[station]['name'], station, varname.title()))
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       varname.title()))
 
     return fig, df
 

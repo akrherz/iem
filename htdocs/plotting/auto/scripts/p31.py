@@ -5,7 +5,6 @@ import calendar
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -38,7 +37,6 @@ def plotter(fdict):
     days = ctx['days']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     cursor.execute("""
     WITH data as (
@@ -83,7 +81,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel(r"Temperature Change $^\circ$F")
     ax.set_title(("%s %s\nMax Change in High Temp by Week of Year"
-                  ) % (station, nt.sts[station]['name']))
+                  ) % (station, ctx['_nt'].sts[station]['name']))
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 366)

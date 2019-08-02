@@ -5,7 +5,6 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'above': 'Above Threshold',
@@ -44,6 +43,7 @@ def get_description():
 
 
 def nice(val):
+    """Helper."""
     if val == 'M':
         return 'M'
     if val < 0.01 and val > 0:
@@ -56,25 +56,24 @@ def plotter(fdict):
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     year = ctx['year']
     threshold = ctx['thres']
     mydir = ctx['dir']
     varname = ctx['var']
-    nt = NetworkTable(network)
 
     op = ">=" if mydir == 'above' else "<"
     df = read_sql("""
-    SELECT day, extract(doy from day) as doy, extract(year from day) as year,
-    extract(week from day) as week,
-    max_rh, min_rh, avg_rh,
-    case when """ + varname + """ """ + op + """ %s then 1 else 0 end
-    as rh_exceed
-    from summary s JOIN stations t
-    ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s
-    and min_rh is not null and max_rh is not null
-    ORDER by day ASC
-    """, pgconn, params=(threshold, station, network), index_col='day')
+        SELECT day, extract(doy from day) as doy,
+        extract(year from day) as year,
+        extract(week from day) as week,
+        max_rh, min_rh, avg_rh,
+        case when """ + varname + """ """ + op + """ %s then 1 else 0 end
+        as rh_exceed
+        from summary s JOIN stations t
+        ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s
+        and min_rh is not null and max_rh is not null
+        ORDER by day ASC
+    """, pgconn, params=(threshold, station, ctx['network']), index_col='day')
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -108,8 +107,8 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_title(("%s [%s] (%.0f-%.0f)\n"
                   "%.0f Daily Relative Humidity"
-                  ) % (nt.sts[station]['name'], station, df['year'].min(),
-                       df['year'].max(), year))
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       df['year'].min(), df['year'].max(), year))
     ax2 = ax.twinx()
     ax2.set_ylabel("Daily Frequency w/ %s %s %.0f%%" % (varname, op,
                                                         threshold),

@@ -6,7 +6,6 @@ import calendar
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -72,9 +71,8 @@ def plotter(fdict):
     syear = ctx['syear']
     eyear = ctx['eyear']
 
-    nt = NetworkTable('WFO')
-    nt.sts['_ALL'] = {'name': 'All Offices'}
-    if station not in nt.sts:
+    ctx['_nt'].sts['_ALL'] = {'name': 'All Offices'}
+    if station not in ctx['_nt'].sts:
         raise NoDataFound("No Data Found.")
 
     lastdoy = 367
@@ -181,7 +179,7 @@ def plotter(fdict):
     title = vtec.get_ps_string(phenomena, significance)
     if combo == 'svrtor':
         title = "Severe Thunderstorm + Tornado Warning"
-    ptitle = "%s" % (nt.sts[station]['name'],)
+    ptitle = "%s" % (ctx['_nt'].sts[station]['name'],)
     if opt == 'state':
         ptitle = ("NWS Issued for Counties/Parishes in %s"
                   ) % (reference.state_names[state],)

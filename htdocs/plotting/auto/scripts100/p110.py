@@ -2,8 +2,7 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
 CWEEK = {1: '3/1-->3/7   ',
@@ -77,11 +76,10 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('coop')
-
-    station = fdict.get('station', 'IA0200')
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     df = read_sql("""
     with events as (
         SELECT c.climoweek, a.precip, a.year from """+table+""" a
@@ -118,8 +116,8 @@ def plotter(fdict):
  CL                MAX         MEAN   0.01-    0.26-    0.51-    1.01-            TOTAL
  WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       ctx['_nt'].sts[station]['name'])
 
     annEvents = 0
     cat1t = 0

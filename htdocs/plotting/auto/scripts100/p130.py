@@ -2,7 +2,6 @@
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -29,18 +28,17 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station'].upper()
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
     df = read_sql("""
-    SELECT year, month,
-    avg(high) as avg_high_all, avg(low) as avg_low_all,
-    avg(case when snowd > 0 then high else null end) as avg_high_snow,
-    avg(case when snowd > 0 then low else null end) as avg_low_snow,
-    avg(case when snowd = 0 then high else null end) as avg_high_nosnow,
-    avg(case when snowd = 0 then low else null end) as avg_low_nosnow,
-    sum(case when snowd > 0 then 1 else 0 end) as coverdays
-    from """ + table + """
-    WHERE station = %s
-    GROUP by year, month
+        SELECT year, month,
+        avg(high) as avg_high_all, avg(low) as avg_low_all,
+        avg(case when snowd > 0 then high else null end) as avg_high_snow,
+        avg(case when snowd > 0 then low else null end) as avg_low_snow,
+        avg(case when snowd = 0 then high else null end) as avg_high_nosnow,
+        avg(case when snowd = 0 then low else null end) as avg_low_nosnow,
+        sum(case when snowd > 0 then 1 else 0 end) as coverdays
+        from """ + table + """
+        WHERE station = %s
+        GROUP by year, month
     """, pgconn, params=(station, ), index_col=None)
     if df.empty:
         raise NoDataFound("No data found.")
@@ -78,7 +76,7 @@ def plotter(fdict):
         ax[i].set_ylim([(ys2.min() - 10), (ys.max() + 20)])
 
     ax[0].set_title(("%s [%s]\nSnow Cover Impact on Average Temp [%s-%s]"
-                     ) % (nt.sts[station]['name'], station,
+                     ) % (ctx['_nt'].sts[station]['name'], station,
                           df2['year'].min(), df2['year'].max()))
     ax[0].set_ylabel(r"Avg High Temp $^\circ$F")
     ax[1].set_ylabel(r"Avg Low Temp $^\circ$F")

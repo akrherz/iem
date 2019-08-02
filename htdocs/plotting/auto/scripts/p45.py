@@ -3,7 +3,6 @@ import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -40,12 +39,9 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     hour = ctx['hour']
     year = ctx['year']
     month = ctx['month']
-
-    nt = NetworkTable(network)
 
     df = read_sql("""
         WITH obs as (
@@ -63,7 +59,7 @@ def plotter(fdict):
         sum(case when o.sum >= 1 then 1 else 0 end) as hits, count(*)
         from obs o GROUP by year, month ORDER by year ASC, month ASC
       """, pgconn, params=(station,
-                           nt.sts[station]['tzname'], hour),
+                           ctx['_nt'].sts[station]['tzname'], hour),
                   index_col=None)
     df['freq'] = df['hits'] / df['count'] * 100.
     climo = df.groupby('month').sum()
@@ -97,7 +93,7 @@ def plotter(fdict):
                      "Frequency of %s Cloud Observation of Overcast"
                      ) % (df['year'].min(),
                           datetime.datetime.now().year, station,
-                          nt.sts[station]['name'],
+                          ctx['_nt'].sts[station]['name'],
                           datetime.datetime(2000, 1, 1, hour,
                                             0).strftime("%I %p")))
 

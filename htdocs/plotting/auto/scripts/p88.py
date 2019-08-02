@@ -6,7 +6,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ['clear', 'clear'],
@@ -40,9 +40,7 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     which = ctx['which']
-    nt = NetworkTable(network)
 
     data = np.zeros((24, 52), 'f')
 
@@ -70,7 +68,7 @@ def plotter(fdict):
     SELECT l.w as week, l.hr as hour, l.avg - c.avg as difference
     from cloudy l JOIN climo c on
     (l.w = c.w and l.hr = c.hr)
-    """, pgconn, params=(nt.sts[station]['tzname'], station))
+    """, pgconn, params=(ctx['_nt'].sts[station]['tzname'], station))
 
     for _, row in df.iterrows():
         if row[0] > 52:
@@ -85,13 +83,17 @@ def plotter(fdict):
     a = fig.colorbar(cs)
     a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
     ax.grid(True)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("[%s] %s %s-%s\nHourly Temp Departure "
                   "(skies were %s vs all)"
-                  ) % (station, nt.sts[station]['name'],
-                       max([nt.sts[station]['archive_begin'].year, 1973]),
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       max([ab.year, 1973]),
                        datetime.date.today().year, PDICT[ctx['which']]))
     ax.set_ylim(-0.5, 23.5)
-    ax.set_ylabel("Local Hour of Day, %s" % (nt.sts[station]['tzname'],))
+    ax.set_ylabel("Local Hour of Day, %s" % (
+        ctx['_nt'].sts[station]['tzname'],))
     ax.set_yticks((0, 4, 8, 12, 16, 20))
     ax.set_xticks(range(0, 55, 7))
     ax.set_xticklabels(('Jan 1', 'Feb 19', 'Apr 8', 'May 27', 'Jul 15',

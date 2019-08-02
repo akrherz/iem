@@ -2,7 +2,6 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -34,8 +33,7 @@ def plotter(fdict):
     station = ctx['station']
     varname = ctx['var']
 
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("No Metadata found.")
     res = """\
@@ -46,14 +44,13 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (datetime.date.today().strftime("%d %b %Y"),
        bs.date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['name'])
     if varname == 'maxmin':
         res += """\
 # DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR STATION NUMBER  %s
      JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
  DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
-""" % (nt.sts[station]['archive_begin'].year, datetime.date.today().year,
-       station)
+""" % (bs.year, datetime.date.today().year, station)
     elif varname == 'means':
         res += """\
 # DAILY MEAN HIGHS AND LOWS FOR STATION NUMBER  %s
@@ -84,7 +81,7 @@ def plotter(fdict):
                 if ts not in df.index:
                     res += bad
                     continue
-            except Exception as _:
+            except:
                 res += bad
                 continue
             row = df.loc[ts]

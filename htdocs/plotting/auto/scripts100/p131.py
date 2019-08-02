@@ -5,7 +5,7 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('CLR', 'Clear (CLR)'),
@@ -36,7 +36,8 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['description'] = """This plot displays the frequency of having overcast
+    desc['description'] = """
+    This plot displays the frequency of having overcast
     conditions reported by air temperature.  More specifically, this script
     looks for the report of 'OVC' within the METAR sky conditions.  Many
     caveats apply with the reporting changes of this over the years."""
@@ -58,12 +59,9 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     month = ctx['month']
     varname = ctx['var']
     hour = ctx.get('hour')
-
-    nt = NetworkTable(network)
 
     if month == 'all':
         months = range(1, 13)
@@ -106,7 +104,7 @@ def plotter(fdict):
             GROUP by t ORDER by t ASC
             """, pgconn, params=(varname, varname, varname, varname,
                                  station, tuple(months),
-                                 nt.sts[station]['tzname'], hour),
+                                 ctx['_nt'].sts[station]['tzname'], hour),
                       index_col=None)
     df['freq'] = df['hits'] / df['count'] * 100.
     df2 = df[df['count'] > 2]
@@ -119,14 +117,17 @@ def plotter(fdict):
     if hour is not None:
         ts = datetime.datetime(2000, 1, 1, hour)
         hrlabel = ts.strftime("%-I %p")
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(
         ("%s [%s]\nFrequency of %s by "
          "Air Temp (month=%s,hour=%s) (%s-%s)\n"
          "(must have 3+ hourly observations at the given temperature)"
-         ) % (nt.sts[station]['name'], station,
+         ) % (ctx['_nt'].sts[station]['name'], station,
               "Overcast Clouds" if varname == 'OVC' else 'Clear Skies',
               month.upper(), hrlabel,
-              nt.sts[station]['archive_begin'].year,
+              ab.year,
               datetime.datetime.now().year), size=10)
 
     ax.set_ylabel("%s Frequency [%%]" % (PDICT[varname], ))

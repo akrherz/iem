@@ -4,9 +4,9 @@ import calendar
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'tmpf': 'Air Temperature',
          'dwpf': 'Dew Point Temperature'}
@@ -49,7 +49,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     t1 = ctx['t1']
     t2 = ctx['t2']
     t3 = ctx['t3']
@@ -57,20 +56,18 @@ def plotter(fdict):
     t5 = ctx['t5']
     v = ctx['var']
 
-    nt = NetworkTable(network)
-
     cursor.execute("""
-    SELECT extract(week from valid) as w,
-    sum(case when """ + v + """::int < %s then 1 else 0 end),
-    sum(case when """ + v + """::int < %s then 1 else 0 end),
-    sum(case when """ + v + """::int < %s then 1 else 0 end),
-    sum(case when """ + v + """::int < %s then 1 else 0 end),
-    sum(case when """ + v + """::int < %s then 1 else 0 end),
-    count(*)
-    from alldata where station = %s and """ + v + """ is not null
-    and extract(minute  from valid  - '1 minute'::interval) > 49
-    and report_type = 2
-    GROUP by w ORDER by w ASC
+        SELECT extract(week from valid) as w,
+        sum(case when """ + v + """::int < %s then 1 else 0 end),
+        sum(case when """ + v + """::int < %s then 1 else 0 end),
+        sum(case when """ + v + """::int < %s then 1 else 0 end),
+        sum(case when """ + v + """::int < %s then 1 else 0 end),
+        sum(case when """ + v + """::int < %s then 1 else 0 end),
+        count(*)
+        from alldata where station = %s and """ + v + """ is not null
+        and extract(minute  from valid  - '1 minute'::interval) > 49
+        and report_type = 2
+        GROUP by w ORDER by w ASC
     """, (t1, t2, t3, t4, t5, station))
     weeks = []
     d1 = []
@@ -115,10 +112,13 @@ def plotter(fdict):
            label='Below %s' % (t1))
 
     ax.grid(True, zorder=11)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("%s [%s]\n"
                   r"Hourly %s ($^\circ$F) Frequencies (%s-%s)"
-                  ) % (nt.sts[station]['name'], station,
-                       PDICT[v], nt.sts[station]['archive_begin'].year,
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       PDICT[v], ab.year,
                        datetime.datetime.now().year))
     ax.set_ylabel("Frequency [%]")
 

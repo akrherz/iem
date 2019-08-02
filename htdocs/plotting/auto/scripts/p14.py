@@ -4,7 +4,6 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -39,8 +38,6 @@ def plotter(fdict):
     jdaylimit = 367
     if year == today.year:
         jdaylimit = int(today.strftime("%j"))
-    network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network)
 
     table = "alldata_%s" % (station[:2],)
     endyear = int(datetime.datetime.now().year) + 1
@@ -148,8 +145,14 @@ def plotter(fdict):
     addl = ""
     if jdaylimit < 367:
         addl = " thru %s" % (today.strftime("%-d %b"), )
-    ax.set_title("%s [%s] [%s-%s]\nDaily Precipitation Contributions%s" % (
-                nt.sts[station]['name'], station, minyear, endyear-2, addl))
+    ax.set_title(
+        (
+         "%s [%s] [%s-%s]\nDaily Precipitation Contributions%s"
+        ) % (
+            ctx['_nt'].sts[station]['name'], station, minyear, endyear-2,
+            addl
+            )
+    )
     ax.set_xticks(np.arange(0, 5))
     xlabels = []
     for i in range(5):

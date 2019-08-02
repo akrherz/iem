@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -55,7 +54,6 @@ def plotter(fdict):
     state = ctx['state']
     wfo = ctx['wfo']
 
-    nt = NetworkTable("NWSCLI")
     today = ctx['sdate']
     yesterday = today - datetime.timedelta(days=1)
     d180 = today - datetime.timedelta(days=180)
@@ -103,10 +101,10 @@ def plotter(fdict):
         ).sort_values(ascending=False).index)
 
     for station, row in df.iterrows():
-        if station not in nt.sts:
+        if station not in ctx['_nt'].sts:
             continue
-        lats.append(nt.sts[station]['lat'])
-        lons.append(nt.sts[station]['lon'])
+        lats.append(ctx['_nt'].sts[station]['lat'])
+        lons.append(ctx['_nt'].sts[station]['lon'])
         if varname == 'precip':
             last_wet = row['last_wet']
             days = 0 if last_wet in [today, yesterday] else row['precip_days']

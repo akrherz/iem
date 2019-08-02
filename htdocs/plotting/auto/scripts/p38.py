@@ -6,7 +6,6 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -49,7 +48,6 @@ def plotter(fdict):
     varname = ctx['var']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
         WITH agg as (
@@ -89,7 +87,7 @@ def plotter(fdict):
     lyear = datetime.date.today().year - 1
     ax.set_title(("[%s] %s Daily Solar Radiation\n"
                   "1979-%s NARR Climatology w/ %s "
-                  ) % (station, nt.sts[station]['name'], lyear, year))
+                  ) % (station, ctx['_nt'].sts[station]['name'], lyear, year))
     ax.legend()
     ax.grid(True)
     ax.set_ylabel("Shortwave Solar Radiation $MJ$ $d^{-1}$")

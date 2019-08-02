@@ -7,8 +7,8 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.datatypes import speed
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'mps': 'Meters per Second',
          'kt': 'Knots',
@@ -65,14 +65,13 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     units = ctx['units']
-    network = ctx['network']
-
-    nt = NetworkTable(network)
 
     df = read_sql("""
     SELECT extract(doy from valid) as doy, sknt, drct from alldata
     where station = %s and sknt >= 0 and drct >= 0 and report_type = 2
     """, asos, params=(station, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No data Found.")
 
     # Compute components in MPS
     (df['u'], df['v']) = uv(speed(df['sknt'].values, 'KT').value('MPS'),
@@ -98,10 +97,13 @@ def plotter(fdict):
     ax.legend(ncol=2, fontsize=11, loc=(0., -0.21))
     ax.grid(True)
     ax.set_xlim(0, 366)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("[%s] %s Daily Average Component Wind Speed\n"
                   "[%s-%s] 7 day smooth filter applied, %.0f obs found"
-                  "") % (station, nt.sts[station]['name'],
-                         nt.sts[station]['archive_begin'].year,
+                  "") % (station, ctx['_nt'].sts[station]['name'],
+                         ab.year,
                          datetime.datetime.now().year, len(df.index)))
     ax.set_ylabel("Average Wind Speed %s" % (PDICT.get(units), ))
 

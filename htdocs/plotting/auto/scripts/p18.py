@@ -11,7 +11,6 @@ import psycopg2.extras
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -65,7 +64,7 @@ def highcharts(fdict):
     j = dict()
     j['title'] = dict(text=('[%s] %s Time Series'
                             ) % (ctx['station'],
-                                 ctx['nt'].sts[ctx['station']]['name']))
+                                 ctx['_nt'].sts[ctx['station']]['name']))
     j['xAxis'] = dict(type='datetime')
     j['yAxis'] = dict(title=dict(text='%s %s' % (MDICT[ctx['var']],
                                                  UNITS[ctx['var']])))
@@ -108,7 +107,6 @@ def get_data(fdict):
     coop_pgconn = get_dbconn('coop')
     ccursor = coop_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx['station'] = ctx['zstation']
-    ctx['nt'] = NetworkTable(ctx['network'])
     sdate = ctx['sdate']
     days = ctx['days']
     ctx['edate'] = sdate + datetime.timedelta(days=days)
@@ -122,7 +120,7 @@ def get_data(fdict):
         ctx['climo'] = {}
         ccursor.execute("""
             SELECT valid, high, low from ncdc_climate81 where station = %s
-        """, (ctx['nt'].sts[ctx['station']]['ncdc81'],))
+        """, (ctx['_nt'].sts[ctx['station']]['ncdc81'],))
         for row in ccursor:
             ctx['climo'][row[0].strftime("%m%d")] = dict(high=row[1],
                                                          low=row[2])
@@ -183,7 +181,7 @@ def plotter(fdict):
                ec='lightblue', label="Daily Climatology")
     # Construct a local timezone x axis
     x = ctx['df'].index.tz_localize(pytz.UTC).tz_convert(
-        ctx['nt'].sts[ctx['station']]['tzname']).tz_localize(None)
+        ctx['_nt'].sts[ctx['station']]['tzname']).tz_localize(None)
     ax.plot(x.values, ctx['df']['datum'], color='r',
             label='Hourly Obs')
     ax.set_ylabel("%s %s" % (MDICT[ctx['var']], UNITS[ctx['var']]))
@@ -195,7 +193,7 @@ def plotter(fdict):
     ax.axhline(32, linestyle='-.')
     ax.grid(True)
     ax.set_title(("%s [%s]\n%s Timeseries %s - %s"
-                  ) % (ctx['nt'].sts[ctx['station']]['name'], ctx['station'],
+                  ) % (ctx['_nt'].sts[ctx['station']]['name'], ctx['station'],
                        MDICT[ctx['var']],
                        ctx['sdate'].strftime("%d %b %Y"),
                        ctx['edate'].strftime("%d %b %Y")))

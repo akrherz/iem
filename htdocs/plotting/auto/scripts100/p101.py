@@ -3,7 +3,6 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 import pyiem.nws.vtec as vtec
@@ -37,14 +36,12 @@ def plotter(fdict):
     pgconn = get_dbconn('postgis')
     pcursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
+    ctx['_nt'].sts['_ALL'] = dict(name="ALL WFOs")
     syear = ctx['syear']
     eyear = ctx['eyear'] + 1
     station = ctx['station'][:4]
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear, 1, 1)
-    nt = NetworkTable('WFO')
-    if station not in nt.sts:
-        raise NoDataFound("No Data Found.")
     wfo_limiter = " and wfo = '%s' " % (
         station if len(station) == 3 else station[1:],)
     if station == '_ALL':
@@ -56,6 +53,8 @@ def plotter(fdict):
         and issue < %s """ + wfo_limiter + """
         GROUP by phenomena, significance ORDER by count DESC
     """, (sts, ets))
+    if pcursor.rowcount == 0:
+        raise NoDataFound("No data found.")
     labels = []
     vals = []
     cnt = 1
@@ -80,10 +79,11 @@ def plotter(fdict):
     for i in range(1, len(vals)):
         y = vals[i] / float(vals[0]) * 100.0
         ax.text(y + 1, i, '%.1f%%' % (y,), va='center')
-    fig.text(0.5, 0.95, "%s-%s NWS %s Watch/Warning/Advisory Totals" % (
-                syear, eyear-1 if (eyear - 1 != syear) else '',
-                "ALL WFOs" if station == '_ALL' else nt.sts[station]['name']),
-             ha='center')
+    fig.text(
+        0.5, 0.95,
+        "%s-%s NWS %s Watch/Warning/Advisory Totals" % (
+            syear, eyear-1 if (eyear - 1 != syear) else '',
+            ctx['_nt'].sts[station]['name']), ha='center')
     fig.text(0.5, 0.05, "Event+County/Zone Count, Relative to #%s" % (
         labels[0],), ha='center', fontsize=10)
     ax.set_ylim(len(vals), -0.5)

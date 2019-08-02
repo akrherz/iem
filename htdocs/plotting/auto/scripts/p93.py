@@ -9,7 +9,7 @@ from pyiem.datatypes import temperature, speed
 import pyiem.meteorology as pymet
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 
 PDICT = {'yes': 'Yes, Include only Year to Date period each year',
@@ -91,12 +91,10 @@ def plotter(fdict):
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     highlightyear = ctx['year']
     ytd = ctx['ytd']
     varname = ctx['var']
     inc = ctx['inc']
-    nt = NetworkTable(network)
     doylimiter = get_doylimit(ytd, varname)
     tmpflimit = "and tmpf >= 50" if varname != 'windchill' else 'and tmpf < 50'
     if varname not in ['windchill', 'heatindex']:
@@ -147,7 +145,10 @@ def plotter(fdict):
         maxval = int(df2[varname].max() + 1)
         LEVELS[varname] = np.arange(maxval - 31, maxval)
 
-    minyear = max([1973, nt.sts[station]['archive_begin'].year])
+    bs = ctx['_nt'].sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("Unknown station metadata.")
+    minyear = max([1973, bs.year])
     maxyear = datetime.date.today().year
     years = float((maxyear - minyear) + 1)
     x = []
@@ -201,7 +202,7 @@ def plotter(fdict):
     title = "Entire Year" if ytd == 'no' else title
     ax.set_title(("[%s] %s %s-%s\n"
                   "%s Histogram (%s)%s"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        minyear,
                        datetime.date.today().year, title2, title,
                        inctitle))

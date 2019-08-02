@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.datatypes import speed
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -50,9 +49,6 @@ def plotter(fdict):
     phenomena = ctx['p']
     date = ctx.get('date')
     wfo = ctx['wfo']
-    nt = NetworkTable("WFO")
-    if wfo not in nt.sts:
-        raise NoDataFound("No station metadata.")
     pgconn = get_dbconn('postgis')
     ps = [phenomena]
     if phenomena == '_A':
@@ -86,7 +82,7 @@ def plotter(fdict):
     g.ax_marg_x.set_title(
         ("NWS %s\n%s Storm Motion\n"
          "%s warnings ploted between %s and %s"
-         ) % (nt.sts[wfo]['name'], PDICT[phenomena],
+         ) % (ctx['_nt'].sts[wfo]['name'], PDICT[phenomena],
               len(df.index), df['issue'].min().date().strftime("%b %-d, %Y"),
               df['issue'].max().date().strftime("%b %-d, %Y")))
     g.fig.subplots_adjust(top=.9)

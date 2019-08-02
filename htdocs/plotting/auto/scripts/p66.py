@@ -1,9 +1,7 @@
 """Consec days"""
-import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -46,7 +44,6 @@ def plotter(fdict):
     mydir = ctx['dir']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     agg = "min" if mydir == 'above' else 'max'
     op = ">=" if mydir == 'above' else '<'
@@ -68,7 +65,7 @@ def plotter(fdict):
     label = "AOA" if mydir == 'above' else 'below'
     ax.set_title(("[%s] %s\nFrequency of %s Consec Days"
                   r" with %s %s %s$^\circ$F "
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        days, varname.capitalize(), label, threshold))
     ax.set_ylabel("Frequency of Days [%]")
     ax.set_ylim(0, 100)

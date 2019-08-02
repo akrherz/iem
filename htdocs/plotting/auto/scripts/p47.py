@@ -2,7 +2,6 @@
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -37,7 +36,6 @@ def plotter(fdict):
     year = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     # beat month
     df = read_sql("""
@@ -54,7 +52,7 @@ def plotter(fdict):
         ax.scatter(row['precip'], row['snow'], s=60,
                    marker='o', color='r', zorder=3, label=str(year))
     ax.set_title(("[%s] %s\n%s Snowfall vs Precipitation Totals"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        calendar.month_name[month]))
     ax.grid(True)
     ax.axhline(df['snow'].mean(), lw=2, color='black')
@@ -66,7 +64,7 @@ def plotter(fdict):
     ax.text(df['precip'].mean(), ylim[1], "%.2f" % (df['precip'].mean(),),
             va='top', ha='center', color='white', bbox=dict(color='black'))
     xlim = ax.get_xlim()
-    ax.text(xlim[1], df['snow'].mean(),  "%.1f" % (df['snow'].mean(),),
+    ax.text(xlim[1], df['snow'].mean(), "%.1f" % (df['snow'].mean(),),
             va='center', ha='right', color='white', bbox=dict(color='black'))
     ax.set_ylabel("Snowfall Total [inch]")
     ax.set_xlabel("Precipitation Total (liquid + melted) [inch]")

@@ -4,7 +4,6 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -63,7 +62,6 @@ def plotter(fdict):
     station = ctx['station']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
     WITH data as (
@@ -85,7 +83,7 @@ def plotter(fdict):
 
     fig = plt.figure(figsize=(12, 6))
     fig.text(0.5, 0.95, ("[%s] %s Year of Daily Records, ties included"
-                         ) % (station, nt.sts[station]['name']),
+                         ) % (station, ctx['_nt'].sts[station]['name']),
              ha='center', fontsize=16)
     ax = plt.axes([0.04, 0.55, 0.35, 0.35])
     magic(ax, df, 'max_high_rank', 'Maximum High (warm)', ctx)
@@ -100,4 +98,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IA6389', network='IACLIMATE'))
+    plotter(dict())

@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -62,11 +61,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     month = ctx['month']
     varname = ctx['var']
-
-    nt = NetworkTable(network)
 
     if month == 'all':
         months = range(1, 13)
@@ -93,8 +89,8 @@ def plotter(fdict):
         extract(month from valid at time zone %s) in %s)
     SELECT v as valid, p01i from data
     ORDER by """ + dbvar + """ """ + sorder + """ NULLS LAST LIMIT 100
-        """, pgconn, params=(nt.sts[station]['tzname'],
-                             station, nt.sts[station]['tzname'],
+        """, pgconn, params=(ctx['_nt'].sts[station]['tzname'],
+                             station, ctx['_nt'].sts[station]['tzname'],
                              tuple(months)),
                   index_col=None)
     if df.empty:
@@ -139,15 +135,17 @@ def plotter(fdict):
     ax.set_xlabel(("Precipitation [inch]"
                    if varname in ['max_p01i'] else r"Temperature $^\circ$F"
                    ))
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("%s [%s] Top 10 Events\n"
                   "%s (%s) "
                   "(%s-%s)"
-                  ) % (nt.sts[station]['name'], station, METRICS[varname],
-                       MDICT[month],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       METRICS[varname], MDICT[month], ab.year,
                        datetime.datetime.now().year), size=12)
 
-    fig.text(0.98, 0.03, "Timezone: %s" % (nt.sts[station]['tzname'],),
+    fig.text(0.98, 0.03, "Timezone: %s" % (ctx['_nt'].sts[station]['tzname'],),
              ha='right')
 
     return fig, df.loc[rows2keep]

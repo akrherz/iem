@@ -5,7 +5,6 @@ import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -45,16 +44,15 @@ def get_context(fdict):
     size = minutes * 60.
     stride = 1 if size < 1000 else int(((size / 1000) + 1))
 
-    nt = NetworkTable("TALLTOWERS")
-    towerid = nt.sts[station]['remote_id']
-    ctx['title'] = "Tall Tower %s" % (nt.sts[station]['name'], )
+    towerid = ctx['_nt'].sts[station]['remote_id']
+    ctx['title'] = "Tall Tower %s" % (ctx['_nt'].sts[station]['name'], )
 
     ctx['df'] = read_sql("""
-    WITH data as (
-        SELECT *, row_number() OVER (ORDER by valid ASC)
-        from data_analog where tower = %s and
-        valid between %s and %s ORDER by valid ASC)
-    select * from data where row_number %% %s = 0
+        WITH data as (
+            SELECT *, row_number() OVER (ORDER by valid ASC)
+            from data_analog where tower = %s and
+            valid between %s and %s ORDER by valid ASC)
+        select * from data where row_number %% %s = 0
     """, pgconn, params=(towerid, dt,
                          dt + datetime.timedelta(minutes=minutes), stride),
                          index_col='valid')

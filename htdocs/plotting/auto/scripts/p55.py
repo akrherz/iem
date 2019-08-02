@@ -5,7 +5,6 @@ import calendar
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -40,7 +39,6 @@ def plotter(fdict):
     month = ctx['month']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     # beat month
     cursor.execute("""
@@ -61,7 +59,7 @@ def plotter(fdict):
     o.avgt, c81.avgt, c71.avgt from
     obs o, c81, c71 where o.sday = c81.sday and o.sday = c71.sday
     ORDER by o.sday ASC
-    """, (station, month, nt.sts[station]['ncdc81'],
+    """, (station, month, ctx['_nt'].sts[station]['ncdc81'],
           station))
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
@@ -105,11 +103,14 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 6))
 
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax[0].set_title(("%s %s Daily Climate Comparison\n"
                      "Observation Period: %s-%s for %s"
                      ) % (station,
-                          nt.sts[station]['name'],
-                          nt.sts[station]['archive_begin'].year,
+                          ctx['_nt'].sts[station]['name'],
+                          ab.year,
                           datetime.datetime.now().year,
                           calendar.month_name[month]), fontsize=12)
 

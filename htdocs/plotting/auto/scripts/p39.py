@@ -4,7 +4,6 @@ import calendar
 
 import psycopg2.extras
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -45,7 +44,6 @@ def plotter(fdict):
     month = ctx['month']
     effective_date = ctx['date']
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     oldmonth = datetime.date(year, month, 1)
     sts = datetime.date(effective_date.year, effective_date.month, 1)
@@ -53,9 +51,10 @@ def plotter(fdict):
     days = int((ets - sts).days)
 
     # beat month
-    cursor.execute("""SELECT extract(day from day), (high+low)/2. from
-    """+table+""" WHERE station = %s and year = %s and month = %s
-    ORDER by day ASC
+    cursor.execute("""
+        SELECT extract(day from day), (high+low)/2. from
+        """ + table + """ WHERE station = %s and year = %s and month = %s
+        ORDER by day ASC
     """, (station, year, month))
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
@@ -65,10 +64,11 @@ def plotter(fdict):
         prevmonth.append(float(row[1]))
 
     # build history
-    cursor.execute("""SELECT year, day, (high+low)/2. from
-    """+table+""" WHERE station = %s and month = %s and
-    extract(day from day) <= %s and day < %s
-    ORDER by day ASC
+    cursor.execute("""
+        SELECT year, day, (high+low)/2. from
+        """ + table + """ WHERE station = %s and month = %s and
+        extract(day from day) <= %s and day < %s
+        ORDER by day ASC
     """, (station, effective_date.month, days, ets))
 
     for i, row in enumerate(cursor):
@@ -118,7 +118,7 @@ def plotter(fdict):
     ax.set_title(("[%s] %s scenarios for %s\n"
                   "1-%s [%s] + %s-%s [%s-%s] beats %s %s %s/%s (%.1f%%)"
                   ) % (station,
-                       nt.sts[station]['name'],
+                       ctx['_nt'].sts[station]['name'],
                        effective_date.strftime("%b %Y"),
                        effective_date.day, effective_date.year,
                        effective_date.day + 1, days, baseyear,

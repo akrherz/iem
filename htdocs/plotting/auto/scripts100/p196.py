@@ -3,7 +3,6 @@
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.nws.vtec import NWS_COLORS
 from pyiem.exceptions import NoDataFound
@@ -34,8 +33,7 @@ def get_description():
 
 def get_df(ctx):
     """Figure out what data we need to fetch here"""
-    nt = NetworkTable(ctx['network'])
-    ctx['ugc'] = nt.sts[ctx['station']]['ugc_zone']
+    ctx['ugc'] = ctx['_nt'].sts[ctx['station']]['ugc_zone']
     pgconn = get_dbconn('postgis')
     events = read_sql("""
         SELECT generate_series(issue, expire, '1 minute'::interval) as valid,
@@ -58,7 +56,7 @@ def get_df(ctx):
     ctx['title'] = (
         "%s [%s] (%s to %s)\n"
         "Frequency of NWS Heat Headline for %s by Heat Index"
-    ) % (nt.sts[ctx['station']]['name'], ctx['station'],
+    ) % (ctx['_nt'].sts[ctx['station']]['name'], ctx['station'],
          str(events.index.values[0])[:10], str(obs.index.values[-1])[:10],
          ctx['ugc'])
     if ctx['opt'] == 'yes':

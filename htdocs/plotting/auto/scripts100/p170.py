@@ -4,7 +4,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -60,16 +59,17 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     year = ctx['year']
     pweather = ctx['var']
     if pweather == 'PSN':
         pweather = "+SN"
         PDICT['+SN'] = PDICT['PSN']
 
-    nt = NetworkTable(network)
-    tzname = nt.sts[station]['tzname']
-    syear = max([1973, nt.sts[station]['archive_begin'].year])
+    tzname = ctx['_nt'].sts[station]['tzname']
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    syear = max([1973, ab.year])
     limiter = "array_to_string(wxcodes, '') LIKE '%%" + pweather + "%%'"
     if pweather == "1":
         # Special in the case of non-VCTS
@@ -93,8 +93,8 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title(("[%s] %s %s Events\n"
                   "(%s-%s) Distinct Calendar Days with '%s' Reported"
-                  ) % (station, nt.sts[station]['name'], PDICT[pweather],
-                       syear, datetime.date.today().year,
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       PDICT[pweather], syear, datetime.date.today().year,
                        pweather if pweather != '1' else 'TS'))
     df2 = df[df['year'] == year]
     if not df2.empty:

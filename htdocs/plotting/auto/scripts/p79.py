@@ -6,8 +6,8 @@ from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -55,10 +55,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     month = ctx['month']
-
-    nt = NetworkTable(network)
 
     if month == 'all':
         months = range(1, 13)
@@ -87,7 +84,7 @@ def plotter(fdict):
     # Convert sea level pressure to station pressure
     df['pressure'] = mcalc.add_height_to_pressure(
         df['slp'].values * units('millibars'),
-        nt.sts[station]['elevation'] * units('m')
+        ctx['_nt'].sts[station]['elevation'] * units('m')
     ).to(units('millibar'))
     # compute mixing ratio
     df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
@@ -113,11 +110,14 @@ def plotter(fdict):
         width=10, align='center'
     )
     ax.grid(True, zorder=11)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("%s [%s]\nAverage Dew Point by Wind Direction (month=%s) "
                   "(%s-%s)\n"
                   "(must have 3+ hourly obs > 3 knots at given direction)"
-                  ) % (nt.sts[station]['name'], station, month.upper(),
-                       max([1973, nt.sts[station]['archive_begin'].year]),
+                  ) % (ctx['_nt'].sts[station]['name'], station, month.upper(),
+                       max([1973, ab.year]),
                        datetime.datetime.now().year), size=10)
 
     ax.set_ylabel("Dew Point [F]")

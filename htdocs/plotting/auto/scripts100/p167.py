@@ -6,9 +6,8 @@ import pytz
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
 from matplotlib.patches import Rectangle
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
 
@@ -56,17 +55,14 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     year = ctx['year']
     month = ctx['month']
 
-    nt = NetworkTable(network)
-    tzname = nt.sts[station]['tzname']
+    tzname = ctx['_nt'].sts[station]['tzname']
     tzinfo = pytz.timezone(tzname)
 
     # Figure out the 1rst and last of this month in the local time zone
-    sts = datetime.datetime(year, month, 3, 0, 0)
-    sts = sts.replace(tzinfo=pytz.utc)
+    sts = utc(year, month, 3)
     sts = sts.astimezone(tzinfo).replace(day=1, hour=0, minute=0)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     days = (ets-sts).days
@@ -124,7 +120,7 @@ def plotter(fdict):
     ax.set_title(('[%s] %s %s Flight Category\n'
                   'based on Hourly METAR Cloud Amount/Level'
                   ' and Visibility Reports'
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        sts.strftime("%b %Y")))
 
     colors = ['#EEEEEE', 'green', 'blue', 'red', 'magenta']

@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -53,13 +52,13 @@ def get_description():
     return desc
 
 
-def do_labels(ax, extrenum, varname, direction, threshold, station, network,
+def do_labels(ax, extrenum, varname, direction, threshold, station, ctx,
               season):
     """Helper."""
-    nt = NetworkTable(network)
     ax.set_title(("%s [%s] %s Date and Days\n"
                   "%s %s$^\circ$F"
-                  ) % (nt.sts[station]['name'], station, extrenum.capitalize(),
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       extrenum.capitalize(),
                        PDICT["%s_%s_%s" % (extrenum, varname, direction)],
                        threshold))
     ax.set_xlabel(("Date of %s Occurrence%s"
@@ -78,7 +77,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     threshold = ctx['threshold']
-    network = ctx['network']
     season = ctx['season']
     (extrenum, varname, direction) = ctx['which'].split("_")
     year = ctx['year']
@@ -121,7 +119,7 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.scatter(df2[col], df2['count'])
     ax.grid(True)
-    do_labels(ax, extrenum, varname, direction, threshold, station, network,
+    do_labels(ax, extrenum, varname, direction, threshold, station, ctx,
               season)
 
     xticks = []

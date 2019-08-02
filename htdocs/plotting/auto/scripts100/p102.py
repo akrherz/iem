@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem import util
 from pyiem.reference import lsr_events
@@ -46,14 +45,12 @@ def plotter(fdict):
     """ Go """
     pgconn = util.get_dbconn('postgis')
     ctx = util.get_autoplot_context(fdict, get_description())
+    ctx['_nt'].sts['_ALL'] = dict(name='All WFOs')
     station = ctx['station'][:4]
     syear = ctx['year']
     eyear = ctx['eyear']
     # optional parameter, this could return null
     ltype = ctx.get('ltype')
-    nt = NetworkTable('WFO')
-    if station not in nt.sts:
-        raise NoDataFound("Station metadata unknown.")
     wfo_limiter = " and wfo = '%s' " % (
         station if len(station) == 3 else station[1:],)
     if station == '_ALL':
@@ -140,7 +137,7 @@ def plotter(fdict):
     fig.text(0.85, 0.88, "%s" % (eyear,), fontsize=14, ha='center')
 
     fig.text(0.5, 0.97, "NWS %s Local Storm Report Sources Ranks" % (
-                "ALL WFOs" if station == '_ALL' else nt.sts[station]['name'],),
+                ctx['_nt'].sts[station]['name'],),
              ha='center')
     if ltype:
         label = "For LSR Types: %s" % (repr(ltype), )

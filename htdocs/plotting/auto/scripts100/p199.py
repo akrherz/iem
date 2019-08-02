@@ -5,7 +5,7 @@ from pandas.io.sql import read_sql
 from metpy.units import units
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
+from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.tracker import loadqc
 from pyiem.exceptions import NoDataFound
 
@@ -252,6 +252,8 @@ def plotter(fdict):
     ctx['qc'] = loadqc(date=ctx['date'])
     ctx['pgconn'] = get_dbconn('isuag')
     ctx['nt'] = NetworkTable("ISUSM")
+    if not ctx['nt'].sts:
+        raise NoDataFound("No station metadata found.")
     # Adjust stations to make some room
     ctx['nt'].sts['BOOI4']['lon'] -= 0.15
     ctx['nt'].sts['BOOI4']['lat'] -= 0.15

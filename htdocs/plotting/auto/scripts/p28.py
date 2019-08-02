@@ -5,7 +5,6 @@ from collections import OrderedDict
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -68,16 +67,18 @@ def get_ctx(fdict):
     opt = ctx['opt']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     cursor.execute("""
-    SELECT year,  extract(doy from day) as doy, precip
-    from """+table+""" where station = %s and precip is not null
+        SELECT year,  extract(doy from day) as doy, precip
+        from """+table+""" where station = %s and precip is not null
     """, (station,))
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found")
 
-    baseyear = nt.sts[station]['archive_begin'].year - 1
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    baseyear = ab.year - 1
     ctx['years'] = (datetime.datetime.now().year - baseyear) + 1
 
     data = np.zeros((ctx['years'], 367*2))
@@ -132,7 +133,7 @@ def get_ctx(fdict):
 
     ctx['sdate'] = date - datetime.timedelta(days=360)
     ctx['title'] = "%s %s" % (station,
-                              nt.sts[station]['name'])
+                              ctx['_nt'].sts[station]['name'])
     ctx['subtitle'] = ("Trailing Days Precip %s [%s-%s] to %s"
                        ) % (PDICT[opt], baseyear+2,
                             datetime.datetime.now().year,

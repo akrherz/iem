@@ -2,7 +2,6 @@
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
@@ -26,7 +25,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
     table = "alldata_%s" % (station[:2], )
 
     df = read_sql("""
@@ -66,7 +64,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_title((
         "[%s] %s\nYearly Precip Total Percentile for all %s stations "
-         ) % (station, nt.sts[station]['name'], station[:2])
+         ) % (station, ctx['_nt'].sts[station]['name'], station[:2])
     )
 
     # second plot
@@ -83,4 +81,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IA0000', network='IACLIMATE'))
+    plotter(dict())

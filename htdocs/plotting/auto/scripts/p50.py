@@ -2,7 +2,6 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -44,10 +43,9 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('postgis')
-    nt = NetworkTable('WFO')
-    nt.sts['_ALL'] = {'name': 'All Offices'}
-
     ctx = get_autoplot_context(fdict, get_description())
+    ctx['_nt'].sts['_ALL'] = {'name': 'All Offices'}
+
     opt = ctx['opt']
     station = ctx['station']
     state = ctx['state']
@@ -72,7 +70,7 @@ def plotter(fdict):
     supextra = ""
     if opt == 'wfo' and station != '_ALL':
         supextra = "For warnings issued by %s %s.\n" % (
-            station, nt.sts[station]['name'])
+            station, ctx['_nt'].sts[station]['name'])
     if opt == 'state':
         supextra = (
             "For warnings that covered some portion of %s.\n"

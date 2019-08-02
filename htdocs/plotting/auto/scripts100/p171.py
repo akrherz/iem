@@ -3,7 +3,6 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 import pyiem.nws.vtec as vtec
 from pyiem import reference
 from pyiem.plot.use_agg import plt
@@ -54,11 +53,7 @@ def plotter(fdict):
     significance = ctx['significance']
     opt = ctx['opt']
     state = ctx['state']
-
-    nt = NetworkTable('WFO')
-    nt.sts['_ALL'] = {'name': 'All Offices'}
-    if station not in nt.sts:
-        raise NoDataFound("Unknown station metadata.")
+    ctx['_nt'].sts['_ALL'] = {'name': 'All Offices'}
 
     wfo_limiter = (" and wfo = '%s' "
                    ) % (station if len(station) == 3 else station[1:],)
@@ -90,7 +85,7 @@ def plotter(fdict):
         index=range(df2.index.min(), df2.index.max() + 1),
         columns=range(1, 13))
 
-    title = "NWS %s" % (nt.sts[station]['name'], )
+    title = "NWS %s" % (ctx['_nt'].sts[station]['name'], )
     if opt == 'state':
         title = ("NWS Issued for Counties/Zones for State of %s"
                  ) % (reference.state_names[state],)

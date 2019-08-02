@@ -79,9 +79,9 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
     ddf = read_sql("""
-    SELECT high, low, year, month from """+table+"""
-      WHERE station = %s and year > 1892 and high >= low
-      and month in %s
+        SELECT high, low, year, month from """+table+"""
+        WHERE station = %s and year > 1892 and high >= low
+        and month in %s
     """, pgconn, params=(station, tuple(months)), index_col=None)
     if ddf.empty:
         raise NoDataFound("No Data Found.")
@@ -94,8 +94,11 @@ def plotter(fdict):
         for j, yedge in enumerate(yedges[:-1]):
             rows.append(dict(high=yedge, low=xedge, count=hist[i, j]))
     df = pd.DataFrame(rows)
+    ab = nt.sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     years = float(
-        datetime.datetime.now().year - nt.sts[station]['archive_begin'].year
+        datetime.datetime.now().year - ab.year
         )
     hist = np.ma.array(hist / years)
     hist.mask = np.where(hist < (1./years), True, False)

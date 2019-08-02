@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -61,7 +60,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
     sdate = ctx['sdate']
     edate = ctx['edate']
     year2 = ctx.get('year2', 0)
@@ -94,10 +92,10 @@ def plotter(fdict):
     df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
 
     xlen = int((edate - sdate).days) + 1  # In case of leap day
-    bs = nt.sts[station]['archive_begin']
-    if bs is None:
-        raise NoDataFound("No Data Found.")
-    years = (datetime.datetime.now().year - bs.year) + 1
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    years = (datetime.datetime.now().year - ab.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
     pacc = np.zeros((years, xlen))
@@ -131,10 +129,13 @@ def plotter(fdict):
         title = "Stress Degree Days (base=86)"
 
     ax1.set_title(("Accumulated %s\n%s %s"
-                   ) % (title, station, nt.sts[station]['name']),
+                   ) % (title, station, ctx['_nt'].sts[station]['name']),
                   fontsize=18 if whichplots == 'all' else 14)
 
-    for year in range(nt.sts[station]['archive_begin'].year,
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    for year in range(ab.year,
                       datetime.datetime.now().year + 1):
         sts = sdate.replace(year=year)
         ets = sts + datetime.timedelta(days=(xlen-1))

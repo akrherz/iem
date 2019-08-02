@@ -11,7 +11,6 @@ import metpy.calc as mcalc
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
-from pyiem.network import Table as NetworkTable
 
 PDICT = OrderedDict([
     ('tmpf', 'Air Temperature [F]'),
@@ -72,13 +71,11 @@ def plotter(fdict):
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     h1 = int(ctx['h1'])
     h2 = int(ctx['h2'])
     varname = ctx['v']
 
-    nt = NetworkTable(network)
-    tzname = nt.sts[station]['tzname']
+    tzname = ctx['_nt'].sts[station]['tzname']
 
     df = read_sql("""
     WITH data as (
@@ -106,7 +103,7 @@ def plotter(fdict):
     if varname == 'q':
         df['pressure'] = mcalc.add_height_to_pressure(
             df['slp'].values * units('millibars'),
-            nt.sts[station]['elevation'] * units('m')
+            ctx['_nt'].sts[station]['elevation'] * units('m')
         ).to(units('millibar'))
         # compute mixing ratio
         df['q'] = mcalc.mixing_ratio_from_relative_humidity(
@@ -173,7 +170,7 @@ def plotter(fdict):
     title = (
         "%s [%s] %s Difference (%.0f-%.0f)\n"
         "%s minus %s (%s) (timezone: %s)"
-     ) % (nt.sts[station]['name'], station, PDICT[varname],
+     ) % (ctx['_nt'].sts[station]['name'], station, PDICT[varname],
           df['year'].min(), df['year'].max(),
           ets.strftime("%-I %p"), sts.strftime("%-I %p"),
           "same day" if h2 > h1 else "previous day", tzname)
@@ -183,6 +180,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter({
-        'station': 'AMW', 'network': 'IA_ASOS', 'h1': 18, 'h2': 6,
-        'v': 'q'})
+    plotter(dict())

@@ -4,7 +4,6 @@ import datetime
 import numpy as np
 import matplotlib.colors as mpcolors
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.colormaps import nwssnow
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -39,8 +38,7 @@ def plotter(fdict):
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
-    ab = nt.sts[station]['archive_begin']
+    ab = ctx['_nt'].sts[station]['archive_begin']
     if ab is None:
         raise NoDataFound("Unknown station metadatab.")
     syear = max([ctx['syear'], ab.year])
@@ -77,8 +75,10 @@ def plotter(fdict):
                         'May 1'])
     ax.set_ylabel('Year of Nov,Dec of Season Labeled')
     ax.set_xlabel('Date of Winter Season')
-    ax.set_title(('[%s] %s\nDaily Snow Depth (%s-%s) [inches]'
-                 '') % (station, nt.sts[station]['name'], minyear, eyear))
+    ax.set_title(
+        (
+         '[%s] %s\nDaily Snow Depth (%s-%s) [inches]'
+        ) % (station, ctx['_nt'].sts[station]['name'], minyear, eyear))
 
     cmap = nwssnow()
     norm = mpcolors.BoundaryNorm(LEVELS, cmap.N)

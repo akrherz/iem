@@ -4,7 +4,6 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -48,12 +47,9 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     year = ctx['year']
     month = ctx['month']
     model = ctx['model']
-
-    nt = NetworkTable(network)
 
     # Extract the range of forecasts for each day for approximately
     # the given month
@@ -142,7 +138,8 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     ax.set_title('[%s] %s Daily Temperatures\n%s Forecast MOS Range for %s' % (
-        station, nt.sts[station]['name'], model, month1.strftime("%B %Y")))
+        station, ctx['_nt'].sts[station]['name'], model,
+        month1.strftime("%B %Y")))
     arr = (df['high_max'] - df['high_min']).values
     ax.bar(days + 0.1, arr, facecolor='pink', width=0.7,
            bottom=hbottom, zorder=1, alpha=0.5, label='Daytime High',

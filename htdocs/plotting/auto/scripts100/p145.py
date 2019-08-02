@@ -7,7 +7,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem import util
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.network import Table as NetworkTable  # This is needed.
 
 VARS = OrderedDict((
     ('tsoil', '4 inch Soil Temperature'),

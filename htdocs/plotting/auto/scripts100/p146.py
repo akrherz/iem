@@ -6,8 +6,8 @@ import numpy as np
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -33,8 +33,6 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
-    nt = NetworkTable(network)
 
     df = read_sql("""
     WITH obs as (
@@ -45,6 +43,8 @@ def plotter(fdict):
 
     SELECT extract(week from t) as week, avgt from obs
     """, pgconn, params=(station,), index_col=None)
+    if df.empty:
+        raise NoDataFound("No data found.")
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -63,7 +63,10 @@ def plotter(fdict):
             rows.append(dict(tmpf=y, week=x, count=H[i, j]))
     resdf = pd.DataFrame(rows)
 
-    years = datetime.date.today().year - nt.sts[station]['archive_begin'].year
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    years = datetime.date.today().year - ab.year
     H = np.ma.array(H) / float(years)
     H.mask = np.ma.where(H < 0.1, True, False)
     res = ax.pcolormesh((xedges - 1) * 7, yedges, H.transpose(),
@@ -83,8 +86,8 @@ def plotter(fdict):
 
     ax.set_title(("[%s] %s (%s-%s)\n"
                   "Temperature Frequency During Precipitation by Week"
-                  ) % (station, nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       ab.year,
                        datetime.date.today().year))
     ax.grid(True)
     ax.set_ylabel(r"Temperature [$^\circ$F]")

@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -74,8 +73,9 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
+    if station not in ctx['_nt'].sts:  # This is needed.
+        raise NoDataFound("Unknown station metadata.")
     varname = ctx['var']
-    network = 'RAOB'
     hour = int(ctx['hour'])
     month = ctx['month']
     level = ctx['level']
@@ -99,12 +99,12 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
-    nt = NetworkTable(network, only_online=False)
-    name = nt.sts[station]['name']
+    name = ctx['_nt'].sts[station]['name']
     stations = [station, ]
     if station.startswith("_"):
-        name = nt.sts[station]['name'].split("--")[0]
-        stations = nt.sts[station]['name'].split("--")[1].strip().split(" ")
+        name = ctx['_nt'].sts[station]['name'].split("--")[0]
+        stations = ctx['_nt'].sts[station]['name'].split(
+            "--")[1].strip().split(" ")
     pgconn = get_dbconn('postgis')
 
     dfin = read_sql("""

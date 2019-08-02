@@ -6,7 +6,6 @@ import numpy.ma as ma
 import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -35,9 +34,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
-
-    nt = NetworkTable(network)
     df = read_sql("""
         select extract(doy from valid) as doy,
         greatest(skyl1, skyl2, skyl3, skyl4) as sky from alldata
@@ -80,7 +76,10 @@ def plotter(fdict):
     cmap.set_under('#F9CCCC')
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
 
-    syear = max([1973, nt.sts[station]['archive_begin'].year])
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    syear = max([1973, ab.year])
     years = (datetime.date.today().year - syear) + 1.
     c = ax.imshow(
         H / years, aspect='auto', interpolation='nearest', norm=norm,
@@ -92,7 +91,7 @@ def plotter(fdict):
     ax.set_title(("%s-%s [%s %s Ceilings Frequency\n"
                   "Level at which Overcast Conditions Reported"
                   ) % (syear, datetime.date.today().year, station,
-                       nt.sts[station]['name']))
+                       ctx['_nt'].sts[station]['name']))
     ax.set_ylabel("Overcast Level [ft AGL], irregular scale")
     ax.set_xlabel("Week of the Year")
     ax.set_xticks(np.arange(1, 55, 7))
@@ -104,4 +103,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(network='IA_ASOS', station='AMW'))
+    plotter(dict())

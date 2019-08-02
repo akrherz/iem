@@ -5,7 +5,6 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from scipy import stats
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -37,8 +36,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     which = ctx['which']
     station = ctx['station']
-    network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network)
 
     table = "alldata_%s" % (station[:2],)
 
@@ -74,7 +71,8 @@ def plotter(fdict):
     ax.set_ylabel("%s Date" % ('End' if delta == 0 else 'Start',))
     ax.set_title(("%s [%s] %s\n"
                   "%s Date of Warmest (Avg Temp) 91 Day Period"
-                  ) % (nt.sts[station]['name'], station, PDICT.get(which),
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       PDICT.get(which),
                        'End' if delta == 0 else 'Start'))
 
     yticks = []

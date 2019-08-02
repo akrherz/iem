@@ -4,7 +4,6 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -62,7 +61,6 @@ def plotter(fdict):
     year = ctx['year']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     if ctx['opt'] == 'monthly':
         df = read_sql("""
@@ -91,7 +89,7 @@ def plotter(fdict):
                       color='r', s=10)
     plot_trailing(ax[0], df, 'max_high')
     ax[0].set_title(("%s %s\n%s Temperature Range (Max High - Min Low)"
-                     ) % (station, nt.sts[station]['name'],
+                     ) % (station, ctx['_nt'].sts[station]['name'],
                           (calendar.month_name[month]
                            if ctx['opt'] == 'monthly' else 'Yearly')))
     ax[0].grid(True)

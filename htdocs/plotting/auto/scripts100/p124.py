@@ -3,7 +3,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 CATS = np.array([0.01, 0.5, 1., 2., 3., 4.])
@@ -30,9 +29,8 @@ def plotter(fdict):
     station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
 
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("No metadata found.")
     startyear = bs.year
@@ -59,8 +57,8 @@ def plotter(fdict):
 # Number of days per year with precipitation at or above threshold [inch]
 # Partitioned by month of the year, 'ANN' represents the entire year
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['archive_begin'].date(), datetime.date.today(),
+       station, ctx['_nt'].sts[station]['name'])
 
     for i, cat in enumerate(CATS):
         col = "cat%s" % (i+1,)

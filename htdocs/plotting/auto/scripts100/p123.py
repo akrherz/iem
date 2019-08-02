@@ -3,7 +3,6 @@ import datetime
 
 import pandas as pd
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -22,10 +21,10 @@ def get_description():
 
 
 def wrap(cnt, s=None):
+    """Helper."""
     if cnt > 0:
         return s or cnt
-    else:
-        return ""
+    return ""
 
 
 def contiguous_regions(condition):
@@ -64,8 +63,7 @@ def plotter(fdict):
     station = ctx['station']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("No Data Found.")
     res = """\
@@ -78,7 +76,7 @@ def plotter(fdict):
 # above or below a temperature threshold
 """ % (datetime.date.today().strftime("%d %b %Y"),
        bs.date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['name'])
     res += "#   %-27s %-27s  %-27s %-27s\n" % (" Low Cooler Than",
                                                " Low Warmer Than",
                                                " High Cooler Than",
@@ -98,7 +96,7 @@ def plotter(fdict):
         highs[i] = row[0]
         lows[i] = row[1]
 
-    startyear = max([1900, nt.sts[station]['archive_begin'].year])
+    startyear = max([1900, bs.year])
     rows = []
     for thres in range(-20, 101, 2):
         condition = lows < thres

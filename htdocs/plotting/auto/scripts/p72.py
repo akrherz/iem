@@ -4,7 +4,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.nws import vtec
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -89,13 +88,9 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    nt = NetworkTable("WFO")
-    if wfo not in nt.sts:
-        raise NoDataFound("Station is unknown.")
-
     (fig, ax) = plt.subplots(1, 1)
 
-    tzname = nt.sts[wfo]['tzname']
+    tzname = ctx['_nt'].sts[wfo]['tzname']
     df = read_sql("""
     WITH data as (
         SELECT extract(year from issue) as yr, eventid,
@@ -135,7 +130,8 @@ def plotter(fdict):
                         "", "", "9 PM", "", "", "Mid"])
     ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
     ax.set_ylabel("Percentage [%%] out of %.0f Events" % (df['total'].max(), ))
-    title = "[%s] %s :: Time of Day Frequency" % (wfo, nt.sts[wfo]['name'])
+    title = "[%s] %s :: Time of Day Frequency" % (
+        wfo, ctx['_nt'].sts[wfo]['name'])
     subtitle = "%s (%s.%s) [%s]" % (
         vtec.get_ps_string(phenomena, significance),
         phenomena, significance, MDICT[ctx['season']]

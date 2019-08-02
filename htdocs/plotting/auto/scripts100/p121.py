@@ -2,7 +2,6 @@
 import datetime
 
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -50,8 +49,7 @@ def plotter(fdict):
     prs = [make(thres1), make(thres2), make(thres3), make(thres4)]
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
-    s = nt.sts[station]['archive_begin']
+    s = ctx['_nt'].sts[station]['archive_begin']
     e = datetime.date.today()
 
     if s is None:
@@ -70,7 +68,7 @@ THRES  %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.
 YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 """ % (datetime.date.today().strftime("%d %b %Y"),
        s.date(), datetime.date.today(), station,
-       nt.sts[station]['name'],
+       ctx['_nt'].sts[station]['name'],
        prs[0][0], prs[0][1], prs[0][0], prs[0][1],
        prs[1][0], prs[1][1], prs[1][0], prs[1][1],
        prs[2][0], prs[2][1], prs[2][0], prs[2][1],
@@ -88,7 +86,7 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
                       index=pd.Series(range(s.year, e.year + 1),
                                       name='year'))
 
-    cycle_pos = [-1, -1,  -1, -1]
+    cycle_pos = [-1, -1, -1, -1]
 
     cursor.execute("""
         SELECT day, high, low from """+table+"""

@@ -7,7 +7,6 @@ from scipy import stats
 from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 
@@ -75,7 +74,7 @@ def run_calcs(df, ctx):
     # Convert sea level pressure to station pressure
     df['pressure'] = mcalc.add_height_to_pressure(
         df['slp'].values * units('millibars'),
-        ctx['nt'].sts[ctx['station']]['elevation'] * units('m')
+        ctx['_nt'].sts[ctx['station']]['elevation'] * units('m')
     ).to(units('millibar'))
     # Compute the mixing ratio
     df['mixingratio'] = mcalc.mixing_ratio_from_relative_humidity(
@@ -149,7 +148,7 @@ def get_data(ctx, startyear):
         try:
             tokens = [int(i.strip()) for i in ctx['hours'].split("-")]
             hours = range(tokens[0], tokens[1] + 1)
-        except:
+        except ValueError:
             raise Exception("malformed hour limiter, sorry.")
         ctx['hour_limiter'] = "[%s-%s]" % (utc(2017, 1, 1, tokens[0]
                                                ).strftime("%-I %p"),
@@ -169,9 +168,9 @@ def get_data(ctx, startyear):
       SELECT valid,
       extract(year from valid + '%s days'::interval)::int as year,
       tmpf, dwpf, slp, relh from obs
-    """, pgconn, params=(ctx['nt'].sts[ctx['station']]['tzname'],
+    """, pgconn, params=(ctx['_nt'].sts[ctx['station']]['tzname'],
                          ctx['station'], tuple(months),
-                         ctx['nt'].sts[ctx['station']]['tzname'],
+                         ctx['_nt'].sts[ctx['station']]['tzname'],
                          tuple(hours), deltadays),
                   index_col=None)
 
@@ -211,7 +210,7 @@ def make_plot(df, ctx):
                    ) % (PDICT[varname], 'F' if varname == 'dwpf' else 'kPa'))
     ax.grid(True)
     ax.set_title(("[%s] %s %.0f-%.0f\nAverage %s [%s] %s"
-                  ) % (ctx['station'], ctx['nt'].sts[ctx['station']]['name'],
+                  ) % (ctx['station'], ctx['_nt'].sts[ctx['station']]['name'],
                        df.index.min(), df.index.max(), PDICT[varname],
                        MDICT[season], ctx.get('hour_limiter', '')))
     ax.legend(ncol=1, loc=1)
@@ -221,7 +220,6 @@ def make_plot(df, ctx):
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
-    ctx['nt'] = NetworkTable(ctx['network'])
     startyear = ctx['year']
 
     df = get_data(ctx, startyear)

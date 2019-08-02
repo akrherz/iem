@@ -2,7 +2,6 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -27,7 +26,6 @@ def plotter(fdict):
     station = ctx['station'].upper()
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     df = read_sql("""
      SELECT year, count(low) from """+table+""" WHERE
      station = %s and low >= 32
@@ -44,8 +42,8 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # OF DAYS EACH YEAR WHERE MIN >=32 F
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['archive_begin'].date(), datetime.date.today(),
+       station, ctx['_nt'].sts[station]['name'])
 
     for _, row in df.iterrows():
         res += "%s %3i\n" % (row['year'], row['count'])
