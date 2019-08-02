@@ -1,5 +1,6 @@
 """xy point plot of arridity"""
 import datetime
+import os
 from collections import OrderedDict
 
 import pandas as pd
@@ -10,6 +11,7 @@ from pyiem.meteorology import gdd
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
@@ -76,7 +78,10 @@ def load(dirname, location, sdate):
     """ Read a file please """
     data = []
     idx = []
-    for line in open("%s/%s.met" % (dirname, location)):
+    fn = "%s/%s.met" % (dirname, location)
+    if not os.path.isfile(fn):
+        raise NoDataFound("File was not found.")
+    for line in open(fn):
         line = line.strip()
         if not line.startswith('19') and not line.startswith('20'):
             continue
