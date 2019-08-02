@@ -7,6 +7,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
@@ -87,6 +88,8 @@ def plotter(fdict):
     WHERE t.network = %s and t.id = %s and to_char(day, 'mmdd') in %s
     GROUP by yr ORDER by yr ASC
     """, pgconn, params=(ctx['network'], station, tuple(sdays)))
+    if df.empty:
+        raise NoDataFound("No data was found.")
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 

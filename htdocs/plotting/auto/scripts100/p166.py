@@ -6,6 +6,7 @@ import matplotlib.ticker as ticker
 from pyiem import util
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
+from pyiem.exceptions import NoDataFound
 
 MDICT = {'ytd': 'Limit Plot to Year to Date',
          'year': 'Plot Entire Year of Data'}
@@ -48,6 +49,8 @@ def plotter(fdict):
         where """ + sqllimit + """
         num < 3000 GROUP by year ORDER by year ASC
     """, pgconn, index_col='year')
+    if df.empty:
+        raise NoDataFound("No data was found.")
 
     # Get total issued
     odf = read_sql("""

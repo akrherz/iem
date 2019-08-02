@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "state": "Aggregate by State",
@@ -89,6 +90,8 @@ def plotter(fdict):
         """ % (date1, date2, state)
 
     df = read_sql(sql, pgconn, index_col=None)
+    if df.empty:
+        raise NoDataFound("No data was found.")
     minvalid = df['min_issue'].min()
     maxvalid = df['max_issue'].max()
     df.fillna(0, inplace=True)

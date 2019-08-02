@@ -1,5 +1,6 @@
 """yieldfx plot"""
 import calendar
+import os
 from collections import OrderedDict
 import datetime
 
@@ -8,6 +9,7 @@ from pyiem.meteorology import gdd
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context
+from pyiem.exceptions import NoDataFound
 
 STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
@@ -49,7 +51,10 @@ def load(dirname, location, sdate):
     data = []
     idx = []
     mindoy = int(sdate.strftime("%j"))
-    for line in open("%s/%s.met" % (dirname, location)):
+    fn = "%s/%s.met" % (dirname, location)
+    if not os.path.isfile(fn):
+        raise NoDataFound("Data file was not found.")
+    for line in open(fn):
         line = line.strip()
         if not line.startswith('19') and not line.startswith('20'):
             continue
