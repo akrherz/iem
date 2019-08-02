@@ -15,10 +15,21 @@ INSERT into iem_schema_manager_version values (32, now());
 ---   + iacounties
 ---   + iowatorn
 ---   + placepoly
----   + states
 ---   + tz
 ---   + uscounties
 ---   + warnings_import
+
+--- states table is loaded by some shp2pgsql load that has unknown origins :(
+CREATE TABLE states(
+  gid int,
+  state_name varchar,
+  state_fips varchar,
+  state_abbr varchar,
+  the_geom geometry(MultiPolygon, 4326),
+  simple_geom geometry(MultiPolygon, 4326)
+);
+GRANT ALL on states to mesonet,ldm;
+GRANT SELECT on states to nobody,apache;
 
 ---
 --- cwsu table, manually got this at some point :/
