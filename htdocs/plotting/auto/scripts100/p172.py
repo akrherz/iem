@@ -5,7 +5,6 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 
@@ -38,19 +37,18 @@ def plotter(fdict):
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     year1 = ctx.get('year1')
     year2 = ctx.get('year2')
     year3 = ctx.get('year3')
-    nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
     df = read_sql("""
-    WITH years as (SELECT distinct year from """ + table + """
-        WHERE station = %s and sday = '0101')
-    SELECT day, sday, year, precip,
-    sum(precip) OVER (PARTITION by year ORDER by day ASC) as accum from
-    """ + table + """ WHERE station = %s and year in (select year from years)
-    ORDER by day ASC
+        WITH years as (SELECT distinct year from """ + table + """
+            WHERE station = %s and sday = '0101')
+        SELECT day, sday, year, precip,
+        sum(precip) OVER (PARTITION by year ORDER by day ASC) as accum from
+        """ + table + """ WHERE station = %s
+        and year in (select year from years)
+        ORDER by day ASC
     """, pgconn, params=(station, station), index_col='day')
     if df.empty:
         raise NoDataFound("No data found!")
@@ -81,10 +79,13 @@ def plotter(fdict):
                 label='%s - %.2f' % (year, df2['accum'].iloc[-1]),
                 color=color, lw=2)
 
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("Year to Date Accumulated Precipitation\n"
                   "[%s] %s (%s-%s)"
-                  ) % (station, nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       ab.year,
                        datetime.date.today().year))
     ax.set_ylabel("Precipitation [inch]")
     ax.grid(True)

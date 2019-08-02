@@ -23,6 +23,7 @@ np.seterr(all='ignore')
 
 HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
+HTTP500 = "500 Internal Server Error"
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 if BASEDIR not in sys.path:
     sys.path.insert(0, BASEDIR)
@@ -89,6 +90,8 @@ def handle_error(exp, fmt, uri):
     tb = traceback.extract_tb(exc_traceback)[-1]
     sys.stderr.write(("URI:%s %s method:%s lineno:%s %s\n"
                       ) % (uri, exp.__class__.__name__, tb[2], tb[1], exp))
+    if not isinstance(exp, NoDataFound):
+        traceback.print_exc()
     del(exc_type, exc_value, exc_traceback, tb)
     if fmt in ['png', 'svg', 'pdf']:
         return error_image(str(exp), fmt)
@@ -160,7 +163,7 @@ def workflow(environ, form, fmt):
         return HTTP400, handle_error(exp, fmt, environ.get('REQUEST_URI'))
     except Exception as exp:
         # Everything else should be considered fatal
-        raise exp
+        return HTTP500, handle_error(exp, fmt, environ.get('REQUEST_URI'))
     end_time = datetime.datetime.utcnow()
     sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s\n"
                       ) % (scriptnum, (end_time - start_time).total_seconds(),
@@ -226,8 +229,12 @@ def application(environ, start_response):
     fmt = fields.get('fmt', 'png')[:4]
     # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
-    # do the work!
-    status, output = workflow(environ, fields, fmt)
+    try:
+        # do the work!
+        status, output = workflow(environ, fields, fmt)
+    except Exception as exp:
+        status = HTTP500
+        output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
     start_response(status, response_headers)
     # python3 mod-wsgi requires returning bytes, so we encode strings
     if sys.version_info[0] > 2 and isinstance(output, str):

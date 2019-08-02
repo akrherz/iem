@@ -2,7 +2,6 @@
 import datetime
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'precip_days': 'Precipitation Days',
@@ -28,17 +27,16 @@ def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station'].upper()
+    station = ctx['station']
     varname = ctx['var']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     df = read_sql("""
-    SELECT year, month,
-    sum(case when precip >= 0.01 then 1 else 0 end) as precip_days,
-    sum(case when snow >= 0.01 then 1 else 0 end) as snow_days
-    from """+table+""" WHERE station = %s
-    GROUP by year, month
+        SELECT year, month,
+        sum(case when precip >= 0.01 then 1 else 0 end) as precip_days,
+        sum(case when snow >= 0.01 then 1 else 0 end) as snow_days
+        from """+table+""" WHERE station = %s
+        GROUP by year, month
     """, pgconn, params=(station,), index_col=['year', 'month'])
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -53,8 +51,8 @@ def plotter(fdict):
 # Days with a trace accumulation are not included
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'],
+       ctx['_nt'].sts[station]['archive_begin'].date(),
+       datetime.date.today(), station, ctx['_nt'].sts[station]['name'],
        "PRECIPITATION" if varname == 'precip_days' else "SNOW FALL")
 
     for year in df.index.levels[0]:
@@ -65,7 +63,7 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
                 val = df.at[(year, month), varname]
                 total += val
                 res += " %3i" % (val, )
-            except Exception as exp:
+            except:
                 res += "    "
         res += " %3i\n" % (total, )
     return None, df, res

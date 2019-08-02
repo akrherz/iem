@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -72,13 +71,10 @@ def get_context(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     month = ctx['month']
     varname = ctx['var']
     mydir = ctx['dir']
     threshold = ctx['thres']
-
-    ctx['nt'] = NetworkTable(network)
 
     offset = 'day'
     if month == 'all':
@@ -106,14 +102,14 @@ def get_context(fdict):
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and t.network = %s and extract(month from day) in %s
         GROUP by year ORDER by year ASC
-        """, pgconn, params=(threshold, station, network,
+        """, pgconn, params=(threshold, station, ctx['network'],
                              tuple(months)),
                          index_col='year')
     ctx['title'] = "(%s) %s %s %.0f" % (MDICT[ctx['month']],
                                         METRICS[ctx['var']],
                                         DIRS[ctx['dir']],
                                         ctx['thres'])
-    ctx['subtitle'] = "%s [%s]" % (ctx['nt'].sts[ctx['zstation']]['name'],
+    ctx['subtitle'] = "%s [%s]" % (ctx['_nt'].sts[ctx['zstation']]['name'],
                                    ctx['zstation'])
     return ctx
 

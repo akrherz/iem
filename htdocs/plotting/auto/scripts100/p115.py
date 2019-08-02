@@ -4,8 +4,7 @@ import calendar
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'precip': 'Total Precipitation',
@@ -62,23 +61,24 @@ def p(df, year, month, varname, precision):
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('coop')
+    ctx = get_autoplot_context(fdict, get_description())
 
-    station = fdict.get('station', 'IA0200').upper()
-    varname = fdict.get('var', 'precip')
+    station = ctx['station']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     today = datetime.date.today().replace(day=1)
 
     df = read_sql("""
-    SELECT year, month,
-    case when month in (10, 11, 12) then year + 1 else year end as water_year,
-    sum(precip) as precip,
-    avg(high) as avg_high, avg(low) as avg_low,
-    avg((high+low)/2.) as avg_temp from """+table+""" WHERE
-    station = %s and day < %s
-    GROUP by year, water_year, month
-    ORDER by year ASC, month ASC
+        SELECT year, month,
+        case when month in (10, 11, 12) then year + 1 else year end
+          as water_year,
+        sum(precip) as precip,
+        avg(high) as avg_high, avg(low) as avg_low,
+        avg((high+low)/2.) as avg_temp from """+table+""" WHERE
+        station = %s and day < %s
+        GROUP by year, water_year, month
+        ORDER by year ASC, month ASC
     """, pgconn, params=(station, today), index_col=None)
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -92,9 +92,9 @@ def plotter(fdict):
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
         ) % (datetime.date.today().strftime("%d %b %Y"),
-             nt.sts[station]['archive_begin'].date(),
+             ctx['_nt'].sts[station]['archive_begin'].date(),
              datetime.date.today(), station,
-             nt.sts[station]['name'])
+             ctx['_nt'].sts[station]['name'])
     res += ("# %s\n"
             "YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   "
             "OCT   NOV   DEC   ANN WYEAR\n") % (LABELS[varname], )
@@ -162,4 +162,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IN0784'))
+    plotter(dict())

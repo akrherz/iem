@@ -2,9 +2,8 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'cdd': 'Cooling Degree Days',
@@ -35,32 +34,30 @@ def get_description():
 def plotter(fdict):
     """ Go """
     import seaborn as sns
+    ctx = get_autoplot_context(fdict, get_description())
     pgconn = get_dbconn('coop')
 
-    station = fdict.get('station', 'IA0200')
-    varname = fdict.get('var', 'cdd')
+    station = ctx['station']
+    varname = ctx['var']
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
 
     df = read_sql("""
-    SELECT year, month, sum(precip) as sum_precip,
-    avg(high) as avg_high,
-    avg(low) as avg_low,
-    sum(cdd(high,low,60)) as cdd60,
-    sum(cdd(high,low,65)) as cdd65,
-    sum(hdd(high,low,60)) as hdd60,
-    sum(hdd(high,low,65)) as hdd65,
-    sum(case when precip >= 0.01 then 1 else 0 end) as rain_days,
-    sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
-     from """+table+""" WHERE station = %s GROUP by year, month
+        SELECT year, month, sum(precip) as sum_precip,
+        avg(high) as avg_high,
+        avg(low) as avg_low,
+        sum(cdd(high,low,60)) as cdd60,
+        sum(cdd(high,low,65)) as cdd65,
+        sum(hdd(high,low,60)) as hdd60,
+        sum(hdd(high,low,65)) as hdd65,
+        sum(case when precip >= 0.01 then 1 else 0 end) as rain_days,
+        sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
+        from """+table+""" WHERE station = %s GROUP by year, month
     """, pgconn, params=(station,), index_col=None)
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df['monthdate'] = df[['year', 'month']].apply(lambda x: datetime.date(x[0],
-                                                                          x[1],
-                                                                          1),
-                                                  axis=1)
+    df['monthdate'] = df[['year', 'month']].apply(
+        lambda x: datetime.date(x[0], x[1], 1), axis=1)
     df.set_index('monthdate', inplace=True)
 
     res = """\
@@ -70,8 +67,8 @@ def plotter(fdict):
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['archive_begin'].date(),
+       datetime.date.today(), station, ctx['_nt'].sts[station]['name'])
     res += """# THESE ARE THE MONTHLY %s (base=65) FOR STATION  %s
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    \
 OCT    NOV    DEC
@@ -112,8 +109,8 @@ OCT    NOV    DEC
     y1 = int(fdict.get('syear', 1990))
 
     fig, ax = plt.subplots(1, 1, figsize=(8., 6.))
-    fig.text(0.5, 0.95, "[%s] %s (%s-%s)" % (station, nt.sts[station]['name'],
-                                             y1, y1 + 20), ha='center',
+    fig.text(0.5, 0.95, "[%s] %s (%s-%s)" % (
+        station, ctx['_nt'].sts[station]['name'], y1, y1 + 20), ha='center',
              fontsize=16)
     ax.set_title(r"%s base=60$^\circ$F" % (PDICT[varname], ))
     filtered = df[(df['year'] >= y1) & (df['year'] <= (y1 + 20))]

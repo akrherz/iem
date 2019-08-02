@@ -7,7 +7,6 @@ from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'spring': 'Spring Season',
@@ -43,10 +42,8 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     year = ctx['year']
     season = ctx['season']
-    nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
 
     pgconn = get_dbconn('coop')
@@ -107,9 +104,12 @@ def plotter(fdict):
 
     ax[0].plot(obs.index.values, obs['avgt'].values)
     ax[0].set_ylim(obs['avgt'].min() - 8, obs['avgt'].max() + 8)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax[0].set_title(("%s-%s [%s] %s\n91 Day Average Temperatures"
-                     ) % (nt.sts[station]['archive_begin'].year,
-                          year + 3, station, nt.sts[station]['name']))
+                     ) % (ab.year,
+                          year + 3, station, ctx['_nt'].sts[station]['name']))
     ax[0].set_ylabel(r"Trailing 91 Day Avg T $^{\circ}$F")
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%b\n%Y'))
     ax[0].grid(True)

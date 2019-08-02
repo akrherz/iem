@@ -5,9 +5,9 @@ import datetime
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.datatypes import speed
+from pyiem.exceptions import NoDataFound
 
 UNITS = {'mph': 'miles per hour',
          'kt': 'knots',
@@ -61,7 +61,6 @@ def get_context(fdict):
 
     station = ctx['zstation']
     ctx['station'] = station
-    network = ctx['network']
     units = ctx['units']
     p1 = ctx.get('p1')
     p2 = ctx.get('p2')
@@ -71,7 +70,6 @@ def get_context(fdict):
     p6 = ctx.get('p6')
     y1 = ctx.get('y1')
     y2 = ctx.get('y2')
-    ctx['nt'] = NetworkTable(network)
 
     ylimiter = ""
     if y1 is not None and y2 is not None:
@@ -79,7 +77,10 @@ def get_context(fdict):
                     "extract(year from valid) <= %s "
                     ) % (y1, y2)
     else:
-        y1 = ctx['nt'].sts[station]['archive_begin'].year
+        ab = ctx['_nt'].sts[station]['archive_begin']
+        if ab is None:
+            raise NoDataFound("Unknown station metadata.")
+        y1 = ab.year
         y2 = datetime.date.today().year
 
     df = read_sql("""
@@ -92,7 +93,7 @@ def get_context(fdict):
     extract(hour from ts)::int as hour, extract(day from ts)::int as day,
     avg(sknt) as avg_sknt from obs GROUP by month, day, hour
     ORDER by month, day, hour
-        """, pgconn, params=(ctx['nt'].sts[station]['tzname'], station),
+        """, pgconn, params=(ctx['_nt'].sts[station]['tzname'], station),
                   index_col=None)
     # Figure out which mode we are going to do
     if all([a is None for a in [p1, p2, p3, p4, p5, p6]]):
@@ -134,9 +135,9 @@ def get_context(fdict):
     ctx['df'] = df
     ctx['ylabel'] = "Average Wind Speed [%s]" % (UNITS[units],)
     ctx['xlabel'] = ("Hour of Day (timezone: %s)"
-                     ) % (ctx['nt'].sts[station]['tzname'],)
+                     ) % (ctx['_nt'].sts[station]['tzname'],)
     ctx['title'] = ("[%s] %s [%s-%s]"
-                    ) % (ctx['station'], ctx['nt'].sts[station]['name'],
+                    ) % (ctx['station'], ctx['_nt'].sts[station]['name'],
                          y1, y2)
     return ctx
 
@@ -200,4 +201,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(p1='0501-0510'))
+    plotter(dict())

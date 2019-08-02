@@ -5,7 +5,6 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -53,8 +52,6 @@ def plotter(fdict):
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
-    nt = NetworkTable(network)
     year = ctx['year']
     emphasis = ctx['emphasis']
     opt = ctx['opt']
@@ -69,7 +66,7 @@ def plotter(fdict):
         max_""" + varname + """ is not null and
         min_""" + varname + """ is not null
         ORDER by day ASC
-    """, pgconn, params=(station, network), index_col='day')
+    """, pgconn, params=(station, ctx['network']), index_col='day')
     if df.empty:
         raise NoDataFound("No Data Found!")
     df['range'] = df['max_' + varname] - df['min_' + varname]
@@ -97,7 +94,8 @@ def plotter(fdict):
     ax.set_ylabel("%s %s" % (PDICT2[varname],
                              r"$^\circ$F" if varname != 'rh' else "%"))
     ax.set_title("%s [%s] %s Daily Min/Max %s\nPeriod: %s to %s" % (
-                nt.sts[station]['name'], station, year, PDICT2[varname],
+                ctx['_nt'].sts[station]['name'],
+                station, year, PDICT2[varname],
                 df.index.values[0].strftime("%-d %b"),
                 df.index.values[-1].strftime("%-d %b")))
 

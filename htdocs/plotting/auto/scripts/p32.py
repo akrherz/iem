@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -59,7 +58,6 @@ def plotter(fdict):
     gddceil = ctx['gddceil']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
     WITH data as (
@@ -114,7 +112,7 @@ def plotter(fdict):
         ax.set_xlabel("Growing Degree Day Base: %s Ceiling: %s" % (
             gddbase, gddceil))
     ax.set_title(("%s %s\nYear %s Daily %s Departure"
-                  ) % (station, nt.sts[station]['name'], year,
+                  ) % (station, ctx['_nt'].sts[station]['name'], year,
                        PDICT[varname]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
     ax.xaxis.set_major_locator(mdates.DayLocator(1))

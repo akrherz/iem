@@ -4,9 +4,9 @@ import calendar
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -37,11 +37,9 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     hour = ctx['hour']
     t1 = ctx['t1']
     t2 = ctx['t2']
-    nt = NetworkTable(network)
 
     df = read_sql("""
     WITH obs as (
@@ -58,6 +56,8 @@ def plotter(fdict):
     sum(case when tmp < %s then 1 else 0 end) as below,
     count(*) from obs GROUP by month ORDER by month ASC
     """, pgconn, params=(station, hour, t1, t2, t2, t1), index_col='month')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['freq'] = df['hits'] / df['count'] * 100.
     df['above_freq'] = df['above'] / df['count'] * 100.
     df['below_freq'] = df['below'] / df['count'] * 100.
@@ -82,11 +82,11 @@ def plotter(fdict):
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_ylabel("Frequency [%]")
     ut = utc(2000, 1, 1, hour, 0)
-    localt = ut.astimezone(pytz.timezone(nt.sts[station]['tzname']))
+    localt = ut.astimezone(pytz.timezone(ctx['_nt'].sts[station]['tzname']))
     ax.set_xlim(0.5, 12.5)
     ax.set_title(("%s [%s]\nFrequency of %s UTC (%s LST) "
                   r"Temp between %s$^\circ$F and %s$^\circ$F"
-                  ) % (nt.sts[station]['name'], station, hour,
+                  ) % (ctx['_nt'].sts[station]['name'], station, hour,
                        localt.strftime("%-I %p"), t1, t2))
     ax.legend(loc=(0.05, -0.14), ncol=3, fontsize=14)
     pos = ax.get_position()

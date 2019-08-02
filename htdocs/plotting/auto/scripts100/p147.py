@@ -3,7 +3,6 @@ import calendar
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -40,11 +39,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['station1']
     station2 = ctx['station2']
-    network1 = ctx['network1']
-    network2 = ctx['network2']
     mag = ctx['mag']
-    nt1 = NetworkTable(network1)
-    nt2 = NetworkTable(network2)
     pvar = ctx['pvar']
     pgconn = get_dbconn('coop')
 
@@ -79,9 +74,10 @@ def plotter(fdict):
     v = int(mag) if pvar != 'precip' else round(mag, 2)
     units = " inch" if pvar == 'precip' else r"$^\circ$F"
     ax.set_title(("%s [%s] Daily %s\n%s+%s %s Than %s [%s]"
-                  ) % (nt1.sts[station1]['name'], station1, PDICT[pvar],
+                  ) % (ctx['_nt1'].sts[station1]['name'], station1,
+                       PDICT[pvar],
                        v, units, "Warmer" if pvar != 'precip' else 'Wetter',
-                       nt2.sts[station2]['name'], station2))
+                       ctx['_nt2'].sts[station2]['name'], station2))
     ax.set_xlim(0, 366)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])

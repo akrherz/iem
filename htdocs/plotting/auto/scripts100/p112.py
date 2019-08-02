@@ -3,7 +3,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -26,14 +25,19 @@ def get_description():
     return desc
 
 
-def modMonth(stationID, db, monthly, mo1, mo2, mt1, mt2, nt, gddbase, gddceil):
+def modMonth(
+        stationID, db, monthly, mo1, mo2, mt1, mt2, ctx, gddbase, gddceil):
+    """modMonth."""
     res = ("\n               %-12s                %-12s\n"
            "     ****************************  ***************************\n"
            " YEAR  40-86  48-86  50-86  %.0f-%.0f"
            "   40-86  48-86  50-86  %.0f-%.0f\n"
            "     ****************************  *************************** \n"
            ) % (mt1, mt2, gddbase, gddceil, gddbase, gddceil)
-    s = nt.sts[stationID]['archive_begin'].year
+    ab = ctx['_nt'].sts[stationID]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    s = ab.year
     e = datetime.date(datetime.date.today().year + 1, 1, 1)
     now = s
     for year in range(s, e.year):
@@ -82,7 +86,6 @@ def plotter(fdict):
     varname = "gdd%s%s" % (gddbase, gddceil)
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     df = read_sql("""
     SELECT year, month, sum(precip) as sum_precip,
     avg(high) as avg_high,
@@ -101,7 +104,7 @@ def plotter(fdict):
     GROUP by year, month
     """, pgconn, params=(gddbase, gddceil, station), index_col=None)
 
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("No Data Found.")
     res = """\
@@ -112,7 +115,7 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (datetime.date.today().strftime("%d %b %Y"),
        bs.date(), datetime.date.today(), station,
-       nt.sts[station]['name'])
+       ctx['_nt'].sts[station]['name'])
     res += ("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID %s\n"
             ) % (station, )
 
@@ -136,17 +139,17 @@ def plotter(fdict):
         monthly[ts.month]['50'].append(float(row['gdd50']))
         monthly[ts.month]['XX'].append(float(row[varname]))
 
-    res += modMonth(station, db, monthly, 1, 2, "JANUARY", "FEBRUARY", nt,
+    res += modMonth(station, db, monthly, 1, 2, "JANUARY", "FEBRUARY", ctx,
                     gddbase, gddceil)
-    res += modMonth(station, db, monthly, 3, 4, "MARCH", "APRIL", nt,
+    res += modMonth(station, db, monthly, 3, 4, "MARCH", "APRIL", ctx,
                     gddbase, gddceil)
-    res += modMonth(station, db, monthly, 5, 6, "MAY", "JUNE", nt,
+    res += modMonth(station, db, monthly, 5, 6, "MAY", "JUNE", ctx,
                     gddbase, gddceil)
-    res += modMonth(station, db, monthly, 7, 8, "JULY", "AUGUST", nt,
+    res += modMonth(station, db, monthly, 7, 8, "JULY", "AUGUST", ctx,
                     gddbase, gddceil)
-    res += modMonth(station, db, monthly, 9, 10, "SEPTEMBER", "OCTOBER", nt,
+    res += modMonth(station, db, monthly, 9, 10, "SEPTEMBER", "OCTOBER", ctx,
                     gddbase, gddceil)
-    res += modMonth(station, db, monthly, 11, 12, "NOVEMBER", "DECEMBER", nt,
+    res += modMonth(station, db, monthly, 11, 12, "NOVEMBER", "DECEMBER", ctx,
                     gddbase, gddceil)
 
     return None, df, res

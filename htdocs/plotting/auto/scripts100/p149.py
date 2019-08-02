@@ -4,7 +4,6 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 import matplotlib.dates as mdates
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -15,7 +14,8 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['description'] = """This plot presents a time series of Arridity Index.
+    desc['description'] = """
+    This plot presents a time series of Arridity Index.
     This index computes the standardized high temperature departure subtracted
     by the standardized precipitation departure.  For the purposes of this
     plot, this index is computed daily over a trailing period of days of your
@@ -60,7 +60,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     days = ctx['days']
     days2 = ctx['days2']
     _days2 = days2 if days2 > 0 else 1
@@ -71,7 +70,6 @@ def plotter(fdict):
     yrrange = ets.year - sts.year
     year2 = ctx.get('year2')  # could be null!
     year3 = ctx.get('year3')  # could be null!
-    nt = NetworkTable(network)
     pgconn = get_dbconn('coop')
 
     table = "alldata_%s" % (station[:2], )
@@ -194,7 +192,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_title(("%s [%s] %s Arridity Index\n"
                   "Std. High Temp Departure minus Std. Precip Departure"
-                  ) % (nt.sts[station]['name'], station, title))
+                  ) % (ctx['_nt'].sts[station]['name'], station, title))
     ax.set_ylim(0 - maxval, maxval)
     ax.set_ylabel("Arridity Index")
     ax.text(1.01, 0.75, "<-- More Water Stress", ha='left', va='center',
@@ -206,5 +204,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(year2=2016, sdate='2016-2-1', edate='2016-8-9',
-                 network='IACLIMATE'))
+    plotter(dict())

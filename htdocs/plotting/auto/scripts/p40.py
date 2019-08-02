@@ -5,7 +5,6 @@ import numpy as np
 from pandas.io.sql import read_sql
 from matplotlib import cm
 from matplotlib.patches import Rectangle
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
@@ -43,7 +42,7 @@ def get_description():
     return desc
 
 
-def plot_sky(days, vsby, data, station, nt, sts):
+def plot_sky(days, vsby, data, station, ctx, sts):
     """Sky plot variant."""
     fig = plt.figure(figsize=(8, 6))
     # vsby plot
@@ -70,7 +69,7 @@ def plot_sky(days, vsby, data, station, nt, sts):
         0.5, 0.935,
         ('[%s] %s %s Clouds & Visibility\nbased on ASOS METAR Cloud Amount '
          '/Level and Visibility Reports'
-         ) % (station, nt.sts[station]['name'], sts.strftime("%b %Y")),
+         ) % (station, ctx['_nt'].sts[station]['name'], sts.strftime("%b %Y")),
         ha='center', fontsize=14)
 
     cmap = cm.get_cmap('gray_r')
@@ -97,7 +96,7 @@ def plot_sky(days, vsby, data, station, nt, sts):
     return fig
 
 
-def plot_vsby(days, vsby, station, nt, sts):
+def plot_vsby(days, vsby, station, ctx, sts):
     """Sky plot variant."""
     fig = plt.figure(figsize=(8, 6))
 
@@ -121,7 +120,7 @@ def plot_vsby(days, vsby, station, nt, sts):
     fig.text(
         0.5, 0.935,
         ('[%s] %s %s Visibility\nbased on hourly ASOS METAR Visibility Reports'
-         ) % (station, nt.sts[station]['name'], sts.strftime("%b %Y")),
+         ) % (station, ctx['_nt'].sts[station]['name'], sts.strftime("%b %Y")),
         ha='center', fontsize=14)
 
     cmap = cm.get_cmap('gray')
@@ -147,12 +146,9 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     year = ctx['year']
     month = ctx['month']
     ptype = ctx['ptype']
-
-    nt = NetworkTable(network)
 
     # Extract the range of forecasts for each day for approximately
     # the given month
@@ -197,9 +193,9 @@ def plotter(fdict):
     vsby = np.ma.array(vsby, mask=np.where(vsby < 0, True, False))
 
     if ptype == 'vsby':
-        fig = plot_vsby(days, vsby, station, nt, sts)
+        fig = plot_vsby(days, vsby, station, ctx, sts)
     else:
-        fig = plot_sky(days, vsby, data, station, nt, sts)
+        fig = plot_sky(days, vsby, data, station, ctx, sts)
 
     return fig, df
 

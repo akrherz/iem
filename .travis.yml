@@ -91,12 +91,15 @@ before_script:
   - cd database; sh bootstrap.sh
   - python schema_manager.py
   - cd ..
-  # Add some test data to the database
-  - python database/store_test_data.py
-  - python scripts/dbutil/sync_stations.py
 script:
   # restart apache
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
+  # Run autoplot tests with basically no data in database
+  - python test/run_autoplots.py
+  # Add some test data to the database
+  - python database/store_test_data.py
+  - python scripts/dbutil/sync_stations.py
+  # Run autoplot testing a second time
   - python test/run_autoplots.py
   - pytest cgi-bin/request/asos.py
   - pytest cgi-bin/request/daily.py

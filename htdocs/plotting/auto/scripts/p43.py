@@ -6,7 +6,6 @@ import pytz
 import matplotlib.dates as mdates
 from pandas.io.sql import read_sql
 import pyiem.datatypes as dt
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
@@ -96,20 +95,15 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     sdate = ctx.get('sdate')
     plot_type = ctx['p']
 
-    nt = NetworkTable(network)
-    if not nt.sts:
+    if not ctx['_nt'].sts:
         raise NoDataFound(("Network Identifier %s is unknown to IEM"
-                           ) % (network,))
-    if station not in nt.sts:
-        raise NoDataFound(("Station %s does not exist in network %s"
-                           ) % (station, network))
-    tzname = nt.sts[station]['tzname']
+                           ) % (ctx['network'],))
+    tzname = ctx['_nt'].sts[station]['tzname']
 
-    df = get_data(network, station, tzname, sdate)
+    df = get_data(ctx['network'], station, tzname, sdate)
     if df.empty:
         raise NoDataFound("No data was found!")
     # if d1 is not None and d1 >= 0 and d1 <= 360:
@@ -144,7 +138,7 @@ def plotter(fdict):
             color='#346633', zorder=3)
 
     ax.set_title("[%s] %s\nRecent Time Series" % (
-        station, nt.sts[station]['name']))
+        station, ctx['_nt'].sts[station]['name']))
     ax.grid(True)
     ax.text(-0.1, 0, "Temperature [F]", rotation=90,
             transform=ax.transAxes, verticalalignment='bottom')

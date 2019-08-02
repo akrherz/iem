@@ -4,9 +4,9 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -50,7 +50,6 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     offset = 0
     if ctx['month'] == 'all':
         months = range(1, 13)
@@ -69,8 +68,6 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    nt = NetworkTable(network)
-
     df = read_sql("""
         SELECT extract(year from valid + '%s months'::interval) as year,
          min(wcht(tmpf::numeric,(sknt*1.15)::numeric)) as min_windchill
@@ -79,6 +76,8 @@ def plotter(fdict):
          GROUP by year ORDER by year ASC
       """, pgconn, params=(offset, station, tuple(months)),
                   index_col='year')
+    if df.empty:
+        raise NoDataFound("No data found.")
 
     ys = []
     freq = []
@@ -98,7 +97,7 @@ def plotter(fdict):
     ax[0].set_xlabel("Frequency [%]")
     ax[0].set_title(("[%s] %s %.0f-%.0f\n"
                      "Frequency of Observed Wind Chill over %s"
-                     ) % (station, nt.sts[station]['name'],
+                     ) % (station, ctx['_nt'].sts[station]['name'],
                           df.index[0], df.index[-1], MDICT[ctx['month']]))
     ax[0].set_xticks([0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100])
     ax[0].grid(True)

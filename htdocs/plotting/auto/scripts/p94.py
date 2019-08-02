@@ -4,9 +4,9 @@ import datetime
 import numpy as np
 import pandas as pd
 import psycopg2.extras
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -34,8 +34,6 @@ def plotter(fdict):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
-    nt = NetworkTable(network)
 
     cursor.execute("""
     WITH obs as (select valid at time zone %s + '10 minutes'::interval as v,
@@ -47,7 +45,9 @@ def plotter(fdict):
     GROUP by series, date)
 
     SELECT series, avg(max), avg(min) from sums GROUP by series
-    """, (nt.sts[station]['tzname'], station))
+    """, (ctx['_nt'].sts[station]['tzname'], station))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data found.")
 
     rows = []
     hrs = range(25)
@@ -67,10 +67,13 @@ def plotter(fdict):
             color='r')
     ax.plot(hrs, np.array(lows) - lows[0], label="Low Temp", lw=2,
             color='b')
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("[%s] %s %s-%s\n"
                   "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
-                  ) % (station, nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       ab.year,
                        datetime.date.today().year))
     ax.set_ylabel(r"Average Temperature Difference $^\circ$F")
     ax.set_xlim(0, 24)

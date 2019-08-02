@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -118,10 +117,9 @@ def get_context(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     sknt = ctx['wind']
-    nt = NetworkTable(network)
-    df = read_sql("""WITH data as (
+    df = read_sql("""
+    WITH data as (
         SELECT valid, lag(valid) OVER (ORDER by valid ASC),
         extract(year from valid + '5 months'::interval) as season,
         wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
@@ -138,7 +136,7 @@ def get_context(fdict):
         df2[i] = df[df['wcht'] < i].groupby('season')['timedelta'].sum()
     ctx['df'] = df2
     ctx['title'] = ("[%s] %s Wind Chill Hours"
-                    ) % (station, nt.sts[station]['name'])
+                    ) % (station, ctx['_nt'].sts[station]['name'])
     ctx['subtitle'] = ("Hours below threshold by season (wind >= %s kts)"
                        ) % (sknt,)
     ctx['dfdescribe'] = df2.iloc[:-1].describe()

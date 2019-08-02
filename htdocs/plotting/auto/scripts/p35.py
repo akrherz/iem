@@ -6,7 +6,6 @@ import calendar
 
 import psycopg2.extras
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -57,15 +56,12 @@ def plotter(fdict):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     hours = ctx['hours']
     interval = ctx['interval']
     varname = ctx['var']
     if interval > 10 or interval < 0.1:
         raise NoDataFound(
             "Invalid interval provided, positive number less than 10")
-
-    nt = NetworkTable(network)
 
     cursor.execute("""
     WITH one as (
@@ -94,8 +90,11 @@ def plotter(fdict):
     bins = compute_bins(interval)
 
     hist, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     years = float(
-        datetime.datetime.now().year - nt.sts[station]['archive_begin'].year
+        datetime.datetime.now().year - ab.year
         )
     hist = np.ma.array(hist / years / 7.0)
     hist.mask = np.where(hist < (1./years), True, False)
@@ -106,7 +105,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_title((
         "%s [%s] Histogram\n(bin=%s) of %s Hour %s Change"
-        ) % (nt.sts[station]['name'], station, interval, hours,
+        ) % (ctx['_nt'].sts[station]['name'], station, interval, hours,
              PDICT[varname]))
     ax.set_ylabel("%s Change" % (PDICT[varname], ))
 

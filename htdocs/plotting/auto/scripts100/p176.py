@@ -3,7 +3,6 @@
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -36,9 +35,7 @@ def get_context(fdict):
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     opt = ctx['opt']
-    nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
     cursor.execute("""
         SELECT day, sday, high, low from """ + table + """ WHERE station = %s
@@ -80,8 +77,8 @@ def get_context(fdict):
                     rows.append(dict(margin=margin, date=row[0]))
 
     ctx['df'] = pd.DataFrame(rows)
-    ctx['title'] = "[%s] %s Daily Record Margin" % (station,
-                                                    nt.sts[station]['name'])
+    ctx['title'] = "[%s] %s Daily Record Margin" % (
+        station, ctx['_nt'].sts[station]['name'])
     ctx['subtitle'] = (
         "By how much did a new daily record beat the previous %s"
     ) % (PDICT[opt], )

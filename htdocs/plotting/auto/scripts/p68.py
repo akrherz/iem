@@ -1,6 +1,5 @@
 """VTEC combos"""
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -31,11 +30,7 @@ def plotter(fdict):
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station'][:4]
-
-    nt = NetworkTable('WFO')
-    nt.sts['_ALL'] = {'name': 'All Offices'}
-    if station not in nt.sts:
-        raise NoDataFound("No Data Found.")
+    ctx['_nt'].sts['_ALL'] = {'name': 'All Offices'}
 
     fig = plt.figure(figsize=(8,
                               14 if station != '_ALL' else 21))
@@ -68,7 +63,7 @@ def plotter(fdict):
         ax[0].text(yr, row['wfo'] + 1, "%s" % (row['wfo'],), ha='center')
     ax[0].set_title(("[%s] NWS %s\nCount of Distinct VTEC Phenomena/"
                      "Significance - %i to %i"
-                     ) % (station, nt.sts[station]['name'],
+                     ) % (station, ctx['_nt'].sts[station]['name'],
                           df['year'].min(), df['year'].max()))
     ax[0].grid()
     ax[0].set_ylabel("Count")

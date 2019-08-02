@@ -5,13 +5,12 @@ from collections import OrderedDict
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
+from metpy.calc import apparent_temperature
+from metpy.units import units
 from pyiem import reference
 from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
-from metpy.units import units
-from metpy.calc import apparent_temperature
 from pyiem.exceptions import NoDataFound
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
@@ -116,8 +115,8 @@ def plotter(fdict):
         title = reference.state_names[ctx['state']]
     else:
         bnds = reference.wfo_bounds[ctx['wfo']]
-        nt = NetworkTable("WFO")
-        title = "NWS CWA %s [%s]" % (nt.sts[ctx['wfo']]['name'], ctx['wfo'])
+        title = "NWS CWA %s [%s]" % (
+            ctx['_nt'].sts[ctx['wfo']]['name'], ctx['wfo'])
     df, valid = get_df(ctx, bnds)
     if df.empty:
         raise NoDataFound("No data was found for your query")

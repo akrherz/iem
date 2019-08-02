@@ -7,7 +7,6 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from scipy import stats
 from matplotlib.font_manager import FontProperties
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -114,7 +113,8 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
         df = read_sql("""
         WITH data as (
             SELECT
-            extract(year from day + '"""+doffset+"""'::interval)::int as myyear,
+            extract(year from day + '""" + doffset + """'::interval)::int
+              as myyear,
             high, low, (high+low)/2. as avg from """ + table + """
             WHERE station = %s and high is not null
             and low is not null """ + mlimiter + """)
@@ -126,7 +126,8 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
         df = read_sql("""
         WITH data as (
             SELECT
-            extract(year from day + '"""+doffset+"""'::interval)::int as myyear,
+            extract(year from day + '""" + doffset + """'::interval)::int
+              as myyear,
             high, low, (high+low)/2. as avg, day, month from """ + table + """
             WHERE station = %s and high is not null and low is not null),
         agg1 as (
@@ -148,7 +149,6 @@ def plotter(fdict):
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     month1 = ctx['month1']
     month2 = ctx['month2']
     highlight = ctx['highlight']
@@ -159,7 +159,6 @@ def plotter(fdict):
     opt = ctx['opt']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable(network)
 
     m1data, y1, y2 = get_data(pgconn, table, station, month1, p1, varname,
                               days, opt)
@@ -184,21 +183,21 @@ def plotter(fdict):
     ax.axvline(highlight, zorder=1, color='k')
     y = highlight * s_slp + s_int
     ax.axhline(y, zorder=1, color='k')
-    ax.text(pc1[0], y, "%.0f $^\circ$F" % (y,), va='center',
+    ax.text(pc1[0], y, r"%.0f $^\circ$F" % (y,), va='center',
             bbox=dict(color='white'))
-    ax.text(highlight, pc2[0], "%.0f $^\circ$F" % (highlight,), ha='center',
+    ax.text(highlight, pc2[0], r"%.0f $^\circ$F" % (highlight,), ha='center',
             rotation=90, bbox=dict(color='white'))
     t2 = PDICT[varname]
     if days > 1:
         t2 = "%s %s over %s days" % (ODICT[opt], PDICT[varname], days)
     fig.suptitle(("[%s] %s\n%s (%s-%s) vs %s (%s-%s)\n%s"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        MDICT[month2], y1, y2,
                        MDICT[month1], y3, y4, t2))
-    ax.set_xlabel("%s (%s-%s) %s $^\circ$F" % (MDICT[month1], y1, y2,
-                                               PDICT[varname]))
-    ax.set_ylabel("%s (%s-%s) %s $^\circ$F" % (MDICT[month2], y3, y4,
-                                               PDICT[varname]))
+    ax.set_xlabel(r"%s (%s-%s) %s $^\circ$F" % (MDICT[month1], y1, y2,
+                                                PDICT[varname]))
+    ax.set_ylabel(r"%s (%s-%s) %s $^\circ$F" % (MDICT[month2], y3, y4,
+                                                PDICT[varname]))
     ax.text(0.95, 0.05, "Quantile - Quantile Plot",
             transform=ax.transAxes, ha='right')
     ax.grid(True)
@@ -229,12 +228,12 @@ def plotter(fdict):
 
     pr0 = plt.Rectangle((0, 0), 1, 1, fc="r")
     pr1 = plt.Rectangle((0, 0), 1, 1, fc="b")
-    ax.legend((pr0, pr1), ("%s (%s-%s), $\mu$=%.1f" % (MDICT[month1], y1,
-                                                       y2, np.mean(m1data)),
-                           "%s (%s-%s), $\mu$=%.1f" % (MDICT[month2], y3,
-                                                       y4, np.mean(m2data))),
+    ax.legend((pr0, pr1), (r"%s (%s-%s), $\mu$=%.1f" % (MDICT[month1], y1,
+                                                        y2, np.mean(m1data)),
+                           r"%s (%s-%s), $\mu$=%.1f" % (MDICT[month2], y3,
+                                                        y4, np.mean(m2data))),
               ncol=1, loc=(0.5, -0.15))
-    ax.set_ylabel("%s $^\circ$F" % (PDICT[varname],))
+    ax.set_ylabel(r"%s $^\circ$F" % (PDICT[varname],))
     ax.grid()
 
     # Third
@@ -261,7 +260,8 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    fig, df = plotter(dict(station='IA7708', network='IACLIMATE', month1='6',
-                           month2='1', var='low', highlight=44, days=1,
-                           opt='max'))
-    fig.savefig('/tmp/bah.png')
+    plotter(dict())
+    # fig, df = plotter(dict(station='IA7708', network='IACLIMATE', month1='6',
+    #                       month2='1', var='low', highlight=44, days=1,
+    #                       opt='max'))
+    # fig.savefig('/tmp/bah.png')

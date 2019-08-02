@@ -6,7 +6,7 @@ from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('max_dwpf', 'Highest Dew Point Temperature'),
@@ -91,9 +91,7 @@ def plotter(fdict):
     if varname2 in ['dwpf', 'tmpf', 'feel']:
         varname2 = "i" + varname2
     month = ctx['month']
-    network = ctx['network']
     station = ctx['zstation']
-    nt = NetworkTable(network)
 
     if month == 'all':
         months = range(1, 13)
@@ -137,10 +135,11 @@ def plotter(fdict):
         (a.hr = extract(hour from o.ts)
         and a.""" + varname + """ = o.""" + varname2 + """)
         ORDER by a.hr ASC, o.ts DESC
-    """, pgconn, params=(nt.sts[station]['tzname'], station,
-                         nt.sts[station]['tzname'], tuple(months)),
+    """, pgconn, params=(ctx['_nt'].sts[station]['tzname'], station,
+                         ctx['_nt'].sts[station]['tzname'], tuple(months)),
                   index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No Data was found.")
     y0 = 0.1
     yheight = 0.8
     dy = (yheight / 24.)
@@ -153,13 +152,16 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlim([df[varname].min() - 5,
                  df[varname].max() + 5])
-    ax.set_ylabel("Local Time %s" % (nt.sts[station]['tzname'], ),
+    ax.set_ylabel("Local Time %s" % (ctx['_nt'].sts[station]['tzname'], ),
                   fontproperties=font1)
 
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata")
     fig.text(0.5, 0.93, ("%s [%s] %s-%s\n"
                          "%s [%s]"
-                         ) % (nt.sts[station]['name'], station,
-                              nt.sts[station]['archive_begin'].year,
+                         ) % (ctx['_nt'].sts[station]['name'], station,
+                              ab.year,
                               datetime.date.today().year,
                               PDICT[varname],
                               MDICT[month]),

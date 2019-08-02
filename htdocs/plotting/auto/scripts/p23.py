@@ -8,7 +8,6 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
@@ -46,7 +45,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
-    nt = NetworkTable("%sCLIMATE" % (station[:2].upper(),))
     table = "alldata_%s" % (station[:2],)
     syear = ctx['syear']
     years = ctx['years']
@@ -60,9 +58,11 @@ def plotter(fdict):
 
     elnino = []
     elninovalid = []
-    cursor.execute("""SELECT anom_34, monthdate from elnino
+    cursor.execute("""
+        SELECT anom_34, monthdate from elnino
         where monthdate >= %s and monthdate < %s
-        ORDER by monthdate ASC""", (sts, ets))
+        ORDER by monthdate ASC
+    """, (sts, ets))
     for row in cursor:
         elnino.append(float(row[0]))
         elninovalid.append(row[1])
@@ -91,8 +91,8 @@ def plotter(fdict):
     obs.sum - climo.p as precip from
     obs JOIN climo on (climo.month = obs.month)
     ORDER by obs.year ASC, obs.month ASC
-    """, pgconn,  params=(station, archiveend, station, archiveend, sts.year,
-                          ets.year), index_col=None)
+    """, pgconn, params=(station, archiveend, station, archiveend, sts.year,
+                         ets.year), index_col=None)
     if df.empty:
         raise NoDataFound("No Data Found.")
     df['date'] = pd.to_datetime({'year': df['year'], 'month': df['month'],
@@ -102,7 +102,8 @@ def plotter(fdict):
     ax.set_title(("[%s] %s\nMonthly Departure of %s + "
                   "El Nino 3.4 Index\n"
                   "Climatology computed from present day period of record"
-                  ) % (station, nt.sts[station]['name'], PDICT.get(varname)))
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       PDICT.get(varname)))
 
     xticks = []
     xticklabels = []

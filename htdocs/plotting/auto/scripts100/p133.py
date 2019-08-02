@@ -2,7 +2,6 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -59,14 +58,12 @@ def highcharts(fdict):
     """ Highcharts Output """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
-    nt = NetworkTable(network)
     date = ctx['date']
     df = get_data(fdict)
 
     j = dict()
-    j['title'] = {'text': '%s [%s] Snowfall Totals' % (nt.sts[station]['name'],
-                                                       station)}
+    j['title'] = {'text': '%s [%s] Snowfall Totals' % (
+        ctx['_nt'].sts[station]['name'], station)}
     j['subtitle'] = {'text': 'Before and After %s' % (date.strftime("%-d %B"),)
                      }
     j['xAxis'] = {'title': {'text': 'Snowfall Total [inch] before %s' % (
@@ -104,8 +101,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
-    nt = NetworkTable(network)
     date = ctx['date']
     df = get_data(fdict)
     if df.empty:
@@ -121,7 +116,7 @@ def plotter(fdict):
         date.strftime("%-d %b"), ))
     ax.grid(True)
     ax.set_title(("%s [%s] Snowfall Totals\nPrior to and after: %s"
-                  ) % (nt.sts[station]['name'], station,
+                  ) % (ctx['_nt'].sts[station]['name'], station,
                        date.strftime("%-d %B")))
     ax.axvline(df['before'].mean(), color='r', lw=2,
                label='Before Avg: %.1f' % (df['before'].mean(),))

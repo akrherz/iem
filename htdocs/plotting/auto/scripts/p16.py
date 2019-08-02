@@ -9,7 +9,6 @@ from windrose import WindroseAxes
 from matplotlib.patches import Rectangle
 from pyiem.util import get_autoplot_context, get_dbconn, drct2text
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
@@ -169,7 +168,6 @@ def get_context(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     ctx['station'] = ctx['zstation']
-    ctx['nt'] = NetworkTable(ctx['network'])
 
     if ctx['month'] == 'all':
         months = range(1, 13)
@@ -217,11 +215,11 @@ def get_context(fdict):
                         "%s") % (minvalid.year,
                                  maxvalid.year, ctx['station'],
                                  ctx['month'].upper(),
-                                 ctx['nt'].sts[ctx['station']]['name'],
+                                 ctx['_nt'].sts[ctx['station']]['name'],
                                  title)
     ctx['title'] = "%s-%s %s Wind Rose, month=%s" % (
         minvalid.year, maxvalid.year, ctx['station'], ctx['month'].upper())
-    ctx['subtitle'] = "%s, %s" % (ctx['nt'].sts[ctx['station']]['name'],
+    ctx['subtitle'] = "%s, %s" % (ctx['_nt'].sts[ctx['station']]['name'],
                                   title.replace(r"$^\circ$", ""))
     return ctx
 

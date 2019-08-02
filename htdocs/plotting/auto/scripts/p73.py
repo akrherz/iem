@@ -4,7 +4,6 @@ import datetime
 from pandas.io.sql import read_sql
 from matplotlib.ticker import MaxNLocator
 import pyiem.nws.vtec as vtec
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -44,10 +43,7 @@ def plotter(fdict):
     phenomena = ctx['phenomena']
     significance = ctx['significance']
 
-    nt = NetworkTable('WFO')
-    nt.sts['_ALL'] = {'name': 'All Offices'}
-    if station not in nt.sts:
-        raise NoDataFound("Station metadata unknown.")
+    ctx['_nt'].sts['_ALL'] = {'name': 'All Offices'}
 
     wfo_limiter = (" and wfo = '%s' "
                    ) % (station if len(station) == 3 else station[1:],)
@@ -77,7 +73,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
     ax.set_title(("NWS %s [%s]\n%s (%s.%s) Count"
-                  ) % (nt.sts[station]['name'], title,
+                  ) % (ctx['_nt'].sts[station]['name'], title,
                        vtec.get_ps_string(phenomena, significance),
                        phenomena, significance))
     if limit == 'yes':

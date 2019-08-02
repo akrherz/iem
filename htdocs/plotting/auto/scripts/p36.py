@@ -6,7 +6,6 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 import matplotlib.patheffects as PathEffects
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
@@ -33,7 +32,6 @@ def plotter(fdict):
     station = ctx['station']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     cursor.execute("""
         SELECT year, month, avg((high+low)/2.) from """+table+"""
@@ -91,7 +89,7 @@ def plotter(fdict):
     ax.set_xlim(-0.5, 11.5)
     ax.set_ylim(-0.5, 11.5)
     ax.set_title(("[%s] %s\nYears that Month was Warmer than other Month"
-                  ) % (station, nt.sts[station]['name']))
+                  ) % (station, ctx['_nt'].sts[station]['name']))
     fig.colorbar(res)
     ax.set_xlabel("This Month was Warmer than...")
     ax.set_ylabel("...this month for same year")

@@ -1,7 +1,6 @@
 """Temp drops in the fall"""
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -35,7 +34,6 @@ def plotter(fdict):
     station = ctx['station']
     year = ctx['year']
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
       with data as (
@@ -50,7 +48,7 @@ def plotter(fdict):
       GROUP by year ORDER by year ASC
     """, pgconn, params=(station,), index_col='year')
     if df.empty:
-      raise NoDataFound("No Data Found.")
+        raise NoDataFound("No Data Found.")
     # remove in-progress years
     df = df[df['count'] > 122]
 
@@ -66,7 +64,7 @@ def plotter(fdict):
     ax.set_title(("%s %s\n"
                   "Max Jul-Dec Low Temp Drop Exceeding "
                   "Previous Min Low for Fall"
-                  ) % (station, nt.sts[station]['name']))
+                  ) % (station, ctx['_nt'].sts[station]['name']))
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     return fig, df

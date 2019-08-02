@@ -5,7 +5,6 @@ import datetime
 import matplotlib.dates as mdates
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -51,7 +50,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
     threshold = ctx['threshold']
     varname = ctx['var']
     opt = ctx['opt']
@@ -86,7 +84,7 @@ def plotter(fdict):
     ax.set_ylabel("Frequency [%]")
     ax.set_title((
         "%s %s (%s-%s)\nFrequency of %s %s %s"
-        ) % (station, nt.sts[station]['name'],
+        ) % (station, ctx['_nt'].sts[station]['name'],
              df['min_date'].min().year,
              df['max_date'].max().year, PDICT[varname], PDICT2[opt],
              threshold))

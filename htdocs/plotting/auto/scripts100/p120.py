@@ -4,7 +4,6 @@ import datetime
 from pandas.io.sql import read_sql
 import pandas as pd
 import matplotlib.dates as mdates
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -40,7 +39,6 @@ def plotter(fdict):
     thresholds = [ctx['t1'], ctx['t2'], ctx['t3'], ctx['t4']]
 
     table = "alldata_%s" % (station[:2], )
-    nt = NetworkTable("%sCLIMATE" % (station[:2], ))
     # Load up dict of dates..
 
     df = pd.DataFrame({'dates': pd.date_range("2000/01/29", "2000/06/30"),
@@ -60,7 +58,7 @@ def plotter(fdict):
             """ + table + """
             WHERE month < 7 and station = %s and year < %s
             GROUP by year
-        """, pgconn,  params=(base, station, datetime.date.today().year),
+        """, pgconn, params=(base, station, datetime.date.today().year),
                        index_col=None)
         for _, row in df2.iterrows():
             if row['doy'] == 0:
@@ -68,7 +66,7 @@ def plotter(fdict):
             df.loc[0:row['doy'], '%scnts' % (base,)] += 1
         df['%sfreq' % (base,)] = df['%scnts' % (base,)] / len(df2.index) * 100.
 
-    bs = nt.sts[station]['archive_begin']
+    bs = ctx['_nt'].sts[station]['archive_begin']
     if bs is None:
         raise NoDataFound("No metadata found.")
     res = """\
@@ -83,7 +81,7 @@ def plotter(fdict):
  DOY Date    <%s  <%s  <%s  <%s
 """ % (datetime.date.today().strftime("%d %b %Y"),
        bs.date(), datetime.date.today(), station,
-       nt.sts[station]['name'], thresholds[0] + 1,
+       ctx['_nt'].sts[station]['name'], thresholds[0] + 1,
        thresholds[1] + 1, thresholds[2] + 1, thresholds[3] + 1)
     fcols = ['%sfreq' % (s,) for s in thresholds]
     mindate = None
@@ -109,8 +107,8 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
     ax.set_title(("Frequency of Last Spring Temperature\n"
                   "%s %s (%s-%s)"
-                  ) % (station, nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       bs.year,
                        datetime.date.today().year))
     ax.grid(True)
     df.reset_index(inplace=True)

@@ -65,6 +65,8 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
+    if station not in nt.sts:
+        raise NoDataFound("Unknown station metadata.")
 
     df = read_sql("""
     SELECT year,

@@ -7,7 +7,7 @@ from scipy import stats
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('avg_tmpf', 'Average Temperature'),
@@ -67,10 +67,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']
     month = ctx['month']
-    network = ctx['network']
     station = ctx['zstation']
     hour = ctx['hour']
-    nt = NetworkTable(network)
 
     if month == 'all':
         months = range(1, 13)
@@ -104,9 +102,12 @@ def plotter(fdict):
     SELECT extract(year from hts)::int as year, avg(avg_itmpf) as avg_tmpf,
     count(*) as cnt
     from agg1 GROUP by year ORDER by year ASC
-    """, pgconn, params=(nt.sts[station]['tzname'], station,
-                         nt.sts[station]['tzname'], tuple(months), hour),
+    """, pgconn, params=(ctx['_nt'].sts[station]['tzname'], station,
+                         ctx['_nt'].sts[station]['tzname'], tuple(months),
+                         hour),
                   index_col='year')
+    if df.empty:
+        raise NoDataFound("No data was found.")
     minfreq = len(months) * 30 * 0.8
     df2 = df[df['cnt'] > minfreq]
 
@@ -129,7 +130,7 @@ def plotter(fdict):
     lts = datetime.datetime(2000, 1, 1, int(hour), 0)
     fig.text(0.5, 0.91, ("%s [%s] %s Local %s-%s\n"
                          "%s [%s]"
-                         ) % (nt.sts[station]['name'], station,
+                         ) % (ctx['_nt'].sts[station]['name'], station,
                               lts.strftime("%-I %p"),
                               df2.index.min(),
                               df2.index.max(),

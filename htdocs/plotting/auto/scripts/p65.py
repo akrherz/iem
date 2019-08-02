@@ -3,7 +3,6 @@ import calendar
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -43,7 +42,6 @@ def plotter(fdict):
     days = int((ets - ts).days)
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     s = "ASC" if mydir == 'cold' else 'DESC'
     df = read_sql("""
@@ -68,7 +66,7 @@ def plotter(fdict):
     lbl = 'Coldest' if mydir == 'cold' else 'Hottest'
     ax[0].set_title(("[%s] %s\nFrequency of Day in %s\n"
                      "Having %s High Temperature of %s"
-                     ) % (station, nt.sts[station]['name'],
+                     ) % (station, ctx['_nt'].sts[station]['name'],
                           calendar.month_name[month], lbl,
                           calendar.month_name[month]), fontsize=10)
     ax[0].set_ylabel("Years (ties split)")

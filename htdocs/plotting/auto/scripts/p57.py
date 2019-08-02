@@ -6,7 +6,6 @@ from collections import OrderedDict
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -47,7 +46,6 @@ def plotter(fdict):
     agg = ctx['agg']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     lastday = datetime.date.today()
     if varname == 'total_precip' and agg == 'max':
@@ -94,10 +92,13 @@ def plotter(fdict):
                 va='bottom')
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(top=resdf[col].max()*1.2)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown Station Metadata.")
     ax.set_title(("[%s] %s\n%s %s [%s-%s]\n"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        PDICT2[agg], PDICT[varname],
-                       nt.sts[station]['archive_begin'].year, lastday.year))
+                       ab.year, lastday.year))
     ylabel = r"Temperature $^\circ$F"
     if varname in ['total_precip']:
         ylabel = 'Precipitation [inch]'

@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -42,18 +41,17 @@ def get_description():
 
 def highcharts(fdict):
     """ Highcharts Output """
-    station = fdict.get('station', 'IATDSM')
-    network = fdict.get('network', 'IACLIMATE')
-    varname = fdict.get('var', 'high_above')
-    nt = NetworkTable(network)
-    df = get_data(fdict, nt)
+    ctx = get_autoplot_context(fdict, get_description())
+    station = ctx['station']
+    varname = ctx['var']
+    df = get_data(ctx)
 
     j = dict()
     j['tooltip'] = {
         'shared': True,
         'headerFormat':
             '<span style="font-size: 10px">{point.key: %b %e}</span><br/>'}
-    j['title'] = {'text': '%s [%s] %s %sF' % (nt.sts[station]['name'],
+    j['title'] = {'text': '%s [%s] %s %sF' % (ctx['_nt'].sts[station]['name'],
                                               station,
                                               PDICT[varname],
                                               int(fdict.get('threshold', 32)))}
@@ -112,10 +110,9 @@ def highcharts(fdict):
     return j
 
 
-def get_data(fdict, nt):
+def get_data(ctx):
     """ Get the data"""
     pgconn = get_dbconn('coop')
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     threshold = ctx['threshold']
     varname = ctx['var']
@@ -127,7 +124,7 @@ def get_data(fdict, nt):
     col = "high" if varname.find("high") == 0 else "low"
     # We need to do some magic to compute the start date, since we don't want
     # an incomplete year mucking things up
-    sts = nt.sts[station]['archive_begin']
+    sts = ctx['_nt'].sts[station]['archive_begin']
     if sts is None:
         raise NoDataFound("Unknown station metadata.")
     if sts.month > 1:
@@ -164,9 +161,7 @@ def plotter(fdict):
     threshold = ctx['threshold']
     varname = ctx['var']
     year = ctx['year']
-    network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network)
-    df = get_data(fdict, nt)
+    df = get_data(ctx)
     if df.empty:
         raise NoDataFound('Error, no results returned!')
 
@@ -176,8 +171,9 @@ def plotter(fdict):
     ax.plot(df.index.values, df['max'], c='r', lw=2, label='Max')
     ax.plot(df.index.values, df['min'], c='b', lw=2, label='Min')
     ax.set_title((r"%s [%s]\n%s %.0f$^\circ$F"
-                  ) % (nt.sts[station]['name'], station, PDICT[varname],
-                       threshold))
+                  ) % (
+                      ctx['_nt'].sts[station]['name'], station, PDICT[varname],
+                      threshold))
     ax.legend(ncol=1, loc=2)
     xticks = []
     xticklabels = []

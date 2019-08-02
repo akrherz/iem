@@ -5,7 +5,6 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 import pytz
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -36,19 +35,16 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
-    nt = NetworkTable(network)
-
     jan1 = datetime.datetime.now().replace(hour=0, day=1, month=1, minute=0,
                                            second=0, microsecond=0,
                                            tzinfo=pytz.utc)
     ts1973 = datetime.datetime(1973, 1, 1)
     today = datetime.datetime.now()
     cursor.execute("""
-    SELECT valid at time zone 'UTC', phour from hourly WHERE
-    station = %s and network = %s and phour >= 0.01 and
-    valid >= '1973-01-01 00:00+00' and valid < %s
-    """, (station, network, jan1))
+        SELECT valid at time zone 'UTC', phour from hourly WHERE
+        station = %s and network = %s and phour >= 0.01 and
+        valid >= '1973-01-01 00:00+00' and valid < %s
+    """, (station, ctx['network'], jan1))
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
 
@@ -60,7 +56,7 @@ def plotter(fdict):
             minvalid = row[0]
         data[(row[0] - ts1973).days * 24 + row[0].hour] = row[1]
 
-    lts = jan1.astimezone(pytz.timezone(nt.sts[station]['tzname']))
+    lts = jan1.astimezone(pytz.timezone(ctx['_nt'].sts[station]['tzname']))
     lts = lts.replace(month=7, hour=0)
     cnts = [0]*24
     avgv = [0]*24
@@ -93,7 +89,7 @@ def plotter(fdict):
     ax2.set_ylabel("Bias with Average 24 Hour Precip [in/day]", color='r')
     ax.set_title(("[%s] %s %s-%s\n"
                   "Bias of 24 Hour 'Day' Split for Precipitation"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        minvalid.year,
                        datetime.date.today().year))
     ax.set_ylabel("Bias of Days per Year with Precip", color='b')
@@ -102,7 +98,7 @@ def plotter(fdict):
     ax.set_xticklabels(('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM', 'Mid'))
     ax.grid(True)
     ax.set_xlabel(("Hour Used for 24 Hour Summary, Timezone: %s"
-                   ) % (nt.sts[station]['tzname'], ))
+                   ) % (ctx['_nt'].sts[station]['tzname'], ))
     box = ax.get_position()
     ax.set_position([box.x0, box.y0,
                      box.width * .95, box.height])

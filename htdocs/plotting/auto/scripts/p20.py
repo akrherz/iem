@@ -4,7 +4,6 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -35,8 +34,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
-    nt = NetworkTable(network)
     year = ctx['year']
 
     df = read_sql("""
@@ -104,7 +101,7 @@ def plotter(fdict):
     ax.legend(ncol=3)
     ax.set_title(("%s [%s]\n"
                   "Number of Hours with *Measurable* Precipitation Reported"
-                  ) % (nt.sts[station]['name'], station))
+                  ) % (ctx['_nt'].sts[station]['name'], station))
 
     return fig, df
 

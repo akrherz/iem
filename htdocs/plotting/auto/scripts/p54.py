@@ -5,9 +5,9 @@ import calendar
 import numpy as np
 from matplotlib import cm
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'low': 'Morning Low (midnight to 8 AM)',
          'high': 'Afternoon High (noon to 8 PM)'}
@@ -42,13 +42,8 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['zstation1']
-    network1 = ctx['network1']
     station2 = ctx['zstation2']
-    network2 = ctx['network2']
     varname = ctx['varname']
-
-    nt1 = NetworkTable(network1)
-    nt2 = NetworkTable(network2)
 
     aggfunc = "min"
     tlimit = "0 and 8"
@@ -75,10 +70,11 @@ def plotter(fdict):
     two.avg as sknt2
     from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
     and one.d - two.d between -25 and 25
-    """, pgconn, params=(station1, nt1.sts[station1]['tzname'],
-                         station2, nt2.sts[station2]['tzname']),
+    """, pgconn, params=(station1, ctx['_nt1'].sts[station1]['tzname'],
+                         station2, ctx['_nt2'].sts[station2]['tzname']),
                   index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
@@ -90,8 +86,8 @@ def plotter(fdict):
     ax[0].set_title(("[%s] %s minus [%s] %s\n"
                      "%s Temp Difference Period: %s - %s"
                      ) % (
-        station1, nt1.sts[station1]['name'],
-        station2, nt2.sts[station2]['name'],
+        station1, ctx['_nt1'].sts[station1]['name'],
+        station2, ctx['_nt2'].sts[station2]['name'],
         "Mid - 8 AM Low" if varname == 'low' else 'Noon - 8 PM High',
         df['day'].min(), df['day'].max()))
 

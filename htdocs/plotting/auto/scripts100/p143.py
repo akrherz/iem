@@ -1,5 +1,6 @@
 """xy point plot of arridity"""
 import datetime
+import os
 from collections import OrderedDict
 
 import pandas as pd
@@ -10,6 +11,7 @@ from pyiem.meteorology import gdd
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 STATIONS = OrderedDict([
         ('ames', 'Central (Ames)'),
@@ -44,12 +46,15 @@ PDICT = {'yes': 'Colorize Labels by Corn Yield Trend',
 def load_yields(location):
     """Loads up the county corn yields"""
     pgconn = get_dbconn('coop')
-    df = read_sql("""select year, num_value as yield
-    from nass_quickstats where
-    county_ansi = %s and state_alpha = 'IA' and year >= 1980
-    and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
-    and unit_desc = 'BU / ACRE' ORDER by year ASC
+    df = read_sql("""
+        select year, num_value as yield
+        from nass_quickstats where
+        county_ansi = %s and state_alpha = 'IA' and year >= 1980
+        and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
+        and unit_desc = 'BU / ACRE' ORDER by year ASC
     """, pgconn, params=(COUNTY[location],), index_col='year')
+    if df.empty:
+        raise NoDataFound("Data was not found.")
     slp, intercept, _, _, _ = stats.linregress(df.index.values,
                                                df['yield'].values)
     df['model'] = slp * df.index.values + intercept
@@ -76,7 +81,10 @@ def load(dirname, location, sdate):
     """ Read a file please """
     data = []
     idx = []
-    for line in open("%s/%s.met" % (dirname, location)):
+    fn = "%s/%s.met" % (dirname, location)
+    if not os.path.isfile(fn):
+        raise NoDataFound("File was not found.")
+    for line in open(fn):
         line = line.strip()
         if not line.startswith('19') and not line.startswith('20'):
             continue

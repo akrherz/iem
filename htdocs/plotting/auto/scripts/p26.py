@@ -5,7 +5,6 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -52,9 +51,11 @@ def get_context(fdict):
     varname = ctx['var']
     half = ctx['half']
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
-    startyear = int(nt.sts[station]['archive_begin'].year)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    startyear = int(ab.year)
     data = np.ma.ones((thisyear-startyear+1, 366)) * 199
     if half == 'fall':
         cursor.execute("""SELECT extract(doy from day), year,
@@ -136,7 +137,7 @@ def get_context(fdict):
     ctx['ylabel'] = title
     ctx['title'] = "%s-%s %s %s\n%s" % (startyear,
                                         thisyear-1, station,
-                                        nt.sts[station]['name'], title)
+                                        ctx['_nt'].sts[station]['name'], title)
     return ctx
 
 

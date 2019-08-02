@@ -31,9 +31,9 @@ from collections import OrderedDict
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'above': 'At or Above Threshold...',
          'below': 'Below Threshold...'}
@@ -156,13 +156,11 @@ def plotter(fdict):
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     threshold = ctx['threshold']
     mydir = ctx['dir']
     hours = ctx['hours']
     varname = ctx['var']
     month = ctx['m'] if fdict.get('month') is None else fdict.get('month')
-    nt = NetworkTable(network)
 
     year_limiter = ""
     y1, y2 = None, None
@@ -196,12 +194,12 @@ def plotter(fdict):
         ets = ets.replace(day=1)
 
     cursor.execute("""
-      SELECT valid, round(""" + varname + """::numeric,0)
-      from alldata where station = %s """ + year_limiter + """
-      and """ + varname + """ is not null and
-      extract(month from valid) in %s
-      ORDER by valid ASC
-      """, (station, tuple(months)))
+        SELECT valid, round(""" + varname + """::numeric,0)
+        from alldata where station = %s """ + year_limiter + """
+        and """ + varname + """ is not null and
+        extract(month from valid) in %s
+        ORDER by valid ASC
+    """, (station, tuple(months)))
 
     (fig, ax) = plt.subplots(1, 1, figsize=(9, 6))
     interval = datetime.timedelta(hours=hours)
@@ -240,12 +238,15 @@ def plotter(fdict):
 
     ax.grid(True)
     ax.set_ylabel(r"%s $^\circ$F" % (PDICT2.get(varname),))
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(
         ("%s-%s [%s] %s\n"
          r"%s :: %.0fd%.0fh+ Streaks %s %s$^\circ$F"
-         ) % (y1 if y1 is not None else nt.sts[station]['archive_begin'].year,
+         ) % (y1 if y1 is not None else ab.year,
               y2 if y2 is not None else datetime.datetime.now().year, station,
-              nt.sts[station]['name'], MDICT.get(month),
+              ctx['_nt'].sts[station]['name'], MDICT.get(month),
               hours / 24, hours % 24, mydir, threshold))
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
     # ax.set_ylim(bottom=43)

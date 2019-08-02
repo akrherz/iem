@@ -1,8 +1,7 @@
 """compares yearly summaries"""
+from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from collections import OrderedDict
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -42,8 +41,6 @@ def plotter(fdict):
     station2 = ctx['station2'].upper()
     table1 = "alldata_%s" % (station1[:2], )
     table2 = "alldata_%s" % (station2[:2], )
-    nt1 = NetworkTable("%sCLIMATE" % (station1[:2],))
-    nt2 = NetworkTable("%sCLIMATE" % (station2[:2],))
     varname = ctx['var']
 
     df = read_sql("""WITH one as (
@@ -79,24 +76,24 @@ def plotter(fdict):
 
     bars = ax.bar(df.index, df['diff_'+varname], fc=color_above,
                   ec=color_above)
-    for bar, val in zip(bars, df['diff_'+varname].values):
+    for mybar, val in zip(bars, df['diff_'+varname].values):
         if val < 0:
-            bar.set_facecolor(color_below)
-            bar.set_edgecolor(color_below)
+            mybar.set_facecolor(color_below)
+            mybar.set_edgecolor(color_below)
 
     ax.set_title(("Yearly %s [%s] %s\nminus [%s] %s"
                   ) % (PDICT[varname], station1,
-                       nt1.sts[station1]['name'], station2,
-                       nt2.sts[station2]['name']))
+                       ctx['_nt1'].sts[station1]['name'], station2,
+                       ctx['_nt2'].sts[station2]['name']))
     units = 'inch' if varname in ['total_precip', ] else 'F'
     lbl = 'wetter' if units == 'inch' else 'warmer'
     wins = len(df[df['diff_'+varname] > 0].index)
-    ax.text(0.5, 0.95, "%s %s (%s/%s)" % (nt1.sts[station1]['name'], lbl,
-                                          wins, len(df.index)),
+    ax.text(0.5, 0.95, "%s %s (%s/%s)" % (
+        ctx['_nt1'].sts[station1]['name'], lbl, wins, len(df.index)),
             transform=ax.transAxes, ha='center')
     wins = len(df[df['diff_'+varname] < 0].index)
-    ax.text(0.5, 0.05, "%s %s (%s/%s)" % (nt1.sts[station2]['name'], lbl,
-                                          wins, len(df.index)),
+    ax.text(0.5, 0.05, "%s %s (%s/%s)" % (
+        ctx['_nt1'].sts[station2]['name'], lbl, wins, len(df.index)),
             transform=ax.transAxes, ha='center')
     ax.axhline(df['diff_'+varname].mean(), lw=2, color='k')
     ax.set_ylabel("%s [%s] Avg: %.2f" % (PDICT[varname], units,

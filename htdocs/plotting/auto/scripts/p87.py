@@ -4,7 +4,6 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -52,15 +51,11 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx['zstation']
-    network = ctx['network']
     syear = ctx['syear']
     eyear = ctx['eyear']
     groupby = ctx['groupby']
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear + 1, 1, 1)
-    nt = NetworkTable(network)
-    if station not in nt.sts:
-        raise NoDataFound("Unknown station metadata.")
     code = ctx['code']
     if code == 'PSN':
         code = "+SN"
@@ -84,7 +79,8 @@ def plotter(fdict):
         SELECT week, year, hour, count(*) from agg
         WHERE week < 53
         GROUP by week, year, hour
-        """, pgconn, params=(nt.sts[station]['tzname'], station, sts, ets),
+        """, pgconn, params=(
+            ctx['_nt'].sts[station]['tzname'], station, sts, ets),
                       index_col=None)
     else:
         data = np.ma.zeros((24, 366), 'f')
@@ -103,7 +99,8 @@ def plotter(fdict):
             from data)
         SELECT doy, year, hour, count(*) from agg
         GROUP by doy, year, hour
-        """, pgconn, params=(nt.sts[station]['tzname'], station, sts, ets),
+        """, pgconn, params=(
+            ctx['_nt'].sts[station]['tzname'], station, sts, ets),
                       index_col=None)
     if df.empty:
         raise NoDataFound("No data was found, sorry!")
@@ -126,11 +123,11 @@ def plotter(fdict):
     cax.set_ylabel("Count")
     ax.set_ylim(-0.5, 23.5)
     ax.set_yticks((0, 4, 8, 12, 16, 20))
-    ax.set_ylabel("Local Time, %s" % (nt.sts[station]['tzname'],))
+    ax.set_ylabel("Local Time, %s" % (ctx['_nt'].sts[station]['tzname'],))
     ax.set_yticklabels(('Mid', '4 AM', '8 AM', 'Noon', '4 PM', '8 PM'))
     ax.set_title(("[%s] %s %s Reports\n[%.0f - %.0f]"
                   " by hour and %s"
-                  ) % (station, nt.sts[station]['name'],
+                  ) % (station, ctx['_nt'].sts[station]['name'],
                        PDICT[code], minyear, maxyear,
                        PDICT2[groupby].replace("group ", "")))
     ax.grid(True)

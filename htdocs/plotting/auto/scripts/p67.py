@@ -7,7 +7,7 @@ import psycopg2.extras
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -35,21 +35,21 @@ def plotter(fdict):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     threshold = ctx['threshold']
     month = ctx['month']
 
-    nt = NetworkTable(network)
-
     cursor.execute("""
-    WITH data as (
-    SELECT tmpf::int as t, sknt from alldata where station = %s
-    and extract(month from valid) = %s and tmpf is not null
-    and sknt >= 0)
+        WITH data as (
+            SELECT tmpf::int as t, sknt from alldata where station = %s
+            and extract(month from valid) = %s and tmpf is not null
+            and sknt >= 0
+        )
 
-    SELECT t, sum(case when sknt >= %s then 1 else 0 end), count(*) from data
-    GROUP by t ORDER by t ASC
+        SELECT t, sum(case when sknt >= %s then 1 else 0 end), count(*)
+        from data GROUP by t ORDER by t ASC
     """, (station, month, threshold))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data was Found.")
     tmpf = []
     events = []
     total = []
@@ -77,12 +77,15 @@ def plotter(fdict):
     txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                  foreground="k")])
     ax.grid(True, zorder=11)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("%s [%s]\nFrequency of %s+ knot Wind Speeds by Temperature "
                   "for %s (%s-%s)\n"
                   "(must have 3+ hourly observations at the given temperature)"
-                  ) % (nt.sts[station]['name'], station, threshold,
+                  ) % (ctx['_nt'].sts[station]['name'], station, threshold,
                        calendar.month_name[month],
-                       nt.sts[station]['archive_begin'].year,
+                       ab.year,
                        datetime.datetime.now().year), size=10)
 
     ax.set_ylabel("Frequency [%]")

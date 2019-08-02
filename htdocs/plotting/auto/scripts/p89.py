@@ -10,6 +10,7 @@ from pyiem import iemre, reference
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -65,6 +66,8 @@ def get_data(ctx):
     SELECT the_geom, state_abbr from states where state_abbr = %s
     """, pgconn, params=(ctx['state'], ), index_col='state_abbr',
                                            geom_col='the_geom')
+    if states.empty:
+        raise NoDataFound("No data was found.")
 
     with ncopen(iemre.get_daily_ncname(ctx['year'])) as nc:
         precip = nc.variables['p01d']

@@ -3,7 +3,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -37,7 +36,6 @@ def plotter(fdict):
     t2 = ctx['t2']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
         SELECT year,
@@ -77,8 +75,10 @@ def plotter(fdict):
     ax.set_ylim(-1, max(doy2-doy)+4)
     ax.set_xlim(min(doy)-4, max(doy)+4)
 
-    ax.set_title("[%s] %s\nFirst Fall Temperature Occurences" % (
-                                            station, nt.sts[station]['name']))
+    ax.set_title(
+        "[%s] %s\nFirst Fall Temperature Occurences" % (
+            station, ctx['_nt'].sts[station]['name'])
+    )
     ax.set_ylabel(r"Days until first sub %s$^{\circ}\mathrm{F}$" % (t2,))
     ax.set_xlabel(r"First day of sub %s$^{\circ}\mathrm{F}$" % (t1,))
 

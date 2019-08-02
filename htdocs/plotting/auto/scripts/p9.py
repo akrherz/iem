@@ -54,7 +54,10 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
-    syear = max(nt.sts[station]['archive_begin'].year, 1893)
+    ab = nt.sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown Station Metadata.")
+    syear = max(ab.year, 1893)
 
     glabel = "%s%s%s" % (varname, base, ceiling)
     gfunc = "gddxx(%s, %s, high, low)" % (base, ceiling)

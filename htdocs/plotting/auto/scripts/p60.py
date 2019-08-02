@@ -6,9 +6,9 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
@@ -49,12 +49,9 @@ def plotter(fdict):
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     threshold = ctx['threshold']
     direction = ctx['direction']
     varname = ctx['var']
-
-    nt = NetworkTable(network)
 
     mydir = "<" if direction == 'below' else '>='
 
@@ -68,7 +65,8 @@ def plotter(fdict):
     SELECT week::int, hour::int,
     sum(case when d """+mydir+""" %s then 1 else 0 end),
     count(*) from data GROUP by week, hour
-    """, pgconn, params=(nt.sts[station]['tzname'], station, threshold),
+    """, pgconn, params=(
+        ctx['_nt'].sts[station]['tzname'], station, threshold),
                   index_col=None)
     data = np.zeros((24, 53), 'f')
     df['freq[%]'] = df['sum'] / df['count'] * 100.
@@ -92,16 +90,19 @@ def plotter(fdict):
     fig.colorbar(res, label='%', extend='min')
     ax.grid(True, zorder=11)
     units = r"$^\circ$F" if varname != 'relh' else '%'
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("%s [%s]\n"
                   "Hourly %s %s %s%s (%s-%s)"
                   ) % (
-                 nt.sts[station]['name'], station, PDICT2[varname],
+                 ctx['_nt'].sts[station]['name'], station, PDICT2[varname],
                  PDICT[direction], threshold, units,
-                 nt.sts[station]['archive_begin'].year,
+                 ab.year,
                  datetime.datetime.now().year), size=12)
 
     ax.set_xticks(xticks)
-    ax.set_ylabel("%s Timezone" % (nt.sts[station]['tzname'],))
+    ax.set_ylabel("%s Timezone" % (ctx['_nt'].sts[station]['tzname'],))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 53)
     ax.set_ylim(0, 24)

@@ -6,7 +6,6 @@ from pandas.io.sql import read_sql
 import numpy as np
 from pyiem import util
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 
@@ -35,8 +34,6 @@ def plotter(fdict):
     pgconn = util.get_dbconn('coop')
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
-    nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2],)
     df = read_sql("""
     with data as (
@@ -79,10 +76,13 @@ def plotter(fdict):
     ax.set_xlim(min(x) - 5, 400)
     ax.set_ylim(y[-1] - 1, y[0] + 1)
     ax.grid(True)
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("Most Recent & Latest Date of High Temperature\n"
                   "[%s] %s (%s-%s)"
-                  ) % (station, nt.sts[station]['name'],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (station, ctx['_nt'].sts[station]['name'],
+                       ab.year,
                        datetime.date.today().year))
     ax.set_ylabel(r"High Temperature $^\circ$F")
     ax.set_xlabel("** denotes ties")

@@ -3,7 +3,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -37,14 +36,9 @@ def plotter(fdict):
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx['zstation1']
-    network1 = ctx['network1']
     station2 = ctx['zstation2']
-    network2 = ctx['network2']
     sdate = ctx['sdate']
     edate = ctx['edate']
-
-    nt1 = NetworkTable(network1)
-    nt2 = NetworkTable(network2)
 
     df = read_sql("""
     WITH one as (
@@ -61,8 +55,8 @@ def plotter(fdict):
     one.max_tmpf as one_high, one.min_tmpf as one_low,
     two.max_tmpf as two_high, two.min_tmpf as two_low
     from one JOIN two on (one.day = two.day) ORDER by day ASC
-    """, pgconn, params=(station1, network1, sdate, edate,
-                         station2, network2, sdate, edate),
+    """, pgconn, params=(station1, ctx['network1'], sdate, edate,
+                         station2, ctx['network2'], sdate, edate),
                   index_col='day')
     if df.empty:
         raise NoDataFound("No data found for this comparison")
@@ -74,8 +68,8 @@ def plotter(fdict):
     ax[0].set_title(("[%s] %s minus [%s] %s\n"
                      "Temperature Difference Period: %s - %s"
                      ) % (
-        station1, nt1.sts[station1]['name'],
-        station2, nt2.sts[station2]['name'],
+        station1, ctx['_nt1'].sts[station1]['name'],
+        station2, ctx['_nt2'].sts[station2]['name'],
         sdate.strftime("%-d %b %Y"), edate.strftime("%-d %b %Y")))
 
     for i, varname in enumerate(['high', 'low']):
@@ -102,7 +96,7 @@ def plotter(fdict):
                    "Bias: %.2f" % (df[col].mean(),),
                    transform=ax[i].transAxes,
                    va='top', ha='right', color='k', fontsize=8)
-        ax[i].set_ylabel(("%s Temp Difference $^\circ$F"
+        ax[i].set_ylabel((r"%s Temp Difference $^\circ$F"
                           ) % (varname.capitalize(),))
         y0 = min([df[col].min(), -1])
         y1 = max([df[col].max(), 1])

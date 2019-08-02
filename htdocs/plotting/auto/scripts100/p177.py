@@ -10,7 +10,6 @@ from pyiem import meteorology
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 
@@ -86,7 +85,7 @@ def make_daily_pet_plot(ctx):
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Potential Evapotranspiration, "
                   "Climatology from Ames 1986-2014"
-                  ) % (ctx['nt'].sts[ctx['station']]['name'], ))
+                  ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
     interval = int(len(dates) / 7 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
@@ -98,14 +97,15 @@ def make_daily_rad_plot(ctx):
     """Generate a daily radiation plot"""
     # Get clear sky theory
     theory = meteorology.clearsky_shortwave_irradiance_year(
-                ctx['nt'].sts[ctx['station']]['lat'],
-                ctx['nt'].sts[ctx['station']]['elevation'])
+                ctx['_nt'].sts[ctx['station']]['lat'],
+                ctx['_nt'].sts[ctx['station']]['elevation'])
 
     icursor = ctx['pgconn'].cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor.execute("""SELECT valid, slrmj_tot_qc from sm_daily
-    where station = '%s'
-    and valid >= '%s' and valid <= '%s' and slrmj_tot_qc is not null
-    ORDER by valid ASC
+    icursor.execute("""
+        SELECT valid, slrmj_tot_qc from sm_daily
+        where station = '%s'
+        and valid >= '%s' and valid <= '%s' and slrmj_tot_qc is not null
+        ORDER by valid ASC
     """ % (ctx['station'], ctx['sts'].strftime("%Y-%m-%d"),
            ctx['ets'].strftime("%Y-%m-%d")))
     dates = []
@@ -134,7 +134,7 @@ def make_daily_rad_plot(ctx):
     ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Daily Solar Radiation"
-                  ) % (ctx['nt'].sts[ctx['station']]['name'], ))
+                  ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.legend(loc='best', ncol=1, fontsize=10)
     return fig, df
 
@@ -166,7 +166,7 @@ def make_daily_plot(ctx):
     ax.set_ylabel(r"4 inch Soil Temperature $^\circ$F")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Daily Max/Min/Avg 4 inch Soil Temperatures"
-                  ) % (ctx['nt'].sts[ctx['station']]['name'], ))
+                  ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
     interval = int(len(df.index) / 7 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
@@ -195,7 +195,7 @@ def make_battery_plot(ctx):
     ax.set_ylabel("Battery Voltage [V]")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Battery Voltage"
-                  ) % (ctx['nt'].sts[ctx['station']]['name'], ))
+                  ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
     # interval = len(dates) / 7 + 1
     # ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
@@ -218,7 +218,7 @@ def make_vsm_histogram_plot(ctx):
     (fig, ax) = plt.subplots(3, 1, sharex=True)
     ax[0].set_title(("ISUSM Station: %s VWC Histogram\n"
                      "For un-frozen condition between %s and %s"
-                     ) % (ctx['nt'].sts[ctx['station']]['name'],
+                     ) % (ctx['_nt'].sts[ctx['station']]['name'],
                           ctx['sts'].strftime("%-d %b %Y"),
                           ctx['ets'].strftime("%-d %b %Y")))
     for i, col in enumerate(['v12', 'v24', 'v50']):
@@ -278,7 +278,7 @@ def make_daily_water_change_plot(ctx):
     ax[0].set_ylabel("Water Depth [inch]")
     ax[0].set_title(("ISUSM Station: %s Daily Soil (6-30\") Water\n"
                     "For un-frozen condition between %s and %s"
-                     ) % (ctx['nt'].sts[ctx['station']]['name'],
+                     ) % (ctx['_nt'].sts[ctx['station']]['name'],
                           ctx['sts'].strftime("%-d %b %Y"),
                           ctx['ets'].strftime("%-d %b %Y")))
     bars = ax[1].bar(df['valid'].values, df['change'].values, fc='b', ec='b')
@@ -308,9 +308,10 @@ def make_daily_water_change_plot(ctx):
 
 def plot2(ctx):
     """Just soil temps"""
-    df = read_sql("""SELECT * from sm_hourly WHERE
+    df = read_sql("""
+        SELECT * from sm_hourly WHERE
         station = %s and valid BETWEEN %s and %s ORDER by valid ASC
-        """, ctx['pgconn'], params=(ctx['station'], ctx['sts'], ctx['ets']),
+    """, ctx['pgconn'], params=(ctx['station'], ctx['sts'], ctx['ets']),
                   index_col='valid')
     d12t = df['t12_c_avg_qc']
     d24t = df['t24_c_avg_qc']
@@ -325,7 +326,7 @@ def plot2(ctx):
     ax.grid(True)
     ax.set_title(("ISUSM Station: %s Timeseries\n"
                   "Soil Temperature at Depth\n "
-                  ) % (ctx['nt'].sts[ctx['station']]['name'], ))
+                  ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.plot(valid, temperature(tsoil, 'C').value('F'), linewidth=2,
             color='brown', label='4 inch')
     if not d12t.isnull().any():
@@ -429,7 +430,7 @@ def plot1(ctx):
                                  tz=pytz.timezone("America/Chicago")))
 
     ax[0].set_title(("ISUSM Station: %s Timeseries"
-                     ) % (ctx['nt'].sts[ctx['station']]['name'], ))
+                     ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + box.height * 0.05, box.width,
                         box.height * 0.95])
@@ -484,7 +485,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     ctx['pgconn'] = get_dbconn('isuag')
-    ctx['nt'] = NetworkTable("ISUSM", only_online=False)
 
     if ctx['opt'] == '1':
         fig, df = plot1(ctx)

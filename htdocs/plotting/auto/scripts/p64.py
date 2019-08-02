@@ -5,7 +5,6 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.reference import TRACE_VALUE
@@ -43,8 +42,7 @@ def get_data(ctx):
     threshold = TRACE_VALUE if threshold == 'T' else float(threshold)
 
     table = "alldata_%s" % (station[:2],)
-    ctx['nt'] = NetworkTable("%sCLIMATE" % (station[:2],))
-    ab = ctx['nt'].sts[station]['archive_begin']
+    ab = ctx['_nt'].sts[station]['archive_begin']
     if ab is None:
         raise NoDataFound("No Data Found.")
     syear = max(1893, ab.year)
@@ -131,7 +129,7 @@ def plotter(fdict):
     ax.set_ylabel('Snowfall [inch], Avg: %.1f inch' % (df['snowfall'].mean(),))
     ax.set_title(
         ('[%s] %s %s %s Snowfall\n(color is how long snow remained)'
-         ) % (ctx['station'], ctx['nt'].sts[ctx['station']]['name'],
+         ) % (ctx['station'], ctx['_nt'].sts[ctx['station']]['name'],
               'Last' if ctx['dir'] == 'last' else 'First',
               ('Trace+' if ctx['threshold'] == 'T'
                else "%.2f+ Inch" % (float(ctx['threshold']),))))

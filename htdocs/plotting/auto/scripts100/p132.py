@@ -4,7 +4,6 @@ import calendar
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -72,12 +71,10 @@ def plotter(fdict):
     pgconn = get_dbconn('coop')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    network = ctx['network']
     month = ctx['month']
     varname = ctx['var']
     days = ctx['days']
 
-    nt = NetworkTable(network)
     table = "alldata_%s" % (station[:2], )
 
     if month == 'all':
@@ -157,12 +154,14 @@ def plotter(fdict):
     ax.set_xlabel(("Precipitation [inch]"
                    if varname in ['total_precip'] else r'Temperature $^\circ$F'
                    ))
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("%s [%s] Top 10 Events\n"
                   "%s [days=%s] (%s) "
                   "(%s-%s)"
-                  ) % (nt.sts[station]['name'], station, METRICS[varname],
-                       days, MDICT[month],
-                       nt.sts[station]['archive_begin'].year,
+                  ) % (ctx['_nt'].sts[station]['name'], station,
+                       METRICS[varname], days, MDICT[month], ab.year,
                        datetime.datetime.now().year), size=12)
 
     return plt.gcf(), df

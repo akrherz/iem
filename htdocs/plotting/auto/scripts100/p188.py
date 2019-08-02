@@ -5,7 +5,6 @@ import calendar
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -47,7 +46,6 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    nt = NetworkTable(ctx['network'])
     varname = ctx['var']
     thres = ctx['thres']
     thres2 = ctx['thres2']
@@ -109,11 +107,13 @@ def plotter(fdict):
     if df2 is not None:
         ax.bar(ctx['year'], df2['peak_value'], color='red', zorder=2)
     ax.grid(True)
-    ax.set_title(("[%s] %s %s\n"
-                  "%s (%.0f-%.0f)") % (station, nt.sts[station]['name'],
-                                       PDICT[varname], title,
-                                       df.index.min(),
-                                       df.index.max()))
+    ax.set_title(
+        (
+            "[%s] %s %s\n%s (%.0f-%.0f)"
+        ) % (
+            station, ctx['_nt'].sts[station]['name'],
+            PDICT[varname], title, df.index.min(), df.index.max())
+    )
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax.set_ylim(df['peak_value'].min() - 5, df['peak_value'].max() + 5)
     ax.set_ylabel(ctx['ax1_ylabel'])

@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -135,10 +134,9 @@ def plotter(fdict):
             abbrcol = "wfo"
             geoval = wfo
             geomcol = "the_geom"
-            nt = NetworkTable("WFO")
-            if wfo not in nt.sts:
+            if wfo not in ctx['_nt'].sts:
                 raise NoDataFound("Unknown station metadata.")
-            title2 = "NWS %s [%s]" % (nt.sts[wfo]['name'], wfo)
+            title2 = "NWS %s [%s]" % (ctx['_nt'].sts[wfo]['name'], wfo)
         elif ctx['w'] == 'ugc':
             table = "ugcs"
             abbrcol = "ugc"

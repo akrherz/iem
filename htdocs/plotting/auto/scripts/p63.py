@@ -3,7 +3,6 @@ import datetime
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -36,8 +35,7 @@ def plotter(fdict):
     station = ctx['station']
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
-    sts = nt.sts[station]['archive_begin']
+    sts = ctx['_nt'].sts[station]['archive_begin']
     if sts is None:
         raise NoDataFound("Station metadata unknown.")
     syear = sts.year if sts.month == 1 and sts.day == 1 else (sts.year + 1)
@@ -113,7 +111,7 @@ def plotter(fdict):
                      "%s sets record then accumulate (%s-%s)\n"
                      "events/year value is long term average, total events / "
                      "%.0f years"
-                     ) % (station, nt.sts[station]['name'],
+                     ) % (station, ctx['_nt'].sts[station]['name'],
                           syear, syear + 1, eyear, eyear - syear - 1))
     rate = sum(hyears) / float(len(hyears))
     ax[0].text(eyear-70, 32,

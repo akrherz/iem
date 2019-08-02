@@ -5,7 +5,7 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('above', 'At or Above Temperature'),
@@ -39,13 +39,11 @@ def plotter(fdict):
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     month = int(ctx['month'])
     thres = ctx['t']
     mydir = ctx['dir']
 
-    nt = NetworkTable(network)
-    tzname = nt.sts[station]['tzname']
+    tzname = ctx['_nt'].sts[station]['tzname']
 
     df = read_sql("""
     WITH data as (
@@ -61,6 +59,8 @@ def plotter(fdict):
     GROUP by hour ORDER by hour ASC
     """, pgconn, params=(tzname, station, month, thres, thres),
                   index_col='hour')
+    if df.empty:
+        raise NoDataFound("No data found.")
 
     df['below_freq'] = df['below'].values.astype('f') / df['count'] * 100.
     df['above_freq'] = df['above'].values.astype('f') / df['count'] * 100.
@@ -85,7 +85,7 @@ def plotter(fdict):
     ax.set_title(("(%s - %s) %s [%s]\n"
                   r"Frequency of %s Hour, %s: %s$^\circ$F"
                   ) % (df['min_valid'].min().year, df['max_valid'].max().year,
-                       nt.sts[station]['name'], station,
+                       ctx['_nt'].sts[station]['name'], station,
                        calendar.month_name[month], PDICT[mydir],
                        thres))
 

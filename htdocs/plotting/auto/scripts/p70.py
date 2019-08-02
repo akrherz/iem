@@ -5,7 +5,6 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter
-from pyiem.network import Table as NetworkTable
 from pyiem import reference
 from pyiem.plot.use_agg import plt
 from pyiem.nws import vtec
@@ -49,7 +48,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-
     pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station'][:4]
@@ -59,7 +57,6 @@ def plotter(fdict):
     opt = ctx['opt']
     state = ctx['state']
 
-    nt = NetworkTable('WFO')
     wfolimiter = " wfo = '%s' " % (station,)
     if opt == 'state':
         wfolimiter = " substr(ugc, 1, 2) = '%s' " % (state, )
@@ -131,7 +128,7 @@ def plotter(fdict):
       datetime.timedelta(days=int(np.average(ends[:-1])))).strftime(
                                                                 "%-d %b")),
                   color='red')
-    title = "[%s] NWS %s" % (station, nt.sts[station]['name'])
+    title = "[%s] NWS %s" % (station, ctx['_nt'].sts[station]['name'])
     if opt == 'state':
         title = ("NWS Issued Alerts for State of %s"
                  ) % (reference.state_names[state],)

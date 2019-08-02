@@ -6,10 +6,10 @@ import psycopg2.extras
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import speed
 from pyiem.reference import TRACE_VALUE
 from pyiem.plot import calendar_plot
+from pyiem.exceptions import NoDataFound
 
 
 PDICT = OrderedDict([
@@ -72,18 +72,19 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     varname = ctx['var']
-    network = ctx['network']
     sdate = ctx['sdate']
     edate = ctx['edate']
 
-    nt = NetworkTable(network)
-
     # Get Climatology
-    cdf = read_sql("""SELECT to_char(valid, 'mmdd') as sday, high, low,
-    (high + low) / 2. as avg,
-    precip from ncdc_climate81 WHERE station = %s
+    cdf = read_sql("""
+        SELECT to_char(valid, 'mmdd') as sday, high, low,
+        (high + low) / 2. as avg,
+        precip from ncdc_climate81 WHERE station = %s
     """, get_dbconn('coop'),
-                   params=(nt.sts[station]['ncdc81'],), index_col='sday')
+                   params=(
+                       ctx['_nt'].sts[station]['ncdc81'],), index_col='sday')
+    if cdf.empty:
+        raise NoDataFound("No Data Found.")
 
     cursor.execute("""
     SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
@@ -91,7 +92,7 @@ def plotter(fdict):
     pday, coalesce(avg_sknt, 0) as avg_sknt from summary s JOIN stations t
     on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
     t.id = %s and t.network = %s ORDER by day ASC
-    """, (sdate, edate, station, network))
+    """, (sdate, edate, station, ctx['network']))
     rows = []
     data = {}
     for row in cursor:
@@ -114,7 +115,7 @@ def plotter(fdict):
     df = pd.DataFrame(rows)
 
     title = '[%s] %s Daily %s' % (
-        station, nt.sts[station]['name'], PDICT.get(varname))
+        station, ctx['_nt'].sts[station]['name'], PDICT.get(varname))
     subtitle = '%s thru %s' % (
         sdate.strftime("%-d %b %Y"), edate.strftime("%-d %b %Y"))
 

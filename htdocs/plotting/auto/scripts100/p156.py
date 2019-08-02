@@ -66,11 +66,11 @@ def plotter(fdict):
     states = [st1, st2, st3, st4, st5, st6]
     commodity_desc = ctx['commodity_desc']
     df = read_sql("""
-    select week_ending, state_alpha, num_value, unit_desc, year,
-    extract(doy from week_ending) as doy from
-    nass_quickstats
-    where commodity_desc = %s  and statisticcat_desc = 'CONDITION'
-    and state_alpha in %s ORDER by week_ending ASC
+        select week_ending, state_alpha, num_value, unit_desc, year,
+        extract(doy from week_ending) as doy from
+        nass_quickstats
+        where commodity_desc = %s  and statisticcat_desc = 'CONDITION'
+        and state_alpha in %s ORDER by week_ending ASC
     """, pgconn, params=(commodity_desc, tuple(states),),
                   index_col=None)
     if df.empty:
@@ -85,8 +85,10 @@ def plotter(fdict):
         for col in range(2):
             state = states[i]
             df2 = df[df['state_alpha'] == state]
+            if df2.empty:
+                continue
             _years = df2['year'].unique()
-            colors = ['black',  'green', 'blue', 'red']
+            colors = ['black', 'green', 'blue', 'red']
 
             for year in _years:
                 s = df2[(df2['year'] == year) &
@@ -129,4 +131,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(commodity_desc='SOYBEAN', y1=2012, y2=2005, y3=1988, y4=1993))
+    plotter(dict())

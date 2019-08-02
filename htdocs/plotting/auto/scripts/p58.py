@@ -3,7 +3,6 @@ import calendar
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -34,7 +33,6 @@ def plotter(fdict):
     threshold = float(ctx['threshold'])
 
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     cursor.execute("""
          WITH monthly as (
@@ -59,7 +57,7 @@ def plotter(fdict):
         ax.text(i, row['freq']+2, "%.1f" % (row['freq'],), ha='center')
     ax.set_title(("[%s] %s\nFreq of One Day Having %.0f%% of That Month's "
                   "Precip Total"
-                  ) % (station, nt.sts[station]['name'], threshold))
+                  ) % (station, ctx['_nt'].sts[station]['name'], threshold))
     ax.grid(True)
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(0, 100)

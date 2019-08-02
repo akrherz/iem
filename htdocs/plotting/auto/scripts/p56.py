@@ -4,7 +4,6 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.nws import vtec
-from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem import reference
@@ -55,10 +54,6 @@ def plotter(fdict):
     significance = ctx['significance']
     station = ctx['station'][:4]
 
-    nt = NetworkTable('WFO')
-    if station not in nt.sts:
-        raise NoDataFound("Unknown station.")
-
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
@@ -68,7 +63,7 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(2, 1, sharex=True)
 
     limiter = " wfo = '%s' " % (station,)
-    title = "[%s] NWS %s" % (station, nt.sts[station]['name'])
+    title = "[%s] NWS %s" % (station, ctx['_nt'].sts[station]['name'])
     if opt == 'state':
         title = "State of %s" % (reference.state_names[state],)
         limiter = " substr(ugc, 1, 2) = '%s' " % (state,)

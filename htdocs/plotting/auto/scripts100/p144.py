@@ -1,7 +1,7 @@
 """ISUAG"""
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
+from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.datatypes import temperature
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
@@ -158,10 +158,13 @@ def plotter(fdict):
 
     nt = NetworkTable("ISUSM")
     nt2 = NetworkTable("ISUAG", only_online=False)
+    ab = nt.sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     ax.set_title(("[%s] %s 4 Inch Soil Temps\n[%s] %s used for pre-%s dates"
                   ) % (station, nt.sts[station]['name'], oldstation,
                        nt2.sts[oldstation]['name'],
-                       nt.sts[station]['archive_begin'].year))
+                       ab.year))
     ax.set_ylim(df['yr'].min() - 1, df2['yr'].max() + 1)
 
     p0 = plt.Rectangle((0, 0), 1, 1, fc="r")

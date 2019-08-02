@@ -3,7 +3,6 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -57,7 +56,6 @@ def plotter(fdict):
         maxv = temp
     station = ctx['station']
     table = "alldata_%s" % (station[:2],)
-    nt = NetworkTable("%sCLIMATE" % (station[:2],))
 
     df = read_sql("""
     WITH climate as (
@@ -72,8 +70,8 @@ def plotter(fdict):
     FROM """+table+""" a JOIN climate c
     on (a.sday = c.sday)
     WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
-    """, pgconn, params=(nt.sts[station]['ncdc81'], minv, maxv, minv, maxv,
-                         station), index_col='doy')
+    """, pgconn, params=(ctx['_nt'].sts[station]['ncdc81'], minv, maxv, minv,
+                         maxv, station), index_col='doy')
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -89,7 +87,8 @@ def plotter(fdict):
     ax.set_ylabel("Percentage of Years [%]")
     ax.set_title(("%s [%s]\nFreq of Temp between "
                   "%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
-                  ) % (station, nt.sts[station]['name'], minv, maxv))
+                  ) % (ctx['station'], ctx['_nt'].sts[ctx['station']]['name'],
+                       minv, maxv))
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.legend(loc='best')
     ax.set_xticklabels(calendar.month_abbr[1:])

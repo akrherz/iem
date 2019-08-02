@@ -4,7 +4,6 @@ import datetime
 import pytz
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -42,23 +41,20 @@ def plotter(fdict):
     sts = datetime.datetime(sts.year, sts.month, sts.day)
     days = ctx['days']
 
-    nt = NetworkTable('WFO')
-    if station not in nt.sts:
-        raise NoDataFound("No Data Found.")
-    tz = pytz.timezone(nt.sts[station]['tzname'])
+    tz = pytz.timezone(ctx['_nt'].sts[station]['tzname'])
 
     sts = sts.replace(tzinfo=tz)
     ets = sts + datetime.timedelta(days=days)
     df = read_sql("""
-     SELECT phenomena, significance, eventid,
-     min(issue at time zone 'UTC') as minissue,
-     max(expire at time zone 'UTC') as maxexpire,
-     max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire,
-     extract(year from product_issue) as year
-     from warnings
-     WHERE wfo = %s and issue > %s and issue < %s
-     GROUP by phenomena, significance, eventid, year
-     ORDER by minissue ASC
+        SELECT phenomena, significance, eventid,
+        min(issue at time zone 'UTC') as minissue,
+        max(expire at time zone 'UTC') as maxexpire,
+        max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire,
+        extract(year from product_issue) as year
+        from warnings
+        WHERE wfo = %s and issue > %s and issue < %s
+        GROUP by phenomena, significance, eventid, year
+        ORDER by minissue ASC
     """, pgconn, params=(station, sts, ets), index_col=None)
     if df.empty:
         raise NoDataFound("No events were found for WFO and time period.")
@@ -116,7 +112,7 @@ def plotter(fdict):
     ax.set_ylabel("Sequential Product Number")
     ax.set_title(("%s-%s NWS %s\nissued Watch/Warning/Advisories"
                   ) % (sts.strftime("%-d %b %Y"), ets.strftime("%-d %b %Y"),
-                       nt.sts[station]['name']))
+                       ctx['_nt'].sts[station]['name']))
     ax.set_ylim(0.4, len(events)+1)
     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1, tz=tz))
     xinterval = int(days / 7) + 1

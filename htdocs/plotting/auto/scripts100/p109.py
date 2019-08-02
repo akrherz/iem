@@ -5,10 +5,10 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 import pytz
-from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
+from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = OrderedDict((

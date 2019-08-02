@@ -3,7 +3,6 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -58,7 +57,6 @@ def plotter(fdict):
     pgconn = get_dbconn('asos')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     hours = ctx['hours']
     mydir = ctx['dir']
     month = ctx['month']
@@ -78,8 +76,7 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    nt = NetworkTable(network)
-    tzname = nt.sts[station]['tzname']
+    tzname = ctx['_nt'].sts[station]['tzname']
 
     # backwards intuitive
     sortdir = "ASC" if mydir == 'warm' else 'DESC'
@@ -106,10 +103,13 @@ def plotter(fdict):
     fig = plt.figure()
     ax = plt.axes([0.55, 0.1, 0.4, 0.8])
 
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     fig.text(0.5, 0.95, ('[%s] %s Top 10 %s\n'
                          'Over %s Hour Period (%s-%s) [%s]'
-                         ) % (station, nt.sts[station]['name'], MDICT[mydir],
-                              hours, nt.sts[station]['archive_begin'].year,
+                         ) % (station, ctx['_nt'].sts[station]['name'],
+                              MDICT[mydir], hours, ab.year,
                               datetime.date.today().year, MDICT2[month]),
              ha='center', va='center')
 

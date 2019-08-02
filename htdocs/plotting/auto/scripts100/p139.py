@@ -6,7 +6,7 @@ from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
-from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
         ('all', 'No Month/Time Limit'),
@@ -53,7 +53,6 @@ def plotter(fdict):
     pgconn = get_dbconn('iem')
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    network = ctx['network']
     month = ctx['month']
 
     if month == 'all':
@@ -71,8 +70,6 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    nt = NetworkTable(network)
-
     df = read_sql("""
         SELECT day as date, max_tmpf as max, min_tmpf as min,
         max_tmpf::int - min_tmpf::int as difference
@@ -81,15 +78,20 @@ def plotter(fdict):
         and extract(month from day) in %s
         and max_tmpf is not null and min_tmpf is not null
         ORDER by difference DESC, date DESC LIMIT 10
-    """, pgconn, params=(station, network, tuple(months)),
+    """, pgconn, params=(station, ctx['network'], tuple(months)),
                   parse_dates=('date',), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found,")
     df['rank'] = df['difference'].rank(ascending=False, method='min')
     fig = plt.figure(figsize=(5.5, 4))
+    ab = ctx['_nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     fig.text(0.5, 0.9, ("%s [%s] %s-%s\n"
                         "Top 10 Local Calendar Day [%s] "
                         "Temperature Differences"
-                        ) % (nt.sts[station]['name'], station,
-                             nt.sts[station]['archive_begin'].year,
+                        ) % (ctx['_nt'].sts[station]['name'], station,
+                             ab.year,
                              datetime.date.today().year,
                              month.capitalize()), ha='center')
     fig.text(0.1, 0.81, " #  Date         Diff   Low High",
