@@ -193,7 +193,9 @@ nexradSlider = {
   })],
   listeners   : {
 	  changecomplete: function(){
-			var dt = new Date(this.getValue());
+            var dt = new Date(this.getValue());
+            // Need to rectify date to modulo 5
+            dt.setMinutes(5 * parseInt(dt.getMinutes() / 5));
 			nexradWMS.mergeNewParams({
 			     time: dt.toUTC().format('Y-m-d\\TH:i')
 			});
