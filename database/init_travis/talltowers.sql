@@ -58,4 +58,4 @@ CREATE TABLE data_analog(
 
 );
 GRANT ALL on data_analog to mesonet,ldm;
-GRANT SELECT on data_anlog to nobody,apache;
+GRANT SELECT on data_analog to nobody,apache;
