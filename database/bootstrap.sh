@@ -16,3 +16,7 @@ do
 /usr/bin/psql -v "ON_ERROR_STOP=1" -f init/${db}.sql -h localhost -U postgres -q $db || exit 2
 /usr/bin/psql -v "ON_ERROR_STOP=1" -f functions.sql -h localhost -U postgres -q $db || exit 2
 done
+
+# one offs
+/usr/bin/psql -v "ON_ERROR_STOP=1" -c "create database talltowers;" -h localhost -U postgres || exit 2
+/usr/bin/psql -v "ON_ERROR_STOP=1" -f init_travis/talltowers.sql -h localhost -U postgres -q talltowers || exit 2
