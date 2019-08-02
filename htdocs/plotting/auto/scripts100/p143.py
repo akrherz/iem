@@ -53,10 +53,10 @@ def load_yields(location):
         and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
         and unit_desc = 'BU / ACRE' ORDER by year ASC
     """, pgconn, params=(COUNTY[location],), index_col='year')
-    slp, intercept, _, _, _ = stats.linregress(df.index.values,
-                                               df['yield'].values)
     if df.empty:
         raise NoDataFound("Data was not found.")
+    slp, intercept, _, _, _ = stats.linregress(df.index.values,
+                                               df['yield'].values)
     df['model'] = slp * df.index.values + intercept
     df['departure'] = 100. * (df['yield'] - df['model']) / df['model']
     return df
