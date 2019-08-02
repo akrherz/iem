@@ -1,3 +1,11 @@
+CREATE TABLE towers(
+  id smallint UNIQUE NOT NULL,
+  name varchar);
+INSERT into towers values(0, 'Hamilton');
+INSERT into towers values(1, 'Story');
+GRANT SELECT on towers to nobody,apache;
+GRANT ALL on towers to mesonet,ldm;
+
 CREATE TABLE data_analog(
   tower smallint REFERENCES towers(id),
   valid timestamptz,
