@@ -3,6 +3,7 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -83,15 +84,17 @@ def plotter(fdict):
 
     (agg, dbvar) = varname.split("_")
     sorder = 'DESC' if agg == 'max' else 'ASC'
-    df = read_sql("""WITH data as (
-        SELECT valid at time zone %s as v, p01i from alldata
-        WHERE station = %s and
-        extract(month from valid at time zone %s) in %s)
-    SELECT v as valid, p01i from data
-    ORDER by """ + dbvar + """ """ + sorder + """ NULLS LAST LIMIT 100
-        """, pgconn, params=(ctx['_nt'].sts[station]['tzname'],
-                             station, ctx['_nt'].sts[station]['tzname'],
-                             tuple(months)),
+    df = read_sql("""
+        WITH data as (
+            SELECT valid at time zone %s as v, p01i from alldata
+            WHERE station = %s and
+            extract(month from valid at time zone %s) in %s)
+
+        SELECT v as valid, p01i from data
+        ORDER by """ + dbvar + """ """ + sorder + """ NULLS LAST LIMIT 100
+    """, pgconn, params=(ctx['_nt'].sts[station]['tzname'],
+                         station, ctx['_nt'].sts[station]['tzname'],
+                         tuple(months)),
                   index_col=None)
     if df.empty:
         raise NoDataFound('Error, no results returned!')
@@ -105,7 +108,7 @@ def plotter(fdict):
     rows2keep = []
     for idx, row in df.iterrows():
         key = row['valid'].strftime("%Y%m%d%H")
-        if key in hours:
+        if key in hours or pd.isnull(row[dbvar]):
             continue
         rows2keep.append(idx)
         hours.append(key)
@@ -119,6 +122,8 @@ def plotter(fdict):
         lastval = row[dbvar]
         if len(ylabels) == 10:
             break
+    if not y:
+        raise NoDataFound("No data found.")
 
     fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.5, 0.8])

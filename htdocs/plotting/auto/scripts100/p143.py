@@ -46,14 +46,17 @@ PDICT = {'yes': 'Colorize Labels by Corn Yield Trend',
 def load_yields(location):
     """Loads up the county corn yields"""
     pgconn = get_dbconn('coop')
-    df = read_sql("""select year, num_value as yield
-    from nass_quickstats where
-    county_ansi = %s and state_alpha = 'IA' and year >= 1980
-    and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
-    and unit_desc = 'BU / ACRE' ORDER by year ASC
+    df = read_sql("""
+        select year, num_value as yield
+        from nass_quickstats where
+        county_ansi = %s and state_alpha = 'IA' and year >= 1980
+        and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
+        and unit_desc = 'BU / ACRE' ORDER by year ASC
     """, pgconn, params=(COUNTY[location],), index_col='year')
     slp, intercept, _, _, _ = stats.linregress(df.index.values,
                                                df['yield'].values)
+    if df.empty:
+        raise NoDataFound("Data was not found.")
     df['model'] = slp * df.index.values + intercept
     df['departure'] = 100. * (df['yield'] - df['model']) / df['model']
     return df
